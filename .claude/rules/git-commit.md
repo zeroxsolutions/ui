@@ -30,8 +30,8 @@ archaeology — the history owns that.
 
 ## The pre-commit hook must pass
 
-`.husky/pre-commit` runs `pnpm nx run-many -t build`. Don't `--no-verify` past a
-failing build to land a commit — fix the build or don't commit. If a commit is
+`.husky/pre-commit` runs `pnpm nx run-many -t lint build`. Don't `--no-verify`
+past a failing lint or build to land a commit — fix it or don't commit. If a commit is
 legitimately allowed to skip the hook, say so explicitly and why.
 
 ## Commit only when asked
