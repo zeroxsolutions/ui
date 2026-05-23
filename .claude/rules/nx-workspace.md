@@ -39,3 +39,21 @@ consumers hot-iterate on `src/`.
 
 Cloudflare data resources are provisioned via Terraform. Match the
 terraform-computed names in wrangler config; never hand-name or hand-create.
+
+## Read the live docs, don't trust stale memory
+
+Nx moves fast and this workspace is pinned (`nx` is **22.7.1** — confirm in the
+root `package.json` before relying on a version-specific feature). Before any
+non-trivial Nx operation — choosing a generator, changing target defaults,
+touching `nx release` or `nx sync`, debugging the cache — fetch the current
+official docs rather than answering from training data, which lags the pinned
+version.
+
+- **Docs index for agents:** <https://nx.dev/llms.txt> — lists every section.
+- **Raw Markdown:** append `.md` to any `nx.dev` doc URL to fetch the page as
+  clean Markdown (e.g. `https://nx.dev/reference/project-configuration.md`).
+  Prefer this over the rendered HTML when reading programmatically.
+- **AI / agent integration:** <https://nx.dev/features/enhance-AI> and the MCP
+  reference at <https://nx.dev/docs/reference/nx-mcp>. The Nx MCP server (set up
+  via `npx nx configure-ai-agents`) exposes the project graph and generators to
+  agents live — use it when available instead of guessing project structure.
