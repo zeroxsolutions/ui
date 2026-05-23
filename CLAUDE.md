@@ -1,9 +1,5 @@
 # CLAUDE.md
 
-## Rules
+## Plan
 
-RULES in .claude/rules directory
-
-## Plans
-
-MAKE a plan when you work on a task and write it down in a file named <task_name>.md in the .claude/plans directory.
+MAKE plan with checkpoint (tasklist) to .claude/plan folder
