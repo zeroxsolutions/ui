@@ -1,1 +1,1 @@
-pnpm nx run-many -t lint build
+pnpm nx run-many -t lint build test
