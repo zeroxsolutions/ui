@@ -33,11 +33,12 @@ Exception: the user explicitly asks for the raw command.
 ## Publishable `@chiselart/*` packages
 
 Keep the generator's `"files"` field (`["dist", …]`) so `publish` ships only the
-build output and never leaks `src/`, **and** keep the `@chiselart/source` export
-condition for in-monorepo hot-iterate (it resolves off the `workspace:*`
-symlink, not the tarball — the two are unrelated). `files` scopes only the
-published tarball, never in-workspace resolution. See [pm.md](pm.md) for the full
-rationale; scaffold via the generator (above) so both are wired correctly.
+build output and never leaks `src/`. Do **not** add a `@chiselart/source` (source)
+export condition — every package resolves through its built `dist` (cross-repo via
+`types`/`import`, in-monorepo via TypeScript project references + a `tsc -b -w`
+watcher). A source-everywhere condition collapses the workspace into one TS
+program (IDE RAM) and lies about what a dist-only tarball ships. See
+[pm.md](pm.md) for the full rationale; scaffold via the generator (above).
 
 ## IaC owns infra naming
 

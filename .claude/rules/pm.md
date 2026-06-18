@@ -37,21 +37,23 @@ Exception: the user explicitly asks for the raw command. See
 
 ## Publishable `@chiselart/*` packages
 
-Keep **both** the `@chiselart/source` export condition **and** the generator's
-`"files"` field (`["dist", "!**/*.tsbuildinfo"]`) — they serve two unrelated
-concerns, don't conflate them:
+Keep the generator's `"files"` field (`["dist", "!**/*.tsbuildinfo"]`) and do
+**not** ship a `@chiselart/source` (source) export condition. Every consumer —
+in-monorepo and cross-repo — resolves a package through its built `dist` (the
+published contract); there is no source export condition anywhere.
 
-- **`@chiselart/source` → `src/`** lets consumers *inside this monorepo* (linked
-  via `workspace:*`) hot-iterate on source through the package **symlink**, no
-  rebuild. It resolves off the symlinked package directory (which always has
-  `src/`) and has nothing to do with what gets published.
 - **`files`** scopes the *published* npm tarball to build output only, so
-  `nx release` / `publish` **never ships `src/`** — source is not leaked when a
-  package goes to a public registry. `files` affects **only** the tarball, never
-  in-monorepo resolution.
+  `nx release` / `publish` **never ships `src/`**. A published package ships
+  `dist/` (JS + `.d.ts`); consumers resolve it via `types` / `import` (dist).
+- **In-monorepo dev** resolves siblings via **TypeScript project references**
+  (`composite` + `references`, already wired), so the editor reads each
+  package's `.d.ts` and `declarationMap` keeps Go-to-Definition into source.
+  Hot-iterate a package by running its build in watch (`tsc -b -w` / `nx watch`)
+  so its `dist` re-emits.
 
-Do **not** drop `files` to "help hot-iterate" — it does not (the symlink + the
-source condition already do), and dropping it leaks `src/` on publish. A
-published package ships `dist/` (JS + `.d.ts`); cross-repo consumers resolve it
-via `types` / `import` (dist). Scaffold with the generator (nx-workspace.md —
-"generators, never hand-scaffolding"); it wires both correctly — keep its output.
+Do **not** re-introduce a `@chiselart/source` (or any source) export condition:
+resolving every dependency to its `src/` collapses the whole workspace into one
+giant TypeScript program (IDE RAM/lag), and makes a dist-only published package
+advertise a condition it can't satisfy. Scaffold with the generator
+(nx-workspace.md — "generators, never hand-scaffolding") and keep its
+`dist`-only output.
