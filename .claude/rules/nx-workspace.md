@@ -32,8 +32,12 @@ Exception: the user explicitly asks for the raw command.
 
 ## Publishable `@chiselart/*` packages
 
-No `"files"` field; keep the `@chiselart/source` export condition so workspace
-consumers hot-iterate on `src/`.
+Keep the generator's `"files"` field (`["dist", …]`) so `publish` ships only the
+build output and never leaks `src/`, **and** keep the `@chiselart/source` export
+condition for in-monorepo hot-iterate (it resolves off the `workspace:*`
+symlink, not the tarball — the two are unrelated). `files` scopes only the
+published tarball, never in-workspace resolution. See [pm.md](pm.md) for the full
+rationale; scaffold via the generator (above) so both are wired correctly.
 
 ## IaC owns infra naming
 

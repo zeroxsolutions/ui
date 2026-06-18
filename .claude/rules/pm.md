@@ -37,5 +37,21 @@ Exception: the user explicitly asks for the raw command. See
 
 ## Publishable `@chiselart/*` packages
 
-Keep the `@chiselart/source` export condition and omit the `"files"` field so
-workspace consumers hot-iterate on `src/` (per nx-workspace.md).
+Keep **both** the `@chiselart/source` export condition **and** the generator's
+`"files"` field (`["dist", "!**/*.tsbuildinfo"]`) — they serve two unrelated
+concerns, don't conflate them:
+
+- **`@chiselart/source` → `src/`** lets consumers *inside this monorepo* (linked
+  via `workspace:*`) hot-iterate on source through the package **symlink**, no
+  rebuild. It resolves off the symlinked package directory (which always has
+  `src/`) and has nothing to do with what gets published.
+- **`files`** scopes the *published* npm tarball to build output only, so
+  `nx release` / `publish` **never ships `src/`** — source is not leaked when a
+  package goes to a public registry. `files` affects **only** the tarball, never
+  in-monorepo resolution.
+
+Do **not** drop `files` to "help hot-iterate" — it does not (the symlink + the
+source condition already do), and dropping it leaks `src/` on publish. A
+published package ships `dist/` (JS + `.d.ts`); cross-repo consumers resolve it
+via `types` / `import` (dist). Scaffold with the generator (nx-workspace.md —
+"generators, never hand-scaffolding"); it wires both correctly — keep its output.
