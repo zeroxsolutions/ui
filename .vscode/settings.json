@@ -1,0 +1,10 @@
+{
+  "typescript.tsserver.maxTsServerMemory": 4096,
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/out-tsc/**": true,
+    "**/.nx/**": true
+  }
+}
