@@ -45,3 +45,7 @@ Thumbs.db
 
 .nx/polygraph
 .nx/self-healing
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+
+storybook-static
