@@ -1,10 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@chiselart/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@chiselart/ui/resizable';
 
 const meta: Meta<typeof ResizablePanelGroup> = {
   title: 'Primitives/Resizable',
@@ -17,7 +13,7 @@ type Story = StoryObj<typeof ResizablePanelGroup>;
 export const Default: Story = {
   render: () => (
     <ResizablePanelGroup
-      direction="horizontal"
+      orientation="horizontal"
       className="h-40 w-full rounded-md ring-1 ring-foreground/10"
     >
       <ResizablePanel defaultSize={50}>

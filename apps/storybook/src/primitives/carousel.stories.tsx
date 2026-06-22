@@ -1,14 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Card,
-  CardContent,
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@chiselart/ui';
+import { Card, CardContent } from '@chiselart/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@chiselart/ui/carousel';
 
 const meta: Meta<typeof Carousel> = {
   title: 'Primitives/Carousel',

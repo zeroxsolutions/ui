@@ -1,14 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@chiselart/ui';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@chiselart/ui/table';
 
 const meta: Meta<typeof Table> = {
   title: 'Primitives/Table',

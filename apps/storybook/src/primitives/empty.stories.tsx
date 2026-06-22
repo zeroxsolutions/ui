@@ -1,14 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Empty,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-  EmptyDescription,
-  EmptyContent,
-  Button,
-} from '@chiselart/ui';
+import { Button } from '@chiselart/ui/button';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@chiselart/ui/empty';
 import { InboxIcon, PlusIcon } from 'lucide-react';
 
 const meta: Meta<typeof Empty> = {

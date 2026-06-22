@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Switch } from '@chiselart/ui';
+import { Switch } from '@chiselart/ui/switch';
 
 const meta: Meta<typeof Switch> = {
   title: 'Primitives/Switch',

@@ -1,14 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbEllipsis,
-} from '@chiselart/ui';
+import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@chiselart/ui/breadcrumb';
 
 const meta: Meta<typeof Breadcrumb> = {
   title: 'Primitives/Breadcrumb',

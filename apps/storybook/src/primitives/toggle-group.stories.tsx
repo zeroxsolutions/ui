@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BoldIcon, ItalicIcon, UnderlineIcon } from 'lucide-react';
 
-import { ToggleGroup, ToggleGroupItem } from '@chiselart/ui';
+import { ToggleGroup, ToggleGroupItem } from '@chiselart/ui/toggle-group';
 
 const meta: Meta<typeof ToggleGroup> = {
   title: 'Primitives/ToggleGroup',

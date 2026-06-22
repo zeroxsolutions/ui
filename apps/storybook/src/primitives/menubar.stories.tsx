@@ -1,14 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Menubar,
-  MenubarMenu,
-  MenubarTrigger,
-  MenubarContent,
-  MenubarItem,
-  MenubarSeparator,
-  MenubarShortcut,
-} from '@chiselart/ui';
+import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger } from '@chiselart/ui/menubar';
 
 const meta: Meta<typeof Menubar> = {
   title: 'Primitives/Menubar',

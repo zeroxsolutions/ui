@@ -1,14 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { UserIcon } from 'lucide-react';
 
-import {
-  Item,
-  ItemMedia,
-  ItemContent,
-  ItemTitle,
-  ItemDescription,
-  ItemGroup,
-} from '@chiselart/ui';
+import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@chiselart/ui/item';
 
 const meta: Meta<typeof Item> = {
   title: 'Primitives/Item',

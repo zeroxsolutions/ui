@@ -1,15 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Button,
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@chiselart/ui';
+import { Button } from '@chiselart/ui/button';
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@chiselart/ui/card';
 
 const meta: Meta<typeof Card> = {
   title: 'Primitives/Card',

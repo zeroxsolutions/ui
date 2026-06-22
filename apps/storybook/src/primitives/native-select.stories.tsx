@@ -1,10 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  NativeSelect,
-  NativeSelectOptGroup,
-  NativeSelectOption,
-} from '@chiselart/ui';
+import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from '@chiselart/ui/native-select';
 
 const meta: Meta<typeof NativeSelect> = {
   title: 'Primitives/NativeSelect',

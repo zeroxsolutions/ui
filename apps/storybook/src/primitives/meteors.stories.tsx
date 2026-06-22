@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Meteors } from '@chiselart/ui';
+import { Meteors } from '@chiselart/ui/meteors';
 
 const meta: Meta<typeof Meteors> = {
   title: 'Components/Meteors',

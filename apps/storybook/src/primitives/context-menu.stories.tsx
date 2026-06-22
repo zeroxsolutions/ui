@@ -1,21 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuLabel,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuGroup,
-  ContextMenuCheckboxItem,
-  ContextMenuRadioGroup,
-  ContextMenuRadioItem,
-  ContextMenuSub,
-  ContextMenuSubTrigger,
-  ContextMenuSubContent,
-} from '@chiselart/ui';
+import { ContextMenu, ContextMenuCheckboxItem, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuLabel, ContextMenuRadioGroup, ContextMenuRadioItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '@chiselart/ui/context-menu';
 
 const meta: Meta<typeof ContextMenu> = {
   title: 'Primitives/ContextMenu',

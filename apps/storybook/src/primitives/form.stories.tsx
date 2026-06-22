@@ -1,17 +1,9 @@
 import { useForm } from 'react-hook-form';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Button,
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-} from '@chiselart/ui';
+import { Button } from '@chiselart/ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@chiselart/ui/form';
+import { Input } from '@chiselart/ui/input';
 
 const meta: Meta = {
   title: 'Primitives/Form',

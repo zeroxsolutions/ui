@@ -1,16 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Field,
-  FieldLabel,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldSet,
-  FieldLegend,
-  FieldSeparator,
-  Input,
-} from '@chiselart/ui';
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from '@chiselart/ui/field';
+import { Input } from '@chiselart/ui/input';
 
 const meta: Meta<typeof Field> = {
   title: 'Primitives/Field',

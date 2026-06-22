@@ -1,16 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Drawer,
-  DrawerTrigger,
-  DrawerContent,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose,
-  Button,
-} from '@chiselart/ui';
+import { Button } from '@chiselart/ui/button';
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@chiselart/ui/drawer';
 
 const meta: Meta<typeof Drawer> = {
   title: 'Primitives/Drawer',
@@ -23,7 +14,9 @@ type Story = StoryObj<typeof Drawer>;
 export const Default: Story = {
   render: () => (
     <Drawer>
-      <DrawerTrigger render={<Button variant="outline">Open drawer</Button>} />
+      <DrawerTrigger asChild>
+        <Button variant="outline">Open drawer</Button>
+      </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>Are you absolutely sure?</DrawerTitle>
@@ -36,7 +29,9 @@ export const Default: Story = {
         </div>
         <DrawerFooter>
           <Button>Confirm</Button>
-          <DrawerClose render={<Button variant="outline">Cancel</Button>} />
+          <DrawerClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
@@ -46,7 +41,9 @@ export const Default: Story = {
 export const RightSide: Story = {
   render: () => (
     <Drawer direction="right">
-      <DrawerTrigger render={<Button variant="outline">Open side panel</Button>} />
+      <DrawerTrigger asChild>
+        <Button variant="outline">Open side panel</Button>
+      </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>Filters</DrawerTitle>
@@ -55,7 +52,9 @@ export const RightSide: Story = {
         <div className="px-4 text-sm text-muted-foreground">Panel body content.</div>
         <DrawerFooter>
           <Button>Apply</Button>
-          <DrawerClose render={<Button variant="outline">Close</Button>} />
+          <DrawerClose asChild>
+            <Button variant="outline">Close</Button>
+          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

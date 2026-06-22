@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Slider } from '@chiselart/ui';
+import { Slider } from '@chiselart/ui/slider';
 
 const meta: Meta<typeof Slider> = {
   title: 'Primitives/Slider',

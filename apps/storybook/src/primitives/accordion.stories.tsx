@@ -1,11 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@chiselart/ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@chiselart/ui/accordion';
 
 const meta: Meta<typeof Accordion> = {
   title: 'Primitives/Accordion',

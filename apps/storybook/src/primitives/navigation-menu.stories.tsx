@@ -1,13 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from '@chiselart/ui';
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@chiselart/ui/navigation-menu';
 
 const meta: Meta<typeof NavigationMenu> = {
   title: 'Primitives/NavigationMenu',

@@ -1,18 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogMedia,
-  Button,
-} from '@chiselart/ui';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogTrigger } from '@chiselart/ui/alert-dialog';
+import { Button } from '@chiselart/ui/button';
 import { TrashIcon } from 'lucide-react';
 
 const meta: Meta<typeof AlertDialog> = {

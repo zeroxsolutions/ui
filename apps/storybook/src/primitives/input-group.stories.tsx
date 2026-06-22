@@ -1,11 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MailIcon, SearchIcon } from 'lucide-react';
 
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from '@chiselart/ui';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@chiselart/ui/input-group';
 
 const meta: Meta<typeof InputGroup> = {
   title: 'Primitives/InputGroup',

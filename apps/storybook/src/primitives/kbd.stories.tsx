@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Kbd, KbdGroup } from '@chiselart/ui';
+import { Kbd, KbdGroup } from '@chiselart/ui/kbd';
 
 const meta: Meta<typeof Kbd> = {
   title: 'Primitives/Kbd',

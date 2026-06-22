@@ -1,19 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-  Button,
-  Field,
-  FieldLabel,
-  Input,
-} from '@chiselart/ui';
+import { Button } from '@chiselart/ui/button';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@chiselart/ui/dialog';
+import { Field, FieldLabel } from '@chiselart/ui/field';
+import { Input } from '@chiselart/ui/input';
 
 const meta: Meta<typeof Dialog> = {
   title: 'Primitives/Dialog',

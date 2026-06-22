@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Input } from '@chiselart/ui';
+import { Input } from '@chiselart/ui/input';
 
 const meta: Meta<typeof Input> = {
   title: 'Primitives/Input',

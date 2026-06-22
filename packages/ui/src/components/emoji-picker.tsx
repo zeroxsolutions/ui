@@ -13,6 +13,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import { getFluentEmojiCDN } from '@lobehub/fluent-emoji';
+
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SearchInput } from './search-input';
@@ -341,6 +343,30 @@ export function EmojiPickerNav({
   );
 }
 
+/**
+ * A single Fluent 3D emoji, resolved by codepoint through LobeHub's
+ * `getFluentEmojiCDN`. On a CDN/codepoint miss it falls back to the native
+ * glyph so nothing renders blank. Temporary: the artwork is hot-linked from the
+ * Fluent CDN; a self-hosted webp set will replace this later.
+ */
+function FluentEmojiImage({ glyph, name }: { glyph: string; name: string }) {
+  const [failed, setFailed] = React.useState(false);
+  if (failed) {
+    return <span className="text-xl leading-none">{glyph}</span>;
+  }
+  return (
+    <img
+      src={getFluentEmojiCDN(glyph, { type: '3d', cdn: 'unpkg' })}
+      alt={name}
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+      className="size-full object-contain"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 function EmojiGrid({
   emojis,
   onSelect,
@@ -360,7 +386,7 @@ function EmojiGrid({
           size='icon'
           variant='ghost'
         >
-          {em.e}
+          <FluentEmojiImage glyph={em.e} name={em.n} />
         </Button>
       ))}
     </div>

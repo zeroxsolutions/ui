@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { DirectionProvider, Button, ButtonGroup } from '@chiselart/ui';
+import { Button } from '@chiselart/ui/button';
+import { ButtonGroup } from '@chiselart/ui/button-group';
+import { DirectionProvider } from '@chiselart/ui/direction';
 
 /**
  * `DirectionProvider` is a non-visual Base UI context provider that sets the

@@ -1,15 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  AvatarEditor,
-  AvatarEditorColor,
-  AvatarEditorContent,
-  AvatarEditorEmoji,
-  AvatarEditorTrigger,
-  AvatarEditorUpload,
-  type AvatarValue,
-} from '@chiselart/ui';
+import { AvatarEditor, AvatarEditorColor, AvatarEditorContent, AvatarEditorEmoji, AvatarEditorTrigger, AvatarEditorUpload, type AvatarValue } from '@chiselart/ui/avatar-editor';
 
 const meta: Meta<typeof AvatarEditor> = {
   title: 'Components/AvatarEditor',

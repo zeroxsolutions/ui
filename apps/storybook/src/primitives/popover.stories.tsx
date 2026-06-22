@@ -1,14 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Button,
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from '@chiselart/ui';
+import { Button } from '@chiselart/ui/button';
+import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@chiselart/ui/popover';
 
 const meta: Meta<typeof Popover> = {
   title: 'Primitives/Popover',

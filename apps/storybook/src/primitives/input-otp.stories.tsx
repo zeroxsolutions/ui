@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-  InputOTPSeparator,
-} from '@chiselart/ui';
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@chiselart/ui/input-otp';
 
 const meta: Meta<typeof InputOTP> = {
   title: 'Primitives/InputOTP',

@@ -1,16 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  Button,
-} from '@chiselart/ui';
+import { Button } from '@chiselart/ui/button';
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@chiselart/ui/sheet';
 
 const meta: Meta<typeof Sheet> = {
   title: 'Primitives/Sheet',

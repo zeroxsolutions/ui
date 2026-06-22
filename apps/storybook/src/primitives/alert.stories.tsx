@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Alert, AlertTitle, AlertDescription, AlertAction, Button } from '@chiselart/ui';
+import { Alert, AlertAction, AlertDescription, AlertTitle } from '@chiselart/ui/alert';
+import { Button } from '@chiselart/ui/button';
 import { CircleAlertIcon, TriangleAlertIcon } from 'lucide-react';
 
 const meta: Meta<typeof Alert> = {

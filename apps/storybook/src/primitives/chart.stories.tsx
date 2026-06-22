@@ -1,14 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
 
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@chiselart/ui';
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@chiselart/ui/chart';
 
 const meta: Meta<typeof ChartContainer> = {
   title: 'Primitives/Chart',

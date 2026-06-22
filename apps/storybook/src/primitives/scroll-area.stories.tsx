@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { ScrollArea } from '@chiselart/ui';
+import { ScrollArea } from '@chiselart/ui/scroll-area';
 
 const meta: Meta<typeof ScrollArea> = {
   title: 'Primitives/ScrollArea',

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { PasswordInput } from '@chiselart/ui';
+import { PasswordInput } from '@chiselart/ui/password-input';
 
 const meta: Meta<typeof PasswordInput> = {
   title: 'Components/PasswordInput',

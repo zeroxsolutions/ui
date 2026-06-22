@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@chiselart/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@chiselart/ui/tabs';
 
 const meta: Meta<typeof Tabs> = {
   title: 'Primitives/Tabs',

@@ -1,11 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import {
-  Button,
-  ButtonGroup,
-  ButtonGroupSeparator,
-  ButtonGroupText,
-} from '@chiselart/ui';
+import { Button } from '@chiselart/ui/button';
+import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from '@chiselart/ui/button-group';
 
 const meta: Meta<typeof ButtonGroup> = {
   title: 'Primitives/ButtonGroup',

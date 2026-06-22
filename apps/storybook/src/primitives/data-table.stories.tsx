@@ -11,18 +11,12 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 
-import {
-  DataTable,
-  DataTableColumnHeader,
-  DataTablePagination,
-  DataTableToolbar,
-  DataTableView,
-  DataTableViewOptions,
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  Input,
-} from '@chiselart/ui';
+import { DataTable, DataTableToolbar, DataTableView } from '@chiselart/ui/data-table';
+import { DataTableColumnHeader } from '@chiselart/ui/data-table-column-header';
+import { DataTablePagination } from '@chiselart/ui/data-table-pagination';
+import { DataTableViewOptions } from '@chiselart/ui/data-table-view-options';
+import { Empty, EmptyHeader, EmptyTitle } from '@chiselart/ui/empty';
+import { Input } from '@chiselart/ui/input';
 
 type Person = { name: string; role: string; email: string };
 

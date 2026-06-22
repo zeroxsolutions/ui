@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { HoverCard, HoverCardTrigger, HoverCardContent } from '@chiselart/ui';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@chiselart/ui/hover-card';
 
 const meta: Meta<typeof HoverCard> = {
   title: 'Primitives/HoverCard',
