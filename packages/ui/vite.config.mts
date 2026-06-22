@@ -58,13 +58,16 @@ export default defineConfig(() => ({
       tsconfigPath: resolve(import.meta.dirname, 'tsconfig.lib.json'),
     }),
     {
-      // Ship the design-system theme/tokens as `@chiselart/ui/styles.css`.
+      // Ship raw CSS the build doesn't bundle: `styles.css` (the standalone
+      // theme/tokens) and `source.css` (Tailwind `@source` registration).
       name: 'chisel-copy-styles',
       closeBundle() {
-        copyFileSync(
-          resolve(import.meta.dirname, 'src/styles.css'),
-          resolve(import.meta.dirname, 'dist/styles.css'),
-        );
+        for (const file of ['styles.css', 'source.css']) {
+          copyFileSync(
+            resolve(import.meta.dirname, `src/${file}`),
+            resolve(import.meta.dirname, `dist/${file}`),
+          );
+        }
       },
     },
   ],

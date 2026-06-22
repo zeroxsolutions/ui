@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Palette, Smile, Trash2, Upload } from 'lucide-react';
+import { Loader2, Palette, Smile, Trash2, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -25,16 +25,39 @@ export interface AvatarValue {
   color?: string | null;
 }
 
+export type AvatarTab = 'emoji' | 'upload' | 'color';
+
 export interface AvatarEditorProps {
   value: AvatarValue;
   onChange: (value: AvatarValue) => void;
   /** The clickable avatar element rendered as the popover trigger. */
   children: React.ReactNode;
+  /**
+   * Which tabs to show, in order. Defaults to all three. Use e.g. `['upload']`
+   * for a photo-only avatar whose backend stores a single image URL (no emoji /
+   * color to persist). The tab strip is hidden when only one tab is shown.
+   */
+  tabs?: readonly AvatarTab[];
+  /**
+   * Custom upload handler. When provided, a picked file is handed to this
+   * instead of being read inline — let the consumer upload it to a backend and
+   * resolve the persisted URL, which becomes `imageUrl`. Resolve `null` to make
+   * the pick a no-op; reject to surface the error yourself (the editor just
+   * clears its busy state). When omitted, the file is read inline as a data URL.
+   */
+  onUpload?: (file: File) => string | null | Promise<string | null>;
   /** Swatches shown on the Color tab. */
   colors?: string[];
   align?: 'start' | 'center' | 'end';
   side?: 'top' | 'bottom' | 'left' | 'right';
 }
+
+const ALL_TABS: readonly AvatarTab[] = ['emoji', 'upload', 'color'];
+const TAB_ICON: Record<AvatarTab, typeof Smile> = {
+  emoji: Smile,
+  upload: Upload,
+  color: Palette,
+};
 
 /** A distinct, evenly-spread default palette for avatar tiles. */
 const DEFAULT_COLORS = [
@@ -52,16 +75,33 @@ export function AvatarEditor({
   value,
   onChange,
   children,
+  tabs = ALL_TABS,
+  onUpload,
   colors = DEFAULT_COLORS,
   align = 'start',
   side = 'bottom',
 }: AvatarEditorProps) {
   const fileRef = React.useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = React.useState(false);
 
   const setEmoji = (emoji: string) => onChange({ ...value, emoji, imageUrl: null });
   const setColor = (color: string) => onChange({ ...value, color });
   const onFile = (file: File | undefined) => {
     if (!file) return;
+    if (onUpload) {
+      // Hand the raw file to the consumer (e.g. a backend asset upload) and
+      // adopt the URL it resolves — don't inline a base64 data URL.
+      setUploading(true);
+      Promise.resolve(onUpload(file))
+        .then((url) => {
+          if (url) onChange({ ...value, imageUrl: url, emoji: null });
+        })
+        .catch(() => {
+          /* the consumer owns error messaging; just stop the spinner */
+        })
+        .finally(() => setUploading(false));
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () =>
       onChange({ ...value, imageUrl: String(reader.result), emoji: null });
@@ -82,19 +122,25 @@ export function AvatarEditor({
         side={side}
         className="w-[332px] gap-0 overflow-hidden p-0"
       >
-        <Tabs defaultValue="emoji" className="gap-0">
+        <Tabs defaultValue={tabs[0]} className="gap-0">
           <div className="flex items-center gap-1 p-2">
-            <TabsList variant="line">
-              <TabsTrigger value="emoji" aria-label="Emoji" className="flex-none px-2">
-                <Smile />
-              </TabsTrigger>
-              <TabsTrigger value="upload" aria-label="Upload" className="flex-none px-2">
-                <Upload />
-              </TabsTrigger>
-              <TabsTrigger value="color" aria-label="Color" className="flex-none px-2">
-                <Palette />
-              </TabsTrigger>
-            </TabsList>
+            {tabs.length > 1 && (
+              <TabsList variant="line">
+                {tabs.map((tab) => {
+                  const Icon = TAB_ICON[tab];
+                  return (
+                    <TabsTrigger
+                      key={tab}
+                      value={tab}
+                      aria-label={tab}
+                      className="flex-none px-2"
+                    >
+                      <Icon />
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            )}
             <Button
               type="button"
               variant="ghost"
@@ -107,30 +153,40 @@ export function AvatarEditor({
             </Button>
           </div>
 
-          <TabsContent value="emoji" className="p-0">
-            <EmojiPicker onSelect={setEmoji} />
-          </TabsContent>
+          {tabs.includes('emoji') && (
+            <TabsContent value="emoji" className="p-0">
+              <EmojiPicker onSelect={setEmoji} />
+            </TabsContent>
+          )}
 
-          <TabsContent value="upload" className="p-3">
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => onFile(e.target.files?.[0] ?? undefined)}
-            />
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-lg bg-muted/50 py-10 text-sm text-muted-foreground transition-colors hover:bg-muted"
-            >
-              <Upload className="size-6" />
-              <span>Click to upload an image</span>
-              <span className="text-xs">PNG, JPG or GIF</span>
-            </button>
-          </TabsContent>
+          {tabs.includes('upload') && (
+            <TabsContent value="upload" className="p-3">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => onFile(e.target.files?.[0] ?? undefined)}
+              />
+              <button
+                type="button"
+                disabled={uploading}
+                onClick={() => fileRef.current?.click()}
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-lg bg-muted/50 py-10 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:opacity-60"
+              >
+                {uploading ? (
+                  <Loader2 className="size-6 animate-spin" />
+                ) : (
+                  <Upload className="size-6" />
+                )}
+                <span>{uploading ? 'Uploading…' : 'Click to upload an image'}</span>
+                <span className="text-xs">PNG, JPG or GIF</span>
+              </button>
+            </TabsContent>
+          )}
 
-          <TabsContent value="color" className="p-3">
+          {tabs.includes('color') && (
+            <TabsContent value="color" className="p-3">
             <div className="grid grid-cols-6 gap-2">
               {colors.map((c) => (
                 <button
@@ -156,7 +212,8 @@ export function AvatarEditor({
                 className="h-8 w-12 cursor-pointer rounded-md bg-transparent"
               />
             </label>
-          </TabsContent>
+            </TabsContent>
+          )}
         </Tabs>
       </PopoverContent>
     </Popover>
