@@ -10,11 +10,10 @@ beforeAll(() => {
 
 afterEach(() => {
   cleanup();
-  localStorage.clear();
 });
 
 describe('EmojiPicker', () => {
-  it('selects an emoji and records it as frequently used', () => {
+  it('calls onSelect with the chosen emoji', () => {
     const onSelect = vi.fn();
     render(<EmojiPicker onSelect={onSelect} />);
 
@@ -22,10 +21,12 @@ describe('EmojiPicker', () => {
     fireEvent.click(screen.getByRole('button', { name: 'grinning face' }));
 
     expect(onSelect).toHaveBeenCalledWith('😀');
-    const frequent = JSON.parse(
-      localStorage.getItem('chisel-ui:emoji-frequent') ?? '[]',
-    );
-    expect(frequent).toContain('😀');
+  });
+
+  it('renders the consumer-supplied frequent row', () => {
+    render(<EmojiPicker onSelect={vi.fn()} frequent={['🍕']} />);
+
+    expect(screen.getByText('Frequently used')).toBeTruthy();
   });
 
   it('filters the grid by search query', () => {
