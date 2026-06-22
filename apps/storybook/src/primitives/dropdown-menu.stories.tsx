@@ -32,7 +32,9 @@ export const Default: Story = {
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline">Open menu</Button>} />
       <DropdownMenuContent className="w-52">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
@@ -65,9 +67,11 @@ export const WithCheckboxesAndSubmenu: Story = {
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline">View options</Button>} />
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Appearance</DropdownMenuLabel>
-        <DropdownMenuCheckboxItem checked>Status Bar</DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem>Activity Bar</DropdownMenuCheckboxItem>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+          <DropdownMenuCheckboxItem checked>Status Bar</DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem>Activity Bar</DropdownMenuCheckboxItem>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup defaultValue="bottom">
           <DropdownMenuLabel>Panel position</DropdownMenuLabel>
