@@ -1,5 +1,12 @@
 import * as React from 'react';
-import { Loader2, Palette, Smile, Trash2, Upload } from 'lucide-react';
+import {
+  Loader2,
+  Palette,
+  Smile,
+  Trash2,
+  Upload,
+  type LucideIcon,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -27,74 +34,199 @@ export interface AvatarValue {
 
 export type AvatarTab = 'emoji' | 'upload' | 'color';
 
+interface AvatarEditorContextValue {
+  value: AvatarValue;
+  /** Set the emoji (clears any image). */
+  setEmoji: (emoji: string) => void;
+  /** Set the tile color. */
+  setColor: (color: string) => void;
+  /** Set the image URL (clears any emoji). */
+  setImage: (url: string) => void;
+  /** Clear emoji + image. */
+  remove: () => void;
+}
+
+const AvatarEditorContext =
+  React.createContext<AvatarEditorContextValue | null>(null);
+
+/** Read the value/setters shared by the surrounding <AvatarEditor>. */
+function useAvatarEditor(): AvatarEditorContextValue {
+  const ctx = React.useContext(AvatarEditorContext);
+  if (!ctx) {
+    throw new Error('AvatarEditor parts must be used within <AvatarEditor>');
+  }
+  return ctx;
+}
+
 export interface AvatarEditorProps {
   value: AvatarValue;
   onChange: (value: AvatarValue) => void;
-  /** The clickable avatar element rendered as the popover trigger. */
-  children: React.ReactNode;
-  /**
-   * Which tabs to show, in order. Defaults to all three. Use e.g. `['upload']`
-   * for a photo-only avatar whose backend stores a single image URL (no emoji /
-   * color to persist). The tab strip is hidden when only one tab is shown.
-   */
-  tabs?: readonly AvatarTab[];
-  /**
-   * Custom upload handler. When provided, a picked file is handed to this
-   * instead of being read inline — let the consumer upload it to a backend and
-   * resolve the persisted URL, which becomes `imageUrl`. Resolve `null` to make
-   * the pick a no-op; reject to surface the error yourself (the editor just
-   * clears its busy state). When omitted, the file is read inline as a data URL.
-   */
-  onUpload?: (file: File) => string | null | Promise<string | null>;
-  /** Swatches shown on the Color tab. */
-  colors?: string[];
-  align?: 'start' | 'center' | 'end';
-  side?: 'top' | 'bottom' | 'left' | 'right';
+  /** Compose `AvatarEditorTrigger` + `AvatarEditorContent`. */
+  children?: React.ReactNode;
 }
-
-const ALL_TABS: readonly AvatarTab[] = ['emoji', 'upload', 'color'];
-const TAB_ICON: Record<AvatarTab, typeof Smile> = {
-  emoji: Smile,
-  upload: Upload,
-  color: Palette,
-};
-
-/** A distinct, evenly-spread default palette for avatar tiles. */
-const DEFAULT_COLORS = [
-  '#6366f1', '#8b5cf6', '#a855f7', '#ec4899', '#ef4444', '#f97316',
-  '#f59e0b', '#84cc16', '#10b981', '#14b8a6', '#0ea5e9', '#3b82f6',
-];
 
 /**
  * Chisel's agent/profile **avatar editor** — a popover opened from the avatar
- * tile with **Emoji · Upload · Color** tabs plus a **Remove** action, modelled
- * 1:1 on LobeHub. Picking an emoji or uploading an image is mutually exclusive
- * (the other is cleared); Remove clears both.
+ * tile, modelled on LobeHub. Compound + context: the Root holds the value and
+ * the setters; the parts read them. The consumer composes which tabs exist by
+ * including the tab parts (`AvatarEditorEmoji` / `Upload` / `Color`) and owns all
+ * visible copy via each part's `children`. Picking an emoji or image is mutually
+ * exclusive; Remove clears both.
  */
-export function AvatarEditor({
-  value,
-  onChange,
+export function AvatarEditor({ value, onChange, children }: AvatarEditorProps) {
+  const ctx: AvatarEditorContextValue = {
+    value,
+    setEmoji: (emoji) => onChange({ ...value, emoji, imageUrl: null }),
+    setColor: (color) => onChange({ ...value, color }),
+    setImage: (imageUrl) => onChange({ ...value, imageUrl, emoji: null }),
+    remove: () => onChange({ ...value, emoji: null, imageUrl: null }),
+  };
+  return (
+    <AvatarEditorContext.Provider value={ctx}>
+      <Popover>{children}</Popover>
+    </AvatarEditorContext.Provider>
+  );
+}
+
+/** The clickable avatar tile that opens the editor. */
+export function AvatarEditorTrigger({
+  className,
+  'aria-label': ariaLabel = 'Edit avatar',
+  ...props
+}: React.ComponentProps<typeof PopoverTrigger>) {
+  return (
+    <PopoverTrigger
+      aria-label={ariaLabel}
+      className={cn(
+        'inline-flex rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+interface AvatarTabMeta {
+  value: AvatarTab;
+  Icon: LucideIcon;
+}
+
+/**
+ * Popover body. Scans its children for the tab parts to build the icon strip
+ * (hidden when only one tab) and always renders the Remove action.
+ */
+export function AvatarEditorContent({
+  className,
   children,
-  tabs = ALL_TABS,
-  onUpload,
-  colors = DEFAULT_COLORS,
   align = 'start',
   side = 'bottom',
-}: AvatarEditorProps) {
+  ...props
+}: React.ComponentProps<typeof PopoverContent>) {
+  const tabs = React.Children.toArray(children)
+    .filter(React.isValidElement)
+    .map((child) => TAB_META.get(child.type as React.ElementType))
+    .filter((meta): meta is AvatarTabMeta => Boolean(meta));
+
+  return (
+    <PopoverContent
+      align={align}
+      side={side}
+      className={cn('w-[332px] gap-0 overflow-hidden p-0', className)}
+      {...props}
+    >
+      <Tabs defaultValue={tabs[0]?.value} className="gap-0">
+        <div className="flex items-center gap-1 p-2">
+          {tabs.length > 1 && (
+            <TabsList variant="line">
+              {tabs.map(({ value, Icon }) => (
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  aria-label={value}
+                  className="flex-none px-2"
+                >
+                  <Icon />
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          )}
+          <AvatarEditorRemove />
+        </div>
+        {children}
+      </Tabs>
+    </PopoverContent>
+  );
+}
+
+/** Clears both emoji and image. Auto-placed in the content header. */
+export function AvatarEditorRemove({
+  className,
+  'aria-label': ariaLabel = 'Remove avatar',
+  ...props
+}: React.ComponentProps<typeof Button>) {
+  const { remove } = useAvatarEditor();
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      aria-label={ariaLabel}
+      onClick={remove}
+      className={cn(
+        'ml-auto size-7 text-muted-foreground hover:text-destructive',
+        className,
+      )}
+      {...props}
+    >
+      <Trash2 />
+    </Button>
+  );
+}
+
+/** Emoji tab — picks an emoji (clears any image). */
+export function AvatarEditorEmoji({
+  className,
+  ...props
+}: Omit<React.ComponentProps<typeof TabsContent>, 'value'>) {
+  const { setEmoji } = useAvatarEditor();
+  return (
+    <TabsContent value="emoji" className={cn('p-0', className)} {...props}>
+      <EmojiPicker onSelect={setEmoji} />
+    </TabsContent>
+  );
+}
+
+export interface AvatarEditorUploadProps
+  extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
+  /**
+   * Hand the raw file to a backend and resolve the persisted URL (which becomes
+   * `imageUrl`); resolve `null` for a no-op. Omit to read the file inline as a
+   * data URL.
+   */
+  onUpload?: (file: File) => string | null | Promise<string | null>;
+}
+
+/**
+ * Upload tab. `children` override the default dropzone copy; a picked file goes
+ * to `onUpload` (or is read inline as a data URL when omitted).
+ */
+export function AvatarEditorUpload({
+  className,
+  children,
+  onUpload,
+  ...props
+}: AvatarEditorUploadProps) {
+  const { setImage } = useAvatarEditor();
   const fileRef = React.useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = React.useState(false);
 
-  const setEmoji = (emoji: string) => onChange({ ...value, emoji, imageUrl: null });
-  const setColor = (color: string) => onChange({ ...value, color });
   const onFile = (file: File | undefined) => {
     if (!file) return;
     if (onUpload) {
-      // Hand the raw file to the consumer (e.g. a backend asset upload) and
-      // adopt the URL it resolves — don't inline a base64 data URL.
       setUploading(true);
       Promise.resolve(onUpload(file))
         .then((url) => {
-          if (url) onChange({ ...value, imageUrl: url, emoji: null });
+          if (url) setImage(url);
         })
         .catch(() => {
           /* the consumer owns error messaging; just stop the spinner */
@@ -103,119 +235,94 @@ export function AvatarEditor({
       return;
     }
     const reader = new FileReader();
-    reader.onload = () =>
-      onChange({ ...value, imageUrl: String(reader.result), emoji: null });
+    reader.onload = () => setImage(String(reader.result));
     reader.readAsDataURL(file);
   };
-  const remove = () => onChange({ ...value, emoji: null, imageUrl: null });
 
   return (
-    <Popover>
-      <PopoverTrigger
-        aria-label="Edit avatar"
-        className="inline-flex rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+    <TabsContent value="upload" className={cn('p-3', className)} {...props}>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => onFile(e.target.files?.[0] ?? undefined)}
+      />
+      <button
+        type="button"
+        disabled={uploading}
+        onClick={() => fileRef.current?.click()}
+        className="flex w-full flex-col items-center justify-center gap-2 rounded-lg bg-muted/50 py-10 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:opacity-60"
       >
-        {children}
-      </PopoverTrigger>
-      <PopoverContent
-        align={align}
-        side={side}
-        className="w-[332px] gap-0 overflow-hidden p-0"
-      >
-        <Tabs defaultValue={tabs[0]} className="gap-0">
-          <div className="flex items-center gap-1 p-2">
-            {tabs.length > 1 && (
-              <TabsList variant="line">
-                {tabs.map((tab) => {
-                  const Icon = TAB_ICON[tab];
-                  return (
-                    <TabsTrigger
-                      key={tab}
-                      value={tab}
-                      aria-label={tab}
-                      className="flex-none px-2"
-                    >
-                      <Icon />
-                    </TabsTrigger>
-                  );
-                })}
-              </TabsList>
+        {children ?? (
+          <>
+            {uploading ? (
+              <Loader2 className="size-6 animate-spin" />
+            ) : (
+              <Upload className="size-6" />
             )}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Remove avatar"
-              onClick={remove}
-              className="ml-auto size-7 text-muted-foreground hover:text-destructive"
-            >
-              <Trash2 />
-            </Button>
-          </div>
-
-          {tabs.includes('emoji') && (
-            <TabsContent value="emoji" className="p-0">
-              <EmojiPicker onSelect={setEmoji} />
-            </TabsContent>
-          )}
-
-          {tabs.includes('upload') && (
-            <TabsContent value="upload" className="p-3">
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => onFile(e.target.files?.[0] ?? undefined)}
-              />
-              <button
-                type="button"
-                disabled={uploading}
-                onClick={() => fileRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center gap-2 rounded-lg bg-muted/50 py-10 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:opacity-60"
-              >
-                {uploading ? (
-                  <Loader2 className="size-6 animate-spin" />
-                ) : (
-                  <Upload className="size-6" />
-                )}
-                <span>{uploading ? 'Uploading…' : 'Click to upload an image'}</span>
-                <span className="text-xs">PNG, JPG or GIF</span>
-              </button>
-            </TabsContent>
-          )}
-
-          {tabs.includes('color') && (
-            <TabsContent value="color" className="p-3">
-            <div className="grid grid-cols-6 gap-2">
-              {colors.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  aria-label={c}
-                  style={{ backgroundColor: c }}
-                  className={cn(
-                    'size-9 rounded-full outline-none ring-ring ring-offset-2 ring-offset-popover transition-transform hover:scale-110 focus-visible:ring-2',
-                    value.color === c && 'ring-2',
-                  )}
-                />
-              ))}
-            </div>
-            <label className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-              Custom
-              <input
-                type="color"
-                value={value.color ?? '#000000'}
-                onChange={(e) => setColor(e.target.value)}
-                aria-label="Custom color"
-                className="h-8 w-12 cursor-pointer rounded-md bg-transparent"
-              />
-            </label>
-            </TabsContent>
-          )}
-        </Tabs>
-      </PopoverContent>
-    </Popover>
+            <span>{uploading ? 'Uploading…' : 'Click to upload an image'}</span>
+            <span className="text-xs">PNG, JPG or GIF</span>
+          </>
+        )}
+      </button>
+    </TabsContent>
   );
 }
+
+/** A distinct, evenly-spread default palette for avatar tiles. */
+const DEFAULT_COLORS = [
+  '#6366f1', '#8b5cf6', '#a855f7', '#ec4899', '#ef4444', '#f97316',
+  '#f59e0b', '#84cc16', '#10b981', '#14b8a6', '#0ea5e9', '#3b82f6',
+];
+
+export interface AvatarEditorColorProps
+  extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
+  /** Swatches shown on the Color tab. */
+  colors?: string[];
+}
+
+/** Color tab — swatches + a custom picker; `children` override the custom label. */
+export function AvatarEditorColor({
+  className,
+  children,
+  colors = DEFAULT_COLORS,
+  ...props
+}: AvatarEditorColorProps) {
+  const { value, setColor } = useAvatarEditor();
+  return (
+    <TabsContent value="color" className={cn('p-3', className)} {...props}>
+      <div className="grid grid-cols-6 gap-2">
+        {colors.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => setColor(c)}
+            aria-label={c}
+            style={{ backgroundColor: c }}
+            className={cn(
+              'size-9 rounded-full outline-none ring-ring ring-offset-2 ring-offset-popover transition-transform hover:scale-110 focus-visible:ring-2',
+              value.color === c && 'ring-2',
+            )}
+          />
+        ))}
+      </div>
+      <label className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+        {children ?? 'Custom'}
+        <input
+          type="color"
+          value={value.color ?? '#000000'}
+          onChange={(e) => setColor(e.target.value)}
+          aria-label="Custom color"
+          className="h-8 w-12 cursor-pointer rounded-md bg-transparent"
+        />
+      </label>
+    </TabsContent>
+  );
+}
+
+const TAB_META = new Map<React.ElementType, AvatarTabMeta>([
+  [AvatarEditorEmoji, { value: 'emoji', Icon: Smile }],
+  [AvatarEditorUpload, { value: 'upload', Icon: Upload }],
+  [AvatarEditorColor, { value: 'color', Icon: Palette }],
+]);

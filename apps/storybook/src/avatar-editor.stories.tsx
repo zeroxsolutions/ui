@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AvatarEditor, type AvatarValue } from '@chiselart/ui';
+import {
+  AvatarEditor,
+  AvatarEditorColor,
+  AvatarEditorContent,
+  AvatarEditorEmoji,
+  AvatarEditorTrigger,
+  AvatarEditorUpload,
+  type AvatarValue,
+} from '@chiselart/ui';
 
 const meta: Meta<typeof AvatarEditor> = {
   title: 'Components/AvatarEditor',
@@ -10,8 +18,10 @@ const meta: Meta<typeof AvatarEditor> = {
     docs: {
       description: {
         component:
-          'LobeHub-style avatar editor: a popover from the avatar tile with ' +
-          'Emoji · Upload · Color tabs and a Remove action.',
+          'LobeHub-style avatar editor — a compound popover. The Root holds the ' +
+          'value; compose AvatarEditorTrigger + AvatarEditorContent, and include ' +
+          'the tab parts (Emoji / Upload / Color) you want. The icon strip is ' +
+          'built from the parts present; each part owns its copy via children.',
       },
     },
   },
@@ -45,7 +55,14 @@ export const Default: Story = {
     });
     return (
       <AvatarEditor value={value} onChange={setValue}>
-        <AvatarTile value={value} />
+        <AvatarEditorTrigger>
+          <AvatarTile value={value} />
+        </AvatarEditorTrigger>
+        <AvatarEditorContent>
+          <AvatarEditorEmoji />
+          <AvatarEditorUpload />
+          <AvatarEditorColor />
+        </AvatarEditorContent>
       </AvatarEditor>
     );
   },
@@ -60,7 +77,32 @@ export const EmptyDefault: Story = {
     });
     return (
       <AvatarEditor value={value} onChange={setValue}>
-        <AvatarTile value={value} />
+        <AvatarEditorTrigger>
+          <AvatarTile value={value} />
+        </AvatarEditorTrigger>
+        <AvatarEditorContent>
+          <AvatarEditorEmoji />
+          <AvatarEditorUpload />
+          <AvatarEditorColor />
+        </AvatarEditorContent>
+      </AvatarEditor>
+    );
+  },
+};
+
+/** Photo-only avatar (the profile use case): include just the Upload tab — the
+ * strip is hidden, and `children` override the dropzone copy. */
+export const UploadOnly: Story = {
+  render: () => {
+    const [value, setValue] = useState<AvatarValue>({ imageUrl: null });
+    return (
+      <AvatarEditor value={value} onChange={setValue}>
+        <AvatarEditorTrigger>
+          <AvatarTile value={value} />
+        </AvatarEditorTrigger>
+        <AvatarEditorContent>
+          <AvatarEditorUpload />
+        </AvatarEditorContent>
       </AvatarEditor>
     );
   },
