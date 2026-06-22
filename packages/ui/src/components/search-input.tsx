@@ -11,8 +11,12 @@ import {
  * A search field — the `input-group` composition (leading magnifier + control)
  * packaged as one reusable component so call-sites never hand-roll the icon
  * alignment. `className` sizes the group; remaining props go to the input.
+ *
+ * Named modifier-first (`SearchInput`), per component-conventions: a new input
+ * variant takes the `<Modifier>Input` form; noun-first is reserved for inherited
+ * names (`InputOTP`, `InputGroup`).
  */
-function InputSearch({
+function SearchInput({
   className,
   ...props
 }: React.ComponentProps<"input">) {
@@ -26,4 +30,4 @@ function InputSearch({
   )
 }
 
-export { InputSearch }
+export { SearchInput }

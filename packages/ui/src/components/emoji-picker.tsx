@@ -14,7 +14,7 @@ import {
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { InputSearch } from './input-search';
+import { SearchInput } from './search-input';
 import { cn } from '@/lib/utils';
 import {
   EMOJI_CATEGORIES,
@@ -118,7 +118,7 @@ export function EmojiPicker({ onSelect, className }: EmojiPickerProps) {
   return (
     <div className={cn('flex flex-col', className)}>
       <div className="px-2 pb-2">
-        <InputSearch
+        <SearchInput
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search"

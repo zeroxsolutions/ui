@@ -62,7 +62,7 @@ export * from './components/ui/tooltip';
 // Composed components (Chisel-authored)
 export * from './components/avatar-editor';
 export * from './components/emoji-picker';
-export * from './components/input-search';
+export * from './components/search-input';
 
 // Hooks
 export * from './hooks/use-mobile';
