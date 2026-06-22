@@ -15,20 +15,18 @@ import { cn } from "@/lib/utils"
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.ComponentProps<"div"> {
   column: Column<TData, TValue>
-  /** Sort / hide action labels (override per locale; default English). */
-  labels?: { ascending?: string; descending?: string; hide?: string }
 }
 
 /**
  * Sortable / hideable header. Used inside a column's `header`, so it takes the
  * `column` directly (column defs live outside the render tree, can't read
- * context). Its title is `children` (consumer copy); the sort/hide action labels
- * default to English and are overridable via `labels`.
+ * context). Its title is `children`; the menu shows the default sort/hide
+ * actions, whose copy lives as each action part's own `children` default —
+ * compose the parts for different copy, never a `labels` config.
  */
 function DataTableColumnHeader<TData, TValue>({
   column,
   children,
-  labels,
   className,
   ...props
 }: DataTableColumnHeaderProps<TData, TValue>) {
@@ -41,7 +39,6 @@ function DataTableColumnHeader<TData, TValue>({
   }
 
   const sorted = column.getIsSorted()
-  const { ascending = "Asc", descending = "Desc", hide = "Hide" } = labels ?? {}
 
   return (
     <div className={cn("flex items-center gap-2", className)} {...props}>
@@ -67,29 +64,69 @@ function DataTableColumnHeader<TData, TValue>({
         <DropdownMenuContent align="start">
           {column.getCanSort() && (
             <>
-              <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-                <ArrowUp className="text-muted-foreground/70" />
-                {ascending}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-                <ArrowDown className="text-muted-foreground/70" />
-                {descending}
-              </DropdownMenuItem>
+              <DataTableColumnHeaderSortAscending column={column} />
+              <DataTableColumnHeaderSortDescending column={column} />
             </>
           )}
           {column.getCanSort() && column.getCanHide() && (
             <DropdownMenuSeparator />
           )}
-          {column.getCanHide() && (
-            <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-              <EyeOff className="text-muted-foreground/70" />
-              {hide}
-            </DropdownMenuItem>
-          )}
+          {column.getCanHide() && <DataTableColumnHeaderHide column={column} />}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
   )
 }
 
-export { DataTableColumnHeader }
+type DataTableColumnActionProps<TData, TValue> = {
+  column: Column<TData, TValue>
+} & React.ComponentProps<typeof DropdownMenuItem>
+
+/** Sort-ascending action; `children` override the default copy. */
+function DataTableColumnHeaderSortAscending<TData, TValue>({
+  column,
+  children,
+  ...props
+}: DataTableColumnActionProps<TData, TValue>) {
+  return (
+    <DropdownMenuItem {...props} onClick={() => column.toggleSorting(false)}>
+      <ArrowUp className="text-muted-foreground/70" />
+      {children ?? "Asc"}
+    </DropdownMenuItem>
+  )
+}
+
+/** Sort-descending action; `children` override the default copy. */
+function DataTableColumnHeaderSortDescending<TData, TValue>({
+  column,
+  children,
+  ...props
+}: DataTableColumnActionProps<TData, TValue>) {
+  return (
+    <DropdownMenuItem {...props} onClick={() => column.toggleSorting(true)}>
+      <ArrowDown className="text-muted-foreground/70" />
+      {children ?? "Desc"}
+    </DropdownMenuItem>
+  )
+}
+
+/** Hide-column action; `children` override the default copy. */
+function DataTableColumnHeaderHide<TData, TValue>({
+  column,
+  children,
+  ...props
+}: DataTableColumnActionProps<TData, TValue>) {
+  return (
+    <DropdownMenuItem {...props} onClick={() => column.toggleVisibility(false)}>
+      <EyeOff className="text-muted-foreground/70" />
+      {children ?? "Hide"}
+    </DropdownMenuItem>
+  )
+}
+
+export {
+  DataTableColumnHeader,
+  DataTableColumnHeaderSortAscending,
+  DataTableColumnHeaderSortDescending,
+  DataTableColumnHeaderHide,
+}
