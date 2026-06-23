@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { EmojiPicker } from './emoji-picker';
@@ -10,6 +10,7 @@ beforeAll(() => {
 
 afterEach(() => {
   cleanup();
+  vi.unstubAllGlobals();
 });
 
 describe('EmojiPicker', () => {
@@ -50,5 +51,44 @@ describe('EmojiPicker', () => {
     });
 
     expect(screen.getByText('No emoji found')).toBeTruthy();
+  });
+
+  it('defers a cell’s artwork until it scrolls into view', () => {
+    // Mock IntersectionObserver to capture observed cells without auto-firing,
+    // so the gated (off-screen) state is what we assert. jsdom has no IO, so the
+    // component would otherwise render every cell eagerly.
+    const targets: Element[] = [];
+    let fire: ((el: Element) => void) | null = null;
+    class MockIO {
+      constructor(private cb: IntersectionObserverCallback) {
+        fire = (el: Element) =>
+          this.cb(
+            [{ target: el, isIntersecting: true } as IntersectionObserverEntry],
+            this as unknown as IntersectionObserver,
+          );
+      }
+      observe(el: Element) {
+        targets.push(el);
+      }
+      unobserve() {
+        /* no-op */
+      }
+      disconnect() {
+        /* no-op */
+      }
+    }
+    vi.stubGlobal('IntersectionObserver', MockIO);
+
+    render(<EmojiPicker onSelect={vi.fn()} />);
+
+    // Every cell is registered for observation, but none has intersected yet…
+    expect(targets.length).toBeGreaterThan(500);
+    expect(document.querySelectorAll('img')).toHaveLength(0);
+    // …the buttons (accessible name + click target) still exist meanwhile.
+    expect(screen.getByRole('button', { name: 'grinning face' })).toBeTruthy();
+
+    // Scrolling a cell into view renders its Fluent artwork.
+    act(() => fire?.(targets[0]));
+    expect(document.querySelectorAll('img').length).toBeGreaterThan(0);
   });
 });

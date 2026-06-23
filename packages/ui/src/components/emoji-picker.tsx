@@ -60,6 +60,14 @@ interface EmojiPickerContextValue {
   scrollToCategory: (id: string) => void;
   sectionRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
   hasFrequent: boolean;
+  /** The scroll viewport — the IntersectionObserver root for cell visibility. */
+  viewportRef: React.RefObject<HTMLElement | null>;
+  /**
+   * Defer a cell's artwork until it scrolls near the viewport. Calls `onShow`
+   * once the cell intersects, then stops observing it. Returns a cleanup. Falls
+   * back to showing immediately where `IntersectionObserver` is unavailable.
+   */
+  observeCell: (el: Element, onShow: () => void) => () => void;
 }
 
 const EmojiPickerContext = React.createContext<EmojiPickerContextValue | null>(
@@ -111,6 +119,54 @@ export function EmojiPicker({
   const [active, setActive] = React.useState('smileys_people');
   const sectionRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Visibility gating. The catalog is ~1900 cells; rendering every `<img>` up
+  // front makes the browser fetch hundreds of webp on open (native
+  // `loading="lazy"` over-fetches — its look-ahead ignores the inner scroll
+  // clip). A single IntersectionObserver rooted at the scroll viewport renders a
+  // cell's artwork only once it scrolls near, so opening loads ~one screenful.
+  const viewportRef = React.useRef<HTMLElement | null>(null);
+  const observerRef = React.useRef<IntersectionObserver | null>(null);
+  const cellShow = React.useRef(new Map<Element, () => void>());
+
+  const getObserver = React.useCallback(() => {
+    if (typeof IntersectionObserver === 'undefined') return null;
+    if (!observerRef.current) {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            cellShow.current.get(entry.target)?.();
+            cellShow.current.delete(entry.target);
+            observerRef.current?.unobserve(entry.target);
+          }
+        },
+        // Root captured at creation; the viewport mounts (commit) before any
+        // cell effect (post-commit) registers, so it is set by first use.
+        { root: viewportRef.current, rootMargin: '160px 0px', threshold: 0 },
+      );
+    }
+    return observerRef.current;
+  }, []);
+
+  React.useEffect(() => () => observerRef.current?.disconnect(), []);
+
+  const observeCell = React.useCallback(
+    (el: Element, onShow: () => void) => {
+      const observer = getObserver();
+      if (!observer) {
+        onShow();
+        return () => undefined;
+      }
+      cellShow.current.set(el, onShow);
+      observer.observe(el);
+      return () => {
+        cellShow.current.delete(el);
+        observer.unobserve(el);
+      };
+    },
+    [getObserver],
+  );
+
   const q = query.trim().toLowerCase();
   const results = React.useMemo(() => {
     if (!q) return null;
@@ -160,6 +216,8 @@ export function EmojiPicker({
       scrollToCategory,
       sectionRefs,
       hasFrequent: frequent.length > 0,
+      viewportRef,
+      observeCell,
     }),
     [
       query,
@@ -170,6 +228,7 @@ export function EmojiPicker({
       active,
       scrollToCategory,
       frequent.length,
+      observeCell,
     ],
   );
 
@@ -281,9 +340,21 @@ export function EmojiPickerContent({
   size = 'md',
   ...props
 }: EmojiPickerContentProps) {
-  const { results, sections, select, sectionRefs } = useEmojiPicker();
+  const { results, sections, select, sectionRefs, viewportRef } =
+    useEmojiPicker();
+  // The ScrollArea forwards this ref to its root; the cell observer is rooted at
+  // the inner scroll viewport. Set during commit, before any cell registers.
+  const setScrollRoot = React.useCallback(
+    (el: HTMLElement | null) => {
+      viewportRef.current =
+        el?.querySelector<HTMLElement>('[data-slot="scroll-area-viewport"]') ??
+        null;
+    },
+    [viewportRef],
+  );
   return (
     <ScrollArea
+      ref={setScrollRoot}
       className={cn(emojiPickerContentVariants({ size }), className)}
       {...props}
     >
@@ -356,22 +427,51 @@ function EmojiGrid({
   return (
     <div className="grid grid-cols-8 gap-0.5 pb-2">
       {emojis.map((em, i) => (
-        <Button
-          key={`${em.e}-${i}`}
-          type="button"
-          onClick={() => onSelect(em.e)}
-          title={em.n}
-          aria-label={em.n}
-          size='icon'
-          variant='ghost'
-        >
-          <FluentEmoji
-            glyph={em.e}
-            name={em.n}
-            className="size-full object-contain"
-          />
-        </Button>
+        <EmojiCell key={`${em.e}-${i}`} emoji={em} onSelect={onSelect} />
       ))}
     </div>
+  );
+}
+
+/**
+ * One emoji button. Its accessible name and click target exist immediately so
+ * search and keyboard nav work, but the Fluent artwork (`<img>`) is rendered
+ * only once the cell scrolls near the viewport — see `observeCell`. This is what
+ * keeps opening the picker from fetching hundreds of webp at once.
+ */
+function EmojiCell({
+  emoji,
+  onSelect,
+}: {
+  emoji: EmojiDatum;
+  onSelect: (emoji: string) => void;
+}) {
+  const { observeCell } = useEmojiPicker();
+  const ref = React.useRef<HTMLButtonElement>(null);
+  const [shown, setShown] = React.useState(false);
+
+  React.useEffect(() => {
+    if (shown || !ref.current) return;
+    return observeCell(ref.current, () => setShown(true));
+  }, [observeCell, shown]);
+
+  return (
+    <Button
+      ref={ref}
+      type="button"
+      onClick={() => onSelect(emoji.e)}
+      title={emoji.n}
+      aria-label={emoji.n}
+      size="icon"
+      variant="ghost"
+    >
+      {shown && (
+        <FluentEmoji
+          glyph={emoji.e}
+          name={emoji.n}
+          className="size-full object-contain"
+        />
+      )}
+    </Button>
   );
 }
