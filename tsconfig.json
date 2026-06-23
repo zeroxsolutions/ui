@@ -11,6 +11,9 @@
     },
     {
       "path": "./apps/storybook"
+    },
+    {
+      "path": "./packages/fluent-emoji"
     }
   ]
 }

@@ -13,13 +13,15 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import { getFluentEmojiCDN } from '@lobehub/fluent-emoji';
-
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SearchInput } from './search-input';
 import { cn } from '@/lib/utils';
-import { EMOJI_CATEGORIES, type EmojiDatum } from '@/lib/emoji/emoji-data';
+import {
+  EMOJI_CATEGORIES,
+  FluentEmoji,
+  type EmojiDatum,
+} from '@chiselart/fluent-emoji';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from './ui/empty';
 import { Button } from './ui/button';
@@ -90,9 +92,10 @@ export interface EmojiPickerProps {
 
 /**
  * A searchable, categorized emoji grid with an optional frequent row and a
- * category nav — modelled on the LobeHub picker. Data is the committed
- * `emoji-data.ts` (generated from Unicode CLDR); the frequent row is
- * consumer-supplied (`frequent`) — the picker holds no persistence of its own.
+ * category nav — modelled on the LobeHub picker. The catalog and the Fluent 3D
+ * artwork come from `@chiselart/fluent-emoji` (self-hosted, no third-party CDN);
+ * the frequent row is consumer-supplied (`frequent`) — the picker holds no
+ * persistence of its own.
  *
  * Compound + context: the Root owns the state and the parts read it. Used bare
  * (`<EmojiPicker onSelect />`) it renders the default composition; compose the
@@ -343,30 +346,6 @@ export function EmojiPickerNav({
   );
 }
 
-/**
- * A single Fluent 3D emoji, resolved by codepoint through LobeHub's
- * `getFluentEmojiCDN`. On a CDN/codepoint miss it falls back to the native
- * glyph so nothing renders blank. Temporary: the artwork is hot-linked from the
- * Fluent CDN; a self-hosted webp set will replace this later.
- */
-function FluentEmojiImage({ glyph, name }: { glyph: string; name: string }) {
-  const [failed, setFailed] = React.useState(false);
-  if (failed) {
-    return <span className="text-xl leading-none">{glyph}</span>;
-  }
-  return (
-    <img
-      src={getFluentEmojiCDN(glyph, { type: '3d', cdn: 'unpkg' })}
-      alt={name}
-      loading="lazy"
-      decoding="async"
-      draggable={false}
-      className="size-full object-contain"
-      onError={() => setFailed(true)}
-    />
-  );
-}
-
 function EmojiGrid({
   emojis,
   onSelect,
@@ -386,7 +365,11 @@ function EmojiGrid({
           size='icon'
           variant='ghost'
         >
-          <FluentEmojiImage glyph={em.e} name={em.n} />
+          <FluentEmoji
+            glyph={em.e}
+            name={em.n}
+            className="size-full object-contain"
+          />
         </Button>
       ))}
     </div>

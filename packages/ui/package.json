@@ -24,8 +24,8 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
+    "@chiselart/fluent-emoji": "workspace:*",
     "@fontsource-variable/inter": "^5.2.8",
-    "@lobehub/fluent-emoji": "^4.1.0",
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

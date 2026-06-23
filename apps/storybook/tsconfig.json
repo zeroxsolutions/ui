@@ -6,6 +6,9 @@
       "path": "../../packages/ui"
     },
     {
+      "path": "../../packages/fluent-emoji"
+    },
+    {
       "path": "./tsconfig.storybook.json"
     }
   ],

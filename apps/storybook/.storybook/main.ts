@@ -17,6 +17,14 @@ const uiSrc = resolve(
   '../../../packages/ui/src',
 );
 
+// `@chiselart/fluent-emoji` (catalog + self-hosted Fluent artwork) is consumed
+// from source too, so its `import.meta.glob` over the bundled .webp runs in this
+// build and emits the assets — no third-party CDN, no prebuilt dist needed.
+const fluentEmojiSrc = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  '../../../packages/fluent-emoji/src/index.ts',
+);
+
 const isSkipped = (p: string) =>
   p.endsWith('.d.ts') ||
   /\.(test|spec|stories)\.(ts|tsx)$/.test(p) ||
@@ -34,6 +42,11 @@ for (const rel of readdirSync(uiSrc, { recursive: true }) as string[]) {
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))'],
+  // Serve the Fluent emoji artwork as static files at `/fluent-emoji` (the base
+  // set in preview.ts) — the package ships raw .webp, not bundled assets.
+  staticDirs: [
+    { from: '../../../packages/fluent-emoji/assets', to: '/fluent-emoji' },
+  ],
   addons: [],
   framework: {
     name: getAbsolutePath('@storybook/react-vite'),
@@ -50,6 +63,7 @@ const config: StorybookConfig = {
       resolve: {
         alias: {
           ...subpathAliases,
+          '@chiselart/fluent-emoji': fluentEmojiSrc,
           // The library's internal `@/…` imports resolve into its own src.
           '@': uiSrc,
         },
