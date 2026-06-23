@@ -223,7 +223,7 @@ export function EmojiPickerGroupLabel({
   return (
     <div
       className={cn(
-        'sticky top-0 z-10 bg-popover px-2 py-1 text-foreground/50 text-sm font-medium',
+        'sticky top-0 z-10 bg-popover px-2 py-1 text-muted-foreground text-sm font-medium',
         className,
       )}
       {...props}

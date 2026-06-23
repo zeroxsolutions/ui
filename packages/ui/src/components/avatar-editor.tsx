@@ -61,6 +61,10 @@ function useAvatarEditor(): AvatarEditorContextValue {
 export interface AvatarEditorProps {
   value: AvatarValue;
   onChange: (value: AvatarValue) => void;
+  /** Open state — uncontrolled by default; pass `open` to control it. */
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
   /** Compose `AvatarEditorTrigger` + `AvatarEditorContent`. */
   children?: React.ReactNode;
 }
@@ -73,7 +77,14 @@ export interface AvatarEditorProps {
  * visible copy via each part's `children`. Picking an emoji or image is mutually
  * exclusive; Remove clears both.
  */
-export function AvatarEditor({ value, onChange, children }: AvatarEditorProps) {
+export function AvatarEditor({
+  value,
+  onChange,
+  open,
+  defaultOpen,
+  onOpenChange,
+  children,
+}: AvatarEditorProps) {
   const ctx: AvatarEditorContextValue = {
     value,
     setEmoji: (emoji) => onChange({ ...value, emoji, imageUrl: null }),
@@ -83,7 +94,9 @@ export function AvatarEditor({ value, onChange, children }: AvatarEditorProps) {
   };
   return (
     <AvatarEditorContext.Provider value={ctx}>
-      <Popover>{children}</Popover>
+      <Popover open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
+        {children}
+      </Popover>
     </AvatarEditorContext.Provider>
   );
 }
@@ -131,7 +144,7 @@ export function AvatarEditorContent({
     <PopoverContent
       align={align}
       side={side}
-      className={cn('w-[332px] gap-0 overflow-hidden p-0', className)}
+      className={cn('w-84 gap-0 overflow-hidden p-0', className)}
       {...props}
     >
       <Tabs defaultValue={tabs[0]?.value} className="gap-0">

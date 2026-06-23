@@ -7,7 +7,6 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
-import { cn } from "@/lib/utils"
 
 /**
  * A password field — the `input-group` composition with a show/hide toggle in
@@ -25,7 +24,7 @@ function PasswordInput({
   const [visible, setVisible] = React.useState(false)
 
   return (
-    <InputGroup className={cn(className)}>
+    <InputGroup className={className}>
       <InputGroupInput {...props} type={visible ? "text" : "password"} />
       <InputGroupAddon align="inline-end">
         <InputGroupButton
