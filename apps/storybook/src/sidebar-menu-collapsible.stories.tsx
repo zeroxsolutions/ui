@@ -19,7 +19,7 @@ import { SearchInput } from '@chiselart/ui/search-input';
 import { MessageSquareIcon, SlidersHorizontalIcon } from 'lucide-react';
 
 const meta: Meta<typeof SidebarMenuCollapsible> = {
-  title: 'Primitives/SidebarMenuCollapsible',
+  title: 'Components/SidebarMenuCollapsible',
   component: SidebarMenuCollapsible,
 };
 export default meta;
