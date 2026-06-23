@@ -1,0 +1,39 @@
+import * as React from 'react';
+
+import { cn } from '@/lib/utils';
+import { FileTypeIcon } from './file-type-icon';
+
+export interface BinaryFileCardProps extends React.ComponentProps<'div'> {
+  /** File name — drives the type icon and the displayed title. */
+  name: string;
+}
+
+/**
+ * A centered fallback card for a file with no inline viewer (binary or unknown):
+ * the type icon + the file name, then any `children` — the place for the file
+ * size, a download action, or a "no preview" note, all consumer-owned. Fills the
+ * space it's given.
+ */
+export function BinaryFileCard({
+  name,
+  className,
+  children,
+  ...props
+}: BinaryFileCardProps) {
+  return (
+    <div
+      data-slot="binary-file-card"
+      className={cn(
+        'flex size-full flex-col items-center justify-center gap-3 text-center',
+        className,
+      )}
+      {...props}
+    >
+      <FileTypeIcon name={name} className="size-12 text-muted-foreground" />
+      <span className="max-w-xs truncate text-sm font-medium text-foreground">
+        {name}
+      </span>
+      {children}
+    </div>
+  );
+}
