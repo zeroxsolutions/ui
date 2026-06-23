@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import {
@@ -28,58 +29,99 @@ type Story = StoryObj<typeof SidebarMenuCollapsible>;
 
 const topics = ['Pricing page copy', 'Onboarding flow', 'Q3 launch plan'];
 
-export const Default: Story = {
-  render: () => (
+/** The bordered rail shell every story shares. */
+function Frame({ children }: { children: ReactNode }) {
+  return (
     <div className="h-[480px] w-64 overflow-hidden rounded-lg border">
       <SidebarProvider>
         <Sidebar collapsible="none">
           <SidebarContent>
             <SidebarGroup>
-              <SidebarMenu className="gap-1">
-                {/* Open section: header action + above-list search + rows. */}
-                <SidebarMenuCollapsible defaultOpen>
-                  <SidebarMenuCollapsibleTrigger>
-                    <span className="truncate">Topics</span>
-                    <span className="ml-1 text-[11px]">{topics.length}</span>
-                  </SidebarMenuCollapsibleTrigger>
-                  <SidebarMenuAction aria-label="Topic display options">
-                    <SlidersHorizontalIcon />
-                  </SidebarMenuAction>
-                  <SidebarMenuCollapsibleContent>
-                    <div className="px-1 pb-1">
-                      <SearchInput placeholder="Search topics" className="h-7" />
-                    </div>
-                    <SidebarMenu className="gap-1 py-0.5 pl-3.5">
-                      {topics.map((title) => (
-                        <SidebarMenuItem key={title}>
-                          <SidebarMenuButton>
-                            <MessageSquareIcon />
-                            <span>{title}</span>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarMenuCollapsibleContent>
-                </SidebarMenuCollapsible>
-
-                {/* Collapsed section with an honest empty state. */}
-                <SidebarMenuCollapsible>
-                  <SidebarMenuCollapsibleTrigger>
-                    <span className="truncate">Tasks</span>
-                  </SidebarMenuCollapsibleTrigger>
-                  <SidebarMenuCollapsibleContent>
-                    <SidebarMenu className="gap-1 py-0.5 pl-3.5">
-                      <SidebarMenuItem className="px-2 py-1 text-xs text-muted-foreground">
-                        No tasks yet
-                      </SidebarMenuItem>
-                    </SidebarMenu>
-                  </SidebarMenuCollapsibleContent>
-                </SidebarMenuCollapsible>
-              </SidebarMenu>
+              <SidebarMenu className="gap-1">{children}</SidebarMenu>
             </SidebarGroup>
           </SidebarContent>
         </Sidebar>
       </SidebarProvider>
     </div>
+  );
+}
+
+/** Topics: a header action + above-list search + rows. */
+function TopicsSection({ defaultOpen }: { defaultOpen?: boolean }) {
+  return (
+    <SidebarMenuCollapsible defaultOpen={defaultOpen}>
+      <SidebarMenuCollapsibleTrigger>
+        <span className="truncate">Topics</span>
+        <span className="ml-1 text-[11px]">{topics.length}</span>
+      </SidebarMenuCollapsibleTrigger>
+      <SidebarMenuAction aria-label="Topic display options">
+        <SlidersHorizontalIcon />
+      </SidebarMenuAction>
+      <SidebarMenuCollapsibleContent>
+        <div className="px-1 pb-1">
+          <SearchInput placeholder="Search topics" className="h-7" />
+        </div>
+        <SidebarMenu className="gap-1 py-0.5 pl-3.5">
+          {topics.map((title) => (
+            <SidebarMenuItem key={title}>
+              <SidebarMenuButton>
+                <MessageSquareIcon />
+                <span>{title}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarMenuCollapsibleContent>
+    </SidebarMenuCollapsible>
+  );
+}
+
+/** Tasks: an honest empty state. */
+function TasksSection({ defaultOpen }: { defaultOpen?: boolean }) {
+  return (
+    <SidebarMenuCollapsible defaultOpen={defaultOpen}>
+      <SidebarMenuCollapsibleTrigger>
+        <span className="truncate">Tasks</span>
+      </SidebarMenuCollapsibleTrigger>
+      <SidebarMenuCollapsibleContent>
+        <SidebarMenu className="gap-1 py-0.5 pl-3.5">
+          <SidebarMenuItem className="px-2 py-1 text-xs text-muted-foreground">
+            No tasks yet
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarMenuCollapsibleContent>
+    </SidebarMenuCollapsible>
+  );
+}
+
+/** A realistic mix — one section open, one closed. */
+export const Default: Story = {
+  render: () => (
+    <Frame>
+      <TopicsSection defaultOpen />
+      <TasksSection />
+    </Frame>
+  ),
+};
+
+/** Both sections open — inspect the expanded chevron + content at a glance. */
+export const Expanded: Story = {
+  name: 'All expanded',
+  render: () => (
+    <Frame>
+      <TopicsSection defaultOpen />
+      <TasksSection defaultOpen />
+    </Frame>
+  ),
+};
+
+/** Both sections closed — inspect the collapsed chevron + headers only. */
+export const Collapsed: Story = {
+  name: 'All collapsed',
+  render: () => (
+    <Frame>
+      <TopicsSection />
+      <TasksSection />
+    </Frame>
   ),
 };
