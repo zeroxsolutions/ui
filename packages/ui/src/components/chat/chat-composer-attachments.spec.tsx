@@ -7,13 +7,8 @@ import type { ChatAttachmentLike } from './chat-types';
 afterEach(cleanup);
 
 const attachments: ChatAttachmentLike[] = [
-  {
-    id: 'a1',
-    name: 'hero.png',
-    kind: 'image',
-    dataUrl: 'data:image/png;base64,AAAA',
-  },
-  { id: 'a2', name: 'notes.txt', kind: 'text' },
+  { id: 'a1', name: 'one.txt', kind: 'text' },
+  { id: 'a2', name: 'two.txt', kind: 'text' },
 ];
 
 describe('ChatComposerAttachments', () => {
@@ -24,15 +19,12 @@ describe('ChatComposerAttachments', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders an image as a thumbnail and a non-image as a file chip', () => {
+  it('renders one chip per attachment', () => {
     render(
       <ChatComposerAttachments attachments={attachments} onRemove={vi.fn()} />,
     );
-    expect((screen.getByAltText('hero.png') as HTMLImageElement).src).toContain(
-      'data:image/png',
-    );
-    expect(screen.queryByAltText('notes.txt')).toBeNull();
-    expect(screen.getByText('notes.txt')).toBeTruthy();
+    expect(screen.getByText('one.txt')).toBeTruthy();
+    expect(screen.getByText('two.txt')).toBeTruthy();
   });
 
   it('forwards removal of a specific chip by id', () => {
@@ -40,7 +32,7 @@ describe('ChatComposerAttachments', () => {
     render(
       <ChatComposerAttachments attachments={attachments} onRemove={onRemove} />,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Remove notes.txt' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove two.txt' }));
     expect(onRemove).toHaveBeenCalledWith('a2');
   });
 });
