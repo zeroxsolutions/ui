@@ -1,7 +1,8 @@
 import * as React from 'react';
-import Markdown from 'react-markdown';
+import Markdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import { CodeBlock } from '@/components/ai-elements/code-block';
 import { cn } from '@/lib/utils';
 
 /**
@@ -22,9 +23,6 @@ const PROSE = [
   '[&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-6',
   '[&_li]:my-1',
   '[&_blockquote]:my-3 [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground [&_blockquote]:italic',
-  '[&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em]',
-  '[&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-3',
-  '[&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[0.85em]',
   '[&_hr]:my-6 [&_hr]:border-border',
   '[&_img]:max-w-full [&_img]:rounded-md',
   '[&_table]:my-3 [&_table]:w-full [&_table]:border-collapse [&_table]:text-left',
@@ -32,25 +30,81 @@ const PROSE = [
   '[&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-1.5',
 ].join(' ');
 
+/**
+ * Code styling for the default (plain `<pre>`) renderer. Split out so the
+ * `codeBlocks` variant can drop it — there `CodeBlock` owns code rendering and
+ * these descendant rules would otherwise repaint its inner `<pre>`/`<code>`.
+ */
+const PROSE_CODE = [
+  '[&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em]',
+  '[&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-3',
+  '[&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[0.85em]',
+].join(' ');
+
+/**
+ * `components` override used only in `codeBlocks` mode: fenced code renders as
+ * the interactive `CodeBlock` (copy button + horizontal scroll rail); inline
+ * code stays a muted chip. The fenced wrapper is unwrapped — `code` emits the
+ * block-level `<CodeBlock>` directly, since a `<div>` must not nest inside `<pre>`.
+ */
+const codeBlockComponents: Components = {
+  pre: ({ children }) => <>{children}</>,
+  code: ({ className, children }) => {
+    const text = String(children ?? '');
+    const lang = /language-(\w+)/.exec(className ?? '')?.[1];
+    const isBlock = !!lang || text.includes('\n');
+    if (isBlock) {
+      return <CodeBlock code={text.replace(/\n$/, '')} language={lang ?? 'text'} />;
+    }
+    return (
+      <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">
+        {children}
+      </code>
+    );
+  },
+};
+
 export interface MarkdownViewProps
   extends Omit<React.ComponentProps<'div'>, 'children'> {
   /** Markdown source to render (GitHub-Flavored Markdown). */
   children: string;
+  /**
+   * Render fenced code blocks with the interactive `CodeBlock` (copy button,
+   * horizontal scroll rail) instead of a plain styled `<pre>`. Off by default so
+   * existing read-only callers (previews, frontmatter) are unchanged; chat
+   * surfaces opt in.
+   */
+  codeBlocks?: boolean;
 }
 
 /**
  * Renders a Markdown string (GFM: tables, task lists, strikethrough, autolinks)
  * styled to the design tokens. Read-only — raw embedded HTML is not rendered, so
  * it's safe for untrusted content. Pair with an editor for the edit half.
+ *
+ * Memoized: parsing Markdown is not free and chat surfaces render it inside a
+ * streaming message list, so a settled message must not re-parse on every parent
+ * render. Props are `children` (string) + `codeBlocks` + plain `div` attributes,
+ * so the default shallow comparison is correct.
  */
-export function MarkdownView({
+export const MarkdownView = React.memo(function MarkdownView({
   children,
   className,
+  codeBlocks = false,
   ...props
 }: MarkdownViewProps) {
   return (
-    <div data-slot="markdown-view" className={cn(PROSE, className)} {...props}>
-      <Markdown remarkPlugins={[remarkGfm]}>{children}</Markdown>
+    <div
+      data-slot="markdown-view"
+      className={cn(PROSE, !codeBlocks && PROSE_CODE, className)}
+      {...props}
+    >
+      <Markdown
+        remarkPlugins={[remarkGfm]}
+        components={codeBlocks ? codeBlockComponents : undefined}
+      >
+        {children}
+      </Markdown>
     </div>
   );
-}
+});

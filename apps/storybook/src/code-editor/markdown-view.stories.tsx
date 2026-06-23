@@ -42,3 +42,14 @@ export const Default: Story = {
     </div>
   ),
 };
+
+export const CodeBlocks: Story = {
+  name: 'Code blocks (interactive)',
+  render: () => (
+    <div className="max-w-2xl rounded-lg border p-6">
+      {/* `codeBlocks` swaps the plain <pre> for the interactive CodeBlock
+          (hover copy button + horizontal scroll rail) — used by chat surfaces. */}
+      <MarkdownView codeBlocks>{SAMPLE}</MarkdownView>
+    </div>
+  ),
+};
