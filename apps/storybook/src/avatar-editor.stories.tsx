@@ -2,6 +2,9 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { AvatarEditor, AvatarEditorColor, AvatarEditorContent, AvatarEditorEmoji, AvatarEditorTrigger, AvatarEditorUpload, type AvatarValue } from '@chiselart/ui/avatar-editor';
+import { Button } from '@chiselart/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@chiselart/ui/dialog';
+import { FluentEmoji } from '@chiselart/fluent-emoji';
 
 const meta: Meta<typeof AvatarEditor> = {
   title: 'Components/AvatarEditor',
@@ -32,7 +35,10 @@ function AvatarTile({ value }: { value: AvatarValue }) {
       {value.imageUrl ? (
         <img src={value.imageUrl} alt="" className="size-full object-cover" />
       ) : (
-        <span>{value.emoji ?? '🙂'}</span>
+        <FluentEmoji
+          glyph={value.emoji ?? '🙂'}
+          className="size-full object-contain p-[12%]"
+        />
       )}
     </div>
   );
@@ -78,6 +84,43 @@ export const EmptyDefault: Story = {
           <AvatarEditorColor />
         </AvatarEditorContent>
       </AvatarEditor>
+    );
+  },
+};
+
+/** The web-app scenario: the editor lives inside a modal Dialog. Because the
+ * Dialog and the Popover are BOTH Base UI, the nested emoji popover stays
+ * interactive. A Radix modal Dialog would block it — Radix sets
+ * `body { pointer-events: none }`, which a portaled Base UI popup inherits. */
+export const InsideDialog: Story = {
+  render: () => {
+    const [value, setValue] = useState<AvatarValue>({
+      emoji: '😎',
+      color: '#6366f1',
+      imageUrl: null,
+    });
+    return (
+      <Dialog>
+        <DialogTrigger render={<Button variant="outline">Edit agent</Button>} />
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit agent</DialogTitle>
+            <DialogDescription>
+              Click the avatar to pick an emoji, upload an image, or set a colour.
+            </DialogDescription>
+          </DialogHeader>
+          <AvatarEditor value={value} onChange={setValue}>
+            <AvatarEditorTrigger>
+              <AvatarTile value={value} />
+            </AvatarEditorTrigger>
+            <AvatarEditorContent>
+              <AvatarEditorEmoji />
+              <AvatarEditorUpload />
+              <AvatarEditorColor />
+            </AvatarEditorContent>
+          </AvatarEditor>
+        </DialogContent>
+      </Dialog>
     );
   },
 };
