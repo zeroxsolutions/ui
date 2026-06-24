@@ -123,6 +123,9 @@ importers:
       '@chiselart/fluent-emoji':
         specifier: workspace:*
         version: link:../../packages/fluent-emoji
+      '@chiselart/icons':
+        specifier: workspace:*
+        version: link:../../packages/icons
       '@chiselart/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -174,7 +177,21 @@ importers:
         specifier: ^0.35.2
         version: 0.35.2
 
-  packages/icons: {}
+  packages/icons:
+    dependencies:
+      lucide-react:
+        specifier: ^1.21.0
+        version: 1.21.0(react@19.2.7)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.7(react@19.2.7)
+    devDependencies:
+      glob:
+        specifier: ^13.0.6
+        version: 13.0.6
 
   packages/ui:
     dependencies:
