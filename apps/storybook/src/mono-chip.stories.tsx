@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { MonoChip } from '@chiselart/ui/mono-chip'
 
 const meta: Meta<typeof MonoChip> = {
-  title: 'Primitives/MonoChip',
+  title: 'Components/MonoChip',
   component: MonoChip,
 }
 export default meta

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { DirtyDot } from '@chiselart/ui/dirty-dot'
 
 const meta: Meta<typeof DirtyDot> = {
-  title: 'Primitives/DirtyDot',
+  title: 'Components/DirtyDot',
   component: DirtyDot,
 }
 export default meta

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { IconLabel } from '@chiselart/ui/icon-label'
 
 const meta: Meta<typeof IconLabel> = {
-  title: 'Primitives/IconLabel',
+  title: 'Components/IconLabel',
   component: IconLabel,
 }
 export default meta

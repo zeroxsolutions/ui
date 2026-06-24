@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StatusDot, type StatusTone } from '@chiselart/ui/status-dot'
 
 const meta: Meta<typeof StatusDot> = {
-  title: 'Primitives/StatusDot',
+  title: 'Components/StatusDot',
   component: StatusDot,
 }
 export default meta

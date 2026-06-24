@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { ConfirmButton } from '@chiselart/ui/confirm-button'
 
 const meta: Meta<typeof ConfirmButton> = {
-  title: 'Primitives/ConfirmButton',
+  title: 'Components/ConfirmButton',
   component: ConfirmButton,
 }
 export default meta
