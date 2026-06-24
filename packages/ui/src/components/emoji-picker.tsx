@@ -12,7 +12,6 @@ import {
   Smile,
   type LucideIcon,
 } from 'lucide-react';
-
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SearchInput } from './search-input';
@@ -41,10 +40,60 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 /** Default heading for the frequent row; override via composition. */
 const FREQUENT_LABEL = 'Frequently used';
 
+/** Cells per grid row, and the fixed row metrics the window is computed from.
+ * The grid is uniform — a cell is a `Button size="icon"` (`size-9` = 36px) and
+ * rows sit a `gap-0.5` (2px) apart — and the viewport height is the `size`
+ * variant (below), so the visible window is pure arithmetic: no element
+ * measurement (which reads 0 in jsdom) and no ResizeObserver. */
+const COLS = 8;
+const CELL_ROW_HEIGHT = 38;
+const HEADER_HEIGHT = 28;
+const SIZE_PX = { sm: 160, md: 240, lg: 320 } as const;
+/** Rows rendered beyond the viewport on each side, in px (~6 rows). */
+const OVERSCAN_PX = 6 * CELL_ROW_HEIGHT;
+
 interface EmojiSection {
   id: string;
   name: string;
   emojis: EmojiDatum[];
+}
+
+/** One virtual row: a sticky section heading or a row of up to `COLS` emoji. */
+type EmojiRow =
+  | { type: 'header'; key: string; id: string; name: string }
+  | { type: 'cells'; key: string; emojis: EmojiDatum[] };
+
+/** Flatten sections (or flat search results) into the virtualizer's row list. */
+function buildRows(
+  sections: EmojiSection[],
+  results: EmojiDatum[] | null,
+): { rows: EmojiRow[]; headerIndices: number[] } {
+  const rows: EmojiRow[] = [];
+  const headerIndices: number[] = [];
+  const pushCells = (emojis: EmojiDatum[], keyBase: string) => {
+    for (let i = 0; i < emojis.length; i += COLS) {
+      rows.push({
+        type: 'cells',
+        key: `${keyBase}-${i}`,
+        emojis: emojis.slice(i, i + COLS),
+      });
+    }
+  };
+  // Search view is a flat grid of matches — no section headers.
+  if (results) {
+    pushCells(results, 'search');
+    return { rows, headerIndices };
+  }
+  for (const sec of sections) {
+    headerIndices.push(rows.length);
+    rows.push({ type: 'header', key: `h-${sec.id}`, id: sec.id, name: sec.name });
+    pushCells(sec.emojis, sec.id);
+  }
+  return { rows, headerIndices };
+}
+
+interface Scroller {
+  scrollToIndex: (index: number, opts?: { align?: 'start' }) => void;
 }
 
 interface EmojiPickerContextValue {
@@ -54,20 +103,15 @@ interface EmojiPickerContextValue {
   select: (emoji: string) => void;
   /** Search results, or null when not searching. */
   results: EmojiDatum[] | null;
-  sections: EmojiSection[];
   navCategories: { id: string; name: string }[];
   active: string;
   scrollToCategory: (id: string) => void;
-  sectionRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
   hasFrequent: boolean;
-  /** The scroll viewport — the IntersectionObserver root for cell visibility. */
-  viewportRef: React.RefObject<HTMLElement | null>;
-  /**
-   * Defer a cell's artwork until it scrolls near the viewport. Calls `onShow`
-   * once the cell intersects, then stops observing it. Returns a cleanup. Falls
-   * back to showing immediately where `IntersectionObserver` is unavailable.
-   */
-  observeCell: (el: Element, onShow: () => void) => () => void;
+  /** Flattened rows + the indices that are sticky headers. */
+  rows: EmojiRow[];
+  headerIndices: number[];
+  /** The scrollable grid registers its virtualizer here so the nav can jump. */
+  scrollerRef: React.RefObject<Scroller | null>;
 }
 
 const EmojiPickerContext = React.createContext<EmojiPickerContextValue | null>(
@@ -105,6 +149,10 @@ export interface EmojiPickerProps {
  * the frequent row is consumer-supplied (`frequent`) — the picker holds no
  * persistence of its own.
  *
+ * The grid is **windowed**: only the rows in (and near) the viewport mount, so
+ * opening the ~1900-emoji catalog renders one screenful and fetches only the
+ * artwork in view.
+ *
  * Compound + context: the Root owns the state and the parts read it. Used bare
  * (`<EmojiPicker onSelect />`) it renders the default composition; compose the
  * parts to override any visible copy (every string is a part's `children`/prop
@@ -117,55 +165,6 @@ export function EmojiPicker({
 }: EmojiPickerProps) {
   const [query, setQuery] = React.useState('');
   const [active, setActive] = React.useState('smileys_people');
-  const sectionRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
-
-  // Visibility gating. The catalog is ~1900 cells; rendering every `<img>` up
-  // front makes the browser fetch hundreds of webp on open (native
-  // `loading="lazy"` over-fetches — its look-ahead ignores the inner scroll
-  // clip). A single IntersectionObserver rooted at the scroll viewport renders a
-  // cell's artwork only once it scrolls near, so opening loads ~one screenful.
-  const viewportRef = React.useRef<HTMLElement | null>(null);
-  const observerRef = React.useRef<IntersectionObserver | null>(null);
-  const cellShow = React.useRef(new Map<Element, () => void>());
-
-  const getObserver = React.useCallback(() => {
-    if (typeof IntersectionObserver === 'undefined') return null;
-    if (!observerRef.current) {
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (!entry.isIntersecting) continue;
-            cellShow.current.get(entry.target)?.();
-            cellShow.current.delete(entry.target);
-            observerRef.current?.unobserve(entry.target);
-          }
-        },
-        // Root captured at creation; the viewport mounts (commit) before any
-        // cell effect (post-commit) registers, so it is set by first use.
-        { root: viewportRef.current, rootMargin: '160px 0px', threshold: 0 },
-      );
-    }
-    return observerRef.current;
-  }, []);
-
-  React.useEffect(() => () => observerRef.current?.disconnect(), []);
-
-  const observeCell = React.useCallback(
-    (el: Element, onShow: () => void) => {
-      const observer = getObserver();
-      if (!observer) {
-        onShow();
-        return () => undefined;
-      }
-      cellShow.current.set(el, onShow);
-      observer.observe(el);
-      return () => {
-        cellShow.current.delete(el);
-        observer.unobserve(el);
-      };
-    },
-    [getObserver],
-  );
 
   const q = query.trim().toLowerCase();
   const results = React.useMemo(() => {
@@ -199,10 +198,23 @@ export function EmojiPicker({
     [],
   );
 
-  const scrollToCategory = React.useCallback((id: string) => {
-    setActive(id);
-    sectionRefs.current[id]?.scrollIntoView({ block: 'start' });
-  }, []);
+  const { rows, headerIndices } = React.useMemo(
+    () => buildRows(sections, results),
+    [sections, results],
+  );
+
+  // The scrollable grid (in EmojiPickerContent) registers its virtualizer here;
+  // the nav lives in a sibling subtree and jumps through this ref.
+  const scrollerRef = React.useRef<Scroller | null>(null);
+
+  const scrollToCategory = React.useCallback(
+    (id: string) => {
+      setActive(id);
+      const idx = rows.findIndex((r) => r.type === 'header' && r.id === id);
+      if (idx >= 0) scrollerRef.current?.scrollToIndex(idx, { align: 'start' });
+    },
+    [rows],
+  );
 
   const ctx = React.useMemo<EmojiPickerContextValue>(
     () => ({
@@ -210,25 +222,24 @@ export function EmojiPicker({
       setQuery,
       select: onSelect,
       results,
-      sections,
       navCategories,
       active,
       scrollToCategory,
-      sectionRefs,
       hasFrequent: frequent.length > 0,
-      viewportRef,
-      observeCell,
+      rows,
+      headerIndices,
+      scrollerRef,
     }),
     [
       query,
       onSelect,
       results,
-      sections,
       navCategories,
       active,
       scrollToCategory,
       frequent.length,
-      observeCell,
+      rows,
+      headerIndices,
     ],
   );
 
@@ -285,7 +296,7 @@ export function EmojiPickerGroupLabel({
   return (
     <div
       className={cn(
-        'sticky top-0 z-10 bg-popover px-2 py-1 text-muted-foreground text-sm font-medium',
+        'bg-popover px-2 py-1 text-muted-foreground text-sm font-medium',
         className,
       )}
       {...props}
@@ -331,8 +342,14 @@ export type EmojiPickerContentProps = React.ComponentProps<typeof ScrollArea> &
   VariantProps<typeof emojiPickerContentVariants>;
 
 /**
- * Scrollable grid body. While searching it shows the matches or — when none —
- * its `children` (an `EmojiPickerEmpty` override) or the default empty state.
+ * Windowed, scrollable grid body. While searching it shows the matches or —
+ * when none — its `children` (an `EmojiPickerEmpty` override) or the default
+ * empty state. Only the rows in (and near) the viewport mount; the section
+ * header covering the top of the viewport is pinned.
+ *
+ * The window is plain arithmetic over fixed row heights and the known viewport
+ * height (the `size` variant) — no element measurement, so it is correct under
+ * jsdom (scroll starts at the top) and needs no virtualization library.
  */
 export function EmojiPickerContent({
   className,
@@ -340,43 +357,134 @@ export function EmojiPickerContent({
   size = 'md',
   ...props
 }: EmojiPickerContentProps) {
-  const { results, sections, select, sectionRefs, viewportRef } =
+  const { results, rows, headerIndices, select, scrollerRef } =
     useEmojiPicker();
-  // The ScrollArea forwards this ref to its root; the cell observer is rooted at
-  // the inner scroll viewport. Set during commit, before any cell registers.
+
+  const viewportHeight = SIZE_PX[size ?? 'md'];
+  const [scrollTop, setScrollTop] = React.useState(0);
+
+  // Per-row top offsets + total height (uniform, fixed metrics).
+  const { offsets, total } = React.useMemo(() => {
+    const offsets: number[] = [];
+    let acc = 0;
+    for (const r of rows) {
+      offsets.push(acc);
+      acc += r.type === 'header' ? HEADER_HEIGHT : CELL_ROW_HEIGHT;
+    }
+    return { offsets, total: acc };
+  }, [rows]);
+  const offsetsRef = React.useRef(offsets);
+  offsetsRef.current = offsets;
+
+  const viewportRef = React.useRef<HTMLElement | null>(null);
+  const onScroll = React.useCallback(() => {
+    setScrollTop(viewportRef.current?.scrollTop ?? 0);
+  }, []);
+  // The ScrollArea forwards this ref to its root; scrolling happens on the inner
+  // viewport (and scroll events don't bubble), so listen on it directly.
   const setScrollRoot = React.useCallback(
     (el: HTMLElement | null) => {
+      viewportRef.current?.removeEventListener('scroll', onScroll);
       viewportRef.current =
         el?.querySelector<HTMLElement>('[data-slot="scroll-area-viewport"]') ??
         null;
+      viewportRef.current?.addEventListener('scroll', onScroll, {
+        passive: true,
+      });
     },
-    [viewportRef],
+    [onScroll],
   );
+
+  // Let the sibling nav jump to a category by scrolling to its header offset.
+  React.useEffect(() => {
+    scrollerRef.current = {
+      scrollToIndex: (index) => {
+        const y = offsetsRef.current[index] ?? 0;
+        const vp = viewportRef.current;
+        if (vp) vp.scrollTop = y;
+        setScrollTop(y);
+      },
+    };
+    return () => {
+      scrollerRef.current = null;
+    };
+  }, [scrollerRef]);
+
+  // A new row set (e.g. entering/leaving search) starts back at the top.
+  React.useEffect(() => {
+    if (viewportRef.current) viewportRef.current.scrollTop = 0;
+    setScrollTop(0);
+  }, [results]);
+
+  // Empty search → the empty state, not a windowed list.
+  if (results && results.length === 0) {
+    return (
+      <ScrollArea
+        ref={setScrollRoot}
+        className={cn(emojiPickerContentVariants({ size }), className)}
+        {...props}
+      >
+        {children ?? <EmojiPickerEmpty />}
+      </ScrollArea>
+    );
+  }
+
+  // The visible window (+ overscan), found over the fixed offsets.
+  const top = scrollTop - OVERSCAN_PX;
+  const bottom = scrollTop + viewportHeight + OVERSCAN_PX;
+  const rowHeight = (i: number) =>
+    rows[i].type === 'header' ? HEADER_HEIGHT : CELL_ROW_HEIGHT;
+  let start = 0;
+  while (start < rows.length && offsets[start] + rowHeight(start) < top) start++;
+  let end = start;
+  while (end < rows.length && offsets[end] <= bottom) end++;
+
+  // The header to pin: the last one whose offset is at or above the viewport top.
+  let stickyIndex = -1;
+  for (const hi of headerIndices) {
+    if (offsets[hi] <= scrollTop) stickyIndex = hi;
+    else break;
+  }
+
   return (
     <ScrollArea
       ref={setScrollRoot}
       className={cn(emojiPickerContentVariants({ size }), className)}
       {...props}
     >
-      {results ? (
-        results.length > 0 ? (
-          <EmojiGrid emojis={results} onSelect={select} />
-        ) : (
-          (children ?? <EmojiPickerEmpty />)
-        )
-      ) : (
-        sections.map((cat) => (
-          <div
-            key={cat.id}
-            ref={(el) => {
-              sectionRefs.current[cat.id] = el;
-            }}
-          >
-            <EmojiPickerGroupLabel>{cat.name}</EmojiPickerGroupLabel>
-            <EmojiGrid emojis={cat.emojis} onSelect={select} />
+      <div style={{ position: 'relative', width: '100%', height: total }}>
+        {stickyIndex >= 0 && rows[stickyIndex].type === 'header' && (
+          <div style={{ position: 'sticky', top: 0, zIndex: 10, width: '100%' }}>
+            <EmojiPickerGroupLabel>
+              {(rows[stickyIndex] as { name: string }).name}
+            </EmojiPickerGroupLabel>
           </div>
-        ))
-      )}
+        )}
+        {rows.slice(start, end).map((row, i) => {
+          const index = start + i;
+          // The pinned header is rendered once, above — skip its in-flow copy.
+          if (index === stickyIndex) return null;
+          return (
+            <div
+              key={row.key}
+              data-index={index}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${offsets[index]}px)`,
+              }}
+            >
+              {row.type === 'header' ? (
+                <EmojiPickerGroupLabel>{row.name}</EmojiPickerGroupLabel>
+              ) : (
+                <EmojiGrid emojis={row.emojis} onSelect={select} />
+              )}
+            </div>
+          );
+        })}
+      </div>
     </ScrollArea>
   );
 }
@@ -425,7 +533,7 @@ function EmojiGrid({
   onSelect: (emoji: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-8 gap-0.5 pb-2">
+    <div className="grid grid-cols-8 gap-0.5">
       {emojis.map((em, i) => (
         <EmojiCell key={`${em.e}-${i}`} emoji={em} onSelect={onSelect} />
       ))}
@@ -433,12 +541,9 @@ function EmojiGrid({
   );
 }
 
-/**
- * One emoji button. Its accessible name and click target exist immediately so
- * search and keyboard nav work, but the Fluent artwork (`<img>`) is rendered
- * only once the cell scrolls near the viewport — see `observeCell`. This is what
- * keeps opening the picker from fetching hundreds of webp at once.
- */
+/** One emoji button. Only cells in (or near) the viewport mount, so the Fluent
+ * artwork is rendered immediately — virtualization, not per-cell deferral, is
+ * what keeps opening the picker from fetching the whole catalog. */
 function EmojiCell({
   emoji,
   onSelect,
@@ -446,18 +551,8 @@ function EmojiCell({
   emoji: EmojiDatum;
   onSelect: (emoji: string) => void;
 }) {
-  const { observeCell } = useEmojiPicker();
-  const ref = React.useRef<HTMLButtonElement>(null);
-  const [shown, setShown] = React.useState(false);
-
-  React.useEffect(() => {
-    if (shown || !ref.current) return;
-    return observeCell(ref.current, () => setShown(true));
-  }, [observeCell, shown]);
-
   return (
     <Button
-      ref={ref}
       type="button"
       onClick={() => onSelect(emoji.e)}
       title={emoji.n}
@@ -465,13 +560,11 @@ function EmojiCell({
       size="icon"
       variant="ghost"
     >
-      {shown && (
-        <FluentEmoji
-          glyph={emoji.e}
-          name={emoji.n}
-          className="size-full object-contain"
-        />
-      )}
+      <FluentEmoji
+        glyph={emoji.e}
+        name={emoji.n}
+        className="size-full object-contain"
+      />
     </Button>
   );
 }

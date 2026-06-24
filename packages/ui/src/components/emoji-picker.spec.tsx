@@ -1,11 +1,19 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { EmojiPicker } from './emoji-picker';
 
-// jsdom doesn't implement scrollIntoView (the category nav calls it).
 beforeAll(() => {
+  // The category nav scrolls the viewport; jsdom implements neither.
   Element.prototype.scrollIntoView = vi.fn();
+  Element.prototype.scrollTo = vi.fn();
+  // The virtualizer measures the scroll element via ResizeObserver, absent in
+  // jsdom — without it the grid window never seeds.
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
 });
 
 afterEach(() => {
@@ -53,42 +61,16 @@ describe('EmojiPicker', () => {
     expect(screen.getByText('No emoji found')).toBeTruthy();
   });
 
-  it('defers a cell’s artwork until it scrolls into view', () => {
-    // Mock IntersectionObserver to capture observed cells without auto-firing,
-    // so the gated (off-screen) state is what we assert. jsdom has no IO, so the
-    // component would otherwise render every cell eagerly.
-    const targets: Element[] = [];
-    let fire: ((el: Element) => void) | null = null;
-    class MockIO {
-      constructor(private cb: IntersectionObserverCallback) {
-        fire = (el: Element) =>
-          this.cb(
-            [{ target: el, isIntersecting: true } as IntersectionObserverEntry],
-            this as unknown as IntersectionObserver,
-          );
-      }
-      observe(el: Element) {
-        targets.push(el);
-      }
-      unobserve() {
-        /* no-op */
-      }
-      disconnect() {
-        /* no-op */
-      }
-    }
-    vi.stubGlobal('IntersectionObserver', MockIO);
-
+  it('virtualizes the grid — mounts only a window of cells, not the whole catalog', () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
 
-    // Every cell is registered for observation, but none has intersected yet…
-    expect(targets.length).toBeGreaterThan(500);
-    expect(document.querySelectorAll('img')).toHaveLength(0);
-    // …the buttons (accessible name + click target) still exist meanwhile.
-    expect(screen.getByRole('button', { name: 'grinning face' })).toBeTruthy();
+    // The catalog is ~1900 emoji; a windowed render mounts ~one screenful of
+    // Fluent artwork, so the count stays far below the full catalog.
+    const mounted = document.querySelectorAll('img').length;
+    expect(mounted).toBeGreaterThan(0);
+    expect(mounted).toBeLessThan(300);
 
-    // Scrolling a cell into view renders its Fluent artwork.
-    act(() => fire?.(targets[0]));
-    expect(document.querySelectorAll('img').length).toBeGreaterThan(0);
+    // The first cell of the initial window is present and clickable.
+    expect(screen.getByRole('button', { name: 'grinning face' })).toBeTruthy();
   });
 });
