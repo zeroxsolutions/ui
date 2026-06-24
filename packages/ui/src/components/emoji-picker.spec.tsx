@@ -61,8 +61,10 @@ describe('EmojiPicker', () => {
     expect(screen.getByText('No emoji found')).toBeTruthy();
   });
 
-  it('switches the artwork style via the style toggle', () => {
+  it('switches the artwork style via the appearance swatches', () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
+    // The grid cell button is named after the emoji; the appearance swatches are
+    // named "<style> style", so this resolves the grid cell unambiguously.
     const grinningImg = () =>
       screen
         .getByRole('button', { name: 'grinning face' })
@@ -72,8 +74,8 @@ describe('EmojiPicker', () => {
     expect(grinningImg()?.getAttribute('src')).toContain('/3d/');
     expect(grinningImg()?.getAttribute('src')).toMatch(/\.webp$/);
 
-    // Flipping to Flat redraws every cell from the flat svg set.
-    fireEvent.click(screen.getByRole('tab', { name: 'Flat style' }));
+    // Clicking the Flat swatch redraws every cell from the flat svg set.
+    fireEvent.click(screen.getByRole('button', { name: 'Flat style' }));
     expect(grinningImg()?.getAttribute('src')).toContain('/flat/');
     expect(grinningImg()?.getAttribute('src')).toMatch(/\.svg$/);
   });

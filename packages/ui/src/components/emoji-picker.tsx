@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { SearchInput } from './search-input';
 import { cn } from '@/lib/utils';
 import {
@@ -141,14 +142,14 @@ export interface EmojiPickerProps {
   frequent?: string[];
   /**
    * Initial render style for the artwork — `'3d'` (default) or `'flat'`. The
-   * picker owns the live selection (the style toggle); pass `onStyleChange` to
-   * persist it, mirroring how `frequent` is consumer-owned.
+   * picker owns the live selection (the appearance swatches); pass `onStyleChange`
+   * to persist it, mirroring how `frequent` is consumer-owned.
    */
   defaultStyle?: FluentEmojiStyle;
-  /** Notified when the user switches style via `EmojiPickerStyleToggle`. */
+  /** Notified when the user switches style via `EmojiPickerAppearance`. */
   onStyleChange?: (style: FluentEmojiStyle) => void;
   /**
-   * Compose the parts (`EmojiPickerSearch`, `EmojiPickerStyleToggle`,
+   * Compose the parts (`EmojiPickerSearch`, `EmojiPickerAppearance`,
    * `EmojiPickerContent`, `EmojiPickerNav`) to override copy or layout. Omit for
    * the default picker.
    */
@@ -275,7 +276,7 @@ export function EmojiPicker({
       {children ?? (
         <React.Fragment>
           <EmojiPickerSearch />
-          <EmojiPickerStyleToggle />
+          <EmojiPickerAppearance />
           <EmojiPickerContent />
           <EmojiPickerNav />
         </React.Fragment>
@@ -324,37 +325,58 @@ const STYLE_OPTIONS: { id: FluentEmojiStyle; label: string }[] = [
   { id: 'mono', label: 'Mono' },
 ];
 
+// A representative glyph that exists in every Fluent style — the swatches render
+// it so the user sees each appearance instead of reading a style name.
+const APPEARANCE_SAMPLE = { glyph: '😀', name: 'grinning face' } as const;
+
 /**
- * Compact 3D / Flat switch bound to the picker's render style. Every cell
- * redraws in the chosen style; the Root owns the selection (`defaultStyle` /
- * `onStyleChange`).
+ * Appearance picker — one swatch per Fluent style (3D / Flat / Modern / Mono),
+ * each previewing the same sample emoji rendered in that style; clicking a
+ * swatch switches the artwork every cell draws in. The preview *is* the selector
+ * (you see each style rather than reading a label). Exposed as a radiogroup; the
+ * Root owns the selection (`defaultStyle` / `onStyleChange`).
  */
-export function EmojiPickerStyleToggle({
+export function EmojiPickerAppearance({
   className,
   ...props
-}: Omit<React.ComponentProps<typeof Tabs>, 'value' | 'onValueChange'>) {
+}: React.ComponentProps<'div'>) {
   const { style, setStyle } = useEmojiPicker();
   return (
-    <div className="flex justify-end px-2 pb-1">
-      <Tabs
-        value={style}
-        onValueChange={(value) => setStyle(value as FluentEmojiStyle)}
-        className={cn('w-auto', className)}
-        {...props}
+    <div className={cn('px-2 pb-1', className)} {...props}>
+      <div className="px-0.5 pb-1 text-xs font-medium text-muted-foreground">
+        Appearance
+      </div>
+      <ToggleGroup
+        // Single-select: Base UI's value is an array; bind the lone style and
+        // ignore a deselect so an appearance is always chosen.
+        value={[style]}
+        onValueChange={(value) => {
+          const next = value[0] as FluentEmojiStyle | undefined;
+          if (next) setStyle(next);
+        }}
+        spacing={6}
+        aria-label="Emoji appearance"
+        className="w-full"
       >
-        <TabsList variant="line" className="h-7 gap-1">
-          {STYLE_OPTIONS.map((o) => (
-            <TabsTrigger
-              key={o.id}
-              value={o.id}
-              aria-label={`${o.label} style`}
-              className="px-2 text-xs"
-            >
-              {o.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+        {STYLE_OPTIONS.map((o) => (
+          <ToggleGroupItem
+            key={o.id}
+            value={o.id}
+            aria-label={`${o.label} style`}
+            // Base UI Toggle marks the pressed item with `aria-pressed`/`data-pressed`
+            // (not Radix's `data-state=on`); ring the selected swatch off that.
+            className="h-auto flex-1 flex-col gap-1 py-1.5 aria-pressed:ring-2 aria-pressed:ring-ring"
+          >
+            <FluentEmoji
+              glyph={APPEARANCE_SAMPLE.glyph}
+              name={APPEARANCE_SAMPLE.name}
+              variant={o.id}
+              className="size-7 object-contain"
+            />
+            <span className="text-[10px] text-muted-foreground">{o.label}</span>
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
     </div>
   );
 }
