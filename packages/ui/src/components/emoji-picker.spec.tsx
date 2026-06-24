@@ -61,6 +61,23 @@ describe('EmojiPicker', () => {
     expect(screen.getByText('No emoji found')).toBeTruthy();
   });
 
+  it('switches the artwork style via the style toggle', () => {
+    render(<EmojiPicker onSelect={vi.fn()} />);
+    const grinningImg = () =>
+      screen
+        .getByRole('button', { name: 'grinning face' })
+        .querySelector('img');
+
+    // Defaults to the 3D webp.
+    expect(grinningImg()?.getAttribute('src')).toContain('/3d/');
+    expect(grinningImg()?.getAttribute('src')).toMatch(/\.webp$/);
+
+    // Flipping to Flat redraws every cell from the flat svg set.
+    fireEvent.click(screen.getByRole('tab', { name: 'Flat style' }));
+    expect(grinningImg()?.getAttribute('src')).toContain('/flat/');
+    expect(grinningImg()?.getAttribute('src')).toMatch(/\.svg$/);
+  });
+
   it('virtualizes the grid — mounts only a window of cells, not the whole catalog', () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
 
