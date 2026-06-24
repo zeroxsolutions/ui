@@ -1,7 +1,7 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { GithubMark } from './github-mark';
+import { GithubMark } from '../github-mark';
 import { lucideMark } from './lucide-mark';
 import { AI4BharatMark } from './ai4bharat';
 import { DeepgramMark } from './deepgram';
