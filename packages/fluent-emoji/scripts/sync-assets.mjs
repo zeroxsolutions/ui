@@ -1,26 +1,37 @@
-// Regenerate `packages/fluent-emoji/assets/` from @lobehub/fluent-emoji-3d
-// (MIT, repackaging Microsoft's MIT-licensed Fluent Emoji). For every glyph in
-// our catalog it copies the matching 3D `.webp`, saved under OUR codepoint key
-// (emojiToUnicode) so the runtime resolver always lines up — independent of how
-// the upstream set names its files. The artwork is then committed; this script
-// is only re-run to refresh or extend the set.
+// Regenerate `packages/fluent-emoji/assets/<style>/` from the lobehub repackages
+// of Microsoft's MIT-licensed Fluent Emoji:
+//   3D   → @lobehub/fluent-emoji-3d   (.webp)
+//   Flat → @lobehub/fluent-emoji-flat (.svg)
+// For every glyph in our catalog it copies the matching artwork, saved under OUR
+// codepoint key (emojiToUnicode) so the runtime resolver always lines up —
+// independent of how the upstream set names its files. Layout is by STYLE
+// (assets/3d/<cp>.webp, assets/flat/<cp>.svg), not by name: the lookup key is the
+// codepoint, and a runtime package keys on it, not on a human folder name. The
+// artwork is committed; this script is only re-run to refresh or extend the set.
+//
+// Glyphs absent from a set fall back to the native glyph at runtime; see
+// `fill-gaps.mjs` for pulling the few that exist in Microsoft's source repo.
 //
 // Usage:  node packages/fluent-emoji/scripts/sync-assets.mjs
 import { createRequire } from 'node:module';
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-} from 'node:fs';
+import { copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = join(here, '..');
 const require = createRequire(import.meta.url);
+
+// Each style: upstream lobehub package + file extension. Saved under assets/<id>/.
+// All four are static and self-hosted; the animated `anim` style is NOT here —
+// at ~300 KB/glyph it is ~527 MB, served lazily from a CDN instead (see the
+// plan's "DEFERRED — anim" note), not committed.
+const STYLES = [
+  { id: '3d', pkg: '@lobehub/fluent-emoji-3d', ext: 'webp' },
+  { id: 'flat', pkg: '@lobehub/fluent-emoji-flat', ext: 'svg' },
+  { id: 'modern', pkg: '@lobehub/fluent-emoji-modern', ext: 'svg' },
+  { id: 'mono', pkg: '@lobehub/fluent-emoji-mono', ext: 'svg' },
+];
 
 /** Same key as the runtime resolver: every code point as lowercase hex, '-'. */
 const emojiToUnicode = (glyph) =>
@@ -43,54 +54,61 @@ if (!match) throw new Error('Could not locate EMOJI_CATEGORIES array in emoji-da
 const categories = JSON.parse(match[1]);
 const glyphs = [...new Set(categories.flatMap((c) => c.emojis.map((e) => e.e)))];
 
-// --- index the upstream 3D set, tolerant of FE0F naming differences ----------
-const srcAssetsDir = join(
-  dirname(require.resolve('@lobehub/fluent-emoji-3d/package.json')),
-  'assets',
-);
-const srcFiles = readdirSync(srcAssetsDir).filter((f) => f.endsWith('.webp'));
-const byExact = new Set(srcFiles.map((f) => f.replace(/\.webp$/, '')));
-const byStripped = new Map();
-for (const f of srcFiles) {
-  const key = f.replace(/\.webp$/, '');
-  const s = stripFe0f(key);
-  if (!byStripped.has(s)) byStripped.set(s, key);
-}
-
-const resolveSource = (ourKey) => {
-  if (byExact.has(ourKey)) return ourKey;
-  const stripped = stripFe0f(ourKey);
-  if (byExact.has(stripped)) return stripped;
-  if (byStripped.has(stripped)) return byStripped.get(stripped);
-  return null;
+/** Index an upstream set, tolerant of FE0F naming differences. */
+const indexSet = (srcDir, ext) => {
+  const files = readdirSync(srcDir).filter((f) => f.endsWith(`.${ext}`));
+  const byExact = new Set(files.map((f) => f.replace(new RegExp(`\\.${ext}$`), '')));
+  const byStripped = new Map();
+  for (const f of files) {
+    const key = f.replace(new RegExp(`\\.${ext}$`), '');
+    const s = stripFe0f(key);
+    if (!byStripped.has(s)) byStripped.set(s, key);
+  }
+  const resolve = (ourKey) => {
+    if (byExact.has(ourKey)) return ourKey;
+    const stripped = stripFe0f(ourKey);
+    if (byExact.has(stripped)) return stripped;
+    if (byStripped.has(stripped)) return byStripped.get(stripped);
+    return null;
+  };
+  return { resolve };
 };
 
-// --- rebuild assets/ ----------------------------------------------------------
-const outDir = join(pkgRoot, 'assets');
-rmSync(outDir, { recursive: true, force: true });
-mkdirSync(outDir, { recursive: true });
+// --- rebuild assets/<style>/ for each style ----------------------------------
+rmSync(join(pkgRoot, 'assets'), { recursive: true, force: true });
 
-let copied = 0;
-const missed = [];
-for (const glyph of glyphs) {
-  const ourKey = emojiToUnicode(glyph);
-  const sourceKey = resolveSource(ourKey);
-  if (!sourceKey) {
-    missed.push({ glyph, key: ourKey });
-    continue;
+const missingByStyle = {};
+for (const { id, pkg, ext } of STYLES) {
+  const srcDir = join(dirname(require.resolve(`${pkg}/package.json`)), 'assets');
+  const { resolve } = indexSet(srcDir, ext);
+  const outDir = join(pkgRoot, 'assets', id);
+  mkdirSync(outDir, { recursive: true });
+
+  let copied = 0;
+  const missed = [];
+  for (const glyph of glyphs) {
+    const ourKey = emojiToUnicode(glyph);
+    const sourceKey = resolve(ourKey);
+    if (!sourceKey) {
+      missed.push({ glyph, key: ourKey });
+      continue;
+    }
+    copyFileSync(join(srcDir, `${sourceKey}.${ext}`), join(outDir, `${ourKey}.${ext}`));
+    copied += 1;
   }
-  copyFileSync(
-    join(srcAssetsDir, `${sourceKey}.webp`),
-    join(outDir, `${ourKey}.webp`),
-  );
-  copied += 1;
+  missingByStyle[id] = missed;
+  console.log(`fluent-emoji ${id}: ${glyphs.length} glyphs → ${copied} copied, ${missed.length} missing`);
+  if (copied === 0) {
+    throw new Error(`No ${id} assets copied — is ${pkg} installed?`);
+  }
 }
 
-console.log(`fluent-emoji: ${glyphs.length} glyphs → ${copied} copied, ${missed.length} missing`);
-if (missed.length) {
-  console.log('missing (will fall back to the native glyph at runtime):');
-  for (const m of missed) console.log(`  ${m.glyph}  ${m.key}`);
-}
-if (!existsSync(join(outDir, '.gitkeep')) && copied === 0) {
-  throw new Error('No assets copied — is @lobehub/fluent-emoji-3d installed?');
+// Keys missing from EVERY style — the gap `fill-gaps.mjs` tries from MS source.
+const missingSets = STYLES.map((s) => new Set((missingByStyle[s.id] ?? []).map((m) => m.key)));
+const everywhereMissing = (missingByStyle[STYLES[0].id] ?? []).filter((m) =>
+  missingSets.every((set) => set.has(m.key)),
+);
+if (everywhereMissing.length) {
+  console.log(`\nmissing from all styles (fall back to native glyph): ${everywhereMissing.length}`);
+  for (const m of everywhereMissing) console.log(`  ${m.glyph}  ${m.key}`);
 }

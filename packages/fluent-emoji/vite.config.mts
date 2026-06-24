@@ -26,14 +26,19 @@ export default defineConfig(() => ({
         cpSync(
           resolve(import.meta.dirname, 'assets'),
           resolve(import.meta.dirname, 'dist/assets'),
-          { recursive: true },
+          { recursive: true, force: true },
         );
       },
     },
   ],
   build: {
     outDir: './dist',
-    emptyOutDir: true,
+    // This plugin owns `dist/assets/` (~7.4k tiny files across 4 style folders),
+    // so vite must NOT empty it: `emptyOutDir`'s rimraf on a tree that large
+    // races to `ENOTEMPTY` on macOS under concurrent builds. The bundler's own
+    // outputs are stable-named (`index.js`/`.d.ts`) and overwrite in place, and
+    // the assets are force-copied above, so a non-empty outDir is correct here.
+    emptyOutDir: false,
     reportCompressedSize: true,
     commonjsOptions: {
       transformMixedEsModules: true,

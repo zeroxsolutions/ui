@@ -27,6 +27,10 @@
     "name": "fluent-emoji"
   },
   "devDependencies": {
-    "@lobehub/fluent-emoji-3d": "^1.1.0"
+    "@lobehub/fluent-emoji-3d": "^1.1.0",
+    "@lobehub/fluent-emoji-flat": "^1.1.0",
+    "@lobehub/fluent-emoji-modern": "^1.0.0",
+    "@lobehub/fluent-emoji-mono": "^1.1.0",
+    "sharp": "^0.35.2"
   }
 }

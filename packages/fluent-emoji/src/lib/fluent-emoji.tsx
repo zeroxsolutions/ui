@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { fluentEmojiUrl } from './resolve';
+import { fluentEmojiUrl, type FluentEmojiStyle } from './resolve';
 
 export interface FluentEmojiProps
   extends Omit<React.ComponentProps<'img'>, 'src' | 'alt'> {
@@ -9,22 +9,29 @@ export interface FluentEmojiProps
   name?: string;
   /** Serve from this base URL instead of the bundled asset (see resolve). */
   base?: string;
+  /** Render style — `'3d'` (default) or `'flat'`; see {@link FluentEmojiStyle}. */
+  variant?: FluentEmojiStyle;
 }
 
 /**
- * Microsoft **Fluent 3D** rendering of an emoji `glyph`, resolved by codepoint
- * to a bundled `.webp` — no third-party CDN. On a missing asset or a load error
- * it falls back to the native glyph so nothing renders blank. Pass `base` (or
- * call `setFluentEmojiBase`) to serve the artwork from a CDN instead.
+ * Microsoft **Fluent** rendering of an emoji `glyph`, resolved by codepoint to a
+ * bundled asset (`'3d'` webp by default, or `'flat'` svg via `variant`) — no
+ * third-party CDN. On a missing asset or a load error it falls back to the
+ * native glyph so nothing renders blank. Pass `base` (or call
+ * `setFluentEmojiBase`) to serve the artwork from a CDN instead.
  */
 export function FluentEmoji({
   glyph,
   name,
   base,
+  variant,
   className,
   ...props
 }: FluentEmojiProps) {
-  const src = fluentEmojiUrl(glyph, base ? { base } : undefined);
+  const src = fluentEmojiUrl(
+    glyph,
+    base || variant ? { base, style: variant } : undefined,
+  );
   const [failed, setFailed] = React.useState(false);
   // Reset the error latch when the resolved artwork changes, so a recycled
   // instance (same key, new glyph) re-attempts the image instead of staying on
