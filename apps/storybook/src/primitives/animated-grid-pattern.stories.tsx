@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AnimatedGridPattern } from '@chiselart/ui/animated-grid-pattern';
 
 const meta: Meta<typeof AnimatedGridPattern> = {
-  title: 'Components/AnimatedGridPattern',
+  title: 'Primitives/AnimatedGridPattern',
   component: AnimatedGridPattern,
 };
 export default meta;

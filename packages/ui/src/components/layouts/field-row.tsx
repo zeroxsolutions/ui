@@ -5,9 +5,9 @@ import { cn } from '@/lib/utils';
 import { FieldGrid } from './field-grid';
 
 interface FieldRowProps extends ComponentProps<'div'> {
-  /** Optional trailing action (e.g. an aspect-lock toggle, flip buttons).
-   *  When omitted, an icon-button-sized spacer is rendered so multiple rows in a
-   *  section line up at the right edge. */
+  /** Optional trailing action (e.g. an aspect-lock toggle, a reset button). It
+   *  sits in a fixed icon-button-width slot (a default `Button size="icon"`
+   *  fills it exactly); a narrower control is centred. */
   action?: ReactNode;
   /** Column count for the inner grid (default 2); forwarded to `FieldGrid`. */
   cols?: number;
@@ -15,10 +15,10 @@ interface FieldRowProps extends ComponentProps<'div'> {
 }
 
 /**
- * Field grid + optional trailing icon-button slot. Use it for any row in a
- * property section that mixes inputs with a side action — every row reserves the
- * same trailing slot, so panels align cleanly even when one row has an action
- * and another doesn't.
+ * Field grid + a fixed trailing action slot. Use it for any row in a property
+ * section that mixes inputs with a side action: the slot is always reserved at a
+ * single icon-button width — present or not, with one action or none — so every
+ * row's inputs share the same right edge and the panel reads as one aligned grid.
  */
 export function FieldRow({
   action,
@@ -32,7 +32,7 @@ export function FieldRow({
       <div className="flex-1 min-w-0">
         <FieldGrid cols={cols}>{children}</FieldGrid>
       </div>
-      {action ?? <div className="size-7 shrink-0" aria-hidden />}
+      <div className="flex min-w-9 shrink-0 justify-center">{action}</div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 
 import { ChatAttachmentChip } from '@chiselart/ui/chat-attachment-chip';
 
@@ -14,21 +15,25 @@ export default meta;
 type Story = StoryObj<typeof ChatAttachmentChip>;
 
 export const Kinds: Story = {
-  render: () => (
-    <div className="flex items-center gap-3">
-      <ChatAttachmentChip
-        attachment={{ id: '1', name: 'hero.png', kind: 'image', dataUrl: PNG_1X1 }}
-        onRemove={() => {}}
-      />
-      <ChatAttachmentChip
-        attachment={{ id: '2', name: 'spec.txt', kind: 'text' }}
-        onRemove={() => {}}
-      />
-      <ChatAttachmentChip
-        attachment={{ id: '3', name: 'brief.pdf', kind: 'pdf' }}
-        onRemove={() => {}}
-        compact
-      />
-    </div>
-  ),
+  render: () => {
+    const [chips, setChips] = useState([
+      { id: '1', name: 'hero.png', kind: 'image' as const, dataUrl: PNG_1X1 },
+      { id: '2', name: 'spec.txt', kind: 'text' as const },
+      { id: '3', name: 'brief.pdf', kind: 'pdf' as const },
+    ]);
+    const remove = (id: string) =>
+      setChips((prev) => prev.filter((c) => c.id !== id));
+    return (
+      <div className="flex items-center gap-3">
+        {chips.map((chip) => (
+          <ChatAttachmentChip
+            key={chip.id}
+            attachment={chip}
+            onRemove={() => remove(chip.id)}
+            compact={chip.kind === 'pdf'}
+          />
+        ))}
+      </div>
+    );
+  },
 };

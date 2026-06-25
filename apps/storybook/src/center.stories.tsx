@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Star } from 'lucide-react';
 
 import { Badge } from '@chiselart/ui/badge';
 import { Center } from '@chiselart/ui/center';
@@ -27,7 +28,9 @@ export const Inline: Story = {
     <p className="text-sm">
       A badge{' '}
       <Center inline className="align-middle">
-        <Badge variant="secondary">★</Badge>
+        <Badge variant="secondary">
+          <Star className="size-3" />
+        </Badge>
       </Center>{' '}
       sits inline with text.
     </p>

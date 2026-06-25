@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Highlighter } from '@chiselart/ui/highlighter';
 
 const meta: Meta<typeof Highlighter> = {
-  title: 'Components/Highlighter',
+  title: 'Primitives/Highlighter',
   component: Highlighter,
 };
 export default meta;

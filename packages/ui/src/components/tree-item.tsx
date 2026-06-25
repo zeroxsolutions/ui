@@ -50,9 +50,9 @@ export interface TreeItemProps extends Omit<TreeRowProps, "children"> {
   icon?: ReactNode
   /** Display name; shown unless `rename.editing`. */
   name: string
-  /** Extra classes on the clickable name button (selection colour, dimming). */
-  nameButtonClassName?: string
-  /** Extra classes on the name text span (strikethrough/italic/colour). */
+  /** Extra classes on the name text span (strikethrough/italic/colour). The
+   *  row's selection/hover background and any row-wide dimming live on
+   *  `className` (TreeRow) — the name isn't styled as a separate node. */
   nameClassName?: string
   /** Click on the name region. Raw event so callers can read shift/meta keys. */
   onActivate?: (event: ReactMouseEvent) => void
@@ -71,7 +71,6 @@ export interface TreeItemProps extends Omit<TreeRowProps, "children"> {
 function TreeItem({
   icon,
   name,
-  nameButtonClassName,
   nameClassName,
   onActivate,
   onActivateDoubleClick,
@@ -87,10 +86,10 @@ function TreeItem({
       <Button
         variant="ghost"
         size="sm"
-        className={cn(
-          "h-auto min-w-0 flex-1 justify-start gap-1.5 px-0 py-1 text-left text-xs",
-          nameButtonClassName,
-        )}
+        // The TreeRow owns the row's hover/selection background; the name is
+        // only the click target, so it must not paint its own ghost hover on
+        // top (that double-paints a button-shaped rect inside the row).
+        className="h-auto min-w-0 flex-1 justify-start gap-1.5 px-0 py-1 text-left text-xs hover:bg-transparent"
         onClick={onActivate}
         onDoubleClick={onActivateDoubleClick}
       >

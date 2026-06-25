@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Meteors } from '@chiselart/ui/meteors';
 
 const meta: Meta<typeof Meteors> = {
-  title: 'Components/Meteors',
+  title: 'Primitives/Meteors',
   component: Meteors,
 };
 export default meta;

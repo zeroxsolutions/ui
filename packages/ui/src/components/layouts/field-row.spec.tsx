@@ -17,13 +17,15 @@ describe('FieldRow', () => {
     expect(getByText('lock')).toBeTruthy();
   });
 
-  it('reserves an aligned spacer when no action is given', () => {
+  it('reserves the fixed trailing action slot even when no action is given', () => {
     const { container } = render(
       <FieldRow>
         <span>x</span>
       </FieldRow>,
     );
-    expect(container.querySelector('[aria-hidden]')).toBeTruthy();
+    // The slot is always rendered at a single icon-button width so a row with no
+    // action keeps the same right edge as one that has an action.
+    expect(container.querySelector('.min-w-9')).toBeTruthy();
   });
 
   it('merges className and forwards arbitrary props onto the row', () => {

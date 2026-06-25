@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 
 import { ChatComposerGhostText } from '@chiselart/ui/chat-composer-ghost-text';
+import { Textarea } from '@chiselart/ui/textarea';
 
 const meta: Meta<typeof ChatComposerGhostText> = {
   title: 'Chat/ComposerGhostText',
@@ -16,12 +17,11 @@ function Demo() {
   const [text, setText] = useState('Design a landing page for ');
   return (
     <div className="relative w-[28rem]">
-      <textarea
+      <Textarea
         ref={ref}
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={3}
-        className="w-full rounded-md border border-input bg-transparent p-3 text-sm outline-none"
       />
       <ChatComposerGhostText
         textareaRef={ref}

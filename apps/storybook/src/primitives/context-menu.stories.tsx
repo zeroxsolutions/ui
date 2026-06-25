@@ -45,7 +45,7 @@ export const WithGroupsAndSubmenu: Story = {
       <ContextMenuContent className="w-56">
         <ContextMenuGroup>
           <ContextMenuLabel>Appearance</ContextMenuLabel>
-          <ContextMenuCheckboxItem checked>Show Bookmarks</ContextMenuCheckboxItem>
+          <ContextMenuCheckboxItem defaultChecked>Show Bookmarks</ContextMenuCheckboxItem>
           <ContextMenuCheckboxItem>Show Full URLs</ContextMenuCheckboxItem>
         </ContextMenuGroup>
         <ContextMenuSeparator />

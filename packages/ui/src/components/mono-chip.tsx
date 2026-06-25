@@ -12,7 +12,7 @@ function MonoChip({ className, ...props }: React.ComponentProps<"span">) {
     <span
       data-slot="mono-chip"
       className={cn(
-        "inline-flex h-5 items-center rounded-[5px] bg-muted px-1.5 font-mono text-[11px]",
+        "inline-flex h-5 items-center rounded-sm bg-muted px-1.5 font-mono text-xs",
         className
       )}
       {...props}

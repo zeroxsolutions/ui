@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { MoreHorizontal } from 'lucide-react';
 
 import { Button } from '@chiselart/ui/button';
 import {
@@ -25,8 +26,13 @@ export const Default: Story = {
             <span className="truncate text-sm font-medium">Layers</span>
           </PanelHeaderTitle>
           <PanelHeaderActions>
-            <Button variant="ghost" size="icon" className="size-6">
-              »
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-6"
+              aria-label="Panel options"
+            >
+              <MoreHorizontal />
             </Button>
           </PanelHeaderActions>
         </PanelHeaderRow>

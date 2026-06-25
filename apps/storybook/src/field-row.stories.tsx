@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Link2 } from 'lucide-react';
 
 import { Button } from '@chiselart/ui/button';
 import { FieldRow } from '@chiselart/ui/field-row';
@@ -15,11 +16,18 @@ type Story = StoryObj<typeof FieldRow>;
 export const Default: Story = {
   render: () => (
     <div className="w-72 space-y-1">
-      <FieldRow action={<Button variant="ghost" size="icon">🔒</Button>}>
+      <FieldRow
+        action={
+          <Button variant="ghost" size="icon" aria-label="Link aspect ratio">
+            <Link2 />
+          </Button>
+        }
+      >
         <Input placeholder="W" />
         <Input placeholder="H" />
       </FieldRow>
-      {/* No action → an aligned spacer keeps the inputs flush with the row above. */}
+      {/* No action → a same-width spacer keeps these inputs flush with the row
+          above (both trailing slots are a default icon-button footprint). */}
       <FieldRow>
         <Input placeholder="X" />
         <Input placeholder="Y" />

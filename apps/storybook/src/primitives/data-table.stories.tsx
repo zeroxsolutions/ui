@@ -50,7 +50,7 @@ const columns: ColumnDef<Person>[] = [
 ];
 
 const meta: Meta = {
-  title: 'Components/DataTable',
+  title: 'Primitives/DataTable',
 };
 export default meta;
 

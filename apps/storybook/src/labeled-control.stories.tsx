@@ -15,7 +15,7 @@ export const Default: Story = {
   render: () => (
     <div className="w-56 space-y-3">
       <LabeledControl label="Fill">
-        <div className="h-8 rounded bg-[#0099ff] ring-1 ring-foreground/10" />
+        <div className="h-8 rounded bg-primary ring-1 ring-foreground/10" />
       </LabeledControl>
       <LabeledControl label="Name">
         <Input placeholder="Untitled" />
