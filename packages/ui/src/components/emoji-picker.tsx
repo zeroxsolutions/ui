@@ -14,14 +14,12 @@ import {
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { SearchInput } from './search-input';
 import { cn } from '@/lib/utils';
 import {
   EMOJI_CATEGORIES,
   FluentEmoji,
   type EmojiDatum,
-  type FluentEmojiStyle,
 } from '@chiselart/fluent-emoji';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from './ui/empty';
@@ -101,9 +99,6 @@ interface Scroller {
 interface EmojiPickerContextValue {
   query: string;
   setQuery: (q: string) => void;
-  /** The render style every cell draws in (`'3d'` default, or `'flat'`). */
-  style: FluentEmojiStyle;
-  setStyle: (style: FluentEmojiStyle) => void;
   /** Forwards the chosen emoji to the consumer's onSelect. */
   select: (emoji: string) => void;
   /** Search results, or null when not searching. */
@@ -141,17 +136,8 @@ export interface EmojiPickerProps {
    */
   frequent?: string[];
   /**
-   * Initial render style for the artwork — `'3d'` (default) or `'flat'`. The
-   * picker owns the live selection (the appearance swatches); pass `onStyleChange`
-   * to persist it, mirroring how `frequent` is consumer-owned.
-   */
-  defaultStyle?: FluentEmojiStyle;
-  /** Notified when the user switches style via `EmojiPickerAppearance`. */
-  onStyleChange?: (style: FluentEmojiStyle) => void;
-  /**
-   * Compose the parts (`EmojiPickerSearch`, `EmojiPickerAppearance`,
-   * `EmojiPickerContent`, `EmojiPickerNav`) to override copy or layout. Omit for
-   * the default picker.
+   * Compose the parts (`EmojiPickerSearch`, `EmojiPickerContent`,
+   * `EmojiPickerNav`) to override copy or layout. Omit for the default picker.
    */
   children?: React.ReactNode;
 }
@@ -175,20 +161,10 @@ export interface EmojiPickerProps {
 export function EmojiPicker({
   onSelect,
   frequent = [],
-  defaultStyle = '3d',
-  onStyleChange,
   children,
 }: EmojiPickerProps) {
   const [query, setQuery] = React.useState('');
   const [active, setActive] = React.useState('smileys_people');
-  const [style, setStyleState] = React.useState<FluentEmojiStyle>(defaultStyle);
-  const setStyle = React.useCallback(
-    (next: FluentEmojiStyle) => {
-      setStyleState(next);
-      onStyleChange?.(next);
-    },
-    [onStyleChange],
-  );
 
   const q = query.trim().toLowerCase();
   const results = React.useMemo(() => {
@@ -244,8 +220,6 @@ export function EmojiPicker({
     () => ({
       query,
       setQuery,
-      style,
-      setStyle,
       select: onSelect,
       results,
       navCategories,
@@ -258,8 +232,6 @@ export function EmojiPicker({
     }),
     [
       query,
-      style,
-      setStyle,
       onSelect,
       results,
       navCategories,
@@ -276,7 +248,6 @@ export function EmojiPicker({
       {children ?? (
         <React.Fragment>
           <EmojiPickerSearch />
-          <EmojiPickerAppearance />
           <EmojiPickerContent />
           <EmojiPickerNav />
         </React.Fragment>
@@ -313,70 +284,6 @@ export function EmojiPickerSearch({
         className={className}
         {...props}
       />
-    </div>
-  );
-}
-
-/** The selectable render styles, in display order. */
-const STYLE_OPTIONS: { id: FluentEmojiStyle; label: string }[] = [
-  { id: '3d', label: '3D' },
-  { id: 'flat', label: 'Flat' },
-  { id: 'modern', label: 'Modern' },
-  { id: 'mono', label: 'Mono' },
-];
-
-// A representative glyph that exists in every Fluent style — the swatches render
-// it so the user sees each appearance instead of reading a style name.
-const APPEARANCE_SAMPLE = { glyph: '😀', name: 'grinning face' } as const;
-
-/**
- * Appearance picker — one swatch per Fluent style (3D / Flat / Modern / Mono),
- * each previewing the same sample emoji rendered in that style; clicking a
- * swatch switches the artwork every cell draws in. The preview *is* the selector
- * (you see each style rather than reading a label). Exposed as a radiogroup; the
- * Root owns the selection (`defaultStyle` / `onStyleChange`).
- */
-export function EmojiPickerAppearance({
-  className,
-  ...props
-}: React.ComponentProps<'div'>) {
-  const { style, setStyle } = useEmojiPicker();
-  return (
-    <div className={cn('px-2 pb-1', className)} {...props}>
-      <div className="px-0.5 pb-1 text-xs font-medium text-muted-foreground">
-        Appearance
-      </div>
-      <ToggleGroup
-        // Single-select: Base UI's value is an array; bind the lone style and
-        // ignore a deselect so an appearance is always chosen.
-        value={[style]}
-        onValueChange={(value) => {
-          const next = value[0] as FluentEmojiStyle | undefined;
-          if (next) setStyle(next);
-        }}
-        spacing={6}
-        aria-label="Emoji appearance"
-        className="w-full"
-      >
-        {STYLE_OPTIONS.map((o) => (
-          <ToggleGroupItem
-            key={o.id}
-            value={o.id}
-            aria-label={`${o.label} style`}
-            // Base UI Toggle marks the pressed item with `aria-pressed`/`data-pressed`
-            // (not Radix's `data-state=on`); ring the selected swatch off that.
-            className="h-auto flex-1 flex-col gap-1 py-1.5 aria-pressed:ring-2 aria-pressed:ring-ring"
-          >
-            <FluentEmoji
-              glyph={APPEARANCE_SAMPLE.glyph}
-              name={APPEARANCE_SAMPLE.name}
-              variant={o.id}
-              className="size-7 object-contain"
-            />
-            <span className="text-[10px] text-muted-foreground">{o.label}</span>
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
     </div>
   );
 }
@@ -450,7 +357,7 @@ export function EmojiPickerContent({
   size = 'md',
   ...props
 }: EmojiPickerContentProps) {
-  const { results, rows, headerIndices, select, style, scrollerRef } =
+  const { results, rows, headerIndices, select, scrollerRef } =
     useEmojiPicker();
 
   const viewportHeight = SIZE_PX[size ?? 'md'];
@@ -572,7 +479,7 @@ export function EmojiPickerContent({
               {row.type === 'header' ? (
                 <EmojiPickerGroupLabel>{row.name}</EmojiPickerGroupLabel>
               ) : (
-                <EmojiGrid emojis={row.emojis} onSelect={select} variant={style} />
+                <EmojiGrid emojis={row.emojis} onSelect={select} />
               )}
             </div>
           );
@@ -621,37 +528,29 @@ export function EmojiPickerNav({
 function EmojiGrid({
   emojis,
   onSelect,
-  variant,
 }: {
   emojis: EmojiDatum[];
   onSelect: (emoji: string) => void;
-  variant: FluentEmojiStyle;
 }) {
   return (
     <div className="grid grid-cols-8 gap-0.5">
       {emojis.map((em, i) => (
-        <EmojiCell
-          key={`${em.e}-${i}`}
-          emoji={em}
-          onSelect={onSelect}
-          variant={variant}
-        />
+        <EmojiCell key={`${em.e}-${i}`} emoji={em} onSelect={onSelect} />
       ))}
     </div>
   );
 }
 
-/** One emoji button. Only cells in (or near) the viewport mount, so the Fluent
- * artwork is rendered immediately — virtualization, not per-cell deferral, is
- * what keeps opening the picker from fetching the whole catalog. */
+/** One emoji button, drawn in the app-wide Fluent style (`setFluentEmojiStyle`).
+ * Only cells in (or near) the viewport mount, so the Fluent artwork is rendered
+ * immediately — virtualization, not per-cell deferral, is what keeps opening the
+ * picker from fetching the whole catalog. */
 function EmojiCell({
   emoji,
   onSelect,
-  variant,
 }: {
   emoji: EmojiDatum;
   onSelect: (emoji: string) => void;
-  variant: FluentEmojiStyle;
 }) {
   return (
     <Button
@@ -665,7 +564,6 @@ function EmojiCell({
       <FluentEmoji
         glyph={emoji.e}
         name={emoji.n}
-        variant={variant}
         className="size-full object-contain"
       />
     </Button>

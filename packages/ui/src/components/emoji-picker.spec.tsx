@@ -61,23 +61,16 @@ describe('EmojiPicker', () => {
     expect(screen.getByText('No emoji found')).toBeTruthy();
   });
 
-  it('switches the artwork style via the appearance swatches', () => {
+  it('renders the grid in the global Fluent style (3D by default)', () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
-    // The grid cell button is named after the emoji; the appearance swatches are
-    // named "<style> style", so this resolves the grid cell unambiguously.
-    const grinningImg = () =>
-      screen
-        .getByRole('button', { name: 'grinning face' })
-        .querySelector('img');
+    // The picker no longer owns a style control — cells draw in the app-wide
+    // style (`setFluentEmojiStyle`), defaulting to the 3D webp set.
+    const grinningImg = screen
+      .getByRole('button', { name: 'grinning face' })
+      .querySelector('img');
 
-    // Defaults to the 3D webp.
-    expect(grinningImg()?.getAttribute('src')).toContain('/3d/');
-    expect(grinningImg()?.getAttribute('src')).toMatch(/\.webp$/);
-
-    // Clicking the Flat swatch redraws every cell from the flat svg set.
-    fireEvent.click(screen.getByRole('button', { name: 'Flat style' }));
-    expect(grinningImg()?.getAttribute('src')).toContain('/flat/');
-    expect(grinningImg()?.getAttribute('src')).toMatch(/\.svg$/);
+    expect(grinningImg?.getAttribute('src')).toContain('/3d/');
+    expect(grinningImg?.getAttribute('src')).toMatch(/\.webp$/);
   });
 
   it('virtualizes the grid — mounts only a window of cells, not the whole catalog', () => {
