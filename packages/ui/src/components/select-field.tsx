@@ -1,3 +1,4 @@
+import type * as React from "react"
 import type { ReactNode } from "react"
 
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
@@ -15,7 +16,8 @@ export interface SelectFieldOption {
   icon?: ReactNode
 }
 
-export interface SelectFieldProps {
+export interface SelectFieldProps
+  extends Omit<React.ComponentProps<typeof InputGroup>, "onChange" | "children"> {
   /** Leading label addon (e.g. "Align", "Type"). */
   label?: ReactNode
   value: string
@@ -37,10 +39,9 @@ export interface SelectFieldProps {
 
 /**
  * A compact labelled select for a property inspector: an `InputGroup` with an
- * optional label addon and a `Select` whose own border/background/ring are
- * stripped so the group provides the single outer chrome (the SDK Select has no
- * borderless variant, so this is an internal override, not a consumer re-chrome).
- * Controlled — the consumer owns the value and supplies any placeholder copy.
+ * optional label addon and a `Select` rendered with the `borderless` trigger
+ * variant so the group provides the single outer chrome. Controlled — the
+ * consumer owns the value and supplies any placeholder copy.
  */
 function SelectField({
   label,
@@ -52,20 +53,20 @@ function SelectField({
   className,
   mixed,
   placeholder,
+  ...props
 }: SelectFieldProps) {
   return (
-    <InputGroup className={className} data-disabled={disabled || undefined}>
+    <InputGroup
+      className={className}
+      data-disabled={disabled || undefined}
+      {...props}
+    >
       {label && <InputGroupAddon>{label}</InputGroupAddon>}
       <Select
         value={mixed ? "" : value}
         onValueChange={(v) => onValueChange(v ?? "")}
       >
-        <SelectTrigger
-          disabled={disabled}
-          // Strip the trigger's own chrome — the InputGroup owns the outer
-          // border/background, and the SDK Select has no borderless variant.
-          className="flex-1 border-0 !bg-transparent shadow-none ring-0 outline-none focus:ring-0 focus-visible:ring-0 focus-visible:outline-none hover:!bg-transparent dark:!bg-transparent dark:hover:!bg-transparent"
-        >
+        <SelectTrigger variant="borderless" disabled={disabled} className="flex-1">
           <SelectValue placeholder={mixed ? placeholder : undefined} />
         </SelectTrigger>
         <SelectContent>

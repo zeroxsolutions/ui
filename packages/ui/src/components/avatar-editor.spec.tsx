@@ -36,7 +36,7 @@ const openEditor = () =>
 describe('AvatarEditor', () => {
   it('shows only the Upload pane (no tab strip) when Upload is the only tab', () => {
     render(
-      <AvatarEditor value={{}} onChange={vi.fn()}>
+      <AvatarEditor value={{}} onValueChange={vi.fn()}>
         <AvatarEditorTrigger>
           <span>avatar</span>
         </AvatarEditorTrigger>
@@ -55,7 +55,7 @@ describe('AvatarEditor', () => {
 
   it('builds the icon strip from the tab parts the consumer includes', () => {
     render(
-      <AvatarEditor value={{}} onChange={vi.fn()}>
+      <AvatarEditor value={{}} onValueChange={vi.fn()}>
         <AvatarEditorTrigger>
           <span>avatar</span>
         </AvatarEditorTrigger>
@@ -75,7 +75,7 @@ describe('AvatarEditor', () => {
 
   it('lets children override the upload copy', () => {
     render(
-      <AvatarEditor value={{}} onChange={vi.fn()}>
+      <AvatarEditor value={{}} onValueChange={vi.fn()}>
         <AvatarEditorTrigger>
           <span>avatar</span>
         </AvatarEditorTrigger>
@@ -94,7 +94,7 @@ describe('AvatarEditor', () => {
     const onUpload = vi.fn().mockResolvedValue('https://cdn.example/a.png');
     const onChange = vi.fn();
     render(
-      <AvatarEditor value={{}} onChange={onChange}>
+      <AvatarEditor value={{}} onValueChange={onChange}>
         <AvatarEditorTrigger>
           <span>avatar</span>
         </AvatarEditorTrigger>
@@ -123,7 +123,7 @@ describe('AvatarEditor', () => {
   it('clears emoji and image on Remove', () => {
     const onChange = vi.fn();
     render(
-      <AvatarEditor value={{ emoji: '😀' }} onChange={onChange}>
+      <AvatarEditor value={{ emoji: '😀' }} onValueChange={onChange}>
         <AvatarEditorTrigger>
           <span>avatar</span>
         </AvatarEditorTrigger>

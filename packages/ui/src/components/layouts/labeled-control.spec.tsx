@@ -15,4 +15,15 @@ describe('LabeledControl', () => {
     expect(getByText('Fill')).toBeTruthy();
     expect(getByText('swatch')).toBeTruthy();
   });
+
+  it('merges className and forwards arbitrary props onto the wrapper', () => {
+    const { getByTestId } = render(
+      <LabeledControl label="Fill" className="mt-2" data-testid="wrapper">
+        <button>swatch</button>
+      </LabeledControl>,
+    );
+    const wrapper = getByTestId('wrapper');
+    expect(wrapper.className).toContain('flex-col');
+    expect(wrapper.className).toContain('mt-2');
+  });
 });

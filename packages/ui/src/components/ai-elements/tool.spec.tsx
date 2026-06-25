@@ -71,6 +71,26 @@ describe('ToolHeader', () => {
     );
     expect(screen.getByText('3 results')).toBeTruthy();
   });
+
+  it('overrides the status word via statusLabel', () => {
+    render(
+      <Tool>
+        <ToolHeader state="input-available" title="x" statusLabel="En cours" />
+      </Tool>,
+    );
+    expect(screen.getByText('En cours')).toBeTruthy();
+    expect(screen.queryByText('Running')).toBeNull();
+  });
+
+  it('overrides the unresolved-name fallback via fallbackLabel', () => {
+    render(
+      <Tool>
+        <ToolHeader state="input-available" fallbackLabel="action" />
+      </Tool>,
+    );
+    expect(screen.getByText('action')).toBeTruthy();
+    expect(screen.queryByText('tool')).toBeNull();
+  });
 });
 
 describe('ToolInput / ToolOutput', () => {
@@ -95,6 +115,20 @@ describe('ToolInput / ToolOutput', () => {
   it('renders nothing when there is no output and no error', () => {
     const { container } = render(<ToolOutput output={undefined} />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it('overrides the section headings', () => {
+    const { rerender } = render(<ToolInput input={{ q: 'hi' }} label="Args" />);
+    expect(screen.getByText('Args')).toBeTruthy();
+    expect(screen.queryByText('Parameters')).toBeNull();
+
+    rerender(<ToolOutput output="done" resultLabel="Output" />);
+    expect(screen.getByText('Output')).toBeTruthy();
+    expect(screen.queryByText('Result')).toBeNull();
+
+    rerender(<ToolOutput output={undefined} errorText="boom" errorLabel="Failure" />);
+    expect(screen.getByText('Failure')).toBeTruthy();
+    expect(screen.queryByText('Error')).toBeNull();
   });
 });
 

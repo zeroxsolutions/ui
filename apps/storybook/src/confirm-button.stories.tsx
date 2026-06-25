@@ -23,3 +23,19 @@ export const Destructive: Story = {
     </ConfirmButton>
   ),
 }
+
+/** `cancelLabel` overrides the dismissing button's copy (defaults to "Cancel"). */
+export const CustomCancelLabel: Story = {
+  render: () => (
+    <ConfirmButton
+      title="Discard changes?"
+      description="Your edits will be lost."
+      actionLabel="Discard"
+      cancelLabel="Keep editing"
+      destructive
+      onConfirm={() => {}}
+    >
+      Discard
+    </ConfirmButton>
+  ),
+}

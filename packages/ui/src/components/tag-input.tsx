@@ -2,6 +2,7 @@ import { X } from "lucide-react"
 import { useState, type KeyboardEvent } from "react"
 
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
@@ -50,15 +51,16 @@ function TagInput({
           {value.map((tag) => (
             <Badge key={tag} variant="secondary" className="gap-1 pr-1">
               {tag}
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon-xs"
                 onClick={() => onValueChange(value.filter((t) => t !== tag))}
                 aria-label={`Remove ${tag}`}
-                className="rounded-full text-muted-foreground hover:text-foreground"
+                className="size-4 rounded-full text-muted-foreground hover:text-foreground"
                 disabled={disabled}
               >
                 <X className="size-3" />
-              </button>
+              </Button>
             </Badge>
           ))}
         </div>

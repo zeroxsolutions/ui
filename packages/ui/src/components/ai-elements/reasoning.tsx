@@ -23,10 +23,10 @@ import { cn } from '@/lib/utils';
  * "Thinking…" (pulsing) → "Thought for N seconds".
  *
  * Open state is plain local state (the host never drives it from outside); the
- * live cue is `animate-pulse`. Presentational — `isStreaming` in, content as a
+ * live cue is `animate-pulse`. Presentational — `streaming` in, content as a
  * markdown string. Compose the parts:
  *
- *   <Reasoning isStreaming={isLive}>
+ *   <Reasoning streaming={isLive}>
  *     <ReasoningTrigger />
  *     <ReasoningContent>{text}</ReasoningContent>
  *   </Reasoning>
@@ -35,57 +35,62 @@ const AUTO_CLOSE_DELAY = 1000;
 const MS_IN_S = 1000;
 
 interface ReasoningContextValue {
-  isStreaming: boolean;
+  streaming: boolean;
   isOpen: boolean;
   duration: number | undefined;
 }
 
 const ReasoningContext = createContext<ReasoningContextValue | null>(null);
 
-function useReasoning(): ReasoningContextValue {
+/**
+ * Read the live reasoning state (`streaming`, `isOpen`, `duration`) from inside a
+ * `<Reasoning>`. Lets a consumer compute their own trigger label. Throws when
+ * used outside `<Reasoning>`.
+ */
+export function useReasoning(): ReasoningContextValue {
   const ctx = useContext(ReasoningContext);
   if (!ctx) throw new Error('Reasoning parts must be used within <Reasoning>');
   return ctx;
 }
 
 export interface ReasoningProps {
-  isStreaming?: boolean;
+  streaming?: boolean;
   defaultOpen?: boolean;
   className?: string;
   children: ReactNode;
 }
 
 export function Reasoning({
-  isStreaming = false,
+  streaming = false,
   defaultOpen,
   className,
   children,
 }: ReasoningProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen ?? isStreaming);
+  const [isOpen, setIsOpen] = useState(defaultOpen ?? streaming);
   const [duration, setDuration] = useState<number | undefined>(undefined);
   const startRef = useRef<number | null>(null);
-  const everStreamedRef = useRef(isStreaming);
+  const everStreamedRef = useRef(streaming);
   const autoClosedRef = useRef(false);
 
   // Track stream start → compute elapsed seconds when it ends.
   useEffect(() => {
-    if (isStreaming) {
+    if (streaming) {
       everStreamedRef.current = true;
       if (startRef.current === null) startRef.current = Date.now();
     } else if (startRef.current !== null) {
       setDuration(Math.ceil((Date.now() - startRef.current) / MS_IN_S));
       startRef.current = null;
     }
-  }, [isStreaming]);
+  }, [streaming]);
 
   // Auto-open while streaming (unless the caller pinned it closed).
   useEffect(() => {
-    if (isStreaming && !isOpen && defaultOpen !== false) setIsOpen(true);
-  }, [isStreaming, isOpen, defaultOpen]);
+    if (streaming && !isOpen && defaultOpen !== false) setIsOpen(true);
+  }, [streaming, isOpen, defaultOpen]);
 
   // Auto-close once, shortly after streaming ends, so old thoughts tuck away.
   useEffect(() => {
-    if (everStreamedRef.current && !isStreaming && isOpen && !autoClosedRef.current) {
+    if (everStreamedRef.current && !streaming && isOpen && !autoClosedRef.current) {
       const t = setTimeout(() => {
         setIsOpen(false);
         autoClosedRef.current = true;
@@ -93,10 +98,10 @@ export function Reasoning({
       return () => clearTimeout(t);
     }
     return undefined;
-  }, [isStreaming, isOpen]);
+  }, [streaming, isOpen]);
 
   return (
-    <ReasoningContext.Provider value={{ isStreaming, isOpen, duration }}>
+    <ReasoningContext.Provider value={{ streaming, isOpen, duration }}>
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}
@@ -108,15 +113,22 @@ export function Reasoning({
   );
 }
 
-function thinkingLabel(isStreaming: boolean, duration: number | undefined): string {
-  if (isStreaming || duration === 0) return 'Thinking…';
+function thinkingLabel(streaming: boolean, duration: number | undefined): string {
+  if (streaming || duration === 0) return 'Thinking…';
   if (duration === undefined) return 'Thought for a few seconds';
   return `Thought for ${duration} second${duration === 1 ? '' : 's'}`;
 }
 
-export function ReasoningTrigger({ className }: { className?: string }) {
-  const { isStreaming, isOpen, duration } = useReasoning();
-  const live = isStreaming || duration === 0;
+export function ReasoningTrigger({
+  children,
+  className,
+}: {
+  /** Overrides the computed "Thinking…" / "Thought for N seconds" label. */
+  children?: ReactNode;
+  className?: string;
+}) {
+  const { streaming, isOpen, duration } = useReasoning();
+  const live = streaming || duration === 0;
   return (
     <CollapsibleTrigger
       className={cn(
@@ -126,7 +138,7 @@ export function ReasoningTrigger({ className }: { className?: string }) {
     >
       <Brain className="size-4 shrink-0" />
       <span className={cn('min-w-0 flex-1 truncate text-left', live && 'animate-pulse')}>
-        {thinkingLabel(isStreaming, duration)}
+        {children ?? thinkingLabel(streaming, duration)}
       </span>
       <ChevronDown
         className={cn('size-4 shrink-0 transition-transform', isOpen && 'rotate-180')}

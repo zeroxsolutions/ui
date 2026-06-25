@@ -60,7 +60,8 @@ function useAvatarEditor(): AvatarEditorContextValue {
 
 export interface AvatarEditorProps {
   value: AvatarValue;
-  onChange: (value: AvatarValue) => void;
+  /** Fires with the new avatar value when a part edits it. */
+  onValueChange: (value: AvatarValue) => void;
   /** Open state — uncontrolled by default; pass `open` to control it. */
   open?: boolean;
   defaultOpen?: boolean;
@@ -79,7 +80,7 @@ export interface AvatarEditorProps {
  */
 export function AvatarEditor({
   value,
-  onChange,
+  onValueChange,
   open,
   defaultOpen,
   onOpenChange,
@@ -87,10 +88,10 @@ export function AvatarEditor({
 }: AvatarEditorProps) {
   const ctx: AvatarEditorContextValue = {
     value,
-    setEmoji: (emoji) => onChange({ ...value, emoji, imageUrl: null }),
-    setColor: (color) => onChange({ ...value, color }),
-    setImage: (imageUrl) => onChange({ ...value, imageUrl, emoji: null }),
-    remove: () => onChange({ ...value, emoji: null, imageUrl: null }),
+    setEmoji: (emoji) => onValueChange({ ...value, emoji, imageUrl: null }),
+    setColor: (color) => onValueChange({ ...value, color }),
+    setImage: (imageUrl) => onValueChange({ ...value, imageUrl, emoji: null }),
+    remove: () => onValueChange({ ...value, emoji: null, imageUrl: null }),
   };
   return (
     <AvatarEditorContext.Provider value={ctx}>
@@ -261,11 +262,17 @@ export function AvatarEditorUpload({
         className="hidden"
         onChange={(e) => onFile(e.target.files?.[0] ?? undefined)}
       />
+      {/* A raw element, not the Button primitive: a drop target is a tall
+          column (icon over copy, `py-10`) that no Button `size` variant
+          expresses, and forcing one would mean overriding its fixed height +
+          row layout. It still rides tokens (`bg-muted`, `text-muted-foreground`,
+          `ring-ring`) — no hardcoded colour — and `children` overrides the
+          default icon-led copy. */}
       <button
         type="button"
         disabled={uploading}
         onClick={() => fileRef.current?.click()}
-        className="flex w-full flex-col items-center justify-center gap-2 rounded-lg bg-muted/50 py-10 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:opacity-60"
+        className="flex w-full flex-col items-center justify-center gap-2 rounded-lg bg-muted/50 py-10 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-60"
       >
         {children ?? (
           <>

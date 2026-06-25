@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react"
 import type { ComponentProps, ReactNode } from "react"
 
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 /**
@@ -68,19 +69,20 @@ function TreeRow({
       {...rest}
     >
       {hasChildren ? (
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon-xs"
           aria-label={expanded ? collapseLabel : expandLabel}
           onClick={(e) => {
             e.stopPropagation()
             onToggleExpand()
           }}
-          className="flex size-5 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
+          className="size-5 shrink-0 text-muted-foreground hover:text-foreground"
         >
           <ChevronRight
             className={cn("size-3.5 transition-transform", expanded && "rotate-90")}
           />
-        </button>
+        </Button>
       ) : (
         <span className="w-5 shrink-0" aria-hidden />
       )}

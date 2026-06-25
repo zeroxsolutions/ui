@@ -46,4 +46,28 @@ describe('ConfirmButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
     expect(onConfirm).toHaveBeenCalledTimes(1)
   })
+
+  it('defaults the cancel label to "Cancel" and lets it be overridden', async () => {
+    const { rerender } = render(
+      <ConfirmButton title="Discard?" actionLabel="Discard" onConfirm={vi.fn()}>
+        Discard
+      </ConfirmButton>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Discard' }))
+    await waitFor(() => expect(screen.getByText('Discard?')).toBeTruthy())
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy()
+
+    rerender(
+      <ConfirmButton
+        title="Discard?"
+        actionLabel="Discard"
+        cancelLabel="Keep editing"
+        onConfirm={vi.fn()}
+      >
+        Discard
+      </ConfirmButton>,
+    )
+    expect(screen.getByRole('button', { name: 'Keep editing' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Cancel' })).toBeNull()
+  })
 })

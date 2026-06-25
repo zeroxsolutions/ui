@@ -14,7 +14,10 @@ type Story = StoryObj<typeof FloatingToolbarShell>;
 export const Default: Story = {
   render: () => (
     <div className="relative h-48 w-full rounded-md bg-muted/40">
-      <FloatingToolbarShell label="Canvas tools">
+      <FloatingToolbarShell
+        label="Canvas tools"
+        className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2"
+      >
         <Button variant="ghost" size="icon">
           V
         </Button>

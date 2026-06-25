@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,15 +20,20 @@ export function Section({
   count,
   onAdd,
   onAddTestId,
+  addLabel,
   open,
   onToggle,
   actions,
   children,
-}: {
+  className,
+  ...props
+}: Omit<ComponentProps<'div'>, 'title'> & {
   title: string;
   count?: number;
   onAdd?: () => void;
   onAddTestId?: string;
+  /** Tooltip on the add button; defaults to `Add {title}`. */
+  addLabel?: ReactNode;
   open?: boolean;
   onToggle?: () => void;
   actions?: ReactNode;
@@ -37,7 +42,7 @@ export function Section({
   const isCollapsible = onToggle != null;
   const isOpen = open ?? true;
   return (
-    <div>
+    <div className={className} {...props}>
       <div className="flex items-center h-8 px-2.5 mt-1 gap-1">
         {isCollapsible ? (
           <Button
@@ -75,7 +80,9 @@ export function Section({
             >
               <Plus className="size-3" />
             </TooltipTrigger>
-            <TooltipContent>Add {title.toLowerCase()}</TooltipContent>
+            <TooltipContent>
+              {addLabel ?? `Add ${title.toLowerCase()}`}
+            </TooltipContent>
           </Tooltip>
         )}
       </div>

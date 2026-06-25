@@ -14,7 +14,7 @@ type Story = StoryObj<typeof FieldGrid>;
 export const TwoColumns: Story = {
   render: () => (
     <div className="w-64">
-      <FieldGrid>
+      <FieldGrid className="grid-cols-2">
         <Input placeholder="X" />
         <Input placeholder="Y" />
         <Input placeholder="W" />
@@ -27,7 +27,7 @@ export const TwoColumns: Story = {
 export const ThreeColumns: Story = {
   render: () => (
     <div className="w-72">
-      <FieldGrid cols={3}>
+      <FieldGrid className="grid-cols-3">
         <Input placeholder="Count" />
         <Input placeholder="Gutter" />
         <Input placeholder="Margin" />

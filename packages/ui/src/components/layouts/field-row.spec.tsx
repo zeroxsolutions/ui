@@ -25,4 +25,15 @@ describe('FieldRow', () => {
     );
     expect(container.querySelector('[aria-hidden]')).toBeTruthy();
   });
+
+  it('merges className and forwards arbitrary props onto the row', () => {
+    const { getByTestId } = render(
+      <FieldRow className="mt-2" data-testid="row">
+        <span>x</span>
+      </FieldRow>,
+    );
+    const row = getByTestId('row');
+    expect(row.className).toContain('flex');
+    expect(row.className).toContain('mt-2');
+  });
 });

@@ -38,6 +38,19 @@ describe('EmojiPicker', () => {
     expect(screen.getByText('Frequently used')).toBeTruthy();
   });
 
+  it('lets frequentLabel override the frequent-row heading', () => {
+    render(
+      <EmojiPicker
+        onSelect={vi.fn()}
+        frequent={['🍕']}
+        frequentLabel="Hay dùng"
+      />,
+    );
+
+    expect(screen.getByText('Hay dùng')).toBeTruthy();
+    expect(screen.queryByText('Frequently used')).toBeNull();
+  });
+
   it('filters the grid by search query', () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
 

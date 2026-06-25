@@ -28,7 +28,7 @@ import {
  *
  * Generic over the option value `T` — it knows nothing about the options' domain.
  */
-export interface ToolbarOption<T extends string> {
+export interface SplitButtonOption<T extends string> {
   value: T
   label: string
   icon: ComponentType<{ className?: string }>
@@ -37,7 +37,7 @@ export interface ToolbarOption<T extends string> {
 }
 
 export interface SplitButtonProps<T extends string> {
-  options: ToolbarOption<T>[]
+  options: SplitButtonOption<T>[]
   /** The currently selected option — drives the primary icon + tooltip. */
   value: T
   /** Whether this group is active — highlights both regions. */
@@ -50,7 +50,7 @@ export interface SplitButtonProps<T extends string> {
   /** Extra menu content appended after the options. */
   extraItems?: ReactNode
   /** Filter which options appear in the menu (default: all). */
-  filter?: (option: ToolbarOption<T>) => boolean
+  filter?: (option: SplitButtonOption<T>) => boolean
   align?: "start" | "center" | "end"
 }
 

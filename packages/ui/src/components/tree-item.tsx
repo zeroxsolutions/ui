@@ -5,6 +5,7 @@ import type {
 } from "react"
 
 import { TreeRow, type TreeRowProps } from "@/components/tree-row"
+import { Button } from "@/components/ui/button"
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -83,10 +84,11 @@ function TreeItem({
 }: TreeItemProps) {
   const row = (
     <TreeRow ref={ref} {...rowProps}>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="sm"
         className={cn(
-          "flex min-w-0 flex-1 items-center gap-1.5 py-1 text-left text-xs",
+          "h-auto min-w-0 flex-1 justify-start gap-1.5 px-0 py-1 text-left text-xs",
           nameButtonClassName,
         )}
         onClick={onActivate}
@@ -114,7 +116,7 @@ function TreeItem({
           <span className={cn("flex-1 truncate", nameClassName)}>{name}</span>
         )}
         {inlineEnd}
-      </button>
+      </Button>
       {trailing}
     </TreeRow>
   )

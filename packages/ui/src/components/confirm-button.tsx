@@ -17,6 +17,8 @@ interface ConfirmButtonProps {
   description?: ReactNode
   /** Label of the confirming action button inside the dialog. */
   actionLabel: string
+  /** Label of the dismissing button inside the dialog. */
+  cancelLabel?: ReactNode
   /** Render the confirm action in the destructive (red) variant. */
   destructive?: boolean
   /** Runs only after the user confirms. */
@@ -39,6 +41,7 @@ function ConfirmButton({
   title,
   description,
   actionLabel,
+  cancelLabel = 'Cancel',
   destructive = false,
   onConfirm,
   children,
@@ -70,7 +73,7 @@ function ConfirmButton({
             )}
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
             <AlertDialogAction
               variant={destructive ? "destructive" : "default"}
               onClick={() => void onConfirm()}

@@ -6,7 +6,7 @@ import { FieldGrid } from './field-grid';
 afterEach(cleanup);
 
 describe('FieldGrid', () => {
-  it('defaults to a 2-column grid', () => {
+  it('bakes the curated grid + gap decision', () => {
     const { container } = render(
       <FieldGrid>
         <span>a</span>
@@ -15,17 +15,27 @@ describe('FieldGrid', () => {
     );
     const grid = container.firstChild as HTMLElement;
     expect(grid.className).toContain('grid');
-    expect(grid.className).toContain('grid-cols-2');
+    expect(grid.className).toContain('gap-x-2');
+    expect(grid.className).toContain('gap-y-1');
   });
 
-  it('honours the cols prop', () => {
+  it('takes the column count from a passed className', () => {
     const { container } = render(
-      <FieldGrid cols={3}>
+      <FieldGrid className="grid-cols-3">
         <span>a</span>
       </FieldGrid>,
     );
-    expect((container.firstChild as HTMLElement).className).toContain(
-      'grid-cols-3',
+    const grid = container.firstChild as HTMLElement;
+    expect(grid.className).toContain('grid-cols-3');
+    expect(grid.className).toContain('gap-x-2');
+  });
+
+  it('forwards arbitrary props onto the grid element', () => {
+    const { getByTestId } = render(
+      <FieldGrid data-testid="grid">
+        <span>a</span>
+      </FieldGrid>,
     );
+    expect(getByTestId('grid')).toBeTruthy();
   });
 });

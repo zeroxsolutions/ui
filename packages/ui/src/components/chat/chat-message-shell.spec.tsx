@@ -44,7 +44,7 @@ describe('ChatMessageShell', () => {
 
   it('paints a streaming accent in the agent colour', () => {
     const { container } = render(
-      <ChatMessageShell role="assistant" agent={{ color: '#ff0000' }} isStreaming>
+      <ChatMessageShell role="assistant" agent={{ color: '#ff0000' }} streaming>
         body
       </ChatMessageShell>,
     );

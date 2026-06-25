@@ -28,7 +28,7 @@ type Story = StoryObj<typeof Reasoning>;
 export const Streaming: Story = {
   render: () => (
     <div className="max-w-xl">
-      <Reasoning isStreaming>
+      <Reasoning streaming>
         <ReasoningTrigger />
         <ReasoningContent>{THOUGHT}</ReasoningContent>
       </Reasoning>

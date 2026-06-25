@@ -52,7 +52,7 @@ export const Default: Story = {
       imageUrl: null,
     });
     return (
-      <AvatarEditor value={value} onChange={setValue}>
+      <AvatarEditor value={value} onValueChange={setValue}>
         <AvatarEditorTrigger>
           <AvatarTile value={value} />
         </AvatarEditorTrigger>
@@ -74,7 +74,7 @@ export const EmptyDefault: Story = {
       imageUrl: null,
     });
     return (
-      <AvatarEditor value={value} onChange={setValue}>
+      <AvatarEditor value={value} onValueChange={setValue}>
         <AvatarEditorTrigger>
           <AvatarTile value={value} />
         </AvatarEditorTrigger>
@@ -109,7 +109,7 @@ export const InsideDialog: Story = {
               Click the avatar to pick an emoji, upload an image, or set a colour.
             </DialogDescription>
           </DialogHeader>
-          <AvatarEditor value={value} onChange={setValue}>
+          <AvatarEditor value={value} onValueChange={setValue}>
             <AvatarEditorTrigger>
               <AvatarTile value={value} />
             </AvatarEditorTrigger>
@@ -131,7 +131,7 @@ export const UploadOnly: Story = {
   render: () => {
     const [value, setValue] = useState<AvatarValue>({ imageUrl: null });
     return (
-      <AvatarEditor value={value} onChange={setValue}>
+      <AvatarEditor value={value} onValueChange={setValue}>
         <AvatarEditorTrigger>
           <AvatarTile value={value} />
         </AvatarEditorTrigger>

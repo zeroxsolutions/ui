@@ -31,9 +31,18 @@ const PROSE = [
 ].join(' ');
 
 /**
+ * Inline-code chip styling, shared by the `codeBlocks` renderer's explicit
+ * inline `<code>` and mirrored as `[&_code]` descendant rules in `PROSE_CODE`
+ * below — one source for the chip's look so the two paths never drift.
+ */
+const INLINE_CODE = 'rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]';
+
+/**
  * Code styling for the default (plain `<pre>`) renderer. Split out so the
  * `codeBlocks` variant can drop it — there `CodeBlock` owns code rendering and
  * these descendant rules would otherwise repaint its inner `<pre>`/`<code>`.
+ * The `[&_code]` rules are the descendant-selector mirror of `INLINE_CODE`
+ * (kept as a literal so Tailwind statically detects each class).
  */
 const PROSE_CODE = [
   '[&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em]',
@@ -56,11 +65,7 @@ const codeBlockComponents: Components = {
     if (isBlock) {
       return <CodeBlock code={text.replace(/\n$/, '')} language={lang ?? 'text'} />;
     }
-    return (
-      <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">
-        {children}
-      </code>
-    );
+    return <code className={INLINE_CODE}>{children}</code>;
   },
 };
 

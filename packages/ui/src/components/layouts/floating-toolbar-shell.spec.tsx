@@ -17,6 +17,19 @@ describe('FloatingToolbarShell', () => {
     expect(toolbar.className).toContain('pointer-events-auto');
   });
 
+  it('owns only the visual shell identity, not outer placement', () => {
+    const { getByRole } = render(
+      <FloatingToolbarShell label="Tools">x</FloatingToolbarShell>,
+    );
+    const toolbar = getByRole('toolbar');
+    expect(toolbar.className).toContain('bg-card/95');
+    expect(toolbar.className).toContain('rounded-sm');
+    // Placement is the consumer's; it is not baked into the shell identity.
+    expect(toolbar.className).not.toContain('absolute');
+    expect(toolbar.className).not.toContain('bottom-3');
+    expect(toolbar.className).not.toContain('-translate-x-1/2');
+  });
+
   it('merges a passed className', () => {
     const { getByRole } = render(
       <FloatingToolbarShell className="bottom-6">x</FloatingToolbarShell>,

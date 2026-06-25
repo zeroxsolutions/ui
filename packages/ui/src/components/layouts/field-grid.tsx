@@ -1,25 +1,21 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps } from 'react';
 
-interface FieldGridProps {
-  /** Number of columns. Defaults to 2 (most common in property panels). */
-  cols?: 1 | 2 | 3 | 4;
-  children: ReactNode;
-}
-
-const COLS_CLASS: Record<NonNullable<FieldGridProps['cols']>, string> = {
-  1: 'grid-cols-1',
-  2: 'grid-cols-2',
-  3: 'grid-cols-3',
-  4: 'grid-cols-4',
-};
+import { cn } from '@/lib/utils';
 
 /**
  * Standard tight grid wrapper for paired/triplet inputs (X+Y, W+H,
- * opacity+blend, count+gutter+margin, …). Keeps spacing consistent across every
- * section.
+ * opacity+blend, count+gutter+margin, …). Bakes only the curated `gap-x-2
+ * gap-y-1` spacing decision so sections stay consistent; the consumer picks the
+ * column count via `className` (`grid-cols-3`, …).
  */
-export function FieldGrid({ cols = 2, children }: FieldGridProps) {
+export function FieldGrid({
+  className,
+  children,
+  ...props
+}: ComponentProps<'div'>) {
   return (
-    <div className={`grid ${COLS_CLASS[cols]} gap-x-2 gap-y-1`}>{children}</div>
+    <div className={cn('grid gap-x-2 gap-y-1', className)} {...props}>
+      {children}
+    </div>
   );
 }

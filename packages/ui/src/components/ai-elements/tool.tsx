@@ -47,12 +47,16 @@ export type ToolPart = { state: ToolState };
 export function Tool({ className, ...props }: ComponentProps<typeof Collapsible>) {
   return (
     <Collapsible
-      className={cn('group/tool my-2 w-full overflow-hidden rounded-md bg-muted', className)}
+      className={cn('my-2 w-full overflow-hidden rounded-md bg-muted', className)}
       {...props}
     />
   );
 }
 
+/**
+ * Per-state status cue (icon + tone) and the default visible word. The icon and
+ * tone are fixed; the word is overridable per call-site via `ToolHeader.statusLabel`.
+ */
 const STATUS: Record<ToolState, { label: string; icon: ReactNode }> = {
   'input-streaming': { label: 'Pending', icon: <Circle className="size-3" /> },
   'input-available': {
@@ -76,6 +80,10 @@ export interface ToolHeaderProps {
   state: ToolState;
   toolName?: string;
   type?: string;
+  /** Visible word in the status badge; defaults to the per-state `STATUS` label. */
+  statusLabel?: ReactNode;
+  /** Visible fallback name when none of title/toolName/type resolve one. Defaults to `'tool'`. */
+  fallbackLabel?: ReactNode;
   className?: string;
 }
 
@@ -86,15 +94,20 @@ export function ToolHeader({
   state,
   toolName,
   type,
+  statusLabel,
+  fallbackLabel = 'tool',
   className,
 }: ToolHeaderProps) {
   const name =
-    title ?? toolName ?? (type ? type.split('-').slice(1).join('-') : 'tool');
+    title ?? toolName ?? (type ? type.split('-').slice(1).join('-') : fallbackLabel);
   const status = STATUS[state];
   const Icon = icon ?? Wrench;
   return (
     <CollapsibleTrigger
-      className={cn('flex w-full items-center gap-2 px-3 py-2 text-left', className)}
+      className={cn(
+        'group/tool flex w-full items-center gap-2 px-3 py-2 text-left',
+        className,
+      )}
     >
       <Icon className="size-3.5 shrink-0 text-muted-foreground" />
       <span className="shrink-0 text-sm font-medium">{name}</span>
@@ -107,9 +120,9 @@ export function ToolHeader({
       )}
       <Badge variant="secondary" className="shrink-0 gap-1 rounded-full text-[10px]">
         {status.icon}
-        {status.label}
+        {statusLabel ?? status.label}
       </Badge>
-      <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-data-[open]/tool:rotate-180" />
+      <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-aria-expanded/tool:rotate-180" />
     </CollapsibleTrigger>
   );
 }
@@ -137,10 +150,19 @@ function ToolLabel({ children }: { children: ReactNode }) {
   );
 }
 
-export function ToolInput({ input, className }: { input: unknown; className?: string }) {
+export function ToolInput({
+  input,
+  label = 'Parameters',
+  className,
+}: {
+  input: unknown;
+  /** Section heading; defaults to `'Parameters'`. */
+  label?: ReactNode;
+  className?: string;
+}) {
   return (
     <div className={cn('space-y-1.5 overflow-hidden', className)}>
-      <ToolLabel>Parameters</ToolLabel>
+      <ToolLabel>{label}</ToolLabel>
       <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
     </div>
   );
@@ -149,10 +171,16 @@ export function ToolInput({ input, className }: { input: unknown; className?: st
 export function ToolOutput({
   output,
   errorText,
+  resultLabel = 'Result',
+  errorLabel = 'Error',
   className,
 }: {
   output: unknown;
   errorText?: string;
+  /** Section heading for a successful result; defaults to `'Result'`. */
+  resultLabel?: ReactNode;
+  /** Section heading for an error; defaults to `'Error'`. */
+  errorLabel?: ReactNode;
   className?: string;
 }) {
   if (!output && !errorText) return null;
@@ -172,9 +200,9 @@ export function ToolOutput({
 
   return (
     <div className={cn('space-y-1.5', className)}>
-      <ToolLabel>{errorText ? 'Error' : 'Result'}</ToolLabel>
+      <ToolLabel>{errorText ? errorLabel : resultLabel}</ToolLabel>
       {errorText ? (
-        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+        <div className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
           {errorText}
         </div>
       ) : (

@@ -45,3 +45,26 @@ export const Static: Story = {
     </div>
   ),
 };
+
+/** `addLabel` overrides the add button's tooltip (defaults to `Add {title}`). */
+export const CustomAddLabel: Story = {
+  render: () => {
+    const [open, setOpen] = useState(true);
+    return (
+      <div className="w-72 rounded-md bg-card ring-1 ring-foreground/10">
+        <Section
+          title="Variables"
+          count={1}
+          open={open}
+          onToggle={() => setOpen((v) => !v)}
+          onAdd={() => {}}
+          addLabel="New variable"
+        >
+          <div className="rounded bg-muted/60 px-2 py-1.5 text-sm">
+            primary-color
+          </div>
+        </Section>
+      </div>
+    );
+  },
+};

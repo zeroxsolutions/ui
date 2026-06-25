@@ -54,4 +54,15 @@ describe('Section', () => {
     fireEvent.click(getByTestId('add-layer'));
     expect(onAdd).toHaveBeenCalledTimes(1);
   });
+
+  it('forwards className and arbitrary props onto the root', () => {
+    const { container } = render(
+      <Section title="Layers" className="custom-root" data-testid="section-root">
+        <div>body</div>
+      </Section>,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.className).toContain('custom-root');
+    expect(root.getAttribute('data-testid')).toBe('section-root');
+  });
 });

@@ -5,91 +5,13 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group"
+import { evaluateExpression } from "@/lib/expr-eval"
 
-/**
- * Tiny recursive-descent evaluator for simple arithmetic so a field accepts
- * `100 + 8` / `(4 + 2) * 3` and commits the result. Supports `+ - * /`,
- * parentheses and decimals; returns null for anything else.
- */
-function evaluateExpression(expr: string): number | null {
-  const trimmed = expr.trim()
-  if (!trimmed) return null
-  // Only digits, decimal points, whitespace and the basic operators.
-  if (!/^[\d\s.+\-*/()]+$/.test(trimmed)) return null
-  try {
-    let pos = 0
-    const peek = () => trimmed[pos]
-    const consume = (ch: string) => {
-      if (trimmed[pos] !== ch) throw new Error("unexpected")
-      pos++
-    }
-
-    function skipWs() {
-      while (pos < trimmed.length && trimmed[pos] === " ") pos++
-    }
-
-    function parseNumber(): number {
-      skipWs()
-      const start = pos
-      if (trimmed[pos] === "-" || trimmed[pos] === "+") pos++
-      while (
-        pos < trimmed.length &&
-        ((trimmed[pos] >= "0" && trimmed[pos] <= "9") || trimmed[pos] === ".")
-      )
-        pos++
-      if (pos === start) throw new Error("expected number")
-      return Number(trimmed.slice(start, pos))
-    }
-
-    function parsePrimary(): number {
-      skipWs()
-      if (peek() === "(") {
-        consume("(")
-        const val = parseAddSub()
-        skipWs()
-        consume(")")
-        return val
-      }
-      return parseNumber()
-    }
-
-    function parseMulDiv(): number {
-      let left = parsePrimary()
-      skipWs()
-      while (pos < trimmed.length && (peek() === "*" || peek() === "/")) {
-        const op = peek()
-        pos++
-        const right = parsePrimary()
-        left = op === "*" ? left * right : left / right
-        skipWs()
-      }
-      return left
-    }
-
-    function parseAddSub(): number {
-      let left = parseMulDiv()
-      skipWs()
-      while (pos < trimmed.length && (peek() === "+" || peek() === "-")) {
-        const op = peek()
-        pos++
-        const right = parseMulDiv()
-        left = op === "+" ? left + right : left - right
-        skipWs()
-      }
-      return left
-    }
-
-    const result = parseAddSub()
-    skipWs()
-    if (pos !== trimmed.length) return null
-    if (typeof result !== "number" || !isFinite(result)) return null
-    return result
-  } catch {
-    return null
-  }
-}
-
-export interface NumberFieldProps {
+export interface NumberFieldProps
+  extends Omit<
+    React.ComponentProps<typeof InputGroup>,
+    "onChange" | "children" | "defaultValue" | "value" | "placeholder"
+  > {
   /** Leading label addon (e.g. "X", "W"). */
   label?: ReactNode
   value: number
@@ -97,12 +19,6 @@ export interface NumberFieldProps {
   disabled?: boolean
   min?: number
   max?: number
-  /**
-   * Advisory step size for the value. Currently informational — the field
-   * commits typed/arithmetic input rather than native stepping; keyboard
-   * increment is not yet wired.
-   */
-  step?: number
   /** Trailing unit addon (e.g. "px", "°"). */
   suffix?: ReactNode
   /** Override raw parsing — receives the draft string, returns a number or null. */
@@ -145,6 +61,7 @@ function NumberField({
   mixed,
   placeholder,
   displayText,
+  ...props
 }: NumberFieldProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState("")
@@ -179,7 +96,11 @@ function NumberField({
   )
 
   return (
-    <InputGroup className={className} data-disabled={disabled || undefined}>
+    <InputGroup
+      className={className}
+      data-disabled={disabled || undefined}
+      {...props}
+    >
       {label && <InputGroupAddon>{label}</InputGroupAddon>}
       <InputGroupInput
         type="text"

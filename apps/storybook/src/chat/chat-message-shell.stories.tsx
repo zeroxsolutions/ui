@@ -33,7 +33,7 @@ export const Streaming: Story = {
       <ChatMessageShell
         role="assistant"
         showAgentLabel
-        isStreaming
+        streaming
         agent={{ name: 'Leonardo', color: '#0ea5e9' }}
       >
         Sketching the hero section…

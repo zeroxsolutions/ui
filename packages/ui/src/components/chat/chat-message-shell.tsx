@@ -37,14 +37,14 @@ export interface ChatMessageShellProps {
    * Live-streaming flag — adds a subtle leading-edge accent in the agent's
    * colour while text is still arriving. No-op without `agent.color`.
    */
-  isStreaming?: boolean;
+  streaming?: boolean;
 }
 
 export function ChatMessageShell({
   role,
   agent,
   showAgentLabel,
-  isStreaming,
+  streaming,
   children,
   className,
 }: ChatMessageShellProps) {
@@ -76,7 +76,7 @@ export function ChatMessageShell({
   // would let an inner pre's intrinsic width grow the parent past the edge.
   const accent = agent?.color;
   const accentStyle: CSSProperties | undefined =
-    isStreaming && accent ? { borderInlineStartColor: accent } : undefined;
+    streaming && accent ? { borderInlineStartColor: accent } : undefined;
 
   return (
     <div data-role={role} className={cn('group flex w-full flex-col', className)}>
@@ -98,7 +98,7 @@ export function ChatMessageShell({
           '[&>*]:min-w-0 [&>*]:max-w-full',
           // While streaming, render an agent-coloured accent on the leading
           // edge. A border (not a separate element) leaves the layout intact.
-          isStreaming && accent && 'border-l-2 pl-3 -ml-3',
+          streaming && accent && 'border-l-2 pl-3 -ml-3',
         )}
         style={accentStyle}
       >

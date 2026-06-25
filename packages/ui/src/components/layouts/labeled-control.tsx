@@ -1,4 +1,11 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
+
+import { cn } from '@/lib/utils';
+
+interface LabeledControlProps extends ComponentProps<'div'> {
+  label: ReactNode;
+  children: ReactNode;
+}
 
 /**
  * A label above a full-width control — the row layout for inputs that don't
@@ -7,13 +14,12 @@ import type { ReactNode } from 'react';
  */
 export function LabeledControl({
   label,
+  className,
   children,
-}: {
-  label: ReactNode;
-  children: ReactNode;
-}) {
+  ...props
+}: LabeledControlProps) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className={cn('flex flex-col gap-1', className)} {...props}>
       <span className="flex items-center text-xs text-muted-foreground">
         {label}
       </span>

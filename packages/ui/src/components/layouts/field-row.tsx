@@ -1,10 +1,10 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
+
+import { cn } from '@/lib/utils';
 
 import { FieldGrid } from './field-grid';
 
-interface FieldRowProps {
-  /** Number of columns in the inner grid. Defaults to 2. */
-  cols?: 1 | 2 | 3 | 4;
+interface FieldRowProps extends ComponentProps<'div'> {
   /** Optional trailing action (e.g. an aspect-lock toggle, flip buttons).
    *  When omitted, an icon-button-sized spacer is rendered so multiple rows in a
    *  section line up at the right edge. */
@@ -18,11 +18,16 @@ interface FieldRowProps {
  * same trailing slot, so panels align cleanly even when one row has an action
  * and another doesn't.
  */
-export function FieldRow({ cols = 2, action, children }: FieldRowProps) {
+export function FieldRow({
+  action,
+  className,
+  children,
+  ...props
+}: FieldRowProps) {
   return (
-    <div className="flex items-end gap-1">
+    <div className={cn('flex items-end gap-1', className)} {...props}>
       <div className="flex-1 min-w-0">
-        <FieldGrid cols={cols}>{children}</FieldGrid>
+        <FieldGrid className="grid-cols-2">{children}</FieldGrid>
       </div>
       {action ?? <div className="size-7 shrink-0" aria-hidden />}
     </div>

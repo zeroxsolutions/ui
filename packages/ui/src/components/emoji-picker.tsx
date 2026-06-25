@@ -37,8 +37,8 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   flags: Flag,
 };
 
-/** Default heading for the frequent row; override via composition. */
-const FREQUENT_LABEL = 'Frequently used';
+/** Default heading + nav name for the frequent row; override via `frequentLabel`. */
+const DEFAULT_FREQUENT_LABEL = 'Frequently used';
 
 /** Cells per grid row, and the fixed row metrics the window is computed from.
  * The grid is uniform — a cell is a `Button size="icon"` (`size-9` = 36px) and
@@ -135,6 +135,8 @@ export interface EmojiPickerProps {
    * list and its persistence — the picker keeps no storage of its own.
    */
   frequent?: string[];
+  /** Heading + nav name for the frequent row. Defaults to `'Frequently used'`. */
+  frequentLabel?: string;
   /**
    * Compose the parts (`EmojiPickerSearch`, `EmojiPickerContent`,
    * `EmojiPickerNav`) to override copy or layout. Omit for the default picker.
@@ -161,6 +163,7 @@ export interface EmojiPickerProps {
 export function EmojiPicker({
   onSelect,
   frequent = [],
+  frequentLabel = DEFAULT_FREQUENT_LABEL,
   children,
 }: EmojiPickerProps) {
   const [query, setQuery] = React.useState('');
@@ -182,20 +185,20 @@ export function EmojiPicker({
         ? [
             {
               id: 'frequent',
-              name: FREQUENT_LABEL,
+              name: frequentLabel,
               emojis: frequent.map((e) => ({ e, n: e, k: '' })),
             },
           ]
         : [];
     return [...head, ...EMOJI_CATEGORIES];
-  }, [frequent]);
+  }, [frequent, frequentLabel]);
 
   const navCategories = React.useMemo(
     () => [
-      { id: 'frequent', name: FREQUENT_LABEL },
+      { id: 'frequent', name: frequentLabel },
       ...EMOJI_CATEGORIES.map((c) => ({ id: c.id, name: c.name })),
     ],
-    [],
+    [frequentLabel],
   );
 
   const { rows, headerIndices } = React.useMemo(

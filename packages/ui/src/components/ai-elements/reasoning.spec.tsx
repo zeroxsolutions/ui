@@ -19,12 +19,23 @@ afterEach(cleanup);
 describe('Reasoning', () => {
   it('shows the streaming label while streaming', () => {
     render(
-      <Reasoning isStreaming>
+      <Reasoning streaming>
         <ReasoningTrigger />
         <ReasoningContent>{'thinking out loud'}</ReasoningContent>
       </Reasoning>,
     );
     expect(screen.getByText('Thinking…')).toBeTruthy();
+  });
+
+  it('lets ReasoningTrigger children override the computed label', () => {
+    render(
+      <Reasoning streaming>
+        <ReasoningTrigger>Razonando…</ReasoningTrigger>
+        <ReasoningContent>{'thinking out loud'}</ReasoningContent>
+      </Reasoning>,
+    );
+    expect(screen.getByText('Razonando…')).toBeTruthy();
+    expect(screen.queryByText('Thinking…')).toBeNull();
   });
 
   it('renders the content markdown when open', () => {
