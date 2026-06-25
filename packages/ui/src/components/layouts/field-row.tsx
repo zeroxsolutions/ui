@@ -9,6 +9,8 @@ interface FieldRowProps extends ComponentProps<'div'> {
    *  When omitted, an icon-button-sized spacer is rendered so multiple rows in a
    *  section line up at the right edge. */
   action?: ReactNode;
+  /** Column count for the inner grid (default 2); forwarded to `FieldGrid`. */
+  cols?: number;
   children: ReactNode;
 }
 
@@ -20,6 +22,7 @@ interface FieldRowProps extends ComponentProps<'div'> {
  */
 export function FieldRow({
   action,
+  cols = 2,
   className,
   children,
   ...props
@@ -27,7 +30,7 @@ export function FieldRow({
   return (
     <div className={cn('flex items-end gap-1', className)} {...props}>
       <div className="flex-1 min-w-0">
-        <FieldGrid className="grid-cols-2">{children}</FieldGrid>
+        <FieldGrid cols={cols}>{children}</FieldGrid>
       </div>
       {action ?? <div className="size-7 shrink-0" aria-hidden />}
     </div>

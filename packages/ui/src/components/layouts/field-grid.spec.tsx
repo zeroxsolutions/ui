@@ -19,15 +19,28 @@ describe('FieldGrid', () => {
     expect(grid.className).toContain('gap-y-1');
   });
 
-  it('takes the column count from a passed className', () => {
+  it('renders a (possibly dynamic) column count as a computed grid-template', () => {
+    const { container } = render(
+      <FieldGrid cols={3}>
+        <span>a</span>
+      </FieldGrid>,
+    );
+    const grid = container.firstChild as HTMLElement;
+    // A computed inline template, not a `grid-cols-3` utility — so any runtime
+    // count works (Tailwind can't JIT a dynamic `grid-cols-${n}`).
+    expect(grid.style.gridTemplateColumns).toBe('repeat(3, minmax(0, 1fr))');
+    expect(grid.className).not.toContain('grid-cols-3');
+  });
+
+  it('also accepts the column count via className', () => {
     const { container } = render(
       <FieldGrid className="grid-cols-3">
         <span>a</span>
       </FieldGrid>,
     );
-    const grid = container.firstChild as HTMLElement;
-    expect(grid.className).toContain('grid-cols-3');
-    expect(grid.className).toContain('gap-x-2');
+    expect((container.firstChild as HTMLElement).className).toContain(
+      'grid-cols-3',
+    );
   });
 
   it('forwards arbitrary props onto the grid element', () => {
