@@ -156,7 +156,13 @@ export const editorTheme: Extension = EditorView.theme({
     color: 'var(--foreground)',
   },
   '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--foreground)' },
-  '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
+  // The focused selector mirrors CodeMirror's own baseTheme path
+  // (`.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground`)
+  // so it matches that rule's specificity and, injected later as a theme, wins.
+  // A shorter `&.cm-focused .cm-selectionBackground` is out-ranked by the base
+  // rule, leaving the pale light-theme default in place — which, under the dark
+  // token background, hides the (light) selected text entirely.
+  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
     { backgroundColor: 'color-mix(in oklch, var(--accent) 70%, transparent)' },
   '.cm-matchingBracket, &.cm-focused .cm-matchingBracket': {
     backgroundColor: 'color-mix(in oklch, var(--primary) 22%, transparent)',
