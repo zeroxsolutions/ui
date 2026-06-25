@@ -48,4 +48,26 @@ describe('NumberField', () => {
     fireEvent.blur(input)
     expect(onValueChange).toHaveBeenCalledWith(7)
   })
+
+  it('steps the value on ArrowUp/ArrowDown when step is set (clamped)', () => {
+    const onValueChange = vi.fn()
+    render(
+      <NumberField value={5} step={2} max={6} onValueChange={onValueChange} />,
+    )
+
+    const input = screen.getByRole('textbox')
+    fireEvent.keyDown(input, { key: 'ArrowUp' })
+    // 5 + 2 = 7, clamped to max 6.
+    expect(onValueChange).toHaveBeenLastCalledWith(6)
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(onValueChange).toHaveBeenLastCalledWith(3)
+  })
+
+  it('leaves the arrows inert when no step is given', () => {
+    const onValueChange = vi.fn()
+    render(<NumberField value={5} onValueChange={onValueChange} />)
+
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'ArrowUp' })
+    expect(onValueChange).not.toHaveBeenCalled()
+  })
 })

@@ -19,6 +19,9 @@ export interface NumberFieldProps
   disabled?: boolean
   min?: number
   max?: number
+  /** Increment/decrement applied on ArrowUp / ArrowDown (clamped to min/max).
+   *  Omit to leave the arrows as native text-cursor movement. */
+  step?: number
   /** Trailing unit addon (e.g. "px", "°"). */
   suffix?: ReactNode
   /** Override raw parsing — receives the draft string, returns a number or null. */
@@ -54,6 +57,7 @@ function NumberField({
   disabled,
   min,
   max,
+  step,
   suffix,
   parseRaw,
   endAddon,
@@ -90,9 +94,22 @@ function NumberField({
         setEditing(false)
         setDraft(String(value))
         e.currentTarget.blur()
+      } else if (
+        step !== undefined &&
+        (e.key === "ArrowUp" || e.key === "ArrowDown")
+      ) {
+        // Step the value (the arrows are inert otherwise — a text cursor in a
+        // single-line field has nowhere to go vertically).
+        e.preventDefault()
+        const base = editing ? (evaluateExpression(draft) ?? value) : value
+        let next = base + (e.key === "ArrowUp" ? step : -step)
+        if (min !== undefined) next = Math.max(min, next)
+        if (max !== undefined) next = Math.min(max, next)
+        onValueChange(next)
+        if (editing) setDraft(String(next))
       }
     },
-    [value],
+    [value, step, min, max, onValueChange, editing, draft],
   )
 
   return (
