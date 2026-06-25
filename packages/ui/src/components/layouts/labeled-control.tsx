@@ -1,16 +1,22 @@
 import type { ComponentProps, ReactNode } from 'react';
 
+import { Field, FieldLabel } from '@/components/ui/field';
 import { cn } from '@/lib/utils';
 
-interface LabeledControlProps extends ComponentProps<'div'> {
+interface LabeledControlProps
+  extends Omit<ComponentProps<typeof Field>, 'orientation'> {
   label: ReactNode;
   children: ReactNode;
 }
 
 /**
- * A label above a full-width control — the row layout for inputs that don't
- * carry their own inline label (a colour swatch, a custom picker). Pairs with
- * inline-labeled fields so a property section can mix both and stay aligned.
+ * The compact inspector field — the design-system `Field` (vertical) with the
+ * dense `text-xs` muted label property panels want, for a full-width control
+ * that carries no inline label of its own (a colour swatch, a custom picker).
+ *
+ * It composes `Field` + `FieldLabel` so the label is a real label slot
+ * (`role=group`, `data-slot`) rather than a hand-rolled `<span>`. The compact
+ * preset lives here once instead of being repainted at all ~50 call sites.
  */
 export function LabeledControl({
   label,
@@ -19,11 +25,11 @@ export function LabeledControl({
   ...props
 }: LabeledControlProps) {
   return (
-    <div className={cn('flex flex-col gap-1', className)} {...props}>
-      <span className="flex items-center text-xs text-muted-foreground">
+    <Field className={cn('gap-1', className)} {...props}>
+      <FieldLabel className="text-xs font-normal text-muted-foreground">
         {label}
-      </span>
+      </FieldLabel>
       {children}
-    </div>
+    </Field>
   );
 }
