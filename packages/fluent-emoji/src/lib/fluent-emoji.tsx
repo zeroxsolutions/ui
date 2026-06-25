@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { fluentEmojiUrl, type FluentEmojiStyle } from './resolve';
+import { useAmbientFluentEmojiStyle } from './style-context';
 
 export interface FluentEmojiProps
   extends Omit<React.ComponentProps<'img'>, 'src' | 'alt'> {
@@ -19,6 +20,10 @@ export interface FluentEmojiProps
  * third-party CDN. On a missing asset or a load error it falls back to the
  * native glyph so nothing renders blank. Pass `base` (or call
  * `setFluentEmojiBase`) to serve the artwork from a CDN instead.
+ *
+ * Style precedence: an explicit `variant` wins; otherwise the ambient style from
+ * a {@link FluentEmojiStyleProvider} (re-renders on change); otherwise the
+ * resolver default (`setFluentEmojiStyle` / `'3d'`).
  */
 export function FluentEmoji({
   glyph,
@@ -28,9 +33,11 @@ export function FluentEmoji({
   className,
   ...props
 }: FluentEmojiProps) {
+  const ambient = useAmbientFluentEmojiStyle();
+  const style = variant ?? ambient;
   const src = fluentEmojiUrl(
     glyph,
-    base || variant ? { base, style: variant } : undefined,
+    base || style ? { base, style } : undefined,
   );
   const [failed, setFailed] = React.useState(false);
   // Reset the error latch when the resolved artwork changes, so a recycled
