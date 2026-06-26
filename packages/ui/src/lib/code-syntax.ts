@@ -18,8 +18,6 @@ import {
   ensureHighlighter,
   ensureLanguage,
   getLoadedHighlighter,
-  highlighterPending,
-  languagePending,
   resolveLanguage,
   SHIKI_THEME_NAME,
   tokensToRanges,
@@ -68,18 +66,20 @@ function buildDecorations(view: EditorView): DecorationSet {
   const canonical = resolveLanguage(lang);
   if (!canonical) return Decoration.none;
 
+  // `ensureHighlighter`/`ensureLanguage` de-dupe the actual work internally, so
+  // we always subscribe THIS view to the completion. Gating the subscription on
+  // a global "already in flight" flag starves a view that mounts mid-load (React
+  // StrictMode remounts the editor while the first instance's load is pending):
+  // only the destroyed first view got the callback, so the live view never
+  // repainted and the file stayed plain until an unrelated edit forced a rebuild.
   const h = getLoadedHighlighter();
   if (!h) {
-    const firstKick = !highlighterPending();
-    const pending = ensureHighlighter();
-    if (firstKick) pending.then(() => requestRehighlight(view));
+    ensureHighlighter().then(() => requestRehighlight(view));
     return Decoration.none;
   }
 
   if (!h.getLoadedLanguages().includes(canonical)) {
-    if (!languagePending(canonical)) {
-      ensureLanguage(canonical).then(() => requestRehighlight(view));
-    }
+    ensureLanguage(canonical).then(() => requestRehighlight(view));
     return Decoration.none;
   }
 

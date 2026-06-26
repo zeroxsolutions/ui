@@ -159,16 +159,6 @@ export function getLoadedHighlighter(): Highlighter | null {
   return highlighter;
 }
 
-/** Whether highlighter creation has been kicked off (the load is in flight or done). */
-export function highlighterPending(): boolean {
-  return creating != null;
-}
-
-/** Whether a load for `lang` is already tracked (the de-dup guard for re-highlight). */
-export function languagePending(lang: string): boolean {
-  return loadingLangs.has(lang);
-}
-
 /** A token's mark range in document coordinates plus the inline style to apply. */
 export interface SyntaxRange {
   from: number;
