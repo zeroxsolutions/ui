@@ -38,22 +38,119 @@ export function ensureHighlighter(): Promise<Highlighter> {
   return creating;
 }
 
+/**
+ * Grammar loaders, one LITERAL dynamic import per language we highlight. shiki's
+ * own `loadLanguage('<id>')` resolves a grammar through its internal
+ * `bundledLanguages[id]()` map keyed on a COMPUTED id — which a bundler's static
+ * scanner cannot follow. Under Vite that means a grammar is discovered only at
+ * first highlight, which forces an on-demand dep re-optimization; the already
+ * loaded shiki chunk then imports the grammar with a now-stale `?v=` hash, the
+ * request 504s ("Outdated Optimize Dep"), shiki swallows it, and the file is
+ * left unhighlighted with no error. Importing each grammar by a LITERAL
+ * specifier here makes the dependency statically analyzable, so every bundler
+ * pre-bundles it deterministically — no runtime discovery, no hash drift. A
+ * language absent from this map degrades to plain text. The set mirrors the
+ * file router's `EXTENSION_TO_LANGUAGE` (file-content-router) plus Markdown.
+ */
+const LANG_LOADERS: Record<string, () => Promise<{ default: unknown }>> = {
+  markdown: () => import('@shikijs/langs/markdown'),
+  json: () => import('@shikijs/langs/json'),
+  yaml: () => import('@shikijs/langs/yaml'),
+  toml: () => import('@shikijs/langs/toml'),
+  ini: () => import('@shikijs/langs/ini'),
+  xml: () => import('@shikijs/langs/xml'),
+  html: () => import('@shikijs/langs/html'),
+  css: () => import('@shikijs/langs/css'),
+  scss: () => import('@shikijs/langs/scss'),
+  less: () => import('@shikijs/langs/less'),
+  javascript: () => import('@shikijs/langs/javascript'),
+  typescript: () => import('@shikijs/langs/typescript'),
+  jsx: () => import('@shikijs/langs/jsx'),
+  tsx: () => import('@shikijs/langs/tsx'),
+  python: () => import('@shikijs/langs/python'),
+  shellscript: () => import('@shikijs/langs/shellscript'),
+  sql: () => import('@shikijs/langs/sql'),
+  dockerfile: () => import('@shikijs/langs/dockerfile'),
+  go: () => import('@shikijs/langs/go'),
+  rust: () => import('@shikijs/langs/rust'),
+  java: () => import('@shikijs/langs/java'),
+  kotlin: () => import('@shikijs/langs/kotlin'),
+  swift: () => import('@shikijs/langs/swift'),
+  c: () => import('@shikijs/langs/c'),
+  cpp: () => import('@shikijs/langs/cpp'),
+  csharp: () => import('@shikijs/langs/csharp'),
+  php: () => import('@shikijs/langs/php'),
+  ruby: () => import('@shikijs/langs/ruby'),
+  lua: () => import('@shikijs/langs/lua'),
+};
+
+/**
+ * Common shiki language aliases → the canonical id in {@link LANG_LOADERS}.
+ * The editor passes canonical ids (the file router's `EXTENSION_TO_LANGUAGE`),
+ * but a Markdown code fence (chat `CodeBlock`) carries whatever the author typed
+ * — `js`, `ts`, `py`, `sh`, ```` ```bash ````, … — so those must map back to the
+ * one grammar we load.
+ */
+const LANG_ALIASES: Record<string, string> = {
+  js: 'javascript',
+  mjs: 'javascript',
+  cjs: 'javascript',
+  ts: 'typescript',
+  mts: 'typescript',
+  cts: 'typescript',
+  py: 'python',
+  rb: 'ruby',
+  rs: 'rust',
+  kt: 'kotlin',
+  cs: 'csharp',
+  'c++': 'cpp',
+  sh: 'shellscript',
+  shell: 'shellscript',
+  bash: 'shellscript',
+  zsh: 'shellscript',
+  console: 'shellscript',
+  yml: 'yaml',
+  md: 'markdown',
+  htm: 'html',
+};
+
+/**
+ * Canonical grammar id for a (possibly aliased) language, or `undefined` when no
+ * grammar is bundled for it — the signal to render plain text.
+ */
+export function resolveLanguage(lang: string): string | undefined {
+  const id = LANG_ALIASES[lang] ?? lang;
+  return id in LANG_LOADERS ? id : undefined;
+}
+
 // Lazy per-language load (the full grammar bundle is ~10MB — never load it all).
-// A failed load (unknown id) still resolves; `loadingLangs.has` then stays the
-// loop guard so an unknown language degrades to plain text, not an infinite
-// re-highlight.
+// `lang` may be an alias; we key the in-flight guard by the CANONICAL id so two
+// aliases of one grammar share a single load. A failed or unsupported load still
+// resolves so the language degrades to plain text, not an infinite re-highlight.
 export function ensureLanguage(lang: string): Promise<void> {
-  const existing = loadingLangs.get(lang);
+  const canonical = resolveLanguage(lang);
+  const key = canonical ?? lang;
+  const existing = loadingLangs.get(key);
   if (existing) return existing;
+  // No grammar for this id → cache a settled no-op so the caller stops retrying.
+  if (!canonical) {
+    const noop = Promise.resolve();
+    loadingLangs.set(key, noop);
+    return noop;
+  }
   const p = ensureHighlighter()
     .then((h) =>
-      h.getLoadedLanguages().includes(lang)
+      h.getLoadedLanguages().includes(canonical)
         ? undefined
-        : h.loadLanguage(lang as Parameters<Highlighter['loadLanguage']>[0]),
+        : LANG_LOADERS[canonical]().then((mod) =>
+            h.loadLanguage(
+              mod.default as Parameters<Highlighter['loadLanguage']>[0],
+            ),
+          ),
     )
     .then(() => undefined)
     .catch(() => undefined);
-  loadingLangs.set(lang, p);
+  loadingLangs.set(key, p);
   return p;
 }
 
@@ -160,18 +257,18 @@ export async function highlightToLines(
   code: string,
   language: string,
 ): Promise<HighlightLine[] | null> {
-  const lang = language.trim();
-  if (!lang) return null;
-  await ensureLanguage(lang);
+  const canonical = resolveLanguage(language.trim());
+  if (!canonical) return null;
+  await ensureLanguage(canonical);
   const h = highlighter;
-  if (!h || !h.getLoadedLanguages().includes(lang)) return null;
+  if (!h || !h.getLoadedLanguages().includes(canonical)) return null;
 
   let tokens: ThemedToken[][];
   try {
     tokens = h.codeToTokens(code, {
-      // `lang` is a runtime-validated id (loaded above); the bundled signature
-      // narrows to known ids, so widen our checked string to it.
-      lang: lang as Parameters<Highlighter['codeToTokens']>[1]['lang'],
+      // `canonical` is loaded above; the bundled signature narrows to known ids,
+      // so widen our checked string to it.
+      lang: canonical as Parameters<Highlighter['codeToTokens']>[1]['lang'],
       theme: SHIKI_THEME_NAME,
     }).tokens;
   } catch {

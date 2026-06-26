@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { highlightToLines, styleObjectForToken } from './shiki';
+import {
+  highlightToLines,
+  resolveLanguage,
+  styleObjectForToken,
+} from './shiki';
 
 describe('styleObjectForToken', () => {
   it('emits the color when present', () => {
@@ -29,7 +33,42 @@ describe('styleObjectForToken', () => {
   });
 });
 
+describe('resolveLanguage', () => {
+  it('passes through a canonical, bundled id', () => {
+    expect(resolveLanguage('markdown')).toBe('markdown');
+    expect(resolveLanguage('typescript')).toBe('typescript');
+    expect(resolveLanguage('shellscript')).toBe('shellscript');
+  });
+
+  it('maps common Markdown-fence aliases to their canonical grammar', () => {
+    expect(resolveLanguage('js')).toBe('javascript');
+    expect(resolveLanguage('ts')).toBe('typescript');
+    expect(resolveLanguage('py')).toBe('python');
+    expect(resolveLanguage('bash')).toBe('shellscript');
+    expect(resolveLanguage('yml')).toBe('yaml');
+    expect(resolveLanguage('md')).toBe('markdown');
+  });
+
+  it('returns undefined for a language we ship no grammar for', () => {
+    expect(resolveLanguage('definitely-not-a-language')).toBeUndefined();
+    expect(resolveLanguage('plaintext')).toBeUndefined();
+  });
+});
+
 describe('highlightToLines', () => {
+  // SKILL.md is the workspace's primary file; markdown must highlight.
+  it('highlights Markdown with the brand palette (the SKILL.md path)', async () => {
+    const lines = await highlightToLines('# Heading\n\n- item', 'markdown');
+    expect(lines).not.toBeNull();
+    const colors = (lines ?? [])
+      .flat()
+      .map((t) => t.style?.color)
+      .filter((c): c is string => Boolean(c));
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c.startsWith('var(--code-'))).toBe(true);
+  }, 20000);
+
+
   it('returns null for an empty or whitespace language', async () => {
     expect(await highlightToLines('x', '')).toBeNull();
     expect(await highlightToLines('x', '   ')).toBeNull();

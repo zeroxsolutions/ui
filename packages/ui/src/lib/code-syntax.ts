@@ -20,6 +20,7 @@ import {
   getLoadedHighlighter,
   highlighterPending,
   languagePending,
+  resolveLanguage,
   SHIKI_THEME_NAME,
   tokensToRanges,
 } from './shiki';
@@ -61,6 +62,12 @@ function buildDecorations(view: EditorView): DecorationSet {
   const lang = view.state.facet(syntaxLanguage);
   if (!lang) return Decoration.none;
 
+  // Normalize aliases (`js` → `javascript`) and drop unsupported languages to
+  // plain text. Everything below keys off the canonical id so the loaded-set
+  // check, the in-flight guard, and `codeToTokens` always agree.
+  const canonical = resolveLanguage(lang);
+  if (!canonical) return Decoration.none;
+
   const h = getLoadedHighlighter();
   if (!h) {
     const firstKick = !highlighterPending();
@@ -69,9 +76,9 @@ function buildDecorations(view: EditorView): DecorationSet {
     return Decoration.none;
   }
 
-  if (!h.getLoadedLanguages().includes(lang)) {
-    if (!languagePending(lang)) {
-      ensureLanguage(lang).then(() => requestRehighlight(view));
+  if (!h.getLoadedLanguages().includes(canonical)) {
+    if (!languagePending(canonical)) {
+      ensureLanguage(canonical).then(() => requestRehighlight(view));
     }
     return Decoration.none;
   }
@@ -79,9 +86,9 @@ function buildDecorations(view: EditorView): DecorationSet {
   let tokens: ThemedToken[][];
   try {
     tokens = h.codeToTokens(view.state.doc.toString(), {
-      // `lang` is a runtime-validated id (loaded above); the bundled signature
-      // narrows to known ids, so widen our checked string to it.
-      lang: lang as Parameters<Highlighter['codeToTokens']>[1]['lang'],
+      // `canonical` is loaded above; the bundled signature narrows to known ids,
+      // so widen our checked string to it.
+      lang: canonical as Parameters<Highlighter['codeToTokens']>[1]['lang'],
       theme: SHIKI_THEME_NAME,
     }).tokens;
   } catch {
