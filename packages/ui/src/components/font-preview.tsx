@@ -44,7 +44,7 @@ export function FontPreview({
   ...props
 }: FontPreviewProps) {
   const id = React.useId();
-  const family = `chisel-font-${id.replace(/[^a-zA-Z0-9]/g, '')}`;
+  const family = `font-${id.replace(/[^a-zA-Z0-9]/g, '')}`;
   const fmt = format ?? formatOf(src);
   const specimen = children ?? 'The quick brown fox jumps over the lazy dog';
   const css = `@font-face { font-family: '${family}'; src: url("${src}")${

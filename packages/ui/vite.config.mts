@@ -90,7 +90,7 @@ export default defineConfig(() => ({
     {
       // Ship raw CSS the build doesn't bundle: `styles.css` (the standalone
       // theme/tokens) and `source.css` (Tailwind `@source` registration).
-      name: 'chisel-copy-styles',
+      name: 'copy-styles',
       closeBundle() {
         for (const file of ['styles.css', 'source.css']) {
           copyFileSync(

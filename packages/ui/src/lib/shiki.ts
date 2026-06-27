@@ -6,7 +6,7 @@ import { CODE_THEME_NAME, codeTheme } from './code-theme';
 
 /**
  * Framework-agnostic Shiki core — the single highlighter instance, lazy grammar
- * loading, and the brand syntax theme, with NO CodeMirror imports so a static
+ * loading, and the syntax theme, with NO CodeMirror imports so a static
  * `<pre>` (the chat `CodeBlock`) can highlight without dragging the editor into
  * its bundle. The CodeMirror bridge ({@link file://./code-syntax.ts}) and the
  * static renderer both consume this module, sharing one highlighter + one
@@ -14,7 +14,7 @@ import { CODE_THEME_NAME, codeTheme } from './code-theme';
  *
  * The theme is {@link codeTheme} — a hand-authored TextMate theme whose token
  * colors are `var(--code-*)` design tokens (defined in `styles.css`), so the
- * palette is brand-linked and flips light/dark for free.
+ * palette is token-linked and flips light/dark for free.
  */
 
 /** Name of the registered syntax theme; passed to `codeToTokens`. */

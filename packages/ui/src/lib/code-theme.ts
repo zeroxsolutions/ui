@@ -1,10 +1,10 @@
 import type { ThemeRegistrationRaw } from 'shiki';
 
 /**
- * The Chisel brand syntax theme — a hand-authored Shiki TextMate theme whose
+ * A hand-authored Shiki TextMate theme whose
  * token colors are `var(--code-*)` references, NOT concrete hex. The actual hues
  * live in the design-token layer (`styles.css`, `:root` + `.dark`), derived from
- * base-vega's chromatic family, so the palette is brand-linked AND flips
+ * base-vega's chromatic family, so the palette is token-linked AND flips
  * light/dark for free — the same CSS var resolves to a different OKLch value
  * under `.dark`, no Shiki dual-theme plumbing required.
  *
@@ -18,7 +18,7 @@ import type { ThemeRegistrationRaw } from 'shiki';
  */
 
 /** Registered theme name; passed as `theme` to `codeToTokens`. */
-export const CODE_THEME_NAME = 'chisel-code';
+export const CODE_THEME_NAME = 'ui-code';
 
 /** The `--code-*` CSS variables the theme references (must exist in `styles.css`). */
 export const CODE_TOKEN_VARS = [

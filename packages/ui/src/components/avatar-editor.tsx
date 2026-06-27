@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Loader2,
   Palette,
@@ -7,6 +6,7 @@ import {
   Upload,
   type LucideIcon,
 } from 'lucide-react';
+import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,12 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { EmojiPicker } from './emoji-picker';
 
@@ -70,14 +65,6 @@ export interface AvatarEditorProps {
   children?: React.ReactNode;
 }
 
-/**
- * Chisel's agent/profile **avatar editor** — a popover opened from the avatar
- * tile, modelled on LobeHub. Compound + context: the Root holds the value and
- * the setters; the parts read them. The consumer composes which tabs exist by
- * including the tab parts (`AvatarEditorEmoji` / `Upload` / `Color`) and owns all
- * visible copy via each part's `children`. Picking an emoji or image is mutually
- * exclusive; Remove clears both.
- */
 export function AvatarEditor({
   value,
   onValueChange,
@@ -95,7 +82,11 @@ export function AvatarEditor({
   };
   return (
     <AvatarEditorContext.Provider value={ctx}>
-      <Popover open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
+      <Popover
+        open={open}
+        defaultOpen={defaultOpen}
+        onOpenChange={onOpenChange}
+      >
         {children}
       </Popover>
     </AvatarEditorContext.Provider>
@@ -292,8 +283,18 @@ export function AvatarEditorUpload({
 
 /** A distinct, evenly-spread default palette for avatar tiles. */
 const DEFAULT_COLORS = [
-  '#6366f1', '#8b5cf6', '#a855f7', '#ec4899', '#ef4444', '#f97316',
-  '#f59e0b', '#84cc16', '#10b981', '#14b8a6', '#0ea5e9', '#3b82f6',
+  '#6366f1',
+  '#8b5cf6',
+  '#a855f7',
+  '#ec4899',
+  '#ef4444',
+  '#f97316',
+  '#f59e0b',
+  '#84cc16',
+  '#10b981',
+  '#14b8a6',
+  '#0ea5e9',
+  '#3b82f6',
 ];
 
 export interface AvatarEditorColorProps
