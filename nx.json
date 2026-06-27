@@ -91,7 +91,7 @@
   "release": {
     "projectsRelationship": "independent",
     "version": {
-      "conventionalCommits": true
+      "fallbackCurrentVersionResolver": "disk"
     },
     "changelog": {
       "git": {
