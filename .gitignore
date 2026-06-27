@@ -49,3 +49,7 @@ vite.config.*.timestamp*
 vitest.config.*.timestamp*
 
 storybook-static
+
+# Next.js
+.next
+out
