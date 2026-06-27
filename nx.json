@@ -93,11 +93,12 @@
     "version": {
       "fallbackCurrentVersionResolver": "disk"
     },
+    "git": {
+      "commit": true,
+      "tag": true
+    },
     "changelog": {
-      "git": {
-        "commit": true,
-        "tag": true
-      },
+      "workspaceChangelog": false,
       "projectChangelogs": true
     }
   },
