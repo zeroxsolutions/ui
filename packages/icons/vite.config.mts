@@ -87,7 +87,7 @@ export default defineConfig(() => ({
       entry: entries,
       formats: ['es' as const],
     },
-    rollupOptions: {
+    rolldownOptions: {
       external,
       output: {
         entryFileNames: '[name].js',
