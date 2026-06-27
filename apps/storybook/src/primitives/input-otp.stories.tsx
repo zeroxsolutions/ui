@@ -8,6 +8,14 @@ import {
   InputOTPSlot,
 } from '@zeroxsolutions/ui/input-otp';
 
+/**
+ * `InputOTP` is a segmented one-time-passcode field built on the `input-otp`
+ * library: a single hidden input drives a row of individual character slots,
+ * with an animated caret marking the active slot. Compose `InputOTPSlot`s
+ * inside `InputOTPGroup`s, size the field via `maxLength`, and optionally split
+ * groups with an `InputOTPSeparator`. Use it for short verification or
+ * confirmation codes.
+ */
 const meta: Meta<typeof InputOTP> = {
   title: 'Primitives/InputOTP',
   component: InputOTP,
@@ -16,6 +24,7 @@ export default meta;
 
 type Story = StoryObj<typeof InputOTP>;
 
+/** Single six-slot group bound to local state via `value` / `onChange`. */
 export const Default: Story = {
   render: () => {
     const [value, setValue] = useState('');
@@ -34,6 +43,7 @@ export const Default: Story = {
   },
 };
 
+/** Six slots split into two three-slot groups divided by an `InputOTPSeparator`. */
 export const WithSeparator: Story = {
   render: () => {
     const [value, setValue] = useState('');

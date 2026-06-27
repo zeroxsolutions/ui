@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Container } from '@zeroxsolutions/ui/container';
 
+/**
+ * `Container` is the centred, max-width content column for a full-width surface,
+ * keeping content from stretching edge-to-edge on wide screens. Pick the width by
+ * name with `size` (`sm` / `md` / `lg` / `full`) rather than hardcoding a
+ * `max-w-*`; `className` carries the surface's own padding and vertical rhythm.
+ */
 const meta: Meta<typeof Container> = {
   title: 'Layouts/Container',
   component: Container,

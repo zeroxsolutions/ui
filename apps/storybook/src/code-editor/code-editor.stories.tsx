@@ -51,6 +51,13 @@ const FOLDERS = [
 ];
 const ROOT_FILES = ['SKILL.md'];
 
+/**
+ * `CodeEditor` is the headless root for a multi-file code editor: it holds the
+ * open files and the active selection in React context and leaves the layout to
+ * the consumer, who assembles a `FileTree`, a `CodeEditorContent` pane, and a
+ * `CommandSwitcher` against that shared state. It owns no persistence or dirty
+ * tracking — the consumer holds the files and reacts to `onFileTextChange`.
+ */
 const meta: Meta<typeof CodeEditor> = {
   title: 'Code Editor/CodeEditor',
   component: CodeEditor,
@@ -59,6 +66,11 @@ export default meta;
 
 type Story = StoryObj<typeof CodeEditor>;
 
+/**
+ * A full workspace wiring: a file tree, the routed content pane, and a ⌘K command
+ * switcher all bound to one active-path selection, with edits flowing back through
+ * `onFileTextChange`.
+ */
 export const Workspace: Story = {
   render: () => {
     const [files, setFiles] = React.useState(INITIAL);

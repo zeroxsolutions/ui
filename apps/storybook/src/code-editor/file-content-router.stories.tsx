@@ -33,6 +33,15 @@ const FILES: RoutedFile[] = [
   { path: 'data/model.bin', view: 'binary' },
 ];
 
+/**
+ * `FileContentRouter` picks the right viewer for an already-classified
+ * `RoutedFile`, switching on its `view` discriminant: code to an editor pane,
+ * markdown to a rendered preview, images and fonts to their previews, and
+ * everything else to a binary fallback card. It carries no app knowledge and
+ * fills the space it is given, so the stories supply a fixed-size frame and a set
+ * of sample files. Use it as the content area of a file browser once upstream
+ * code has decided how each file should be shown.
+ */
 const meta: Meta<typeof FileContentRouter> = {
   title: 'Code Editor/FileContentRouter',
   component: FileContentRouter,
@@ -41,6 +50,10 @@ export default meta;
 
 type Story = StoryObj<typeof FileContentRouter>;
 
+/**
+ * Routes one sample file per `view` kind — code, markdown, image, font, and
+ * binary — switched live via the path buttons to show each viewer in turn.
+ */
 export const ByType: Story = {
   render: () => {
     const [active, setActive] = React.useState(0);

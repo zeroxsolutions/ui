@@ -13,6 +13,14 @@ import {
 import { Input } from '@zeroxsolutions/ui/input';
 import { Textarea } from '@zeroxsolutions/ui/textarea';
 
+/**
+ * `FrontmatterEditor` is a compound editor for frontmatter (YAML metadata): the
+ * Root holds the document and field setters in context, and the consumer
+ * composes one `FrontmatterField` per key with its own label, hint, control, and
+ * validation. It is controlled via `value` + `onValueChange`, with `errors`
+ * supplied by the consumer's own validator. The stories pair it with `Input` and
+ * `Textarea` controls to edit string fields.
+ */
 const meta: Meta<typeof FrontmatterEditor> = {
   title: 'Code Editor/FrontmatterEditor',
   component: FrontmatterEditor,
@@ -21,6 +29,12 @@ export default meta;
 
 type Story = StoryObj<typeof FrontmatterEditor>;
 
+/**
+ * Composes a three-field skill-metadata form (`name`, `description`, `license`)
+ * from `Input` and `Textarea` controls. Validation is the consumer's: the render
+ * computes `errors` (mirroring the skill harness rules) and feeds them to the
+ * Root, which surfaces each message on its field.
+ */
 export const SkillMetadata: Story = {
   render: () => {
     const [value, setValue] = React.useState<FrontmatterValue>({

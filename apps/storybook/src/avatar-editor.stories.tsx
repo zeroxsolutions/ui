@@ -21,20 +21,15 @@ import {
   DialogTrigger,
 } from '@zeroxsolutions/ui/dialog';
 
+/**
+ * A compound popover avatar editor — the Root holds the value; compose
+ * `AvatarEditorTrigger` + `AvatarEditorContent`, and include the tab parts
+ * (Emoji / Upload / Color) you want. The icon strip is built from the parts
+ * present; each part owns its copy via children.
+ */
 const meta: Meta<typeof AvatarEditor> = {
   title: 'Components/AvatarEditor',
   component: AvatarEditor,
-  parameters: {
-    docs: {
-      description: {
-        component:
-          'LobeHub-style avatar editor — a compound popover. The Root holds the ' +
-          'value; compose AvatarEditorTrigger + AvatarEditorContent, and include ' +
-          'the tab parts (Emoji / Upload / Color) you want. The icon strip is ' +
-          'built from the parts present; each part owns its copy via children.',
-      },
-    },
-  },
 };
 export default meta;
 
@@ -59,6 +54,8 @@ function AvatarTile({ value }: { value: AvatarValue }) {
   );
 }
 
+/** The full editor: all three tab parts (Emoji / Upload / Color), seeded with an
+ * emoji and color so the trigger tile shows a glyph. */
 export const Default: Story = {
   render: () => {
     const [value, setValue] = useState<AvatarValue>({
@@ -81,6 +78,8 @@ export const Default: Story = {
   },
 };
 
+/** The empty starting state: no emoji or image, only a color — the trigger tile
+ * falls back to its placeholder glyph until a part sets a value. */
 export const EmptyDefault: Story = {
   render: () => {
     const [value, setValue] = useState<AvatarValue>({

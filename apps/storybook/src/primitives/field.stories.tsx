@@ -12,6 +12,14 @@ import {
 } from '@zeroxsolutions/ui/field';
 import { Input } from '@zeroxsolutions/ui/input';
 
+/**
+ * `Field` is a composition of layout primitives for building accessible form
+ * rows: it pairs a `FieldLabel` and control with optional `FieldDescription`
+ * and `FieldError` text, and supports vertical, horizontal, or responsive
+ * orientation. `FieldSet`, `FieldLegend`, `FieldGroup`, and `FieldSeparator`
+ * group related fields, while `data-invalid` propagates error styling down to
+ * the label and content.
+ */
 const meta: Meta<typeof Field> = {
   title: 'Primitives/Field',
   component: Field,
@@ -20,6 +28,7 @@ export default meta;
 
 type Story = StoryObj<typeof Field>;
 
+/** A single vertical field: label, input, and a helper description below it. */
 export const Default: Story = {
   render: () => (
     <Field className="w-80">
@@ -32,6 +41,10 @@ export const Default: Story = {
   ),
 };
 
+/**
+ * Invalid state: `data-invalid` on the field plus `aria-invalid` on the input
+ * trigger destructive styling and render the `FieldError` message.
+ */
 export const WithError: Story = {
   render: () => (
     <Field className="w-80" data-invalid="true">
@@ -42,6 +55,10 @@ export const WithError: Story = {
   ),
 };
 
+/**
+ * Multiple fields grouped under a `FieldLegend` inside a `FieldSet`, with a
+ * `FieldSeparator` dividing the rows within the `FieldGroup`.
+ */
 export const FieldSetGroup: Story = {
   render: () => (
     <FieldSet className="w-80">

@@ -5,6 +5,16 @@ import { useState, type ReactNode } from 'react';
 import { Button } from '@zeroxsolutions/ui/button';
 import { TreeItem } from '@zeroxsolutions/ui/tree-item';
 
+/**
+ * `TreeItem` is one row of a hierarchy tree, the layer above `TreeRow`: it adds a
+ * clickable name button (a leading `icon` plus the name, or an inline-rename
+ * `Input` with Enter-commit / Escape-cancel), an `inlineEnd` slot for badges after
+ * the name, a `trailing` slot for hover actions, and optional `contextMenuContent`
+ * that wraps the row in a right-click context menu. Use it to build layer trees,
+ * scene outliners, or file trees; selection/hover colour and row height stay
+ * caller-owned via `className`, and `onActivate` receives the raw event so callers
+ * can read shift/meta keys.
+ */
 const meta: Meta<typeof TreeItem> = {
   title: 'Components/TreeItem',
   component: TreeItem,

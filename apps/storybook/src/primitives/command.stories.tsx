@@ -19,6 +19,13 @@ import {
   UserIcon,
 } from 'lucide-react';
 
+/**
+ * `Command` is a searchable command menu built on the `cmdk` primitive: a text
+ * input that filters a list of grouped, keyboard-navigable items. Use it for
+ * command palettes and quick-action menus, optionally grouping entries with
+ * headings and separators and annotating them with trailing `CommandShortcut`
+ * hints.
+ */
 const meta: Meta<typeof Command> = {
   title: 'Primitives/Command',
   component: Command,
@@ -27,6 +34,11 @@ export default meta;
 
 type Story = StoryObj<typeof Command>;
 
+/**
+ * Demonstrates an inline command menu with two labeled groups separated by a
+ * divider, icon-prefixed items, and keyboard-shortcut hints on the settings
+ * actions.
+ */
 export const Default: Story = {
   render: () => (
     <Command className="w-80 ring-1 ring-foreground/10">

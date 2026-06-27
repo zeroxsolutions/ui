@@ -7,6 +7,13 @@ import {
   CollapsibleTrigger,
 } from '@zeroxsolutions/ui/collapsible';
 
+/**
+ * `Collapsible` is a Base UI disclosure that shows or hides a content panel in
+ * response to its trigger, animating the panel height between open and closed.
+ * Compose `CollapsibleTrigger` (rendered here as a `Button`) with
+ * `CollapsibleContent` to wrap the toggleable region. Use it for optional or
+ * secondary content that should stay collapsed until the user expands it.
+ */
 const meta: Meta<typeof Collapsible> = {
   title: 'Primitives/Collapsible',
   component: Collapsible,
@@ -15,6 +22,7 @@ export default meta;
 
 type Story = StoryObj<typeof Collapsible>;
 
+/** Closed by default; activating the trigger reveals the animated content panel. */
 export const Default: Story = {
   render: () => (
     <Collapsible className="w-72">
@@ -31,6 +39,7 @@ export const Default: Story = {
   ),
 };
 
+/** Starts expanded via `defaultOpen`, showing a stacked list of panel items on load. */
 export const DefaultOpen: Story = {
   render: () => (
     <Collapsible defaultOpen className="w-72">

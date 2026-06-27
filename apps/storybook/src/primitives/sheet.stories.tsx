@@ -12,6 +12,13 @@ import {
   SheetTrigger,
 } from '@zeroxsolutions/ui/sheet';
 
+/**
+ * `Sheet` is a Base UI Dialog rendered as a panel that slides in from a screen
+ * edge over a backdrop. Use it for transient, focused tasks—editing, navigation,
+ * or details—without leaving the current page. It composes a trigger, header
+ * (title and description), body, and footer; the `side` prop selects which edge
+ * the panel enters from.
+ */
 const meta: Meta<typeof Sheet> = {
   title: 'Primitives/Sheet',
   component: Sheet,
@@ -20,6 +27,7 @@ export default meta;
 
 type Story = StoryObj<typeof Sheet>;
 
+/** Default panel sliding in from the right edge, with a titled header and a footer save action. */
 export const Default: Story = {
   render: () => (
     <Sheet>
@@ -39,6 +47,7 @@ export const Default: Story = {
   ),
 };
 
+/** `side="left"` makes the panel slide in from the left edge for navigation-style content. */
 export const LeftSide: Story = {
   render: () => (
     <Sheet>

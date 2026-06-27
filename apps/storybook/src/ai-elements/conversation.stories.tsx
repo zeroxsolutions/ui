@@ -28,6 +28,15 @@ function Bubble({
   );
 }
 
+/**
+ * `Conversation` is a chat scroll surface: a Base UI `ScrollArea` with a styled
+ * overlay scrollbar, auto-pin-to-bottom while streaming, and a floating
+ * jump-to-bottom button. It fills any bounded parent via `h-full`, so every story
+ * wraps it in a fixed-size box to make the scroll behaviour observable.
+ * `ConversationContent` supplies the inner padding and the flex-column gap between
+ * messages; `ConversationScrollButton` reveals its arrow only once the user has
+ * scrolled away from the bottom.
+ */
 const meta: Meta<typeof Conversation> = {
   title: 'AI Elements/Conversation',
   component: Conversation,
@@ -45,6 +54,10 @@ export default meta;
 
 type Story = StoryObj<typeof Conversation>;
 
+/**
+ * Twelve alternating bubbles overflow the bounded box, exercising the scroll
+ * surface and the inter-message gap that `ConversationContent`'s flex column adds.
+ */
 export const Default: Story = {
   render: () => (
     <Conversation>

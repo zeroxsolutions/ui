@@ -6,6 +6,13 @@ import {
   HoverCardTrigger,
 } from '@zeroxsolutions/ui/hover-card';
 
+/**
+ * `HoverCard` is a floating preview surface built on Base UI's PreviewCard
+ * primitive: hovering or focusing the trigger opens a portalled, positioned
+ * popup after a short delay. Use it for supplementary, sighted-only context
+ * such as user or entity previews, where the content is non-essential rather
+ * than required to complete a task.
+ */
 const meta: Meta<typeof HoverCard> = {
   title: 'Primitives/HoverCard',
   component: HoverCard,
@@ -14,6 +21,7 @@ export default meta;
 
 type Story = StoryObj<typeof HoverCard>;
 
+/** Baseline preview card: an underlined text trigger reveals a portalled popup with summary details on hover. */
 export const Default: Story = {
   render: () => (
     <HoverCard>

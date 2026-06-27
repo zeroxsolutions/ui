@@ -17,6 +17,12 @@ import {
   ContextMenuTrigger,
 } from '@zeroxsolutions/ui/context-menu';
 
+/**
+ * `ContextMenu` is a right-click (long-press) menu built on Base UI's
+ * context-menu primitive. A `ContextMenuTrigger` wraps the target region and
+ * opens a positioned popup of items that supports keyboard-shortcut hints, a
+ * `destructive` variant, checkbox and radio selections, and nested submenus.
+ */
 const meta: Meta<typeof ContextMenu> = {
   title: 'Primitives/ContextMenu',
   component: ContextMenu,
@@ -25,6 +31,10 @@ export default meta;
 
 type Story = StoryObj<typeof ContextMenu>;
 
+/**
+ * Demonstrates the baseline menu: plain action items with keyboard-shortcut
+ * hints, a separator, and a `destructive`-variant Delete entry.
+ */
 export const Default: Story = {
   render: () => (
     <ContextMenu>
@@ -51,6 +61,10 @@ export const Default: Story = {
   ),
 };
 
+/**
+ * Demonstrates richer structure: labeled groups of checkbox items, a radio
+ * group for single-choice density, and a nested submenu via `ContextMenuSub`.
+ */
 export const WithGroupsAndSubmenu: Story = {
   render: () => (
     <ContextMenu>

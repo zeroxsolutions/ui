@@ -4,6 +4,12 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Section } from '@zeroxsolutions/ui/section';
 
+/**
+ * `Section` is a titled panel block with an optional count badge and a trailing
+ * add button, used to group related controls or rows inside an inspector panel.
+ * Pass `onToggle` to make the header a collapsible disclosure and `onAdd` to
+ * surface the add action; a `Separator` is rendered beneath every section.
+ */
 const meta: Meta<typeof Section> = {
   title: 'Layouts/Section',
   component: Section,
@@ -12,6 +18,7 @@ export default meta;
 
 type Story = StoryObj<typeof Section>;
 
+/** Collapsible mode — `open` + `onToggle` turn the header into a disclosure with a count badge and an add button. */
 export const Collapsible: Story = {
   render: () => {
     const [open, setOpen] = useState(true);
@@ -36,6 +43,7 @@ export const Collapsible: Story = {
   },
 };
 
+/** Static mode — without `onToggle` the header is a plain label and the content is always shown. */
 export const Static: Story = {
   render: () => (
     <div className="w-72 rounded-md bg-card ring-1 ring-foreground/10">

@@ -12,6 +12,13 @@ import {
   DrawerTrigger,
 } from '@zeroxsolutions/ui/drawer';
 
+/**
+ * `Drawer` is a modal panel built on the `vaul` primitive that slides in from a
+ * screen edge and traps focus while open. Compose it from `DrawerTrigger`,
+ * `DrawerContent` (portaled over a dimming overlay), and the header/footer
+ * slots; the `direction` prop selects which edge it enters from, and the bottom
+ * variant exposes a drag handle for swipe-to-dismiss.
+ */
 const meta: Meta<typeof Drawer> = {
   title: 'Primitives/Drawer',
   component: Drawer,
@@ -20,6 +27,11 @@ export default meta;
 
 type Story = StoryObj<typeof Drawer>;
 
+/**
+ * Default bottom-edge drawer with a title, description, body copy, and
+ * confirm / cancel footer actions; shows the drag handle and swipe-to-dismiss
+ * affordance.
+ */
 export const Default: Story = {
   render: () => (
     <Drawer>
@@ -47,6 +59,10 @@ export const Default: Story = {
   ),
 };
 
+/**
+ * Side-panel layout using `direction="right"`, anchoring the drawer to the
+ * right edge as a filter sheet instead of the default bottom sheet.
+ */
 export const RightSide: Story = {
   render: () => (
     <Drawer direction="right">

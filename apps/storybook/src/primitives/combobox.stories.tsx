@@ -9,6 +9,13 @@ import {
   ComboboxList,
 } from '@zeroxsolutions/ui/combobox';
 
+/**
+ * `Combobox` is a filterable select built on Base UI's combobox primitive: a
+ * text input that opens a popup list whose options narrow as the user types.
+ * Items may be plain strings or objects mapped to display text via
+ * `itemToStringLabel`, and the `ComboboxEmpty` slot renders when no option
+ * matches the current query.
+ */
 const meta: Meta<typeof Combobox> = {
   title: 'Primitives/Combobox',
   component: Combobox,
@@ -28,6 +35,10 @@ const fruits = [
   'Strawberry',
 ];
 
+/**
+ * Demonstrates the simplest setup: an array of plain strings as items, with
+ * type-to-filter selection and an empty state when nothing matches.
+ */
 export const Default: Story = {
   render: () => (
     <Combobox items={fruits}>
@@ -55,6 +66,10 @@ const frameworks: Framework[] = [
   { value: 'vite', label: 'Vite' },
 ];
 
+/**
+ * Demonstrates object-shaped items whose display text is derived via
+ * `itemToStringLabel`, so each option can carry a separate `value` and `label`.
+ */
 export const Objects: Story = {
   render: () => (
     <Combobox

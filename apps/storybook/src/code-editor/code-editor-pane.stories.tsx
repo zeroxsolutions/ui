@@ -9,8 +9,8 @@ const TS_SAMPLE = `import { createHighlighter } from 'shiki';
 
 // Tokenize once, decorate the document.
 export async function highlight(code: string, lang: string) {
-  const hl = await createHighlighter({ themes: ['chisel-vars'], langs: [lang] });
-  return hl.codeToTokens(code, { lang, theme: 'chisel-vars' });
+  const hl = await createHighlighter({ themes: ['github-dark'], langs: [lang] });
+  return hl.codeToTokens(code, { lang, theme: 'github-dark' });
 }
 
 const answer = 42;
@@ -30,6 +30,13 @@ if __name__ == "__main__":
     print(load_skill("manifest.json"))
 `;
 
+/**
+ * `CodeEditorPane` is a single text-editing surface built on CodeMirror 6 with
+ * Shiki syntax highlighting. It behaves as a controlled or uncontrolled textbox
+ * (`value` / `defaultValue` / `onValueChange`), while `language`, `readOnly`, and
+ * `wrap` reconfigure the live editor without remounting. The editor fills the
+ * height it is given, so each story sizes the wrapper element.
+ */
 const meta: Meta<typeof CodeEditorPane> = {
   title: 'Code Editor/CodeEditorPane',
   component: CodeEditorPane,
@@ -38,6 +45,7 @@ export default meta;
 
 type Story = StoryObj<typeof CodeEditorPane>;
 
+/** A TypeScript document highlighted live, driven by controlled `value` state. */
 export const TypeScript: Story = {
   render: () => {
     const [value, setValue] = React.useState(TS_SAMPLE);
@@ -53,6 +61,7 @@ export const TypeScript: Story = {
   },
 };
 
+/** The same surface highlighting a Python document, showing the `language` swap. */
 export const Python: Story = {
   render: () => {
     const [value, setValue] = React.useState(PY_SAMPLE);
@@ -68,6 +77,10 @@ export const Python: Story = {
   },
 };
 
+/**
+ * Toggles the `readOnly` and `wrap` props live against a JSON document; the long
+ * single line contrasts soft-wrapping with horizontal scrolling.
+ */
 export const ReadOnlyAndWrap: Story = {
   render: () => {
     const [readOnly, setReadOnly] = React.useState(true);

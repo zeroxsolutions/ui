@@ -10,6 +10,13 @@ import {
   TableRow,
 } from '@zeroxsolutions/ui/table';
 
+/**
+ * `Table` and its sub-components (`TableHeader`, `TableBody`, `TableRow`,
+ * `TableHead`, `TableCell`, `TableCaption`) are styled wrappers over native HTML
+ * table elements, rendered inside a horizontally scrollable container. Compose
+ * them to lay out tabular data with consistent spacing, borders, and row hover
+ * states.
+ */
 const meta: Meta<typeof Table> = {
   title: 'Primitives/Table',
   component: Table,
@@ -25,7 +32,12 @@ const invoices = [
     method: 'Credit Card',
     amount: '$250.00',
   },
-  { invoice: 'INV002', status: 'Pending', method: 'PayPal', amount: '$150.00' },
+  {
+    invoice: 'INV002',
+    status: 'Pending',
+    method: 'Wire transfer',
+    amount: '$150.00',
+  },
   {
     invoice: 'INV003',
     status: 'Unpaid',
@@ -34,6 +46,7 @@ const invoices = [
   },
 ];
 
+/** A basic invoice table composing the caption, header, body, rows, and cells. */
 export const Default: Story = {
   render: () => (
     <Table>

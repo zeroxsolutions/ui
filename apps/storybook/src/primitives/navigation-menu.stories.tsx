@@ -9,6 +9,13 @@ import {
   NavigationMenuTrigger,
 } from '@zeroxsolutions/ui/navigation-menu';
 
+/**
+ * `NavigationMenu` is a Base UI menu bar for primary site navigation: triggers
+ * open positioned popover panels of links, while standalone items render as
+ * direct links. Compose `NavigationMenuList`, `NavigationMenuItem`,
+ * `NavigationMenuTrigger`, `NavigationMenuContent`, and `NavigationMenuLink` to
+ * build the structure; panel content is portaled and animated on open/close.
+ */
 const meta: Meta<typeof NavigationMenu> = {
   title: 'Primitives/NavigationMenu',
   component: NavigationMenu,
@@ -17,6 +24,10 @@ export default meta;
 
 type Story = StoryObj<typeof NavigationMenu>;
 
+/**
+ * Horizontal bar mixing trigger-driven dropdown panels (Products, Resources)
+ * with a single standalone link (Pricing).
+ */
 export const Default: Story = {
   render: () => (
     <NavigationMenu>

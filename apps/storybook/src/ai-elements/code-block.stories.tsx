@@ -31,6 +31,14 @@ def clamp(x: float, lo: float = 0.0, hi: float = 1.0) -> float:
         return 0.0
     return max(lo, min(hi, x))`;
 
+/**
+ * `CodeBlock` renders a monospace `<pre>` with Shiki syntax highlighting and a
+ * copy control. With a `language` it tokenizes the source and shows a header
+ * (file-type icon + language name); highlighting is async and degrades to plain
+ * mono while the grammar loads or for unknown languages. With no language it
+ * stays a borderless plain block whose copy button reveals on hover, and a line
+ * that is too wide scrolls sideways on a thin horizontal rail.
+ */
 const meta: Meta<typeof CodeBlock> = {
   title: 'AI Elements/CodeBlock',
   component: CodeBlock,
@@ -39,17 +47,25 @@ export default meta;
 
 type Story = StoryObj<typeof CodeBlock>;
 
+/**
+ * Highlighted TypeScript: a real language id yields the file-type icon + label
+ * header and a Shiki-tokenized body, painted from the design-token color palette.
+ */
 export const TypeScript: Story = {
   name: 'Highlighted (language header + colors)',
   render: () => (
     <div className="max-w-lg">
       {/* A real language → file-type icon + label header, Shiki-highlighted body
-          painted with the brand `--code-*` palette. */}
+          painted with the `--code-*` palette. */}
       <CodeBlock code={TS_SAMPLE} language="ts" />
     </div>
   ),
 };
 
+/**
+ * The same highlighting path applied to a non-TypeScript grammar (Python),
+ * showing that the header label and tokenizer generalize across languages.
+ */
 export const Python: Story = {
   render: () => (
     <div className="max-w-lg">
@@ -58,6 +74,10 @@ export const Python: Story = {
   ),
 };
 
+/**
+ * JSON highlighting in the narrower container — the structured-output format used
+ * for tool parameter/result panels and JSON disclosures.
+ */
 export const Json: Story = {
   render: () => (
     <div className="max-w-md">
@@ -66,6 +86,10 @@ export const Json: Story = {
   ),
 };
 
+/**
+ * With no `language` the block drops its header and stays plain mono; the copy
+ * button is hidden until hover.
+ */
 export const PlainText: Story = {
   name: 'No language (plain, hover copy)',
   render: () => (
@@ -76,6 +100,10 @@ export const PlainText: Story = {
   ),
 };
 
+/**
+ * A single unbreakable line overflows sideways; the thin horizontal scroll rail
+ * mounts only while the line is too wide to fit the block.
+ */
 export const HorizontalScroll: Story = {
   name: 'Overflowing line (scroll rail)',
   render: () => (

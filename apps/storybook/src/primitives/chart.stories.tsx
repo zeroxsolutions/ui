@@ -10,6 +10,14 @@ import {
   type ChartConfig,
 } from '@zeroxsolutions/ui/chart';
 
+/**
+ * `ChartContainer` wraps a Recharts chart in a themed, responsive container,
+ * injecting per-series CSS color variables from a `ChartConfig` and exposing
+ * that config to descendants through context. Pair it with `ChartTooltip` /
+ * `ChartTooltipContent` and `ChartLegend` / `ChartLegendContent` to render
+ * config-aware tooltips and legends instead of raw Recharts output. Use it
+ * whenever charts must follow design-token colors and the surrounding theme.
+ */
 const meta: Meta<typeof ChartContainer> = {
   title: 'Primitives/Chart',
   component: ChartContainer,
@@ -32,6 +40,7 @@ const config = {
   mobile: { label: 'Mobile', color: 'var(--chart-2)' },
 } satisfies ChartConfig;
 
+/** Single-series bar chart with a config-driven tooltip and no legend. */
 export const Default: Story = {
   render: () => (
     <ChartContainer config={config} className="h-64 w-[480px]">
@@ -45,6 +54,7 @@ export const Default: Story = {
   ),
 };
 
+/** Two series rendered side by side, adding a legend alongside the tooltip. */
 export const Grouped: Story = {
   render: () => (
     <ChartContainer config={config} className="h-64 w-[480px]">

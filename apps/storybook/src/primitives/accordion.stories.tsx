@@ -7,6 +7,13 @@ import {
   AccordionTrigger,
 } from '@zeroxsolutions/ui/accordion';
 
+/**
+ * `Accordion` is a vertically stacked set of expandable disclosure items built on
+ * Base UI accordion primitives, composed from `Accordion`, `AccordionItem`,
+ * `AccordionTrigger`, and `AccordionContent`. Use it to collapse long-form
+ * content into headers that toggle their panels; by default only one panel stays
+ * open, and `multiple` allows several to expand at once.
+ */
 const meta: Meta<typeof Accordion> = {
   title: 'Primitives/Accordion',
   component: Accordion,
@@ -15,15 +22,16 @@ export default meta;
 
 type Story = StoryObj<typeof Accordion>;
 
+/** Single-open default: opening one item collapses the others, with three items. */
 export const Default: Story = {
   render: () => (
     <Accordion className="w-[420px]">
       <AccordionItem value="item-1">
-        <AccordionTrigger>What is Chisel?</AccordionTrigger>
+        <AccordionTrigger>What is this design toolkit?</AccordionTrigger>
         <AccordionContent>
           <p>
-            Chisel is a design and editing toolkit for building cross-platform
-            interfaces with a shared component system.
+            This design toolkit builds cross-platform interfaces with a shared
+            component system.
           </p>
         </AccordionContent>
       </AccordionItem>
@@ -49,6 +57,7 @@ export const Default: Story = {
   ),
 };
 
+/** `multiple` with `defaultValue` so several panels stay expanded simultaneously. */
 export const MultipleOpen: Story = {
   render: () => (
     <Accordion className="w-[420px]" multiple defaultValue={['a', 'b']}>

@@ -19,6 +19,15 @@ import {
 } from '@zeroxsolutions/ui/sidebar-menu-collapsible';
 import { MessageSquareIcon, SlidersHorizontalIcon } from 'lucide-react';
 
+/**
+ * `SidebarMenuCollapsible` is a disclosure section for use inside a
+ * `SidebarMenu`: its trigger renders as a `SidebarMenuButton` with an
+ * auto-rotating chevron, and its content panel holds the nested rows. It renders
+ * as a `SidebarMenuItem` (`<li>`), so it must live within a `SidebarMenu`, and is
+ * driven by the `open` / `onOpenChange` pair (or uncontrolled via `defaultOpen`).
+ * The label and rows come from `children`; indent nested lists with `pl-3.5` and
+ * render any above-list content (such as a search field) before the list.
+ */
 const meta: Meta<typeof SidebarMenuCollapsible> = {
   title: 'Components/SidebarMenuCollapsible',
   component: SidebarMenuCollapsible,

@@ -10,6 +10,13 @@ import {
   BreadcrumbSeparator,
 } from '@zeroxsolutions/ui/breadcrumb';
 
+/**
+ * `Breadcrumb` is a navigation primitive that renders a hierarchical trail
+ * showing the current page's location within the site. It is composed from
+ * parts: `BreadcrumbList` wraps the ordered items, `BreadcrumbLink` marks
+ * navigable ancestors, `BreadcrumbPage` marks the current page, and
+ * `BreadcrumbSeparator` / `BreadcrumbEllipsis` divide or collapse the trail.
+ */
 const meta: Meta<typeof Breadcrumb> = {
   title: 'Primitives/Breadcrumb',
   component: Breadcrumb,
@@ -18,6 +25,7 @@ export default meta;
 
 type Story = StoryObj<typeof Breadcrumb>;
 
+/** A standard trail of navigable links ending in the non-interactive current page. */
 export const Default: Story = {
   render: () => (
     <Breadcrumb>
@@ -38,6 +46,7 @@ export const Default: Story = {
   ),
 };
 
+/** Uses `BreadcrumbEllipsis` to collapse intermediate levels when the trail is long. */
 export const WithEllipsis: Story = {
   render: () => (
     <Breadcrumb>

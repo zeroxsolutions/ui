@@ -25,18 +25,18 @@ import { Input } from '@zeroxsolutions/ui/input';
 type Person = { name: string; role: string; email: string };
 
 const data: Person[] = [
-  { name: 'Ada Lovelace', role: 'Engineer', email: 'ada@zeroxsolutions.dev' },
-  { name: 'Alan Turing', role: 'Researcher', email: 'alan@zeroxsolutions.dev' },
-  { name: 'Grace Hopper', role: 'Admiral', email: 'grace@zeroxsolutions.dev' },
+  { name: 'Ada Lovelace', role: 'Engineer', email: 'ada@example.com' },
+  { name: 'Alan Turing', role: 'Researcher', email: 'alan@example.com' },
+  { name: 'Grace Hopper', role: 'Admiral', email: 'grace@example.com' },
   {
     name: 'Katherine Johnson',
     role: 'Mathematician',
-    email: 'kj@zeroxsolutions.dev',
+    email: 'kj@example.com',
   },
   {
     name: 'Margaret Hamilton',
     role: 'Engineer',
-    email: 'mh@zeroxsolutions.dev',
+    email: 'mh@example.com',
   },
 ];
 
@@ -61,6 +61,14 @@ const columns: ColumnDef<Person>[] = [
   },
 ];
 
+/**
+ * `DataTable` is a compound recipe that wraps a TanStack Table instance and
+ * shares it through context, so its parts — toolbar, view, view options, and
+ * pagination — read the same table without prop drilling. The consumer owns
+ * `useReactTable` plus the column definitions; these stories only compose the
+ * parts around that instance. All visible copy (filter placeholder, empty
+ * state, status line) is passed as children, leaving i18n to the host app.
+ */
 const meta: Meta = {
   title: 'Primitives/DataTable',
 };

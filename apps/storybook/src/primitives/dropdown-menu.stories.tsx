@@ -24,6 +24,12 @@ import {
   UserIcon,
 } from 'lucide-react';
 
+/**
+ * `DropdownMenu` is a button-triggered menu built on the Base UI Menu primitive
+ * that portals its content and positions it relative to the trigger. Compose it
+ * from items, groups, labels, separators, and shortcut hints, plus stateful
+ * checkbox/radio items and nested submenus for hierarchical actions.
+ */
 const meta: Meta<typeof DropdownMenu> = {
   title: 'Primitives/DropdownMenu',
   component: DropdownMenu,
@@ -32,6 +38,10 @@ export default meta;
 
 type Story = StoryObj<typeof DropdownMenu>;
 
+/**
+ * Account-style menu with a group label, items carrying leading icons and
+ * keyboard-shortcut hints, and a destructive "Log out" item.
+ */
 export const Default: Story = {
   render: () => (
     <DropdownMenu>
@@ -69,6 +79,11 @@ export const Default: Story = {
   ),
 };
 
+/**
+ * Stateful and nested controls: toggleable `DropdownMenuCheckboxItem`s, a
+ * single-select `DropdownMenuRadioGroup`, and a `DropdownMenuSub` that opens a
+ * nested submenu.
+ */
 export const WithCheckboxesAndSubmenu: Story = {
   render: () => (
     <DropdownMenu>

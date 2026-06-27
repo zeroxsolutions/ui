@@ -7,10 +7,12 @@ import { InworldMark } from '@zeroxsolutions/icons/inworld';
 import { LeonardoMark } from '@zeroxsolutions/icons/leonardo';
 import { PipecatMark } from '@zeroxsolutions/icons/pipecat';
 
-/** Visual catalog of the vendored brand marks shipped by @zeroxsolutions/icons —
- *  brands @lobehub/icons doesn't carry. github-mark is sized/coloured via
- *  `className` (currentColor); the provider marks mirror the @lobehub/icons
- *  color-mark API (`size="1em"`, scaled by the parent font-size). */
+/**
+ * Visual catalog of the vendored brand marks shipped by `@zeroxsolutions/icons`
+ * — the marks `@lobehub/icons` doesn't carry. `GithubMark` is sized and coloured
+ * via `className` (it paints with `currentColor`); the provider marks mirror the
+ * `@lobehub/icons` color-mark API (`size="1em"`, scaled by the parent font-size).
+ */
 const meta: Meta = {
   title: 'Icons/Brand Marks',
 };
@@ -35,6 +37,10 @@ function Cell({
   );
 }
 
+/**
+ * Every vendored mark rendered in a labelled grid, demonstrating both sizing
+ * APIs: `currentColor` via `className` and the font-relative `size="1em"`.
+ */
 export const All: Story = {
   render: () => (
     <div className="flex flex-wrap gap-3">

@@ -4,6 +4,13 @@ import { useState } from 'react';
 import { FluentEmoji } from '@zeroxsolutions/fluent-emoji';
 import { EmojiPicker } from '@zeroxsolutions/ui/emoji-picker';
 
+/**
+ * `EmojiPicker` is a searchable, categorized emoji grid with a category jump-nav
+ * and an optional frequent row. The grid is windowed, so only the rows in (and
+ * near) the viewport mount when the catalog opens. It reports the chosen glyph
+ * through `onSelect`; the frequent row is consumer-supplied (`frequent`) — the
+ * picker keeps no storage of its own.
+ */
 const meta: Meta<typeof EmojiPicker> = {
   title: 'Components/EmojiPicker',
   component: EmojiPicker,
@@ -12,6 +19,7 @@ export default meta;
 
 type Story = StoryObj<typeof EmojiPicker>;
 
+/** The bare picker wired to local state, with the picked glyph previewed above. */
 export const Default: Story = {
   render: () => {
     const [picked, setPicked] = useState<string | null>(null);
@@ -29,7 +37,10 @@ export const Default: Story = {
   },
 };
 
-/** A frequent row with a custom heading via `frequentLabel`. */
+/**
+ * A seeded frequent row: `frequent` supplies the recently-used glyphs and
+ * `frequentLabel` renames its heading from the default `Frequently used`.
+ */
 export const CustomFrequentLabel: Story = {
   render: () => {
     const [picked, setPicked] = useState<string | null>(null);

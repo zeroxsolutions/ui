@@ -11,6 +11,13 @@ import {
   CardTitle,
 } from '@zeroxsolutions/ui/card';
 
+/**
+ * `Card` is a composable container that groups related content on a bordered,
+ * rounded surface. It pairs with slot subcomponents — `CardHeader`, `CardTitle`,
+ * `CardDescription`, `CardAction`, `CardContent`, and `CardFooter` — that manage
+ * spacing and layout, including a header grid that positions an action opposite
+ * the title.
+ */
 const meta: Meta<typeof Card> = {
   title: 'Primitives/Card',
   component: Card,
@@ -19,6 +26,7 @@ export default meta;
 
 type Story = StoryObj<typeof Card>;
 
+/** Minimal card composed of a header (title plus description) and body content. */
 export const Default: Story = {
   render: () => (
     <Card className="w-80">
@@ -33,6 +41,7 @@ export const Default: Story = {
   ),
 };
 
+/** Adds a `CardAction` aligned to the header's title row and a `CardFooter` with a full-width button. */
 export const WithActionAndFooter: Story = {
   render: () => (
     <Card className="w-80">

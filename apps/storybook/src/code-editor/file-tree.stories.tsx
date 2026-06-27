@@ -10,6 +10,15 @@ import {
 } from '@zeroxsolutions/ui/file-tree';
 import { FileTypeIcon } from '@zeroxsolutions/ui/file-type-icon';
 
+/**
+ * `FileTree` is an accessible tree view (WAI-ARIA APG Tree View) for navigating a
+ * file bundle. The Root owns selection and folder expansion as
+ * controlled/uncontrolled state and drives keyboard navigation (arrows move and
+ * collapse/expand, Enter/Space select); consumers compose `FileTreeItem`,
+ * `FileTreeLabel`, and `FileTreeGroup` and supply every visible label and icon.
+ * The stories build a small folder hierarchy to exercise selection, nesting, and
+ * expansion.
+ */
 const meta: Meta<typeof FileTree> = {
   title: 'Code Editor/FileTree',
   component: FileTree,
@@ -27,6 +36,10 @@ function FileLabel({ name }: { name: string }) {
   );
 }
 
+/**
+ * A nested folder hierarchy with controlled selection and expansion, pairing each
+ * leaf with a `FileTypeIcon` and each folder with a `Folder` glyph.
+ */
 export const SkillBundle: Story = {
   render: () => {
     const [value, setValue] = React.useState('SKILL.md');

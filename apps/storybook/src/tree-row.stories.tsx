@@ -3,6 +3,15 @@ import { useState } from 'react';
 
 import { TreeRow } from '@zeroxsolutions/ui/tree-row';
 
+/**
+ * `TreeRow` is the shared skeleton of one row in a hierarchy tree (a layer tree, a
+ * scene outliner, a file tree): a flex `group` container with depth indent
+ * (`baseIndent + depth * indentStep` px of left padding) and a disclosure chevron
+ * that rotates 90° when `expanded`, or a same-width spacer for leaves so names stay
+ * aligned. Everything that legitimately differs stays caller-owned — selection/hover
+ * colour and row height via `className`, the row content via `children`, and
+ * drag/drop handlers spread straight onto the row.
+ */
 const meta: Meta<typeof TreeRow> = {
   title: 'Components/TreeRow',
   component: TreeRow,

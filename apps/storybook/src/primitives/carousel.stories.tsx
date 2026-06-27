@@ -9,6 +9,13 @@ import {
   CarouselPrevious,
 } from '@zeroxsolutions/ui/carousel';
 
+/**
+ * `Carousel` is a slide container built on Embla that scrolls through
+ * `CarouselItem` children horizontally or vertically, with keyboard arrow
+ * support and `CarouselPrevious`/`CarouselNext` controls that disable at the
+ * ends. Slide sizing comes from item basis classes and the `opts` forwarded to
+ * Embla.
+ */
 const meta: Meta<typeof Carousel> = {
   title: 'Primitives/Carousel',
   component: Carousel,
@@ -17,6 +24,7 @@ export default meta;
 
 type Story = StoryObj<typeof Carousel>;
 
+/** One full-width slide per view, paged with the previous and next controls. */
 export const Default: Story = {
   render: () => (
     <div className="px-12">
@@ -39,6 +47,7 @@ export const Default: Story = {
   ),
 };
 
+/** Shows three slides at once via `basis-1/3` items and `align: 'start'` snapping. */
 export const MultipleVisible: Story = {
   render: () => (
     <div className="px-12">

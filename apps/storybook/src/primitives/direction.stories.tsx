@@ -18,6 +18,10 @@ export default meta;
 
 type Story = StoryObj<typeof DirectionProvider>;
 
+/**
+ * `direction="ltr"`: the button group flows left to right, the default reading
+ * order for most Latin-script locales.
+ */
 export const LeftToRight: Story = {
   render: () => (
     <DirectionProvider direction="ltr">
@@ -33,6 +37,10 @@ export const LeftToRight: Story = {
   ),
 };
 
+/**
+ * `direction="rtl"`: with Arabic labels the button group mirrors so the flow and
+ * ordering run right to left.
+ */
 export const RightToLeft: Story = {
   render: () => (
     <DirectionProvider direction="rtl">

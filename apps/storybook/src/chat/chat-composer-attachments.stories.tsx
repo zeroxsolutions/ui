@@ -10,6 +10,13 @@ import {
   InputGroupTextarea,
 } from '@zeroxsolutions/ui/input-group';
 
+/**
+ * `ChatComposerAttachments` is the block-start row of attachment chips for an
+ * `InputGroup` composer. It renders nothing while `attachments` is empty (so the
+ * box keeps its single-line height), then a wrapping row of compact
+ * `ChatAttachmentChip`s once the host adds files. The host owns the list and the
+ * remove handler.
+ */
 const meta: Meta<typeof ChatComposerAttachments> = {
   title: 'Chat/ComposerAttachments',
   component: ChatComposerAttachments,
@@ -18,8 +25,11 @@ export default meta;
 
 type Story = StoryObj<typeof ChatComposerAttachments>;
 
-// The attachment row is the block-start of an `InputGroup` composer — shown
-// here inside one so the wrapping behaviour reads in context.
+/**
+ * The attachment row mounted inside a real `InputGroup` composer — the
+ * block-start of the box, above the textarea and send button — so its wrapping
+ * behaviour reads in context.
+ */
 export const InComposer: Story = {
   render: () => {
     const [attachments, setAttachments] = useState([
@@ -52,6 +62,10 @@ export const InComposer: Story = {
   },
 };
 
+/**
+ * With an empty `attachments` array the component renders nothing, so the
+ * composer collapses to just its textarea with no attachment row.
+ */
 export const Empty: Story = {
   render: () => (
     <InputGroup className="w-[28rem]">

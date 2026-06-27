@@ -15,6 +15,14 @@ import {
 import { Button } from '@zeroxsolutions/ui/button';
 import { TrashIcon } from 'lucide-react';
 
+/**
+ * `AlertDialog` is a modal, built from Base UI alert-dialog parts, that
+ * interrupts the user to confirm a consequential action and blocks interaction
+ * with the rest of the page until a choice is made. Compose `AlertDialogTrigger`,
+ * `AlertDialogContent`, the header/footer slots, and the `Cancel` / `Action`
+ * buttons to assemble the dialog; an optional `AlertDialogMedia` slot adds a
+ * leading icon and `size="sm"` switches to a compact, centered layout.
+ */
 const meta: Meta<typeof AlertDialog> = {
   title: 'Primitives/AlertDialog',
   component: AlertDialog,
@@ -23,6 +31,10 @@ export default meta;
 
 type Story = StoryObj<typeof AlertDialog>;
 
+/**
+ * Destructive confirmation flow: a trigger button opens the dialog with a
+ * title, description, and Cancel / Delete actions.
+ */
 export const Default: Story = {
   render: () => (
     <AlertDialog>
@@ -46,6 +58,10 @@ export const Default: Story = {
   ),
 };
 
+/**
+ * Compact `size="sm"` variant whose header leads with an `AlertDialogMedia`
+ * icon above a centered title and description.
+ */
 export const WithMedia: Story = {
   render: () => (
     <AlertDialog>

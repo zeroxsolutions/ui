@@ -10,6 +10,15 @@ import {
   type ToolState,
 } from '@zeroxsolutions/ui/tool';
 
+/**
+ * `Tool` renders a collapsible tool-invocation card: a header row (icon, title,
+ * optional subtitle, status badge, chevron) over a content area showing the
+ * call's JSON `ToolInput` and `ToolOutput`. It is presentational — the host maps
+ * its dispatcher lifecycle onto a `ToolState` (`input-streaming` →
+ * `input-available` → `output-available` / `output-error`) and supplies the
+ * title, icon, input, and output. Compose `ToolHeader` plus a `ToolContent` that
+ * wraps `ToolInput`/`ToolOutput` inside a `Tool`.
+ */
 const meta: Meta<typeof Tool> = {
   title: 'AI Elements/Tool',
   component: Tool,
@@ -18,6 +27,10 @@ export default meta;
 
 type Story = StoryObj<typeof Tool>;
 
+/**
+ * A successful call: an open card whose `output-available` header carries a
+ * subtitle and custom icon, with parameters and a JSON result in the body.
+ */
 export const Completed: Story = {
   render: () => (
     <div className="max-w-lg">
@@ -37,6 +50,10 @@ export const Completed: Story = {
   ),
 };
 
+/**
+ * A failed call: the `output-error` state renders `errorText` in a destructive
+ * banner in place of a result.
+ */
 export const Error: Story = {
   render: () => (
     <div className="max-w-lg">
@@ -54,6 +71,10 @@ export const Error: Story = {
   ),
 };
 
+/**
+ * All four `ToolState` values rendered as collapsed header-only cards, showing
+ * each state's status icon, tone, and label.
+ */
 export const States: Story = {
   name: 'All states (collapsed)',
   render: () => (

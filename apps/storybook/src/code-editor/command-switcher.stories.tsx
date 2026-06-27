@@ -24,6 +24,13 @@ const FILES = [
   'assets/logo.png',
 ];
 
+/**
+ * `CommandSwitcher` is a ⌘K-style command palette for jumping to a target: a
+ * controlled dialog (`open` / `onOpenChange`) wrapping the `Command` shell.
+ * Choosing a `CommandSwitcherItem` reports its value via `onValueChange` and
+ * closes the dialog. Stories compose the contents (`CommandInput`, `CommandList`,
+ * items) as children and bind the ⌘K key with `useCommandShortcut`.
+ */
 const meta: Meta<typeof CommandSwitcher> = {
   title: 'Code Editor/CommandSwitcher',
   component: CommandSwitcher,
@@ -32,6 +39,10 @@ export default meta;
 
 type Story = StoryObj<typeof CommandSwitcher>;
 
+/**
+ * Opens the palette from a button or the ⌘K shortcut and reports the chosen file
+ * path; `CommandEmpty` covers a search that matches nothing.
+ */
 export const FileJump: Story = {
   render: () => {
     const [open, setOpen] = React.useState(false);

@@ -3,6 +3,14 @@ import { Image, MessageSquare, Sparkles, Workflow } from 'lucide-react';
 
 import { ChatEmptyState } from '@zeroxsolutions/ui/chat-empty-state';
 
+/**
+ * `ChatEmptyState` is the starter shown in an empty conversation: a centered
+ * header (icon, title, description) above an optional column of clickable
+ * suggestion cards. Selecting a card reports its `prompt` through
+ * `onSelectPrompt`; with no handler the cards render disabled as a read-only
+ * preview. Copy and the suggestion set are consumer-supplied, so wrap it in a
+ * sized container to control placement.
+ */
 const meta: Meta<typeof ChatEmptyState> = {
   title: 'Chat/EmptyState',
   component: ChatEmptyState,
@@ -31,6 +39,7 @@ const suggestions = [
   },
 ];
 
+/** Full layout: header plus a column of clickable suggestion cards wired to `onSelectPrompt`. */
 export const WithSuggestions: Story = {
   render: () => (
     <div className="w-[28rem]">
@@ -45,6 +54,7 @@ export const WithSuggestions: Story = {
   ),
 };
 
+/** Header-only variant — icon, title, and description with no suggestion list. */
 export const HeaderOnly: Story = {
   render: () => (
     <div className="w-[28rem]">

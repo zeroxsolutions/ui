@@ -7,6 +7,13 @@ import {
   TabsTrigger,
 } from '@zeroxsolutions/ui/tabs';
 
+/**
+ * `Tabs` is a Base UI tab set composed of `Tabs` (root), `TabsList`,
+ * `TabsTrigger`, and `TabsContent`, where only the panel matching the active
+ * trigger is shown. The active tab is tracked by string value (`defaultValue`
+ * for uncontrolled usage), and the trigger row supports a `default` segmented
+ * look or a `line` underline look via the `TabsList` `variant` prop.
+ */
 const meta: Meta<typeof Tabs> = {
   title: 'Primitives/Tabs',
   component: Tabs,
@@ -15,6 +22,7 @@ export default meta;
 
 type Story = StoryObj<typeof Tabs>;
 
+/** Default segmented `TabsList` with a muted background and three panels. */
 export const Default: Story = {
   render: () => (
     <Tabs defaultValue="account" className="w-80">
@@ -32,6 +40,7 @@ export const Default: Story = {
   ),
 };
 
+/** `line` variant: transparent list with an underline indicator on the active tab. */
 export const Line: Story = {
   render: () => (
     <Tabs defaultValue="overview" className="w-80">

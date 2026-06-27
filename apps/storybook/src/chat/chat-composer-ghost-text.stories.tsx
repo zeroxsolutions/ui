@@ -4,6 +4,13 @@ import { useRef, useState } from 'react';
 import { ChatComposerGhostText } from '@zeroxsolutions/ui/chat-composer-ghost-text';
 import { Textarea } from '@zeroxsolutions/ui/textarea';
 
+/**
+ * `ChatComposerGhostText` is an inline typeahead overlay that renders a
+ * predicted continuation as muted ghost text positioned right after the user's
+ * draft inside a composer textarea. It mounts as an absolutely positioned,
+ * click-through sibling of the textarea and mirrors its measured typography and
+ * padding, so the host computes the suggestion while this only positions it.
+ */
 const meta: Meta<typeof ChatComposerGhostText> = {
   title: 'Chat/ComposerGhostText',
   component: ChatComposerGhostText,
@@ -32,6 +39,11 @@ function Demo() {
   );
 }
 
+/**
+ * A controlled `Textarea` with a fixed `suggestion`: the ghost continuation
+ * appears in muted text immediately after the caret and stays aligned as the
+ * draft is edited.
+ */
 export const Typeahead: Story = {
   render: () => <Demo />,
 };

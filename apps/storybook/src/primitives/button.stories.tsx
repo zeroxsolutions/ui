@@ -3,6 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '@zeroxsolutions/ui/button';
 import { ArrowRightIcon, PlusIcon } from 'lucide-react';
 
+/**
+ * `Button` is the interactive action control built on the Base UI button
+ * primitive, rendering a native `<button>` by default. It exposes `variant`
+ * (default, secondary, outline, ghost, destructive, link) and `size` (xs, sm,
+ * default, lg, icon) props, and styles `data-icon` children as inline-start or
+ * inline-end adornments.
+ */
 const meta: Meta<typeof Button> = {
   title: 'Primitives/Button',
   component: Button,
@@ -11,6 +18,7 @@ export default meta;
 
 type Story = StoryObj<typeof Button>;
 
+/** Shows every visual `variant` side by side for comparison. */
 export const Variants: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-2">
@@ -24,6 +32,7 @@ export const Variants: Story = {
   ),
 };
 
+/** Walks the `size` scale from `xs` to `lg`, plus a square `icon` button. */
 export const Sizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-2">
@@ -38,6 +47,7 @@ export const Sizes: Story = {
   ),
 };
 
+/** Demonstrates leading/trailing `data-icon` adornments and the disabled state. */
 export const WithIcons: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-2">

@@ -4,6 +4,13 @@ import { Button } from '@zeroxsolutions/ui/button';
 import { Toaster } from '@zeroxsolutions/ui/sonner';
 import { toast } from 'sonner';
 
+/**
+ * `Toaster` mounts the Sonner toast container, themed to follow the active color
+ * scheme and preconfigured with status icons for success, info, warning, error,
+ * and loading. Render it once near the root, then call `toast()` and its
+ * variants from anywhere to push transient notifications. The stories pair it
+ * with buttons that fire toasts on click.
+ */
 const meta: Meta<typeof Toaster> = {
   title: 'Primitives/Sonner',
   component: Toaster,
@@ -12,6 +19,7 @@ export default meta;
 
 type Story = StoryObj<typeof Toaster>;
 
+/** A button that fires a single neutral toast through the base `toast()` call. */
 export const Default: Story = {
   render: () => (
     <div>
@@ -23,6 +31,10 @@ export const Default: Story = {
   ),
 };
 
+/**
+ * Contrasts the `toast.success` and `toast.error` variants, each rendering its
+ * own status icon and styling.
+ */
 export const Variants: Story = {
   render: () => (
     <div className="flex gap-2">

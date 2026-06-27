@@ -10,6 +10,13 @@ import {
   MenubarTrigger,
 } from '@zeroxsolutions/ui/menubar';
 
+/**
+ * `Menubar` is a horizontal bar of top-level menus (File, Edit, ...) built on Base
+ * UI menu primitives. Each `MenubarMenu` pairs a `MenubarTrigger` with a
+ * `MenubarContent` dropdown of `MenubarItem`s, optional `MenubarSeparator`s, and
+ * right-aligned `MenubarShortcut` hints. Use it for desktop-style application menu
+ * bars.
+ */
 const meta: Meta<typeof Menubar> = {
   title: 'Primitives/Menubar',
   component: Menubar,
@@ -18,6 +25,7 @@ export default meta;
 
 type Story = StoryObj<typeof Menubar>;
 
+/** Two menus (File and Edit) showing item shortcuts and a separator between item groups. */
 export const Default: Story = {
   render: () => (
     <Menubar>

@@ -17,6 +17,13 @@ import {
 } from '@zeroxsolutions/ui/sidebar-group-collapsible';
 import { FolderIcon, UserIcon } from 'lucide-react';
 
+/**
+ * `SidebarGroupCollapsible` is a group-level disclosure for a sidebar: its trigger
+ * is a full-width `SidebarGroupLabel` with a trailing rotating chevron, and its
+ * content holds the group body. It is the section-header counterpart to a
+ * collapsible menu row; wrap it in a `SidebarGroup` and drive it with
+ * `defaultOpen` or the controlled `open` / `onOpenChange` pair.
+ */
 const meta: Meta<typeof SidebarGroupCollapsible> = {
   title: 'Components/SidebarGroupCollapsible',
   component: SidebarGroupCollapsible,
