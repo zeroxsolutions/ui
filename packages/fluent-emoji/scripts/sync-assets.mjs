@@ -1,7 +1,10 @@
-// Regenerate `packages/fluent-emoji/assets/<style>/` from the lobehub repackages
-// of Microsoft's MIT-licensed Fluent Emoji:
-//   3D   → @lobehub/fluent-emoji-3d   (.webp)
-//   Flat → @lobehub/fluent-emoji-flat (.svg)
+// Regenerate `packages/fluent-emoji/assets/<style>/` for the four STATIC styles
+// from the lobehub repackages of Microsoft's MIT-licensed Fluent Emoji:
+//   3D     → @lobehub/fluent-emoji-3d     (.webp)
+//   Flat   → @lobehub/fluent-emoji-flat   (.svg)
+//   Modern → @lobehub/fluent-emoji-modern (.svg)
+//   Mono   → @lobehub/fluent-emoji-mono   (.svg)
+// (The animated `anim` style is owned by sync-anim.mjs, not this script.)
 // For every glyph in our catalog it copies the matching artwork, saved under OUR
 // codepoint key (emojiToUnicode) so the runtime resolver always lines up —
 // independent of how the upstream set names its files. Layout is by STYLE
@@ -23,9 +26,10 @@ const pkgRoot = join(here, '..');
 const require = createRequire(import.meta.url);
 
 // Each style: upstream lobehub package + file extension. Saved under assets/<id>/.
-// All four are static and self-hosted; the animated `anim` style is NOT here —
-// at ~300 KB/glyph it is ~527 MB, served lazily from a CDN instead (see the
-// plan's "DEFERRED — anim" note), not committed.
+// All four are static and self-hosted. The animated `anim` style is handled by
+// the separate sync-anim.mjs (its ~700 MB upstream set is split across four npm
+// packages); it lands in assets/anim/ and ships like the rest — heavy, so a CDN
+// base is preferred in production. See the README "Regenerating the artwork".
 const STYLES = [
   { id: '3d', pkg: '@lobehub/fluent-emoji-3d', ext: 'webp' },
   { id: 'flat', pkg: '@lobehub/fluent-emoji-flat', ext: 'svg' },

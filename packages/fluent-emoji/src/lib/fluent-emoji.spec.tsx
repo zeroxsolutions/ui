@@ -6,6 +6,7 @@ import {
   fluentEmojiUrl,
   setFluentEmojiBase,
   setFluentEmojiStyle,
+  setFluentEmojiStyleBase,
 } from './resolve';
 import { FluentEmoji } from './fluent-emoji';
 
@@ -13,6 +14,9 @@ afterEach(() => {
   cleanup();
   setFluentEmojiBase(undefined);
   setFluentEmojiStyle(undefined);
+  for (const s of ['3d', 'flat', 'modern', 'mono', 'anim'] as const) {
+    setFluentEmojiStyleBase(s, undefined);
+  }
 });
 
 describe('emojiToUnicode', () => {
@@ -51,6 +55,7 @@ describe('fluentEmojiUrl', () => {
     ['flat', 'flat/1f92f.svg'],
     ['modern', 'modern/1f92f.svg'],
     ['mono', 'mono/1f92f.svg'],
+    ['anim', 'anim/1f92f.webp'],
   ] as const)('maps the %s style to the right dir + extension', (style, tail) => {
     expect(fluentEmojiUrl('🤯', { base: 'https://cdn.example/emoji', style })).toBe(
       `https://cdn.example/emoji/${tail}`,
@@ -87,6 +92,44 @@ describe('fluentEmojiUrl', () => {
   });
 });
 
+describe('setFluentEmojiStyleBase (per-style base)', () => {
+  it('routes one style to its own base while others use the global base', () => {
+    setFluentEmojiBase('https://cdn.example/emoji');
+    setFluentEmojiStyleBase('anim', 'https://anim-cdn.example');
+    // anim uses its dedicated base…
+    expect(fluentEmojiUrl('🤯', { style: 'anim' })).toBe(
+      'https://anim-cdn.example/anim/1f92f.webp',
+    );
+    // …while the static styles keep resolving from the global base.
+    expect(fluentEmojiUrl('🤯', { style: 'flat' })).toBe(
+      'https://cdn.example/emoji/flat/1f92f.svg',
+    );
+  });
+
+  it('lets a per-call base win over the per-style base', () => {
+    setFluentEmojiStyleBase('anim', 'https://anim-cdn.example');
+    expect(fluentEmojiUrl('🤯', { style: 'anim', base: 'https://per-call' })).toBe(
+      'https://per-call/anim/1f92f.webp',
+    );
+  });
+
+  it('applies the per-style base for the configured default style too', () => {
+    setFluentEmojiStyle('anim');
+    setFluentEmojiStyleBase('anim', 'https://anim-cdn.example');
+    // No per-call style/base, yet anim still resolves from its dedicated base.
+    expect(fluentEmojiUrl('🤯')).toBe('https://anim-cdn.example/anim/1f92f.webp');
+  });
+
+  it('clears the override when passed undefined', () => {
+    setFluentEmojiBase('https://cdn.example/emoji');
+    setFluentEmojiStyleBase('anim', 'https://anim-cdn.example');
+    setFluentEmojiStyleBase('anim', undefined);
+    expect(fluentEmojiUrl('🤯', { style: 'anim' })).toBe(
+      'https://cdn.example/emoji/anim/1f92f.webp',
+    );
+  });
+});
+
 describe('<FluentEmoji>', () => {
   it('renders an <img> with the resolved src and accessible name', () => {
     render(
@@ -115,6 +158,20 @@ describe('<FluentEmoji>', () => {
     expect(
       screen.getByRole('img', { name: 'exploding head' }).getAttribute('src'),
     ).toBe('https://cdn.example/emoji/flat/1f92f.svg');
+  });
+
+  it('resolves the animated webp when variant="anim"', () => {
+    render(
+      <FluentEmoji
+        glyph="🤯"
+        name="exploding head"
+        variant="anim"
+        base="https://cdn.example/emoji"
+      />,
+    );
+    expect(
+      screen.getByRole('img', { name: 'exploding head' }).getAttribute('src'),
+    ).toBe('https://cdn.example/emoji/anim/1f92f.webp');
   });
 
   it('falls back to the native glyph when the image fails to load', () => {

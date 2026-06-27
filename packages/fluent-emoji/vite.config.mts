@@ -1,9 +1,9 @@
 /// <reference types='vitest' />
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import dts from 'vite-plugin-dts';
 import { cpSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
 
 export default defineConfig(() => ({
   root: import.meta.dirname,
@@ -21,7 +21,7 @@ export default defineConfig(() => ({
       // .webp must bypass the bundler entirely. Copy `assets/` → `dist/assets/`
       // verbatim (unhashed, keyed by codepoint) so `fluentEmojiUrl` can resolve
       // `<base>/<codepoint>.webp` and a consumer serves them as static files.
-      name: 'chisel-copy-emoji-assets',
+      name: 'copy-emoji-assets',
       closeBundle() {
         cpSync(
           resolve(import.meta.dirname, 'assets'),
@@ -33,8 +33,9 @@ export default defineConfig(() => ({
   ],
   build: {
     outDir: './dist',
-    // This plugin owns `dist/assets/` (~7.4k tiny files across 4 style folders),
-    // so vite must NOT empty it: `emptyOutDir`'s rimraf on a tree that large
+    // This plugin owns `dist/assets/` (~9k files across 5 style folders — the
+    // four small static sets plus the heavy animated `anim` webp), so vite must
+    // NOT empty it: `emptyOutDir`'s rimraf on a tree that large
     // races to `ENOTEMPTY` on macOS under concurrent builds. The bundler's own
     // outputs are stable-named (`index.js`/`.d.ts`) and overwrite in place, and
     // the assets are force-copied above, so a non-empty outDir is correct here.

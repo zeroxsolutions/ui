@@ -20,7 +20,13 @@ describe('EmojiAppearance', () => {
   it('renders one preview swatch per Fluent style', () => {
     render(<EmojiAppearance value="3d" onValueChange={vi.fn()} />);
 
-    for (const label of ['3D style', 'Flat style', 'Modern style', 'Mono style']) {
+    for (const label of [
+      '3D style',
+      'Flat style',
+      'Modern style',
+      'Mono style',
+      'Animated style',
+    ]) {
       expect(screen.getByRole('button', { name: label })).toBeTruthy();
     }
   });
@@ -37,6 +43,7 @@ describe('EmojiAppearance', () => {
     expect(src('Flat style')).toContain('/flat/');
     expect(src('Modern style')).toContain('/modern/');
     expect(src('Mono style')).toContain('/mono/');
+    expect(src('Animated style')).toContain('/anim/');
   });
 
   it('marks the selected style as pressed', () => {

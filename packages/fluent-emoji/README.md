@@ -1,8 +1,8 @@
 # @zeroxsolutions/fluent-emoji
 
-Self-hosted Microsoft **Fluent Emoji** for Chisel — a committed Unicode CLDR
-catalog plus the artwork in four styles, resolved by codepoint. No third-party
-CDN.
+Self-hosted Microsoft **Fluent Emoji** — a committed Unicode CLDR
+catalog plus the artwork in five styles (four static + animated), resolved by
+codepoint. No third-party CDN.
 
 ```tsx
 import { FluentEmoji, EMOJI_CATEGORIES } from '@zeroxsolutions/fluent-emoji';
@@ -16,20 +16,30 @@ import { FluentEmoji, EMOJI_CATEGORIES } from '@zeroxsolutions/fluent-emoji';
 
 ## Styles
 
-Four static styles ship in the package, each in its own `assets/<style>/`
-subfolder. Pick one per call with `variant` (component) / `style`
-(`fluentEmojiUrl`), or set a default with `setFluentEmojiStyle`.
+Five styles ship in the package, each in its own `assets/<style>/` subfolder.
+Pick one per call with `variant` (component) / `style` (`fluentEmojiUrl`), or set
+a default with `setFluentEmojiStyle`.
 
-| `variant` | source style         | format |
-| --------- | -------------------- | ------ |
-| `3d`      | Fluent 3D (default)  | webp   |
-| `flat`    | Fluent Flat          | svg    |
-| `modern`  | Fluent Color (2D)    | svg    |
-| `mono`    | Fluent High Contrast | svg    |
+| `variant` | source style         | format        |
+| --------- | -------------------- | ------------- |
+| `3d`      | Fluent 3D (default)  | webp          |
+| `flat`    | Fluent Flat          | svg           |
+| `modern`  | Fluent Color (2D)    | svg           |
+| `mono`    | Fluent High Contrast | svg           |
+| `anim`    | Fluent Animated      | webp (animated) |
 
-The **animated** style is intentionally not bundled — animated webp average
-~300 KB/glyph (~527 MB for the catalog), too large to self-host. To add it later,
-resolve it lazily from a CDN; see the implementation note in the workspace plan.
+```tsx
+<FluentEmoji glyph="🎉" name="party popper" variant="anim" />;
+```
+
+The **animated** (`anim`) artwork is by far the heaviest set — animated webp run
+hundreds of KB/glyph (~280 MB total). It is committed in the repo and self-hosted
+like the rest, but it is **deliberately excluded from the npm tarball** so a plain
+`npm install` stays small (~28 MB) for consumers that only need the static styles.
+To use `anim`, host `assets/anim/` on a CDN and point that one style at it with
+{@link setFluentEmojiStyleBase} — see **Deploying the animated style to a CDN**
+below. Without an `anim` base configured, animated glyphs fall back to the native
+glyph (as do any glyphs with no animated artwork upstream, by design).
 
 ## Serving the artwork
 
@@ -50,9 +60,45 @@ setFluentEmojiBase('/fluent-emoji');
 A missing asset (or a load error) falls back to the native glyph, so nothing
 renders blank.
 
+## Deploying the animated style to a CDN
+
+The four static styles ship inside the package (`dist/assets/{3d,flat,modern,mono}/`);
+the animated `anim` set does **not** — it is excluded from the tarball to keep
+installs small. So `anim` has to be hosted separately and routed to its own base,
+while the static styles keep resolving from the package or your public dir.
+
+1. **Upload the artwork.** The committed `assets/anim/` (or `dist/assets/anim/`
+   after a build) holds the files keyed by codepoint. Sync it first if it's not
+   present, then push it to any static host / bucket / CDN:
+
+   ```sh
+   node scripts/sync-anim.mjs                                   # (re)build assets/anim/
+   aws s3 sync assets/anim s3://my-bucket/fluent-emoji/anim     # or Cloudflare R2 / GCS / …
+   ```
+
+2. **Point only `anim` at that CDN.** The resolver appends `/<style>/<codepoint>.<ext>`,
+   so the upload target above is `<animBase>/anim/`:
+
+   ```ts
+   import {
+     setFluentEmojiBase,
+     setFluentEmojiStyleBase,
+   } from '@zeroxsolutions/fluent-emoji';
+
+   setFluentEmojiBase('/fluent-emoji'); // 3d/flat/modern/mono from your public dir
+   setFluentEmojiStyleBase('anim', 'https://cdn.example.com/fluent-emoji'); // anim from the CDN
+   // <FluentEmoji glyph="🎉" variant="anim" /> →
+   //   https://cdn.example.com/fluent-emoji/anim/1f389.webp
+   ```
+
+   A per-call `base` still wins; `setFluentEmojiStyleBase('anim', undefined)`
+   clears the override. (If you'd rather serve **all** styles from one CDN, upload
+   the whole `assets/` tree and use `setFluentEmojiBase` alone — no per-style base
+   needed.)
+
 ## Regenerating the artwork
 
-Run both, in order:
+The four static styles, in order:
 
 ```sh
 node scripts/sync-assets.mjs   # copy each style from its @lobehub/* dev dep
@@ -68,14 +114,32 @@ remainder — newest-Unicode glyphs, country/subdivision flags, and family/coupl
 sequences that have **no** Fluent artwork anywhere and stay on the native-glyph
 fallback by design.
 
+The animated style is owned by a separate script (it has no dev dep — the set is
+~700 MB, split across four npm packages):
+
+```sh
+node scripts/sync-anim.mjs     # rebuild assets/anim/ from @lobehub/fluent-emoji-anim-1..4
+```
+
+`sync-anim.mjs` streams each `@lobehub/fluent-emoji-anim-{1..4}` tarball straight
+from the npm registry, extracts its `assets/*.webp`, and copies the catalog
+matches under our codepoint key — normalizing the upstream zero-padded, FE0F-bearing
+names to ours. Pass `--dry` to preview the source packages without downloading.
+Microsoft only animated a subset of the catalog: most faces/objects carry real
+animation frames, while many symbols, keycaps, and flags ship as static webp so
+every glyph still resolves; the rest fall back to the native glyph, as above.
+
 ## Attribution & licensing
 
 The emoji artwork is **Microsoft Fluent Emoji** (MIT), redistributed here via
 **[@lobehub/fluent-emoji](https://github.com/lobehub/fluent-emoji)** (MIT,
-the `-3d`/`-flat`/`-modern`/`-mono` packages) and, for gap-fills, directly from
+the `-3d`/`-flat`/`-modern`/`-mono` static packages and the
+`-anim-1`…`-anim-4` animated packages) and, for gap-fills, directly from
 **[microsoft/fluentui-emoji](https://github.com/microsoft/fluentui-emoji)**
 (MIT). This package only repackages those assets for self-hosting; the wrapper
-code/catalog is Chisel's. Both upstream MIT notices are reproduced verbatim in
-[`THIRD_PARTY_LICENSES`](./THIRD_PARTY_LICENSES) and travel in the published
-tarball. Microsoft trademarks (e.g. Clippy, Windows-logo glyphs) are not
-included and no Microsoft endorsement is implied.
+code/catalog is Chisel's. Both upstream projects are MIT-licensed — see their
+repositories' `LICENSE` files for the full notices
+([lobehub](https://github.com/lobehub/fluent-emoji/blob/master/LICENSE),
+[microsoft](https://github.com/microsoft/fluentui-emoji/blob/main/LICENSE)).
+Microsoft trademarks (e.g. Clippy, Windows-logo glyphs) are not included and no
+Microsoft endorsement is implied.

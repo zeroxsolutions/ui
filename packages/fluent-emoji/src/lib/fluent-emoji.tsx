@@ -10,7 +10,8 @@ export interface FluentEmojiProps
   name?: string;
   /** Serve from this base URL instead of the bundled asset (see resolve). */
   base?: string;
-  /** Render style — `'3d'` (default) or `'flat'`; see {@link FluentEmojiStyle}. */
+  /** Render style — `'3d'` (default), `'flat'`, `'modern'`, `'mono'`, or
+   *  `'anim'` (animated); see {@link FluentEmojiStyle}. */
   variant?: FluentEmojiStyle;
 }
 

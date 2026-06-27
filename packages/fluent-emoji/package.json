@@ -16,7 +16,7 @@
   "sideEffects": false,
   "files": [
     "dist",
-    "THIRD_PARTY_LICENSES",
+    "!dist/assets/anim",
     "!**/*.tsbuildinfo"
   ],
   "peerDependencies": {

@@ -11,6 +11,7 @@ const STYLE_OPTIONS: { id: FluentEmojiStyle; label: string }[] = [
   { id: 'flat', label: 'Flat' },
   { id: 'modern', label: 'Modern' },
   { id: 'mono', label: 'Mono' },
+  { id: 'anim', label: 'Animated' },
 ];
 
 // A glyph present in every Fluent style — each swatch previews it so the user
@@ -30,9 +31,9 @@ export interface EmojiAppearanceProps
 
 /**
  * A row of preview swatches for the Fluent emoji artwork **style** — 3D / Flat /
- * Modern / Mono — each swatch rendering the same sample emoji in its style, so
- * the preview *is* the selector (you see each appearance rather than reading a
- * label). Single-select.
+ * Modern / Mono / Animated — each swatch rendering the same sample emoji in its
+ * style (the Animated swatch plays its frames), so the preview *is* the selector
+ * (you see each appearance rather than reading a label). Single-select.
  *
  * This is an **app-level appearance control**, not part of the emoji glyph picker:
  * the artwork style is a global preference. It's controlled (`value` /
