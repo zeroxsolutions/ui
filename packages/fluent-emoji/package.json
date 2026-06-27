@@ -16,6 +16,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "NOTICE",
     "!dist/assets/anim",
     "!**/*.tsbuildinfo"
   ],

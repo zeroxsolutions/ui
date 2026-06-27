@@ -1,0 +1,35 @@
+@zeroxsolutions/fluent-emoji — third-party notices
+
+This package redistributes emoji artwork from Microsoft Fluent Emoji, obtained
+via LobeHub's repackages. The artwork is MIT-licensed; the copyright notices and
+the MIT permission notice below are included as required by that license. The
+wrapper code and the Unicode catalog are the package author's own work.
+
+--------------------------------------------------------------------------------
+Microsoft Fluent Emoji — https://github.com/microsoft/fluentui-emoji
+  Copyright (c) Microsoft Corporation.
+
+LobeHub Fluent Emoji — https://github.com/lobehub/fluent-emoji
+  (@lobehub/fluent-emoji-3d, -flat, -modern, -mono, and -anim-1 … -anim-4)
+  Copyright (c) 2023 LobeHub
+--------------------------------------------------------------------------------
+
+Both are provided under the MIT License:
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
