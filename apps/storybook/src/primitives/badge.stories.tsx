@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Badge } from '@chiselart/ui/badge';
+import { Badge } from '@zeroxsolutions/ui/badge';
 import { CheckIcon } from 'lucide-react';
 
 const meta: Meta<typeof Badge> = {

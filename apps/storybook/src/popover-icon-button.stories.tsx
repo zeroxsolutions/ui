@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Settings2 } from 'lucide-react'
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Settings2 } from 'lucide-react';
 
-import { PopoverIconButton } from '@chiselart/ui/popover-icon-button'
+import { PopoverIconButton } from '@zeroxsolutions/ui/popover-icon-button';
 
 const meta: Meta<typeof PopoverIconButton> = {
   title: 'Components/PopoverIconButton',
   component: PopoverIconButton,
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof PopoverIconButton>
+type Story = StoryObj<typeof PopoverIconButton>;
 
 export const Default: Story = {
   render: () => (
@@ -25,4 +25,4 @@ export const Default: Story = {
       </div>
     </PopoverIconButton>
   ),
-}
+};

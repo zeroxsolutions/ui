@@ -1,15 +1,15 @@
 import { readdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { basename, dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import type { StorybookConfig } from '@storybook/react-vite';
-import { mergeConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import { mergeConfig } from 'vite';
 
-// Consume `@chiselart/ui` from SOURCE (not dist) so component edits hot-reload
+// Consume `@zeroxsolutions/ui` from SOURCE (not dist) so component edits hot-reload
 // and Tailwind v4 scans the library's classes from the module graph. The
-// published package exposes flat per-component subpaths (`@chiselart/ui/button`);
+// published package exposes flat per-component subpaths (`@zeroxsolutions/ui/button`);
 // here each one is aliased to its source file (which still lives nested under
 // `src/components/ui`, `src/lib`, …), keyed by basename to mirror the build.
 const uiSrc = resolve(
@@ -17,7 +17,7 @@ const uiSrc = resolve(
   '../../../packages/ui/src',
 );
 
-// `@chiselart/fluent-emoji` (catalog + self-hosted Fluent artwork) is consumed
+// `@zeroxsolutions/fluent-emoji` (catalog + self-hosted Fluent artwork) is consumed
 // from source too, so its `import.meta.glob` over the bundled .webp runs in this
 // build and emits the assets — no third-party CDN, no prebuilt dist needed.
 const fluentEmojiSrc = resolve(
@@ -31,13 +31,13 @@ const isSkipped = (p: string) =>
   p === 'index.ts';
 
 const subpathAliases: Record<string, string> = {
-  '@chiselart/ui/styles.css': resolve(uiSrc, 'styles.css'),
-  '@chiselart/ui/source.css': resolve(uiSrc, 'source.css'),
+  '@zeroxsolutions/ui/styles.css': resolve(uiSrc, 'styles.css'),
+  '@zeroxsolutions/ui/source.css': resolve(uiSrc, 'source.css'),
 };
 for (const rel of readdirSync(uiSrc, { recursive: true }) as string[]) {
   if (!/\.(ts|tsx)$/.test(rel) || isSkipped(rel)) continue;
   const name = basename(rel).replace(/\.(ts|tsx)$/, '');
-  subpathAliases[`@chiselart/ui/${name}`] = join(uiSrc, rel);
+  subpathAliases[`@zeroxsolutions/ui/${name}`] = join(uiSrc, rel);
 }
 
 const config: StorybookConfig = {
@@ -63,7 +63,7 @@ const config: StorybookConfig = {
       resolve: {
         alias: {
           ...subpathAliases,
-          '@chiselart/fluent-emoji': fluentEmojiSrc,
+          '@zeroxsolutions/fluent-emoji': fluentEmojiSrc,
           // The library's internal `@/…` imports resolve into its own src.
           '@': uiSrc,
         },

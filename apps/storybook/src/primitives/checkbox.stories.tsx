@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Checkbox } from '@chiselart/ui/checkbox';
-import { Label } from '@chiselart/ui/label';
+import { Checkbox } from '@zeroxsolutions/ui/checkbox';
+import { Label } from '@zeroxsolutions/ui/label';
 
 const meta: Meta<typeof Checkbox> = {
   title: 'Primitives/Checkbox',

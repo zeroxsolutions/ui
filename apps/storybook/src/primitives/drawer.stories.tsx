@@ -1,7 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@chiselart/ui/button';
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@chiselart/ui/drawer';
+import { Button } from '@zeroxsolutions/ui/button';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@zeroxsolutions/ui/drawer';
 
 const meta: Meta<typeof Drawer> = {
   title: 'Primitives/Drawer',
@@ -47,9 +56,13 @@ export const RightSide: Story = {
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>Filters</DrawerTitle>
-          <DrawerDescription>Refine the results shown in the list.</DrawerDescription>
+          <DrawerDescription>
+            Refine the results shown in the list.
+          </DrawerDescription>
         </DrawerHeader>
-        <div className="px-4 text-sm text-muted-foreground">Panel body content.</div>
+        <div className="px-4 text-sm text-muted-foreground">
+          Panel body content.
+        </div>
         <DrawerFooter>
           <Button>Apply</Button>
           <DrawerClose asChild>

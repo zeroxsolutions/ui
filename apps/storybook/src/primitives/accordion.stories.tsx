@@ -1,6 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@chiselart/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@zeroxsolutions/ui/accordion';
 
 const meta: Meta<typeof Accordion> = {
   title: 'Primitives/Accordion',
@@ -25,13 +30,19 @@ export const Default: Story = {
       <AccordionItem value="item-2">
         <AccordionTrigger>Is it accessible?</AccordionTrigger>
         <AccordionContent>
-          <p>Yes. It is built on Base UI primitives that ship with full ARIA support.</p>
+          <p>
+            Yes. It is built on Base UI primitives that ship with full ARIA
+            support.
+          </p>
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="item-3">
         <AccordionTrigger>Can I customize the theme?</AccordionTrigger>
         <AccordionContent>
-          <p>Tokens drive every color, radius, and spacing value, so theming is global.</p>
+          <p>
+            Tokens drive every color, radius, and spacing value, so theming is
+            global.
+          </p>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

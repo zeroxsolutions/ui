@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Alert, AlertAction, AlertDescription, AlertTitle } from '@chiselart/ui/alert';
-import { Button } from '@chiselart/ui/button';
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from '@zeroxsolutions/ui/alert';
+import { Button } from '@zeroxsolutions/ui/button';
 import { CircleAlertIcon, TriangleAlertIcon } from 'lucide-react';
 
 const meta: Meta<typeof Alert> = {
@@ -41,7 +46,9 @@ export const WithAction: Story = {
     <Alert className="w-[480px]">
       <CircleAlertIcon />
       <AlertTitle>Update available</AlertTitle>
-      <AlertDescription>A new version of the app is ready to install.</AlertDescription>
+      <AlertDescription>
+        A new version of the app is ready to install.
+      </AlertDescription>
       <AlertAction>
         <Button size="sm" variant="outline">
           Update

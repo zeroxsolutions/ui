@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Progress, ProgressLabel, ProgressValue } from '@chiselart/ui/progress';
+import {
+  Progress,
+  ProgressLabel,
+  ProgressValue,
+} from '@zeroxsolutions/ui/progress';
 
 const meta: Meta<typeof Progress> = {
   title: 'Primitives/Progress',

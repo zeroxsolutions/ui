@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Star } from 'lucide-react';
 
-import { Badge } from '@chiselart/ui/badge';
-import { Center } from '@chiselart/ui/center';
+import { Badge } from '@zeroxsolutions/ui/badge';
+import { Center } from '@zeroxsolutions/ui/center';
 
 const meta: Meta<typeof Center> = {
   title: 'Layouts/Center',

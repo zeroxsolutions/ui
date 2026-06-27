@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { GithubMark } from '@chiselart/icons/github-mark';
-import { AI4BharatMark } from '@chiselart/icons/ai4bharat';
-import { DeepgramMark } from '@chiselart/icons/deepgram';
-import { InworldMark } from '@chiselart/icons/inworld';
-import { LeonardoMark } from '@chiselart/icons/leonardo';
-import { PipecatMark } from '@chiselart/icons/pipecat';
+import { AI4BharatMark } from '@zeroxsolutions/icons/ai4bharat';
+import { DeepgramMark } from '@zeroxsolutions/icons/deepgram';
+import { GithubMark } from '@zeroxsolutions/icons/github-mark';
+import { InworldMark } from '@zeroxsolutions/icons/inworld';
+import { LeonardoMark } from '@zeroxsolutions/icons/leonardo';
+import { PipecatMark } from '@zeroxsolutions/icons/pipecat';
 
-/** Visual catalog of the vendored brand marks shipped by @chiselart/icons —
+/** Visual catalog of the vendored brand marks shipped by @zeroxsolutions/icons —
  *  brands @lobehub/icons doesn't carry. github-mark is sized/coloured via
  *  `className` (currentColor); the provider marks mirror the @lobehub/icons
  *  color-mark API (`size="1em"`, scaled by the parent font-size). */
@@ -18,7 +18,13 @@ export default meta;
 
 type Story = StoryObj;
 
-function Cell({ label, children }: { label: string; children: React.ReactNode }) {
+function Cell({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex w-28 flex-col items-center gap-2 rounded-lg border p-4">
       <div className="flex h-10 items-center justify-center text-3xl">

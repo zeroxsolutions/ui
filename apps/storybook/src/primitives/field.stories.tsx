@@ -1,7 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from '@chiselart/ui/field';
-import { Input } from '@chiselart/ui/input';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+} from '@zeroxsolutions/ui/field';
+import { Input } from '@zeroxsolutions/ui/input';
 
 const meta: Meta<typeof Field> = {
   title: 'Primitives/Field',
@@ -16,7 +25,9 @@ export const Default: Story = {
     <Field className="w-80">
       <FieldLabel htmlFor="field-email">Email</FieldLabel>
       <Input id="field-email" type="email" placeholder="you@example.com" />
-      <FieldDescription>We'll never share your email with anyone.</FieldDescription>
+      <FieldDescription>
+        We'll never share your email with anyone.
+      </FieldDescription>
     </Field>
   ),
 };
@@ -44,7 +55,9 @@ export const FieldSetGroup: Story = {
         <Field>
           <FieldLabel htmlFor="set-email">Email</FieldLabel>
           <Input id="set-email" type="email" placeholder="you@example.com" />
-          <FieldDescription>Used for sign-in and notifications.</FieldDescription>
+          <FieldDescription>
+            Used for sign-in and notifications.
+          </FieldDescription>
         </Field>
       </FieldGroup>
     </FieldSet>

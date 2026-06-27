@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Highlighter } from '@chiselart/ui/highlighter';
+import { Highlighter } from '@zeroxsolutions/ui/highlighter';
 
 const meta: Meta<typeof Highlighter> = {
   title: 'Primitives/Highlighter',

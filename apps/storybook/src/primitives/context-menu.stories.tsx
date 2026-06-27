@@ -1,6 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { ContextMenu, ContextMenuCheckboxItem, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuLabel, ContextMenuRadioGroup, ContextMenuRadioItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '@chiselart/ui/context-menu';
+import {
+  ContextMenu,
+  ContextMenuCheckboxItem,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+} from '@zeroxsolutions/ui/context-menu';
 
 const meta: Meta<typeof ContextMenu> = {
   title: 'Primitives/ContextMenu',
@@ -45,13 +60,17 @@ export const WithGroupsAndSubmenu: Story = {
       <ContextMenuContent className="w-56">
         <ContextMenuGroup>
           <ContextMenuLabel>Appearance</ContextMenuLabel>
-          <ContextMenuCheckboxItem defaultChecked>Show Bookmarks</ContextMenuCheckboxItem>
+          <ContextMenuCheckboxItem defaultChecked>
+            Show Bookmarks
+          </ContextMenuCheckboxItem>
           <ContextMenuCheckboxItem>Show Full URLs</ContextMenuCheckboxItem>
         </ContextMenuGroup>
         <ContextMenuSeparator />
         <ContextMenuRadioGroup defaultValue="comfortable">
           <ContextMenuLabel>Density</ContextMenuLabel>
-          <ContextMenuRadioItem value="comfortable">Comfortable</ContextMenuRadioItem>
+          <ContextMenuRadioItem value="comfortable">
+            Comfortable
+          </ContextMenuRadioItem>
           <ContextMenuRadioItem value="compact">Compact</ContextMenuRadioItem>
         </ContextMenuRadioGroup>
         <ContextMenuSeparator />

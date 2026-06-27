@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Circle, MousePointer2, Square, Type } from 'lucide-react';
 
-import { Button } from '@chiselart/ui/button';
-import { FloatingToolbarShell } from '@chiselart/ui/floating-toolbar-shell';
+import { Button } from '@zeroxsolutions/ui/button';
+import { FloatingToolbarShell } from '@zeroxsolutions/ui/floating-toolbar-shell';
 
 const meta: Meta<typeof FloatingToolbarShell> = {
   title: 'Layouts/FloatingToolbarShell',

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Input } from '@chiselart/ui/input';
-import { LabeledControl } from '@chiselart/ui/labeled-control';
+import { Input } from '@zeroxsolutions/ui/input';
+import { LabeledControl } from '@zeroxsolutions/ui/labeled-control';
 
 const meta: Meta<typeof LabeledControl> = {
   title: 'Layouts/LabeledControl',

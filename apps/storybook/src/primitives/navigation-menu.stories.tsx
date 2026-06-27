@@ -1,6 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@chiselart/ui/navigation-menu';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from '@zeroxsolutions/ui/navigation-menu';
 
 const meta: Meta<typeof NavigationMenu> = {
   title: 'Primitives/NavigationMenu',
@@ -20,7 +27,9 @@ export const Default: Story = {
             <div className="grid w-64 gap-1">
               <NavigationMenuLink href="#editor">Editor</NavigationMenuLink>
               <NavigationMenuLink href="#canvas">Canvas</NavigationMenuLink>
-              <NavigationMenuLink href="#tokens">Design tokens</NavigationMenuLink>
+              <NavigationMenuLink href="#tokens">
+                Design tokens
+              </NavigationMenuLink>
             </div>
           </NavigationMenuContent>
         </NavigationMenuItem>
@@ -28,7 +37,9 @@ export const Default: Story = {
           <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
           <NavigationMenuContent>
             <div className="grid w-64 gap-1">
-              <NavigationMenuLink href="#docs">Documentation</NavigationMenuLink>
+              <NavigationMenuLink href="#docs">
+                Documentation
+              </NavigationMenuLink>
               <NavigationMenuLink href="#guides">Guides</NavigationMenuLink>
             </div>
           </NavigationMenuContent>

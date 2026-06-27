@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Link2 } from 'lucide-react';
 
-import { Button } from '@chiselart/ui/button';
-import { FieldRow } from '@chiselart/ui/field-row';
-import { Input } from '@chiselart/ui/input';
+import { Button } from '@zeroxsolutions/ui/button';
+import { FieldRow } from '@zeroxsolutions/ui/field-row';
+import { Input } from '@zeroxsolutions/ui/input';
 
 const meta: Meta<typeof FieldRow> = {
   title: 'Layouts/FieldRow',

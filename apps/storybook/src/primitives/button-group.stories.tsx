@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@chiselart/ui/button';
-import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from '@chiselart/ui/button-group';
+import { Button } from '@zeroxsolutions/ui/button';
+import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+  ButtonGroupText,
+} from '@zeroxsolutions/ui/button-group';
 
 const meta: Meta<typeof ButtonGroup> = {
   title: 'Primitives/ButtonGroup',
@@ -25,7 +29,7 @@ export const WithTextAndSeparator: Story = {
   render: () => (
     <ButtonGroup>
       <ButtonGroupText>https://</ButtonGroupText>
-      <Button variant="outline">chiselart.dev</Button>
+      <Button variant="outline">zeroxsolutions.dev</Button>
       <ButtonGroupSeparator />
       <Button variant="outline">Copy</Button>
     </ButtonGroup>

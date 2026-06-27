@@ -1,5 +1,5 @@
 {
-  "name": "@chiselart/ui",
+  "name": "@zeroxsolutions/ui",
   "version": "0.0.32",
   "type": "module",
   "sideEffects": [
@@ -24,7 +24,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@chiselart/fluent-emoji": "workspace:*",
+    "@zeroxsolutions/fluent-emoji": "workspace:*",
     "@codemirror/commands": "^6.10.3",
     "@codemirror/language": "^6.12.3",
     "@codemirror/state": "^6.6.0",

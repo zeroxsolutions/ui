@@ -1,10 +1,10 @@
 /// <reference types='vitest' />
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import dts from 'vite-plugin-dts';
 import { glob } from 'glob';
 import { readFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
+import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
 
 const pkg = JSON.parse(
   readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf8'),
@@ -22,7 +22,7 @@ const external = [
 ].map((name) => new RegExp(`^${name}(/.*)?$`));
 
 // One flat entry per source file, keyed by basename → `dist/<name>.js`, public
-// as `@chiselart/icons/<name>`. Per-file entries give real tree-shaking (a brand
+// as `@zeroxsolutions/icons/<name>`. Per-file entries give real tree-shaking (a brand
 // mark's heavy inline SVG never lands in a bundle that only imports another).
 // Basenames must be unique across src/ for the flat output to be collision-free.
 const entries: Record<string, string> = {};
@@ -97,7 +97,7 @@ export default defineConfig(() => ({
     },
   },
   test: {
-    name: '@chiselart/icons',
+    name: '@zeroxsolutions/icons',
     watch: false,
     globals: true,
     environment: 'jsdom',

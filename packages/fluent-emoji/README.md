@@ -1,13 +1,16 @@
-# @chiselart/fluent-emoji
+# @zeroxsolutions/fluent-emoji
 
 Self-hosted Microsoft **Fluent Emoji** for Chisel — a committed Unicode CLDR
 catalog plus the artwork in four styles, resolved by codepoint. No third-party
 CDN.
 
 ```tsx
-import { FluentEmoji, EMOJI_CATEGORIES } from '@chiselart/fluent-emoji';
+import { FluentEmoji, EMOJI_CATEGORIES } from '@zeroxsolutions/fluent-emoji';
 
-<FluentEmoji glyph="🤯" name="exploding head" />;          {/* 3D (default) */}
+<FluentEmoji glyph="🤯" name="exploding head" />;
+{
+  /* 3D (default) */
+}
 <FluentEmoji glyph="🤯" name="exploding head" variant="flat" />;
 ```
 
@@ -17,12 +20,12 @@ Four static styles ship in the package, each in its own `assets/<style>/`
 subfolder. Pick one per call with `variant` (component) / `style`
 (`fluentEmojiUrl`), or set a default with `setFluentEmojiStyle`.
 
-| `variant` | source style          | format |
-| --------- | --------------------- | ------ |
-| `3d`      | Fluent 3D (default)   | webp   |
-| `flat`    | Fluent Flat           | svg    |
-| `modern`  | Fluent Color (2D)     | svg    |
-| `mono`    | Fluent High Contrast  | svg    |
+| `variant` | source style         | format |
+| --------- | -------------------- | ------ |
+| `3d`      | Fluent 3D (default)  | webp   |
+| `flat`    | Fluent Flat          | svg    |
+| `modern`  | Fluent Color (2D)    | svg    |
+| `mono`    | Fluent High Contrast | svg    |
 
 The **animated** style is intentionally not bundled — animated webp average
 ~300 KB/glyph (~527 MB for the catalog), too large to self-host. To add it later,
@@ -37,9 +40,9 @@ mode force-inlines bundled assets, the artwork is shipped as raw files instead �
 the consuming app serves them and points the resolver at the base:
 
 ```ts
-import { setFluentEmojiBase } from '@chiselart/fluent-emoji';
+import { setFluentEmojiBase } from '@zeroxsolutions/fluent-emoji';
 
-// e.g. after copying `@chiselart/fluent-emoji/dist/assets` to `public/fluent-emoji`
+// e.g. after copying `@zeroxsolutions/fluent-emoji/dist/assets` to `public/fluent-emoji`
 // (recursively — keep the style subfolders), or pointing at a CDN:
 setFluentEmojiBase('/fluent-emoji');
 ```

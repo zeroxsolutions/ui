@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { MonoChip } from '@chiselart/ui/mono-chip'
+import { MonoChip } from '@zeroxsolutions/ui/mono-chip';
 
 const meta: Meta<typeof MonoChip> = {
   title: 'Components/MonoChip',
   component: MonoChip,
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof MonoChip>
+type Story = StoryObj<typeof MonoChip>;
 
 export const Default: Story = {
   render: () => (
@@ -23,4 +23,4 @@ export const Default: Story = {
       </MonoChip>
     </div>
   ),
-}
+};

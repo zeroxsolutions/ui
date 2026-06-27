@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Download } from 'lucide-react';
 
-import { BinaryFileCard } from '@chiselart/ui/binary-file-card';
-import { Button } from '@chiselart/ui/button';
+import { BinaryFileCard } from '@zeroxsolutions/ui/binary-file-card';
+import { Button } from '@zeroxsolutions/ui/button';
 
 const meta: Meta<typeof BinaryFileCard> = {
   title: 'Code Editor/BinaryFileCard',

@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { ReactNode } from 'react';
 
+import { SearchInput } from '@zeroxsolutions/ui/search-input';
 import {
   Sidebar,
   SidebarContent,
@@ -10,13 +11,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-} from '@chiselart/ui/sidebar';
+} from '@zeroxsolutions/ui/sidebar';
 import {
   SidebarMenuCollapsible,
   SidebarMenuCollapsibleContent,
   SidebarMenuCollapsibleTrigger,
-} from '@chiselart/ui/sidebar-menu-collapsible';
-import { SearchInput } from '@chiselart/ui/search-input';
+} from '@zeroxsolutions/ui/sidebar-menu-collapsible';
 import { MessageSquareIcon, SlidersHorizontalIcon } from 'lucide-react';
 
 const meta: Meta<typeof SidebarMenuCollapsible> = {

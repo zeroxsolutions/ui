@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { FileTypeIcon } from '@chiselart/ui/file-type-icon';
+import { FileTypeIcon } from '@zeroxsolutions/ui/file-type-icon';
 
 const meta: Meta<typeof FileTypeIcon> = {
   title: 'Code Editor/FileTypeIcon',

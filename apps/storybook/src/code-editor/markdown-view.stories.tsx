@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { MarkdownView } from '@chiselart/ui/markdown-view';
+import { MarkdownView } from '@zeroxsolutions/ui/markdown-view';
 
 const SAMPLE = `# PDF Toolkit
 

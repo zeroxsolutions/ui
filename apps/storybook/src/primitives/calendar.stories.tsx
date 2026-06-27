@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 
-import { Calendar } from '@chiselart/ui/calendar';
+import { Calendar } from '@zeroxsolutions/ui/calendar';
 
 const meta: Meta<typeof Calendar> = {
   title: 'Primitives/Calendar',

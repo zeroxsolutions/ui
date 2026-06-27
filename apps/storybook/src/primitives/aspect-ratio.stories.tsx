@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AspectRatio } from '@chiselart/ui/aspect-ratio';
+import { AspectRatio } from '@zeroxsolutions/ui/aspect-ratio';
 
 const meta: Meta<typeof AspectRatio> = {
   title: 'Primitives/AspectRatio',

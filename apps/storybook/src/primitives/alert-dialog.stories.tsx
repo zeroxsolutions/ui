@@ -1,7 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogTrigger } from '@chiselart/ui/alert-dialog';
-import { Button } from '@chiselart/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@zeroxsolutions/ui/alert-dialog';
+import { Button } from '@zeroxsolutions/ui/button';
 import { TrashIcon } from 'lucide-react';
 
 const meta: Meta<typeof AlertDialog> = {
@@ -15,13 +26,15 @@ type Story = StoryObj<typeof AlertDialog>;
 export const Default: Story = {
   render: () => (
     <AlertDialog>
-      <AlertDialogTrigger render={<Button variant="destructive">Delete project</Button>} />
+      <AlertDialogTrigger
+        render={<Button variant="destructive">Delete project</Button>}
+      />
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This permanently deletes the project and all of its files. This action cannot
-            be undone.
+            This permanently deletes the project and all of its files. This
+            action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -36,7 +49,9 @@ export const Default: Story = {
 export const WithMedia: Story = {
   render: () => (
     <AlertDialog>
-      <AlertDialogTrigger render={<Button variant="outline">Remove file</Button>} />
+      <AlertDialogTrigger
+        render={<Button variant="outline">Remove file</Button>}
+      />
       <AlertDialogContent size="sm">
         <AlertDialogHeader>
           <AlertDialogMedia>

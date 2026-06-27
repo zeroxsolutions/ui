@@ -1,13 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@chiselart/ui/command';
 import {
-  CalendarIcon,
-  SmileIcon,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from '@zeroxsolutions/ui/command';
+import {
   CalculatorIcon,
-  UserIcon,
+  CalendarIcon,
   CreditCardIcon,
   SettingsIcon,
+  SmileIcon,
+  UserIcon,
 } from 'lucide-react';
 
 const meta: Meta<typeof Command> = {

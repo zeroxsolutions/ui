@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@chiselart/ui/button';
-import { Toaster } from '@chiselart/ui/sonner';
+import { Button } from '@zeroxsolutions/ui/button';
+import { Toaster } from '@zeroxsolutions/ui/sonner';
 import { toast } from 'sonner';
 
 const meta: Meta<typeof Toaster> = {
@@ -26,10 +26,7 @@ export const Default: Story = {
 export const Variants: Story = {
   render: () => (
     <div className="flex gap-2">
-      <Button
-        variant="outline"
-        onClick={() => toast.success('Profile saved')}
-      >
+      <Button variant="outline" onClick={() => toast.success('Profile saved')}>
         Success
       </Button>
       <Button

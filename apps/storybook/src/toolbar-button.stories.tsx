@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import { MousePointer2, Square } from 'lucide-react'
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { MousePointer2, Square } from 'lucide-react';
 
-import { ToolbarButton } from '@chiselart/ui/toolbar-button'
+import { ToolbarButton } from '@zeroxsolutions/ui/toolbar-button';
 
 const meta: Meta<typeof ToolbarButton> = {
   title: 'Components/ToolbarButton',
   component: ToolbarButton,
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof ToolbarButton>
+type Story = StoryObj<typeof ToolbarButton>;
 
 export const Toolbar: Story = {
   render: () => (
@@ -18,4 +18,4 @@ export const Toolbar: Story = {
       <ToolbarButton label="Rectangle" shortcut="R" icon={Square} />
     </div>
   ),
-}
+};

@@ -1,5 +1,5 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
 
 import {
   FrontmatterEditor,
@@ -9,9 +9,9 @@ import {
   FrontmatterFieldError,
   FrontmatterFieldLabel,
   type FrontmatterValue,
-} from '@chiselart/ui/frontmatter-editor';
-import { Input } from '@chiselart/ui/input';
-import { Textarea } from '@chiselart/ui/textarea';
+} from '@zeroxsolutions/ui/frontmatter-editor';
+import { Input } from '@zeroxsolutions/ui/input';
+import { Textarea } from '@zeroxsolutions/ui/textarea';
 
 const meta: Meta<typeof FrontmatterEditor> = {
   title: 'Code Editor/FrontmatterEditor',
@@ -46,7 +46,9 @@ export const SkillMetadata: Story = {
         >
           <FrontmatterField name="name">
             <FrontmatterFieldLabel>Name</FrontmatterFieldLabel>
-            <FrontmatterFieldControl render={<Input placeholder="my-skill" />} />
+            <FrontmatterFieldControl
+              render={<Input placeholder="my-skill" />}
+            />
             <FrontmatterFieldError />
           </FrontmatterField>
 

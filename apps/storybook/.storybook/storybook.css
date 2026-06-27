@@ -2,7 +2,7 @@
 @import '../../../packages/ui/src/styles.css';
 
 /* Tailwind v4's automatic content detection roots at this Storybook app, so it
-   misses the utility classes used inside `@chiselart/ui`'s source. Scan the
+   misses the utility classes used inside `@zeroxsolutions/ui`'s source. Scan the
    library explicitly so component classes (grid-cols-8, w-[332px], size-9, …)
    are generated. */
 @source '../../../packages/ui/src';

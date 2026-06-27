@@ -1,9 +1,9 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
 
-import { CodeEditorPane } from '@chiselart/ui/code-editor-pane';
-import { Label } from '@chiselart/ui/label';
-import { Switch } from '@chiselart/ui/switch';
+import { CodeEditorPane } from '@zeroxsolutions/ui/code-editor-pane';
+import { Label } from '@zeroxsolutions/ui/label';
+import { Switch } from '@zeroxsolutions/ui/switch';
 
 const TS_SAMPLE = `import { createHighlighter } from 'shiki';
 
@@ -76,7 +76,8 @@ export const ReadOnlyAndWrap: Story = {
       <div className="flex w-[640px] flex-col gap-3">
         <div className="flex items-center gap-6">
           <Label className="flex items-center gap-2">
-            <Switch checked={readOnly} onCheckedChange={setReadOnly} /> Read-only
+            <Switch checked={readOnly} onCheckedChange={setReadOnly} />{' '}
+            Read-only
           </Label>
           <Label className="flex items-center gap-2">
             <Switch checked={wrap} onCheckedChange={setWrap} /> Wrap

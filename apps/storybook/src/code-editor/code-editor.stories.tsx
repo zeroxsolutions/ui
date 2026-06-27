@@ -1,25 +1,22 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
 
+import { CodeEditor, CodeEditorContent } from '@zeroxsolutions/ui/code-editor';
+import { CommandInput, CommandList } from '@zeroxsolutions/ui/command';
 import {
-  CodeEditor,
-  CodeEditorContent,
-} from '@chiselart/ui/code-editor';
-import { type RoutedFile } from '@chiselart/ui/file-content-router';
+  CommandSwitcher,
+  CommandSwitcherItem,
+} from '@zeroxsolutions/ui/command-switcher';
+import { Empty } from '@zeroxsolutions/ui/empty';
+import { type RoutedFile } from '@zeroxsolutions/ui/file-content-router';
 import {
   FileTree,
   FileTreeGroup,
   FileTreeItem,
   FileTreeLabel,
-} from '@chiselart/ui/file-tree';
-import { FileTypeIcon } from '@chiselart/ui/file-type-icon';
-import {
-  CommandSwitcher,
-  CommandSwitcherItem,
-} from '@chiselart/ui/command-switcher';
-import { CommandInput, CommandList } from '@chiselart/ui/command';
-import { useCommandShortcut } from '@chiselart/ui/use-command-shortcut';
-import { Empty } from '@chiselart/ui/empty';
+} from '@zeroxsolutions/ui/file-tree';
+import { FileTypeIcon } from '@zeroxsolutions/ui/file-type-icon';
+import { useCommandShortcut } from '@zeroxsolutions/ui/use-command-shortcut';
 
 const INITIAL: RoutedFile[] = [
   {
@@ -67,7 +64,10 @@ export const Workspace: Story = {
     const [files, setFiles] = React.useState(INITIAL);
     const [active, setActive] = React.useState('SKILL.md');
     const [paletteOpen, setPaletteOpen] = React.useState(false);
-    useCommandShortcut({ key: 'k', onTrigger: () => setPaletteOpen((o) => !o) });
+    useCommandShortcut({
+      key: 'k',
+      onTrigger: () => setPaletteOpen((o) => !o),
+    });
 
     const onFileTextChange = (path: string, text: string) =>
       setFiles((prev) =>

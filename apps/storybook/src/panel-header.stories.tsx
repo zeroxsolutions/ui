@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MoreHorizontal } from 'lucide-react';
 
-import { Button } from '@chiselart/ui/button';
+import { Button } from '@zeroxsolutions/ui/button';
 import {
   PanelHeader,
   PanelHeaderActions,
   PanelHeaderRow,
   PanelHeaderTitle,
-} from '@chiselart/ui/panel-header';
+} from '@zeroxsolutions/ui/panel-header';
 
 const meta: Meta<typeof PanelHeader> = {
   title: 'Layouts/PanelHeader',

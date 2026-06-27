@@ -1,6 +1,9 @@
-import * as React from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { FluentEmoji, type FluentEmojiStyle } from '@chiselart/fluent-emoji';
+import {
+  FluentEmoji,
+  type FluentEmojiStyle,
+} from '@zeroxsolutions/fluent-emoji';
+import * as React from 'react';
 
 /** The selectable Fluent artwork styles, in display order. */
 const STYLE_OPTIONS: { id: FluentEmojiStyle; label: string }[] = [
@@ -34,7 +37,7 @@ export interface EmojiAppearanceProps
  * This is an **app-level appearance control**, not part of the emoji glyph picker:
  * the artwork style is a global preference. It's controlled (`value` /
  * `onValueChange`); the consumer owns persistence and applying the choice app-wide
- * (`setFluentEmojiStyle` from `@chiselart/fluent-emoji`).
+ * (`setFluentEmojiStyle` from `@zeroxsolutions/fluent-emoji`).
  */
 export function EmojiAppearance({
   value,

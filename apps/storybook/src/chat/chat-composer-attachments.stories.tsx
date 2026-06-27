@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ArrowUp } from 'lucide-react';
 import { useState } from 'react';
 
-import { ChatComposerAttachments } from '@chiselart/ui/chat-composer-attachments';
+import { ChatComposerAttachments } from '@zeroxsolutions/ui/chat-composer-attachments';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupTextarea,
-} from '@chiselart/ui/input-group';
+} from '@zeroxsolutions/ui/input-group';
 
 const meta: Meta<typeof ChatComposerAttachments> = {
   title: 'Chat/ComposerAttachments',
@@ -39,7 +39,11 @@ export const InComposer: Story = {
           rows={2}
         />
         <InputGroupAddon align="block-end">
-          <InputGroupButton size="icon-sm" aria-label="Send" className="ml-auto">
+          <InputGroupButton
+            size="icon-sm"
+            aria-label="Send"
+            className="ml-auto"
+          >
             <ArrowUp />
           </InputGroupButton>
         </InputGroupAddon>

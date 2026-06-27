@@ -4,7 +4,7 @@ import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from '@chiselart/ui/conversation';
+} from '@zeroxsolutions/ui/conversation';
 
 /** A message bubble stand-in — the story exercises the scroll surface, not the
  *  real chat bubble. */

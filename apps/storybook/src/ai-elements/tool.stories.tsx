@@ -8,7 +8,7 @@ import {
   ToolInput,
   ToolOutput,
   type ToolState,
-} from '@chiselart/ui/tool';
+} from '@zeroxsolutions/ui/tool';
 
 const meta: Meta<typeof Tool> = {
   title: 'AI Elements/Tool',
@@ -44,7 +44,10 @@ export const Error: Story = {
         <ToolHeader state="output-error" title="fetch_page" />
         <ToolContent>
           <ToolInput input={{ url: 'https://x.test' }} />
-          <ToolOutput output={undefined} errorText="Request timed out after 30s" />
+          <ToolOutput
+            output={undefined}
+            errorText="Request timed out after 30s"
+          />
         </ToolContent>
       </Tool>
     </div>

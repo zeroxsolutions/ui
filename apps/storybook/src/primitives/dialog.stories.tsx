@@ -1,9 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@chiselart/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@chiselart/ui/dialog';
-import { Field, FieldLabel } from '@chiselart/ui/field';
-import { Input } from '@chiselart/ui/input';
+import { Button } from '@zeroxsolutions/ui/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@zeroxsolutions/ui/dialog';
+import { Field, FieldLabel } from '@zeroxsolutions/ui/field';
+import { Input } from '@zeroxsolutions/ui/input';
 
 const meta: Meta<typeof Dialog> = {
   title: 'Primitives/Dialog',

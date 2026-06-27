@@ -1,7 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@chiselart/ui/button';
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@chiselart/ui/card';
+import { Button } from '@zeroxsolutions/ui/button';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@zeroxsolutions/ui/card';
 
 const meta: Meta<typeof Card> = {
   title: 'Primitives/Card',
@@ -37,9 +45,7 @@ export const WithActionAndFooter: Story = {
           </Button>
         </CardAction>
       </CardHeader>
-      <CardContent>
-        Unlock unlimited projects and priority support.
-      </CardContent>
+      <CardContent>Unlock unlimited projects and priority support.</CardContent>
       <CardFooter>
         <Button className="w-full">Upgrade</Button>
       </CardFooter>

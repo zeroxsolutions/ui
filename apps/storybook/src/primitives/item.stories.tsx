@@ -1,7 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { UserIcon } from 'lucide-react';
 
-import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@chiselart/ui/item';
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from '@zeroxsolutions/ui/item';
 
 const meta: Meta<typeof Item> = {
   title: 'Primitives/Item',
@@ -34,7 +41,7 @@ export const Group: Story = {
         </ItemMedia>
         <ItemContent>
           <ItemTitle>Ada Lovelace</ItemTitle>
-          <ItemDescription>ada@chiselart.dev</ItemDescription>
+          <ItemDescription>ada@zeroxsolutions.dev</ItemDescription>
         </ItemContent>
       </Item>
       <Item variant="outline">
@@ -43,7 +50,7 @@ export const Group: Story = {
         </ItemMedia>
         <ItemContent>
           <ItemTitle>Alan Turing</ItemTitle>
-          <ItemDescription>alan@chiselart.dev</ItemDescription>
+          <ItemDescription>alan@zeroxsolutions.dev</ItemDescription>
         </ItemContent>
       </Item>
     </ItemGroup>

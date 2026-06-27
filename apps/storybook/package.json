@@ -1,14 +1,14 @@
 {
-  "name": "@chiselart/storybook",
+  "name": "@zeroxsolutions/storybook",
   "version": "0.0.1",
   "private": true,
   "nx": {
     "projectType": "application"
   },
   "dependencies": {
-    "@chiselart/fluent-emoji": "workspace:*",
-    "@chiselart/icons": "workspace:*",
-    "@chiselart/ui": "workspace:*",
+    "@zeroxsolutions/fluent-emoji": "workspace:*",
+    "@zeroxsolutions/icons": "workspace:*",
+    "@zeroxsolutions/ui": "workspace:*",
     "lucide-react": "^1.21.0",
     "sonner": "^2.0.7"
   },

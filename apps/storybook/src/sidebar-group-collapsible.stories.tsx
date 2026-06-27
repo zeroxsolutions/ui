@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { ReactNode } from 'react';
 
 import {
   Sidebar,
@@ -9,12 +9,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-} from '@chiselart/ui/sidebar';
+} from '@zeroxsolutions/ui/sidebar';
 import {
   SidebarGroupCollapsible,
   SidebarGroupCollapsibleContent,
   SidebarGroupCollapsibleTrigger,
-} from '@chiselart/ui/sidebar-group-collapsible';
+} from '@zeroxsolutions/ui/sidebar-group-collapsible';
 import { FolderIcon, UserIcon } from 'lucide-react';
 
 const meta: Meta<typeof SidebarGroupCollapsible> = {

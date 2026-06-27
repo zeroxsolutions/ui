@@ -1,4 +1,3 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   type ColumnDef,
@@ -10,22 +9,35 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import * as React from 'react';
 
-import { DataTable, DataTableToolbar, DataTableView } from '@chiselart/ui/data-table';
-import { DataTableColumnHeader } from '@chiselart/ui/data-table-column-header';
-import { DataTablePagination } from '@chiselart/ui/data-table-pagination';
-import { DataTableViewOptions } from '@chiselart/ui/data-table-view-options';
-import { Empty, EmptyHeader, EmptyTitle } from '@chiselart/ui/empty';
-import { Input } from '@chiselart/ui/input';
+import {
+  DataTable,
+  DataTableToolbar,
+  DataTableView,
+} from '@zeroxsolutions/ui/data-table';
+import { DataTableColumnHeader } from '@zeroxsolutions/ui/data-table-column-header';
+import { DataTablePagination } from '@zeroxsolutions/ui/data-table-pagination';
+import { DataTableViewOptions } from '@zeroxsolutions/ui/data-table-view-options';
+import { Empty, EmptyHeader, EmptyTitle } from '@zeroxsolutions/ui/empty';
+import { Input } from '@zeroxsolutions/ui/input';
 
 type Person = { name: string; role: string; email: string };
 
 const data: Person[] = [
-  { name: 'Ada Lovelace', role: 'Engineer', email: 'ada@chiselart.dev' },
-  { name: 'Alan Turing', role: 'Researcher', email: 'alan@chiselart.dev' },
-  { name: 'Grace Hopper', role: 'Admiral', email: 'grace@chiselart.dev' },
-  { name: 'Katherine Johnson', role: 'Mathematician', email: 'kj@chiselart.dev' },
-  { name: 'Margaret Hamilton', role: 'Engineer', email: 'mh@chiselart.dev' },
+  { name: 'Ada Lovelace', role: 'Engineer', email: 'ada@zeroxsolutions.dev' },
+  { name: 'Alan Turing', role: 'Researcher', email: 'alan@zeroxsolutions.dev' },
+  { name: 'Grace Hopper', role: 'Admiral', email: 'grace@zeroxsolutions.dev' },
+  {
+    name: 'Katherine Johnson',
+    role: 'Mathematician',
+    email: 'kj@zeroxsolutions.dev',
+  },
+  {
+    name: 'Margaret Hamilton',
+    role: 'Engineer',
+    email: 'mh@zeroxsolutions.dev',
+  },
 ];
 
 const columns: ColumnDef<Person>[] = [

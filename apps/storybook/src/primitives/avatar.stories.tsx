@@ -1,6 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Avatar, AvatarBadge, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarImage } from '@chiselart/ui/avatar';
+import {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarGroupCount,
+  AvatarImage,
+} from '@zeroxsolutions/ui/avatar';
 
 const meta: Meta<typeof Avatar> = {
   title: 'Primitives/Avatar',
@@ -14,17 +21,11 @@ export const Default: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <Avatar size="sm">
-        <AvatarImage
-          src="https://github.com/shadcn.png"
-          alt="@shadcn"
-        />
+        <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
         <AvatarFallback>CN</AvatarFallback>
       </Avatar>
       <Avatar>
-        <AvatarImage
-          src="https://github.com/shadcn.png"
-          alt="@shadcn"
-        />
+        <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
         <AvatarFallback>CN</AvatarFallback>
       </Avatar>
       <Avatar size="lg">

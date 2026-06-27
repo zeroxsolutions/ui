@@ -1,10 +1,25 @@
-import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 
-import { AvatarEditor, AvatarEditorColor, AvatarEditorContent, AvatarEditorEmoji, AvatarEditorTrigger, AvatarEditorUpload, type AvatarValue } from '@chiselart/ui/avatar-editor';
-import { Button } from '@chiselart/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@chiselart/ui/dialog';
-import { FluentEmoji } from '@chiselart/fluent-emoji';
+import { FluentEmoji } from '@zeroxsolutions/fluent-emoji';
+import {
+  AvatarEditor,
+  AvatarEditorColor,
+  AvatarEditorContent,
+  AvatarEditorEmoji,
+  AvatarEditorTrigger,
+  AvatarEditorUpload,
+  type AvatarValue,
+} from '@zeroxsolutions/ui/avatar-editor';
+import { Button } from '@zeroxsolutions/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@zeroxsolutions/ui/dialog';
 
 const meta: Meta<typeof AvatarEditor> = {
   title: 'Components/AvatarEditor',
@@ -106,7 +121,8 @@ export const InsideDialog: Story = {
           <DialogHeader>
             <DialogTitle>Edit agent</DialogTitle>
             <DialogDescription>
-              Click the avatar to pick an emoji, upload an image, or set a colour.
+              Click the avatar to pick an emoji, upload an image, or set a
+              colour.
             </DialogDescription>
           </DialogHeader>
           <AvatarEditor value={value} onValueChange={setValue}>

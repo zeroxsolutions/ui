@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { ChatMessageShell } from '@chiselart/ui/chat-message-shell';
+import { ChatMessageShell } from '@zeroxsolutions/ui/chat-message-shell';
 
 const meta: Meta<typeof ChatMessageShell> = {
   title: 'Chat/MessageShell',

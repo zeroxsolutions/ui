@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@chiselart/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@chiselart/ui/collapsible';
+import { Button } from '@zeroxsolutions/ui/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@zeroxsolutions/ui/collapsible';
 
 const meta: Meta<typeof Collapsible> = {
   title: 'Primitives/Collapsible',
@@ -15,9 +19,7 @@ export const Default: Story = {
   render: () => (
     <Collapsible className="w-72">
       <CollapsibleTrigger
-        render={
-          <Button variant="outline" className="w-full justify-between" />
-        }
+        render={<Button variant="outline" className="w-full justify-between" />}
       >
         Toggle details
       </CollapsibleTrigger>
@@ -33,9 +35,7 @@ export const DefaultOpen: Story = {
   render: () => (
     <Collapsible defaultOpen className="w-72">
       <CollapsibleTrigger
-        render={
-          <Button variant="outline" className="w-full justify-between" />
-        }
+        render={<Button variant="outline" className="w-full justify-between" />}
       >
         Notifications
       </CollapsibleTrigger>

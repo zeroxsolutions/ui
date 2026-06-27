@@ -1,12 +1,12 @@
 /// <reference types='vitest' />
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import dts from 'vite-plugin-dts';
-import { libInjectCss } from 'vite-plugin-lib-inject-css';
+import react from '@vitejs/plugin-react';
 import { glob } from 'glob';
 import { copyFileSync, readFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
+import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
+import { libInjectCss } from 'vite-plugin-lib-inject-css';
 
 const pkg = JSON.parse(
   readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf8'),
@@ -24,7 +24,7 @@ const external = [
 ].map((name) => new RegExp(`^${name}(/.*)?$`));
 
 // One flat entry per source file, keyed by basename → `dist/<name>.js`, public
-// as `@chiselart/ui/<name>`. Per-file entries give real tree-shaking (a barrel
+// as `@zeroxsolutions/ui/<name>`. Per-file entries give real tree-shaking (a barrel
 // would bundle the whole library on a single import). Basenames must be unique
 // across src/ for the flat output to be collision-free.
 const entries: Record<string, string> = {};
@@ -120,7 +120,7 @@ export default defineConfig(() => ({
     },
   },
   test: {
-    name: '@chiselart/ui',
+    name: '@zeroxsolutions/ui',
     watch: false,
     globals: true,
     environment: 'jsdom',

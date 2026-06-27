@@ -1,19 +1,19 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
 
-import {
-  CommandSwitcher,
-  CommandSwitcherItem,
-} from '@chiselart/ui/command-switcher';
+import { Button } from '@zeroxsolutions/ui/button';
 import {
   CommandEmpty,
   CommandInput,
   CommandList,
   CommandShortcut,
-} from '@chiselart/ui/command';
-import { useCommandShortcut } from '@chiselart/ui/use-command-shortcut';
-import { Button } from '@chiselart/ui/button';
-import { FileTypeIcon } from '@chiselart/ui/file-type-icon';
+} from '@zeroxsolutions/ui/command';
+import {
+  CommandSwitcher,
+  CommandSwitcherItem,
+} from '@zeroxsolutions/ui/command-switcher';
+import { FileTypeIcon } from '@zeroxsolutions/ui/file-type-icon';
+import { useCommandShortcut } from '@zeroxsolutions/ui/use-command-shortcut';
 
 const FILES = [
   'SKILL.md',

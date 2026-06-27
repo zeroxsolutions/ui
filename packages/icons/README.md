@@ -1,7 +1,7 @@
-# @chiselart/icons
+# @zeroxsolutions/icons
 
 This library was generated with [Nx](https://nx.dev).
 
 ## Running unit tests
 
-Run `nx test @chiselart/icons` to execute the unit tests via [Vitest](https://vitest.dev/).
+Run `nx test @zeroxsolutions/icons` to execute the unit tests via [Vitest](https://vitest.dev/).

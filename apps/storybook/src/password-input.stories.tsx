@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { PasswordInput } from '@chiselart/ui/password-input';
+import { PasswordInput } from '@zeroxsolutions/ui/password-input';
 
 const meta: Meta<typeof PasswordInput> = {
   title: 'Components/PasswordInput',
@@ -16,6 +16,10 @@ export const Default: Story = {
 
 export const WithValue: Story = {
   render: () => (
-    <PasswordInput defaultValue="hunter2" placeholder="Password" className="w-64" />
+    <PasswordInput
+      defaultValue="hunter2"
+      placeholder="Password"
+      className="w-64"
+    />
   ),
 };

@@ -1,6 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@chiselart/ui/tabs';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@zeroxsolutions/ui/tabs';
 
 const meta: Meta<typeof Tabs> = {
   title: 'Primitives/Tabs',
@@ -18,7 +23,9 @@ export const Default: Story = {
         <TabsTrigger value="password">Password</TabsTrigger>
         <TabsTrigger value="team">Team</TabsTrigger>
       </TabsList>
-      <TabsContent value="account">Manage your account settings here.</TabsContent>
+      <TabsContent value="account">
+        Manage your account settings here.
+      </TabsContent>
       <TabsContent value="password">Change your password here.</TabsContent>
       <TabsContent value="team">Invite and manage your team.</TabsContent>
     </Tabs>

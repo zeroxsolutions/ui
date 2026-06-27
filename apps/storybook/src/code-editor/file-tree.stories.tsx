@@ -1,14 +1,14 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Folder } from 'lucide-react';
+import * as React from 'react';
 
 import {
   FileTree,
   FileTreeGroup,
   FileTreeItem,
   FileTreeLabel,
-} from '@chiselart/ui/file-tree';
-import { FileTypeIcon } from '@chiselart/ui/file-type-icon';
+} from '@zeroxsolutions/ui/file-tree';
+import { FileTypeIcon } from '@zeroxsolutions/ui/file-type-icon';
 
 const meta: Meta<typeof FileTree> = {
   title: 'Code Editor/FileTree',

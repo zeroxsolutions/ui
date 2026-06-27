@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { TabCloseButton } from '@chiselart/ui/tab-close-button'
+import { TabCloseButton } from '@zeroxsolutions/ui/tab-close-button';
 
 const meta: Meta<typeof TabCloseButton> = {
   title: 'Components/TabCloseButton',
   component: TabCloseButton,
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof TabCloseButton>
+type Story = StoryObj<typeof TabCloseButton>;
 
 export const States: Story = {
   render: () => (
@@ -27,4 +27,4 @@ export const States: Story = {
       </span>
     </div>
   ),
-}
+};

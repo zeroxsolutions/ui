@@ -1,7 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@chiselart/ui/button';
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@chiselart/ui/sheet';
+import { Button } from '@zeroxsolutions/ui/button';
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@zeroxsolutions/ui/sheet';
 
 const meta: Meta<typeof Sheet> = {
   title: 'Primitives/Sheet',
@@ -33,7 +42,9 @@ export const Default: Story = {
 export const LeftSide: Story = {
   render: () => (
     <Sheet>
-      <SheetTrigger render={<Button variant="outline">Open from left</Button>} />
+      <SheetTrigger
+        render={<Button variant="outline">Open from left</Button>}
+      />
       <SheetContent side="left">
         <SheetHeader>
           <SheetTitle>Navigation</SheetTitle>

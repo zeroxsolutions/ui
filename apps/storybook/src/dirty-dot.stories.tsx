@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { DirtyDot } from '@chiselart/ui/dirty-dot'
+import { DirtyDot } from '@zeroxsolutions/ui/dirty-dot';
 
 const meta: Meta<typeof DirtyDot> = {
   title: 'Components/DirtyDot',
   component: DirtyDot,
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof DirtyDot>
+type Story = StoryObj<typeof DirtyDot>;
 
 export const Default: Story = {
   render: () => (
@@ -17,4 +17,4 @@ export const Default: Story = {
       <span>file.ts — unsaved</span>
     </div>
   ),
-}
+};

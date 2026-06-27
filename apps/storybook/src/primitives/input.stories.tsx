@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Input } from '@chiselart/ui/input';
+import { Input } from '@zeroxsolutions/ui/input';
 
 const meta: Meta<typeof Input> = {
   title: 'Primitives/Input',
@@ -16,6 +16,11 @@ export const Default: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <Input placeholder="Disabled" defaultValue="hello@chiselart.dev" disabled className="w-64" />
+    <Input
+      placeholder="Disabled"
+      defaultValue="hello@zeroxsolutions.dev"
+      disabled
+      className="w-64"
+    />
   ),
 };

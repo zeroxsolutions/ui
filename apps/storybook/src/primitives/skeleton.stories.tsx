@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Skeleton } from '@chiselart/ui/skeleton';
+import { Skeleton } from '@zeroxsolutions/ui/skeleton';
 
 const meta: Meta<typeof Skeleton> = {
   title: 'Primitives/Skeleton',

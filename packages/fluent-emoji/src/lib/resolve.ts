@@ -22,7 +22,7 @@ const DEFAULT_STYLE: FluentEmojiStyle = '3d';
 // module. It works wherever the package's files are served as-is (Node, a Vite
 // dev server, or an app that serves `dist/assets`). For a production web build,
 // point it at where the artwork is actually served — copy
-// `@chiselart/fluent-emoji/dist/assets` into your public dir, or use your CDN —
+// `@zeroxsolutions/fluent-emoji/dist/assets` into your public dir, or use your CDN —
 // via setFluentEmojiBase (or a per-call `base`).
 //
 // Vite leaves this literal (no asset extension → not transformed/inlined), so it

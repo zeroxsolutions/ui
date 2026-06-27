@@ -1,16 +1,16 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { StatusDot, type StatusTone } from '@chiselart/ui/status-dot'
+import { StatusDot, type StatusTone } from '@zeroxsolutions/ui/status-dot';
 
 const meta: Meta<typeof StatusDot> = {
   title: 'Components/StatusDot',
   component: StatusDot,
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof StatusDot>
+type Story = StoryObj<typeof StatusDot>;
 
-const TONES: StatusTone[] = ['online', 'offline', 'busy', 'idle']
+const TONES: StatusTone[] = ['online', 'offline', 'busy', 'idle'];
 
 export const Tones: Story = {
   render: () => (
@@ -27,4 +27,4 @@ export const Tones: Story = {
       </div>
     </div>
   ),
-}
+};

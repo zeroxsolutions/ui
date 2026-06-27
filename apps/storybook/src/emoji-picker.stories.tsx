@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 
-import { EmojiPicker } from '@chiselart/ui/emoji-picker';
-import { FluentEmoji } from '@chiselart/fluent-emoji';
+import { FluentEmoji } from '@zeroxsolutions/fluent-emoji';
+import { EmojiPicker } from '@zeroxsolutions/ui/emoji-picker';
 
 const meta: Meta<typeof EmojiPicker> = {
   title: 'Components/EmojiPicker',

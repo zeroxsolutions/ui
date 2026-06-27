@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/react-vite';
-import { setFluentEmojiBase } from '@chiselart/fluent-emoji';
+import { setFluentEmojiBase } from '@zeroxsolutions/fluent-emoji';
 
 // Theme/tokens + an explicit `@source` so Tailwind generates the library's
 // component classes (see storybook.css).

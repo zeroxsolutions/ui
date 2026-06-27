@@ -4,7 +4,7 @@ import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from '@chiselart/ui/reasoning';
+} from '@zeroxsolutions/ui/reasoning';
 
 const THOUGHT = `Let me work through this.
 

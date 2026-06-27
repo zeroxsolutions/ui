@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Slider } from '@chiselart/ui/slider';
+import { Slider } from '@zeroxsolutions/ui/slider';
 
 const meta: Meta<typeof Slider> = {
   title: 'Primitives/Slider',
@@ -11,7 +11,9 @@ export default meta;
 type Story = StoryObj<typeof Slider>;
 
 export const Default: Story = {
-  render: () => <Slider defaultValue={50} max={100} step={1} className="w-64" />,
+  render: () => (
+    <Slider defaultValue={50} max={100} step={1} className="w-64" />
+  ),
 };
 
 export const Range: Story = {

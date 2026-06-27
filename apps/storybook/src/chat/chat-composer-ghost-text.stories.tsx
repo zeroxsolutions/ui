@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 
-import { ChatComposerGhostText } from '@chiselart/ui/chat-composer-ghost-text';
-import { Textarea } from '@chiselart/ui/textarea';
+import { ChatComposerGhostText } from '@zeroxsolutions/ui/chat-composer-ghost-text';
+import { Textarea } from '@zeroxsolutions/ui/textarea';
 
 const meta: Meta<typeof ChatComposerGhostText> = {
   title: 'Chat/ComposerGhostText',

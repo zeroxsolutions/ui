@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Image, MessageSquare, Sparkles, Workflow } from 'lucide-react';
 
-import { ChatEmptyState } from '@chiselart/ui/chat-empty-state';
+import { ChatEmptyState } from '@zeroxsolutions/ui/chat-empty-state';
 
 const meta: Meta<typeof ChatEmptyState> = {
   title: 'Chat/EmptyState',

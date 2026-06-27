@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@chiselart/ui/button';
+import { Button } from '@zeroxsolutions/ui/button';
 import { ArrowRightIcon, PlusIcon } from 'lucide-react';
 
 const meta: Meta<typeof Button> = {

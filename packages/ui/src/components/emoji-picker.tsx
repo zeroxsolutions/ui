@@ -1,4 +1,12 @@
-import * as React from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
+import {
+  EMOJI_CATEGORIES,
+  FluentEmoji,
+  type EmojiDatum,
+} from '@zeroxsolutions/fluent-emoji';
+import { cva, type VariantProps } from 'class-variance-authority';
 import {
   Clock,
   Coffee,
@@ -12,18 +20,10 @@ import {
   Smile,
   type LucideIcon,
 } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import * as React from 'react';
 import { SearchInput } from './search-input';
-import { cn } from '@/lib/utils';
-import {
-  EMOJI_CATEGORIES,
-  FluentEmoji,
-  type EmojiDatum,
-} from '@chiselart/fluent-emoji';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from './ui/empty';
 import { Button } from './ui/button';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from './ui/empty';
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   frequent: Clock,
@@ -86,7 +86,12 @@ function buildRows(
   }
   for (const sec of sections) {
     headerIndices.push(rows.length);
-    rows.push({ type: 'header', key: `h-${sec.id}`, id: sec.id, name: sec.name });
+    rows.push({
+      type: 'header',
+      key: `h-${sec.id}`,
+      id: sec.id,
+      name: sec.name,
+    });
     pushCells(sec.emojis, sec.id);
   }
   return { rows, headerIndices };
@@ -147,7 +152,7 @@ export interface EmojiPickerProps {
 /**
  * A searchable, categorized emoji grid with an optional frequent row and a
  * category nav — modelled on the LobeHub picker. The catalog and the Fluent 3D
- * artwork come from `@chiselart/fluent-emoji` (self-hosted, no third-party CDN);
+ * artwork come from `@zeroxsolutions/fluent-emoji` (self-hosted, no third-party CDN);
  * the frequent row is consumer-supplied (`frequent`) — the picker holds no
  * persistence of its own.
  *
@@ -438,7 +443,8 @@ export function EmojiPickerContent({
   const rowHeight = (i: number) =>
     rows[i].type === 'header' ? HEADER_HEIGHT : CELL_ROW_HEIGHT;
   let start = 0;
-  while (start < rows.length && offsets[start] + rowHeight(start) < top) start++;
+  while (start < rows.length && offsets[start] + rowHeight(start) < top)
+    start++;
   let end = start;
   while (end < rows.length && offsets[end] <= bottom) end++;
 
@@ -457,7 +463,9 @@ export function EmojiPickerContent({
     >
       <div style={{ position: 'relative', width: '100%', height: total }}>
         {stickyIndex >= 0 && rows[stickyIndex].type === 'header' && (
-          <div style={{ position: 'sticky', top: 0, zIndex: 10, width: '100%' }}>
+          <div
+            style={{ position: 'sticky', top: 0, zIndex: 10, width: '100%' }}
+          >
             <EmojiPickerGroupLabel>
               {(rows[stickyIndex] as { name: string }).name}
             </EmojiPickerGroupLabel>

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BoldIcon } from 'lucide-react';
 
-import { Toggle } from '@chiselart/ui/toggle';
+import { Toggle } from '@zeroxsolutions/ui/toggle';
 
 const meta: Meta<typeof Toggle> = {
   title: 'Primitives/Toggle',

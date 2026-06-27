@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Container } from '@chiselart/ui/container';
+import { Container } from '@zeroxsolutions/ui/container';
 
 const meta: Meta<typeof Container> = {
   title: 'Layouts/Container',

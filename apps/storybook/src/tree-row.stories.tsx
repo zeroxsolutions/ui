@@ -1,17 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useState } from 'react'
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 
-import { TreeRow } from '@chiselart/ui/tree-row'
+import { TreeRow } from '@zeroxsolutions/ui/tree-row';
 
 const meta: Meta<typeof TreeRow> = {
   title: 'Components/TreeRow',
   component: TreeRow,
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof TreeRow>
+type Story = StoryObj<typeof TreeRow>;
 
-const cx = (...c: Array<string | false | undefined>) => c.filter(Boolean).join(' ')
+const cx = (...c: Array<string | false | undefined>) =>
+  c.filter(Boolean).join(' ');
 
 /**
  * The shared row skeleton: indent + disclosure chevron + caller content. The
@@ -22,11 +23,11 @@ const cx = (...c: Array<string | false | undefined>) => c.filter(Boolean).join('
  */
 export const Nested: Story = {
   render: () => {
-    const [open, setOpen] = useState(true)
-    const [selected, setSelected] = useState('rectangle')
+    const [open, setOpen] = useState(true);
+    const [selected, setSelected] = useState('rectangle');
 
     const rowClass = (id: string) =>
-      cx(selected === id ? 'bg-accent font-medium' : 'hover:bg-muted')
+      cx(selected === id ? 'bg-accent font-medium' : 'hover:bg-muted');
 
     return (
       <div className="w-64 text-xs">
@@ -65,6 +66,6 @@ export const Nested: Story = {
           </>
         )}
       </div>
-    )
+    );
   },
-}
+};

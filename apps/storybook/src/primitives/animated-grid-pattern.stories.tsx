@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AnimatedGridPattern } from '@chiselart/ui/animated-grid-pattern';
+import { AnimatedGridPattern } from '@zeroxsolutions/ui/animated-grid-pattern';
 
 const meta: Meta<typeof AnimatedGridPattern> = {
   title: 'Primitives/AnimatedGridPattern',

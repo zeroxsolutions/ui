@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 
-import { EmojiAppearance } from '@chiselart/ui/emoji-appearance';
-import type { FluentEmojiStyle } from '@chiselart/fluent-emoji';
+import type { FluentEmojiStyle } from '@zeroxsolutions/fluent-emoji';
+import { EmojiAppearance } from '@zeroxsolutions/ui/emoji-appearance';
 
 const meta: Meta<typeof EmojiAppearance> = {
   title: 'Components/EmojiAppearance',

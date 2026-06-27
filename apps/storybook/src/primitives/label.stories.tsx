@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Input } from '@chiselart/ui/input';
-import { Label } from '@chiselart/ui/label';
+import { Input } from '@zeroxsolutions/ui/input';
+import { Label } from '@zeroxsolutions/ui/label';
 
 const meta: Meta<typeof Label> = {
   title: 'Primitives/Label',

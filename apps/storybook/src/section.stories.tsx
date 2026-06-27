@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Section } from '@chiselart/ui/section';
+import { Section } from '@zeroxsolutions/ui/section';
 
 const meta: Meta<typeof Section> = {
   title: 'Layouts/Section',
