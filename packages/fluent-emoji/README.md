@@ -99,24 +99,10 @@ while the static styles keep resolving from the package or your public dir.
 
 The artwork under `assets/<style>/` is **pre-generated and committed** — there is
 no in-repo regeneration tooling. It is keyed by codepoint and sourced from
-LobeHub's repackages of Microsoft Fluent Emoji, plus a few gap-fills from
-`microsoft/fluentui-emoji` (see **Attribution & licensing** for the exact
-packages). Microsoft only animated a subset of the catalog, so in the `anim` set
+LobeHub's repackages of Microsoft Fluent Emoji — the static
+`@lobehub/fluent-emoji-{3d,flat,modern,mono}` and animated
+`@lobehub/fluent-emoji-anim-1`…`-anim-4` packages — plus a few gap-fills from
+`microsoft/fluentui-emoji`. Microsoft only animated a subset of the catalog, so in the `anim` set
 most faces/objects carry real animation frames while many symbols, keycaps, and
 flags are static; glyphs with no upstream artwork fall back to the native glyph,
 by design.
-
-## Attribution & licensing
-
-The emoji artwork is **Microsoft Fluent Emoji** (MIT), redistributed here via
-**[@lobehub/fluent-emoji](https://github.com/lobehub/fluent-emoji)** (MIT,
-the `-3d`/`-flat`/`-modern`/`-mono` static packages and the
-`-anim-1`…`-anim-4` animated packages) and, for gap-fills, directly from
-**[microsoft/fluentui-emoji](https://github.com/microsoft/fluentui-emoji)**
-(MIT). This package only repackages those assets for self-hosting; the wrapper
-code/catalog is Chisel's. Both upstream projects are MIT-licensed — see their
-repositories' `LICENSE` files for the full notices
-([lobehub](https://github.com/lobehub/fluent-emoji/blob/master/LICENSE),
-[microsoft](https://github.com/microsoft/fluentui-emoji/blob/main/LICENSE)).
-Microsoft trademarks (e.g. Clippy, Windows-logo glyphs) are not included and no
-Microsoft endorsement is implied.
