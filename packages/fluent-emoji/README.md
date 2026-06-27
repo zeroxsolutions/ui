@@ -16,9 +16,10 @@ import { FluentEmoji, EMOJI_CATEGORIES } from '@zeroxsolutions/fluent-emoji';
 
 ## Styles
 
-Five styles ship in the package, each in its own `assets/<style>/` subfolder.
-Pick one per call with `variant` (component) / `style` (`fluentEmojiUrl`), or set
-a default with `setFluentEmojiStyle`.
+Five styles are available, each in its own `assets/<style>/` subfolder. Pick one
+per call with `variant` (component) / `style` (`fluentEmojiUrl`), or set a default
+with `setFluentEmojiStyle`. (Four ship in the npm tarball; `anim` is self-hosted
+separately — see below.)
 
 | `variant` | source style         | format        |
 | --------- | -------------------- | ------------- |
@@ -32,22 +33,22 @@ a default with `setFluentEmojiStyle`.
 <FluentEmoji glyph="🎉" name="party popper" variant="anim" />;
 ```
 
-The **animated** (`anim`) artwork is by far the heaviest set — animated webp run
-hundreds of KB/glyph (~280 MB total). It is committed in the repo and self-hosted
-like the rest, but it is **deliberately excluded from the npm tarball** so a plain
-`npm install` stays small (~28 MB) for consumers that only need the static styles.
-To use `anim`, host `assets/anim/` on a CDN and point that one style at it with
-{@link setFluentEmojiStyleBase} — see **Deploying the animated style to a CDN**
-below. Without an `anim` base configured, animated glyphs fall back to the native
-glyph (as do any glyphs with no animated artwork upstream, by design).
+The **animated** (`anim`) artwork is the heaviest set — animated webp run hundreds
+of KB/glyph (~280 MB total) — so it is **excluded from the npm tarball** to keep a
+plain `npm install` small (~28 MB) for consumers that only need the static styles.
+It is still committed in the repo for self-hosting; serve it from a CDN with
+`setFluentEmojiStyleBase` (see **Deploying the animated style to a CDN** below).
+Without an `anim` base configured, animated glyphs fall back to the native glyph
+(as do any glyphs with no upstream artwork, by design).
 
 ## Serving the artwork
 
-The files ship under `dist/assets/<style>/` (keyed by codepoint, e.g.
-`3d/1f92f.webp`, `flat/1f92f.svg`). `fluentEmojiUrl(glyph, { style })` /
-`<FluentEmoji>` resolve `<base>/<style>/<codepoint>.<ext>`. Because Vite library
-mode force-inlines bundled assets, the artwork is shipped as raw files instead —
-the consuming app serves them and points the resolver at the base:
+The four static styles ship under `dist/assets/<style>/` (keyed by codepoint, e.g.
+`3d/1f92f.webp`, `flat/1f92f.svg`; `anim` is the exception — see below).
+`fluentEmojiUrl(glyph, { style })` / `<FluentEmoji>` resolve
+`<base>/<style>/<codepoint>.<ext>`. Because Vite library mode force-inlines
+bundled assets, the artwork is shipped as raw files instead — the consuming app
+serves them and points the resolver at the base:
 
 ```ts
 import { setFluentEmojiBase } from '@zeroxsolutions/fluent-emoji';
@@ -67,12 +68,10 @@ the animated `anim` set does **not** — it is excluded from the tarball to keep
 installs small. So `anim` has to be hosted separately and routed to its own base,
 while the static styles keep resolving from the package or your public dir.
 
-1. **Upload the artwork.** The committed `assets/anim/` (or `dist/assets/anim/`
-   after a build) holds the files keyed by codepoint. Sync it first if it's not
-   present, then push it to any static host / bucket / CDN:
+1. **Upload the artwork.** The committed `assets/anim/` holds the files keyed by
+   codepoint — push it to any static host / bucket / CDN:
 
    ```sh
-   node scripts/sync-anim.mjs                                   # (re)build assets/anim/
    aws s3 sync assets/anim s3://my-bucket/fluent-emoji/anim     # or Cloudflare R2 / GCS / …
    ```
 
@@ -96,38 +95,16 @@ while the static styles keep resolving from the package or your public dir.
    the whole `assets/` tree and use `setFluentEmojiBase` alone — no per-style base
    needed.)
 
-## Regenerating the artwork
+## Artwork provenance
 
-The four static styles, in order:
-
-```sh
-node scripts/sync-assets.mjs   # copy each style from its @lobehub/* dev dep
-node scripts/fill-gaps.mjs     # fill the few gaps from microsoft/fluentui-emoji
-```
-
-`sync-assets.mjs` rebuilds `assets/<style>/` from the `@lobehub/fluent-emoji-*`
-dev deps (3d/flat/modern/mono), one file per catalog glyph under our codepoint
-key. Those sets are built from an older Microsoft snapshot, so they miss some
-glyphs; `fill-gaps.mjs` pulls the missing artwork that exists in Microsoft's
-source repo (3D png → webp via `sharp`; the rest as svg) and reports the
-remainder — newest-Unicode glyphs, country/subdivision flags, and family/couple
-sequences that have **no** Fluent artwork anywhere and stay on the native-glyph
-fallback by design.
-
-The animated style is owned by a separate script (it has no dev dep — the set is
-~700 MB, split across four npm packages):
-
-```sh
-node scripts/sync-anim.mjs     # rebuild assets/anim/ from @lobehub/fluent-emoji-anim-1..4
-```
-
-`sync-anim.mjs` streams each `@lobehub/fluent-emoji-anim-{1..4}` tarball straight
-from the npm registry, extracts its `assets/*.webp`, and copies the catalog
-matches under our codepoint key — normalizing the upstream zero-padded, FE0F-bearing
-names to ours. Pass `--dry` to preview the source packages without downloading.
-Microsoft only animated a subset of the catalog: most faces/objects carry real
-animation frames, while many symbols, keycaps, and flags ship as static webp so
-every glyph still resolves; the rest fall back to the native glyph, as above.
+The artwork under `assets/<style>/` is **pre-generated and committed** — there is
+no in-repo regeneration tooling. It is keyed by codepoint and sourced from
+LobeHub's repackages of Microsoft Fluent Emoji, plus a few gap-fills from
+`microsoft/fluentui-emoji` (see **Attribution & licensing** for the exact
+packages). Microsoft only animated a subset of the catalog, so in the `anim` set
+most faces/objects carry real animation frames while many symbols, keycaps, and
+flags are static; glyphs with no upstream artwork fall back to the native glyph,
+by design.
 
 ## Attribution & licensing
 
