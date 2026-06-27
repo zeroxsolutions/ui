@@ -2,8 +2,6 @@ import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { GithubMark } from '../github-mark';
-import { lucideMark } from './lucide-mark';
-import { AI4BharatMark } from './ai4bharat';
 import { DeepgramMark } from './deepgram';
 import { InworldMark } from './inworld';
 import { LeonardoMark } from './leonardo';
@@ -34,7 +32,6 @@ describe('brand marks (lobehub size API)', () => {
     ['InworldMark', InworldMark],
     ['LeonardoMark', LeonardoMark],
     ['PipecatMark', PipecatMark],
-    ['AI4BharatMark', AI4BharatMark],
   ] as const;
 
   it.each(marks)('%s renders an svg sized via the size prop', (_name, Mark) => {
@@ -47,19 +44,5 @@ describe('brand marks (lobehub size API)', () => {
     const svg = container.querySelector('svg');
     expect(svg?.getAttribute('width')).toBe('24');
     expect(svg?.getAttribute('height')).toBe('24');
-  });
-});
-
-describe('lucideMark', () => {
-  it('adapts a lucide icon to the size API (string → width/height)', () => {
-    const Star = (props: { size?: number; style?: React.CSSProperties }) => (
-      <svg data-role="lucide" {...props} />
-    );
-    const Mark = lucideMark(Star as never);
-    const { container } = render(<Mark size="1em" />);
-    const svg = container.querySelector('svg[data-role="lucide"]');
-    expect(svg).toBeTruthy();
-    expect((svg as HTMLElement).style.width).toBe('1em');
-    expect((svg as HTMLElement).style.height).toBe('1em');
   });
 });

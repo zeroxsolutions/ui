@@ -167,27 +167,12 @@ importers:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
     devDependencies:
-      '@lobehub/fluent-emoji-3d':
-        specifier: ^1.1.0
-        version: 1.1.0
-      '@lobehub/fluent-emoji-flat':
-        specifier: ^1.1.0
-        version: 1.1.0
-      '@lobehub/fluent-emoji-modern':
-        specifier: ^1.0.0
-        version: 1.0.0
-      '@lobehub/fluent-emoji-mono':
-        specifier: ^1.1.0
-        version: 1.1.0
       sharp:
         specifier: ^0.35.2
         version: 0.35.2
 
   packages/icons:
     dependencies:
-      lucide-react:
-        specifier: ^1.21.0
-        version: 1.21.0(react@19.2.7)
       react:
         specifier: ^19.0.0
         version: 19.2.7
@@ -1782,18 +1767,6 @@ packages:
 
   '@lezer/lr@1.4.10':
     resolution: {integrity: sha512-rnCpTIBafOx4mRp43xOxDJbFipJm/c0cia/V5TiGlhmMa+wsSdoGmUN3w5Bqrks/09Q/D4tNAmWaT8p6NRi77A==}
-
-  '@lobehub/fluent-emoji-3d@1.1.0':
-    resolution: {integrity: sha512-Wlq2lVStTnr8BDpIJ0pEnTKO4LuDxxqTEhTvRtD1DLRF0me7ogeRQjKoehDHXuVJ2Qaecgl5wRBv60lUAG3h7g==}
-
-  '@lobehub/fluent-emoji-flat@1.1.0':
-    resolution: {integrity: sha512-lPYCg8+N56MIj+iOgeBeH6AF0tneXxJCvgi41rOTjAWpA5rU2WUcmU1fiIXouEe8GrSTarWCYLY2ML+rdLRHsg==}
-
-  '@lobehub/fluent-emoji-modern@1.0.0':
-    resolution: {integrity: sha512-YdZEgLC/vh29uDEl440q3W2vN50FdUFarQoKUHH9Clzx61/wW6mImLJywVBMKQPa3+GL59j3NvOlTLhH4rxleA==}
-
-  '@lobehub/fluent-emoji-mono@1.1.0':
-    resolution: {integrity: sha512-VuHXsJ+HozYzmvK6RVi2QpJJqTI3C8JKAWrInbYHlVhgdYBjvHwPnIdw6RkK5CLDA1/Yvr/4ODxOA7YnD0gceQ==}
 
   '@marijn/find-cluster-break@1.0.2':
     resolution: {integrity: sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==}
@@ -10717,14 +10690,6 @@ snapshots:
   '@lezer/lr@1.4.10':
     dependencies:
       '@lezer/common': 1.5.2
-
-  '@lobehub/fluent-emoji-3d@1.1.0': {}
-
-  '@lobehub/fluent-emoji-flat@1.1.0': {}
-
-  '@lobehub/fluent-emoji-modern@1.0.0': {}
-
-  '@lobehub/fluent-emoji-mono@1.1.0': {}
 
   '@marijn/find-cluster-break@1.0.2': {}
 

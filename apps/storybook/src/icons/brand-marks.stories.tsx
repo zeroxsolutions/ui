@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AI4BharatMark } from '@zeroxsolutions/icons/ai4bharat';
 import { DeepgramMark } from '@zeroxsolutions/icons/deepgram';
 import { GithubMark } from '@zeroxsolutions/icons/github-mark';
 import { InworldMark } from '@zeroxsolutions/icons/inworld';
@@ -60,9 +59,6 @@ export const All: Story = {
       </Cell>
       <Cell label="PipecatMark">
         <PipecatMark size="1em" />
-      </Cell>
-      <Cell label="AI4BharatMark">
-        <AI4BharatMark size="1em" />
       </Cell>
     </div>
   ),
