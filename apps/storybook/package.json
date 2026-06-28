@@ -23,6 +23,7 @@
         "executor": "nx:run-commands",
         "defaultConfiguration": "development",
         "dependsOn": [
+          "^build",
           "build-storybook"
         ],
         "configurations": {
