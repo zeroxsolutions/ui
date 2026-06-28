@@ -2,9 +2,6 @@
   "name": "@zeroxsolutions/storybook",
   "version": "0.0.1",
   "private": true,
-  "nx": {
-    "projectType": "application"
-  },
   "dependencies": {
     "@zeroxsolutions/fluent-emoji": "workspace:*",
     "@zeroxsolutions/icons": "workspace:*",
@@ -17,6 +14,29 @@
     "@tanstack/react-table": "^8.21.3",
     "react-hook-form": "^7.80.0",
     "recharts": "3.8.0",
-    "tailwindcss": "^4.3.1"
+    "tailwindcss": "^4.3.1",
+    "wrangler": "^4.105.0"
+  },
+  "nx": {
+    "targets": {
+      "deploy": {
+        "executor": "nx:run-commands",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build-storybook"
+        ],
+        "configurations": {
+          "development": {
+            "command": "wrangler deploy --env development"
+          },
+          "production": {
+            "command": "wrangler deploy --env production"
+          }
+        },
+        "options": {
+          "cwd": "{projectRoot}"
+        }
+      }
+    }
   }
 }

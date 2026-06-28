@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "storybook",
+  "compatibility_date": "2025-12-10",
+  "assets": {
+    "directory": "./storybook-static",
+    "not_found_handling": "single-page-application",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  "env": {
+    "development": {
+      "workers_dev": true,
+    },
+    "production": {
+      "workers_dev": false,
+      "routes": [
+        { "pattern": "storybook.zeroxsolutions.com", "custom_domain": true },
+      ],
+    },
+  },
+}
