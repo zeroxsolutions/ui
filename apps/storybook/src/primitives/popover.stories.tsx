@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Popover,
   PopoverContent,
@@ -8,7 +8,7 @@ import {
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
-} from '@zeroxsolutions/ui/popover';
+} from '@zeroxsolutions/ui/components/ui/popover';
 
 /**
  * `Popover` is a Base UI overlay that anchors floating content to a trigger

@@ -15,7 +15,7 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from '@zeroxsolutions/ui/context-menu';
+} from '@zeroxsolutions/ui/components/ui/context-menu';
 
 /**
  * `ContextMenu` is a right-click (long-press) menu built on Base UI's

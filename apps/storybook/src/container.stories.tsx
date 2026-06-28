@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Container } from '@zeroxsolutions/ui/container';
+import { Container } from '@zeroxsolutions/ui/components/layouts/container';
 
 /**
  * `Container` is the centred, max-width content column for a full-width surface,

@@ -5,7 +5,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@zeroxsolutions/ui/accordion';
+} from '@zeroxsolutions/ui/components/ui/accordion';
 
 /**
  * `Accordion` is a vertically stacked set of expandable disclosure items built on

@@ -9,7 +9,7 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from '@zeroxsolutions/ui/command';
+} from '@zeroxsolutions/ui/components/ui/command';
 import {
   CalculatorIcon,
   CalendarIcon,

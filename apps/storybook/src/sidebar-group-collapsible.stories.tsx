@@ -9,12 +9,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-} from '@zeroxsolutions/ui/sidebar';
+} from '@zeroxsolutions/ui/components/ui/sidebar';
 import {
   SidebarGroupCollapsible,
   SidebarGroupCollapsibleContent,
   SidebarGroupCollapsibleTrigger,
-} from '@zeroxsolutions/ui/sidebar-group-collapsible';
+} from '@zeroxsolutions/ui/components/sidebar-group-collapsible';
 import { FolderIcon, UserIcon } from 'lucide-react';
 
 /**

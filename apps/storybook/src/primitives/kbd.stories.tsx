@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Kbd, KbdGroup } from '@zeroxsolutions/ui/kbd';
+import { Kbd, KbdGroup } from '@zeroxsolutions/ui/components/ui/kbd';
 
 /**
  * `Kbd` renders a `<kbd>` element styled as a keyboard key cap for displaying

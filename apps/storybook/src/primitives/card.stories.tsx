@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Card,
   CardAction,
@@ -9,7 +9,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@zeroxsolutions/ui/card';
+} from '@zeroxsolutions/ui/components/ui/card';
 
 /**
  * `Card` is a composable container that groups related content on a bordered,

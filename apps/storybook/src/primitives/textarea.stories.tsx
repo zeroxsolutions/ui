@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Textarea } from '@zeroxsolutions/ui/textarea';
+import { Textarea } from '@zeroxsolutions/ui/components/ui/textarea';
 
 /**
  * `Textarea` is a styled wrapper around the native `<textarea>` element for

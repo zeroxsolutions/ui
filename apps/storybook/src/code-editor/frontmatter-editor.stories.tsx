@@ -9,9 +9,9 @@ import {
   FrontmatterFieldError,
   FrontmatterFieldLabel,
   type FrontmatterValue,
-} from '@zeroxsolutions/ui/frontmatter-editor';
-import { Input } from '@zeroxsolutions/ui/input';
-import { Textarea } from '@zeroxsolutions/ui/textarea';
+} from '@zeroxsolutions/ui/components/frontmatter-editor';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
+import { Textarea } from '@zeroxsolutions/ui/components/ui/textarea';
 
 /**
  * `FrontmatterEditor` is a compound editor for frontmatter (YAML metadata): the

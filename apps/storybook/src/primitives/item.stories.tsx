@@ -8,7 +8,7 @@ import {
   ItemGroup,
   ItemMedia,
   ItemTitle,
-} from '@zeroxsolutions/ui/item';
+} from '@zeroxsolutions/ui/components/ui/item';
 
 /**
  * `Item` is a composable row primitive for list-style content, assembling

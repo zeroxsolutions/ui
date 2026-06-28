@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
-import { SelectField } from '@zeroxsolutions/ui/select-field';
+import { SelectField } from '@zeroxsolutions/ui/components/select-field';
 
 /**
  * `SelectField` is a compact labelled select for a property inspector, pairing an

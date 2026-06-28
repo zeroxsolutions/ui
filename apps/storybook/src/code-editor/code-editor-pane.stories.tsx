@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
 
-import { CodeEditorPane } from '@zeroxsolutions/ui/code-editor-pane';
-import { Label } from '@zeroxsolutions/ui/label';
-import { Switch } from '@zeroxsolutions/ui/switch';
+import { CodeEditorPane } from '@zeroxsolutions/ui/components/code-editor-pane';
+import { Label } from '@zeroxsolutions/ui/components/ui/label';
+import { Switch } from '@zeroxsolutions/ui/components/ui/switch';
 
 const TS_SAMPLE = `import { createHighlighter } from 'shiki';
 

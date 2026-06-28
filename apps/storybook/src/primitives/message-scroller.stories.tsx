@@ -7,7 +7,7 @@ import {
   MessageScrollerItem,
   MessageScrollerProvider,
   MessageScrollerViewport,
-} from '@zeroxsolutions/ui/message-scroller';
+} from '@zeroxsolutions/ui/components/ui/message-scroller';
 
 /**
  * `MessageScroller` is a compound, auto-sticking scroll viewport for chat-style

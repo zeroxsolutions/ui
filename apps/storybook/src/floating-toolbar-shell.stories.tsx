@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Circle, MousePointer2, Square, Type } from 'lucide-react';
 
-import { Button } from '@zeroxsolutions/ui/button';
-import { FloatingToolbarShell } from '@zeroxsolutions/ui/floating-toolbar-shell';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
+import { FloatingToolbarShell } from '@zeroxsolutions/ui/components/layouts/floating-toolbar-shell';
 
 /**
  * `FloatingToolbarShell` is the shared chrome for an editor's on-canvas tool

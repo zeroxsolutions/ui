@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BoldIcon, ItalicIcon, UnderlineIcon } from 'lucide-react';
 
-import { ToggleGroup, ToggleGroupItem } from '@zeroxsolutions/ui/toggle-group';
+import { ToggleGroup, ToggleGroupItem } from '@zeroxsolutions/ui/components/ui/toggle-group';
 
 /**
  * `ToggleGroup` is a Base UI set of related two-state toggle buttons, where each

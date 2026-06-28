@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
-import { TagInput } from '@zeroxsolutions/ui/tag-input';
+import { TagInput } from '@zeroxsolutions/ui/components/tag-input';
 
 /**
  * `TagInput` is a controlled tag editor that renders existing tags as removable

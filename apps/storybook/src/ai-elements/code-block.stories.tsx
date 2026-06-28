@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { CodeBlock } from '@zeroxsolutions/ui/code-block';
+import { CodeBlock } from '@zeroxsolutions/ui/components/ai-elements/code-block';
 
 const JSON_SAMPLE = JSON.stringify(
   { tool: 'search', query: 'design tokens', results: 3, ok: true },

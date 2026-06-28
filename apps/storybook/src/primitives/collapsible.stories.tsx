@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@zeroxsolutions/ui/collapsible';
+} from '@zeroxsolutions/ui/components/ui/collapsible';
 
 /**
  * `Collapsible` is a Base UI disclosure that shows or hides a content panel in

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Slider } from '@zeroxsolutions/ui/slider';
+import { Slider } from '@zeroxsolutions/ui/components/ui/slider';
 
 /**
  * `Slider` wraps the Base UI slider primitive to let users pick a numeric value

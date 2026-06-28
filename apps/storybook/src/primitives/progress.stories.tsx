@@ -4,7 +4,7 @@ import {
   Progress,
   ProgressLabel,
   ProgressValue,
-} from '@zeroxsolutions/ui/progress';
+} from '@zeroxsolutions/ui/components/ui/progress';
 
 /**
  * `Progress` is a Base UI indicator that visualizes completion of a determinate

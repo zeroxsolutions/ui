@@ -7,7 +7,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from '@zeroxsolutions/ui/navigation-menu';
+} from '@zeroxsolutions/ui/components/ui/navigation-menu';
 
 /**
  * `NavigationMenu` is a Base UI menu bar for primary site navigation: triggers

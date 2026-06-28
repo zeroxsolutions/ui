@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { FileTypeIcon } from '@zeroxsolutions/ui/file-type-icon';
+import { FileTypeIcon } from '@zeroxsolutions/ui/components/file-type-icon';
 
 /**
  * `FileTypeIcon` renders a lucide icon chosen from a file name's extension

@@ -8,7 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from '@zeroxsolutions/ui/chart';
+} from '@zeroxsolutions/ui/components/ui/chart';
 
 /**
  * `ChartContainer` wraps a Recharts chart in a themed, responsive container,

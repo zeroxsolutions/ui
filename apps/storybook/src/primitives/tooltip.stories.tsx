@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@zeroxsolutions/ui/tooltip';
+} from '@zeroxsolutions/ui/components/ui/tooltip';
 
 /**
  * `Tooltip` is a Base UI popup that reveals a short hint when its trigger is

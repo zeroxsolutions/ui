@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useForm } from 'react-hook-form';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,8 +10,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@zeroxsolutions/ui/form';
-import { Input } from '@zeroxsolutions/ui/input';
+} from '@zeroxsolutions/ui/components/ui/form';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
 
 /**
  * `Form` adapts react-hook-form to the field primitives: `Form` re-exports the

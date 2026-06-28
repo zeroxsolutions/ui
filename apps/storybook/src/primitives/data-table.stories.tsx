@@ -15,12 +15,12 @@ import {
   DataTable,
   DataTableToolbar,
   DataTableView,
-} from '@zeroxsolutions/ui/data-table';
-import { DataTableColumnHeader } from '@zeroxsolutions/ui/data-table-column-header';
-import { DataTablePagination } from '@zeroxsolutions/ui/data-table-pagination';
-import { DataTableViewOptions } from '@zeroxsolutions/ui/data-table-view-options';
-import { Empty, EmptyHeader, EmptyTitle } from '@zeroxsolutions/ui/empty';
-import { Input } from '@zeroxsolutions/ui/input';
+} from '@zeroxsolutions/ui/components/ui/data-table';
+import { DataTableColumnHeader } from '@zeroxsolutions/ui/components/ui/data-table-column-header';
+import { DataTablePagination } from '@zeroxsolutions/ui/components/ui/data-table-pagination';
+import { DataTableViewOptions } from '@zeroxsolutions/ui/components/ui/data-table-view-options';
+import { Empty, EmptyHeader, EmptyTitle } from '@zeroxsolutions/ui/components/ui/empty';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
 
 type Person = { name: string; role: string; email: string };
 

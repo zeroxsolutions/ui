@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
 import { FluentEmoji } from '@zeroxsolutions/fluent-emoji';
-import { EmojiPicker } from '@zeroxsolutions/ui/emoji-picker';
+import { EmojiPicker } from '@zeroxsolutions/ui/components/emoji-picker';
 
 /**
  * `EmojiPicker` is a searchable, categorized emoji grid with a category jump-nav

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { FieldGrid } from '@zeroxsolutions/ui/field-grid';
-import { Input } from '@zeroxsolutions/ui/input';
+import { FieldGrid } from '@zeroxsolutions/ui/components/layouts/field-grid';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
 
 /**
  * `FieldGrid` is a tight CSS grid wrapper for paired or triplet inputs (X+Y,

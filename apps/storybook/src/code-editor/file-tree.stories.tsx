@@ -7,8 +7,8 @@ import {
   FileTreeGroup,
   FileTreeItem,
   FileTreeLabel,
-} from '@zeroxsolutions/ui/file-tree';
-import { FileTypeIcon } from '@zeroxsolutions/ui/file-type-icon';
+} from '@zeroxsolutions/ui/components/file-tree';
+import { FileTypeIcon } from '@zeroxsolutions/ui/components/file-type-icon';
 
 /**
  * `FileTree` is an accessible tree view (WAI-ARIA APG Tree View) for navigating a

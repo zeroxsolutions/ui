@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
 import type { FluentEmojiStyle } from '@zeroxsolutions/fluent-emoji';
-import { EmojiAppearance } from '@zeroxsolutions/ui/emoji-appearance';
+import { EmojiAppearance } from '@zeroxsolutions/ui/components/emoji-appearance';
 
 /**
  * `EmojiAppearance` is a single-select row of preview swatches for the emoji

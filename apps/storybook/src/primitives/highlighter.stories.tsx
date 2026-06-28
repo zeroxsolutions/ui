@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Highlighter } from '@zeroxsolutions/ui/highlighter';
+import { Highlighter } from '@zeroxsolutions/ui/components/ui/highlighter';
 
 /**
  * `Highlighter` wraps inline text in a span and draws a hand-drawn rough-notation

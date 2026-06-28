@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AnimatedGridPattern } from '@zeroxsolutions/ui/animated-grid-pattern';
+import { AnimatedGridPattern } from '@zeroxsolutions/ui/components/ui/animated-grid-pattern';
 
 /**
  * `AnimatedGridPattern` is a decorative SVG background that tiles a line grid

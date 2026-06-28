@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BoldIcon } from 'lucide-react';
 
-import { Toggle } from '@zeroxsolutions/ui/toggle';
+import { Toggle } from '@zeroxsolutions/ui/components/ui/toggle';
 
 /**
  * `Toggle` is a two-state pressed/unpressed button built on the Base UI Toggle

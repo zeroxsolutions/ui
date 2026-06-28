@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Image, MessageSquare, Sparkles, Workflow } from 'lucide-react';
 
-import { ChatEmptyState } from '@zeroxsolutions/ui/chat-empty-state';
+import { ChatEmptyState } from '@zeroxsolutions/ui/components/chat/chat-empty-state';
 
 /**
  * `ChatEmptyState` is the starter shown in an empty conversation: a centered

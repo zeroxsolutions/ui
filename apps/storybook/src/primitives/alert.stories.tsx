@@ -5,8 +5,8 @@ import {
   AlertAction,
   AlertDescription,
   AlertTitle,
-} from '@zeroxsolutions/ui/alert';
-import { Button } from '@zeroxsolutions/ui/button';
+} from '@zeroxsolutions/ui/components/ui/alert';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import { CircleAlertIcon, TriangleAlertIcon } from 'lucide-react';
 
 /**

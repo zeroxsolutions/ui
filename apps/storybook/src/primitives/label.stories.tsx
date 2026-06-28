@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Input } from '@zeroxsolutions/ui/input';
-import { Label } from '@zeroxsolutions/ui/label';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
+import { Label } from '@zeroxsolutions/ui/components/ui/label';
 
 /**
  * `Label` renders a styled `<label>` element for form controls, linked to an

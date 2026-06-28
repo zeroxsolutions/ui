@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { MonoChip } from '@zeroxsolutions/ui/mono-chip';
+import { MonoChip } from '@zeroxsolutions/ui/components/mono-chip';
 
 /**
  * `MonoChip` renders a compact monospace pill for short code-ish values such as

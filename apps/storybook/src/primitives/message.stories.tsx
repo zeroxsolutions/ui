@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Bubble, BubbleContent } from '@zeroxsolutions/ui/bubble';
+import { Bubble, BubbleContent } from '@zeroxsolutions/ui/components/ui/bubble';
 import {
   Message,
   MessageAvatar,
@@ -8,14 +8,14 @@ import {
   MessageFooter,
   MessageGroup,
   MessageHeader,
-} from '@zeroxsolutions/ui/message';
+} from '@zeroxsolutions/ui/components/ui/message';
 
 /**
  * `Message` is a chat message row that lays an avatar beside its content and
  * flips horizontally via `align="start" | "end"` to separate incoming from
  * outgoing messages. Compose it from `MessageAvatar`, `MessageContent`,
  * `MessageHeader`, and `MessageFooter`, then stack rows inside a `MessageGroup`.
- * `MessageContent` usually wraps a `Bubble` (from `@zeroxsolutions/ui/bubble`)
+ * `MessageContent` usually wraps a `Bubble` (from `@zeroxsolutions/ui/components/ui/bubble`)
  * to render the speech-bubble surface, which inherits the row's alignment.
  */
 const meta: Meta<typeof Message> = {

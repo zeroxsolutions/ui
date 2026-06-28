@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -16,7 +16,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@zeroxsolutions/ui/dropdown-menu';
+} from '@zeroxsolutions/ui/components/ui/dropdown-menu';
 import {
   CreditCardIcon,
   LogOutIcon,

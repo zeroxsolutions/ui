@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Link2 } from 'lucide-react';
 
-import { Button } from '@zeroxsolutions/ui/button';
-import { FieldRow } from '@zeroxsolutions/ui/field-row';
-import { Input } from '@zeroxsolutions/ui/input';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
+import { FieldRow } from '@zeroxsolutions/ui/components/layouts/field-row';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
 
 /**
  * `FieldRow` pairs an inner `FieldGrid` (two columns by default) with a fixed

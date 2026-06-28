@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { RotateCw } from 'lucide-react';
 
-import { IconLabel } from '@zeroxsolutions/ui/icon-label';
+import { IconLabel } from '@zeroxsolutions/ui/components/icon-label';
 
 /**
  * `IconLabel` is an icon-only form label that reveals its meaning in a hover

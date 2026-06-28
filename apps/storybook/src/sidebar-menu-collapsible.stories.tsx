@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactNode } from 'react';
 
-import { SearchInput } from '@zeroxsolutions/ui/search-input';
+import { SearchInput } from '@zeroxsolutions/ui/components/search-input';
 import {
   Sidebar,
   SidebarContent,
@@ -11,12 +11,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-} from '@zeroxsolutions/ui/sidebar';
+} from '@zeroxsolutions/ui/components/ui/sidebar';
 import {
   SidebarMenuCollapsible,
   SidebarMenuCollapsibleContent,
   SidebarMenuCollapsibleTrigger,
-} from '@zeroxsolutions/ui/sidebar-menu-collapsible';
+} from '@zeroxsolutions/ui/components/sidebar-menu-collapsible';
 import { MessageSquareIcon, SlidersHorizontalIcon } from 'lucide-react';
 
 /**

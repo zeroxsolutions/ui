@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Spinner } from '@zeroxsolutions/ui/spinner';
+import { Spinner } from '@zeroxsolutions/ui/components/ui/spinner';
 
 /**
  * `Spinner` renders an animated, spinning loader icon to signal an in-progress or

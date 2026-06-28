@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BellIcon } from 'lucide-react';
 
-import { Marker, MarkerContent, MarkerIcon } from '@zeroxsolutions/ui/marker';
+import { Marker, MarkerContent, MarkerIcon } from '@zeroxsolutions/ui/components/ui/marker';
 
 /**
  * `Marker` is an inline label/divider row built on Base UI's `useRender`. It

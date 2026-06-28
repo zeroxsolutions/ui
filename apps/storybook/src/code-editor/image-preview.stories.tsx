@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { ImagePreview } from '@zeroxsolutions/ui/image-preview';
+import { ImagePreview } from '@zeroxsolutions/ui/components/image-preview';
 
 const SAMPLE =
   'data:image/svg+xml;utf8,' +

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Sheet,
   SheetClose,
@@ -10,7 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@zeroxsolutions/ui/sheet';
+} from '@zeroxsolutions/ui/components/ui/sheet';
 
 /**
  * `Sheet` is a Base UI Dialog rendered as a panel that slides in from a screen

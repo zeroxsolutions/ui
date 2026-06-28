@@ -5,7 +5,7 @@ import {
   BubbleContent,
   BubbleGroup,
   BubbleReactions,
-} from '@zeroxsolutions/ui/bubble';
+} from '@zeroxsolutions/ui/components/ui/bubble';
 
 /**
  * `Bubble` is a compound chat-bubble primitive. `Bubble` is the wrapper that

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { FontPreview } from '@zeroxsolutions/ui/font-preview';
+import { FontPreview } from '@zeroxsolutions/ui/components/font-preview';
 
 const INTER = 'https://rsms.me/inter/font-files/InterVariable.woff2?v=4.1';
 

@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   FileContentRouter,
   type RoutedFile,
-} from '@zeroxsolutions/ui/file-content-router';
+} from '@zeroxsolutions/ui/components/file-content-router';
 
 // A self-contained SVG asset (no network) for the image route.
 const SVG = `data:image/svg+xml;utf8,${encodeURIComponent(

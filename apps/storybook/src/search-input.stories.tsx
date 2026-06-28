@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
-import { SearchInput } from '@zeroxsolutions/ui/search-input';
+import { SearchInput } from '@zeroxsolutions/ui/components/search-input';
 
 /**
  * `SearchInput` is the `input-group` composition (a leading magnifier icon plus

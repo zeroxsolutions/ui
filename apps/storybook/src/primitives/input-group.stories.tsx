@@ -5,7 +5,7 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from '@zeroxsolutions/ui/input-group';
+} from '@zeroxsolutions/ui/components/ui/input-group';
 
 /**
  * `InputGroup` wraps an input or textarea together with addon slots (icons,

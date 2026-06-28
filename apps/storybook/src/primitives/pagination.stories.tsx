@@ -8,7 +8,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@zeroxsolutions/ui/pagination';
+} from '@zeroxsolutions/ui/components/ui/pagination';
 
 /**
  * `Pagination` renders an accessible `<nav>` landmark for paging through

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
-import { TreeRow } from '@zeroxsolutions/ui/tree-row';
+import { TreeRow } from '@zeroxsolutions/ui/components/tree-row';
 
 /**
  * `TreeRow` is the shared skeleton of one row in a hierarchy tree (a layer tree, a

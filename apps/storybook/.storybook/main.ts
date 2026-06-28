@@ -1,5 +1,4 @@
-import { readdirSync } from 'node:fs';
-import { basename, dirname, join, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { StorybookConfig } from '@storybook/react-vite';
@@ -7,39 +6,11 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { mergeConfig } from 'vite';
 
-// Consume `@zeroxsolutions/ui` from SOURCE (not dist) so component edits hot-reload
-// and Tailwind v4 scans the library's classes from the module graph. The
-// published package exposes flat per-component subpaths (`@zeroxsolutions/ui/button`);
-// here each one is aliased to its source file (which still lives nested under
-// `src/components/ui`, `src/lib`, …), keyed by basename to mirror the build.
-const uiSrc = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../packages/ui/src',
-);
-
-// `@zeroxsolutions/fluent-emoji` (catalog + self-hosted Fluent artwork) is consumed
-// from source too, so its `import.meta.glob` over the bundled .webp runs in this
-// build and emits the assets — no third-party CDN, no prebuilt dist needed.
-const fluentEmojiSrc = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../packages/fluent-emoji/src/index.ts',
-);
-
-const isSkipped = (p: string) =>
-  p.endsWith('.d.ts') ||
-  /\.(test|spec|stories)\.(ts|tsx)$/.test(p) ||
-  p === 'index.ts';
-
-const subpathAliases: Record<string, string> = {
-  '@zeroxsolutions/ui/styles.css': resolve(uiSrc, 'styles.css'),
-  '@zeroxsolutions/ui/source.css': resolve(uiSrc, 'source.css'),
-};
-for (const rel of readdirSync(uiSrc, { recursive: true }) as string[]) {
-  if (!/\.(ts|tsx)$/.test(rel) || isSkipped(rel)) continue;
-  const name = basename(rel).replace(/\.(ts|tsx)$/, '');
-  subpathAliases[`@zeroxsolutions/ui/${name}`] = join(uiSrc, rel);
-}
-
+// The workspace packages (`@zeroxsolutions/ui`, `…/icons`, `…/fluent-emoji`) are
+// consumed exactly as a downstream app would — resolved from node_modules via
+// their published `exports`, with NO source aliases or path rewrites. This keeps
+// the Storybook a faithful integration check of the packages as shipped (so a
+// broken export / type / missing file surfaces here too).
 const config: StorybookConfig = {
   stories: ['../src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))'],
   // Serve the Fluent emoji artwork as static files at `/fluent-emoji` (the base
@@ -60,14 +31,6 @@ const config: StorybookConfig = {
       // ONLY here. (Having it in two places double-declares the Fast Refresh
       // runtime: "RefreshRuntime has already been declared".)
       plugins: [react(), tailwindcss()],
-      resolve: {
-        alias: {
-          ...subpathAliases,
-          '@zeroxsolutions/fluent-emoji': fluentEmojiSrc,
-          // The library's internal `@/…` imports resolve into its own src.
-          '@': uiSrc,
-        },
-      },
     }),
 };
 

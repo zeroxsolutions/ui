@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
-import { ButtonGroup } from '@zeroxsolutions/ui/button-group';
-import { DirectionProvider } from '@zeroxsolutions/ui/direction';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
+import { ButtonGroup } from '@zeroxsolutions/ui/components/ui/button-group';
+import { DirectionProvider } from '@zeroxsolutions/ui/components/ui/direction';
 
 /**
  * `DirectionProvider` is a non-visual Base UI context provider that sets the

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Meteors } from '@zeroxsolutions/ui/meteors';
+import { Meteors } from '@zeroxsolutions/ui/components/ui/meteors';
 
 /**
  * `Meteors` is a decorative background effect that renders a configurable number

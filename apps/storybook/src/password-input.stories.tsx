@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { PasswordInput } from '@zeroxsolutions/ui/password-input';
+import { PasswordInput } from '@zeroxsolutions/ui/components/password-input';
 
 /**
  * `PasswordInput` is a text field that masks its value and exposes a show/hide

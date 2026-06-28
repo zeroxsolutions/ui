@@ -8,7 +8,7 @@ import {
   MenubarSeparator,
   MenubarShortcut,
   MenubarTrigger,
-} from '@zeroxsolutions/ui/menubar';
+} from '@zeroxsolutions/ui/components/ui/menubar';
 
 /**
  * `Menubar` is a horizontal bar of top-level menus (File, Edit, ...) built on Base

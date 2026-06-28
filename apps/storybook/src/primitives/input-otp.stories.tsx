@@ -6,7 +6,7 @@ import {
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
-} from '@zeroxsolutions/ui/input-otp';
+} from '@zeroxsolutions/ui/components/ui/input-otp';
 
 /**
  * `InputOTP` is a segmented one-time-passcode field built on the `input-otp`

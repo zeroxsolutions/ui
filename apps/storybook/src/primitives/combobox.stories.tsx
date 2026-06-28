@@ -7,7 +7,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from '@zeroxsolutions/ui/combobox';
+} from '@zeroxsolutions/ui/components/ui/combobox';
 
 /**
  * `Combobox` is a filterable select built on Base UI's combobox primitive: a

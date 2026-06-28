@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Badge } from '@zeroxsolutions/ui/badge';
+import { Badge } from '@zeroxsolutions/ui/components/ui/badge';
 import { CheckIcon } from 'lucide-react';
 
 /**

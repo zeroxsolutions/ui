@@ -4,7 +4,7 @@ import {
   NativeSelect,
   NativeSelectOptGroup,
   NativeSelectOption,
-} from '@zeroxsolutions/ui/native-select';
+} from '@zeroxsolutions/ui/components/ui/native-select';
 
 /**
  * `NativeSelect` wraps the platform `<select>` element with consistent border,

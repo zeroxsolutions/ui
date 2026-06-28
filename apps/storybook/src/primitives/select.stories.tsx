@@ -9,7 +9,7 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from '@zeroxsolutions/ui/select';
+} from '@zeroxsolutions/ui/components/ui/select';
 
 /**
  * `Select` is a listbox-style dropdown for choosing a single value from a set of

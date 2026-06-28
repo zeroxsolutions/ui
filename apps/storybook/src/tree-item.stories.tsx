@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Eye, Frame, Image, Square, Type } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 
-import { Button } from '@zeroxsolutions/ui/button';
-import { TreeItem } from '@zeroxsolutions/ui/tree-item';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
+import { TreeItem } from '@zeroxsolutions/ui/components/tree-item';
 
 /**
  * `TreeItem` is one row of a hierarchy tree, the layer above `TreeRow`: it adds a

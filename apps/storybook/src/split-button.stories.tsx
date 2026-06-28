@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Circle, Square, Triangle } from 'lucide-react';
 import { useState } from 'react';
 
-import { SplitButton } from '@zeroxsolutions/ui/split-button';
+import { SplitButton } from '@zeroxsolutions/ui/components/split-button';
 
 /**
  * `SplitButton` pairs a primary action button with a separate, always-visible

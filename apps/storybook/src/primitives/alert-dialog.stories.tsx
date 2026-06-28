@@ -11,8 +11,8 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@zeroxsolutions/ui/alert-dialog';
-import { Button } from '@zeroxsolutions/ui/button';
+} from '@zeroxsolutions/ui/components/ui/alert-dialog';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import { TrashIcon } from 'lucide-react';
 
 /**

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
-import { Calendar } from '@zeroxsolutions/ui/calendar';
+import { Calendar } from '@zeroxsolutions/ui/components/ui/calendar';
 
 /**
  * `Calendar` is a date-selection grid built on react-day-picker's `DayPicker`,

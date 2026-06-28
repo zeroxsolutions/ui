@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Input } from '@zeroxsolutions/ui/input';
-import { LabeledControl } from '@zeroxsolutions/ui/labeled-control';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
+import { LabeledControl } from '@zeroxsolutions/ui/components/layouts/labeled-control';
 
 /**
  * `LabeledControl` is the compact inspector field: a vertical `Field` with a

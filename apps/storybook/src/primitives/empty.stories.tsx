@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Empty,
   EmptyContent,
@@ -8,7 +8,7 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from '@zeroxsolutions/ui/empty';
+} from '@zeroxsolutions/ui/components/ui/empty';
 import { InboxIcon, PlusIcon } from 'lucide-react';
 
 /**

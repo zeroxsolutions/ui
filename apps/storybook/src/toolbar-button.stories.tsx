@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MousePointer2, Square } from 'lucide-react';
 
-import { ToolbarButton } from '@zeroxsolutions/ui/toolbar-button';
+import { ToolbarButton } from '@zeroxsolutions/ui/components/toolbar-button';
 
 /**
  * `ToolbarButton` is an icon button for an editor toolbar, pairing an

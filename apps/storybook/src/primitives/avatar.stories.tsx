@@ -7,7 +7,7 @@ import {
   AvatarGroup,
   AvatarGroupCount,
   AvatarImage,
-} from '@zeroxsolutions/ui/avatar';
+} from '@zeroxsolutions/ui/components/ui/avatar';
 
 /**
  * `Avatar` is a Base UI avatar that renders a circular user image and

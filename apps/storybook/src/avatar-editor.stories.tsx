@@ -10,8 +10,8 @@ import {
   AvatarEditorTrigger,
   AvatarEditorUpload,
   type AvatarValue,
-} from '@zeroxsolutions/ui/avatar-editor';
-import { Button } from '@zeroxsolutions/ui/button';
+} from '@zeroxsolutions/ui/components/avatar-editor';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@zeroxsolutions/ui/dialog';
+} from '@zeroxsolutions/ui/components/ui/dialog';
 
 /**
  * A compound popover avatar editor — the Root holds the value; compose

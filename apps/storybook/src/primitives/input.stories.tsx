@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Input } from '@zeroxsolutions/ui/input';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
 
 /**
  * `Input` is a styled single-line text field built on the Base UI input

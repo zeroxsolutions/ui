@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { TabCloseButton } from '@zeroxsolutions/ui/tab-close-button';
+import { TabCloseButton } from '@zeroxsolutions/ui/components/tab-close-button';
 
 /**
  * `TabCloseButton` is the trailing control on an editor tab: a dirty buffer

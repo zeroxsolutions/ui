@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Card, CardContent } from '@zeroxsolutions/ui/card';
+import { Card, CardContent } from '@zeroxsolutions/ui/components/ui/card';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@zeroxsolutions/ui/carousel';
+} from '@zeroxsolutions/ui/components/ui/carousel';
 
 /**
  * `Carousel` is a slide container built on Embla that scrolls through

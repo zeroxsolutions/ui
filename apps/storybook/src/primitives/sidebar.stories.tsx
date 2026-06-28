@@ -14,7 +14,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
-} from '@zeroxsolutions/ui/sidebar';
+} from '@zeroxsolutions/ui/components/ui/sidebar';
 import { HomeIcon, InboxIcon, SearchIcon, SettingsIcon } from 'lucide-react';
 
 /**

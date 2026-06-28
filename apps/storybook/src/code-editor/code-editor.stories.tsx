@@ -1,22 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
 
-import { CodeEditor, CodeEditorContent } from '@zeroxsolutions/ui/code-editor';
-import { CommandInput, CommandList } from '@zeroxsolutions/ui/command';
+import { CodeEditor, CodeEditorContent } from '@zeroxsolutions/ui/components/code-editor';
+import { CommandInput, CommandList } from '@zeroxsolutions/ui/components/ui/command';
 import {
   CommandSwitcher,
   CommandSwitcherItem,
-} from '@zeroxsolutions/ui/command-switcher';
-import { Empty } from '@zeroxsolutions/ui/empty';
-import { type RoutedFile } from '@zeroxsolutions/ui/file-content-router';
+} from '@zeroxsolutions/ui/components/command-switcher';
+import { Empty } from '@zeroxsolutions/ui/components/ui/empty';
+import { type RoutedFile } from '@zeroxsolutions/ui/components/file-content-router';
 import {
   FileTree,
   FileTreeGroup,
   FileTreeItem,
   FileTreeLabel,
-} from '@zeroxsolutions/ui/file-tree';
-import { FileTypeIcon } from '@zeroxsolutions/ui/file-type-icon';
-import { useCommandShortcut } from '@zeroxsolutions/ui/use-command-shortcut';
+} from '@zeroxsolutions/ui/components/file-tree';
+import { FileTypeIcon } from '@zeroxsolutions/ui/components/file-type-icon';
+import { useCommandShortcut } from '@zeroxsolutions/ui/hooks/use-command-shortcut';
 
 const INITIAL: RoutedFile[] = [
   {

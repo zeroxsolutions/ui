@@ -4,7 +4,7 @@ import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from '@zeroxsolutions/ui/reasoning';
+} from '@zeroxsolutions/ui/components/ai-elements/reasoning';
 
 const THOUGHT = `Let me work through this.
 

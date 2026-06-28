@@ -1,19 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   CommandEmpty,
   CommandInput,
   CommandList,
   CommandShortcut,
-} from '@zeroxsolutions/ui/command';
+} from '@zeroxsolutions/ui/components/ui/command';
 import {
   CommandSwitcher,
   CommandSwitcherItem,
-} from '@zeroxsolutions/ui/command-switcher';
-import { FileTypeIcon } from '@zeroxsolutions/ui/file-type-icon';
-import { useCommandShortcut } from '@zeroxsolutions/ui/use-command-shortcut';
+} from '@zeroxsolutions/ui/components/command-switcher';
+import { FileTypeIcon } from '@zeroxsolutions/ui/components/file-type-icon';
+import { useCommandShortcut } from '@zeroxsolutions/ui/hooks/use-command-shortcut';
 
 const FILES = [
   'SKILL.md',

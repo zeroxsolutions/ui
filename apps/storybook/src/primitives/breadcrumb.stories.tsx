@@ -8,7 +8,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@zeroxsolutions/ui/breadcrumb';
+} from '@zeroxsolutions/ui/components/ui/breadcrumb';
 
 /**
  * `Breadcrumb` is a navigation primitive that renders a hierarchical trail

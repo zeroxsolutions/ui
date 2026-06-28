@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
-import { NumberField } from '@zeroxsolutions/ui/number-field';
+import { NumberField } from '@zeroxsolutions/ui/components/number-field';
 
 /**
  * `NumberField` is a compact, controlled numeric input for a property

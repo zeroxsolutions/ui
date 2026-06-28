@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Separator } from '@zeroxsolutions/ui/separator';
+import { Separator } from '@zeroxsolutions/ui/components/ui/separator';
 
 /**
  * `Separator` is a Base UI separator that renders a thin divider line to group

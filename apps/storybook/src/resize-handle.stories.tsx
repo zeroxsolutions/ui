@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
-import { ResizeHandle } from '@zeroxsolutions/ui/resize-handle';
+import { ResizeHandle } from '@zeroxsolutions/ui/components/resize-handle';
 
 /**
  * `ResizeHandle` is a 1px vertical grip that resizes an adjacent panel by

@@ -8,7 +8,7 @@ import {
   ToolInput,
   ToolOutput,
   type ToolState,
-} from '@zeroxsolutions/ui/tool';
+} from '@zeroxsolutions/ui/components/ai-elements/tool';
 
 /**
  * `Tool` renders a collapsible tool-invocation card: a header row (icon, title,

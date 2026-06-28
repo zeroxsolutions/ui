@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Checkbox } from '@zeroxsolutions/ui/checkbox';
-import { Label } from '@zeroxsolutions/ui/label';
+import { Checkbox } from '@zeroxsolutions/ui/components/ui/checkbox';
+import { Label } from '@zeroxsolutions/ui/components/ui/label';
 
 /**
  * `Checkbox` is a Base UI checkbox styled as a small square control that shows a

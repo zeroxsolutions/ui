@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Skeleton } from '@zeroxsolutions/ui/skeleton';
+import { Skeleton } from '@zeroxsolutions/ui/components/ui/skeleton';
 
 /**
  * `Skeleton` is a presentational placeholder that renders a pulsing, muted block

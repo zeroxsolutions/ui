@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { StatusDot, type StatusTone } from '@zeroxsolutions/ui/status-dot';
+import { StatusDot, type StatusTone } from '@zeroxsolutions/ui/components/status-dot';
 
 /**
  * `StatusDot` is a small presence indicator — a coloured circle that signals a

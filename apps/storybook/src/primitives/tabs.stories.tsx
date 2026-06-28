@@ -5,7 +5,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@zeroxsolutions/ui/tabs';
+} from '@zeroxsolutions/ui/components/ui/tabs';
 
 /**
  * `Tabs` is a Base UI tab set composed of `Tabs` (root), `TabsList`,

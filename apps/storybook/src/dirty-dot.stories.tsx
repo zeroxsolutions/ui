@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { DirtyDot } from '@zeroxsolutions/ui/dirty-dot';
+import { DirtyDot } from '@zeroxsolutions/ui/components/dirty-dot';
 
 /**
  * `DirtyDot` is a small filled circle that marks unsaved changes — the dot an

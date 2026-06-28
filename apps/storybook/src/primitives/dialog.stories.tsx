@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -10,9 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@zeroxsolutions/ui/dialog';
-import { Field, FieldLabel } from '@zeroxsolutions/ui/field';
-import { Input } from '@zeroxsolutions/ui/input';
+} from '@zeroxsolutions/ui/components/ui/dialog';
+import { Field, FieldLabel } from '@zeroxsolutions/ui/components/ui/field';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
 
 /**
  * `Dialog` is a modal built on the Base UI dialog primitive: a trigger opens a

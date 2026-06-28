@@ -9,8 +9,8 @@ import {
   FieldLegend,
   FieldSeparator,
   FieldSet,
-} from '@zeroxsolutions/ui/field';
-import { Input } from '@zeroxsolutions/ui/input';
+} from '@zeroxsolutions/ui/components/ui/field';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
 
 /**
  * `Field` is a composition of layout primitives for building accessible form

@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MoreHorizontal } from 'lucide-react';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   PanelHeader,
   PanelHeaderActions,
   PanelHeaderRow,
   PanelHeaderTitle,
-} from '@zeroxsolutions/ui/panel-header';
+} from '@zeroxsolutions/ui/components/layouts/panel-header';
 
 /**
  * `PanelHeader` frames the top strip of a side panel through a compound API:

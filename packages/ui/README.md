@@ -2,18 +2,18 @@
 
 A React component library and design system — ~120 components built on
 [Base UI](https://base-ui.com) primitives and **Tailwind CSS v4**, shipped as
-flat, tree-shakeable per-component subpaths. Covers everything from low-level
+tree-shakeable per-component subpaths that mirror the source tree. Covers everything from low-level
 primitives (button, dialog, select) to composed surfaces (a CodeMirror code
 editor, a chat thread, an avatar editor), all wired to one CSS-variable token
 set that flips light/dark for free.
 
 ```tsx
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
-} from '@zeroxsolutions/ui/dialog';
+} from '@zeroxsolutions/ui/components/ui/dialog';
 
 <Dialog>
   <DialogTrigger render={<Button>Open</Button>} />
@@ -70,34 +70,56 @@ of the box, but any class toggler works.
 
 ## Components
 
-Every component is its own subpath: `@zeroxsolutions/ui/<name>`. A few groups:
+Every module is its own subpath, mirroring the source tree under `dist/`:
+`@zeroxsolutions/ui/<dir>/<name>`. The prefixes are `components/ui/*`
+(primitives), `components/layouts/*`, `components/ai-elements/*`,
+`components/chat/*`, `components/*` (composed surfaces), `hooks/*`, and `lib/*`
+(utilities). For example:
 
-- **Primitives** (~70, Base UI / shadcn-style) — `accordion`, `alert`,
-  `alert-dialog`, `avatar`, `badge`, `button`, `calendar`, `card`, `carousel`,
-  `chart`, `checkbox`, `combobox`, `command`, `context-menu`, `dialog`, `drawer`,
-  `dropdown-menu`, `field`, `form`, `hover-card`, `input`, `input-otp`, `menubar`,
-  `navigation-menu`, `pagination`, `popover`, `progress`, `radio-group`,
-  `resizable`, `scroll-area`, `select`, `sheet`, `sidebar`, `slider`, `sonner`,
-  `switch`, `table`, `tabs`, `textarea`, `toggle`, `tooltip`, … plus `data-table`
-  (TanStack Table) and chat surfaces (`message`, `bubble`, `attachment`).
-- **Layouts** — `center`, `container`, `field-grid`, `field-row`,
-  `floating-toolbar-shell`, `labeled-control`, `panel-header`, `section`.
-- **Code editor** — `code-editor` (CodeMirror + file tree + command palette),
-  `code-editor-pane`, `file-tree`, `file-content-router`, `command-switcher`,
-  `frontmatter-editor`, `markdown-view`, `font-preview`, `image-preview`,
-  `binary-file-card`, `file-type-icon`.
-- **Chat & AI elements** — `chat-message-shell`, `chat-empty-state`,
-  `chat-attachment-chip`, `chat-composer-attachments`, `chat-composer-ghost-text`;
-  `code-block`, `conversation`, `reasoning`, `tool`.
-- **Emoji** — `emoji-picker`, `emoji-appearance`, `avatar-editor`, backed by
+```tsx
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
+import { Center } from '@zeroxsolutions/ui/components/layouts/center';
+import { CodeBlock } from '@zeroxsolutions/ui/components/ai-elements/code-block';
+import { CodeEditor } from '@zeroxsolutions/ui/components/code-editor';
+import { useCommandShortcut } from '@zeroxsolutions/ui/hooks/use-command-shortcut';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
+```
+
+A few groups (names below are the leaf, prefixed per the line that introduces them):
+
+- **Primitives** (`components/ui/*`, ~70, Base UI / shadcn-style) — `accordion`,
+  `alert`, `alert-dialog`, `avatar`, `badge`, `button`, `calendar`, `card`,
+  `carousel`, `chart`, `checkbox`, `combobox`, `command`, `context-menu`,
+  `dialog`, `drawer`, `dropdown-menu`, `field`, `form`, `hover-card`, `input`,
+  `input-otp`, `menubar`, `navigation-menu`, `pagination`, `popover`, `progress`,
+  `radio-group`, `resizable`, `scroll-area`, `select`, `sheet`, `sidebar`,
+  `slider`, `sonner`, `switch`, `table`, `tabs`, `textarea`, `toggle`, `tooltip`,
+  … plus `data-table` (TanStack Table) and chat primitives (`message`, `bubble`,
+  `attachment`).
+- **Layouts** (`components/layouts/*`) — `center`, `container`, `field-grid`,
+  `field-row`, `floating-toolbar-shell`, `labeled-control`, `panel-header`,
+  `section`.
+- **Code editor** (`components/*`) — `code-editor` (CodeMirror + file tree +
+  command palette), `code-editor-pane`, `file-tree`, `file-content-router`,
+  `command-switcher`, `frontmatter-editor`, `markdown-view`, `font-preview`,
+  `image-preview`, `binary-file-card`, `file-type-icon`.
+- **Chat & AI elements** — chat surfaces under `components/chat/*`
+  (`chat-message-shell`, `chat-empty-state`, `chat-attachment-chip`,
+  `chat-composer-attachments`, `chat-composer-ghost-text`); AI elements under
+  `components/ai-elements/*` (`code-block`, `conversation`, `reasoning`, `tool`).
+- **Emoji** (`components/*`) — `emoji-picker`, `emoji-appearance`,
+  `avatar-editor`, backed by
   [`@zeroxsolutions/fluent-emoji`](../fluent-emoji).
-- **Higher-level controls** — `number-field`, `select-field`, `search-input`,
-  `password-input`, `tag-input`, `confirm-button`, `split-button`,
-  `toolbar-button`, `popover-icon-button`, `tree-item`, `tree-row`, `status-dot`,
-  `dirty-dot`, `mono-chip`, `icon-label`, `resize-handle`, `tab-close-button`,
-  `sidebar-group-collapsible`, `sidebar-menu-collapsible`.
-- **Hooks & utilities** — `use-command-shortcut`, `use-mobile`,
-  `use-stick-to-bottom`, and `utils` (`cn`).
+- **Higher-level controls** (`components/*`) — `number-field`, `select-field`,
+  `search-input`, `password-input`, `tag-input`, `confirm-button`,
+  `split-button`, `toolbar-button`, `popover-icon-button`, `tree-item`,
+  `tree-row`, `status-dot`, `dirty-dot`, `mono-chip`, `icon-label`,
+  `resize-handle`, `tab-close-button`, `sidebar-group-collapsible`,
+  `sidebar-menu-collapsible`.
+- **Hooks** (`hooks/*`) — `use-command-shortcut`, `use-mobile`,
+  `use-stick-to-bottom`.
+- **Utilities** (`lib/*`) — `utils` (`cn`), `shiki`, `code-theme`,
+  `code-syntax`, and other internals.
 
 Browse the workspace **Storybook** for the full catalog with live, interactive
 examples of every component and variant.
@@ -118,10 +140,12 @@ vendor marks lucide doesn't ship, see [`@zeroxsolutions/icons`](../icons).
 ## Development
 
 ```sh
-nx build @zeroxsolutions/ui    # build to dist/ (flat subpaths + raw CSS)
+nx build @zeroxsolutions/ui    # build to dist/ (subpaths mirror src + raw CSS)
 nx test @zeroxsolutions/ui     # unit tests via Vitest
 ```
 
-In the workspace, the Storybook app consumes this library from **source** (Vite
-aliases each `@zeroxsolutions/ui/<name>` subpath to `src/`), so component edits
-hot-reload without a rebuild.
+In the workspace, the **Storybook** app consumes this package exactly as a
+downstream app would — resolved from `node_modules` via its published `exports`,
+with **no** source aliases or path rewrites — so a broken export, type, or
+missing file surfaces there too. Rebuild the library
+(`nx build @zeroxsolutions/ui`) for Storybook to pick up component changes.

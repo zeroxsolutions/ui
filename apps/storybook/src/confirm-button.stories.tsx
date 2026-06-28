@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { ConfirmButton } from '@zeroxsolutions/ui/confirm-button';
+import { ConfirmButton } from '@zeroxsolutions/ui/components/confirm-button';
 
 /**
  * `ConfirmButton` is a trigger button that gates its action behind an

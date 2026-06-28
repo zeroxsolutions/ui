@@ -4,7 +4,7 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from '@zeroxsolutions/ui/hover-card';
+} from '@zeroxsolutions/ui/components/ui/hover-card';
 
 /**
  * `HoverCard` is a floating preview surface built on Base UI's PreviewCard

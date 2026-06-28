@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Drawer,
   DrawerClose,
@@ -10,7 +10,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@zeroxsolutions/ui/drawer';
+} from '@zeroxsolutions/ui/components/ui/drawer';
 
 /**
  * `Drawer` is a modal panel built on the `vaul` primitive that slides in from a

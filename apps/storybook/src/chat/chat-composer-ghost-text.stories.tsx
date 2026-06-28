@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 
-import { ChatComposerGhostText } from '@zeroxsolutions/ui/chat-composer-ghost-text';
-import { Textarea } from '@zeroxsolutions/ui/textarea';
+import { ChatComposerGhostText } from '@zeroxsolutions/ui/components/chat/chat-composer-ghost-text';
+import { Textarea } from '@zeroxsolutions/ui/components/ui/textarea';
 
 /**
  * `ChatComposerGhostText` is an inline typeahead overlay that renders a

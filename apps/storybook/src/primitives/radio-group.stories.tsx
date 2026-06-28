@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Label } from '@zeroxsolutions/ui/label';
-import { RadioGroup, RadioGroupItem } from '@zeroxsolutions/ui/radio-group';
+import { Label } from '@zeroxsolutions/ui/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@zeroxsolutions/ui/components/ui/radio-group';
 
 /**
  * `RadioGroup` is a Base UI single-selection control that manages a set of

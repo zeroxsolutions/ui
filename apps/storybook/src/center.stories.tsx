@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Star } from 'lucide-react';
 
-import { Badge } from '@zeroxsolutions/ui/badge';
-import { Center } from '@zeroxsolutions/ui/center';
+import { Badge } from '@zeroxsolutions/ui/components/ui/badge';
+import { Center } from '@zeroxsolutions/ui/components/layouts/center';
 
 /**
  * `Center` is a layout atom that centers its children on both axes via flexbox;

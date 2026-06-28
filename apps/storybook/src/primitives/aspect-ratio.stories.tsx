@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AspectRatio } from '@zeroxsolutions/ui/aspect-ratio';
+import { AspectRatio } from '@zeroxsolutions/ui/components/ui/aspect-ratio';
 
 /**
  * `AspectRatio` constrains its children to a fixed width-to-height ratio using

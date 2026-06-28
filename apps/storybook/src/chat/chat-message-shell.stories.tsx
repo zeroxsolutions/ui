@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { ChatMessageShell } from '@zeroxsolutions/ui/chat-message-shell';
+import { ChatMessageShell } from '@zeroxsolutions/ui/components/chat/chat-message-shell';
 
 /**
  * `ChatMessageShell` wraps a single message row and is agnostic to how the body

@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Section } from '@zeroxsolutions/ui/section';
+import { Section } from '@zeroxsolutions/ui/components/layouts/section';
 
 /**
  * `Section` is a titled panel block with an optional count badge and a trailing

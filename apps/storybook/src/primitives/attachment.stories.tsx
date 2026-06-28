@@ -17,8 +17,8 @@ import {
   AttachmentMedia,
   AttachmentTitle,
   AttachmentTrigger,
-} from '@zeroxsolutions/ui/attachment';
-import { Spinner } from '@zeroxsolutions/ui/spinner';
+} from '@zeroxsolutions/ui/components/ui/attachment';
+import { Spinner } from '@zeroxsolutions/ui/components/ui/spinner';
 
 /**
  * `Attachment` is a compound card that represents a single uploaded or pending

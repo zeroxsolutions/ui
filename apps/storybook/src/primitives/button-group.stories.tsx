@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '@zeroxsolutions/ui/button';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   ButtonGroup,
   ButtonGroupSeparator,
   ButtonGroupText,
-} from '@zeroxsolutions/ui/button-group';
+} from '@zeroxsolutions/ui/components/ui/button-group';
 
 /**
  * `ButtonGroup` joins related buttons and controls into a single connected

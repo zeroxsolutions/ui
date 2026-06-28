@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { ScrollArea } from '@zeroxsolutions/ui/scroll-area';
+import { ScrollArea } from '@zeroxsolutions/ui/components/ui/scroll-area';
 
 /**
  * `ScrollArea` wraps content in a fixed-size viewport and renders a custom,

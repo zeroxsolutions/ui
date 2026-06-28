@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Settings2 } from 'lucide-react';
 
-import { PopoverIconButton } from '@zeroxsolutions/ui/popover-icon-button';
+import { PopoverIconButton } from '@zeroxsolutions/ui/components/popover-icon-button';
 
 /**
  * `PopoverIconButton` is a ghost icon button that pairs a hover/focus tooltip

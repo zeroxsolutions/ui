@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Download } from 'lucide-react';
 
-import { BinaryFileCard } from '@zeroxsolutions/ui/binary-file-card';
-import { Button } from '@zeroxsolutions/ui/button';
+import { BinaryFileCard } from '@zeroxsolutions/ui/components/binary-file-card';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 
 /**
  * `BinaryFileCard` is the centered fallback shown for a file that has no inline

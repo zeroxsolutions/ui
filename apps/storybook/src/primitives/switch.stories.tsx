@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Switch } from '@zeroxsolutions/ui/switch';
+import { Switch } from '@zeroxsolutions/ui/components/ui/switch';
 
 /**
  * `Switch` is a Base UI toggle control for turning a single setting on or off,

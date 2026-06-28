@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ArrowUp } from 'lucide-react';
 import { useState } from 'react';
 
-import { ChatComposerAttachments } from '@zeroxsolutions/ui/chat-composer-attachments';
+import { ChatComposerAttachments } from '@zeroxsolutions/ui/components/chat/chat-composer-attachments';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupTextarea,
-} from '@zeroxsolutions/ui/input-group';
+} from '@zeroxsolutions/ui/components/ui/input-group';
 
 /**
  * `ChatComposerAttachments` is the block-start row of attachment chips for an

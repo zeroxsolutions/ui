@@ -4,7 +4,7 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from '@zeroxsolutions/ui/resizable';
+} from '@zeroxsolutions/ui/components/ui/resizable';
 
 /**
  * `ResizablePanelGroup` lays out one or more `ResizablePanel`s along a

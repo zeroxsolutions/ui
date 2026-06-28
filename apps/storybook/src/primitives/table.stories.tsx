@@ -8,7 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@zeroxsolutions/ui/table';
+} from '@zeroxsolutions/ui/components/ui/table';
 
 /**
  * `Table` and its sub-components (`TableHeader`, `TableBody`, `TableRow`,
