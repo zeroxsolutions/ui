@@ -25,16 +25,20 @@
         "dependsOn": [
           "build-storybook"
         ],
-        "configurations": {
-          "development": {
-            "command": "wrangler deploy --env development"
-          },
-          "production": {
-            "command": "wrangler deploy --env production"
-          }
-        },
         "options": {
-          "cwd": "{projectRoot}"
+          "cwd": "{projectRoot}",
+          "command": "wrangler deploy --env production"
+        }
+      },
+      "upload": {
+        "executor": "nx:run-commands",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build-storybook"
+        ],
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "wrangler versions upload --env development"
         }
       }
     }
