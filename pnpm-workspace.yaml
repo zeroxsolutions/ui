@@ -3,3 +3,5 @@ packages:
   - "apps/*"
 
 autoInstallPeers: true
+catalog:
+  "wrangler": "^4.105.0"
