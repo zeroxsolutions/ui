@@ -1,0 +1,260 @@
+name: spec-driven-superpowers
+version: 1
+description: Spec-driven workflow with explicit review and execution planning artifacts
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: Change proposal with explicit success criteria and impact boundaries
+    template: proposal.md
+    instruction: >
+      Create the proposal document that explains why the change exists, what
+      success means, and which capabilities are affected.
+
+      Use the template as the section structure. Keep implementation detail out
+      of this artifact.
+
+      If exploratory work is needed before scope is clear, prefer invoking
+      superpowers `brainstorming` and retain any output at
+      `openspec/changes/<change>/brainstorm.md`. If that capability is
+      unavailable, write the same companion note manually to the same path.
+
+      The Capabilities section is contract-critical:
+      - new capabilities create new `specs/<capability>/spec.md`
+      - modified capabilities must reference existing names under
+        `openspec/specs/`
+
+      Keep the proposal concise and specific about impact.
+    requires: []
+
+  - id: specs
+    generates: specs/**/*.md
+    description: Detailed specifications for the change
+    template: spec.md
+    instruction: >
+      Create one spec file per capability named in the proposal.
+
+      Use exact capability names from the proposal. For modified capabilities,
+      create delta specs under the existing capability folder name.
+
+      Preserve normal OpenSpec spec discipline:
+      - use ADDED, MODIFIED, REMOVED, or RENAMED sections
+      - each requirement uses `### Requirement: ...`
+      - each scenario uses `#### Scenario: ...`
+      - every requirement has at least one scenario
+      - MODIFIED requirements must include the full updated requirement block
+
+      Specs define required behavior, not implementation tactics.
+    requires:
+      - proposal
+
+  - id: design
+    generates: design.md
+    description: Technical design with implementation decisions and workflow state model
+    template: design.md
+    instruction: >
+      Create the design document that explains how the change will be
+      implemented.
+
+      In `spec-driven-superpowers`, `design.md` is required. Use it to capture
+      approach, trade-offs, migration concerns, and state model details when
+      they matter.
+
+      Keep it architecture-focused. Proposal explains why; specs define what;
+      design explains how.
+    requires:
+      - specs
+
+  - id: review
+    generates: review.md
+    description: Pre-implementation readiness gate and validation focus
+    template: review.md
+    instruction: >
+      Create the readiness gate for implementation.
+
+      Use the template as the section structure. This artifact records current
+      readiness state, not free-form notes.
+
+      Always make these sections explicit:
+      - `Readiness Decision`
+      - `Blocked By`
+      - `Validation Focus`
+      - `Key Risks`
+
+      Use mode sections only when justified by the change:
+      - `Execution Mode`
+      - `Verification Mode`
+      - `Debug Mode`
+      - `Review Request` / `Review Scope` / `Review Focus` / `Review Status`
+      - `Delegation Mode`
+      - `Parallelization Mode`
+      - `Worktree Mode`
+      - `Branch Finish Mode`
+
+      If review findings exist, `Findings Summary` must include disposition for
+      each meaningful finding. If a blocker or validation concern is important
+      here, later tasks and plans must account for it.
+
+      When superpowers is available, prefer `pre-implementation review` and
+      write the current judgment back into this file. Otherwise write the same
+      structure directly here. Preserve optional `Manual Adjustments` and never
+      create a parallel tool-owned document tree.
+    requires:
+      - specs
+      - design
+
+  - id: tasks
+    generates: tasks.md
+    description: Change-level implementation checklist and tracking source of truth
+    template: tasks.md
+    instruction: >
+      Create the coarse-grained implementation checklist.
+
+      Follow the template and keep every task in checkbox form:
+      `- [ ] X.Y Description`
+
+      Group related work under numbered headings, keep tasks dependency-ordered,
+      and make each task verifiable.
+
+      `tasks.md` is the change-level source of truth. If later execution plans
+      change task boundaries, ordering, or completion definition, update this
+      file as well.
+    requires:
+      - review
+      - specs
+      - design
+
+  - id: plan
+    generates: plan.md
+    description: Execution-focused implementation plan derived from tasks
+    template: plan.md
+    instruction: >
+      Create the execution plan that expands `tasks.md` into ordered steps.
+
+      Use the template as the section structure. `plan.md` is the execution
+      driver; `tasks.md` remains the coarse-grained source of truth.
+
+      Core sections must stay explicit:
+      - `Scope`
+      - `Covers`
+      - `Plan Type`
+      - `Execution Strategy`
+      - `Ordered Steps`
+      - `Validation Per Step`
+      - `Files / Owners`
+      - `Completion Checkpoint`
+
+      Mode-triggered sections become required when their matching review mode
+      is active:
+      - `Completion Verification`
+      - `Debugging Trail`
+      - `Review Follow-Up`
+      - `Delegation Units`
+      - `Parallel Units`
+      - `Isolation Boundaries`
+      - `Worktree Units`
+      - `Isolation Reason`
+      - `Integration Owner`
+      - `Finish Checklist`
+      - `Delivery Handoff`
+
+      Keep `Covers` explicit for every execution block. Map high-priority
+      `Validation Focus` items into execution or verification steps.
+
+      Use `full` plans for high-risk, cross-module, or validation-intensive
+      work. Otherwise `lightweight` is acceptable.
+
+      When superpowers is available, prefer `writing-plans`. Otherwise write
+      the same structure directly to `plan.md`.
+
+      Preserve optional `Manual Adjustments`, append transient observations to
+      `Execution Notes`, and update `tasks.md` whenever plan changes alter task
+      boundaries, ordering, or completion definition.
+    requires:
+      - tasks
+      - review
+
+apply:
+  requires:
+    - plan
+  tracks: tasks.md
+  instruction: |
+    Read `proposal.md`, specs, `design.md`, `review.md`, `tasks.md`, and
+    `plan.md` before implementing.
+
+    Apply preflight:
+    - stop if `Readiness Decision` is `blocked`
+    - resolve or explicitly track every `ready with conditions` item before
+      implementation continues
+    - stop if current open tasks are not covered by explicit `Covers:` mappings
+    - stop if high-priority `Validation Focus` items are not mapped into
+      execution or verification steps
+    - if `Execution Mode` is `tdd-required`, use test-first execution
+    - if `Verification Mode` is `retained-required`, `plan.md` must include
+      current `Completion Verification`
+    - if `Debug Mode` is `systematic-debugging`, `Observed Failure` and
+      `Debugging Trail` must exist before code changes
+    - if `Review Status` is `findings-received`, accepted findings must be
+      written back into `tasks.md`, `plan.md`, or `verification.md`
+    - if `Delegation Mode` is active, `Delegation Units` must define ownership
+      and writeback expectations
+    - if `Parallelization Mode` is active, `Parallel Units` and
+      `Isolation Boundaries` must make overlap safe or explicitly controlled
+    - if `Worktree Mode` is active, `Worktree Units`, `Isolation Reason`, and
+      `Integration Owner` must be explicit
+    - if `Branch Finish Mode` is active, `Finish Checklist` and
+      `Delivery Handoff` must be explicit and finish-ready state must not
+      outrun verification or unresolved checklist items
+    - if plan changes task boundaries, ordering, or completion definition,
+      update `tasks.md` before continuing
+
+    Execution model:
+    - `plan.md` is the execution driver
+    - `tasks.md` remains the coarse-grained progress truth
+    - mark tasks complete only after the covered plan work satisfies the task
+      completion definition
+
+    Preferred superpowers capabilities by situation:
+    - always prefer `executing-plans` for normal plan-driven execution
+    - prefer `test-driven-development` when `Execution Mode` is
+      `tdd-preferred` or `tdd-required`
+    - prefer `verification-before-completion` when retained verification is
+      recommended or required
+    - prefer `systematic-debugging` when `Debug Mode` is active
+    - prefer `requesting-code-review` and `receiving-code-review` when explicit
+      review is in flight
+    - prefer `subagent-driven-development` when delegation is active
+    - prefer `dispatching-parallel-agents` when safe parallelization is active
+    - prefer `using-git-worktrees` when worktree isolation is active
+    - prefer `finishing-a-development-branch` when finish-ready behavior is
+      active
+
+    Capability invocation context always comes from the current change:
+    - `review.md`
+    - `tasks.md`
+    - `plan.md`
+    - current `Covers:` mappings
+    - current mode-triggered sections
+    - deterministic writeback rules
+
+    If any preferred capability is unavailable or invocation fails, continue
+    manually with the same artifact paths, structure, and writeback rules.
+
+    Deterministic writeback rules:
+    - `plan.md` may rewrite execution steps, `Covers`, validation steps,
+      current status summary, and any active mode-driven sections
+    - preserve optional `Manual Adjustments`
+    - append transient implementation observations to `Execution Notes`
+    - if retained verification is used, write to
+      `openspec/changes/<change>/verification.md`
+    - `verification.md` uses `Completion Decision`, `Commands Run`,
+      `Manual Checks`, `Evidence`, and `Residual Risks`
+    - preserve optional `Manual Adjustments` or `Previous Iterations` in
+      `verification.md`
+    - do not create scattered notes or a parallel superpowers document tree
+    - the main agent remains the writeback owner for delegated, parallel, and
+      worktree-isolated execution
+
+    If `Verification Mode` is `retained-required` and current retained evidence
+    is still missing, implementation may be complete but apply must report
+    `implemented, verification pending` rather than fully complete.
