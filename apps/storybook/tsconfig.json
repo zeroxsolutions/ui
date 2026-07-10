@@ -9,6 +9,9 @@
       "path": "../../packages/icons"
     },
     {
+      "path": "../../packages/editor"
+    },
+    {
       "path": "../../packages/fluent-emoji"
     },
     {

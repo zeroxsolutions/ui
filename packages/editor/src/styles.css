@@ -1,0 +1,12 @@
+/* Default editor theme layer for `@zeroxsolutions/editor`.
+ *
+ * The editor rides `@zeroxsolutions/ui`'s design tokens; this sheet adds only
+ * the editor-specific tokens (prose spacing, callout palettes, code/diagram/
+ * math surfaces) on top of them, keyed to the design system's `.dark`
+ * mechanism. Populated by the theming layer (see the `editor-theming` spec).
+ */
+@custom-variant dark (&:is(.dark *));
+
+@layer components {
+  /* Editor prose/callout/code/math tokens are added here by the theming task. */
+}

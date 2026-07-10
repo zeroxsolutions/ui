@@ -26,6 +26,11 @@ const orphans = readdirSync(appsDir).filter((name) => {
   if (name.endsWith('-e2e')) return false;
   const appPath = join(appsDir, name);
   if (!isDir(appPath) || !existsSync(join(appPath, 'package.json'))) return false;
+  // A Storybook host (owns a `.storybook/` config) is tested by its own
+  // `test-storybook` target via @storybook/test-runner — the modern-Nx idiom
+  // (v21+ removed the sibling `storybook-e2e` Cypress generator), so it needs no
+  // `*-e2e` sibling. See .agents/rules/e2e-pairs-each-app.md.
+  if (isDir(join(appPath, '.storybook'))) return false;
   return !isDir(join(appsDir, `${name}-e2e`));
 });
 if (orphans.length === 0) process.exit(0);

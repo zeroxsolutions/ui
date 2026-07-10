@@ -5,6 +5,8 @@ Every app carries a paired `<app>-e2e` project (its scoped name is `@scope/<app>
 
 The e2e **runner follows the app kind** — a browser app drives a browser, a worker/node app runs HTTP-level with no browser — and matches the workspace's configured e2e runner (see `CLAUDE.md`, encoded in `nx.json`); read that config rather than assuming it. Invoke through nx by the scoped e2e project name.
 
+**Exception — a Storybook host.** A Storybook host app (one that owns a `.storybook/` config) is **not** paired with a `*-e2e` sibling: on modern Nx (v21+ removed the sibling `storybook-e2e` Cypress generator) a Storybook host is tested by its own on-project **`test-storybook`** target via `@storybook/test-runner` (Nx's `interactionTests`), not a separate e2e project. The pre-tool hook detects the `.storybook/` directory and exempts it; keep that host's `test-storybook` target as its e2e-equivalent coverage.
+
 **Incorrect — e2e specs inside the app, or an app with no sibling:**
 ```
 apps/<app>/src/**.e2e.ts   # 🔴 e2e living in the app project
