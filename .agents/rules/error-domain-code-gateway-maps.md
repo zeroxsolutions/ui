@@ -1,38 +1,44 @@
-## Raise a `DomainError` With a Registry Code; Map It to the Wire Once in the Gateway's `onError`
+## Raise a Plain Typed Error in the Domain; Map It to the Wire by Type at Each Transport's `onError`
 `[HIGH]` `error-domain-code-gateway-maps`
 
-Domain code — aggregates, value objects, command/event handlers, services — raises a **`DomainError`** (base from the house domain toolkit; see `CLAUDE.md`) carrying a registry **`code`** + message; it knows nothing about HTTP or the wire format and MUST NOT construct or throw a wire-format error (`JsonApiError`). An error a caller **branches on** MAY be a specific `DomainError` subclass; the base with a code covers the rest. A new code adds a **registry entry** (`code → { status, title, source? }`), never a new per-handler payload.
+A failure raised anywhere in a bounded context's `lib/` (aggregate, value object, command/event handler, service, guard) is a **plain `Error` subclass** carrying only domain data — the offending id, field, or value. It carries **no** wire concern: no HTTP status, no wire `code` string, no JSON:API shape, and **no custom base** — and it MUST NOT construct or throw a wire-format error (`JsonApiError`). Each subclass exists so a transport (and any caller) can branch on the specific failure **by its type**; a shared/generic failure (e.g. a query-whitelist rejection) is a plain `Error` subclass in the house toolkit that raises it, mapped by type at the consuming service.
 
-Map failures **centrally** — a single `app.onError`, never per handler — that turns raised `DomainError`s (and framework/unexpected errors) into a consistent HTTP status + one standard error document. That document is full JSON:API v1.1 (see `CLAUDE.md`): `{ errors: [ { status, code, title, detail, source? } ] }`, built by the shared `@scope/jsonapi` `errors[]` builder off the `code → { status, title }` registry. Handlers stay thin and let `onError` render the document; multi-field validation renders **one entry per field** with `source.pointer` = the field's JSON Pointer.
+Each **transport** — a service's single `onError`, the edge gateway — owns a **type-keyed registry** mapping a concrete **error class → `{ status, title, code? }`**, built with the shared `@scope/jsonapi` `defineErrorMap([[ErrorClass, meta], …])` and resolved by `createDomainErrorResolver(registry)` (the `resolve` hook for `createJsonApiErrorHandler`). It resolves a raised error by its **constructor identity** (`registry.get(err.constructor)`), never by a field read off the error. **Registry membership is the sole discriminator**: a type in the registry → its mapped status (+ code); any other error — a programming bug, or a domain error someone forgot to register → a generic **500** with no leaked detail. A new domain error adds **one registry entry** keyed on its class, never a per-handler payload; a completeness test asserts every declared domain error class appears in a registry (else it 500s).
 
-At the **edge gateway** this same `onError` renders the document and **preserves the upstream service's error objects** — it MUST NOT collapse them to a bare `message` — and MAY set `errors[].id` to the request id. A `*-cron` / `*-queue` entrypoint applies the same discipline: services throw, the entrypoint hand-crafts no error JSON.
+Map failures **centrally** — a single `app.onError` per transport, never per handler — rendering the one standard document: full JSON:API v1.1 (see `CLAUDE.md`) `{ errors: [ { status, code?, title, detail, source? } ] }`, built by the shared `@scope/jsonapi` machinery. The wire `code`, when emitted, is supplied by the transport's registry — an **edge presentation choice**, never declared by the domain; the default is **preserve** it, so existing clients keep branching on `errors[].code`. Handlers stay thin and let `onError` render; multi-field validation renders **one entry per field** with `source.pointer` = the field's JSON Pointer.
 
-**Incorrect — the wire error thrown in the domain, or an upstream error flattened at the gateway:**
+At the **edge gateway** this same `onError` maps the errors the gateway itself raises by type, and **preserves a fronted service's rendered error document** — a downstream error arrives as an already-serialized JSON:API document over `hc` (no live error instance crosses the hop), so the gateway forwards its error objects unchanged (never a bare `message`) and MAY stamp `errors[].id` = the request id; it MUST NOT re-map the document by type. A `*-cron` / `*-queue` entrypoint applies the same discipline: services throw, the entrypoint hand-crafts no error JSON.
+
+**Incorrect — a based/coded or wire error in the domain, or an upstream error flattened at the gateway:**
 ```ts
-// lib/<domain>/<entity>.ts — domain code coupled to the wire format
-if (this.isFull()) throw new JsonApiError(409, 'Class is at capacity');   // 🔴 wire error inside the domain
-// gateway onError collapsing an upstream service's errors[] to a bare message:
-return c.json({ error: upstream.message }, 502);   // 🔴 drops the errors[] objects + their codes
+// lib/<domain>/<entity>.ts — a wire concern in the domain
+if (this.isFull()) throw new JsonApiError(409, 'Class is at capacity');       // 🔴 wire error inside the domain
+export class ClassFull extends DomainError { constructor(){ super('class.full', '…'); } }  // 🔴 a custom base + wire `code` in the domain
+return c.json({ error: upstream.message }, 502);   // 🔴 gateway drops the upstream errors[] objects + their codes
 ```
 
-**Correct — a `DomainError` with a code; the wire mapping happens once, at the edge:**
+**Correct — a plain typed error; the transport maps it by type:**
 ```ts
-// lib/<domain>/<entity>.ts — knows no HTTP/JSON:API
-export class ClassFull extends DomainError {
-  constructor() { super('<domain>.class.full', 'Class is at capacity'); }   // caller may branch on the subclass
-}
+// lib/<domain>/<entity>.ts — a plain Error: no code, no base, knows no HTTP/JSON:API
+export class ClassFull extends Error { constructor(){ super('Class is at capacity'); } }   // caller branches on the type
 if (this.isFull()) throw new ClassFull();
-// gateway src/app.ts — the one place that speaks JSON:API
-app.onError((err, c) => renderErrors(err, c));   // registry code → { status, title, source }; preserves upstream errors[], stamps errors[].id
+// hono/<domain>-error-map.ts — the transport owns the type → wire table
+export const <domain>ErrorRegistry = defineErrorMap([
+  [ClassFull, { status: 409, title: 'Conflict', code: '<domain>.class.full' }],            // a new error = one entry here
+]);
+export const resolveDomainError = createDomainErrorResolver(<domain>ErrorRegistry);         // registry miss → undefined → generic 500
+// hono/app.ts — one central onError per transport
+app.onError(createJsonApiErrorHandler({ resolve: resolveDomainError }));
 ```
-The `errors[]` builder and the `code → { status, title }` registry are shared machinery from `@scope/jsonapi` — never hand-assembled per route.
 
 **Rules of thumb:**
-- The domain/services raise a `DomainError` (or a caller-branchable subclass) with a registry `code` + message — never a wire (`JsonApiError`) or HTTP error in `lib/`.
-- One `app.onError` owns status + body; the body is the JSON:API `errors[]` document from the shared toolkit; a new `DomainError` code adds a registry entry, not a per-handler payload.
-- The gateway preserves upstream service error objects (never a bare `message`), may stamp `errors[].id` = request id; multi-field validation renders one entry per field with `source.pointer`.
+- The domain/services raise a **plain `Error` subclass** with only domain data — no wire `code`, no custom base, never a `JsonApiError`/HTTP error in `lib/`.
+- Each transport owns a **type-keyed registry** (`defineErrorMap`) resolved by constructor identity (`createDomainErrorResolver`); a new error adds one entry keyed on its class.
+- **Registry membership is the discriminator** — a registered type → its status (+ code); anything else → a generic 500 (a completeness test guards a forgotten registration).
+- One `app.onError` per transport owns status + body; the wire `code`, when present, comes from the registry (default preserved), never from the error.
+- The gateway preserves a fronted service's rendered document (never re-maps by type, never a bare `message`), may stamp `errors[].id` = the request id; multi-field validation renders one entry per field with `source.pointer`.
 
 **Why:**
-- Keeping the wire format out of the domain lets `lib/` stay transport-agnostic and unit-testable and makes each error traceable to a domain condition; one central map is what makes every route return the identical error-document shape and keeps the machine `code`/`title`/`source` intact across the tier instead of evaporating to a message.
+- A domain error is a domain fact, not a wire token: keeping the `code`/status out of the domain lets `lib/` stay transport-agnostic and unit-testable, and corrects the dependency direction — the edge decides how an error looks on the wire. Mapping by **type** at one central `onError` keeps every route's error-document shape identical and lets a change of wire format touch only the transport's table, never the domain; and registry membership makes a forgotten error surface loudly as a 500 instead of masquerading as a lenient 4xx.
 
 Reference: [Cosmic Python — domain modeling & exceptions](https://www.cosmicpython.com/book/chapter_01_domain_model.html) · see `bounded-context-transport-agnostic` · `lib-house-toolkits` · `hono-openapi-routes` · `boundary-worker-composition-only`

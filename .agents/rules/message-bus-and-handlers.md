@@ -5,6 +5,8 @@ In a write-owning bounded context the **message bus is the entrypoint into the d
 
 A handler is a **plain function** — `(deps) => (message) => result` — registered on the bus by message type, receiving its dependencies **by closure**. The object graph is wired by a per-invocation **`bootstrap`** — the one composition root — via plain construction (see `di-plain-construction`). The `bootstrap` takes already-resolved dependencies (an injected `uow`; pure `clock` / `ids` defaulted where the context needs them), registers each handler, and returns a wired `MessageBus`. It never reads `c.env` or a binding: the transport builds the `uow` from its own binding per invocation and passes it in (see `db-client-per-invocation`, `bounded-context-transport-agnostic`). Because a binding exists only per invocation, the bus is never a module-level singleton — the **same** `bootstrap` is re-run and reused by every entrypoint (HTTP, `*-queue`, cron), so one registration serves every trigger.
 
+**Name each handler for what it handles.** A **command handler** is the camelCase of its Command — `CreateClass` → `createClass`, a one-to-one pair (file `create-class.ts` on both sides) — so `bus.onCommand(CreateClass, createClass(deps))` reads as an obvious match and the handler is greppable straight from the command name. An **event handler** is named for the **reaction it performs**, not the event — `bus.onEvent(ClassCreated, [projectClassCount(deps)])` — because one event fans out to zero-or-more handlers that cannot all share the event's name; each says what it does (`projectClassCount`, `sendWelcomeEmail`). The asymmetry follows the routing: a command's one handler mirrors it 1:1, an event's many handlers each name their own effect. Casing is the TS default — a PascalCase Command/Event class, a camelCase handler function, a kebab-case file (see `naming-files-and-symbols`).
+
 **Incorrect — the transport wires straight to a handler, bypassing the bus:**
 ```ts
 classesRoutes.openapi(createClassRoute, async (c) => {
@@ -38,6 +40,7 @@ export function bootstrap({ uow, clock = systemClock, ids = uuidV7IdGenerator }:
 **Rules of thumb:**
 - The transport builds the message and calls `bus.send` / `bus.publish` — never a handler or service method directly.
 - One command → one handler; one event → zero-or-more handlers; the bus owns routing.
+- Name a **command handler** the camelCase 1:1 of its command (`CreateClass` → `createClass`); name an **event handler** for its reaction (`projectClassCount`), never the event — one event has zero-or-more handlers, so they can't share the event's name.
 - The `bootstrap` is the one composition root, run per invocation; it takes resolved deps and returns a `MessageBus`, never reading `c.env`, never a module-level singleton.
 - The same `bootstrap` serves every entrypoint (HTTP, `*-queue`, cron); a cross-context event rides a Queue to a `*-queue` consumer.
 - Test a handler by passing fake `deps` (a fake unit of work + in-memory bus) straight to it (see `test-seams-and-real-db`).

@@ -8,6 +8,9 @@ Structure each backend `<domain>` package's `lib/` as a **downward-only** stack:
 | Schema | `lib/db/` | tables + drizzle-zod row schemas + the tenancy column; the schema-derived row type stays here |
 | Repository | `lib/repositories/` | data access only; extends the house `BaseRepository` (see `repo-extend-baserepository`) |
 | Domain | `lib/domain/` | aggregates + value objects — pure classes with invariants (see `aggregate-write-model`) |
+| Commands | `lib/commands/` | bare imperative Command classes — the write intents dispatched on the bus (see `message-bus-and-handlers`) |
+| Events | `lib/events/` | bare past-tense Domain Event classes an aggregate raises |
+| Handlers | `lib/handlers/` | command + event handler **functions** `(deps) => (message) => result`, registered on the bus at the `bootstrap` |
 | Service | `lib/services/` | business logic; returns domain rows/objects |
 | Declared types | `lib/types/` | interfaces + type aliases — service DTOs, port/seam interfaces, value types |
 | Helpers | `lib/utils/` | stateless pure functions + self-contained value classes |
