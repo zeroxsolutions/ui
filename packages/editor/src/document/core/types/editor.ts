@@ -26,6 +26,10 @@ export interface EditorSelection {
   empty: boolean;
   /** The node type at the selection head, when the selection is inside one. */
   nodeType?: string;
+  /** Whether this is a whole-node selection — a block picked up by the drag
+   *  handle or a selected atomic node (image) — rather than a text range. Text
+   *  chrome (the bubble menu) shows only when this is false. */
+  isNode?: boolean;
 }
 
 /** Viewport-relative coordinates of a caret/selection edge (CSS pixels). */
@@ -34,6 +38,20 @@ export interface CaretRect {
   bottom: number;
   left: number;
   right: number;
+}
+
+/** An inline trigger match (`/` slash command, `@` mention, …): the query typed
+ *  after the trigger char, plus the document range spanning the trigger char
+ *  through the caret — so the chrome can delete `char…query` when an item is
+ *  chosen, keeping the Notion-style inline flow where the `/` stays visible in
+ *  the text while the menu filters. */
+export interface TriggerQuery {
+  /** The run of non-space characters typed after the trigger char. */
+  query: string;
+  /** Document position of the trigger char (start of the range to delete). */
+  from: number;
+  /** Document position of the caret (end of the range to delete). */
+  to: number;
 }
 
 export interface IEditor {
@@ -65,6 +83,20 @@ export interface IEditor {
    *  (slash menu, etc.). Reliable for a collapsed caret, unlike the browser
    *  Selection rect. Null when unavailable. */
   caretRect(): CaretRect | null;
+  /** For an inline trigger menu (slash `/`, mention `@`): when the collapsed
+   *  caret sits in a textblock right after `char` followed by a run of non-space
+   *  query chars — and `char` began the block or followed whitespace — returns
+   *  that query and the `char…caret` document range. Null otherwise. Drives the
+   *  Notion-style inline slash menu (the `/` stays typed in the document). */
+  triggerQuery(char: string): TriggerQuery | null;
+  /** Paint (or clear) the slash menu's inline decoration — all engine-side, so
+   *  it mutates no document content. `from…to` gets the gray `/query` highlight;
+   *  `ghost` (when set) renders faint inline text right after the caret — the
+   *  Notion `/<placeholder>` hint on an empty query, or the autocomplete
+   *  completion of the highlighted item as you type. Pass `null` to clear. */
+  setSlashDecoration(
+    deco: { from: number; to: number; ghost?: string } | null,
+  ): void;
   focus(position?: FocusPosition): void;
   blur(): void;
   isFocused(): boolean;
@@ -74,6 +106,12 @@ export interface IEditor {
   // ── Change streams ───────────────────────────────────────────────────────
   /** Subscribe to step-sized deltas; returns an unsubscribe fn. */
   onChange(handler: (delta: Delta) => void): () => void;
+  /** Subscribe to selection changes — caret moves, range selects, focus/blur —
+   *  fired AFTER the engine has updated its selection. Chrome that reads
+   *  `getSelection()` must use this, not the raw DOM `selectionchange`, which can
+   *  run a tick before the engine syncs (so a just-made selection reads stale).
+   *  Returns an unsubscribe fn. */
+  onSelectionUpdate(handler: () => void): () => void;
   /** Subscribe to debounced/on-demand snapshots; returns an unsubscribe fn. */
   onSnapshot(handler: (snapshot: Snapshot) => void): () => void;
 

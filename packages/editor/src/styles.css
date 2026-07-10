@@ -65,12 +65,47 @@
   --tw-prose-invert-td-borders: var(--border);
 }
 
+/* Strip the typography plugin's paragraph spacing INSIDE the flex "prefix"
+ * layouts — a task item (checkbox + text), a callout (emoji + text), and a
+ * toggle (chevron + body). Prose gives every `<p>` a 1.25em top/bottom margin;
+ * here that margin pushes the first line down (stranding the checkbox / emoji /
+ * chevron on a line of its own) and leaves a matching gap under the last line.
+ * Deliberately UNLAYERED so it beats the plugin's own layered `p` rule — a
+ * layered override loses to it regardless of specificity (the same reason the
+ * prose-var block above is unlayered). The body `<p>` sits under a
+ * `[data-node-view-content]` wrapper, so target the paragraph itself, not the
+ * wrapper (the component's `[&>:first-child]:mt-0` only reaches the wrapper). */
+.document-editor ul[data-type='taskList'] li p,
+.document-editor [data-slot='callout'] p,
+.document-editor [data-slot='toggle'] p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* The callout's emoji is a flex sibling of the body, and the `@tailwindcss/
+ * typography` plugin gives every `<img>` a 2em block margin. On a flex item that
+ * bottom margin inflates the row's cross size — stranding the text at the top of
+ * an over-tall box, i.e. a big gap under it. Neutralise just the emoji's bottom
+ * margin (the `mt-0.5` utility that nudges it onto the first text line stays).
+ * UNLAYERED to beat the plugin's layered `img` rule. */
+.document-editor [data-slot='callout'] > img {
+  margin-bottom: 0;
+}
+
 @layer components {
   /* 2. Engine internals the `prose` plugin doesn't cover. */
 
-  /* The contenteditable host has no focus ring of its own. */
+  /* The contenteditable host has no focus ring of its own. Symmetric inline
+   * padding gives the content balanced left/right margins — so it reads as a
+   * centered page, not a column shoved to the right — and the left side doubles
+   * as the gutter that houses the fixed block drag handle: the
+   * `tiptap-extension-global-drag-handle` places it at `blockLeft − dragHandleWidth`,
+   * so the text needs room to its left for the handle to land inside the editor
+   * rather than float in the outer margin. The gutter is wide enough to seat
+   * both the "+" affordance and the grip handle side by side (see `<Editor/>`). */
   .document-editor .ProseMirror {
     outline: none;
+    padding-inline: 3rem;
   }
 
   /* Empty-state placeholder (Tiptap Placeholder marks empty nodes). */
@@ -98,7 +133,9 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    margin-top: 0.3rem;
+    /* Centre the checkbox on the first text line (line-height 1.625rem, box
+     * 0.8125rem) now that the paragraph's top margin is stripped above. */
+    margin-top: 0.375rem;
     user-select: none;
   }
   .document-editor ul[data-type='taskList'] li > label input[type='checkbox'] {
@@ -152,6 +189,31 @@
     pointer-events: none;
   }
 
+  /* The inline `/query` the slash menu is filtering on — a subtle gray highlight
+   * (a ProseMirror decoration with class `slash-active`, painted via the façade's
+   * `setTriggerHighlight` while the menu is open, cleared when it closes) so the
+   * active trigger reads as a pending command, matching Notion. `box-decoration-
+   * break: clone` keeps the pill intact if the `/query` wraps a line. */
+  .document-editor .slash-active {
+    background: color-mix(in oklab, var(--muted-foreground) 16%, transparent);
+    border-radius: 0.25rem;
+    padding: 0.05rem 0.1rem;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  /* The inline ghost after the `/query` — the Notion `/<placeholder>` hint on an
+   * empty query, or the autocomplete completion of the highlighted item. A
+   * non-editable widget decoration (class `slash-ghost`): faint, unselectable,
+   * and click-through so it never interferes with the caret. */
+  .document-editor .slash-ghost {
+    color: var(--muted-foreground);
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+  }
+
   /* Highlight mark. */
   .document-editor mark {
     background: color-mix(in oklab, var(--primary) 22%, transparent);
@@ -174,10 +236,29 @@
     max-width: 100%;
     height: auto;
   }
-  .document-editor .ProseMirror-selectednode {
+  /* A node-selected block — the state a drag via the handle puts the block in.
+   * Notion-style: NO fill on a text block. The browser's own translucent drag
+   * ghost, which follows the pointer, is the only cue a drag needs; a static
+   * tint on the source block is just noise. Only atomic media keeps a light ring
+   * so a selected image's bounds stay visible. */
+  .document-editor img.ProseMirror-selectednode,
+  .document-editor [data-slot='image'].ProseMirror-selectednode,
+  .document-editor .ProseMirror-selectednode:is(img, video, iframe) {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
-    border-radius: 0.5rem;
+    border-radius: 0.375rem;
+  }
+
+  /* Drag in flight — the LobeHub pattern: GRAY OUT, don't fill. The editor root
+   * carries `.is-dragging` ONLY while a block is actually being dragged (set by
+   * `<Editor/>` off the drag's dragstart/dragend — never a plain click/selection).
+   * The WHOLE surface (the Mirror) dims uniformly — no per-node fade, so selecting
+   * a block on its own never grays it — while the browser's native drag ghost
+   * trailing the pointer reads as the live, full-color copy. */
+  .document-editor.is-dragging .ProseMirror {
+    cursor: grabbing;
+    filter: grayscale(1);
+    opacity: 0.45;
   }
 
   /* Callout node view — colored per `data-callout` on both the editable node
@@ -204,6 +285,16 @@
     background: color-mix(in oklab, var(--destructive) 8%, var(--background));
   }
 
+  /* Static toggle (`<details>`): the `toReact` codec lays it out with
+   * `display:flex` so the ▸ marker sits inline with the first body line. That
+   * flex context suppresses the UA's built-in "hide content when closed" rule, so
+   * restore it explicitly — collapse everything but the `<summary>` chevron when
+   * the details is not `[open]`. (The editable node view collapses via React, so
+   * this only concerns the static surface.) */
+  .document-editor details[data-slot='toggle']:not([open]) > :not(summary) {
+    display: none;
+  }
+
   /* Block drag handle. The `tiptap-extension-global-drag-handle` extension
    * appends a draggable `.drag-handle` next to the editor and toggles its
    * `.hide` class as the pointer moves over blocks — so visibility is driven by
@@ -219,16 +310,13 @@
     justify-content: center;
     border-radius: 0.375rem;
     background: transparent;
+    /* The house `GripVertical` icon (rendered into this div by `<Editor/>`)
+     * inherits this as its `currentColor` stroke. */
+    color: var(--muted-foreground);
     cursor: grab;
     opacity: 0.55;
     transition: opacity 0.15s ease, background 0.15s ease;
     z-index: 40;
-  }
-  .drag-handle::after {
-    content: '⠿';
-    font-size: 1rem;
-    line-height: 1;
-    color: var(--muted-foreground);
   }
   .drag-handle:hover {
     background: var(--accent);

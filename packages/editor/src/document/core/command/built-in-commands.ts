@@ -106,6 +106,46 @@ export function makeBuiltInCommands(
     deleteSelection: {
       run: () => editor.chain().deleteSelection().run(),
     },
+    // Delete an explicit document range — used by the inline slash menu to erase
+    // the typed `/query` before running the chosen block command.
+    deleteRange: {
+      args: z.object({
+        from: z.number().int().min(0),
+        to: z.number().int().min(0),
+      }),
+      run: ({ from, to }) => editor.chain().focus().deleteRange({ from, to }).run(),
+    },
+    // The block "+" affordance: insert an empty paragraph after the top-level
+    // block at viewport `y` (the block the drag handle points at), move the
+    // caret into it, and type `/` so the inline slash menu opens on the fresh
+    // line — the Notion "+" behavior. `y` maps to a block via its DOM rect
+    // rather than `posAtCoords`, whose `x` would fall in the handle gutter.
+    insertBlockAt: {
+      args: z.object({ y: z.number() }),
+      run: ({ y }) => {
+        try {
+          const { view } = editor;
+          const blocks = Array.from(view.dom.children) as HTMLElement[];
+          const target =
+            blocks.find((element) => {
+              const rect = element.getBoundingClientRect();
+              return y >= rect.top && y <= rect.bottom;
+            }) ?? blocks.at(-1);
+          if (!target) return false;
+          const after = view.state.doc.resolve(view.posAtDOM(target, 0)).after(1);
+          return editor
+            .chain()
+            .insertContentAt(after, { type: 'paragraph' })
+            .setTextSelection(after + 1)
+            .insertContent('/')
+            .scrollIntoView()
+            .focus()
+            .run();
+        } catch {
+          return false;
+        }
+      },
+    },
     deleteNode: {
       args: z.object({ name: z.string().min(1) }),
       run: ({ name }) => editor.chain().deleteNode(name).run(),

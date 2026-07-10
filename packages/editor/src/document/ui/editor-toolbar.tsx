@@ -1,14 +1,21 @@
 'use client';
 
-import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import { Separator } from '@zeroxsolutions/ui/components/ui/separator';
+import { Toggle } from '@zeroxsolutions/ui/components/ui/toggle';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@zeroxsolutions/ui/components/ui/tooltip';
 import type { IEditor, ToolbarItem } from '../core/index.js';
 import { useEditorChanges } from './use-editor-changes.js';
 
 /**
  * The fixed/inline formatting toolbar (task 8.4), composed from the house
- * design-system `Button`. Each button dispatches its feature's command through
- * the `IEditor` façade and reflects `isActive(activeWhen)` as a pressed state —
+ * design-system `Toggle` (native pressed state) wrapped in a `Tooltip`, with a
+ * `Separator` between groups. Each button dispatches its feature's command through
+ * the `IEditor` façade and reflects `isActive(activeWhen)` as its pressed state —
  * no engine reference. Re-renders on every editor change via `useEditorChanges`.
  */
 export interface EditorToolbarProps {
@@ -31,26 +38,32 @@ export function EditorToolbar({ editor, items, className }: EditorToolbarProps) 
         .filter(Boolean)
         .join(' ')}
     >
-      {items.map((item, index) => {
-        const active = item.activeWhen ? editor.isActive(item.activeWhen) : false;
-        const separator = index > 0 && item.id.startsWith('sep');
-        return (
-          <span key={item.id} className="contents">
-            {separator && <Separator orientation="vertical" className="mx-0.5 h-5" />}
-            <Button
-              type="button"
-              size="sm"
-              variant={active ? 'secondary' : 'ghost'}
-              aria-pressed={active}
-              aria-label={item.title}
-              title={item.title}
-              onClick={() => editor.run(item.command, item.args)}
-            >
-              {item.icon ?? item.title}
-            </Button>
-          </span>
-        );
-      })}
+      <TooltipProvider>
+        {items.map((item, index) => {
+          const active = item.activeWhen ? editor.isActive(item.activeWhen) : false;
+          const separator = index > 0 && item.id.startsWith('sep');
+          return (
+            <span key={item.id} className="contents">
+              {separator && <Separator orientation="vertical" className="mx-0.5 h-5" />}
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Toggle
+                      size="sm"
+                      pressed={active}
+                      aria-label={item.title}
+                      onPressedChange={() => editor.run(item.command, item.args)}
+                    >
+                      {item.icon ?? item.title}
+                    </Toggle>
+                  }
+                />
+                <TooltipContent>{item.title}</TooltipContent>
+              </Tooltip>
+            </span>
+          );
+        })}
+      </TooltipProvider>
     </div>
   );
 }

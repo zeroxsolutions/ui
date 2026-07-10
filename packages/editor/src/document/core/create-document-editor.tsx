@@ -1,4 +1,6 @@
 import { Editor, type Content, type Extensions } from '@tiptap/core';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { createPmStepsBackend } from './backend/pm-steps-backend.js';
 import { makeBuiltInCommands } from './command/built-in-commands.js';
 import { CommandRegistry } from './command/command-registry.js';
@@ -14,7 +16,7 @@ import type {
   DocumentBackendFactory,
   IDocumentBackend,
 } from './types/document-backend.js';
-import type { EditorSelection, IEditor } from './types/editor.js';
+import type { EditorSelection, IEditor, TriggerQuery } from './types/editor.js';
 import type { EditorFeature } from './types/feature.js';
 import type { DocJSON } from './types/json.js';
 
@@ -48,6 +50,61 @@ const EMPTY_DOC: DocJSON = {
   content: [{ type: 'paragraph' }],
 };
 
+/** The slash menu's inline decoration: the gray `/query` highlight over
+ *  `from…to`, plus optional faint `ghost` text right after the caret (the Notion
+ *  `/<placeholder>` hint / autocomplete completion). Held in a ProseMirror plugin
+ *  so it maps through edits. */
+type SlashDeco = { from: number; to: number; ghost?: string } | null;
+const SLASH_DECORATION_KEY = new PluginKey<SlashDeco>('slashDecoration');
+
+/** A decoration-only plugin driven by the façade's `setSlashDecoration`. Meta-only
+ *  updates change no document content, so they never emit a delta (the backend
+ *  skips `!docChanged`) — no feedback loop with the chrome that drives it. */
+const slashDecorationPlugin = (): Plugin<SlashDeco> =>
+  new Plugin<SlashDeco>({
+    key: SLASH_DECORATION_KEY,
+    state: {
+      init: () => null,
+      apply(tr, value) {
+        const meta = tr.getMeta(SLASH_DECORATION_KEY) as SlashDeco | undefined;
+        if (meta !== undefined) return meta;
+        if (!value) return null;
+        // Keep the decoration over the same text as the doc changes around it.
+        const from = tr.mapping.map(value.from);
+        const to = tr.mapping.map(value.to);
+        return to > from ? { ...value, from, to } : null;
+      },
+    },
+    props: {
+      decorations(state) {
+        const deco = SLASH_DECORATION_KEY.getState(state);
+        if (!deco) return null;
+        const decorations = [
+          Decoration.inline(deco.from, deco.to, { class: 'slash-active' }),
+        ];
+        if (deco.ghost) {
+          // A non-editable widget after the caret (`side: 1`) — the faint inline
+          // placeholder / autocomplete. Keyed on its text so it only re-renders
+          // when the hint changes.
+          const ghost = deco.ghost;
+          decorations.push(
+            Decoration.widget(
+              deco.to,
+              () => {
+                const span = document.createElement('span');
+                span.className = 'slash-ghost';
+                span.textContent = ghost;
+                return span;
+              },
+              { side: 1, key: `slash-ghost:${ghost}` },
+            ),
+          );
+        }
+        return DecorationSet.create(state.doc, decorations);
+      },
+    },
+  });
+
 export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
   const features = resolveFeatures(config.features ?? []);
   const featureIds = new Set(features.map((feature) => feature.id));
@@ -78,6 +135,10 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
     },
   });
 
+  // The slash menu's inline decoration (gray `/query` highlight + ghost
+  // placeholder/autocomplete) rides a decoration plugin, one per instance.
+  engine.registerPlugin(slashDecorationPlugin());
+
   const handle = engine as unknown as EngineHandle;
   const registry = new CommandRegistry();
   for (const [name, command] of Object.entries(makeBuiltInCommands(handle))) {
@@ -91,6 +152,35 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
       to: selection.to,
       empty: selection.empty,
       nodeType: selection.$head?.parent?.type?.name,
+      // A ProseMirror NodeSelection carries a `node`; a TextSelection/CellSelection
+      // does not — that distinguishes a block/image pick-up from a text range.
+      isNode: 'node' in selection,
+    };
+  };
+
+  // Inline trigger detection (slash `/`, mention `@`). Reads the current
+  // textblock's text before a collapsed caret and matches a trigger char that
+  // begins the block or follows whitespace, capturing the non-space run after
+  // it as the query. Returns the `char…caret` doc range so the chrome can delete
+  // the typed `/query` when an item is chosen — the Notion inline flow.
+  const triggerQuery = (char: string): TriggerQuery | null => {
+    const { selection } = engine.state;
+    if (!selection.empty) return null;
+    const $from = selection.$from;
+    if (!$from.parent.isTextblock) return null;
+    const caret = selection.from;
+    const parentStart = $from.start();
+    // The object-replacement char (U+FFFC) keeps inline atoms one char wide, so
+    // a text index lines up with a document offset within the block.
+    const textBefore = $from.parent.textBetween(0, caret - parentStart, '\n', '￼');
+    const escaped = char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = new RegExp(`(?:^|\\s)${escaped}(\\S*)$`).exec(textBefore);
+    if (!match) return null;
+    const query = match[1];
+    return {
+      query,
+      from: parentStart + textBefore.length - query.length - char.length,
+      to: caret,
     };
   };
 
@@ -126,6 +216,22 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
         return null;
       }
     },
+    triggerQuery,
+    setSlashDecoration: (deco) => {
+      // Skip a redundant dispatch so the chrome can call this on every change
+      // without churning transactions (a meta-only tr emits no delta anyway).
+      const current = SLASH_DECORATION_KEY.getState(engine.state) ?? null;
+      const next = deco ?? null;
+      const same =
+        (!current && !next) ||
+        (!!current &&
+          !!next &&
+          current.from === next.from &&
+          current.to === next.to &&
+          (current.ghost ?? '') === (next.ghost ?? ''));
+      if (same) return;
+      engine.view.dispatch(engine.state.tr.setMeta(SLASH_DECORATION_KEY, next));
+    },
     focus: (position) => {
       engine.commands.focus(position as Parameters<typeof engine.commands.focus>[0]);
     },
@@ -136,6 +242,19 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
     isEditable: () => engine.isEditable,
     setEditable: (editable) => engine.setEditable(editable),
     onChange: (handler) => backend.subscribe({ onDelta: handler }),
+    onSelectionUpdate: (handler) => {
+      // Engine selection/focus events fire with `engine.state` already updated,
+      // so a handler that reads `getSelection()` never sees a stale value (the
+      // raw DOM `selectionchange` can run before the engine syncs).
+      engine.on('selectionUpdate', handler);
+      engine.on('focus', handler);
+      engine.on('blur', handler);
+      return () => {
+        engine.off('selectionUpdate', handler);
+        engine.off('focus', handler);
+        engine.off('blur', handler);
+      };
+    },
     onSnapshot: (handler) => backend.subscribe({ onSnapshot: handler }),
     hasFeature: (id) => featureIds.has(id),
     get backend() {

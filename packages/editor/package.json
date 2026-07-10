@@ -25,6 +25,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
+    "@zeroxsolutions/fluent-emoji": "workspace:*",
     "@zeroxsolutions/ui": "workspace:*",
     "@tailwindcss/typography": "^0.5.19",
     "@tiptap/core": "^3.27.3",
@@ -46,6 +47,7 @@
     "@tiptap/react": "^3.27.3",
     "@tiptap/starter-kit": "^3.27.3",
     "katex": "^0.16.11",
+    "lucide-react": "^1.21.0",
     "mermaid": "^11.16.0",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",

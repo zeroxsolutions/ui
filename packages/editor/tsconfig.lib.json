@@ -12,7 +12,6 @@
     "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -52,6 +51,9 @@
   "references": [
     {
       "path": "../ui/tsconfig.lib.json"
+    },
+    {
+      "path": "../fluent-emoji/tsconfig.lib.json"
     }
   ]
 }

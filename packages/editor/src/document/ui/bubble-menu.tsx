@@ -1,16 +1,26 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button } from '@zeroxsolutions/ui/components/ui/button';
+import { Toggle } from '@zeroxsolutions/ui/components/ui/toggle';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@zeroxsolutions/ui/components/ui/tooltip';
 import type { BubbleItem, IEditor } from '../core/index.js';
 import { selectionRect, selectionWithin, type Point } from './selection-rect.js';
+import { FloatingShell } from './floating-shell.js';
 
 /**
  * The selection bubble menu (task 8.2): a floating formatting bar that appears
  * over a non-empty text selection. It reads the browser selection geometry (not
- * the engine) to position itself and dispatches its buttons' commands through the
- * `IEditor` façade. The floating "+" affordance for an empty line reuses the
- * slash menu's `/` trigger, so it is not duplicated here.
+ * the engine) to position itself, and dispatches its buttons' commands through the
+ * `IEditor` façade. The bar is a `FloatingShell` (the one sanctioned bespoke
+ * positioning surface — it must not take focus from the selection), and its
+ * buttons are the design-system `Toggle` (native pressed state) wrapped in a
+ * `Tooltip`. The floating "+" affordance for an empty line reuses the slash menu's
+ * `/` trigger, so it is not duplicated here.
  */
 export interface BubbleMenuProps {
   editor: IEditor;
@@ -24,44 +34,68 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
 
   useEffect(() => {
     const update = () => {
+      const selection = editor.getSelection();
       const active =
         editor.isEditable() &&
-        !editor.getSelection().empty &&
+        // Hide when focus leaves the editor: a blurred selection stays visually
+        // "selected" in the DOM, so without this the bar would linger after an
+        // outside click. Formatting buttons `preventDefault` on mousedown, so
+        // clicking one keeps focus and the bar stays open.
+        editor.isFocused() &&
+        !selection.empty &&
+        // Only a text range gets the formatting bar — never a whole-node
+        // selection (a block picked up by the drag handle, a selected image),
+        // which would otherwise pop the bar open mid-drag.
+        !selection.isNode &&
         selectionWithin(container ?? null);
       setRect(active ? selectionRect() : null);
     };
     update();
-    document.addEventListener('selectionchange', update);
-    const off = editor.onChange(update);
+    // Drive off the engine's selection/focus events (fired with `getSelection()`
+    // already current), not the raw DOM `selectionchange` — that runs a tick
+    // before the engine syncs, so a dblclick / keyboard selection read stale and
+    // the bar never appeared. `onChange` covers edits that reshape the selection.
+    const offSelection = editor.onSelectionUpdate(update);
+    const offChange = editor.onChange(update);
     return () => {
-      document.removeEventListener('selectionchange', update);
-      off();
+      offSelection();
+      offChange();
     };
   }, [editor, container]);
 
-  if (!rect) return null;
   return (
-    <div
+    <FloatingShell
+      open={Boolean(rect)}
+      anchor={rect}
+      side="top"
       role="toolbar"
-      data-bubble-menu
-      className="fixed z-50 flex items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-md animate-in fade-in zoom-in-95"
-      style={{ top: Math.max(0, rect.top - 44), left: rect.left }}
+      data-bubble-menu=""
+      className="flex items-center gap-0.5 rounded-lg p-1"
     >
-      {items.map((item) => (
-        <Button
-          key={item.id}
-          type="button"
-          size="sm"
-          variant={item.activeWhen && editor.isActive(item.activeWhen) ? 'secondary' : 'ghost'}
-          aria-pressed={item.activeWhen ? editor.isActive(item.activeWhen) : undefined}
-          aria-label={item.title}
-          title={item.title}
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={() => editor.run(item.command, item.args)}
-        >
-          {item.icon ?? item.title}
-        </Button>
-      ))}
-    </div>
+      <TooltipProvider>
+        {items.map((item) => {
+          const active = item.activeWhen ? editor.isActive(item.activeWhen) : false;
+          return (
+            <Tooltip key={item.id}>
+              <TooltipTrigger
+                render={
+                  <Toggle
+                    size="sm"
+                    pressed={active}
+                    aria-label={item.title}
+                    // Keep focus (and the selection) on mousedown so the command applies.
+                    onMouseDown={(event) => event.preventDefault()}
+                    onPressedChange={() => editor.run(item.command, item.args)}
+                  >
+                    {item.icon ?? item.title}
+                  </Toggle>
+                }
+              />
+              <TooltipContent>{item.title}</TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </TooltipProvider>
+    </FloatingShell>
   );
 }
