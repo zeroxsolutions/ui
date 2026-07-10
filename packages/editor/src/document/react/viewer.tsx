@@ -40,7 +40,10 @@ export function Viewer({
   const registry = useMemo(() => createCodecRegistry(features), [features]);
   const tree = renderToReact(doc, registry);
   const inner = (
-    <div className={['zerox-editor-viewer', className].filter(Boolean).join(' ')}>
+    <div
+      data-editor="document"
+      className={['document-editor prose max-w-none', className].filter(Boolean).join(' ')}
+    >
       {tree}
     </div>
   );

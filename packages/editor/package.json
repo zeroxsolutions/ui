@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@zeroxsolutions/ui": "workspace:*",
+    "@tailwindcss/typography": "^0.5.19",
     "@tiptap/core": "^3.27.3",
     "@tiptap/extension-details": "^3.27.3",
     "@tiptap/extension-highlight": "^3.27.3",
@@ -33,6 +34,7 @@
     "@tiptap/extension-link": "^3.27.3",
     "@tiptap/extension-list": "^3.27.3",
     "@tiptap/extension-mathematics": "^3.27.3",
+    "@tiptap/extension-placeholder": "^3.27.3",
     "@tiptap/extension-subscript": "^3.27.3",
     "@tiptap/extension-superscript": "^3.27.3",
     "@tiptap/extension-table": "^3.27.3",
@@ -47,6 +49,7 @@
     "mermaid": "^11.16.0",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
+    "tiptap-extension-global-drag-handle": "^0.1.18",
     "unified": "^11.0.5",
     "zod": "^4.4.3"
   },

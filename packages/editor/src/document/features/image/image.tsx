@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { z } from 'zod';
 import {
   defineFeature,
@@ -21,53 +21,83 @@ const imageAttrs = z.object({
 });
 type ImageAttrs = z.infer<typeof imageAttrs>;
 
-function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewProps<ImageAttrs>) {
-  const [editing, setEditing] = useState(false);
-  const widthStyle = attrs.width ? `${attrs.width}px` : undefined;
+/**
+ * Presentational figure shared by the editable node view and the static
+ * `toReact` codec, so both surfaces render the image identically. Layout and
+ * colors are design-system token utilities; the computed pixel width stays an
+ * inline style. The editable chrome (Edit button + popover) is passed as
+ * children by the node view.
+ */
+function ImageFigure({
+  src,
+  alt,
+  title,
+  width,
+  selected,
+  contentEditable,
+  children,
+}: {
+  src: string;
+  alt: string;
+  title?: string;
+  width: number | null;
+  selected?: boolean;
+  contentEditable?: boolean;
+  children?: ReactNode;
+}) {
   return (
-    <div
-      className="zerox-image"
+    <figure
+      data-slot="image"
       data-selected={selected}
-      contentEditable={false}
-      style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}
+      contentEditable={contentEditable}
+      className="relative my-4 inline-block max-w-full"
     >
-      {attrs.src ? (
+      {src ? (
         <img
-          src={attrs.src}
-          alt={attrs.alt}
-          title={attrs.title || undefined}
-          style={{ width: widthStyle, maxWidth: '100%', height: 'auto', borderRadius: 4 }}
+          src={src}
+          alt={alt}
+          title={title}
+          className="h-auto max-w-full rounded-lg border"
+          style={{ width: width ? `${width}px` : undefined }}
         />
       ) : (
-        <span style={{ opacity: 0.6 }}>Empty image</span>
+        <span className="text-muted-foreground text-sm">Empty image</span>
       )}
+      {alt ? (
+        <figcaption className="text-muted-foreground mt-1 text-sm">{alt}</figcaption>
+      ) : null}
+      {children}
+    </figure>
+  );
+}
+
+function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewProps<ImageAttrs>) {
+  const [editing, setEditing] = useState(false);
+  return (
+    <ImageFigure
+      src={attrs.src}
+      alt={attrs.alt}
+      title={attrs.title || undefined}
+      width={attrs.width}
+      selected={selected}
+      contentEditable={false}
+    >
       {editable && (
         <button
           type="button"
           onClick={() => setEditing((v) => !v)}
-          style={{ position: 'absolute', top: 4, right: 4 }}
+          className="absolute right-2 top-2 rounded-md border bg-background px-2 py-0.5 text-xs hover:bg-accent"
         >
           {editing ? 'Done' : 'Edit'}
         </button>
       )}
       {editable && editing && (
-        <div
-          className="zerox-image-popover"
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 4,
-            padding: 8,
-            zIndex: 10,
-          }}
-        >
+        <div className="absolute left-0 top-full z-10 flex flex-col gap-2 rounded-md border bg-popover p-2 text-sm">
           <input
             placeholder="Alt text"
             defaultValue={attrs.alt}
             onBlur={(e) => updateAttrs({ alt: e.target.value })}
+            className="rounded-md border bg-background px-2 py-1 text-sm"
           />
           <input
             placeholder="Width (px)"
@@ -76,10 +106,11 @@ function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewProps<Ima
             onBlur={(e) =>
               updateAttrs({ width: e.target.value ? Number(e.target.value) : null })
             }
+            className="rounded-md border bg-background px-2 py-1 text-sm"
           />
         </div>
       )}
-    </div>
+    </ImageFigure>
   );
 }
 
@@ -101,12 +132,7 @@ const imageCodec: NodeCodec<ImageAttrs> = {
   toReact: (node) => {
     const { src = '', alt = '', title = '', width } = node.attrs ?? {};
     return (
-      <img
-        src={src}
-        alt={alt}
-        title={title || undefined}
-        width={width ?? undefined}
-      />
+      <ImageFigure src={src} alt={alt} title={title || undefined} width={width ?? null} />
     );
   },
   fromHTML: (element) =>

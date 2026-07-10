@@ -1,10 +1,24 @@
 import { Highlight } from '@tiptap/extension-highlight';
+import { Placeholder } from '@tiptap/extension-placeholder';
 import { Subscript } from '@tiptap/extension-subscript';
 import { Superscript } from '@tiptap/extension-superscript';
 import { TaskItem } from '@tiptap/extension-task-item';
 import { TaskList } from '@tiptap/extension-task-list';
 import StarterKit from '@tiptap/starter-kit';
+import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 import { defineFeature, type EditorFeature } from '../../core/index.js';
+
+/** Options for the standard block set. */
+export interface StandardKitOptions {
+  /**
+   * Placeholder shown on the empty document / empty top-level blocks. Pass a
+   * localized string; empty headings always show `Heading N`. Defaults to the
+   * slash-command hint.
+   */
+  placeholder?: string;
+  /** Show the left-gutter block drag handle (default `true`). */
+  dragHandle?: boolean;
+}
 import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs.js';
 import {
   standardBubbleItems,
@@ -24,7 +38,8 @@ import {
  * substrate); `codeBlock` and `link` are disabled (the dedicated code-block and
  * link features own those).
  */
-export function standardKit(): EditorFeature {
+export function standardKit(options: StandardKitOptions = {}): EditorFeature {
+  const { placeholder = "Type '/' for commands…", dragHandle = true } = options;
   return defineFeature({
     id: 'standard',
     codecs: standardNodeCodecs,
@@ -46,6 +61,14 @@ export function standardKit(): EditorFeature {
         Superscript,
         TaskList,
         TaskItem.configure({ nested: true }),
+        Placeholder.configure({
+          includeChildren: true,
+          placeholder: ({ node }) =>
+            node.type.name === 'heading'
+              ? `Heading ${node.attrs.level as number}`
+              : placeholder,
+        }),
+        ...(dragHandle ? [GlobalDragHandle.configure({ dragHandleWidth: 24 })] : []),
       ],
     },
   });

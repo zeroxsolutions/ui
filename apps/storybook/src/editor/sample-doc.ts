@@ -10,7 +10,34 @@ export const sampleDoc: DocJSON = {
       content: [
         { type: 'text', text: 'A Notion-like editor with the ' },
         { type: 'text', text: 'engine fully hidden', marks: [{ type: 'bold' }] },
-        { type: 'text', text: ' behind a stable façade.' },
+        { type: 'text', text: ' behind a ' },
+        {
+          type: 'text',
+          text: 'stable façade',
+          marks: [{ type: 'link', attrs: { href: 'https://example.com' } }],
+        },
+        { type: 'text', text: '. Press ' },
+        { type: 'text', text: '/', marks: [{ type: 'code' }] },
+        { type: 'text', text: ' for commands.' },
+      ],
+    },
+    {
+      type: 'heading',
+      attrs: { level: 2 },
+      content: [{ type: 'text', text: "Why it's different" }],
+    },
+    {
+      type: 'blockquote',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'The engine is swappable; your document JSON is the contract.',
+            },
+          ],
+        },
       ],
     },
     {
@@ -20,12 +47,56 @@ export const sampleDoc: DocJSON = {
         { type: 'paragraph', content: [{ type: 'text', text: 'JSON is the source of truth.' }] },
       ],
     },
+    { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: 'Highlights' }] },
     {
       type: 'bulletList',
       content: [
-        { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Type / for the slash menu' }] }] },
-        { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Select text for the bubble menu' }] }] },
+        {
+          type: 'listItem',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'Type ' },
+                { type: 'text', text: '/', marks: [{ type: 'code' }] },
+                { type: 'text', text: ' for the slash menu' },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'listItem',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'Select text for the ' },
+                { type: 'text', text: 'bubble menu', marks: [{ type: 'highlight' }] },
+              ],
+            },
+          ],
+        },
       ],
+    },
+    {
+      type: 'taskList',
+      content: [
+        {
+          type: 'taskItem',
+          attrs: { checked: true },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Prose typography' }] }],
+        },
+        {
+          type: 'taskItem',
+          attrs: { checked: false },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ship it' }] }],
+        },
+      ],
+    },
+    {
+      type: 'callout',
+      attrs: { variant: 'success' },
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'All gates green.' }] }],
     },
   ],
 };

@@ -81,21 +81,17 @@ function MermaidView({ attrs, updateAttrs, editable }: NodeViewProps<MermaidAttr
 
   return (
     <div
-      className="zerox-mermaid"
+      className="my-4 flex flex-col gap-2 overflow-x-auto rounded-lg border bg-card p-4"
       data-mermaid
       contentEditable={false}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5rem',
-        padding: '0.75rem 1rem',
-        borderRadius: '0.5rem',
-        border: '1px solid var(--zerox-border, currentColor)',
-      }}
     >
       {editable ? (
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button type="button" onClick={toggleEditing}>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={toggleEditing}
+            className="rounded-md border bg-background px-2 py-1 text-xs hover:bg-accent"
+          >
             {editing ? 'Done' : 'Edit'}
           </button>
         </div>
@@ -106,17 +102,21 @@ function MermaidView({ attrs, updateAttrs, editable }: NodeViewProps<MermaidAttr
           onChange={(event) => setDraft(event.target.value)}
           onBlur={commit}
           spellCheck={false}
-          style={{ width: '100%', minHeight: '6rem', fontFamily: 'monospace' }}
+          className="min-h-24 w-full rounded-md border bg-background p-2 font-mono text-sm"
         />
       ) : null}
       {error !== null ? (
-        <pre className="zerox-mermaid-error">
+        <pre className="text-destructive text-sm whitespace-pre-wrap">
           {error}
           {'\n\n'}
           {attrs.source}
         </pre>
       ) : (
-        <div ref={containerRef} dangerouslySetInnerHTML={{ __html: svg }} />
+        <div
+          ref={containerRef}
+          className="flex justify-center"
+          dangerouslySetInnerHTML={{ __html: svg }}
+        />
       )}
     </div>
   );
@@ -151,7 +151,7 @@ const mermaidCodec: NodeCodec<MermaidAttrs> = {
     // `pre.mermaid` — the live Editor/Viewer node view renders the real diagram,
     // while the static export shows the readable source (also mermaid-cli's
     // convention for auto-rendering on the client).
-    <pre className="mermaid">{String(node.attrs?.source ?? '')}</pre>
+    <pre className="mermaid my-4 overflow-x-auto rounded-lg border bg-card p-4 text-sm">{String(node.attrs?.source ?? '')}</pre>
   ),
 };
 

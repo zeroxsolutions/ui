@@ -1,12 +1,244 @@
 /* Default editor theme layer for `@zeroxsolutions/editor`.
  *
- * The editor rides `@zeroxsolutions/ui`'s design tokens; this sheet adds only
- * the editor-specific tokens (prose spacing, callout palettes, code/diagram/
- * math surfaces) on top of them, keyed to the design system's `.dark`
- * mechanism. Populated by the theming layer (see the `editor-theming` spec).
+ * The editor rides `@zeroxsolutions/ui`'s design tokens. This sheet:
+ *   1. maps `@tailwindcss/typography`'s `--tw-prose-*` variables onto those
+ *      tokens, so body copy on a `.document-editor.prose` surface inherits the
+ *      design-system colors and flips automatically with the `.dark` class
+ *      (no `prose-invert` needed);
+ *   2. styles the editing-engine internals the `prose` plugin doesn't cover —
+ *      the empty-state placeholder, task-list checkboxes, table cells, the
+ *      selected-node ring, the block drag handle, and the highlight `<mark>`.
+ *
+ * Node views (callout, code block, mention, …) carry their own Tailwind
+ * utilities in their components; this sheet is only for the content-DOM the
+ * engine produces, which cannot take a per-node `className`.
+ *
+ * The scope class `.document-editor` is a plain, engine-neutral hook applied to
+ * the Editor/Viewer root (alongside `data-editor="document"`).
  */
+/* KaTeX's own stylesheet — required so block/inline math lays out correctly and
+ * its MathML annotation (the raw TeX source) stays visually hidden. `katex` is a
+ * dependency of this package, so the consumer's CSS bundler resolves this bare
+ * import against node_modules. */
+@import 'katex/dist/katex.min.css';
+@plugin "@tailwindcss/typography";
 @custom-variant dark (&:is(.dark *));
 
+/* 1. Map prose colors onto the design-system tokens (both modes via `.dark`).
+ *
+ * Deliberately UNLAYERED: the `@tailwindcss/typography` plugin registers its
+ * `.prose` variable defaults in a layer, and layer order would otherwise let
+ * those defaults win over an override placed in `@layer components` — which
+ * showed up as dim, low-contrast body text in dark mode. Unlayered declarations
+ * beat any layered rule, so these token mappings always apply. Because every
+ * value is a design-system token that already flips with `.dark`, no
+ * `prose-invert` is needed. */
+.document-editor {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-lead: var(--muted-foreground);
+  --tw-prose-links: var(--primary);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-counters: var(--muted-foreground);
+  --tw-prose-bullets: var(--muted-foreground);
+  --tw-prose-hr: var(--border);
+  --tw-prose-quotes: var(--foreground);
+  --tw-prose-quote-borders: var(--border);
+  --tw-prose-captions: var(--muted-foreground);
+  --tw-prose-code: var(--foreground);
+  --tw-prose-pre-code: var(--foreground);
+  --tw-prose-pre-bg: var(--muted);
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
+  /* invert vars kept in sync so a consumer adding `dark:prose-invert` is harmless */
+  --tw-prose-invert-body: var(--foreground);
+  --tw-prose-invert-headings: var(--foreground);
+  --tw-prose-invert-links: var(--primary);
+  --tw-prose-invert-bold: var(--foreground);
+  --tw-prose-invert-bullets: var(--muted-foreground);
+  --tw-prose-invert-hr: var(--border);
+  --tw-prose-invert-quotes: var(--foreground);
+  --tw-prose-invert-quote-borders: var(--border);
+  --tw-prose-invert-code: var(--foreground);
+  --tw-prose-invert-pre-bg: var(--muted);
+  --tw-prose-invert-th-borders: var(--border);
+  --tw-prose-invert-td-borders: var(--border);
+}
+
 @layer components {
-  /* Editor prose/callout/code/math tokens are added here by the theming task. */
+  /* 2. Engine internals the `prose` plugin doesn't cover. */
+
+  /* The contenteditable host has no focus ring of its own. */
+  .document-editor .ProseMirror {
+    outline: none;
+  }
+
+  /* Empty-state placeholder (Tiptap Placeholder marks empty nodes). */
+  .document-editor .ProseMirror .is-empty::before,
+  .document-editor .ProseMirror .is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: var(--muted-foreground);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  /* Task lists: flatten the marker and tint the checkbox with the brand token. */
+  .document-editor ul[data-type='taskList'] {
+    list-style: none;
+    padding-left: 0;
+  }
+  .document-editor ul[data-type='taskList'] li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .document-editor ul[data-type='taskList'] li > label {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-top: 0.3rem;
+    user-select: none;
+  }
+  .document-editor ul[data-type='taskList'] li > label input[type='checkbox'] {
+    accent-color: var(--primary);
+  }
+  .document-editor ul[data-type='taskList'] li > div {
+    flex: 1;
+    min-width: 0;
+  }
+  .document-editor ul[data-type='taskList'] li > div > p {
+    margin: 0;
+  }
+
+  /* Tables: give cells a visible grid and header emphasis (prose leaves tiptap
+   * tables borderless), plus the column-resize affordance. */
+  .document-editor table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  .document-editor th,
+  .document-editor td {
+    border: 1px solid var(--border);
+    padding: 0.375rem 0.75rem;
+    vertical-align: top;
+    position: relative;
+  }
+  .document-editor th {
+    background: var(--muted);
+    font-weight: 600;
+    text-align: left;
+  }
+  .document-editor .column-resize-handle {
+    position: absolute;
+    right: -2px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary);
+    pointer-events: none;
+  }
+  .document-editor .tableWrapper {
+    overflow-x: auto;
+  }
+  .document-editor .selectedCell::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+    pointer-events: none;
+  }
+
+  /* Highlight mark. */
+  .document-editor mark {
+    background: color-mix(in oklab, var(--primary) 22%, transparent);
+    color: inherit;
+    border-radius: 0.2rem;
+    padding: 0 0.15rem;
+  }
+
+  /* Inline code sits inside prose; ensure it wraps on narrow viewports. */
+  .document-editor :where(code):not(:where(pre code)) {
+    overflow-wrap: anywhere;
+  }
+  .document-editor :where(pre) {
+    overflow-x: auto;
+  }
+
+  /* Images: rounded, responsive, with a ring when selected as a node. */
+  .document-editor img {
+    border-radius: 0.5rem;
+    max-width: 100%;
+    height: auto;
+  }
+  .document-editor .ProseMirror-selectednode {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+  }
+
+  /* Callout node view — colored per `data-callout` on both the editable node
+   * view and the static Viewer (its root carries `.document-editor` too). The
+   * `--info`/`--success`/`--warning`/`--destructive` tokens flip with `.dark`. */
+  .document-editor [data-slot='callout'] {
+    border-color: var(--border);
+    background: color-mix(in oklab, var(--muted-foreground) 6%, var(--background));
+  }
+  .document-editor [data-callout='info'] {
+    border-color: color-mix(in oklab, var(--info) 35%, var(--border));
+    background: color-mix(in oklab, var(--info) 8%, var(--background));
+  }
+  .document-editor [data-callout='success'] {
+    border-color: color-mix(in oklab, var(--success) 35%, var(--border));
+    background: color-mix(in oklab, var(--success) 8%, var(--background));
+  }
+  .document-editor [data-callout='warning'] {
+    border-color: color-mix(in oklab, var(--warning) 40%, var(--border));
+    background: color-mix(in oklab, var(--warning) 10%, var(--background));
+  }
+  .document-editor [data-callout='danger'] {
+    border-color: color-mix(in oklab, var(--destructive) 35%, var(--border));
+    background: color-mix(in oklab, var(--destructive) 8%, var(--background));
+  }
+
+  /* Block drag handle (Tiptap global drag handle renders a fixed grip). */
+  .drag-handle {
+    position: fixed;
+    width: 1.25rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    background: transparent;
+    cursor: grab;
+    opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease;
+    z-index: 40;
+  }
+  .drag-handle::after {
+    content: '⠿';
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--muted-foreground);
+  }
+  .drag-handle:hover {
+    background: var(--accent);
+    opacity: 1;
+  }
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+  .document-editor .ProseMirror:hover ~ .drag-handle,
+  .drag-handle.show {
+    opacity: 0.6;
+  }
+  @media (pointer: coarse) {
+    .drag-handle {
+      display: none !important;
+    }
+  }
 }

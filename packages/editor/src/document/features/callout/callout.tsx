@@ -1,7 +1,7 @@
+import type { ReactNode } from 'react';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
 import type { NodeJSON, NodeViewProps } from '../../core/index.js';
-import { useEditorTheme } from '../../../shared/theme/editor-theme-context.js';
 
 /**
  * A callout block — a custom node with a React node view (icon + colored palette
@@ -41,32 +41,32 @@ const ALERT_TO_VARIANT: Record<string, Variant> = {
   CAUTION: 'danger',
 };
 
-function CalloutView({ attrs, children }: NodeViewProps<CalloutAttrs>) {
-  // CSS-variable-based palette → flips with the design system's `.dark` even
-  // inside the engine's separate node-view root, so no React context is needed
-  // for dark mode here.
-  const { variant } = useEditorTheme();
-  const palette = variant.callouts[attrs.variant] ?? variant.callouts.info;
+/**
+ * Presentational shell shared by the editable node view and the static
+ * `toReact` codec, so both surfaces render identically. Layout is Tailwind
+ * utilities; the per-variant colors live in `styles.css` keyed on
+ * `[data-callout]` (design-system `--info` / `--success` / … tokens that flip
+ * with `.dark`), so a callout is themed even in the engine-free Viewer.
+ */
+function CalloutShell({ variant, children }: { variant: Variant; children: ReactNode }) {
   return (
     <div
-      className="zerox-callout"
-      data-callout={attrs.variant}
-      style={{
-        display: 'flex',
-        gap: '0.5rem',
-        padding: '0.75rem 1rem',
-        borderRadius: '0.5rem',
-        border: `1px solid ${palette.border}`,
-        background: palette.background,
-        color: palette.foreground,
-      }}
+      data-slot="callout"
+      data-callout={variant}
+      className="my-4 flex gap-3 rounded-lg border p-4"
     >
-      <span aria-hidden style={{ color: palette.icon }}>
-        {ICON[attrs.variant]}
+      <span aria-hidden className="mt-0.5 shrink-0 select-none text-lg leading-none">
+        {ICON[variant]}
       </span>
-      <div style={{ flex: 1 }}>{children}</div>
+      <div className="min-w-0 flex-1 [&>:first-child]:mt-0 [&>:last-child]:mb-0">
+        {children}
+      </div>
     </div>
   );
+}
+
+function CalloutView({ attrs, children }: NodeViewProps<CalloutAttrs>) {
+  return <CalloutShell variant={attrs.variant}>{children}</CalloutShell>;
 }
 
 const firstParagraphText = (token: {
@@ -91,12 +91,7 @@ const calloutCodec: NodeCodec<CalloutAttrs> = {
     )}</div>`,
   toReact: (node, ctx) => {
     const v = (node.attrs?.variant ?? 'info') as Variant;
-    return (
-      <div className="zerox-callout" data-callout={v}>
-        <span aria-hidden>{ICON[v]}</span>
-        <div>{ctx.renderChildren(node as never)}</div>
-      </div>
-    );
+    return <CalloutShell variant={v}>{ctx.renderChildren(node as never)}</CalloutShell>;
   },
   fromMarkdown: (token, ctx) => {
     if (token.type !== 'blockquote') return null;

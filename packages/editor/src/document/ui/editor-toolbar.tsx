@@ -21,13 +21,22 @@ export function EditorToolbar({ editor, items, className }: EditorToolbarProps) 
   // Subscribe so pressed states track the selection.
   useEditorChanges(editor);
   return (
-    <div role="toolbar" data-editor-toolbar className={className} style={{ display: 'flex', gap: 2 }}>
+    <div
+      role="toolbar"
+      data-editor-toolbar
+      className={[
+        'flex flex-wrap items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-sm',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       {items.map((item, index) => {
         const active = item.activeWhen ? editor.isActive(item.activeWhen) : false;
         const separator = index > 0 && item.id.startsWith('sep');
         return (
-          <span key={item.id} style={{ display: 'contents' }}>
-            {separator && <Separator orientation="vertical" />}
+          <span key={item.id} className="contents">
+            {separator && <Separator orientation="vertical" className="mx-0.5 h-5" />}
             <Button
               type="button"
               size="sm"

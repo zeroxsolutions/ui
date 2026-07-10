@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { z } from 'zod';
 import {
   defineFeature,
@@ -20,22 +21,47 @@ const codeBlockAttrs = z.object({
 });
 type CodeBlockAttrs = z.infer<typeof codeBlockAttrs>;
 
+/** Copy-to-clipboard button that flips to a confirmation for ~1.5s. */
+function CopyCodeButton({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      className="rounded px-1.5 py-0.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+      onClick={() => {
+        void navigator.clipboard?.writeText(code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+    >
+      {copied ? 'Copied' : 'Copy'}
+    </button>
+  );
+}
+
 function CodeBlockView({ attrs, updateAttrs, editable }: NodeViewProps<CodeBlockAttrs>) {
   const Pane = resolveCodeMirrorPane();
   return (
-    <div className="zerox-code-block" data-language={attrs.language} contentEditable={false}>
-      <div className="zerox-code-block-toolbar">
+    <div
+      data-slot="code-block"
+      data-language={attrs.language}
+      contentEditable={false}
+      className="my-4 overflow-hidden rounded-lg border bg-muted/40"
+    >
+      <div className="flex items-center justify-between border-b border-border px-3 py-1.5">
         {editable ? (
           <input
-            className="zerox-code-block-lang"
+            className="w-28 bg-transparent font-mono text-xs text-muted-foreground outline-none placeholder:text-muted-foreground/60"
             value={attrs.language}
             spellCheck={false}
             aria-label="Language"
+            placeholder="text"
             onChange={(event) => updateAttrs({ language: event.target.value })}
           />
         ) : (
-          <span className="zerox-code-block-lang">{attrs.language}</span>
+          <span className="font-mono text-xs text-muted-foreground">{attrs.language}</span>
         )}
+        <CopyCodeButton code={attrs.code} />
       </div>
       <Pane
         value={attrs.code}
@@ -64,8 +90,12 @@ const codeBlockCodec: NodeCodec<CodeBlockAttrs> = {
   toReact: (node) => {
     const { language = 'text', code = '' } = node.attrs ?? {};
     return (
-      <pre>
-        <code className={`language-${language}`}>{code}</code>
+      <pre
+        data-slot="code-block"
+        data-language={language}
+        className="my-4 overflow-x-auto rounded-lg border bg-muted/40 p-4 text-sm"
+      >
+        <code className={`language-${language} font-mono`}>{code}</code>
       </pre>
     );
   },

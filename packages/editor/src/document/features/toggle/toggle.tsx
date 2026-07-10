@@ -19,11 +19,7 @@ type ToggleAttrs = z.infer<typeof toggleAttrs>;
 
 function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<ToggleAttrs>) {
   return (
-    <div
-      className="zerox-toggle"
-      data-open={attrs.open}
-      style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}
-    >
+    <div className="my-2" data-slot="toggle" data-open={attrs.open}>
       {/* `contentEditable={false}` keeps typed text out of the disclosure marker. */}
       <span
         role="button"
@@ -31,18 +27,20 @@ function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<ToggleAttrs>
         aria-expanded={attrs.open}
         contentEditable={false}
         onClick={() => updateAttrs({ open: !attrs.open })}
-        style={{
-          cursor: 'pointer',
-          userSelect: 'none',
-          display: 'inline-block',
-          lineHeight: 1.5,
-          transition: 'transform 0.15s ease',
-          transform: attrs.open ? 'rotate(90deg)' : 'rotate(0deg)',
-        }}
+        className="flex cursor-pointer select-none items-center gap-2 rounded-md py-1 font-medium hover:bg-accent"
       >
-        ▸
+        <span
+          aria-hidden
+          className={`inline-block leading-none text-muted-foreground transition-transform ${
+            attrs.open ? 'rotate-90' : ''
+          }`}
+        >
+          ▸
+        </span>
       </span>
-      <div style={{ flex: 1, display: attrs.open ? 'block' : 'none' }}>{children}</div>
+      <div className={`pl-6 [&>:first-child]:mt-0 ${attrs.open ? 'block' : 'hidden'}`}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -59,7 +57,20 @@ const toggleCodec: NodeCodec<ToggleAttrs> = {
   toHTML: (node, ctx) => detailsHtml(node, ctx),
   toMarkdown: (node, ctx) => detailsHtml(node, ctx),
   toReact: (node, ctx) => (
-    <details open={node.attrs?.open ?? true}>{ctx.renderChildren(node as never)}</details>
+    <details
+      className="group my-2 [&>:not(summary)]:pl-6 [&>summary+*]:mt-0"
+      open={node.attrs?.open ?? true}
+    >
+      <summary className="flex list-none cursor-pointer select-none items-center gap-2 rounded-md py-1 font-medium hover:bg-accent [&::-webkit-details-marker]:hidden">
+        <span
+          aria-hidden
+          className="inline-block leading-none text-muted-foreground transition-transform group-open:rotate-90"
+        >
+          ▸
+        </span>
+      </summary>
+      {ctx.renderChildren(node as never)}
+    </details>
   ),
   // Markdown has no native toggle: remark surfaces a raw `<details>` block as an
   // `html` token, so HTML import is the two-way path — never parse it here.

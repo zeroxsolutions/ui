@@ -67,17 +67,12 @@ export function SlashMenu({ editor, items }: SlashMenuProps) {
   return (
     <div
       data-slash-menu
-      style={{
-        position: 'fixed',
-        top: point ? point.bottom : 0,
-        left: point ? point.left : 0,
-        zIndex: 50,
-        width: 280,
-      }}
+      className="fixed z-50 w-72 overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md animate-in fade-in slide-in-from-top-1"
+      style={{ top: point ? point.bottom : 0, left: point ? point.left : 0 }}
     >
       <Command>
         <CommandInput ref={inputRef} placeholder="Filter blocks…" />
-        <CommandList>
+        <CommandList className="max-h-80">
           <CommandEmpty>No matching blocks</CommandEmpty>
           {groupByHeading(items).map(([heading, groupItems]) => (
             <CommandGroup key={heading} heading={heading}>
@@ -86,12 +81,19 @@ export function SlashMenu({ editor, items }: SlashMenuProps) {
                   key={item.id}
                   value={`${item.title} ${(item.keywords ?? []).join(' ')}`}
                   onSelect={() => select(item)}
+                  className="flex items-center gap-3"
                 >
-                  <span>{item.icon}</span>
-                  <span>{item.title}</span>
-                  {item.description && (
-                    <span style={{ opacity: 0.6 }}>{item.description}</span>
-                  )}
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-secondary text-base">
+                    {item.icon}
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="text-sm font-medium">{item.title}</span>
+                    {item.description && (
+                      <span className="truncate text-xs text-muted-foreground">
+                        {item.description}
+                      </span>
+                    )}
+                  </span>
                 </CommandItem>
               ))}
             </CommandGroup>

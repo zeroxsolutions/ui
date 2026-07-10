@@ -35,6 +35,12 @@ export interface DocumentEditorConfig {
   snapshotDebounceMs?: number;
   onChange?(delta: Delta): void;
   onSnapshot?(snapshot: Snapshot): void;
+  /**
+   * Internal seam: receive the raw engine instance (typed `unknown` so no engine
+   * type leaks) so the React `<Editor/>` surface can drive `@tiptap/react`'s
+   * node-view portal host (`EditorContent`). Not for consumer use.
+   */
+  onEngine?(engine: unknown): void;
 }
 
 const EMPTY_DOC: DocJSON = {
@@ -145,6 +151,10 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
   if (config.onChange) backend.subscribe({ onDelta: config.onChange });
   if (config.onSnapshot) backend.subscribe({ onSnapshot: config.onSnapshot });
   ready = true;
+
+  // Hand the raw engine to the React surface (if any) so `EditorContent` can
+  // host the React node-view portals. Nothing else may read this.
+  config.onEngine?.(engine);
 
   return facade;
 }

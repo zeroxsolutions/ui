@@ -53,21 +53,27 @@ export function BlockMenu({ editor, items, container }: BlockMenuProps) {
   return (
     <div
       data-block-menu
-      style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 40 }}
+      className="fixed z-40"
+      style={{ top: pos.top, left: pos.left }}
     >
       <Popover>
-        <PopoverTrigger aria-label="Block actions" title="Block actions">
+        <PopoverTrigger
+          aria-label="Block actions"
+          title="Block actions"
+          className="flex h-6 w-5 cursor-grab items-center justify-center rounded text-muted-foreground opacity-60 transition hover:bg-accent hover:opacity-100"
+        >
           ⋮⋮
         </PopoverTrigger>
-        <PopoverContent align="start" side="left" style={{ width: 200 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <PopoverContent align="start" side="left" className="w-52 p-1">
+          <div className="flex flex-col gap-0.5">
             {items.map((item) => (
-              <span key={item.id} style={{ display: 'contents' }}>
-                {item.separatorBefore && <Separator />}
+              <span key={item.id} className="contents">
+                {item.separatorBefore && <Separator className="my-1" />}
                 <Button
                   type="button"
                   size="sm"
                   variant="ghost"
+                  className="w-full justify-start"
                   onClick={() => editor.run(item.command, item.args)}
                 >
                   {item.icon ?? item.title}

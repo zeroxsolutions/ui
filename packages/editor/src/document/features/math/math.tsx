@@ -31,6 +31,15 @@ interface MathViewProps extends NodeViewProps<MathAttrs> {
   display: boolean;
 }
 
+/**
+ * Wrapper classes shared by the editable node view and the static `toReact`
+ * codec, so the editor and the engine-free Viewer render an identical shell.
+ * Block math is a centered, scrollable muted box; inline math sits in the text
+ * flow with no box (design-system tokens, no hardcoded color).
+ */
+const MATH_BLOCK_WRAPPER = 'my-4 overflow-x-auto rounded-md bg-muted/40 p-3 text-center';
+const MATH_INLINE_WRAPPER = 'inline-block align-middle';
+
 function MathView({ attrs, updateAttrs, editable, display }: MathViewProps) {
   // KaTeX's color is the one JS-side theme value that doesn't ride the CSS
   // `.dark` flip, so it comes from the active editor theme's variant.
@@ -68,55 +77,35 @@ function MathView({ attrs, updateAttrs, editable, display }: MathViewProps) {
 
   const rendered = html ? (
     display ? (
-      <div
-        className="zerox-math-rendered"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <div dangerouslySetInnerHTML={{ __html: html }} />
     ) : (
-      <span
-        className="zerox-math-rendered"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <span dangerouslySetInnerHTML={{ __html: html }} />
     )
   ) : (
-    <span
-      className="zerox-math-empty"
-      style={{ opacity: 0.5, fontStyle: 'italic' }}
-    >
-      empty formula
-    </span>
+    <span className="text-muted-foreground text-sm italic">empty formula</span>
   );
 
   if (editing && editable) {
-    const editorStyle = { width: '100%', fontFamily: 'monospace' as const };
     return display ? (
-      <div
-        className="zerox-math zerox-math-block"
-        data-math="block"
-        contentEditable={false}
-      >
+      <div className={MATH_BLOCK_WRAPPER} data-math="block" contentEditable={false}>
         <textarea
           autoFocus
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={commit}
           spellCheck={false}
-          style={{ ...editorStyle, minHeight: '4rem' }}
+          className="min-h-16 w-full rounded-md border bg-background p-2 font-mono text-sm"
         />
       </div>
     ) : (
-      <span
-        className="zerox-math zerox-math-inline"
-        data-math="inline"
-        contentEditable={false}
-      >
+      <span className={MATH_INLINE_WRAPPER} data-math="inline" contentEditable={false}>
         <input
           autoFocus
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={commit}
           spellCheck={false}
-          style={editorStyle}
+          className="rounded-md border bg-background px-2 py-1 font-mono text-sm"
         />
       </span>
     );
@@ -134,7 +123,7 @@ function MathView({ attrs, updateAttrs, editable, display }: MathViewProps) {
 
   return display ? (
     <div
-      className="zerox-math zerox-math-block"
+      className={MATH_BLOCK_WRAPPER}
       data-math="block"
       contentEditable={false}
       {...interactive}
@@ -143,7 +132,7 @@ function MathView({ attrs, updateAttrs, editable, display }: MathViewProps) {
     </div>
   ) : (
     <span
-      className="zerox-math zerox-math-inline"
+      className={MATH_INLINE_WRAPPER}
       data-math="inline"
       contentEditable={false}
       {...interactive}
@@ -197,6 +186,7 @@ const mathInlineCodec: NodeCodec<MathAttrs> = {
     return (
       <span
         data-math-inline
+        className={MATH_INLINE_WRAPPER}
         dangerouslySetInnerHTML={{
           __html: katex.renderToString(latex, { throwOnError: false }),
         }}
@@ -233,6 +223,7 @@ const mathBlockCodec: NodeCodec<MathAttrs> = {
     return (
       <div
         data-math-block
+        className={MATH_BLOCK_WRAPPER}
         dangerouslySetInnerHTML={{
           __html: katex.renderToString(latex, {
             throwOnError: false,

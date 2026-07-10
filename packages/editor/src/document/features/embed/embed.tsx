@@ -27,31 +27,44 @@ const escapeHtml = (value: string): string =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-/** Responsive 16:9 frame shared by the node view and the static React codec. */
-const frameStyle = {
-  width: '100%',
-  aspectRatio: '16 / 9',
-  border: 0,
-} as const;
+/**
+ * Responsive 16:9 iframe frame shared by the editable node view and the static
+ * `toReact` codec, so both surfaces render identically. `data-embed` marks the
+ * block (the codec reads it on import) and `contentEditable={false}` keeps the
+ * frame out of the editable text flow.
+ */
+function EmbedFrame({ url, title }: { url: string; title: string }) {
+  return (
+    <div
+      data-slot="embed"
+      data-embed
+      contentEditable={false}
+      className="my-4 overflow-hidden rounded-lg border"
+    >
+      <iframe
+        src={url}
+        title={title}
+        loading="lazy"
+        className="aspect-video h-full w-full border-0"
+      />
+    </div>
+  );
+}
 
 function EmbedView({ attrs, updateAttrs, editable }: NodeViewProps<EmbedAttrs>) {
   if (attrs.url) {
-    return (
-      <div className="zerox-embed" contentEditable={false} style={{ margin: '0.5rem 0' }}>
-        <iframe src={attrs.url} title={attrs.title} loading="lazy" style={frameStyle} />
-      </div>
-    );
+    return <EmbedFrame url={attrs.url} title={attrs.title} />;
   }
   if (!editable) {
     // Empty embed in the read-only Viewer: render nothing interactive.
-    return <div className="zerox-embed" contentEditable={false} />;
+    return <div contentEditable={false} />;
   }
   const commit = (value: string): void => {
     const url = value.trim();
     if (url) updateAttrs({ url });
   };
   return (
-    <div className="zerox-embed" contentEditable={false} style={{ margin: '0.5rem 0' }}>
+    <div className="my-4" contentEditable={false}>
       <input
         type="url"
         placeholder="Paste a URL to embed…"
@@ -62,14 +75,7 @@ function EmbedView({ attrs, updateAttrs, editable }: NodeViewProps<EmbedAttrs>) 
             commit(event.currentTarget.value);
           }
         }}
-        style={{
-          width: '100%',
-          padding: '0.5rem 0.75rem',
-          borderRadius: '0.375rem',
-          border: '1px solid rgba(125, 125, 125, 0.4)',
-          background: 'transparent',
-          color: 'inherit',
-        }}
+        className="w-full rounded-md border bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
       />
     </div>
   );
@@ -93,11 +99,7 @@ const embedCodec: NodeCodec<EmbedAttrs> = {
   toReact: (node) => {
     const attrs = node.attrs ?? { url: '', title: '' };
     // SSR-safe: a plain iframe, no engine and no browser-only APIs.
-    return (
-      <div className="zerox-embed" data-embed>
-        <iframe src={attrs.url} title={attrs.title} loading="lazy" style={frameStyle} />
-      </div>
-    );
+    return <EmbedFrame url={attrs.url} title={attrs.title} />;
   },
   fromHTML: (element) => {
     const isEmbed = element.hasAttribute('data-embed') || element.tagName === 'IFRAME';

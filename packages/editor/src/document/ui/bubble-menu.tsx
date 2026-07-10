@@ -44,14 +44,8 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
     <div
       role="toolbar"
       data-bubble-menu
-      style={{
-        position: 'fixed',
-        top: Math.max(0, rect.top - 44),
-        left: rect.left,
-        zIndex: 50,
-        display: 'flex',
-        gap: 2,
-      }}
+      className="fixed z-50 flex items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-md animate-in fade-in zoom-in-95"
+      style={{ top: Math.max(0, rect.top - 44), left: rect.left }}
     >
       {items.map((item) => (
         <Button

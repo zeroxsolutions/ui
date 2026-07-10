@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { EditorContent } from '@tiptap/react';
 import { createDocumentEditor } from '../core/create-document-editor.js';
 import type { Delta } from '../core/types/delta.js';
 import type { IEditor } from '../core/types/editor.js';
@@ -33,7 +34,11 @@ export function Editor({
   onReady,
   onChange,
 }: EditorProps) {
-  const mountRef = useRef<HTMLDivElement>(null);
+  // The raw engine instance — needed only to hand to `@tiptap/react`'s
+  // `EditorContent`, which hosts the React node-view portals (without it, custom
+  // node views never mount and render as bare `<div>`s). Typed `unknown`: no
+  // engine type crosses this component's props/exports.
+  const [engine, setEngine] = useState<unknown>(null);
   const editorRef = useRef<IEditor | null>(null);
   const callbacks = useRef({ onReady, onChange });
   callbacks.current = { onReady, onChange };
@@ -41,13 +46,14 @@ export function Editor({
   // Build once on mount; changing `features`/`content` structurally requires a
   // remount (pass a React `key`). Editable is updated imperatively below.
   useEffect(() => {
-    const element = mountRef.current;
-    if (!element) return;
     const editor = createDocumentEditor({
       features,
       content,
       editable,
-      element,
+      // Mount into a detached holder; `EditorContent` below adopts the view DOM
+      // and calls `createNodeViews()` once its portal host exists.
+      element: document.createElement('div'),
+      onEngine: (raw) => setEngine(raw),
       onChange: (delta) => callbacks.current.onChange?.(delta),
     });
     editorRef.current = editor;
@@ -55,6 +61,7 @@ export function Editor({
     return () => {
       editor.destroy();
       editorRef.current = null;
+      setEngine(null);
     };
     // Intentionally build once — see the note above.
   }, []);
@@ -63,5 +70,16 @@ export function Editor({
     editorRef.current?.setEditable(editable);
   }, [editable]);
 
-  return <div ref={mountRef} className={className} data-editor="document" />;
+  return (
+    <EditorContent
+      editor={engine as never}
+      data-editor="document"
+      className={[
+        'document-editor prose max-w-none text-base leading-relaxed focus:outline-none',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    />
+  );
 }

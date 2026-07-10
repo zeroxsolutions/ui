@@ -25,30 +25,36 @@ const escapeHtml = (value: string): string =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-/** The inline pill look — a rounded, muted background that reads as one unit. */
-const pillStyle = {
-  display: 'inline-block',
-  padding: '0 0.25rem',
-  borderRadius: '0.25rem',
-  background: 'rgba(125, 125, 125, 0.15)',
-  color: 'inherit',
-  fontWeight: 500,
-  whiteSpace: 'nowrap',
-} as const;
+/**
+ * The inline pill — a rounded chip on the design-system `primary` token that
+ * reads as one unit. Shared by the editable node view and the static `toReact`
+ * codec so both surfaces render identically.
+ */
+function MentionPill({
+  id,
+  label,
+  contentEditable,
+}: {
+  id: string;
+  label: string;
+  contentEditable?: boolean;
+}) {
+  return (
+    <span
+      data-slot="mention"
+      data-mention-id={id}
+      contentEditable={contentEditable}
+      className="inline-flex items-center rounded-md bg-primary/10 px-1.5 py-0.5 text-sm font-medium text-primary"
+    >
+      @{label || id}
+    </span>
+  );
+}
 
 function MentionView({ attrs }: NodeViewProps<MentionAttrs>) {
   // Inline atom: no editable content slot, no engine — a static pill. The label
   // falls back to the id so an unresolved mention still renders something.
-  return (
-    <span
-      className="zerox-mention"
-      data-mention-id={attrs.id}
-      contentEditable={false}
-      style={pillStyle}
-    >
-      @{attrs.label || attrs.id}
-    </span>
-  );
+  return <MentionPill id={attrs.id} label={attrs.label} contentEditable={false} />;
 }
 
 const mentionCodec: NodeCodec<MentionAttrs> = {
@@ -62,11 +68,7 @@ const mentionCodec: NodeCodec<MentionAttrs> = {
   },
   toReact: (node) => {
     const attrs = node.attrs ?? { id: '', label: '' };
-    return (
-      <span className="zerox-mention" data-mention-id={attrs.id} style={pillStyle}>
-        @{attrs.label || attrs.id}
-      </span>
-    );
+    return <MentionPill id={attrs.id} label={attrs.label} />;
   },
   fromHTML: (element) => {
     if (!element.getAttribute('data-mention-id')) return null;

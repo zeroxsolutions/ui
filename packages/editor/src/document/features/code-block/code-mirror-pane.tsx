@@ -24,18 +24,18 @@ export type CodeMirrorPaneComponent = ComponentType<CodeMirrorPaneProps>;
 function DefaultCodePane({ value, readOnly, onChange }: CodeMirrorPaneProps) {
   if (readOnly) {
     return (
-      <pre className="zerox-code">
+      <pre className="overflow-x-auto p-4 font-mono text-sm">
         <code>{value}</code>
       </pre>
     );
   }
   return (
     <textarea
-      className="zerox-code"
+      className="block w-full resize-y bg-transparent p-4 font-mono text-sm text-foreground outline-none"
       value={value}
       spellCheck={false}
+      rows={4}
       onChange={(event) => onChange?.(event.target.value)}
-      style={{ width: '100%', fontFamily: 'monospace', minHeight: '4rem' }}
     />
   );
 }
