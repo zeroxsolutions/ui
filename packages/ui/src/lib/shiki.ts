@@ -85,6 +85,18 @@ const LANG_LOADERS: Record<string, () => Promise<{ default: unknown }>> = {
 };
 
 /**
+ * The canonical language ids the highlighter can load — the keys of
+ * {@link LANG_LOADERS}, in declaration order. Exposed so a language picker can
+ * offer exactly the set the design system highlights, and so a test can assert
+ * that set stays in sync with the picker's own mapping. Importing this pulls in
+ * this module (and Shiki); a runtime picker keeps its own light copy and relies
+ * on the sync test rather than importing here.
+ */
+export const CODE_LANGUAGE_IDS: readonly string[] = Object.freeze(
+  Object.keys(LANG_LOADERS),
+);
+
+/**
  * Common shiki language aliases → the canonical id in {@link LANG_LOADERS}.
  * The editor passes canonical ids (the file router's `EXTENSION_TO_LANGUAGE`),
  * but a Markdown code fence (chat `CodeBlock`) carries whatever the author typed

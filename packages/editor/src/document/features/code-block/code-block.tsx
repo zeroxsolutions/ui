@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Code } from 'lucide-react';
+import { LanguageSwitcher } from '@zeroxsolutions/ui/components/language-switcher';
 import { z } from 'zod';
 import {
   defineFeature,
@@ -50,13 +52,14 @@ function CodeBlockView({ attrs, updateAttrs, editable }: NodeViewProps<CodeBlock
     >
       <div className="flex items-center justify-between border-b border-border px-3 py-1.5">
         {editable ? (
-          <input
-            className="w-28 bg-transparent font-mono text-xs text-muted-foreground outline-none placeholder:text-muted-foreground/60"
+          <LanguageSwitcher.Dropdown
+            kind="code"
+            searchable
             value={attrs.language}
-            spellCheck={false}
+            onValueChange={(language) => updateAttrs({ language })}
             aria-label="Language"
-            placeholder="text"
-            onChange={(event) => updateAttrs({ language: event.target.value })}
+            placeholder="Language…"
+            className="h-7 min-w-32 gap-1.5 border-0 bg-transparent text-xs shadow-none hover:bg-accent"
           />
         ) : (
           <span className="font-mono text-xs text-muted-foreground">{attrs.language}</span>
@@ -152,6 +155,7 @@ export function codeBlock(): EditorFeature {
     slash: [
       {
         id: 'codeBlock',
+        icon: <Code className="size-4" />,
         title: 'Code block',
         description: 'Syntax-highlighted code',
         group: 'Blocks',
