@@ -1,0 +1,10 @@
+import type { ComponentPropsWithoutRef, FC } from 'react';
+
+type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
+
+/** just — Material Icon Theme (MIT). */
+const JustIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16" width={size} height={size} {...props}><path fill="#ef5350" d="M8 1a7 7 0 0 0-7 7 7 7 0 0 0 7 7 7 7 0 0 0 7-7 7 7 0 0 0-7-7m0 1a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2m0 8a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2"/></svg>
+);
+
+export { JustIcon };

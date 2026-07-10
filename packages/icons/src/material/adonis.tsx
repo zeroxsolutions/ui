@@ -1,0 +1,10 @@
+import type { ComponentPropsWithoutRef, FC } from 'react';
+
+type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
+
+/** adonis — Material Icon Theme (MIT). */
+const AdonisIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width={size} height={size} {...props}><path fill="#7c4dff" d="m79.579 25.741-66.481 115.15h63.305l11.218-19.433H47.613L79.804 65.7l20.005 34.649 11.423-19.783zm42.118 50.221-45.203 78.297h90.408z" paintOrder="fill markers stroke"/></svg>
+);
+
+export { AdonisIcon };

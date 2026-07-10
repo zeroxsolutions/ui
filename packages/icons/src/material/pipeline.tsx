@@ -1,0 +1,10 @@
+import type { ComponentPropsWithoutRef, FC } from 'react';
+
+type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
+
+/** pipeline — Material Icon Theme (MIT). */
+const PipelineIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={size} height={size} {...props}><path fill="#f57f17" d="M20 24h-8.1a5 5 0 0 0-.732-1.754l11.078-11.078A4.997 4.997 0 1 0 20.1 6h-8.202a5 5 0 1 0 0 2H20.1a5 5 0 0 0 .73 1.754L9.755 20.832A4.997 4.997 0 1 0 11.9 26H20v4h10V20H20ZM7 10a3 3 0 1 1 3-3 3.003 3.003 0 0 1-3 3m18-6a3 3 0 1 1-3 3 3.003 3.003 0 0 1 3-3M7 28a3 3 0 1 1 3-3 3.003 3.003 0 0 1-3 3m15-6h6v6h-6Z"/></svg>
+);
+
+export { PipelineIcon };

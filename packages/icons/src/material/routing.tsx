@@ -1,0 +1,10 @@
+import type { ComponentPropsWithoutRef, FC } from 'react';
+
+type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
+
+/** routing — Material Icon Theme (MIT). */
+const RoutingIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={size} height={size} {...props}><path fill="#43a047" d="M18 14v-2h8l2-3-2-3h-8V4l-2-2-2 2v6H6l-2 3 2 3h8v10a4 4 0 0 0-4 4h12a4 4 0 0 0-4-4v-6h8l2-3-2-3Z"/></svg>
+);
+
+export { RoutingIcon };

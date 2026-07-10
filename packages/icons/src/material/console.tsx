@@ -1,0 +1,10 @@
+import type { ComponentPropsWithoutRef, FC } from 'react';
+
+type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
+
+/** console — Material Icon Theme (MIT). */
+const ConsoleIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width={size} height={size} {...props}><path fill="#ff7043" d="M2 2a1 1 0 0 0-1 1v10c0 .554.446 1 1 1h12c.554 0 1-.446 1-1V3a1 1 0 0 0-1-1zm0 3h12v8H2zm1 2 2 2-2 2 1 1 3-3-3-3zm5 3.5V12h5v-1.5z"/></svg>
+);
+
+export { ConsoleIcon };

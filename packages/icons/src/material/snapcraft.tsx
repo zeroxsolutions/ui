@@ -1,0 +1,10 @@
+import type { ComponentPropsWithoutRef, FC } from 'react';
+
+type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
+
+/** snapcraft — Material Icon Theme (MIT). */
+const SnapcraftIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1.28 1.28" width={size} height={size} {...props}><path fill="#81c784" d="M.76.36 1 .48.76.72zm-.48.8.44-.4-.2-.2zM.12.12l.6.6V.36z"/><path fill="#ff6e40" d="M1.12.36.76.32l.4.2z"/></svg>
+);
+
+export { SnapcraftIcon };

@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { DeepgramMark } from '@zeroxsolutions/icons/deepgram';
-import { GithubMark } from '@zeroxsolutions/icons/github-mark';
-import { InworldMark } from '@zeroxsolutions/icons/inworld';
-import { LeonardoMark } from '@zeroxsolutions/icons/leonardo';
-import { PipecatMark } from '@zeroxsolutions/icons/pipecat';
+import { DeepgramMark } from '@zeroxsolutions/icons/brands/deepgram';
+import { GithubMark } from '@zeroxsolutions/icons/brands/github-mark';
+import { InworldMark } from '@zeroxsolutions/icons/brands/inworld';
+import { LeonardoMark } from '@zeroxsolutions/icons/brands/leonardo';
+import { PipecatMark } from '@zeroxsolutions/icons/brands/pipecat';
 
 /**
  * Visual catalog of the vendored brand marks shipped by `@zeroxsolutions/icons`

@@ -1,0 +1,10 @@
+import type { ComponentPropsWithoutRef, FC } from 'react';
+
+type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
+
+/** ballerina — Material Icon Theme (MIT). */
+const BallerinaIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={size} height={size} {...props}><path fill="#00bfa5" d="m14 12-6-2V2h6Zm-6 0 4 2.058L8 16Zm0 18V18l6-2v4l-2 10Zm10-18 6-2V2h-6Zm6 0-4 2.058L24 16Zm0 18V18l-6-2v4l2 10Z"/></svg>
+);
+
+export { BallerinaIcon };

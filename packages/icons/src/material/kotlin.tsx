@@ -1,0 +1,10 @@
+import type { ComponentPropsWithoutRef, FC } from 'react';
+
+type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
+
+/** kotlin — Material Icon Theme (MIT). */
+const KotlinIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={size} height={size} {...props}><defs><linearGradient id="mi-kotlin-a" x1="1.725" x2="22.185" y1="22.67" y2="1.982" gradientTransform="translate(1.306 1.129)scale(.89324)" gradientUnits="userSpaceOnUse"><stop offset="0" stopColor="#7c4dff"/><stop offset=".5" stopColor="#d500f9"/><stop offset="1" stopColor="#ef5350"/></linearGradient></defs><path fill="url(#mi-kotlin-a)" d="M2.975 2.976v18.048h18.05v-.03l-4.478-4.511-4.48-4.515 4.48-4.515 4.443-4.477z"/></svg>
+);
+
+export { KotlinIcon };

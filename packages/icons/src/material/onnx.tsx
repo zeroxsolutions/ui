@@ -1,0 +1,10 @@
+import type { ComponentPropsWithoutRef, FC } from 'react';
+
+type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
+
+/** onnx — Material Icon Theme (MIT). */
+const OnnxIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16" width={size} height={size} {...props}><path fill="#40c4ff" fillRule="evenodd" d="m8.019 8.019-.772 4.873 4.873.772zm0 0-4.873.772.772 4.873zm0 0-2.24-4.396-4.396 2.24zm0 0 3.489-3.489-3.49-3.488zm0 0 4.396 2.24 2.24-4.396z" clipRule="evenodd"/></svg>
+);
+
+export { OnnxIcon };
