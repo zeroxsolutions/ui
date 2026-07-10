@@ -28,6 +28,14 @@ export interface EditorSelection {
   nodeType?: string;
 }
 
+/** Viewport-relative coordinates of a caret/selection edge (CSS pixels). */
+export interface CaretRect {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+}
+
 export interface IEditor {
   readonly status: EditorStatus;
 
@@ -53,6 +61,10 @@ export interface IEditor {
 
   // ── Selection & focus ────────────────────────────────────────────────────
   getSelection(): EditorSelection;
+  /** Viewport coordinates of the selection head (caret), for positioning chrome
+   *  (slash menu, etc.). Reliable for a collapsed caret, unlike the browser
+   *  Selection rect. Null when unavailable. */
+  caretRect(): CaretRect | null;
   focus(position?: FocusPosition): void;
   blur(): void;
   isFocused(): boolean;

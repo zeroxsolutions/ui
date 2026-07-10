@@ -14,6 +14,7 @@ export type {
   IDocumentBackend,
 } from './document-backend.js';
 export type {
+  CaretRect,
   EditorSelection,
   EditorStatus,
   FocusPosition,

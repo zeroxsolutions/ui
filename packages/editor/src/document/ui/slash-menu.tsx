@@ -9,9 +9,8 @@ import {
   CommandItem,
   CommandList,
 } from '@zeroxsolutions/ui/components/ui/command';
-import type { IEditor, SlashItem } from '../core/index.js';
+import type { CaretRect, IEditor, SlashItem } from '../core/index.js';
 import { groupByHeading } from './collect-ui-contributions.js';
-import { selectionRect, type Point } from './selection-rect.js';
 
 /**
  * The slash (`/`) insert menu (task 8.1): a house-design-system `Command` (cmdk)
@@ -27,7 +26,7 @@ export interface SlashMenuProps {
 
 export function SlashMenu({ editor, items }: SlashMenuProps) {
   const [open, setOpen] = useState(false);
-  const [point, setPoint] = useState<Point | null>(null);
+  const [point, setPoint] = useState<CaretRect | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -44,7 +43,7 @@ export function SlashMenu({ editor, items }: SlashMenuProps) {
         editor.getSelection().empty
       ) {
         event.preventDefault();
-        setPoint(selectionRect());
+        setPoint(editor.caretRect());
         setOpen(true);
       }
     };

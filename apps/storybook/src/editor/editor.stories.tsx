@@ -3,12 +3,10 @@ import { useRef, useState } from 'react';
 import type { DocJSON, EditorFeature, IEditor } from '@zeroxsolutions/editor/document/core/index';
 import { Editor } from '@zeroxsolutions/editor/document/react/editor';
 import {
-  BlockMenu,
   BubbleMenu,
   EditorToolbar,
   SlashMenu,
   collectUiContributions,
-  defaultBlockMenuItems,
 } from '@zeroxsolutions/editor/document/ui/index';
 import { standardKit } from '@zeroxsolutions/editor/document/features/standard/index';
 import { callout } from '@zeroxsolutions/editor/document/features/callout/index';
@@ -71,11 +69,6 @@ function EditorPlayground({
           <>
             <SlashMenu editor={editor} items={ui.slash} />
             <BubbleMenu editor={editor} items={ui.bubble} container={containerRef.current} />
-            <BlockMenu
-              editor={editor}
-              items={[...ui.blockMenu, ...defaultBlockMenuItems]}
-              container={containerRef.current}
-            />
           </>
         )}
       </div>

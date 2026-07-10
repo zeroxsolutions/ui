@@ -109,6 +109,23 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
     isActive: (name, attributes) =>
       engine.isActive(name, attributes as Record<string, unknown> | undefined),
     getSelection,
+    caretRect: () => {
+      // ProseMirror's `coordsAtPos` gives exact viewport coords for any
+      // position — including an empty line — where the browser Selection rect of
+      // a collapsed caret is unreliable (often reports 0,0). Engine-internal;
+      // the returned shape is engine-agnostic.
+      try {
+        const coords = engine.view.coordsAtPos(engine.state.selection.head);
+        return {
+          top: coords.top,
+          bottom: coords.bottom,
+          left: coords.left,
+          right: coords.right,
+        };
+      } catch {
+        return null;
+      }
+    },
     focus: (position) => {
       engine.commands.focus(position as Parameters<typeof engine.commands.focus>[0]);
     },
