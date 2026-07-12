@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { Check, Copy, Eye, PencilLine, Workflow } from 'lucide-react';
+import { useState } from 'react';
+import { Eye, PencilLine, Workflow } from 'lucide-react';
 import { CodeEditorPane } from '@zeroxsolutions/ui/components/code-editor-pane';
-import { Button } from '@zeroxsolutions/ui/components/ui/button';
+import { CopyButton } from '@zeroxsolutions/ui/components/copy-button';
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -34,35 +34,6 @@ const mermaidAttrs = z.object({
 type MermaidAttrs = z.infer<typeof mermaidAttrs>;
 
 type ViewMode = 'view' | 'edit';
-
-/** Copy the source with a transient check, mirroring the design-system code block. */
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon-sm"
-      aria-label={copied ? 'Copied' : 'Copy source'}
-      onClick={() => {
-        navigator.clipboard
-          ?.writeText(text)
-          .then(() => {
-            setCopied(true);
-            clearTimeout(timer.current);
-            timer.current = setTimeout(() => setCopied(false), 1500);
-          })
-          .catch(() => {
-            /* best-effort */
-          });
-      }}
-    >
-      {copied ? <Check /> : <Copy />}
-    </Button>
-  );
-}
 
 function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MermaidAttrs>) {
   // A freshly inserted (empty) block opens ready to edit; an existing diagram
@@ -99,6 +70,7 @@ function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<M
         </div>
         <div className="flex items-center gap-1">
           <ToggleGroup
+            size="sm"
             value={[mode]}
             onValueChange={(next: unknown) => {
               const picked = (Array.isArray(next) ? next[0] : undefined) as ViewMode | undefined;
@@ -112,7 +84,7 @@ function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<M
               <PencilLine />
             </ToggleGroupItem>
           </ToggleGroup>
-          <CopyButton text={attrs.source} />
+          <CopyButton value={attrs.source} label="Copy source" size="icon-sm" />
         </div>
       </div>
 

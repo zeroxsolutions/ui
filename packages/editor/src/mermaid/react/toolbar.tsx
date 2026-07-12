@@ -1,8 +1,5 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { Check, ChevronDown, Copy, Download, Image as ImageIcon, Workflow } from 'lucide-react';
-import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,15 +10,25 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@zeroxsolutions/ui/components/ui/alert-dialog';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@zeroxsolutions/ui/components/ui/dropdown-menu';
 import { cn } from '@zeroxsolutions/ui/lib/utils';
+import {
+  Check,
+  ChevronDown,
+  Copy,
+  Download,
+  Image as ImageIcon,
+  Workflow,
+} from 'lucide-react';
+import { useRef, useState } from 'react';
 import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '../core/detect.js';
 import { copySvg, copyText, downloadPng, downloadSvg } from '../core/export.js';
 import { DIAGRAM_TEMPLATES } from '../core/templates.js';
@@ -42,12 +49,19 @@ export interface MermaidToolbarProps {
  * for confirmation (a design-system `AlertDialog`) before replacing it. Export
  * feedback is inline (a transient check), so no toast dependency is added.
  */
-export function MermaidToolbar({ source, svg, onPickTemplate, className }: MermaidToolbarProps) {
+export function MermaidToolbar({
+  source,
+  svg,
+  onPickTemplate,
+  className,
+}: MermaidToolbarProps) {
   const type = detectDiagramType(source);
   const hasContent = source.trim().length > 0;
   const [pending, setPending] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
 
   const pickTemplate = (templateSource: string) => {
     if (hasContent) setPending(templateSource);
@@ -85,17 +99,17 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
               </Button>
             }
           />
-          <DropdownMenuContent align="start">
-            <DropdownMenuLabel>Insert a starter diagram</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {DIAGRAM_TEMPLATES.map((template) => (
-              <DropdownMenuItem
-                key={template.type}
-                onClick={() => pickTemplate(template.source)}
-              >
-                {template.label}
-              </DropdownMenuItem>
-            ))}
+          <DropdownMenuContent>
+            <DropdownMenuGroup>
+              {DIAGRAM_TEMPLATES.map((template) => (
+                <DropdownMenuItem
+                  key={template.type}
+                  onClick={() => pickTemplate(template.source)}
+                >
+                  {template.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -130,12 +144,16 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>
+      <AlertDialog
+        open={pending !== null}
+        onOpenChange={(open) => !open && setPending(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Replace the current diagram?</AlertDialogTitle>
             <AlertDialogDescription>
-              Inserting this template will overwrite the diagram source you already have.
+              Inserting this template will overwrite the diagram source you
+              already have.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
