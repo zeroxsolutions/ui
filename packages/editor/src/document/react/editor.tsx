@@ -139,12 +139,16 @@ export function Editor({
   // and toggle the class the stylesheet keys the grayout off.
   useEffect(() => {
     if (!rootEl) return;
-    // Only an actual drag toggles the grayout (never a click/selection). Scope
-    // the start to drags originating in THIS editor; listen for the end on
-    // `document` so it's caught even if the handle is repositioned mid-drag —
-    // that keeps the class from ever sticking after a drop.
+    // Only a drag off the block handle toggles the grayout. A native
+    // text/selection drag (e.g. highlighting the code-block header) or a node
+    // view's own internal drag must NOT flip the editor into the dragging state:
+    // such a drag has no matching handle `dragend`, so the grayout would stick
+    // after the pointer is released. Scope the start to THIS editor's own
+    // `.drag-handle`; listen for the end on `document` so it's caught even if the
+    // handle is repositioned mid-drag — that keeps the class from ever sticking.
     const start = (event: DragEvent) => {
-      if (rootEl.contains(event.target as Node)) rootEl.classList.add('is-dragging');
+      const handle = (event.target as HTMLElement | null)?.closest?.('.drag-handle');
+      if (handle && rootEl.contains(handle)) rootEl.classList.add('is-dragging');
     };
     const end = () => rootEl.classList.remove('is-dragging');
     document.addEventListener('dragstart', start);

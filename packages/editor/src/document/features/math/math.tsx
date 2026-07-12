@@ -1,4 +1,5 @@
 import { useEffect, useState, type KeyboardEvent } from 'react';
+import { Sigma } from 'lucide-react';
 import { z } from 'zod';
 import katex from 'katex';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
@@ -287,6 +288,7 @@ export function math(): EditorFeature {
     slash: [
       {
         id: 'math-block',
+        icon: <Sigma className="size-4" />,
         title: 'Math block',
         description: 'Display equation (KaTeX)',
         group: 'Blocks',

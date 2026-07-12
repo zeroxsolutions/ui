@@ -4,9 +4,11 @@ import { Subscript } from '@tiptap/extension-subscript';
 import { Superscript } from '@tiptap/extension-superscript';
 import { TaskItem } from '@tiptap/extension-task-item';
 import { TaskList } from '@tiptap/extension-task-list';
+import { ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 import { defineFeature, type EditorFeature } from '../../core/index.js';
+import { TaskItemView } from './task-item-view.js';
 
 /** Options for the standard block set. */
 export interface StandardKitOptions {
@@ -60,7 +62,14 @@ export function standardKit(options: StandardKitOptions = {}): EditorFeature {
         Subscript,
         Superscript,
         TaskList,
-        TaskItem.configure({ nested: true }),
+        // A React node view so the checkbox is the house `Checkbox`, not a bare
+        // `<input>`. Cast at the seam: the view's props are typed locally to keep
+        // the engine out of its `.d.ts` (see `task-item-view.tsx`).
+        TaskItem.extend({
+          addNodeView() {
+            return ReactNodeViewRenderer(TaskItemView as never);
+          },
+        }).configure({ nested: true }),
         Placeholder.configure({
           includeChildren: true,
           placeholder: ({ node }) =>

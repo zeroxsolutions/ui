@@ -116,7 +116,21 @@ export const featureBlocksDoc: DocJSON = {
       attrs: { open: true },
       content: [{ type: 'paragraph', content: [{ type: 'text', text: 'A collapsible toggle body.' }] }],
     },
-    { type: 'codeBlock', attrs: { language: 'ts', code: 'export const x = 1;' } },
+    {
+      type: 'codeBlock',
+      attrs: {
+        language: 'ts',
+        code: [
+          "import { createClient } from './client';",
+          '',
+          'export async function activeItems(limit = 10) {',
+          '  const client = createClient({ retries: 3 });',
+          '  const items = await client.list({ limit });',
+          '  return items.filter((item) => item.active);',
+          '}',
+        ].join('\n'),
+      },
+    },
     { type: 'mathBlock', attrs: { latex: 'E = mc^2' } },
     { type: 'mermaid', attrs: { source: 'graph TD;\n  A-->B;' } },
     {

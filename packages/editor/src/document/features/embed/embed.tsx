@@ -1,3 +1,5 @@
+import { Frame } from 'lucide-react';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
 import type { NodeViewProps } from '../../core/index.js';
@@ -51,7 +53,7 @@ function EmbedFrame({ url, title }: { url: string; title: string }) {
   );
 }
 
-function EmbedView({ attrs, updateAttrs, editable }: NodeViewProps<EmbedAttrs>) {
+export function EmbedView({ attrs, updateAttrs, editable }: NodeViewProps<EmbedAttrs>) {
   if (attrs.url) {
     return <EmbedFrame url={attrs.url} title={attrs.title} />;
   }
@@ -65,7 +67,7 @@ function EmbedView({ attrs, updateAttrs, editable }: NodeViewProps<EmbedAttrs>) 
   };
   return (
     <div className="my-4" contentEditable={false}>
-      <input
+      <Input
         type="url"
         placeholder="Paste a URL to embed…"
         onBlur={(event) => commit(event.currentTarget.value)}
@@ -75,7 +77,6 @@ function EmbedView({ attrs, updateAttrs, editable }: NodeViewProps<EmbedAttrs>) 
             commit(event.currentTarget.value);
           }
         }}
-        className="w-full rounded-md border bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
       />
     </div>
   );
@@ -150,6 +151,7 @@ export function embed(): EditorFeature {
     slash: [
       {
         id: 'embed',
+        icon: <Frame className="size-4" />,
         title: 'Embed',
         description: 'Embed a URL',
         group: 'Blocks',

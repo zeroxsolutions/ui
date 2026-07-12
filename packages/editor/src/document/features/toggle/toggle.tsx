@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
 import type { NodeJSON, NodeViewProps, SerializeContext } from '../../core/index.js';
@@ -19,7 +20,10 @@ type ToggleAttrs = z.infer<typeof toggleAttrs>;
 
 function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<ToggleAttrs>) {
   return (
-    <div className="my-2" data-slot="toggle" data-open={attrs.open}>
+    // Notion layout: the ▸ marker sits in the left gutter, inline with the first
+    // body line — a flex row (`items-start`) puts the fixed-width chevron beside
+    // the flowing body instead of stranding it on a line of its own above.
+    <div className="my-2 flex items-start gap-1" data-slot="toggle" data-open={attrs.open}>
       {/* `contentEditable={false}` keeps typed text out of the disclosure marker. */}
       <span
         role="button"
@@ -27,20 +31,18 @@ function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<ToggleAttrs>
         aria-expanded={attrs.open}
         contentEditable={false}
         onClick={() => updateAttrs({ open: !attrs.open })}
-        className="flex cursor-pointer select-none items-center gap-2 rounded-md py-1 font-medium hover:bg-accent"
+        className="mt-0.5 flex size-6 shrink-0 cursor-pointer select-none items-center justify-center rounded-md text-muted-foreground hover:bg-accent"
       >
         <span
           aria-hidden
-          className={`inline-block leading-none text-muted-foreground transition-transform ${
+          className={`inline-block leading-none transition-transform ${
             attrs.open ? 'rotate-90' : ''
           }`}
         >
           ▸
         </span>
       </span>
-      <div className={`pl-6 [&>:first-child]:mt-0 ${attrs.open ? 'block' : 'hidden'}`}>
-        {children}
-      </div>
+      <div className={`min-w-0 flex-1 ${attrs.open ? 'block' : 'hidden'}`}>{children}</div>
     </div>
   );
 }
@@ -57,19 +59,24 @@ const toggleCodec: NodeCodec<ToggleAttrs> = {
   toHTML: (node, ctx) => detailsHtml(node, ctx),
   toMarkdown: (node, ctx) => detailsHtml(node, ctx),
   toReact: (node, ctx) => (
+    // Notion layout, static twin of `ToggleView`: `display:flex` on the
+    // `<details>` seats the ▸ marker (the `<summary>`) inline with the first body
+    // line. The browser still hides the non-summary flex item when closed, so the
+    // native open/close keeps working with zero JS.
     <details
-      className="group my-2 [&>:not(summary)]:pl-6 [&>summary+*]:mt-0"
+      data-slot="toggle"
+      className="group my-2 flex items-start gap-1"
       open={node.attrs?.open ?? true}
     >
-      <summary className="flex list-none cursor-pointer select-none items-center gap-2 rounded-md py-1 font-medium hover:bg-accent [&::-webkit-details-marker]:hidden">
+      <summary className="mt-0.5 flex size-6 shrink-0 list-none cursor-pointer select-none items-center justify-center rounded-md text-muted-foreground hover:bg-accent [&::-webkit-details-marker]:hidden">
         <span
           aria-hidden
-          className="inline-block leading-none text-muted-foreground transition-transform group-open:rotate-90"
+          className="inline-block leading-none transition-transform group-open:rotate-90"
         >
           ▸
         </span>
       </summary>
-      {ctx.renderChildren(node as never)}
+      <div className="min-w-0 flex-1">{ctx.renderChildren(node as never)}</div>
     </details>
   ),
   // Markdown has no native toggle: remark surfaces a raw `<details>` block as an
@@ -114,6 +121,7 @@ export function toggle(): EditorFeature {
     slash: [
       {
         id: 'toggle',
+        icon: <ChevronRight className="size-4" />,
         title: 'Toggle',
         description: 'Collapsible section',
         group: 'Blocks',

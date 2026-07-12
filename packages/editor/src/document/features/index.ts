@@ -11,13 +11,7 @@ export { toggle } from './toggle/index.js';
 export { link } from './link/index.js';
 export { image } from './image/index.js';
 export { table } from './table/index.js';
-export {
-  codeBlock,
-  resolveCodeMirrorPane,
-  setCodeMirrorPane,
-  type CodeMirrorPaneComponent,
-  type CodeMirrorPaneProps,
-} from './code-block/index.js';
+export { codeBlock } from './code-block/index.js';
 export { mermaid } from './mermaid/index.js';
 export { math } from './math/index.js';
 export { mention } from './mention/index.js';

@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { Workflow } from 'lucide-react';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
 import type { NodeViewProps } from '../../core/index.js';
@@ -185,6 +186,7 @@ export function mermaid(): EditorFeature {
     slash: [
       {
         id: 'mermaid',
+        icon: <Workflow className="size-4" />,
         title: 'Mermaid',
         description: 'Diagram from text',
         group: 'Blocks',

@@ -43,9 +43,13 @@ const allFeatures = (): EditorFeature[] => [
 function EditorPlayground({
   content,
   editable = true,
+  toolbar = false,
 }: {
   content: DocJSON;
   editable?: boolean;
+  /** Show a persistent top formatting toolbar. Off by default — the Notion-like
+   *  experience formats through the on-selection bubble menu, with no always-on bar. */
+  toolbar?: boolean;
 }) {
   const features = useRef(allFeatures()).current;
   const ui = useRef(collectUiContributions(features)).current;
@@ -53,32 +57,41 @@ function EditorPlayground({
   const [editor, setEditor] = useState<IEditor | null>(null);
 
   return (
-    <div className="mx-auto max-w-2xl rounded-lg border bg-background p-3 text-foreground">
-      {editor && editable && (
-        <EditorToolbar editor={editor} items={ui.toolbar} className="mb-2 border-b pb-2" />
-      )}
-      <div ref={containerRef} className="relative">
-        <Editor
-          features={features}
-          content={content}
-          editable={editable}
-          onReady={setEditor}
-          className="min-h-48 outline-none"
-        />
-        {editor && editable && (
-          <>
-            <SlashMenu editor={editor} items={ui.slash} />
-            <BubbleMenu editor={editor} items={ui.bubble} container={containerRef.current} />
-          </>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto max-w-3xl px-4 py-16">
+        {editor && editable && toolbar && (
+          <EditorToolbar
+            editor={editor}
+            items={ui.toolbar}
+            className="sticky top-4 z-10 mx-auto mb-6 w-fit shadow-md"
+          />
         )}
+        <div ref={containerRef} className="relative">
+          <Editor
+            features={features}
+            content={content}
+            editable={editable}
+            onReady={setEditor}
+            className="min-h-[70vh]"
+          />
+          {editor && editable && (
+            <>
+              <SlashMenu editor={editor} items={ui.slash} />
+              <BubbleMenu editor={editor} items={ui.bubble} container={containerRef.current} />
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
 const meta: Meta<typeof EditorPlayground> = {
-  title: 'Editor/Editor',
+  title: 'Document Editor/Editor',
   component: EditorPlayground,
+  // Render edge-to-edge (no Storybook canvas padding) so the editor reads as a
+  // real full-page document surface, not a small boxed widget.
+  parameters: { layout: 'fullscreen' },
 };
 export default meta;
 
@@ -93,6 +106,11 @@ export const Default: Story = {
 /** Every feature block rendered together (callout, toggle, code, math, mermaid, table). */
 export const FeatureBlocks: Story = {
   render: () => <EditorPlayground content={featureBlocksDoc} />,
+};
+
+/** The same editor with an optional persistent top formatting toolbar. */
+export const WithToolbar: Story = {
+  render: () => <EditorPlayground content={sampleDoc} toolbar />,
 };
 
 /** A read-only editor — no chrome, `editable={false}`. */

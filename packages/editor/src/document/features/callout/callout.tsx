@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { FluentEmoji } from '@zeroxsolutions/fluent-emoji';
+import { Info } from 'lucide-react';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
 import type { NodeJSON, NodeViewProps } from '../../core/index.js';
@@ -53,11 +55,15 @@ function CalloutShell({ variant, children }: { variant: Variant; children: React
     <div
       data-slot="callout"
       data-callout={variant}
-      className="my-4 flex gap-3 rounded-lg border p-4"
+      className="my-4 flex items-start gap-3 rounded-lg border p-4"
     >
-      <span aria-hidden className="mt-0.5 shrink-0 select-none text-lg leading-none">
-        {ICON[variant]}
-      </span>
+      <FluentEmoji
+        glyph={ICON[variant]}
+        name={variant}
+        variant="flat"
+        aria-hidden
+        className="mt-0.5 size-5 shrink-0 select-none"
+      />
       <div className="min-w-0 flex-1 [&>:first-child]:mt-0 [&>:last-child]:mb-0">
         {children}
       </div>
@@ -156,6 +162,7 @@ export function callout(): EditorFeature {
     slash: [
       {
         id: 'callout',
+        icon: <Info className="size-4" />,
         title: 'Callout',
         description: 'Highlighted note block',
         group: 'Blocks',

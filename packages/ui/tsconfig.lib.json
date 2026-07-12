@@ -50,6 +50,9 @@
   "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
   "references": [
     {
+      "path": "../icons/tsconfig.lib.json"
+    },
+    {
       "path": "../fluent-emoji/tsconfig.lib.json"
     }
   ]

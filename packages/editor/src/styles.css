@@ -92,6 +92,47 @@
   margin-bottom: 0;
 }
 
+/* The engine wraps the document in a `.ProseMirror` div, so the first/last block
+ * is a GRANDCHILD of `.prose` — outside `@tailwindcss/typography`'s
+ * `.prose > :first-child`/`:last-child` margin reset, which only reaches direct
+ * children. Re-apply it one level in so the live editor/viewer's first block sits
+ * flush at the top (and the last flush at the bottom) exactly like the static
+ * `<Viewer/>`, where the block IS a direct prose child — without it the live
+ * surface starts one heading-margin lower and the two frames don't match.
+ * UNLAYERED (like the prose-var + task/callout resets above) so it beats the
+ * typography plugin's own layered `h2`/`p` top-margin, which a `@layer components`
+ * rule would lose to regardless of specificity. */
+.document-editor .ProseMirror > :first-child {
+  margin-top: 0;
+}
+.document-editor .ProseMirror > :last-child {
+  margin-bottom: 0;
+}
+
+/* The design-system CodeBlock owns its whole surface — a rounded `bg-muted/50`
+ * wrapper with a header and a `<pre>` body. Inside `.prose` the typography plugin
+ * ALSO styles that inner `<pre>`/`<code>` (a second background, a border-radius,
+ * vertical margin, a forced text color, and backtick quotes on `code`), which
+ * double-boxes the block and splits the header↔body seam — so it looks broken in
+ * the viewer versus its standalone story. Neutralize the plugin on the DS surface
+ * so it renders identically in prose. UNLAYERED to beat the plugin's own rules. */
+.document-editor [data-slot='code-block'] pre {
+  margin: 0;
+  background: transparent;
+  border-radius: 0;
+  color: inherit;
+}
+.document-editor [data-slot='code-block'] code {
+  background: transparent;
+  color: inherit;
+  font-weight: inherit;
+  padding: 0;
+}
+.document-editor [data-slot='code-block'] code::before,
+.document-editor [data-slot='code-block'] code::after {
+  content: none;
+}
+
 @layer components {
   /* 2. Engine internals the `prose` plugin doesn't cover. */
 
@@ -105,6 +146,15 @@
    * both the "+" affordance and the grip handle side by side (see `<Editor/>`). */
   .document-editor .ProseMirror {
     outline: none;
+  }
+  /* The 3rem side gutter houses the drag handle + "+" affordance — which the
+   * global-drag-handle extension only ever shows on the EDITABLE surface (it
+   * bails with `if (!view.editable) return`). So scope the gutter to the editable
+   * ProseMirror (`contenteditable="true"`): a read-only `<ViewerLive/>` then frames
+   * its content flush, exactly like the static `<Viewer/>` (which has no
+   * ProseMirror at all), so the two read surfaces match instead of the live one
+   * sitting 3rem wider on each side. */
+  .document-editor .ProseMirror[contenteditable='true'] {
     padding-inline: 3rem;
   }
 
@@ -249,14 +299,18 @@
     border-radius: 0.375rem;
   }
 
-  /* Drag in flight — the LobeHub pattern: GRAY OUT, don't fill. The editor root
-   * carries `.is-dragging` ONLY while a block is actually being dragged (set by
-   * `<Editor/>` off the drag's dragstart/dragend — never a plain click/selection).
-   * The WHOLE surface (the Mirror) dims uniformly — no per-node fade, so selecting
-   * a block on its own never grays it — while the browser's native drag ghost
-   * trailing the pointer reads as the live, full-color copy. */
+  /* Drag in flight — GRAY OUT the source block, don't fill. The editor root
+   * carries `.is-dragging` ONLY while a block is dragged off its handle (set by
+   * `<Editor/>` off a handle-scoped dragstart/dragend — never a plain click,
+   * text selection, or a node view's internal drag). The global-drag-handle
+   * extension puts a `NodeSelection` on the grabbed block, so the block in flight
+   * is exactly `.ProseMirror-selectednode`: dim only THAT block — the browser's
+   * native drag ghost trailing the pointer is the live, full-color mirror — and
+   * leave the rest of the document untouched. */
   .document-editor.is-dragging .ProseMirror {
     cursor: grabbing;
+  }
+  .document-editor.is-dragging .ProseMirror-selectednode {
     filter: grayscale(1);
     opacity: 0.45;
   }

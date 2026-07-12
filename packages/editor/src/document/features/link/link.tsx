@@ -1,4 +1,5 @@
 import { Link } from '@tiptap/extension-link';
+import { Link as LinkIcon } from 'lucide-react';
 import { z } from 'zod';
 import {
   defineFeature,
@@ -47,6 +48,7 @@ const linkCodec: MarkCodec = {
 const linkBubbleItem: BubbleItem = {
   id: 'link',
   title: 'Link',
+  icon: <LinkIcon className="size-4" />,
   command: 'setLink',
   activeWhen: 'link',
 };

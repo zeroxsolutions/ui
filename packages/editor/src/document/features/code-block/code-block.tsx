@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { Code } from 'lucide-react';
-import { LanguageSwitcher } from '@zeroxsolutions/ui/components/language-switcher';
+import { CodeBlock as CodeBlockSurface } from '@zeroxsolutions/ui/components/ai-elements/code-block';
 import { z } from 'zod';
 import {
   defineFeature,
@@ -8,14 +7,14 @@ import {
   type NodeCodec,
   type NodeViewProps,
 } from '../../core/index.js';
-import { resolveCodeMirrorPane } from './code-mirror-pane.js';
 
 /**
  * A fenced code block. A pure custom node (no engine extension — `standardKit`
  * disables StarterKit's `codeBlock` so this feature owns it): the code + language
- * live in attrs and are edited through the {@link resolveCodeMirrorPane} seam, so
- * the heavy syntax editor stays out of the core and out of the engine. Codec is
- * the fenced ```lang block. Engine-free.
+ * live in attrs. Rendering **reuses the design-system `CodeBlock`** directly — its
+ * Shiki-highlighted read-only view, its copy control, and (when `editable`) its
+ * CodeMirror editing surface — so the editor adds no bespoke code chrome and no
+ * wrapper of its own. Codec is the fenced ```lang block. Engine-free.
  */
 const codeBlockAttrs = z.object({
   language: z.string().default('text'),
@@ -23,54 +22,28 @@ const codeBlockAttrs = z.object({
 });
 type CodeBlockAttrs = z.infer<typeof codeBlockAttrs>;
 
-/** Copy-to-clipboard button that flips to a confirmation for ~1.5s. */
-function CopyCodeButton({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      type="button"
-      className="rounded px-1.5 py-0.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-      onClick={() => {
-        void navigator.clipboard?.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      }}
-    >
-      {copied ? 'Copied' : 'Copy'}
-    </button>
-  );
-}
-
-function CodeBlockView({ attrs, updateAttrs, editable }: NodeViewProps<CodeBlockAttrs>) {
-  const Pane = resolveCodeMirrorPane();
+/**
+ * The node view: the design-system `CodeBlock` inside a `contentEditable={false}`
+ * boundary that stops pointer/mouse-down from reaching ProseMirror, so editing the
+ * code or picking a language never moves the editor selection or re-selects the
+ * node. `editable` flips the surface between the read-only Shiki view and the
+ * editable CodeMirror pane; edits and language changes write straight to attrs.
+ */
+function CodeBlockNodeView({ attrs, updateAttrs, editable }: NodeViewProps<CodeBlockAttrs>) {
   return (
     <div
-      data-slot="code-block"
-      data-language={attrs.language}
+      data-code-block
       contentEditable={false}
-      className="my-4 overflow-hidden rounded-lg border bg-muted/40"
+      className="my-4"
+      onMouseDown={(event) => event.stopPropagation()}
+      onPointerDown={(event) => event.stopPropagation()}
     >
-      <div className="flex items-center justify-between border-b border-border px-3 py-1.5">
-        {editable ? (
-          <LanguageSwitcher.Dropdown
-            kind="code"
-            searchable
-            value={attrs.language}
-            onValueChange={(language) => updateAttrs({ language })}
-            aria-label="Language"
-            placeholder="Language…"
-            className="h-7 min-w-32 gap-1.5 border-0 bg-transparent text-xs shadow-none hover:bg-accent"
-          />
-        ) : (
-          <span className="font-mono text-xs text-muted-foreground">{attrs.language}</span>
-        )}
-        <CopyCodeButton code={attrs.code} />
-      </div>
-      <Pane
-        value={attrs.code}
+      <CodeBlockSurface
+        code={attrs.code}
         language={attrs.language}
-        readOnly={!editable}
-        onChange={(code) => updateAttrs({ code })}
+        editable={editable}
+        onCodeChange={(code) => updateAttrs({ code })}
+        onLanguageChange={(language) => updateAttrs({ language })}
       />
     </div>
   );
@@ -90,17 +63,11 @@ const codeBlockCodec: NodeCodec<CodeBlockAttrs> = {
     const { language = 'text', code = '' } = node.attrs ?? {};
     return `<pre><code class="language-${language}">${escapeHtml(code)}</code></pre>`;
   },
+  // The static Viewer reuses the same read-only design-system surface, so exported
+  // code carries the Shiki highlight + copy control, not a bare `<pre>`.
   toReact: (node) => {
     const { language = 'text', code = '' } = node.attrs ?? {};
-    return (
-      <pre
-        data-slot="code-block"
-        data-language={language}
-        className="my-4 overflow-x-auto rounded-lg border bg-muted/40 p-4 text-sm"
-      >
-        <code className={`language-${language} font-mono`}>{code}</code>
-      </pre>
-    );
+    return <CodeBlockSurface code={code} language={language} className="my-4" />;
   },
   // Generic: claims every fenced code token. Register language-specialized blocks
   // (e.g. `mermaid`) BEFORE this feature so they can claim their own fences first.
@@ -134,7 +101,7 @@ export function codeBlock(): EditorFeature {
         selectable: true,
         draggable: true,
         attrs: codeBlockAttrs,
-        render: CodeBlockView,
+        render: CodeBlockNodeView,
       },
     ],
     codecs: [codeBlockCodec as NodeCodec],

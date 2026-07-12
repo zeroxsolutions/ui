@@ -143,6 +143,27 @@ export const editorTheme: Extension = EditorView.theme({
     backgroundColor: 'transparent',
   },
   '&.cm-focused': { outline: 'none' },
+  // Long lines scroll on the design system's thin rail, not the browser's default
+  // chrome scrollbar — a `var(--border)` rounded thumb over a transparent track,
+  // matching the `ScrollBar` primitive (`w-2.5 rounded-full bg-border`) the
+  // read-only CodeBlock uses. `scrollbar-*` covers Firefox; `::-webkit-scrollbar`
+  // covers Chrome/Safari.
+  '.cm-scroller': {
+    scrollbarWidth: 'thin',
+    scrollbarColor: 'var(--border) transparent',
+  },
+  '.cm-scroller::-webkit-scrollbar': { height: '10px', width: '10px' },
+  '.cm-scroller::-webkit-scrollbar-track': { backgroundColor: 'transparent' },
+  '.cm-scroller::-webkit-scrollbar-thumb': {
+    backgroundColor: 'var(--border)',
+    borderRadius: '9999px',
+    border: '2px solid transparent',
+    backgroundClip: 'padding-box',
+  },
+  '.cm-scroller::-webkit-scrollbar-thumb:hover': {
+    backgroundColor: 'var(--muted-foreground)',
+  },
+  '.cm-scroller::-webkit-scrollbar-corner': { backgroundColor: 'transparent' },
   '.cm-content': {
     fontFamily:
       'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',

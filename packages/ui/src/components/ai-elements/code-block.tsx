@@ -283,7 +283,6 @@ export function CodeBlock({
             value={code}
             language={isPlain ? undefined : language}
             onValueChange={onCodeChange}
-            className="border-0 bg-transparent"
           />
         </Suspense>
       ) : (

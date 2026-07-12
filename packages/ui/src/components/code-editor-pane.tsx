@@ -26,7 +26,7 @@ import {
 } from '@/lib/code-syntax';
 
 const paneVariants = cva(
-  'h-full overflow-hidden rounded-md border border-input bg-background transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/40 [&_.cm-editor]:h-full [&_.cm-scroller]:overflow-auto',
+  'h-full overflow-hidden [&_.cm-editor]:h-full [&_.cm-scroller]:overflow-auto',
   {
     variants: {
       size: {
@@ -117,6 +117,21 @@ export function CodeEditorPane({
         bracketMatching(),
         keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
         editorTheme,
+        // Keep browser extensions + native spellcheck out of the code surface: the
+        // `.cm-content` is contenteditable, so Grammarly / LanguageTool / password
+        // managers inject nodes and the browser paints spellcheck underlines into
+        // it — none of which belong in code and which corrupt CodeMirror's DOM.
+        EditorView.contentAttributes.of({
+          spellcheck: 'false',
+          autocorrect: 'off',
+          autocapitalize: 'off',
+          translate: 'no',
+          'data-gramm': 'false',
+          'data-gramm_editor': 'false',
+          'data-enable-grammarly': 'false',
+          'data-1p-ignore': 'true',
+          'data-lpignore': 'true',
+        }),
         shikiHighlighting(),
         languageCompartment.current.of(syntaxLanguage.of(language)),
         editableCompartment.current.of([

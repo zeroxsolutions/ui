@@ -1,4 +1,13 @@
-import { useState, type ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
+import { Image as ImageIcon } from 'lucide-react';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
+import { Field, FieldLabel } from '@zeroxsolutions/ui/components/ui/field';
+import { Input } from '@zeroxsolutions/ui/components/ui/input';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@zeroxsolutions/ui/components/ui/popover';
 import { z } from 'zod';
 import {
   defineFeature,
@@ -71,8 +80,9 @@ function ImageFigure({
   );
 }
 
-function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewProps<ImageAttrs>) {
-  const [editing, setEditing] = useState(false);
+export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewProps<ImageAttrs>) {
+  const altId = useId();
+  const widthId = useId();
   return (
     <ImageFigure
       src={attrs.src}
@@ -83,32 +93,49 @@ function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewProps<Ima
       contentEditable={false}
     >
       {editable && (
-        <button
-          type="button"
-          onClick={() => setEditing((v) => !v)}
-          className="absolute right-2 top-2 rounded-md border bg-background px-2 py-0.5 text-xs hover:bg-accent"
+        // A design-system `Popover` for the alt/width editor (DOM-anchored, so the
+        // caret-anchored `FloatingShell` is the wrong primitive). `contentEditable`
+        // off + stopping pointer/mouse-down keeps opening it from moving the
+        // ProseMirror selection or re-rendering this node view mid-edit.
+        <span
+          contentEditable={false}
+          onMouseDown={(event) => event.stopPropagation()}
+          onPointerDown={(event) => event.stopPropagation()}
+          className="absolute right-2 top-2"
         >
-          {editing ? 'Done' : 'Edit'}
-        </button>
-      )}
-      {editable && editing && (
-        <div className="absolute left-0 top-full z-10 flex flex-col gap-2 rounded-md border bg-popover p-2 text-sm">
-          <input
-            placeholder="Alt text"
-            defaultValue={attrs.alt}
-            onBlur={(e) => updateAttrs({ alt: e.target.value })}
-            className="rounded-md border bg-background px-2 py-1 text-sm"
-          />
-          <input
-            placeholder="Width (px)"
-            type="number"
-            defaultValue={attrs.width ?? ''}
-            onBlur={(e) =>
-              updateAttrs({ width: e.target.value ? Number(e.target.value) : null })
-            }
-            className="rounded-md border bg-background px-2 py-1 text-sm"
-          />
-        </div>
+          <Popover>
+            <PopoverTrigger
+              render={
+                <Button type="button" variant="outline" size="sm">
+                  Edit
+                </Button>
+              }
+            />
+            <PopoverContent align="end" className="w-60 gap-3">
+              <Field>
+                <FieldLabel htmlFor={altId}>Alt text</FieldLabel>
+                <Input
+                  id={altId}
+                  placeholder="Describe the image"
+                  defaultValue={attrs.alt}
+                  onBlur={(event) => updateAttrs({ alt: event.target.value })}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor={widthId}>Width (px)</FieldLabel>
+                <Input
+                  id={widthId}
+                  type="number"
+                  placeholder="Auto"
+                  defaultValue={attrs.width ?? ''}
+                  onBlur={(event) =>
+                    updateAttrs({ width: event.target.value ? Number(event.target.value) : null })
+                  }
+                />
+              </Field>
+            </PopoverContent>
+          </Popover>
+        </span>
       )}
     </ImageFigure>
   );
@@ -187,6 +214,7 @@ export function image(): EditorFeature {
     slash: [
       {
         id: 'image',
+        icon: <ImageIcon className="size-4" />,
         title: 'Image',
         description: 'Embed an image by URL',
         group: 'Blocks',
