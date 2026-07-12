@@ -22,6 +22,14 @@
   },
   "nx": {
     "targets": {
+      "storybook": {
+        "executor": "nx:run-commands",
+        "continuous": true,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "storybook dev -p 6006"
+        }
+      },
       "test-storybook": {
         "executor": "nx:run-commands",
         "options": {
