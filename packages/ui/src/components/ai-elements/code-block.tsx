@@ -1,18 +1,9 @@
-import { Check, Copy } from 'lucide-react';
 import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area';
-import {
-  Fragment,
-  Suspense,
-  lazy,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { Fragment, Suspense, lazy, useEffect, useState } from 'react';
 
+import { CopyButton } from '@/components/copy-button';
 import { codeLanguageIcon } from '@/components/language-switcher-data';
 import { LanguageSwitcher } from '@/components/language-switcher';
-import { Button } from '@/components/ui/button';
 import { ScrollBar } from '@/components/ui/scroll-area';
 import { highlightToLines, type HighlightLine } from '@/lib/shiki';
 import { cn } from '@/lib/utils';
@@ -61,8 +52,6 @@ export interface CodeBlockProps {
   /** When given (and `editable`), the header language label becomes a picker. */
   onLanguageChange?: (language: string) => void;
 }
-
-const COPY_RESET_MS = 2000;
 
 /** Languages with no real grammar — no header, no highlight (plain `<pre>`). */
 const PLAIN_LANGUAGES = new Set(['', 'text', 'plaintext', 'plain', 'txt']);
@@ -155,41 +144,6 @@ function useHighlightedLines(
   return lines;
 }
 
-function CopyButton({ code, className }: { code: string; className?: string }) {
-  const [copied, setCopied] = useState(false);
-  const timer = useRef<number>(0);
-
-  useEffect(() => () => window.clearTimeout(timer.current), []);
-
-  const copy = useCallback(() => {
-    if (!navigator?.clipboard?.writeText) return;
-    navigator.clipboard
-      .writeText(code)
-      .then(() => {
-        setCopied(true);
-        timer.current = window.setTimeout(() => setCopied(false), COPY_RESET_MS);
-      })
-      .catch(() => {
-        /* best-effort */
-      });
-  }, [code]);
-
-  const Icon = copied ? Check : Copy;
-
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon-xs"
-      onClick={copy}
-      aria-label={copied ? 'Copied' : 'Copy code'}
-      className={className}
-    >
-      <Icon />
-    </Button>
-  );
-}
-
 function HighlightedCode({ lines }: { lines: HighlightLine[] }) {
   return (
     <>
@@ -263,11 +217,12 @@ export function CodeBlock({
             </span>
           )}
           <span className="flex-1" />
-          <CopyButton code={code} />
+          <CopyButton value={code} label="Copy code" />
         </div>
       ) : (
         <CopyButton
-          code={code}
+          value={code}
+          label="Copy code"
           className="absolute right-1 top-1 z-10 bg-muted/70 opacity-0 backdrop-blur transition-opacity group-hover/code:opacity-100 focus-visible:opacity-100"
         />
       )}
