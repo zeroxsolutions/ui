@@ -18,7 +18,7 @@ classesRoutes.openapi(createClassRoute, async (c) => {
 ```ts
 // hono/routes/classes.ts — thin adapter: build → dispatch → re-read row → serialize
 classesRoutes.openapi(createClassRoute, async (c) => {
-  const cmd = new CreateClass({ ...c.req.valid('json'), orgId: c.req.param('orgId'), actorId: c.get('actor').id });
+  const cmd = new CreateClass({ ...c.req.valid('json'), orgId: c.req.param('orgId') }); // actorId rides in the validated body — set by the gateway, not resolved in the service (see mw-scope-in-path-actor-in-command)
   const id  = await c.get('bus').send(cmd);       // ✅ the bus routes to the one handler
   // …post-commit row read → serialize (see aggregate-write-model)
 });
@@ -48,4 +48,4 @@ export function bootstrap({ uow, clock = systemClock, ids = uuidV7IdGenerator }:
 **Why:**
 - Routing every write through one bus makes the domain's entrypoints uniform — HTTP, queue, and cron each build a message and dispatch — keeps the transport a thin adapter, and gives one registration point so a new trigger reuses the exact same handler, wired as ordinary readable code.
 
-Reference: [Cosmic Python — the message bus](https://www.cosmicpython.com/book/chapter_09_all_messagebus.html) · [Cosmic Python — bootstrap / DI](https://www.cosmicpython.com/book/chapter_13_dependency_injection.html) · see `di-plain-construction` · `aggregate-write-model` · `bounded-context-transport-agnostic` · `db-client-per-invocation` · `boundary-worker-composition-only` · `db-per-service` · `test-seams-and-real-db`
+Reference: [Cosmic Python — the message bus](https://www.cosmicpython.com/book/chapter_09_all_messagebus.html) · [Cosmic Python — bootstrap / DI](https://www.cosmicpython.com/book/chapter_13_dependency_injection.html) · see `di-plain-construction` · `aggregate-write-model` · `bounded-context-transport-agnostic` · `db-client-per-invocation` · `boundary-worker-composition-only` · `db-per-service` · `mw-scope-in-path-actor-in-command` · `test-seams-and-real-db`
