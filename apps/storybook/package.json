@@ -27,7 +27,7 @@
         "continuous": true,
         "options": {
           "cwd": "{projectRoot}",
-          "command": "storybook dev -p 6006"
+          "command": "storybook dev -p 6006 --exact-port"
         }
       },
       "test-storybook": {
