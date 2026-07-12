@@ -116,7 +116,7 @@ function SplitButton<T extends string>({
             const Icon = o.icon
             return (
               <DropdownMenuItem key={o.value} onClick={() => onValueChange(o.value)}>
-                <Icon className="size-3.5" />
+                <Icon />
                 {o.label}
                 {o.shortcut ? (
                   <DropdownMenuShortcut>

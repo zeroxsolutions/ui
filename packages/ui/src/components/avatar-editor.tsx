@@ -174,11 +174,11 @@ export function AvatarEditorRemove({
     <Button
       type="button"
       variant="ghost"
-      size="icon"
+      size="icon-sm"
       aria-label={ariaLabel}
       onClick={remove}
       className={cn(
-        'ml-auto size-7 text-muted-foreground hover:text-destructive',
+        'ml-auto text-muted-foreground hover:text-destructive',
         className,
       )}
       {...props}

@@ -1,12 +1,31 @@
 import { Check, Copy } from 'lucide-react';
 import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area';
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Fragment,
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
-import { fileTypeIcon } from '@/components/file-type-icon';
+import { codeLanguageIcon } from '@/components/language-switcher-data';
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { Button } from '@/components/ui/button';
 import { ScrollBar } from '@/components/ui/scroll-area';
 import { highlightToLines, type HighlightLine } from '@/lib/shiki';
 import { cn } from '@/lib/utils';
+
+/**
+ * Lazily loaded so read-only consumers (markdown, tool panels) never bundle the
+ * CodeMirror/Shiki editing surface — it loads only when `editable` is used.
+ */
+const CodeEditorPane = lazy(() =>
+  import('@/components/code-editor-pane').then((module) => ({
+    default: module.CodeEditorPane,
+  })),
+);
 
 /**
  * CodeBlock — a mono `<pre>` with Shiki syntax highlighting and a copy control,
@@ -21,6 +40,12 @@ import { cn } from '@/lib/utils';
  * (`MarkdownView codeBlocks`), tool Parameters/Result panels, and JSON
  * disclosures.
  *
+ * Pass `editable` to make the body an editable code surface (the lazily-loaded
+ * `CodeEditorPane` — CodeMirror + Shiki), wiring edits back through `onCodeChange`
+ * and, when `onLanguageChange` is given, turning the header label into a language
+ * picker. Editable and read-only share the same header/copy chrome, so a code
+ * block reads identically whether it is being edited or displayed.
+ *
  * `code` is the source string. Presentational — copy uses the Clipboard API
  * best-effort and resets after ~2s.
  */
@@ -29,6 +54,12 @@ export interface CodeBlockProps {
   /** Shiki language id (e.g. `ts`, `json`, `bash`); drives highlighting + header. */
   language?: string;
   className?: string;
+  /** Make the body an editable code surface (CodeMirror + Shiki) instead of a `<pre>`. */
+  editable?: boolean;
+  /** Fired with the full code on every edit (requires `editable`). */
+  onCodeChange?: (code: string) => void;
+  /** When given (and `editable`), the header language label becomes a picker. */
+  onLanguageChange?: (language: string) => void;
 }
 
 const COPY_RESET_MS = 2000;
@@ -86,33 +117,12 @@ const LANGUAGE_LABEL: Record<string, string> = {
   graphql: 'GraphQL',
 };
 
-/** Map a language id to a file extension `fileTypeIcon` understands. */
-const LANGUAGE_EXTENSION: Record<string, string> = {
-  python: 'py',
-  ruby: 'rb',
-  rust: 'rs',
-  golang: 'go',
-  csharp: 'cs',
-  'c++': 'cpp',
-  shell: 'sh',
-  shellscript: 'sh',
-  shellsession: 'sh',
-  markdown: 'md',
-  yml: 'yaml',
-};
-
 function isPlainLanguage(language: string | undefined): boolean {
   return !language || PLAIN_LANGUAGES.has(language.toLowerCase());
 }
 
 function languageLabel(language: string): string {
   return LANGUAGE_LABEL[language.toLowerCase()] ?? language;
-}
-
-function languageIcon(language: string) {
-  const key = language.toLowerCase();
-  const ext = LANGUAGE_EXTENSION[key] ?? key;
-  return fileTypeIcon(`x.${ext}`);
 }
 
 /**
@@ -170,12 +180,12 @@ function CopyButton({ code, className }: { code: string; className?: string }) {
     <Button
       type="button"
       variant="ghost"
-      size="icon-sm"
+      size="icon-xs"
       onClick={copy}
       aria-label={copied ? 'Copied' : 'Copy code'}
       className={className}
     >
-      <Icon className="size-3.5" />
+      <Icon />
     </Button>
   );
 }
@@ -201,22 +211,27 @@ function HighlightedCode({ lines }: { lines: HighlightLine[] }) {
   );
 }
 
-export function CodeBlock({ code, language, className }: CodeBlockProps) {
-  const lines = useHighlightedLines(code, language);
-  const hasHeader = !isPlainLanguage(language);
-  const LanguageIcon = hasHeader ? languageIcon(language as string) : null;
+export function CodeBlock({
+  code,
+  language,
+  className,
+  editable,
+  onCodeChange,
+  onLanguageChange,
+}: CodeBlockProps) {
+  // Skip the read-only tokenizer while editing — `CodeEditorPane` highlights itself.
+  const lines = useHighlightedLines(code, editable ? undefined : language);
+  const isPlain = isPlainLanguage(language);
+  // An editable block always carries the header (so it has a language picker +
+  // copy); a read-only block only when the language is real (else a hover copy).
+  const hasHeader = editable || !isPlain;
+  // The full-color Material icon for the language (shared with the language
+  // switcher); it self-scales at 1em, so it carries no size class.
+  const LanguageIcon = !isPlain ? codeLanguageIcon(language as string) : null;
 
-  // A long line (an id, a URL, a base64 blob) overflows sideways. A native
-  // `overflow-x-auto` pre leaves that to the OS scrollbar, which on macOS is an
-  // overlay that only flashes mid-scroll — the row reads as un-scrollable. Scroll
-  // through a Base UI ScrollArea instead, so the horizontal rail is the same
-  // styled thin scrollbar the rest of the system uses. The Scrollbar mounts only
-  // when the viewport actually overflows (no `keepMounted`), so the rail is
-  // present exactly when the line is too long. The viewport is `w-full` (not
-  // `size-full`) so height stays auto and the block still grows vertically; only
-  // the long line scrolls sideways.
   return (
     <div
+      data-slot="code-block"
       data-language={language}
       className={cn(
         // Borderless on purpose — the surface is delineated by `bg-muted`, not a
@@ -226,32 +241,69 @@ export function CodeBlock({ code, language, className }: CodeBlockProps) {
         className,
       )}
     >
-      {hasHeader && LanguageIcon ? (
+      {hasHeader ? (
         <div className="flex items-center gap-1.5 border-b border-border/60 px-3 py-1.5">
-          <LanguageIcon className="size-3.5 shrink-0 text-muted-foreground" />
-          <span className="text-[11px] font-medium text-muted-foreground">
-            {languageLabel(language as string)}
-          </span>
+          {/* The picker renders its own language icon — only show a standalone
+              icon for the read-only label. */}
+          {LanguageIcon && !(editable && onLanguageChange) ? (
+            <LanguageIcon className="shrink-0" />
+          ) : null}
+          {editable && onLanguageChange ? (
+            <LanguageSwitcher
+              kind="code"
+              searchable
+              value={language ?? 'text'}
+              onValueChange={onLanguageChange}
+              aria-label="Language"
+              placeholder="Language…"
+            />
+          ) : (
+            <span className="text-[11px] font-medium text-muted-foreground">
+              {isPlain ? 'Text' : languageLabel(language as string)}
+            </span>
+          )}
           <span className="flex-1" />
-          <CopyButton code={code} className="size-6" />
+          <CopyButton code={code} />
         </div>
       ) : (
         <CopyButton
           code={code}
-          className="absolute right-1 top-1 z-10 size-6 bg-muted/70 opacity-0 backdrop-blur transition-opacity group-hover/code:opacity-100 focus-visible:opacity-100"
+          className="absolute right-1 top-1 z-10 bg-muted/70 opacity-0 backdrop-blur transition-opacity group-hover/code:opacity-100 focus-visible:opacity-100"
         />
       )}
-      <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
-        <ScrollAreaPrimitive.Viewport className="w-full">
-          <pre className="m-0 px-3 py-2 text-xs leading-relaxed">
-            <code className="font-mono">
-              {lines ? <HighlightedCode lines={lines} /> : code}
-            </code>
-          </pre>
-        </ScrollAreaPrimitive.Viewport>
-        <ScrollBar orientation="horizontal" />
-        <ScrollAreaPrimitive.Corner />
-      </ScrollAreaPrimitive.Root>
+      {editable ? (
+        <Suspense
+          fallback={
+            <pre className="m-0 px-3 py-2 text-xs leading-relaxed">
+              <code className="font-mono">{code}</code>
+            </pre>
+          }
+        >
+          <CodeEditorPane
+            value={code}
+            language={isPlain ? undefined : language}
+            onValueChange={onCodeChange}
+            className="border-0 bg-transparent"
+          />
+        </Suspense>
+      ) : (
+        // A long line (an id, a URL, a base64 blob) overflows sideways. A native
+        // `overflow-x-auto` pre leaves that to the OS scrollbar, which on macOS is
+        // an overlay that only flashes mid-scroll — the row reads as un-scrollable.
+        // Scroll through a Base UI ScrollArea instead, so the horizontal rail is
+        // the same styled thin scrollbar the rest of the system uses.
+        <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
+          <ScrollAreaPrimitive.Viewport className="w-full">
+            <pre className="m-0 px-3 py-2 text-xs leading-relaxed">
+              <code className="font-mono">
+                {lines ? <HighlightedCode lines={lines} /> : code}
+              </code>
+            </pre>
+          </ScrollAreaPrimitive.Viewport>
+          <ScrollBar orientation="horizontal" />
+          <ScrollAreaPrimitive.Corner />
+        </ScrollAreaPrimitive.Root>
+      )}
     </div>
   );
 }

@@ -120,11 +120,11 @@ export function ConversationScrollButton({
     <Button
       type="button"
       variant="secondary"
-      size="icon"
+      size="icon-sm"
       onClick={ctx.scrollToBottom}
       aria-label="Scroll to bottom"
       className={cn(
-        'absolute bottom-3 left-1/2 size-8 -translate-x-1/2 rounded-full bg-background/80 shadow-sm backdrop-blur',
+        'absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-background/80 shadow-sm backdrop-blur',
         className,
       )}
       {...props}

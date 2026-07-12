@@ -56,10 +56,10 @@ function TagInput({
                 size="icon-xs"
                 onClick={() => onValueChange(value.filter((t) => t !== tag))}
                 aria-label={`Remove ${tag}`}
-                className="size-4 rounded-full text-muted-foreground hover:text-foreground"
+                className="rounded-full text-muted-foreground hover:text-foreground"
                 disabled={disabled}
               >
-                <X className="size-3" />
+                <X />
               </Button>
             </Badge>
           ))}

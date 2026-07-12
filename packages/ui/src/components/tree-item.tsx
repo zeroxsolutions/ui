@@ -5,7 +5,6 @@ import type {
 } from "react"
 
 import { TreeRow, type TreeRowProps } from "@/components/tree-row"
-import { Button } from "@/components/ui/button"
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -30,7 +29,8 @@ export interface TreeItemRename {
  * One row of a hierarchy tree, the layer above {@link TreeRow}. TreeRow owns the
  * indent + disclosure chevron; TreeItem owns the next shared layer:
  *
- * - a clickable name button: `icon` + the name (or, while `rename.editing`, an
+ * - a clickable name region (a plain `div`, not a `<button>` — see the W3C tree
+ *   view pattern): `icon` + the name (or, while `rename.editing`, an
  *   inline `Input` with Enter-commit / Escape-cancel / stop-propagation, guarded
  *   against IME composition) + an `inlineEnd` slot for badges after the name,
  * - a `trailing` slot for hover actions (visibility / lock toggles), and
@@ -83,13 +83,13 @@ function TreeItem({
 }: TreeItemProps) {
   const row = (
     <TreeRow ref={ref} {...rowProps}>
-      <Button
-        variant="ghost"
-        size="sm"
-        // The TreeRow owns the row's hover/selection background; the name is
-        // only the click target, so it must not paint its own ghost hover on
-        // top (that double-paints a button-shaped rect inside the row).
-        className="h-auto min-w-0 flex-1 justify-start gap-1.5 px-0 py-1 text-left text-xs hover:bg-transparent"
+      {/* The name is a plain clickable region, NOT a <button>: per the W3C tree
+          view pattern a treeitem's activation is owned by the tree (roving
+          tabindex + Enter), so this skeleton leaves role/keyboard to the
+          consumer (the TreeRow owns hover/selection). A <div> also holds the
+          rename <input> as a valid child — a <button> may not nest one. */}
+      <div
+        className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 py-1 text-xs"
         onClick={onActivate}
         onDoubleClick={onActivateDoubleClick}
       >
@@ -115,7 +115,7 @@ function TreeItem({
           <span className={cn("flex-1 truncate", nameClassName)}>{name}</span>
         )}
         {inlineEnd}
-      </Button>
+      </div>
       {trailing}
     </TreeRow>
   )

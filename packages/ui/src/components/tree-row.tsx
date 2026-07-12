@@ -77,14 +77,14 @@ function TreeRow({
             e.stopPropagation()
             onToggleExpand()
           }}
-          className="size-5 shrink-0 text-muted-foreground hover:text-foreground"
+          className="shrink-0 text-muted-foreground hover:text-foreground"
         >
           <ChevronRight
-            className={cn("size-3.5 transition-transform", expanded && "rotate-90")}
+            className={cn("transition-transform", expanded && "rotate-90")}
           />
         </Button>
       ) : (
-        <span className="w-5 shrink-0" aria-hidden />
+        <span className="w-6 shrink-0" aria-hidden />
       )}
       {children}
     </div>

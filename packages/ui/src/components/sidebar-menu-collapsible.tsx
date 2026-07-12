@@ -70,7 +70,7 @@ function SidebarMenuCollapsibleTrigger({
         />
       }
     >
-      <ChevronRightIcon className="size-3.5 shrink-0 transition-transform group-aria-expanded/sidebar-menu-collapsible:rotate-90" />
+      <ChevronRightIcon className="transition-transform group-aria-expanded/sidebar-menu-collapsible:rotate-90" />
       {children}
     </CollapsibleTrigger>
   )

@@ -58,16 +58,16 @@ export function Tool({ className, ...props }: ComponentProps<typeof Collapsible>
  * tone are fixed; the word is overridable per call-site via `ToolHeader.statusLabel`.
  */
 const STATUS: Record<ToolState, { label: string; icon: ReactNode }> = {
-  'input-streaming': { label: 'Pending', icon: <Circle className="size-3" /> },
+  'input-streaming': { label: 'Pending', icon: <Circle /> },
   'input-available': {
     label: 'Running',
-    icon: <Clock className="size-3 animate-pulse" />,
+    icon: <Clock className="animate-pulse" />,
   },
   'output-available': {
     label: 'Completed',
-    icon: <CheckCircle2 className="size-3 text-success" />,
+    icon: <CheckCircle2 className="text-success" />,
   },
-  'output-error': { label: 'Error', icon: <XCircle className="size-3 text-destructive" /> },
+  'output-error': { label: 'Error', icon: <XCircle className="text-destructive" /> },
 };
 
 export interface ToolHeaderProps {

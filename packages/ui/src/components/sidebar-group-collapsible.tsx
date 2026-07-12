@@ -57,7 +57,7 @@ function SidebarGroupCollapsibleTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto size-4 shrink-0 transition-transform group-aria-expanded/sidebar-group-collapsible:rotate-90" />
+      <ChevronRightIcon className="ml-auto transition-transform group-aria-expanded/sidebar-group-collapsible:rotate-90" />
     </SidebarGroupLabel>
   )
 }
