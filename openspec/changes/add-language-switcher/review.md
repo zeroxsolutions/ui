@@ -29,7 +29,7 @@ subagent-eligible
 serial-only
 
 <!-- The steps are dependency-ordered: add the icons dep → build the icon map + option
-     builders → component + sub-components → editor wiring → story. They touch overlapping
+     builders → component + forms → editor wiring → story. They touch overlapping
      modules and shared config; do not parallelize. -->
 
 ## Worktree Mode
@@ -55,7 +55,7 @@ none
   in `src/lib/shiki.ts` — no unmapped language renders a broken/blank icon.
 - Code-block round-trip: selecting a language sets `attrs.language`; the fenced-Markdown
   codec and HTML export produce the same output they did with the `<input>`.
-- `searchable` is present on `.Dropdown`/`.Icon` and absent from `.Segmented` at the type level.
+- `searchable` is present on the `dropdown`/`icon` forms and absent from `segmented` at the type level.
 
 ## Key Risks
 
@@ -64,7 +64,7 @@ none
   lockfile resolves cleanly.
 - **Icon coverage / bundle.** ~30 Material icons statically imported; a shiki id lacking a
   clean Material match must fall back rather than break. Bounded bundle cost accepted (design D5).
-- **Primitive drift across `searchable`.** `.Dropdown` swaps `dropdown-menu` ↔ `combobox`;
-  keyboard/focus behaviour must stay consistent — exercise both in the story/spec.
+- **`searchable` toggle within one primitive.** The `dropdown` form shows/hides its `CommandInput`
+  on `searchable` inside one `Popover` + `Command`; keyboard/focus behaviour must stay consistent — exercise both in the story/spec.
 - **`Intl.DisplayNames` fallback.** Missing native name → raw code; consumers needing exact
   wording pass `options`.

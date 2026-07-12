@@ -22,16 +22,16 @@ just added under `@zeroxsolutions/icons/material/*`.
   i18n-agnostic (the consumer owns every visible string), modelled on the existing
   `select-field` / `command-switcher` components.
 - **Two orthogonal axes:**
-  - **Display form** as compound sub-components — `LanguageSwitcher.Dropdown`,
-    `.Segmented`, `.Icon` (the repo's compound idiom, as with `Icon.Light`). Bare
-    `LanguageSwitcher` aliases `.Dropdown`.
+  - **Display form** as a `form` prop — `form="dropdown" | "segmented" | "icon"`,
+    typed as a discriminated union so each form carries only the props that fit it.
+    `form` defaults to `"dropdown"`.
   - **Domain** as a `kind` prop — `kind="locale" | "code"`.
 - **Built-in data, overridable.** `kind="code"` auto-builds its options from the
   shiki registry and attaches a full-color Material icon per language;
   `kind="locale"` renders native language names via `Intl.DisplayNames`. Either can
   be overridden with an explicit `options` array (bring-your-own data).
 - **Editor wiring.** Replace the code block's raw `<input>` language field with
-  `<LanguageSwitcher.Dropdown kind="code" searchable>`, so language selection is a
+  `<LanguageSwitcher kind="code" searchable>` (dropdown is the default form), so language selection is a
   searchable, icon-labelled picker constrained to the languages the editor can
   actually highlight.
 - **Dependency.** Add `@zeroxsolutions/icons` as a dependency of
@@ -39,14 +39,14 @@ just added under `@zeroxsolutions/icons/material/*`.
 
 ## Success Criteria
 
-- `LanguageSwitcher.Dropdown`, `.Segmented`, and `.Icon` all render, are keyboard-
+- The `dropdown`, `segmented`, and `icon` forms all render, are keyboard-
   and screen-reader-operable, and are controlled purely via `value` + `onValueChange`.
 - `kind="code"` with no `options` lists exactly the shiki-supported languages, each
   showing its full-color Material icon; `kind="locale"` renders native names from
   BCP-47 codes.
 - Passing an explicit `options` array overrides the built-in data for either `kind`.
-- `searchable` filters the list on `.Dropdown` / `.Icon`; `.Segmented` exposes no
-  `searchable` prop.
+- `searchable` filters the list on the `dropdown` / `icon` forms; the `segmented`
+  form exposes no `searchable` prop.
 - The component ships no hard-coded human-facing copy (labels are computed or supplied).
 - The editor code block selects its language through the switcher; a chosen language
   round-trips through the block's attrs and its fenced-Markdown serialization exactly
@@ -69,8 +69,8 @@ just added under `@zeroxsolutions/icons/material/*`.
 ### New Capabilities
 
 - `language-switcher`: a controlled, i18n-agnostic component for selecting a language
-  — either a UI locale or a programming language — presented as one of three compound
-  display forms, with built-in-but-overridable option data per domain `kind`.
+  — either a UI locale or a programming language — presented as one of three
+  display forms (a `form` prop), with built-in-but-overridable option data per domain `kind`.
 
 ### Modified Capabilities
 

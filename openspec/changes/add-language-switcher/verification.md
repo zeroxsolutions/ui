@@ -15,8 +15,8 @@
 
 - **No icon drift** — `language-switcher.spec.tsx` asserts `CODE_LANGUAGE_OPTION_IDS` (the picker's own id set) equals the highlighter's exported `CODE_LANGUAGE_IDS` from `src/lib/shiki.ts`. Every highlightable language resolves a Material icon (aliases: `dockerfile→docker`, `shellscript→console`, `jsx/tsx→react`, `sql→database`, `ini→document`, `scss→sass`).
 - **Code-block round-trip unchanged** — the editor wiring swaps only the editable control; `attrs.language`, the fenced-Markdown codec, and the `<pre><code class="language-…">` HTML export are untouched. `code-block.spec.tsx` (attr + export + import assertions) stays green. The read-only branch still renders the plain `<span>`.
-- **`searchable` type-level guarantee** — `.Segmented` exposes no `searchable` prop; the spec pins this with a `@ts-expect-error` assertion (the spec file is included in `nx typecheck`).
-- **Accessibility** — the Combobox trigger renders `role="combobox"` with the accessible name from `aria-label` (defaults to "Select language") plus `aria-expanded`/`aria-haspopup`; verified in-test.
+- **`searchable` type-level guarantee** — the `segmented` form exposes no `searchable` prop; the spec pins this with a `@ts-expect-error` assertion (the spec file is included in `nx typecheck`).
+- **Accessibility** — the trigger is a `Button` carrying the accessible name from `aria-label` (defaults to "Select language"); the spec drives every form via `getByRole('button', { name: /select language/i })`; verified in-test.
 
 ## Known pre-existing issue (out of scope)
 
@@ -24,7 +24,7 @@
 
 ## Rule audit (`.agents/rules/*` vs the change)
 
-- `ui-from-design-system` — composed from house primitives (`dropdown-menu`/`combobox`/`toggle-group`/`button`); no competing UI library. ✓
+- `ui-from-design-system` — composed from house primitives (`popover`/`command`/`toggle-group`/`button`); no competing UI library. ✓
 - `lib-public-exports-and-semver` — new modules surface through ui's existing `./*` dist-mirrored exports map (no barrel edit); additive (a minor). ✓
 - `naming-files-and-symbols` — kebab files, PascalCase `LanguageSwitcher`, camelCase helpers. ✓
 - `house-libs-catalog-scope` — `@zeroxsolutions/icons` added as `workspace:*` (mirrors `@zeroxsolutions/fluent-emoji`). ✓

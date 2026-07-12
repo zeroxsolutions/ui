@@ -62,7 +62,7 @@ describe('localeOptions', () => {
 })
 
 describe('LanguageSwitcher display forms', () => {
-  it('renders the dropdown form when used bare, with an accessible trigger', () => {
+  it('renders the dropdown form by default, with an accessible trigger', () => {
     render(
       <LanguageSwitcher
         value="en"
@@ -70,49 +70,71 @@ describe('LanguageSwitcher display forms', () => {
         locales={['en', 'vi']}
       />,
     )
-    // Base UI's combobox trigger has role="combobox" and carries the accessible name.
+    // The dropdown trigger is a Popover button carrying the accessible name.
     expect(
-      screen.getByRole('combobox', { name: /select language/i }),
+      screen.getByRole('button', { name: /select language/i }),
     ).toBeTruthy()
   })
 
-  it('renders the icon form with an accessible trigger', () => {
-    render(
-      <LanguageSwitcher.Icon
-        value="en"
-        onValueChange={vi.fn()}
-        locales={['en', 'vi']}
-      />,
-    )
-    expect(
-      screen.getByRole('combobox', { name: /select language/i }),
-    ).toBeTruthy()
-  })
+  it.each(['dropdown', 'icon'] as const)(
+    'opens a Popover + Command list from the %s trigger',
+    (form) => {
+      render(
+        <LanguageSwitcher
+          form={form}
+          kind="code"
+          value="typescript"
+          onValueChange={vi.fn()}
+        />,
+      )
+      const trigger = screen.getByRole('button', { name: /select language/i })
+      fireEvent.click(trigger)
+      // Both forms open the same Command list (clean `no-scrollbar` scroll).
+      expect(screen.getAllByText('Python').length).toBeGreaterThan(0)
+      expect(
+        document.querySelectorAll('[data-slot="command-item"]').length,
+      ).toBeGreaterThan(0)
+    },
+  )
 
   it('shows the current code language in the dropdown trigger', () => {
     render(
-      <LanguageSwitcher.Dropdown
-        kind="code"
-        value="typescript"
-        onValueChange={vi.fn()}
-      />,
+      <LanguageSwitcher kind="code" value="typescript" onValueChange={vi.fn()} />,
     )
     expect(screen.getAllByText('TypeScript').length).toBeGreaterThan(0)
   })
 
   it('resolves a code alias for display (ts → TypeScript)', () => {
-    render(
-      <LanguageSwitcher.Dropdown
+    render(<LanguageSwitcher kind="code" value="ts" onValueChange={vi.fn()} />)
+    expect(screen.getAllByText('TypeScript').length).toBeGreaterThan(0)
+  })
+
+  it('shows the search field only when searchable', () => {
+    const { rerender } = render(
+      <LanguageSwitcher
         kind="code"
-        value="ts"
+        searchable
+        value="typescript"
         onValueChange={vi.fn()}
       />,
     )
-    expect(screen.getAllByText('TypeScript').length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: /select language/i }))
+    expect(document.querySelector('[data-slot="command-input"]')).toBeTruthy()
+
+    rerender(
+      <LanguageSwitcher
+        kind="code"
+        searchable={false}
+        value="typescript"
+        onValueChange={vi.fn()}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /select language/i }))
+    expect(document.querySelector('[data-slot="command-input"]')).toBeNull()
   })
 })
 
-describe('LanguageSwitcher.Segmented', () => {
+describe('LanguageSwitcher form="segmented"', () => {
   const localeOpts = [
     { value: 'en', label: 'English' },
     { value: 'vi', label: 'Tiếng Việt' },
@@ -121,7 +143,8 @@ describe('LanguageSwitcher.Segmented', () => {
   it('renders every option inline and reports a selection (controlled)', () => {
     const onValueChange = vi.fn()
     render(
-      <LanguageSwitcher.Segmented
+      <LanguageSwitcher
+        form="segmented"
         value="en"
         onValueChange={onValueChange}
         options={localeOpts}
@@ -135,7 +158,8 @@ describe('LanguageSwitcher.Segmented', () => {
   it('does not deselect on its own — clicking the current option is a no-op', () => {
     const onValueChange = vi.fn()
     render(
-      <LanguageSwitcher.Segmented
+      <LanguageSwitcher
+        form="segmented"
         value="en"
         onValueChange={onValueChange}
         options={localeOpts}
@@ -147,7 +171,8 @@ describe('LanguageSwitcher.Segmented', () => {
 
   it('lets explicit options override the kind data', () => {
     render(
-      <LanguageSwitcher.Segmented
+      <LanguageSwitcher
+        form="segmented"
         kind="code"
         value="x"
         onValueChange={vi.fn()}
@@ -159,11 +184,11 @@ describe('LanguageSwitcher.Segmented', () => {
   })
 })
 
-describe('LanguageSwitcher.Segmented type contract', () => {
-  it('exposes no `searchable` prop (type-level guarantee)', () => {
+describe('LanguageSwitcher type contract', () => {
+  it('rejects `searchable` on the segmented form (type-level guarantee)', () => {
     const element = (
-      // @ts-expect-error `searchable` is not a prop of LanguageSwitcher.Segmented
-      <LanguageSwitcher.Segmented value="en" onValueChange={() => {}} searchable />
+      // @ts-expect-error `searchable` is not a prop of the `segmented` form
+      <LanguageSwitcher form="segmented" value="en" onValueChange={() => {}} searchable />
     )
     expect(element).toBeTruthy()
   })

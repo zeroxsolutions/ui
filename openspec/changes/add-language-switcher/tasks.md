@@ -12,18 +12,18 @@
 ## 3. LanguageSwitcher component
 
 - [x] 3.1 Create `packages/ui/src/components/language-switcher.tsx` with `LanguageOption` and the controlled `value` / `onValueChange` / `options?` / `placeholder?` contract; resolve options as explicit `options` → else the `kind` builder.
-- [x] 3.2 Implement the `.Dropdown` form: `dropdown-menu` when not searchable, `combobox` when `searchable`; `kind="code"` defaults `searchable=true`; current selection shown in the trigger with its icon.
-- [x] 3.3 Implement the `.Segmented` form over `toggle-group` (single-select, all options inline); its props type omits `searchable`.
-- [x] 3.4 Implement the `.Icon` form: icon-only trigger (globe default / current option icon) opening the same menu; supports `searchable`.
-- [x] 3.5 Attach the compound sub-components (`LanguageSwitcher = Dropdown as … & { Dropdown, Segmented, Icon }`) so bare `LanguageSwitcher` renders `.Dropdown`; ensure keyboard + accessible-name coverage on every form.
+- [x] 3.2 Implement the `dropdown` form: a `Popover` + `Command` (the `CommandInput` search field shows when `searchable`, hides otherwise); `kind="code"` defaults `searchable=true`; current selection shown in the trigger with its icon.
+- [x] 3.3 Implement the `segmented` form over `toggle-group` (single-select, all options inline); its props type omits `searchable`.
+- [x] 3.4 Implement the `icon` form: icon-only trigger (globe default / current option icon) opening the same `Popover` + `Command`; supports `searchable`.
+- [x] 3.5 Expose the display forms through a `form` prop (a `PopoverFormProps | SegmentedFormProps` discriminated union) defaulting to `"dropdown"` so a bare `LanguageSwitcher` renders the dropdown form; ensure keyboard + accessible-name coverage on every form.
 
 ## 4. Editor code-block wiring
 
-- [x] 4.1 In `packages/editor/.../code-block/code-block.tsx`, replace the raw `<input>` language field with `<LanguageSwitcher.Dropdown kind="code" searchable value={attrs.language} onValueChange={(l) => updateAttrs({ language: l })} />`, leaving the `language` attr, fenced-Markdown codec, and HTML export unchanged.
+- [x] 4.1 In the code-block, replace the raw `<input>` language field with `<LanguageSwitcher kind="code" searchable value={attrs.language} onValueChange={(l) => updateAttrs({ language: l })} />` (dropdown is the default form), leaving the `language` attr, fenced-Markdown codec, and HTML export unchanged.
 
 ## 5. Tests & story
 
-- [x] 5.1 Co-locate `packages/ui/src/components/language-switcher.spec.tsx` (Vitest + jsdom): controlled selection; all three forms render; `kind="code"` lists shiki langs with icons; `kind="locale"` renders native names; explicit `options` overrides; `.Segmented` exposes no `searchable`.
+- [x] 5.1 Co-locate `packages/ui/src/components/language-switcher.spec.tsx` (Vitest + jsdom): controlled selection; all three forms render; `kind="code"` lists shiki langs with icons; `kind="locale"` renders native names; explicit `options` overrides; the `segmented` form exposes no `searchable`.
 - [x] 5.2 Add `apps/storybook/src/language-switcher.stories.tsx` at the storybook root covering all three forms × both kinds (`Icons/…`-style grid), including a searchable code dropdown.
 - [x] 5.3 Update/extend the editor's code-block spec if it asserts on the language control, keeping the attr round-trip assertions green.
 

@@ -1,4 +1,4 @@
-import type { FC, ReactNode } from "react"
+import type { ComponentPropsWithoutRef, FC, ReactNode } from "react"
 
 import { CIcon } from "@zeroxsolutions/icons/material/c"
 import { ConsoleIcon } from "@zeroxsolutions/icons/material/console"
@@ -39,8 +39,10 @@ export interface LanguageOption {
   icon?: ReactNode
 }
 
-/** Minimal icon-component shape (the Material icons scale by a single `size` prop). */
-type LanguageIcon = FC<{ size?: string | number }>
+/** A Material icon component — scales by `size` and accepts the usual svg props (`className`, …). */
+export type LanguageIcon = FC<
+  { size?: string | number } & ComponentPropsWithoutRef<"svg">
+>
 
 /**
  * The programming languages the design system can syntax-highlight (the shiki
@@ -119,6 +121,20 @@ const CODE_ALIASES: Record<string, string> = {
 /** The canonical code id for a possibly-aliased value (`ts` → `typescript`); unchanged if unknown. */
 export function canonicalCodeId(value: string): string {
   return CODE_ALIASES[value] ?? value
+}
+
+const CODE_ICON_BY_ID: Record<string, LanguageIcon> = Object.fromEntries(
+  CODE_LANGUAGES.map((l) => [l.id, l.Icon]),
+)
+
+/**
+ * The full-color Material icon component for a code-language id — resolving
+ * aliases (`ts` → `typescript`), falling back to a generic document icon for ids
+ * outside the highlightable set. Lets other surfaces (e.g. a read-only code-block
+ * header) show the same icons the switcher uses. Self-scales at `size="1em"`.
+ */
+export function codeLanguageIcon(id: string): LanguageIcon {
+  return CODE_ICON_BY_ID[canonicalCodeId(id)] ?? DocumentIcon
 }
 
 let cachedCodeOptions: LanguageOption[] | null = null

@@ -7,13 +7,13 @@ import {
 } from '@zeroxsolutions/ui/components/language-switcher';
 
 /**
- * A controlled, i18n-agnostic language selector. The **display form** is a
- * compound sub-component — `LanguageSwitcher.Dropdown`, `.Segmented`, `.Icon`
- * (bare `LanguageSwitcher` is the dropdown) — and the **domain** is the `kind`
- * prop: `"locale"` for UI locales (native names via `Intl.DisplayNames`) or
- * `"code"` for programming languages (labelled and carrying their full-color
- * Material file-type icon). The consumer owns `value` and every visible string;
- * pass `options` to override the built-in `kind` data.
+ * A controlled, i18n-agnostic language selector. The **display form** is the
+ * `form` prop — `"dropdown"` (default), `"segmented"`, or `"icon"` — and the
+ * **domain** is the `kind` prop: `"locale"` for UI locales (native names via
+ * `Intl.DisplayNames`) or `"code"` for programming languages (labelled and
+ * carrying their full-color Material file-type icon). `searchable` applies to the
+ * `dropdown`/`icon` forms only. The consumer owns `value` and every visible
+ * string; pass `options` to override the built-in `kind` data.
  */
 const meta: Meta = {
   title: 'Components/LanguageSwitcher',
@@ -59,7 +59,8 @@ export const Overview: Story = {
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-medium">kind=&quot;locale&quot;</h3>
           <Row label="Dropdown">
-            <LanguageSwitcher.Dropdown
+            <LanguageSwitcher
+              form="dropdown"
               kind="locale"
               value={locale}
               onValueChange={setLocale}
@@ -67,7 +68,8 @@ export const Overview: Story = {
             />
           </Row>
           <Row label="Segmented">
-            <LanguageSwitcher.Segmented
+            <LanguageSwitcher
+              form="segmented"
               kind="locale"
               value={locale2}
               onValueChange={setLocale2}
@@ -75,7 +77,8 @@ export const Overview: Story = {
             />
           </Row>
           <Row label="Icon">
-            <LanguageSwitcher.Icon
+            <LanguageSwitcher
+              form="icon"
               kind="locale"
               value={locale3}
               onValueChange={setLocale3}
@@ -86,14 +89,16 @@ export const Overview: Story = {
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-medium">kind=&quot;code&quot;</h3>
           <Row label="Dropdown (searchable)">
-            <LanguageSwitcher.Dropdown
+            <LanguageSwitcher
+              form="dropdown"
               kind="code"
               value={code}
               onValueChange={setCode}
             />
           </Row>
           <Row label="Segmented (custom set)">
-            <LanguageSwitcher.Segmented
+            <LanguageSwitcher
+              form="segmented"
               kind="code"
               value={code2}
               onValueChange={setCode2}
@@ -101,7 +106,8 @@ export const Overview: Story = {
             />
           </Row>
           <Row label="Icon">
-            <LanguageSwitcher.Icon
+            <LanguageSwitcher
+              form="icon"
               kind="code"
               value={code3}
               onValueChange={setCode3}
@@ -115,18 +121,13 @@ export const Overview: Story = {
 
 /**
  * The dropdown a code block uses: `kind="code"` is searchable by default and
- * lists every highlightable language with its Material icon.
+ * lists every highlightable language with its Material icon. `form` defaults to
+ * `dropdown`, so it can be omitted.
  */
 export const CodeDropdown: Story = {
   render: () => {
     const [value, setValue] = useState('typescript');
-    return (
-      <LanguageSwitcher.Dropdown
-        kind="code"
-        value={value}
-        onValueChange={setValue}
-      />
-    );
+    return <LanguageSwitcher kind="code" value={value} onValueChange={setValue} />;
   },
 };
 
@@ -135,7 +136,7 @@ export const LocaleDropdown: Story = {
   render: () => {
     const [value, setValue] = useState('en');
     return (
-      <LanguageSwitcher.Dropdown
+      <LanguageSwitcher
         kind="locale"
         value={value}
         onValueChange={setValue}
@@ -150,7 +151,8 @@ export const LocaleSegmented: Story = {
   render: () => {
     const [value, setValue] = useState('en');
     return (
-      <LanguageSwitcher.Segmented
+      <LanguageSwitcher
+        form="segmented"
         kind="locale"
         value={value}
         onValueChange={setValue}

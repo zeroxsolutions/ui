@@ -17,24 +17,23 @@ its own. The consumer owns the value and decides whether and how it changes.
 - **THEN** `onValueChange` is called with the picked option's value
 - **AND** the displayed selection does not change unless the consumer updates `value`
 
-### Requirement: Display form is chosen through compound sub-components
+### Requirement: Display form is chosen through a `form` prop
 
-The component **SHALL** expose three display forms as compound sub-components —
-`LanguageSwitcher.Dropdown`, `LanguageSwitcher.Segmented`, and `LanguageSwitcher.Icon`
-— and the bare `LanguageSwitcher` **SHALL** render the same form as `.Dropdown`. Each
-form presents the same controlled selection over the same options; only the presentation
-differs (a trigger-and-menu, an inline segmented control, and an icon-only trigger-and-menu
-respectively).
+The component **SHALL** expose three display forms through a `form` prop —
+`form="dropdown"`, `form="segmented"`, and `form="icon"` — and **SHALL** default to
+`"dropdown"` when `form` is omitted. Each form presents the same controlled selection over
+the same options; only the presentation differs (a trigger-and-menu, an inline segmented
+control, and an icon-only trigger-and-menu respectively).
 
 #### Scenario: Selecting a display form
 
-- **WHEN** a consumer renders `LanguageSwitcher.Segmented` (or `.Dropdown`, or `.Icon`)
+- **WHEN** a consumer renders `LanguageSwitcher` with `form="segmented"` (or `"dropdown"`, or `"icon"`)
 - **THEN** the selection is presented in that form
 - **AND** the same `value` / `onValueChange` contract applies to every form
 
-#### Scenario: Bare component defaults to the dropdown form
+#### Scenario: Omitted form defaults to the dropdown form
 
-- **WHEN** a consumer renders `LanguageSwitcher` with no sub-component
+- **WHEN** a consumer renders `LanguageSwitcher` with no `form` prop
 - **THEN** it renders the dropdown form
 
 ### Requirement: The domain kind supplies built-in option data
@@ -73,17 +72,17 @@ Each option carries a `value`, a `label`, and an optional leading `icon`.
 ### Requirement: Search is an affordance of the dropdown and icon forms only
 
 The `searchable` affordance **SHALL** filter the option list by user-typed text on the
-`.Dropdown` and `.Icon` forms; the `.Segmented` form **MUST NOT** expose a `searchable`
+`dropdown` and `icon` forms; the `segmented` form **MUST NOT** expose a `searchable`
 option, because it presents every option inline with nothing to filter.
 
 #### Scenario: Filtering a long code-language list
 
-- **WHEN** a searchable `.Dropdown` (or `.Icon`) switcher is open and the user types text
+- **WHEN** a searchable `dropdown` (or `icon`) switcher is open and the user types text
 - **THEN** only options whose label matches the text remain visible
 
 #### Scenario: Segmented form has no search
 
-- **WHEN** the `.Segmented` form is used
+- **WHEN** the `segmented` form is used
 - **THEN** no search affordance is present and all options are shown inline
 
 ### Requirement: The component is keyboard- and screen-reader-operable
