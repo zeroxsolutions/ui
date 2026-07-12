@@ -111,6 +111,26 @@ Phase 1 (chrome) is committed. Phase 2 (per-feature UIs) and Phase 3 (node-view
 shells) are tasked but gated — Phase 3 behind the D-R1 spike. The
 `editor-ui-composition` spec governs all three regardless of when they land.
 
+### D7 — Phase 2 scope corrected to the surfaces that actually exist (revised at apply)
+
+An apply-time survey of the feature files found the originally-tasked Phase 2
+targets did not match the code. Only **`image`**, **`embed`**, and **`code-block`**
+render hand-rolled UI that duplicates a design-system component. **`link`** renders
+no UI (a `BubbleItem` marker; the href popover is chrome-owned and does not exist
+yet), **`table`** renders no UI (its column/row menus and column-resize are
+`TableKit`-engine-owned), and **`mention`** is a static inline `@label` chip whose
+`@`-typeahead is chrome/out-of-scope. Per the `editor-ui-composition` requirement
+("no re-implementation of a component the design system already ships"), those three
+are **already compliant** — there is nothing to recompose — so building new
+popover/menu/typeahead surfaces for them is *new-feature* work outside this refactor,
+not part of it. Phase 2 therefore recomposes exactly the three real targets, and —
+because the feature specs are codec-only (no UI regression net) — each recompose
+adds a co-located view render test. Two apply-time constraints carried over from the
+node-view context: (a) the DS `Popover`/`LanguageSwitcher` inside a node view keeps a
+pointer-down/mouse-down guard so opening it doesn't move ProseMirror selection; (b)
+`sonner` is not adopted for the code-block copy toast — a `Toaster` mount is an
+app-level concern, so the self-contained Copy→Copied flip stays.
+
 ### Surface → component target (the refactor's map)
 
 | Surface | Target composition |
@@ -119,10 +139,10 @@ shells) are tasked but gated — Phase 3 behind the D-R1 spike. The
 | bubble-menu | shared floating-shell + `ToggleGroup`/`Toggle` + `Tooltip` |
 | editor-toolbar | `ToggleGroup`/`Toggle` + `Tooltip` + `button-group` |
 | block-menu | `DropdownMenu`/`ContextMenu` + `Tooltip` on the handle |
-| link (P2) | `Popover` + `field`/`input` + `hover-card` |
-| image/embed (P2) | `tabs` + `field`/`input` + `aspect-ratio` + `progress`/`spinner` |
-| code-block (P2) | `combobox`/`native-select` + `kbd` + `sonner` |
-| mention (P2) | headless `Command`/`combobox` + `avatar` |
+| image (P2) | DS `Button` (trigger) + `Popover`/`PopoverContent` + `Field`/`FieldLabel` + `Input` — replaces the hand-rolled `bg-popover` edit panel + raw `<input>`s |
+| embed (P2) | DS `Input` — replaces the raw `<input type=url>` + hand-rolled focus-ring |
+| code-block (P2) | Copy → DS `Button`; language picker already DS `LanguageSwitcher` (kept, not downgraded to a bare `combobox`); no `sonner`/`kbd` |
+| link / mention / table (P2) | **N/A** — no hand-rolled surface (bubble-item marker / static chip / engine-owned menus+resize); compliant as-is (D7) |
 | callout (P3) | `alert` (keep FluentEmoji icon) — behind spike |
 | toggle (P3) | `collapsible` — behind spike |
 

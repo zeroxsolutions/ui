@@ -3,16 +3,23 @@
 The committed portion of `refactor-editor-chrome`: the **contract** (amend
 `ui-from-design-system` + the `editor-ui-composition` spec) and **Phase 1
 (chrome)** — slash, bubble, toolbar, and block surfaces recomposed from the design
-system behind one shared floating-shell primitive. Phase 2 (per-feature UIs) and
-Phase 3 (node-view shells) are tasked in `tasks.md` but are **out of this plan's
-scope** and land in later apply cycles / behind the D-R1 spike.
+system behind one shared floating-shell primitive. Phase 1 landed in commits
+`61c426c` (contract) + `2898e5e` (chrome).
+
+**Phase 2 (per-feature UIs) is now added to this plan** — scope corrected at apply
+(design D7) to the three surfaces that actually hand-roll a design-system look-alike:
+`image`, `embed`, `code-block`. `link` / `mention` / `table` render no such surface
+and are reclassified N/A (already compliant). Phase 3 (node-view shells) stays out of
+scope, behind the D-R1 spike.
 
 ## Covers
 
-- Tasks: `1.1`, `1.2`, `2.1`, `2.2`, `2.3`, `2.4`, `2.5`, `2.6`, `5.1`, `5.2`,
-  `5.3`, `5.4`
+- Tasks: `1.1`, `1.2`, `2.1`, `2.2`, `2.3`, `2.4`, `2.5`, `2.6`, `3.1`, `3.2`,
+  `3.3`, `5.1`, `5.2`, `5.3`, `5.4` (`3.4`, `3.5` closed N/A — no surface to
+  recompose, per D7)
 - Validation Focus: no-re-implementation grep · engine-free `.d.ts` · behavior
-  parity probes (trigger/filter/flip/bubble/keyboard) · rule is name-clean
+  parity probes (trigger/filter/flip/bubble/keyboard) · rule is name-clean ·
+  Phase 2 view specs green (image/embed/code-block commit + composition)
 
 ## Plan Type
 
@@ -42,6 +49,21 @@ tdd-preferred
    `<span contents>` hack). Finalize `chrome.spec.tsx`.
 8. Run the full validation sweep (build/test, `.d.ts`, probes, no-reimpl grep,
    rule-audit).
+
+Phase 2 (added at apply — serial, one surface then green, per `review.md`):
+
+9. `image.tsx`: Edit trigger → DS `Button`; alt/width editor → DS `Popover` +
+   `Field`/`FieldLabel` + `Input`; delete the hand-rolled `bg-popover` panel + raw
+   `<input>`s. Keep the pointer-guard (no PM selection move on open); preserve
+   commit-on-blur (`alt`; `width` numeric→`null`). Add `image-view.spec.tsx`.
+10. `embed.tsx`: URL entry → DS `Input`; preserve commit on blur + Enter
+    (`preventDefault`/trim/ignore-empty); URL set → iframe frame, no input. Add
+    `embed-view.spec.tsx`.
+11. `code-block.tsx`: Copy → DS `Button` (keep Copy→Copied flip + clipboard); keep
+    the DS `LanguageSwitcher`; no `sonner`/`kbd`. Add `code-block-view.spec.tsx`.
+12. Phase 2 validation: `nx test @zeroxsolutions/editor` (new view specs + all prior
+    green); `nx build @zeroxsolutions/editor` + `assert-engine-free-dts` clean; no
+    `bg-popover` / raw look-alike survives in the three files.
 
 ## Validation Per Step
 
@@ -89,6 +111,20 @@ acceptance signal, because the refactor changes how every surface renders.
 ## Execution Notes
 
 <!-- apply-time notes appended here -->
+
+- 2026-07-10 — Plan **complete**. All Covers tasks done (`1.1`, `1.2`,
+  `2.1`–`2.6`, `5.1`–`5.4`). Landed as two commits on `refactor/editor-chrome`:
+  `61c426c` (contract — rule amend + `editor-ui-composition` spec) and `2898e5e`
+  (Phase 1 chrome — slash/bubble/toolbar/block recomposed from the design system
+  behind the shared `floating-shell`). `nx run-many -t lint build test` green;
+  `assert-engine-free-dts` clean; retained browser probes (trigger/filter/flip,
+  bubble-over-text, keyboard nav) verified in prior sessions; `5.4` rule-audit
+  performed at each commit.
+- Remaining open tasks (`3.1`–`3.5` Phase 2, `4.1`–`4.3` Phase 3) are **outside
+  this plan's Covers** — deferred to later apply cycles by design. Phase 3 is
+  gated on the D-R1 `NodeViewContent` spike (`4.1`) and must not start until it
+  resolves. Continuing them requires a new/extended plan; per the apply preflight,
+  this cycle stops here rather than implementing uncovered tasks.
 
 ## Manual Adjustments
 

@@ -34,16 +34,37 @@
       components present, no re-implemented shell) while keeping all existing
       behavior assertions green.
 
-## 3. Phase 2 — per-feature UIs (may apply in a later cycle)
+## 3. Phase 2 — per-feature UIs
 
-- [ ] 3.1 `link`: popover editor from `field`/`input` + `hover-card` preview.
-- [ ] 3.2 `image` / `embed`: `tabs` (upload/url) + `field`/`input` +
-      `aspect-ratio` + `progress`/`spinner`.
-- [ ] 3.3 `code-block`: language picker via `combobox`/`native-select` + `kbd` +
-      `sonner` (copied toast).
-- [ ] 3.4 `mention`: headless `Command`/`combobox` + `avatar`.
-- [ ] 3.5 `table`: column/row actions via `dropdown-menu`/`context-menu`; adopt
-      `resizable` where it replaces the hand-rolled column-resize.
+Scope corrected at apply from an on-disk survey (design D7): only `image`, `embed`,
+and `code-block` render hand-rolled UI that duplicates a design-system component;
+`link` / `mention` / `table` render no such surface, so they are already compliant
+with `editor-ui-composition` and need no recompose. Each recompose adds a co-located
+view render test (the feature specs are codec-only — no UI net today).
+
+- [ ] 3.1 `image`: Edit affordance + alt/width editor → DS `Button` (trigger) +
+      `Popover` (`PopoverContent`) + `Field`/`FieldLabel` + `Input`, deleting the
+      hand-rolled `bg-popover` panel and raw `<input>`s. Keep the pointer-guard so
+      opening the popover doesn't move ProseMirror selection; preserve commit-on-blur
+      for `alt` and `width` (numeric → `null` when empty). Add `image-view.spec.tsx`.
+- [ ] 3.2 `embed`: URL entry → DS `Input` (drop the raw `<input type=url>` +
+      hand-rolled focus-ring). Preserve commit on blur **and** Enter
+      (`preventDefault`, trim, ignore empty); once a URL is set, the iframe frame
+      shows and no input renders. Add `embed-view.spec.tsx`.
+- [ ] 3.3 `code-block`: Copy button → DS `Button` (`variant="ghost"`, keep the
+      Copy→Copied 1.5s flip + `navigator.clipboard`). The language picker is already
+      the DS `LanguageSwitcher` and stays (its pointer-guard too); `sonner`/`kbd`
+      are **not** added — a `Toaster` mount is app-owned, out of this recompose. Add
+      `code-block-view.spec.tsx`.
+- [x] 3.4 `link` / `mention` — **N/A (compliant as-is):** `link.tsx` renders no UI
+      (a `BubbleItem` marker; the href popover is chrome-owned), and `mention.tsx`
+      is a static inline `@label` chip (its `@`-typeahead is chrome/out-of-scope).
+      Neither hand-rolls a design-system component look-alike, so the spec's
+      "no re-implementation" requirement is already met; building new popover /
+      typeahead surfaces is new-feature work outside this refactor.
+- [x] 3.5 `table` — **N/A (compliant as-is):** `table.tsx` renders no UI; its
+      column/row menus and column-resize are `TableKit`-engine-owned, not hand-rolled
+      markup. Nothing to recompose; adding new action menus is new-feature work.
 
 ## 4. Phase 3 — node-view shells (gated by spike)
 
@@ -64,5 +85,5 @@
 - [x] 5.3 Confirm no surface still declares a `bg-popover border shadow` container
       of its own and no hand-rolled command/menu list survives (spec: "no
       re-implementation").
-- [ ] 5.4 Rule-audit the staged diff against `.agents/rules/*` (per
+- [x] 5.4 Rule-audit the staged diff against `.agents/rules/*` (per
       `green-before-commit`) before any commit.
