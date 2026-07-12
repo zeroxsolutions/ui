@@ -113,7 +113,7 @@ A few groups (names below are the leaf, prefixed per the line that introduces th
 - **Higher-level controls** (`components/*`) — `number-field`, `select-field`,
   `search-input`, `password-input`, `tag-input`, `confirm-button`,
   `split-button`, `toolbar-button`, `popover-icon-button`, `tree-item`,
-  `tree-row`, `status-dot`, `dirty-dot`, `mono-chip`, `icon-label`,
+  `tree-row`, `status-dot`, `dirty-dot`, `icon-label`,
   `resize-handle`, `tab-close-button`, `sidebar-group-collapsible`,
   `sidebar-menu-collapsible`.
 - **Hooks** (`hooks/*`) — `use-command-shortcut`, `use-mobile`,
