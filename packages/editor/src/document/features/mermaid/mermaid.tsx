@@ -1,123 +1,132 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import { Workflow } from 'lucide-react';
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { Check, Copy, Eye, PencilLine, Workflow } from 'lucide-react';
+import { CodeEditorPane } from '@zeroxsolutions/ui/components/code-editor-pane';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from '@zeroxsolutions/ui/components/ui/toggle-group';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
 import type { NodeViewProps } from '../../core/index.js';
-import { useEditorTheme } from '../../../shared/theme/editor-theme-context.js';
+import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '../../../mermaid/core/detect.js';
+import { DEFAULT_DIAGRAM_SOURCE } from '../../../mermaid/core/templates.js';
+import { DiagramPreview } from '../../../mermaid/react/preview.js';
+import { DiagramViewer } from '../../../mermaid/react/viewer.js';
 
 /**
- * A Mermaid diagram block — a custom **atom** node that renders a diagram from a
- * text `source` attribute. Serves as the worked example for a leaf/atom feature:
- * declarative `NodeSpec` + a React `render` view that **lazy-loads** the heavy
- * `mermaid` engine only in the browser + a two-way `NodeCodec` using the
- * GitHub/mermaid-cli fenced-``` ```mermaid ``` ```-block convention + slash — all
- * engine-free (no `@tiptap/*` / `prosemirror-*` import; `mermaid` is `import()`ed
- * inside an effect, never at module top).
+ * The in-document Mermaid block. A custom **atom** node holding a text `source`;
+ * the node view is a **code-block-style header** (diagram-type label on the left;
+ * an eye/pencil view-edit `ToggleGroup` + a copy control on the right) over a body
+ * that follows the toggle — the rendered diagram under the eye (`DiagramPreview`,
+ * which reuses the `mermaid` surface's shared render + pan/zoom), the design
+ * system's `CodeEditorPane` under the pencil. The read-only Viewer renders the
+ * diagram with no edit affordance. View/edit is local view-state — never
+ * persisted — so `source` stays the only attribute and the fenced ` ```mermaid `
+ * codec is unchanged. Engine-free (the engine loads lazily inside the surface).
  */
-const DEFAULT_SOURCE = 'graph TD;\n  A-->B;';
-
 const mermaidAttrs = z.object({
-  source: z.string().default(DEFAULT_SOURCE),
+  source: z.string().default(DEFAULT_DIAGRAM_SOURCE),
 });
 type MermaidAttrs = z.infer<typeof mermaidAttrs>;
 
-function MermaidView({ attrs, updateAttrs, editable }: NodeViewProps<MermaidAttrs>) {
-  // The JS-side Mermaid theme values (theme name + themeVariables) don't ride the
-  // CSS `.dark` flip, so they come from the active editor theme's variant.
-  const { variant } = useEditorTheme();
-  const mermaidTheme = variant.mermaid;
+type ViewMode = 'view' | 'edit';
 
-  // `useId()` gives a render-stable unique id without `Math.random()`/`Date.now()`
-  // (unavailable in some SSR/hydration contexts). Sanitize it — React ids carry
-  // colons/guillemets that are invalid inside an SVG element id.
-  const reactId = useId();
-  const diagramId = `zerox-mermaid-${reactId.replace(/[^a-zA-Z0-9-]/g, '')}`;
+/** Copy the source with a transient check, mirroring the design-system code block. */
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-sm"
+      aria-label={copied ? 'Copied' : 'Copy source'}
+      onClick={() => {
+        navigator.clipboard
+          ?.writeText(text)
+          .then(() => {
+            setCopied(true);
+            clearTimeout(timer.current);
+            timer.current = setTimeout(() => setCopied(false), 1500);
+          })
+          .catch(() => {
+            /* best-effort */
+          });
+      }}
+    >
+      {copied ? <Check /> : <Copy />}
+    </Button>
+  );
+}
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [svg, setSvg] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(attrs.source);
+function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MermaidAttrs>) {
+  // A freshly inserted (empty) block opens ready to edit; an existing diagram
+  // opens as a picture. Local view-state only — never written to the document.
+  const [mode, setMode] = useState<ViewMode>(
+    editable && attrs.source.trim() === '' ? 'edit' : 'view',
+  );
+  const type = detectDiagramType(attrs.source);
 
-  // Keep the draft in sync when the attribute changes from outside the view.
-  useEffect(() => {
-    setDraft(attrs.source);
-  }, [attrs.source]);
-
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        // Lazy `import()` keeps the large `mermaid` engine out of the core bundle;
-        // it loads only when a diagram actually renders in a browser.
-        const mermaidEngine = (await import('mermaid')).default;
-        mermaidEngine.initialize({
-          startOnLoad: false,
-          // The theme string is one of Mermaid's built-in theme ids; the engine's
-          // config type is only known behind the lazy import, so widen here.
-          theme: mermaidTheme.theme as never,
-          themeVariables: mermaidTheme.themeVariables,
-        });
-        const { svg: rendered } = await mermaidEngine.render(diagramId, attrs.source);
-        if (cancelled) return;
-        setError(null);
-        setSvg(rendered);
-      } catch (err) {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : String(err));
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [attrs.source, diagramId, mermaidTheme]);
-
-  const commit = () => {
-    if (draft !== attrs.source) updateAttrs({ source: draft });
-  };
-  const toggleEditing = () => {
-    if (editing) commit();
-    setEditing((prev) => !prev);
-  };
+  // Read-only Viewer: the diagram, no header, no edit affordance.
+  if (!editable) {
+    return (
+      <div className="my-4 rounded-lg border bg-card p-4" data-mermaid contentEditable={false}>
+        <DiagramViewer source={attrs.source} />
+      </div>
+    );
+  }
 
   return (
     <div
-      className="my-4 flex flex-col gap-2 overflow-x-auto rounded-lg border bg-card p-4"
       data-mermaid
       contentEditable={false}
+      onMouseDown={(event) => event.stopPropagation()}
+      onPointerDown={(event) => event.stopPropagation()}
+      className={cn(
+        'my-4 overflow-hidden rounded-lg border bg-card',
+        selected && 'ring-2 ring-ring',
+      )}
     >
-      {editable ? (
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={toggleEditing}
-            className="rounded-md border bg-background px-2 py-1 text-xs hover:bg-accent"
-          >
-            {editing ? 'Done' : 'Edit'}
-          </button>
+      <div className="flex items-center justify-between gap-2 border-b px-2 py-1.5">
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Workflow className="size-4" />
+          <span>{DIAGRAM_TYPE_LABEL[type]}</span>
         </div>
-      ) : null}
-      {editing ? (
-        <textarea
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onBlur={commit}
-          spellCheck={false}
-          className="min-h-24 w-full rounded-md border bg-background p-2 font-mono text-sm"
-        />
-      ) : null}
-      {error !== null ? (
-        <pre className="text-destructive text-sm whitespace-pre-wrap">
-          {error}
-          {'\n\n'}
-          {attrs.source}
-        </pre>
+        <div className="flex items-center gap-1">
+          <ToggleGroup
+            value={[mode]}
+            onValueChange={(next: unknown) => {
+              const picked = (Array.isArray(next) ? next[0] : undefined) as ViewMode | undefined;
+              if (picked) setMode(picked);
+            }}
+          >
+            <ToggleGroupItem value="view" aria-label="View">
+              <Eye />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="edit" aria-label="Edit">
+              <PencilLine />
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <CopyButton text={attrs.source} />
+        </div>
+      </div>
+
+      {mode === 'edit' ? (
+        <div className="h-64">
+          <CodeEditorPane
+            value={attrs.source}
+            onValueChange={(source) => updateAttrs({ source })}
+            placeholder="Write Mermaid source…"
+            className="h-full"
+          />
+        </div>
       ) : (
-        <div
-          ref={containerRef}
-          className="flex justify-center"
-          dangerouslySetInnerHTML={{ __html: svg }}
-        />
+        <DiagramPreview source={attrs.source} className="rounded-none border-0" />
       )}
     </div>
   );
@@ -150,9 +159,10 @@ const mermaidCodec: NodeCodec<MermaidAttrs> = {
     // SSR-safe fallback: Mermaid needs a live DOM to produce an SVG, which the
     // static server-side Viewer doesn't have. Emit the raw source in a
     // `pre.mermaid` — the live Editor/Viewer node view renders the real diagram,
-    // while the static export shows the readable source (also mermaid-cli's
-    // convention for auto-rendering on the client).
-    <pre className="mermaid my-4 overflow-x-auto rounded-lg border bg-card p-4 text-sm">{String(node.attrs?.source ?? '')}</pre>
+    // while the static export shows the readable source.
+    <pre className="mermaid my-4 overflow-x-auto rounded-lg border bg-card p-4 text-sm">
+      {String(node.attrs?.source ?? '')}
+    </pre>
   ),
 };
 
@@ -176,9 +186,11 @@ export function mermaid(): EditorFeature {
         args: z.object({ source: z.string() }).optional(),
         run: (editor, args) =>
           editor.run('insertContent', {
+            // A slash insert (no args) seeds an empty diagram, so the block opens
+            // ready to edit; a programmatic caller passes its own source.
             content: {
               type: 'mermaid',
-              attrs: { source: args?.source ?? DEFAULT_SOURCE },
+              attrs: { source: args?.source ?? '' },
             },
           }),
       },
