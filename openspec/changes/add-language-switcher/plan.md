@@ -24,7 +24,7 @@ tdd-preferred
 2. Author the shiki-id → Material-icon map (static imports + aliases + fallback).
 3. Author `codeLanguageOptions()` and `localeOptions(codes)` builders.
 4. Write the spec assertions for the controlled contract, the three forms, `kind` data, `options` override, and the `segmented`-form-has-no-`searchable` guarantee (expected to fail first).
-5. Implement `language-switcher.tsx`: the shared controlled core + a `form` prop — `dropdown`/`icon` (Popover + Command; `CommandInput` shown when `searchable`) and `segmented` (toggle-group); wire keyboard + accessible names → make the spec green.
+5. Implement `language-switcher.tsx`: the shared controlled core + a `form` prop — `dropdown`/`icon` (the shipped `Combobox`; in-popup `ComboboxInput` shown when `searchable`) and `segmented` (toggle-group); wire keyboard + accessible names → make the spec green.
 6. Swap the code-block `<input>` for `<LanguageSwitcher kind="code" searchable …>` (dropdown is the default form), keeping attrs/codec/export unchanged; keep the code-block spec green.
 7. Add the storybook story (3 forms × 2 kinds, incl. searchable code dropdown).
 8. Run the full green gate + rule-audit; write the verification note.

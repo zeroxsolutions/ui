@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   LanguageSwitcher,
   type LanguageOption,
+  type LanguageSwitcherProps,
 } from '@zeroxsolutions/ui/components/language-switcher';
 
 /**
@@ -15,12 +16,48 @@ import {
  * `dropdown`/`icon` forms only. The consumer owns `value` and every visible
  * string; pass `options` to override the built-in `kind` data.
  */
-const meta: Meta = {
+
+/**
+ * The props the Controls panel drives. `LanguageSwitcher`'s own props are a
+ * `form`-discriminated union (`searchable` exists only on the dropdown/icon
+ * forms), which Storybook Controls can't represent, so the story flattens the
+ * controllable surface into one shape and maps it onto the component in `render`.
+ */
+interface LanguageSwitcherStoryArgs {
+  form: 'dropdown' | 'segmented' | 'icon';
+  kind: 'locale' | 'code';
+  searchable: boolean;
+  disabled: boolean;
+  placeholder?: string;
+  emptyText?: string;
+}
+
+const meta: Meta<LanguageSwitcherStoryArgs> = {
   title: 'Components/LanguageSwitcher',
+  component: LanguageSwitcher,
+  argTypes: {
+    form: {
+      control: 'inline-radio',
+      options: ['dropdown', 'segmented', 'icon'],
+      description: 'Display form.',
+    },
+    kind: {
+      control: 'inline-radio',
+      options: ['locale', 'code'],
+      description: 'Built-in option set used when `options` is not supplied.',
+    },
+    searchable: {
+      control: 'boolean',
+      description: 'Show the in-popup search field (dropdown/icon forms only).',
+    },
+    disabled: { control: 'boolean' },
+    placeholder: { control: 'text' },
+    emptyText: { control: 'text' },
+  },
 };
 export default meta;
 
-type Story = StoryObj;
+type Story = StoryObj<LanguageSwitcherStoryArgs>;
 
 const LOCALES = ['en', 'vi', 'ja', 'fr', 'de'];
 
@@ -44,6 +81,34 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
     </div>
   );
 }
+
+/**
+ * Drive every prop from the Controls panel. `value` is held in local state (the
+ * component is controlled) while `form`/`kind`/`searchable`/`disabled` flow from
+ * args — flip `form` to see the dropdown, segmented, and icon presentations, and
+ * `kind` to switch between UI locales and code languages.
+ */
+export const Playground: Story = {
+  args: {
+    form: 'dropdown',
+    kind: 'locale',
+    searchable: false,
+    disabled: false,
+  },
+  render: (args) => {
+    const [value, setValue] = useState('en');
+    // The story's flat args carry independent `form`/`searchable` knobs; the
+    // component's union correlates them, so collapse to its prop type here.
+    return (
+      <LanguageSwitcher
+        {...(args as unknown as LanguageSwitcherProps)}
+        value={value}
+        onValueChange={setValue}
+        locales={LOCALES}
+      />
+    );
+  },
+};
 
 /** Every form × both kinds, each independently controlled. */
 export const Overview: Story = {

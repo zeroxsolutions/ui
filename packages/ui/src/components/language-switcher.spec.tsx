@@ -70,14 +70,14 @@ describe('LanguageSwitcher display forms', () => {
         locales={['en', 'vi']}
       />,
     )
-    // The dropdown trigger is a Popover button carrying the accessible name.
+    // The dropdown trigger is a Combobox control carrying the accessible name.
     expect(
-      screen.getByRole('button', { name: /select language/i }),
+      screen.getByRole('combobox', { name: /select language/i }),
     ).toBeTruthy()
   })
 
   it.each(['dropdown', 'icon'] as const)(
-    'opens a Popover + Command list from the %s trigger',
+    'opens a Combobox list from the %s trigger',
     (form) => {
       render(
         <LanguageSwitcher
@@ -87,12 +87,12 @@ describe('LanguageSwitcher display forms', () => {
           onValueChange={vi.fn()}
         />,
       )
-      const trigger = screen.getByRole('button', { name: /select language/i })
+      const trigger = screen.getByRole('combobox', { name: /select language/i })
       fireEvent.click(trigger)
-      // Both forms open the same Command list (clean `no-scrollbar` scroll).
+      // Both forms open the same Combobox list.
       expect(screen.getAllByText('Python').length).toBeGreaterThan(0)
       expect(
-        document.querySelectorAll('[data-slot="command-item"]').length,
+        document.querySelectorAll('[data-slot="combobox-item"]').length,
       ).toBeGreaterThan(0)
     },
   )
@@ -110,7 +110,8 @@ describe('LanguageSwitcher display forms', () => {
   })
 
   it('shows the search field only when searchable', () => {
-    const { rerender } = render(
+    // Searchable: the popup carries a search input (inside the Combobox content).
+    const { unmount } = render(
       <LanguageSwitcher
         kind="code"
         searchable
@@ -118,10 +119,14 @@ describe('LanguageSwitcher display forms', () => {
         onValueChange={vi.fn()}
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: /select language/i }))
-    expect(document.querySelector('[data-slot="command-input"]')).toBeTruthy()
+    fireEvent.click(screen.getByRole('combobox', { name: /select language/i }))
+    expect(
+      document.querySelector('[data-slot="combobox-content"] input'),
+    ).toBeTruthy()
+    unmount()
 
-    rerender(
+    // Not searchable: the same popup opens with no input — just the list.
+    render(
       <LanguageSwitcher
         kind="code"
         searchable={false}
@@ -129,8 +134,10 @@ describe('LanguageSwitcher display forms', () => {
         onValueChange={vi.fn()}
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: /select language/i }))
-    expect(document.querySelector('[data-slot="command-input"]')).toBeNull()
+    fireEvent.click(screen.getByRole('combobox', { name: /select language/i }))
+    expect(
+      document.querySelector('[data-slot="combobox-content"] input'),
+    ).toBeNull()
   })
 })
 

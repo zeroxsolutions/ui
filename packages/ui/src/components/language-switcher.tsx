@@ -1,22 +1,19 @@
 'use client';
 
-import { ChevronDownIcon, GlobeIcon } from 'lucide-react';
+import { Combobox as ComboboxPrimitive } from '@base-ui/react';
+import { GlobeIcon } from 'lucide-react';
 import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from '@/components/ui/combobox';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 import {
@@ -52,11 +49,11 @@ export interface LanguageSwitcherBaseProps {
 }
 
 /**
- * The `dropdown` (default) and `icon` forms — both a `Popover` + `Command` (a
- * clean search field over a scrollable list), differing only by the trigger: a
- * wide labelled button vs. an icon-only button. Both accept `searchable`.
+ * The `dropdown` (default) and `icon` forms — both the shipped `Combobox` (a
+ * searchable select), differing only by the trigger: a wide labelled button vs.
+ * an icon-only button. Both accept `searchable`.
  */
-interface PopoverFormProps extends LanguageSwitcherBaseProps {
+interface ComboboxFormProps extends LanguageSwitcherBaseProps {
   form?: 'dropdown' | 'icon';
   /** Show the search field in the popup. Defaults to `true` for `kind="code"`. */
   searchable?: boolean;
@@ -71,7 +68,7 @@ interface SegmentedFormProps extends LanguageSwitcherBaseProps {
  * Props for {@link LanguageSwitcher} — a discriminated union on `form`. The
  * `dropdown`/`icon` forms accept `searchable`; the `segmented` form does not.
  */
-export type LanguageSwitcherProps = PopoverFormProps | SegmentedFormProps;
+export type LanguageSwitcherProps = ComboboxFormProps | SegmentedFormProps;
 
 function useLanguageOptions({
   kind = 'locale',
@@ -106,12 +103,13 @@ function findCurrent(
 }
 
 /**
- * The shared Popover + Command body for the dropdown and icon forms — shadcn's
- * standard combobox recipe: a clean `CommandInput` over a scrollable `CommandList`
- * (no native scrollbar) inside a `Popover` that owns its own width. Each form only
- * supplies its trigger; everything below the trigger is identical.
+ * The shared body for the dropdown and icon forms — the shipped `Combobox` (a
+ * searchable select): the search field lives inside the popup and shows only
+ * when `searchable`, the options are a scrollable list, and the selected option
+ * carries a check. Each form supplies only its trigger; everything below the
+ * trigger is identical.
  */
-function LanguageSwitcherPopover({
+function LanguageSwitcherCombobox({
   options,
   value,
   onValueChange,
@@ -135,47 +133,46 @@ function LanguageSwitcherPopover({
   // Resolve aliases (`ts` → `typescript`) so the trigger and the checked item
   // reflect the current value even when it is an alias.
   const current = findCurrent(options, value, kind);
-  const [open, setOpen] = React.useState(false);
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Combobox
+      items={options}
+      value={current ?? null}
+      onValueChange={(option) => {
+        if (option) onValueChange(option.value);
+      }}
+      itemToStringLabel={(option: LanguageOption) => option.label}
+      isItemEqualToValue={(a: LanguageOption, b: LanguageOption) =>
+        a?.value === b?.value
+      }
+      disabled={disabled}
+    >
       {trigger(current)}
-      <PopoverContent align="start" className="p-0">
-        <Command>
-          {searchable && (
-            <CommandInput placeholder={placeholder ?? 'Search…'} />
+      {/* min-w-56 widens the popup past a narrow (icon) trigger; the width still
+          tracks the anchor for the wider dropdown trigger. */}
+      <ComboboxContent className="min-w-56">
+        {searchable && (
+          <ComboboxInput
+            showTrigger={false}
+            placeholder={placeholder ?? 'Search…'}
+          />
+        )}
+        <ComboboxEmpty>{emptyText ?? 'No results.'}</ComboboxEmpty>
+        <ComboboxList>
+          {(option: LanguageOption) => (
+            <ComboboxItem key={option.value} value={option}>
+              {option.icon}
+              <span>{option.label}</span>
+            </ComboboxItem>
           )}
-          <CommandList>
-            <CommandEmpty>{emptyText ?? 'No results.'}</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  keywords={[option.label]}
-                  data-checked={
-                    current?.value === option.value ? 'true' : undefined
-                  }
-                  onSelect={() => {
-                    onValueChange(option.value);
-                    setOpen(false);
-                  }}
-                  disabled={disabled}
-                >
-                  {option.icon}
-                  <span>{option.label}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
   );
 }
 
 /**
  * The dropdown form: a wide labelled trigger (current language + chevron) opening
- * the shared Popover + Command. Searchable by default for `kind="code"`.
+ * the shared `Combobox`. Searchable by default for `kind="code"`.
  */
 function LanguageSwitcherDropdown({
   kind = 'locale',
@@ -186,11 +183,11 @@ function LanguageSwitcherDropdown({
   className,
   'aria-label': ariaLabel,
   ...rest
-}: Omit<PopoverFormProps, 'form'>) {
+}: Omit<ComboboxFormProps, 'form'>) {
   const options = useLanguageOptions({ kind, ...rest });
   const isSearchable = searchable ?? kind === 'code';
   return (
-    <LanguageSwitcherPopover
+    <LanguageSwitcherCombobox
       options={options}
       value={rest.value}
       onValueChange={rest.onValueChange}
@@ -200,15 +197,15 @@ function LanguageSwitcherDropdown({
       emptyText={emptyText}
       disabled={disabled}
       trigger={(current) => (
-        <PopoverTrigger
+        // ComboboxTrigger appends the chevron itself — the dropdown affordance.
+        <ComboboxTrigger
           render={<Button variant="outline" size="sm" disabled={disabled} />}
           aria-label={ariaLabel ?? 'Select language'}
           className={className}
         >
           {current?.icon}
           <span>{current?.label ?? placeholder ?? 'Select…'}</span>
-          <ChevronDownIcon />
-        </PopoverTrigger>
+        </ComboboxTrigger>
       )}
     />
   );
@@ -216,7 +213,7 @@ function LanguageSwitcherDropdown({
 
 /**
  * The icon form: an icon-only trigger (the current language's icon, or a globe)
- * opening the same shared Popover + Command. Compact — for a header or toolbar.
+ * opening the same shared `Combobox`. Compact — for a header or toolbar.
  */
 function LanguageSwitcherIcon({
   kind = 'locale',
@@ -227,11 +224,11 @@ function LanguageSwitcherIcon({
   className,
   'aria-label': ariaLabel,
   ...rest
-}: Omit<PopoverFormProps, 'form'>) {
+}: Omit<ComboboxFormProps, 'form'>) {
   const options = useLanguageOptions({ kind, ...rest });
   const isSearchable = searchable ?? kind === 'code';
   return (
-    <LanguageSwitcherPopover
+    <LanguageSwitcherCombobox
       options={options}
       value={rest.value}
       onValueChange={rest.onValueChange}
@@ -241,13 +238,16 @@ function LanguageSwitcherIcon({
       emptyText={emptyText}
       disabled={disabled}
       trigger={(current) => (
-        <PopoverTrigger
+        // The design-system `ComboboxTrigger` always appends a chevron, which
+        // would crowd an icon-only button; use the primitive trigger directly
+        // (switch, don't patch) so the icon form stays a single glyph.
+        <ComboboxPrimitive.Trigger
           render={<Button variant="ghost" size="icon" disabled={disabled} />}
           aria-label={ariaLabel ?? 'Select language'}
           className={className}
         >
           {current?.icon ?? <GlobeIcon />}
-        </PopoverTrigger>
+        </ComboboxPrimitive.Trigger>
       )}
     />
   );

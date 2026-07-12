@@ -5,7 +5,7 @@
 `nx run-many -t lint build test` → **Successfully ran targets build, test for 4 projects.**
 (No project defines a `lint` target, so the gate runs `build` + `test`; both green.)
 
-- `nx test @zeroxsolutions/ui` (`language-switcher.spec.tsx`) → **12 passed**.
+- `nx test @zeroxsolutions/ui` (`language-switcher.spec.tsx`) → **14 passed**.
 - `nx test @zeroxsolutions/editor` (`code-block.spec.tsx`) → **4 passed** (unchanged).
 - `nx build @zeroxsolutions/ui` → built; `dist/components/language-switcher.js` + `.d.ts` emitted; `@zeroxsolutions/icons` stays **external** (no `dist/material/` inside ui).
 - `nx build @zeroxsolutions/editor` → built (resolves `@zeroxsolutions/ui/components/language-switcher`).
@@ -16,7 +16,7 @@
 - **No icon drift** — `language-switcher.spec.tsx` asserts `CODE_LANGUAGE_OPTION_IDS` (the picker's own id set) equals the highlighter's exported `CODE_LANGUAGE_IDS` from `src/lib/shiki.ts`. Every highlightable language resolves a Material icon (aliases: `dockerfile→docker`, `shellscript→console`, `jsx/tsx→react`, `sql→database`, `ini→document`, `scss→sass`).
 - **Code-block round-trip unchanged** — the editor wiring swaps only the editable control; `attrs.language`, the fenced-Markdown codec, and the `<pre><code class="language-…">` HTML export are untouched. `code-block.spec.tsx` (attr + export + import assertions) stays green. The read-only branch still renders the plain `<span>`.
 - **`searchable` type-level guarantee** — the `segmented` form exposes no `searchable` prop; the spec pins this with a `@ts-expect-error` assertion (the spec file is included in `nx typecheck`).
-- **Accessibility** — the trigger is a `Button` carrying the accessible name from `aria-label` (defaults to "Select language"); the spec drives every form via `getByRole('button', { name: /select language/i })`; verified in-test.
+- **Accessibility** — the `Combobox` trigger carries the accessible name from `aria-label` (defaults to "Select language") and exposes `role="combobox"` (Base UI's ARIA combobox pattern); the spec drives every form via `getByRole('combobox', { name: /select language/i })`; verified in-test. The `segmented` form's `ToggleGroup` items carry each option's `aria-label`.
 
 ## Known pre-existing issue (out of scope)
 
@@ -24,7 +24,7 @@
 
 ## Rule audit (`.agents/rules/*` vs the change)
 
-- `ui-from-design-system` — composed from house primitives (`popover`/`command`/`toggle-group`/`button`); no competing UI library. ✓
+- `ui-from-design-system` — composed from shipped design-system components (`combobox`/`toggle-group`/`button`), not a hand-rolled `Popover` + `Command` look-alike; the one primitive reach (Base UI `Combobox.Trigger` for the chevron-less icon trigger) is the sanctioned "switch, don't patch" case. No competing UI library. ✓
 - `lib-public-exports-and-semver` — new modules surface through ui's existing `./*` dist-mirrored exports map (no barrel edit); additive (a minor). ✓
 - `naming-files-and-symbols` — kebab files, PascalCase `LanguageSwitcher`, camelCase helpers. ✓
 - `house-libs-catalog-scope` — `@zeroxsolutions/icons` added as `workspace:*` (mirrors `@zeroxsolutions/fluent-emoji`). ✓

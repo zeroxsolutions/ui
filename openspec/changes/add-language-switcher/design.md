@@ -36,7 +36,7 @@ and the 587 full-color Material file-type icons at `@zeroxsolutions/icons/materi
 ### D1 — Display form = a `form` prop (discriminated union), not a `variant` prop
 
 `LanguageSwitcher` takes a `form` prop — `"dropdown" | "segmented" | "icon"` — typed as a
-discriminated union (`PopoverFormProps | SegmentedFormProps`) so each form carries only the
+discriminated union (`ComboboxFormProps | SegmentedFormProps`) so each form carries only the
 props that fit it (see D6). `form` defaults to `"dropdown"`, so a bare `LanguageSwitcher`
 renders the dropdown form.
 
@@ -46,14 +46,18 @@ renders the dropdown form.
 variant="borderless"`). The display form is the `form` axis, so the domain axis takes
 a distinct name, `kind`. `kind` defaults to `"locale"` (the more generic case).
 
-### D3 — One Base UI primitive per form
+### D3 — One design-system component per form
 
-- `dropdown` → a `Popover` + `Command`: the `CommandInput` search field shows when `searchable`
-  and hides otherwise; the options stay a scrollable `CommandList`. One primitive across the
-  `searchable` boundary; the public prop is just `searchable`.
+- `dropdown` → the shipped `Combobox` (a searchable select): the `ComboboxInput` search field
+  renders **inside** the popup and shows only when `searchable`; the options stay a scrollable
+  `ComboboxList` and the selected option carries a check. One component across the `searchable`
+  boundary; the public prop is just `searchable`. Composing the shipped `Combobox` — rather than
+  hand-rolling a `Popover` + `Command` look-alike — is what `ui-from-design-system` requires.
 - `segmented` → `toggle-group` (single-select), every option rendered inline.
-- `icon` → the same `Popover` + `Command` body with an icon-only trigger (a globe by default, or
-  the current option's icon when present).
+- `icon` → the same `Combobox` body with an icon-only trigger (a globe by default, or the current
+  option's icon when present). The design-system `ComboboxTrigger` always appends a chevron, which
+  crowds an icon-only button, so the icon form renders the Base UI `Combobox.Trigger` primitive
+  directly (switch, don't patch) — the one sanctioned reach past the wrapper.
 
 ### D4 — Built-in option builders, overridable
 
@@ -103,8 +107,8 @@ only the editing control changes.
   `language-switcher` module regardless of `kind`. Bounded and small; acceptable versus the
   complexity of dynamic per-subpath loading. If it matters later, the code builder can move
   behind a lazy import.
-- **`searchable` toggle within one primitive.** The `dropdown`/`icon` forms show/hide the
-  `CommandInput` across the `searchable` boundary inside one `Popover` + `Command`; the story must
+- **`searchable` toggle within one component.** The `dropdown`/`icon` forms show/hide the
+  in-popup `ComboboxInput` across the `searchable` boundary inside one `Combobox`; the story must
   exercise both states so focus/keyboard behaviour stays consistent.
 - **`Intl.DisplayNames` availability.** Ubiquitous in modern browsers/runtimes; a missing
   native name falls back to the raw code. Consumers needing exact wording pass `options`.

@@ -64,7 +64,7 @@ none
   lockfile resolves cleanly.
 - **Icon coverage / bundle.** ~30 Material icons statically imported; a shiki id lacking a
   clean Material match must fall back rather than break. Bounded bundle cost accepted (design D5).
-- **`searchable` toggle within one primitive.** The `dropdown` form shows/hides its `CommandInput`
-  on `searchable` inside one `Popover` + `Command`; keyboard/focus behaviour must stay consistent — exercise both in the story/spec.
+- **`searchable` toggle within one component.** The `dropdown` form shows/hides its in-popup
+  `ComboboxInput` on `searchable` inside one `Combobox`; keyboard/focus behaviour must stay consistent — exercise both in the story/spec.
 - **`Intl.DisplayNames` fallback.** Missing native name → raw code; consumers needing exact
   wording pass `options`.
