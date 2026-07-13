@@ -5,8 +5,8 @@ import {
   CodeEditor,
   CodeEditorContent,
   useCodeEditor,
-} from './code-editor';
-import type { RoutedFile } from './file-content-router';
+} from './code-editor.js';
+import type { RoutedFile } from './file-content-router.js';
 
 afterEach(() => {
   cleanup();

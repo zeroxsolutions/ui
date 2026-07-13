@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { CodeBlock } from '@zeroxsolutions/ui/components/ai-elements/code-block';
+import { CodeBlock } from '@zeroxsolutions/ui/components/code-block';
 
 const JSON_SAMPLE = JSON.stringify(
   { tool: 'search', query: 'design tokens', results: 3, ok: true },
@@ -40,7 +40,7 @@ def clamp(x: float, lo: float = 0.0, hi: float = 1.0) -> float:
  * that is too wide scrolls sideways on a thin horizontal rail.
  */
 const meta: Meta<typeof CodeBlock> = {
-  title: 'AI Elements/CodeBlock',
+  title: 'Components/CodeBlock',
   component: CodeBlock,
 };
 export default meta;

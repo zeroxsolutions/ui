@@ -1,22 +1,19 @@
 import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area';
-import { Fragment, Suspense, lazy, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 import { CopyButton } from '@/components/copy-button';
+import {
+  Disclosure,
+  DisclosureActions,
+  DisclosureContent,
+  DisclosureHeader,
+  DisclosureTitle,
+  DisclosureTrigger,
+} from '@/components/disclosure';
 import { codeLanguageIcon } from '@/components/language-switcher-data';
-import { LanguageSwitcher } from '@/components/language-switcher';
 import { ScrollBar } from '@/components/ui/scroll-area';
 import { highlightToLines, type HighlightLine } from '@/lib/shiki';
 import { cn } from '@/lib/utils';
-
-/**
- * Lazily loaded so read-only consumers (markdown, tool panels) never bundle the
- * CodeMirror/Shiki editing surface — it loads only when `editable` is used.
- */
-const CodeEditorPane = lazy(() =>
-  import('@/components/code-editor-pane').then((module) => ({
-    default: module.CodeEditorPane,
-  })),
-);
 
 /**
  * CodeBlock — a mono `<pre>` with Shiki syntax highlighting and a copy control,
@@ -31,11 +28,10 @@ const CodeEditorPane = lazy(() =>
  * (`MarkdownView codeBlocks`), tool Parameters/Result panels, and JSON
  * disclosures.
  *
- * Pass `editable` to make the body an editable code surface (the lazily-loaded
- * `CodeEditorPane` — CodeMirror + Shiki), wiring edits back through `onCodeChange`
- * and, when `onLanguageChange` is given, turning the header label into a language
- * picker. Editable and read-only share the same header/copy chrome, so a code
- * block reads identically whether it is being edited or displayed.
+ * A read-only view: it renders the highlighted source, never an editing surface
+ * — the editable code surface lives in the composite editor package's code-block
+ * feature, which composes this same `Disclosure` chrome so the two read
+ * identically.
  *
  * `code` is the source string. Presentational — copy uses the Clipboard API
  * best-effort and resets after ~2s.
@@ -45,12 +41,6 @@ export interface CodeBlockProps {
   /** Shiki language id (e.g. `ts`, `json`, `bash`); drives highlighting + header. */
   language?: string;
   className?: string;
-  /** Make the body an editable code surface (CodeMirror + Shiki) instead of a `<pre>`. */
-  editable?: boolean;
-  /** Fired with the full code on every edit (requires `editable`). */
-  onCodeChange?: (code: string) => void;
-  /** When given (and `editable`), the header language label becomes a picker. */
-  onLanguageChange?: (language: string) => void;
 }
 
 /** Languages with no real grammar — no header, no highlight (plain `<pre>`). */
@@ -165,99 +155,81 @@ function HighlightedCode({ lines }: { lines: HighlightLine[] }) {
   );
 }
 
-export function CodeBlock({
-  code,
-  language,
-  className,
-  editable,
-  onCodeChange,
-  onLanguageChange,
-}: CodeBlockProps) {
-  // Skip the read-only tokenizer while editing — `CodeEditorPane` highlights itself.
-  const lines = useHighlightedLines(code, editable ? undefined : language);
+export function CodeBlock({ code, language, className }: CodeBlockProps) {
+  const lines = useHighlightedLines(code, language);
   const isPlain = isPlainLanguage(language);
-  // An editable block always carries the header (so it has a language picker +
-  // copy); a read-only block only when the language is real (else a hover copy).
-  const hasHeader = editable || !isPlain;
+  // A block carries the header only when the language is real; an unlabelled
+  // block stays a borderless muted surface with a hover copy.
+  const hasHeader = !isPlain;
   // The full-color Material icon for the language (shared with the language
   // switcher); it self-scales at 1em, so it carries no size class.
   const LanguageIcon = !isPlain ? codeLanguageIcon(language as string) : null;
 
-  return (
-    <div
-      data-slot="code-block"
-      data-language={language}
-      className={cn(
-        // Borderless on purpose — the surface is delineated by `bg-muted`, not a
-        // border, so a code block nested inside a tool/JSON card doesn't stack
-        // border-inside-border.
-        'group/code relative w-full overflow-hidden rounded-md bg-muted/50',
-        className,
-      )}
-    >
-      {hasHeader ? (
-        <div className="flex items-center gap-1.5 border-b border-border/60 px-3 py-1.5">
-          {/* The picker renders its own language icon — only show a standalone
-              icon for the read-only label. */}
-          {LanguageIcon && !(editable && onLanguageChange) ? (
-            <LanguageIcon className="shrink-0" />
-          ) : null}
-          {editable && onLanguageChange ? (
-            <LanguageSwitcher
-              kind="code"
-              searchable
-              value={language ?? 'text'}
-              onValueChange={onLanguageChange}
-              aria-label="Language"
-              placeholder="Language…"
-            />
-          ) : (
-            <span className="text-[11px] font-medium text-muted-foreground">
-              {isPlain ? 'Text' : languageLabel(language as string)}
-            </span>
-          )}
-          <span className="flex-1" />
-          <CopyButton value={code} label="Copy code" />
-        </div>
-      ) : (
+  // The code body — a read-only Shiki `<pre>` whose long lines scroll through a
+  // Base UI ScrollArea (its styled thin rail), not the OS overlay scrollbar a
+  // native `overflow-x-auto` would leave.
+  const body = (
+    <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
+      <ScrollAreaPrimitive.Viewport className="w-full">
+        <pre className="m-0 px-3 py-2 text-xs leading-relaxed">
+          <code className="font-mono">
+            {lines ? <HighlightedCode lines={lines} /> : code}
+          </code>
+        </pre>
+      </ScrollAreaPrimitive.Viewport>
+      <ScrollBar orientation="horizontal" />
+      <ScrollAreaPrimitive.Corner />
+    </ScrollAreaPrimitive.Root>
+  );
+
+  // An unlabelled block stays a minimal muted surface with a hover copy — no
+  // header, so no Disclosure chrome; used for fenced code inside markdown and JSON
+  // panels, where a header/collapse would be noise. Borderless on purpose: the
+  // surface is delineated by `bg-muted`, so a block nested inside a card doesn't
+  // stack border-inside-border.
+  if (!hasHeader) {
+    return (
+      <div
+        data-slot="code-block"
+        data-language={language}
+        className={cn(
+          'group/code relative w-full overflow-hidden rounded-md bg-muted/50',
+          className,
+        )}
+      >
         <CopyButton
           value={code}
           label="Copy code"
           className="absolute right-1 top-1 z-10 bg-muted/70 opacity-0 backdrop-blur transition-opacity group-hover/code:opacity-100 focus-visible:opacity-100"
         />
-      )}
-      {editable ? (
-        <Suspense
-          fallback={
-            <pre className="m-0 px-3 py-2 text-xs leading-relaxed">
-              <code className="font-mono">{code}</code>
-            </pre>
-          }
-        >
-          <CodeEditorPane
-            value={code}
-            language={isPlain ? undefined : language}
-            onValueChange={onCodeChange}
-          />
-        </Suspense>
-      ) : (
-        // A long line (an id, a URL, a base64 blob) overflows sideways. A native
-        // `overflow-x-auto` pre leaves that to the OS scrollbar, which on macOS is
-        // an overlay that only flashes mid-scroll — the row reads as un-scrollable.
-        // Scroll through a Base UI ScrollArea instead, so the horizontal rail is
-        // the same styled thin scrollbar the rest of the system uses.
-        <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
-          <ScrollAreaPrimitive.Viewport className="w-full">
-            <pre className="m-0 px-3 py-2 text-xs leading-relaxed">
-              <code className="font-mono">
-                {lines ? <HighlightedCode lines={lines} /> : code}
-              </code>
-            </pre>
-          </ScrollAreaPrimitive.Viewport>
-          <ScrollBar orientation="horizontal" />
-          <ScrollAreaPrimitive.Corner />
-        </ScrollAreaPrimitive.Root>
-      )}
-    </div>
+        {body}
+      </div>
+    );
+  }
+
+  // A labelled block composes the shared Disclosure: the language (icon + label)
+  // fills the title; copy + the collapse toggle fill the actions; the code body
+  // is the collapsible content. `data-slot` stays "code-block" — the editor
+  // stylesheet targets it — so the Disclosure root carries it instead of its
+  // default "disclosure".
+  return (
+    <Disclosure
+      variant="muted"
+      data-slot="code-block"
+      data-language={language}
+      className={cn('group/code', className)}
+    >
+      <DisclosureHeader>
+        <DisclosureTitle>
+          {LanguageIcon ? <LanguageIcon className="shrink-0" /> : null}
+          <span className="text-[11px]">{languageLabel(language as string)}</span>
+        </DisclosureTitle>
+        <DisclosureActions>
+          <CopyButton value={code} label="Copy code" />
+          <DisclosureTrigger />
+        </DisclosureActions>
+      </DisclosureHeader>
+      <DisclosureContent>{body}</DisclosureContent>
+    </Disclosure>
   );
 }

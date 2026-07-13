@@ -21,22 +21,23 @@ import {
   resolveLanguage,
   SHIKI_THEME_NAME,
   tokensToRanges,
-} from './shiki';
+} from '@zeroxsolutions/ui/lib/shiki';
 
 // Re-exported for back-compat: these pure helpers moved to the framework-agnostic
-// core (`./shiki`) but several call-sites + specs import them from here.
+// core (`@zeroxsolutions/ui/lib/shiki`) but several call-sites + specs import them
+// from here.
 export {
   styleForToken,
   tokensToRanges,
   type SyntaxRange,
-} from './shiki';
+} from '@zeroxsolutions/ui/lib/shiki';
 
 /**
  * Syntax highlighting for the CodeMirror surface, powered by Shiki — a thin,
  * own-built bridge (no third-party CodeMirror widget) over the shared highlighter
- * in {@link file://./shiki.ts}. Shiki tokenizes the document; we map each token to
- * a CodeMirror `Decoration.mark` carrying an inline style. Token colors are
- * `var(--shiki-token-*)` references resolved to the design tokens by
+ * in `@zeroxsolutions/ui/lib/shiki`. Shiki tokenizes the document; we map each
+ * token to a CodeMirror `Decoration.mark` carrying an inline style. Token colors
+ * are `var(--shiki-token-*)` references resolved to the design tokens by
  * {@link editorTheme} — light/dark tracks the tokens for free.
  */
 

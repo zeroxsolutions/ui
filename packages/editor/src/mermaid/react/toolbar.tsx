@@ -12,17 +12,27 @@ import {
 } from '@zeroxsolutions/ui/components/ui/alert-dialog';
 import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from '@zeroxsolutions/ui/components/ui/combobox';
+import {
+  DisclosureActions,
+  DisclosureHeader,
+  DisclosureTitle,
+} from '@zeroxsolutions/ui/components/disclosure';
+import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@zeroxsolutions/ui/components/ui/dropdown-menu';
-import { cn } from '@zeroxsolutions/ui/lib/utils';
 import {
   Check,
-  ChevronDown,
   Copy,
   Download,
   Image as ImageIcon,
@@ -32,6 +42,7 @@ import { useRef, useState } from 'react';
 import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '../core/detect.js';
 import { copySvg, copyText, downloadPng, downloadSvg } from '../core/export.js';
 import { DIAGRAM_TEMPLATES } from '../core/templates.js';
+import type { DiagramTemplate } from '../core/types.js';
 
 export interface MermaidToolbarProps {
   source: string;
@@ -42,12 +53,18 @@ export interface MermaidToolbarProps {
   className?: string;
 }
 
+/** Mutable copy of the readonly template list — the `Combobox` `items` prop. */
+const TEMPLATE_ITEMS: DiagramTemplate[] = [...DIAGRAM_TEMPLATES];
+
 /**
- * The standalone surface's toolbar: the detected diagram type + a template
- * picker on the left, an export menu on the right — all composed from
- * `@zeroxsolutions/ui`. Choosing a template while the source is non-empty asks
- * for confirmation (a design-system `AlertDialog`) before replacing it. Export
- * feedback is inline (a transient check), so no toast dependency is added.
+ * The standalone surface's header — the house `DisclosureHeader` compound, not a
+ * bespoke bar: a stateful `Combobox` type/template switcher (the
+ * `LanguageSwitcher` pattern — it *displays* the active diagram type, unlike a
+ * fire-and-forget menu) fills the title; the export menu fills the actions.
+ * Choosing a template while the source is non-empty asks for confirmation (a
+ * design-system `AlertDialog`) before replacing it. Export feedback is inline (a
+ * transient check), so no toast dependency is added. Renders the header parts
+ * only; `MermaidEditor` owns the enclosing `Disclosure` and its body.
  */
 export function MermaidToolbar({
   source,
@@ -56,6 +73,15 @@ export function MermaidToolbar({
   className,
 }: MermaidToolbarProps) {
   const type = detectDiagramType(source);
+  // The displayed selection: the template matching the detected type, or a
+  // display-only option carrying the type's label when no template exists for it
+  // (journey/timeline/quadrant/unknown) — so the switcher always shows the type.
+  const current: DiagramTemplate =
+    TEMPLATE_ITEMS.find((template) => template.type === type) ?? {
+      type,
+      label: DIAGRAM_TYPE_LABEL[type],
+      source: '',
+    };
   const hasContent = source.trim().length > 0;
   const [pending, setPending] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -81,68 +107,72 @@ export function MermaidToolbar({
   };
 
   return (
-    <div
-      className={cn(
-        'flex items-center justify-between gap-2 border-b bg-card px-2 py-1.5',
-        className,
-      )}
-    >
-      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-        <Workflow className="size-4" />
-        <span>{DIAGRAM_TYPE_LABEL[type]}</span>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button variant="ghost" size="xs">
-                Templates
-                <ChevronDown />
-              </Button>
+    <>
+      <DisclosureHeader className={className}>
+        <DisclosureTitle>
+          <Combobox
+            items={TEMPLATE_ITEMS}
+            value={current}
+            onValueChange={(template: DiagramTemplate | null) => {
+              if (template) pickTemplate(template.source);
+            }}
+            itemToStringLabel={(template: DiagramTemplate) => template.label}
+            isItemEqualToValue={(a: DiagramTemplate, b: DiagramTemplate) =>
+              a?.type === b?.type
             }
-          />
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              {DIAGRAM_TEMPLATES.map((template) => (
-                <DropdownMenuItem
-                  key={template.type}
-                  onClick={() => pickTemplate(template.source)}
-                >
-                  {template.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          >
+            <ComboboxTrigger
+              render={<Button variant="ghost" size="sm" />}
+              aria-label="Diagram type"
+            >
+              <Workflow />
+              <span>{current.label}</span>
+            </ComboboxTrigger>
+            <ComboboxContent className="min-w-56">
+              <ComboboxEmpty>No templates.</ComboboxEmpty>
+              <ComboboxList>
+                {(template: DiagramTemplate) => (
+                  <ComboboxItem key={template.type} value={template}>
+                    <span>{template.label}</span>
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        </DisclosureTitle>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button variant="outline" size="sm" disabled={!svg}>
-              {done ? <Check /> : <Download />}
-              Export
-            </Button>
-          }
-        />
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => runExport(() => copyText(source))}>
-            <Copy />
-            Copy source
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => runExport(() => copySvg(svg))}>
-            <Copy />
-            Copy SVG
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => runExport(() => downloadSvg(svg))}>
-            <Download />
-            Download SVG
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => runExport(() => downloadPng(svg))}>
-            <ImageIcon />
-            Download PNG
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        <DisclosureActions>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="outline" size="sm" disabled={!svg}>
+                  {done ? <Check /> : <Download />}
+                  Export
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => runExport(() => copyText(source))}>
+                <Copy />
+                Copy source
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => runExport(() => copySvg(svg))}>
+                <Copy />
+                Copy SVG
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => runExport(() => downloadSvg(svg))}>
+                <Download />
+                Download SVG
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => runExport(() => downloadPng(svg))}>
+                <ImageIcon />
+                Download PNG
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </DisclosureActions>
+      </DisclosureHeader>
 
       <AlertDialog
         open={pending !== null}
@@ -169,6 +199,6 @@ export function MermaidToolbar({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }

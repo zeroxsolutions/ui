@@ -2,29 +2,28 @@ import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
-interface FloatingToolbarShellProps extends ComponentProps<'div'> {
+interface FloatingToolbarProps extends ComponentProps<'div'> {
   children: ReactNode;
   /** Accessible name for the `toolbar` landmark (WAI-ARIA Toolbar pattern). */
   label?: string;
 }
 
 /**
- * The floating tool-palette shell — a rounded bar with the card background,
- * blur, hairline ring and shadow. Shared chrome for an editor's on-canvas
- * toolbar; fill it with the tool content that differs. The consumer owns
- * placement (e.g. `absolute bottom-3 left-1/2 -translate-x-1/2 z-20`) via
- * `className`.
+ * The floating tool palette — a rounded bar with the card background, blur,
+ * hairline ring and shadow. Shared chrome for an editor's on-canvas toolbar;
+ * fill it with the tool content that differs. The consumer owns placement
+ * (e.g. `absolute bottom-3 left-1/2 -translate-x-1/2 z-20`) via `className`.
  *
  * `pointer-events-auto` keeps it interactive even when mounted inside a
  * pointer-events-none canvas overlay; it is a no-op where the surrounding tree
  * already receives pointer events.
  */
-export function FloatingToolbarShell({
+export function FloatingToolbar({
   children,
   className,
   label,
   ...props
-}: FloatingToolbarShellProps) {
+}: FloatingToolbarProps) {
   return (
     <div
       role="toolbar"

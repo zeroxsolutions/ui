@@ -72,15 +72,14 @@ of the box, but any class toggler works.
 
 Every module is its own subpath, mirroring the source tree under `dist/`:
 `@zeroxsolutions/ui/<dir>/<name>`. The prefixes are `components/ui/*`
-(primitives), `components/layouts/*`, `components/ai-elements/*`,
-`components/chat/*`, `components/*` (composed surfaces), `hooks/*`, and `lib/*`
-(utilities). For example:
+(primitives), `components/layouts/*`, `components/chat/*`, `components/*`
+(composed surfaces), `hooks/*`, and `lib/*` (utilities). For example:
 
 ```tsx
 import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import { Center } from '@zeroxsolutions/ui/components/layouts/center';
-import { CodeBlock } from '@zeroxsolutions/ui/components/ai-elements/code-block';
-import { CodeEditor } from '@zeroxsolutions/ui/components/code-editor';
+import { CodeBlock } from '@zeroxsolutions/ui/components/code-block';
+import { Disclosure } from '@zeroxsolutions/ui/components/disclosure';
 import { useCommandShortcut } from '@zeroxsolutions/ui/hooks/use-command-shortcut';
 import { cn } from '@zeroxsolutions/ui/lib/utils';
 ```
@@ -97,16 +96,19 @@ A few groups (names below are the leaf, prefixed per the line that introduces th
   … plus `data-table` (TanStack Table) and chat primitives (`message`, `bubble`,
   `attachment`).
 - **Layouts** (`components/layouts/*`) — `center`, `container`, `field-grid`,
-  `field-row`, `floating-toolbar-shell`, `labeled-control`, `panel-header`,
+  `field-row`, `floating-toolbar`, `labeled-control`, `panel-header`,
   `section`.
-- **Code editor** (`components/*`) — `code-editor` (CodeMirror + file tree +
-  command palette), `code-editor-pane`, `file-tree`, `file-content-router`,
-  `command-switcher`, `frontmatter-editor`, `markdown-view`, `font-preview`,
-  `image-preview`, `binary-file-card`, `file-type-icon`.
-- **Chat & AI elements** — chat surfaces under `components/chat/*`
-  (`chat-message-shell`, `chat-empty-state`, `chat-attachment-chip`,
-  `chat-composer-attachments`, `chat-composer-ghost-text`); AI elements under
-  `components/ai-elements/*` (`code-block`, `conversation`, `reasoning`, `tool`).
+- **Blocks & display** (`components/*`) — `disclosure` (the shared collapsible
+  header + body block many surfaces compose), `code-block` (read-only Shiki code
+  display, built on `disclosure`).
+- **File & content previews** (`components/*`) — `file-tree`, `command-switcher`,
+  `language-switcher`, `frontmatter-editor`, `markdown-view`, `font-preview`,
+  `image-preview`, `binary-file-card`, `file-type-icon`. (The CodeMirror code
+  editor — `code-editor`, `code-mirror-pane`, `file-content-router` — now lives in
+  [`@zeroxsolutions/editor`](../editor).)
+- **Chat** (`components/chat/*`) — `chat-message-shell`, `chat-empty-state`,
+  `chat-attachment-chip`, `chat-composer-attachments`, `chat-composer-ghost-text`,
+  `reasoning`, `tool`.
 - **Emoji** (`components/*`) — `emoji-picker`, `emoji-appearance`,
   `avatar-editor`, backed by
   [`@zeroxsolutions/fluent-emoji`](../fluent-emoji).
@@ -116,21 +118,22 @@ A few groups (names below are the leaf, prefixed per the line that introduces th
   `tree-row`, `status-dot`, `dirty-dot`, `icon-label`,
   `resize-handle`, `tab-close-button`, `sidebar-group-collapsible`,
   `sidebar-menu-collapsible`.
-- **Hooks** (`hooks/*`) — `use-command-shortcut`, `use-mobile`,
-  `use-stick-to-bottom`.
-- **Utilities** (`lib/*`) — `utils` (`cn`), `shiki`, `code-theme`,
-  `code-syntax`, and other internals.
+- **Hooks** (`hooks/*`) — `use-command-shortcut`, `use-mobile`.
+- **Utilities** (`lib/*`) — `utils` (`cn`), `shiki`, `code-theme`, and other
+  internals.
 
 Browse the workspace **Storybook** for the full catalog with live, interactive
 examples of every component and variant.
 
 ## Syntax highlighting
 
-`code-block` (static `<pre>`) and the CodeMirror editor share one
-[Shiki](https://shiki.style)-based highlighter and the hand-authored `ui-code`
-theme, whose token colors are `var(--code-*)` references. Because the palette
-lives in the token layer, highlighted code flips light/dark with the rest of the
-UI — no Shiki dual-theme plumbing.
+This package owns the single [Shiki](https://shiki.style)-based highlighter
+(`lib/shiki`) and the hand-authored `ui-code` theme, whose token colors are
+`var(--code-*)` references. The read-only `code-block` uses it directly, and the
+CodeMirror editor in [`@zeroxsolutions/editor`](../editor) forward-imports the
+same instance — one highlighter, not two. Because the palette lives in the token
+layer, highlighted code flips light/dark with the rest of the UI — no Shiki
+dual-theme plumbing.
 
 ## Icons
 

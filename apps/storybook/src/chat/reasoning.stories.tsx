@@ -4,7 +4,7 @@ import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from '@zeroxsolutions/ui/components/ai-elements/reasoning';
+} from '@zeroxsolutions/ui/components/chat/reasoning';
 
 const THOUGHT = `Let me work through this.
 
@@ -25,7 +25,7 @@ That ordering keeps the primary action above the fold.`;
  * `ReasoningContent`, which renders its markdown-string child.
  */
 const meta: Meta<typeof Reasoning> = {
-  title: 'AI Elements/Reasoning',
+  title: 'Chat/Reasoning',
   component: Reasoning,
 };
 export default meta;

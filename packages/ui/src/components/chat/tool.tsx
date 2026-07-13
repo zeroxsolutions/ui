@@ -18,7 +18,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
-import { CodeBlock } from './code-block';
+import { CodeBlock } from '@/components/code-block';
 
 /**
  * Tool — a tool-invocation card built on the SDK `Collapsible` + `Badge`. One

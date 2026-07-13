@@ -4,13 +4,13 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 // Highlighting is async + pulls the heavy Shiki highlighter; stub it so the
 // component's rendering logic is tested deterministically. The default resolves
 // `null` (degrade to plain text); individual cases override with real tokens.
-vi.mock('../../lib/shiki', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../lib/shiki')>();
+vi.mock('../lib/shiki', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../lib/shiki')>();
   return { ...actual, highlightToLines: vi.fn().mockResolvedValue(null) };
 });
 
 import { CodeBlock } from './code-block';
-import { highlightToLines } from '../../lib/shiki';
+import { highlightToLines } from '../lib/shiki';
 
 beforeAll(() => {
   // Base UI ScrollArea measures its viewport with a ResizeObserver and queries

@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
 
-import { CodeEditor, CodeEditorContent } from '@zeroxsolutions/ui/components/code-editor';
+import { CodeEditor, CodeEditorContent } from '@zeroxsolutions/editor/code/code-editor';
 import { CommandInput, CommandList } from '@zeroxsolutions/ui/components/ui/command';
 import {
   CommandSwitcher,
   CommandSwitcherItem,
 } from '@zeroxsolutions/ui/components/command-switcher';
 import { Empty } from '@zeroxsolutions/ui/components/ui/empty';
-import { type RoutedFile } from '@zeroxsolutions/ui/components/file-content-router';
+import { type RoutedFile } from '@zeroxsolutions/editor/code/file-content-router';
 import {
   FileTree,
   FileTreeGroup,

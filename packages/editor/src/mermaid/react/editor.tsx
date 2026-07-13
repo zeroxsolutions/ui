@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CodeEditorPane } from '@zeroxsolutions/ui/components/code-editor-pane';
+import { Disclosure } from '@zeroxsolutions/ui/components/disclosure';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -15,6 +15,7 @@ import {
 } from '@zeroxsolutions/ui/components/ui/tabs';
 import { useIsMobile } from '@zeroxsolutions/ui/hooks/use-mobile';
 import { cn } from '@zeroxsolutions/ui/lib/utils';
+import { CodeMirrorPane } from '../../shared/code-mirror/index.js';
 import type { MermaidEditorProps } from '../core/types.js';
 import { DiagramCanvas } from './preview.js';
 import { MermaidToolbar } from './toolbar.js';
@@ -22,9 +23,12 @@ import { useMermaidRender } from './use-mermaid-render.js';
 
 /**
  * `<MermaidEditor>` — the standalone Mermaid authoring surface: a source pane
- * (the design system's `CodeEditorPane`) beside a live pan/zoom preview, with a
- * toolbar for the diagram type, templates, and export. Controlled the same way as
- * `CodeEditorPane` (`value`/`defaultValue`/`onValueChange`), so any host can own
+ * (the in-package `CodeMirrorPane`) beside a live pan/zoom preview, inside the
+ * house `Disclosure` compound — a header (a type/template switcher + export) over
+ * the body, so the header never drifts from the other block surfaces. A Mermaid
+ * block never collapses, so `Disclosure` supplies the header structure and the
+ * card container, not a collapse toggle. Controlled the same way as
+ * `CodeMirrorPane` (`value`/`defaultValue`/`onValueChange`), so any host can own
  * the source. `layout='auto'` splits side-by-side on wide viewports and switches
  * to tabs on narrow ones. Everything but the pan/zoom viewport is composed from
  * `@zeroxsolutions/ui`; the Mermaid engine is loaded lazily by the render hook.
@@ -52,7 +56,7 @@ export function MermaidEditor({
   const useTabs = layout === 'tabs' || (layout === 'auto' && isMobile);
 
   const codePane = (
-    <CodeEditorPane
+    <CodeMirrorPane
       value={source}
       onValueChange={setSource}
       readOnly={readOnly}
@@ -64,41 +68,37 @@ export function MermaidEditor({
   const canvas = <DiagramCanvas state={state} className="h-full rounded-none border-0" />;
 
   return (
-    <div
-      data-slot="mermaid-editor"
-      className={cn(
-        'flex h-[28rem] flex-col overflow-hidden rounded-lg border bg-card',
-        className,
-      )}
-    >
+    <Disclosure data-slot="mermaid-editor" className={className}>
       {toolbar && (
         <MermaidToolbar source={source} svg={state.svg} onPickTemplate={setSource} />
       )}
 
-      {useTabs ? (
-        <Tabs defaultValue="code" className="min-h-0 flex-1">
-          <TabsList className="mx-2 mt-2">
-            <TabsTrigger value="code">Code</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-          </TabsList>
-          <TabsContent value="code" className="min-h-0 flex-1 p-2 pt-0">
-            {codePane}
-          </TabsContent>
-          <TabsContent value="preview" className="min-h-0 flex-1 p-2 pt-0">
-            {canvas}
-          </TabsContent>
-        </Tabs>
-      ) : (
-        <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
-          <ResizablePanel defaultSize={45} minSize={20}>
-            {codePane}
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={55} minSize={20}>
-            {canvas}
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      )}
-    </div>
+      <div className="flex h-[28rem] min-h-0 flex-col overflow-hidden">
+        {useTabs ? (
+          <Tabs defaultValue="code" className="min-h-0 flex-1">
+            <TabsList className="mx-2 mt-2">
+              <TabsTrigger value="code">Code</TabsTrigger>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+            </TabsList>
+            <TabsContent value="code" className="min-h-0 flex-1 p-2 pt-0">
+              {codePane}
+            </TabsContent>
+            <TabsContent value="preview" className="min-h-0 flex-1 p-2 pt-0">
+              {canvas}
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1">
+            <ResizablePanel defaultSize={45} minSize={20}>
+              {codePane}
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={55} minSize={20}>
+              {canvas}
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
+      </div>
+    </Disclosure>
   );
 }

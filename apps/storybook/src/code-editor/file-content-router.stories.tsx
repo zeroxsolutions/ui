@@ -5,7 +5,7 @@ import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   FileContentRouter,
   type RoutedFile,
-} from '@zeroxsolutions/ui/components/file-content-router';
+} from '@zeroxsolutions/editor/code/file-content-router';
 
 // A self-contained SVG asset (no network) for the image route.
 const SVG = `data:image/svg+xml;utf8,${encodeURIComponent(

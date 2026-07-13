@@ -1,16 +1,16 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { FloatingToolbarShell } from './floating-toolbar-shell';
+import { FloatingToolbar } from './floating-toolbar';
 
 afterEach(cleanup);
 
-describe('FloatingToolbarShell', () => {
+describe('FloatingToolbar', () => {
   it('renders a labelled toolbar landmark around its children', () => {
     const { getByRole } = render(
-      <FloatingToolbarShell label="Tools">
+      <FloatingToolbar label="Tools">
         <button>tool</button>
-      </FloatingToolbarShell>,
+      </FloatingToolbar>,
     );
     const toolbar = getByRole('toolbar', { name: 'Tools' });
     expect(toolbar).toBeTruthy();
@@ -19,7 +19,7 @@ describe('FloatingToolbarShell', () => {
 
   it('owns only the visual shell identity, not outer placement', () => {
     const { getByRole } = render(
-      <FloatingToolbarShell label="Tools">x</FloatingToolbarShell>,
+      <FloatingToolbar label="Tools">x</FloatingToolbar>,
     );
     const toolbar = getByRole('toolbar');
     expect(toolbar.className).toContain('bg-card/95');
@@ -32,7 +32,7 @@ describe('FloatingToolbarShell', () => {
 
   it('merges a passed className', () => {
     const { getByRole } = render(
-      <FloatingToolbarShell className="bottom-6">x</FloatingToolbarShell>,
+      <FloatingToolbar className="bottom-6">x</FloatingToolbar>,
     );
     expect(getByRole('toolbar').className).toContain('bottom-6');
   });

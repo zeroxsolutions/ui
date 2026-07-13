@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
 
-import { CodeEditorPane } from '@zeroxsolutions/ui/components/code-editor-pane';
+import { CodeMirrorPane } from '@zeroxsolutions/editor/shared/code-mirror/code-mirror-pane';
 import { Label } from '@zeroxsolutions/ui/components/ui/label';
 import { Switch } from '@zeroxsolutions/ui/components/ui/switch';
 
@@ -31,19 +31,19 @@ if __name__ == "__main__":
 `;
 
 /**
- * `CodeEditorPane` is a single text-editing surface built on CodeMirror 6 with
+ * `CodeMirrorPane` is a single text-editing surface built on CodeMirror 6 with
  * Shiki syntax highlighting. It behaves as a controlled or uncontrolled textbox
  * (`value` / `defaultValue` / `onValueChange`), while `language`, `readOnly`, and
  * `wrap` reconfigure the live editor without remounting. The editor fills the
  * height it is given, so each story sizes the wrapper element.
  */
-const meta: Meta<typeof CodeEditorPane> = {
-  title: 'Code Editor/CodeEditorPane',
-  component: CodeEditorPane,
+const meta: Meta<typeof CodeMirrorPane> = {
+  title: 'Code Editor/CodeMirrorPane',
+  component: CodeMirrorPane,
 };
 export default meta;
 
-type Story = StoryObj<typeof CodeEditorPane>;
+type Story = StoryObj<typeof CodeMirrorPane>;
 
 /** A TypeScript document highlighted live, driven by controlled `value` state. */
 export const TypeScript: Story = {
@@ -51,7 +51,7 @@ export const TypeScript: Story = {
     const [value, setValue] = React.useState(TS_SAMPLE);
     return (
       <div className="h-[420px] w-[640px]">
-        <CodeEditorPane
+        <CodeMirrorPane
           value={value}
           onValueChange={setValue}
           language="typescript"
@@ -67,7 +67,7 @@ export const Python: Story = {
     const [value, setValue] = React.useState(PY_SAMPLE);
     return (
       <div className="h-[360px] w-[640px]">
-        <CodeEditorPane
+        <CodeMirrorPane
           value={value}
           onValueChange={setValue}
           language="python"
@@ -97,7 +97,7 @@ export const ReadOnlyAndWrap: Story = {
           </Label>
         </div>
         <div className="h-[300px]">
-          <CodeEditorPane
+          <CodeMirrorPane
             defaultValue={`{ "name": "demo", "description": "${'a very long single line that demonstrates soft wrapping versus horizontal scrolling — toggle the switch above to compare the two behaviours in the editor surface'}" }`}
             language="json"
             readOnly={readOnly}

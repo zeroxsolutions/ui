@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Compartment, EditorState } from '@codemirror/state';
+import { Compartment, EditorState, type Extension } from '@codemirror/state';
 import {
   EditorView,
   drawSelection,
@@ -15,17 +15,17 @@ import {
   historyKeymap,
   indentWithTab,
 } from '@codemirror/commands';
-import { bracketMatching, indentOnInput } from '@codemirror/language';
+import { bracketMatching, indentOnInput, indentUnit } from '@codemirror/language';
 import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import {
   editorTheme,
   shikiHighlighting,
   syntaxLanguage,
-} from '@/lib/code-syntax';
+} from './code-syntax.js';
 
-const paneVariants = cva(
+const codeMirrorPaneVariants = cva(
   'h-full overflow-hidden [&_.cm-editor]:h-full [&_.cm-scroller]:overflow-auto',
   {
     variants: {
@@ -38,12 +38,12 @@ const paneVariants = cva(
   },
 );
 
-export interface CodeEditorPaneProps
+export interface CodeMirrorPaneProps
   extends Omit<
       React.ComponentProps<'div'>,
       'defaultValue' | 'onChange' | 'children'
     >,
-    VariantProps<typeof paneVariants> {
+    VariantProps<typeof codeMirrorPaneVariants> {
   /** Document text (controlled). Pair with `onValueChange`. */
   value?: string;
   /** Initial document text (uncontrolled). */
@@ -58,17 +58,32 @@ export interface CodeEditorPaneProps
   wrap?: boolean;
   /** Placeholder shown while the document is empty. */
   placeholder?: string;
+  /** Columns a tab occupies and the width of one indent step. Defaults to 2. */
+  tabSize?: number;
+  /** Indent with a real tab character instead of spaces. Defaults to false. */
+  useTabs?: boolean;
+  /** Show the line-number gutter. Defaults to true. */
+  showLineNumbers?: boolean;
   ref?: React.Ref<HTMLDivElement>;
+}
+
+/** The tab-width + indent-unit extension the settings menu reconfigures live. */
+function indentExtension(tabSize: number, useTabs: boolean): Extension {
+  return [
+    EditorState.tabSize.of(tabSize),
+    indentUnit.of(useTabs ? '\t' : ' '.repeat(tabSize)),
+  ];
 }
 
 /**
  * A single text-editing surface built on CodeMirror 6 with Shiki syntax
  * highlighting, themed to the design tokens. A controlled textbox
- * (`value`/`defaultValue`/`onValueChange`); `language`, `readOnly`, `wrap`, and
- * `placeholder` reconfigure the live editor without remounting. The editor fills
- * the height it is given — size the wrapper.
+ * (`value`/`defaultValue`/`onValueChange`); `language`, `readOnly`, `wrap`,
+ * `placeholder`, `tabSize`, `useTabs`, and `showLineNumbers` reconfigure the live
+ * editor without remounting (each backed by a CodeMirror `Compartment`). The
+ * editor fills the height it is given — size the wrapper.
  */
-export function CodeEditorPane({
+export function CodeMirrorPane({
   value,
   defaultValue,
   onValueChange,
@@ -76,11 +91,14 @@ export function CodeEditorPane({
   readOnly = false,
   wrap = false,
   placeholder,
+  tabSize = 2,
+  useTabs = false,
+  showLineNumbers = true,
   size,
   className,
   ref,
   ...props
-}: CodeEditorPaneProps) {
+}: CodeMirrorPaneProps) {
   const hostRef = React.useRef<HTMLDivElement | null>(null);
   const viewRef = React.useRef<EditorView | null>(null);
   const onValueChangeRef = React.useRef(onValueChange);
@@ -90,6 +108,8 @@ export function CodeEditorPane({
   const editableCompartment = React.useRef(new Compartment());
   const wrapCompartment = React.useRef(new Compartment());
   const placeholderCompartment = React.useRef(new Compartment());
+  const indentCompartment = React.useRef(new Compartment());
+  const lineNumbersCompartment = React.useRef(new Compartment());
 
   const setHost = React.useCallback(
     (node: HTMLDivElement | null) => {
@@ -108,13 +128,16 @@ export function CodeEditorPane({
     const state = EditorState.create({
       doc: value ?? defaultValue ?? '',
       extensions: [
-        lineNumbers(),
+        lineNumbersCompartment.current.of(
+          showLineNumbers ? lineNumbers() : [],
+        ),
         highlightActiveLine(),
         highlightActiveLineGutter(),
         drawSelection(),
         history(),
         indentOnInput(),
         bracketMatching(),
+        indentCompartment.current.of(indentExtension(tabSize, useTabs)),
         keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
         editorTheme,
         // Keep browser extensions + native spellcheck out of the code surface: the
@@ -204,13 +227,29 @@ export function CodeEditorPane({
     });
   }, [placeholder]);
 
+  React.useEffect(() => {
+    viewRef.current?.dispatch({
+      effects: indentCompartment.current.reconfigure(
+        indentExtension(tabSize, useTabs),
+      ),
+    });
+  }, [tabSize, useTabs]);
+
+  React.useEffect(() => {
+    viewRef.current?.dispatch({
+      effects: lineNumbersCompartment.current.reconfigure(
+        showLineNumbers ? lineNumbers() : [],
+      ),
+    });
+  }, [showLineNumbers]);
+
   return (
     <div
       ref={setHost}
-      data-slot="code-editor-pane"
+      data-slot="code-mirror-pane"
       data-language={language}
       data-readonly={readOnly || undefined}
-      className={cn(paneVariants({ size }), className)}
+      className={cn(codeMirrorPaneVariants({ size }), className)}
       {...props}
     />
   );

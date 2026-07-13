@@ -4,7 +4,7 @@ import {
   FileContentRouter,
   type FileContentRouterProps,
   type RoutedFile,
-} from './file-content-router';
+} from './file-content-router.js';
 
 interface CodeEditorContextValue {
   files: RoutedFile[];

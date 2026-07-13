@@ -1,7 +1,7 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
-import { CodeEditorPane } from './code-editor-pane';
+import { CodeMirrorPane } from './code-mirror-pane.js';
 
 beforeAll(() => {
   // CodeMirror measures layout on mount; jsdom lacks these.
@@ -20,10 +20,10 @@ afterEach(() => {
   cleanup();
 });
 
-describe('CodeEditorPane', () => {
+describe('CodeMirrorPane', () => {
   it('mounts a CodeMirror editor showing the document text', () => {
     const { container } = render(
-      <CodeEditorPane value={'const x = 1'} language="typescript" />,
+      <CodeMirrorPane value={'const x = 1'} language="typescript" />,
     );
     const content = container.querySelector('.cm-content');
     expect(content).not.toBeNull();
@@ -32,9 +32,9 @@ describe('CodeEditorPane', () => {
 
   it('reflects language and read-only as data attributes', () => {
     const { container } = render(
-      <CodeEditorPane value="x" language="python" readOnly />,
+      <CodeMirrorPane value="x" language="python" readOnly />,
     );
-    const root = container.querySelector('[data-slot="code-editor-pane"]')!;
+    const root = container.querySelector('[data-slot="code-mirror-pane"]')!;
     expect(root.getAttribute('data-language')).toBe('python');
     expect(root.getAttribute('data-readonly')).toBe('true');
     // read-only editors are not contenteditable
@@ -43,14 +43,41 @@ describe('CodeEditorPane', () => {
     ).toBe('false');
   });
 
+  it('shows the line-number gutter by default and hides it when disabled', () => {
+    const { container, rerender } = render(
+      <CodeMirrorPane value={'a\nb'} language="typescript" />,
+    );
+    // Default: the gutter is present.
+    expect(container.querySelector('.cm-lineNumbers')).not.toBeNull();
+    // Toggling the compartment removes the gutter without a remount.
+    rerender(
+      <CodeMirrorPane value={'a\nb'} language="typescript" showLineNumbers={false} />,
+    );
+    expect(container.querySelector('.cm-lineNumbers')).toBeNull();
+    // …and toggling it back restores it (compartment reconfigure, still no remount).
+    rerender(
+      <CodeMirrorPane value={'a\nb'} language="typescript" showLineNumbers />,
+    );
+    expect(container.querySelector('.cm-lineNumbers')).not.toBeNull();
+  });
+
+  it('mounts and keeps its text with custom indent settings (tabSize + useTabs)', () => {
+    const { container } = render(
+      <CodeMirrorPane value={'const x = 1'} language="typescript" tabSize={8} useTabs />,
+    );
+    expect(container.querySelector('.cm-content')?.textContent).toContain(
+      'const x = 1',
+    );
+  });
+
   it('syncs a controlled value change into the editor', () => {
     const { container, rerender } = render(
-      <CodeEditorPane value="first" language="typescript" />,
+      <CodeMirrorPane value="first" language="typescript" />,
     );
     expect(container.querySelector('.cm-content')?.textContent).toContain(
       'first',
     );
-    rerender(<CodeEditorPane value="second" language="typescript" />);
+    rerender(<CodeMirrorPane value="second" language="typescript" />);
     expect(container.querySelector('.cm-content')?.textContent).toContain(
       'second',
     );
@@ -70,7 +97,7 @@ describe('CodeEditorPane', () => {
   // because jsdom can't compute `color-mix`/`oklch` — but it preserves the rule
   // text verbatim.
   it("themes the selection so it out-ranks CodeMirror's baseTheme default", () => {
-    render(<CodeEditorPane value={'const x = 1'} language="typescript" />);
+    render(<CodeMirrorPane value={'const x = 1'} language="typescript" />);
 
     const css = [...document.querySelectorAll('style')]
       .map((s) => s.textContent ?? '')

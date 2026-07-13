@@ -8,7 +8,7 @@ import {
   ToolInput,
   ToolOutput,
   type ToolState,
-} from '@zeroxsolutions/ui/components/ai-elements/tool';
+} from '@zeroxsolutions/ui/components/chat/tool';
 
 /**
  * `Tool` renders a collapsible tool-invocation card: a header row (icon, title,
@@ -20,7 +20,7 @@ import {
  * wraps `ToolInput`/`ToolOutput` inside a `Tool`.
  */
 const meta: Meta<typeof Tool> = {
-  title: 'AI Elements/Tool',
+  title: 'Chat/Tool',
   component: Tool,
 };
 export default meta;

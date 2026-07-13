@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { FileContentRouter, fileView } from './file-content-router';
+import { FileContentRouter, fileView } from './file-content-router.js';
 
 afterEach(() => {
   cleanup();

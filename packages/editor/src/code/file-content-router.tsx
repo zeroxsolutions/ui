@@ -1,11 +1,12 @@
 import * as React from 'react';
 
-import { cn } from '@/lib/utils';
-import { BinaryFileCard } from './binary-file-card';
-import { CodeEditorPane } from './code-editor-pane';
-import { FontPreview } from './font-preview';
-import { ImagePreview } from './image-preview';
-import { MarkdownView } from './markdown-view';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
+import { BinaryFileCard } from '@zeroxsolutions/ui/components/binary-file-card';
+import { FontPreview } from '@zeroxsolutions/ui/components/font-preview';
+import { ImagePreview } from '@zeroxsolutions/ui/components/image-preview';
+import { MarkdownView } from '@zeroxsolutions/ui/components/markdown-view';
+import { ScrollArea } from '@zeroxsolutions/ui/components/ui/scroll-area';
+import { CodeMirrorPane } from '../shared/code-mirror/index.js';
 
 /**
  * A file, already classified into how it should be shown. The discriminant
@@ -118,7 +119,7 @@ export interface FileContentRouterProps
 }
 
 /**
- * Picks the right viewer for a {@link RoutedFile} — code → `CodeEditorPane`,
+ * Picks the right viewer for a {@link RoutedFile} — code → `CodeMirrorPane`,
  * markdown → `MarkdownView`, image → `ImagePreview`, font → `FontPreview`, else
  * → `BinaryFileCard`. The type-aware heart of the editor; carries no app
  * knowledge or copy (override the binary fallback via `children`). Fills the
@@ -136,7 +137,7 @@ export function FileContentRouter({
   switch (file.view) {
     case 'code':
       content = (
-        <CodeEditorPane
+        <CodeMirrorPane
           value={file.text}
           language={file.language}
           readOnly={readOnly}
@@ -147,9 +148,11 @@ export function FileContentRouter({
       break;
     case 'markdown':
       content = (
-        <div className="size-full overflow-auto p-4">
-          <MarkdownView>{file.text}</MarkdownView>
-        </div>
+        <ScrollArea className="size-full">
+          <div className="p-4">
+            <MarkdownView>{file.text}</MarkdownView>
+          </div>
+        </ScrollArea>
       );
       break;
     case 'image':
@@ -157,9 +160,11 @@ export function FileContentRouter({
       break;
     case 'font':
       content = (
-        <div className="size-full overflow-auto p-6">
-          <FontPreview src={file.src} format={file.format} />
-        </div>
+        <ScrollArea className="size-full">
+          <div className="p-6">
+            <FontPreview src={file.src} format={file.format} />
+          </div>
+        </ScrollArea>
       );
       break;
     case 'binary':

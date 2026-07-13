@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ThemedToken } from 'shiki/types';
 
-import { styleForToken, tokensToRanges } from './code-syntax';
+import { styleForToken, tokensToRanges } from './code-syntax.js';
 
 describe('styleForToken', () => {
   it('emits the color when present', () => {

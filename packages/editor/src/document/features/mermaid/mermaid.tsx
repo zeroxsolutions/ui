@@ -1,8 +1,16 @@
 'use client';
 
 import { Eye, PencilLine, Workflow } from 'lucide-react';
-import { CodeEditorPane } from '@zeroxsolutions/ui/components/code-editor-pane';
+import { CodeBlock } from '@zeroxsolutions/ui/components/code-block';
 import { CopyButton } from '@zeroxsolutions/ui/components/copy-button';
+import {
+  Disclosure,
+  DisclosureActions,
+  DisclosureContent,
+  DisclosureHeader,
+  DisclosureTitle,
+} from '@zeroxsolutions/ui/components/disclosure';
+import { Card, CardContent } from '@zeroxsolutions/ui/components/ui/card';
 import {
   Tabs,
   TabsContent,
@@ -13,6 +21,7 @@ import { cn } from '@zeroxsolutions/ui/lib/utils';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
 import type { NodeViewProps } from '../../core/index.js';
+import { CodeMirrorPane } from '../../../shared/code-mirror/index.js';
 import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '../../../mermaid/core/detect.js';
 import { DEFAULT_DIAGRAM_SOURCE } from '../../../mermaid/core/templates.js';
 import { DiagramPreview } from '../../../mermaid/react/preview.js';
@@ -24,7 +33,7 @@ import { DiagramViewer } from '../../../mermaid/react/viewer.js';
  * a View/Edit `Tabs` control with icon triggers + a copy control on the right)
  * over the active tab's panel — the rendered diagram under **View**
  * (`DiagramPreview`, which reuses the `mermaid` surface's shared render +
- * pan/zoom), the design system's `CodeEditorPane` under **Edit**. The read-only
+ * pan/zoom), the in-package `CodeMirrorPane` under **Edit**. The read-only
  * Viewer renders the diagram with no edit affordance. The active tab is local
  * view-state — never persisted — so `source` stays the only attribute and the
  * fenced ` ```mermaid ` codec is unchanged. Engine-free (the engine loads lazily
@@ -35,15 +44,18 @@ const mermaidAttrs = z.object({
 });
 type MermaidAttrs = z.infer<typeof mermaidAttrs>;
 
-function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MermaidAttrs>) {
+export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MermaidAttrs>) {
   const type = detectDiagramType(attrs.source);
 
-  // Read-only Viewer: the diagram, no header, no edit affordance.
+  // Read-only Viewer: the diagram framed by the design-system Card, no header, no
+  // edit affordance.
   if (!editable) {
     return (
-      <div className="my-4 rounded-lg border bg-card p-4" data-mermaid contentEditable={false}>
-        <DiagramViewer source={attrs.source} />
-      </div>
+      <Card size="sm" className="my-4" data-mermaid contentEditable={false}>
+        <CardContent>
+          <DiagramViewer source={attrs.source} />
+        </CardContent>
+      </Card>
     );
   }
 
@@ -52,24 +64,26 @@ function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<M
   // owns it and mounts only the active panel) — never written to the document.
   const initialTab = attrs.source.trim() === '' ? 'edit' : 'view';
 
+  // The header + body come from the shared `Disclosure` compound (the same chrome
+  // the code-block composes) — the diagram-type label fills the title, the
+  // View/Edit tabs + copy fill the actions, the active panel fills the content.
+  // No collapse trigger: a Mermaid block never collapses, so `Disclosure` is used
+  // for its header structure and its card container, not its toggle.
   return (
-    <div
+    <Disclosure
       data-mermaid
       contentEditable={false}
       onMouseDown={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
-      className={cn(
-        'my-4 overflow-hidden rounded-lg border bg-card',
-        selected && 'ring-2 ring-ring',
-      )}
+      className={cn('my-4', selected && 'ring-2 ring-ring')}
     >
       <Tabs defaultValue={initialTab} className="gap-0">
-        <div className="flex items-center justify-between gap-2 border-b px-2 py-1.5">
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <DisclosureHeader>
+          <DisclosureTitle>
             <Workflow className="size-4" />
             <span>{DIAGRAM_TYPE_LABEL[type]}</span>
-          </div>
-          <div className="flex items-center gap-1">
+          </DisclosureTitle>
+          <DisclosureActions>
             <TabsList>
               <TabsTrigger value="view" aria-label="View">
                 <Eye />
@@ -79,23 +93,25 @@ function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<M
               </TabsTrigger>
             </TabsList>
             <CopyButton value={attrs.source} label="Copy source" size="icon" />
-          </div>
-        </div>
+          </DisclosureActions>
+        </DisclosureHeader>
 
-        <TabsContent value="view">
-          <DiagramPreview source={attrs.source} className="rounded-none border-0" />
-        </TabsContent>
-        <TabsContent value="edit">
-          <CodeEditorPane
-            value={attrs.source}
-            onValueChange={(source) => updateAttrs({ source })}
-            language="mermaid"
-            placeholder="Write Mermaid source…"
-            className="h-64"
-          />
-        </TabsContent>
+        <DisclosureContent>
+          <TabsContent value="view">
+            <DiagramPreview source={attrs.source} className="rounded-none border-0" />
+          </TabsContent>
+          <TabsContent value="edit">
+            <CodeMirrorPane
+              value={attrs.source}
+              onValueChange={(source) => updateAttrs({ source })}
+              language="mermaid"
+              placeholder="Write Mermaid source…"
+              className="h-64"
+            />
+          </TabsContent>
+        </DisclosureContent>
       </Tabs>
-    </div>
+    </Disclosure>
   );
 }
 
@@ -107,7 +123,7 @@ function escapeHtml(source: string): string {
     .replace(/>/g, '&gt;');
 }
 
-const mermaidCodec: NodeCodec<MermaidAttrs> = {
+export const mermaidCodec: NodeCodec<MermaidAttrs> = {
   node: 'mermaid',
   toMarkdown: (node) => '```mermaid\n' + String(node.attrs?.source ?? '') + '\n```',
   fromMarkdown: (token) =>
@@ -124,12 +140,14 @@ const mermaidCodec: NodeCodec<MermaidAttrs> = {
       : null,
   toReact: (node) => (
     // SSR-safe fallback: Mermaid needs a live DOM to produce an SVG, which the
-    // static server-side Viewer doesn't have. Emit the raw source in a
-    // `pre.mermaid` — the live Editor/Viewer node view renders the real diagram,
-    // while the static export shows the readable source.
-    <pre className="mermaid my-4 overflow-x-auto rounded-lg border bg-card p-4 text-sm">
-      {String(node.attrs?.source ?? '')}
-    </pre>
+    // static export doesn't have. Render the source through the read-only
+    // design-system `CodeBlock` — Shiki-highlighted and copyable, consistent with
+    // every other code block — while the live node view renders the real diagram.
+    <CodeBlock
+      code={String(node.attrs?.source ?? '')}
+      language="mermaid"
+      className="my-4"
+    />
   ),
 };
 

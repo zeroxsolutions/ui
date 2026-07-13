@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { Maximize, Minus, Plus, RotateCcw, Workflow } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@zeroxsolutions/ui/components/ui/alert';
+import { FloatingToolbar } from '@zeroxsolutions/ui/components/layouts/floating-toolbar';
 import { Button } from '@zeroxsolutions/ui/components/ui/button';
 import {
   Empty,
@@ -180,7 +181,7 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
       </div>
 
       {status !== 'empty' && (
-        <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md border bg-background/90 p-0.5 backdrop-blur-sm">
+        <FloatingToolbar label="Zoom controls" className="absolute bottom-2 right-2">
           <Button variant="ghost" size="icon-sm" aria-label="Zoom out" onClick={() => zoomButton(1 / 1.2)}>
             <Minus />
           </Button>
@@ -196,7 +197,7 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
           <Button variant="ghost" size="icon-sm" aria-label="Reset view" onClick={reset}>
             <RotateCcw />
           </Button>
-        </div>
+        </FloatingToolbar>
       )}
 
       {status === 'error' && (

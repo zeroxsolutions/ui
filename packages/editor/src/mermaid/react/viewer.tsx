@@ -1,5 +1,6 @@
 'use client';
 
+import { CodeBlock } from '@zeroxsolutions/ui/components/code-block';
 import { cn } from '@zeroxsolutions/ui/lib/utils';
 import { useMermaidRender } from './use-mermaid-render.js';
 
@@ -12,9 +13,10 @@ export interface DiagramViewerProps {
 
 /**
  * Read-only diagram render — no pan/zoom chrome, no controls. SSR-safe: the
- * first paint (and any environment without a live DOM) emits the readable source
- * in a `pre.mermaid`, and the client render effect swaps in the rendered SVG once
- * mounted. Used by the in-document block's read-only viewer.
+ * first paint (and any environment without a live DOM) renders the readable
+ * source through the design-system read-only `CodeBlock` (Shiki-highlighted,
+ * copyable), and the client render effect swaps in the rendered SVG once mounted.
+ * Used by the in-document block's read-only viewer.
  */
 export function DiagramViewer({ source, className }: DiagramViewerProps) {
   const { svg, status } = useMermaidRender(source);
@@ -32,14 +34,5 @@ export function DiagramViewer({ source, className }: DiagramViewerProps) {
     );
   }
 
-  return (
-    <pre
-      className={cn(
-        'mermaid overflow-x-auto rounded-md border bg-card p-4 text-sm',
-        className,
-      )}
-    >
-      {source}
-    </pre>
-  );
+  return <CodeBlock code={source} language="mermaid" className={className} />;
 }

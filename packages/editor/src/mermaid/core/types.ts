@@ -44,8 +44,8 @@ export interface DiagramTemplate {
 export type MermaidEditorLayout = 'split' | 'tabs' | 'auto';
 
 /**
- * `<MermaidEditor>` props — controlled exactly like the design system's
- * `CodeEditorPane` (`value`/`defaultValue`/`onValueChange`), so a host (including
+ * `<MermaidEditor>` props — controlled exactly like the in-package
+ * `CodeMirrorPane` (`value`/`defaultValue`/`onValueChange`), so a host (including
  * the in-document block) can own the source string with no adapter.
  */
 export interface MermaidEditorProps {

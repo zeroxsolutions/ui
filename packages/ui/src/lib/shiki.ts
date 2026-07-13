@@ -8,9 +8,9 @@ import { CODE_THEME_NAME, codeTheme } from './code-theme';
  * Framework-agnostic Shiki core — the single highlighter instance, lazy grammar
  * loading, and the syntax theme, with NO CodeMirror imports so a static
  * `<pre>` (the chat `CodeBlock`) can highlight without dragging the editor into
- * its bundle. The CodeMirror bridge ({@link file://./code-syntax.ts}) and the
- * static renderer both consume this module, sharing one highlighter + one
- * grammar cache.
+ * its bundle. The read-only renderer here and the CodeMirror bridge in the
+ * composite editor package both consume this module, sharing one highlighter +
+ * one grammar cache.
  *
  * The theme is {@link codeTheme} — a hand-authored TextMate theme whose token
  * colors are `var(--code-*)` design tokens (defined in `styles.css`), so the
@@ -49,9 +49,9 @@ export function ensureHighlighter(): Promise<Highlighter> {
  * left unhighlighted with no error. Importing each grammar by a LITERAL
  * specifier here makes the dependency statically analyzable, so every bundler
  * pre-bundles it deterministically — no runtime discovery, no hash drift. A
- * language absent from this map degrades to plain text. The set mirrors the
- * file router's `EXTENSION_TO_LANGUAGE` (file-content-router) plus Markdown and
- * Mermaid (the diagram editor's source language).
+ * language absent from this map degrades to plain text. The set covers the
+ * languages the read-only block highlights plus Markdown and Mermaid (the
+ * diagram editor's source language).
  */
 const LANG_LOADERS: Record<string, () => Promise<{ default: unknown }>> = {
   markdown: () => import('@shikijs/langs/markdown'),
