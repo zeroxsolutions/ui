@@ -39,4 +39,4 @@ import { Button } from '<design-system>/components/ui/button';   // ✅ house de
 **Why:**
 - One component set on one token set keeps every surface visually consistent and shrinks bundle + maintenance; a second UI library forks the design system, and a hand-rolled look-alike silently drifts from the component it copies (tokens, a11y, dark mode) — so bespoke is confined to what the system provably can't do (coordinate/virtual anchoring, foreign focus ownership), never a re-skin of what it already ships. Importing the source stylesheets is what makes the design system's classes exist in your Tailwind build. (The `className`/variant/native discipline that keeps a composed surface faithful is `ui-primitive-fidelity`.)
 
-Reference: [Tailwind CSS](https://tailwindcss.com/) · see `ui-primitive-fidelity` · `house-libs-catalog-scope` · `fe-app-structure` · `lib-public-exports-and-semver`
+Reference: [Tailwind CSS](https://tailwindcss.com/) · see `ui-primitive-fidelity` · `ui-compound-authoring` · `house-libs-catalog-scope` · `fe-app-structure` · `lib-public-exports-and-semver`
