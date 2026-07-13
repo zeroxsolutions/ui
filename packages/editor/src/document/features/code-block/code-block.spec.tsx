@@ -83,6 +83,19 @@ describe('code-block node view (editable)', () => {
     );
   });
 
+  it('opens the settings menu without crashing', () => {
+    // Regression: the settings menu's "Tab size" DropdownMenuLabel must sit inside
+    // a group/radio-group context, or Base UI throws "MenuGroupContext is missing"
+    // when the menu OPENS — a crash no closed-menu test could catch.
+    render(
+      <CodeBlockNodeView {...nodeViewProps({ language: 'typescript', code: 'const x = 1' }, true)} />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Code settings' }));
+    expect(screen.getByText('Tab size')).toBeTruthy();
+    expect(screen.getByRole('menuitemradio', { name: '4' })).toBeTruthy();
+    expect(screen.getByRole('menuitemcheckbox', { name: 'Soft wrap' })).toBeTruthy();
+  });
+
   it('copies the source through the copy control', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });

@@ -58,13 +58,16 @@ export function CodeSettingsMenu({
         <Settings2 />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Tab size</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={String(settings.tabSize)}
           onValueChange={(value) =>
             onSettingsChange({ tabSize: Number(value) })
           }
         >
+          {/* The label lives inside the RadioGroup: Base UI's `MenuGroupLabel`
+              needs a `Menu.Group`/`Menu.RadioGroup` context, so a bare label
+              directly under the content throws on open. */}
+          <DropdownMenuLabel>Tab size</DropdownMenuLabel>
           {TAB_SIZES.map((size) => (
             <DropdownMenuRadioItem key={size} value={String(size)}>
               {size}
