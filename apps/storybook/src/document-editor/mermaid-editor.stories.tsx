@@ -17,6 +17,10 @@ import { DiagramViewer } from '@zeroxsolutions/editor/mermaid/react/viewer';
 const meta: Meta<typeof MermaidEditor> = {
   title: 'Document Editor/Mermaid Editor',
   component: MermaidEditor,
+  // Render edge-to-edge (no Storybook canvas padding) so the editor surface reads
+  // as a real full-page tool, not a small boxed widget — matching the sibling
+  // Editor/Viewer stories. Each story owns its own framing wrapper.
+  parameters: { layout: 'fullscreen' },
 };
 export default meta;
 
