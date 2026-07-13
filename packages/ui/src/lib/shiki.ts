@@ -50,10 +50,14 @@ export function ensureHighlighter(): Promise<Highlighter> {
  * specifier here makes the dependency statically analyzable, so every bundler
  * pre-bundles it deterministically — no runtime discovery, no hash drift. A
  * language absent from this map degrades to plain text. The set mirrors the
- * file router's `EXTENSION_TO_LANGUAGE` (file-content-router) plus Markdown.
+ * file router's `EXTENSION_TO_LANGUAGE` (file-content-router) plus Markdown and
+ * Mermaid (the diagram editor's source language).
  */
 const LANG_LOADERS: Record<string, () => Promise<{ default: unknown }>> = {
   markdown: () => import('@shikijs/langs/markdown'),
+  // Vendored: shiki's bundled `mermaid` is only the markdown code-block wrapper
+  // (no internal tokenizing → monochrome). See ./mermaid-grammar.ts.
+  mermaid: () => import('./mermaid-grammar'),
   json: () => import('@shikijs/langs/json'),
   yaml: () => import('@shikijs/langs/yaml'),
   toml: () => import('@shikijs/langs/toml'),

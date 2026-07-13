@@ -89,6 +89,7 @@ function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<M
           <CodeEditorPane
             value={attrs.source}
             onValueChange={(source) => updateAttrs({ source })}
+            language="mermaid"
             placeholder="Write Mermaid source…"
             className="h-64"
           />

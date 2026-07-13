@@ -17,6 +17,7 @@ import { KotlinIcon } from "@zeroxsolutions/icons/material/kotlin"
 import { LessIcon } from "@zeroxsolutions/icons/material/less"
 import { LuaIcon } from "@zeroxsolutions/icons/material/lua"
 import { MarkdownIcon } from "@zeroxsolutions/icons/material/markdown"
+import { MermaidIcon } from "@zeroxsolutions/icons/material/mermaid"
 import { PhpIcon } from "@zeroxsolutions/icons/material/php"
 import { PythonIcon } from "@zeroxsolutions/icons/material/python"
 import { ReactIcon } from "@zeroxsolutions/icons/material/react"
@@ -55,6 +56,7 @@ export type LanguageIcon = FC<
  */
 const CODE_LANGUAGES: readonly { id: string; label: string; Icon: LanguageIcon }[] = [
   { id: "markdown", label: "Markdown", Icon: MarkdownIcon },
+  { id: "mermaid", label: "Mermaid", Icon: MermaidIcon },
   { id: "json", label: "JSON", Icon: JsonIcon },
   { id: "yaml", label: "YAML", Icon: YamlIcon },
   { id: "toml", label: "TOML", Icon: TomlIcon },

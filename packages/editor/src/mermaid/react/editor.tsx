@@ -56,6 +56,7 @@ export function MermaidEditor({
       value={source}
       onValueChange={setSource}
       readOnly={readOnly}
+      language="mermaid"
       placeholder="Write Mermaid source…"
       className="h-full"
     />
