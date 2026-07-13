@@ -12,7 +12,7 @@ import { DiagramViewer } from '@zeroxsolutions/editor/mermaid/react/viewer';
  * live pan/zoom preview, with a toolbar for the diagram type, templates, and
  * export — composed from `@zeroxsolutions/ui`, only the pan/zoom viewport bespoke.
  * The in-document **block** (last story) reuses the same render + source
- * components behind a code-block-style header with an eye/pencil view/edit toggle.
+ * components behind a code-block-style header with a View/Edit tab control.
  */
 const meta: Meta<typeof MermaidEditor> = {
   title: 'Document Editor/Mermaid Editor',
@@ -95,9 +95,9 @@ export const ReadOnlyViewer: Story = {
 };
 
 /**
- * The in-document **block** — a code-block-style header (diagram type + eye/pencil
- * view/edit toggle + copy) over a body that follows the toggle. Toggle to the
- * pencil to edit the source in `CodeEditorPane`; the eye renders the diagram.
+ * The in-document **block** — a code-block-style header (diagram type + a View/Edit
+ * tab control + copy) over the active tab's panel. The **Edit** tab edits the
+ * source in `CodeEditorPane`; the **View** tab renders the diagram.
  */
 export const InDocumentBlock: Story = {
   render: () => {
@@ -108,7 +108,7 @@ export const InDocumentBlock: Story = {
       content: [
         { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Diagram' }] },
         { type: 'mermaid', attrs: { source: FLOWCHART } },
-        { type: 'paragraph', content: [{ type: 'text', text: 'Edit it with the pencil toggle.' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Switch to the Edit tab to change the source.' }] },
       ],
     };
     return (

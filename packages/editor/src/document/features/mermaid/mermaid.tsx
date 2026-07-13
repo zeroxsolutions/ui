@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import { Eye, PencilLine, Workflow } from 'lucide-react';
 import { CodeEditorPane } from '@zeroxsolutions/ui/components/code-editor-pane';
 import { CopyButton } from '@zeroxsolutions/ui/components/copy-button';
 import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@zeroxsolutions/ui/components/ui/toggle-group';
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@zeroxsolutions/ui/components/ui/tabs';
 import { cn } from '@zeroxsolutions/ui/lib/utils';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
@@ -20,27 +21,21 @@ import { DiagramViewer } from '../../../mermaid/react/viewer.js';
 /**
  * The in-document Mermaid block. A custom **atom** node holding a text `source`;
  * the node view is a **code-block-style header** (diagram-type label on the left;
- * an eye/pencil view-edit `ToggleGroup` + a copy control on the right) over a body
- * that follows the toggle — the rendered diagram under the eye (`DiagramPreview`,
- * which reuses the `mermaid` surface's shared render + pan/zoom), the design
- * system's `CodeEditorPane` under the pencil. The read-only Viewer renders the
- * diagram with no edit affordance. View/edit is local view-state — never
- * persisted — so `source` stays the only attribute and the fenced ` ```mermaid `
- * codec is unchanged. Engine-free (the engine loads lazily inside the surface).
+ * a View/Edit `Tabs` control with icon triggers + a copy control on the right)
+ * over the active tab's panel — the rendered diagram under **View**
+ * (`DiagramPreview`, which reuses the `mermaid` surface's shared render +
+ * pan/zoom), the design system's `CodeEditorPane` under **Edit**. The read-only
+ * Viewer renders the diagram with no edit affordance. The active tab is local
+ * view-state — never persisted — so `source` stays the only attribute and the
+ * fenced ` ```mermaid ` codec is unchanged. Engine-free (the engine loads lazily
+ * inside the surface).
  */
 const mermaidAttrs = z.object({
   source: z.string().default(DEFAULT_DIAGRAM_SOURCE),
 });
 type MermaidAttrs = z.infer<typeof mermaidAttrs>;
 
-type ViewMode = 'view' | 'edit';
-
 function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MermaidAttrs>) {
-  // A freshly inserted (empty) block opens ready to edit; an existing diagram
-  // opens as a picture. Local view-state only — never written to the document.
-  const [mode, setMode] = useState<ViewMode>(
-    editable && attrs.source.trim() === '' ? 'edit' : 'view',
-  );
   const type = detectDiagramType(attrs.source);
 
   // Read-only Viewer: the diagram, no header, no edit affordance.
@@ -51,6 +46,11 @@ function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<M
       </div>
     );
   }
+
+  // A freshly inserted (empty) block opens on the Edit tab; an existing diagram
+  // opens as a picture. The active tab is uncontrolled view-state (Base UI Tabs
+  // owns it and mounts only the active panel) — never written to the document.
+  const initialTab = attrs.source.trim() === '' ? 'edit' : 'view';
 
   return (
     <div
@@ -63,43 +63,37 @@ function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<M
         selected && 'ring-2 ring-ring',
       )}
     >
-      <div className="flex items-center justify-between gap-2 border-b px-2 py-1.5">
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Workflow className="size-4" />
-          <span>{DIAGRAM_TYPE_LABEL[type]}</span>
+      <Tabs defaultValue={initialTab} className="gap-0">
+        <div className="flex items-center justify-between gap-2 border-b px-2 py-1.5">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Workflow className="size-4" />
+            <span>{DIAGRAM_TYPE_LABEL[type]}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <TabsList>
+              <TabsTrigger value="view" aria-label="View">
+                <Eye />
+              </TabsTrigger>
+              <TabsTrigger value="edit" aria-label="Edit">
+                <PencilLine />
+              </TabsTrigger>
+            </TabsList>
+            <CopyButton value={attrs.source} label="Copy source" size="icon" />
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <ToggleGroup
-            size="sm"
-            value={[mode]}
-            onValueChange={(next: unknown) => {
-              const picked = (Array.isArray(next) ? next[0] : undefined) as ViewMode | undefined;
-              if (picked) setMode(picked);
-            }}
-          >
-            <ToggleGroupItem value="view" aria-label="View">
-              <Eye />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="edit" aria-label="Edit">
-              <PencilLine />
-            </ToggleGroupItem>
-          </ToggleGroup>
-          <CopyButton value={attrs.source} label="Copy source" size="icon-sm" />
-        </div>
-      </div>
 
-      {mode === 'edit' ? (
-        <div className="h-64">
+        <TabsContent value="view">
+          <DiagramPreview source={attrs.source} className="rounded-none border-0" />
+        </TabsContent>
+        <TabsContent value="edit">
           <CodeEditorPane
             value={attrs.source}
             onValueChange={(source) => updateAttrs({ source })}
             placeholder="Write Mermaid source…"
-            className="h-full"
+            className="h-64"
           />
-        </div>
-      ) : (
-        <DiagramPreview source={attrs.source} className="rounded-none border-0" />
-      )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
