@@ -112,7 +112,7 @@ A few groups (names below are the leaf, prefixed per the line that introduces th
 - **Emoji** (`components/*`) — `emoji-picker`, `emoji-appearance`,
   `avatar-editor`, backed by
   [`@zeroxsolutions/fluent-emoji`](../fluent-emoji).
-- **Higher-level controls** (`components/*`) — `number-field`, `select-field`,
+- **Higher-level controls** (`components/*`) — `number-field`,
   `search-input`, `password-input`, `tag-input`, `confirm-button`,
   `split-button`, `toolbar-button`, `popover-icon-button`, `tree-item`,
   `tree-row`, `status-dot`, `dirty-dot`, `icon-label`,
