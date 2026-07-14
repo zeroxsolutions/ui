@@ -45,10 +45,10 @@ export function Section({
     <div className={className} {...props}>
       <div className="flex items-center h-8 px-2.5 mt-1 gap-1">
         {isCollapsible ? (
-          <Button
-            variant="ghost"
+          <button
+            type="button"
             onClick={onToggle}
-            className="flex items-center gap-1 flex-1 min-w-0 h-auto p-0 justify-start"
+            className="flex flex-1 min-w-0 items-center justify-start gap-1 rounded-md text-left outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             {isOpen ? (
               <ChevronDown className="size-3 text-muted-foreground" />
@@ -61,7 +61,7 @@ export function Section({
                 {count}
               </Badge>
             )}
-          </Button>
+          </button>
         ) : (
           <span className="text-xs font-medium truncate flex-1">{title}</span>
         )}
