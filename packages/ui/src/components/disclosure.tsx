@@ -68,8 +68,13 @@ function DisclosureTitle({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       data-slot="disclosure-title"
+      // Auto-size icons placed *directly* in the title — a child combinator, not a
+      // descendant one, so a nested component's own icons (a LanguageSwitcher or
+      // Combobox trigger the title may hold) keep their own sizing instead of being
+      // overridden. Mirrors how Button/Badge size their descendant svgs, so a title
+      // icon is a bare `<Icon />` with no per-consumer size class.
       className={cn(
-        'flex min-w-0 items-center gap-1.5 font-medium text-muted-foreground',
+        "flex min-w-0 items-center gap-1.5 font-medium text-muted-foreground [&>svg]:shrink-0 [&>svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
