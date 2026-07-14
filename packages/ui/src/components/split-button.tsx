@@ -1,136 +1,125 @@
 import { ChevronDown } from "lucide-react"
-import type { ComponentType, ReactNode } from "react"
+import type { ComponentProps } from "react"
 
 import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Kbd } from "@/components/ui/kbd"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
 /**
- * A split-action button: a primary region that runs the default action on the
- * *current* option, plus a separate, always-visible chevron that opens a menu to
- * switch which option is current. The industry split-button pattern (NN/G,
- * Atlassian, PatternFly): one-click access to the common choice while
- * consolidating related variants behind the arrow — used "if the result of
- * clicking the button is an action or selecting a tool". The chevron is
- * persistently rendered and visually separate per NN/G's guidance that the menu
- * signifier must never be hidden. https://www.nngroup.com/articles/split-buttons/
+ * SplitButton - a single divided control: a primary action segment plus a caret
+ * segment that opens a menu of related variants of that action. Built by
+ * composing the design-system `ButtonGroup`, so the two segments share one
+ * rounded outline with a seam (outer corners rounded, inner squared) instead of
+ * reading as two loose buttons. The classic split-button pattern (NN/G,
+ * Atlassian, PatternFly): one-click access to the safe default while
+ * consolidating related choices behind the arrow.
+ * https://www.nngroup.com/articles/split-buttons/
  *
- * Generic over the option value `T` — it knows nothing about the options' domain.
+ * Compound, not a prop-bag - the consumer composes the parts, so it can inject a
+ * control the author never foresaw:
+ *
+ *   <SplitButton>
+ *     <SplitButtonAction onClick={allowOnce}>Allow once</SplitButtonAction>
+ *     <SplitButtonMenu>
+ *       <SplitButtonTrigger aria-label="More allow options" />
+ *       <SplitButtonContent>
+ *         <SplitButtonItem onClick={allowSession}>Allow this session</SplitButtonItem>
+ *         <SplitButtonItem onClick={allowAlways}>Always allow</SplitButtonItem>
+ *       </SplitButtonContent>
+ *     </SplitButtonMenu>
+ *   </SplitButton>
+ *
+ * The caret's open state rides the Base UI `DropdownMenu`; the two segments share
+ * a matched `variant`/`size` (defaulting to `outline`, whose border is the seam),
+ * and `ButtonGroup` joins them. Because Base UI `Menu.Root` renders no DOM, the
+ * action and the caret stay adjacent group children - so the group's seam
+ * selectors apply - while the menu content portals out of flow. The primary
+ * segment can carry a label or an icon; it is not restricted to icon-only.
+ *
+ * Semantics are classic: the primary runs a fixed action, and each item runs its
+ * own related-variant handler - not a remembered-default toggle.
  */
-export interface SplitButtonOption<T extends string> {
-  value: T
-  label: string
-  icon: ComponentType<{ className?: string }>
-  /** Resolved shortcut label (e.g. "W"); rendered as a <Kbd> chip. */
-  shortcut?: string
+function SplitButton({
+  className,
+  ...props
+}: ComponentProps<typeof ButtonGroup>) {
+  return <ButtonGroup className={className} {...props} />
 }
 
-export interface SplitButtonProps<T extends string> {
-  options: SplitButtonOption<T>[]
-  /** The currently selected option — drives the primary icon + tooltip. */
-  value: T
-  /** Whether this group is active — highlights both regions. */
-  active?: boolean
-  /** Run the default action for the current option (primary click). */
-  onPrimary: () => void
-  /** Switch the current option (menu item click). */
-  onValueChange: (value: T) => void
-  dropdownLabel: string
-  /** Extra menu content appended after the options. */
-  extraItems?: ReactNode
-  /** Filter which options appear in the menu (default: all). */
-  filter?: (option: SplitButtonOption<T>) => boolean
-  align?: "start" | "center" | "end"
-}
-
-function SplitButton<T extends string>({
-  options,
-  value,
-  active = false,
-  onPrimary,
-  onValueChange,
-  dropdownLabel,
-  extraItems,
-  filter,
-  align = "start",
-}: SplitButtonProps<T>) {
-  const current = options.find((o) => o.value === value) ?? options[0]
-  const CurrentIcon = current.icon
-  const items = filter ? options.filter(filter) : options
-  const variant = active ? "secondary" : "ghost"
-
+/** The primary action segment - a `Button`; label or icon as children. */
+function SplitButtonAction({
+  variant = "outline",
+  ...props
+}: ComponentProps<typeof Button>) {
   return (
-    <div className="flex items-center">
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Button
-              variant={variant}
-              size="icon"
-              onClick={onPrimary}
-              aria-label={current.label}
-            />
-          }
-        >
-          <CurrentIcon />
-        </TooltipTrigger>
-        <TooltipContent>
-          {current.label}
-          {current.shortcut ? (
-            <>
-              {" "}
-              <Kbd>{current.shortcut}</Kbd>
-            </>
-          ) : null}
-        </TooltipContent>
-      </Tooltip>
-
-      <DropdownMenu>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <DropdownMenuTrigger
-                render={
-                  <Button variant={variant} size="icon" aria-label={dropdownLabel} />
-                }
-              >
-                <ChevronDown className="size-2.5" />
-              </DropdownMenuTrigger>
-            }
-          />
-          <TooltipContent>{dropdownLabel}</TooltipContent>
-        </Tooltip>
-        <DropdownMenuContent align={align} side="top" className="w-auto">
-          {items.map((o) => {
-            const Icon = o.icon
-            return (
-              <DropdownMenuItem key={o.value} onClick={() => onValueChange(o.value)}>
-                <Icon />
-                {o.label}
-                {o.shortcut ? (
-                  <DropdownMenuShortcut>
-                    <Kbd>{o.shortcut}</Kbd>
-                  </DropdownMenuShortcut>
-                ) : null}
-              </DropdownMenuItem>
-            )
-          })}
-          {extraItems}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <Button data-slot="split-button-action" variant={variant} {...props} />
   )
 }
 
-export { SplitButton }
+/** The menu wrapper - the Base UI `DropdownMenu` that owns the caret's open state. */
+const SplitButtonMenu = DropdownMenu
+
+/**
+ * The caret segment - a `Button` rendered as the menu trigger via Base UI
+ * `render`. Defaults its glyph to a chevron; matched to the action's variant.
+ */
+function SplitButtonTrigger({
+  variant = "outline",
+  size = "icon",
+  "aria-label": ariaLabel = "More options",
+  children,
+  ...props
+}: ComponentProps<typeof Button>) {
+  return (
+    <DropdownMenuTrigger
+      render={
+        <Button
+          data-slot="split-button-trigger"
+          variant={variant}
+          size={size}
+          aria-label={ariaLabel}
+          {...props}
+        />
+      }
+    >
+      {children ?? <ChevronDown />}
+    </DropdownMenuTrigger>
+  )
+}
+
+/**
+ * The dropdown surface holding the variant items; anchored to the caret. Sizes
+ * to its content (`w-auto`) rather than the narrow caret's `--anchor-width`, so
+ * item labels don't wrap; still bounded by the menu's own `min-w-32`.
+ */
+function SplitButtonContent({
+  align = "end",
+  className,
+  ...props
+}: ComponentProps<typeof DropdownMenuContent>) {
+  return (
+    <DropdownMenuContent
+      align={align}
+      className={cn("w-auto", className)}
+      {...props}
+    />
+  )
+}
+
+/** One related-variant item; supply its own `onClick`. */
+const SplitButtonItem = DropdownMenuItem
+
+export {
+  SplitButton,
+  SplitButtonAction,
+  SplitButtonMenu,
+  SplitButtonTrigger,
+  SplitButtonContent,
+  SplitButtonItem,
+}

@@ -1,8 +1,14 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { Circle, Square } from 'lucide-react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { SplitButton } from './split-button'
+import {
+  SplitButton,
+  SplitButtonAction,
+  SplitButtonContent,
+  SplitButtonItem,
+  SplitButtonMenu,
+  SplitButtonTrigger,
+} from './split-button'
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = () => {}
@@ -16,43 +22,55 @@ beforeAll(() => {
 
 afterEach(cleanup)
 
-const options = [
-  { value: 'rect', label: 'Rectangle', icon: Square },
-  { value: 'ellipse', label: 'Ellipse', icon: Circle },
-] as const
+function Example({
+  onPrimary = () => {},
+  onSession = () => {},
+}: {
+  onPrimary?: () => void
+  onSession?: () => void
+}) {
+  return (
+    <SplitButton>
+      <SplitButtonAction onClick={onPrimary}>Allow once</SplitButtonAction>
+      <SplitButtonMenu>
+        <SplitButtonTrigger aria-label="More allow options" />
+        <SplitButtonContent>
+          <SplitButtonItem onClick={onSession}>Allow this session</SplitButtonItem>
+        </SplitButtonContent>
+      </SplitButtonMenu>
+    </SplitButton>
+  )
+}
 
 describe('SplitButton', () => {
-  it('runs onPrimary for the current option on a primary click', () => {
-    const onPrimary = vi.fn()
-    render(
-      <SplitButton
-        options={[...options]}
-        value="rect"
-        onPrimary={onPrimary}
-        onValueChange={() => {}}
-        dropdownLabel="Shape tools"
-      />,
-    )
+  it('renders the primary and caret as two segments of one group', () => {
+    render(<Example />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Rectangle' }))
+    const group = screen.getByRole('group') // throws if the ButtonGroup is missing
+    const buttons = screen.getAllByRole('button')
+    expect(buttons).toHaveLength(2)
+    // both segments live inside the single group — one divided control
+    expect(group.contains(buttons[0])).toBe(true)
+    expect(group.contains(buttons[1])).toBe(true)
+    // getByRole throws if absent, so these assert the two named segments exist
+    screen.getByRole('button', { name: 'Allow once' })
+    screen.getByRole('button', { name: 'More allow options' })
+  })
+
+  it('runs the fixed primary action on a primary click', () => {
+    const onPrimary = vi.fn()
+    render(<Example onPrimary={onPrimary} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Allow once' }))
     expect(onPrimary).toHaveBeenCalledTimes(1)
   })
 
-  it('fires onValueChange with the chosen option from the menu', async () => {
-    const onValueChange = vi.fn()
-    render(
-      <SplitButton
-        options={[...options]}
-        value="rect"
-        onPrimary={() => {}}
-        onValueChange={onValueChange}
-        dropdownLabel="Shape tools"
-      />,
-    )
+  it("opens the menu from the caret and runs the item's own handler", async () => {
+    const onSession = vi.fn()
+    render(<Example onSession={onSession} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Shape tools' }))
-    const item = await screen.findByText('Ellipse')
-    fireEvent.click(item)
-    expect(onValueChange).toHaveBeenCalledWith('ellipse')
+    fireEvent.click(screen.getByRole('button', { name: 'More allow options' }))
+    fireEvent.click(await screen.findByText('Allow this session'))
+    expect(onSession).toHaveBeenCalledTimes(1)
   })
 })

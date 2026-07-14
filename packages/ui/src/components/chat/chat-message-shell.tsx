@@ -4,15 +4,15 @@ import { cn } from '@/lib/utils';
 import type { ChatAgentIdentity, ChatRole } from './chat-types';
 
 /**
- * ChatMessageShell — the wrapper for one message row, agnostic to how the
+ * ChatMessageShell - the wrapper for one message row, agnostic to how the
  * body is rendered.
  *
- * `user` → a soft `bg-muted` bubble pinned to the inline-end, capped at 85%
- * width. Every other role → full-width plain prose with an optional agent
+ * `user` -> a soft `bg-muted` bubble pinned to the inline-end, capped at 85%
+ * width. Every other role -> full-width plain prose with an optional agent
  * identity row (colour dot + name) above and an agent-coloured leading-edge
  * accent while streaming. The host decides when to show the identity row
  * (typically only on the first message of a contiguous same-agent run) and
- * supplies the message body as `children` (markdown, tool cards, thinking —
+ * supplies the message body as `children` (markdown, tool cards, thinking -
  * none of which this shell knows about).
  *
  * Presentational only: no app state, no router. `className`/`...props` is not
@@ -34,7 +34,7 @@ export interface ChatMessageShellProps {
    */
   showAgentLabel?: boolean;
   /**
-   * Live-streaming flag — adds a subtle leading-edge accent in the agent's
+   * Live-streaming flag - adds a subtle leading-edge accent in the agent's
    * colour while text is still arriving. No-op without `agent.color`.
    */
   streaming?: boolean;
@@ -71,7 +71,7 @@ export function ChatMessageShell({
     );
   }
 
-  // Assistant (and system/tool) — full-width plain prose. A definite width on
+  // Assistant (and system/tool) - full-width plain prose. A definite width on
   // the body keeps wide tool cards / code blocks inside the panel; `w-fit`
   // would let an inner pre's intrinsic width grow the parent past the edge.
   const accent = agent?.color;
@@ -82,11 +82,15 @@ export function ChatMessageShell({
     <div data-role={role} className={cn('group flex w-full flex-col', className)}>
       {showAgentLabel && agent?.name && (
         <div className="mb-1.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <span
-            className="size-1.5 shrink-0 rounded-full"
-            style={accent ? { backgroundColor: accent } : undefined}
-            aria-hidden
-          />
+          {agent.icon ? (
+            <agent.icon className="size-4 shrink-0" />
+          ) : (
+            <span
+              className="size-1.5 shrink-0 rounded-full"
+              style={accent ? { backgroundColor: accent } : undefined}
+              aria-hidden
+            />
+          )}
           <span className="truncate font-medium tracking-tight">
             {agent.name}
           </span>

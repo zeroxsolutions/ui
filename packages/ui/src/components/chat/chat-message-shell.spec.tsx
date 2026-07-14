@@ -42,6 +42,24 @@ describe('ChatMessageShell', () => {
     expect(screen.getByText('Vincent')).toBeTruthy();
   });
 
+  it('renders the agent icon in place of the colour dot when provided', () => {
+    const Mark = ({ className }: { className?: string }) => (
+      <svg data-testid="agent-mark" className={className} />
+    );
+    const { container } = render(
+      <ChatMessageShell
+        role="assistant"
+        agent={{ name: 'Claude', icon: Mark }}
+        showAgentLabel
+      >
+        body
+      </ChatMessageShell>,
+    );
+    expect(screen.getByTestId('agent-mark')).toBeTruthy();
+    // The colour dot (the only aria-hidden node) is gone when an icon is present.
+    expect(container.querySelector('[aria-hidden]')).toBeNull();
+  });
+
   it('paints a streaming accent in the agent colour', () => {
     const { container } = render(
       <ChatMessageShell role="assistant" agent={{ color: '#ff0000' }} streaming>
