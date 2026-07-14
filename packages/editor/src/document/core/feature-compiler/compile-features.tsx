@@ -24,9 +24,17 @@ import { deriveAttributes } from './derive-attributes.js';
  *
  * The minimal substrate (`doc`/`paragraph`/`text`) is defined here so an editor
  * always has a working schema; every other block/mark comes from a feature.
+ *
+ * The top node's `content` is parameterized (default `block+`) so a compact
+ * surface — the chat composer — can constrain the document to a **single
+ * textblock** (`paragraph`) at the schema level, making a second block
+ * structurally impossible (ProseMirror's `splitBlock` no-ops) rather than
+ * suppressed by behavior. The default keeps the block document unchanged.
  */
 
-const Doc = Node.create({ name: 'doc', topNode: true, content: 'block+' });
+/** The top node, built per compile so its content expression is configurable. */
+const makeDoc = (topContent: string): Node =>
+  Node.create({ name: 'doc', topNode: true, content: topContent });
 
 const Paragraph = Node.create({
   name: 'paragraph',
@@ -63,6 +71,12 @@ function compileNode(spec: NodeSpec): Node {
             buildNodeViewComponent(spec) as Parameters<
               typeof ReactNodeViewRenderer
             >[0],
+            // The node-view's own DOM host defaults to a block <div>; an inline
+            // node (mention) needs a <span> so the pill stays in the inline flow
+            // instead of forcing a line break before and after it.
+            spec.group === 'inline'
+              ? ({ as: 'span' } as Parameters<typeof ReactNodeViewRenderer>[1])
+              : undefined,
           )
       : undefined,
   });
@@ -138,8 +152,22 @@ function compileBehavior(features: EditorFeature[]): Extension {
   });
 }
 
-export function compileFeatures(features: EditorFeature[]): EngineExtensions {
-  const extensions: (Node | Mark | Extension)[] = [Doc, Paragraph, Text];
+/** Options for the feature compiler. */
+export interface CompileOptions {
+  /** The top node's ProseMirror content expression. Defaults to `block+`; a
+   *  compact surface passes `paragraph` for a single-textblock schema. */
+  topContent?: string;
+}
+
+export function compileFeatures(
+  features: EditorFeature[],
+  options: CompileOptions = {},
+): EngineExtensions {
+  const extensions: (Node | Mark | Extension)[] = [
+    makeDoc(options.topContent ?? 'block+'),
+    Paragraph,
+    Text,
+  ];
   for (const feature of features) {
     for (const node of feature.nodes ?? []) extensions.push(compileNode(node));
     for (const mark of feature.marks ?? []) extensions.push(compileMark(mark));

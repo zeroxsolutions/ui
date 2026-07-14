@@ -35,6 +35,9 @@ export interface DocumentEditorConfig {
   element?: HTMLElement;
   editable?: boolean;
   snapshotDebounceMs?: number;
+  /** The top node's content expression (default `block+`). A compact surface —
+   *  the chat composer — passes `paragraph` for a single-textblock schema. */
+  topContent?: string;
   onChange?(delta: Delta): void;
   onSnapshot?(snapshot: Snapshot): void;
   /**
@@ -108,7 +111,9 @@ const slashDecorationPlugin = (): Plugin<SlashDeco> =>
 export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
   const features = resolveFeatures(config.features ?? []);
   const featureIds = new Set(features.map((feature) => feature.id));
-  const extensions = compileFeatures(features) as unknown as Extensions;
+  const extensions = compileFeatures(features, {
+    topContent: config.topContent,
+  }) as unknown as Extensions;
   const content = config.content ?? EMPTY_DOC;
 
   const makeBackend = config.backendFactory ?? createPmStepsBackend;

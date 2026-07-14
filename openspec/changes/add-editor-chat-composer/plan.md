@@ -132,3 +132,37 @@ Accepted findings that shaped this plan:
 ## Execution Notes
 
 <!-- Append transient observations during apply; do not overwrite Manual Adjustments. -->
+
+- **Steps 3-8 implemented (2026-07-14).** Tasks 3-8 done; task 9 (release) is
+  user-gated and not run.
+- **Shared codec extracted to `composer/message-payload.ts`** (`docToPayload`,
+  `docToSegments`, `segmentsToDoc`, `dedupeMentions`) rather than inlining the
+  doc↔payload mapping in `chat-input`/`chat-message-view` — the single mapping is
+  the "one shared codec" the spec requires, and it is unit-tested independently
+  (`message-payload.spec`). `ChatMessageView` renders via `renderToReact` + the
+  `mention` codec's `toReact`, so its pill IS the same `MentionPill` the input's
+  node-view renders (proven by an identity assertion in `chat-message-view.spec`).
+- **Menus written self-contained, NOT via a shared hook.** A first attempt at a
+  `useTriggerMenu` hook created a circular data dependency (the list `count` feeds
+  the hook, but the list derives from the hook's `active.query`) and pushed toward
+  an impure render-time read — the "abstract at 2 occurrences guesses the shape
+  wrong" trap. Reverted to two self-contained components mirroring the proven
+  `slash-menu.tsx` (out-of-scope, untouched). The shared inline-decoration slot is
+  made non-interfering with a `painted` ref so mounting both menus never lets one
+  wipe the other's `@`/`/` highlight (VF-menu-exclusivity).
+- **Substrate (path B) already landed** by tasks 2.1-2.2: `topContent: 'paragraph'`
+  threaded through `createDocumentEditor` + the `createEditor` builder; `ChatInput`
+  builds via `createDocumentEditor({ topContent: COMPOSER_TOP_CONTENT, onEngine })`
+  so `@tiptap/react`'s `EditorContent` hosts the mention node-view portals.
+- **`Enter` submit** is a capture-phase listener on the composer wrapper (an
+  ancestor of the contenteditable), so it runs before ProseMirror; when a menu is
+  open its `document`-capture handler stops `Enter` upstream, so submit fires only
+  when no menu owns the key. `Shift+Enter` falls through to the engine hard-break.
+- **`.chat-composer` CSS scope** added to `styles.css` (token-only): the composer
+  reuses the engine's `.slash-active`/`.slash-ghost` inline decorations and the
+  Placeholder, but with none of the document surface's 3rem drag-handle gutter.
+- **Verification** retained in `verification.md`: editor typecheck/build/test
+  green, storybook builds, `test-storybook` green for the composer, and a 23/23
+  real-browser (Playwright) pass with discrimination checks. Pre-existing,
+  unrelated `storybook:typecheck` failures (pagination/message-scroller stories)
+  are documented there and left untouched.

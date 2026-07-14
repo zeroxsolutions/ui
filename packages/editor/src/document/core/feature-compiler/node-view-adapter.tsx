@@ -33,7 +33,16 @@ export function buildNodeViewComponent(spec: NodeSpec): unknown {
       deleteNode: () => engineProps.deleteNode(),
       children: spec.content ? <NodeViewContent /> : undefined,
     };
-    return <NodeViewWrapper data-type={spec.name}>{spec.render?.(props)}</NodeViewWrapper>;
+    // An inline node (a mention atom) must render inline; the default wrapper is
+    // a block <div>, which breaks the paragraph line before and after the pill.
+    return (
+      <NodeViewWrapper
+        as={spec.group === 'inline' ? 'span' : 'div'}
+        data-type={spec.name}
+      >
+        {spec.render?.(props)}
+      </NodeViewWrapper>
+    );
   }
   return EditorNodeView;
 }

@@ -388,4 +388,79 @@
       display: none !important;
     }
   }
+
+  /* 4. The chat composer (`ChatInput` / `ChatMessageView`) — a compact, single
+   * text line, NOT the block document. It reuses the engine (so it inherits the
+   * `.slash-active`/`.slash-ghost` inline decorations) but wants none of the
+   * document surface's 3rem drag-handle gutter or prose block spacing, so it
+   * gets its own scope. Every colour is a semantic token (the sanctioned
+   * "foreign engine rides the design tokens" exception). */
+  .chat-composer .ProseMirror {
+    outline: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  /* The empty-state placeholder (Tiptap Placeholder marks the empty node). */
+  .chat-composer .ProseMirror .is-empty::before,
+  .chat-composer .ProseMirror .is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: var(--muted-foreground);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  /* The composer's own accent — a deliberate coloured exception to the design
+   * system's monochrome tokens, scoped to the chat surface so it never leaks
+   * elsewhere. A proper CSS variable with a light AND a dark value (NOT a
+   * hardcoded per-rule colour), so dark mode and theming still work; the mention
+   * pill reads it too (the unlayered override at the end of this file). */
+  .chat-composer {
+    --composer-accent: oklch(0.55 0.18 265);
+  }
+  .dark .chat-composer {
+    --composer-accent: oklch(0.7 0.15 265);
+  }
+
+  /* The inline `@query` / `/query` the open menu is filtering on — a coloured
+   * highlight on the composer accent (NOT a flat gray), so the pending
+   * mention/command reads as active and matches the resolved pill. */
+  .chat-composer .slash-active {
+    background: color-mix(in oklab, var(--composer-accent) 16%, transparent);
+    color: var(--composer-accent);
+    border-radius: 0.25rem;
+    padding: 0.05rem 0.1rem;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .chat-composer .slash-ghost {
+    color: var(--muted-foreground);
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+  }
+}
+
+/* The composer's mention pill overrides the shared `MentionPill`'s monochrome
+ * `primary` look with the composer accent. UNLAYERED so it beats the primitive's
+ * Tailwind utility classes (`bg-primary/10` / `text-primary`, which sit in the
+ * later `utilities` cascade layer). Scoped to `.chat-composer`, so the document
+ * editor's mention pill is untouched and stays on `--primary`. Applies to both
+ * the editable pill (ChatInput) and the read-only one (ChatMessageView). */
+.chat-composer [data-slot='mention'] {
+  background-color: color-mix(in oklab, var(--composer-accent) 12%, transparent);
+  color: var(--composer-accent);
+}
+
+/* The composer's leading `/command` pill — the same accent family as the mention,
+ * a touch more defined (a hairline accent ring + a trailing gap) so the command
+ * that owns the line reads as distinct from an inline `@mention`. UNLAYERED for
+ * the same reason as the mention override; scoped to `.chat-composer`, and shared
+ * by the editable pill (ChatInput) and the read-only one (ChatMessageView). */
+.chat-composer [data-slot='command'] {
+  background-color: color-mix(in oklab, var(--composer-accent) 14%, transparent);
+  color: var(--composer-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--composer-accent) 30%, transparent);
+  margin-right: 0.125rem;
 }

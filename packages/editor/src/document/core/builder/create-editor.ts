@@ -24,6 +24,10 @@ export interface EditorBuilder {
   backend(factory: DocumentBackendFactory): EditorBuilder;
   content(doc: DocJSON): EditorBuilder;
   editable(editable: boolean): EditorBuilder;
+  /** Constrain the top node's content expression (default `block+`). A compact
+   *  surface — the chat composer — passes `paragraph` for a single-textblock
+   *  schema so a second block is structurally impossible. */
+  topContent(expr: string): EditorBuilder;
   snapshotDebounce(ms: number): EditorBuilder;
   onChange(handler: (delta: Delta) => void): EditorBuilder;
   onSnapshot(handler: (snapshot: Snapshot) => void): EditorBuilder;
@@ -38,6 +42,7 @@ export function createEditor(): EditorBuilder {
   let content: DocJSON | undefined;
   let editable = true;
   let snapshotDebounceMs: number | undefined;
+  let topContent: string | undefined;
 
   const builder: EditorBuilder = {
     use(...next) {
@@ -54,6 +59,10 @@ export function createEditor(): EditorBuilder {
     },
     editable(next) {
       editable = next;
+      return builder;
+    },
+    topContent(expr) {
+      topContent = expr;
       return builder;
     },
     snapshotDebounce(ms) {
@@ -75,6 +84,7 @@ export function createEditor(): EditorBuilder {
         backendFactory,
         snapshotDebounceMs,
         editable: options?.editable ?? editable,
+        topContent,
         element: options?.element,
         onChange: changeHandlers.length
           ? (delta) => changeHandlers.forEach((handler) => handler(delta))

@@ -118,3 +118,49 @@ describe('createDocumentEditor', () => {
     );
   });
 });
+
+const twoPara = (): DocJSON => ({
+  type: 'doc',
+  content: [
+    { type: 'paragraph', content: [{ type: 'text', text: 'one' }] },
+    { type: 'paragraph', content: [{ type: 'text', text: 'two' }] },
+  ],
+});
+
+describe('topContent substrate', () => {
+  it('defaults to block+ — a multi-block document is preserved', () => {
+    const editor = build((b) => b.content(twoPara()));
+    expect(editor.getJSON().content).toHaveLength(2);
+    expect(editor.getText()).toContain('one');
+    expect(editor.getText()).toContain('two');
+  });
+
+  it('topContent("paragraph") builds a single-textblock document', () => {
+    const editor = build((b) => b.topContent('paragraph').content(doc('hi')));
+    expect(editor.getJSON().content).toHaveLength(1);
+    expect(editor.getText()).toBe('hi');
+  });
+
+  const insertSecondParagraph = (editor: IEditor): void => {
+    editor.run('focus', { position: 'end' });
+    editor.run('insertContent', {
+      content: { type: 'paragraph', content: [{ type: 'text', text: 'two' }] },
+    });
+  };
+
+  it('topContent("paragraph") makes a second top-level block structurally impossible', () => {
+    // The single-textblock schema (content: "paragraph") admits exactly one
+    // block, so a transaction that would create a second — the composer's
+    // Enter/splitBlock, or an inserted paragraph — cannot: the new text merges
+    // into the one block. The constraint is structural, not behavioral.
+    const constrained = build((b) => b.topContent('paragraph').content(doc('one')));
+    insertSecondParagraph(constrained);
+    expect(constrained.getJSON().content).toHaveLength(1);
+  });
+
+  it('the default block+ substrate DOES admit a second block (the test discriminates)', () => {
+    const unconstrained = build((b) => b.content(doc('one')));
+    insertSecondParagraph(unconstrained);
+    expect(unconstrained.getJSON().content!.length).toBeGreaterThan(1);
+  });
+});
