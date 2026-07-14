@@ -57,7 +57,7 @@ export function CodeSettingsMenu({
       >
         <Settings2 />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="min-w-48">
         <DropdownMenuRadioGroup
           value={String(settings.tabSize)}
           onValueChange={(value) =>
