@@ -20,7 +20,7 @@ const STATUS_TONE_CLASS: Record<StatusTone, string> = {
 }
 
 export interface AiProviderCardProps
-  extends Omit<React.ComponentProps<'div'>, 'onSelect'> {
+  extends Omit<React.ComponentProps<'div'>, 'onSelect' | 'onClick'> {
   /** Provider display name. */
   name: string
   /** Brand mark node - consumer-supplied (e.g. a `@zeroxsolutions/icons` mark).
