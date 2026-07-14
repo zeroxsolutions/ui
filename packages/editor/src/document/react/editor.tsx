@@ -104,6 +104,31 @@ export function Editor({
     };
   }, [rootEl]);
 
+  // Host the grip icon inside the handle through a wrapper node WE create — never
+  // by portaling straight into `.drag-handle`. That handle is owned by the drag
+  // extension, which tears its node down on `editor.destroy()`; portaling React
+  // directly into it means React's own portal teardown races that removal and
+  // throws `removeChild: not a child of this node` on unmount (a flaky crash on
+  // every story/editor swap). Because React only ever removes the grip from OUR
+  // span — which still parents it even after the extension detaches the handle —
+  // the race is gone. `display: contents` keeps the span out of the handle's
+  // layout, so the grip sits exactly where it did before.
+  const [gripHost, setGripHost] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!handleEl) {
+      setGripHost(null);
+      return;
+    }
+    const host = document.createElement('span');
+    host.style.display = 'contents';
+    handleEl.appendChild(host);
+    setGripHost(host);
+    return () => {
+      setGripHost(null);
+      host.remove();
+    };
+  }, [handleEl]);
+
   // The "+" affordance sits just left of the drag handle and shadows its
   // position: the extension moves the handle (inline `style.left/top`) and
   // toggles its `.hide` class as the pointer crosses blocks, so mirror those
@@ -174,7 +199,7 @@ export function Editor({
           .filter(Boolean)
           .join(' ')}
       />
-      {handleEl && createPortal(<GripVertical size={16} aria-hidden />, handleEl)}
+      {gripHost && createPortal(<GripVertical size={16} aria-hidden />, gripHost)}
       {rootEl &&
         plus &&
         !plus.hidden &&
