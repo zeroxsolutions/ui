@@ -4,12 +4,15 @@ Inline-SVG React icons organized into **categories**, each exposed as a real
 import subpath. One icon per subpath, imported as
 `@zeroxsolutions/icons/<category>/<name>`:
 
-- **`brands/`** — AI + dev/infra **marks** (logos [lucide-react](https://lucide.dev)
-  doesn't ship). A self-sufficient set of **129** vendored marks — model labs,
-  inference hosts, voice, generative media, agent tooling, vector/data stores, and
-  dev/cloud/infra — each a compound component with the [`@lobehub/icons`](https://github.com/lobehub/lobe-icons)
-  variant surface (`.Color` / `.Mono` / `.Avatar` / `.Text` / `.Combine`) **where
-  each variant exists**. No runtime dependency on any icon library.
+- **`brands/`** — brand **marks** (logos [lucide-react](https://lucide.dev)
+  doesn't ship). A self-sufficient set of vendored marks spanning the AI ecosystem
+  (model labs, inference hosts, voice, generative media, agent tooling, vector/data
+  stores), dev/cloud/infra, **social / communication** (Facebook, Discord, X,
+  WhatsApp, …) and **workspace / productivity** (Slack, Notion, Figma, Gmail, …) —
+  plus full **Cloudflare AI Gateway** provider coverage. Each is a compound component
+  with the [`@lobehub/icons`](https://github.com/lobehub/lobe-icons) variant surface
+  (`.Color` / `.Mono` / `.Avatar` / `.Text` / `.Combine`) **where each variant
+  exists**. No runtime dependency on any icon library.
 - **`material/`** — the [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme)
   **file-type icons** (language / framework / tooling glyphs). Reach here for a
   file-kind icon; use lucide for generic UI glyphs.
@@ -70,8 +73,8 @@ import { OpenaiMark } from '@zeroxsolutions/icons/brands/openai';
 ### `brands/`
 
 Each mark is `@zeroxsolutions/icons/brands/<name>`; the export symbol is the
-PascalCase of the name plus `Mark` (`openai` → `OpenaiMark`). **129** marks span
-the AI ecosystem and dev/infra:
+PascalCase of the name plus `Mark` (`openai` → `OpenaiMark`). The marks span the
+AI ecosystem, dev/infra, social/communication, and workspace/productivity:
 
 | Domain | Source | Examples |
 | --- | --- | --- |
@@ -82,14 +85,21 @@ the AI ecosystem and dev/infra:
 | Agent / tooling | lobehub | `langchain`, `llamaindex`, `crewai`, `dify`, `n8n`, `zapier`, `mcp`, … |
 | Vector / data | Simple Icons + others | `qdrant`, `milvus`, `redis`, `mongodb`, `supabase`, `pinecone`, `chroma`, … |
 | Dev / cloud / infra | lobehub + Simple Icons + others | `aws`, `azure`, `gcp`, `docker`, `kubernetes`, `terraform`, `stripe`, `twilio`, `heroku`, `sendgrid`, `segment`, `github-mark`, … |
+| Social / communication | Simple Icons + gilbarbara | `facebook`, `messenger`, `instagram`, `threads`, `x`, `linkedin`, `youtube`, `tiktok`, `reddit`, `pinterest`, `snapchat`, `mastodon`, `bluesky`, `whatsapp`, `telegram`, `signal`, `wechat`, `line` |
+| Workspace / collaboration | Simple Icons + gilbarbara + svgl | `slack`, `discord`, `microsoft-teams`, `zoom`, `google-meet`, `notion`, `figma`, `trello`, `asana`, `jira`, `confluence`, `linear`, `miro`, `airtable`, `monday`, `clickup`, `dropbox`, `loom`, `calendly` |
+| Mail / office | Simple Icons + gilbarbara + svgl | `gmail`, `google-drive`, `google-docs`, `google-calendar`, `outlook`, `onedrive` |
+| AI Gateway providers | lobehub + vendor | `bedrock`, `vertexai`, `xai`, `parallel` (closing the [Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/usage/providers/) provider gap) |
 
 Marks are vendored from [`@lobehub/icons`](https://github.com/lobehub/lobe-icons)
 (MIT — the AI brands, with full variants), [Simple Icons](https://simpleicons.org)
-(CC0 — dev/infra, base + `.Color`/`.Mono`/`.Avatar`), and a few from
-[svgl](https://svgl.app) / [gilbarbara/logos](https://github.com/gilbarbara/logos)
-(`hume`, `pinecone`, `chroma`, `heroku`, `twilio`, `sendgrid`, `segment` — base +
-`.Color`/`.Avatar`). Which variants a mark ships
-follows its source; `.Text`/`.Combine` exist mainly on the lobehub AI marks.
+(CC0 — most dev/infra + social/workspace, base + `.Color`/`.Mono`/`.Avatar`),
+[gilbarbara/logos](https://github.com/gilbarbara/logos) (`linkedin`,
+`microsoft-teams`, `onedrive`, `monday`, and existing `hume`, `pinecone`, `heroku`,
+`twilio`, `sendgrid`, `segment`), [svgl](https://svgl.app) (`outlook`), and
+`parallel.ai` / vendor SVGs. A **full-colour / gradient** mark (`microsoft-teams`,
+`outlook`, `onedrive`, `monday`) renders its base as the full artwork and ships
+`.Color` **without** `.Mono`. Which variants a mark ships follows its source;
+`.Text`/`.Combine` exist mainly on the lobehub AI marks.
 
 ### `material/`
 
@@ -107,14 +117,17 @@ The `material/` icons are from the
 are retained by that project.
 
 The `brands/` marks are vendored from [`@lobehub/icons`](https://github.com/lobehub/lobe-icons)
-(**MIT**) and [Simple Icons](https://simpleicons.org) (**CC0**), a few from
-[svgl](https://svgl.app) and [gilbarbara/logos](https://github.com/gilbarbara/logos),
-plus vendor-supplied / hand-inlined SVGs (`inworld`, `leonardo`, `github-mark`); the
-composition helpers under `brands/internal/` adapt lobehub's `useFillId`,
-`IconAvatar`, and `IconCombine` (MIT). The marks are vendored — there is **no
-runtime dependency** on any icon library. Each mark is the trademark of its owner,
-included for identification/attribution only — not affiliation or endorsement;
-follow each owner's brand guidelines when you use them.
+(**MIT**) and [Simple Icons](https://simpleicons.org) (**CC0**), from
+[gilbarbara/logos](https://github.com/gilbarbara/logos) and [svgl](https://svgl.app),
+plus vendor-supplied / hand-inlined SVGs (`inworld`, `leonardo`, `github-mark`,
+`parallel`); the composition helpers under `brands/internal/` adapt lobehub's
+`useFillId`, `IconAvatar`, and `IconCombine` (MIT). The marks are vendored — there
+is **no runtime dependency** on any icon library. Each mark is the trademark of its
+owner, included for identification/attribution only — not affiliation or
+endorsement; follow each owner's brand guidelines when you use them. This applies
+with particular care to the trademark-restrictive families — LinkedIn (whose logo
+Simple Icons no longer ships), the Meta family (Facebook, Instagram, WhatsApp,
+Messenger, Threads), and the Microsoft family (Teams, Outlook, OneDrive).
 
 ## Development
 
