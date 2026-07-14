@@ -14,5 +14,3 @@ const when = utcInstant;                            // ✅ store the UTC instant
 // resolve tz + locale per request (org default + optional user override)
 t('attendance.title');                             // ✅ react-i18next
 ```
-
-Reference: see `fe-app-structure`
