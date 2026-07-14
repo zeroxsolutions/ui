@@ -81,7 +81,7 @@ export function ChatMessageShell({
   return (
     <div data-role={role} className={cn('group flex w-full flex-col', className)}>
       {showAgentLabel && agent?.name && (
-        <div className="mb-1.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <div className="mb-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
           {agent.icon ? (
             <agent.icon className="size-4 shrink-0" />
           ) : (

@@ -222,7 +222,7 @@ export function CodeBlock({ code, language, className }: CodeBlockProps) {
       <DisclosureHeader>
         <DisclosureTitle>
           {LanguageIcon ? <LanguageIcon className="shrink-0" /> : null}
-          <span className="text-[11px]">{languageLabel(language as string)}</span>
+          <span className="text-xs">{languageLabel(language as string)}</span>
         </DisclosureTitle>
         <DisclosureActions>
           <CopyButton value={code} label="Copy code" size="icon" />
