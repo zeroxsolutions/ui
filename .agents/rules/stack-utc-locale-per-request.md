@@ -15,4 +15,4 @@ const when = utcInstant;                            // ✅ store the UTC instant
 t('attendance.title');                             // ✅ react-i18next
 ```
 
-Reference: see `ui-from-design-system` · `fe-app-structure`
+Reference: see `fe-app-structure`

@@ -28,4 +28,4 @@ useQuery({ queryKey: ['x'], queryFn: getX });    // ✅ React Query for server s
 ```
 Files and symbols follow the naming rules — a PascalCase component in a kebab-case file.
 
-Reference: see `gen-via-generator` · `fe-data-via-api` · `ui-from-design-system` · `fe-deploy-by-render-mode` · `naming-files-and-symbols`
+Reference: see `gen-via-generator` · `fe-data-via-api` · `fe-deploy-by-render-mode` · `naming-files-and-symbols`

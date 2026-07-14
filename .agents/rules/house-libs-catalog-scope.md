@@ -21,4 +21,4 @@ Treat every library reference in `CLAUDE.md` or a rule as a **pointer to the ins
 // a published house lib → "name": "@scope/common", "publishConfig": { "access": "restricted" }
 ```
 
-Reference: see `lib-public-exports-and-semver` · `lib-house-toolkits` · `ui-from-design-system`
+Reference: see `lib-public-exports-and-semver` · `lib-house-toolkits`

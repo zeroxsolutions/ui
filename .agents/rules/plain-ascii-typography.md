@@ -59,4 +59,4 @@ const label = "Don't allow"; // straight apostrophe
   ASCII and leaving typography to the render layer keeps authored text portable, greppable,
   diff-clean, and free of the machine-generated tell.
 
-Reference: see `naming-files-and-symbols`, `commit-conventions`, `stack-utc-locale-per-request`, `ui-primitive-fidelity`
+Reference: see `naming-files-and-symbols`, `commit-conventions`, `stack-utc-locale-per-request`
