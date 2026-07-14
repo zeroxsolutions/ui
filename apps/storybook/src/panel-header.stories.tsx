@@ -40,8 +40,7 @@ export const Default: Story = {
           <PanelHeaderActions>
             <Button
               variant="ghost"
-              size="icon"
-              className="size-6"
+              size="icon-xs"
               aria-label="Panel options"
             >
               <MoreHorizontal />

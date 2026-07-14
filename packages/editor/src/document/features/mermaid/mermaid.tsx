@@ -9,8 +9,11 @@ import {
   DisclosureContent,
   DisclosureHeader,
   DisclosureTitle,
+  DisclosureTrigger,
 } from '@zeroxsolutions/ui/components/disclosure';
+import { codeLanguageIcon } from '@zeroxsolutions/ui/components/language-switcher-data';
 import { Card, CardContent } from '@zeroxsolutions/ui/components/ui/card';
+import { Separator } from '@zeroxsolutions/ui/components/ui/separator';
 import {
   Tabs,
   TabsContent,
@@ -30,19 +33,27 @@ import { DiagramViewer } from '../../../mermaid/react/viewer.js';
 /**
  * The in-document Mermaid block. A custom **atom** node holding a text `source`;
  * the node view is a **code-block-style header** (diagram-type label on the left;
- * a View/Edit `Tabs` control with icon triggers + a copy control on the right)
- * over the active tab's panel — the rendered diagram under **View**
- * (`DiagramPreview`, which reuses the `mermaid` surface's shared render +
- * pan/zoom), the in-package `CodeMirrorPane` under **Edit**. The read-only
- * Viewer renders the diagram with no edit affordance. The active tab is local
- * view-state — never persisted — so `source` stays the only attribute and the
- * fenced ` ```mermaid ` codec is unchanged. Engine-free (the engine loads lazily
- * inside the surface).
+ * a View/Edit `Tabs` control with icon triggers, a copy control, and the collapse
+ * chevron on the right) over the active tab's panel — the rendered diagram under
+ * **View** (`DiagramPreview`, which reuses the `mermaid` surface's shared render +
+ * pan/zoom), the in-package `CodeMirrorPane` under **Edit**. It composes the same
+ * `Disclosure` chrome the read-only `CodeBlock` does — same header, same copy +
+ * collapse affordances — so the two blocks read identically; only the body differs
+ * (Mermaid adds the View/Edit switch and a live engine `CodeBlock` has no reason to
+ * carry). The read-only Viewer renders the diagram with no edit affordance. The
+ * active tab is local view-state — never persisted — so `source` stays the only
+ * attribute and the fenced ` ```mermaid ` codec is unchanged. Engine-free (the
+ * engine loads lazily inside the surface).
  */
 const mermaidAttrs = z.object({
   source: z.string().default(DEFAULT_DIAGRAM_SOURCE),
 });
 type MermaidAttrs = z.infer<typeof mermaidAttrs>;
+
+// The block's type icon is the design system's full-colour Mermaid mark — the
+// same `codeLanguageIcon` resolver the code-block header uses for its language
+// icon, so the two headers read identically (a brand mark, not a lucide glyph).
+const MermaidTypeIcon = codeLanguageIcon('mermaid');
 
 export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MermaidAttrs>) {
   const type = detectDiagramType(attrs.source);
@@ -64,13 +75,21 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
   // owns it and mounts only the active panel) — never written to the document.
   const initialTab = attrs.source.trim() === '' ? 'edit' : 'view';
 
-  // The header + body come from the shared `Disclosure` compound (the same chrome
-  // the code-block composes) — the diagram-type label fills the title, the
-  // View/Edit tabs + copy fill the actions, the active panel fills the content.
-  // No collapse trigger: a Mermaid block never collapses, so `Disclosure` is used
-  // for its header structure and its card container, not its toggle.
+  // The header + body come from the shared `Disclosure` compound in its `muted`
+  // variant — the same borderless muted chrome the read-only code-block composes,
+  // so the two blocks read identically: the diagram-type label fills the title; the
+  // View/Edit tabs (the segmented control, 36px) plus the copy + collapse chevron
+  // (the icon-action pair, 32px — matching code-block's copy+chevron grouping) fill
+  // the actions; the panels fill the collapsible body.
+  //
+  // `DisclosureContent` carries `keepMounted` so the collapse toggle only *hides* the
+  // active panel (height→0) and never unmounts it. Without it, folding a block that
+  // is showing the diagram would tear down the preview's `dangerouslySetInnerHTML`
+  // SVG mid-render and React would crash on `removeChild`; keeping the node mounted
+  // (Base UI just toggles `hidden`) sidesteps that entirely.
   return (
     <Disclosure
+      variant="muted"
       data-mermaid
       contentEditable={false}
       onMouseDown={(event) => event.stopPropagation()}
@@ -80,7 +99,7 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
       <Tabs defaultValue={initialTab} className="gap-0">
         <DisclosureHeader>
           <DisclosureTitle>
-            <Workflow className="size-4" />
+            <MermaidTypeIcon className="shrink-0" />
             <span>{DIAGRAM_TYPE_LABEL[type]}</span>
           </DisclosureTitle>
           <DisclosureActions>
@@ -93,10 +112,11 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
               </TabsTrigger>
             </TabsList>
             <CopyButton value={attrs.source} label="Copy source" size="icon" />
+            <DisclosureTrigger />
           </DisclosureActions>
         </DisclosureHeader>
-
-        <DisclosureContent>
+        <DisclosureContent keepMounted>
+          <Separator />
           <TabsContent value="view">
             <DiagramPreview source={attrs.source} className="rounded-none border-0" />
           </TabsContent>

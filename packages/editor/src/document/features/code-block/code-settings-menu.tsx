@@ -52,7 +52,7 @@ export function CodeSettingsMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="icon-sm" aria-label="Code settings" />
+          <Button variant="ghost" size="icon" aria-label="Code settings" />
         }
       >
         <Settings2 />

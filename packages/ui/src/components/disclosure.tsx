@@ -100,10 +100,12 @@ function DisclosureTrigger({
     <CollapsiblePrimitive.Trigger
       data-slot="disclosure-trigger"
       aria-label="Toggle"
-      render={<Button variant="ghost" size="icon-sm" />}
+      render={<Button variant="ghost" size="icon" />}
       className={cn('group/disclosure-trigger text-muted-foreground', className)}
       {...props}
     >
+      {/* Default icon-button size (36px) so every control in a disclosure header
+          reads at one size, even beside a segmented control with no smaller variant. */}
       <ChevronDown className="transition-transform group-aria-expanded/disclosure-trigger:rotate-180" />
     </CollapsiblePrimitive.Trigger>
   );

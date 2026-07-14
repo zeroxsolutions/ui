@@ -94,7 +94,7 @@ function EditableCodeBlock({
         </DisclosureTitle>
         <DisclosureActions>
           <CodeSettingsMenu settings={settings} onSettingsChange={patchSettings} />
-          <CopyButton value={code} label="Copy code" />
+          <CopyButton value={code} label="Copy code" size="icon" />
           <DisclosureTrigger />
         </DisclosureActions>
       </DisclosureHeader>

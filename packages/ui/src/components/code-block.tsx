@@ -225,7 +225,7 @@ export function CodeBlock({ code, language, className }: CodeBlockProps) {
           <span className="text-[11px]">{languageLabel(language as string)}</span>
         </DisclosureTitle>
         <DisclosureActions>
-          <CopyButton value={code} label="Copy code" />
+          <CopyButton value={code} label="Copy code" size="icon" />
           <DisclosureTrigger />
         </DisclosureActions>
       </DisclosureHeader>
