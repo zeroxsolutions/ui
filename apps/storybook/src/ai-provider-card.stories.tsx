@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useState } from 'react';
+import { useState, type FC } from 'react';
 
 import { AnthropicMark } from '@zeroxsolutions/icons/brands/anthropic';
 import { MistralMark } from '@zeroxsolutions/icons/brands/mistral';
@@ -14,8 +14,8 @@ import { Switch } from '@zeroxsolutions/ui/components/ui/switch';
  * reserved height so grid rows align, and a footer with a muted meta note (or a
  * tone-styled status) plus a trailing `action` control. The whole card selects
  * on click; the `action` sits in a stop-propagation island. The consumer
- * supplies the mark and the control - here, `@zeroxsolutions/icons` marks and a
- * `Switch`.
+ * supplies the mark and the control - here, `@zeroxsolutions/icons` marks
+ * (`.Color` where the brand ships one) and a `Switch`.
  */
 const meta: Meta<typeof AiProviderCard> = {
   title: 'Components/AiProviderCard',
@@ -24,6 +24,19 @@ const meta: Meta<typeof AiProviderCard> = {
 export default meta;
 
 type Story = StoryObj<typeof AiProviderCard>;
+
+/** A brand mark whose `.Color` (multi-colour) variant is optional: only genuinely
+ *  multi-colour brands ship it; monochrome brands (OpenAI, Anthropic, ...) do not. */
+type BrandMark = FC<{ size?: string | number }> & {
+  Color?: FC<{ size?: string | number }>;
+};
+
+/** Prefer the brand's `.Color` glyph; fall back to the base mark (currentColor,
+ *  so it flips with the theme) when the brand ships no colour variant. */
+function BrandGlyph({ mark }: { mark: BrandMark }) {
+  const Glyph = mark.Color ?? mark;
+  return <Glyph size={20} />;
+}
 
 /** A trailing enable control that owns its own state - the `action` slot. */
 function EnableSwitch({ defaultChecked = true }: { defaultChecked?: boolean }) {
@@ -37,7 +50,7 @@ export const Default: Story = {
     <div className="w-80">
       <AiProviderCard
         name="OpenAI"
-        icon={<OpenaiMark.Avatar size={20} shape="square" />}
+        icon={<BrandGlyph mark={OpenaiMark} />}
         description="GPT-5, o-series reasoning, and the image and audio models behind the Responses API."
         meta="12 models"
         action={<EnableSwitch />}
@@ -50,13 +63,14 @@ export const Default: Story = {
 /**
  * A grid of providers with descriptions of differing length - the reserved
  * description height keeps every footer (and switch) on the same baseline.
+ * Mistral renders its `.Color` mark; OpenAI/Anthropic fall back to currentColor.
  */
 export const Grid: Story = {
   render: () => (
     <div className="grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <AiProviderCard
         name="OpenAI"
-        icon={<OpenaiMark.Avatar size={20} shape="square" />}
+        icon={<BrandGlyph mark={OpenaiMark} />}
         description="GPT-5 and the o-series reasoning models."
         meta="12 models"
         action={<EnableSwitch />}
@@ -64,7 +78,7 @@ export const Grid: Story = {
       />
       <AiProviderCard
         name="Anthropic"
-        icon={<AnthropicMark.Avatar size={20} shape="square" />}
+        icon={<BrandGlyph mark={AnthropicMark} />}
         description="The Claude family: Opus, Sonnet, and Haiku, with long-context and tool use across every tier of the lineup."
         meta="8 models"
         action={<EnableSwitch />}
@@ -72,7 +86,7 @@ export const Grid: Story = {
       />
       <AiProviderCard
         name="Mistral"
-        icon={<MistralMark.Avatar size={20} shape="square" />}
+        icon={<BrandGlyph mark={MistralMark} />}
         description="Open-weight and hosted models."
         meta="6 models"
         action={<EnableSwitch defaultChecked={false} />}
@@ -88,7 +102,7 @@ export const WithStatus: Story = {
     <div className="grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
       <AiProviderCard
         name="Ollama"
-        icon={<OllamaMark.Avatar size={20} shape="square" />}
+        icon={<BrandGlyph mark={OllamaMark} />}
         description="Local models served over the Ollama runtime."
         status={{ tone: 'busy', text: 'Runtime not reachable' }}
         action={<EnableSwitch defaultChecked={false} />}
@@ -96,7 +110,7 @@ export const WithStatus: Story = {
       />
       <AiProviderCard
         name="Mistral"
-        icon={<MistralMark.Avatar size={20} shape="square" />}
+        icon={<BrandGlyph mark={MistralMark} />}
         description="Hosted models via API key."
         status={{ tone: 'idle', text: 'Key added, not verified' }}
         action={<EnableSwitch />}
