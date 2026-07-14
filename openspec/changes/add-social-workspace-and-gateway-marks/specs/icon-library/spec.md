@@ -5,14 +5,14 @@
 ### Requirement: The brands category is a self-sufficient AI and dev/infra mark set
 
 The `brands` category **SHALL** provide vendored brand marks spanning the AI
-ecosystem — model labs, inference/hosting platforms, voice/speech vendors,
-generative-media tools, agent/framework tooling, and vector/data stores — common
+ecosystem - model labs, inference/hosting platforms, voice/speech vendors,
+generative-media tools, agent/framework tooling, and vector/data stores - common
 dev/cloud/infra vendors, **and** social / communication and workspace /
 productivity brands (social networks, messaging apps, collaboration tools, and
 office / mail suites). The set **SHALL** cover every native provider on the
 **Cloudflare AI Gateway** provider list, via either a dedicated mark or an umbrella
 mark for the provider's parent brand (e.g. `aws` for Amazon Bedrock). All marks
-live in the one flat `brands/` category — there is **no** per-domain subpath
+live in the one flat `brands/` category - there is **no** per-domain subpath
 namespace; each mark imports as `@zeroxsolutions/icons/brands/<name>`. Each mark
 **SHALL** be a vendored component (committed source, not generated in-repo); the
 package **MUST NOT** depend on any third-party icon library at runtime to render a
@@ -44,7 +44,7 @@ implying affiliation or endorsement.
 #### Scenario: Cloudflare AI Gateway providers are covered
 
 - **WHEN** a consumer needs the brand mark for a native Cloudflare AI Gateway provider (e.g. `parallel`, `bedrock`, `vertexai`, `xai`, `cohere`, `perplexity`)
-- **THEN** the `brands` category resolves a mark for that provider, either dedicated (`brands/parallel`) or via the provider's parent-brand umbrella mark — covering every native provider except `cartesia`, which is documented as a deferral until a licensable brand asset exists (it has no umbrella mark)
+- **THEN** the `brands` category resolves a mark for that provider, either dedicated (`brands/parallel`) or via the provider's parent-brand umbrella mark - covering every native provider except `cartesia`, which is documented as a deferral until a licensable brand asset exists (it has no umbrella mark)
 
 #### Scenario: No runtime icon-library dependency
 
@@ -65,16 +65,16 @@ following variants **SHALL** be present **only when it applies to that brand** (
 artwork or composition exists), and referencing an absent variant **MUST** be a
 type error:
 
-- `.Color` — the full brand-color artwork; its intrinsic colors **MUST NOT** be
+- `.Color` - the full brand-color artwork; its intrinsic colors **MUST NOT** be
   recolored by the surrounding `color`.
-- `.Mono` — a monochrome rendering that paints via `currentColor`, inheriting the
+- `.Mono` - a monochrome rendering that paints via `currentColor`, inheriting the
   surrounding text color.
-- `.Avatar` — the icon centered on a filled background (the brand's primary color by
+- `.Avatar` - the icon centered on a filled background (the brand's primary color by
   default), accepting `background`, foreground `color`, and an icon-size multiplier
   in addition to `size`.
-- `.Text` — the brand wordmark, accepting `text` and `textColor` in addition to
+- `.Text` - the brand wordmark, accepting `text` and `textColor` in addition to
   `size`.
-- `.Combine` — the icon paired with the wordmark, accepting `text` and `textColor`
+- `.Combine` - the icon paired with the wordmark, accepting `text` and `textColor`
   in addition to `size`.
 
 A mark whose source artwork is a single monochrome path **SHALL** render its base
@@ -83,8 +83,8 @@ silhouette in the brand's primary color). A mark whose source artwork is full-co
 or gradient with no clean monochrome silhouette **SHALL** render its base as the
 full-color artwork and expose `.Color` (the same artwork), and **MUST NOT** expose
 a `.Mono` variant. The `.Avatar` and `.Combine` variants **SHALL** be generic
-composition components shared across all brands — parametrized by the brand's icon,
-primary color, and name — not per-brand vendored artwork. Every icon-form rendering
+composition components shared across all brands - parametrized by the brand's icon,
+primary color, and name - not per-brand vendored artwork. Every icon-form rendering
 (base, `.Color`, `.Mono`) **SHALL** be sized by a single `size` prop applied to the
 svg width/height.
 
@@ -111,7 +111,7 @@ svg width/height.
 #### Scenario: A full-color source exposes no monochrome variant
 
 - **WHEN** a mark is vendored from full-color or gradient source artwork with no clean monochrome silhouette (e.g. `instagram`, `microsoft-teams`, `outlook`, `onedrive`)
-- **THEN** its base renders the full-color artwork, `.Color` renders the same artwork, and the component exposes no `.Mono` (nor `.Text` / `.Combine`) sub-component — referencing one is a type error
+- **THEN** its base renders the full-color artwork, `.Color` renders the same artwork, and the component exposes no `.Mono` (nor `.Text` / `.Combine`) sub-component - referencing one is a type error
 
 #### Scenario: Absent variants are not exposed
 

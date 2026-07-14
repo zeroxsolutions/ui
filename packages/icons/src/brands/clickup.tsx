@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** ClickUp — brand mark vendored from Simple Icons (CC0). */
+/** ClickUp - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "ClickUp";
 const COLOR_PRIMARY = "#7B68EE";
 const PATH =

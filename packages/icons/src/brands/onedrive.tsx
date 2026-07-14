@@ -2,7 +2,7 @@ import type { FC } from 'react';
 
 import type { IconProps } from './internal/types';
 
-/** OneDrive — brand mark vendored from gilbarbara/logos. */
+/** OneDrive - brand mark vendored from gilbarbara/logos. */
 const TITLE = "OneDrive";
 const COLOR_PRIMARY = "#0078D4";
 

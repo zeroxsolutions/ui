@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Discord — brand mark vendored from Simple Icons (CC0). */
+/** Discord - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Discord";
 const COLOR_PRIMARY = "#5865F2";
 const PATH =

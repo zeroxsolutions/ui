@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Messenger — brand mark vendored from Simple Icons (CC0). */
+/** Messenger - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Messenger";
 const COLOR_PRIMARY = "#0866FF";
 const PATH =

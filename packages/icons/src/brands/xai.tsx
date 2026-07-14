@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** xAI — brand mark vendored from @lobehub/icons (MIT). */
+/** xAI - brand mark vendored from @lobehub/icons (MIT). */
 const TITLE = "xAI";
 const COLOR_PRIMARY = "#000000";
 

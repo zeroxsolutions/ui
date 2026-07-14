@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Gmail — brand mark vendored from Simple Icons (CC0). */
+/** Gmail - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Gmail";
 const COLOR_PRIMARY = "#EA4335";
 const PATH =

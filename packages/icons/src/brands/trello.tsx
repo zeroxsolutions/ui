@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Trello — brand mark vendored from Simple Icons (CC0). */
+/** Trello - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Trello";
 const COLOR_PRIMARY = "#0052CC";
 const PATH =

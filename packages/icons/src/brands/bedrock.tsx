@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Bedrock — brand mark vendored from @lobehub/icons (MIT). */
+/** Bedrock - brand mark vendored from @lobehub/icons (MIT). */
 const TITLE = "Bedrock";
 const COLOR_PRIMARY = "#6350FB";
 

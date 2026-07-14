@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Parallel — brand mark vendored from parallel.ai (brand SVG). */
+/** Parallel - brand mark vendored from parallel.ai (brand SVG). */
 const TITLE = "Parallel";
 const COLOR_PRIMARY = "#1D1C1A";
 

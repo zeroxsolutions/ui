@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Facebook — brand mark vendored from Simple Icons (CC0). */
+/** Facebook - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Facebook";
 const COLOR_PRIMARY = "#0866FF";
 const PATH =

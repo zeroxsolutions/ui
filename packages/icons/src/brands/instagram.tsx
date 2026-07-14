@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Instagram — brand mark vendored from Simple Icons (CC0). */
+/** Instagram - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Instagram";
 const COLOR_PRIMARY = "#FF0069";
 const PATH =

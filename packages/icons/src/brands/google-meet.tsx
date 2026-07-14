@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Google Meet — brand mark vendored from Simple Icons (CC0). */
+/** Google Meet - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Google Meet";
 const COLOR_PRIMARY = "#00897B";
 const PATH =

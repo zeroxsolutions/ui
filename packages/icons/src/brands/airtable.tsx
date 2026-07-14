@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Airtable — brand mark vendored from Simple Icons (CC0). */
+/** Airtable - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Airtable";
 const COLOR_PRIMARY = "#18BFFF";
 const PATH =

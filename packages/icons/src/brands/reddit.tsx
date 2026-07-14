@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Reddit — brand mark vendored from Simple Icons (CC0). */
+/** Reddit - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Reddit";
 const COLOR_PRIMARY = "#FF4500";
 const PATH =

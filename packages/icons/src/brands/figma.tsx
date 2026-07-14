@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Figma — brand mark vendored from Simple Icons (CC0). */
+/** Figma - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Figma";
 const COLOR_PRIMARY = "#F24E1E";
 const PATH =

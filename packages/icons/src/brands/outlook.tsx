@@ -3,7 +3,7 @@ import type { FC } from 'react';
 
 import type { IconProps } from './internal/types';
 
-/** Outlook — brand mark vendored from svgl. */
+/** Outlook - brand mark vendored from svgl. */
 const TITLE = "Outlook";
 const COLOR_PRIMARY = "#0078D4";
 

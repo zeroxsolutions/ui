@@ -2,7 +2,7 @@ import type { FC } from 'react';
 
 import type { IconProps } from './internal/types';
 
-/** monday.com — brand mark vendored from gilbarbara/logos. */
+/** monday.com - brand mark vendored from gilbarbara/logos. */
 const TITLE = "monday.com";
 const COLOR_PRIMARY = "#F62B54";
 

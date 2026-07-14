@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Snapchat — brand mark vendored from Simple Icons (CC0). */
+/** Snapchat - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Snapchat";
 const COLOR_PRIMARY = "#FFFC00";
 const PATH =

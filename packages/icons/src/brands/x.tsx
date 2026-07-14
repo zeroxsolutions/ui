@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** X — brand mark vendored from Simple Icons (CC0). */
+/** X - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "X";
 const COLOR_PRIMARY = "#000000";
 const PATH =

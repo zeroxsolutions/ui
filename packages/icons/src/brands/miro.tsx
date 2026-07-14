@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Miro — brand mark vendored from Simple Icons (CC0). */
+/** Miro - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Miro";
 const COLOR_PRIMARY = "#050038";
 const PATH =

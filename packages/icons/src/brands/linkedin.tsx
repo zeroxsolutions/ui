@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** LinkedIn — brand mark vendored from gilbarbara/logos. */
+/** LinkedIn - brand mark vendored from gilbarbara/logos. */
 const TITLE = "LinkedIn";
 const COLOR_PRIMARY = "#0A66C2";
 const PATH =

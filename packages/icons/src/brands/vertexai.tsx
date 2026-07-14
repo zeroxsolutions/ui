@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Vertex AI — brand mark vendored from @lobehub/icons (MIT). */
+/** Vertex AI - brand mark vendored from @lobehub/icons (MIT). */
 const TITLE = "Vertex AI";
 const COLOR_PRIMARY = "#4285F4";
 

@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Zoom — brand mark vendored from Simple Icons (CC0). */
+/** Zoom - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Zoom";
 const COLOR_PRIMARY = "#0B5CFF";
 const PATH =

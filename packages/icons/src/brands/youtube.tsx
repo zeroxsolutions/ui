@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** YouTube — brand mark vendored from Simple Icons (CC0). */
+/** YouTube - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "YouTube";
 const COLOR_PRIMARY = "#FF0000";
 const PATH =

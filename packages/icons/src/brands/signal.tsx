@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Signal — brand mark vendored from Simple Icons (CC0). */
+/** Signal - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Signal";
 const COLOR_PRIMARY = "#3B45FD";
 const PATH =

@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** WeChat — brand mark vendored from Simple Icons (CC0). */
+/** WeChat - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "WeChat";
 const COLOR_PRIMARY = "#07C160";
 const PATH =

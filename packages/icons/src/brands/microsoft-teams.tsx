@@ -3,7 +3,7 @@ import type { FC } from 'react';
 
 import type { IconProps } from './internal/types';
 
-/** Microsoft Teams — brand mark vendored from gilbarbara/logos. */
+/** Microsoft Teams - brand mark vendored from gilbarbara/logos. */
 const TITLE = "Microsoft Teams";
 const COLOR_PRIMARY = "#5059C9";
 

@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Telegram — brand mark vendored from Simple Icons (CC0). */
+/** Telegram - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Telegram";
 const COLOR_PRIMARY = "#26A5E4";
 const PATH =

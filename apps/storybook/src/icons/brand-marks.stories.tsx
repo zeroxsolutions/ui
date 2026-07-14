@@ -53,7 +53,7 @@ import { FigmaMark } from '@zeroxsolutions/icons/brands/figma';
 import { LinearMark } from '@zeroxsolutions/icons/brands/linear';
 import { DropboxMark } from '@zeroxsolutions/icons/brands/dropbox';
 
-// Full-colour marks (Type C — base renders the full artwork, no `.Mono`).
+// Full-colour marks (Type C - base renders the full artwork, no `.Mono`).
 import { MicrosoftTeamsMark } from '@zeroxsolutions/icons/brands/microsoft-teams';
 import { OnedriveMark } from '@zeroxsolutions/icons/brands/onedrive';
 import { OutlookMark } from '@zeroxsolutions/icons/brands/outlook';
@@ -68,7 +68,7 @@ import { XaiMark } from '@zeroxsolutions/icons/brands/xai';
 import { ParallelMark } from '@zeroxsolutions/icons/brands/parallel';
 
 /**
- * Visual catalog of `@zeroxsolutions/icons/brands` — a self-sufficient brand-mark
+ * Visual catalog of `@zeroxsolutions/icons/brands` - a self-sufficient brand-mark
  * set spanning the AI ecosystem, dev/cloud/infra, and now **social** and
  * **workspace / productivity** brands, plus full Cloudflare AI Gateway provider
  * coverage. Vendored from `@lobehub/icons` (AI), Simple Icons (CC0), gilbarbara/logos
@@ -137,7 +137,7 @@ export const AllBases: Story = {
 
 /**
  * The full variant surface on one gradient brand (Gemini has all five). Each
- * variant is rendered only if the mark exposes it — a mark ships only the
+ * variant is rendered only if the mark exposes it - a mark ships only the
  * variants that exist for its brand.
  */
 export const VariantSurface: Story = {
@@ -219,7 +219,7 @@ const socialWorkspace: [string, Mark & { Color?: Mark }][] = [
   ['Google Meet', GoogleMeetMark],
 ];
 
-/** The new social / workspace cluster — each mark's `.Color` variant (Type-M brands). */
+/** The new social / workspace cluster - each mark's `.Color` variant (Type-M brands). */
 export const SocialAndWorkspace: Story = {
   render: () => (
     <div className="flex flex-wrap gap-3">
@@ -233,7 +233,7 @@ export const SocialAndWorkspace: Story = {
 };
 
 /**
- * Full-colour (Type-C) marks — the base renders the multi-colour / gradient artwork
+ * Full-colour (Type-C) marks - the base renders the multi-colour / gradient artwork
  * directly; these ship `.Color` but no `.Mono` (no clean monochrome silhouette).
  */
 export const FullColorMarks: Story = {

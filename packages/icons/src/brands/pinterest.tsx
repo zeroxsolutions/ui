@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Pinterest — brand mark vendored from Simple Icons (CC0). */
+/** Pinterest - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Pinterest";
 const COLOR_PRIMARY = "#BD081C";
 const PATH =

@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Linear — brand mark vendored from Simple Icons (CC0). */
+/** Linear - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Linear";
 const COLOR_PRIMARY = "#5E6AD2";
 const PATH =

@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** WhatsApp — brand mark vendored from Simple Icons (CC0). */
+/** WhatsApp - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "WhatsApp";
 const COLOR_PRIMARY = "#25D366";
 const PATH =

@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Notion — brand mark vendored from Simple Icons (CC0). */
+/** Notion - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Notion";
 const COLOR_PRIMARY = "#000000";
 const PATH =

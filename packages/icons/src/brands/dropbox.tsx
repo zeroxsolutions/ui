@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Dropbox — brand mark vendored from Simple Icons (CC0). */
+/** Dropbox - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Dropbox";
 const COLOR_PRIMARY = "#0061FF";
 const PATH =

@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { makeAvatar, type IconAvatarProps } from './internal/avatar';
 import type { IconProps } from './internal/types';
 
-/** Asana — brand mark vendored from Simple Icons (CC0). */
+/** Asana - brand mark vendored from Simple Icons (CC0). */
 const TITLE = "Asana";
 const COLOR_PRIMARY = "#F06A6A";
 const PATH =
