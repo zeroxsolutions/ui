@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
+  ArrowUpIcon,
   FileTextIcon,
   ImageIcon,
   RotateCwIcon,
@@ -18,6 +19,12 @@ import {
   AttachmentTitle,
   AttachmentTrigger,
 } from '@zeroxsolutions/ui/components/ui/attachment';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from '@zeroxsolutions/ui/components/ui/input-group';
 import { Spinner } from '@zeroxsolutions/ui/components/ui/spinner';
 
 /**
@@ -240,5 +247,56 @@ export const Group: Story = {
         </AttachmentContent>
       </Attachment>
     </AttachmentGroup>
+  ),
+};
+
+/**
+ * The composer integration: an `AttachmentGroup` of compact cards sits in an
+ * `InputGroup` block-start row, above the message textarea and send button. This
+ * is the pending-attachment strip for a chat composer — composed entirely from
+ * the shipped `Attachment` + `InputGroup` primitives, no bespoke chip.
+ */
+export const Composer: Story = {
+  render: () => (
+    <InputGroup className="w-[28rem]">
+      <InputGroupAddon align="block-start">
+        <AttachmentGroup className="w-full">
+          <Attachment size="sm">
+            <AttachmentMedia variant="image">
+              <img src={photoSrc} alt="" />
+            </AttachmentMedia>
+            <AttachmentContent>
+              <AttachmentTitle>photo.png</AttachmentTitle>
+              <AttachmentDescription>1.1 MB</AttachmentDescription>
+            </AttachmentContent>
+            <AttachmentActions>
+              <AttachmentAction aria-label="Remove photo.png">
+                <XIcon />
+              </AttachmentAction>
+            </AttachmentActions>
+          </Attachment>
+          <Attachment size="sm">
+            <AttachmentMedia>
+              <FileTextIcon />
+            </AttachmentMedia>
+            <AttachmentContent>
+              <AttachmentTitle>report.pdf</AttachmentTitle>
+              <AttachmentDescription>2.4 MB</AttachmentDescription>
+            </AttachmentContent>
+            <AttachmentActions>
+              <AttachmentAction aria-label="Remove report.pdf">
+                <XIcon />
+              </AttachmentAction>
+            </AttachmentActions>
+          </Attachment>
+        </AttachmentGroup>
+      </InputGroupAddon>
+      <InputGroupTextarea placeholder="Add a message…" />
+      <InputGroupAddon align="block-end">
+        <InputGroupButton size="icon-sm" aria-label="Send" className="ml-auto">
+          <ArrowUpIcon />
+        </InputGroupButton>
+      </InputGroupAddon>
+    </InputGroup>
   ),
 };
