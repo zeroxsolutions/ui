@@ -24,10 +24,11 @@ import { useMermaidRender } from './use-mermaid-render.js';
 /**
  * `<MermaidEditor>` — the standalone Mermaid authoring surface: a source pane
  * (the in-package `CodeMirrorPane`) beside a live pan/zoom preview, inside the
- * house `Disclosure` compound — a header (a type/template switcher + export) over
- * the body, so the header never drifts from the other block surfaces. A Mermaid
- * block never collapses, so `Disclosure` supplies the header structure and the
- * card container, not a collapse toggle. Controlled the same way as
+ * house `Disclosure` compound in its `muted` variant — the same borderless muted
+ * chrome the in-document code-block and Mermaid block compose, so this surface
+ * reads identically to them: a header (a type/template switcher + export) over the
+ * body. A Mermaid block never collapses, so `Disclosure` supplies the header
+ * structure and the surface container, not a collapse toggle. Controlled the same way as
  * `CodeMirrorPane` (`value`/`defaultValue`/`onValueChange`), so any host can own
  * the source. `layout='auto'` splits side-by-side on wide viewports and switches
  * to tabs on narrow ones. Everything but the pan/zoom viewport is composed from
@@ -68,7 +69,7 @@ export function MermaidEditor({
   const canvas = <DiagramCanvas state={state} className="h-full rounded-none border-0" />;
 
   return (
-    <Disclosure data-slot="mermaid-editor" className={className}>
+    <Disclosure variant="muted" data-slot="mermaid-editor" className={className}>
       {toolbar && (
         <MermaidToolbar source={source} svg={state.svg} onPickTemplate={setSource} />
       )}
