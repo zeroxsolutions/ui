@@ -1,154 +1,303 @@
-import { useEffect, useState, type KeyboardEvent } from 'react';
-import { Sigma } from 'lucide-react';
-import { z } from 'zod';
+'use client';
+
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react';
+import { Check, Eye, Omega, PencilLine, Radical, Sigma, X } from 'lucide-react';
 import katex from 'katex';
+import { z } from 'zod';
+import { Button } from '@zeroxsolutions/ui/components/ui/button';
+import { Card, CardContent } from '@zeroxsolutions/ui/components/ui/card';
+import { CopyButton } from '@zeroxsolutions/ui/components/copy-button';
+import {
+  Disclosure,
+  DisclosureActions,
+  DisclosureContent,
+  DisclosureHeader,
+  DisclosureTitle,
+  DisclosureTrigger,
+} from '@zeroxsolutions/ui/components/disclosure';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@zeroxsolutions/ui/components/ui/input-group';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@zeroxsolutions/ui/components/ui/popover';
+import { Separator } from '@zeroxsolutions/ui/components/ui/separator';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@zeroxsolutions/ui/components/ui/tabs';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
 import type { NodeViewProps } from '../../core/index.js';
-import { useEditorTheme } from '../../../shared/theme/editor-theme-context.js';
+import { CodeMirrorPane } from '../../../shared/code-mirror/index.js';
+import { FormulaPreview } from '../../../math/react/preview.js';
+import { FormulaViewer } from '../../../math/react/viewer.js';
+import { MathPalette } from '../../../math/react/palette.js';
 
 /**
- * Inline + block **math**, rendered with **KaTeX**. Serves as the worked example
- * for a *two-node* leaf feature: two declarative atom `NodeSpec`s (`mathInline`
- * in the inline flow, `mathBlock` in the block flow), a React `render` view that
- * renders the formula **synchronously** with KaTeX (SSR-safe, no lazy load) plus
- * a click-to-edit `latex` affordance, and one two-way `NodeCodec` per node —
- * all engine-free (no `@tiptap/*` / `prosemirror-*` import; `katex` is a pure
- * rendering lib, allowed here).
+ * Inline + block **math**, rendered with **KaTeX**. The node contract is
+ * unchanged: a single `latex` attribute and the `$...$` / `$$...$$` / `data-latex`
+ * codecs round-trip exactly as before. What changed is the authoring UI, brought
+ * onto the sibling blocks' pattern:
  *
- * NOTE — KaTeX stylesheet: KaTeX ships `katex/dist/katex.min.css`. It is
- * **deliberately not** `import`ed here — a JS side-effect CSS import breaks the
- * library's Tailwind/bundling contract (see `ui-from-design-system`). The
- * consuming app must include KaTeX's CSS (the editor's `styles.css` documents
- * this) for the rendered markup below to lay out correctly; we only emit the
- * KaTeX HTML.
+ * - **Block** (`mathBlock`) composes the shared `Disclosure` chrome + `Tabs` -
+ *   View shows the rendered formula, Edit shows the design-system `CodeMirrorPane`
+ *   (`language="latex"`) with a live preview strip and the symbol/template palette.
+ *   `DisclosureContent` is `keepMounted` so collapsing never tears down the render.
+ * - **Inline** (`mathInline`) cannot host block chrome in the text flow, so it
+ *   stays click-to-edit into a design-system `Popover` holding an `InputGroup`
+ *   (input + palette/commit/cancel addons) and a one-line live preview.
+ *
+ * The heavy render/preview lives in the `math/` surface, reused here so the block
+ * and the standalone `MathEditor` share one render path. View/edit and collapse
+ * are local view state, never persisted.
+ *
+ * NOTE - KaTeX stylesheet: KaTeX ships `katex/dist/katex.min.css`. It is
+ * **deliberately not** `import`ed here - a JS side-effect CSS import breaks the
+ * library's bundling contract. The consuming app includes KaTeX's CSS via the
+ * editor's `styles.css` (`@import`); we only emit the KaTeX HTML.
  */
 const mathAttrs = z.object({
   latex: z.string().default(''),
 });
 type MathAttrs = z.infer<typeof mathAttrs>;
 
-interface MathViewProps extends NodeViewProps<MathAttrs> {
-  /** `true` → block/display math (`<div>`, KaTeX `displayMode`); `false` → inline (`<span>`). */
-  display: boolean;
-}
-
-/**
- * Wrapper classes shared by the editable node view and the static `toReact`
- * codec, so the editor and the engine-free Viewer render an identical shell.
- * Block math is a centered, scrollable muted box; inline math sits in the text
- * flow with no box (design-system tokens, no hardcoded color).
- */
+/** Wrapper classes shared by the `toReact` codecs so the static export matches the view. */
 const MATH_BLOCK_WRAPPER = 'my-4 overflow-x-auto rounded-md bg-muted/40 p-3 text-center';
 const MATH_INLINE_WRAPPER = 'inline-block align-middle';
 
-function MathView({ attrs, updateAttrs, editable, display }: MathViewProps) {
-  // KaTeX's color is the one JS-side theme value that doesn't ride the CSS
-  // `.dark` flip, so it comes from the active editor theme's variant.
-  const { variant } = useEditorTheme();
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(attrs.latex);
+/**
+ * The inline popover body: a compact LaTeX input with palette/commit/cancel
+ * controls in an `InputGroup` addon and a one-line live preview. Enter commits,
+ * Escape cancels. The palette inserts at the input caret (a template lands the
+ * caret in its first hole via `caretOffset`).
+ */
+function MathInlineForm({
+  initialLatex,
+  onCommit,
+  onCancel,
+}: {
+  initialLatex: string;
+  onCommit: (latex: string) => void;
+  onCancel: () => void;
+}) {
+  const [draft, setDraft] = useState(initialLatex);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const pendingCaret = useRef<number | null>(null);
 
-  // Keep the draft in sync when the attribute changes from outside the view.
+  // Sync the caret to the DOM input after a palette insert (an imperative
+  // external-system sync - the one legitimate use of an effect here).
   useEffect(() => {
-    setDraft(attrs.latex);
-  }, [attrs.latex]);
+    if (pendingCaret.current === null) return;
+    const input = inputRef.current;
+    if (input) {
+      input.focus();
+      input.setSelectionRange(pendingCaret.current, pendingCaret.current);
+    }
+    pendingCaret.current = null;
+  });
 
-  const commit = () => {
-    setEditing(false);
-    if (draft !== attrs.latex) updateAttrs({ latex: draft });
+  const insert = (snippet: string, caretOffset?: number) => {
+    const input = inputRef.current;
+    const start = input?.selectionStart ?? draft.length;
+    const end = input?.selectionEnd ?? draft.length;
+    const next = draft.slice(0, start) + snippet + draft.slice(end);
+    pendingCaret.current = start + (caretOffset ?? snippet.length);
+    setDraft(next);
   };
-  const beginEditing = () => {
-    if (editable) setEditing(true);
-  };
+
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === 'Enter') {
       event.preventDefault();
-      beginEditing();
+      onCommit(draft);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      onCancel();
     }
   };
 
-  // KaTeX renders synchronously to an HTML string — no DOM, no async, SSR-safe.
-  const html = attrs.latex
-    ? katex.renderToString(attrs.latex, {
-        throwOnError: false,
-        displayMode: display,
-        ...variant.math,
-      })
-    : '';
-
-  const rendered = html ? (
-    display ? (
-      <div dangerouslySetInnerHTML={{ __html: html }} />
-    ) : (
-      <span dangerouslySetInnerHTML={{ __html: html }} />
-    )
-  ) : (
-    <span className="text-muted-foreground text-sm italic">empty formula</span>
+  return (
+    <div className="flex flex-col gap-2">
+      <InputGroup>
+        <InputGroupInput
+          ref={inputRef}
+          autoFocus
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          onKeyDown={onKeyDown}
+          placeholder="LaTeX formula"
+          aria-label="Inline LaTeX"
+        />
+        <InputGroupAddon align="inline-end">
+          <MathPalette
+            onInsert={insert}
+            nativeButton={false}
+            trigger={
+              <InputGroupButton size="icon-xs" aria-label="Insert symbol">
+                <Omega />
+              </InputGroupButton>
+            }
+          />
+          <InputGroupButton
+            size="icon-xs"
+            aria-label="Apply"
+            onClick={() => onCommit(draft)}
+          >
+            <Check />
+          </InputGroupButton>
+          <InputGroupButton size="icon-xs" aria-label="Cancel" onClick={onCancel}>
+            <X />
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
+      <FormulaPreview source={draft} displayMode={false} compact />
+    </div>
   );
+}
 
-  if (editing && editable) {
-    return display ? (
-      <div className={MATH_BLOCK_WRAPPER} data-math="block" contentEditable={false}>
-        <textarea
-          autoFocus
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onBlur={commit}
-          spellCheck={false}
-          className="min-h-16 w-full rounded-md border bg-background p-2 font-mono text-sm"
-        />
-      </div>
-    ) : (
-      <span className={MATH_INLINE_WRAPPER} data-math="inline" contentEditable={false}>
-        <input
-          autoFocus
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onBlur={commit}
-          spellCheck={false}
-          className="rounded-md border bg-background px-2 py-1 font-mono text-sm"
-        />
+/**
+ * The inline math node view. Read-only renders the real formula (no edit
+ * affordance); editable is click-to-edit into a `Popover` anchored to the formula.
+ */
+function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
+  const [editing, setEditing] = useState(false);
+
+  if (!editable) {
+    return (
+      <span data-math="inline" className={MATH_INLINE_WRAPPER} contentEditable={false}>
+        <FormulaViewer source={attrs.latex} displayMode={false} />
       </span>
     );
   }
 
-  // When editable, the whole formula is a click/keyboard affordance into edit mode.
-  const interactive: {
-    role?: 'button';
-    tabIndex?: number;
-    onClick?: () => void;
-    onKeyDown?: (event: KeyboardEvent) => void;
-  } = editable
-    ? { role: 'button', tabIndex: 0, onClick: beginEditing, onKeyDown }
-    : {};
-
-  return display ? (
-    <div
-      className={MATH_BLOCK_WRAPPER}
-      data-math="block"
-      contentEditable={false}
-      {...interactive}
-    >
-      {rendered}
-    </div>
-  ) : (
-    <span
-      className={MATH_INLINE_WRAPPER}
-      data-math="inline"
-      contentEditable={false}
-      {...interactive}
-    >
-      {rendered}
-    </span>
+  return (
+    <Popover open={editing} onOpenChange={setEditing}>
+      <PopoverTrigger
+        render={<span />}
+        nativeButton={false}
+        data-math="inline"
+        contentEditable={false}
+        className={cn(
+          'inline-block cursor-pointer rounded-sm align-middle hover:bg-muted',
+          selected && 'ring-2 ring-ring',
+        )}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        {attrs.latex ? (
+          <FormulaViewer source={attrs.latex} displayMode={false} />
+        ) : (
+          <span className="text-sm text-muted-foreground italic">empty formula</span>
+        )}
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-80 p-2">
+        <MathInlineForm
+          initialLatex={attrs.latex}
+          onCommit={(latex) => {
+            if (latex !== attrs.latex) updateAttrs({ latex });
+            setEditing(false);
+          }}
+          onCancel={() => setEditing(false)}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 
-const MathInlineView = (props: NodeViewProps<MathAttrs>) => (
-  <MathView {...props} display={false} />
-);
-const MathBlockView = (props: NodeViewProps<MathAttrs>) => (
-  <MathView {...props} display />
-);
+/**
+ * The block math node view. Read-only is a design-system `Card` holding the real
+ * formula; editable composes the shared `Disclosure`/`Tabs` chrome.
+ */
+function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
+  if (!editable) {
+    return (
+      <Card size="sm" className="my-4" data-math="block" contentEditable={false}>
+        <CardContent>
+          <FormulaViewer source={attrs.latex} />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // A freshly inserted (empty) block opens on Edit; an existing formula opens as a
+  // picture. The active tab is uncontrolled view-state - never written to the doc.
+  const initialTab = attrs.latex.trim() === '' ? 'edit' : 'view';
+
+  return (
+    <Disclosure
+      variant="muted"
+      data-math="block"
+      contentEditable={false}
+      onMouseDown={(event) => event.stopPropagation()}
+      onPointerDown={(event) => event.stopPropagation()}
+      className={cn('my-4', selected && 'ring-2 ring-ring')}
+    >
+      <Tabs defaultValue={initialTab} className="gap-0">
+        <DisclosureHeader>
+          <DisclosureTitle>
+            <Sigma className="shrink-0" />
+            <span>Math</span>
+          </DisclosureTitle>
+          <DisclosureActions>
+            <TabsList>
+              <TabsTrigger value="view" aria-label="View">
+                <Eye />
+              </TabsTrigger>
+              <TabsTrigger value="edit" aria-label="Edit">
+                <PencilLine />
+              </TabsTrigger>
+            </TabsList>
+            <CopyButton value={attrs.latex} label="Copy source" size="icon" />
+            <DisclosureTrigger />
+          </DisclosureActions>
+        </DisclosureHeader>
+        {/* keepMounted so collapsing only hides the active panel and never tears
+            down an in-flight render. */}
+        <DisclosureContent keepMounted>
+          <Separator />
+          <TabsContent value="view" className="p-2">
+            <FormulaPreview source={attrs.latex} />
+          </TabsContent>
+          <TabsContent value="edit" className="flex flex-col">
+            <div className="flex items-center justify-end px-2 pt-2">
+              <MathPalette
+                onInsert={(snippet) => updateAttrs({ latex: attrs.latex + snippet })}
+                trigger={
+                  <Button variant="ghost" size="sm">
+                    <Omega />
+                    Insert
+                  </Button>
+                }
+              />
+            </div>
+            <CodeMirrorPane
+              value={attrs.latex}
+              onValueChange={(latex) => updateAttrs({ latex })}
+              language="latex"
+              placeholder="Write LaTeX source..."
+              className="h-48"
+            />
+            <Separator />
+            <div className="p-2">
+              <FormulaPreview source={attrs.latex} />
+            </div>
+          </TabsContent>
+        </DisclosureContent>
+      </Tabs>
+    </Disclosure>
+  );
+}
 
 /** Escape the characters that matter for text embedded in HTML element content. */
 function escapeHtml(value: string): string {
@@ -164,7 +313,7 @@ function escapeAttr(value: string): string {
 
 const mathInlineCodec: NodeCodec<MathAttrs> = {
   node: 'mathInline',
-  // `$…$` is the de-facto inline-math delimiter (TeX / remark-math dialect).
+  // `$...$` is the de-facto inline-math delimiter (TeX / remark-math dialect).
   toMarkdown: (node) => `$${String(node.attrs?.latex ?? '')}$`,
   toHTML: (node) => {
     const latex = String(node.attrs?.latex ?? '');
@@ -194,15 +343,15 @@ const mathInlineCodec: NodeCodec<MathAttrs> = {
       />
     );
   },
-  // Inline `$…$` parsing belongs to the inline layer we don't own, and
-  // remark-math isn't installed — HTML is the lossless round-trip path, so
+  // Inline `$...$` parsing belongs to the inline layer we don't own, and
+  // remark-math isn't installed - HTML is the lossless round-trip path, so
   // decline every Markdown token. (Two-way Markdown would need remark-math.)
   fromMarkdown: () => null,
 };
 
 const mathBlockCodec: NodeCodec<MathAttrs> = {
   node: 'mathBlock',
-  // `$$ … $$` fenced on its own lines is the display-math convention.
+  // `$$ ... $$` fenced on its own lines is the display-math convention.
   toMarkdown: (node) => `$$\n${String(node.attrs?.latex ?? '')}\n$$`,
   toHTML: (node) => {
     const latex = String(node.attrs?.latex ?? '');
@@ -234,8 +383,8 @@ const mathBlockCodec: NodeCodec<MathAttrs> = {
       />
     );
   },
-  // remark (without remark-math) surfaces `$$…$$` as paragraph text; don't
-  // mis-parse it — rely on the HTML round-trip. Two-way Markdown for math would
+  // remark (without remark-math) surfaces `$$...$$` as paragraph text; don't
+  // mis-parse it - rely on the HTML round-trip. Two-way Markdown for math would
   // need remark-math (out of scope for this feature).
   fromMarkdown: () => null,
 };
@@ -294,6 +443,15 @@ export function math(): EditorFeature {
         group: 'Blocks',
         keywords: ['math', 'latex', 'katex', 'equation', 'formula'],
         command: 'insertMathBlock',
+      },
+      {
+        id: 'math-inline',
+        icon: <Radical className="size-4" />,
+        title: 'Inline math',
+        description: 'Inline formula (KaTeX)',
+        group: 'Inline',
+        keywords: ['math', 'latex', 'katex', 'inline', 'formula'],
+        command: 'insertMathInline',
       },
     ],
   });
