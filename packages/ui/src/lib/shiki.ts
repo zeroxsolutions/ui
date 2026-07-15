@@ -86,6 +86,7 @@ const LANG_LOADERS: Record<string, () => Promise<{ default: unknown }>> = {
   php: () => import('@shikijs/langs/php'),
   ruby: () => import('@shikijs/langs/ruby'),
   lua: () => import('@shikijs/langs/lua'),
+  latex: () => import('@shikijs/langs/latex'),
 };
 
 /**
@@ -128,6 +129,7 @@ const LANG_ALIASES: Record<string, string> = {
   yml: 'yaml',
   md: 'markdown',
   htm: 'html',
+  tex: 'latex',
 };
 
 /**
