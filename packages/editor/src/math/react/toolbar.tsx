@@ -11,6 +11,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@zeroxsolutions/ui/components/ui/dropdown-menu';
@@ -77,14 +78,16 @@ export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
             }
           />
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => runExport(() => copyLatex(source))}>
-              <Copy />
-              Copy LaTeX
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => runExport(() => copyMathML(source))}>
-              <Copy />
-              Copy MathML
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => runExport(() => copyLatex(source))}>
+                <Copy />
+                Copy LaTeX
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => runExport(() => copyMathML(source))}>
+                <Copy />
+                Copy MathML
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </DisclosureActions>

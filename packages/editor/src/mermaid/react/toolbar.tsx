@@ -27,6 +27,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -152,23 +153,27 @@ export function MermaidToolbar({
               }
             />
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => runExport(() => copyText(source))}>
-                <Copy />
-                Copy source
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => runExport(() => copySvg(svg))}>
-                <Copy />
-                Copy SVG
-              </DropdownMenuItem>
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => runExport(() => copyText(source))}>
+                  <Copy />
+                  Copy source
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => runExport(() => copySvg(svg))}>
+                  <Copy />
+                  Copy SVG
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => runExport(() => downloadSvg(svg))}>
-                <Download />
-                Download SVG
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => runExport(() => downloadPng(svg))}>
-                <ImageIcon />
-                Download PNG
-              </DropdownMenuItem>
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => runExport(() => downloadSvg(svg))}>
+                  <Download />
+                  Download SVG
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => runExport(() => downloadPng(svg))}>
+                  <ImageIcon />
+                  Download PNG
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </DisclosureActions>
