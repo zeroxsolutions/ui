@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { DocJSON, NodeJSON } from '../document/core/index.js';
 import { docToPayload } from './message-payload.js';
-import { commandTrigger, mentionTrigger } from './composer-triggers.js';
+import {
+  channelTrigger,
+  commandTrigger,
+  mentionTrigger,
+} from './composer-triggers.js';
 
 // The registry the payload derives from - the shipped mention + command tokens.
 const tokens = [mentionTrigger().token, commandTrigger().token];
@@ -52,6 +56,22 @@ describe('docToPayload', () => {
     expect(payload.text).toBe('hello');
     expect(payload.tokens.command).toEqual([]);
     expect(payload.tokens.mention).toEqual([]);
+  });
+
+  it('buckets a newly registered trigger with no change to this mapping', () => {
+    // The generalisation proof: #channel is registered as one token; docToPayload
+    // is not touched, yet its refs bucket and flatten correctly.
+    const withChannel = [...tokens, channelTrigger().token];
+    const doc = para(
+      { type: 'text', text: 'ship it in ' },
+      { type: 'channel', attrs: { id: 'c1', label: 'general', slug: 'c1' } },
+      { type: 'text', text: ' with ' },
+      { type: 'mention', attrs: { id: 'u1', label: 'Ada' } },
+    );
+    const payload = docToPayload(doc, withChannel);
+    expect(payload.tokens.channel).toEqual([{ id: 'c1', label: 'general' }]);
+    expect(payload.tokens.mention).toEqual([{ id: 'u1', label: 'Ada' }]);
+    expect(payload.text).toBe('ship it in #general with @Ada');
   });
 
   it('maps a hard break to a newline and coalesces text', () => {

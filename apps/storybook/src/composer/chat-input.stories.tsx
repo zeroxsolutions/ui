@@ -5,10 +5,12 @@ import { Code2, Image as ImageIcon } from 'lucide-react';
 import { ChatInput } from '@zeroxsolutions/editor/composer/chat-input';
 import { ChatMessageView } from '@zeroxsolutions/editor/composer/chat-message-view';
 import {
+  channelTrigger,
   commandTrigger,
   mentionTrigger,
 } from '@zeroxsolutions/editor/composer/composer-triggers';
 import type {
+  ChatChannel,
   ChatCommand,
   ChatMessagePayload,
   ChatPerson,
@@ -16,15 +18,17 @@ import type {
 import { ChatMessageShell } from '@zeroxsolutions/ui/components/chat/chat-message-shell';
 
 /**
- * `ChatInput` is the contentEditable chat composer from `@zeroxsolutions/editor`.
- * Type `@` for a caret-anchored mention menu (selecting inserts a resolved
- * `{ id, label }` pill), or `/` at the very start for a command menu. A command
+ * `ChatInput` is the contentEditable chat composer from `@zeroxsolutions/editor`,
+ * driven by a **trigger registry**: `@` mention and `#` channel (references,
+ * insertable anywhere) and `/` command (an invocation, start-only). A command
  * commits (Tab / Enter, or typing its full slug + space) into an inline `/name`
  * token that stays in the line; Backspace on it re-opens it as editable text.
  * `Enter` submits the structured payload and clears; `Shift+Enter` inserts a
- * newline. The people and command lists are caller-supplied; here each submit is
- * rendered back through `ChatMessageView` inside the design-system
- * `ChatMessageShell`.
+ * newline. Each trigger is ONE `ComposerTrigger` in `triggers` - `#channel`
+ * reuses the same generic menu, node/codec factory, and payload mapping as the
+ * other two, which is the registry's whole point. The lists are caller-supplied;
+ * each submit is rendered back through `ChatMessageView` on the same registry,
+ * inside the design-system `ChatMessageShell`.
  */
 const people: ChatPerson[] = [
   { id: 'u1', label: 'Ada Lovelace', description: '@ada' },
@@ -44,8 +48,19 @@ const commands: ChatCommand[] = [
   { id: 'translate', name: 'translate', label: 'Translate', description: 'Translate to another language' },
 ];
 
-// The trigger registry: adding a trigger is adding a `ComposerTrigger` here.
-const triggers = [mentionTrigger({ people }), commandTrigger(commands)];
+const channels: ChatChannel[] = [
+  { id: 'c1', label: 'general', description: 'Company-wide announcements' },
+  { id: 'c2', label: 'design', description: 'Design crits and specs' },
+  { id: 'c3', label: 'engineering', description: 'Builds, reviews, incidents' },
+];
+
+// The trigger registry: adding a trigger is adding ONE `ComposerTrigger` here -
+// `#channel` needed no new menu, no hand-written node, and no payload change.
+const triggers = [
+  mentionTrigger({ people }),
+  channelTrigger(channels),
+  commandTrigger(commands),
+];
 
 function Playground() {
   const [messages, setMessages] = useState<ChatMessagePayload[]>([]);
@@ -55,14 +70,15 @@ function Playground() {
         <div className="flex flex-col gap-3">
           {messages.map((message, index) => (
             <ChatMessageShell key={index} role="user">
-              <ChatMessageView message={message} />
+              {/* The same registry renders the pills read-only. */}
+              <ChatMessageView message={message} triggers={triggers} />
             </ChatMessageShell>
           ))}
         </div>
       )}
       <ChatInput
         triggers={triggers}
-        placeholder="Message… (@ to mention, / for a command)"
+        placeholder="Message... (@ mention, # channel, / command)"
         onSubmit={(payload) => setMessages((prev) => [...prev, payload])}
       />
     </div>
@@ -77,20 +93,21 @@ export default meta;
 
 type Story = StoryObj<typeof ChatInput>;
 
-/** The full composer: `@` mention menu, `/` command mode, and each submitted
- *  payload rendered back through `ChatMessageView`. */
+/** The full composer on three registered triggers: `@` mention, `#` channel, and
+ *  `/` command, with each submitted payload rendered back through
+ *  `ChatMessageView` on the same registry. */
 export const Playground_: Story = {
   name: 'Playground',
   render: () => <Playground />,
 };
 
-/** Just the input, empty — shows the placeholder and the send affordance. */
+/** Just the input, empty - shows the placeholder and the send affordance. */
 export const Empty: Story = {
   render: () => (
     <div className="w-[32rem]">
       <ChatInput
         triggers={triggers}
-        placeholder="Ask anything… (@ to mention, / for a command)"
+        placeholder="Ask anything... (@ mention, # channel, / command)"
         onSubmit={() => {}}
       />
     </div>

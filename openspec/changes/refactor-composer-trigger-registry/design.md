@@ -228,8 +228,18 @@ Trigger detection per token, recomputed on every selection/change/focus:
   so `ChatMessageView` renders `payload.doc` directly and `segmentsToDoc` /
   `docToSegments` / the closed `ChatSegment` union are deleted outright.
 
+- **`#channel` ships as the generalisation proof.** `channelTrigger` is one
+  `referenceToken` over the inline-token factory (label display) - no new menu, no
+  hand-written node, and `docToPayload` was not touched (a spec asserts a newly
+  registered trigger buckets and flattens with zero change to the mapping). It is
+  **opt-in**, not in `defaultComposerTriggers`: a host registers it in
+  `ChatInput`'s `triggers` and passes the same list to `ChatMessageView` so its
+  codec renders the pill.
+- **One shared accent hue.** `#channel` reuses the same `--composer-accent` as
+  `@mention` (the reference treatment: tinted fill, no ring); only the invocation
+  `/command` adds the hairline ring since it owns the line. Triggers are told
+  apart by their glyph, not by colour - the Discord model.
+
 ## Open Questions
 
-- Does `#channel` ship in this change (as the generalisation proof), or does the
-  change land with `@`/`/` migrated only? Leaning: include `#channel`.
-- Per-token accent var vs one shared hue - leaning one hue.
+None outstanding. Emoji (`:` insertion) remains a deferred follow-up change.

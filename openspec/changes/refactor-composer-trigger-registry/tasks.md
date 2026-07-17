@@ -34,7 +34,7 @@
 
 ## 7. Optional: `#channel` as the generalisation proof
 
-- [ ] 7.1 Register a `channelToken` (reference) and a Storybook story showing three triggers coexisting - proving a new trigger is one registered object (no new menu/node/payload edit). (Emoji `:` is a separate follow-up change.)
+- [x] 7.1 Register a `channelToken` (reference) and a Storybook story showing three triggers coexisting - proving a new trigger is one registered object (no new menu/node/payload edit). (Emoji `:` is a separate follow-up change.)
 
 ## 8. Validation
 
@@ -45,4 +45,4 @@
 ## 9. Review and release (gated)
 
 - [x] 9.1 Run the `code-reviewer` subagent over the trigger-registry files and the payload-derivation logic (the maintainer-requested review); resolve findings.
-- [ ] 9.2 Release via `nx release` (SemVer major for `@zeroxsolutions/editor`) - only when the maintainer explicitly asks.
+- [ ] 9.2 Release via `nx release` (SemVer major for `@zeroxsolutions/editor`) - only when the maintainer explicitly asks. **Declined for now:** the maintainer opted out of releasing with this change; the breaking surface is committed and awaits a future release cut.

@@ -32,8 +32,24 @@ export interface ChatCommand {
   icon?: ReactNode;
 }
 
+/** A channel offered in the `#` menu, and carried by an inserted pill. */
+export interface ChatChannel {
+  id: string;
+  label: string;
+  /** Optional secondary line shown in the menu (the channel's topic). */
+  description?: string;
+  /** Optional leading glyph shown in the menu row. */
+  icon?: ReactNode;
+}
+
 /** A resolved mention in a submitted message - identity plus its display label. */
 export interface ChatMention {
+  id: string;
+  label: string;
+}
+
+/** A resolved channel in a submitted message - identity plus its display label. */
+export interface ChatChannelRef {
   id: string;
   label: string;
 }
@@ -63,6 +79,7 @@ export interface ChatCommandRef {
  */
 export interface ComposerTokenRegistry {
   mention: ChatMention;
+  channel: ChatChannelRef;
   command: ChatCommandRef;
 }
 
