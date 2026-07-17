@@ -2,34 +2,43 @@ import {
   createCodecRegistry,
   renderToReact,
 } from '../document/serialize/index.js';
-import { mention } from '../document/features/mention/index.js';
-import { slashCommand } from './command-node.js';
+import { defaultComposerTriggers, type ComposerTrigger } from './composer-triggers.js';
 import type { ChatMessagePayload } from './composer-types.js';
-import { segmentsToDoc } from './message-payload.js';
 
 /**
- * The read-only render of a submitted message — the matching half of `ChatInput`.
- * It rebuilds the single-block document from the payload's positional `segments`
- * and renders it through the **same** `mention` + `command` codecs the input uses
- * (via `renderToReact` / `toReact`), so every pill is the identical component —
- * one shared render path, no look-alike, no drift. The leading `/command` is an
- * inline node in `segments`, so it renders inline in place (no separate badge).
- * No editing engine is instantiated (like the static `Viewer`), so the view
- * renders on the server; the ProseMirror-derived markup rides the design tokens
- * under the `.chat-composer` scope (the sanctioned foreign-engine exception).
+ * The read-only render of a submitted message - the matching half of `ChatInput`.
+ * It renders the payload's canonical `doc` through the **same** codecs the input
+ * uses (via `renderToReact` / `toReact`), so every pill is the identical
+ * component - one shared render path, no look-alike, no drift. A leading
+ * `/command` is an inline node in the doc, so it renders inline in place (no
+ * separate badge). No editing engine is instantiated (like the static `Viewer`),
+ * so the view renders on the server; the ProseMirror-derived markup rides the
+ * design tokens under the `.chat-composer` scope (the foreign-engine exception).
  */
 export interface ChatMessageViewProps {
   message: ChatMessagePayload;
+  /** The triggers whose codecs render the pills; defaults to the shipped
+   *  `@mention` + `/command`. Pass this to render host-registered triggers. */
+  triggers?: ComposerTrigger[];
   className?: string;
 }
 
-// The codec registry is stateless and pure (the `mention` + `command` toReact
-// plus the built-in doc/paragraph/text substrate), so it is built once and shared
-// across every rendered message rather than per-render.
-const composerRegistry = createCodecRegistry([mention(), slashCommand()]);
+// The default codec registry (shipped mention + command pills plus the built-in
+// doc/paragraph/text substrate) is stateless and pure, so it is built once and
+// shared across every rendered message rather than per-render.
+const defaultRegistry = createCodecRegistry(
+  defaultComposerTriggers().map((trigger) => trigger.feature),
+);
 
-export function ChatMessageView({ message, className }: ChatMessageViewProps) {
-  const body = renderToReact(segmentsToDoc(message.segments), composerRegistry);
+export function ChatMessageView({
+  message,
+  triggers,
+  className,
+}: ChatMessageViewProps) {
+  const registry = triggers
+    ? createCodecRegistry(triggers.map((trigger) => trigger.feature))
+    : defaultRegistry;
+  const body = renderToReact(message.doc, registry);
   return (
     <div
       className={[

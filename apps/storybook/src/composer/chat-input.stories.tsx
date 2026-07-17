@@ -4,6 +4,10 @@ import { Code2, Image as ImageIcon } from 'lucide-react';
 
 import { ChatInput } from '@zeroxsolutions/editor/composer/chat-input';
 import { ChatMessageView } from '@zeroxsolutions/editor/composer/chat-message-view';
+import {
+  commandTrigger,
+  mentionTrigger,
+} from '@zeroxsolutions/editor/composer/composer-triggers';
 import type {
   ChatCommand,
   ChatMessagePayload,
@@ -40,6 +44,9 @@ const commands: ChatCommand[] = [
   { id: 'translate', name: 'translate', label: 'Translate', description: 'Translate to another language' },
 ];
 
+// The trigger registry: adding a trigger is adding a `ComposerTrigger` here.
+const triggers = [mentionTrigger({ people }), commandTrigger(commands)];
+
 function Playground() {
   const [messages, setMessages] = useState<ChatMessagePayload[]>([]);
   return (
@@ -54,8 +61,7 @@ function Playground() {
         </div>
       )}
       <ChatInput
-        people={people}
-        commands={commands}
+        triggers={triggers}
         placeholder="Message… (@ to mention, / for a command)"
         onSubmit={(payload) => setMessages((prev) => [...prev, payload])}
       />
@@ -83,8 +89,7 @@ export const Empty: Story = {
   render: () => (
     <div className="w-[32rem]">
       <ChatInput
-        people={people}
-        commands={commands}
+        triggers={triggers}
         placeholder="Ask anything… (@ to mention, / for a command)"
         onSubmit={() => {}}
       />

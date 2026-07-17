@@ -2,6 +2,7 @@ import { act, render, fireEvent, cleanup, waitFor } from '@testing-library/react
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IEditor } from '../document/core/index.js';
 import type { ChatCommand } from './composer-types.js';
+import { commandTrigger, mentionTrigger } from './composer-triggers.js';
 import { ChatInput } from './chat-input.js';
 
 afterEach(cleanup);
@@ -11,14 +12,16 @@ const commands: ChatCommand[] = [
   { id: 'video', name: 'video', label: 'Video' },
 ];
 
-/** Mount `ChatInput`, capturing its façade via `onReady` so the test can drive
- *  real content (jsdom runs ProseMirror content ops fine; only caret geometry is
- *  unavailable, which the payload path never needs). */
+/** Mount `ChatInput` on the shipped triggers, capturing its façade via `onReady`
+ *  so the test can drive real content (jsdom runs ProseMirror content ops fine;
+ *  only caret geometry is unavailable, which the payload path never needs). */
 async function mount(onSubmit = vi.fn()) {
   let editor!: IEditor;
+  // Stable across re-renders so the editor builds once.
+  const triggers = [mentionTrigger(), commandTrigger(commands)];
   const utils = render(
     <ChatInput
-      commands={commands}
+      triggers={triggers}
       onSubmit={onSubmit}
       onReady={(e) => {
         editor = e;
@@ -29,9 +32,6 @@ async function mount(onSubmit = vi.fn()) {
   const control = utils.container.querySelector(
     '[data-slot="input-group-control"]',
   ) as HTMLElement;
-  // Wait for `@tiptap/react` to adopt the view DOM, then focus the real
-  // contenteditable — jsdom only reports focus (which the menus' open-state
-  // reads) when the actual `.ProseMirror` element is focused.
   await waitFor(() =>
     expect(control.querySelector('.ProseMirror')).not.toBeNull(),
   );
@@ -44,7 +44,7 @@ async function mount(onSubmit = vi.fn()) {
 }
 
 describe('ChatInput', () => {
-  it('submits positional segments + de-duped mentions with a null command, then clears', async () => {
+  it('submits a registry-derived payload (typed tokens + flat text), then clears', async () => {
     const { editor, control, onSubmit } = await mount();
     act(() => {
       editor.run('insertContent', { content: 'a portrait of ' });
@@ -53,13 +53,10 @@ describe('ChatInput', () => {
 
     fireEvent.keyDown(control, { key: 'Enter' });
 
-    expect(onSubmit).toHaveBeenCalledWith({
-      command: null,
-      mentions: [{ id: 'u1', label: 'Ada' }],
-      segments: [
-        { text: 'a portrait of ' },
-        { mention: { id: 'u1', label: 'Ada' } },
-      ],
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({
+      text: 'a portrait of @Ada',
+      tokens: { mention: [{ id: 'u1', label: 'Ada' }], command: [] },
     });
     // Cleared after submit.
     expect(editor.getText()).toBe('');
@@ -80,7 +77,7 @@ describe('ChatInput', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('commits the command as a leading inline node and carries it in the payload', async () => {
+  it('commits the command as a leading inline pill and buckets it in the payload', async () => {
     const { editor, control, onSubmit } = await mount();
     // Type `/im` at the start so the command menu opens, then commit with Enter
     // (the menu owns Enter while open); the `/im` becomes an inline `/name` node.
@@ -89,24 +86,21 @@ describe('ChatInput', () => {
     });
     fireEvent.keyDown(document, { key: 'Enter' });
 
-    // The committed pill leads the line; the argument text follows.
     act(() => {
       editor.run('insertContent', { content: 'a portrait of ' });
     });
     // The command is an inline node in the document, not surface state.
-    expect(
-      control.querySelector('[data-slot="command"]')?.textContent,
-    ).toBe('/image-gen');
+    expect(control.querySelector('[data-slot="command"]')?.textContent).toBe(
+      '/image-gen',
+    );
 
     fireEvent.keyDown(control, { key: 'Enter' });
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit.mock.calls[0][0]).toMatchObject({
-      command: { id: 'image', label: 'Image', name: 'image-gen' },
-      segments: [
-        { command: { id: 'image', label: 'Image', name: 'image-gen' } },
-        { text: 'a portrait of ' },
-      ],
-    });
+    const payload = onSubmit.mock.calls[0][0];
+    expect(payload.tokens.command).toEqual([
+      { id: 'image', label: 'Image', name: 'image-gen' },
+    ]);
+    expect(payload.text).toBe('/image-gen a portrait of ');
   });
 });

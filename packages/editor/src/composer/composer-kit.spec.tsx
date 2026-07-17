@@ -3,7 +3,6 @@ import { createEditor } from '../document/core/index.js';
 import type { DocJSON, IEditor, NodeJSON } from '../document/core/index.js';
 import { mention } from '../document/features/mention/index.js';
 import { COMPOSER_TOP_CONTENT, composerKit } from './composer-kit.js';
-import { segmentsToText } from './composer-types.js';
 
 const editors: IEditor[] = [];
 function build(): IEditor {
@@ -60,17 +59,5 @@ describe('composerKit', () => {
       content: { type: 'paragraph', content: [{ type: 'text', text: 'world' }] },
     });
     expect((editor.getJSON() as DocJSON).content).toHaveLength(1);
-  });
-});
-
-describe('segmentsToText', () => {
-  it('derives a flat string from positional segments', () => {
-    expect(
-      segmentsToText([
-        { text: 'hi ' },
-        { mention: { id: 'u1', label: 'Ada' } },
-        { text: ' there' },
-      ]),
-    ).toBe('hi @Ada there');
   });
 });
