@@ -4,19 +4,22 @@
   "files": [],
   "references": [
     {
-      "path": "./packages/ui"
-    },
-    {
       "path": "./packages/icons"
-    },
-    {
-      "path": "./apps/storybook"
     },
     {
       "path": "./packages/fluent-emoji"
     },
     {
       "path": "./packages/editor"
+    },
+    {
+      "path": "./packages/ui"
+    },
+    {
+      "path": "./apps/registry-e2e"
+    },
+    {
+      "path": "./apps/registry"
     }
   ]
 }

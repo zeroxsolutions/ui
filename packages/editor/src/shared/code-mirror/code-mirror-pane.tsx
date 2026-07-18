@@ -179,7 +179,6 @@ export function CodeMirrorPane({
       viewRef.current = null;
     };
     // Mount-once: initial doc/config are seeded here, kept in sync below.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Controlled value → editor (guarded against the edit→onValueChange feedback loop).

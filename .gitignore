@@ -55,3 +55,4 @@ storybook-static
 out
 
 .nx/migrate-runs
+test-output

@@ -14,7 +14,6 @@ import {
   TabsTrigger,
 } from '@zeroxsolutions/ui/components/ui/tabs';
 import { useIsMobile } from '@zeroxsolutions/ui/hooks/use-mobile';
-import { cn } from '@zeroxsolutions/ui/lib/utils';
 import { CodeMirrorPane } from '../../shared/code-mirror/index.js';
 import type { MermaidEditorProps } from '../core/types.js';
 import { DiagramCanvas } from './preview.js';
