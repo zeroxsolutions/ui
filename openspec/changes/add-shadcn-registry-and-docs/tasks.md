@@ -19,9 +19,9 @@
 
 ## 3. Registry app: preview + docs
 
-- [ ] 3.1 Configure the Next.js `registry` app for static export (`output: 'export'`) + MDX.
-- [ ] 3.2 Add an isolated live-preview wrapper that renders a component apart from page chrome, resolving from workspace source.
-- [ ] 3.3 Add at least one component docs page that renders its component in the isolated live preview.
+- [x] 3.1 Static export configured (`output: 'export'`; sample `api/hello` route removed - API routes are incompatible with export). Registry app builds to `apps/registry/out/` (index.html, all routes prerendered static). MDX DEFERRED to when prose docs are authored - previews use `.tsx`, which is enough for the sandbox + `registry-e2e` target.
+- [x] 3.2 `ComponentPreview` wrapper (`data-slot="component-preview"`, isolated centered frame). Registry resolves `@zeroxsolutions/ui` via its **dist** (declared the workspace dep so Turbopack links it into `apps/registry/node_modules`; nx project-ref alone is TS-only; source-import deferred - the `@/` alias would collide). Tailwind v4 wired: `postcss.config.js` (`@tailwindcss/postcss`) + `global.css` imports ui `styles.css` + `source.css` -> 207KB CSS with ui theme tokens + component classes.
+- [x] 3.3 `/preview/button` page renders all 5 Button variants inside `ComponentPreview`; static-exports to `out/preview/button.html` with the markup + generated styled CSS.
 
 ## 4. Registry (plumbing + 1-2 samples only)
 

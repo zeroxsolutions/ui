@@ -2,8 +2,10 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Next.js options go here
-  // See: https://nextjs.org/docs/app/api-reference/config/next-config-js
+  // Static export: this app documents + previews components and serves the shadcn
+  // registry as static JSON under public/r - it has no server runtime, so it ships
+  // to Cloudflare Pages (see fe-deploy-by-render-mode). No API routes.
+  output: 'export',
 };
 
 module.exports = nextConfig;
