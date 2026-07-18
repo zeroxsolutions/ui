@@ -1,0 +1,30 @@
+{
+  // Static-assets Worker for the registry app (the workspace convention for a
+  // static site - see apps/storybook's prior config). It serves the Next.js
+  // static export (`output: 'export'` -> ./out): the docs/preview HTML plus the
+  // shadcn registry JSON under /r. Assets-only (no `main`, no server code), so no
+  // `compatibility_flags: ["nodejs_compat"]` and no data bindings. Exposure follows
+  // the worker-wrangler-config rule: workers_dev in development, a custom-domain
+  // route in production.
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "registry",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "env": {
+    "development": {
+      "workers_dev": true
+    },
+    "production": {
+      "workers_dev": false,
+      "routes": [
+        { "pattern": "registry.zeroxsolutions.com", "custom_domain": true }
+      ]
+    }
+  }
+}

@@ -10,6 +10,36 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
-    "tailwindcss": "^4.3.1"
+    "tailwindcss": "^4.3.1",
+    "wrangler": "catalog:"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build",
+          { "projects": ["@zeroxsolutions/ui"], "target": "shadcn-build" }
+        ],
+        "outputs": [
+          "{workspaceRoot}/apps/registry/.next/!(cache)/**/*",
+          "{workspaceRoot}/apps/registry/.next/!(cache)",
+          "{workspaceRoot}/apps/registry/out"
+        ]
+      },
+      "deploy": {
+        "executor": "nx:run-commands",
+        "defaultConfiguration": "development",
+        "dependsOn": ["build"],
+        "configurations": {
+          "development": {
+            "command": "wrangler deploy --env development"
+          },
+          "production": {
+            "command": "wrangler deploy --env production"
+          }
+        },
+        "options": { "cwd": "{projectRoot}" }
+      }
+    }
   }
 }

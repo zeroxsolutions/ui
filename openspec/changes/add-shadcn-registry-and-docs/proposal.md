@@ -64,7 +64,8 @@ names.
   previews; `packages/ui` stays jsdom-only with no `@vitest/browser*` dep.
 - `nx e2e @zeroxsolutions/registry-e2e` runs (Playwright).
 - `nx run-many -t lint build test` green across the workspace; `apps/registry` deploys
-  as a static export to Cloudflare Pages per `fe-deploy-by-render-mode`.
+  as a static site to Cloudflare via `wrangler deploy` (Workers Static Assets - the
+  workspace's established static-site pattern).
 - The `refactor-design-system-conventions` proposal is de-stale-d (its
   "re-organize Storybook" deliverable replaced by the docs/registry authoring
   standard).
@@ -92,8 +93,8 @@ names.
   alias rewrite - so one source serves both `pnpm add` and `shadcn add`.
 - `docs-site`: the Next.js **`registry`** app that replaces the Storybook host - MDX
   docs plus an isolated **live component preview** (the design/dev sandbox), hosting the
-  registry at `/r/*.json`, deployed as a static export to Cloudflare Pages, paired with
-  a `registry-e2e` project.
+  registry at `/r/*.json`, deployed as a static site to Cloudflare (Workers Static
+  Assets), paired with a `registry-e2e` project.
 - `component-testing`: the library test split - `packages/ui` stays jsdom-only (units),
   and real-browser interaction/a11y/visual coverage (the removed `test-storybook` role)
   lives in the app's `registry-e2e` (Playwright), per the nx library-vs-app split.
@@ -118,7 +119,9 @@ not an OpenSpec capability.)
   ESLint was also adopted (repo was `linter:none`) with a tuned ruleset.
 - **Rules touched**: `e2e-pairs-each-app` (the Storybook-host exemption's subject is
   gone; the new Next.js app carries a real `*-e2e` - update the rule text);
-  `fe-deploy-by-render-mode` (the registry app is a static export -> Pages);
+  `fe-deploy-by-render-mode` (the registry app is a static export; deployed via Workers
+  Static Assets - a deliberate repo choice over the rule's Pages default) +
+  `worker-wrangler-config` (assets-only Worker: env split, `workers_dev`/custom-domain route);
   `lib-public-exports-and-semver` (unchanged - package kept, registry additive);
   `gen-via-generator` / `run-through-nx` (all create/remove via generators, all tasks
   via `nx`).

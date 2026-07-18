@@ -65,10 +65,15 @@ on install. The former docs/dev/test tool was a Storybook host that resolved `ui
 6. **Playwright installed once** (`@nx/playwright` + `@playwright/test`) - it backs the
    `registry-e2e` runner.
 
-7. **Deploy = static export -> Cloudflare Pages.** The registry app sets Next.js
-   `output: 'export'`; registry JSON lives under `public/r` so it ships as static
-   assets. Deploy through an `nx` target wrapping `wrangler pages deploy`
-   (`fe-deploy-by-render-mode`), no `nodejs_compat`, no bindings.
+7. **Deploy = static export -> Cloudflare (Workers Static Assets).** The registry app
+   sets Next.js `output: 'export'`; registry JSON lives under `public/r` so it ships as
+   static assets. Deploy through an `nx` target wrapping `wrangler deploy` as an
+   assets-only Worker (`assets.directory: ./out`, no `main`), no `nodejs_compat`, no
+   bindings - the workspace's established static-site pattern (see the prior
+   `apps/storybook` config). This is a deliberate repo choice over the Pages path in
+   `fe-deploy-by-render-mode` (Cloudflare now recommends Workers Static Assets for static
+   sites); exposure follows `worker-wrangler-config` (`workers_dev` in development, a
+   `routes[].custom_domain` in production).
 
 8. **All create/remove via generators, serialized.** `@nx/workspace:remove` the
    Storybook app; `@nx/next:application` the app (+ its e2e); `@nx/workspace:move` to

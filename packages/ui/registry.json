@@ -1,0 +1,47 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "zeroxsolutions-ui",
+  "homepage": "https://zeroxsolutions-registry.pages.dev",
+  "items": [
+    {
+      "name": "utils",
+      "type": "registry:lib",
+      "title": "cn utility",
+      "description": "The `cn` class-merge helper (clsx + tailwind-merge) that every @zeroxsolutions/ui component imports through the @/lib/utils alias.",
+      "dependencies": ["clsx", "tailwind-merge"],
+      "files": [
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "The Button primitive - a Base UI button with class-variance-authority variants (default, outline, secondary, ghost, destructive, link) and sizes.",
+      "dependencies": ["@base-ui/react", "class-variance-authority"],
+      "registryDependencies": ["utils"],
+      "files": [
+        {
+          "path": "src/components/ui/button.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "model-info-card",
+      "type": "registry:component",
+      "title": "Model Info Card",
+      "description": "A composed model detail panel - an identity header (media slot, name over vendor, mono modelId) over titled ModelInfoCardSection bodies. Composes the cn utility.",
+      "registryDependencies": ["utils"],
+      "files": [
+        {
+          "path": "src/components/model-info-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    }
+  ]
+}

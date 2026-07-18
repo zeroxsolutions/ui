@@ -38,16 +38,19 @@ same deployment that documents a component also distributes it via `shadcn add`.
 - **WHEN** a client requests `/r/<name>.json` from the registry app
 - **THEN** it receives the built registry item for that component
 
-### Requirement: The registry app deploys as a static export to Cloudflare Pages
+### Requirement: The registry app deploys as a static site to Cloudflare, with no server runtime
 
 The registry app MUST have no server runtime requirement - it MUST build to a static
-export and deploy to Cloudflare Pages through an `nx` target wrapping
-`wrangler pages deploy`, carrying no `nodejs_compat` and no data bindings.
+export and deploy to Cloudflare through an `nx` target wrapping `wrangler deploy` as an
+**assets-only Worker** (`assets.directory` over the static build, no `main`), carrying no
+`nodejs_compat` flag and no data bindings. This is the workspace's established static-site
+pattern (Workers Static Assets); the production custom domain is declared as a
+`routes[].custom_domain` entry under `env.production`.
 
 #### Scenario: The registry app deploys statically
 
 - **WHEN** the deploy target runs
-- **THEN** it publishes a static build directory to Cloudflare Pages
+- **THEN** it publishes the static build directory to Cloudflare as static assets
 - **AND** the app declares no server binding or `nodejs_compat` flag
 
 ### Requirement: The registry app is paired with an e2e project that covers component interaction

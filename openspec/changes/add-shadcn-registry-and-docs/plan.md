@@ -36,8 +36,9 @@ tdd-preferred
    -> `apps/registry/public/r`; validate emitted items.
 6. **Interaction/visual coverage** (5.1-5.2): `registry-e2e` specs drive the previews;
    confirm `packages/ui` stays jsdom-only (no browser project, no `test-storybook`).
-7. **Deploy target** (6.1): registry static-export build target + `wrangler pages deploy`
-   under `configurations`, no `nodejs_compat`/bindings.
+7. **Deploy target** (6.1): registry static-export build target + a `deploy` target
+   wrapping `wrangler deploy` (Workers Static Assets, the repo's static-site convention)
+   under `configurations`, no `nodejs_compat`/bindings; domain via `routes[].custom_domain`.
 8. **Follow-up edits** (7.1-7.3): de-stale `refactor-design-system-conventions/proposal.md`;
    update `.agents/rules/e2e-pairs-each-app.md`; document the ESLint adoption.
 9. **Validation sweep** (8.1-8.6).
@@ -53,7 +54,8 @@ tdd-preferred
    `model-info-card` carries its `registryDependencies`.
 6. `nx e2e @zeroxsolutions/registry-e2e` runs and asserts a component's interaction/layout
    against its preview; `nx test @zeroxsolutions/ui` stays jsdom-only.
-7. The Pages deploy target dry-runs with no server binding.
+7. The `deploy` target dry-runs (`wrangler deploy --env production --dry-run`) with no
+   server binding.
 8. The refactor proposal no longer mentions re-organizing Storybook; the e2e-pairs rule
    reflects the new Next.js app.
 9. Full sweep: 8.1-8.6 all pass.
@@ -65,7 +67,8 @@ tdd-preferred
 - `packages/ui/**` - re-scaffolded (`@nx/react:library`), src + custom `vite.config.mts`
   + `components.json` restored; `registry.json` to add
 - `eslint.config.mjs` (root) - ESLint adopted + tuned ruleset
-- `apps/registry/next.config.*` + its `project.json` targets (build/pages-deploy/shadcn-build)
+- `apps/registry/next.config.*` + `wrangler.jsonc` + its `package.json` nx targets
+  (build/deploy/shadcn-build)
 - `openspec/changes/refactor-design-system-conventions/proposal.md` - de-stale edit
 - `.agents/rules/e2e-pairs-each-app.md` - rule text update
 - `vitest.config.ts` (root) - unchanged (aggregates the jsdom project)
@@ -92,5 +95,17 @@ by inference.
 - Detour (folded into tasks 2b): `packages/ui` re-scaffolded to a clean baseline; ESLint
   adopted workspace-wide (repo was `linter:none`); app renamed `docs` -> `registry`.
   Vitest browser mode was explored then reverted in favor of `registry-e2e`.
+- Steps 5-9 (tasks 4-8) completed this session: authored `registry.json` (utils/button/
+  model-info-card, both composed items declaring `registryDependencies: ["utils"]` - the
+  honest same-source dep, since model-info-card does not import button); added the
+  `shadcn-build` nx target on `@zeroxsolutions/ui`; wrote `registry-e2e` specs
+  (interaction/a11y/geometry, chromium-only) + a home rewrite (dropping the stale
+  `@zeroxsolutions/docs` template); added `wrangler.jsonc` + a `deploy` target (Workers
+  Static Assets via `wrangler deploy`, matching the prior `apps/storybook` convention);
+  de-staled the refactor proposal; recorded the ESLint adoption in `eslint.config.mjs`.
+- Task 7.2 deviation (user-confirmed): the shared `.agents/rules/e2e-pairs-each-app.md`
+  was NOT edited - it is generic, already covers the registry app via its default rule,
+  and its Storybook-host exemption stays valid for other repos (per the
+  `rules-shared-standard-not-repo-specific` guidance). See `verification.md` for evidence.
 
 ## Manual Adjustments

@@ -54,5 +54,8 @@ storybook-static
 .next
 out
 
+# Generated shadcn registry JSON (emitted by @zeroxsolutions/ui:shadcn-build)
+apps/registry/public/r
+
 .nx/migrate-runs
 test-output

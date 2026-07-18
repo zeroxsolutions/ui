@@ -1,3 +1,8 @@
+// Workspace ESLint config. This tree was previously linter:none; ESLint was
+// adopted during the add-shadcn-registry-and-docs change (the nx generators
+// pulled it in and the team chose to keep it). Lint is the workspace linter
+// standard per the green-before-commit rule. The rule tuning below is
+// deliberate - see each rule's inline note.
 import nx from '@nx/eslint-plugin';
 
 export default [

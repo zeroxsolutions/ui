@@ -59,9 +59,12 @@ Included deliverables (each handled in its cluster):
   (`media`/`name`/`vendor`/`modelId`) with composable `ModelInfoCardSection` parts
   - a splitting inconsistency vs shadcn's "parts, not props" to resolve. (The model
   **picker** + **hover** correction stay in `add-model-picker`.)
-- **Re-organize Storybook** - the `*.stories.tsx` titles/navigation follow the new
-  component grouping (the Storybook nav mirrors the folder groups), and each
-  component's story uses a consistent structure.
+- **Author each cluster's registry item + preview** - as a cluster's names
+  settle, add its isolated live-preview page and its `registry.json` item (with
+  `registryDependencies`) in the phase-1 `registry` app, so the docs/`shadcn add`
+  channel tracks the final component grouping. This replaces the former "re-organize
+  Storybook" deliverable - Storybook was removed in `add-shadcn-registry-and-docs`,
+  which stood up the `registry` app + preview sandbox for exactly this purpose.
 
 ## Success Criteria
 
@@ -72,10 +75,11 @@ Included deliverables (each handled in its cluster):
 - No look-alike components remain (an icon+label+value line is the shipped `Item`,
   etc.); naming/filenames are role-consistent and kebab; groups are coherent.
 - Components are domain-free and monochrome (hue only via a scoped var).
-- `nx run-many -t lint build test` green; Storybook builds; no regression in
-  `editor` (which consumes `ui`).
-- Storybook navigation is grouped to mirror the component grouping; every
-  component's story sits in its group with a consistent story structure.
+- `nx run-many -t lint build test` green; the `registry` app builds and
+  `nx e2e @zeroxsolutions/registry-e2e` passes; no regression in `editor` (which
+  consumes `ui`).
+- Each aligned component has an isolated live-preview page and a schema-valid
+  `registry.json` item in the `registry` app, following the final grouping/names.
 - Each cluster is reviewed and agreed before merge; any public-surface (subpath
   import) rename is flagged as breaking.
 
@@ -117,8 +121,9 @@ None. (The `model-info-card` hover-placement change moves to the separate
   `@zeroxsolutions/editor` (45 components + 5 hooks; consumes `ui` in 15+ places -
   refactors must not regress it), `@zeroxsolutions/icons` (icon system only),
   `@zeroxsolutions/fluent-emoji` (2 components + 2 hooks),
-  `@zeroxsolutions/storybook` (all `*.stories.tsx` re-titled/grouped to the new
-  scheme). Total audit universe: ~89 components + 13 hooks.
+  `@zeroxsolutions/registry` (an isolated preview page + a `registry.json` item
+  per aligned component, following the final grouping). Total audit universe:
+  ~89 components + 13 hooks.
 - **Consumers**: renaming files/exports changes the `./*` subpath import paths - a
   **breaking (major)** change per `lib-public-exports-and-semver`; batched and
   flagged per cluster.
