@@ -1,7 +1,9 @@
-# CLAUDE.md
+# AGENTS.md
 
 <!--
-SCAFFOLD TEMPLATE — copy to the repo root as `CLAUDE.md` and fill every <...>.
+SCAFFOLD TEMPLATE — copy to the repo root as `AGENTS.md` and fill every <...>.
+Claude Code reads `CLAUDE.md`; point it at this file (copy or symlink) so both
+harnesses share one concrete layer.
 
 This file is the repo's ONE concrete layer. The rules under `.claude/rules/*` are
 generic and identifier-free; every concrete name and per-repo decision lives HERE
