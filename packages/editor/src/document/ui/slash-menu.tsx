@@ -9,26 +9,31 @@ import {
   ItemTitle,
 } from '@zeroxsolutions/ui/components/ui/item';
 import { Empty, EmptyDescription } from '@zeroxsolutions/ui/components/ui/empty';
+import {
+  Popover,
+  PopoverContent,
+} from '@zeroxsolutions/ui/components/ui/popover';
 import { ScrollArea } from '@zeroxsolutions/ui/components/ui/scroll-area';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import type { CaretRect, IEditor, SlashItem, TriggerQuery } from '../core/index.js';
 import { filterSlashItems, groupByHeading } from './collect-ui-contributions.js';
-import { FloatingShell } from './floating-shell.js';
+import { rectAnchor } from './selection-rect.js';
 
 /**
  * The slash (`/`) insert menu — Notion-style **inline**: typing `/` leaves the
  * `/` (and everything typed after it) as real text in the document, painted with
  * a gray `slash-active` highlight and a faint inline ghost right after the caret
  * (the `/<placeholder>` hint on an empty query, or the highlighted item's
- * autocomplete completion as you type). The popup is a `FloatingShell` (the one
- * sanctioned bespoke positioning surface — the editor owns focus and the caret has
- * no DOM trigger, so a design-system `Popover` can't express it); its rows,
- * empty-state, and scrolling are the design-system `Item` / `Empty` / `ScrollArea`
- * components. Detection, the delete-on-select range, and the inline decoration come
- * from the engine-free `IEditor` seams (`triggerQuery`, `setSlashDecoration`);
- * picking an item deletes the typed `/query` and dispatches the item's command
- * through the façade. Keyboard nav (↑/↓, Enter/Tab, Esc) is handled here because
- * the editor keeps focus (the query is typed into it), so a cmdk input can't own
- * the keys.
+ * autocomplete completion as you type). The popup is a caret-anchored `Popover`
+ * (the shipped primitive, non-modal by default and with `initialFocus={false}` so
+ * the editor keeps focus and the typed `/query` keeps flowing into the document);
+ * its rows, empty-state, and scrolling are the design-system `Item` / `Empty` /
+ * `ScrollArea` components. Detection, the delete-on-select range, and the inline
+ * decoration come from the engine-free `IEditor` seams (`triggerQuery`,
+ * `setSlashDecoration`); picking an item deletes the typed `/query` and dispatches
+ * the item's command through the façade. Keyboard nav (↑/↓, Enter/Tab, Esc) is
+ * handled here because the editor keeps focus (the query is typed into it), so a
+ * cmdk input can't own the keys.
  */
 export interface SlashMenuProps {
   editor: IEditor;
@@ -180,67 +185,68 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
   }, [editor, active, dismiss, select]);
 
   return (
-    <FloatingShell
-      open={Boolean(active && point)}
-      anchor={point}
-      side="bottom"
-      contentKey={ordered.length}
-      className="w-72"
-      data-slash-menu=""
-    >
-      <ScrollArea className="max-h-80">
-        <div className="p-1">
-          {ordered.length === 0 ? (
-            <Empty className="min-h-0 gap-1 border-0 p-6">
-              <EmptyDescription>No matching blocks</EmptyDescription>
-            </Empty>
-          ) : (
-            groups.map(([heading, groupItems]) => (
-              <div key={heading} className="pb-1">
-                <div className="px-2 pb-1 pt-1.5 text-xs font-medium text-muted-foreground">
-                  {heading}
-                </div>
-                {groupItems.map((item) => {
-                  const position = ordered.indexOf(item);
-                  const highlighted = position === index;
-                  return (
-                    <Item
-                      key={item.id}
-                      size="sm"
-                      data-highlighted={highlighted || undefined}
-                      onMouseEnter={() => setIndex(position)}
-                      // Keep the editor focused so the selection/range survives the click.
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => select(item)}
-                      className={[
-                        'cursor-pointer',
-                        highlighted ? 'bg-accent text-accent-foreground' : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                    >
-                      <ItemMedia
-                        variant="icon"
-                        className="size-8 rounded-md border bg-secondary text-base"
-                      >
-                        {item.icon}
-                      </ItemMedia>
-                      <ItemContent className="gap-0.5">
-                        <ItemTitle>{item.title}</ItemTitle>
-                        {item.description && (
-                          <ItemDescription className="line-clamp-1">
-                            {item.description}
-                          </ItemDescription>
+    <Popover open={Boolean(active && point)}>
+      <PopoverContent
+        anchor={rectAnchor(point)}
+        side="bottom"
+        align="start"
+        // The editor owns the caret; the popover must not steal focus on open.
+        initialFocus={false}
+        data-slot="slash-menu"
+        className="w-72 gap-0 p-0"
+      >
+        <ScrollArea className="max-h-80">
+          <div className="p-1">
+            {ordered.length === 0 ? (
+              <Empty className="min-h-0 gap-1 border-0 p-6">
+                <EmptyDescription>No matching blocks</EmptyDescription>
+              </Empty>
+            ) : (
+              groups.map(([heading, groupItems]) => (
+                <div key={heading} className="pb-1">
+                  <div className="px-2 pb-1 pt-1.5 text-xs font-medium text-muted-foreground">
+                    {heading}
+                  </div>
+                  {groupItems.map((item) => {
+                    const position = ordered.indexOf(item);
+                    const highlighted = position === index;
+                    return (
+                      <Item
+                        key={item.id}
+                        size="sm"
+                        data-highlighted={highlighted || undefined}
+                        onMouseEnter={() => setIndex(position)}
+                        // Keep the editor focused so the selection/range survives the click.
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => select(item)}
+                        className={cn(
+                          'cursor-pointer',
+                          highlighted && 'bg-accent text-accent-foreground',
                         )}
-                      </ItemContent>
-                    </Item>
-                  );
-                })}
-              </div>
-            ))
-          )}
-        </div>
-      </ScrollArea>
-    </FloatingShell>
+                      >
+                        <ItemMedia
+                          variant="icon"
+                          className="size-8 rounded-md border bg-secondary text-base"
+                        >
+                          {item.icon}
+                        </ItemMedia>
+                        <ItemContent className="gap-0.5">
+                          <ItemTitle>{item.title}</ItemTitle>
+                          {item.description && (
+                            <ItemDescription className="line-clamp-1">
+                              {item.description}
+                            </ItemDescription>
+                          )}
+                        </ItemContent>
+                      </Item>
+                    );
+                  })}
+                </div>
+              ))
+            )}
+          </div>
+        </ScrollArea>
+      </PopoverContent>
+    </Popover>
   );
 }

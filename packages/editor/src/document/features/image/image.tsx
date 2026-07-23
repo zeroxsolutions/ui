@@ -93,8 +93,8 @@ export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewPr
       contentEditable={false}
     >
       {editable && (
-        // A design-system `Popover` for the alt/width editor (DOM-anchored, so the
-        // caret-anchored `FloatingShell` is the wrong primitive). `contentEditable`
+        // A design-system `Popover` for the alt/width editor (DOM-anchored to the
+        // image, unlike the caret-anchored chrome popovers). `contentEditable`
         // off + stopping pointer/mouse-down keeps opening it from moving the
         // ProseMirror selection or re-rendering this node view mid-edit.
         <span

@@ -95,10 +95,11 @@ const mention = referenceToken('mention', '@', {
 describe('TriggerMenu - opening + gate', () => {
   it('an invocation opens at the input start and filters by the query', () => {
     const editor = fakeEditor({ trigger: { query: 'im', from: 1, to: 3 } });
-    const { container, getByText, queryByText } = render(
+    const { getByText, queryByText } = render(
       <TriggerMenu editor={editor} token={command} />,
     );
-    expect(container.querySelector('[data-trigger-menu]')).not.toBeNull();
+    // The popover portals to document.body, so the assertion must query there.
+    expect(document.body.querySelector('[data-slot="trigger-menu"]')).not.toBeNull();
     expect(getByText('Image')).toBeDefined();
     expect(queryByText('Video')).toBeNull();
   });
@@ -108,8 +109,8 @@ describe('TriggerMenu - opening + gate', () => {
       trigger: { query: 'im', from: 7, to: 9 },
       json: docWithText('hello /im'),
     });
-    const { container } = render(<TriggerMenu editor={editor} token={command} />);
-    expect(container.querySelector('[data-trigger-menu]')).toBeNull();
+    render(<TriggerMenu editor={editor} token={command} />);
+    expect(document.body.querySelector('[data-slot="trigger-menu"]')).toBeNull();
   });
 
   it('an invocation stays closed once a command already leads the line', () => {
@@ -117,8 +118,8 @@ describe('TriggerMenu - opening + gate', () => {
       trigger: { query: 'im', from: 1, to: 3 },
       json: docWithCommand('image-gen'),
     });
-    const { container } = render(<TriggerMenu editor={editor} token={command} />);
-    expect(container.querySelector('[data-trigger-menu]')).toBeNull();
+    render(<TriggerMenu editor={editor} token={command} />);
+    expect(document.body.querySelector('[data-slot="trigger-menu"]')).toBeNull();
   });
 
   it('a reference opens mid-line (gate: anywhere)', () => {
@@ -126,10 +127,10 @@ describe('TriggerMenu - opening + gate', () => {
       trigger: { query: 'al', from: 4, to: 6 },
       json: docWithText('hi @al'),
     });
-    const { container, getByText } = render(
+    const { getByText } = render(
       <TriggerMenu editor={editor} token={mention} />,
     );
-    expect(container.querySelector('[data-trigger-menu]')).not.toBeNull();
+    expect(document.body.querySelector('[data-slot="trigger-menu"]')).not.toBeNull();
     expect(getByText('Alice')).toBeDefined();
   });
 });

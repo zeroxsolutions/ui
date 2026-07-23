@@ -8,6 +8,7 @@ import {
   InputGroupAddon,
   InputGroupButton,
 } from '@zeroxsolutions/ui/components/ui/input-group';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import { createDocumentEditor } from '../document/core/index.js';
 import type { IEditor } from '../document/core/index.js';
 import { COMPOSER_TOP_CONTENT, composerKit } from './composer-kit.js';
@@ -137,12 +138,10 @@ export function ChatInput({
   return (
     <>
       <InputGroup
-        className={[
+        className={cn(
           'h-auto min-h-9 items-center gap-1.5 px-2 py-1.5',
           className,
-        ]
-          .filter(Boolean)
-          .join(' ')}
+        )}
       >
         <div
           ref={wrapperRef}

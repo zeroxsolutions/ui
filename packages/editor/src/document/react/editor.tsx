@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { EditorContent } from '@tiptap/react';
 import { GripVertical, Plus } from 'lucide-react';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import { createDocumentEditor } from '../core/create-document-editor.js';
 import type { Delta } from '../core/types/delta.js';
 import type { IEditor } from '../core/types/editor.js';
@@ -192,12 +193,10 @@ export function Editor({
       <EditorContent
         editor={engine as never}
         data-editor="document"
-        className={[
+        className={cn(
           'document-editor prose max-w-none text-base leading-relaxed focus:outline-none',
           className,
-        ]
-          .filter(Boolean)
-          .join(' ')}
+        )}
       />
       {gripHost && createPortal(<GripVertical size={16} aria-hidden />, gripHost)}
       {rootEl &&

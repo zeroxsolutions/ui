@@ -3,24 +3,27 @@
 import { useEffect, useState } from 'react';
 import { Toggle } from '@zeroxsolutions/ui/components/ui/toggle';
 import {
+  Popover,
+  PopoverContent,
+} from '@zeroxsolutions/ui/components/ui/popover';
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@zeroxsolutions/ui/components/ui/tooltip';
 import type { BubbleItem, IEditor } from '../core/index.js';
-import { selectionRect, selectionWithin, type Point } from './selection-rect.js';
-import { FloatingShell } from './floating-shell.js';
+import { rectAnchor, selectionRect, selectionWithin, type Point } from './selection-rect.js';
 
 /**
  * The selection bubble menu (task 8.2): a floating formatting bar that appears
  * over a non-empty text selection. It reads the browser selection geometry (not
  * the engine) to position itself, and dispatches its buttons' commands through the
- * `IEditor` façade. The bar is a `FloatingShell` (the one sanctioned bespoke
- * positioning surface — it must not take focus from the selection), and its
- * buttons are the design-system `Toggle` (native pressed state) wrapped in a
- * `Tooltip`. The floating "+" affordance for an empty line reuses the slash menu's
- * `/` trigger, so it is not duplicated here.
+ * `IEditor` façade. The bar is a caret-anchored `Popover` (the shipped primitive,
+ * non-modal by default and with `initialFocus={false}` so it never steals the
+ * selection), and its buttons are the design-system `Toggle` (native pressed
+ * state) wrapped in a `Tooltip`. The floating "+" affordance for an empty line
+ * reuses the slash menu's `/` trigger, so it is not duplicated here.
  */
 export interface BubbleMenuProps {
   editor: IEditor;
@@ -64,38 +67,42 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
   }, [editor, container]);
 
   return (
-    <FloatingShell
-      open={Boolean(rect)}
-      anchor={rect}
-      side="top"
-      role="toolbar"
-      data-bubble-menu=""
-      className="flex items-center gap-0.5 rounded-lg p-1"
-    >
-      <TooltipProvider>
-        {items.map((item) => {
-          const active = item.activeWhen ? editor.isActive(item.activeWhen) : false;
-          return (
-            <Tooltip key={item.id}>
-              <TooltipTrigger
-                render={
-                  <Toggle
-                    size="sm"
-                    pressed={active}
-                    aria-label={item.title}
-                    // Keep focus (and the selection) on mousedown so the command applies.
-                    onMouseDown={(event) => event.preventDefault()}
-                    onPressedChange={() => editor.run(item.command, item.args)}
-                  >
-                    {item.icon ?? item.title}
-                  </Toggle>
-                }
-              />
-              <TooltipContent>{item.title}</TooltipContent>
-            </Tooltip>
-          );
-        })}
-      </TooltipProvider>
-    </FloatingShell>
+    <Popover open={Boolean(rect)}>
+      <PopoverContent
+        anchor={rectAnchor(rect)}
+        side="top"
+        align="center"
+        // The editor owns the caret; the popover must not steal focus on open.
+        initialFocus={false}
+        role="toolbar"
+        data-slot="bubble-menu"
+        className="flex-row items-center gap-0.5 rounded-lg p-1"
+      >
+        <TooltipProvider>
+          {items.map((item) => {
+            const active = item.activeWhen ? editor.isActive(item.activeWhen) : false;
+            return (
+              <Tooltip key={item.id}>
+                <TooltipTrigger
+                  render={
+                    <Toggle
+                      size="sm"
+                      pressed={active}
+                      aria-label={item.title}
+                      // Keep focus (and the selection) on mousedown so the command applies.
+                      onMouseDown={(event) => event.preventDefault()}
+                      onPressedChange={() => editor.run(item.command, item.args)}
+                    >
+                      {item.icon ?? item.title}
+                    </Toggle>
+                  }
+                />
+                <TooltipContent>{item.title}</TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </TooltipProvider>
+      </PopoverContent>
+    </Popover>
   );
 }

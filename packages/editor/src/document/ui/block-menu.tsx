@@ -57,7 +57,7 @@ export function BlockMenu({ editor, items, container }: BlockMenuProps) {
 
   if (!pos) return null;
   return (
-    <div data-block-menu className="fixed z-40" style={{ top: pos.top, left: pos.left }}>
+    <div data-slot="block-menu" className="fixed z-40" style={{ top: pos.top, left: pos.left }}>
       <TooltipProvider>
         <DropdownMenu>
           <Tooltip>

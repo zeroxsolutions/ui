@@ -1,3 +1,4 @@
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import {
   createCodecRegistry,
   renderToReact,
@@ -41,12 +42,10 @@ export function ChatMessageView({
   const body = renderToReact(message.doc, registry);
   return (
     <div
-      className={[
+      className={cn(
         'chat-composer inline-flex flex-wrap items-baseline gap-1.5 text-sm text-foreground [&_p]:m-0 [&_p]:inline',
         className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      )}
     >
       {body}
     </div>

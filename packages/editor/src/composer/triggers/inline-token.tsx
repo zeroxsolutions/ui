@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import {
   defineFeature,
   type EditorFeature,
@@ -97,12 +98,10 @@ export function inlineToken(spec: InlineTokenSpec): InlineToken {
         data-token-kind={kind}
         data-token-id={attrs.id}
         contentEditable={contentEditable}
-        className={[
+        className={cn(
           'inline-flex items-center rounded-md bg-primary/10 px-1.5 py-0.5 text-sm font-medium text-primary',
           spec.accentClass,
-        ]
-          .filter(Boolean)
-          .join(' ')}
+        )}
       >
         {tokenText(spec, attrs)}
       </span>

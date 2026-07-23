@@ -129,22 +129,23 @@ describe('BubbleMenu', () => {
   it('shows over a non-empty text selection', () => {
     stubDomSelection(false);
     const editor = fakeEditor(vi.fn(() => true), { from: 1, to: 5, empty: false, isNode: false });
-    const { container } = render(<BubbleMenu editor={editor} items={items} />);
-    expect(container.querySelector('[data-bubble-menu]')).not.toBeNull();
+    render(<BubbleMenu editor={editor} items={items} />);
+    // The popover portals to document.body, so the assertion must query there.
+    expect(document.body.querySelector('[data-slot="bubble-menu"]')).not.toBeNull();
   });
 
   it('stays hidden for a whole-node selection (a block picked up by the drag handle / a selected image)', () => {
     stubDomSelection(false);
     const editor = fakeEditor(vi.fn(() => true), { from: 1, to: 5, empty: false, isNode: true });
-    const { container } = render(<BubbleMenu editor={editor} items={items} />);
-    expect(container.querySelector('[data-bubble-menu]')).toBeNull();
+    render(<BubbleMenu editor={editor} items={items} />);
+    expect(document.body.querySelector('[data-slot="bubble-menu"]')).toBeNull();
   });
 
   it('stays hidden when the selection is collapsed (a caret)', () => {
     stubDomSelection(true);
     const editor = fakeEditor(vi.fn(() => true), { from: 3, to: 3, empty: true, isNode: false });
-    const { container } = render(<BubbleMenu editor={editor} items={items} />);
-    expect(container.querySelector('[data-bubble-menu]')).toBeNull();
+    render(<BubbleMenu editor={editor} items={items} />);
+    expect(document.body.querySelector('[data-slot="bubble-menu"]')).toBeNull();
   });
 });
 
@@ -158,12 +159,13 @@ describe('SlashMenu', () => {
       from: 0,
       to: 1,
     });
-    const { container, getByText, queryByText } = render(
+    const { getByText, queryByText } = render(
       <SlashMenu editor={editor} items={items} />,
     );
-    expect(container.querySelector('[data-slash-menu]')).not.toBeNull();
+    // The popover portals to document.body, so the assertion must query there.
+    expect(document.body.querySelector('[data-slot="slash-menu"]')).not.toBeNull();
     // Rows compose the design-system `Item` (not a hand-rolled `<button>` list).
-    expect(container.querySelector('[data-slot="item"]')).not.toBeNull();
+    expect(document.body.querySelector('[data-slot="item"]')).not.toBeNull();
     expect(getByText('Heading 1')).toBeDefined();
     expect(queryByText('Quote')).toBeNull();
   });
@@ -174,16 +176,16 @@ describe('SlashMenu', () => {
       from: 1,
       to: 12,
     });
-    const { container, getByText } = render(<SlashMenu editor={editor} items={items} />);
-    expect(container.querySelector('[data-slot="empty"]')).not.toBeNull();
-    expect(container.querySelector('[data-slot="item"]')).toBeNull();
+    const { getByText } = render(<SlashMenu editor={editor} items={items} />);
+    expect(document.body.querySelector('[data-slot="empty"]')).not.toBeNull();
+    expect(document.body.querySelector('[data-slot="item"]')).toBeNull();
     expect(getByText('No matching blocks')).toBeDefined();
   });
 
   it('stays closed when there is no `/` trigger', () => {
     const editor = fakeEditor(vi.fn(() => true), { from: 1, to: 1, empty: true }, null);
-    const { container } = render(<SlashMenu editor={editor} items={items} />);
-    expect(container.querySelector('[data-slash-menu]')).toBeNull();
+    render(<SlashMenu editor={editor} items={items} />);
+    expect(document.body.querySelector('[data-slot="slash-menu"]')).toBeNull();
   });
 
   it('sets the inline placeholder ghost after `/` on an empty query', () => {

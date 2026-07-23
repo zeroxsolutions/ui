@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, type ReactNode } from 'react';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import { createCodecRegistry } from '../serialize/create-codec-registry.js';
 import { renderToReact } from '../serialize/render-to-react.js';
 import { defaultEditorTheme } from '../../shared/theme/default-theme.js';
@@ -42,7 +43,7 @@ export function Viewer({
   const inner = (
     <div
       data-editor="document"
-      className={['document-editor prose max-w-none', className].filter(Boolean).join(' ')}
+      className={cn('document-editor prose max-w-none', className)}
     >
       {tree}
     </div>

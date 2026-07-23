@@ -28,3 +28,37 @@ export function selectionWithin(container: HTMLElement | null): boolean {
   const range = selection.getRangeAt(0);
   return container.contains(range.commonAncestorContainer);
 }
+
+/**
+ * A viewport-space rect the floating surfaces anchor against — the shape of both
+ * `Point` (a selection rect, above) and the engine-free `CaretRect`. The two are
+ * structurally identical; this alias names the contract the anchor helper takes.
+ */
+export interface RectLike {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+}
+
+/**
+ * Wrap a viewport-space rect as a Base UI `VirtualElement` so a `Popover` can
+ * anchor to a coordinate (a caret or a selection rect) that has no DOM trigger.
+ * Returns `null` for an empty rect so the popover's `anchor` prop closes it.
+ */
+export function rectAnchor(rect: RectLike | null) {
+  if (!rect) return null;
+  return {
+    getBoundingClientRect: () => ({
+      width: rect.right - rect.left,
+      height: rect.bottom - rect.top,
+      x: rect.left,
+      y: rect.top,
+      top: rect.top,
+      left: rect.left,
+      right: rect.right,
+      bottom: rect.bottom,
+      toJSON: () => ({}),
+    }),
+  };
+}

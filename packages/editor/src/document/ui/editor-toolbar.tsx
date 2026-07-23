@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@zeroxsolutions/ui/components/ui/tooltip';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import type { IEditor, ToolbarItem } from '../core/index.js';
 import { useEditorChanges } from './use-editor-changes.js';
 
@@ -30,13 +31,11 @@ export function EditorToolbar({ editor, items, className }: EditorToolbarProps) 
   return (
     <div
       role="toolbar"
-      data-editor-toolbar
-      className={[
-        'flex flex-wrap items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-sm',
+      data-slot="editor-toolbar"
+      className={cn(
+        'flex flex-wrap items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-md',
         className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      )}
     >
       <TooltipProvider>
         {items.map((item, index) => {

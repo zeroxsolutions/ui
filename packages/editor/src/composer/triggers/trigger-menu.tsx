@@ -9,9 +9,14 @@ import {
   ItemTitle,
 } from '@zeroxsolutions/ui/components/ui/item';
 import { Empty, EmptyDescription } from '@zeroxsolutions/ui/components/ui/empty';
+import {
+  Popover,
+  PopoverContent,
+} from '@zeroxsolutions/ui/components/ui/popover';
 import { ScrollArea } from '@zeroxsolutions/ui/components/ui/scroll-area';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 import type { CaretRect, IEditor, TriggerQuery } from '../../document/core/index.js';
-import { FloatingShell } from '../../document/ui/floating-shell.js';
+import { rectAnchor } from '../../document/ui/selection-rect.js';
 import {
   defaultTriggerFilter,
   type TriggerOption,
@@ -22,10 +27,12 @@ import {
  * The one generic suggestion menu, driven by a `TriggerToken` descriptor - the
  * merge of the two hand-written `mention-menu` / `command-menu` (they were ~85%
  * identical). Typing the token's char leaves the `char query` as visible text
- * highlighted on the composer accent; the popup is a caret-anchored
- * `FloatingShell` whose rows / empty-state / scrolling are the design-system
- * `Item` / `Empty` / `ScrollArea`. Selecting an option deletes the typed query
- * and commits the token via `token.insert`.
+ * highlighted on the composer accent; the popup is a caret-anchored `Popover`
+ * (the shipped primitive, non-modal by default and with `initialFocus={false}`
+ * so the editor keeps focus and the typed query keeps flowing in) whose rows /
+ * empty-state / scrolling are the design-system `Item` / `Empty` /
+ * `ScrollArea`. Selecting an option deletes the typed query and commits the
+ * token via `token.insert`.
  *
  * Every divergence between the old menus is read off the descriptor, not
  * branched here: `gate` (anywhere vs input-start), `queryField` (which text the
@@ -281,63 +288,65 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
   }, [editor, token]);
 
   return (
-    <FloatingShell
-      open={Boolean(active && point)}
-      anchor={point}
-      side="bottom"
-      contentKey={ordered.length}
-      className="w-64"
-      data-trigger-menu={token.kind}
-    >
-      <ScrollArea className="max-h-72">
-        <div className="p-1">
-          {ordered.length === 0 ? (
-            <Empty className="min-h-0 gap-1 border-0 p-6">
-              <EmptyDescription>
-                {token.emptyText ?? 'No matches'}
-              </EmptyDescription>
-            </Empty>
-          ) : (
-            ordered.map((option, position) => {
-              const highlighted = position === index;
-              return (
-                <Item
-                  key={option.id}
-                  size="sm"
-                  data-highlighted={highlighted || undefined}
-                  onMouseEnter={() => setIndex(position)}
-                  // Keep the editor focused so the range survives the click.
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => select(option)}
-                  className={[
-                    'cursor-pointer',
-                    highlighted ? 'bg-accent text-accent-foreground' : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  {option.icon && (
-                    <ItemMedia
-                      variant="icon"
-                      className={token.menuMediaClassName ?? 'text-muted-foreground'}
-                    >
-                      {option.icon}
-                    </ItemMedia>
-                  )}
-                  <ItemContent className="gap-0.5">
-                    <ItemTitle>{option.label}</ItemTitle>
-                    {option.description && (
-                      <ItemDescription className="line-clamp-1">
-                        {option.description}
-                      </ItemDescription>
+    <Popover open={Boolean(active && point)}>
+      <PopoverContent
+        anchor={rectAnchor(point)}
+        side="bottom"
+        align="start"
+        // The editor owns the caret; the popover must not steal focus on open.
+        initialFocus={false}
+        data-slot="trigger-menu"
+        data-token-kind={token.kind}
+        className="w-64 gap-0 p-0"
+      >
+        <ScrollArea className="max-h-72">
+          <div className="p-1">
+            {ordered.length === 0 ? (
+              <Empty className="min-h-0 gap-1 border-0 p-6">
+                <EmptyDescription>
+                  {token.emptyText ?? 'No matches'}
+                </EmptyDescription>
+              </Empty>
+            ) : (
+              ordered.map((option, position) => {
+                const highlighted = position === index;
+                return (
+                  <Item
+                    key={option.id}
+                    size="sm"
+                    data-highlighted={highlighted || undefined}
+                    onMouseEnter={() => setIndex(position)}
+                    // Keep the editor focused so the range survives the click.
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => select(option)}
+                    className={cn(
+                      'cursor-pointer',
+                      highlighted && 'bg-accent text-accent-foreground',
                     )}
-                  </ItemContent>
-                </Item>
-              );
-            })
-          )}
-        </div>
-      </ScrollArea>
-    </FloatingShell>
+                  >
+                    {option.icon && (
+                      <ItemMedia
+                        variant="icon"
+                        className={token.menuMediaClassName ?? 'text-muted-foreground'}
+                      >
+                        {option.icon}
+                      </ItemMedia>
+                    )}
+                    <ItemContent className="gap-0.5">
+                      <ItemTitle>{option.label}</ItemTitle>
+                      {option.description && (
+                        <ItemDescription className="line-clamp-1">
+                          {option.description}
+                        </ItemDescription>
+                      )}
+                    </ItemContent>
+                  </Item>
+                );
+              })
+            )}
+          </div>
+        </ScrollArea>
+      </PopoverContent>
+    </Popover>
   );
 }
