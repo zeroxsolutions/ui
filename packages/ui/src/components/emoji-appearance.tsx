@@ -14,7 +14,7 @@ const STYLE_OPTIONS: { id: FluentEmojiStyle; label: string }[] = [
   { id: 'anim', label: 'Animated' },
 ];
 
-// A glyph present in every Fluent style — each swatch previews it so the user
+// A glyph present in every Fluent style - each swatch previews it so the user
 // sees the artwork rather than reading a style name.
 const SAMPLE = { glyph: '😀', name: 'grinning face' } as const;
 
@@ -30,8 +30,8 @@ export interface EmojiAppearanceProps
 }
 
 /**
- * A row of preview swatches for the Fluent emoji artwork **style** — 3D / Flat /
- * Modern / Mono / Animated — each swatch rendering the same sample emoji in its
+ * A row of preview swatches for the Fluent emoji artwork **style** - 3D / Flat /
+ * Modern / Mono / Animated - each swatch rendering the same sample emoji in its
  * style (the Animated swatch plays its frames), so the preview *is* the selector
  * (you see each appearance rather than reading a label). Single-select.
  *
@@ -49,6 +49,7 @@ export function EmojiAppearance({
     <ToggleGroup
       // Single-select: Base UI's value is an array; bind the lone style and
       // ignore a deselect so a style is always chosen.
+      data-slot="emoji-appearance"
       value={[value]}
       onValueChange={(next) => {
         const picked = next[0] as FluentEmojiStyle | undefined;

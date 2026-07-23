@@ -42,7 +42,7 @@ export function Section({
   const isCollapsible = onToggle != null;
   const isOpen = open ?? true;
   return (
-    <div className={className} {...props}>
+    <div data-slot="section" className={className} {...props}>
       <div className="flex items-center h-8 px-2.5 mt-1 gap-1">
         {isCollapsible ? (
           <button

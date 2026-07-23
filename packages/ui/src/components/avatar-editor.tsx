@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { EmojiPicker } from './emoji-picker';
 
-export interface AvatarValue {
+interface AvatarValue {
   /** Emoji glyph avatar, or null. */
   emoji?: string | null;
   /** Uploaded image avatar (data URL / asset URL), or null. */
@@ -27,7 +27,7 @@ export interface AvatarValue {
   color?: string | null;
 }
 
-export type AvatarTab = 'emoji' | 'upload' | 'color';
+type AvatarTab = 'emoji' | 'upload' | 'color';
 
 interface AvatarEditorContextValue {
   value: AvatarValue;
@@ -44,7 +44,7 @@ interface AvatarEditorContextValue {
 const AvatarEditorContext =
   React.createContext<AvatarEditorContextValue | null>(null);
 
-/** Read the value/setters shared by the surrounding <AvatarEditor>. */
+/** Read the value/Setters shared by the surrounding <AvatarEditor>. */
 function useAvatarEditor(): AvatarEditorContextValue {
   const ctx = React.useContext(AvatarEditorContext);
   if (!ctx) {
@@ -53,11 +53,11 @@ function useAvatarEditor(): AvatarEditorContextValue {
   return ctx;
 }
 
-export interface AvatarEditorProps {
+interface AvatarEditorProps {
   value: AvatarValue;
   /** Fires with the new avatar value when a part edits it. */
   onValueChange: (value: AvatarValue) => void;
-  /** Open state — uncontrolled by default; pass `open` to control it. */
+  /** Open state - uncontrolled by default; pass `open` to control it. */
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -65,7 +65,11 @@ export interface AvatarEditorProps {
   children?: React.ReactNode;
 }
 
-export function AvatarEditor({
+/**
+ * Avatar editor - composes the emoji / upload / color tabs behind a Popover.
+ * Compound + context: the Root owns the value + setters and the parts read it.
+ */
+function AvatarEditor({
   value,
   onValueChange,
   open,
@@ -86,6 +90,7 @@ export function AvatarEditor({
         open={open}
         defaultOpen={defaultOpen}
         onOpenChange={onOpenChange}
+        data-slot="avatar-editor"
       >
         {children}
       </Popover>
@@ -93,14 +98,20 @@ export function AvatarEditor({
   );
 }
 
+interface AvatarTabMeta {
+  value: AvatarTab;
+  Icon: LucideIcon;
+}
+
 /** The clickable avatar tile that opens the editor. */
-export function AvatarEditorTrigger({
+function AvatarEditorTrigger({
   className,
   'aria-label': ariaLabel = 'Edit avatar',
   ...props
 }: React.ComponentProps<typeof PopoverTrigger>) {
   return (
     <PopoverTrigger
+      data-slot="avatar-editor-trigger"
       aria-label={ariaLabel}
       className={cn(
         'inline-flex rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
@@ -111,16 +122,11 @@ export function AvatarEditorTrigger({
   );
 }
 
-interface AvatarTabMeta {
-  value: AvatarTab;
-  Icon: LucideIcon;
-}
-
 /**
  * Popover body. Scans its children for the tab parts to build the icon strip
  * (hidden when only one tab) and always renders the Remove action.
  */
-export function AvatarEditorContent({
+function AvatarEditorContent({
   className,
   children,
   align = 'start',
@@ -134,6 +140,7 @@ export function AvatarEditorContent({
 
   return (
     <PopoverContent
+      data-slot="avatar-editor-content"
       align={align}
       side={side}
       className={cn('w-84 gap-0 overflow-hidden p-0', className)}
@@ -164,7 +171,7 @@ export function AvatarEditorContent({
 }
 
 /** Clears both emoji and image. Auto-placed in the content header. */
-export function AvatarEditorRemove({
+function AvatarEditorRemove({
   className,
   'aria-label': ariaLabel = 'Remove avatar',
   ...props
@@ -172,6 +179,7 @@ export function AvatarEditorRemove({
   const { remove } = useAvatarEditor();
   return (
     <Button
+      data-slot="avatar-editor-remove"
       type="button"
       variant="ghost"
       size="icon-sm"
@@ -188,20 +196,25 @@ export function AvatarEditorRemove({
   );
 }
 
-/** Emoji tab — picks an emoji (clears any image). */
-export function AvatarEditorEmoji({
+/** Emoji tab - picks an emoji (clears any image). */
+function AvatarEditorEmoji({
   className,
   ...props
 }: Omit<React.ComponentProps<typeof TabsContent>, 'value'>) {
   const { setEmoji } = useAvatarEditor();
   return (
-    <TabsContent value="emoji" className={cn('p-0', className)} {...props}>
+    <TabsContent
+      data-slot="avatar-editor-emoji"
+      value="emoji"
+      className={cn('p-0', className)}
+      {...props}
+    >
       <EmojiPicker onSelect={setEmoji} />
     </TabsContent>
   );
 }
 
-export interface AvatarEditorUploadProps
+interface AvatarEditorUploadProps
   extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
   /**
    * Hand the raw file to a backend and resolve the persisted URL (which becomes
@@ -215,7 +228,7 @@ export interface AvatarEditorUploadProps
  * Upload tab. `children` override the default dropzone copy; a picked file goes
  * to `onUpload` (or is read inline as a data URL when omitted).
  */
-export function AvatarEditorUpload({
+function AvatarEditorUpload({
   className,
   children,
   onUpload,
@@ -245,7 +258,12 @@ export function AvatarEditorUpload({
   };
 
   return (
-    <TabsContent value="upload" className={cn('p-3', className)} {...props}>
+    <TabsContent
+      data-slot="avatar-editor-upload"
+      value="upload"
+      className={cn('p-3', className)}
+      {...props}
+    >
       <input
         ref={fileRef}
         type="file"
@@ -257,7 +275,7 @@ export function AvatarEditorUpload({
           column (icon over copy, `py-10`) that no Button `size` variant
           expresses, and forcing one would mean overriding its fixed height +
           row layout. It still rides tokens (`bg-muted`, `text-muted-foreground`,
-          `ring-ring`) — no hardcoded colour — and `children` overrides the
+          `ring-ring`) - no hardcoded colour - and `children` overrides the
           default icon-led copy. */}
       <button
         type="button"
@@ -272,7 +290,7 @@ export function AvatarEditorUpload({
             ) : (
               <Upload className="size-6" />
             )}
-            <span>{uploading ? 'Uploading…' : 'Click to upload an image'}</span>
+            <span>{uploading ? 'Uploading...' : 'Click to upload an image'}</span>
             <span className="text-xs">PNG, JPG or GIF</span>
           </>
         )}
@@ -297,14 +315,14 @@ const DEFAULT_COLORS = [
   '#3b82f6',
 ];
 
-export interface AvatarEditorColorProps
+interface AvatarEditorColorProps
   extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
   /** Swatches shown on the Color tab. */
   colors?: string[];
 }
 
-/** Color tab — swatches + a custom picker; `children` override the custom label. */
-export function AvatarEditorColor({
+/** Color tab - swatches + a custom picker; `children` override the custom label. */
+function AvatarEditorColor({
   className,
   children,
   colors = DEFAULT_COLORS,
@@ -312,7 +330,12 @@ export function AvatarEditorColor({
 }: AvatarEditorColorProps) {
   const { value, setColor } = useAvatarEditor();
   return (
-    <TabsContent value="color" className={cn('p-3', className)} {...props}>
+    <TabsContent
+      data-slot="avatar-editor-color"
+      value="color"
+      className={cn('p-3', className)}
+      {...props}
+    >
       <div className="grid grid-cols-6 gap-2">
         {colors.map((c) => (
           <button
@@ -347,3 +370,20 @@ const TAB_META = new Map<React.ElementType, AvatarTabMeta>([
   [AvatarEditorUpload, { value: 'upload', Icon: Upload }],
   [AvatarEditorColor, { value: 'color', Icon: Palette }],
 ]);
+
+export {
+  AvatarEditor,
+  AvatarEditorTrigger,
+  AvatarEditorContent,
+  AvatarEditorRemove,
+  AvatarEditorEmoji,
+  AvatarEditorUpload,
+  AvatarEditorColor,
+};
+export type {
+  AvatarValue,
+  AvatarTab,
+  AvatarEditorProps,
+  AvatarEditorUploadProps,
+  AvatarEditorColorProps,
+};

@@ -7,7 +7,7 @@ const containerVariants = cva('mx-auto w-full', {
   variants: {
     /**
      * Max content width. Binds the max-width scale so a surface picks a width by
-     * name instead of hardcoding one — `mx-auto w-full` centres it either way.
+     * name instead of hardcoding one - `mx-auto w-full` centres it either way.
      */
     size: {
       sm: 'max-w-3xl',
@@ -31,10 +31,16 @@ export interface ContainerProps
  * (don't hardcode a `max-w-*`); `className` is for the surface's own padding /
  * vertical rhythm.
  *
- *   <Container size="lg" className="px-6 py-6">…</Container>
+ *   <Container size="lg" className="px-6 py-6">...</Container>
  */
-export function Container({ size, className, ...props }: ContainerProps) {
+function Container({ size, className, ...props }: ContainerProps) {
   return (
-    <div className={cn(containerVariants({ size }), className)} {...props} />
+    <div
+      data-slot="container"
+      className={cn(containerVariants({ size }), className)}
+      {...props}
+    />
   );
 }
+
+export { Container, containerVariants };

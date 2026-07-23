@@ -9,7 +9,7 @@ export type PermissionStatusValue = "pending" | "approved" | "denied"
 /**
  * Permission - an inline, non-modal AI-consent card for a chat message. The host
  * owns the `status`; the card renders in the message stream (inside
- * `ChatMessageShell`) and stays in scrollback after it resolves. Compound, not a
+ * `ChatMessage`) and stays in scrollback after it resolves. Compound, not a
  * prop-bag - the consumer composes the parts:
  *
  *   <Permission status={status}>

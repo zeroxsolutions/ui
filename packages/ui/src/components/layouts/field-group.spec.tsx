@@ -1,17 +1,17 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { FieldRow } from './field-row';
+import { FieldGroup } from './field-group';
 
 afterEach(cleanup);
 
-describe('FieldRow', () => {
+describe('FieldGroup', () => {
   it('renders its inputs and a provided trailing action', () => {
     const { getByText } = render(
-      <FieldRow action={<button>lock</button>}>
+      <FieldGroup action={<button>lock</button>}>
         <span>x</span>
         <span>y</span>
-      </FieldRow>,
+      </FieldGroup>,
     );
     expect(getByText('x')).toBeTruthy();
     expect(getByText('lock')).toBeTruthy();
@@ -19,9 +19,9 @@ describe('FieldRow', () => {
 
   it('reserves the fixed trailing action slot even when no action is given', () => {
     const { container } = render(
-      <FieldRow>
+      <FieldGroup>
         <span>x</span>
-      </FieldRow>,
+      </FieldGroup>,
     );
     // The slot is always rendered at a single icon-button width so a row with no
     // action keeps the same right edge as one that has an action.
@@ -30,12 +30,23 @@ describe('FieldRow', () => {
 
   it('merges className and forwards arbitrary props onto the row', () => {
     const { getByTestId } = render(
-      <FieldRow className="mt-2" data-testid="row">
+      <FieldGroup className="mt-2" data-testid="row">
         <span>x</span>
-      </FieldRow>,
+      </FieldGroup>,
     );
     const row = getByTestId('row');
     expect(row.className).toContain('flex');
     expect(row.className).toContain('mt-2');
+  });
+
+  it('stamps data-slot="field-group" on the root', () => {
+    const { container } = render(
+      <FieldGroup>
+        <span>x</span>
+      </FieldGroup>,
+    );
+    expect(
+      container.querySelector('[data-slot="field-group"]'),
+    ).toBeTruthy();
   });
 });

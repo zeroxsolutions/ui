@@ -71,7 +71,7 @@ function AiProviderIconBase({
     const Avatar =
       mark.Avatar ??
       makeAvatar((mark.Mono ?? mark) as FC<IconProps>, {
-        background: mark.colorPrimary ?? '#000',
+        background: mark.colorPrimary ?? 'var(--primary)',
       });
     return <Avatar size={size} shape={shape} className={className} style={style} />;
   }

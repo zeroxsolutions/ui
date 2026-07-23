@@ -96,7 +96,7 @@ A few groups (names below are the leaf, prefixed per the line that introduces th
   … plus `data-table` (TanStack Table) and chat primitives (`message`, `bubble`,
   `attachment`).
 - **Layouts** (`components/layouts/*`) — `center`, `container`, `field-grid`,
-  `field-row`, `floating-toolbar`, `labeled-control`, `panel-header`,
+  `field-group`, `floating-toolbar`, `labeled-control`, `panel-header`,
   `section`.
 - **Blocks & display** (`components/*`) — `disclosure` (the shared collapsible
   header + body block many surfaces compose), `code-block` (read-only Shiki code
@@ -106,7 +106,7 @@ A few groups (names below are the leaf, prefixed per the line that introduces th
   `image-preview`, `binary-file-card`, `file-type-icon`. (The CodeMirror code
   editor — `code-editor`, `code-mirror-pane`, `file-content-router` — now lives in
   [`@zeroxsolutions/editor`](../editor).)
-- **Chat** (`components/chat/*`) — `chat-message-shell`, `chat-empty-state`,
+- **Chat** (`components/chat/*`) — `chat-message`, `chat-empty-state`,
   `chat-attachment-chip`, `chat-composer-attachments`, `chat-composer-ghost-text`,
   `reasoning`, `tool`.
 - **Emoji** (`components/*`) — `emoji-picker`, `emoji-appearance`,
@@ -115,7 +115,7 @@ A few groups (names below are the leaf, prefixed per the line that introduces th
 - **Higher-level controls** (`components/*`) — `number-field`,
   `search-input`, `password-input`, `tag-input`, `confirm-button`,
   `split-button`, `toolbar-button`, `popover-icon-button`, `tree-item`,
-  `tree-row`, `status-dot`, `dirty-dot`, `icon-label`,
+  `tree-indent`, `status-dot`, `dirty-dot`, `icon-label`,
   `resize-handle`, `tab-close-button`, `sidebar-group-collapsible`,
   `sidebar-menu-collapsible`.
 - **Hooks** (`hooks/*`) — `use-command-shortcut`, `use-mobile`.

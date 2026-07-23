@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import type { ChatAgentIdentity, ChatRole } from './chat-types';
 
 /**
- * ChatMessageShell - the wrapper for one message row, agnostic to how the
+ * ChatMessage - the wrapper for one message row, agnostic to how the
  * body is rendered.
  *
  * `user` -> a soft `bg-muted` bubble pinned to the inline-end, capped at 85%
@@ -13,13 +13,13 @@ import type { ChatAgentIdentity, ChatRole } from './chat-types';
  * accent while streaming. The host decides when to show the identity row
  * (typically only on the first message of a contiguous same-agent run) and
  * supplies the message body as `children` (markdown, tool cards, thinking -
- * none of which this shell knows about).
+ * none of which this wrapper knows about).
  *
  * Presentational only: no app state, no router. `className`/`...props` is not
- * spread here because the shell renders distinct user vs assistant trees;
+ * spread here because the wrapper renders distinct user vs assistant trees;
  * place and size it from the consumer's surrounding container.
  */
-export interface ChatMessageShellProps {
+interface ChatMessageProps {
   role: ChatRole;
   children: ReactNode;
   className?: string;
@@ -40,14 +40,14 @@ export interface ChatMessageShellProps {
   streaming?: boolean;
 }
 
-export function ChatMessageShell({
+function ChatMessage({
   role,
   agent,
   showAgentLabel,
   streaming,
   children,
   className,
-}: ChatMessageShellProps) {
+}: ChatMessageProps) {
   const isUser = role === 'user';
 
   if (isUser) {
@@ -56,6 +56,7 @@ export function ChatMessageShell({
     // over-emphatic here).
     return (
       <div
+        data-slot="chat-message"
         data-role="user"
         className={cn('group ml-auto w-fit max-w-[85%]', className)}
       >
@@ -79,7 +80,11 @@ export function ChatMessageShell({
     streaming && accent ? { borderInlineStartColor: accent } : undefined;
 
   return (
-    <div data-role={role} className={cn('group flex w-full flex-col', className)}>
+    <div
+      data-slot="chat-message"
+      data-role={role}
+      className={cn('group flex w-full flex-col', className)}
+    >
       {showAgentLabel && agent?.name && (
         <div className="mb-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
           {agent.icon ? (
@@ -111,3 +116,5 @@ export function ChatMessageShell({
     </div>
   );
 }
+
+export { ChatMessage };

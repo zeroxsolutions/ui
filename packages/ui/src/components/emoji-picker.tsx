@@ -41,8 +41,8 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 const DEFAULT_FREQUENT_LABEL = 'Frequently used';
 
 /** Cells per grid row, and the fixed row metrics the window is computed from.
- * The grid is uniform — a cell is a `Button size="icon"` (`size-9` = 36px) and
- * rows sit a `gap-0.5` (2px) apart — and the viewport height is the `size`
+ * The grid is uniform - a cell is a `Button size="icon"` (`size-9` = 36px) and
+ * rows sit a `gap-0.5` (2px) apart - and the viewport height is the `size`
  * variant (below), so the visible window is pure arithmetic: no element
  * measurement (which reads 0 in jsdom) and no ResizeObserver. */
 const COLS = 8;
@@ -79,7 +79,7 @@ function buildRows(
       });
     }
   };
-  // Search view is a flat grid of matches — no section headers.
+  // Search view is a flat grid of matches - no section headers.
   if (results) {
     pushCells(results, 'search');
     return { rows, headerIndices };
@@ -132,12 +132,12 @@ function useEmojiPicker(): EmojiPickerContextValue {
   return ctx;
 }
 
-export interface EmojiPickerProps {
+interface EmojiPickerProps {
   /** Called with the chosen emoji glyph. */
   onSelect: (emoji: string) => void;
   /**
    * Recently-used emoji glyphs shown in the frequent row. The consumer owns this
-   * list and its persistence — the picker keeps no storage of its own.
+   * list and its persistence - the picker keeps no storage of its own.
    */
   frequent?: string[];
   /** Heading + nav name for the frequent row. Defaults to `'Frequently used'`. */
@@ -151,9 +151,9 @@ export interface EmojiPickerProps {
 
 /**
  * A searchable, categorized emoji grid with an optional frequent row and a
- * category nav — modelled on the LobeHub picker. The catalog and the Fluent 3D
+ * category nav - modelled on the LobeHub picker. The catalog and the Fluent 3D
  * artwork come from `@zeroxsolutions/fluent-emoji` (self-hosted, no third-party CDN);
- * the frequent row is consumer-supplied (`frequent`) — the picker holds no
+ * the frequent row is consumer-supplied (`frequent`) - the picker holds no
  * persistence of its own.
  *
  * The grid is **windowed**: only the rows in (and near) the viewport mount, so
@@ -163,9 +163,9 @@ export interface EmojiPickerProps {
  * Compound + context: the Root owns the state and the parts read it. Used bare
  * (`<EmojiPicker onSelect />`) it renders the default composition; compose the
  * parts to override any visible copy (every string is a part's `children`/prop
- * default, never frozen) — `<EmojiPickerEmpty>` overrides the no-results state.
+ * default, never frozen) - `<EmojiPickerEmpty>` overrides the no-results state.
  */
-export function EmojiPicker({
+function EmojiPicker({
   onSelect,
   frequent = [],
   frequentLabel = DEFAULT_FREQUENT_LABEL,
@@ -264,7 +264,7 @@ export function EmojiPicker({
   );
 }
 
-export type EmojiPickerSearchProps = Omit<
+type EmojiPickerSearchProps = Omit<
   React.ComponentProps<typeof SearchInput>,
   'value' | 'onChange'
 > & {
@@ -275,7 +275,7 @@ export type EmojiPickerSearchProps = Omit<
 };
 
 /** Search box bound to the picker query. Copy is overridable via the props. */
-export function EmojiPickerSearch({
+function EmojiPickerSearch({
   className,
   placeholder = 'Search',
   'aria-label': ariaLabel = 'Search emoji',
@@ -283,7 +283,7 @@ export function EmojiPickerSearch({
 }: EmojiPickerSearchProps) {
   const { query, setQuery } = useEmojiPicker();
   return (
-    <div className="px-2 py-1">
+    <div data-slot="emoji-picker-search" className="px-2 py-1">
       <SearchInput
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -296,13 +296,14 @@ export function EmojiPickerSearch({
   );
 }
 
-/** Sticky section heading — this is what "Frequently used" / a category name is. */
-export function EmojiPickerGroupLabel({
+/** Sticky section heading - this is what "Frequently used" / a category name is. */
+function EmojiPickerGroupLabel({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
   return (
     <div
+      data-slot="emoji-picker-group-label"
       className={cn(
         'bg-popover px-2 py-1 text-muted-foreground text-sm font-medium',
         className,
@@ -312,17 +313,17 @@ export function EmojiPickerGroupLabel({
   );
 }
 
-export type EmojiPickerEmptyProps = {
+type EmojiPickerEmptyProps = {
   /** Override the default no-results state. */
   children?: React.ReactNode;
 };
 
 /** No-results state. `children` overrides the default copy; place it in Content. */
-export function EmojiPickerEmpty({ children }: EmojiPickerEmptyProps) {
+function EmojiPickerEmpty({ children }: EmojiPickerEmptyProps) {
   return children ? (
     children
   ) : (
-    <Empty>
+    <Empty data-slot="emoji-picker-empty">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <SearchX />
@@ -346,20 +347,20 @@ const emojiPickerContentVariants = cva('px-2', {
   },
 });
 
-export type EmojiPickerContentProps = React.ComponentProps<typeof ScrollArea> &
+type EmojiPickerContentProps = React.ComponentProps<typeof ScrollArea> &
   VariantProps<typeof emojiPickerContentVariants>;
 
 /**
- * Windowed, scrollable grid body. While searching it shows the matches or —
- * when none — its `children` (an `EmojiPickerEmpty` override) or the default
+ * Windowed, scrollable grid body. While searching it shows the matches or -
+ * when none - its `children` (an `EmojiPickerEmpty` override) or the default
  * empty state. Only the rows in (and near) the viewport mount; the section
  * header covering the top of the viewport is pinned.
  *
  * The window is plain arithmetic over fixed row heights and the known viewport
- * height (the `size` variant) — no element measurement, so it is correct under
+ * height (the `size` variant) - no element measurement, so it is correct under
  * jsdom (scroll starts at the top) and needs no virtualization library.
  */
-export function EmojiPickerContent({
+function EmojiPickerContent({
   className,
   children,
   size = 'md',
@@ -424,7 +425,7 @@ export function EmojiPickerContent({
     setScrollTop(0);
   }, [results]);
 
-  // Empty search → the empty state, not a windowed list.
+  // Empty search -> the empty state, not a windowed list.
   if (results && results.length === 0) {
     return (
       <ScrollArea
@@ -473,7 +474,7 @@ export function EmojiPickerContent({
         )}
         {rows.slice(start, end).map((row, i) => {
           const index = start + i;
-          // The pinned header is rendered once, above — skip its in-flow copy.
+          // The pinned header is rendered once, above - skip its in-flow copy.
           if (index === stickyIndex) return null;
           return (
             <div
@@ -501,7 +502,7 @@ export function EmojiPickerContent({
 }
 
 /** Category jump-nav. Hidden while searching. */
-export function EmojiPickerNav({
+function EmojiPickerNav({
   className,
   ...props
 }: Omit<React.ComponentProps<typeof Tabs>, 'value' | 'onValueChange'>) {
@@ -510,6 +511,7 @@ export function EmojiPickerNav({
   if (results) return null;
   return (
     <Tabs
+      data-slot="emoji-picker-nav"
       value={active}
       onValueChange={(value) => scrollToCategory(String(value))}
       className={className}
@@ -554,7 +556,7 @@ function EmojiGrid({
 
 /** One emoji button, drawn in the app-wide Fluent style (`setFluentEmojiStyle`).
  * Only cells in (or near) the viewport mount, so the Fluent artwork is rendered
- * immediately — virtualization, not per-cell deferral, is what keeps opening the
+ * immediately - virtualization, not per-cell deferral, is what keeps opening the
  * picker from fetching the whole catalog. */
 function EmojiCell({
   emoji,
@@ -580,3 +582,19 @@ function EmojiCell({
     </Button>
   );
 }
+
+export {
+  EmojiPicker,
+  EmojiPickerSearch,
+  EmojiPickerContent,
+  EmojiPickerNav,
+  EmojiPickerEmpty,
+  EmojiPickerGroupLabel,
+  emojiPickerContentVariants,
+};
+export type {
+  EmojiPickerProps,
+  EmojiPickerSearchProps,
+  EmojiPickerContentProps,
+  EmojiPickerEmptyProps,
+};

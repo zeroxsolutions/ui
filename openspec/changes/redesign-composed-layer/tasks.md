@@ -8,12 +8,12 @@
 
 ## 2. ui composed cluster - data-slot + naming + variants
 
-- [ ] 2.1 mini-proposal; add the missing `data-slot="<kebab>"` across the audited roots/parts: `tree-row`, `tree-item`, `icon-label`, `resize-handle`, `menu-button` (+ `-content`/`-menu`/`-radio-group`/`-radio-item`), `split-button` (+ `-content`/`-menu`/`-item`), `emoji-appearance`, `emoji-picker` parts, `avatar-editor` parts, `container`, `field-grid`, `field-row`, `floating-toolbar`, `panel-header` (+ `-row`/`-title`/`-actions`), `section`.
-- [ ] 2.2 Naming: rename `ChatMessageShell` -> `ChatMessage` (wrapper, not a shell; file `chat-message.tsx`); rename `TreeRow` (indent+chevron, not an Item twin) and review `FieldRow` - drop the `*Row` token; stamp `data-slot="chat-message"` and keep `data-role` as state.
-- [ ] 2.3 Convert the inline-export files to plain declarations + one trailing `export { ... }` (house style): `avatar-editor.tsx`, `file-tree.tsx`, `emoji-picker.tsx`.
-- [ ] 2.4 Variants: export `emojiPickerContentVariants` and `containerVariants` alongside their components; replace the `toggle.tsx` template-literal ternaries with `cn()`; confirm every authored component with variants uses `cva` + exports `<Component>Variants`.
-- [ ] 2.5 Open the closed `ResizeHandleProps`: extend `React.ComponentProps<'div'>`, forward `className` through `cn()`; fix `ai-provider-icon.tsx` hardcoded `#000` -> a token.
-- [ ] 2.6 Prove composable-into-block per cluster (sample region in the `registry` app, no component edit, real-browser check); green gate.
+- [x] 2.1 mini-proposal; add the missing `data-slot="<kebab>"` across the audited roots/parts: `tree-row`, `tree-item`, `icon-label`, `resize-handle`, `menu-button` (+ `-content`/`-menu`/`-radio-group`/`-radio-item`), `split-button` (+ `-content`/`-menu`/`-item`), `emoji-appearance`, `emoji-picker` parts, `avatar-editor` parts, `container`, `field-grid`, `field-row`, `floating-toolbar`, `panel-header` (+ `-row`/`-title`/`-actions`), `section`. -> `clusters/02-ui-composed.md`
+- [x] 2.2 Naming: rename `ChatMessageShell` -> `ChatMessage` (wrapper, not a shell; file `chat-message.tsx`); rename `TreeRow` (indent+chevron, not an Item twin) and review `FieldRow` - drop the `*Row` token; stamp `data-slot="chat-message"` and keep `data-role` as state.
+- [x] 2.3 Convert the inline-export files to plain declarations + one trailing `export { ... }` (house style): `avatar-editor.tsx`, `file-tree.tsx`, `emoji-picker.tsx`.
+- [x] 2.4 Variants: export `emojiPickerContentVariants` and `containerVariants` alongside their components; replace the `toggle.tsx` template-literal ternaries with `cn()`; confirm every authored component with variants uses `cva` + exports `<Component>Variants`.
+- [x] 2.5 Open the closed `ResizeHandleProps`: extend `React.ComponentProps<'div'>`, forward `className` through `cn()`; fix `ai-provider-icon.tsx` hardcoded `#000` -> a token.
+- [x] 2.6 Prove composable-into-block per cluster (sample region in the `registry` app, no component edit, real-browser check); green gate.
 
 ## 3. icons + fluent-emoji cluster
 

@@ -124,7 +124,7 @@ function handleTreeKeyDown(
       if (current.getAttribute('aria-expanded') === 'false') {
         ctx.setExpanded(current.dataset.value!, true);
       } else {
-        focus(items[index + 1]); // already open → move to first child
+        focus(items[index + 1]); // already open -> move to first child
       }
       break;
     }
@@ -162,8 +162,7 @@ function handleTreeKeyDown(
   }
 }
 
-export interface FileTreeProps
-  extends Omit<React.ComponentProps<'ul'>, 'onSelect'> {
+interface FileTreeProps extends Omit<React.ComponentProps<'ul'>, 'onSelect'> {
   /** Selected item value (controlled). */
   value?: string;
   /** Initially-selected value (uncontrolled). */
@@ -182,9 +181,9 @@ export interface FileTreeProps
  * controlled/uncontrolled triads) and drives keyboard navigation
  * (Up/Down/Home/End move, Left/Right collapse/expand, Enter/Space select); the
  * consumer composes `FileTreeItem` / `FileTreeLabel` / `FileTreeGroup` and owns
- * every visible label and icon. Ships no copy — give the Root an `aria-label`.
+ * every visible label and icon. Ships no copy - give the Root an `aria-label`.
  */
-export function FileTree({
+function FileTree({
   value,
   defaultValue,
   onValueChange,
@@ -272,8 +271,8 @@ export function FileTree({
   );
 }
 
-export interface FileTreeItemProps extends React.ComponentProps<'li'> {
-  /** Stable identifier — typically the file path. */
+interface FileTreeItemProps extends React.ComponentProps<'li'> {
+  /** Stable identifier - typically the file path. */
   value: string;
 }
 
@@ -282,7 +281,7 @@ export interface FileTreeItemProps extends React.ComponentProps<'li'> {
  * contains a `FileTreeGroup` (then it gets `aria-expanded`), otherwise a leaf.
  * Its row is a `FileTreeLabel`; nested children go in a `FileTreeGroup`.
  */
-export function FileTreeItem({
+function FileTreeItem({
   value,
   className,
   children,
@@ -338,15 +337,15 @@ export function FileTreeItem({
   );
 }
 
-export type FileTreeLabelProps = React.ComponentProps<'div'>;
+type FileTreeLabelProps = React.ComponentProps<'div'>;
 
 /**
- * The clickable row of a `FileTreeItem` — a chevron (folders only), the
+ * The clickable row of a `FileTreeItem` - a chevron (folders only), the
  * consumer's icon + file name (`children`), indented by depth. Clicking selects
  * the item and toggles a folder. The focus ring follows the item's keyboard
  * focus; visible state is exposed via `data-selected`.
  */
-export function FileTreeLabel({
+function FileTreeLabel({
   className,
   children,
   onClick,
@@ -390,13 +389,13 @@ export function FileTreeLabel({
   );
 }
 
-export type FileTreeGroupProps = React.ComponentProps<'ul'>;
+type FileTreeGroupProps = React.ComponentProps<'ul'>;
 
 /**
  * The nested children of a folder `FileTreeItem` (`ul[role=group]`). Rendered
  * only while its parent item is expanded; deepens `aria-level` for descendants.
  */
-export function FileTreeGroup({
+function FileTreeGroup({
   className,
   children,
   ...props
@@ -416,3 +415,16 @@ export function FileTreeGroup({
     </DepthContext.Provider>
   );
 }
+
+export {
+  FileTree,
+  FileTreeItem,
+  FileTreeLabel,
+  FileTreeGroup,
+};
+export type {
+  FileTreeProps,
+  FileTreeItemProps,
+  FileTreeLabelProps,
+  FileTreeGroupProps,
+};

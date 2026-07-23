@@ -15,7 +15,7 @@ own - risk emphasis is a consumer variant choice. It composes design-system prim
 ### Requirement: Permission renders inline in the message stream, never as a modal
 
 `@zeroxsolutions/ui` MUST ship a `Permission` compound that renders an AI-consent request as a
-block inside a chat message body (within `ChatMessageShell`), NOT as an `AlertDialog` or any modal
+block inside a chat message body (within `ChatMessage`), NOT as an `AlertDialog` or any modal
 overlay. The request MUST be part of the message flow so it stays visible in scrollback.
 
 #### Scenario: A pending request appears in the message body

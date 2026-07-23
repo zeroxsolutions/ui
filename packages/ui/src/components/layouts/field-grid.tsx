@@ -28,6 +28,7 @@ export function FieldGrid({
 }: FieldGridProps) {
   return (
     <div
+      data-slot="field-grid"
       className={cn('grid gap-x-2 gap-y-1', className)}
       style={
         cols

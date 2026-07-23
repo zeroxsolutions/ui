@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '../../core/index.js';
 import type { NodeJSON, NodeViewProps, SerializeContext } from '../../core/index.js';
+import { cn } from '@zeroxsolutions/ui/lib/utils';
 
 /**
  * A toggle block — a collapsible/details section (like Notion's toggle or the
@@ -35,14 +36,15 @@ function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<ToggleAttrs>
       >
         <span
           aria-hidden
-          className={`inline-block leading-none transition-transform ${
-            attrs.open ? 'rotate-90' : ''
-          }`}
+          className={cn(
+            'inline-block leading-none transition-transform',
+            attrs.open && 'rotate-90',
+          )}
         >
           ▸
         </span>
       </span>
-      <div className={`min-w-0 flex-1 ${attrs.open ? 'block' : 'hidden'}`}>{children}</div>
+      <div className={cn('min-w-0 flex-1', attrs.open ? 'block' : 'hidden')}>{children}</div>
     </div>
   );
 }

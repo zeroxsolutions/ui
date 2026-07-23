@@ -44,7 +44,7 @@ function MenuButton({
   className,
   ...props
 }: ComponentProps<typeof ButtonGroup>) {
-  return <ButtonGroup className={className} {...props} />
+  return <ButtonGroup data-slot="menu-button" className={className} {...props} />
 }
 
 /** The primary segment - repeats the current action; its label reflects `value`. */
@@ -55,8 +55,14 @@ function MenuButtonAction({
   return <Button data-slot="menu-button-action" variant={variant} {...props} />
 }
 
-/** The menu wrapper - the Base UI `DropdownMenu` owning open + selection state. */
-const MenuButtonMenu = DropdownMenu
+/**
+ * The menu wrapper - the Base UI `DropdownMenu` owning open + selection state.
+ * Thin wrapper so the part carries its authored `data-slot` instead of surfacing
+ * the wrapped primitive's.
+ */
+function MenuButtonMenu(props: ComponentProps<typeof DropdownMenu>) {
+  return <DropdownMenu data-slot="menu-button-menu" {...props} />
+}
 
 /** The caret segment - opens the menu that changes the current action. */
 function MenuButtonTrigger({
@@ -91,6 +97,7 @@ function MenuButtonContent({
 }: ComponentProps<typeof DropdownMenuContent>) {
   return (
     <DropdownMenuContent
+      data-slot="menu-button-content"
       align={align}
       className={cn("w-auto", className)}
       {...props}
@@ -98,11 +105,21 @@ function MenuButtonContent({
   )
 }
 
-/** The current-selection group - `value` + `onValueChange` set the default. */
-const MenuButtonRadioGroup = DropdownMenuRadioGroup
+/**
+ * The current-selection group - `value` + `onValueChange` set the default.
+ * Thin wrapper so the part carries its authored `data-slot`.
+ */
+function MenuButtonRadioGroup(props: ComponentProps<typeof DropdownMenuRadioGroup>) {
+  return <DropdownMenuRadioGroup data-slot="menu-button-radio-group" {...props} />
+}
 
-/** One selectable default; the checked one is the current action. */
-const MenuButtonRadioItem = DropdownMenuRadioItem
+/**
+ * One selectable default; the checked one is the current action.
+ * Thin wrapper so the part carries its authored `data-slot`.
+ */
+function MenuButtonRadioItem(props: ComponentProps<typeof DropdownMenuRadioItem>) {
+  return <DropdownMenuRadioItem data-slot="menu-button-radio-item" {...props} />
+}
 
 export {
   MenuButton,

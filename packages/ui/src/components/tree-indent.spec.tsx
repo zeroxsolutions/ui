@@ -1,18 +1,29 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { TreeRow } from './tree-row'
+import { TreeIndent } from './tree-indent'
 
 afterEach(cleanup)
 
-describe('TreeRow', () => {
+describe('TreeIndent', () => {
   it('indents by baseIndent + depth * indentStep', () => {
     const { container } = render(
-      <TreeRow depth={2} indentStep={12} baseIndent={4} hasChildren={false} expanded={false} onToggleExpand={() => {}}>
+      <TreeIndent depth={2} indentStep={12} baseIndent={4} hasChildren={false} expanded={false} onToggleExpand={() => {}}>
         <span>node</span>
-      </TreeRow>,
+      </TreeIndent>,
     )
     expect((container.firstElementChild as HTMLElement).style.paddingLeft).toBe('28px')
+  })
+
+  it('stamps data-slot="tree-indent" on the root', () => {
+    const { container } = render(
+      <TreeIndent depth={0} hasChildren={false} expanded={false} onToggleExpand={() => {}}>
+        <span>leaf</span>
+      </TreeIndent>,
+    )
+    expect(
+      container.querySelector('[data-slot="tree-indent"]'),
+    ).toBeTruthy()
   })
 
   it('toggles via the chevron and stops propagation so the row is not selected', () => {
@@ -20,9 +31,9 @@ describe('TreeRow', () => {
     const onRowClick = vi.fn()
     render(
       <div onClick={onRowClick}>
-        <TreeRow depth={0} hasChildren expanded={false} onToggleExpand={onToggleExpand} expandLabel="Expand node">
+        <TreeIndent depth={0} hasChildren expanded={false} onToggleExpand={onToggleExpand} expandLabel="Expand node">
           <span>node</span>
-        </TreeRow>
+        </TreeIndent>
       </div>,
     )
 
@@ -33,9 +44,9 @@ describe('TreeRow', () => {
 
   it('renders an aligned spacer (no disclosure button) for a leaf', () => {
     render(
-      <TreeRow depth={0} hasChildren={false} expanded={false} onToggleExpand={() => {}}>
+      <TreeIndent depth={0} hasChildren={false} expanded={false} onToggleExpand={() => {}}>
         <span>leaf</span>
-      </TreeRow>,
+      </TreeIndent>,
     )
     expect(screen.queryByRole('button')).toBeNull()
   })

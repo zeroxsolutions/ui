@@ -26,6 +26,7 @@ export function FloatingToolbar({
 }: FloatingToolbarProps) {
   return (
     <div
+      data-slot="floating-toolbar"
       role="toolbar"
       aria-label={label}
       className={cn(

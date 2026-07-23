@@ -23,6 +23,7 @@ function IconLabel({ icon: Icon, tooltip, className, ...props }: IconLabelProps)
       <TooltipTrigger
         render={
           <span
+            data-slot="icon-label"
             className={cn('flex items-center text-muted-foreground', className)}
             {...props}
           />

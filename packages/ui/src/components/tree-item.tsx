@@ -4,7 +4,7 @@ import type {
   RefObject,
 } from "react"
 
-import { TreeRow, type TreeRowProps } from "@/components/tree-row"
+import { TreeIndent, type TreeIndentProps } from "@/components/tree-indent"
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -26,8 +26,8 @@ export interface TreeItemRename {
 }
 
 /**
- * One row of a hierarchy tree, the layer above {@link TreeRow}. TreeRow owns the
- * indent + disclosure chevron; TreeItem owns the next shared layer:
+ * One row of a hierarchy tree, the layer above {@link TreeIndent}. TreeIndent
+ * owns the indent + disclosure chevron; TreeItem owns the next shared layer:
  *
  * - a clickable name region (a plain `div`, not a `<button>` — see the W3C tree
  *   view pattern): `icon` + the name (or, while `rename.editing`, an
@@ -39,20 +39,20 @@ export interface TreeItemRename {
  *
  * Everything that legitimately differs stays caller-owned: selection/hover COLOUR
  * + row height via `className`, the icon + badges + actions via slots, drag/drop
- * spread straight onto the row (TreeItem extends the div props through TreeRow).
+ * spread straight onto the row (TreeItem extends the div props through TreeIndent).
  * `onActivate` gets the raw event so a caller can read shift/meta.
  *
- * `ref` reaches the row div — a consumer needs it for `scrollIntoView` and so a
+ * `ref` reaches the row div - a consumer needs it for `scrollIntoView` and so a
  * wrapping Base UI `render` context-menu trigger composes its ref.
  */
-export interface TreeItemProps extends Omit<TreeRowProps, "children"> {
+export interface TreeItemProps extends Omit<TreeIndentProps, "children"> {
   /** Leading icon (node/kind icon). */
   icon?: ReactNode
   /** Display name; shown unless `rename.editing`. */
   name: string
   /** Extra classes on the name text span (strikethrough/italic/colour). The
    *  row's selection/hover background and any row-wide dimming live on
-   *  `className` (TreeRow) — the name isn't styled as a separate node. */
+   *  `className` (TreeIndent) - the name isn't styled as a separate node. */
   nameClassName?: string
   /** Click on the name region. Raw event so callers can read shift/meta keys. */
   onActivate?: (event: ReactMouseEvent) => void
@@ -82,12 +82,12 @@ function TreeItem({
   ...rowProps
 }: TreeItemProps) {
   const row = (
-    <TreeRow ref={ref} {...rowProps}>
+    <TreeIndent ref={ref} data-slot="tree-item" {...rowProps}>
       {/* The name is a plain clickable region, NOT a <button>: per the W3C tree
           view pattern a treeitem's activation is owned by the tree (roving
           tabindex + Enter), so this skeleton leaves role/keyboard to the
-          consumer (the TreeRow owns hover/selection). A <div> also holds the
-          rename <input> as a valid child — a <button> may not nest one. */}
+          consumer (the TreeIndent owns hover/selection). A <div> also holds the
+          rename <input> as a valid child - a <button> may not nest one. */}
       <div
         className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 py-1 text-xs"
         onClick={onActivate}
@@ -117,7 +117,7 @@ function TreeItem({
         {inlineEnd}
       </div>
       {trailing}
-    </TreeRow>
+    </TreeIndent>
   )
 
   if (!contextMenuContent) return row
