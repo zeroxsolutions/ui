@@ -1,0 +1,6 @@
+schema: spec-driven-superpowers
+created: 2026-07-21
+goal: "Redesign the composed layer (designed-public + editor surfaces) to true
+  shadcn/ui philosophy: composition over config, parts-not-props, cva,
+  data-slot, Base UI render, semantic tokens, monochrome, restraint-over-chrome
+  - and composable enough to assemble into blocks/pages."
