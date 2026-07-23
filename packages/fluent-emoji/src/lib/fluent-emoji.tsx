@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { fluentEmojiUrl, type FluentEmojiStyle } from './resolve';
-import { useAmbientFluentEmojiStyle } from './style-context';
+import { fluentEmojiUrl, type FluentEmojiStyle } from './fluent-emoji-url';
+import { useAmbientFluentEmojiStyle } from './fluent-emoji-style-provider';
 
 export interface FluentEmojiProps
   extends Omit<React.ComponentProps<'img'>, 'src' | 'alt'> {

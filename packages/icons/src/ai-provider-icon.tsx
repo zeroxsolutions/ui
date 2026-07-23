@@ -5,7 +5,7 @@ import type { IconProps } from './brands/internal/types';
 import {
   resolveAiProviderMark,
   type AiProviderMapping,
-} from './ai-provider-config';
+} from './ai-provider-mappings';
 
 /** Which visual form of the resolved brand mark to render. */
 export type AiProviderIconType = 'color' | 'mono' | 'avatar' | 'combine';

@@ -17,8 +17,8 @@
 
 ## 3. icons + fluent-emoji cluster
 
-- [ ] 3.1 mini-proposal; rename utility modules to match their primary export (kebab): `ai-provider-config.ts` -> `ai-provider-mappings.ts`, `codepoint.ts` -> `emoji-to-unicode.ts`, `style-context.tsx` -> `fluent-emoji-style-provider.tsx`, `resolve.ts` -> `fluent-emoji-url.ts`, `emoji-data.ts` -> `emoji-categories.ts`.
-- [ ] 3.2 Walk resolvers/Provider/setters against the philosophy checklist; confirm the icon-source rule holds; green gate.
+- [x] 3.1 mini-proposal; rename utility modules to match their primary export (kebab): `ai-provider-config.ts` -> `ai-provider-mappings.ts`, `codepoint.ts` -> `emoji-to-unicode.ts`, `style-context.tsx` -> `fluent-emoji-style-provider.tsx`, `resolve.ts` -> `fluent-emoji-url.ts`, `emoji-data.ts` -> `emoji-categories.ts`.
+- [x] 3.2 Walk resolvers/Provider/setters against the philosophy checklist; confirm the icon-source rule holds; green gate.
 
 ## 4. Compound-spec deltas (per-cluster trigger)
 

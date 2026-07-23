@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { setFluentEmojiStyle, type FluentEmojiStyle } from './resolve';
+import { setFluentEmojiStyle, type FluentEmojiStyle } from './fluent-emoji-url';
 
 interface FluentEmojiStyleContextValue {
   /** The ambient artwork style every `<FluentEmoji>` (without its own `variant`)

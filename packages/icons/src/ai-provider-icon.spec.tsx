@@ -2,7 +2,7 @@ import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { AiProviderIcon } from './ai-provider-icon';
-import { resolveAiProviderMark } from './ai-provider-config';
+import { resolveAiProviderMark } from './ai-provider-mappings';
 
 afterEach(cleanup);
 

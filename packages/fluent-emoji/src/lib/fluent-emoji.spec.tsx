@@ -1,13 +1,13 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { emojiToUnicode } from './codepoint';
+import { emojiToUnicode } from './emoji-to-unicode';
 import {
   fluentEmojiUrl,
   setFluentEmojiBase,
   setFluentEmojiStyle,
   setFluentEmojiStyleBase,
-} from './resolve';
+} from './fluent-emoji-url';
 import { FluentEmoji } from './fluent-emoji';
 
 afterEach(() => {

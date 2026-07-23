@@ -1,4 +1,4 @@
-import { emojiToUnicode } from './codepoint';
+import { emojiToUnicode } from './emoji-to-unicode';
 
 /**
  * The rendering styles we ship, each in its own `assets/<style>/` subfolder:
