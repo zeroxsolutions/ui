@@ -44,7 +44,7 @@ function MenuButton({
   className,
   ...props
 }: ComponentProps<typeof ButtonGroup>) {
-  return <ButtonGroup data-slot="menu-button" className={className} {...props} />
+  return <ButtonGroup className={className} {...props} />
 }
 
 /** The primary segment - repeats the current action; its label reflects `value`. */
@@ -57,11 +57,10 @@ function MenuButtonAction({
 
 /**
  * The menu wrapper - the Base UI `DropdownMenu` owning open + selection state.
- * Thin wrapper so the part carries its authored `data-slot` instead of surfacing
- * the wrapped primitive's.
+ * Forwarder kept as the compound's named part for this slot.
  */
 function MenuButtonMenu(props: ComponentProps<typeof DropdownMenu>) {
-  return <DropdownMenu data-slot="menu-button-menu" {...props} />
+  return <DropdownMenu {...props} />
 }
 
 /** The caret segment - opens the menu that changes the current action. */
@@ -97,7 +96,6 @@ function MenuButtonContent({
 }: ComponentProps<typeof DropdownMenuContent>) {
   return (
     <DropdownMenuContent
-      data-slot="menu-button-content"
       align={align}
       className={cn("w-auto", className)}
       {...props}
@@ -107,18 +105,18 @@ function MenuButtonContent({
 
 /**
  * The current-selection group - `value` + `onValueChange` set the default.
- * Thin wrapper so the part carries its authored `data-slot`.
+ * Forwarder kept as the compound's named part for this slot.
  */
 function MenuButtonRadioGroup(props: ComponentProps<typeof DropdownMenuRadioGroup>) {
-  return <DropdownMenuRadioGroup data-slot="menu-button-radio-group" {...props} />
+  return <DropdownMenuRadioGroup {...props} />
 }
 
 /**
  * One selectable default; the checked one is the current action.
- * Thin wrapper so the part carries its authored `data-slot`.
+ * Forwarder kept as the compound's named part for this slot.
  */
 function MenuButtonRadioItem(props: ComponentProps<typeof DropdownMenuRadioItem>) {
-  return <DropdownMenuRadioItem data-slot="menu-button-radio-item" {...props} />
+  return <DropdownMenuRadioItem {...props} />
 }
 
 export {

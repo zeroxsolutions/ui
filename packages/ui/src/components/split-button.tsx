@@ -49,7 +49,7 @@ function SplitButton({
   className,
   ...props
 }: ComponentProps<typeof ButtonGroup>) {
-  return <ButtonGroup data-slot="split-button" className={className} {...props} />
+  return <ButtonGroup className={className} {...props} />
 }
 
 /** The primary action segment - a `Button`; label or icon as children. */
@@ -64,11 +64,10 @@ function SplitButtonAction({
 
 /**
  * The menu wrapper - the Base UI `DropdownMenu` that owns the caret's open state.
- * Thin wrapper so the part carries its authored `data-slot` instead of surfacing
- * the wrapped primitive's.
+ * Forwarder kept as the compound's named part for this slot.
  */
 function SplitButtonMenu(props: ComponentProps<typeof DropdownMenu>) {
-  return <DropdownMenu data-slot="split-button-menu" {...props} />
+  return <DropdownMenu {...props} />
 }
 
 /**
@@ -111,7 +110,6 @@ function SplitButtonContent({
 }: ComponentProps<typeof DropdownMenuContent>) {
   return (
     <DropdownMenuContent
-      data-slot="split-button-content"
       align={align}
       className={cn("w-auto", className)}
       {...props}
@@ -121,10 +119,10 @@ function SplitButtonContent({
 
 /**
  * One related-variant item; supply its own `onClick`.
- * Thin wrapper so the part carries its authored `data-slot`.
+ * Forwarder kept as the compound's named part for this slot.
  */
 function SplitButtonItem(props: ComponentProps<typeof DropdownMenuItem>) {
-  return <DropdownMenuItem data-slot="split-button-item" {...props} />
+  return <DropdownMenuItem {...props} />
 }
 
 export {

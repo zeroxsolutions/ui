@@ -85,3 +85,27 @@ icon+label+value line composes `Item`).
 - **WHEN** a new component would present an icon+label+value line or a status token
 - **THEN** it composes the shipped `Item` or `Badge` primitive, never a `*Row` or `*Chip`
   twin of one.
+
+### Requirement: A compound part retains a composed primitive's functional data-slot
+
+A compound part that composes a design-system primitive MUST retain the primitive's
+functional `data-slot` where descendant style hooks depend on it. For example, a
+`SplitButton` Root composes `ButtonGroup`, and the child buttons'
+`in-data-[slot=button-group]` radius hooks depend on the Root keeping
+`data-slot="button-group"`; overriding it with `data-slot="split-button"` breaks the seam.
+Such a part is targetable through the primitive's slot plus its composed position; an
+authored part that is NOT a functional primitive (an action button, a trigger) carries its
+own `data-slot`.
+
+#### Scenario: A compound root composes a primitive with descendant hooks
+
+- **WHEN** a compound root composes a primitive whose descendant hooks key off the
+  primitive's data-slot (e.g. `ButtonGroup` radius)
+- **THEN** the root retains the primitive's `data-slot` (e.g. `button-group`), not its own
+  symbol-kebab.
+
+#### Scenario: An authored part is not a functional primitive
+
+- **WHEN** a compound part is an authored button (an action or a trigger), not a primitive
+  with functional descendant hooks
+- **THEN** it carries its own `data-slot` (e.g. `split-button-action`).
