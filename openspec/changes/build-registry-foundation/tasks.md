@@ -1,9 +1,9 @@
 ## 1. Doc-page foundation
 
-- [ ] 1.1 Build the reusable doc components in `apps/registry/src/components/docs/`: `DocPage` (the shell), `DocTabs` (Preview/Code/Props/Composition), `PropsTable`, `CompositionTree`, `UsageCode` (the `shadcn add` command + import snippet, derived from item name + deployed URL), `DarkModeToggle` - each composing `@zeroxsolutions/ui` primitives, no re-skinning.
-- [ ] 1.2 Retro-fit the existing `/preview/button` page to the new `DocPage` shape (Preview + Code/Usage + Props + Composition + dark-mode), as the reference instance.
-- [ ] 1.3 Add a catalog index/navigation page that lists items by `category` and `type`.
-- [ ] 1.4 Extend `registry-e2e` to assert the doc page renders every section (Preview, Code/Usage, Props, Composition, dark-mode toggle).
+- [x] 1.1 Build the reusable doc components in `apps/registry/src/components/docs/`: `DocPage` (the shell), `DocTabs` (Preview/Code/Props/Composition), `PropsTable`, `CompositionTree`, `UsageCode` (the `shadcn add` command + import snippet, derived from item name + deployed URL), `DarkModeToggle` - each composing `@zeroxsolutions/ui` primitives, no re-skinning.
+- [x] 1.2 Retro-fit the existing `/preview/button` page to the new `DocPage` shape (Preview + Code/Usage + Props + Composition + dark-mode), as the reference instance.
+- [x] 1.3 Add a catalog index/navigation page that lists items by `category` and `type`.
+- [x] 1.4 Extend `registry-e2e` to assert the doc page renders every section (Preview, Code/Usage, Props, Composition, dark-mode toggle).
 
 ## 2. Typed, categorized registry items
 
