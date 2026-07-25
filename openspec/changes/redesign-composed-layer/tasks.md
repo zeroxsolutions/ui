@@ -22,18 +22,18 @@
 
 ## 4. Compound-spec deltas (per-cluster trigger)
 
-- [ ] 4.1 Track the six candidate compound specs (`ui-menu-button`, `ui-split-button`, `ui-permission`, `model-list`, `model-info-card`, `ai-provider-card`); add a delta only where a cluster changes a requirement (e.g. a `data-slot` obligation or a part rename). Note: `model-list`'s three files are independent compositions, NOT a compound split - no merge required.
-- [ ] 4.2 Validate every added compound delta `--strict` before its cluster merges.
+- [x] 4.1 Track the six candidate compound specs (`ui-menu-button`, `ui-split-button`, `ui-permission`, `model-list`, `model-info-card`, `ai-provider-card`); add a delta only where a cluster changes a requirement (e.g. a `data-slot` obligation or a part rename). Note: `model-list`'s three files are independent compositions, NOT a compound split - no merge required.
+- [x] 4.2 Validate every added compound delta `--strict` before its cluster merges.
 
 ## 5. Breaking-rename + release bookkeeping
 
-- [ ] 5.1 For each cluster that renames a public subpath (`chat-message-shell` -> `chat-message`, `tree-row`, the icon/fluent-emoji module renames), update in-repo consumers in the same commit and record the rename in the cluster's mini-proposal.
-- [ ] 5.2 Decide the versioning cadence (per-cluster major vs a final surface-freeze cluster) once the first breaking rename lands; carry the major bump via `nx release` with a migration note.
+- [x] 5.1 For each cluster that renames a public subpath (`chat-message-shell` -> `chat-message`, `tree-row`, the icon/fluent-emoji module renames), update in-repo consumers in the same commit and record the rename in the cluster's mini-proposal.
+- [x] 5.2 Decide the versioning cadence (per-cluster major vs a final surface-freeze cluster) once the first breaking rename lands; carry the major bump via `nx release` with a migration note.
 
 ## 6. Validation
 
-- [ ] 6.1 Migration completeness: `grep -rn "\.filter(Boolean)\.join" packages/*/src` returns zero; `grep -rn "data-(bubble|slash|trigger|block)-menu\|data-editor-toolbar" packages/*/src` returns zero; no bespoke `*Shell` component remains; no `*Row` token remains (except any justified, documented case); the floating surface comes from the `Popover` primitive.
-- [ ] 6.2 `nx run-many -t lint build test` green across `ui`, `editor`, `icons`, `fluent-emoji`, `registry`, `registry-e2e`.
-- [ ] 6.3 `nx e2e @zeroxsolutions/registry-e2e` passes (extended to the composable-into-block sample regions).
-- [ ] 6.4 `editor` no-regression: its existing `.spec.tsx` suites pass (updated only where behavior intentionally changed).
-- [ ] 6.5 Rule-audit each cluster's staged diff against `.agents/rules/*` before commit; never bypass the husky gate.
+- [x] 6.1 Migration completeness: `grep -rn "\.filter(Boolean)\.join" packages/*/src` returns zero; `grep -rn "data-(bubble|slash|trigger|block)-menu\|data-editor-toolbar" packages/*/src` returns zero; no bespoke `*Shell` component remains; no `*Row` token remains (except any justified, documented case); the floating surface comes from the `Popover` primitive.
+- [x] 6.2 `nx run-many -t lint build test` green across `ui`, `editor`, `icons`, `fluent-emoji`, `registry`, `registry-e2e`.
+- [x] 6.3 `nx e2e @zeroxsolutions/registry-e2e` passes (extended to the composable-into-block sample regions).
+- [x] 6.4 `editor` no-regression: its existing `.spec.tsx` suites pass (updated only where behavior intentionally changed).
+- [x] 6.5 Rule-audit each cluster's staged diff against `.agents/rules/*` before commit; never bypass the husky gate.
