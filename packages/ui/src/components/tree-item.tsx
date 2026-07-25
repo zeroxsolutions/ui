@@ -82,13 +82,17 @@ function TreeItem({
   ...rowProps
 }: TreeItemProps) {
   const row = (
-    <TreeIndent ref={ref} data-slot="tree-item" {...rowProps}>
+    <TreeIndent ref={ref} {...rowProps}>
       {/* The name is a plain clickable region, NOT a <button>: per the W3C tree
           view pattern a treeitem's activation is owned by the tree (roving
           tabindex + Enter), so this skeleton leaves role/keyboard to the
           consumer (the TreeIndent owns hover/selection). A <div> also holds the
-          rename <input> as a valid child - a <button> may not nest one. */}
+          rename <input> as a valid child - a <button> may not nest one. The
+          `data-slot="tree-item"` rides this content region (not the TreeIndent
+          root) so TreeIndent keeps its own `tree-indent` slot and neither
+          overrides the other. */}
       <div
+        data-slot="tree-item"
         className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 py-1 text-xs"
         onClick={onActivate}
         onDoubleClick={onActivateDoubleClick}
