@@ -227,3 +227,101 @@ for (const docPage of DOC_PAGES) {
     });
   });
 }
+
+/**
+ * Block/page coverage (cluster 5): a `registry:block` composes existing
+ * registry items and a `registry:page` composes blocks/components. Both follow
+ * the same DocPage shape; their Composition tabs additionally list the
+ * composed items, proving the ecosystem path.
+ */
+const COMPOSED_PAGES = [
+  {
+    slug: 'ai-provider-picker',
+    title: 'AiProviderPicker',
+    itemName: 'ai-provider-picker',
+    importPath: 'components/blocks/ai-provider-picker',
+    exportName: 'AiProviderPicker',
+    /** The Composition tree's root node name. */
+    compositionRoot: 'AiProviderPicker',
+    /** Composed items the Composition tree must list (block deps). */
+    composedChildren: ['AiProviderCard', 'AiProviderIcon'],
+    /** Preview slot rendered by the block. */
+    previewSlot: 'ai-provider-picker',
+  },
+  {
+    slug: 'demo-page',
+    title: 'DemoPage',
+    itemName: 'demo-page',
+    importPath: 'components/pages/demo-page',
+    exportName: 'DemoPage',
+    compositionRoot: 'DemoPage',
+    /** Composed items the Composition tree must list (page deps). */
+    composedChildren: ['AiProviderPicker', 'ChatMessage'],
+    previewSlot: 'demo-page',
+  },
+] as const;
+
+for (const composedPage of COMPOSED_PAGES) {
+  test.describe(`Composed doc page (/preview/${composedPage.slug})`, () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(`/preview/${composedPage.slug}`);
+    });
+
+    test('renders the title and dark-mode toggle in the header', async ({
+      page,
+    }) => {
+      await expect(
+        page.getByRole('heading', { level: 1, name: composedPage.title })
+      ).toBeVisible();
+      await expect(
+        page.locator('[data-slot="dark-mode-toggle"]')
+      ).toBeVisible();
+    });
+
+    test('renders the composed surface in the Preview tab', async ({ page }) => {
+      const frame = page.locator('[data-slot="component-preview"]');
+      await expect(frame).toBeVisible();
+      // The composed surface carries its own data-slot - a real rendered tree,
+      // not an empty preview frame.
+      await expect(
+        frame.locator(`[data-slot="${composedPage.previewSlot}"]`)
+      ).toBeVisible();
+    });
+
+    test('renders the shadcn add command and import snippet in the Code tab', async ({
+      page,
+    }) => {
+      await page.getByRole('tab', { name: 'Code' }).click();
+
+      const codePanel = page.locator('[data-slot="doc-tab-code"]');
+      await expect(codePanel).toBeVisible();
+      await expect(codePanel).toContainText(
+        `npx shadcn add https://registry.zeroxsolutions.com/r/${composedPage.itemName}.json`
+      );
+      await expect(codePanel).toContainText(
+        `import { ${composedPage.exportName} } from '@zeroxsolutions/ui/${composedPage.importPath}';`
+      );
+    });
+
+    test('renders the Composition tree listing the composed items', async ({
+      page,
+    }) => {
+      await page.getByRole('tab', { name: 'Composition' }).click();
+
+      const compositionPanel = page.locator(
+        '[data-slot="doc-tab-composition"]'
+      );
+      await expect(compositionPanel).toBeVisible();
+      const tree = compositionPanel.locator('[data-slot="composition-tree"]');
+      await expect(tree).toBeVisible();
+      await expect(
+        tree.getByText(composedPage.compositionRoot, { exact: true })
+      ).toBeVisible();
+      // The composed children (the registry items this block/page declares as
+      // `registryDependencies`) must each appear in the tree.
+      for (const childName of composedPage.composedChildren) {
+        await expect(tree.getByText(childName, { exact: true })).toBeVisible();
+      }
+    });
+  });
+}

@@ -171,6 +171,9 @@ importers:
 
   apps/registry:
     dependencies:
+      '@zeroxsolutions/icons':
+        specifier: workspace:*
+        version: link:../../packages/icons
       '@zeroxsolutions/ui':
         specifier: workspace:*
         version: link:../../packages/ui

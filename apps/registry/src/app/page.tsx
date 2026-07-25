@@ -51,6 +51,18 @@ const CATALOG: CatalogEntry[] = [
     type: 'registry:component',
     category: 'layout',
   },
+  {
+    name: 'AiProviderPicker',
+    href: '/preview/ai-provider-picker',
+    type: 'registry:block',
+    category: 'blocks',
+  },
+  {
+    name: 'DemoPage',
+    href: '/preview/demo-page',
+    type: 'registry:page',
+    category: 'pages',
+  },
 ];
 
 const CATEGORY_ORDER = [

@@ -149,6 +149,41 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "ai-provider-picker",
+      "type": "registry:block",
+      "category": "blocks",
+      "title": "AI Provider Picker",
+      "description": "A registry:block - a responsive grid of AiProviderCard tiles, each showing one AI provider via an AiProviderIcon in the card's icon slot. Composes the ai-provider-card and ai-provider-icon items into one reusable surface.",
+      "registryDependencies": [
+        "ai-provider-card",
+        "ai-provider-icon"
+      ],
+      "files": [
+        {
+          "path": "src/components/blocks/ai-provider-picker.tsx",
+          "type": "registry:block"
+        }
+      ]
+    },
+    {
+      "name": "demo-page",
+      "type": "registry:page",
+      "category": "pages",
+      "title": "Demo Page",
+      "description": "A registry:page - a small page region composing the ai-provider-picker block and the chat-message component. Pages assemble blocks and components into a full interface region.",
+      "registryDependencies": [
+        "ai-provider-picker",
+        "chat-message"
+      ],
+      "files": [
+        {
+          "path": "src/components/pages/demo-page.tsx",
+          "type": "registry:page",
+          "target": "components/demo-page.tsx"
+        }
+      ]
     }
   ]
 }

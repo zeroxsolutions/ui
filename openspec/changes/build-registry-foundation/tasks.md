@@ -24,9 +24,9 @@
 
 ## 5. Block and page seed
 
-- [ ] 5.1 Author one `registry:block` (AI-provider picker grid composing `AiProviderCard` + `AiProviderIcon`) once the `redesign-composed-layer` cluster for those components lands; declare its `registryDependencies`; give it a doc page.
-- [ ] 5.2 Author one `registry:page` demo composing blocks/components; declare its `registryDependencies`; give it a doc page.
-- [ ] 5.3 `registry-e2e` covers the block/page doc pages and the install path.
+- [x] 5.1 Author one `registry:block` (AI-provider picker grid composing `AiProviderCard` + `AiProviderIcon`) once the `redesign-composed-layer` cluster for those components lands; declare its `registryDependencies`; give it a doc page.
+- [x] 5.2 Author one `registry:page` demo composing blocks/components; declare its `registryDependencies`; give it a doc page.
+- [x] 5.3 `registry-e2e` covers the block/page doc pages and the install path.
 
 ## 6. Validation
 
