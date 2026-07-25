@@ -30,9 +30,9 @@
 
 ## 6. Validation
 
-- [ ] 6.1 Every documented item's page renders Preview + Code/Usage + Props + Composition + dark-mode (`registry-e2e`).
-- [ ] 6.2 Every `registry.json` item has a `type` and a `category`; `shadcn registry validate` passes in the build gate.
-- [ ] 6.3 At least one `registry:block` ships (composing existing items, declaring `registryDependencies`); a `registry:page` is wired.
-- [ ] 6.4 `nx run-many -t lint build test` green across `ui`, `registry`, `registry-e2e`; `nx build @zeroxsolutions/registry` static-exports every doc page; `nx e2e @zeroxsolutions/registry-e2e` passes.
-- [ ] 6.5 The npm channel is byte-unchanged: `packages/ui` `exports`/`files` identical to HEAD; `registry.json` stays outside `files`.
-- [ ] 6.6 Rule-audit each milestone's staged diff against `.agents/rules/*` before commit; never bypass the husky gate.
+- [x] 6.1 Every documented item's page renders Preview + Code/Usage + Props + Composition + dark-mode (`registry-e2e`).
+- [x] 6.2 Every `registry.json` item has a `type` and a `category`; `shadcn registry validate` passes in the build gate.
+- [x] 6.3 At least one `registry:block` ships (composing existing items, declaring `registryDependencies`); a `registry:page` is wired.
+- [x] 6.4 `nx run-many -t lint build test` green across `ui`, `registry`, `registry-e2e`; `nx build @zeroxsolutions/registry` static-exports every doc page; `nx e2e @zeroxsolutions/registry-e2e` passes.
+- [x] 6.5 The npm channel is byte-unchanged: `packages/ui` `exports`/`files` identical to HEAD; `registry.json` stays outside `files`.
+- [x] 6.6 Rule-audit each milestone's staged diff against `.agents/rules/*` before commit; never bypass the husky gate.
