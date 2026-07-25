@@ -55,6 +55,100 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "split-button",
+      "type": "registry:component",
+      "category": "components",
+      "title": "Split Button",
+      "description": "A single divided control - a primary action segment plus a caret that opens a menu of related variants. Composes ButtonGroup for the seamed outline; a matched variant/size is set per segment.",
+      "registryDependencies": [
+        "utils",
+        "button",
+        "button-group",
+        "dropdown-menu"
+      ],
+      "files": [
+        {
+          "path": "src/components/split-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "menu-button",
+      "type": "registry:component",
+      "category": "components",
+      "title": "Menu Button",
+      "description": "A remembered-default split control - the primary repeats the currently-selected action and the caret opens a menu that changes which action is current. Composes ButtonGroup for the seamed outline.",
+      "registryDependencies": [
+        "utils",
+        "button",
+        "button-group",
+        "dropdown-menu"
+      ],
+      "files": [
+        {
+          "path": "src/components/menu-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "chat-message",
+      "type": "registry:component",
+      "category": "data-display",
+      "title": "Chat Message",
+      "description": "The wrapper for one chat message row, agnostic to how the body is rendered. User messages pin right as a bubble; assistant messages lay out as full-width prose with an optional agent identity row.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "src/components/chat/chat-message.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/chat/chat-types.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "tree-item",
+      "type": "registry:component",
+      "category": "data-display",
+      "title": "Tree Item",
+      "description": "One row of a hierarchy tree - the layer above TreeIndent. Owns the clickable name region, inline-rename, trailing actions, and an optional context menu.",
+      "registryDependencies": [
+        "utils",
+        "tree-indent",
+        "context-menu",
+        "input"
+      ],
+      "files": [
+        {
+          "path": "src/components/tree-item.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "field-group",
+      "type": "registry:component",
+      "category": "layout",
+      "title": "Field Group",
+      "description": "A field grid plus a fixed trailing action slot. Use it for any property row that mixes inputs with a side action - the slot is always reserved at one icon-button width so every row shares the same right edge.",
+      "registryDependencies": [
+        "utils",
+        "field-grid"
+      ],
+      "files": [
+        {
+          "path": "src/components/layouts/field-group.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

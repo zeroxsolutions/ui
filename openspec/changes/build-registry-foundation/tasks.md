@@ -18,9 +18,9 @@
 
 ## 4. Per-item doc pages
 
-- [ ] 4.1 Add a `registry:component`/`registry:ui` doc page per documented item as `redesign-composed-layer` stabilizes each cluster - each page composes `DocPage` with hand-authored Props + Composition and the derived `shadcn add` command + import snippet.
-- [ ] 4.2 Add the matching `registry.json` item (with `type` + `category` + `registryDependencies`) for each documented component if it is not already present.
-- [ ] 4.3 Per page: `registry-e2e` asserts all sections render; the page is reachable from the catalog index.
+- [x] 4.1 Add a `registry:component`/`registry:ui` doc page per documented item as `redesign-composed-layer` stabilizes each cluster - each page composes `DocPage` with hand-authored Props + Composition and the derived `shadcn add` command + import snippet.
+- [x] 4.2 Add the matching `registry.json` item (with `type` + `category` + `registryDependencies`) for each documented component if it is not already present.
+- [x] 4.3 Per page: `registry-e2e` asserts all sections render; the page is reachable from the catalog index.
 
 ## 5. Block and page seed
 
