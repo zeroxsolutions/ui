@@ -66,10 +66,12 @@
     "targets": {
       "shadcn-build": {
         "executor": "nx:run-commands",
-        "outputs": ["{workspaceRoot}/apps/registry/public/r"],
+        "outputs": [
+          "{workspaceRoot}/apps/registry/public/r"
+        ],
         "options": {
           "cwd": "{projectRoot}",
-          "command": "shadcn build -o ../../apps/registry/public/r"
+          "command": "shadcn build -o ../../apps/registry/public/r && shadcn registry validate registry.json"
         }
       }
     }

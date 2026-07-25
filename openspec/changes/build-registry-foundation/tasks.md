@@ -7,14 +7,14 @@
 
 ## 2. Typed, categorized registry items
 
-- [ ] 2.1 Add a `category` to the three existing items (`utils`, `button`, `model-info-card`) and confirm each already carries a `type`.
-- [ ] 2.2 Fix any pre-existing item that `shadcn registry validate` flags (missing fields, bad `type`, dangling `registryDependencies`) so the registry is clean before validate is wired.
-- [ ] 2.3 Grep-confirm every item has both a `type` and a `category`.
+- [x] 2.1 Add a `category` to the three existing items (`utils`, `button`, `model-info-card`) and confirm each already carries a `type`.
+- [x] 2.2 Fix any pre-existing item that `shadcn registry validate` flags (missing fields, bad `type`, dangling `registryDependencies`) so the registry is clean before validate is wired.
+- [x] 2.3 Grep-confirm every item has both a `type` and a `category`.
 
 ## 3. `shadcn registry validate` in the gate
 
-- [ ] 3.1 Add a `shadcn registry validate` step to the `@zeroxsolutions/ui` `shadcn-build` nx target (after `shadcn build`), so the static `build` target (which depends on `shadcn-build`) carries validate into the gate.
-- [ ] 3.2 Prove the gate fails on a deliberately malformed item, then remove the deliberate malformation.
+- [x] 3.1 Add a `shadcn registry validate` step to the `@zeroxsolutions/ui` `shadcn-build` nx target (after `shadcn build`), so the static `build` target (which depends on `shadcn-build`) carries validate into the gate.
+- [x] 3.2 Prove the gate fails on a deliberately malformed item, then remove the deliberate malformation.
 
 ## 4. Per-item doc pages
 
