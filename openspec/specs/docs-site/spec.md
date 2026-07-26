@@ -23,26 +23,37 @@ and serve through an `nx` target.
 
 ### Requirement: Each documented component renders in an isolated live preview
 
-The registry app MUST render each documented component in an **isolated live preview** -
-the component rendered on its own, apart from page chrome - so it serves as the design
-and development sandbox that Storybook provided, and as the surface the `registry-e2e`
-tests drive.
+A documented registry item MUST render in a complete doc page that matches the
+`ui.shadcn.com` shape: a live **Preview**, a **Code/Usage** section (the `shadcn add`
+command plus an import snippet), a **Props** table, a **Composition** tree, and a
+**dark-mode** toggle. The isolated live preview is the Preview section of this page - the
+page as a whole is the documentation, not just the render. (See the `registry-ecosystem`
+capability for the complete contract.)
 
-#### Scenario: A component page shows an isolated live render
+#### Scenario: A documented item's page
 
-- **WHEN** a reader opens a component's docs page
-- **THEN** the component is rendered live and interactable
-- **AND** the preview is isolated from the surrounding navigation and chrome
+- **WHEN** a registry item is documented
+- **THEN** its page renders the live Preview, the `shadcn add` command and import snippet,
+  the Props table, the Composition tree, and a dark-mode toggle.
+
+#### Scenario: A consumer copies the install path
+
+- **WHEN** a consumer opens a documented item's page
+- **THEN** they can copy the `shadcn add` command and the import snippet straight from the
+  page and install/use the item.
 
 ### Requirement: The registry app hosts the component registry
 
-The registry app MUST serve the built component registry at `/r/<name>.json`, so the
-same deployment that documents a component also distributes it via `shadcn add`.
+The registry app MUST host the registry, where every item declares a `type` and a
+`category`, `shadcn registry validate` runs in the build gate, and the ecosystem grows
+from single components to composed `registry:block` and `registry:page` items. (See the
+`registry-ecosystem` capability for the type/category/validate/growth contract.)
 
-#### Scenario: A registry item is served from the deployment
+#### Scenario: The registry ships typed, categorized items
 
-- **WHEN** a client requests `/r/<name>.json` from the registry app
-- **THEN** it receives the built registry item for that component
+- **WHEN** the registry app is built and deployed
+- **THEN** every registry item carries a `type` and a `category`, the build gate runs
+  `shadcn registry validate`, and at least one `registry:block` composes existing items.
 
 ### Requirement: The registry app deploys as a static site to Cloudflare, with no server runtime
 
