@@ -58,11 +58,11 @@ async function readButtons(page: Page, kind: 'split' | 'menu') {
   return { action, trigger };
 }
 
-test.describe('SplitButton radius seam (/preview/split-button)', () => {
+test.describe('SplitButton radius seam (/preview/components/split-button)', () => {
   test('action RIGHT and caret LEFT corners are square (the seam)', async ({
     page,
   }) => {
-    await page.goto('/preview/split-button');
+    await page.goto('/preview/components/split-button');
 
     const { action, trigger } = await readButtons(page, 'split');
     const actionCorners = await radii(action);
@@ -88,19 +88,21 @@ test.describe('SplitButton radius seam (/preview/split-button)', () => {
   });
 
   test('Root carries data-slot="button-group" (the fix)', async ({ page }) => {
-    await page.goto('/preview/split-button');
+    await page.goto('/preview/components/split-button');
     // The Root must surface the ButtonGroup primitive's data-slot, NOT the
-    // overridden "split-button". The seam hook depends on this.
-    const root = page.locator('[role="group"]').first();
+    // overridden "split-button". The seam hook depends on this. Scoped to the
+    // data-slot (not [role="group"]) because the docs chrome ToggleGroups also
+    // render role="group".
+    const root = page.locator('[data-slot="button-group"]').first();
     await expect(root).toHaveAttribute('data-slot', 'button-group');
   });
 });
 
-test.describe('MenuButton radius seam (/preview/menu-button)', () => {
+test.describe('MenuButton radius seam (/preview/components/menu-button)', () => {
   test('action RIGHT and caret LEFT corners are square (the seam)', async ({
     page,
   }) => {
-    await page.goto('/preview/menu-button');
+    await page.goto('/preview/components/menu-button');
 
     const { action, trigger } = await readButtons(page, 'menu');
     const actionCorners = await radii(action);
@@ -123,8 +125,8 @@ test.describe('MenuButton radius seam (/preview/menu-button)', () => {
   });
 
   test('Root carries data-slot="button-group" (the fix)', async ({ page }) => {
-    await page.goto('/preview/menu-button');
-    const root = page.locator('[role="group"]').first();
+    await page.goto('/preview/components/menu-button');
+    const root = page.locator('[data-slot="button-group"]').first();
     await expect(root).toHaveAttribute('data-slot', 'button-group');
   });
 });

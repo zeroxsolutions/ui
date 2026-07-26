@@ -41,6 +41,96 @@
       ]
     },
     {
+      "name": "button-hero",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "Button Hero",
+      "description": "All Button variants in one row - the hero preview for the Button doc page.",
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "src/examples/button-hero.tsx",
+          "type": "registry:example",
+          "target": "examples/button-hero.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-default",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "Button Default",
+      "description": "The default Button variant.",
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "src/examples/button-default.tsx",
+          "type": "registry:example",
+          "target": "examples/button-default.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-secondary",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "Button Secondary",
+      "description": "The secondary Button variant.",
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "src/examples/button-secondary.tsx",
+          "type": "registry:example",
+          "target": "examples/button-secondary.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-outline",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "Button Outline",
+      "description": "The outline Button variant.",
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "src/examples/button-outline.tsx",
+          "type": "registry:example",
+          "target": "examples/button-outline.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-destructive",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "Button Destructive",
+      "description": "The destructive Button variant.",
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "src/examples/button-destructive.tsx",
+          "type": "registry:example",
+          "target": "examples/button-destructive.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-ghost",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "Button Ghost",
+      "description": "The ghost Button variant.",
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "src/examples/button-ghost.tsx",
+          "type": "registry:example",
+          "target": "examples/button-ghost.tsx"
+        }
+      ]
+    },
+    {
       "name": "model-info-card",
       "type": "registry:component",
       "category": "data-display",
@@ -182,6 +272,111 @@
           "path": "src/components/pages/demo-page.tsx",
           "type": "registry:page",
           "target": "components/demo-page.tsx"
+        }
+      ]
+    },
+    {
+      "name": "split-button-hero",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "SplitButton Hero",
+      "description": "A divided control - a primary action segment plus a caret that opens a menu.",
+      "registryDependencies": ["split-button"],
+      "files": [
+        {
+          "path": "src/examples/split-button-hero.tsx",
+          "type": "registry:example",
+          "target": "examples/split-button-hero.tsx"
+        }
+      ]
+    },
+    {
+      "name": "menu-button-hero",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "MenuButton Hero",
+      "description": "A remembered-default split control - the primary repeats the selected action.",
+      "registryDependencies": ["menu-button"],
+      "files": [
+        {
+          "path": "src/examples/menu-button-hero.tsx",
+          "type": "registry:example",
+          "target": "examples/menu-button-hero.tsx"
+        }
+      ]
+    },
+    {
+      "name": "chat-message-hero",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "ChatMessage Hero",
+      "description": "A user bubble plus an assistant row - monochrome.",
+      "registryDependencies": ["chat-message"],
+      "files": [
+        {
+          "path": "src/examples/chat-message-hero.tsx",
+          "type": "registry:example",
+          "target": "examples/chat-message-hero.tsx"
+        }
+      ]
+    },
+    {
+      "name": "tree-hero",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "TreeItem Hero",
+      "description": "A small hierarchy tree of TreeItem rows.",
+      "registryDependencies": ["tree-item"],
+      "files": [
+        {
+          "path": "src/examples/tree-hero.tsx",
+          "type": "registry:example",
+          "target": "examples/tree-hero.tsx"
+        }
+      ]
+    },
+    {
+      "name": "field-group-hero",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "FieldGroup Hero",
+      "description": "A two-column field grid with a trailing action slot.",
+      "registryDependencies": ["field-group"],
+      "files": [
+        {
+          "path": "src/examples/field-group-hero.tsx",
+          "type": "registry:example",
+          "target": "examples/field-group-hero.tsx"
+        }
+      ]
+    },
+    {
+      "name": "ai-provider-picker-hero",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "AiProviderPicker Hero",
+      "description": "The AiProviderPicker block rendering its default provider grid.",
+      "registryDependencies": ["ai-provider-picker"],
+      "files": [
+        {
+          "path": "src/examples/ai-provider-picker-hero.tsx",
+          "type": "registry:example",
+          "target": "examples/ai-provider-picker-hero.tsx"
+        }
+      ]
+    },
+    {
+      "name": "demo-page-hero",
+      "type": "registry:example",
+      "category": "examples",
+      "title": "DemoPage Hero",
+      "description": "The DemoPage region composing the picker block and chat component.",
+      "registryDependencies": ["demo-page"],
+      "files": [
+        {
+          "path": "src/examples/demo-page-hero.tsx",
+          "type": "registry:example",
+          "target": "examples/demo-page-hero.tsx"
         }
       ]
     }

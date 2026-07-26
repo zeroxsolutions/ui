@@ -31,7 +31,10 @@ export default defineConfig({
   },
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'pnpm exec nx run @zeroxsolutions/registry:dev',
+    // shadcn-build first so public/r/*.json (the Code-view + Installation
+    // targets) exist before the dev server serves them (review F4).
+    command:
+      'pnpm exec nx run @zeroxsolutions/ui:shadcn-build && pnpm exec nx run @zeroxsolutions/registry:dev',
     url: 'http://localhost:3000',
     reuseExistingServer: true,
     cwd: workspaceRoot,

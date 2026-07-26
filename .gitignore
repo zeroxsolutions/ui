@@ -57,5 +57,11 @@ out
 # Generated shadcn registry JSON (emitted by @zeroxsolutions/ui:shadcn-build)
 apps/registry/public/r
 
+# Playwright e2e artifacts (regenerated screenshots + reports)
+apps/registry-e2e/screenshots
+playwright-report
+test-results
+
+
 .nx/migrate-runs
 test-output
