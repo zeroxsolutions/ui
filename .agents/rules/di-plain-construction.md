@@ -23,6 +23,7 @@ const cards = new CardService(new CardRepository(tx));     // ✅ plain construc
 
 **Rules of thumb:**
 - Depend on `I<Entity>Repository` / `I<Entity>Service` / `IUnitOfWork` interfaces; only the `bootstrap` names a concrete class.
+- The seam is audit-enforced: every `*Repository`/`*Service` has an `I*` interface, and no consumer in `lib/handlers|services` + `hono/routes` imports a concrete `*Repository`/`*Service` - only `bootstrap` names a concrete. A consumer bound to a concrete class is the smell `green-before-commit`'s rule-audit catches (not a gate check - the gate proves the code runs, the audit proves it honors the seam).
 - Wiring is plain construction at the composition root - nothing to register, nothing to resolve at runtime.
 - Interfaces are test seams and swap points; a jest spec injects a fake at the same seam.
 - Env-derived deps are built per invocation by the transport and passed into the bootstrap; pure deps default.
