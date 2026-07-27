@@ -3,6 +3,9 @@ creds/
 
 # Local .terraform directories
 .terraform/
+# Module-level lockfiles from standalone `terraform init` validation - only the root
+# .terraform.lock.hcl is committed; module dirs are validated through the root.
+modules/*/.terraform.lock.hcl
 
 # .tfstate files — contain secret values and resource ids; use the remote backend
 *.tfstate

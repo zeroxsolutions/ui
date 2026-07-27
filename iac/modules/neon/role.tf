@@ -5,22 +5,12 @@ resource "neon_role" "main" {
   name       = "${each.key}_owner"
 }
 
-# Neon requires ~30s after role creation before the password field is available
+# Neon requires ~30s after role creation before the password field is available.
+# Co-located with the role - a provisioning gate, like provisioners on a resource.
 resource "time_sleep" "wait_30_seconds" {
   create_duration = "30s"
 
   triggers = {
     roles = join(",", [for r in neon_role.main : r.id])
-  }
-}
-
-output "database_roles" {
-  depends_on = [time_sleep.wait_30_seconds]
-  sensitive  = true
-  value = {
-    for key, database_name in var.databases : key => {
-      name     = "${key}_owner"
-      password = neon_role.main[key].password
-    }
   }
 }

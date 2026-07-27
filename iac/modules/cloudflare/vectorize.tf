@@ -1,7 +1,7 @@
 # Vectorize indexes.
-# The Cloudflare Terraform provider v5.18 has no native Vectorize resource, so
-# creation is shelled out to the wrangler CLI. State holds only the input
-# trigger - CF is the source of truth for index existence.
+# Verified: cloudflare provider v5.22 (latest) still has no native Vectorize
+# resource, so creation is shelled out to the wrangler CLI. State holds only the
+# input trigger - CF is the source of truth for index existence.
 
 resource "terraform_data" "vectorize_indexes" {
   for_each = { for idx in var.vectorize_indexes : idx.name => idx }

@@ -44,3 +44,21 @@ variable "support_email" {
   description = "Support email for OAuth consent screen (required when enable_google_signin = true)"
   default     = null
 }
+
+variable "firebase_admin_service_account_id" {
+  type        = string
+  description = "Service account id for the Firebase Admin SDK credential (6-30 chars, lowercase)."
+  default     = "firebase-admin-sdk"
+}
+
+variable "firebase_admin_display_name" {
+  type        = string
+  description = "Display name for the admin service account."
+  default     = "Firebase Admin SDK"
+}
+
+variable "firebase_admin_role" {
+  type        = string
+  description = "IAM role granted to the admin service account. Defaults to the broad roles/firebase.admin - narrow per product for least-privilege (e.g. roles/firebaseauth.admin + roles/datastore.user)."
+  default     = "roles/firebase.admin"
+}

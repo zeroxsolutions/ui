@@ -7,6 +7,6 @@ resource "cloudflare_d1_database" "databases" {
   primary_location_hint = each.value.primary_location_hint
 
   read_replication = {
-    mode = "disabled"
+    mode = each.value.read_replication_mode
   }
 }

@@ -39,6 +39,7 @@ module "cloudflare" {
   origin_connection_limit = var.cloudflare_origin_connection_limit
   dns_records             = var.cloudflare_dns_records
   d1_databases            = var.cloudflare_d1_databases
+  pages_projects          = var.cloudflare_pages_projects
 }
 
 module "google_main" {

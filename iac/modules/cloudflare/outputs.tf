@@ -53,6 +53,16 @@ output "r2_bucket_names" {
   value       = { for key, b in cloudflare_r2_bucket.main : key => b.name }
 }
 
+output "pages_projects" {
+  description = "Map of Pages project logical_key => { subdomain, domains }"
+  value = {
+    for key, p in cloudflare_pages_project.this : key => {
+      subdomain = p.subdomain
+      domains   = p.domains
+    }
+  }
+}
+
 output "r2_buckets" {
   description = "Map of R2 bucket logical name to { name }"
   value = {
@@ -70,13 +80,8 @@ output "r2_custom_domains" {
 }
 
 output "ai_gateways" {
-  description = "AI Gateway slugs keyed by logical name - bind via AI_GATEWAY_ID in wrangler"
-  value = {
-    for name, slug in local.ai_gateway_slugs : name => {
-      id   = slug
-      slug = slug
-    }
-  }
+  description = "AI Gateway ids keyed by logical name - bind via AI_GATEWAY_ID in wrangler"
+  value       = { for name, g in cloudflare_ai_gateway.main : name => g.id }
 }
 
 output "ai_gateway_run_token" {

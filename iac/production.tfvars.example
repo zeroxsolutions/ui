@@ -17,6 +17,16 @@ cloudflare_r2_buckets    = ["files", "recordings"]
 cloudflare_queues        = ["grading"]
 cloudflare_kv_namespaces = []
 cloudflare_d1_databases  = []
+# Cloudflare Pages - connect a Git repo; Cloudflare builds+deploys on push (Pages
+# Functions = a Worker; no GitHub Actions). Authorize the GitHub/GitLab app once first.
+# cloudflare_pages_projects = {
+#   web = {
+#     production_branch = "main"
+#     source     = { type = "github", config = { owner = "ZeroXSolutions", repo_name = "classify-web" } }
+#     build_config = { build_command = "pnpm nx build @scope/web", root_dir = "apps/web" }
+#     custom_domains = ["classify.com"]
+#   }
+# }
 # Cloudflare Realtime SFU app id/secret feed the api-gateway (var + wrangler secret); provision
 # the SFU app via Terraform/Cloudflare and keep the secret out of committed vars.
 
@@ -60,7 +70,7 @@ gcp_admin_credentials_file_path = "./creds/classify-admin-production.json"
 #     name              = "Classify"
 #     domain            = "classify.com"
 #     environment_types = ["development", "production"]
-#     domains           = ["auth.classify.com"]
+#     domains           = [{ name = "auth.classify.com" }]
 #   }
 # }
 # clerk_application_settings = { enable_organizations = true }

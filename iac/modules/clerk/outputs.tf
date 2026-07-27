@@ -57,3 +57,25 @@ output "role_sets" {
     for k, rs in clerk_role_set.this : k => { id = rs.id, key = rs.key }
   }
 }
+
+output "redirect_urls" {
+  description = "Provisioned redirect URLs: url => id."
+  value       = { for k, r in clerk_redirect_url.this : k => r.id }
+}
+
+output "jwt_templates" {
+  description = "Provisioned JWT templates: name => id."
+  value       = { for k, t in clerk_jwt_template.this : k => t.id }
+}
+
+output "organization_domains" {
+  description = "Provisioned organization domains with verification status."
+  value = [
+    for d in clerk_organization_domain.this : { name = d.name, verification_status = d.verification_status }
+  ]
+}
+
+output "instance_configs" {
+  description = "Provisioned instance configs: application_key => id."
+  value       = { for k, c in clerk_instance_config.this : k => c.id }
+}

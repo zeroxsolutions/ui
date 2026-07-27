@@ -63,6 +63,58 @@ variable "cloudflare_d1_databases" {
   description = "D1 databases to create"
 }
 
+variable "cloudflare_pages_projects" {
+  type = map(object({
+    production_branch = string
+    source = optional(object({
+      type = string
+      config = optional(object({
+        owner                          = optional(string)
+        repo_name                      = optional(string)
+        deployments_enabled            = optional(bool)
+        production_deployments_enabled = optional(bool)
+        preview_deployment_setting     = optional(string)
+        preview_branch_includes        = optional(list(string))
+        preview_branch_excludes        = optional(list(string))
+        pr_comments_enabled            = optional(bool)
+        path_includes                  = optional(list(string))
+        path_excludes                  = optional(list(string))
+      }))
+    }))
+    build_config = optional(object({
+      build_command   = optional(string)
+      root_dir        = optional(string)
+      destination_dir = optional(string)
+      build_caching   = optional(bool)
+    }))
+    # Pages Functions = an edge Worker; per bounded-context-transport-agnostic the
+    # frontend opens NO database connection, so only edge-legit bindings are exposed
+    # (env, kv, r2, services). Extend for d1/hyperdrive/durable-objects only if a
+    # product genuinely breaks that boundary.
+    deployment_configs = optional(object({
+      production = optional(object({
+        compatibility_date  = optional(string)
+        compatibility_flags = optional(list(string))
+        env_vars            = optional(map(object({ type = string, value = string })))
+        kv_namespaces       = optional(map(object({ namespace_id = string })))
+        r2_buckets          = optional(map(object({ name = string, jurisdiction = optional(string) })))
+        services            = optional(map(object({ service = string, environment = optional(string), entrypoint = optional(string) })))
+      }))
+      preview = optional(object({
+        compatibility_date  = optional(string)
+        compatibility_flags = optional(list(string))
+        env_vars            = optional(map(object({ type = string, value = string })))
+        kv_namespaces       = optional(map(object({ namespace_id = string })))
+        r2_buckets          = optional(map(object({ name = string, jurisdiction = optional(string) })))
+        services            = optional(map(object({ service = string, environment = optional(string), entrypoint = optional(string) })))
+      }))
+    }))
+    custom_domains = optional(list(string), [])
+  }))
+  default     = {}
+  description = "Map of logical_key => Cloudflare Pages project. `source` connects a github/gitlab repo (Cloudflare builds+deploys on push, no GitHub Actions); deployment_configs wires Pages Functions bindings; custom_domains -> cloudflare_pages_domain. Authorize the GitHub/GitLab app on the account once first."
+}
+
 ## Neon
 variable "neon_api_key" {
   type        = string
@@ -159,11 +211,17 @@ variable "clerk_applications" {
     template          = optional(string)
     logo_path         = optional(string)
     favicon_path      = optional(string)
-    domains           = optional(list(string), [])
-    instance_config   = optional(string)
+    domains = optional(list(object({
+      name       = string
+      proxy_path = optional(string)
+    })), [])
+    instance_config = optional(object({
+      environment = optional(string, "production")
+      config      = string
+    }))
   }))
   default     = {}
-  description = "Map of logical_key => Clerk application (Platform API). One clerk_application per entry, plus a clerk_domain per `domains` entry."
+  description = "Map of logical_key => Clerk application (Platform API). `domain` is the primary domain at creation (create-only); each `domains` entry provisions an additional clerk_domain; `instance_config` binds a clerk_instance_config to the application's instance matching `environment`."
 }
 
 variable "clerk_application_settings" {
@@ -174,7 +232,7 @@ variable "clerk_application_settings" {
     max_allowed_memberships = optional(number)
   })
   default     = null
-  description = "Singleton instance organization settings (Backend API). null = don't manage."
+  description = "Singleton instance organization settings (Backend API, scoped to the instance of clerk_api_key - NOT Platform-created applications). null = don't manage."
 }
 
 variable "clerk_redirect_urls" {

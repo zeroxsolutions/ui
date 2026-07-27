@@ -18,8 +18,28 @@ output "r2_bucket_names" {
   value = module.cloudflare.r2_bucket_names
 }
 
+# Pages projects - subdomain (<name>.pages.dev) + domains. With `source` set, Cloudflare
+# builds+deploys the repo (Pages Functions = a Worker) on push; no GitHub Actions.
+output "cloudflare_pages_projects" {
+  value = module.cloudflare.pages_projects
+}
+
 output "queue_ids" {
   value = module.cloudflare.queue_ids
+}
+
+# KV / D1 / AI Gateway binding ids - consumed by workers' wrangler.jsonc. Were
+# module-only before; surfaced at root so `terraform output` gives them directly.
+output "cloudflare_kv_namespace_ids" {
+  value = module.cloudflare.kv_namespace_ids
+}
+
+output "cloudflare_d1_database_ids" {
+  value = module.cloudflare.d1_database_ids
+}
+
+output "cloudflare_ai_gateways" {
+  value = module.cloudflare.ai_gateways
 }
 
 output "web_app_firebase_config" {
@@ -74,6 +94,22 @@ output "clerk_permissions" {
 
 output "clerk_roles" {
   value = module.clerk.roles
+}
+
+output "clerk_redirect_urls" {
+  value = module.clerk.redirect_urls
+}
+
+output "clerk_jwt_templates" {
+  value = module.clerk.jwt_templates
+}
+
+output "clerk_organization_domains" {
+  value = module.clerk.organization_domains
+}
+
+output "clerk_instance_configs" {
+  value = module.clerk.instance_configs
 }
 
 output "clerk_role_sets" {

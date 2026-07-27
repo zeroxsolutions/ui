@@ -1,4 +1,7 @@
-# Backend API. Singleton instance organization settings.
+# Backend API. Singleton instance organization settings - scoped to the instance of
+# `api_key`, NOT to applications created via the Platform API (use
+# applications.instance_config for those). Enable organizations here so the
+# clerk_organization resources can be seeded.
 resource "clerk_application_settings" "this" {
   count = var.application_settings == null ? 0 : 1
 

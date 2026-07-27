@@ -15,6 +15,6 @@ resource "cloudflare_hyperdrive_config" "main" {
   origin_connection_limit = var.origin_connection_limit
 
   caching = {
-    disabled = false
+    disabled = each.value.caching_disabled
   }
 }

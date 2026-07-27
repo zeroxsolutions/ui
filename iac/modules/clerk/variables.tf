@@ -20,17 +20,23 @@ variable "platform_api_key" {
 variable "applications" {
   type = map(object({
     name              = string
-    domain            = optional(string)
+    domain            = optional(string) # primary domain, create-only
     environment_types = optional(list(string), ["development", "production"])
     proxy_path        = optional(string)
     template          = optional(string)
     logo_path         = optional(string)
     favicon_path      = optional(string)
-    domains           = optional(list(string), [])
-    instance_config   = optional(string)
+    domains = optional(list(object({ # additional clerk_domain resources
+      name       = string
+      proxy_path = optional(string) # per-domain proxy path, create-only
+    })), [])
+    instance_config = optional(object({
+      environment = optional(string, "production") # which of environment_types to bind
+      config      = string                         # JSON string of instance config
+    }))
   }))
   default     = {}
-  description = "Map of logical_key => Clerk application. Each entry provisions one clerk_application (Platform API), a clerk_domain per `domains` entry, and a clerk_instance_config when `instance_config` (JSON string) is set."
+  description = "Map of logical_key => Clerk application. `domain` is the primary domain at creation (create-only); each `domains` entry provisions an additional clerk_domain. `instance_config` (when set) binds a clerk_instance_config to the application's instance matching `environment` (default production)."
 }
 
 ## Instance-level config (Backend API); scoped to the instance of `api_key`.
@@ -42,7 +48,7 @@ variable "application_settings" {
     max_allowed_memberships = optional(number)
   })
   default     = null
-  description = "Singleton instance organization settings (Backend API). null = don't manage."
+  description = "Singleton instance organization settings (Backend API, scoped to the instance of `api_key` - NOT to Platform-created applications; use applications.instance_config for those). null = don't manage."
 }
 
 variable "redirect_urls" {

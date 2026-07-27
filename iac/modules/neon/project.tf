@@ -4,12 +4,9 @@ resource "neon_project" "main" {
   region_id                 = var.region_id
   pg_version                = var.pg_version
   history_retention_seconds = var.history_retention_seconds
+  default_branch_protected  = var.default_branch_protected
 
   branch {
-    name = "main"
+    name = var.branch_name
   }
-}
-
-output "database_host" {
-  value = neon_project.main.database_host
 }

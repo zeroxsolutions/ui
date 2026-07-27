@@ -20,11 +20,18 @@ enumerates them, so it can't drift.
   never `dev`/`prod`), so two envs never collide in one account. Select the
   workspace and pass its matching var-file together (`iac-terraform-root`).
 - **Per-provider modules.** `modules/cloudflare` (Hyperdrive, R2, Queues, KV, D1,
-  DNS, …), `modules/neon` (project + database + owner role), `modules/google`
+  DNS, Pages, …), `modules/neon` (project + database + owner role), `modules/google`
   (Firebase project + web app + Admin SDK), `modules/clerk` (applications, domains,
   instance config, redirect URLs, JWT templates — the opt-in auth alternative to
-  Firebase; Platform API beta). Add resources by extending a module, new providers
-  by adding a per-provider module — the set is per-root, not a ceiling.
+  Firebase; Platform API beta). A **Pages project** with `source` set connects a
+  Git repo so Cloudflare builds+deploys on push (Pages Functions run as a Worker);
+  authorize the GitHub/GitLab app on the account once first. Workers Builds (for
+  standalone backend Workers) is dashboard-only, not Terraform (provider gap
+  cloudflare/terraform-provider-cloudflare#6924). Add resources by extending a
+  module, new providers by adding a per-provider module; the set is per-root, not a
+  ceiling. The Worker/Pages infrastructure (project, bindings, routes, domains, build
+  setup) is owned by Terraform here; wrangler only deploys code - see
+  `terraform-owns-infra-wrangler-deploys`.
 - **A Neon database per entry, wired to its own Hyperdrive.** One Neon project per
   workspace; the `neon_databases` map declares each database, and **every entry
   gets its own `<key>_owner` role plus a Cloudflare Hyperdrive config** named
