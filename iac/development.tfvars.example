@@ -1,0 +1,94 @@
+## Common
+project_name = "classify"
+
+## Neon PostgreSQL
+# classify is microservices: one Neon database per bounded-context service (database-per-service).
+# statistics is a read-model (no own DB — reads billing/academics); it is NOT listed here.
+# Map is logical_key => postgres_database_name; each key gets its own owner role
+# and a matching Hyperdrive config (see main.tf).
+neon_api_key = "<neon_api_key>"
+neon_org_id  = "<neon_org_id>"
+neon_databases = {
+  iam         = "iam"
+  academics   = "academics"
+  rooms       = "rooms"
+  "exam-prep" = "exam_prep"
+  billing     = "billing"
+}
+
+## Cloudflare
+cloudflare_account_id = "<account_id>"
+cloudflare_api_token  = "<api_token>"
+
+# R2 object storage — logical names, prefixed with project+workspace at creation.
+# `recordings` backs the online-rooms recording seam (RECORDINGS_BUCKET binding).
+cloudflare_r2_buckets = ["files", "recordings"]
+
+# Workers Queues — `grading` is consumed by the grading-queue worker (exam essay/report jobs).
+cloudflare_queues = ["grading"]
+
+# Cloudflare Realtime SFU — the app id/secret feed the api-gateway (REALTIME_APP_ID var +
+# REALTIME_APP_SECRET wrangler secret). Provision the SFU app via Terraform/Cloudflare and wire
+# its outputs; the secret never lives in committed vars.
+
+# Workers KV — none yet.
+cloudflare_kv_namespaces = []
+
+# D1 — classify is Postgres-only (Neon via Hyperdrive), so no D1 databases.
+cloudflare_d1_databases = []
+
+## Google / Firebase — Main app (end-user / web-app auth)
+gcp_region                     = "asia-southeast1"
+gcp_main_project_id            = "classify-development"
+gcp_main_credentials_file_path = "./creds/classify-development.json"
+
+## Google / Firebase — Admin app (back-office auth)
+gcp_admin_project_id            = "classify-admin-development"
+gcp_admin_credentials_file_path = "./creds/classify-admin-development.json"
+
+## Clerk - opt-in ALTERNATIVE auth provider to Firebase (pick ONE).
+## Leave commented / at defaults when using Firebase above. Requires the Platform API
+## beta enabled on the Clerk account. Real keys live in this gitignored file only
+## (tf-state-and-secrets). With clerk_applications = {} no Clerk resource is created,
+## so null keys are harmless for a Firebase product.
+# clerk_api_key          = "<clerk_instance_secret_key>"   # sk_test_...
+# clerk_platform_api_key = "<clerk_platform_api_key>"      # ak_ (beta)
+# # Per-domain applications (Platform API fans out one clerk_application per entry):
+# clerk_applications = {
+#   main = {
+#     name              = "Classify"
+#     domain            = "classify.example"
+#     environment_types = ["development", "production"]
+#     domains           = ["auth.classify.example"]   # extra clerk_domain custom domains
+#     # instance_config  = jsonencode({ url_based_session_syncing = "1" })
+#   }
+# }
+# clerk_application_settings = { enable_organizations = true }
+# clerk_redirect_urls = ["https://classify.example/oauth/callback"]
+# clerk_jwt_templates = {}
+# # Organizations (tenants) + RBAC catalog - Backend API, instance-scoped. Permission
+# # and role references use logical handles (the map keys); the module resolves them.
+# clerk_organizations = {
+#   acme = {
+#     name                    = "Acme"
+#     slug                    = "acme"
+#     max_allowed_memberships = 100
+#     domains = [{ name = "acme.example", enrollment_mode = "automatic_invitation" }]
+#   }
+# }
+# clerk_permissions = {
+#   manage_classes = { key = "org:classes:manage", name = "Manage classes" }
+# }
+# clerk_roles = {
+#   admin = { key = "org:admin", name = "Admin", permissions = ["manage_classes"] }
+#   staff = { key = "org:staff", name = "Staff", permissions = [] }
+# }
+# clerk_role_sets = {
+#   default = {
+#     key           = "role_set:default"
+#     name          = "Default"
+#     default_role  = "staff"
+#     creator_role  = "admin"
+#     roles         = ["admin", "staff"]
+#   }
+# }
