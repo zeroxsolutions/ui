@@ -1,7 +1,7 @@
 ## Store Secrets in the Secret Store; Log Structured, Never Credentials
 `[HIGH]` `secrets-and-logging`
 
-Every worker - the edge gateway, each `<domain>-service`, and the `*-cron` / `*-queue` workers - keeps secrets out of plaintext config and out of log lines. A secret (an auth provider's service-account key, a database URL, an API token) is NEVER placed in wrangler `vars`; set it with `wrangler secret put <NAME> --env <env>` or manage it through Terraform, and reference a Terraform-produced Hyperdrive `id` rather than a raw connection string. Local secrets for `wrangler dev` live in a gitignored `.dev.vars` file in the worker directory that mirrors the deployed secrets (keep `.dev.vars*` and `.env*` ignored, never committed).
+Every worker - the edge gateway, each `<domain>-service`, and the `*-consumer` / `*-job` workers - keeps secrets out of plaintext config and out of log lines. A secret (an auth provider's service-account key, a database URL, an API token) is NEVER placed in wrangler `vars`; set it with `wrangler secret put <NAME> --env <env>` or manage it through Terraform, and reference a Terraform-produced Hyperdrive `id` rather than a raw connection string. Local secrets for `wrangler dev` live in a gitignored `.dev.vars` file in the worker directory that mirrors the deployed secrets (keep `.dev.vars*` and `.env*` ignored, never committed).
 
 Log with structured `console` calls captured by Workers Logs under `observability.enabled` - a JSON object of safe fields. Never log a secret, token, or full request body: a logged credential outlives the request in the log sink and is a compliance breach.
 

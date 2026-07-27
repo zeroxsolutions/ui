@@ -14,3 +14,5 @@ const when = utcInstant;                            // ✅ store the UTC instant
 // resolve tz + locale per request (org default + optional user override)
 t('attendance.title');                             // ✅ next-intl | react-i18next
 ```
+
+Reference: [next-intl](https://next-intl.dev), [react-i18next](https://react.i18next.com), see `CLAUDE.md` (the per-app i18n library pick)

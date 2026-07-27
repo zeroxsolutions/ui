@@ -5,7 +5,7 @@ A write persists inside a single **Unit of Work** - one atomic transaction. The 
 
 An aggregate records the **Domain Events** it raises (`raise()`); the handler drains them with `pullEvents()` and **stages them into the outbox table within that same transaction**, so the aggregate rows and the outbox rows commit together. Never dispatch an event **before** commit, and never with a **bare post-commit publish** - the commit-succeeds-then-publish gap loses the event if the process dies between the two.
 
-A separate **relay** (a `<worker>-queue` / cron worker) reads the outbox, publishes each event to a Cloudflare Queue, and marks it sent. Same-context reactions run **in-process** off the bus (`bus.publish`); cross-context consumers run **off the Queue**. Delivery is **at-least-once**, so cross-context consumers MUST be **idempotent**.
+A separate **relay** (a `<worker>-consumer` / `<worker>-job` worker) reads the outbox, publishes each event to a Cloudflare Queue, and marks it sent. Same-context reactions run **in-process** off the bus (`bus.publish`); cross-context consumers run **off the Queue**. Delivery is **at-least-once**, so cross-context consumers MUST be **idempotent**.
 
 **Incorrect - the aggregate committed on its own, then a bare post-commit publish:**
 ```ts
@@ -19,7 +19,7 @@ await uow.run(async (repos) => {
   await repos.organizations.save(org);            // one aggregate, written across its several tables
   await repos.outbox.stage(org.pullEvents());     // ✅ aggregate rows + outbox rows in ONE transaction
 });                                               // any failure rolls back everything
-// relay (<worker>-queue/cron): read outbox -> publish to Queue -> mark sent; consumers are idempotent
+// relay (<worker>-consumer/<worker>-job): read outbox -> publish to Queue -> mark sent; consumers are idempotent
 ```
 
 **Rules of thumb:**
