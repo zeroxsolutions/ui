@@ -4,5 +4,5 @@ packages:
 
 autoInstallPeers: true
 catalog:
-  "wrangler": "^4.105.0"
-  "lucide-react": "^1.21.0"
+  "wrangler": "^4.116.0"
+  "lucide-react": "^1.28.0"
