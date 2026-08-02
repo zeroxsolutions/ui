@@ -11,49 +11,7 @@
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
     "ts-js-best-practices@zeroxsolutions": true,
-    "context7@claude-plugins-official": true
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-manual-project.mjs\""
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-secrets-in-vars.mjs\""
-          }
-        ]
-      },
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-secrets-in-vars.mjs\""
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-git-no-verify.mjs\""
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-iac-destruct.mjs\""
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/remind-rule-audit.mjs\""
-          }
-        ]
-      }
-    ]
+    "context7@claude-plugins-official": true,
+    "nx-cloudflare-in-house-guards@zeroxsolutions": true
   }
 }

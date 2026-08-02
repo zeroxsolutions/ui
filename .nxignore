@@ -1,0 +1,3 @@
+# The rules submodule belongs to zeroxsolutions/nx-cloudflare-in-house-rules and is
+# built and tested there. Keep it out of this workspace project graph.
+.agents/

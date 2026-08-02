@@ -1,0 +1,73 @@
+# This form is an inbox, not a design document. The proposal, design, specs, and
+# tasks live in an OpenSpec change under openspec/changes/ - do not restate them
+# here, or the same decision ends up with two sources of truth.
+#
+# No `labels:` key on purpose - see the note in 1-bug.yml.
+name: Change request
+description: New work, or a change to existing behaviour. Becomes an OpenSpec change if accepted.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Capture the problem here. If this is accepted, the proposal, design, and
+        tasks get written as an OpenSpec change under `openspec/changes/` - so
+        keep this short and leave the solution shape to that change.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem is this solving?
+      description: >
+        The situation today and why it is a problem. Not the solution - that is
+        the change proposal's job.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area most affected
+      options:
+        - edge gateway (*-gateway)
+        - HTTP service (*-service)
+        - message consumer (*-consumer)
+        - scheduled job (*-job)
+        - frontend app
+        - shared package (packages/*)
+        - contract package (*-api-specs)
+        - infrastructure (iac/)
+        - workspace / tooling
+        - architecture rules (.agents/rules/)
+        - not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What would be true if this were done?
+      description: >
+        Observable outcomes, not tasks. These become the proposal's success
+        criteria.
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Known constraints or prior art
+      description: >
+        Rules that bear on it, an archived change that decided something
+        related, or a decision you already know is fixed.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Before submitting
+      options:
+        - label: >
+            I searched existing issues and change proposals for something that
+            already covers this.
+          required: false

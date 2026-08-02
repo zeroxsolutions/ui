@@ -1,0 +1,71 @@
+# The pull-request gate. Three jobs:
+#
+#   gate     - the shared nx-gate workflow, same targets as the pre-commit hook
+#              but scoped by `affected` (the hook sweeps; the gate re-verifies what
+#              the change reaches - keep the asymmetry).
+#   contract - composes `nx-setup` directly: the freshness check (re-emit + git diff)
+#              runs ONLY where an `emit-openapi` target exists; an SDK/library
+#              workspace has no contract to emit and skips cleanly.
+#   iac      - the one terraform check needing no credential; `iac/` is outside the
+#              nx graph, so it is not an nx target.
+#
+# Nothing here names a project, path, or branch, so the file copies unchanged.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  gate:
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
+    with:
+      targets: lint build test
+
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: zeroxsolutions/github-actions/nx-setup@v1
+
+      # Re-emit from source and assert the working tree is unchanged, but ONLY when
+      # this workspace actually has an emit-openapi target (a product with a
+      # contract). An SDK or library workspace has none, so the job skips instead of
+      # failing on a missing target.
+      - name: Freshness - the committed documents match a fresh emit
+        run: |
+          if pnpm nx show projects --with-target emit-openapi 2>/dev/null | grep -q .; then
+            pnpm nx run-many -t emit-openapi
+            git diff --exit-code
+          else
+            echo 'no emit-openapi target in this workspace; nothing to check'
+          fi
+
+  iac:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Terraform is NOT preinstalled on the runner image.
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_wrapper: false
+
+      # Directories are discovered from the committed `*.tf`, never named; any
+      # `modules/` path is dropped (modules are git-sourced from tf-modules, so none
+      # live in this repo, but the exclusion is harmless).
+      - name: Terraform formatting
+        run: |
+          dirs="$(git ls-files '*.tf' | xargs -r -n1 dirname | sort -u \
+                  | grep -vE '(^|/)modules(/|$)' || true)"
+          if [ -z "$dirs" ]; then
+            echo 'no terraform directory in this workspace; nothing to check'
+            exit 0
+          fi
+          status=0
+          for dir in $dirs; do
+            echo "::group::terraform fmt -check $dir"
+            terraform fmt -check -diff "$dir" || status=1
+            echo '::endgroup::'
+          done
+          exit $status

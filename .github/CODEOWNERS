@@ -1,0 +1,43 @@
+# PRECONDITION - this file currently does nothing. Code-owner review requests
+# work in public repositories on any plan, but in a PRIVATE repository they
+# require a paid plan (Pro for a personal account, Team or higher for an
+# organisation). This repository is private on the free tier, so this file is
+# documentation only: it records which paths carry extra review weight, and it
+# starts working by itself the moment the plan is upgraded. Do not read its
+# presence as enforcement.
+#
+# Ownership is LAST-MATCH-WINS: the final matching line decides, so the default
+# owner goes first and the more specific paths follow.
+
+# Default owner for everything not matched below.
+*                       @luongvantuit
+
+# --- Paths that carry extra review weight ---------------------------------
+# These are the shared contracts. A change here propagates beyond the project
+# that made it, so they are called out even where the tool cannot enforce it.
+
+# Architecture rules. Extended, never deleted or reshaped to "simplify" - the
+# same discipline the infrastructure modules are held to.
+/.agents/rules/         @luongvantuit
+
+# Specs and change proposals - the source of truth for intended behaviour.
+/openspec/              @luongvantuit
+
+# Infrastructure. Curated modules shared across products; a destroy here can
+# lose data irreversibly.
+/iac/                   @luongvantuit
+
+# The collaboration surface itself, including this file and dependency
+# automation.
+/.github/               @luongvantuit
+
+# Shared dependency versions. One catalog entry moves every project at once.
+/pnpm-workspace.yaml    @luongvantuit
+
+# Workspace-wide toolchain and task-runner configuration.
+/nx.json                @luongvantuit
+/package.json           @luongvantuit
+/tsconfig.base.json     @luongvantuit
+
+# The repository's concrete choices and workspace inventory.
+/AGENTS.md              @luongvantuit

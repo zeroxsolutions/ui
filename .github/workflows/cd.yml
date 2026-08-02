@@ -1,0 +1,42 @@
+# Deploy the pushed branch to the environment of the same name. Only `development`
+# and `production` deploy; the integration branch runs the gate only. Promotion is a
+# fast-forward, which carries the validated SHA:
+#
+#   git push origin master:development
+#   git push origin development:production
+#
+# NOT the approval-gated shape `cd-deploy-through-nx-target-per-env` prescribes: a
+# free-plan private repo cannot enforce a required reviewer (422) or branch
+# protection (403), so `environment: production` would gate nothing while looking
+# gated. Switch back when the plan allows. Record the choice in AGENTS.md.
+#
+# CI owns only WHEN code ships - no identity, binding, `terraform apply` or secret.
+name: cd
+
+on:
+  push:
+    branches: [development, production]
+
+# One deploy at a time per branch. In-flight runs are NOT cancelled: killing a
+# deploy mid-sweep leaves some workers new and some old.
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # Re-run the gate on the pushed commit. The pull-request gate ran on the merge
+  # preview, which is not the commit that ships.
+  gate:
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
+    with:
+      targets: lint build test
+
+  # `secrets: inherit` is what lets the credentials through - a called workflow gets
+  # an empty `secrets` context otherwise; the environment scopes which value wins.
+  deploy:
+    needs: [gate]
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-deploy.yml@v1
+    secrets: inherit
+    with:
+      targets: wrangler:deploy
+      environment: ${{ github.ref_name }}

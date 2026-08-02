@@ -1,0 +1,30 @@
+# blank_issues_enabled is left `true` deliberately. Setting it to `false` hides
+# the blank-issue option ONLY from collaborators at Read or Triage level; anyone
+# with Write, Maintain, or Admin still sees it labelled "Maintainers only". This
+# repository is private with write-level collaborators, so `false` would change
+# nothing here. Revisit if the repository ever goes public.
+blank_issues_enabled: true
+
+contact_links:
+  - name: Propose a change
+    url: https://github.com/zeroxsolutions/ui-sdk/tree/master/openspec/changes
+    about: >
+      New work is tracked as an OpenSpec change, not an issue. Open a change
+      request only if you want it discussed before a proposal is written.
+
+  - name: Architecture rules
+    url: https://github.com/zeroxsolutions/ui-sdk/tree/master/.agents/rules
+    about: >
+      Read the rule that governs an area before proposing a change to how it is
+      structured.
+
+  - name: Contributing and local setup
+    url: https://github.com/zeroxsolutions/ui-sdk/blob/master/AGENTS.md
+    about: This repository's concrete choices and its workspace inventory.
+
+# No security row here on purpose: GitHub adds the security policy to this
+# chooser automatically once SECURITY.md exists, so a contact link for it would
+# appear twice.
+#
+# Questions have no home while Discussions are disabled. Enable Discussions and
+# add a row here, or point the row at wherever the team actually answers them.
