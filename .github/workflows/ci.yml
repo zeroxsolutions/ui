@@ -24,7 +24,7 @@ jobs:
       targets: lint build test
 
   contract:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: zeroxsolutions/github-actions/nx-setup@v1
 
@@ -42,7 +42,7 @@ jobs:
           fi
 
   iac:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v7
 
