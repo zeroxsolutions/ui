@@ -1,11 +1,12 @@
-# The pull-request gate. Three jobs:
+# The pull-request gate. Four jobs:
 #
-#   gate     - the shared nx-gate workflow, same targets as the pre-commit hook
+#   gate     - the shared `nx-gate` workflow, same targets as the pre-commit hook
 #              but scoped by `affected` (the hook sweeps; the gate re-verifies what
 #              the change reaches - keep the asymmetry).
-#   contract - composes `nx-setup` directly: the freshness check (re-emit + git diff)
-#              runs ONLY where an `emit-openapi` target exists; an SDK/library
-#              workspace has no contract to emit and skips cleanly.
+#   e2e      - gate-only. The hook's set stays a SUBSET of the gate's, never the
+#              reverse, so a target that starts a runtime lands here instead.
+#   contract - composes `nx-setup` directly: its check is an nx target PLUS a
+#              `git diff`, and a delegated job cannot add steps.
 #   iac      - the one terraform check needing no credential; `iac/` is outside the
 #              nx graph, so it is not an nx target.
 #
@@ -21,25 +22,28 @@ jobs:
   gate:
     uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
-      targets: lint build test
+      targets: lint typecheck build test
+
+  # Separate from `gate` so its cost is visible and its failure is legible on its
+  # own. `affected` runs it only for changes that can reach it (ci-nx-affected-gates).
+  e2e:
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
+    with:
+      targets: e2e
 
   contract:
     runs-on: self-hosted
     steps:
       - uses: zeroxsolutions/github-actions/nx-setup@v1
 
-      # Re-emit from source and assert the working tree is unchanged, but ONLY when
-      # this workspace actually has an emit-openapi target (a product with a
-      # contract). An SDK or library workspace has none, so the job skips instead of
-      # failing on a missing target.
+      # Re-emit from source and assert the working tree is unchanged. Diffing the
+      # whole tree rather than one named document is both identifier-free and
+      # strictly stronger: it catches any stale generated artifact, not just a
+      # spec someone remembered to list here.
       - name: Freshness - the committed documents match a fresh emit
         run: |
-          if pnpm nx show projects --with-target emit-openapi 2>/dev/null | grep -q .; then
-            pnpm nx run-many -t emit-openapi
-            git diff --exit-code
-          else
-            echo 'no emit-openapi target in this workspace; nothing to check'
-          fi
+          pnpm nx run-many -t openapi:emit
+          git diff --exit-code
 
   iac:
     runs-on: self-hosted
@@ -52,8 +56,17 @@ jobs:
           terraform_wrapper: false
 
       # Directories are discovered from the committed `*.tf`, never named; any
-      # `modules/` path is dropped (modules are git-sourced from tf-modules, so none
-      # live in this repo, but the exclusion is harmless).
+      # `modules/` path is dropped as upstream's to format
+      # (iac-modules-extend-not-rewrite). NOTE the missing `-recursive`: it is what
+      # made the exclusion real. With it, `fmt` descends from the root back into
+      # `modules/` and reports exactly the files the grep just removed. The dir list
+      # already names every directory holding a tracked `.tf`, so recursion adds no
+      # coverage - only the paths it was told to skip.
+      #
+      # `terraform validate` deliberately does NOT run here: it needs `init` to
+      # fetch a PRIVATE module repository, and the automatic GITHUB_TOKEN is scoped
+      # to this repository. Adding it means provisioning a cross-repo token - not a
+      # free win.
       - name: Terraform formatting
         run: |
           dirs="$(git ls-files '*.tf' | xargs -r -n1 dirname | sort -u \

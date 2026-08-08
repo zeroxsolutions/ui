@@ -29,7 +29,7 @@ jobs:
   gate:
     uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
-      targets: lint build test
+      targets: lint typecheck build test
 
   # `secrets: inherit` is what lets the credentials through - a called workflow gets
   # an empty `secrets` context otherwise; the environment scopes which value wins.
