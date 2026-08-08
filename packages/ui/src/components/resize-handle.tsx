@@ -11,7 +11,9 @@ import { shouldStartDrag } from "@/lib/resize-drag"
  * `touch-action: none` so it never steals focus or selects text. Double-click
  * fires `onToggle` (e.g. collapse/expand the panel).
  */
-export interface ResizeHandleProps extends React.ComponentProps<'div'> {
+// `onDrag` below is a resize-width delta, not the native HTML5 drag event - omit
+// the native handler so its signature does not clash with ours.
+export interface ResizeHandleProps extends Omit<React.ComponentProps<'div'>, 'onDrag'> {
   /** Width delta in px since the last move; apply it to the panel size. */
   onDrag: (dx: number) => void
   /** Double-click action (e.g. collapse/expand the panel). */
