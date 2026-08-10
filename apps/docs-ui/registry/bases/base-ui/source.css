@@ -1,0 +1,13 @@
+/* Tailwind source registration for the ui registry.
+ *
+ * A consuming app's Tailwind build skips `node_modules` by default, so the
+ * utility classes used inside these registry components are never generated.
+ * `@source` resolves relative to THIS file, so `./` scans the sibling component
+ * source the consumer copied via `shadcn add` (and that this docs app serves
+ * in place under `registry/bases/base-ui/`).
+ *
+ * Deliberately NO `@import 'tailwindcss'` and NO `@theme` here: the consuming
+ * app owns Tailwind and the design tokens; the registry rides the app's token
+ * names.
+ */
+@source './';

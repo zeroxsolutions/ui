@@ -1,7 +1,0 @@
-/* Tailwind v4 entry at the top level so the postcss plugin expands it here, then
- * the design system's theme/tokens and the `@source` registration that makes
- * Tailwind generate the utility classes used inside `@zeroxsolutions/ui`
- * components (a consuming app's scan skips node_modules by default). */
-@import 'tailwindcss';
-@import '@zeroxsolutions/ui/styles.css';
-@import '@zeroxsolutions/ui/source.css';

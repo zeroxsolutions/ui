@@ -11,7 +11,9 @@ and nowhere else. Do NOT restate a generic rule in this file - name the choice a
 point to the rule by slug if context helps. Delete these comments after filling.
 -->
 
-<one line: what this repo is - product / domain - and its runtime (e.g. Cloudflare Workers)>.
+The ZeroX Solutions UI SDK - a shadcn-style component/block **registry** and a
+headless rich-text **editor core**, authored in an Nx + pnpm monorepo. No backend,
+no workers; the deployables are a Next.js docs/registry app and its e2e sibling.
 
 ## This project's choices
 
@@ -29,9 +31,27 @@ the rule that defines the options - do not re-explain the rule:
 
 ## Workspace
 
-The concrete inventory - every `apps/*` and `packages/*` project and its target
-role. This is the only place these names are authoritative.
+A UI SDK monorepo (Nx + pnpm). The shadcn-style ui **registry** and the editor
+**chrome** are authored inside the docs app; the editor **core** is a standalone
+headless package. This is the only place these names are authoritative.
 
-- `apps/<app>` (+ `<app>-e2e`) - `<kind + role>`.
-- `packages/<lib>` (`@<scope>/<lib>`) - `<role>`.
-- `<standalone non-nx roots, e.g. iac/>` - `<toolchain>`.
+- `apps/docs-ui` (`@zeroxsolutions/docs-ui`) - Next.js docs app **and** the shadcn
+  registry host. The ui registry source lives at
+  `apps/docs-ui/registry/bases/base-ui/{ui,components,blocks,pages,examples,hooks,lib}/`
+  (organized by **base**; no `<style>/` folder - style is a token); the editor
+  chrome lives at `apps/docs-ui/registry/bases/base-ui/editor/`. `registry.json` +
+  `components.json` sit at the app root; the `shadcn-build` target emits `public/r/`.
+  `@zeroxsolutions/ui` is **DELETED** - its source became this registry.
+- `apps/docs-ui-e2e` (`@zeroxsolutions/docs-ui-e2e`) - Playwright e2e for docs-ui.
+- `packages/editor-core` (`@zeroxsolutions/editor-core`) - the **headless**, published
+  rich-text editor engine: Tiptap/ProseMirror behind an engine-free `IEditor`
+  contract, with zero `@tiptap/react` or `@zeroxsolutions/ui` imports. The React
+  chrome (`<Editor>`/`<Viewer>`, menus, toolbar, theme, built-in features) ships as
+  **registry items**, not from this package; the chrome injects a `NodeViewRenderer`
+  at mount.
+- `packages/icons` (`@zeroxsolutions/icons`) - vendored SVG icon set.
+- `packages/fluent-emoji` (`@zeroxsolutions/fluent-emoji`) - Fluent emoji set.
+
+Workspace root (`@zeroxsolutions/source`) - the Nx workspace itself (tooling
+devDependencies, husky, `local-registry`); not a shipped package. Standalone non-nx
+roots: none.

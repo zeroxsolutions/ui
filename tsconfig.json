@@ -10,16 +10,13 @@
       "path": "./packages/fluent-emoji"
     },
     {
-      "path": "./packages/editor"
+      "path": "./apps/docs-ui-e2e"
     },
     {
-      "path": "./packages/ui"
+      "path": "./apps/docs-ui"
     },
     {
-      "path": "./apps/registry-e2e"
-    },
-    {
-      "path": "./apps/registry"
+      "path": "./packages/editor-core"
     }
   ]
 }

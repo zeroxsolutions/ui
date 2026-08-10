@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-vega",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "registry/bases/base-ui/styles.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "rtl": false,
+  "aliases": {
+    "components": "@/registry/bases/base-ui/components",
+    "utils": "@/registry/bases/base-ui/lib/utils",
+    "ui": "@/registry/bases/base-ui/ui",
+    "lib": "@/registry/bases/base-ui/lib",
+    "hooks": "@/registry/bases/base-ui/hooks"
+  },
+  "menuColor": "default",
+  "menuAccent": "subtle",
+  "registries": {}
+}

@@ -1,0 +1,12 @@
+/* Tailwind source registration for the editor chrome.
+ *
+ * A consuming app's Tailwind build skips `node_modules` by default, so the
+ * utility classes used inside these editor-chrome components are never
+ * generated. `@source` resolves relative to THIS file, so `./` scans the sibling
+ * chrome source.
+ *
+ * Deliberately NO `@import 'tailwindcss'` and NO `@theme`: the editor chrome
+ * rides the app's Tailwind + the ui-registry tokens. Import this alongside the
+ * ui-registry `source.css` (`../source.css`).
+ */
+@source './';

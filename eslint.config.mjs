@@ -16,6 +16,7 @@ export default [
       '**/test-output',
       '**/vite.config.*.timestamp*',
       '**/vitest.config.*.timestamp*',
+      '**/.wrangler/**',
     ],
   },
   {
