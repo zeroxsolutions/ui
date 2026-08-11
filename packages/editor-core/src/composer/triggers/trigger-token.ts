@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type { IEditor } from '../../document/core/index.js';
 
 /**
@@ -50,7 +49,7 @@ export interface TriggerOption {
   /** Optional secondary line in the menu row. */
   description?: string;
   /** Optional leading glyph in the menu row (not the inline pill). */
-  icon?: ReactNode;
+  icon?: unknown;
 }
 
 /**

@@ -25,7 +25,6 @@ export function serialize(
       (node.content ?? [])
         .map((child) => serializeNode(child, format, registry, ctx))
         .join(''),
-    renderChildren: () => null,
   };
   return ctx.serializeNode(doc);
 }

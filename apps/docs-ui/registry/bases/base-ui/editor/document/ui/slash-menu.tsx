@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   Item,
   ItemContent,
@@ -228,7 +229,7 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
                           variant="icon"
                           className="size-8 rounded-md border bg-secondary text-base"
                         >
-                          {item.icon}
+                          {item.icon as ReactNode}
                         </ItemMedia>
                         <ItemContent className="gap-0.5">
                           <ItemTitle>{item.title}</ItemTitle>

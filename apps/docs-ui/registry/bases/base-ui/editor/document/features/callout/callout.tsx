@@ -4,6 +4,7 @@ import { Info } from 'lucide-react';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeJSON, NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
+import type { ReactNodeCodec } from '../../../react-types';
 
 /**
  * A callout block — a custom node with a React node view (icon + colored palette
@@ -72,7 +73,7 @@ function CalloutShell({ variant, children }: { variant: Variant; children: React
 }
 
 function CalloutView({ attrs, children }: NodeViewProps<CalloutAttrs>) {
-  return <CalloutShell variant={attrs.variant}>{children}</CalloutShell>;
+  return <CalloutShell variant={attrs.variant}>{children as ReactNode}</CalloutShell>;
 }
 
 const firstParagraphText = (token: {
@@ -83,7 +84,7 @@ const firstParagraphText = (token: {
   return String(first.children?.[0]?.value ?? '');
 };
 
-const calloutCodec: NodeCodec<CalloutAttrs> = {
+const calloutCodec: ReactNodeCodec<CalloutAttrs> = {
   node: 'callout',
   toMarkdown: (node, ctx) => {
     const variant = (node.attrs?.variant ?? 'info') as Variant;

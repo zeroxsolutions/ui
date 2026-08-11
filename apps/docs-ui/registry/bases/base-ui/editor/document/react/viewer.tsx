@@ -3,7 +3,7 @@
 import { useMemo, type ReactNode } from 'react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/create-codec-registry';
-import { renderToReact } from '@zeroxsolutions/editor-core/document/serialize/render-to-react';
+import { renderToReact } from '../serialize/render-to-react';
 import { defaultEditorTheme } from '../../shared/theme/default-theme.js';
 import {
   EditorThemeContext,

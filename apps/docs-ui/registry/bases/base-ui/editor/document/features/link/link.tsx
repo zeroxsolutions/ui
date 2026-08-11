@@ -7,6 +7,7 @@ import {
   type EditorFeature,
   type MarkCodec,
 } from '@zeroxsolutions/editor-core/document/core/index';
+import type { ReactMarkCodec } from '../../../react-types';
 
 /**
  * The link mark. Its engine schema + autolink/paste-URL behavior come from
@@ -21,7 +22,7 @@ const linkArgs = z.object({ href: z.string().min(1) });
 const escapeAttr = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
-const linkCodec: MarkCodec = {
+const linkCodec: ReactMarkCodec = {
   mark: 'link',
   toMarkdown: (mark) => ({ open: '[', close: `](${String(mark.attrs?.href ?? '')})` }),
   toHTML: (mark) => ({
@@ -56,7 +57,7 @@ const linkBubbleItem: BubbleItem = {
 export function link(): EditorFeature {
   return defineFeature({
     id: 'link',
-    markCodecs: [linkCodec],
+    markCodecs: [linkCodec as MarkCodec],
     commands: {
       setLink: {
         args: linkArgs,

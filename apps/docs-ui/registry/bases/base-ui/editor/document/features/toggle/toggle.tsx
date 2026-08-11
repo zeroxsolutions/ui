@@ -1,7 +1,9 @@
 import { ChevronRight } from 'lucide-react';
 import { z } from 'zod';
+import type { ReactNode } from 'react';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeJSON, NodeViewProps, SerializeContext } from '@zeroxsolutions/editor-core/document/core/index';
+import type { ReactNodeCodec } from '../../../react-types';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**
@@ -44,7 +46,7 @@ function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<ToggleAttrs>
           ▸
         </span>
       </span>
-      <div className={cn('min-w-0 flex-1', attrs.open ? 'block' : 'hidden')}>{children}</div>
+      <div className={cn('min-w-0 flex-1', attrs.open ? 'block' : 'hidden')}>{children as ReactNode}</div>
     </div>
   );
 }
@@ -56,7 +58,7 @@ const detailsHtml = (node: NodeJSON<ToggleAttrs>, ctx: SerializeContext): string
   return `<details${open ? ' open' : ''}>${ctx.serializeChildren(node as never)}</details>`;
 };
 
-const toggleCodec: NodeCodec<ToggleAttrs> = {
+const toggleCodec: ReactNodeCodec<ToggleAttrs> = {
   node: 'toggle',
   toHTML: (node, ctx) => detailsHtml(node, ctx),
   toMarkdown: (node, ctx) => detailsHtml(node, ctx),

@@ -7,12 +7,14 @@ façade and the declarative `defineFeature` API, importing no engine type. The
 engine can be swapped without rippling into your code. JSON is the source of truth;
 HTML/Markdown are pluggable per-node codecs.
 
-**This package is the headless core.** It ships no React surfaces, no menus or
-toolbar, no theme CSS, and no concrete features - those are the **editor chrome**,
-which lives in the ui registry (`@/registry/bases/base-ui/editor/...`) and
-composes this core. The chrome injects its React node-view renderer at mount via
-the `nodeViewRenderer` option; a headless consumer passes its own (or omits it
-and gets no React node views).
+**This package is the framework-free core: zero `react`** (no runtime, no types,
+no peer dep - the bar Tiptap's `@tiptap/core` and Lexical set). It ships no React
+surfaces, no menus or toolbar, no theme CSS, and no concrete features - those are
+the **editor chrome**, which lives in the ui registry
+(`@/registry/bases/base-ui/editor/...`) and composes this core. The chrome injects
+its React node-view renderer at mount via the `nodeViewRenderer` option, and owns
+the React serialization walker + `toReact` codec typing; a headless consumer
+passes its own renderer (or omits it and gets no React node views).
 
 > The one exception is the explicitly **unstable** `document/advanced` subpath -
 > see [The `advanced` escape](#the-advanced-escape).
@@ -24,8 +26,10 @@ and gets no React node views).
 "dependencies": { "@zeroxsolutions/editor-core": "workspace:*" }
 ```
 
-Peer: `react` (types only - the core renders no React itself; the `NodeSpec.render`
-contract uses React *types*).
+No `react` peer - the core is **framework-free** (zero `react` runtime, types, and
+peer dep, like Tiptap's `@tiptap/core`). The React chrome - the `<Editor/>`/`<Viewer/>`
+surfaces, the node-view renderer, and the `toReact` serialization walker + codec
+typing - is supplied by the ui registry (`@/registry/bases/base-ui/editor/...`).
 
 ## Quick start - the imperative builder
 

@@ -1,19 +1,18 @@
-import type { ReactNode } from 'react';
 import type { MarkJSON, NodeJSON } from './json.js';
 
 /**
  * The per-node/mark codec contract (see the `editor-serialization` spec).
  * Serialization knowledge lives **with each feature**, not in a monolithic
  * serializer: a generic walker delegates to the registered codec for each node
- * type. The same codec powers export (Markdown/HTML/React), the static Viewer,
- * and two-way import. Adding a block requires no edit to the walker or core.
+ * type. The same codec powers export (Markdown/HTML) and two-way import; the
+ * React tree is rendered by the chrome (core is framework-free). Adding a block
+ * requires no edit to the walker or core.
  */
 
 /** A serialization target. The common set is enumerated; the format set is open. */
 export type Format =
   | 'markdown'
   | 'html'
-  | 'react'
   // `string & {}` keeps the literal autocomplete while allowing custom formats.
   | (string & {});
 
@@ -37,8 +36,6 @@ export interface SerializeContext {
   serializeChildren(node: NodeJSON): string;
   /** Serialize a single node to a string (Markdown/HTML). */
   serializeNode(node: NodeJSON): string;
-  /** Render a node's children to a React tree (`react` format). */
-  renderChildren(node: NodeJSON): ReactNode;
 }
 
 /** Passed to a codec while importing; lets it recurse and report issues. */
@@ -62,7 +59,10 @@ export interface NodeCodec<A = Record<string, unknown>> {
   node: string;
   toMarkdown?(node: NodeJSON<A>, ctx: SerializeContext): string;
   toHTML?(node: NodeJSON<A>, ctx: SerializeContext): string;
-  toReact?(node: NodeJSON<A>, ctx: SerializeContext): ReactNode;
+  /** React-tree output - opaque at core so core names no React type. The chrome
+   *  React walker calls it and casts; feature authors use the chrome's React
+   *  codec alias to write it with full typing. */
+  toReact?(node: NodeJSON<A>, ctx: SerializeContext): unknown;
   fromMarkdown?(
     token: MarkdownToken,
     ctx: DeserializeContext,
@@ -77,11 +77,8 @@ export interface MarkCodec<A = Record<string, unknown>> {
   mark: string;
   toMarkdown?(mark: MarkJSON<A>, ctx: SerializeContext): MarkDelimiters;
   toHTML?(mark: MarkJSON<A>, ctx: SerializeContext): MarkDelimiters;
-  toReact?(
-    mark: MarkJSON<A>,
-    children: ReactNode,
-    ctx: SerializeContext,
-  ): ReactNode;
+  /** React-tree output - opaque at core (see `NodeCodec.toReact`). */
+  toReact?(mark: MarkJSON<A>, children: unknown, ctx: SerializeContext): unknown;
   fromMarkdown?(
     token: MarkdownToken,
     ctx: DeserializeContext,

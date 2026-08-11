@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -86,7 +87,7 @@ export function BlockMenu({ editor, items, container }: BlockMenuProps) {
                   variant={item.id === 'delete' ? 'destructive' : 'default'}
                   onClick={() => editor.run(item.command, item.args)}
                 >
-                  {item.icon ?? item.title}
+                  {(item.icon as ReactNode) ?? item.title}
                 </DropdownMenuItem>
               </span>
             ))}

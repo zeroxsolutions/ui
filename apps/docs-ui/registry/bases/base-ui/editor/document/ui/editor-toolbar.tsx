@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import { Toggle } from '@/registry/bases/base-ui/ui/toggle';
 import {
@@ -53,7 +54,7 @@ export function EditorToolbar({ editor, items, className }: EditorToolbarProps) 
                       aria-label={item.title}
                       onPressedChange={() => editor.run(item.command, item.args)}
                     >
-                      {item.icon ?? item.title}
+                      {(item.icon as ReactNode) ?? item.title}
                     </Toggle>
                   }
                 />

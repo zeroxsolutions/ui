@@ -1,13 +1,16 @@
 import { renderToStaticMarkup } from 'react-dom/server';
+import type { ReactNode } from 'react';
 import { z } from 'zod';
 import { describe, expect, it } from 'vitest';
-import { defineFeature } from '../core/index.js';
-import type { DocJSON, SerializeContext } from '../core/index.js';
-import { createCodecRegistry } from './create-codec-registry.js';
-import { importMarkdown } from './import-markdown.js';
-import { renderToReact } from './render-to-react.js';
-import { serialize } from './serialize-to-string.js';
-import { validateDoc, type ImportReport } from './validate-doc.js';
+import { defineFeature, type DocJSON, type SerializeContext } from '@zeroxsolutions/editor-core/document/core/index';
+import {
+  createCodecRegistry,
+  importMarkdown,
+  serialize,
+  validateDoc,
+  type ImportReport,
+} from '@zeroxsolutions/editor-core/document/serialize/index';
+import { renderToReact } from './render-to-react';
 
 const bold = defineFeature({
   id: 'bold',
@@ -17,7 +20,7 @@ const bold = defineFeature({
       mark: 'bold',
       toMarkdown: () => ({ open: '**', close: '**' }),
       toHTML: () => ({ open: '<strong>', close: '</strong>' }),
-      toReact: (_mark, children) => <strong>{children}</strong>,
+      toReact: (_mark, children) => <strong>{children as ReactNode}</strong>,
       fromMarkdown: (token) =>
         token.type === 'strong' ? { type: 'bold' } : null,
       fromHTML: (element) =>

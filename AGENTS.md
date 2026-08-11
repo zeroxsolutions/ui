@@ -43,12 +43,13 @@ headless package. This is the only place these names are authoritative.
   `components.json` sit at the app root; the `shadcn-build` target emits `public/r/`.
   `@zeroxsolutions/ui` is **DELETED** - its source became this registry.
 - `apps/docs-ui-e2e` (`@zeroxsolutions/docs-ui-e2e`) - Playwright e2e for docs-ui.
-- `packages/editor-core` (`@zeroxsolutions/editor-core`) - the **headless**, published
-  rich-text editor engine: Tiptap/ProseMirror behind an engine-free `IEditor`
-  contract, with zero `@tiptap/react` or `@zeroxsolutions/ui` imports. The React
-  chrome (`<Editor>`/`<Viewer>`, menus, toolbar, theme, built-in features) ships as
-  **registry items**, not from this package; the chrome injects a `NodeViewRenderer`
-  at mount.
+- `packages/editor-core` (`@zeroxsolutions/editor-core`) - the **framework-free**,
+  published rich-text editor engine: Tiptap/ProseMirror behind an engine-free
+  `IEditor` contract, with zero `react` (no runtime, no types, no peer dep) and no
+  `@tiptap/react`/`@zeroxsolutions/ui` imports. The React chrome
+  (`<Editor>`/`<Viewer>`, menus, toolbar, theme, built-in features, and the React
+  serialization walker + `toReact` codec typing) ships as **registry items**, not
+  from this package; the chrome injects a `NodeViewRenderer` at mount.
 - `packages/icons` (`@zeroxsolutions/icons`) - vendored SVG icon set.
 - `packages/fluent-emoji` (`@zeroxsolutions/fluent-emoji`) - Fluent emoji set.
 

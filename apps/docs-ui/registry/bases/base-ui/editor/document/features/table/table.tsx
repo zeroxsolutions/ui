@@ -6,6 +6,7 @@ import {
   type NodeCodec,
   type NodeJSON,
 } from '@zeroxsolutions/editor-core/document/core/index';
+import type { ReactNodeCodec } from '../../../react-types';
 
 /**
  * Tables. The engine schema (table / row / header / cell, column resizing) comes
@@ -14,6 +15,10 @@ import {
  * HTML/React codecs, and the insert command + slash item. Import this feature
  * lazily (`await import('@zeroxsolutions/editor-core/document/features/table/index.js')`)
  * to keep it out of the core bundle.
+ *
+ * The node codecs author against the chrome `ReactNodeCodec` (so `toReact` can
+ * call `ctx.renderChildren`) and are cast to the core `NodeCodec` at the
+ * registration boundary.
  */
 const cellText = (cell: NodeJSON, serialize: (n: NodeJSON) => string): string =>
   (cell.content ?? [])
@@ -23,7 +28,7 @@ const cellText = (cell: NodeJSON, serialize: (n: NodeJSON) => string): string =>
     .replace(/\|/g, '\\|')
     .trim();
 
-const tableCodec: NodeCodec = {
+const tableCodec: ReactNodeCodec = {
   node: 'table',
   toMarkdown: (node, ctx) => {
     const rows = node.content ?? [];
@@ -70,19 +75,19 @@ const tableCodec: NodeCodec = {
       : null,
 };
 
-const tableRow: NodeCodec = {
+const tableRow: ReactNodeCodec = {
   node: 'tableRow',
   toHTML: (node, ctx) => `<tr>${ctx.serializeChildren(node)}</tr>`,
   toReact: (node, ctx) => <tr>{ctx.renderChildren(node)}</tr>,
 };
 
-const tableCell: NodeCodec = {
+const tableCell: ReactNodeCodec = {
   node: 'tableCell',
   toHTML: (node, ctx) => `<td>${ctx.serializeChildren(node)}</td>`,
   toReact: (node, ctx) => <td>{ctx.renderChildren(node)}</td>,
 };
 
-const tableHeader: NodeCodec = {
+const tableHeader: ReactNodeCodec = {
   node: 'tableHeader',
   toHTML: (node, ctx) => `<th>${ctx.serializeChildren(node)}</th>`,
   toReact: (node, ctx) => <th>{ctx.renderChildren(node)}</th>,
@@ -91,7 +96,7 @@ const tableHeader: NodeCodec = {
 export function table(): EditorFeature {
   return defineFeature({
     id: 'table',
-    codecs: [tableCodec, tableRow, tableCell, tableHeader],
+    codecs: [tableCodec, tableRow, tableCell, tableHeader] as NodeCodec[],
     commands: {
       insertTable: {
         run: (editor) =>

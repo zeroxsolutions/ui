@@ -339,7 +339,7 @@
     background: color-mix(in oklab, var(--destructive) 8%, var(--background));
   }
 
-  /* Static toggle (`<details>`): the `toReact` codec lays it out with
+  /* Static toggle (`<details>`): the chrome-owned `toReact` codec lays it out with
    * `display:flex` so the ▸ marker sits inline with the first body line. That
    * flex context suppresses the UA's built-in "hide content when closed" rule, so
    * restore it explicitly — collapse everything but the `<summary>` chevron when

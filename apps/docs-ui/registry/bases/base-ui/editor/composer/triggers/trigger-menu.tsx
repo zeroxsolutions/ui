@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   Item,
   ItemContent,
@@ -324,12 +325,12 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
                       highlighted && 'bg-accent text-accent-foreground',
                     )}
                   >
-                    {option.icon && (
+                    {(option.icon as ReactNode) && (
                       <ItemMedia
                         variant="icon"
                         className={token.menuMediaClassName ?? 'text-muted-foreground'}
                       >
-                        {option.icon}
+                        {option.icon as ReactNode}
                       </ItemMedia>
                     )}
                     <ItemContent className="gap-0.5">

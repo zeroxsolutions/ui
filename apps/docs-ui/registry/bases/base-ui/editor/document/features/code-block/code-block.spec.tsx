@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import type { ReactNode } from 'react';
 import { EditorView } from '@codemirror/view';
 
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
@@ -124,7 +125,7 @@ describe('code-block export codec', () => {
     const rendered = codeBlockCodec.toReact?.(
       { type: 'codeBlock', attrs: { language: 'text', code: 'exported' } } as never,
       {} as never,
-    );
+    ) as ReactNode;
     const { container } = render(<>{rendered}</>);
     expect(container.querySelector('[data-slot="code-block"]')).not.toBeNull();
     expect(screen.getByText('exported')).toBeTruthy();

@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type { DocJSON } from '../document/core/index.js';
 
 /**
@@ -15,7 +14,7 @@ export interface ChatPerson {
   /** Optional secondary line shown in the menu (a handle, email, or role). */
   description?: string;
   /** Optional leading glyph shown in the menu row. */
-  icon?: ReactNode;
+  icon?: unknown;
 }
 
 /** A command offered in the `/` menu. Invoked by typing its `name` slug after
@@ -29,7 +28,7 @@ export interface ChatCommand {
   /** Optional secondary line shown in the menu (what the command does). */
   description?: string;
   /** Optional leading glyph shown in the menu row (not the inline pill). */
-  icon?: ReactNode;
+  icon?: unknown;
 }
 
 /** A channel offered in the `#` menu, and carried by an inserted pill. */
@@ -39,7 +38,7 @@ export interface ChatChannel {
   /** Optional secondary line shown in the menu (the channel's topic). */
   description?: string;
   /** Optional leading glyph shown in the menu row. */
-  icon?: ReactNode;
+  icon?: unknown;
 }
 
 /** A resolved mention in a submitted message - identity plus its display label. */

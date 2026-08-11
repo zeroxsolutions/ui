@@ -1,8 +1,6 @@
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import {
-  createCodecRegistry,
-  renderToReact,
-} from '@zeroxsolutions/editor-core/document/serialize/index';
+import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/index';
+import { renderToReact } from '../document/serialize/render-to-react';
 import { defaultComposerTriggers, type ComposerTrigger } from './composer-triggers';
 import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
 

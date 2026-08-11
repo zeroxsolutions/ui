@@ -1,12 +1,18 @@
 import { createElement } from 'react';
 import type { MarkCodec, MarkdownToken, NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
+import type { ReactNodeCodec } from '../../../react-types';
 
 /**
  * Codecs for the standard blocks/marks the `standardKit` feature contributes
  * (their engine schema comes from Tiptap's MIT extensions; these give them
  * Markdown/HTML/React serialization + two-way import). Ordered so a task list
  * matches before a plain list and a task item before a plain list item.
+ *
+ * The node codecs author against the chrome `ReactNodeCodec` (so `toReact` can
+ * call `ctx.renderChildren` and return JSX); each is cast back to the core
+ * `NodeCodec` at the registry boundary, where the narrowed React signature meets
+ * core's opaque `toReact` slot.
  */
 
 const clampLevel = (value: unknown): number =>
@@ -15,7 +21,7 @@ const levelOf = (node: NodeJSON): number => clampLevel(node.attrs?.level);
 const blocks = (node: NodeJSON, join: (parts: string[]) => string, serialize: (n: NodeJSON) => string) =>
   join((node.content ?? []).map(serialize));
 
-const heading: NodeCodec = {
+const heading: ReactNodeCodec = {
   node: 'heading',
   toMarkdown: (node, ctx) => `${'#'.repeat(levelOf(node))} ${ctx.serializeChildren(node)}`,
   toHTML: (node, ctx) => `<h${levelOf(node)}>${ctx.serializeChildren(node)}</h${levelOf(node)}>`,
@@ -30,7 +36,7 @@ const heading: NodeCodec = {
       : null,
 };
 
-const blockquote: NodeCodec = {
+const blockquote: ReactNodeCodec = {
   node: 'blockquote',
   toMarkdown: (node, ctx) =>
     blocks(node, (p) => p.join('\n\n'), ctx.serializeNode)
@@ -63,7 +69,7 @@ const hardBreak: NodeCodec = {
   fromHTML: (element) => (element.tagName === 'BR' ? { type: 'hardBreak' } : null),
 };
 
-const listItem: NodeCodec = {
+const listItem: ReactNodeCodec = {
   node: 'listItem',
   toMarkdown: (node, ctx) => blocks(node, (p) => p.join('\n'), ctx.serializeNode),
   toHTML: (node, ctx) => `<li>${blocks(node, (p) => p.join(''), ctx.serializeNode)}</li>`,
@@ -78,7 +84,7 @@ const listItem: NodeCodec = {
       : null,
 };
 
-const bulletList: NodeCodec = {
+const bulletList: ReactNodeCodec = {
   node: 'bulletList',
   toMarkdown: (node, ctx) => (node.content ?? []).map((item) => `- ${ctx.serializeNode(item)}`).join('\n'),
   toHTML: (node, ctx) => `<ul>${blocks(node, (p) => p.join(''), ctx.serializeNode)}</ul>`,
@@ -91,7 +97,7 @@ const bulletList: NodeCodec = {
     element.tagName === 'UL' ? { type: 'bulletList', content: ctx.fromHTMLChildren(element) } : null,
 };
 
-const orderedList: NodeCodec = {
+const orderedList: ReactNodeCodec = {
   node: 'orderedList',
   toMarkdown: (node, ctx) =>
     (node.content ?? []).map((item, index) => `${index + 1}. ${ctx.serializeNode(item)}`).join('\n'),
@@ -105,7 +111,7 @@ const orderedList: NodeCodec = {
     element.tagName === 'OL' ? { type: 'orderedList', content: ctx.fromHTMLChildren(element) } : null,
 };
 
-const taskItem: NodeCodec = {
+const taskItem: ReactNodeCodec = {
   node: 'taskItem',
   toMarkdown: (node, ctx) =>
     `- [${node.attrs?.checked ? 'x' : ' '}] ${blocks(node, (p) => p.join('\n'), ctx.serializeNode)}`,
@@ -120,7 +126,7 @@ const taskItem: NodeCodec = {
       : null,
 };
 
-const taskList: NodeCodec = {
+const taskList: ReactNodeCodec = {
   node: 'taskList',
   toMarkdown: (node, ctx) => (node.content ?? []).map((item) => ctx.serializeNode(item)).join('\n'),
   toHTML: (node, ctx) => `<ul data-type="taskList">${blocks(node, (p) => p.join(''), ctx.serializeNode)}</ul>`,
@@ -143,7 +149,7 @@ function hasTaskItems(token: MarkdownToken): boolean {
   );
 }
 
-export const standardNodeCodecs: NodeCodec[] = [
+export const standardNodeCodecs = [
   heading,
   blockquote,
   horizontalRule,
@@ -154,7 +160,7 @@ export const standardNodeCodecs: NodeCodec[] = [
   bulletList,
   orderedList,
   listItem,
-];
+] as NodeCodec[];
 
 // ── Mark codecs ──────────────────────────────────────────────────────────────
 

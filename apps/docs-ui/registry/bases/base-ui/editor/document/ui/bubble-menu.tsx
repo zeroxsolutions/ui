@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Toggle } from '@/registry/bases/base-ui/ui/toggle';
 import {
   Popover,
@@ -93,7 +94,7 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
                       onMouseDown={(event) => event.preventDefault()}
                       onPressedChange={() => editor.run(item.command, item.args)}
                     >
-                      {item.icon ?? item.title}
+                      {(item.icon as ReactNode) ?? item.title}
                     </Toggle>
                   }
                 />

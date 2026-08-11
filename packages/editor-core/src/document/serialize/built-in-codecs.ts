@@ -1,10 +1,12 @@
 import type { NodeCodec } from '../core/types/codec.js';
 
 /**
- * Codecs for the substrate the compiler always ships (`doc`, `paragraph`) — the
+ * Codecs for the substrate the compiler always ships (`doc`, `paragraph`) - the
  * base every document shares. Every other block/mark carries its own codec from
  * its feature (see the `editor-serialization` spec). Text nodes and their marks
- * are handled directly by the walkers, so they need no codec here.
+ * are handled directly by the walkers, so they need no codec here. The React
+ * tree for these is the chrome React walker's job (paragraph wraps in `<p>`),
+ * so no `toReact` lives in core.
  */
 
 const docCodec: NodeCodec = {
@@ -12,7 +14,6 @@ const docCodec: NodeCodec = {
   toMarkdown: (node, ctx) =>
     (node.content ?? []).map((child) => ctx.serializeNode(child)).join('\n\n'),
   toHTML: (node, ctx) => ctx.serializeChildren(node),
-  toReact: (node, ctx) => ctx.renderChildren(node),
   fromMarkdown: (token, ctx) =>
     token.type === 'root'
       ? { type: 'doc', content: ctx.fromMarkdownChildren(token) }
@@ -30,7 +31,6 @@ const paragraphCodec: NodeCodec = {
   node: 'paragraph',
   toMarkdown: (node, ctx) => ctx.serializeChildren(node),
   toHTML: (node, ctx) => `<p>${ctx.serializeChildren(node)}</p>`,
-  toReact: (node, ctx) => <p>{ctx.renderChildren(node)}</p>,
   fromMarkdown: (token, ctx) =>
     token.type === 'paragraph'
       ? { type: 'paragraph', content: ctx.fromMarkdownChildren(token) }

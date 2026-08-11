@@ -6,9 +6,10 @@
  *   import { createEditor }  from '@zeroxsolutions/editor-core/document/core/builder/create-editor';
  *   import { defineFeature } from '@zeroxsolutions/editor-core/document/core/define-feature';
  *
- * The headless core ships no React chrome: the `<Editor/>` / `<Viewer/>`
- * surfaces and the node-view renderer live in the ui registry
- * (`@/registry/bases/base-ui/editor/...`) and inject the renderer at mount.
+ * The framework-free core ships zero `react` (no runtime, types, or peer dep):
+ * the `<Editor/>` / `<Viewer/>` surfaces, the node-view renderer, and the React
+ * serialization walker + `toReact` codec typing live in the ui registry
+ * (`@/registry/bases/base-ui/editor/...`) and are injected at mount.
  *
  * This file is excluded from the build entries; it exists only as documentation.
  */

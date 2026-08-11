@@ -6,6 +6,7 @@ import {
   within,
 } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import type { ReactNode } from 'react';
 import { EditorView } from '@codemirror/view';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { DocJSON, IEditor, NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
@@ -175,7 +176,7 @@ describe('mermaid export codec', () => {
     const rendered = mermaidCodec.toReact?.(
       { type: 'mermaid', attrs: { source: SOURCE } } as never,
       {} as never,
-    );
+    ) as ReactNode;
     const { container } = render(<>{rendered}</>);
     expect(container.querySelector('[data-slot="code-block"]')).not.toBeNull();
     expect(container.textContent).toContain('graph TD');

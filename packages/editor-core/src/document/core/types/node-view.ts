@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type { IEditor } from './editor.js';
 
 /**
@@ -21,7 +20,8 @@ export interface NodeViewProps<A = Record<string, unknown>> {
   editor: IEditor;
   /** Delete this node from the document. */
   deleteNode(): void;
-  /** The editable content slot for content-bearing nodes. Render it where the
-   *  node's children belong; omit for atoms. */
-  children?: ReactNode;
+  /** The editable content slot for content-bearing nodes; opaque at core (the
+   *  chrome types it as a React tree). Render it where the node's children
+   *  belong; omit for atoms. */
+  children?: unknown;
 }

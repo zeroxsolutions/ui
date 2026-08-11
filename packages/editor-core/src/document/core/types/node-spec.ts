@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type { ZodType } from 'zod';
 import type { NodeViewProps } from './node-view.js';
 
@@ -43,9 +42,10 @@ export interface NodeSpec<A = Record<string, unknown>> {
   /** Zod schema for the node's attributes — the single source of the attribute
    *  type, its defaults, and boundary validation. */
   attrs?: ZodType<A>;
-  /** The interactive React view (engine-free props). Omit for a node styled
-   *  purely by CSS from a wrapper tag. */
-  render?(props: NodeViewProps<A>): ReactNode;
+  /** The interactive view (engine-free props); opaque at core so core names no
+   *  React type. The chrome types it as a React tree and injects the renderer.
+   *  Omit for a node styled purely by CSS from a wrapper. */
+  render?(props: NodeViewProps<A>): unknown;
   /** Engine-agnostic DOM hint for clipboard/serialization of a view-less node:
    *  the wrapper tag the schema serializes to and parses from. Richer HTML
    *  handling belongs in the node's codec (see `NodeCodec`). */
@@ -54,11 +54,10 @@ export interface NodeSpec<A = Record<string, unknown>> {
 
 /**
  * A node-view renderer injected by the React chrome. Core calls it with a
- * feature's `NodeSpec`; chrome wraps the feature's `render` in a `@tiptap/react`
- * `ReactNodeViewRenderer` + `NodeViewWrapper`. Core itself imports no
- * `@tiptap/react` - the concrete component type stays opaque (`unknown`) so no
- * engine type reaches a public `.d.ts`. Omit it for a headless build whose nodes
- * have no React views.
+ * feature's `NodeSpec`; chrome wraps the feature's `render` in `@tiptap/react`'s
+ * node-view renderer + wrapper host. Core itself imports no `@tiptap/react` -
+ * the concrete component type stays opaque (`unknown`) so no engine type reaches
+ * a public `.d.ts`. Omit it for a headless build whose nodes have no React views.
  */
 export type NodeViewRenderer = (
   spec: NodeSpec,

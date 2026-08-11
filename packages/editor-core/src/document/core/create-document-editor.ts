@@ -39,9 +39,9 @@ export interface DocumentEditorConfig {
   onChange?(delta: Delta): void;
   onSnapshot?(snapshot: Snapshot): void;
   /**
-   * Internal seam: the React node-view renderer (chrome's
-   * `ReactNodeViewRenderer` + `NodeViewWrapper` wrapper), injected so core
-   * imports no `@tiptap/react`. Not for consumer use.
+   * Internal seam: the React node-view renderer (the chrome's wrapper around
+   * `@tiptap/react`'s node-view renderer), injected so core imports no
+   * `@tiptap/react`. Not for consumer use.
    */
   nodeViewRenderer?: NodeViewRenderer;
   /**

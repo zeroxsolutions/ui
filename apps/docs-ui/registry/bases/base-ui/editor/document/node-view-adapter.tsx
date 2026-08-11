@@ -37,7 +37,7 @@ export function buildNodeViewComponent(spec: NodeSpec): unknown {
         as={spec.group === 'inline' ? 'span' : 'div'}
         data-type={spec.name}
       >
-        {spec.render?.(props)}
+        {spec.render?.(props) as ReactNode}
       </NodeViewWrapper>
     );
   }
