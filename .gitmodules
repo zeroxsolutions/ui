@@ -1,3 +1,0 @@
-[submodule ".agents/rules"]
-	path = .agents/rules
-	url = https://github.com/zeroxsolutions/nx-cloudflare-in-house-rules.git

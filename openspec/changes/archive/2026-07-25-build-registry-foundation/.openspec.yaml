@@ -1,6 +1,0 @@
-schema: spec-driven-superpowers
-created: 2026-07-21
-goal: "Turn the registry into a full shadcn ecosystem foundation: registry types
-  (ui/component/block/page/example), categories, shadcn registry validate,
-  complete doc pages (Preview/Code/Props/Composition/dark-mode) - ready to ship
-  blocks and pages, not just components."
