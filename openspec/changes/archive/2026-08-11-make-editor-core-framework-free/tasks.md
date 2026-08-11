@@ -64,10 +64,11 @@ task carries its own verification.
 
 ## 9. Post-archive prose (after `openspec archive`)
 
-- [ ] 9.1 Manually correct the Purpose paragraph of `openspec/specs/editor-serialization/spec.md` to drop "React" from "export to Markdown/HTML/React" (archive syncs requirement bodies, not free-text Purpose).
-- [ ] 9.2 Manually correct the Purpose paragraph of `openspec/specs/editor-viewer/spec.md` to state React codecs are chrome-owned and core supplies JSON only.
+- [x] 9.1 Corrected the Purpose paragraph of `openspec/specs/editor-serialization/spec.md` to drop "React" from "export to Markdown/HTML/React" (archive syncs requirement bodies, not free-text Purpose), and reworded the parenthetical to note React output is chrome-owned.
+- [x] 9.1b Also reworded the "JSON Is the Source of Truth" requirement body's parenthetical: "(HTML, Markdown, React output)" -> "(HTML, Markdown)" with a trailing clause noting a React tree is a chrome-derived view. The framework-free change made lumping React with core-produced formats misleading.
+- [x] 9.2 Corrected the Purpose paragraph of `openspec/specs/editor-viewer/spec.md` to state React codecs are chrome-owned and core supplies JSON only.
 
 ## 10. Commit gate
 
-- [ ] 10.1 Rule-audit the staged diff against `.agents/rules/*` (two directions: obey the rules; and per check added/leaned-on, name what becomes reachable if it is deleted).
-- [ ] 10.2 Commit only when the user asks; conventional form (e.g. `refactor(editor-core)!: make core framework-free - move react to chrome`), with a `BREAKING CHANGE:` footer noting the published `.d.ts` no longer names `ReactNode` and `react` is removed from peerDependencies.
+- [x] 10.1 Rule-audit the staged diff against `.agents/rules/*` (two directions: obey the rules; and per check added/leaned-on, name what becomes reachable if it is deleted).
+- [x] 10.2 Commit only when the user asks; conventional form (e.g. `refactor(editor-core)!: make core framework-free - move react to chrome`), with a `BREAKING CHANGE:` footer noting the published `.d.ts` no longer names `ReactNode` and `react` is removed from peerDependencies.
