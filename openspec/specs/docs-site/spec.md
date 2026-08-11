@@ -2,24 +2,24 @@
 
 ## Purpose
 
-Define the fumadocs docs site - the Next.js `docs-ui` app (`apps/docs-ui`,
-`@zeroxsolutions/docs-ui`) - that replaces the Storybook host. It documents each
+Define the fumadocs docs site - the Next.js `registry-ui` app (`apps/registry-ui`,
+`@zeroxsolutions/registry-ui`) - that replaces the Storybook host. It documents each
 component in an isolated live preview authored as MDX and served by fumadocs,
 hosts the built shadcn component registry at `/r/<name>.json`, and deploys to
 Cloudflare as a static assets-only Worker with no server runtime at
 `ui.zeroxsolutions.com`. The site is multi-section - general project docs and
 component/registry docs coexist under one fumadocs app - so the registry is one
 audience of the docs, not the whole site. It is paired with a Playwright
-`docs-ui-e2e` project that carries the real-browser interaction, a11y, and visual
+`registry-ui-e2e` project that carries the real-browser interaction, a11y, and visual
 coverage the jsdom-only library cannot.
 
 ## Requirements
 
 ### Requirement: A Next.js registry app replaces the Storybook host
 
-The workspace MUST provide a Next.js app named **`docs-ui`** (`apps/docs-ui`,
-`@zeroxsolutions/docs-ui`) - renamed from `registry`, because the app is now a docs
-site, not only a registry host. It MUST remove the Storybook host
+The workspace MUST provide a Next.js app named **`registry-ui`** (`apps/registry-ui`,
+`@zeroxsolutions/registry-ui`) - the UI surface that hosts the shadcn component
+registry (the fumadocs docs site is planned to live here too). It MUST remove the Storybook host
 (`@zeroxsolutions/storybook`, its `.storybook/` config, its `@storybook/*`
 dependencies, and its `test-storybook` target). It still hosts the shadcn
 component registry at `/r/<name>.json`, and it MUST build and serve through an
@@ -31,8 +31,8 @@ component registry at `/r/<name>.json`, and it MUST build and serve through an
 - **WHEN** the workspace is inspected after the change
 - **THEN** no Storybook project, `.storybook/` config, `@storybook/*` dependency,
   or `test-storybook` target remains
-- **AND** the `docs` app (not `registry`) builds via its `nx` build target
-- **AND** the shadcn registry still serves at `/r/<name>.json` off the `docs` app
+- **AND** the `registry-ui` app builds via its `nx` build target
+- **AND** the shadcn registry still serves at `/r/<name>.json` off the `registry-ui` app
 
 ### Requirement: Each documented component renders in an isolated live preview
 
@@ -98,18 +98,18 @@ the production custom domain (`ui.zeroxsolutions.com`) is declared as a
   assets at `ui.zeroxsolutions.com`
 - **AND** the app declares no server binding or `nodejs_compat` flag
 
-### Requirement: The docs app is paired with an e2e project that covers component interaction
+### Requirement: The registry-ui app is paired with an e2e project that covers component interaction
 
-The docs app MUST carry a paired `docs-e2e` project
-(`@zeroxsolutions/docs-e2e`, Playwright) driving a real browser, invoked through
+The registry-ui app MUST carry a paired `registry-ui-e2e` project
+(`@zeroxsolutions/registry-ui-e2e`, Playwright) driving a real browser, invoked through
 `nx` by its scoped name. Because the library is jsdom-only, this e2e is where
 real-browser interaction / a11y / visual coverage of the components lives
 (driving the app's isolated previews).
 
-#### Scenario: The docs e2e project runs
+#### Scenario: The registry-ui e2e project runs
 
-- **WHEN** `nx e2e @zeroxsolutions/docs-e2e` is invoked
-- **THEN** the e2e suite drives the docs app in a browser
+- **WHEN** `nx e2e @zeroxsolutions/registry-ui-e2e` is invoked
+- **THEN** the e2e suite drives the registry-ui app in a browser
 - **AND** it can assert a component's interaction/layout against its isolated
   preview
 

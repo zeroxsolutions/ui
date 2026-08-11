@@ -73,7 +73,7 @@ and group and the catalog can grow beyond single components.
 
 The workspace MUST NOT ship a consumer-import `@zeroxsolutions/ui` package - it is
 **deleted**, not merely unpublished. Its component source MUST live as registry
-source inside the docs app (`apps/docs-ui/registry/bases/<base>/`), alongside
+source inside the docs app (`apps/registry-ui/registry/bases/<base>/`), alongside
 `registry.json`, `components.json`, and the `shadcn-build` target. No consumer
 project imports it; consumers obtain components only by `shadcn add` (copy-in).
 
@@ -105,7 +105,7 @@ the build copies it out for consumers.
 ### Requirement: Component source is organized per-base
 
 The registry source MUST be organized by base under
-`apps/docs-ui/registry/bases/<base>/` - mirroring shadcn-ui/ui's
+`apps/registry-ui/registry/bases/<base>/` - mirroring shadcn-ui/ui's
 `apps/v4/registry/bases/<base>/` layout. A base holds its primitives in
 `bases/<base>/ui/` and its composed components, blocks, and pages in
 `bases/<base>/{components,blocks,pages}/`, with `examples/` holding example items and

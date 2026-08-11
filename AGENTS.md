@@ -32,17 +32,18 @@ the rule that defines the options - do not re-explain the rule:
 ## Workspace
 
 A UI SDK monorepo (Nx + pnpm). The shadcn-style ui **registry** and the editor
-**chrome** are authored inside the docs app; the editor **core** is a standalone
-headless package. This is the only place these names are authoritative.
+**chrome** are authored inside the registry-ui app; the editor **core** is a
+standalone headless package. This is the only place these names are authoritative.
 
-- `apps/docs-ui` (`@zeroxsolutions/docs-ui`) - Next.js docs app **and** the shadcn
-  registry host. The ui registry source lives at
-  `apps/docs-ui/registry/bases/base-ui/{ui,components,blocks,pages,examples,hooks,lib}/`
+- `apps/registry-ui` (`@zeroxsolutions/registry-ui`) - Next.js app **and** the
+  shadcn registry host. The ui registry source lives at
+  `apps/registry-ui/registry/bases/base-ui/{ui,components,blocks,pages,examples,hooks,lib}/`
   (organized by **base**; no `<style>/` folder - style is a token); the editor
-  chrome lives at `apps/docs-ui/registry/bases/base-ui/editor/`. `registry.json` +
-  `components.json` sit at the app root; the `shadcn-build` target emits `public/r/`.
+  chrome lives at `apps/registry-ui/registry/bases/base-ui/editor/`. `registry.json`
+  + `components.json` sit at the app root; the `shadcn-build` target emits `public/r/`.
   `@zeroxsolutions/ui` is **DELETED** - its source became this registry.
-- `apps/docs-ui-e2e` (`@zeroxsolutions/docs-ui-e2e`) - Playwright e2e for docs-ui.
+- `apps/registry-ui-e2e` (`@zeroxsolutions/registry-ui-e2e`) - Playwright e2e for
+  registry-ui.
 - `packages/editor-core` (`@zeroxsolutions/editor-core`) - the **framework-free**,
   published rich-text editor engine: Tiptap/ProseMirror behind an engine-free
   `IEditor` contract, with zero `react` (no runtime, no types, no peer dep) and no
