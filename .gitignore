@@ -40,8 +40,6 @@ Thumbs.db
 
 .nx/cache
 .nx/workspace-data
-.claude/worktrees
-.claude/settings.local.json
 
 .nx/polygraph
 .nx/self-healing
@@ -74,6 +72,3 @@ test-results
 
 .nx/migrate-runs
 test-output
-
-# Playwright MCP (browser automation) runtime output - console logs + screenshots
-.playwright-mcp/
