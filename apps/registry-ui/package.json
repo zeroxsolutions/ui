@@ -80,7 +80,12 @@
         ],
         "options": {
           "cwd": "{projectRoot}",
-          "command": "shadcn build -o public/r && shadcn registry validate registry.json"
+          "commands": [
+            "rm -rf public/r",
+            "shadcn build -o public/r",
+            "shadcn registry validate registry.json"
+          ],
+          "parallel": false
         }
       }
     }

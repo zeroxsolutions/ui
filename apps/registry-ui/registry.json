@@ -4,134 +4,84 @@
   "homepage": "https://ui.zeroxsolutions.com",
   "items": [
     {
-      "name": "utils",
-      "type": "registry:lib",
-      "category": "primitives",
-      "title": "cn utility",
-      "description": "The `cn` class-merge helper (clsx + tailwind-merge) that every ui-registry component imports through the `@/registry/bases/base-ui/lib/utils` alias.",
-      "dependencies": ["clsx", "tailwind-merge"],
+      "name": "status-dot",
+      "type": "registry:component",
+      "categories": ["data-display"],
+      "title": "Status Dot",
+      "description": "A small tone-coded presence dot (online, offline, busy, idle). Exports the `StatusTone` union that other items reuse for their own status surfaces.",
+      "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
-          "path": "registry/bases/base-ui/lib/utils.ts",
+          "path": "registry/bases/base-ui/components/status-dot.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "tree-indent",
+      "type": "registry:component",
+      "categories": ["data-display"],
+      "title": "Tree Indent",
+      "description": "The indentation and expand/collapse chevron for one row of a hierarchy tree - the layer beneath TreeItem. Owns depth guides and the disclosure toggle, nothing else.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/tree-indent.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "tree-item",
+      "type": "registry:component",
+      "categories": ["data-display"],
+      "title": "Tree Item",
+      "description": "One row of a hierarchy tree - the layer above TreeIndent. Owns the clickable name region, inline-rename, trailing actions, and an optional context menu.",
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/tree-indent.json",
+        "@shadcn/context-menu",
+        "@shadcn/input",
+        "@shadcn/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/tree-item.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/ime.ts",
           "type": "registry:lib"
         }
       ]
     },
     {
-      "name": "button",
-      "type": "registry:ui",
-      "category": "primitives",
-      "title": "Button",
-      "description": "The Button primitive - a Base UI button with class-variance-authority variants (default, outline, secondary, ghost, destructive, link) and sizes.",
-      "dependencies": ["@base-ui/react", "class-variance-authority"],
-      "registryDependencies": ["utils"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/ui/button.tsx",
-          "type": "registry:ui"
-        }
-      ]
-    },
-    {
-      "name": "button-hero",
-      "type": "registry:example",
-      "category": "examples",
-      "title": "Button Hero",
-      "description": "All Button variants in one row - the hero preview for the Button doc page.",
-      "registryDependencies": ["button"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/button-hero.tsx",
-          "type": "registry:example",
-          "target": "examples/button-hero.tsx"
-        }
-      ]
-    },
-    {
-      "name": "button-default",
-      "type": "registry:example",
-      "category": "examples",
-      "title": "Button Default",
-      "description": "The default Button variant.",
-      "registryDependencies": ["button"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/button-default.tsx",
-          "type": "registry:example",
-          "target": "examples/button-default.tsx"
-        }
-      ]
-    },
-    {
-      "name": "button-secondary",
-      "type": "registry:example",
-      "category": "examples",
-      "title": "Button Secondary",
-      "description": "The secondary Button variant.",
-      "registryDependencies": ["button"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/button-secondary.tsx",
-          "type": "registry:example",
-          "target": "examples/button-secondary.tsx"
-        }
-      ]
-    },
-    {
-      "name": "button-outline",
-      "type": "registry:example",
-      "category": "examples",
-      "title": "Button Outline",
-      "description": "The outline Button variant.",
-      "registryDependencies": ["button"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/button-outline.tsx",
-          "type": "registry:example",
-          "target": "examples/button-outline.tsx"
-        }
-      ]
-    },
-    {
-      "name": "button-destructive",
-      "type": "registry:example",
-      "category": "examples",
-      "title": "Button Destructive",
-      "description": "The destructive Button variant.",
-      "registryDependencies": ["button"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/button-destructive.tsx",
-          "type": "registry:example",
-          "target": "examples/button-destructive.tsx"
-        }
-      ]
-    },
-    {
-      "name": "button-ghost",
-      "type": "registry:example",
-      "category": "examples",
-      "title": "Button Ghost",
-      "description": "The ghost Button variant.",
-      "registryDependencies": ["button"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/button-ghost.tsx",
-          "type": "registry:example",
-          "target": "examples/button-ghost.tsx"
-        }
-      ]
-    },
-    {
-      "name": "model-info-card",
+      "name": "field-grid",
       "type": "registry:component",
-      "category": "data-display",
-      "title": "Model Info Card",
-      "description": "A composed model detail panel - an identity header (media slot, name over vendor, mono modelId) over titled ModelInfoCardSection bodies. Composes the cn utility.",
-      "registryDependencies": ["utils"],
+      "categories": ["layout"],
+      "title": "Field Grid",
+      "description": "The bare label/control grid that property rows are built on - column template and gutters only, no action slot.",
+      "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/model-info-card.tsx",
+          "path": "registry/bases/base-ui/components/layouts/field-grid.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "field-group",
+      "type": "registry:component",
+      "categories": ["layout"],
+      "title": "Field Group",
+      "description": "A field grid plus a fixed trailing action slot. Use it for any property row that mixes inputs with a side action - the slot is always reserved at one icon-button width so every row shares the same right edge.",
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/field-grid.json",
+        "@shadcn/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layouts/field-group.tsx",
           "type": "registry:component"
         }
       ]
@@ -139,14 +89,15 @@
     {
       "name": "split-button",
       "type": "registry:component",
-      "category": "components",
+      "categories": ["components"],
       "title": "Split Button",
       "description": "A single divided control - a primary action segment plus a caret that opens a menu of related variants. Composes ButtonGroup for the seamed outline; a matched variant/size is set per segment.",
+      "dependencies": ["lucide-react"],
       "registryDependencies": [
-        "utils",
-        "button",
-        "button-group",
-        "dropdown-menu"
+        "@shadcn/button",
+        "@shadcn/button-group",
+        "@shadcn/dropdown-menu",
+        "@shadcn/utils"
       ],
       "files": [
         {
@@ -158,14 +109,15 @@
     {
       "name": "menu-button",
       "type": "registry:component",
-      "category": "components",
+      "categories": ["components"],
       "title": "Menu Button",
       "description": "A remembered-default split control - the primary repeats the currently-selected action and the caret opens a menu that changes which action is current. Composes ButtonGroup for the seamed outline.",
+      "dependencies": ["lucide-react"],
       "registryDependencies": [
-        "utils",
-        "button",
-        "button-group",
-        "dropdown-menu"
+        "@shadcn/button",
+        "@shadcn/button-group",
+        "@shadcn/dropdown-menu",
+        "@shadcn/utils"
       ],
       "files": [
         {
@@ -175,12 +127,26 @@
       ]
     },
     {
+      "name": "model-info-card",
+      "type": "registry:component",
+      "categories": ["data-display"],
+      "title": "Model Info Card",
+      "description": "A composed model detail panel - an identity header (media slot, name over vendor, mono modelId) over titled ModelInfoCardSection bodies.",
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/model-info-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "chat-message",
       "type": "registry:component",
-      "category": "data-display",
+      "categories": ["data-display"],
       "title": "Chat Message",
       "description": "The wrapper for one chat message row, agnostic to how the body is rendered. User messages pin right as a bubble; assistant messages lay out as full-width prose with an optional agent identity row.",
-      "registryDependencies": ["utils"],
+      "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/chat/chat-message.tsx",
@@ -188,34 +154,24 @@
         },
         {
           "path": "registry/bases/base-ui/components/chat/chat-types.ts",
-          "type": "registry:lib"
-        }
-      ]
-    },
-    {
-      "name": "tree-item",
-      "type": "registry:component",
-      "category": "data-display",
-      "title": "Tree Item",
-      "description": "One row of a hierarchy tree - the layer above TreeIndent. Owns the clickable name region, inline-rename, trailing actions, and an optional context menu.",
-      "registryDependencies": ["utils", "tree-indent", "context-menu", "input"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/tree-item.tsx",
           "type": "registry:component"
         }
       ]
     },
     {
-      "name": "field-group",
+      "name": "ai-provider-card",
       "type": "registry:component",
-      "category": "layout",
-      "title": "Field Group",
-      "description": "A field grid plus a fixed trailing action slot. Use it for any property row that mixes inputs with a side action - the slot is always reserved at one icon-button width so every row shares the same right edge.",
-      "registryDependencies": ["utils", "field-grid"],
+      "categories": ["data-display"],
+      "title": "AI Provider Card",
+      "description": "One AI provider tile - an icon slot over name and description, with a tone-coded status line in the footer. The unit the AiProviderPicker grid is built from.",
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/status-dot.json",
+        "@shadcn/card",
+        "@shadcn/utils"
+      ],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/layouts/field-group.tsx",
+          "path": "registry/bases/base-ui/components/ai-provider-card.tsx",
           "type": "registry:component"
         }
       ]
@@ -223,10 +179,13 @@
     {
       "name": "ai-provider-picker",
       "type": "registry:block",
-      "category": "blocks",
+      "categories": ["blocks"],
       "title": "AI Provider Picker",
-      "description": "A registry:block - a responsive grid of AiProviderCard tiles, each showing one AI provider via an AiProviderIcon in the card's icon slot. Composes the ai-provider-card and ai-provider-icon items into one reusable surface.",
-      "registryDependencies": ["ai-provider-card", "ai-provider-icon"],
+      "description": "A responsive grid of AiProviderCard tiles, each showing one AI provider icon. Composes the ai-provider-card item into one reusable surface.",
+      "dependencies": ["@zeroxsolutions/icons"],
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/ai-provider-card.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/blocks/ai-provider-picker.tsx",
@@ -237,25 +196,120 @@
     {
       "name": "demo-page",
       "type": "registry:page",
-      "category": "pages",
+      "categories": ["pages"],
       "title": "Demo Page",
-      "description": "A registry:page - a small page region composing the ai-provider-picker block and the chat-message component. Pages assemble blocks and components into a full interface region.",
-      "registryDependencies": ["ai-provider-picker", "chat-message"],
+      "description": "A small page region composing the ai-provider-picker block and the chat-message component. Pages assemble blocks and components into a full interface region.",
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/ai-provider-picker.json",
+        "https://ui.zeroxsolutions.com/r/chat-message.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/pages/demo-page.tsx",
           "type": "registry:page",
-          "target": "components/demo-page.tsx"
+          "target": "@components/demo-page.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-hero",
+      "type": "registry:example",
+      "categories": ["examples"],
+      "title": "Button Hero",
+      "description": "All Button variants in one row - the hero preview for the Button doc page.",
+      "registryDependencies": ["@shadcn/button"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/button-hero.tsx",
+          "type": "registry:example",
+          "target": "examples/button-hero.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-default",
+      "type": "registry:example",
+      "categories": ["examples"],
+      "title": "Button Default",
+      "description": "The default Button variant.",
+      "registryDependencies": ["@shadcn/button"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/button-default.tsx",
+          "type": "registry:example",
+          "target": "examples/button-default.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-secondary",
+      "type": "registry:example",
+      "categories": ["examples"],
+      "title": "Button Secondary",
+      "description": "The secondary Button variant.",
+      "registryDependencies": ["@shadcn/button"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/button-secondary.tsx",
+          "type": "registry:example",
+          "target": "examples/button-secondary.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-outline",
+      "type": "registry:example",
+      "categories": ["examples"],
+      "title": "Button Outline",
+      "description": "The outline Button variant.",
+      "registryDependencies": ["@shadcn/button"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/button-outline.tsx",
+          "type": "registry:example",
+          "target": "examples/button-outline.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-destructive",
+      "type": "registry:example",
+      "categories": ["examples"],
+      "title": "Button Destructive",
+      "description": "The destructive Button variant.",
+      "registryDependencies": ["@shadcn/button"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/button-destructive.tsx",
+          "type": "registry:example",
+          "target": "examples/button-destructive.tsx"
+        }
+      ]
+    },
+    {
+      "name": "button-ghost",
+      "type": "registry:example",
+      "categories": ["examples"],
+      "title": "Button Ghost",
+      "description": "The ghost Button variant.",
+      "registryDependencies": ["@shadcn/button"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/button-ghost.tsx",
+          "type": "registry:example",
+          "target": "examples/button-ghost.tsx"
         }
       ]
     },
     {
       "name": "split-button-hero",
       "type": "registry:example",
-      "category": "examples",
+      "categories": ["examples"],
       "title": "SplitButton Hero",
       "description": "A divided control - a primary action segment plus a caret that opens a menu.",
-      "registryDependencies": ["split-button"],
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/split-button.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/split-button-hero.tsx",
@@ -267,10 +321,12 @@
     {
       "name": "menu-button-hero",
       "type": "registry:example",
-      "category": "examples",
+      "categories": ["examples"],
       "title": "MenuButton Hero",
       "description": "A remembered-default split control - the primary repeats the selected action.",
-      "registryDependencies": ["menu-button"],
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/menu-button.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/menu-button-hero.tsx",
@@ -282,10 +338,12 @@
     {
       "name": "chat-message-hero",
       "type": "registry:example",
-      "category": "examples",
+      "categories": ["examples"],
       "title": "ChatMessage Hero",
       "description": "A user bubble plus an assistant row - monochrome.",
-      "registryDependencies": ["chat-message"],
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/chat-message.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/chat-message-hero.tsx",
@@ -297,10 +355,10 @@
     {
       "name": "tree-hero",
       "type": "registry:example",
-      "category": "examples",
+      "categories": ["examples"],
       "title": "TreeItem Hero",
       "description": "A small hierarchy tree of TreeItem rows.",
-      "registryDependencies": ["tree-item"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tree-item.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tree-hero.tsx",
@@ -312,10 +370,14 @@
     {
       "name": "field-group-hero",
       "type": "registry:example",
-      "category": "examples",
+      "categories": ["examples"],
       "title": "FieldGroup Hero",
       "description": "A two-column field grid with a trailing action slot.",
-      "registryDependencies": ["field-group"],
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/field-group.json",
+        "@shadcn/input",
+        "@shadcn/label"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/field-group-hero.tsx",
@@ -327,10 +389,12 @@
     {
       "name": "ai-provider-picker-hero",
       "type": "registry:example",
-      "category": "examples",
+      "categories": ["examples"],
       "title": "AiProviderPicker Hero",
       "description": "The AiProviderPicker block rendering its default provider grid.",
-      "registryDependencies": ["ai-provider-picker"],
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/ai-provider-picker.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/ai-provider-picker-hero.tsx",
@@ -342,10 +406,10 @@
     {
       "name": "demo-page-hero",
       "type": "registry:example",
-      "category": "examples",
+      "categories": ["examples"],
       "title": "DemoPage Hero",
       "description": "The DemoPage region composing the picker block and chat component.",
-      "registryDependencies": ["demo-page"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/demo-page.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/demo-page-hero.tsx",
