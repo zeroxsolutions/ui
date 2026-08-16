@@ -1,0 +1,17 @@
+{
+  "extraKnownMarketplaces": {
+    "zeroxsolutions": {
+      "source": {
+        "source": "github",
+        "repo": "zeroxsolutions/agent-plugins"
+      },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "ts-js-best-practices@zeroxsolutions": true,
+    "context7@claude-plugins-official": true,
+    "nx-cloudflare-in-house-guards@zeroxsolutions": true
+  }
+}
