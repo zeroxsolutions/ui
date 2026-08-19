@@ -1,17 +1,16 @@
-# This form is an inbox, not a design document. The proposal, design, specs, and
-# tasks live in an OpenSpec change under openspec/changes/ - do not restate them
-# here, or the same decision ends up with two sources of truth.
+# This form is an inbox, not a design document. The design and plan are worked
+# out when the work is picked up - do not restate them here, or the same
+# decision ends up with two sources of truth.
 #
 # No `labels:` key on purpose - see the note in 1-bug.yml.
 name: Change request
-description: New work, or a change to existing behaviour. Becomes an OpenSpec change if accepted.
+description: New work, or a change to existing behaviour.
 body:
   - type: markdown
     attributes:
       value: |
-        Capture the problem here. If this is accepted, the proposal, design, and
-        tasks get written as an OpenSpec change under `openspec/changes/` - so
-        keep this short and leave the solution shape to that change.
+        Capture the problem here. The design and plan get written when the work
+        starts - so keep this short and leave the solution shape to that work.
 
   - type: textarea
     id: problem
@@ -34,10 +33,9 @@ body:
         - scheduled job (*-job)
         - frontend app
         - shared package (packages/*)
-        - contract package (*-api-specs)
         - infrastructure (iac/)
         - workspace / tooling
-        - architecture rules (.agents/rules/)
+        - architecture rules (.claude/rules/)
         - not sure
     validations:
       required: true

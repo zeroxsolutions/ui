@@ -1,14 +1,12 @@
-# The pull-request gate. Four jobs:
+# The pull-request gate. Three jobs:
 #
-#   gate     - the shared `nx-gate` workflow, same targets as the pre-commit hook
-#              but scoped by `affected` (the hook sweeps; the gate re-verifies what
-#              the change reaches - keep the asymmetry).
-#   e2e      - gate-only. The hook's set stays a SUBSET of the gate's, never the
-#              reverse, so a target that starts a runtime lands here instead.
-#   contract - composes `nx-setup` directly: its check is an nx target PLUS a
-#              `git diff`, and a delegated job cannot add steps.
-#   iac      - the one terraform check needing no credential; `iac/` is outside the
-#              nx graph, so it is not an nx target.
+#   gate - the shared `nx-gate` workflow, same targets as the pre-commit hook
+#          but scoped by `affected` (the hook sweeps; the gate re-verifies what
+#          the change reaches - keep the asymmetry).
+#   e2e  - gate-only. The hook's set stays a SUBSET of the gate's, never the
+#          reverse, so a target that starts a runtime lands here instead.
+#   iac  - the one terraform check needing no credential; `iac/` is outside the
+#          nx graph, so it is not an nx target.
 #
 # Nothing here names a project, path, or branch, so the file copies unchanged.
 name: ci
@@ -30,20 +28,6 @@ jobs:
     uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
       targets: e2e
-
-  contract:
-    runs-on: self-hosted
-    steps:
-      - uses: zeroxsolutions/github-actions/nx-setup@v1
-
-      # Re-emit from source and assert the working tree is unchanged. Diffing the
-      # whole tree rather than one named document is both identifier-free and
-      # strictly stronger: it catches any stale generated artifact, not just a
-      # spec someone remembered to list here.
-      - name: Freshness - the committed documents match a fresh emit
-        run: |
-          pnpm nx run-many -t openapi:emit
-          git diff --exit-code
 
   iac:
     runs-on: self-hosted

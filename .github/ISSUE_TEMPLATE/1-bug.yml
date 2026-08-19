@@ -26,7 +26,6 @@ body:
         - scheduled job (*-job)
         - frontend app
         - shared package (packages/*)
-        - contract package (*-api-specs)
         - infrastructure (iac/)
         - workspace / tooling
         - not sure
@@ -50,8 +49,8 @@ body:
     attributes:
       label: Expected behaviour
       description: >
-        What should happen, and what says so - a spec under openspec/specs/, a
-        rule slug, or the contract.
+        What should happen, and what says so - a rule slug, the contract, or the
+        documentation.
     validations:
       required: true
 

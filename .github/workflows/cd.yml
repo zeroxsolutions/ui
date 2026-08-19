@@ -8,7 +8,7 @@
 # NOT the approval-gated shape `cd-deploy-through-nx-target-per-env` prescribes: a
 # free-plan private repo cannot enforce a required reviewer (422) or branch
 # protection (403), so `environment: production` would gate nothing while looking
-# gated. Switch back when the plan allows. Record the choice in AGENTS.md.
+# gated. Switch back when the plan allows. Record the choice in CLAUDE.md.
 #
 # CI owns only WHEN code ships - no identity, binding, `terraform apply` or secret.
 name: cd

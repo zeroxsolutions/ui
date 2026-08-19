@@ -6,16 +6,11 @@ not exist. This template therefore asks only for what no gate can check.
 
 ## Change
 
-<!-- Which OpenSpec change does this implement? Path under openspec/changes/, and
-     the task IDs it closes. Write "none" for work that needs no change proposal,
-     and say why in one line. -->
-
-- Change:
-- Tasks closed:
+<!-- What this implements and why, in one or two lines. -->
 
 ## Rule audit
 
-<!-- Required by `green-before-commit`: walk .agents/rules/*.md against the staged
+<!-- Required by `green-before-commit`: walk .claude/rules/*.md against the staged
      diff at commit time and state the result. "Compliant" is a valid answer; so
      is a list of what you fixed. An empty section means the audit did not happen. -->
 

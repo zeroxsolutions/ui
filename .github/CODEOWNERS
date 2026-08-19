@@ -18,10 +18,7 @@
 
 # Architecture rules. Extended, never deleted or reshaped to "simplify" - the
 # same discipline the infrastructure modules are held to.
-/.agents/rules/         @luongvantuit
-
-# Specs and change proposals - the source of truth for intended behaviour.
-/openspec/              @luongvantuit
+/.claude/rules/         @luongvantuit
 
 # Infrastructure. Curated modules shared across products; a destroy here can
 # lose data irreversibly.
@@ -40,4 +37,4 @@
 /tsconfig.base.json     @luongvantuit
 
 # The repository's concrete choices and workspace inventory.
-/AGENTS.md              @luongvantuit
+/CLAUDE.md              @luongvantuit

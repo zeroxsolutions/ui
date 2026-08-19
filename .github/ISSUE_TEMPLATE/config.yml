@@ -6,20 +6,14 @@
 blank_issues_enabled: true
 
 contact_links:
-  - name: Propose a change
-    url: https://github.com/zeroxsolutions/ui-sdk/tree/master/openspec/changes
-    about: >
-      New work is tracked as an OpenSpec change, not an issue. Open a change
-      request only if you want it discussed before a proposal is written.
-
   - name: Architecture rules
-    url: https://github.com/zeroxsolutions/ui-sdk/tree/master/.agents/rules
+    url: https://github.com/zeroxsolutions/ui-sdk/tree/master/.claude/rules
     about: >
       Read the rule that governs an area before proposing a change to how it is
       structured.
 
   - name: Contributing and local setup
-    url: https://github.com/zeroxsolutions/ui-sdk/blob/master/AGENTS.md
+    url: https://github.com/zeroxsolutions/ui-sdk/blob/master/CLAUDE.md
     about: This repository's concrete choices and its workspace inventory.
 
 # No security row here on purpose: GitHub adds the security policy to this
