@@ -24,9 +24,4 @@ cloudflare_r2_custom_domains = [
 
 # Nothing else is provisioned here: this repo publishes packages and a shadcn registry,
 # so it has no queue, no D1 database, no KV namespace and no Pages project. Each of
-# these defaults to empty; they are listed to record that the omission is deliberate.
-# cloudflare_queues         = []
-# cloudflare_kv_namespaces  = []
-# cloudflare_d1_databases   = []
-# cloudflare_dns_records    = []
-# cloudflare_pages_projects = {}
+# these defaults to empty in variables.tf.

@@ -23,4 +23,9 @@ module "cloudflare" {
   # This root has no database layer to point one at - the Neon module that fed it
   # belonged to a different product.
   hyperdrive_configs = {}
+
+  # The module provisions a Realtime (Calls) SFU app unless told not to - its
+  # realtime_enabled defaults to true. This repo has no rooms feature, so the
+  # default would create ui-sdk-rooms-production for nothing.
+  realtime_enabled = false
 }
