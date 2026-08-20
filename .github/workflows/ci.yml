@@ -1,12 +1,15 @@
-# The pull-request gate. Three jobs:
+# The pull-request gate. Two jobs:
 #
 #   gate - the shared `nx-gate` workflow, same targets as the pre-commit hook
 #          but scoped by `affected` (the hook sweeps; the gate re-verifies what
 #          the change reaches - keep the asymmetry).
 #   e2e  - gate-only. The hook's set stays a SUBSET of the gate's, never the
 #          reverse, so a target that starts a runtime lands here instead.
-#   iac  - the one terraform check needing no credential; `iac/` is outside the
-#          nx graph, so it is not an nx target.
+#
+# Nothing checks `iac/` any more: it is outside the nx graph, so neither job
+# reaches it, and the pre-commit hook formats with prettier, which does not read
+# `.tf`. The job that ran `terraform fmt -check` was removed after ten runs that
+# never once failed - see the commit that removed it.
 #
 # Nothing here names a project, path, or branch, so the file copies unchanged.
 name: ci
@@ -29,40 +32,3 @@ jobs:
     with:
       targets: e2e
 
-  iac:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v7
-
-      # Terraform is NOT preinstalled on the runner image.
-      - uses: hashicorp/setup-terraform@v4
-        with:
-          terraform_wrapper: false
-
-      # Directories are discovered from the committed `*.tf`, never named; any
-      # `modules/` path is dropped as upstream's to format
-      # (iac-modules-extend-not-rewrite). NOTE the missing `-recursive`: it is what
-      # made the exclusion real. With it, `fmt` descends from the root back into
-      # `modules/` and reports exactly the files the grep just removed. The dir list
-      # already names every directory holding a tracked `.tf`, so recursion adds no
-      # coverage - only the paths it was told to skip.
-      #
-      # `terraform validate` deliberately does NOT run here: it needs `init` to
-      # fetch a PRIVATE module repository, and the automatic GITHUB_TOKEN is scoped
-      # to this repository. Adding it means provisioning a cross-repo token - not a
-      # free win.
-      - name: Terraform formatting
-        run: |
-          dirs="$(git ls-files '*.tf' | xargs -r -n1 dirname | sort -u \
-                  | grep -vE '(^|/)modules(/|$)' || true)"
-          if [ -z "$dirs" ]; then
-            echo 'no terraform directory in this workspace; nothing to check'
-            exit 0
-          fi
-          status=0
-          for dir in $dirs; do
-            echo "::group::terraform fmt -check $dir"
-            terraform fmt -check -diff "$dir" || status=1
-            echo '::endgroup::'
-          done
-          exit $status
