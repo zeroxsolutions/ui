@@ -1,11 +1,11 @@
 ## Common
-project_name = "classify"
+project_name = "ui-sdk"
 
 ## Neon PostgreSQL
 neon_api_key = "<neon_api_key>"
 neon_org_id  = "<neon_org_id>"
 neon_databases = {
-  app = "classify"
+  app = "ui-sdk"
 }
 
 ## Cloudflare
@@ -22,15 +22,15 @@ cloudflare_d1_databases  = []
 # cloudflare_pages_projects = {
 #   web = {
 #     production_branch = "main"
-#     source     = { type = "github", config = { owner = "ZeroXSolutions", repo_name = "classify-web" } }
+#     source     = { type = "github", config = { owner = "ZeroXSolutions", repo_name = "ui-sdk-web" } }
 #     build_config = { build_command = "pnpm nx build @scope/web", root_dir = "apps/web" }
-#     custom_domains = ["classify.com"]
+#     custom_domains = ["ui-sdk.com"]
 #   }
 # }
 # Cloudflare Realtime SFU app id/secret feed the api-gateway (var + wrangler secret); provision
 # the SFU app via Terraform/Cloudflare and keep the secret out of committed vars.
 
-# DNS records (zone for classify's domain). content "192.0.2.1" is a placeholder
+# DNS records (zone for ui-sdk's domain). content "192.0.2.1" is a placeholder
 # proxied A record (orange-cloud) — the Worker route does the real routing.
 cloudflare_dns_records = [
   {
@@ -51,12 +51,12 @@ cloudflare_dns_records = [
 
 ## Google / Firebase — Main app (end-user / web-app auth)
 gcp_region                     = "asia-southeast1"
-gcp_main_project_id            = "classify"
-gcp_main_credentials_file_path = "./creds/classify-production.json"
+gcp_main_project_id            = "ui-sdk"
+gcp_main_credentials_file_path = "./creds/ui-sdk-production.json"
 
 ## Google / Firebase — Admin app (back-office auth)
-gcp_admin_project_id            = "classify-admin"
-gcp_admin_credentials_file_path = "./creds/classify-admin-production.json"
+gcp_admin_project_id            = "ui-sdk-admin"
+gcp_admin_credentials_file_path = "./creds/ui-sdk-admin-production.json"
 
 ## Clerk - opt-in ALTERNATIVE auth provider to Firebase (pick ONE).
 ## Leave commented / at defaults when using Firebase above. Requires the Platform API
@@ -68,13 +68,13 @@ gcp_admin_credentials_file_path = "./creds/classify-admin-production.json"
 # clerk_applications = {
 #   main = {
 #     name              = "Classify"
-#     domain            = "classify.com"
+#     domain            = "ui-sdk.com"
 #     environment_types = ["development", "production"]
-#     domains           = [{ name = "auth.classify.com" }]
+#     domains           = [{ name = "auth.ui-sdk.com" }]
 #   }
 # }
 # clerk_application_settings = { enable_organizations = true }
-# clerk_redirect_urls = ["https://classify.com/oauth/callback"]
+# clerk_redirect_urls = ["https://ui-sdk.com/oauth/callback"]
 # clerk_jwt_templates = {}
 # # Organizations (tenants) + RBAC catalog - Backend API, instance-scoped. Permission
 # # and role references use logical handles (the map keys); the module resolves them.

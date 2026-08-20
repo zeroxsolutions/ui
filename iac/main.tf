@@ -5,7 +5,7 @@ terraform {
 }
 
 module "neon" {
-  source = "git::https://github.com/zeroxsolutions/tf-modules.git//neon?ref=v1.0.0"
+  source = "git::https://github.com/zeroxsolutions/tf-modules.git//neon?ref=v1.0.3"
 
   project_name              = var.project_name
   api_key                   = var.neon_api_key
@@ -17,7 +17,7 @@ module "neon" {
 }
 
 module "cloudflare" {
-  source = "git::https://github.com/zeroxsolutions/tf-modules.git//cloudflare?ref=v1.0.0"
+  source = "git::https://github.com/zeroxsolutions/tf-modules.git//cloudflare?ref=v1.0.3"
 
   project_name = var.project_name
   account_id   = var.cloudflare_account_id
@@ -45,7 +45,7 @@ module "cloudflare" {
 }
 
 module "google_main" {
-  source = "git::https://github.com/zeroxsolutions/tf-modules.git//google?ref=v1.0.0"
+  source = "git::https://github.com/zeroxsolutions/tf-modules.git//google?ref=v1.0.3"
 
   project_id            = var.gcp_main_project_id
   region                = var.gcp_region
@@ -54,7 +54,7 @@ module "google_main" {
 }
 
 # module "google_admin" {
-#   source = "git::https://github.com/zeroxsolutions/tf-modules.git//google?ref=v1.0.0"
+#   source = "git::https://github.com/zeroxsolutions/tf-modules.git//google?ref=v1.0.3"
 
 #   project_id            = var.gcp_admin_project_id
 #   region                = var.gcp_region
@@ -63,7 +63,7 @@ module "google_main" {
 # }
 
 module "clerk" {
-  source = "git::https://github.com/zeroxsolutions/tf-modules.git//clerk?ref=v1.0.0"
+  source = "git::https://github.com/zeroxsolutions/tf-modules.git//clerk?ref=v1.0.3"
 
   api_key          = var.clerk_api_key
   platform_api_key = var.clerk_platform_api_key

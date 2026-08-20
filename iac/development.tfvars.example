@@ -1,8 +1,8 @@
 ## Common
-project_name = "classify"
+project_name = "ui-sdk"
 
 ## Neon PostgreSQL
-# classify is microservices: one Neon database per bounded-context service (database-per-service).
+# ui-sdk is microservices: one Neon database per bounded-context service (database-per-service).
 # statistics is a read-model (no own DB — reads billing/academics); it is NOT listed here.
 # Map is logical_key => postgres_database_name; each key gets its own owner role
 # and a matching Hyperdrive config (see main.tf).
@@ -34,7 +34,7 @@ cloudflare_queues = ["grading"]
 # Workers KV — none yet.
 cloudflare_kv_namespaces = []
 
-# D1 — classify is Postgres-only (Neon via Hyperdrive), so no D1 databases.
+# D1 — ui-sdk is Postgres-only (Neon via Hyperdrive), so no D1 databases.
 cloudflare_d1_databases = []
 
 # Cloudflare Pages - connect a Git repo and Cloudflare builds+deploys on push (Pages
@@ -45,27 +45,27 @@ cloudflare_d1_databases = []
 #     production_branch = "main"
 #     source = {
 #       type   = "github"
-#       config = { owner = "ZeroXSolutions", repo_name = "classify-web", deployments_enabled = true }
+#       config = { owner = "ZeroXSolutions", repo_name = "ui-sdk-web", deployments_enabled = true }
 #     }
 #     build_config = { build_command = "pnpm nx build @scope/web", root_dir = "apps/web" }
 #     deployment_configs = {
 #       production = {
 #         compatibility_date = "2026-07-01"
-#         env_vars           = { API_URL = { type = "plain_text", value = "https://api.classify.example" } }
+#         env_vars           = { API_URL = { type = "plain_text", value = "https://api.ui-sdk.example" } }
 #       }
 #     }
-#     custom_domains = ["classify.example"]
+#     custom_domains = ["ui-sdk.example"]
 #   }
 # }
 
 ## Google / Firebase — Main app (end-user / web-app auth)
 gcp_region                     = "asia-southeast1"
-gcp_main_project_id            = "classify-development"
-gcp_main_credentials_file_path = "./creds/classify-development.json"
+gcp_main_project_id            = "ui-sdk-development"
+gcp_main_credentials_file_path = "./creds/ui-sdk-development.json"
 
 ## Google / Firebase — Admin app (back-office auth)
-gcp_admin_project_id            = "classify-admin-development"
-gcp_admin_credentials_file_path = "./creds/classify-admin-development.json"
+gcp_admin_project_id            = "ui-sdk-admin-development"
+gcp_admin_credentials_file_path = "./creds/ui-sdk-admin-development.json"
 
 ## Clerk - opt-in ALTERNATIVE auth provider to Firebase (pick ONE).
 ## Leave commented / at defaults when using Firebase above. Requires the Platform API
@@ -78,14 +78,14 @@ gcp_admin_credentials_file_path = "./creds/classify-admin-development.json"
 # clerk_applications = {
 #   main = {
 #     name              = "Classify"
-#     domain            = "classify.example"
+#     domain            = "ui-sdk.example"
 #     environment_types = ["development", "production"]
-#     domains           = [{ name = "auth.classify.example" }] # extra clerk_domain resources
+#     domains           = [{ name = "auth.ui-sdk.example" }] # extra clerk_domain resources
 #     # instance_config = { environment = "production", config = jsonencode({ url_based_session_syncing = "1" }) }
 #   }
 # }
 # clerk_application_settings = { enable_organizations = true }
-# clerk_redirect_urls = ["https://classify.example/oauth/callback"]
+# clerk_redirect_urls = ["https://ui-sdk.example/oauth/callback"]
 # clerk_jwt_templates = {}
 # # Organizations (tenants) + RBAC catalog - Backend API, instance-scoped. Permission
 # # and role references use logical handles (the map keys); the module resolves them.

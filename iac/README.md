@@ -5,7 +5,7 @@ Firebase resources the Workers consume as **bindings**. A standalone Terraform
 root that lives **inside** this repo but is **not** an nx project — run `terraform`
 here directly, never through `nx`. Governed by `iac-terraform-root`,
 `bindings-not-endpoints`, `tf-state-and-secrets`, and `db-migrations` in
-`.agents/rules/`.
+`.claude/rules/`.
 
 This README is the **same across every product's iac root** — it documents the
 shared concept only. The concrete resources a given root declares (which

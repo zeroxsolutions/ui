@@ -2,7 +2,7 @@
 # Copy to backend.config (gitignored) and fill the placeholders, then:
 #   terraform init -backend-config=backend.config
 bucket                      = "terraform-states"
-key                         = "classify/terraform.tfstate"
+key                         = "ui-sdk/terraform.tfstate"
 region                      = "auto"
 skip_credentials_validation = true
 skip_metadata_api_check     = true
