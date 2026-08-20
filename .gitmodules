@@ -1,0 +1,3 @@
+[submodule ".claude/rules"]
+	path = .claude/rules
+	url = https://github.com/zeroxsolutions/nx-cloudflare-in-house-rules.git
