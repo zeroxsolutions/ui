@@ -77,7 +77,7 @@ gcp_admin_credentials_file_path = "./creds/ui-sdk-admin-development.json"
 # # Per-domain applications (Platform API fans out one clerk_application per entry):
 # clerk_applications = {
 #   main = {
-#     name              = "Classify"
+#     name              = "Ui-sdk"
 #     domain            = "ui-sdk.example"
 #     environment_types = ["development", "production"]
 #     domains           = [{ name = "auth.ui-sdk.example" }] # extra clerk_domain resources

@@ -67,7 +67,7 @@ gcp_admin_credentials_file_path = "./creds/ui-sdk-admin-production.json"
 # clerk_platform_api_key = "<clerk_platform_api_key>"      # ak_ (beta)
 # clerk_applications = {
 #   main = {
-#     name              = "Classify"
+#     name              = "Ui-sdk"
 #     domain            = "ui-sdk.com"
 #     environment_types = ["development", "production"]
 #     domains           = [{ name = "auth.ui-sdk.com" }]

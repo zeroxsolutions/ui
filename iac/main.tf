@@ -50,7 +50,7 @@ module "google_main" {
   project_id            = var.gcp_main_project_id
   region                = var.gcp_region
   credentials_file_path = var.gcp_main_credentials_file_path
-  app_display_name      = "Classify"
+  app_display_name      = "Ui-sdk"
 }
 
 # module "google_admin" {
@@ -59,7 +59,7 @@ module "google_main" {
 #   project_id            = var.gcp_admin_project_id
 #   region                = var.gcp_region
 #   credentials_file_path = var.gcp_admin_credentials_file_path
-#   app_display_name      = "Classify Admin"
+#   app_display_name      = "Ui-sdk Admin"
 # }
 
 module "clerk" {
