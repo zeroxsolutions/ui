@@ -2,6 +2,12 @@ output "r2_bucket_names" {
   value = module.cloudflare.r2_bucket_names
 }
 
+# Public HTTPS origin per R2 custom domain, keyed by hostname. This is the base URL an
+# app points its asset resolver at.
+output "r2_custom_domains" {
+  value = module.cloudflare.r2_custom_domains
+}
+
 output "queue_ids" {
   value = module.cloudflare.queue_ids
 }

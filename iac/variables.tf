@@ -25,6 +25,18 @@ variable "cloudflare_r2_buckets" {
   default     = []
 }
 
+variable "cloudflare_r2_custom_domains" {
+  type = list(object({
+    bucket    = string
+    domain    = string
+    zone_name = string
+    min_tls   = optional(string, "1.2")
+    enabled   = optional(bool, true)
+  }))
+  description = "Public custom domains attached to R2 buckets. `bucket` is a logical name that must also appear in cloudflare_r2_buckets; `zone_name` is the Cloudflare zone the hostname belongs to. The Cloudflare API provisions the proxied CNAME itself, so no cloudflare_dns_records entry is needed."
+  default     = []
+}
+
 variable "cloudflare_queues" {
   type        = list(string)
   description = "Logical Queue names - prefixed with project+workspace at creation"
