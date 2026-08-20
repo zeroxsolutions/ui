@@ -12,11 +12,29 @@ variable "cloudflare_account_id" {
   nullable    = false
 }
 
+# The provider takes either a scoped api_token or the Global API Key (api_key +
+# email), and the module passes all three through. A scoped token is the better
+# credential - it can be limited to R2 plus this one zone - so it is what
+# production.tfvars.example documents; the Global API Key is here because the
+# account's existing key is what every other root in the org already uses.
 variable "cloudflare_api_token" {
   type        = string
-  description = "API token for Cloudflare provider"
+  description = "Scoped API token for the Cloudflare provider. Leave null to authenticate with cloudflare_api_key + cloudflare_email instead."
   sensitive   = true
-  nullable    = false
+  default     = null
+}
+
+variable "cloudflare_api_key" {
+  type        = string
+  description = "Global API Key for the Cloudflare provider, paired with cloudflare_email. Leave null when cloudflare_api_token is set."
+  sensitive   = true
+  default     = null
+}
+
+variable "cloudflare_email" {
+  type        = string
+  description = "Account email the Global API Key belongs to. Required only alongside cloudflare_api_key."
+  default     = null
 }
 
 variable "cloudflare_r2_buckets" {

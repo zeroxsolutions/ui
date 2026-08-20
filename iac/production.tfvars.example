@@ -3,7 +3,15 @@ project_name = "ui-sdk"
 
 ## Cloudflare
 cloudflare_account_id = "<account_id>"
-cloudflare_api_token  = "<api_token>"
+
+# Authenticate with one of the two styles the provider accepts, never both.
+# The account's Global API Key is what the org's other Terraform roots use, so it is
+# what this root runs on today. A scoped token is the better credential - it can be
+# limited to R2 plus the one zone below - and swapping to it means setting
+# cloudflare_api_token and dropping the two lines under it.
+# cloudflare_api_token = "<api_token>"
+cloudflare_api_key = "<global_api_key>"
+cloudflare_email   = "<account_email>"
 
 # R2 object storage - logical names, prefixed with project+workspace at creation, so
 # `fluent-emoji` becomes `ui-sdk-fluent-emoji-production`. It serves the artwork

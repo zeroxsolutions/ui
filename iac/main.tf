@@ -10,6 +10,8 @@ module "cloudflare" {
   project_name = var.project_name
   account_id   = var.cloudflare_account_id
   api_token    = var.cloudflare_api_token
+  api_key      = var.cloudflare_api_key
+  email        = var.cloudflare_email
 
   r2_buckets        = var.cloudflare_r2_buckets
   r2_custom_domains = var.cloudflare_r2_custom_domains
