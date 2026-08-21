@@ -30,19 +30,43 @@ its cost are here.
   exits 0 with `No tasks were run` (measured on run 32446129678, branch `development`). That is
   the defect: nothing reports that the registry never shipped. Either give `registry-ui` a real
   deploy target or drop the job.
-- **`@nx/vitest` is registered twice in `nx.json`** - the second entry sets `testMode: watch`.
-  **Also a live defect**: a watch-mode `test` target does not terminate, so it hangs the gate
-  rather than failing it. One registration, without `testMode`, is what the other repos carry.
 - **`iac/` provisions exactly one thing: the artwork bucket.** The root composes only
   `tf-modules//cloudflare` (`v1.0.3`) and declares one R2 bucket, `fluent-emoji`, served
   at `https://fluent-emoji.zeroxsolutions.com`. The `neon`, `google_main` and `clerk`
   modules were scaffold from another product and are gone - a UI registry has no
   database, no Firebase project and no auth provider. `hyperdrive_configs` is passed
   empty because the module requires it, not because a Hyperdrive config is coming.
+  **`realtime_enabled = false` is passed deliberately**: it is the module's only input
+  that defaults to creating something, so a root that simply omits it gets a Realtime SFU
+  app named `<project>-rooms-<workspace>`. Composing a module is about the defaults that
+  are not inert, not only the inputs it demands.
+  Editing the root is verified with **no credentials**: `terraform init -backend=false`
+  fetches the private modules and providers, and `terraform validate` then checks the
+  whole root. Only `apply` needs a key.
 - **Only the `production` workspace is applied, and there is no development bucket.**
   The artwork is byte-identical in every environment, so a second bucket would duplicate
   370 MB to serve the same bytes; local dev reads the same public URL.
   `development.tfvars.example` was deleted rather than left empty.
+- **Artwork keys are codepoint-addressed at the bucket root, with no version prefix.**
+  `<style>/<codepoint>.<ext>`, served `Cache-Control: public, max-age=31536000, immutable`.
+  A key is not content-hashed, so re-sourced artwork at the same key would serve stale for
+  a year. The answer then is to upload under a `v2/` prefix **at that point** and move each
+  app's base URL: old URLs keep working and nothing needs purging. Adding the prefix now
+  costs a path segment forever to buy nothing today.
+- **The sync is `rclone copy`, and it carries no gate coverage.** A shell script that shells
+  out to a binary has nothing the unit gate can hold, so it is verified by running it. It is
+  `rclone` and not `@aws-sdk/client-s3` because the SDK sends a CRC32 header beside the
+  `Content-MD5` and R2 accepts one non-default checksum - all 9217 objects failed with
+  *"You can only specify one non-default checksum at a time"* (measured 2026-08-21). One
+  client option fixed that one; the reason to move was that rclone absorbs the class of it
+  upstream. `copy` and never `sync`: sync deletes whatever the source lacks, so a mistyped
+  `assets/` would empty the bucket. There is no prune - removing an object is manual.
+- **`r2:sync` is invoked as `nx r2:sync fluent-emoji`, never by the scoped name.**
+  `packages/fluent-emoji/package.json` sets `nx.name`, so the graph keys on `fluent-emoji`
+  and the scoped form fails with `Could not find project`. A deviation from
+  `naming-projects` that predates this work; fixing it means renaming the project. The
+  target also carries no `configurations` block where `deploy-via-nx-per-env` prescribes one
+  per environment - there is one environment here, so there is nothing to configure.
 - **The artwork ships on its own workflow, not through `cd.yml`.**
   `fluent-emoji-cd.yml` runs `nx r2:sync fluent-emoji` - a wrapper over `rclone copy` - on a
   push to `production` that touches `packages/fluent-emoji/assets/**`. It is the one workflow here that names a
