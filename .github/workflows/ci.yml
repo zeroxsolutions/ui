@@ -17,6 +17,16 @@ on:
   push:
     branches: [main, master]
 
+# A superseded gate is worthless: it reports on a commit nobody will ship. Cancelling
+# in-flight is safe HERE and not in `cd.yml` - a gate writes nothing outside its runner,
+# where a half-finished deploy leaves real state behind.
+#
+# `github.ref` separates a pull request (`refs/pull/N/merge`) from a branch push, so a PR
+# and the master push it later becomes never cancel each other.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   gate:
     uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
