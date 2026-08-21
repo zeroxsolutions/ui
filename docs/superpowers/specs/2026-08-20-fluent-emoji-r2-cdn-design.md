@@ -3,9 +3,9 @@
 Design for publishing `packages/fluent-emoji/assets/` to a Cloudflare R2 bucket and
 serving it over a public custom domain, plus the sync tool that uploads it.
 
-Status: every decision below is settled with the owner; the design as a whole is not
-yet signed off and nothing is implemented. Lands as **two sequential changes** -
-the Terraform root first, the sync tool second, on a bucket Terraform already owns.
+Status: phase 1 applied 2026-08-20. Phase 2 built 2026-08-21 and gate-green; its first
+real run waits on a bucket-scoped R2 token, which nobody has issued yet - the CI secrets
+hold `REPLACE_ME`.
 
 ## Why
 
@@ -29,7 +29,7 @@ alternative that looks equally reasonable from the diff alone.
 | How consumers learn the base | an env var per consuming app | Exporting a constant from the package, or changing `DEFAULT_BASE`, would make the package the source of truth but couples every consumer's asset host to a package release. |
 | Sync implementation | Node + `@aws-sdk/client-s3` | `aws4fetch` means hand-rolling `ListObjectsV2` XML parsing, pagination and retry - the exact code whose failure mode is silent (a dropped page reads as "not uploaded yet"). `rclone` needs a binary outside `.tool-versions`. |
 | Credentials | read from `process.env`, nothing else | `--env-file` makes a missing file exit 9 with an error about a file rather than a credential; `--env-file-if-exists` only pays off with startup validation, which is the part actually worth having. |
-| Trigger | an nx target run by hand | The artwork is pre-generated and changes rarely, so a CI job on every push spends 9217 HEAD requests to discover nothing changed. CI can call the same target later. |
+| Trigger | CI, on a push to `production` touching `assets/` or the tool | The artwork is pre-generated and changes rarely, so an unfiltered job would list the whole bucket on every push to learn nothing moved. A path filter costs nothing when it does not. Running it by hand stays available through `workflow_dispatch` and the nx target. |
 
 ## Path and cache policy
 
@@ -143,7 +143,9 @@ Depends on phase 1: the bucket name and public URL come from `terraform output`.
 | --- | --- | --- |
 | `packages/fluent-emoji/tools/r2-sync/sync-plan.ts` | file path -> object key, extension -> content type, and `(local manifest, remote manifest) -> { upload, skip, orphan }` | yes |
 | `packages/fluent-emoji/tools/r2-sync/sync-plan.spec.ts` | its tests | |
-| `packages/fluent-emoji/tools/r2-sync/main.ts` | walk `assets/` and stream MD5, paginate `ListObjectsV2`, `PutObject` with bounded concurrency, parse flags, validate env, structured logs, exit code | no |
+| `packages/fluent-emoji/tools/r2-sync/map-with-concurrency.ts` | run N tasks at a time, results in input order | yes |
+| `packages/fluent-emoji/tools/r2-sync/map-with-concurrency.spec.ts` | its tests - the bound is the property, and nothing else can show it | |
+| `packages/fluent-emoji/tools/r2-sync/main.ts` | walk `assets/` and stream MD5, paginate `ListObjectsV2`, `PutObject`, parse flags, validate env, structured logs, exit code | no |
 
 The split exists so the decision logic is testable without a network or credentials.
 
@@ -180,6 +182,10 @@ The token is **Object Read & Write scoped to this bucket**. Admin tokens cannot 
 bucket-scoped, so an Admin token would carry account-wide R2 write access for a job that
 writes one bucket.
 
+In CI the four split by disclosure, not by habit: `R2_ACCOUNT_ID` and `R2_BUCKET` grant
+nothing and are **variables**, so their values read plainly in a run instead of as `***`;
+only the key pair are secrets. All four live in the `production` environment.
+
 Logs are structured JSON on stdout and never include a key or secret.
 
 ### nx target
@@ -210,26 +216,17 @@ missing block reads as a choice rather than an omission.
 
 ### Gate coverage
 
-Two config files must widen or the new code is invisible to the gate:
+`tools/**` had to be named in two places or the new code would be invisible to the gate,
+and both now name it: `vite.config.mts` `test.include`, and `tsconfig.spec.json`
+`include` - `tsconfig.lib.json` has `rootDir: "src"` and never covers `tools/`.
 
-- `vite.config.mts` `test.include` is `{src,tests}/**`, so `tools/**` must be added or
-  `sync-plan.spec.ts` never runs.
-- `tsconfig.spec.json` `include` must add `tools/**/*.ts`. `tsconfig.lib.json` has
-  `rootDir: "src"` and will not cover `tools/`, so without this the script and its spec
-  are never type-checked.
+`tsconfig.spec.json` also carries `allowImportingTsExtensions` + `emitDeclarationOnly`,
+because `main.ts` runs on node's type stripping: node resolves ESM its own way, so
+`./sync-plan` and `./sync-plan.js` both fail and only `./sync-plan.ts` loads (measured on
+node 24.14.1).
 
-Tests cover: identical ETag skips, differing ETag uploads, absent remote uploads, remote
-key with no local file becomes an orphan, content type follows the extension, object key
-follows the path. Each must be seen failing for its own reason first.
-
-## Prose this change falsifies
-
-- `packages/fluent-emoji/README.md` - the section "Deploying the animated style to a
-  CDN" documents a manual `aws s3 sync assets/anim` and the two-base setup via
-  `setFluentEmojiStyleBase('anim', ...)`. Both become wrong: one base serves all five
-  styles. Rewrite it in the same change, do not leave it for later.
-- `CLAUDE.md` - the Configuration table gains the four `R2_*` rows; the choices section
-  gains the bucket, environment and `configurations` deviations; the line calling `iac/`
-  an untouched scaffold stops being true once phase 1 lands.
-- `.gitignore` has no `.env*` entry. This is the change that first puts R2 secrets on
-  developer machines, so it adds one.
+Tests cover: identical ETag skips, quoted ETag skips, differing ETag uploads, absent
+remote uploads, remote key with no local file becomes an orphan, empty local list orphans
+everything, content type follows the extension and refuses an inherited property name,
+object key follows the path, and the concurrency limiter's bound. Each was seen failing
+for its own reason first.

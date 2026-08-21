@@ -77,3 +77,6 @@ test-results
 
 .nx/migrate-runs
 test-output
+
+# Local secrets for the r2-sync tool and anything else that reads process.env.
+.env*

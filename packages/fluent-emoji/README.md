@@ -36,8 +36,8 @@ separately — see below.)
 The **animated** (`anim`) artwork is the heaviest set — animated webp run hundreds
 of KB/glyph (~280 MB total) — so it is **excluded from the npm tarball** to keep a
 plain `npm install` small (~28 MB) for consumers that only need the static styles.
-It is still committed in the repo for self-hosting; serve it from a CDN with
-`setFluentEmojiStyleBase` (see **Deploying the animated style to a CDN** below).
+It is still committed in the repo, and the house CDN serves it alongside the other
+four (see **Serving every style from one base** below).
 Without an `anim` base configured, animated glyphs fall back to the native glyph
 (as do any glyphs with no upstream artwork, by design).
 
@@ -61,39 +61,42 @@ setFluentEmojiBase('/fluent-emoji');
 A missing asset (or a load error) falls back to the native glyph, so nothing
 renders blank.
 
-## Deploying the animated style to a CDN
+## Serving every style from one base
 
-The four static styles ship inside the package (`dist/assets/{3d,flat,modern,mono}/`);
-the animated `anim` set does **not** — it is excluded from the tarball to keep
-installs small. So `anim` has to be hosted separately and routed to its own base,
-while the static styles keep resolving from the package or your public dir.
+`anim` is not in the tarball, so a consumer that wants animated glyphs needs a host
+for it. Hosting the **whole** `assets/` tree is what removes the second base entirely:
+the resolver appends `/<style>/<codepoint>.<ext>` to one root, so one base covers all
+five styles and `setFluentEmojiStyleBase` becomes unnecessary.
 
-1. **Upload the artwork.** The committed `assets/anim/` holds the files keyed by
-   codepoint — push it to any static host / bucket / CDN:
+Inside ZeroXSolutions that host is `https://fluent-emoji.zeroxsolutions.com`, an R2
+bucket this repo publishes to (`nx r2:sync fluent-emoji`).
 
-   ```sh
-   aws s3 sync assets/anim s3://my-bucket/fluent-emoji/anim     # or Cloudflare R2 / GCS / …
-   ```
+```ts
+import { setFluentEmojiBase } from '@zeroxsolutions/fluent-emoji';
 
-2. **Point only `anim` at that CDN.** The resolver appends `/<style>/<codepoint>.<ext>`,
-   so the upload target above is `<animBase>/anim/`:
+setFluentEmojiBase('https://fluent-emoji.zeroxsolutions.com');
+// <FluentEmoji glyph="🎉" variant="anim" /> ->
+//   https://fluent-emoji.zeroxsolutions.com/anim/1f389.webp
+```
 
-   ```ts
-   import {
-     setFluentEmojiBase,
-     setFluentEmojiStyleBase,
-   } from '@zeroxsolutions/fluent-emoji';
+**That bucket is empty as of 2026-08-21** - it is provisioned and serving over a valid
+certificate, but the first sync has not run, so every key 404s and every glyph falls
+back to the native one. Until it does, host the tree yourself:
 
-   setFluentEmojiBase('/fluent-emoji'); // 3d/flat/modern/mono from your public dir
-   setFluentEmojiStyleBase('anim', 'https://cdn.example.com/fluent-emoji'); // anim from the CDN
-   // <FluentEmoji glyph="🎉" variant="anim" /> →
-   //   https://cdn.example.com/fluent-emoji/anim/1f389.webp
-   ```
+```sh
+aws s3 sync assets s3://my-bucket/fluent-emoji     # or Cloudflare R2 / GCS / ...
+```
 
-   A per-call `base` still wins; `setFluentEmojiStyleBase('anim', undefined)`
-   clears the override. (If you'd rather serve **all** styles from one CDN, upload
-   the whole `assets/` tree and use `setFluentEmojiBase` alone — no per-style base
-   needed.)
+**A different host per style** is still available where you want one - `anim` remote and
+the static styles from your own public directory, say:
+
+```ts
+setFluentEmojiBase('/fluent-emoji');                                   // 3d/flat/modern/mono
+setFluentEmojiStyleBase('anim', 'https://cdn.example.com/fluent-emoji'); // anim only
+```
+
+A per-call `base` still wins over both, and `setFluentEmojiStyleBase('anim', undefined)`
+clears the override.
 
 ## Artwork provenance
 

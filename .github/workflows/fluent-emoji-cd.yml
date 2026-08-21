@@ -1,0 +1,49 @@
+# Publish `packages/fluent-emoji/assets/` to the R2 bucket Terraform owns, serving
+# https://fluent-emoji.zeroxsolutions.com.
+#
+# Deliberately not a job in cd.yml, and deliberately not `nx-deploy`. cd.yml names no
+# project, path or branch so that it copies between repos unchanged, and this file is
+# nothing but a project, a path and a branch. `nx-deploy` forwards only the two
+# Cloudflare deploy secrets into the step, so an R2 key it does not name is unreachable
+# whatever the environment holds - and it always passes `-c <env>`, which `r2:sync` has
+# no configuration for.
+#
+# `production` only, matching the bucket: the artwork is byte-identical in every
+# environment, so there is no development bucket to sync to.
+name: fluent-emoji-cd
+
+on:
+  push:
+    branches: [production]
+    paths:
+      - packages/fluent-emoji/assets/**
+      - packages/fluent-emoji/tools/r2-sync/**
+      - .github/workflows/fluent-emoji-cd.yml
+  workflow_dispatch:
+
+# One at a time; a second push waits rather than racing the first. An interrupted sync
+# needs no repair - the next run rebuilds its plan from what the bucket actually holds.
+concurrency:
+  group: fluent-emoji-cd
+
+jobs:
+  sync:
+    runs-on: self-hosted
+    # The whole tree is 9217 files / 370 MB, and only the first run uploads it; every
+    # later run compares digests and uploads nothing.
+    timeout-minutes: 30
+    environment:
+      name: production
+    steps:
+      - uses: zeroxsolutions/github-actions/nx-setup@v1
+
+      # Account id and bucket name are `vars`, not secrets: neither grants access, and
+      # as vars their values are visible in the run rather than masked to `***`.
+      - name: Sync the artwork to R2
+        shell: bash
+        env:
+          R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ vars.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: pnpm nx r2:sync fluent-emoji

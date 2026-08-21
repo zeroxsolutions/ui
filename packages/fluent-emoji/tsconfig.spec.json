@@ -12,7 +12,12 @@
     ],
     "jsx": "react-jsx",
     "module": "esnext",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    // `tools/r2-sync/main.ts` runs on node's type stripping, which resolves ESM the way
+    // node does - `./sync-plan` and `./sync-plan.js` both fail, only the real extension
+    // resolves (measured on node 24.14.1).
+    "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": true
   },
   "include": [
     "vite.config.ts",
