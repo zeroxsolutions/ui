@@ -40,3 +40,39 @@ jobs:
     with:
       targets: wrangler:deploy
       environment: ${{ github.ref_name }}
+
+  # Publish whatever the workspace declares an `r2:sync` target for. Identifier-free like
+  # the rest of this file: `run-many` matches no project in a repo that declares none and
+  # exits 0, the same way `deploy` does.
+  #
+  # `production` only, and not because production is special - because there is one bucket.
+  # The artwork is byte-identical per environment, so a development run would either write
+  # the production bucket or find no variables and fail; neither is a second environment.
+  #
+  # Not a job on `nx-deploy`: that workflow forwards only the two Cloudflare deploy secrets,
+  # so an R2 key it does not name never reaches the process, and it always passes `-c <env>`,
+  # which `r2:sync` has no configuration for.
+  #
+  # This runs on every push to `production`, where a dedicated workflow could have filtered
+  # by path - GitHub has `paths:` at workflow level and nothing at job level. The cost is one
+  # listing and one local pass over the tree to discover nothing moved.
+  r2-sync:
+    needs: [gate]
+    if: github.ref_name == 'production'
+    runs-on: self-hosted
+    timeout-minutes: 30
+    environment:
+      name: production
+    steps:
+      - uses: zeroxsolutions/github-actions/nx-setup@v1
+
+      # Account id and bucket name are `vars`, not secrets: neither grants access, and as
+      # vars their values read plainly in the run rather than as `***`.
+      - name: Sync to R2
+        shell: bash
+        env:
+          R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ vars.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: pnpm nx run-many -t r2:sync

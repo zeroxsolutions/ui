@@ -67,14 +67,13 @@ its cost are here.
   `naming-projects` that predates this work; fixing it means renaming the project. The
   target also carries no `configurations` block where `deploy-via-nx-per-env` prescribes one
   per environment - there is one environment here, so there is nothing to configure.
-- **The artwork ships on its own workflow, not through `cd.yml`.**
-  `fluent-emoji-cd.yml` runs `nx r2:sync fluent-emoji` - a wrapper over `rclone copy` - on a
-  push to `production` that touches `packages/fluent-emoji/assets/**`. It is the one workflow here that names a
-  project, a path and a branch, which is exactly why it is not a job in `cd.yml` - that
-  file stays identifier-free so it copies between repos. `nx-deploy` is also the wrong
-  shape: it forwards only the two Cloudflare deploy secrets, so an R2 key it does not
-  name never reaches the process, and it always passes `-c <env>`, which `r2:sync`
-  has no configuration for.
+- **The artwork ships from `cd.yml`'s own `r2-sync` job, on `production` only.** It runs
+  `nx run-many -t r2:sync`, which names no project, so the job is copyable to the other
+  repos the way the rest of that file is - but **until it is copied this repo's `cd.yml` is
+  the one that differs**; the other 11 are still byte-identical to each other. It lived in
+  its own workflow file first to get a `paths:` filter, which GitHub offers at workflow
+  level and not at job level. That bought one skipped listing per production push and cost
+  the copyability anyway.
 
 ## Workspace
 
