@@ -133,6 +133,12 @@ async function main(): Promise<number> {
       accessKeyId: env.R2_ACCESS_KEY_ID,
       secretAccessKey: env.R2_SECRET_ACCESS_KEY,
     },
+    // The SDK defaults to WHEN_SUPPORTED, which adds a CRC32 header to every request
+    // alongside the Content-MD5 below. R2 takes one non-default checksum and rejects
+    // the pair: "You can only specify one non-default checksum at a time" - all 9217
+    // objects, measured. MD5 is the one to keep, because it is also the ETag the next
+    // run compares against.
+    requestChecksumCalculation: 'WHEN_REQUIRED',
   });
 
   const local = await walkAssets(ASSETS_DIR);

@@ -27,7 +27,7 @@ alternative that looks equally reasonable from the diff alone.
 | Environments | `production` workspace only | The artwork is byte-identical in every environment, so a `development` bucket would duplicate 370 MB to serve the same bytes. Consumers point local dev at the same public URL. |
 | Hostname | `fluent-emoji.zeroxsolutions.com` | One R2 custom domain maps to exactly one bucket and serves from the bucket root, so `cdn.zeroxsolutions.com/fluent-emoji/*` is not reachable without putting a Worker in front. A dedicated bucket therefore forces a dedicated hostname. |
 | How consumers learn the base | an env var per consuming app | Exporting a constant from the package, or changing `DEFAULT_BASE`, would make the package the source of truth but couples every consumer's asset host to a package release. |
-| Sync implementation | Node + `@aws-sdk/client-s3` | `aws4fetch` means hand-rolling `ListObjectsV2` XML parsing, pagination and retry - the exact code whose failure mode is silent (a dropped page reads as "not uploaded yet"). `rclone` needs a binary outside `.tool-versions`. |
+| Sync implementation | Node + `@aws-sdk/client-s3` | `aws4fetch` means hand-rolling `ListObjectsV2` XML parsing, pagination and retry - the exact code whose failure mode is silent (a dropped page reads as "not uploaded yet"). **The reason given here for ruling out `rclone` has expired**: it was "a binary outside `.tool-versions`", true under asdf and false since the repo moved to mise, which pins `rclone` from `aqua:rclone/rclone`. What still separates them is `rclone sync` deleting extra remote files by default, against this tool's `--prune`-off default and its refusal to prune on an empty local list. Re-open the choice on that, not on the toolchain. |
 | Credentials | read from `process.env`, nothing else | `--env-file` makes a missing file exit 9 with an error about a file rather than a credential; `--env-file-if-exists` only pays off with startup validation, which is the part actually worth having. |
 | Trigger | CI, on a push to `production` touching `assets/` or the tool | The artwork is pre-generated and changes rarely, so an unfiltered job would list the whole bucket on every push to learn nothing moved. A path filter costs nothing when it does not. Running it by hand stays available through `workflow_dispatch` and the nx target. |
 
@@ -158,6 +158,13 @@ asset is 1.33 MB (`flat/1f1f8-1f1fb.svg`, measured 2026-08-20), far under any mu
 threshold. So the plan compares the local file's MD5 against the remote ETag: equal
 means skip. Listing 9217 objects is about ten
 paginated calls; the second sync onward uploads nothing.
+
+**The client must set `requestChecksumCalculation: 'WHEN_REQUIRED'`.** The SDK defaults to
+`WHEN_SUPPORTED` and puts a CRC32 header on every request beside the `Content-MD5` the tool
+sends; R2 accepts one non-default checksum and refuses the pair with *"You can only specify
+one non-default checksum at a time"* - all 9217 objects, measured 2026-08-21 on run
+32503028929. Confirmed against a local HTTP server rather than against R2: the default sends
+`content-md5` + `x-amz-checksum-crc32`, `WHEN_REQUIRED` sends `content-md5` alone.
 
 `--dry-run` prints the plan and uploads nothing. `--prune` deletes remote objects absent
 from `assets/`, and is **off by default** - adding a file is safe, removing one is not.
