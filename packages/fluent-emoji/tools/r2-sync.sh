@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # Publish `assets/` to the R2 bucket Terraform owns.
 #
-# rclone owns the transfer. This wrapper exists to map the four documented variables
-# onto rclone's seven-key env config, so `CLAUDE.md`'s inventory stays four rows and a
-# forgotten variable is named here rather than surfacing as an opaque 403.
+# rclone configures itself from its own environment variables - `RCLONE_S3_<FLAG>` is
+# `--s3-<flag>` uppercased - so nothing here renames anything and there is no config
+# file and no remote to define. `:s3:` is rclone's on-the-fly backend.
 set -euo pipefail
 
+# Both missing values fail late and misleadingly (measured 2026-08-22): with no endpoint
+# rclone reaches AWS and returns 403, which reads as a bad credential; with no bucket the
+# destination is bare `:s3:` and it returns `input member Key must not be empty`.
 missing=()
-for name in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET; do
+for name in RCLONE_S3_ENDPOINT RCLONE_S3_ACCESS_KEY_ID RCLONE_S3_SECRET_ACCESS_KEY R2_BUCKET; do
   [ -n "${!name:-}" ] || missing+=("$name")
 done
 if [ ${#missing[@]} -gt 0 ]; then
@@ -15,14 +18,10 @@ if [ ${#missing[@]} -gt 0 ]; then
   exit 1
 fi
 
-export RCLONE_CONFIG_R2_TYPE=s3
-export RCLONE_CONFIG_R2_PROVIDER=Cloudflare
-# An object-scoped token cannot HeadBucket, which rclone otherwise does first.
-export RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true
-export RCLONE_CONFIG_R2_ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
-export RCLONE_CONFIG_R2_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
-export RCLONE_CONFIG_R2_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY"
-
+# Provider and bucket-check are properties of this destination, not of an environment, so
+# they are flags here rather than variables somebody has to set. An object-scoped token
+# cannot HeadBucket, which rclone otherwise does before the first upload.
+#
 # `copy`, never `sync`: sync deletes what is not in `assets/`, so an empty or mistyped
 # source would empty the bucket. Removing an object stays a deliberate manual step.
 #
@@ -31,7 +30,9 @@ export RCLONE_CONFIG_R2_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY"
 #
 # Stats print at INFO by default while rclone logs at NOTICE, so they need the level
 # lowered or the run is silent until it ends.
-exec rclone copy assets "r2:${R2_BUCKET}" \
+exec rclone copy assets ":s3:${R2_BUCKET}" \
+  --s3-provider Cloudflare \
+  --s3-no-check-bucket \
   --checksum \
   --transfers 8 \
   --header-upload 'Cache-Control: public, max-age=31536000, immutable' \
