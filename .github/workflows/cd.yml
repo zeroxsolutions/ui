@@ -54,8 +54,9 @@ jobs:
   # which `rclone:sync` has no configuration for.
   #
   # This runs on every push to `production`, where a dedicated workflow could have filtered
-  # by path - GitHub has `paths:` at workflow level and nothing at job level. The cost is one
-  # listing and one local pass over the tree to discover nothing moved.
+  # by path - GitHub has `paths:` at workflow level and nothing at job level. The cost of the
+  # run that finds nothing moved is 0 B transferred; the 4m14s it still takes is checkout and
+  # install, which a path filter would not have saved either (measured 2026-08-22).
   rclone-sync:
     needs: [gate]
     if: github.ref_name == 'production'
