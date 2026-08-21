@@ -54,13 +54,15 @@ its cost are here.
   app's base URL: old URLs keep working and nothing needs purging. Adding the prefix now
   costs a path segment forever to buy nothing today.
 - **The sync is `rclone copy`, and it carries no gate coverage.** A shell script that shells
-  out to a binary has nothing the unit gate can hold, so it is verified by running it. It is
-  `rclone` and not `@aws-sdk/client-s3` because the SDK sends a CRC32 header beside the
-  `Content-MD5` and R2 accepts one non-default checksum - all 9217 objects failed with
-  *"You can only specify one non-default checksum at a time"* (measured 2026-08-21). One
-  client option fixed that one; the reason to move was that rclone absorbs the class of it
-  upstream. `copy` and never `sync`: sync deletes whatever the source lacks, so a mistyped
-  `assets/` would empty the bucket. There is no prune - removing an object is manual.
+  out to a binary has nothing the unit gate can hold, so it is verified by running it - the
+  first full copy moved all 9217 objects / 351.9 MiB in 15m35s from the `mac-mini` runner
+  (2026-08-22). It is `rclone` and not `@aws-sdk/client-s3` because the SDK sends a CRC32
+  header beside the `Content-MD5` and R2 accepts one non-default checksum - all 9217 objects
+  failed with *"You can only specify one non-default checksum at a time"* (measured
+  2026-08-21). One client option fixed that one; the reason to move was that rclone absorbs
+  the class of it upstream. `copy` and never `sync`: sync deletes whatever the source lacks,
+  so a mistyped `assets/` would empty the bucket. There is no prune - removing an object is
+  manual.
 - **`r2:sync` is invoked as `nx r2:sync fluent-emoji`, never by the scoped name.**
   `packages/fluent-emoji/package.json` sets `nx.name`, so the graph keys on `fluent-emoji`
   and the scoped form fails with `Could not find project`. A deviation from
@@ -100,7 +102,7 @@ One row per environment input (see `env-input-inventory`).
 | `cloudflare_api_key` + `cloudflare_email` | `terraform apply` | `iac/<env>.tfvars` (gitignored, `*.example` committed) | yes | the provider 401s at plan time. The root also accepts a scoped `cloudflare_api_token` instead; it runs on the account's Global API Key because that is the credential the org's other roots already use. |
 | `R2_ACCOUNT_ID` | `nx r2:sync fluent-emoji` | CI **variable**, `production` environment | yes | the tool exits 1 with `r2.config.missing` naming it, before any request |
 | `R2_BUCKET` | same | CI **variable**, `production` environment | yes | same. Value is `ui-sdk-fluent-emoji-production`, from `terraform output` |
-| `R2_ACCESS_KEY_ID` + `R2_SECRET_ACCESS_KEY` | same | CI env secrets, `production` environment | yes | **both hold the placeholder `REPLACE_ME` today.** So the run does not report a missing variable - it reports `r2.failed` with a signature error from R2. Replace with an Object Read & Write token scoped to that one bucket; an Admin token cannot be bucket-scoped and would carry account-wide R2 write. |
+| `R2_ACCESS_KEY_ID` + `R2_SECRET_ACCESS_KEY` | same | CI env secrets, `production` environment | yes | the wrapper names them and exits 1 before rclone starts. A **wrong** value fails differently and later - rclone reports a signature error per object, so the job goes red mid-transfer rather than at the first line. The token is Object Read & Write scoped to that one bucket; an Admin token cannot be bucket-scoped and would carry account-wide R2 write. |
 
 Environments: `development`, `production` - the branch name is the environment name, so
 `cd.yml` deploys the pushed branch to the environment it is named after.

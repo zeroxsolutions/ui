@@ -79,14 +79,6 @@ setFluentEmojiBase('https://fluent-emoji.zeroxsolutions.com');
 //   https://fluent-emoji.zeroxsolutions.com/anim/1f389.webp
 ```
 
-**That bucket is empty as of 2026-08-21** - it is provisioned and serving over a valid
-certificate, but the first sync has not run, so every key 404s and every glyph falls
-back to the native one. Until it does, host the tree yourself:
-
-```sh
-aws s3 sync assets s3://my-bucket/fluent-emoji     # or Cloudflare R2 / GCS / ...
-```
-
 **A different host per style** is still available where you want one - `anim` remote and
 the static styles from your own public directory, say:
 
