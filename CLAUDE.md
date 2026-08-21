@@ -44,8 +44,8 @@ its cost are here.
   370 MB to serve the same bytes; local dev reads the same public URL.
   `development.tfvars.example` was deleted rather than left empty.
 - **The artwork ships on its own workflow, not through `cd.yml`.**
-  `fluent-emoji-cd.yml` runs `nx r2:sync fluent-emoji` on a push to `production` that
-  touches `packages/fluent-emoji/assets/**`. It is the one workflow here that names a
+  `fluent-emoji-cd.yml` runs `nx r2:sync fluent-emoji` - a wrapper over `rclone copy` - on a
+  push to `production` that touches `packages/fluent-emoji/assets/**`. It is the one workflow here that names a
   project, a path and a branch, which is exactly why it is not a job in `cd.yml` - that
   file stays identifier-free so it copies between repos. `nx-deploy` is also the wrong
   shape: it forwards only the two Cloudflare deploy secrets, so an R2 key it does not
@@ -62,7 +62,9 @@ its cost are here.
 - `packages/icons` (`@zeroxsolutions/icons`) - publishable.
 - `iac/` - Terraform root, standalone (**not** an nx project). See `iac/README.md`.
 
-Toolchain is pinned in `.tool-versions`: nodejs 24.14.1, pnpm 10.33.0.
+Toolchain is pinned in `.tool-versions`: nodejs 24.14.1, pnpm 10.33.0, terraform 1.15.8,
+rclone 1.75.0. mise installs all four, in CI too, so `iac/` and the R2 sync run the versions
+this file names rather than whatever the machine happens to carry.
 
 ## Configuration
 

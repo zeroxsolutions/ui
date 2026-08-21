@@ -31,13 +31,9 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "{projectRoot}",
-          "command": "node tools/r2-sync/main.ts"
+          "command": "./tools/r2-sync.sh"
         }
       }
     }
-  },
-  "devDependencies": {
-    "@aws-sdk/client-s3": "^3.1115.0",
-    "sharp": "^0.35.2"
   }
 }

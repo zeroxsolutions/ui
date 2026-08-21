@@ -27,7 +27,7 @@ alternative that looks equally reasonable from the diff alone.
 | Environments | `production` workspace only | The artwork is byte-identical in every environment, so a `development` bucket would duplicate 370 MB to serve the same bytes. Consumers point local dev at the same public URL. |
 | Hostname | `fluent-emoji.zeroxsolutions.com` | One R2 custom domain maps to exactly one bucket and serves from the bucket root, so `cdn.zeroxsolutions.com/fluent-emoji/*` is not reachable without putting a Worker in front. A dedicated bucket therefore forces a dedicated hostname. |
 | How consumers learn the base | an env var per consuming app | Exporting a constant from the package, or changing `DEFAULT_BASE`, would make the package the source of truth but couples every consumer's asset host to a package release. |
-| Sync implementation | Node + `@aws-sdk/client-s3` | `aws4fetch` means hand-rolling `ListObjectsV2` XML parsing, pagination and retry - the exact code whose failure mode is silent (a dropped page reads as "not uploaded yet"). **The reason given here for ruling out `rclone` has expired**: it was "a binary outside `.tool-versions`", true under asdf and false since the repo moved to mise, which pins `rclone` from `aqua:rclone/rclone`. What still separates them is `rclone sync` deleting extra remote files by default, against this tool's `--prune`-off default and its refusal to prune on an empty local list. Re-open the choice on that, not on the toolchain. |
+| Sync implementation | `rclone copy`, pinned in `.tool-versions` | Superseded 2026-08-21. This first read `Node + @aws-sdk/client-s3`, ruling out `rclone` as "a binary outside `.tool-versions`" - true under asdf, false since the repo moved to mise, which pins it from `aqua:rclone/rclone`. The SDK route then cost a day to an S3-compat quirk (below) of exactly the kind rclone absorbs upstream. `aws4fetch` stays ruled out for the original reason: hand-rolled `ListObjectsV2` pagination fails silently, a dropped page reading as "not uploaded yet". |
 | Credentials | read from `process.env`, nothing else | `--env-file` makes a missing file exit 9 with an error about a file rather than a credential; `--env-file-if-exists` only pays off with startup validation, which is the part actually worth having. |
 | Trigger | CI, on a push to `production` touching `assets/` or the tool | The artwork is pre-generated and changes rarely, so an unfiltered job would list the whole bucket on every push to learn nothing moved. A path filter costs nothing when it does not. Running it by hand stays available through `workflow_dispatch` and the nx target. |
 
@@ -139,44 +139,43 @@ Depends on phase 1: the bucket name and public URL come from `terraform output`.
 
 ### Units
 
-| File | Responsibility | Pure |
-| --- | --- | --- |
-| `packages/fluent-emoji/tools/r2-sync/sync-plan.ts` | file path -> object key, extension -> content type, and `(local manifest, remote manifest) -> { upload, skip, orphan }` | yes |
-| `packages/fluent-emoji/tools/r2-sync/sync-plan.spec.ts` | its tests | |
-| `packages/fluent-emoji/tools/r2-sync/map-with-concurrency.ts` | run N tasks at a time, results in input order | yes |
-| `packages/fluent-emoji/tools/r2-sync/map-with-concurrency.spec.ts` | its tests - the bound is the property, and nothing else can show it | |
-| `packages/fluent-emoji/tools/r2-sync/main.ts` | walk `assets/` and stream MD5, paginate `ListObjectsV2`, `PutObject`, parse flags, validate env, structured logs, exit code | no |
+| File | Responsibility |
+| --- | --- |
+| `packages/fluent-emoji/tools/r2-sync.sh` | map the four documented variables onto rclone's env config, then `rclone copy` |
 
-The split exists so the decision logic is testable without a network or credentials.
+Nothing else. The decision logic that used to be worth unit-testing - which files differ,
+which are orphans, what content type a key carries - is rclone's, and testing it here
+would be testing rclone.
 
 ### How incremental works
 
-R2 returns the object MD5 as the ETag for objects written by a single `PutObject`. The
-tool calls `PutObject` directly and never `lib-storage`'s multipart `Upload`, so the
-ETag is an MD5 by construction rather than by luck about file sizes - though the largest
-asset is 1.33 MB (`flat/1f1f8-1f1fb.svg`, measured 2026-08-20), far under any multipart
-threshold. So the plan compares the local file's MD5 against the remote ETag: equal
-means skip. Listing 9217 objects is about ten
-paginated calls; the second sync onward uploads nothing.
+`--checksum` compares MD5 rather than modification time. That flag is load-bearing, not a
+refinement: a checkout writes fresh mtimes on all 9217 files, so the default comparison
+would re-upload the whole 370 MB every run.
 
-**The client must set `requestChecksumCalculation: 'WHEN_REQUIRED'`.** The SDK defaults to
-`WHEN_SUPPORTED` and puts a CRC32 header on every request beside the `Content-MD5` the tool
-sends; R2 accepts one non-default checksum and refuses the pair with *"You can only specify
-one non-default checksum at a time"* - all 9217 objects, measured 2026-08-21 on run
-32503028929. Confirmed against a local HTTP server rather than against R2: the default sends
-`content-md5` + `x-amz-checksum-crc32`, `WHEN_REQUIRED` sends `content-md5` alone.
+`copy`, never `sync`. `sync` deletes whatever the remote holds and the source does not, so
+an empty or mistyped `assets/` empties the bucket - the failure the previous tool guarded
+against by refusing `--prune` on an empty local list. `copy` cannot express it. Removing an
+object from the bucket is a deliberate manual step, and there is no `--prune` any more.
 
-`--dry-run` prints the plan and uploads nothing. `--prune` deletes remote objects absent
-from `assets/`, and is **off by default** - adding a file is safe, removing one is not.
-The planner reports every remote key as an orphan when the local list is empty, which is
-what a mistyped assets directory produces, so `main.ts` refuses `--prune` on an empty
-local list rather than emptying the bucket.
+`--dry-run` is rclone's own, and `nx r2:sync fluent-emoji -- --dry-run` reaches it.
+
+**Why the SDK route was abandoned, kept because it is the evidence for the decision above.**
+`@aws-sdk/client-s3` defaults `requestChecksumCalculation` to `WHEN_SUPPORTED`, adding a
+CRC32 header beside the `Content-MD5` the tool sent. R2 accepts one non-default checksum and
+refused the pair - *"You can only specify one non-default checksum at a time"*, all 9217
+objects, run 32503028929 on 2026-08-21. One client option fixed it (confirmed against a local
+HTTP server: the default sends `content-md5` + `x-amz-checksum-crc32`, `WHEN_REQUIRED` sends
+`content-md5` alone). The fix was cheap; finding it was not, and it is the second such quirk
+this account already works around - `iac/backend.config` carries `skip_s3_checksum = true`
+for the Terraform S3 backend.
 
 ### Configuration
 
-Read from the environment; nothing loads a file. `main.ts` validates all four at startup
-and exits non-zero naming the missing one, which is what keeps a forgotten variable from
-surfacing as an opaque 403.
+Read from the environment; nothing loads a file. The wrapper checks all four before
+invoking rclone and exits non-zero naming every one that is missing, which is what keeps a
+forgotten variable from surfacing as an opaque 403. rclone's own config takes seven keys;
+mapping them in the wrapper is what keeps this table - and `CLAUDE.md`'s - at four rows.
 
 | Variable | Use |
 | --- | --- |
@@ -193,7 +192,9 @@ In CI the four split by disclosure, not by habit: `R2_ACCOUNT_ID` and `R2_BUCKET
 nothing and are **variables**, so their values read plainly in a run instead of as `***`;
 only the key pair are secrets. All four live in the `production` environment.
 
-Logs are structured JSON on stdout and never include a key or secret.
+rclone's stats print on one line every 30s. `--stats-log-level NOTICE` is needed for them
+to appear at all: stats log at INFO while rclone logs at NOTICE, so the default is a silent
+run until the summary.
 
 ### nx target
 
@@ -201,7 +202,7 @@ Logs are structured JSON on stdout and never include a key or secret.
 // packages/fluent-emoji/package.json -> nx.targets
 "r2:sync": {
   "executor": "nx:run-commands",
-  "options": { "cwd": "{projectRoot}", "command": "node tools/r2-sync/main.ts" }
+  "options": { "cwd": "{projectRoot}", "command": "./tools/r2-sync.sh" }
 }
 ```
 
@@ -212,9 +213,8 @@ key on. So the target is invoked as `nx r2:sync fluent-emoji`; the scoped form f
 is addressed by its scoped `package.json#name`), and predates this design - fixing it
 means renaming the project, which is its own change with its own blast radius.
 
-Node 24.14.1 strips types natively, so the script runs without `jiti`, `tsx` or a build
-step. No `dependsOn: ["^build"]`: the sync reads `assets/`, which is the committed
-source, not the `dist/assets/` copy the vite plugin makes.
+No `dependsOn: ["^build"]`: the sync reads `assets/`, the committed source, not the
+`dist/assets/` copy the vite plugin makes.
 
 **Deviation from `deploy-via-nx-per-env`.** That rule puts environments under
 `configurations` with `defaultConfiguration: development`. There is one environment here
@@ -223,17 +223,8 @@ missing block reads as a choice rather than an omission.
 
 ### Gate coverage
 
-`tools/**` had to be named in two places or the new code would be invisible to the gate,
-and both now name it: `vite.config.mts` `test.include`, and `tsconfig.spec.json`
-`include` - `tsconfig.lib.json` has `rootDir: "src"` and never covers `tools/`.
-
-`tsconfig.spec.json` also carries `allowImportingTsExtensions` + `emitDeclarationOnly`,
-because `main.ts` runs on node's type stripping: node resolves ESM its own way, so
-`./sync-plan` and `./sync-plan.js` both fail and only `./sync-plan.ts` loads (measured on
-node 24.14.1).
-
-Tests cover: identical ETag skips, quoted ETag skips, differing ETag uploads, absent
-remote uploads, remote key with no local file becomes an orphan, empty local list orphans
-everything, content type follows the extension and refuses an inherited property name,
-object key follows the path, and the concurrency limiter's bound. Each was seen failing
-for its own reason first.
+None, and that is the trade. A shell script that shells out to rclone has nothing the unit
+gate can hold; `tools/**` is out of `vite.config.mts` `test.include` and out of
+`tsconfig.spec.json` `include` again. What replaced 264 lines of tested TypeScript is a
+30-line wrapper whose only logic is the four-variable check. The sync is verified by
+running it.
