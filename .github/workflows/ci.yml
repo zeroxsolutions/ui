@@ -6,10 +6,8 @@
 #   e2e  - gate-only. The hook's set stays a SUBSET of the gate's, never the
 #          reverse, so a target that starts a runtime lands here instead.
 #
-# Nothing checks `iac/` any more: it is outside the nx graph, so neither job
-# reaches it, and the pre-commit hook formats with prettier, which does not read
-# `.tf`. The job that ran `terraform fmt -check` was removed after ten runs that
-# never once failed - see the commit that removed it.
+# Nothing checks `iac/`: it is outside the nx graph, so neither job reaches it,
+# and the pre-commit hook formats with prettier, which does not read `.tf`.
 #
 # Nothing here names a project, path, or branch, so the file copies unchanged.
 name: ci
@@ -31,4 +29,3 @@ jobs:
     uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
       targets: e2e
-
