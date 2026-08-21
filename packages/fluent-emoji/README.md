@@ -69,7 +69,7 @@ the resolver appends `/<style>/<codepoint>.<ext>` to one root, so one base cover
 five styles and `setFluentEmojiStyleBase` becomes unnecessary.
 
 Inside ZeroXSolutions that host is `https://fluent-emoji.zeroxsolutions.com`, an R2
-bucket this repo publishes to (`nx r2:sync fluent-emoji`).
+bucket this repo publishes to (`nx rclone:sync fluent-emoji`).
 
 ```ts
 import { setFluentEmojiBase } from '@zeroxsolutions/fluent-emoji';

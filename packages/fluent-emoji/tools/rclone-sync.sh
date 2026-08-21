@@ -10,11 +10,11 @@ set -euo pipefail
 # rclone reaches AWS and returns 403, which reads as a bad credential; with no bucket the
 # destination is bare `:s3:` and it returns `input member Key must not be empty`.
 missing=()
-for name in RCLONE_S3_ENDPOINT RCLONE_S3_ACCESS_KEY_ID RCLONE_S3_SECRET_ACCESS_KEY R2_BUCKET; do
+for name in RCLONE_S3_ENDPOINT RCLONE_S3_ACCESS_KEY_ID RCLONE_S3_SECRET_ACCESS_KEY S3_BUCKET; do
   [ -n "${!name:-}" ] || missing+=("$name")
 done
 if [ ${#missing[@]} -gt 0 ]; then
-  echo "r2.config.missing: ${missing[*]}" >&2
+  echo "rclone.config.missing: ${missing[*]}" >&2
   exit 1
 fi
 
@@ -30,7 +30,7 @@ fi
 #
 # Stats print at INFO by default while rclone logs at NOTICE, so they need the level
 # lowered or the run is silent until it ends.
-exec rclone copy assets ":s3:${R2_BUCKET}" \
+exec rclone copy assets ":s3:${S3_BUCKET}" \
   --s3-provider Cloudflare \
   --s3-no-check-bucket \
   --checksum \

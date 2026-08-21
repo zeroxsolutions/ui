@@ -27,11 +27,11 @@
   "nx": {
     "name": "fluent-emoji",
     "targets": {
-      "r2:sync": {
+      "rclone:sync": {
         "executor": "nx:run-commands",
         "options": {
           "cwd": "{projectRoot}",
-          "command": "./tools/r2-sync.sh"
+          "command": "./tools/rclone-sync.sh"
         }
       }
     }

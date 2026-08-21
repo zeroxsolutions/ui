@@ -41,7 +41,7 @@ jobs:
       targets: wrangler:deploy
       environment: ${{ github.ref_name }}
 
-  # Publish whatever the workspace declares an `r2:sync` target for. Identifier-free like
+  # Publish whatever the workspace declares an `rclone:sync` target for. Identifier-free like
   # the rest of this file: `run-many` matches no project in a repo that declares none and
   # exits 0, the same way `deploy` does.
   #
@@ -51,12 +51,12 @@ jobs:
   #
   # Not a job on `nx-deploy`: that workflow forwards only the two Cloudflare deploy secrets,
   # so an R2 key it does not name never reaches the process, and it always passes `-c <env>`,
-  # which `r2:sync` has no configuration for.
+  # which `rclone:sync` has no configuration for.
   #
   # This runs on every push to `production`, where a dedicated workflow could have filtered
   # by path - GitHub has `paths:` at workflow level and nothing at job level. The cost is one
   # listing and one local pass over the tree to discover nothing moved.
-  r2-sync:
+  rclone-sync:
     needs: [gate]
     if: github.ref_name == 'production'
     runs-on: self-hosted
@@ -77,5 +77,5 @@ jobs:
           RCLONE_S3_ENDPOINT: ${{ vars.RCLONE_S3_ENDPOINT }}
           RCLONE_S3_ACCESS_KEY_ID: ${{ secrets.RCLONE_S3_ACCESS_KEY_ID }}
           RCLONE_S3_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_S3_SECRET_ACCESS_KEY }}
-          R2_BUCKET: ${{ vars.R2_BUCKET }}
-        run: pnpm nx run-many -t r2:sync
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+        run: pnpm nx run-many -t rclone:sync

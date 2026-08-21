@@ -63,14 +63,21 @@ its cost are here.
   the class of it upstream. `copy` and never `sync`: sync deletes whatever the source lacks,
   so a mistyped `assets/` would empty the bucket. There is no prune - removing an object is
   manual.
-- **`r2:sync` is invoked as `nx r2:sync fluent-emoji`, never by the scoped name.**
+- **Nothing in the sync is named for R2, so moving off it changes values and not names.**
+  The target names its tool the way `wrangler:deploy` does, the variables are rclone's own
+  or name the S3 API, and the only R2-specific things left are two flag values
+  (`--s3-provider Cloudflare`, and `--s3-no-check-bucket` for an object-scoped token) plus
+  the endpoint's value. A name that says `r2` would have to be renamed everywhere the day
+  the store changes, and until that day it quietly claims the code knows something about R2
+  that it does not.
+- **`rclone:sync` is invoked as `nx rclone:sync fluent-emoji`, never by the scoped name.**
   `packages/fluent-emoji/package.json` sets `nx.name`, so the graph keys on `fluent-emoji`
   and the scoped form fails with `Could not find project`. A deviation from
   `naming-projects` that predates this work; fixing it means renaming the project. The
   target also carries no `configurations` block where `deploy-via-nx-per-env` prescribes one
   per environment - there is one environment here, so there is nothing to configure.
-- **The artwork ships from `cd.yml`'s own `r2-sync` job, on `production` only.** It runs
-  `nx run-many -t r2:sync`, which names no project, so the job is copyable to the other
+- **The artwork ships from `cd.yml`'s own `rclone-sync` job, on `production` only.** It runs
+  `nx run-many -t rclone:sync`, which names no project, so the job is copyable to the other
   repos the way the rest of that file is - but **until it is copied this repo's `cd.yml` is
   the one that differs**; the other 11 are still byte-identical to each other. It lived in
   its own workflow file first to get a `paths:` filter, which GitHub offers at workflow
@@ -100,8 +107,8 @@ One row per environment input (see `env-input-inventory`).
 | `CLOUDFLARE_API_TOKEN` | deploy job (reusable `nx-deploy.yml`) | CI env secret, reaching the job through `secrets: inherit`, scoped by the `development` / `production` environment | not yet | **it is already absent** - no environment here holds it (the `production` environment holds only the R2 rows below), so the deploy job runs with the value empty (measured 2026-08-21). Harmless only while `wrangler:deploy` matches no project; the first real deploy target 401s. |
 | R2 backend keys | `terraform init` | `iac/backend.config` (gitignored, `*.example` committed) | yes | state cannot be read or written; no plan runs |
 | `cloudflare_api_key` + `cloudflare_email` | `terraform apply` | `iac/<env>.tfvars` (gitignored, `*.example` committed) | yes | the provider 401s at plan time. The root also accepts a scoped `cloudflare_api_token` instead; it runs on the account's Global API Key because that is the credential the org's other roots already use. |
-| `RCLONE_S3_ENDPOINT` | `nx r2:sync fluent-emoji` | CI **variable**, `production` environment | yes | the wrapper exits 1 with `r2.config.missing` naming it, before any request. Without that guard rclone reaches **AWS** and returns 403, which reads as a bad credential (measured 2026-08-22). Value is `https://<account-id>.r2.cloudflarestorage.com` |
-| `R2_BUCKET` | same | CI **variable**, `production` environment | yes | same guard. The one input that keeps a house name, because rclone has no variable for it: there is no `--s3-bucket` flag, and `RCLONE_S3_BUCKET` is read by nothing - set it and leave the destination bare and rclone calls `ListBuckets` on the root (measured 2026-08-22). The bucket is the destination path, `:s3:<bucket>`. Value is `ui-sdk-fluent-emoji-production`, from `terraform output` |
+| `RCLONE_S3_ENDPOINT` | `nx rclone:sync fluent-emoji` | CI **variable**, `production` environment | yes | the wrapper exits 1 with `rclone.config.missing` naming it, before any request. Without that guard rclone reaches **AWS** and returns 403, which reads as a bad credential (measured 2026-08-22). Value is `https://<account-id>.r2.cloudflarestorage.com` |
+| `S3_BUCKET` | same | CI **variable**, `production` environment | yes | same guard. The one input that keeps a house name, because rclone has no variable for it: there is no `--s3-bucket` flag, and `RCLONE_S3_BUCKET` is read by nothing - set it and leave the destination bare and rclone calls `ListBuckets` on the root (measured 2026-08-22). The bucket is the destination path, `:s3:<bucket>`. Value is `ui-sdk-fluent-emoji-production`, from `terraform output` |
 | `RCLONE_S3_ACCESS_KEY_ID` + `RCLONE_S3_SECRET_ACCESS_KEY` | same | CI env secrets, `production` environment | yes | same guard. A **wrong** value fails differently and later - rclone reports a signature error per object, so the job goes red mid-transfer rather than at the first line. The token is Object Read & Write scoped to that one bucket; an Admin token cannot be bucket-scoped and would carry account-wide R2 write. |
 
 Environments: `development`, `production` - the branch name is the environment name, so
