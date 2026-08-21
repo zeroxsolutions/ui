@@ -27,7 +27,7 @@ its cost are here.
 - **No deployable target exists.** No project carries a `wrangler.*` config or a
   `wrangler:deploy` target, yet `cd.yml` asks `nx-deploy` for exactly that. The job is a
   **green no-op**, not a red pipeline - `nx run-many -t wrangler:deploy` matches no project and
-  exits 0 with `No tasks were run` (measured on run 32446129678, branch `development`). That is
+  exits 0 with `No tasks were run` (measured 2026-08-21 on a `development` push). That is
   the defect: nothing reports that the registry never shipped. Either give `registry-ui` a real
   deploy target or drop the job.
 - **`iac/` provisions exactly one thing: the artwork bucket.** The root composes only
