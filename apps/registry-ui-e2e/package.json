@@ -3,8 +3,22 @@
   "version": "0.0.1",
   "private": true,
   "nx": {
-    "implicitDependencies": [
-      "@zeroxsolutions/registry-ui"
-    ]
+    "implicitDependencies": ["@zeroxsolutions/registry-ui"],
+    "targets": {
+      "install-browsers": {
+        "executor": "nx:run-commands",
+        "cache": false,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "playwright install"
+        }
+      },
+      "e2e": {
+        "dependsOn": [
+          { "projects": ["@zeroxsolutions/registry-ui"], "target": "dev" },
+          "install-browsers"
+        ]
+      }
+    }
   }
 }
