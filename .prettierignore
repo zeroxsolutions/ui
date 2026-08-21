@@ -1,6 +1,42 @@
-# Add files here to ignore them from prettier formatting
 /dist
 /coverage
 /.nx/cache
 /.nx/workspace-data
-.nx/self-healing
+/.nx/migrate-runs
+/.nx/self-healing
+
+# pnpm rewrites it on every install, so formatting is undone by the next `pnpm add`.
+/pnpm-lock.yaml
+
+# Stamped here from elsewhere - a pinned rules submodule, vendored skills, CLI-regenerated
+# commands - so a formatted copy diffs against its source until the next stamp reverts it.
+/.claude
+
+# Terraform's provider cache: vendored and credential-bearing. Unanchored on purpose -
+# `terraform init` inside a module writes one there too.
+**/.terraform
+
+# Mirrors .gitignore, because prettier does not read it.
+dist
+out
+out-tsc
+tmp
+.next
+.open-next
+.wrangler
+test-output
+.playwright-mcp
+
+# drizzle-kit rewrites the SQL and the meta snapshots wholesale on the next migration.
+# drizzle.config.ts is hand-authored and is deliberately not in here.
+**/drizzle/
+
+# Each carries its own "do not edit" header; `wrangler types` and Next rewrite them per build.
+**/worker-configuration.d.ts
+**/cloudflare-env.d.ts
+**/next-env.d.ts
+
+# Loaded into every agent session, and prettier pads markdown table columns - measured once at
+# 29% of the file in alignment whitespace alone. Re-measure before removing these two lines.
+/CLAUDE.md
+/CLAUDE.template.md
