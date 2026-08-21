@@ -28,6 +28,6 @@
     "name": "fluent-emoji"
   },
   "devDependencies": {
-    "sharp": "^0.35.2"
+    "sharp": "^0.35.3"
   }
 }
