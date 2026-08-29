@@ -1,15 +1,11 @@
-# The pull-request gate. Two jobs:
+# The pull-request gate. The shared workflow scopes each target set with `affected` and
+# sweeps instead when no base commit resolves.
 #
-#   gate - the shared `nx-gate` workflow, same targets as the pre-commit hook
-#          but scoped by `affected` (the hook sweeps; the gate re-verifies what
-#          the change reaches - keep the asymmetry).
-#   e2e  - gate-only. The hook's set stays a SUBSET of the gate's, never the
-#          reverse, so a target that starts a runtime lands here instead.
+# `iac/` is checked by nothing here: it is outside the nx graph, and the pre-commit hook
+# formats with prettier, which does not read `.tf`.
 #
-# Nothing checks `iac/`: it is outside the nx graph, so neither job reaches it,
-# and the pre-commit hook formats with prettier, which does not read `.tf`.
-#
-# Nothing here names a project, path, or branch, so the file copies unchanged.
+# No project and no path is named, and the branch list carries both default-branch
+# spellings, so the file copies to another repository unchanged.
 name: ci
 
 on:
@@ -33,8 +29,8 @@ jobs:
     with:
       targets: lint typecheck build test
 
-  # Separate from `gate` so its cost is visible and its failure is legible on its
-  # own. `affected` runs it only for changes that can reach it (ci-nx-affected-gates).
+  # Its own job because it starts a Workers runtime: too slow to run on every commit, and
+  # a failure here is legible without reading the gate's log.
   e2e:
     uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
