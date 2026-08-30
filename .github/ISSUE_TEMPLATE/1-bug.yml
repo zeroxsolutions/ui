@@ -1,12 +1,9 @@
-# Area options below are worker ROLES, not project names: roles are fixed for
-# every product by `naming-projects`, so adding a worker never requires editing
-# this file. Never replace them with concrete project names.
-#
-# No `labels:` key on purpose - a label referenced here but absent from the
-# repository is silently skipped, and label sets differ per product. Seed labels
-# per repository instead.
+# The bug intake form. `labels:` names only what GitHub creates in every repository:
+# a label listed here that the repository lacks is not added to the issue, so naming
+# anything else would make the file product-specific.
 name: Bug report
 description: Something behaves differently from what the specs or rules require.
+labels: [bug]
 body:
   - type: markdown
     attributes:
@@ -14,23 +11,8 @@ body:
         For a change to existing behaviour, or new work, use the change request
         template instead - this one is for something that is already wrong.
 
-  - type: dropdown
-    id: area
-    attributes:
-      label: Area
-      description: Which part of the workspace does this sit in?
-      options:
-        - edge gateway (*-gateway)
-        - HTTP service (*-service)
-        - message consumer (*-consumer)
-        - scheduled job (*-job)
-        - frontend app
-        - shared package (packages/*)
-        - infrastructure (iac/)
-        - workspace / tooling
-        - not sure
-    validations:
-      required: true
+        The title states the problem, not the fix, in under 60 characters. See
+        CONTRIBUTING.md.
 
   - type: dropdown
     id: environment

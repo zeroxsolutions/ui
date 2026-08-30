@@ -2,15 +2,19 @@
 # out when the work is picked up - do not restate them here, or the same
 # decision ends up with two sources of truth.
 #
-# No `labels:` key on purpose - see the note in 1-bug.yml.
+# `labels:` names only a GitHub default - see the note in 1-bug.yml.
 name: Change request
 description: New work, or a change to existing behaviour.
+labels: [enhancement]
 body:
   - type: markdown
     attributes:
       value: |
         Capture the problem here. The design and plan get written when the work
         starts - so keep this short and leave the solution shape to that work.
+
+        That applies to the title too: it states the problem, not the solution,
+        in under 60 characters. See CONTRIBUTING.md.
 
   - type: textarea
     id: problem
@@ -19,24 +23,6 @@ body:
       description: >
         The situation today and why it is a problem. Not the solution - that is
         the change proposal's job.
-    validations:
-      required: true
-
-  - type: dropdown
-    id: area
-    attributes:
-      label: Area most affected
-      options:
-        - edge gateway (*-gateway)
-        - HTTP service (*-service)
-        - message consumer (*-consumer)
-        - scheduled job (*-job)
-        - frontend app
-        - shared package (packages/*)
-        - infrastructure (iac/)
-        - workspace / tooling
-        - architecture rules (.claude/rules/)
-        - not sure
     validations:
       required: true
 
