@@ -16,17 +16,20 @@ problem, so the two are never the same sentence.
 
 ## Issue labels
 
-The labels GitHub creates in every repository are the whole classification here,
-and `bug`, `enhancement`, `documentation` and `question` are the type among them.
+The labels GitHub creates in every repository are the only labels here, and
+`bug`, `enhancement`, `documentation` and `question` are the type among them.
 An issue carries one type; the two issue forms apply `bug` and `enhancement` for
 you.
 
-There is no priority label and no area label, on purpose. Each is an axis that
-starts paying for itself once the queue is longer than one person can read, and
-this one is not. Whichever is added first is written with the axis inside the
-label - `priority: high`, `area: booking` - because a GitHub label namespace is
-flat, unlike Bugzilla or Google's issue tracker where Priority and Component are
-form fields that carry the axis name themselves.
+There is no priority label and no area label. Priority is not a label here at
+all - GitHub carries it as an issue field on the organisation, so it is a column
+that names the axis and the value goes in bare. Set it on the issue itself.
+
+An area has no such field, and a label axis starts paying for itself only once
+the queue is longer than one person can read, which this one is not. If one is
+ever added it is written with the axis inside the label - `area: booking` -
+because a GitHub label namespace is flat, unlike Bugzilla or Google's issue
+tracker where Component is a form field carrying the axis name itself.
 
 An area names a part of the product a person reporting a problem can recognise:
 booking, payments, search. Never a project, package or folder - nobody filing an
