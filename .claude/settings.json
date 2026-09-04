@@ -12,7 +12,7 @@
     "superpowers@claude-plugins-official": true,
     "ts-js-best-practices@zeroxsolutions": true,
     "context7@claude-plugins-official": true,
-    "nx-cloudflare-in-house@zeroxsolutions": true,
+    "cloudflare-in-house@zeroxsolutions": true,
     "claude-md-management@claude-plugins-official": true
   }
 }
