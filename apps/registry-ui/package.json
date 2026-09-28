@@ -73,6 +73,9 @@
   },
   "nx": {
     "targets": {
+      "build": {
+        "dependsOn": ["^build", "shadcn-build"]
+      },
       "shadcn-build": {
         "executor": "nx:run-commands",
         "outputs": [
