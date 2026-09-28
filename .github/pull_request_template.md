@@ -10,11 +10,10 @@ not exist. This template therefore asks only for what no gate can check.
 
 ## Doctrine audit
 
-<!-- Required by `landing-a-change`: map the staged diff against the skills that
-     govern the paths it touches and state the result - the commit-time reminder names
-     them, and `reviewing-a-diff` says what counts as a finding. "Compliant" is a
-     valid answer; so is a list of what you fixed. An empty section means the audit
-     did not happen. -->
+<!-- Map the staged diff against the skills that govern the paths it touches and
+     state the result - the commit-time reminder names them, and `reviewing-a-diff`
+     says what counts as a finding. "Compliant" is a valid answer; so is a list of
+     what you fixed. An empty section means the audit did not happen. -->
 
 ## Risk surface
 

@@ -10,6 +10,8 @@ export default [
       '**/out-tsc',
       '**/vite.config.*.timestamp*',
       '**/vitest.config.*.timestamp*',
+      '**/worker-configuration.d.ts',
+      '**/cloudflare-env.d.ts',
       '**/test-output',
       '**/.next',
       '**/.open-next',

@@ -38,13 +38,13 @@ test-output
 # from an upstream change by `shadcn diff`. `ui` is a directory the CLI owns; the other two it
 # placed by kind rather than by directory, into buckets that also hold each app's own files, so
 # those are named file by file. Globbed over `apps/*` because the set is the same in every app
-# carrying a components.json, and the entry has to exist before the first `shadcn add` rather
-# than after the formatter has already rewritten what was placed.
+# carrying a components.json, and a new one arrives already covered.
 apps/*/src/components/ui
 apps/*/src/hooks/use-mobile.ts
 apps/*/src/lib/utils.ts
 
-# drizzle-kit rewrites the SQL and the meta snapshots wholesale on the next migration.
+# drizzle-kit writes everything under it - the migration SQL, the meta snapshots, the
+# journal - so a formatted copy diffs against what the tool writes next.
 # drizzle.config.ts is hand-authored and is deliberately not in here.
 **/drizzle/
 
