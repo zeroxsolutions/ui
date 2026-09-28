@@ -3,8 +3,8 @@
 Infrastructure-as-code for this platform: it provisions the Cloudflare / Neon /
 Firebase resources the Workers consume as **bindings**. A standalone Terraform
 root that lives **inside** this repo but is **not** an nx project — run `terraform`
-here directly, never through `nx`. Governed by the `working-the-terraform-root`,
-`configuring-a-worker` and `writing-a-drizzle-schema` skills.
+here directly, never through `nx`. Governed by the `working-the-infrastructure-root`,
+`configuring-a-worker` and `writing-a-table-schema` skills.
 
 This README is the **same across every product's iac root** — it documents the
 shared concept only. The concrete resources a given root declares (which
@@ -17,21 +17,19 @@ enumerates them, so it can't drift.
 - **One standalone root, a workspace per environment.** Every resource name is
   namespaced by `terraform.workspace` (full-word `development` / `production`,
   never `dev`/`prod`), so two envs never collide in one account. Select the
-  workspace and pass its matching var-file together (`working-the-terraform-root`).
+  workspace and pass its matching var-file together (`working-the-infrastructure-root`).
 - **Per-provider modules.** A root composes one module per provider from the shared
   modules repo (Cloudflare, Neon, Google, Clerk, ...); which ones a given root
   composes, and what each provisions, is visible in its own `main.tf` - this README
-  never enumerates them. A **Pages project** with `source` set connects a
-  Git repo so Cloudflare builds+deploys on push (Pages Functions run as a Worker);
-  authorize the GitHub/GitLab app on the account once first. Workers Builds (for
-  standalone backend Workers) is dashboard-only, not Terraform (provider gap
-  cloudflare/terraform-provider-cloudflare#6924). Add resources by extending a
-  module, new providers by adding a per-provider module; the set is per-root, not a
-  ceiling. The Worker/Pages infrastructure (project, bindings, routes, domains, build
-  setup) is owned by Terraform here; wrangler only deploys code - see
-  `working-the-terraform-root`.
+  never enumerates them. Add resources by extending a module, new providers by
+  adding a per-provider module; the set is per-root, not a ceiling.
+- **The root owns what a binding resolves against, never a worker.** Databases,
+  queues, buckets, key-value namespaces, poolers and DNS are applied here, by a
+  human. A worker or a hosted site - its code, bindings, routes, custom domains and
+  crons - is declared in its own `wrangler.jsonc` and shipped by its deploy target
+  in CI (`working-the-infrastructure-root`).
 - **Remote, secret-free state.** State lives in an S3-compatible remote backend
-  (Cloudflare R2) and is never committed (`working-the-terraform-root`). Provisioning
+  (Cloudflare R2) and is never committed (`working-the-infrastructure-root`). Provisioning
   flows one direction — `apply` emits an id, a worker's `wrangler.jsonc` consumes
   it; config never invents an id (`configuring-a-worker`).
 
@@ -55,7 +53,7 @@ exact set.
 ## Secrets — never committed
 
 `.gitignore` excludes every real value; only `*.example` files are tracked
-(`working-the-terraform-root`). Every root should commit `*.example` templates so the
+(`working-the-infrastructure-root`). Every root should commit `*.example` templates so the
 next person can seed the real files.
 
 - `*.tfvars` — Neon / Cloudflare API tokens.
