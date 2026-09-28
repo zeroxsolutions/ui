@@ -37,9 +37,10 @@ issue can choose between two of those.
 
 ---
 
-The rules under `.claude/rules/` are the authority and carry the reasoning behind
-each line above. This page exists only because GitHub links it from the issue and
-pull request flow, where that directory is not in front of you.
+The `gundam` plugin's skills are the authority and carry the reasoning behind each
+line above - `filing-an-issue` for the fields and labels, `landing-a-change`
+for the commit and PR side. This page exists only because GitHub links it from the
+issue and pull request flow, where a skill is not in front of you.
 
 [mozilla]: https://bugzilla.mozilla.org/page.cgi?id=bug-writing.html
 [cc]: https://www.conventionalcommits.org/

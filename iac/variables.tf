@@ -115,10 +115,9 @@ variable "cloudflare_pages_projects" {
       destination_dir = optional(string)
       build_caching   = optional(bool)
     }))
-    # Pages Functions = an edge Worker; per bounded-context-transport-agnostic the
-    # frontend opens NO database connection, so only edge-legit bindings are exposed
-    # (env, kv, r2, services). Extend for d1/hyperdrive/durable-objects only if a
-    # product genuinely breaks that boundary.
+    # Pages Functions = an edge Worker; the frontend opens NO database connection, so
+    # only edge-legit bindings are exposed (env, kv, r2, services). Extend for
+    # d1/hyperdrive/durable-objects only if a product genuinely breaks that boundary.
     deployment_configs = optional(object({
       production = optional(object({
         compatibility_date  = optional(string)

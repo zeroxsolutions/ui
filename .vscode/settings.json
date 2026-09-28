@@ -20,6 +20,30 @@
     "**/node_modules/**": true,
     "**/dist/**": true,
     "**/out-tsc/**": true,
-    "**/.nx/**": true
+    "**/.nx/**": true,
+    "**/.next/**": true,
+    "**/.open-next/**": true,
+    "**/.wrangler/**": true,
+    "**/.terraform/**": true,
+    "**/.git/objects/**": true,
+    "**/coverage/**": true,
+    "**/test-output/**": true,
+    "**/playwright-report/**": true,
+    "**/.playwright-mcp/**": true,
+    "**/tmp/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/out-tsc": true,
+    "**/.nx": true,
+    "**/.next": true,
+    "**/.open-next": true,
+    "**/.wrangler": true,
+    "**/.terraform": true,
+    "**/coverage": true,
+    "**/test-output": true,
+    "**/playwright-report": true,
+    "**/.playwright-mcp": true
   }
 }

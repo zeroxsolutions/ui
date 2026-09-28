@@ -1,2 +1,6 @@
-pnpm nx format:write --stdin
+# The staged set goes through prettier directly and is re-staged. `--ignore-unknown` is
+# what lets the whole staged list through in one call regardless of extension.
+git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 -r pnpm exec prettier --write --ignore-unknown
+git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 -r git add
+
 pnpm nx run-many -t lint typecheck build test

@@ -1,11 +1,15 @@
-# The pull-request gate. The shared workflow scopes each target set with `affected` and
-# sweeps instead when no base commit resolves.
+# The pull-request gate. Two jobs:
 #
-# `iac/` is checked by nothing here: it is outside the nx graph, and the pre-commit hook
-# formats with prettier, which does not read `.tf`.
+#   gate - the shared `nx-gate` workflow, same targets as the pre-commit hook
+#          but scoped by `affected` (the hook sweeps; the gate re-verifies what
+#          the change reaches - keep the asymmetry).
+#   e2e  - gate-only. The hook's set stays inside the gate's and never the
+#          reverse, so a target that starts a runtime lands here instead.
 #
-# No project and no path is named, and the branch list carries both default-branch
-# spellings, so the file copies to another repository unchanged.
+# Nothing checks `iac/`: it is outside the nx graph, so neither job reaches it,
+# and the pre-commit hook formats with prettier, which does not read `.tf`.
+#
+# Nothing here names a project, path, or branch, so the file copies unchanged.
 name: ci
 
 on:
@@ -14,7 +18,7 @@ on:
     branches: [main, master]
 
 # A superseded gate is worthless: it reports on a commit nobody will ship. Cancelling
-# in-flight is safe HERE and not in `cd.yml` - a gate writes nothing outside its runner,
+# in-flight is safe for a gate and not for `cd.yml` - a gate writes nothing outside its runner,
 # where a half-finished deploy leaves real state behind.
 #
 # `github.ref` separates a pull request (`refs/pull/N/merge`) from a branch push, so a PR
@@ -29,8 +33,9 @@ jobs:
     with:
       targets: lint typecheck build test
 
-  # Its own job because it starts a Workers runtime: too slow to run on every commit, and
-  # a failure here is legible without reading the gate's log.
+  # Separate from `gate` so its cost is visible and its failure is legible on its
+  # own. `affected` runs it only for changes that can reach it, from the base the
+  # shared workflow resolves out of the event payload.
   e2e:
     uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:

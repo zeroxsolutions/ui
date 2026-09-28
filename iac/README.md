@@ -3,9 +3,8 @@
 Infrastructure-as-code for this platform: it provisions the Cloudflare / Neon /
 Firebase resources the Workers consume as **bindings**. A standalone Terraform
 root that lives **inside** this repo but is **not** an nx project — run `terraform`
-here directly, never through `nx`. Governed by `iac-terraform-root`,
-`bindings-not-endpoints`, `tf-state-and-secrets`, and `db-migrations` in
-`.claude/rules/`.
+here directly, never through `nx`. Governed by the `working-the-terraform-root`,
+`configuring-a-worker` and `writing-a-drizzle-schema` skills.
 
 This README is the **same across every product's iac root** — it documents the
 shared concept only. The concrete resources a given root declares (which
@@ -18,7 +17,7 @@ enumerates them, so it can't drift.
 - **One standalone root, a workspace per environment.** Every resource name is
   namespaced by `terraform.workspace` (full-word `development` / `production`,
   never `dev`/`prod`), so two envs never collide in one account. Select the
-  workspace and pass its matching var-file together (`iac-terraform-root`).
+  workspace and pass its matching var-file together (`working-the-terraform-root`).
 - **Per-provider modules.** A root composes one module per provider from the shared
   modules repo (Cloudflare, Neon, Google, Clerk, ...); which ones a given root
   composes, and what each provisions, is visible in its own `main.tf` - this README
@@ -30,22 +29,22 @@ enumerates them, so it can't drift.
   module, new providers by adding a per-provider module; the set is per-root, not a
   ceiling. The Worker/Pages infrastructure (project, bindings, routes, domains, build
   setup) is owned by Terraform here; wrangler only deploys code - see
-  `terraform-owns-infra-wrangler-deploys`.
+  `working-the-terraform-root`.
 - **Remote, secret-free state.** State lives in an S3-compatible remote backend
-  (Cloudflare R2) and is never committed (`tf-state-and-secrets`). Provisioning
+  (Cloudflare R2) and is never committed (`working-the-terraform-root`). Provisioning
   flows one direction — `apply` emits an id, a worker's `wrangler.jsonc` consumes
-  it; config never invents an id (`bindings-not-endpoints`).
+  it; config never invents an id (`configuring-a-worker`).
 
 ## Layout
 
-| Path | Purpose |
-|---|---|
-| `main.tf` | Composes the provider modules this root needs. |
-| `variables.tf` | Root inputs (typed). |
-| `outputs.tf` | The binding ids / config this root exports (see **Outputs**). |
+| Path                              | Purpose                                                                                                                           |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `main.tf`                         | Composes the provider modules this root needs.                                                                                    |
+| `variables.tf`                    | Root inputs (typed).                                                                                                              |
+| `outputs.tf`                      | The binding ids / config this root exports (see **Outputs**).                                                                     |
 | `*.tfvars` (+ `*.tfvars.example`) | The concrete resources this root declares — databases, buckets, queues, DNS, Firebase projects. **The per-root source of truth.** |
-| `backend.config` (+ `.example`) | Remote-state backend (R2) config. |
-| `.terraform.lock.hcl` | Pinned provider versions (committed). |
+| `backend.config` (+ `.example`)   | Remote-state backend (R2) config.                                                                                                 |
+| `.terraform.lock.hcl`             | Pinned provider versions (committed).                                                                                             |
 
 ## Outputs
 
@@ -56,7 +55,7 @@ exact set.
 ## Secrets — never committed
 
 `.gitignore` excludes every real value; only `*.example` files are tracked
-(`tf-state-and-secrets`). Every root should commit `*.example` templates so the
+(`working-the-terraform-root`). Every root should commit `*.example` templates so the
 next person can seed the real files.
 
 - `*.tfvars` — Neon / Cloudflare API tokens.

@@ -6,10 +6,10 @@
 blank_issues_enabled: true
 
 contact_links:
-  - name: Architecture rules
-    url: https://github.com/zeroxsolutions/ui-sdk/tree/master/.claude/rules
+  - name: Architecture doctrine
+    url: https://github.com/zeroxsolutions/agent-plugins/tree/master/plugins/gundam/skills
     about: >
-      Read the rule that governs an area before proposing a change to how it is
+      Read the skill that governs an area before proposing a change to how it is
       structured.
 
   - name: Contributing and local setup

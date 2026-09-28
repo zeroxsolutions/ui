@@ -2,10 +2,9 @@ import type { MathSymbolGroup } from './types.js';
 
 /**
  * The curated symbol catalog the palette inserts, grouped and searchable by name
- * so a user need not memorize LaTeX commands. Pure data, engine-free. Per the
- * `plain-ascii-typography` rule the `latex` field is ASCII (`\alpha`, `\sum`) and
- * the `preview` field holds the exact Unicode glyph (the Greek letter, the
- * operator sign) - the glyph is content, like an i18n string, not decorative
+ * so a user need not memorize LaTeX commands. Pure data, engine-free. The `latex`
+ * field is ASCII (`\alpha`, `\sum`) and the `preview` field holds the exact
+ * Unicode glyph (the Greek letter, the operator sign) - the glyph is content, like an i18n string, not decorative
  * typography, so it is kept verbatim. Start curated (a common set); grow from use.
  */
 export const SYMBOL_GROUPS: readonly MathSymbolGroup[] = [

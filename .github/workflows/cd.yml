@@ -1,36 +1,42 @@
-# Deploys the pushed branch to the environment of the same name. Promotion is a
-# fast-forward, so a higher environment ships the SHA the lower one already validated:
+# Deploy the pushed branch to the environment of the same name. Only `development`
+# and `production` deploy; the integration branch runs the gate only. Promotion is a
+# fast-forward, which carries the validated SHA:
 #
 #   git push origin master:development
 #   git push origin development:production
 #
-# Not approval-gated: a free-plan private repository answers 422 to a required reviewer
-# and 403 to branch protection, so `environment: production` would gate nothing while
-# looking gated. Switch back when the plan allows.
+# There is no approval gate on the production job: a free-plan private repo cannot
+# enforce a required reviewer (422) or branch protection (403), so
+# `environment: production` would gate nothing while looking gated. Switch back when
+# the plan allows. Record the choice in CLAUDE.md.
+#
+# CI decides when code ships and nothing else - no identity, binding,
+# `terraform apply` or secret.
 name: cd
 
 on:
   push:
     branches: [development, production]
 
-# Cancelling mid-sweep would leave some workers new and some old, so an in-flight run
-# finishes rather than being replaced.
+# One deploy at a time per branch, and an in-flight run is left to finish: killing a
+# deploy mid-sweep leaves some workers new and some old.
 concurrency:
   group: cd-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  # The pull-request gate ran on the merge preview, which is not the commit that ships.
+  # Re-run the gate on the pushed commit. The pull-request gate ran on the merge
+  # preview, which is not the commit that ships.
   gate:
     uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
       targets: lint typecheck build test
 
+  # `secrets: inherit` is what lets the credentials through - a called workflow gets
+  # an empty `secrets` context otherwise; the environment scopes which value wins.
   deploy:
     needs: [gate]
     uses: zeroxsolutions/github-actions/.github/workflows/nx-deploy.yml@v1
-    # Without this a called workflow gets an empty `secrets` context; `environment` below
-    # scopes which value each name resolves to.
     secrets: inherit
     with:
       targets: wrangler:deploy

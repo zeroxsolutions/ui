@@ -16,11 +16,12 @@ its cost are here.
 - **`components.json` aliases deviate from the CLI defaults** - every alias points into
   `@/registry/bases/base-ui/*` rather than `@/components`, because this app *is* the registry
   source and its files must live where the registry serves them from.
-- **The stamped `.prettierrc` shadcn override reaches nothing here.** It globs
-  `apps/*/src/components|hooks|lib/**`, but the aliases above put those files under
-  `apps/registry-ui/registry/bases/base-ui/` - so the repo that *authors* the shadcn items is
-  the one repo whose items that formatting never touches. Kept byte-identical to the stamp
-  anyway; re-pointing the glob is a deviation that needs its own decision.
+- **The stamped `.prettierignore` shadcn entries reach nothing here.** They glob
+  `apps/*/src/components/ui` and two files beside it, but the aliases above put those files
+  under `apps/registry-ui/registry/bases/base-ui/` - so the pre-commit hook formats this
+  repo's copies of the upstream primitives in house style, and `shadcn diff` against upstream
+  reports that formatting as drift. Kept byte-identical to the stamp anyway; re-pointing the
+  glob is a deviation that needs its own decision.
 - **Build & test tooling** - `@nx/js/typescript` (build + typecheck), `@nx/vite`, `@nx/next/plugin`
   for the registry app; **vitest** for unit, **Playwright** for e2e, `@nx/eslint` for lint. One
   unit runner throughout - this repo has no jest, where the backend repos deliberately split.
@@ -72,10 +73,10 @@ its cost are here.
   that it does not.
 - **`rclone:sync` is invoked as `nx rclone:sync fluent-emoji`, never by the scoped name.**
   `packages/fluent-emoji/package.json` sets `nx.name`, so the graph keys on `fluent-emoji`
-  and the scoped form fails with `Could not find project`. A deviation from
-  `naming-projects` that predates this work; fixing it means renaming the project. The
-  target also carries no `configurations` block where `deploy-via-nx-per-env` prescribes one
-  per environment - there is one environment here, so there is nothing to configure.
+  and the scoped form fails with `Could not find project`. A deviation from the house
+  naming scheme that predates this work; fixing it means renaming the project. The target
+  also carries no `configurations` block, where a deploy target elsewhere carries one per
+  environment - there is one environment here, so there is nothing to configure.
 - **The artwork ships from `cd.yml`'s own `rclone-sync` job, on `production` only.** It runs
   `nx run-many -t rclone:sync`, which names no project, so the job is copyable to the other
   repos the way the rest of that file is - but **until it is copied this repo's `cd.yml` is
@@ -100,7 +101,7 @@ this file names rather than whatever the machine happens to carry.
 
 ## Configuration
 
-One row per environment input (see `env-input-inventory`).
+One row per environment input.
 
 | Input | Consumer | Mechanism | Required | Absent means |
 | --- | --- | --- | --- | --- |

@@ -9,10 +9,9 @@
     }
   },
   "enabledPlugins": {
-    "superpowers@claude-plugins-official": true,
-    "ts-js-best-practices@zeroxsolutions": true,
+    "claude-md-management@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "in-house@zeroxsolutions": true,
-    "claude-md-management@claude-plugins-official": true
+    "gundam@zeroxsolutions": true,
+    "superpowers@claude-plugins-official": true
   }
 }

@@ -16,10 +16,6 @@
 # These are the shared contracts. A change here propagates beyond the project
 # that made it, so they are called out even where the tool cannot enforce it.
 
-# Architecture rules. Extended, never deleted or reshaped to "simplify" - the
-# same discipline the infrastructure modules are held to.
-/.claude/rules/         @luongvantuit
-
 # Infrastructure. Curated modules shared across products; a destroy here can
 # lose data irreversibly.
 /iac/                   @luongvantuit

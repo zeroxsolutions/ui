@@ -9,7 +9,7 @@ A Markdown template, not a form, on purpose: a form captures input at creation
 time, and this needs to land as an unticked checklist you work through over
 minutes or hours.
 
-Every item below is a step CI does NOT do. CI owns timing only - it never
+Every item below is a step CI leaves to a person. CI owns timing only - it never
 applies infrastructure, never provisions a secret, and never creates a route.
 Delete an item that does not apply to this deploy rather than leaving it
 ambiguous.

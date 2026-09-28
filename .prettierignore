@@ -8,6 +8,13 @@
 # pnpm rewrites it on every install, so formatting is undone by the next `pnpm add`.
 /pnpm-lock.yaml
 
+# nx and pnpm both write these too: a version field on release, a dependency on `pnpm add`. A
+# formatted copy drifts from what the next tool run writes, which is the reason above. Prettier
+# also explodes every compact nx target inside a package.json - `"dependsOn": ["^build"]` over
+# three lines - for the length of the file.
+package.json
+/pnpm-workspace.yaml
+
 # Stamped here from elsewhere - a pinned rules submodule, vendored skills, CLI-regenerated
 # commands - so a formatted copy diffs against its source until the next stamp reverts it.
 /.claude
@@ -27,6 +34,16 @@ tmp
 test-output
 .playwright-mcp
 
+# Upstream's, vendored by the shadcn CLI: a file the formatter rewrote can no longer be told
+# from an upstream change by `shadcn diff`. `ui` is a directory the CLI owns; the other two it
+# placed by kind rather than by directory, into buckets that also hold each app's own files, so
+# those are named file by file. Globbed over `apps/*` because the set is the same in every app
+# carrying a components.json, and the entry has to exist before the first `shadcn add` rather
+# than after the formatter has already rewritten what was placed.
+apps/*/src/components/ui
+apps/*/src/hooks/use-mobile.ts
+apps/*/src/lib/utils.ts
+
 # drizzle-kit rewrites the SQL and the meta snapshots wholesale on the next migration.
 # drizzle.config.ts is hand-authored and is deliberately not in here.
 **/drizzle/
@@ -40,3 +57,8 @@ test-output
 # 29% of the file in alignment whitespace alone. Re-measure before removing these two lines.
 /CLAUDE.md
 /CLAUDE.template.md
+
+# The same padding, for a different reason: this one is read in an incident, and its credential
+# table is edited by hand under time pressure. Measured at 671 bytes of alignment whitespace,
+# 13% of the file.
+/.github/SECURITY.md
