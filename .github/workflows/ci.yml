@@ -9,7 +9,8 @@
 # Nothing checks `iac/`: it is outside the nx graph, so neither job reaches it,
 # and the pre-commit hook formats with prettier, which does not read `.tf`.
 #
-# Nothing here names a project, path, or branch, so the file copies unchanged.
+# No project and no path is named, and the branch list carries both default-branch
+# spellings, so the file copies to another repository unchanged.
 name: ci
 
 on:

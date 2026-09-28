@@ -8,10 +8,10 @@
 # There is no approval gate on the production job: a free-plan private repo cannot
 # enforce a required reviewer (422) or branch protection (403), so
 # `environment: production` would gate nothing while looking gated. Switch back when
-# the plan allows. Record the choice in CLAUDE.md.
+# the plan allows.
 #
-# CI decides when code ships and nothing else - no identity, binding,
-# `terraform apply` or secret.
+# CI decides when code ships and nothing else: it creates no identity or binding, runs no
+# `terraform apply`, and provisions no secret.
 name: cd
 
 on:
