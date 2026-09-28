@@ -4,6 +4,5 @@ packages:
 
 autoInstallPeers: true
 catalog:
-  "@opennextjs/cloudflare": "1.20.6"
   "wrangler": "^4.105.0"
   "lucide-react": "^1.21.0"

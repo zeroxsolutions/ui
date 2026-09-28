@@ -13,7 +13,7 @@ const nextConfig = {
 /**
  * Wires the Workers bindings into `next dev` only. Called unconditionally, `next build` starts a
  * miniflare per config load and exits leaving a `workerd` process behind, and the next build then
- * fails on its persisted state with `SQLITE_BUSY` (@opennextjs/cloudflare 1.20.6, next 16.1.7).
+ * fails on its persisted state with `SQLITE_BUSY`.
  *
  * @param {string} phase
  */

@@ -6,9 +6,6 @@ settings:
 
 catalogs:
   default:
-    '@opennextjs/cloudflare':
-      specifier: 1.20.6
-      version: 1.20.6
     lucide-react:
       specifier: ^1.21.0
       version: 1.21.0
@@ -199,7 +196,7 @@ importers:
         specifier: ^5.2.8
         version: 5.2.8
       '@opennextjs/cloudflare':
-        specifier: 'catalog:'
+        specifier: 1.20.6
         version: 1.20.6(encoding@0.1.13)(next@16.1.7(@babel/core@7.29.0)(@playwright/test@1.61.1)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(wrangler@4.142.0(@types/node@20.19.9))
       '@shadcn/react':
         specifier: ^0.1.0
@@ -360,9 +357,6 @@ importers:
       vaul:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      wrangler:
-        specifier: 'catalog:'
-        version: 4.142.0(@types/node@20.19.9)
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -382,6 +376,9 @@ importers:
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
+      wrangler:
+        specifier: 'catalog:'
+        version: 4.142.0(@types/node@20.19.9)
 
   apps/registry-ui-e2e: {}
 

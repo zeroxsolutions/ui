@@ -5,8 +5,7 @@
   "compatibility_date": "2026-08-20",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "observability": { "enabled": true },
-  // Both addresses `wrangler dev` binds. Unset, the server port silently becomes the next free
-  // one, and the e2e suite drives this exact port.
+  // Both addresses `wrangler dev` binds. Unset, the server port silently becomes the next free one.
   "dev": { "port": 8787, "inspector_port": 9229 },
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "env": {
