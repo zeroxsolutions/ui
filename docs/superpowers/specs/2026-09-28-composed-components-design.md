@@ -34,10 +34,10 @@ registry/bases/base-ui/
 |-- components/
 |   |-- data-entry/
 |   |   |-- chat-suggestion-item.tsx         picking a prompt hands it to the app
-|   |   |-- code-language-combobox.tsx
-|   |   |-- code-language-toggle-group.tsx
 |   |   |-- emoji-appearance-toggle-group.tsx
 |   |   |-- emoji-picker.tsx
+|   |   |-- language-combobox.tsx            locales and code languages both
+|   |   |-- language-toggle-group.tsx
 |   |   |-- number-field.tsx
 |   |   |-- password-input.tsx
 |   |   |-- resize-handle.tsx                onDrag(dx) hands the new size to the app
@@ -80,16 +80,16 @@ registry/bases/base-ui/
 |       |-- icon-chip.tsx
 |       |-- icon-label.tsx
 |       `-- panel-field-label.tsx
-|-- constants/code-languages.ts              CODE_LANGUAGES, CODE_ALIASES, the language labels
+|-- constants/code-languages.ts              CODE_LANGUAGES, CODE_ALIASES
 |-- hooks/use-controllable-state.ts
 |-- hooks/use-highlighted-lines.ts
-|-- lib/code-language.ts                     canonicalCodeId, codeLanguageIcon, option builders
 |-- lib/file-type.ts                         extensionOf, the extension map, fileTypeIcon
 |-- lib/font-format.ts                       formatOf
+|-- lib/language-options.ts                 canonicalCodeId, codeLanguageIcon, codeLanguageOptions, localeOptions
 |-- types/chat-agent.ts
 |-- types/chat-role.ts
 |-- types/chat-suggestion.ts
-`-- types/code-language.ts
+`-- types/language-option.ts                LanguageKind, LanguageOption, LanguageIcon
 ```
 
 `ui/` ends holding only files `shadcn add` wrote: `ui/data-table*.tsx` move out and
@@ -111,7 +111,7 @@ spec (b) publishes that composition as an example.
 | `PopoverIconButton`                                 | `Popover`, `PopoverTrigger`, `PopoverContent`, `Tooltip`, `TooltipTrigger`, `TooltipContent`, `Button`                                          |
 | `ToolbarButton`                                     | `Toggle` (`aria-pressed`), `Tooltip`, `Kbd`                                                                                                     |
 | `SearchInput`                                       | `InputGroup`, `InputGroupAddon`, `InputGroupInput`                                                                                              |
-| `BinaryFileCard`                                    | `Empty`, `EmptyMedia`, `EmptyTitle`, `EmptyContent`                                                                                             |
+| `BinaryFileCard`                                    | `Empty`, `EmptyHeader`, `EmptyMedia`, `EmptyTitle`                                                                                              |
 | `MenuButton`, `SplitButton`                         | `ButtonGroup`, `Button`, `DropdownMenu*`; the one remaining class, `w-auto` on the content, is a `className`                                    |
 | `SidebarGroupCollapsible`, `SidebarMenuCollapsible` | `Collapsible` with `SidebarGroupLabel` or `SidebarMenuButton`, as upstream's Sidebar docs compose it                                            |
 | `Section`                                           | `CollapsibleCard variant="plain"` plus `Badge`                                                                                                  |
@@ -120,9 +120,9 @@ spec (b) publishes that composition as an example.
 upstream's `AlertDialogAction` is a plain `Button`). The upstream composition closes through
 `AlertDialogClose` or the caller's `open`, so the defect leaves with the component.
 
-Their published items (`split-button`, `menu-button`) and examples (`split-button-hero`,
-`menu-button-hero`) are rewritten to compose upstream parts in the commit that removes them,
-so `shadcn build` keeps passing.
+Their published items (`split-button`, `menu-button`) go, and their examples
+(`split-button-hero`, `menu-button-hero`) are rewritten to compose upstream parts, in the
+commit that removes them, so `shadcn build` keeps passing.
 
 ## Families
 
@@ -144,7 +144,7 @@ rename an upstream part is left to the upstream part. State that parts style off
 | `PermissionCard` (`Permission`)                                                                                         | root, `Header`, `Title`, `Actions`, `Resolved`                                 | `CardDescription` replaces `Description`; `Preview` goes                | `Status` reads the root's `data-status`                                                                     | `data-status`                              |
 | `CommandMenu` (`CommandSwitcher`)                                                                                       | root, `Item`                                                                   | -                                                                       | -                                                                                                           | -                                          |
 | `FrontmatterForm` (`FrontmatterEditor`, `FrontmatterField*`)                                                            | root, `Field`, `FieldLabel`, `FieldControl`, `FieldError`                      | `FieldDescription`                                                      | -                                                                                                           | -                                          |
-| `CodeLanguageCombobox`, `CodeLanguageToggleGroup` (`LanguageSwitcher`)                                                  | `useLanguageOptions`                                                           | `Combobox*`, `ToggleGroup*`                                             | the display modes become two roots; the `trigger` render prop becomes a child                               | -                                          |
+| `LanguageCombobox`, `LanguageToggleGroup` (`LanguageSwitcher`)                                                          | `useLanguageOptions`                                                           | `Combobox*`, `ToggleGroup*`                                             | the display modes become two roots; the `trigger` render prop becomes a child                               | -                                          |
 | `EmojiPicker`                                                                                                           | root, `Search`, `GroupLabel`, `Content`, `Nav`                                 | `Empty` replaces `EmojiPickerEmpty`                                     | `EmojiGrid`, `EmojiCell` become `Grid`, `Cell`; one source for the size                                     | -                                          |
 | `EmojiAppearanceToggleGroup` (`EmojiAppearance`)                                                                        | root                                                                           | -                                                                       | `Item`                                                                                                      | -                                          |
 | `AvatarPicker` (`AvatarEditor`)                                                                                         | root, `Trigger`, `Content`, `Remove`, `Emoji`, `Upload`, `Color`               | `Tabs*`                                                                 | tabs declared by the consumer instead of found by scanning children; `AvatarPickerValue`, `AvatarPickerTab` | `data-uploading`                           |
@@ -193,18 +193,24 @@ Each gets a spec that fails before the fix.
 Pass 1 moves files and nothing else, by a script that replaces exact import strings and
 asserts each file's count before writing: the kind folders, the merged families
 (`data-table*`, `model-list*`, `tree-item` with `tree-indent`), `ui/form.tsx` deleted, the
-`registry.json` paths. Specs move with their modules. One commit, gate green.
+`registry.json` paths. Specs move with their modules. Two commits, gate green on each: the
+moves into kind folders, then the merged families.
 
 Pass 2 is one commit per rule, each ending with its check printing nothing:
 
 1. the removed components, their items and examples rewritten onto upstream parts
-2. types, constants, lib and hooks out of component files
-3. renames, by script
-4. slots: content props become children, parts reshaped per the table
-5. state onto `data-*`, replacing class maps
-6. class strings out of module constants; `cva` without variants dropped; arbitrary values onto the scale
-7. export blocks at the foot, spread and `data-slot` on every part
-8. the three defects, test first
+2. renames, by script
+3. export blocks at the foot
+4. types, constants, lib and hooks out of component files
+5. slots: content props become children, parts reshaped per the table
+6. state onto `data-*`, replacing class maps
+7. class strings out of module constants; `cva` without variants dropped; arbitrary values onto the scale
+8. spread and `data-slot` on every part
+9. the three defects, test first
+
+Renames and export blocks come before the extraction because both are mechanical and every
+later rule edits the renamed files. Pass 1 and rules 1 to 3 are one plan; rules 4 to 9 are a
+second, written once the first lands, since their edits are read off the renamed tree.
 
 A commit that changes a component `editor/` renders changes that call site in the same
 commit.
