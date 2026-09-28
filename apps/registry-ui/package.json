@@ -9,6 +9,7 @@
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.43.1",
     "@fontsource-variable/inter": "^5.2.8",
+    "@opennextjs/cloudflare": "catalog:",
     "@shadcn/react": "^0.1.0",
     "@shikijs/langs": "4.2.0",
     "@tailwindcss/typography": "^0.5.19",
@@ -62,6 +63,7 @@
     "tiptap-extension-global-drag-handle": "^0.1.18",
     "unified": "^11.0.5",
     "vaul": "^1.1.2",
+    "wrangler": "catalog:",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -75,6 +77,23 @@
     "targets": {
       "build": {
         "dependsOn": ["^build", "shadcn-build"]
+      },
+      "wrangler:build": {
+        "executor": "nx:run-commands",
+        "dependsOn": ["^build", "shadcn-build"],
+        "outputs": ["{projectRoot}/.open-next"],
+        "cache": true,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild"
+        }
+      },
+      "wrangler:typegen": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+        }
       },
       "shadcn-build": {
         "executor": "nx:run-commands",

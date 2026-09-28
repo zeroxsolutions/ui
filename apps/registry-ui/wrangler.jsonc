@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ui-sdk-registry-ui",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-20",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "observability": { "enabled": true },
+  // Both addresses `wrangler dev` binds. Unset, the server port silently becomes the next free
+  // one, and the e2e suite drives this exact port.
+  "dev": { "port": 8787, "inspector_port": 9229 },
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "env": {
+    "development": {
+      "workers_dev": true,
+    },
+    "production": {
+      "workers_dev": false,
+      // Absent, a versioned preview still gets a *.workers.dev hostname from the account's own
+      // subdomain setting; the registry has one public host.
+      "preview_urls": false,
+      // A custom domain pattern is a bare hostname; wrangler rejects a wildcard or a path.
+      "routes": [{ "pattern": "ui.zeroxsolutions.com", "custom_domain": true }],
+    },
+  },
+}
