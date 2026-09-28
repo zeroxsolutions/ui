@@ -57,7 +57,8 @@ out
 test-output
 vite.config.*.timestamp*
 
-# Local env - direct DB connection strings for migrations (secrets). Commit only *.example.
+# Local secrets: nx loads the root .env into every task, which is how `rclone:sync` reads its keys
+# locally. Commit only *.example.
 .env
 .env.*
 !.env.example

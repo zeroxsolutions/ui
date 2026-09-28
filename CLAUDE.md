@@ -16,12 +16,12 @@ its cost are here.
 - **`components.json` aliases deviate from the CLI defaults** - every alias points into
   `@/registry/bases/base-ui/*` rather than `@/components`, because this app *is* the registry
   source and its files must live where the registry serves them from.
-- **The stamped `.prettierignore` shadcn entries reach nothing here.** They glob
-  `apps/*/src/components/ui` and two files beside it, but the aliases above put those files
-  under `apps/registry-ui/registry/bases/base-ui/` - so the pre-commit hook formats this
-  repo's copies of the upstream primitives in house style, and `shadcn diff` against upstream
-  reports that formatting as drift. Kept byte-identical to the stamp anyway; re-pointing the
-  glob is a deviation that needs its own decision.
+- **`.prettierignore` names the vendored primitives at the alias paths too.** The stamped
+  shadcn entries glob `apps/*/src/components/ui` and two files beside it, which the aliases
+  above never write to, so three lines beside them name `registry/bases/base-ui/ui`,
+  `hooks/use-mobile.ts` and `lib/utils.ts`; that is where this file departs from the stamp.
+  The files there were reformatted in house style before those lines existed, so `shadcn diff`
+  still reports that formatting as drift until each one is re-added from upstream.
 - **Animated icons come from `@lucide-animated`, addressed by full URL and never vendored.**
   467 MIT icons on Lucide + Motion, both already declared here. shadcn's public directory
   (`ui.shadcn.com/r/registries.json`) lists it, so `@lucide-animated/<icon>` resolves with no

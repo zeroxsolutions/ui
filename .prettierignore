@@ -15,8 +15,8 @@
 package.json
 /pnpm-workspace.yaml
 
-# Stamped here from elsewhere - a pinned rules submodule, vendored skills, CLI-regenerated
-# commands - so a formatted copy diffs against its source until the next stamp reverts it.
+# The Claude settings are stamped from nx-scaffold, so a formatted copy diffs against the stamp
+# until the next one reverts it.
 /.claude
 
 # Terraform's provider cache: vendored and credential-bearing. Unanchored on purpose -
@@ -42,11 +42,10 @@ test-output
 apps/*/src/components/ui
 apps/*/src/hooks/use-mobile.ts
 apps/*/src/lib/utils.ts
-
-# drizzle-kit writes everything under it - the migration SQL, the meta snapshots, the
-# journal - so a formatted copy diffs against what the tool writes next.
-# drizzle.config.ts is hand-authored and is deliberately not in here.
-**/drizzle/
+# The registry app keeps the same three under its components.json aliases instead.
+apps/registry-ui/registry/bases/base-ui/ui
+apps/registry-ui/registry/bases/base-ui/hooks/use-mobile.ts
+apps/registry-ui/registry/bases/base-ui/lib/utils.ts
 
 # Each carries its own "do not edit" header; `wrangler types` and Next rewrite them per build.
 **/worker-configuration.d.ts
