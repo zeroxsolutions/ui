@@ -1,6 +1,15 @@
-# The staged set goes through prettier directly and is re-staged. `--ignore-unknown` is
-# what lets the whole staged list through in one call regardless of extension.
-git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 -r pnpm exec prettier --write --ignore-unknown
+# The re-stage below adds each staged file whole, so a file with unstaged edits beside its staged
+# ones would carry those edits into the commit.
+partial=$(git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 -r git diff --name-only --)
+if [ -n "$partial" ]; then
+  echo "pre-commit: these files also have unstaged edits; stage or stash them first:" >&2
+  echo "$partial" >&2
+  exit 1
+fi
+
+# `--files` splits on commas and spaces, so a path containing either is not formatted.
+files=$(git diff --cached --name-only --diff-filter=ACMR | paste -sd, -)
+[ -z "$files" ] || pnpm nx format:write --files="$files"
 git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 -r git add
 
 pnpm nx run-many -t lint typecheck build test
