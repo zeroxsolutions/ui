@@ -1,24 +1,10 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { EditorView } from '@codemirror/view';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  DocJSON,
-  IEditor,
-  NodeViewProps,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  createCodecRegistry,
-  importMarkdown,
-  serialize,
-} from '@zeroxsolutions/editor-core/document/serialize/index';
+import type { DocJSON, IEditor, NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
+import { createCodecRegistry, importMarkdown, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../standard/index.js';
 import { mermaid, MermaidView, mermaidCodec } from './mermaid.js';
 
@@ -118,21 +104,15 @@ describe('mermaid', () => {
 });
 
 describe('mermaid node view (editable)', () => {
-  it('composes the shared Disclosure header — type label, View/Edit tabs, copy', () => {
-    const { container } = render(
-      <MermaidView {...nodeViewProps({ source: SOURCE }, true)} />,
-    );
-    // The header + body are the shared Disclosure compound, not a bespoke strip.
-    expect(container.querySelector('[data-slot="disclosure"]')).not.toBeNull();
-    const title = container.querySelector<HTMLElement>(
-      '[data-slot="disclosure-title"]',
-    );
+  it('composes the shared CollapsibleCard header — type label, View/Edit tabs, copy', () => {
+    const { container } = render(<MermaidView {...nodeViewProps({ source: SOURCE }, true)} />);
+    // The header + body are the shared CollapsibleCard compound, not a bespoke strip.
+    expect(container.querySelector('[data-slot="collapsible-card"]')).not.toBeNull();
+    const title = container.querySelector<HTMLElement>('[data-slot="collapsible-card-title"]');
     expect(title).not.toBeNull();
     expect(within(title!).getByText('Flowchart')).toBeTruthy();
     // The View/Edit tab control + copy live in the actions slot.
-    const actions = container.querySelector<HTMLElement>(
-      '[data-slot="disclosure-actions"]',
-    );
+    const actions = container.querySelector<HTMLElement>('[data-slot="collapsible-card-actions"]');
     expect(actions).not.toBeNull();
     expect(screen.getByRole('tab', { name: 'View' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Edit' })).toBeTruthy();
@@ -140,26 +120,18 @@ describe('mermaid node view (editable)', () => {
   });
 
   it('reveals the CodeMirror pane on the Edit tab', () => {
-    const { container } = render(
-      <MermaidView {...nodeViewProps({ source: SOURCE }, true)} />,
-    );
+    const { container } = render(<MermaidView {...nodeViewProps({ source: SOURCE }, true)} />);
     // An existing diagram opens on View — the edit pane is not mounted yet.
-    expect(
-      container.querySelector('[data-slot="code-mirror-pane"]'),
-    ).toBeNull();
+    expect(container.querySelector('[data-slot="code-mirror-pane"]')).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: 'Edit' }));
-    expect(
-      container.querySelector('[data-slot="code-mirror-pane"]'),
-    ).not.toBeNull();
+    expect(container.querySelector('[data-slot="code-mirror-pane"]')).not.toBeNull();
     expect(container.querySelector('.cm-content')).not.toBeNull();
   });
 
   it('writes an edit to the source attribute', () => {
     const updateAttrs = vi.fn();
     // An empty block opens on Edit, so the pane is mounted immediately.
-    const { container } = render(
-      <MermaidView {...nodeViewProps({ source: '' }, true, updateAttrs)} />,
-    );
+    const { container } = render(<MermaidView {...nodeViewProps({ source: '' }, true, updateAttrs)} />);
     const cm = container.querySelector<HTMLElement>('.cm-editor');
     expect(cm).not.toBeNull();
     const view = EditorView.findFromDOM(cm!);
@@ -181,9 +153,7 @@ describe('mermaid node view (editable)', () => {
 
 describe('mermaid node view (read-only)', () => {
   it('frames the diagram in the design-system Card, with no edit tabs', () => {
-    const { container } = render(
-      <MermaidView {...nodeViewProps({ source: SOURCE }, false)} />,
-    );
+    const { container } = render(<MermaidView {...nodeViewProps({ source: SOURCE }, false)} />);
     expect(container.querySelector('[data-slot="card"]')).not.toBeNull();
     expect(screen.queryByRole('tab', { name: 'Edit' })).toBeNull();
   });

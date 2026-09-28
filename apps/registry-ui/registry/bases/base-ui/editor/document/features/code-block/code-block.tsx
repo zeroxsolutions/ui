@@ -5,13 +5,13 @@ import { Code } from 'lucide-react';
 import { CodeBlock as CodeBlockSurface } from '@/registry/bases/base-ui/components/data-display/code-block';
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
-  Disclosure,
-  DisclosureActions,
-  DisclosureContent,
-  DisclosureHeader,
-  DisclosureTitle,
-  DisclosureTrigger,
-} from '@/registry/bases/base-ui/components/layout/disclosure';
+  CollapsibleCard,
+  CollapsibleCardActions,
+  CollapsibleCardContent,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardTrigger,
+} from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { LanguageSwitcher } from '@/registry/bases/base-ui/components/data-entry/language-switcher';
 import { z } from 'zod';
 import {
@@ -27,7 +27,7 @@ import { CodeSettingsMenu, type CodeMirrorSettings } from './code-settings-menu.
  * A fenced code block. A pure custom node (no engine extension — `standardKit`
  * disables StarterKit's `codeBlock` so this feature owns it): the code + language
  * live in attrs. The **editable** node view composes the design-system chrome —
- * the shared `Disclosure` (header + collapsible body) framing the in-package
+ * the shared `CollapsibleCard` (header + collapsible body) framing the in-package
  * `CodeMirrorPane` (CodeMirror + Shiki), with a language picker, a settings menu,
  * and a copy control — so the editor owns its editing surface without a bespoke
  * shell. The **read-only** paths (the live Viewer and the export codec) render the
@@ -52,7 +52,7 @@ const DEFAULT_CODE_SETTINGS: CodeMirrorSettings = {
 const PLAIN_LANGUAGES = new Set(['', 'text', 'plaintext', 'plain', 'txt']);
 
 /**
- * The editable surface: the shared `Disclosure` framing `CodeMirrorPane`. Typing
+ * The editable surface: the shared `CollapsibleCard` framing `CodeMirrorPane`. Typing
  * writes the node's `code` attr; the `LanguageSwitcher` writes `language`; the
  * settings menu drives the pane's CodeMirror compartments as local view-state
  * (tab size, tabs/spaces, line numbers, soft wrap) — never written to the document.
@@ -74,9 +74,9 @@ function EditableCodeBlock({
   const isPlain = PLAIN_LANGUAGES.has(language.toLowerCase());
 
   return (
-    <Disclosure variant="muted" data-language={language} className="group/code">
-      <DisclosureHeader>
-        <DisclosureTitle>
+    <CollapsibleCard variant="muted" data-language={language} className="group/code">
+      <CollapsibleCardHeader>
+        <CollapsibleCardTitle>
           <LanguageSwitcher
             kind="code"
             searchable
@@ -85,14 +85,14 @@ function EditableCodeBlock({
             aria-label="Language"
             placeholder="Language…"
           />
-        </DisclosureTitle>
-        <DisclosureActions>
+        </CollapsibleCardTitle>
+        <CollapsibleCardActions>
           <CodeSettingsMenu settings={settings} onSettingsChange={patchSettings} />
           <CopyButton value={code} label="Copy code" size="icon" />
-          <DisclosureTrigger />
-        </DisclosureActions>
-      </DisclosureHeader>
-      <DisclosureContent>
+          <CollapsibleCardTrigger />
+        </CollapsibleCardActions>
+      </CollapsibleCardHeader>
+      <CollapsibleCardContent>
         <CodeMirrorPane
           value={code}
           language={isPlain ? undefined : language}
@@ -104,8 +104,8 @@ function EditableCodeBlock({
           placeholder="Write code…"
           className="h-64"
         />
-      </DisclosureContent>
-    </Disclosure>
+      </CollapsibleCardContent>
+    </CollapsibleCard>
   );
 }
 

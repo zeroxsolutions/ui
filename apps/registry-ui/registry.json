@@ -12,7 +12,7 @@
       "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/feedback/status-dot.tsx",
+          "path": "registry/bases/base-ui/components/feedback/status-indicator.tsx",
           "type": "registry:component"
         }
       ]
@@ -44,7 +44,7 @@
       "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/layout/field-grid.tsx",
+          "path": "registry/bases/base-ui/components/layout/panel-field-group.tsx",
           "type": "registry:component"
         }
       ]
@@ -58,7 +58,7 @@
       "registryDependencies": ["https://ui.zeroxsolutions.com/r/field-grid.json", "@shadcn/utils"],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/layout/field-group.tsx",
+          "path": "registry/bases/base-ui/components/layout/panel-row.tsx",
           "type": "registry:component"
         }
       ]

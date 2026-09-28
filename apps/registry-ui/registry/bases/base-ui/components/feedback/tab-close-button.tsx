@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 
-import { DirtyDot } from '@/registry/bases/base-ui/components/feedback/dirty-dot';
+import { UnsavedIndicator } from '@/registry/bases/base-ui/components/feedback/unsaved-indicator';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 
 /**
@@ -32,7 +32,7 @@ function TabCloseButton({ dirty, revealClose, onClose, className }: TabCloseButt
       }}
       className={className}
     >
-      {showDot ? <DirtyDot /> : <X />}
+      {showDot ? <UnsavedIndicator /> : <X />}
     </Button>
   );
 }

@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { TreeIndent, TreeItem } from './tree-item';
+import { TreeItemIndent, TreeItem } from './tree-item';
 
 afterEach(cleanup);
 
@@ -53,10 +53,10 @@ describe('TreeItem', () => {
 
 afterEach(cleanup);
 
-describe('TreeIndent', () => {
+describe('TreeItemIndent', () => {
   it('indents by baseIndent + depth * indentStep', () => {
     const { container } = render(
-      <TreeIndent
+      <TreeItemIndent
         depth={2}
         indentStep={12}
         baseIndent={4}
@@ -65,18 +65,18 @@ describe('TreeIndent', () => {
         onToggleExpand={() => {}}
       >
         <span>node</span>
-      </TreeIndent>,
+      </TreeItemIndent>,
     );
     expect((container.firstElementChild as HTMLElement).style.paddingLeft).toBe('28px');
   });
 
-  it('stamps data-slot="tree-indent" on the root', () => {
+  it('stamps data-slot="tree-item-indent" on the root', () => {
     const { container } = render(
-      <TreeIndent depth={0} hasChildren={false} expanded={false} onToggleExpand={() => {}}>
+      <TreeItemIndent depth={0} hasChildren={false} expanded={false} onToggleExpand={() => {}}>
         <span>leaf</span>
-      </TreeIndent>,
+      </TreeItemIndent>,
     );
-    expect(container.querySelector('[data-slot="tree-indent"]')).toBeTruthy();
+    expect(container.querySelector('[data-slot="tree-item-indent"]')).toBeTruthy();
   });
 
   it('toggles via the chevron and stops propagation so the row is not selected', () => {
@@ -84,9 +84,15 @@ describe('TreeIndent', () => {
     const onRowClick = vi.fn();
     render(
       <div onClick={onRowClick}>
-        <TreeIndent depth={0} hasChildren expanded={false} onToggleExpand={onToggleExpand} expandLabel="Expand node">
+        <TreeItemIndent
+          depth={0}
+          hasChildren
+          expanded={false}
+          onToggleExpand={onToggleExpand}
+          expandLabel="Expand node"
+        >
           <span>node</span>
-        </TreeIndent>
+        </TreeItemIndent>
       </div>,
     );
 
@@ -97,9 +103,9 @@ describe('TreeIndent', () => {
 
   it('renders an aligned spacer (no disclosure button) for a leaf', () => {
     render(
-      <TreeIndent depth={0} hasChildren={false} expanded={false} onToggleExpand={() => {}}>
+      <TreeItemIndent depth={0} hasChildren={false} expanded={false} onToggleExpand={() => {}}>
         <span>leaf</span>
-      </TreeIndent>,
+      </TreeItemIndent>,
     );
     expect(screen.queryByRole('button')).toBeNull();
   });

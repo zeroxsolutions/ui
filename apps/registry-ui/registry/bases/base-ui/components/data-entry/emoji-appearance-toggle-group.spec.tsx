@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { EmojiAppearance } from './emoji-appearance';
+import { EmojiAppearanceToggleGroup } from './emoji-appearance-toggle-group';
 
 beforeAll(() => {
   // Base UI's ToggleGroup measures with ResizeObserver and reads animations —
@@ -16,9 +16,9 @@ beforeAll(() => {
 
 afterEach(cleanup);
 
-describe('EmojiAppearance', () => {
+describe('EmojiAppearanceToggleGroup', () => {
   it('renders one preview swatch per Fluent style', () => {
-    render(<EmojiAppearance value="3d" onValueChange={vi.fn()} />);
+    render(<EmojiAppearanceToggleGroup value="3d" onValueChange={vi.fn()} />);
 
     for (const label of ['3D style', 'Flat style', 'Modern style', 'Mono style', 'Animated style']) {
       expect(screen.getByRole('button', { name: label })).toBeTruthy();
@@ -26,7 +26,7 @@ describe('EmojiAppearance', () => {
   });
 
   it('previews each swatch in its own style', () => {
-    render(<EmojiAppearance value="3d" onValueChange={vi.fn()} />);
+    render(<EmojiAppearanceToggleGroup value="3d" onValueChange={vi.fn()} />);
 
     const src = (label: string) =>
       screen.getByRole('button', { name: label }).querySelector('img')?.getAttribute('src');
@@ -41,7 +41,7 @@ describe('EmojiAppearance', () => {
   });
 
   it('marks the selected style as pressed', () => {
-    render(<EmojiAppearance value="modern" onValueChange={vi.fn()} />);
+    render(<EmojiAppearanceToggleGroup value="modern" onValueChange={vi.fn()} />);
 
     expect(screen.getByRole('button', { name: 'Modern style' }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('button', { name: '3D style' }).getAttribute('aria-pressed')).toBe('false');
@@ -49,7 +49,7 @@ describe('EmojiAppearance', () => {
 
   it('reports the chosen style via onValueChange', () => {
     const onValueChange = vi.fn();
-    render(<EmojiAppearance value="3d" onValueChange={onValueChange} />);
+    render(<EmojiAppearanceToggleGroup value="3d" onValueChange={onValueChange} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Flat style' }));
 

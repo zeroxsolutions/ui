@@ -8,13 +8,13 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
-  Disclosure,
-  DisclosureActions,
-  DisclosureContent,
-  DisclosureHeader,
-  DisclosureTitle,
-  DisclosureTrigger,
-} from '@/registry/bases/base-ui/components/layout/disclosure';
+  CollapsibleCard,
+  CollapsibleCardActions,
+  CollapsibleCardContent,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardTrigger,
+} from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import {
   InputGroup,
   InputGroupAddon,
@@ -38,10 +38,10 @@ import { MathPalette } from '../../../math/react/palette.js';
  * codecs round-trip exactly as before. What changed is the authoring UI, brought
  * onto the sibling blocks' pattern:
  *
- * - **Block** (`mathBlock`) composes the shared `Disclosure` chrome + `Tabs` -
+ * - **Block** (`mathBlock`) composes the shared `CollapsibleCard` chrome + `Tabs` -
  *   View shows the rendered formula, Edit shows the design-system `CodeMirrorPane`
  *   (`language="latex"`) with a live preview strip and the symbol/template palette.
- *   `DisclosureContent` is `keepMounted` so collapsing never tears down the render.
+ *   `CollapsibleCardContent` is `keepMounted` so collapsing never tears down the render.
  * - **Inline** (`mathInline`) cannot host block chrome in the text flow, so it
  *   stays click-to-edit into a design-system `Popover` holding an `InputGroup`
  *   (input + palette/commit/cancel addons) and a one-line live preview.
@@ -199,7 +199,7 @@ function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeViewProp
 
 /**
  * The block math node view. Read-only is a design-system `Card` holding the real
- * formula; editable composes the shared `Disclosure`/`Tabs` chrome.
+ * formula; editable composes the shared `CollapsibleCard`/`Tabs` chrome.
  */
 function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
   if (!editable) {
@@ -217,7 +217,7 @@ function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps
   const initialTab = attrs.latex.trim() === '' ? 'edit' : 'view';
 
   return (
-    <Disclosure
+    <CollapsibleCard
       variant="muted"
       data-math="block"
       contentEditable={false}
@@ -226,12 +226,12 @@ function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps
       className={cn('my-4', selected && 'ring-ring ring-2')}
     >
       <Tabs defaultValue={initialTab} className="gap-0">
-        <DisclosureHeader>
-          <DisclosureTitle>
+        <CollapsibleCardHeader>
+          <CollapsibleCardTitle>
             <Sigma className="shrink-0" />
             <span>Math</span>
-          </DisclosureTitle>
-          <DisclosureActions>
+          </CollapsibleCardTitle>
+          <CollapsibleCardActions>
             <TabsList>
               <TabsTrigger value="view" aria-label="View">
                 <Eye />
@@ -241,12 +241,12 @@ function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps
               </TabsTrigger>
             </TabsList>
             <CopyButton value={attrs.latex} label="Copy source" size="icon" />
-            <DisclosureTrigger />
-          </DisclosureActions>
-        </DisclosureHeader>
+            <CollapsibleCardTrigger />
+          </CollapsibleCardActions>
+        </CollapsibleCardHeader>
         {/* keepMounted so collapsing only hides the active panel and never tears
             down an in-flight render. */}
-        <DisclosureContent keepMounted>
+        <CollapsibleCardContent keepMounted>
           <Separator />
           <TabsContent value="view" className="p-2">
             <FormulaPreview source={attrs.latex} />
@@ -275,9 +275,9 @@ function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps
               <FormulaPreview source={attrs.latex} />
             </div>
           </TabsContent>
-        </DisclosureContent>
+        </CollapsibleCardContent>
       </Tabs>
-    </Disclosure>
+    </CollapsibleCard>
   );
 }
 

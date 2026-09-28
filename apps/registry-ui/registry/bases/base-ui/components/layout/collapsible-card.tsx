@@ -7,20 +7,20 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**
- * `Disclosure` — the house collapsible-block compound: a header (title + actions)
+ * `CollapsibleCard` — the house collapsible-block compound: a header (title + actions)
  * over a collapsible body, built on the Base UI `Collapsible` primitive so the
  * open/closed state rides that primitive (never a hand-rolled context). It is the
  * shared chrome many block surfaces compose so their header never drifts — the
  * read-only `CodeBlock`, the editor's editable code-block, the chat
- * `reasoning`/`tool` panels, and the Mermaid header — filling its parts rather
+ * `ReasoningCollapsible`/`ToolCallCard` panels, and the Mermaid header — filling its parts rather
  * than re-implementing a header. Author a new block by composing the parts, not by
  * passing slots as props (see `ui-compound-authoring`).
  *
- * Parts: `Disclosure` (root) · `DisclosureHeader` · `DisclosureTitle` ·
- * `DisclosureActions` · `DisclosureTrigger` (the collapse toggle) ·
- * `DisclosureContent` (the collapsible body). Defaults open.
+ * Parts: `CollapsibleCard` (root) · `CollapsibleCardHeader` · `CollapsibleCardTitle` ·
+ * `CollapsibleCardActions` · `CollapsibleCardTrigger` (the collapse toggle) ·
+ * `CollapsibleCardContent` (the collapsible body). Defaults open.
  */
-const disclosureVariants = cva('group/disclosure flex w-full flex-col overflow-hidden text-sm', {
+const collapsibleCardVariants = cva('group/collapsible-card flex w-full flex-col overflow-hidden text-sm', {
   variants: {
     variant: {
       default: 'rounded-md border border-border bg-card text-card-foreground',
@@ -32,28 +32,28 @@ const disclosureVariants = cva('group/disclosure flex w-full flex-col overflow-h
   defaultVariants: { variant: 'default' },
 });
 
-function Disclosure({
+function CollapsibleCard({
   className,
   variant,
   defaultOpen = true,
   ...props
-}: CollapsiblePrimitive.Root.Props & VariantProps<typeof disclosureVariants>) {
+}: CollapsiblePrimitive.Root.Props & VariantProps<typeof collapsibleCardVariants>) {
   return (
     <CollapsiblePrimitive.Root
-      data-slot="disclosure"
+      data-slot="collapsible-card"
       defaultOpen={defaultOpen}
-      className={cn(disclosureVariants({ variant, className }))}
+      className={cn(collapsibleCardVariants({ variant, className }))}
       {...props}
     />
   );
 }
 
-function DisclosureHeader({ className, ...props }: ComponentProps<'div'>) {
+function CollapsibleCardHeader({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
-      data-slot="disclosure-header"
+      data-slot="collapsible-card-header"
       className={cn(
-        'flex items-center gap-1.5 px-3 py-1.5 has-data-[slot=disclosure-actions]:justify-between',
+        'flex items-center gap-1.5 px-3 py-1.5 has-data-[slot=collapsible-card-actions]:justify-between',
         className,
       )}
       {...props}
@@ -61,10 +61,10 @@ function DisclosureHeader({ className, ...props }: ComponentProps<'div'>) {
   );
 }
 
-function DisclosureTitle({ className, ...props }: ComponentProps<'div'>) {
+function CollapsibleCardTitle({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
-      data-slot="disclosure-title"
+      data-slot="collapsible-card-title"
       // Auto-size icons placed *directly* in the title — a child combinator, not a
       // descendant one, so a nested component's own icons (a LanguageSwitcher or
       // Combobox trigger the title may hold) keep their own sizing instead of being
@@ -79,30 +79,30 @@ function DisclosureTitle({ className, ...props }: ComponentProps<'div'>) {
   );
 }
 
-function DisclosureActions({ className, ...props }: ComponentProps<'div'>) {
-  return <div data-slot="disclosure-actions" className={cn('flex items-center gap-0.5', className)} {...props} />;
+function CollapsibleCardActions({ className, ...props }: ComponentProps<'div'>) {
+  return <div data-slot="collapsible-card-actions" className={cn('flex items-center gap-0.5', className)} {...props} />;
 }
 
-function DisclosureTrigger({ className, ...props }: CollapsiblePrimitive.Trigger.Props) {
+function CollapsibleCardTrigger({ className, ...props }: CollapsiblePrimitive.Trigger.Props) {
   return (
     <CollapsiblePrimitive.Trigger
-      data-slot="disclosure-trigger"
+      data-slot="collapsible-card-trigger"
       aria-label="Toggle"
       render={<Button variant="ghost" size="icon" />}
-      className={cn('group/disclosure-trigger text-muted-foreground', className)}
+      className={cn('group/collapsible-card-trigger text-muted-foreground', className)}
       {...props}
     >
       {/* Default icon-button size (36px) so every control in a disclosure header
           reads at one size, even beside a segmented control with no smaller variant. */}
-      <ChevronDown className="transition-transform group-aria-expanded/disclosure-trigger:rotate-180" />
+      <ChevronDown className="transition-transform group-aria-expanded/collapsible-card-trigger:rotate-180" />
     </CollapsiblePrimitive.Trigger>
   );
 }
 
-function DisclosureContent({ className, ...props }: CollapsiblePrimitive.Panel.Props) {
+function CollapsibleCardContent({ className, ...props }: CollapsiblePrimitive.Panel.Props) {
   return (
     <CollapsiblePrimitive.Panel
-      data-slot="disclosure-content"
+      data-slot="collapsible-card-content"
       className={cn('overflow-hidden', className)}
       {...props}
     />
@@ -110,11 +110,11 @@ function DisclosureContent({ className, ...props }: CollapsiblePrimitive.Panel.P
 }
 
 export {
-  Disclosure,
-  DisclosureHeader,
-  DisclosureTitle,
-  DisclosureActions,
-  DisclosureTrigger,
-  DisclosureContent,
-  disclosureVariants,
+  CollapsibleCard,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardActions,
+  CollapsibleCardTrigger,
+  CollapsibleCardContent,
+  collapsibleCardVariants,
 };

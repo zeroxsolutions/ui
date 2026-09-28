@@ -4,25 +4,25 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/registry/base
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /** A frontmatter document — arbitrary keys; values are usually strings. */
-export type FrontmatterValue = Record<string, unknown>;
+export type FrontmatterFormValue = Record<string, unknown>;
 
-interface FrontmatterContextValue {
-  value: FrontmatterValue;
+interface FrontmatterFormContextValue {
+  value: FrontmatterFormValue;
   setField: (name: string, fieldValue: unknown) => void;
   errors: Record<string, string>;
 }
 
-const FrontmatterContext = React.createContext<FrontmatterContextValue | null>(null);
+const FrontmatterFormContext = React.createContext<FrontmatterFormContextValue | null>(null);
 
-function useFrontmatterContext(): FrontmatterContextValue {
-  const ctx = React.useContext(FrontmatterContext);
+function useFrontmatterFormContext(): FrontmatterFormContextValue {
+  const ctx = React.useContext(FrontmatterFormContext);
   if (!ctx) {
-    throw new Error('FrontmatterEditor parts must be used within <FrontmatterEditor>');
+    throw new Error('FrontmatterForm parts must be used within <FrontmatterForm>');
   }
   return ctx;
 }
 
-interface FrontmatterFieldContextValue {
+interface FrontmatterFormFieldContextValue {
   name: string;
   value: unknown;
   setValue: (fieldValue: unknown) => void;
@@ -31,26 +31,26 @@ interface FrontmatterFieldContextValue {
   errorId: string;
 }
 
-const FrontmatterFieldContext = React.createContext<FrontmatterFieldContextValue | null>(null);
+const FrontmatterFormFieldContext = React.createContext<FrontmatterFormFieldContextValue | null>(null);
 
 /**
  * The current field's binding — `value`, `setValue`, `error`, and the `id`s for
  * label/error wiring. Use it to bind a control the built-in
- * `FrontmatterFieldControl` doesn't cover (a `Switch`, a tag input, …).
+ * `FrontmatterFormFieldControl` doesn't cover (a `Switch`, a tag input, …).
  */
-export function useFrontmatterField(): FrontmatterFieldContextValue {
-  const ctx = React.useContext(FrontmatterFieldContext);
+export function useFrontmatterFormField(): FrontmatterFormFieldContextValue {
+  const ctx = React.useContext(FrontmatterFormFieldContext);
   if (!ctx) {
-    throw new Error('useFrontmatterField / FrontmatterField parts must be used within <FrontmatterField>');
+    throw new Error('useFrontmatterFormField / FrontmatterFormField parts must be used within <FrontmatterFormField>');
   }
   return ctx;
 }
 
-export interface FrontmatterEditorProps extends Omit<React.ComponentProps<'div'>, 'onChange'> {
+export interface FrontmatterFormProps extends Omit<React.ComponentProps<'div'>, 'onChange'> {
   /** The frontmatter object (controlled). */
-  value: FrontmatterValue;
+  value: FrontmatterFormValue;
   /** Receives the next object whenever a field changes. */
-  onValueChange: (value: FrontmatterValue) => void;
+  onValueChange: (value: FrontmatterFormValue) => void;
   /**
    * Validation messages keyed by field name. The consumer computes these (the
    * SDK ships no validation rules); a field with an entry renders it and marks
@@ -62,50 +62,50 @@ export interface FrontmatterEditorProps extends Omit<React.ComponentProps<'div'>
 /**
  * A **frontmatter (YAML metadata) editor** — a compound recipe, not a configured
  * form. The Root holds the document and field setters in context; the consumer
- * composes one `FrontmatterField` per key and owns every label, hint, control,
+ * composes one `FrontmatterFormField` per key and owns every label, hint, control,
  * and validation rule. Controlled: pass `value` + `onValueChange`, and `errors`
  * computed by your own validator.
  */
-export function FrontmatterEditor({
+export function FrontmatterForm({
   value,
   onValueChange,
   errors = {},
   className,
   children,
   ...props
-}: FrontmatterEditorProps) {
-  const ctx: FrontmatterContextValue = {
+}: FrontmatterFormProps) {
+  const ctx: FrontmatterFormContextValue = {
     value,
     setField: (name, fieldValue) => onValueChange({ ...value, [name]: fieldValue }),
     errors,
   };
   return (
-    <FrontmatterContext.Provider value={ctx}>
-      <div data-slot="frontmatter-editor" className={cn('flex flex-col gap-5', className)} {...props}>
+    <FrontmatterFormContext.Provider value={ctx}>
+      <div data-slot="frontmatter-form" className={cn('flex flex-col gap-5', className)} {...props}>
         {children}
       </div>
-    </FrontmatterContext.Provider>
+    </FrontmatterFormContext.Provider>
   );
 }
 
-export interface FrontmatterFieldProps extends React.ComponentProps<typeof Field> {
+export interface FrontmatterFormFieldProps extends React.ComponentProps<typeof Field> {
   /** Frontmatter key this field binds to. */
   name: string;
 }
 
 /**
- * One field of a `FrontmatterEditor`, bound to `name`. Renders a `Field` group
+ * One field of a `FrontmatterForm`, bound to `name`. Renders a `Field` group
  * and provides the field binding to its parts; compose
- * `FrontmatterFieldLabel` + `FrontmatterFieldControl` + `FrontmatterFieldError`
- * (and optionally `FrontmatterFieldDescription`) as children.
+ * `FrontmatterFormFieldLabel` + `FrontmatterFormFieldControl` + `FrontmatterFormFieldError`
+ * (and optionally `FrontmatterFormFieldDescription`) as children.
  */
-export function FrontmatterField({ name, children, ...props }: FrontmatterFieldProps) {
-  const ctx = useFrontmatterContext();
+export function FrontmatterFormField({ name, children, ...props }: FrontmatterFormFieldProps) {
+  const ctx = useFrontmatterFormContext();
   const controlId = React.useId();
   const errorId = React.useId();
   const error = ctx.errors[name];
 
-  const fieldCtx: FrontmatterFieldContextValue = {
+  const fieldCtx: FrontmatterFormFieldContextValue = {
     name,
     value: ctx.value[name],
     setValue: (fieldValue) => ctx.setField(name, fieldValue),
@@ -115,38 +115,38 @@ export function FrontmatterField({ name, children, ...props }: FrontmatterFieldP
   };
 
   return (
-    <FrontmatterFieldContext.Provider value={fieldCtx}>
+    <FrontmatterFormFieldContext.Provider value={fieldCtx}>
       <Field data-invalid={error ? true : undefined} {...props}>
         {children}
       </Field>
-    </FrontmatterFieldContext.Provider>
+    </FrontmatterFormFieldContext.Provider>
   );
 }
 
 /** Label for the current field; wires `htmlFor` to its control. Copy is `children`. */
-export function FrontmatterFieldLabel(props: React.ComponentProps<typeof FieldLabel>) {
-  const field = useFrontmatterField();
+export function FrontmatterFormFieldLabel(props: React.ComponentProps<typeof FieldLabel>) {
+  const field = useFrontmatterFormField();
   return <FieldLabel htmlFor={field.controlId} {...props} />;
 }
 
 /** Supplementary hint under a field. Copy is `children`. */
-export function FrontmatterFieldDescription(props: React.ComponentProps<typeof FieldDescription>) {
+export function FrontmatterFormFieldDescription(props: React.ComponentProps<typeof FieldDescription>) {
   return <FieldDescription {...props} />;
 }
 
-export interface FrontmatterFieldControlProps {
+export interface FrontmatterFormFieldControlProps {
   /**
    * The control element to bind — e.g. `<Input placeholder="my-skill" />` or
    * `<Textarea />`. It receives `id`, `value`, `onChange`, and invalid-state
    * a11y props; for string fields. Any `value`/`onChange` on the element are
-   * overridden. For non-text controls, use `useFrontmatterField()` instead.
+   * overridden. For non-text controls, use `useFrontmatterFormField()` instead.
    */
   render: React.ReactElement;
 }
 
 /** Binds a text control (`Input` / `Textarea`) to the current field's string value. */
-export function FrontmatterFieldControl({ render }: FrontmatterFieldControlProps) {
-  const field = useFrontmatterField();
+export function FrontmatterFormFieldControl({ render }: FrontmatterFormFieldControlProps) {
+  const field = useFrontmatterFormField();
   return React.cloneElement(render as React.ReactElement<Record<string, unknown>>, {
     id: field.controlId,
     value: (field.value ?? '') as string,
@@ -157,8 +157,8 @@ export function FrontmatterFieldControl({ render }: FrontmatterFieldControlProps
 }
 
 /** Renders the current field's validation message (from the Root `errors`), if any. */
-export function FrontmatterFieldError(props: React.ComponentProps<typeof FieldError>) {
-  const field = useFrontmatterField();
+export function FrontmatterFormFieldError(props: React.ComponentProps<typeof FieldError>) {
+  const field = useFrontmatterFormField();
   if (!field.error) return null;
   return (
     <FieldError id={field.errorId} {...props}>

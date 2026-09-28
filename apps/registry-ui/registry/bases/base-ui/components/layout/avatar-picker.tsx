@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { EmojiPicker } from '../data-entry/emoji-picker';
 
-interface AvatarValue {
+interface AvatarPickerValue {
   /** Emoji glyph avatar, or null. */
   emoji?: string | null;
   /** Uploaded image avatar (data URL / asset URL), or null. */
@@ -16,10 +16,10 @@ interface AvatarValue {
   color?: string | null;
 }
 
-type AvatarTab = 'emoji' | 'upload' | 'color';
+type AvatarPickerTab = 'emoji' | 'upload' | 'color';
 
-interface AvatarEditorContextValue {
-  value: AvatarValue;
+interface AvatarPickerContextValue {
+  value: AvatarPickerValue;
   /** Set the emoji (clears any image). */
   setEmoji: (emoji: string) => void;
   /** Set the tile color. */
@@ -30,35 +30,35 @@ interface AvatarEditorContextValue {
   remove: () => void;
 }
 
-const AvatarEditorContext = React.createContext<AvatarEditorContextValue | null>(null);
+const AvatarPickerContext = React.createContext<AvatarPickerContextValue | null>(null);
 
-/** Read the value/Setters shared by the surrounding <AvatarEditor>. */
-function useAvatarEditor(): AvatarEditorContextValue {
-  const ctx = React.useContext(AvatarEditorContext);
+/** Read the value/Setters shared by the surrounding <AvatarPicker>. */
+function useAvatarPicker(): AvatarPickerContextValue {
+  const ctx = React.useContext(AvatarPickerContext);
   if (!ctx) {
-    throw new Error('AvatarEditor parts must be used within <AvatarEditor>');
+    throw new Error('AvatarPicker parts must be used within <AvatarPicker>');
   }
   return ctx;
 }
 
-interface AvatarEditorProps {
-  value: AvatarValue;
+interface AvatarPickerProps {
+  value: AvatarPickerValue;
   /** Fires with the new avatar value when a part edits it. */
-  onValueChange: (value: AvatarValue) => void;
+  onValueChange: (value: AvatarPickerValue) => void;
   /** Open state - uncontrolled by default; pass `open` to control it. */
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** Compose `AvatarEditorTrigger` + `AvatarEditorContent`. */
+  /** Compose `AvatarPickerTrigger` + `AvatarPickerContent`. */
   children?: React.ReactNode;
 }
 
 /**
- * Avatar editor - composes the emoji / upload / color tabs behind a Popover.
+ * Avatar picker - composes the emoji / upload / color tabs behind a Popover.
  * Compound + context: the Root owns the value + setters and the parts read it.
  */
-function AvatarEditor({ value, onValueChange, open, defaultOpen, onOpenChange, children }: AvatarEditorProps) {
-  const ctx: AvatarEditorContextValue = {
+function AvatarPicker({ value, onValueChange, open, defaultOpen, onOpenChange, children }: AvatarPickerProps) {
+  const ctx: AvatarPickerContextValue = {
     value,
     setEmoji: (emoji) => onValueChange({ ...value, emoji, imageUrl: null }),
     setColor: (color) => onValueChange({ ...value, color }),
@@ -66,28 +66,28 @@ function AvatarEditor({ value, onValueChange, open, defaultOpen, onOpenChange, c
     remove: () => onValueChange({ ...value, emoji: null, imageUrl: null }),
   };
   return (
-    <AvatarEditorContext.Provider value={ctx}>
-      <Popover open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange} data-slot="avatar-editor">
+    <AvatarPickerContext.Provider value={ctx}>
+      <Popover open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange} data-slot="avatar-picker">
         {children}
       </Popover>
-    </AvatarEditorContext.Provider>
+    </AvatarPickerContext.Provider>
   );
 }
 
-interface AvatarTabMeta {
-  value: AvatarTab;
+interface AvatarPickerTabMeta {
+  value: AvatarPickerTab;
   Icon: LucideIcon;
 }
 
 /** The clickable avatar tile that opens the editor. */
-function AvatarEditorTrigger({
+function AvatarPickerTrigger({
   className,
   'aria-label': ariaLabel = 'Edit avatar',
   ...props
 }: React.ComponentProps<typeof PopoverTrigger>) {
   return (
     <PopoverTrigger
-      data-slot="avatar-editor-trigger"
+      data-slot="avatar-picker-trigger"
       aria-label={ariaLabel}
       className={cn(
         'focus-visible:ring-ring/50 inline-flex rounded-[inherit] outline-none focus-visible:ring-2',
@@ -102,7 +102,7 @@ function AvatarEditorTrigger({
  * Popover body. Scans its children for the tab parts to build the icon strip
  * (hidden when only one tab) and always renders the Remove action.
  */
-function AvatarEditorContent({
+function AvatarPickerContent({
   className,
   children,
   align = 'start',
@@ -112,11 +112,11 @@ function AvatarEditorContent({
   const tabs = React.Children.toArray(children)
     .filter(React.isValidElement)
     .map((child) => TAB_META.get(child.type as React.ElementType))
-    .filter((meta): meta is AvatarTabMeta => Boolean(meta));
+    .filter((meta): meta is AvatarPickerTabMeta => Boolean(meta));
 
   return (
     <PopoverContent
-      data-slot="avatar-editor-content"
+      data-slot="avatar-picker-content"
       align={align}
       side={side}
       className={cn('w-84 gap-0 overflow-hidden p-0', className)}
@@ -133,7 +133,7 @@ function AvatarEditorContent({
               ))}
             </TabsList>
           )}
-          <AvatarEditorRemove />
+          <AvatarPickerRemove />
         </div>
         {children}
       </Tabs>
@@ -142,15 +142,15 @@ function AvatarEditorContent({
 }
 
 /** Clears both emoji and image. Auto-placed in the content header. */
-function AvatarEditorRemove({
+function AvatarPickerRemove({
   className,
   'aria-label': ariaLabel = 'Remove avatar',
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { remove } = useAvatarEditor();
+  const { remove } = useAvatarPicker();
   return (
     <Button
-      data-slot="avatar-editor-remove"
+      data-slot="avatar-picker-remove"
       type="button"
       variant="ghost"
       size="icon-sm"
@@ -165,16 +165,16 @@ function AvatarEditorRemove({
 }
 
 /** Emoji tab - picks an emoji (clears any image). */
-function AvatarEditorEmoji({ className, ...props }: Omit<React.ComponentProps<typeof TabsContent>, 'value'>) {
-  const { setEmoji } = useAvatarEditor();
+function AvatarPickerEmoji({ className, ...props }: Omit<React.ComponentProps<typeof TabsContent>, 'value'>) {
+  const { setEmoji } = useAvatarPicker();
   return (
-    <TabsContent data-slot="avatar-editor-emoji" value="emoji" className={cn('p-0', className)} {...props}>
+    <TabsContent data-slot="avatar-picker-emoji" value="emoji" className={cn('p-0', className)} {...props}>
       <EmojiPicker onSelect={setEmoji} />
     </TabsContent>
   );
 }
 
-interface AvatarEditorUploadProps extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
+interface AvatarPickerUploadProps extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
   /**
    * Hand the raw file to a backend and resolve the persisted URL (which becomes
    * `imageUrl`); resolve `null` for a no-op. Omit to read the file inline as a
@@ -187,8 +187,8 @@ interface AvatarEditorUploadProps extends Omit<React.ComponentProps<typeof TabsC
  * Upload tab. `children` override the default dropzone copy; a picked file goes
  * to `onUpload` (or is read inline as a data URL when omitted).
  */
-function AvatarEditorUpload({ className, children, onUpload, ...props }: AvatarEditorUploadProps) {
-  const { setImage } = useAvatarEditor();
+function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarPickerUploadProps) {
+  const { setImage } = useAvatarPicker();
   const fileRef = React.useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = React.useState(false);
 
@@ -212,7 +212,7 @@ function AvatarEditorUpload({ className, children, onUpload, ...props }: AvatarE
   };
 
   return (
-    <TabsContent data-slot="avatar-editor-upload" value="upload" className={cn('p-3', className)} {...props}>
+    <TabsContent data-slot="avatar-picker-upload" value="upload" className={cn('p-3', className)} {...props}>
       <input
         ref={fileRef}
         type="file"
@@ -260,16 +260,16 @@ const DEFAULT_COLORS = [
   '#3b82f6',
 ];
 
-interface AvatarEditorColorProps extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
+interface AvatarPickerColorProps extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
   /** Swatches shown on the Color tab. */
   colors?: string[];
 }
 
 /** Color tab - swatches + a custom picker; `children` override the custom label. */
-function AvatarEditorColor({ className, children, colors = DEFAULT_COLORS, ...props }: AvatarEditorColorProps) {
-  const { value, setColor } = useAvatarEditor();
+function AvatarPickerColor({ className, children, colors = DEFAULT_COLORS, ...props }: AvatarPickerColorProps) {
+  const { value, setColor } = useAvatarPicker();
   return (
-    <TabsContent data-slot="avatar-editor-color" value="color" className={cn('p-3', className)} {...props}>
+    <TabsContent data-slot="avatar-picker-color" value="color" className={cn('p-3', className)} {...props}>
       <div className="grid grid-cols-6 gap-2">
         {colors.map((c) => (
           <button
@@ -299,19 +299,19 @@ function AvatarEditorColor({ className, children, colors = DEFAULT_COLORS, ...pr
   );
 }
 
-const TAB_META = new Map<React.ElementType, AvatarTabMeta>([
-  [AvatarEditorEmoji, { value: 'emoji', Icon: Smile }],
-  [AvatarEditorUpload, { value: 'upload', Icon: Upload }],
-  [AvatarEditorColor, { value: 'color', Icon: Palette }],
+const TAB_META = new Map<React.ElementType, AvatarPickerTabMeta>([
+  [AvatarPickerEmoji, { value: 'emoji', Icon: Smile }],
+  [AvatarPickerUpload, { value: 'upload', Icon: Upload }],
+  [AvatarPickerColor, { value: 'color', Icon: Palette }],
 ]);
 
 export {
-  AvatarEditor,
-  AvatarEditorTrigger,
-  AvatarEditorContent,
-  AvatarEditorRemove,
-  AvatarEditorEmoji,
-  AvatarEditorUpload,
-  AvatarEditorColor,
+  AvatarPicker,
+  AvatarPickerTrigger,
+  AvatarPickerContent,
+  AvatarPickerRemove,
+  AvatarPickerEmoji,
+  AvatarPickerUpload,
+  AvatarPickerColor,
 };
-export type { AvatarValue, AvatarTab, AvatarEditorProps, AvatarEditorUploadProps, AvatarEditorColorProps };
+export type { AvatarPickerValue, AvatarPickerTab, AvatarPickerProps, AvatarPickerUploadProps, AvatarPickerColorProps };

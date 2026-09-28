@@ -4,13 +4,13 @@ import { Eye, PencilLine, Workflow } from 'lucide-react';
 import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
-  Disclosure,
-  DisclosureActions,
-  DisclosureContent,
-  DisclosureHeader,
-  DisclosureTitle,
-  DisclosureTrigger,
-} from '@/registry/bases/base-ui/components/layout/disclosure';
+  CollapsibleCard,
+  CollapsibleCardActions,
+  CollapsibleCardContent,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardTrigger,
+} from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { codeLanguageIcon } from '@/registry/bases/base-ui/components/language-switcher-data';
 import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
@@ -32,7 +32,7 @@ import { DiagramViewer } from '../../../mermaid/react/viewer.js';
  * chevron on the right) over the active tab's panel — the rendered diagram under
  * **View** (`DiagramPreview`, which reuses the `mermaid` surface's shared render +
  * pan/zoom), the in-package `CodeMirrorPane` under **Edit**. It composes the same
- * `Disclosure` chrome the read-only `CodeBlock` does — same header, same copy +
+ * `CollapsibleCard` chrome the read-only `CodeBlock` does — same header, same copy +
  * collapse affordances — so the two blocks read identically; only the body differs
  * (Mermaid adds the View/Edit switch and a live engine `CodeBlock` has no reason to
  * carry). The read-only Viewer renders the diagram with no edit affordance. The
@@ -70,20 +70,20 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
   // owns it and mounts only the active panel) — never written to the document.
   const initialTab = attrs.source.trim() === '' ? 'edit' : 'view';
 
-  // The header + body come from the shared `Disclosure` compound in its `muted`
+  // The header + body come from the shared `CollapsibleCard` compound in its `muted`
   // variant — the same borderless muted chrome the read-only code-block composes,
   // so the two blocks read identically: the diagram-type label fills the title; the
   // View/Edit tabs (the segmented control, 36px) plus the copy + collapse chevron
   // (the icon-action pair, 32px — matching code-block's copy+chevron grouping) fill
   // the actions; the panels fill the collapsible body.
   //
-  // `DisclosureContent` carries `keepMounted` so the collapse toggle only *hides* the
+  // `CollapsibleCardContent` carries `keepMounted` so the collapse toggle only *hides* the
   // active panel (height→0) and never unmounts it. Without it, folding a block that
   // is showing the diagram would tear down the preview's `dangerouslySetInnerHTML`
   // SVG mid-render and React would crash on `removeChild`; keeping the node mounted
   // (Base UI just toggles `hidden`) sidesteps that entirely.
   return (
-    <Disclosure
+    <CollapsibleCard
       variant="muted"
       data-mermaid
       contentEditable={false}
@@ -92,12 +92,12 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
       className={cn('my-4', selected && 'ring-ring ring-2')}
     >
       <Tabs defaultValue={initialTab} className="gap-0">
-        <DisclosureHeader>
-          <DisclosureTitle>
+        <CollapsibleCardHeader>
+          <CollapsibleCardTitle>
             <MermaidTypeIcon className="shrink-0" />
             <span>{DIAGRAM_TYPE_LABEL[type]}</span>
-          </DisclosureTitle>
-          <DisclosureActions>
+          </CollapsibleCardTitle>
+          <CollapsibleCardActions>
             <TabsList>
               <TabsTrigger value="view" aria-label="View">
                 <Eye />
@@ -107,10 +107,10 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
               </TabsTrigger>
             </TabsList>
             <CopyButton value={attrs.source} label="Copy source" size="icon" />
-            <DisclosureTrigger />
-          </DisclosureActions>
-        </DisclosureHeader>
-        <DisclosureContent keepMounted>
+            <CollapsibleCardTrigger />
+          </CollapsibleCardActions>
+        </CollapsibleCardHeader>
+        <CollapsibleCardContent keepMounted>
           <Separator />
           <TabsContent value="view">
             <DiagramPreview source={attrs.source} className="rounded-none border-0" />
@@ -124,9 +124,9 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
               className="h-64"
             />
           </TabsContent>
-        </DisclosureContent>
+        </CollapsibleCardContent>
       </Tabs>
-    </Disclosure>
+    </CollapsibleCard>
   );
 }
 

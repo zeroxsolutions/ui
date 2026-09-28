@@ -1,17 +1,17 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { FieldGrid } from './field-grid';
+import { PanelFieldGroup } from './panel-field-group';
 
 afterEach(cleanup);
 
-describe('FieldGrid', () => {
+describe('PanelFieldGroup', () => {
   it('bakes the curated grid + gap decision', () => {
     const { container } = render(
-      <FieldGrid>
+      <PanelFieldGroup>
         <span>a</span>
         <span>b</span>
-      </FieldGrid>,
+      </PanelFieldGroup>,
     );
     const grid = container.firstChild as HTMLElement;
     expect(grid.className).toContain('grid');
@@ -21,9 +21,9 @@ describe('FieldGrid', () => {
 
   it('renders a (possibly dynamic) column count as a computed grid-template', () => {
     const { container } = render(
-      <FieldGrid cols={3}>
+      <PanelFieldGroup cols={3}>
         <span>a</span>
-      </FieldGrid>,
+      </PanelFieldGroup>,
     );
     const grid = container.firstChild as HTMLElement;
     // A computed inline template, not a `grid-cols-3` utility — so any runtime
@@ -34,18 +34,18 @@ describe('FieldGrid', () => {
 
   it('also accepts the column count via className', () => {
     const { container } = render(
-      <FieldGrid className="grid-cols-3">
+      <PanelFieldGroup className="grid-cols-3">
         <span>a</span>
-      </FieldGrid>,
+      </PanelFieldGroup>,
     );
     expect((container.firstChild as HTMLElement).className).toContain('grid-cols-3');
   });
 
   it('forwards arbitrary props onto the grid element', () => {
     const { getByTestId } = render(
-      <FieldGrid data-testid="grid">
+      <PanelFieldGroup data-testid="grid">
         <span>a</span>
-      </FieldGrid>,
+      </PanelFieldGroup>,
     );
     expect(getByTestId('grid')).toBeTruthy();
   });

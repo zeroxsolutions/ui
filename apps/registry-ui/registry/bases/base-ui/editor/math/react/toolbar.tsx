@@ -4,10 +4,10 @@ import { useRef, useState } from 'react';
 import { Check, Copy, Download, Omega, Sigma } from 'lucide-react';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import {
-  DisclosureActions,
-  DisclosureHeader,
-  DisclosureTitle,
-} from '@/registry/bases/base-ui/components/layout/disclosure';
+  CollapsibleCardActions,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+} from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,13 +27,13 @@ export interface MathToolbarProps {
 }
 
 /**
- * The standalone surface's header - the house `DisclosureHeader` compound, not a
+ * The standalone surface's header - the house `CollapsibleCardHeader` compound, not a
  * bespoke bar. Where the mermaid toolbar puts a diagram-type `Combobox` in the
  * title, math has no "type": the title is a static `Math` label and the palette is
  * the star, so the palette (a `Popover` + `Command` inserter) and the export menu
  * fill the actions. Export feedback is inline (a transient check), so no toast
  * dependency is added. Renders the header parts only; `MathEditor` owns the
- * enclosing `Disclosure` and its body.
+ * enclosing `CollapsibleCard` and its body.
  */
 export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
   const [done, setDone] = useState(false);
@@ -52,13 +52,13 @@ export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
   };
 
   return (
-    <DisclosureHeader className={className}>
-      <DisclosureTitle>
+    <CollapsibleCardHeader className={className}>
+      <CollapsibleCardTitle>
         <Sigma className="shrink-0" />
         <span>Math</span>
-      </DisclosureTitle>
+      </CollapsibleCardTitle>
 
-      <DisclosureActions>
+      <CollapsibleCardActions>
         <MathPalette
           onInsert={onInsert}
           trigger={
@@ -90,7 +90,7 @@ export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
-      </DisclosureActions>
-    </DisclosureHeader>
+      </CollapsibleCardActions>
+    </CollapsibleCardHeader>
   );
 }

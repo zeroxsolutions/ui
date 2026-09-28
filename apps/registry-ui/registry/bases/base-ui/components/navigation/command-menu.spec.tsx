@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { CommandSwitcher, CommandSwitcherItem } from './command-switcher';
+import { CommandMenu, CommandMenuItem } from './command-menu';
 import { CommandInput, CommandList } from '@/registry/bases/base-ui/ui/command';
 import { useCommandShortcut } from '../../hooks/use-command-shortcut';
 
@@ -19,18 +19,18 @@ afterEach(() => {
   cleanup();
 });
 
-describe('CommandSwitcher', () => {
+describe('CommandMenu', () => {
   it('reports the chosen value and closes on select', () => {
     const onValueChange = vi.fn();
     const onOpenChange = vi.fn();
     render(
-      <CommandSwitcher open onOpenChange={onOpenChange} onValueChange={onValueChange}>
+      <CommandMenu open onOpenChange={onOpenChange} onValueChange={onValueChange}>
         <CommandInput placeholder="Jump to file…" />
         <CommandList>
-          <CommandSwitcherItem value="SKILL.md">SKILL.md</CommandSwitcherItem>
-          <CommandSwitcherItem value="scripts/run.py">run.py</CommandSwitcherItem>
+          <CommandMenuItem value="SKILL.md">SKILL.md</CommandMenuItem>
+          <CommandMenuItem value="scripts/run.py">run.py</CommandMenuItem>
         </CommandList>
-      </CommandSwitcher>,
+      </CommandMenu>,
     );
 
     fireEvent.click(screen.getByText('run.py'));

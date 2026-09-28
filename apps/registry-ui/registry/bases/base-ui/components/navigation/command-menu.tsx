@@ -2,21 +2,21 @@ import * as React from 'react';
 
 import { Command, CommandDialog, CommandItem } from '@/registry/bases/base-ui/ui/command';
 
-interface CommandSwitcherContextValue {
+interface CommandMenuContextValue {
   select: (value: string) => void;
 }
 
-const CommandSwitcherContext = React.createContext<CommandSwitcherContextValue | null>(null);
+const CommandMenuContext = React.createContext<CommandMenuContextValue | null>(null);
 
-function useCommandSwitcher(): CommandSwitcherContextValue {
-  const ctx = React.useContext(CommandSwitcherContext);
+function useCommandMenu(): CommandMenuContextValue {
+  const ctx = React.useContext(CommandMenuContext);
   if (!ctx) {
-    throw new Error('CommandSwitcher parts must be used within <CommandSwitcher>');
+    throw new Error('CommandMenu parts must be used within <CommandMenu>');
   }
   return ctx;
 }
 
-export interface CommandSwitcherProps extends Omit<
+export interface CommandMenuProps extends Omit<
   React.ComponentProps<typeof CommandDialog>,
   'children' | 'onOpenChange'
 > {
@@ -33,33 +33,33 @@ export interface CommandSwitcherProps extends Omit<
 /**
  * A ⌘K-style **command palette for jumping to a target** — a controlled dialog
  * (`open` / `onOpenChange`) wrapping the `Command` shell. Choosing a
- * `CommandSwitcherItem` reports its value via `onValueChange` and closes the
+ * `CommandMenuItem` reports its value via `onValueChange` and closes the
  * dialog. Compose the contents (`CommandInput`, `CommandList`, `CommandEmpty`,
  * items) as children and own all copy; bind the ⌘K key with `useCommandShortcut`.
  */
-export function CommandSwitcher({ open, onOpenChange, onValueChange, children, ...props }: CommandSwitcherProps) {
-  const ctx: CommandSwitcherContextValue = {
+export function CommandMenu({ open, onOpenChange, onValueChange, children, ...props }: CommandMenuProps) {
+  const ctx: CommandMenuContextValue = {
     select: (value) => {
       onValueChange?.(value);
       onOpenChange?.(false);
     },
   };
   return (
-    <CommandSwitcherContext.Provider value={ctx}>
+    <CommandMenuContext.Provider value={ctx}>
       <CommandDialog open={open} onOpenChange={onOpenChange} {...props}>
         <Command>{children}</Command>
       </CommandDialog>
-    </CommandSwitcherContext.Provider>
+    </CommandMenuContext.Provider>
   );
 }
 
-export interface CommandSwitcherItemProps extends Omit<React.ComponentProps<typeof CommandItem>, 'onSelect' | 'value'> {
+export interface CommandMenuItemProps extends Omit<React.ComponentProps<typeof CommandItem>, 'onSelect' | 'value'> {
   /** Reported via the switcher's `onValueChange` when chosen. */
   value: string;
 }
 
-/** An item in a `CommandSwitcher`; selecting it reports `value` and closes. */
-export function CommandSwitcherItem({ value, ...props }: CommandSwitcherItemProps) {
-  const { select } = useCommandSwitcher();
+/** An item in a `CommandMenu`; selecting it reports `value` and closes. */
+export function CommandMenuItem({ value, ...props }: CommandMenuItemProps) {
+  const { select } = useCommandMenu();
   return <CommandItem value={value} onSelect={() => select(value)} {...props} />;
 }

@@ -2,14 +2,14 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  FrontmatterEditor,
-  FrontmatterField,
-  FrontmatterFieldControl,
-  FrontmatterFieldError,
-  FrontmatterFieldLabel,
-  useFrontmatterField,
-  type FrontmatterValue,
-} from './frontmatter-editor';
+  FrontmatterForm,
+  FrontmatterFormField,
+  FrontmatterFormFieldControl,
+  FrontmatterFormFieldError,
+  FrontmatterFormFieldLabel,
+  useFrontmatterFormField,
+  type FrontmatterFormValue,
+} from './frontmatter-form';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 
 afterEach(() => {
@@ -21,22 +21,22 @@ function NameEditor({
   onValueChange = () => {},
   errors,
 }: {
-  value: FrontmatterValue;
-  onValueChange?: (value: FrontmatterValue) => void;
+  value: FrontmatterFormValue;
+  onValueChange?: (value: FrontmatterFormValue) => void;
   errors?: Record<string, string>;
 }) {
   return (
-    <FrontmatterEditor value={value} onValueChange={onValueChange} errors={errors}>
-      <FrontmatterField name="name">
-        <FrontmatterFieldLabel>Name</FrontmatterFieldLabel>
-        <FrontmatterFieldControl render={<Input />} />
-        <FrontmatterFieldError />
-      </FrontmatterField>
-    </FrontmatterEditor>
+    <FrontmatterForm value={value} onValueChange={onValueChange} errors={errors}>
+      <FrontmatterFormField name="name">
+        <FrontmatterFormFieldLabel>Name</FrontmatterFormFieldLabel>
+        <FrontmatterFormFieldControl render={<Input />} />
+        <FrontmatterFormFieldError />
+      </FrontmatterFormField>
+    </FrontmatterForm>
   );
 }
 
-describe('FrontmatterEditor', () => {
+describe('FrontmatterForm', () => {
   it('associates the label with the control and reflects the value', () => {
     render(<NameEditor value={{ name: 'pdf-toolkit' }} />);
     const input = screen.getByLabelText('Name') as HTMLInputElement;
@@ -71,11 +71,11 @@ describe('FrontmatterEditor', () => {
     expect(screen.getByLabelText('Name').getAttribute('aria-invalid')).toBeNull();
   });
 
-  it('exposes the field binding via useFrontmatterField for custom controls', () => {
+  it('exposes the field binding via useFrontmatterFormField for custom controls', () => {
     const onValueChange = vi.fn();
 
     function ToggleField() {
-      const field = useFrontmatterField();
+      const field = useFrontmatterFormField();
       return (
         <button type="button" onClick={() => field.setValue(!field.value)}>
           {field.value ? 'on' : 'off'}
@@ -84,11 +84,11 @@ describe('FrontmatterEditor', () => {
     }
 
     render(
-      <FrontmatterEditor value={{ network: false }} onValueChange={onValueChange}>
-        <FrontmatterField name="network">
+      <FrontmatterForm value={{ network: false }} onValueChange={onValueChange}>
+        <FrontmatterFormField name="network">
           <ToggleField />
-        </FrontmatterField>
-      </FrontmatterEditor>,
+        </FrontmatterFormField>
+      </FrontmatterForm>,
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'off' }));

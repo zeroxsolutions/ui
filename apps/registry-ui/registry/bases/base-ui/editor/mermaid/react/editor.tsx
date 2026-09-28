@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Disclosure } from '@/registry/bases/base-ui/components/layout/disclosure';
+import { CollapsibleCard } from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/registry/bases/base-ui/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { useIsMobile } from '@/registry/bases/base-ui/hooks/use-mobile';
@@ -14,10 +14,10 @@ import { useMermaidRender } from './use-mermaid-render.js';
 /**
  * `<MermaidEditor>` — the standalone Mermaid authoring surface: a source pane
  * (the in-package `CodeMirrorPane`) beside a live pan/zoom preview, inside the
- * house `Disclosure` compound in its `muted` variant — the same borderless muted
+ * house `CollapsibleCard` compound in its `muted` variant — the same borderless muted
  * chrome the in-document code-block and Mermaid block compose, so this surface
  * reads identically to them: a header (a type/template switcher + export) over the
- * body. A Mermaid block never collapses, so `Disclosure` supplies the header
+ * body. A Mermaid block never collapses, so `CollapsibleCard` supplies the header
  * structure and the surface container, not a collapse toggle. Controlled the same way as
  * `CodeMirrorPane` (`value`/`defaultValue`/`onValueChange`), so any host can own
  * the source. `layout='auto'` splits side-by-side on wide viewports and switches
@@ -59,7 +59,7 @@ export function MermaidEditor({
   const canvas = <DiagramCanvas state={state} className="h-full rounded-none border-0" />;
 
   return (
-    <Disclosure variant="muted" data-slot="mermaid-editor" className={className}>
+    <CollapsibleCard variant="muted" data-slot="mermaid-editor" className={className}>
       {toolbar && <MermaidToolbar source={source} svg={state.svg} onPickTemplate={setSource} />}
 
       <div className="flex h-[28rem] min-h-0 flex-col overflow-hidden">
@@ -88,6 +88,6 @@ export function MermaidEditor({
           </ResizablePanelGroup>
         )}
       </div>
-    </Disclosure>
+    </CollapsibleCard>
   );
 }

@@ -6,7 +6,7 @@ import { MarkdownView } from '@/registry/bases/base-ui/components/data-display/m
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**
- * Reasoning — a thinking / reasoning disclosure built on the SDK `Collapsible`
+ * ReasoningCollapsible — a thinking / reasoning disclosure built on the SDK `Collapsible`
  * with a muted-trigger language. Auto-opens while the agent is streaming its
  * reasoning, then auto-collapses ~1s after the stream ends; the trigger reads
  * "Thinking…" (pulsing) → "Thought for N seconds".
@@ -15,41 +15,46 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
  * live cue is `animate-pulse`. Presentational — `streaming` in, content as a
  * markdown string. Compose the parts:
  *
- *   <Reasoning streaming={isLive}>
- *     <ReasoningTrigger />
- *     <ReasoningContent>{text}</ReasoningContent>
- *   </Reasoning>
+ *   <ReasoningCollapsible streaming={isLive}>
+ *     <ReasoningCollapsibleTrigger />
+ *     <ReasoningCollapsibleContent>{text}</ReasoningCollapsibleContent>
+ *   </ReasoningCollapsible>
  */
 const AUTO_CLOSE_DELAY = 1000;
 const MS_IN_S = 1000;
 
-interface ReasoningContextValue {
+interface ReasoningCollapsibleContextValue {
   streaming: boolean;
   isOpen: boolean;
   duration: number | undefined;
 }
 
-const ReasoningContext = createContext<ReasoningContextValue | null>(null);
+const ReasoningCollapsibleContext = createContext<ReasoningCollapsibleContextValue | null>(null);
 
 /**
  * Read the live reasoning state (`streaming`, `isOpen`, `duration`) from inside a
- * `<Reasoning>`. Lets a consumer compute their own trigger label. Throws when
- * used outside `<Reasoning>`.
+ * `<ReasoningCollapsible>`. Lets a consumer compute their own trigger label. Throws when
+ * used outside `<ReasoningCollapsible>`.
  */
-export function useReasoning(): ReasoningContextValue {
-  const ctx = useContext(ReasoningContext);
-  if (!ctx) throw new Error('Reasoning parts must be used within <Reasoning>');
+export function useReasoningCollapsible(): ReasoningCollapsibleContextValue {
+  const ctx = useContext(ReasoningCollapsibleContext);
+  if (!ctx) throw new Error('ReasoningCollapsible parts must be used within <ReasoningCollapsible>');
   return ctx;
 }
 
-export interface ReasoningProps {
+export interface ReasoningCollapsibleProps {
   streaming?: boolean;
   defaultOpen?: boolean;
   className?: string;
   children: ReactNode;
 }
 
-export function Reasoning({ streaming = false, defaultOpen, className, children }: ReasoningProps) {
+export function ReasoningCollapsible({
+  streaming = false,
+  defaultOpen,
+  className,
+  children,
+}: ReasoningCollapsibleProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen ?? streaming);
   const [duration, setDuration] = useState<number | undefined>(undefined);
   const startRef = useRef<number | null>(null);
@@ -85,11 +90,11 @@ export function Reasoning({ streaming = false, defaultOpen, className, children 
   }, [streaming, isOpen]);
 
   return (
-    <ReasoningContext.Provider value={{ streaming, isOpen, duration }}>
+    <ReasoningCollapsibleContext.Provider value={{ streaming, isOpen, duration }}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen} className={cn('my-2', className)}>
         {children}
       </Collapsible>
-    </ReasoningContext.Provider>
+    </ReasoningCollapsibleContext.Provider>
   );
 }
 
@@ -99,7 +104,7 @@ function thinkingLabel(streaming: boolean, duration: number | undefined): string
   return `Thought for ${duration} second${duration === 1 ? '' : 's'}`;
 }
 
-export function ReasoningTrigger({
+export function ReasoningCollapsibleTrigger({
   children,
   className,
 }: {
@@ -107,7 +112,7 @@ export function ReasoningTrigger({
   children?: ReactNode;
   className?: string;
 }) {
-  const { streaming, isOpen, duration } = useReasoning();
+  const { streaming, isOpen, duration } = useReasoningCollapsible();
   const live = streaming || duration === 0;
   return (
     <CollapsibleTrigger
@@ -125,7 +130,7 @@ export function ReasoningTrigger({
   );
 }
 
-export function ReasoningContent({ children, className }: { children: string; className?: string }) {
+export function ReasoningCollapsibleContent({ children, className }: { children: string; className?: string }) {
   return (
     <CollapsibleContent className={cn('text-muted-foreground mt-2 text-sm', className)}>
       <MarkdownView codeBlocks>{children}</MarkdownView>

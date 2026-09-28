@@ -3,13 +3,13 @@ import { Fragment, useEffect, useState } from 'react';
 
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
-  Disclosure,
-  DisclosureActions,
-  DisclosureContent,
-  DisclosureHeader,
-  DisclosureTitle,
-  DisclosureTrigger,
-} from '@/registry/bases/base-ui/components/layout/disclosure';
+  CollapsibleCard,
+  CollapsibleCardActions,
+  CollapsibleCardContent,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardTrigger,
+} from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { codeLanguageIcon } from '@/registry/bases/base-ui/components/language-switcher-data';
 import { ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 import { highlightToLines, type HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
@@ -25,12 +25,12 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
  * mono while the grammar loads and for unknown languages, so the code is always
  * legible. With no language (or `text`/`plaintext`) it stays a borderless plain
  * block with a hover copy button — used for fenced code inside markdown
- * (`MarkdownView codeBlocks`), tool Parameters/Result panels, and JSON
+ * (`MarkdownView codeBlocks`), `ToolCallCard` Parameters/Result panels, and JSON
  * disclosures.
  *
  * A read-only view: it renders the highlighted source, never an editing surface
  * — the editable code surface lives in the composite editor package's code-block
- * feature, which composes this same `Disclosure` chrome so the two read
+ * feature, which composes this same `CollapsibleCard` chrome so the two read
  * identically.
  *
  * `code` is the source string. Presentational — copy uses the Clipboard API
@@ -178,7 +178,7 @@ export function CodeBlock({ code, language, className }: CodeBlockProps) {
   );
 
   // An unlabelled block stays a minimal muted surface with a hover copy — no
-  // header, so no Disclosure chrome; used for fenced code inside markdown and JSON
+  // header, so no CollapsibleCard chrome; used for fenced code inside markdown and JSON
   // panels, where a header/collapse would be noise. Borderless on purpose: the
   // surface is delineated by `bg-muted`, so a block nested inside a card doesn't
   // stack border-inside-border.
@@ -199,24 +199,29 @@ export function CodeBlock({ code, language, className }: CodeBlockProps) {
     );
   }
 
-  // A labelled block composes the shared Disclosure: the language (icon + label)
+  // A labelled block composes the shared CollapsibleCard: the language (icon + label)
   // fills the title; copy + the collapse toggle fill the actions; the code body
   // is the collapsible content. `data-slot` stays "code-block" — the editor
-  // stylesheet targets it — so the Disclosure root carries it instead of its
-  // default "disclosure".
+  // stylesheet targets it — so the CollapsibleCard root carries it instead of its
+  // default "collapsible-card".
   return (
-    <Disclosure variant="muted" data-slot="code-block" data-language={language} className={cn('group/code', className)}>
-      <DisclosureHeader>
-        <DisclosureTitle>
+    <CollapsibleCard
+      variant="muted"
+      data-slot="code-block"
+      data-language={language}
+      className={cn('group/code', className)}
+    >
+      <CollapsibleCardHeader>
+        <CollapsibleCardTitle>
           {LanguageIcon ? <LanguageIcon className="shrink-0" /> : null}
           <span className="text-xs">{languageLabel(language as string)}</span>
-        </DisclosureTitle>
-        <DisclosureActions>
+        </CollapsibleCardTitle>
+        <CollapsibleCardActions>
           <CopyButton value={code} label="Copy code" size="icon" />
-          <DisclosureTrigger />
-        </DisclosureActions>
-      </DisclosureHeader>
-      <DisclosureContent>{body}</DisclosureContent>
-    </Disclosure>
+          <CollapsibleCardTrigger />
+        </CollapsibleCardActions>
+      </CollapsibleCardHeader>
+      <CollapsibleCardContent>{body}</CollapsibleCardContent>
+    </CollapsibleCard>
   );
 }

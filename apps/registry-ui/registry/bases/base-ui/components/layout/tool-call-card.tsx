@@ -9,34 +9,34 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
 
 /**
- * Tool — a tool-invocation card built on the SDK `Collapsible` + `Badge`. One
+ * ToolCallCard — a tool-invocation card built on the SDK `Collapsible` + `Badge`. One
  * card with a header row (icon · title · status badge · chevron) and a content
- * area separated by a top `Separator`; `ToolInput`/`ToolOutput` render JSON via
+ * area separated by a top `Separator`; `ToolCallCardInput`/`ToolCallCardOutput` render JSON via
  * `CodeBlock`. Presentational — the host maps its dispatcher lifecycle onto
- * `ToolState` (pending → running → completed → error) and supplies title/icon/
+ * `ToolCallCardState` (pending → running → completed → error) and supplies title/icon/
  * input/output.
  *
- *   <Tool>
- *     <ToolHeader state={state} title="search" subtitle={summary} icon={Icon} />
- *     <ToolContent>
- *       <ToolInput input={params} />
- *       <ToolOutput output={result} errorText={error} />
- *     </ToolContent>
- *   </Tool>
+ *   <ToolCallCard>
+ *     <ToolCallCardHeader state={state} title="search" subtitle={summary} icon={Icon} />
+ *     <ToolCallCardContent>
+ *       <ToolCallCardInput input={params} />
+ *       <ToolCallCardOutput output={result} errorText={error} />
+ *     </ToolCallCardContent>
+ *   </ToolCallCard>
  */
-export type ToolState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
+export type ToolCallCardState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
 
-export type ToolPart = { state: ToolState };
+export type ToolCallCardPart = { state: ToolCallCardState };
 
-export function Tool({ className, ...props }: ComponentProps<typeof Collapsible>) {
+export function ToolCallCard({ className, ...props }: ComponentProps<typeof Collapsible>) {
   return <Collapsible className={cn('bg-muted my-2 w-full overflow-hidden rounded-md', className)} {...props} />;
 }
 
 /**
  * Per-state status cue (icon + tone) and the default visible word. The icon and
- * tone are fixed; the word is overridable per call-site via `ToolHeader.statusLabel`.
+ * tone are fixed; the word is overridable per call-site via `ToolCallCardHeader.statusLabel`.
  */
-const STATUS: Record<ToolState, { label: string; icon: ReactNode }> = {
+const STATUS: Record<ToolCallCardState, { label: string; icon: ReactNode }> = {
   'input-streaming': { label: 'Pending', icon: <Circle /> },
   'input-available': {
     label: 'Running',
@@ -52,14 +52,14 @@ const STATUS: Record<ToolState, { label: string; icon: ReactNode }> = {
   },
 };
 
-export interface ToolHeaderProps {
+export interface ToolCallCardHeaderProps {
   /** Display title; falls back to `toolName`, then a derived `type`. */
   title?: string;
   /** Human-readable one-line summary of the call, shown muted after the name. */
   subtitle?: string;
   /** Leading glyph; the host resolves it (e.g. via a `toolIcon` map). Defaults to `Wrench`. */
   icon?: LucideIcon;
-  state: ToolState;
+  state: ToolCallCardState;
   toolName?: string;
   type?: string;
   /** Visible word in the status badge; defaults to the per-state `STATUS` label. */
@@ -69,7 +69,7 @@ export interface ToolHeaderProps {
   className?: string;
 }
 
-export function ToolHeader({
+export function ToolCallCardHeader({
   title,
   subtitle,
   icon,
@@ -79,12 +79,14 @@ export function ToolHeader({
   statusLabel,
   fallbackLabel = 'tool',
   className,
-}: ToolHeaderProps) {
+}: ToolCallCardHeaderProps) {
   const name = title ?? toolName ?? (type ? type.split('-').slice(1).join('-') : fallbackLabel);
   const status = STATUS[state];
   const Icon = icon ?? Wrench;
   return (
-    <CollapsibleTrigger className={cn('group/tool flex w-full items-center gap-2 px-3 py-2 text-left', className)}>
+    <CollapsibleTrigger
+      className={cn('group/tool-call-card flex w-full items-center gap-2 px-3 py-2 text-left', className)}
+    >
       <Icon className="text-muted-foreground size-3.5 shrink-0" />
       <span className="shrink-0 text-sm font-medium">{name}</span>
       {subtitle ? (
@@ -96,12 +98,12 @@ export function ToolHeader({
         {status.icon}
         {statusLabel ?? status.label}
       </Badge>
-      <ChevronDown className="text-muted-foreground size-4 shrink-0 transition-transform group-aria-expanded/tool:rotate-180" />
+      <ChevronDown className="text-muted-foreground size-4 shrink-0 transition-transform group-aria-expanded/tool-call-card:rotate-180" />
     </CollapsibleTrigger>
   );
 }
 
-export function ToolContent({ className, children, ...props }: ComponentProps<typeof CollapsibleContent>) {
+export function ToolCallCardContent({ className, children, ...props }: ComponentProps<typeof CollapsibleContent>) {
   return (
     <CollapsibleContent {...props}>
       <Separator />
@@ -110,11 +112,11 @@ export function ToolContent({ className, children, ...props }: ComponentProps<ty
   );
 }
 
-function ToolLabel({ children }: { children: ReactNode }) {
+function ToolCallCardLabel({ children }: { children: ReactNode }) {
   return <h4 className="text-muted-foreground text-xs font-medium">{children}</h4>;
 }
 
-export function ToolInput({
+export function ToolCallCardInput({
   input,
   label = 'Parameters',
   className,
@@ -126,13 +128,13 @@ export function ToolInput({
 }) {
   return (
     <div className={cn('space-y-1.5 overflow-hidden', className)}>
-      <ToolLabel>{label}</ToolLabel>
+      <ToolCallCardLabel>{label}</ToolCallCardLabel>
       <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
     </div>
   );
 }
 
-export function ToolOutput({
+export function ToolCallCardOutput({
   output,
   errorText,
   resultLabel = 'Result',
@@ -164,7 +166,7 @@ export function ToolOutput({
 
   return (
     <div className={cn('space-y-1.5', className)}>
-      <ToolLabel>{errorText ? errorLabel : resultLabel}</ToolLabel>
+      <ToolCallCardLabel>{errorText ? errorLabel : resultLabel}</ToolCallCardLabel>
       {errorText ? (
         <div className="bg-destructive/10 text-destructive rounded-md px-3 py-2 text-xs">{errorText}</div>
       ) : (

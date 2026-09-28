@@ -1,17 +1,17 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { FieldGroup } from './field-group';
+import { PanelRow } from './panel-row';
 
 afterEach(cleanup);
 
-describe('FieldGroup', () => {
+describe('PanelRow', () => {
   it('renders its inputs and a provided trailing action', () => {
     const { getByText } = render(
-      <FieldGroup action={<button>lock</button>}>
+      <PanelRow action={<button>lock</button>}>
         <span>x</span>
         <span>y</span>
-      </FieldGroup>,
+      </PanelRow>,
     );
     expect(getByText('x')).toBeTruthy();
     expect(getByText('lock')).toBeTruthy();
@@ -19,9 +19,9 @@ describe('FieldGroup', () => {
 
   it('reserves the fixed trailing action slot even when no action is given', () => {
     const { container } = render(
-      <FieldGroup>
+      <PanelRow>
         <span>x</span>
-      </FieldGroup>,
+      </PanelRow>,
     );
     // The slot is always rendered at a single icon-button width so a row with no
     // action keeps the same right edge as one that has an action.
@@ -30,21 +30,21 @@ describe('FieldGroup', () => {
 
   it('merges className and forwards arbitrary props onto the row', () => {
     const { getByTestId } = render(
-      <FieldGroup className="mt-2" data-testid="row">
+      <PanelRow className="mt-2" data-testid="row">
         <span>x</span>
-      </FieldGroup>,
+      </PanelRow>,
     );
     const row = getByTestId('row');
     expect(row.className).toContain('flex');
     expect(row.className).toContain('mt-2');
   });
 
-  it('stamps data-slot="field-group" on the root', () => {
+  it('stamps data-slot="panel-row" on the root', () => {
     const { container } = render(
-      <FieldGroup>
+      <PanelRow>
         <span>x</span>
-      </FieldGroup>,
+      </PanelRow>,
     );
-    expect(container.querySelector('[data-slot="field-group"]')).toBeTruthy();
+    expect(container.querySelector('[data-slot="panel-row"]')).toBeTruthy();
   });
 });

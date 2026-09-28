@@ -22,9 +22,9 @@ const TONE_CLASS: Record<StatusTone, string> = {
  *   - idle    → pending / away
  *
  * Not this: an arbitrary identity colour (a team/agent hex) or a "modified"
- * flag (use `DirtyDot`) — those aren't a status.
+ * flag (use `UnsavedIndicator`) — those aren't a status.
  */
-function StatusDot({
+function StatusIndicator({
   tone,
   pulse,
   className,
@@ -36,7 +36,7 @@ function StatusDot({
 }) {
   return (
     <span
-      data-slot="status-dot"
+      data-slot="status-indicator"
       aria-hidden
       className={cn('inline-block size-2 shrink-0 rounded-full', TONE_CLASS[tone], pulse && 'animate-pulse', className)}
       {...props}
@@ -44,4 +44,4 @@ function StatusDot({
   );
 }
 
-export { StatusDot };
+export { StatusIndicator };

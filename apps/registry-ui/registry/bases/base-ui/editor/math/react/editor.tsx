@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Disclosure } from '@/registry/bases/base-ui/components/layout/disclosure';
+import { CollapsibleCard } from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/registry/bases/base-ui/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { useIsMobile } from '@/registry/bases/base-ui/hooks/use-mobile';
@@ -13,7 +13,7 @@ import { MathToolbar } from './toolbar.js';
 /**
  * `<MathEditor>` - the standalone KaTeX authoring surface: a LaTeX source pane
  * (the in-package `CodeMirrorPane`, `language="latex"`) beside a live formula
- * preview, inside the house `Disclosure` compound in its `muted` variant - the
+ * preview, inside the house `CollapsibleCard` compound in its `muted` variant - the
  * same borderless muted chrome the in-document code-block and mermaid block
  * compose, so this surface reads identically to them. Controlled the same way as
  * `CodeMirrorPane` (`value`/`defaultValue`/`onValueChange`), so any host can own
@@ -61,7 +61,7 @@ export function MathEditor({
   const preview = <FormulaPreview source={source} className="h-full" />;
 
   return (
-    <Disclosure variant="muted" data-slot="math-editor" className={className}>
+    <CollapsibleCard variant="muted" data-slot="math-editor" className={className}>
       {toolbar && <MathToolbar source={source} onInsert={insert} />}
 
       <div className="flex h-[28rem] min-h-0 flex-col overflow-hidden">
@@ -90,6 +90,6 @@ export function MathEditor({
           </ResizablePanelGroup>
         )}
       </div>
-    </Disclosure>
+    </CollapsibleCard>
   );
 }

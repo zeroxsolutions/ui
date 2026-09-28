@@ -17,15 +17,10 @@ export interface UseCommandShortcutOptions {
 /**
  * Registers a global keyboard shortcut (default ⌘/Ctrl + key) and calls
  * `onTrigger`. The side-effect lives in the consumer's component by design —
- * use it to open a `CommandSwitcher`. The latest `onTrigger` is always called
+ * use it to open a `CommandMenu`. The latest `onTrigger` is always called
  * without re-binding the listener.
  */
-export function useCommandShortcut({
-  key,
-  mod = true,
-  onTrigger,
-  enabled = true,
-}: UseCommandShortcutOptions): void {
+export function useCommandShortcut({ key, mod = true, onTrigger, enabled = true }: UseCommandShortcutOptions): void {
   const handler = React.useRef(onTrigger);
   handler.current = onTrigger;
 

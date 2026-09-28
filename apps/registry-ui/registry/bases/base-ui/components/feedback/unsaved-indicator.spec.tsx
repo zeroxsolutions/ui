@@ -1,18 +1,18 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { DirtyDot } from './dirty-dot';
+import { UnsavedIndicator } from './unsaved-indicator';
 
 afterEach(cleanup);
 
-describe('DirtyDot', () => {
+describe('UnsavedIndicator', () => {
   it('renders a labelled dot', () => {
-    const { getByLabelText } = render(<DirtyDot />);
+    const { getByLabelText } = render(<UnsavedIndicator />);
     expect(getByLabelText('Unsaved changes')).toBeTruthy();
   });
 
   it('merges a passed className', () => {
-    const { getByLabelText } = render(<DirtyDot className="size-3" />);
+    const { getByLabelText } = render(<UnsavedIndicator className="size-3" />);
     expect(getByLabelText('Unsaved changes').className).toContain('size-3');
   });
 });

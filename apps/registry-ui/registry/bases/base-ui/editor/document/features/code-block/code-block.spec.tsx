@@ -34,11 +34,7 @@ afterEach(cleanup);
 
 type CodeBlockAttrs = { language: string; code: string };
 
-function nodeViewProps(
-  attrs: CodeBlockAttrs,
-  editable: boolean,
-  updateAttrs = vi.fn(),
-): NodeViewProps<CodeBlockAttrs> {
+function nodeViewProps(attrs: CodeBlockAttrs, editable: boolean, updateAttrs = vi.fn()): NodeViewProps<CodeBlockAttrs> {
   return {
     attrs,
     updateAttrs,
@@ -48,34 +44,21 @@ function nodeViewProps(
 }
 
 describe('code-block node view (editable)', () => {
-  it('frames CodeMirrorPane inside the shared Disclosure', () => {
+  it('frames CodeMirrorPane inside the shared CollapsibleCard', () => {
     const { container } = render(
-      <CodeBlockNodeView
-        {...nodeViewProps(
-          { language: 'typescript', code: 'const x = 1' },
-          true,
-        )}
-      />,
+      <CodeBlockNodeView {...nodeViewProps({ language: 'typescript', code: 'const x = 1' }, true)} />,
     );
-    const disclosure = container.querySelector('[data-slot="disclosure"]');
+    const disclosure = container.querySelector('[data-slot="collapsible-card"]');
     expect(disclosure).not.toBeNull();
-    // The editing surface is the moved CodeMirror pane, framed by the Disclosure.
-    expect(
-      disclosure?.querySelector('[data-slot="code-mirror-pane"]'),
-    ).not.toBeNull();
+    // The editing surface is the moved CodeMirror pane, framed by the CollapsibleCard.
+    expect(disclosure?.querySelector('[data-slot="code-mirror-pane"]')).not.toBeNull();
     expect(container.querySelector('.cm-content')).not.toBeNull();
   });
 
   it('writes an edit to the code attribute', () => {
     const updateAttrs = vi.fn();
     const { container } = render(
-      <CodeBlockNodeView
-        {...nodeViewProps(
-          { language: 'typescript', code: 'a' },
-          true,
-          updateAttrs,
-        )}
-      />,
+      <CodeBlockNodeView {...nodeViewProps({ language: 'typescript', code: 'a' }, true, updateAttrs)} />,
     );
     const cm = container.querySelector<HTMLElement>('.cm-editor');
     expect(cm).not.toBeNull();
@@ -88,49 +71,30 @@ describe('code-block node view (editable)', () => {
 
   it('writes a language switch to the language attribute', () => {
     const updateAttrs = vi.fn();
-    render(
-      <CodeBlockNodeView
-        {...nodeViewProps({ language: 'text', code: 'x' }, true, updateAttrs)}
-      />,
-    );
+    render(<CodeBlockNodeView {...nodeViewProps({ language: 'text', code: 'x' }, true, updateAttrs)} />);
     fireEvent.click(screen.getByRole('combobox', { name: /language/i }));
     const python = screen.getAllByText('Python')[0];
     const item = python.closest('[data-slot="combobox-item"]');
     expect(item).not.toBeNull();
     fireEvent.click(item!);
-    expect(updateAttrs).toHaveBeenCalledWith(
-      expect.objectContaining({ language: expect.any(String) }),
-    );
+    expect(updateAttrs).toHaveBeenCalledWith(expect.objectContaining({ language: expect.any(String) }));
   });
 
   it('opens the settings menu without crashing', () => {
     // Regression: the settings menu's "Tab size" DropdownMenuLabel must sit inside
     // a group/radio-group context, or Base UI throws "MenuGroupContext is missing"
     // when the menu OPENS — a crash no closed-menu test could catch.
-    render(
-      <CodeBlockNodeView
-        {...nodeViewProps(
-          { language: 'typescript', code: 'const x = 1' },
-          true,
-        )}
-      />,
-    );
+    render(<CodeBlockNodeView {...nodeViewProps({ language: 'typescript', code: 'const x = 1' }, true)} />);
     fireEvent.click(screen.getByRole('button', { name: 'Code settings' }));
     expect(screen.getByText('Tab size')).toBeTruthy();
     expect(screen.getByRole('menuitemradio', { name: '4' })).toBeTruthy();
-    expect(
-      screen.getByRole('menuitemcheckbox', { name: 'Soft wrap' }),
-    ).toBeTruthy();
+    expect(screen.getByRole('menuitemcheckbox', { name: 'Soft wrap' })).toBeTruthy();
   });
 
   it('copies the source through the copy control', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });
-    render(
-      <CodeBlockNodeView
-        {...nodeViewProps({ language: 'typescript', code: 'payload' }, true)}
-      />,
-    );
+    render(<CodeBlockNodeView {...nodeViewProps({ language: 'typescript', code: 'payload' }, true)} />);
     fireEvent.click(screen.getByRole('button', { name: 'Copy code' }));
     expect(writeText).toHaveBeenCalledWith('payload');
   });
@@ -138,15 +102,9 @@ describe('code-block node view (editable)', () => {
 
 describe('code-block node view (read-only)', () => {
   it('renders the read-only design-system CodeBlock, not the editing pane', () => {
-    const { container } = render(
-      <CodeBlockNodeView
-        {...nodeViewProps({ language: 'text', code: 'hello' }, false)}
-      />,
-    );
+    const { container } = render(<CodeBlockNodeView {...nodeViewProps({ language: 'text', code: 'hello' }, false)} />);
     expect(container.querySelector('[data-slot="code-block"]')).not.toBeNull();
-    expect(
-      container.querySelector('[data-slot="code-mirror-pane"]'),
-    ).toBeNull();
+    expect(container.querySelector('[data-slot="code-mirror-pane"]')).toBeNull();
     expect(container.querySelector('.cm-content')).toBeNull();
     expect(screen.getByText('hello')).toBeTruthy();
   });

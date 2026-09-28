@@ -1,10 +1,6 @@
 import * as React from 'react';
 
-import {
-  FileContentRouter,
-  type FileContentRouterProps,
-  type RoutedFile,
-} from './file-content-router.js';
+import { FileContentRouter, type FileContentRouterProps, type RoutedFile } from './file-content-router.js';
 
 interface CodeEditorContextValue {
   files: RoutedFile[];
@@ -15,14 +11,12 @@ interface CodeEditorContextValue {
   onFileTextChange?: (path: string, text: string) => void;
 }
 
-const CodeEditorContext = React.createContext<CodeEditorContextValue | null>(
-  null,
-);
+const CodeEditorContext = React.createContext<CodeEditorContextValue | null>(null);
 
 /**
  * The editor's shared state — the open files, which one is active, and the edit
  * callback. Throws outside a `<CodeEditor>`. Bind the active path to a
- * `FileTree` (`value`/`onValueChange`), a `CommandSwitcher`, and the content
+ * `FileTree` (`value`/`onValueChange`), a `CommandMenu`, and the content
  * pane so they all track one selection.
  */
 export function useCodeEditor(): CodeEditorContextValue {
@@ -64,14 +58,14 @@ export interface CodeEditorProps {
   onFileTextChange?: (path: string, text: string) => void;
   /** Render every file read-only. */
   readOnly?: boolean;
-  /** The assembled layout — tree, content pane, command switcher. */
+  /** The assembled layout — tree, content pane, command menu. */
   children: React.ReactNode;
 }
 
 /**
  * Headless root for a multi-file code editor: holds the open files and the
  * active selection in context, leaving the layout to the consumer (assemble a
- * `FileTree`, a `CodeEditorContent`, and a `CommandSwitcher` against
+ * `FileTree`, a `CodeEditorContent`, and a `CommandMenu` against
  * {@link useCodeEditor}). Owns no persistence or dirty state — the consumer owns
  * the files and reacts to `onFileTextChange`.
  */
@@ -84,15 +78,8 @@ export function CodeEditor({
   readOnly = false,
   children,
 }: CodeEditorProps) {
-  const [activePath, setActivePath] = useControllableState(
-    value,
-    defaultValue,
-    onValueChange,
-  );
-  const activeFile = React.useMemo(
-    () => files.find((file) => file.path === activePath),
-    [files, activePath],
-  );
+  const [activePath, setActivePath] = useControllableState(value, defaultValue, onValueChange);
+  const activeFile = React.useMemo(() => files.find((file) => file.path === activePath), [files, activePath]);
 
   const context = React.useMemo<CodeEditorContextValue>(
     () => ({
@@ -106,15 +93,10 @@ export function CodeEditor({
     [files, activePath, setActivePath, activeFile, readOnly, onFileTextChange],
   );
 
-  return (
-    <CodeEditorContext.Provider value={context}>
-      {children}
-    </CodeEditorContext.Provider>
-  );
+  return <CodeEditorContext.Provider value={context}>{children}</CodeEditorContext.Provider>;
 }
 
-export interface CodeEditorContentProps
-  extends Omit<FileContentRouterProps, 'file' | 'readOnly' | 'onTextChange'> {
+export interface CodeEditorContentProps extends Omit<FileContentRouterProps, 'file' | 'readOnly' | 'onTextChange'> {
   /** Shown when no file is active (consumer-owned empty state). */
   children?: React.ReactNode;
 }
@@ -124,10 +106,7 @@ export interface CodeEditorContentProps
  * the editor's `onFileTextChange`. When no file is active it renders `children`
  * as the empty state.
  */
-export function CodeEditorContent({
-  children,
-  ...props
-}: CodeEditorContentProps) {
+export function CodeEditorContent({ children, ...props }: CodeEditorContentProps) {
   const { activeFile, readOnly, onFileTextChange } = useCodeEditor();
   if (!activeFile) return <>{children}</>;
   return (

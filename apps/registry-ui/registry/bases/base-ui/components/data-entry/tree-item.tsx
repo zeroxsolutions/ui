@@ -19,7 +19,7 @@ export interface TreeItemRename {
 }
 
 /**
- * One row of a hierarchy tree, the layer above {@link TreeIndent}. TreeIndent
+ * One row of a hierarchy tree, the layer above {@link TreeItemIndent}. TreeItemIndent
  * owns the indent + disclosure chevron; TreeItem owns the next shared layer:
  *
  * - a clickable name region (a plain `div`, not a `<button>` — see the W3C tree
@@ -32,20 +32,20 @@ export interface TreeItemRename {
  *
  * Everything that legitimately differs stays caller-owned: selection/hover COLOUR
  * + row height via `className`, the icon + badges + actions via slots, drag/drop
- * spread straight onto the row (TreeItem extends the div props through TreeIndent).
+ * spread straight onto the row (TreeItem extends the div props through TreeItemIndent).
  * `onActivate` gets the raw event so a caller can read shift/meta.
  *
  * `ref` reaches the row div - a consumer needs it for `scrollIntoView` and so a
  * wrapping Base UI `render` context-menu trigger composes its ref.
  */
-export interface TreeItemProps extends Omit<TreeIndentProps, 'children'> {
+export interface TreeItemProps extends Omit<TreeItemIndentProps, 'children'> {
   /** Leading icon (node/kind icon). */
   icon?: ReactNode;
   /** Display name; shown unless `rename.editing`. */
   name: string;
   /** Extra classes on the name text span (strikethrough/italic/colour). The
    *  row's selection/hover background and any row-wide dimming live on
-   *  `className` (TreeIndent) - the name isn't styled as a separate node. */
+   *  `className` (TreeItemIndent) - the name isn't styled as a separate node. */
   nameClassName?: string;
   /** Click on the name region. Raw event so callers can read shift/meta keys. */
   onActivate?: (event: ReactMouseEvent) => void;
@@ -75,14 +75,14 @@ function TreeItem({
   ...rowProps
 }: TreeItemProps) {
   const row = (
-    <TreeIndent ref={ref} {...rowProps}>
+    <TreeItemIndent ref={ref} {...rowProps}>
       {/* The name is a plain clickable region, NOT a <button>: per the W3C tree
           view pattern a treeitem's activation is owned by the tree (roving
           tabindex + Enter), so this skeleton leaves role/keyboard to the
-          consumer (the TreeIndent owns hover/selection). A <div> also holds the
+          consumer (the TreeItemIndent owns hover/selection). A <div> also holds the
           rename <input> as a valid child - a <button> may not nest one. The
-          `data-slot="tree-item"` rides this content region (not the TreeIndent
-          root) so TreeIndent keeps its own `tree-indent` slot and neither
+          `data-slot="tree-item"` rides this content region (not the TreeItemIndent
+          root) so TreeItemIndent keeps its own `tree-item-indent` slot and neither
           overrides the other. */}
       <div
         data-slot="tree-item"
@@ -114,7 +114,7 @@ function TreeItem({
         {inlineEnd}
       </div>
       {trailing}
-    </TreeIndent>
+    </TreeItemIndent>
   );
 
   if (!contextMenuContent) return row;
@@ -147,7 +147,7 @@ function TreeItem({
  * `ref` reaches the row div - a consumer needs it for `scrollIntoView` and so a
  * wrapping Base UI `render` trigger (e.g. a context menu) can compose its ref.
  */
-export interface TreeIndentProps extends ComponentProps<'div'> {
+export interface TreeItemIndentProps extends ComponentProps<'div'> {
   /** Nesting depth; 0 for roots. Drives the left indent. */
   depth: number;
   /** Pixels of indent added per depth level. Default 12. */
@@ -167,7 +167,7 @@ export interface TreeIndentProps extends ComponentProps<'div'> {
   children: ReactNode;
 }
 
-function TreeIndent({
+function TreeItemIndent({
   depth,
   indentStep = 12,
   baseIndent = 0,
@@ -180,10 +180,10 @@ function TreeIndent({
   style,
   children,
   ...rest
-}: TreeIndentProps) {
+}: TreeItemIndentProps) {
   return (
     <div
-      data-slot="tree-indent"
+      data-slot="tree-item-indent"
       // The shared row rhythm: rounded-md, a gap before trailing actions, and a
       // hair of right padding. Callers override any of these via `className`
       // (cn = tailwind-merge) and own selection/hover COLOUR + row height.
@@ -212,4 +212,4 @@ function TreeIndent({
   );
 }
 
-export { TreeItem, TreeIndent };
+export { TreeItem, TreeItemIndent };

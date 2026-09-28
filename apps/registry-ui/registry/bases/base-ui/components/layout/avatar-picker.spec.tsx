@@ -2,13 +2,13 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
-  AvatarEditor,
-  AvatarEditorColor,
-  AvatarEditorContent,
-  AvatarEditorEmoji,
-  AvatarEditorTrigger,
-  AvatarEditorUpload,
-} from './avatar-editor';
+  AvatarPicker,
+  AvatarPickerColor,
+  AvatarPickerContent,
+  AvatarPickerEmoji,
+  AvatarPickerTrigger,
+  AvatarPickerUpload,
+} from './avatar-picker';
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn();
@@ -26,17 +26,17 @@ afterEach(() => {
 
 const openEditor = () => fireEvent.click(screen.getByRole('button', { name: 'Edit avatar' }));
 
-describe('AvatarEditor', () => {
+describe('AvatarPicker', () => {
   it('shows only the Upload pane (no tab strip) when Upload is the only tab', () => {
     render(
-      <AvatarEditor value={{}} onValueChange={vi.fn()}>
-        <AvatarEditorTrigger>
+      <AvatarPicker value={{}} onValueChange={vi.fn()}>
+        <AvatarPickerTrigger>
           <span>avatar</span>
-        </AvatarEditorTrigger>
-        <AvatarEditorContent>
-          <AvatarEditorUpload />
-        </AvatarEditorContent>
-      </AvatarEditor>,
+        </AvatarPickerTrigger>
+        <AvatarPickerContent>
+          <AvatarPickerUpload />
+        </AvatarPickerContent>
+      </AvatarPicker>,
     );
     openEditor();
 
@@ -48,16 +48,16 @@ describe('AvatarEditor', () => {
 
   it('builds the icon strip from the tab parts the consumer includes', () => {
     render(
-      <AvatarEditor value={{}} onValueChange={vi.fn()}>
-        <AvatarEditorTrigger>
+      <AvatarPicker value={{}} onValueChange={vi.fn()}>
+        <AvatarPickerTrigger>
           <span>avatar</span>
-        </AvatarEditorTrigger>
-        <AvatarEditorContent>
-          <AvatarEditorEmoji />
-          <AvatarEditorUpload />
-          <AvatarEditorColor />
-        </AvatarEditorContent>
-      </AvatarEditor>,
+        </AvatarPickerTrigger>
+        <AvatarPickerContent>
+          <AvatarPickerEmoji />
+          <AvatarPickerUpload />
+          <AvatarPickerColor />
+        </AvatarPickerContent>
+      </AvatarPicker>,
     );
     openEditor();
 
@@ -68,14 +68,14 @@ describe('AvatarEditor', () => {
 
   it('lets children override the upload copy', () => {
     render(
-      <AvatarEditor value={{}} onValueChange={vi.fn()}>
-        <AvatarEditorTrigger>
+      <AvatarPicker value={{}} onValueChange={vi.fn()}>
+        <AvatarPickerTrigger>
           <span>avatar</span>
-        </AvatarEditorTrigger>
-        <AvatarEditorContent>
-          <AvatarEditorUpload>Tải ảnh lên</AvatarEditorUpload>
-        </AvatarEditorContent>
-      </AvatarEditor>,
+        </AvatarPickerTrigger>
+        <AvatarPickerContent>
+          <AvatarPickerUpload>Tải ảnh lên</AvatarPickerUpload>
+        </AvatarPickerContent>
+      </AvatarPicker>,
     );
     openEditor();
 
@@ -87,14 +87,14 @@ describe('AvatarEditor', () => {
     const onUpload = vi.fn().mockResolvedValue('https://cdn.example/a.png');
     const onChange = vi.fn();
     render(
-      <AvatarEditor value={{}} onValueChange={onChange}>
-        <AvatarEditorTrigger>
+      <AvatarPicker value={{}} onValueChange={onChange}>
+        <AvatarPickerTrigger>
           <span>avatar</span>
-        </AvatarEditorTrigger>
-        <AvatarEditorContent>
-          <AvatarEditorUpload onUpload={onUpload} />
-        </AvatarEditorContent>
-      </AvatarEditor>,
+        </AvatarPickerTrigger>
+        <AvatarPickerContent>
+          <AvatarPickerUpload onUpload={onUpload} />
+        </AvatarPickerContent>
+      </AvatarPicker>,
     );
     openEditor();
 
@@ -114,14 +114,14 @@ describe('AvatarEditor', () => {
   it('clears emoji and image on Remove', () => {
     const onChange = vi.fn();
     render(
-      <AvatarEditor value={{ emoji: '😀' }} onValueChange={onChange}>
-        <AvatarEditorTrigger>
+      <AvatarPicker value={{ emoji: '😀' }} onValueChange={onChange}>
+        <AvatarPickerTrigger>
           <span>avatar</span>
-        </AvatarEditorTrigger>
-        <AvatarEditorContent>
-          <AvatarEditorUpload />
-        </AvatarEditorContent>
-      </AvatarEditor>,
+        </AvatarPickerTrigger>
+        <AvatarPickerContent>
+          <AvatarPickerUpload />
+        </AvatarPickerContent>
+      </AvatarPicker>,
     );
     openEditor();
 

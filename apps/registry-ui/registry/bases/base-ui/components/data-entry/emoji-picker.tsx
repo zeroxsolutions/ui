@@ -438,7 +438,7 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
               {row.type === 'header' ? (
                 <EmojiPickerGroupLabel>{row.name}</EmojiPickerGroupLabel>
               ) : (
-                <EmojiGrid emojis={row.emojis} onSelect={select} />
+                <EmojiPickerGrid emojis={row.emojis} onSelect={select} />
               )}
             </div>
           );
@@ -475,11 +475,11 @@ function EmojiPickerNav({ className, ...props }: Omit<React.ComponentProps<typeo
   );
 }
 
-function EmojiGrid({ emojis, onSelect }: { emojis: EmojiDatum[]; onSelect: (emoji: string) => void }) {
+function EmojiPickerGrid({ emojis, onSelect }: { emojis: EmojiDatum[]; onSelect: (emoji: string) => void }) {
   return (
     <div className="grid grid-cols-8 gap-0.5">
       {emojis.map((em, i) => (
-        <EmojiCell key={`${em.e}-${i}`} emoji={em} onSelect={onSelect} />
+        <EmojiPickerCell key={`${em.e}-${i}`} emoji={em} onSelect={onSelect} />
       ))}
     </div>
   );
@@ -489,7 +489,7 @@ function EmojiGrid({ emojis, onSelect }: { emojis: EmojiDatum[]; onSelect: (emoj
  * Only cells in (or near) the viewport mount, so the Fluent artwork is rendered
  * immediately - virtualization, not per-cell deferral, is what keeps opening the
  * picker from fetching the whole catalog. */
-function EmojiCell({ emoji, onSelect }: { emoji: EmojiDatum; onSelect: (emoji: string) => void }) {
+function EmojiPickerCell({ emoji, onSelect }: { emoji: EmojiDatum; onSelect: (emoji: string) => void }) {
   return (
     <Button
       type="button"

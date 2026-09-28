@@ -8,13 +8,13 @@ afterEach(cleanup);
 describe('TabCloseButton', () => {
   it('shows the unsaved dot (not the ×) for a dirty tab that is not revealing close', () => {
     const { container } = render(<TabCloseButton dirty revealClose={false} onClose={() => {}} />);
-    expect(container.querySelector('[data-slot="dirty-dot"]')).toBeTruthy();
+    expect(container.querySelector('[data-slot="unsaved-indicator"]')).toBeTruthy();
     expect(container.querySelector('.lucide-x')).toBeNull();
   });
 
   it('reveals the × when active/hovered, even while dirty', () => {
     const { container } = render(<TabCloseButton dirty revealClose onClose={() => {}} />);
-    expect(container.querySelector('[data-slot="dirty-dot"]')).toBeNull();
+    expect(container.querySelector('[data-slot="unsaved-indicator"]')).toBeNull();
     expect(container.querySelector('.lucide-x')).toBeTruthy();
   });
 

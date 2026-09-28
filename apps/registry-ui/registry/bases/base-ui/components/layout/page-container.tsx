@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-const containerVariants = cva('mx-auto w-full', {
+const pageContainerVariants = cva('mx-auto w-full', {
   variants: {
     /**
      * Max content width. Binds the max-width scale so a surface picks a width by
@@ -21,7 +21,7 @@ const containerVariants = cva('mx-auto w-full', {
   },
 });
 
-export interface ContainerProps extends ComponentProps<'div'>, VariantProps<typeof containerVariants> {}
+export interface PageContainerProps extends ComponentProps<'div'>, VariantProps<typeof pageContainerVariants> {}
 
 /**
  * The centred, max-width content column for a full-width surface, so content
@@ -29,10 +29,10 @@ export interface ContainerProps extends ComponentProps<'div'>, VariantProps<type
  * (don't hardcode a `max-w-*`); `className` is for the surface's own padding /
  * vertical rhythm.
  *
- *   <Container size="lg" className="px-6 py-6">...</Container>
+ *   <PageContainer size="lg" className="px-6 py-6">...</PageContainer>
  */
-function Container({ size, className, ...props }: ContainerProps) {
-  return <div data-slot="container" className={cn(containerVariants({ size }), className)} {...props} />;
+function PageContainer({ size, className, ...props }: PageContainerProps) {
+  return <div data-slot="page-container" className={cn(pageContainerVariants({ size }), className)} {...props} />;
 }
 
-export { Container, containerVariants };
+export { PageContainer, pageContainerVariants };

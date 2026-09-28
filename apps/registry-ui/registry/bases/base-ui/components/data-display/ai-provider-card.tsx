@@ -9,9 +9,9 @@ import {
   CardTitle,
 } from '@/registry/bases/base-ui/ui/card';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import type { StatusTone } from '../feedback/status-dot';
+import type { StatusTone } from '../feedback/status-indicator';
 
-/** Footer status colour by tone - semantic tokens only, mirroring `StatusDot`. */
+/** Footer status colour by tone - semantic tokens only, mirroring `StatusIndicator`. */
 const STATUS_TONE_CLASS: Record<StatusTone, string> = {
   online: 'text-success',
   offline: 'text-muted-foreground',

@@ -20,10 +20,10 @@ import {
   ComboboxTrigger,
 } from '@/registry/bases/base-ui/ui/combobox';
 import {
-  DisclosureActions,
-  DisclosureHeader,
-  DisclosureTitle,
-} from '@/registry/bases/base-ui/components/layout/disclosure';
+  CollapsibleCardActions,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+} from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,14 +52,14 @@ export interface MermaidToolbarProps {
 const TEMPLATE_ITEMS: DiagramTemplate[] = [...DIAGRAM_TEMPLATES];
 
 /**
- * The standalone surface's header — the house `DisclosureHeader` compound, not a
+ * The standalone surface's header — the house `CollapsibleCardHeader` compound, not a
  * bespoke bar: a stateful `Combobox` type/template switcher (the
  * `LanguageSwitcher` pattern — it *displays* the active diagram type, unlike a
  * fire-and-forget menu) fills the title; the export menu fills the actions.
  * Choosing a template while the source is non-empty asks for confirmation (a
  * design-system `AlertDialog`) before replacing it. Export feedback is inline (a
  * transient check), so no toast dependency is added. Renders the header parts
- * only; `MermaidEditor` owns the enclosing `Disclosure` and its body.
+ * only; `MermaidEditor` owns the enclosing `CollapsibleCard` and its body.
  */
 export function MermaidToolbar({ source, svg, onPickTemplate, className }: MermaidToolbarProps) {
   const type = detectDiagramType(source);
@@ -95,8 +95,8 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
 
   return (
     <>
-      <DisclosureHeader className={className}>
-        <DisclosureTitle>
+      <CollapsibleCardHeader className={className}>
+        <CollapsibleCardTitle>
           <Combobox
             items={TEMPLATE_ITEMS}
             value={current}
@@ -121,9 +121,9 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
               </ComboboxList>
             </ComboboxContent>
           </Combobox>
-        </DisclosureTitle>
+        </CollapsibleCardTitle>
 
-        <DisclosureActions>
+        <CollapsibleCardActions>
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -157,8 +157,8 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-        </DisclosureActions>
-      </DisclosureHeader>
+        </CollapsibleCardActions>
+      </CollapsibleCardHeader>
 
       <AlertDialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>
         <AlertDialogContent>
