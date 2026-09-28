@@ -81,18 +81,33 @@
     }
   },
   "release": {
+    "projects": ["packages/*"],
     "projectsRelationship": "independent",
     "version": {
       "fallbackCurrentVersionResolver": "disk",
-      "conventionalCommits": true
-    },
-    "git": {
-      "commit": true,
-      "tag": true
+      "conventionalCommits": true,
+      "preVersionCommand": "git clean -xdfq packages/*/dist && pnpm nx run-many -t build --skip-nx-cache",
+      "git": {
+        "commit": true,
+        "tag": true
+      }
     },
     "changelog": {
       "workspaceChangelog": false,
-      "projectChangelogs": true
+      "projectChangelogs": true,
+      "git": {
+        "commit": true,
+        "tag": true
+      }
+    },
+    "conventionalCommits": {
+      "types": {
+        "refactor": {
+          "changelog": {
+            "hidden": false
+          }
+        }
+      }
     }
   },
   "generators": {
