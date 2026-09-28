@@ -22,7 +22,7 @@ export type PermissionStatusValue = 'pending' | 'approved' | 'denied';
  *     <PermissionPreview label="Command"><CodeBlock ... /></PermissionPreview>
  *     <PermissionActions>
  *       <Button variant="ghost" onClick={deny}>Deny</Button>
- *       <SplitButton>...Allow once + scopes...</SplitButton>   // plain Button for a single scope
+ *       <ButtonGroup>...Allow once + scopes...</ButtonGroup>   // plain Button for a single scope
  *     </PermissionActions>
  *     <PermissionResolved><CheckCircle2 className="text-success" /> Allowed once - 2:14pm</PermissionResolved>
  *   </Permission>
@@ -120,8 +120,8 @@ function PermissionPreview({ className, ...props }: ComponentProps<'div'>) {
 
 /**
  * The decision row - shown only while `pending`. Asymmetric: a plain `Deny`
- * button and the graduated-scope `Allow` control (a `SplitButton`, or a plain
- * `Button` for a single scope).
+ * button and the graduated-scope `Allow` control (a `ButtonGroup` holding a
+ * `Button` and a `DropdownMenu`, or a plain `Button` for a single scope).
  */
 function PermissionActions({ className, ...props }: ComponentProps<'div'>) {
   return (

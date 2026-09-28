@@ -1,16 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 
+import { Button } from '@/registry/bases/base-ui/ui/button';
+import { ButtonGroup } from '@/registry/bases/base-ui/ui/button-group';
 import {
-  MenuButton,
-  MenuButtonAction,
-  MenuButtonContent,
-  MenuButtonMenu,
-  MenuButtonRadioGroup,
-  MenuButtonRadioItem,
-  MenuButtonTrigger,
-} from '@/registry/bases/base-ui/components/layout/menu-button';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/registry/bases/base-ui/ui/dropdown-menu';
 
 const OPTIONS = [
   { value: 'once', label: 'Allow once' },
@@ -20,26 +21,30 @@ const OPTIONS = [
 
 type OptionValue = (typeof OPTIONS)[number]['value'];
 
-/** A remembered-default split control - the MenuButton hero (stateful). */
-export function MenuButtonHero() {
+/** A remembered-default action whose caret menu picks the default, composed from upstream parts. */
+function MenuButtonHero() {
   const [value, setValue] = useState<OptionValue>('once');
   const current = OPTIONS.find((option) => option.value === value);
 
   return (
-    <MenuButton aria-label="Remembered action">
-      <MenuButtonAction>{current?.label}</MenuButtonAction>
-      <MenuButtonMenu>
-        <MenuButtonTrigger aria-label="Change action" />
-        <MenuButtonContent>
-          <MenuButtonRadioGroup value={value} onValueChange={(next) => setValue(next as OptionValue)}>
+    <ButtonGroup aria-label="Remembered action">
+      <Button variant="outline">{current?.label}</Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger render={<Button variant="outline" size="icon" aria-label="Change action" />}>
+          <ChevronDown />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-auto">
+          <DropdownMenuRadioGroup value={value} onValueChange={(next) => setValue(next as OptionValue)}>
             {OPTIONS.map((option) => (
-              <MenuButtonRadioItem key={option.value} value={option.value}>
+              <DropdownMenuRadioItem key={option.value} value={option.value}>
                 {option.label}
-              </MenuButtonRadioItem>
+              </DropdownMenuRadioItem>
             ))}
-          </MenuButtonRadioGroup>
-        </MenuButtonContent>
-      </MenuButtonMenu>
-    </MenuButton>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </ButtonGroup>
   );
 }
+
+export { MenuButtonHero };

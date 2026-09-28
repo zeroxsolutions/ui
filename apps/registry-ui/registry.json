@@ -64,36 +64,6 @@
       ]
     },
     {
-      "name": "split-button",
-      "type": "registry:component",
-      "categories": ["components"],
-      "title": "Split Button",
-      "description": "A single divided control - a primary action segment plus a caret that opens a menu of related variants. Composes ButtonGroup for the seamed outline; a matched variant/size is set per segment.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/button", "@shadcn/button-group", "@shadcn/dropdown-menu", "@shadcn/utils"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/layout/split-button.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
-      "name": "menu-button",
-      "type": "registry:component",
-      "categories": ["components"],
-      "title": "Menu Button",
-      "description": "A remembered-default split control - the primary repeats the currently-selected action and the caret opens a menu that changes which action is current. Composes ButtonGroup for the seamed outline.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/button", "@shadcn/button-group", "@shadcn/dropdown-menu", "@shadcn/utils"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/layout/menu-button.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "model-info-card",
       "type": "registry:component",
       "categories": ["data-display"],
@@ -268,7 +238,7 @@
       "categories": ["examples"],
       "title": "SplitButton Hero",
       "description": "A divided control - a primary action segment plus a caret that opens a menu.",
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/split-button.json"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/button-group", "@shadcn/dropdown-menu"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/split-button-hero.tsx",
@@ -283,7 +253,7 @@
       "categories": ["examples"],
       "title": "MenuButton Hero",
       "description": "A remembered-default split control - the primary repeats the selected action.",
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/menu-button.json"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/button-group", "@shadcn/dropdown-menu"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/menu-button-hero.tsx",

@@ -2,15 +2,14 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { Permission, PermissionActions, PermissionResolved, PermissionStatus, PermissionTitle } from './permission';
-import {
-  SplitButton,
-  SplitButtonAction,
-  SplitButtonContent,
-  SplitButtonItem,
-  SplitButtonMenu,
-  SplitButtonTrigger,
-} from '../layout/split-button';
 import { Button } from '@/registry/bases/base-ui/ui/button';
+import { ButtonGroup } from '@/registry/bases/base-ui/ui/button-group';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/registry/bases/base-ui/ui/dropdown-menu';
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = () => {};
@@ -68,20 +67,20 @@ describe('Permission', () => {
     screen.getByText('Denied');
   });
 
-  it('renders an asymmetric row: a plain Deny plus a graduated-scope SplitButton Allow', () => {
+  it('renders an asymmetric row: a plain Deny plus a graduated-scope split Allow', () => {
     render(
       <Permission status="pending">
         <PermissionActions>
           <Button variant="ghost">Deny</Button>
-          <SplitButton>
-            <SplitButtonAction variant="default">Allow once</SplitButtonAction>
-            <SplitButtonMenu>
-              <SplitButtonTrigger variant="default" aria-label="More allow options" />
-              <SplitButtonContent>
-                <SplitButtonItem>Allow this session</SplitButtonItem>
-              </SplitButtonContent>
-            </SplitButtonMenu>
-          </SplitButton>
+          <ButtonGroup>
+            <Button>Allow once</Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button size="icon" aria-label="More allow options" />} />
+              <DropdownMenuContent align="end" className="w-auto">
+                <DropdownMenuItem>Allow this session</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ButtonGroup>
         </PermissionActions>
       </Permission>,
     );

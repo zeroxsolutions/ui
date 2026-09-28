@@ -12,12 +12,13 @@ import {
   Leaf,
   Lightbulb,
   Plane,
+  Search,
   SearchX,
   Smile,
   type LucideIcon,
 } from 'lucide-react';
 import * as React from 'react';
-import { SearchInput } from '../general/search-input';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 
@@ -236,7 +237,7 @@ function EmojiPicker({ onSelect, frequent = [], frequentLabel = DEFAULT_FREQUENT
   );
 }
 
-type EmojiPickerSearchProps = Omit<React.ComponentProps<typeof SearchInput>, 'value' | 'onChange'> & {
+type EmojiPickerSearchProps = Omit<React.ComponentProps<'input'>, 'value' | 'onChange'> & {
   /** Override the default placeholder. */
   placeholder?: string;
   /** Override the default aria-label. */
@@ -253,14 +254,19 @@ function EmojiPickerSearch({
   const { query, setQuery } = useEmojiPicker();
   return (
     <div data-slot="emoji-picker-search" className="px-2 py-1">
-      <SearchInput
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={placeholder}
-        aria-label={ariaLabel}
-        className={className}
-        {...props}
-      />
+      <InputGroup className={className}>
+        <InputGroupAddon>
+          <Search />
+        </InputGroupAddon>
+        <InputGroupInput
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={placeholder}
+          aria-label={ariaLabel}
+          {...props}
+        />
+      </InputGroup>
     </div>
   );
 }

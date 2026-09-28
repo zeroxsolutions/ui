@@ -43,14 +43,8 @@ describe('fileView', () => {
 
 describe('FileContentRouter', () => {
   it('renders Markdown through the prose view', () => {
-    render(
-      <FileContentRouter
-        file={{ path: 'README.md', view: 'markdown', text: '# Title' }}
-      />,
-    );
-    expect(
-      screen.getByRole('heading', { level: 1, name: 'Title' }),
-    ).toBeTruthy();
+    render(<FileContentRouter file={{ path: 'README.md', view: 'markdown', text: '# Title' }} />);
+    expect(screen.getByRole('heading', { level: 1, name: 'Title' })).toBeTruthy();
   });
 
   it('renders an image with its alt text', () => {
@@ -64,18 +58,12 @@ describe('FileContentRouter', () => {
         }}
       />,
     );
-    expect(screen.getByRole('img', { name: 'Logo' }).getAttribute('src')).toBe(
-      'blob:logo',
-    );
+    expect(screen.getByRole('img', { name: 'Logo' }).getAttribute('src')).toBe('blob:logo');
   });
 
   it('renders the binary fallback card with the file name', () => {
-    const { container } = render(
-      <FileContentRouter file={{ path: 'data.bin', view: 'binary' }} />,
-    );
-    expect(
-      container.querySelector('[data-slot="binary-file-card"]'),
-    ).toBeTruthy();
+    const { container } = render(<FileContentRouter file={{ path: 'data.bin', view: 'binary' }} />);
+    expect(container.querySelector('[data-slot="empty"]')).toBeTruthy();
     expect(screen.getByText('data.bin')).toBeTruthy();
   });
 
@@ -89,15 +77,7 @@ describe('FileContentRouter', () => {
   });
 
   it('exposes the routed view as a data attribute', () => {
-    const { container } = render(
-      <FileContentRouter
-        file={{ path: 'logo.png', view: 'image', src: 'blob:logo' }}
-      />,
-    );
-    expect(
-      container
-        .querySelector('[data-slot="file-content-router"]')
-        ?.getAttribute('data-view'),
-    ).toBe('image');
+    const { container } = render(<FileContentRouter file={{ path: 'logo.png', view: 'image', src: 'blob:logo' }} />);
+    expect(container.querySelector('[data-slot="file-content-router"]')?.getAttribute('data-view')).toBe('image');
   });
 });

@@ -1,10 +1,11 @@
 import * as React from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { BinaryFileCard } from '@/registry/bases/base-ui/components/data-display/binary-file-card';
+import { FileTypeIcon } from '@/registry/bases/base-ui/components/data-display/file-type-icon';
 import { FontPreview } from '@/registry/bases/base-ui/components/data-display/font-preview';
 import { ImagePreview } from '@/registry/bases/base-ui/components/data-display/image-preview';
 import { MarkdownView } from '@/registry/bases/base-ui/components/data-display/markdown-view';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import { CodeMirrorPane } from '../shared/code-mirror/index.js';
 
@@ -104,14 +105,14 @@ export interface FileContentRouterProps extends Omit<React.ComponentProps<'div'>
   readOnly?: boolean;
   /** Fired with new text when an editable (`code`) file is edited. */
   onTextChange?: (text: string) => void;
-  /** Replaces the default `BinaryFileCard` for the `binary` view. */
+  /** Replaces the default empty state for the `binary` view. */
   children?: React.ReactNode;
 }
 
 /**
  * Picks the right viewer for a {@link RoutedFile} — code → `CodeMirrorPane`,
  * markdown → `MarkdownView`, image → `ImagePreview`, font → `FontPreview`, else
- * → `BinaryFileCard`. The type-aware heart of the editor; carries no app
+ * → an `Empty` naming the file. The type-aware heart of the editor; carries no app
  * knowledge or copy (override the binary fallback via `children`). Fills the
  * space it is given.
  */
@@ -158,7 +159,16 @@ export function FileContentRouter({
       );
       break;
     case 'binary':
-      content = children ?? <BinaryFileCard name={file.path} />;
+      content = children ?? (
+        <Empty className="size-full">
+          <EmptyHeader>
+            <EmptyMedia>
+              <FileTypeIcon name={file.path} className="text-muted-foreground size-12" />
+            </EmptyMedia>
+            <EmptyTitle>{file.path}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
+      );
       break;
   }
 
