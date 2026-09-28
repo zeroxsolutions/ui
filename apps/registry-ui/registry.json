@@ -18,32 +18,12 @@
       ]
     },
     {
-      "name": "tree-indent",
-      "type": "registry:component",
-      "categories": ["data-display"],
-      "title": "Tree Indent",
-      "description": "The indentation and expand/collapse chevron for one row of a hierarchy tree - the layer beneath TreeItem. Owns depth guides and the disclosure toggle, nothing else.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/button", "@shadcn/utils"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/data-entry/tree-indent.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "tree-item",
       "type": "registry:component",
       "categories": ["data-display"],
       "title": "Tree Item",
       "description": "One row of a hierarchy tree - the layer above TreeIndent. Owns the clickable name region, inline-rename, trailing actions, and an optional context menu.",
-      "registryDependencies": [
-        "https://ui.zeroxsolutions.com/r/tree-indent.json",
-        "@shadcn/context-menu",
-        "@shadcn/input",
-        "@shadcn/utils"
-      ],
+      "registryDependencies": ["@shadcn/context-menu", "@shadcn/input", "@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/tree-item.tsx",
