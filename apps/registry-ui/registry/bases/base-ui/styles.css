@@ -106,10 +106,14 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
+  /* The surface the palette below sits on. Not `--muted`: dark keeps the
+     elevated card step while light takes the muted one, which one token
+     cannot express. */
+  --code-surface: oklch(0.97 0 0);
   /* Syntax-highlighting palette (light). Hues derive from the brand's
-       chromatic family (info-blue · success-green · warning-amber · mark-purple
-       · destructive-red · selection-cyan); L/C tuned for the near-white `muted`
-       code surface. Consumed by the Shiki theme (lib/code-theme.ts) for both the
+       chromatic family (info-blue, success-green, warning-amber, mark-purple,
+       destructive-red, selection-cyan); L/C tuned for the near-white
+       `--code-surface`. Consumed by the Shiki theme (lib/code-theme.ts) for both the
        chat CodeBlock and the editor. */
   --code-fg: oklch(0.25 0 0);
   --code-comment: oklch(0.6 0.015 250);
@@ -167,8 +171,9 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 
-  /* Syntax-highlighting palette (dark) — same hue families, lifted in L /
-       softened in C for the dark `muted` code surface. */
+  --code-surface: oklch(0.205 0 0);
+  /* Syntax-highlighting palette (dark) - same hue families, lifted in L /
+       softened in C for the dark `--code-surface`. */
   --code-fg: oklch(0.9 0 0);
   --code-comment: oklch(0.6 0.02 250);
   --code-keyword: oklch(0.75 0.15 290);
