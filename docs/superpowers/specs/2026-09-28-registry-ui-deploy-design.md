@@ -108,6 +108,3 @@ Nothing is deployed from a session.
 - A writable cache, a queue or a tag cache; they arrive with the first route that sets
   `revalidate`.
 - The docs pages themselves.
-- `registry/bases/base-ui/components/docs/installation.tsx:22` hardcodes
-  `https://registry.zeroxsolutions.com`, a host that is not this one; noted, not changed
-  here.

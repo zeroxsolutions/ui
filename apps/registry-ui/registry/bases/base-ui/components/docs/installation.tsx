@@ -3,23 +3,15 @@
 import { useState } from 'react';
 
 import { CodeBlock } from '@/registry/bases/base-ui/components/code-block';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/registry/bases/base-ui/ui/tabs';
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@/registry/bases/base-ui/ui/toggle-group';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**
  * The deployed base URL the `shadcn add` command resolves the item against. The
  * same host serves the static registry JSON under `/r/<name>.json`.
  */
-const REGISTRY_BASE_URL = 'https://registry.zeroxsolutions.com';
+const REGISTRY_BASE_URL = 'https://ui.zeroxsolutions.com';
 
 export interface InstallationProps {
   /** Registry item name - the `<name>` segment of `/r/<name>.json`. */
@@ -53,14 +45,8 @@ function installCommand(pkgManager: PackageManager, name: string): string {
  */
 export function Installation({ name }: InstallationProps) {
   return (
-    <section
-      id="installation"
-      data-slot="installation"
-      className="scroll-mt-20"
-    >
-      <h2 className="mb-3 text-xl font-semibold tracking-tight">
-        Installation
-      </h2>
+    <section id="installation" data-slot="installation" className="scroll-mt-20">
+      <h2 className="mb-3 text-xl font-semibold tracking-tight">Installation</h2>
       <Tabs defaultValue="cli">
         <TabsList>
           <TabsTrigger value="cli">CLI</TabsTrigger>
@@ -89,13 +75,7 @@ function CliInstallation({ name }: { name: string }) {
   );
 }
 
-function PackageManagerToggle({
-  value,
-  onChange,
-}: {
-  value: PackageManager;
-  onChange: (pkg: PackageManager) => void;
-}) {
+function PackageManagerToggle({ value, onChange }: { value: PackageManager; onChange: (pkg: PackageManager) => void }) {
   return (
     <ToggleGroup
       variant="outline"
@@ -109,12 +89,7 @@ function PackageManagerToggle({
       className={cn('w-fit')}
     >
       {PACKAGE_MANAGERS.map((pkg) => (
-        <ToggleGroupItem
-          key={pkg}
-          value={pkg}
-          data-slot="package-manager-trigger"
-          data-pkg={pkg}
-        >
+        <ToggleGroupItem key={pkg} value={pkg} data-slot="package-manager-trigger" data-pkg={pkg}>
           {pkg}
         </ToggleGroupItem>
       ))}
@@ -125,10 +100,8 @@ function PackageManagerToggle({
 function ManualInstallation({ name }: { name: string }) {
   const jsonUrl = `${REGISTRY_BASE_URL}/r/${name}.json`;
   return (
-    <div className="flex flex-col gap-3 pt-2 text-sm text-muted-foreground">
-      <p>
-        Download the registry JSON and add the component files to your project:
-      </p>
+    <div className="text-muted-foreground flex flex-col gap-3 pt-2 text-sm">
+      <p>Download the registry JSON and add the component files to your project:</p>
       <CodeBlock code={jsonUrl} language="text" />
     </div>
   );
