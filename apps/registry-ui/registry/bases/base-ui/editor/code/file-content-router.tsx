@@ -165,7 +165,7 @@ export function FileContentRouter({
             <EmptyMedia>
               <FileTypeIcon name={file.path} className="text-muted-foreground size-12" />
             </EmptyMedia>
-            <EmptyTitle>{file.path}</EmptyTitle>
+            <EmptyTitle className="max-w-xs truncate">{file.path}</EmptyTitle>
           </EmptyHeader>
         </Empty>
       );

@@ -67,6 +67,13 @@ describe('FileContentRouter', () => {
     expect(screen.getByText('data.bin')).toBeTruthy();
   });
 
+  it('truncates a long binary file name instead of overflowing', () => {
+    const path = 'src/generated/a-very-long-vendored-binary-artifact-name.wasm';
+    const { container } = render(<FileContentRouter file={{ path, view: 'binary' }} />);
+    const title = container.querySelector('[data-slot="empty-title"]');
+    expect(title?.className).toContain('truncate');
+  });
+
   it('lets children override the binary fallback', () => {
     render(
       <FileContentRouter file={{ path: 'data.bin', view: 'binary' }}>

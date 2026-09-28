@@ -1365,3 +1365,5 @@ Expected: the hook's success line for 5 projects; the subject above.
 ## After this plan
 
 The spec's kind-folder check still prints `components/chat` and its loose-file check prints `components/language-switcher-data.tsx`: both are the `types/`, `constants/` and `lib/` extraction, rule 4, and move in plan B with the slots, `data-*` state, recipes and the three defects.
+
+Plan B also carries three renames that come with a reshape: `LabeledControl` becomes `PanelFieldLabel`, `ChatEmptyState` becomes `ChatSuggestionItem`, and `LanguageSwitcher` splits into `LanguageCombobox` and `LanguageToggleGroup`.

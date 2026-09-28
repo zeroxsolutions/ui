@@ -22,8 +22,9 @@
       "type": "registry:component",
       "categories": ["data-display"],
       "title": "Tree Item",
-      "description": "One row of a hierarchy tree - the layer above TreeIndent. Owns the clickable name region, inline-rename, trailing actions, and an optional context menu.",
-      "registryDependencies": ["@shadcn/context-menu", "@shadcn/input", "@shadcn/utils"],
+      "description": "One row of a hierarchy tree, including TreeItemIndent. Owns the clickable name region, inline-rename, trailing actions, and an optional context menu.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/context-menu", "@shadcn/input", "@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/tree-item.tsx",
@@ -238,6 +239,7 @@
       "categories": ["examples"],
       "title": "SplitButton Hero",
       "description": "A divided control - a primary action segment plus a caret that opens a menu.",
+      "dependencies": ["lucide-react"],
       "registryDependencies": ["@shadcn/button", "@shadcn/button-group", "@shadcn/dropdown-menu"],
       "files": [
         {
@@ -253,6 +255,7 @@
       "categories": ["examples"],
       "title": "MenuButton Hero",
       "description": "A remembered-default split control - the primary repeats the selected action.",
+      "dependencies": ["lucide-react"],
       "registryDependencies": ["@shadcn/button", "@shadcn/button-group", "@shadcn/dropdown-menu"],
       "files": [
         {
