@@ -22,6 +22,16 @@ its cost are here.
   repo's copies of the upstream primitives in house style, and `shadcn diff` against upstream
   reports that formatting as drift. Kept byte-identical to the stamp anyway; re-pointing the
   glob is a deviation that needs its own decision.
+- **Animated icons come from `@lucide-animated`, addressed by full URL and never vendored.**
+  467 MIT icons on Lucide + Motion, both already declared here. shadcn's public directory
+  (`ui.shadcn.com/r/registries.json`) lists it, so `@lucide-animated/<icon>` resolves with no
+  consumer config - but only for as long as shadcn keeps listing it, so composed items name
+  `https://lucide-animated.com/r/<icon>.json` the way they already name this registry's own
+  items. They stay out of `registry/` because they are `registry:ui` primitives and this
+  registry publishes composed items only. **The cost:** their icons are documented as
+  hover-animated; the `MenuIconHandle` ref (`startAnimation` / `stopAnimation`) that drives one
+  from an open/closed state is exported and typed but undocumented, so any state-driven toggle
+  built on them rests on an unpublished contract.
 - **Build & test tooling** - `@nx/js/typescript` (build + typecheck), `@nx/vite`, `@nx/next/plugin`
   for the registry app; **vitest** for unit, **Playwright** for e2e, `@nx/eslint` for lint. One
   unit runner throughout - this repo has no jest, where the backend repos deliberately split.
@@ -130,5 +140,6 @@ cat <project>/node_modules/@zeroxsolutions/<lib>/README.md
 | `@zeroxsolutions/fluent-emoji` | Fluent emoji assets | any frontend | authored here, not consumed here |
 | `@zeroxsolutions/editor-core` | editor primitives | any frontend | authored here |
 | shadcn registry | composed UI items | any frontend | this repo **is** the registry - see the first choice above |
+| `@lucide-animated` | animated icons | any frontend | consumed as a registry dependency, never vendored - see the choice above |
 
 `@zeroxsolutions/ui` is gone: the package was deleted upstream and the registry replaced it.
