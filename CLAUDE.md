@@ -35,12 +35,11 @@ its cost are here.
 - **Build & test tooling** - `@nx/js/typescript` (build + typecheck), `@nx/vite`, `@nx/next/plugin`
   for the registry app; **vitest** for unit, **Playwright** for e2e, `@nx/eslint` for lint. One
   unit runner throughout - this repo has no jest, where the backend repos deliberately split.
-- **No deployable target exists.** No project carries a `wrangler.*` config or a
-  `wrangler:deploy` target, yet `cd.yml` asks `nx-deploy` for exactly that. The job is a
-  **green no-op**, not a red pipeline - `nx run-many -t wrangler:deploy` matches no project and
-  exits 0 with `No tasks were run` (measured 2026-08-21 on a `development` push). That is
-  the defect: nothing reports that the registry never shipped. Either give `registry-ui` a real
-  deploy target or drop the job.
+- **No project carries a `wrangler:deploy` target yet.** `registry-ui` has its worker config
+  and `wrangler:build`, but `cd.yml` asks `nx-deploy` for `wrangler:deploy`, and until that
+  target exists the job is a **green no-op**: `nx run-many -t wrangler:deploy` matches no
+  project and exits 0 with `No tasks were run` (measured 2026-08-21 on a `development` push).
+  Nothing reports that the registry never shipped.
 - **`iac/` provisions exactly one thing: the artwork bucket.** The root composes only
   `tf-modules//cloudflare` (`v1.0.3`) and declares one R2 bucket, `fluent-emoji`, served
   at `https://fluent-emoji.zeroxsolutions.com`. The `neon`, `google_main` and `clerk`

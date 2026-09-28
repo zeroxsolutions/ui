@@ -6,7 +6,7 @@
 
 **Architecture:** The OpenNext adapter bundles `next build`'s standalone output into `.open-next/` (a `worker.js` plus an `assets/` directory that carries `public/r`). Four nx targets on the app build, preview, type and deploy that artifact; `cd.yml`'s existing `wrangler:deploy` job picks the project up unchanged. The e2e project drives the worker preview, so CI's e2e job builds the artifact that ships.
 
-**Tech Stack:** Next.js 16, `@opennextjs/cloudflare` 1.20.6, wrangler 4 (workspace catalog `^4.105.0`), nx 23, Playwright, pnpm 10.33.0.
+**Tech Stack:** Next.js 16, `@opennextjs/cloudflare` 1.20.6 (pinned in the app), wrangler 4 (workspace catalog `^4.105.0`), nx 23, Playwright, pnpm 10.33.0.
 
 **Spec:** `docs/superpowers/specs/2026-09-28-registry-ui-deploy-design.md`
 
@@ -33,8 +33,7 @@
 
 **Files:**
 
-- Modify: `pnpm-workspace.yaml` (catalog)
-- Modify: `apps/registry-ui/package.json` (dependencies, `nx.targets`)
+- Modify: `apps/registry-ui/package.json` (dependencies, devDependencies, `nx.targets`)
 - Create: `apps/registry-ui/open-next.config.ts`
 - Rename + modify: `apps/registry-ui/next.config.js` -> `apps/registry-ui/next.config.mjs`
 - Create: `apps/registry-ui/wrangler.jsonc`
@@ -54,26 +53,26 @@ pnpm nx show project @zeroxsolutions/registry-ui --json | python3 -c "import jso
 
 Expected: `False`.
 
-- [ ] **Step 2: Declare the adapter in the catalog and on the app**
+- [ ] **Step 2: Declare the adapter and the CLI on the app**
 
 Read the current versions first; do not type them from memory:
 
 ```bash
 npm view @opennextjs/cloudflare version   # 1.20.6 when this plan was written
-npm view wrangler version
 ```
 
-In `pnpm-workspace.yaml`, add to `catalog:` beside the existing `wrangler` line:
-
-```yaml
-'@opennextjs/cloudflare': '1.20.6'
-```
-
-In `apps/registry-ui/package.json`, add to `dependencies` (keep keys sorted):
+In `apps/registry-ui/package.json`, add to `dependencies` (keep keys sorted). It is a plain pin,
+not a catalog entry, because this app is its only declarer; it is a runtime dependency because
+the worker bundle imports its cache override:
 
 ```json
-    "@opennextjs/cloudflare": "catalog:",
-    "wrangler": "catalog:",
+    "@opennextjs/cloudflare": "1.20.6",
+```
+
+and to `devDependencies`, since wrangler is a CLI the build and deploy run and never ship:
+
+```json
+    "wrangler": "catalog:"
 ```
 
 Then install:
@@ -115,9 +114,7 @@ Replace the file's contents with:
 // @ts-check
 
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
-
-// Wires the Workers bindings into `next dev`, so local dev sees what the deployed worker sees.
-initOpenNextCloudflareForDev();
+import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -126,7 +123,17 @@ const nextConfig = {
   output: 'standalone',
 };
 
-export default nextConfig;
+/**
+ * Wires the Workers bindings into `next dev` only. Called unconditionally, `next build` starts a
+ * miniflare per config load and exits leaving a `workerd` process behind, and the next build then
+ * fails on its persisted state with `SQLITE_BUSY`.
+ *
+ * @param {string} phase
+ */
+export default async function config(phase) {
+  if (phase === PHASE_DEVELOPMENT_SERVER) await initOpenNextCloudflareForDev();
+  return nextConfig;
+}
 ```
 
 `.mjs` because the app's `package.json` sets no `"type"`, so a `.js` config loads as CommonJS and cannot `import` the adapter.
@@ -141,8 +148,7 @@ export default nextConfig;
   "compatibility_date": "2026-08-20",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "observability": { "enabled": true },
-  // Both addresses `wrangler dev` binds. Unset, the server port silently becomes the next free
-  // one, and the e2e suite drives this exact port.
+  // Both addresses `wrangler dev` binds. Unset, the server port silently becomes the next free one.
   "dev": { "port": 8787, "inspector_port": 9229 },
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "env": {
@@ -217,7 +223,7 @@ Expected: the line prints.
 
 ```bash
 git add apps/registry-ui/open-next.config.ts apps/registry-ui/wrangler.jsonc apps/registry-ui/cloudflare-env.d.ts
-git commit -F msg.txt -- pnpm-workspace.yaml pnpm-lock.yaml apps/registry-ui/package.json apps/registry-ui/open-next.config.ts apps/registry-ui/next.config.js apps/registry-ui/next.config.mjs apps/registry-ui/wrangler.jsonc apps/registry-ui/cloudflare-env.d.ts
+git commit -F msg.txt -- pnpm-lock.yaml apps/registry-ui/package.json apps/registry-ui/open-next.config.ts apps/registry-ui/next.config.js apps/registry-ui/next.config.mjs apps/registry-ui/wrangler.jsonc apps/registry-ui/cloudflare-env.d.ts
 ```
 
 Subject: `build(registry-ui): build the app as a worker through opennext`. Body: why - the registry host needs a deployable artifact, and `public/r` only reaches it through `shadcn-build`.
@@ -424,7 +430,7 @@ This is the one direct wrangler call in the plan: a read-only validation that no
 
 - [ ] **Step 4: Update `CLAUDE.md` in the same change**
 
-Replace the bullet that starts `- **No deployable target exists.**` with:
+Replace the bullet whose bold lead is "No project carries a `wrangler:deploy` target yet." with:
 
 ```markdown
 - **`registry-ui` deploys as a worker through OpenNext, and it is the only deployable.**
@@ -432,7 +438,7 @@ Replace the bullet that starts `- **No deployable target exists.**` with:
   domain `ui.zeroxsolutions.com`, declared in the app's `wrangler.jsonc`, not in `iac/`.
   Development gets no custom domain on purpose: a second registry hostname is one a consumer
   could write into `components.json`. The cache is the adapter's static-assets one, which
-  writes nothing - so the first route that sets `revalidate` has to bring a writable cache and
+  writes nothing, so the first route that sets `revalidate` has to bring a writable cache and
   a real queue, or it throws the first time a stored render goes stale.
 ```
 
