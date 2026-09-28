@@ -2,36 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from '@/registry/bases/base-ui/ui/item';
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/registry/bases/base-ui/ui/item';
 import { Empty, EmptyDescription } from '@/registry/bases/base-ui/ui/empty';
-import { Popover, PopoverContent } from '@/registry/bases/base-ui/ui/popover';
+import { Popover } from '@/registry/bases/base-ui/ui/popover';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import type {
-  CaretRect,
-  IEditor,
-  SlashItem,
-  TriggerQuery,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  filterSlashItems,
-  groupByHeading,
-} from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
-import { rectAnchor } from './selection-rect.js';
+import type { CaretRect, IEditor, SlashItem, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
+import { filterSlashItems, groupByHeading } from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
+import { RectPopover } from './rect-popover.js';
 
 /**
  * The slash (`/`) insert menu — Notion-style **inline**: typing `/` leaves the
  * `/` (and everything typed after it) as real text in the document, painted with
  * a gray `slash-active` highlight and a faint inline ghost right after the caret
  * (the `/<placeholder>` hint on an empty query, or the highlighted item's
- * autocomplete completion as you type). The popup is a caret-anchored `Popover`
- * (the shipped primitive, non-modal by default and with `initialFocus={false}` so
+ * autocomplete completion as you type). The popup is a `Popover` anchored to the
+ * caret by `RectPopover` (non-modal by default and with `initialFocus={false}` so
  * the editor keeps focus and the typed `/query` keeps flowing into the document);
  * its rows, empty-state, and scrolling are the design-system `Item` / `Empty` /
  * `ScrollArea` components. Detection, the delete-on-select range, and the inline
@@ -49,11 +35,7 @@ export interface SlashMenuProps {
   placeholder?: string;
 }
 
-export function SlashMenu({
-  editor,
-  items,
-  placeholder = 'Type to search',
-}: SlashMenuProps) {
+export function SlashMenu({ editor, items, placeholder = 'Type to search' }: SlashMenuProps) {
   const [active, setActive] = useState<TriggerQuery | null>(null);
   const [point, setPoint] = useState<CaretRect | null>(null);
   const [index, setIndex] = useState(0);
@@ -61,17 +43,11 @@ export function SlashMenu({
   // text lingers, until the caret moves to a different trigger (or none).
   const dismissedFrom = useRef<number | null>(null);
 
-  const filtered = useMemo(
-    () => filterSlashItems(items, active?.query ?? ''),
-    [items, active?.query],
-  );
+  const filtered = useMemo(() => filterSlashItems(items, active?.query ?? ''), [items, active?.query]);
   const groups = useMemo(() => groupByHeading(filtered), [filtered]);
   // The flattened render order — arrow-key nav walks this, so the highlight
   // tracks what's actually on screen even when items span multiple groups.
-  const ordered = useMemo(
-    () => groups.flatMap(([, groupItems]) => groupItems),
-    [groups],
-  );
+  const ordered = useMemo(() => groups.flatMap(([, groupItems]) => groupItems), [groups]);
 
   const orderedRef = useRef(ordered);
   orderedRef.current = ordered;
@@ -127,17 +103,13 @@ export function SlashMenu({
     if (active.query.length === 0) return placeholder;
     const item = ordered[index];
     const title = item?.title ?? '';
-    return title.toLowerCase().startsWith(active.query.toLowerCase())
-      ? title.slice(active.query.length)
-      : '';
+    return title.toLowerCase().startsWith(active.query.toLowerCase()) ? title.slice(active.query.length) : '';
   }, [active, ordered, index, placeholder]);
 
   // Paint the gray `/query` highlight + inline ghost while the menu is open, and
   // clear it the moment it closes (or the component unmounts).
   useEffect(() => {
-    editor.setSlashDecoration(
-      active ? { from: active.from, to: active.to, ghost } : null,
-    );
+    editor.setSlashDecoration(active ? { from: active.from, to: active.to, ghost } : null);
   }, [editor, active, ghost]);
   useEffect(() => () => editor.setSlashDecoration(null), [editor]);
 
@@ -183,9 +155,7 @@ export function SlashMenu({
       if (event.key === 'ArrowUp') {
         event.preventDefault();
         event.stopPropagation();
-        setIndex((i) =>
-          list.length ? (i - 1 + list.length) % list.length : 0,
-        );
+        setIndex((i) => (list.length ? (i - 1 + list.length) % list.length : 0));
         return;
       }
       if (event.key === 'Enter' || event.key === 'Tab') {
@@ -201,8 +171,8 @@ export function SlashMenu({
 
   return (
     <Popover open={Boolean(active && point)}>
-      <PopoverContent
-        anchor={rectAnchor(point)}
+      <RectPopover
+        rect={point}
         side="bottom"
         align="start"
         // The editor owns the caret; the popover must not steal focus on open.
@@ -219,9 +189,7 @@ export function SlashMenu({
             ) : (
               groups.map(([heading, groupItems]) => (
                 <div key={heading} className="pb-1">
-                  <div className="px-2 pb-1 pt-1.5 text-xs font-medium text-muted-foreground">
-                    {heading}
-                  </div>
+                  <div className="text-muted-foreground px-2 pt-1.5 pb-1 text-xs font-medium">{heading}</div>
                   {groupItems.map((item) => {
                     const position = ordered.indexOf(item);
                     const highlighted = position === index;
@@ -234,23 +202,15 @@ export function SlashMenu({
                         // Keep the editor focused so the selection/range survives the click.
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => select(item)}
-                        className={cn(
-                          'cursor-pointer',
-                          highlighted && 'bg-accent text-accent-foreground',
-                        )}
+                        className={cn('cursor-pointer', highlighted && 'bg-accent text-accent-foreground')}
                       >
-                        <ItemMedia
-                          variant="icon"
-                          className="size-8 rounded-md border bg-secondary text-base"
-                        >
+                        <ItemMedia variant="icon" className="bg-secondary size-8 rounded-md border text-base">
                           {item.icon as ReactNode}
                         </ItemMedia>
                         <ItemContent className="gap-0.5">
                           <ItemTitle>{item.title}</ItemTitle>
                           {item.description && (
-                            <ItemDescription className="line-clamp-1">
-                              {item.description}
-                            </ItemDescription>
+                            <ItemDescription className="line-clamp-1">{item.description}</ItemDescription>
                           )}
                         </ItemContent>
                       </Item>
@@ -261,7 +221,7 @@ export function SlashMenu({
             )}
           </div>
         </ScrollArea>
-      </PopoverContent>
+      </RectPopover>
     </Popover>
   );
 }

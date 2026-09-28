@@ -3,30 +3,18 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Toggle } from '@/registry/bases/base-ui/ui/toggle';
-import { Popover, PopoverContent } from '@/registry/bases/base-ui/ui/popover';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/registry/bases/base-ui/ui/tooltip';
-import type {
-  BubbleItem,
-  IEditor,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  rectAnchor,
-  selectionRect,
-  selectionWithin,
-  type Point,
-} from './selection-rect.js';
+import { Popover } from '@/registry/bases/base-ui/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
+import type { BubbleItem, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { selectionRect, selectionWithin, type Point } from './selection-rect.js';
+import { RectPopover } from './rect-popover.js';
 
 /**
  * The selection bubble menu (task 8.2): a floating formatting bar that appears
  * over a non-empty text selection. It reads the browser selection geometry (not
  * the engine) to position itself, and dispatches its buttons' commands through the
- * `IEditor` façade. The bar is a caret-anchored `Popover` (the shipped primitive,
- * non-modal by default and with `initialFocus={false}` so it never steals the
+ * `IEditor` façade. The bar is a `Popover` anchored to the selection by `RectPopover`
+ * (non-modal by default and with `initialFocus={false}` so it never steals the
  * selection), and its buttons are the design-system `Toggle` (native pressed
  * state) wrapped in a `Tooltip`. The floating "+" affordance for an empty line
  * reuses the slash menu's `/` trigger, so it is not duplicated here.
@@ -74,8 +62,8 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
 
   return (
     <Popover open={Boolean(rect)}>
-      <PopoverContent
-        anchor={rectAnchor(rect)}
+      <RectPopover
+        rect={rect}
         side="top"
         align="center"
         // The editor owns the caret; the popover must not steal focus on open.
@@ -86,9 +74,7 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
       >
         <TooltipProvider>
           {items.map((item) => {
-            const active = item.activeWhen
-              ? editor.isActive(item.activeWhen)
-              : false;
+            const active = item.activeWhen ? editor.isActive(item.activeWhen) : false;
             return (
               <Tooltip key={item.id}>
                 <TooltipTrigger
@@ -99,9 +85,7 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
                       aria-label={item.title}
                       // Keep focus (and the selection) on mousedown so the command applies.
                       onMouseDown={(event) => event.preventDefault()}
-                      onPressedChange={() =>
-                        editor.run(item.command, item.args)
-                      }
+                      onPressedChange={() => editor.run(item.command, item.args)}
                     >
                       {(item.icon as ReactNode) ?? item.title}
                     </Toggle>
@@ -112,7 +96,7 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
             );
           })}
         </TooltipProvider>
-      </PopoverContent>
+      </RectPopover>
     </Popover>
   );
 }

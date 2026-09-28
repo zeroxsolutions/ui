@@ -36,8 +36,8 @@
     "@zeroxsolutions/fluent-emoji": "workspace:*",
     "@zeroxsolutions/icons": "workspace:*",
     "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "cn": "^0.4.0",
     "date-fns": "^4.4.0",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
@@ -59,7 +59,6 @@
     "rough-notation": "^0.5.1",
     "shiki": "^4.2.0",
     "sonner": "^2.0.7",
-    "tailwind-merge": "^3.6.0",
     "tiptap-extension-global-drag-handle": "^0.1.18",
     "unified": "^11.0.5",
     "vaul": "^1.1.2",
@@ -68,7 +67,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.1",
     "@types/katex": "^0.16.7",
-    "shadcn": "^4.17.0",
+    "shadcn": "^4.21.0",
     "tailwindcss": "^4.3.1",
     "tw-animate-css": "^1.4.0",
     "wrangler": "catalog:"
@@ -76,12 +75,20 @@
   "nx": {
     "targets": {
       "build": {
-        "dependsOn": ["^build", "shadcn-build"]
+        "dependsOn": [
+          "^build",
+          "shadcn-build"
+        ]
       },
       "wrangler:build": {
         "executor": "nx:run-commands",
-        "dependsOn": ["^build", "shadcn-build"],
-        "outputs": ["{projectRoot}/.open-next"],
+        "dependsOn": [
+          "^build",
+          "shadcn-build"
+        ],
+        "outputs": [
+          "{projectRoot}/.open-next"
+        ],
         "cache": true,
         "options": {
           "cwd": "{projectRoot}",

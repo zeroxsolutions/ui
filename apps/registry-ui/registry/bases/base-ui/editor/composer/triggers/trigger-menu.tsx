@@ -2,23 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from '@/registry/bases/base-ui/ui/item';
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/registry/bases/base-ui/ui/item';
 import { Empty, EmptyDescription } from '@/registry/bases/base-ui/ui/empty';
-import { Popover, PopoverContent } from '@/registry/bases/base-ui/ui/popover';
+import { Popover } from '@/registry/bases/base-ui/ui/popover';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import type {
-  CaretRect,
-  IEditor,
-  TriggerQuery,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import { rectAnchor } from '../../document/ui/selection-rect.js';
+import type { CaretRect, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
+import { RectPopover } from '../../document/ui/rect-popover.js';
 import {
   defaultTriggerFilter,
   type TriggerOption,
@@ -29,8 +19,8 @@ import {
  * The one generic suggestion menu, driven by a `TriggerToken` descriptor - the
  * merge of the two hand-written `mention-menu` / `command-menu` (they were ~85%
  * identical). Typing the token's char leaves the `char query` as visible text
- * highlighted on the composer accent; the popup is a caret-anchored `Popover`
- * (the shipped primitive, non-modal by default and with `initialFocus={false}`
+ * highlighted on the composer accent; the popup is a `Popover` anchored to the
+ * caret by `RectPopover` (non-modal by default and with `initialFocus={false}`
  * so the editor keeps focus and the typed query keeps flowing in) whose rows /
  * empty-state / scrolling are the design-system `Item` / `Empty` /
  * `ScrollArea`. Selecting an option deletes the typed query and commits the
@@ -51,9 +41,7 @@ export interface TriggerMenuProps {
 /** The option text the typed query completes and commit-on-space matches - the
  *  label for a reference, the slug (or id) for an invocation. */
 function queryText(token: TriggerToken, option: TriggerOption): string {
-  return token.queryField === 'slug'
-    ? (option.slug ?? option.id)
-    : option.label;
+  return token.queryField === 'slug' ? (option.slug ?? option.id) : option.label;
 }
 
 /** Whether the char begins the single-block input - reads the canonical JSON so
@@ -70,17 +58,11 @@ function charAtInputStart(editor: IEditor, char: string): boolean {
  *  of the one paragraph's content (the `topContent: 'paragraph'` schema). Reads
  *  the raw node attrs directly - not `readRef`, whose per-token ref shape may
  *  rename the field (a command's slug becomes `name`). */
-function leadingTokenNode(
-  editor: IEditor,
-  token: TriggerToken,
-): { text: string; from: number; to: number } | null {
+function leadingTokenNode(editor: IEditor, token: TriggerToken): { text: string; from: number; to: number } | null {
   const first = editor.getJSON().content?.[0]?.content?.[0];
   if (!first || first.type !== token.nodeName) return null;
   const attrs = (first.attrs ?? {}) as Record<string, unknown>;
-  const query =
-    token.queryField === 'slug'
-      ? (attrs.slug ?? attrs.id ?? '')
-      : (attrs.label ?? attrs.id ?? '');
+  const query = token.queryField === 'slug' ? (attrs.slug ?? attrs.id ?? '') : (attrs.label ?? attrs.id ?? '');
   return { text: String(query), from: 1, to: 2 };
 }
 
@@ -116,8 +98,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
         return;
       }
       const query = editor.triggerQuery(token.char);
-      const gated =
-        token.gate === 'line-start' && !charAtInputStart(editor, token.char);
+      const gated = token.gate === 'line-start' && !charAtInputStart(editor, token.char);
       if (!query || gated) {
         dismissedFrom.current = null;
         setActive(null);
@@ -167,9 +148,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
   const ghost = useMemo(() => {
     if (!active || active.query.length === 0) return '';
     const text = ordered[index] ? queryText(token, ordered[index]) : '';
-    return text.toLowerCase().startsWith(active.query.toLowerCase())
-      ? text.slice(active.query.length)
-      : '';
+    return text.toLowerCase().startsWith(active.query.toLowerCase()) ? text.slice(active.query.length) : '';
   }, [token, active, ordered, index]);
 
   // Paint the `char query` highlight (+ completion ghost) while open, clearing
@@ -234,9 +213,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
       if (event.key === 'ArrowUp') {
         event.preventDefault();
         event.stopPropagation();
-        setIndex((i) =>
-          list.length ? (i - 1 + list.length) % list.length : 0,
-        );
+        setIndex((i) => (list.length ? (i - 1 + list.length) % list.length : 0));
         return;
       }
       if (event.key === 'Enter' || event.key === 'Tab') {
@@ -249,9 +226,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
       if (event.key === ' ' && token.commitOnSpace) {
         const needle = (activeRef.current?.query ?? '').trim().toLowerCase();
         const exact = list.find(
-          (option) =>
-            queryText(token, option).toLowerCase() === needle ||
-            option.label.toLowerCase() === needle,
+          (option) => queryText(token, option).toLowerCase() === needle || option.label.toLowerCase() === needle,
         );
         if (exact) {
           event.preventDefault();
@@ -276,8 +251,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
       if (!node) return;
       const selection = editor.getSelection();
       const afterNode = selection.empty && selection.from === node.to;
-      const nodeSelected =
-        selection.from === node.from && selection.to === node.to;
+      const nodeSelected = selection.from === node.from && selection.to === node.to;
       if (!afterNode && !nodeSelected) return;
       event.preventDefault();
       event.stopPropagation();
@@ -293,8 +267,8 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
 
   return (
     <Popover open={Boolean(active && point)}>
-      <PopoverContent
-        anchor={rectAnchor(point)}
+      <RectPopover
+        rect={point}
         side="bottom"
         align="start"
         // The editor owns the caret; the popover must not steal focus on open.
@@ -307,9 +281,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
           <div className="p-1">
             {ordered.length === 0 ? (
               <Empty className="min-h-0 gap-1 border-0 p-6">
-                <EmptyDescription>
-                  {token.emptyText ?? 'No matches'}
-                </EmptyDescription>
+                <EmptyDescription>{token.emptyText ?? 'No matches'}</EmptyDescription>
               </Empty>
             ) : (
               ordered.map((option, position) => {
@@ -323,27 +295,17 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
                     // Keep the editor focused so the range survives the click.
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => select(option)}
-                    className={cn(
-                      'cursor-pointer',
-                      highlighted && 'bg-accent text-accent-foreground',
-                    )}
+                    className={cn('cursor-pointer', highlighted && 'bg-accent text-accent-foreground')}
                   >
                     {(option.icon as ReactNode) && (
-                      <ItemMedia
-                        variant="icon"
-                        className={
-                          token.menuMediaClassName ?? 'text-muted-foreground'
-                        }
-                      >
+                      <ItemMedia variant="icon" className={token.menuMediaClassName ?? 'text-muted-foreground'}>
                         {option.icon as ReactNode}
                       </ItemMedia>
                     )}
                     <ItemContent className="gap-0.5">
                       <ItemTitle>{option.label}</ItemTitle>
                       {option.description && (
-                        <ItemDescription className="line-clamp-1">
-                          {option.description}
-                        </ItemDescription>
+                        <ItemDescription className="line-clamp-1">{option.description}</ItemDescription>
                       )}
                     </ItemContent>
                   </Item>
@@ -352,7 +314,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
             )}
           </div>
         </ScrollArea>
-      </PopoverContent>
+      </RectPopover>
     </Popover>
   );
 }
