@@ -13,7 +13,7 @@ import { shouldStartDrag } from '@/registry/bases/base-ui/lib/resize-drag';
  */
 // `onDrag` below is a resize-width delta, not the native HTML5 drag event - omit
 // the native handler so its signature does not clash with ours.
-export interface ResizeHandleProps extends Omit<React.ComponentProps<'div'>, 'onDrag'> {
+interface ResizeHandleProps extends Omit<React.ComponentProps<'div'>, 'onDrag'> {
   /** Width delta in px since the last move; apply it to the panel size. */
   onDrag: (dx: number) => void;
   /** Double-click action (e.g. collapse/expand the panel). */
@@ -78,3 +78,4 @@ function ResizeHandle({ onDrag, onToggle, className, ...props }: ResizeHandlePro
 }
 
 export { ResizeHandle };
+export type { ResizeHandleProps };

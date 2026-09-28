@@ -28,7 +28,7 @@ export { codeLanguageOptions, localeOptions } from '../language-switcher-data';
 export type { LanguageKind, LanguageOption } from '../language-switcher-data';
 
 /** Props shared by every display form. Controlled: the consumer owns `value`. */
-export interface LanguageSwitcherBaseProps {
+interface LanguageSwitcherBaseProps {
   /** The selected language's value (a BCP-47 code, or a code-language id). */
   value: string;
   /** Called with the newly-selected value; the consumer decides whether to apply it. */
@@ -68,7 +68,7 @@ interface SegmentedFormProps extends LanguageSwitcherBaseProps {
  * Props for {@link LanguageSwitcher} — a discriminated union on `form`. The
  * `dropdown`/`icon` forms accept `searchable`; the `segmented` form does not.
  */
-export type LanguageSwitcherProps = ComboboxFormProps | SegmentedFormProps;
+type LanguageSwitcherProps = ComboboxFormProps | SegmentedFormProps;
 
 function useLanguageOptions({
   kind = 'locale',
@@ -284,8 +284,11 @@ function LanguageSwitcherSegmented({
  * The consumer owns `value` and every visible string; pass `options` to override
  * the built-in `kind` data.
  */
-export function LanguageSwitcher({ form = 'dropdown', ...rest }: LanguageSwitcherProps) {
+function LanguageSwitcher({ form = 'dropdown', ...rest }: LanguageSwitcherProps) {
   if (form === 'segmented') return <LanguageSwitcherSegmented {...rest} />;
   if (form === 'icon') return <LanguageSwitcherIcon {...rest} />;
   return <LanguageSwitcherDropdown {...rest} />;
 }
+
+export { LanguageSwitcher };
+export type { LanguageSwitcherBaseProps, LanguageSwitcherProps };

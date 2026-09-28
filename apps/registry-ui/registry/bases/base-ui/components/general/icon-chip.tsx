@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-export interface IconChipProps {
+interface IconChipProps {
   /** The glyph node, sized by the caller (e.g. `<Eye className="size-3" />`). */
   icon: React.ReactNode;
   /** Tooltip text, and the chip's accessible name when it is a string. */
@@ -44,3 +44,4 @@ function IconChip({ icon, label, tint, className }: IconChipProps) {
 }
 
 export { IconChip };
+export type { IconChipProps };

@@ -18,7 +18,7 @@ function formatOf(src: string): string | undefined {
 
 const DEFAULT_SIZES = [36, 24, 18, 14];
 
-export interface FontPreviewProps extends React.ComponentProps<'div'> {
+interface FontPreviewProps extends React.ComponentProps<'div'> {
   /** Font file URL or data URL, loaded via a scoped `@font-face`. */
   src: string;
   /** CSS `format()` hint; derived from the `src` extension when omitted. */
@@ -35,7 +35,7 @@ export interface FontPreviewProps extends React.ComponentProps<'div'> {
  * pangram); `sizes` controls the size scale. Spacing between rows is the
  * component's own; the consumer places and pads the wrapper.
  */
-export function FontPreview({ src, format, sizes = DEFAULT_SIZES, className, children, ...props }: FontPreviewProps) {
+function FontPreview({ src, format, sizes = DEFAULT_SIZES, className, children, ...props }: FontPreviewProps) {
   const id = React.useId();
   const family = `font-${id.replace(/[^a-zA-Z0-9]/g, '')}`;
   const fmt = format ?? formatOf(src);
@@ -58,3 +58,6 @@ export function FontPreview({ src, format, sizes = DEFAULT_SIZES, className, chi
     </div>
   );
 }
+
+export { FontPreview };
+export type { FontPreviewProps };

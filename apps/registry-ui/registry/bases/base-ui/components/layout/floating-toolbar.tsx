@@ -18,7 +18,7 @@ interface FloatingToolbarProps extends ComponentProps<'div'> {
  * pointer-events-none canvas overlay; it is a no-op where the surrounding tree
  * already receives pointer events.
  */
-export function FloatingToolbar({ children, className, label, ...props }: FloatingToolbarProps) {
+function FloatingToolbar({ children, className, label, ...props }: FloatingToolbarProps) {
   return (
     <div
       data-slot="floating-toolbar"
@@ -34,3 +34,5 @@ export function FloatingToolbar({ children, className, label, ...props }: Floati
     </div>
   );
 }
+
+export { FloatingToolbar };

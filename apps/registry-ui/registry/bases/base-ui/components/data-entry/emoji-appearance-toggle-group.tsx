@@ -15,7 +15,7 @@ const STYLE_OPTIONS: { id: FluentEmojiStyle; label: string }[] = [
 // sees the artwork rather than reading a style name.
 const SAMPLE = { glyph: '😀', name: 'grinning face' } as const;
 
-export interface EmojiAppearanceToggleGroupProps extends Omit<
+interface EmojiAppearanceToggleGroupProps extends Omit<
   React.ComponentProps<typeof ToggleGroup>,
   'value' | 'onValueChange'
 > {
@@ -36,7 +36,7 @@ export interface EmojiAppearanceToggleGroupProps extends Omit<
  * `onValueChange`); the consumer owns persistence and applying the choice app-wide
  * (`setFluentEmojiStyle` from `@zeroxsolutions/fluent-emoji`).
  */
-export function EmojiAppearanceToggleGroup({ value, onValueChange, ...props }: EmojiAppearanceToggleGroupProps) {
+function EmojiAppearanceToggleGroup({ value, onValueChange, ...props }: EmojiAppearanceToggleGroupProps) {
   return (
     <ToggleGroup
       // Single-select: Base UI's value is an array; bind the lone style and
@@ -67,3 +67,6 @@ export function EmojiAppearanceToggleGroup({ value, onValueChange, ...props }: E
     </ToggleGroup>
   );
 }
+
+export { EmojiAppearanceToggleGroup };
+export type { EmojiAppearanceToggleGroupProps };

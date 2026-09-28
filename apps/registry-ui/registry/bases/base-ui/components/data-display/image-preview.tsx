@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-export interface ImagePreviewProps extends React.ComponentProps<'img'> {
+interface ImagePreviewProps extends React.ComponentProps<'img'> {
   /** Image source — an asset URL, blob URL, or data URL. */
   src: string;
 }
@@ -25,7 +25,7 @@ const CHECKERBOARD: React.CSSProperties = {
  * wrapper); `className` and other `img` props apply to the image. Pass `alt` for
  * the accessible name — it defaults to empty (decorative).
  */
-export function ImagePreview({ src, alt = '', className, ...props }: ImagePreviewProps) {
+function ImagePreview({ src, alt = '', className, ...props }: ImagePreviewProps) {
   return (
     <div
       data-slot="image-preview"
@@ -36,3 +36,6 @@ export function ImagePreview({ src, alt = '', className, ...props }: ImagePrevie
     </div>
   );
 }
+
+export { ImagePreview };
+export type { ImagePreviewProps };

@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-export interface PanelFieldGroupProps extends ComponentProps<'div'> {
+interface PanelFieldGroupProps extends ComponentProps<'div'> {
   /**
    * Column count, rendered as a computed `grid-template-columns: repeat(n, …)`
    * — NOT a `grid-cols-N` utility. That makes it accept ANY count, including one
@@ -19,7 +19,7 @@ export interface PanelFieldGroupProps extends ComponentProps<'div'> {
  * gap-y-1` spacing decision so sections stay consistent; pass `cols` for a
  * (possibly dynamic) column count, or drive it via `className`.
  */
-export function PanelFieldGroup({ cols, className, children, style, ...props }: PanelFieldGroupProps) {
+function PanelFieldGroup({ cols, className, children, style, ...props }: PanelFieldGroupProps) {
   return (
     <div
       data-slot="panel-field-group"
@@ -31,3 +31,6 @@ export function PanelFieldGroup({ cols, className, children, style, ...props }: 
     </div>
   );
 }
+
+export { PanelFieldGroup };
+export type { PanelFieldGroupProps };

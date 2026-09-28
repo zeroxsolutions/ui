@@ -69,7 +69,7 @@ const codeBlockComponents: Components = {
   },
 };
 
-export interface MarkdownViewProps extends Omit<React.ComponentProps<'div'>, 'children'> {
+interface MarkdownViewProps extends Omit<React.ComponentProps<'div'>, 'children'> {
   /** Markdown source to render (GitHub-Flavored Markdown). */
   children: string;
   /**
@@ -91,7 +91,7 @@ export interface MarkdownViewProps extends Omit<React.ComponentProps<'div'>, 'ch
  * render. Props are `children` (string) + `codeBlocks` + plain `div` attributes,
  * so the default shallow comparison is correct.
  */
-export const MarkdownView = React.memo(function MarkdownView({
+const MarkdownView = React.memo(function MarkdownView({
   children,
   className,
   codeBlocks = false,
@@ -105,3 +105,6 @@ export const MarkdownView = React.memo(function MarkdownView({
     </div>
   );
 });
+
+export { MarkdownView };
+export type { MarkdownViewProps };

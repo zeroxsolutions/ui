@@ -21,7 +21,7 @@ const pageContainerVariants = cva('mx-auto w-full', {
   },
 });
 
-export interface PageContainerProps extends ComponentProps<'div'>, VariantProps<typeof pageContainerVariants> {}
+interface PageContainerProps extends ComponentProps<'div'>, VariantProps<typeof pageContainerVariants> {}
 
 /**
  * The centred, max-width content column for a full-width surface, so content
@@ -36,3 +36,4 @@ function PageContainer({ size, className, ...props }: PageContainerProps) {
 }
 
 export { PageContainer, pageContainerVariants };
+export type { PageContainerProps };

@@ -102,11 +102,11 @@ const ICON_BY_EXTENSION: Record<string, LucideIcon> = {
 };
 
 /** The lucide icon a file name maps to — exposed for call-sites that need the component itself. */
-export function fileTypeIcon(name: string): LucideIcon {
+function fileTypeIcon(name: string): LucideIcon {
   return ICON_BY_EXTENSION[extensionOf(name)] ?? File;
 }
 
-export interface FileTypeIconProps extends LucideProps {
+interface FileTypeIconProps extends LucideProps {
   /** File name or path; the icon is derived from its extension. */
   name: string;
 }
@@ -118,7 +118,10 @@ export interface FileTypeIconProps extends LucideProps {
  * accessible label, or pass `aria-label` when it stands alone. All `LucideProps`
  * (`size`, `className`, `aria-*`) pass through.
  */
-export function FileTypeIcon({ name, ...props }: FileTypeIconProps) {
+function FileTypeIcon({ name, ...props }: FileTypeIconProps) {
   const Icon = fileTypeIcon(name);
   return <Icon {...props} />;
 }
+
+export { fileTypeIcon, FileTypeIcon };
+export type { FileTypeIconProps };

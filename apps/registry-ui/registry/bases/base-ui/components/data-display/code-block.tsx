@@ -36,7 +36,7 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
  * `code` is the source string. Presentational — copy uses the Clipboard API
  * best-effort and resets after ~2s.
  */
-export interface CodeBlockProps {
+interface CodeBlockProps {
   code: string;
   /** Shiki language id (e.g. `ts`, `json`, `bash`); drives highlighting + header. */
   language?: string;
@@ -152,7 +152,7 @@ function HighlightedCode({ lines }: { lines: HighlightLine[] }) {
   );
 }
 
-export function CodeBlock({ code, language, className }: CodeBlockProps) {
+function CodeBlock({ code, language, className }: CodeBlockProps) {
   const lines = useHighlightedLines(code, language);
   const isPlain = isPlainLanguage(language);
   // A block carries the header only when the language is real; an unlabelled
@@ -225,3 +225,6 @@ export function CodeBlock({ code, language, className }: CodeBlockProps) {
     </CollapsibleCard>
   );
 }
+
+export { CodeBlock };
+export type { CodeBlockProps };

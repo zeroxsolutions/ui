@@ -23,7 +23,7 @@ import type { ChatSuggestion } from '../chat/chat-types';
  * `suggestions` set come in as props (no baked strings). Internal centering +
  * padding is the component's identity; place it with the surrounding container.
  */
-export interface ChatEmptyStateProps {
+interface ChatEmptyStateProps {
   /** Leading glyph for the header (e.g. a lucide icon element). */
   icon?: ReactNode;
   title: ReactNode;
@@ -33,14 +33,7 @@ export interface ChatEmptyStateProps {
   className?: string;
 }
 
-export function ChatEmptyState({
-  icon,
-  title,
-  description,
-  suggestions,
-  onSelectPrompt,
-  className,
-}: ChatEmptyStateProps) {
+function ChatEmptyState({ icon, title, description, suggestions, onSelectPrompt, className }: ChatEmptyStateProps) {
   const disabled = !onSelectPrompt;
   return (
     <Empty className={cn('p-6', className)}>
@@ -82,3 +75,6 @@ export function ChatEmptyState({
     </Empty>
   );
 }
+
+export { ChatEmptyState };
+export type { ChatEmptyStateProps };

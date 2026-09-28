@@ -24,11 +24,11 @@ import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code
  *     </ToolCallCardContent>
  *   </ToolCallCard>
  */
-export type ToolCallCardState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
+type ToolCallCardState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
 
-export type ToolCallCardPart = { state: ToolCallCardState };
+type ToolCallCardPart = { state: ToolCallCardState };
 
-export function ToolCallCard({ className, ...props }: ComponentProps<typeof Collapsible>) {
+function ToolCallCard({ className, ...props }: ComponentProps<typeof Collapsible>) {
   return <Collapsible className={cn('bg-muted my-2 w-full overflow-hidden rounded-md', className)} {...props} />;
 }
 
@@ -52,7 +52,7 @@ const STATUS: Record<ToolCallCardState, { label: string; icon: ReactNode }> = {
   },
 };
 
-export interface ToolCallCardHeaderProps {
+interface ToolCallCardHeaderProps {
   /** Display title; falls back to `toolName`, then a derived `type`. */
   title?: string;
   /** Human-readable one-line summary of the call, shown muted after the name. */
@@ -69,7 +69,7 @@ export interface ToolCallCardHeaderProps {
   className?: string;
 }
 
-export function ToolCallCardHeader({
+function ToolCallCardHeader({
   title,
   subtitle,
   icon,
@@ -103,7 +103,7 @@ export function ToolCallCardHeader({
   );
 }
 
-export function ToolCallCardContent({ className, children, ...props }: ComponentProps<typeof CollapsibleContent>) {
+function ToolCallCardContent({ className, children, ...props }: ComponentProps<typeof CollapsibleContent>) {
   return (
     <CollapsibleContent {...props}>
       <Separator />
@@ -116,7 +116,7 @@ function ToolCallCardLabel({ children }: { children: ReactNode }) {
   return <h4 className="text-muted-foreground text-xs font-medium">{children}</h4>;
 }
 
-export function ToolCallCardInput({
+function ToolCallCardInput({
   input,
   label = 'Parameters',
   className,
@@ -134,7 +134,7 @@ export function ToolCallCardInput({
   );
 }
 
-export function ToolCallCardOutput({
+function ToolCallCardOutput({
   output,
   errorText,
   resultLabel = 'Result',
@@ -175,3 +175,6 @@ export function ToolCallCardOutput({
     </div>
   );
 }
+
+export { ToolCallCard, ToolCallCardHeader, ToolCallCardContent, ToolCallCardInput, ToolCallCardOutput };
+export type { ToolCallCardState, ToolCallCardPart, ToolCallCardHeaderProps };

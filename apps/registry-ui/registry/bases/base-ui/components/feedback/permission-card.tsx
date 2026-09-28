@@ -4,7 +4,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /** The lifecycle of a consent request - host-driven, like `ToolCallCard`'s state. */
-export type PermissionCardStatusValue = 'pending' | 'approved' | 'denied';
+type PermissionCardStatusValue = 'pending' | 'approved' | 'denied';
 
 /**
  * PermissionCard - an inline, non-modal AI-consent card for a chat message. The host
@@ -171,3 +171,4 @@ export {
   PermissionCardActions,
   PermissionCardResolved,
 };
+export type { PermissionCardStatusValue };

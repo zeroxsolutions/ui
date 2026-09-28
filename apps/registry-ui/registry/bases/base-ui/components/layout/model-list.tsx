@@ -13,7 +13,7 @@ import {
 import { Switch } from '@/registry/bases/base-ui/ui/switch';
 import { Skeleton } from '@/registry/bases/base-ui/ui/skeleton';
 
-export interface ModelListProps extends Omit<React.ComponentProps<'div'>, 'title'> {
+interface ModelListProps extends Omit<React.ComponentProps<'div'>, 'title'> {
   /** Header title (e.g. "Model list"). */
   title?: React.ReactNode;
   /** Trailing header slot - search, refresh, and the like. */
@@ -50,7 +50,7 @@ function ModelList({ title, controls, tabs, children, className, ...props }: Mod
   );
 }
 
-export interface ModelListItemProps extends Omit<React.ComponentProps<'div'>, 'id' | 'title'> {
+interface ModelListItemProps extends Omit<React.ComponentProps<'div'>, 'id' | 'title'> {
   /** Primary line - the model display name. */
   name: React.ReactNode;
   /** Secondary line under the name - the model id. */
@@ -128,7 +128,7 @@ function ModelListItem({
   );
 }
 
-export interface ModelListSkeletonProps extends React.ComponentProps<'div'> {
+interface ModelListSkeletonProps extends React.ComponentProps<'div'> {
   /** Number of placeholder items. Defaults to 6. */
   count?: number;
 }
@@ -157,3 +157,4 @@ function ModelListSkeleton({ count = 6, className, ...props }: ModelListSkeleton
 }
 
 export { ModelList, ModelListItem, ModelListSkeleton };
+export type { ModelListProps, ModelListItemProps, ModelListSkeletonProps };

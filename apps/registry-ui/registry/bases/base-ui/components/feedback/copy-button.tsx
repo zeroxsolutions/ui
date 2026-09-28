@@ -7,7 +7,7 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 
 const COPY_RESET_MS = 2000;
 
-export interface CopyButtonProps extends Omit<React.ComponentProps<typeof Button>, 'value' | 'onClick' | 'children'> {
+interface CopyButtonProps extends Omit<React.ComponentProps<typeof Button>, 'value' | 'onClick' | 'children'> {
   /** Text written to the clipboard on click. */
   value: string;
   /** Accessible name in the idle state. */
@@ -28,7 +28,7 @@ export interface CopyButtonProps extends Omit<React.ComponentProps<typeof Button
  * drops into a code-block header, a toolbar, or a card corner unchanged. Clipboard
  * writes are best-effort (a denied permission is swallowed).
  */
-export function CopyButton({
+function CopyButton({
   value,
   label = 'Copy',
   copiedLabel = 'Copied',
@@ -73,3 +73,6 @@ export function CopyButton({
     </Button>
   );
 }
+
+export { CopyButton };
+export type { CopyButtonProps };

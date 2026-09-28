@@ -17,7 +17,7 @@ interface LabeledControlProps extends Omit<ComponentProps<typeof Field>, 'orient
  * (`role=group`, `data-slot`) rather than a hand-rolled `<span>`. The compact
  * preset lives here once instead of being repainted at all ~50 call sites.
  */
-export function LabeledControl({ label, className, children, ...props }: LabeledControlProps) {
+function LabeledControl({ label, className, children, ...props }: LabeledControlProps) {
   return (
     <Field className={cn('gap-1', className)} {...props}>
       <FieldLabel className="text-muted-foreground text-xs font-normal">{label}</FieldLabel>
@@ -25,3 +25,5 @@ export function LabeledControl({ label, className, children, ...props }: Labeled
     </Field>
   );
 }
+
+export { LabeledControl };

@@ -32,19 +32,17 @@ import { XmlIcon } from '@zeroxsolutions/icons/material/xml';
 import { YamlIcon } from '@zeroxsolutions/icons/material/yaml';
 
 /** The domain a switcher's built-in option data is drawn from. */
-export type LanguageKind = 'locale' | 'code';
+type LanguageKind = 'locale' | 'code';
 
 /** One selectable language: a stable `value`, a display `label`, an optional leading icon. */
-export interface LanguageOption {
+interface LanguageOption {
   value: string;
   label: string;
   icon?: ReactNode;
 }
 
 /** A Material icon component — scales by `size` and accepts the usual svg props (`className`, …). */
-export type LanguageIcon = FC<
-  { size?: string | number } & ComponentPropsWithoutRef<'svg'>
->;
+type LanguageIcon = FC<{ size?: string | number } & ComponentPropsWithoutRef<'svg'>>;
 
 /**
  * The programming languages the design system can syntax-highlight (the shiki
@@ -94,9 +92,7 @@ const CODE_LANGUAGES: readonly {
 ];
 
 /** The canonical code-language ids this module offers, in display order (for the sync test). */
-export const CODE_LANGUAGE_OPTION_IDS: readonly string[] = CODE_LANGUAGES.map(
-  (l) => l.id,
-);
+const CODE_LANGUAGE_OPTION_IDS: readonly string[] = CODE_LANGUAGES.map((l) => l.id);
 
 /**
  * Common code-fence aliases → the canonical id in {@link CODE_LANGUAGES}, so a
@@ -127,13 +123,11 @@ const CODE_ALIASES: Record<string, string> = {
 };
 
 /** The canonical code id for a possibly-aliased value (`ts` → `typescript`); unchanged if unknown. */
-export function canonicalCodeId(value: string): string {
+function canonicalCodeId(value: string): string {
   return CODE_ALIASES[value] ?? value;
 }
 
-const CODE_ICON_BY_ID: Record<string, LanguageIcon> = Object.fromEntries(
-  CODE_LANGUAGES.map((l) => [l.id, l.Icon]),
-);
+const CODE_ICON_BY_ID: Record<string, LanguageIcon> = Object.fromEntries(CODE_LANGUAGES.map((l) => [l.id, l.Icon]));
 
 /**
  * The full-color Material icon component for a code-language id — resolving
@@ -141,7 +135,7 @@ const CODE_ICON_BY_ID: Record<string, LanguageIcon> = Object.fromEntries(
  * outside the highlightable set. Lets other surfaces (e.g. a read-only code-block
  * header) show the same icons the switcher uses. Self-scales at `size="1em"`.
  */
-export function codeLanguageIcon(id: string): LanguageIcon {
+function codeLanguageIcon(id: string): LanguageIcon {
   return CODE_ICON_BY_ID[canonicalCodeId(id)] ?? DocumentIcon;
 }
 
@@ -151,7 +145,7 @@ let cachedCodeOptions: LanguageOption[] | null = null;
  * The built-in `kind="code"` options: every highlightable language as a
  * {@link LanguageOption} carrying its Material icon. Computed once and reused.
  */
-export function codeLanguageOptions(): LanguageOption[] {
+function codeLanguageOptions(): LanguageOption[] {
   cachedCodeOptions ??= CODE_LANGUAGES.map(({ id, label, Icon }) => ({
     value: id,
     label,
@@ -174,6 +168,9 @@ function localeLabel(code: string): string {
  * native language name. Pass an explicit `options` to the switcher to override
  * these labels.
  */
-export function localeOptions(codes: readonly string[]): LanguageOption[] {
+function localeOptions(codes: readonly string[]): LanguageOption[] {
   return codes.map((code) => ({ value: code, label: localeLabel(code) }));
 }
+
+export { CODE_LANGUAGE_OPTION_IDS, canonicalCodeId, codeLanguageIcon, codeLanguageOptions, localeOptions };
+export type { LanguageKind, LanguageOption, LanguageIcon };

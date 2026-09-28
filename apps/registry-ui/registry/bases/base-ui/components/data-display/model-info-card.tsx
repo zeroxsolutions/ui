@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-export interface ModelInfoCardProps extends React.ComponentProps<'div'> {
+interface ModelInfoCardProps extends React.ComponentProps<'div'> {
   /** Leading logo slot, rendered verbatim (e.g. an `AiProviderIcon`). */
   media?: React.ReactNode;
   /** Model display name. */
@@ -39,7 +39,7 @@ function ModelInfoCard({ media, name, vendor, modelId, children, className, ...p
   );
 }
 
-export interface ModelInfoCardSectionProps extends Omit<React.ComponentProps<'div'>, 'title'> {
+interface ModelInfoCardSectionProps extends Omit<React.ComponentProps<'div'>, 'title'> {
   /** Consumer class for the accent bar (background colour). The DS ships none. */
   accent?: string;
   /** Section title. */
@@ -70,3 +70,4 @@ function ModelInfoCardSection({ accent, title, value, children, className, ...pr
 }
 
 export { ModelInfoCard, ModelInfoCardSection };
+export type { ModelInfoCardProps, ModelInfoCardSectionProps };

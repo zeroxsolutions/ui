@@ -19,7 +19,7 @@ const STATUS_TONE_CLASS: Record<StatusTone, string> = {
   idle: 'text-warning',
 };
 
-export interface AiProviderCardProps extends Omit<React.ComponentProps<'div'>, 'onSelect' | 'onClick'> {
+interface AiProviderCardProps extends Omit<React.ComponentProps<'div'>, 'onSelect' | 'onClick'> {
   /** Provider display name. */
   name: string;
   /** Brand mark node - consumer-supplied (e.g. a `@zeroxsolutions/icons` mark).
@@ -87,3 +87,4 @@ function AiProviderCard({
 }
 
 export { AiProviderCard };
+export type { AiProviderCardProps };

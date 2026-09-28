@@ -10,7 +10,7 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
  * <button>, and never a `size-*` override — the variant owns the size and its
  * icon size).
  */
-export interface TabCloseButtonProps {
+interface TabCloseButtonProps {
   dirty: boolean;
   /** Force the × instead of the dot (active tab / row hover). */
   revealClose: boolean;
@@ -38,3 +38,4 @@ function TabCloseButton({ dirty, revealClose, onClose, className }: TabCloseButt
 }
 
 export { TabCloseButton };
+export type { TabCloseButtonProps };

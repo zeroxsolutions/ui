@@ -3,7 +3,7 @@ import { useCallback, useState, type ReactNode } from 'react';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
 import { evaluateExpression } from '@/registry/bases/base-ui/lib/expr-eval';
 
-export interface NumberFieldProps extends Omit<
+interface NumberFieldProps extends Omit<
   React.ComponentProps<typeof InputGroup>,
   'onChange' | 'children' | 'defaultValue' | 'value' | 'placeholder'
 > {
@@ -132,3 +132,4 @@ function NumberField({
 }
 
 export { NumberField };
+export type { NumberFieldProps };

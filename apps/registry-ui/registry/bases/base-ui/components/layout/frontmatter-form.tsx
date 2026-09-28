@@ -4,7 +4,7 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/registry/base
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /** A frontmatter document — arbitrary keys; values are usually strings. */
-export type FrontmatterFormValue = Record<string, unknown>;
+type FrontmatterFormValue = Record<string, unknown>;
 
 interface FrontmatterFormContextValue {
   value: FrontmatterFormValue;
@@ -38,7 +38,7 @@ const FrontmatterFormFieldContext = React.createContext<FrontmatterFormFieldCont
  * label/error wiring. Use it to bind a control the built-in
  * `FrontmatterFormFieldControl` doesn't cover (a `Switch`, a tag input, …).
  */
-export function useFrontmatterFormField(): FrontmatterFormFieldContextValue {
+function useFrontmatterFormField(): FrontmatterFormFieldContextValue {
   const ctx = React.useContext(FrontmatterFormFieldContext);
   if (!ctx) {
     throw new Error('useFrontmatterFormField / FrontmatterFormField parts must be used within <FrontmatterFormField>');
@@ -46,7 +46,7 @@ export function useFrontmatterFormField(): FrontmatterFormFieldContextValue {
   return ctx;
 }
 
-export interface FrontmatterFormProps extends Omit<React.ComponentProps<'div'>, 'onChange'> {
+interface FrontmatterFormProps extends Omit<React.ComponentProps<'div'>, 'onChange'> {
   /** The frontmatter object (controlled). */
   value: FrontmatterFormValue;
   /** Receives the next object whenever a field changes. */
@@ -66,14 +66,7 @@ export interface FrontmatterFormProps extends Omit<React.ComponentProps<'div'>, 
  * and validation rule. Controlled: pass `value` + `onValueChange`, and `errors`
  * computed by your own validator.
  */
-export function FrontmatterForm({
-  value,
-  onValueChange,
-  errors = {},
-  className,
-  children,
-  ...props
-}: FrontmatterFormProps) {
+function FrontmatterForm({ value, onValueChange, errors = {}, className, children, ...props }: FrontmatterFormProps) {
   const ctx: FrontmatterFormContextValue = {
     value,
     setField: (name, fieldValue) => onValueChange({ ...value, [name]: fieldValue }),
@@ -88,7 +81,7 @@ export function FrontmatterForm({
   );
 }
 
-export interface FrontmatterFormFieldProps extends React.ComponentProps<typeof Field> {
+interface FrontmatterFormFieldProps extends React.ComponentProps<typeof Field> {
   /** Frontmatter key this field binds to. */
   name: string;
 }
@@ -99,7 +92,7 @@ export interface FrontmatterFormFieldProps extends React.ComponentProps<typeof F
  * `FrontmatterFormFieldLabel` + `FrontmatterFormFieldControl` + `FrontmatterFormFieldError`
  * (and optionally `FrontmatterFormFieldDescription`) as children.
  */
-export function FrontmatterFormField({ name, children, ...props }: FrontmatterFormFieldProps) {
+function FrontmatterFormField({ name, children, ...props }: FrontmatterFormFieldProps) {
   const ctx = useFrontmatterFormContext();
   const controlId = React.useId();
   const errorId = React.useId();
@@ -124,17 +117,17 @@ export function FrontmatterFormField({ name, children, ...props }: FrontmatterFo
 }
 
 /** Label for the current field; wires `htmlFor` to its control. Copy is `children`. */
-export function FrontmatterFormFieldLabel(props: React.ComponentProps<typeof FieldLabel>) {
+function FrontmatterFormFieldLabel(props: React.ComponentProps<typeof FieldLabel>) {
   const field = useFrontmatterFormField();
   return <FieldLabel htmlFor={field.controlId} {...props} />;
 }
 
 /** Supplementary hint under a field. Copy is `children`. */
-export function FrontmatterFormFieldDescription(props: React.ComponentProps<typeof FieldDescription>) {
+function FrontmatterFormFieldDescription(props: React.ComponentProps<typeof FieldDescription>) {
   return <FieldDescription {...props} />;
 }
 
-export interface FrontmatterFormFieldControlProps {
+interface FrontmatterFormFieldControlProps {
   /**
    * The control element to bind — e.g. `<Input placeholder="my-skill" />` or
    * `<Textarea />`. It receives `id`, `value`, `onChange`, and invalid-state
@@ -145,7 +138,7 @@ export interface FrontmatterFormFieldControlProps {
 }
 
 /** Binds a text control (`Input` / `Textarea`) to the current field's string value. */
-export function FrontmatterFormFieldControl({ render }: FrontmatterFormFieldControlProps) {
+function FrontmatterFormFieldControl({ render }: FrontmatterFormFieldControlProps) {
   const field = useFrontmatterFormField();
   return React.cloneElement(render as React.ReactElement<Record<string, unknown>>, {
     id: field.controlId,
@@ -157,7 +150,7 @@ export function FrontmatterFormFieldControl({ render }: FrontmatterFormFieldCont
 }
 
 /** Renders the current field's validation message (from the Root `errors`), if any. */
-export function FrontmatterFormFieldError(props: React.ComponentProps<typeof FieldError>) {
+function FrontmatterFormFieldError(props: React.ComponentProps<typeof FieldError>) {
   const field = useFrontmatterFormField();
   if (!field.error) return null;
   return (
@@ -166,3 +159,14 @@ export function FrontmatterFormFieldError(props: React.ComponentProps<typeof Fie
     </FieldError>
   );
 }
+
+export {
+  useFrontmatterFormField,
+  FrontmatterForm,
+  FrontmatterFormField,
+  FrontmatterFormFieldLabel,
+  FrontmatterFormFieldDescription,
+  FrontmatterFormFieldControl,
+  FrontmatterFormFieldError,
+};
+export type { FrontmatterFormValue, FrontmatterFormProps, FrontmatterFormFieldProps, FrontmatterFormFieldControlProps };

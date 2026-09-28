@@ -36,25 +36,20 @@ const ReasoningCollapsibleContext = createContext<ReasoningCollapsibleContextVal
  * `<ReasoningCollapsible>`. Lets a consumer compute their own trigger label. Throws when
  * used outside `<ReasoningCollapsible>`.
  */
-export function useReasoningCollapsible(): ReasoningCollapsibleContextValue {
+function useReasoningCollapsible(): ReasoningCollapsibleContextValue {
   const ctx = useContext(ReasoningCollapsibleContext);
   if (!ctx) throw new Error('ReasoningCollapsible parts must be used within <ReasoningCollapsible>');
   return ctx;
 }
 
-export interface ReasoningCollapsibleProps {
+interface ReasoningCollapsibleProps {
   streaming?: boolean;
   defaultOpen?: boolean;
   className?: string;
   children: ReactNode;
 }
 
-export function ReasoningCollapsible({
-  streaming = false,
-  defaultOpen,
-  className,
-  children,
-}: ReasoningCollapsibleProps) {
+function ReasoningCollapsible({ streaming = false, defaultOpen, className, children }: ReasoningCollapsibleProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen ?? streaming);
   const [duration, setDuration] = useState<number | undefined>(undefined);
   const startRef = useRef<number | null>(null);
@@ -104,7 +99,7 @@ function thinkingLabel(streaming: boolean, duration: number | undefined): string
   return `Thought for ${duration} second${duration === 1 ? '' : 's'}`;
 }
 
-export function ReasoningCollapsibleTrigger({
+function ReasoningCollapsibleTrigger({
   children,
   className,
 }: {
@@ -130,10 +125,13 @@ export function ReasoningCollapsibleTrigger({
   );
 }
 
-export function ReasoningCollapsibleContent({ children, className }: { children: string; className?: string }) {
+function ReasoningCollapsibleContent({ children, className }: { children: string; className?: string }) {
   return (
     <CollapsibleContent className={cn('text-muted-foreground mt-2 text-sm', className)}>
       <MarkdownView codeBlocks>{children}</MarkdownView>
     </CollapsibleContent>
   );
 }
+
+export { useReasoningCollapsible, ReasoningCollapsible, ReasoningCollapsibleTrigger, ReasoningCollapsibleContent };
+export type { ReasoningCollapsibleProps };

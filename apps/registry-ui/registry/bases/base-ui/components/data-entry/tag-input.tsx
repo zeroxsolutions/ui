@@ -12,7 +12,7 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
  * last tag. Controlled — the consumer owns the tag array and supplies any
  * placeholder copy.
  */
-export interface TagInputProps {
+interface TagInputProps {
   value: string[];
   onValueChange: (value: string[]) => void;
   placeholder?: string;
@@ -72,3 +72,4 @@ function TagInput({ value, onValueChange, placeholder, disabled, className }: Ta
 }
 
 export { TagInput };
+export type { TagInputProps };

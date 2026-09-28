@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-export type StatusTone = 'online' | 'offline' | 'busy' | 'idle';
+type StatusTone = 'online' | 'offline' | 'busy' | 'idle';
 
 const TONE_CLASS: Record<StatusTone, string> = {
   online: 'bg-success',
@@ -45,3 +45,4 @@ function StatusIndicator({
 }
 
 export { StatusIndicator };
+export type { StatusTone };

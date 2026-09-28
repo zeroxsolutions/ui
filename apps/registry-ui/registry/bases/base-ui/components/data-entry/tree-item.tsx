@@ -8,7 +8,7 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 
 /** Inline-rename wiring for a {@link TreeItem}. Omit the whole object when the
  *  row isn't renamable. */
-export interface TreeItemRename {
+interface TreeItemRename {
   editing: boolean;
   draft: string;
   onDraftChange: (value: string) => void;
@@ -38,7 +38,7 @@ export interface TreeItemRename {
  * `ref` reaches the row div - a consumer needs it for `scrollIntoView` and so a
  * wrapping Base UI `render` context-menu trigger composes its ref.
  */
-export interface TreeItemProps extends Omit<TreeItemIndentProps, 'children'> {
+interface TreeItemProps extends Omit<TreeItemIndentProps, 'children'> {
   /** Leading icon (node/kind icon). */
   icon?: ReactNode;
   /** Display name; shown unless `rename.editing`. */
@@ -147,7 +147,7 @@ function TreeItem({
  * `ref` reaches the row div - a consumer needs it for `scrollIntoView` and so a
  * wrapping Base UI `render` trigger (e.g. a context menu) can compose its ref.
  */
-export interface TreeItemIndentProps extends ComponentProps<'div'> {
+interface TreeItemIndentProps extends ComponentProps<'div'> {
   /** Nesting depth; 0 for roots. Drives the left indent. */
   depth: number;
   /** Pixels of indent added per depth level. Default 12. */
@@ -213,3 +213,4 @@ function TreeItemIndent({
 }
 
 export { TreeItem, TreeItemIndent };
+export type { TreeItemRename, TreeItemProps, TreeItemIndentProps };

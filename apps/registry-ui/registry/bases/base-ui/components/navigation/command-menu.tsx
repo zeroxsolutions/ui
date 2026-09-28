@@ -16,10 +16,7 @@ function useCommandMenu(): CommandMenuContextValue {
   return ctx;
 }
 
-export interface CommandMenuProps extends Omit<
-  React.ComponentProps<typeof CommandDialog>,
-  'children' | 'onOpenChange'
-> {
+interface CommandMenuProps extends Omit<React.ComponentProps<typeof CommandDialog>, 'children' | 'onOpenChange'> {
   /** Open state (controlled). */
   open?: boolean;
   /** Fired when the dialog should open or close. */
@@ -37,7 +34,7 @@ export interface CommandMenuProps extends Omit<
  * dialog. Compose the contents (`CommandInput`, `CommandList`, `CommandEmpty`,
  * items) as children and own all copy; bind the ⌘K key with `useCommandShortcut`.
  */
-export function CommandMenu({ open, onOpenChange, onValueChange, children, ...props }: CommandMenuProps) {
+function CommandMenu({ open, onOpenChange, onValueChange, children, ...props }: CommandMenuProps) {
   const ctx: CommandMenuContextValue = {
     select: (value) => {
       onValueChange?.(value);
@@ -53,13 +50,16 @@ export function CommandMenu({ open, onOpenChange, onValueChange, children, ...pr
   );
 }
 
-export interface CommandMenuItemProps extends Omit<React.ComponentProps<typeof CommandItem>, 'onSelect' | 'value'> {
+interface CommandMenuItemProps extends Omit<React.ComponentProps<typeof CommandItem>, 'onSelect' | 'value'> {
   /** Reported via the switcher's `onValueChange` when chosen. */
   value: string;
 }
 
 /** An item in a `CommandMenu`; selecting it reports `value` and closes. */
-export function CommandMenuItem({ value, ...props }: CommandMenuItemProps) {
+function CommandMenuItem({ value, ...props }: CommandMenuItemProps) {
   const { select } = useCommandMenu();
   return <CommandItem value={value} onSelect={() => select(value)} {...props} />;
 }
+
+export { CommandMenu, CommandMenuItem };
+export type { CommandMenuProps, CommandMenuItemProps };
