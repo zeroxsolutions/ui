@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { BinaryFileCard } from '@/registry/bases/base-ui/components/binary-file-card';
-import { FontPreview } from '@/registry/bases/base-ui/components/font-preview';
-import { ImagePreview } from '@/registry/bases/base-ui/components/image-preview';
-import { MarkdownView } from '@/registry/bases/base-ui/components/markdown-view';
+import { BinaryFileCard } from '@/registry/bases/base-ui/components/data-display/binary-file-card';
+import { FontPreview } from '@/registry/bases/base-ui/components/data-display/font-preview';
+import { ImagePreview } from '@/registry/bases/base-ui/components/data-display/image-preview';
+import { MarkdownView } from '@/registry/bases/base-ui/components/data-display/markdown-view';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import { CodeMirrorPane } from '../shared/code-mirror/index.js';
 
@@ -62,16 +62,7 @@ const EXTENSION_TO_LANGUAGE: Record<string, string> = {
   dockerfile: 'dockerfile',
 };
 
-const IMAGE_EXTENSIONS = new Set([
-  'png',
-  'jpg',
-  'jpeg',
-  'gif',
-  'webp',
-  'avif',
-  'bmp',
-  'ico',
-]);
+const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'bmp', 'ico']);
 const FONT_EXTENSIONS = new Set(['woff', 'woff2', 'ttf', 'otf', 'eot']);
 
 function extensionOf(path: string): string {
@@ -106,8 +97,7 @@ export function fileView(path: string): FileViewKind {
   return { view: 'binary' };
 }
 
-export interface FileContentRouterProps
-  extends Omit<React.ComponentProps<'div'>, 'children' | 'onChange'> {
+export interface FileContentRouterProps extends Omit<React.ComponentProps<'div'>, 'children' | 'onChange'> {
   /** The file to display, already classified by `view`. */
   file: RoutedFile;
   /** Render an editable file read-only. */
@@ -173,12 +163,7 @@ export function FileContentRouter({
   }
 
   return (
-    <div
-      data-slot="file-content-router"
-      data-view={file.view}
-      className={cn('size-full', className)}
-      {...props}
-    >
+    <div data-slot="file-content-router" data-view={file.view} className={cn('size-full', className)} {...props}>
       {content}
     </div>
   );

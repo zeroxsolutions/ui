@@ -1,6 +1,6 @@
 'use client';
 
-import { CodeBlock } from '@/registry/bases/base-ui/components/code-block';
+import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
 
 export interface UsageProps {
   /** Import snippet - the `import { X } from '@/...'` line the consumer writes after `shadcn add`. */

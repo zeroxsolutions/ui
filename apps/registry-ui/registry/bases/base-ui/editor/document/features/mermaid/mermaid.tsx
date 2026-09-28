@@ -1,8 +1,8 @@
 'use client';
 
 import { Eye, PencilLine, Workflow } from 'lucide-react';
-import { CodeBlock } from '@/registry/bases/base-ui/components/code-block';
-import { CopyButton } from '@/registry/bases/base-ui/components/copy-button';
+import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
+import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
   Disclosure,
   DisclosureActions,
@@ -10,29 +10,17 @@ import {
   DisclosureHeader,
   DisclosureTitle,
   DisclosureTrigger,
-} from '@/registry/bases/base-ui/components/disclosure';
+} from '@/registry/bases/base-ui/components/layout/disclosure';
 import { codeLanguageIcon } from '@/registry/bases/base-ui/components/language-switcher-data';
 import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/registry/bases/base-ui/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { z } from 'zod';
-import {
-  defineFeature,
-  type EditorFeature,
-  type NodeCodec,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
 import { CodeMirrorPane } from '../../../shared/code-mirror/index.js';
-import {
-  detectDiagramType,
-  DIAGRAM_TYPE_LABEL,
-} from '@zeroxsolutions/editor-core/mermaid/core/detect';
+import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '@zeroxsolutions/editor-core/mermaid/core/detect';
 import { DEFAULT_DIAGRAM_SOURCE } from '@zeroxsolutions/editor-core/mermaid/core/templates';
 import { DiagramPreview } from '../../../mermaid/react/preview.js';
 import { DiagramViewer } from '../../../mermaid/react/viewer.js';
@@ -62,12 +50,7 @@ type MermaidAttrs = z.infer<typeof mermaidAttrs>;
 // icon, so the two headers read identically (a brand mark, not a lucide glyph).
 const MermaidTypeIcon = codeLanguageIcon('mermaid');
 
-export function MermaidView({
-  attrs,
-  updateAttrs,
-  editable,
-  selected,
-}: NodeViewProps<MermaidAttrs>) {
+export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MermaidAttrs>) {
   const type = detectDiagramType(attrs.source);
 
   // Read-only Viewer: the diagram framed by the design-system Card, no header, no
@@ -106,7 +89,7 @@ export function MermaidView({
       contentEditable={false}
       onMouseDown={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
-      className={cn('my-4', selected && 'ring-2 ring-ring')}
+      className={cn('my-4', selected && 'ring-ring ring-2')}
     >
       <Tabs defaultValue={initialTab} className="gap-0">
         <DisclosureHeader>
@@ -130,10 +113,7 @@ export function MermaidView({
         <DisclosureContent keepMounted>
           <Separator />
           <TabsContent value="view">
-            <DiagramPreview
-              source={attrs.source}
-              className="rounded-none border-0"
-            />
+            <DiagramPreview source={attrs.source} className="rounded-none border-0" />
           </TabsContent>
           <TabsContent value="edit">
             <CodeMirrorPane
@@ -152,27 +132,19 @@ export function MermaidView({
 
 /** Escape the three characters that matter for `<pre>`-embedded diagram source. */
 function escapeHtml(source: string): string {
-  return source
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return source.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 export const mermaidCodec: NodeCodec<MermaidAttrs> = {
   node: 'mermaid',
-  toMarkdown: (node) =>
-    '```mermaid\n' + String(node.attrs?.source ?? '') + '\n```',
+  toMarkdown: (node) => '```mermaid\n' + String(node.attrs?.source ?? '') + '\n```',
   fromMarkdown: (token) =>
     token.type === 'code' && token.lang === 'mermaid'
       ? { type: 'mermaid', attrs: { source: String(token.value ?? '') } }
       : null,
-  toHTML: (node) =>
-    `<pre class="mermaid" data-mermaid>${escapeHtml(
-      String(node.attrs?.source ?? ''),
-    )}</pre>`,
+  toHTML: (node) => `<pre class="mermaid" data-mermaid>${escapeHtml(String(node.attrs?.source ?? ''))}</pre>`,
   fromHTML: (element) =>
-    element.classList.contains('mermaid') ||
-    element.hasAttribute('data-mermaid')
+    element.classList.contains('mermaid') || element.hasAttribute('data-mermaid')
       ? { type: 'mermaid', attrs: { source: element.textContent ?? '' } }
       : null,
   toReact: (node) => (
@@ -180,11 +152,7 @@ export const mermaidCodec: NodeCodec<MermaidAttrs> = {
     // static export doesn't have. Render the source through the read-only
     // design-system `CodeBlock` — Shiki-highlighted and copyable, consistent with
     // every other code block — while the live node view renders the real diagram.
-    <CodeBlock
-      code={String(node.attrs?.source ?? '')}
-      language="mermaid"
-      className="my-4"
-    />
+    <CodeBlock code={String(node.attrs?.source ?? '')} language="mermaid" className="my-4" />
   ),
 };
 

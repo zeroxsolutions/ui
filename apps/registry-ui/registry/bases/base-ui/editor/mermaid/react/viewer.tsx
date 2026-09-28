@@ -1,6 +1,6 @@
 'use client';
 
-import { CodeBlock } from '@/registry/bases/base-ui/components/code-block';
+import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { useMermaidRender } from './use-mermaid-render.js';
 
@@ -25,10 +25,7 @@ export function DiagramViewer({ source, className }: DiagramViewerProps) {
     return (
       <div
         data-slot="diagram-viewer"
-        className={cn(
-          'flex justify-center overflow-x-auto [&_svg]:h-auto [&_svg]:max-w-full',
-          className,
-        )}
+        className={cn('flex justify-center overflow-x-auto [&_svg]:h-auto [&_svg]:max-w-full', className)}
         dangerouslySetInnerHTML={{ __html: svg }}
       />
     );

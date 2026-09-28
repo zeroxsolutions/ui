@@ -8,25 +8,12 @@ import {
   type WheelEvent as ReactWheelEvent,
 } from 'react';
 import { Maximize, Minus, Plus, RotateCcw, Workflow } from 'lucide-react';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/registry/bases/base-ui/ui/alert';
-import { FloatingToolbar } from '@/registry/bases/base-ui/components/layouts/floating-toolbar';
+import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
+import { FloatingToolbar } from '@/registry/bases/base-ui/components/layout/floating-toolbar';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/registry/bases/base-ui/ui/empty';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import {
-  useMermaidRender,
-  type MermaidRenderState,
-} from './use-mermaid-render.js';
+import { useMermaidRender, type MermaidRenderState } from './use-mermaid-render.js';
 
 /**
  * `<DiagramCanvas>` — the diagram render inside a pan/zoom viewport. This
@@ -51,8 +38,7 @@ const IDENTITY: Transform = { x: 0, y: 0, k: 1 };
 const MIN_SCALE = 0.1;
 const MAX_SCALE = 8;
 
-const clamp = (value: number, lo: number, hi: number): number =>
-  Math.min(hi, Math.max(lo, value));
+const clamp = (value: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, value));
 
 export interface DiagramCanvasProps {
   state: MermaidRenderState;
@@ -148,11 +134,7 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
     }
     const cw = viewport.clientWidth;
     const ch = viewport.clientHeight;
-    const k = clamp(
-      Math.min(cw / intrinsicW, ch / intrinsicH) * 0.95,
-      MIN_SCALE,
-      MAX_SCALE,
-    );
+    const k = clamp(Math.min(cw / intrinsicW, ch / intrinsicH) * 0.95, MIN_SCALE, MAX_SCALE);
     setTransform({
       k,
       x: (cw - intrinsicW * k) / 2,
@@ -165,10 +147,7 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
   return (
     <div
       data-slot="diagram-canvas"
-      className={cn(
-        'relative flex h-full min-h-48 flex-col overflow-hidden rounded-md border bg-card',
-        className,
-      )}
+      className={cn('bg-card relative flex h-full min-h-48 flex-col overflow-hidden rounded-md border', className)}
     >
       <div
         ref={viewportRef}
@@ -186,15 +165,13 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
                 <Workflow />
               </EmptyMedia>
               <EmptyTitle>No diagram yet</EmptyTitle>
-              <EmptyDescription>
-                Write Mermaid source to render a diagram.
-              </EmptyDescription>
+              <EmptyDescription>Write Mermaid source to render a diagram.</EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
           <div
             ref={contentRef}
-            className="absolute left-0 top-0 origin-top-left will-change-transform"
+            className="absolute top-0 left-0 origin-top-left will-change-transform"
             style={{
               transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.k})`,
             }}
@@ -204,53 +181,27 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
       </div>
 
       {status !== 'empty' && (
-        <FloatingToolbar
-          label="Zoom controls"
-          className="absolute bottom-2 right-2"
-        >
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Zoom out"
-            onClick={() => zoomButton(1 / 1.2)}
-          >
+        <FloatingToolbar label="Zoom controls" className="absolute right-2 bottom-2">
+          <Button variant="ghost" size="icon-sm" aria-label="Zoom out" onClick={() => zoomButton(1 / 1.2)}>
             <Minus />
           </Button>
-          <span className="min-w-10 text-center text-xs tabular-nums text-muted-foreground">
+          <span className="text-muted-foreground min-w-10 text-center text-xs tabular-nums">
             {Math.round(transform.k * 100)}%
           </span>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Zoom in"
-            onClick={() => zoomButton(1.2)}
-          >
+          <Button variant="ghost" size="icon-sm" aria-label="Zoom in" onClick={() => zoomButton(1.2)}>
             <Plus />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Fit to view"
-            onClick={fit}
-          >
+          <Button variant="ghost" size="icon-sm" aria-label="Fit to view" onClick={fit}>
             <Maximize />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Reset view"
-            onClick={reset}
-          >
+          <Button variant="ghost" size="icon-sm" aria-label="Reset view" onClick={reset}>
             <RotateCcw />
           </Button>
         </FloatingToolbar>
       )}
 
       {status === 'error' && (
-        <Alert
-          variant="destructive"
-          className="absolute inset-x-2 bottom-2 w-auto"
-        >
+        <Alert variant="destructive" className="absolute inset-x-2 bottom-2 w-auto">
           <AlertTitle>Diagram error{line ? ` — line ${line}` : ''}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>

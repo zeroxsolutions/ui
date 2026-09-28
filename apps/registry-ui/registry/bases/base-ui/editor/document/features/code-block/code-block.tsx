@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import { Code } from 'lucide-react';
-import { CodeBlock as CodeBlockSurface } from '@/registry/bases/base-ui/components/code-block';
-import { CopyButton } from '@/registry/bases/base-ui/components/copy-button';
+import { CodeBlock as CodeBlockSurface } from '@/registry/bases/base-ui/components/data-display/code-block';
+import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
   Disclosure,
   DisclosureActions,
@@ -11,8 +11,8 @@ import {
   DisclosureHeader,
   DisclosureTitle,
   DisclosureTrigger,
-} from '@/registry/bases/base-ui/components/disclosure';
-import { LanguageSwitcher } from '@/registry/bases/base-ui/components/language-switcher';
+} from '@/registry/bases/base-ui/components/layout/disclosure';
+import { LanguageSwitcher } from '@/registry/bases/base-ui/components/data-entry/language-switcher';
 import { z } from 'zod';
 import {
   defineFeature,
@@ -21,10 +21,7 @@ import {
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { CodeMirrorPane } from '../../../shared/code-mirror/index.js';
-import {
-  CodeSettingsMenu,
-  type CodeMirrorSettings,
-} from './code-settings-menu.js';
+import { CodeSettingsMenu, type CodeMirrorSettings } from './code-settings-menu.js';
 
 /**
  * A fenced code block. A pure custom node (no engine extension — `standardKit`
@@ -67,12 +64,9 @@ function EditableCodeBlock({
   attrs: CodeBlockAttrs;
   updateAttrs: (patch: Partial<CodeBlockAttrs>) => void;
 }) {
-  const [settings, setSettings] = React.useState<CodeMirrorSettings>(
-    DEFAULT_CODE_SETTINGS,
-  );
+  const [settings, setSettings] = React.useState<CodeMirrorSettings>(DEFAULT_CODE_SETTINGS);
   const patchSettings = React.useCallback(
-    (patch: Partial<CodeMirrorSettings>) =>
-      setSettings((prev) => ({ ...prev, ...patch })),
+    (patch: Partial<CodeMirrorSettings>) => setSettings((prev) => ({ ...prev, ...patch })),
     [],
   );
 
@@ -93,10 +87,7 @@ function EditableCodeBlock({
           />
         </DisclosureTitle>
         <DisclosureActions>
-          <CodeSettingsMenu
-            settings={settings}
-            onSettingsChange={patchSettings}
-          />
+          <CodeSettingsMenu settings={settings} onSettingsChange={patchSettings} />
           <CopyButton value={code} label="Copy code" size="icon" />
           <DisclosureTrigger />
         </DisclosureActions>
@@ -124,11 +115,7 @@ function EditableCodeBlock({
  * language never moves the editor selection. `editable` flips between the live
  * `CodeMirrorPane` surface and the read-only `the ui registry` `CodeBlock`.
  */
-export function CodeBlockNodeView({
-  attrs,
-  updateAttrs,
-  editable,
-}: NodeViewProps<CodeBlockAttrs>) {
+export function CodeBlockNodeView({ attrs, updateAttrs, editable }: NodeViewProps<CodeBlockAttrs>) {
   return (
     <div
       data-code-block
@@ -146,8 +133,7 @@ export function CodeBlockNodeView({
   );
 }
 
-const escapeHtml = (value: string): string =>
-  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const escapeHtml = (value: string): string => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export const codeBlockCodec: NodeCodec<CodeBlockAttrs> = {
   node: 'codeBlock',
@@ -164,9 +150,7 @@ export const codeBlockCodec: NodeCodec<CodeBlockAttrs> = {
   // carries the Shiki highlight + copy control, not a bare `<pre>`.
   toReact: (node) => {
     const { language = 'text', code = '' } = node.attrs ?? {};
-    return (
-      <CodeBlockSurface code={code} language={language} className="my-4" />
-    );
+    return <CodeBlockSurface code={code} language={language} className="my-4" />;
   },
   // Generic: claims every fenced code token. Register language-specialized blocks
   // (e.g. `mermaid`) BEFORE this feature so they can claim their own fences first.

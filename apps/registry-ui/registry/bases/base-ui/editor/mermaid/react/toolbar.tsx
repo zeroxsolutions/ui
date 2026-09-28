@@ -23,7 +23,7 @@ import {
   DisclosureActions,
   DisclosureHeader,
   DisclosureTitle,
-} from '@/registry/bases/base-ui/components/disclosure';
+} from '@/registry/bases/base-ui/components/layout/disclosure';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,24 +32,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
-import {
-  Check,
-  Copy,
-  Download,
-  Image as ImageIcon,
-  Workflow,
-} from 'lucide-react';
+import { Check, Copy, Download, Image as ImageIcon, Workflow } from 'lucide-react';
 import { useRef, useState } from 'react';
-import {
-  detectDiagramType,
-  DIAGRAM_TYPE_LABEL,
-} from '@zeroxsolutions/editor-core/mermaid/core/detect';
-import {
-  copySvg,
-  copyText,
-  downloadPng,
-  downloadSvg,
-} from '@zeroxsolutions/editor-core/mermaid/core/export';
+import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '@zeroxsolutions/editor-core/mermaid/core/detect';
+import { copySvg, copyText, downloadPng, downloadSvg } from '@zeroxsolutions/editor-core/mermaid/core/export';
 import { DIAGRAM_TEMPLATES } from '@zeroxsolutions/editor-core/mermaid/core/templates';
 import type { DiagramTemplate } from '@zeroxsolutions/editor-core/mermaid/core/types';
 
@@ -75,19 +61,12 @@ const TEMPLATE_ITEMS: DiagramTemplate[] = [...DIAGRAM_TEMPLATES];
  * transient check), so no toast dependency is added. Renders the header parts
  * only; `MermaidEditor` owns the enclosing `Disclosure` and its body.
  */
-export function MermaidToolbar({
-  source,
-  svg,
-  onPickTemplate,
-  className,
-}: MermaidToolbarProps) {
+export function MermaidToolbar({ source, svg, onPickTemplate, className }: MermaidToolbarProps) {
   const type = detectDiagramType(source);
   // The displayed selection: the template matching the detected type, or a
   // display-only option carrying the type's label when no template exists for it
   // (journey/timeline/quadrant/unknown) — so the switcher always shows the type.
-  const current: DiagramTemplate = TEMPLATE_ITEMS.find(
-    (template) => template.type === type,
-  ) ?? {
+  const current: DiagramTemplate = TEMPLATE_ITEMS.find((template) => template.type === type) ?? {
     type,
     label: DIAGRAM_TYPE_LABEL[type],
     source: '',
@@ -95,9 +74,7 @@ export function MermaidToolbar({
   const hasContent = source.trim().length > 0;
   const [pending, setPending] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
-    undefined,
-  );
+  const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const pickTemplate = (templateSource: string) => {
     if (hasContent) setPending(templateSource);
@@ -127,14 +104,9 @@ export function MermaidToolbar({
               if (template) pickTemplate(template.source);
             }}
             itemToStringLabel={(template: DiagramTemplate) => template.label}
-            isItemEqualToValue={(a: DiagramTemplate, b: DiagramTemplate) =>
-              a?.type === b?.type
-            }
+            isItemEqualToValue={(a: DiagramTemplate, b: DiagramTemplate) => a?.type === b?.type}
           >
-            <ComboboxTrigger
-              render={<Button variant="ghost" size="sm" />}
-              aria-label="Diagram type"
-            >
+            <ComboboxTrigger render={<Button variant="ghost" size="sm" />} aria-label="Diagram type">
               <Workflow />
               <span>{current.label}</span>
             </ComboboxTrigger>
@@ -163,9 +135,7 @@ export function MermaidToolbar({
             />
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
-                <DropdownMenuItem
-                  onClick={() => runExport(() => copyText(source))}
-                >
+                <DropdownMenuItem onClick={() => runExport(() => copyText(source))}>
                   <Copy />
                   Copy source
                 </DropdownMenuItem>
@@ -176,15 +146,11 @@ export function MermaidToolbar({
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem
-                  onClick={() => runExport(() => downloadSvg(svg))}
-                >
+                <DropdownMenuItem onClick={() => runExport(() => downloadSvg(svg))}>
                   <Download />
                   Download SVG
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => runExport(() => downloadPng(svg))}
-                >
+                <DropdownMenuItem onClick={() => runExport(() => downloadPng(svg))}>
                   <ImageIcon />
                   Download PNG
                 </DropdownMenuItem>
@@ -194,16 +160,12 @@ export function MermaidToolbar({
         </DisclosureActions>
       </DisclosureHeader>
 
-      <AlertDialog
-        open={pending !== null}
-        onOpenChange={(open) => !open && setPending(null)}
-      >
+      <AlertDialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Replace the current diagram?</AlertDialogTitle>
             <AlertDialogDescription>
-              Inserting this template will overwrite the diagram source you
-              already have.
+              Inserting this template will overwrite the diagram source you already have.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

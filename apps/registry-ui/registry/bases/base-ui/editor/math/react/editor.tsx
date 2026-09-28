@@ -1,18 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Disclosure } from '@/registry/bases/base-ui/components/disclosure';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/registry/bases/base-ui/ui/resizable';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/registry/bases/base-ui/ui/tabs';
+import { Disclosure } from '@/registry/bases/base-ui/components/layout/disclosure';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/registry/bases/base-ui/ui/resizable';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { useIsMobile } from '@/registry/bases/base-ui/hooks/use-mobile';
 import { CodeMirrorPane } from '../../shared/code-mirror/index.js';
 import type { MathEditorProps } from '@zeroxsolutions/editor-core/math/core/types';
@@ -88,10 +79,7 @@ export function MathEditor({
             </TabsContent>
           </Tabs>
         ) : (
-          <ResizablePanelGroup
-            orientation="horizontal"
-            className="min-h-0 flex-1"
-          >
+          <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1">
             <ResizablePanel defaultSize={45} minSize={20}>
               {codePane}
             </ResizablePanel>

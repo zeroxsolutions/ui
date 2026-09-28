@@ -7,7 +7,7 @@ import {
   SplitButtonItem,
   SplitButtonMenu,
   SplitButtonTrigger,
-} from '@/registry/bases/base-ui/components/split-button';
+} from '@/registry/bases/base-ui/components/layout/split-button';
 
 /** A divided control - primary action plus a caret menu - the SplitButton hero. */
 export function SplitButtonHero() {

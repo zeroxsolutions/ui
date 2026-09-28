@@ -10,7 +10,7 @@ import {
   MenuButtonRadioGroup,
   MenuButtonRadioItem,
   MenuButtonTrigger,
-} from '@/registry/bases/base-ui/components/menu-button';
+} from '@/registry/bases/base-ui/components/layout/menu-button';
 
 const OPTIONS = [
   { value: 'once', label: 'Allow once' },
@@ -31,10 +31,7 @@ export function MenuButtonHero() {
       <MenuButtonMenu>
         <MenuButtonTrigger aria-label="Change action" />
         <MenuButtonContent>
-          <MenuButtonRadioGroup
-            value={value}
-            onValueChange={(next) => setValue(next as OptionValue)}
-          >
+          <MenuButtonRadioGroup value={value} onValueChange={(next) => setValue(next as OptionValue)}>
             {OPTIONS.map((option) => (
               <MenuButtonRadioItem key={option.value} value={option.value}>
                 {option.label}

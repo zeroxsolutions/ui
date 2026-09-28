@@ -7,7 +7,7 @@ import {
   DisclosureActions,
   DisclosureHeader,
   DisclosureTitle,
-} from '@/registry/bases/base-ui/components/disclosure';
+} from '@/registry/bases/base-ui/components/layout/disclosure';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,10 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
-import {
-  copyLatex,
-  copyMathML,
-} from '@zeroxsolutions/editor-core/math/core/export';
+import { copyLatex, copyMathML } from '@zeroxsolutions/editor-core/math/core/export';
 import { MathPalette } from './palette.js';
 
 export interface MathToolbarProps {
@@ -40,9 +37,7 @@ export interface MathToolbarProps {
  */
 export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
   const [done, setDone] = useState(false);
-  const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
-    undefined,
-  );
+  const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const runExport = (action: () => Promise<void>) => {
     void action()
@@ -84,15 +79,11 @@ export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
           />
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() => runExport(() => copyLatex(source))}
-              >
+              <DropdownMenuItem onClick={() => runExport(() => copyLatex(source))}>
                 <Copy />
                 Copy LaTeX
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => runExport(() => copyMathML(source))}
-              >
+              <DropdownMenuItem onClick={() => runExport(() => copyMathML(source))}>
                 <Copy />
                 Copy MathML
               </DropdownMenuItem>

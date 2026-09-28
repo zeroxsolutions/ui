@@ -6,7 +6,7 @@ import katex from 'katex';
 import { z } from 'zod';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
-import { CopyButton } from '@/registry/bases/base-ui/components/copy-button';
+import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
   Disclosure,
   DisclosureActions,
@@ -14,31 +14,18 @@ import {
   DisclosureHeader,
   DisclosureTitle,
   DisclosureTrigger,
-} from '@/registry/bases/base-ui/components/disclosure';
+} from '@/registry/bases/base-ui/components/layout/disclosure';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
 } from '@/registry/bases/base-ui/ui/input-group';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/registry/bases/base-ui/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/registry/bases/base-ui/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import {
-  defineFeature,
-  type EditorFeature,
-  type NodeCodec,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
 import { CodeMirrorPane } from '../../../shared/code-mirror/index.js';
 import { FormulaPreview } from '../../../math/react/preview.js';
@@ -74,8 +61,7 @@ const mathAttrs = z.object({
 type MathAttrs = z.infer<typeof mathAttrs>;
 
 /** Wrapper classes shared by the `toReact` codecs so the static export matches the view. */
-const MATH_BLOCK_WRAPPER =
-  'my-4 overflow-x-auto rounded-md bg-muted/40 p-3 text-center';
+const MATH_BLOCK_WRAPPER = 'my-4 overflow-x-auto rounded-md bg-muted/40 p-3 text-center';
 const MATH_INLINE_WRAPPER = 'inline-block align-middle';
 
 /**
@@ -150,18 +136,10 @@ function MathInlineForm({
               </InputGroupButton>
             }
           />
-          <InputGroupButton
-            size="icon-xs"
-            aria-label="Apply"
-            onClick={() => onCommit(draft)}
-          >
+          <InputGroupButton size="icon-xs" aria-label="Apply" onClick={() => onCommit(draft)}>
             <Check />
           </InputGroupButton>
-          <InputGroupButton
-            size="icon-xs"
-            aria-label="Cancel"
-            onClick={onCancel}
-          >
+          <InputGroupButton size="icon-xs" aria-label="Cancel" onClick={onCancel}>
             <X />
           </InputGroupButton>
         </InputGroupAddon>
@@ -175,21 +153,12 @@ function MathInlineForm({
  * The inline math node view. Read-only renders the real formula (no edit
  * affordance); editable is click-to-edit into a `Popover` anchored to the formula.
  */
-function MathInlineView({
-  attrs,
-  updateAttrs,
-  editable,
-  selected,
-}: NodeViewProps<MathAttrs>) {
+function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
   const [editing, setEditing] = useState(false);
 
   if (!editable) {
     return (
-      <span
-        data-math="inline"
-        className={MATH_INLINE_WRAPPER}
-        contentEditable={false}
-      >
+      <span data-math="inline" className={MATH_INLINE_WRAPPER} contentEditable={false}>
         <FormulaViewer source={attrs.latex} displayMode={false} />
       </span>
     );
@@ -203,17 +172,15 @@ function MathInlineView({
         data-math="inline"
         contentEditable={false}
         className={cn(
-          'inline-block cursor-pointer rounded-sm align-middle hover:bg-muted',
-          selected && 'ring-2 ring-ring',
+          'hover:bg-muted inline-block cursor-pointer rounded-sm align-middle',
+          selected && 'ring-ring ring-2',
         )}
         onMouseDown={(event) => event.stopPropagation()}
       >
         {attrs.latex ? (
           <FormulaViewer source={attrs.latex} displayMode={false} />
         ) : (
-          <span className="text-sm text-muted-foreground italic">
-            empty formula
-          </span>
+          <span className="text-muted-foreground text-sm italic">empty formula</span>
         )}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 p-2">
@@ -234,20 +201,10 @@ function MathInlineView({
  * The block math node view. Read-only is a design-system `Card` holding the real
  * formula; editable composes the shared `Disclosure`/`Tabs` chrome.
  */
-function MathBlockView({
-  attrs,
-  updateAttrs,
-  editable,
-  selected,
-}: NodeViewProps<MathAttrs>) {
+function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
   if (!editable) {
     return (
-      <Card
-        size="sm"
-        className="my-4"
-        data-math="block"
-        contentEditable={false}
-      >
+      <Card size="sm" className="my-4" data-math="block" contentEditable={false}>
         <CardContent>
           <FormulaViewer source={attrs.latex} />
         </CardContent>
@@ -266,7 +223,7 @@ function MathBlockView({
       contentEditable={false}
       onMouseDown={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
-      className={cn('my-4', selected && 'ring-2 ring-ring')}
+      className={cn('my-4', selected && 'ring-ring ring-2')}
     >
       <Tabs defaultValue={initialTab} className="gap-0">
         <DisclosureHeader>
@@ -297,9 +254,7 @@ function MathBlockView({
           <TabsContent value="edit" className="flex flex-col">
             <div className="flex items-center justify-end px-2 pt-2">
               <MathPalette
-                onInsert={(snippet) =>
-                  updateAttrs({ latex: attrs.latex + snippet })
-                }
+                onInsert={(snippet) => updateAttrs({ latex: attrs.latex + snippet })}
                 trigger={
                   <Button variant="ghost" size="sm">
                     <Omega />
@@ -328,10 +283,7 @@ function MathBlockView({
 
 /** Escape the characters that matter for text embedded in HTML element content. */
 function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 /** Escape a value placed inside a double-quoted HTML attribute. */
 function escapeAttr(value: string): string {
@@ -345,17 +297,14 @@ const mathInlineCodec: NodeCodec<MathAttrs> = {
   toHTML: (node) => {
     const latex = String(node.attrs?.latex ?? '');
     // Raw latex rides in `data-latex` so `fromHTML` round-trips it exactly.
-    return `<span data-math-inline data-latex="${escapeAttr(latex)}">${escapeHtml(
-      latex,
-    )}</span>`;
+    return `<span data-math-inline data-latex="${escapeAttr(latex)}">${escapeHtml(latex)}</span>`;
   },
   fromHTML: (element) =>
     element.hasAttribute('data-math-inline')
       ? {
           type: 'mathInline',
           attrs: {
-            latex:
-              element.getAttribute('data-latex') ?? element.textContent ?? '',
+            latex: element.getAttribute('data-latex') ?? element.textContent ?? '',
           },
         }
       : null,
@@ -383,17 +332,14 @@ const mathBlockCodec: NodeCodec<MathAttrs> = {
   toMarkdown: (node) => `$$\n${String(node.attrs?.latex ?? '')}\n$$`,
   toHTML: (node) => {
     const latex = String(node.attrs?.latex ?? '');
-    return `<div data-math-block data-latex="${escapeAttr(latex)}">${escapeHtml(
-      latex,
-    )}</div>`;
+    return `<div data-math-block data-latex="${escapeAttr(latex)}">${escapeHtml(latex)}</div>`;
   },
   fromHTML: (element) =>
     element.hasAttribute('data-math-block')
       ? {
           type: 'mathBlock',
           attrs: {
-            latex:
-              element.getAttribute('data-latex') ?? element.textContent ?? '',
+            latex: element.getAttribute('data-latex') ?? element.textContent ?? '',
           },
         }
       : null,

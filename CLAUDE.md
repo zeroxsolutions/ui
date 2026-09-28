@@ -21,9 +21,7 @@ its cost are here.
   above never write to, so three lines beside them name `registry/bases/base-ui/ui`,
   `hooks/use-mobile.ts` and `lib/utils.ts`; that is where this file departs from the stamp.
   Every primitive there is `shadcn add <item> -o` output, byte for byte, and imports `cn`
-  from the `cn` package as upstream now does. `data-table*.tsx` and `form.tsx` sit in the
-  same folder but no upstream item publishes them - `data-table*` is house code, and
-  base-vega's `form` item carries no files - so the formatter skips them too.
+  from the `cn` package as upstream now does.
 - **Animated icons come from `@lucide-animated`, addressed by full URL and never vendored.**
   467 MIT icons on Lucide + Motion, both already declared here. shadcn's public directory
   (`ui.shadcn.com/r/registries.json`) lists it, so `@lucide-animated/<icon>` resolves with no

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { CodeBlock } from '@/registry/bases/base-ui/components/code-block';
+import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
 import { cn } from '@/registry/bases/base-ui/lib/utils';

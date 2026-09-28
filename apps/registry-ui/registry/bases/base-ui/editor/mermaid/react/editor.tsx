@@ -1,18 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Disclosure } from '@/registry/bases/base-ui/components/disclosure';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/registry/bases/base-ui/ui/resizable';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/registry/bases/base-ui/ui/tabs';
+import { Disclosure } from '@/registry/bases/base-ui/components/layout/disclosure';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/registry/bases/base-ui/ui/resizable';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { useIsMobile } from '@/registry/bases/base-ui/hooks/use-mobile';
 import { CodeMirrorPane } from '../../shared/code-mirror/index.js';
 import type { MermaidEditorProps } from '@zeroxsolutions/editor-core/mermaid/core/types';
@@ -65,23 +56,11 @@ export function MermaidEditor({
       className="h-full"
     />
   );
-  const canvas = (
-    <DiagramCanvas state={state} className="h-full rounded-none border-0" />
-  );
+  const canvas = <DiagramCanvas state={state} className="h-full rounded-none border-0" />;
 
   return (
-    <Disclosure
-      variant="muted"
-      data-slot="mermaid-editor"
-      className={className}
-    >
-      {toolbar && (
-        <MermaidToolbar
-          source={source}
-          svg={state.svg}
-          onPickTemplate={setSource}
-        />
-      )}
+    <Disclosure variant="muted" data-slot="mermaid-editor" className={className}>
+      {toolbar && <MermaidToolbar source={source} svg={state.svg} onPickTemplate={setSource} />}
 
       <div className="flex h-[28rem] min-h-0 flex-col overflow-hidden">
         {useTabs ? (
@@ -98,10 +77,7 @@ export function MermaidEditor({
             </TabsContent>
           </Tabs>
         ) : (
-          <ResizablePanelGroup
-            orientation="horizontal"
-            className="min-h-0 flex-1"
-          >
+          <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1">
             <ResizablePanel defaultSize={45} minSize={20}>
               {codePane}
             </ResizablePanel>

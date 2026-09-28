@@ -3,17 +3,9 @@
 import { useEffect, useState } from 'react';
 import { Maximize, Monitor, Smartphone, Tablet } from 'lucide-react';
 
-import { CodeBlock } from '@/registry/bases/base-ui/components/code-block';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/registry/bases/base-ui/ui/tabs';
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@/registry/bases/base-ui/ui/toggle-group';
+import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 export interface PreviewCodeProps {
@@ -92,12 +84,9 @@ export function PreviewCode({ kind, slug, exampleName }: PreviewCodeProps) {
   }, [exampleName]);
 
   return (
-    <div
-      data-slot="preview-code"
-      className="overflow-hidden rounded-lg border bg-card"
-    >
+    <div data-slot="preview-code" className="bg-card overflow-hidden rounded-lg border">
       <Tabs defaultValue="preview">
-        <div className="flex items-center justify-between gap-2 border-b bg-muted/40 px-3 py-2">
+        <div className="bg-muted/40 flex items-center justify-between gap-2 border-b px-3 py-2">
           <TabsList data-slot="preview-code-toggle">
             <TabsTrigger value="preview" data-slot="preview-code-trigger">
               Preview
@@ -112,27 +101,18 @@ export function PreviewCode({ kind, slug, exampleName }: PreviewCodeProps) {
             rel="noopener"
             data-slot="preview-code-fullscreen"
             aria-label="Open preview in new tab"
-            className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+            className="text-muted-foreground hover:bg-background hover:text-foreground inline-flex size-9 items-center justify-center rounded-md transition-colors"
           >
             <Maximize className="size-4" />
           </a>
         </div>
 
         <TabsContent value="preview" className="m-0">
-          <div className="flex items-center gap-2 border-b bg-muted/20 px-3 py-2">
+          <div className="bg-muted/20 flex items-center gap-2 border-b px-3 py-2">
             <DeviceSwitcher device={device} onChange={setDevice} />
           </div>
-          <div
-            data-slot="component-preview"
-            data-mode="preview"
-            className="bg-background p-4"
-          >
-            <div
-              className={cn(
-                'mx-auto w-full transition-[max-width] duration-200',
-                deviceWidth(device),
-              )}
-            >
+          <div data-slot="component-preview" data-mode="preview" className="bg-background p-4">
+            <div className={cn('mx-auto w-full transition-[max-width] duration-200', deviceWidth(device))}>
               <iframe
                 src={previewHref}
                 title={`${kind}/${slug} preview`}
@@ -144,21 +124,13 @@ export function PreviewCode({ kind, slug, exampleName }: PreviewCodeProps) {
         </TabsContent>
 
         <TabsContent value="code" className="m-0">
-          <div
-            data-slot="component-preview"
-            data-mode="code"
-            className="bg-background p-4"
-          >
+          <div data-slot="component-preview" data-mode="code" className="bg-background p-4">
             {loading ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                Loading source…
-              </p>
+              <p className="text-muted-foreground py-8 text-center text-sm">Loading source…</p>
             ) : source ? (
               <CodeBlock code={source} language="tsx" />
             ) : (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                Source unavailable.
-              </p>
+              <p className="text-muted-foreground py-8 text-center text-sm">Source unavailable.</p>
             )}
           </div>
         </TabsContent>
@@ -171,13 +143,7 @@ function deviceWidth(device: Device): string {
   return DEVICES.find((d) => d.value === device)?.width ?? 'max-w-none';
 }
 
-function DeviceSwitcher({
-  device,
-  onChange,
-}: {
-  device: Device;
-  onChange: (device: Device) => void;
-}) {
+function DeviceSwitcher({ device, onChange }: { device: Device; onChange: (device: Device) => void }) {
   return (
     <ToggleGroup
       variant="outline"

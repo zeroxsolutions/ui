@@ -1,4 +1,4 @@
-import { AiProviderCard } from '@/registry/bases/base-ui/components/ai-provider-card';
+import { AiProviderCard } from '@/registry/bases/base-ui/components/data-display/ai-provider-card';
 import { AiProviderIcon } from '@zeroxsolutions/icons/ai-provider-icon';
 
 /**
@@ -34,8 +34,7 @@ export const DEFAULT_AI_PROVIDER_ENTRIES: AiProviderPickerEntry[] = [
   {
     provider: 'openai',
     name: 'OpenAI',
-    description:
-      'GPT reasoning and chat models for general-purpose assistance.',
+    description: 'GPT reasoning and chat models for general-purpose assistance.',
     meta: '12 models',
   },
   {
@@ -83,21 +82,14 @@ export function AiProviderPicker({
   className,
 }: AiProviderPickerProps) {
   return (
-    <div
-      data-slot="ai-provider-picker"
-      className={
-        className ?? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
-      }
-    >
+    <div data-slot="ai-provider-picker" className={className ?? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'}>
       {entries.map((entry) => (
         <AiProviderCard
           key={entry.provider}
           name={entry.name}
           description={entry.description}
           meta={entry.meta}
-          icon={
-            <AiProviderIcon provider={entry.provider} type="avatar" size={32} />
-          }
+          icon={<AiProviderIcon provider={entry.provider} type="avatar" size={32} />}
           onSelect={onSelect ? () => onSelect(entry.provider) : undefined}
         />
       ))}

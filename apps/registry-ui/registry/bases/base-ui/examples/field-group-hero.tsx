@@ -1,4 +1,4 @@
-import { FieldGroup } from '@/registry/bases/base-ui/components/layouts/field-group';
+import { FieldGroup } from '@/registry/bases/base-ui/components/layout/field-group';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 import { Label } from '@/registry/bases/base-ui/ui/label';
 
