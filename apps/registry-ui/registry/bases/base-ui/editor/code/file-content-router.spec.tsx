@@ -1,7 +1,15 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { FileContentRouter, fileView } from './file-content-router.js';
+
+// The markdown view renders upstream ScrollArea, which measures its viewport
+// in a `queueMicrotask` its layout effect schedules on mount, outside of
+// `render`'s own act() batch — awaiting a no-op act() settles it before the
+// test's assertions run.
+async function settle(): Promise<void> {
+  await act(async () => {});
+}
 
 afterEach(() => {
   cleanup();
@@ -42,8 +50,9 @@ describe('fileView', () => {
 });
 
 describe('FileContentRouter', () => {
-  it('renders Markdown through the prose view', () => {
+  it('renders Markdown through the prose view', async () => {
     render(<FileContentRouter file={{ path: 'README.md', view: 'markdown', text: '# Title' }} />);
+    await settle();
     expect(screen.getByRole('heading', { level: 1, name: 'Title' })).toBeTruthy();
   });
 

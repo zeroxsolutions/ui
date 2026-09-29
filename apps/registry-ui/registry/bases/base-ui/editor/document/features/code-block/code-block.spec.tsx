@@ -1,10 +1,18 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { EditorView } from '@codemirror/view';
 
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
 import { CodeBlockNodeView, codeBlockCodec } from './code-block.js';
+
+// The read-only path's design-system CodeBlock renders upstream ScrollArea,
+// which measures its viewport in a `queueMicrotask` its layout effect
+// schedules on mount, outside of `render`'s own act() batch — awaiting a
+// no-op act() settles it before the test's assertions run.
+async function settle(): Promise<void> {
+  await act(async () => {});
+}
 
 // The editable node view mounts a real CodeMirror editor and a Base UI
 // Combobox/DropdownMenu; the read-only path renders the design-system CodeBlock's
@@ -91,18 +99,20 @@ describe('code-block node view (editable)', () => {
     expect(screen.getByRole('menuitemcheckbox', { name: 'Soft wrap' })).toBeTruthy();
   });
 
-  it('copies the source through the copy control', () => {
+  it('copies the source through the copy control', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });
     render(<CodeBlockNodeView {...nodeViewProps({ language: 'typescript', code: 'payload' }, true)} />);
     fireEvent.click(screen.getByRole('button', { name: 'Copy code' }));
     expect(writeText).toHaveBeenCalledWith('payload');
+    await screen.findByRole('button', { name: 'Copied' });
   });
 });
 
 describe('code-block node view (read-only)', () => {
-  it('renders the read-only design-system CodeBlock, not the editing pane', () => {
+  it('renders the read-only design-system CodeBlock, not the editing pane', async () => {
     const { container } = render(<CodeBlockNodeView {...nodeViewProps({ language: 'text', code: 'hello' }, false)} />);
+    await settle();
     expect(container.querySelector('[data-slot="code-block"]')).not.toBeNull();
     expect(container.querySelector('[data-slot="code-mirror-pane"]')).toBeNull();
     expect(container.querySelector('.cm-content')).toBeNull();
@@ -111,7 +121,7 @@ describe('code-block node view (read-only)', () => {
 });
 
 describe('code-block export codec', () => {
-  it('renders toReact through the read-only design-system CodeBlock', () => {
+  it('renders toReact through the read-only design-system CodeBlock', async () => {
     const rendered = codeBlockCodec.toReact?.(
       {
         type: 'codeBlock',
@@ -120,6 +130,7 @@ describe('code-block export codec', () => {
       {} as never,
     ) as ReactNode;
     const { container } = render(<>{rendered}</>);
+    await settle();
     expect(container.querySelector('[data-slot="code-block"]')).not.toBeNull();
     expect(screen.getByText('exported')).toBeTruthy();
   });

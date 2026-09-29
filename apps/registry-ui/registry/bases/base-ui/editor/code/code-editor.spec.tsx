@@ -1,8 +1,16 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { CodeEditor, CodeEditorContent, useCodeEditor } from './code-editor.js';
 import type { RoutedFile } from './file-content-router.js';
+
+// CodeEditorContent's Markdown view renders upstream ScrollArea, which
+// measures its viewport in a `queueMicrotask` its layout effect schedules
+// on mount, outside of `render`'s own act() batch — awaiting a no-op act()
+// settles it before the test's assertions run.
+async function settle(): Promise<void> {
+  await act(async () => {});
+}
 
 afterEach(() => {
   cleanup();
@@ -27,7 +35,7 @@ describe('useCodeEditor', () => {
 });
 
 describe('CodeEditor', () => {
-  it('renders the active file through the content pane', () => {
+  it('renders the active file through the content pane', async () => {
     render(
       <CodeEditor files={FILES} value="README.md">
         <CodeEditorContent>
@@ -35,9 +43,8 @@ describe('CodeEditor', () => {
         </CodeEditorContent>
       </CodeEditor>,
     );
-    expect(
-      screen.getByRole('heading', { level: 1, name: 'Readme' }),
-    ).toBeTruthy();
+    await settle();
+    expect(screen.getByRole('heading', { level: 1, name: 'Readme' })).toBeTruthy();
   });
 
   it('shows the empty state when no file is active', () => {
@@ -51,7 +58,7 @@ describe('CodeEditor', () => {
     expect(screen.getByText('nothing open')).toBeTruthy();
   });
 
-  it('switches the active file via context (uncontrolled)', () => {
+  it('switches the active file via context (uncontrolled)', async () => {
     function Switcher() {
       const { setActivePath } = useCodeEditor();
       return (
@@ -66,6 +73,7 @@ describe('CodeEditor', () => {
         <CodeEditorContent />
       </CodeEditor>,
     );
+    await settle();
     expect(screen.getByRole('heading', { name: 'Readme' })).toBeTruthy();
     fireEvent.click(screen.getByText('open guide'));
     expect(screen.getByRole('heading', { name: 'Guide' })).toBeTruthy();

@@ -1,7 +1,15 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { MarkdownView } from './markdown-view';
+
+// The codeBlocks variant's CodeBlock renders upstream ScrollArea, which measures
+// its viewport in a `queueMicrotask` its layout effect schedules on mount,
+// outside of `render`'s own act() batch — awaiting a no-op act() settles it
+// before the test's assertions run.
+async function settle(): Promise<void> {
+  await act(async () => {});
+}
 
 beforeAll(() => {
   // The codeBlocks variant renders CodeBlock, which measures via a ResizeObserver
@@ -39,20 +47,23 @@ describe('MarkdownView', () => {
   });
 
   describe('codeBlocks variant', () => {
-    it('renders fenced code as an interactive CodeBlock (copy button)', () => {
+    it('renders fenced code as an interactive CodeBlock (copy button)', async () => {
       render(<MarkdownView codeBlocks>{'```json\n{ "a": 1 }\n```'}</MarkdownView>);
+      await settle();
       expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
       expect(screen.getByText('{ "a": 1 }')).toBeTruthy();
     });
 
-    it('heads a fenced block that names a language with that language', () => {
+    it('heads a fenced block that names a language with that language', async () => {
       const { container } = render(<MarkdownView codeBlocks>{'```json\n{ "a": 1 }\n```'}</MarkdownView>);
+      await settle();
       expect(screen.getByText('JSON')).toBeTruthy();
       expect(container.querySelector('[data-slot="collapsible-card-header"]')).toBeTruthy();
     });
 
-    it('leaves a fenced block with no language headerless', () => {
+    it('leaves a fenced block with no language headerless', async () => {
       const { container } = render(<MarkdownView codeBlocks>{'```\nline one\nline two\n```'}</MarkdownView>);
+      await settle();
       expect(container.querySelector('[data-slot="collapsible-card-header"]')).toBeNull();
       expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
     });

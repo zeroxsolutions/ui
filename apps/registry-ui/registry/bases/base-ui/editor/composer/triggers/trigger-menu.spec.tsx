@@ -1,11 +1,6 @@
-import { render, fireEvent, cleanup } from '@testing-library/react';
+import { act, render, fireEvent, cleanup } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type {
-  DocJSON,
-  EditorSelection,
-  IEditor,
-  TriggerQuery,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import type { DocJSON, EditorSelection, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { TriggerMenu } from './trigger-menu.js';
 import { commandTrigger } from '../composer-triggers';
 import {
@@ -14,6 +9,14 @@ import {
   type TriggerOption,
 } from '@zeroxsolutions/editor-core/composer/triggers/trigger-token';
 
+// TriggerMenu's popover renders upstream ScrollArea, which measures its
+// viewport in a `queueMicrotask` its layout effect schedules on mount,
+// outside of `render`'s own act() batch — awaiting a no-op act() settles it
+// before the test's assertions run.
+async function settle(): Promise<void> {
+  await act(async () => {});
+}
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -21,9 +24,7 @@ afterEach(() => {
 
 const docWithText = (text: string): DocJSON => ({
   type: 'doc',
-  content: [
-    { type: 'paragraph', content: text ? [{ type: 'text', text }] : [] },
-  ],
+  content: [{ type: 'paragraph', content: text ? [{ type: 'text', text }] : [] }],
 });
 
 /** A doc whose leading inline node is a committed command pill (the uniform
@@ -98,15 +99,12 @@ const mention = referenceToken('mention', '@', {
 });
 
 describe('TriggerMenu - opening + gate', () => {
-  it('an invocation opens at the input start and filters by the query', () => {
+  it('an invocation opens at the input start and filters by the query', async () => {
     const editor = fakeEditor({ trigger: { query: 'im', from: 1, to: 3 } });
-    const { getByText, queryByText } = render(
-      <TriggerMenu editor={editor} token={command} />,
-    );
+    const { getByText, queryByText } = render(<TriggerMenu editor={editor} token={command} />);
+    await settle();
     // The popover portals to document.body, so the assertion must query there.
-    expect(
-      document.body.querySelector('[data-slot="trigger-menu"]'),
-    ).not.toBeNull();
+    expect(document.body.querySelector('[data-slot="trigger-menu"]')).not.toBeNull();
     expect(getByText('Image')).toBeDefined();
     expect(queryByText('Video')).toBeNull();
   });
@@ -117,9 +115,7 @@ describe('TriggerMenu - opening + gate', () => {
       json: docWithText('hello /im'),
     });
     render(<TriggerMenu editor={editor} token={command} />);
-    expect(
-      document.body.querySelector('[data-slot="trigger-menu"]'),
-    ).toBeNull();
+    expect(document.body.querySelector('[data-slot="trigger-menu"]')).toBeNull();
   });
 
   it('an invocation stays closed once a command already leads the line', () => {
@@ -128,22 +124,17 @@ describe('TriggerMenu - opening + gate', () => {
       json: docWithCommand('image-gen'),
     });
     render(<TriggerMenu editor={editor} token={command} />);
-    expect(
-      document.body.querySelector('[data-slot="trigger-menu"]'),
-    ).toBeNull();
+    expect(document.body.querySelector('[data-slot="trigger-menu"]')).toBeNull();
   });
 
-  it('a reference opens mid-line (gate: anywhere)', () => {
+  it('a reference opens mid-line (gate: anywhere)', async () => {
     const editor = fakeEditor({
       trigger: { query: 'al', from: 4, to: 6 },
       json: docWithText('hi @al'),
     });
-    const { getByText } = render(
-      <TriggerMenu editor={editor} token={mention} />,
-    );
-    expect(
-      document.body.querySelector('[data-slot="trigger-menu"]'),
-    ).not.toBeNull();
+    const { getByText } = render(<TriggerMenu editor={editor} token={mention} />);
+    await settle();
+    expect(document.body.querySelector('[data-slot="trigger-menu"]')).not.toBeNull();
     expect(getByText('Alice')).toBeDefined();
   });
 });
@@ -155,9 +146,7 @@ describe('TriggerMenu - commit', () => {
       run,
       trigger: { query: 'im', from: 1, to: 3 },
     });
-    const { getByText } = render(
-      <TriggerMenu editor={editor} token={command} />,
-    );
+    const { getByText } = render(<TriggerMenu editor={editor} token={command} />);
     fireEvent.mouseDown(getByText('Image'));
     fireEvent.click(getByText('Image'));
     expect(run).toHaveBeenCalledWith('deleteRange', { from: 1, to: 3 });
@@ -176,18 +165,19 @@ describe('TriggerMenu - commit', () => {
     expect(run).toHaveBeenCalledWith('commit', options[0]);
   });
 
-  it('an invocation does not auto-commit on Space for a partial query', () => {
+  it('an invocation does not auto-commit on Space for a partial query', async () => {
     const run = vi.fn(() => true);
     const editor = fakeEditor({
       run,
       trigger: { query: 'im', from: 1, to: 3 },
     });
     render(<TriggerMenu editor={editor} token={command} />);
+    await settle();
     fireEvent.keyDown(document, { key: ' ' });
     expect(run).not.toHaveBeenCalledWith('commit', expect.anything());
   });
 
-  it('a reference never commits on Space, even on an exact match', () => {
+  it('a reference never commits on Space, even on an exact match', async () => {
     const run = vi.fn(() => true);
     const editor = fakeEditor({
       run,
@@ -195,6 +185,7 @@ describe('TriggerMenu - commit', () => {
       json: docWithText('@alice'),
     });
     render(<TriggerMenu editor={editor} token={mention} />);
+    await settle();
     fireEvent.keyDown(document, { key: ' ' });
     expect(run).not.toHaveBeenCalledWith('commit', expect.anything());
   });
@@ -233,9 +224,7 @@ describe('TriggerMenu - backspace restore (invocation)', () => {
     // read the raw node attrs, not the ref. `/image-gen` (id 'image') must
     // restore to `/image-gen`, never `/image`.
     const run = vi.fn(() => true);
-    const token = commandTrigger([
-      { id: 'image', name: 'image-gen', label: 'Image' },
-    ]).token;
+    const token = commandTrigger([{ id: 'image', name: 'image-gen', label: 'Image' }]).token;
     const editor = fakeEditor({
       run,
       json: {

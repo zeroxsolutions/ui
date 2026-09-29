@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { EditorView } from '@codemirror/view';
@@ -41,6 +41,14 @@ beforeAll(() => {
   Element.prototype.setPointerCapture ??= () => {};
   Element.prototype.releasePointerCapture ??= () => {};
 });
+
+// The read-only path's design-system CodeBlock renders upstream ScrollArea,
+// which measures its viewport in a `queueMicrotask` its layout effect
+// schedules on mount, outside of `render`'s own act() batch — awaiting a
+// no-op act() settles it before the test's assertions run.
+async function settle(): Promise<void> {
+  await act(async () => {});
+}
 
 const editors: IEditor[] = [];
 function build(content?: DocJSON): IEditor {
@@ -142,30 +150,33 @@ describe('mermaid node view (editable)', () => {
     expect(updateAttrs).toHaveBeenCalledWith({ source: 'graph TD' });
   });
 
-  it('copies the source through the copy control', () => {
+  it('copies the source through the copy control', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });
     render(<MermaidView {...nodeViewProps({ source: SOURCE }, true)} />);
     fireEvent.click(screen.getByRole('button', { name: 'Copy source' }));
     expect(writeText).toHaveBeenCalledWith(SOURCE);
+    await screen.findByRole('button', { name: 'Copied' });
   });
 });
 
 describe('mermaid node view (read-only)', () => {
-  it('frames the diagram in the design-system Card, with no edit tabs', () => {
+  it('frames the diagram in the design-system Card, with no edit tabs', async () => {
     const { container } = render(<MermaidView {...nodeViewProps({ source: SOURCE }, false)} />);
+    await settle();
     expect(container.querySelector('[data-slot="card"]')).not.toBeNull();
     expect(screen.queryByRole('tab', { name: 'Edit' })).toBeNull();
   });
 });
 
 describe('mermaid export codec', () => {
-  it('renders toReact through the read-only design-system CodeBlock', () => {
+  it('renders toReact through the read-only design-system CodeBlock', async () => {
     const rendered = mermaidCodec.toReact?.(
       { type: 'mermaid', attrs: { source: SOURCE } } as never,
       {} as never,
     ) as ReactNode;
     const { container } = render(<>{rendered}</>);
+    await settle();
     expect(container.querySelector('[data-slot="code-block"]')).not.toBeNull();
     expect(container.textContent).toContain('graph TD');
   });
