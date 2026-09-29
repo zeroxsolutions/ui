@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react';
+
 import { Button } from '@/registry/bases/base-ui/ui/button';
 
-/** All Button variants on one row - the hero preview for the Button doc page. */
-export function ButtonHero() {
+/** Every Button variant on one row. */
+function ButtonDemo(): ReactNode {
   return (
     <div className="flex flex-wrap items-center gap-3">
       <Button>Default</Button>
@@ -12,3 +14,5 @@ export function ButtonHero() {
     </div>
   );
 }
+
+export { ButtonDemo };

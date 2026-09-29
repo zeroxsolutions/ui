@@ -5,8 +5,8 @@ import type { ReactNode } from 'react';
 import { TreeItem, TreeItemIndent, TreeItemLabel } from '@/registry/bases/base-ui/components/data-entry/tree-item';
 import { ItemTitle } from '@/registry/bases/base-ui/ui/item';
 
-/** A small hierarchy - the TreeItem hero. */
-export function TreeHero(): ReactNode {
+/** A folder expanded over two files. */
+function TreeItemDemo(): ReactNode {
   return (
     <div className="flex w-full flex-col gap-1">
       <TreeItem expanded>
@@ -30,3 +30,5 @@ export function TreeHero(): ReactNode {
     </div>
   );
 }
+
+export { TreeItemDemo };

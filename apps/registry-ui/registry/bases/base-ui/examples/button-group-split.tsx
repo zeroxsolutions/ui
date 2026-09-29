@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ButtonGroup } from '@/registry/bases/base-ui/ui/button-group';
@@ -12,7 +13,7 @@ import {
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
 
 /** A primary action plus a caret menu of related actions, composed from upstream parts. */
-function SplitButtonHero() {
+function ButtonGroupSplit(): ReactNode {
   return (
     <ButtonGroup aria-label="Allow">
       <Button variant="outline">Action</Button>
@@ -29,4 +30,4 @@ function SplitButtonHero() {
   );
 }
 
-export { SplitButtonHero };
+export { ButtonGroupSplit };

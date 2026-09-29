@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ButtonGroup } from '@/registry/bases/base-ui/ui/button-group';
@@ -22,7 +22,7 @@ const OPTIONS = [
 type OptionValue = (typeof OPTIONS)[number]['value'];
 
 /** A remembered-default action whose caret menu picks the default, composed from upstream parts. */
-function MenuButtonHero() {
+function ButtonGroupMenu(): ReactNode {
   const [value, setValue] = useState<OptionValue>('once');
   const current = OPTIONS.find((option) => option.value === value);
 
@@ -47,4 +47,4 @@ function MenuButtonHero() {
   );
 }
 
-export { MenuButtonHero };
+export { ButtonGroupMenu };

@@ -1,5 +1,9 @@
+import type { ReactNode } from 'react';
+
 import { Button } from '@/registry/bases/base-ui/ui/button';
 
-export function ButtonDefault() {
+function ButtonDefault(): ReactNode {
   return <Button>Default</Button>;
 }
+
+export { ButtonDefault };

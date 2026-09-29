@@ -1,5 +1,9 @@
+import type { ReactNode } from 'react';
+
 import { Button } from '@/registry/bases/base-ui/ui/button';
 
-export function ButtonOutline() {
+function ButtonOutline(): ReactNode {
   return <Button variant="outline">Outline</Button>;
 }
+
+export { ButtonOutline };
