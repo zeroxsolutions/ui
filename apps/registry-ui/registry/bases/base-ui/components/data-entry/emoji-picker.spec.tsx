@@ -1,9 +1,17 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { Empty, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 
 import { EmojiPicker, EmojiPickerContent, EmojiPickerSearch } from './emoji-picker';
+
+// ScrollArea (upstream) measures its viewport in a `queueMicrotask` its layout
+// effect schedules on mount and on each hidden-state change, outside of
+// `render`'s own act() batch — awaiting a no-op act() settles it before the
+// test's assertions run.
+async function settle(): Promise<void> {
+  await act(async () => {});
+}
 
 beforeAll(() => {
   // The category nav scrolls the viewport; jsdom implements neither.
@@ -16,6 +24,10 @@ beforeAll(() => {
     unobserve() {}
     disconnect() {}
   } as unknown as typeof ResizeObserver;
+  // ScrollArea also waits for subtree animations via getAnimations, absent in
+  // jsdom — without a stub, settling past that wait throws once the real
+  // (0ms) timer it schedules fires.
+  Element.prototype.getAnimations ??= vi.fn(() => []);
 });
 
 afterEach(() => {
@@ -24,9 +36,10 @@ afterEach(() => {
 });
 
 describe('EmojiPicker', () => {
-  it('calls onSelect with the chosen emoji', () => {
+  it('calls onSelect with the chosen emoji', async () => {
     const onSelect = vi.fn();
     render(<EmojiPicker onSelect={onSelect} />);
+    await settle();
 
     // "grinning face" (😀) is the first emoji in Smileys & People.
     fireEvent.click(screen.getByRole('button', { name: 'grinning face' }));
@@ -34,25 +47,29 @@ describe('EmojiPicker', () => {
     expect(onSelect).toHaveBeenCalledWith('😀');
   });
 
-  it('renders the consumer-supplied frequent row', () => {
+  it('renders the consumer-supplied frequent row', async () => {
     render(<EmojiPicker onSelect={vi.fn()} frequent={['🍕']} />);
+    await settle();
 
     expect(screen.getByText('Frequently used')).toBeTruthy();
   });
 
-  it('lets frequentLabel override the frequent-row heading', () => {
+  it('lets frequentLabel override the frequent-row heading', async () => {
     render(<EmojiPicker onSelect={vi.fn()} frequent={['🍕']} frequentLabel="Hay dùng" />);
+    await settle();
 
     expect(screen.getByText('Hay dùng')).toBeTruthy();
     expect(screen.queryByText('Frequently used')).toBeNull();
   });
 
-  it('filters the grid by search query', () => {
+  it('filters the grid by search query', async () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
+    await settle();
 
     fireEvent.change(screen.getByLabelText('Search emoji'), {
       target: { value: 'pizza' },
     });
+    await settle();
 
     // The match is shown…
     expect(screen.getByRole('button', { name: 'pizza' })).toBeTruthy();
@@ -60,18 +77,21 @@ describe('EmojiPicker', () => {
     expect(screen.queryByRole('button', { name: 'grinning face' })).toBeNull();
   });
 
-  it('shows an empty state for a query with no matches', () => {
+  it('shows an empty state for a query with no matches', async () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
+    await settle();
 
     fireEvent.change(screen.getByLabelText('Search emoji'), {
       target: { value: 'zzzznotanemoji' },
     });
+    await settle();
 
     expect(screen.getByText('No emoji found')).toBeTruthy();
   });
 
-  it('renders the grid in the global Fluent style (3D by default)', () => {
+  it('renders the grid in the global Fluent style (3D by default)', async () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
+    await settle();
     // The picker no longer owns a style control — cells draw in the app-wide
     // style (`setFluentEmojiStyle`), defaulting to the 3D webp set.
     const grinningImg = screen.getByRole('button', { name: 'grinning face' }).querySelector('img');
@@ -80,8 +100,9 @@ describe('EmojiPicker', () => {
     expect(grinningImg?.getAttribute('src')).toMatch(/\.webp$/);
   });
 
-  it('virtualizes the grid — mounts only a window of cells, not the whole catalog', () => {
+  it('virtualizes the grid — mounts only a window of cells, not the whole catalog', async () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
+    await settle();
 
     // The catalog is ~1900 emoji; a windowed render mounts ~one screenful of
     // Fluent artwork, so the count stays far below the full catalog.
@@ -93,7 +114,7 @@ describe('EmojiPicker', () => {
     expect(screen.getByRole('button', { name: 'grinning face' })).toBeTruthy();
   });
 
-  it('renders the consumer-composed Empty in place of the default no-results state', () => {
+  it('renders the consumer-composed Empty in place of the default no-results state', async () => {
     render(
       <EmojiPicker onSelect={vi.fn()}>
         <EmojiPickerSearch />
@@ -104,21 +125,24 @@ describe('EmojiPicker', () => {
         </EmojiPickerContent>
       </EmojiPicker>,
     );
+    await settle();
 
     fireEvent.change(screen.getByLabelText('Search emoji'), {
       target: { value: 'zzzznotanemoji' },
     });
+    await settle();
 
     expect(screen.getByText('Nothing matches')).toBeTruthy();
     expect(screen.queryByText('No emoji found')).toBeNull();
   });
 
-  it('sizes the viewport, the rows and the cells from one set of spacing steps', () => {
+  it('sizes the viewport, the rows and the cells from one set of spacing steps', async () => {
     render(
       <EmojiPicker onSelect={vi.fn()}>
         <EmojiPickerContent size="lg" />
       </EmojiPicker>,
     );
+    await settle();
 
     const content = document.querySelector<HTMLElement>('[data-slot="emoji-picker-content"]');
     expect(content?.style.getPropertyValue('--emoji-picker-height')).toBe('calc(var(--spacing) * 80)');
@@ -129,8 +153,9 @@ describe('EmojiPicker', () => {
     expect(firstCells?.style.transform).toBe('translateY(28px)');
   });
 
-  it('stamps a data-slot on the grid and on each cell', () => {
+  it('stamps a data-slot on the grid and on each cell', async () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
+    await settle();
 
     const cell = screen.getByRole('button', { name: 'grinning face' });
     expect(cell.getAttribute('data-slot')).toBe('emoji-picker-cell');
