@@ -22,10 +22,12 @@ import {
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
 
 const STATUS_WORD = { pending: 'Pending', approved: 'Allowed', denied: 'Denied' } as const;
+const SCOPE_WORD = { once: 'Allowed once', session: 'Allowed for this session' } as const;
 
 /** A deploy-approval request the visitor can deny or allow, once or for the session. */
 function PermissionCardDemo(): ReactNode {
   const [status, setStatus] = useState<'pending' | 'approved' | 'denied'>('pending');
+  const [scope, setScope] = useState<'once' | 'session'>('once');
 
   return (
     <PermissionCard status={status} className="w-full max-w-sm rounded-lg border p-4">
@@ -40,18 +42,32 @@ function PermissionCardDemo(): ReactNode {
           Deny
         </Button>
         <ButtonGroup>
-          <Button onClick={() => setStatus('approved')}>Allow once</Button>
+          <Button
+            onClick={() => {
+              setScope('once');
+              setStatus('approved');
+            }}
+          >
+            Allow once
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button size="icon" aria-label="More allow options" />} />
             <DropdownMenuContent align="end" className="w-auto">
-              <DropdownMenuItem onClick={() => setStatus('approved')}>Allow this session</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setScope('session');
+                  setStatus('approved');
+                }}
+              >
+                Allow this session
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </ButtonGroup>
       </PermissionCardActions>
       {status === 'approved' && (
         <PermissionCardResolved>
-          <CheckCircle2 className="size-3.5" /> Allowed once - 2:14pm
+          <CheckCircle2 className="size-3.5" /> {SCOPE_WORD[scope]} - 2:14pm
         </PermissionCardResolved>
       )}
       {status === 'denied' && (

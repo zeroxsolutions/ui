@@ -229,16 +229,22 @@ function familyProblems(items: RegistryItem[], families: string[]): string[] {
 /** Each component or block item has exactly one `<name>-demo` example, and every example is one of those. */
 function demoProblems(items: RegistryItem[]): string[] {
   const names = items.filter((item) => PUBLISHED.includes(item.type)).map((item) => item.name);
-  const examples = items.filter((item) => item.type === 'registry:example').map((item) => item.name);
+  const examples = items.filter((item) => item.type === 'registry:example');
   return [
     ...names.flatMap((name) => {
-      const count = examples.filter((example) => example === `${name}-demo`).length;
+      const count = examples.filter((example) => example.name === `${name}-demo`).length;
       if (count === 0) return [`${name}: has no ${name}-demo example`];
       return count === 1 ? [] : [`${name}: has ${count} ${name}-demo examples`];
     }),
     ...examples
-      .filter((example) => !names.some((name) => example === `${name}-demo`))
-      .map((example) => `${example}: is the demo of no item`),
+      .filter((example) => !names.some((name) => example.name === `${name}-demo`))
+      .map((example) => `${example.name}: is the demo of no item`),
+    ...examples.flatMap((example) => {
+      const expected = { path: `${BASE}/examples/${example.name}.tsx`, type: 'registry:example' };
+      return isDeepStrictEqual(example.files[0], expected)
+        ? []
+        : [`${example.name}: files[0] should be ${JSON.stringify(expected)}`];
+    }),
   ];
 }
 
@@ -463,6 +469,19 @@ describe('demoProblems', () => {
     };
     expect(demoProblems([...familyItems, treeItemDemo, aiProviderPickerDemo, example])).toEqual([
       'button-demo: is the demo of no item',
+    ]);
+  });
+
+  it('reports a demo whose files[0] names another file', () => {
+    const wrongFile = {
+      ...treeItemDemo,
+      files: [{ path: `${BASE}/examples/button-demo.tsx`, type: 'registry:example' }],
+    };
+    expect(demoProblems([...familyItems, wrongFile, aiProviderPickerDemo])).toEqual([
+      `tree-item-demo: files[0] should be ${JSON.stringify({
+        path: `${BASE}/examples/tree-item-demo.tsx`,
+        type: 'registry:example',
+      })}`,
     ]);
   });
 });

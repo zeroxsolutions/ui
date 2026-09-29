@@ -14,6 +14,7 @@ vi.mock('../lib/shiki', async (importOriginal) => {
 import { AlertDialogConfirm } from './alert-dialog-confirm';
 import { ButtonGroupMenu } from './button-group-menu';
 import { ButtonGroupSplit } from './button-group-split';
+import { PermissionCardDemo } from './permission-card-demo';
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = () => {};
@@ -87,8 +88,8 @@ const EXPECTED_SLOT: Record<string, string> = {
   'popover-icon-trigger': 'tooltip-trigger',
   'reasoning-collapsible-demo': 'reasoning-collapsible',
   'resize-handle-demo': 'resize-handle',
-  'sidebar-group-collapsible': 'collapsible',
-  'sidebar-menu-collapsible': 'collapsible',
+  'sidebar-group-collapsible': 'sidebar-group',
+  'sidebar-menu-collapsible': 'sidebar-menu-sub',
   'status-indicator-demo': 'status-indicator',
   'tab-close-button-demo': 'tab-close-button',
   'tag-input-demo': 'tag-input',
@@ -118,6 +119,7 @@ describe('examples', () => {
     // render's own act() batch; settle it so no example leaves a state update
     // to land after the test has moved on.
     await act(async () => {});
+    // command-menu-demo portals its dialog out of the render container, so this checks the whole document.
     expect(document.querySelector(`[data-slot="${EXPECTED_SLOT[file]}"]`)).not.toBeNull();
   });
 
@@ -141,5 +143,12 @@ describe('examples', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Change action' }));
     fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Always allow' }));
     expect(await screen.findByRole('button', { name: 'Always allow' })).toBeTruthy();
+  });
+
+  it('permission-card-demo shows the session wording after allowing for the session', async () => {
+    render(<PermissionCardDemo />);
+    fireEvent.click(screen.getByRole('button', { name: 'More allow options' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Allow this session' }));
+    expect(await screen.findByText('Allowed for this session - 2:14pm')).toBeTruthy();
   });
 });
