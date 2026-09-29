@@ -651,6 +651,36 @@
       ]
     },
     {
+      "name": "model-list",
+      "type": "registry:component",
+      "title": "Model List",
+      "description": "The frame for a model list section: a header over a scrolling content area that dims any item marked unavailable.",
+      "categories": ["layout"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/skeleton", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/model-list.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "page-container",
+      "type": "registry:component",
+      "title": "Page Container",
+      "description": "The centred, max-width content column of a full-width surface, sized from a named max-width scale.",
+      "categories": ["layout"],
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/page-container.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "panel-field-group",
       "type": "registry:component",
       "title": "Panel Field Group",
@@ -665,6 +695,20 @@
       ]
     },
     {
+      "name": "panel-header",
+      "type": "registry:component",
+      "title": "Panel Header",
+      "description": "The top strip of a side panel: one or more rows of a title and trailing actions over a bottom border.",
+      "categories": ["layout"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/panel-header.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "panel-row",
       "type": "registry:component",
       "title": "Panel Row",
@@ -674,6 +718,47 @@
       "files": [
         {
           "path": "registry/bases/base-ui/components/layout/panel-row.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "reasoning-collapsible",
+      "type": "registry:component",
+      "title": "Reasoning Collapsible",
+      "description": "A thinking disclosure that opens itself while a reasoning stream is live and closes shortly after the stream ends.",
+      "categories": ["layout"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/collapsible", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/reasoning-collapsible.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "tool-call-card",
+      "type": "registry:component",
+      "title": "Tool Call Card",
+      "description": "One tool invocation in a chat transcript: a trigger row over collapsible sections, whose status badge follows the call's lifecycle state.",
+      "categories": ["layout"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/badge", "@shadcn/collapsible", "@shadcn/utils"],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)"
+        },
+        "light": {
+          "success": "oklch(0.627 0.19 149)"
+        },
+        "dark": {
+          "success": "oklch(0.723 0.19 149)"
+        }
+      },
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/tool-call-card.tsx",
           "type": "registry:component"
         }
       ]
@@ -1217,6 +1302,68 @@
       ]
     },
     {
+      "name": "model-list-demo",
+      "type": "registry:example",
+      "title": "Model List Demo",
+      "description": "A model list of three providers, one dimmed as unavailable, each toggleable and removable.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/icons"],
+      "registryDependencies": ["@shadcn/item", "@shadcn/switch", "https://ui.zeroxsolutions.com/r/model-list.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/model-list-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "page-container-demo",
+      "type": "registry:example",
+      "title": "Page Container Demo",
+      "description": "A small, centered content column inside a wider surface.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/page-container.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/page-container-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "panel-field-group-demo",
+      "type": "registry:example",
+      "title": "Panel Field Group Demo",
+      "description": "A three-column PanelFieldGroup for a position's X, Y and Z.",
+      "categories": ["examples"],
+      "registryDependencies": [
+        "@shadcn/input",
+        "@shadcn/label",
+        "https://ui.zeroxsolutions.com/r/panel-field-group.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/panel-field-group-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "panel-header-demo",
+      "type": "registry:example",
+      "title": "Panel Header Demo",
+      "description": "A single-row panel header: a title beside a trailing collapse action.",
+      "categories": ["examples"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/button", "https://ui.zeroxsolutions.com/r/panel-header.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/panel-header-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
       "name": "panel-row-demo",
       "type": "registry:example",
       "title": "Panel Row Demo",
@@ -1233,6 +1380,42 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/panel-row-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "reasoning-collapsible-demo",
+      "type": "registry:example",
+      "title": "Reasoning Collapsible Demo",
+      "description": "A reasoning disclosure the caller starts and stops streaming, its body a rendered Markdown note.",
+      "categories": ["examples"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "https://ui.zeroxsolutions.com/r/markdown-view.json",
+        "https://ui.zeroxsolutions.com/r/reasoning-collapsible.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/reasoning-collapsible-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "tool-call-card-demo",
+      "type": "registry:example",
+      "title": "Tool Call Card Demo",
+      "description": "A completed search call, its parameters shown under the trigger.",
+      "categories": ["examples"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/code-block.json",
+        "https://ui.zeroxsolutions.com/r/tool-call-card.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/tool-call-card-demo.tsx",
           "type": "registry:example"
         }
       ]
