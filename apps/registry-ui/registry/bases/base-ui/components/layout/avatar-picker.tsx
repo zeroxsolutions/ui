@@ -42,16 +42,10 @@ function useAvatarPicker(): AvatarPickerContextValue {
   return ctx;
 }
 
-interface AvatarPickerProps {
+interface AvatarPickerProps extends React.ComponentProps<typeof Popover> {
   value: AvatarPickerValue;
   /** Fires with the new avatar value when a part edits it. */
   onValueChange: (value: AvatarPickerValue) => void;
-  /** Open state - uncontrolled by default; pass `open` to control it. */
-  open?: boolean;
-  defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  /** Compose `AvatarPickerTrigger` + `AvatarPickerContent`. */
-  children?: React.ReactNode;
 }
 
 /**
@@ -76,14 +70,7 @@ interface AvatarPickerProps {
  *     </AvatarPickerContent>
  *   </AvatarPicker>
  */
-function AvatarPicker({
-  value,
-  onValueChange,
-  open,
-  defaultOpen,
-  onOpenChange,
-  children,
-}: AvatarPickerProps): React.ReactNode {
+function AvatarPicker({ value, onValueChange, ...props }: AvatarPickerProps): React.ReactNode {
   const ctx: AvatarPickerContextValue = {
     value,
     setEmoji: (emoji) => onValueChange({ ...value, emoji, imageUrl: null }),
@@ -93,9 +80,7 @@ function AvatarPicker({
   };
   return (
     <AvatarPickerContext.Provider value={ctx}>
-      <Popover open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange} data-slot="avatar-picker">
-        {children}
-      </Popover>
+      <Popover data-slot="avatar-picker" {...props} />
     </AvatarPickerContext.Provider>
   );
 }

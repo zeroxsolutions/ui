@@ -1,6 +1,7 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { Popover as PopoverPrimitive } from '@base-ui/react/popover';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Palette, Smile, Upload } from 'lucide-react';
-import type { MouseEvent, ReactNode } from 'react';
+import { createRef, type MouseEvent, type ReactNode } from 'react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
@@ -189,5 +190,26 @@ describe('AvatarPicker', () => {
     expect(screen.getByRole('button', { name: '#6366f1' }).getAttribute('aria-pressed')).toBe('false');
     fireEvent.click(screen.getByRole('button', { name: '#6366f1' }));
     expect(onChange).toHaveBeenCalledWith({ color: '#6366f1' });
+  });
+
+  it('hands upstream Popover the root props it does not read', async () => {
+    const actionsRef = createRef<PopoverPrimitive.Root.Actions>();
+    render(
+      <AvatarPicker value={{}} onValueChange={vi.fn()} defaultOpen actionsRef={actionsRef}>
+        <AvatarPickerTrigger>
+          <span>avatar</span>
+        </AvatarPickerTrigger>
+        <AvatarPickerContent>
+          <Tabs defaultValue="color">
+            <AvatarPickerColor />
+          </Tabs>
+        </AvatarPickerContent>
+      </AvatarPicker>,
+    );
+    expect(screen.getByRole('button', { name: '#6366f1' })).toBeTruthy();
+
+    act(() => actionsRef.current?.close());
+
+    await waitFor(() => expect(screen.queryByRole('button', { name: '#6366f1' })).toBeNull());
   });
 });
