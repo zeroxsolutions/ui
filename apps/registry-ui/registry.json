@@ -8,12 +8,16 @@
       "type": "registry:component",
       "categories": ["data-display"],
       "title": "Status Dot",
-      "description": "A small tone-coded presence dot (online, offline, busy, idle). Exports the `StatusTone` union that other items reuse for their own status surfaces.",
+      "description": "A small tone-coded presence dot (online, offline, busy, idle).",
       "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/feedback/status-indicator.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/types/status-tone.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -98,11 +102,15 @@
       "categories": ["data-display"],
       "title": "AI Provider Card",
       "description": "One AI provider tile - an icon slot over name and description, with a tone-coded status line in the footer. The unit the AiProviderPicker grid is built from.",
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/status-dot.json", "@shadcn/card", "@shadcn/utils"],
+      "registryDependencies": ["@shadcn/card", "@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/ai-provider-card.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/types/status-tone.ts",
+          "type": "registry:lib"
         }
       ]
     },

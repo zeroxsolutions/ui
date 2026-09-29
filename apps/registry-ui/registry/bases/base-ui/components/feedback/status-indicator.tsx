@@ -1,14 +1,10 @@
 import * as React from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-
-type StatusTone = 'online' | 'offline' | 'busy' | 'idle';
+import type { StatusTone } from '@/registry/bases/base-ui/types/status-tone';
 
 interface StatusIndicatorProps extends React.ComponentProps<'span'> {
-  /**
-   * online: connected, enabled, active. offline: disconnected, disabled.
-   * busy: an error, unavailable. idle: pending, away.
-   */
+  /** The status the dot's colour reports. */
   tone: StatusTone;
   /** Animate the dot, for a state still in progress such as connecting or live. */
   pulse?: boolean;
@@ -38,4 +34,4 @@ function StatusIndicator({ tone, pulse = false, className, ...props }: StatusInd
 }
 
 export { StatusIndicator };
-export type { StatusIndicatorProps, StatusTone };
+export type { StatusIndicatorProps };

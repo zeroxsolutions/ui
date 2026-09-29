@@ -18,7 +18,7 @@ import { Skeleton } from '@/registry/bases/base-ui/ui/skeleton';
  *   </ModelListHeader>
  *   <ModelListContent>
  *     <ItemGroup>
- *       <Item size="sm" data-unavailable={unavailable || undefined}>
+ *       <Item size="sm" data-unavailable={unavailable}>
  *         <ItemMedia><AiProviderIcon provider="openai" /></ItemMedia>
  *         <ItemContent><ItemTitle>GPT-4o</ItemTitle><ItemDescription>gpt-4o</ItemDescription></ItemContent>
  *         <ItemActions>
@@ -62,15 +62,14 @@ function ModelListAction({ className, ...props }: React.ComponentProps<'div'>): 
 
 /**
  * The scrolling region: item groups, an empty state or a `ModelListSkeleton`.
- * An `Item` inside it carrying `data-unavailable` is dimmed; set the attribute
- * only when the model is unavailable, since `data-unavailable="false"` counts too.
+ * An `Item` inside it with `data-unavailable={true}` is dimmed.
  */
 function ModelListContent({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   return (
     <div
       data-slot="model-list-content"
       className={cn(
-        'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-3 **:data-[slot=item]:data-unavailable:opacity-55',
+        'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-3 **:data-[slot=item]:data-[unavailable=true]:opacity-55',
         className,
       )}
       {...props}

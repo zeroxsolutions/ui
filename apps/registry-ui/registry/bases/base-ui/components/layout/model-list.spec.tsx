@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { compile } from 'tailwindcss';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Item, ItemActions, ItemContent, ItemGroup, ItemTitle } from '@/registry/bases/base-ui/ui/item';
@@ -13,6 +14,25 @@ import {
 } from './model-list';
 
 afterEach(cleanup);
+
+/** Whether an opacity rule compiled from the enclosing `ModelListContent`'s classes applies to `item`. */
+async function isDimmed(item: Element | null): Promise<boolean> {
+  const content = item?.closest('[data-slot="model-list-content"]');
+  if (!item || !content) throw new Error('no item rendered inside a ModelListContent');
+  const compiler = await compile('@tailwind utilities;');
+  const style = document.createElement('style');
+  style.textContent = compiler.build([...content.classList]);
+  document.head.append(style);
+  const rules = [...(style.sheet?.cssRules ?? [])].filter(
+    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.style.getPropertyValue('opacity') !== '',
+  );
+  style.remove();
+  // jsdom's selector engine matches no escaped class name inside :is(), so the
+  // content is addressed by its data-slot, which selects the same element.
+  return rules.some((rule) =>
+    item.matches(rule.selectorText.replace(/\.(?:\\.|[\w-])+/g, '[data-slot="model-list-content"]')),
+  );
+}
 
 describe('ModelList', () => {
   it('renders the title, controls, tabs, and content', () => {
@@ -57,7 +77,7 @@ describe('ModelList', () => {
 });
 
 describe('ModelListContent', () => {
-  it('dims an item marked unavailable', () => {
+  it('dims an item marked unavailable', async () => {
     render(
       <ModelListContent>
         <ItemGroup>
@@ -70,9 +90,25 @@ describe('ModelListContent', () => {
       </ModelListContent>,
     );
 
-    const content = document.querySelector('[data-slot="model-list-content"]');
-    expect(content?.className).toContain('**:data-[slot=item]:data-unavailable:opacity-55');
-    expect(content?.querySelector('[data-slot="item"]')?.hasAttribute('data-unavailable')).toBe(true);
+    expect(await isDimmed(document.querySelector('[data-slot="item"]'))).toBe(true);
+  });
+
+  it('does not dim an item whose data-unavailable is false', async () => {
+    render(
+      <ModelListContent>
+        <ItemGroup>
+          <Item size="sm" data-unavailable={false}>
+            <ItemContent>
+              <ItemTitle>GPT-4o</ItemTitle>
+            </ItemContent>
+          </Item>
+        </ItemGroup>
+      </ModelListContent>,
+    );
+
+    const item = document.querySelector('[data-slot="item"]');
+    expect(item?.getAttribute('data-unavailable')).toBe('false');
+    expect(await isDimmed(item)).toBe(false);
   });
 });
 

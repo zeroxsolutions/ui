@@ -4,7 +4,6 @@ import * as React from 'react';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
 import { TabsContent } from '@/registry/bases/base-ui/ui/tabs';
-import { AVATAR_COLORS } from '@/registry/bases/base-ui/constants/avatar-colors';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { EmojiPicker } from '../data-entry/emoji-picker';
 
@@ -255,7 +254,7 @@ function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarP
 }
 
 interface AvatarPickerColorProps extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
-  /** Swatches shown on the Color pane. */
+  /** Swatches shown on the Color pane. Defaults to twelve hues spread evenly round the wheel. */
   colors?: readonly string[];
 }
 
@@ -266,7 +265,20 @@ interface AvatarPickerColorProps extends Omit<React.ComponentProps<typeof TabsCo
 function AvatarPickerColor({
   className,
   children,
-  colors = AVATAR_COLORS,
+  colors = [
+    '#6366f1',
+    '#8b5cf6',
+    '#a855f7',
+    '#ec4899',
+    '#ef4444',
+    '#f97316',
+    '#f59e0b',
+    '#84cc16',
+    '#10b981',
+    '#14b8a6',
+    '#0ea5e9',
+    '#3b82f6',
+  ],
   ...props
 }: AvatarPickerColorProps): React.ReactNode {
   const { value, setColor } = useAvatarPicker();

@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Card, CardDescription } from '@/registry/bases/base-ui/ui/card';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import type { StatusTone } from '../feedback/status-indicator';
+import type { StatusTone } from '@/registry/bases/base-ui/types/status-tone';
 
 interface AiProviderCardProps extends React.ComponentProps<typeof Card> {
   /** Tone of the attention note in `AiProviderCardStatus`; omit for a muted note. */
