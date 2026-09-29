@@ -1,130 +1,96 @@
 import * as React from 'react';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Trash2 } from 'lucide-react';
+
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from '@/registry/bases/base-ui/ui/item';
-import { Switch } from '@/registry/bases/base-ui/ui/switch';
 import { Skeleton } from '@/registry/bases/base-ui/ui/skeleton';
 
-interface ModelListProps extends Omit<React.ComponentProps<'div'>, 'title'> {
-  /** Header title (e.g. "Model list"). */
-  title?: React.ReactNode;
-  /** Trailing header slot - search, refresh, and the like. */
-  controls?: React.ReactNode;
-  /** Optional tab bar rendered below the header. */
-  tabs?: React.ReactNode;
-  /** The scrollable list region content (item groups, an empty state, or a
-   *  loading skeleton). */
-  children?: React.ReactNode;
+/**
+ * The frame for a model list section: a `ModelListHeader` over a scrolling
+ * `ModelListContent`. It owns no list state - it does not filter, group, sort
+ * or paginate. Place it in a height-constrained flex parent so the content
+ * scrolls.
+ * @example
+ * <ModelList>
+ *   <ModelListHeader>
+ *     <ModelListTitle>Model list</ModelListTitle>
+ *     <ModelListAction>{search}</ModelListAction>
+ *   </ModelListHeader>
+ *   <ModelListContent>
+ *     <ItemGroup>
+ *       <Item size="sm" data-unavailable={unavailable || undefined}>
+ *         <ItemMedia><AiProviderIcon provider="openai" /></ItemMedia>
+ *         <ItemContent><ItemTitle>GPT-4o</ItemTitle><ItemDescription>gpt-4o</ItemDescription></ItemContent>
+ *         <ItemActions>
+ *           <Switch checked={enabled} disabled={unavailable} onCheckedChange={setEnabled} />
+ *           <ModelListItemRemove onClick={remove} />
+ *         </ItemActions>
+ *       </Item>
+ *     </ItemGroup>
+ *   </ModelListContent>
+ * </ModelList>
+ */
+function ModelList({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
+  return <div data-slot="model-list" className={cn('flex min-h-0 flex-1 flex-col', className)} {...props} />;
 }
 
-/**
- * The presentational frame for a model list section: a header carrying a `title`
- * and a trailing `controls` slot (search, refresh), an optional `tabs` slot
- * below it, and a scrollable region for `children`. It owns no list state - it
- * does not filter, group, sort, or paginate; the consumer supplies prepared
- * children and controls. Domain-free. Place it in a height-constrained flex
- * parent so the list region scrolls.
- */
-function ModelList({ title, controls, tabs, children, className, ...props }: ModelListProps) {
+/** The row above the list: a title and trailing controls. A `TabsList` placed in it takes a line of its own. */
+function ModelListHeader({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   return (
-    <div data-slot="model-list" className={cn('flex min-h-0 flex-1 flex-col', className)} {...props}>
-      <div className="flex flex-col gap-2 px-1 pt-1">
-        <div className="flex items-center justify-between gap-2">
-          {title != null && <h3 className="text-base font-semibold tracking-tight">{title}</h3>}
-          {controls != null && <div className="flex shrink-0 items-center gap-2">{controls}</div>}
-        </div>
-        {tabs}
-      </div>
-      <div data-slot="model-list-content" className="min-h-0 flex-1 overflow-y-auto">
-        <div className="flex flex-col gap-4 py-3">{children}</div>
-      </div>
-    </div>
+    <div
+      data-slot="model-list-header"
+      className={cn('flex flex-wrap items-center gap-2 px-1 pt-1 *:data-[slot=tabs-list]:basis-full', className)}
+      {...props}
+    />
   );
 }
 
-interface ModelListItemProps extends Omit<React.ComponentProps<'div'>, 'id' | 'title'> {
-  /** Primary line - the model display name. */
-  name: React.ReactNode;
-  /** Secondary line under the name - the model id. */
-  modelId?: React.ReactNode;
-  /** Leading logo slot, rendered verbatim (e.g. an `AiProviderIcon`). */
-  media?: React.ReactNode;
-  /** Meta region before the controls - capability / token chips. */
-  meta?: React.ReactNode;
-  /** Enable toggle state. Provide to render a `Switch`; omit `onEnabledChange`
-   *  to render it read-only. */
-  enabled?: boolean;
-  /** Called with the next enabled state when the toggle is activated. */
-  onEnabledChange?: (enabled: boolean) => void;
-  /** Show a trailing remove control when provided. */
-  onRemove?: () => void;
-  /** Extra trailing content, before the toggle (escape hatch). */
-  action?: React.ReactNode;
-  /** Dim the item and disable the toggle - listed but unusable. */
-  unavailable?: boolean;
+function ModelListTitle({ className, ...props }: React.ComponentProps<'h3'>): React.ReactNode {
+  return (
+    <h3
+      data-slot="model-list-title"
+      className={cn('flex-1 text-base font-semibold tracking-tight', className)}
+      {...props}
+    />
+  );
+}
+
+/** Trailing header controls - search, refresh and the like. */
+function ModelListAction({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
+  return <div data-slot="model-list-action" className={cn('flex shrink-0 items-center gap-2', className)} {...props} />;
 }
 
 /**
- * One model as a horizontal list item, built on the shipped `Item`: a leading
- * media slot (the provider logo, e.g. an `AiProviderIcon`), the model name over
- * its id, a meta slot for capability / token chips, and trailing controls - an
- * optional enable `Switch` (from `enabled` / `onEnabledChange`) and remove
- * `Button` (from `onRemove`), plus an `action` escape hatch. Domain-free: it
- * imports no model or capability type; every value is a prop or a slot. An
- * `unavailable` model stays listed but is dimmed and its toggle disabled.
- * @example <ModelListItem name="GPT-4o" modelId="gpt-4o" media={<AiProviderIcon provider="openai" />} enabled onEnabledChange={setOn} />
+ * The scrolling region: item groups, an empty state or a `ModelListSkeleton`.
+ * An `Item` inside it carrying `data-unavailable` is dimmed; set the attribute
+ * only when the model is unavailable, since `data-unavailable="false"` counts too.
  */
-function ModelListItem({
-  name,
-  modelId,
-  media,
-  meta,
-  enabled,
-  onEnabledChange,
-  onRemove,
-  action,
-  unavailable = false,
-  className,
-  ...props
-}: ModelListItemProps) {
+function ModelListContent({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   return (
-    <Item data-slot="model-list-item" size="sm" className={cn(unavailable && 'opacity-55', className)} {...props}>
-      {media != null && <ItemMedia>{media}</ItemMedia>}
-      <ItemContent>
-        <ItemTitle>{name}</ItemTitle>
-        {modelId != null && <ItemDescription>{modelId}</ItemDescription>}
-      </ItemContent>
-      <ItemActions>
-        {meta}
-        {action}
-        {enabled !== undefined && (
-          <Switch
-            checked={enabled}
-            disabled={!onEnabledChange || unavailable}
-            onCheckedChange={onEnabledChange ? (checked) => onEnabledChange(checked) : undefined}
-          />
-        )}
-        {onRemove && (
-          <Button
-            aria-label="Remove model"
-            className="text-muted-foreground hover:text-destructive size-7"
-            onClick={onRemove}
-            size="icon-sm"
-            variant="ghost"
-          >
-            <Trash2 className="size-3.5" />
-          </Button>
-        )}
-      </ItemActions>
-    </Item>
+    <div
+      data-slot="model-list-content"
+      className={cn(
+        'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-3 **:data-[slot=item]:data-unavailable:opacity-55',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+/** The remove control for one model item, labelled "Remove model" unless an `aria-label` is given. */
+function ModelListItemRemove({ className, children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
+  return (
+    <Button
+      data-slot="model-list-item-remove"
+      aria-label="Remove model"
+      variant="ghost"
+      size="icon-sm"
+      className={cn('text-muted-foreground hover:text-destructive size-7', className)}
+      {...props}
+    >
+      {children ?? <Trash2 className="size-3.5" />}
+    </Button>
   );
 }
 
@@ -134,12 +100,10 @@ interface ModelListSkeletonProps extends React.ComponentProps<'div'> {
 }
 
 /**
- * Placeholder items shown while a model list loads. Each mirrors
- * `ModelListItem`'s shape - a leading media placeholder, two stacked text-line
- * placeholders, and a trailing control placeholder - composed from the shipped
- * `Skeleton`. Presentational and domain-free.
+ * Placeholder items shown while a model list loads, each the shape of a model
+ * item: a media placeholder, two text lines and a trailing control.
  */
-function ModelListSkeleton({ count = 6, className, ...props }: ModelListSkeletonProps) {
+function ModelListSkeleton({ count = 6, className, ...props }: ModelListSkeletonProps): React.ReactNode {
   return (
     <div data-slot="model-list-skeleton" className={cn('flex flex-col gap-2', className)} {...props}>
       {Array.from({ length: count }, (_, index) => (
@@ -156,5 +120,13 @@ function ModelListSkeleton({ count = 6, className, ...props }: ModelListSkeleton
   );
 }
 
-export { ModelList, ModelListItem, ModelListSkeleton };
-export type { ModelListProps, ModelListItemProps, ModelListSkeletonProps };
+export {
+  ModelList,
+  ModelListAction,
+  ModelListContent,
+  ModelListHeader,
+  ModelListItemRemove,
+  ModelListSkeleton,
+  ModelListTitle,
+};
+export type { ModelListSkeletonProps };

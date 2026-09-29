@@ -1,31 +1,53 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ModelList, ModelListItem, ModelListSkeleton } from './model-list';
+
+import { Item, ItemActions, ItemContent, ItemGroup, ItemTitle } from '@/registry/bases/base-ui/ui/item';
+import {
+  ModelList,
+  ModelListAction,
+  ModelListContent,
+  ModelListHeader,
+  ModelListItemRemove,
+  ModelListSkeleton,
+  ModelListTitle,
+} from './model-list';
 
 afterEach(cleanup);
 
 describe('ModelList', () => {
-  it('renders the title, controls, tabs, and children', () => {
+  it('renders the title, controls, tabs, and content', () => {
     render(
-      <ModelList title="Model list" controls={<button type="button">Refresh</button>} tabs={<div data-testid="tabs" />}>
-        <div data-testid="child-a" />
-        <div data-testid="child-b" />
+      <ModelList>
+        <ModelListHeader>
+          <ModelListTitle>Model list</ModelListTitle>
+          <ModelListAction>
+            <button type="button">Refresh</button>
+          </ModelListAction>
+          <div data-testid="tabs" />
+        </ModelListHeader>
+        <ModelListContent>
+          <div data-testid="child-a" />
+          <div data-testid="child-b" />
+        </ModelListContent>
       </ModelList>,
     );
 
-    expect(screen.getByText('Model list')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Model list' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Refresh' })).toBeTruthy();
     expect(screen.getByTestId('tabs')).toBeTruthy();
-    expect(screen.getByTestId('child-a')).toBeTruthy();
-    expect(screen.getByTestId('child-b')).toBeTruthy();
+    const content = document.querySelector('[data-slot="model-list-content"]');
+    expect(content?.querySelector('[data-testid="child-a"]')).toBeTruthy();
+    expect(content?.querySelector('[data-testid="child-b"]')).toBeTruthy();
   });
 
-  it('renders its children in order without transforming them', () => {
+  it('renders its content in order without transforming it', () => {
     render(
-      <ModelList title="Model list">
-        <div data-testid="child">a</div>
-        <div data-testid="child">b</div>
-        <div data-testid="child">c</div>
+      <ModelList>
+        <ModelListContent>
+          <div data-testid="child">a</div>
+          <div data-testid="child">b</div>
+          <div data-testid="child">c</div>
+        </ModelListContent>
       </ModelList>,
     );
 
@@ -34,84 +56,48 @@ describe('ModelList', () => {
   });
 });
 
-// jsdom does not implement PointerEvent, which Base UI's Switch onClick
-// constructs; shim it so a click can toggle the switch under test.
-if (typeof globalThis.PointerEvent === 'undefined') {
-  globalThis.PointerEvent = class PointerEvent extends MouseEvent {} as never;
-}
-
-afterEach(cleanup);
-
-describe('ModelListItem', () => {
-  it('renders the name as the primary line and the id beneath it', () => {
-    render(<ModelListItem name="GPT-4o" modelId="gpt-4o" />);
-
-    expect(screen.getByText('GPT-4o')).toBeTruthy();
-    expect(screen.getByText('gpt-4o')).toBeTruthy();
-  });
-
-  it('renders the media, meta, and action slots', () => {
+describe('ModelListContent', () => {
+  it('dims an item marked unavailable', () => {
     render(
-      <ModelListItem
-        name="GPT-4o"
-        modelId="gpt-4o"
-        media={<span data-testid="logo" />}
-        meta={<span data-testid="chip" />}
-        action={<span data-testid="extra" />}
-      />,
+      <ModelListContent>
+        <ItemGroup>
+          <Item size="sm" data-unavailable>
+            <ItemContent>
+              <ItemTitle>GPT-4o</ItemTitle>
+            </ItemContent>
+          </Item>
+        </ItemGroup>
+      </ModelListContent>,
     );
 
-    expect(document.querySelector('[data-slot="item-media"] [data-testid="logo"]')).toBeTruthy();
-    expect(screen.getByTestId('chip')).toBeTruthy();
-    expect(screen.getByTestId('extra')).toBeTruthy();
+    const content = document.querySelector('[data-slot="model-list-content"]');
+    expect(content?.className).toContain('**:data-[slot=item]:data-unavailable:opacity-55');
+    expect(content?.querySelector('[data-slot="item"]')?.hasAttribute('data-unavailable')).toBe(true);
   });
+});
 
-  it('renders the media node verbatim in the leading slot', () => {
-    render(<ModelListItem name="X" modelId="x" media={<svg data-testid="mark" />} />);
-
-    const media = document.querySelector('[data-slot="item-media"]');
-    expect(media?.querySelector('[data-testid="mark"]')).toBeTruthy();
-  });
-
-  it('reports the next state through onEnabledChange', () => {
-    const onEnabledChange = vi.fn();
-    render(<ModelListItem name="X" modelId="x" enabled={false} onEnabledChange={onEnabledChange} />);
-
-    fireEvent.click(document.querySelector('[data-slot="switch"]') as HTMLElement);
-
-    expect(onEnabledChange).toHaveBeenCalledTimes(1);
-    expect(onEnabledChange).toHaveBeenCalledWith(true);
-  });
-
-  it('dims the item and does not toggle when unavailable', () => {
-    const onEnabledChange = vi.fn();
-    render(<ModelListItem name="X" modelId="x" enabled onEnabledChange={onEnabledChange} unavailable />);
-
-    const item = document.querySelector('[data-slot="model-list-item"]');
-    expect(item?.className).toContain('opacity-55');
-
-    fireEvent.click(document.querySelector('[data-slot="switch"]') as HTMLElement);
-    expect(onEnabledChange).not.toHaveBeenCalled();
-  });
-
-  it('renders a remove control that calls onRemove', () => {
+describe('ModelListItemRemove', () => {
+  it('renders a labelled remove control that calls onClick', () => {
     const onRemove = vi.fn();
-    render(<ModelListItem name="X" modelId="x" onRemove={onRemove} />);
+    render(
+      <Item>
+        <ItemActions>
+          <ModelListItemRemove onClick={onRemove} />
+        </ItemActions>
+      </Item>,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove model' }));
 
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
 
-  it('omits optional slots without throwing', () => {
-    render(<ModelListItem name="Only name" />);
+  it('takes the consumer label in place of the default', () => {
+    render(<ModelListItemRemove aria-label="Remove GPT-4o" />);
 
-    expect(screen.getByText('Only name')).toBeTruthy();
-    expect(document.querySelector('[data-slot="switch"]')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Remove GPT-4o' })).toBeTruthy();
   });
 });
-
-afterEach(cleanup);
 
 describe('ModelListSkeleton', () => {
   it('renders six placeholder items by default', () => {
@@ -129,5 +115,3 @@ describe('ModelListSkeleton', () => {
     expect(items[0].querySelectorAll('[data-slot="skeleton"]')).toHaveLength(4);
   });
 });
-
-export {};
