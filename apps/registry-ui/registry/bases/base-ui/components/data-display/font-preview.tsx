@@ -1,20 +1,7 @@
 import * as React from 'react';
 
+import { formatOf } from '@/registry/bases/base-ui/lib/font-format';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-
-/** Font extension → CSS `format()` hint. */
-const FORMAT_BY_EXTENSION: Record<string, string> = {
-  woff2: 'woff2',
-  woff: 'woff',
-  ttf: 'truetype',
-  otf: 'opentype',
-  eot: 'embedded-opentype',
-};
-
-function formatOf(src: string): string | undefined {
-  const ext = src.split(/[?#]/)[0].split('.').pop()?.toLowerCase();
-  return ext ? FORMAT_BY_EXTENSION[ext] : undefined;
-}
 
 const DEFAULT_SIZES = [36, 24, 18, 14];
 

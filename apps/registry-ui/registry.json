@@ -91,8 +91,12 @@
           "type": "registry:component"
         },
         {
-          "path": "registry/bases/base-ui/components/chat/chat-types.ts",
-          "type": "registry:component"
+          "path": "registry/bases/base-ui/types/chat-role.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/types/chat-agent-identity.ts",
+          "type": "registry:lib"
         }
       ]
     },

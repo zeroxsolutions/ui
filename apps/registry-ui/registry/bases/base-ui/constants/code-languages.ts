@@ -1,5 +1,3 @@
-import type { ComponentPropsWithoutRef, FC, ReactNode } from 'react';
-
 import { CIcon } from '@zeroxsolutions/icons/material/c';
 import { ConsoleIcon } from '@zeroxsolutions/icons/material/console';
 import { CppIcon } from '@zeroxsolutions/icons/material/cpp';
@@ -31,27 +29,16 @@ import { TypescriptIcon } from '@zeroxsolutions/icons/material/typescript';
 import { XmlIcon } from '@zeroxsolutions/icons/material/xml';
 import { YamlIcon } from '@zeroxsolutions/icons/material/yaml';
 
-/** The domain a switcher's built-in option data is drawn from. */
-type LanguageKind = 'locale' | 'code';
-
-/** One selectable language: a stable `value`, a display `label`, an optional leading icon. */
-interface LanguageOption {
-  value: string;
-  label: string;
-  icon?: ReactNode;
-}
-
-/** A Material icon component — scales by `size` and accepts the usual svg props (`className`, …). */
-type LanguageIcon = FC<{ size?: string | number } & ComponentPropsWithoutRef<'svg'>>;
+import type { LanguageIcon } from '@/registry/bases/base-ui/types/language-option';
 
 /**
- * The programming languages the design system can syntax-highlight (the shiki
- * registry in `src/lib/shiki.ts`), each with a display label and its full-color
- * Material file-type icon. This is a deliberate, self-contained copy of the id
- * set — importing it drags in no Shiki highlighter — kept in sync with the
- * highlighter's `CODE_LANGUAGE_IDS` by a co-located test. A few ids reuse a
- * near-neighbour icon (`jsx`/`tsx` → React, `shellscript` → console,
- * `dockerfile` → docker, `sql` → database, `ini` → document, `scss` → sass).
+ * The programming languages the design system can syntax-highlight (the Shiki
+ * registry in `lib/shiki.ts`), each with a display label and its full-color
+ * Material file-type icon. A self-contained copy of the id set, so importing it
+ * loads no Shiki highlighter; `lib/language-options.spec.tsx` fails when it
+ * drifts from the highlighter's `CODE_LANGUAGE_IDS`. A few ids reuse a
+ * near-neighbour icon (`jsx`/`tsx` -> React, `shellscript` -> console,
+ * `dockerfile` -> docker, `sql` -> database, `ini` -> document, `scss` -> sass).
  */
 const CODE_LANGUAGES: readonly {
   id: string;
@@ -91,13 +78,10 @@ const CODE_LANGUAGES: readonly {
   { id: 'lua', label: 'Lua', Icon: LuaIcon },
 ];
 
-/** The canonical code-language ids this module offers, in display order (for the sync test). */
-const CODE_LANGUAGE_OPTION_IDS: readonly string[] = CODE_LANGUAGES.map((l) => l.id);
-
 /**
- * Common code-fence aliases → the canonical id in {@link CODE_LANGUAGES}, so a
+ * Common code-fence aliases -> the canonical id in {@link CODE_LANGUAGES}, so a
  * value like `ts` or `py` (as stored by an editor code block) still resolves to
- * its option for display. Mirrors the highlighter's alias table for the ids we list.
+ * its option for display. Mirrors the highlighter's alias table for the ids listed here.
  */
 const CODE_ALIASES: Record<string, string> = {
   js: 'javascript',
@@ -122,55 +106,4 @@ const CODE_ALIASES: Record<string, string> = {
   htm: 'html',
 };
 
-/** The canonical code id for a possibly-aliased value (`ts` → `typescript`); unchanged if unknown. */
-function canonicalCodeId(value: string): string {
-  return CODE_ALIASES[value] ?? value;
-}
-
-const CODE_ICON_BY_ID: Record<string, LanguageIcon> = Object.fromEntries(CODE_LANGUAGES.map((l) => [l.id, l.Icon]));
-
-/**
- * The full-color Material icon component for a code-language id — resolving
- * aliases (`ts` → `typescript`), falling back to a generic document icon for ids
- * outside the highlightable set. Lets other surfaces (e.g. a read-only code-block
- * header) show the same icons the switcher uses. Self-scales at `size="1em"`.
- */
-function codeLanguageIcon(id: string): LanguageIcon {
-  return CODE_ICON_BY_ID[canonicalCodeId(id)] ?? DocumentIcon;
-}
-
-let cachedCodeOptions: LanguageOption[] | null = null;
-
-/**
- * The built-in `kind="code"` options: every highlightable language as a
- * {@link LanguageOption} carrying its Material icon. Computed once and reused.
- */
-function codeLanguageOptions(): LanguageOption[] {
-  cachedCodeOptions ??= CODE_LANGUAGES.map(({ id, label, Icon }) => ({
-    value: id,
-    label,
-    icon: <Icon aria-hidden />,
-  }));
-  return cachedCodeOptions;
-}
-
-/** The native language name for a BCP-47 code (`vi` → `Tiếng Việt`), or the raw code as fallback. */
-function localeLabel(code: string): string {
-  try {
-    return new Intl.DisplayNames([code], { type: 'language' }).of(code) ?? code;
-  } catch {
-    return code;
-  }
-}
-
-/**
- * The built-in `kind="locale"` options: each BCP-47 code labelled with its own
- * native language name. Pass an explicit `options` to the switcher to override
- * these labels.
- */
-function localeOptions(codes: readonly string[]): LanguageOption[] {
-  return codes.map((code) => ({ value: code, label: localeLabel(code) }));
-}
-
-export { CODE_LANGUAGE_OPTION_IDS, canonicalCodeId, codeLanguageIcon, codeLanguageOptions, localeOptions };
-export type { LanguageKind, LanguageOption, LanguageIcon };
+export { CODE_LANGUAGES, CODE_ALIASES };

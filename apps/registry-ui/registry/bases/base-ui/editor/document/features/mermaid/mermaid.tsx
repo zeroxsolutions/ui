@@ -11,7 +11,7 @@ import {
   CollapsibleCardTitle,
   CollapsibleCardTrigger,
 } from '@/registry/bases/base-ui/components/layout/collapsible-card';
-import { codeLanguageIcon } from '@/registry/bases/base-ui/components/language-switcher-data';
+import { codeLanguageIcon } from '@/registry/bases/base-ui/lib/language-options';
 import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';

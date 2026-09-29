@@ -1,30 +1,8 @@
 import * as React from 'react';
 import { ChevronRight } from 'lucide-react';
 
+import { useControllableState } from '@/registry/bases/base-ui/hooks/use-controllable-state';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-
-/**
- * Minimal controlled/uncontrolled state: uses `prop` when provided, otherwise an
- * internal state seeded from `defaultProp`. Mirrors the Base UI / Radix triad.
- */
-function useControllableState<T>(opts: {
-  prop: T | undefined;
-  defaultProp: T;
-  onChange?: (value: T) => void;
-}): [T, (next: T) => void] {
-  const { prop, defaultProp, onChange } = opts;
-  const [uncontrolled, setUncontrolled] = React.useState<T>(defaultProp);
-  const controlled = prop !== undefined;
-  const value = controlled ? (prop as T) : uncontrolled;
-  const setValue = React.useCallback(
-    (next: T) => {
-      if (!controlled) setUncontrolled(next);
-      onChange?.(next);
-    },
-    [controlled, onChange],
-  );
-  return [value, setValue];
-}
 
 interface FileTreeContextValue {
   selectedValue: string | undefined;

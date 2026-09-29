@@ -16,16 +16,8 @@ import {
 } from '@/registry/bases/base-ui/ui/combobox';
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
 
-import {
-  canonicalCodeId,
-  codeLanguageOptions,
-  localeOptions,
-  type LanguageKind,
-  type LanguageOption,
-} from '../language-switcher-data';
-
-export { codeLanguageOptions, localeOptions } from '../language-switcher-data';
-export type { LanguageKind, LanguageOption } from '../language-switcher-data';
+import { canonicalCodeId, codeLanguageOptions, localeOptions } from '@/registry/bases/base-ui/lib/language-options';
+import type { LanguageKind, LanguageOption } from '@/registry/bases/base-ui/types/language-option';
 
 /** Props shared by every display form. Controlled: the consumer owns `value`. */
 interface LanguageSwitcherBaseProps {

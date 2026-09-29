@@ -3,7 +3,7 @@ import { Sparkles } from 'lucide-react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ChatEmptyState } from './chat-empty-state';
-import type { ChatSuggestion } from '../chat/chat-types';
+import type { ChatSuggestion } from '@/registry/bases/base-ui/types/chat-suggestion';
 
 afterEach(cleanup);
 

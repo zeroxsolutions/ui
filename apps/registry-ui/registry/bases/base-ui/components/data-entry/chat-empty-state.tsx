@@ -10,7 +10,7 @@ import {
 } from '@/registry/bases/base-ui/ui/empty';
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@/registry/bases/base-ui/ui/item';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import type { ChatSuggestion } from '../chat/chat-types';
+import type { ChatSuggestion } from '@/registry/bases/base-ui/types/chat-suggestion';
 
 /**
  * ChatEmptyState — the starter shown in an empty conversation: a centered

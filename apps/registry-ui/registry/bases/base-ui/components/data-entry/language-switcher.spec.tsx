@@ -1,9 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { CODE_LANGUAGE_IDS } from '../../lib/shiki';
-import { LanguageSwitcher, codeLanguageOptions, localeOptions } from './language-switcher';
-import { CODE_LANGUAGE_OPTION_IDS } from '../language-switcher-data';
+import { LanguageSwitcher } from './language-switcher';
 
 // jsdom shims Base UI's Combobox/ToggleGroup reach for on mount.
 beforeAll(() => {
@@ -20,38 +18,6 @@ beforeAll(() => {
 });
 
 afterEach(cleanup);
-
-describe('codeLanguageOptions', () => {
-  it('offers every highlightable language, each labelled and iconed', () => {
-    const options = codeLanguageOptions();
-    expect(options.length).toBeGreaterThan(0);
-    for (const option of options) {
-      expect(option.value).toBeTruthy();
-      expect(option.label).toBeTruthy();
-      expect(option.icon).toBeTruthy();
-    }
-  });
-
-  it('renders a Material svg icon for a code language', () => {
-    const ts = codeLanguageOptions().find((o) => o.value === 'typescript');
-    const { container } = render(<>{ts?.icon}</>);
-    expect(container.querySelector('svg')).toBeTruthy();
-  });
-
-  it('stays in sync with the highlighter language set (no drift)', () => {
-    expect([...CODE_LANGUAGE_OPTION_IDS].sort()).toEqual([...CODE_LANGUAGE_IDS].sort());
-  });
-});
-
-describe('localeOptions', () => {
-  it('labels each BCP-47 code with its native language name', () => {
-    const byValue = Object.fromEntries(localeOptions(['en', 'vi', 'ja']).map((o) => [o.value, o.label]));
-    expect(byValue.en).toBe('English');
-    // A name was resolved (not the raw code) for the non-English locales.
-    expect(byValue.vi).not.toBe('vi');
-    expect(byValue.ja).not.toBe('ja');
-  });
-});
 
 describe('LanguageSwitcher display forms', () => {
   it('renders the dropdown form by default, with an accessible trigger', () => {

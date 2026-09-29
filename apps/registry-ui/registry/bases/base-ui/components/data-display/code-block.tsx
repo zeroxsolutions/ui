@@ -1,5 +1,4 @@
 import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area';
-import { Fragment, useEffect, useState } from 'react';
 
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
@@ -10,9 +9,11 @@ import {
   CollapsibleCardTitle,
   CollapsibleCardTrigger,
 } from '@/registry/bases/base-ui/components/layout/collapsible-card';
-import { codeLanguageIcon } from '@/registry/bases/base-ui/components/language-switcher-data';
+import { HighlightedCode } from '@/registry/bases/base-ui/components/data-display/highlighted-code';
 import { ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
-import { highlightToLines, type HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
+import { useHighlightedLines } from '@/registry/bases/base-ui/hooks/use-highlighted-lines';
+import { isPlainLanguage, languageLabel } from '@/registry/bases/base-ui/lib/code-language';
+import { codeLanguageIcon } from '@/registry/bases/base-ui/lib/language-options';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**
@@ -41,115 +42,6 @@ interface CodeBlockProps {
   /** Shiki language id (e.g. `ts`, `json`, `bash`); drives highlighting + header. */
   language?: string;
   className?: string;
-}
-
-/** Languages with no real grammar — no header, no highlight (plain `<pre>`). */
-const PLAIN_LANGUAGES = new Set(['', 'text', 'plaintext', 'plain', 'txt']);
-
-/** Display name for a language id; falls back to the id itself when unlisted. */
-const LANGUAGE_LABEL: Record<string, string> = {
-  ts: 'TypeScript',
-  tsx: 'TSX',
-  js: 'JavaScript',
-  jsx: 'JSX',
-  mjs: 'JavaScript',
-  cjs: 'JavaScript',
-  json: 'JSON',
-  jsonc: 'JSON',
-  py: 'Python',
-  python: 'Python',
-  rb: 'Ruby',
-  ruby: 'Ruby',
-  go: 'Go',
-  rs: 'Rust',
-  rust: 'Rust',
-  java: 'Java',
-  kt: 'Kotlin',
-  kotlin: 'Kotlin',
-  c: 'C',
-  cpp: 'C++',
-  'c++': 'C++',
-  cs: 'C#',
-  csharp: 'C#',
-  php: 'PHP',
-  swift: 'Swift',
-  lua: 'Lua',
-  sql: 'SQL',
-  sh: 'Shell',
-  bash: 'Shell',
-  zsh: 'Shell',
-  shell: 'Shell',
-  shellscript: 'Shell',
-  html: 'HTML',
-  xml: 'XML',
-  css: 'CSS',
-  scss: 'SCSS',
-  less: 'Less',
-  yaml: 'YAML',
-  yml: 'YAML',
-  toml: 'TOML',
-  md: 'Markdown',
-  mdx: 'MDX',
-  markdown: 'Markdown',
-  diff: 'Diff',
-  dockerfile: 'Dockerfile',
-  graphql: 'GraphQL',
-};
-
-function isPlainLanguage(language: string | undefined): boolean {
-  return !language || PLAIN_LANGUAGES.has(language.toLowerCase());
-}
-
-function languageLabel(language: string): string {
-  return LANGUAGE_LABEL[language.toLowerCase()] ?? language;
-}
-
-/**
- * Tokenize `code` as `language` via the shared Shiki highlighter. Returns `null`
- * until the (async, lazily loaded) grammar resolves and for unknown languages —
- * the caller renders the raw string meanwhile. Unmount-safe; re-runs on code or
- * language change.
- */
-function useHighlightedLines(code: string, language: string | undefined): HighlightLine[] | null {
-  const [lines, setLines] = useState<HighlightLine[] | null>(null);
-
-  useEffect(() => {
-    if (isPlainLanguage(language)) {
-      setLines(null);
-      return undefined;
-    }
-    let active = true;
-    setLines(null);
-    highlightToLines(code, language as string).then((result) => {
-      if (active) setLines(result);
-    });
-    return () => {
-      active = false;
-    };
-  }, [code, language]);
-
-  return lines;
-}
-
-function HighlightedCode({ lines }: { lines: HighlightLine[] }) {
-  return (
-    <>
-      {lines.map((line, i) => (
-        <Fragment key={i}>
-          {line.map((token, j) =>
-            token.style ? (
-              <span key={j} style={token.style}>
-                {token.content}
-              </span>
-            ) : (
-              <Fragment key={j}>{token.content}</Fragment>
-            ),
-          )}
-          {i < lines.length - 1 ? '\n' : null}
-        </Fragment>
-      ))}
-    </>
-  );
 }
 
 function CodeBlock({ code, language, className }: CodeBlockProps) {

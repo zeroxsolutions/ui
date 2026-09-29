@@ -1,7 +1,8 @@
 import { type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import type { ChatAgentIdentity, ChatRole } from '../chat/chat-types';
+import type { ChatAgentIdentity } from '@/registry/bases/base-ui/types/chat-agent-identity';
+import type { ChatRole } from '@/registry/bases/base-ui/types/chat-role';
 
 /**
  * ChatMessage - the wrapper for one message row, agnostic to how the
