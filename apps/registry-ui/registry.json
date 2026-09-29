@@ -241,6 +241,47 @@
       ]
     },
     {
+      "name": "copy-button",
+      "type": "registry:component",
+      "title": "Copy Button",
+      "description": "An icon button that copies its value to the clipboard, showing a check and carrying data-copied until its timeout resets it.",
+      "categories": ["feedback"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/button"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/feedback/copy-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "permission-card",
+      "type": "registry:component",
+      "title": "Permission Card",
+      "description": "An inline, non-modal AI-consent request that stays in scrollback after it resolves, switching between its decision and resolved parts as the host settles its status.",
+      "categories": ["feedback"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/utils"],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)"
+        },
+        "light": {
+          "success": "oklch(0.627 0.19 149)"
+        },
+        "dark": {
+          "success": "oklch(0.723 0.19 149)"
+        }
+      },
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/feedback/permission-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "status-indicator",
       "type": "registry:component",
       "title": "Status Indicator",
@@ -269,6 +310,39 @@
         {
           "path": "registry/bases/base-ui/types/status-tone.ts",
           "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "tab-close-button",
+      "type": "registry:component",
+      "title": "Tab Close Button",
+      "description": "The trailing control on an editor tab, showing the unsaved dot until the tab's hover, focus or active state reveals its close X.",
+      "categories": ["feedback"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/utils",
+        "https://ui.zeroxsolutions.com/r/unsaved-indicator.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/feedback/tab-close-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "unsaved-indicator",
+      "type": "registry:component",
+      "title": "Unsaved Indicator",
+      "description": "The unsaved-changes dot an editor shows on a tab, announced as an image named Unsaved changes.",
+      "categories": ["feedback"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/feedback/unsaved-indicator.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -478,6 +552,83 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tree-item-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "copy-button-demo",
+      "type": "registry:example",
+      "title": "Copy Button Demo",
+      "description": "An install command with its own copy button, announcing the copy inline.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/copy-button.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/copy-button-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "permission-card-demo",
+      "type": "registry:example",
+      "title": "Permission Card Demo",
+      "description": "A deploy-approval request whose decision buttons resolve into a resolved outcome.",
+      "categories": ["examples"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/button-group",
+        "@shadcn/card",
+        "@shadcn/dropdown-menu",
+        "https://ui.zeroxsolutions.com/r/permission-card.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/permission-card-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "status-indicator-demo",
+      "type": "registry:example",
+      "title": "Status Indicator Demo",
+      "description": "Every status tone beside its label, with a pulsing connecting state.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/status-indicator.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/status-indicator-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "tab-close-button-demo",
+      "type": "registry:example",
+      "title": "Tab Close Button Demo",
+      "description": "Two editor tabs, one saved and one with unsaved changes.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tab-close-button.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/tab-close-button-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "unsaved-indicator-demo",
+      "type": "registry:example",
+      "title": "Unsaved Indicator Demo",
+      "description": "The unsaved dot beside a tab label with pending edits.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/unsaved-indicator.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/unsaved-indicator-demo.tsx",
           "type": "registry:example"
         }
       ]

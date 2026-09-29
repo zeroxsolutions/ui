@@ -33,6 +33,7 @@ const EXPECTED_SLOT: Record<string, string> = {
   'button-secondary': 'button',
   'chat-message-demo': 'chat-message',
   'chat-suggestion-item-demo': 'chat-suggestion-item',
+  'copy-button-demo': 'copy-button',
   'emoji-appearance-toggle-group-demo': 'emoji-appearance-toggle-group',
   'emoji-picker-demo': 'emoji-picker-content',
   'language-combobox-demo': 'combobox-trigger',
@@ -40,9 +41,13 @@ const EXPECTED_SLOT: Record<string, string> = {
   'number-field-demo': 'input-group',
   'panel-row-demo': 'panel-row',
   'password-input-demo': 'input-group',
+  'permission-card-demo': 'permission-card',
   'resize-handle-demo': 'resize-handle',
+  'status-indicator-demo': 'status-indicator',
+  'tab-close-button-demo': 'tab-close-button',
   'tag-input-demo': 'tag-input',
   'tree-item-demo': 'tree-item',
+  'unsaved-indicator-demo': 'unsaved-indicator',
 };
 
 const EXAMPLES = Object.entries(MODULES).flatMap(([path, module]) =>
