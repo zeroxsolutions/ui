@@ -54,6 +54,11 @@ Read from npm on 2026-09-29: `fumadocs-mdx` 15.4.5 (peer `next ^15.3.0 || ^16.0.
 upstream declares it and imports it nowhere. Each has one declarer, so each is a plain pin in this
 app's `package.json`.
 
+fumadocs-mdx from 15.0.13 on emits a Turbopack rule Next accepts only from 16.2.0, and
+`@opennextjs/cloudflare` 1.20.7 peers `next >=16.3.6` (npm, 2026-09-30). The app pinned
+`next ~16.1.6`, so Next moves first, to 16.3.7, and the adapter to 1.20.7. The repo root and the app
+both declare `next`, so it becomes one catalog entry.
+
 ### Content pipeline
 
 | File                     | Holds                                                                                                                                                       |
@@ -64,10 +69,12 @@ app's `package.json`.
 | `src/lib/source.ts`      | `loader({ baseUrl: '/docs', source: docs.toFumadocsSource() })`                                                                                             |
 | `src/mdx-components.tsx` | headings with anchors, `pre`/`code` with a copy button, `Steps`, `CodeTabs`, `Callout`, `ComponentPreview`, `ComponentSource`                               |
 
-`ComponentPreview` and `ComponentSource` take a demo or item name and resolve it through
-`registry/bases/base-ui/examples/__index__.tsx`: name to a lazy import of the demo and its file path.
-A new target writes that file from `examples/*.tsx`, and `build`, `typecheck` and `test` depend on it
-and on the `fumadocs-mdx` generation; the file is gitignored, so a target missing that dependency
+`ComponentPreview` and `ComponentSource` take a demo or item name and resolve it through two
+generated files, as upstream's generator writes two: `examples/__index__.tsx` maps a name to the files
+it ships and is read on the server, `examples/__components__.tsx` maps a name to a lazy component and
+is imported only from a client component, because the demos use hooks and carry no client directive.
+A new target writes both from `examples/*.tsx` and `registry.json`, and `build` and `test` depend on it
+and on the `fumadocs-mdx` generation (the app has no `typecheck` target); the file is gitignored, so a target missing that dependency
 fails with a missing module rather than going green. `ComponentSource` reads the file at build time,
 which is safe only because every route that renders it is `force-static`.
 
@@ -95,16 +102,16 @@ deleted: the shell replaces it and no item published it.
 
 ### Routes
 
-| Path                                             | File                                       | Renders                                                                                                                                                                                                               |
-| ------------------------------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                                              | `src/app/(app)/page.tsx`                   | a landing page: what the registry is, the install line, links to Components and Blocks                                                                                                                                |
-| `/docs/...`                                      | `src/app/(app)/docs/[[...slug]]/page.tsx`  | the MDX body, `page.data.toc`, `findNeighbour` for the pager; `force-static`, `dynamicParams = false`, `generateStaticParams` from `source`                                                                           |
-| `/blocks`                                        | `src/app/(app)/blocks/page.tsx`            | each block in an iframe                                                                                                                                                                                               |
-| `/view/<name>`                                   | `src/app/(view)/view/[name]/page.tsx`      | one block, full page; `force-static`                                                                                                                                                                                  |
-| `/api/search`                                    | `src/app/api/search/route.ts`              | `staticGET` from `createFromSource(source)`, `revalidate = false`; the command menu reads it with `staticClient` from `fumadocs-core/search/client/orama-static`                                                      |
-| `/llms.txt`, `/llms-full.txt`, `/docs/<slug>.md` | route handlers                             | fumadocs' `llms()` over `page.data.getText('processed')`; every `.md` path listed in `generateStaticParams`. Upstream lists none and reads the file with `fs.readFileSync` on first request, which a Worker cannot do |
-| OG image                                         | `opengraph-image.tsx` beside the docs page | rendered per page at build, with the pages' params                                                                                                                                                                    |
-| `/sitemap.xml`, `/robots.txt`                    | `src/app/sitemap.ts`, `src/app/robots.ts`  | static                                                                                                                                                                                                                |
+| Path                                             | File                                      | Renders                                                                                                                                                                                                               |
+| ------------------------------------------------ | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                              | `src/app/(app)/page.tsx`                  | a landing page: what the registry is, the install line, links to Components and Blocks                                                                                                                                |
+| `/docs/...`                                      | `src/app/(app)/docs/[[...slug]]/page.tsx` | the MDX body, `page.data.toc`, a pager that walks the flattened tree and skips the external links (`findNeighbour` would hand it one); `force-static`, `dynamicParams = false`, `generateStaticParams` from `source`  |
+| `/blocks`                                        | `src/app/(app)/blocks/page.tsx`           | each block in an iframe                                                                                                                                                                                               |
+| `/view/<name>`                                   | `src/app/(view)/view/[name]/page.tsx`     | one block, full page; `force-static`                                                                                                                                                                                  |
+| `/api/search`                                    | `src/app/api/search/route.ts`             | `staticGET` from `createFromSource(source)`, `revalidate = false`; the command menu reads it with `staticClient` from `fumadocs-core/search/client/orama-static`                                                      |
+| `/llms.txt`, `/llms-full.txt`, `/docs/<slug>.md` | route handlers                            | fumadocs' `llms()` over `page.data.getText('processed')`; every `.md` path listed in `generateStaticParams`. Upstream lists none and reads the file with `fs.readFileSync` on first request, which a Worker cannot do |
+| `/og/docs/<slug>/image.png`                      | a route handler, fumadocs' own pattern    | one image per page, rendered at build from the pages' params. Next refuses an `opengraph-image` file inside an optional catch-all                                                                                     |
+| `/sitemap.xml`, `/robots.txt`                    | `src/app/sitemap.ts`, `src/app/robots.ts` | static                                                                                                                                                                                                                |
 
 `src/app/api/hello` is deleted. `/charts`, `/colors`, `/create`, `rss.xml` and `r/registries.json`
 are not built: this repo has nothing for them to show.
@@ -115,7 +122,8 @@ through `ASSETS` and writes nothing (OpenNext source, read 2026-09-29).
 `wrangler.jsonc` gains `"keep_names": false`. `next-themes` sets the theme class from an inline script
 before hydration; with the bundler's name-keeping on, that script calls a helper the page never
 defines and throws, and the theme is set only after hydration, which no check made after hydration
-sees.
+sees. A render at request time was measured carrying `__name(...)` in that script; every route in this
+frame is prerendered, so no case here fails when the line is removed.
 
 ### Content tree
 
@@ -195,9 +203,10 @@ and one for the unhappy path: an unknown `/docs/...` answers the not-found page.
 - How a page looks; no check compares pixels.
 - The API Reference tables are written by hand, as upstream's are. Nothing compares them with a part's
   props, so a changed prop leaves its table wrong until someone edits it.
-- The worker's size: 42 compiled pages and their demos go into one worker, whose limit is 3 MiB
-  gzipped on the free plan and 10 MiB on paid. The first build measures it; near the limit, the demos
-  move behind lazy imports as upstream's `__components__` does.
+- The worker's size. Measured on the frame (`wrangler deploy --dry-run`, 2026-09-30): 6773 KiB
+  gzipped, over the free plan's 3 MiB and under the paid plan's 10 MiB. The demos are already lazy;
+  the weight is two copies of the Shiki grammars, `next` itself and the share-image renderer. Which
+  plan it deploys on, and any cut, belong to the deploy spec.
 - The known component defects (the AvatarPicker slot, FrontmatterFormFieldControl rejecting
   `Textarea`, TooltipTrigger's `data-slot`, `combobox-value`) are reported where an API Reference meets
   them, not fixed here.
