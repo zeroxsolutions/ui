@@ -389,6 +389,104 @@
       ]
     },
     {
+      "name": "avatar-picker",
+      "type": "registry:component",
+      "title": "Avatar Picker",
+      "description": "A Popover-based avatar editor whose emoji, upload and colour panes edit one avatar value.",
+      "categories": ["layout"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/popover",
+        "@shadcn/tabs",
+        "@shadcn/utils",
+        "https://ui.zeroxsolutions.com/r/emoji-picker.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/avatar-picker.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "center",
+      "type": "registry:component",
+      "title": "Center",
+      "description": "A box that centres its children on both axes, in block or inline flow, with its element swappable through render.",
+      "categories": ["layout"],
+      "dependencies": ["@base-ui/react", "class-variance-authority"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/center.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "collapsible-card",
+      "type": "registry:component",
+      "title": "Collapsible Card",
+      "description": "A collapsible card with a header and body, open by default, in a bordered, muted or plain surface variant.",
+      "categories": ["layout"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/collapsible", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/collapsible-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "file-tree",
+      "type": "registry:component",
+      "title": "File Tree",
+      "description": "An accessible file tree that drives keyboard navigation and owns selection and folder expansion, controlled or uncontrolled.",
+      "categories": ["layout"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/file-tree.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-controllable-state.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "floating-toolbar",
+      "type": "registry:component",
+      "title": "Floating Toolbar",
+      "description": "A floating, blurred card-colour toolbar shell, a toolbar landmark around the tools the caller composes.",
+      "categories": ["layout"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/floating-toolbar.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "frontmatter-form",
+      "type": "registry:component",
+      "title": "Frontmatter Form",
+      "description": "A frontmatter editor whose root holds the document and field setters for the consumer's composed fields.",
+      "categories": ["layout"],
+      "registryDependencies": ["@shadcn/field", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/layout/frontmatter-form.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "panel-field-group",
       "type": "registry:component",
       "title": "Panel Field Group",
@@ -729,6 +827,96 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/panel-field-label-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "avatar-picker-demo",
+      "type": "registry:example",
+      "title": "Avatar Picker Demo",
+      "description": "A colour-tinted tile that opens an emoji and colour editor over AvatarPicker.",
+      "categories": ["examples"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/tabs", "https://ui.zeroxsolutions.com/r/avatar-picker.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/avatar-picker-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "center-demo",
+      "type": "registry:example",
+      "title": "Center Demo",
+      "description": "A dashed frame with its content centred on both axes.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/center.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/center-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "collapsible-card-demo",
+      "type": "registry:example",
+      "title": "Collapsible Card Demo",
+      "description": "A bordered card whose body collapses behind its own trigger.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/collapsible-card.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/collapsible-card-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "file-tree-demo",
+      "type": "registry:example",
+      "title": "File Tree Demo",
+      "description": "A small file tree with one folder expanded and a leaf selected by default.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/file-tree.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/file-tree-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "floating-toolbar-demo",
+      "type": "registry:example",
+      "title": "Floating Toolbar Demo",
+      "description": "A row of formatting buttons in the toolbar's own shell.",
+      "categories": ["examples"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/button", "https://ui.zeroxsolutions.com/r/floating-toolbar.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/floating-toolbar-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "frontmatter-form-demo",
+      "type": "registry:example",
+      "title": "Frontmatter Form Demo",
+      "description": "A skill's frontmatter, a name and its description, each bound through FrontmatterFormFieldControl.",
+      "categories": ["examples"],
+      "registryDependencies": [
+        "@shadcn/field",
+        "@shadcn/input",
+        "https://ui.zeroxsolutions.com/r/frontmatter-form.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/frontmatter-form-demo.tsx",
           "type": "registry:example"
         }
       ]
