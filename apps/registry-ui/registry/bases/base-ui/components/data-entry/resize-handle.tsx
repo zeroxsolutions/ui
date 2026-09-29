@@ -9,10 +9,13 @@ import { shouldStartDrag } from '@/registry/bases/base-ui/lib/resize-drag';
  * click, jitter, or double-click never nudges the width. Uses pointer capture so
  * the drag survives the pointer leaving the 1px grip, and `preventDefault` +
  * `touch-action: none` so it never steals focus or selects text. Double-click
- * fires `onToggle` (e.g. collapse/expand the panel). A caller's own pointer or
- * double-click handler runs first, and calling `event.preventDefault()` in it
- * skips the matching own action (arming or continuing the drag, ending it, or
- * toggling).
+ * fires `onToggle` (e.g. collapse/expand the panel). A caller's own
+ * `onPointerDown`, `onPointerMove` or `onDoubleClick` runs first, and calling
+ * `event.preventDefault()` in it skips the matching own action (arming,
+ * reporting the drag delta, or toggling). The `onPointerUp` / `onPointerCancel`
+ * / `onLostPointerCapture` cleanup always ends the drag after the caller's
+ * handler runs, whatever it does - skipping it there would strand the drag
+ * armed once the pointer is gone.
  */
 // `onDrag` below is a resize-width delta, not the native HTML5 drag event - omit
 // the native handler so its signature does not clash with ours.
@@ -88,15 +91,15 @@ function ResizeHandle({
       }}
       onPointerUp={(event) => {
         onPointerUp?.(event);
-        if (!event.defaultPrevented) end();
+        end();
       }}
       onPointerCancel={(event) => {
         onPointerCancel?.(event);
-        if (!event.defaultPrevented) end();
+        end();
       }}
       onLostPointerCapture={(event) => {
         onLostPointerCapture?.(event);
-        if (!event.defaultPrevented) end();
+        end();
       }}
       onDoubleClick={(event) => {
         onDoubleClick?.(event);

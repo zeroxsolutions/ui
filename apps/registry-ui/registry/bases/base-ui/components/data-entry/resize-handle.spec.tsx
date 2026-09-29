@@ -123,82 +123,6 @@ describe('ResizeHandle composed handlers honor a caller preventDefault', () => {
     expect(onDrag).not.toHaveBeenCalled();
   });
 
-  it("keeps the drag armed when a caller's onPointerUp prevents the default, but still runs", () => {
-    const onDrag = vi.fn();
-    const onPointerUp = vi.fn();
-    const { container } = render(
-      <ResizeHandle
-        onDrag={onDrag}
-        onToggle={() => {}}
-        onPointerUp={(event) => {
-          onPointerUp(event);
-          event.preventDefault();
-        }}
-      />,
-    );
-    const handle = container.firstElementChild!;
-
-    fireEvent.pointerDown(handle, { clientX: 100, pointerId: 1 });
-    fireEvent.pointerMove(handle, { clientX: 110, pointerId: 1 });
-    fireEvent.pointerUp(handle, { clientX: 110, pointerId: 1 });
-    fireEvent.pointerMove(handle, { clientX: 120, pointerId: 1 });
-
-    expect(onPointerUp).toHaveBeenCalledTimes(1);
-    expect(onDrag).toHaveBeenCalledWith(10);
-  });
-
-  it("keeps the drag armed when a caller's onPointerCancel prevents the default, but still runs", () => {
-    const onDrag = vi.fn();
-    const onPointerCancel = vi.fn();
-    const { container } = render(
-      <ResizeHandle
-        onDrag={onDrag}
-        onToggle={() => {}}
-        onPointerCancel={(event) => {
-          onPointerCancel(event);
-          event.preventDefault();
-        }}
-      />,
-    );
-    const handle = container.firstElementChild!;
-
-    fireEvent.pointerDown(handle, { clientX: 100, pointerId: 1 });
-    fireEvent.pointerMove(handle, { clientX: 110, pointerId: 1 });
-    // pointercancel is not cancelable by default; the gate is exercised the
-    // same way regardless of event type, so force it cancelable here.
-    fireEvent.pointerCancel(handle, { clientX: 110, pointerId: 1, cancelable: true });
-    fireEvent.pointerMove(handle, { clientX: 120, pointerId: 1 });
-
-    expect(onPointerCancel).toHaveBeenCalledTimes(1);
-    expect(onDrag).toHaveBeenCalledWith(10);
-  });
-
-  it("keeps the drag armed when a caller's onLostPointerCapture prevents the default, but still runs", () => {
-    const onDrag = vi.fn();
-    const onLostPointerCapture = vi.fn();
-    const { container } = render(
-      <ResizeHandle
-        onDrag={onDrag}
-        onToggle={() => {}}
-        onLostPointerCapture={(event) => {
-          onLostPointerCapture(event);
-          event.preventDefault();
-        }}
-      />,
-    );
-    const handle = container.firstElementChild!;
-
-    fireEvent.pointerDown(handle, { clientX: 100, pointerId: 1 });
-    fireEvent.pointerMove(handle, { clientX: 110, pointerId: 1 });
-    // lostpointercapture is not cancelable by default; force it cancelable
-    // here for the same reason as onPointerCancel above.
-    fireEvent.lostPointerCapture(handle, { clientX: 110, pointerId: 1, cancelable: true });
-    fireEvent.pointerMove(handle, { clientX: 120, pointerId: 1 });
-
-    expect(onLostPointerCapture).toHaveBeenCalledTimes(1);
-    expect(onDrag).toHaveBeenCalledWith(10);
-  });
-
   it("skips onToggle when a caller's onDoubleClick prevents the default, but still runs", () => {
     const onToggle = vi.fn();
     const onDoubleClick = vi.fn();
@@ -217,5 +141,33 @@ describe('ResizeHandle composed handlers honor a caller preventDefault', () => {
 
     expect(onDoubleClick).toHaveBeenCalledTimes(1);
     expect(onToggle).not.toHaveBeenCalled();
+  });
+});
+
+describe("ResizeHandle's cleanup handlers ignore a caller preventDefault", () => {
+  it("still ends the drag when a caller's onPointerUp calls preventDefault, but still runs", () => {
+    const onDrag = vi.fn();
+    const onPointerUp = vi.fn();
+    const { container } = render(
+      <ResizeHandle
+        onDrag={onDrag}
+        onToggle={() => {}}
+        onPointerUp={(event) => {
+          onPointerUp(event);
+          event.preventDefault();
+        }}
+      />,
+    );
+    const handle = container.firstElementChild!;
+
+    fireEvent.pointerDown(handle, { clientX: 100, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientX: 110, pointerId: 1 });
+    fireEvent.pointerUp(handle, { clientX: 110, pointerId: 1 });
+    // No pointerdown before this move - a preventDefault'd onPointerUp must
+    // still end the drag, or a later hover would report a stray delta.
+    fireEvent.pointerMove(handle, { clientX: 120, pointerId: 1 });
+
+    expect(onPointerUp).toHaveBeenCalledTimes(1);
+    expect(onDrag).not.toHaveBeenCalled();
   });
 });
