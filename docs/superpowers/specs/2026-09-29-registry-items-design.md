@@ -15,7 +15,8 @@ Success is the gate green with `registry.spec.ts` in it, and `shadcn build` plus
 ## Scope
 
 In: `registry.json`, `examples/`, `pages/demo-page.tsx`, the import of an example in
-`src/app/page.tsx`, and the new `registry.spec.ts` and `examples/examples.spec.tsx`.
+`src/app/page.tsx`, the new `registry.spec.ts` and `examples/examples.spec.tsx`, and the item
+count in `CLAUDE.md`.
 
 Out: the MDX pages, `meta.json`, sidebar, table of contents, pager, header and footer, and the
 choice to build them on `fumadocs-mdx` and `fumadocs-core` as upstream's `apps/v4` does (spec
@@ -27,8 +28,8 @@ Paths are relative to `apps/registry-ui/registry/bases/base-ui/` unless they sta
 
 ## Items
 
-One `registry:component` item per family file under `components/`, 42 of them, and one
-`registry:block`, `ai-provider-picker`.
+One `registry:component` item per family file under `components/` (the `docs/` pages aside),
+42 of them, and one `registry:block`, `ai-provider-picker`.
 
 | Field                  | Value                                                                                                                                                                                                |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -38,7 +39,7 @@ One `registry:component` item per family file under `components/`, 42 of them, a
 | `categories`           | the kind folder: `data-display`, `data-entry`, `feedback`, `general`, `layout`, `navigation`; `blocks` for the block                                                                                 |
 | `files`                | the family file (`registry:component`, or `registry:block`), then every `lib/`, `hooks/` and `types/` file it imports, transitively, as `registry:lib` or `registry:hook`, without `target`          |
 | `registryDependencies` | `@shadcn/<x>` for each `ui/<x>` imported, `@shadcn/utils` for `cn`, `https://ui.zeroxsolutions.com/r/<name>.json` for another item, `https://lucide-animated.com/r/<icon>.json` for an animated icon |
-| `dependencies`         | each npm package imported, other than `react`                                                                                                                                                        |
+| `dependencies`         | each npm package imported at runtime, other than `react` and `react-dom`                                                                                                                             |
 | `cssVars`              | only on an item whose files paint with a house token (below)                                                                                                                                         |
 
 Renamed items: `status-dot` is `status-indicator`, `field-grid` is `panel-field-group`,
@@ -67,8 +68,10 @@ An item carries only the tokens its files use. `--info` has no reader and ships 
 `<name>-<variant>.tsx`.
 
 **Published.** Each item has exactly one `examples/<name>-demo.tsx`, published as the
-`registry:example` item `<name>-demo`, whose `registryDependencies` name the item's URL plus
-each upstream part the demo composes. The demo is the preview at the top of the item's page.
+`registry:example` item `<name>-demo` and declared by the same rule as an item: its
+`registryDependencies` name the item's URL plus each other item and upstream part the demo
+composes, its `dependencies` each package it imports, and its `files` any `lib/`, `hooks/` or
+`types/` file it reaches. The demo is the preview at the top of the item's page.
 Existing examples are renamed to it: `chat-message-hero` to `chat-message-demo`, `tree-hero` to
 `tree-item-demo`, `field-group-hero` to `panel-row-demo`, `ai-provider-picker-hero` to
 `ai-provider-picker-demo`. The other 39 are written.
@@ -99,15 +102,16 @@ Each composes exactly the parts the removed-components table of the 2026-09-28 s
 
 ## Tests
 
-`examples/examples.spec.tsx` renders every file in `examples/` once and asserts the
-`data-slot` of the component it demonstrates is in the document. It replaces
+`examples/examples.spec.tsx` renders every file in `examples/` once and asserts a `data-slot`
+of the component it demonstrates is in the document: the root's own where the root renders
+one, else the most specific one the demo puts in the DOM. It replaces
 `split-button-hero.spec.tsx` and `menu-button-hero.spec.tsx`.
 
 `apps/registry-ui/registry/registry.spec.ts` reads `registry.json` and the source tree and asserts:
 
-1. every family file under `components/` and `blocks/` is the first file of exactly one item,
-   and every component or block item's first file is one; `name` is the file's basename and
-   `categories` its kind folder;
+1. every family file under `components/` (the `docs/` pages aside) and `blocks/` is the first
+   file of exactly one component or block item, and every such item's first file is one;
+   `name` is the file's basename and `categories` its kind folder, `blocks` for a block;
 2. every component or block item has exactly one `<name>-demo` example, and every
    `registry:example` is some item's demo;
 3. each item's `files`, `registryDependencies` and `dependencies` equal what its files import;

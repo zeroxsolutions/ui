@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 
@@ -16,6 +16,7 @@ type CssVars = Record<'theme' | 'light' | 'dark', Record<string, string>>;
 interface RegistryItem {
   name: string;
   type: string;
+  categories?: string[];
   dependencies?: string[];
   registryDependencies?: string[];
   cssVars?: CssVars;
@@ -40,6 +41,8 @@ const BARE_IMPORT = /^\s*import\s*['"]([^'"]+)['"]/gm;
 const DYNAMIC_IMPORT = /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g;
 const SHIPPED = /^registry\/bases\/base-ui\/(lib|hooks|types)\//;
 const TOKEN_CLASS = /\b(?:bg|text|border|ring|fill|stroke)-(success|warning)(?![\w-])/g;
+const FAMILY = /^registry\/bases\/base-ui\/(?:components\/([^/]+)|(blocks))\/([^/]+)\.tsx$/;
+const PUBLISHED = ['registry:component', 'registry:block'];
 
 /** The specifiers a source file imports; a type-only import of a package is left out, since nothing installs for it. */
 function importsOf(path: string): string[] {
@@ -189,6 +192,56 @@ function cssVarsProblems(item: RegistryItem): string[] {
     : [`${item.name}: cssVars should be ${JSON.stringify(expected)}`];
 }
 
+/** Every family file: a component under a kind folder (the docs pages aside) or a block, specs left out. */
+function familyFiles(): string[] {
+  return ['components', 'blocks']
+    .flatMap((dir) =>
+      readdirSync(join(APP, BASE, dir), { recursive: true, encoding: 'utf8' }).map((path) => `${BASE}/${dir}/${path}`),
+    )
+    .filter((path) => FAMILY.test(path) && !path.endsWith('.spec.tsx') && !path.startsWith(`${BASE}/components/docs/`))
+    .sort();
+}
+
+/** Each family file is the first file of exactly one component or block item, which takes its name and kind folder. */
+function familyProblems(items: RegistryItem[], families: string[]): string[] {
+  const published = items.filter((item) => PUBLISHED.includes(item.type));
+  const unowned = families.flatMap((family) => {
+    const owners = published.filter((item) => item.files[0]?.path === family).map((item) => item.name);
+    if (owners.length === 0) return [`${family}: is the first file of no item`];
+    return owners.length === 1 ? [] : [`${family}: is the first file of ${owners.join(' and ')}`];
+  });
+  const misnamed = published.flatMap((item) => {
+    const path = item.files[0]?.path ?? '';
+    const match = families.includes(path) ? FAMILY.exec(path) : null;
+    if (match === null) return [`${item.name}: first file ${path} is not a family file`];
+    const [, kind, blocks, name] = match;
+    const categories = [kind ?? blocks];
+    return [
+      ...(item.name === name ? [] : [`${item.name}: name should be ${name}`]),
+      ...(isDeepStrictEqual(item.categories, categories)
+        ? []
+        : [`${item.name}: categories should be ${JSON.stringify(categories)}`]),
+    ];
+  });
+  return [...unowned, ...misnamed];
+}
+
+/** Each component or block item has exactly one `<name>-demo` example, and every example is one of those. */
+function demoProblems(items: RegistryItem[]): string[] {
+  const names = items.filter((item) => PUBLISHED.includes(item.type)).map((item) => item.name);
+  const examples = items.filter((item) => item.type === 'registry:example').map((item) => item.name);
+  return [
+    ...names.flatMap((name) => {
+      const count = examples.filter((example) => example === `${name}-demo`).length;
+      if (count === 0) return [`${name}: has no ${name}-demo example`];
+      return count === 1 ? [] : [`${name}: has ${count} ${name}-demo examples`];
+    }),
+    ...examples
+      .filter((example) => !names.some((name) => example === `${name}-demo`))
+      .map((example) => `${example}: is the demo of no item`),
+  ];
+}
+
 describe('registry.json', () => {
   it('declares exactly the files, upstream items and packages each item imports', () => {
     const owners = ownersOf(REGISTRY.items);
@@ -197,6 +250,14 @@ describe('registry.json', () => {
 
   it('carries the success and warning tokens an item paints with, and no others', () => {
     expect(REGISTRY.items.flatMap(cssVarsProblems)).toEqual([]);
+  });
+
+  it('publishes each family file as one item named and categorised after it', () => {
+    expect(familyProblems(REGISTRY.items, familyFiles())).toEqual([]);
+  });
+
+  it('publishes one demo per item and no other example', () => {
+    expect(demoProblems(REGISTRY.items)).toEqual([]);
   });
 });
 
@@ -310,6 +371,98 @@ describe('cssVarsProblems', () => {
     };
     expect(cssVarsProblems(item)).toEqual([
       'status-indicator: cssVars should be {"theme":{"color-success":"var(--success)","color-warning":"var(--warning)"},"light":{"success":"oklch(0.627 0.19 149)","warning":"oklch(0.681 0.162 75.834)"},"dark":{"success":"oklch(0.723 0.19 149)","warning":"oklch(0.79 0.155 80)"}}',
+    ]);
+  });
+});
+
+const FAMILIES = [`${BASE}/blocks/ai-provider-picker.tsx`, `${BASE}/components/data-entry/tree-item.tsx`];
+
+const familyItems: RegistryItem[] = [
+  { ...treeItem, categories: ['data-entry'] },
+  { ...aiProviderPicker, categories: ['blocks'] },
+];
+
+const treeItemDemo: RegistryItem = {
+  name: 'tree-item-demo',
+  type: 'registry:example',
+  files: [{ path: `${BASE}/examples/tree-item-demo.tsx`, type: 'registry:example' }],
+};
+
+const aiProviderPickerDemo: RegistryItem = {
+  name: 'ai-provider-picker-demo',
+  type: 'registry:example',
+  files: [{ path: `${BASE}/examples/ai-provider-picker-demo.tsx`, type: 'registry:example' }],
+};
+
+describe('familyProblems', () => {
+  it('reports nothing for items named and categorised after their family files', () => {
+    expect(familyProblems([...familyItems, treeItemDemo], FAMILIES)).toEqual([]);
+  });
+
+  it('reports a family file no item publishes', () => {
+    expect(familyProblems(familyItems.slice(1), FAMILIES)).toEqual([
+      'registry/bases/base-ui/components/data-entry/tree-item.tsx: is the first file of no item',
+    ]);
+  });
+
+  it('reports a family file two items publish', () => {
+    const twin = { ...familyItems[0], name: 'tree-row' };
+    expect(familyProblems([...familyItems, twin], FAMILIES)).toEqual([
+      'registry/bases/base-ui/components/data-entry/tree-item.tsx: is the first file of tree-item and tree-row',
+      'tree-row: name should be tree-item',
+    ]);
+  });
+
+  it('reports an item whose first file is not a family file', () => {
+    const item = {
+      name: 'ime',
+      type: 'registry:component',
+      categories: ['data-entry'],
+      files: [{ path: `${BASE}/lib/ime.ts`, type: 'registry:lib' }],
+    };
+    expect(familyProblems([...familyItems, item], FAMILIES)).toEqual([
+      'ime: first file registry/bases/base-ui/lib/ime.ts is not a family file',
+    ]);
+  });
+
+  it('reports an item not named after its family file', () => {
+    expect(familyProblems([{ ...familyItems[0], name: 'tree-row' }, familyItems[1]], FAMILIES)).toEqual([
+      'tree-row: name should be tree-item',
+    ]);
+  });
+
+  it('reports an item not categorised under its kind folder', () => {
+    expect(familyProblems([{ ...familyItems[0], categories: ['data-display'] }, familyItems[1]], FAMILIES)).toEqual([
+      'tree-item: categories should be ["data-entry"]',
+    ]);
+  });
+});
+
+describe('demoProblems', () => {
+  it('reports nothing when each item has one demo and each example is a demo', () => {
+    expect(demoProblems([...familyItems, treeItemDemo, aiProviderPickerDemo])).toEqual([]);
+  });
+
+  it('reports an item with no demo', () => {
+    expect(demoProblems([...familyItems, treeItemDemo])).toEqual([
+      'ai-provider-picker: has no ai-provider-picker-demo example',
+    ]);
+  });
+
+  it('reports an item with two demos', () => {
+    expect(demoProblems([...familyItems, treeItemDemo, treeItemDemo, aiProviderPickerDemo])).toEqual([
+      'tree-item: has 2 tree-item-demo examples',
+    ]);
+  });
+
+  it('reports an example that is the demo of no item', () => {
+    const example = {
+      name: 'button-demo',
+      type: 'registry:example',
+      files: [{ path: `${BASE}/examples/button-demo.tsx`, type: 'registry:example' }],
+    };
+    expect(demoProblems([...familyItems, treeItemDemo, aiProviderPickerDemo, example])).toEqual([
+      'button-demo: is the demo of no item',
     ]);
   });
 });

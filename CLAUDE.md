@@ -9,8 +9,8 @@ Where the generic rules name options, this repo selects. Only the pick, the devi
 its cost are here.
 
 - **Delivery - a shadcn registry, not a package.** `apps/registry-ui` serves `registry.json`
-  (registry name `zeroxsolutions-ui`, 22 items: 7 `registry:component`, 13 `registry:example`,
-  1 block, 1 page) at `https://ui.zeroxsolutions.com`, **which does not resolve yet**. Style
+  (registry name `zeroxsolutions-ui`, 86 items: 42 `registry:component`, 1 `registry:block`,
+  43 `registry:example`) at `https://ui.zeroxsolutions.com`, **which does not resolve yet**. Style
   `base-vega`, base color `neutral`, `lucide` icons, `rsc: false`. The registry publishes
   **composed items only**, so a consuming app takes primitives from shadcn's own registry.
 - **`components.json` aliases deviate from the CLI defaults** - every alias points into
