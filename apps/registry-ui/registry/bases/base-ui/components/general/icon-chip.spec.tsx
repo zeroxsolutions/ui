@@ -1,31 +1,49 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 
 import { IconChip } from './icon-chip';
+
+beforeAll(() => {
+  // Base UI's tooltip positioning needs ResizeObserver, absent in jsdom.
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 afterEach(cleanup);
 
 describe('IconChip', () => {
-  it('renders the icon inside a container styled by the tint', () => {
+  it('renders the icon inside a chip tinted by className', () => {
     render(
-      <IconChip icon={<svg data-testid="glyph" />} label="Vision input" tint="bg-emerald-500/15 text-emerald-600" />,
+      <IconChip aria-label="Vision input" className="bg-emerald-500/15 text-emerald-600">
+        <svg data-testid="glyph" />
+      </IconChip>,
     );
-
-    expect(screen.getByTestId('glyph')).toBeTruthy();
-    const container = document.querySelector('[data-slot="icon-chip"]');
-    expect(container?.className).toContain('bg-emerald-500/15');
-    expect(container?.className).toContain('text-emerald-600');
+    const chip = screen.getByLabelText('Vision input');
+    expect(chip.getAttribute('data-slot')).toBe('icon-chip');
+    expect(chip.contains(screen.getByTestId('glyph'))).toBe(true);
+    expect(chip.className).toContain('rounded-sm');
+    expect(chip.className).toContain('bg-emerald-500/15');
   });
 
-  it('exposes a string label as the accessible name', () => {
-    render(<IconChip icon={<svg />} label="Reasoning" tint="bg-violet-500/15" />);
-
-    expect(document.querySelector('[aria-label="Reasoning"]')).toBeTruthy();
-  });
-
-  it('carries no built-in capability set - only the supplied icon renders', () => {
-    render(<IconChip icon={<svg data-testid="only" />} label="Function calling" />);
-
-    expect(screen.getAllByTestId('only')).toHaveLength(1);
+  it('takes the trigger props of a tooltip the consumer composes around it', () => {
+    render(
+      <TooltipProvider>
+        <Tooltip open>
+          <TooltipTrigger render={<IconChip aria-label="Reasoning" />}>
+            <svg />
+          </TooltipTrigger>
+          <TooltipContent>Reasoning</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>,
+    );
+    const chip = screen.getByLabelText('Reasoning');
+    expect(chip.className).toContain('size-5');
+    expect(chip.hasAttribute('data-popup-open')).toBe(true);
+    expect(screen.getByText('Reasoning', { selector: '[data-slot="tooltip-content"]' })).toBeTruthy();
   });
 });

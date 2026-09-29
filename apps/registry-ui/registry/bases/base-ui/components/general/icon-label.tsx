@@ -1,34 +1,27 @@
-import type { ComponentProps, ComponentType } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-interface IconLabelProps extends ComponentProps<'span'> {
-  icon: ComponentType<{ className?: string }>;
-  tooltip: string;
-}
-
 /**
- * An icon-only form label with a hover tooltip — for dense panels that label
- * fields with an icon (no verbose text) and reveal the meaning on hover. Use
- * for a field's `label` slot where space is tight.
+ * An icon standing in for a field's text label in a dense panel. Give it an
+ * `aria-label`, and compose a tooltip around it to reveal the meaning on hover:
+ *
+ *   <Tooltip>
+ *     <TooltipTrigger render={<IconLabel aria-label="Rotation" />}>
+ *       <RotateCw />
+ *     </TooltipTrigger>
+ *     <TooltipContent>Rotation</TooltipContent>
+ *   </Tooltip>
+ *
+ * An svg child with no `size-*` class of its own is drawn at `size-3`.
  */
-function IconLabel({ icon: Icon, tooltip, className, ...props }: IconLabelProps) {
+function IconLabel({ className, ...props }: ComponentProps<'span'>): ReactNode {
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span
-            data-slot="icon-label"
-            className={cn('text-muted-foreground flex items-center', className)}
-            {...props}
-          />
-        }
-      >
-        <Icon className="size-3" />
-      </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
-    </Tooltip>
+    <span
+      data-slot="icon-label"
+      className={cn("text-muted-foreground flex items-center [&_svg:not([class*='size-'])]:size-3", className)}
+      {...props}
+    />
   );
 }
 

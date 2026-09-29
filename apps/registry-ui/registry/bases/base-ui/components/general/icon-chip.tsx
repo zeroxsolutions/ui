@@ -1,47 +1,28 @@
-import * as React from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-interface IconChipProps {
-  /** The glyph node, sized by the caller (e.g. `<Eye className="size-3" />`). */
-  icon: React.ReactNode;
-  /** Tooltip text, and the chip's accessible name when it is a string. */
-  label: React.ReactNode;
-  /** Consumer className for the tinted container (background + text colour). The
-   *  design system ships no colour of its own - the tint comes from here. */
-  tint?: string;
-  /** Extra classes merged onto the tinted container. */
-  className?: string;
-}
-
 /**
- * A generic tinted-icon-plus-tooltip chip: a small square holding an `icon`,
- * coloured by a consumer-supplied `tint` class, with `label` shown on hover as a
- * tooltip (and used as the accessible name when it is a string). It carries no
- * capability taxonomy of its own - the caller decides what each chip means, so
- * one visual serves model abilities, generation types, or any icon/label/tint
- * triple.
- * @example <IconChip icon={<Eye className="size-3" />} label="Vision input" tint="bg-emerald-500/15 text-emerald-600" />
+ * A small square holding one glyph, tinted by the caller's `className` (the
+ * design system ships no tint). It carries no meaning of its own, so one chip
+ * serves model abilities, generation types or any icon the caller picks. Give
+ * it an `aria-label`, and compose a tooltip around it when the glyph needs words:
+ *
+ *   <Tooltip>
+ *     <TooltipTrigger render={<IconChip aria-label="Vision input" className="bg-emerald-500/15 text-emerald-600" />}>
+ *       <Eye className="size-3" />
+ *     </TooltipTrigger>
+ *     <TooltipContent>Vision input</TooltipContent>
+ *   </Tooltip>
  */
-function IconChip({ icon, label, tint, className }: IconChipProps) {
+function IconChip({ className, ...props }: ComponentProps<'span'>): ReactNode {
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span
-            aria-label={typeof label === 'string' ? label : undefined}
-            data-slot="icon-chip"
-            className={cn('flex size-5 items-center justify-center rounded-[5px]', tint, className)}
-          />
-        }
-      >
-        {icon}
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
+    <span
+      data-slot="icon-chip"
+      className={cn('flex size-5 items-center justify-center rounded-sm', className)}
+      {...props}
+    />
   );
 }
 
 export { IconChip };
-export type { IconChipProps };
