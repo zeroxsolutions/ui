@@ -6,29 +6,38 @@ import { TabCloseButton } from './tab-close-button';
 afterEach(cleanup);
 
 describe('TabCloseButton', () => {
-  it('shows the unsaved dot (not the ×) for a dirty tab that is not revealing close', () => {
-    const { container } = render(<TabCloseButton dirty revealClose={false} onClose={() => {}} />);
-    expect(container.querySelector('[data-slot="unsaved-indicator"]')).toBeTruthy();
-    expect(container.querySelector('.lucide-x')).toBeNull();
+  it('marks a dirty tab with data-dirty and renders the unsaved dot beside the X', () => {
+    render(<TabCloseButton dirty />);
+    const button = screen.getByRole('button', { name: 'Close' });
+    expect(button.hasAttribute('data-dirty')).toBe(true);
+    expect(button.querySelector('[data-slot="unsaved-indicator"]')).toBeTruthy();
+    expect(button.querySelector('.lucide-x')).toBeTruthy();
   });
 
-  it('reveals the × when active/hovered, even while dirty', () => {
-    const { container } = render(<TabCloseButton dirty revealClose onClose={() => {}} />);
-    expect(container.querySelector('[data-slot="unsaved-indicator"]')).toBeNull();
-    expect(container.querySelector('.lucide-x')).toBeTruthy();
+  it('renders only the X for a clean tab', () => {
+    render(<TabCloseButton />);
+    const button = screen.getByRole('button', { name: 'Close' });
+    expect(button.hasAttribute('data-dirty')).toBe(false);
+    expect(button.querySelector('[data-slot="unsaved-indicator"]')).toBeNull();
+    expect(button.querySelector('.lucide-x')).toBeTruthy();
   });
 
-  it('fires onClose and stops propagation so the tab is not also activated', () => {
-    const onClose = vi.fn();
+  it('marks itself with its slot', () => {
+    render(<TabCloseButton />);
+    expect(screen.getByRole('button', { name: 'Close' }).dataset.slot).toBe('tab-close-button');
+  });
+
+  it('calls onClick and stops propagation so the tab is not also activated', () => {
+    const onClick = vi.fn();
     const onRowClick = vi.fn();
     render(
       <div onClick={onRowClick}>
-        <TabCloseButton dirty={false} revealClose onClose={onClose} />
+        <TabCloseButton onClick={onClick} />
       </div>,
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onClick).toHaveBeenCalledTimes(1);
     expect(onRowClick).not.toHaveBeenCalled();
   });
 });
