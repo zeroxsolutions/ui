@@ -1,14 +1,10 @@
-import { useCallback, useState, type ReactNode } from 'react';
+import * as React from 'react';
 
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
+import { InputGroup, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
 import { evaluateExpression } from '@/registry/bases/base-ui/lib/expr-eval';
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-interface NumberFieldProps extends Omit<
-  React.ComponentProps<typeof InputGroup>,
-  'onChange' | 'children' | 'defaultValue' | 'value' | 'placeholder'
-> {
-  /** Leading label addon (e.g. "X", "W"). */
-  label?: ReactNode;
+interface NumberFieldProps extends Omit<React.ComponentProps<typeof InputGroup>, 'onChange' | 'defaultValue'> {
   value: number;
   onValueChange: (value: number) => void;
   disabled?: boolean;
@@ -17,21 +13,14 @@ interface NumberFieldProps extends Omit<
   /** Increment/decrement applied on ArrowUp / ArrowDown (clamped to min/max).
    *  Omit to leave the arrows as native text-cursor movement. */
   step?: number;
-  /** Trailing unit addon (e.g. "px", "°"). */
-  suffix?: ReactNode;
-  /** Override raw parsing — receives the draft string, returns a number or null. */
+  /** Override raw parsing - receives the draft string, returns a number or null. */
   parseRaw?: (raw: string) => number | null;
-  /** A second trailing addon after `suffix` (e.g. a popover trigger). */
-  endAddon?: ReactNode;
-  className?: string;
   /**
-   * Multi-selection with differing values — blanks the value and shows
-   * `placeholder` until the user types one, which then applies to every
+   * Multi-selection with differing values - blanks the value and shows the
+   * input's `placeholder` until the user types one, which then applies to every
    * selected target.
    */
   mixed?: boolean;
-  /** Placeholder shown while `mixed` (the consumer owns the copy, e.g. "Mixed"). */
-  placeholder?: string;
   /**
    * Show this text in place of the numeric value while not editing (e.g. a
    * "Hug" / "Fill" sizing label). Focusing clears it so typing commits a number.
@@ -39,97 +28,173 @@ interface NumberFieldProps extends Omit<
   displayText?: string;
 }
 
+interface NumberFieldContextValue {
+  /** What the input shows: the draft while editing, else the value or `displayText`. */
+  text: string;
+  /** Whether the input shows its `placeholder`: only while mixed and not editing. */
+  placeholderShown: boolean;
+  disabled: boolean | undefined;
+  begin: () => void;
+  change: (raw: string) => void;
+  commit: () => void;
+  keyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+}
+
+const NumberFieldContext = React.createContext<NumberFieldContextValue | null>(null);
+
+function useNumberField(): NumberFieldContextValue {
+  const context = React.useContext(NumberFieldContext);
+  if (!context) throw new Error('NumberFieldInput must be used within <NumberField>');
+  return context;
+}
+
 /**
- * A compact numeric field for a property inspector: an `InputGroup` with an
- * optional label addon, a value input that accepts arithmetic expressions and
- * clamps to `min`/`max`, and optional unit/`endAddon` trailing slots. Controlled
- * — the consumer owns the number and supplies any placeholder copy.
+ * A compact numeric field for a property inspector, over upstream's
+ * `InputGroup`. The root parses (arithmetic expressions, or `parseRaw`), clamps
+ * to `min`/`max` and steps on the arrow keys; the consumer composes a
+ * `NumberFieldInput` and any `InputGroupAddon` / `InputGroupText` around it (a
+ * label before, a unit or a trigger after). Controlled - the consumer owns the
+ * number. The root carries `data-mixed` while `mixed` and `data-editing` while
+ * the input holds a draft.
  */
 function NumberField({
-  label,
   value,
   onValueChange,
   disabled,
   min,
   max,
   step,
-  suffix,
   parseRaw,
-  endAddon,
-  className,
   mixed,
-  placeholder,
   displayText,
+  className,
+  children,
   ...props
-}: NumberFieldProps) {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState('');
+}: NumberFieldProps): React.ReactNode {
+  const [editing, setEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState('');
 
-  const handleFocus = useCallback(() => {
+  const clamp = React.useCallback(
+    (next: number) => {
+      let clamped = next;
+      if (min !== undefined) clamped = Math.max(min, clamped);
+      if (max !== undefined) clamped = Math.min(max, clamped);
+      return clamped;
+    },
+    [min, max],
+  );
+
+  const begin = React.useCallback(() => {
     setEditing(true);
     setDraft(mixed || displayText ? '' : String(value));
   }, [value, mixed, displayText]);
 
-  const commit = useCallback(() => {
+  const change = React.useCallback(
+    (raw: string) => {
+      if (editing) setDraft(raw);
+      else onValueChange(Number(raw));
+    },
+    [editing, onValueChange],
+  );
+
+  const commit = React.useCallback(() => {
     setEditing(false);
     const result = parseRaw ? parseRaw(draft) : evaluateExpression(draft);
-    if (result !== null) {
-      let clamped = result;
-      if (min !== undefined) clamped = Math.max(min, clamped);
-      if (max !== undefined) clamped = Math.min(max, clamped);
-      onValueChange(clamped);
-    }
-  }, [draft, min, max, onValueChange, parseRaw]);
+    if (result !== null) onValueChange(clamp(result));
+  }, [draft, parseRaw, onValueChange, clamp]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        e.currentTarget.blur();
-      } else if (e.key === 'Escape') {
+  const keyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') {
+        event.currentTarget.blur();
+      } else if (event.key === 'Escape') {
         setEditing(false);
         setDraft(String(value));
-        e.currentTarget.blur();
-      } else if (step !== undefined && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-        // Step the value (the arrows are inert otherwise — a text cursor in a
+        event.currentTarget.blur();
+      } else if (step !== undefined && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+        // Step the value (the arrows are inert otherwise - a text cursor in a
         // single-line field has nowhere to go vertically).
-        e.preventDefault();
+        event.preventDefault();
         const base = editing ? (evaluateExpression(draft) ?? value) : value;
-        let next = base + (e.key === 'ArrowUp' ? step : -step);
-        if (min !== undefined) next = Math.max(min, next);
-        if (max !== undefined) next = Math.min(max, next);
+        const next = clamp(base + (event.key === 'ArrowUp' ? step : -step));
         onValueChange(next);
         if (editing) setDraft(String(next));
       }
     },
-    [value, step, min, max, onValueChange, editing, draft],
+    [value, step, editing, draft, onValueChange, clamp],
+  );
+
+  const text = editing ? draft : mixed ? '' : (displayText ?? String(value));
+  const context = React.useMemo<NumberFieldContextValue>(
+    () => ({ text, placeholderShown: Boolean(mixed) && !editing, disabled, begin, change, commit, keyDown }),
+    [text, mixed, editing, disabled, begin, change, commit, keyDown],
   );
 
   return (
-    <InputGroup className={className} data-disabled={disabled || undefined} {...props}>
-      {label && <InputGroupAddon>{label}</InputGroupAddon>}
-      <InputGroupInput
-        type="text"
-        inputMode="decimal"
-        value={editing ? draft : mixed ? '' : (displayText ?? value)}
-        placeholder={mixed && !editing ? placeholder : undefined}
-        onChange={(e) => {
-          if (editing) {
-            setDraft(e.target.value);
-          } else {
-            onValueChange(Number(e.target.value));
-          }
-        }}
-        onFocus={handleFocus}
-        onBlur={commit}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-        className="tabular-nums"
-      />
-      {suffix && <InputGroupAddon align="inline-end">{suffix}</InputGroupAddon>}
-      {endAddon && <InputGroupAddon align="inline-end">{endAddon}</InputGroupAddon>}
-    </InputGroup>
+    <NumberFieldContext.Provider value={context}>
+      <InputGroup
+        data-slot="number-field"
+        data-mixed={mixed || undefined}
+        data-editing={editing || undefined}
+        data-disabled={disabled || undefined}
+        className={className}
+        {...props}
+      >
+        {children}
+      </InputGroup>
+    </NumberFieldContext.Provider>
   );
 }
 
-export { NumberField };
-export type { NumberFieldProps };
+type NumberFieldInputProps = Omit<
+  React.ComponentProps<typeof InputGroupInput>,
+  'value' | 'defaultValue' | 'type' | 'disabled'
+>;
+
+/**
+ * The value input of a `NumberField`. It shows the field's value (or its draft
+ * while focused) and hands every edit to the root; its `placeholder` shows only
+ * while the field is `mixed`. It keeps upstream's `input-group-control` slot,
+ * which the group's focus ring reads.
+ */
+function NumberFieldInput({
+  placeholder,
+  className,
+  onFocus,
+  onChange,
+  onBlur,
+  onKeyDown,
+  ...props
+}: NumberFieldInputProps): React.ReactNode {
+  const field = useNumberField();
+  return (
+    <InputGroupInput
+      type="text"
+      inputMode="decimal"
+      value={field.text}
+      placeholder={field.placeholderShown ? placeholder : undefined}
+      disabled={field.disabled}
+      className={cn('tabular-nums', className)}
+      onFocus={(event) => {
+        onFocus?.(event);
+        field.begin();
+      }}
+      onChange={(event) => {
+        onChange?.(event);
+        field.change(event.target.value);
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        field.commit();
+      }}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        field.keyDown(event);
+      }}
+      {...props}
+    />
+  );
+}
+
+export { NumberField, NumberFieldInput };
+export type { NumberFieldProps, NumberFieldInputProps };
