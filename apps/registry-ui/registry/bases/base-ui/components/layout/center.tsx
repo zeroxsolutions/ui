@@ -1,23 +1,10 @@
 import { mergeProps } from '@base-ui/react/merge-props';
 import { useRender } from '@base-ui/react/use-render';
 import { cva, type VariantProps } from 'class-variance-authority';
+import type { ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-/**
- * Center — a layout atom that centers its children on both axes. The centering
- * (`items-center justify-center`) is the component's IDENTITY, not a prop: a box
- * whose alignment you can change is a `Flex`, not a `Center` — which is exactly
- * why Radix Themes ships no Center. The single knob is `inline`, toggling
- * block-flow vs inline-flow, the one canonical Center prop (Mantine, Chakra).
- *
- * Center owns only its internal centering classes; outer spacing, sizing and
- * placement (`h-screen`, `w-full`, a `gap` between grouped children) are the
- * consumer's via `className` (merged last so a consumer utility wins). Spreads
- * `...props` and forwards `ref` (React 19 ref-as-prop) onto its single primary
- * element. Polymorphic through the Base UI `render` prop, e.g.
- * `render={<main />}` — the consumer then owns that node's semantics/a11y.
- */
 const centerVariants = cva('items-center justify-center', {
   variants: {
     inline: {
@@ -30,20 +17,22 @@ const centerVariants = cva('items-center justify-center', {
   },
 });
 
+/**
+ * Centres its children on both axes. The centring is fixed: a box whose
+ * alignment the caller could change would be a flex box, not a centre. `inline`
+ * picks inline flow over block flow. Size, spacing and placement (`h-screen`,
+ * `gap-2`) come from `className`; `render={<main />}` swaps the element, and
+ * its semantics are then the caller's.
+ */
 function Center({
   className,
   inline,
   render,
   ...props
-}: useRender.ComponentProps<'div'> & VariantProps<typeof centerVariants>) {
+}: useRender.ComponentProps<'div'> & VariantProps<typeof centerVariants>): ReactNode {
   return useRender({
     defaultTagName: 'div',
-    props: mergeProps<'div'>(
-      {
-        className: cn(centerVariants({ inline }), className),
-      },
-      props,
-    ),
+    props: mergeProps<'div'>({ className: cn(centerVariants({ inline }), className) }, props),
     render,
     state: {
       slot: 'center',

@@ -1,4 +1,4 @@
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { FloatingToolbar } from './floating-toolbar';
@@ -6,20 +6,21 @@ import { FloatingToolbar } from './floating-toolbar';
 afterEach(cleanup);
 
 describe('FloatingToolbar', () => {
-  it('renders a labelled toolbar landmark around its children', () => {
-    const { getByRole } = render(
-      <FloatingToolbar label="Tools">
-        <button>tool</button>
+  it('renders a toolbar landmark named by its aria-label around its children', () => {
+    render(
+      <FloatingToolbar aria-label="Tools">
+        <button type="button">tool</button>
       </FloatingToolbar>,
     );
-    const toolbar = getByRole('toolbar', { name: 'Tools' });
-    expect(toolbar).toBeTruthy();
+    const toolbar = screen.getByRole('toolbar', { name: 'Tools' });
+    expect(toolbar.getAttribute('data-slot')).toBe('floating-toolbar');
     expect(toolbar.className).toContain('pointer-events-auto');
+    expect(screen.getByRole('button', { name: 'tool' }).parentElement).toBe(toolbar);
   });
 
   it('owns only the visual shell identity, not outer placement', () => {
-    const { getByRole } = render(<FloatingToolbar label="Tools">x</FloatingToolbar>);
-    const toolbar = getByRole('toolbar');
+    render(<FloatingToolbar aria-label="Tools">x</FloatingToolbar>);
+    const toolbar = screen.getByRole('toolbar');
     expect(toolbar.className).toContain('bg-card/95');
     expect(toolbar.className).toContain('rounded-sm');
     // Placement is the consumer's; it is not baked into the shell identity.
@@ -29,7 +30,7 @@ describe('FloatingToolbar', () => {
   });
 
   it('merges a passed className', () => {
-    const { getByRole } = render(<FloatingToolbar className="bottom-6">x</FloatingToolbar>);
-    expect(getByRole('toolbar').className).toContain('bottom-6');
+    render(<FloatingToolbar className="bottom-6">x</FloatingToolbar>);
+    expect(screen.getByRole('toolbar').className).toContain('bottom-6');
   });
 });

@@ -2,36 +2,25 @@ import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-interface FloatingToolbarProps extends ComponentProps<'div'> {
-  children: ReactNode;
-  /** Accessible name for the `toolbar` landmark (WAI-ARIA Toolbar pattern). */
-  label?: string;
-}
-
 /**
- * The floating tool palette — a rounded bar with the card background, blur,
- * hairline ring and shadow. Shared chrome for an editor's on-canvas toolbar;
- * fill it with the tool content that differs. The consumer owns placement
- * (e.g. `absolute bottom-3 left-1/2 -translate-x-1/2 z-20`) via `className`.
- *
- * `pointer-events-auto` keeps it interactive even when mounted inside a
- * pointer-events-none canvas overlay; it is a no-op where the surrounding tree
- * already receives pointer events.
+ * The floating tool palette of an editor canvas: a rounded, blurred card-colour
+ * bar with a hairline ring and a shadow, around the tools the caller composes.
+ * It is a `toolbar` landmark, so give it an `aria-label`. Placement (for
+ * example `absolute bottom-3 left-1/2 -translate-x-1/2 z-20`) is the caller's
+ * `className`. `pointer-events-auto` keeps it clickable inside a
+ * `pointer-events-none` canvas overlay.
  */
-function FloatingToolbar({ children, className, label, ...props }: FloatingToolbarProps) {
+function FloatingToolbar({ className, ...props }: ComponentProps<'div'>): ReactNode {
   return (
     <div
       data-slot="floating-toolbar"
       role="toolbar"
-      aria-label={label}
       className={cn(
         'bg-card/95 ring-foreground/10 pointer-events-auto flex flex-row items-center gap-0.5 rounded-sm px-1.5 py-1 shadow-lg ring-1 backdrop-blur-sm',
         className,
       )}
       {...props}
-    >
-      {children}
-    </div>
+    />
   );
 }
 

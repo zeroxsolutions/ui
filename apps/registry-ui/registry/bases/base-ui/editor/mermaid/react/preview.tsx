@@ -181,7 +181,7 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
       </div>
 
       {status !== 'empty' && (
-        <FloatingToolbar label="Zoom controls" className="absolute right-2 bottom-2">
+        <FloatingToolbar aria-label="Zoom controls" className="absolute right-2 bottom-2">
           <Button variant="ghost" size="icon-sm" aria-label="Zoom out" onClick={() => zoomButton(1 / 1.2)}>
             <Minus />
           </Button>
