@@ -33,12 +33,16 @@ const EXPECTED_SLOT: Record<string, string> = {
   'button-secondary': 'button',
   'chat-message-demo': 'chat-message',
   'chat-suggestion-item-demo': 'chat-suggestion-item',
+  'command-menu-demo': 'command-menu',
   'copy-button-demo': 'copy-button',
   'emoji-appearance-toggle-group-demo': 'emoji-appearance-toggle-group',
   'emoji-picker-demo': 'emoji-picker-content',
+  'icon-chip-demo': 'icon-chip',
+  'icon-label-demo': 'icon-label',
   'language-combobox-demo': 'combobox-trigger',
   'language-toggle-group-demo': 'language-toggle-group',
   'number-field-demo': 'input-group',
+  'panel-field-label-demo': 'field-label',
   'panel-row-demo': 'panel-row',
   'password-input-demo': 'input-group',
   'permission-card-demo': 'permission-card',
@@ -65,12 +69,12 @@ describe('examples', () => {
   });
 
   it.each(EXAMPLES)('$file renders $exportName with its data-slot', async ({ file, Example }) => {
-    const { container } = render(<Example />);
+    render(<Example />);
     // An upstream ScrollArea measures its viewport in a queueMicrotask outside
     // render's own act() batch; settle it so no example leaves a state update
     // to land after the test has moved on.
     await act(async () => {});
-    expect(container.querySelector(`[data-slot="${EXPECTED_SLOT[file]}"]`)).not.toBeNull();
+    expect(document.querySelector(`[data-slot="${EXPECTED_SLOT[file]}"]`)).not.toBeNull();
   });
 
   it('button-group-split opens its related actions from the caret', async () => {
