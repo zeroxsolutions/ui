@@ -1,180 +1,141 @@
-import { CheckCircle2, ChevronDown, Circle, Clock, type LucideIcon, Wrench, XCircle } from 'lucide-react';
-import { isValidElement, type ComponentProps, type ReactNode } from 'react';
+import { CheckCircle2, ChevronDown, Circle, Clock, XCircle } from 'lucide-react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
-import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
-
 /**
- * ToolCallCard — a tool-invocation card built on the SDK `Collapsible` + `Badge`. One
- * card with a header row (icon · title · status badge · chevron) and a content
- * area separated by a top `Separator`; `ToolCallCardInput`/`ToolCallCardOutput` render JSON via
- * `CodeBlock`. Presentational — the host maps its dispatcher lifecycle onto
- * `ToolCallCardState` (pending → running → completed → error) and supplies title/icon/
- * input/output.
+ * ToolCallCard - one tool invocation in a chat transcript: a trigger row over
+ * collapsible sections. The host maps its dispatcher lifecycle onto `state`
+ * (pending, running, completed, error), which the root carries as
+ * `data-state`; `ToolCallCardStatus` picks its icon from it. Every word is the
+ * consumer's:
  *
- *   <ToolCallCard>
- *     <ToolCallCardHeader state={state} title="search" subtitle={summary} icon={Icon} />
+ *   <ToolCallCard state="output-available">
+ *     <ToolCallCardTrigger>
+ *       <Wrench />
+ *       <ToolCallCardTitle>search</ToolCallCardTitle>
+ *       <ToolCallCardDescription>3 results</ToolCallCardDescription>
+ *       <ToolCallCardStatus>Completed</ToolCallCardStatus>
+ *     </ToolCallCardTrigger>
  *     <ToolCallCardContent>
- *       <ToolCallCardInput input={params} />
- *       <ToolCallCardOutput output={result} errorText={error} />
+ *       <ToolCallCardSection>
+ *         <ToolCallCardSectionTitle>Parameters</ToolCallCardSectionTitle>
+ *         <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
+ *       </ToolCallCardSection>
  *     </ToolCallCardContent>
  *   </ToolCallCard>
  */
 type ToolCallCardState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
 
-type ToolCallCardPart = { state: ToolCallCardState };
-
-function ToolCallCard({ className, ...props }: ComponentProps<typeof Collapsible>) {
-  return <Collapsible className={cn('bg-muted my-2 w-full overflow-hidden rounded-md', className)} {...props} />;
-}
-
-/**
- * Per-state status cue (icon + tone) and the default visible word. The icon and
- * tone are fixed; the word is overridable per call-site via `ToolCallCardHeader.statusLabel`.
- */
-const STATUS: Record<ToolCallCardState, { label: string; icon: ReactNode }> = {
-  'input-streaming': { label: 'Pending', icon: <Circle /> },
-  'input-available': {
-    label: 'Running',
-    icon: <Clock className="animate-pulse" />,
-  },
-  'output-available': {
-    label: 'Completed',
-    icon: <CheckCircle2 className="text-success" />,
-  },
-  'output-error': {
-    label: 'Error',
-    icon: <XCircle className="text-destructive" />,
-  },
-};
-
-interface ToolCallCardHeaderProps {
-  /** Display title; falls back to `toolName`, then a derived `type`. */
-  title?: string;
-  /** Human-readable one-line summary of the call, shown muted after the name. */
-  subtitle?: string;
-  /** Leading glyph; the host resolves it (e.g. via a `toolIcon` map). Defaults to `Wrench`. */
-  icon?: LucideIcon;
+interface ToolCallCardProps extends ComponentProps<typeof Collapsible> {
+  /** Where the call is in its lifecycle; set on the root as `data-state`. */
   state: ToolCallCardState;
-  toolName?: string;
-  type?: string;
-  /** Visible word in the status badge; defaults to the per-state `STATUS` label. */
-  statusLabel?: ReactNode;
-  /** Visible fallback name when none of title/toolName/type resolve one. Defaults to `'tool'`. */
-  fallbackLabel?: ReactNode;
-  className?: string;
 }
 
-function ToolCallCardHeader({
-  title,
-  subtitle,
-  icon,
-  state,
-  toolName,
-  type,
-  statusLabel,
-  fallbackLabel = 'tool',
-  className,
-}: ToolCallCardHeaderProps) {
-  const name = title ?? toolName ?? (type ? type.split('-').slice(1).join('-') : fallbackLabel);
-  const status = STATUS[state];
-  const Icon = icon ?? Wrench;
+function ToolCallCard({ state, className, ...props }: ToolCallCardProps): ReactNode {
+  return (
+    <Collapsible
+      data-slot="tool-call-card"
+      data-state={state}
+      className={cn('group/tool-call-card bg-muted w-full overflow-hidden rounded-md', className)}
+      {...props}
+    />
+  );
+}
+
+/** The header row that toggles the sections; a leading svg child is sized and muted as the tool's icon. */
+function ToolCallCardTrigger({ className, children, ...props }: ComponentProps<typeof CollapsibleTrigger>): ReactNode {
   return (
     <CollapsibleTrigger
-      className={cn('group/tool-call-card flex w-full items-center gap-2 px-3 py-2 text-left', className)}
-    >
-      <Icon className="text-muted-foreground size-3.5 shrink-0" />
-      <span className="shrink-0 text-sm font-medium">{name}</span>
-      {subtitle ? (
-        <span className="text-muted-foreground min-w-0 flex-1 truncate text-xs">{subtitle}</span>
-      ) : (
-        <span className="flex-1" />
+      data-slot="tool-call-card-trigger"
+      className={cn(
+        'group/tool-call-card-trigger [&>svg:first-child]:text-muted-foreground flex w-full items-center gap-2 px-3 py-2 text-left [&>svg:first-child]:size-3.5 [&>svg:first-child]:shrink-0',
+        className,
       )}
-      <Badge variant="secondary" className="shrink-0 gap-1 rounded-full text-[10px]">
-        {status.icon}
-        {statusLabel ?? status.label}
-      </Badge>
-      <ChevronDown className="text-muted-foreground size-4 shrink-0 transition-transform group-aria-expanded/tool-call-card:rotate-180" />
+      {...props}
+    >
+      {children}
+      <ChevronDown
+        aria-hidden
+        className="text-muted-foreground size-4 shrink-0 transition-transform group-aria-expanded/tool-call-card-trigger:rotate-180"
+      />
     </CollapsibleTrigger>
   );
 }
 
-function ToolCallCardContent({ className, children, ...props }: ComponentProps<typeof CollapsibleContent>) {
+function ToolCallCardTitle({ className, ...props }: ComponentProps<'span'>): ReactNode {
+  return <span data-slot="tool-call-card-title" className={cn('shrink-0 text-sm font-medium', className)} {...props} />;
+}
+
+/** A one-line summary of the call, truncated to the row. */
+function ToolCallCardDescription({ className, ...props }: ComponentProps<'span'>): ReactNode {
   return (
-    <CollapsibleContent {...props}>
-      <Separator />
-      <div className={cn('text-popover-foreground space-y-3 px-3 py-3', className)}>{children}</div>
-    </CollapsibleContent>
+    <span
+      data-slot="tool-call-card-description"
+      className={cn('text-muted-foreground min-w-0 flex-1 truncate text-xs', className)}
+      {...props}
+    />
   );
 }
 
-function ToolCallCardLabel({ children }: { children: ReactNode }) {
-  return <h4 className="text-muted-foreground text-xs font-medium">{children}</h4>;
-}
-
-function ToolCallCardInput({
-  input,
-  label = 'Parameters',
-  className,
-}: {
-  input: unknown;
-  /** Section heading; defaults to `'Parameters'`. */
-  label?: ReactNode;
-  className?: string;
-}) {
+/** The status badge: its children are the word, its icon follows the root's `data-state`. */
+function ToolCallCardStatus({ className, children, ...props }: ComponentProps<'span'>): ReactNode {
   return (
-    <div className={cn('space-y-1.5 overflow-hidden', className)}>
-      <ToolCallCardLabel>{label}</ToolCallCardLabel>
-      <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
-    </div>
+    <Badge
+      variant="secondary"
+      render={<span data-slot="tool-call-card-status" />}
+      className={cn('ml-auto rounded-full', className)}
+      {...props}
+    >
+      <Circle aria-hidden className="hidden group-data-[state=input-streaming]/tool-call-card:block" />
+      <Clock aria-hidden className="hidden animate-pulse group-data-[state=input-available]/tool-call-card:block" />
+      <CheckCircle2
+        aria-hidden
+        className="text-success hidden group-data-[state=output-available]/tool-call-card:block"
+      />
+      <XCircle aria-hidden className="text-destructive hidden group-data-[state=output-error]/tool-call-card:block" />
+      {children}
+    </Badge>
   );
 }
 
-function ToolCallCardOutput({
-  output,
-  errorText,
-  resultLabel = 'Result',
-  errorLabel = 'Error',
-  className,
-}: {
-  output: unknown;
-  errorText?: string;
-  /** Section heading for a successful result; defaults to `'Result'`. */
-  resultLabel?: ReactNode;
-  /** Section heading for an error; defaults to `'Error'`. */
-  errorLabel?: ReactNode;
-  className?: string;
-}) {
-  if (!output && !errorText) return null;
-
-  let body: ReactNode = null;
-  if (!errorText) {
-    if (typeof output === 'string') {
-      body = <CodeBlock code={output} language="json" />;
-    } else if (isValidElement(output)) {
-      body = output;
-    } else if (output && typeof output === 'object') {
-      body = <CodeBlock code={JSON.stringify(output, null, 2)} language="json" />;
-    } else {
-      body = <CodeBlock code={String(output)} language="json" />;
-    }
-  }
-
+function ToolCallCardContent({ className, ...props }: ComponentProps<typeof CollapsibleContent>): ReactNode {
   return (
-    <div className={cn('space-y-1.5', className)}>
-      <ToolCallCardLabel>{errorText ? errorLabel : resultLabel}</ToolCallCardLabel>
-      {errorText ? (
-        <div className="bg-destructive/10 text-destructive rounded-md px-3 py-2 text-xs">{errorText}</div>
-      ) : (
-        body
-      )}
-    </div>
+    <CollapsibleContent
+      data-slot="tool-call-card-content"
+      className={cn('text-popover-foreground flex flex-col gap-3 border-t p-3', className)}
+      {...props}
+    />
   );
 }
 
-export { ToolCallCard, ToolCallCardHeader, ToolCallCardContent, ToolCallCardInput, ToolCallCardOutput };
-export type { ToolCallCardState, ToolCallCardPart, ToolCallCardHeaderProps };
+/** One labelled block of the call, such as its parameters, its result or its error. */
+function ToolCallCardSection({ className, ...props }: ComponentProps<'div'>): ReactNode {
+  return (
+    <div data-slot="tool-call-card-section" className={cn('flex min-w-0 flex-col gap-1.5', className)} {...props} />
+  );
+}
+
+function ToolCallCardSectionTitle({ className, ...props }: ComponentProps<'h4'>): ReactNode {
+  return (
+    <h4
+      data-slot="tool-call-card-section-title"
+      className={cn('text-muted-foreground text-xs font-medium', className)}
+      {...props}
+    />
+  );
+}
+
+export {
+  ToolCallCard,
+  ToolCallCardTrigger,
+  ToolCallCardTitle,
+  ToolCallCardDescription,
+  ToolCallCardStatus,
+  ToolCallCardContent,
+  ToolCallCardSection,
+  ToolCallCardSectionTitle,
+};
+export type { ToolCallCardState, ToolCallCardProps };

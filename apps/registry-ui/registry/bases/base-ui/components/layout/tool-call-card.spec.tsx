@@ -1,148 +1,87 @@
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { Wrench } from 'lucide-react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   ToolCallCard,
   ToolCallCardContent,
-  ToolCallCardHeader,
-  ToolCallCardInput,
-  ToolCallCardOutput,
+  ToolCallCardDescription,
+  ToolCallCardSection,
+  ToolCallCardSectionTitle,
+  ToolCallCardStatus,
+  ToolCallCardTitle,
+  ToolCallCardTrigger,
   type ToolCallCardState,
 } from './tool-call-card';
 
-beforeAll(() => {
-  // ToolCallCardInput/ToolCallCardOutput render CodeBlock, which measures via a ResizeObserver
-  // and queries Element.getAnimations — both absent in jsdom.
-  globalThis.ResizeObserver ??= class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  } as unknown as typeof ResizeObserver;
-  Element.prototype.getAnimations ??= () => [];
-});
-
 afterEach(cleanup);
 
-// ToolCallCardHeader renders a Base UI Collapsible Trigger, which needs its Root — so
-// every header case is wrapped in <ToolCallCard> (the Collapsible Root).
-describe('ToolCallCardHeader', () => {
-  it('prefers title, then toolName, then a derived type', () => {
-    const { rerender } = render(
-      <ToolCallCard>
-        <ToolCallCardHeader state="input-available" title="Search" />
-      </ToolCallCard>,
-    );
-    expect(screen.getByText('Search')).toBeTruthy();
+const root = (): HTMLElement => document.querySelector('[data-slot="tool-call-card"]') as HTMLElement;
 
-    rerender(
-      <ToolCallCard>
-        <ToolCallCardHeader state="input-available" toolName="lookup" />
-      </ToolCallCard>,
-    );
-    expect(screen.getByText('lookup')).toBeTruthy();
+function Card({ state, defaultOpen }: { state: ToolCallCardState; defaultOpen?: boolean }) {
+  return (
+    <ToolCallCard state={state} defaultOpen={defaultOpen}>
+      <ToolCallCardTrigger>
+        <Wrench />
+        <ToolCallCardTitle>search</ToolCallCardTitle>
+        <ToolCallCardDescription>3 results</ToolCallCardDescription>
+        <ToolCallCardStatus>Completed</ToolCallCardStatus>
+      </ToolCallCardTrigger>
+      <ToolCallCardContent>
+        <ToolCallCardSection>
+          <ToolCallCardSectionTitle>Parameters</ToolCallCardSectionTitle>
+          <pre>{'{ "q": "hi" }'}</pre>
+        </ToolCallCardSection>
+      </ToolCallCardContent>
+    </ToolCallCard>
+  );
+}
 
-    rerender(
-      <ToolCallCard>
-        <ToolCallCardHeader state="input-available" type="tool-fetch-page" />
-      </ToolCallCard>,
-    );
-    expect(screen.getByText('fetch-page')).toBeTruthy();
+describe('ToolCallCard', () => {
+  it.each<ToolCallCardState>(['input-streaming', 'input-available', 'output-available', 'output-error'])(
+    'reflects the %s state on the root',
+    (state) => {
+      render(<Card state={state} />);
+      expect(root().getAttribute('data-state')).toBe(state);
+    },
+  );
+
+  it('renders the header parts inside the trigger', () => {
+    render(<Card state="output-available" />);
+    const trigger = screen.getByRole('button');
+    expect(trigger.getAttribute('data-slot')).toBe('tool-call-card-trigger');
+    for (const [text, slot] of [
+      ['search', 'tool-call-card-title'],
+      ['3 results', 'tool-call-card-description'],
+      ['Completed', 'tool-call-card-status'],
+    ]) {
+      const node = screen.getByText(text).closest('[data-slot^="tool-call-card-"]');
+      expect(node?.getAttribute('data-slot')).toBe(slot);
+      expect(trigger.contains(node)).toBe(true);
+    }
   });
 
-  it.each<[ToolCallCardState, string]>([
-    ['input-streaming', 'Pending'],
-    ['input-available', 'Running'],
-    ['output-available', 'Completed'],
-    ['output-error', 'Error'],
-  ])('renders the %s status badge as %s', (state, label) => {
-    render(
-      <ToolCallCard>
-        <ToolCallCardHeader state={state} title="x" />
-      </ToolCallCard>,
-    );
-    expect(screen.getByText(label)).toBeTruthy();
-  });
-
-  it('shows the subtitle when given', () => {
-    render(
-      <ToolCallCard>
-        <ToolCallCardHeader state="input-available" title="x" subtitle="3 results" />
-      </ToolCallCard>,
-    );
-    expect(screen.getByText('3 results')).toBeTruthy();
-  });
-
-  it('overrides the status word via statusLabel', () => {
-    render(
-      <ToolCallCard>
-        <ToolCallCardHeader state="input-available" title="x" statusLabel="En cours" />
-      </ToolCallCard>,
-    );
-    expect(screen.getByText('En cours')).toBeTruthy();
-    expect(screen.queryByText('Running')).toBeNull();
-  });
-
-  it('overrides the unresolved-name fallback via fallbackLabel', () => {
-    render(
-      <ToolCallCard>
-        <ToolCallCardHeader state="input-available" fallbackLabel="action" />
-      </ToolCallCard>,
-    );
-    expect(screen.getByText('action')).toBeTruthy();
-    expect(screen.queryByText('tool')).toBeNull();
-  });
-});
-
-describe('ToolCallCardInput / ToolCallCardOutput', () => {
-  it('serializes the input as JSON', () => {
-    render(<ToolCallCardInput input={{ q: 'hi' }} />);
-    expect(screen.getByText(/"q": "hi"/)).toBeTruthy();
-    expect(screen.getByText('Parameters')).toBeTruthy();
-  });
-
-  it('renders an error block when errorText is set', () => {
-    render(<ToolCallCardOutput output={undefined} errorText="boom" />);
-    expect(screen.getByText('Error')).toBeTruthy();
-    expect(screen.getByText('boom')).toBeTruthy();
-  });
-
-  it('renders a string output as a result block', () => {
-    render(<ToolCallCardOutput output="done" />);
-    expect(screen.getByText('Result')).toBeTruthy();
-    expect(screen.getByText('done')).toBeTruthy();
-  });
-
-  it('renders nothing when there is no output and no error', () => {
-    const { container } = render(<ToolCallCardOutput output={undefined} />);
-    expect(container.firstChild).toBeNull();
-  });
-
-  it('overrides the section headings', () => {
-    const { rerender } = render(<ToolCallCardInput input={{ q: 'hi' }} label="Args" />);
-    expect(screen.getByText('Args')).toBeTruthy();
+  it('opens its sections from the trigger', () => {
+    render(<Card state="output-available" />);
     expect(screen.queryByText('Parameters')).toBeNull();
 
-    rerender(<ToolCallCardOutput output="done" resultLabel="Output" />);
-    expect(screen.getByText('Output')).toBeTruthy();
-    expect(screen.queryByText('Result')).toBeNull();
-
-    rerender(<ToolCallCardOutput output={undefined} errorText="boom" errorLabel="Failure" />);
-    expect(screen.getByText('Failure')).toBeTruthy();
-    expect(screen.queryByText('Error')).toBeNull();
+    fireEvent.click(screen.getByRole('button'));
+    expect(screen.getByText('Parameters').getAttribute('data-slot')).toBe('tool-call-card-section-title');
+    expect(screen.getByText('Parameters').closest('[data-slot="tool-call-card-section"]')).toBeTruthy();
   });
-});
 
-describe('ToolCallCard composition', () => {
-  it('composes header + content', () => {
+  it('runs the caller onClick on the trigger and still toggles', () => {
+    let clicks = 0;
     render(
-      <ToolCallCard defaultOpen>
-        <ToolCallCardHeader state="output-available" title="search" />
-        <ToolCallCardContent>
-          <ToolCallCardInput input={{ a: 1 }} />
-        </ToolCallCardContent>
+      <ToolCallCard state="input-available">
+        <ToolCallCardTrigger onClick={() => (clicks += 1)}>
+          <ToolCallCardTitle>search</ToolCallCardTitle>
+        </ToolCallCardTrigger>
+        <ToolCallCardContent>body</ToolCallCardContent>
       </ToolCallCard>,
     );
-    expect(screen.getByText('search')).toBeTruthy();
-    expect(screen.getByText('Parameters')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button'));
+    expect(clicks).toBe(1);
+    expect(screen.getByText('body')).toBeTruthy();
   });
 });
