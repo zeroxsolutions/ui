@@ -22,7 +22,7 @@ function renderField(props: Omit<NumberFieldProps, 'children'>, input: NumberFie
 }
 
 function root(): HTMLElement {
-  return document.querySelector<HTMLElement>('[data-slot="number-field"]')!;
+  return document.querySelector<HTMLElement>('[data-slot="input-group"]')!;
 }
 
 describe('NumberField', () => {
@@ -103,9 +103,10 @@ describe('NumberField', () => {
     expect(root().querySelector('input')).toBe(screen.getByRole('textbox'));
   });
 
-  it('carries data-mixed while mixed and data-editing while the input is focused', () => {
+  it('keeps the upstream input-group slot and carries data-mixed while mixed and data-editing while the input is focused', () => {
     renderField({ value: 5, mixed: true, onValueChange: () => {} });
 
+    expect(root().getAttribute('data-slot')).toBe('input-group');
     expect(root().hasAttribute('data-mixed')).toBe(true);
     expect(root().hasAttribute('data-editing')).toBe(false);
     const input = screen.getByRole('textbox');
