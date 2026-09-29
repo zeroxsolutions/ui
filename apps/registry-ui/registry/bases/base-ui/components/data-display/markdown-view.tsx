@@ -2,7 +2,18 @@ import * as React from 'react';
 import Markdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
+import {
+  CodeBlock,
+  CodeBlockCopy,
+  CodeBlockLanguage,
+} from '@/registry/bases/base-ui/components/data-display/code-block';
+import {
+  CollapsibleCardActions,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardTrigger,
+} from '@/registry/bases/base-ui/components/layout/collapsible-card';
+import { isPlainLanguage } from '@/registry/bases/base-ui/lib/code-language';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**
@@ -63,7 +74,21 @@ const codeBlockComponents: Components = {
     const lang = /language-(\w+)/.exec(className ?? '')?.[1];
     const isBlock = !!lang || text.includes('\n');
     if (isBlock) {
-      return <CodeBlock code={text.replace(/\n$/, '')} language={lang ?? 'text'} />;
+      return (
+        <CodeBlock code={text.replace(/\n$/, '')} language={lang ?? 'text'}>
+          {isPlainLanguage(lang) ? undefined : (
+            <CollapsibleCardHeader>
+              <CollapsibleCardTitle>
+                <CodeBlockLanguage />
+              </CollapsibleCardTitle>
+              <CollapsibleCardActions>
+                <CodeBlockCopy />
+                <CollapsibleCardTrigger />
+              </CollapsibleCardActions>
+            </CollapsibleCardHeader>
+          )}
+        </CodeBlock>
+      );
     }
     return <code className={INLINE_CODE}>{children}</code>;
   },

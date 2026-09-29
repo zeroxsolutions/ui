@@ -2,7 +2,11 @@
 
 import * as React from 'react';
 import { Code } from 'lucide-react';
-import { CodeBlock as CodeBlockSurface } from '@/registry/bases/base-ui/components/data-display/code-block';
+import {
+  CodeBlock as CodeBlockSurface,
+  CodeBlockCopy,
+  CodeBlockLanguage,
+} from '@/registry/bases/base-ui/components/data-display/code-block';
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
   CollapsibleCard,
@@ -110,6 +114,36 @@ function EditableCodeBlock({
 }
 
 /**
+ * The read-only surface: the registry `CodeBlock`, with a language header when
+ * the block names a real language and the floating copy when it is plain text.
+ */
+function ReadOnlyCodeBlock({
+  code,
+  language,
+  className,
+}: {
+  code: string;
+  language: string;
+  className?: string;
+}): React.ReactNode {
+  return (
+    <CodeBlockSurface code={code} language={language} className={className}>
+      {PLAIN_LANGUAGES.has(language.toLowerCase()) ? undefined : (
+        <CollapsibleCardHeader>
+          <CollapsibleCardTitle>
+            <CodeBlockLanguage />
+          </CollapsibleCardTitle>
+          <CollapsibleCardActions>
+            <CodeBlockCopy />
+            <CollapsibleCardTrigger />
+          </CollapsibleCardActions>
+        </CollapsibleCardHeader>
+      )}
+    </CodeBlockSurface>
+  );
+}
+
+/**
  * The node view inside a `contentEditable={false}` boundary that stops
  * pointer/mouse-down from reaching ProseMirror, so editing the code or picking a
  * language never moves the editor selection. `editable` flips between the live
@@ -127,7 +161,7 @@ export function CodeBlockNodeView({ attrs, updateAttrs, editable }: NodeViewProp
       {editable ? (
         <EditableCodeBlock attrs={attrs} updateAttrs={updateAttrs} />
       ) : (
-        <CodeBlockSurface code={attrs.code} language={attrs.language} />
+        <ReadOnlyCodeBlock code={attrs.code} language={attrs.language} />
       )}
     </div>
   );
@@ -150,7 +184,7 @@ export const codeBlockCodec: NodeCodec<CodeBlockAttrs> = {
   // carries the Shiki highlight + copy control, not a bare `<pre>`.
   toReact: (node) => {
     const { language = 'text', code = '' } = node.attrs ?? {};
-    return <CodeBlockSurface code={code} language={language} className="my-4" />;
+    return <ReadOnlyCodeBlock code={code} language={language} className="my-4" />;
   },
   // Generic: claims every fenced code token. Register language-specialized blocks
   // (e.g. `mermaid`) BEFORE this feature so they can claim their own fences first.

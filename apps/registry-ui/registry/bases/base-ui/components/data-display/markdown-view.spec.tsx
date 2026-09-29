@@ -45,6 +45,18 @@ describe('MarkdownView', () => {
       expect(screen.getByText('{ "a": 1 }')).toBeTruthy();
     });
 
+    it('heads a fenced block that names a language with that language', () => {
+      const { container } = render(<MarkdownView codeBlocks>{'```json\n{ "a": 1 }\n```'}</MarkdownView>);
+      expect(screen.getByText('JSON')).toBeTruthy();
+      expect(container.querySelector('[data-slot="collapsible-card-header"]')).toBeTruthy();
+    });
+
+    it('leaves a fenced block with no language headerless', () => {
+      const { container } = render(<MarkdownView codeBlocks>{'```\nline one\nline two\n```'}</MarkdownView>);
+      expect(container.querySelector('[data-slot="collapsible-card-header"]')).toBeNull();
+      expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
+    });
+
     it('keeps inline code as a plain chip (no copy button)', () => {
       render(<MarkdownView codeBlocks>{'use `npm` here'}</MarkdownView>);
       expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();

@@ -9,7 +9,13 @@ vi.mock('../../lib/shiki', async (importOriginal) => {
   return { ...actual, highlightToLines: vi.fn().mockResolvedValue(null) };
 });
 
-import { CodeBlock } from './code-block';
+import { CodeBlock, CodeBlockCopy, CodeBlockLanguage } from './code-block';
+import {
+  CollapsibleCardActions,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardTrigger,
+} from '../layout/collapsible-card';
 import { highlightToLines } from '../../lib/shiki';
 
 beforeAll(() => {
@@ -36,17 +42,65 @@ describe('CodeBlock', () => {
     expect(container.querySelector('[data-language="json"]')).toBeTruthy();
   });
 
-  it('shows a language header with a prettified label for a real language', () => {
-    render(<CodeBlock code="const x = 1" language="ts" />);
-    expect(screen.getByText('TypeScript')).toBeTruthy();
+  it('renders no header of its own, whatever the language', () => {
+    const { container } = render(<CodeBlock code="const x = 1" language="ts" />);
+    expect(container.querySelector('[data-slot="collapsible-card-header"]')).toBeNull();
+    expect(screen.queryByText('TypeScript')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
   });
 
-  it('omits the header for a plain language', () => {
-    const { container } = render(<CodeBlock code="hello" language="text" />);
-    // No header strip; the body still renders, copy stays the floating button.
-    expect(container.querySelector('.border-b')).toBeNull();
-    expect(screen.getByText('hello')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
+  it('takes a composed header in place of the floating copy', () => {
+    const { container } = render(
+      <CodeBlock code="const x = 1" language="ts">
+        <CollapsibleCardHeader>
+          <CollapsibleCardTitle>
+            <CodeBlockLanguage />
+          </CollapsibleCardTitle>
+          <CollapsibleCardActions>
+            <CodeBlockCopy />
+            <CollapsibleCardTrigger />
+          </CollapsibleCardActions>
+        </CollapsibleCardHeader>
+      </CodeBlock>,
+    );
+    expect(container.querySelector('[data-slot="code-block-language"]')?.textContent).toBe('TypeScript');
+    expect(screen.getAllByRole('button', { name: 'Copy code' })).toHaveLength(1);
+    expect(container.querySelector('[data-slot="code-block-copy"]')).toBeTruthy();
+  });
+
+  it('collapses the code from a composed trigger', () => {
+    render(
+      <CodeBlock code="const x = 1" language="ts">
+        <CollapsibleCardHeader>
+          <CollapsibleCardTrigger />
+        </CollapsibleCardHeader>
+      </CodeBlock>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle' }));
+    expect(screen.queryByText('const x = 1')).toBeNull();
+  });
+
+  it('copies the root code from CodeBlockCopy', () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    render(
+      <CodeBlock code="payload" language="json">
+        <CodeBlockCopy label="Copy payload" />
+      </CodeBlock>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Copy payload' }));
+
+    expect(writeText).toHaveBeenCalledWith('payload');
+  });
+
+  it('labels a plain block as plain text', () => {
+    render(
+      <CodeBlock code="hello">
+        <CodeBlockLanguage />
+      </CodeBlock>,
+    );
+    expect(screen.getByText('Plain text')).toBeTruthy();
   });
 
   it('paints highlighted token spans when the highlighter resolves lines', async () => {

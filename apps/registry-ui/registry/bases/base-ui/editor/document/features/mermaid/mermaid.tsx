@@ -1,7 +1,11 @@
 'use client';
 
 import { Eye, PencilLine, Workflow } from 'lucide-react';
-import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
+import {
+  CodeBlock,
+  CodeBlockCopy,
+  CodeBlockLanguage,
+} from '@/registry/bases/base-ui/components/data-display/code-block';
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
   CollapsibleCard,
@@ -152,7 +156,17 @@ export const mermaidCodec: NodeCodec<MermaidAttrs> = {
     // static export doesn't have. Render the source through the read-only
     // design-system `CodeBlock` — Shiki-highlighted and copyable, consistent with
     // every other code block — while the live node view renders the real diagram.
-    <CodeBlock code={String(node.attrs?.source ?? '')} language="mermaid" className="my-4" />
+    <CodeBlock code={String(node.attrs?.source ?? '')} language="mermaid" className="my-4">
+      <CollapsibleCardHeader>
+        <CollapsibleCardTitle>
+          <CodeBlockLanguage />
+        </CollapsibleCardTitle>
+        <CollapsibleCardActions>
+          <CodeBlockCopy />
+          <CollapsibleCardTrigger />
+        </CollapsibleCardActions>
+      </CollapsibleCardHeader>
+    </CodeBlock>
   ),
 };
 

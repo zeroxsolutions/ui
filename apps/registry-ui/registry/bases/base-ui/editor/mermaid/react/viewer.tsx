@@ -1,6 +1,16 @@
 'use client';
 
-import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
+import {
+  CodeBlock,
+  CodeBlockCopy,
+  CodeBlockLanguage,
+} from '@/registry/bases/base-ui/components/data-display/code-block';
+import {
+  CollapsibleCardActions,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardTrigger,
+} from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { useMermaidRender } from './use-mermaid-render.js';
 
@@ -31,5 +41,17 @@ export function DiagramViewer({ source, className }: DiagramViewerProps) {
     );
   }
 
-  return <CodeBlock code={source} language="mermaid" className={className} />;
+  return (
+    <CodeBlock code={source} language="mermaid" className={className}>
+      <CollapsibleCardHeader>
+        <CollapsibleCardTitle>
+          <CodeBlockLanguage />
+        </CollapsibleCardTitle>
+        <CollapsibleCardActions>
+          <CodeBlockCopy />
+          <CollapsibleCardTrigger />
+        </CollapsibleCardActions>
+      </CollapsibleCardHeader>
+    </CodeBlock>
+  );
 }
