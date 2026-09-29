@@ -1,62 +1,86 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemFooter,
+  ItemMedia,
+  ItemTitle,
+} from '@/registry/bases/base-ui/ui/item';
 import * as modelInfoCardModule from './model-info-card';
-import { ModelInfoCard, ModelInfoCardSection } from './model-info-card';
+import { ModelInfoCard, ModelInfoCardBadge, ModelInfoCardSection } from './model-info-card';
 
 afterEach(cleanup);
 
 describe('ModelInfoCard', () => {
-  it('renders the identity header - media, name, vendor, modelId - over the body', () => {
+  it('renders the composed identity header - media, name, vendor, modelId - over the body', () => {
     render(
-      <ModelInfoCard media={<span data-testid="logo" />} name="GPT-4o" vendor="OpenAI" modelId="gpt-4o">
+      <ModelInfoCard>
+        <Item size="xs">
+          <ItemMedia>
+            <span data-testid="logo" />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>GPT-4o</ItemTitle>
+            <ItemDescription>OpenAI</ItemDescription>
+          </ItemContent>
+          <ItemFooter>gpt-4o</ItemFooter>
+        </Item>
         <div data-testid="body" />
       </ModelInfoCard>,
     );
 
     const card = document.querySelector('[data-slot="model-info-card"]');
-    expect(card?.querySelector('[data-testid="logo"]')).toBeTruthy();
+    expect(card?.querySelector('[data-slot="item-media"] [data-testid="logo"]')).toBeTruthy();
     expect(screen.getByText('GPT-4o')).toBeTruthy();
     expect(screen.getByText('OpenAI')).toBeTruthy();
     expect(screen.getByText('gpt-4o')).toBeTruthy();
-    expect(screen.getByTestId('body')).toBeTruthy();
-  });
-
-  it('renders with only a name (optional slots omitted)', () => {
-    render(<ModelInfoCard name="Custom model" />);
-
-    expect(screen.getByText('Custom model')).toBeTruthy();
+    expect(card?.querySelector('[data-testid="body"]')).toBeTruthy();
   });
 });
 
 describe('ModelInfoCardSection', () => {
-  it('renders an accent bar, title, value, and children', () => {
+  it('renders an accent badge, title, value, and children', () => {
     render(
-      <ModelInfoCardSection accent="bg-blue-500" title="Context Length" value="128K tokens">
+      <ModelInfoCardSection>
+        <Item size="xs">
+          <ModelInfoCardBadge className="bg-blue-500" />
+          <ItemContent>
+            <ItemTitle>Context Length</ItemTitle>
+          </ItemContent>
+          <ItemActions>128K tokens</ItemActions>
+        </Item>
         <div data-testid="line" />
       </ModelInfoCardSection>,
     );
 
     const section = document.querySelector('[data-slot="model-info-card-section"]');
-    expect(section?.querySelector('.bg-blue-500')).toBeTruthy();
+    expect(section?.querySelector('[data-slot="model-info-card-badge"]')?.className).toContain('bg-blue-500');
     expect(screen.getByText('Context Length')).toBeTruthy();
     expect(screen.getByText('128K tokens')).toBeTruthy();
-    expect(screen.getByTestId('line')).toBeTruthy();
+    expect(section?.querySelector('[data-testid="line"]')).toBeTruthy();
   });
+});
 
-  it('omits the trailing value cleanly', () => {
-    render(
-      <ModelInfoCardSection title="Abilities">
-        <div />
-      </ModelInfoCardSection>,
-    );
+describe('ModelInfoCardBadge', () => {
+  it('lets the consumer class replace the muted accent', () => {
+    render(<ModelInfoCardBadge className="bg-blue-500" />);
 
-    expect(screen.getByText('Abilities')).toBeTruthy();
+    const badge = document.querySelector('[data-slot="model-info-card-badge"]');
+    expect(badge?.className).toContain('bg-blue-500');
+    expect(badge?.className).not.toContain('bg-muted-foreground');
   });
 });
 
 describe('model-info-card module', () => {
-  it('exports only the card and section - no line/row or hover-wrapper component', () => {
-    expect(Object.keys(modelInfoCardModule).sort()).toEqual(['ModelInfoCard', 'ModelInfoCardSection']);
+  it('exports the card, its section and the accent badge - no line/row or hover-wrapper component', () => {
+    expect(Object.keys(modelInfoCardModule).sort()).toEqual([
+      'ModelInfoCard',
+      'ModelInfoCardBadge',
+      'ModelInfoCardSection',
+    ]);
   });
 });
