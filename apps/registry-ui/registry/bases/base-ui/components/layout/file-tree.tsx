@@ -143,6 +143,10 @@ interface FileTreeProps extends Omit<React.ComponentProps<'ul'>, 'onSelect'> {
   onExpandedChange?: (expanded: string[]) => void;
 }
 
+// `Tree` is not a shape the design system publishes; nothing upstream names a
+// hierarchy, so the root keeps the name of what it draws. `TreeItem`
+// (data-entry/tree-item) draws a similar row and is kept a separate tree until
+// a change shows the two move together.
 /**
  * An accessible **file tree** (WAI-ARIA APG Tree View) for navigating a file
  * bundle. Compound + context: the Root owns selection and folder expansion (both
@@ -161,8 +165,9 @@ function FileTree({
   className,
   children,
   onKeyDown,
+  ref,
   ...props
-}: FileTreeProps) {
+}: FileTreeProps): React.ReactNode {
   const [selectedValue, select] = useControllableState<string | undefined>({
     prop: value,
     defaultProp: defaultValue,
@@ -176,6 +181,14 @@ function FileTree({
   const expandedSet = React.useMemo(() => new Set(expandedList), [expandedList]);
   const [activeValue, setActiveValue] = React.useState<string | undefined>(value ?? defaultValue);
   const treeRef = React.useRef<HTMLUListElement>(null);
+  const setTreeRef = React.useCallback(
+    (node: HTMLUListElement | null) => {
+      treeRef.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
+  );
 
   const ctx: FileTreeContextValue = {
     selectedValue,
@@ -223,7 +236,7 @@ function FileTree({
             if (!e.defaultPrevented) handleTreeKeyDown(e, ctx);
           }}
           {...props}
-          ref={treeRef}
+          ref={setTreeRef}
         >
           {children}
         </ul>
@@ -242,7 +255,7 @@ interface FileTreeItemProps extends React.ComponentProps<'li'> {
  * contains a `FileTreeGroup` (then it gets `aria-expanded`), otherwise a leaf.
  * Its row is a `FileTreeLabel`; nested children go in a `FileTreeGroup`.
  */
-function FileTreeItem({ value, className, children, onFocus, ...props }: FileTreeItemProps) {
+function FileTreeItem({ value, className, children, onFocus, ...props }: FileTreeItemProps): React.ReactNode {
   const ctx = useFileTree();
   const level = React.useContext(DepthContext);
   const labelId = React.useId();
@@ -297,7 +310,7 @@ type FileTreeLabelProps = React.ComponentProps<'div'>;
  * the item and toggles a folder. The focus ring follows the item's keyboard
  * focus; visible state is exposed via `data-selected`.
  */
-function FileTreeLabel({ className, children, onClick, ...props }: FileTreeLabelProps) {
+function FileTreeLabel({ className, children, onClick, style, ...props }: FileTreeLabelProps): React.ReactNode {
   const ctx = useFileTree();
   const item = useFileTreeItem();
   return (
@@ -305,7 +318,7 @@ function FileTreeLabel({ className, children, onClick, ...props }: FileTreeLabel
       id={item.labelId}
       data-slot="file-tree-label"
       data-selected={item.selected ? '' : undefined}
-      style={{ paddingInlineStart: `${(item.level - 1) * 12 + 6}px` }}
+      style={{ paddingInlineStart: `calc(var(--spacing) * ${(item.level - 1) * 3 + 1.5})`, ...style }}
       className={cn(
         'text-foreground/80 flex h-7 cursor-pointer items-center gap-1.5 rounded-md pr-2 transition-colors',
         'hover:bg-muted hover:text-foreground',
@@ -339,7 +352,7 @@ type FileTreeGroupProps = React.ComponentProps<'ul'>;
  * The nested children of a folder `FileTreeItem` (`ul[role=group]`). Rendered
  * only while its parent item is expanded; deepens `aria-level` for descendants.
  */
-function FileTreeGroup({ className, children, ...props }: FileTreeGroupProps) {
+function FileTreeGroup({ className, children, ...props }: FileTreeGroupProps): React.ReactNode {
   const item = useFileTreeItem();
   if (!item.expanded) return null;
   return (

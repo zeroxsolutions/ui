@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { FileTree, FileTreeGroup, FileTreeItem, FileTreeLabel, type FileTreeProps } from './file-tree';
@@ -40,7 +41,7 @@ function renderTree(props?: FileTreeProps) {
 
 const item = (name: string) => screen.getByRole('treeitem', { name });
 
-describe('FileTree — structure & ARIA', () => {
+describe('FileTree - structure & ARIA', () => {
   it('exposes the tree/treeitem/group roles with correct levels and folder state', () => {
     renderTree({ defaultExpanded: ['src'] });
 
@@ -68,7 +69,7 @@ describe('FileTree — structure & ARIA', () => {
   });
 });
 
-describe('FileTree — selection', () => {
+describe('FileTree - selection', () => {
   it('selects a leaf on click and reports it (uncontrolled)', () => {
     const onValueChange = vi.fn();
     renderTree({ onValueChange });
@@ -90,7 +91,7 @@ describe('FileTree — selection', () => {
   });
 });
 
-describe('FileTree — folder expansion', () => {
+describe('FileTree - folder expansion', () => {
   it('toggles a folder on click and reports the expanded set', () => {
     const onExpandedChange = vi.fn();
     renderTree({ onExpandedChange });
@@ -102,7 +103,7 @@ describe('FileTree — folder expansion', () => {
   });
 });
 
-describe('FileTree — keyboard (WAI-ARIA APG)', () => {
+describe('FileTree - keyboard (WAI-ARIA APG)', () => {
   it('moves focus with ArrowDown / ArrowUp / Home / End', () => {
     renderTree({ defaultExpanded: ['src'] });
     const first = item('SKILL.md');
@@ -158,5 +159,45 @@ describe('FileTree — keyboard (WAI-ARIA APG)', () => {
     skill.focus();
     fireEvent.keyDown(skill, { key: ' ' });
     expect(onValueChange).toHaveBeenLastCalledWith('SKILL.md');
+  });
+});
+
+describe('FileTree - composition', () => {
+  it('hands a caller ref the tree element and keeps its own keyboard handling', () => {
+    const ref = React.createRef<HTMLUListElement>();
+    render(
+      <FileTree aria-label="Files" ref={ref}>
+        <FileTreeItem value="SKILL.md">
+          <FileTreeLabel>SKILL.md</FileTreeLabel>
+        </FileTreeItem>
+        <FileTreeItem value="README.md">
+          <FileTreeLabel>README.md</FileTreeLabel>
+        </FileTreeItem>
+      </FileTree>,
+    );
+
+    expect(ref.current).toBe(screen.getByRole('tree', { name: 'Files' }));
+    item('SKILL.md').focus();
+    fireEvent.keyDown(item('SKILL.md'), { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(item('README.md'));
+  });
+
+  it('keeps the depth indent under a caller style', () => {
+    render(
+      <FileTree aria-label="Files" defaultExpanded={['src']}>
+        <FileTreeItem value="src">
+          <FileTreeLabel>src</FileTreeLabel>
+          <FileTreeGroup>
+            <FileTreeItem value="src/index.ts">
+              <FileTreeLabel style={{ opacity: 0.5 }}>index.ts</FileTreeLabel>
+            </FileTreeItem>
+          </FileTreeGroup>
+        </FileTreeItem>
+      </FileTree>,
+    );
+
+    const label = screen.getByText('index.ts');
+    expect(label.style.opacity).toBe('0.5');
+    expect(label.style.paddingInlineStart).toBe('calc(var(--spacing) * 4.5)');
   });
 });
