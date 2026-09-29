@@ -80,17 +80,24 @@ registry/bases/base-ui/
 |       |-- icon-chip.tsx
 |       |-- icon-label.tsx
 |       `-- panel-field-label.tsx
-|-- constants/code-languages.ts              CODE_LANGUAGES, CODE_ALIASES
 |-- hooks/use-controllable-state.ts
 |-- hooks/use-highlighted-lines.ts
+|-- hooks/use-language-options.ts            both language roots read it
+|-- lib/code-language.ts                     isPlainLanguage, languageLabel
 |-- lib/file-type.ts                         extensionOf, the extension map, fileTypeIcon
 |-- lib/font-format.ts                       formatOf
-|-- lib/language-options.ts                 canonicalCodeId, codeLanguageIcon, codeLanguageOptions, localeOptions
-|-- types/chat-agent.ts
-|-- types/chat-role.ts
-|-- types/chat-suggestion.ts
-`-- types/language-option.ts                LanguageKind, LanguageOption, LanguageIcon
+|-- lib/language-options.tsx                 the code-language table and aliases, the option builders
+|-- types/language-option.ts                 LanguageKind, LanguageOption, LanguageIcon
+`-- types/status-tone.ts                     StatusIndicator and AiProviderCard both read it
 ```
+
+There is no `constants/`: each fixed table has one reader, and a value enters `constants/`
+only at its second, so the code-language table stays in `lib/language-options.tsx` and the
+avatar colours in `avatar-picker.tsx`. The chat prop types (`ChatRole`, the agent identity,
+`ChatSuggestion`) go with the prop bags that declared them: once content arrives as children
+nothing imports them.
+
+````
 
 `ui/` ends holding only files `shadcn add` wrote: `ui/data-table*.tsx` move out and
 `ui/form.tsx` is deleted, since no upstream base-vega item publishes it and nothing imports
@@ -196,21 +203,23 @@ asserts each file's count before writing: the kind folders, the merged families
 `registry.json` paths. Specs move with their modules. Two commits, gate green on each: the
 moves into kind folders, then the merged families.
 
-Pass 2 is one commit per rule, each ending with its check printing nothing:
+Pass 2 starts with three mechanical rules, one commit each:
 
 1. the removed components, their items and examples rewritten onto upstream parts
 2. renames, by script
 3. export blocks at the foot
-4. types, constants, lib and hooks out of component files
-5. slots: content props become children, parts reshaped per the table
-6. state onto `data-*`, replacing class maps
-7. class strings out of module constants; `cva` without variants dropped; arbitrary values onto the scale
-8. spread and `data-slot` on every part
-9. the three defects, test first
 
-Renames and export blocks come before the extraction because both are mechanical and every
-later rule edits the renamed files. Pass 1 and rules 1 to 3 are one plan; rules 4 to 9 are a
-second, written once the first lands, since their edits are read off the renamed tree.
+Then types, lib and hooks move out of component files in one commit, and every family after
+that is one commit that takes it through the remaining rules at once: slots (content props
+become children, parts reshaped per the table), state onto `data-*`, class strings out of
+module constants with `cva` only where a variant exists and arbitrary values onto the scale,
+and spread plus `data-slot` on every part. A defect is fixed test-first in its family's
+commit. Last, one commit folds what crosses families and adds the check scripts.
+
+A commit per family rather than per rule keeps each family's reshape, its spec and its call
+sites reviewable together; a rule-wide commit would reopen every family file once per rule.
+Pass 1 and rules 1 to 3 are one plan; the rest is a second, written once the first landed,
+since its edits are read off the renamed tree.
 
 A commit that changes a component `editor/` renders changes that call site in the same
 commit.
@@ -235,10 +244,13 @@ grep -rnoE '[a-z-]+-\[[0-9.]+(px|rem)\]' components --include='*.tsx' | grep -v 
 # no content prop
 grep -rnE '^\s+(title|description|heading|subtitle|emptyText)\??: (string|React\.ReactNode|ReactNode);' \
   components --include='*.tsx' | grep -v /docs/
-```
+````
 
-Two checks need a script rather than a grep and are part of the plan: every exported name
-opens with its file's root, and every part both spreads its props and carries `data-slot`.
+Three checks need a script rather than a grep and are part of the plan: every exported name
+opens with its file's root; every part both spreads its props and carries `data-slot` (a part
+that renders no element of its own, a context root or a control it clones, has neither to
+carry, and a part wrapping an upstream part keeps the upstream `data-slot` that upstream's
+recipes select on); and every registry item declares what its files import.
 `ui/` holding only CLI output is checked by `shadcn add <item> --dry-run --diff` reporting no
 change for each file there.
 
