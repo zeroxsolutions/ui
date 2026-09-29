@@ -3,7 +3,13 @@ import { DocumentIcon } from '@zeroxsolutions/icons/material/document';
 import { TypescriptIcon } from '@zeroxsolutions/icons/material/typescript';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { canonicalCodeId, codeLanguageIcon, codeLanguageOptions, localeOptions } from './language-options';
+import {
+  canonicalCodeId,
+  codeLanguageIcon,
+  codeLanguageOptions,
+  findLanguageOption,
+  localeOptions,
+} from './language-options';
 import { CODE_LANGUAGE_IDS } from './shiki';
 
 afterEach(cleanup);
@@ -66,5 +72,28 @@ describe('localeOptions', () => {
 
   it('falls back to the raw code when it is not a valid language tag', () => {
     expect(localeOptions(['not a tag'])).toEqual([{ value: 'not a tag', label: 'not a tag' }]);
+  });
+});
+
+describe('findLanguageOption', () => {
+  const options = [
+    { value: 'typescript', label: 'TypeScript' },
+    { value: 'python', label: 'Python' },
+  ];
+
+  it('finds the option carrying the value', () => {
+    expect(findLanguageOption(options, 'python', 'code')).toBe(options[1]);
+  });
+
+  it('finds a code option through its alias', () => {
+    expect(findLanguageOption(options, 'ts', 'code')).toBe(options[0]);
+  });
+
+  it('does not alias a locale value, which comes back as a bare option', () => {
+    expect(findLanguageOption(options, 'ts', 'locale')).toEqual({ value: 'ts', label: 'ts' });
+  });
+
+  it('returns undefined for an empty value', () => {
+    expect(findLanguageOption(options, '', 'code')).toBeUndefined();
   });
 });

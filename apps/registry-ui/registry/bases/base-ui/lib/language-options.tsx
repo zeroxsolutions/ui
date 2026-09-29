@@ -1,7 +1,7 @@
 import { DocumentIcon } from '@zeroxsolutions/icons/material/document';
 
 import { CODE_ALIASES, CODE_LANGUAGES } from '@/registry/bases/base-ui/constants/code-languages';
-import type { LanguageIcon, LanguageOption } from '@/registry/bases/base-ui/types/language-option';
+import type { LanguageIcon, LanguageKind, LanguageOption } from '@/registry/bases/base-ui/types/language-option';
 
 /** The canonical code id for a possibly-aliased value (`ts` -> `typescript`); unchanged if unknown. */
 function canonicalCodeId(value: string): string {
@@ -55,4 +55,25 @@ function localeOptions(codes: readonly string[]): LanguageOption[] {
   return codes.map((code) => ({ value: code, label: localeLabel(code) }));
 }
 
-export { canonicalCodeId, codeLanguageIcon, codeLanguageOptions, localeOptions };
+/**
+ * The option carrying `value` among `options`. For `kind="code"` an alias also
+ * matches its canonical id (`ts` finds `typescript`). A value no option carries
+ * comes back as a bare option labelled with the value itself, so a picker still
+ * shows it; an empty value comes back as `undefined`.
+ */
+function findLanguageOption(
+  options: readonly LanguageOption[],
+  value: string,
+  kind: LanguageKind,
+): LanguageOption | undefined {
+  const direct = options.find((o) => o.value === value);
+  if (direct) return direct;
+  if (kind === 'code') {
+    const canonical = canonicalCodeId(value);
+    const aliased = options.find((o) => o.value === canonical);
+    if (aliased) return aliased;
+  }
+  return value ? { value, label: value } : undefined;
+}
+
+export { canonicalCodeId, codeLanguageIcon, codeLanguageOptions, findLanguageOption, localeOptions };

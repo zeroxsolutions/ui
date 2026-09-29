@@ -16,7 +16,18 @@ import {
   CollapsibleCardTitle,
   CollapsibleCardTrigger,
 } from '@/registry/bases/base-ui/components/layout/collapsible-card';
-import { LanguageSwitcher } from '@/registry/bases/base-ui/components/data-entry/language-switcher';
+import { LanguageCombobox } from '@/registry/bases/base-ui/components/data-entry/language-combobox';
+import { Button } from '@/registry/bases/base-ui/ui/button';
+import {
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
+} from '@/registry/bases/base-ui/ui/combobox';
+import type { LanguageOption } from '@/registry/bases/base-ui/types/language-option';
 import { z } from 'zod';
 import {
   defineFeature,
@@ -57,7 +68,7 @@ const PLAIN_LANGUAGES = new Set(['', 'text', 'plaintext', 'plain', 'txt']);
 
 /**
  * The editable surface: the shared `CollapsibleCard` framing `CodeMirrorPane`. Typing
- * writes the node's `code` attr; the `LanguageSwitcher` writes `language`; the
+ * writes the node's `code` attr; the `LanguageCombobox` writes `language`; the
  * settings menu drives the pane's CodeMirror compartments as local view-state
  * (tab size, tabs/spaces, line numbers, soft wrap) — never written to the document.
  */
@@ -81,14 +92,34 @@ function EditableCodeBlock({
     <CollapsibleCard variant="muted" data-language={language} className="group/code">
       <CollapsibleCardHeader>
         <CollapsibleCardTitle>
-          <LanguageSwitcher
+          <LanguageCombobox
             kind="code"
-            searchable
             value={language || 'text'}
             onValueChange={(next) => updateAttrs({ language: next })}
-            aria-label="Language"
-            placeholder="Language…"
-          />
+          >
+            <ComboboxTrigger render={<Button variant="outline" size="sm" />} aria-label="Language">
+              <ComboboxValue>
+                {(option: LanguageOption | null) => (
+                  <>
+                    {option?.icon}
+                    <span>{option?.label ?? 'Language...'}</span>
+                  </>
+                )}
+              </ComboboxValue>
+            </ComboboxTrigger>
+            <ComboboxContent className="min-w-56">
+              <ComboboxInput showTrigger={false} placeholder="Language..." />
+              <ComboboxEmpty>No results.</ComboboxEmpty>
+              <ComboboxList>
+                {(option: LanguageOption) => (
+                  <ComboboxItem key={option.value} value={option}>
+                    {option.icon}
+                    <span>{option.label}</span>
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </LanguageCombobox>
         </CollapsibleCardTitle>
         <CollapsibleCardActions>
           <CodeSettingsMenu settings={settings} onSettingsChange={patchSettings} />

@@ -10,7 +10,17 @@ interface LanguageOption {
   icon?: ReactNode;
 }
 
+/** Where a language picker's options come from: explicit `options`, or the built-in set for `kind`. */
+interface LanguageOptionSource {
+  /** Which built-in set to offer when `options` is absent. Defaults to `locale`. */
+  kind?: LanguageKind;
+  /** Explicit options; they replace the built-in set. */
+  options?: LanguageOption[];
+  /** For `kind="locale"` without `options`: the BCP-47 codes to offer. */
+  locales?: readonly string[];
+}
+
 /** A Material icon component: scales by `size` and accepts the usual svg props (`className`, ...). */
 type LanguageIcon = FC<{ size?: string | number } & ComponentPropsWithoutRef<'svg'>>;
 
-export type { LanguageKind, LanguageOption, LanguageIcon };
+export type { LanguageKind, LanguageOption, LanguageOptionSource, LanguageIcon };
