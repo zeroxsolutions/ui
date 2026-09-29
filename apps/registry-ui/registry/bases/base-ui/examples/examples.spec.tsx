@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ComponentType } from 'react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
@@ -11,6 +11,7 @@ vi.mock('../lib/shiki', async (importOriginal) => {
   return { ...actual, highlightToLines: vi.fn().mockResolvedValue(null) };
 });
 
+import { AlertDialogConfirm } from './alert-dialog-confirm';
 import { ButtonGroupMenu } from './button-group-menu';
 import { ButtonGroupSplit } from './button-group-split';
 
@@ -22,6 +23,12 @@ beforeAll(() => {
     unobserve() {}
     disconnect() {}
   } as unknown as typeof ResizeObserver;
+  window.matchMedia ??= () =>
+    ({
+      matches: false,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }) as unknown as MediaQueryList;
 });
 
 afterEach(cleanup);
@@ -32,6 +39,7 @@ const MODULES = import.meta.glob<Record<string, ComponentType>>(['./*.tsx', '!./
 const EXPECTED_SLOT: Record<string, string> = {
   'ai-provider-card-demo': 'ai-provider-card',
   'ai-provider-picker-demo': 'ai-provider-picker',
+  'alert-dialog-confirm': 'alert-dialog-trigger',
   'avatar-picker-demo': 'avatar-picker-trigger',
   'button-default': 'button',
   'button-demo': 'button',
@@ -46,11 +54,13 @@ const EXPECTED_SLOT: Record<string, string> = {
   'chat-suggestion-item-demo': 'chat-suggestion-item',
   'code-block-demo': 'code-block',
   'collapsible-card-demo': 'collapsible-card',
+  'collapsible-card-section': 'collapsible-card',
   'command-menu-demo': 'command-menu',
   'copy-button-demo': 'copy-button',
   'data-table-demo': 'data-table',
   'emoji-appearance-toggle-group-demo': 'emoji-appearance-toggle-group',
   'emoji-picker-demo': 'emoji-picker-content',
+  'empty-file': 'empty',
   'file-tree-demo': 'file-tree',
   'file-type-icon-demo': 'file-type-icon',
   'floating-toolbar-demo': 'floating-toolbar',
@@ -60,6 +70,7 @@ const EXPECTED_SLOT: Record<string, string> = {
   'icon-chip-demo': 'icon-chip',
   'icon-label-demo': 'icon-label',
   'image-preview-demo': 'image-preview',
+  'input-group-search': 'input-group',
   'language-combobox-demo': 'combobox-trigger',
   'language-toggle-group-demo': 'language-toggle-group',
   'markdown-view-demo': 'markdown-view',
@@ -73,11 +84,15 @@ const EXPECTED_SLOT: Record<string, string> = {
   'panel-row-demo': 'panel-row',
   'password-input-demo': 'input-group',
   'permission-card-demo': 'permission-card',
+  'popover-icon-trigger': 'tooltip-trigger',
   'reasoning-collapsible-demo': 'reasoning-collapsible',
   'resize-handle-demo': 'resize-handle',
+  'sidebar-group-collapsible': 'collapsible',
+  'sidebar-menu-collapsible': 'collapsible',
   'status-indicator-demo': 'status-indicator',
   'tab-close-button-demo': 'tab-close-button',
   'tag-input-demo': 'tag-input',
+  'toggle-toolbar': 'tooltip-trigger',
   'tool-call-card-demo': 'tool-call-card',
   'tree-item-demo': 'tree-item',
   'unsaved-indicator-demo': 'unsaved-indicator',
@@ -104,6 +119,13 @@ describe('examples', () => {
     // to land after the test has moved on.
     await act(async () => {});
     expect(document.querySelector(`[data-slot="${EXPECTED_SLOT[file]}"]`)).not.toBeNull();
+  });
+
+  it('alert-dialog-confirm closes the dialog after confirming', async () => {
+    render(<AlertDialogConfirm />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete project' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
   });
 
   it('button-group-split opens its related actions from the caret', async () => {
