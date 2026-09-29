@@ -1,7 +1,9 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { EmojiPicker } from './emoji-picker';
+import { Empty, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
+
+import { EmojiPicker, EmojiPickerContent, EmojiPickerSearch } from './emoji-picker';
 
 beforeAll(() => {
   // The category nav scrolls the viewport; jsdom implements neither.
@@ -89,5 +91,49 @@ describe('EmojiPicker', () => {
 
     // The first cell of the initial window is present and clickable.
     expect(screen.getByRole('button', { name: 'grinning face' })).toBeTruthy();
+  });
+
+  it('renders the consumer-composed Empty in place of the default no-results state', () => {
+    render(
+      <EmojiPicker onSelect={vi.fn()}>
+        <EmojiPickerSearch />
+        <EmojiPickerContent>
+          <Empty>
+            <EmptyTitle>Nothing matches</EmptyTitle>
+          </Empty>
+        </EmojiPickerContent>
+      </EmojiPicker>,
+    );
+
+    fireEvent.change(screen.getByLabelText('Search emoji'), {
+      target: { value: 'zzzznotanemoji' },
+    });
+
+    expect(screen.getByText('Nothing matches')).toBeTruthy();
+    expect(screen.queryByText('No emoji found')).toBeNull();
+  });
+
+  it('sizes the viewport, the rows and the cells from one set of spacing steps', () => {
+    render(
+      <EmojiPicker onSelect={vi.fn()}>
+        <EmojiPickerContent size="lg" />
+      </EmojiPicker>,
+    );
+
+    const content = document.querySelector<HTMLElement>('[data-slot="emoji-picker-content"]');
+    expect(content?.style.getPropertyValue('--emoji-picker-height')).toBe('calc(var(--spacing) * 80)');
+    expect(content?.style.getPropertyValue('--emoji-picker-cell')).toBe('calc(var(--spacing) * 9)');
+    expect(content?.style.getPropertyValue('--emoji-picker-columns')).toBe('repeat(8, minmax(0, 1fr))');
+    // The first cell row sits one header below the top: 7 spacing steps at 4px.
+    const firstCells = document.querySelector<HTMLElement>('[data-index="1"]');
+    expect(firstCells?.style.transform).toBe('translateY(28px)');
+  });
+
+  it('stamps a data-slot on the grid and on each cell', () => {
+    render(<EmojiPicker onSelect={vi.fn()} />);
+
+    const cell = screen.getByRole('button', { name: 'grinning face' });
+    expect(cell.getAttribute('data-slot')).toBe('emoji-picker-cell');
+    expect(cell.closest('[data-slot="emoji-picker-grid"]')).not.toBeNull();
   });
 });

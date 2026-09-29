@@ -2,7 +2,6 @@ import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { EMOJI_CATEGORIES, FluentEmoji, type EmojiDatum } from '@zeroxsolutions/fluent-emoji';
-import { cva, type VariantProps } from 'class-variance-authority';
 import {
   Clock,
   Coffee,
@@ -34,20 +33,30 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   flags: Flag,
 };
 
-/** Default heading + nav name for the frequent row; override via `frequentLabel`. */
-const DEFAULT_FREQUENT_LABEL = 'Frequently used';
-
-/** Cells per grid row, and the fixed row metrics the window is computed from.
- * The grid is uniform - a cell is a `Button size="icon"` (`size-9` = 36px) and
- * rows sit a `gap-0.5` (2px) apart - and the viewport height is the `size`
- * variant (below), so the visible window is pure arithmetic: no element
- * measurement (which reads 0 in jsdom) and no ResizeObserver. */
-const COLS = 8;
-const CELL_ROW_HEIGHT = 38;
-const HEADER_HEIGHT = 28;
-const SIZE_PX = { sm: 160, md: 240, lg: 320 } as const;
+/** Cells per grid row. */
+const COLUMNS = 8;
+/**
+ * The grid's metrics in spacing steps (multiples of the theme's `--spacing`).
+ * They are the one source for both sides: `EmojiPickerContent` hands them to CSS
+ * as variables the classes read, and the window arithmetic below turns them into
+ * px, so the visible window needs no element measurement (which reads 0 in
+ * jsdom) and no ResizeObserver.
+ */
+const CELL_STEPS = 9;
+const ROW_GAP_STEPS = 0.5;
+const HEADER_STEPS = 7;
+const HEIGHT_STEPS = { sm: 40, md: 60, lg: 80 } as const;
+/** The px one spacing step measures at the default `--spacing` (0.25rem) on a 16px root; the arithmetic assumes it. */
+const SPACING_PX = 4;
+const CELL_ROW_PX = (CELL_STEPS + ROW_GAP_STEPS) * SPACING_PX;
+const HEADER_PX = HEADER_STEPS * SPACING_PX;
 /** Rows rendered beyond the viewport on each side, in px (~6 rows). */
-const OVERSCAN_PX = 6 * CELL_ROW_HEIGHT;
+const OVERSCAN_PX = 6 * CELL_ROW_PX;
+
+/** A length of `steps` spacing steps, as CSS that follows the theme's `--spacing`. */
+function spacingSteps(steps: number): string {
+  return `calc(var(--spacing) * ${steps})`;
+}
 
 interface EmojiSection {
   id: string;
@@ -55,7 +64,7 @@ interface EmojiSection {
   emojis: EmojiDatum[];
 }
 
-/** One virtual row: a sticky section heading or a row of up to `COLS` emoji. */
+/** One virtual row: a sticky section heading or a row of up to `COLUMNS` emoji. */
 type EmojiRow =
   { type: 'header'; key: string; id: string; name: string } | { type: 'cells'; key: string; emojis: EmojiDatum[] };
 
@@ -67,11 +76,11 @@ function buildRows(
   const rows: EmojiRow[] = [];
   const headerIndices: number[] = [];
   const pushCells = (emojis: EmojiDatum[], keyBase: string) => {
-    for (let i = 0; i < emojis.length; i += COLS) {
+    for (let i = 0; i < emojis.length; i += COLUMNS) {
       rows.push({
         type: 'cells',
         key: `${keyBase}-${i}`,
-        emojis: emojis.slice(i, i + COLS),
+        emojis: emojis.slice(i, i + COLUMNS),
       });
     }
   };
@@ -157,9 +166,10 @@ interface EmojiPickerProps {
  * Compound + context: the Root owns the state and the parts read it. Used bare
  * (`<EmojiPicker onSelect />`) it renders the default composition; compose the
  * parts to override any visible copy (every string is a part's `children`/prop
- * default, never frozen) - `<EmojiPickerEmpty>` overrides the no-results state.
+ * default, never frozen) - an upstream `Empty` placed in `EmojiPickerContent`
+ * overrides the no-results state.
  */
-function EmojiPicker({ onSelect, frequent = [], frequentLabel = DEFAULT_FREQUENT_LABEL, children }: EmojiPickerProps) {
+function EmojiPicker({ onSelect, frequent = [], frequentLabel = 'Frequently used', children }: EmojiPickerProps) {
   const [query, setQuery] = React.useState('');
   const [active, setActive] = React.useState('smileys_people');
 
@@ -282,58 +292,34 @@ function EmojiPickerGroupLabel({ className, ...props }: React.ComponentProps<'di
   );
 }
 
-type EmojiPickerEmptyProps = {
-  /** Override the default no-results state. */
-  children?: React.ReactNode;
+// `style` is taken: the root carries the grid metrics as CSS variables there.
+type EmojiPickerContentProps = Omit<React.ComponentProps<typeof ScrollArea>, 'style'> & {
+  /** The viewport height: `sm`, `md` (default) or `lg`. */
+  size?: keyof typeof HEIGHT_STEPS;
 };
-
-/** No-results state. `children` overrides the default copy; place it in Content. */
-function EmojiPickerEmpty({ children }: EmojiPickerEmptyProps) {
-  return children ? (
-    children
-  ) : (
-    <Empty data-slot="emoji-picker-empty">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <SearchX />
-        </EmptyMedia>
-        <EmptyTitle>No emoji found</EmptyTitle>
-      </EmptyHeader>
-    </Empty>
-  );
-}
-
-const emojiPickerContentVariants = cva('px-2', {
-  variants: {
-    size: {
-      sm: 'h-40',
-      md: 'h-60',
-      lg: 'h-80',
-    },
-  },
-  defaultVariants: {
-    size: 'md',
-  },
-});
-
-type EmojiPickerContentProps = React.ComponentProps<typeof ScrollArea> &
-  VariantProps<typeof emojiPickerContentVariants>;
 
 /**
  * Windowed, scrollable grid body. While searching it shows the matches or -
- * when none - its `children` (an `EmojiPickerEmpty` override) or the default
- * empty state. Only the rows in (and near) the viewport mount; the section
- * header covering the top of the viewport is pinned.
+ * when none - its `children` (an upstream `Empty` the consumer composes) or the
+ * default empty state. Only the rows in (and near) the viewport mount; the
+ * section header covering the top of the viewport is pinned.
  *
  * The window is plain arithmetic over fixed row heights and the known viewport
- * height (the `size` variant) - no element measurement, so it is correct under
+ * height (the `size` prop) - no element measurement, so it is correct under
  * jsdom (scroll starts at the top) and needs no virtualization library.
  */
 function EmojiPickerContent({ className, children, size = 'md', ...props }: EmojiPickerContentProps) {
-  const { results, rows, headerIndices, select, scrollerRef } = useEmojiPicker();
+  const { results, rows, headerIndices, scrollerRef } = useEmojiPicker();
 
-  const viewportHeight = SIZE_PX[size ?? 'md'];
+  const viewportHeight = HEIGHT_STEPS[size] * SPACING_PX;
   const [scrollTop, setScrollTop] = React.useState(0);
+  const metrics = {
+    '--emoji-picker-height': spacingSteps(HEIGHT_STEPS[size]),
+    '--emoji-picker-cell': spacingSteps(CELL_STEPS),
+    '--emoji-picker-gap': spacingSteps(ROW_GAP_STEPS),
+    '--emoji-picker-header': spacingSteps(HEADER_STEPS),
+    '--emoji-picker-columns': `repeat(${COLUMNS}, minmax(0, 1fr))`,
+  } as React.CSSProperties;
 
   // Per-row top offsets + total height (uniform, fixed metrics).
   const { offsets, total } = React.useMemo(() => {
@@ -341,7 +327,7 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
     let acc = 0;
     for (const r of rows) {
       offsets.push(acc);
-      acc += r.type === 'header' ? HEADER_HEIGHT : CELL_ROW_HEIGHT;
+      acc += r.type === 'header' ? HEADER_PX : CELL_ROW_PX;
     }
     return { offsets, total: acc };
   }, [rows]);
@@ -389,8 +375,23 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
   // Empty search -> the empty state, not a windowed list.
   if (results && results.length === 0) {
     return (
-      <ScrollArea ref={setScrollRoot} className={cn(emojiPickerContentVariants({ size }), className)} {...props}>
-        {children ?? <EmojiPickerEmpty />}
+      <ScrollArea
+        ref={setScrollRoot}
+        data-slot="emoji-picker-content"
+        className={cn('h-(--emoji-picker-height) px-2', className)}
+        style={metrics}
+        {...props}
+      >
+        {children ?? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <SearchX />
+              </EmptyMedia>
+              <EmptyTitle>No emoji found</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        )}
       </ScrollArea>
     );
   }
@@ -398,7 +399,7 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
   // The visible window (+ overscan), found over the fixed offsets.
   const top = scrollTop - OVERSCAN_PX;
   const bottom = scrollTop + viewportHeight + OVERSCAN_PX;
-  const rowHeight = (i: number) => (rows[i].type === 'header' ? HEADER_HEIGHT : CELL_ROW_HEIGHT);
+  const rowHeight = (i: number) => (rows[i].type === 'header' ? HEADER_PX : CELL_ROW_PX);
   let start = 0;
   while (start < rows.length && offsets[start] + rowHeight(start) < top) start++;
   let end = start;
@@ -412,11 +413,19 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
   }
 
   return (
-    <ScrollArea ref={setScrollRoot} className={cn(emojiPickerContentVariants({ size }), className)} {...props}>
-      <div style={{ position: 'relative', width: '100%', height: total }}>
+    <ScrollArea
+      ref={setScrollRoot}
+      data-slot="emoji-picker-content"
+      className={cn('h-(--emoji-picker-height) px-2', className)}
+      style={metrics}
+      {...props}
+    >
+      <div className="relative w-full" style={{ height: total }}>
         {stickyIndex >= 0 && rows[stickyIndex].type === 'header' && (
-          <div style={{ position: 'sticky', top: 0, zIndex: 10, width: '100%' }}>
-            <EmojiPickerGroupLabel>{(rows[stickyIndex] as { name: string }).name}</EmojiPickerGroupLabel>
+          <div className="sticky top-0 z-10 w-full">
+            <EmojiPickerGroupLabel className="h-(--emoji-picker-header)">
+              {(rows[stickyIndex] as { name: string }).name}
+            </EmojiPickerGroupLabel>
           </div>
         )}
         {rows.slice(start, end).map((row, i) => {
@@ -427,18 +436,17 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
             <div
               key={row.key}
               data-index={index}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                transform: `translateY(${offsets[index]}px)`,
-              }}
+              className="absolute top-0 left-0 w-full"
+              style={{ transform: `translateY(${offsets[index]}px)` }}
             >
               {row.type === 'header' ? (
-                <EmojiPickerGroupLabel>{row.name}</EmojiPickerGroupLabel>
+                <EmojiPickerGroupLabel className="h-(--emoji-picker-header)">{row.name}</EmojiPickerGroupLabel>
               ) : (
-                <EmojiPickerGrid emojis={row.emojis} onSelect={select} />
+                <EmojiPickerGrid>
+                  {row.emojis.map((emoji, i) => (
+                    <EmojiPickerCell key={`${emoji.e}-${i}`} emoji={emoji} />
+                  ))}
+                </EmojiPickerGrid>
               )}
             </div>
           );
@@ -475,42 +483,47 @@ function EmojiPickerNav({ className, ...props }: Omit<React.ComponentProps<typeo
   );
 }
 
-function EmojiPickerGrid({ emojis, onSelect }: { emojis: EmojiDatum[]; onSelect: (emoji: string) => void }) {
+/** One row of cells, laid out in the columns and gap `EmojiPickerContent` sets. */
+function EmojiPickerGrid({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div className="grid grid-cols-8 gap-0.5">
-      {emojis.map((em, i) => (
-        <EmojiPickerCell key={`${em.e}-${i}`} emoji={em} onSelect={onSelect} />
-      ))}
-    </div>
+    <div
+      data-slot="emoji-picker-grid"
+      className={cn('grid grid-cols-(--emoji-picker-columns) gap-(--emoji-picker-gap)', className)}
+      {...props}
+    />
   );
 }
+
+type EmojiPickerCellProps = Omit<React.ComponentProps<typeof Button>, 'children'> & {
+  /** The emoji this cell draws and hands to the picker's `onSelect` when pressed. */
+  emoji: EmojiDatum;
+};
 
 /** One emoji button, drawn in the app-wide Fluent style (`setFluentEmojiStyle`).
  * Only cells in (or near) the viewport mount, so the Fluent artwork is rendered
  * immediately - virtualization, not per-cell deferral, is what keeps opening the
  * picker from fetching the whole catalog. */
-function EmojiPickerCell({ emoji, onSelect }: { emoji: EmojiDatum; onSelect: (emoji: string) => void }) {
+function EmojiPickerCell({ emoji, className, onClick, ...props }: EmojiPickerCellProps) {
+  const { select } = useEmojiPicker();
   return (
     <Button
+      data-slot="emoji-picker-cell"
       type="button"
-      onClick={() => onSelect(emoji.e)}
       title={emoji.n}
       aria-label={emoji.n}
       size="icon"
       variant="ghost"
+      className={cn('size-(--emoji-picker-cell)', className)}
+      onClick={(event) => {
+        onClick?.(event);
+        select(emoji.e);
+      }}
+      {...props}
     >
       <FluentEmoji glyph={emoji.e} name={emoji.n} className="size-full object-contain" />
     </Button>
   );
 }
 
-export {
-  EmojiPicker,
-  EmojiPickerSearch,
-  EmojiPickerContent,
-  EmojiPickerNav,
-  EmojiPickerEmpty,
-  EmojiPickerGroupLabel,
-  emojiPickerContentVariants,
-};
-export type { EmojiPickerProps, EmojiPickerSearchProps, EmojiPickerContentProps, EmojiPickerEmptyProps };
+export { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerNav, EmojiPickerGroupLabel };
+export type { EmojiPickerProps, EmojiPickerSearchProps, EmojiPickerContentProps };
