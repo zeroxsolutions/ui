@@ -6,7 +6,7 @@ import {
   type Table as TanstackTable,
   useReactTable,
 } from '@tanstack/react-table';
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { DropdownMenu, DropdownMenuContent } from '@/registry/bases/base-ui/ui/dropdown-menu';
@@ -51,7 +51,7 @@ function useRowsTable(rows: Row[]): TanstackTable<Row> {
 }
 
 /** Renders the three column actions for `name` in an open menu, and the table state they change. */
-function ColumnActions({ onClick }: { onClick: () => void }): ReactNode {
+function ColumnActions({ onClick }: { onClick: (event: MouseEvent) => void }): ReactNode {
   const table = useRowsTable([{ name: 'a', size: 1 }]);
   const column = table.getColumn('name');
   if (!column) return null;
@@ -110,6 +110,32 @@ describe('DataTableColumnHeader actions', () => {
 
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('visible').textContent).toBe('false');
+  });
+});
+
+describe('DataTableColumnHeader actions honor a caller preventDefault', () => {
+  it('skips the ascending sort when the caller onClick prevents the default', async () => {
+    render(<ColumnActions onClick={(event) => event.preventDefault()} />);
+
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Asc' }));
+
+    expect(screen.getByTestId('sorting').textContent).toBe('[]');
+  });
+
+  it('skips the descending sort when the caller onClick prevents the default', async () => {
+    render(<ColumnActions onClick={(event) => event.preventDefault()} />);
+
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Desc' }));
+
+    expect(screen.getByTestId('sorting').textContent).toBe('[]');
+  });
+
+  it('skips hiding the column when the caller onClick prevents the default', async () => {
+    render(<ColumnActions onClick={(event) => event.preventDefault()} />);
+
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Hide' }));
+
+    expect(screen.getByTestId('visible').textContent).toBe('true');
   });
 });
 

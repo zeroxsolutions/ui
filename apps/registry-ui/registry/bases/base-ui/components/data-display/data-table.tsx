@@ -168,7 +168,10 @@ type DataTableColumnActionProps<TData, TValue> = {
   column: Column<TData, TValue>;
 } & React.ComponentProps<typeof DropdownMenuItem>;
 
-/** Sort-ascending action; `children` override the default copy. A caller's `onClick` runs before the sort. */
+/**
+ * Sort-ascending action; `children` override the default copy. A caller's
+ * `onClick` runs first, and calling `event.preventDefault()` in it skips the sort.
+ */
 function DataTableColumnHeaderSortAscending<TData, TValue>({
   column,
   children,
@@ -180,7 +183,7 @@ function DataTableColumnHeaderSortAscending<TData, TValue>({
       data-slot="data-table-column-header-sort-ascending"
       onClick={(event) => {
         onClick?.(event);
-        column.toggleSorting(false);
+        if (!event.defaultPrevented) column.toggleSorting(false);
       }}
       {...props}
     >
@@ -190,7 +193,10 @@ function DataTableColumnHeaderSortAscending<TData, TValue>({
   );
 }
 
-/** Sort-descending action; `children` override the default copy. A caller's `onClick` runs before the sort. */
+/**
+ * Sort-descending action; `children` override the default copy. A caller's
+ * `onClick` runs first, and calling `event.preventDefault()` in it skips the sort.
+ */
 function DataTableColumnHeaderSortDescending<TData, TValue>({
   column,
   children,
@@ -202,7 +208,7 @@ function DataTableColumnHeaderSortDescending<TData, TValue>({
       data-slot="data-table-column-header-sort-descending"
       onClick={(event) => {
         onClick?.(event);
-        column.toggleSorting(true);
+        if (!event.defaultPrevented) column.toggleSorting(true);
       }}
       {...props}
     >
@@ -212,7 +218,10 @@ function DataTableColumnHeaderSortDescending<TData, TValue>({
   );
 }
 
-/** Hide-column action; `children` override the default copy. A caller's `onClick` runs before the column hides. */
+/**
+ * Hide-column action; `children` override the default copy. A caller's
+ * `onClick` runs first, and calling `event.preventDefault()` in it skips the hide.
+ */
 function DataTableColumnHeaderHide<TData, TValue>({
   column,
   children,
@@ -224,7 +233,7 @@ function DataTableColumnHeaderHide<TData, TValue>({
       data-slot="data-table-column-header-hide"
       onClick={(event) => {
         onClick?.(event);
-        column.toggleVisibility(false);
+        if (!event.defaultPrevented) column.toggleVisibility(false);
       }}
       {...props}
     >
