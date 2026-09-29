@@ -1,33 +1,51 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AiProviderCard } from './ai-provider-card';
+import { CardFooter, CardHeader, CardTitle } from '@/registry/bases/base-ui/ui/card';
+import {
+  AiProviderCard,
+  AiProviderCardAction,
+  AiProviderCardDescription,
+  AiProviderCardStatus,
+  AiProviderCardTrigger,
+} from './ai-provider-card';
 
 afterEach(cleanup);
 
 describe('AiProviderCard', () => {
-  it('invokes onSelect when the card body is clicked', () => {
+  it('can be focused and selected from the keyboard', () => {
     const onSelect = vi.fn();
-    render(<AiProviderCard name="OpenAI" description="Models" onSelect={onSelect} />);
+    render(
+      <AiProviderCard>
+        <CardHeader>
+          <CardTitle>OpenAI</CardTitle>
+        </CardHeader>
+        <AiProviderCardTrigger aria-label="Select OpenAI" onClick={onSelect} />
+      </AiProviderCard>,
+    );
 
-    fireEvent.click(screen.getByText('OpenAI'));
+    const trigger = screen.getByRole('button', { name: 'Select OpenAI' });
+    trigger.focus();
+    expect(document.activeElement).toBe(trigger);
 
+    fireEvent.click(trigger);
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
-  it('does not invoke onSelect when the trailing action is activated', () => {
+  it('does not invoke the trigger when the action is activated', () => {
     const onSelect = vi.fn();
     const onAction = vi.fn();
     render(
-      <AiProviderCard
-        name="OpenAI"
-        onSelect={onSelect}
-        action={
-          <button type="button" onClick={onAction}>
-            toggle
-          </button>
-        }
-      />,
+      <AiProviderCard>
+        <CardFooter>
+          <AiProviderCardAction>
+            <button type="button" onClick={onAction}>
+              toggle
+            </button>
+          </AiProviderCardAction>
+        </CardFooter>
+        <AiProviderCardTrigger aria-label="Select OpenAI" onClick={onSelect} />
+      </AiProviderCard>,
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'toggle' }));
@@ -36,17 +54,37 @@ describe('AiProviderCard', () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it('shows the tone-styled status in place of the meta note', () => {
-    render(<AiProviderCard name="Claude Code" meta="12 models" status={{ tone: 'busy', text: 'Command failed' }} />);
+  it('carries the status tone on the root for the status note to read', () => {
+    render(
+      <AiProviderCard status="busy">
+        <CardFooter>
+          <AiProviderCardStatus>Command failed</AiProviderCardStatus>
+        </CardFooter>
+      </AiProviderCard>,
+    );
 
-    const status = screen.getByText('Command failed');
-    expect(status.className).toContain('text-destructive');
-    expect(screen.queryByText('12 models')).toBeNull();
+    const card = document.querySelector('[data-slot="ai-provider-card"]');
+    expect(card?.getAttribute('data-status')).toBe('busy');
+    expect(card?.querySelector('[data-slot="ai-provider-card-status"]')?.textContent).toBe('Command failed');
   });
 
-  it('renders with neither an icon nor a description', () => {
-    render(<AiProviderCard name="Custom provider" />);
+  it('sets no status when none is given', () => {
+    render(<AiProviderCard />);
+
+    expect(document.querySelector('[data-slot="ai-provider-card"]')?.hasAttribute('data-status')).toBe(false);
+  });
+
+  it('renders the composed header and description', () => {
+    render(
+      <AiProviderCard>
+        <CardHeader>
+          <CardTitle>Custom provider</CardTitle>
+          <AiProviderCardDescription>Models</AiProviderCardDescription>
+        </CardHeader>
+      </AiProviderCard>,
+    );
 
     expect(screen.getByText('Custom provider')).toBeTruthy();
+    expect(document.querySelector('[data-slot="ai-provider-card-description"]')?.textContent).toBe('Models');
   });
 });

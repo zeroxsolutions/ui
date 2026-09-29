@@ -121,7 +121,7 @@
       "title": "AI Provider Picker",
       "description": "A responsive grid of AiProviderCard tiles, each showing one AI provider icon. Composes the ai-provider-card item into one reusable surface.",
       "dependencies": ["@zeroxsolutions/icons"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/ai-provider-card.json"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/ai-provider-card.json", "@shadcn/card"],
       "files": [
         {
           "path": "registry/bases/base-ui/blocks/ai-provider-picker.tsx",

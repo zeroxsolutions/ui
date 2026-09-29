@@ -1,4 +1,10 @@
-import { AiProviderCard } from '@/registry/bases/base-ui/components/data-display/ai-provider-card';
+import {
+  AiProviderCard,
+  AiProviderCardDescription,
+  AiProviderCardStatus,
+  AiProviderCardTrigger,
+} from '@/registry/bases/base-ui/components/data-display/ai-provider-card';
+import { CardFooter, CardHeader, CardTitle } from '@/registry/bases/base-ui/ui/card';
 import { AiProviderIcon } from '@zeroxsolutions/icons/ai-provider-icon';
 
 /**
@@ -20,7 +26,7 @@ export interface AiProviderPickerEntry {
 export interface AiProviderPickerProps {
   /** Tile data; defaults to {@link DEFAULT_AI_PROVIDER_ENTRIES}. */
   entries?: AiProviderPickerEntry[];
-  /** Whole-card select handler - receives the provider key. */
+  /** Card select handler - receives the provider key. Omit it and no card is selectable. */
   onSelect?: (provider: string) => void;
   className?: string;
 }
@@ -71,7 +77,7 @@ export const DEFAULT_AI_PROVIDER_ENTRIES: AiProviderPickerEntry[] = [
 
 /**
  * A `registry:block` - a responsive grid of `AiProviderCard` tiles, each
- * showing one AI provider via an `AiProviderIcon` in the card's `icon` slot.
+ * showing one AI provider via an `AiProviderIcon` beside the card's title.
  * Composes two existing registry items (`ai-provider-card`, `ai-provider-icon`)
  * into one reusable surface; the host supplies tile data or takes the default
  * sample, and gets a `provider` key back on select.
@@ -84,14 +90,21 @@ export function AiProviderPicker({
   return (
     <div data-slot="ai-provider-picker" className={className ?? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'}>
       {entries.map((entry) => (
-        <AiProviderCard
-          key={entry.provider}
-          name={entry.name}
-          description={entry.description}
-          meta={entry.meta}
-          icon={<AiProviderIcon provider={entry.provider} type="avatar" size={32} />}
-          onSelect={onSelect ? () => onSelect(entry.provider) : undefined}
-        />
+        <AiProviderCard key={entry.provider}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2.5">
+              <AiProviderIcon provider={entry.provider} type="avatar" size={32} />
+              <span className="min-w-0 flex-1 truncate">{entry.name}</span>
+            </CardTitle>
+            <AiProviderCardDescription>{entry.description}</AiProviderCardDescription>
+          </CardHeader>
+          <CardFooter className="mt-auto">
+            <AiProviderCardStatus>{entry.meta}</AiProviderCardStatus>
+          </CardFooter>
+          {onSelect && (
+            <AiProviderCardTrigger aria-label={`Select ${entry.name}`} onClick={() => onSelect(entry.provider)} />
+          )}
+        </AiProviderCard>
       ))}
     </div>
   );
