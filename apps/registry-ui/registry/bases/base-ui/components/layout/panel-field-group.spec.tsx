@@ -19,34 +19,46 @@ describe('PanelFieldGroup', () => {
     expect(grid.className).toContain('gap-y-1');
   });
 
-  it('renders a (possibly dynamic) column count as a computed grid-template', () => {
+  it('hands a runtime column count to the grid through the --cols variable', () => {
     const { container } = render(
       <PanelFieldGroup cols={3}>
         <span>a</span>
       </PanelFieldGroup>,
     );
     const grid = container.firstChild as HTMLElement;
-    // A computed inline template, not a `grid-cols-3` utility — so any runtime
-    // count works (Tailwind can't JIT a dynamic `grid-cols-${n}`).
-    expect(grid.style.gridTemplateColumns).toBe('repeat(3, minmax(0, 1fr))');
-    expect(grid.className).not.toContain('grid-cols-3');
+    expect(grid.style.getPropertyValue('--cols')).toBe('3');
+    expect(grid.style.gridTemplateColumns).toBe('');
+    expect(grid.className).toContain('grid-cols-[repeat(var(--cols,1),minmax(0,1fr))]');
   });
 
-  it('also accepts the column count via className', () => {
+  it('lets a grid-cols class replace the variable-driven template', () => {
     const { container } = render(
       <PanelFieldGroup className="grid-cols-3">
         <span>a</span>
       </PanelFieldGroup>,
     );
-    expect((container.firstChild as HTMLElement).className).toContain('grid-cols-3');
+    const grid = container.firstChild as HTMLElement;
+    expect(grid.className).toContain('grid-cols-3');
+    expect(grid.className).not.toContain('var(--cols');
   });
 
-  it('forwards arbitrary props onto the grid element', () => {
+  it('keeps a caller style beside the column variable', () => {
+    const { container } = render(
+      <PanelFieldGroup cols={2} style={{ rowGap: '0px' }}>
+        <span>a</span>
+      </PanelFieldGroup>,
+    );
+    const grid = container.firstChild as HTMLElement;
+    expect(grid.style.getPropertyValue('--cols')).toBe('2');
+    expect(grid.style.rowGap).toBe('0px');
+  });
+
+  it('forwards arbitrary props and stamps data-slot on the grid element', () => {
     const { getByTestId } = render(
       <PanelFieldGroup data-testid="grid">
         <span>a</span>
       </PanelFieldGroup>,
     );
-    expect(getByTestId('grid')).toBeTruthy();
+    expect(getByTestId('grid').getAttribute('data-slot')).toBe('panel-field-group');
   });
 });

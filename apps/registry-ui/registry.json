@@ -56,7 +56,7 @@
       "categories": ["layout"],
       "title": "Field Group",
       "description": "A field grid plus a fixed trailing action slot. Use it for any property row that mixes inputs with a side action - the slot is always reserved at one icon-button width so every row shares the same right edge.",
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/field-grid.json", "@shadcn/utils"],
+      "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/layout/panel-row.tsx",
@@ -303,7 +303,14 @@
       "categories": ["examples"],
       "title": "FieldGroup Hero",
       "description": "A two-column field grid with a trailing action slot.",
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/field-group.json", "@shadcn/input", "@shadcn/label"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/field-group.json",
+        "https://ui.zeroxsolutions.com/r/field-grid.json",
+        "@shadcn/button",
+        "@shadcn/input",
+        "@shadcn/label"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/field-group-hero.tsx",

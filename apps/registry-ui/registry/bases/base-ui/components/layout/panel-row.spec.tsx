@@ -1,50 +1,62 @@
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { PanelRow } from './panel-row';
+import { Field, FieldLabel } from '@/registry/bases/base-ui/ui/field';
+
+import { PanelFieldGroup } from './panel-field-group';
+import { PanelRow, PanelRowAction } from './panel-row';
 
 afterEach(cleanup);
 
 describe('PanelRow', () => {
-  it('renders its inputs and a provided trailing action', () => {
-    const { getByText } = render(
-      <PanelRow action={<button>lock</button>}>
-        <span>x</span>
-        <span>y</span>
+  it('renders the fields and the action the consumer composes', () => {
+    render(
+      <PanelRow>
+        <PanelFieldGroup cols={2}>
+          <span>x</span>
+          <span>y</span>
+        </PanelFieldGroup>
+        <PanelRowAction>
+          <button type="button">lock</button>
+        </PanelRowAction>
       </PanelRow>,
     );
-    expect(getByText('x')).toBeTruthy();
-    expect(getByText('lock')).toBeTruthy();
+    expect(screen.getByText('x')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'lock' }).closest('[data-slot="panel-row-action"]')).toBeTruthy();
   });
 
-  it('reserves the fixed trailing action slot even when no action is given', () => {
-    const { container } = render(
-      <PanelRow>
+  it('reserves the action column in the row template, with or without an action', () => {
+    render(
+      <PanelRow data-testid="row">
         <span>x</span>
       </PanelRow>,
     );
-    // The slot is always rendered at a single icon-button width so a row with no
-    // action keeps the same right edge as one that has an action.
-    expect(container.querySelector('.min-w-9')).toBeTruthy();
+    expect(screen.getByTestId('row').className).toContain('grid-cols-[minmax(0,1fr)_minmax(--spacing(9),auto)]');
   });
 
   it('merges className and forwards arbitrary props onto the row', () => {
-    const { getByTestId } = render(
+    render(
       <PanelRow className="mt-2" data-testid="row">
         <span>x</span>
       </PanelRow>,
     );
-    const row = getByTestId('row');
-    expect(row.className).toContain('flex');
+    const row = screen.getByTestId('row');
+    expect(row.className).toContain('grid');
     expect(row.className).toContain('mt-2');
+    expect(row.getAttribute('data-slot')).toBe('panel-row');
   });
 
-  it('stamps data-slot="panel-row" on the root', () => {
-    const { container } = render(
-      <PanelRow>
-        <span>x</span>
+  it('is not a field group, so upstream field-group selectors never match it', () => {
+    render(
+      <PanelRow data-testid="row">
+        <Field orientation="responsive">
+          <FieldLabel>Width</FieldLabel>
+        </Field>
       </PanelRow>,
     );
-    expect(container.querySelector('[data-slot="panel-row"]')).toBeTruthy();
+    const row = screen.getByTestId('row');
+    expect(row.className).not.toContain('group/field-group');
+    expect(row.className).not.toContain('@container/field-group');
+    expect(screen.getByRole('group').closest('[data-slot="field-group"]')).toBeNull();
   });
 });

@@ -1,34 +1,28 @@
-import type { ComponentProps } from 'react';
+import type { ComponentProps, CSSProperties, ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 interface PanelFieldGroupProps extends ComponentProps<'div'> {
   /**
-   * Column count, rendered as a computed `grid-template-columns: repeat(n, …)`
-   * — NOT a `grid-cols-N` utility. That makes it accept ANY count, including one
-   * derived at runtime (`cols={axes.length}`), which a static Tailwind class
-   * can't express (the JIT only detects complete literal class strings). Omit to
-   * let `className` (`grid-cols-*`) drive the columns instead.
+   * Column count, written to the `--cols` variable the grid template reads, so a
+   * count known only at runtime (`cols={axes.length}`) works. Omit it for one
+   * column, or pass a `grid-cols-*` class, which replaces the template.
    */
   cols?: number;
 }
 
 /**
- * Standard tight grid wrapper for paired/triplet inputs (X+Y, W+H,
- * opacity+blend, count+gutter+margin, …). Bakes only the curated `gap-x-2
- * gap-y-1` spacing decision so sections stay consistent; pass `cols` for a
- * (possibly dynamic) column count, or drive it via `className`.
+ * The tight grid for paired and triplet inputs (X + Y, W + H, count + gutter +
+ * margin) in a property panel: one gutter decision, any number of columns.
  */
-function PanelFieldGroup({ cols, className, children, style, ...props }: PanelFieldGroupProps) {
+function PanelFieldGroup({ cols, className, style, ...props }: PanelFieldGroupProps): ReactNode {
   return (
     <div
       data-slot="panel-field-group"
-      className={cn('grid gap-x-2 gap-y-1', className)}
-      style={cols ? { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, ...style } : style}
+      className={cn('grid grid-cols-[repeat(var(--cols,1),minmax(0,1fr))] gap-x-2 gap-y-1', className)}
+      style={cols === undefined ? style : ({ '--cols': cols, ...style } as CSSProperties)}
       {...props}
-    >
-      {children}
-    </div>
+    />
   );
 }
 
