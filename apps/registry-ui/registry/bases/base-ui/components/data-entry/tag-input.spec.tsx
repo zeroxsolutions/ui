@@ -32,4 +32,13 @@ describe('TagInput', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Remove design' }));
     expect(onValueChange).toHaveBeenCalledWith(['ui']);
   });
+
+  it('stamps its data-slot and passes the div props through to the root', () => {
+    const { container } = render(<TagInput value={[]} onValueChange={vi.fn()} id="tags" aria-label="Tags" />);
+
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.getAttribute('data-slot')).toBe('tag-input');
+    expect(root.id).toBe('tags');
+    expect(root.getAttribute('aria-label')).toBe('Tags');
+  });
 });

@@ -20,7 +20,18 @@ interface ResizeHandleProps extends Omit<React.ComponentProps<'div'>, 'onDrag'> 
   onToggle: () => void;
 }
 
-function ResizeHandle({ onDrag, onToggle, className, ...props }: ResizeHandleProps) {
+function ResizeHandle({
+  onDrag,
+  onToggle,
+  className,
+  onPointerDown: onPointerDownProp,
+  onPointerMove: onPointerMoveProp,
+  onPointerUp,
+  onPointerCancel,
+  onLostPointerCapture,
+  onDoubleClick,
+  ...props
+}: ResizeHandleProps): React.ReactNode {
   const downX = useRef(0);
   const lastX = useRef(0);
   const armed = useRef(false);
@@ -64,12 +75,30 @@ function ResizeHandle({ onDrag, onToggle, className, ...props }: ResizeHandlePro
         'group/handle bg-border hover:bg-primary/50 active:bg-primary relative z-40 flex w-px shrink-0 cursor-col-resize touch-none items-center justify-center transition-colors select-none after:absolute after:inset-y-0 after:left-1/2 after:w-2 after:-translate-x-1/2',
         className,
       )}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={end}
-      onPointerCancel={end}
-      onLostPointerCapture={end}
-      onDoubleClick={onToggle}
+      onPointerDown={(event) => {
+        onPointerDownProp?.(event);
+        onPointerDown(event);
+      }}
+      onPointerMove={(event) => {
+        onPointerMoveProp?.(event);
+        onPointerMove(event);
+      }}
+      onPointerUp={(event) => {
+        onPointerUp?.(event);
+        end();
+      }}
+      onPointerCancel={(event) => {
+        onPointerCancel?.(event);
+        end();
+      }}
+      onLostPointerCapture={(event) => {
+        onLostPointerCapture?.(event);
+        end();
+      }}
+      onDoubleClick={(event) => {
+        onDoubleClick?.(event);
+        onToggle();
+      }}
       {...props}
     >
       <div className="bg-border group-hover/handle:bg-primary/50 z-10 flex h-8 w-1 shrink-0 rounded-full transition-colors" />

@@ -9,19 +9,19 @@ import {
 } from '@/registry/bases/base-ui/ui/input-group';
 
 /**
- * A password field — the `input-group` composition with a show/hide toggle in
+ * A password field - the `input-group` composition with a show/hide toggle in
  * the inline-end addon, packaged so call-sites never re-wire the eye button.
- * `className` sizes the group; remaining props (incl. `ref`/`onChange` for RHF
- * `register`, ref-as-prop in React 19) flow straight to the input.
- *
- * Named modifier-first (`PasswordInput`), per component-conventions: a new input
- * variant takes the `<Modifier>Input` form.
+ * `className` sizes the group, which keeps upstream's `data-slot="input-group"`
+ * (recipes such as `ui/combobox.tsx`'s popup select on it) and carries
+ * `data-visible` while the password shows; remaining props (incl.
+ * `ref`/`onChange` for RHF `register`, ref-as-prop in React 19) flow straight
+ * to the input.
  */
-function PasswordInput({ className, ...props }: Omit<React.ComponentProps<'input'>, 'type'>) {
+function PasswordInput({ className, ...props }: Omit<React.ComponentProps<'input'>, 'type'>): React.ReactNode {
   const [visible, setVisible] = React.useState(false);
 
   return (
-    <InputGroup className={className}>
+    <InputGroup data-visible={visible || undefined} className={className}>
       <InputGroupInput {...props} type={visible ? 'text' : 'password'} />
       <InputGroupAddon align="inline-end">
         <InputGroupButton

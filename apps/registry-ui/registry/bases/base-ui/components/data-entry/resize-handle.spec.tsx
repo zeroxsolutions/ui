@@ -30,6 +30,27 @@ describe('ResizeHandle', () => {
     expect(onToggle).toHaveBeenCalledTimes(1);
   });
 
+  it("runs the consumer's own pointer and double-click handlers beside its own", () => {
+    const onToggle = vi.fn();
+    const onDrag = vi.fn();
+    const onDoubleClick = vi.fn();
+    const onPointerDown = vi.fn();
+    const { container } = render(
+      <ResizeHandle onDrag={onDrag} onToggle={onToggle} onDoubleClick={onDoubleClick} onPointerDown={onPointerDown} />,
+    );
+    const handle = container.firstElementChild!;
+
+    fireEvent.doubleClick(handle);
+    expect(onDoubleClick).toHaveBeenCalledTimes(1);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+
+    fireEvent.pointerDown(handle, { clientX: 100, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientX: 110, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientX: 120, pointerId: 1 });
+    expect(onPointerDown).toHaveBeenCalledTimes(1);
+    expect(onDrag).toHaveBeenCalledWith(10);
+  });
+
   it('emits onDrag deltas only after the pointer crosses the threshold', () => {
     const onDrag = vi.fn();
     const { container } = render(<ResizeHandle onDrag={onDrag} onToggle={() => {}} />);

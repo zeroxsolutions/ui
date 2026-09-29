@@ -1,26 +1,28 @@
 import { X } from 'lucide-react';
-import { useState, type KeyboardEvent } from 'react';
+import { useState, type ComponentProps, type KeyboardEvent, type ReactNode } from 'react';
 
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
+interface TagInputProps extends Omit<ComponentProps<'div'>, 'onChange' | 'defaultValue'> {
+  /** The tags, in order; a duplicate is never added. */
+  value: string[];
+  /** Called with the whole next tag array on every add or remove. */
+  onValueChange: (value: string[]) => void;
+  /** Placeholder copy for the input. */
+  placeholder?: string;
+  disabled?: boolean;
+}
+
 /**
  * A simple tag editor: existing tags as removable `Badge` chips above an `Input`
  * that commits on Enter / comma / blur. Backspace on an empty input drops the
- * last tag. Controlled — the consumer owns the tag array and supplies any
- * placeholder copy.
+ * last tag. Controlled - the consumer owns the tag array and supplies any
+ * placeholder copy. Other props land on the root `div`.
  */
-interface TagInputProps {
-  value: string[];
-  onValueChange: (value: string[]) => void;
-  placeholder?: string;
-  disabled?: boolean;
-  className?: string;
-}
-
-function TagInput({ value, onValueChange, placeholder, disabled, className }: TagInputProps) {
+function TagInput({ value, onValueChange, placeholder, disabled, className, ...props }: TagInputProps): ReactNode {
   const [draft, setDraft] = useState('');
 
   const commit = () => {
@@ -39,7 +41,7 @@ function TagInput({ value, onValueChange, placeholder, disabled, className }: Ta
   };
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div data-slot="tag-input" className={cn('space-y-2', className)} {...props}>
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {value.map((tag) => (
