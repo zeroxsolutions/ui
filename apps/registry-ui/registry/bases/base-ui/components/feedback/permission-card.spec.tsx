@@ -4,12 +4,14 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import {
   PermissionCard,
   PermissionCardActions,
+  PermissionCardHeader,
   PermissionCardResolved,
   PermissionCardStatus,
   PermissionCardTitle,
 } from './permission-card';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ButtonGroup } from '@/registry/bases/base-ui/ui/button-group';
+import { CardDescription } from '@/registry/bases/base-ui/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,29 +50,30 @@ describe('PermissionCard', () => {
     expect(root().getAttribute('data-status')).toBe('approved');
   });
 
-  it('shows the per-status badge label', () => {
-    render(
-      <PermissionCard status="pending">
-        <PermissionCardStatus status="pending" />
-      </PermissionCard>,
-    );
-    screen.getByText('Needs approval');
-    cleanup();
-
-    render(
-      <PermissionCard status="approved">
-        <PermissionCardStatus status="approved" />
-      </PermissionCard>,
-    );
-    screen.getByText('Allowed');
-    cleanup();
-
+  it('renders the consumer status word, with the icon the root status picks', () => {
     render(
       <PermissionCard status="denied">
-        <PermissionCardStatus status="denied" />
+        <PermissionCardHeader>
+          <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
+          <PermissionCardStatus>Denied</PermissionCardStatus>
+        </PermissionCardHeader>
       </PermissionCard>,
     );
-    screen.getByText('Denied');
+    const status = screen.getByText('Denied');
+    expect(status.getAttribute('data-slot')).toBe('permission-card-status');
+    expect(status.querySelectorAll('svg')).toHaveLength(3);
+  });
+
+  it('composes the upstream card description under the header', () => {
+    render(
+      <PermissionCard status="pending">
+        <PermissionCardHeader>
+          <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
+        </PermissionCardHeader>
+        <CardDescription>Deploy the web app to production</CardDescription>
+      </PermissionCard>,
+    );
+    expect(screen.getByText('Deploy the web app to production').getAttribute('data-slot')).toBe('card-description');
   });
 
   it('renders an asymmetric row: a plain Deny plus a graduated-scope split Allow', () => {
@@ -101,7 +104,7 @@ describe('PermissionCard', () => {
   it('persists a resolved outcome once the request is decided', () => {
     render(
       <PermissionCard status="approved">
-        <PermissionCardResolved>Allowed once · 2:14pm</PermissionCardResolved>
+        <PermissionCardResolved>Allowed once - 2:14pm</PermissionCardResolved>
       </PermissionCard>,
     );
     screen.getByText(/Allowed once/);
