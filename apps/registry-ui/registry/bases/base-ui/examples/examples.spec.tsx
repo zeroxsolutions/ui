@@ -1,7 +1,15 @@
 /// <reference types="vite/client" />
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { ComponentType } from 'react';
-import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+
+// code-block-demo renders CodeBlock, which highlights asynchronously through the
+// shared Shiki highlighter; mocking it keeps this spec deterministic, the same
+// way code-block.spec.tsx does for the component's own tests.
+vi.mock('../lib/shiki', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../lib/shiki')>();
+  return { ...actual, highlightToLines: vi.fn().mockResolvedValue(null) };
+});
 
 import { ButtonGroupMenu } from './button-group-menu';
 import { ButtonGroupSplit } from './button-group-split';
@@ -22,6 +30,7 @@ const MODULES = import.meta.glob<Record<string, ComponentType>>(['./*.tsx', '!./
 
 /** Each example file, by basename, and the `data-slot` of the component it demonstrates. */
 const EXPECTED_SLOT: Record<string, string> = {
+  'ai-provider-card-demo': 'ai-provider-card',
   'ai-provider-picker-demo': 'ai-provider-picker',
   'avatar-picker-demo': 'avatar-picker-trigger',
   'button-default': 'button',
@@ -35,18 +44,26 @@ const EXPECTED_SLOT: Record<string, string> = {
   'center-demo': 'center',
   'chat-message-demo': 'chat-message',
   'chat-suggestion-item-demo': 'chat-suggestion-item',
+  'code-block-demo': 'code-block',
   'collapsible-card-demo': 'collapsible-card',
   'command-menu-demo': 'command-menu',
   'copy-button-demo': 'copy-button',
+  'data-table-demo': 'data-table',
   'emoji-appearance-toggle-group-demo': 'emoji-appearance-toggle-group',
   'emoji-picker-demo': 'emoji-picker-content',
   'file-tree-demo': 'file-tree',
+  'file-type-icon-demo': 'file-type-icon',
   'floating-toolbar-demo': 'floating-toolbar',
+  'font-preview-demo': 'font-preview',
   'frontmatter-form-demo': 'frontmatter-form',
+  'highlighted-code-demo': 'highlighted-code',
   'icon-chip-demo': 'icon-chip',
   'icon-label-demo': 'icon-label',
+  'image-preview-demo': 'image-preview',
   'language-combobox-demo': 'combobox-trigger',
   'language-toggle-group-demo': 'language-toggle-group',
+  'markdown-view-demo': 'markdown-view',
+  'model-info-card-demo': 'model-info-card',
   'number-field-demo': 'input-group',
   'panel-field-label-demo': 'field-label',
   'panel-row-demo': 'panel-row',

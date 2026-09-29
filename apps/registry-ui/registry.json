@@ -50,6 +50,170 @@
       ]
     },
     {
+      "name": "code-block",
+      "type": "registry:component",
+      "title": "Code Block",
+      "description": "Read-only source over a collapsible card, highlighted through the shared Shiki highlighter and falling back to plain mono while the grammar loads.",
+      "categories": ["data-display"],
+      "dependencies": ["@base-ui/react", "@shikijs/langs", "@zeroxsolutions/icons", "shiki"],
+      "registryDependencies": [
+        "@shadcn/scroll-area",
+        "@shadcn/utils",
+        "https://ui.zeroxsolutions.com/r/collapsible-card.json",
+        "https://ui.zeroxsolutions.com/r/copy-button.json",
+        "https://ui.zeroxsolutions.com/r/highlighted-code.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-display/code-block.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-highlighted-lines.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/code-language.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/code-theme.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/language-options.tsx",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/mermaid-grammar.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/shiki.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/types/language-option.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "data-table",
+      "type": "registry:component",
+      "title": "Data Table",
+      "description": "The composable parts of a @tanstack/react-table view - toolbar, view, column header actions, pagination and view options - reading one shared table instance from context.",
+      "categories": ["data-display"],
+      "dependencies": ["@tanstack/react-table", "lucide-react"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/dropdown-menu", "@shadcn/table", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-display/data-table.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "file-type-icon",
+      "type": "registry:component",
+      "title": "File Type Icon",
+      "description": "A lucide icon chosen for a file's type from its extension, decorative unless paired with the visible file name or given an aria-label.",
+      "categories": ["data-display"],
+      "dependencies": ["lucide-react"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-display/file-type-icon.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/file-type.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "font-preview",
+      "type": "registry:component",
+      "title": "Font Preview",
+      "description": "A specimen of a font file at several sizes, one row per size, loaded through an @font-face scoped to the instance.",
+      "categories": ["data-display"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-display/font-preview.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/font-format.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "highlighted-code",
+      "type": "registry:component",
+      "title": "Highlighted Code",
+      "description": "A mono code element that renders tokenized lines from the shared Shiki highlighter, falling back to its raw children until they arrive.",
+      "categories": ["data-display"],
+      "dependencies": ["@shikijs/langs", "shiki"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-display/highlighted-code.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/code-theme.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/mermaid-grammar.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/shiki.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "image-preview",
+      "type": "registry:component",
+      "title": "Image Preview",
+      "description": "Shows an image contained within its filled wrapper, over a checkerboard so transparent pixels read clearly.",
+      "categories": ["data-display"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-display/image-preview.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "markdown-view",
+      "type": "registry:component",
+      "title": "Markdown View",
+      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with fenced code optionally rendered as a CodeBlock instead of a plain pre.",
+      "categories": ["data-display"],
+      "dependencies": ["class-variance-authority", "react-markdown", "remark-gfm"],
+      "registryDependencies": [
+        "@shadcn/utils",
+        "https://ui.zeroxsolutions.com/r/code-block.json",
+        "https://ui.zeroxsolutions.com/r/collapsible-card.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-display/markdown-view.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/code-language.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "model-info-card",
       "type": "registry:component",
       "title": "Model Info Card",
@@ -544,6 +708,20 @@
       ]
     },
     {
+      "name": "ai-provider-card-demo",
+      "type": "registry:example",
+      "title": "AI Provider Card Demo",
+      "description": "Two AiProviderCard tiles - one online, one idle - each toggled independently and reporting the last selection.",
+      "categories": ["examples"],
+      "registryDependencies": ["@shadcn/card", "https://ui.zeroxsolutions.com/r/ai-provider-card.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/ai-provider-card-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
       "name": "chat-message-demo",
       "type": "registry:example",
       "title": "Chat Message Demo",
@@ -557,6 +735,123 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/chat-message-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "code-block-demo",
+      "type": "registry:example",
+      "title": "Code Block Demo",
+      "description": "A collapsible TypeScript block with its language, a copy action and a collapse toggle.",
+      "categories": ["examples"],
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/code-block.json",
+        "https://ui.zeroxsolutions.com/r/collapsible-card.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/code-block-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "data-table-demo",
+      "type": "registry:example",
+      "title": "Data Table Demo",
+      "description": "A small, paginated file table with sortable columns and a view-options menu.",
+      "categories": ["examples"],
+      "dependencies": ["@tanstack/react-table"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/data-table.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/data-table-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "file-type-icon-demo",
+      "type": "registry:example",
+      "title": "File Type Icon Demo",
+      "description": "A row of file names, each with the icon FileTypeIcon resolves for its extension.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/file-type-icon.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/file-type-icon-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "font-preview-demo",
+      "type": "registry:example",
+      "title": "Font Preview Demo",
+      "description": "A specimen of a variable sans-serif at its four default sizes.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/font-preview.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/font-preview-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "highlighted-code-demo",
+      "type": "registry:example",
+      "title": "Highlighted Code Demo",
+      "description": "Pre-tokenized lines styled with the same tokens the shared Shiki theme paints with.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/highlighted-code.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/highlighted-code-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "image-preview-demo",
+      "type": "registry:example",
+      "title": "Image Preview Demo",
+      "description": "A small sample graphic over the transparency checkerboard, contained within its sized wrapper.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/image-preview.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/image-preview-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "markdown-view-demo",
+      "type": "registry:example",
+      "title": "Markdown View Demo",
+      "description": "A short GFM document: a heading, bold text, a link, a task list and a table.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/markdown-view.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/markdown-view-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "model-info-card-demo",
+      "type": "registry:example",
+      "title": "Model Info Card Demo",
+      "description": "The identity header for one model over two detail sections: context length and pricing.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/icons"],
+      "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/model-info-card.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/model-info-card-demo.tsx",
           "type": "registry:example"
         }
       ]
