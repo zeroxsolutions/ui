@@ -24,7 +24,7 @@
       "title": "Tree Item",
       "description": "One row of a hierarchy tree, including TreeItemIndent. Owns the clickable name region, inline-rename, trailing actions, and an optional context menu.",
       "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/button", "@shadcn/context-menu", "@shadcn/input", "@shadcn/utils"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/input", "@shadcn/item", "@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/tree-item.tsx",
@@ -288,7 +288,7 @@
       "categories": ["examples"],
       "title": "TreeItem Hero",
       "description": "A small hierarchy tree of TreeItem rows.",
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tree-item.json"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tree-item.json", "@shadcn/item"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tree-hero.tsx",

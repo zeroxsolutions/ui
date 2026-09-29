@@ -1,14 +1,32 @@
 'use client';
 
-import { TreeItem } from '@/registry/bases/base-ui/components/data-entry/tree-item';
+import type { ReactNode } from 'react';
+
+import { TreeItem, TreeItemIndent, TreeItemLabel } from '@/registry/bases/base-ui/components/data-entry/tree-item';
+import { ItemTitle } from '@/registry/bases/base-ui/ui/item';
 
 /** A small hierarchy - the TreeItem hero. */
-export function TreeHero() {
+export function TreeHero(): ReactNode {
   return (
     <div className="flex w-full flex-col gap-1">
-      <TreeItem depth={0} hasChildren expanded onToggleExpand={() => {}} name="src" />
-      <TreeItem depth={1} hasChildren={false} expanded={false} onToggleExpand={() => {}} name="index.ts" />
-      <TreeItem depth={1} hasChildren={false} expanded={false} onToggleExpand={() => {}} name="page.tsx" />
+      <TreeItem expanded>
+        <TreeItemIndent depth={0} hasChildren onToggleExpand={() => {}} />
+        <TreeItemLabel>
+          <ItemTitle>src</ItemTitle>
+        </TreeItemLabel>
+      </TreeItem>
+      <TreeItem>
+        <TreeItemIndent depth={1} hasChildren={false} onToggleExpand={() => {}} />
+        <TreeItemLabel>
+          <ItemTitle>index.ts</ItemTitle>
+        </TreeItemLabel>
+      </TreeItem>
+      <TreeItem>
+        <TreeItemIndent depth={1} hasChildren={false} onToggleExpand={() => {}} />
+        <TreeItemLabel>
+          <ItemTitle>page.tsx</ItemTitle>
+        </TreeItemLabel>
+      </TreeItem>
     </div>
   );
 }
