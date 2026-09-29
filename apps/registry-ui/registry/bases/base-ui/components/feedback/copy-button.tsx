@@ -7,7 +7,7 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 
 const COPY_RESET_MS = 2000;
 
-interface CopyButtonProps extends Omit<React.ComponentProps<typeof Button>, 'value' | 'onClick' | 'children'> {
+interface CopyButtonProps extends Omit<React.ComponentProps<typeof Button>, 'value' | 'children'> {
   /** Text written to the clipboard on click. */
   value: string;
   /** Accessible name in the idle state. */
@@ -21,12 +21,13 @@ interface CopyButtonProps extends Omit<React.ComponentProps<typeof Button>, 'val
 }
 
 /**
- * A copy-to-clipboard icon button with transient feedback: on a successful copy
- * it swaps its icon to a check and its accessible name to "Copied" for `timeout`
- * ms, then resets. Defaults to a `ghost` `icon-xs` button, and every `Button`
- * prop (`variant`, `size`, `className`, `disabled`, …) passes through — so it
- * drops into a code-block header, a toolbar, or a card corner unchanged. Clipboard
- * writes are best-effort (a denied permission is swallowed).
+ * A copy-to-clipboard icon button. After a successful copy it shows a check,
+ * takes `copiedLabel` as its accessible name and carries `data-copied` for
+ * `timeout` ms, then resets. A caller `onClick` runs first, and calling
+ * `event.preventDefault()` in it skips the copy. Defaults to a `ghost`
+ * `icon-xs` `Button`, and every `Button` prop passes through. A write the
+ * browser refuses, such as a denied clipboard permission, leaves the button
+ * idle.
  */
 function CopyButton({
   value,
@@ -34,10 +35,11 @@ function CopyButton({
   copiedLabel = 'Copied',
   timeout = COPY_RESET_MS,
   onCopied,
+  onClick,
   variant = 'ghost',
   size = 'icon-xs',
   ...props
-}: CopyButtonProps) {
+}: CopyButtonProps): React.ReactNode {
   const [copied, setCopied] = React.useState(false);
   const timer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -53,23 +55,24 @@ function CopyButton({
         timer.current = setTimeout(() => setCopied(false), timeout);
         onCopied?.(value);
       })
-      .catch(() => {
-        /* best-effort — clipboard may be denied */
-      });
+      .catch(() => {});
   }, [value, timeout, onCopied]);
-
-  const Icon = copied ? Check : Copy;
 
   return (
     <Button
+      data-slot="copy-button"
+      data-copied={copied ? '' : undefined}
       type="button"
       variant={variant}
       size={size}
-      onClick={copy}
       aria-label={copied ? copiedLabel : label}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) copy();
+      }}
       {...props}
     >
-      <Icon />
+      {copied ? <Check /> : <Copy />}
     </Button>
   );
 }
