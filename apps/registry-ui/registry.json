@@ -84,19 +84,11 @@
       "categories": ["data-display"],
       "title": "Chat Message",
       "description": "The wrapper for one chat message row, agnostic to how the body is rendered. User messages pin right as a bubble; assistant messages lay out as full-width prose with an optional agent identity row.",
-      "registryDependencies": ["@shadcn/utils"],
+      "registryDependencies": ["@shadcn/message", "@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/chat-message.tsx",
           "type": "registry:component"
-        },
-        {
-          "path": "registry/bases/base-ui/types/chat-role.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "registry/bases/base-ui/types/chat-agent-identity.ts",
-          "type": "registry:lib"
         }
       ]
     },
@@ -137,7 +129,9 @@
       "description": "A small page region composing the ai-provider-picker block and the chat-message component. Pages assemble blocks and components into a full interface region.",
       "registryDependencies": [
         "https://ui.zeroxsolutions.com/r/ai-provider-picker.json",
-        "https://ui.zeroxsolutions.com/r/chat-message.json"
+        "https://ui.zeroxsolutions.com/r/chat-message.json",
+        "@shadcn/bubble",
+        "@shadcn/message"
       ],
       "files": [
         {
@@ -275,7 +269,11 @@
       "categories": ["examples"],
       "title": "ChatMessage Hero",
       "description": "A user bubble plus an assistant row - monochrome.",
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/chat-message.json"],
+      "registryDependencies": [
+        "https://ui.zeroxsolutions.com/r/chat-message.json",
+        "@shadcn/bubble",
+        "@shadcn/message"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/chat-message-hero.tsx",

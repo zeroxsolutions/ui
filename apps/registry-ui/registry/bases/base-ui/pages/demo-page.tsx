@@ -1,4 +1,6 @@
 import { ChatMessage } from '@/registry/bases/base-ui/components/data-display/chat-message';
+import { Bubble, BubbleContent } from '@/registry/bases/base-ui/ui/bubble';
+import { MessageContent, MessageHeader } from '@/registry/bases/base-ui/ui/message';
 import { AiProviderPicker, type AiProviderPickerEntry } from '@/registry/bases/base-ui/blocks/ai-provider-picker';
 
 export interface DemoPageProps {
@@ -24,9 +26,22 @@ export function DemoPage({ entries, className }: DemoPageProps) {
         <AiProviderPicker entries={entries} />
       </section>
       <section data-slot="demo-pane-chat" className="flex flex-col gap-2">
-        <ChatMessage role="user">Which provider should we use?</ChatMessage>
-        <ChatMessage role="assistant" showAgentLabel agent={{ name: 'Assistant', color: '#6366f1' }}>
-          Pick any tile above - each card is one provider; the picker calls back with its key when you choose.
+        <ChatMessage align="end">
+          <MessageContent>
+            <Bubble variant="muted">
+              <BubbleContent>Which provider should we use?</BubbleContent>
+            </Bubble>
+          </MessageContent>
+        </ChatMessage>
+        <ChatMessage>
+          <MessageContent>
+            <MessageHeader>Assistant</MessageHeader>
+            <Bubble variant="ghost">
+              <BubbleContent>
+                Pick any tile above - each card is one provider; the picker calls back with its key when you choose.
+              </BubbleContent>
+            </Bubble>
+          </MessageContent>
         </ChatMessage>
       </section>
     </div>
