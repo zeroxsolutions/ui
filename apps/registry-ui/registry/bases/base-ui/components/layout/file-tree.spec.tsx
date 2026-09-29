@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -107,7 +107,9 @@ describe('FileTree - keyboard (WAI-ARIA APG)', () => {
   it('moves focus with ArrowDown / ArrowUp / Home / End', () => {
     renderTree({ defaultExpanded: ['src'] });
     const first = item('SKILL.md');
-    first.focus();
+    act(() => {
+      first.focus();
+    });
 
     fireEvent.keyDown(first, { key: 'ArrowDown' });
     expect(document.activeElement).toBe(item('src'));
@@ -125,7 +127,9 @@ describe('FileTree - keyboard (WAI-ARIA APG)', () => {
   it('ArrowRight expands a collapsed folder, then moves into the first child', () => {
     renderTree();
     const src = item('src');
-    src.focus();
+    act(() => {
+      src.focus();
+    });
 
     fireEvent.keyDown(src, { key: 'ArrowRight' });
     expect(item('src').getAttribute('aria-expanded')).toBe('true');
@@ -138,7 +142,9 @@ describe('FileTree - keyboard (WAI-ARIA APG)', () => {
     renderTree({ defaultExpanded: ['src'] });
 
     const child = item('index.ts');
-    child.focus();
+    act(() => {
+      child.focus();
+    });
     fireEvent.keyDown(child, { key: 'ArrowLeft' });
     expect(document.activeElement).toBe(item('src'));
 
@@ -151,12 +157,16 @@ describe('FileTree - keyboard (WAI-ARIA APG)', () => {
     renderTree({ onValueChange });
 
     const readme = item('README.md');
-    readme.focus();
+    act(() => {
+      readme.focus();
+    });
     fireEvent.keyDown(readme, { key: 'Enter' });
     expect(onValueChange).toHaveBeenLastCalledWith('README.md');
 
     const skill = item('SKILL.md');
-    skill.focus();
+    act(() => {
+      skill.focus();
+    });
     fireEvent.keyDown(skill, { key: ' ' });
     expect(onValueChange).toHaveBeenLastCalledWith('SKILL.md');
   });
@@ -177,7 +187,9 @@ describe('FileTree - composition', () => {
     );
 
     expect(ref.current).toBe(screen.getByRole('tree', { name: 'Files' }));
-    item('SKILL.md').focus();
+    act(() => {
+      item('SKILL.md').focus();
+    });
     fireEvent.keyDown(item('SKILL.md'), { key: 'ArrowDown' });
     expect(document.activeElement).toBe(item('README.md'));
   });
