@@ -42,12 +42,13 @@ describe('CopyButton', () => {
     expect(button.hasAttribute('data-copied')).toBe(true);
   });
 
-  it('calls a caller onClick and still copies', () => {
+  it('calls a caller onClick and still copies', async () => {
     const onClick = vi.fn();
     render(<CopyButton value="payload" onClick={onClick} />);
     fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(writeText).toHaveBeenCalledWith('payload');
+    await screen.findByRole('button', { name: 'Copied' });
   });
 
   it('skips the copy when a caller onClick prevents the default', () => {
