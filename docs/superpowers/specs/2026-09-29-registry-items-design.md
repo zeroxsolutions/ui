@@ -103,7 +103,7 @@ Each composes exactly the parts the removed-components table of the 2026-09-28 s
 `data-slot` of the component it demonstrates is in the document. It replaces
 `split-button-hero.spec.tsx` and `menu-button-hero.spec.tsx`.
 
-`apps/registry-ui/registry.spec.ts` reads `registry.json` and the source tree and asserts:
+`apps/registry-ui/registry/registry.spec.ts` reads `registry.json` and the source tree and asserts:
 
 1. every family file under `components/` and `blocks/` is the first file of exactly one item,
    and every component or block item's first file is one; `name` is the file's basename and
@@ -115,9 +115,7 @@ Each composes exactly the parts the removed-components table of the 2026-09-28 s
    no other item carries them.
 
 Each rule has a case that feeds it a deliberately wrong `registry.json` fragment and expects
-the failure, so a rule that cannot fail is caught. The three uncommitted scripts of plan B are
-the reference for rules 1 and 3; the family-name and part-shape scripts check components, not
-the registry, and stay out.
+the failure, so a rule that cannot fail is caught.
 
 ## Not covered
 
