@@ -1,10 +1,11 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import type { FluentEmojiStyle } from '@zeroxsolutions/fluent-emoji';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { EmojiAppearanceToggleGroup } from './emoji-appearance-toggle-group';
+import { EmojiAppearanceToggleGroup, EmojiAppearanceToggleGroupItem } from './emoji-appearance-toggle-group';
 
 beforeAll(() => {
-  // Base UI's ToggleGroup measures with ResizeObserver and reads animations —
+  // Base UI's ToggleGroup measures with ResizeObserver and reads animations;
   // jsdom implements neither.
   globalThis.ResizeObserver ??= class {
     observe() {}
@@ -16,42 +17,56 @@ beforeAll(() => {
 
 afterEach(cleanup);
 
-describe('EmojiAppearanceToggleGroup', () => {
-  it('renders one preview swatch per Fluent style', () => {
-    render(<EmojiAppearanceToggleGroup value="3d" onValueChange={vi.fn()} />);
+function renderGroup(value: FluentEmojiStyle, onValueChange = vi.fn()) {
+  return render(
+    <EmojiAppearanceToggleGroup value={value} onValueChange={onValueChange}>
+      <EmojiAppearanceToggleGroupItem value="3d">3D</EmojiAppearanceToggleGroupItem>
+      <EmojiAppearanceToggleGroupItem value="flat">Flat</EmojiAppearanceToggleGroupItem>
+      <EmojiAppearanceToggleGroupItem value="modern">Modern</EmojiAppearanceToggleGroupItem>
+      <EmojiAppearanceToggleGroupItem value="mono">Mono</EmojiAppearanceToggleGroupItem>
+      <EmojiAppearanceToggleGroupItem value="anim">Animated</EmojiAppearanceToggleGroupItem>
+    </EmojiAppearanceToggleGroup>,
+  );
+}
 
-    for (const label of ['3D style', 'Flat style', 'Modern style', 'Mono style', 'Animated style']) {
-      expect(screen.getByRole('button', { name: label })).toBeTruthy();
+describe('EmojiAppearanceToggleGroup', () => {
+  it('renders one swatch per composed item, named by its label', () => {
+    renderGroup('3d');
+
+    for (const label of ['3D', 'Flat', 'Modern', 'Mono', 'Animated']) {
+      expect(screen.getByRole('button', { name: label }).getAttribute('data-slot')).toBe(
+        'emoji-appearance-toggle-group-item',
+      );
     }
   });
 
   it('previews each swatch in its own style', () => {
-    render(<EmojiAppearanceToggleGroup value="3d" onValueChange={vi.fn()} />);
+    renderGroup('3d');
 
     const src = (label: string) =>
       screen.getByRole('button', { name: label }).querySelector('img')?.getAttribute('src');
 
     // Each swatch draws the sample emoji in its own artwork set, regardless of
-    // the selected value — the preview *is* the option.
-    expect(src('3D style')).toContain('/3d/');
-    expect(src('Flat style')).toContain('/flat/');
-    expect(src('Modern style')).toContain('/modern/');
-    expect(src('Mono style')).toContain('/mono/');
-    expect(src('Animated style')).toContain('/anim/');
+    // the selected value: the preview is the option.
+    expect(src('3D')).toContain('/3d/');
+    expect(src('Flat')).toContain('/flat/');
+    expect(src('Modern')).toContain('/modern/');
+    expect(src('Mono')).toContain('/mono/');
+    expect(src('Animated')).toContain('/anim/');
   });
 
   it('marks the selected style as pressed', () => {
-    render(<EmojiAppearanceToggleGroup value="modern" onValueChange={vi.fn()} />);
+    renderGroup('modern');
 
-    expect(screen.getByRole('button', { name: 'Modern style' }).getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByRole('button', { name: '3D style' }).getAttribute('aria-pressed')).toBe('false');
+    expect(screen.getByRole('button', { name: 'Modern' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: '3D' }).getAttribute('aria-pressed')).toBe('false');
   });
 
   it('reports the chosen style via onValueChange', () => {
     const onValueChange = vi.fn();
-    render(<EmojiAppearanceToggleGroup value="3d" onValueChange={onValueChange} />);
+    renderGroup('3d', onValueChange);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Flat style' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Flat' }));
 
     expect(onValueChange).toHaveBeenCalledWith('flat');
   });
