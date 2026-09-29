@@ -14,7 +14,7 @@ import {
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
 
 interface DataTableContextValue {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- one context holds a table of any row type; useDataTable narrows it
   table: TanstackTable<any>;
 }
 
@@ -39,11 +39,11 @@ interface DataTableProps<TData> extends React.ComponentProps<'div'> {
  * The consumer owns `useReactTable` + the column defs; the SDK ships only the
  * composable parts (shadcn data-table is a recipe, not a packaged component).
  */
-function DataTable<TData>({ table, className, children, ...props }: DataTableProps<TData>) {
+function DataTable<TData>({ table, className, children, ...props }: DataTableProps<TData>): React.ReactNode {
   const value = React.useMemo(() => ({ table }), [table]);
   return (
     <DataTableContext.Provider value={value}>
-      <div className={cn('space-y-2', className)} {...props}>
+      <div data-slot="data-table" className={cn('space-y-2', className)} {...props}>
         {children}
       </div>
     </DataTableContext.Provider>
@@ -51,22 +51,19 @@ function DataTable<TData>({ table, className, children, ...props }: DataTablePro
 }
 
 /** A flex row for filters + actions above the table. */
-function DataTableToolbar({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div className={cn('flex items-center gap-2', className)} {...props} />;
+function DataTableToolbar({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
+  return <div data-slot="data-table-toolbar" className={cn('flex items-center gap-2', className)} {...props} />;
 }
 
-interface DataTableViewProps extends React.ComponentProps<'div'> {
-  /** Rendered spanning all columns when there are no rows — consumer copy. */
-  empty?: React.ReactNode;
-}
-
-/** The table content (header + body) rendered from the context table instance. */
-function DataTableView({ empty = null, className, ...props }: DataTableViewProps) {
+/**
+ * The table content (header + body) rendered from the context table instance.
+ * `children` render in the body only while there are no rows - a `DataTableEmpty`.
+ */
+function DataTableView({ children, className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   const table = useDataTable();
-  const colSpan = table.getAllLeafColumns().length;
 
   return (
-    <div className={cn('rounded-md border', className)} {...props}>
+    <div data-slot="data-table-view" className={cn('rounded-md border', className)} {...props}>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((group) => (
@@ -80,22 +77,33 @@ function DataTableView({ empty = null, className, ...props }: DataTableViewProps
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={colSpan}>{empty}</TableCell>
-            </TableRow>
-          )}
+          {table.getRowModel().rows.length
+            ? table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  ))}
+                </TableRow>
+              ))
+            : children}
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+/** The one row a `DataTableView` shows when there are no rows: a cell spanning every column. */
+function DataTableEmpty({ className, ...props }: React.ComponentProps<typeof TableCell>): React.ReactNode {
+  const table = useDataTable();
+  return (
+    <TableRow>
+      <TableCell
+        data-slot="data-table-empty"
+        colSpan={table.getAllLeafColumns().length}
+        className={cn('h-24 text-center', className)}
+        {...props}
+      />
+    </TableRow>
   );
 }
 
@@ -107,7 +115,7 @@ interface DataTableColumnHeaderProps<TData, TValue> extends React.ComponentProps
  * Sortable / hideable header. Used inside a column's `header`, so it takes the
  * `column` directly (column defs live outside the render tree, can't read
  * context). Its title is `children`; the menu shows the default sort/hide
- * actions, whose copy lives as each action part's own `children` default —
+ * actions, whose copy lives as each action part's own `children` default -
  * compose the parts for different copy, never a `labels` config.
  */
 function DataTableColumnHeader<TData, TValue>({
@@ -115,10 +123,10 @@ function DataTableColumnHeader<TData, TValue>({
   children,
   className,
   ...props
-}: DataTableColumnHeaderProps<TData, TValue>) {
+}: DataTableColumnHeaderProps<TData, TValue>): React.ReactNode {
   if (!column.getCanSort() && !column.getCanHide()) {
     return (
-      <div className={cn(className)} {...props}>
+      <div data-slot="data-table-column-header" className={cn(className)} {...props}>
         {children}
       </div>
     );
@@ -127,7 +135,7 @@ function DataTableColumnHeader<TData, TValue>({
   const sorted = column.getIsSorted();
 
   return (
-    <div className={cn('flex items-center gap-2', className)} {...props}>
+    <div data-slot="data-table-column-header" className={cn('flex items-center gap-2', className)} {...props}>
       <DropdownMenu>
         <DropdownMenuTrigger
           render={<Button variant="ghost" size="sm" className="data-[popup-open]:bg-accent -ml-2.5" />}
@@ -160,52 +168,73 @@ type DataTableColumnActionProps<TData, TValue> = {
   column: Column<TData, TValue>;
 } & React.ComponentProps<typeof DropdownMenuItem>;
 
-/** Sort-ascending action; `children` override the default copy. */
+/** Sort-ascending action; `children` override the default copy. A caller's `onClick` runs before the sort. */
 function DataTableColumnHeaderSortAscending<TData, TValue>({
   column,
   children,
+  onClick,
   ...props
-}: DataTableColumnActionProps<TData, TValue>) {
+}: DataTableColumnActionProps<TData, TValue>): React.ReactNode {
   return (
-    <DropdownMenuItem {...props} onClick={() => column.toggleSorting(false)}>
+    <DropdownMenuItem
+      data-slot="data-table-column-header-sort-ascending"
+      onClick={(event) => {
+        onClick?.(event);
+        column.toggleSorting(false);
+      }}
+      {...props}
+    >
       <ArrowUp className="text-muted-foreground/70" />
       {children ?? 'Asc'}
     </DropdownMenuItem>
   );
 }
 
-/** Sort-descending action; `children` override the default copy. */
+/** Sort-descending action; `children` override the default copy. A caller's `onClick` runs before the sort. */
 function DataTableColumnHeaderSortDescending<TData, TValue>({
   column,
   children,
+  onClick,
   ...props
-}: DataTableColumnActionProps<TData, TValue>) {
+}: DataTableColumnActionProps<TData, TValue>): React.ReactNode {
   return (
-    <DropdownMenuItem {...props} onClick={() => column.toggleSorting(true)}>
+    <DropdownMenuItem
+      data-slot="data-table-column-header-sort-descending"
+      onClick={(event) => {
+        onClick?.(event);
+        column.toggleSorting(true);
+      }}
+      {...props}
+    >
       <ArrowDown className="text-muted-foreground/70" />
       {children ?? 'Desc'}
     </DropdownMenuItem>
   );
 }
 
-/** Hide-column action; `children` override the default copy. */
+/** Hide-column action; `children` override the default copy. A caller's `onClick` runs before the column hides. */
 function DataTableColumnHeaderHide<TData, TValue>({
   column,
   children,
+  onClick,
   ...props
-}: DataTableColumnActionProps<TData, TValue>) {
+}: DataTableColumnActionProps<TData, TValue>): React.ReactNode {
   return (
-    <DropdownMenuItem {...props} onClick={() => column.toggleVisibility(false)}>
+    <DropdownMenuItem
+      data-slot="data-table-column-header-hide"
+      onClick={(event) => {
+        onClick?.(event);
+        column.toggleVisibility(false);
+      }}
+      {...props}
+    >
       <EyeOff className="text-muted-foreground/70" />
       {children ?? 'Hide'}
     </DropdownMenuItem>
   );
 }
 
-interface DataTablePaginationProps {
-  /** Status line (e.g. a localized "Page 1 of 3"); omit to hide it. */
-  children?: React.ReactNode;
-  className?: string;
+interface DataTablePaginationProps extends React.ComponentProps<'div'> {
   /** Accessible names for the icon-only buttons (override per locale). */
   previousLabel?: string;
   nextLabel?: string;
@@ -213,7 +242,7 @@ interface DataTablePaginationProps {
 
 /**
  * Prev/next pager reading the table from <DataTable> context. Pass children for
- * a status line — the consumer's i18n owns "Page X of Y" — and the icon-only
+ * a status line - the consumer's i18n owns "Page X of Y" - and the icon-only
  * buttons take overridable accessible names.
  */
 function DataTablePagination({
@@ -221,10 +250,11 @@ function DataTablePagination({
   className,
   previousLabel = 'Previous page',
   nextLabel = 'Next page',
-}: DataTablePaginationProps) {
+  ...props
+}: DataTablePaginationProps): React.ReactNode {
   const table = useDataTable();
   return (
-    <div className={cn('flex items-center justify-end gap-2', className)}>
+    <div data-slot="data-table-pagination" className={cn('flex items-center justify-end gap-2', className)} {...props}>
       {children}
       <Button
         variant="outline"
@@ -248,25 +278,14 @@ function DataTablePagination({
   );
 }
 
-interface DataTableViewOptionsProps {
-  /** Trigger label next to the icon; omit for an icon-only trigger. */
-  children?: React.ReactNode;
-  className?: string;
-  /** Accessible name for the trigger (override per locale). */
-  'aria-label'?: string;
-}
-
 /**
  * Column-visibility toggle, reading the table from <DataTable> context. The
- * trigger is icon-only by default — pass children to add a visible label (the
- * consumer's i18n owns that copy). No "Toggle columns" heading: the checkbox
- * list speaks for itself, matching shadcn.
+ * trigger is icon-only by default - pass children to add a visible label (the
+ * consumer's i18n owns that copy) - and is named "Toggle columns" unless an
+ * `aria-label` is given. No "Toggle columns" heading: the checkbox list speaks
+ * for itself, matching shadcn.
  */
-function DataTableViewOptions({
-  children,
-  className,
-  'aria-label': ariaLabel = 'Toggle columns',
-}: DataTableViewOptionsProps) {
+function DataTableViewOptions({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
   const table = useDataTable();
   const columns = table
     .getAllColumns()
@@ -276,7 +295,17 @@ function DataTableViewOptions({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" size="sm" className={className} aria-label={ariaLabel} />}>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            data-slot="data-table-view-options"
+            variant="outline"
+            size="sm"
+            aria-label="Toggle columns"
+            {...props}
+          />
+        }
+      >
         <Settings2 />
         {children}
       </DropdownMenuTrigger>
@@ -300,6 +329,7 @@ export {
   DataTable,
   DataTableToolbar,
   DataTableView,
+  DataTableEmpty,
   useDataTable,
   DataTableColumnHeader,
   DataTableColumnHeaderSortAscending,
