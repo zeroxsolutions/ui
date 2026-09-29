@@ -5,31 +5,28 @@ import { StatusIndicator } from './status-indicator';
 
 afterEach(cleanup);
 
-const cls = (node: ChildNode | null) => (node as HTMLElement).className;
+const dot = (container: HTMLElement): HTMLElement => container.firstChild as HTMLElement;
 
 describe('StatusIndicator', () => {
-  it('uses the success token when online', () => {
-    const { container } = render(<StatusIndicator tone="online" />);
-    expect(cls(container.firstChild)).toContain('bg-success');
-  });
-
-  it('uses a muted token when offline', () => {
-    const { container } = render(<StatusIndicator tone="offline" />);
-    expect(cls(container.firstChild)).toContain('bg-muted-foreground');
-  });
-
-  it('uses the destructive token when busy', () => {
+  it('carries its tone on data-tone', () => {
     const { container } = render(<StatusIndicator tone="busy" />);
-    expect(cls(container.firstChild)).toContain('bg-destructive');
+    expect(dot(container).dataset.tone).toBe('busy');
   });
 
-  it('animates when pulse is set', () => {
-    const { container } = render(<StatusIndicator tone="idle" pulse />);
-    expect(cls(container.firstChild)).toContain('animate-pulse');
+  it('carries data-pulse only while pulsing', () => {
+    const { container, rerender } = render(<StatusIndicator tone="idle" pulse />);
+    expect(dot(container).hasAttribute('data-pulse')).toBe(true);
+    rerender(<StatusIndicator tone="idle" />);
+    expect(dot(container).hasAttribute('data-pulse')).toBe(false);
+  });
+
+  it('marks itself with its slot', () => {
+    const { container } = render(<StatusIndicator tone="online" />);
+    expect(dot(container).dataset.slot).toBe('status-indicator');
   });
 
   it('merges a passed className', () => {
     const { container } = render(<StatusIndicator tone="online" className="size-1.5" />);
-    expect(cls(container.firstChild)).toContain('size-1.5');
+    expect(dot(container).className).toContain('size-1.5');
   });
 });
