@@ -25,7 +25,7 @@ describe('CommandMenu', () => {
     const onOpenChange = vi.fn();
     render(
       <CommandMenu open onOpenChange={onOpenChange} onValueChange={onValueChange}>
-        <CommandInput placeholder="Jump to file…" />
+        <CommandInput placeholder="Jump to file..." />
         <CommandList>
           <CommandMenuItem value="SKILL.md">SKILL.md</CommandMenuItem>
           <CommandMenuItem value="scripts/run.py">run.py</CommandMenuItem>
@@ -36,6 +36,37 @@ describe('CommandMenu', () => {
     fireEvent.click(screen.getByText('run.py'));
     expect(onValueChange).toHaveBeenCalledWith('scripts/run.py');
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('runs an item onSelect as well as reporting the value', () => {
+    const onValueChange = vi.fn();
+    const onSelect = vi.fn();
+    render(
+      <CommandMenu open onValueChange={onValueChange}>
+        <CommandList>
+          <CommandMenuItem value="SKILL.md" onSelect={onSelect}>
+            SKILL.md
+          </CommandMenuItem>
+        </CommandList>
+      </CommandMenu>,
+    );
+
+    fireEvent.click(screen.getByText('SKILL.md'));
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(onValueChange).toHaveBeenCalledWith('SKILL.md');
+  });
+
+  it('marks the palette and its items with their slots', () => {
+    render(
+      <CommandMenu open>
+        <CommandList>
+          <CommandMenuItem value="SKILL.md">SKILL.md</CommandMenuItem>
+        </CommandList>
+      </CommandMenu>,
+    );
+
+    expect(document.querySelector('[data-slot="command-menu"]')).toBeTruthy();
+    expect(screen.getByText('SKILL.md').closest('[data-slot="command-menu-item"]')).toBeTruthy();
   });
 });
 
