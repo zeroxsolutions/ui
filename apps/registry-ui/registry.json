@@ -64,6 +64,164 @@
       ]
     },
     {
+      "name": "chat-suggestion-item",
+      "type": "registry:component",
+      "title": "Chat Suggestion Item",
+      "description": "One starter prompt in an empty conversation, an upstream Item rendered as a button that hands its prompt to onSelectPrompt when picked.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@shadcn/item", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-entry/chat-suggestion-item.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "emoji-appearance-toggle-group",
+      "type": "registry:component",
+      "title": "Emoji Appearance Toggle Group",
+      "description": "A single-select row of swatches for choosing the Fluent Emoji artwork style, each previewing the same sample emoji in its own style.",
+      "categories": ["data-entry"],
+      "dependencies": ["@zeroxsolutions/fluent-emoji"],
+      "registryDependencies": ["@shadcn/toggle-group", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-entry/emoji-appearance-toggle-group.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "emoji-picker",
+      "type": "registry:component",
+      "title": "Emoji Picker",
+      "description": "A searchable, categorized emoji grid with an optional frequent row and a category nav, windowed so opening the catalog renders only what is in view.",
+      "categories": ["data-entry"],
+      "dependencies": ["@zeroxsolutions/fluent-emoji", "lucide-react"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/empty",
+        "@shadcn/input-group",
+        "@shadcn/scroll-area",
+        "@shadcn/tabs",
+        "@shadcn/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-entry/emoji-picker.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "language-combobox",
+      "type": "registry:component",
+      "title": "Language Combobox",
+      "description": "A searchable language picker over upstream Combobox that maps a BCP-47 code or code-language id to its option and reports the value the consumer picks.",
+      "categories": ["data-entry"],
+      "dependencies": ["@base-ui/react", "@zeroxsolutions/icons"],
+      "registryDependencies": ["@shadcn/combobox"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-entry/language-combobox.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-language-options.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/language-options.tsx",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/types/language-option.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "language-toggle-group",
+      "type": "registry:component",
+      "title": "Language Toggle Group",
+      "description": "Every language shown inline as a single-select toggle group for a small fixed set, which never deselects so a language is always chosen.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@shadcn/toggle-group"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-entry/language-toggle-group.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "number-field",
+      "type": "registry:component",
+      "title": "Number Field",
+      "description": "A compact numeric field for a property inspector that parses arithmetic expressions, clamps to min and max, and steps on the arrow keys.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@shadcn/input-group", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-entry/number-field.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/expr-eval.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "password-input",
+      "type": "registry:component",
+      "title": "Password Input",
+      "description": "A password field with a show or hide toggle packaged into the addon, so a call site never wires the eye button itself.",
+      "categories": ["data-entry"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/input-group"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-entry/password-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "resize-handle",
+      "type": "registry:component",
+      "title": "Resize Handle",
+      "description": "A vertical resize grip for a side or floating panel that only starts dragging once the pointer crosses a small movement threshold.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-entry/resize-handle.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/resize-drag.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "tag-input",
+      "type": "registry:component",
+      "title": "Tag Input",
+      "description": "A tag editor with removable chips above an input that commits a new tag on Enter, comma, or blur.",
+      "categories": ["data-entry"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/badge", "@shadcn/button", "@shadcn/input", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-entry/tag-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "tree-item",
       "type": "registry:component",
       "title": "Tree Item",
@@ -171,6 +329,141 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/chat-message-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "chat-suggestion-item-demo",
+      "type": "registry:example",
+      "title": "Chat Suggestion Item Demo",
+      "description": "An empty conversation with two starter prompts, each a ChatSuggestionItem.",
+      "categories": ["examples"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "@shadcn/empty",
+        "@shadcn/item",
+        "https://ui.zeroxsolutions.com/r/chat-suggestion-item.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/chat-suggestion-item-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "emoji-appearance-toggle-group-demo",
+      "type": "registry:example",
+      "title": "Emoji Appearance Toggle Group Demo",
+      "description": "Every Fluent artwork style previewed and picked from one EmojiAppearanceToggleGroup row.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/emoji-appearance-toggle-group.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/emoji-appearance-toggle-group-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "emoji-picker-demo",
+      "type": "registry:example",
+      "title": "Emoji Picker Demo",
+      "description": "The default EmojiPicker composition over a small frequent row.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/emoji-picker.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/emoji-picker-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "language-combobox-demo",
+      "type": "registry:example",
+      "title": "Language Combobox Demo",
+      "description": "The built-in code-language options, picked from a LanguageCombobox trigger showing the current one.",
+      "categories": ["examples"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/combobox",
+        "https://ui.zeroxsolutions.com/r/language-combobox.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/language-combobox-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "language-toggle-group-demo",
+      "type": "registry:example",
+      "title": "Language Toggle Group Demo",
+      "description": "A fixed three-language LanguageToggleGroup, always one language pressed.",
+      "categories": ["examples"],
+      "registryDependencies": ["@shadcn/toggle-group", "https://ui.zeroxsolutions.com/r/language-toggle-group.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/language-toggle-group-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "number-field-demo",
+      "type": "registry:example",
+      "title": "Number Field Demo",
+      "description": "A width NumberField with unit addons, its arithmetic input clamped and stepped.",
+      "categories": ["examples"],
+      "registryDependencies": ["@shadcn/input-group", "https://ui.zeroxsolutions.com/r/number-field.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/number-field-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "password-input-demo",
+      "type": "registry:example",
+      "title": "Password Input Demo",
+      "description": "A labelled PasswordInput with its show or hide toggle.",
+      "categories": ["examples"],
+      "registryDependencies": ["@shadcn/label", "https://ui.zeroxsolutions.com/r/password-input.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/password-input-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "resize-handle-demo",
+      "type": "registry:example",
+      "title": "Resize Handle Demo",
+      "description": "A side panel resized by dragging its ResizeHandle or collapsed by a double-click.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/resize-handle.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/resize-handle-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "tag-input-demo",
+      "type": "registry:example",
+      "title": "Tag Input Demo",
+      "description": "A TagInput over two starting tags.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tag-input.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/tag-input-demo.tsx",
           "type": "registry:example"
         }
       ]

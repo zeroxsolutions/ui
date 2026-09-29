@@ -32,7 +32,16 @@ const EXPECTED_SLOT: Record<string, string> = {
   'button-outline': 'button',
   'button-secondary': 'button',
   'chat-message-demo': 'chat-message',
+  'chat-suggestion-item-demo': 'chat-suggestion-item',
+  'emoji-appearance-toggle-group-demo': 'emoji-appearance-toggle-group',
+  'emoji-picker-demo': 'emoji-picker-content',
+  'language-combobox-demo': 'combobox-trigger',
+  'language-toggle-group-demo': 'language-toggle-group',
+  'number-field-demo': 'input-group',
   'panel-row-demo': 'panel-row',
+  'password-input-demo': 'input-group',
+  'resize-handle-demo': 'resize-handle',
+  'tag-input-demo': 'tag-input',
   'tree-item-demo': 'tree-item',
 };
 
