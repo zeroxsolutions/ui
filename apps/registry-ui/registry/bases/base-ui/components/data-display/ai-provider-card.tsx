@@ -36,13 +36,7 @@ function AiProviderCardDescription({
   className,
   ...props
 }: React.ComponentProps<typeof CardDescription>): React.ReactNode {
-  return (
-    <CardDescription
-      data-slot="ai-provider-card-description"
-      className={cn('line-clamp-2 min-h-11', className)}
-      {...props}
-    />
-  );
+  return <CardDescription className={cn('line-clamp-2 min-h-11', className)} {...props} />;
 }
 
 /** The footer note (a model count, or an attention message), toned by the card's `status`. */

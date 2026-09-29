@@ -85,6 +85,20 @@ describe('AiProviderCard', () => {
     );
 
     expect(screen.getByText('Custom provider')).toBeTruthy();
-    expect(document.querySelector('[data-slot="ai-provider-card-description"]')?.textContent).toBe('Models');
+    expect(document.querySelector('[data-slot="card-description"]')?.textContent).toBe('Models');
+  });
+
+  it("keeps the upstream card-description slot so CardHeader's own recipe selects on it", () => {
+    render(
+      <AiProviderCard>
+        <CardHeader>
+          <CardTitle>Custom provider</CardTitle>
+          <AiProviderCardDescription>Models</AiProviderCardDescription>
+        </CardHeader>
+      </AiProviderCard>,
+    );
+
+    const header = document.querySelector('[data-slot="card-header"]');
+    expect(header?.querySelector('[data-slot="card-description"]')?.textContent).toBe('Models');
   });
 });
