@@ -1,9 +1,10 @@
-import { Loader2, Palette, Smile, Trash2, Upload, type LucideIcon } from 'lucide-react';
+import { Loader2, Trash2, Upload } from 'lucide-react';
 import * as React from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+import { TabsContent } from '@/registry/bases/base-ui/ui/tabs';
+import { AVATAR_COLORS } from '@/registry/bases/base-ui/constants/avatar-colors';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { EmojiPicker } from '../data-entry/emoji-picker';
 
@@ -16,6 +17,7 @@ interface AvatarPickerValue {
   color?: string | null;
 }
 
+/** The `value` of each pane, and so of the `TabsTrigger` the consumer declares for it. */
 type AvatarPickerTab = 'emoji' | 'upload' | 'color';
 
 interface AvatarPickerContextValue {
@@ -54,10 +56,35 @@ interface AvatarPickerProps {
 }
 
 /**
- * Avatar picker - composes the emoji / upload / color tabs behind a Popover.
- * Compound + context: the Root owns the value + setters and the parts read it.
+ * Avatar picker: a Popover whose parts edit one avatar value. The consumer
+ * composes the panes inside upstream `Tabs`, declaring a `TabsTrigger` per pane
+ * it includes (or none, for a single pane), and places `AvatarPickerRemove`:
+ *
+ *   <AvatarPicker value={avatar} onValueChange={setAvatar}>
+ *     <AvatarPickerTrigger>{tile}</AvatarPickerTrigger>
+ *     <AvatarPickerContent>
+ *       <Tabs defaultValue="emoji" className="gap-0">
+ *         <div className="flex items-center gap-1 p-2">
+ *           <TabsList variant="line">
+ *             <TabsTrigger value="emoji" aria-label="Emoji"><Smile /></TabsTrigger>
+ *             <TabsTrigger value="color" aria-label="Color"><Palette /></TabsTrigger>
+ *           </TabsList>
+ *           <AvatarPickerRemove className="ml-auto" />
+ *         </div>
+ *         <AvatarPickerEmoji />
+ *         <AvatarPickerColor />
+ *       </Tabs>
+ *     </AvatarPickerContent>
+ *   </AvatarPicker>
  */
-function AvatarPicker({ value, onValueChange, open, defaultOpen, onOpenChange, children }: AvatarPickerProps) {
+function AvatarPicker({
+  value,
+  onValueChange,
+  open,
+  defaultOpen,
+  onOpenChange,
+  children,
+}: AvatarPickerProps): React.ReactNode {
   const ctx: AvatarPickerContextValue = {
     value,
     setEmoji: (emoji) => onValueChange({ ...value, emoji, imageUrl: null }),
@@ -74,17 +101,12 @@ function AvatarPicker({ value, onValueChange, open, defaultOpen, onOpenChange, c
   );
 }
 
-interface AvatarPickerTabMeta {
-  value: AvatarPickerTab;
-  Icon: LucideIcon;
-}
-
 /** The clickable avatar tile that opens the editor. */
 function AvatarPickerTrigger({
   className,
   'aria-label': ariaLabel = 'Edit avatar',
   ...props
-}: React.ComponentProps<typeof PopoverTrigger>) {
+}: React.ComponentProps<typeof PopoverTrigger>): React.ReactNode {
   return (
     <PopoverTrigger
       data-slot="avatar-picker-trigger"
@@ -98,22 +120,13 @@ function AvatarPickerTrigger({
   );
 }
 
-/**
- * Popover body. Scans its children for the tab parts to build the icon strip
- * (hidden when only one tab) and always renders the Remove action.
- */
+/** The popover body the consumer fills with `Tabs` and the panes. */
 function AvatarPickerContent({
   className,
-  children,
   align = 'start',
   side = 'bottom',
   ...props
-}: React.ComponentProps<typeof PopoverContent>) {
-  const tabs = React.Children.toArray(children)
-    .filter(React.isValidElement)
-    .map((child) => TAB_META.get(child.type as React.ElementType))
-    .filter((meta): meta is AvatarPickerTabMeta => Boolean(meta));
-
+}: React.ComponentProps<typeof PopoverContent>): React.ReactNode {
   return (
     <PopoverContent
       data-slot="avatar-picker-content"
@@ -121,32 +134,17 @@ function AvatarPickerContent({
       side={side}
       className={cn('w-84 gap-0 overflow-hidden p-0', className)}
       {...props}
-    >
-      <Tabs defaultValue={tabs[0]?.value} className="gap-0">
-        <div className="flex items-center gap-1 p-2">
-          {tabs.length > 1 && (
-            <TabsList variant="line">
-              {tabs.map(({ value, Icon }) => (
-                <TabsTrigger key={value} value={value} aria-label={value} className="flex-none px-2">
-                  <Icon />
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          )}
-          <AvatarPickerRemove />
-        </div>
-        {children}
-      </Tabs>
-    </PopoverContent>
+    />
   );
 }
 
-/** Clears both emoji and image. Auto-placed in the content header. */
+/** Clears both emoji and image, unless the consumer's own `onClick` prevents default. */
 function AvatarPickerRemove({
   className,
+  onClick,
   'aria-label': ariaLabel = 'Remove avatar',
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: React.ComponentProps<typeof Button>): React.ReactNode {
   const { remove } = useAvatarPicker();
   return (
     <Button
@@ -155,8 +153,11 @@ function AvatarPickerRemove({
       variant="ghost"
       size="icon-sm"
       aria-label={ariaLabel}
-      onClick={remove}
-      className={cn('text-muted-foreground hover:text-destructive ml-auto', className)}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) remove();
+      }}
+      className={cn('text-muted-foreground hover:text-destructive', className)}
       {...props}
     >
       <Trash2 />
@@ -164,8 +165,11 @@ function AvatarPickerRemove({
   );
 }
 
-/** Emoji tab - picks an emoji (clears any image). */
-function AvatarPickerEmoji({ className, ...props }: Omit<React.ComponentProps<typeof TabsContent>, 'value'>) {
+/** Emoji pane (tab value `emoji`): picks an emoji and clears any image. */
+function AvatarPickerEmoji({
+  className,
+  ...props
+}: Omit<React.ComponentProps<typeof TabsContent>, 'value'>): React.ReactNode {
   const { setEmoji } = useAvatarPicker();
   return (
     <TabsContent data-slot="avatar-picker-emoji" value="emoji" className={cn('p-0', className)} {...props}>
@@ -184,15 +188,17 @@ interface AvatarPickerUploadProps extends Omit<React.ComponentProps<typeof TabsC
 }
 
 /**
- * Upload tab. `children` override the default dropzone copy; a picked file goes
- * to `onUpload` (or is read inline as a data URL when omitted).
+ * Upload pane (tab value `upload`). A picked file goes to `onUpload`, or is read
+ * inline as a data URL when that is omitted. The pane carries `data-uploading`
+ * while `onUpload` is pending, so `children` that replace the default dropzone
+ * copy can style off it.
  */
-function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarPickerUploadProps) {
+function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarPickerUploadProps): React.ReactNode {
   const { setImage } = useAvatarPicker();
   const fileRef = React.useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = React.useState(false);
 
-  const onFile = (file: File | undefined) => {
+  const onFile = (file: File | undefined): void => {
     if (!file) return;
     if (onUpload) {
       setUploading(true);
@@ -212,7 +218,13 @@ function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarP
   };
 
   return (
-    <TabsContent data-slot="avatar-picker-upload" value="upload" className={cn('p-3', className)} {...props}>
+    <TabsContent
+      data-slot="avatar-picker-upload"
+      data-uploading={uploading || undefined}
+      value="upload"
+      className={cn('group/avatar-picker-upload p-3', className)}
+      {...props}
+    >
       <input
         ref={fileRef}
         type="file"
@@ -222,10 +234,8 @@ function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarP
       />
       {/* A raw element, not the Button primitive: a drop target is a tall
           column (icon over copy, `py-10`) that no Button `size` variant
-          expresses, and forcing one would mean overriding its fixed height +
-          row layout. It still rides tokens (`bg-muted`, `text-muted-foreground`,
-          `ring-ring`) - no hardcoded colour - and `children` overrides the
-          default icon-led copy. */}
+          expresses, and forcing one would mean overriding its fixed height and
+          row layout. */}
       <button
         type="button"
         disabled={uploading}
@@ -244,29 +254,21 @@ function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarP
   );
 }
 
-/** A distinct, evenly-spread default palette for avatar tiles. */
-const DEFAULT_COLORS = [
-  '#6366f1',
-  '#8b5cf6',
-  '#a855f7',
-  '#ec4899',
-  '#ef4444',
-  '#f97316',
-  '#f59e0b',
-  '#84cc16',
-  '#10b981',
-  '#14b8a6',
-  '#0ea5e9',
-  '#3b82f6',
-];
-
 interface AvatarPickerColorProps extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
-  /** Swatches shown on the Color tab. */
-  colors?: string[];
+  /** Swatches shown on the Color pane. */
+  colors?: readonly string[];
 }
 
-/** Color tab - swatches + a custom picker; `children` override the custom label. */
-function AvatarPickerColor({ className, children, colors = DEFAULT_COLORS, ...props }: AvatarPickerColorProps) {
+/**
+ * Color pane (tab value `color`): swatches, the current one pressed, and a
+ * custom picker whose label `children` replace.
+ */
+function AvatarPickerColor({
+  className,
+  children,
+  colors = AVATAR_COLORS,
+  ...props
+}: AvatarPickerColorProps): React.ReactNode {
   const { value, setColor } = useAvatarPicker();
   return (
     <TabsContent data-slot="avatar-picker-color" value="color" className={cn('p-3', className)} {...props}>
@@ -277,11 +279,9 @@ function AvatarPickerColor({ className, children, colors = DEFAULT_COLORS, ...pr
             type="button"
             onClick={() => setColor(c)}
             aria-label={c}
+            aria-pressed={value.color === c}
             style={{ backgroundColor: c }}
-            className={cn(
-              'ring-ring ring-offset-popover size-9 rounded-full ring-offset-2 transition-transform outline-none hover:scale-110 focus-visible:ring-2',
-              value.color === c && 'ring-2',
-            )}
+            className="ring-ring ring-offset-popover size-9 rounded-full ring-offset-2 transition-transform outline-none hover:scale-110 focus-visible:ring-2 aria-pressed:ring-2"
           />
         ))}
       </div>
@@ -298,12 +298,6 @@ function AvatarPickerColor({ className, children, colors = DEFAULT_COLORS, ...pr
     </TabsContent>
   );
 }
-
-const TAB_META = new Map<React.ElementType, AvatarPickerTabMeta>([
-  [AvatarPickerEmoji, { value: 'emoji', Icon: Smile }],
-  [AvatarPickerUpload, { value: 'upload', Icon: Upload }],
-  [AvatarPickerColor, { value: 'color', Icon: Palette }],
-]);
 
 export {
   AvatarPicker,
