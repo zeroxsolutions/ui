@@ -1,4 +1,5 @@
 import type { LucideProps } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { fileTypeIcon } from '@/registry/bases/base-ui/lib/file-type';
 
@@ -8,15 +9,14 @@ interface FileTypeIconProps extends LucideProps {
 }
 
 /**
- * A lucide icon chosen for a file's type, derived from its extension
- * (`run.py` → code, `logo.png` → image, `Inter.woff2` → type, unknown → generic
- * file). Decorative — pair it with the visible file name, which supplies the
- * accessible label, or pass `aria-label` when it stands alone. All `LucideProps`
- * (`size`, `className`, `aria-*`) pass through.
+ * A lucide icon chosen for a file's type from its extension (`run.py` -> code,
+ * `logo.png` -> image, `Inter.woff2` -> type, unknown -> a generic file).
+ * Decorative: pair it with the visible file name, or pass `aria-label` when it
+ * stands alone. Every `LucideProps` passes through.
  */
-function FileTypeIcon({ name, ...props }: FileTypeIconProps) {
+function FileTypeIcon({ name, ...props }: FileTypeIconProps): ReactNode {
   const Icon = fileTypeIcon(name);
-  return <Icon {...props} />;
+  return <Icon data-slot="file-type-icon" {...props} />;
 }
 
 export { FileTypeIcon };
