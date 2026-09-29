@@ -5,6 +5,13 @@ import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
+type ToolCallCardState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
+
+interface ToolCallCardProps extends ComponentProps<typeof Collapsible> {
+  /** Where the call is in its lifecycle; set on the root as `data-state`. */
+  state: ToolCallCardState;
+}
+
 /**
  * ToolCallCard - one tool invocation in a chat transcript: a trigger row over
  * collapsible sections. The host maps its dispatcher lifecycle onto `state`
@@ -27,13 +34,6 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
  *     </ToolCallCardContent>
  *   </ToolCallCard>
  */
-type ToolCallCardState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
-
-interface ToolCallCardProps extends ComponentProps<typeof Collapsible> {
-  /** Where the call is in its lifecycle; set on the root as `data-state`. */
-  state: ToolCallCardState;
-}
-
 function ToolCallCard({ state, className, ...props }: ToolCallCardProps): ReactNode {
   return (
     <Collapsible

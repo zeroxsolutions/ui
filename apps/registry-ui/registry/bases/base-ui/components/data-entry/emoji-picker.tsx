@@ -169,7 +169,12 @@ interface EmojiPickerProps {
  * default, never frozen) - an upstream `Empty` placed in `EmojiPickerContent`
  * overrides the no-results state.
  */
-function EmojiPicker({ onSelect, frequent = [], frequentLabel = 'Frequently used', children }: EmojiPickerProps) {
+function EmojiPicker({
+  onSelect,
+  frequent = [],
+  frequentLabel = 'Frequently used',
+  children,
+}: EmojiPickerProps): React.ReactNode {
   const [query, setQuery] = React.useState('');
   const [active, setActive] = React.useState('smileys_people');
 
@@ -260,7 +265,7 @@ function EmojiPickerSearch({
   placeholder = 'Search',
   'aria-label': ariaLabel = 'Search emoji',
   ...props
-}: EmojiPickerSearchProps) {
+}: EmojiPickerSearchProps): React.ReactNode {
   const { query, setQuery } = useEmojiPicker();
   return (
     <div data-slot="emoji-picker-search" className="px-2 py-1">
@@ -282,7 +287,7 @@ function EmojiPickerSearch({
 }
 
 /** Sticky section heading - this is what "Frequently used" / a category name is. */
-function EmojiPickerGroupLabel({ className, ...props }: React.ComponentProps<'div'>) {
+function EmojiPickerGroupLabel({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   return (
     <div
       data-slot="emoji-picker-group-label"
@@ -308,7 +313,7 @@ type EmojiPickerContentProps = Omit<React.ComponentProps<typeof ScrollArea>, 'st
  * height (the `size` prop) - no element measurement, so it is correct under
  * jsdom (scroll starts at the top) and needs no virtualization library.
  */
-function EmojiPickerContent({ className, children, size = 'md', ...props }: EmojiPickerContentProps) {
+function EmojiPickerContent({ className, children, size = 'md', ...props }: EmojiPickerContentProps): React.ReactNode {
   const { results, rows, headerIndices, scrollerRef } = useEmojiPicker();
 
   const viewportHeight = HEIGHT_STEPS[size] * SPACING_PX;
@@ -457,7 +462,10 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
 }
 
 /** Category jump-nav. Hidden while searching. */
-function EmojiPickerNav({ className, ...props }: Omit<React.ComponentProps<typeof Tabs>, 'value' | 'onValueChange'>) {
+function EmojiPickerNav({
+  className,
+  ...props
+}: Omit<React.ComponentProps<typeof Tabs>, 'value' | 'onValueChange'>): React.ReactNode {
   const { results, navCategories, active, scrollToCategory, hasFrequent } = useEmojiPicker();
   if (results) return null;
   return (
@@ -484,7 +492,7 @@ function EmojiPickerNav({ className, ...props }: Omit<React.ComponentProps<typeo
 }
 
 /** One row of cells, laid out in the columns and gap `EmojiPickerContent` sets. */
-function EmojiPickerGrid({ className, ...props }: React.ComponentProps<'div'>) {
+function EmojiPickerGrid({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   return (
     <div
       data-slot="emoji-picker-grid"
@@ -503,7 +511,7 @@ type EmojiPickerCellProps = Omit<React.ComponentProps<typeof Button>, 'children'
  * Only cells in (or near) the viewport mount, so the Fluent artwork is rendered
  * immediately - virtualization, not per-cell deferral, is what keeps opening the
  * picker from fetching the whole catalog. */
-function EmojiPickerCell({ emoji, className, onClick, ...props }: EmojiPickerCellProps) {
+function EmojiPickerCell({ emoji, className, onClick, ...props }: EmojiPickerCellProps): React.ReactNode {
   const { select } = useEmojiPicker();
   return (
     <Button

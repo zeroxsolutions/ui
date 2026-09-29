@@ -3,6 +3,17 @@ import type { ComponentProps, ReactNode } from 'react';
 import { Item } from '@/registry/bases/base-ui/ui/item';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
+interface ChatSuggestionItemProps extends ComponentProps<'button'> {
+  /** The text handed to `onSelectPrompt` when the item is picked. */
+  prompt: string;
+  /**
+   * Receives `prompt` after the caller's `onClick`, unless that handler
+   * called `preventDefault()`. Without it the item renders disabled, a
+   * read-only preview, unless `disabled` says otherwise.
+   */
+  onSelectPrompt?: (prompt: string) => void;
+}
+
 /**
  * ChatSuggestionItem - one starter prompt in an empty conversation, an upstream
  * `Item` rendered as a button. Picking it hands `prompt` to `onSelectPrompt`.
@@ -24,17 +35,6 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
  *     </EmptyContent>
  *   </Empty>
  */
-interface ChatSuggestionItemProps extends ComponentProps<'button'> {
-  /** The text handed to `onSelectPrompt` when the item is picked. */
-  prompt: string;
-  /**
-   * Receives `prompt` after the caller's `onClick`, unless that handler
-   * called `preventDefault()`. Without it the item renders disabled, a
-   * read-only preview, unless `disabled` says otherwise.
-   */
-  onSelectPrompt?: (prompt: string) => void;
-}
-
 function ChatSuggestionItem({
   prompt,
   onSelectPrompt,

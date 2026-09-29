@@ -3,6 +3,15 @@ import type { ComponentProps, ReactNode } from 'react';
 import { Message } from '@/registry/bases/base-ui/ui/message';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
+interface ChatMessageProps extends ComponentProps<typeof Message> {
+  /**
+   * While true, the row carries `data-streaming` and a leading-edge line in
+   * `border-primary`; `style.borderInlineStartColor` recolours it, for
+   * example to the agent's colour.
+   */
+  streaming?: boolean;
+}
+
 /**
  * ChatMessage - one chat message row: upstream `Message` plus a leading-edge
  * accent while the text is still arriving. The consumer composes the row from
@@ -20,15 +29,6 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
  *     </MessageContent>
  *   </ChatMessage>
  */
-interface ChatMessageProps extends ComponentProps<typeof Message> {
-  /**
-   * While true, the row carries `data-streaming` and a leading-edge line in
-   * `border-primary`; `style.borderInlineStartColor` recolours it, for
-   * example to the agent's colour.
-   */
-  streaming?: boolean;
-}
-
 function ChatMessage({ streaming = false, className, ...props }: ChatMessageProps): ReactNode {
   return (
     <Message

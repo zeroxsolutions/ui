@@ -6,6 +6,10 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 /** The lifecycle of a consent request - host-driven, like `ToolCallCard`'s state. */
 type PermissionCardStatusValue = 'pending' | 'approved' | 'denied';
 
+interface PermissionCardProps extends ComponentProps<'div'> {
+  status: PermissionCardStatusValue;
+}
+
 /**
  * PermissionCard - an inline, non-modal AI-consent request inside a chat
  * message, which stays in scrollback after it resolves. The host owns
@@ -31,10 +35,6 @@ type PermissionCardStatusValue = 'pending' | 'approved' | 'denied';
  * graduated-scope `Allow`. For a risky operation the consumer gives `Deny`
  * the emphasised button variant.
  */
-interface PermissionCardProps extends ComponentProps<'div'> {
-  status: PermissionCardStatusValue;
-}
-
 function PermissionCard({ status, className, ...props }: PermissionCardProps): ReactNode {
   return (
     <div

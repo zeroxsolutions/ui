@@ -54,7 +54,7 @@ const TEMPLATE_ITEMS: DiagramTemplate[] = [...DIAGRAM_TEMPLATES];
 /**
  * The standalone surface's header — the house `CollapsibleCardHeader` compound, not a
  * bespoke bar: a stateful `Combobox` type/template switcher (the
- * `LanguageCombobox` pattern — it *displays* the active diagram type, unlike a
+ * `LanguageCombobox` pattern - it *displays* the active diagram type, unlike a
  * fire-and-forget menu) fills the title; the export menu fills the actions.
  * Choosing a template while the source is non-empty asks for confirmation (a
  * design-system `AlertDialog`) before replacing it. Export feedback is inline (a

@@ -7,7 +7,7 @@ import { EmojiPicker, EmojiPickerCell, EmojiPickerContent, EmojiPickerSearch } f
 
 // ScrollArea (upstream) measures its viewport in a `queueMicrotask` its layout
 // effect schedules on mount and on each hidden-state change, outside of
-// `render`'s own act() batch — awaiting a no-op act() settles it before the
+// `render`'s own act() batch - awaiting a no-op act() settles it before the
 // test's assertions run.
 async function settle(): Promise<void> {
   await act(async () => {});
@@ -25,7 +25,7 @@ beforeAll(() => {
     disconnect() {}
   } as unknown as typeof ResizeObserver;
   // ScrollArea also waits for subtree animations via getAnimations, absent in
-  // jsdom — without a stub, settling past that wait throws once the real
+  // jsdom - without a stub, settling past that wait throws once the real
   // (0ms) timer it schedules fires.
   Element.prototype.getAnimations ??= vi.fn(() => []);
 });
@@ -100,7 +100,7 @@ describe('EmojiPicker', () => {
     expect(grinningImg?.getAttribute('src')).toMatch(/\.webp$/);
   });
 
-  it('virtualizes the grid — mounts only a window of cells, not the whole catalog', async () => {
+  it('virtualizes the grid - mounts only a window of cells, not the whole catalog', async () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
     await settle();
 

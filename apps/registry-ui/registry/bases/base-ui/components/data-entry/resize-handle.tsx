@@ -1,7 +1,22 @@
-import { useCallback, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  useCallback,
+  useRef,
+  type ComponentProps,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { shouldStartDrag } from '@/registry/bases/base-ui/lib/resize-drag';
+
+// `onDrag` below is a resize-width delta, not the native HTML5 drag event - omit
+// the native handler so its signature does not clash with ours.
+interface ResizeHandleProps extends Omit<ComponentProps<'div'>, 'onDrag'> {
+  /** Width delta in px since the last move; apply it to the panel size. */
+  onDrag: (dx: number) => void;
+  /** Double-click action (e.g. collapse/expand the panel). */
+  onToggle: () => void;
+}
 
 /**
  * A vertical resize grip for a side or floating panel. Stable by design: a
@@ -17,15 +32,6 @@ import { shouldStartDrag } from '@/registry/bases/base-ui/lib/resize-drag';
  * handler runs, whatever it does - skipping it there would strand the drag
  * armed once the pointer is gone.
  */
-// `onDrag` below is a resize-width delta, not the native HTML5 drag event - omit
-// the native handler so its signature does not clash with ours.
-interface ResizeHandleProps extends Omit<React.ComponentProps<'div'>, 'onDrag'> {
-  /** Width delta in px since the last move; apply it to the panel size. */
-  onDrag: (dx: number) => void;
-  /** Double-click action (e.g. collapse/expand the panel). */
-  onToggle: () => void;
-}
-
 function ResizeHandle({
   onDrag,
   onToggle,
@@ -37,7 +43,7 @@ function ResizeHandle({
   onLostPointerCapture,
   onDoubleClick,
   ...props
-}: ResizeHandleProps): React.ReactNode {
+}: ResizeHandleProps): ReactNode {
   const downX = useRef(0);
   const lastX = useRef(0);
   const armed = useRef(false);

@@ -4,23 +4,6 @@ import { createContext, useContext, useEffect, useRef, useState, type ComponentP
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-/**
- * ReasoningCollapsible - a thinking / reasoning disclosure. It opens while
- * `streaming` is true, closes itself once about a second after the stream
- * ends, and carries `data-streaming` on the root meanwhile. The label and the
- * body are the consumer's; `useReasoningCollapsible` hands the label its
- * timing:
- *
- *   function ReasoningLabel() {
- *     const { streaming, duration } = useReasoningCollapsible();
- *     return streaming ? 'Thinking...' : `Thought for ${duration ?? 'a few'} seconds`;
- *   }
- *
- *   <ReasoningCollapsible streaming={isLive}>
- *     <ReasoningCollapsibleTrigger><ReasoningLabel /></ReasoningCollapsibleTrigger>
- *     <ReasoningCollapsibleContent><MarkdownView codeBlocks>{text}</MarkdownView></ReasoningCollapsibleContent>
- *   </ReasoningCollapsible>
- */
 const AUTO_CLOSE_DELAY = 1000;
 const MS_IN_S = 1000;
 
@@ -50,6 +33,23 @@ interface ReasoningCollapsibleProps extends Omit<ComponentProps<typeof Collapsib
   defaultOpen?: boolean;
 }
 
+/**
+ * ReasoningCollapsible - a thinking / reasoning disclosure. It opens while
+ * `streaming` is true, closes itself once about a second after the stream
+ * ends, and carries `data-streaming` on the root meanwhile. The label and the
+ * body are the consumer's; `useReasoningCollapsible` hands the label its
+ * timing:
+ *
+ *   function ReasoningLabel() {
+ *     const { streaming, duration } = useReasoningCollapsible();
+ *     return streaming ? 'Thinking...' : `Thought for ${duration ?? 'a few'} seconds`;
+ *   }
+ *
+ *   <ReasoningCollapsible streaming={isLive}>
+ *     <ReasoningCollapsibleTrigger><ReasoningLabel /></ReasoningCollapsibleTrigger>
+ *     <ReasoningCollapsibleContent><MarkdownView codeBlocks>{text}</MarkdownView></ReasoningCollapsibleContent>
+ *   </ReasoningCollapsible>
+ */
 function ReasoningCollapsible({
   streaming = false,
   defaultOpen,

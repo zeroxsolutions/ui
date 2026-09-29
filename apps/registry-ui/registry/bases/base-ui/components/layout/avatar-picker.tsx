@@ -5,7 +5,7 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
 import { TabsContent } from '@/registry/bases/base-ui/ui/tabs';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { EmojiPicker } from '../data-entry/emoji-picker';
+import { EmojiPicker } from '@/registry/bases/base-ui/components/data-entry/emoji-picker';
 
 interface AvatarPickerValue {
   /** Emoji glyph avatar, or null. */
