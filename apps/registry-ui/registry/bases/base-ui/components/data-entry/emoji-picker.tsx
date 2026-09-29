@@ -524,7 +524,7 @@ function EmojiPickerCell({ emoji, className, onClick, ...props }: EmojiPickerCel
       className={cn('size-(--emoji-picker-cell)', className)}
       onClick={(event) => {
         onClick?.(event);
-        if (!event.defaultPrevented) select(emoji.e);
+        select(emoji.e);
       }}
       {...props}
     >
@@ -533,5 +533,5 @@ function EmojiPickerCell({ emoji, className, onClick, ...props }: EmojiPickerCel
   );
 }
 
-export { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerNav, EmojiPickerGroupLabel, EmojiPickerCell };
-export type { EmojiPickerProps, EmojiPickerSearchProps, EmojiPickerContentProps, EmojiPickerCellProps };
+export { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerNav, EmojiPickerGroupLabel };
+export type { EmojiPickerProps, EmojiPickerSearchProps, EmojiPickerContentProps };
