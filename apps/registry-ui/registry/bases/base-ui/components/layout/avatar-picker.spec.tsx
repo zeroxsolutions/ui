@@ -111,6 +111,26 @@ describe('AvatarPicker', () => {
     expect(screen.getByRole('button', { name: '#6366f1' })).toBeTruthy();
   });
 
+  it('keeps a pane wrapped in a consumer component reachable through its tab', () => {
+    function UploadWrapper({ children }: { children: ReactNode }) {
+      return <div data-testid="upload-wrapper">{children}</div>;
+    }
+    render(
+      <Picker defaultTab="emoji">
+        <AvatarPickerEmoji />
+        <UploadWrapper>
+          <AvatarPickerUpload />
+        </UploadWrapper>
+        <AvatarPickerColor />
+      </Picker>,
+    );
+    openEditor();
+
+    expect(screen.queryByText('Click to upload an image')).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Upload' }));
+    expect(screen.getByText('Click to upload an image')).toBeTruthy();
+  });
+
   it('lets children override the upload copy', () => {
     render(
       <Picker defaultTab="upload">
@@ -145,6 +165,29 @@ describe('AvatarPicker', () => {
     resolve('https://cdn.example/a.png');
     await waitFor(() => expect(pane.hasAttribute('data-uploading')).toBe(false));
     expect(onChange).toHaveBeenCalledWith({ imageUrl: 'https://cdn.example/a.png', emoji: null });
+  });
+
+  it('clears data-uploading once a rejected onUpload settles, without adopting a URL', async () => {
+    let reject: (reason: unknown) => void = () => {};
+    const onUpload = vi.fn(() => new Promise<string | null>((_resolve, r) => (reject = r)));
+    const onChange = vi.fn();
+    render(
+      <Picker defaultTab="upload" onValueChange={onChange}>
+        <AvatarPickerUpload onUpload={onUpload} />
+      </Picker>,
+    );
+    openEditor();
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['x'], 'a.png', { type: 'image/png' });
+    fireEvent.change(input, { target: { files: [file] } });
+
+    const pane = document.querySelector('[data-slot="avatar-picker-upload"]') as HTMLElement;
+    expect(pane.hasAttribute('data-uploading')).toBe(true);
+
+    reject(new Error('upload failed'));
+    await waitFor(() => expect(pane.hasAttribute('data-uploading')).toBe(false));
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("clears emoji and image on Remove and still runs the consumer's onClick", () => {

@@ -2,10 +2,7 @@ import { memo, type CSSProperties, type FC } from 'react';
 
 import { makeAvatar } from './brands/internal/avatar';
 import type { IconProps } from './brands/internal/types';
-import {
-  resolveAiProviderMark,
-  type AiProviderMapping,
-} from './ai-provider-mappings';
+import { resolveAiProviderMark, type AiProviderMapping } from './ai-provider-mappings';
 
 /** Which visual form of the resolved brand mark to render. */
 export type AiProviderIconType = 'color' | 'mono' | 'avatar' | 'combine';
@@ -48,8 +45,8 @@ const DefaultMark: FC<IconProps> = ({ size = '1em', style, ...rest }) => (
  * Render an AI provider's brand logo from a provider key. Resolves the key to a
  * vendored `@zeroxsolutions/icons` mark and renders the requested `type`
  * variant, degrading to the base mark when a variant is absent, and to a
- * neutral placeholder when the key matches nothing. Suitable for
- * `AiProviderCard`'s `icon` slot.
+ * neutral placeholder when the key matches nothing. Suitable for the brand
+ * mark inside an `AiProviderCard`'s `CardTitle`.
  * @example <AiProviderIcon provider="openai" type="avatar" size={32} />
  */
 function AiProviderIconBase({
@@ -80,8 +77,7 @@ function AiProviderIconBase({
     return <mark.Combine size={size} className={className} style={style} />;
   }
 
-  const Icon =
-    type === 'color' ? mark.Color ?? mark.Mono ?? mark : mark.Mono ?? mark;
+  const Icon = type === 'color' ? (mark.Color ?? mark.Mono ?? mark) : (mark.Mono ?? mark);
   return <Icon size={size} className={className} style={style} />;
 }
 

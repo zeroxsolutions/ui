@@ -93,7 +93,7 @@ interface FrontmatterFormFieldProps extends React.ComponentProps<typeof Field> {
 /**
  * One field of a `FrontmatterForm`, bound to `name`: an upstream `Field`,
  * marked invalid when the root's `errors` hold `name`. It keeps upstream's
- * `data-slot="field"`, which `FieldLabel` and `FieldGroup` select on.
+ * `data-slot="field"`, which `FieldLabel` selects on.
  */
 function FrontmatterFormField({ name, ...props }: FrontmatterFormFieldProps): React.ReactNode {
   const ctx = useFrontmatterFormContext();
