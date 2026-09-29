@@ -1,23 +1,24 @@
 import { Brain, ChevronDown } from 'lucide-react';
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
-import { MarkdownView } from '@/registry/bases/base-ui/components/data-display/markdown-view';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**
- * ReasoningCollapsible — a thinking / reasoning disclosure built on the SDK `Collapsible`
- * with a muted-trigger language. Auto-opens while the agent is streaming its
- * reasoning, then auto-collapses ~1s after the stream ends; the trigger reads
- * "Thinking…" (pulsing) → "Thought for N seconds".
+ * ReasoningCollapsible - a thinking / reasoning disclosure. It opens while
+ * `streaming` is true, closes itself once about a second after the stream
+ * ends, and carries `data-streaming` on the root meanwhile. The label and the
+ * body are the consumer's; `useReasoningCollapsible` hands the label its
+ * timing:
  *
- * Open state is plain local state (the host never drives it from outside); the
- * live cue is `animate-pulse`. Presentational — `streaming` in, content as a
- * markdown string. Compose the parts:
+ *   function ReasoningLabel() {
+ *     const { streaming, duration } = useReasoningCollapsible();
+ *     return streaming ? 'Thinking...' : `Thought for ${duration ?? 'a few'} seconds`;
+ *   }
  *
  *   <ReasoningCollapsible streaming={isLive}>
- *     <ReasoningCollapsibleTrigger />
- *     <ReasoningCollapsibleContent>{text}</ReasoningCollapsibleContent>
+ *     <ReasoningCollapsibleTrigger><ReasoningLabel /></ReasoningCollapsibleTrigger>
+ *     <ReasoningCollapsibleContent><MarkdownView codeBlocks>{text}</MarkdownView></ReasoningCollapsibleContent>
  *   </ReasoningCollapsible>
  */
 const AUTO_CLOSE_DELAY = 1000;
@@ -26,6 +27,7 @@ const MS_IN_S = 1000;
 interface ReasoningCollapsibleContextValue {
   streaming: boolean;
   isOpen: boolean;
+  /** Whole seconds the last stream lasted, rounded up; undefined until a stream has ended. */
   duration: number | undefined;
 }
 
@@ -33,7 +35,7 @@ const ReasoningCollapsibleContext = createContext<ReasoningCollapsibleContextVal
 
 /**
  * Read the live reasoning state (`streaming`, `isOpen`, `duration`) from inside a
- * `<ReasoningCollapsible>`. Lets a consumer compute their own trigger label. Throws when
+ * `<ReasoningCollapsible>`, for example to word the trigger's label. Throws when
  * used outside `<ReasoningCollapsible>`.
  */
 function useReasoningCollapsible(): ReasoningCollapsibleContextValue {
@@ -42,21 +44,25 @@ function useReasoningCollapsible(): ReasoningCollapsibleContextValue {
   return ctx;
 }
 
-interface ReasoningCollapsibleProps {
+interface ReasoningCollapsibleProps extends Omit<ComponentProps<typeof Collapsible>, 'open' | 'defaultOpen'> {
   streaming?: boolean;
+  /** The initial open state; defaults to `streaming`. `false` also keeps a stream from opening it. */
   defaultOpen?: boolean;
-  className?: string;
-  children: ReactNode;
 }
 
-function ReasoningCollapsible({ streaming = false, defaultOpen, className, children }: ReasoningCollapsibleProps) {
+function ReasoningCollapsible({
+  streaming = false,
+  defaultOpen,
+  onOpenChange,
+  className,
+  ...props
+}: ReasoningCollapsibleProps): ReactNode {
   const [isOpen, setIsOpen] = useState(defaultOpen ?? streaming);
   const [duration, setDuration] = useState<number | undefined>(undefined);
   const startRef = useRef<number | null>(null);
   const everStreamedRef = useRef(streaming);
   const autoClosedRef = useRef(false);
 
-  // Track stream start → compute elapsed seconds when it ends.
   useEffect(() => {
     if (streaming) {
       everStreamedRef.current = true;
@@ -67,12 +73,11 @@ function ReasoningCollapsible({ streaming = false, defaultOpen, className, child
     }
   }, [streaming]);
 
-  // Auto-open while streaming (unless the caller pinned it closed).
   useEffect(() => {
     if (streaming && !isOpen && defaultOpen !== false) setIsOpen(true);
   }, [streaming, isOpen, defaultOpen]);
 
-  // Auto-close once, shortly after streaming ends, so old thoughts tuck away.
+  // Closes once only, so a reader who reopens old reasoning keeps it open.
   useEffect(() => {
     if (everStreamedRef.current && !streaming && isOpen && !autoClosedRef.current) {
       const t = setTimeout(() => {
@@ -86,50 +91,55 @@ function ReasoningCollapsible({ streaming = false, defaultOpen, className, child
 
   return (
     <ReasoningCollapsibleContext.Provider value={{ streaming, isOpen, duration }}>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen} className={cn('my-2', className)}>
-        {children}
-      </Collapsible>
+      <Collapsible
+        data-slot="reasoning-collapsible"
+        data-streaming={streaming ? '' : undefined}
+        open={isOpen}
+        onOpenChange={(open, eventDetails) => {
+          setIsOpen(open);
+          onOpenChange?.(open, eventDetails);
+        }}
+        className={cn('group/reasoning-collapsible', className)}
+        {...props}
+      />
     </ReasoningCollapsibleContext.Provider>
   );
 }
 
-function thinkingLabel(streaming: boolean, duration: number | undefined): string {
-  if (streaming || duration === 0) return 'Thinking…';
-  if (duration === undefined) return 'Thought for a few seconds';
-  return `Thought for ${duration} second${duration === 1 ? '' : 's'}`;
-}
-
+/** The toggle row; its children are the label, which pulses while the root is streaming. */
 function ReasoningCollapsibleTrigger({
-  children,
   className,
-}: {
-  /** Overrides the computed "Thinking…" / "Thought for N seconds" label. */
-  children?: ReactNode;
-  className?: string;
-}) {
-  const { streaming, isOpen, duration } = useReasoningCollapsible();
-  const live = streaming || duration === 0;
+  children,
+  ...props
+}: ComponentProps<typeof CollapsibleTrigger>): ReactNode {
   return (
     <CollapsibleTrigger
+      data-slot="reasoning-collapsible-trigger"
       className={cn(
-        'text-muted-foreground hover:text-foreground flex w-full items-center gap-2 text-sm transition-colors',
+        'group/reasoning-collapsible-trigger text-muted-foreground hover:text-foreground flex w-full items-center gap-2 text-sm transition-colors',
         className,
       )}
+      {...props}
     >
-      <Brain className="size-4 shrink-0" />
-      <span className={cn('min-w-0 flex-1 truncate text-left', live && 'animate-pulse')}>
-        {children ?? thinkingLabel(streaming, duration)}
+      <Brain aria-hidden className="size-4 shrink-0" />
+      <span className="min-w-0 flex-1 truncate text-left group-data-streaming/reasoning-collapsible:animate-pulse">
+        {children}
       </span>
-      <ChevronDown className={cn('size-4 shrink-0 transition-transform', isOpen && 'rotate-180')} />
+      <ChevronDown
+        aria-hidden
+        className="size-4 shrink-0 transition-transform group-aria-expanded/reasoning-collapsible-trigger:rotate-180"
+      />
     </CollapsibleTrigger>
   );
 }
 
-function ReasoningCollapsibleContent({ children, className }: { children: string; className?: string }) {
+function ReasoningCollapsibleContent({ className, ...props }: ComponentProps<typeof CollapsibleContent>): ReactNode {
   return (
-    <CollapsibleContent className={cn('text-muted-foreground mt-2 text-sm', className)}>
-      <MarkdownView codeBlocks>{children}</MarkdownView>
-    </CollapsibleContent>
+    <CollapsibleContent
+      data-slot="reasoning-collapsible-content"
+      className={cn('text-muted-foreground mt-2 text-sm', className)}
+      {...props}
+    />
   );
 }
 
