@@ -175,8 +175,10 @@ function TreeItemRenameInput({
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (isImeComposing(event.nativeEvent)) return;
-        if (event.key === 'Enter') event.currentTarget.blur();
-        if (event.key === 'Escape') onCancel();
+        if (!event.defaultPrevented) {
+          if (event.key === 'Enter') event.currentTarget.blur();
+          if (event.key === 'Escape') onCancel();
+        }
         event.stopPropagation();
       }}
       onClick={(event) => {

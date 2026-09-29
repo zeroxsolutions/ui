@@ -131,3 +131,24 @@ describe('NumberField', () => {
     expect(onValueChange).toHaveBeenCalledWith(2);
   });
 });
+
+describe('NumberFieldInput honors a caller preventDefault', () => {
+  it("skips stepping the value when a caller's onKeyDown prevents the default, but still runs", () => {
+    const onValueChange = vi.fn();
+    const onKeyDown = vi.fn();
+    renderField(
+      { value: 5, step: 2, onValueChange },
+      {
+        onKeyDown: (event) => {
+          onKeyDown(event);
+          event.preventDefault();
+        },
+      },
+    );
+
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'ArrowUp' });
+
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+});

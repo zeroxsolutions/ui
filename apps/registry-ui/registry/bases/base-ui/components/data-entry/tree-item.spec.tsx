@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { createRef } from 'react';
+import { createRef, type KeyboardEvent } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -133,7 +133,11 @@ describe('TreeItemIndent', () => {
 });
 
 describe('TreeItemRenameInput', () => {
-  function renderRename(handlers: { onCommit?: () => void; onCancel?: () => void; onKeyDown?: () => void }) {
+  function renderRename(handlers: {
+    onCommit?: () => void;
+    onCancel?: () => void;
+    onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  }) {
     const onRowKeyDown = vi.fn();
     const onRowClick = vi.fn();
     render(
@@ -176,5 +180,27 @@ describe('TreeItemRenameInput', () => {
 
     fireEvent.click(input);
     expect(onRowClick).not.toHaveBeenCalled();
+  });
+
+  it("skips the commit when a caller's onKeyDown prevents the default on Enter, but still runs", () => {
+    const onCommit = vi.fn();
+    const onKeyDown = vi.fn((event) => event.preventDefault());
+    const { input } = renderRename({ onCommit, onKeyDown });
+
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+    expect(onCommit).not.toHaveBeenCalled();
+  });
+
+  it("skips the cancel when a caller's onKeyDown prevents the default on Escape, but still runs", () => {
+    const onCancel = vi.fn();
+    const onKeyDown = vi.fn((event) => event.preventDefault());
+    const { input } = renderRename({ onCancel, onKeyDown });
+
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+    expect(onCancel).not.toHaveBeenCalled();
   });
 });

@@ -3,7 +3,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { Empty, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 
-import { EmojiPicker, EmojiPickerContent, EmojiPickerSearch } from './emoji-picker';
+import { EmojiPicker, EmojiPickerCell, EmojiPickerContent, EmojiPickerSearch } from './emoji-picker';
 
 // ScrollArea (upstream) measures its viewport in a `queueMicrotask` its layout
 // effect schedules on mount and on each hidden-state change, outside of
@@ -160,5 +160,28 @@ describe('EmojiPicker', () => {
     const cell = screen.getByRole('button', { name: 'grinning face' });
     expect(cell.getAttribute('data-slot')).toBe('emoji-picker-cell');
     expect(cell.closest('[data-slot="emoji-picker-grid"]')).not.toBeNull();
+  });
+});
+
+describe('EmojiPickerCell honors a caller preventDefault', () => {
+  it("skips selecting the emoji when a caller's onClick prevents the default, but still runs", () => {
+    const onSelect = vi.fn();
+    const onClick = vi.fn();
+    render(
+      <EmojiPicker onSelect={onSelect}>
+        <EmojiPickerCell
+          emoji={{ e: '🍕', n: 'pizza', k: 'pizza' }}
+          onClick={(event) => {
+            onClick(event);
+            event.preventDefault();
+          }}
+        />
+      </EmojiPicker>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'pizza' }));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onSelect).not.toHaveBeenCalled();
   });
 });

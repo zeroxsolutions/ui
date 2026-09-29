@@ -189,7 +189,7 @@ function NumberFieldInput({
       }}
       onKeyDown={(event) => {
         onKeyDown?.(event);
-        field.keyDown(event);
+        if (!event.defaultPrevented) field.keyDown(event);
       }}
       {...props}
     />
