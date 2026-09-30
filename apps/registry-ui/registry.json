@@ -684,11 +684,11 @@
       "type": "registry:component",
       "title": "Frontmatter Form",
       "description": "A frontmatter editor whose root holds the document and field setters for the consumer's composed fields.",
-      "categories": ["layout"],
+      "categories": ["data-entry"],
       "registryDependencies": ["@shadcn/field"],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/layout/frontmatter-form.tsx",
+          "path": "registry/bases/base-ui/components/data-entry/frontmatter-form.tsx",
           "type": "registry:component"
         }
       ]
