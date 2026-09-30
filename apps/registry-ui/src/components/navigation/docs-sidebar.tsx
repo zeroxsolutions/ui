@@ -116,6 +116,8 @@ function DocsSidebar({ tree, ...props }: DocsSidebarProps): ReactNode {
 
   return (
     <Sidebar
+      role="navigation"
+      aria-label="Docs"
       className="sticky top-[calc(var(--header-height)+0.6rem)] z-30 hidden h-[calc(100svh-10rem)] overflow-hidden overscroll-none bg-transparent [--sidebar-menu-width:--spacing(56)] lg:flex"
       collapsible="none"
       {...props}

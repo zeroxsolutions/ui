@@ -16,16 +16,11 @@ async function scrollToPageEnd(page: Page): Promise<void> {
 }
 
 function sidebar(page: Page): Locator {
-  return page.locator('[data-slot="sidebar"]');
+  return page.getByRole('navigation', { name: 'Docs' });
 }
 
-function sidebarScroller(page: Page): Locator {
-  return page.locator('[data-docs-sidebar-content]');
-}
-
-/** The TOC's list scroller: the heading `On this page` sits in the list, the list in the scroller. */
-function tocScroller(page: Page): Locator {
-  return page.getByText('On this page', { exact: true }).locator('xpath=../..');
+function toc(page: Page): Locator {
+  return page.getByRole('navigation', { name: 'On this page' });
 }
 
 for (const size of [
@@ -63,21 +58,22 @@ test('the page never rubber-bands', async ({ page }) => {
   expect(await page.evaluate('getComputedStyle(document.scrollingElement).overscrollBehaviorY')).toBe('none');
 });
 
-/** Wheels `scroller` to its end, then once more, and reports whether the page moved on that last wheel. */
-async function pageMovedPastListEnd(page: Page, scroller: Locator): Promise<boolean> {
-  await scroller.hover();
-  // One long wheel can land short of the end in WebKit under load, so keep wheeling until the list is there.
-  await expect
-    .poll(async () => {
-      await page.mouse.wheel(0, 1000);
-      return scroller.evaluate(
-        (list: { scrollTop: number; clientHeight: number; scrollHeight: number }) =>
-          list.scrollTop + list.clientHeight >= list.scrollHeight - 1,
-      );
-    })
-    .toBe(true);
+/**
+ * Wheels over `rail` until its last link is in view, then wheels on past the list's end, and reports
+ * whether the page moved at any point. Until the list's end every wheel scrolls the list; past it, a
+ * wheel either stops at the rail or moves the page.
+ */
+async function pageMovedWheelingPastRail(page: Page, rail: Locator): Promise<boolean> {
   const before = await pageScrollY(page);
 
+  const last = rail.getByRole('link').last();
+  await rail.getByRole('link').first().hover();
+  // The list clips its links, so the last one is in the viewport only once the list has scrolled to it.
+  await expect(async () => {
+    await page.mouse.wheel(0, 400);
+    await expect(last).toBeInViewport({ timeout: 500 });
+  }).toPass();
+  await page.mouse.wheel(0, 400);
   await page.mouse.wheel(0, 400);
   // This asserts an absence: no event marks a chained scroll that never comes, so wait for one to land.
   // eslint-disable-next-line playwright/no-wait-for-timeout
@@ -86,19 +82,19 @@ async function pageMovedPastListEnd(page: Page, scroller: Locator): Promise<bool
   return (await pageScrollY(page)) !== before;
 }
 
-test('a wheel over the sidebar list at its end leaves the page where it was', async ({ page }) => {
+test('a wheel over the sidebar past the end of its list leaves the page where it was', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(LONGEST_PAGE);
 
-  expect(await pageMovedPastListEnd(page, sidebarScroller(page))).toBe(false);
+  expect(await pageMovedWheelingPastRail(page, sidebar(page))).toBe(false);
 });
 
-test('a wheel over the TOC list at its end leaves the page where it was', async ({ page }) => {
+test('a wheel over the TOC past the end of its list leaves the page where it was', async ({ page }) => {
   // Short enough that this page's headings overflow the TOC column, so its list has an end to wheel past.
   await page.setViewportSize({ width: 1440, height: 320 });
   await page.goto(LONGEST_PAGE);
 
-  expect(await pageMovedPastListEnd(page, tocScroller(page))).toBe(false);
+  expect(await pageMovedWheelingPastRail(page, toc(page))).toBe(false);
 });
 
 for (const colorScheme of ['light', 'dark'] as const) {
@@ -108,6 +104,6 @@ for (const colorScheme of ['light', 'dark'] as const) {
     await page.goto(LONGEST_PAGE);
 
     await expect(sidebar(page)).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-    await expect(tocScroller(page).locator('xpath=..')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    await expect(toc(page)).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   });
 }

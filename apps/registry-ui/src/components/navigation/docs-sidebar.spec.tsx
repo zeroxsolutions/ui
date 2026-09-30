@@ -73,10 +73,19 @@ describe('DocsSidebar', () => {
     expect(screen.getByRole('link', { name: 'Badge' }).getAttribute('aria-current')).toBeNull();
   });
 
-  it('marks the current page for the restore script to find', async () => {
+  it('is the landmark named Docs', async () => {
     await renderSidebar();
 
-    expect(listScroller().querySelector('[data-active]')?.textContent).toBe('Installation');
+    expect(
+      screen.getByRole('navigation', { name: 'Docs' }).contains(screen.getByRole('link', { name: 'Button' })),
+    ).toBe(true);
+  });
+
+  it('marks exactly the current page for the restore script to find', async () => {
+    await renderSidebar();
+
+    const marked = listScroller().querySelectorAll('[data-active]');
+    expect([...marked].map((item) => item.textContent)).toEqual(['Installation']);
   });
 
   it('restores the offset stored for this page', async () => {

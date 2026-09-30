@@ -49,7 +49,12 @@ export default async function DocsPage({ params }: DocsPageProps): Promise<React
           <DocsPager tree={source.pageTree} url={page.url} className="mt-6 border-t pt-6" />
         </div>
       </div>
-      <div className="sticky top-[calc(var(--header-height)+1px)] z-30 ml-auto hidden h-[90svh] w-(--sidebar-width) flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex">
+      {/* A landmark only when it lists something: a page without headings leaves the column empty. */}
+      <div
+        role={page.data.toc.length ? 'navigation' : undefined}
+        aria-label={page.data.toc.length ? 'On this page' : undefined}
+        className="sticky top-[calc(var(--header-height)+1px)] z-30 ml-auto hidden h-[90svh] w-(--sidebar-width) flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex"
+      >
         <div className="h-(--top-spacing) shrink-0" />
         {/* overscroll-none on the list too, beyond upstream: WebKit chains a wheel past its end into the page otherwise. */}
         {page.data.toc.length ? (

@@ -76,10 +76,12 @@ describe('DocsToc', () => {
     expect(screen.getByRole('link', { name: 'Usage' }).getAttribute('aria-current')).toBe('location');
   });
 
-  it('titles its list On this page', async () => {
+  it('titles its list of headings On this page', async () => {
     await renderSettled(<DocsToc toc={toc} />);
 
-    expect(screen.getByText('On this page')).toBeTruthy();
+    const list = screen.getByText('On this page').parentElement;
+    expect(list?.contains(screen.getByRole('link', { name: 'Installation' }))).toBe(true);
+    expect(list?.contains(screen.getByRole('link', { name: 'Usage' }))).toBe(true);
   });
 
   it('renders nothing for a page without headings', async () => {

@@ -21,8 +21,11 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:8787';
  * `playwright.config.mts` via its extension list
  * (.ts/.js/.mts/.mjs/.cts/.cjs).
  */
+const preset = nxE2EPreset(import.meta.dirname, { testDir: './src' });
+
 export default defineConfig({
-  ...nxE2EPreset(import.meta.dirname, { testDir: './src' }),
+  ...preset,
+  reporter: [...(Array.isArray(preset.reporter) ? preset.reporter : []), ['./src/test/interrupt-on-sigterm.ts']],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
@@ -33,12 +36,13 @@ export default defineConfig({
   webServer: {
     command: 'pnpm exec nx run @zeroxsolutions/registry-ui:wrangler:dev',
     url: 'http://localhost:8787',
-    reuseExistingServer: true,
+    // Never test a worker this run did not start: one left on 8787 by an earlier run serves an older
+    // build than the one just made, and the suite passes against it. A held port fails the run instead.
+    reuseExistingServer: false,
     cwd: workspaceRoot,
     // Starting includes the worker build; the 60s default is timed for a server that only boots.
     timeout: 300_000,
-    // Unset, Playwright SIGKILLs nx and the worker nx started keeps port 8787, so the next run's
-    // reuseExistingServer tests that stale worker instead of the one it just built.
+    // Unset, Playwright SIGKILLs nx and the worker nx started keeps port 8787, so the next run is refused.
     gracefulShutdown: { signal: 'SIGINT', timeout: 10_000 },
   },
   projects: [

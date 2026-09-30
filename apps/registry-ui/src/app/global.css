@@ -11,6 +11,10 @@
   html {
     @apply overscroll-y-none;
   }
+
+  [data-slot='layout'] {
+    @apply overscroll-none;
+  }
 }
 
 @utility container-wrapper {
