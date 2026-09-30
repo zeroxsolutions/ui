@@ -102,18 +102,11 @@ function ModelListSkeleton({ count = 6, className, ...props }: ModelListSkeleton
             <Skeleton className="size-full" />
           </ItemMedia>
           <ItemContent>
-            {/* A Skeleton draws no size of its own; each box here is the line it stands in for. */}
-            <div className="h-3.5 w-40">
-              <Skeleton className="size-full" />
-            </div>
-            <div className="h-3 w-56">
-              <Skeleton className="size-full" />
-            </div>
+            <Skeleton className="h-3.5 w-40" />
+            <Skeleton className="h-3 w-56" />
           </ItemContent>
           <ItemActions>
-            <div className="h-4 w-8">
-              <Skeleton className="size-full" />
-            </div>
+            <Skeleton className="h-4 w-8" />
           </ItemActions>
         </Item>
       ))}

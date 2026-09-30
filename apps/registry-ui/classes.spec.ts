@@ -34,6 +34,8 @@ const PRIMITIVE_LOOK =
 const LAYOUT_KEPT =
   /^(?:(?:h|min-h|max-h|size)-(?:full|auto|0|fit|min|max|none|svh)|text-(?:left|center|right|start|end|wrap|nowrap|balance|pretty|ellipsis|clip)|font-(?:mono|sans)|outline-(?:none|hidden))$/;
 const VARIABLE_DECLARATION = /^\[--[\w-]+:/;
+/** Skeleton draws no size of its own; upstream's examples size and round it by className, so these are its API. */
+const SKELETON_SHAPE = /^(?:h|w|size|min-h|max-h|min-w|max-w|rounded(?:-[a-z]+)?)(?:-|$)/;
 /** A colour literal or function inside a custom property's value: `#hex`, `rgb(`/`rgba(`, `hsl(`/`hsla(`, `oklch(`, `oklab(`, `lab(`, `lch(`, `color(`. */
 const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(/;
 const PRIMITIVE_MODULE = /\/registry\/bases\/base-ui\/ui\//;
@@ -51,12 +53,16 @@ function utilityOf(className: string): string {
   return className.slice(start).replace(/^!|!$/g, '');
 }
 
-/** Which rule a class breaks, or null. `onPrimitive` is whether it sits on a vendored primitive. */
-export function classViolation(className: string, onPrimitive: boolean): string | null {
+/**
+ * Which rule a class breaks, or null. `onPrimitive` is whether it sits on a vendored primitive;
+ * `primitive` names it, so Skeleton's shape classes pass.
+ */
+export function classViolation(className: string, onPrimitive: boolean, primitive = ''): string | null {
   const utility = utilityOf(className);
   if (PALETTE.test(utility)) return 'palette colour';
   const declaresVariable = VARIABLE_DECLARATION.test(utility);
   if (utility.includes('[') && (!declaresVariable || COLOR_LITERAL.test(utility))) return 'arbitrary value';
+  if (primitive === 'Skeleton' && SKELETON_SHAPE.test(utility)) return null;
   if (onPrimitive && PRIMITIVE_LOOK.test(utility) && !LAYOUT_KEPT.test(utility)) return 'restyles a primitive';
   return null;
 }
@@ -79,11 +85,11 @@ function violationsIn(file: string, text: string): Violation[] {
   });
 
   const found: Violation[] = [];
-  const check = (node: ts.Node, onPrimitive: boolean): void => {
+  const check = (node: ts.Node, onPrimitive: boolean, primitive = ''): void => {
     literalTexts(node)
       .flatMap((text) => text.split(/\s+/).filter(Boolean))
       .forEach((className) => {
-        const rule = classViolation(className, onPrimitive);
+        const rule = classViolation(className, onPrimitive, primitive);
         if (rule) found.push({ file, line: lineOf(source, node), className, rule });
       });
   };
@@ -92,7 +98,8 @@ function violationsIn(file: string, text: string): Violation[] {
       const element = node.parent.parent;
       const tag =
         ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element) ? element.tagName.getText(source) : '';
-      check(node.initializer, primitives.has(tag.split('.')[0]));
+      const primitive = primitives.has(tag.split('.')[0]) ? tag.split('.')[0] : '';
+      check(node.initializer, primitive !== '', primitive);
       return;
     }
     if (ts.isCallExpression(node) && ['cn', 'cva'].includes(node.expression.getText(source))) {
@@ -168,6 +175,25 @@ describe('violationsIn', () => {
     expect(violationsIn('fixture.tsx', source).map(({ className, rule }) => ({ className, rule }))).toEqual([
       { className: 'h-8', rule: 'restyles a primitive' },
       { className: 'text-emerald-600', rule: 'palette colour' },
+    ]);
+  });
+
+  it('lets Skeleton take its size and radius by className, and still flags a palette colour on it', () => {
+    const source = [
+      "import { Skeleton } from '@/registry/bases/base-ui/ui/skeleton';",
+      '',
+      'function Demo() {',
+      '  return (',
+      '    <>',
+      '      <Skeleton className="h-4 w-40 rounded-full" />',
+      '      <Skeleton className="bg-red-500" />',
+      '    </>',
+      '  );',
+      '}',
+    ].join('\n');
+
+    expect(violationsIn('fixture.tsx', source).map(({ className, rule }) => ({ className, rule }))).toEqual([
+      { className: 'bg-red-500', rule: 'palette colour' },
     ]);
   });
 });

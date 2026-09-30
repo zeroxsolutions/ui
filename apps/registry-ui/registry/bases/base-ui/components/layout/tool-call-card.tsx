@@ -3,7 +3,7 @@ import { useRef, type ComponentProps, type ReactNode } from 'react';
 
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { Card, CardContent, CardHeader } from '@/registry/bases/base-ui/ui/card';
+import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
@@ -51,7 +51,7 @@ function ToolCallCard({ state, className, ...props }: ToolCallCardProps): ReactN
 
 /**
  * The header row that toggles the sections: a full-width ghost button in the
- * card's header, holding the consumer's icon, title, description and status,
+ * card's flow, holding the consumer's icon, title, description and status,
  * then a chevron that turns over while the sections are open and plays while
  * the row is hovered or focused.
  */
@@ -66,37 +66,35 @@ function ToolCallCardTrigger({
 }: ComponentProps<typeof CollapsibleTrigger>): ReactNode {
   const iconRef = useRef<ChevronDownIconHandle>(null);
   return (
-    <CardHeader>
-      <CollapsibleTrigger
-        data-slot="tool-call-card-trigger"
-        render={<Button variant="ghost" />}
-        className={cn('group/tool-call-card-trigger w-full justify-start text-left', className)}
-        onMouseEnter={(event) => {
-          onMouseEnter?.(event);
-          iconRef.current?.startAnimation();
-        }}
-        onMouseLeave={(event) => {
-          onMouseLeave?.(event);
-          iconRef.current?.stopAnimation();
-        }}
-        onFocus={(event) => {
-          onFocus?.(event);
-          iconRef.current?.startAnimation();
-        }}
-        onBlur={(event) => {
-          onBlur?.(event);
-          iconRef.current?.stopAnimation();
-        }}
-        {...props}
-      >
-        {children}
-        <ChevronDownIcon
-          ref={iconRef}
-          aria-hidden
-          className="transition-transform group-aria-expanded/tool-call-card-trigger:rotate-180"
-        />
-      </CollapsibleTrigger>
-    </CardHeader>
+    <CollapsibleTrigger
+      data-slot="tool-call-card-trigger"
+      render={<Button variant="ghost" />}
+      className={cn('group/tool-call-card-trigger w-full justify-start text-left', className)}
+      onMouseEnter={(event) => {
+        onMouseEnter?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onMouseLeave={(event) => {
+        onMouseLeave?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      onFocus={(event) => {
+        onFocus?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      {...props}
+    >
+      {children}
+      <ChevronDownIcon
+        ref={iconRef}
+        aria-hidden
+        className="transition-transform group-aria-expanded/tool-call-card-trigger:rotate-180"
+      />
+    </CollapsibleTrigger>
   );
 }
 
@@ -125,8 +123,9 @@ function ToolCallCardStatus({ className, children, ...props }: ComponentProps<'s
       className={cn('ml-auto', className)}
       {...props}
     >
-      {/* Static lucide glyphs, not lucide-animated ones: the Badge sizes only a direct svg
-          child, and an animated icon is a div around its svg, so it would render unsized. */}
+      {/* Static lucide glyphs where lucide-animated has clock and circle-check: inside the trigger,
+          Button's descendant svg rule sizes an animated icon to 16px over its size prop and the
+          Badge's size-3, and the trigger's hover reaches no separate part without a context. */}
       <Circle aria-hidden className="hidden group-data-[state=input-streaming]/tool-call-card:block" />
       <Clock aria-hidden className="hidden animate-pulse group-data-[state=input-available]/tool-call-card:block" />
       <CheckCircle2
