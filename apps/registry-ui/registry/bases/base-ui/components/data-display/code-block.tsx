@@ -98,6 +98,7 @@ function CodeBlock({
 function CodeBlockActions({ className, ...props }: ComponentProps<'div'>): ReactNode {
   return (
     <div
+      data-slot="code-block-actions"
       className={cn(
         'absolute top-1 right-1 z-10 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/code-block:opacity-100 has-focus-visible:opacity-100',
         className,
@@ -114,7 +115,7 @@ function CodeBlockActions({ className, ...props }: ComponentProps<'div'>): React
  */
 function CodeBlockContent({ children, ...props }: ComponentProps<typeof CollapsibleCardContent>): ReactNode {
   return (
-    <CollapsibleCardContent {...props}>
+    <CollapsibleCardContent data-slot="code-block-content" {...props}>
       {/* A ScrollArea rather than overflow-x-auto, so long lines scroll on the styled rail instead of the OS overlay bar. */}
       {/* The pre's bottom padding clears that rail, which Base UI positions over the viewport's bottom edge. */}
       <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
@@ -153,7 +154,7 @@ function CodeBlockLineNumbers({ className, ...props }: ComponentProps<'span'>): 
 function CodeBlockCode(props: Omit<ComponentProps<typeof HighlightedCode>, 'lines' | 'children'>): ReactNode {
   const { code, lines } = useCodeBlock();
   return (
-    <HighlightedCode lines={lines} {...props}>
+    <HighlightedCode data-slot="code-block-code" lines={lines} {...props}>
       {code}
     </HighlightedCode>
   );
@@ -166,7 +167,11 @@ function CodeBlockLanguage({ className, children, ...props }: ComponentProps<'sp
   const LanguageIcon = codeLanguageIcon(plain ? 'text' : (language as string));
 
   return (
-    <span className={cn('flex min-w-0 items-center gap-1.5 text-xs', className)} {...props}>
+    <span
+      data-slot="code-block-language"
+      className={cn('flex min-w-0 items-center gap-1.5 text-xs', className)}
+      {...props}
+    >
       <LanguageIcon aria-hidden className="shrink-0" />
       {children ?? (plain ? 'Plain text' : languageLabel(language as string))}
     </span>
@@ -178,7 +183,7 @@ type CodeBlockCopyProps = Omit<CopyButtonProps, 'value'>;
 /** Copies the block's code; takes every `CopyButton` prop but `value`. */
 function CodeBlockCopy({ label = 'Copy code', size = 'icon', ...props }: CodeBlockCopyProps): ReactNode {
   const { code } = useCodeBlock();
-  return <CopyButton value={code} label={label} size={size} {...props} />;
+  return <CopyButton data-slot="code-block-copy" value={code} label={label} size={size} {...props} />;
 }
 
 export {

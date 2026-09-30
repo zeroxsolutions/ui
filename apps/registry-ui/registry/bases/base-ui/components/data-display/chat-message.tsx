@@ -28,7 +28,12 @@ interface ChatMessageProps extends ComponentProps<typeof Message> {
  */
 function ChatMessage({ streaming = false, className, ...props }: ChatMessageProps): ReactNode {
   return (
-    <Message data-streaming={streaming ? '' : undefined} className={cn('group/chat-message', className)} {...props} />
+    <Message
+      data-slot="chat-message"
+      data-streaming={streaming ? '' : undefined}
+      className={cn('group/chat-message', className)}
+      {...props}
+    />
   );
 }
 
@@ -42,6 +47,7 @@ function ChatMessageAccent({ className, ...props }: ComponentProps<'span'>): Rea
   return (
     <span
       aria-hidden
+      data-slot="chat-message-accent"
       className={cn(
         'absolute inset-y-0 -start-3 hidden w-0.5 bg-(--chat-message-accent,var(--color-primary)) group-data-streaming/chat-message:block',
         className,

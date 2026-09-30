@@ -27,13 +27,19 @@ function isBlockCode(className: string | undefined, text: string): boolean {
 
 /** Inline code: a muted chip in the text's own size. */
 function MarkdownViewInlineCode({ className, ...props }: ComponentProps<'code'>): ReactNode {
-  return <code className={cn('bg-muted rounded px-1.5 py-0.5 font-mono', className)} {...props} />;
+  return (
+    <code
+      data-slot="markdown-view-inline-code"
+      className={cn('bg-muted rounded px-1.5 py-0.5 font-mono', className)}
+      {...props}
+    />
+  );
 }
 
 /** A GFM table as the upstream `Table`, whose own container scrolls it sideways when it is wider than the view. */
 function MarkdownViewTable({ node: _node, ...props }: ComponentProps<'table'> & ExtraProps): ReactNode {
   return (
-    <div className="my-3">
+    <div data-slot="markdown-view-table" className="my-3">
       <Table {...props} />
     </div>
   );
@@ -102,6 +108,7 @@ interface MarkdownViewProps extends Omit<ComponentProps<'div'>, 'children'> {
 function MarkdownView({ children, className, ...props }: MarkdownViewProps): ReactNode {
   return (
     <div
+      data-slot="markdown-view"
       className={cn(
         'text-foreground text-sm leading-relaxed',
         '[&_h1]:mb-3 [&_h1]:text-2xl [&_h1]:font-semibold [&_h1:not(:first-child)]:mt-6',

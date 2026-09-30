@@ -59,7 +59,7 @@ function DataTable<TData>({ table, className, children, ...props }: DataTablePro
   const value = React.useMemo(() => ({ table }), [table]);
   return (
     <DataTableContext.Provider value={value}>
-      <div className={cn('space-y-2', className)} {...props}>
+      <div data-slot="data-table" className={cn('space-y-2', className)} {...props}>
         {children}
       </div>
     </DataTableContext.Provider>
@@ -68,7 +68,7 @@ function DataTable<TData>({ table, className, children, ...props }: DataTablePro
 
 /** A flex row for filters + actions above the table. */
 function DataTableToolbar({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
-  return <div className={cn('flex items-center gap-2', className)} {...props} />;
+  return <div data-slot="data-table-toolbar" className={cn('flex items-center gap-2', className)} {...props} />;
 }
 
 /**
@@ -80,7 +80,7 @@ function DataTableView({ children, className, ...props }: React.ComponentProps<'
   const table = useDataTable();
 
   return (
-    <div className={cn('overflow-hidden rounded-lg border', className)} {...props}>
+    <div data-slot="data-table-view" className={cn('overflow-hidden rounded-lg border', className)} {...props}>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((group) => (
@@ -119,7 +119,7 @@ function DataTableEmpty({ children, ...props }: React.ComponentProps<typeof Tabl
   const table = useDataTable();
   return (
     <TableRow>
-      <TableCell colSpan={table.getAllLeafColumns().length} {...props}>
+      <TableCell data-slot="data-table-empty" colSpan={table.getAllLeafColumns().length} {...props}>
         <Empty>{children}</Empty>
       </TableCell>
     </TableRow>
@@ -172,7 +172,7 @@ function DataTableColumnHeader<TData, TValue>({
   return (
     <DataTableColumnHeaderContext.Provider value={value}>
       <DropdownMenu>
-        <div className={cn('flex items-center gap-2', className)} {...props} />
+        <div data-slot="data-table-column-header" className={cn('flex items-center gap-2', className)} {...props} />
       </DropdownMenu>
     </DataTableColumnHeaderContext.Provider>
   );
@@ -198,6 +198,7 @@ function DataTableColumnHeaderTrigger({
   return (
     // The negative margin lines the button's label up with the column's cells.
     <DropdownMenuTrigger
+      data-slot="data-table-column-header-trigger"
       render={<Button variant="ghost" size="sm" className="-ml-2.5" />}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
@@ -228,7 +229,7 @@ function DataTableColumnHeaderContent({
   align = 'start',
   ...props
 }: React.ComponentProps<typeof DropdownMenuContent>): React.ReactNode {
-  return <DropdownMenuContent align={align} {...props} />;
+  return <DropdownMenuContent data-slot="data-table-column-header-content" align={align} {...props} />;
 }
 
 /** A column menu item whose leading animated icon plays while the item is hovered or focused. */
@@ -280,6 +281,7 @@ function DataTableColumnHeaderSortAscending({
   const { column } = useDataTableColumnHeader();
   return (
     <DataTableColumnHeaderAction
+      data-slot="data-table-column-header-sort-ascending"
       icon={ArrowUpIcon}
       onClick={(event) => {
         onClick?.(event);
@@ -304,6 +306,7 @@ function DataTableColumnHeaderSortDescending({
   const { column } = useDataTableColumnHeader();
   return (
     <DataTableColumnHeaderAction
+      data-slot="data-table-column-header-sort-descending"
       icon={ArrowDownIcon}
       onClick={(event) => {
         onClick?.(event);
@@ -328,6 +331,7 @@ function DataTableColumnHeaderHide({
   const { column } = useDataTableColumnHeader();
   return (
     <DataTableColumnHeaderAction
+      data-slot="data-table-column-header-hide"
       icon={EyeOffIcon}
       onClick={(event) => {
         onClick?.(event);
@@ -346,7 +350,13 @@ function DataTableColumnHeaderHide({
  * `DataTablePaginationPrevious` and `DataTablePaginationNext`.
  */
 function DataTablePagination({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
-  return <div className={cn('flex items-center justify-end gap-2', className)} {...props} />;
+  return (
+    <div
+      data-slot="data-table-pagination"
+      className={cn('flex items-center justify-end gap-2', className)}
+      {...props}
+    />
+  );
 }
 
 type DataTablePaginationStepProps = Omit<React.ComponentProps<typeof Button>, 'children'> & {
@@ -396,6 +406,7 @@ function DataTablePaginationPrevious(props: DataTablePaginationStepProps): React
   const table = useDataTable();
   return (
     <DataTablePaginationStep
+      data-slot="data-table-pagination-previous"
       icon={ChevronLeftIcon}
       onClick={() => table.previousPage()}
       disabled={!table.getCanPreviousPage()}
@@ -409,6 +420,7 @@ function DataTablePaginationNext(props: DataTablePaginationStepProps): React.Rea
   const table = useDataTable();
   return (
     <DataTablePaginationStep
+      data-slot="data-table-pagination-next"
       icon={ChevronRightIcon}
       onClick={() => table.nextPage()}
       disabled={!table.getCanNextPage()}
@@ -434,7 +446,17 @@ function DataTableViewOptions({ children, ...props }: React.ComponentProps<typeo
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" size="sm" aria-label="Toggle columns" {...props} />}>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            data-slot="data-table-view-options"
+            variant="outline"
+            size="sm"
+            aria-label="Toggle columns"
+            {...props}
+          />
+        }
+      >
         <Settings2 />
         {children}
       </DropdownMenuTrigger>
