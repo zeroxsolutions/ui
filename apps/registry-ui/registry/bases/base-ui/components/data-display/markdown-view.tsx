@@ -4,6 +4,9 @@ import remarkGfm from 'remark-gfm';
 
 import {
   CodeBlock,
+  CodeBlockActions,
+  CodeBlockCode,
+  CodeBlockContent,
   CodeBlockCopy,
   CodeBlockLanguage,
 } from '@/registry/bases/base-ui/components/data-display/code-block';
@@ -92,7 +95,11 @@ const markdownViewCodeBlockComponents: Components = {
     const language = /language-(\w+)/.exec(className ?? '')?.[1];
     return (
       <CodeBlock code={text.replace(/\n$/, '')} language={language ?? 'text'} className="my-3">
-        {isPlainLanguage(language) ? undefined : (
+        {isPlainLanguage(language) ? (
+          <CodeBlockActions>
+            <CodeBlockCopy variant="secondary" />
+          </CodeBlockActions>
+        ) : (
           <CollapsibleCardHeader>
             <CollapsibleCardTitle>
               <CodeBlockLanguage />
@@ -103,6 +110,9 @@ const markdownViewCodeBlockComponents: Components = {
             </CollapsibleCardActions>
           </CollapsibleCardHeader>
         )}
+        <CodeBlockContent>
+          <CodeBlockCode />
+        </CodeBlockContent>
       </CodeBlock>
     );
   },

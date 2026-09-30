@@ -9,7 +9,18 @@ vi.mock('../../lib/shiki', async (importOriginal) => {
   return { ...actual, highlightToLines: vi.fn().mockResolvedValue(null) };
 });
 
-import { CodeBlock, CodeBlockCopy, CodeBlockLanguage } from './code-block';
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockCode,
+  CodeBlockContent,
+  CodeBlockCopy,
+  CodeBlockLanguage,
+  CodeBlockLineNumbers,
+  type CodeBlockProps,
+} from './code-block';
+import type { ReactNode } from 'react';
+
 import {
   CollapsibleCardActions,
   CollapsibleCardHeader,
@@ -39,30 +50,41 @@ beforeAll(() => {
 
 afterEach(cleanup);
 
+/** A block whose content is the code alone, with `children` composed before it. */
+function Block({ children, ...props }: Omit<CodeBlockProps, 'children'> & { children?: ReactNode }): ReactNode {
+  return (
+    <CodeBlock {...props}>
+      {children}
+      <CodeBlockContent>
+        <CodeBlockCode />
+      </CodeBlockContent>
+    </CodeBlock>
+  );
+}
+
 describe('CodeBlock', () => {
   it('renders the code string', async () => {
-    render(<CodeBlock code={'{ "a": 1 }'} />);
+    render(<Block code={'{ "a": 1 }'} />);
     await settle();
     expect(screen.getByText('{ "a": 1 }')).toBeTruthy();
   });
 
   it('stamps the language as data-language', async () => {
-    const { container } = render(<CodeBlock code="x" language="json" />);
+    const { container } = render(<Block code="x" language="json" />);
     await settle();
     expect(container.querySelector('[data-language="json"]')).toBeTruthy();
   });
 
-  it('renders no header of its own, whatever the language', async () => {
-    render(<CodeBlock code="const x = 1" language="ts" />);
+  it('renders only what is composed: no header and no copy of its own', async () => {
+    render(<Block code="const x = 1" language="ts" />);
     await settle();
     expect(screen.queryByText('TypeScript')).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Toggle' })).toBeNull();
-    expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
+    expect(screen.queryByRole('button')).toBeNull();
   });
 
-  it('takes a composed header in place of the floating copy', async () => {
+  it('shows a composed header above the code', async () => {
     render(
-      <CodeBlock code="const x = 1" language="ts">
+      <Block code="const x = 1" language="ts">
         <CollapsibleCardHeader>
           <CollapsibleCardTitle>
             <CodeBlockLanguage />
@@ -72,7 +94,7 @@ describe('CodeBlock', () => {
             <CollapsibleCardTrigger />
           </CollapsibleCardActions>
         </CollapsibleCardHeader>
-      </CodeBlock>,
+      </Block>,
     );
     await settle();
     expect(screen.getByText('TypeScript')).toBeTruthy();
@@ -81,11 +103,11 @@ describe('CodeBlock', () => {
 
   it('collapses the code from a composed trigger', async () => {
     render(
-      <CodeBlock code="const x = 1" language="ts">
+      <Block code="const x = 1" language="ts">
         <CollapsibleCardHeader>
           <CollapsibleCardTrigger />
         </CollapsibleCardHeader>
-      </CodeBlock>,
+      </Block>,
     );
     await settle();
     fireEvent.click(screen.getByRole('button', { name: 'Toggle' }));
@@ -97,9 +119,9 @@ describe('CodeBlock', () => {
     Object.assign(navigator, { clipboard: { writeText } });
 
     render(
-      <CodeBlock code="payload" language="json">
+      <Block code="payload" language="json">
         <CodeBlockCopy label="Copy payload" />
-      </CodeBlock>,
+      </Block>,
     );
     await settle();
     fireEvent.click(screen.getByRole('button', { name: 'Copy payload' }));
@@ -110,9 +132,9 @@ describe('CodeBlock', () => {
 
   it('labels a plain block as plain text', async () => {
     render(
-      <CodeBlock code="hello">
+      <Block code="hello">
         <CodeBlockLanguage />
-      </CodeBlock>,
+      </Block>,
     );
     await settle();
     expect(screen.getByText('Plain text')).toBeTruthy();
@@ -124,7 +146,7 @@ describe('CodeBlock', () => {
     vi.mocked(highlightToLines).mockResolvedValueOnce([
       [{ content: 'const', style: { color: 'rgb(1, 2, 3)' } }, { content: ' x' }],
     ]);
-    render(<CodeBlock code="const x" language="ts" />);
+    render(<Block code="const x" language="ts" />);
 
     const keyword = await screen.findByText('const');
     expect(keyword.tagName).toBe('SPAN');
@@ -134,7 +156,7 @@ describe('CodeBlock', () => {
   it('paints lines it is given, and highlights nothing itself', async () => {
     vi.mocked(highlightToLines).mockClear();
     render(
-      <CodeBlock
+      <Block
         code="const x"
         language="ts"
         lines={[[{ content: 'const', style: { color: 'rgb(4, 5, 6)' } }, { content: ' x' }]]}
@@ -150,7 +172,7 @@ describe('CodeBlock', () => {
 
   it('shows the code plain when handed null lines', async () => {
     vi.mocked(highlightToLines).mockClear();
-    const { container } = render(<CodeBlock code="const x" language="ts" lines={null} />);
+    const { container } = render(<Block code="const x" language="ts" lines={null} />);
     await settle();
 
     expect(container.querySelector('code')?.textContent).toBe('const x');
@@ -159,7 +181,14 @@ describe('CodeBlock', () => {
   });
 
   it('numbers each line in a gutter hidden from assistive technology, apart from the code', async () => {
-    const { container } = render(<CodeBlock code={'a\nb\nc'} lineNumbers />);
+    const { container } = render(
+      <CodeBlock code={'a\nb\nc'}>
+        <CodeBlockContent>
+          <CodeBlockLineNumbers />
+          <CodeBlockCode />
+        </CodeBlockContent>
+      </CodeBlock>,
+    );
     await settle();
 
     const pre = container.querySelector('pre');
@@ -168,18 +197,24 @@ describe('CodeBlock', () => {
     expect(pre?.querySelector('code')?.textContent).toBe('a\nb\nc');
   });
 
-  it('draws no gutter unless asked', async () => {
-    const { container } = render(<CodeBlock code={'a\nb'} />);
+  it('draws no gutter unless one is composed', async () => {
+    const { container } = render(<Block code={'a\nb'} />);
     await settle();
 
     expect(container.querySelector('pre')?.textContent).toBe('a\nb');
   });
 
-  it('copies the code and flips the label to Copied', async () => {
+  it('copies the code from a floating action and flips the label to Copied', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });
 
-    render(<CodeBlock code="payload" />);
+    render(
+      <Block code="payload">
+        <CodeBlockActions>
+          <CodeBlockCopy variant="secondary" />
+        </CodeBlockActions>
+      </Block>,
+    );
     await settle();
     fireEvent.click(screen.getByRole('button', { name: 'Copy code' }));
 
@@ -189,10 +224,18 @@ describe('CodeBlock', () => {
 
   it('no-ops when the clipboard API is unavailable', async () => {
     Object.assign(navigator, { clipboard: undefined });
-    render(<CodeBlock code="payload" />);
+    render(
+      <Block code="payload">
+        <CodeBlockCopy />
+      </Block>,
+    );
     await settle();
     // Clicking must not throw, and the label stays "Copy code".
     fireEvent.click(screen.getByRole('button', { name: 'Copy code' }));
     expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
+  });
+
+  it('throws when a part sits outside a CodeBlock', () => {
+    expect(() => render(<CodeBlockCode />)).toThrow(/inside a CodeBlock/);
   });
 });

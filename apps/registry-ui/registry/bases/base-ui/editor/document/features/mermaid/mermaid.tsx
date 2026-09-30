@@ -3,6 +3,8 @@
 import { Eye, PencilLine, Workflow } from 'lucide-react';
 import {
   CodeBlock,
+  CodeBlockCode,
+  CodeBlockContent,
   CodeBlockCopy,
   CodeBlockLanguage,
 } from '@/registry/bases/base-ui/components/data-display/code-block';
@@ -166,6 +168,9 @@ export const mermaidCodec: NodeCodec<MermaidAttrs> = {
           <CollapsibleCardTrigger />
         </CollapsibleCardActions>
       </CollapsibleCardHeader>
+      <CodeBlockContent>
+        <CodeBlockCode />
+      </CodeBlockContent>
     </CodeBlock>
   ),
 };

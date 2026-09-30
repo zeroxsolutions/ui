@@ -4,8 +4,11 @@ import type { ComponentProps, ReactNode } from 'react';
 
 import {
   CodeBlock,
+  CodeBlockCode,
+  CodeBlockContent,
   CodeBlockCopy,
   CodeBlockLanguage,
+  CodeBlockLineNumbers,
 } from '@/registry/bases/base-ui/components/data-display/code-block';
 import {
   CollapsibleCardActions,
@@ -21,6 +24,8 @@ interface SourceCodeBlockProps extends ComponentProps<typeof CodeBlock> {
   collapsible?: boolean;
   /** Adds the copy button at the header's end; on by default. */
   copyable?: boolean;
+  /** Numbers each line in a gutter beside the code, which a copy leaves out. */
+  lineNumbers?: boolean;
 }
 
 /**
@@ -33,6 +38,7 @@ function SourceCodeBlock({
   children,
   collapsible = false,
   copyable = true,
+  lineNumbers = false,
   ...props
 }: SourceCodeBlockProps): ReactNode {
   return (
@@ -47,6 +53,10 @@ function SourceCodeBlock({
           {collapsible ? <CollapsibleCardTrigger /> : null}
         </CollapsibleCardActions>
       </CollapsibleCardHeader>
+      <CodeBlockContent>
+        {lineNumbers ? <CodeBlockLineNumbers /> : null}
+        <CodeBlockCode />
+      </CodeBlockContent>
     </CodeBlock>
   );
 }

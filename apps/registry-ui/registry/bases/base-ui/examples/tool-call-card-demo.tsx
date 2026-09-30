@@ -2,7 +2,13 @@
 
 import { useRef, type ReactNode } from 'react';
 
-import { CodeBlock } from '@/registry/bases/base-ui/components/data-display/code-block';
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockCode,
+  CodeBlockContent,
+  CodeBlockCopy,
+} from '@/registry/bases/base-ui/components/data-display/code-block';
 import {
   ToolCallCard,
   ToolCallCardContent,
@@ -37,7 +43,14 @@ function ToolCallCardDemo(): ReactNode {
       <ToolCallCardContent>
         <ToolCallCardSection>
           <ToolCallCardSectionTitle>Parameters</ToolCallCardSectionTitle>
-          <CodeBlock code={PARAMETERS} language="json" />
+          <CodeBlock code={PARAMETERS} language="json">
+            <CodeBlockActions>
+              <CodeBlockCopy variant="secondary" />
+            </CodeBlockActions>
+            <CodeBlockContent>
+              <CodeBlockCode />
+            </CodeBlockContent>
+          </CodeBlock>
         </ToolCallCardSection>
       </ToolCallCardContent>
     </ToolCallCard>
