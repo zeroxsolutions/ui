@@ -35,6 +35,28 @@ its cost are here.
 - **Build & test tooling** - `@nx/js/typescript` (build + typecheck), `@nx/vite`, `@nx/next/plugin`
   for the registry app; **vitest** for unit, **Playwright** for e2e, `@nx/eslint` for lint. One
   unit runner throughout - this repo has no jest, where the backend repos deliberately split.
+  The e2e suite runs against the worker, not `next dev`. Its `webServer` starts
+  `registry-ui:wrangler:dev` (the adapter's preview on port 8787), and the e2e target declares
+  `wrangler:build` itself, because the Playwright plugin splits `wrangler:dev` at the colon and
+  infers a target named `wrangler`. With `.open-next` deleted and `--skip-nx-cache`, the suite
+  rebuilds the worker and passes (measured 2026-09-30).
+- **The docs site is MDX through fumadocs, and every route is rendered at build.** `content/docs`
+  is read by `fumadocs-mdx` 15.4.5 and `fumadocs-core` 16.15.17 on Next 16.3.7 (`fumadocs-mdx`
+  needs Next >= 16.2.0, `@opennextjs/cloudflare` 1.20.7 >= 16.3.6), inside a shell built from this
+  registry's own primitives. Two generated outputs are gitignored: `.source/` (target
+  `fumadocs-generate`) and the demo index `examples/__index__.tsx` + `__components__.tsx` (target
+  `examples-index`). `build`, `wrangler:build` and `test` depend on both; a `tsc` run by hand
+  before them fails with `Cannot find module 'collections/server'`. Every route is prerendered,
+  the search index, each page's `.md` and each share image included. The worker's incremental
+  cache is `static-assets-incremental-cache`, which reads the build's output back and writes
+  nothing, so a route rendered on a request has nowhere to be kept. `src/lib/source.spec.ts`
+  holds each page to its registry item, its demo and its install command.
+- **The worker is 6773 KiB gzipped**, measured with `wrangler deploy --dry-run --env production`
+  on 2026-09-30. That is above the free plan's 3 MiB and below the paid plan's 10 MiB. In the
+  server output, the two Shiki grammar packages gzip to 1268 KiB (4.4.3, through fumadocs-core)
+  and 1213 KiB (4.2.0, through the registry's own highlighter), the `next` package to 2712 KiB,
+  and the share images' `resvg.wasm` to 516 KiB. The demos are lazy imports already, and a lazy
+  chunk still ships in the worker. A deploy on the free plan needs that cut first.
 - **No project carries a `wrangler:deploy` target yet.** `registry-ui` has its worker config
   and `wrangler:build`, but `cd.yml` asks `nx-deploy` for `wrangler:deploy`, and until that
   target exists the job is a **green no-op**: `nx run-many -t wrangler:deploy` matches no
@@ -97,7 +119,7 @@ its cost are here.
 ## Workspace
 
 - `apps/registry-ui` (`@zeroxsolutions/registry-ui`, private) - the Next.js registry host: the
-  component source, `registry.json`, and the site that serves them.
+  component source, `registry.json`, and the site that serves them with its docs at `/docs`.
 - `apps/registry-ui-e2e` (`@zeroxsolutions/registry-ui-e2e`, private) - its Playwright pair.
 - `packages/editor-core` (`@zeroxsolutions/editor-core`) - publishable.
 - `packages/fluent-emoji` (`@zeroxsolutions/fluent-emoji`) - publishable.
@@ -135,9 +157,10 @@ cat <project>/node_modules/@zeroxsolutions/<lib>/README.md
 
 | Asset | Concern | Used by | This repo's choice |
 | --- | --- | --- | --- |
-| `@zeroxsolutions/icons` | the org's icon set | any frontend | authored here, not consumed here |
+| `@zeroxsolutions/icons` | the org's icon set | any frontend | authored here; the AI Provider Picker block and the docs' icons page import it |
 | `@zeroxsolutions/fluent-emoji` | Fluent emoji assets | any frontend | authored here, not consumed here |
 | `@zeroxsolutions/editor-core` | editor primitives | any frontend | authored here |
+| `@zeroxsolutions/routing` | route units: a path's pattern and its URL builder | any frontend | `0.0.7`, one declarer; `src/routes/app-routes.ts` declares each path the site links to, and `app-routes.spec.ts` holds each to a page |
 | shadcn registry | composed UI items | any frontend | this repo **is** the registry - see the first choice above |
 | `@lucide-animated` | animated icons | any frontend | consumed as a registry dependency, never vendored - see the choice above |
 
