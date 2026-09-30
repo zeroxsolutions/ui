@@ -677,21 +677,18 @@ Same steps as Task 7, for `registry/bases/base-ui/blocks/`, every example still 
 every remaining `src/` module and every MDX page still listed. Commit
 `refactor(registry-ui): rebuild the block and the remaining examples on base-nova`.
 
-### Task 12: Close the lists, record the choices, show the result
+### Task 12: Record the choices, show the result
 
 **Files:**
 
-- Modify: `apps/registry-ui/classes.spec.ts`, `apps/registry-ui/copy.spec.ts`, `AGENTS.md`
+- Modify: `AGENTS.md`
 
-- [ ] **Step 1:** both `PENDING` lists are empty; delete the constant and the "lists as pending" case
-      from each spec, so each holds the whole tree.
-- [ ] **Step 2:** `AGENTS.md` (`CLAUDE.md` imports it): replace the animated-icons choice's "never
+- [ ] **Step 1:** `AGENTS.md` (`CLAUDE.md` imports it): replace the animated-icons choice's "never
       vendored" with what is true now - vendored as `shadcn add` output under `registry/bases/base-ui/ui/`
-      like the primitives, never published, and named by URL in items' `registryDependencies`; add one
-      choice line for the two gate specs and the sentence-case rule.
-- [ ] **Step 3:** full gate, `wrangler:build`, e2e, `shadcn build` + `validate`.
-- [ ] **Step 4:** with a dev server you start on a free port (never 3000), screenshot `/docs`,
+      like the primitives, never published, and named by URL in items' `registryDependencies`.
+- [ ] **Step 2:** full gate, `wrangler:build`, e2e, `shadcn build` + `validate`.
+- [ ] **Step 3:** with a dev server you start on a free port (never 3000), screenshot `/docs`,
       `/docs/components/status-indicator`, `/blocks` at 1440x900 and 390x844, light and dark, into
       `.playwright-mcp/c2/`, and the same pages upstream into the same folder; list them in the report.
       Stop the server and `git restore apps/registry-ui/next-env.d.ts`.
-- [ ] **Step 5: Commit** `docs: record the base-nova rules and the vendored animated icons`.
+- [ ] **Step 4: Commit** `docs: record the base-nova rules and the vendored animated icons`.

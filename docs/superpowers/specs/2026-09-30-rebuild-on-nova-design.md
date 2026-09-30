@@ -137,22 +137,6 @@ its props change only where that skill requires a slot, since nothing installs t
 follow the same rules. Where an item's look depended on a class that rule 1 removes, the primitive's
 own variant or size replaces it; where none fits, the item takes the primitive's default.
 
-## The gate holds the rules
-
-Two unit specs in `apps/registry-ui` read the source and fail with the file, the line and the class
-or string:
-
-- **`classes.spec.ts`** (new, beside `copy.spec.ts` at the app root, because both read the whole
-  tree) - rules 1 to 3, over the registry's items, block and examples and every module under `src/`: no palette colour, no arbitrary
-  value outside the layout's declared variables, and on a primitive's `className` no class from the
-  forbidden families (height, padding, radius, font size and weight, colour).
-- **`copy.spec.ts`** (new) - rule 7: every JSX text node and every `title`, `aria-label`,
-  `placeholder` and `label` string literal, and every MDX heading, is sentence case once the names
-  are set aside. The names come from the registry's item titles plus one short list in the spec.
-
-`source.spec.ts` keeps holding each page to its item; it now also fails on a page whose item is not
-in the registry.
-
 ## Verification
 
 - The unit gate, the build, `wrangler:build`, and `shadcn build` + `validate` pass.
