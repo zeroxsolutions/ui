@@ -237,7 +237,7 @@ function CommandMenu({ tree, navItems }: CommandMenuProps): ReactNode {
           <DialogDescription>Find a page or a heading.</DialogDescription>
         </DialogHeader>
         <Command
-          className="**:data-[slot=input-group]:border-input! **:data-[slot=input-group]:bg-input/50! rounded-none bg-transparent **:data-[slot=command-input]:h-9! **:data-[slot=command-input]:py-0 **:data-[slot=command-input-wrapper]:mb-0 **:data-[slot=input-group]:h-9! **:data-[slot=input-group]:rounded-md!"
+          className="**:data-[slot=input-group]:border-input! **:data-[slot=input-group]:bg-input/50! rounded-none bg-transparent p-0 **:data-[slot=command-input]:h-9! **:data-[slot=command-input]:py-0 **:data-[slot=command-input-wrapper]:mb-0 **:data-[slot=command-input-wrapper]:p-0 **:data-[slot=input-group]:h-9! **:data-[slot=input-group]:rounded-md!"
           filter={commandFilter}
         >
           <div className="relative">
