@@ -1,7 +1,9 @@
-import { ChevronRight } from 'lucide-react';
+'use client';
+
 import * as React from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
+import { ChevronRightIcon, type ChevronRightIconHandle } from '@/registry/bases/base-ui/ui/chevron-right';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 import { Item } from '@/registry/bases/base-ui/ui/item';
 import { isImeComposing } from '@/registry/bases/base-ui/lib/ime';
@@ -29,10 +31,10 @@ interface TreeItemProps extends React.ComponentProps<typeof Item> {
 /**
  * One row of a hierarchy tree (a layer tree, a scene outliner, a file tree),
  * over upstream's `Item` at `size="xs"`. The row owns the shared rhythm and the
- * `group/tree-item` its parts style off; the consumer composes the rest: a
+ * `group/tree-item` its parts style off, and it never wraps; the consumer composes the rest: a
  * `TreeItemIndent`, a `TreeItemLabel` holding `ItemMedia` and `ItemTitle` (or a
  * `TreeItemRenameInput` while renaming), and `ItemActions` for trailing actions.
- * Selection and hover colour, row height and drag handlers go on the row itself.
+ * Selection state and drag handlers go on the row itself.
  * A context menu wraps the row as `ContextMenuTrigger render={<TreeItem />}`.
  *
  * `ref` reaches the row div - a consumer needs it for `scrollIntoView`, and a
@@ -53,7 +55,7 @@ function TreeItem({
         data-expanded={expanded || undefined}
         data-editing={editing || undefined}
         size={size}
-        className={cn('group/tree-item flex-nowrap gap-1 py-0 pr-1 pl-0 text-xs', className)}
+        className={cn('group/tree-item flex-nowrap', className)}
         {...props}
       />
     </TreeItemContext.Provider>
@@ -95,6 +97,7 @@ function TreeItemIndent({
   ...props
 }: TreeItemIndentProps): React.ReactNode {
   const { expanded } = useTreeItem();
+  const iconRef = React.useRef<ChevronRightIconHandle>(null);
   return (
     <span
       data-slot="tree-item-indent"
@@ -111,9 +114,13 @@ function TreeItemIndent({
             event.stopPropagation();
             onToggleExpand();
           }}
-          className="text-muted-foreground hover:text-foreground shrink-0"
+          onMouseEnter={() => iconRef.current?.startAnimation()}
+          onMouseLeave={() => iconRef.current?.stopAnimation()}
+          onFocus={() => iconRef.current?.startAnimation()}
+          onBlur={() => iconRef.current?.stopAnimation()}
+          className="shrink-0"
         >
-          <ChevronRight className="transition-transform group-data-expanded/tree-item:rotate-90" />
+          <ChevronRightIcon ref={iconRef} className="transition-transform group-data-expanded/tree-item:rotate-90" />
         </Button>
       ) : (
         <span className="w-6 shrink-0" aria-hidden />
@@ -133,7 +140,7 @@ function TreeItemLabel({ className, ...props }: React.ComponentProps<'div'>): Re
   return (
     <div
       data-slot="tree-item-label"
-      className={cn('flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 py-1', className)}
+      className={cn('flex min-w-0 flex-1 cursor-pointer items-center gap-1.5', className)}
       {...props}
     />
   );

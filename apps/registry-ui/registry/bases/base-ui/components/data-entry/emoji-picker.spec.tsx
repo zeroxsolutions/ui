@@ -136,7 +136,7 @@ describe('EmojiPicker', () => {
     expect(screen.queryByText('No emoji found')).toBeNull();
   });
 
-  it('sizes the viewport, the rows and the cells from one set of spacing steps', async () => {
+  it("sizes the viewport and the rows from one set of spacing steps, a cell row being the preset's icon button", async () => {
     render(
       <EmojiPicker onSelect={vi.fn()}>
         <EmojiPickerContent size="lg" />
@@ -146,11 +146,13 @@ describe('EmojiPicker', () => {
 
     const content = document.querySelector<HTMLElement>('[data-slot="emoji-picker-content"]');
     expect(content?.style.getPropertyValue('--emoji-picker-height')).toBe('calc(var(--spacing) * 80)');
-    expect(content?.style.getPropertyValue('--emoji-picker-cell')).toBe('calc(var(--spacing) * 9)');
     expect(content?.style.getPropertyValue('--emoji-picker-columns')).toBe('repeat(8, minmax(0, 1fr))');
     // The first cell row sits one header below the top: 7 spacing steps at 4px.
     const firstCells = document.querySelector<HTMLElement>('[data-index="1"]');
     expect(firstCells?.style.transform).toBe('translateY(28px)');
+    // The next one a cell row further: the size-8 button (32px) plus the half-step gap.
+    const secondCells = document.querySelector<HTMLElement>('[data-index="2"]');
+    expect(secondCells?.style.transform).toBe('translateY(62px)');
   });
 
   it('stamps a data-slot on the grid and on each cell', async () => {

@@ -55,10 +55,7 @@ function ChatSuggestionItem({
             onClick?.(event);
             if (!event.defaultPrevented) onSelectPrompt?.(prompt);
           }}
-          className={cn(
-            'hover:bg-muted w-full cursor-pointer text-left disabled:cursor-default disabled:opacity-60',
-            className,
-          )}
+          className={cn('w-full text-left', className)}
           {...props}
         />
       }

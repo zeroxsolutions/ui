@@ -25,7 +25,7 @@ describe('TagInput', () => {
     expect(onValueChange).toHaveBeenCalledWith(['design']);
   });
 
-  it('removes a tag when its chip × is clicked', () => {
+  it('removes a tag when its chip is pressed', () => {
     const onValueChange = vi.fn();
     render(<TagInput value={['design', 'ui']} onValueChange={onValueChange} />);
 

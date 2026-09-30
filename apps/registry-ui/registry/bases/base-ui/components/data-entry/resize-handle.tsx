@@ -19,10 +19,12 @@ interface ResizeHandleProps extends Omit<ComponentProps<'div'>, 'onDrag'> {
 }
 
 /**
- * A vertical resize grip for a side or floating panel. Stable by design: a
+ * A vertical resize grip for a side or floating panel, drawn as upstream's
+ * `ResizableHandle` with its handle, for a panel that sits outside a
+ * `ResizablePanelGroup`. Stable by design: a
  * resize only begins once the pointer crosses a small movement threshold, so a
  * click, jitter, or double-click never nudges the width. Uses pointer capture so
- * the drag survives the pointer leaving the 1px grip, and `preventDefault` +
+ * the drag survives the pointer leaving the 1px line, and `preventDefault` +
  * `touch-action: none` so it never steals focus or selects text. Double-click
  * fires `onToggle` (e.g. collapse/expand the panel). A caller's own
  * `onPointerDown`, `onPointerMove` or `onDoubleClick` runs first, and calling
@@ -84,7 +86,7 @@ function ResizeHandle({
     <div
       data-slot="resize-handle"
       className={cn(
-        'group/handle bg-border hover:bg-primary/50 active:bg-primary relative z-40 flex w-px shrink-0 cursor-col-resize touch-none items-center justify-center transition-colors select-none after:absolute after:inset-y-0 after:left-1/2 after:w-2 after:-translate-x-1/2',
+        'bg-border relative flex w-px shrink-0 cursor-col-resize touch-none items-center justify-center select-none after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2',
         className,
       )}
       onPointerDown={(event) => {
@@ -113,7 +115,7 @@ function ResizeHandle({
       }}
       {...props}
     >
-      <div className="bg-border group-hover/handle:bg-primary/50 z-10 flex h-8 w-1 shrink-0 rounded-full transition-colors" />
+      <div className="bg-border z-10 flex h-6 w-1 shrink-0 rounded-lg" />
     </div>
   );
 }
