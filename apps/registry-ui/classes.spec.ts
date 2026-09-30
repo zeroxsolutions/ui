@@ -26,12 +26,9 @@ const PENDING: readonly string[] = [
   'registry/bases/base-ui/examples/avatar-picker-demo.tsx',
   'registry/bases/base-ui/examples/icon-chip-demo.tsx',
   'registry/bases/base-ui/examples/model-info-card-demo.tsx',
-  'src/app/(app)/docs/[[...slug]]/page.tsx',
-  'src/app/(app)/docs/layout.tsx',
   'src/components/data-display/block-frame.tsx',
   'src/components/data-display/component-preview.tsx',
   'src/components/navigation/command-menu.tsx',
-  'src/components/navigation/docs-toc.tsx',
   'src/components/navigation/mobile-nav.tsx',
   'src/mdx-components.tsx',
 ];

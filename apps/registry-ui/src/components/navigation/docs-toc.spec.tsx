@@ -1,5 +1,6 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import type { TableOfContents } from 'fumadocs-core/toc';
+import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DocsToc } from './docs-toc';
@@ -47,9 +48,16 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+/** Renders `ui` and lets the TOC's scroll area finish measuring itself before a case asserts. */
+async function renderSettled(ui: ReactNode): Promise<void> {
+  await act(async () => {
+    render(ui);
+  });
+}
+
 describe('DocsToc', () => {
-  it('marks the heading in view, and moves the mark as another scrolls in', () => {
-    render(
+  it('marks the heading in view, and moves the mark as another scrolls in', async () => {
+    await renderSettled(
       <>
         <h2 id="installation">Installation</h2>
         <h2 id="usage">Usage</h2>
@@ -66,5 +74,13 @@ describe('DocsToc', () => {
 
     expect(screen.getByRole('link', { name: 'Installation' }).getAttribute('aria-current')).toBeNull();
     expect(screen.getByRole('link', { name: 'Usage' }).getAttribute('aria-current')).toBe('location');
+  });
+
+  it('is the landmark named On this page', async () => {
+    await renderSettled(<DocsToc toc={toc} />);
+
+    expect(
+      screen.getByRole('navigation', { name: 'On this page' }).contains(screen.getByRole('link', { name: 'Usage' })),
+    ).toBe(true);
   });
 });
