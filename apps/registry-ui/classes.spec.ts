@@ -11,14 +11,6 @@ const PENDING: readonly string[] = [
   'registry/bases/base-ui/components/data-display/data-table.tsx',
   'registry/bases/base-ui/components/data-display/image-preview.tsx',
   'registry/bases/base-ui/components/data-display/markdown-view.tsx',
-  'registry/bases/base-ui/components/layout/avatar-picker.tsx',
-  'registry/bases/base-ui/components/layout/collapsible-card.tsx',
-  'registry/bases/base-ui/components/layout/model-list.tsx',
-  'registry/bases/base-ui/components/layout/panel-field-group.tsx',
-  'registry/bases/base-ui/components/layout/panel-row.tsx',
-  'registry/bases/base-ui/components/layout/reasoning-collapsible.tsx',
-  'registry/bases/base-ui/components/layout/tool-call-card.tsx',
-  'registry/bases/base-ui/examples/avatar-picker-demo.tsx',
   'registry/bases/base-ui/examples/model-info-card-demo.tsx',
 ];
 
@@ -36,6 +28,8 @@ const PRIMITIVE_LOOK =
 const LAYOUT_KEPT =
   /^(?:(?:h|min-h|max-h|size)-(?:full|auto|0|fit|min|max|none|svh)|text-(?:left|center|right|start|end|wrap|nowrap|balance|pretty|ellipsis|clip)|font-(?:mono|sans)|outline-(?:none|hidden))$/;
 const VARIABLE_DECLARATION = /^\[--([\w-]+):([^\]]*)\]$/;
+/** Skeleton draws no size of its own; upstream's examples size and round it by className, so these are its API. */
+const SKELETON_SHAPE = /^(?:h|w|size|min-h|max-h|min-w|max-w|rounded(?:-[a-z]+)?)(?:-|$)/;
 /** The terms a size is written with: the spacing unit, numbers and length units, `calc` and arithmetic. */
 const SIZE_TERM =
   /var\(--spacing\)|--spacing\(\d+(?:\.\d+)?\)|calc|\d+(?:\.\d+)?(?:px|rem|em|svh|dvh|lvh|vh|%)?|[-+*/()_ ]/g;
@@ -83,6 +77,8 @@ function isLayoutSize(utility: string, layoutVariables: ReadonlySet<string>): bo
 interface ClassContext {
   /** The class sits on a vendored primitive. */
   onPrimitive?: boolean;
+  /** Which primitive it sits on, so Skeleton's shape classes pass. */
+  primitive?: string;
   /** The class reaches a primitive through a descendant variant; only the docs site is held to this. */
   reachesChildren?: boolean;
   /** The variables the site's layouts declare, which a layout size may use. */
@@ -103,6 +99,7 @@ export function classViolation(
   className: string,
   {
     onPrimitive = false,
+    primitive = '',
     reachesChildren = false,
     layoutVariables = new Set(),
     mayDeclare = true,
@@ -111,6 +108,7 @@ export function classViolation(
 ): string | null {
   const utility = utilityOf(className);
   if (PALETTE.test(utility)) return 'palette colour';
+  if (primitive === 'Skeleton' && SKELETON_SHAPE.test(utility)) return null;
   if (isLayoutSize(utility, layoutVariables)) return null;
   const declaration = VARIABLE_DECLARATION.exec(utility);
   const declaresVariable = declaration !== null;
@@ -206,12 +204,13 @@ function violationsIn(
   const mayDeclare = !site || file.endsWith('/layout.tsx');
 
   const found: Violation[] = [];
-  const check = (node: ts.Node, onPrimitive: boolean): void => {
+  const check = (node: ts.Node, onPrimitive: boolean, primitive = ''): void => {
     literalTexts(node)
       .flatMap((text) => text.split(/\s+/).filter(Boolean))
       .forEach((className) => {
         const rule = classViolation(className, {
           onPrimitive,
+          primitive,
           reachesChildren: site,
           layoutVariables,
           mayDeclare,
@@ -255,7 +254,8 @@ function violationsIn(
         ts.forEachChild(child, findRecipe);
       };
       findRecipe(node.initializer);
-      check(node.initializer, primitives.has(tag.split('.')[0]) || (site && mergesRecipe));
+      const primitive = primitives.has(tag.split('.')[0]) ? tag.split('.')[0] : '';
+      check(node.initializer, primitive !== '' || (site && mergesRecipe), primitive);
       return;
     }
     if (ts.isCallExpression(node) && ['cn', 'cva'].includes(node.expression.getText(source))) {
@@ -270,6 +270,13 @@ function violationsIn(
 }
 
 describe('classViolation', () => {
+  it('lets Skeleton take its size and radius by className, and still flags a palette colour on it', () => {
+    expect(classViolation('h-4', { onPrimitive: true, primitive: 'Skeleton' })).toBeNull();
+    expect(classViolation('rounded-full', { onPrimitive: true, primitive: 'Skeleton' })).toBeNull();
+    expect(classViolation('bg-red-500', { onPrimitive: true, primitive: 'Skeleton' })).toBe('palette colour');
+    expect(classViolation('h-4', { onPrimitive: true, primitive: 'Button' })).toBe('restyles a primitive');
+  });
+
   const layoutVariables = new Set(['header-height', 'sidebar-width']);
 
   it.each([

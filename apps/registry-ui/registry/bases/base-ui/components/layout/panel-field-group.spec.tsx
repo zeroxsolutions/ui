@@ -28,7 +28,8 @@ describe('PanelFieldGroup', () => {
     const grid = container.firstChild as HTMLElement;
     expect(grid.style.getPropertyValue('--cols')).toBe('3');
     expect(grid.style.gridTemplateColumns).toBe('');
-    expect(grid.className).toContain('grid-cols-[repeat(var(--cols,1),minmax(0,1fr))]');
+    expect(grid.className).toContain('[--panel-field-group-columns:repeat(var(--cols,1),minmax(0,1fr))]');
+    expect(grid.className).toContain('grid-cols-(--panel-field-group-columns)');
   });
 
   it('lets a grid-cols class replace the variable-driven template', () => {
@@ -39,7 +40,7 @@ describe('PanelFieldGroup', () => {
     );
     const grid = container.firstChild as HTMLElement;
     expect(grid.className).toContain('grid-cols-3');
-    expect(grid.className).not.toContain('var(--cols');
+    expect(grid.className).not.toContain('grid-cols-(--panel-field-group-columns)');
   });
 
   it('keeps a caller style beside the column variable', () => {

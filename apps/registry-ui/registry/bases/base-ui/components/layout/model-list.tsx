@@ -3,6 +3,8 @@ import { Trash2 } from 'lucide-react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
+import { Item, ItemActions, ItemContent, ItemMedia } from '@/registry/bases/base-ui/ui/item';
+import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import { Skeleton } from '@/registry/bases/base-ui/ui/skeleton';
 
 /**
@@ -45,14 +47,9 @@ function ModelListHeader({ className, ...props }: React.ComponentProps<'div'>): 
   );
 }
 
+/** The section's heading, growing to push the header's controls to its end. */
 function ModelListTitle({ className, ...props }: React.ComponentProps<'h3'>): React.ReactNode {
-  return (
-    <h3
-      data-slot="model-list-title"
-      className={cn('flex-1 text-base font-semibold tracking-tight', className)}
-      {...props}
-    />
-  );
+  return <h3 data-slot="model-list-title" className={cn('flex-1 text-base font-medium', className)} {...props} />;
 }
 
 /** Trailing header controls - search, refresh and the like. */
@@ -61,34 +58,27 @@ function ModelListAction({ className, ...props }: React.ComponentProps<'div'>): 
 }
 
 /**
- * The scrolling region: item groups, an empty state or a `ModelListSkeleton`.
- * An `Item` inside it with `data-unavailable={true}` is dimmed.
+ * The scrolling region, a `ScrollArea` filling the rest of the frame: item
+ * groups, an empty state or a `ModelListSkeleton`, stacked. An `Item` inside it
+ * with `data-unavailable={true}` is dimmed.
  */
-function ModelListContent({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
+function ModelListContent({ className, children, ...props }: React.ComponentProps<typeof ScrollArea>): React.ReactNode {
   return (
-    <div
+    <ScrollArea
       data-slot="model-list-content"
-      className={cn(
-        'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-3 **:data-[slot=item]:data-[unavailable=true]:opacity-55',
-        className,
-      )}
+      className={cn('min-h-0 flex-1 **:data-[slot=item]:data-[unavailable=true]:opacity-55', className)}
       {...props}
-    />
+    >
+      <div className="flex flex-col gap-4 py-3">{children}</div>
+    </ScrollArea>
   );
 }
 
-/** The remove control for one model item, labelled "Remove model" unless an `aria-label` is given. */
-function ModelListItemRemove({ className, children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
+/** The ghost remove button for one model item, labelled "Remove model" unless an `aria-label` is given; `children` replace its trash icon. */
+function ModelListItemRemove({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
   return (
-    <Button
-      data-slot="model-list-item-remove"
-      aria-label="Remove model"
-      variant="ghost"
-      size="icon-sm"
-      className={cn('text-muted-foreground hover:text-destructive', className)}
-      {...props}
-    >
-      {children ?? <Trash2 className="size-3.5" />}
+    <Button data-slot="model-list-item-remove" aria-label="Remove model" variant="ghost" size="icon-sm" {...props}>
+      {children ?? <Trash2 />}
     </Button>
   );
 }
@@ -99,21 +89,26 @@ interface ModelListSkeletonProps extends React.ComponentProps<'div'> {
 }
 
 /**
- * Placeholder items shown while a model list loads, each the shape of a model
- * item: a media placeholder, two text lines and a trailing control.
+ * Placeholder items shown while a model list loads, each a small `Item` in the
+ * shape of a model item: a media placeholder, two text lines and a trailing
+ * control.
  */
 function ModelListSkeleton({ count = 6, className, ...props }: ModelListSkeletonProps): React.ReactNode {
   return (
     <div data-slot="model-list-skeleton" className={cn('flex flex-col gap-2', className)} {...props}>
       {Array.from({ length: count }, (_, index) => (
-        <div key={index} data-slot="model-list-skeleton-item" className="flex items-center gap-3 rounded-lg p-2.5">
-          <Skeleton className="size-8 shrink-0 rounded-lg" />
-          <div className="min-w-0 flex-1 space-y-1.5">
+        <Item key={index} data-slot="model-list-skeleton-item" size="sm">
+          <ItemMedia variant="image">
+            <Skeleton className="size-full" />
+          </ItemMedia>
+          <ItemContent>
             <Skeleton className="h-3.5 w-40" />
             <Skeleton className="h-3 w-56" />
-          </div>
-          <Skeleton className="h-4 w-8 shrink-0 rounded-full" />
-        </div>
+          </ItemContent>
+          <ItemActions>
+            <Skeleton className="h-4 w-8" />
+          </ItemActions>
+        </Item>
       ))}
     </div>
   );

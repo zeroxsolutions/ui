@@ -19,7 +19,7 @@ function CollapsibleCardDemo(): ReactNode {
           <CollapsibleCardTrigger />
         </CollapsibleCardActions>
       </CollapsibleCardHeader>
-      <CollapsibleCardContent className="px-3 pb-3">Background, Shadow, Text</CollapsibleCardContent>
+      <CollapsibleCardContent className="px-3 pb-3">Background, shadow, text</CollapsibleCardContent>
     </CollapsibleCard>
   );
 }

@@ -77,6 +77,17 @@ describe('ModelList', () => {
 });
 
 describe('ModelListContent', () => {
+  it('scrolls its children inside a ScrollArea viewport', () => {
+    render(
+      <ModelListContent>
+        <div data-testid="child" />
+      </ModelListContent>,
+    );
+
+    const viewport = document.querySelector('[data-slot="model-list-content"] [data-slot="scroll-area-viewport"]');
+    expect(viewport?.contains(screen.getByTestId('child'))).toBe(true);
+  });
+
   it('dims an item marked unavailable', async () => {
     render(
       <ModelListContent>

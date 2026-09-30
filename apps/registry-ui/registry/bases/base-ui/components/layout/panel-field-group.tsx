@@ -19,7 +19,10 @@ function PanelFieldGroup({ cols, className, style, ...props }: PanelFieldGroupPr
   return (
     <div
       data-slot="panel-field-group"
-      className={cn('grid grid-cols-[repeat(var(--cols,1),minmax(0,1fr))] gap-x-2 gap-y-1', className)}
+      className={cn(
+        'grid grid-cols-(--panel-field-group-columns) gap-x-2 gap-y-1 [--panel-field-group-columns:repeat(var(--cols,1),minmax(0,1fr))]',
+        className,
+      )}
       style={cols === undefined ? style : ({ '--cols': cols, ...style } as CSSProperties)}
       {...props}
     />

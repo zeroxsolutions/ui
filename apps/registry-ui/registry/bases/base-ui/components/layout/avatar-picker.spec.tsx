@@ -53,17 +53,17 @@ function Picker({
         <span>avatar</span>
       </AvatarPickerTrigger>
       <AvatarPickerContent>
-        <Tabs defaultValue={defaultTab} className="gap-0">
-          <div className="flex items-center gap-1 p-2">
+        <Tabs defaultValue={defaultTab}>
+          <div className="flex items-center gap-1">
             {strip && (
               <TabsList variant="line">
-                <TabsTrigger value="emoji" aria-label="Emoji" className="flex-none px-2">
+                <TabsTrigger value="emoji" aria-label="Emoji" className="flex-none">
                   <Smile />
                 </TabsTrigger>
-                <TabsTrigger value="upload" aria-label="Upload" className="flex-none px-2">
+                <TabsTrigger value="upload" aria-label="Upload" className="flex-none">
                   <Upload />
                 </TabsTrigger>
-                <TabsTrigger value="color" aria-label="Color" className="flex-none px-2">
+                <TabsTrigger value="color" aria-label="Color" className="flex-none">
                   <Palette />
                 </TabsTrigger>
               </TabsList>
@@ -88,7 +88,7 @@ describe('AvatarPicker', () => {
     );
     openEditor();
 
-    expect(screen.getByText('Click to upload an image')).toBeTruthy();
+    expect(screen.getByText('Upload an image')).toBeTruthy();
     expect(screen.queryByRole('tab')).toBeNull();
   });
 
@@ -126,9 +126,9 @@ describe('AvatarPicker', () => {
     );
     openEditor();
 
-    expect(screen.queryByText('Click to upload an image')).toBeNull();
+    expect(screen.queryByText('Upload an image')).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: 'Upload' }));
-    expect(screen.getByText('Click to upload an image')).toBeTruthy();
+    expect(screen.getByText('Upload an image')).toBeTruthy();
   });
 
   it('lets children override the upload copy', () => {
@@ -140,7 +140,32 @@ describe('AvatarPicker', () => {
     openEditor();
 
     expect(screen.getByText('Upload a photo')).toBeTruthy();
-    expect(screen.queryByText('Click to upload an image')).toBeNull();
+    expect(screen.queryByText('Upload an image')).toBeNull();
+  });
+
+  it('opens the file picker from its button', () => {
+    const click = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
+    render(
+      <Picker defaultTab="upload">
+        <AvatarPickerUpload />
+      </Picker>,
+    );
+    openEditor();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Choose image' }));
+    expect(click).toHaveBeenCalledTimes(1);
+    click.mockRestore();
+  });
+
+  it('names the custom colour field by its label, which children replace', () => {
+    render(
+      <Picker defaultTab="color">
+        <AvatarPickerColor>Pick any</AvatarPickerColor>
+      </Picker>,
+    );
+    openEditor();
+
+    expect(screen.getByText('Pick any').getAttribute('for')).toBe(screen.getByLabelText('Custom color').id);
   });
 
   it('marks the upload pane data-uploading until onUpload settles, then adopts the resolved URL', async () => {

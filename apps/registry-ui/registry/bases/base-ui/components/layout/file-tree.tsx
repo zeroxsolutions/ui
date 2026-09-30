@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { ChevronRight } from 'lucide-react';
 
 import { useControllableState } from '@/registry/bases/base-ui/hooks/use-controllable-state';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { ChevronRightIcon, type ChevronRightIconHandle } from '@/registry/bases/base-ui/ui/chevron-right';
 
 interface FileTreeContextValue {
   selectedValue: string | undefined;
@@ -31,6 +31,8 @@ interface FileTreeItemContextValue {
   folder: boolean;
   expanded: boolean;
   selected: boolean;
+  /** Whether the item itself, not a descendant, holds keyboard focus. */
+  focused: boolean;
   labelId: string;
 }
 
@@ -255,8 +257,9 @@ interface FileTreeItemProps extends React.ComponentProps<'li'> {
  * contains a `FileTreeGroup` (then it gets `aria-expanded`), otherwise a leaf.
  * Its row is a `FileTreeLabel`; nested children go in a `FileTreeGroup`.
  */
-function FileTreeItem({ value, className, children, onFocus, ...props }: FileTreeItemProps): React.ReactNode {
+function FileTreeItem({ value, className, children, onFocus, onBlur, ...props }: FileTreeItemProps): React.ReactNode {
   const ctx = useFileTree();
+  const [focused, setFocused] = React.useState(false);
   const level = React.useContext(DepthContext);
   const labelId = React.useId();
   const folder = React.useMemo(
@@ -273,6 +276,7 @@ function FileTreeItem({ value, className, children, onFocus, ...props }: FileTre
     folder,
     expanded,
     selected,
+    focused,
     labelId,
   };
 
@@ -292,7 +296,13 @@ function FileTreeItem({ value, className, children, onFocus, ...props }: FileTre
         className={cn('group/treeitem outline-none', className)}
         onFocus={(e) => {
           onFocus?.(e);
-          if (e.target === e.currentTarget) ctx.setActiveValue(value);
+          if (e.target !== e.currentTarget) return;
+          ctx.setActiveValue(value);
+          setFocused(true);
+        }}
+        onBlur={(e) => {
+          onBlur?.(e);
+          if (e.target === e.currentTarget) setFocused(false);
         }}
         {...props}
       >
@@ -308,11 +318,29 @@ type FileTreeLabelProps = React.ComponentProps<'div'>;
  * The clickable row of a `FileTreeItem` - a chevron (folders only), the
  * consumer's icon + file name (`children`), indented by depth. Clicking selects
  * the item and toggles a folder. The focus ring follows the item's keyboard
- * focus; visible state is exposed via `data-selected`.
+ * focus; visible state is exposed via `data-selected`. The chevron turns while
+ * the folder is open and plays while the row is hovered or its item focused.
  */
-function FileTreeLabel({ className, children, onClick, style, ...props }: FileTreeLabelProps): React.ReactNode {
+function FileTreeLabel({
+  className,
+  children,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  style,
+  ...props
+}: FileTreeLabelProps): React.ReactNode {
   const ctx = useFileTree();
   const item = useFileTreeItem();
+  const iconRef = React.useRef<ChevronRightIconHandle>(null);
+  const [hovered, setHovered] = React.useState(false);
+  const playing = hovered || item.focused;
+
+  React.useEffect(() => {
+    if (playing) iconRef.current?.startAnimation();
+    else iconRef.current?.stopAnimation();
+  }, [playing]);
+
   return (
     <div
       id={item.labelId}
@@ -331,12 +359,22 @@ function FileTreeLabel({ className, children, onClick, style, ...props }: FileTr
         ctx.select(item.value);
         if (item.folder) ctx.toggleExpanded(item.value);
       }}
+      onMouseEnter={(e) => {
+        onMouseEnter?.(e);
+        setHovered(true);
+      }}
+      onMouseLeave={(e) => {
+        onMouseLeave?.(e);
+        setHovered(false);
+      }}
       {...props}
     >
       {item.folder ? (
-        <ChevronRight
+        <ChevronRightIcon
+          ref={iconRef}
           aria-hidden
-          className={cn('text-muted-foreground size-4 shrink-0 transition-transform', item.expanded && 'rotate-90')}
+          size={16}
+          className={cn('flex shrink-0 transition-transform', item.expanded && 'rotate-90')}
         />
       ) : (
         <span aria-hidden className="w-4 shrink-0" />

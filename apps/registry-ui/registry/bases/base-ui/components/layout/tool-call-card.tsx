@@ -1,7 +1,10 @@
-import { CheckCircle2, ChevronDown, Circle, Clock, XCircle } from 'lucide-react';
-import type { ComponentProps, ReactNode } from 'react';
+import { CheckCircle2, Circle, Clock, XCircle } from 'lucide-react';
+import { useRef, type ComponentProps, type ReactNode } from 'react';
 
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
+import { Button } from '@/registry/bases/base-ui/ui/button';
+import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
+import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
@@ -13,8 +16,8 @@ interface ToolCallCardProps extends ComponentProps<typeof Collapsible> {
 }
 
 /**
- * ToolCallCard - one tool invocation in a chat transcript: a trigger row over
- * collapsible sections. The host maps its dispatcher lifecycle onto `state`
+ * ToolCallCard - one tool invocation in a chat transcript, on the small card
+ * surface: a trigger row over collapsible sections. The host maps its dispatcher lifecycle onto `state`
  * (pending, running, completed, error), which the root carries as
  * `data-state`; `ToolCallCardStatus` picks its icon from it. Every word is the
  * consumer's:
@@ -39,34 +42,65 @@ function ToolCallCard({ state, className, ...props }: ToolCallCardProps): ReactN
     <Collapsible
       data-slot="tool-call-card"
       data-state={state}
-      className={cn('group/tool-call-card bg-muted w-full overflow-hidden rounded-md', className)}
+      render={<Card size="sm" />}
+      className={cn('group/tool-call-card w-full', className)}
       {...props}
     />
   );
 }
 
-/** The header row that toggles the sections; a leading svg child is sized and muted as the tool's icon. */
-function ToolCallCardTrigger({ className, children, ...props }: ComponentProps<typeof CollapsibleTrigger>): ReactNode {
+/**
+ * The header row that toggles the sections: a full-width ghost button in the
+ * card's flow, holding the consumer's icon, title, description and status,
+ * then a chevron that turns over while the sections are open and plays while
+ * the row is hovered or focused.
+ */
+function ToolCallCardTrigger({
+  className,
+  children,
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onBlur,
+  ...props
+}: ComponentProps<typeof CollapsibleTrigger>): ReactNode {
+  const iconRef = useRef<ChevronDownIconHandle>(null);
   return (
     <CollapsibleTrigger
       data-slot="tool-call-card-trigger"
-      className={cn(
-        'group/tool-call-card-trigger [&>svg:first-child]:text-muted-foreground flex w-full items-center gap-2 px-3 py-2 text-left [&>svg:first-child]:size-3.5 [&>svg:first-child]:shrink-0',
-        className,
-      )}
+      render={<Button variant="ghost" />}
+      className={cn('group/tool-call-card-trigger w-full justify-start text-left', className)}
+      onMouseEnter={(event) => {
+        onMouseEnter?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onMouseLeave={(event) => {
+        onMouseLeave?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      onFocus={(event) => {
+        onFocus?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        iconRef.current?.stopAnimation();
+      }}
       {...props}
     >
       {children}
-      <ChevronDown
+      <ChevronDownIcon
+        ref={iconRef}
         aria-hidden
-        className="text-muted-foreground size-4 shrink-0 transition-transform group-aria-expanded/tool-call-card-trigger:rotate-180"
+        className="transition-transform group-aria-expanded/tool-call-card-trigger:rotate-180"
       />
     </CollapsibleTrigger>
   );
 }
 
+/** The tool's name, kept whole while the description beside it truncates. */
 function ToolCallCardTitle({ className, ...props }: ComponentProps<'span'>): ReactNode {
-  return <span data-slot="tool-call-card-title" className={cn('shrink-0 text-sm font-medium', className)} {...props} />;
+  return <span data-slot="tool-call-card-title" className={cn('shrink-0', className)} {...props} />;
 }
 
 /** A one-line summary of the call, truncated to the row. */
@@ -86,9 +120,12 @@ function ToolCallCardStatus({ className, children, ...props }: ComponentProps<'s
     <Badge
       variant="secondary"
       render={<span data-slot="tool-call-card-status" />}
-      className={cn('ml-auto rounded-full', className)}
+      className={cn('ml-auto', className)}
       {...props}
     >
+      {/* Static lucide glyphs where lucide-animated has clock and circle-check: inside the trigger,
+          Button's descendant svg rule sizes an animated icon to 16px over its size prop and the
+          Badge's size-3, and the trigger's hover reaches no separate part without a context. */}
       <Circle aria-hidden className="hidden group-data-[state=input-streaming]/tool-call-card:block" />
       <Clock aria-hidden className="hidden animate-pulse group-data-[state=input-available]/tool-call-card:block" />
       <CheckCircle2
@@ -101,11 +138,13 @@ function ToolCallCardStatus({ className, children, ...props }: ComponentProps<'s
   );
 }
 
+/** The sections under the trigger, in the card's content inset; unmounted while closed. */
 function ToolCallCardContent({ className, ...props }: ComponentProps<typeof CollapsibleContent>): ReactNode {
   return (
     <CollapsibleContent
       data-slot="tool-call-card-content"
-      className={cn('text-popover-foreground flex flex-col gap-3 border-t p-3', className)}
+      render={<CardContent />}
+      className={cn('flex flex-col gap-3', className)}
       {...props}
     />
   );
@@ -118,6 +157,7 @@ function ToolCallCardSection({ className, ...props }: ComponentProps<'div'>): Re
   );
 }
 
+/** A section's small muted heading, such as `Parameters` or `Result`. */
 function ToolCallCardSectionTitle({ className, ...props }: ComponentProps<'h4'>): ReactNode {
   return (
     <h4
