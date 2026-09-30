@@ -57,7 +57,8 @@ does not have.
    variables declared once in the layout that owns them.
 4. **A missing primitive is added, not imitated.** When a region needs a primitive that is not
    vendored yet, it is added with `shadcn add <item> -o`, byte for byte, as the others were.
-5. **A region of an item that scrolls on its own is a `ScrollArea`.** A plain `overflow-auto` box is not.
+5. **Every region that scrolls because its content overflows is a `ScrollArea`**, in the items and in
+   the docs shell alike. A plain `overflow-auto` box is not.
 6. **Icons are `@lucide-animated` where it has the glyph**, and `lucide-react` only where it does not.
    An animated icon inside a control animates on that control's hover or focus, not on its own.
 7. **UI copy is sentence case.** Buttons, labels, headings, placeholders, `aria-label`s, empty and
@@ -129,8 +130,12 @@ dependency, linking to shadcn's page for it.
 
 ## The composed items
 
-Each of the 42 components and the block is rebuilt on the rules above, one family at a time. Its
-props, its behaviour and its registry entry do not change; only how it is styled does. Its examples
+Each of the 42 components and the block is rebuilt on the rules above and on the house skill for
+writing a component, in full: one family per file named for its root, subject-plus-shape names,
+content arriving as children (a string prop naming content becomes a slot), coordination through
+`data-*`, a wrapper that carries placement only, class strings only in a recipe or on the element,
+and composition taken from upstream's fetched example. Its behaviour and its registry entry stay;
+its props change only where that skill requires a slot, since nothing installs these items yet. Its examples
 follow the same rules. Where an item's look depended on a class that rule 1 removes, the primitive's
 own variant or size replaces it; where none fits, the item takes the primitive's default.
 

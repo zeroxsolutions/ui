@@ -587,6 +587,11 @@ shadcn@latest add x` under `pnpm`, switches to `npx ...` under `npm`, and the co
 (9 modules + specs), their examples under `registry/bases/base-ui/examples/`, and their entries in
 `registry.json` (animated-icon `registryDependencies`).
 
+- [ ] **Step 0:** open the gundam skills `writing-a-component` (SKILL.md and every file in its
+      `references/`, plus `test-sizing-a-wrapped-component.md` and `publishing-a-registry-item.md`),
+      `adding-a-design-system-component` and `writing-component-tests`. Each module is rebuilt to
+      every section of `writing-a-component`, not only the class rules; a string prop naming content
+      becomes a slot (children), and its examples, spec and docs page follow the new API.
 - [ ] **Step 1:** for each module, read the upstream base-nova preview card closest to it (the list:
       `gh api 'repos/shadcn-ui/ui/contents/apps/v4/registry/bases/base/blocks/preview-02/cards' --jq '.[].name'`)
       to see how the same primitives compose there.
@@ -595,7 +600,8 @@ shadcn@latest add x` under `pnpm`, switches to `npx ...` under `npm`, and the co
 - [ ] **Step 3:** rebuild: each removed class is replaced by the primitive's own variant or size
       prop, or dropped for the primitive's default; each palette colour becomes a theme token (add a
       missing status token to `styles.css` with light and dark values); icons from Task 1; copy to
-      sentence case. Props and behaviour unchanged.
+      sentence case. Every overflow scroller is a `ScrollArea`. Behaviour unchanged; props change only
+      where `writing-a-component` requires a slot.
 - [ ] **Step 4:** the item's own spec still passes; a case that asserted a removed class is rewritten
       to assert the behaviour it stood for. `shadcn build` + `validate` pass. Commit
       `refactor(registry-ui): rebuild the general, feedback and navigation items on base-nova`.
