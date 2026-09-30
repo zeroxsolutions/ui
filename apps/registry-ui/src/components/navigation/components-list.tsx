@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { publishedItems } from '@/lib/registry';
 import { source } from '@/lib/source';
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /** A category as a heading: `data-display` reads `Data display`. */
 function categoryLabel(category: string): string {
@@ -14,9 +15,9 @@ function categoryLabel(category: string): string {
  * Every component and block the registry publishes, under its category in `registry.json`'s order. An
  * item with a docs page links to it; the rest are listed by title until theirs is written.
  */
-function ComponentsList(): ReactNode {
+function ComponentsList({ className, ...props }: ComponentProps<'div'>): ReactNode {
   return (
-    <div className="flex flex-col gap-8">
+    <div className={cn('flex flex-col gap-8', className)} {...props}>
       {[...Map.groupBy(publishedItems, (item) => item.category)].map(([category, items]) => (
         <section key={category} className="flex flex-col gap-3">
           <h2 className="text-xl font-semibold tracking-tight">{categoryLabel(category)}</h2>

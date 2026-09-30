@@ -36,7 +36,7 @@ function ComponentPreviewCard({
   const [codeOpen, setCodeOpen] = useState(false);
 
   return (
-    <Card data-slot="component-preview" data-not-typeset className={cn('mt-4 mb-12', className)} {...props}>
+    <Card data-slot="component-preview" className={cn('mt-4 mb-12', className)} {...props}>
       <CardContent>
         {/* A demo taller or wider than the area scrolls inside it rather than spilling out of the card. */}
         <ScrollArea data-slot="component-preview-demo" className={cn('h-72 w-full', previewClassName)}>

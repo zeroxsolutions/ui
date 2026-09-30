@@ -36,7 +36,7 @@ function SourceCodeBlock({
   ...props
 }: SourceCodeBlockProps): ReactNode {
   return (
-    <CodeBlock data-not-typeset {...props}>
+    <CodeBlock {...props}>
       <CollapsibleCardHeader>
         <CollapsibleCardTitle>
           <CodeBlockLanguage>{props.language}</CodeBlockLanguage>

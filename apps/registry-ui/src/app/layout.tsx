@@ -4,9 +4,6 @@ import { registryHomepage } from '@/lib/registry';
 import { AppProviders } from '@/providers/app-providers';
 
 import './global.css';
-// After the global sheet, as upstream orders them: typeset's rules and the code block's share a layer
-// and a specificity, so the later sheet's margins win.
-import './typeset.css';
 
 export const metadata: Metadata = {
   // The share images' URLs resolve against it; unset, the build warns and falls back to localhost.
