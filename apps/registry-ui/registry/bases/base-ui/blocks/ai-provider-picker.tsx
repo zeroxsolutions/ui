@@ -85,7 +85,11 @@ function AiProviderPicker({
   ...props
 }: AiProviderPickerProps): React.ReactNode {
   return (
-    <div className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3', className)} {...props}>
+    <div
+      data-slot="ai-provider-picker"
+      className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3', className)}
+      {...props}
+    >
       {entries.map((entry) => (
         <AiProviderCard key={entry.provider}>
           <CardHeader>
