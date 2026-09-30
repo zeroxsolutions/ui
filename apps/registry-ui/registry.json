@@ -806,7 +806,9 @@
         "@shadcn/card",
         "@shadcn/collapsible",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/chevron-down.json"
+        "https://lucide-animated.com/r/chevron-down.json",
+        "https://lucide-animated.com/r/circle-check.json",
+        "https://lucide-animated.com/r/clock.json"
       ],
       "cssVars": {
         "theme": {

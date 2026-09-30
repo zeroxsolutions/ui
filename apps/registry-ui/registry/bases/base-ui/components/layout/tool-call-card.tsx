@@ -1,14 +1,27 @@
-import { CheckCircle2, Circle, Clock, XCircle } from 'lucide-react';
-import { useRef, type ComponentProps, type ReactNode } from 'react';
+import { Circle, XCircle } from 'lucide-react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  type ComponentProps,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
+import { CircleCheckIcon, type CircleCheckIconHandle } from '@/registry/bases/base-ui/ui/circle-check';
+import { ClockIcon, type ClockIconHandle } from '@/registry/bases/base-ui/ui/clock';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 type ToolCallCardState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
+
+/** The animated status glyphs inside a trigger, which that trigger plays while it is hovered or focused. */
+const ToolCallCardTriggerIcons = createContext<RefObject<Set<ClockIconHandle | CircleCheckIconHandle>> | null>(null);
 
 interface ToolCallCardProps extends ComponentProps<typeof Collapsible> {
   /** Where the call is in its lifecycle; set on the root as `data-state`. */
@@ -65,36 +78,48 @@ function ToolCallCardTrigger({
   ...props
 }: ComponentProps<typeof CollapsibleTrigger>): ReactNode {
   const iconRef = useRef<ChevronDownIconHandle>(null);
+  const statusIcons = useRef(new Set<ClockIconHandle | CircleCheckIconHandle>());
+  const startAnimation = (): void => {
+    iconRef.current?.startAnimation();
+    for (const icon of statusIcons.current) icon.startAnimation();
+  };
+  const stopAnimation = (): void => {
+    iconRef.current?.stopAnimation();
+    for (const icon of statusIcons.current) icon.stopAnimation();
+  };
+
   return (
-    <CollapsibleTrigger
-      data-slot="tool-call-card-trigger"
-      render={<Button variant="ghost" />}
-      className={cn('group/tool-call-card-trigger w-full justify-start text-left', className)}
-      onMouseEnter={(event) => {
-        onMouseEnter?.(event);
-        iconRef.current?.startAnimation();
-      }}
-      onMouseLeave={(event) => {
-        onMouseLeave?.(event);
-        iconRef.current?.stopAnimation();
-      }}
-      onFocus={(event) => {
-        onFocus?.(event);
-        iconRef.current?.startAnimation();
-      }}
-      onBlur={(event) => {
-        onBlur?.(event);
-        iconRef.current?.stopAnimation();
-      }}
-      {...props}
-    >
-      {children}
-      <ChevronDownIcon
-        ref={iconRef}
-        aria-hidden
-        className="transition-transform group-aria-expanded/tool-call-card-trigger:rotate-180"
-      />
-    </CollapsibleTrigger>
+    <ToolCallCardTriggerIcons value={statusIcons}>
+      <CollapsibleTrigger
+        data-slot="tool-call-card-trigger"
+        render={<Button variant="ghost" />}
+        className={cn('group/tool-call-card-trigger w-full justify-start text-left', className)}
+        onMouseEnter={(event) => {
+          onMouseEnter?.(event);
+          startAnimation();
+        }}
+        onMouseLeave={(event) => {
+          onMouseLeave?.(event);
+          stopAnimation();
+        }}
+        onFocus={(event) => {
+          onFocus?.(event);
+          startAnimation();
+        }}
+        onBlur={(event) => {
+          onBlur?.(event);
+          stopAnimation();
+        }}
+        {...props}
+      >
+        {children}
+        <ChevronDownIcon
+          ref={iconRef}
+          aria-hidden
+          className="transition-transform group-aria-expanded/tool-call-card-trigger:rotate-180"
+        />
+      </CollapsibleTrigger>
+    </ToolCallCardTriggerIcons>
   );
 }
 
@@ -114,8 +139,28 @@ function ToolCallCardDescription({ className, ...props }: ComponentProps<'span'>
   );
 }
 
-/** The status badge: its children are the word, its icon follows the root's `data-state`. */
+/**
+ * The status badge: its children are the word, its icon follows the root's `data-state`. Inside a
+ * `ToolCallCardTrigger` the clock and the check play while the trigger is hovered or focused; anywhere
+ * else they hold still.
+ */
 function ToolCallCardStatus({ className, children, ...props }: ComponentProps<'span'>): ReactNode {
+  const triggerIcons = useContext(ToolCallCardTriggerIcons);
+  // Handing the icon a ref also stops it playing on its own hover, so outside a trigger it holds still.
+  const playWithTrigger = useCallback(
+    (icon: ClockIconHandle | CircleCheckIconHandle | null) => {
+      if (!icon || !triggerIcons) return;
+      triggerIcons.current.add(icon);
+      return () => {
+        triggerIcons.current.delete(icon);
+      };
+    },
+    [triggerIcons],
+  );
+
+  // Badge sizes only its direct svg children; an animated icon's svg sits inside the icon's own div,
+  // where the trigger Button's descendant rule would draw it at 16px over its `size`, so `*:size-3!`
+  // gives it the Badge's icon size.
   return (
     <Badge
       variant="secondary"
@@ -123,14 +168,18 @@ function ToolCallCardStatus({ className, children, ...props }: ComponentProps<'s
       className={cn('ml-auto', className)}
       {...props}
     >
-      {/* Static lucide glyphs where lucide-animated has clock and circle-check: inside the trigger,
-          Button's descendant svg rule sizes an animated icon to 16px over its size prop and the
-          Badge's size-3, and the trigger's hover reaches no separate part without a context. */}
       <Circle aria-hidden className="hidden group-data-[state=input-streaming]/tool-call-card:block" />
-      <Clock aria-hidden className="hidden animate-pulse group-data-[state=input-available]/tool-call-card:block" />
-      <CheckCircle2
+      <ClockIcon
+        ref={playWithTrigger}
         aria-hidden
-        className="text-success hidden group-data-[state=output-available]/tool-call-card:block"
+        size={12}
+        className="hidden *:size-3! group-data-[state=input-available]/tool-call-card:block"
+      />
+      <CircleCheckIcon
+        ref={playWithTrigger}
+        aria-hidden
+        size={12}
+        className="text-success hidden *:size-3! group-data-[state=output-available]/tool-call-card:block"
       />
       <XCircle aria-hidden className="text-destructive hidden group-data-[state=output-error]/tool-call-card:block" />
       {children}
