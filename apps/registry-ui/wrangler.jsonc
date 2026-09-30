@@ -4,6 +4,10 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-08-20",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // next-themes inlines its theme script from the function's own source. With the bundler's name-keeping
+  // on, a page rendered in the worker carries a script calling `__name`, which the browser never
+  // defines, so it throws and the theme is set only after hydration.
+  "keep_names": false,
   "observability": { "enabled": true },
   // Both addresses `wrangler dev` binds. Unset, the server port silently becomes the next free one.
   "dev": { "port": 8787, "inspector_port": 9229 },

@@ -276,6 +276,9 @@ importers:
       '@zeroxsolutions/icons':
         specifier: workspace:*
         version: link:../../packages/icons
+      '@zeroxsolutions/routing':
+        specifier: 0.0.7
+        version: 0.0.7
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -5478,6 +5481,9 @@ packages:
 
   '@yuku-toolchain/types@0.10.2':
     resolution: {integrity: sha512-sSeo4SSSToiS+sSD+bwn/s94EEcaLJ7tG5LCp8gFYC1G5VzxzX7fqB6m9RU1yMD8KTpu6zdU/I1NlQf8hVBJ9Q==}
+
+  '@zeroxsolutions/routing@0.0.7':
+    resolution: {integrity: sha512-msCh2/JFgenClrZvVzufZj+8hayaKARQCKcjjeMnViggngzz1ZbXdedjrKTr6Ji6S1Wb+nLJB/nYlP4vyq0Lcw==}
 
   '@zkochan/js-yaml@0.0.7':
     resolution: {integrity: sha512-nrUSn7hzt7J6JWgWGz78ZYI8wj+gdIJdk0Ynjpp8l+trkn58Uqsf6RYrYkEK+3X18EX+TNdtJI0WxAtc+L84SQ==}
@@ -18043,6 +18049,11 @@ snapshots:
     optional: true
 
   '@yuku-toolchain/types@0.10.2': {}
+
+  '@zeroxsolutions/routing@0.0.7':
+    dependencies:
+      path-to-regexp: 8.4.2
+      tslib: 2.8.1
 
   '@zkochan/js-yaml@0.0.7':
     dependencies:

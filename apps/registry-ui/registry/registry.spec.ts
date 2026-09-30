@@ -192,13 +192,13 @@ function cssVarsProblems(item: RegistryItem): string[] {
     : [`${item.name}: cssVars should be ${JSON.stringify(expected)}`];
 }
 
-/** Every family file: a component under a kind folder (the docs pages aside) or a block, specs left out. */
+/** Every family file: a component under a kind folder or a block, specs left out. */
 function familyFiles(): string[] {
   return ['components', 'blocks']
     .flatMap((dir) =>
       readdirSync(join(APP, BASE, dir), { recursive: true, encoding: 'utf8' }).map((path) => `${BASE}/${dir}/${path}`),
     )
-    .filter((path) => FAMILY.test(path) && !path.endsWith('.spec.tsx') && !path.startsWith(`${BASE}/components/docs/`))
+    .filter((path) => FAMILY.test(path) && !path.endsWith('.spec.tsx'))
     .sort();
 }
 
