@@ -30,10 +30,6 @@
   --color-info: var(--info);
   --color-selection-signal: var(--selection-signal);
   --color-component-mark: var(--component-mark);
-  --color-code: var(--code);
-  --color-code-foreground: var(--code-foreground);
-  --color-code-highlight: var(--code-highlight);
-  --color-code-line-number: var(--code-line-number);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -114,14 +110,6 @@
      elevated card step while light takes the muted one, which one token
      cannot express. */
   --code-surface: var(--muted);
-  /* A docs code block, upstream's `--code` family drawn from this theme's own tokens: its surface, its
-     text, a highlighted line and the line numbers. */
-  --code: var(--code-surface);
-  /* The docs code block's header and plain text; `--code-fg` below is the syntax palette's own plain
-     text, read by the chat CodeBlock and the editor through lib/code-theme.ts. */
-  --code-foreground: var(--foreground);
-  --code-highlight: color-mix(in oklab, var(--muted), var(--border));
-  --code-line-number: var(--muted-foreground);
   /* Syntax-highlighting palette (light). Hues derive from the brand's
        chromatic family (info-blue, success-green, warning-amber, mark-purple,
        destructive-red, selection-cyan); L/C tuned for the near-white
@@ -184,10 +172,6 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   --code-surface: var(--card);
-  --code: var(--code-surface);
-  --code-foreground: var(--muted-foreground);
-  --code-highlight: var(--muted);
-  --code-line-number: var(--muted-foreground);
   /* Syntax-highlighting palette (dark) - same hue families, lifted in L /
        softened in C for the dark `--code-surface`. */
   --code-fg: oklch(0.9 0 0);

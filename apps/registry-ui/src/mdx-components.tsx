@@ -1,18 +1,25 @@
-import type { ComponentProps, ReactNode } from 'react';
+import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
 import { CodeBlockCommand } from '@/components/data-display/code-block-command';
-import { CodeCollapsibleWrapper } from '@/components/data-display/code-collapsible-wrapper';
 import { CodeTabs } from '@/components/data-display/code-tabs';
 import { ComponentPreview } from '@/components/data-display/component-preview';
 import { ComponentSource } from '@/components/data-display/component-source';
-import { CopyButton } from '@/components/data-display/copy-button';
-import { DocsCodeBlockScrollArea, DocsCodeBlockTitle } from '@/components/data-display/docs-code-block';
+import { SourceCodeBlock } from '@/components/data-display/source-code-block';
 import { ComponentsList } from '@/components/navigation/components-list';
-import { packageManagerCommands } from '@/lib/highlight-code';
+import { packageManagerCommands } from '@/lib/package-manager-commands';
+import { highlightToLines } from '@/registry/bases/base-ui/lib/shiki';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
 import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+
+/** The text a node renders, as a reader would copy it. */
+function nodeText(node: ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(nodeText).join('');
+  if (isValidElement<{ children?: ReactNode }>(node)) return nodeText(node.props.children);
+  return '';
+}
 
 /** A heading's text as a link to itself, upstream's; the id comes from the MDX compiler, which slugs every heading. */
 function HeadingAnchor({ id, children }: { id?: string; children: ReactNode }): ReactNode {
@@ -57,59 +64,26 @@ export const mdxComponents = {
       <ScrollBar orientation="horizontal" />
     </ScrollArea>
   ),
-  // Upstream's `pre`, less its overflow: a fence's code scrolls in the block's `ScrollArea`, and its copy
-  // button sits beside that, outside the scroller. A package-manager block is its own scroller and copy.
-  pre: ({ className, children, __raw__, ...props }: ComponentProps<'pre'> & { __raw__?: string }) => {
-    const pre = (
-      <pre
-        data-not-typeset
-        className={cn(
-          'min-w-0 px-4 py-3.5 outline-none has-data-highlighted-line:px-0 has-data-line-numbers:px-0 has-data-[slot=tabs]:p-0',
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </pre>
-    );
-    if (!__raw__ || packageManagerCommands(__raw__)) return pre;
+  // A fence, upstream's `pre` + `code` pair, as the registry's `CodeBlock`: the fence's text tokenized
+  // here, as the page renders at build, by the registry's highlighter, and an npm command as the
+  // package-manager block. Inline code stays a plain `code`, which typeset styles.
+  pre: async ({ children, title }: ComponentProps<'pre'>) => {
+    const code = isValidElement<{ className?: string; children?: ReactNode }>(children) ? children.props : {};
+    const language = /language-(\S+)/.exec(code.className ?? '')?.[1];
+    const raw = nodeText(code.children).replace(/\n$/, '');
+    const commands = packageManagerCommands(raw);
+    if (commands) return <CodeBlockCommand commands={commands} className="mt-6" />;
 
     return (
-      <>
-        <CopyButton value={__raw__} />
-        <DocsCodeBlockScrollArea>{pre}</DocsCodeBlockScrollArea>
-      </>
+      <SourceCodeBlock
+        code={raw}
+        language={language}
+        lines={language ? await highlightToLines(raw, language) : null}
+        className="mt-6"
+      >
+        {title}
+      </SourceCodeBlock>
     );
-  },
-  figcaption: ({
-    children,
-    'data-language': language,
-    ...props
-  }: ComponentProps<'figcaption'> & { 'data-language'?: string }) =>
-    typeof language === 'string' ? (
-      <DocsCodeBlockTitle language={language} {...props}>
-        {children}
-      </DocsCodeBlockTitle>
-    ) : (
-      <figcaption {...props}>{children}</figcaption>
-    ),
-  code: ({
-    __npm__,
-    __yarn__,
-    __pnpm__,
-    __bun__,
-    ...props
-  }: ComponentProps<'code'> & {
-    __npm__?: string;
-    __yarn__?: string;
-    __pnpm__?: string;
-    __bun__?: string;
-  }) => {
-    // An npm command, under a tab per package manager; anything else, inline or in a fence, as it is.
-    if (__npm__ && __yarn__ && __pnpm__ && __bun__) {
-      return <CodeBlockCommand __npm__={__npm__} __yarn__={__yarn__} __pnpm__={__pnpm__} __bun__={__bun__} />;
-    }
-    return <code {...props} />;
   },
   Step: (props: ComponentProps<'h3'>) => <h3 {...props} />,
   Steps: ({ className, ...props }: ComponentProps<'div'>) => (
@@ -149,6 +123,5 @@ export const mdxComponents = {
   AlertDescription,
   ComponentPreview,
   ComponentSource,
-  CodeCollapsibleWrapper,
   ComponentsList,
 };

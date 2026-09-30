@@ -1,7 +1,6 @@
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 
-import { CODE_THEMES } from '@/constants/code-themes';
-import { transformers } from '@/lib/highlight-code';
+import { rehypeCodeTitle } from '@/lib/rehype-code-title';
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -10,9 +9,10 @@ export const docs = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
-    // fumadocs' own Shiki pass, with the highlighter module's transformers in place of its defaults, as
-    // upstream hands the same module's transformers to rehype-pretty-code. `icon: false`: the MDX
-    // figcaption draws the language's icon itself.
-    rehypeCodeOptions: { themes: CODE_THEMES, transformers, icon: false },
+    // No fumadocs Shiki pass: the MDX `pre` component highlights a fence with the registry's own
+    // highlighter and theme (`lib/shiki.ts`) as the page renders at build, so the site has one Shiki
+    // and one theme. The fence's title is all that is left to carry.
+    rehypeCodeOptions: false,
+    rehypePlugins: (plugins) => [...plugins, rehypeCodeTitle],
   },
 });

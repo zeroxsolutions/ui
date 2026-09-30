@@ -1,10 +1,9 @@
 'use client';
 
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { copyToClipboard, useCopiedState } from '@/components/data-display/copy-button';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { CheckIcon } from '@/registry/bases/base-ui/ui/check';
+import { CheckIcon, type CheckIconHandle } from '@/registry/bases/base-ui/ui/check';
 import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
 import { CopyIcon, type CopyIconHandle } from '@/registry/bases/base-ui/ui/copy';
 import {
@@ -38,15 +37,20 @@ async function copyPageMarkdown(url: string): Promise<boolean> {
       await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })]);
       return true;
     }
-    return await copyToClipboard(await markdown);
+    await navigator.clipboard.writeText(await markdown);
+    return true;
   } catch {
     try {
-      return await copyToClipboard(await markdown);
+      await navigator.clipboard.writeText(await markdown);
+      return true;
     } catch {
       return false;
     }
   }
 }
+
+/** How long the button shows its check after a copy, as upstream's. */
+const COPIED_MS = 2000;
 
 interface CopyPageButtonProps {
   /** The page's own URL, absolute or from the site's root. */
@@ -58,9 +62,17 @@ interface CopyPageButtonProps {
  * Markdown, and the chevron beside it opens the page's Markdown or an assistant primed with its URL.
  */
 function CopyPageButton({ url }: CopyPageButtonProps): ReactNode {
-  const { hasCopied, markCopied, checkIconRef } = useCopiedState();
+  const [hasCopied, setHasCopied] = useState(false);
+  const checkIconRef = useRef<CheckIconHandle>(null);
   const copyIconRef = useRef<CopyIconHandle>(null);
   const chevronIconRef = useRef<ChevronDownIconHandle>(null);
+
+  useEffect(() => {
+    if (!hasCopied) return;
+    checkIconRef.current?.startAnimation();
+    const timer = setTimeout(() => setHasCopied(false), COPIED_MS);
+    return () => clearTimeout(timer);
+  }, [hasCopied]);
 
   return (
     <div className="group/buttons bg-secondary relative flex rounded-lg *:[[data-slot=button]]:focus-visible:relative *:[[data-slot=button]]:focus-visible:z-10">
@@ -69,7 +81,7 @@ function CopyPageButton({ url }: CopyPageButtonProps): ReactNode {
         size="sm"
         className="h-8 shadow-none md:h-7 md:text-[0.8rem]"
         onClick={async () => {
-          if (await copyPageMarkdown(url)) markCopied();
+          if (await copyPageMarkdown(url)) setHasCopied(true);
         }}
         onMouseEnter={() => copyIconRef.current?.startAnimation()}
         onMouseLeave={() => copyIconRef.current?.stopAnimation()}

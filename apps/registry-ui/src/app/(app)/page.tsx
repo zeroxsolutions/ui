@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
-import { highlightCode } from '@/lib/highlight-code';
+import { SourceCodeBlock } from '@/components/data-display/source-code-block';
 import { registryHomepage } from '@/lib/registry';
 import { docsPageUrl } from '@/lib/source';
+import { highlightToLines } from '@/registry/bases/base-ui/lib/shiki';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { blocksRoute } from '@/routes/app-routes';
 
@@ -20,7 +20,7 @@ export default async function HomePage(): Promise<ReactNode> {
           own primitives, and the shadcn CLI installs it from its URL.
         </p>
       </header>
-      <DocsCodeBlock code={INSTALL} highlightedCode={await highlightCode(INSTALL, 'bash')} language="bash" />
+      <SourceCodeBlock code={INSTALL} language="bash" lines={await highlightToLines(INSTALL, 'bash')} />
       <div className="flex flex-wrap gap-3">
         <Link href={docsPageUrl(['components'])} className={buttonVariants()}>
           Browse components

@@ -59,7 +59,7 @@ function ComponentPreviewTabs({
         <div
           data-slot="code"
           data-mobile-code-visible={isMobileCodeVisible}
-          className="relative overflow-hidden **:data-[slot=copy-button]:right-4 **:data-[slot=copy-button]:hidden data-[mobile-code-visible=true]:**:data-[slot=copy-button]:flex **:data-[slot=scroll-area-viewport]:max-h-72 [&_[data-code-figure]]:m-0! [&_[data-code-figure]]:rounded-t-none [&_[data-code-figure]]:border-t"
+          className="relative overflow-hidden **:data-[slot=code-block]:m-0! **:data-[slot=code-block]:rounded-none **:data-[slot=code-block]:border-t **:data-[slot=code-block-copy]:hidden data-[mobile-code-visible=true]:**:data-[slot=code-block-copy]:flex **:data-[slot=code-block-viewport]:max-h-72"
         >
           {isMobileCodeVisible ? (
             source
@@ -71,7 +71,8 @@ function ComponentPreviewTabs({
                   className="absolute inset-0"
                   style={{
                     background:
-                      'linear-gradient(to top, var(--color-code), color-mix(in oklab, var(--color-code) 60%, transparent), transparent)',
+                      // The code block's surface (the card's background under `bg-muted/50`), fading up into the code.
+                      'linear-gradient(to top, color-mix(in oklab, var(--color-muted) 50%, var(--color-background)), color-mix(in oklab, var(--color-muted) 30%, transparent), transparent)',
                   }}
                 />
                 <Button

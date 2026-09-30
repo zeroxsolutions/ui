@@ -12,8 +12,8 @@ function intersects(
 
 /** The part of a block's code a reader sees: its text's box cut to the scroller's viewport. */
 async function visibleCodeBox(block: Locator): Promise<{ x: number; y: number; width: number; height: number }> {
-  const viewport = await block.locator('[data-slot=scroll-area-viewport]').first().boundingBox();
-  const code = await block.locator('code').first().boundingBox();
+  const viewport = await block.locator('[data-slot=code-block-viewport]').first().boundingBox();
+  const code = await block.locator('[data-slot=highlighted-code]').first().boundingBox();
   if (!viewport || !code) throw new Error('the block has no code in a scroller');
   const x = Math.max(viewport.x, code.x);
   const y = Math.max(viewport.y, code.y);
@@ -53,13 +53,19 @@ test('a component page previews the item, shows its source, and pages on', async
     await expect(preview.locator('[data-slot=code]')).toContainText('function StatusIndicatorDemo', { timeout: 1_000 });
   }).toPass();
 
+  // The Command tab is the install section's default, and its block starts on pnpm.
+  await expect(page.getByRole('tab', { name: 'Command', selected: true })).toBeVisible();
   const install = page
-    .getByRole('tabpanel')
+    .locator('[data-slot=code-block]')
     .filter({ has: page.getByRole('tab', { name: 'pnpm' }) })
     .first();
   await expect(install.getByText('pnpm dlx shadcn@latest add')).toBeVisible();
   await install.getByRole('tab', { name: 'npm', exact: true }).click();
   await expect(install.getByText('npx shadcn@latest add')).toBeVisible();
+
+  // A usage fence is headed by its language.
+  const usage = page.locator('[data-slot=code-block]').filter({ hasText: 'import { StatusIndicator }' }).first();
+  await expect(usage.getByText('TSX', { exact: true })).toBeVisible();
 
   const next = page.getByRole('link', { name: 'Next page' });
   const href = await next.getAttribute('href');
@@ -76,12 +82,14 @@ for (const [width, height] of [
     await page.goto(PAGE);
 
     // The install command and a usage fence: one package-manager block and one plain one.
-    const blocks = page.locator('[data-code-figure]').filter({ has: page.locator('[data-slot=copy-button]:visible') });
+    const blocks = page
+      .locator('[data-slot=code-block]')
+      .filter({ has: page.locator('[data-slot=code-block-copy]:visible') });
     const count = await blocks.count();
     expect(count).toBeGreaterThanOrEqual(2);
     for (let index = 0; index < count; index++) {
       const block = blocks.nth(index);
-      const button = await block.locator('[data-slot=copy-button]:visible').first().boundingBox();
+      const button = await block.locator('[data-slot=code-block-copy]:visible').first().boundingBox();
       expect(button).not.toBeNull();
       expect(intersects(button!, await visibleCodeBox(block))).toBe(false);
     }
@@ -92,8 +100,8 @@ test('at 390 wide a long command scrolls inside its block, and the page does not
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/docs/installation');
 
-  const block = page.locator('[data-code-figure]').filter({ hasText: 'status-indicator.json' }).first();
-  const viewport = block.locator('[data-slot=scroll-area-viewport]').first();
+  const block = page.locator('[data-slot=code-block]').filter({ hasText: 'status-indicator.json' }).first();
+  const viewport = block.locator('[data-slot=code-block-viewport]').first();
   await expect(viewport).toBeVisible();
 
   const box = await block.boundingBox();
