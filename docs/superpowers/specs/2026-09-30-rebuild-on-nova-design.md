@@ -27,21 +27,18 @@ they come: `Card`, `CardHeader`, `Field`, `FieldGroup`, `Select`, `Button size="
 only layout classes beside them (`flex`, `items-baseline`, `justify-between`, `w-full`). That is the
 shape every composed item and every shell piece here takes.
 
-**The docs shell follows upstream `apps/v4`** (layout, sidebar, TOC, page header, code preview,
-code block, install command), read live from `shadcn-ui/ui@main`, never from memory.
+**The docs shell takes its structure and behaviour from upstream `apps/v4`**, read live from
+`shadcn-ui/ui@main`: which region scrolls, which is sticky, what the sidebar and TOC hold. It takes
+neither upstream's classes nor its extras. Upstream's shell classes (`h-[30px]`, `text-[0.8rem]`, a
+repositioned dialog) style ui.shadcn.com itself, not the base-nova preset, so copying them is what
+made the shell stop looking like base-nova. The shell is built from this registry's own items and the
+vendored base-nova primitives as the CLI wrote them, and holds only what these docs need.
 
 ## Rules
 
-Rules 1 to 6 apply to what the registry publishes: the 42 `registry:component` items, the block and
-their examples. Rule 7 applies to those and to every module under `apps/registry-ui/src/` and every
-docs page.
-
-**The docs shell is a port of upstream's own shell, not a composed item.** Upstream writes its shell
-with classes on the primitives (`h-[30px]`, `text-[0.8rem]`, `bg-transparent`, a sticky `Sidebar`),
-and the shell here takes those classes as upstream writes them, adapted only where Base UI's API or
-this site's data differs. Rules 1 to 6 do not bind it; bending the port to satisfy them is what put
-a wrapper `nav` and a `ScrollArea` around the sidebar in the first attempt, a structure upstream
-does not have.
+Every rule applies to what the registry publishes (the 42 `registry:component` items, the block and
+their examples) and to the docs shell: every module under `apps/registry-ui/src/`. Rule 7 also
+covers every docs page.
 
 1. **A primitive is used as it comes.** A `className` on a primitive, or on a plain element that
    stands in for one, carries layout only: display, flex and grid placement, width and max-width,
@@ -75,12 +72,11 @@ the footer height; the docs layout is one `SidebarProvider` grid (`--sidebar-wid
 the TOC column. The site footer hides itself on docs pages (`group-has-[[data-slot=docs]]/body:hidden`)
 as upstream's does. The header is sticky and the page is the only scroller of the article.
 
-**Sidebar.** Upstream's `DocsSidebar`: the `Sidebar` primitive itself is the sticky column
-(`collapsible="none"`, bounded height, `overflow-hidden overscroll-none bg-transparent`), and
-`SidebarContent` is the list's own scroller, with upstream's fade and hidden scrollbar. There is no
-wrapper and no `ScrollArea`. It keeps its scroll position across navigations in `sessionStorage` and
-centres the active item on the first render, as upstream's effect does, and upstream's inline
-restore script runs before paint so a reload does not jump. Groups come from `meta.json`.
+**Sidebar.** Upstream's structure on the primitives as they come: the `Sidebar` primitive
+(`collapsible="none"`) is the sticky, bounded, `overscroll-none` column, and `SidebarContent` is the
+list's scroller. Groups come from `meta.json`: `SidebarGroupLabel` and `SidebarMenuButton` at their
+own size, the current page marked with `isActive`. The sidebar has the page's own background. No
+fade, no scroll-position script, no hit-area or size classes.
 
 **The scroll defect, and what fixes it.** Today the sidebar's `aside` is sticky at
 `100svh - header`, the full height below the header, inside a flex row that ends where the footer
@@ -93,16 +89,20 @@ it by behaviour: at the end of a long page at 1440 and 1024 wide the sidebar's t
 header; a wheel over a rail scrolled to its end leaves the page where it was; the page's scrolling
 element computes `overscroll-behavior-y: none`.
 
-**TOC.** Upstream's: a sticky, bounded, `overscroll-none` column beside the article, its list in its
-own scroller with the same fade, the active heading marked. Heading `On this page`.
+**TOC.** A sticky, bounded, `overscroll-none` column beside the article, its list in a `ScrollArea`,
+the active heading marked. Heading `On this page`.
 
-**Page header.** Title and description, then on the right a `Copy page` button (it copies the page's
-Markdown, which the site already serves at `<page>.md`) and previous / next icon buttons, as
-upstream's page header has. The pager at the bottom stays.
+**Page header.** Title and description, then on the right the registry's `CopyButton` copying the
+page's Markdown (served at `<page>.md`) and previous / next icon buttons. No menu of AI providers.
+The pager at the bottom stays.
 
-**Header, footer, mobile nav, command menu, mode switcher.** Ported from upstream's `site-header.tsx`, `main-nav.tsx`, `site-footer.tsx`, `mobile-nav.tsx`,
-`command-menu.tsx`, `mode-switcher.tsx`. The header's search trigger shows the platform's modifier as
-now.
+**Header, footer, mobile nav, command menu, mode switcher.** Upstream's structure on the primitives as
+they come. The command menu is the `CommandDialog` primitive at its own position and size, one
+`CommandItem` per page with no per-item icon animation, no debounce and no observers. The header's
+search trigger shows the platform's modifier.
+
+No upstream utility is added to `styles.css` (`scroll-fade`, `extend-touch-target`, `--top-spacing`
+and the like); a layout variable the shell needs is declared once in the layout that owns it.
 
 ## Code preview and code blocks
 
@@ -110,16 +110,14 @@ now.
 a few lines with a `View code` button that expands it, as upstream's `component-preview-tabs.tsx`
 does. The `Preview` / `Code` tabs go.
 
-**Install command.** A block with package-manager tabs (`pnpm`, `npm`, `yarn`, `bun`) and a copy
-button, as upstream's `code-block-command.tsx`; the chosen manager is remembered for the next block.
-Where a page offers both, `Command` and `Manual` tabs sit above it, the manual tab showing the item's
-files.
+**Install command.** The registry's `CodeBlock` holding the one `pnpm dlx shadcn@latest add <url>`
+command, with its language label and its copy button. No package-manager tabs.
 
-**Code block.** Highlighted at build by the registry's own highlighter, with upstream's themes
-(`github-light`, `github-dark`), a copy button, a header bar that always shows the fence's language
+**Code block.** The registry's own `CodeBlock`, highlighted by the registry's own highlighter on its
+`--code-*` tokens, with a copy button, a header bar that always shows the fence's language
 (its label and its icon, `tsx`, `bash`, ...) and the fence's title beside it when one is given, and horizontal overflow in the
-block rather than the page. Upstream keeps highlighting in one module, `lib/highlight-code.ts`; so
-does this site, and MDX code fences and the component source both go through it.
+block's `ScrollArea` rather than the page. MDX code fences and the component source both go through
+that one highlighter; the site defines no code block of its own.
 
 ## Docs content
 
@@ -145,7 +143,7 @@ Two unit specs in `apps/registry-ui` read the source and fail with the file, the
 or string:
 
 - **`classes.spec.ts`** (new, beside `copy.spec.ts` at the app root, because both read the whole
-  tree) - rules 1 to 3, over the registry's items, block and examples only: no palette colour, no arbitrary
+  tree) - rules 1 to 3, over the registry's items, block and examples and every module under `src/`: no palette colour, no arbitrary
   value outside the layout's declared variables, and on a primitive's `className` no class from the
   forbidden families (height, padding, radius, font size and weight, colour).
 - **`copy.spec.ts`** (new) - rule 7: every JSX text node and every `title`, `aria-label`,
@@ -160,7 +158,7 @@ in the registry.
 - The unit gate, the build, `wrangler:build`, and `shadcn build` + `validate` pass.
 - The e2e suite passes on the worker, with the sidebar / footer case above added.
 - Screenshots of `/docs`, one component page and `/blocks` at 1440 and 390 wide, in light and dark,
-  compared by eye against upstream's same pages and the base-nova preview, go in the final report.
+  compared by eye against the base-nova preview, go in the final report.
 
 ## Out of scope
 

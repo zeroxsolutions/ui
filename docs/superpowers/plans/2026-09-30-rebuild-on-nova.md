@@ -563,6 +563,51 @@ shadcn@latest add x` under `pnpm`, switches to `npx ...` under `npm`, and the co
 - [ ] **Step 5:** run unit + e2e; remove touched files from both `PENDING` lists; commit
       `feat(registry-ui): rebuild the code preview, code blocks and page header on upstream's shape`.
 
+### Task 5c: Put the shell on base-nova as it comes
+
+Tasks 3 to 5 ported upstream's shell with its classes and extras. The spec now binds the shell to
+every rule: upstream gives the structure and behaviour only. This task takes the shell on `master`
+(with Task 5's branch `c2-task5` merged in first) and strips it back to the primitives.
+
+**Files:**
+
+- Modify: `src/components/navigation/docs-sidebar.tsx`, `docs-toc.tsx`, `command-menu.tsx`,
+  `mobile-nav.tsx`, `main-nav.tsx` if present, `docs-pager.tsx`; `src/components/layout/site-header.tsx`,
+  `site-footer.tsx`; `src/components/general/mode-switcher.tsx`; `src/app/(app)/docs/layout.tsx`,
+  `src/app/(app)/docs/[[...slug]]/page.tsx`, `src/app/layout.tsx`, `src/app/global.css` / `styles.css`
+  (upstream utilities only); every spec beside them
+- Delete: `src/lib/docs-sidebar-scroll.ts` (and its inline script), the package-manager tabs and their
+  storage (`package-manager-commands.ts`, `use-config.ts`, the tabs in `code-block-command.tsx`), the
+  AI-provider menu in `copy-page-button.tsx`, whatever becomes unused
+- Modify: `apps/registry-ui/classes.spec.ts`, `src/test/tsx-source.ts` - rules 1 to 3 scan `src/` too
+- Modify: the e2e specs these touch
+
+- [ ] **Step 1: Widen the gate first (RED).** `classes.spec.ts` scans every `.tsx` under `src/`
+      besides the registry. The one allowed arbitrary value is a layout variable the owning layout
+      declares (`--header-height`, the sidebar and TOC widths) and the `calc` that uses it. Run it;
+      the failures are this task's list.
+- [ ] **Step 2: Sidebar.** `Sidebar collapsible="none"` sticky and bounded under the header,
+      `overscroll-none`; `SidebarContent` the scroller; `SidebarGroupLabel`, `SidebarMenu`,
+      `SidebarMenuItem`, `SidebarMenuButton isActive render={<Link/>}` with no class that sizes or
+      colours them. The page's own background. No fade, no edge gradient, no scroll script.
+- [ ] **Step 3: TOC** in a `ScrollArea`, bounded sticky column, active heading marked through a
+      `data-*` attribute styled by the primitive's own state where one exists, otherwise by
+      `text-foreground` vs `text-muted-foreground` tokens only.
+- [ ] **Step 4: Command menu.** `CommandDialog` at its own position and size; `CommandInput`,
+      `CommandList`, `CommandGroup`, `CommandItem`, `CommandShortcut` as they come. No per-item animated
+      arrow, no MutationObserver, no debounce, no rAF batching. Search results show text without
+      Markdown backticks.
+- [ ] **Step 5: Header, mobile nav, mode switcher, page header, pager.** `Button` variants and sizes
+      only. The page header's copy action is the registry's `CopyButton` copying `<page>.md`. The
+      install block is the registry's `CodeBlock` with one `pnpm dlx shadcn@latest add <url>` line.
+- [ ] **Step 6: Drop the upstream utilities** from the stylesheets (`scroll-fade`,
+      `extend-touch-target`, `--top-spacing`, `no-scrollbar` and the like) once nothing uses them.
+- [ ] **Step 7: Look at it.** Screenshots of `/docs`, a component page and the command dialog at
+      1440 and 390, light and dark, next to the base-nova preview on `ui.shadcn.com/create`; list what
+      differs in the report and fix what is ours.
+- [ ] **Step 8:** the unit gate, `wrangler:build`, and the e2e on the worker pass (the rails e2e
+      holds); commit `refactor(registry-ui): put the docs shell on base-nova as it comes`.
+
 ### Task 6: Drop the primitive pages
 
 **Files:**
