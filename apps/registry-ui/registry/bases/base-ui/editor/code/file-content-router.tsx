@@ -3,7 +3,7 @@ import * as React from 'react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { FileTypeIcon } from '@/registry/bases/base-ui/components/data-display/file-type-icon';
 import { FontPreview } from '@/registry/bases/base-ui/components/data-display/font-preview';
-import { ImagePreview } from '@/registry/bases/base-ui/components/data-display/image-preview';
+import { ImagePreview, ImagePreviewImage } from '@/registry/bases/base-ui/components/data-display/image-preview';
 import { MarkdownView } from '@/registry/bases/base-ui/components/data-display/markdown-view';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
@@ -147,7 +147,11 @@ export function FileContentRouter({
       );
       break;
     case 'image':
-      content = <ImagePreview src={file.src} alt={file.alt} />;
+      content = (
+        <ImagePreview>
+          <ImagePreviewImage src={file.src} alt={file.alt} />
+        </ImagePreview>
+      );
       break;
     case 'font':
       content = (

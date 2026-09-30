@@ -192,7 +192,7 @@
       "name": "image-preview",
       "type": "registry:component",
       "title": "Image Preview",
-      "description": "Shows an image contained within its filled wrapper, over a checkerboard so transparent pixels read clearly.",
+      "description": "A frame that shows an image contained within it, over a checkerboard so transparent pixels read clearly.",
       "categories": ["data-display"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
