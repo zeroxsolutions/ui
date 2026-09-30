@@ -12,11 +12,19 @@ import type { ReactNode } from 'react';
 import {
   DataTable,
   DataTableColumnHeader,
+  DataTableColumnHeaderContent,
+  DataTableColumnHeaderHide,
+  DataTableColumnHeaderSortAscending,
+  DataTableColumnHeaderSortDescending,
+  DataTableColumnHeaderTrigger,
   DataTablePagination,
+  DataTablePaginationNext,
+  DataTablePaginationPrevious,
   DataTableToolbar,
   DataTableView,
   DataTableViewOptions,
 } from '@/registry/bases/base-ui/components/data-display/data-table';
+import { DropdownMenuSeparator } from '@/registry/bases/base-ui/ui/dropdown-menu';
 
 interface FileRow {
   name: string;
@@ -32,11 +40,31 @@ const DATA: FileRow[] = [
 const COLUMNS: ColumnDef<FileRow>[] = [
   {
     accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column}>Name</DataTableColumnHeader>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column}>
+        <DataTableColumnHeaderTrigger>Name</DataTableColumnHeaderTrigger>
+        <DataTableColumnHeaderContent>
+          <DataTableColumnHeaderSortAscending />
+          <DataTableColumnHeaderSortDescending />
+          <DropdownMenuSeparator />
+          <DataTableColumnHeaderHide />
+        </DataTableColumnHeaderContent>
+      </DataTableColumnHeader>
+    ),
   },
   {
     accessorKey: 'size',
-    header: ({ column }) => <DataTableColumnHeader column={column}>Size</DataTableColumnHeader>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column}>
+        <DataTableColumnHeaderTrigger>Size</DataTableColumnHeaderTrigger>
+        <DataTableColumnHeaderContent>
+          <DataTableColumnHeaderSortAscending />
+          <DataTableColumnHeaderSortDescending />
+          <DropdownMenuSeparator />
+          <DataTableColumnHeaderHide />
+        </DataTableColumnHeaderContent>
+      </DataTableColumnHeader>
+    ),
   },
 ];
 
@@ -61,6 +89,8 @@ function DataTableDemo(): ReactNode {
         <span className="text-muted-foreground text-sm">
           {`Page ${table.getState().pagination.pageIndex + 1} of ${table.getPageCount()}`}
         </span>
+        <DataTablePaginationPrevious aria-label="Previous page" />
+        <DataTablePaginationNext aria-label="Next page" />
       </DataTablePagination>
     </DataTable>
   );

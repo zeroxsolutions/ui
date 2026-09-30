@@ -109,7 +109,6 @@
         "@shadcn/button",
         "@shadcn/dropdown-menu",
         "@shadcn/empty",
-        "@shadcn/scroll-area",
         "@shadcn/table",
         "@shadcn/utils",
         "https://lucide-animated.com/r/arrow-down.json",
@@ -921,7 +920,7 @@
       "description": "A small, paginated file table with sortable columns and a view-options menu.",
       "categories": ["examples"],
       "dependencies": ["@tanstack/react-table"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/data-table.json"],
+      "registryDependencies": ["@shadcn/dropdown-menu", "https://ui.zeroxsolutions.com/r/data-table.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/data-table-demo.tsx",

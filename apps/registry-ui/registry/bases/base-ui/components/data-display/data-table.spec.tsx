@@ -10,14 +10,18 @@ import {
 import type { MouseEvent, ReactNode } from 'react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { DropdownMenu, DropdownMenuContent } from '@/registry/bases/base-ui/ui/dropdown-menu';
 import {
   DataTable,
+  DataTableColumnHeader,
+  DataTableColumnHeaderContent,
   DataTableColumnHeaderHide,
   DataTableColumnHeaderSortAscending,
   DataTableColumnHeaderSortDescending,
+  DataTableColumnHeaderTrigger,
   DataTableEmpty,
   DataTablePagination,
+  DataTablePaginationNext,
+  DataTablePaginationPrevious,
   DataTableView,
 } from './data-table';
 
@@ -43,12 +47,6 @@ beforeAll(() => {
 
 afterEach(cleanup);
 
-// ScrollArea measures its viewport in a microtask its layout effect schedules on
-// mount, outside render's own act() batch; awaiting a no-op act() settles it.
-async function settle(): Promise<void> {
-  await act(async () => {});
-}
-
 function useRowsTable(rows: Row[]): TanstackTable<Row> {
   return useReactTable({
     data: rows,
@@ -65,17 +63,25 @@ function ColumnActions({ onClick }: { onClick: (event: MouseEvent) => void }): R
   if (!column) return null;
   return (
     <>
-      <DropdownMenu open>
-        <DropdownMenuContent>
-          <DataTableColumnHeaderSortAscending column={column} onClick={onClick} />
-          <DataTableColumnHeaderSortDescending column={column} onClick={onClick} />
-          <DataTableColumnHeaderHide column={column} onClick={onClick} />
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <DataTableColumnHeader column={column}>
+        <DataTableColumnHeaderTrigger>Name</DataTableColumnHeaderTrigger>
+        <DataTableColumnHeaderContent>
+          <DataTableColumnHeaderSortAscending onClick={onClick} />
+          <DataTableColumnHeaderSortDescending onClick={onClick} />
+          <DataTableColumnHeaderHide onClick={onClick} />
+        </DataTableColumnHeaderContent>
+      </DataTableColumnHeader>
       <output data-testid="sorting">{JSON.stringify(table.getState().sorting)}</output>
       <output data-testid="visible">{String(column.getIsVisible())}</output>
     </>
   );
+}
+
+/** Renders `ColumnActions` and opens its menu from the header's trigger. */
+async function openColumnActions(onClick: (event: MouseEvent) => void): Promise<void> {
+  render(<ColumnActions onClick={onClick} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Name' }));
+  await screen.findByRole('menu');
 }
 
 function RowsTable({ rows }: { rows: Row[] }): ReactNode {
@@ -92,7 +98,7 @@ function RowsTable({ rows }: { rows: Row[] }): ReactNode {
 describe('DataTableColumnHeader actions', () => {
   it('sorts ascending and still calls the caller onClick', async () => {
     const onClick = vi.fn();
-    render(<ColumnActions onClick={onClick} />);
+    await openColumnActions(onClick);
 
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Asc' }));
 
@@ -102,7 +108,7 @@ describe('DataTableColumnHeader actions', () => {
 
   it('sorts descending and still calls the caller onClick', async () => {
     const onClick = vi.fn();
-    render(<ColumnActions onClick={onClick} />);
+    await openColumnActions(onClick);
 
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Desc' }));
 
@@ -112,7 +118,7 @@ describe('DataTableColumnHeader actions', () => {
 
   it('hides the column and still calls the caller onClick', async () => {
     const onClick = vi.fn();
-    render(<ColumnActions onClick={onClick} />);
+    await openColumnActions(onClick);
 
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Hide' }));
 
@@ -123,7 +129,7 @@ describe('DataTableColumnHeader actions', () => {
 
 describe('DataTableColumnHeader actions honor a caller preventDefault', () => {
   it('skips the ascending sort when the caller onClick prevents the default', async () => {
-    render(<ColumnActions onClick={(event) => event.preventDefault()} />);
+    await openColumnActions((event) => event.preventDefault());
 
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Asc' }));
 
@@ -131,7 +137,7 @@ describe('DataTableColumnHeader actions honor a caller preventDefault', () => {
   });
 
   it('skips the descending sort when the caller onClick prevents the default', async () => {
-    render(<ColumnActions onClick={(event) => event.preventDefault()} />);
+    await openColumnActions((event) => event.preventDefault());
 
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Desc' }));
 
@@ -139,7 +145,7 @@ describe('DataTableColumnHeader actions honor a caller preventDefault', () => {
   });
 
   it('skips hiding the column when the caller onClick prevents the default', async () => {
-    render(<ColumnActions onClick={(event) => event.preventDefault()} />);
+    await openColumnActions((event) => event.preventDefault());
 
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Hide' }));
 
@@ -147,17 +153,37 @@ describe('DataTableColumnHeader actions honor a caller preventDefault', () => {
   });
 });
 
+describe('DataTableColumnHeader', () => {
+  it('opens the column menu from the trigger named by its title', async () => {
+    await openColumnActions(() => {});
+
+    expect(screen.getByRole('menuitem', { name: 'Asc' })).toBeTruthy();
+    expect(screen.getByRole('menuitem', { name: 'Desc' })).toBeTruthy();
+    expect(screen.getByRole('menuitem', { name: 'Hide' })).toBeTruthy();
+  });
+
+  it('takes a plain title with no menu for a column that neither sorts nor hides', () => {
+    function PlainHeader(): ReactNode {
+      const table = useRowsTable([]);
+      const column = table.getColumn('name');
+      return column ? <DataTableColumnHeader column={column}>Name</DataTableColumnHeader> : null;
+    }
+    render(<PlainHeader />);
+
+    expect(screen.getByText('Name')).toBeTruthy();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+});
+
 describe('DataTableEmpty', () => {
   it('renders one cell spanning every column when there are no rows', async () => {
     render(<RowsTable rows={[]} />);
-    await settle();
 
     expect(screen.getByRole('cell', { name: 'No results.' }).getAttribute('colspan')).toBe('2');
   });
 
   it('is not rendered while there are rows', async () => {
     render(<RowsTable rows={[{ name: 'a', size: 1 }]} />);
-    await settle();
 
     expect(screen.queryByText('No results.')).toBeNull();
     expect(screen.getByRole('cell', { name: 'a' })).toBeTruthy();
@@ -182,7 +208,10 @@ function PagedTable(): ReactNode {
   return (
     <DataTable table={table}>
       <DataTableView />
-      <DataTablePagination />
+      <DataTablePagination>
+        <DataTablePaginationPrevious aria-label="Previous page" />
+        <DataTablePaginationNext aria-label="Next page" />
+      </DataTablePagination>
     </DataTable>
   );
 }
@@ -190,7 +219,6 @@ function PagedTable(): ReactNode {
 describe('DataTablePagination', () => {
   it('steps to the next page and back', async () => {
     render(<PagedTable />);
-    await settle();
     const previous = screen.getByRole('button', { name: 'Previous page' });
     expect(previous.hasAttribute('disabled')).toBe(true);
 
