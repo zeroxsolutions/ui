@@ -2,10 +2,10 @@ import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-/** The strip across the foot of every page: what the registry is built from. */
+/** The strip across the foot of every page but a docs page, which hides it as upstream's does: what the registry is built from. */
 function SiteFooter({ className, ...props }: ComponentProps<'footer'>): ReactNode {
   return (
-    <footer className={cn('border-t', className)} {...props}>
+    <footer className={cn('border-t group-has-[[data-slot=docs]]/body:hidden', className)} {...props}>
       <p className="text-muted-foreground px-4 py-6 text-center text-sm md:px-6">
         Composed from{' '}
         <a href="https://ui.shadcn.com" className="text-foreground font-medium underline underline-offset-4">

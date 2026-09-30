@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ReactNode } from 'react';
 
-import { DocsSidebar, DocsSidebarProvider } from './docs-sidebar';
+import { DocsSidebar, SidebarProvider } from './docs-sidebar';
 
 vi.mock('next/navigation', () => ({ usePathname: (): string => '/docs/installation' }));
 
@@ -39,19 +39,19 @@ afterEach(() => {
 
 /** The sidebar inside the provider the docs layout gives it. */
 async function renderSidebar(ui: ReactNode = <DocsSidebar tree={tree} />): Promise<void> {
-  // The scroll area measures itself once mounted; awaiting lets that settle before a case asserts.
+  // The layout effect restores the list's offset on mount; awaiting lets it run before a case asserts.
   await act(async () => {
-    render(<DocsSidebarProvider>{ui}</DocsSidebarProvider>);
+    render(<SidebarProvider>{ui}</SidebarProvider>);
   });
 }
 
-/** The box the sidebar's list scrolls in. */
-function listViewport(): HTMLElement {
-  const viewport = screen
+/** The box the sidebar's list scrolls in; the inline restore script finds it by the same attribute. */
+function listScroller(): HTMLElement {
+  const scroller = screen
     .getByRole('link', { name: 'Installation' })
-    .closest<HTMLElement>('[data-slot="scroll-area-viewport"]');
-  if (!viewport) throw new Error('the sidebar list is not inside a scroll area');
-  return viewport;
+    .closest<HTMLElement>('[data-docs-sidebar-content]');
+  if (!scroller) throw new Error('the sidebar list is not inside its scroller');
+  return scroller;
 }
 
 describe('DocsSidebar', () => {
@@ -73,12 +73,10 @@ describe('DocsSidebar', () => {
     expect(screen.getByRole('link', { name: 'Badge' }).getAttribute('aria-current')).toBeNull();
   });
 
-  it('is the landmark named Docs', async () => {
+  it('marks the current page for the restore script to find', async () => {
     await renderSidebar();
 
-    expect(
-      screen.getByRole('navigation', { name: 'Docs' }).contains(screen.getByRole('link', { name: 'Button' })),
-    ).toBe(true);
+    expect(listScroller().querySelector('[data-active]')?.textContent).toBe('Installation');
   });
 
   it('restores the offset stored for this page', async () => {
@@ -86,7 +84,7 @@ describe('DocsSidebar', () => {
 
     await renderSidebar();
 
-    expect(listViewport().scrollTop).toBe(120);
+    expect(listScroller().scrollTop).toBe(120);
   });
 
   it('ignores an offset stored for another page', async () => {
@@ -94,7 +92,7 @@ describe('DocsSidebar', () => {
 
     await renderSidebar();
 
-    expect(listViewport().scrollTop).toBe(0);
+    expect(listScroller().scrollTop).toBe(0);
   });
 
   it('still lists the pages when the browser refuses storage', async () => {

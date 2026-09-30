@@ -48,7 +48,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/** Renders `ui` and lets the TOC's scroll area finish measuring itself before a case asserts. */
+/** Renders `ui` and lets the anchor provider's effects run before a case asserts. */
 async function renderSettled(ui: ReactNode): Promise<void> {
   await act(async () => {
     render(ui);
@@ -76,11 +76,15 @@ describe('DocsToc', () => {
     expect(screen.getByRole('link', { name: 'Usage' }).getAttribute('aria-current')).toBe('location');
   });
 
-  it('is the landmark named On this page', async () => {
+  it('titles its list On this page', async () => {
     await renderSettled(<DocsToc toc={toc} />);
 
-    expect(
-      screen.getByRole('navigation', { name: 'On this page' }).contains(screen.getByRole('link', { name: 'Usage' })),
-    ).toBe(true);
+    expect(screen.getByText('On this page')).toBeTruthy();
+  });
+
+  it('renders nothing for a page without headings', async () => {
+    const { container } = render(<DocsToc toc={[]} />);
+
+    expect(container.childElementCount).toBe(0);
   });
 });

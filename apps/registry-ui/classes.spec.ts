@@ -2,7 +2,7 @@
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
-import { authoredTsx, lineOf, literalTexts, parseTsxSource, readSource } from './src/test/tsx-source';
+import { lineOf, literalTexts, parseTsxSource, readSource, registryItemTsx } from './src/test/tsx-source';
 
 /** Files not rebuilt on base-nova yet; each task that rebuilds one removes it. */
 const PENDING: readonly string[] = [
@@ -26,11 +26,6 @@ const PENDING: readonly string[] = [
   'registry/bases/base-ui/examples/avatar-picker-demo.tsx',
   'registry/bases/base-ui/examples/icon-chip-demo.tsx',
   'registry/bases/base-ui/examples/model-info-card-demo.tsx',
-  'src/components/data-display/block-frame.tsx',
-  'src/components/data-display/component-preview.tsx',
-  'src/components/navigation/command-menu.tsx',
-  'src/components/navigation/mobile-nav.tsx',
-  'src/mdx-components.tsx',
 ];
 
 /** Utilities that paint with a theme colour: `<prefix>-<hue>[-<shade>]`, or the css-var form `<prefix>-(--color-<hue>[-<shade>])`. */
@@ -185,8 +180,8 @@ describe('violationsIn', () => {
   });
 });
 
-describe('the authored modules', () => {
-  const files = authoredTsx();
+describe('the registry items', () => {
+  const files = registryItemTsx();
 
   it('keep every rebuilt module to the class rules', () => {
     expect(

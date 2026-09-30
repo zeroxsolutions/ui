@@ -6,9 +6,9 @@ import { source } from '@/lib/source';
 
 export default function AppLayout({ children }: { children: ReactNode }): ReactNode {
   return (
-    <div className="flex min-h-svh flex-col [--header-height:--spacing(14)]">
+    <div data-slot="layout" className="group/layout bg-background relative z-10 flex min-h-svh flex-col">
       <SiteHeader tree={source.pageTree} />
-      <main className="flex flex-1 flex-col">{children}</main>
+      <main className="flex min-h-0 flex-1 flex-col">{children}</main>
       <SiteFooter />
     </div>
   );

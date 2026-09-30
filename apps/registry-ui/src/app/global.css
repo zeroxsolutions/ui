@@ -1,7 +1,18 @@
 /* The one and only global stylesheet, imported once from the root layout.
  *
- * It holds no rules of its own on purpose: the design system - Tailwind, the
- * `@theme` block, and every design token - lives in the registry so that
- * `shadcn build` ships the exact same CSS consumers install. This file only
- * wires that source into the docs app. */
+ * The design system - Tailwind, the `@theme` block, and every design token - lives in the registry so
+ * that `shadcn build` ships the exact same CSS consumers install. This file wires that source into the
+ * docs app and adds only what the docs shell, a port of upstream's `apps/v4`, takes from upstream's own
+ * `app/globals.css`. `scroll-fade` comes with `shadcn/tailwind.css` and `scrollbar-none` with Tailwind. */
 @import '../../registry/bases/base-ui/styles.css';
+
+@layer base {
+  /* The viewport takes its overscroll from the root element, so a drag at the page's end never rubber-bands. */
+  html {
+    @apply overscroll-y-none;
+  }
+}
+
+@utility container-wrapper {
+  @apply mx-auto w-full px-2;
+}

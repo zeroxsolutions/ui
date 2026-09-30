@@ -37,18 +37,27 @@ export default async function DocsPage({ params }: DocsPageProps): Promise<React
   const Body = page.data.body;
 
   return (
-    <div className="flex items-start gap-10 px-6">
-      <article className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-6 py-10">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">{page.data.title}</h1>
-          <p className="text-muted-foreground">{page.data.description}</p>
-        </header>
-        <Body components={mdxComponents} />
-        <DocsPager tree={source.pageTree} url={page.url} className="mt-6 border-t pt-6" />
-      </article>
-      <aside className="sticky top-(--docs-rail-top) hidden h-(--docs-rail-height) w-56 shrink-0 flex-col xl:flex">
-        <DocsToc toc={page.data.toc} />
-      </aside>
+    <div data-slot="docs" className="flex scroll-mt-24 items-stretch pb-8 text-[1.05rem] sm:text-[15px] xl:w-full">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="h-(--top-spacing) shrink-0" />
+        <div className="text-foreground dark:text-foreground mx-auto flex w-full max-w-160 min-w-0 flex-1 flex-col gap-6 px-4 py-6 md:px-0 lg:py-8">
+          <header className="flex flex-col gap-2">
+            <h1 className="text-3xl font-semibold tracking-tight">{page.data.title}</h1>
+            <p className="text-muted-foreground">{page.data.description}</p>
+          </header>
+          <Body components={mdxComponents} />
+          <DocsPager tree={source.pageTree} url={page.url} className="mt-6 border-t pt-6" />
+        </div>
+      </div>
+      <div className="sticky top-[calc(var(--header-height)+1px)] z-30 ml-auto hidden h-[90svh] w-(--sidebar-width) flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex">
+        <div className="h-(--top-spacing) shrink-0" />
+        {/* overscroll-none on the list too, beyond upstream: WebKit chains a wheel past its end into the page otherwise. */}
+        {page.data.toc.length ? (
+          <div className="scroll-fade flex scrollbar-none flex-col gap-8 overflow-y-auto overscroll-none px-8">
+            <DocsToc toc={page.data.toc} />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

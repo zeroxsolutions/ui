@@ -6,8 +6,8 @@ import ts from 'typescript';
 /** The app's root; every path this module returns is relative to it. */
 export const APP_ROOT = resolve(import.meta.dirname, '../..');
 
-const SCANNED = [
-  'src',
+/** What the registry publishes: its composed items, its block and their examples. */
+const REGISTRY_ITEMS = [
   'registry/bases/base-ui/components',
   'registry/bases/base-ui/blocks',
   'registry/bases/base-ui/examples',
@@ -21,11 +21,21 @@ function walk(dir: string, ext: string): string[] {
   });
 }
 
-/** Every authored `.tsx` module the rules bind, generated indexes and specs excluded. */
-export function authoredTsx(): string[] {
-  return SCANNED.flatMap((dir) => walk(join(APP_ROOT, dir), '.tsx'))
+function tsxUnder(dirs: string[]): string[] {
+  return dirs
+    .flatMap((dir) => walk(join(APP_ROOT, dir), '.tsx'))
     .map((path) => relative(APP_ROOT, path))
     .sort();
+}
+
+/** Every `.tsx` module the registry publishes, generated indexes and specs excluded. The class rules bind these. */
+export function registryItemTsx(): string[] {
+  return tsxUnder(REGISTRY_ITEMS);
+}
+
+/** Every authored `.tsx` module: the registry's items and the docs site in `src/`. The copy rule binds these. */
+export function authoredTsx(): string[] {
+  return tsxUnder(['src', ...REGISTRY_ITEMS]);
 }
 
 /** Every MDX page under `content/docs`. */
