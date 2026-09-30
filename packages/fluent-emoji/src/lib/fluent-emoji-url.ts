@@ -27,9 +27,11 @@ const DEFAULT_STYLE: FluentEmojiStyle = '3d';
 // `@zeroxsolutions/fluent-emoji/dist/assets` into your public dir, or use your CDN —
 // via setFluentEmojiBase (or a per-call `base`).
 //
-// Vite leaves this literal (no asset extension → not transformed/inlined), so it
-// is plain URL math at runtime, not a bundled asset.
-const DEFAULT_BASE = new URL('./assets', import.meta.url).href;
+// Built from the module URL's text, not `new URL('./assets', import.meta.url)`:
+// Turbopack resolves that form to a file when an app builds, follows it through
+// a variable too, and fails the build on a directory ("Module not found: Can't
+// resolve './assets'").
+const DEFAULT_BASE = import.meta.url.replace(/[^/]*$/, 'assets');
 
 let configuredBase: string | undefined;
 let configuredStyle: FluentEmojiStyle | undefined;
@@ -60,10 +62,7 @@ export function setFluentEmojiBase(base: string | undefined): void {
  * // <FluentEmoji glyph="🎉" variant="anim" /> →
  * //   https://cdn.example.com/fluent-emoji/anim/1f389.webp
  */
-export function setFluentEmojiStyleBase(
-  style: FluentEmojiStyle,
-  base: string | undefined,
-): void {
+export function setFluentEmojiStyleBase(style: FluentEmojiStyle, base: string | undefined): void {
   const next = { ...configuredStyleBases };
   if (base === undefined) delete next[style];
   else next[style] = base;
@@ -101,15 +100,11 @@ export interface FluentEmojiUrlOptions {
  * empty glyph. A missing file at the resolved URL is the caller's concern —
  * render the native glyph as a fallback (see {@link FluentEmoji}).
  */
-export function fluentEmojiUrl(
-  glyph: string,
-  options?: FluentEmojiUrlOptions,
-): string | undefined {
+export function fluentEmojiUrl(glyph: string, options?: FluentEmojiUrlOptions): string | undefined {
   const code = emojiToUnicode(glyph);
   if (!code) return undefined;
   const style = options?.style ?? configuredStyle ?? DEFAULT_STYLE;
-  const base =
-    options?.base ?? configuredStyleBases[style] ?? configuredBase ?? DEFAULT_BASE;
+  const base = options?.base ?? configuredStyleBases[style] ?? configuredBase ?? DEFAULT_BASE;
   const { dir, ext } = STYLE_ASSET[style];
   return `${base.replace(/\/+$/, '')}/${dir}/${code}.${ext}`;
 }

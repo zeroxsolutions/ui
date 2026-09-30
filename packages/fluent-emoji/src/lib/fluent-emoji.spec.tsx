@@ -2,12 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { emojiToUnicode } from './emoji-to-unicode';
-import {
-  fluentEmojiUrl,
-  setFluentEmojiBase,
-  setFluentEmojiStyle,
-  setFluentEmojiStyleBase,
-} from './fluent-emoji-url';
+import { fluentEmojiUrl, setFluentEmojiBase, setFluentEmojiStyle, setFluentEmojiStyleBase } from './fluent-emoji-url';
 import { FluentEmoji } from './fluent-emoji';
 
 afterEach(() => {
@@ -38,16 +33,20 @@ describe('emojiToUnicode', () => {
 });
 
 describe('fluentEmojiUrl', () => {
+  it("resolves against the package's own assets directory when no base is set", () => {
+    // Through a variable, so Vite leaves this `new URL` alone; it rewrites the literal form.
+    const specUrl = import.meta.url;
+    expect(fluentEmojiUrl('🤯')).toBe(new URL('./assets/3d/1f92f.webp', specUrl).href);
+  });
+
   it('builds a <base>/3d/<code>.webp URL by default', () => {
-    expect(fluentEmojiUrl('🤯', { base: 'https://cdn.example/emoji' })).toBe(
-      'https://cdn.example/emoji/3d/1f92f.webp',
-    );
+    expect(fluentEmojiUrl('🤯', { base: 'https://cdn.example/emoji' })).toBe('https://cdn.example/emoji/3d/1f92f.webp');
   });
 
   it('builds a <base>/flat/<code>.svg URL for the flat style', () => {
-    expect(
-      fluentEmojiUrl('🤯', { base: 'https://cdn.example/emoji', style: 'flat' }),
-    ).toBe('https://cdn.example/emoji/flat/1f92f.svg');
+    expect(fluentEmojiUrl('🤯', { base: 'https://cdn.example/emoji', style: 'flat' })).toBe(
+      'https://cdn.example/emoji/flat/1f92f.svg',
+    );
   });
 
   it.each([
@@ -82,9 +81,7 @@ describe('fluentEmojiUrl', () => {
   it('lets a per-call style win over the configured default', () => {
     setFluentEmojiBase('https://cdn.example/emoji');
     setFluentEmojiStyle('flat');
-    expect(fluentEmojiUrl('🤯', { style: '3d' })).toBe(
-      'https://cdn.example/emoji/3d/1f92f.webp',
-    );
+    expect(fluentEmojiUrl('🤯', { style: '3d' })).toBe('https://cdn.example/emoji/3d/1f92f.webp');
   });
 
   it('returns undefined for an empty glyph', () => {
@@ -97,20 +94,14 @@ describe('setFluentEmojiStyleBase (per-style base)', () => {
     setFluentEmojiBase('https://cdn.example/emoji');
     setFluentEmojiStyleBase('anim', 'https://anim-cdn.example');
     // anim uses its dedicated base…
-    expect(fluentEmojiUrl('🤯', { style: 'anim' })).toBe(
-      'https://anim-cdn.example/anim/1f92f.webp',
-    );
+    expect(fluentEmojiUrl('🤯', { style: 'anim' })).toBe('https://anim-cdn.example/anim/1f92f.webp');
     // …while the static styles keep resolving from the global base.
-    expect(fluentEmojiUrl('🤯', { style: 'flat' })).toBe(
-      'https://cdn.example/emoji/flat/1f92f.svg',
-    );
+    expect(fluentEmojiUrl('🤯', { style: 'flat' })).toBe('https://cdn.example/emoji/flat/1f92f.svg');
   });
 
   it('lets a per-call base win over the per-style base', () => {
     setFluentEmojiStyleBase('anim', 'https://anim-cdn.example');
-    expect(fluentEmojiUrl('🤯', { style: 'anim', base: 'https://per-call' })).toBe(
-      'https://per-call/anim/1f92f.webp',
-    );
+    expect(fluentEmojiUrl('🤯', { style: 'anim', base: 'https://per-call' })).toBe('https://per-call/anim/1f92f.webp');
   });
 
   it('applies the per-style base for the configured default style too', () => {
@@ -124,54 +115,30 @@ describe('setFluentEmojiStyleBase (per-style base)', () => {
     setFluentEmojiBase('https://cdn.example/emoji');
     setFluentEmojiStyleBase('anim', 'https://anim-cdn.example');
     setFluentEmojiStyleBase('anim', undefined);
-    expect(fluentEmojiUrl('🤯', { style: 'anim' })).toBe(
-      'https://cdn.example/emoji/anim/1f92f.webp',
-    );
+    expect(fluentEmojiUrl('🤯', { style: 'anim' })).toBe('https://cdn.example/emoji/anim/1f92f.webp');
   });
 });
 
 describe('<FluentEmoji>', () => {
   it('renders an <img> with the resolved src and accessible name', () => {
-    render(
-      <FluentEmoji
-        glyph="🤯"
-        name="exploding head"
-        base="https://cdn.example/emoji"
-      />,
-    );
+    render(<FluentEmoji glyph="🤯" name="exploding head" base="https://cdn.example/emoji" />);
     const img = screen.getByRole('img', { name: 'exploding head' });
     expect(img.tagName).toBe('IMG');
-    expect(img.getAttribute('src')).toBe(
-      'https://cdn.example/emoji/3d/1f92f.webp',
-    );
+    expect(img.getAttribute('src')).toBe('https://cdn.example/emoji/3d/1f92f.webp');
   });
 
   it('resolves the flat svg when variant="flat"', () => {
-    render(
-      <FluentEmoji
-        glyph="🤯"
-        name="exploding head"
-        variant="flat"
-        base="https://cdn.example/emoji"
-      />,
+    render(<FluentEmoji glyph="🤯" name="exploding head" variant="flat" base="https://cdn.example/emoji" />);
+    expect(screen.getByRole('img', { name: 'exploding head' }).getAttribute('src')).toBe(
+      'https://cdn.example/emoji/flat/1f92f.svg',
     );
-    expect(
-      screen.getByRole('img', { name: 'exploding head' }).getAttribute('src'),
-    ).toBe('https://cdn.example/emoji/flat/1f92f.svg');
   });
 
   it('resolves the animated webp when variant="anim"', () => {
-    render(
-      <FluentEmoji
-        glyph="🤯"
-        name="exploding head"
-        variant="anim"
-        base="https://cdn.example/emoji"
-      />,
+    render(<FluentEmoji glyph="🤯" name="exploding head" variant="anim" base="https://cdn.example/emoji" />);
+    expect(screen.getByRole('img', { name: 'exploding head' }).getAttribute('src')).toBe(
+      'https://cdn.example/emoji/anim/1f92f.webp',
     );
-    expect(
-      screen.getByRole('img', { name: 'exploding head' }).getAttribute('src'),
-    ).toBe('https://cdn.example/emoji/anim/1f92f.webp');
   });
 
   it('falls back to the native glyph when the image fails to load', () => {
