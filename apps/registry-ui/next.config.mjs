@@ -1,6 +1,7 @@
 // @ts-check
 
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
+import { createMDX } from 'fumadocs-mdx/next';
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
 
 /** @type {import('next').NextConfig} */
@@ -13,6 +14,8 @@ const nextConfig = {
   agentRules: false,
 };
 
+const withMDX = createMDX();
+
 /**
  * Wires the Workers bindings into `next dev` only. Called unconditionally, `next build` starts a
  * miniflare per config load and exits leaving a `workerd` process behind, and the next build then
@@ -22,5 +25,5 @@ const nextConfig = {
  */
 export default async function config(phase) {
   if (phase === PHASE_DEVELOPMENT_SERVER) await initOpenNextCloudflareForDev();
-  return nextConfig;
+  return withMDX(nextConfig);
 }

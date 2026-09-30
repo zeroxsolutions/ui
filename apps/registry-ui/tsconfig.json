@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/registry/*": ["./registry/*"]
+      "@/registry/*": ["./registry/*"],
+      "collections/*": ["./.source/*"]
     },
     "outDir": "dist",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
@@ -33,6 +34,8 @@
     "registry/**/*.ts",
     "registry/**/*.tsx",
     "registry.json",
+    "source.config.ts",
+    ".source/**/*.ts",
     "../../apps/registry-ui/.next/types/**/*.ts",
     "../../dist/apps/registry-ui/.next/types/**/*.ts",
     "next-env.d.ts"

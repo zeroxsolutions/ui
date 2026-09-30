@@ -30,6 +30,7 @@ out-tsc
 tmp
 .next
 .open-next
+.source
 .wrangler
 test-output
 .playwright-mcp

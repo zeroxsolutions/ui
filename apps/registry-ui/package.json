@@ -40,6 +40,8 @@
     "cn": "^0.4.0",
     "date-fns": "^4.4.0",
     "embla-carousel-react": "^8.6.0",
+    "fumadocs-core": "16.15.17",
+    "fumadocs-mdx": "15.4.5",
     "input-otp": "^1.4.2",
     "katex": "^0.16.11",
     "lucide-react": "catalog:",
@@ -74,17 +76,25 @@
   },
   "nx": {
     "targets": {
+      "test": {
+        "dependsOn": [
+          "^build",
+          "fumadocs-generate"
+        ]
+      },
       "build": {
         "dependsOn": [
           "^build",
-          "shadcn-build"
+          "shadcn-build",
+          "fumadocs-generate"
         ]
       },
       "wrangler:build": {
         "executor": "nx:run-commands",
         "dependsOn": [
           "^build",
-          "shadcn-build"
+          "shadcn-build",
+          "fumadocs-generate"
         ],
         "outputs": [
           "{projectRoot}/.open-next"
@@ -93,6 +103,17 @@
         "options": {
           "cwd": "{projectRoot}",
           "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild"
+        }
+      },
+      "wrangler:dev": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "wrangler:build"
+        ],
+        "continuous": true,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "opennextjs-cloudflare preview --env development"
         }
       },
       "wrangler:typegen": {
@@ -115,6 +136,17 @@
             "shadcn registry validate registry.json"
           ],
           "parallel": false
+        }
+      },
+      "fumadocs-generate": {
+        "executor": "nx:run-commands",
+        "outputs": [
+          "{projectRoot}/.source"
+        ],
+        "cache": true,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "fumadocs-mdx"
         }
       }
     }

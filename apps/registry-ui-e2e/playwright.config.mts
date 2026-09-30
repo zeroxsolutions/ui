@@ -3,7 +3,7 @@ import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
 
 // For CI, you may want to set BASE_URL to the deployed application.
-const baseURL = process.env['BASE_URL'] || 'http://localhost:3000';
+const baseURL = process.env['BASE_URL'] || 'http://localhost:8787';
 
 /**
  * Read environment variables from file.
@@ -29,12 +29,17 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
-  /* Run your local dev server before starting the tests */
+  /* Run the worker the adapter builds before starting the tests */
   webServer: {
-    command: 'pnpm exec nx run @zeroxsolutions/registry-ui:dev',
-    url: 'http://localhost:3000',
+    command: 'pnpm exec nx run @zeroxsolutions/registry-ui:wrangler:dev',
+    url: 'http://localhost:8787',
     reuseExistingServer: true,
     cwd: workspaceRoot,
+    // Starting includes the worker build; the 60s default is timed for a server that only boots.
+    timeout: 300_000,
+    // Unset, Playwright SIGKILLs nx and the worker nx started keeps port 8787, so the next run's
+    // reuseExistingServer tests that stale worker instead of the one it just built.
+    gracefulShutdown: { signal: 'SIGINT', timeout: 10_000 },
   },
   projects: [
     {
