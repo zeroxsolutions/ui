@@ -17,7 +17,12 @@ import { Spinner } from '@/registry/bases/base-ui/ui/spinner';
 import { TabsContent } from '@/registry/bases/base-ui/ui/tabs';
 import { UploadIcon, type UploadIconHandle } from '@/registry/bases/base-ui/ui/upload';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { EmojiPicker } from '@/registry/bases/base-ui/components/data-entry/emoji-picker';
+import {
+  EmojiPicker,
+  EmojiPickerContent,
+  EmojiPickerNav,
+  EmojiPickerSearch,
+} from '@/registry/bases/base-ui/components/data-entry/emoji-picker';
 
 interface AvatarPickerValue {
   /** Emoji glyph avatar, or null. */
@@ -164,7 +169,11 @@ function AvatarPickerEmoji(props: Omit<React.ComponentProps<typeof TabsContent>,
   const { setEmoji } = useAvatarPicker();
   return (
     <TabsContent data-slot="avatar-picker-emoji" value="emoji" {...props}>
-      <EmojiPicker onSelect={setEmoji} />
+      <EmojiPicker onSelect={setEmoji}>
+        <EmojiPickerSearch />
+        <EmojiPickerContent />
+        <EmojiPickerNav />
+      </EmojiPicker>
     </TabsContent>
   );
 }

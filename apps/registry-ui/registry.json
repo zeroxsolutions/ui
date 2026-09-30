@@ -286,10 +286,9 @@
       "dependencies": ["@zeroxsolutions/fluent-emoji", "lucide-react"],
       "registryDependencies": [
         "@shadcn/button",
-        "@shadcn/empty",
         "@shadcn/input-group",
         "@shadcn/scroll-area",
-        "@shadcn/tabs",
+        "@shadcn/toggle-group",
         "@shadcn/utils",
         "https://lucide-animated.com/r/clock.json",
         "https://lucide-animated.com/r/coffee.json",
@@ -1053,9 +1052,10 @@
       "name": "emoji-picker-demo",
       "type": "registry:example",
       "title": "Emoji Picker Demo",
-      "description": "The default EmojiPicker composition over a small frequent row.",
+      "description": "The EmojiPicker composed from its parts over a small frequent row, with an empty state for a search that matches nothing.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/emoji-picker.json"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/empty", "https://ui.zeroxsolutions.com/r/emoji-picker.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/emoji-picker-demo.tsx",
