@@ -149,3 +149,6 @@ own variant or size replaces it; where none fits, the item takes the primitive's
 
 The logo, the home page and its shader (spec c3); new item pages beyond the ones that exist; the
 deploy (worker size, plan choice, the duplicate Shiki); the editor (spec d).
+
+What this spec did not finish is carried into spec c3
+(`2026-10-01-logo-home-and-carry-over-design.md`, "What c2 left").
