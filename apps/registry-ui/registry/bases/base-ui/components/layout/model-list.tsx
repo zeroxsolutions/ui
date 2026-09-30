@@ -78,7 +78,7 @@ function ModelListContent({ className, children, ...props }: React.ComponentProp
 /** The ghost remove button for one model item, labelled "Remove model" unless an `aria-label` is given; `children` replace its trash icon. */
 function ModelListRemoveButton({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
   return (
-    <Button aria-label="Remove model" variant="ghost" size="icon-sm" {...props}>
+    <Button data-slot="model-list-remove-button" aria-label="Remove model" variant="ghost" size="icon-sm" {...props}>
       {children ?? <Trash2 />}
     </Button>
   );
