@@ -37,7 +37,7 @@ interface CodeBlockProps extends ComponentProps<typeof CollapsibleCard> {
   lines?: HighlightLine[] | null;
   /** Numbers each line in a gutter beside the code, which a copy leaves out. */
   lineNumbers?: boolean;
-  /** The header, composed from `CollapsibleCard` parts; absent, a copy button floats over the code on hover. */
+  /** The header, composed from `CollapsibleCard` parts; absent, a secondary copy button floats over the code on hover or focus. */
   children?: ReactNode;
 }
 
@@ -91,7 +91,8 @@ function CodeBlock({
           <CopyButton
             value={code}
             label="Copy code"
-            className="bg-muted/70 absolute top-1 right-1 z-10 opacity-0 backdrop-blur transition-opacity group-hover/code-block:opacity-100 focus-visible:opacity-100"
+            variant="secondary"
+            className="absolute top-1 right-1 z-10 opacity-0 transition-opacity group-hover/code-block:opacity-100 focus-visible:opacity-100"
           />
         )}
         <CollapsibleCardContent>

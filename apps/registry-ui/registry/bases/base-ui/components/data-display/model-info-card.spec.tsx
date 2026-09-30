@@ -47,9 +47,9 @@ describe('ModelInfoCardSection', () => {
     render(
       <ModelInfoCardSection>
         <Item size="xs">
-          <ModelInfoCardBadge className="bg-blue-500" />
+          <ModelInfoCardBadge className="bg-chart-1" />
           <ItemContent>
-            <ItemTitle>Context Length</ItemTitle>
+            <ItemTitle>Context length</ItemTitle>
           </ItemContent>
           <ItemActions>128K tokens</ItemActions>
         </Item>
@@ -58,8 +58,8 @@ describe('ModelInfoCardSection', () => {
     );
 
     const section = document.querySelector('[data-slot="model-info-card-section"]');
-    expect(section?.querySelector('[data-slot="model-info-card-badge"]')?.className).toContain('bg-blue-500');
-    expect(screen.getByText('Context Length')).toBeTruthy();
+    expect(section?.querySelector('[data-slot="model-info-card-badge"]')?.className).toContain('bg-chart-1');
+    expect(screen.getByText('Context length')).toBeTruthy();
     expect(screen.getByText('128K tokens')).toBeTruthy();
     expect(section?.querySelector('[data-testid="line"]')).toBeTruthy();
   });
@@ -67,10 +67,10 @@ describe('ModelInfoCardSection', () => {
 
 describe('ModelInfoCardBadge', () => {
   it('lets the consumer class replace the muted accent', () => {
-    render(<ModelInfoCardBadge className="bg-blue-500" />);
+    render(<ModelInfoCardBadge className="bg-chart-1" />);
 
     const badge = document.querySelector('[data-slot="model-info-card-badge"]');
-    expect(badge?.className).toContain('bg-blue-500');
+    expect(badge?.className).toContain('bg-chart-1');
     expect(badge?.className).not.toContain('bg-muted-foreground');
   });
 });

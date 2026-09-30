@@ -10,6 +10,7 @@ import {
   AiProviderCardTrigger,
 } from '@/registry/bases/base-ui/components/data-display/ai-provider-card';
 import { CardFooter, CardHeader, CardTitle } from '@/registry/bases/base-ui/ui/card';
+import { Switch } from '@/registry/bases/base-ui/ui/switch';
 
 const PROVIDERS = [
   {
@@ -43,14 +44,12 @@ function AiProviderCardDemo(): ReactNode {
             <CardFooter className="mt-auto justify-between">
               <AiProviderCardStatus>{provider.note}</AiProviderCardStatus>
               <AiProviderCardAction>
-                <button
-                  type="button"
-                  aria-pressed={enabled[provider.name]}
-                  className="text-muted-foreground aria-pressed:text-foreground text-xs underline-offset-2 hover:underline"
-                  onClick={() => setEnabled((current) => ({ ...current, [provider.name]: !current[provider.name] }))}
-                >
-                  {enabled[provider.name] ? 'Enabled' : 'Disabled'}
-                </button>
+                <Switch
+                  size="sm"
+                  aria-label={`Enable ${provider.name}`}
+                  checked={enabled[provider.name]}
+                  onCheckedChange={(checked) => setEnabled((current) => ({ ...current, [provider.name]: checked }))}
+                />
               </AiProviderCardAction>
             </CardFooter>
             <AiProviderCardTrigger aria-label={`Select ${provider.name}`} onClick={() => setSelected(provider.name)} />

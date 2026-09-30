@@ -17,7 +17,7 @@ function ImagePreview({ src, alt = '', className, ...props }: ImagePreviewProps)
   return (
     <div
       data-slot="image-preview"
-      className="flex size-full items-center justify-center overflow-hidden rounded-md bg-[image:repeating-conic-gradient(var(--muted)_0_25%,var(--background)_0_50%)] bg-size-[--spacing(4)_--spacing(4)]"
+      className="bg-checkerboard flex size-full items-center justify-center overflow-hidden rounded-md"
     >
       <img src={src} alt={alt} className={cn('max-h-full max-w-full object-contain', className)} {...props} />
     </div>

@@ -20,7 +20,7 @@ import { AiProviderIcon } from '@zeroxsolutions/icons/ai-provider-icon';
 function ModelInfoCardDemo(): ReactNode {
   return (
     <ModelInfoCard className="w-full max-w-sm">
-      <Item size="xs" className="p-0">
+      <Item size="xs">
         <ItemMedia>
           <AiProviderIcon provider="openai" type="avatar" size={32} />
         </ItemMedia>
@@ -28,11 +28,13 @@ function ModelInfoCardDemo(): ReactNode {
           <ItemTitle>GPT-4o</ItemTitle>
           <ItemDescription>OpenAI</ItemDescription>
         </ItemContent>
-        <ItemFooter className="text-muted-foreground font-mono text-xs">gpt-4o</ItemFooter>
+        <ItemFooter>
+          <code className="text-muted-foreground text-xs">gpt-4o</code>
+        </ItemFooter>
       </Item>
       <ModelInfoCardSection>
         <Item size="xs">
-          <ModelInfoCardBadge className="bg-blue-500" />
+          <ModelInfoCardBadge className="bg-chart-1" />
           <ItemContent>
             <ItemTitle>Context length</ItemTitle>
           </ItemContent>
@@ -41,7 +43,7 @@ function ModelInfoCardDemo(): ReactNode {
       </ModelInfoCardSection>
       <ModelInfoCardSection>
         <Item size="xs">
-          <ModelInfoCardBadge className="bg-emerald-500" />
+          <ModelInfoCardBadge className="bg-chart-4" />
           <ItemContent>
             <ItemTitle>Pricing</ItemTitle>
           </ItemContent>

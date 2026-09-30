@@ -39,12 +39,26 @@ describe('ChatMessage', () => {
     expect(root().hasAttribute('data-streaming')).toBe(false);
   });
 
-  it('passes the caller style through, so an agent colour tints the accent', () => {
+  it('draws the streaming line only while the message is streaming', () => {
+    const { rerender } = render(<ChatMessage streaming>body</ChatMessage>);
+    expect(root().querySelector('[data-slot="chat-message-accent"]')).not.toBeNull();
+
+    rerender(<ChatMessage>body</ChatMessage>);
+    expect(root().querySelector('[data-slot="chat-message-accent"]')).toBeNull();
+  });
+
+  it('paints the streaming line in the accent colour it is given', () => {
     render(
-      <ChatMessage streaming style={{ borderInlineStartColor: 'rgb(255, 0, 0)' }}>
+      <ChatMessage streaming accentColor="rgb(255, 0, 0)">
         body
       </ChatMessage>,
     );
-    expect(root().style.borderInlineStartColor).toBe('rgb(255, 0, 0)');
+    const accent = root().querySelector<HTMLElement>('[data-slot="chat-message-accent"]');
+    expect(accent?.style.backgroundColor).toBe('rgb(255, 0, 0)');
+  });
+
+  it('passes the caller style through to the row', () => {
+    render(<ChatMessage style={{ maxWidth: '40rem' }}>body</ChatMessage>);
+    expect(root().style.maxWidth).toBe('40rem');
   });
 });

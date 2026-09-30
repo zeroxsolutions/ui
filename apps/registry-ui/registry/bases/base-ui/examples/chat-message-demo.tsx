@@ -4,7 +4,7 @@ import { ChatMessage } from '@/registry/bases/base-ui/components/data-display/ch
 import { Bubble, BubbleContent } from '@/registry/bases/base-ui/ui/bubble';
 import { MessageContent, MessageHeader } from '@/registry/bases/base-ui/ui/message';
 
-/** A user bubble and the assistant's reply. */
+/** A user bubble and the assistant's reply, still streaming. */
 function ChatMessageDemo(): ReactNode {
   return (
     <div className="flex w-full flex-col gap-3">
@@ -15,7 +15,7 @@ function ChatMessageDemo(): ReactNode {
           </Bubble>
         </MessageContent>
       </ChatMessage>
-      <ChatMessage>
+      <ChatMessage streaming>
         <MessageContent>
           <MessageHeader>Assistant</MessageHeader>
           <Bubble variant="ghost">

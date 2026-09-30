@@ -58,7 +58,9 @@ function DataTableDemo(): ReactNode {
       </DataTableToolbar>
       <DataTableView />
       <DataTablePagination>
-        {`Page ${table.getState().pagination.pageIndex + 1} of ${table.getPageCount()}`}
+        <span className="text-muted-foreground text-sm">
+          {`Page ${table.getState().pagination.pageIndex + 1} of ${table.getPageCount()}`}
+        </span>
       </DataTablePagination>
     </DataTable>
   );

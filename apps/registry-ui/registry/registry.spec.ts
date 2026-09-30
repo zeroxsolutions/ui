@@ -20,6 +20,8 @@ interface RegistryItem {
   dependencies?: string[];
   registryDependencies?: string[];
   cssVars?: CssVars;
+  /** CSS rules the item ships, keyed by at-rule (`@utility <name>`), each a map of declarations. */
+  css?: Record<string, Record<string, string>>;
   files: RegistryFile[];
 }
 
@@ -201,6 +203,28 @@ function cssVarsProblems(item: RegistryItem): string[] {
     : [`${item.name}: cssVars should be ${JSON.stringify(expected)}`];
 }
 
+/** The declarations of the top-level `<rule> { ... }` block in the base stylesheet, or undefined when it declares none. */
+function stylesheetRule(rule: string): Record<string, string> | undefined {
+  const css = readFileSync(join(APP, BASE, 'styles.css'), 'utf8');
+  const escaped = rule.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const body = new RegExp(`^${escaped} \\{\\n([\\s\\S]*?)^\\}`, 'm').exec(css)?.[1];
+  if (body === undefined) return undefined;
+  return Object.fromEntries(
+    [...body.matchAll(/^\s*([\w-]+):\s*([^;]+);/gm)].map(([, property, value]) => [property, value.trim()]),
+  );
+}
+
+/** Each rule an item's `css` ships is the same rule, with the same declarations, as the stylesheet the site renders with. */
+function cssProblems(item: RegistryItem): string[] {
+  return Object.entries(item.css ?? {}).flatMap(([rule, declarations]) => {
+    const expected = stylesheetRule(rule);
+    if (expected === undefined) return [`${item.name}: css ships ${rule}, which styles.css does not declare`];
+    return isDeepStrictEqual(declarations, expected)
+      ? []
+      : [`${item.name}: css ${rule} should be ${JSON.stringify(expected)}`];
+  });
+}
+
 /** Every family file: a component under a kind folder or a block, specs left out. */
 function familyFiles(): string[] {
   return ['components', 'blocks']
@@ -265,6 +289,10 @@ describe('registry.json', () => {
 
   it('carries the success and warning tokens an item paints with, and no others', () => {
     expect(REGISTRY.items.flatMap(cssVarsProblems)).toEqual([]);
+  });
+
+  it('ships each css rule exactly as styles.css declares it', () => {
+    expect(REGISTRY.items.flatMap(cssProblems)).toEqual([]);
   });
 
   it('publishes each family file as one item named and categorised after it', () => {
@@ -421,6 +449,30 @@ describe('cssVarsProblems', () => {
     };
     expect(cssVarsProblems(item)).toEqual([
       'status-indicator: cssVars should be {"theme":{"color-success":"var(--success)","color-warning":"var(--warning)"},"light":{"success":"oklch(0.627 0.19 149)","warning":"oklch(0.681 0.162 75.834)"},"dark":{"success":"oklch(0.723 0.19 149)","warning":"oklch(0.79 0.155 80)"}}',
+    ]);
+  });
+});
+
+const CHECKERBOARD = {
+  'background-image': 'repeating-conic-gradient(var(--muted) 0 25%, var(--background) 0 50%)',
+  'background-size': 'calc(var(--spacing) * 4) calc(var(--spacing) * 4)',
+};
+
+describe('cssProblems', () => {
+  it('reports nothing for a rule shipped as styles.css declares it', () => {
+    expect(cssProblems({ ...treeItem, css: { '@utility bg-checkerboard': CHECKERBOARD } })).toEqual([]);
+  });
+
+  it('reports a rule whose declarations differ from styles.css', () => {
+    const css = { '@utility bg-checkerboard': { ...CHECKERBOARD, 'background-size': '8px 8px' } };
+    expect(cssProblems({ ...treeItem, css })).toEqual([
+      `tree-item: css @utility bg-checkerboard should be ${JSON.stringify(CHECKERBOARD)}`,
+    ]);
+  });
+
+  it('reports a rule styles.css does not declare', () => {
+    expect(cssProblems({ ...treeItem, css: { '@utility bg-missing': {} } })).toEqual([
+      'tree-item: css ships @utility bg-missing, which styles.css does not declare',
     ]);
   });
 });

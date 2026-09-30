@@ -22,21 +22,18 @@ function AiProviderCard({ status, size = 'sm', className, ...props }: AiProvider
       data-slot="ai-provider-card"
       data-status={status}
       size={size}
-      className={cn(
-        'group/ai-provider-card focus-within:ring-ring/50 has-data-[slot=ai-provider-card-trigger]:hover:ring-foreground/20 relative h-full transition-shadow',
-        className,
-      )}
+      className={cn('group/ai-provider-card relative h-full', className)}
       {...props}
     />
   );
 }
 
-/** The provider blurb: clamped to two lines, with the height of two reserved so grid rows align. */
+/** The provider blurb, clamped to two lines. */
 function AiProviderCardDescription({
   className,
   ...props
 }: React.ComponentProps<typeof CardDescription>): React.ReactNode {
-  return <CardDescription className={cn('line-clamp-2 min-h-11', className)} {...props} />;
+  return <CardDescription className={cn('line-clamp-2', className)} {...props} />;
 }
 
 /** The footer note (a model count, or an attention message), toned by the card's `status`. */
@@ -63,8 +60,8 @@ function AiProviderCardAction({ className, ...props }: React.ComponentProps<'div
 
 /**
  * The button that selects the card. It covers the whole card below any
- * `AiProviderCardAction`, so the card is one keyboard stop; give it an
- * `aria-label` naming the provider.
+ * `AiProviderCardAction`, so the card is one keyboard stop, and draws its hover
+ * and focus rings inside the card's edge; give it an `aria-label` naming the provider.
  */
 function AiProviderCardTrigger({
   type = 'button',
@@ -75,7 +72,10 @@ function AiProviderCardTrigger({
     <button
       data-slot="ai-provider-card-trigger"
       type={type}
-      className={cn('absolute inset-0 z-10 cursor-pointer rounded-xl outline-none', className)}
+      className={cn(
+        'hover:inset-ring-foreground/20 focus-visible:inset-ring-ring/50 absolute inset-0 z-10 cursor-pointer rounded-xl outline-none hover:inset-ring-1 focus-visible:inset-ring-3',
+        className,
+      )}
       {...props}
     />
   );
