@@ -1,9 +1,11 @@
-import { X } from 'lucide-react';
-import { useState, type ComponentProps, type KeyboardEvent, type ReactNode } from 'react';
+'use client';
+
+import { useRef, useState, type ComponentProps, type KeyboardEvent, type ReactNode } from 'react';
 
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Input } from '@/registry/bases/base-ui/ui/input';
+import { XIcon, type XIconHandle } from '@/registry/bases/base-ui/ui/x';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 interface TagInputProps extends Omit<ComponentProps<'div'>, 'onChange' | 'defaultValue'> {
@@ -18,9 +20,10 @@ interface TagInputProps extends Omit<ComponentProps<'div'>, 'onChange' | 'defaul
 
 /**
  * A simple tag editor: existing tags as removable `Badge` chips above an `Input`
- * that commits on Enter / comma / blur. Backspace on an empty input drops the
- * last tag. Controlled - the consumer owns the tag array and supplies any
- * placeholder copy. Other props land on the root `div`.
+ * that commits on Enter / comma / blur. A chip's remove button drops its tag,
+ * and Backspace on an empty input drops the last tag. Controlled - the consumer
+ * owns the tag array and supplies any placeholder copy. Other props land on the
+ * root `div`.
  */
 function TagInput({ value, onValueChange, placeholder, disabled, className, ...props }: TagInputProps): ReactNode {
   const [draft, setDraft] = useState('');
@@ -41,23 +44,18 @@ function TagInput({ value, onValueChange, placeholder, disabled, className, ...p
   };
 
   return (
-    <div data-slot="tag-input" className={cn('space-y-2', className)} {...props}>
+    <div data-slot="tag-input" className={cn('flex flex-col gap-2', className)} {...props}>
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {value.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1 pr-1">
+            <TagInputTag
+              key={tag}
+              disabled={disabled}
+              removeLabel={`Remove ${tag}`}
+              onRemove={() => onValueChange(value.filter((t) => t !== tag))}
+            >
               {tag}
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => onValueChange(value.filter((t) => t !== tag))}
-                aria-label={`Remove ${tag}`}
-                className="text-muted-foreground hover:text-foreground rounded-full"
-                disabled={disabled}
-              >
-                <X />
-              </Button>
-            </Badge>
+            </TagInputTag>
           ))}
         </div>
       )}
@@ -70,6 +68,44 @@ function TagInput({ value, onValueChange, placeholder, disabled, className, ...p
         disabled={disabled}
       />
     </div>
+  );
+}
+
+interface TagInputTagProps extends ComponentProps<typeof Badge> {
+  /** Called when the remove button is pressed. */
+  onRemove: () => void;
+  /** The remove button's accessible name, e.g. `Remove design`. */
+  removeLabel: string;
+  /** Disables the remove button; the label is never interactive. */
+  disabled?: boolean;
+}
+
+/**
+ * One tag, composed as upstream's combobox chip: the label, then a ghost
+ * `icon-xs` button that removes it (upstream's inline-end badge icon slot). The
+ * cross plays on the button's hover or focus.
+ */
+function TagInputTag({ children, onRemove, removeLabel, disabled, ...props }: TagInputTagProps): ReactNode {
+  const iconRef = useRef<XIconHandle>(null);
+  return (
+    <Badge data-slot="tag-input-tag" variant="secondary" {...props}>
+      {children}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-xs"
+        data-icon="inline-end"
+        aria-label={removeLabel}
+        disabled={disabled}
+        onClick={onRemove}
+        onMouseEnter={() => iconRef.current?.startAnimation()}
+        onMouseLeave={() => iconRef.current?.stopAnimation()}
+        onFocus={() => iconRef.current?.startAnimation()}
+        onBlur={() => iconRef.current?.stopAnimation()}
+      >
+        <XIcon ref={iconRef} aria-hidden />
+      </Button>
+    </Badge>
   );
 }
 

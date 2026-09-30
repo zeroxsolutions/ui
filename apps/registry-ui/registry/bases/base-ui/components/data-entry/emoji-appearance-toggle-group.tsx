@@ -2,7 +2,6 @@ import { FluentEmoji, type FluentEmojiStyle } from '@zeroxsolutions/fluent-emoji
 import type { ComponentProps, ReactNode } from 'react';
 
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 // A glyph present in every Fluent style - each swatch previews it so the user
 // sees the artwork rather than reading a style name.
@@ -21,8 +20,10 @@ interface EmojiAppearanceToggleGroupProps extends Omit<
 /**
  * A row of preview swatches for the Fluent emoji artwork **style**, one
  * `EmojiAppearanceToggleGroupItem` per style the consumer offers. Each swatch
- * renders the same sample emoji in its style (an `anim` swatch plays its frames),
- * so the preview is the selector. Single-select, and a style is always chosen.
+ * renders the same sample emoji in its style (an `anim` swatch plays its frames)
+ * before its label, so the preview is the selector. Single-select, and a style is
+ * always chosen. Outlined and spaced apart unless `variant` or `spacing` say
+ * otherwise.
  *
  * This is an **app-level appearance control**, not part of the emoji glyph picker:
  * the artwork style is a global preference. It's controlled (`value` /
@@ -40,7 +41,8 @@ function EmojiAppearanceToggleGroup({ value, onValueChange, ...props }: EmojiApp
         const picked = next[0] as FluentEmojiStyle | undefined;
         if (picked) onValueChange(picked);
       }}
-      spacing={6}
+      variant="outline"
+      spacing={2}
       aria-label="Emoji style"
       {...props}
     />
@@ -53,32 +55,21 @@ interface EmojiAppearanceToggleGroupItemProps extends Omit<ComponentProps<typeof
 }
 
 /**
- * One swatch: the sample emoji drawn in `value`'s style over the consumer's
- * label (`children`), which names the swatch; the preview itself is decorative.
+ * One swatch: the sample emoji drawn in `value`'s style before the consumer's
+ * label (`children`), which names the swatch; the preview itself is decorative,
+ * drawn as large as fits the toggle (h-8) so the styles read apart.
  */
-function EmojiAppearanceToggleGroupItem({
-  value,
-  className,
-  children,
-  ...props
-}: EmojiAppearanceToggleGroupItemProps): ReactNode {
+function EmojiAppearanceToggleGroupItem({ value, children, ...props }: EmojiAppearanceToggleGroupItemProps): ReactNode {
   return (
-    <ToggleGroupItem
-      data-slot="emoji-appearance-toggle-group-item"
-      value={value}
-      // Base UI Toggle marks the pressed item with `aria-pressed`/`data-pressed`
-      // (not Radix's `data-state=on`); ring the selected swatch off that.
-      className={cn('aria-pressed:ring-ring h-auto flex-col gap-1 px-3 py-2 aria-pressed:ring-2', className)}
-      {...props}
-    >
+    <ToggleGroupItem data-slot="emoji-appearance-toggle-group-item" value={value} {...props}>
       <FluentEmoji
         glyph={SAMPLE.glyph}
         name={SAMPLE.name}
         variant={value}
         aria-hidden
-        className="size-8 object-contain"
+        className="size-6 object-contain"
       />
-      <span className="text-muted-foreground text-xs">{children}</span>
+      {children}
     </ToggleGroupItem>
   );
 }

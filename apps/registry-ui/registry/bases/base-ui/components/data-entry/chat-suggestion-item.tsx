@@ -21,14 +21,14 @@ interface ChatSuggestionItemProps extends ComponentProps<'button'> {
  *
  *   <Empty>
  *     <EmptyHeader>
- *       <EmptyMedia variant="icon"><Sparkles /></EmptyMedia>
+ *       <EmptyMedia variant="icon"><SparklesIcon /></EmptyMedia>
  *       <EmptyTitle>Start a conversation</EmptyTitle>
  *       <EmptyDescription>Ask anything</EmptyDescription>
  *     </EmptyHeader>
  *     <EmptyContent>
  *       <ItemGroup>
  *         <ChatSuggestionItem prompt="summarise this" onSelectPrompt={send}>
- *           <ItemMedia><FileText /></ItemMedia>
+ *           <ItemMedia variant="icon"><FileTextIcon /></ItemMedia>
  *           <ItemContent><ItemTitle>Summarise</ItemTitle></ItemContent>
  *         </ChatSuggestionItem>
  *       </ItemGroup>
@@ -55,10 +55,7 @@ function ChatSuggestionItem({
             onClick?.(event);
             if (!event.defaultPrevented) onSelectPrompt?.(prompt);
           }}
-          className={cn(
-            'hover:bg-muted w-full cursor-pointer text-left disabled:cursor-default disabled:opacity-60',
-            className,
-          )}
+          className={cn('w-full text-left', className)}
           {...props}
         />
       }

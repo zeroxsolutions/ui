@@ -279,12 +279,25 @@ describe('registry.json', () => {
 const treeItem: RegistryItem = {
   name: 'tree-item',
   type: 'registry:component',
-  dependencies: ['lucide-react'],
-  registryDependencies: ['@shadcn/button', '@shadcn/input', '@shadcn/item', '@shadcn/utils'],
+  registryDependencies: [
+    '@shadcn/button',
+    '@shadcn/input',
+    '@shadcn/item',
+    '@shadcn/utils',
+    `${ANIMATED_ICON_URL}chevron-right.json`,
+  ],
   files: [
     { path: `${BASE}/components/data-entry/tree-item.tsx`, type: 'registry:component' },
     { path: `${BASE}/lib/ime.ts`, type: 'registry:lib' },
   ],
+};
+
+const emojiAppearanceToggleGroup: RegistryItem = {
+  name: 'emoji-appearance-toggle-group',
+  type: 'registry:component',
+  dependencies: ['@zeroxsolutions/fluent-emoji'],
+  registryDependencies: ['@shadcn/toggle-group'],
+  files: [{ path: `${BASE}/components/data-entry/emoji-appearance-toggle-group.tsx`, type: 'registry:component' }],
 };
 
 const aiProviderPicker: RegistryItem = {
@@ -318,8 +331,15 @@ describe('declarationProblems', () => {
   });
 
   it('reports an upstream part the item imports but does not declare', () => {
-    const item = { ...treeItem, registryDependencies: ['@shadcn/input', '@shadcn/item', '@shadcn/utils'] };
+    const item = { ...treeItem, registryDependencies: treeItem.registryDependencies?.slice(1) };
     expect(declarationProblems(item, new Map())).toEqual(['tree-item: registryDependencies lacks @shadcn/button']);
+  });
+
+  it('names a vendored animated icon by its lucide-animated URL', () => {
+    const item = { ...treeItem, registryDependencies: treeItem.registryDependencies?.slice(0, -1) };
+    expect(declarationProblems(item, new Map())).toEqual([
+      'tree-item: registryDependencies lacks https://lucide-animated.com/r/chevron-right.json',
+    ]);
   });
 
   it('reports a registry dependency no file of the item imports', () => {
@@ -330,14 +350,16 @@ describe('declarationProblems', () => {
   });
 
   it('reports a package the item imports but does not declare', () => {
-    const item = { ...treeItem, dependencies: [] };
-    expect(declarationProblems(item, new Map())).toEqual(['tree-item: dependencies lacks lucide-react']);
+    const item = { ...emojiAppearanceToggleGroup, dependencies: [] };
+    expect(declarationProblems(item, new Map())).toEqual([
+      'emoji-appearance-toggle-group: dependencies lacks @zeroxsolutions/fluent-emoji',
+    ]);
   });
 
   it('reports a package no file of the item imports', () => {
-    const item = { ...treeItem, dependencies: ['lucide-react', 'shiki'] };
+    const item = { ...emojiAppearanceToggleGroup, dependencies: ['@zeroxsolutions/fluent-emoji', 'shiki'] };
     expect(declarationProblems(item, new Map())).toEqual([
-      'tree-item: dependencies declares shiki, which its files do not import',
+      'emoji-appearance-toggle-group: dependencies declares shiki, which its files do not import',
     ]);
   });
 

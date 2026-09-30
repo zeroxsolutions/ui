@@ -1,36 +1,40 @@
+'use client';
+
+import { EMOJI_CATEGORIES, FluentEmoji, type EmojiDatum } from '@zeroxsolutions/fluent-emoji';
+import { Dumbbell, Flag, Hash, Lightbulb, Plane, SearchX, type LucideIcon } from 'lucide-react';
+import * as React from 'react';
+
+import { Button } from '@/registry/bases/base-ui/ui/button';
+import { ClockIcon } from '@/registry/bases/base-ui/ui/clock';
+import { CoffeeIcon } from '@/registry/bases/base-ui/ui/coffee';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
+import { LeafIcon } from '@/registry/bases/base-ui/ui/leaf';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
+import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/ui/search';
+import { SmileIcon } from '@/registry/bases/base-ui/ui/smile';
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { EMOJI_CATEGORIES, FluentEmoji, type EmojiDatum } from '@zeroxsolutions/fluent-emoji';
-import {
-  Clock,
-  Coffee,
-  Dumbbell,
-  Flag,
-  Hash,
-  Leaf,
-  Lightbulb,
-  Plane,
-  Search,
-  SearchX,
-  Smile,
-  type LucideIcon,
-} from 'lucide-react';
-import * as React from 'react';
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
-import { Button } from '@/registry/bases/base-ui/ui/button';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  frequent: Clock,
-  smileys_people: Smile,
-  animals_nature: Leaf,
-  food_drink: Coffee,
-  travel_places: Plane,
-  activities: Dumbbell,
-  objects: Lightbulb,
-  symbols: Hash,
-  flags: Flag,
+/** What every `@lucide-animated` icon's ref exposes. */
+interface AnimatedIconHandle {
+  startAnimation: () => void;
+  stopAnimation: () => void;
+}
+
+type AnimatedIcon = React.ComponentType<React.HTMLAttributes<HTMLDivElement> & React.RefAttributes<AnimatedIconHandle>>;
+
+/** The nav's glyph per category: animated where `@lucide-animated` draws it, a still lucide glyph where it does not. */
+const CATEGORY_ICONS: Record<string, { animated: AnimatedIcon } | { still: LucideIcon }> = {
+  frequent: { animated: ClockIcon },
+  smileys_people: { animated: SmileIcon },
+  animals_nature: { animated: LeafIcon },
+  food_drink: { animated: CoffeeIcon },
+  travel_places: { still: Plane },
+  activities: { still: Dumbbell },
+  objects: { still: Lightbulb },
+  symbols: { still: Hash },
+  flags: { still: Flag },
 };
 
 /** Cells per grid row. */
@@ -40,9 +44,10 @@ const COLUMNS = 8;
  * They are the one source for both sides: `EmojiPickerContent` hands them to CSS
  * as variables the classes read, and the window arithmetic below turns them into
  * px, so the visible window needs no element measurement (which reads 0 in
- * jsdom) and no ResizeObserver.
+ * jsdom) and no ResizeObserver. A cell is the preset's `size="icon"` button,
+ * `size-8`; the recipe draws it, so a change there has to change `CELL_STEPS`.
  */
-const CELL_STEPS = 9;
+const CELL_STEPS = 8;
 const ROW_GAP_STEPS = 0.5;
 const HEADER_STEPS = 7;
 const HEIGHT_STEPS = { sm: 40, md: 60, lg: 80 } as const;
@@ -259,24 +264,44 @@ type EmojiPickerSearchProps = Omit<React.ComponentProps<'input'>, 'value' | 'onC
   'aria-label'?: string;
 };
 
-/** Search box bound to the picker query. Copy is overridable via the props. */
+/**
+ * Search box bound to the picker query. Copy is overridable via the props;
+ * `className` places the input group. Its search glyph plays on the group's
+ * hover and while the box takes focus.
+ */
 function EmojiPickerSearch({
   className,
   placeholder = 'Search',
   'aria-label': ariaLabel = 'Search emoji',
+  onFocus,
+  onBlur,
   ...props
 }: EmojiPickerSearchProps): React.ReactNode {
   const { query, setQuery } = useEmojiPicker();
+  const iconRef = React.useRef<SearchIconHandle>(null);
   return (
-    <div data-slot="emoji-picker-search" className="px-2 py-1">
-      <InputGroup className={className}>
+    <div data-slot="emoji-picker-search">
+      <InputGroup
+        className={className}
+        onMouseEnter={() => iconRef.current?.startAnimation()}
+        onMouseLeave={() => iconRef.current?.stopAnimation()}
+      >
         <InputGroupAddon>
-          <Search />
+          {/* The addon sizes only an svg that is its direct child, and this glyph wraps its svg in a div. */}
+          <SearchIcon ref={iconRef} size={16} />
         </InputGroupAddon>
         <InputGroupInput
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onFocus={(event) => {
+            onFocus?.(event);
+            iconRef.current?.startAnimation();
+          }}
+          onBlur={(event) => {
+            onBlur?.(event);
+            iconRef.current?.stopAnimation();
+          }}
           placeholder={placeholder}
           aria-label={ariaLabel}
           {...props}
@@ -286,25 +311,30 @@ function EmojiPickerSearch({
   );
 }
 
-/** Sticky section heading - this is what "Frequently used" / a category name is. */
+/**
+ * Sticky section heading - this is what "Frequently used" / a category name is.
+ * Drawn as the preset's own group labels (`ComboboxLabel`, `SelectLabel`), on
+ * the popover surface so rows scrolling under it stay hidden.
+ */
 function EmojiPickerGroupLabel({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   return (
     <div
       data-slot="emoji-picker-group-label"
-      className={cn('bg-popover text-muted-foreground px-2 py-1 text-sm font-medium', className)}
+      className={cn('bg-popover text-muted-foreground px-2 py-1.5 text-xs', className)}
       {...props}
     />
   );
 }
 
 // `style` is taken: the root carries the grid metrics as CSS variables there.
-type EmojiPickerContentProps = Omit<React.ComponentProps<typeof ScrollArea>, 'style'> & {
+type EmojiPickerContentProps = Omit<React.ComponentProps<'div'>, 'style'> & {
   /** The viewport height: `sm`, `md` (default) or `lg`. */
   size?: keyof typeof HEIGHT_STEPS;
 };
 
 /**
- * Windowed, scrollable grid body. While searching it shows the matches or -
+ * Windowed, scrollable grid body: a region of the `size` height, placed by
+ * `className`, holding a `ScrollArea` that fills it. While searching it shows the matches or -
  * when none - its `children` (an upstream `Empty` the consumer composes) or the
  * default empty state. Only the rows in (and near) the viewport mount; the
  * section header covering the top of the viewport is pinned.
@@ -320,7 +350,6 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
   const [scrollTop, setScrollTop] = React.useState(0);
   const metrics = {
     '--emoji-picker-height': spacingSteps(HEIGHT_STEPS[size]),
-    '--emoji-picker-cell': spacingSteps(CELL_STEPS),
     '--emoji-picker-gap': spacingSteps(ROW_GAP_STEPS),
     '--emoji-picker-header': spacingSteps(HEADER_STEPS),
     '--emoji-picker-columns': `repeat(${COLUMNS}, minmax(0, 1fr))`,
@@ -380,24 +409,25 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
   // Empty search -> the empty state, not a windowed list.
   if (results && results.length === 0) {
     return (
-      <ScrollArea
-        ref={setScrollRoot}
+      <div
         data-slot="emoji-picker-content"
-        className={cn('h-(--emoji-picker-height) px-2', className)}
+        className={cn('h-(--emoji-picker-height)', className)}
         style={metrics}
         {...props}
       >
-        {children ?? (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <SearchX />
-              </EmptyMedia>
-              <EmptyTitle>No emoji found</EmptyTitle>
-            </EmptyHeader>
-          </Empty>
-        )}
-      </ScrollArea>
+        <ScrollArea ref={setScrollRoot} className="h-full">
+          {children ?? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <SearchX />
+                </EmptyMedia>
+                <EmptyTitle>No emoji found</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
+          )}
+        </ScrollArea>
+      </div>
     );
   }
 
@@ -418,46 +448,48 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
   }
 
   return (
-    <ScrollArea
-      ref={setScrollRoot}
+    <div
       data-slot="emoji-picker-content"
-      className={cn('h-(--emoji-picker-height) px-2', className)}
+      className={cn('h-(--emoji-picker-height)', className)}
       style={metrics}
       {...props}
     >
-      <div className="relative w-full" style={{ height: total }}>
-        {stickyIndex >= 0 && rows[stickyIndex].type === 'header' && (
-          <div className="sticky top-0 z-10 w-full">
-            <EmojiPickerGroupLabel className="h-(--emoji-picker-header)">
-              {(rows[stickyIndex] as { name: string }).name}
-            </EmojiPickerGroupLabel>
-          </div>
-        )}
-        {rows.slice(start, end).map((row, i) => {
-          const index = start + i;
-          // The pinned header is rendered once, above - skip its in-flow copy.
-          if (index === stickyIndex) return null;
-          return (
-            <div
-              key={row.key}
-              data-index={index}
-              className="absolute top-0 left-0 w-full"
-              style={{ transform: `translateY(${offsets[index]}px)` }}
-            >
-              {row.type === 'header' ? (
-                <EmojiPickerGroupLabel className="h-(--emoji-picker-header)">{row.name}</EmojiPickerGroupLabel>
-              ) : (
-                <EmojiPickerGrid>
-                  {row.emojis.map((emoji, i) => (
-                    <EmojiPickerCell key={`${emoji.e}-${i}`} emoji={emoji} />
-                  ))}
-                </EmojiPickerGrid>
-              )}
+      <ScrollArea ref={setScrollRoot} className="h-full">
+        {/* Inset past the ScrollArea's scrollbar (w-2.5) on both sides: the bar sits over the viewport's edge and would cover the last column. */}
+        <div className="relative w-full" style={{ height: total }}>
+          {stickyIndex >= 0 && rows[stickyIndex].type === 'header' && (
+            <div className="sticky top-0 z-10 w-full px-3">
+              <EmojiPickerGroupLabel className="h-(--emoji-picker-header)">
+                {(rows[stickyIndex] as { name: string }).name}
+              </EmojiPickerGroupLabel>
             </div>
-          );
-        })}
-      </div>
-    </ScrollArea>
+          )}
+          {rows.slice(start, end).map((row, i) => {
+            const index = start + i;
+            // The pinned header is rendered once, above - skip its in-flow copy.
+            if (index === stickyIndex) return null;
+            return (
+              <div
+                key={row.key}
+                data-index={index}
+                className="absolute inset-x-3 top-0"
+                style={{ transform: `translateY(${offsets[index]}px)` }}
+              >
+                {row.type === 'header' ? (
+                  <EmojiPickerGroupLabel className="h-(--emoji-picker-header)">{row.name}</EmojiPickerGroupLabel>
+                ) : (
+                  <EmojiPickerGrid>
+                    {row.emojis.map((emoji, i) => (
+                      <EmojiPickerCell key={`${emoji.e}-${i}`} emoji={emoji} />
+                    ))}
+                  </EmojiPickerGrid>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }
 
@@ -477,17 +509,53 @@ function EmojiPickerNav({
       {...props}
     >
       <TabsList variant="line" className="w-full justify-between gap-0">
-        {navCategories.map((c) => {
-          const Icon = CATEGORY_ICONS[c.id] ?? Smile;
-          const disabled = c.id === 'frequent' && !hasFrequent;
-          return (
-            <TabsTrigger key={c.id} value={c.id} disabled={disabled} aria-label={c.name} className="flex-1 px-0">
-              <Icon />
-            </TabsTrigger>
-          );
-        })}
+        {navCategories.map((c) => (
+          <EmojiPickerNavTrigger
+            key={c.id}
+            value={c.id}
+            disabled={c.id === 'frequent' && !hasFrequent}
+            aria-label={c.name}
+          />
+        ))}
       </TabsList>
     </Tabs>
+  );
+}
+
+/** One category tab, its glyph from `CATEGORY_ICONS`; an animated glyph plays on the tab's hover or focus. */
+function EmojiPickerNavTrigger({
+  value,
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onBlur,
+  ...props
+}: React.ComponentProps<typeof TabsTrigger> & { value: string }): React.ReactNode {
+  const iconRef = React.useRef<AnimatedIconHandle>(null);
+  const icon = CATEGORY_ICONS[value] ?? CATEGORY_ICONS.smileys_people;
+  return (
+    <TabsTrigger
+      value={value}
+      onMouseEnter={(event) => {
+        onMouseEnter?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onMouseLeave={(event) => {
+        onMouseLeave?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      onFocus={(event) => {
+        onFocus?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      {...props}
+    >
+      {'animated' in icon ? <icon.animated ref={iconRef} /> : <icon.still />}
+    </TabsTrigger>
   );
 }
 
@@ -496,7 +564,7 @@ function EmojiPickerGrid({ className, ...props }: React.ComponentProps<'div'>): 
   return (
     <div
       data-slot="emoji-picker-grid"
-      className={cn('grid grid-cols-(--emoji-picker-columns) gap-(--emoji-picker-gap)', className)}
+      className={cn('grid grid-cols-(--emoji-picker-columns) justify-items-center gap-(--emoji-picker-gap)', className)}
       {...props}
     />
   );
@@ -521,14 +589,14 @@ function EmojiPickerCell({ emoji, className, onClick, ...props }: EmojiPickerCel
       aria-label={emoji.n}
       size="icon"
       variant="ghost"
-      className={cn('size-(--emoji-picker-cell)', className)}
+      className={className}
       onClick={(event) => {
         onClick?.(event);
         select(emoji.e);
       }}
       {...props}
     >
-      <FluentEmoji glyph={emoji.e} name={emoji.n} className="size-full object-contain" />
+      <FluentEmoji glyph={emoji.e} name={emoji.n} className="size-6 object-contain" />
     </Button>
   );
 }

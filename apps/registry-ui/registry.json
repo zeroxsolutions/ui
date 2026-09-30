@@ -248,7 +248,7 @@
       "description": "A single-select row of swatches for choosing the Fluent Emoji artwork style, each previewing the same sample emoji in its own style.",
       "categories": ["data-entry"],
       "dependencies": ["@zeroxsolutions/fluent-emoji"],
-      "registryDependencies": ["@shadcn/toggle-group", "@shadcn/utils"],
+      "registryDependencies": ["@shadcn/toggle-group"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/emoji-appearance-toggle-group.tsx",
@@ -269,7 +269,12 @@
         "@shadcn/input-group",
         "@shadcn/scroll-area",
         "@shadcn/tabs",
-        "@shadcn/utils"
+        "@shadcn/utils",
+        "https://lucide-animated.com/r/clock.json",
+        "https://lucide-animated.com/r/coffee.json",
+        "https://lucide-animated.com/r/leaf.json",
+        "https://lucide-animated.com/r/search.json",
+        "https://lucide-animated.com/r/smile.json"
       ],
       "files": [
         {
@@ -343,8 +348,11 @@
       "title": "Password Input",
       "description": "A password field with a show or hide toggle packaged into the addon, so a call site never wires the eye button itself.",
       "categories": ["data-entry"],
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/input-group"],
+      "registryDependencies": [
+        "@shadcn/input-group",
+        "https://lucide-animated.com/r/eye.json",
+        "https://lucide-animated.com/r/eye-off.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/password-input.tsx",
@@ -376,8 +384,13 @@
       "title": "Tag Input",
       "description": "A tag editor with removable chips above an input that commits a new tag on Enter, comma, or blur.",
       "categories": ["data-entry"],
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/badge", "@shadcn/button", "@shadcn/input", "@shadcn/utils"],
+      "registryDependencies": [
+        "@shadcn/badge",
+        "@shadcn/button",
+        "@shadcn/input",
+        "@shadcn/utils",
+        "https://lucide-animated.com/r/x.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/tag-input.tsx",
@@ -391,8 +404,13 @@
       "title": "Tree Item",
       "description": "One row of a hierarchy tree over upstream Item, with a depth indent and disclosure, a clickable label and an inline rename input.",
       "categories": ["data-entry"],
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/button", "@shadcn/input", "@shadcn/item", "@shadcn/utils"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/input",
+        "@shadcn/item",
+        "@shadcn/utils",
+        "https://lucide-animated.com/r/chevron-right.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/tree-item.tsx",
@@ -948,7 +966,9 @@
       "registryDependencies": [
         "@shadcn/empty",
         "@shadcn/item",
-        "https://ui.zeroxsolutions.com/r/chat-suggestion-item.json"
+        "https://ui.zeroxsolutions.com/r/chat-suggestion-item.json",
+        "https://lucide-animated.com/r/file-text.json",
+        "https://lucide-animated.com/r/sparkles.json"
       ],
       "files": [
         {
@@ -1037,7 +1057,7 @@
       "title": "Password Input Demo",
       "description": "A labelled PasswordInput with its show or hide toggle.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/label", "https://ui.zeroxsolutions.com/r/password-input.json"],
+      "registryDependencies": ["@shadcn/field", "https://ui.zeroxsolutions.com/r/password-input.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/password-input-demo.tsx",
