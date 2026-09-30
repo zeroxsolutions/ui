@@ -125,7 +125,8 @@ own variant or size replaces it; where none fits, the item takes the primitive's
 Two unit specs in `apps/registry-ui` read the source and fail with the file, the line and the class
 or string:
 
-- **`styles.spec.ts`** (already exists; extended) - rules 1 to 3: no palette colour, no arbitrary
+- **`classes.spec.ts`** (new, beside `copy.spec.ts` at the app root, because both read the whole
+  tree) - rules 1 to 3: no palette colour, no arbitrary
   value outside the layout's declared variables, and on a primitive's `className` no class from the
   forbidden families (height, padding, radius, font size and weight, colour).
 - **`copy.spec.ts`** (new) - rule 7: every JSX text node and every `title`, `aria-label`,
