@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { ChatMessage } from '@/registry/bases/base-ui/components/data-display/chat-message';
+import { ChatMessage, ChatMessageAccent } from '@/registry/bases/base-ui/components/data-display/chat-message';
 import { Bubble, BubbleContent } from '@/registry/bases/base-ui/ui/bubble';
 import { MessageContent, MessageHeader } from '@/registry/bases/base-ui/ui/message';
 
@@ -16,6 +16,7 @@ function ChatMessageDemo(): ReactNode {
         </MessageContent>
       </ChatMessage>
       <ChatMessage streaming>
+        <ChatMessageAccent />
         <MessageContent>
           <MessageHeader>Assistant</MessageHeader>
           <Bubble variant="ghost">

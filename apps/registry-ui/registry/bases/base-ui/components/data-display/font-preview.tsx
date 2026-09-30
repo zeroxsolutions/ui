@@ -39,7 +39,7 @@ function FontPreview({
       {sizes.map((size) => (
         <div key={size} className="flex items-baseline gap-3">
           <span className="text-muted-foreground w-10 shrink-0 text-xs tabular-nums">{size}</span>
-          <span className="text-foreground truncate" style={{ fontFamily: family, fontSize: size, lineHeight: 1.3 }}>
+          <span className="text-foreground truncate leading-snug" style={{ fontFamily: family, fontSize: size }}>
             {children}
           </span>
         </div>

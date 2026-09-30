@@ -4,7 +4,7 @@ import { AiProviderIcon } from '@zeroxsolutions/icons/ai-provider-icon';
 import {
   AiProviderCard,
   AiProviderCardDescription,
-  AiProviderCardStatus,
+  AiProviderCardLabel,
   AiProviderCardTrigger,
 } from '@/registry/bases/base-ui/components/data-display/ai-provider-card';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
@@ -99,7 +99,7 @@ function AiProviderPicker({
             <AiProviderCardDescription>{entry.description}</AiProviderCardDescription>
           </CardHeader>
           <CardFooter className="mt-auto">
-            <AiProviderCardStatus>{entry.meta}</AiProviderCardStatus>
+            <AiProviderCardLabel>{entry.meta}</AiProviderCardLabel>
           </CardFooter>
           {onSelect && (
             <AiProviderCardTrigger aria-label={`Select ${entry.name}`} onClick={() => onSelect(entry.provider)} />

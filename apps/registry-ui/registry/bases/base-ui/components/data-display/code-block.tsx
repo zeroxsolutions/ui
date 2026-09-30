@@ -14,13 +14,14 @@ import { ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 interface CodeBlockContextValue {
   code: string;
   language: string | undefined;
+  lines: HighlightLine[] | null;
 }
 
 const CodeBlockContext = createContext<CodeBlockContextValue | null>(null);
 
 function useCodeBlock(): CodeBlockContextValue {
   const context = useContext(CodeBlockContext);
-  if (!context) throw new Error('CodeBlockLanguage and CodeBlockCopy must be placed inside a CodeBlock.');
+  if (!context) throw new Error('CodeBlock parts must be placed inside a CodeBlock.');
   return context;
 }
 
@@ -35,16 +36,12 @@ interface CodeBlockProps extends ComponentProps<typeof CollapsibleCard> {
    * `code` plain.
    */
   lines?: HighlightLine[] | null;
-  /** Numbers each line in a gutter beside the code, which a copy leaves out. */
-  lineNumbers?: boolean;
-  /** The header, composed from `CollapsibleCard` parts; absent, a secondary copy button floats over the code on hover or focus. */
-  children?: ReactNode;
 }
 
 /**
- * Read-only source over a collapsible card, highlighted through the shared Shiki
- * highlighter and falling back to plain mono while the grammar loads. Compose a
- * header as children:
+ * Read-only source over a collapsible card, highlighted through the shared Shiki highlighter and
+ * falling back to plain mono while the grammar loads. The root holds the code; its parts show it.
+ * Compose a header from `CollapsibleCard` parts, then the body:
  *
  * ```tsx
  * <CodeBlock code={source} language="ts">
@@ -57,21 +54,24 @@ interface CodeBlockProps extends ComponentProps<typeof CollapsibleCard> {
  *       <CollapsibleCardTrigger />
  *     </CollapsibleCardActions>
  *   </CollapsibleCardHeader>
+ *   <CodeBlockContent>
+ *     <CodeBlockLineNumbers />
+ *     <CodeBlockCode />
+ *   </CodeBlockContent>
  * </CodeBlock>
  * ```
  *
- * The root keeps `data-slot="code-block"`; the editor stylesheet targets it. Its scroller's viewport
- * is `data-slot="code-block-viewport"`, where a container caps the block's height; the code then
- * scrolls both ways inside it.
+ * A block with no header floats its copy over the code instead:
+ * `<CodeBlockActions><CodeBlockCopy variant="secondary" /></CodeBlockActions>` before the content.
+ *
+ * The root keeps `data-slot="code-block"`; the editor stylesheet targets it.
  */
 function CodeBlock({
   code,
   language,
   lines: givenLines,
-  lineNumbers = false,
   variant = 'muted',
   className,
-  children,
   ...props
 }: CodeBlockProps): ReactNode {
   // Given lines, the hook is handed no language, so it neither loads a grammar nor highlights.
@@ -79,50 +79,84 @@ function CodeBlock({
   const lines = givenLines === undefined ? highlightedLines : givenLines;
 
   return (
-    <CodeBlockContext.Provider value={{ code, language }}>
+    <CodeBlockContext.Provider value={{ code, language, lines }}>
       <CollapsibleCard
         data-slot="code-block"
         data-language={language}
         variant={variant}
         className={cn('group/code-block relative', className)}
         {...props}
-      >
-        {children ?? (
-          <CopyButton
-            value={code}
-            label="Copy code"
-            variant="secondary"
-            className="absolute top-1 right-1 z-10 opacity-0 transition-opacity group-hover/code-block:opacity-100 focus-visible:opacity-100"
-          />
-        )}
-        <CollapsibleCardContent>
-          {/* A ScrollArea rather than overflow-x-auto, so long lines scroll on the styled rail instead of the OS overlay bar. */}
-          {/* The pre's bottom padding clears that rail, which Base UI positions over the viewport's bottom edge. */}
-          <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
-            <ScrollAreaPrimitive.Viewport data-slot="code-block-viewport" className="w-full">
-              <pre className={cn('m-0 px-3 pt-2 pb-3 text-xs leading-relaxed', lineNumbers && 'flex gap-4')}>
-                {lineNumbers ? (
-                  <span
-                    aria-hidden
-                    data-slot="code-block-line-numbers"
-                    className="text-muted-foreground text-right select-none"
-                  >
-                    {code
-                      .split('\n')
-                      .map((_, index) => index + 1)
-                      .join('\n')}
-                  </span>
-                ) : null}
-                <HighlightedCode lines={lines}>{code}</HighlightedCode>
-              </pre>
-            </ScrollAreaPrimitive.Viewport>
-            <ScrollBar />
-            <ScrollBar orientation="horizontal" />
-            <ScrollAreaPrimitive.Corner />
-          </ScrollAreaPrimitive.Root>
-        </CollapsibleCardContent>
-      </CollapsibleCard>
+      />
     </CodeBlockContext.Provider>
+  );
+}
+
+/**
+ * The actions of a block with no header, floated over the code's top-right corner and shown while
+ * the block is hovered or one of them holds keyboard focus.
+ */
+function CodeBlockActions({ className, ...props }: ComponentProps<'div'>): ReactNode {
+  return (
+    <div
+      data-slot="code-block-actions"
+      className={cn(
+        'absolute top-1 right-1 z-10 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/code-block:opacity-100 has-focus-visible:opacity-100',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+/**
+ * The body the card's trigger folds: a scroller holding the `pre` its children fill, usually
+ * `CodeBlockLineNumbers` and `CodeBlockCode`. Its viewport is `data-slot="code-block-viewport"`,
+ * where a container caps the block's height; the code then scrolls both ways inside it.
+ */
+function CodeBlockContent({ children, ...props }: ComponentProps<typeof CollapsibleCardContent>): ReactNode {
+  return (
+    <CollapsibleCardContent data-slot="code-block-content" {...props}>
+      {/* A ScrollArea rather than overflow-x-auto, so long lines scroll on the styled rail instead of the OS overlay bar. */}
+      {/* The pre's bottom padding clears that rail, which Base UI positions over the viewport's bottom edge. */}
+      <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
+        <ScrollAreaPrimitive.Viewport data-slot="code-block-viewport" className="w-full">
+          <pre className="m-0 px-3 pt-2 pb-3 text-xs leading-relaxed has-data-[slot=code-block-line-numbers]:flex has-data-[slot=code-block-line-numbers]:gap-4">
+            {children}
+          </pre>
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollBar />
+        <ScrollBar orientation="horizontal" />
+        <ScrollAreaPrimitive.Corner />
+      </ScrollAreaPrimitive.Root>
+    </CollapsibleCardContent>
+  );
+}
+
+/** A gutter numbering each line of the block's code, hidden from assistive technology and left out of a copy. */
+function CodeBlockLineNumbers({ className, ...props }: ComponentProps<'span'>): ReactNode {
+  const { code } = useCodeBlock();
+  return (
+    <span
+      aria-hidden
+      data-slot="code-block-line-numbers"
+      className={cn('text-muted-foreground text-right select-none', className)}
+      {...props}
+    >
+      {code
+        .split('\n')
+        .map((_, index) => index + 1)
+        .join('\n')}
+    </span>
+  );
+}
+
+/** The block's code, painted with its highlighted lines once they arrive and plain until then. */
+function CodeBlockCode(props: Omit<ComponentProps<typeof HighlightedCode>, 'lines' | 'children'>): ReactNode {
+  const { code, lines } = useCodeBlock();
+  return (
+    <HighlightedCode data-slot="code-block-code" lines={lines} {...props}>
+      {code}
+    </HighlightedCode>
   );
 }
 
@@ -152,5 +186,13 @@ function CodeBlockCopy({ label = 'Copy code', size = 'icon', ...props }: CodeBlo
   return <CopyButton data-slot="code-block-copy" value={code} label={label} size={size} {...props} />;
 }
 
-export { CodeBlock, CodeBlockLanguage, CodeBlockCopy };
+export {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockContent,
+  CodeBlockLineNumbers,
+  CodeBlockCode,
+  CodeBlockLanguage,
+  CodeBlockCopy,
+};
 export type { CodeBlockProps, CodeBlockCopyProps };

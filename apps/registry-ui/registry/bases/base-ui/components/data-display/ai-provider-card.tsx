@@ -5,14 +5,14 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { StatusTone } from '@/registry/bases/base-ui/types/status-tone';
 
 interface AiProviderCardProps extends React.ComponentProps<typeof Card> {
-  /** Tone of the attention note in `AiProviderCardStatus`; omit for a muted note. */
+  /** Tone of the attention note in `AiProviderCardLabel`; omit for a muted note. */
   status?: StatusTone;
 }
 
 /**
  * A tile for one AI provider in an overview grid. The consumer composes
  * `CardHeader` + `CardTitle` (brand mark and name), an `AiProviderCardDescription`,
- * a `CardFooter` holding an `AiProviderCardStatus` and an `AiProviderCardAction`,
+ * a `CardFooter` holding an `AiProviderCardLabel` and an `AiProviderCardAction`,
  * and, when the tile selects, an `AiProviderCardTrigger` that covers the card.
  * Defaults to the small card size.
  */
@@ -33,14 +33,16 @@ function AiProviderCardDescription({
   className,
   ...props
 }: React.ComponentProps<typeof CardDescription>): React.ReactNode {
-  return <CardDescription className={cn('line-clamp-2', className)} {...props} />;
+  return (
+    <CardDescription data-slot="ai-provider-card-description" className={cn('line-clamp-2', className)} {...props} />
+  );
 }
 
 /** The footer note (a model count, or an attention message), toned by the card's `status`. */
-function AiProviderCardStatus({ className, ...props }: React.ComponentProps<'span'>): React.ReactNode {
+function AiProviderCardLabel({ className, ...props }: React.ComponentProps<'span'>): React.ReactNode {
   return (
     <span
-      data-slot="ai-provider-card-status"
+      data-slot="ai-provider-card-label"
       className={cn(
         'text-muted-foreground group-data-[status=busy]/ai-provider-card:text-destructive group-data-[status=idle]/ai-provider-card:text-warning group-data-[status=online]/ai-provider-card:text-success truncate text-xs',
         className,
@@ -81,5 +83,5 @@ function AiProviderCardTrigger({
   );
 }
 
-export { AiProviderCard, AiProviderCardAction, AiProviderCardDescription, AiProviderCardStatus, AiProviderCardTrigger };
+export { AiProviderCard, AiProviderCardAction, AiProviderCardDescription, AiProviderCardLabel, AiProviderCardTrigger };
 export type { AiProviderCardProps };

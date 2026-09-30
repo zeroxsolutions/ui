@@ -11,7 +11,7 @@ import {
   ItemTitle,
 } from '@/registry/bases/base-ui/ui/item';
 import * as modelInfoCardModule from './model-info-card';
-import { ModelInfoCard, ModelInfoCardBadge, ModelInfoCardSection } from './model-info-card';
+import { ModelInfoCard, ModelInfoCardIndicator, ModelInfoCardSection } from './model-info-card';
 
 afterEach(cleanup);
 
@@ -46,7 +46,9 @@ describe('ModelInfoCardSection', () => {
     render(
       <ModelInfoCardSection>
         <Item size="xs">
-          <ModelInfoCardBadge />
+          <ItemMedia>
+            <ModelInfoCardIndicator />
+          </ItemMedia>
           <ItemContent>
             <ItemTitle>Context length</ItemTitle>
           </ItemContent>
@@ -63,10 +65,10 @@ describe('ModelInfoCardSection', () => {
 });
 
 describe('model-info-card module', () => {
-  it('exports the card, its section and the accent badge - no line/row or hover-wrapper component', () => {
+  it('exports the card, its section and the accent indicator - no line/row or hover-wrapper component', () => {
     expect(Object.keys(modelInfoCardModule).sort()).toEqual([
       'ModelInfoCard',
-      'ModelInfoCardBadge',
+      'ModelInfoCardIndicator',
       'ModelInfoCardSection',
     ]);
   });

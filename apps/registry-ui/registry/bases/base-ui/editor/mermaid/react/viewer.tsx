@@ -2,6 +2,8 @@
 
 import {
   CodeBlock,
+  CodeBlockCode,
+  CodeBlockContent,
   CodeBlockCopy,
   CodeBlockLanguage,
 } from '@/registry/bases/base-ui/components/data-display/code-block';
@@ -52,6 +54,9 @@ export function DiagramViewer({ source, className }: DiagramViewerProps) {
           <CollapsibleCardTrigger />
         </CollapsibleCardActions>
       </CollapsibleCardHeader>
+      <CodeBlockContent>
+        <CodeBlockCode />
+      </CodeBlockContent>
     </CodeBlock>
   );
 }

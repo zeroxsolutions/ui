@@ -4,6 +4,9 @@ import * as React from 'react';
 import { Code } from 'lucide-react';
 import {
   CodeBlock as CodeBlockSurface,
+  CodeBlockActions,
+  CodeBlockCode,
+  CodeBlockContent,
   CodeBlockCopy,
   CodeBlockLanguage,
 } from '@/registry/bases/base-ui/components/data-display/code-block';
@@ -159,7 +162,11 @@ function ReadOnlyCodeBlock({
 }): React.ReactNode {
   return (
     <CodeBlockSurface code={code} language={language} className={className}>
-      {PLAIN_LANGUAGES.has(language.toLowerCase()) ? undefined : (
+      {PLAIN_LANGUAGES.has(language.toLowerCase()) ? (
+        <CodeBlockActions>
+          <CodeBlockCopy variant="secondary" />
+        </CodeBlockActions>
+      ) : (
         <CollapsibleCardHeader>
           <CollapsibleCardTitle>
             <CodeBlockLanguage />
@@ -170,6 +177,9 @@ function ReadOnlyCodeBlock({
           </CollapsibleCardActions>
         </CollapsibleCardHeader>
       )}
+      <CodeBlockContent>
+        <CodeBlockCode />
+      </CodeBlockContent>
     </CodeBlockSurface>
   );
 }

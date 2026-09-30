@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { ImagePreview } from '@/registry/bases/base-ui/components/data-display/image-preview';
+import { ImagePreview, ImagePreviewImage } from '@/registry/bases/base-ui/components/data-display/image-preview';
 
 const SAMPLE_IMAGE =
   'data:image/svg+xml;utf8,' +
@@ -12,7 +12,9 @@ const SAMPLE_IMAGE =
 function ImagePreviewDemo(): ReactNode {
   return (
     <div className="size-32">
-      <ImagePreview src={SAMPLE_IMAGE} alt="Sample circular graphic" />
+      <ImagePreview>
+        <ImagePreviewImage src={SAMPLE_IMAGE} alt="Sample circular graphic" />
+      </ImagePreview>
     </div>
   );
 }

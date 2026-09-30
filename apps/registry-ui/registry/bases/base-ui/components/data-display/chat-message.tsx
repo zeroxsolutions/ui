@@ -1,49 +1,61 @@
 import type { ComponentProps, ReactNode } from 'react';
 
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Message } from '@/registry/bases/base-ui/ui/message';
 
 interface ChatMessageProps extends ComponentProps<typeof Message> {
-  /** While true, the row carries `data-streaming` and a line in `--primary` beside its leading edge. */
+  /** While true, the row carries `data-streaming`, which shows its `ChatMessageAccent`. */
   streaming?: boolean;
-  /** Any CSS colour for the streaming line, such as the agent's colour; `--primary` when omitted. */
-  accentColor?: string;
 }
 
 /**
- * ChatMessage - one chat message row: upstream `Message` plus a line beside its
- * leading edge while the text is still arriving. The consumer composes the row
- * from upstream parts, a muted `Bubble` for the user and a ghost one for the agent:
+ * ChatMessage - one chat message row: upstream `Message`, marked with `data-streaming` while its text
+ * is still arriving. The consumer composes the row from upstream parts, a muted `Bubble` for the user
+ * and a ghost one for the agent, and a `ChatMessageAccent` for the streaming line:
  *
  *   <ChatMessage align="end">
  *     <MessageContent>
  *       <Bubble variant="muted"><BubbleContent>Hello</BubbleContent></Bubble>
  *     </MessageContent>
  *   </ChatMessage>
- *   <ChatMessage streaming accentColor={agent.color}>
+ *   <ChatMessage streaming style={{ '--chat-message-accent': agent.color } as CSSProperties}>
+ *     <ChatMessageAccent />
  *     <MessageContent>
  *       <MessageHeader>{agent.name}</MessageHeader>
  *       <Bubble variant="ghost"><BubbleContent>{text}</BubbleContent></Bubble>
  *     </MessageContent>
  *   </ChatMessage>
- *
- * The line sits outside the row, in the space before its leading edge, so the
- * row keeps upstream's own padding and the list around it needs room there.
  */
-function ChatMessage({ streaming = false, accentColor, children, ...props }: ChatMessageProps): ReactNode {
+function ChatMessage({ streaming = false, className, ...props }: ChatMessageProps): ReactNode {
   return (
-    <Message data-slot="chat-message" data-streaming={streaming ? '' : undefined} {...props}>
-      {streaming ? (
-        <span
-          aria-hidden
-          data-slot="chat-message-accent"
-          className="bg-primary absolute inset-y-0 -start-3 w-0.5"
-          style={accentColor ? { backgroundColor: accentColor } : undefined}
-        />
-      ) : null}
-      {children}
-    </Message>
+    <Message
+      data-slot="chat-message"
+      data-streaming={streaming ? '' : undefined}
+      className={cn('group/chat-message', className)}
+      {...props}
+    />
   );
 }
 
-export { ChatMessage };
+/**
+ * The line beside the row's leading edge, shown only while the row streams. It is painted in
+ * `--chat-message-accent` (any CSS colour, such as the agent's, set on the row), or `--primary` when
+ * that is unset. It sits outside the row, in the space before its leading edge, so the row keeps
+ * upstream's own padding and the list around it needs room there.
+ */
+function ChatMessageAccent({ className, ...props }: ComponentProps<'span'>): ReactNode {
+  return (
+    <span
+      aria-hidden
+      data-slot="chat-message-accent"
+      className={cn(
+        'absolute inset-y-0 -start-3 hidden w-0.5 bg-(--chat-message-accent,var(--color-primary)) group-data-streaming/chat-message:block',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export { ChatMessage, ChatMessageAccent };
 export type { ChatMessageProps };

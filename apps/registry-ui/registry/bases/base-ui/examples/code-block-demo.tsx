@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 
 import {
   CodeBlock,
+  CodeBlockCode,
+  CodeBlockContent,
   CodeBlockCopy,
   CodeBlockLanguage,
 } from '@/registry/bases/base-ui/components/data-display/code-block';
@@ -27,6 +29,9 @@ function CodeBlockDemo(): ReactNode {
           <CollapsibleCardTrigger />
         </CollapsibleCardActions>
       </CollapsibleCardHeader>
+      <CodeBlockContent>
+        <CodeBlockCode />
+      </CodeBlockContent>
     </CodeBlock>
   );
 }

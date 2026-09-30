@@ -41,7 +41,7 @@
       "title": "Chat Message",
       "description": "One chat message row over upstream Message, with a line beside its leading edge while its text is still streaming.",
       "categories": ["data-display"],
-      "registryDependencies": ["@shadcn/message"],
+      "registryDependencies": ["@shadcn/message", "@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/chat-message.tsx",
@@ -109,7 +109,6 @@
         "@shadcn/button",
         "@shadcn/dropdown-menu",
         "@shadcn/empty",
-        "@shadcn/scroll-area",
         "@shadcn/table",
         "@shadcn/utils",
         "https://lucide-animated.com/r/arrow-down.json",
@@ -193,7 +192,7 @@
       "name": "image-preview",
       "type": "registry:component",
       "title": "Image Preview",
-      "description": "Shows an image contained within its filled wrapper, over a checkerboard so transparent pixels read clearly.",
+      "description": "A frame that shows an image contained within it, over a checkerboard so transparent pixels read clearly.",
       "categories": ["data-display"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
@@ -213,11 +212,10 @@
       "name": "markdown-view",
       "type": "registry:component",
       "title": "Markdown View",
-      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code optionally rendered as a CodeBlock instead of a plain pre.",
+      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code as a CodeBlock.",
       "categories": ["data-display"],
       "dependencies": ["react-markdown", "remark-gfm"],
       "registryDependencies": [
-        "@shadcn/scroll-area",
         "@shadcn/table",
         "@shadcn/utils",
         "https://ui.zeroxsolutions.com/r/code-block.json",
@@ -240,6 +238,7 @@
       "title": "Model Info Card",
       "description": "The detail panel for one model: an identity header composed from Item parts over titled sections.",
       "categories": ["data-display"],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
@@ -921,7 +920,7 @@
       "description": "A small, paginated file table with sortable columns and a view-options menu.",
       "categories": ["examples"],
       "dependencies": ["@tanstack/react-table"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/data-table.json"],
+      "registryDependencies": ["@shadcn/dropdown-menu", "https://ui.zeroxsolutions.com/r/data-table.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/data-table-demo.tsx",
