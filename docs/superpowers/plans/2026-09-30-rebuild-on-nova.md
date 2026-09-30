@@ -561,10 +561,11 @@ collapsible="none"`, sticky under `--header-height`, its height bounded so it en
 - [ ] **Step 2: Write the failing unit specs.** `highlightCode('const a = 1', 'ts')` returns HTML
       holding both themes' colours; `CodeBlockCommand` given `npx shadcn@latest add x` shows `pnpm dlx
 shadcn@latest add x` under `pnpm`, switches to `npx ...` under `npm`, and the copy button copies
-      the visible command; `CopyPageButton` fetches `<url>.md` and writes it to the clipboard.
+      the visible command; `CopyPageButton` fetches `<url>.md` and writes it to the clipboard. An MDX fence ` ```tsx ` renders a block whose header shows `tsx`; one with `title="app.tsx"` shows the title too.
 - [ ] **Step 3: Build them.** Preview: one card, demo above, source below collapsed with a
       `View code` button, no `Preview`/`Code` tabs. Install: package-manager tabs remembered in
-      `localStorage` (read and written inside `try`). Code block: title bar when given, copy button,
+      `localStorage` (read and written inside `try`). Code block: a header bar that always shows the fence's language (label and icon; the fence's
+      title beside it when given), copy button,
       horizontal overflow inside the block. Page header: title, description, `Copy page`, previous /
       next icon buttons (`aria-label`s `Previous page` / `Next page`).
 - [ ] **Step 4: Update the e2e** `component-page.spec.ts` to the new shape (the demo renders, `View code`

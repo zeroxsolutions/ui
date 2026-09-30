@@ -102,7 +102,8 @@ Where a page offers both, `Command` and `Manual` tabs sit above it, the manual t
 files.
 
 **Code block.** Highlighted at build by the registry's own highlighter, with upstream's themes
-(`github-light`, `github-dark`), a copy button, an optional title bar, and horizontal overflow in the
+(`github-light`, `github-dark`), a copy button, a header bar that always shows the fence's language
+(its label and its icon, `tsx`, `bash`, ...) and the fence's title beside it when one is given, and horizontal overflow in the
 block rather than the page. Upstream keeps highlighting in one module, `lib/highlight-code.ts`; so
 does this site, and MDX code fences and the component source both go through it.
 
