@@ -31,7 +31,9 @@ describe('PanelRow', () => {
         <span>x</span>
       </PanelRow>,
     );
-    expect(screen.getByTestId('row').className).toContain('grid-cols-[minmax(0,1fr)_minmax(--spacing(9),auto)]');
+    const row = screen.getByTestId('row');
+    expect(row.className).toContain('[--panel-row-columns:minmax(0,1fr)_minmax(--spacing(8),auto)]');
+    expect(row.className).toContain('grid-cols-(--panel-row-columns)');
   });
 
   it('merges className and forwards arbitrary props onto the row', () => {

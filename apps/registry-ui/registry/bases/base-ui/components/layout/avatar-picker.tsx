@@ -1,9 +1,21 @@
-import { Loader2, Trash2, Upload } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import * as React from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/registry/bases/base-ui/ui/empty';
+import { Field, FieldLabel } from '@/registry/bases/base-ui/ui/field';
+import { Input } from '@/registry/bases/base-ui/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
+import { Spinner } from '@/registry/bases/base-ui/ui/spinner';
 import { TabsContent } from '@/registry/bases/base-ui/ui/tabs';
+import { UploadIcon, type UploadIconHandle } from '@/registry/bases/base-ui/ui/upload';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { EmojiPicker } from '@/registry/bases/base-ui/components/data-entry/emoji-picker';
 
@@ -54,10 +66,10 @@ interface AvatarPickerProps extends React.ComponentProps<typeof Popover> {
  * it includes (or none, for a single pane), and places `AvatarPickerRemove`:
  *
  *   <AvatarPicker value={avatar} onValueChange={setAvatar}>
- *     <AvatarPickerTrigger>{tile}</AvatarPickerTrigger>
+ *     <AvatarPickerTrigger><Avatar>...</Avatar></AvatarPickerTrigger>
  *     <AvatarPickerContent>
- *       <Tabs defaultValue="emoji" className="gap-0">
- *         <div className="flex items-center gap-1 p-2">
+ *       <Tabs defaultValue="emoji">
+ *         <div className="flex items-center gap-1">
  *           <TabsList variant="line">
  *             <TabsTrigger value="emoji" aria-label="Emoji"><Smile /></TabsTrigger>
  *             <TabsTrigger value="color" aria-label="Color"><Palette /></TabsTrigger>
@@ -85,9 +97,12 @@ function AvatarPicker({ value, onValueChange, ...props }: AvatarPickerProps): Re
   );
 }
 
-/** The clickable avatar tile that opens the editor. */
+/**
+ * The ghost icon button that opens the editor, around the avatar the consumer
+ * composes as its children. Named "Edit avatar" unless an `aria-label` is given;
+ * `render` swaps the button for another element.
+ */
 function AvatarPickerTrigger({
-  className,
   'aria-label': ariaLabel = 'Edit avatar',
   ...props
 }: React.ComponentProps<typeof PopoverTrigger>): React.ReactNode {
@@ -95,16 +110,13 @@ function AvatarPickerTrigger({
     <PopoverTrigger
       data-slot="avatar-picker-trigger"
       aria-label={ariaLabel}
-      className={cn(
-        'focus-visible:ring-ring/50 inline-flex rounded-[inherit] outline-none focus-visible:ring-2',
-        className,
-      )}
+      render={<Button variant="ghost" size="icon-lg" />}
       {...props}
     />
   );
 }
 
-/** The popover body the consumer fills with `Tabs` and the panes. */
+/** The popover body the consumer fills with `Tabs` and the panes, opening below the trigger's start edge. */
 function AvatarPickerContent({
   className,
   align = 'start',
@@ -116,7 +128,7 @@ function AvatarPickerContent({
       data-slot="avatar-picker-content"
       align={align}
       side={side}
-      className={cn('w-84 gap-0 overflow-hidden p-0', className)}
+      className={cn('w-84', className)}
       {...props}
     />
   );
@@ -124,7 +136,6 @@ function AvatarPickerContent({
 
 /** Clears both emoji and image, unless the consumer's own `onClick` prevents default. */
 function AvatarPickerRemove({
-  className,
   onClick,
   'aria-label': ariaLabel = 'Remove avatar',
   ...props
@@ -141,7 +152,6 @@ function AvatarPickerRemove({
         onClick?.(event);
         if (!event.defaultPrevented) remove();
       }}
-      className={cn('text-muted-foreground hover:text-destructive', className)}
       {...props}
     >
       <Trash2 />
@@ -150,13 +160,10 @@ function AvatarPickerRemove({
 }
 
 /** Emoji pane (tab value `emoji`): picks an emoji and clears any image. */
-function AvatarPickerEmoji({
-  className,
-  ...props
-}: Omit<React.ComponentProps<typeof TabsContent>, 'value'>): React.ReactNode {
+function AvatarPickerEmoji(props: Omit<React.ComponentProps<typeof TabsContent>, 'value'>): React.ReactNode {
   const { setEmoji } = useAvatarPicker();
   return (
-    <TabsContent data-slot="avatar-picker-emoji" value="emoji" className={cn('p-0', className)} {...props}>
+    <TabsContent data-slot="avatar-picker-emoji" value="emoji" {...props}>
       <EmojiPicker onSelect={setEmoji} />
     </TabsContent>
   );
@@ -172,14 +179,16 @@ interface AvatarPickerUploadProps extends Omit<React.ComponentProps<typeof TabsC
 }
 
 /**
- * Upload pane (tab value `upload`). A picked file goes to `onUpload`, or is read
- * inline as a data URL when that is omitted. The pane carries `data-uploading`
- * while `onUpload` is pending, so `children` that replace the default dropzone
- * copy can style off it.
+ * Upload pane (tab value `upload`): an empty state whose `Choose image` button
+ * opens the file picker. A picked file goes to `onUpload`, or is read inline as
+ * a data URL when that is omitted. `children` replace the default icon, title
+ * and description; the pane carries `data-uploading` while `onUpload` is
+ * pending, so they can style off it.
  */
 function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarPickerUploadProps): React.ReactNode {
   const { setImage } = useAvatarPicker();
   const fileRef = React.useRef<HTMLInputElement>(null);
+  const iconRef = React.useRef<UploadIconHandle>(null);
   const [uploading, setUploading] = React.useState(false);
 
   const onFile = (file: File | undefined): void => {
@@ -206,7 +215,7 @@ function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarP
       data-slot="avatar-picker-upload"
       data-uploading={uploading || undefined}
       value="upload"
-      className={cn('group/avatar-picker-upload p-3', className)}
+      className={cn('group/avatar-picker-upload', className)}
       {...props}
     >
       <input
@@ -216,24 +225,30 @@ function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarP
         className="hidden"
         onChange={(e) => onFile(e.target.files?.[0] ?? undefined)}
       />
-      {/* A raw element, not the Button primitive: a drop target is a tall
-          column (icon over copy, `py-10`) that no Button `size` variant
-          expresses, and forcing one would mean overriding its fixed height and
-          row layout. */}
-      <button
-        type="button"
-        disabled={uploading}
-        onClick={() => fileRef.current?.click()}
-        className="bg-muted/50 text-muted-foreground hover:bg-muted focus-visible:ring-ring/50 flex w-full flex-col items-center justify-center gap-2 rounded-lg py-10 text-sm transition-colors outline-none focus-visible:ring-2 disabled:opacity-60"
-      >
+      <Empty>
         {children ?? (
-          <>
-            {uploading ? <Loader2 className="size-6 animate-spin" /> : <Upload className="size-6" />}
-            <span>{uploading ? 'Uploading...' : 'Click to upload an image'}</span>
-            <span className="text-xs">PNG, JPG or GIF</span>
-          </>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">{uploading ? <Spinner /> : <UploadIcon ref={iconRef} aria-hidden />}</EmptyMedia>
+            <EmptyTitle>{uploading ? 'Uploading...' : 'Upload an image'}</EmptyTitle>
+            <EmptyDescription>PNG, JPG or GIF</EmptyDescription>
+          </EmptyHeader>
         )}
-      </button>
+        <EmptyContent>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+            onMouseEnter={() => iconRef.current?.startAnimation()}
+            onMouseLeave={() => iconRef.current?.stopAnimation()}
+            onFocus={() => iconRef.current?.startAnimation()}
+            onBlur={() => iconRef.current?.stopAnimation()}
+          >
+            Choose image
+          </Button>
+        </EmptyContent>
+      </Empty>
     </TabsContent>
   );
 }
@@ -245,7 +260,7 @@ interface AvatarPickerColorProps extends Omit<React.ComponentProps<typeof TabsCo
 
 /**
  * Color pane (tab value `color`): swatches, the current one pressed, and a
- * custom picker whose label `children` replace.
+ * custom colour field whose label `children` replace (`Custom` by default).
  */
 function AvatarPickerColor({
   className,
@@ -267,8 +282,14 @@ function AvatarPickerColor({
   ...props
 }: AvatarPickerColorProps): React.ReactNode {
   const { value, setColor } = useAvatarPicker();
+  const customId = React.useId();
   return (
-    <TabsContent data-slot="avatar-picker-color" value="color" className={cn('p-3', className)} {...props}>
+    <TabsContent
+      data-slot="avatar-picker-color"
+      value="color"
+      className={cn('flex flex-col gap-4', className)}
+      {...props}
+    >
       <div className="grid grid-cols-6 gap-2">
         {colors.map((c) => (
           <button
@@ -282,16 +303,17 @@ function AvatarPickerColor({
           />
         ))}
       </div>
-      <label className="text-muted-foreground mt-4 flex items-center gap-2 text-sm">
-        {children ?? 'Custom'}
-        <input
+      <Field orientation="horizontal">
+        <FieldLabel htmlFor={customId}>{children ?? 'Custom'}</FieldLabel>
+        <Input
+          id={customId}
           type="color"
           value={value.color ?? '#000000'}
           onChange={(e) => setColor(e.target.value)}
           aria-label="Custom color"
-          className="h-8 w-12 cursor-pointer rounded-md bg-transparent"
+          className="w-12"
         />
-      </label>
+      </Field>
     </TabsContent>
   );
 }

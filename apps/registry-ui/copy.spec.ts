@@ -11,7 +11,6 @@ import { APP_ROOT, authoredTsx, docsMetas, docsPages, lineOf, parseTsxSource, re
 const PENDING: readonly string[] = [
   'content/docs/blocks/ai-provider-picker.mdx',
   'content/docs/components/status-indicator.mdx',
-  'registry/bases/base-ui/examples/collapsible-card-demo.tsx',
 ];
 
 /** Names that keep their capitals wherever they sit in a sentence, beside the registry's item titles. */

@@ -70,9 +70,15 @@ function sourceOf(importer: string, specifier: string): string | undefined {
   return found;
 }
 
-/** The upstream item a vendored file is, or undefined for a file this registry owns. */
+/**
+ * The upstream item a vendored file is, or undefined for a file this registry owns. A lucide-animated
+ * icon, which exports an `<Name>IconHandle`, is named by its full URL, as its consumers declare it.
+ */
 function upstreamOf(source: string): string | undefined {
   const part = /^registry\/bases\/base-ui\/ui\/([^/]+)\.tsx?$/.exec(source);
+  if (part && /^export interface \w+IconHandle\b/m.test(readFileSync(join(APP, source), 'utf8'))) {
+    return `https://lucide-animated.com/r/${part[1]}.json`;
+  }
   if (part) return `@shadcn/${part[1]}`;
   if (source === `${BASE}/lib/utils.ts`) return '@shadcn/utils';
   if (source === `${BASE}/hooks/use-mobile.ts`) return '@shadcn/use-mobile';

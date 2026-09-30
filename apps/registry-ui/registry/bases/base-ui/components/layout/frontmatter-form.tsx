@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Field, FieldError, FieldLabel } from '@/registry/bases/base-ui/ui/field';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/registry/bases/base-ui/ui/field';
 
 /** A frontmatter document: arbitrary keys, values usually strings. */
 type FrontmatterFormValue = Record<string, unknown>;
@@ -47,7 +46,7 @@ function useFrontmatterFormField(): FrontmatterFormFieldContextValue {
   return ctx;
 }
 
-interface FrontmatterFormProps extends Omit<React.ComponentProps<'div'>, 'onChange'> {
+interface FrontmatterFormProps extends Omit<React.ComponentProps<typeof FieldGroup>, 'onChange'> {
   /** The frontmatter object (controlled). */
   value: FrontmatterFormValue;
   /** Receives the next object whenever a field changes. */
@@ -61,18 +60,12 @@ interface FrontmatterFormProps extends Omit<React.ComponentProps<'div'>, 'onChan
 }
 
 /**
- * A frontmatter (YAML metadata) editor. The root holds the document and its
- * field setters; the consumer composes one `FrontmatterFormField` per key and
- * owns every label, hint (upstream `FieldDescription`), control and validation
- * rule.
+ * A frontmatter (YAML metadata) editor, an upstream `FieldGroup` of fields. The
+ * root holds the document and its field setters; the consumer composes one
+ * `FrontmatterFormField` per key and owns every label, hint (upstream
+ * `FieldDescription`), control and validation rule.
  */
-function FrontmatterForm({
-  value,
-  onValueChange,
-  errors = {},
-  className,
-  ...props
-}: FrontmatterFormProps): React.ReactNode {
+function FrontmatterForm({ value, onValueChange, errors = {}, ...props }: FrontmatterFormProps): React.ReactNode {
   const ctx: FrontmatterFormContextValue = {
     value,
     setField: (name, fieldValue) => onValueChange({ ...value, [name]: fieldValue }),
@@ -80,7 +73,7 @@ function FrontmatterForm({
   };
   return (
     <FrontmatterFormContext.Provider value={ctx}>
-      <div data-slot="frontmatter-form" className={cn('flex flex-col gap-5', className)} {...props} />
+      <FieldGroup data-slot="frontmatter-form" {...props} />
     </FrontmatterFormContext.Provider>
   );
 }

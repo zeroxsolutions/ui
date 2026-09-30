@@ -1,6 +1,8 @@
-import { Brain, ChevronDown } from 'lucide-react';
 import { createContext, useContext, useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 
+import { BrainIcon, type BrainIconHandle } from '@/registry/bases/base-ui/ui/brain';
+import { Button } from '@/registry/bases/base-ui/ui/button';
+import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
@@ -106,40 +108,76 @@ function ReasoningCollapsible({
   );
 }
 
-/** The toggle row; its children are the label, which pulses while the root is streaming. */
+/**
+ * The toggle row, a full-width ghost button; its children are the label, which
+ * pulses while the root is streaming. Its brain and chevron play while the row
+ * is hovered or focused, and the chevron turns over while the body is open.
+ */
 function ReasoningCollapsibleTrigger({
   className,
   children,
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onBlur,
   ...props
 }: ComponentProps<typeof CollapsibleTrigger>): ReactNode {
+  const brainRef = useRef<BrainIconHandle>(null);
+  const chevronRef = useRef<ChevronDownIconHandle>(null);
+  const play = (): void => {
+    brainRef.current?.startAnimation();
+    chevronRef.current?.startAnimation();
+  };
+  const stop = (): void => {
+    brainRef.current?.stopAnimation();
+    chevronRef.current?.stopAnimation();
+  };
   return (
     <CollapsibleTrigger
       data-slot="reasoning-collapsible-trigger"
-      className={cn(
-        'group/reasoning-collapsible-trigger text-muted-foreground hover:text-foreground flex w-full items-center gap-2 text-sm transition-colors',
-        className,
-      )}
+      render={<Button variant="ghost" size="sm" />}
+      className={cn('group/reasoning-collapsible-trigger w-full justify-start', className)}
+      onMouseEnter={(event) => {
+        onMouseEnter?.(event);
+        play();
+      }}
+      onMouseLeave={(event) => {
+        onMouseLeave?.(event);
+        stop();
+      }}
+      onFocus={(event) => {
+        onFocus?.(event);
+        play();
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        stop();
+      }}
       {...props}
     >
-      <Brain aria-hidden className="size-4 shrink-0" />
+      <BrainIcon ref={brainRef} aria-hidden />
       <span className="min-w-0 flex-1 truncate text-left group-data-streaming/reasoning-collapsible:animate-pulse">
         {children}
       </span>
-      <ChevronDown
+      <ChevronDownIcon
+        ref={chevronRef}
         aria-hidden
-        className="size-4 shrink-0 transition-transform group-aria-expanded/reasoning-collapsible-trigger:rotate-180"
+        className="transition-transform group-aria-expanded/reasoning-collapsible-trigger:rotate-180"
       />
     </CollapsibleTrigger>
   );
 }
 
-function ReasoningCollapsibleContent({ className, ...props }: ComponentProps<typeof CollapsibleContent>): ReactNode {
+/** The reasoning body, in muted text under the trigger; unmounted while closed. */
+function ReasoningCollapsibleContent({
+  className,
+  children,
+  ...props
+}: ComponentProps<typeof CollapsibleContent>): ReactNode {
   return (
-    <CollapsibleContent
-      data-slot="reasoning-collapsible-content"
-      className={cn('text-muted-foreground mt-2 text-sm', className)}
-      {...props}
-    />
+    <CollapsibleContent data-slot="reasoning-collapsible-content" className={cn('mt-2', className)} {...props}>
+      <div className="text-muted-foreground text-sm">{children}</div>
+    </CollapsibleContent>
   );
 }
 

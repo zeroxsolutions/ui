@@ -66,6 +66,27 @@ describe('CollapsibleCard', () => {
     expect(trigger.textContent).toBe('Layers');
   });
 
+  it("runs the caller's hover and focus handlers on the trigger beside its own", () => {
+    const calls: string[] = [];
+    render(
+      <CollapsibleCard>
+        <CollapsibleCardTrigger
+          onMouseEnter={() => calls.push('enter')}
+          onMouseLeave={() => calls.push('leave')}
+          onFocus={() => calls.push('focus')}
+          onBlur={() => calls.push('blur')}
+        />
+        <CollapsibleCardContent>Body</CollapsibleCardContent>
+      </CollapsibleCard>,
+    );
+    const trigger = screen.getByRole('button', { name: 'Toggle' });
+    fireEvent.mouseEnter(trigger);
+    fireEvent.mouseLeave(trigger);
+    fireEvent.focus(trigger);
+    fireEvent.blur(trigger);
+    expect(calls).toEqual(['enter', 'leave', 'focus', 'blur']);
+  });
+
   it('composes a caller onClick on the trigger with the toggle', () => {
     let clicks = 0;
     render(
