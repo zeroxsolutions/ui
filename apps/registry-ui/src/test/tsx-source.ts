@@ -45,6 +45,13 @@ export function docsPages(): string[] {
     .sort();
 }
 
+/** Every `meta.json` under `content/docs`. */
+export function docsMetas(): string[] {
+  return walk(join(APP_ROOT, 'content/docs'), 'meta.json')
+    .map((path) => relative(APP_ROOT, path))
+    .sort();
+}
+
 /** A repo-relative file's own text, read fresh each call. */
 export function readSource(file: string): string {
   return readFileSync(join(APP_ROOT, file), 'utf8');

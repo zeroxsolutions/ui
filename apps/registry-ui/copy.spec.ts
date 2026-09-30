@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
-import { APP_ROOT, authoredTsx, docsPages, lineOf, parseTsxSource, readSource } from './src/test/tsx-source';
+import { APP_ROOT, authoredTsx, docsMetas, docsPages, lineOf, parseTsxSource, readSource } from './src/test/tsx-source';
 
 /** Files whose copy is not sentence case yet; each task that rebuilds one removes it. */
 const PENDING: readonly string[] = [
@@ -94,9 +94,29 @@ function mdxCopy(file: string, text: string): CopyUse[] {
   });
 }
 
+/** A `meta.json`'s `title` and each `---Separator---` label its `pages` names, the docs navigation's own group labels. */
+function metaCopy(file: string, text: string): CopyUse[] {
+  const meta = JSON.parse(text) as { title?: string; pages?: string[] };
+  const labels = [
+    ...(meta.title ? [meta.title] : []),
+    ...(meta.pages ?? []).flatMap((entry) => /^---(.+)---$/.exec(entry)?.[1] ?? []),
+  ];
+  const lines = text.split('\n');
+  return labels.map((label) => ({
+    file,
+    line: lines.findIndex((line) => line.includes(JSON.stringify(label))) + 1,
+    text: label,
+  }));
+}
+
 function violationsIn(file: string, text: string): (CopyUse & { word: string })[] {
   const names = [...NAMES, ...ITEM_TITLES];
-  return (file.endsWith('.mdx') ? mdxCopy(file, text) : tsxCopy(file, text)).flatMap((use) => {
+  const uses = file.endsWith('.mdx')
+    ? mdxCopy(file, text)
+    : file.endsWith('meta.json')
+      ? metaCopy(file, text)
+      : tsxCopy(file, text);
+  return uses.flatMap((use) => {
     const word = casingViolation(use.text, names);
     return word ? [{ ...use, word }] : [];
   });
@@ -123,7 +143,7 @@ describe('casingViolation', () => {
   });
 });
 
-describe('tsxCopy and mdxCopy', () => {
+describe('tsxCopy, mdxCopy and metaCopy', () => {
   it('flags a JSX text and an aria-label through the copy extractor', () => {
     const source = ['function Demo() {', '  return <button aria-label="On This Page">Copy Page</button>;', '}'].join(
       '\n',
@@ -140,10 +160,16 @@ describe('tsxCopy and mdxCopy', () => {
 
     expect(mdxCopy('fixture.mdx', source).map((use) => use.text)).toEqual(['Real Heading', 'Some Description']);
   });
+
+  it("reads a meta.json's title and its pages' separator labels, plain page names aside", () => {
+    const source = JSON.stringify({ title: 'Components', pages: ['index', '---See Also---', 'button'] });
+
+    expect(metaCopy('fixture/meta.json', source).map((use) => use.text)).toEqual(['Components', 'See Also']);
+  });
 });
 
 describe('the copy', () => {
-  const files = [...authoredTsx(), ...docsPages()];
+  const files = [...authoredTsx(), ...docsPages(), ...docsMetas()];
 
   it('is sentence case in every rebuilt file', () => {
     expect(

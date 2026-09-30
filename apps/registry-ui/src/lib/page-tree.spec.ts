@@ -14,14 +14,14 @@ describe('pageTreeGroups', () => {
       name: 'Docs',
       children: [
         page('Introduction', '/docs'),
-        { type: 'separator', name: 'Get Started' },
+        { type: 'separator', name: 'Get started' },
         page('Installation', '/docs/installation'),
         {
           type: 'folder',
           name: 'Components',
-          index: page('Components', '/docs/components'),
+          // fumadocs sorts a folder's own index page first among its children, never inside `index`.
           children: [
-            page('Button', '/docs/components/button'),
+            page('Components', '/docs/components'),
             {
               type: 'folder',
               name: 'Feedback',
@@ -37,10 +37,37 @@ describe('pageTreeGroups', () => {
       pageTreeGroups(tree).map((group) => ({ name: group.name, urls: group.pages.map((item) => item.url) })),
     ).toEqual([
       { name: undefined, urls: ['/docs'] },
-      { name: 'Get Started', urls: ['/docs/installation'] },
-      { name: 'Components', urls: ['/docs/components', '/docs/components/button'] },
+      { name: 'Get started', urls: ['/docs/installation'] },
+      // Components' own index page repeats the folder's name, already the group's heading above it,
+      // so it is left out; nothing else is left in the folder's own group, and it is gone too.
       { name: 'Feedback', urls: ['/docs/components/status-indicator'] },
       { name: undefined, urls: ['/docs/changelog'] },
+    ]);
+  });
+
+  it("keeps a folder's own leading page where its name differs from the folder's", () => {
+    const tree: Root = {
+      name: 'Docs',
+      children: [
+        {
+          type: 'folder',
+          name: 'Feedback',
+          children: [
+            page('Overview', '/docs/components/feedback'),
+            page('Status Indicator', '/docs/components/status-indicator'),
+          ],
+        },
+      ],
+    };
+
+    expect(pageTreeGroups(tree)).toEqual([
+      {
+        name: 'Feedback',
+        pages: [
+          page('Overview', '/docs/components/feedback'),
+          page('Status Indicator', '/docs/components/status-indicator'),
+        ],
+      },
     ]);
   });
 

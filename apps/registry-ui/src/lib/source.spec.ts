@@ -83,12 +83,21 @@ function readItems(): Map<string, ItemText> {
   );
 }
 
-/** The pages `components/meta.json` lists after its `---Primitives---` separator, up to the next one. */
-function readPrimitives(root: string): Set<string> {
-  const { pages } = JSON.parse(readFileSync(join(root, 'components/meta.json'), 'utf8')) as { pages: string[] };
-  const after = pages.slice(pages.indexOf('---Primitives---') + 1);
-  const end = after.findIndex((entry) => entry.startsWith('---'));
-  return new Set((end === -1 ? after : after.slice(0, end)).filter((entry) => /^[a-z0-9-]+$/.test(entry)));
+/** The registry.json items published as `registry:component`, by name. */
+function readComponentNames(): Set<string> {
+  const { items } = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as {
+    items: { name: string; type: string }[];
+  };
+  return new Set(items.filter((item) => item.type === 'registry:component').map((item) => item.name));
+}
+
+/** Every page directly under `components/`, its own index aside, that names nothing `registry.json` publishes as a `registry:component`. */
+function nonComponentPages(sources: Record<string, string>, components: Set<string>): string[] {
+  return Object.keys(sources)
+    .filter((slug) => /^components\/[^/]+$/.test(slug) && slug !== 'components/index')
+    .filter((slug) => !components.has(slug.slice('components/'.length)))
+    .sort()
+    .map((slug) => `${slug}: names no registry:component item`);
 }
 
 /** A page's frontmatter `title` and `description`, each an unquoted value on one line. */
@@ -98,7 +107,7 @@ function readFrontmatter(source: string): Partial<ItemText> {
   return { title: field('title'), description: field('description') };
 }
 
-/** The pages under `components/` and `blocks/` that document one item or primitive each, which leaves out a folder's index. */
+/** The pages under `components/` and `blocks/` that document one registry item each, which leaves out a folder's index. */
 function namedPages(sources: Record<string, string>): [slug: string, name: string, source: string][] {
   return Object.entries(sources)
     .filter(([slug]) => /^(components|blocks)\/[^/]+$/.test(slug) && !slug.endsWith('/index'))
@@ -106,17 +115,13 @@ function namedPages(sources: Record<string, string>): [slug: string, name: strin
 }
 
 /**
- * Every page under `components/` or `blocks/` that is neither a registry item nor a primitive
- * `components/meta.json` lists, and every item page whose title or description is not the item's.
+ * Every page under `components/` or `blocks/` that names no registry item, and every item page
+ * whose title or description is not the item's.
  */
-function unnamedPages(
-  sources: Record<string, string>,
-  items: Map<string, ItemText>,
-  primitives: Set<string>,
-): string[] {
+function unnamedPages(sources: Record<string, string>, items: Map<string, ItemText>): string[] {
   return namedPages(sources).flatMap(([slug, name, source]) => {
     const item = items.get(name);
-    if (!item) return primitives.has(name) ? [] : [`${slug}: is neither a registry item nor a listed primitive`];
+    if (!item) return [`${slug}: is not a registry item`];
     const { title, description } = readFrontmatter(source);
     return [
       ...(title === item.title ? [] : [`${slug}: title is not "${item.title}"`]),
@@ -210,22 +215,37 @@ describe('content/docs', () => {
     ]);
   });
 
-  it("documents only items and listed primitives, and repeats an item's title and description", () => {
-    expect(unnamedPages(readPageSources(CONTENT), readItems(), readPrimitives(CONTENT))).toEqual([]);
+  it("documents only registry items, and repeats an item's title and description", () => {
+    expect(unnamedPages(readPageSources(CONTENT), readItems())).toEqual([]);
   });
 
-  it('reports a page for nothing published or listed, and an item page that renames its item', () => {
+  it('reports a page for nothing published, and an item page that renames its item', () => {
     const items = new Map([['status-indicator', { title: 'Status Indicator', description: 'A small dot.' }]]);
     const sources = {
       'components/index': '---\ntitle: Components\n---',
-      'components/button': '---\ntitle: Button\n---',
       'components/card': '---\ntitle: Card\n---',
       'components/status-indicator': '---\ntitle: Status\ndescription: A small dot.\n---',
     };
 
-    expect(unnamedPages(sources, items, new Set(['button']))).toEqual([
-      'components/card: is neither a registry item nor a listed primitive',
+    expect(unnamedPages(sources, items)).toEqual([
+      'components/card: is not a registry item',
       'components/status-indicator: title is not "Status Indicator"',
+    ]);
+  });
+
+  it('documents only registry:component items under components/, its own index aside', () => {
+    expect(nonComponentPages(readPageSources(CONTENT), readComponentNames())).toEqual([]);
+  });
+
+  it('reports a components page for nothing registry.json publishes as a registry:component', () => {
+    const sources = {
+      'components/index': '---\ntitle: Components\n---',
+      'components/status-indicator': '---\ntitle: Status Indicator\n---',
+      'components/button': '---\ntitle: Button\n---',
+    };
+
+    expect(nonComponentPages(sources, new Set(['status-indicator']))).toEqual([
+      'components/button: names no registry:component item',
     ]);
   });
 

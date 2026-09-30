@@ -10,21 +10,26 @@ export interface PageTreeGroup {
 
 /**
  * The tree's pages in the groups its `meta.json` files declare, in tree order. A separator opens a
- * group under its name; a folder is a group of its index page and its own pages, followed by the
- * groups of the folders inside it. A group with no page is dropped.
+ * group under its name; a folder is a group of its own pages (its own index page first, fumadocs'
+ * own sort), followed by the groups of the folders inside it. A folder's index page is left out of
+ * its group where that page's own name repeats the folder's - a reader already has the folder's name
+ * from the heading above it. A group with no page is dropped.
  */
 export function pageTreeGroups(tree: Root): PageTreeGroup[] {
   const groups: PageTreeGroup[] = [];
 
-  function collect(nodes: Node[], name?: ReactNode, index?: Item): void {
-    let group: PageTreeGroup = { name, pages: index ? [index] : [] };
+  function collect(nodes: Node[], name?: ReactNode): void {
+    let group: PageTreeGroup = { name, pages: [] };
     groups.push(group);
+    let leading = true;
     for (const node of nodes) {
       if (node.type === 'page') {
-        group.pages.push(node);
+        if (!(leading && node.name === name)) group.pages.push(node);
+        leading = false;
         continue;
       }
-      if (node.type === 'folder') collect(node.children, node.name, node.index);
+      leading = false;
+      if (node.type === 'folder') collect(node.children, node.name);
       group = { name: node.type === 'separator' ? node.name : undefined, pages: [] };
       groups.push(group);
     }

@@ -83,7 +83,8 @@ async function pageMovedWheelingPastRail(page: Page, rail: Locator): Promise<boo
 }
 
 test('a wheel over the sidebar past the end of its list leaves the page where it was', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
+  // Short enough that the sidebar's own list overflows its column, so its list has an end to wheel past.
+  await page.setViewportSize({ width: 1440, height: 500 });
   await page.goto(LONGEST_PAGE);
 
   expect(await pageMovedWheelingPastRail(page, sidebar(page))).toBe(false);
