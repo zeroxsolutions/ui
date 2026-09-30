@@ -3,9 +3,10 @@
 import type { Root } from 'fumadocs-core/page-tree';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
+import { useState, type MouseEvent, type ReactNode } from 'react';
 
 import { DocsSidebar } from '@/components/navigation/docs-sidebar';
+import { useIconAnimation } from '@/hooks/use-icon-animation';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { MenuIcon, type MenuIconHandle } from '@/registry/bases/base-ui/ui/menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/registry/bases/base-ui/ui/sheet';
@@ -34,7 +35,7 @@ interface MobileNavProps {
 function MobileNav({ tree, items }: MobileNavProps): ReactNode {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const iconRef = useRef<MenuIconHandle>(null);
+  const menuIcon = useIconAnimation<MenuIconHandle>();
 
   const closeOnLink = (event: MouseEvent<HTMLElement>): void => {
     if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
@@ -42,26 +43,15 @@ function MobileNav({ tree, items }: MobileNavProps): ReactNode {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger
-        render={
-          <Button
-            variant="ghost"
-            onMouseEnter={() => iconRef.current?.startAnimation()}
-            onMouseLeave={() => iconRef.current?.stopAnimation()}
-            onFocus={() => iconRef.current?.startAnimation()}
-            onBlur={() => iconRef.current?.stopAnimation()}
-          />
-        }
-      >
-        <MenuIcon ref={iconRef} />
+      <SheetTrigger render={<Button variant="ghost" {...menuIcon.handlers} />}>
+        <MenuIcon ref={menuIcon.ref} />
         Menu
       </SheetTrigger>
       <SheetContent side="left">
         <SheetHeader>
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
-        {/* The sheet's own surface under the list, rather than the theme's sidebar tint. */}
-        <SidebarProvider className="min-h-0 flex-1" style={{ '--sidebar': 'var(--popover)' } as CSSProperties}>
+        <SidebarProvider className="min-h-0 flex-1">
           <DocsSidebar tree={tree} className="w-full" onClick={closeOnLink}>
             <SidebarGroup>
               <SidebarGroupLabel>Sections</SidebarGroupLabel>

@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 export interface UseCommandShortcutOptions {
-  /** Key to match, case-insensitive — e.g. `'k'`. */
+  /** Key to match, case-insensitive - e.g. `'k'`. */
   key: string;
   /**
-   * Require the platform command modifier (⌘ on macOS, Ctrl elsewhere).
+   * Require the platform command modifier (Command on macOS, Ctrl elsewhere).
    * Default `true`.
    */
   mod?: boolean;
@@ -12,15 +12,36 @@ export interface UseCommandShortcutOptions {
   onTrigger: () => void;
   /** Disable the listener without unmounting. Default `true` (enabled). */
   enabled?: boolean;
+  /**
+   * Leave the key to a text field, a select or an editable element that has
+   * focus, so `/` still types a slash there. Default `false`.
+   */
+  ignoreEditable?: boolean;
+}
+
+/** Whether a key press lands where the key is text: a field, a select or an editable element. */
+function isEditable(target: EventTarget | null): boolean {
+  return (
+    (target instanceof HTMLElement && target.isContentEditable) ||
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement
+  );
 }
 
 /**
- * Registers a global keyboard shortcut (default ⌘/Ctrl + key) and calls
- * `onTrigger`. The side-effect lives in the consumer's component by design —
+ * Registers a global keyboard shortcut (default Cmd or Ctrl + key) and calls
+ * `onTrigger`. The side-effect lives in the consumer's component by design -
  * use it to open a `CommandMenu`. The latest `onTrigger` is always called
  * without re-binding the listener.
  */
-export function useCommandShortcut({ key, mod = true, onTrigger, enabled = true }: UseCommandShortcutOptions): void {
+export function useCommandShortcut({
+  key,
+  mod = true,
+  onTrigger,
+  enabled = true,
+  ignoreEditable = false,
+}: UseCommandShortcutOptions): void {
   const handler = React.useRef(onTrigger);
   handler.current = onTrigger;
 
@@ -28,6 +49,7 @@ export function useCommandShortcut({ key, mod = true, onTrigger, enabled = true 
     if (!enabled) return;
     const onKeyDown = (event: KeyboardEvent) => {
       const modPressed = mod ? event.metaKey || event.ctrlKey : true;
+      if (ignoreEditable && isEditable(event.target)) return;
       if (modPressed && event.key.toLowerCase() === key.toLowerCase()) {
         event.preventDefault();
         handler.current();
@@ -35,5 +57,5 @@ export function useCommandShortcut({ key, mod = true, onTrigger, enabled = true 
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [key, mod, enabled]);
+  }, [key, mod, enabled, ignoreEditable]);
 }

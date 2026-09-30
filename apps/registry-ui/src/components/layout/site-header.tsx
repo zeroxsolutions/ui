@@ -2,7 +2,7 @@ import type { Root } from 'fumadocs-core/page-tree';
 import type { ReactNode } from 'react';
 
 import { ModeSwitcher } from '@/components/general/mode-switcher';
-import { CommandMenu } from '@/components/navigation/command-menu';
+import { DocsSearch } from '@/components/navigation/docs-search';
 import { MainNav } from '@/components/navigation/main-nav';
 import { MobileNav } from '@/components/navigation/mobile-nav';
 import { docsPageUrl } from '@/lib/source';
@@ -32,7 +32,7 @@ function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
         </div>
         <MainNav items={navItems} className="hidden lg:flex" />
         <div className="ml-auto flex items-center gap-2">
-          <CommandMenu tree={tree} navItems={navItems} />
+          <DocsSearch tree={tree} navItems={navItems} />
           <Separator orientation="vertical" className="hidden lg:block" />
           <ModeSwitcher />
         </div>

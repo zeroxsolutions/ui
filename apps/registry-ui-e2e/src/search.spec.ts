@@ -9,11 +9,10 @@ test('the command menu finds a page and goes to it', async ({ page }) => {
     await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1_000 });
   }).toPass();
   await page.getByRole('combobox').fill('status');
-  // The page list filters to the same page by its title, so the index's own hit is picked from its group.
-  await page
-    .getByRole('group', { name: 'Search results' })
-    .getByRole('option', { name: 'Status Indicator', exact: true })
-    .click();
+  // The page list filters to the page by its title, and the index's own hit for that page is dropped, so it is listed once.
+  const option = page.getByRole('option', { name: 'Status Indicator', exact: true });
+  await expect(option).toHaveCount(1);
+  await option.click();
 
   await expect(page).toHaveURL(/\/docs\/components\/status-indicator$/);
 });
@@ -45,7 +44,7 @@ test.describe('on a phone-width header', () => {
 
     // The trigger listens only once the page has hydrated, so it is clicked until the search opens.
     await expect(async () => {
-      await page.getByRole('button', { name: 'Search docs', exact: true }).click();
+      await page.getByRole('button', { name: 'Search documentation' }).filter({ visible: true }).click();
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1_000 });
     }).toPass();
   });

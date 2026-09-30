@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
+
+import { useIconAnimation } from '@/hooks/use-icon-animation';
 
 import { ArrowLeftIcon, type ArrowLeftIconHandle } from '@/registry/bases/base-ui/ui/arrow-left';
 import { ArrowRightIcon, type ArrowRightIconHandle } from '@/registry/bases/base-ui/ui/arrow-right';
@@ -14,21 +16,19 @@ interface DocsNeighbourLinkProps {
   href: string;
 }
 
-/** The page header's icon link to the previous or the next page, upstream's; its arrow plays on hover or focus. */
+/** The page header's icon link to the previous or the next page; its arrow plays on hover or focus. */
 function DocsNeighbourLink({ direction, href }: DocsNeighbourLinkProps): ReactNode {
-  const iconRef = useRef<ArrowLeftIconHandle & ArrowRightIconHandle>(null);
+  const left = useIconAnimation<ArrowLeftIconHandle>();
+  const right = useIconAnimation<ArrowRightIconHandle>();
 
   return (
     <Link
       href={href}
       aria-label={direction === 'previous' ? 'Previous page' : 'Next page'}
       className={buttonVariants({ variant: 'secondary', size: 'icon-sm' })}
-      onMouseEnter={() => iconRef.current?.startAnimation()}
-      onMouseLeave={() => iconRef.current?.stopAnimation()}
-      onFocus={() => iconRef.current?.startAnimation()}
-      onBlur={() => iconRef.current?.stopAnimation()}
+      {...(direction === 'previous' ? left : right).handlers}
     >
-      {direction === 'previous' ? <ArrowLeftIcon ref={iconRef} /> : <ArrowRightIcon ref={iconRef} />}
+      {direction === 'previous' ? <ArrowLeftIcon ref={left.ref} /> : <ArrowRightIcon ref={right.ref} />}
     </Link>
   );
 }

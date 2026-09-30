@@ -5,11 +5,17 @@ import { http } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { CommandMenu } from './command-menu';
+import { DocsSearch } from './docs-search';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: () => undefined }) }));
 
-const tree: Root = { name: 'Docs', children: [{ type: 'page', name: 'Introduction', url: '/docs' }] };
+const tree: Root = {
+  name: 'Docs',
+  children: [
+    { type: 'page', name: 'Introduction', url: '/docs' },
+    { type: 'page', name: 'Status Indicator', url: '/docs/components/status-indicator' },
+  ],
+};
 
 /** The search index `/api/search` exports at build, here built from one page by the same library. */
 const searchAPI = createSearchAPI('advanced', {
@@ -36,18 +42,37 @@ afterEach(() => {
 });
 afterAll(() => server.close());
 
-describe('CommandMenu', () => {
-  it('opens on Ctrl+K and lists the pages the search index finds', async () => {
-    render(<CommandMenu tree={tree} />);
+describe('DocsSearch', () => {
+  it('opens on Ctrl+K and lists a page its title matches once, not again among the search results', async () => {
+    render(<DocsSearch tree={tree} />);
 
     fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
     fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'status' } });
+    // The index has answered once a text hit shows; its page hit for the same title is dropped.
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'status root element' } });
+    await screen.findByRole('option', { name: /on its root element/ }, { timeout: 3_000 });
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'status' } });
 
-    expect(await screen.findByRole('option', { name: 'Status Indicator' }, { timeout: 3_000 })).toBeTruthy();
+    await waitFor(() => expect(screen.getAllByRole('option', { name: 'Status Indicator' })).toHaveLength(1));
+  });
+
+  it('opens on / outside a field, and leaves / to a field that has focus', async () => {
+    render(
+      <>
+        <input aria-label="Other field" />
+        <DocsSearch tree={tree} />
+      </>,
+    );
+
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Other field' }), { key: '/' });
+    expect(screen.queryByRole('combobox')).toBeNull();
+
+    fireEvent.keyDown(document.body, { key: '/' });
+    expect(await screen.findByRole('combobox')).toBeTruthy();
   });
 
   it("lists the site's sections and the docs' pages before a query", async () => {
-    render(<CommandMenu tree={tree} navItems={[{ href: '/blocks', label: 'Blocks' }]} />);
+    render(<DocsSearch tree={tree} navItems={[{ href: '/blocks', label: 'Blocks' }]} />);
 
     fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
 
@@ -56,30 +81,32 @@ describe('CommandMenu', () => {
   });
 
   it('drops the last query when it closes, so a reopened menu lists no stale results', async () => {
-    render(<CommandMenu tree={tree} />);
+    render(<DocsSearch tree={tree} />);
 
     fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
-    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'status' } });
-    await screen.findByRole('option', { name: 'Status Indicator' }, { timeout: 3_000 });
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'root element' } });
+    await screen.findByRole('option', { name: /on its root element/ }, { timeout: 3_000 });
 
-    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    // Focus sits in the menu's input, where a browser would take Ctrl+K itself, so the chord is sent there.
+    fireEvent.keyDown(screen.getByRole('combobox'), { key: 'k', ctrlKey: true });
     await waitFor(() => expect(screen.queryByRole('combobox')).toBeNull());
     fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
 
     expect(await screen.findByRole('option', { name: 'Introduction' })).toBeTruthy();
-    expect(screen.queryByRole('option', { name: 'Status Indicator' })).toBeNull();
+    expect(screen.queryByRole('option', { name: /on its root element/ })).toBeNull();
   });
 
   it('opens from an icon-only trigger, for a header too narrow for the full search button', async () => {
-    render(<CommandMenu tree={tree} />);
+    render(<DocsSearch tree={tree} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Search docs' }));
+    // The header draws one trigger per width: the full button first, the icon-only one after it.
+    fireEvent.click(screen.getAllByRole('button', { name: 'Search documentation' })[1]);
 
     expect(await screen.findByRole('combobox')).toBeTruthy();
   });
 
   it('shows a search result as its text, without the Markdown backticks the index keeps', async () => {
-    render(<CommandMenu tree={tree} />);
+    render(<DocsSearch tree={tree} />);
 
     fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
     fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'root element' } });
@@ -89,15 +116,15 @@ describe('CommandMenu', () => {
   });
 
   it('names the search button once, whichever of its labels and shortcut hint are drawn', () => {
-    render(<CommandMenu tree={tree} />);
+    render(<DocsSearch tree={tree} />);
 
-    expect(screen.getByRole('button', { name: 'Search documentation' })).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: 'Search documentation' })).toHaveLength(2);
   });
 
   it('shows the command key glyph in the shortcut hint once mounted on macOS', async () => {
     vi.stubGlobal('navigator', { ...navigator, userAgent: 'Macintosh; Intel Mac OS X 10_15_7' });
 
-    render(<CommandMenu tree={tree} />);
+    render(<DocsSearch tree={tree} />);
 
     expect(await screen.findByText('\u2318')).toBeTruthy();
     expect(screen.queryByText('Ctrl')).toBeNull();

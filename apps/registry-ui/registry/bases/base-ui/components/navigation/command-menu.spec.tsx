@@ -95,4 +95,18 @@ describe('useCommandShortcut', () => {
     fireEvent.keyDown(document.body, { key: 'k', ctrlKey: true });
     expect(onTrigger).toHaveBeenCalledTimes(1);
   });
+
+  it('leaves the key to a focused field when asked, and fires elsewhere', () => {
+    const onTrigger = vi.fn();
+    renderHook(() => useCommandShortcut({ key: '/', mod: false, ignoreEditable: true, onTrigger }));
+    const input = document.createElement('input');
+    document.body.append(input);
+
+    fireEvent.keyDown(input, { key: '/' });
+    expect(onTrigger).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(document.body, { key: '/' });
+    expect(onTrigger).toHaveBeenCalledTimes(1);
+    input.remove();
+  });
 });
