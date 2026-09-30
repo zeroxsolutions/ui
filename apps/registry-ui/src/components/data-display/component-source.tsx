@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { SourceCodeBlock } from '@/components/data-display/source-code-block';
 import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
@@ -20,6 +20,10 @@ interface ComponentSourceProps {
   copyable?: boolean;
   /** Shows only the first this many lines. */
   maxLines?: number;
+  /** Draws the block's header of language, name and copy; off, the code alone. */
+  header?: boolean;
+  /** The block's surface; `flush` fills one its container draws. */
+  variant?: ComponentProps<typeof SourceCodeBlock>['variant'];
   /** Placement for the block. */
   className?: string;
 }
@@ -38,6 +42,8 @@ function ComponentSource({
   collapsible = true,
   copyable = true,
   maxLines,
+  header,
+  variant,
   className,
 }: ComponentSourceProps): ReactNode {
   if (code === undefined) throw new Error(`ComponentSource: "${name}" has no source; only a docs page reads it`);
@@ -51,6 +57,8 @@ function ComponentSource({
       lineNumbers
       collapsible={collapsible}
       copyable={copyable}
+      header={header}
+      variant={variant}
       className={className}
     >
       {title}

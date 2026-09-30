@@ -4,10 +4,9 @@ import { useState, type ComponentProps, type ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 
-interface ComponentPreviewCardProps extends ComponentProps<typeof Card> {
+interface ComponentPreviewCardProps extends ComponentProps<'div'> {
   /** Placement for the area the demo sits in. */
   previewClassName?: string;
   /** Where the demo sits on the cross axis. */
@@ -18,11 +17,14 @@ interface ComponentPreviewCardProps extends ComponentProps<typeof Card> {
   component: ReactNode;
   /** The demo's whole source. */
   source: ReactNode;
-  /** Its first lines, shown until `View code` opens `source`. */
+  /** Its first lines, shown under a fade until `View code` opens `source`. */
   sourcePreview?: ReactNode;
 }
 
-/** One card: the demo on top, and below it the first lines of its source with a `View code` button that shows it whole. */
+/**
+ * One frame on the card's surface: the demo on top and its source flush beneath it, split by a rule.
+ * Collapsed, the source's first lines fade into the code surface behind a `View code` button.
+ */
 function ComponentPreviewCard({
   className,
   previewClassName,
@@ -36,39 +38,44 @@ function ComponentPreviewCard({
   const [codeOpen, setCodeOpen] = useState(false);
 
   return (
-    <Card data-slot="component-preview" className={cn('mt-4 mb-12', className)} {...props}>
-      <CardContent>
-        {/* A demo taller or wider than the area scrolls inside it rather than spilling out of the card. */}
-        <ScrollArea data-slot="component-preview-demo" className={cn('h-72 w-full', previewClassName)}>
-          <div
-            data-align={align}
-            className="flex min-h-full w-full min-w-fit justify-center data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start"
-          >
-            {component}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </CardContent>
+    <div
+      data-slot="component-preview"
+      className={cn('ring-foreground/10 mt-4 mb-12 flex flex-col overflow-hidden rounded-xl ring-1', className)}
+      {...props}
+    >
+      {/* A demo taller or wider than the area scrolls inside it rather than spilling out of the frame. */}
+      <ScrollArea className={cn('h-72', previewClassName)}>
+        <div
+          data-align={align}
+          className="flex min-h-full min-w-fit justify-center p-10 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start"
+        >
+          {component}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
       {hideCode ? null : (
-        <CardContent>
-          <div data-slot="component-preview-code" className="flex flex-col gap-2">
-            {codeOpen ? (
-              source
-            ) : (
-              // An excerpt to open with `View code`, not a scroller: its overflow clips, and it takes no focus.
-              <div inert className="overflow-hidden **:data-[slot=scroll-area-scrollbar]:hidden">
+        <div
+          data-slot="component-preview-code"
+          className="bg-code border-foreground/10 border-t **:data-[slot=code-block-viewport]:max-h-96"
+        >
+          {codeOpen ? (
+            source
+          ) : (
+            <div className="relative">
+              {/* An excerpt under the fade, not a scroller: its overflow clips, and it takes no focus. */}
+              <div inert className="overflow-hidden">
                 {sourcePreview}
               </div>
-            )}
-            {codeOpen ? null : (
-              <Button variant="outline" size="sm" className="self-center" onClick={() => setCodeOpen(true)}>
-                View code
-              </Button>
-            )}
-          </div>
-        </CardContent>
+              <div className="from-code via-code/60 absolute inset-0 flex items-center justify-center bg-linear-to-t to-transparent">
+                <Button variant="outline" size="sm" onClick={() => setCodeOpen(true)}>
+                  View code
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       )}
-    </Card>
+    </div>
   );
 }
 

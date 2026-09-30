@@ -12,6 +12,7 @@ const collapsibleCardVariants = cva('group/collapsible-card flex w-full flex-col
       default: 'bg-card text-card-foreground ring-foreground/10 rounded-xl ring-1',
       muted: 'rounded-md bg-muted/50',
       plain: 'border-b border-border',
+      flush: '',
     },
   },
   defaultVariants: { variant: 'default' },
@@ -26,7 +27,8 @@ type CollapsibleCardProps = ComponentProps<typeof Collapsible> & VariantProps<ty
  * `CollapsibleCardContent`. `variant` picks the surface, stamped on the root as
  * `data-variant`: `default` the card surface, `muted` a borderless fill for a
  * block nested in another card, `plain` no surface and a rule underneath, for a
- * titled group of rows in a panel.
+ * titled group of rows in a panel, `flush` no surface at all, for a block filling a
+ * surface its container draws.
  */
 function CollapsibleCard({
   className,

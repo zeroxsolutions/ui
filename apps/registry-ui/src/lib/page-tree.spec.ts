@@ -40,7 +40,7 @@ describe('pageTreeGroups', () => {
       { name: 'Get started', urls: ['/docs/installation'] },
       // Components' own index page repeats the folder's name, but it is the folder's only page before
       // the folder inside it, so it stays: dropped, the Components heading would go with it.
-      { name: 'Components', urls: ['/docs/components'] },
+      { name: undefined, urls: ['/docs/components'] },
       { name: 'Feedback', urls: ['/docs/components/status-indicator'] },
       { name: undefined, urls: ['/docs/changelog'] },
     ]);
@@ -63,7 +63,7 @@ describe('pageTreeGroups', () => {
     ]);
   });
 
-  it("keeps a folder's index page that repeats the folder's name where a separator follows it", () => {
+  it("keeps a folder's lone index page, without a heading that repeats its name, where a separator follows it", () => {
     const tree: Root = {
       name: 'Docs',
       children: [
@@ -80,7 +80,7 @@ describe('pageTreeGroups', () => {
     };
 
     expect(pageTreeGroups(tree)).toEqual([
-      { name: 'Components', pages: [page('Components', '/docs/components')] },
+      { name: undefined, pages: [page('Components', '/docs/components')] },
       { name: 'Feedback', pages: [page('Status Indicator', '/docs/components/status-indicator')] },
     ]);
   });

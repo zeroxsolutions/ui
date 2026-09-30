@@ -15,11 +15,18 @@ export interface PageTreeGroup {
  * folder's `meta.json` names `"index"`; otherwise, as with a `"..."` rest entry, fumadocs keeps it apart
  * as the folder's `index`, and it is put first here. A folder's index page is left out of its group
  * where that page's own name repeats the folder's and another page follows it in the group - a reader
- * already has the folder's name from the heading above it. Where it is the group's only page it stays,
- * or the group, its heading and the only link to the page would go. A group with no page is dropped.
+ * already has the folder's name from the heading above it. Where it is the group's only page it stays
+ * and the heading goes instead, so the link is not listed under its own name. A group with no page is
+ * dropped.
  */
 export function pageTreeGroups(tree: Root): PageTreeGroup[] {
   const groups: PageTreeGroup[] = [];
+
+  // The page is the group's only one, so its heading would only repeat the link beneath it.
+  function keepAlone(group: PageTreeGroup, page: Item): void {
+    group.name = undefined;
+    group.pages.push(page);
+  }
 
   function collect(nodes: Node[], name?: ReactNode): void {
     let group: PageTreeGroup = { name, pages: [] };
@@ -34,7 +41,7 @@ export function pageTreeGroups(tree: Root): PageTreeGroup[] {
         continue;
       }
       leading = false;
-      if (repeated && group.pages.length === 0) group.pages.push(repeated);
+      if (repeated && group.pages.length === 0) keepAlone(group, repeated);
       repeated = undefined;
       if (node.type === 'folder') {
         const { index, children } = node;
@@ -43,7 +50,7 @@ export function pageTreeGroups(tree: Root): PageTreeGroup[] {
       group = { name: node.type === 'separator' ? node.name : undefined, pages: [] };
       groups.push(group);
     }
-    if (repeated && group.pages.length === 0) group.pages.push(repeated);
+    if (repeated && group.pages.length === 0) keepAlone(group, repeated);
   }
 
   collect(tree.children);

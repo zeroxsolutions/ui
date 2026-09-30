@@ -53,8 +53,8 @@ function ComponentPreview({
           <ComponentPreviewDemo name={name} />
         )
       }
-      source={<ComponentSource {...source} />}
-      sourcePreview={<ComponentSource {...source} maxLines={SOURCE_PREVIEW_LINES} copyable={false} />}
+      source={<ComponentSource {...source} variant="flush" />}
+      sourcePreview={<ComponentSource {...source} variant="flush" header={false} maxLines={SOURCE_PREVIEW_LINES} />}
       {...props}
     />
   );
