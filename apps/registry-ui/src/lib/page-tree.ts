@@ -10,10 +10,12 @@ export interface PageTreeGroup {
 
 /**
  * The tree's pages in the groups its `meta.json` files declare, in tree order. A separator opens a
- * group under its name; a folder is a group of its own pages (its own index page first, fumadocs'
- * own sort), followed by the groups of the folders inside it. A folder's index page is left out of
- * its group where that page's own name repeats the folder's - a reader already has the folder's name
- * from the heading above it. A group with no page is dropped.
+ * group under its name; a folder is a group of its own pages, its index page first, followed by the
+ * groups of the folders inside it. A folder's index page sits among its children only where the
+ * folder's `meta.json` names `"index"`; otherwise, as with a `"..."` rest entry, fumadocs keeps it apart
+ * as the folder's `index`, and it is put first here. A folder's index page is left out of its group
+ * where that page's own name repeats the folder's - a reader already has the folder's name from the
+ * heading above it. A group with no page is dropped.
  */
 export function pageTreeGroups(tree: Root): PageTreeGroup[] {
   const groups: PageTreeGroup[] = [];
@@ -29,7 +31,10 @@ export function pageTreeGroups(tree: Root): PageTreeGroup[] {
         continue;
       }
       leading = false;
-      if (node.type === 'folder') collect(node.children, node.name);
+      if (node.type === 'folder') {
+        const { index, children } = node;
+        collect(index && !children.includes(index) ? [index, ...children] : children, node.name);
+      }
       group = { name: node.type === 'separator' ? node.name : undefined, pages: [] };
       groups.push(group);
     }

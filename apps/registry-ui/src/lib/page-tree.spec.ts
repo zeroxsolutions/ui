@@ -71,6 +71,25 @@ describe('pageTreeGroups', () => {
     ]);
   });
 
+  it("puts a folder's index page first when its meta.json keeps it apart from the children", () => {
+    const tree: Root = {
+      name: 'Docs',
+      children: [
+        {
+          type: 'folder',
+          name: 'Feedback',
+          index: page('Overview', '/docs/components/feedback'),
+          children: [page('Status Indicator', '/docs/components/status-indicator')],
+        },
+      ],
+    };
+
+    expect(pageTreeGroups(tree)[0]?.pages.map((item) => item.url)).toEqual([
+      '/docs/components/feedback',
+      '/docs/components/status-indicator',
+    ]);
+  });
+
   it('drops a separator or folder with no page under it', () => {
     const tree: Root = {
       name: 'Docs',

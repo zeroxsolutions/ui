@@ -99,14 +99,18 @@ function mdxCopy(file: string, text: string): CopyUse[] {
 /** A `meta.json`'s `title` and each `---Separator---` label its `pages` names, the docs navigation's own group labels. */
 function metaCopy(file: string, text: string): CopyUse[] {
   const meta = JSON.parse(text) as { title?: string; pages?: string[] };
+  // Each label beside the string it is written as, which is what its line holds.
   const labels = [
-    ...(meta.title ? [meta.title] : []),
-    ...(meta.pages ?? []).flatMap((entry) => /^---(.+)---$/.exec(entry)?.[1] ?? []),
+    ...(meta.title ? [{ label: meta.title, written: meta.title }] : []),
+    ...(meta.pages ?? []).flatMap((entry) => {
+      const label = /^---(.+)---$/.exec(entry)?.[1];
+      return label ? [{ label, written: entry }] : [];
+    }),
   ];
   const lines = text.split('\n');
-  return labels.map((label) => ({
+  return labels.map(({ label, written }) => ({
     file,
-    line: lines.findIndex((line) => line.includes(JSON.stringify(label))) + 1,
+    line: lines.findIndex((line) => line.includes(JSON.stringify(written))) + 1,
     text: label,
   }));
 }
@@ -164,9 +168,12 @@ describe('tsxCopy, mdxCopy and metaCopy', () => {
   });
 
   it("reads a meta.json's title and its pages' separator labels, plain page names aside", () => {
-    const source = JSON.stringify({ title: 'Components', pages: ['index', '---See Also---', 'button'] });
+    const source = JSON.stringify({ title: 'Components', pages: ['index', '---See Also---', 'button'] }, null, 2);
 
-    expect(metaCopy('fixture/meta.json', source).map((use) => use.text)).toEqual(['Components', 'See Also']);
+    expect(metaCopy('fixture/meta.json', source).map(({ text, line }) => ({ text, line }))).toEqual([
+      { text: 'Components', line: 2 },
+      { text: 'See Also', line: 5 },
+    ]);
   });
 });
 
