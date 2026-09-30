@@ -7,6 +7,20 @@ This registry publishes composed items: components, blocks and the demos that sh
 built from shadcn's own primitives, which a consuming app installs from shadcn's registry rather
 than from this one.
 
+<ComponentPreview name="status-indicator-demo" />
+
+## Install an item
+
+Each item is addressed by its URL:
+
 ```bash
 npx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json
 ```
+
+<Callout>
+  <AlertTitle>Primitives come from shadcn</AlertTitle>
+  <AlertDescription>
+    An item that composes a primitive names it as a registry dependency, and the CLI installs it from shadcn's own
+    registry.
+  </AlertDescription>
+</Callout>

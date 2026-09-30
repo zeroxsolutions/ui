@@ -39,7 +39,9 @@ type ExampleModule = Record<string, ComponentType>;
 
 // Next's global types declare `import.meta.glob` without Vite's module type parameter, and theirs is
 // the declaration that wins, so the module shape is asserted here instead.
-const MODULES = import.meta.glob(['./*.tsx', '!./*.spec.tsx'], { eager: true }) as Record<string, ExampleModule>;
+const MODULES = import.meta.glob(['./*.tsx', '!./*.spec.tsx', '!./__index__.tsx', '!./__components__.tsx'], {
+  eager: true,
+}) as Record<string, ExampleModule>;
 
 /** Each example file, by basename, and the `data-slot` of the component it demonstrates. */
 const EXPECTED_SLOT: Record<string, string> = {

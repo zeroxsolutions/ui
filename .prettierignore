@@ -31,6 +31,8 @@ tmp
 .next
 .open-next
 .source
+apps/registry-ui/registry/bases/base-ui/examples/__index__.tsx
+apps/registry-ui/registry/bases/base-ui/examples/__components__.tsx
 .wrangler
 test-output
 .playwright-mcp

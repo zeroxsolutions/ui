@@ -1,5 +1,7 @@
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 
+import { CODE_THEMES } from '@/constants/code-themes';
+
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: { postprocess: { includeProcessedMarkdown: true } },
@@ -7,6 +9,6 @@ export const docs = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
-    rehypeCodeOptions: { themes: { light: 'github-light', dark: 'github-dark' } },
+    rehypeCodeOptions: { themes: CODE_THEMES },
   },
 });

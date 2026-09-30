@@ -86,6 +86,10 @@ storybook-static
 # Generated shadcn registry JSON (emitted by @zeroxsolutions/registry-ui:shadcn-build)
 apps/registry-ui/public/r
 
+# The docs' demo index (emitted by @zeroxsolutions/registry-ui:examples-index)
+apps/registry-ui/registry/bases/base-ui/examples/__index__.tsx
+apps/registry-ui/registry/bases/base-ui/examples/__components__.tsx
+
 # Playwright e2e artifacts (regenerated screenshots + reports)
 apps/registry-ui-e2e/screenshots
 playwright-report

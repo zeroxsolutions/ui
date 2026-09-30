@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { source } from '@/lib/source';
+import { mdxComponents } from '@/mdx-components';
 
 export const revalidate = false;
 export const dynamic = 'force-static';
@@ -35,7 +36,7 @@ export default async function DocsPage({ params }: DocsPageProps): Promise<React
         <h1 className="text-3xl font-semibold tracking-tight">{page.data.title}</h1>
         <p className="text-muted-foreground">{page.data.description}</p>
       </header>
-      <Body />
+      <Body components={mdxComponents} />
     </article>
   );
 }

@@ -7,6 +7,12 @@ export default [
   ...nx.configs['flat/react-typescript'],
   ...baseConfig,
   {
-    ignores: ['.next/**/*', '.source/**/*', '**/out-tsc'],
+    ignores: [
+      '.next/**/*',
+      '.source/**/*',
+      'registry/bases/base-ui/examples/__index__.tsx',
+      'registry/bases/base-ui/examples/__components__.tsx',
+      '**/out-tsc',
+    ],
   },
 ];
