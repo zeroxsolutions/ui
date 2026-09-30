@@ -514,25 +514,6 @@
       ]
     },
     {
-      "name": "tab-close-button",
-      "type": "registry:component",
-      "title": "Tab Close Button",
-      "description": "The trailing control on an editor tab, showing the unsaved dot until the tab's hover, focus or active state reveals its close X.",
-      "categories": ["feedback"],
-      "registryDependencies": [
-        "@shadcn/button",
-        "@shadcn/utils",
-        "https://lucide-animated.com/r/x.json",
-        "https://ui.zeroxsolutions.com/r/unsaved-indicator.json"
-      ],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/feedback/tab-close-button.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "unsaved-indicator",
       "type": "registry:component",
       "title": "Unsaved Indicator",
@@ -822,6 +803,26 @@
       "files": [
         {
           "path": "registry/bases/base-ui/components/navigation/command-menu.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "editor-tab",
+      "type": "registry:component",
+      "title": "Editor Tab",
+      "description": "One tab in an editor's tab strip, whose close button shows the unsaved dot until the tab's hover, focus or active state reveals its X.",
+      "categories": ["navigation"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/item",
+        "@shadcn/utils",
+        "https://lucide-animated.com/r/x.json",
+        "https://ui.zeroxsolutions.com/r/unsaved-indicator.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/navigation/editor-tab.tsx",
           "type": "registry:component"
         }
       ]
@@ -1199,20 +1200,6 @@
       ]
     },
     {
-      "name": "tab-close-button-demo",
-      "type": "registry:example",
-      "title": "Tab Close Button Demo",
-      "description": "Two editor tabs, one saved and one with unsaved changes.",
-      "categories": ["examples"],
-      "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/tab-close-button.json"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/tab-close-button-demo.tsx",
-          "type": "registry:example"
-        }
-      ]
-    },
-    {
       "name": "unsaved-indicator-demo",
       "type": "registry:example",
       "title": "Unsaved Indicator Demo",
@@ -1508,6 +1495,20 @@
         {
           "path": "registry/bases/base-ui/hooks/use-command-shortcut.ts",
           "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "editor-tab-demo",
+      "type": "registry:example",
+      "title": "Editor Tab Demo",
+      "description": "A tab strip: the active tab, and one with unsaved changes.",
+      "categories": ["examples"],
+      "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/editor-tab.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-tab-demo.tsx",
+          "type": "registry:example"
         }
       ]
     },
