@@ -11,3 +11,9 @@ export const blocksRoute = createStaticRoute('/blocks', () => '/blocks');
 
 /** One block alone on a page, which the docs and the blocks page frame. */
 export const viewRoute = createDynamicRoute<{ name: string }>('/view/:name', ({ name }) => `/view/${name}`);
+
+/** A docs page's share image, which `/og/docs/[...slug]` draws once at build. `slug` is its segments joined. */
+export const docsShareImageRoute = createDynamicRoute<{ slug: string }>(
+  '/og/docs/*slug',
+  ({ slug }) => `/og/docs/${slug}`,
+);

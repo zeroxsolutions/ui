@@ -10,18 +10,20 @@ import * as appRoutes from './app-routes';
 const APP_DIR = join(import.meta.dirname, '..', 'app');
 
 /**
- * Every pathname a page in the app tree answers, read off the tree, with a dynamic segment `[x]` spelled
- * as the route pattern spells it, `:x`. A group folder is absent from the URL, a private `_` folder is
- * not routable, and an optional catch-all `[[...x]]` answers its parent's path as well as every path
- * below it.
+ * Every pathname a page or an endpoint in the app tree answers, read off the tree, with a dynamic
+ * segment `[x]` spelled as the route pattern spells it, `:x`, and a catch-all `[...x]` as its
+ * wildcard, `*x`. A group folder is absent from the URL, a private `_` folder is not routable, and an
+ * optional catch-all `[[...x]]` answers its parent's path as well as every path below it.
  */
 function pagePathnames(directory: string, segments: readonly string[] = []): string[] {
   const entries = readdirSync(directory, { withFileTypes: true });
-  const found = entries.some((entry) => entry.isFile() && entry.name === 'page.tsx') ? [`/${segments.join('/')}`] : [];
+  const found = entries.some((entry) => entry.isFile() && (entry.name === 'page.tsx' || entry.name === 'route.tsx'))
+    ? [`/${segments.join('/')}`]
+    : [];
   for (const entry of entries) {
     if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
     const pathless = entry.name.startsWith('(') || entry.name.startsWith('[[...');
-    const segment = entry.name.replace(/^\[(\w+)\]$/, ':$1');
+    const segment = entry.name.replace(/^\[\.\.\.(\w+)\]$/, '*$1').replace(/^\[(\w+)\]$/, ':$1');
     found.push(...pagePathnames(join(directory, entry.name), pathless ? segments : [...segments, segment]));
   }
   return found;
@@ -40,6 +42,15 @@ describe('app routes', () => {
   it('builds a view path its own pattern reads the name back from', () => {
     expect(appRoutes.viewRoute.matcher(appRoutes.viewRoute.build({ name: 'ai-provider-picker' }))).toMatchObject({
       params: { name: 'ai-provider-picker' },
+    });
+  });
+
+  it('builds a share-image path its own pattern reads the slug back from', () => {
+    const built = appRoutes.docsShareImageRoute.build({ slug: 'components/button/image.png' });
+
+    expect(built).toBe('/og/docs/components/button/image.png');
+    expect(appRoutes.docsShareImageRoute.matcher(built)).toMatchObject({
+      params: { slug: ['components', 'button', 'image.png'] },
     });
   });
 

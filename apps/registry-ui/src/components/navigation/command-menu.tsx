@@ -31,6 +31,11 @@ function isTyping(target: EventTarget | null): boolean {
   );
 }
 
+/** Whether this browser runs on macOS, where the search shortcut is Cmd+K rather than Ctrl+K. */
+function isMac(): boolean {
+  return typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac');
+}
+
 /**
  * A search box that opens on Ctrl+K, Cmd+K or `/`, and closes on Escape. Empty, it lists the docs'
  * pages; with a query, the pages and headings the search index finds. Choosing one navigates to it.
@@ -38,7 +43,14 @@ function isTyping(target: EventTarget | null): boolean {
 function CommandMenu({ tree }: { tree: Root }): ReactNode {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  // Stable for the server and the first client render, then corrected once mounted, so hydration
+  // never compares a platform-specific hint against the one it prerendered.
+  const [modifierKey, setModifierKey] = useState('Ctrl');
   const { search, setSearch, query } = useDocsSearch({ client: searchClient });
+
+  useEffect(() => {
+    if (isMac()) setModifierKey('Cmd');
+  }, []);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent): void {
@@ -61,13 +73,21 @@ function CommandMenu({ tree }: { tree: Root }): ReactNode {
 
   return (
     <>
-      <Button variant="outline" className="text-muted-foreground w-full justify-start" onClick={() => setOpen(true)}>
+      <Button
+        variant="outline"
+        className="text-muted-foreground hidden w-56 justify-start md:inline-flex"
+        onClick={() => setOpen(true)}
+      >
         <SearchIcon data-icon="inline-start" />
         Search docs...
         <KbdGroup className="ml-auto">
-          <Kbd>Ctrl</Kbd>
+          <Kbd>{modifierKey}</Kbd>
           <Kbd>K</Kbd>
         </KbdGroup>
+      </Button>
+      <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen(true)}>
+        <SearchIcon />
+        <span className="sr-only">Search docs</span>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen} title="Search docs" description="Find a page or a heading.">
         <Command shouldFilter={false}>

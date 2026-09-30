@@ -5,3 +5,9 @@ test('/docs renders the introduction page', async ({ page }) => {
 
   await expect(page.getByRole('heading', { level: 1, name: 'Introduction' })).toBeVisible();
 });
+
+test("a docs page's title carries the site's suffix", async ({ page }) => {
+  await page.goto('/docs');
+
+  await expect(page).toHaveTitle('Introduction - ZeroXSolutions UI');
+});

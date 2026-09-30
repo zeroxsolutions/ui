@@ -38,9 +38,7 @@ function SiteHeader({ tree, className, ...props }: SiteHeaderProps): ReactNode {
           </Link>
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <div className="hidden w-56 md:block">
-            <CommandMenu tree={tree} />
-          </div>
+          <CommandMenu tree={tree} />
           <ModeSwitcher />
         </div>
       </div>

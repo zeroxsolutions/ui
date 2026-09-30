@@ -54,4 +54,21 @@ describe('CommandMenu', () => {
 
     expect(await screen.findByRole('option', { name: 'Status Indicator' })).toBeTruthy();
   });
+
+  it('opens from an icon-only trigger, for a header too narrow for the full search button', async () => {
+    render(<CommandMenu tree={tree} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Search docs' }));
+
+    expect(await screen.findByRole('combobox')).toBeTruthy();
+  });
+
+  it('shows the Cmd shortcut hint once mounted on macOS', async () => {
+    vi.stubGlobal('navigator', { ...navigator, userAgent: 'Macintosh; Intel Mac OS X 10_15_7' });
+
+    render(<CommandMenu tree={tree} />);
+
+    expect(await screen.findByText('Cmd')).toBeTruthy();
+    expect(screen.queryByText('Ctrl')).toBeNull();
+  });
 });

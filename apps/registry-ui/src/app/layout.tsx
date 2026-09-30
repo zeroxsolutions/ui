@@ -8,7 +8,7 @@ import './global.css';
 export const metadata: Metadata = {
   // The share images' URLs resolve against it; unset, the build warns and falls back to localhost.
   metadataBase: new URL(registryHomepage),
-  title: 'ZeroXSolutions UI',
+  title: { default: 'ZeroXSolutions UI', template: '%s - ZeroXSolutions UI' },
   description: 'Base UI components and blocks, distributed as a shadcn registry.',
 };
 

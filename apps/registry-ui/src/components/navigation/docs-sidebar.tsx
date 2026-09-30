@@ -34,6 +34,7 @@ function DocsSidebar({ tree, ...props }: DocsSidebarProps): ReactNode {
   const pathname = usePathname();
 
   return (
+    // The vendored provider binds Ctrl/Cmd+B, prevents default, toggles, and writes the sidebar_state cookie.
     <SidebarProvider className="h-full min-h-0">
       <Sidebar collapsible="none" {...props}>
         <SidebarContent>

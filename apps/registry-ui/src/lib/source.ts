@@ -1,7 +1,7 @@
 import { docs } from 'collections/server';
 import { llms, loader } from 'fumadocs-core/source';
 
-import { docsRoute } from '@/routes/app-routes';
+import { docsRoute, docsShareImageRoute } from '@/routes/app-routes';
 
 export const source = loader({
   baseUrl: docsRoute.build(),
@@ -27,5 +27,5 @@ export const docsLlms = llms(source, {
 /** The address of a docs page's share image, which `/og/docs/[...slug]` draws at build, and its segments there. */
 export function docsPageImage(page: { slugs: string[] }): { segments: string[]; url: string } {
   const segments = [...page.slugs, 'image.png'];
-  return { segments, url: `/og/docs/${segments.join('/')}` };
+  return { segments, url: docsShareImageRoute.build({ slug: segments.join('/') }) };
 }

@@ -2,6 +2,7 @@ import { ImageResponse } from 'next/og';
 import { notFound } from 'next/navigation';
 
 import { docsPageImage, source } from '@/lib/source';
+import { docsShareImageRoute } from '@/routes/app-routes';
 
 export const revalidate = false;
 export const dynamicParams = false;
@@ -21,7 +22,7 @@ export function generateStaticParams(): { slug: string[] }[] {
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string[] }> }): Promise<Response> {
   const { slug } = await params;
   const page = source.getPage(slug.slice(0, -1));
-  if (!page || docsPageImage(page).segments.join('/') !== slug.join('/')) notFound();
+  if (!page || docsPageImage(page).url !== docsShareImageRoute.build({ slug: slug.join('/') })) notFound();
 
   return new ImageResponse(
     <div
