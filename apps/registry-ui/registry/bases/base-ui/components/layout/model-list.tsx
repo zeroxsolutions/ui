@@ -25,7 +25,7 @@ import { Skeleton } from '@/registry/bases/base-ui/ui/skeleton';
  *         <ItemContent><ItemTitle>GPT-4o</ItemTitle><ItemDescription>gpt-4o</ItemDescription></ItemContent>
  *         <ItemActions>
  *           <Switch checked={enabled} disabled={unavailable} onCheckedChange={setEnabled} />
- *           <ModelListItemRemove onClick={remove} />
+ *           <ModelListRemoveButton onClick={remove} />
  *         </ItemActions>
  *       </Item>
  *     </ItemGroup>
@@ -76,9 +76,9 @@ function ModelListContent({ className, children, ...props }: React.ComponentProp
 }
 
 /** The ghost remove button for one model item, labelled "Remove model" unless an `aria-label` is given; `children` replace its trash icon. */
-function ModelListItemRemove({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
+function ModelListRemoveButton({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
   return (
-    <Button data-slot="model-list-item-remove" aria-label="Remove model" variant="ghost" size="icon-sm" {...props}>
+    <Button aria-label="Remove model" variant="ghost" size="icon-sm" {...props}>
       {children ?? <Trash2 />}
     </Button>
   );
@@ -120,7 +120,7 @@ export {
   ModelListAction,
   ModelListContent,
   ModelListHeader,
-  ModelListItemRemove,
+  ModelListRemoveButton,
   ModelListSkeleton,
   ModelListTitle,
 };
