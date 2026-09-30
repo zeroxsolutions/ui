@@ -575,20 +575,6 @@
       ]
     },
     {
-      "name": "panel-field-label",
-      "type": "registry:component",
-      "title": "Panel Field Label",
-      "description": "Upstream's field label as the preset draws it, naming a property panel control that has no inline label of its own.",
-      "categories": ["general"],
-      "registryDependencies": ["@shadcn/field"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/general/panel-field-label.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "avatar-picker",
       "type": "registry:component",
       "title": "Avatar Picker",
@@ -1277,24 +1263,6 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/icon-label-demo.tsx",
-          "type": "registry:example"
-        }
-      ]
-    },
-    {
-      "name": "panel-field-label-demo",
-      "type": "registry:example",
-      "title": "Panel Field Label Demo",
-      "description": "A PanelFieldLabel naming a fill swatch that carries no inline label of its own.",
-      "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/field",
-        "@shadcn/input",
-        "https://ui.zeroxsolutions.com/r/panel-field-label.json"
-      ],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/panel-field-label-demo.tsx",
           "type": "registry:example"
         }
       ]
