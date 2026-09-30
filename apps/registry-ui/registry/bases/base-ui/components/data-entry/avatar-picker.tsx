@@ -88,7 +88,7 @@ function AvatarPicker({ value, onValueChange, ...props }: AvatarPickerProps): Re
   };
   return (
     <AvatarPickerContext.Provider value={ctx}>
-      <Popover {...props} />
+      <Popover data-slot="avatar-picker" {...props} />
     </AvatarPickerContext.Provider>
   );
 }
@@ -102,7 +102,14 @@ function AvatarPickerTrigger({
   'aria-label': ariaLabel = 'Edit avatar',
   ...props
 }: React.ComponentProps<typeof PopoverTrigger>): React.ReactNode {
-  return <PopoverTrigger aria-label={ariaLabel} render={<Button variant="ghost" size="icon-lg" />} {...props} />;
+  return (
+    <PopoverTrigger
+      data-slot="avatar-picker-trigger"
+      aria-label={ariaLabel}
+      render={<Button variant="ghost" size="icon-lg" />}
+      {...props}
+    />
+  );
 }
 
 /** The popover body the consumer fills with `Tabs` and the panes, opening below the trigger's start edge. */
@@ -112,7 +119,15 @@ function AvatarPickerContent({
   side = 'bottom',
   ...props
 }: React.ComponentProps<typeof PopoverContent>): React.ReactNode {
-  return <PopoverContent align={align} side={side} className={cn('w-84', className)} {...props} />;
+  return (
+    <PopoverContent
+      data-slot="avatar-picker-content"
+      align={align}
+      side={side}
+      className={cn('w-84', className)}
+      {...props}
+    />
+  );
 }
 
 /**
@@ -129,6 +144,7 @@ function AvatarPickerRemoveButton({
   const { remove } = useAvatarPicker();
   return (
     <Button
+      data-slot="avatar-picker-remove-button"
       type="button"
       variant="ghost"
       size="icon-sm"
@@ -155,7 +171,7 @@ function AvatarPickerEmojiContent({
 }: Omit<React.ComponentProps<typeof TabsContent>, 'value'>): React.ReactNode {
   const { setEmoji } = useAvatarPicker();
   return (
-    <TabsContent value="emoji" {...props}>
+    <TabsContent data-slot="avatar-picker-emoji-content" value="emoji" {...props}>
       <EmojiPicker onSelect={setEmoji}>{children}</EmojiPicker>
     </TabsContent>
   );
@@ -222,6 +238,7 @@ function AvatarPickerUploadContent({
   return (
     <AvatarPickerUploadContext.Provider value={{ choose: () => fileRef.current?.click(), uploading }}>
       <TabsContent
+        data-slot="avatar-picker-upload-content"
         data-uploading={uploading || undefined}
         aria-busy={uploading}
         value="upload"
@@ -252,6 +269,7 @@ function AvatarPickerUploadTrigger({ onClick, ...props }: React.ComponentProps<t
   }
   return (
     <Button
+      data-slot="avatar-picker-upload-trigger"
       type="button"
       variant="outline"
       size="sm"
@@ -270,7 +288,14 @@ function AvatarPickerColorContent({
   className,
   ...props
 }: Omit<React.ComponentProps<typeof TabsContent>, 'value'>): React.ReactNode {
-  return <TabsContent value="color" className={cn('flex flex-col gap-4', className)} {...props} />;
+  return (
+    <TabsContent
+      data-slot="avatar-picker-color-content"
+      value="color"
+      className={cn('flex flex-col gap-4', className)}
+      {...props}
+    />
+  );
 }
 
 interface AvatarPickerColorGroupProps extends React.ComponentProps<'div'> {
@@ -304,7 +329,12 @@ function AvatarPickerColorGroup({
 }: AvatarPickerColorGroupProps): React.ReactNode {
   const { value, setColor } = useAvatarPicker();
   return (
-    <div role="group" className={cn('grid grid-cols-6 gap-2', className)} {...props}>
+    <div
+      data-slot="avatar-picker-color-group"
+      role="group"
+      className={cn('grid grid-cols-6 gap-2', className)}
+      {...props}
+    >
       {colors.map((c) => (
         <button
           key={c}
@@ -328,7 +358,7 @@ function AvatarPickerColorField({ children, ...props }: React.ComponentProps<typ
   const { value, setColor } = useAvatarPicker();
   const inputId = React.useId();
   return (
-    <Field orientation="horizontal" {...props}>
+    <Field data-slot="avatar-picker-color-field" orientation="horizontal" {...props}>
       <FieldLabel htmlFor={inputId}>{children}</FieldLabel>
       <Input
         id={inputId}
