@@ -8,7 +8,7 @@
 # custom domain does not, so a stray apply would also try to re-point the live
 # fluent-emoji.zeroxsolutions.com at the empty parallel bucket.
 #
-# This root is applied in the `production` workspace only; CLAUDE.md records why.
+# This root is applied in the `production` workspace only; AGENTS.md records why.
 resource "terraform_data" "workspace_guard" {
   lifecycle {
     precondition {

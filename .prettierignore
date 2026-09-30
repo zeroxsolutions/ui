@@ -54,8 +54,8 @@ apps/registry-ui/registry/bases/base-ui/lib/utils.ts
 
 # Loaded into every agent session, and prettier pads markdown table columns - measured once at
 # 29% of the file in alignment whitespace alone. Re-measure before removing these two lines.
-/CLAUDE.md
-/CLAUDE.template.md
+/AGENTS.md
+/AGENTS.template.md
 
 # The same padding, for a different reason: this one is read in an incident, and its credential
 # table is edited by hand under time pressure. Measured at 671 bytes of alignment whitespace,

@@ -13,7 +13,7 @@ contact_links:
       structured.
 
   - name: Contributing and local setup
-    url: https://github.com/zeroxsolutions/ui-sdk/blob/master/CLAUDE.md
+    url: https://github.com/zeroxsolutions/ui-sdk/blob/master/AGENTS.md
     about: This repository's concrete choices and its workspace inventory.
 
 # No security row here on purpose: GitHub adds the security policy to this

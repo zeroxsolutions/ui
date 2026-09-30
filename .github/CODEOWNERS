@@ -33,4 +33,4 @@
 /tsconfig.base.json     @luongvantuit
 
 # The repository's concrete choices and workspace inventory.
-/CLAUDE.md              @luongvantuit
+/AGENTS.md              @luongvantuit
