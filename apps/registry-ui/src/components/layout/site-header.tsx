@@ -5,9 +5,10 @@ import type { ComponentProps, ReactNode } from 'react';
 import { ModeSwitcher } from '@/components/general/mode-switcher';
 import { CommandMenu } from '@/components/navigation/command-menu';
 import { MobileNav } from '@/components/navigation/mobile-nav';
+import { docsPageUrl } from '@/lib/source';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
-import { docsRoute, homeRoute } from '@/routes/app-routes';
+import { blocksRoute, docsRoute, homeRoute } from '@/routes/app-routes';
 
 interface SiteHeaderProps extends ComponentProps<'header'> {
   /** The docs page tree, which the search lists before a query and the menu lists on a narrow screen. */
@@ -28,6 +29,12 @@ function SiteHeader({ tree, className, ...props }: SiteHeaderProps): ReactNode {
         <nav aria-label="Main" className="hidden items-center lg:flex">
           <Link href={docsRoute.build()} className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
             Docs
+          </Link>
+          <Link href={docsPageUrl(['components'])} className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+            Components
+          </Link>
+          <Link href={blocksRoute.build()} className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+            Blocks
           </Link>
         </nav>
         <div className="ml-auto flex items-center gap-2">

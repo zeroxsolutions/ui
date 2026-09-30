@@ -33,3 +33,11 @@ export function pageTreeGroups(tree: Root): PageTreeGroup[] {
   collect(tree.children);
   return groups.filter((group) => group.pages.length > 0);
 }
+
+/**
+ * Whether a page in the tree leaves the site: a `meta.json` link to another origin. Unmarked, it is
+ * read off the URL as fumadocs' own link does, by a scheme or a leading `//`.
+ */
+export function isExternal(page: Item): boolean {
+  return page.external ?? /^(\w+:|\/\/)/.test(page.url);
+}

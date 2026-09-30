@@ -1,0 +1,45 @@
+---
+title: Installation
+description: Set up an app to install items from this registry with the shadcn CLI.
+---
+
+The shadcn CLI installs every item. It reads the app's `components.json` to decide where each file goes and how
+its imports are written.
+
+## Create components.json
+
+The items compose the Base UI build of shadcn's primitives and are drawn in the nova style, so `components.json`
+names `base-nova` as its `style`. An app that has no `components.json` gets one on that base and style from:
+
+```bash
+npx shadcn@latest init --base base --preset nova
+```
+
+In an app that already has one, `style` has to start with `base-`. A Radix style installs the Radix build of each
+primitive, and the items' imports do not match it.
+
+## Install an item
+
+Each item is addressed by its URL:
+
+```bash
+npx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json
+```
+
+The CLI writes the item's files under the aliases in `components.json` and rewrites its imports to match. With
+the aliases `init` writes, Status Indicator lands in `components/feedback/status-indicator.tsx`, its tone type in
+`lib/status-tone.ts`, and the component imports them as `@/lib/utils` and `@/lib/status-tone`.
+
+## Items that use other items
+
+An item names each item it composes by that item's URL, `https://ui.zeroxsolutions.com/r/<name>.json`, and each
+shadcn primitive it composes as `@shadcn/<name>`. The CLI fetches the first kind from this registry and the second
+from shadcn's, so `components.json` needs no `registries` entry for either. Tab Close Button, for example, names
+`https://ui.zeroxsolutions.com/r/unsaved-indicator.json` and `@shadcn/button`.
+
+## Colours
+
+An item that paints a status uses two colours shadcn's theme does not define, `success` and `warning`. It carries
+both as `cssVars`, and the CLI adds them to the CSS file `components.json` names: `--color-success` and
+`--color-warning` under `@theme inline`, and `--success` and `--warning` under `:root` and `.dark`. An item copied
+by hand needs the same entries, copied from the `cssVars` in its JSON.

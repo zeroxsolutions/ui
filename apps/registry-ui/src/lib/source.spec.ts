@@ -65,12 +65,78 @@ function readPageSources(root: string): Record<string, string> {
   );
 }
 
-/** The names of the components and the block `registry.json` publishes, which an item page is named for. */
-function readItemNames(): Set<string> {
+/** What an item page repeats of its item: the `title` and `description` in `registry.json`. */
+interface ItemText {
+  title: string;
+  description: string;
+}
+
+/** The components and the block `registry.json` publishes, by the name an item page is named for. */
+function readItems(): Map<string, ItemText> {
   const { items } = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as {
-    items: { name: string; type: string }[];
+    items: (ItemText & { name: string; type: string })[];
   };
-  return new Set(items.filter((item) => item.type !== 'registry:example').map((item) => item.name));
+  return new Map(
+    items
+      .filter((item) => item.type !== 'registry:example')
+      .map(({ name, title, description }) => [name, { title, description }]),
+  );
+}
+
+/** The pages `components/meta.json` lists after its `---Primitives---` separator, up to the next one. */
+function readPrimitives(root: string): Set<string> {
+  const { pages } = JSON.parse(readFileSync(join(root, 'components/meta.json'), 'utf8')) as { pages: string[] };
+  const after = pages.slice(pages.indexOf('---Primitives---') + 1);
+  const end = after.findIndex((entry) => entry.startsWith('---'));
+  return new Set((end === -1 ? after : after.slice(0, end)).filter((entry) => /^[a-z0-9-]+$/.test(entry)));
+}
+
+/** A page's frontmatter `title` and `description`, each an unquoted value on one line. */
+function readFrontmatter(source: string): Partial<ItemText> {
+  const block = /^---\n([\s\S]*?)\n---/.exec(source)?.[1] ?? '';
+  const field = (key: string): string | undefined => new RegExp(`^${key}: *(.*)$`, 'm').exec(block)?.[1];
+  return { title: field('title'), description: field('description') };
+}
+
+/** The pages under `components/` and `blocks/` that document one item or primitive each, which leaves out a folder's index. */
+function namedPages(sources: Record<string, string>): [slug: string, name: string, source: string][] {
+  return Object.entries(sources)
+    .filter(([slug]) => /^(components|blocks)\/[^/]+$/.test(slug) && !slug.endsWith('/index'))
+    .map(([slug, source]) => [slug, slug.split('/')[1] ?? '', source]);
+}
+
+/**
+ * Every page under `components/` or `blocks/` that is neither a registry item nor a primitive
+ * `components/meta.json` lists, and every item page whose title or description is not the item's.
+ */
+function unnamedPages(
+  sources: Record<string, string>,
+  items: Map<string, ItemText>,
+  primitives: Set<string>,
+): string[] {
+  return namedPages(sources).flatMap(([slug, name, source]) => {
+    const item = items.get(name);
+    if (!item) return primitives.has(name) ? [] : [`${slug}: is neither a registry item nor a listed primitive`];
+    const { title, description } = readFrontmatter(source);
+    return [
+      ...(title === item.title ? [] : [`${slug}: title is not "${item.title}"`]),
+      ...(description === item.description ? [] : [`${slug}: description is not the item's`]),
+    ];
+  });
+}
+
+/** The command a page installs its subject with: an item by its URL here, a primitive by its name at shadcn. */
+function installCommand(name: string, items: Map<string, ItemText>): string {
+  return items.has(name)
+    ? `npx shadcn@latest add https://ui.zeroxsolutions.com/r/${name}.json`
+    : `npx shadcn@latest add ${name}`;
+}
+
+/** Every item or primitive page with no line that is exactly its install command. */
+function missingInstallCommands(sources: Record<string, string>, items: Map<string, ItemText>): string[] {
+  return namedPages(sources)
+    .filter(([, name, source]) => !source.split('\n').some((line) => line.trim() === installCommand(name, items)))
+    .map(([slug, name]) => `${slug}: has no \`${installCommand(name, items)}\``);
 }
 
 const NAMED_SOURCE = /<(ComponentPreview|ComponentSource)\b[^>]*?\bname="([^"]+)"/g;
@@ -126,7 +192,7 @@ describe('content/docs', () => {
   });
 
   it("opens every item page with the item's own demo", () => {
-    expect(misplacedFirstPreviews(readPageSources(CONTENT), readItemNames())).toEqual([]);
+    expect(misplacedFirstPreviews(readPageSources(CONTENT), new Set(readItems().keys()))).toEqual([]);
   });
 
   it("reports an item page whose first preview is not the item's demo", () => {
@@ -141,6 +207,42 @@ describe('content/docs', () => {
     expect(misplacedFirstPreviews(sources, new Set(['ai-provider-picker', 'status-indicator', 'tag-input']))).toEqual([
       'components/status-indicator',
       'components/tag-input',
+    ]);
+  });
+
+  it("documents only items and listed primitives, and repeats an item's title and description", () => {
+    expect(unnamedPages(readPageSources(CONTENT), readItems(), readPrimitives(CONTENT))).toEqual([]);
+  });
+
+  it('reports a page for nothing published or listed, and an item page that renames its item', () => {
+    const items = new Map([['status-indicator', { title: 'Status Indicator', description: 'A small dot.' }]]);
+    const sources = {
+      'components/index': '---\ntitle: Components\n---',
+      'components/button': '---\ntitle: Button\n---',
+      'components/card': '---\ntitle: Card\n---',
+      'components/status-indicator': '---\ntitle: Status\ndescription: A small dot.\n---',
+    };
+
+    expect(unnamedPages(sources, items, new Set(['button']))).toEqual([
+      'components/card: is neither a registry item nor a listed primitive',
+      'components/status-indicator: title is not "Status Indicator"',
+    ]);
+  });
+
+  it('installs each item by its URL here and each primitive by its name at shadcn', () => {
+    expect(missingInstallCommands(readPageSources(CONTENT), readItems())).toEqual([]);
+  });
+
+  it('reports a page that installs its subject some other way', () => {
+    const items = new Map([['status-indicator', { title: 'Status Indicator', description: 'A small dot.' }]]);
+    const sources = {
+      'components/button': '```bash\nnpx shadcn@latest add button-group\n```',
+      'components/status-indicator': '```bash\nnpx shadcn@latest add status-indicator\n```',
+    };
+
+    expect(missingInstallCommands(sources, items)).toEqual([
+      'components/button: has no `npx shadcn@latest add button`',
+      'components/status-indicator: has no `npx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json`',
     ]);
   });
 });

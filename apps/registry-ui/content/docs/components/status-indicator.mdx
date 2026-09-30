@@ -1,0 +1,114 @@
+---
+title: Status Indicator
+description: A small decorative dot colored by a semantic status tone (online, offline, busy or idle), which can pulse for a state still in progress.
+---
+
+<ComponentPreview name="status-indicator-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+npx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add shadcn's `utils`, which gives the component `cn`.</Step>
+
+```bash
+npx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/feedback/status-indicator.tsx`.</Step>
+
+<ComponentSource name="status-indicator" />
+
+<Step>Copy the tone type into `lib/status-tone.ts`.</Step>
+
+<ComponentSource name="status-indicator" file="registry/bases/base-ui/types/status-tone.ts" />
+
+<Step>Add the `success` and `warning` colours, as [Installation](/docs/installation#colours) describes.</Step>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { StatusIndicator } from '@/components/feedback/status-indicator';
+```
+
+The dot is hidden from assistive technology, so the text beside it carries the status:
+
+```tsx
+<div className="flex items-center gap-2">
+  <StatusIndicator tone="online" />
+  <span>Online</span>
+</div>
+```
+
+It is not for an identity colour, and not for an unsaved-changes flag, which is Unsaved Indicator.
+
+## Examples
+
+### Online
+
+For connected, enabled or active.
+
+<ComponentPreview name="status-indicator-online" />
+
+### Offline
+
+For disconnected or disabled.
+
+<ComponentPreview name="status-indicator-offline" />
+
+### Busy
+
+For an error, or unavailable.
+
+<ComponentPreview name="status-indicator-busy" />
+
+### Idle
+
+For pending or away.
+
+<ComponentPreview name="status-indicator-idle" />
+
+### Pulse
+
+`pulse` animates the dot, for a state still in progress such as connecting or live.
+
+<ComponentPreview name="status-indicator-pulse" />
+
+## API Reference
+
+### StatusIndicator
+
+Renders a `span` and takes every prop a `span` takes, plus:
+
+| Prop    | Type                                        | Default  |
+| ------- | ------------------------------------------- | -------- |
+| `tone`  | `'online' \| 'offline' \| 'busy' \| 'idle'` | required |
+| `pulse` | `boolean`                                   | `false`  |
+
+It sets `data-slot="status-indicator"`, `data-tone` to its tone, `data-pulse` while it pulses, and
+`aria-hidden`.

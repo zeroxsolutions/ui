@@ -40,4 +40,21 @@ describe('DocsPager', () => {
     );
     expect(screen.queryByRole('link', { name: /^Next/ })).toBeNull();
   });
+
+  it('steps over a link to another site', () => {
+    const withLink: Root = {
+      name: 'Docs',
+      children: [
+        { type: 'page', name: 'Button', url: '/docs/components/button' },
+        { type: 'page', name: 'Badge', url: 'https://ui.shadcn.com/docs/components/base/badge' },
+        { type: 'page', name: 'AI Provider Picker', url: '/docs/blocks/ai-provider-picker' },
+      ],
+    };
+
+    render(<DocsPager tree={withLink} url="/docs/components/button" />);
+
+    expect(screen.getByRole('link', { name: 'Next: AI Provider Picker' }).getAttribute('href')).toBe(
+      '/docs/blocks/ai-provider-picker',
+    );
+  });
 });

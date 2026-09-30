@@ -1,0 +1,94 @@
+---
+title: AI Provider Picker
+description: A responsive grid of AI provider cards, from the host's entries or a sample, that calls back with the provider key a card selects.
+---
+
+<ComponentPreview name="ai-provider-picker-demo" view="ai-provider-picker" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+npx shadcn@latest add https://ui.zeroxsolutions.com/r/ai-provider-picker.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the icon package, which draws each provider's mark.</Step>
+
+```bash
+npm install @zeroxsolutions/icons
+```
+
+<Step>Add shadcn's `card` and this registry's AI Provider Card.</Step>
+
+```bash
+npx shadcn@latest add card https://ui.zeroxsolutions.com/r/ai-provider-card.json
+```
+
+<Step>Copy the block into `components/ai-provider-picker.tsx`.</Step>
+
+<ComponentSource name="ai-provider-picker" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { AiProviderPicker } from '@/components/ai-provider-picker';
+```
+
+With no `entries`, the block shows its sample providers. A card becomes selectable once `onSelect` is passed:
+
+```tsx
+<AiProviderPicker onSelect={(provider) => setProvider(provider)} />
+```
+
+## API Reference
+
+### AiProviderPicker
+
+Renders a `div` with `data-slot="ai-provider-picker"`.
+
+| Prop        | Type                         | Default                                                |
+| ----------- | ---------------------------- | ------------------------------------------------------ |
+| `entries`   | `AiProviderPickerEntry[]`    | `DEFAULT_AI_PROVIDER_ENTRIES`                          |
+| `onSelect`  | `(provider: string) => void` | none, and no card is selectable                        |
+| `className` | `string`                     | `grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3` |
+
+`className` replaces the grid's classes rather than adding to them, so a caller that passes one sets the whole
+layout.
+
+### AiProviderPickerEntry
+
+One card's data.
+
+| Field         | Type               | Holds                                               |
+| ------------- | ------------------ | --------------------------------------------------- |
+| `provider`    | `string`           | the key `AiProviderIcon` resolves, such as `openai` |
+| `name`        | `string`           | the card's title                                    |
+| `description` | `string`           | the text under the title, clamped to two lines      |
+| `meta`        | `string`, optional | the muted footer note, such as `12 models`          |
+
+### DEFAULT_AI_PROVIDER_ENTRIES
+
+The sample entries the block shows with no `entries`: providers the `@zeroxsolutions/icons` brand set has a mark
+for, with names, blurbs and model counts only.

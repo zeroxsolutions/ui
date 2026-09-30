@@ -1,0 +1,57 @@
+---
+title: Icons
+description: Brand marks and file-type icons as React components, one import path per icon.
+---
+
+`@zeroxsolutions/icons` is an npm package, not a registry item. The AI Provider Picker block depends on it, and an
+app can import from it directly.
+
+<ComponentPreview name="icons-demo" />
+
+## Installation
+
+```bash
+pnpm add @zeroxsolutions/icons react react-dom
+```
+
+`react` and `react-dom` are peer dependencies, on React 19.
+
+## Usage
+
+Each icon has its own import path, `@zeroxsolutions/icons/<category>/<name>`:
+
+```tsx
+import { GeminiMark } from '@zeroxsolutions/icons/brands/gemini';
+import { OpenaiMark } from '@zeroxsolutions/icons/brands/openai';
+import { TypescriptIcon } from '@zeroxsolutions/icons/material/typescript';
+```
+
+```tsx
+<OpenaiMark size="1.25rem" />
+<GeminiMark.Color size="1.5rem" />
+<GeminiMark.Avatar size={32} />
+<TypescriptIcon size="1.5rem" />
+```
+
+## Categories
+
+### brands
+
+Brand marks: AI labs and inference hosts, developer and cloud tools, social networks and workspace apps. The
+export is the name in PascalCase plus `Mark`, so `brands/openai` exports `OpenaiMark`. The base component draws
+the mark in `currentColor`, and a mark carries the variants its source has, each as a property of the base:
+
+- `.Color`, the brand's own colours
+- `.Mono`, the mark in `currentColor`
+- `.Avatar`, the mark on a filled background
+- `.Text`, the wordmark
+- `.Combine`, the mark and the wordmark together
+
+A variant a mark does not have is a type error. `GithubMark` is the one mark that takes standard SVG props and
+is sized with `className`.
+
+### material
+
+The Material Icon Theme's file-type icons, in full colour. The export is the name in PascalCase plus `Icon`, so
+`material/typescript` exports `TypescriptIcon`. An icon with artwork for a light background also exports it as
+`.Light`.

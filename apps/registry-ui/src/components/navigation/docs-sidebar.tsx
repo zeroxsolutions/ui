@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { pageTreeGroups } from '@/lib/page-tree';
+import { isExternal, pageTreeGroups } from '@/lib/page-tree';
 import {
   Sidebar,
   SidebarContent,
@@ -25,7 +25,8 @@ interface DocsSidebarProps extends ComponentProps<typeof Sidebar> {
 }
 
 /**
- * The docs' page list, grouped as the content's `meta.json` files order it, with the current page marked.
+ * The docs' page list, grouped as the content's `meta.json` files order it, with the current page marked;
+ * a link to another site is listed and never marked.
  * It carries its own provider, whose wrapper is a full-height flex box: the sidebar never collapses, so
  * nothing outside it reads the provider, and the wrapper takes the height its container gives it.
  */
@@ -42,7 +43,7 @@ function DocsSidebar({ tree, ...props }: DocsSidebarProps): ReactNode {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {group.pages.map((page) => {
-                    const current = isMatch(page.url, pathname);
+                    const current = !isExternal(page) && isMatch(page.url, pathname);
                     return (
                       <SidebarMenuItem key={page.url}>
                         <SidebarMenuButton

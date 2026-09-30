@@ -3,8 +3,10 @@ import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 import { ComponentPreview } from '@/components/data-display/component-preview';
 import { ComponentSource } from '@/components/data-display/component-source';
 import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
+import { ComponentsList } from '@/components/navigation/components-list';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/registry/bases/base-ui/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 
 /** The text a node renders, as a reader would copy it. */
@@ -47,6 +49,18 @@ export const mdxComponents = {
     </h4>
   ),
   p: ({ className, ...props }: ComponentProps<'p'>) => <p className={cn('leading-7', className)} {...props} />,
+  a: ({ className, ...props }: ComponentProps<'a'>) => (
+    <a className={cn('font-medium underline underline-offset-4', className)} {...props} />
+  ),
+  ul: ({ className, ...props }: ComponentProps<'ul'>) => (
+    <ul className={cn('ml-6 list-disc leading-7 [&>li]:mt-2', className)} {...props} />
+  ),
+  table: Table,
+  thead: TableHeader,
+  tbody: TableBody,
+  tr: TableRow,
+  th: TableHead,
+  td: TableCell,
   code: ({ className, ...props }: ComponentProps<'code'>) =>
     typeof props.children === 'string' ? (
       <code className={cn('bg-muted rounded-md px-1.5 py-0.5 font-mono text-[0.9em]', className)} {...props} />
@@ -81,4 +95,5 @@ export const mdxComponents = {
   AlertDescription,
   ComponentPreview,
   ComponentSource,
+  ComponentsList,
 };

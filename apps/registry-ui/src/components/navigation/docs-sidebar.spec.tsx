@@ -42,4 +42,14 @@ describe('DocsSidebar', () => {
     expect(screen.getByRole('link', { name: 'Introduction' }).getAttribute('aria-current')).toBeNull();
     expect(screen.getByRole('link', { name: 'Button' }).getAttribute('aria-current')).toBeNull();
   });
+
+  it('lists a link to another site, and never marks it', () => {
+    const badge = 'https://ui.shadcn.com/docs/components/base/badge';
+    render(
+      <DocsSidebar tree={{ ...tree, children: [...tree.children, { type: 'page', name: 'Badge', url: badge }] }} />,
+    );
+
+    expect(screen.getByRole('link', { name: 'Badge' }).getAttribute('href')).toBe(badge);
+    expect(screen.getByRole('link', { name: 'Badge' }).getAttribute('aria-current')).toBeNull();
+  });
 });
