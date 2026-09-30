@@ -132,6 +132,40 @@ describe('CodeBlock', () => {
     expect(keyword.style.color).toBe('rgb(1, 2, 3)');
   });
 
+  it('paints lines it is given, and highlights nothing itself', async () => {
+    vi.mocked(highlightToLines).mockClear();
+    render(
+      <CodeBlock
+        code="const x"
+        language="ts"
+        lines={[[{ content: 'const', style: { color: 'rgb(4, 5, 6)' } }, { content: ' x' }]]}
+      />,
+    );
+    await settle();
+
+    const keyword = screen.getByText('const');
+    expect(keyword.tagName).toBe('SPAN');
+    expect(keyword.style.color).toBe('rgb(4, 5, 6)');
+    expect(highlightToLines).not.toHaveBeenCalled();
+  });
+
+  it('shows the code plain when handed null lines', async () => {
+    vi.mocked(highlightToLines).mockClear();
+    const { container } = render(<CodeBlock code="const x" language="ts" lines={null} />);
+    await settle();
+
+    expect(container.querySelector('[data-slot="highlighted-code"]')?.textContent).toBe('const x');
+    expect(container.querySelector('[data-slot="highlighted-code"] span')).toBeNull();
+    expect(highlightToLines).not.toHaveBeenCalled();
+  });
+
+  it('marks its scroller viewport for a container to cap', async () => {
+    const { container } = render(<CodeBlock code="x" />);
+    await settle();
+
+    expect(container.querySelector('[data-slot="code-block-viewport"] pre')).toBeTruthy();
+  });
+
   it('copies the code and flips the label to Copied', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });

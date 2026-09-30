@@ -7,6 +7,7 @@ import { CollapsibleCard, CollapsibleCardContent } from '@/registry/bases/base-u
 import { useHighlightedLines } from '@/registry/bases/base-ui/hooks/use-highlighted-lines';
 import { isPlainLanguage, languageLabel } from '@/registry/bases/base-ui/lib/code-language';
 import { codeLanguageIcon } from '@/registry/bases/base-ui/lib/language-options';
+import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 
@@ -28,6 +29,12 @@ interface CodeBlockProps extends ComponentProps<typeof CollapsibleCard> {
   code: string;
   /** Shiki language id (`ts`, `json`, `bash`); absent or plain text renders unhighlighted. */
   language?: string;
+  /**
+   * `code` already tokenized, as `highlightToLines` returns it, for a block highlighted ahead of
+   * render (on the server, at build); given, the block highlights nothing itself, and `null` shows
+   * `code` plain.
+   */
+  lines?: HighlightLine[] | null;
   /** The header, composed from `CollapsibleCard` parts; absent, a copy button floats over the code on hover. */
   children?: ReactNode;
 }
@@ -51,10 +58,21 @@ interface CodeBlockProps extends ComponentProps<typeof CollapsibleCard> {
  * </CodeBlock>
  * ```
  *
- * The root keeps `data-slot="code-block"`; the editor stylesheet targets it.
+ * The root keeps `data-slot="code-block"`; the editor stylesheet targets it. Its scroller's viewport
+ * is `data-slot="code-block-viewport"`, where a container caps the block's height.
  */
-function CodeBlock({ code, language, variant = 'muted', className, children, ...props }: CodeBlockProps): ReactNode {
-  const lines = useHighlightedLines(code, language);
+function CodeBlock({
+  code,
+  language,
+  lines: givenLines,
+  variant = 'muted',
+  className,
+  children,
+  ...props
+}: CodeBlockProps): ReactNode {
+  // Given lines, the hook is handed no language, so it neither loads a grammar nor highlights.
+  const highlightedLines = useHighlightedLines(code, givenLines === undefined ? language : undefined);
+  const lines = givenLines === undefined ? highlightedLines : givenLines;
 
   return (
     <CodeBlockContext.Provider value={{ code, language }}>
@@ -75,7 +93,7 @@ function CodeBlock({ code, language, variant = 'muted', className, children, ...
         <CollapsibleCardContent>
           {/* A ScrollArea rather than overflow-x-auto, so long lines scroll on the styled rail instead of the OS overlay bar. */}
           <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
-            <ScrollAreaPrimitive.Viewport className="w-full">
+            <ScrollAreaPrimitive.Viewport data-slot="code-block-viewport" className="w-full">
               <pre className="m-0 px-3 py-2 text-xs leading-relaxed">
                 <HighlightedCode lines={lines}>{code}</HighlightedCode>
               </pre>

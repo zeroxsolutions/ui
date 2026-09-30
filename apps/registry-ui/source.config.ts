@@ -1,6 +1,6 @@
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 
-import { CODE_THEMES } from '@/constants/code-themes';
+import { rehypeCodeTitle } from '@/lib/rehype-code-title';
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -9,6 +9,10 @@ export const docs = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
-    rehypeCodeOptions: { themes: CODE_THEMES },
+    // No fumadocs Shiki pass: the MDX `pre` component highlights a fence with the registry's own
+    // highlighter and theme (`lib/shiki.ts`) as the page renders at build, so the site has one Shiki
+    // and one theme. The fence's title is all that is left to carry.
+    rehypeCodeOptions: false,
+    rehypePlugins: (plugins) => [...plugins, rehypeCodeTitle],
   },
 });

@@ -1,12 +1,16 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
+import { CodeBlockCommand } from '@/components/data-display/code-block-command';
+import { CodeTabs } from '@/components/data-display/code-tabs';
 import { ComponentPreview } from '@/components/data-display/component-preview';
 import { ComponentSource } from '@/components/data-display/component-source';
-import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
+import { SourceCodeBlock } from '@/components/data-display/source-code-block';
 import { ComponentsList } from '@/components/navigation/components-list';
+import { packageManagerCommands } from '@/lib/package-manager-commands';
+import { highlightToLines } from '@/registry/bases/base-ui/lib/shiki';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/registry/bases/base-ui/ui/table';
+import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 
 /** The text a node renders, as a reader would copy it. */
@@ -17,79 +21,103 @@ function nodeText(node: ReactNode): string {
   return '';
 }
 
-/** A heading's text as a link to itself; the id comes from the MDX compiler, which slugs every heading. */
+/** A heading's text as a link to itself, upstream's; the id comes from the MDX compiler, which slugs every heading. */
 function HeadingAnchor({ id, children }: { id?: string; children: ReactNode }): ReactNode {
   if (!id) return children;
 
   return (
-    <a href={`#${id}`} className="group/heading-anchor">
-      {children}
-      <span aria-hidden="true" className="text-muted-foreground ml-2 opacity-0 group-hover/heading-anchor:opacity-100">
+    <a className="group no-underline" href={`#${id}`}>
+      <span className="underline-offset-4 group-hover:underline">{children}</span>
+      <span aria-hidden="true" className="text-muted-foreground ml-2 opacity-0 group-hover:opacity-100">
         #
       </span>
     </a>
   );
 }
 
-/** Every element and component a page in `content/docs` may use, passed to its compiled body. */
+/**
+ * Every element and component a page in `content/docs` may use, passed to its compiled body, upstream's
+ * `mdx-components.tsx` on this site's primitives. Prose takes its styles from `.typeset` around the
+ * body, so the plain elements carry no classes.
+ */
 export const mdxComponents = {
-  h2: ({ id, className, children, ...props }: ComponentProps<'h2'>) => (
-    <h2 id={id} className={cn('mt-10 scroll-m-20 text-xl font-semibold tracking-tight', className)} {...props}>
+  h2: ({ children, id, ...props }: ComponentProps<'h2'>) => (
+    <h2 id={id} {...props}>
       <HeadingAnchor id={id}>{children}</HeadingAnchor>
     </h2>
   ),
-  h3: ({ id, className, children, ...props }: ComponentProps<'h3'>) => (
-    <h3 id={id} className={cn('mt-8 scroll-m-20 text-lg font-semibold tracking-tight', className)} {...props}>
+  h3: ({ children, id, ...props }: ComponentProps<'h3'>) => (
+    <h3 id={id} {...props}>
       <HeadingAnchor id={id}>{children}</HeadingAnchor>
     </h3>
   ),
-  h4: ({ id, className, children, ...props }: ComponentProps<'h4'>) => (
-    <h4 id={id} className={cn('mt-6 scroll-m-20 font-semibold tracking-tight', className)} {...props}>
+  h4: ({ children, id, ...props }: ComponentProps<'h4'>) => (
+    <h4 id={id} {...props}>
       <HeadingAnchor id={id}>{children}</HeadingAnchor>
     </h4>
   ),
-  p: ({ className, ...props }: ComponentProps<'p'>) => <p className={cn('leading-7', className)} {...props} />,
-  a: ({ className, ...props }: ComponentProps<'a'>) => (
-    <a className={cn('font-medium underline underline-offset-4', className)} {...props} />
+  // Upstream's wrapper is a plain `overflow-x: auto` box; here it is a `ScrollArea`, still `typeset-scroll`
+  // for typeset's margins and its max-content table width, its viewport carrying upstream's edge fade.
+  table: (props: ComponentProps<'table'>) => (
+    <ScrollArea className="typeset-scroll **:data-[slot=scroll-area-viewport]:scroll-fade-x [&_table]:w-full">
+      <table {...props} />
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   ),
-  ul: ({ className, ...props }: ComponentProps<'ul'>) => (
-    <ul className={cn('ml-6 list-disc leading-7 [&>li]:mt-2', className)} {...props} />
-  ),
-  table: Table,
-  thead: TableHeader,
-  tbody: TableBody,
-  tr: TableRow,
-  th: TableHead,
-  td: TableCell,
-  code: ({ className, ...props }: ComponentProps<'code'>) =>
-    typeof props.children === 'string' ? (
-      <code className={cn('bg-muted rounded-md px-1.5 py-0.5 font-mono text-[0.9em]', className)} {...props} />
-    ) : (
-      <code className={className} {...props} />
-    ),
-  pre: ({ children, ...props }: ComponentProps<'pre'>) => (
-    <DocsCodeBlock code={nodeText(children)}>
-      <pre {...props}>{children}</pre>
-    </DocsCodeBlock>
-  ),
+  // A fence, upstream's `pre` + `code` pair, as the registry's `CodeBlock`: the fence's text tokenized
+  // here, as the page renders at build, by the registry's highlighter, and an npm command as the
+  // package-manager block. Inline code stays a plain `code`, which typeset styles.
+  pre: async ({ children, title }: ComponentProps<'pre'>) => {
+    const code = isValidElement<{ className?: string; children?: ReactNode }>(children) ? children.props : {};
+    const language = /language-(\S+)/.exec(code.className ?? '')?.[1];
+    const raw = nodeText(code.children).replace(/\n$/, '');
+    const commands = packageManagerCommands(raw);
+    if (commands) return <CodeBlockCommand commands={commands} className="mt-6" />;
+
+    return (
+      <SourceCodeBlock
+        code={raw}
+        language={language}
+        lines={language ? await highlightToLines(raw, language) : null}
+        className="mt-6"
+      >
+        {title}
+      </SourceCodeBlock>
+    );
+  },
+  Step: (props: ComponentProps<'h3'>) => <h3 {...props} />,
   Steps: ({ className, ...props }: ComponentProps<'div'>) => (
-    <div className={cn('ml-4 border-l pl-8 [counter-reset:step]', className)} {...props} />
+    <div
+      className={cn('steps [&>h3]:step mb-12 [counter-reset:step] md:ml-4 md:border-l md:pl-8', className)}
+      {...props}
+    />
   ),
-  Step: ({ className, ...props }: ComponentProps<'h3'>) => (
-    <h3
+  Tabs: ({ className, ...props }: ComponentProps<typeof Tabs>) => (
+    <Tabs className={cn('relative mt-6 w-full', className)} {...props} />
+  ),
+  TabsList: ({ className, ...props }: ComponentProps<typeof TabsList>) => (
+    <TabsList className={cn('justify-start gap-4 rounded-none bg-transparent px-0', className)} {...props} />
+  ),
+  // Upstream's classes, with Base UI's `data-active` for Radix's `data-[state=active]`.
+  TabsTrigger: ({ className, ...props }: ComponentProps<typeof TabsTrigger>) => (
+    <TabsTrigger
       className={cn(
-        'mt-8 font-semibold [counter-increment:step]',
-        'before:bg-muted before:mr-4 before:-ml-12 before:inline-flex before:size-8 before:items-center before:justify-center before:rounded-full before:text-sm before:content-[counter(step)]',
+        'not-typeset text-muted-foreground hover:text-primary data-active:border-primary data-active:text-foreground dark:data-active:border-primary rounded-none border-0 border-b-2 border-transparent bg-transparent px-0 pb-3 text-base data-active:bg-transparent data-active:shadow-none! dark:data-active:bg-transparent',
         className,
       )}
       {...props}
     />
   ),
-  CodeTabs: (props: ComponentProps<typeof Tabs>) => <Tabs defaultValue="cli" {...props} />,
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
+  TabsContent: ({ className, ...props }: ComponentProps<typeof TabsContent>) => (
+    <TabsContent
+      className={cn(
+        'relative [&_h3.font-heading]:text-base [&_h3.font-heading]:font-medium *:[figure]:first:mt-0 [&>.steps]:mt-6',
+        className,
+      )}
+      {...props}
+    />
+  ),
+  CodeTabs,
   Callout: Alert,
   AlertTitle,
   AlertDescription,

@@ -31,6 +31,8 @@ const NAMES: readonly string[] = [
   'Motion',
   'Fluent',
   'TypeScript',
+  'ChatGPT',
+  'Claude',
 ];
 
 const ITEM_TITLES: readonly string[] = (

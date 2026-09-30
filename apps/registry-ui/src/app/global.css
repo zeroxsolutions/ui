@@ -1,4 +1,4 @@
-/* The one and only global stylesheet, imported once from the root layout.
+/* The global stylesheet, imported once from the root layout, which imports `typeset.css` after it.
  *
  * The design system - Tailwind, the `@theme` block, and every design token - lives in the registry so
  * that `shadcn build` ships the exact same CSS consumers install. This file wires that source into the
@@ -24,5 +24,35 @@
 @utility extend-touch-target {
   @media (pointer: coarse) {
     @apply relative touch-manipulation after:absolute after:-inset-2;
+  }
+}
+
+@utility step {
+  counter-increment: step;
+
+  &:before {
+    @apply border-background bg-muted mr-2 inline-flex size-6 items-center justify-center rounded-full text-center -indent-px font-mono text-sm font-medium md:absolute md:mt-[-4px] md:ml-[-50px] md:size-9 md:border-4;
+    content: counter(step);
+  }
+}
+
+/* Upstream's step list. */
+@layer components {
+  .steps {
+    &:first-child {
+      @apply !mt-0;
+    }
+
+    &:first-child > h3:first-child {
+      @apply !mt-0;
+    }
+
+    > h3 {
+      @apply !mt-8;
+    }
+
+    > h3 + p {
+      @apply !mt-2;
+    }
   }
 }
