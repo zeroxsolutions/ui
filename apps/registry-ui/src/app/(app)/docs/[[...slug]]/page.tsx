@@ -58,7 +58,7 @@ export default async function DocsPage({ params }: DocsPageProps): Promise<React
           </div>
           {page.data.description && <p className="text-muted-foreground text-balance">{page.data.description}</p>}
         </div>
-        <div className="w-full flex-1 leading-7">
+        <div className="w-full flex-1 leading-7 wrap-break-word">
           <Body components={mdxComponents} />
         </div>
         <DocsPager tree={source.pageTree} url={page.url} />

@@ -35,7 +35,11 @@ for (const size of [
     await scrollToPageEnd(page);
 
     const [rail, header] = await Promise.all([sidebar(page).boundingBox(), page.getByRole('banner').boundingBox()]);
-    expect(rail?.y).toBeGreaterThanOrEqual((header?.y ?? 0) + (header?.height ?? Infinity));
+    // Rounded to whole pixels: WebKit rounds a fractional page height up, so at the page's end the rail
+    // can sit under half a pixel higher, which no reader sees.
+    expect(Math.round(rail?.y ?? 0)).toBeGreaterThanOrEqual(
+      Math.round((header?.y ?? 0) + (header?.height ?? Infinity)),
+    );
   });
 }
 
