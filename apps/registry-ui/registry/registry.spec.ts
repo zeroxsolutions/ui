@@ -304,7 +304,7 @@ const aiProviderPicker: RegistryItem = {
   name: 'ai-provider-picker',
   type: 'registry:block',
   dependencies: ['@zeroxsolutions/icons'],
-  registryDependencies: ['@shadcn/card', `${ITEM_URL}ai-provider-card.json`],
+  registryDependencies: ['@shadcn/card', '@shadcn/utils', `${ITEM_URL}ai-provider-card.json`],
   files: [{ path: `${BASE}/blocks/ai-provider-picker.tsx`, type: 'registry:block' }],
 };
 

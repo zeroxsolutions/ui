@@ -1,42 +1,39 @@
+import * as React from 'react';
+import { AiProviderIcon } from '@zeroxsolutions/icons/ai-provider-icon';
+
 import {
   AiProviderCard,
   AiProviderCardDescription,
   AiProviderCardStatus,
   AiProviderCardTrigger,
 } from '@/registry/bases/base-ui/components/data-display/ai-provider-card';
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { CardFooter, CardHeader, CardTitle } from '@/registry/bases/base-ui/ui/card';
-import { AiProviderIcon } from '@zeroxsolutions/icons/ai-provider-icon';
 
 /**
- * One tile's source data - the domain-free shape a host supplies (or takes from
- * the `DEFAULT_AI_PROVIDER_ENTRIES` sample). No API keys, no endpoints - just
- * what the picker needs to render one card.
+ * One card's data, the shape a host supplies or takes from
+ * {@link AI_PROVIDER_PICKER_SAMPLE_ENTRIES}. It holds no key and no endpoint.
  */
-export interface AiProviderPickerEntry {
-  /** AI provider key resolved by `AiProviderIcon` (e.g. `openai`, `claude`). */
+interface AiProviderPickerEntry {
+  /** The key `AiProviderIcon` resolves, such as `openai` or `claude`; also what `onSelect` receives. */
   provider: string;
-  /** Display name shown as the card title. */
+  /** The card's title. */
   name: string;
-  /** Short blurb rendered under the name; clamps to two lines per card. */
+  /** The text under the title, clamped to two lines. */
   description: string;
-  /** Muted footer note (e.g. "12 models"). */
+  /** The muted footer note, such as "12 models"; omitted, the footer is empty. */
   meta?: string;
 }
 
-export interface AiProviderPickerProps {
-  /** Tile data; defaults to {@link DEFAULT_AI_PROVIDER_ENTRIES}. */
-  entries?: AiProviderPickerEntry[];
-  /** Card select handler - receives the provider key. Omit it and no card is selectable. */
+interface AiProviderPickerProps extends Omit<React.ComponentProps<'div'>, 'onSelect'> {
+  /** The cards, in order; defaults to {@link AI_PROVIDER_PICKER_SAMPLE_ENTRIES}. */
+  entries?: readonly AiProviderPickerEntry[];
+  /** Called with the `provider` key of the card selected. Omitted, no card is selectable. */
   onSelect?: (provider: string) => void;
-  className?: string;
 }
 
-/**
- * Sample tile data covering the providers the vendored `@zeroxsolutions/icons`
- * brand set resolves. Domain-free: names, blurbs, and model counts only - no
- * endpoints, no auth. The `provider` value is the icon-resolver key.
- */
-export const DEFAULT_AI_PROVIDER_ENTRIES: AiProviderPickerEntry[] = [
+/** Sample cards for providers the `@zeroxsolutions/icons` brand set draws a mark for. */
+const AI_PROVIDER_PICKER_SAMPLE_ENTRIES: readonly AiProviderPickerEntry[] = [
   {
     provider: 'openai',
     name: 'OpenAI',
@@ -76,19 +73,22 @@ export const DEFAULT_AI_PROVIDER_ENTRIES: AiProviderPickerEntry[] = [
 ];
 
 /**
- * A `registry:block` - a responsive grid of `AiProviderCard` tiles, each
- * showing one AI provider via an `AiProviderIcon` beside the card's title.
- * Composes two existing registry items (`ai-provider-card`, `ai-provider-icon`)
- * into one reusable surface; the host supplies tile data or takes the default
- * sample, and gets a `provider` key back on select.
+ * A responsive grid of `AiProviderCard` tiles, one per entry, each with the
+ * provider's mark beside its name. With `onSelect`, each card is one button
+ * that calls back with its entry's `provider` key.
  */
-export function AiProviderPicker({
-  entries = DEFAULT_AI_PROVIDER_ENTRIES,
+function AiProviderPicker({
+  entries = AI_PROVIDER_PICKER_SAMPLE_ENTRIES,
   onSelect,
   className,
-}: AiProviderPickerProps) {
+  ...props
+}: AiProviderPickerProps): React.ReactNode {
   return (
-    <div data-slot="ai-provider-picker" className={className ?? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'}>
+    <div
+      data-slot="ai-provider-picker"
+      className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3', className)}
+      {...props}
+    >
       {entries.map((entry) => (
         <AiProviderCard key={entry.provider}>
           <CardHeader>
@@ -109,3 +109,6 @@ export function AiProviderPicker({
     </div>
   );
 }
+
+export { AI_PROVIDER_PICKER_SAMPLE_ENTRIES, AiProviderPicker };
+export type { AiProviderPickerEntry, AiProviderPickerProps };

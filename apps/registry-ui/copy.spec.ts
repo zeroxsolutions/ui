@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { APP_ROOT, authoredTsx, docsMetas, docsPages, lineOf, parseTsxSource, readSource } from './src/test/tsx-source';
 
 /** Files whose copy is not sentence case yet; each task that rebuilds one removes it. */
-const PENDING: readonly string[] = ['content/docs/blocks/ai-provider-picker.mdx'];
+const PENDING: readonly string[] = [];
 
 /** Names that keep their capitals wherever they sit in a sentence, beside the registry's item titles. */
 const NAMES: readonly string[] = [
