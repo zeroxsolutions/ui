@@ -21,8 +21,6 @@ interface SourceCodeBlockProps extends ComponentProps<typeof CodeBlock> {
   collapsible?: boolean;
   /** Adds the copy button at the header's end; on by default. */
   copyable?: boolean;
-  /** Draws the header; off, the block is the code alone. */
-  header?: boolean;
 }
 
 /**
@@ -35,11 +33,8 @@ function SourceCodeBlock({
   children,
   collapsible = false,
   copyable = true,
-  header = true,
   ...props
 }: SourceCodeBlockProps): ReactNode {
-  if (!header) return <CodeBlock {...props} />;
-
   return (
     <CodeBlock {...props}>
       <CollapsibleCardHeader>

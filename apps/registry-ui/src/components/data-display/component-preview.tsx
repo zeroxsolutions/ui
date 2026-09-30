@@ -54,7 +54,7 @@ function ComponentPreview({
         )
       }
       source={<ComponentSource {...source} variant="flush" />}
-      sourcePreview={<ComponentSource {...source} variant="flush" header={false} maxLines={SOURCE_PREVIEW_LINES} />}
+      sourcePreview={<ComponentSource {...source} variant="flush" maxLines={SOURCE_PREVIEW_LINES} copyable={false} />}
       {...props}
     />
   );
