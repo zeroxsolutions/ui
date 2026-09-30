@@ -30,6 +30,7 @@ function EditorTab({ active = false, dirty = false, className, ...props }: Edito
   return (
     <EditorTabContext.Provider value={{ dirty }}>
       <Item
+        data-slot="editor-tab"
         data-active={active ? '' : undefined}
         data-dirty={dirty ? '' : undefined}
         variant="outline"
@@ -45,6 +46,7 @@ function EditorTab({ active = false, dirty = false, className, ...props }: Edito
 function EditorTabTitle({ className, ...props }: React.ComponentProps<typeof ItemTitle>): React.ReactNode {
   return (
     <ItemTitle
+      data-slot="editor-tab-title"
       className={cn('text-muted-foreground group-data-active/editor-tab:text-foreground', className)}
       {...props}
     />
@@ -73,6 +75,7 @@ function EditorTabCloseButton({
 
   return (
     <Button
+      data-slot="editor-tab-close-button"
       type="button"
       variant="ghost"
       size="icon-xs"
