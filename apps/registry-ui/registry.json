@@ -384,7 +384,7 @@
       "name": "resize-handle",
       "type": "registry:component",
       "title": "Resize Handle",
-      "description": "A vertical resize grip for a side or floating panel that only starts dragging once the pointer crosses a small movement threshold.",
+      "description": "A vertical resize grip for a panel outside any ResizablePanelGroup that only starts dragging once the pointer crosses a small movement threshold.",
       "categories": ["data-entry"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
@@ -1131,7 +1131,7 @@
       "name": "resize-handle-demo",
       "type": "registry:example",
       "title": "Resize Handle Demo",
-      "description": "A side panel resized by dragging its ResizeHandle or collapsed by a double-click.",
+      "description": "A panel floating over a canvas, resized by dragging its ResizeHandle or collapsed by a double-click.",
       "categories": ["examples"],
       "registryDependencies": ["https://ui.zeroxsolutions.com/r/resize-handle.json"],
       "files": [
