@@ -5,14 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { authoredTsx, lineOf, literalTexts, parseTsxSource, readSource, siteLayouts } from './src/test/tsx-source';
 
 /** Files not rebuilt on base-nova yet; each task that rebuilds one removes it. */
-const PENDING: readonly string[] = [
-  'registry/bases/base-ui/components/data-display/ai-provider-card.tsx',
-  'registry/bases/base-ui/components/data-display/chat-message.tsx',
-  'registry/bases/base-ui/components/data-display/data-table.tsx',
-  'registry/bases/base-ui/components/data-display/image-preview.tsx',
-  'registry/bases/base-ui/components/data-display/markdown-view.tsx',
-  'registry/bases/base-ui/examples/model-info-card-demo.tsx',
-];
+const PENDING: readonly string[] = [];
 
 /** Utilities that paint with a theme colour: `<prefix>-<hue>[-<shade>]`, or the css-var form `<prefix>-(--color-<hue>[-<shade>])`. */
 const PALETTE_UTILITY =

@@ -6,13 +6,13 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
  * The detail panel for one model, meant for the shipped `HoverCardContent`. The
  * consumer composes the identity header from `Item` parts (`ItemMedia` for the
  * logo, `ItemTitle` for the name, `ItemDescription` for the vendor, `ItemFooter`
- * for the mono model id) over `ModelInfoCardSection`s.
+ * for the model id) over `ModelInfoCardSection`s.
  * @example
  * <ModelInfoCard>
- *   <Item size="xs" className="p-0">
+ *   <Item size="xs">
  *     <ItemMedia><AiProviderIcon provider="openai" /></ItemMedia>
  *     <ItemContent><ItemTitle>GPT-4o</ItemTitle><ItemDescription>OpenAI</ItemDescription></ItemContent>
- *     <ItemFooter className="text-muted-foreground font-mono text-xs">gpt-4o</ItemFooter>
+ *     <ItemFooter><code className="text-muted-foreground text-xs">gpt-4o</code></ItemFooter>
  *   </Item>
  *   {sections}
  * </ModelInfoCard>
@@ -32,7 +32,7 @@ function ModelInfoCardSection({ className, ...props }: React.ComponentProps<'div
 
 /**
  * The accent pill beside a section title. Its colour is the consumer's
- * background class (e.g. `bg-blue-500`); without one it is muted.
+ * background class on a theme token (e.g. `bg-chart-1`); without one it is muted.
  */
 function ModelInfoCardBadge({ className, ...props }: React.ComponentProps<'span'>): React.ReactNode {
   return (

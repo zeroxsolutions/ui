@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
   type ColumnDef,
   getCoreRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   type Table as TanstackTable,
   useReactTable,
@@ -16,6 +17,7 @@ import {
   DataTableColumnHeaderSortAscending,
   DataTableColumnHeaderSortDescending,
   DataTableEmpty,
+  DataTablePagination,
   DataTableView,
 } from './data-table';
 
@@ -143,15 +145,56 @@ describe('DataTableEmpty', () => {
   it('renders one cell spanning every column when there are no rows', () => {
     render(<RowsTable rows={[]} />);
 
-    const cell = screen.getByText('No results.');
-    expect(cell.getAttribute('data-slot')).toBe('data-table-empty');
-    expect(cell.getAttribute('colspan')).toBe('2');
+    const cell = screen.getByText('No results.').closest('td');
+    expect(cell?.getAttribute('data-slot')).toBe('data-table-empty');
+    expect(cell?.getAttribute('colspan')).toBe('2');
   });
 
   it('is not rendered while there are rows', () => {
     render(<RowsTable rows={[{ name: 'a', size: 1 }]} />);
 
     expect(screen.queryByText('No results.')).toBeNull();
+    expect(screen.getByRole('cell', { name: 'a' })).toBeTruthy();
+  });
+});
+
+function PagedTable(): ReactNode {
+  const table = useReactTable({
+    data: [
+      { name: 'a', size: 1 },
+      { name: 'b', size: 2 },
+    ],
+    columns: COLUMNS,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 1 } },
+  });
+  return (
+    <DataTable table={table}>
+      <DataTableView />
+      <DataTablePagination />
+    </DataTable>
+  );
+}
+
+describe('DataTableView', () => {
+  it('scrolls the table inside a ScrollArea rather than the page', () => {
+    render(<RowsTable rows={[{ name: 'a', size: 1 }]} />);
+
+    expect(screen.getByRole('table').closest('[data-slot="scroll-area"]')).not.toBeNull();
+  });
+});
+
+describe('DataTablePagination', () => {
+  it('steps to the next page and back', () => {
+    render(<PagedTable />);
+    const previous = screen.getByRole('button', { name: 'Previous page' });
+    expect(previous.hasAttribute('disabled')).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    expect(screen.getByRole('cell', { name: 'b' })).toBeTruthy();
+
+    fireEvent.click(previous);
     expect(screen.getByRole('cell', { name: 'a' })).toBeTruthy();
   });
 });

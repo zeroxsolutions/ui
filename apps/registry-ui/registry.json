@@ -39,9 +39,9 @@
       "name": "chat-message",
       "type": "registry:component",
       "title": "Chat Message",
-      "description": "One chat message row over upstream Message, with a leading-edge accent while its text is still streaming.",
+      "description": "One chat message row over upstream Message, with a line beside its leading edge while its text is still streaming.",
       "categories": ["data-display"],
-      "registryDependencies": ["@shadcn/message", "@shadcn/utils"],
+      "registryDependencies": ["@shadcn/message"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/chat-message.tsx",
@@ -105,7 +105,20 @@
       "description": "The composable parts of a @tanstack/react-table view - toolbar, view, column header actions, pagination and view options - reading one shared table instance from context.",
       "categories": ["data-display"],
       "dependencies": ["@tanstack/react-table", "lucide-react"],
-      "registryDependencies": ["@shadcn/button", "@shadcn/dropdown-menu", "@shadcn/table", "@shadcn/utils"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/dropdown-menu",
+        "@shadcn/empty",
+        "@shadcn/scroll-area",
+        "@shadcn/table",
+        "@shadcn/utils",
+        "https://lucide-animated.com/r/arrow-down.json",
+        "https://lucide-animated.com/r/arrow-up.json",
+        "https://lucide-animated.com/r/chevron-left.json",
+        "https://lucide-animated.com/r/chevron-right.json",
+        "https://lucide-animated.com/r/chevrons-up-down.json",
+        "https://lucide-animated.com/r/eye-off.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/data-table.tsx",
@@ -188,16 +201,24 @@
           "path": "registry/bases/base-ui/components/data-display/image-preview.tsx",
           "type": "registry:component"
         }
-      ]
+      ],
+      "css": {
+        "@utility bg-checkerboard": {
+          "background-image": "repeating-conic-gradient(var(--muted) 0 25%, var(--background) 0 50%)",
+          "background-size": "calc(var(--spacing) * 4) calc(var(--spacing) * 4)"
+        }
+      }
     },
     {
       "name": "markdown-view",
       "type": "registry:component",
       "title": "Markdown View",
-      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with fenced code optionally rendered as a CodeBlock instead of a plain pre.",
+      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code optionally rendered as a CodeBlock instead of a plain pre.",
       "categories": ["data-display"],
-      "dependencies": ["class-variance-authority", "react-markdown", "remark-gfm"],
+      "dependencies": ["react-markdown", "remark-gfm"],
       "registryDependencies": [
+        "@shadcn/scroll-area",
+        "@shadcn/table",
         "@shadcn/utils",
         "https://ui.zeroxsolutions.com/r/code-block.json",
         "https://ui.zeroxsolutions.com/r/collapsible-card.json"
@@ -840,7 +861,11 @@
       "title": "AI Provider Card Demo",
       "description": "Two AiProviderCard tiles - one online, one idle - each toggled independently and reporting the last selection.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/card", "https://ui.zeroxsolutions.com/r/ai-provider-card.json"],
+      "registryDependencies": [
+        "@shadcn/card",
+        "@shadcn/switch",
+        "https://ui.zeroxsolutions.com/r/ai-provider-card.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/ai-provider-card-demo.tsx",
@@ -852,7 +877,7 @@
       "name": "chat-message-demo",
       "type": "registry:example",
       "title": "Chat Message Demo",
-      "description": "A user bubble and the assistant's reply, each a ChatMessage row.",
+      "description": "A user bubble and the assistant's reply, still streaming, each a ChatMessage row.",
       "categories": ["examples"],
       "registryDependencies": [
         "@shadcn/bubble",

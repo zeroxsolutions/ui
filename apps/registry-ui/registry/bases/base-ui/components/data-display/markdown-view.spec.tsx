@@ -5,7 +5,7 @@ import { MarkdownView } from './markdown-view';
 
 // The codeBlocks variant's CodeBlock renders upstream ScrollArea, which measures
 // its viewport in a `queueMicrotask` its layout effect schedules on mount,
-// outside of `render`'s own act() batch — awaiting a no-op act() settles it
+// outside of `render`'s own act() batch; awaiting a no-op act() settles it
 // before the test's assertions run.
 async function settle(): Promise<void> {
   await act(async () => {});
@@ -13,7 +13,7 @@ async function settle(): Promise<void> {
 
 beforeAll(() => {
   // The codeBlocks variant renders CodeBlock, which measures via a ResizeObserver
-  // and queries Element.getAnimations — both absent in jsdom.
+  // and queries Element.getAnimations, both absent in jsdom.
   globalThis.ResizeObserver ??= class {
     observe() {}
     unobserve() {}
@@ -38,6 +38,20 @@ describe('MarkdownView', () => {
     render(<MarkdownView>{'| A | B |\n| - | - |\n| 1 | 2 |'}</MarkdownView>);
     expect(screen.getByRole('table')).toBeTruthy();
     expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['A', 'B']);
+  });
+
+  it('renders a GFM table as the upstream Table inside a ScrollArea, so a wide one scrolls on its own', () => {
+    const { container } = render(<MarkdownView>{'| A | B |\n| - | - |\n| 1 | 2 |'}</MarkdownView>);
+    const table = container.querySelector('[data-slot="table"]');
+    expect(table?.closest('[data-slot="scroll-area"]')).not.toBeNull();
+    expect(table?.querySelector('[data-slot="table-head"]')?.textContent).toBe('A');
+  });
+
+  it('renders a plain fenced block inside a ScrollArea, so a long line scrolls on its own', () => {
+    const { container } = render(<MarkdownView>{'```\nplain\n```'}</MarkdownView>);
+    const pre = container.querySelector('pre');
+    expect(pre?.textContent).toBe('plain');
+    expect(pre?.closest('[data-slot="scroll-area"]')).not.toBeNull();
   });
 
   it('does not render raw embedded HTML as markup (safe for untrusted content)', () => {

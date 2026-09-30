@@ -1,45 +1,47 @@
 import type { ComponentProps, ReactNode } from 'react';
 
 import { Message } from '@/registry/bases/base-ui/ui/message';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 interface ChatMessageProps extends ComponentProps<typeof Message> {
-  /**
-   * While true, the row carries `data-streaming` and a leading-edge line in
-   * `border-primary`; `style.borderInlineStartColor` recolours it, for
-   * example to the agent's colour.
-   */
+  /** While true, the row carries `data-streaming` and a line in `--primary` beside its leading edge. */
   streaming?: boolean;
+  /** Any CSS colour for the streaming line, such as the agent's colour; `--primary` when omitted. */
+  accentColor?: string;
 }
 
 /**
- * ChatMessage - one chat message row: upstream `Message` plus a leading-edge
- * accent while the text is still arriving. The consumer composes the row from
- * upstream parts, a muted `Bubble` for the user and a ghost one for the agent:
+ * ChatMessage - one chat message row: upstream `Message` plus a line beside its
+ * leading edge while the text is still arriving. The consumer composes the row
+ * from upstream parts, a muted `Bubble` for the user and a ghost one for the agent:
  *
  *   <ChatMessage align="end">
  *     <MessageContent>
  *       <Bubble variant="muted"><BubbleContent>Hello</BubbleContent></Bubble>
  *     </MessageContent>
  *   </ChatMessage>
- *   <ChatMessage streaming style={{ borderInlineStartColor: agent.color }}>
+ *   <ChatMessage streaming accentColor={agent.color}>
  *     <MessageContent>
  *       <MessageHeader>{agent.name}</MessageHeader>
  *       <Bubble variant="ghost"><BubbleContent>{text}</BubbleContent></Bubble>
  *     </MessageContent>
  *   </ChatMessage>
+ *
+ * The line sits outside the row, in the space before its leading edge, so the
+ * row keeps upstream's own padding and the list around it needs room there.
  */
-function ChatMessage({ streaming = false, className, ...props }: ChatMessageProps): ReactNode {
+function ChatMessage({ streaming = false, accentColor, children, ...props }: ChatMessageProps): ReactNode {
   return (
-    <Message
-      data-slot="chat-message"
-      data-streaming={streaming ? '' : undefined}
-      className={cn(
-        'data-streaming:border-primary data-streaming:-ms-3 data-streaming:border-s-2 data-streaming:ps-3',
-        className,
-      )}
-      {...props}
-    />
+    <Message data-slot="chat-message" data-streaming={streaming ? '' : undefined} {...props}>
+      {streaming ? (
+        <span
+          aria-hidden
+          data-slot="chat-message-accent"
+          className="bg-primary absolute inset-y-0 -start-3 w-0.5"
+          style={accentColor ? { backgroundColor: accentColor } : undefined}
+        />
+      ) : null}
+      {children}
+    </Message>
   );
 }
 

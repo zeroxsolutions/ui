@@ -205,3 +205,10 @@
     @apply font-sans;
   }
 }
+
+/* ImagePreview's backdrop, so transparent pixels read. The image-preview item ships this same
+   utility in its registry `css`, and a change here is copied there. */
+@utility bg-checkerboard {
+  background-image: repeating-conic-gradient(var(--muted) 0 25%, var(--background) 0 50%);
+  background-size: calc(var(--spacing) * 4) calc(var(--spacing) * 4);
+}
