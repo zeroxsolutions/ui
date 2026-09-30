@@ -54,9 +54,10 @@ function useNumberField(): NumberFieldContextValue {
  * to `min`/`max` and steps on the arrow keys; the consumer composes a
  * `NumberFieldInput` and any `InputGroupAddon` / `InputGroupText` around it (a
  * label before, a unit or a trigger after). Controlled - the consumer owns the
- * number. The root keeps upstream's `data-slot="input-group"` (recipes such as
- * `ui/combobox.tsx`'s popup select on it) and carries `data-mixed` while
- * `mixed` and `data-editing` while the input holds a draft.
+ * number. The root carries `data-mixed` while `mixed` and `data-editing` while
+ * the input holds a draft. `NumberFieldInput` keeps upstream's
+ * `data-slot="input-group-control"`, which the group's focus and invalid
+ * rings select on.
  */
 function NumberField({
   value,
@@ -134,6 +135,7 @@ function NumberField({
   return (
     <NumberFieldContext.Provider value={context}>
       <InputGroup
+        data-slot="number-field"
         data-mixed={mixed || undefined}
         data-editing={editing || undefined}
         data-disabled={disabled || undefined}
