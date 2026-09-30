@@ -8,6 +8,9 @@ const nextConfig = {
   // The adapter bundles from this output; without it the adapter fails on a missing
   // pages-manifest.json rather than naming the setting that produces it.
   output: 'standalone',
+  // Unset, `next dev` run by a coding agent writes an AGENTS.md and a CLAUDE.md into this app,
+  // beside the repo's own CLAUDE.md, and re-creates them whenever they are deleted.
+  agentRules: false,
 };
 
 /**

@@ -32,6 +32,7 @@
     "src/**/*.jsx",
     "registry/**/*.ts",
     "registry/**/*.tsx",
+    "registry.json",
     "../../apps/registry-ui/.next/types/**/*.ts",
     "../../dist/apps/registry-ui/.next/types/**/*.ts",
     "next-env.d.ts"
