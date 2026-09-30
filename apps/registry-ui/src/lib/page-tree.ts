@@ -1,4 +1,4 @@
-import type { Item, Node, Root } from 'fumadocs-core/page-tree';
+import { flattenTree, type Item, type Node, type Root } from 'fumadocs-core/page-tree';
 import type { ReactNode } from 'react';
 
 /** A run of pages under one label, as the docs navigation lists them. */
@@ -40,4 +40,15 @@ export function pageTreeGroups(tree: Root): PageTreeGroup[] {
  */
 export function isExternal(page: Item): boolean {
   return page.external ?? /^(\w+:|\/\/)/.test(page.url);
+}
+
+/**
+ * The pages before and after `url` in the tree's reading order, stepping over a link to another site:
+ * fumadocs' `findNeighbour` counts a `meta.json` link to another site as a page.
+ */
+export function pageNeighbours(tree: Root, url: string): { previous?: Item; next?: Item } {
+  const pages = flattenTree(tree.children).filter((page) => !isExternal(page));
+  const index = pages.findIndex((page) => page.url === url);
+  if (index === -1) return {};
+  return { previous: pages[index - 1], next: pages[index + 1] };
 }

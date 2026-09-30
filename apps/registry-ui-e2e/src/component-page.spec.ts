@@ -1,14 +1,114 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
+
+const PAGE = '/docs/components/status-indicator';
+
+/** Whether two boxes share any area. */
+function intersects(
+  a: { x: number; y: number; width: number; height: number },
+  b: { x: number; y: number; width: number; height: number },
+): boolean {
+  return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+}
+
+/** The part of a block's code a reader sees: its text's box cut to the scroller's viewport. */
+async function visibleCodeBox(block: Locator): Promise<{ x: number; y: number; width: number; height: number }> {
+  const viewport = await block.locator('[data-slot=scroll-area-viewport]').first().boundingBox();
+  const code = await block.locator('code').first().boundingBox();
+  if (!viewport || !code) throw new Error('the block has no code in a scroller');
+  const x = Math.max(viewport.x, code.x);
+  const y = Math.max(viewport.y, code.y);
+  return {
+    x,
+    y,
+    width: Math.min(viewport.x + viewport.width, code.x + code.width) - x,
+    height: Math.min(viewport.y + viewport.height, code.y + code.height) - y,
+  };
+}
+
+/**
+ * The scroll box of an element, as far as this spec reads it; this project's types carry no DOM lib.
+ * A cast, not a helper: an `evaluate` callback runs in the page and sees nothing from this module.
+ */
+interface Scroller {
+  scrollWidth: number;
+  clientWidth: number;
+  scrollLeft: number;
+  scrollTo(options: { left: number }): void;
+}
+
+async function pageScrollsSideways(page: Page): Promise<boolean> {
+  return Boolean(await page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth'));
+}
 
 test('a component page previews the item, shows its source, and pages on', async ({ page }) => {
-  await page.goto('/docs/components/status-indicator');
+  await page.goto(PAGE);
 
-  const preview = page.getByRole('tabpanel', { name: 'Preview' }).first();
+  const preview = page.locator('[data-slot=component-preview]').first();
   await expect(preview.getByText('Connecting')).toBeVisible();
 
-  await page.getByRole('tab', { name: 'Code' }).first().click();
-  await expect(page.getByRole('tabpanel', { name: 'Code' }).first()).toContainText('function StatusIndicatorDemo');
+  // The button listens only once the page has hydrated, so it is clicked until the source opens.
+  const viewCode = preview.getByRole('button', { name: 'View code' });
+  await expect(async () => {
+    if (await viewCode.isVisible()) await viewCode.click({ timeout: 1_000 });
+    await expect(preview.locator('[data-slot=code]')).toContainText('function StatusIndicatorDemo', { timeout: 1_000 });
+  }).toPass();
 
-  await page.getByRole('link', { name: 'Next: Button' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Button' })).toBeVisible();
+  const install = page
+    .getByRole('tabpanel')
+    .filter({ has: page.getByRole('tab', { name: 'pnpm' }) })
+    .first();
+  await expect(install.getByText('pnpm dlx shadcn@latest add')).toBeVisible();
+  await install.getByRole('tab', { name: 'npm', exact: true }).click();
+  await expect(install.getByText('npx shadcn@latest add')).toBeVisible();
+
+  const next = page.getByRole('link', { name: 'Next page' });
+  const href = await next.getAttribute('href');
+  await next.click();
+  await expect(page).toHaveURL(new RegExp(`${href}$`));
+});
+
+for (const [width, height] of [
+  [1440, 900],
+  [390, 844],
+] as const) {
+  test(`at ${width} wide no copy button covers the code it copies`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto(PAGE);
+
+    // The install command and a usage fence: one package-manager block and one plain one.
+    const blocks = page.locator('[data-code-figure]').filter({ has: page.locator('[data-slot=copy-button]:visible') });
+    const count = await blocks.count();
+    expect(count).toBeGreaterThanOrEqual(2);
+    for (let index = 0; index < count; index++) {
+      const block = blocks.nth(index);
+      const button = await block.locator('[data-slot=copy-button]:visible').first().boundingBox();
+      expect(button).not.toBeNull();
+      expect(intersects(button!, await visibleCodeBox(block))).toBe(false);
+    }
+  });
+}
+
+test('at 390 wide a long command scrolls inside its block, and the page does not scroll sideways', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/docs/installation');
+
+  const block = page.locator('[data-code-figure]').filter({ hasText: 'status-indicator.json' }).first();
+  const viewport = block.locator('[data-slot=scroll-area-viewport]').first();
+  await expect(viewport).toBeVisible();
+
+  const box = await block.boundingBox();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(390);
+
+  const overflow = await viewport.evaluate((element) => {
+    const box = element as unknown as Scroller;
+    return box.scrollWidth - box.clientWidth;
+  });
+  expect(overflow).toBeGreaterThan(0);
+  await viewport.evaluate((element) => (element as unknown as Scroller).scrollTo({ left: 100 }));
+  await expect
+    .poll(() => viewport.evaluate((element) => (element as unknown as Scroller).scrollLeft))
+    .toBeGreaterThan(0);
+
+  expect(await pageScrollsSideways(page)).toBe(false);
 });

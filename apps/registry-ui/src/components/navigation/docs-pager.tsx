@@ -1,10 +1,13 @@
-import { flattenTree, type Root } from 'fumadocs-core/page-tree';
-import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
-import Link from 'next/link';
-import type { ComponentProps, ReactNode } from 'react';
+'use client';
 
-import { isExternal } from '@/lib/page-tree';
+import type { Root } from 'fumadocs-core/page-tree';
+import Link from 'next/link';
+import { useRef, type ComponentProps, type ReactNode } from 'react';
+
+import { pageNeighbours } from '@/lib/page-tree';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { ArrowLeftIcon, type ArrowLeftIconHandle } from '@/registry/bases/base-ui/ui/arrow-left';
+import { ArrowRightIcon, type ArrowRightIconHandle } from '@/registry/bases/base-ui/ui/arrow-right';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 
 interface DocsPagerProps extends ComponentProps<'nav'> {
@@ -15,36 +18,52 @@ interface DocsPagerProps extends ComponentProps<'nav'> {
 }
 
 /**
- * Links to the page before and the page after the current one, stepping over a link to another site.
- * Renders nothing for a page with neither.
+ * Links to the page before and the page after the current one at the foot of a page, upstream's,
+ * stepping over a link to another site; each arrow plays on its link's hover or focus. Renders nothing
+ * for a page with neither.
  */
 function DocsPager({ tree, url, className, ...props }: DocsPagerProps): ReactNode {
-  // fumadocs' findNeighbour counts a meta.json link to another site as a page, so the pager walks the
-  // flattened tree itself.
-  const pages = flattenTree(tree.children).filter((page) => !isExternal(page));
-  const index = pages.findIndex((page) => page.url === url);
-  const previous = index > 0 ? pages[index - 1] : undefined;
-  const next = index === -1 ? undefined : pages[index + 1];
+  const { previous, next } = pageNeighbours(tree, url);
+  const previousIconRef = useRef<ArrowLeftIconHandle>(null);
+  const nextIconRef = useRef<ArrowRightIconHandle>(null);
   if (!previous && !next) return null;
 
   return (
-    <nav aria-label="Pager" className={cn('flex items-center justify-between gap-2', className)} {...props}>
-      {previous ? (
-        <Link href={previous.url} rel="prev" className={buttonVariants({ variant: 'secondary', size: 'sm' })}>
-          <ArrowLeftIcon data-icon="inline-start" />
+    <nav
+      aria-label="Pager"
+      className={cn('hidden h-16 w-full items-center gap-2 px-4 sm:flex sm:px-0', className)}
+      {...props}
+    >
+      {previous && (
+        <Link
+          href={previous.url}
+          rel="prev"
+          className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'shadow-none')}
+          onMouseEnter={() => previousIconRef.current?.startAnimation()}
+          onMouseLeave={() => previousIconRef.current?.stopAnimation()}
+          onFocus={() => previousIconRef.current?.startAnimation()}
+          onBlur={() => previousIconRef.current?.stopAnimation()}
+        >
+          <ArrowLeftIcon ref={previousIconRef} />
           <span className="sr-only">Previous: </span>
           {previous.name}
         </Link>
-      ) : (
-        <span />
       )}
-      {next ? (
-        <Link href={next.url} rel="next" className={buttonVariants({ variant: 'secondary', size: 'sm' })}>
+      {next && (
+        <Link
+          href={next.url}
+          rel="next"
+          className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'ml-auto shadow-none')}
+          onMouseEnter={() => nextIconRef.current?.startAnimation()}
+          onMouseLeave={() => nextIconRef.current?.stopAnimation()}
+          onFocus={() => nextIconRef.current?.startAnimation()}
+          onBlur={() => nextIconRef.current?.stopAnimation()}
+        >
           <span className="sr-only">Next: </span>
           {next.name}
-          <ArrowRightIcon data-icon="inline-end" />
+          <ArrowRightIcon ref={nextIconRef} />
         </Link>
-      ) : null}
+      )}
     </nav>
   );
 }
