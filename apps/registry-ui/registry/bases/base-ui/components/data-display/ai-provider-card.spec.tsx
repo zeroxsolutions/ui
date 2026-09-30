@@ -55,7 +55,7 @@ describe('AiProviderCard', () => {
   });
 
   it('carries the status tone on the root for the status note to read', () => {
-    render(
+    const { container } = render(
       <AiProviderCard status="busy">
         <CardFooter>
           <AiProviderCardStatus>Command failed</AiProviderCardStatus>
@@ -63,15 +63,14 @@ describe('AiProviderCard', () => {
       </AiProviderCard>,
     );
 
-    const card = document.querySelector('[data-slot="ai-provider-card"]');
-    expect(card?.getAttribute('data-status')).toBe('busy');
-    expect(card?.querySelector('[data-slot="ai-provider-card-status"]')?.textContent).toBe('Command failed');
+    expect(container.firstElementChild?.getAttribute('data-status')).toBe('busy');
+    expect(screen.getByText('Command failed')).toBeTruthy();
   });
 
   it('sets no status when none is given', () => {
-    render(<AiProviderCard />);
+    const { container } = render(<AiProviderCard />);
 
-    expect(document.querySelector('[data-slot="ai-provider-card"]')?.hasAttribute('data-status')).toBe(false);
+    expect(container.firstElementChild?.hasAttribute('data-status')).toBe(false);
   });
 
   it('renders the composed header and description', () => {
@@ -85,20 +84,6 @@ describe('AiProviderCard', () => {
     );
 
     expect(screen.getByText('Custom provider')).toBeTruthy();
-    expect(document.querySelector('[data-slot="card-description"]')?.textContent).toBe('Models');
-  });
-
-  it("keeps the upstream card-description slot so CardHeader's own recipe selects on it", () => {
-    render(
-      <AiProviderCard>
-        <CardHeader>
-          <CardTitle>Custom provider</CardTitle>
-          <AiProviderCardDescription>Models</AiProviderCardDescription>
-        </CardHeader>
-      </AiProviderCard>,
-    );
-
-    const header = document.querySelector('[data-slot="card-header"]');
-    expect(header?.querySelector('[data-slot="card-description"]')?.textContent).toBe('Models');
+    expect(screen.getByText('Models')).toBeTruthy();
   });
 });

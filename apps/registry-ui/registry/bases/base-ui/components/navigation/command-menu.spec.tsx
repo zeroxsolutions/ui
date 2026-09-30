@@ -72,7 +72,7 @@ describe('CommandMenu', () => {
     expect(screen.getByRole('dialog', { name: 'Jump to file' })).toBeTruthy();
   });
 
-  it('marks the palette and its items with their slots', () => {
+  it('offers each item as an option in the open palette', () => {
     render(
       <CommandMenu open>
         <CommandList>
@@ -81,8 +81,7 @@ describe('CommandMenu', () => {
       </CommandMenu>,
     );
 
-    expect(document.querySelector('[data-slot="command-menu"]')).toBeTruthy();
-    expect(screen.getByText('SKILL.md').closest('[data-slot="command-menu-item"]')).toBeTruthy();
+    expect(screen.getByRole('option', { name: 'SKILL.md' })).toBeTruthy();
   });
 });
 

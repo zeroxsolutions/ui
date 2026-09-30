@@ -45,13 +45,13 @@ describe('CollapsibleCard', () => {
 
   it('stamps its variant on the root, default when none is given', () => {
     const { container } = renderCard();
-    const root = container.querySelector('[data-slot="collapsible-card"]');
+    const root = container.firstElementChild;
     expect(root?.getAttribute('data-variant')).toBe('default');
   });
 
   it('takes the plain variant', () => {
     const { container } = renderCard({ variant: 'plain' });
-    const root = container.querySelector('[data-slot="collapsible-card"]');
+    const root = container.firstElementChild;
     expect(root?.getAttribute('data-variant')).toBe('plain');
   });
 

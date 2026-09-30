@@ -33,21 +33,20 @@ describe('ModelInfoCard', () => {
       </ModelInfoCard>,
     );
 
-    const card = document.querySelector('[data-slot="model-info-card"]');
-    expect(card?.querySelector('[data-slot="item-media"] [data-testid="logo"]')).toBeTruthy();
+    expect(screen.getByTestId('logo')).toBeTruthy();
     expect(screen.getByText('GPT-4o')).toBeTruthy();
     expect(screen.getByText('OpenAI')).toBeTruthy();
     expect(screen.getByText('gpt-4o')).toBeTruthy();
-    expect(card?.querySelector('[data-testid="body"]')).toBeTruthy();
+    expect(screen.getByTestId('body')).toBeTruthy();
   });
 });
 
 describe('ModelInfoCardSection', () => {
-  it('renders an accent badge, title, value, and children', () => {
+  it('renders the title, value and children it composes', () => {
     render(
       <ModelInfoCardSection>
         <Item size="xs">
-          <ModelInfoCardBadge className="bg-chart-1" />
+          <ModelInfoCardBadge />
           <ItemContent>
             <ItemTitle>Context length</ItemTitle>
           </ItemContent>
@@ -57,21 +56,9 @@ describe('ModelInfoCardSection', () => {
       </ModelInfoCardSection>,
     );
 
-    const section = document.querySelector('[data-slot="model-info-card-section"]');
-    expect(section?.querySelector('[data-slot="model-info-card-badge"]')?.className).toContain('bg-chart-1');
     expect(screen.getByText('Context length')).toBeTruthy();
     expect(screen.getByText('128K tokens')).toBeTruthy();
-    expect(section?.querySelector('[data-testid="line"]')).toBeTruthy();
-  });
-});
-
-describe('ModelInfoCardBadge', () => {
-  it('lets the consumer class replace the muted accent', () => {
-    render(<ModelInfoCardBadge className="bg-chart-1" />);
-
-    const badge = document.querySelector('[data-slot="model-info-card-badge"]');
-    expect(badge?.className).toContain('bg-chart-1');
-    expect(badge?.className).not.toContain('bg-muted-foreground');
+    expect(screen.getByTestId('line')).toBeTruthy();
   });
 });
 

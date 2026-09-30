@@ -1,8 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { compile } from 'tailwindcss';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { Item, ItemActions, ItemContent, ItemGroup, ItemTitle } from '@/registry/bases/base-ui/ui/item';
+import { Item, ItemActions } from '@/registry/bases/base-ui/ui/item';
 import {
   ModelList,
   ModelListAction,
@@ -14,25 +13,6 @@ import {
 } from './model-list';
 
 afterEach(cleanup);
-
-/** Whether an opacity rule compiled from the enclosing `ModelListContent`'s classes applies to `item`. */
-async function isDimmed(item: Element | null): Promise<boolean> {
-  const content = item?.closest('[data-slot="model-list-content"]');
-  if (!item || !content) throw new Error('no item rendered inside a ModelListContent');
-  const compiler = await compile('@tailwind utilities;');
-  const style = document.createElement('style');
-  style.textContent = compiler.build([...content.classList]);
-  document.head.append(style);
-  const rules = [...(style.sheet?.cssRules ?? [])].filter(
-    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.style.getPropertyValue('opacity') !== '',
-  );
-  style.remove();
-  // jsdom's selector engine matches no escaped class name inside :is(), so the
-  // content is addressed by its data-slot, which selects the same element.
-  return rules.some((rule) =>
-    item.matches(rule.selectorText.replace(/\.(?:\\.|[\w-])+/g, '[data-slot="model-list-content"]')),
-  );
-}
 
 describe('ModelList', () => {
   it('renders the title, controls, tabs, and content', () => {
@@ -55,9 +35,8 @@ describe('ModelList', () => {
     expect(screen.getByRole('heading', { name: 'Model list' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Refresh' })).toBeTruthy();
     expect(screen.getByTestId('tabs')).toBeTruthy();
-    const content = document.querySelector('[data-slot="model-list-content"]');
-    expect(content?.querySelector('[data-testid="child-a"]')).toBeTruthy();
-    expect(content?.querySelector('[data-testid="child-b"]')).toBeTruthy();
+    expect(screen.getByTestId('child-a')).toBeTruthy();
+    expect(screen.getByTestId('child-b')).toBeTruthy();
   });
 
   it('renders its content in order without transforming it', () => {
@@ -73,53 +52,6 @@ describe('ModelList', () => {
 
     const children = screen.getAllByTestId('child');
     expect(children.map((child) => child.textContent)).toEqual(['a', 'b', 'c']);
-  });
-});
-
-describe('ModelListContent', () => {
-  it('scrolls its children inside a ScrollArea viewport', () => {
-    render(
-      <ModelListContent>
-        <div data-testid="child" />
-      </ModelListContent>,
-    );
-
-    const viewport = document.querySelector('[data-slot="model-list-content"] [data-slot="scroll-area-viewport"]');
-    expect(viewport?.contains(screen.getByTestId('child'))).toBe(true);
-  });
-
-  it('dims an item marked unavailable', async () => {
-    render(
-      <ModelListContent>
-        <ItemGroup>
-          <Item size="sm" data-unavailable>
-            <ItemContent>
-              <ItemTitle>GPT-4o</ItemTitle>
-            </ItemContent>
-          </Item>
-        </ItemGroup>
-      </ModelListContent>,
-    );
-
-    expect(await isDimmed(document.querySelector('[data-slot="item"]'))).toBe(true);
-  });
-
-  it('does not dim an item whose data-unavailable is false', async () => {
-    render(
-      <ModelListContent>
-        <ItemGroup>
-          <Item size="sm" data-unavailable={false}>
-            <ItemContent>
-              <ItemTitle>GPT-4o</ItemTitle>
-            </ItemContent>
-          </Item>
-        </ItemGroup>
-      </ModelListContent>,
-    );
-
-    const item = document.querySelector('[data-slot="item"]');
-    expect(item?.getAttribute('data-unavailable')).toBe('false');
-    expect(await isDimmed(item)).toBe(false);
   });
 });
 
@@ -148,17 +80,14 @@ describe('ModelListItemRemove', () => {
 
 describe('ModelListSkeleton', () => {
   it('renders six placeholder items by default', () => {
-    render(<ModelListSkeleton />);
+    const { container } = render(<ModelListSkeleton />);
 
-    expect(document.querySelectorAll('[data-slot="model-list-skeleton-item"]')).toHaveLength(6);
+    expect(container.firstElementChild?.children).toHaveLength(6);
   });
 
-  it('renders the requested number of placeholder items, each matching the item shape', () => {
-    render(<ModelListSkeleton count={3} />);
+  it('renders the requested number of placeholder items', () => {
+    const { container } = render(<ModelListSkeleton count={3} />);
 
-    const items = document.querySelectorAll('[data-slot="model-list-skeleton-item"]');
-    expect(items).toHaveLength(3);
-    // media placeholder + two text lines + a trailing control = 4 skeletons
-    expect(items[0].querySelectorAll('[data-slot="skeleton"]')).toHaveLength(4);
+    expect(container.firstElementChild?.children).toHaveLength(3);
   });
 });

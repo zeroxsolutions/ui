@@ -18,13 +18,8 @@ describe('PanelFieldLabel', () => {
     expect(screen.getByLabelText('Fill').id).toBe('fill');
   });
 
-  it('merges a passed className into the label', () => {
-    render(<PanelFieldLabel className="mt-1">Fill</PanelFieldLabel>);
-    expect(screen.getByText('Fill').className).toContain('mt-1');
-  });
-
-  it('keeps upstream field-label slot so Field selectors still reach it', () => {
-    render(<PanelFieldLabel>Fill</PanelFieldLabel>);
-    expect(screen.getByText('Fill').getAttribute('data-slot')).toBe('field-label');
+  it('forwards the props it was not asked for onto the label', () => {
+    render(<PanelFieldLabel id="fill-label">Fill</PanelFieldLabel>);
+    expect(screen.getByText('Fill').id).toBe('fill-label');
   });
 });

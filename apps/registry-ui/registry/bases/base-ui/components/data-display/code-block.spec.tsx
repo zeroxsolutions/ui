@@ -53,15 +53,15 @@ describe('CodeBlock', () => {
   });
 
   it('renders no header of its own, whatever the language', async () => {
-    const { container } = render(<CodeBlock code="const x = 1" language="ts" />);
+    render(<CodeBlock code="const x = 1" language="ts" />);
     await settle();
-    expect(container.querySelector('[data-slot="collapsible-card-header"]')).toBeNull();
     expect(screen.queryByText('TypeScript')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Toggle' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
   });
 
   it('takes a composed header in place of the floating copy', async () => {
-    const { container } = render(
+    render(
       <CodeBlock code="const x = 1" language="ts">
         <CollapsibleCardHeader>
           <CollapsibleCardTitle>
@@ -75,9 +75,8 @@ describe('CodeBlock', () => {
       </CodeBlock>,
     );
     await settle();
-    expect(container.querySelector('[data-slot="code-block-language"]')?.textContent).toBe('TypeScript');
+    expect(screen.getByText('TypeScript')).toBeTruthy();
     expect(screen.getAllByRole('button', { name: 'Copy code' })).toHaveLength(1);
-    expect(container.querySelector('[data-slot="code-block-copy"]')).toBeTruthy();
   });
 
   it('collapses the code from a composed trigger', async () => {
@@ -154,33 +153,26 @@ describe('CodeBlock', () => {
     const { container } = render(<CodeBlock code="const x" language="ts" lines={null} />);
     await settle();
 
-    expect(container.querySelector('[data-slot="highlighted-code"]')?.textContent).toBe('const x');
-    expect(container.querySelector('[data-slot="highlighted-code"] span')).toBeNull();
+    expect(container.querySelector('code')?.textContent).toBe('const x');
+    expect(container.querySelector('code span')).toBeNull();
     expect(highlightToLines).not.toHaveBeenCalled();
   });
 
-  it('marks its scroller viewport for a container to cap', async () => {
-    const { container } = render(<CodeBlock code="x" />);
-    await settle();
-
-    expect(container.querySelector('[data-slot="code-block-viewport"] pre')).toBeTruthy();
-  });
-
   it('numbers each line in a gutter hidden from assistive technology, apart from the code', async () => {
-    render(<CodeBlock code={'a\nb\nc'} lineNumbers />);
+    const { container } = render(<CodeBlock code={'a\nb\nc'} lineNumbers />);
     await settle();
 
-    const gutter = document.querySelector('[data-slot="code-block-line-numbers"]');
-    expect(gutter?.textContent).toBe('1\n2\n3');
-    expect(gutter?.getAttribute('aria-hidden')).toBe('true');
-    expect(document.querySelector('[data-slot="highlighted-code"]')?.textContent).toBe('a\nb\nc');
+    const pre = container.querySelector('pre');
+    expect(pre?.textContent).toBe('1\n2\n3a\nb\nc');
+    expect(pre?.querySelector(':scope > [aria-hidden="true"]')?.textContent).toBe('1\n2\n3');
+    expect(pre?.querySelector('code')?.textContent).toBe('a\nb\nc');
   });
 
   it('draws no gutter unless asked', async () => {
-    render(<CodeBlock code={'a\nb'} />);
+    const { container } = render(<CodeBlock code={'a\nb'} />);
     await settle();
 
-    expect(document.querySelector('[data-slot="code-block-line-numbers"]')).toBeNull();
+    expect(container.querySelector('pre')?.textContent).toBe('a\nb');
   });
 
   it('copies the code and flips the label to Copied', async () => {

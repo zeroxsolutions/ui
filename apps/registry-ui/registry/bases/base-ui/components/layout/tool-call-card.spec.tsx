@@ -16,8 +16,6 @@ import {
 
 afterEach(cleanup);
 
-const root = (): HTMLElement => document.querySelector('[data-slot="tool-call-card"]') as HTMLElement;
-
 function Card({ state, defaultOpen }: { state: ToolCallCardState; defaultOpen?: boolean }) {
   return (
     <ToolCallCard state={state} defaultOpen={defaultOpen}>
@@ -41,24 +39,14 @@ describe('ToolCallCard', () => {
   it.each<ToolCallCardState>(['input-streaming', 'input-available', 'output-available', 'output-error'])(
     'reflects the %s state on the root',
     (state) => {
-      render(<Card state={state} />);
-      expect(root().getAttribute('data-state')).toBe(state);
+      const { container } = render(<Card state={state} />);
+      expect(container.firstElementChild?.getAttribute('data-state')).toBe(state);
     },
   );
 
-  it('renders the header parts inside the trigger', () => {
+  it('renders the header parts inside the trigger, which names the button', () => {
     render(<Card state="output-available" />);
-    const trigger = screen.getByRole('button');
-    expect(trigger.getAttribute('data-slot')).toBe('tool-call-card-trigger');
-    for (const [text, slot] of [
-      ['search', 'tool-call-card-title'],
-      ['3 results', 'tool-call-card-description'],
-      ['Completed', 'tool-call-card-status'],
-    ]) {
-      const node = screen.getByText(text).closest('[data-slot^="tool-call-card-"]');
-      expect(node?.getAttribute('data-slot')).toBe(slot);
-      expect(trigger.contains(node)).toBe(true);
-    }
+    expect(screen.getByRole('button', { name: 'search 3 results Completed' })).toBeTruthy();
   });
 
   it('opens its sections from the trigger', () => {
@@ -66,8 +54,8 @@ describe('ToolCallCard', () => {
     expect(screen.queryByText('Parameters')).toBeNull();
 
     fireEvent.click(screen.getByRole('button'));
-    expect(screen.getByText('Parameters').getAttribute('data-slot')).toBe('tool-call-card-section-title');
-    expect(screen.getByText('Parameters').closest('[data-slot="tool-call-card-section"]')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Parameters' })).toBeTruthy();
+    expect(screen.getByText('{ "q": "hi" }')).toBeTruthy();
   });
 
   it('runs the caller onClick on the trigger and still toggles', () => {

@@ -17,32 +17,29 @@ describe('PanelHeader', () => {
         </PanelHeaderRow>
       </PanelHeader>,
     );
-    expect(screen.getByText('Title').getAttribute('data-slot')).toBe('panel-header-title');
-    expect(screen.getByRole('button', { name: 'x' }).closest('[data-slot="panel-header-actions"]')).toBeTruthy();
+    expect(screen.getByText('Title')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'x' })).toBeTruthy();
   });
 
-  it('draws its bottom rule as a border, with no separator element', () => {
-    const { container } = render(
-      <PanelHeader data-testid="header">
+  it('draws no separator a screen reader would announce', () => {
+    render(
+      <PanelHeader>
         <PanelHeaderRow>row</PanelHeaderRow>
       </PanelHeader>,
     );
-    expect(screen.getByTestId('header').className).toContain('border-b');
-    expect(container.querySelector('[data-slot="separator"],[role="separator"]')).toBeNull();
+    expect(screen.queryByRole('separator')).toBeNull();
   });
 
-  it('merges className and forwards props on every part', () => {
+  it('forwards props on every part', () => {
     render(
-      <PanelHeader className="bg-card" id="header">
-        <PanelHeaderRow className="pb-1.5" data-testid="row">
+      <PanelHeader id="header">
+        <PanelHeaderRow aria-label="row">
           <PanelHeaderTitle aria-label="title" />
         </PanelHeaderRow>
       </PanelHeader>,
     );
-    const row = screen.getByTestId('row');
-    expect(row.className).toContain('pb-1.5');
+    const row = screen.getByLabelText('row');
     expect(row.parentElement?.id).toBe('header');
-    expect(row.parentElement?.className).toContain('bg-card');
-    expect(screen.getByLabelText('title').getAttribute('data-slot')).toBe('panel-header-title');
+    expect(row.contains(screen.getByLabelText('title'))).toBe(true);
   });
 });

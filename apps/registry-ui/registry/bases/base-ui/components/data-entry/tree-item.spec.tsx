@@ -15,7 +15,8 @@ import { TreeItem, TreeItemIndent, TreeItemLabel, TreeItemRenameInput } from './
 afterEach(cleanup);
 
 function row(): HTMLElement {
-  return document.querySelector<HTMLElement>('[data-slot="tree-item"]')!;
+  // Testing Library mounts each render in a div appended to the body; the component's root is its first child.
+  return document.body.firstElementChild?.firstElementChild as HTMLElement;
 }
 
 describe('TreeItem', () => {
@@ -95,8 +96,8 @@ describe('TreeItemIndent', () => {
         <TreeItemIndent depth={2} indentStep={12} baseIndent={4} hasChildren={false} onToggleExpand={() => {}} />
       </TreeItem>,
     );
-    const indent = document.querySelector<HTMLElement>('[data-slot="tree-item-indent"]');
-    expect(indent?.style.paddingLeft).toBe('28px');
+    const indent = row().firstElementChild as HTMLElement;
+    expect(indent.style.paddingLeft).toBe('28px');
   });
 
   it('toggles via the chevron and stops propagation so the row is not selected', () => {

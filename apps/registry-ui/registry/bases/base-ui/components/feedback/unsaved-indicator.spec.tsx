@@ -16,8 +16,8 @@ describe('UnsavedIndicator', () => {
     expect(screen.getByRole('img', { name: 'Modified' })).toBeTruthy();
   });
 
-  it('merges a passed className', () => {
-    render(<UnsavedIndicator className="size-3" />);
-    expect(screen.getByRole('img', { name: 'Unsaved changes' }).className).toContain('size-3');
+  it('forwards the props it was not asked for', () => {
+    render(<UnsavedIndicator id="unsaved" />);
+    expect(screen.getByRole('img', { name: 'Unsaved changes' }).id).toBe('unsaved');
   });
 });

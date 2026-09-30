@@ -46,14 +46,9 @@ describe('FrontmatterForm', () => {
     expect(input.value).toBe('pdf-toolkit');
   });
 
-  it('stamps data-slot on the root and places an upstream FieldDescription in the field', () => {
+  it('shows the description the field composes', () => {
     render(<NameEditor value={{ name: 'a' }} />);
-    expect(screen.getByTestId('form').getAttribute('data-slot')).toBe('frontmatter-form');
-    const description = screen.getByText('Lowercase, dash-separated.');
-    expect(description.getAttribute('data-slot')).toBe('field-description');
-    expect(description.closest('[data-slot="field"]')).toBe(
-      screen.getByLabelText('Name').closest('[data-slot="field"]'),
-    );
+    expect(screen.getByText('Lowercase, dash-separated.')).toBeTruthy();
   });
 
   it('reports the next document when a field changes (controlled)', () => {

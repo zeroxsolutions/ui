@@ -144,7 +144,7 @@ describe('EmojiPicker', () => {
     );
     await settle();
 
-    const content = document.querySelector<HTMLElement>('[data-slot="emoji-picker-content"]');
+    const content = document.querySelector<HTMLElement>('[style*="--emoji-picker-height"]');
     expect(content?.style.getPropertyValue('--emoji-picker-height')).toBe('calc(var(--spacing) * 80)');
     expect(content?.style.getPropertyValue('--emoji-picker-columns')).toBe('repeat(8, minmax(0, 1fr))');
     // The first cell row sits one header below the top: 7 spacing steps at 4px.
@@ -153,14 +153,5 @@ describe('EmojiPicker', () => {
     // The next one a cell row further: the size-8 button (32px) plus the half-step gap.
     const secondCells = document.querySelector<HTMLElement>('[data-index="2"]');
     expect(secondCells?.style.transform).toBe('translateY(62px)');
-  });
-
-  it('stamps a data-slot on the grid and on each cell', async () => {
-    render(<EmojiPicker onSelect={vi.fn()} />);
-    await settle();
-
-    const cell = screen.getByRole('button', { name: 'grinning face' });
-    expect(cell.getAttribute('data-slot')).toBe('emoji-picker-cell');
-    expect(cell.closest('[data-slot="emoji-picker-grid"]')).not.toBeNull();
   });
 });

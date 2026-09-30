@@ -10,16 +10,19 @@ afterEach(cleanup);
 
 describe('ComponentSource', () => {
   it('numbers each line, beside a copy of the source as it is', () => {
-    render(<ComponentSource name="demo" code={code} language="ts" lines={lines} />);
+    const { container } = render(<ComponentSource name="demo" code={code} language="ts" lines={lines} />);
 
-    expect(document.querySelector('[data-slot="code-block-line-numbers"]')?.textContent).toBe('1\n2\n3');
-    expect(document.querySelector('[data-slot="highlighted-code"]')?.textContent).toBe(code);
+    expect(container.querySelector('pre')?.textContent).toBe(`1\n2\n3${code}`);
+    expect(container.querySelector('code')?.textContent).toBe(code);
+    expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
   });
 
   it('cut to its first lines, shows those alone and offers nothing to copy', () => {
-    render(<ComponentSource name="demo" code={code} language="ts" lines={lines} maxLines={2} copyable={false} />);
+    const { container } = render(
+      <ComponentSource name="demo" code={code} language="ts" lines={lines} maxLines={2} copyable={false} />,
+    );
 
-    expect(document.querySelector('[data-slot="highlighted-code"]')?.textContent).toBe('const a = 1;\nconst b = 2;');
+    expect(container.querySelector('code')?.textContent).toBe('const a = 1;\nconst b = 2;');
     expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();
   });
 

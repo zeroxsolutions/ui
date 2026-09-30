@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TabCloseButton } from './tab-close-button';
@@ -6,25 +6,18 @@ import { TabCloseButton } from './tab-close-button';
 afterEach(cleanup);
 
 describe('TabCloseButton', () => {
-  it('marks a dirty tab with data-dirty and renders the unsaved dot beside the X', () => {
+  it('marks a dirty tab with data-dirty and shows the unsaved mark inside the button', () => {
     render(<TabCloseButton dirty />);
     const button = screen.getByRole('button', { name: 'Close' });
     expect(button.hasAttribute('data-dirty')).toBe(true);
-    expect(button.querySelector('[data-slot="unsaved-indicator"]')).toBeTruthy();
-    expect(button.querySelector('[data-slot="tab-close-button-icon"]')).toBeTruthy();
+    expect(within(button).getByRole('img', { name: 'Unsaved changes' })).toBeTruthy();
   });
 
-  it('renders only the X for a clean tab', () => {
+  it('shows no unsaved mark for a clean tab', () => {
     render(<TabCloseButton />);
     const button = screen.getByRole('button', { name: 'Close' });
     expect(button.hasAttribute('data-dirty')).toBe(false);
-    expect(button.querySelector('[data-slot="unsaved-indicator"]')).toBeNull();
-    expect(button.querySelector('[data-slot="tab-close-button-icon"]')).toBeTruthy();
-  });
-
-  it('marks itself with its slot', () => {
-    render(<TabCloseButton />);
-    expect(screen.getByRole('button', { name: 'Close' }).dataset.slot).toBe('tab-close-button');
+    expect(within(button).queryByRole('img', { name: 'Unsaved changes' })).toBeNull();
   });
 
   it('calls onClick and stops propagation so the tab is not also activated', () => {

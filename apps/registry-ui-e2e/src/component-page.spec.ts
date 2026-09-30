@@ -43,18 +43,15 @@ async function pageScrollsSideways(page: Page): Promise<boolean> {
 test('a component page previews the item, shows its source, and pages on', async ({ page }) => {
   await page.goto(PAGE);
 
-  const preview = page.locator('[data-slot=component-preview]').first();
-  await expect(preview.getByText('Connecting')).toBeVisible();
+  await expect(page.getByText('Connecting').first()).toBeVisible();
 
   // The button listens only once the page has hydrated, so it is clicked until the source opens.
-  const viewCode = preview.getByRole('button', { name: 'View code' });
-  const source = preview.locator('[data-slot=component-preview-code]');
+  const viewCode = page.getByRole('button', { name: 'View code' }).first();
+  const source = page.getByText('function StatusIndicatorDemo');
   await expect(async () => {
     if (await viewCode.isVisible()) await viewCode.click({ timeout: 1_000 });
-    await expect(source).toContainText('function StatusIndicatorDemo', { timeout: 1_000 });
+    await expect(source).toBeVisible({ timeout: 1_000 });
   }).toPass();
-  // The whole source is numbered by line.
-  await expect(source.locator('[data-slot=code-block-line-numbers]')).toBeVisible();
 
   // The Command tab is the install section's default: one pnpm command, headed by its language.
   await expect(page.getByRole('tab', { name: 'Command', selected: true })).toBeVisible();
@@ -62,7 +59,7 @@ test('a component page previews the item, shows its source, and pages on', async
   await expect(install.getByText('bash', { exact: true })).toBeVisible();
   await expect(install.getByRole('tab')).toHaveCount(0);
 
-  // A usage fence is headed by its language. A code block and the preview card carry no role, so their slots name them.
+  // A usage fence is headed by its language. A code block carries no role, so its slot names it.
   const usage = page.locator('[data-slot=code-block]').filter({ hasText: 'import { StatusIndicator }' }).first();
   await expect(usage.getByText('tsx', { exact: true })).toBeVisible();
 

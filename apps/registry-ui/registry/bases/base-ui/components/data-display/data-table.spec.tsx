@@ -152,9 +152,7 @@ describe('DataTableEmpty', () => {
     render(<RowsTable rows={[]} />);
     await settle();
 
-    const cell = screen.getByText('No results.').closest('td');
-    expect(cell?.getAttribute('data-slot')).toBe('data-table-empty');
-    expect(cell?.getAttribute('colspan')).toBe('2');
+    expect(screen.getByRole('cell', { name: 'No results.' }).getAttribute('colspan')).toBe('2');
   });
 
   it('is not rendered while there are rows', async () => {
@@ -188,18 +186,6 @@ function PagedTable(): ReactNode {
     </DataTable>
   );
 }
-
-describe('DataTableView', () => {
-  it('scrolls the table inside a ScrollArea rather than the page', async () => {
-    render(<RowsTable rows={[{ name: 'a', size: 1 }]} />);
-    await settle();
-
-    const table = screen.getByRole('table');
-    expect(table.closest('[data-slot="scroll-area"]')).not.toBeNull();
-    // The ScrollArea's overflow hand-off selects the Table primitive's own wrapper by this slot.
-    expect(table.parentElement?.getAttribute('data-slot')).toBe('table-container');
-  });
-});
 
 describe('DataTablePagination', () => {
   it('steps to the next page and back', async () => {

@@ -8,7 +8,8 @@ import { ModeSwitcher } from './mode-switcher';
 afterEach(() => {
   cleanup();
   localStorage.clear();
-  document.documentElement.className = '';
+  document.documentElement.removeAttribute('class');
+  document.documentElement.removeAttribute('style');
 });
 
 describe('ModeSwitcher', () => {
@@ -20,12 +21,14 @@ describe('ModeSwitcher', () => {
     );
     const toggle = screen.getByRole('button', { name: 'Toggle theme' });
 
-    await waitFor(() => expect(document.documentElement.classList.contains('light')).toBe(true));
+    // The colour scheme the page asks the browser to paint its own controls and scrollbars in.
+    const colorScheme = (): string => document.documentElement.style.colorScheme;
+    await waitFor(() => expect(colorScheme()).toBe('light'));
 
     fireEvent.click(toggle);
-    await waitFor(() => expect(document.documentElement.classList.contains('dark')).toBe(true));
+    await waitFor(() => expect(colorScheme()).toBe('dark'));
 
     fireEvent.click(toggle);
-    await waitFor(() => expect(document.documentElement.classList.contains('light')).toBe(true));
+    await waitFor(() => expect(colorScheme()).toBe('light'));
   });
 });

@@ -47,9 +47,8 @@ describe('LanguageToggleGroup', () => {
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
-  it('stamps its data-slot and passes the group props through', () => {
+  it('passes the group props through, so its aria-label names the group', () => {
     renderGroup();
-    const group = screen.getByRole('group', { name: 'Language' });
-    expect(group.getAttribute('data-slot')).toBe('language-toggle-group');
+    expect(screen.getByRole('group', { name: 'Language' })).toBeTruthy();
   });
 });

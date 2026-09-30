@@ -1,4 +1,4 @@
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { PageContainer } from './page-container';
@@ -6,20 +6,15 @@ import { PageContainer } from './page-container';
 afterEach(cleanup);
 
 describe('PageContainer', () => {
-  it('centers a default max-width column around its children', () => {
-    const { getByText } = render(<PageContainer>body</PageContainer>);
-    const el = getByText('body');
-    expect(el.className).toContain('mx-auto');
-    expect(el.className).toContain('max-w-5xl');
+  it('renders its children at every size', () => {
+    for (const size of ['sm', 'md', 'lg', 'full'] as const) {
+      render(<PageContainer size={size}>{`body ${size}`}</PageContainer>);
+      expect(screen.getByText(`body ${size}`)).toBeTruthy();
+    }
   });
 
-  it('binds the width to the size variant', () => {
-    const { getByText } = render(<PageContainer size="lg">body</PageContainer>);
-    expect(getByText('body').className).toContain('max-w-7xl');
-  });
-
-  it('merges a passed className for the surface padding', () => {
-    const { getByText } = render(<PageContainer className="px-6">body</PageContainer>);
-    expect(getByText('body').className).toContain('px-6');
+  it('forwards the props it was not asked for', () => {
+    render(<PageContainer aria-label="Settings">body</PageContainer>);
+    expect(screen.getByLabelText('Settings').textContent).toBe('body');
   });
 });

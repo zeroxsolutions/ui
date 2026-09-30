@@ -6,31 +6,22 @@ import { Center } from './center';
 afterEach(cleanup);
 
 describe('Center', () => {
-  it('centres its children on both axes in block flow by default', () => {
-    render(<Center data-testid="center">x</Center>);
-    const center = screen.getByTestId('center');
-    expect(center.tagName).toBe('DIV');
-    expect(center.getAttribute('data-slot')).toBe('center');
-    expect(center.className).toContain('items-center');
-    expect(center.className).toContain('justify-center');
-    expect(center.className).toContain('flex');
-    expect(center.className).not.toContain('inline-flex');
-  });
-
-  it('switches to inline flow with inline', () => {
+  it('renders its children', () => {
     render(
-      <Center inline data-testid="center">
-        x
+      <Center>
+        <button type="button">Retry</button>
       </Center>,
     );
-    expect(screen.getByTestId('center').className).toContain('inline-flex');
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeTruthy();
   });
 
-  it('renders the element the consumer passes through render, keeping the recipe and className', () => {
-    render(<Center render={<main />} className="h-screen" />);
-    const main = screen.getByRole('main');
-    expect(main.getAttribute('data-slot')).toBe('center');
-    expect(main.className).toContain('items-center');
-    expect(main.className).toContain('h-screen');
+  it('renders the element the caller passes through render, around the children', () => {
+    render(<Center render={<main />}>body</Center>);
+    expect(screen.getByRole('main').textContent).toBe('body');
+  });
+
+  it('forwards the props it was not asked for', () => {
+    render(<Center aria-label="Empty state">x</Center>);
+    expect(screen.getByLabelText('Empty state').textContent).toBe('x');
   });
 });

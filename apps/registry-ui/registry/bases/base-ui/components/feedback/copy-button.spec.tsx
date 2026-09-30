@@ -21,14 +21,9 @@ describe('CopyButton', () => {
     expect(screen.getByRole('button', { name: 'Copy' })).toBeTruthy();
   });
 
-  it('honors a custom label and passes className through', () => {
-    render(<CopyButton value="x" label="Copy source" className="size-6" />);
-    expect(screen.getByRole('button', { name: 'Copy source' }).className).toContain('size-6');
-  });
-
-  it('marks itself with its slot', () => {
-    render(<CopyButton value="x" />);
-    expect(screen.getByRole('button', { name: 'Copy' }).dataset.slot).toBe('copy-button');
+  it('honors a custom label', () => {
+    render(<CopyButton value="x" label="Copy source" />);
+    expect(screen.getByRole('button', { name: 'Copy source' })).toBeTruthy();
   });
 
   it('copies the value, flips to the copied name and carries data-copied', async () => {

@@ -15,8 +15,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const root = (): HTMLElement => document.querySelector('[data-slot="reasoning-collapsible"]') as HTMLElement;
-
 function Label(): ReactNode {
   const { streaming, duration } = useReasoningCollapsible();
   return streaming ? 'Thinking' : `Thought for ${duration ?? '?'}s`;
@@ -37,23 +35,21 @@ function Reasoning({ streaming, defaultOpen }: { streaming?: boolean; defaultOpe
 
 describe('ReasoningCollapsible', () => {
   it('marks the root only while the reasoning is streaming', () => {
-    const { rerender } = render(<Reasoning streaming />);
-    expect(root().hasAttribute('data-streaming')).toBe(true);
+    const { container, rerender } = render(<Reasoning streaming />);
+    expect(container.firstElementChild?.hasAttribute('data-streaming')).toBe(true);
 
     rerender(<Reasoning streaming={false} />);
-    expect(root().hasAttribute('data-streaming')).toBe(false);
+    expect(container.firstElementChild?.hasAttribute('data-streaming')).toBe(false);
   });
 
   it('renders the node it is given as content while open', () => {
     render(<Reasoning defaultOpen />);
     expect(screen.getByText('bold').tagName).toBe('STRONG');
-    expect(screen.getByText('bold').closest('[data-slot="reasoning-collapsible-content"]')).toBeTruthy();
   });
 
   it('renders the consumer label inside the trigger', () => {
     render(<Reasoning streaming />);
     expect(screen.getByRole('button').textContent).toBe('Thinking');
-    expect(screen.getByRole('button').getAttribute('data-slot')).toBe('reasoning-collapsible-trigger');
   });
 
   it('opens while streaming, reports the elapsed seconds and closes after the stream ends', () => {

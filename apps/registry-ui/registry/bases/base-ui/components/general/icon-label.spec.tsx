@@ -17,43 +17,36 @@ beforeAll(() => {
 afterEach(cleanup);
 
 describe('IconLabel', () => {
-  it('holds the icon it is given and sizes an unsized svg to the compact glyph', () => {
+  it('holds the icon it is given, named by its aria-label', () => {
     render(
       <IconLabel aria-label="Rotation">
         <svg data-testid="star" />
       </IconLabel>,
     );
-    const label = screen.getByLabelText('Rotation');
-    expect(label.getAttribute('data-slot')).toBe('icon-label');
-    expect(label.contains(screen.getByTestId('star'))).toBe(true);
-    expect(label.className).toContain("[&_svg:not([class*='size-'])]:size-3");
+    expect(screen.getByLabelText('Rotation').contains(screen.getByTestId('star'))).toBe(true);
   });
 
-  it('merges className and forwards arbitrary props onto the span', () => {
+  it('forwards the props it was not asked for onto the span', () => {
     render(
-      <IconLabel className="ml-auto" data-testid="label">
+      <IconLabel id="rotation" aria-label="Rotation">
         <svg />
       </IconLabel>,
     );
-    const label = screen.getByTestId('label');
-    expect(label.className).toContain('text-muted-foreground');
-    expect(label.className).toContain('ml-auto');
+    expect(screen.getByLabelText('Rotation').id).toBe('rotation');
   });
 
-  it('takes the trigger props of a tooltip the consumer composes around it', () => {
+  it('serves as the trigger of a tooltip the consumer composes around it', () => {
     render(
       <TooltipProvider>
         <Tooltip open>
           <TooltipTrigger render={<IconLabel aria-label="Rotation" />}>
             <svg />
           </TooltipTrigger>
-          <TooltipContent>Rotation</TooltipContent>
+          <TooltipContent>Rotate the layer</TooltipContent>
         </Tooltip>
       </TooltipProvider>,
     );
-    const label = screen.getByLabelText('Rotation');
-    expect(label.className).toContain('text-muted-foreground');
-    expect(label.hasAttribute('data-popup-open')).toBe(true);
-    expect(screen.getByText('Rotation', { selector: '[data-slot="tooltip-content"]' })).toBeTruthy();
+    expect(screen.getByLabelText('Rotation')).toBeTruthy();
+    expect(screen.getByText('Rotate the layer')).toBeTruthy();
   });
 });

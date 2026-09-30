@@ -48,14 +48,13 @@ describe('ChatSuggestionItem', () => {
     expect((screen.getByRole('button', { name: 'Pick' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it('stamps its slot and passes the caller props through', () => {
+  it('passes the caller props through', () => {
     render(
       <ChatSuggestionItem prompt="p" onSelectPrompt={() => {}} aria-describedby="hint">
         Pick
       </ChatSuggestionItem>,
     );
     const button = screen.getByRole('button', { name: 'Pick' });
-    expect(button.getAttribute('data-slot')).toBe('chat-suggestion-item');
     expect(button.getAttribute('aria-describedby')).toBe('hint');
   });
 });

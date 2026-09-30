@@ -168,7 +168,7 @@ describe('AvatarPicker', () => {
     expect(screen.getByText('Pick any').getAttribute('for')).toBe(screen.getByLabelText('Custom color').id);
   });
 
-  it('marks the upload pane data-uploading until onUpload settles, then adopts the resolved URL', async () => {
+  it('shows it is uploading until onUpload settles, then adopts the resolved URL', async () => {
     let resolve: (url: string) => void = () => {};
     const onUpload = vi.fn(() => new Promise<string>((r) => (resolve = r)));
     const onChange = vi.fn();
@@ -184,15 +184,14 @@ describe('AvatarPicker', () => {
     fireEvent.change(input, { target: { files: [file] } });
 
     expect(onUpload).toHaveBeenCalledWith(file);
-    const pane = document.querySelector('[data-slot="avatar-picker-upload"]') as HTMLElement;
-    expect(pane.hasAttribute('data-uploading')).toBe(true);
+    expect(screen.getByText('Uploading...')).toBeTruthy();
 
     resolve('https://cdn.example/a.png');
-    await waitFor(() => expect(pane.hasAttribute('data-uploading')).toBe(false));
+    await waitFor(() => expect(screen.queryByText('Uploading...')).toBeNull());
     expect(onChange).toHaveBeenCalledWith({ imageUrl: 'https://cdn.example/a.png', emoji: null });
   });
 
-  it('clears data-uploading once a rejected onUpload settles, without adopting a URL', async () => {
+  it('leaves the uploading state once a rejected onUpload settles, without adopting a URL', async () => {
     let reject: (reason: unknown) => void = () => {};
     const onUpload = vi.fn(() => new Promise<string | null>((_resolve, r) => (reject = r)));
     const onChange = vi.fn();
@@ -207,11 +206,10 @@ describe('AvatarPicker', () => {
     const file = new File(['x'], 'a.png', { type: 'image/png' });
     fireEvent.change(input, { target: { files: [file] } });
 
-    const pane = document.querySelector('[data-slot="avatar-picker-upload"]') as HTMLElement;
-    expect(pane.hasAttribute('data-uploading')).toBe(true);
+    expect(screen.getByText('Uploading...')).toBeTruthy();
 
     reject(new Error('upload failed'));
-    await waitFor(() => expect(pane.hasAttribute('data-uploading')).toBe(false));
+    await waitFor(() => expect(screen.getByText('Upload an image')).toBeTruthy());
     expect(onChange).not.toHaveBeenCalled();
   });
 

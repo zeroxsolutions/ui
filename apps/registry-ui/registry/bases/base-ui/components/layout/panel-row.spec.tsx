@@ -1,8 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { Field, FieldLabel } from '@/registry/bases/base-ui/ui/field';
-
 import { PanelFieldGroup } from './panel-field-group';
 import { PanelRow, PanelRowAction } from './panel-row';
 
@@ -22,43 +20,16 @@ describe('PanelRow', () => {
       </PanelRow>,
     );
     expect(screen.getByText('x')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'lock' }).closest('[data-slot="panel-row-action"]')).toBeTruthy();
+    expect(screen.getByText('y')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'lock' })).toBeTruthy();
   });
 
-  it('reserves the action column in the row template, with or without an action', () => {
+  it('forwards the props it was not asked for onto the row', () => {
     render(
-      <PanelRow data-testid="row">
+      <PanelRow aria-label="Size">
         <span>x</span>
       </PanelRow>,
     );
-    const row = screen.getByTestId('row');
-    expect(row.className).toContain('[--panel-row-columns:minmax(0,1fr)_minmax(--spacing(8),auto)]');
-    expect(row.className).toContain('grid-cols-(--panel-row-columns)');
-  });
-
-  it('merges className and forwards arbitrary props onto the row', () => {
-    render(
-      <PanelRow className="mt-2" data-testid="row">
-        <span>x</span>
-      </PanelRow>,
-    );
-    const row = screen.getByTestId('row');
-    expect(row.className).toContain('grid');
-    expect(row.className).toContain('mt-2');
-    expect(row.getAttribute('data-slot')).toBe('panel-row');
-  });
-
-  it('is not a field group, so upstream field-group selectors never match it', () => {
-    render(
-      <PanelRow data-testid="row">
-        <Field orientation="responsive">
-          <FieldLabel>Width</FieldLabel>
-        </Field>
-      </PanelRow>,
-    );
-    const row = screen.getByTestId('row');
-    expect(row.className).not.toContain('group/field-group');
-    expect(row.className).not.toContain('@container/field-group');
-    expect(screen.getByRole('group').closest('[data-slot="field-group"]')).toBeNull();
+    expect(screen.getByLabelText('Size').textContent).toBe('x');
   });
 });

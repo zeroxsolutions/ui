@@ -82,16 +82,14 @@ describe('LanguageCombobox', () => {
     const onValueChange = vi.fn();
     renderCombobox({ kind: 'code', value: 'typescript', onValueChange });
     fireEvent.click(trigger());
-    const python = screen.getAllByText('Python')[0].closest('[data-slot="combobox-item"]');
-    expect(python).not.toBeNull();
-    fireEvent.click(python!);
+    fireEvent.click(screen.getByRole('option', { name: 'Python' }));
     expect(onValueChange).toHaveBeenCalledWith('python');
   });
 
   it('lets explicit options replace the kind data', () => {
     renderCombobox({ kind: 'code', value: 'x', onValueChange: vi.fn(), options: [{ value: 'x', label: 'Custom X' }] });
     fireEvent.click(trigger());
-    expect(document.querySelectorAll('[data-slot="combobox-item"]')).toHaveLength(1);
+    expect(screen.getAllByRole('option')).toHaveLength(1);
     expect(screen.queryByText('TypeScript')).toBeNull();
   });
 });

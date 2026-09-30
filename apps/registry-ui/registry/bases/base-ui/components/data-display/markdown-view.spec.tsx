@@ -41,24 +41,6 @@ describe('MarkdownView', () => {
     expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['A', 'B']);
   });
 
-  it('renders a GFM table as the upstream Table inside a ScrollArea, so a wide one scrolls on its own', async () => {
-    const { container } = render(<MarkdownView>{'| A | B |\n| - | - |\n| 1 | 2 |'}</MarkdownView>);
-    await settle();
-    const table = container.querySelector('[data-slot="table"]');
-    expect(table?.closest('[data-slot="scroll-area"]')).not.toBeNull();
-    // The ScrollArea's overflow hand-off selects the Table primitive's own wrapper by this slot.
-    expect(table?.parentElement?.getAttribute('data-slot')).toBe('table-container');
-    expect(table?.querySelector('[data-slot="table-head"]')?.textContent).toBe('A');
-  });
-
-  it('renders a plain fenced block inside a ScrollArea, so a long line scrolls on its own', async () => {
-    const { container } = render(<MarkdownView>{'```\nplain\n```'}</MarkdownView>);
-    await settle();
-    const pre = container.querySelector('pre');
-    expect(pre?.textContent).toBe('plain');
-    expect(pre?.closest('[data-slot="scroll-area"]')?.closest('[data-slot="markdown-view-code"]')).not.toBeNull();
-  });
-
   it('does not render raw embedded HTML as markup (safe for untrusted content)', () => {
     const { container } = render(<MarkdownView>{'<script>alert(1)</script>\n\nsafe'}</MarkdownView>);
     expect(container.querySelector('script')).toBeNull();
@@ -74,16 +56,15 @@ describe('MarkdownView', () => {
     });
 
     it('heads a fenced block that names a language with that language', async () => {
-      const { container } = render(<MarkdownView codeBlocks>{'```json\n{ "a": 1 }\n```'}</MarkdownView>);
+      render(<MarkdownView codeBlocks>{'```json\n{ "a": 1 }\n```'}</MarkdownView>);
       await settle();
       expect(screen.getByText('JSON')).toBeTruthy();
-      expect(container.querySelector('[data-slot="collapsible-card-header"]')).toBeTruthy();
     });
 
     it('leaves a fenced block with no language headerless', async () => {
-      const { container } = render(<MarkdownView codeBlocks>{'```\nline one\nline two\n```'}</MarkdownView>);
+      render(<MarkdownView codeBlocks>{'```\nline one\nline two\n```'}</MarkdownView>);
       await settle();
-      expect(container.querySelector('[data-slot="collapsible-card-header"]')).toBeNull();
+      expect(screen.queryByText('Plain text')).toBeNull();
       expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
     });
 

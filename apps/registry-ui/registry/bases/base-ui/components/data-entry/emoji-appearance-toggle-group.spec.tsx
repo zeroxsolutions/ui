@@ -34,9 +34,7 @@ describe('EmojiAppearanceToggleGroup', () => {
     renderGroup('3d');
 
     for (const label of ['3D', 'Flat', 'Modern', 'Mono', 'Animated']) {
-      expect(screen.getByRole('button', { name: label }).getAttribute('data-slot')).toBe(
-        'emoji-appearance-toggle-group-item',
-      );
+      expect(screen.getByRole('button', { name: label })).toBeTruthy();
     }
   });
 

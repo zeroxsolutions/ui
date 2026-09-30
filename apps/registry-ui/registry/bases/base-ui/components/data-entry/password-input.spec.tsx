@@ -6,7 +6,8 @@ import { PasswordInput } from './password-input';
 afterEach(cleanup);
 
 function root(): HTMLElement {
-  return document.querySelector<HTMLElement>('[data-slot="input-group"]')!;
+  // Testing Library mounts each render in a div appended to the body; the component's root is its first child.
+  return document.body.firstElementChild?.firstElementChild as HTMLElement;
 }
 
 describe('PasswordInput', () => {
@@ -14,7 +15,6 @@ describe('PasswordInput', () => {
     render(<PasswordInput aria-label="Password" />);
     const input = screen.getByLabelText('Password') as HTMLInputElement;
 
-    expect(root().getAttribute('data-slot')).toBe('input-group');
     expect(input.type).toBe('password');
     expect(root().hasAttribute('data-visible')).toBe(false);
 

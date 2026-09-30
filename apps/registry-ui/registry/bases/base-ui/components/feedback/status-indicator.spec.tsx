@@ -20,13 +20,13 @@ describe('StatusIndicator', () => {
     expect(dot(container).hasAttribute('data-pulse')).toBe(false);
   });
 
-  it('marks itself with its slot', () => {
+  it('is hidden from assistive technology, so the text beside it carries the status', () => {
     const { container } = render(<StatusIndicator tone="online" />);
-    expect(dot(container).dataset.slot).toBe('status-indicator');
+    expect(dot(container).getAttribute('aria-hidden')).toBe('true');
   });
 
-  it('merges a passed className', () => {
-    const { container } = render(<StatusIndicator tone="online" className="size-1.5" />);
-    expect(dot(container).className).toContain('size-1.5');
+  it('forwards the props it was not asked for', () => {
+    const { container } = render(<StatusIndicator tone="online" id="presence" />);
+    expect(dot(container).id).toBe('presence');
   });
 });

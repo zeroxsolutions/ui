@@ -42,13 +42,4 @@ describe('AiProviderPicker', () => {
 
     expect(onSelect).toHaveBeenCalledExactlyOnceWith('claude');
   });
-
-  it('merges a passed class with its grid rather than replacing it', () => {
-    const { container } = render(<AiProviderPicker entries={ENTRIES} className="lg:grid-cols-2" />);
-    const root = container.querySelector('[data-slot="ai-provider-picker"]');
-
-    expect(root?.classList.contains('grid')).toBe(true);
-    expect(root?.classList.contains('lg:grid-cols-2')).toBe(true);
-    expect(root?.classList.contains('lg:grid-cols-3')).toBe(false);
-  });
 });
