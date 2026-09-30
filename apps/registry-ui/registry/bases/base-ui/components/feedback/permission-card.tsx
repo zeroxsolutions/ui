@@ -63,8 +63,9 @@ function PermissionCardTitle({ className, ...props }: ComponentProps<typeof Card
 }
 
 /**
- * An outline `Badge` in the header's action slot: its children are the status
- * word, and its icon follows the root's `data-status`.
+ * A `Badge` in the header's action slot, `outline` unless the consumer passes
+ * another `variant` (`destructive` for a denied request): its children are the
+ * status word, and its icon follows the root's `data-status`.
  */
 function PermissionCardStatus({ children, ...props }: ComponentProps<typeof Badge>): ReactNode {
   return (

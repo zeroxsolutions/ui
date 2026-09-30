@@ -35,7 +35,9 @@ function PermissionCardDemo(): ReactNode {
       <PermissionCardHeader>
         <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
         <CardDescription>Deploy the web app to production</CardDescription>
-        <PermissionCardStatus>{STATUS_WORD[status]}</PermissionCardStatus>
+        <PermissionCardStatus variant={status === 'denied' ? 'destructive' : 'outline'}>
+          {STATUS_WORD[status]}
+        </PermissionCardStatus>
       </PermissionCardHeader>
       <PermissionCardActions>
         <Button variant="ghost" onClick={() => setStatus('denied')}>

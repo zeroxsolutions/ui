@@ -539,7 +539,7 @@
       "name": "panel-field-label",
       "type": "registry:component",
       "title": "Panel Field Label",
-      "description": "The dense, muted label a property panel puts over a control with no inline label of its own, keeping upstream's field-label slot.",
+      "description": "Upstream's field label as the preset draws it, naming a property panel control that has no inline label of its own.",
       "categories": ["general"],
       "registryDependencies": ["@shadcn/field"],
       "files": [
