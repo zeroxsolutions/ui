@@ -52,7 +52,17 @@ describe('CommandMenu', () => {
     fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
     fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'status' } });
 
-    expect(await screen.findByRole('option', { name: 'Status Indicator' })).toBeTruthy();
+    // The index is searched once typing pauses for half a second.
+    expect(await screen.findByRole('option', { name: 'Status Indicator' }, { timeout: 3_000 })).toBeTruthy();
+  });
+
+  it("lists the site's sections and the docs' pages before a query", async () => {
+    render(<CommandMenu tree={tree} navItems={[{ href: '/blocks', label: 'Blocks' }]} />);
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    expect(await screen.findByRole('option', { name: 'Blocks' })).toBeTruthy();
+    expect(await screen.findByRole('option', { name: 'Introduction' })).toBeTruthy();
   });
 
   it('opens from an icon-only trigger, for a header too narrow for the full search button', async () => {

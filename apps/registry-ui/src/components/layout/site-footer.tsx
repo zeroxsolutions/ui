@@ -1,22 +1,34 @@
-import type { ComponentProps, ReactNode } from 'react';
-
-import { cn } from '@/registry/bases/base-ui/lib/utils';
+import type { ReactNode } from 'react';
 
 /** The strip across the foot of every page but a docs page, which hides it as upstream's does: what the registry is built from. */
-function SiteFooter({ className, ...props }: ComponentProps<'footer'>): ReactNode {
+function SiteFooter(): ReactNode {
   return (
-    <footer className={cn('border-t group-has-[[data-slot=docs]]/body:hidden', className)} {...props}>
-      <p className="text-muted-foreground px-4 py-6 text-center text-sm md:px-6">
-        Composed from{' '}
-        <a href="https://ui.shadcn.com" className="text-foreground font-medium underline underline-offset-4">
-          shadcn/ui
-        </a>{' '}
-        primitives on{' '}
-        <a href="https://base-ui.com" className="text-foreground font-medium underline underline-offset-4">
-          Base UI
-        </a>
-        .
-      </p>
+    <footer className="group-has-[[data-slot=docs]]/body:hidden">
+      <div className="container-wrapper px-4 xl:px-6">
+        <div className="flex h-(--footer-height) items-center justify-between">
+          <div className="text-muted-foreground w-full px-1 text-center text-xs leading-loose sm:text-sm">
+            Composed from{' '}
+            <a
+              href="https://ui.shadcn.com"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium underline underline-offset-4"
+            >
+              shadcn/ui
+            </a>{' '}
+            primitives on{' '}
+            <a
+              href="https://base-ui.com"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium underline underline-offset-4"
+            >
+              Base UI
+            </a>
+            .
+          </div>
+        </div>
+      </div>
     </footer>
   );
 }

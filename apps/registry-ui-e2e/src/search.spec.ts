@@ -9,7 +9,11 @@ test('the command menu finds a page and goes to it', async ({ page }) => {
     await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1_000 });
   }).toPass();
   await page.getByRole('combobox').fill('status');
-  await page.getByRole('option', { name: 'Status Indicator', exact: true }).click();
+  // The page list filters to the same page by its title, so the index's own hit is picked from its group.
+  await page
+    .getByRole('group', { name: 'Search results' })
+    .getByRole('option', { name: 'Status Indicator', exact: true })
+    .click();
 
   await expect(page).toHaveURL(/\/docs\/components\/status-indicator$/);
 });
