@@ -212,11 +212,10 @@
       "name": "markdown-view",
       "type": "registry:component",
       "title": "Markdown View",
-      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code optionally rendered as a CodeBlock instead of a plain pre.",
+      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code as a CodeBlock.",
       "categories": ["data-display"],
       "dependencies": ["react-markdown", "remark-gfm"],
       "registryDependencies": [
-        "@shadcn/scroll-area",
         "@shadcn/table",
         "@shadcn/utils",
         "https://ui.zeroxsolutions.com/r/code-block.json",

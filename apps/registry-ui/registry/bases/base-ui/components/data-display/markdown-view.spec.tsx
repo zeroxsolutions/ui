@@ -3,7 +3,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { MarkdownView } from './markdown-view';
 
-// The codeBlocks variant's CodeBlock renders upstream ScrollArea, which measures
+// A fenced block's CodeBlock renders upstream ScrollArea, which measures
 // its viewport in a `queueMicrotask` its layout effect schedules on mount,
 // outside of `render`'s own act() batch; awaiting a no-op act() settles it
 // before the test's assertions run.
@@ -12,7 +12,7 @@ async function settle(): Promise<void> {
 }
 
 beforeAll(() => {
-  // The codeBlocks variant renders CodeBlock, which measures via a ResizeObserver
+  // A fenced block renders CodeBlock, which measures via a ResizeObserver
   // and queries Element.getAnimations, both absent in jsdom.
   globalThis.ResizeObserver ??= class {
     observe() {}
@@ -47,38 +47,31 @@ describe('MarkdownView', () => {
     expect(screen.getByText('safe')).toBeTruthy();
   });
 
-  describe('codeBlocks variant', () => {
+  describe('fenced code', () => {
     it('renders fenced code as an interactive CodeBlock (copy button)', async () => {
-      render(<MarkdownView codeBlocks>{'```json\n{ "a": 1 }\n```'}</MarkdownView>);
+      render(<MarkdownView>{'```json\n{ "a": 1 }\n```'}</MarkdownView>);
       await settle();
       expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
       expect(screen.getByText('{ "a": 1 }')).toBeTruthy();
     });
 
     it('heads a fenced block that names a language with that language', async () => {
-      render(<MarkdownView codeBlocks>{'```json\n{ "a": 1 }\n```'}</MarkdownView>);
+      render(<MarkdownView>{'```json\n{ "a": 1 }\n```'}</MarkdownView>);
       await settle();
       expect(screen.getByText('JSON')).toBeTruthy();
     });
 
     it('leaves a fenced block with no language headerless', async () => {
-      render(<MarkdownView codeBlocks>{'```\nline one\nline two\n```'}</MarkdownView>);
+      render(<MarkdownView>{'```\nline one\nline two\n```'}</MarkdownView>);
       await settle();
       expect(screen.queryByText('Plain text')).toBeNull();
       expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
     });
 
     it('keeps inline code as a plain chip (no copy button)', () => {
-      render(<MarkdownView codeBlocks>{'use `npm` here'}</MarkdownView>);
+      render(<MarkdownView>{'use `npm` here'}</MarkdownView>);
       expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();
       expect(screen.getByText('npm').tagName).toBe('CODE');
-    });
-
-    it('renders a plain <pre> (no copy button) by default', async () => {
-      render(<MarkdownView>{'```\nplain\n```'}</MarkdownView>);
-      await settle();
-      expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();
-      expect(screen.getByText('plain')).toBeTruthy();
     });
   });
 });

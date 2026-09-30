@@ -18,7 +18,6 @@ import {
 } from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { isPlainLanguage } from '@/registry/bases/base-ui/lib/code-language';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/registry/bases/base-ui/ui/table';
 
 /** Fenced code, told from inline code by a language class or a line break, since react-markdown marks neither. */
@@ -31,21 +30,19 @@ function MarkdownViewInlineCode({ className, ...props }: ComponentProps<'code'>)
   return <code className={cn('bg-muted rounded px-1.5 py-0.5 font-mono', className)} {...props} />;
 }
 
-/** A GFM table as the upstream `Table`, scrolling sideways in a `ScrollArea` when it is wider than the view. */
+/** A GFM table as the upstream `Table`, whose own container scrolls it sideways when it is wider than the view. */
 function MarkdownViewTable({ node: _node, ...props }: ComponentProps<'table'> & ExtraProps): ReactNode {
   return (
-    // The Table primitive wraps itself in an overflow-x-auto box; letting it overflow hands the scroll to the ScrollArea.
-    <ScrollArea className="my-3 **:data-[slot=table-container]:overflow-visible">
+    <div className="my-3">
       <Table {...props} />
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+    </div>
   );
 }
 
 /**
- * Table parts shared by both modes. `pre` is unwrapped in both, because each
- * `code` renderer draws its own block, and a `CodeBlock` root is a `<div>`,
- * which must not nest in a `<pre>`.
+ * The renderers: tables as upstream's `Table` parts, and fenced code as a `CodeBlock`, headed with its
+ * language when the fence names one; inline code stays a chip. `pre` is unwrapped, because the `code`
+ * renderer draws the whole block, and a `CodeBlock` root is a `<div>`, which must not nest in a `<pre>`.
  */
 const markdownViewComponents: Components = {
   pre: ({ children }) => <>{children}</>,
@@ -55,34 +52,6 @@ const markdownViewComponents: Components = {
   tr: ({ node: _node, ...props }) => <TableRow {...props} />,
   th: ({ node: _node, ...props }) => <TableHead {...props} />,
   td: ({ node: _node, ...props }) => <TableCell {...props} />,
-  code: ({ node: _node, className, children, ...props }) => {
-    const text = String(children ?? '');
-    if (!isBlockCode(className, text)) {
-      return (
-        <MarkdownViewInlineCode className={className} {...props}>
-          {children}
-        </MarkdownViewInlineCode>
-      );
-    }
-    return (
-      <div data-slot="markdown-view-code" className="bg-muted my-3 rounded-lg">
-        <ScrollArea>
-          <pre className="p-3 text-xs leading-relaxed">
-            <code className={cn('font-mono', className)}>{text.replace(/\n$/, '')}</code>
-          </pre>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
-    );
-  },
-};
-
-/**
- * The `codeBlocks` renderers: fenced code becomes a `CodeBlock`, headed with its
- * language when the fence names one; inline code stays a chip.
- */
-const markdownViewCodeBlockComponents: Components = {
-  ...markdownViewComponents,
   code: ({ node: _node, className, children, ...props }) => {
     const text = String(children ?? '');
     if (!isBlockCode(className, text)) {
@@ -121,23 +90,18 @@ const markdownViewCodeBlockComponents: Components = {
 interface MarkdownViewProps extends Omit<ComponentProps<'div'>, 'children'> {
   /** Markdown source to render (GitHub-Flavored Markdown). */
   children: string;
-  /**
-   * Render fenced code as `CodeBlock` (highlighting, copy, collapse) instead of
-   * a plain muted `<pre>`. Off by default; chat surfaces turn it on.
-   */
-  codeBlocks?: boolean;
 }
 
 /**
  * Renders a Markdown string (GFM: tables, task lists, strikethrough, autolinks)
- * styled to the design tokens, with tables as the upstream `Table`. Raw embedded
- * HTML is not rendered, so untrusted content is safe. A wide table or a long
- * code line scrolls sideways in its own `ScrollArea`.
+ * styled to the design tokens, with tables as the upstream `Table` and fenced code
+ * as a `CodeBlock` (highlighting, copy, collapse). Raw embedded HTML is not
+ * rendered, so untrusted content is safe. A wide table or a long code line
+ * scrolls sideways inside its own block.
  */
-function MarkdownView({ children, className, codeBlocks = false, ...props }: MarkdownViewProps): ReactNode {
+function MarkdownView({ children, className, ...props }: MarkdownViewProps): ReactNode {
   return (
     <div
-      data-slot="markdown-view"
       className={cn(
         'text-foreground text-sm leading-relaxed',
         '[&_h1]:mb-3 [&_h1]:text-2xl [&_h1]:font-semibold [&_h1:not(:first-child)]:mt-6',
@@ -157,10 +121,7 @@ function MarkdownView({ children, className, codeBlocks = false, ...props }: Mar
       )}
       {...props}
     >
-      <Markdown
-        remarkPlugins={[remarkGfm]}
-        components={codeBlocks ? markdownViewCodeBlockComponents : markdownViewComponents}
-      >
+      <Markdown remarkPlugins={[remarkGfm]} components={markdownViewComponents}>
         {children}
       </Markdown>
     </div>
@@ -168,7 +129,7 @@ function MarkdownView({ children, className, codeBlocks = false, ...props }: Mar
 }
 
 // A streaming chat list re-renders every message on each chunk; memo keeps a
-// settled message from re-parsing. Its props are a string, a boolean and plain
+// settled message from re-parsing. Its props are a string and plain
 // div attributes, so the shallow comparison holds.
 const MemoizedMarkdownView = memo(MarkdownView);
 
