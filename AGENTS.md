@@ -54,9 +54,11 @@ its cost are here.
 - **The worker is 6773 KiB gzipped**, measured with `wrangler deploy --dry-run --env production`
   on 2026-09-30. That is above the free plan's 3 MiB and below the paid plan's 10 MiB. In the
   server output, the two Shiki grammar packages gzip to 1268 KiB (4.4.3, through fumadocs-core)
-  and 1213 KiB (4.2.0, through the registry's own highlighter), the `next` package to 2712 KiB,
-  and the share images' `resvg.wasm` to 516 KiB. The demos are lazy imports already, and a lazy
-  chunk still ships in the worker. A deploy on the free plan needs that cut first.
+  and 1213 KiB (4.2.0, through the registry's own highlighter), the `next` package to 2710-2713
+  KiB across five runs (the same command gzips a whole copied package directory, not what the
+  bundle actually pulls from it, so the figure moves with `find`'s file order), and the share
+  images' `resvg.wasm` to 516 KiB. The demos are lazy imports already, and a lazy chunk still
+  ships in the worker. A deploy on the free plan needs that cut first.
 - **No project carries a `wrangler:deploy` target yet.** `registry-ui` has its worker config
   and `wrangler:build`, but `cd.yml` asks `nx-deploy` for `wrangler:deploy`, and until that
   target exists the job is a **green no-op**: `nx run-many -t wrangler:deploy` matches no
@@ -158,7 +160,7 @@ cat <project>/node_modules/@zeroxsolutions/<lib>/README.md
 | Asset | Concern | Used by | This repo's choice |
 | --- | --- | --- | --- |
 | `@zeroxsolutions/icons` | the org's icon set | any frontend | authored here; the AI Provider Picker block and the docs' icons page import it |
-| `@zeroxsolutions/fluent-emoji` | Fluent emoji assets | any frontend | authored here, not consumed here |
+| `@zeroxsolutions/fluent-emoji` | Fluent emoji assets | any frontend | authored here; the emoji picker and emoji appearance toggle group components, and the editor's callout block, import it |
 | `@zeroxsolutions/editor-core` | editor primitives | any frontend | authored here |
 | `@zeroxsolutions/routing` | route units: a path's pattern and its URL builder | any frontend | `0.0.7`, one declarer; `src/routes/app-routes.ts` declares each path the site links to, and `app-routes.spec.ts` holds each to a page |
 | shadcn registry | composed UI items | any frontend | this repo **is** the registry - see the first choice above |
