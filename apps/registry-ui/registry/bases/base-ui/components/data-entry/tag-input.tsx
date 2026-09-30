@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type ComponentProps, type KeyboardEvent, type ReactNode } from 'react';
+import * as React from 'react';
 
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Button } from '@/registry/bases/base-ui/ui/button';
@@ -8,106 +8,188 @@ import { Input } from '@/registry/bases/base-ui/ui/input';
 import { XIcon, type XIconHandle } from '@/registry/bases/base-ui/ui/x';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-interface TagInputProps extends Omit<ComponentProps<'div'>, 'onChange' | 'defaultValue'> {
+interface TagInputContextValue {
+  value: string[];
+  disabled: boolean;
+  /** Appends a trimmed, non-empty tag the list does not hold yet. */
+  add: (tag: string) => void;
+  remove: (tag: string) => void;
+}
+
+const TagInputContext = React.createContext<TagInputContextValue | null>(null);
+
+function useTagInput(): TagInputContextValue {
+  const context = React.useContext(TagInputContext);
+  if (!context) throw new Error('TagInput parts must be used within <TagInput>');
+  return context;
+}
+
+interface TagInputProps extends Omit<React.ComponentProps<'div'>, 'onChange' | 'defaultValue'> {
   /** The tags, in order; a duplicate is never added. */
   value: string[];
   /** Called with the whole next tag array on every add or remove. */
   onValueChange: (value: string[]) => void;
-  /** Placeholder copy for the input. */
-  placeholder?: string;
+  /** Disables every part's control; sets `data-disabled`. */
   disabled?: boolean;
 }
 
 /**
- * A simple tag editor: existing tags as removable `Badge` chips above an `Input`
- * that commits on Enter / comma / blur. A chip's remove button drops its tag,
- * and Backspace on an empty input drops the last tag. Controlled - the consumer
- * owns the tag array and supplies any placeholder copy. Other props land on the
- * root `div`.
+ * A tag editor: the root owns the tag array (controlled) and hands adding and
+ * removing to its parts, which the consumer composes:
+ *
+ *   <TagInput value={tags} onValueChange={setTags}>
+ *     <TagInputList>
+ *       {tags.map((tag) => (
+ *         <TagInputTag key={tag} value={tag}>
+ *           {tag}
+ *           <TagInputTagRemove aria-label={`Remove ${tag}`} />
+ *         </TagInputTag>
+ *       ))}
+ *     </TagInputList>
+ *     <TagInputInput placeholder="Add a tag" />
+ *   </TagInput>
+ *
+ * Other props land on the root `div`.
  */
-function TagInput({ value, onValueChange, placeholder, disabled, className, ...props }: TagInputProps): ReactNode {
-  const [draft, setDraft] = useState('');
+function TagInput({ value, onValueChange, disabled = false, className, ...props }: TagInputProps): React.ReactNode {
+  const context = React.useMemo<TagInputContextValue>(
+    () => ({
+      value,
+      disabled,
+      add: (tag) => {
+        const trimmed = tag.trim();
+        if (trimmed && !value.includes(trimmed)) onValueChange([...value, trimmed]);
+      },
+      remove: (tag) => onValueChange(value.filter((t) => t !== tag)),
+    }),
+    [value, disabled, onValueChange],
+  );
+  return (
+    <TagInputContext.Provider value={context}>
+      <div data-disabled={disabled || undefined} className={cn('flex flex-col gap-2', className)} {...props} />
+    </TagInputContext.Provider>
+  );
+}
+
+/** The row the tags wrap in; it takes no room while it holds no tag. */
+function TagInputList({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
+  return <div className={cn('flex flex-wrap gap-1.5 empty:hidden', className)} {...props} />;
+}
+
+const TagInputTagContext = React.createContext<string | null>(null);
+
+interface TagInputTagProps extends React.ComponentProps<typeof Badge> {
+  /** The tag this chip stands for; its `TagInputTagRemove` removes it. */
+  value: string;
+}
+
+/**
+ * One tag, an upstream secondary `Badge`: the label as `children`, then its
+ * `TagInputTagRemove`. Hand-built from `Badge` and `Button` rather than
+ * upstream's `ComboboxChip`, whose remove button takes no accessible name.
+ */
+function TagInputTag({ value, ...props }: TagInputTagProps): React.ReactNode {
+  return (
+    <TagInputTagContext.Provider value={value}>
+      <Badge variant="secondary" {...props} />
+    </TagInputTagContext.Provider>
+  );
+}
+
+/**
+ * The tag's remove button: a ghost `icon-xs` button at the badge's inline end
+ * (`data-icon="inline-end"`, which the Badge recipe pads for). The caller
+ * names it with `aria-label`. Disabled with the root. The cross plays on the
+ * button's hover or focus.
+ */
+function TagInputTagRemove({
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onBlur,
+  ...props
+}: Omit<React.ComponentProps<typeof Button>, 'children'>): React.ReactNode {
+  const { disabled, remove } = useTagInput();
+  const tag = React.useContext(TagInputTagContext);
+  const iconRef = React.useRef<XIconHandle>(null);
+  if (tag === null) throw new Error('TagInputTagRemove must be used within <TagInputTag>');
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-xs"
+      data-icon="inline-end"
+      disabled={disabled}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) remove(tag);
+      }}
+      onMouseEnter={(event) => {
+        onMouseEnter?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onMouseLeave={(event) => {
+        onMouseLeave?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      onFocus={(event) => {
+        onFocus?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      {...props}
+    >
+      <XIcon ref={iconRef} aria-hidden />
+    </Button>
+  );
+}
+
+/**
+ * The draft input, upstream's `Input`: Enter, a comma or leaving the field adds
+ * the draft as a tag, and Backspace in an empty draft removes the last tag. It
+ * takes the Input's own props (`placeholder`, `aria-label`) and keeps the draft
+ * itself. Disabled with the root.
+ */
+function TagInputInput({
+  onKeyDown,
+  onBlur,
+  ...props
+}: Omit<React.ComponentProps<typeof Input>, 'value' | 'defaultValue' | 'onChange'>): React.ReactNode {
+  const { value, disabled, add, remove } = useTagInput();
+  const [draft, setDraft] = React.useState('');
 
   const commit = () => {
-    const tag = draft.trim();
-    if (tag && !value.includes(tag)) onValueChange([...value, tag]);
+    add(draft);
     setDraft('');
   };
 
-  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      commit();
-    } else if (e.key === 'Backspace' && draft === '' && value.length > 0) {
-      onValueChange(value.slice(0, -1));
-    }
-  };
-
   return (
-    <div data-slot="tag-input" className={cn('flex flex-col gap-2', className)} {...props}>
-      {value.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {value.map((tag) => (
-            <TagInputTag
-              key={tag}
-              disabled={disabled}
-              removeLabel={`Remove ${tag}`}
-              onRemove={() => onValueChange(value.filter((t) => t !== tag))}
-            >
-              {tag}
-            </TagInputTag>
-          ))}
-        </div>
-      )}
-      <Input
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onKeyDown={onKeyDown}
-        onBlur={commit}
-        placeholder={placeholder}
-        disabled={disabled}
-      />
-    </div>
+    <Input
+      value={draft}
+      disabled={disabled}
+      onChange={(event) => setDraft(event.target.value)}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        if (event.defaultPrevented) return;
+        if (event.key === 'Enter' || event.key === ',') {
+          event.preventDefault();
+          commit();
+        } else if (event.key === 'Backspace' && draft === '' && value.length > 0) {
+          remove(value[value.length - 1]);
+        }
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        commit();
+      }}
+      {...props}
+    />
   );
 }
 
-interface TagInputTagProps extends ComponentProps<typeof Badge> {
-  /** Called when the remove button is pressed. */
-  onRemove: () => void;
-  /** The remove button's accessible name, e.g. `Remove design`. */
-  removeLabel: string;
-  /** Disables the remove button; the label is never interactive. */
-  disabled?: boolean;
-}
-
-/**
- * One tag, composed as upstream's combobox chip: the label, then a ghost
- * `icon-xs` button that removes it (upstream's inline-end badge icon slot). The
- * cross plays on the button's hover or focus.
- */
-function TagInputTag({ children, onRemove, removeLabel, disabled, ...props }: TagInputTagProps): ReactNode {
-  const iconRef = useRef<XIconHandle>(null);
-  return (
-    <Badge data-slot="tag-input-tag" variant="secondary" {...props}>
-      {children}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-xs"
-        data-icon="inline-end"
-        aria-label={removeLabel}
-        disabled={disabled}
-        onClick={onRemove}
-        onMouseEnter={() => iconRef.current?.startAnimation()}
-        onMouseLeave={() => iconRef.current?.stopAnimation()}
-        onFocus={() => iconRef.current?.startAnimation()}
-        onBlur={() => iconRef.current?.stopAnimation()}
-      >
-        <XIcon ref={iconRef} aria-hidden />
-      </Button>
-    </Badge>
-  );
-}
-
-export { TagInput };
-export type { TagInputProps };
+export { TagInput, TagInputList, TagInputTag, TagInputTagRemove, TagInputInput };
+export type { TagInputProps, TagInputTagProps };
