@@ -458,69 +458,51 @@ describe('the copy', () => {
       `classes.spec.ts` that `pnpm nx build @zeroxsolutions/registry-ui` fails, then revert it.
 - [ ] **Step 6: Gate and commit** `test(registry-ui): hold the source to the class and copy rules`.
 
-### Task 3: Docs layout, sidebar and TOC - the scroll defect
+### Task 3: Port upstream's docs layout, sidebar and TOC - the scroll defect
+
+This task was first done as a restyle behind the class rules (9d52613: a wrapper `nav`, a
+`ScrollArea`, a client provider wrapper). The spec now makes the shell a **port** of upstream's own
+shell; this task redoes it that way on top of 9d52613.
 
 **Files:**
 
-- Modify: `apps/registry-ui/src/app/(app)/layout.tsx`, `src/app/(app)/docs/layout.tsx`,
-  `src/app/(app)/docs/[[...slug]]/page.tsx`
+- Modify: `apps/registry-ui/src/app/layout.tsx`, `src/app/(app)/layout.tsx`, `src/app/(app)/docs/layout.tsx`,
+  `src/app/(app)/docs/[[...slug]]/page.tsx`, `src/components/layout/site-footer.tsx`,
+  `src/app/global.css` (only the upstream utilities the port needs)
 - Modify: `src/components/navigation/docs-sidebar.tsx` (+ spec), `src/components/navigation/docs-toc.tsx` (+ spec)
-- Create: `apps/registry-ui-e2e/src/docs-rails.spec.ts`
+- Create: `src/lib/docs-sidebar-scroll.ts` (upstream's restore key and inline script)
+- Modify: `apps/registry-ui/classes.spec.ts`, `apps/registry-ui/src/test/tsx-source.ts` (class rules scan the
+  registry's `components`, `blocks`, `examples` only; drop every `src/` entry from its `PENDING`)
+- Modify: `apps/registry-ui-e2e/src/docs-rails.spec.ts`
 
-**Interfaces:**
+- [ ] **Step 1: Read upstream live, whole files:** `app/layout.tsx` (the `<body>` classes),
+      `app/(app)/layout.tsx`, `app/(app)/docs/layout.tsx`, `app/(app)/docs/[[...slug]]/page.tsx`,
+      `components/docs-sidebar.tsx`, `lib/docs-sidebar-scroll.ts`, `components/docs-toc.tsx`,
+      `components/site-footer.tsx`, and wherever `scroll-fade`, `scrollbar-none`, `no-scrollbar` are
+      defined (`app/globals.css`, `app/style-registry.css`, or a package). Write down, in the report, the
+      element tree from `<body>` to a sidebar link and to a TOC link, with each element's classes.
+- [ ] **Step 2: Rewrite the e2e first (RED on the current tree where it can be):** at 1440x900 and
+      1024x768 on the longest docs page, scrolled to the end, the sidebar's top is not above the header's
+      bottom; the site footer is not visible on a docs page and is visible on `/blocks`; with the
+      sidebar's scroller at its end, `page.mouse.wheel(0, 400)` over it leaves `window.scrollY` unchanged
+      (same for the TOC's scroller if its list overflows; otherwise assert its scroller computes
+      `overscroll-behavior-y: none`); `document.scrollingElement` computes `overscroll-behavior-y: none`.
+- [ ] **Step 3: Port.** Reproduce Step 1's tree here: body `group/body overscroll-none` + footer
+      height variable; the docs layout's `SidebarProvider` grid; `Sidebar` itself sticky, bounded,
+      `collapsible="none"`, `overflow-hidden overscroll-none bg-transparent`, its edge line; `SidebarContent`
+      as the scroller with the ref, the restore effect, the scroll listener and the fade; `SidebarMenuButton`
+      with upstream's classes, rendered through Base UI's `render={<Link .../>}` in place of `asChild`;
+      the restore script inlined before paint as upstream does; the TOC column and its scroller; the
+      footer hidden on docs pages. Keep this site's data (`meta.json` groups, `isMatch`, routes). Remove
+      what 9d52613 added that upstream does not have (the wrapper `nav`, the `ScrollArea`s); keep a client
+      boundary only where the server layout needs one, and say why. Sentence-case copy still holds.
+- [ ] **Step 4: Scope the class rules to the registry** in `tsx-source.ts` / `classes.spec.ts` and drop
+      the `src/` entries from its `PENDING`; `copy.spec.ts` keeps scanning `src/`.
+- [ ] **Step 5:** unit specs of sidebar and TOC updated (landmarks, restore for same / other pathname,
+      throwing storage); the e2e GREEN in all three browsers; full unit and e2e; commit
+      `fix(registry-ui): port upstream's docs layout, sidebar and TOC`.
 
-- Consumes: `ScrollArea` from `@/registry/bases/base-ui/ui/scroll-area`; `SidebarProvider`, `Sidebar*`.
-- Produces: the sidebar's `nav` carries `aria-label="Docs"`; the TOC's `nav` keeps `aria-label="On this page"`.
-
-- [ ] **Step 1: Write the failing e2e.**
-
-```ts
-// apps/registry-ui-e2e/src/docs-rails.spec.ts
-import { expect, test } from '@playwright/test';
-
-test('at the end of a docs page the sidebar stops above the footer and neither rail chains its scroll', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/docs/installation');
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-
-  const sidebar = page.getByRole('navigation', { name: 'Docs' });
-  const footer = page.getByRole('contentinfo');
-  await expect
-    .poll(async () => {
-      const [rail, foot] = await Promise.all([sidebar.boundingBox(), footer.boundingBox()]);
-      return rail !== null && foot !== null && rail.y + rail.height <= foot.y;
-    })
-    .toBe(true);
-
-  for (const rail of [sidebar, page.getByRole('navigation', { name: 'On this page' })]) {
-    await expect(rail).toHaveCSS('overscroll-behavior-y', 'none');
-  }
-});
-```
-
-Run `pnpm nx e2e @zeroxsolutions/registry-ui-e2e -- docs-rails`: FAIL (no `Docs` landmark, and the
-rail's box reaches the footer). If `/docs/installation` is too short to reach the footer at
-900 high, pick the longest page that exists and say which in the report.
-
-- [ ] **Step 2: Rebuild the layout on upstream's grid.** Read upstream `app/(app)/docs/layout.tsx`,
-      `components/docs-sidebar.tsx`, `components/docs-toc.tsx` and `app/(app)/docs/[[...slug]]/page.tsx`
-      live. The docs layout becomes one `SidebarProvider` grid (`--sidebar-width` declared once, as a
-      `style` or a `[--sidebar-width:...]` class on the provider); the sidebar is `Sidebar
-collapsible="none"`, sticky under `--header-height`, its height bounded so it ends before the
-      footer (upstream: `calc(100svh - <header> - <gap>)`, expressed with the layout's CSS variables),
-      `overscroll-none`, with its groups inside `ScrollArea`. Keep its scroll position across docs
-      navigations in `sessionStorage`, reading and writing inside `try` as upstream does, and scroll the
-      active item into view on first render. The TOC becomes sticky, bounded, `overscroll-none`, in a
-      `ScrollArea`. Rules 1-3 hold: classes on primitives are layout only.
-- [ ] **Step 3: Update the unit specs** of the sidebar and TOC for the new landmark name and the
-      scroll restore (a stored `scrollTop` for the same pathname is applied; a stored one for another
-      pathname is not; a throwing `sessionStorage` leaves the sidebar rendering).
-- [ ] **Step 4: Run** the e2e (PASS), the unit suite, and remove the touched files from both `PENDING` lists.
-- [ ] **Step 5: Commit** `fix(registry-ui): keep the docs rails above the footer and their scroll their own`.
-
-### Task 4: Header, footer, mobile nav, command menu, mode switcher
+### Task 4: Port the header, mobile nav, command menu, mode switcher
 
 **Files:**
 
@@ -529,15 +511,15 @@ collapsible="none"`, sticky under `--header-height`, its height bounded so it en
   `src/components/general/mode-switcher.tsx` (+ spec), `src/app/not-found.tsx`
 
 - [ ] **Step 1:** read upstream `site-header.tsx`, `main-nav.tsx`, `site-footer.tsx`, `mobile-nav.tsx`,
-      `command-menu.tsx`, `mode-switcher.tsx` live. Rebuild each here on the vendored primitives,
-      keeping this site's routes (`@/routes/app-routes`), its search client, and its existing behaviour
+      `command-menu.tsx`, `mode-switcher.tsx` live and port each: upstream's structure and classes,
+      adapted only for Base UI's API (`render` for `asChild`) and this site's data, keeping this site's routes (`@/routes/app-routes`), its search client, and its existing behaviour
       (the platform modifier hint, the phone search trigger, the theme toggle). Icons from Task 1's
       animated set where the glyph exists; an animated icon inside a button animates on the button's
       hover/focus through its handle (`startAnimation` / `stopAnimation`).
 - [ ] **Step 2:** copy is sentence case (`Search docs...`, `Toggle theme`, `Page not found`).
 - [ ] **Step 3:** existing unit and e2e specs pass (`search.spec.ts`, `theme.spec.ts`,
-      `not-found.spec.ts`); remove the touched files from both `PENDING` lists; commit
-      `feat(registry-ui): rebuild the site header, footer and menus on the primitives`.
+      `not-found.spec.ts`); remove the touched files from `copy.spec.ts`'s `PENDING`; commit
+      `feat(registry-ui): port the site header and menus from upstream`.
 
 ### Task 5: Code preview, code blocks, install command, page header
 
@@ -555,6 +537,8 @@ collapsible="none"`, sticky under `--header-height`, its height bounded so it en
 - Produces: `highlightCode(code: string, language?: string): Promise<string>` - HTML with
   `github-light` / `github-dark` dual themes, the only Shiki entry point in `src/`.
 
+- [ ] **Step 0:** this is a port of upstream's files (spec, "The docs shell"): its structure and
+      classes, adapted only for Base UI's API and this site's data; the class rules do not bind `src/`.
 - [ ] **Step 1:** read upstream `lib/highlight-code.ts`, `component-preview.tsx`,
       `component-preview-tabs.tsx`, `code-collapsible-wrapper.tsx`, `code-block-command.tsx`,
       `copy-button.tsx`, `docs-copy-page.tsx` and the code parts of `mdx-components.tsx` live.

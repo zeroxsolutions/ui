@@ -32,8 +32,16 @@ code block, install command), read live from `shadcn-ui/ui@main`, never from mem
 
 ## Rules
 
-Each rule applies to the 42 `registry:component` items, the block, their examples, and every module
-under `apps/registry-ui/src/`.
+Rules 1 to 6 apply to what the registry publishes: the 42 `registry:component` items, the block and
+their examples. Rule 7 applies to those and to every module under `apps/registry-ui/src/` and every
+docs page.
+
+**The docs shell is a port of upstream's own shell, not a composed item.** Upstream writes its shell
+with classes on the primitives (`h-[30px]`, `text-[0.8rem]`, `bg-transparent`, a sticky `Sidebar`),
+and the shell here takes those classes as upstream writes them, adapted only where Base UI's API or
+this site's data differs. Rules 1 to 6 do not bind it; bending the port to satisfy them is what put
+a wrapper `nav` and a `ScrollArea` around the sidebar in the first attempt, a structure upstream
+does not have.
 
 1. **A primitive is used as it comes.** A `className` on a primitive, or on a plain element that
    stands in for one, carries layout only: display, flex and grid placement, width and max-width,
@@ -49,7 +57,7 @@ under `apps/registry-ui/src/`.
    variables declared once in the layout that owns them.
 4. **A missing primitive is added, not imitated.** When a region needs a primitive that is not
    vendored yet, it is added with `shadcn add <item> -o`, byte for byte, as the others were.
-5. **Every region that scrolls on its own is a `ScrollArea`.** A plain `overflow-auto` box is not.
+5. **A region of an item that scrolls on its own is a `ScrollArea`.** A plain `overflow-auto` box is not.
 6. **Icons are `@lucide-animated` where it has the glyph**, and `lucide-react` only where it does not.
    An animated icon inside a control animates on that control's hover or focus, not on its own.
 7. **UI copy is sentence case.** Buttons, labels, headings, placeholders, `aria-label`s, empty and
@@ -60,33 +68,38 @@ under `apps/registry-ui/src/`.
 
 ## The docs shell
 
-**Layout.** The docs layout is one `SidebarProvider` grid, `[--sidebar-width]` then
-`minmax(0,1fr)`, as upstream's `app/(app)/docs/layout.tsx` is. The header is sticky at the top of
-the page and the page is the only scroller of the content column.
+**Layout.** Upstream's structure, file for file: `<body>` carries `group/body overscroll-none` and
+the footer height; the docs layout is one `SidebarProvider` grid (`--sidebar-width` then
+`minmax(0,1fr)`) holding `DocsSidebar` and the page; the page is a flex row of the article column and
+the TOC column. The site footer hides itself on docs pages (`group-has-[[data-slot=docs]]/body:hidden`)
+as upstream's does. The header is sticky and the page is the only scroller of the article.
 
-**Sidebar.** Sticky under the header, with a height **shorter than the viewport** so that it never
-meets the footer, `overscroll-none`, and its list inside a `ScrollArea`. It keeps its scroll position
-across navigations within the docs (upstream keeps it in `sessionStorage`) and scrolls the active item
-into view on the first render. Groups come from `meta.json` as now.
+**Sidebar.** Upstream's `DocsSidebar`: the `Sidebar` primitive itself is the sticky column
+(`collapsible="none"`, bounded height, `overflow-hidden overscroll-none bg-transparent`), and
+`SidebarContent` is the list's own scroller, with upstream's fade and hidden scrollbar. There is no
+wrapper and no `ScrollArea`. It keeps its scroll position across navigations in `sessionStorage` and
+centres the active item on the first render, as upstream's effect does, and upstream's inline
+restore script runs before paint so a reload does not jump. Groups come from `meta.json`.
 
 **The scroll defect, and what fixes it.** Today the sidebar's `aside` is sticky at
 `100svh - header`, the full height below the header, inside a flex row that ends where the footer
 begins. Near the end of the page the footer pushes that full-height box up in one step, and its
 inner scroller chains its overscroll into the page, so a drag at either end moves every column. The
-TOC is sticky with no height and no scroller of its own. The fix is the rule above for both rails: a
-bounded height that leaves the footer's room, `overscroll-none`, a `ScrollArea` inside. An e2e holds
-it: at the bottom of a long page, the sidebar's box does not overlap the footer's, and both rails
-compute `overscroll-behavior: none`.
+TOC is sticky with no height and no scroller of its own. The fix is upstream's structure: the page itself
+`overscroll-none`, the rails bounded and `overscroll-none` with their own scroller, and no footer on a
+docs page for the rail to meet. An e2e holds
+it by behaviour: at the end of a long page at 1440 and 1024 wide the sidebar's top stays under the
+header; a wheel over a rail scrolled to its end leaves the page where it was; the page's scrolling
+element computes `overscroll-behavior-y: none`.
 
-**TOC.** Sticky beside the article, bounded in height, in a `ScrollArea`, the active heading marked
-as now. Heading `On this page`.
+**TOC.** Upstream's: a sticky, bounded, `overscroll-none` column beside the article, its list in its
+own scroller with the same fade, the active heading marked. Heading `On this page`.
 
 **Page header.** Title and description, then on the right a `Copy page` button (it copies the page's
 Markdown, which the site already serves at `<page>.md`) and previous / next icon buttons, as
 upstream's page header has. The pager at the bottom stays.
 
-**Header, footer, mobile nav, command menu, mode switcher.** Rebuilt on the primitives by the rules
-above, following upstream's `site-header.tsx`, `main-nav.tsx`, `site-footer.tsx`, `mobile-nav.tsx`,
+**Header, footer, mobile nav, command menu, mode switcher.** Ported from upstream's `site-header.tsx`, `main-nav.tsx`, `site-footer.tsx`, `mobile-nav.tsx`,
 `command-menu.tsx`, `mode-switcher.tsx`. The header's search trigger shows the platform's modifier as
 now.
 
@@ -127,7 +140,7 @@ Two unit specs in `apps/registry-ui` read the source and fail with the file, the
 or string:
 
 - **`classes.spec.ts`** (new, beside `copy.spec.ts` at the app root, because both read the whole
-  tree) - rules 1 to 3: no palette colour, no arbitrary
+  tree) - rules 1 to 3, over the registry's items, block and examples only: no palette colour, no arbitrary
   value outside the layout's declared variables, and on a primitive's `className` no class from the
   forbidden families (height, padding, radius, font size and weight, colour).
 - **`copy.spec.ts`** (new) - rule 7: every JSX text node and every `title`, `aria-label`,
