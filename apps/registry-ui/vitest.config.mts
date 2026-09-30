@@ -26,10 +26,7 @@ export default defineConfig({
     watch: false,
     globals: true,
     environment: 'jsdom',
-    include: [
-      'registry/**/*.{test,spec}.{ts,tsx}',
-      'src/**/*.{test,spec}.{ts,tsx}',
-    ],
+    include: ['*.spec.ts', 'registry/**/*.{test,spec}.{ts,tsx}', 'src/**/*.{test,spec}.{ts,tsx}'],
     reporters: ['default'],
     coverage: {
       reportsDirectory: './test-output/vitest/coverage',

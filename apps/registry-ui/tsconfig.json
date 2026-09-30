@@ -27,6 +27,7 @@
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
   "include": [
+    "*.spec.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.js",
