@@ -27,6 +27,7 @@ function MobileNav({ tree, items, className }: MobileNavProps): ReactNode {
   const [open, setOpen] = useState(false);
   const iconRef = useRef<MenuIconHandle>(null);
 
+  // MenuIconHandle is exported and typed by lucide-animated but undocumented: driving it from state rests on that unpublished contract.
   useEffect(() => {
     if (open) iconRef.current?.startAnimation();
     else iconRef.current?.stopAnimation();
@@ -58,7 +59,7 @@ function MobileNav({ tree, items, className }: MobileNavProps): ReactNode {
         alignOffset={-16}
         sideOffset={14}
       >
-        <div className="flex flex-col gap-12 overflow-auto px-6 py-6">
+        <nav aria-label="Docs" className="flex flex-col gap-12 overflow-auto px-6 py-6">
           <div className="flex flex-col gap-4">
             <div className="text-muted-foreground text-sm font-medium">Menu</div>
             <div className="flex flex-col gap-3">
@@ -88,7 +89,7 @@ function MobileNav({ tree, items, className }: MobileNavProps): ReactNode {
               </div>
             ))}
           </div>
-        </div>
+        </nav>
       </PopoverContent>
     </Popover>
   );

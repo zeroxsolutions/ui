@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { Root } from 'fumadocs-core/page-tree';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 import { http } from 'msw';
@@ -63,6 +63,21 @@ describe('CommandMenu', () => {
 
     expect(await screen.findByRole('option', { name: 'Blocks' })).toBeTruthy();
     expect(await screen.findByRole('option', { name: 'Introduction' })).toBeTruthy();
+  });
+
+  it('drops the last query when it closes, so a reopened menu lists no stale results', async () => {
+    render(<CommandMenu tree={tree} />);
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'status' } });
+    await screen.findByRole('option', { name: 'Status Indicator' }, { timeout: 3_000 });
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    await waitFor(() => expect(screen.queryByRole('combobox')).toBeNull());
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    expect(await screen.findByRole('option', { name: 'Introduction' })).toBeTruthy();
+    expect(screen.queryByRole('option', { name: 'Status Indicator' })).toBeNull();
   });
 
   it('opens from an icon-only trigger, for a header too narrow for the full search button', async () => {

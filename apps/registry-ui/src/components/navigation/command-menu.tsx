@@ -93,7 +93,8 @@ function CommandMenu({ tree, navItems }: CommandMenuProps): ReactNode {
     if (isMac()) setModifierKey('Cmd');
   }, []);
 
-  // The page groups render a frame after the dialog opens, so the dialog itself paints at once.
+  // The page groups render a frame after the dialog opens, so the dialog itself paints at once. Closed,
+  // the query is dropped, so the next open does not list the last query's results under an empty input.
   useEffect(() => {
     if (open) {
       const frame = requestAnimationFrame(() => setRenderDelayedGroups(true));
@@ -101,8 +102,10 @@ function CommandMenu({ tree, navItems }: CommandMenuProps): ReactNode {
     }
 
     setRenderDelayedGroups(false);
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    setSearch('');
     return undefined;
-  }, [open]);
+  }, [open, setSearch]);
 
   useEffect(() => {
     return () => {
@@ -228,10 +231,10 @@ function CommandMenu({ tree, navItems }: CommandMenuProps): ReactNode {
         <SearchIcon ref={searchIconRef} />
         <span className="sr-only">Search docs</span>
       </Button>
-      <CommandMenuDialogContent className="rounded-xl border-none bg-clip-padding p-2 pb-11 shadow-2xl ring-4 ring-neutral-200/80 dark:bg-neutral-900 dark:ring-neutral-800">
+      <CommandMenuDialogContent className="bg-popover ring-border/80 rounded-xl border-none bg-clip-padding p-2 pb-11 shadow-2xl ring-4">
         <DialogHeader className="sr-only">
           <DialogTitle>Search documentation...</DialogTitle>
-          <DialogDescription>Search for a command to run...</DialogDescription>
+          <DialogDescription>Find a page or a heading.</DialogDescription>
         </DialogHeader>
         <Command
           className="**:data-[slot=input-group]:border-input! **:data-[slot=input-group]:bg-input/50! rounded-none bg-transparent **:data-[slot=command-input]:h-9! **:data-[slot=command-input]:py-0 **:data-[slot=command-input-wrapper]:mb-0 **:data-[slot=input-group]:h-9! **:data-[slot=input-group]:rounded-md!"
@@ -258,7 +261,7 @@ function CommandMenu({ tree, navItems }: CommandMenuProps): ReactNode {
             ) : null}
           </CommandList>
         </Command>
-        <div className="text-muted-foreground absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-2 rounded-b-xl border-t border-t-neutral-100 bg-neutral-50 px-4 text-xs font-medium dark:border-t-neutral-700 dark:bg-neutral-800">
+        <div className="text-muted-foreground bg-muted/50 absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-2 rounded-b-xl border-t px-4 text-xs font-medium">
           <div className="flex items-center gap-2">
             <CommandMenuKbd>
               <CornerDownLeftIcon />
@@ -270,6 +273,12 @@ function CommandMenu({ tree, navItems }: CommandMenuProps): ReactNode {
     </Dialog>
   );
 }
+
+/** Only the selection flag is watched, so the animating icon inside the item never wakes the observer. */
+const COMMAND_MENU_ITEM_OBSERVER_OPTIONS: MutationObserverInit = {
+  attributes: true,
+  attributeFilter: ['aria-selected'],
+};
 
 /** Whether the command item around it is the one the keyboard or the pointer has selected. */
 const CommandMenuItemHighlightContext = createContext(false);
@@ -283,15 +292,19 @@ function CommandMenuItem({ children, className, onHighlight, ...props }: Command
   const ref = useRef<HTMLDivElement>(null);
   const [highlighted, setHighlighted] = useState(false);
 
-  useMutationObserver(ref, (mutations) => {
-    for (const mutation of mutations) {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'aria-selected') {
-        const selected = ref.current?.getAttribute('aria-selected') === 'true';
-        setHighlighted(selected);
-        if (selected) onHighlight?.();
+  useMutationObserver(
+    ref,
+    (mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'aria-selected') {
+          const selected = ref.current?.getAttribute('aria-selected') === 'true';
+          setHighlighted(selected);
+          if (selected) onHighlight?.();
+        }
       }
-    }
-  });
+    },
+    COMMAND_MENU_ITEM_OBSERVER_OPTIONS,
+  );
 
   return (
     <CommandItem
