@@ -85,7 +85,7 @@ function ModelListItemRemove({ className, children, ...props }: React.ComponentP
       aria-label="Remove model"
       variant="ghost"
       size="icon-sm"
-      className={cn('text-muted-foreground hover:text-destructive size-7', className)}
+      className={cn('text-muted-foreground hover:text-destructive', className)}
       {...props}
     >
       {children ?? <Trash2 className="size-3.5" />}
@@ -106,7 +106,7 @@ function ModelListSkeleton({ count = 6, className, ...props }: ModelListSkeleton
   return (
     <div data-slot="model-list-skeleton" className={cn('flex flex-col gap-2', className)} {...props}>
       {Array.from({ length: count }, (_, index) => (
-        <div key={index} data-slot="model-list-skeleton-item" className="flex items-center gap-3 rounded-md p-2.5">
+        <div key={index} data-slot="model-list-skeleton-item" className="flex items-center gap-3 rounded-lg p-2.5">
           <Skeleton className="size-8 shrink-0 rounded-lg" />
           <div className="min-w-0 flex-1 space-y-1.5">
             <Skeleton className="h-3.5 w-40" />
