@@ -826,7 +826,11 @@
       "description": "A responsive grid of AI provider cards, from the host's entries or a sample, that calls back with the provider key a card selects.",
       "categories": ["blocks"],
       "dependencies": ["@zeroxsolutions/icons"],
-      "registryDependencies": ["@shadcn/card", "https://ui.zeroxsolutions.com/r/ai-provider-card.json"],
+      "registryDependencies": [
+        "@shadcn/card",
+        "@shadcn/utils",
+        "https://ui.zeroxsolutions.com/r/ai-provider-card.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/blocks/ai-provider-picker.tsx",

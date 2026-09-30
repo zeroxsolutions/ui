@@ -62,20 +62,19 @@ With no `entries`, the block shows its sample providers. A card becomes selectab
 <AiProviderPicker onSelect={(provider) => setProvider(provider)} />
 ```
 
-## API Reference
+## API reference
 
 ### AiProviderPicker
 
-Renders a `div` with `data-slot="ai-provider-picker"`.
+Renders a `div` and takes every prop a `div` takes, plus:
 
-| Prop        | Type                         | Default                                                |
-| ----------- | ---------------------------- | ------------------------------------------------------ |
-| `entries`   | `AiProviderPickerEntry[]`    | `DEFAULT_AI_PROVIDER_ENTRIES`                          |
-| `onSelect`  | `(provider: string) => void` | none, and no card is selectable                        |
-| `className` | `string`                     | `grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3` |
+| Prop       | Type                               | Default                             |
+| ---------- | ---------------------------------- | ----------------------------------- |
+| `entries`  | `readonly AiProviderPickerEntry[]` | `AI_PROVIDER_PICKER_SAMPLE_ENTRIES` |
+| `onSelect` | `(provider: string) => void`       | none, and no card is selectable     |
 
-`className` replaces the grid's classes rather than adding to them, so a caller that passes one sets the whole
-layout.
+It sets `data-slot="ai-provider-picker"`. Its grid is one column, two from the `sm` breakpoint and three from `lg`;
+a `className` merges with those classes, so `lg:grid-cols-2` replaces only the three-column step.
 
 ### AiProviderPickerEntry
 
@@ -88,7 +87,7 @@ One card's data.
 | `description` | `string`           | the text under the title, clamped to two lines      |
 | `meta`        | `string`, optional | the muted footer note, such as `12 models`          |
 
-### DEFAULT_AI_PROVIDER_ENTRIES
+### AI_PROVIDER_PICKER_SAMPLE_ENTRIES
 
 The sample entries the block shows with no `entries`: providers the `@zeroxsolutions/icons` brand set has a mark
 for, with names, blurbs and model counts only.
