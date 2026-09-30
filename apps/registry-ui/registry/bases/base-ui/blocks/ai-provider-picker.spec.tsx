@@ -28,10 +28,13 @@ describe('AiProviderPicker', () => {
     }
   });
 
-  it('offers no card to select without onSelect', () => {
+  it('offers every card as a button, with or without onSelect', () => {
     render(<AiProviderPicker entries={ENTRIES} />);
 
-    expect(screen.queryAllByRole('button')).toEqual([]);
+    expect(screen.getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Select OpenAI',
+      'Select Anthropic Claude',
+    ]);
   });
 
   it('calls onSelect with the provider key of the card selected', () => {

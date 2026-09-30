@@ -28,7 +28,7 @@ interface AiProviderPickerEntry {
 interface AiProviderPickerProps extends Omit<React.ComponentProps<'div'>, 'onSelect'> {
   /** The cards, in order; defaults to {@link AI_PROVIDER_PICKER_SAMPLE_ENTRIES}. */
   entries?: readonly AiProviderPickerEntry[];
-  /** Called with the `provider` key of the card selected. Omitted, no card is selectable. */
+  /** Called with the `provider` key of the card selected. */
   onSelect?: (provider: string) => void;
 }
 
@@ -74,8 +74,9 @@ const AI_PROVIDER_PICKER_SAMPLE_ENTRIES: readonly AiProviderPickerEntry[] = [
 
 /**
  * A responsive grid of `AiProviderCard` tiles, one per entry, each with the
- * provider's mark beside its name. With `onSelect`, each card is one button
- * that calls back with its entry's `provider` key.
+ * provider's mark beside its name. Each card is one button that calls
+ * `onSelect` with its entry's `provider` key. For cards nothing selects,
+ * compose `AiProviderCard` without its trigger instead.
  */
 function AiProviderPicker({
   entries = AI_PROVIDER_PICKER_SAMPLE_ENTRIES,
@@ -84,11 +85,7 @@ function AiProviderPicker({
   ...props
 }: AiProviderPickerProps): React.ReactNode {
   return (
-    <div
-      data-slot="ai-provider-picker"
-      className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3', className)}
-      {...props}
-    >
+    <div className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3', className)} {...props}>
       {entries.map((entry) => (
         <AiProviderCard key={entry.provider}>
           <CardHeader>
@@ -101,9 +98,7 @@ function AiProviderPicker({
           <CardFooter className="mt-auto">
             <AiProviderCardStatus>{entry.meta}</AiProviderCardStatus>
           </CardFooter>
-          {onSelect && (
-            <AiProviderCardTrigger aria-label={`Select ${entry.name}`} onClick={() => onSelect(entry.provider)} />
-          )}
+          <AiProviderCardTrigger aria-label={`Select ${entry.name}`} onClick={() => onSelect?.(entry.provider)} />
         </AiProviderCard>
       ))}
     </div>

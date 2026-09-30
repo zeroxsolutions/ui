@@ -58,7 +58,8 @@ pnpm dlx shadcn@latest add card https://ui.zeroxsolutions.com/r/ai-provider-card
 import { AiProviderPicker } from '@/components/ai-provider-picker';
 ```
 
-With no `entries`, the block shows its sample providers. A card becomes selectable once `onSelect` is passed:
+With no `entries`, the block shows its sample providers. Every card is a button that calls `onSelect` with its
+entry's `provider` key:
 
 ```tsx
 <AiProviderPicker onSelect={(provider) => setProvider(provider)} />
@@ -73,9 +74,9 @@ Renders a `div` and takes every prop a `div` takes, plus:
 | Prop       | Type                               | Default                             |
 | ---------- | ---------------------------------- | ----------------------------------- |
 | `entries`  | `readonly AiProviderPickerEntry[]` | `AI_PROVIDER_PICKER_SAMPLE_ENTRIES` |
-| `onSelect` | `(provider: string) => void`       | none, and no card is selectable     |
+| `onSelect` | `(provider: string) => void`       | none                                |
 
-It sets `data-slot="ai-provider-picker"`. Its grid is one column, two from the `sm` breakpoint and three from `lg`;
+Its grid is one column, two from the `sm` breakpoint and three from `lg`;
 a `className` merges with those classes, so `lg:grid-cols-2` replaces only the three-column step.
 
 ### AiProviderPickerEntry
