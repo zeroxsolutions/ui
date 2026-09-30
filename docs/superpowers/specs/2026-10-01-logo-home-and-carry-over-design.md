@@ -83,10 +83,15 @@ usability studies. Each section below names the evidence that put it there.
 - **Two actions:** `Browse components` (primary, the components index) and `Get started`
   (secondary, the installation page). NN/g's home page guidance names one to four top tasks.
 - **The install command:** one real item's `pnpm dlx shadcn@latest add <url>` in the registry's
-  `CodeBlock`, with its language and its copy button. Developer-tool home pages that put the first
-  command on the first screen shorten the time to a first working install
-  (everydeveloper.com/developer-tool-homepages). Of the twelve registries surveyed, only 21st.dev
-  does it.
+  `CodeBlock`, with its language and its copy button. The evidence for this is weaker than for the
+  rest of the hero:
+  - No usability study found measures an install command in a hero.
+  - Evil Martians' study of 100 developer-tool landing pages names a code snippet as the common hero
+    visual for a library (evilmartians.com/chronicles/we-studied-100-devtool-landing-pages-here-is-what-actually-works-in-2025).
+  - Of the twelve registries surveyed, only 21st.dev puts its command in the hero; Kibo UI puts it
+    mid-page.
+
+  It stays because the command is what a reader of this site runs next.
 
 ### The shader behind the hero
 
@@ -137,6 +142,8 @@ names the item and links to its docs page. The items are:
 Evidence for this section:
 
 - NN/g measured 74% of viewing time in the first two screenfuls (nngroup.com/articles/scrolling-and-attention).
+- The same Evil Martians study calls a live product embed realistic only for a narrow-scope tool,
+  and a component registry is one.
 - "Specifics beat abstractions" (NN/g top ten home page guidelines).
 - shadcn/ui, Radix and Kibo UI each lead with their own components.
 - The grid is still, never a carousel: auto-forwarding content fails users (nngroup.com/articles/auto-forwarding).
