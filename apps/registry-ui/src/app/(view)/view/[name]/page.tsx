@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { ComponentPreviewDemo } from '@/components/data-display/component-preview-demo';
+import { RegistryExample } from '@/components/data-display/registry-example';
 import { publishedBlocks } from '@/lib/registry';
 
 export const revalidate = false;
@@ -31,7 +31,7 @@ export default async function ViewPage({ params }: ViewPageProps): Promise<React
 
   return (
     <main className="p-6">
-      <ComponentPreviewDemo name={name} />
+      <RegistryExample name={name} />
     </main>
   );
 }

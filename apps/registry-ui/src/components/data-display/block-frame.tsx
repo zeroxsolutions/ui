@@ -8,18 +8,19 @@ interface BlockFrameProps extends ComponentProps<'iframe'> {
   name: string;
   /** What the frame shows, which a screen reader announces for it. */
   title: string;
-  /** Draws the frame's own rounded border; off where a card around it already draws one. */
-  framed?: boolean;
 }
 
-/** A published block on its own page, in a frame as wide as its container, so its breakpoints answer to the frame. */
-function BlockFrame({ name, framed = true, className, ...props }: BlockFrameProps): ReactNode {
+/**
+ * A published block on its own page, in a frame as wide as its container, so its breakpoints answer to
+ * the frame. It draws no surface; a `ComponentPreview` around it does.
+ */
+function BlockFrame({ name, className, ...props }: BlockFrameProps): ReactNode {
   return (
     <iframe
       data-slot="block-frame"
       src={viewRoute.build({ name })}
       loading="lazy"
-      className={cn('bg-background h-144 w-full', framed && 'rounded-xl border', className)}
+      className={cn('bg-background h-144 w-full', className)}
       {...props}
     />
   );

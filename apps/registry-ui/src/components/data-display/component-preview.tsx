@@ -1,63 +1,96 @@
+'use client';
+
 import type { ComponentProps, ReactNode } from 'react';
 
-import { BlockFrame } from '@/components/data-display/block-frame';
-import { ComponentPreviewCard } from '@/components/data-display/component-preview-card';
-import { ComponentPreviewDemo } from '@/components/data-display/component-preview-demo';
-import { ComponentSource } from '@/components/data-display/component-source';
-import { publishedBlocks } from '@/lib/registry';
-import { Index } from '@/registry/bases/base-ui/examples/__index__';
-
-/** How many of the source's first lines the card shows before `View code`. */
-const SOURCE_PREVIEW_LINES = 3;
-
-interface ComponentPreviewProps extends Omit<
-  ComponentProps<typeof ComponentPreviewCard>,
-  'component' | 'source' | 'sourcePreview'
-> {
-  /** A demo name in the examples index. */
-  name: string;
-  /** A published block to frame on its own page in place of the demo. */
-  view?: string;
-  /** The demo's source, its language and its lines as JSON, which `rehypeDocsCode` sets as the page compiles. */
-  code?: string;
-  language?: string;
-  lines?: string;
-}
+import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { Button } from '@/registry/bases/base-ui/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
+import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 
 /**
- * A demo rendered live above its source; with `view`, the card frames that block's own page instead,
- * so the block lays out at the frame's width. Throws for a name the index lacks or a view that is no
- * published block, so a page naming either fails its build.
+ * One frame on the card's ring and radius. Compose what it shows: a `ComponentPreviewStage` holding a
+ * demo, or a framed page that fills it edge to edge, then a `ComponentPreviewSource` flush beneath.
  */
-function ComponentPreview({
-  name,
-  view,
-  code,
-  language,
-  lines,
-  previewClassName,
-  ...props
-}: ComponentPreviewProps): ReactNode {
-  if (!Index[name]) throw new Error(`ComponentPreview: "${name}" is not in the examples index`);
-  const block = view === undefined ? undefined : publishedBlocks.find((item) => item.name === view);
-  if (view !== undefined && !block) throw new Error(`ComponentPreview: "${view}" is not a published block`);
-  const source = { name, code, language, lines, collapsible: false };
-
+function ComponentPreview({ className, ...props }: ComponentProps<'div'>): ReactNode {
   return (
-    <ComponentPreviewCard
-      previewClassName={block ? 'h-auto' : previewClassName}
-      component={
-        block ? (
-          <BlockFrame name={block.name} title={block.title} framed={false} />
-        ) : (
-          <ComponentPreviewDemo name={name} />
-        )
-      }
-      source={<ComponentSource {...source} variant="flush" />}
-      sourcePreview={<ComponentSource {...source} variant="flush" maxLines={SOURCE_PREVIEW_LINES} copyable={false} />}
+    <div
+      data-slot="component-preview"
+      className={cn('ring-foreground/10 flex flex-col overflow-hidden rounded-xl ring-1', className)}
       {...props}
     />
   );
 }
 
-export { ComponentPreview };
+interface ComponentPreviewStageProps extends ComponentProps<typeof ScrollArea> {
+  /** Where the demo sits on the cross axis. */
+  align?: 'center' | 'start' | 'end';
+}
+
+/** The area a demo sits in; a demo taller or wider than it scrolls inside rather than spilling out. */
+function ComponentPreviewStage({
+  align = 'center',
+  className,
+  children,
+  ...props
+}: ComponentPreviewStageProps): ReactNode {
+  return (
+    <ScrollArea data-slot="component-preview-stage" className={cn('h-72', className)} {...props}>
+      <div
+        data-align={align}
+        className="flex min-h-full min-w-fit justify-center p-10 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start"
+      >
+        {children}
+      </div>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
+  );
+}
+
+/**
+ * The source under the demo, on the code surface and split from it by a rule. Closed, it shows its
+ * `ComponentPreviewExcerpt`; `View code` opens its `ComponentPreviewCode`.
+ */
+function ComponentPreviewSource({ className, ...props }: ComponentProps<typeof Collapsible>): ReactNode {
+  return (
+    <Collapsible
+      data-slot="component-preview-source"
+      className={cn(
+        'group/component-preview-source bg-code border-foreground/10 border-t **:data-[slot=code-block-viewport]:max-h-96',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+/** The source's first lines, fading into the code surface under the `View code` trigger; gone once it opens. */
+function ComponentPreviewExcerpt({ className, children, ...props }: ComponentProps<'div'>): ReactNode {
+  return (
+    <div
+      data-slot="component-preview-excerpt"
+      className={cn('relative group-has-data-[slot=component-preview-code]/component-preview-source:hidden', className)}
+      {...props}
+    >
+      {/* An excerpt, not a scroller: its overflow clips, and it takes no focus. */}
+      <div inert className="overflow-hidden">
+        {children}
+      </div>
+      <div className="from-code via-code/60 absolute inset-0 flex items-center justify-center bg-linear-to-t to-transparent">
+        <CollapsibleTrigger render={<Button variant="outline" size="sm" />}>View code</CollapsibleTrigger>
+      </div>
+    </div>
+  );
+}
+
+/** The whole source, shown once `View code` opens it. */
+function ComponentPreviewCode(props: ComponentProps<typeof CollapsibleContent>): ReactNode {
+  return <CollapsibleContent data-slot="component-preview-code" {...props} />;
+}
+
+export {
+  ComponentPreview,
+  ComponentPreviewStage,
+  ComponentPreviewSource,
+  ComponentPreviewExcerpt,
+  ComponentPreviewCode,
+};

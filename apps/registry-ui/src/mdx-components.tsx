@@ -1,6 +1,6 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
-import { ComponentPreview } from '@/components/data-display/component-preview';
+import { ExamplePreview } from '@/components/data-display/example-preview';
 import { ComponentSource } from '@/components/data-display/component-source';
 import { SourceCodeBlock } from '@/components/data-display/source-code-block';
 import { ComponentsList } from '@/components/navigation/components-list';
@@ -107,7 +107,7 @@ export const mdxComponents = {
   Callout: (props: ComponentProps<typeof Alert>) => <Alert className="mt-6 first:mt-0" {...props} />,
   AlertTitle,
   AlertDescription,
-  ComponentPreview,
+  ComponentPreview: ExamplePreview,
   ComponentSource: (props: ComponentProps<typeof ComponentSource>) => <ComponentSource className="mt-6" {...props} />,
   ComponentsList: () => <ComponentsList className="mt-8" />,
 };

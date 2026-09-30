@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { BlockFrame } from '@/components/data-display/block-frame';
+import { ComponentPreview } from '@/components/data-display/component-preview';
 import { publishedBlocks } from '@/lib/registry';
 import { source } from '@/lib/source';
 
@@ -39,7 +40,9 @@ export default function BlocksPage(): ReactNode {
               </h2>
               <p className="text-muted-foreground text-sm">{block.description}</p>
             </div>
-            <BlockFrame name={block.name} title={block.title} />
+            <ComponentPreview>
+              <BlockFrame name={block.name} title={block.title} />
+            </ComponentPreview>
           </section>
         );
       })}
