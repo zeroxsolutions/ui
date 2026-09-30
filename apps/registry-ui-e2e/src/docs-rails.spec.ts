@@ -39,6 +39,20 @@ for (const size of [
   });
 }
 
+test('at 1440x900 the TOC stays where it starts sticking, to the end of a docs page', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(LONGEST_PAGE);
+  await page.mouse.wheel(0, 200);
+  await expect.poll(() => pageScrollY(page)).toBeGreaterThan(0);
+  const stuck = await toc(page).getByText('On this page').boundingBox();
+
+  await scrollToPageEnd(page);
+
+  const atEnd = await toc(page).getByText('On this page').boundingBox();
+  // A page's end can fall on a half pixel, which the sticky column rounds; a push is several pixels.
+  expect(Math.abs((atEnd?.y ?? Infinity) - (stuck?.y ?? 0))).toBeLessThan(1);
+});
+
 test('a docs page has no site footer', async ({ page }) => {
   await page.goto(LONGEST_PAGE);
   await scrollToPageEnd(page);

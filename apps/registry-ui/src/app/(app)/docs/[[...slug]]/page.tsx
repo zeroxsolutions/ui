@@ -49,11 +49,13 @@ export default async function DocsPage({ params }: DocsPageProps): Promise<React
           <DocsPager tree={source.pageTree} url={page.url} className="mt-6 border-t pt-6" />
         </div>
       </div>
-      {/* A landmark only when it lists something: a page without headings leaves the column empty. */}
+      {/* A landmark only when it lists something: a page without headings leaves the column empty.
+          Beyond upstream's 90svh, the column is as tall as the viewport under the header less this
+          page's bottom padding, so at the page's end it still fits and is not pushed up as it sticks. */}
       <div
         role={page.data.toc.length ? 'navigation' : undefined}
         aria-label={page.data.toc.length ? 'On this page' : undefined}
-        className="sticky top-[calc(var(--header-height)+1px)] z-30 ml-auto hidden h-[90svh] w-(--sidebar-width) flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex"
+        className="sticky top-[calc(var(--header-height)+1px)] z-30 ml-auto hidden h-[calc(100svh-var(--header-height)-1px-var(--spacing)*8)] w-(--sidebar-width) flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex"
       >
         <div className="h-(--top-spacing) shrink-0" />
         {/* overscroll-none on the list too, beyond upstream: WebKit chains a wheel past its end into the page otherwise. */}

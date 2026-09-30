@@ -48,7 +48,7 @@ import type { SiteNavItem } from '@/types/site-nav-item';
 /** Reads the index `/api/search` exports at build, once, and searches it in the browser. */
 const searchClient = staticClient();
 
-/** Whether this browser runs on macOS, where the search shortcut is Cmd+K rather than Ctrl+K. */
+/** Whether this browser runs on macOS, where the search shortcut is Command-K rather than Ctrl+K. */
 function isMac(): boolean {
   return typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac');
 }
@@ -70,7 +70,8 @@ function CommandMenu({ tree, navItems }: CommandMenuProps): ReactNode {
   const [renderDelayedGroups, setRenderDelayedGroups] = useState(false);
   const [selectedType, setSelectedType] = useState<'page' | 'component' | null>(null);
   // Stable for the server and the first client render, then corrected once mounted, so hydration
-  // never compares a platform-specific hint against the one it prerendered.
+  // never compares a platform-specific hint against the one it prerendered. macOS draws its Command key
+  // as the place-of-interest sign, which the source spells as an escape to stay plain ASCII.
   const [modifierKey, setModifierKey] = useState('Ctrl');
   const searchIconRef = useRef<SearchIconHandle>(null);
   const { search, setSearch, query } = useDocsSearch({ client: searchClient });
@@ -90,7 +91,7 @@ function CommandMenu({ tree, navItems }: CommandMenuProps): ReactNode {
   );
 
   useEffect(() => {
-    if (isMac()) setModifierKey('Cmd');
+    if (isMac()) setModifierKey('\u2318');
   }, []);
 
   // The page groups render a frame after the dialog opens, so the dialog itself paints at once. Closed,
@@ -209,9 +210,15 @@ function CommandMenu({ tree, navItems }: CommandMenuProps): ReactNode {
           />
         }
       >
-        <span className="hidden xl:inline-flex">Search documentation...</span>
-        <span className="inline-flex xl:hidden">Search...</span>
-        <div className="absolute top-1.5 right-1.5 hidden gap-1 sm:flex">
+        {/* The button is named once; the width-dependent labels and the shortcut hint are what is drawn. */}
+        <span className="sr-only">Search documentation</span>
+        <span aria-hidden className="hidden xl:inline-flex">
+          Search documentation...
+        </span>
+        <span aria-hidden className="inline-flex xl:hidden">
+          Search...
+        </span>
+        <div aria-hidden className="absolute top-1.5 right-1.5 hidden gap-1 sm:flex">
           <KbdGroup>
             <Kbd className="border">{modifierKey}</Kbd>
             <Kbd className="border">K</Kbd>
@@ -355,9 +362,12 @@ interface CommandMenuSearchResultsProps {
   search: string;
 }
 
-/** The index marks each matched term with `<mark>`; the item's filter and its name read the text without them. */
-function withoutMarks(content: string): string {
-  return content.replace(/<\/?mark>/g, '');
+/**
+ * A result's text as it reads: the index marks each matched term with `<mark>` and keeps a code span's
+ * Markdown backticks, and the item's filter reads the text without either.
+ */
+function plainResultText(content: string): string {
+  return content.replace(/<\/?mark>/g, '').replace(/`/g, '');
 }
 
 function CommandMenuSearchResults({ setOpen, query, search }: CommandMenuSearchResultsProps): ReactNode {
@@ -389,8 +399,8 @@ function CommandMenuSearchResults({ setOpen, query, search }: CommandMenuSearchR
             setOpen(false);
           }}
           className="data-[selected=true]:border-input data-[selected=true]:bg-input/50 h-9 rounded-md border border-transparent px-3! font-normal"
-          keywords={[withoutMarks(item.content)]}
-          value={`${withoutMarks(item.content)} ${item.type}`}
+          keywords={[plainResultText(item.content)]}
+          value={`${plainResultText(item.content)} ${item.type}`}
         >
           <CommandMenuSearchResultText content={item.content} />
         </CommandItem>
@@ -400,22 +410,36 @@ function CommandMenuSearchResults({ setOpen, query, search }: CommandMenuSearchR
 }
 
 /**
- * A result's text on one line, each matched term drawn bold. One element holds it all, so the item's
- * flex layout does not split the text at each mark.
+ * A result's text on one line, each code span drawn as code and each matched term bold. One element
+ * holds it all, so the item's flex layout does not split the text at each span. A matched term never
+ * holds a backtick, so splitting at the backticks first leaves every mark whole.
  */
 function CommandMenuSearchResultText({ content }: { content: string }): ReactNode {
   return (
     <div className="line-clamp-1 text-sm">
-      {content.split(/<mark>(.*?)<\/mark>/g).map((part, index) =>
-        index % 2 === 1 ? (
-          <mark key={index} className="text-foreground bg-transparent font-semibold">
-            {part}
-          </mark>
+      {content.split('`').map((span, spanIndex) =>
+        spanIndex % 2 === 1 ? (
+          <code key={spanIndex} className="bg-muted rounded-md px-1 py-0.5 font-mono text-[0.9em]">
+            <CommandMenuSearchResultMarks text={span} />
+          </code>
         ) : (
-          part
+          <CommandMenuSearchResultMarks key={spanIndex} text={span} />
         ),
       )}
     </div>
+  );
+}
+
+/** `text` with each term the index marked drawn bold. */
+function CommandMenuSearchResultMarks({ text }: { text: string }): ReactNode {
+  return text.split(/<mark>(.*?)<\/mark>/g).map((part, index) =>
+    index % 2 === 1 ? (
+      <mark key={index} className="text-foreground bg-transparent font-semibold">
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
   );
 }
 

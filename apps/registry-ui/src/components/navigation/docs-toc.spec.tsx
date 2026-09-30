@@ -46,6 +46,8 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+  window.location.hash = '';
 });
 
 /** Renders `ui` and lets the anchor provider's effects run before a case asserts. */
@@ -74,6 +76,25 @@ describe('DocsToc', () => {
 
     expect(screen.getByRole('link', { name: 'Installation' }).getAttribute('aria-current')).toBeNull();
     expect(screen.getByRole('link', { name: 'Usage' }).getAttribute('aria-current')).toBe('location');
+  });
+
+  it('marks the heading a link landed on, when it scrolls into view together with the one above it', async () => {
+    // A landing near the end of a page cannot scroll its heading to the top, so the heading above it
+    // enters view in the same report; both are stamped with the same clock reading.
+    vi.spyOn(Date, 'now').mockReturnValue(1_000);
+    window.location.hash = '#usage';
+    await renderSettled(
+      <>
+        <h2 id="installation">Installation</h2>
+        <h2 id="usage">Usage</h2>
+        <DocsToc toc={toc} />
+      </>,
+    );
+
+    act(() => reportIntersections([intersection('installation', true), intersection('usage', true)]));
+
+    expect(screen.getByRole('link', { name: 'Usage' }).getAttribute('aria-current')).toBe('location');
+    expect(screen.getByRole('link', { name: 'Installation' }).getAttribute('aria-current')).toBeNull();
   });
 
   it('titles its list of headings On this page', async () => {

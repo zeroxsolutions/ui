@@ -1,7 +1,13 @@
 'use client';
 
-import { AnchorProvider, useActiveAnchor, type TableOfContents, type TOCItemType } from 'fumadocs-core/toc';
-import type { ReactNode } from 'react';
+import {
+  AnchorProvider,
+  useActiveAnchor,
+  useActiveAnchors,
+  type TableOfContents,
+  type TOCItemType,
+} from 'fumadocs-core/toc';
+import { useSyncExternalStore, type ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
@@ -27,8 +33,31 @@ function DocsToc({ toc, className }: DocsTocProps): ReactNode {
   );
 }
 
+function subscribeToHash(onChange: () => void): () => void {
+  window.addEventListener('hashchange', onChange);
+  return () => window.removeEventListener('hashchange', onChange);
+}
+
+/** The heading the URL points at. Read again on every render too, since a client-side push sets it silently. */
+function readHash(): string {
+  return decodeURIComponent(window.location.hash.slice(1));
+}
+
+/**
+ * The heading to mark: the one the URL points at while it is in view, else the one fumadocs estimates.
+ * A landing near a page's end cannot scroll its heading to the top, so the heading above it enters view
+ * in the same report, and fumadocs then marks the first of the two rather than the one landed on.
+ */
+function useMarkedAnchor(): string | undefined {
+  const inView = useActiveAnchors();
+  const estimated = useActiveAnchor();
+  const hash = useSyncExternalStore(subscribeToHash, readHash, () => '');
+
+  return hash && inView.includes(hash) ? hash : estimated;
+}
+
 function DocsTocLink({ item }: { item: TOCItemType }): ReactNode {
-  const active = useActiveAnchor() === item.url.slice(1);
+  const active = useMarkedAnchor() === item.url.slice(1);
 
   return (
     <a

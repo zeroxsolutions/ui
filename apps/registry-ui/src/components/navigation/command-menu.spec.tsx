@@ -19,7 +19,10 @@ const searchAPI = createSearchAPI('advanced', {
       title: 'Status Indicator',
       description: 'A dot and a label for a status.',
       url: '/docs/components/status-indicator',
-      structuredData: { headings: [], contents: [] },
+      structuredData: {
+        headings: [],
+        contents: [{ heading: undefined, content: 'It sets `data-slot` on its root element.' }],
+      },
     },
   ],
 });
@@ -88,12 +91,29 @@ describe('CommandMenu', () => {
     expect(await screen.findByRole('combobox')).toBeTruthy();
   });
 
-  it('shows the Cmd shortcut hint once mounted on macOS', async () => {
+  it('draws a code span in a search result as code, not as its Markdown backticks', async () => {
+    render(<CommandMenu tree={tree} />);
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'root element' } });
+
+    const result = await screen.findByRole('option', { name: /on its root element/ }, { timeout: 3_000 });
+    expect(result.textContent).not.toContain('`');
+    expect(result.querySelector('code')?.textContent).toBe('data-slot');
+  });
+
+  it('names the search button once, whichever of its labels and shortcut hint are drawn', () => {
+    render(<CommandMenu tree={tree} />);
+
+    expect(screen.getByRole('button', { name: 'Search documentation' })).toBeTruthy();
+  });
+
+  it('shows the command key glyph in the shortcut hint once mounted on macOS', async () => {
     vi.stubGlobal('navigator', { ...navigator, userAgent: 'Macintosh; Intel Mac OS X 10_15_7' });
 
     render(<CommandMenu tree={tree} />);
 
-    expect(await screen.findByText('Cmd')).toBeTruthy();
+    expect(await screen.findByText('\u2318')).toBeTruthy();
     expect(screen.queryByText('Ctrl')).toBeNull();
   });
 });
