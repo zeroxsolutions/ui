@@ -5,6 +5,7 @@ import { useState, type ComponentProps, type ReactNode } from 'react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
+import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 
 interface ComponentPreviewCardProps extends ComponentProps<typeof Card> {
   /** Placement for the area the demo sits in. */
@@ -37,15 +38,16 @@ function ComponentPreviewCard({
   return (
     <Card data-slot="component-preview" data-not-typeset className={cn('mt-4 mb-12', className)} {...props}>
       <CardContent>
-        <div
-          data-align={align}
-          className={cn(
-            'flex h-72 w-full justify-center data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start',
-            previewClassName,
-          )}
-        >
-          {component}
-        </div>
+        {/* A demo taller or wider than the area scrolls inside it rather than spilling out of the card. */}
+        <ScrollArea data-slot="component-preview-demo" className={cn('h-72 w-full', previewClassName)}>
+          <div
+            data-align={align}
+            className="flex min-h-full w-full min-w-fit justify-center data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start"
+          >
+            {component}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </CardContent>
       {hideCode ? null : (
         <CardContent>
