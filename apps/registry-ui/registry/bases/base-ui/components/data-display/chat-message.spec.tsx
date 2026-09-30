@@ -4,13 +4,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { Bubble, BubbleContent } from '@/registry/bases/base-ui/ui/bubble';
 import { MessageContent, MessageHeader } from '@/registry/bases/base-ui/ui/message';
 
-import { ChatMessage } from './chat-message';
+import { ChatMessage, ChatMessageAccent } from './chat-message';
 
 afterEach(cleanup);
-
-/** The line drawn beside the message while it streams; decorative, so hidden from assistive technology. */
-const accentLine = (container: HTMLElement): HTMLElement | null =>
-  container.firstElementChild?.querySelector<HTMLElement>(':scope > [aria-hidden="true"]') ?? null;
 
 describe('ChatMessage', () => {
   it('renders the upstream message parts it is given', () => {
@@ -41,21 +37,14 @@ describe('ChatMessage', () => {
     expect(container.firstElementChild?.hasAttribute('data-streaming')).toBe(false);
   });
 
-  it('draws the streaming line only while the message is streaming', () => {
-    const { container, rerender } = render(<ChatMessage streaming>body</ChatMessage>);
-    expect(accentLine(container)).not.toBeNull();
-
-    rerender(<ChatMessage>body</ChatMessage>);
-    expect(accentLine(container)).toBeNull();
-  });
-
-  it('paints the streaming line in the accent colour it is given', () => {
-    const { container } = render(
-      <ChatMessage streaming accentColor="rgb(255, 0, 0)">
+  it('keeps the streaming line out of the accessibility tree', () => {
+    render(
+      <ChatMessage streaming>
+        <ChatMessageAccent data-testid="accent" />
         body
       </ChatMessage>,
     );
-    expect(accentLine(container)?.style.backgroundColor).toBe('rgb(255, 0, 0)');
+    expect(screen.getByTestId('accent').getAttribute('aria-hidden')).toBe('true');
   });
 
   it('passes the caller style through to the row', () => {

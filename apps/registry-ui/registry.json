@@ -41,7 +41,7 @@
       "title": "Chat Message",
       "description": "One chat message row over upstream Message, with a line beside its leading edge while its text is still streaming.",
       "categories": ["data-display"],
-      "registryDependencies": ["@shadcn/message"],
+      "registryDependencies": ["@shadcn/message", "@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/chat-message.tsx",
