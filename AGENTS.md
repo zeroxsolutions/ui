@@ -11,7 +11,7 @@ its cost are here.
 - **Delivery - a shadcn registry, not a package.** `apps/registry-ui` serves `registry.json`
   (registry name `zeroxsolutions-ui`, 86 items: 42 `registry:component`, 1 `registry:block`,
   43 `registry:example`) at `https://ui.zeroxsolutions.com`, **which does not resolve yet**. Style
-  `base-vega`, base color `neutral`, `lucide` icons, `rsc: false`. The registry publishes
+  `base-nova`, base color `neutral`, `lucide` icons, `rsc: false`. The registry publishes
   **composed items only**, so a consuming app takes primitives from shadcn's own registry.
 - **`components.json` aliases deviate from the CLI defaults** - every alias points into
   `@/registry/bases/base-ui/*` rather than `@/components`, because this app *is* the registry
