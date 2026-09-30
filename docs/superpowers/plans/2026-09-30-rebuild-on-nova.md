@@ -539,6 +539,11 @@ shell; this task redoes it that way on top of 9d52613.
 
 - [ ] **Step 0:** this is a port of upstream's files (spec, "The docs shell"): its structure and
       classes, adapted only for Base UI's API and this site's data; the class rules do not bind `src/`.
+      Port onto THIS repo's base-nova primitives (`Tabs`, `Button`, `Tooltip`, ...), never upstream's
+      new-york-v4 ones. Where upstream's shell uses a colour token `styles.css` lacks (a code surface,
+      `surface`, ...), define it in `styles.css` from base-nova's own neutral tokens, light and dark;
+      never copy upstream's theme values. Screenshot the component page and a docs page with code in
+      light and dark next to upstream's and the base-nova preview; list the differences in the report.
 - [ ] **Step 1:** read upstream `lib/highlight-code.ts`, `component-preview.tsx`,
       `component-preview-tabs.tsx`, `code-collapsible-wrapper.tsx`, `code-block-command.tsx`,
       `copy-button.tsx`, `docs-copy-page.tsx` and the code parts of `mdx-components.tsx` live.
