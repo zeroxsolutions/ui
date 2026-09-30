@@ -315,7 +315,7 @@ const treeItem: RegistryItem = {
     `${ANIMATED_ICON_URL}chevron-right.json`,
   ],
   files: [
-    { path: `${BASE}/components/data-entry/tree-item.tsx`, type: 'registry:component' },
+    { path: `${BASE}/components/data-display/tree-item.tsx`, type: 'registry:component' },
     { path: `${BASE}/lib/ime.ts`, type: 'registry:lib' },
   ],
 };
@@ -477,10 +477,10 @@ describe('cssProblems', () => {
   });
 });
 
-const FAMILIES = [`${BASE}/blocks/ai-provider-picker.tsx`, `${BASE}/components/data-entry/tree-item.tsx`];
+const FAMILIES = [`${BASE}/blocks/ai-provider-picker.tsx`, `${BASE}/components/data-display/tree-item.tsx`];
 
 const familyItems: RegistryItem[] = [
-  { ...treeItem, categories: ['data-entry'] },
+  { ...treeItem, categories: ['data-display'] },
   { ...aiProviderPicker, categories: ['blocks'] },
 ];
 
@@ -503,14 +503,14 @@ describe('familyProblems', () => {
 
   it('reports a family file no item publishes', () => {
     expect(familyProblems(familyItems.slice(1), FAMILIES)).toEqual([
-      'registry/bases/base-ui/components/data-entry/tree-item.tsx: is the first file of no item',
+      'registry/bases/base-ui/components/data-display/tree-item.tsx: is the first file of no item',
     ]);
   });
 
   it('reports a family file two items publish', () => {
     const twin = { ...familyItems[0], name: 'tree-row' };
     expect(familyProblems([...familyItems, twin], FAMILIES)).toEqual([
-      'registry/bases/base-ui/components/data-entry/tree-item.tsx: is the first file of tree-item and tree-row',
+      'registry/bases/base-ui/components/data-display/tree-item.tsx: is the first file of tree-item and tree-row',
       'tree-row: name should be tree-item',
     ]);
   });
@@ -534,8 +534,8 @@ describe('familyProblems', () => {
   });
 
   it('reports an item not categorised under its kind folder', () => {
-    expect(familyProblems([{ ...familyItems[0], categories: ['data-display'] }, familyItems[1]], FAMILIES)).toEqual([
-      'tree-item: categories should be ["data-entry"]',
+    expect(familyProblems([{ ...familyItems[0], categories: ['data-entry'] }, familyItems[1]], FAMILIES)).toEqual([
+      'tree-item: categories should be ["data-display"]',
     ]);
   });
 });

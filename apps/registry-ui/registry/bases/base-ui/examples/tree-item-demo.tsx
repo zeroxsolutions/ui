@@ -1,30 +1,49 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
-import { TreeItem, TreeItemIndent, TreeItemLabel } from '@/registry/bases/base-ui/components/data-entry/tree-item';
+import {
+  TreeItem,
+  TreeItemIndent,
+  TreeItemLabel,
+  TreeItemTrigger,
+} from '@/registry/bases/base-ui/components/data-display/tree-item';
 import { ItemTitle } from '@/registry/bases/base-ui/ui/item';
 
-/** A folder expanded over two files. */
+/** A folder over two files, opened and closed by its trigger. */
 function TreeItemDemo(): ReactNode {
+  const [open, setOpen] = useState(true);
+
   return (
     <div className="flex w-full flex-col gap-1">
-      <TreeItem expanded>
-        <TreeItemIndent depth={0} hasChildren onToggleExpand={() => {}} />
+      <TreeItem expanded={open}>
+        <TreeItemIndent depth={0}>
+          <TreeItemTrigger aria-label="Toggle src" onClick={() => setOpen((current) => !current)} />
+        </TreeItemIndent>
         <TreeItemLabel>
           <ItemTitle>src</ItemTitle>
         </TreeItemLabel>
       </TreeItem>
-      <TreeItem>
-        <TreeItemIndent depth={1} hasChildren={false} onToggleExpand={() => {}} />
+      {open && (
+        <>
+          <TreeItem leaf>
+            <TreeItemIndent depth={1} />
+            <TreeItemLabel>
+              <ItemTitle>index.ts</ItemTitle>
+            </TreeItemLabel>
+          </TreeItem>
+          <TreeItem leaf>
+            <TreeItemIndent depth={1} />
+            <TreeItemLabel>
+              <ItemTitle>page.tsx</ItemTitle>
+            </TreeItemLabel>
+          </TreeItem>
+        </>
+      )}
+      <TreeItem leaf>
+        <TreeItemIndent depth={0} />
         <TreeItemLabel>
-          <ItemTitle>index.ts</ItemTitle>
-        </TreeItemLabel>
-      </TreeItem>
-      <TreeItem>
-        <TreeItemIndent depth={1} hasChildren={false} onToggleExpand={() => {}} />
-        <TreeItemLabel>
-          <ItemTitle>page.tsx</ItemTitle>
+          <ItemTitle>README.md</ItemTitle>
         </TreeItemLabel>
       </TreeItem>
     </div>
