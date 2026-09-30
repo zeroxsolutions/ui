@@ -33,6 +33,12 @@ beforeAll(() => {
   Element.prototype.getAnimations ??= () => [];
 });
 
+// The first import transforms the block's whole graph, which alone can outrun a case's timeout under a
+// loaded run; warming it here leaves each case only the fresh evaluation.
+beforeAll(async () => {
+  await import('./code-block-command');
+}, 30_000);
+
 beforeEach(() => {
   writeText = vi.fn(() => Promise.resolve());
   // Only the clipboard is faked: the fresh import reads the real navigator's user agent.
