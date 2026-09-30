@@ -17,36 +17,33 @@ beforeAll(() => {
 afterEach(cleanup);
 
 describe('IconLabel', () => {
-  it('holds the icon it is given, named by its aria-label', () => {
+  it('names the control it is tied to with the words beside its icon', () => {
     render(
-      <IconLabel aria-label="Rotation">
-        <svg data-testid="star" />
-      </IconLabel>,
+      <>
+        <IconLabel htmlFor="rotation">
+          <svg aria-hidden />
+          <span className="sr-only">Rotation</span>
+        </IconLabel>
+        <input id="rotation" type="number" />
+      </>,
     );
-    expect(screen.getByLabelText('Rotation').contains(screen.getByTestId('star'))).toBe(true);
-  });
-
-  it('forwards the props it was not asked for onto the span', () => {
-    render(
-      <IconLabel id="rotation" aria-label="Rotation">
-        <svg />
-      </IconLabel>,
-    );
-    expect(screen.getByLabelText('Rotation').id).toBe('rotation');
+    expect(screen.getByRole('spinbutton', { name: 'Rotation' })).toBeTruthy();
   });
 
   it('serves as the trigger of a tooltip the consumer composes around it', () => {
     render(
       <TooltipProvider>
         <Tooltip open>
-          <TooltipTrigger render={<IconLabel aria-label="Rotation" />}>
-            <svg />
+          <TooltipTrigger render={<IconLabel htmlFor="rotation" />}>
+            <svg aria-hidden />
+            <span className="sr-only">Rotation</span>
           </TooltipTrigger>
           <TooltipContent>Rotate the layer</TooltipContent>
         </Tooltip>
+        <input id="rotation" type="number" />
       </TooltipProvider>,
     );
-    expect(screen.getByLabelText('Rotation')).toBeTruthy();
+    expect(screen.getByRole('spinbutton', { name: 'Rotation' })).toBeTruthy();
     expect(screen.getByText('Rotate the layer')).toBeTruthy();
   });
 });

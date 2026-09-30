@@ -545,7 +545,7 @@
       "name": "icon-label",
       "type": "registry:component",
       "title": "Icon Label",
-      "description": "An icon that stands in for a field's text label in a dense panel, sizing an unclassed child svg to a compact glyph.",
+      "description": "A label whose icon stands in for a field's text in a dense panel, tied to its control through htmlFor and sizing an unclassed child svg to a compact glyph.",
       "categories": ["general"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
