@@ -36,7 +36,7 @@ function legacyCopyToClipboard(value: string): boolean {
 }
 
 /** Writes `value` to the clipboard; whether it landed. */
-export async function copyToClipboard(value: string): Promise<boolean> {
+async function copyToClipboard(value: string): Promise<boolean> {
   if (typeof window === 'undefined' || !value) return false;
 
   if (navigator.clipboard?.writeText) {
@@ -54,7 +54,7 @@ export async function copyToClipboard(value: string): Promise<boolean> {
  * Whether a copy just landed, true for two seconds after `markCopied`, and the check icon's handle,
  * which draws itself in as it appears.
  */
-export function useCopiedState(): {
+function useCopiedState(): {
   hasCopied: boolean;
   markCopied: () => void;
   checkIconRef: RefObject<CheckIconHandle | null>;
@@ -110,4 +110,4 @@ function CopyButton({ value, className, variant = 'ghost', ...props }: CopyButto
   );
 }
 
-export { CopyButton };
+export { copyToClipboard, CopyButton, useCopiedState };

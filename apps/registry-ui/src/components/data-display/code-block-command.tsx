@@ -1,7 +1,7 @@
 'use client';
 
 import { TerminalIcon } from 'lucide-react';
-import { useMemo, useRef, type ComponentProps, type ReactNode } from 'react';
+import { useMemo, useRef, type ReactNode } from 'react';
 
 import { copyToClipboard, useCopiedState } from '@/components/data-display/copy-button';
 import { useConfig, type Config } from '@/hooks/use-config';
@@ -13,7 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-
 
 type PackageManager = Config['packageManager'];
 
-interface CodeBlockCommandProps extends ComponentProps<'pre'> {
+/** The command as each package manager spells it, as `highlight-code`'s transformer puts them on the fence. */
+interface CodeBlockCommandProps {
   __npm__?: string;
   __yarn__?: string;
   __pnpm__?: string;

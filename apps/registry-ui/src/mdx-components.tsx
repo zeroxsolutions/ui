@@ -50,9 +50,9 @@ export const mdxComponents = {
     </h4>
   ),
   // Upstream's wrapper is a plain `overflow-x: auto` box; here it is a `ScrollArea`, still `typeset-scroll`
-  // for typeset's margins and its max-content table width.
+  // for typeset's margins and its max-content table width, its viewport carrying upstream's edge fade.
   table: (props: ComponentProps<'table'>) => (
-    <ScrollArea className="typeset-scroll [&_table]:w-full">
+    <ScrollArea className="typeset-scroll **:data-[slot=scroll-area-viewport]:scroll-fade-x [&_table]:w-full">
       <table {...props} />
       <ScrollBar orientation="horizontal" />
     </ScrollArea>

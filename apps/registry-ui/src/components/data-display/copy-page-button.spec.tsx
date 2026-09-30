@@ -1,22 +1,39 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CopyPageButton } from './copy-page-button';
 
+const MARKDOWN = '# Status Indicator\n';
+
+let requested: string[] = [];
+
+const server = setupServer(
+  http.get('*/docs/components/status-indicator.md', ({ request }) => {
+    requested.push(new URL(request.url).pathname);
+    return HttpResponse.text(MARKDOWN);
+  }),
+  http.get('*/docs/missing.md', ({ request }) => {
+    requested.push(new URL(request.url).pathname);
+    return new HttpResponse(null, { status: 404 });
+  }),
+);
+
 let writeText: ReturnType<typeof vi.fn>;
-let fetchMock: ReturnType<typeof vi.fn>;
 
+beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 beforeEach(() => {
+  requested = [];
   writeText = vi.fn(() => Promise.resolve());
-  fetchMock = vi.fn(() => Promise.resolve(new Response('# Status Indicator\n', { status: 200 })));
   vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
-  vi.stubGlobal('fetch', fetchMock);
 });
-
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  server.resetHandlers();
 });
+afterAll(() => server.close());
 
 describe('CopyPageButton', () => {
   it("fetches the page's Markdown and writes it to the clipboard", async () => {
@@ -24,19 +41,18 @@ describe('CopyPageButton', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy page' }));
 
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith('# Status Indicator\n'));
-    expect(fetchMock).toHaveBeenCalledWith('/docs/components/status-indicator.md');
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(MARKDOWN));
+    expect(requested).toEqual(['/docs/components/status-indicator.md']);
   });
 
   it('writes nothing when the Markdown does not come back', async () => {
-    fetchMock.mockImplementation(() => Promise.resolve(new Response('', { status: 404 })));
     render(<CopyPageButton url="/docs/missing" />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy page' }));
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
-    // Let the rejected fetch settle through both attempts before looking.
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await waitFor(() => expect(requested).toEqual(['/docs/missing.md']));
+    // Let the refused fetch settle through both attempts before looking.
+    await new Promise((resolve) => setTimeout(resolve, 50));
     expect(writeText).not.toHaveBeenCalled();
   });
 });

@@ -117,6 +117,8 @@
   /* A docs code block, upstream's `--code` family drawn from this theme's own tokens: its surface, its
      text, a highlighted line and the line numbers. */
   --code: var(--code-surface);
+  /* The docs code block's header and plain text; `--code-fg` below is the syntax palette's own plain
+     text, read by the chat CodeBlock and the editor through lib/code-theme.ts. */
   --code-foreground: var(--foreground);
   --code-highlight: color-mix(in oklab, var(--muted), var(--border));
   --code-line-number: var(--muted-foreground);
