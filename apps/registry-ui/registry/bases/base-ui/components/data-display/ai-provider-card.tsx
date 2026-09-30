@@ -60,8 +60,8 @@ function AiProviderCardAction({ className, ...props }: React.ComponentProps<'div
 
 /**
  * The button that selects the card. It covers the whole card below any
- * `AiProviderCardAction`, so the card is one keyboard stop, and draws its focus
- * ring inside the card's edge; give it an `aria-label` naming the provider.
+ * `AiProviderCardAction`, so the card is one keyboard stop, and draws its hover
+ * and focus rings inside the card's edge; give it an `aria-label` naming the provider.
  */
 function AiProviderCardTrigger({
   type = 'button',
@@ -73,7 +73,7 @@ function AiProviderCardTrigger({
       data-slot="ai-provider-card-trigger"
       type={type}
       className={cn(
-        'focus-visible:inset-ring-ring/50 absolute inset-0 z-10 cursor-pointer rounded-xl outline-none focus-visible:inset-ring-3',
+        'hover:inset-ring-foreground/20 focus-visible:inset-ring-ring/50 absolute inset-0 z-10 cursor-pointer rounded-xl outline-none hover:inset-ring-1 focus-visible:inset-ring-3',
         className,
       )}
       {...props}

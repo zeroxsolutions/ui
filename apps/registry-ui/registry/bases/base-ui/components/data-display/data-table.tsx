@@ -119,7 +119,8 @@ function DataTableView({ children, className, ...props }: React.ComponentProps<'
 /**
  * The one row a `DataTableView` shows when there are no rows: a cell spanning
  * every column, its `children` centred in an upstream `Empty`. Every other prop
- * goes to the cell.
+ * goes to the cell. The cell keeps `TableCell`'s `whitespace-nowrap`, so a long
+ * message widens the table rather than wrapping; keep it short.
  */
 function DataTableEmpty({ children, ...props }: React.ComponentProps<typeof TableCell>): React.ReactNode {
   const table = useDataTable();

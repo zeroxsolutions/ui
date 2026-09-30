@@ -34,24 +34,29 @@ describe('MarkdownView', () => {
     expect(screen.getByRole('link', { name: 'link' }).getAttribute('href')).toBe('https://x.test');
   });
 
-  it('renders GFM tables', () => {
+  it('renders GFM tables', async () => {
     render(<MarkdownView>{'| A | B |\n| - | - |\n| 1 | 2 |'}</MarkdownView>);
+    await settle();
     expect(screen.getByRole('table')).toBeTruthy();
     expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['A', 'B']);
   });
 
-  it('renders a GFM table as the upstream Table inside a ScrollArea, so a wide one scrolls on its own', () => {
+  it('renders a GFM table as the upstream Table inside a ScrollArea, so a wide one scrolls on its own', async () => {
     const { container } = render(<MarkdownView>{'| A | B |\n| - | - |\n| 1 | 2 |'}</MarkdownView>);
+    await settle();
     const table = container.querySelector('[data-slot="table"]');
     expect(table?.closest('[data-slot="scroll-area"]')).not.toBeNull();
+    // The ScrollArea's overflow hand-off selects the Table primitive's own wrapper by this slot.
+    expect(table?.parentElement?.getAttribute('data-slot')).toBe('table-container');
     expect(table?.querySelector('[data-slot="table-head"]')?.textContent).toBe('A');
   });
 
-  it('renders a plain fenced block inside a ScrollArea, so a long line scrolls on its own', () => {
+  it('renders a plain fenced block inside a ScrollArea, so a long line scrolls on its own', async () => {
     const { container } = render(<MarkdownView>{'```\nplain\n```'}</MarkdownView>);
+    await settle();
     const pre = container.querySelector('pre');
     expect(pre?.textContent).toBe('plain');
-    expect(pre?.closest('[data-slot="scroll-area"]')).not.toBeNull();
+    expect(pre?.closest('[data-slot="scroll-area"]')?.closest('[data-slot="markdown-view-code"]')).not.toBeNull();
   });
 
   it('does not render raw embedded HTML as markup (safe for untrusted content)', () => {
@@ -88,8 +93,9 @@ describe('MarkdownView', () => {
       expect(screen.getByText('npm').tagName).toBe('CODE');
     });
 
-    it('renders a plain <pre> (no copy button) by default', () => {
+    it('renders a plain <pre> (no copy button) by default', async () => {
       render(<MarkdownView>{'```\nplain\n```'}</MarkdownView>);
+      await settle();
       expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();
       expect(screen.getByText('plain')).toBeTruthy();
     });

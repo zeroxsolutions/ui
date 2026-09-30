@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -42,6 +42,12 @@ beforeAll(() => {
 });
 
 afterEach(cleanup);
+
+// ScrollArea measures its viewport in a microtask its layout effect schedules on
+// mount, outside render's own act() batch; awaiting a no-op act() settles it.
+async function settle(): Promise<void> {
+  await act(async () => {});
+}
 
 function useRowsTable(rows: Row[]): TanstackTable<Row> {
   return useReactTable({
@@ -142,28 +148,34 @@ describe('DataTableColumnHeader actions honor a caller preventDefault', () => {
 });
 
 describe('DataTableEmpty', () => {
-  it('renders one cell spanning every column when there are no rows', () => {
+  it('renders one cell spanning every column when there are no rows', async () => {
     render(<RowsTable rows={[]} />);
+    await settle();
 
     const cell = screen.getByText('No results.').closest('td');
     expect(cell?.getAttribute('data-slot')).toBe('data-table-empty');
     expect(cell?.getAttribute('colspan')).toBe('2');
   });
 
-  it('is not rendered while there are rows', () => {
+  it('is not rendered while there are rows', async () => {
     render(<RowsTable rows={[{ name: 'a', size: 1 }]} />);
+    await settle();
 
     expect(screen.queryByText('No results.')).toBeNull();
     expect(screen.getByRole('cell', { name: 'a' })).toBeTruthy();
   });
 });
 
+// Module-level, so the data keeps its identity across renders; a fresh array each render makes the
+// table queue a page reset on every render, and the act() around a click never settles.
+const PAGED_ROWS: Row[] = [
+  { name: 'a', size: 1 },
+  { name: 'b', size: 2 },
+];
+
 function PagedTable(): ReactNode {
   const table = useReactTable({
-    data: [
-      { name: 'a', size: 1 },
-      { name: 'b', size: 2 },
-    ],
+    data: PAGED_ROWS,
     columns: COLUMNS,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -178,23 +190,32 @@ function PagedTable(): ReactNode {
 }
 
 describe('DataTableView', () => {
-  it('scrolls the table inside a ScrollArea rather than the page', () => {
+  it('scrolls the table inside a ScrollArea rather than the page', async () => {
     render(<RowsTable rows={[{ name: 'a', size: 1 }]} />);
+    await settle();
 
-    expect(screen.getByRole('table').closest('[data-slot="scroll-area"]')).not.toBeNull();
+    const table = screen.getByRole('table');
+    expect(table.closest('[data-slot="scroll-area"]')).not.toBeNull();
+    // The ScrollArea's overflow hand-off selects the Table primitive's own wrapper by this slot.
+    expect(table.parentElement?.getAttribute('data-slot')).toBe('table-container');
   });
 });
 
 describe('DataTablePagination', () => {
-  it('steps to the next page and back', () => {
+  it('steps to the next page and back', async () => {
     render(<PagedTable />);
+    await settle();
     const previous = screen.getByRole('button', { name: 'Previous page' });
     expect(previous.hasAttribute('disabled')).toBe(true);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    });
     expect(screen.getByRole('cell', { name: 'b' })).toBeTruthy();
 
-    fireEvent.click(previous);
+    await act(async () => {
+      fireEvent.click(previous);
+    });
     expect(screen.getByRole('cell', { name: 'a' })).toBeTruthy();
   });
 });

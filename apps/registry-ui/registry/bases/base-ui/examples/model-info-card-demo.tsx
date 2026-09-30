@@ -43,7 +43,7 @@ function ModelInfoCardDemo(): ReactNode {
       </ModelInfoCardSection>
       <ModelInfoCardSection>
         <Item size="xs">
-          <ModelInfoCardBadge className="bg-chart-2" />
+          <ModelInfoCardBadge className="bg-chart-4" />
           <ItemContent>
             <ItemTitle>Pricing</ItemTitle>
           </ItemContent>
