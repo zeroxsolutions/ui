@@ -528,15 +528,15 @@
       ]
     },
     {
-      "name": "icon-chip",
+      "name": "icon-media",
       "type": "registry:component",
-      "title": "Icon Chip",
+      "title": "Icon Media",
       "description": "A small square that holds one glyph, tinted through the caller's className.",
       "categories": ["general"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/general/icon-chip.tsx",
+          "path": "registry/bases/base-ui/components/general/icon-media.tsx",
           "type": "registry:component"
         }
       ]
@@ -1214,21 +1214,21 @@
       ]
     },
     {
-      "name": "icon-chip-demo",
+      "name": "icon-media-demo",
       "type": "registry:example",
-      "title": "Icon Chip Demo",
-      "description": "A chat-ability chip named by its own caption, beside two chips named only through a composed tooltip.",
+      "title": "Icon Media Demo",
+      "description": "A chat-ability glyph named by its own caption, beside two named only through a composed tooltip.",
       "categories": ["examples"],
       "registryDependencies": [
         "@shadcn/tooltip",
         "https://lucide-animated.com/r/eye.json",
         "https://lucide-animated.com/r/message-square.json",
         "https://lucide-animated.com/r/wrench.json",
-        "https://ui.zeroxsolutions.com/r/icon-chip.json"
+        "https://ui.zeroxsolutions.com/r/icon-media.json"
       ],
       "files": [
         {
-          "path": "registry/bases/base-ui/examples/icon-chip-demo.tsx",
+          "path": "registry/bases/base-ui/examples/icon-media-demo.tsx",
           "type": "registry:example"
         }
       ]

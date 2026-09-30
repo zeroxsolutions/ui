@@ -3,7 +3,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 
-import { IconChip } from './icon-chip';
+import { IconMedia } from './icon-media';
 
 beforeAll(() => {
   // Base UI's tooltip positioning needs ResizeObserver, absent in jsdom.
@@ -16,12 +16,12 @@ beforeAll(() => {
 
 afterEach(cleanup);
 
-describe('IconChip', () => {
+describe('IconMedia', () => {
   it('holds the icon it is given, named by its aria-label', () => {
     render(
-      <IconChip aria-label="Vision input">
+      <IconMedia aria-label="Vision input">
         <svg data-testid="glyph" />
-      </IconChip>,
+      </IconMedia>,
     );
     expect(screen.getByLabelText('Vision input').contains(screen.getByTestId('glyph'))).toBe(true);
   });
@@ -30,7 +30,7 @@ describe('IconChip', () => {
     render(
       <TooltipProvider>
         <Tooltip open>
-          <TooltipTrigger render={<IconChip aria-label="Reasoning" />}>
+          <TooltipTrigger render={<IconMedia aria-label="Reasoning" />}>
             <svg />
           </TooltipTrigger>
           <TooltipContent>Shows its reasoning</TooltipContent>
