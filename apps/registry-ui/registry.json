@@ -512,25 +512,6 @@
       ]
     },
     {
-      "name": "tab-close-button",
-      "type": "registry:component",
-      "title": "Tab Close Button",
-      "description": "The trailing control on an editor tab, showing the unsaved dot until the tab's hover, focus or active state reveals its close X.",
-      "categories": ["feedback"],
-      "registryDependencies": [
-        "@shadcn/button",
-        "@shadcn/utils",
-        "https://lucide-animated.com/r/x.json",
-        "https://ui.zeroxsolutions.com/r/unsaved-indicator.json"
-      ],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/feedback/tab-close-button.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "unsaved-indicator",
       "type": "registry:component",
       "title": "Unsaved Indicator",
@@ -545,15 +526,15 @@
       ]
     },
     {
-      "name": "icon-chip",
+      "name": "icon-media",
       "type": "registry:component",
-      "title": "Icon Chip",
+      "title": "Icon Media",
       "description": "A small square that holds one glyph, tinted through the caller's className.",
       "categories": ["general"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/general/icon-chip.tsx",
+          "path": "registry/bases/base-ui/components/general/icon-media.tsx",
           "type": "registry:component"
         }
       ]
@@ -562,7 +543,7 @@
       "name": "icon-label",
       "type": "registry:component",
       "title": "Icon Label",
-      "description": "An icon that stands in for a field's text label in a dense panel, sizing an unclassed child svg to a compact glyph.",
+      "description": "A label whose icon stands in for a field's text in a dense panel, tied to its control through htmlFor and sizing an unclassed child svg to a compact glyph.",
       "categories": ["general"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
@@ -573,25 +554,11 @@
       ]
     },
     {
-      "name": "panel-field-label",
-      "type": "registry:component",
-      "title": "Panel Field Label",
-      "description": "Upstream's field label as the preset draws it, naming a property panel control that has no inline label of its own.",
-      "categories": ["general"],
-      "registryDependencies": ["@shadcn/field"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/general/panel-field-label.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "avatar-picker",
       "type": "registry:component",
       "title": "Avatar Picker",
       "description": "A Popover-based avatar editor whose emoji, upload and color panes edit one avatar value.",
-      "categories": ["layout"],
+      "categories": ["data-entry"],
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "@shadcn/button",
@@ -599,15 +566,13 @@
         "@shadcn/field",
         "@shadcn/input",
         "@shadcn/popover",
-        "@shadcn/spinner",
         "@shadcn/tabs",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/upload.json",
         "https://ui.zeroxsolutions.com/r/emoji-picker.json"
       ],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/layout/avatar-picker.tsx",
+          "path": "registry/bases/base-ui/components/data-entry/avatar-picker.tsx",
           "type": "registry:component"
         }
       ]
@@ -684,11 +649,11 @@
       "type": "registry:component",
       "title": "Frontmatter Form",
       "description": "A frontmatter editor whose root holds the document and field setters for the consumer's composed fields.",
-      "categories": ["layout"],
+      "categories": ["data-entry"],
       "registryDependencies": ["@shadcn/field"],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/layout/frontmatter-form.tsx",
+          "path": "registry/bases/base-ui/components/data-entry/frontmatter-form.tsx",
           "type": "registry:component"
         }
       ]
@@ -836,6 +801,26 @@
       "files": [
         {
           "path": "registry/bases/base-ui/components/navigation/command-menu.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "editor-tab",
+      "type": "registry:component",
+      "title": "Editor Tab",
+      "description": "One tab in an editor's tab strip, whose close button shows the unsaved dot until the tab's hover, focus or active state reveals its X.",
+      "categories": ["navigation"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/item",
+        "@shadcn/utils",
+        "https://lucide-animated.com/r/x.json",
+        "https://ui.zeroxsolutions.com/r/unsaved-indicator.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/navigation/editor-tab.tsx",
           "type": "registry:component"
         }
       ]
@@ -1218,20 +1203,6 @@
       ]
     },
     {
-      "name": "tab-close-button-demo",
-      "type": "registry:example",
-      "title": "Tab Close Button Demo",
-      "description": "Two editor tabs, one saved and one with unsaved changes.",
-      "categories": ["examples"],
-      "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/tab-close-button.json"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/tab-close-button-demo.tsx",
-          "type": "registry:example"
-        }
-      ]
-    },
-    {
       "name": "unsaved-indicator-demo",
       "type": "registry:example",
       "title": "Unsaved Indicator Demo",
@@ -1246,21 +1217,21 @@
       ]
     },
     {
-      "name": "icon-chip-demo",
+      "name": "icon-media-demo",
       "type": "registry:example",
-      "title": "Icon Chip Demo",
-      "description": "A chat-ability chip named by its own caption, beside two chips named only through a composed tooltip.",
+      "title": "Icon Media Demo",
+      "description": "A chat-ability glyph named by its own caption, beside two named only through a composed tooltip.",
       "categories": ["examples"],
       "registryDependencies": [
         "@shadcn/tooltip",
         "https://lucide-animated.com/r/eye.json",
         "https://lucide-animated.com/r/message-square.json",
         "https://lucide-animated.com/r/wrench.json",
-        "https://ui.zeroxsolutions.com/r/icon-chip.json"
+        "https://ui.zeroxsolutions.com/r/icon-media.json"
       ],
       "files": [
         {
-          "path": "registry/bases/base-ui/examples/icon-chip-demo.tsx",
+          "path": "registry/bases/base-ui/examples/icon-media-demo.tsx",
           "type": "registry:example"
         }
       ]
@@ -1287,35 +1258,21 @@
       ]
     },
     {
-      "name": "panel-field-label-demo",
-      "type": "registry:example",
-      "title": "Panel Field Label Demo",
-      "description": "A PanelFieldLabel naming a fill swatch that carries no inline label of its own.",
-      "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/field",
-        "@shadcn/input",
-        "https://ui.zeroxsolutions.com/r/panel-field-label.json"
-      ],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/panel-field-label-demo.tsx",
-          "type": "registry:example"
-        }
-      ]
-    },
-    {
       "name": "avatar-picker-demo",
       "type": "registry:example",
       "title": "Avatar Picker Demo",
-      "description": "A color-tinted avatar that opens an emoji and color editor over AvatarPicker.",
+      "description": "A color-tinted avatar that opens an emoji, upload and color editor over AvatarPicker.",
       "categories": ["examples"],
       "registryDependencies": [
         "@shadcn/avatar",
+        "@shadcn/empty",
+        "@shadcn/spinner",
         "@shadcn/tabs",
         "https://lucide-animated.com/r/palette.json",
         "https://lucide-animated.com/r/smile.json",
-        "https://ui.zeroxsolutions.com/r/avatar-picker.json"
+        "https://lucide-animated.com/r/upload.json",
+        "https://ui.zeroxsolutions.com/r/avatar-picker.json",
+        "https://ui.zeroxsolutions.com/r/emoji-picker.json"
       ],
       "files": [
         {
@@ -1541,6 +1498,20 @@
         {
           "path": "registry/bases/base-ui/hooks/use-command-shortcut.ts",
           "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "editor-tab-demo",
+      "type": "registry:example",
+      "title": "Editor Tab Demo",
+      "description": "A tab strip: the active tab, and one with unsaved changes.",
+      "categories": ["examples"],
+      "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/editor-tab.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-tab-demo.tsx",
+          "type": "registry:example"
         }
       ]
     },

@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
-import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/registry/bases/base-ui/ui/card';
+import { Card, CardAction, CardFooter, CardTitle } from '@/registry/bases/base-ui/ui/card';
 import { CircleCheckIcon } from '@/registry/bases/base-ui/ui/circle-check';
 
 /** The lifecycle of a consent request - host-driven, like `ToolCallCard`'s state. */
@@ -21,11 +21,11 @@ interface PermissionCardProps extends ComponentProps<typeof Card> {
  * word is the consumer's:
  *
  *   <PermissionCard status={status}>
- *     <PermissionCardHeader>
+ *     <CardHeader>
  *       <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
  *       <CardDescription>Deploy the web app to production</CardDescription>
  *       <PermissionCardStatus>{statusWord}</PermissionCardStatus>
- *     </PermissionCardHeader>
+ *     </CardHeader>
  *     <CardContent><CodeBlock code={command} language="bash" /></CardContent>
  *     <PermissionCardActions>
  *       <Button variant="ghost" onClick={deny}>Deny</Button>
@@ -52,14 +52,9 @@ function PermissionCard({ status, size = 'sm', className, ...props }: Permission
   );
 }
 
-/** The card's header: the title, an optional `CardDescription`, and the status at its end. */
-function PermissionCardHeader(props: ComponentProps<typeof CardHeader>): ReactNode {
-  return <CardHeader {...props} />;
-}
-
 /** What the assistant asks to do, on one truncated line. */
 function PermissionCardTitle({ className, ...props }: ComponentProps<typeof CardTitle>): ReactNode {
-  return <CardTitle className={cn('min-w-0 truncate', className)} {...props} />;
+  return <CardTitle data-slot="permission-card-title" className={cn('min-w-0 truncate', className)} {...props} />;
 }
 
 /**
@@ -71,16 +66,33 @@ function PermissionCardStatus({ children, ...props }: ComponentProps<typeof Badg
   return (
     <CardAction>
       <Badge data-slot="permission-card-status" variant="outline" {...props}>
-        <Circle aria-hidden className="hidden group-data-[status=pending]/permission-card:block" />
-        <CircleCheckIcon aria-hidden size={12} className="hidden group-data-[status=approved]/permission-card:block" />
-        <CircleX aria-hidden className="hidden group-data-[status=denied]/permission-card:block" />
+        <Circle
+          data-icon="inline-start"
+          aria-hidden
+          className="hidden group-data-[status=pending]/permission-card:block"
+        />
+        <CircleCheckIcon
+          data-icon="inline-start"
+          aria-hidden
+          size={12}
+          className="hidden group-data-[status=approved]/permission-card:block"
+        />
+        <CircleX
+          data-icon="inline-start"
+          aria-hidden
+          className="hidden group-data-[status=denied]/permission-card:block"
+        />
         {children}
       </Badge>
     </CardAction>
   );
 }
 
-/** The decision row, a `CardFooter` shown only while the request is `pending`. */
+/**
+ * The decision row, a `CardFooter` shown only while the request is `pending`.
+ * It keeps upstream's `data-slot="card-footer"`, which the Card recipe reads to
+ * drop its bottom padding.
+ */
 function PermissionCardActions({ className, ...props }: ComponentProps<typeof CardFooter>): ReactNode {
   return (
     <CardFooter
@@ -93,19 +105,15 @@ function PermissionCardActions({ className, ...props }: ComponentProps<typeof Ca
   );
 }
 
-/** The persisted outcome, a `CardFooter` shown once the request is `approved` or `denied`. */
+/**
+ * The persisted outcome, a `CardFooter` shown once the request is `approved` or
+ * `denied`. Like `PermissionCardActions`, it keeps upstream's `card-footer` slot.
+ */
 function PermissionCardResolved({ className, ...props }: ComponentProps<typeof CardFooter>): ReactNode {
   return (
     <CardFooter className={cn('gap-2 group-data-[status=pending]/permission-card:hidden', className)} {...props} />
   );
 }
 
-export {
-  PermissionCard,
-  PermissionCardHeader,
-  PermissionCardTitle,
-  PermissionCardStatus,
-  PermissionCardActions,
-  PermissionCardResolved,
-};
+export { PermissionCard, PermissionCardTitle, PermissionCardStatus, PermissionCardActions, PermissionCardResolved };
 export type { PermissionCardStatusValue, PermissionCardProps };

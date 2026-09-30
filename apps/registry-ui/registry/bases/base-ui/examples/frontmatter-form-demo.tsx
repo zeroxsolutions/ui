@@ -9,7 +9,7 @@ import {
   FrontmatterFormFieldError,
   FrontmatterFormFieldLabel,
   type FrontmatterFormValue,
-} from '@/registry/bases/base-ui/components/layout/frontmatter-form';
+} from '@/registry/bases/base-ui/components/data-entry/frontmatter-form';
 import { FieldDescription } from '@/registry/bases/base-ui/ui/field';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 

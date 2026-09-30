@@ -4,14 +4,13 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import {
   PermissionCard,
   PermissionCardActions,
-  PermissionCardHeader,
   PermissionCardResolved,
   PermissionCardStatus,
   PermissionCardTitle,
 } from './permission-card';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ButtonGroup } from '@/registry/bases/base-ui/ui/button-group';
-import { CardDescription } from '@/registry/bases/base-ui/ui/card';
+import { CardDescription, CardHeader } from '@/registry/bases/base-ui/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,10 +59,10 @@ describe('PermissionCard', () => {
   it('renders the consumer status word', () => {
     render(
       <PermissionCard status="denied">
-        <PermissionCardHeader>
+        <CardHeader>
           <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
           <PermissionCardStatus>Denied</PermissionCardStatus>
-        </PermissionCardHeader>
+        </CardHeader>
       </PermissionCard>,
     );
     expect(screen.getByText('Denied')).toBeTruthy();
@@ -72,10 +71,10 @@ describe('PermissionCard', () => {
   it('shows the upstream card description it composes in the header', () => {
     render(
       <PermissionCard status="pending">
-        <PermissionCardHeader>
+        <CardHeader>
           <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
           <CardDescription>Deploy the web app to production</CardDescription>
-        </PermissionCardHeader>
+        </CardHeader>
       </PermissionCard>,
     );
     expect(screen.getByText('Deploy the web app to production')).toBeTruthy();

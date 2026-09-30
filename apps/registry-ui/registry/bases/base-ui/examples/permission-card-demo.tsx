@@ -5,14 +5,13 @@ import { useRef, useState, type ReactNode } from 'react';
 import {
   PermissionCard,
   PermissionCardActions,
-  PermissionCardHeader,
   PermissionCardResolved,
   PermissionCardStatus,
   PermissionCardTitle,
 } from '@/registry/bases/base-ui/components/feedback/permission-card';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ButtonGroup } from '@/registry/bases/base-ui/ui/button-group';
-import { CardDescription } from '@/registry/bases/base-ui/ui/card';
+import { CardDescription, CardHeader } from '@/registry/bases/base-ui/ui/card';
 import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
 import {
   DropdownMenu,
@@ -32,13 +31,13 @@ function PermissionCardDemo(): ReactNode {
 
   return (
     <PermissionCard status={status} className="w-full max-w-sm">
-      <PermissionCardHeader>
+      <CardHeader>
         <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
         <CardDescription>Deploy the web app to production</CardDescription>
         <PermissionCardStatus variant={status === 'denied' ? 'destructive' : 'outline'}>
           {STATUS_WORD[status]}
         </PermissionCardStatus>
-      </PermissionCardHeader>
+      </CardHeader>
       <PermissionCardActions>
         <Button variant="ghost" onClick={() => setStatus('denied')}>
           Deny
@@ -80,11 +79,9 @@ function PermissionCardDemo(): ReactNode {
           </DropdownMenu>
         </ButtonGroup>
       </PermissionCardActions>
-      {status !== 'pending' && (
-        <PermissionCardResolved>
-          <CardDescription>{status === 'approved' ? SCOPE_WORD[scope] : 'Denied'} - 2:14pm</CardDescription>
-        </PermissionCardResolved>
-      )}
+      <PermissionCardResolved>
+        <CardDescription>{status === 'approved' ? SCOPE_WORD[scope] : 'Denied'} - 2:14pm</CardDescription>
+      </PermissionCardResolved>
     </PermissionCard>
   );
 }

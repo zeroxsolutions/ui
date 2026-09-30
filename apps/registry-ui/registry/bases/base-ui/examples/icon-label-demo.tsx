@@ -13,23 +13,32 @@ function IconLabelDemo(): ReactNode {
     <TooltipProvider>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <IconLabel aria-label="Search">
+          <IconLabel htmlFor="icon-label-demo-filter">
             <SearchIcon aria-hidden />
+            <span className="sr-only">Filter</span>
           </IconLabel>
-          <Input aria-label="Filter" placeholder="Filter..." className="w-32" />
+          <Input id="icon-label-demo-filter" placeholder="Filter..." className="w-32" />
         </div>
-        <Tooltip>
-          <TooltipTrigger render={<IconLabel aria-label="Rotation" />}>
-            <RotateCWIcon aria-hidden />
-          </TooltipTrigger>
-          <TooltipContent>Rotation</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger render={<IconLabel aria-label="Opacity" />}>
-            <Blend />
-          </TooltipTrigger>
-          <TooltipContent>Opacity</TooltipContent>
-        </Tooltip>
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger render={<IconLabel htmlFor="icon-label-demo-rotation" />}>
+              <RotateCWIcon aria-hidden />
+              <span className="sr-only">Rotation</span>
+            </TooltipTrigger>
+            <TooltipContent>Rotation</TooltipContent>
+          </Tooltip>
+          <Input id="icon-label-demo-rotation" type="number" defaultValue={0} className="w-20" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger render={<IconLabel htmlFor="icon-label-demo-opacity" />}>
+              <Blend aria-hidden />
+              <span className="sr-only">Opacity</span>
+            </TooltipTrigger>
+            <TooltipContent>Opacity</TooltipContent>
+          </Tooltip>
+          <Input id="icon-label-demo-opacity" type="number" defaultValue={100} className="w-20" />
+        </div>
       </div>
     </TooltipProvider>
   );

@@ -8,7 +8,7 @@ import {
   ModelListAction,
   ModelListContent,
   ModelListHeader,
-  ModelListItemRemove,
+  ModelListRemoveButton,
   ModelListTitle,
 } from '@/registry/bases/base-ui/components/layout/model-list';
 import {
@@ -69,7 +69,7 @@ function ModelListDemo(): ReactNode {
                       )
                     }
                   />
-                  <ModelListItemRemove
+                  <ModelListRemoveButton
                     aria-label={`Remove ${model.title}`}
                     onClick={() => setModels((current) => current.filter((entry) => entry.id !== model.id))}
                   />

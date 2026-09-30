@@ -7,7 +7,7 @@ import {
   ModelListAction,
   ModelListContent,
   ModelListHeader,
-  ModelListItemRemove,
+  ModelListRemoveButton,
   ModelListSkeleton,
   ModelListTitle,
 } from './model-list';
@@ -55,13 +55,13 @@ describe('ModelList', () => {
   });
 });
 
-describe('ModelListItemRemove', () => {
+describe('ModelListRemoveButton', () => {
   it('renders a labelled remove control that calls onClick', () => {
     const onRemove = vi.fn();
     render(
       <Item>
         <ItemActions>
-          <ModelListItemRemove onClick={onRemove} />
+          <ModelListRemoveButton onClick={onRemove} />
         </ItemActions>
       </Item>,
     );
@@ -72,7 +72,7 @@ describe('ModelListItemRemove', () => {
   });
 
   it('takes the consumer label in place of the default', () => {
-    render(<ModelListItemRemove aria-label="Remove GPT-4o" />);
+    render(<ModelListRemoveButton aria-label="Remove GPT-4o" />);
 
     expect(screen.getByRole('button', { name: 'Remove GPT-4o' })).toBeTruthy();
   });

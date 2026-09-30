@@ -153,7 +153,7 @@ function FrontmatterFormFieldError(props: React.ComponentProps<typeof FieldError
   const field = useFrontmatterFormField();
   if (!field.error) return null;
   return (
-    <FieldError id={field.errorId} {...props}>
+    <FieldError data-slot="frontmatter-form-field-error" id={field.errorId} {...props}>
       {field.error}
     </FieldError>
   );
