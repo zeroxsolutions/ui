@@ -1,7 +1,7 @@
-# CLAUDE.md
+# AGENTS.md
 
 <!--
-SCAFFOLD TEMPLATE - copy to the repo root as `CLAUDE.md`, fill the two sections, delete
+SCAFFOLD TEMPLATE - copy to the repo root as `AGENTS.md`, fill the two sections, delete
 this comment.
 
 Almost nothing qualifies. Before adding a line, name the file a reader would open
