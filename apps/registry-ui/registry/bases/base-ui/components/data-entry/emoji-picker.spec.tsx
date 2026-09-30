@@ -18,7 +18,7 @@ beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn();
   Element.prototype.scrollTo = vi.fn();
   // The virtualizer measures the scroll element via ResizeObserver, absent in
-  // jsdom — without it the grid window never seeds.
+  // jsdom - without it the grid window never seeds.
   globalThis.ResizeObserver ??= class {
     observe() {}
     unobserve() {}
@@ -41,7 +41,7 @@ describe('EmojiPicker', () => {
     render(<EmojiPicker onSelect={onSelect} />);
     await settle();
 
-    // "grinning face" (😀) is the first emoji in Smileys & People.
+    // "grinning face" (😀) is the first emoji in Smileys & people.
     fireEvent.click(screen.getByRole('button', { name: 'grinning face' }));
 
     expect(onSelect).toHaveBeenCalledWith('😀');
@@ -71,9 +71,9 @@ describe('EmojiPicker', () => {
     });
     await settle();
 
-    // The match is shown…
+    // The match is shown...
     expect(screen.getByRole('button', { name: 'pizza' })).toBeTruthy();
-    // …and a non-matching emoji is filtered out.
+    // ...and a non-matching emoji is filtered out.
     expect(screen.queryByRole('button', { name: 'grinning face' })).toBeNull();
   });
 
@@ -92,7 +92,7 @@ describe('EmojiPicker', () => {
   it('renders the grid in the global Fluent style (3D by default)', async () => {
     render(<EmojiPicker onSelect={vi.fn()} />);
     await settle();
-    // The picker no longer owns a style control — cells draw in the app-wide
+    // The picker no longer owns a style control - cells draw in the app-wide
     // style (`setFluentEmojiStyle`), defaulting to the 3D webp set.
     const grinningImg = screen.getByRole('button', { name: 'grinning face' }).querySelector('img');
 

@@ -382,10 +382,11 @@
       "name": "tag-input",
       "type": "registry:component",
       "title": "Tag Input",
-      "description": "A tag editor with chips that remove their tag when pressed, above an input that commits a new tag on Enter, comma, or blur.",
+      "description": "A tag editor with removable chips above an input that commits a new tag on Enter, comma, or blur.",
       "categories": ["data-entry"],
       "registryDependencies": [
         "@shadcn/badge",
+        "@shadcn/button",
         "@shadcn/input",
         "@shadcn/utils",
         "https://lucide-animated.com/r/x.json"

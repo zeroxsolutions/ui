@@ -57,7 +57,7 @@ interface EmojiAppearanceToggleGroupItemProps extends Omit<ComponentProps<typeof
 /**
  * One swatch: the sample emoji drawn in `value`'s style before the consumer's
  * label (`children`), which names the swatch; the preview itself is decorative,
- * drawn at the size the toggle gives an icon.
+ * drawn as large as fits the toggle (h-8) so the styles read apart.
  */
 function EmojiAppearanceToggleGroupItem({ value, children, ...props }: EmojiAppearanceToggleGroupItemProps): ReactNode {
   return (
@@ -67,7 +67,7 @@ function EmojiAppearanceToggleGroupItem({ value, children, ...props }: EmojiAppe
         name={SAMPLE.name}
         variant={value}
         aria-hidden
-        className="size-4 object-contain"
+        className="size-6 object-contain"
       />
       {children}
     </ToggleGroupItem>

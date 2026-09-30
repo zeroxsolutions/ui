@@ -266,8 +266,8 @@ type EmojiPickerSearchProps = Omit<React.ComponentProps<'input'>, 'value' | 'onC
 
 /**
  * Search box bound to the picker query. Copy is overridable via the props;
- * `className` places the input group. Its search glyph plays while the box
- * takes focus.
+ * `className` places the input group. Its search glyph plays on the group's
+ * hover and while the box takes focus.
  */
 function EmojiPickerSearch({
   className,
@@ -281,7 +281,11 @@ function EmojiPickerSearch({
   const iconRef = React.useRef<SearchIconHandle>(null);
   return (
     <div data-slot="emoji-picker-search">
-      <InputGroup className={className}>
+      <InputGroup
+        className={className}
+        onMouseEnter={() => iconRef.current?.startAnimation()}
+        onMouseLeave={() => iconRef.current?.stopAnimation()}
+      >
         <InputGroupAddon>
           {/* The addon sizes only an svg that is its direct child, and this glyph wraps its svg in a div. */}
           <SearchIcon ref={iconRef} size={16} />
@@ -307,12 +311,16 @@ function EmojiPickerSearch({
   );
 }
 
-/** Sticky section heading - this is what "Frequently used" / a category name is. */
+/**
+ * Sticky section heading - this is what "Frequently used" / a category name is.
+ * Drawn as the preset's own group labels (`ComboboxLabel`, `SelectLabel`), on
+ * the popover surface so rows scrolling under it stay hidden.
+ */
 function EmojiPickerGroupLabel({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   return (
     <div
       data-slot="emoji-picker-group-label"
-      className={cn('bg-popover text-muted-foreground px-2 py-1 text-sm font-medium', className)}
+      className={cn('bg-popover text-muted-foreground px-2 py-1.5 text-xs', className)}
       {...props}
     />
   );
@@ -447,9 +455,10 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
       {...props}
     >
       <ScrollArea ref={setScrollRoot} className="h-full">
+        {/* Inset past the ScrollArea's scrollbar (w-2.5) on both sides: the bar sits over the viewport's edge and would cover the last column. */}
         <div className="relative w-full" style={{ height: total }}>
           {stickyIndex >= 0 && rows[stickyIndex].type === 'header' && (
-            <div className="sticky top-0 z-10 w-full">
+            <div className="sticky top-0 z-10 w-full px-3">
               <EmojiPickerGroupLabel className="h-(--emoji-picker-header)">
                 {(rows[stickyIndex] as { name: string }).name}
               </EmojiPickerGroupLabel>
@@ -463,7 +472,7 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
               <div
                 key={row.key}
                 data-index={index}
-                className="absolute top-0 left-0 w-full"
+                className="absolute inset-x-3 top-0"
                 style={{ transform: `translateY(${offsets[index]}px)` }}
               >
                 {row.type === 'header' ? (
@@ -527,7 +536,6 @@ function EmojiPickerNavTrigger({
   return (
     <TabsTrigger
       value={value}
-      className="flex-1"
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
         iconRef.current?.startAnimation();
@@ -556,7 +564,7 @@ function EmojiPickerGrid({ className, ...props }: React.ComponentProps<'div'>): 
   return (
     <div
       data-slot="emoji-picker-grid"
-      className={cn('grid grid-cols-(--emoji-picker-columns) gap-(--emoji-picker-gap)', className)}
+      className={cn('grid grid-cols-(--emoji-picker-columns) justify-items-center gap-(--emoji-picker-gap)', className)}
       {...props}
     />
   );

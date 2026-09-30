@@ -25,12 +25,31 @@ describe('TagInput', () => {
     expect(onValueChange).toHaveBeenCalledWith(['design']);
   });
 
-  it('removes a tag when its chip is pressed', () => {
+  it('removes a tag when its remove button is pressed', () => {
     const onValueChange = vi.fn();
     render(<TagInput value={['design', 'ui']} onValueChange={onValueChange} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove design' }));
     expect(onValueChange).toHaveBeenCalledWith(['ui']);
+  });
+
+  it('keeps a tag when its label is clicked', () => {
+    const onValueChange = vi.fn();
+    render(<TagInput value={['design', 'ui']} onValueChange={onValueChange} />);
+
+    fireEvent.click(screen.getByText('design'));
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Remove design' })).toBeTruthy();
+  });
+
+  it('offers no active remove button while disabled', () => {
+    const onValueChange = vi.fn();
+    render(<TagInput value={['design']} onValueChange={onValueChange} disabled />);
+
+    const remove = screen.getByRole('button', { name: 'Remove design' }) as HTMLButtonElement;
+    expect(remove.disabled).toBe(true);
+    fireEvent.click(remove);
+    expect(onValueChange).not.toHaveBeenCalled();
   });
 
   it('stamps its data-slot and passes the div props through to the root', () => {

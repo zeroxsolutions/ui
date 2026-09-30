@@ -21,14 +21,14 @@ interface ChatSuggestionItemProps extends ComponentProps<'button'> {
  *
  *   <Empty>
  *     <EmptyHeader>
- *       <EmptyMedia variant="icon"><Sparkles /></EmptyMedia>
+ *       <EmptyMedia variant="icon"><SparklesIcon /></EmptyMedia>
  *       <EmptyTitle>Start a conversation</EmptyTitle>
  *       <EmptyDescription>Ask anything</EmptyDescription>
  *     </EmptyHeader>
  *     <EmptyContent>
  *       <ItemGroup>
  *         <ChatSuggestionItem prompt="summarise this" onSelectPrompt={send}>
- *           <ItemMedia><FileText /></ItemMedia>
+ *           <ItemMedia variant="icon"><FileTextIcon /></ItemMedia>
  *           <ItemContent><ItemTitle>Summarise</ItemTitle></ItemContent>
  *         </ChatSuggestionItem>
  *       </ItemGroup>
