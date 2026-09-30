@@ -51,14 +51,16 @@ its cost are here.
   cache is `static-assets-incremental-cache`, which reads the build's output back and writes
   nothing, so a route rendered on a request has nowhere to be kept. `src/lib/source.spec.ts`
   holds each page to its registry item, its demo and its install command.
-- **The worker is 6773 KiB gzipped**, measured with `wrangler deploy --dry-run --env production`
-  on 2026-09-30. That is above the free plan's 3 MiB and below the paid plan's 10 MiB. In the
-  server output, the two Shiki grammar packages gzip to 1268 KiB (4.4.3, through fumadocs-core)
-  and 1213 KiB (4.2.0, through the registry's own highlighter), the `next` package to 2710-2713
-  KiB across five runs (the same command gzips a whole copied package directory, not what the
-  bundle actually pulls from it, so the figure moves with `find`'s file order), and the share
-  images' `resvg.wasm` to 516 KiB. The demos are lazy imports already, and a lazy chunk still
-  ships in the worker. A deploy on the free plan needs that cut first.
+- **The worker is 5181 KiB gzipped**, measured with `wrangler deploy --dry-run --env production`
+  on 2026-09-30. That is above the free plan's 3 MiB and below the paid plan's 10 MiB. Shiki runs
+  in one server layer only: a docs page's code is highlighted as it compiles (`rehypeDocsCode`), so
+  the RSC layer imports no grammar and the SSR layer holds the one set the registry's `CodeBlock`
+  loads lazily. In the server output, gzipping a tar of each package directory, the Shiki grammars
+  (`@shikijs/langs` 4.2.0) come to 1261 KiB, the `next` package to 3748 KiB, and the share images'
+  `resvg.wasm` to 516 KiB; fumadocs-core's own Shiki 4.4.3 leaves only its manifests (3 KiB). The
+  tar figure is of the whole copied directory, not of what the bundle pulls from it. The demos are
+  lazy imports already, and a lazy chunk still ships in the worker. A deploy on the free plan needs
+  that cut first.
 - **No project carries a `wrangler:deploy` target yet.** `registry-ui` has its worker config
   and `wrangler:build`, but `cd.yml` asks `nx-deploy` for `wrangler:deploy`, and until that
   target exists the job is a **green no-op**: `nx run-many -t wrangler:deploy` matches no
