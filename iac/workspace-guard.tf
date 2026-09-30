@@ -8,7 +8,9 @@
 # custom domain does not, so a stray apply would also try to re-point the live
 # fluent-emoji.zeroxsolutions.com at the empty parallel bucket.
 #
-# This root is applied in the `production` workspace only; AGENTS.md records why.
+# This root is applied in the `production` workspace only. The artwork is byte-identical in
+# every environment, so a development bucket would hold a second copy of 370 MB to serve the
+# same bytes; local dev reads the production URL.
 resource "terraform_data" "workspace_guard" {
   lifecycle {
     precondition {

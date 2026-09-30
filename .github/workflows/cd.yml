@@ -58,6 +58,9 @@ jobs:
   # by path - GitHub has `paths:` at workflow level and nothing at job level. The cost of the
   # run that finds nothing moved is 0 B transferred; the 4m14s it still takes is checkout and
   # install, which a path filter would not have saved either (measured 2026-08-22).
+  #
+  # Until this job is copied to the org's other repos, this cd.yml is the one that differs
+  # from theirs.
   rclone-sync:
     needs: [gate]
     if: github.ref_name == 'production'
@@ -70,6 +73,9 @@ jobs:
 
       # `RCLONE_S3_*` is rclone's own naming - `--s3-<flag>` uppercased - so no step in this
       # pipeline renames a value on its way to the tool.
+      #
+      # The key is Object Read & Write scoped to the one bucket; an Admin token cannot be
+      # bucket-scoped and would carry account-wide R2 write.
       #
       # Endpoint and bucket name are `vars`, not secrets: neither grants access, and as vars
       # their values read plainly in the run rather than as `***`.

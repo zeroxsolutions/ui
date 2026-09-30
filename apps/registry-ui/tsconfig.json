@@ -21,6 +21,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@/registry/*": ["./registry/*"],
+      // Written by the `fumadocs-generate` target, which `build` and `test` run first; a `tsc`
+      // run by hand before it fails with `Cannot find module 'collections/server'`.
       "collections/*": ["./.source/*"]
     },
     "outDir": "dist",

@@ -83,7 +83,8 @@ async function highlightSource(element: HastNode): Promise<void> {
  * the server runs to render a page imports Shiki. A fence's `pre` gets its `title` from the fence's
  * meta and its tokenized `lines` as JSON. A `ComponentPreview` or `ComponentSource` gets the source of
  * the file it shows as `code`, its `language`, and its `lines` as JSON. It runs after fumadocs has kept
- * the page's Markdown, so none of this reaches the page's `.md`.
+ * the page's Markdown, so none of this reaches the page's `.md`. A demo's source is read once, as its
+ * page compiles, so under `next dev` an edited demo shows its old source until the page's `.mdx` is saved.
  */
 export function rehypeDocsCode() {
   return async (tree: HastNode): Promise<void> => {
