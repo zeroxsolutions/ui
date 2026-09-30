@@ -66,14 +66,19 @@ function TagInput({ value, onValueChange, disabled = false, className, ...props 
   );
   return (
     <TagInputContext.Provider value={context}>
-      <div data-disabled={disabled || undefined} className={cn('flex flex-col gap-2', className)} {...props} />
+      <div
+        data-slot="tag-input"
+        data-disabled={disabled || undefined}
+        className={cn('flex flex-col gap-2', className)}
+        {...props}
+      />
     </TagInputContext.Provider>
   );
 }
 
 /** The row the tags wrap in; it takes no room while it holds no tag. */
 function TagInputList({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
-  return <div className={cn('flex flex-wrap gap-1.5 empty:hidden', className)} {...props} />;
+  return <div data-slot="tag-input-list" className={cn('flex flex-wrap gap-1.5 empty:hidden', className)} {...props} />;
 }
 
 const TagInputTagContext = React.createContext<string | null>(null);
@@ -91,7 +96,7 @@ interface TagInputTagProps extends React.ComponentProps<typeof Badge> {
 function TagInputTag({ value, ...props }: TagInputTagProps): React.ReactNode {
   return (
     <TagInputTagContext.Provider value={value}>
-      <Badge variant="secondary" {...props} />
+      <Badge data-slot="tag-input-tag" variant="secondary" {...props} />
     </TagInputTagContext.Provider>
   );
 }
@@ -116,6 +121,7 @@ function TagInputTagRemove({
   if (tag === null) throw new Error('TagInputTagRemove must be used within <TagInputTag>');
   return (
     <Button
+      data-slot="tag-input-tag-remove"
       type="button"
       variant="ghost"
       size="icon-xs"
@@ -169,6 +175,7 @@ function TagInputInput({
 
   return (
     <Input
+      data-slot="tag-input-input"
       value={draft}
       disabled={disabled}
       onChange={(event) => setDraft(event.target.value)}

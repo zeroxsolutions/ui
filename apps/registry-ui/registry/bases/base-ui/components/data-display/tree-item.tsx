@@ -67,6 +67,7 @@ function TreeItem({
   return (
     <TreeItemContext.Provider value={context}>
       <Item
+        data-slot="tree-item"
         data-expanded={expanded || undefined}
         data-leaf={leaf || undefined}
         data-editing={editing || undefined}
@@ -93,6 +94,7 @@ interface TreeItemIndentProps extends React.ComponentProps<'span'> {
 function TreeItemIndent({ depth, className, style, children, ...props }: TreeItemIndentProps): React.ReactNode {
   return (
     <span
+      data-slot="tree-item-indent"
       className={cn('flex shrink-0 items-center ps-[calc(var(--tree-item-depth)*--spacing(3))]', className)}
       style={{ '--tree-item-depth': depth, ...style } as React.CSSProperties}
       {...props}
@@ -124,6 +126,7 @@ function TreeItemTrigger({
   const iconRef = React.useRef<ChevronRightIconHandle>(null);
   return (
     <Button
+      data-slot="tree-item-trigger"
       type="button"
       variant="ghost"
       size="icon-xs"
@@ -163,7 +166,13 @@ function TreeItemTrigger({
  * not. `onClick` receives the raw event, so a caller can read shift/meta.
  */
 function TreeItemLabel({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
-  return <div className={cn('flex min-w-0 flex-1 cursor-pointer items-center gap-1.5', className)} {...props} />;
+  return (
+    <div
+      data-slot="tree-item-label"
+      className={cn('flex min-w-0 flex-1 cursor-pointer items-center gap-1.5', className)}
+      {...props}
+    />
+  );
 }
 
 interface TreeItemRenameInputProps extends React.ComponentProps<typeof Input> {
@@ -192,6 +201,7 @@ function TreeItemRenameInput({
 }: TreeItemRenameInputProps): React.ReactNode {
   return (
     <Input
+      data-slot="tree-item-rename-input"
       autoFocus
       className={cn('min-w-0 flex-1', className)}
       onBlur={(event) => {

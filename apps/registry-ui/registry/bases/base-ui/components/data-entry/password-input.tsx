@@ -32,22 +32,22 @@ function usePasswordInput(): PasswordInputContextValue {
  *     </InputGroupAddon>
  *   </PasswordInput>
  *
- * The root keeps upstream's `data-slot="input-group"` (recipes such as
- * `ui/combobox.tsx`'s popup select on it); `className` places the group.
+ * `className` places the group.
  */
 function PasswordInput(props: React.ComponentProps<typeof InputGroup>): React.ReactNode {
   const [visible, setVisible] = React.useState(false);
   const context = React.useMemo(() => ({ visible, toggle: () => setVisible((current) => !current) }), [visible]);
   return (
     <PasswordInputContext.Provider value={context}>
-      <InputGroup data-visible={visible || undefined} {...props} />
+      <InputGroup data-slot="password-input" data-visible={visible || undefined} {...props} />
     </PasswordInputContext.Provider>
   );
 }
 
 /**
  * The password input, upstream's `InputGroupInput`, typed `password` or `text`
- * as the root says. Every other prop (`ref`/`onChange` for RHF `register`,
+ * as the root says. It keeps upstream's `data-slot="input-group-control"`,
+ * which the group's focus ring and invalid ring select on. Every other prop (`ref`/`onChange` for RHF `register`,
  * ref-as-prop in React 19) flows straight to the input.
  */
 function PasswordInputInput(props: Omit<React.ComponentProps<typeof InputGroupInput>, 'type'>): React.ReactNode {
@@ -74,6 +74,7 @@ function PasswordInputToggle({
   const iconRef = React.useRef<EyeIconHandle & EyeOffIconHandle>(null);
   return (
     <InputGroupButton
+      data-slot="password-input-toggle"
       size="icon-xs"
       variant="ghost"
       aria-pressed={visible}

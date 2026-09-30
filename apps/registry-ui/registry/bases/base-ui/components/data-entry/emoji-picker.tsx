@@ -277,6 +277,7 @@ function EmojiPickerSearch({
   const iconRef = React.useRef<SearchIconHandle>(null);
   return (
     <InputGroup
+      data-slot="emoji-picker-search"
       className={className}
       onMouseEnter={() => iconRef.current?.startAnimation()}
       onMouseLeave={() => iconRef.current?.stopAnimation()}
@@ -311,7 +312,13 @@ function EmojiPickerSearch({
  * the popover surface so rows scrolling under it stay hidden.
  */
 function EmojiPickerGroupLabel({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
-  return <div className={cn('bg-popover text-muted-foreground px-2 py-1.5 text-xs', className)} {...props} />;
+  return (
+    <div
+      data-slot="emoji-picker-group-label"
+      className={cn('bg-popover text-muted-foreground px-2 py-1.5 text-xs', className)}
+      {...props}
+    />
+  );
 }
 
 // `style` is taken: the root carries the grid metrics as CSS variables there.
@@ -421,7 +428,13 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
   const sticky = stickyIndex >= 0 ? rows[stickyIndex] : undefined;
 
   return (
-    <div ref={rootRef} className={cn('h-(--emoji-picker-height)', className)} style={metrics} {...props}>
+    <div
+      ref={rootRef}
+      data-slot="emoji-picker-content"
+      className={cn('h-(--emoji-picker-height)', className)}
+      style={metrics}
+      {...props}
+    >
       <ScrollArea ref={setScrollRoot} className="h-full">
         {/* Inset past the ScrollArea's scrollbar (w-2.5) on both sides: the bar sits over the viewport's edge and would cover the last column. */}
         <div className="relative w-full" style={{ height: total }}>
@@ -461,14 +474,14 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
 }
 
 /**
- * The no-results state: renders its `children` (an upstream `Empty` the
- * consumer composes) only while a search matches nothing, as upstream's
+ * The no-results state: renders, with its `children` (an upstream `Empty` the
+ * consumer composes), only while a search matches nothing, as upstream's
  * `ComboboxEmpty` does. Place it in `EmojiPickerContent`.
  */
-function EmojiPickerEmpty({ children }: { children: React.ReactNode }): React.ReactNode {
+function EmojiPickerEmpty(props: React.ComponentProps<'div'>): React.ReactNode {
   const { results } = useEmojiPicker();
   if (!results || results.length > 0) return null;
-  return children;
+  return <div data-slot="emoji-picker-empty" {...props} />;
 }
 
 /**
@@ -484,6 +497,7 @@ function EmojiPickerNav(
   if (results) return null;
   return (
     <ToggleGroup
+      data-slot="emoji-picker-nav"
       spacing={0}
       value={[active]}
       onValueChange={(next: string[]) => {
@@ -513,6 +527,7 @@ function EmojiPickerNavItem({
   const icon = CATEGORY_ICONS[value] ?? CATEGORY_ICONS.smileys_people;
   return (
     <ToggleGroupItem
+      data-slot="emoji-picker-nav-item"
       value={value}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
@@ -541,6 +556,7 @@ function EmojiPickerNavItem({
 function EmojiPickerGrid({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   return (
     <div
+      data-slot="emoji-picker-grid"
       className={cn('grid grid-cols-(--emoji-picker-columns) justify-items-center gap-(--emoji-picker-gap)', className)}
       {...props}
     />
@@ -560,6 +576,7 @@ function EmojiPickerCell({ emoji, className, onClick, ...props }: EmojiPickerCel
   const { select } = useEmojiPicker();
   return (
     <Button
+      data-slot="emoji-picker-cell"
       type="button"
       title={emoji.n}
       aria-label={emoji.n}
