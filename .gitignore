@@ -43,6 +43,12 @@ Thumbs.db
 .nx/migrate-runs
 .claude/worktrees
 .claude/settings.local.json
+.worktrees/
+
+# subagent-driven-development scratch, one directory per plan: its ledger, task
+# briefs, implementer reports and review packages. Git history is the record that
+# outlives a run, so none of it is committed.
+.superpowers/
 
 # Next.js
 .next
@@ -55,7 +61,6 @@ Thumbs.db
 
 out
 test-output
-vite.config.*.timestamp*
 
 # Local secrets: nx loads the root .env into every task, which is how `rclone:sync` reads its keys
 # locally. Commit only *.example.
@@ -85,3 +90,9 @@ apps/registry-ui/public/r
 apps/registry-ui-e2e/screenshots
 playwright-report
 test-results
+
+# @vitest/browser-playwright's own output - a failed assertion's screenshot, and its attachment store
+__screenshots__/
+.vitest-attachments/
+
+gate.log
