@@ -22,16 +22,15 @@ its cost are here.
   `hooks/use-mobile.ts` and `lib/utils.ts`; that is where this file departs from the stamp.
   Every primitive there is `shadcn add <item> -o` output, byte for byte, and imports `cn`
   from the `cn` package as upstream now does.
-- **Animated icons come from `@lucide-animated`, addressed by full URL and never vendored.**
-  467 MIT icons on Lucide + Motion, both already declared here. shadcn's public directory
-  (`ui.shadcn.com/r/registries.json`) lists it, so `@lucide-animated/<icon>` resolves with no
-  consumer config - but only for as long as shadcn keeps listing it, so composed items name
-  `https://lucide-animated.com/r/<icon>.json` the way they already name this registry's own
-  items. They stay out of `registry/` because they are `registry:ui` primitives and this
-  registry publishes composed items only. **The cost:** their icons are documented as
-  hover-animated; the `MenuIconHandle` ref (`startAnimation` / `stopAnimation`) that drives one
-  from an open/closed state is exported and typed but undocumented, so any state-driven toggle
-  built on them rests on an unpublished contract.
+- **Animated icons come from `@lucide-animated`, vendored like the primitives and named by URL.**
+  467 MIT icons on Lucide + Motion, both already declared here. Each one an item uses is
+  `shadcn add` output under `registry/bases/base-ui/ui/`, never edited and never published, because
+  it is a `registry:ui` primitive and this registry publishes composed items only. An item names it in
+  `registryDependencies` as `https://lucide-animated.com/r/<icon>.json`, not `@lucide-animated/<icon>`:
+  the short form resolves only while shadcn's public directory (`ui.shadcn.com/r/registries.json`)
+  keeps listing it. An icon inside a control animates on that control's hover or focus through the
+  icon's handle. **The cost:** the handle (`startAnimation` / `stopAnimation`) is exported and typed
+  but undocumented, so every control that drives one rests on an unpublished contract.
 - **Build & test tooling** - `@nx/js/typescript` (build + typecheck), `@nx/vite`, `@nx/next/plugin`
   for the registry app; **vitest** for unit, **Playwright** for e2e, `@nx/eslint` for lint. One
   unit runner throughout - this repo has no jest, where the backend repos deliberately split.
@@ -53,7 +52,7 @@ its cost are here.
   holds each page to its registry item, its demo and its install command. `rehypeDocsCode` reads a
   demo's source from disk as its page compiles, so in `next dev` an edited demo shows its old
   source until the page's `.mdx` is saved again.
-- **The worker is 5181 KiB gzipped**, measured with `wrangler deploy --dry-run --env production`
+- **The worker is 5220 KiB gzipped**, measured with `wrangler deploy --dry-run --env production`
   on 2026-09-30. That is above the free plan's 3 MiB and below the paid plan's 10 MiB. Shiki runs
   in one server layer only: a docs page's code is highlighted as it compiles (`rehypeDocsCode`), so
   the RSC layer imports no grammar and the SSR layer holds the one set the registry's `CodeBlock`
@@ -171,6 +170,6 @@ cat <project>/node_modules/@zeroxsolutions/<lib>/README.md
 | `@zeroxsolutions/editor-core` | editor primitives | any frontend | authored here |
 | `@zeroxsolutions/routing` | route units: a path's pattern and its URL builder | any frontend | `0.0.7`, one declarer; `src/routes/app-routes.ts` declares each path the site links to, and `app-routes.spec.ts` holds each to a page |
 | shadcn registry | composed UI items | any frontend | this repo **is** the registry - see the first choice above |
-| `@lucide-animated` | animated icons | any frontend | consumed as a registry dependency, never vendored - see the choice above |
+| `@lucide-animated` | animated icons | any frontend | vendored as `shadcn add` output, named by URL in `registryDependencies` - see the choice above |
 
 `@zeroxsolutions/ui` is gone: the package was deleted upstream and the registry replaced it.
