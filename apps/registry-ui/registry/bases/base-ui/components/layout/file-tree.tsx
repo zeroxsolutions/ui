@@ -23,7 +23,7 @@ function useFileTree(): FileTreeContextValue {
 }
 
 /** 1-based depth, incremented by every nested <FileTreeGroup> for `aria-level`. */
-const DepthContext = React.createContext(1);
+const FileTreeDepthContext = React.createContext(1);
 
 interface FileTreeItemContextValue {
   value: string;
@@ -47,18 +47,18 @@ function useFileTreeItem(): FileTreeItemContextValue {
 }
 
 /** All currently-rendered (therefore visible) tree items, in DOM order. */
-function visibleItems(root: HTMLElement): HTMLLIElement[] {
+function fileTreeVisibleItems(root: HTMLElement): HTMLLIElement[] {
   return Array.from(root.querySelectorAll<HTMLLIElement>('[role="treeitem"]'));
 }
 
-function levelOf(el: HTMLElement): number {
+function fileTreeLevelOf(el: HTMLElement): number {
   return Number(el.getAttribute('aria-level') ?? '1');
 }
 
 /** WAI-ARIA APG Tree View keyboard handling (single-select). */
-function handleTreeKeyDown(event: React.KeyboardEvent, ctx: FileTreeContextValue): void {
+function fileTreeHandleKeyDown(event: React.KeyboardEvent, ctx: FileTreeContextValue): void {
   const root = event.currentTarget as HTMLElement;
-  const items = visibleItems(root);
+  const items = fileTreeVisibleItems(root);
   if (items.length === 0) return;
 
   const current = (event.target as HTMLElement).closest<HTMLLIElement>('[role="treeitem"]');
@@ -106,9 +106,9 @@ function handleTreeKeyDown(event: React.KeyboardEvent, ctx: FileTreeContextValue
       if (open) {
         ctx.setExpanded(current.dataset.value!, false);
       } else {
-        const level = levelOf(current);
+        const level = fileTreeLevelOf(current);
         for (let i = index - 1; i >= 0; i--) {
-          if (levelOf(items[i]) < level) {
+          if (fileTreeLevelOf(items[i]) < level) {
             focus(items[i]);
             break;
           }
@@ -147,7 +147,7 @@ interface FileTreeProps extends Omit<React.ComponentProps<'ul'>, 'onSelect'> {
 
 // `Tree` is not a shape the design system publishes; nothing upstream names a
 // hierarchy, so the root keeps the name of what it draws. `TreeItem`
-// (data-entry/tree-item) draws a similar row and is kept a separate tree until
+// (data-display/tree-item) draws a similar row and is kept a separate tree until
 // a change shows the two move together.
 /**
  * An accessible **file tree** (WAI-ARIA APG Tree View) for navigating a file
@@ -218,7 +218,7 @@ function FileTree({
   React.useEffect(() => {
     const root = treeRef.current;
     if (!root) return;
-    const items = visibleItems(root);
+    const items = fileTreeVisibleItems(root);
     if (items.length === 0) return;
     const hasActive = activeValue != null && items.some((el) => el.dataset.value === activeValue);
     if (!hasActive && items[0].dataset.value) {
@@ -228,21 +228,21 @@ function FileTree({
 
   return (
     <FileTreeContext.Provider value={ctx}>
-      <DepthContext.Provider value={1}>
+      <FileTreeDepthContext.Provider value={1}>
         <ul
           role="tree"
           data-slot="file-tree"
           className={cn('text-sm select-none', className)}
           onKeyDown={(e) => {
             onKeyDown?.(e);
-            if (!e.defaultPrevented) handleTreeKeyDown(e, ctx);
+            if (!e.defaultPrevented) fileTreeHandleKeyDown(e, ctx);
           }}
           {...props}
           ref={setTreeRef}
         >
           {children}
         </ul>
-      </DepthContext.Provider>
+      </FileTreeDepthContext.Provider>
     </FileTreeContext.Provider>
   );
 }
@@ -260,7 +260,7 @@ interface FileTreeItemProps extends React.ComponentProps<'li'> {
 function FileTreeItem({ value, className, children, onFocus, onBlur, ...props }: FileTreeItemProps): React.ReactNode {
   const ctx = useFileTree();
   const [focused, setFocused] = React.useState(false);
-  const level = React.useContext(DepthContext);
+  const level = React.useContext(FileTreeDepthContext);
   const labelId = React.useId();
   const folder = React.useMemo(
     () => React.Children.toArray(children).some((child) => React.isValidElement(child) && child.type === FileTreeGroup),
@@ -290,10 +290,8 @@ function FileTreeItem({ value, className, children, onFocus, onBlur, ...props }:
         aria-labelledby={labelId}
         data-slot="file-tree-item"
         data-value={value}
-        data-folder={folder ? '' : undefined}
-        data-selected={selected ? '' : undefined}
         tabIndex={tabbable ? 0 : -1}
-        className={cn('group/treeitem outline-none', className)}
+        className={cn('group/file-tree-item outline-none', className)}
         onFocus={(e) => {
           onFocus?.(e);
           if (e.target !== e.currentTarget) return;
@@ -350,7 +348,7 @@ function FileTreeLabel({
       className={cn(
         'text-foreground/80 flex h-7 cursor-pointer items-center gap-1.5 rounded-md pr-2 transition-colors',
         'hover:bg-muted hover:text-foreground',
-        'group-focus-visible/treeitem:ring-ring/50 group-focus-visible/treeitem:ring-2',
+        'group-focus-visible/file-tree-item:ring-ring/50 group-focus-visible/file-tree-item:ring-2',
         'data-[selected]:bg-muted data-[selected]:text-foreground data-[selected]:font-medium',
         className,
       )}
@@ -394,11 +392,11 @@ function FileTreeGroup({ className, children, ...props }: FileTreeGroupProps): R
   const item = useFileTreeItem();
   if (!item.expanded) return null;
   return (
-    <DepthContext.Provider value={item.level + 1}>
+    <FileTreeDepthContext.Provider value={item.level + 1}>
       <ul role="group" data-slot="file-tree-group" className={cn(className)} {...props}>
         {children}
       </ul>
-    </DepthContext.Provider>
+    </FileTreeDepthContext.Provider>
   );
 }
 
