@@ -18,17 +18,16 @@ interface DocsNeighbourLinkProps {
 
 /** The page header's icon link to the previous or the next page; its arrow plays on hover or focus. */
 function DocsNeighbourLink({ direction, href }: DocsNeighbourLinkProps): ReactNode {
-  const left = useIconAnimation<ArrowLeftIconHandle>();
-  const right = useIconAnimation<ArrowRightIconHandle>();
+  const arrow = useIconAnimation<ArrowLeftIconHandle | ArrowRightIconHandle>();
 
   return (
     <Link
       href={href}
       aria-label={direction === 'previous' ? 'Previous page' : 'Next page'}
       className={buttonVariants({ variant: 'secondary', size: 'icon-sm' })}
-      {...(direction === 'previous' ? left : right).handlers}
+      {...arrow.handlers}
     >
-      {direction === 'previous' ? <ArrowLeftIcon ref={left.ref} /> : <ArrowRightIcon ref={right.ref} />}
+      {direction === 'previous' ? <ArrowLeftIcon ref={arrow.ref} /> : <ArrowRightIcon ref={arrow.ref} />}
     </Link>
   );
 }

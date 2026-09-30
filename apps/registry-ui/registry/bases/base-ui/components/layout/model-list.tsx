@@ -60,13 +60,14 @@ function ModelListAction({ className, ...props }: React.ComponentProps<'div'>): 
 /**
  * The scrolling region, a `ScrollArea` filling the rest of the frame: item
  * groups, an empty state or a `ModelListSkeleton`, stacked. An `Item` inside it
- * with `data-unavailable={true}` is dimmed.
+ * with `data-unavailable={true}` is dimmed from here, because upstream `Item` has no
+ * disabled variant to carry it.
  */
 function ModelListContent({ className, children, ...props }: React.ComponentProps<typeof ScrollArea>): React.ReactNode {
   return (
     <ScrollArea
       data-slot="model-list-content"
-      className={cn('min-h-0 flex-1 **:data-[slot=item]:data-[unavailable=true]:opacity-55', className)}
+      className={cn('min-h-0 flex-1 **:data-[slot=item]:data-[unavailable=true]:opacity-50', className)}
       {...props}
     >
       <div className="flex flex-col gap-4 py-3">{children}</div>

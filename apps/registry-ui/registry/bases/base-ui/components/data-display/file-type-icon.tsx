@@ -12,7 +12,9 @@ interface FileTypeIconProps extends LucideProps {
  * A lucide icon chosen for a file's type from its extension (`run.py` -> code,
  * `logo.png` -> image, `Inter.woff2` -> type, unknown -> a generic file).
  * Decorative: pair it with the visible file name, or pass `aria-label` when it
- * stands alone. Every `LucideProps` passes through.
+ * stands alone. Every `LucideProps` passes through. Every glyph is a static
+ * `lucide-react` one, `FileText` included where an animated twin is vendored:
+ * one icon set keeps the props this component takes the same for every type.
  */
 function FileTypeIcon({ name, ...props }: FileTypeIconProps): ReactNode {
   const Icon = fileTypeIcon(name);

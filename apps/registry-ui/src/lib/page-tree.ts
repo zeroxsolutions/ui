@@ -14,8 +14,9 @@ export interface PageTreeGroup {
  * groups of the folders inside it. A folder's index page sits among its children only where the
  * folder's `meta.json` names `"index"`; otherwise, as with a `"..."` rest entry, fumadocs keeps it apart
  * as the folder's `index`, and it is put first here. A folder's index page is left out of its group
- * where that page's own name repeats the folder's - a reader already has the folder's name from the
- * heading above it. A group with no page is dropped.
+ * where that page's own name repeats the folder's and another page follows it in the group - a reader
+ * already has the folder's name from the heading above it. Where it is the group's only page it stays,
+ * or the group, its heading and the only link to the page would go. A group with no page is dropped.
  */
 export function pageTreeGroups(tree: Root): PageTreeGroup[] {
   const groups: PageTreeGroup[] = [];
@@ -24,13 +25,17 @@ export function pageTreeGroups(tree: Root): PageTreeGroup[] {
     let group: PageTreeGroup = { name, pages: [] };
     groups.push(group);
     let leading = true;
+    let repeated: Item | undefined;
     for (const node of nodes) {
       if (node.type === 'page') {
-        if (!(leading && node.name === name)) group.pages.push(node);
+        if (leading && node.name === name) repeated = node;
+        else group.pages.push(node);
         leading = false;
         continue;
       }
       leading = false;
+      if (repeated && group.pages.length === 0) group.pages.push(repeated);
+      repeated = undefined;
       if (node.type === 'folder') {
         const { index, children } = node;
         collect(index && !children.includes(index) ? [index, ...children] : children, node.name);
@@ -38,6 +43,7 @@ export function pageTreeGroups(tree: Root): PageTreeGroup[] {
       group = { name: node.type === 'separator' ? node.name : undefined, pages: [] };
       groups.push(group);
     }
+    if (repeated && group.pages.length === 0) group.pages.push(repeated);
   }
 
   collect(tree.children);

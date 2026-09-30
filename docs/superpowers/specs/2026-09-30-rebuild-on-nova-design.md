@@ -55,7 +55,8 @@ covers every docs page.
 4. **A missing primitive is added, not imitated.** When a region needs a primitive that is not
    vendored yet, it is added with `shadcn add <item> -o`, byte for byte, as the others were.
 5. **Every region that scrolls because its content overflows is a `ScrollArea`**, in the items and in
-   the docs shell alike. A plain `overflow-auto` box is not.
+   the docs shell alike. A plain `overflow-auto` box is not. A vendored primitive's own scroller, such as
+   `SidebarContent` or `CommandList`, counts as the primitive and is used as it comes (rule 1).
 6. **Icons are `@lucide-animated` where it has the glyph**, and `lucide-react` only where it does not.
    An animated icon inside a control animates on that control's hover or focus, not on its own.
 7. **UI copy is sentence case.** Buttons, labels, headings, placeholders, `aria-label`s, empty and

@@ -254,7 +254,10 @@ function AvatarPickerUpload({ className, children, onUpload, ...props }: AvatarP
 }
 
 interface AvatarPickerColorProps extends Omit<React.ComponentProps<typeof TabsContent>, 'value'> {
-  /** Swatches shown on the Color pane. Defaults to twelve hues spread evenly round the wheel. */
+  /**
+   * Swatches shown on the Color pane. Defaults to twelve hues spread evenly round the wheel. They are
+   * the avatar's own colour, a value the picker hands back, so they stay literal rather than theme tokens.
+   */
   colors?: readonly string[];
 }
 

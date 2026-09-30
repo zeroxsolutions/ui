@@ -38,10 +38,50 @@ describe('pageTreeGroups', () => {
     ).toEqual([
       { name: undefined, urls: ['/docs'] },
       { name: 'Get started', urls: ['/docs/installation'] },
-      // Components' own index page repeats the folder's name, already the group's heading above it,
-      // so it is left out; nothing else is left in the folder's own group, and it is gone too.
+      // Components' own index page repeats the folder's name, but it is the folder's only page before
+      // the folder inside it, so it stays: dropped, the Components heading would go with it.
+      { name: 'Components', urls: ['/docs/components'] },
       { name: 'Feedback', urls: ['/docs/components/status-indicator'] },
       { name: undefined, urls: ['/docs/changelog'] },
+    ]);
+  });
+
+  it("leaves out a folder's index page that repeats the folder's name where another page follows it", () => {
+    const tree: Root = {
+      name: 'Docs',
+      children: [
+        {
+          type: 'folder',
+          name: 'Blocks',
+          children: [page('Blocks', '/docs/blocks'), page('AI Provider Picker', '/docs/blocks/ai-provider-picker')],
+        },
+      ],
+    };
+
+    expect(pageTreeGroups(tree)).toEqual([
+      { name: 'Blocks', pages: [page('AI Provider Picker', '/docs/blocks/ai-provider-picker')] },
+    ]);
+  });
+
+  it("keeps a folder's index page that repeats the folder's name where a separator follows it", () => {
+    const tree: Root = {
+      name: 'Docs',
+      children: [
+        {
+          type: 'folder',
+          name: 'Components',
+          children: [
+            page('Components', '/docs/components'),
+            { type: 'separator', name: 'Feedback' },
+            page('Status Indicator', '/docs/components/status-indicator'),
+          ],
+        },
+      ],
+    };
+
+    expect(pageTreeGroups(tree)).toEqual([
+      { name: 'Components', pages: [page('Components', '/docs/components')] },
+      { name: 'Feedback', pages: [page('Status Indicator', '/docs/components/status-indicator')] },
     ]);
   });
 
