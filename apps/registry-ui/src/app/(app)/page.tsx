@@ -19,7 +19,7 @@ export default function HomePage(): ReactNode {
           own primitives, and the shadcn CLI installs it from its URL.
         </p>
       </header>
-      {/* A command shows plain, as the docs' install commands do. */}
+      {/* Shown plain: this page is no MDX, so `rehypeDocsCode` never highlights it, and one command reads as well unhighlighted. */}
       <SourceCodeBlock code={INSTALL} language="bash" lines={null} />
       <div className="flex flex-wrap gap-3">
         <Link href={docsPageUrl(['components'])} className={buttonVariants()}>

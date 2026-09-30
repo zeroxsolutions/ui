@@ -50,7 +50,14 @@ function ComponentPreviewCard({
       {hideCode ? null : (
         <CardContent>
           <div data-slot="component-preview-code" className="flex flex-col gap-2">
-            {codeOpen ? source : sourcePreview}
+            {codeOpen ? (
+              source
+            ) : (
+              // An excerpt to open with `View code`, not a scroller: its overflow clips, and it takes no focus.
+              <div inert className="overflow-hidden **:data-[slot=scroll-area-scrollbar]:hidden">
+                {sourcePreview}
+              </div>
+            )}
             {codeOpen ? null : (
               <Button variant="outline" size="sm" className="self-center" onClick={() => setCodeOpen(true)}>
                 View code

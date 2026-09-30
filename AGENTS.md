@@ -50,7 +50,9 @@ its cost are here.
   the search index, each page's `.md` and each share image included. The worker's incremental
   cache is `static-assets-incremental-cache`, which reads the build's output back and writes
   nothing, so a route rendered on a request has nowhere to be kept. `src/lib/source.spec.ts`
-  holds each page to its registry item, its demo and its install command.
+  holds each page to its registry item, its demo and its install command. `rehypeDocsCode` reads a
+  demo's source from disk as its page compiles, so in `next dev` an edited demo shows its old
+  source until the page's `.mdx` is saved again.
 - **The worker is 5181 KiB gzipped**, measured with `wrangler deploy --dry-run --env production`
   on 2026-09-30. That is above the free plan's 3 MiB and below the paid plan's 10 MiB. Shiki runs
   in one server layer only: a docs page's code is highlighted as it compiles (`rehypeDocsCode`), so
@@ -58,7 +60,10 @@ its cost are here.
   loads lazily. In the server output, gzipping a tar of each package directory, the Shiki grammars
   (`@shikijs/langs` 4.2.0) come to 1261 KiB, the `next` package to 3748 KiB, and the share images'
   `resvg.wasm` to 516 KiB; fumadocs-core's own Shiki 4.4.3 leaves only its manifests (3 KiB). The
-  tar figure is of the whole copied directory, not of what the bundle pulls from it. The demos are
+  tar figure is of the whole copied directory, not of what the bundle pulls from it, and it does not
+  compare with the 2710-2713 KiB recorded before, which gzipped the same directory file by file in
+  `find`'s order. Each docs page also carries its whole Markdown in its RSC payload for the copy
+  button, and a preview carries its highlighted lines twice (the teaser and the full source). The demos are
   lazy imports already, and a lazy chunk still ships in the worker. A deploy on the free plan needs
   that cut first.
 - **No project carries a `wrangler:deploy` target yet.** `registry-ui` has its worker config

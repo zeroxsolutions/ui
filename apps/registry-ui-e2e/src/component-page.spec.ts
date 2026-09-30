@@ -58,11 +58,11 @@ test('a component page previews the item, shows its source, and pages on', async
 
   // The Command tab is the install section's default: one pnpm command, headed by its language.
   await expect(page.getByRole('tab', { name: 'Command', selected: true })).toBeVisible();
-  const install = page.locator('[data-slot=code-block]').filter({ hasText: 'pnpm dlx shadcn@latest add' }).first();
+  const install = page.getByRole('tabpanel').filter({ hasText: 'pnpm dlx shadcn@latest add' }).first();
   await expect(install.getByText('bash', { exact: true })).toBeVisible();
   await expect(install.getByRole('tab')).toHaveCount(0);
 
-  // A usage fence is headed by its language.
+  // A usage fence is headed by its language. A code block and the preview card carry no role, so their slots name them.
   const usage = page.locator('[data-slot=code-block]').filter({ hasText: 'import { StatusIndicator }' }).first();
   await expect(usage.getByText('tsx', { exact: true })).toBeVisible();
 
@@ -81,14 +81,17 @@ for (const [width, height] of [
     await page.goto(PAGE);
 
     // The install command and a usage fence.
-    const blocks = page
-      .locator('[data-slot=code-block]')
-      .filter({ has: page.locator('[data-slot=code-block-copy]:visible') });
+    const copyCode = page.getByRole('button', { name: 'Copy code' }).filter({ visible: true });
+    const blocks = page.locator('[data-slot=code-block]').filter({ has: copyCode });
     const count = await blocks.count();
     expect(count).toBeGreaterThanOrEqual(2);
     for (let index = 0; index < count; index++) {
       const block = blocks.nth(index);
-      const button = await block.locator('[data-slot=code-block-copy]:visible').first().boundingBox();
+      const button = await block
+        .getByRole('button', { name: 'Copy code' })
+        .filter({ visible: true })
+        .first()
+        .boundingBox();
       expect(button).not.toBeNull();
       expect(intersects(button!, await visibleCodeBox(block))).toBe(false);
     }

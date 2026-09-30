@@ -48,7 +48,7 @@ function ComponentPreview({
       previewClassName={block ? 'h-auto' : previewClassName}
       component={
         block ? (
-          <BlockFrame name={block.name} title={block.title} className="rounded-none border-0" />
+          <BlockFrame name={block.name} title={block.title} framed={false} />
         ) : (
           <ComponentPreviewDemo name={name} />
         )

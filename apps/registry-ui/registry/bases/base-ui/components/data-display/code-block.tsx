@@ -96,9 +96,10 @@ function CodeBlock({
         )}
         <CollapsibleCardContent>
           {/* A ScrollArea rather than overflow-x-auto, so long lines scroll on the styled rail instead of the OS overlay bar. */}
+          {/* The pre's bottom padding clears that rail, which Base UI positions over the viewport's bottom edge. */}
           <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
             <ScrollAreaPrimitive.Viewport data-slot="code-block-viewport" className="w-full">
-              <pre className={cn('m-0 px-3 py-2 text-xs leading-relaxed', lineNumbers && 'flex gap-4')}>
+              <pre className={cn('m-0 px-3 pt-2 pb-3 text-xs leading-relaxed', lineNumbers && 'flex gap-4')}>
                 {lineNumbers ? (
                   <span
                     aria-hidden
