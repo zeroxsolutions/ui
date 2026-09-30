@@ -366,7 +366,7 @@
       "name": "password-input",
       "type": "registry:component",
       "title": "Password Input",
-      "description": "A password field with a show or hide toggle packaged into the addon, so a call site never wires the eye button itself.",
+      "description": "A password field over upstream InputGroup whose composed toggle shows or hides the password.",
       "categories": ["data-entry"],
       "registryDependencies": [
         "@shadcn/input-group",
@@ -1115,7 +1115,11 @@
       "title": "Password Input Demo",
       "description": "A labelled PasswordInput with its show or hide toggle.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/field", "https://ui.zeroxsolutions.com/r/password-input.json"],
+      "registryDependencies": [
+        "@shadcn/field",
+        "@shadcn/input-group",
+        "https://ui.zeroxsolutions.com/r/password-input.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/password-input-demo.tsx",
