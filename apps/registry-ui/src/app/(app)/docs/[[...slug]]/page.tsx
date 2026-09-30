@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 import { DocsPager } from '@/components/navigation/docs-pager';
 import { DocsToc } from '@/components/navigation/docs-toc';
-import { source } from '@/lib/source';
+import { docsPageImage, source } from '@/lib/source';
 import { mdxComponents } from '@/mdx-components';
 
 export const revalidate = false;
@@ -23,7 +23,11 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
   const page = source.getPage((await params).slug);
   if (!page) notFound();
 
-  return { title: page.data.title, description: page.data.description };
+  return {
+    title: page.data.title,
+    description: page.data.description,
+    openGraph: { images: docsPageImage(page).url },
+  };
 }
 
 export default async function DocsPage({ params }: DocsPageProps): Promise<ReactNode> {

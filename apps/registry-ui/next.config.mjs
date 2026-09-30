@@ -12,6 +12,12 @@ const nextConfig = {
   // Unset, `next dev` run by a coding agent writes an AGENTS.md and a CLAUDE.md into this app,
   // beside the repo's own CLAUDE.md, and re-creates them whenever they are deleted.
   agentRules: false,
+  // A docs page's Markdown is a route handler under /llms.mdx; a path cannot end a catch-all segment in
+  // `.md`, so the address readers use is rewritten to it.
+  rewrites: async () => [
+    { source: '/docs.md', destination: '/llms.mdx/docs/content.md' },
+    { source: '/docs/:path*.md', destination: '/llms.mdx/docs/:path*/content.md' },
+  ],
 };
 
 const withMDX = createMDX();

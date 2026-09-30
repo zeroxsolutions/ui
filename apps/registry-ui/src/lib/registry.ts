@@ -1,5 +1,8 @@
 import registry from '../../registry.json';
 
+/** The origin the registry is served from, which its items name each other by and the sitemap lists pages at. */
+export const registryHomepage = registry.homepage;
+
 /** A component or block `registry.json` publishes, as the docs list it. */
 export interface PublishedItem {
   name: string;
