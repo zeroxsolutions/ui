@@ -6,7 +6,7 @@ import {
   AiProviderCard,
   AiProviderCardAction,
   AiProviderCardDescription,
-  AiProviderCardStatus,
+  AiProviderCardLabel,
   AiProviderCardTrigger,
 } from '@/registry/bases/base-ui/components/data-display/ai-provider-card';
 import { CardFooter, CardHeader, CardTitle } from '@/registry/bases/base-ui/ui/card';
@@ -42,7 +42,7 @@ function AiProviderCardDemo(): ReactNode {
               <AiProviderCardDescription>{provider.description}</AiProviderCardDescription>
             </CardHeader>
             <CardFooter className="mt-auto justify-between">
-              <AiProviderCardStatus>{provider.note}</AiProviderCardStatus>
+              <AiProviderCardLabel>{provider.note}</AiProviderCardLabel>
               <AiProviderCardAction>
                 <Switch
                   size="sm"

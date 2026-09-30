@@ -6,7 +6,7 @@ import {
   AiProviderCard,
   AiProviderCardAction,
   AiProviderCardDescription,
-  AiProviderCardStatus,
+  AiProviderCardLabel,
   AiProviderCardTrigger,
 } from './ai-provider-card';
 
@@ -58,7 +58,7 @@ describe('AiProviderCard', () => {
     const { container } = render(
       <AiProviderCard status="busy">
         <CardFooter>
-          <AiProviderCardStatus>Command failed</AiProviderCardStatus>
+          <AiProviderCardLabel>Command failed</AiProviderCardLabel>
         </CardFooter>
       </AiProviderCard>,
     );
