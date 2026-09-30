@@ -10,6 +10,16 @@
   html {
     @apply overscroll-y-none;
   }
+
+  /* The docs' sidebar lists on the surface it sits on, the page or the mobile sheet, rather than on the
+     theme's sidebar tint; the vendored Sidebar has no variant for this under `collapsible="none"`. */
+  [data-slot='sidebar-wrapper'] {
+    --sidebar: var(--background);
+  }
+
+  [data-slot='sheet-content'] [data-slot='sidebar-wrapper'] {
+    --sidebar: var(--popover);
+  }
 }
 
 @layer components {

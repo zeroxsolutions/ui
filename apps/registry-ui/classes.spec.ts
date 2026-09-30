@@ -41,7 +41,10 @@ const PRIMITIVE_LOOK =
   /^-?(?:h|min-h|max-h|size|p[xytrblse]?|rounded(?:-[a-z]+)?|text|font|leading|tracking|bg|border(?:-[xytrbl])?|ring|shadow|fill|stroke|outline|decoration)(?:-|$)/;
 const LAYOUT_KEPT =
   /^(?:(?:h|min-h|max-h|size)-(?:full|auto|0|fit|min|max|none|svh)|text-(?:left|center|right|start|end|wrap|nowrap|balance|pretty|ellipsis|clip)|font-(?:mono|sans)|outline-(?:none|hidden))$/;
-const VARIABLE_DECLARATION = /^\[--([\w-]+):/;
+const VARIABLE_DECLARATION = /^\[--([\w-]+):([^\]]*)\]$/;
+/** The terms a size is written with: the spacing unit, numbers and length units, `calc` and arithmetic. */
+const SIZE_TERM =
+  /var\(--spacing\)|--spacing\(\d+(?:\.\d+)?\)|calc|\d+(?:\.\d+)?(?:px|rem|em|svh|dvh|lvh|vh|%)?|[-+*/()_ ]/g;
 /** A colour literal or function inside a custom property's value: `#hex`, `rgb(`/`rgba(`, `hsl(`/`hsla(`, `oklch(`, `oklab(`, `lab(`, `lch(`, `color(`. */
 const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(/;
 const PRIMITIVE_MODULE = /\/registry\/bases\/base-ui\/ui\//;
@@ -92,38 +95,86 @@ interface ClassContext {
   layoutVariables?: ReadonlySet<string>;
   /** Whether a custom property may be declared here: anywhere in the registry, only a layout in the site. */
   mayDeclare?: boolean;
+  /** Whether a declared custom property must hold a size, as the site's layout variables do. */
+  sizesOnly?: boolean;
+}
+
+/** Whether a custom property's value is a size built on the spacing unit, such as `calc(var(--spacing)*14)`. */
+export function isSizeValue(value: string): boolean {
+  return value.trim() !== '' && (value.match(SIZE_TERM) ?? []).join('') === value;
 }
 
 /** Which rule a class breaks, or null. */
 export function classViolation(
   className: string,
-  { onPrimitive = false, reachesChildren = false, layoutVariables = new Set(), mayDeclare = true }: ClassContext = {},
+  {
+    onPrimitive = false,
+    reachesChildren = false,
+    layoutVariables = new Set(),
+    mayDeclare = true,
+    sizesOnly = false,
+  }: ClassContext = {},
 ): string | null {
   const utility = utilityOf(className);
   if (PALETTE.test(utility)) return 'palette colour';
   if (isLayoutSize(utility, layoutVariables)) return null;
-  const declaresVariable = VARIABLE_DECLARATION.test(utility);
-  if (declaresVariable && !mayDeclare) return 'arbitrary value';
+  const declaration = VARIABLE_DECLARATION.exec(utility);
+  const declaresVariable = declaration !== null;
+  if (declaration && (!mayDeclare || (sizesOnly && !isSizeValue(declaration[2])))) return 'arbitrary value';
   if (utility.includes('[') && (!declaresVariable || COLOR_LITERAL.test(utility))) return 'arbitrary value';
   const restyles = onPrimitive || (reachesChildren && DESCENDANT_VARIANT.test(className));
   if (restyles && PRIMITIVE_LOOK.test(utility) && !LAYOUT_KEPT.test(utility)) return 'restyles a primitive';
   return null;
 }
 
-/** The custom properties a module declares, as a class (`[--x:...]`) or a style key (`'--x':`). */
-function declaredVariables(text: string): string[] {
-  return [...text.matchAll(/\[--([\w-]+):|['"]--([\w-]+)['"]\s*:/g)].map((match) => match[1] ?? match[2]);
+/** The custom properties a module declares, as a class (`[--x:...]`) or a style key (`'--x': '...'`), with their values. */
+function declaredVariables(text: string): { name: string; value: string }[] {
+  return [...text.matchAll(/\[--([\w-]+):([^\]\s]*)\]|['"]--([\w-]+)['"]\s*:\s*['"]([^'"]*)['"]/g)].map((match) => ({
+    name: match[1] ?? match[3],
+    value: match[2] ?? match[4],
+  }));
 }
 
-/** Each variable a site layout declares, with the layouts that declare it. */
+/** Each size variable a site layout declares, with the layouts that declare it; a colour or any other value is no layout size. */
 function layoutDeclarations(): Map<string, string[]> {
   const declarations = new Map<string, string[]>();
   siteLayouts().forEach((file) =>
-    new Set(declaredVariables(readSource(file))).forEach((name) =>
-      declarations.set(name, [...(declarations.get(name) ?? []), file]),
-    ),
+    new Set(
+      declaredVariables(readSource(file))
+        .filter(({ value }) => isSizeValue(value))
+        .map(({ name }) => name),
+    ).forEach((name) => declarations.set(name, [...(declarations.get(name) ?? []), file])),
   );
   return declarations;
+}
+
+/** The module path a site file is imported by, `@/<path>` without its extension. */
+function importPathOf(file: string): string {
+  return `@/${file.replace(/^src\//, '').replace(/\.tsx?$/, '')}`;
+}
+
+/**
+ * The primitives a site module passes on (`export { X } from '<ui module>'`), keyed by the path it is
+ * imported by, so an import of `X` from it is held to the primitive rule as an import from `ui/` is.
+ */
+function primitiveReexports(files: string[]): Map<string, Set<string>> {
+  const reexports = new Map<string, Set<string>>();
+  files
+    .filter((file) => file.startsWith('src/'))
+    .forEach((file) => {
+      const source = parseTsxSource(file, readSource(file));
+      source.statements.forEach((statement) => {
+        if (!ts.isExportDeclaration(statement) || !statement.moduleSpecifier) return;
+        if (!ts.isStringLiteral(statement.moduleSpecifier) || !PRIMITIVE_MODULE.test(statement.moduleSpecifier.text))
+          return;
+        const clause = statement.exportClause;
+        if (!clause || !ts.isNamedExports(clause)) return;
+        const names = reexports.get(importPathOf(file)) ?? new Set<string>();
+        clause.elements.forEach((element) => names.add(element.name.text));
+        reexports.set(importPathOf(file), names);
+      });
+    });
+  return reexports;
 }
 
 interface Violation {
@@ -138,14 +189,24 @@ function isSite(file: string): boolean {
   return file.startsWith('src/');
 }
 
-function violationsIn(file: string, text: string, layoutVariables: ReadonlySet<string> = new Set()): Violation[] {
+function violationsIn(
+  file: string,
+  text: string,
+  layoutVariables: ReadonlySet<string> = new Set(),
+  reexports: ReadonlyMap<string, ReadonlySet<string>> = new Map(),
+): Violation[] {
   const source = parseTsxSource(file, text);
   const primitives = new Set<string>();
   source.statements.forEach((statement) => {
     if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) return;
-    if (!PRIMITIVE_MODULE.test(statement.moduleSpecifier.text)) return;
+    const from = statement.moduleSpecifier.text;
+    const passedOn = reexports.get(from);
+    if (!PRIMITIVE_MODULE.test(from) && !passedOn) return;
     const bindings = statement.importClause?.namedBindings;
-    if (bindings && ts.isNamedImports(bindings)) bindings.elements.forEach((e) => primitives.add(e.name.text));
+    if (!bindings || !ts.isNamedImports(bindings)) return;
+    bindings.elements
+      .filter((element) => !passedOn || passedOn.has((element.propertyName ?? element.name).text))
+      .forEach((element) => primitives.add(element.name.text));
   });
   const site = isSite(file);
   const mayDeclare = !site || file.endsWith('/layout.tsx');
@@ -155,7 +216,13 @@ function violationsIn(file: string, text: string, layoutVariables: ReadonlySet<s
     literalTexts(node)
       .flatMap((text) => text.split(/\s+/).filter(Boolean))
       .forEach((className) => {
-        const rule = classViolation(className, { onPrimitive, reachesChildren: site, layoutVariables, mayDeclare });
+        const rule = classViolation(className, {
+          onPrimitive,
+          reachesChildren: site,
+          layoutVariables,
+          mayDeclare,
+          sizesOnly: site,
+        });
         if (rule) found.push({ file, line: lineOf(source, node), className, rule });
       });
   };
@@ -164,7 +231,26 @@ function violationsIn(file: string, text: string, layoutVariables: ReadonlySet<s
     node.arguments.some(
       (argument) => ts.isCallExpression(argument) && primitives.has(argument.expression.getText(source)),
     );
+  // A custom property set in a `style` object is held to the rule a `[--x:..]` class is.
+  const checkStyle = (node: ts.Node): void => {
+    if (ts.isPropertyAssignment(node) && ts.isStringLiteral(node.name) && node.name.text.startsWith('--')) {
+      const value = ts.isStringLiteralLike(node.initializer) ? node.initializer.text : '';
+      if (!mayDeclare || !isSizeValue(value)) {
+        found.push({
+          file,
+          line: lineOf(source, node),
+          className: `${node.name.text}: ${value}`,
+          rule: 'arbitrary value',
+        });
+      }
+    }
+    ts.forEachChild(node, checkStyle);
+  };
   const visit = (node: ts.Node): void => {
+    if (site && ts.isJsxAttribute(node) && node.name.getText(source) === 'style' && node.initializer) {
+      checkStyle(node.initializer);
+      return;
+    }
     if (ts.isJsxAttribute(node) && node.name.getText(source) === 'className' && node.initializer) {
       const element = node.parent.parent;
       const tag =
@@ -257,6 +343,11 @@ describe('classViolation', () => {
     expect(classViolation('[--sidebar-menu-width:--spacing(56)]', { mayDeclare: false })).toBe('arbitrary value');
   });
 
+  it('lets a site layout declare a size, and nothing else', () => {
+    expect(classViolation('[--header-height:calc(var(--spacing)*14)]', { sizesOnly: true })).toBeNull();
+    expect(classViolation('[--sidebar:var(--background)]', { sizesOnly: true })).toBe('arbitrary value');
+  });
+
   it.each(['**:data-[slot=command-input]:h-9', '*:data-[slot=button]:rounded-lg', '[&_svg]:size-4.5'])(
     '%s reaches into a child and restyles it',
     (className) => {
@@ -304,6 +395,42 @@ describe('violationsIn', () => {
   });
 });
 
+describe('violationsIn on style objects and re-exports', () => {
+  const colourStyle = "const a = <div style={{ '--sidebar': 'var(--background)' }} />;";
+  const sizeStyle = "const a = <div style={{ '--sidebar-width': 'calc(var(--spacing) * 72)' } as CSSProperties} />;";
+
+  it('refuses a custom property in a style object outside a layout', () => {
+    expect(violationsIn('src/components/nav.tsx', sizeStyle).map(({ className }) => className)).toEqual([
+      '--sidebar-width: calc(var(--spacing) * 72)',
+    ]);
+  });
+
+  it('lets a layout set a size in a style object, and refuses a colour there', () => {
+    expect(violationsIn('src/app/docs/layout.tsx', sizeStyle)).toEqual([]);
+    expect(violationsIn('src/app/docs/layout.tsx', colourStyle).map(({ className }) => className)).toEqual([
+      '--sidebar: var(--background)',
+    ]);
+  });
+
+  it('holds a primitive to the rule when a site module passes it on', () => {
+    const source = [
+      "import { SidebarProvider } from '@/components/navigation/docs-sidebar';",
+      'const a = <SidebarProvider className="px-0" />;',
+    ].join('\n');
+    const reexports = new Map([['@/components/navigation/docs-sidebar', new Set(['SidebarProvider'])]]);
+
+    expect(violationsIn('src/app/docs/layout.tsx', source, new Set(), reexports).map(({ rule }) => rule)).toEqual([
+      'restyles a primitive',
+    ]);
+  });
+
+  it('finds the re-export of a primitive in the site', () => {
+    expect(
+      primitiveReexports(['src/components/navigation/docs-sidebar.tsx']).get('@/components/navigation/docs-sidebar'),
+    ).toEqual(new Set(['SidebarProvider']));
+  });
+});
+
 describe('the layout variables', () => {
   it('are each declared by one layout', () => {
     expect(
@@ -317,20 +444,26 @@ describe('the layout variables', () => {
 describe('the registry items and the docs site', () => {
   const files = authoredTsx();
   const layoutVariables = new Set(layoutDeclarations().keys());
+  const reexports = primitiveReexports(files);
 
   it('keep every rebuilt module to the class rules', () => {
     expect(
       files
         .filter((file) => !PENDING.includes(file))
-        .flatMap((file) => violationsIn(file, readSource(file), layoutVariables)),
+        .flatMap((file) => violationsIn(file, readSource(file), layoutVariables, reexports)),
     ).toEqual([]);
   });
 
   it('list as pending only modules that still break a rule', () => {
     expect(
       PENDING.filter(
-        (file) => !files.includes(file) || violationsIn(file, readSource(file), layoutVariables).length === 0,
+        (file) =>
+          !files.includes(file) || violationsIn(file, readSource(file), layoutVariables, reexports).length === 0,
       ),
     ).toEqual([]);
+  });
+
+  it('take no colour as a layout variable', () => {
+    expect([...layoutVariables].sort()).toEqual(['footer-height', 'header-height', 'sidebar-width']);
   });
 });
