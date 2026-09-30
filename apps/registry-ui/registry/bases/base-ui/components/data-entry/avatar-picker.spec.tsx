@@ -6,17 +6,24 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 
+import { EmptyContent, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
+
 import {
   AvatarPicker,
-  AvatarPickerColor,
+  AvatarPickerColorContent,
+  AvatarPickerColorField,
+  AvatarPickerColorGroup,
   AvatarPickerContent,
-  AvatarPickerEmoji,
-  AvatarPickerRemove,
+  AvatarPickerEmojiContent,
+  AvatarPickerRemoveButton,
   AvatarPickerTrigger,
-  AvatarPickerUpload,
+  AvatarPickerUploadContent,
+  AvatarPickerUploadTrigger,
   type AvatarPickerTab,
+  type AvatarPickerUploadContentProps,
   type AvatarPickerValue,
 } from './avatar-picker';
+import { EmojiPickerContent, EmojiPickerSearch } from './emoji-picker';
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn();
@@ -57,23 +64,53 @@ function Picker({
           <div className="flex items-center gap-1">
             {strip && (
               <TabsList variant="line">
-                <TabsTrigger value="emoji" aria-label="Emoji" className="flex-none">
+                <TabsTrigger value="emoji" aria-label="Emoji">
                   <Smile />
                 </TabsTrigger>
-                <TabsTrigger value="upload" aria-label="Upload" className="flex-none">
+                <TabsTrigger value="upload" aria-label="Upload">
                   <Upload />
                 </TabsTrigger>
-                <TabsTrigger value="color" aria-label="Color" className="flex-none">
+                <TabsTrigger value="color" aria-label="Color">
                   <Palette />
                 </TabsTrigger>
               </TabsList>
             )}
-            <AvatarPickerRemove className="ml-auto" onClick={onRemove} />
+            <AvatarPickerRemoveButton className="ml-auto" onClick={onRemove} />
           </div>
           {children}
         </Tabs>
       </AvatarPickerContent>
     </AvatarPicker>
+  );
+}
+
+/** The upload pane as the consumer composes it: a title and the trigger. */
+function UploadPane(props: AvatarPickerUploadContentProps) {
+  return (
+    <AvatarPickerUploadContent {...props}>
+      <EmptyTitle>Upload an image</EmptyTitle>
+      <EmptyContent>
+        <AvatarPickerUploadTrigger>Choose image</AvatarPickerUploadTrigger>
+      </EmptyContent>
+    </AvatarPickerUploadContent>
+  );
+}
+
+function EmojiPane() {
+  return (
+    <AvatarPickerEmojiContent>
+      <EmojiPickerSearch />
+      <EmojiPickerContent />
+    </AvatarPickerEmojiContent>
+  );
+}
+
+function ColorPane() {
+  return (
+    <AvatarPickerColorContent>
+      <AvatarPickerColorGroup aria-label="Colors" />
+      <AvatarPickerColorField>Custom</AvatarPickerColorField>
+    </AvatarPickerColorContent>
   );
 }
 
@@ -83,7 +120,7 @@ describe('AvatarPicker', () => {
   it('shows only the pane the consumer composes when it declares no tab strip', () => {
     render(
       <Picker defaultTab="upload" strip={false}>
-        <AvatarPickerUpload />
+        <UploadPane />
       </Picker>,
     );
     openEditor();
@@ -95,9 +132,9 @@ describe('AvatarPicker', () => {
   it('switches panes through the tabs the consumer declares', () => {
     render(
       <Picker defaultTab="upload">
-        <AvatarPickerEmoji />
-        <AvatarPickerUpload />
-        <AvatarPickerColor />
+        <EmojiPane />
+        <UploadPane />
+        <ColorPane />
       </Picker>,
     );
     openEditor();
@@ -117,11 +154,11 @@ describe('AvatarPicker', () => {
     }
     render(
       <Picker defaultTab="emoji">
-        <AvatarPickerEmoji />
+        <EmojiPane />
         <UploadWrapper>
-          <AvatarPickerUpload />
+          <UploadPane />
         </UploadWrapper>
-        <AvatarPickerColor />
+        <ColorPane />
       </Picker>,
     );
     openEditor();
@@ -131,23 +168,26 @@ describe('AvatarPicker', () => {
     expect(screen.getByText('Upload an image')).toBeTruthy();
   });
 
-  it('lets children override the upload copy', () => {
+  it('renders the copy the consumer composes in the upload pane', () => {
     render(
       <Picker defaultTab="upload">
-        <AvatarPickerUpload>Upload a photo</AvatarPickerUpload>
+        <AvatarPickerUploadContent>
+          <EmptyTitle>Upload a photo</EmptyTitle>
+          <AvatarPickerUploadTrigger>Browse</AvatarPickerUploadTrigger>
+        </AvatarPickerUploadContent>
       </Picker>,
     );
     openEditor();
 
     expect(screen.getByText('Upload a photo')).toBeTruthy();
-    expect(screen.queryByText('Upload an image')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Browse' })).toBeTruthy();
   });
 
-  it('opens the file picker from its button', () => {
+  it('opens the file picker from its trigger', () => {
     const click = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
     render(
       <Picker defaultTab="upload">
-        <AvatarPickerUpload />
+        <UploadPane />
       </Picker>,
     );
     openEditor();
@@ -157,24 +197,26 @@ describe('AvatarPicker', () => {
     click.mockRestore();
   });
 
-  it('names the custom colour field by its label, which children replace', () => {
+  it('names the custom colour input by the label the consumer composes', () => {
     render(
       <Picker defaultTab="color">
-        <AvatarPickerColor>Pick any</AvatarPickerColor>
+        <AvatarPickerColorContent>
+          <AvatarPickerColorField>Pick any</AvatarPickerColorField>
+        </AvatarPickerColorContent>
       </Picker>,
     );
     openEditor();
 
-    expect(screen.getByText('Pick any').getAttribute('for')).toBe(screen.getByLabelText('Custom color').id);
+    expect(screen.getByLabelText('Pick any').getAttribute('type')).toBe('color');
   });
 
-  it('shows it is uploading until onUpload settles, then adopts the resolved URL', async () => {
+  it('is busy, with its trigger disabled, until onUpload settles, then adopts the resolved URL', async () => {
     let resolve: (url: string) => void = () => {};
     const onUpload = vi.fn(() => new Promise<string>((r) => (resolve = r)));
     const onChange = vi.fn();
     render(
       <Picker defaultTab="upload" onValueChange={onChange}>
-        <AvatarPickerUpload onUpload={onUpload} />
+        <UploadPane onUpload={onUpload} />
       </Picker>,
     );
     openEditor();
@@ -184,20 +226,22 @@ describe('AvatarPicker', () => {
     fireEvent.change(input, { target: { files: [file] } });
 
     expect(onUpload).toHaveBeenCalledWith(file);
-    expect(screen.getByText('Uploading...')).toBeTruthy();
+    expect(screen.getByRole('tabpanel').getAttribute('aria-busy')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Choose image' }).hasAttribute('disabled')).toBe(true);
 
     resolve('https://cdn.example/a.png');
-    await waitFor(() => expect(screen.queryByText('Uploading...')).toBeNull());
+    await waitFor(() => expect(screen.getByRole('tabpanel').getAttribute('aria-busy')).toBe('false'));
+    expect(screen.getByRole('button', { name: 'Choose image' }).hasAttribute('disabled')).toBe(false);
     expect(onChange).toHaveBeenCalledWith({ imageUrl: 'https://cdn.example/a.png', emoji: null });
   });
 
-  it('leaves the uploading state once a rejected onUpload settles, without adopting a URL', async () => {
+  it('leaves the busy state once a rejected onUpload settles, without adopting a URL', async () => {
     let reject: (reason: unknown) => void = () => {};
     const onUpload = vi.fn(() => new Promise<string | null>((_resolve, r) => (reject = r)));
     const onChange = vi.fn();
     render(
       <Picker defaultTab="upload" onValueChange={onChange}>
-        <AvatarPickerUpload onUpload={onUpload} />
+        <UploadPane onUpload={onUpload} />
       </Picker>,
     );
     openEditor();
@@ -206,11 +250,25 @@ describe('AvatarPicker', () => {
     const file = new File(['x'], 'a.png', { type: 'image/png' });
     fireEvent.change(input, { target: { files: [file] } });
 
-    expect(screen.getByText('Uploading...')).toBeTruthy();
+    expect(screen.getByRole('tabpanel').getAttribute('aria-busy')).toBe('true');
 
     reject(new Error('upload failed'));
-    await waitFor(() => expect(screen.getByText('Upload an image')).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole('tabpanel').getAttribute('aria-busy')).toBe('false'));
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('lets children replace the remove button icon', () => {
+    render(
+      <AvatarPicker value={{}} onValueChange={vi.fn()} defaultOpen>
+        <AvatarPickerContent>
+          <AvatarPickerRemoveButton>
+            <span>clear</span>
+          </AvatarPickerRemoveButton>
+        </AvatarPickerContent>
+      </AvatarPicker>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Remove avatar' }).textContent).toBe('clear');
   });
 
   it("clears emoji and image on Remove and still runs the consumer's onClick", () => {
@@ -218,7 +276,7 @@ describe('AvatarPicker', () => {
     const onRemove = vi.fn();
     render(
       <Picker defaultTab="upload" value={{ emoji: 'x' }} onValueChange={onChange} onRemove={onRemove}>
-        <AvatarPickerUpload />
+        <UploadPane />
       </Picker>,
     );
     openEditor();
@@ -233,7 +291,7 @@ describe('AvatarPicker', () => {
     const onRemove = vi.fn((event: MouseEvent<HTMLButtonElement>) => event.preventDefault());
     render(
       <Picker defaultTab="upload" value={{ emoji: 'x' }} onValueChange={onChange} onRemove={onRemove}>
-        <AvatarPickerUpload />
+        <UploadPane />
       </Picker>,
     );
     openEditor();
@@ -247,7 +305,7 @@ describe('AvatarPicker', () => {
     const onChange = vi.fn();
     render(
       <Picker defaultTab="color" value={{ color: '#ec4899' }} onValueChange={onChange}>
-        <AvatarPickerColor />
+        <ColorPane />
       </Picker>,
     );
     openEditor();
@@ -267,7 +325,7 @@ describe('AvatarPicker', () => {
         </AvatarPickerTrigger>
         <AvatarPickerContent>
           <Tabs defaultValue="color">
-            <AvatarPickerColor />
+            <ColorPane />
           </Tabs>
         </AvatarPickerContent>
       </AvatarPicker>,

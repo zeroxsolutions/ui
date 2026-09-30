@@ -593,7 +593,7 @@
       "type": "registry:component",
       "title": "Avatar Picker",
       "description": "A Popover-based avatar editor whose emoji, upload and color panes edit one avatar value.",
-      "categories": ["layout"],
+      "categories": ["data-entry"],
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "@shadcn/button",
@@ -601,15 +601,13 @@
         "@shadcn/field",
         "@shadcn/input",
         "@shadcn/popover",
-        "@shadcn/spinner",
         "@shadcn/tabs",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/upload.json",
         "https://ui.zeroxsolutions.com/r/emoji-picker.json"
       ],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/layout/avatar-picker.tsx",
+          "path": "registry/bases/base-ui/components/data-entry/avatar-picker.tsx",
           "type": "registry:component"
         }
       ]
@@ -1305,14 +1303,18 @@
       "name": "avatar-picker-demo",
       "type": "registry:example",
       "title": "Avatar Picker Demo",
-      "description": "A color-tinted avatar that opens an emoji and color editor over AvatarPicker.",
+      "description": "A color-tinted avatar that opens an emoji, upload and color editor over AvatarPicker.",
       "categories": ["examples"],
       "registryDependencies": [
         "@shadcn/avatar",
+        "@shadcn/empty",
+        "@shadcn/spinner",
         "@shadcn/tabs",
         "https://lucide-animated.com/r/palette.json",
         "https://lucide-animated.com/r/smile.json",
-        "https://ui.zeroxsolutions.com/r/avatar-picker.json"
+        "https://lucide-animated.com/r/upload.json",
+        "https://ui.zeroxsolutions.com/r/avatar-picker.json",
+        "https://ui.zeroxsolutions.com/r/emoji-picker.json"
       ],
       "files": [
         {
