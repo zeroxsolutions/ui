@@ -410,8 +410,11 @@
       "title": "Copy Button",
       "description": "An icon button that copies its value to the clipboard, showing a check and carrying data-copied until its timeout resets it.",
       "categories": ["feedback"],
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/button"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "https://lucide-animated.com/r/check.json",
+        "https://lucide-animated.com/r/copy.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/components/feedback/copy-button.tsx",
@@ -426,18 +429,12 @@
       "description": "An inline, non-modal AI-consent request that stays in scrollback after it resolves, switching between its decision and resolved parts as the host settles its status.",
       "categories": ["feedback"],
       "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/utils"],
-      "cssVars": {
-        "theme": {
-          "color-success": "var(--success)"
-        },
-        "light": {
-          "success": "oklch(0.627 0.19 149)"
-        },
-        "dark": {
-          "success": "oklch(0.723 0.19 149)"
-        }
-      },
+      "registryDependencies": [
+        "@shadcn/badge",
+        "@shadcn/card",
+        "@shadcn/utils",
+        "https://lucide-animated.com/r/circle-check.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/components/feedback/permission-card.tsx",
@@ -483,10 +480,10 @@
       "title": "Tab Close Button",
       "description": "The trailing control on an editor tab, showing the unsaved dot until the tab's hover, focus or active state reveals its close X.",
       "categories": ["feedback"],
-      "dependencies": ["lucide-react"],
       "registryDependencies": [
         "@shadcn/button",
         "@shadcn/utils",
+        "https://lucide-animated.com/r/x.json",
         "https://ui.zeroxsolutions.com/r/unsaved-indicator.json"
       ],
       "files": [
@@ -544,7 +541,7 @@
       "title": "Panel Field Label",
       "description": "The dense, muted label a property panel puts over a control with no inline label of its own, keeping upstream's field-label slot.",
       "categories": ["general"],
-      "registryDependencies": ["@shadcn/field", "@shadcn/utils"],
+      "registryDependencies": ["@shadcn/field"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/general/panel-field-label.tsx",
@@ -1110,12 +1107,12 @@
       "title": "Permission Card Demo",
       "description": "A deploy-approval request the visitor can deny or allow, once or for the session.",
       "categories": ["examples"],
-      "dependencies": ["lucide-react"],
       "registryDependencies": [
         "@shadcn/button",
         "@shadcn/button-group",
         "@shadcn/card",
         "@shadcn/dropdown-menu",
+        "https://lucide-animated.com/r/chevron-down.json",
         "https://ui.zeroxsolutions.com/r/permission-card.json"
       ],
       "files": [
@@ -1145,7 +1142,7 @@
       "title": "Tab Close Button Demo",
       "description": "Two editor tabs, one saved and one with unsaved changes.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tab-close-button.json"],
+      "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/tab-close-button.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tab-close-button-demo.tsx",
@@ -1173,8 +1170,13 @@
       "title": "Icon Chip Demo",
       "description": "A chat-ability chip named by its own caption, beside two chips named only through a composed tooltip.",
       "categories": ["examples"],
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/tooltip", "https://ui.zeroxsolutions.com/r/icon-chip.json"],
+      "registryDependencies": [
+        "@shadcn/tooltip",
+        "https://lucide-animated.com/r/eye.json",
+        "https://lucide-animated.com/r/message-square.json",
+        "https://lucide-animated.com/r/wrench.json",
+        "https://ui.zeroxsolutions.com/r/icon-chip.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/icon-chip-demo.tsx",
@@ -1189,7 +1191,13 @@
       "description": "A universally-read field icon beside two others whose meaning is revealed through a composed tooltip.",
       "categories": ["examples"],
       "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/tooltip", "https://ui.zeroxsolutions.com/r/icon-label.json"],
+      "registryDependencies": [
+        "@shadcn/input",
+        "@shadcn/tooltip",
+        "https://lucide-animated.com/r/rotate-cw.json",
+        "https://lucide-animated.com/r/search.json",
+        "https://ui.zeroxsolutions.com/r/icon-label.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/icon-label-demo.tsx",
@@ -1203,7 +1211,11 @@
       "title": "Panel Field Label Demo",
       "description": "A PanelFieldLabel naming a fill swatch that carries no inline label of its own.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/field", "https://ui.zeroxsolutions.com/r/panel-field-label.json"],
+      "registryDependencies": [
+        "@shadcn/field",
+        "@shadcn/input",
+        "https://ui.zeroxsolutions.com/r/panel-field-label.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/panel-field-label-demo.tsx",

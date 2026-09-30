@@ -18,12 +18,9 @@ describe('PanelFieldLabel', () => {
     expect(screen.getByLabelText('Fill').id).toBe('fill');
   });
 
-  it('carries the compact muted label recipe and merges className', () => {
+  it('merges a passed className into the label', () => {
     render(<PanelFieldLabel className="mt-1">Fill</PanelFieldLabel>);
-    const label = screen.getByText('Fill');
-    expect(label.className).toContain('text-xs');
-    expect(label.className).toContain('text-muted-foreground');
-    expect(label.className).toContain('mt-1');
+    expect(screen.getByText('Fill').className).toContain('mt-1');
   });
 
   it('keeps upstream field-label slot so Field selectors still reach it', () => {

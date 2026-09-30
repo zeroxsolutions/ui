@@ -50,6 +50,14 @@ describe('PermissionCard', () => {
     expect(root().getAttribute('data-status')).toBe('approved');
   });
 
+  it('is a small card unless the consumer sizes it', () => {
+    const { rerender } = render(<PermissionCard status="pending" />);
+    expect(root().getAttribute('data-size')).toBe('sm');
+
+    rerender(<PermissionCard status="pending" size="default" />);
+    expect(root().getAttribute('data-size')).toBe('default');
+  });
+
   it('renders the consumer status word, with the icon the root status picks', () => {
     render(
       <PermissionCard status="denied">
@@ -64,16 +72,18 @@ describe('PermissionCard', () => {
     expect(status.querySelectorAll('svg')).toHaveLength(3);
   });
 
-  it('composes the upstream card description under the header', () => {
+  it('composes the upstream card description inside the header', () => {
     render(
       <PermissionCard status="pending">
         <PermissionCardHeader>
           <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
+          <CardDescription>Deploy the web app to production</CardDescription>
         </PermissionCardHeader>
-        <CardDescription>Deploy the web app to production</CardDescription>
       </PermissionCard>,
     );
-    expect(screen.getByText('Deploy the web app to production').getAttribute('data-slot')).toBe('card-description');
+    const description = screen.getByText('Deploy the web app to production');
+    expect(description.getAttribute('data-slot')).toBe('card-description');
+    expect(description.parentElement?.getAttribute('data-slot')).toBe('card-header');
   });
 
   it('renders an asymmetric row: a plain Deny plus a graduated-scope split Allow', () => {

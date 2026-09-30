@@ -1,7 +1,6 @@
 'use client';
 
-import { CheckCircle2, Wrench, XCircle } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 
 import {
   PermissionCard,
@@ -14,6 +13,7 @@ import {
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ButtonGroup } from '@/registry/bases/base-ui/ui/button-group';
 import { CardDescription } from '@/registry/bases/base-ui/ui/card';
+import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,15 +28,15 @@ const SCOPE_WORD = { once: 'Allowed once', session: 'Allowed for this session' }
 function PermissionCardDemo(): ReactNode {
   const [status, setStatus] = useState<'pending' | 'approved' | 'denied'>('pending');
   const [scope, setScope] = useState<'once' | 'session'>('once');
+  const chevronRef = useRef<ChevronDownIconHandle>(null);
 
   return (
-    <PermissionCard status={status} className="w-full max-w-sm rounded-lg border p-4">
+    <PermissionCard status={status} className="w-full max-w-sm">
       <PermissionCardHeader>
-        <Wrench className="text-muted-foreground size-3.5" />
         <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
+        <CardDescription>Deploy the web app to production</CardDescription>
         <PermissionCardStatus>{STATUS_WORD[status]}</PermissionCardStatus>
       </PermissionCardHeader>
-      <CardDescription>Deploy the web app to production</CardDescription>
       <PermissionCardActions>
         <Button variant="ghost" onClick={() => setStatus('denied')}>
           Deny
@@ -51,7 +51,20 @@ function PermissionCardDemo(): ReactNode {
             Allow once
           </Button>
           <DropdownMenu>
-            <DropdownMenuTrigger render={<Button size="icon" aria-label="More allow options" />} />
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  size="icon"
+                  aria-label="More allow options"
+                  onMouseEnter={() => chevronRef.current?.startAnimation()}
+                  onMouseLeave={() => chevronRef.current?.stopAnimation()}
+                  onFocus={() => chevronRef.current?.startAnimation()}
+                  onBlur={() => chevronRef.current?.stopAnimation()}
+                />
+              }
+            >
+              <ChevronDownIcon ref={chevronRef} aria-hidden />
+            </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-auto">
               <DropdownMenuItem
                 onClick={() => {
@@ -65,14 +78,9 @@ function PermissionCardDemo(): ReactNode {
           </DropdownMenu>
         </ButtonGroup>
       </PermissionCardActions>
-      {status === 'approved' && (
+      {status !== 'pending' && (
         <PermissionCardResolved>
-          <CheckCircle2 className="size-3.5" /> {SCOPE_WORD[scope]} - 2:14pm
-        </PermissionCardResolved>
-      )}
-      {status === 'denied' && (
-        <PermissionCardResolved>
-          <XCircle className="size-3.5" /> Denied - 2:14pm
+          <CardDescription>{status === 'approved' ? SCOPE_WORD[scope] : 'Denied'} - 2:14pm</CardDescription>
         </PermissionCardResolved>
       )}
     </PermissionCard>

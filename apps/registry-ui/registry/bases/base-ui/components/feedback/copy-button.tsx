@@ -1,9 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { Check, Copy } from 'lucide-react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
+import { CheckIcon } from '@/registry/bases/base-ui/ui/check';
+import { CopyIcon, type CopyIconHandle } from '@/registry/bases/base-ui/ui/copy';
 
 const COPY_RESET_MS = 2000;
 
@@ -27,7 +28,8 @@ interface CopyButtonProps extends Omit<React.ComponentProps<typeof Button>, 'val
  * `event.preventDefault()` in it skips the copy. Defaults to a `ghost`
  * `icon-xs` `Button`, and every `Button` prop passes through. A write the
  * browser refuses, such as a denied clipboard permission, leaves the button
- * idle.
+ * idle. Its icon plays while the button is hovered or focused; a caller's
+ * pointer and focus handlers still run.
  */
 function CopyButton({
   value,
@@ -36,12 +38,18 @@ function CopyButton({
   timeout = COPY_RESET_MS,
   onCopied,
   onClick,
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onBlur,
   variant = 'ghost',
   size = 'icon-xs',
   ...props
 }: CopyButtonProps): React.ReactNode {
   const [copied, setCopied] = React.useState(false);
   const timer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // The copy and the check icons expose the same handle; whichever is showing holds the ref.
+  const iconRef = React.useRef<CopyIconHandle>(null);
 
   React.useEffect(() => () => clearTimeout(timer.current), []);
 
@@ -70,9 +78,25 @@ function CopyButton({
         onClick?.(event);
         if (!event.defaultPrevented) copy();
       }}
+      onMouseEnter={(event) => {
+        onMouseEnter?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onMouseLeave={(event) => {
+        onMouseLeave?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      onFocus={(event) => {
+        onFocus?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        iconRef.current?.stopAnimation();
+      }}
       {...props}
     >
-      {copied ? <Check /> : <Copy />}
+      {copied ? <CheckIcon ref={iconRef} aria-hidden /> : <CopyIcon ref={iconRef} aria-hidden />}
     </Button>
   );
 }

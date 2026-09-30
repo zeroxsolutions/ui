@@ -51,6 +51,17 @@ describe('CopyButton', () => {
     await screen.findByRole('button', { name: 'Copied' });
   });
 
+  it("still runs a caller's pointer and focus handlers", () => {
+    const handlers = { onMouseEnter: vi.fn(), onMouseLeave: vi.fn(), onFocus: vi.fn(), onBlur: vi.fn() };
+    render(<CopyButton value="payload" {...handlers} />);
+    const button = screen.getByRole('button', { name: 'Copy' });
+    fireEvent.mouseEnter(button);
+    fireEvent.mouseLeave(button);
+    fireEvent.focus(button);
+    fireEvent.blur(button);
+    Object.values(handlers).forEach((handler) => expect(handler).toHaveBeenCalledTimes(1));
+  });
+
   it('skips the copy when a caller onClick prevents the default', () => {
     render(<CopyButton value="payload" onClick={(event) => event.preventDefault()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Copy' }));

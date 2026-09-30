@@ -11,7 +11,7 @@ describe('TabCloseButton', () => {
     const button = screen.getByRole('button', { name: 'Close' });
     expect(button.hasAttribute('data-dirty')).toBe(true);
     expect(button.querySelector('[data-slot="unsaved-indicator"]')).toBeTruthy();
-    expect(button.querySelector('.lucide-x')).toBeTruthy();
+    expect(button.querySelector('[data-slot="tab-close-button-icon"]')).toBeTruthy();
   });
 
   it('renders only the X for a clean tab', () => {
@@ -19,7 +19,7 @@ describe('TabCloseButton', () => {
     const button = screen.getByRole('button', { name: 'Close' });
     expect(button.hasAttribute('data-dirty')).toBe(false);
     expect(button.querySelector('[data-slot="unsaved-indicator"]')).toBeNull();
-    expect(button.querySelector('.lucide-x')).toBeTruthy();
+    expect(button.querySelector('[data-slot="tab-close-button-icon"]')).toBeTruthy();
   });
 
   it('marks itself with its slot', () => {
