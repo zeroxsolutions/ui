@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import {
   ModelInfoCard,
-  ModelInfoCardBadge,
+  ModelInfoCardIndicator,
   ModelInfoCardSection,
 } from '@/registry/bases/base-ui/components/data-display/model-info-card';
 import {
@@ -34,7 +34,9 @@ function ModelInfoCardDemo(): ReactNode {
       </Item>
       <ModelInfoCardSection>
         <Item size="xs">
-          <ModelInfoCardBadge className="bg-chart-1" />
+          <ItemMedia>
+            <ModelInfoCardIndicator tone="chart-1" />
+          </ItemMedia>
           <ItemContent>
             <ItemTitle>Context length</ItemTitle>
           </ItemContent>
@@ -43,7 +45,9 @@ function ModelInfoCardDemo(): ReactNode {
       </ModelInfoCardSection>
       <ModelInfoCardSection>
         <Item size="xs">
-          <ModelInfoCardBadge className="bg-chart-4" />
+          <ItemMedia>
+            <ModelInfoCardIndicator tone="chart-4" />
+          </ItemMedia>
           <ItemContent>
             <ItemTitle>Pricing</ItemTitle>
           </ItemContent>

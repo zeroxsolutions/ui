@@ -238,6 +238,7 @@
       "title": "Model Info Card",
       "description": "The detail panel for one model: an identity header composed from Item parts over titled sections.",
       "categories": ["data-display"],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
