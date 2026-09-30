@@ -35,6 +35,8 @@ interface CodeBlockProps extends ComponentProps<typeof CollapsibleCard> {
    * `code` plain.
    */
   lines?: HighlightLine[] | null;
+  /** Numbers each line in a gutter beside the code, which a copy leaves out. */
+  lineNumbers?: boolean;
   /** The header, composed from `CollapsibleCard` parts; absent, a copy button floats over the code on hover. */
   children?: ReactNode;
 }
@@ -59,12 +61,14 @@ interface CodeBlockProps extends ComponentProps<typeof CollapsibleCard> {
  * ```
  *
  * The root keeps `data-slot="code-block"`; the editor stylesheet targets it. Its scroller's viewport
- * is `data-slot="code-block-viewport"`, where a container caps the block's height.
+ * is `data-slot="code-block-viewport"`, where a container caps the block's height; the code then
+ * scrolls both ways inside it.
  */
 function CodeBlock({
   code,
   language,
   lines: givenLines,
+  lineNumbers = false,
   variant = 'muted',
   className,
   children,
@@ -94,10 +98,23 @@ function CodeBlock({
           {/* A ScrollArea rather than overflow-x-auto, so long lines scroll on the styled rail instead of the OS overlay bar. */}
           <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
             <ScrollAreaPrimitive.Viewport data-slot="code-block-viewport" className="w-full">
-              <pre className="m-0 px-3 py-2 text-xs leading-relaxed">
+              <pre className={cn('m-0 px-3 py-2 text-xs leading-relaxed', lineNumbers && 'flex gap-4')}>
+                {lineNumbers ? (
+                  <span
+                    aria-hidden
+                    data-slot="code-block-line-numbers"
+                    className="text-muted-foreground text-right select-none"
+                  >
+                    {code
+                      .split('\n')
+                      .map((_, index) => index + 1)
+                      .join('\n')}
+                  </span>
+                ) : null}
                 <HighlightedCode lines={lines}>{code}</HighlightedCode>
               </pre>
             </ScrollAreaPrimitive.Viewport>
+            <ScrollBar />
             <ScrollBar orientation="horizontal" />
             <ScrollAreaPrimitive.Corner />
           </ScrollAreaPrimitive.Root>

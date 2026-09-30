@@ -145,6 +145,9 @@
       },
       "fumadocs-generate": {
         "executor": "nx:run-commands",
+        "dependsOn": [
+          "examples-index"
+        ],
         "outputs": [
           "{projectRoot}/.source"
         ],

@@ -38,7 +38,7 @@ function DocsPager({ tree, url, className, ...props }: DocsPagerProps): ReactNod
         <Link
           href={previous.url}
           rel="prev"
-          className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'shadow-none')}
+          className={buttonVariants({ variant: 'secondary', size: 'sm' })}
           onMouseEnter={() => previousIconRef.current?.startAnimation()}
           onMouseLeave={() => previousIconRef.current?.stopAnimation()}
           onFocus={() => previousIconRef.current?.startAnimation()}
@@ -53,7 +53,7 @@ function DocsPager({ tree, url, className, ...props }: DocsPagerProps): ReactNod
         <Link
           href={next.url}
           rel="next"
-          className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'ml-auto shadow-none')}
+          className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'ml-auto')}
           onMouseEnter={() => nextIconRef.current?.startAnimation()}
           onMouseLeave={() => nextIconRef.current?.stopAnimation()}
           onFocus={() => nextIconRef.current?.startAnimation()}

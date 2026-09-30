@@ -2,8 +2,7 @@
  *
  * The design system - Tailwind, the `@theme` block, and every design token - lives in the registry so
  * that `shadcn build` ships the exact same CSS consumers install. This file wires that source into the
- * docs app and adds only what the docs shell, a port of upstream's `apps/v4`, takes from upstream's own
- * `app/globals.css`. `scroll-fade` comes with `shadcn/tailwind.css` and `scrollbar-none` with Tailwind. */
+ * docs app and adds only what the docs themselves need. */
 @import '../../registry/bases/base-ui/styles.css';
 
 @layer base {
@@ -11,48 +10,19 @@
   html {
     @apply overscroll-y-none;
   }
-
-  [data-slot='layout'] {
-    @apply overscroll-none;
-  }
 }
 
-@utility container-wrapper {
-  @apply mx-auto w-full px-2;
-}
-
-@utility extend-touch-target {
-  @media (pointer: coarse) {
-    @apply relative touch-manipulation after:absolute after:-inset-2;
-  }
-}
-
-@utility step {
-  counter-increment: step;
-
-  &:before {
-    @apply border-background bg-muted mr-2 inline-flex size-6 items-center justify-center rounded-full text-center -indent-px font-mono text-sm font-medium md:absolute md:mt-[-4px] md:ml-[-50px] md:size-9 md:border-4;
-    content: counter(step);
-  }
-}
-
-/* Upstream's step list. */
 @layer components {
+  /* A docs page's steps: each heading directly inside `.steps` takes the next number. */
   .steps {
-    &:first-child {
-      @apply !mt-0;
-    }
-
-    &:first-child > h3:first-child {
-      @apply !mt-0;
-    }
+    counter-reset: step;
 
     > h3 {
-      @apply !mt-8;
+      counter-increment: step;
     }
 
-    > h3 + p {
-      @apply !mt-2;
+    > h3::before {
+      content: counter(step) '. ';
     }
   }
 }

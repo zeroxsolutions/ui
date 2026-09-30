@@ -3,7 +3,7 @@ import type { Root } from 'fumadocs-core/page-tree';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 import { http } from 'msw';
 import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { CommandMenu } from './command-menu';
 
@@ -29,19 +29,7 @@ const searchAPI = createSearchAPI('advanced', {
 
 const server = setupServer(http.get('/api/search', () => searchAPI.staticGET()));
 
-// jsdom has no ResizeObserver; the command list measures its height with one.
-class FakeResizeObserver {
-  observe(): void {}
-  unobserve(): void {}
-  disconnect(): void {}
-}
-
-beforeAll(() => {
-  // jsdom does not scroll; the command list scrolls the selected item into view.
-  Element.prototype.scrollIntoView = () => undefined;
-  server.listen({ onUnhandledFrame: 'error' });
-});
-beforeEach(() => vi.stubGlobal('ResizeObserver', FakeResizeObserver));
+beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -55,7 +43,6 @@ describe('CommandMenu', () => {
     fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
     fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'status' } });
 
-    // The index is searched once typing pauses for half a second.
     expect(await screen.findByRole('option', { name: 'Status Indicator' }, { timeout: 3_000 })).toBeTruthy();
   });
 
@@ -91,15 +78,14 @@ describe('CommandMenu', () => {
     expect(await screen.findByRole('combobox')).toBeTruthy();
   });
 
-  it('draws a code span in a search result as code, not as its Markdown backticks', async () => {
+  it('shows a search result as its text, without the Markdown backticks the index keeps', async () => {
     render(<CommandMenu tree={tree} />);
 
     fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
     fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'root element' } });
 
     const result = await screen.findByRole('option', { name: /on its root element/ }, { timeout: 3_000 });
-    expect(result.textContent).not.toContain('`');
-    expect(result.querySelector('code')?.textContent).toBe('data-slot');
+    expect(result.textContent).toBe('It sets data-slot on its root element.');
   });
 
   it('names the search button once, whichever of its labels and shortcut hint are drawn', () => {

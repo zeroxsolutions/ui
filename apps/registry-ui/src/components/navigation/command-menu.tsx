@@ -1,48 +1,24 @@
 'use client';
 
-import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import type { Root } from 'fumadocs-core/page-tree';
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { staticClient } from 'fumadocs-core/search/client/orama-static';
 import { useRouter } from 'next/navigation';
-import {
-  createContext,
-  startTransition,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentProps,
-  type ReactNode,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
-import { useMutationObserver } from '@/hooks/use-mutation-observer';
 import { pageTreeGroups } from '@/lib/page-tree';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { ArrowRightIcon, type ArrowRightIconHandle } from '@/registry/bases/base-ui/ui/arrow-right';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import {
   Command,
+  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
 } from '@/registry/bases/base-ui/ui/command';
-import { CornerDownLeftIcon } from '@/registry/bases/base-ui/ui/corner-down-left';
-import {
-  Dialog,
-  DialogDescription,
-  DialogHeader,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
-} from '@/registry/bases/base-ui/ui/dialog';
 import { Kbd, KbdGroup } from '@/registry/bases/base-ui/ui/kbd';
 import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/ui/search';
-import { Spinner } from '@/registry/bases/base-ui/ui/spinner';
 import type { SiteNavItem } from '@/types/site-nav-item';
 
 /** Reads the index `/api/search` exports at build, once, and searches it in the browser. */
@@ -53,412 +29,204 @@ function isMac(): boolean {
   return typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac');
 }
 
+/** Whether a key press lands in a field, where Ctrl+K and `/` belong to the field rather than the search. */
+function isTyping(target: EventTarget | null): boolean {
+  return (
+    (target instanceof HTMLElement && target.isContentEditable) ||
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement
+  );
+}
+
+/** Keeps an item whose text holds the query, in the order it was listed, where cmdk's own filter reorders by score. */
+function filterByText(value: string, search: string, keywords?: string[]): number {
+  return `${value} ${keywords?.join(' ') ?? ''}`.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+}
+
 interface CommandMenuProps {
   /** The docs page tree, whose groups the menu lists and filters as the query is typed. */
   tree: Root;
+  /** The site's sections, listed first. */
   navItems?: SiteNavItem[];
 }
 
 /**
  * The docs search, opened from the header, by Ctrl+K or Cmd+K, or by `/`. It lists the site's
  * sections and the docs' pages, filtered by the query, and below them what the search index finds.
- * Choosing one navigates to it.
+ * Choosing one navigates to it. Closing it drops the query.
  */
-function CommandMenu({ tree, navItems }: CommandMenuProps): ReactNode {
+function CommandMenu({ tree, navItems = [] }: CommandMenuProps): ReactNode {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [renderDelayedGroups, setRenderDelayedGroups] = useState(false);
-  const [selectedType, setSelectedType] = useState<'page' | 'component' | null>(null);
   // Stable for the server and the first client render, then corrected once mounted, so hydration
   // never compares a platform-specific hint against the one it prerendered. macOS draws its Command key
   // as the place-of-interest sign, which the source spells as an escape to stay plain ASCII.
   const [modifierKey, setModifierKey] = useState('Ctrl');
   const searchIconRef = useRef<SearchIconHandle>(null);
   const { search, setSearch, query } = useDocsSearch({ client: searchClient });
-
-  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-
-      // The index is searched once typing pauses, not on every key.
-      searchTimeoutRef.current = setTimeout(() => {
-        startTransition(() => setSearch(value));
-      }, 500);
-    },
-    [setSearch],
-  );
+  const groups = useMemo(() => pageTreeGroups(tree), [tree]);
 
   useEffect(() => {
     if (isMac()) setModifierKey('\u2318');
   }, []);
 
-  // The page groups render a frame after the dialog opens, so the dialog itself paints at once. Closed,
-  // the query is dropped, so the next open does not list the last query's results under an empty input.
-  useEffect(() => {
-    if (open) {
-      const frame = requestAnimationFrame(() => setRenderDelayedGroups(true));
-      return () => cancelAnimationFrame(frame);
-    }
-
-    setRenderDelayedGroups(false);
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    setSearch('');
-    return undefined;
-  }, [open, setSearch]);
+  const onOpenChange = useCallback(
+    (next: boolean): void => {
+      setOpen(next);
+      if (!next) setSearch('');
+    },
+    [setSearch],
+  );
 
   useEffect(() => {
-    return () => {
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    };
-  }, []);
-
-  const commandFilter = useCallback((value: string, searchValue: string, keywords?: string[]) => {
-    const extendValue = value + ' ' + (keywords?.join(' ') || '');
-    return extendValue.toLowerCase().includes(searchValue.toLowerCase()) ? 1 : 0;
-  }, []);
-
-  const runCommand = useCallback((command: () => unknown) => {
-    setOpen(false);
-    command();
-  }, []);
-
-  const navItemsSection = useMemo(() => {
-    if (!navItems || navItems.length === 0) return null;
-
-    return (
-      <CommandGroup
-        heading="Pages"
-        className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
-      >
-        {navItems.map((item) => (
-          <CommandMenuItem
-            key={item.href}
-            value={`Navigation ${item.label}`}
-            keywords={['nav', 'navigation', item.label.toLowerCase()]}
-            onHighlight={() => setSelectedType('page')}
-            onSelect={() => runCommand(() => router.push(item.href))}
-          >
-            <CommandMenuArrowIcon />
-            {item.label}
-          </CommandMenuItem>
-        ))}
-      </CommandGroup>
-    );
-  }, [navItems, runCommand, router]);
-
-  const pageGroupsSection = useMemo(() => {
-    return pageTreeGroups(tree).map((group) => (
-      <CommandGroup
-        key={group.pages[0]?.url}
-        heading={group.name}
-        className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
-      >
-        {group.pages.map((item) => {
-          const isComponent = item.url.includes('/components/');
-
-          return (
-            <CommandMenuItem
-              key={item.url}
-              value={item.name?.toString() ? `${group.name ?? ''} ${item.name}` : ''}
-              keywords={isComponent ? ['component'] : undefined}
-              onHighlight={() => setSelectedType(isComponent ? 'component' : 'page')}
-              onSelect={() => runCommand(() => router.push(item.url))}
-            >
-              {isComponent ? (
-                <div className="border-muted-foreground aspect-square size-4 rounded-full border border-dashed" />
-              ) : (
-                <CommandMenuArrowIcon />
-              )}
-              {item.name}
-            </CommandMenuItem>
-          );
-        })}
-      </CommandGroup>
-    ));
-  }, [tree, runCommand, router]);
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent): void => {
-      if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || e.key === '/') {
-        if (
-          (e.target instanceof HTMLElement && e.target.isContentEditable) ||
-          e.target instanceof HTMLInputElement ||
-          e.target instanceof HTMLTextAreaElement ||
-          e.target instanceof HTMLSelectElement
-        ) {
-          return;
-        }
-
-        e.preventDefault();
-        setOpen((open) => !open);
-      }
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (!((event.key === 'k' && (event.metaKey || event.ctrlKey)) || event.key === '/')) return;
+      if (isTyping(event.target)) return;
+      event.preventDefault();
+      onOpenChange(!open);
     };
 
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
-  }, []);
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open, onOpenChange]);
+
+  const go = (url: string): void => {
+    onOpenChange(false);
+    router.push(url);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button
-            variant="outline"
-            className="bg-muted text-foreground hover:bg-muted/50 dark:bg-card relative hidden h-8 w-full justify-start rounded-lg border-none pl-3 shadow-none transition-colors md:inline-flex md:w-48 lg:w-40 xl:w-64"
-          />
-        }
-      >
-        {/* The button is named once; the width-dependent labels and the shortcut hint are what is drawn. */}
-        <span className="sr-only">Search documentation</span>
-        <span aria-hidden className="hidden xl:inline-flex">
-          Search documentation...
-        </span>
-        <span aria-hidden className="inline-flex xl:hidden">
-          Search...
-        </span>
-        <div aria-hidden className="absolute top-1.5 right-1.5 hidden gap-1 sm:flex">
-          <KbdGroup>
-            <Kbd className="border">{modifierKey}</Kbd>
-            <Kbd className="border">K</Kbd>
+    <>
+      <div className="hidden md:block">
+        <Button variant="outline" className="w-48 justify-start xl:w-64" onClick={() => setOpen(true)}>
+          {/* The button is named once; the width-dependent labels and the shortcut hint are what is drawn. */}
+          <span className="sr-only">Search documentation</span>
+          <span aria-hidden className="hidden xl:inline">
+            Search documentation...
+          </span>
+          <span aria-hidden className="xl:hidden">
+            Search...
+          </span>
+          <KbdGroup aria-hidden className="ml-auto">
+            <Kbd>{modifierKey}</Kbd>
+            <Kbd>K</Kbd>
           </KbdGroup>
-        </div>
-      </DialogTrigger>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="extend-touch-target size-8 md:hidden"
-        onClick={() => setOpen(true)}
-        onMouseEnter={() => searchIconRef.current?.startAnimation()}
-        onMouseLeave={() => searchIconRef.current?.stopAnimation()}
-        onFocus={() => searchIconRef.current?.startAnimation()}
-        onBlur={() => searchIconRef.current?.stopAnimation()}
-      >
-        <SearchIcon ref={searchIconRef} />
-        <span className="sr-only">Search docs</span>
-      </Button>
-      <CommandMenuDialogContent className="bg-popover ring-border/80 rounded-xl border-none bg-clip-padding p-2 pb-11 shadow-2xl ring-4">
-        <DialogHeader className="sr-only">
-          <DialogTitle>Search documentation...</DialogTitle>
-          <DialogDescription>Find a page or a heading.</DialogDescription>
-        </DialogHeader>
-        <Command
-          className="**:data-[slot=input-group]:border-input! **:data-[slot=input-group]:bg-input/50! rounded-none bg-transparent p-0 **:data-[slot=command-input]:h-9! **:data-[slot=command-input]:py-0 **:data-[slot=command-input-wrapper]:mb-0 **:data-[slot=command-input-wrapper]:p-0 **:data-[slot=input-group]:h-9! **:data-[slot=input-group]:rounded-md!"
-          filter={commandFilter}
+        </Button>
+      </div>
+      <div className="md:hidden">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setOpen(true)}
+          onMouseEnter={() => searchIconRef.current?.startAnimation()}
+          onMouseLeave={() => searchIconRef.current?.stopAnimation()}
+          onFocus={() => searchIconRef.current?.startAnimation()}
+          onBlur={() => searchIconRef.current?.stopAnimation()}
         >
-          <div className="relative">
-            <CommandInput placeholder="Search documentation..." onValueChange={handleSearchChange} />
-            {query.isLoading && (
-              <div className="pointer-events-none absolute top-1/2 right-3 z-10 flex -translate-y-1/2 items-center justify-center">
-                <Spinner className="text-muted-foreground size-4" />
-              </div>
-            )}
-          </div>
-          <CommandList className="no-scrollbar min-h-80 scroll-pt-2 scroll-pb-1.5">
-            <CommandEmpty className="text-muted-foreground py-12 text-center text-sm">
-              {query.isLoading ? 'Searching...' : 'No results found.'}
-            </CommandEmpty>
-            {navItemsSection}
-            {renderDelayedGroups ? (
-              <>
-                {pageGroupsSection}
-                <CommandMenuSearchResults setOpen={setOpen} query={query} search={search} />
-              </>
+          <SearchIcon ref={searchIconRef} />
+          <span className="sr-only">Search docs</span>
+        </Button>
+      </div>
+      <CommandDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        title="Search documentation"
+        description="Find a page or a heading."
+      >
+        <Command filter={filterByText}>
+          <CommandInput placeholder="Search documentation..." onValueChange={setSearch} />
+          <CommandList>
+            <CommandEmpty>{query.isLoading ? 'Searching...' : 'No results found.'}</CommandEmpty>
+            {navItems.length > 0 ? (
+              <CommandGroup heading="Pages">
+                {navItems.map((item) => (
+                  <CommandItem
+                    key={item.href}
+                    value={`Navigation ${item.label}`}
+                    keywords={['nav', 'navigation', item.label.toLowerCase()]}
+                    onSelect={() => go(item.href)}
+                  >
+                    {item.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
             ) : null}
+            {groups.map((group) => (
+              <CommandGroup key={group.pages[0]?.url} heading={group.name}>
+                {group.pages.map((page) => (
+                  <CommandItem
+                    key={page.url}
+                    value={`${group.name ?? ''} ${page.name}`}
+                    keywords={page.url.includes('/components/') ? ['component'] : undefined}
+                    onSelect={() => go(page.url)}
+                  >
+                    {page.name}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ))}
+            <CommandMenuSearchResults query={query} search={search} onSelect={go} />
           </CommandList>
         </Command>
-        <div className="text-muted-foreground bg-muted/50 absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-2 rounded-b-xl border-t px-4 text-xs font-medium">
-          <div className="flex items-center gap-2">
-            <CommandMenuKbd>
-              <CornerDownLeftIcon />
-            </CommandMenuKbd>{' '}
-            {selectedType === 'page' || selectedType === 'component' ? 'Go to page' : null}
-          </div>
-        </div>
-      </CommandMenuDialogContent>
-    </Dialog>
-  );
-}
-
-/** Only the selection flag is watched, so the animating icon inside the item never wakes the observer. */
-const COMMAND_MENU_ITEM_OBSERVER_OPTIONS: MutationObserverInit = {
-  attributes: true,
-  attributeFilter: ['aria-selected'],
-};
-
-/** Whether the command item around it is the one the keyboard or the pointer has selected. */
-const CommandMenuItemHighlightContext = createContext(false);
-
-interface CommandMenuItemProps extends ComponentProps<typeof CommandItem> {
-  /** Called each time this item becomes the selected one. */
-  onHighlight?: () => void;
-}
-
-function CommandMenuItem({ children, className, onHighlight, ...props }: CommandMenuItemProps): ReactNode {
-  const ref = useRef<HTMLDivElement>(null);
-  const [highlighted, setHighlighted] = useState(false);
-
-  useMutationObserver(
-    ref,
-    (mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'aria-selected') {
-          const selected = ref.current?.getAttribute('aria-selected') === 'true';
-          setHighlighted(selected);
-          if (selected) onHighlight?.();
-        }
-      }
-    },
-    COMMAND_MENU_ITEM_OBSERVER_OPTIONS,
-  );
-
-  return (
-    <CommandItem
-      ref={ref}
-      className={cn(
-        'data-[selected=true]:border-input data-[selected=true]:bg-input/50 h-9 rounded-md border border-transparent px-3! font-medium',
-        className,
-      )}
-      {...props}
-    >
-      <CommandMenuItemHighlightContext.Provider value={highlighted}>
-        {children}
-      </CommandMenuItemHighlightContext.Provider>
-    </CommandItem>
-  );
-}
-
-/** The arrow a page item leads with; it plays while its item is selected. */
-function CommandMenuArrowIcon(): ReactNode {
-  const highlighted = useContext(CommandMenuItemHighlightContext);
-  const iconRef = useRef<ArrowRightIconHandle>(null);
-
-  useEffect(() => {
-    if (highlighted) iconRef.current?.startAnimation();
-    else iconRef.current?.stopAnimation();
-  }, [highlighted]);
-
-  return <ArrowRightIcon ref={iconRef} />;
-}
-
-function CommandMenuKbd({ className, ...props }: ComponentProps<'kbd'>): ReactNode {
-  return (
-    <kbd
-      className={cn(
-        "bg-background text-muted-foreground pointer-events-none flex h-5 items-center justify-center gap-1 rounded border px-1 font-sans text-[0.7rem] font-medium select-none [&_svg:not([class*='size-'])]:size-3",
-        className,
-      )}
-      {...props}
-    />
+      </CommandDialog>
+    </>
   );
 }
 
 type CommandMenuQuery = ReturnType<typeof useDocsSearch>['query'];
 
 interface CommandMenuSearchResultsProps {
-  setOpen: (open: boolean) => void;
   query: CommandMenuQuery;
   search: string;
+  /** Called with the chosen result's URL. */
+  onSelect: (url: string) => void;
 }
 
 /**
  * A result's text as it reads: the index marks each matched term with `<mark>` and keeps a code span's
- * Markdown backticks, and the item's filter reads the text without either.
+ * Markdown backticks, and neither is text a reader should see or the filter should match.
  */
 function plainResultText(content: string): string {
   return content.replace(/<\/?mark>/g, '').replace(/`/g, '');
 }
 
-function CommandMenuSearchResults({ setOpen, query, search }: CommandMenuSearchResultsProps): ReactNode {
-  const router = useRouter();
-
-  const uniqueResults = useMemo(() => {
-    if (!query.data || !Array.isArray(query.data)) return [];
-
+function CommandMenuSearchResults({ query, search, onSelect }: CommandMenuSearchResultsProps): ReactNode {
+  const results = useMemo(() => {
+    if (!Array.isArray(query.data)) return [];
+    // A one-word text hit is a stray fragment of a heading or a table cell; a repeated text says nothing new.
     return query.data.filter(
-      (item, index, self) =>
+      (item, index, all) =>
         !(item.type === 'text' && item.content.trim().split(/\s+/).length <= 1) &&
-        index === self.findIndex((t) => t.content === item.content),
+        index === all.findIndex((other) => other.content === item.content),
     );
   }, [query.data]);
 
-  if (!search.trim() || !query.data || query.data === 'empty' || uniqueResults.length === 0) return null;
+  if (!search.trim() || results.length === 0) return null;
 
   return (
-    <CommandGroup
-      className="px-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
-      heading="Search results"
-    >
-      {uniqueResults.map((item) => (
+    <CommandGroup heading="Search results">
+      {results.map((item) => (
         <CommandItem
           key={item.id}
-          data-type={item.type}
-          onSelect={() => {
-            router.push(item.url);
-            setOpen(false);
-          }}
-          className="data-[selected=true]:border-input data-[selected=true]:bg-input/50 h-9 rounded-md border border-transparent px-3! font-normal"
-          keywords={[plainResultText(item.content)]}
           value={`${plainResultText(item.content)} ${item.type}`}
+          keywords={[plainResultText(item.content)]}
+          onSelect={() => onSelect(item.url)}
         >
-          <CommandMenuSearchResultText content={item.content} />
+          <span className="truncate">
+            <CommandMenuSearchResultMarks text={item.content.replace(/`/g, '')} />
+          </span>
         </CommandItem>
       ))}
     </CommandGroup>
   );
 }
 
-/**
- * A result's text on one line, each code span drawn as code and each matched term bold. One element
- * holds it all, so the item's flex layout does not split the text at each span. A matched term never
- * holds a backtick, so splitting at the backticks first leaves every mark whole.
- */
-function CommandMenuSearchResultText({ content }: { content: string }): ReactNode {
-  return (
-    <div className="line-clamp-1 text-sm">
-      {content.split('`').map((span, spanIndex) =>
-        spanIndex % 2 === 1 ? (
-          <code key={spanIndex} className="bg-muted rounded-md px-1 py-0.5 font-mono text-[0.9em]">
-            <CommandMenuSearchResultMarks text={span} />
-          </code>
-        ) : (
-          <CommandMenuSearchResultMarks key={spanIndex} text={span} />
-        ),
-      )}
-    </div>
-  );
-}
-
-/** `text` with each term the index marked drawn bold. */
+/** `text` with each term the index marked drawn in bold. */
 function CommandMenuSearchResultMarks({ text }: { text: string }): ReactNode {
-  return text.split(/<mark>(.*?)<\/mark>/g).map((part, index) =>
-    index % 2 === 1 ? (
-      <mark key={index} className="text-foreground bg-transparent font-semibold">
-        {part}
-      </mark>
-    ) : (
-      part
-    ),
-  );
-}
-
-/** Upstream's own dialog frame for the menu: no backdrop, and pinned near the top rather than centred. */
-function CommandMenuDialogContent({ className, children, ...props }: DialogPrimitive.Popup.Props): ReactNode {
-  return (
-    <DialogPortal>
-      <DialogPrimitive.Popup
-        data-slot="dialog-content"
-        className={cn(
-          'bg-background fixed top-[15%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 outline-none sm:max-w-lg',
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </DialogPrimitive.Popup>
-    </DialogPortal>
-  );
+  return text
+    .split(/<mark>(.*?)<\/mark>/g)
+    .map((part, index) => (index % 2 === 1 ? <strong key={index}>{part}</strong> : part));
 }
 
 export { CommandMenu };

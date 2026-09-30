@@ -9,22 +9,19 @@ import {
 } from 'fumadocs-core/toc';
 import { useSyncExternalStore, type ReactNode } from 'react';
 
-import { cn } from '@/registry/bases/base-ui/lib/utils';
-
 interface DocsTocProps {
   /** The page's headings, as the MDX compiler lists them. */
   toc: TableOfContents;
-  className?: string;
 }
 
 /** The page's headings as in-page links, with the heading in view marked. Renders nothing for a page without one. */
-function DocsToc({ toc, className }: DocsTocProps): ReactNode {
+function DocsToc({ toc }: DocsTocProps): ReactNode {
   if (toc.length === 0) return null;
 
   return (
     <AnchorProvider toc={toc}>
-      <div className={cn('flex flex-col gap-2 p-4 pt-0 text-sm', className)}>
-        <p className="bg-background text-muted-foreground h-6 text-xs font-medium">On this page</p>
+      <div className="flex flex-col gap-2 px-6 text-sm">
+        <p className="text-muted-foreground text-xs font-medium">On this page</p>
         {toc.map((item) => (
           <DocsTocLink key={item.url} item={item} />
         ))}
@@ -65,7 +62,7 @@ function DocsTocLink({ item }: { item: TOCItemType }): ReactNode {
       aria-current={active ? 'location' : undefined}
       data-active={active}
       data-depth={item.depth}
-      className="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[active=true]:font-medium data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+      className="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground data-[depth=3]:pl-4 data-[depth=4]:pl-6"
     >
       {item.title}
     </a>

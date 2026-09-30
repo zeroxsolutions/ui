@@ -12,7 +12,7 @@ The items compose the Base UI build of shadcn's primitives and are drawn in the 
 names `base-nova` as its `style`. An app that has no `components.json` gets one on that base and style from:
 
 ```bash
-npx shadcn@latest init --base base --preset nova
+pnpm dlx shadcn@latest init --base base --preset nova
 ```
 
 In an app that already has one, `style` has to start with `base-`. A Radix style installs the Radix build of each
@@ -23,7 +23,7 @@ primitive, and the items' imports do not match it.
 Each item is addressed by its URL:
 
 ```bash
-npx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json
 ```
 
 The CLI writes the item's files under the aliases in `components.json` and rewrites its imports to match. With

@@ -166,6 +166,23 @@ describe('CodeBlock', () => {
     expect(container.querySelector('[data-slot="code-block-viewport"] pre')).toBeTruthy();
   });
 
+  it('numbers each line in a gutter hidden from assistive technology, apart from the code', async () => {
+    render(<CodeBlock code={'a\nb\nc'} lineNumbers />);
+    await settle();
+
+    const gutter = document.querySelector('[data-slot="code-block-line-numbers"]');
+    expect(gutter?.textContent).toBe('1\n2\n3');
+    expect(gutter?.getAttribute('aria-hidden')).toBe('true');
+    expect(document.querySelector('[data-slot="highlighted-code"]')?.textContent).toBe('a\nb\nc');
+  });
+
+  it('draws no gutter unless asked', async () => {
+    render(<CodeBlock code={'a\nb'} />);
+    await settle();
+
+    expect(document.querySelector('[data-slot="code-block-line-numbers"]')).toBeNull();
+  });
+
   it('copies the code and flips the label to Copied', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });

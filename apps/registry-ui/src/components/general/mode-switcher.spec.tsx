@@ -1,24 +1,12 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { AppProviders } from '@/providers/app-providers';
 
 import { ModeSwitcher } from './mode-switcher';
 
-beforeEach(() => {
-  // jsdom has no matchMedia; the theme provider reads it for the system's colour scheme, light here,
-  // and subscribes through the older addListener.
-  vi.stubGlobal('matchMedia', (media: string) => ({
-    matches: false,
-    media,
-    addListener: () => undefined,
-    removeListener: () => undefined,
-  }));
-});
-
 afterEach(() => {
   cleanup();
-  vi.unstubAllGlobals();
   localStorage.clear();
   document.documentElement.className = '';
 });

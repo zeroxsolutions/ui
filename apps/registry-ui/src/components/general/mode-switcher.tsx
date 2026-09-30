@@ -1,19 +1,13 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { useCallback, useRef, type ComponentProps, type ReactNode } from 'react';
+import { useCallback, useRef, type ReactNode } from 'react';
 
-import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { SunMoonIcon, type SunMoonIconHandle } from '@/registry/bases/base-ui/ui/sun-moon';
 
-interface ModeSwitcherProps {
-  variant?: ComponentProps<typeof Button>['variant'];
-  className?: string;
-}
-
 /** A button that switches the site between its light and dark theme; its icon plays on the button's hover or focus. */
-function ModeSwitcher({ variant = 'ghost', className }: ModeSwitcherProps): ReactNode {
+function ModeSwitcher(): ReactNode {
   const { setTheme, resolvedTheme } = useTheme();
   const iconRef = useRef<SunMoonIconHandle>(null);
 
@@ -23,16 +17,15 @@ function ModeSwitcher({ variant = 'ghost', className }: ModeSwitcherProps): Reac
 
   return (
     <Button
-      variant={variant}
+      variant="ghost"
       size="icon"
-      className={cn('group/toggle extend-touch-target size-8', className)}
       onClick={toggleTheme}
       onMouseEnter={() => iconRef.current?.startAnimation()}
       onMouseLeave={() => iconRef.current?.stopAnimation()}
       onFocus={() => iconRef.current?.startAnimation()}
       onBlur={() => iconRef.current?.stopAnimation()}
     >
-      <SunMoonIcon ref={iconRef} className="[&_svg]:size-4.5!" />
+      <SunMoonIcon ref={iconRef} />
       <span className="sr-only">Toggle theme</span>
     </Button>
   );

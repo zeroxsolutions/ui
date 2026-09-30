@@ -5,30 +5,28 @@ import { usePathname } from 'next/navigation';
 import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { Button } from '@/registry/bases/base-ui/ui/button';
+import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import type { SiteNavItem } from '@/types/site-nav-item';
 
 interface MainNavProps extends ComponentProps<'nav'> {
   items: SiteNavItem[];
 }
 
-/** The site's sections across the header, each marked `data-active` on its own page. */
+/** The site's sections across the header as links, the one for the current page marked `aria-current`. */
 function MainNav({ items, className, ...props }: MainNavProps): ReactNode {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Main" className={cn('items-center gap-0', className)} {...props}>
+    <nav aria-label="Main" className={cn('flex items-center', className)} {...props}>
       {items.map((item) => (
-        <Button
+        <Link
           key={item.href}
-          variant="ghost"
-          nativeButton={false}
-          render={<Link href={item.href} data-active={pathname === item.href} className="relative items-center" />}
-          size="sm"
-          className="px-2.5"
+          href={item.href}
+          aria-current={pathname === item.href ? 'page' : undefined}
+          className={buttonVariants({ variant: 'ghost', size: 'sm' })}
         >
           {item.label}
-        </Button>
+        </Link>
       ))}
     </nav>
   );

@@ -26,17 +26,15 @@ function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
 
   return (
     <header className="bg-background sticky top-0 z-50 w-full">
-      <div className="container-wrapper px-6">
-        <div className="flex h-(--header-height) items-center **:data-[slot=separator]:h-4!">
-          <MobileNav tree={tree} items={navItems} className="flex lg:hidden" />
-          <MainNav items={navItems} className="hidden lg:flex" />
-          <div className="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
-            <div className="flex md:w-auto md:flex-none">
-              <CommandMenu tree={tree} navItems={navItems} />
-            </div>
-            <Separator orientation="vertical" className="ml-2 hidden lg:block" />
-            <ModeSwitcher />
-          </div>
+      <div className="mx-auto flex h-(--header-height) w-full items-center gap-2 px-6">
+        <div className="lg:hidden">
+          <MobileNav tree={tree} items={navItems} />
+        </div>
+        <MainNav items={navItems} className="hidden lg:flex" />
+        <div className="ml-auto flex items-center gap-2">
+          <CommandMenu tree={tree} navItems={navItems} />
+          <Separator orientation="vertical" className="hidden lg:block" />
+          <ModeSwitcher />
         </div>
       </div>
     </header>

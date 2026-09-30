@@ -98,7 +98,7 @@ async function pageMovedWheelingPastRail(page: Page, rail: Locator): Promise<boo
 
 test('a wheel over the sidebar past the end of its list leaves the page where it was', async ({ page }) => {
   // Short enough that the sidebar's own list overflows its column, so its list has an end to wheel past.
-  await page.setViewportSize({ width: 1440, height: 500 });
+  await page.setViewportSize({ width: 1440, height: 320 });
   await page.goto(LONGEST_PAGE);
 
   expect(await pageMovedWheelingPastRail(page, sidebar(page))).toBe(false);
@@ -118,7 +118,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme });
     await page.goto(LONGEST_PAGE);
 
-    await expect(sidebar(page)).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    const pageBackground = String(
+      await page.evaluate("getComputedStyle(document.querySelector('[data-slot=layout]')).backgroundColor"),
+    );
+    await expect(sidebar(page)).toHaveCSS('background-color', pageBackground);
     await expect(toc(page)).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   });
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 
-import { DOCS_SIDEBAR_SCROLL_RESTORE_SCRIPT } from '@/lib/docs-sidebar-scroll';
 import { registryHomepage } from '@/lib/registry';
 import { AppProviders } from '@/providers/app-providers';
 
@@ -24,9 +23,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className="[--header-height:calc(var(--spacing)*14)] lg:[--header-height:calc(var(--spacing)*16)]"
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: DOCS_SIDEBAR_SCROLL_RESTORE_SCRIPT }} />
-      </head>
       <body className="group/body overscroll-none antialiased [--footer-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]">
         <AppProviders>{children}</AppProviders>
       </body>

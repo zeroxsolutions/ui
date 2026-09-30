@@ -48,24 +48,23 @@ test('a component page previews the item, shows its source, and pages on', async
 
   // The button listens only once the page has hydrated, so it is clicked until the source opens.
   const viewCode = preview.getByRole('button', { name: 'View code' });
+  const source = preview.locator('[data-slot=component-preview-code]');
   await expect(async () => {
     if (await viewCode.isVisible()) await viewCode.click({ timeout: 1_000 });
-    await expect(preview.locator('[data-slot=code]')).toContainText('function StatusIndicatorDemo', { timeout: 1_000 });
+    await expect(source).toContainText('function StatusIndicatorDemo', { timeout: 1_000 });
   }).toPass();
+  // The whole source is numbered by line.
+  await expect(source.locator('[data-slot=code-block-line-numbers]')).toBeVisible();
 
-  // The Command tab is the install section's default, and its block starts on pnpm.
+  // The Command tab is the install section's default: one pnpm command, headed by its language.
   await expect(page.getByRole('tab', { name: 'Command', selected: true })).toBeVisible();
-  const install = page
-    .locator('[data-slot=code-block]')
-    .filter({ has: page.getByRole('tab', { name: 'pnpm' }) })
-    .first();
-  await expect(install.getByText('pnpm dlx shadcn@latest add')).toBeVisible();
-  await install.getByRole('tab', { name: 'npm', exact: true }).click();
-  await expect(install.getByText('npx shadcn@latest add')).toBeVisible();
+  const install = page.locator('[data-slot=code-block]').filter({ hasText: 'pnpm dlx shadcn@latest add' }).first();
+  await expect(install.getByText('bash', { exact: true })).toBeVisible();
+  await expect(install.getByRole('tab')).toHaveCount(0);
 
   // A usage fence is headed by its language.
   const usage = page.locator('[data-slot=code-block]').filter({ hasText: 'import { StatusIndicator }' }).first();
-  await expect(usage.getByText('TSX', { exact: true })).toBeVisible();
+  await expect(usage.getByText('tsx', { exact: true })).toBeVisible();
 
   const next = page.getByRole('link', { name: 'Next page' });
   const href = await next.getAttribute('href');
@@ -81,7 +80,7 @@ for (const [width, height] of [
     await page.setViewportSize({ width, height });
     await page.goto(PAGE);
 
-    // The install command and a usage fence: one package-manager block and one plain one.
+    // The install command and a usage fence.
     const blocks = page
       .locator('[data-slot=code-block]')
       .filter({ has: page.locator('[data-slot=code-block-copy]:visible') });

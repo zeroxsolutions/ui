@@ -4,13 +4,12 @@ import type { ReactNode } from 'react';
 import { SourceCodeBlock } from '@/components/data-display/source-code-block';
 import { registryHomepage } from '@/lib/registry';
 import { docsPageUrl } from '@/lib/source';
-import { highlightToLines } from '@/registry/bases/base-ui/lib/shiki';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { blocksRoute } from '@/routes/app-routes';
 
-const INSTALL = `npx shadcn@latest add ${new URL('/r/status-indicator.json', registryHomepage).href}`;
+const INSTALL = `pnpm dlx shadcn@latest add ${new URL('/r/status-indicator.json', registryHomepage).href}`;
 
-export default async function HomePage(): Promise<ReactNode> {
+export default function HomePage(): ReactNode {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-16">
       <header className="flex flex-col gap-3">
@@ -20,7 +19,8 @@ export default async function HomePage(): Promise<ReactNode> {
           own primitives, and the shadcn CLI installs it from its URL.
         </p>
       </header>
-      <SourceCodeBlock code={INSTALL} language="bash" lines={await highlightToLines(INSTALL, 'bash')} />
+      {/* A command shows plain, as the docs' install commands do. */}
+      <SourceCodeBlock code={INSTALL} language="bash" lines={null} />
       <div className="flex flex-wrap gap-3">
         <Link href={docsPageUrl(['components'])} className={buttonVariants()}>
           Browse components

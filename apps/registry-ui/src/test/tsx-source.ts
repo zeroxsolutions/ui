@@ -33,9 +33,14 @@ export function registryItemTsx(): string[] {
   return tsxUnder(REGISTRY_ITEMS);
 }
 
-/** Every authored `.tsx` module: the registry's items and the docs site in `src/`. The copy rule binds these. */
+/** Every authored `.tsx` module: the registry's items and the docs site in `src/`. The class and copy rules bind these. */
 export function authoredTsx(): string[] {
   return tsxUnder(['src', ...REGISTRY_ITEMS]);
+}
+
+/** Every layout under `src/app`, the only modules that may declare a layout variable. */
+export function siteLayouts(): string[] {
+  return tsxUnder(['src/app']).filter((file) => file.endsWith('/layout.tsx'));
 }
 
 /** Every MDX page under `content/docs`. */

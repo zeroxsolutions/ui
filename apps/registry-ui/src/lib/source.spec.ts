@@ -133,8 +133,8 @@ function unnamedPages(sources: Record<string, string>, items: Map<string, ItemTe
 /** The command a page installs its subject with: an item by its URL here, a primitive by its name at shadcn. */
 function installCommand(name: string, items: Map<string, ItemText>): string {
   return items.has(name)
-    ? `npx shadcn@latest add https://ui.zeroxsolutions.com/r/${name}.json`
-    : `npx shadcn@latest add ${name}`;
+    ? `pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/${name}.json`
+    : `pnpm dlx shadcn@latest add ${name}`;
 }
 
 /** Every item or primitive page with no line that is exactly its install command. */
@@ -256,13 +256,13 @@ describe('content/docs', () => {
   it('reports a page that installs its subject some other way', () => {
     const items = new Map([['status-indicator', { title: 'Status Indicator', description: 'A small dot.' }]]);
     const sources = {
-      'components/button': '```bash\nnpx shadcn@latest add button-group\n```',
-      'components/status-indicator': '```bash\nnpx shadcn@latest add status-indicator\n```',
+      'components/button': '```bash\npnpm dlx shadcn@latest add button-group\n```',
+      'components/status-indicator': '```bash\npnpm dlx shadcn@latest add status-indicator\n```',
     };
 
     expect(missingInstallCommands(sources, items)).toEqual([
-      'components/button: has no `npx shadcn@latest add button`',
-      'components/status-indicator: has no `npx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json`',
+      'components/button: has no `pnpm dlx shadcn@latest add button`',
+      'components/status-indicator: has no `pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json`',
     ]);
   });
 });

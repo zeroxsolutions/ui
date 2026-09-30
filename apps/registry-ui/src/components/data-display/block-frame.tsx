@@ -17,7 +17,7 @@ function BlockFrame({ name, className, ...props }: BlockFrameProps): ReactNode {
       data-slot="block-frame"
       src={viewRoute.build({ name })}
       loading="lazy"
-      className={cn('bg-background h-[36rem] w-full rounded-xl border', className)}
+      className={cn('bg-background h-144 w-full rounded-xl border', className)}
       {...props}
     />
   );
