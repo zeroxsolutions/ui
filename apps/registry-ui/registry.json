@@ -285,10 +285,9 @@
       "dependencies": ["@zeroxsolutions/fluent-emoji", "lucide-react"],
       "registryDependencies": [
         "@shadcn/button",
-        "@shadcn/empty",
         "@shadcn/input-group",
         "@shadcn/scroll-area",
-        "@shadcn/tabs",
+        "@shadcn/toggle-group",
         "@shadcn/utils",
         "https://lucide-animated.com/r/clock.json",
         "https://lucide-animated.com/r/coffee.json",
@@ -366,7 +365,7 @@
       "name": "password-input",
       "type": "registry:component",
       "title": "Password Input",
-      "description": "A password field with a show or hide toggle packaged into the addon, so a call site never wires the eye button itself.",
+      "description": "A password field over upstream InputGroup whose composed toggle shows or hides the password.",
       "categories": ["data-entry"],
       "registryDependencies": [
         "@shadcn/input-group",
@@ -384,7 +383,7 @@
       "name": "resize-handle",
       "type": "registry:component",
       "title": "Resize Handle",
-      "description": "A vertical resize grip for a side or floating panel that only starts dragging once the pointer crosses a small movement threshold.",
+      "description": "A vertical resize grip for a panel outside any ResizablePanelGroup that only starts dragging once the pointer crosses a small movement threshold.",
       "categories": ["data-entry"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
@@ -422,8 +421,8 @@
       "name": "tree-item",
       "type": "registry:component",
       "title": "Tree Item",
-      "description": "One row of a hierarchy tree over upstream Item, with a depth indent and disclosure, a clickable label and an inline rename input.",
-      "categories": ["data-entry"],
+      "description": "One row of a hierarchy tree over upstream Item, with a depth indent, a disclosure trigger, a clickable label and an inline rename input.",
+      "categories": ["data-display"],
       "registryDependencies": [
         "@shadcn/button",
         "@shadcn/input",
@@ -433,7 +432,7 @@
       ],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/data-entry/tree-item.tsx",
+          "path": "registry/bases/base-ui/components/data-display/tree-item.tsx",
           "type": "registry:component"
         },
         {
@@ -1052,9 +1051,10 @@
       "name": "emoji-picker-demo",
       "type": "registry:example",
       "title": "Emoji Picker Demo",
-      "description": "The default EmojiPicker composition over a small frequent row.",
+      "description": "The EmojiPicker composed from its parts over a small frequent row, with an empty state for a search that matches nothing.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/emoji-picker.json"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@shadcn/empty", "https://ui.zeroxsolutions.com/r/emoji-picker.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/emoji-picker-demo.tsx",
@@ -1114,7 +1114,11 @@
       "title": "Password Input Demo",
       "description": "A labelled PasswordInput with its show or hide toggle.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/field", "https://ui.zeroxsolutions.com/r/password-input.json"],
+      "registryDependencies": [
+        "@shadcn/field",
+        "@shadcn/input-group",
+        "https://ui.zeroxsolutions.com/r/password-input.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/password-input-demo.tsx",
@@ -1126,7 +1130,7 @@
       "name": "resize-handle-demo",
       "type": "registry:example",
       "title": "Resize Handle Demo",
-      "description": "A side panel resized by dragging its ResizeHandle or collapsed by a double-click.",
+      "description": "A panel floating over a canvas, resized by dragging its ResizeHandle or collapsed by a double-click.",
       "categories": ["examples"],
       "registryDependencies": ["https://ui.zeroxsolutions.com/r/resize-handle.json"],
       "files": [
@@ -1154,7 +1158,7 @@
       "name": "tree-item-demo",
       "type": "registry:example",
       "title": "Tree Item Demo",
-      "description": "A folder expanded over two files, each a TreeItem row.",
+      "description": "A folder over two files, opened and closed by its TreeItemTrigger, each a TreeItem row.",
       "categories": ["examples"],
       "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/tree-item.json"],
       "files": [

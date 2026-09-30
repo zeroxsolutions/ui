@@ -17,13 +17,15 @@ const TreeItemContext = React.createContext<TreeItemContextValue | null>(null);
 
 function useTreeItem(): TreeItemContextValue {
   const context = React.useContext(TreeItemContext);
-  if (!context) throw new Error('TreeItemIndent must be used within <TreeItem>');
+  if (!context) throw new Error('TreeItemTrigger must be used within <TreeItem>');
   return context;
 }
 
 interface TreeItemProps extends React.ComponentProps<typeof Item> {
-  /** Whether the node's children are shown; sets `data-expanded` and names the disclosure. */
+  /** Whether the node's children are shown; sets `data-expanded` and the trigger's `aria-expanded`. */
   expanded?: boolean;
+  /** Whether the node has no children; sets `data-leaf`, which keeps the name aligned with its siblings' names. */
+  leaf?: boolean;
   /** Whether the row is being renamed; sets `data-editing`. */
   editing?: boolean;
 }
@@ -31,17 +33,31 @@ interface TreeItemProps extends React.ComponentProps<typeof Item> {
 /**
  * One row of a hierarchy tree (a layer tree, a scene outliner, a file tree),
  * over upstream's `Item` at `size="xs"`. The row owns the shared rhythm and the
- * `group/tree-item` its parts style off, and it never wraps; the consumer composes the rest: a
- * `TreeItemIndent`, a `TreeItemLabel` holding `ItemMedia` and `ItemTitle` (or a
- * `TreeItemRenameInput` while renaming), and `ItemActions` for trailing actions.
- * Selection state and drag handlers go on the row itself.
- * A context menu wraps the row as `ContextMenuTrigger render={<TreeItem />}`.
+ * `group/tree-item` its parts style off; it overrides the Item recipe's
+ * `flex-wrap` with `flex-nowrap`, so a long name truncates instead of dropping
+ * the actions onto a second line. The consumer composes the rest:
+ *
+ *   <TreeItem expanded={open}>
+ *     <TreeItemIndent depth={0}>
+ *       <TreeItemTrigger aria-label="Toggle src" onClick={toggle} />
+ *     </TreeItemIndent>
+ *     <TreeItemLabel><ItemTitle>src</ItemTitle></TreeItemLabel>
+ *   </TreeItem>
+ *   <TreeItem leaf>
+ *     <TreeItemIndent depth={1} />
+ *     <TreeItemLabel><ItemTitle>index.ts</ItemTitle></TreeItemLabel>
+ *   </TreeItem>
+ *
+ * A `TreeItemRenameInput` replaces the title while renaming, and `ItemActions`
+ * holds trailing actions. Selection state and drag handlers go on the row
+ * itself. A context menu wraps the row as `ContextMenuTrigger render={<TreeItem />}`.
  *
  * `ref` reaches the row div - a consumer needs it for `scrollIntoView`, and a
  * wrapping Base UI `render` trigger composes its ref through it.
  */
 function TreeItem({
   expanded = false,
+  leaf = false,
   editing = false,
   size = 'xs',
   className,
@@ -53,6 +69,7 @@ function TreeItem({
       <Item
         data-slot="tree-item"
         data-expanded={expanded || undefined}
+        data-leaf={leaf || undefined}
         data-editing={editing || undefined}
         size={size}
         className={cn('group/tree-item flex-nowrap', className)}
@@ -63,69 +80,81 @@ function TreeItem({
 }
 
 interface TreeItemIndentProps extends React.ComponentProps<'span'> {
-  /** Nesting depth; 0 for roots. Drives the left indent. */
+  /** Nesting depth; 0 for roots. Each level indents three spacing steps. */
   depth: number;
-  /** Pixels of indent added per depth level. Default 12. */
-  indentStep?: number;
-  /** Pixels of indent at depth 0. Default 0. */
-  baseIndent?: number;
-  /** Whether the node has children - shows the chevron vs. a same-width spacer. */
-  hasChildren: boolean;
-  /** Toggle expand/collapse. The chevron stops propagation so it never selects the row. */
-  onToggleExpand: () => void;
-  /** a11y label for the disclosure control when collapsed. */
-  expandLabel?: string;
-  /** a11y label for the disclosure control when expanded. */
-  collapseLabel?: string;
 }
 
 /**
- * The row's depth indent (`baseIndent + depth * indentStep` px) and disclosure
- * control: a chevron that turns while the row is `expanded`, or a spacer for a
- * leaf so names stay aligned. Place it first in a `TreeItem`.
+ * The row's leading column, first in a `TreeItem`: a depth indent of three
+ * spacing steps per level, then its `children` - a folder row's
+ * `TreeItemTrigger`. On a `leaf` row it holds the room the trigger takes
+ * instead - an invisible, inert button of the trigger's own size - so a leaf's
+ * name lines up with its folder siblings' names.
  */
-function TreeItemIndent({
-  depth,
-  indentStep = 12,
-  baseIndent = 0,
-  hasChildren,
-  onToggleExpand,
-  expandLabel = 'Expand',
-  collapseLabel = 'Collapse',
-  className,
-  style,
-  ...props
-}: TreeItemIndentProps): React.ReactNode {
-  const { expanded } = useTreeItem();
-  const iconRef = React.useRef<ChevronRightIconHandle>(null);
+function TreeItemIndent({ depth, className, style, children, ...props }: TreeItemIndentProps): React.ReactNode {
   return (
     <span
       data-slot="tree-item-indent"
-      className={cn('flex shrink-0 items-center', className)}
-      style={{ paddingLeft: baseIndent + depth * indentStep, ...style }}
+      className={cn('flex shrink-0 items-center ps-[calc(var(--tree-item-depth)*--spacing(3))]', className)}
+      style={{ '--tree-item-depth': depth, ...style } as React.CSSProperties}
       {...props}
     >
-      {hasChildren ? (
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          aria-label={expanded ? collapseLabel : expandLabel}
-          onClick={(event) => {
-            event.stopPropagation();
-            onToggleExpand();
-          }}
-          onMouseEnter={() => iconRef.current?.startAnimation()}
-          onMouseLeave={() => iconRef.current?.stopAnimation()}
-          onFocus={() => iconRef.current?.startAnimation()}
-          onBlur={() => iconRef.current?.stopAnimation()}
-          className="shrink-0"
-        >
-          <ChevronRightIcon ref={iconRef} className="transition-transform group-data-expanded/tree-item:rotate-90" />
-        </Button>
-      ) : (
-        <span className="w-6 shrink-0" aria-hidden />
-      )}
+      <span aria-hidden className="hidden group-data-leaf/tree-item:flex">
+        <Button variant="ghost" size="icon-xs" tabIndex={-1} disabled className="invisible" />
+      </span>
+      {children}
     </span>
+  );
+}
+
+/**
+ * The disclosure control of a folder row: upstream's ghost `icon-xs` button
+ * holding a chevron that turns while the row is `expanded`, with
+ * `aria-expanded` from the row. The caller gives it its `aria-label` and its
+ * `onClick`; the click never reaches the row, so it never selects it. It goes
+ * in the row's `TreeItemIndent`, and a leaf row leaves it out. The chevron plays on the button's hover or focus.
+ */
+function TreeItemTrigger({
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onBlur,
+  ...props
+}: Omit<React.ComponentProps<typeof Button>, 'children'>): React.ReactNode {
+  const { expanded } = useTreeItem();
+  const iconRef = React.useRef<ChevronRightIconHandle>(null);
+  return (
+    <Button
+      data-slot="tree-item-trigger"
+      type="button"
+      variant="ghost"
+      size="icon-xs"
+      aria-expanded={expanded}
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick?.(event);
+      }}
+      onMouseEnter={(event) => {
+        onMouseEnter?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onMouseLeave={(event) => {
+        onMouseLeave?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      onFocus={(event) => {
+        onFocus?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      {...props}
+    >
+      <ChevronRightIcon ref={iconRef} className="transition-transform group-data-expanded/tree-item:rotate-90" />
+    </Button>
   );
 }
 
@@ -201,5 +230,5 @@ function TreeItemRenameInput({
   );
 }
 
-export { TreeItem, TreeItemIndent, TreeItemLabel, TreeItemRenameInput };
+export { TreeItem, TreeItemIndent, TreeItemTrigger, TreeItemLabel, TreeItemRenameInput };
 export type { TreeItemProps, TreeItemIndentProps, TreeItemRenameInputProps };

@@ -19,20 +19,29 @@ interface ResizeHandleProps extends Omit<ComponentProps<'div'>, 'onDrag'> {
 }
 
 /**
- * A vertical resize grip for a side or floating panel, drawn as upstream's
- * `ResizableHandle` with its handle, for a panel that sits outside a
- * `ResizablePanelGroup`. Stable by design: a
- * resize only begins once the pointer crosses a small movement threshold, so a
- * click, jitter, or double-click never nudges the width. Uses pointer capture so
- * the drag survives the pointer leaving the 1px line, and `preventDefault` +
- * `touch-action: none` so it never steals focus or selects text. Double-click
- * fires `onToggle` (e.g. collapse/expand the panel). A caller's own
- * `onPointerDown`, `onPointerMove` or `onDoubleClick` runs first, and calling
- * `event.preventDefault()` in it skips the matching own action (arming,
- * reporting the drag delta, or toggling). The `onPointerUp` / `onPointerCancel`
- * / `onLostPointerCapture` cleanup always ends the drag after the caller's
- * handler runs, whatever it does - skipping it there would strand the drag
- * armed once the pointer is gone.
+ * A vertical resize grip for a panel that sits outside any
+ * `ResizablePanelGroup` - a floating or overlaid panel whose width the caller
+ * owns. Panes that share a row compose upstream instead:
+ * `ResizablePanelGroup` > `ResizablePanel` + `ResizableHandle withHandle` +
+ * `ResizablePanel` (a `collapsible` panel for the collapse toggle).
+ *
+ * The recipe is a deliberate fork of upstream's `ResizableHandle` and its
+ * handle, because that handle renders a `react-resizable-panels` separator,
+ * which throws outside a group. The fork is pointer-only: it has neither
+ * upstream's focus ring nor its keyboard resizing, and upstream's recipe
+ * fixes do not reach it.
+ *
+ * Stable by design: a resize only begins once the pointer crosses a small
+ * movement threshold, so a click, jitter, or double-click never nudges the
+ * width. Uses pointer capture so the drag survives the pointer leaving the
+ * 1px line, and `preventDefault` + `touch-action: none` so it never steals
+ * focus or selects text. Double-click fires `onToggle` (e.g. collapse/expand
+ * the panel). A caller's own `onPointerDown`, `onPointerMove` or
+ * `onDoubleClick` runs first, and calling `event.preventDefault()` in it skips
+ * the matching own action (arming, reporting the drag delta, or toggling). The
+ * `onPointerUp` / `onPointerCancel` / `onLostPointerCapture` cleanup always
+ * ends the drag after the caller's handler runs, whatever it does - skipping it
+ * there would strand the drag armed once the pointer is gone.
  */
 function ResizeHandle({
   onDrag,

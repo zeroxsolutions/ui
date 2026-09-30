@@ -17,6 +17,10 @@ interface ChatSuggestionItemProps extends ComponentProps<'button'> {
 /**
  * ChatSuggestionItem - one starter prompt in an empty conversation, an upstream
  * `Item` rendered as a button. Picking it hands `prompt` to `onSelectPrompt`.
+ * Upstream's example renders an interactive Item only as a link, and the Item
+ * recipe's hover matches only `a`, so this button Item draws that same
+ * `hover:bg-muted` itself, while it is enabled. `className` merges against the
+ * Item recipe.
  * The consumer composes the item's content and the empty state around it:
  *
  *   <Empty>
@@ -46,6 +50,7 @@ function ChatSuggestionItem({
   return (
     <Item
       size="sm"
+      className={cn('enabled:hover:bg-muted text-left', className)}
       render={
         <button
           type="button"
@@ -55,7 +60,6 @@ function ChatSuggestionItem({
             onClick?.(event);
             if (!event.defaultPrevented) onSelectPrompt?.(prompt);
           }}
-          className={cn('w-full text-left', className)}
           {...props}
         />
       }

@@ -10,7 +10,7 @@ import {
 } from '@/registry/bases/base-ui/ui/context-menu';
 import { ItemActions, ItemTitle } from '@/registry/bases/base-ui/ui/item';
 
-import { TreeItem, TreeItemIndent, TreeItemLabel, TreeItemRenameInput } from './tree-item';
+import { TreeItem, TreeItemIndent, TreeItemLabel, TreeItemRenameInput, TreeItemTrigger } from './tree-item';
 
 afterEach(cleanup);
 
@@ -24,7 +24,7 @@ describe('TreeItem', () => {
     const onActivate = vi.fn();
     render(
       <TreeItem>
-        <TreeItemIndent depth={0} hasChildren={false} onToggleExpand={() => {}} />
+        <TreeItemIndent depth={0} />
         <TreeItemLabel onClick={onActivate}>
           <ItemTitle>Layer 1</ItemTitle>
         </TreeItemLabel>
@@ -89,44 +89,46 @@ describe('TreeItem', () => {
   });
 });
 
-describe('TreeItemIndent', () => {
-  it('indents by baseIndent + depth * indentStep', () => {
-    render(
-      <TreeItem>
-        <TreeItemIndent depth={2} indentStep={12} baseIndent={4} hasChildren={false} onToggleExpand={() => {}} />
-      </TreeItem>,
-    );
-    const indent = row().firstElementChild as HTMLElement;
-    expect(indent.style.paddingLeft).toBe('28px');
-  });
-
-  it('toggles via the chevron and stops propagation so the row is not selected', () => {
-    const onToggleExpand = vi.fn();
+describe('TreeItemTrigger', () => {
+  it('runs the caller onClick without the click reaching the row, so the row is not selected', () => {
+    const onToggle = vi.fn();
     const onRowClick = vi.fn();
     render(
       <TreeItem onClick={onRowClick}>
-        <TreeItemIndent depth={0} hasChildren onToggleExpand={onToggleExpand} expandLabel="Expand node" />
+        <TreeItemIndent depth={0}>
+          <TreeItemTrigger aria-label="Toggle node" onClick={onToggle} />
+        </TreeItemIndent>
       </TreeItem>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Expand node' }));
-    expect(onToggleExpand).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle node' }));
+    expect(onToggle).toHaveBeenCalledTimes(1);
     expect(onRowClick).not.toHaveBeenCalled();
   });
 
-  it("names the disclosure from the row's expanded state", () => {
-    render(
-      <TreeItem expanded>
-        <TreeItemIndent depth={0} hasChildren onToggleExpand={() => {}} />
+  it("reports the row's expanded state as aria-expanded", () => {
+    const { rerender } = render(
+      <TreeItem>
+        <TreeItemTrigger aria-label="Toggle node" />
       </TreeItem>,
     );
-    expect(screen.getByRole('button', { name: 'Collapse' })).toBeTruthy();
-  });
+    expect(screen.getByRole('button', { name: 'Toggle node' }).getAttribute('aria-expanded')).toBe('false');
 
-  it('renders an aligned spacer (no disclosure button) for a leaf', () => {
+    rerender(
+      <TreeItem expanded>
+        <TreeItemTrigger aria-label="Toggle node" />
+      </TreeItem>,
+    );
+    expect(screen.getByRole('button', { name: 'Toggle node' }).getAttribute('aria-expanded')).toBe('true');
+  });
+});
+
+describe('TreeItemIndent', () => {
+  it('offers no control on a leaf row', () => {
     render(
-      <TreeItem>
-        <TreeItemIndent depth={0} hasChildren={false} onToggleExpand={() => {}} />
+      <TreeItem leaf>
+        <TreeItemIndent depth={1} />
+        <TreeItemLabel>index.ts</TreeItemLabel>
       </TreeItem>,
     );
     expect(screen.queryByRole('button')).toBeNull();
