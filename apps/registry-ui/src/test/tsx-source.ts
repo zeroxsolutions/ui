@@ -35,14 +35,14 @@ export function docsPages(): string[] {
     .sort();
 }
 
-export function parseTsx(file: string): ts.SourceFile {
-  return ts.createSourceFile(
-    file,
-    readFileSync(join(APP_ROOT, file), 'utf8'),
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TSX,
-  );
+/** A repo-relative file's own text, read fresh each call. */
+export function readSource(file: string): string {
+  return readFileSync(join(APP_ROOT, file), 'utf8');
+}
+
+/** Parses `text` as a `.tsx` module named `file`; `text` never comes off disk here, so a fixture can stand in for it. */
+export function parseTsxSource(file: string, text: string): ts.SourceFile {
+  return ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 }
 
 export function lineOf(source: ts.SourceFile, node: ts.Node): number {

@@ -2,7 +2,7 @@
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
-import { authoredTsx, lineOf, literalTexts, parseTsx } from './src/test/tsx-source';
+import { authoredTsx, lineOf, literalTexts, parseTsxSource, readSource } from './src/test/tsx-source';
 
 /** Files not rebuilt on base-nova yet; each task that rebuilds one removes it. */
 const PENDING: readonly string[] = [
@@ -36,13 +36,22 @@ const PENDING: readonly string[] = [
   'src/mdx-components.tsx',
 ];
 
-const PALETTE =
-  /^-?(?:text|bg|border(?:-[xytrbl])?|ring|fill|stroke|outline|from|via|to|decoration|divide|shadow|accent|caret|placeholder)-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone|black|white)(?:-\d{2,3})?(?:\/\d+)?$/;
+/** Utilities that paint with a theme colour: `<prefix>-<hue>[-<shade>]`, or the css-var form `<prefix>-(--color-<hue>[-<shade>])`. */
+const PALETTE_UTILITY =
+  'text|bg|border(?:-[xytrbl])?|ring|ring-offset|inset-ring|fill|stroke|outline|from|via|to|decoration|divide|shadow|accent|caret|placeholder';
+/** Every hue Tailwind's installed theme (`tailwindcss/theme.css`) names, `black` and `white` included. */
+const PALETTE_HUE =
+  'red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone|mauve|olive|mist|taupe|black|white';
+const PALETTE = new RegExp(
+  `^-?(?:${PALETTE_UTILITY})-(?:(?:${PALETTE_HUE})(?:-\\d{2,3})?|\\(--color-(?:${PALETTE_HUE})(?:-\\d{2,3})?\\))(?:/\\d+)?$`,
+);
 const PRIMITIVE_LOOK =
-  /^-?(?:h|min-h|max-h|size|p[xytrblse]?|rounded(?:-[a-z]+)?|text|font|leading|tracking|bg|border(?:-[xytrbl])?|ring|shadow)(?:-|$)/;
+  /^-?(?:h|min-h|max-h|size|p[xytrblse]?|rounded(?:-[a-z]+)?|text|font|leading|tracking|bg|border(?:-[xytrbl])?|ring|shadow|fill|stroke|outline|decoration)(?:-|$)/;
 const LAYOUT_KEPT =
-  /^(?:(?:h|min-h|max-h|size)-(?:full|auto|0|fit|min|max|none|svh)|text-(?:left|center|right|start|end|wrap|nowrap|balance|pretty|ellipsis|clip)|font-(?:mono|sans))$/;
+  /^(?:(?:h|min-h|max-h|size)-(?:full|auto|0|fit|min|max|none|svh)|text-(?:left|center|right|start|end|wrap|nowrap|balance|pretty|ellipsis|clip)|font-(?:mono|sans)|outline-(?:none|hidden))$/;
 const VARIABLE_DECLARATION = /^\[--[\w-]+:/;
+/** A colour literal or function inside a custom property's value: `#hex`, `rgb(`/`rgba(`, `hsl(`/`hsla(`, `oklch(`, `oklab(`, `lab(`, `lch(`, `color(`. */
+const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(/;
 const PRIMITIVE_MODULE = /\/registry\/bases\/base-ui\/ui\//;
 
 /** A class with its variants (`md:`, `data-[x]:`, `[&_svg]:`) and importance marks removed. */
@@ -62,7 +71,8 @@ function utilityOf(className: string): string {
 export function classViolation(className: string, onPrimitive: boolean): string | null {
   const utility = utilityOf(className);
   if (PALETTE.test(utility)) return 'palette colour';
-  if (utility.includes('[') && !VARIABLE_DECLARATION.test(utility)) return 'arbitrary value';
+  const declaresVariable = VARIABLE_DECLARATION.test(utility);
+  if (utility.includes('[') && (!declaresVariable || COLOR_LITERAL.test(utility))) return 'arbitrary value';
   if (onPrimitive && PRIMITIVE_LOOK.test(utility) && !LAYOUT_KEPT.test(utility)) return 'restyles a primitive';
   return null;
 }
@@ -74,8 +84,8 @@ interface Violation {
   rule: string;
 }
 
-function violationsIn(file: string): Violation[] {
-  const source = parseTsx(file);
+function violationsIn(file: string, text: string): Violation[] {
+  const source = parseTsxSource(file, text);
   const primitives = new Set<string>();
   source.statements.forEach((statement) => {
     if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) return;
@@ -115,13 +125,24 @@ describe('classViolation', () => {
   it.each([
     ['text-emerald-600', false, 'palette colour'],
     ['dark:bg-blue-500/20', false, 'palette colour'],
+    ['bg-(--color-emerald-600)', false, 'palette colour'],
+    ['text-(--color-blue-500)', true, 'palette colour'],
+    ['bg-(--color-emerald-600)/50', false, 'palette colour'],
+    ['ring-offset-blue-500', false, 'palette colour'],
+    ['inset-ring-emerald-600', false, 'palette colour'],
+    ['bg-mauve-500', false, 'palette colour'],
     ['text-[0.85em]', false, 'arbitrary value'],
     ['top-[calc(var(--x)+1px)]', false, 'arbitrary value'],
+    ['[--c:#10b981]', false, 'arbitrary value'],
     ['h-8', true, 'restyles a primitive'],
     ['px-6', true, 'restyles a primitive'],
     ['rounded-full', true, 'restyles a primitive'],
     ['text-muted-foreground', true, 'restyles a primitive'],
     ['[&_svg]:size-3', true, 'restyles a primitive'],
+    ['fill-current', true, 'restyles a primitive'],
+    ['stroke-2', true, 'restyles a primitive'],
+    ['decoration-dotted', true, 'restyles a primitive'],
+    ['outline-2', true, 'restyles a primitive'],
   ])('%s (on a primitive: %s) breaks "%s"', (className, onPrimitive, rule) => {
     expect(classViolation(className, onPrimitive)).toBe(rule);
   });
@@ -133,11 +154,37 @@ describe('classViolation', () => {
     ['text-left', true],
     ['data-[active=true]:flex', true],
     ['[--sidebar-width:--spacing(72)]', false],
+    ['[--radius:8px]', false],
     ['w-(--sidebar-width)', false],
     ['text-muted-foreground', false],
     ['px-6', false],
+    ['outline-none', true],
+    ['outline-hidden', true],
   ])('%s (on a primitive: %s) is allowed', (className, onPrimitive) => {
     expect(classViolation(className, onPrimitive)).toBeNull();
+  });
+});
+
+describe('violationsIn', () => {
+  it('flags a class on an imported primitive, not the same class on a plain element, and a palette colour inside cn()', () => {
+    const source = [
+      "import { Button } from '@/registry/bases/base-ui/ui/button';",
+      '',
+      'function Demo() {',
+      '  return (',
+      '    <>',
+      '      <Button className="h-8" />',
+      '      <div className="h-8" />',
+      "      <div className={cn('text-emerald-600')} />",
+      '    </>',
+      '  );',
+      '}',
+    ].join('\n');
+
+    expect(violationsIn('fixture.tsx', source).map(({ className, rule }) => ({ className, rule }))).toEqual([
+      { className: 'h-8', rule: 'restyles a primitive' },
+      { className: 'text-emerald-600', rule: 'palette colour' },
+    ]);
   });
 });
 
@@ -145,10 +192,14 @@ describe('the authored modules', () => {
   const files = authoredTsx();
 
   it('keep every rebuilt module to the class rules', () => {
-    expect(files.filter((file) => !PENDING.includes(file)).flatMap(violationsIn)).toEqual([]);
+    expect(
+      files.filter((file) => !PENDING.includes(file)).flatMap((file) => violationsIn(file, readSource(file))),
+    ).toEqual([]);
   });
 
   it('list as pending only modules that still break a rule', () => {
-    expect(PENDING.filter((file) => !files.includes(file) || violationsIn(file).length === 0)).toEqual([]);
+    expect(
+      PENDING.filter((file) => !files.includes(file) || violationsIn(file, readSource(file)).length === 0),
+    ).toEqual([]);
   });
 });

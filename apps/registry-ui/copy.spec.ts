@@ -5,14 +5,13 @@ import { join } from 'node:path';
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
-import { APP_ROOT, authoredTsx, docsPages, lineOf, parseTsx } from './src/test/tsx-source';
+import { APP_ROOT, authoredTsx, docsPages, lineOf, parseTsxSource, readSource } from './src/test/tsx-source';
 
 /** Files whose copy is not sentence case yet; each task that rebuilds one removes it. */
 const PENDING: readonly string[] = [
   'content/docs/blocks/ai-provider-picker.mdx',
   'content/docs/components/status-indicator.mdx',
   'registry/bases/base-ui/examples/collapsible-card-demo.tsx',
-  'registry/bases/base-ui/examples/icons-demo.tsx',
 ];
 
 /** Names that keep their capitals wherever they sit in a sentence, beside the registry's item titles. */
@@ -31,6 +30,7 @@ const NAMES: readonly string[] = [
   'Cloudflare',
   'Motion',
   'Fluent',
+  'TypeScript',
 ];
 
 const ITEM_TITLES: readonly string[] = (
@@ -61,8 +61,8 @@ interface CopyUse {
   text: string;
 }
 
-function tsxCopy(file: string): CopyUse[] {
-  const source = parseTsx(file);
+function tsxCopy(file: string, text: string): CopyUse[] {
+  const source = parseTsxSource(file, text);
   const found: CopyUse[] = [];
   const visit = (node: ts.Node): void => {
     if (ts.isJsxText(node)) {
@@ -83,22 +83,20 @@ function tsxCopy(file: string): CopyUse[] {
   return found;
 }
 
-function mdxCopy(file: string): CopyUse[] {
+function mdxCopy(file: string, text: string): CopyUse[] {
   let fenced = false;
-  return readFileSync(join(APP_ROOT, file), 'utf8')
-    .split('\n')
-    .flatMap((line, index) => {
-      if (line.startsWith('```')) fenced = !fenced;
-      const heading = fenced ? null : /^#{1,6}\s+(.+)$/.exec(line);
-      const description = /^description:\s*(.+)$/.exec(line);
-      const text = heading?.[1] ?? description?.[1];
-      return text ? [{ file, line: index + 1, text }] : [];
-    });
+  return text.split('\n').flatMap((line, index) => {
+    if (line.startsWith('```')) fenced = !fenced;
+    const heading = fenced ? null : /^#{1,6}\s+(.+)$/.exec(line);
+    const description = /^description:\s*(.+)$/.exec(line);
+    const text = heading?.[1] ?? description?.[1];
+    return text ? [{ file, line: index + 1, text }] : [];
+  });
 }
 
-function violationsIn(file: string): (CopyUse & { word: string })[] {
+function violationsIn(file: string, text: string): (CopyUse & { word: string })[] {
   const names = [...NAMES, ...ITEM_TITLES];
-  return (file.endsWith('.mdx') ? mdxCopy(file) : tsxCopy(file)).flatMap((use) => {
+  return (file.endsWith('.mdx') ? mdxCopy(file, text) : tsxCopy(file, text)).flatMap((use) => {
     const word = casingViolation(use.text, names);
     return word ? [{ ...use, word }] : [];
   });
@@ -125,14 +123,37 @@ describe('casingViolation', () => {
   });
 });
 
+describe('tsxCopy and mdxCopy', () => {
+  it('flags a JSX text and an aria-label through the copy extractor', () => {
+    const source = ['function Demo() {', '  return <button aria-label="On This Page">Copy Page</button>;', '}'].join(
+      '\n',
+    );
+
+    expect(violationsIn('fixture.tsx', source).map(({ text, word }) => ({ text, word }))).toEqual([
+      { text: 'On This Page', word: 'This' },
+      { text: 'Copy Page', word: 'Page' },
+    ]);
+  });
+
+  it('ignores an mdx heading inside a fence', () => {
+    const source = ['# Real Heading', '```', '## Inside A Fence', '```', 'description: Some Description'].join('\n');
+
+    expect(mdxCopy('fixture.mdx', source).map((use) => use.text)).toEqual(['Real Heading', 'Some Description']);
+  });
+});
+
 describe('the copy', () => {
   const files = [...authoredTsx(), ...docsPages()];
 
   it('is sentence case in every rebuilt file', () => {
-    expect(files.filter((file) => !PENDING.includes(file)).flatMap(violationsIn)).toEqual([]);
+    expect(
+      files.filter((file) => !PENDING.includes(file)).flatMap((file) => violationsIn(file, readSource(file))),
+    ).toEqual([]);
   });
 
   it('lists as pending only files that still break it', () => {
-    expect(PENDING.filter((file) => !files.includes(file) || violationsIn(file).length === 0)).toEqual([]);
+    expect(
+      PENDING.filter((file) => !files.includes(file) || violationsIn(file, readSource(file)).length === 0),
+    ).toEqual([]);
   });
 });
