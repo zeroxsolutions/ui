@@ -1,9 +1,11 @@
+'use client';
+
 import * as React from 'react';
-import { X } from 'lucide-react';
 
 import { UnsavedIndicator } from '@/registry/bases/base-ui/components/feedback/unsaved-indicator';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
+import { XIcon, type XIconHandle } from '@/registry/bases/base-ui/ui/x';
 
 interface TabCloseButtonProps extends Omit<React.ComponentProps<typeof Button>, 'children'> {
   /** Show the unsaved dot in place of the X until the tab reveals it. */
@@ -15,9 +17,21 @@ interface TabCloseButtonProps extends Omit<React.ComponentProps<typeof Button>, 
  * the X takes its place while the nearest `group/tab` ancestor is hovered or
  * carries `data-active`, or while the button has keyboard focus; give the tab
  * `className="group/tab"`. A click never reaches the tab, so closing a tab does
- * not also activate it.
+ * not also activate it. The X plays while the button is hovered or focused; a
+ * caller's pointer and focus handlers still run.
  */
-function TabCloseButton({ dirty = false, className, onClick, ...props }: TabCloseButtonProps): React.ReactNode {
+function TabCloseButton({
+  dirty = false,
+  className,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onBlur,
+  ...props
+}: TabCloseButtonProps): React.ReactNode {
+  const iconRef = React.useRef<XIconHandle>(null);
+
   return (
     <Button
       data-slot="tab-close-button"
@@ -31,12 +45,33 @@ function TabCloseButton({ dirty = false, className, onClick, ...props }: TabClos
         event.stopPropagation();
         onClick?.(event);
       }}
+      onMouseEnter={(event) => {
+        onMouseEnter?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onMouseLeave={(event) => {
+        onMouseLeave?.(event);
+        iconRef.current?.stopAnimation();
+      }}
+      onFocus={(event) => {
+        onFocus?.(event);
+        iconRef.current?.startAnimation();
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        iconRef.current?.stopAnimation();
+      }}
       {...props}
     >
       {dirty && (
         <UnsavedIndicator className="group-hover/tab:hidden group-focus-visible/tab-close-button:hidden group-data-active/tab:hidden" />
       )}
-      <X className="group-data-dirty/tab-close-button:hidden group-data-dirty/tab-close-button:group-hover/tab:block group-data-dirty/tab-close-button:group-focus-visible/tab-close-button:block group-data-dirty/tab-close-button:group-data-active/tab:block" />
+      <XIcon
+        ref={iconRef}
+        data-slot="tab-close-button-icon"
+        aria-hidden
+        className="group-data-dirty/tab-close-button:hidden group-data-dirty/tab-close-button:group-hover/tab:block group-data-dirty/tab-close-button:group-focus-visible/tab-close-button:block group-data-dirty/tab-close-button:group-data-active/tab:block"
+      />
     </Button>
   );
 }

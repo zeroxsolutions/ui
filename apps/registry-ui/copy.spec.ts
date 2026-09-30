@@ -10,7 +10,6 @@ import { APP_ROOT, authoredTsx, docsMetas, docsPages, lineOf, parseTsxSource, re
 /** Files whose copy is not sentence case yet; each task that rebuilds one removes it. */
 const PENDING: readonly string[] = [
   'content/docs/blocks/ai-provider-picker.mdx',
-  'content/docs/components/status-indicator.mdx',
   'registry/bases/base-ui/examples/collapsible-card-demo.tsx',
 ];
 

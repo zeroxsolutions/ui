@@ -19,7 +19,7 @@ afterEach(cleanup);
 describe('IconChip', () => {
   it('renders the icon inside a chip tinted by className', () => {
     render(
-      <IconChip aria-label="Vision input" className="bg-emerald-500/15 text-emerald-600">
+      <IconChip aria-label="Vision input" className="bg-muted text-muted-foreground">
         <svg data-testid="glyph" />
       </IconChip>,
     );
@@ -27,7 +27,16 @@ describe('IconChip', () => {
     expect(chip.getAttribute('data-slot')).toBe('icon-chip');
     expect(chip.contains(screen.getByTestId('glyph'))).toBe(true);
     expect(chip.className).toContain('rounded-sm');
-    expect(chip.className).toContain('bg-emerald-500/15');
+    expect(chip.className).toContain('bg-muted');
+  });
+
+  it('sizes an unsized svg to the compact glyph', () => {
+    render(
+      <IconChip aria-label="Chat">
+        <svg />
+      </IconChip>,
+    );
+    expect(screen.getByLabelText('Chat').className).toContain("[&_svg:not([class*='size-'])]:size-3");
   });
 
   it('takes the trigger props of a tooltip the consumer composes around it', () => {

@@ -33,6 +33,7 @@ interface Declaration {
 const APP = resolve(import.meta.dirname, '..');
 const BASE = 'registry/bases/base-ui';
 const ITEM_URL = 'https://ui.zeroxsolutions.com/r/';
+const ANIMATED_ICON_URL = 'https://lucide-animated.com/r/';
 
 const REGISTRY = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as { items: RegistryItem[] };
 
@@ -43,6 +44,8 @@ const SHIPPED = /^registry\/bases\/base-ui\/(lib|hooks|types)\//;
 const TOKEN_CLASS = /\b(?:bg|text|border|ring|fill|stroke)-(success|warning)(?![\w-])/g;
 const FAMILY = /^registry\/bases\/base-ui\/(?:components\/([^/]+)|(blocks))\/([^/]+)\.tsx$/;
 const PUBLISHED = ['registry:component', 'registry:block'];
+/** What every `@lucide-animated` icon exports beside its component, and no shadcn primitive does. */
+const ANIMATED_ICON = /^export interface \w+IconHandle\b/m;
 
 /** The specifiers a source file imports; a type-only import of a package is left out, since nothing installs for it. */
 function importsOf(path: string): string[] {
@@ -70,10 +73,16 @@ function sourceOf(importer: string, specifier: string): string | undefined {
   return found;
 }
 
-/** The upstream item a vendored file is, or undefined for a file this registry owns. */
+/**
+ * The upstream item a vendored file is, or undefined for a file this registry owns. A vendored
+ * `@lucide-animated` icon is named by its URL, since shadcn's own registry has no item by that name.
+ */
 function upstreamOf(source: string): string | undefined {
   const part = /^registry\/bases\/base-ui\/ui\/([^/]+)\.tsx?$/.exec(source);
-  if (part) return `@shadcn/${part[1]}`;
+  if (part) {
+    const animated = ANIMATED_ICON.test(readFileSync(join(APP, source), 'utf8'));
+    return animated ? `${ANIMATED_ICON_URL}${part[1]}.json` : `@shadcn/${part[1]}`;
+  }
   if (source === `${BASE}/lib/utils.ts`) return '@shadcn/utils';
   if (source === `${BASE}/hooks/use-mobile.ts`) return '@shadcn/use-mobile';
   return undefined;
@@ -329,6 +338,19 @@ describe('declarationProblems', () => {
     const item = { ...treeItem, dependencies: ['lucide-react', 'shiki'] };
     expect(declarationProblems(item, new Map())).toEqual([
       'tree-item: dependencies declares shiki, which its files do not import',
+    ]);
+  });
+
+  it('names a vendored animated icon by its lucide-animated URL, not as a shadcn item', () => {
+    const copyButton: RegistryItem = {
+      name: 'copy-button',
+      type: 'registry:component',
+      registryDependencies: ['@shadcn/button', '@shadcn/check', `${ANIMATED_ICON_URL}copy.json`],
+      files: [{ path: `${BASE}/components/feedback/copy-button.tsx`, type: 'registry:component' }],
+    };
+    expect(declarationProblems(copyButton, new Map())).toEqual([
+      `copy-button: registryDependencies lacks ${ANIMATED_ICON_URL}check.json`,
+      'copy-button: registryDependencies declares @shadcn/check, which its files do not import',
     ]);
   });
 

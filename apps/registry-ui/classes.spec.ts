@@ -15,7 +15,6 @@ const PENDING: readonly string[] = [
   'registry/bases/base-ui/components/data-entry/emoji-picker.tsx',
   'registry/bases/base-ui/components/data-entry/tag-input.tsx',
   'registry/bases/base-ui/components/data-entry/tree-item.tsx',
-  'registry/bases/base-ui/components/general/panel-field-label.tsx',
   'registry/bases/base-ui/components/layout/avatar-picker.tsx',
   'registry/bases/base-ui/components/layout/collapsible-card.tsx',
   'registry/bases/base-ui/components/layout/model-list.tsx',
@@ -24,7 +23,6 @@ const PENDING: readonly string[] = [
   'registry/bases/base-ui/components/layout/reasoning-collapsible.tsx',
   'registry/bases/base-ui/components/layout/tool-call-card.tsx',
   'registry/bases/base-ui/examples/avatar-picker-demo.tsx',
-  'registry/bases/base-ui/examples/icon-chip-demo.tsx',
   'registry/bases/base-ui/examples/model-info-card-demo.tsx',
 ];
 

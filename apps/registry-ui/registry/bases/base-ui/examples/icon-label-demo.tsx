@@ -1,7 +1,10 @@
-import { Blend, RotateCw, Search } from 'lucide-react';
+import { Blend } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { IconLabel } from '@/registry/bases/base-ui/components/general/icon-label';
+import { Input } from '@/registry/bases/base-ui/ui/input';
+import { RotateCWIcon } from '@/registry/bases/base-ui/ui/rotate-cw';
+import { SearchIcon } from '@/registry/bases/base-ui/ui/search';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 
 /** A universally-read field icon beside two others whose meaning is revealed through a composed tooltip. */
@@ -11,13 +14,13 @@ function IconLabelDemo(): ReactNode {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <IconLabel aria-label="Search">
-            <Search />
+            <SearchIcon aria-hidden />
           </IconLabel>
-          <input className="border-input h-8 w-24 rounded-md border px-2 text-sm" placeholder="Filter..." />
+          <Input aria-label="Filter" placeholder="Filter..." className="w-32" />
         </div>
         <Tooltip>
           <TooltipTrigger render={<IconLabel aria-label="Rotation" />}>
-            <RotateCw />
+            <RotateCWIcon aria-hidden />
           </TooltipTrigger>
           <TooltipContent>Rotation</TooltipContent>
         </Tooltip>

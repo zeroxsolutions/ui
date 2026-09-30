@@ -56,6 +56,22 @@ describe('CommandMenu', () => {
     expect(onValueChange).toHaveBeenCalledWith('SKILL.md');
   });
 
+  it('names its dialog in sentence case unless the consumer names it', () => {
+    const { rerender } = render(
+      <CommandMenu open>
+        <CommandList />
+      </CommandMenu>,
+    );
+    expect(screen.getByRole('dialog', { name: 'Command menu' })).toBeTruthy();
+
+    rerender(
+      <CommandMenu open title="Jump to file">
+        <CommandList />
+      </CommandMenu>,
+    );
+    expect(screen.getByRole('dialog', { name: 'Jump to file' })).toBeTruthy();
+  });
+
   it('marks the palette and its items with their slots', () => {
     render(
       <CommandMenu open>

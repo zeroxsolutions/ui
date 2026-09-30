@@ -32,9 +32,18 @@ interface CommandMenuProps extends Omit<React.ComponentProps<typeof CommandDialo
  * holding a `Command`. Choosing a `CommandMenuItem` reports its value through
  * `onValueChange` and closes the dialog. The consumer composes `CommandInput`,
  * `CommandList`, `CommandEmpty` and the items as children and owns all copy;
- * `useCommandShortcut` binds the key that opens it.
+ * `useCommandShortcut` binds the key that opens it. The dialog's hidden `title`
+ * and `description` name it for assistive technology; pass both to describe
+ * what it jumps to.
  */
-function CommandMenu({ onOpenChange, onValueChange, children, ...props }: CommandMenuProps): React.ReactNode {
+function CommandMenu({
+  title = 'Command menu',
+  description = 'Search for a target to jump to.',
+  onOpenChange,
+  onValueChange,
+  children,
+  ...props
+}: CommandMenuProps): React.ReactNode {
   const ctx: CommandMenuContextValue = {
     select: (value) => {
       onValueChange?.(value);
@@ -43,7 +52,7 @@ function CommandMenu({ onOpenChange, onValueChange, children, ...props }: Comman
   };
   return (
     <CommandMenuContext.Provider value={ctx}>
-      <CommandDialog onOpenChange={onOpenChange} {...props}>
+      <CommandDialog title={title} description={description} onOpenChange={onOpenChange} {...props}>
         <Command data-slot="command-menu">{children}</Command>
       </CommandDialog>
     </CommandMenuContext.Provider>
