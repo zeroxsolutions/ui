@@ -46,6 +46,20 @@ function ComponentPreviewStage({
   );
 }
 
+/** A line under the stage naming what it shows, split from it by a rule. */
+function ComponentPreviewCaption({ className, ...props }: ComponentProps<'div'>): ReactNode {
+  return (
+    <div
+      data-slot="component-preview-caption"
+      className={cn(
+        'border-foreground/10 flex items-center justify-between gap-2 border-t px-4 py-3 text-sm',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
 /**
  * The source under the demo, on the code surface and split from it by a rule. Closed, it shows its
  * `ComponentPreviewExcerpt`; `View code` opens its `ComponentPreviewCode`.
@@ -90,6 +104,7 @@ function ComponentPreviewCode(props: ComponentProps<typeof CollapsibleContent>):
 export {
   ComponentPreview,
   ComponentPreviewStage,
+  ComponentPreviewCaption,
   ComponentPreviewSource,
   ComponentPreviewExcerpt,
   ComponentPreviewCode,
