@@ -96,14 +96,16 @@ function startHomeShaderField(container: HTMLElement, canvas: HTMLCanvasElement)
   };
 
   const dpr = Math.min(window.devicePixelRatio, MAX_DPR);
-  const began = performance.now();
+  // Set on the first drawn tick rather than here, so a page opened hidden or scrolled away still
+  // fades in from its own first frame instead of from one already past FADE_IN_SECONDS.
+  let began: number | null = null;
   let ink = homeShaderInk(container);
   let frame = 0;
   let last = 0;
   let onScreen = true;
 
   const visible = (): boolean => onScreen && document.visibilityState === 'visible';
-  const secondsAt = (now: number): number => (now - began) / 1000;
+  const secondsAt = (now: number): number => (began === null ? 0 : (now - began) / 1000);
   const size = (): void => {
     canvas.width = Math.round(container.clientWidth * dpr);
     canvas.height = Math.round(container.clientHeight * dpr);
@@ -123,6 +125,7 @@ function startHomeShaderField(container: HTMLElement, canvas: HTMLCanvasElement)
   };
   const tick = (now: number): void => {
     frame = 0;
+    began ??= now;
     const seconds = secondsAt(now);
     const settled = seconds >= SETTLE_SECONDS;
     if (settled || now - last >= FRAME_MS) {
