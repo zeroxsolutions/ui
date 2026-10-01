@@ -1558,6 +1558,20 @@
       ]
     },
     {
+      "name": "tool-call-card-error",
+      "type": "registry:example",
+      "title": "Tool Call Card Error",
+      "description": "A failed search call, its error shown under the trigger.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tool-call-card.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/tool-call-card-error.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
       "name": "command-menu-demo",
       "type": "registry:example",
       "title": "Command Menu Demo",

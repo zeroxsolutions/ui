@@ -196,7 +196,6 @@ const UNDOCUMENTED = new Set([
   'center',
   'collapsible-card',
   'command-menu',
-  'copy-button',
   'editor-tab',
   'floating-toolbar',
   'icon-label',
@@ -206,10 +205,7 @@ const UNDOCUMENTED = new Set([
   'panel-field-group',
   'panel-header',
   'panel-row',
-  'permission-card',
   'reasoning-collapsible',
-  'tool-call-card',
-  'unsaved-indicator',
 ]);
 
 /** Every component with no page that is not still to be written, and every one still listed as such that has a page. */

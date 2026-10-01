@@ -1,0 +1,78 @@
+---
+title: Copy Button
+description: An icon button that copies its value to the clipboard, showing a check and carrying data-copied until its timeout resets it.
+---
+
+<ComponentPreview name="copy-button-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/copy-button.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button https://lucide-animated.com/r/check.json https://lucide-animated.com/r/copy.json
+```
+
+<Step>Copy the component into `components/feedback/copy-button.tsx`.</Step>
+
+<ComponentSource name="copy-button" title="components/feedback/copy-button.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { CopyButton } from '@/components/feedback/copy-button';
+```
+
+```tsx
+<CopyButton value={command} />
+```
+
+Use it beside a value the reader might want to copy, such as a command or a code snippet's whole block.
+
+## API reference
+
+### CopyButton
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button) and takes every prop it takes
+except `value` and `children`, plus:
+
+| Prop          | Type                      | Default    |
+| ------------- | ------------------------- | ---------- |
+| `value`       | `string`                  | required   |
+| `label`       | `string`                  | `'Copy'`   |
+| `copiedLabel` | `string`                  | `'Copied'` |
+| `timeout`     | `number`                  | `2000`     |
+| `onCopied`    | `(value: string) => void` | -          |
+
+It defaults `variant` to `ghost` and `size` to `icon-xs`. A caller's `onClick` runs before the copy, and calling
+`event.preventDefault()` in it skips the copy; a write the browser refuses, such as a denied clipboard
+permission, leaves the button idle. Its icon plays while the button is hovered or focused, and a caller's own
+pointer and focus handlers still run. It sets `data-slot="copy-button"` and `data-copied` while it shows its
+copied state.

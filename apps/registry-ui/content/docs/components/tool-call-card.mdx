@@ -1,0 +1,172 @@
+---
+title: Tool Call Card
+description: "One tool invocation in a chat transcript: a trigger row over collapsible sections, whose status badge follows the call's lifecycle state."
+---
+
+<ComponentPreview name="tool-call-card-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/tool-call-card.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add lucide-react
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add badge button card collapsible utils https://lucide-animated.com/r/chevron-down.json https://lucide-animated.com/r/circle-check.json https://lucide-animated.com/r/clock.json
+```
+
+<Step>Copy the component into `components/feedback/tool-call-card.tsx`.</Step>
+
+<ComponentSource name="tool-call-card" title="components/feedback/tool-call-card.tsx" />
+
+<Step>Add the `success` colour, as [Installation](/docs/installation#colours) describes.</Step>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  ToolCallCard,
+  ToolCallCardContent,
+  ToolCallCardDescription,
+  ToolCallCardSection,
+  ToolCallCardSectionTitle,
+  ToolCallCardStatus,
+  ToolCallCardTitle,
+  ToolCallCardTrigger,
+} from '@/components/feedback/tool-call-card';
+```
+
+```tsx
+<ToolCallCard state="output-available">
+  <ToolCallCardTrigger>
+    <Wrench />
+    <ToolCallCardTitle>search</ToolCallCardTitle>
+    <ToolCallCardDescription>3 results</ToolCallCardDescription>
+    <ToolCallCardStatus>Completed</ToolCallCardStatus>
+  </ToolCallCardTrigger>
+  <ToolCallCardContent>
+    <ToolCallCardSection>
+      <ToolCallCardSectionTitle>Parameters</ToolCallCardSectionTitle>
+      <CodeBlock code={JSON.stringify(input, null, 2)} language="json">
+        <CodeBlockContent>
+          <CodeBlockCode />
+        </CodeBlockContent>
+      </CodeBlock>
+    </ToolCallCardSection>
+  </ToolCallCardContent>
+</ToolCallCard>
+```
+
+The host maps its own dispatcher lifecycle onto `state`. Use it for a tool invocation whose status the
+assistant reports; for a consent request the visitor must decide, use
+[Permission Card](/docs/components/permission-card) instead.
+
+## Composition
+
+```text
+ToolCallCard
+|-- ToolCallCardTrigger
+|   |-- ToolCallCardTitle
+|   |-- ToolCallCardDescription
+|   `-- ToolCallCardStatus
+`-- ToolCallCardContent
+    `-- ToolCallCardSection
+        |-- ToolCallCardSectionTitle
+        `-- CodeBlock
+            `-- CodeBlockContent
+                `-- CodeBlockCode
+```
+
+## Error state
+
+<ComponentPreview name="tool-call-card-error" />
+
+`state="output-error"` turns the status badge's icon into a cross; the host supplies the failure's own text
+inside a `ToolCallCardSection`.
+
+## API reference
+
+### ToolCallCard
+
+Renders shadcn's [`Collapsible`](https://ui.shadcn.com/docs/components/base/collapsible), as a small
+[`Card`](https://ui.shadcn.com/docs/components/base/card), and takes every prop `Collapsible` takes, plus:
+
+| Prop    | Type                                                                             | Default  |
+| ------- | -------------------------------------------------------------------------------- | -------- |
+| `state` | `'input-streaming' \| 'input-available' \| 'output-available' \| 'output-error'` | required |
+
+It sets `data-slot="tool-call-card"` and `data-state` to its state.
+
+### ToolCallCardTrigger
+
+Renders shadcn's [`CollapsibleTrigger`](https://ui.shadcn.com/docs/components/base/collapsible), as a
+full-width, left-justified, ghost [`Button`](https://ui.shadcn.com/docs/components/base/button), and takes
+every prop `CollapsibleTrigger` takes. Appends a chevron that turns over while the sections are open, and
+plays - along with any `ToolCallCardStatus` icon inside it - while the trigger is hovered or focused; a
+caller's own pointer and focus handlers still run. It sets `data-slot="tool-call-card-trigger"`.
+
+### ToolCallCardTitle
+
+Renders a `span` and takes every prop a `span` takes. The tool's name, kept whole while
+`ToolCallCardDescription` beside it truncates. It sets `data-slot="tool-call-card-title"`.
+
+### ToolCallCardDescription
+
+Renders a `span` and takes every prop a `span` takes. A one-line summary of the call, truncated to the row.
+It sets `data-slot="tool-call-card-description"`.
+
+### ToolCallCardStatus
+
+Renders shadcn's [`Badge`](https://ui.shadcn.com/docs/components/base/badge), as a `span`, and takes every
+prop a `span` takes. Its icon - a circle for `input-streaming`, a clock for `input-available`, a check for
+`output-available`, a cross for `output-error` - follows the root's `state`, and `children` are the status
+word. Inside a `ToolCallCardTrigger` its clock and check play while the trigger is hovered or focused;
+anywhere else they hold still. It sets `data-slot="tool-call-card-status"`.
+
+### ToolCallCardContent
+
+Renders shadcn's [`CollapsibleContent`](https://ui.shadcn.com/docs/components/base/collapsible), as a
+[`CardContent`](https://ui.shadcn.com/docs/components/base/card), and takes every prop `CollapsibleContent`
+takes. The sections under the trigger, in a vertical stack; unmounted while closed. It sets
+`data-slot="tool-call-card-content"`.
+
+### ToolCallCardSection
+
+Renders a `div` and takes every prop a `div` takes. One labelled block of the call, such as its parameters,
+its result or its error. It sets `data-slot="tool-call-card-section"`.
+
+### ToolCallCardSectionTitle
+
+Renders an `h4` and takes every prop an `h4` takes. A section's small muted heading, such as `Parameters` or
+`Result`. It sets `data-slot="tool-call-card-section-title"`.

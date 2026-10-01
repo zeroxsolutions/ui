@@ -1,0 +1,68 @@
+---
+title: Unsaved Indicator
+description: The unsaved-changes dot an editor shows on a tab, announced as an image named Unsaved changes.
+---
+
+<ComponentPreview name="unsaved-indicator-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/unsaved-indicator.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/feedback/unsaved-indicator.tsx`.</Step>
+
+<ComponentSource name="unsaved-indicator" title="components/feedback/unsaved-indicator.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { UnsavedIndicator } from '@/components/feedback/unsaved-indicator';
+```
+
+```tsx
+<div className="flex items-center gap-2">
+  <span>page.tsx</span>
+  <UnsavedIndicator />
+</div>
+```
+
+Use it for a tab's own pending-edit dot; for a presence or connection tone, use
+[Status Indicator](/docs/components/status-indicator) instead.
+
+## API reference
+
+### UnsavedIndicator
+
+Renders a `span` and takes every prop a `span` takes. It is announced as an image named "Unsaved changes";
+pass `aria-label` to name it in another language. It sets `data-slot="unsaved-indicator"`.

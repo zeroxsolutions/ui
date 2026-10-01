@@ -29,6 +29,10 @@
     "resize-handle",
     "tag-input",
     "---Feedback---",
-    "status-indicator"
+    "copy-button",
+    "permission-card",
+    "status-indicator",
+    "tool-call-card",
+    "unsaved-indicator"
   ]
 }

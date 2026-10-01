@@ -1,0 +1,141 @@
+---
+title: Permission Card
+description: An inline, non-modal AI-consent request that stays in scrollback after it resolves, switching between its decision and resolved parts as the host settles its status.
+---
+
+<ComponentPreview name="permission-card-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/permission-card.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add lucide-react
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add badge card utils https://lucide-animated.com/r/circle-check.json
+```
+
+<Step>Copy the component into `components/feedback/permission-card.tsx`.</Step>
+
+<ComponentSource name="permission-card" title="components/feedback/permission-card.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  PermissionCard,
+  PermissionCardActions,
+  PermissionCardResolved,
+  PermissionCardStatus,
+  PermissionCardTitle,
+} from '@/components/feedback/permission-card';
+```
+
+```tsx
+<PermissionCard status={status}>
+  <CardHeader>
+    <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
+    <CardDescription>Deploy the web app to production</CardDescription>
+    <PermissionCardStatus>{statusWord}</PermissionCardStatus>
+  </CardHeader>
+  <PermissionCardActions>
+    <Button variant="ghost" onClick={deny}>
+      Deny
+    </Button>
+    <Button onClick={allow}>Allow once</Button>
+  </PermissionCardActions>
+  <PermissionCardResolved>
+    <CardDescription>Allowed once - 2:14pm</CardDescription>
+  </PermissionCardResolved>
+</PermissionCard>
+```
+
+The decision row is asymmetric on purpose: pair a plain Deny with a graduated Allow, such as a `ButtonGroup`
+holding a scope menu. Use it for an inline, non-modal consent request inside a chat transcript that needs a
+decision; for a tool call with no decision to make, use
+[Tool Call Card](/docs/components/tool-call-card) instead.
+
+## Composition
+
+```text
+PermissionCard
+|-- CardHeader
+|   |-- PermissionCardTitle
+|   |-- CardDescription
+|   `-- PermissionCardStatus
+|-- PermissionCardActions
+|   |-- Button
+|   `-- Button
+`-- PermissionCardResolved
+    `-- CardDescription
+```
+
+## API reference
+
+### PermissionCard
+
+Renders shadcn's [`Card`](https://ui.shadcn.com/docs/components/base/card) and takes every prop it takes,
+plus:
+
+| Prop     | Type                                  | Default  |
+| -------- | ------------------------------------- | -------- |
+| `status` | `'pending' \| 'approved' \| 'denied'` | required |
+
+It defaults `size` to `sm`. It sets `data-slot="permission-card"` and `data-status` to its status.
+
+### PermissionCardTitle
+
+Renders shadcn's [`CardTitle`](https://ui.shadcn.com/docs/components/base/card) and takes every prop it
+takes. What the assistant asks to do, on one truncated line. It sets `data-slot="permission-card-title"`.
+
+### PermissionCardStatus
+
+Renders shadcn's [`Badge`](https://ui.shadcn.com/docs/components/base/badge) and takes every prop it takes,
+inside a `CardAction` that lands it in the header's action corner. Defaults `variant` to `outline`; pass
+`destructive` for a denied request. Its icon - a circle for `pending`, a check for `approved`, a cross for
+`denied` - follows the root's `status`, and `children` are the status word. It sets
+`data-slot="permission-card-status"`.
+
+### PermissionCardActions
+
+Renders shadcn's [`CardFooter`](https://ui.shadcn.com/docs/components/base/card) and takes every prop it
+takes. The decision row, right-aligned, shown only while `status` is `pending`. It keeps `CardFooter`'s own
+`data-slot="card-footer"` rather than setting its own, which the Card recipe reads to drop the footer's bottom
+padding.
+
+### PermissionCardResolved
+
+Renders shadcn's [`CardFooter`](https://ui.shadcn.com/docs/components/base/card) and takes every prop it
+takes. The persisted outcome, shown once `status` is `approved` or `denied`. Like `PermissionCardActions`, it
+keeps `CardFooter`'s own `data-slot="card-footer"` rather than setting its own.
