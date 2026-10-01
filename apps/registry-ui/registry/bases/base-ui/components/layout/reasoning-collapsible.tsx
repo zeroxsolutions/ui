@@ -49,7 +49,7 @@ interface ReasoningCollapsibleProps extends Omit<ComponentProps<typeof Collapsib
  *
  *   <ReasoningCollapsible streaming={isLive}>
  *     <ReasoningCollapsibleTrigger><ReasoningLabel /></ReasoningCollapsibleTrigger>
- *     <ReasoningCollapsibleContent><MarkdownView codeBlocks>{text}</MarkdownView></ReasoningCollapsibleContent>
+ *     <ReasoningCollapsibleContent><MarkdownView>{text}</MarkdownView></ReasoningCollapsibleContent>
  *   </ReasoningCollapsible>
  */
 function ReasoningCollapsible({

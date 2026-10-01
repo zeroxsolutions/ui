@@ -26,7 +26,9 @@ interface PermissionCardProps extends ComponentProps<typeof Card> {
  *       <CardDescription>Deploy the web app to production</CardDescription>
  *       <PermissionCardStatus>{statusWord}</PermissionCardStatus>
  *     </CardHeader>
- *     <CardContent><CodeBlock code={command} language="bash" /></CardContent>
+ *     <CardContent>
+ *       <CodeBlock code={command} language="bash"><CodeBlockContent><CodeBlockCode /></CodeBlockContent></CodeBlock>
+ *     </CardContent>
  *     <PermissionCardActions>
  *       <Button variant="ghost" onClick={deny}>Deny</Button>
  *       <ButtonGroup>...Allow once + scopes...</ButtonGroup>
