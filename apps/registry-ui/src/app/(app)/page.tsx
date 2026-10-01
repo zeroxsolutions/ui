@@ -34,12 +34,17 @@ function homePageInstallCommand(name: string): string {
   return `pnpm dlx shadcn@latest add ${new URL(`/r/${name}.json`, registryHomepage).href}`;
 }
 
-/** The paths an item's files land at in a consuming app: `registry.json`'s own paths, their shared
- * source prefix dropped. */
+/** The paths an item's files land at in a consuming app. A component keeps its path below the
+ * source prefix; the CLI writes a `registry:lib` file into the app's `lib` alias by its file name,
+ * as the item's manual install step says. */
 function homePageInstallFilePaths(name: string): string[] {
   const item = registryData.items.find((entry) => entry.name === name);
   if (!item) throw new Error(`HomePage: "${name}" is not in registry.json`);
-  return item.files.map((file) => file.path.replace('registry/bases/base-ui/', ''));
+  return item.files.map((file) =>
+    file.type === 'registry:lib'
+      ? `lib/${file.path.split('/').at(-1)}`
+      : file.path.replace('registry/bases/base-ui/', ''),
+  );
 }
 
 const INSTALL_STEPS = [
