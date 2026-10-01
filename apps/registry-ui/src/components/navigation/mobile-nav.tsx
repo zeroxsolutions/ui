@@ -7,6 +7,7 @@ import { useState, type MouseEvent, type ReactNode } from 'react';
 
 import { DocsSidebar } from '@/components/navigation/docs-sidebar';
 import { useIconAnimation } from '@/hooks/use-icon-animation';
+import { currentSiteNavItem } from '@/lib/site-nav';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { MenuIcon, type MenuIconHandle } from '@/registry/bases/base-ui/ui/menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/registry/bases/base-ui/ui/sheet';
@@ -34,6 +35,7 @@ interface MobileNavProps {
  */
 function MobileNav({ tree, items }: MobileNavProps): ReactNode {
   const pathname = usePathname();
+  const current = currentSiteNavItem(items, pathname);
   const [open, setOpen] = useState(false);
   const menuIcon = useIconAnimation<MenuIconHandle>();
 
@@ -60,8 +62,8 @@ function MobileNav({ tree, items }: MobileNavProps): ReactNode {
                   {items.map((item) => (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
-                        isActive={pathname === item.href}
-                        render={<Link href={item.href} aria-current={pathname === item.href ? 'page' : undefined} />}
+                        isActive={item === current}
+                        render={<Link href={item.href} aria-current={item === current ? 'page' : undefined} />}
                       >
                         {item.label}
                       </SidebarMenuButton>

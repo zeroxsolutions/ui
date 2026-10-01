@@ -72,7 +72,7 @@ describe('DocsSearch', () => {
   });
 
   it("lists the site's sections and the docs' pages before a query", async () => {
-    render(<DocsSearch tree={tree} navItems={[{ href: '/blocks', label: 'Blocks' }]} />);
+    render(<DocsSearch tree={tree} navItems={[{ href: '/blocks', label: 'Blocks', pattern: '/blocks' }]} />);
 
     fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
 

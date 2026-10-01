@@ -20,7 +20,7 @@ vi.mock('@/registry/bases/base-ui/ui/menu', () => ({
 const tree: Root = { name: 'Docs', children: [{ type: 'page', name: 'Introduction', url: '/docs' }] };
 
 function renderNav(): void {
-  render(<MobileNav tree={tree} items={[{ href: '/blocks', label: 'Blocks' }]} />);
+  render(<MobileNav tree={tree} items={[{ href: '/blocks', label: 'Blocks', pattern: '/blocks' }]} />);
 }
 
 afterEach(() => {

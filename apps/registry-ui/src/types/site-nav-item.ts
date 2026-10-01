@@ -2,4 +2,6 @@
 export interface SiteNavItem {
   href: string;
   label: string;
+  /** The pages the section covers, as a path-to-regexp pattern: `/docs{/*rest}` is `/docs` and every page under it. */
+  pattern: string;
 }

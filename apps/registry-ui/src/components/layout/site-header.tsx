@@ -17,11 +17,12 @@ interface SiteHeaderProps {
 
 /** The bar across the top of every page: the site's sections, the search and the theme switch. */
 function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
+  const components = docsPageUrl(['components']);
   const navItems: SiteNavItem[] = [
-    { href: homeRoute.build(), label: 'Home' },
-    { href: docsRoute.build(), label: 'Docs' },
-    { href: docsPageUrl(['components']), label: 'Components' },
-    { href: blocksRoute.build(), label: 'Blocks' },
+    { href: homeRoute.build(), label: 'Home', pattern: homeRoute.pathname },
+    { href: docsRoute.build(), label: 'Docs', pattern: `${docsRoute.pathname}{/*rest}` },
+    { href: components, label: 'Components', pattern: `${components}{/*rest}` },
+    { href: blocksRoute.build(), label: 'Blocks', pattern: blocksRoute.pathname },
   ];
 
   return (
