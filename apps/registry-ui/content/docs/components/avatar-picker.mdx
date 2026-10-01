@@ -142,7 +142,9 @@ plus:
 | `onValueChange` | `(value: AvatarPickerValue) => void` | required |
 
 `AvatarPickerValue` holds `emoji`, `imageUrl` and `color`, each a string or null. The root shares the value and
-its setters with every part through context. It sets `data-slot="avatar-picker"`.
+its setters with every part through context. It sets `data-slot="avatar-picker"`; upstream's `Popover` renders
+no element of its own to carry it, same as [Language Combobox](/docs/components/language-combobox)'s
+`Combobox`.
 
 ### AvatarPickerTrigger
 
