@@ -1,10 +1,6 @@
 import type { ReactNode } from 'react';
 
-import {
-  ComponentPreviewCode,
-  ComponentPreviewExcerpt,
-  ComponentPreviewSource,
-} from '@/components/data-display/component-preview';
+import { ComponentPreviewExcerpt, ComponentPreviewSource } from '@/components/data-display/component-preview';
 import {
   SourceCodeBlockActions,
   SourceCodeBlockCode,
@@ -30,40 +26,36 @@ interface ExampleSourceProps {
   lines?: string;
 }
 
-/** A demo's source under its preview: its first lines, and the whole file once `View code` opens it. */
+/**
+ * A demo's source under its preview: one block with its language and copy button, showing its first
+ * lines until `View code` opens it to the whole file. The header is the same open and closed.
+ */
 function ExampleSource({ name, code, language, lines }: ExampleSourceProps): ReactNode {
   const source = { name, code, language, lines, variant: 'flush' } as const;
   return (
     <ComponentPreviewSource>
-      <ComponentPreviewExcerpt>
-        <ComponentSource {...source} maxLines={EXCERPT_LINES}>
-          <SourceCodeBlockHeader>
-            <SourceCodeBlockTitle>
-              <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
-            </SourceCodeBlockTitle>
-          </SourceCodeBlockHeader>
-          <SourceCodeBlockContent>
-            <SourceCodeBlockLineNumbers />
-            <SourceCodeBlockCode />
-          </SourceCodeBlockContent>
-        </ComponentSource>
-      </ComponentPreviewExcerpt>
-      <ComponentPreviewCode>
-        <ComponentSource {...source}>
-          <SourceCodeBlockHeader>
-            <SourceCodeBlockTitle>
-              <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
-            </SourceCodeBlockTitle>
-            <SourceCodeBlockActions>
-              <SourceCodeBlockCopy />
-            </SourceCodeBlockActions>
-          </SourceCodeBlockHeader>
-          <SourceCodeBlockContent>
-            <SourceCodeBlockLineNumbers />
-            <SourceCodeBlockCode />
-          </SourceCodeBlockContent>
-        </ComponentSource>
-      </ComponentPreviewCode>
+      <ComponentSource {...source} defaultOpen={false}>
+        <SourceCodeBlockHeader>
+          <SourceCodeBlockTitle>
+            <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
+          </SourceCodeBlockTitle>
+          <SourceCodeBlockActions>
+            <SourceCodeBlockCopy />
+          </SourceCodeBlockActions>
+        </SourceCodeBlockHeader>
+        <ComponentPreviewExcerpt>
+          <ComponentSource {...source} maxLines={EXCERPT_LINES}>
+            <SourceCodeBlockContent>
+              <SourceCodeBlockLineNumbers />
+              <SourceCodeBlockCode />
+            </SourceCodeBlockContent>
+          </ComponentSource>
+        </ComponentPreviewExcerpt>
+        <SourceCodeBlockContent>
+          <SourceCodeBlockLineNumbers />
+          <SourceCodeBlockCode />
+        </SourceCodeBlockContent>
+      </ComponentSource>
     </ComponentPreviewSource>
   );
 }

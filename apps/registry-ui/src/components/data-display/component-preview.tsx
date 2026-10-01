@@ -4,7 +4,7 @@ import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
+import { CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 
 /**
@@ -61,28 +61,29 @@ function ComponentPreviewCaption({ className, ...props }: ComponentProps<'div'>)
 }
 
 /**
- * The source under the demo, on the code surface and split from it by a rule. Closed, it shows its
- * `ComponentPreviewExcerpt`; `View code` opens its `ComponentPreviewCode`.
+ * The source under the demo, on the code surface and split from it by a rule. It holds one code
+ * block, closed until `View code` opens it: closed, the block shows a `ComponentPreviewExcerpt`
+ * under its header; open, its own content.
  */
-function ComponentPreviewSource({ className, ...props }: ComponentProps<typeof Collapsible>): ReactNode {
+function ComponentPreviewSource({ className, ...props }: ComponentProps<'div'>): ReactNode {
   return (
-    <Collapsible
+    <div
       data-slot="component-preview-source"
-      className={cn(
-        'group/component-preview-source bg-code border-foreground/10 border-t **:data-[slot=code-block-viewport]:max-h-96',
-        className,
-      )}
+      className={cn('bg-code border-foreground/10 border-t **:data-[slot=code-block-viewport]:max-h-96', className)}
       {...props}
     />
   );
 }
 
-/** The source's first lines, fading into the code surface under the `View code` trigger; gone once it opens. */
+/**
+ * The source's first lines, fading into the code surface under the `View code` trigger, which opens
+ * the code block it sits in. It shows only while that block is closed.
+ */
 function ComponentPreviewExcerpt({ className, children, ...props }: ComponentProps<'div'>): ReactNode {
   return (
     <div
       data-slot="component-preview-excerpt"
-      className={cn('relative group-has-data-[slot=component-preview-code]/component-preview-source:hidden', className)}
+      className={cn('relative group-data-open/collapsible-card:hidden', className)}
       {...props}
     >
       {/* An excerpt, not a scroller: its overflow clips, and it takes no focus. */}
@@ -96,16 +97,10 @@ function ComponentPreviewExcerpt({ className, children, ...props }: ComponentPro
   );
 }
 
-/** The whole source, shown once `View code` opens it. */
-function ComponentPreviewCode(props: ComponentProps<typeof CollapsibleContent>): ReactNode {
-  return <CollapsibleContent data-slot="component-preview-code" {...props} />;
-}
-
 export {
   ComponentPreview,
   ComponentPreviewStage,
   ComponentPreviewCaption,
   ComponentPreviewSource,
   ComponentPreviewExcerpt,
-  ComponentPreviewCode,
 };
