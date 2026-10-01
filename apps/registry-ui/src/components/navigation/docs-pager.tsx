@@ -33,6 +33,7 @@ function DocsPager({ tree, url, className, ...props }: DocsPagerProps): ReactNod
   return (
     <nav
       aria-label="Pager"
+      data-slot="docs-pager"
       className={cn('hidden h-16 w-full items-center gap-2 px-4 sm:flex sm:px-0', className)}
       {...props}
     >
