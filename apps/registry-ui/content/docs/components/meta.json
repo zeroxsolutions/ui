@@ -46,6 +46,9 @@
     "panel-field-group",
     "panel-header",
     "panel-row",
-    "reasoning-collapsible"
+    "reasoning-collapsible",
+    "---Navigation---",
+    "command-menu",
+    "editor-tab"
   ]
 }

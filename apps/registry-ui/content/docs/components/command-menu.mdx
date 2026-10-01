@@ -1,0 +1,102 @@
+---
+title: Command Menu
+description: "A command palette for jumping to a target: a controlled CommandDialog holding a Command that reports the chosen item's value and closes on select."
+---
+
+<ComponentPreview name="command-menu-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/command-menu.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add command
+```
+
+<Step>Copy the component into `components/navigation/command-menu.tsx`.</Step>
+
+<ComponentSource name="command-menu" title="components/navigation/command-menu.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { CommandMenu, CommandMenuItem } from '@/components/navigation/command-menu';
+```
+
+```tsx
+<CommandMenu open={open} onOpenChange={setOpen} onValueChange={setValue}>
+  <CommandInput placeholder="Jump to file..." />
+  <CommandList>
+    <CommandEmpty>No file found.</CommandEmpty>
+    <CommandMenuItem value="page.tsx">page.tsx</CommandMenuItem>
+  </CommandList>
+</CommandMenu>
+```
+
+The consumer composes `CommandInput`, `CommandList`, `CommandEmpty` and the items as children and owns all copy;
+bind a keyboard shortcut to its `open` state to let a reader summon it from anywhere.
+
+## Composition
+
+```text
+CommandMenu
+|-- CommandInput
+`-- CommandList
+    |-- CommandEmpty
+    `-- CommandMenuItem
+```
+
+## API reference
+
+### CommandMenu
+
+Renders shadcn's [`CommandDialog`](https://ui.shadcn.com/docs/components/base/command) and takes every prop it
+takes except `onOpenChange`, which is redefined below, plus:
+
+| Prop            | Type                      | Default |
+| --------------- | ------------------------- | ------- |
+| `onOpenChange`  | `(open: boolean) => void` | -       |
+| `onValueChange` | `(value: string) => void` | -       |
+
+It defaults CommandDialog's `title` to `'Command menu'` and `description` to `'Search for a target to jump
+to.'`, both read by assistive technology though hidden on screen. It wraps its children in a `Command` that
+carries `data-slot="command-menu"`.
+
+### CommandMenuItem
+
+Renders shadcn's [`CommandItem`](https://ui.shadcn.com/docs/components/base/command) and takes every prop it
+takes except `value`, which is required here:
+
+| Prop    | Type     | Default  |
+| ------- | -------- | -------- |
+| `value` | `string` | required |
+
+Choosing it runs the item's own `onSelect` if given, then reports `value` through the menu's `onValueChange`
+and closes the dialog. It sets `data-slot="command-menu-item"`.

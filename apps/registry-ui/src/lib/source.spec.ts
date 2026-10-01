@@ -191,9 +191,6 @@ function installTarget({ path, type }: RegistryFile): string {
   return path.slice(SOURCE_ROOT.length);
 }
 
-/** Components whose page is still to be written. Each kind's task removes its names; the last task removes the set. */
-const UNDOCUMENTED = new Set(['command-menu', 'editor-tab']);
-
 /** Every component with no page that is not still to be written, and every one still listed as such that has a page. */
 function pagelessComponents(
   sources: Record<string, string>,
@@ -521,7 +518,7 @@ describe('content/docs', () => {
   });
 
   it('gives every component a page, apart from those still to be written', () => {
-    expect(pagelessComponents(readPageSources(CONTENT), readComponentItems(), UNDOCUMENTED)).toEqual([]);
+    expect(pagelessComponents(readPageSources(CONTENT), readComponentItems(), new Set())).toEqual([]);
   });
 
   it('reports a component with no page, and one listed as still to be written that has one', () => {

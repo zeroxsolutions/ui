@@ -1,0 +1,106 @@
+---
+title: Editor Tab
+description: One tab in an editor's tab strip, whose close button shows the unsaved dot until the tab's hover, focus or active state reveals its X.
+---
+
+<ComponentPreview name="editor-tab-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/editor-tab.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button item utils https://lucide-animated.com/r/x.json https://ui.zeroxsolutions.com/r/unsaved-indicator.json
+```
+
+<Step>Copy the component into `components/navigation/editor-tab.tsx`.</Step>
+
+<ComponentSource name="editor-tab" title="components/navigation/editor-tab.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { EditorTab, EditorTabTitle, EditorTabCloseButton } from '@/components/navigation/editor-tab';
+```
+
+```tsx
+<EditorTab active dirty>
+  <ItemContent>
+    <EditorTabTitle>page.tsx</EditorTabTitle>
+  </ItemContent>
+  <ItemActions>
+    <EditorTabCloseButton aria-label="Close page.tsx" onClick={close} />
+  </ItemActions>
+</EditorTab>
+```
+
+The consumer composes the parts inside upstream `ItemContent` and `ItemActions`. Use it for one tab in an
+editor's tab strip; give it `active` for the document on show and `dirty` while that document has unsaved
+changes.
+
+## Composition
+
+```text
+EditorTab
+|-- ItemContent
+|   `-- EditorTabTitle
+`-- ItemActions
+    `-- EditorTabCloseButton
+```
+
+## API reference
+
+### EditorTab
+
+Renders shadcn's [`Item`](https://ui.shadcn.com/docs/components/base/item) and takes every prop it takes
+except `variant` and `size`, which it fixes to `outline` and `xs`, plus:
+
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| `active` | `boolean` | `false` |
+| `dirty`  | `boolean` | `false` |
+
+It sets `data-slot="editor-tab"`, `data-active` while active, and `data-dirty` while dirty.
+
+### EditorTabTitle
+
+Renders shadcn's [`ItemTitle`](https://ui.shadcn.com/docs/components/base/item) and takes every prop it
+takes. It is muted until its tab is active. It sets `data-slot="editor-tab-title"`.
+
+### EditorTabCloseButton
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button) and takes every prop it takes
+except `children`, which it supplies as the [Unsaved Indicator](/docs/components/unsaved-indicator) and a
+close icon.
+
+It is named "Close" unless given its own `aria-label`. On a dirty tab it shows the unsaved dot; the close
+icon takes its place, and plays its hover or focus animation, while the tab is hovered or active, or while
+the button has keyboard focus. A click on it does not reach the tab, so closing a tab does not also activate
+it. It sets `data-slot="editor-tab-close-button"`.
