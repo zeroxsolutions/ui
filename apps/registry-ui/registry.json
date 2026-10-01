@@ -1135,6 +1135,20 @@
       ]
     },
     {
+      "name": "number-field-mixed",
+      "type": "registry:example",
+      "title": "Number Field Mixed",
+      "description": "A NumberField over three selected shapes with differing widths, showing the mixed state until one width is set for all.",
+      "categories": ["examples"],
+      "registryDependencies": ["@shadcn/input-group", "https://ui.zeroxsolutions.com/r/number-field.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/number-field-mixed.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
       "name": "password-input-demo",
       "type": "registry:example",
       "title": "Password Input Demo",

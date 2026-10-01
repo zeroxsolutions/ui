@@ -1,0 +1,129 @@
+---
+title: Tag Input
+description: A tag editor with removable chips above an input that commits a new tag on Enter, comma, or blur.
+---
+
+<ComponentPreview name="tag-input-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/tag-input.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add badge button input utils https://lucide-animated.com/r/x.json
+```
+
+<Step>Copy the component into `components/data-entry/tag-input.tsx`.</Step>
+
+<ComponentSource name="tag-input" title="components/data-entry/tag-input.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  TagInput,
+  TagInputInput,
+  TagInputList,
+  TagInputTag,
+  TagInputTagRemove,
+} from '@/components/data-entry/tag-input';
+```
+
+```tsx
+<TagInput value={tags} onValueChange={setTags}>
+  <TagInputList>
+    {tags.map((tag) => (
+      <TagInputTag key={tag} value={tag}>
+        {tag}
+        <TagInputTagRemove aria-label={`Remove ${tag}`} />
+      </TagInputTag>
+    ))}
+  </TagInputList>
+  <TagInputInput placeholder="Add a tag" />
+</TagInput>
+```
+
+The root owns the tag array and hands adding and removing to its parts through context; other props land on
+the root `div`. Use it for a free-form list of tags the reader types, such as keywords or labels.
+
+## Composition
+
+```text
+TagInput
+|-- TagInputList
+|   `-- TagInputTag
+|       `-- TagInputTagRemove
+`-- TagInputInput
+```
+
+## API reference
+
+### TagInput
+
+Renders a `div` and takes every prop a `div` takes except `onChange` and `defaultValue`, plus:
+
+| Prop            | Type                        | Default  |
+| --------------- | --------------------------- | -------- |
+| `value`         | `string[]`                  | required |
+| `onValueChange` | `(value: string[]) => void` | required |
+| `disabled`      | `boolean`                   | `false`  |
+
+A duplicate tag is never added. It sets `data-slot="tag-input"` and `data-disabled` while `disabled`.
+
+### TagInputList
+
+Renders a `div` and takes every prop a `div` takes. The row the tags wrap in; it takes no room while it
+holds no tag. It sets `data-slot="tag-input-list"`.
+
+### TagInputTag
+
+Renders shadcn's [`Badge`](https://ui.shadcn.com/docs/components/base/badge) and takes every prop it takes,
+plus:
+
+| Prop    | Type     | Default  |
+| ------- | -------- | -------- |
+| `value` | `string` | required |
+
+One tag, an upstream secondary badge: the label as `children`, then its `TagInputTagRemove`. It sets
+`data-slot="tag-input-tag"`.
+
+### TagInputTagRemove
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button) and takes every prop it
+takes except `children`. The tag's remove button, a ghost `icon-xs` button at the badge's inline end
+(`data-icon="inline-end"`); the caller names it with `aria-label`. Disabled with the root; its cross plays
+on hover or focus. Throws outside a `TagInputTag`. It sets `data-slot="tag-input-tag-remove"`.
+
+### TagInputInput
+
+Renders shadcn's [`Input`](https://ui.shadcn.com/docs/components/base/input) and takes every prop it takes
+except `value`, `defaultValue` and `onChange`. Enter, a comma, or leaving the field adds the draft as a tag;
+Backspace in an empty draft removes the last tag. Disabled with the root. It sets
+`data-slot="tag-input-input"`.

@@ -23,6 +23,11 @@
     "emoji-picker",
     "frontmatter-form",
     "language-combobox",
+    "language-toggle-group",
+    "number-field",
+    "password-input",
+    "resize-handle",
+    "tag-input",
     "---Feedback---",
     "status-indicator"
   ]

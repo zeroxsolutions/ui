@@ -1,0 +1,112 @@
+---
+title: Number Field
+description: A compact numeric field for a property inspector that parses arithmetic expressions, clamps to min and max, and steps on the arrow keys.
+---
+
+<ComponentPreview name="number-field-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/number-field.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add input-group utils
+```
+
+<Step>Copy the component into `components/data-entry/number-field.tsx`.</Step>
+
+<ComponentSource name="number-field" title="components/data-entry/number-field.tsx" />
+
+<Step>Copy the arithmetic expression evaluator into `lib/expr-eval.ts`.</Step>
+
+<ComponentSource name="number-field" file="registry/bases/base-ui/lib/expr-eval.ts" title="lib/expr-eval.ts" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { NumberField, NumberFieldInput } from '@/components/data-entry/number-field';
+```
+
+```tsx
+<NumberField value={width} onValueChange={setWidth} min={0} max={1000} step={1}>
+  <NumberFieldInput />
+</NumberField>
+```
+
+The consumer composes a `NumberFieldInput` and any `InputGroupAddon` / `InputGroupText` around it, such as a
+leading label or a trailing unit. Use it for a compact numeric field in a property inspector, such as a width
+or a corner radius; the arithmetic parsing lets a reader type `100 + 8` and commit `108`.
+
+## Composition
+
+```text
+NumberField
+`-- NumberFieldInput
+```
+
+## Mixed values
+
+<ComponentPreview name="number-field-mixed" />
+
+Set `mixed` when the selection holds differing values: the field blanks to its `placeholder` until the reader
+types one, and the consumer's own `onValueChange` applies it to every selected target.
+
+## API reference
+
+### NumberField
+
+Renders shadcn's [`InputGroup`](https://ui.shadcn.com/docs/components/base/input-group) and takes every prop
+it takes except `onChange` and `defaultValue`, plus:
+
+| Prop            | Type                              | Default  |
+| --------------- | --------------------------------- | -------- |
+| `value`         | `number`                          | required |
+| `onValueChange` | `(value: number) => void`         | required |
+| `disabled`      | `boolean`                         | -        |
+| `min`           | `number`                          | -        |
+| `max`           | `number`                          | -        |
+| `step`          | `number`                          | -        |
+| `parseRaw`      | `(raw: string) => number \| null` | -        |
+| `mixed`         | `boolean`                         | -        |
+| `displayText`   | `string`                          | -        |
+
+Parses the draft with `parseRaw`, or as arithmetic by default, and clamps the result to `min` and `max`;
+`step` moves the value on the arrow keys, clamped the same way. `displayText` shows a label (such as "Hug" or
+"Fill") in place of the number until the field is focused. The root carries `data-mixed` while `mixed`,
+`data-editing` while the input holds a draft, and `data-disabled` while `disabled`. It sets
+`data-slot="number-field"`.
+
+### NumberFieldInput
+
+Renders shadcn's [`InputGroupInput`](https://ui.shadcn.com/docs/components/base/input-group) and takes every
+prop it takes except `value`, `defaultValue`, `type` and `disabled`.
+
+Shows the field's value, or its draft while focused; its `placeholder` shows only while the field is `mixed`.
+It keeps upstream's `data-slot="input-group-control"`, which the group's focus and invalid rings select on.

@@ -1,0 +1,82 @@
+---
+title: Resize Handle
+description: A vertical resize grip for a panel outside any ResizablePanelGroup that only starts dragging once the pointer crosses a small movement threshold.
+---
+
+<ComponentPreview name="resize-handle-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/resize-handle.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/data-entry/resize-handle.tsx`.</Step>
+
+<ComponentSource name="resize-handle" title="components/data-entry/resize-handle.tsx" />
+
+<Step>Copy the drag-start threshold check into `lib/resize-drag.ts`.</Step>
+
+<ComponentSource name="resize-handle" file="registry/bases/base-ui/lib/resize-drag.ts" title="lib/resize-drag.ts" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { ResizeHandle } from '@/components/data-entry/resize-handle';
+```
+
+```tsx
+<ResizeHandle
+  onDrag={(dx) => setWidth((current) => current + dx)}
+  onToggle={() => setCollapsed((current) => !current)}
+/>
+```
+
+Use it for a floating or overlaid panel whose width the caller owns. For panes that share a row, compose
+upstream's `ResizablePanelGroup` instead.
+
+## API reference
+
+### ResizeHandle
+
+Renders a `div` and takes every prop a `div` takes except `onDrag`, plus:
+
+| Prop       | Type                   | Default  |
+| ---------- | ---------------------- | -------- |
+| `onDrag`   | `(dx: number) => void` | required |
+| `onToggle` | `() => void`           | required |
+
+A resize only begins once the pointer crosses a small movement threshold, so a click, jitter or double-click
+never nudges the width; it uses pointer capture, so the drag survives the pointer leaving the 1px line.
+Double-click fires `onToggle`. A caller's own `onPointerDown`, `onPointerMove` or `onDoubleClick` runs first,
+and calling `event.preventDefault()` in it skips the matching action; the pointer-up cleanup always ends the
+drag after the caller's own handler runs. It sets `data-slot="resize-handle"`.
