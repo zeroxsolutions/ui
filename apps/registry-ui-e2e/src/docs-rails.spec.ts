@@ -1,7 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
 /** The docs page that runs longest, so its end is furthest below the rails' sticky start. */
-const LONGEST_PAGE = '/docs/components/status-indicator';
+const LONGEST_PAGE = '/docs/blocks/ai-provider-picker';
 
 // The e2e tsconfig has no DOM lib, so page-side reads go in as expression strings.
 async function pageScrollY(page: Page): Promise<number> {
@@ -110,7 +110,7 @@ test('a wheel over the sidebar past the end of its list leaves the page where it
 
 test('a wheel over the TOC past the end of its list leaves the page where it was', async ({ page }) => {
   // Short enough that this page's headings overflow the TOC column, so its list has an end to wheel past.
-  await page.setViewportSize({ width: 1440, height: 240 });
+  await page.setViewportSize({ width: 1440, height: 320 });
   await page.goto(LONGEST_PAGE);
 
   expect(await pageMovedWheelingPastRail(page, toc(page))).toBe(false);
