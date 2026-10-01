@@ -2,10 +2,10 @@ import { expect, test } from '@playwright/test';
 
 const ITEMS = ['Chat Message', 'Code Block', 'File Tree', 'Tag Input', 'Password Input', 'Status Indicator'];
 
-test('/ says what the registry is, shows its items live, fits a phone, and links on', async ({ page }) => {
+test('/ says what the registry is, shows its items live, fits a phone, and links on', async ({ page, browserName }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  expect(await page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth')).toBe(false);
+  await expect.poll(() => page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth')).toBe(false);
 
   await page.setViewportSize({ width: 1440, height: 900 });
   const main = page.getByRole('main');
@@ -16,7 +16,10 @@ test('/ says what the registry is, shows its items live, fits a phone, and links
 
   const browse = main.getByRole('link', { name: 'Browse components' });
   const getStarted = main.getByRole('link', { name: 'Get started' });
-  await getStarted.focus();
+  await browse.focus();
+  // WebKit's default Tab sequence skips plain links (matching real Safari with "Full Keyboard
+  // Access" off); Option+Tab is Safari's own key for moving to the next link.
+  await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');
   await expect(getStarted).toBeFocused();
 
   await browse.click();

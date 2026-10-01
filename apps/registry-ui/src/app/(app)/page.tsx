@@ -90,7 +90,7 @@ export default function HomePage(): ReactNode {
               Get started
             </Link>
           </div>
-          <div className="w-full max-w-xl text-left">
+          <div className="w-full text-left">
             <HomePageCode code={homePageInstallCommand('status-indicator')} language="bash" />
           </div>
         </div>
@@ -107,7 +107,13 @@ export default function HomePage(): ReactNode {
                 <RegistryExample name={`${item.name}-demo`} />
               </ComponentPreviewStage>
               <ComponentPreviewCaption>
-                {item.url ? <Link href={item.url}>{item.title}</Link> : <span>{item.title}</span>}
+                {item.url ? (
+                  <Link href={item.url} className="underline underline-offset-4">
+                    {item.title}
+                  </Link>
+                ) : (
+                  <span>{item.title}</span>
+                )}
               </ComponentPreviewCaption>
             </ComponentPreview>
           ))}
