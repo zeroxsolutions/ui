@@ -1,0 +1,219 @@
+---
+title: Avatar Picker
+description: A Popover-based avatar editor whose emoji, upload and color panes edit one avatar value.
+---
+
+<ComponentPreview name="avatar-picker-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/avatar-picker.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add lucide-react
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button empty field input popover tabs utils https://ui.zeroxsolutions.com/r/emoji-picker.json
+```
+
+<Step>Copy the component into `components/data-entry/avatar-picker.tsx`.</Step>
+
+<ComponentSource name="avatar-picker" title="components/data-entry/avatar-picker.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  AvatarPicker,
+  AvatarPickerColorContent,
+  AvatarPickerColorField,
+  AvatarPickerColorGroup,
+  AvatarPickerContent,
+  AvatarPickerEmojiContent,
+  AvatarPickerRemoveButton,
+  AvatarPickerTrigger,
+} from '@/components/data-entry/avatar-picker';
+```
+
+```tsx
+<AvatarPicker value={avatar} onValueChange={setAvatar}>
+  <AvatarPickerTrigger>
+    <Avatar>...</Avatar>
+  </AvatarPickerTrigger>
+  <AvatarPickerContent>
+    <Tabs defaultValue="emoji">
+      <div className="flex items-center gap-1">
+        <TabsList variant="line">
+          <TabsTrigger value="emoji" aria-label="Emoji">
+            <Smile />
+          </TabsTrigger>
+          <TabsTrigger value="color" aria-label="Color">
+            <Palette />
+          </TabsTrigger>
+        </TabsList>
+        <AvatarPickerRemoveButton className="ml-auto" />
+      </div>
+      <AvatarPickerEmojiContent>
+        <EmojiPickerSearch />
+        <EmojiPickerContent>
+          <EmojiPickerEmpty>
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>No emoji found</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
+          </EmojiPickerEmpty>
+        </EmojiPickerContent>
+        <EmojiPickerNav />
+      </AvatarPickerEmojiContent>
+      <AvatarPickerColorContent>
+        <AvatarPickerColorGroup aria-label="Colors" />
+        <AvatarPickerColorField>Custom</AvatarPickerColorField>
+      </AvatarPickerColorContent>
+    </Tabs>
+  </AvatarPickerContent>
+</AvatarPicker>
+```
+
+The consumer composes the panes inside upstream `Tabs`, declaring a `TabsTrigger` per pane it includes (or none,
+for a single pane), and places `AvatarPickerRemoveButton` next to it. Use it to let someone set an emoji, an
+uploaded image or a flat colour as one avatar value; compose only the panes the app offers.
+
+## Composition
+
+```text
+AvatarPicker
+|-- AvatarPickerTrigger
+`-- AvatarPickerContent
+    `-- Tabs
+        |-- AvatarPickerRemoveButton
+        |-- AvatarPickerEmojiContent
+        |   |-- EmojiPickerSearch
+        |   |-- EmojiPickerContent
+        |   |   `-- EmojiPickerEmpty
+        |   `-- EmojiPickerNav
+        |-- AvatarPickerUploadContent
+        |   `-- AvatarPickerUploadTrigger
+        `-- AvatarPickerColorContent
+            |-- AvatarPickerColorGroup
+            `-- AvatarPickerColorField
+```
+
+## API reference
+
+### AvatarPicker
+
+Renders shadcn's [`Popover`](https://ui.shadcn.com/docs/components/base/popover) and takes every prop it takes,
+plus:
+
+| Prop            | Type                                 | Default  |
+| --------------- | ------------------------------------ | -------- |
+| `value`         | `AvatarPickerValue`                  | required |
+| `onValueChange` | `(value: AvatarPickerValue) => void` | required |
+
+`AvatarPickerValue` holds `emoji`, `imageUrl` and `color`, each a string or null. The root shares the value and
+its setters with every part through context. It sets `data-slot="avatar-picker"`.
+
+### AvatarPickerTrigger
+
+Renders shadcn's [`PopoverTrigger`](https://ui.shadcn.com/docs/components/base/popover) and takes every prop it
+takes. The ghost icon button that opens the editor, around the avatar the consumer composes as `children`. Named
+"Edit avatar" unless an `aria-label` is given; `render` swaps the button for another element. It sets
+`data-slot="avatar-picker-trigger"`.
+
+### AvatarPickerContent
+
+Renders shadcn's [`PopoverContent`](https://ui.shadcn.com/docs/components/base/popover) and takes every prop it
+takes. The popover body the consumer fills with `Tabs` and the panes. It defaults `align` to `start` and `side`
+to `bottom`, opening below the trigger's start edge. It sets `data-slot="avatar-picker-content"`.
+
+### AvatarPickerRemoveButton
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button) and takes every prop it takes.
+The ghost button that clears both emoji and image, unless the consumer's own `onClick` prevents default. It
+defaults `variant` to `ghost` and `size` to `icon-sm`, and is named "Remove avatar" unless an `aria-label` is
+given; `children` replace its trash icon. It sets `data-slot="avatar-picker-remove-button"`.
+
+### AvatarPickerEmojiContent
+
+Renders shadcn's [`TabsContent`](https://ui.shadcn.com/docs/components/base/tabs) and takes every prop it takes
+except `value`. Emoji pane (tab value `emoji`): wraps `children` - the picker's parts, composed by the consumer
+(`EmojiPickerSearch`, `EmojiPickerContent`, `EmojiPickerNav`) - in an `EmojiPicker` whose pick sets the emoji and
+clears any image. It sets `data-slot="avatar-picker-emoji-content"`.
+
+### AvatarPickerUploadContent
+
+Renders shadcn's [`TabsContent`](https://ui.shadcn.com/docs/components/base/tabs) and takes every prop it takes
+except `value`, plus:
+
+| Prop       | Type                                                        | Default |
+| ---------- | ----------------------------------------------------------- | ------- |
+| `onUpload` | `(file: File) => string \| null \| Promise<string \| null>` | -       |
+
+Upload pane (tab value `upload`): an `Empty` frame holding the file input, whose copy the consumer composes as
+`children` (`EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`) with an `AvatarPickerUploadTrigger`
+inside `EmptyContent`. A picked file goes to `onUpload` and the resolved URL becomes `imageUrl`, or - when
+`onUpload` is omitted - is read inline as a data URL. While `onUpload` is pending the pane is `aria-busy` and
+carries `data-uploading`, so the children can swap their copy with `group-data-uploading/avatar-picker-upload:`
+classes. It sets `data-slot="avatar-picker-upload-content"`.
+
+### AvatarPickerUploadTrigger
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button) and takes every prop it takes.
+The outline button that opens the upload pane's file picker, unless the consumer's own `onClick` prevents
+default; disabled while an upload is pending. It defaults `variant` to `outline` and `size` to `sm`; `children`
+are its label. Throws outside an `AvatarPickerUploadContent`. It sets `data-slot="avatar-picker-upload-trigger"`.
+
+### AvatarPickerColorContent
+
+Renders shadcn's [`TabsContent`](https://ui.shadcn.com/docs/components/base/tabs) and takes every prop it takes
+except `value`. Color pane (tab value `color`): the consumer composes `AvatarPickerColorGroup` and
+`AvatarPickerColorField` in it. It sets `data-slot="avatar-picker-color-content"`.
+
+### AvatarPickerColorGroup
+
+Renders a `div` and takes every prop a `div` takes, plus:
+
+| Prop     | Type                | Default                                                                                                                                |
+| -------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `colors` | `readonly string[]` | `['#6366f1', '#8b5cf6', '#a855f7', '#ec4899', '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#14b8a6', '#0ea5e9', '#3b82f6']` |
+
+A grid of colour swatches, each a button named by its own colour and pressed (`aria-pressed`) while it is the
+avatar's colour; a click sets the avatar's colour. `role="group"`; name the group with an `aria-label`. It sets
+`data-slot="avatar-picker-color-group"`.
+
+### AvatarPickerColorField
+
+Renders shadcn's [`Field`](https://ui.shadcn.com/docs/components/base/field) and takes every prop it takes. A
+horizontal `Field` holding a colour input bound to the avatar's colour; `children` are its label, which names
+the input. It defaults Field's `orientation` to `horizontal`. It sets `data-slot="avatar-picker-color-field"`.

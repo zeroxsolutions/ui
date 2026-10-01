@@ -193,20 +193,14 @@ function installTarget({ path, type }: RegistryFile): string {
 
 /** Components whose page is still to be written. Each kind's task removes its names; the last task removes the set. */
 const UNDOCUMENTED = new Set([
-  'avatar-picker',
   'center',
-  'chat-suggestion-item',
   'collapsible-card',
   'command-menu',
   'copy-button',
   'editor-tab',
-  'emoji-appearance-toggle-group',
-  'emoji-picker',
   'floating-toolbar',
-  'frontmatter-form',
   'icon-label',
   'icon-media',
-  'language-combobox',
   'language-toggle-group',
   'model-list',
   'number-field',
@@ -330,6 +324,8 @@ const PROPS_READ_ELSEWHERE: Record<string, string> = {
     'takes DataTablePaginationStepProps, declared for the unexported DataTablePaginationStep both share.',
   ModelInfoCardIndicator:
     'takes ComponentProps<"span"> & VariantProps<typeof modelInfoCardIndicatorVariants>; tone is the variant key of modelInfoCardIndicatorVariants, which this check does not parse from an intersection type.',
+  LanguageCombobox:
+    "takes LanguageOptionSource (kind, options, locales - declared in types/language-option.ts) & Omit<ComboboxPrimitive.Root.Props<LanguageOption>, ...> & { value; onValueChange }; this check reads only two-space-indented members, and the intersection's own value/onValueChange sit four spaces in.",
 };
 
 /**

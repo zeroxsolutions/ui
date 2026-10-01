@@ -1,0 +1,95 @@
+---
+title: Chat Suggestion Item
+description: One starter prompt in an empty conversation, an upstream Item rendered as a button that hands its prompt to onSelectPrompt when picked.
+---
+
+<ComponentPreview name="chat-suggestion-item-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/chat-suggestion-item.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add item utils
+```
+
+<Step>Copy the component into `components/data-entry/chat-suggestion-item.tsx`.</Step>
+
+<ComponentSource name="chat-suggestion-item" title="components/data-entry/chat-suggestion-item.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { ChatSuggestionItem } from '@/components/data-entry/chat-suggestion-item';
+```
+
+```tsx
+<Empty>
+  <EmptyHeader>
+    <EmptyMedia variant="icon">
+      <SparklesIcon />
+    </EmptyMedia>
+    <EmptyTitle>Start a conversation</EmptyTitle>
+    <EmptyDescription>Ask anything</EmptyDescription>
+  </EmptyHeader>
+  <EmptyContent>
+    <ItemGroup>
+      <ChatSuggestionItem prompt="summarise this" onSelectPrompt={send}>
+        <ItemMedia variant="icon">
+          <FileTextIcon />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>Summarise</ItemTitle>
+        </ItemContent>
+      </ChatSuggestionItem>
+    </ItemGroup>
+  </EmptyContent>
+</Empty>
+```
+
+The consumer composes the empty state and each item's content around it. Use it for a starter prompt in an empty
+conversation; a plain upstream `Item` fits a row that is not itself selectable.
+
+## API reference
+
+### ChatSuggestionItem
+
+Renders a `button` and takes every prop a `button` takes, plus:
+
+| Prop             | Type                       | Default  |
+| ---------------- | -------------------------- | -------- |
+| `prompt`         | `string`                   | required |
+| `onSelectPrompt` | `(prompt: string) => void` | -        |
+
+An upstream `Item` at `size="sm"`, rendered as this button; upstream's own hover matches only `a`, so this draws
+`hover:bg-muted` itself while enabled, merging `className` against the Item recipe. Picking it hands `prompt` to
+`onSelectPrompt`, after the caller's own `onClick`, unless that call `preventDefault()`s. Without
+`onSelectPrompt` it renders disabled - a read-only preview - unless `disabled` says otherwise. It sets
+`data-slot="chat-suggestion-item"`.

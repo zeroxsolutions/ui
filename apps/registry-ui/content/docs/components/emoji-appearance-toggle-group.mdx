@@ -1,0 +1,108 @@
+---
+title: Emoji Appearance Toggle Group
+description: A single-select row of swatches for choosing the Fluent Emoji artwork style, each previewing the same sample emoji in its own style.
+---
+
+<ComponentPreview name="emoji-appearance-toggle-group-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/emoji-appearance-toggle-group.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add @zeroxsolutions/fluent-emoji
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add toggle-group
+```
+
+<Step>Copy the component into `components/data-entry/emoji-appearance-toggle-group.tsx`.</Step>
+
+<ComponentSource name="emoji-appearance-toggle-group" title="components/data-entry/emoji-appearance-toggle-group.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  EmojiAppearanceToggleGroup,
+  EmojiAppearanceToggleGroupItem,
+} from '@/components/data-entry/emoji-appearance-toggle-group';
+```
+
+```tsx
+<EmojiAppearanceToggleGroup value={style} onValueChange={setStyle}>
+  <EmojiAppearanceToggleGroupItem value="3d">3D</EmojiAppearanceToggleGroupItem>
+  <EmojiAppearanceToggleGroupItem value="flat">Flat</EmojiAppearanceToggleGroupItem>
+</EmojiAppearanceToggleGroup>
+```
+
+It renders one `EmojiAppearanceToggleGroupItem` per style the app offers; the preview emoji is the selector, so
+a style is always chosen. This is an app-level appearance control, not the emoji glyph picker: the style is a
+global preference the consumer persists and applies app-wide with `setFluentEmojiStyle`. Use it to choose that
+style; for picking an emoji glyph, use [Emoji Picker](/docs/components/emoji-picker).
+
+## Composition
+
+```text
+EmojiAppearanceToggleGroup
+`-- EmojiAppearanceToggleGroupItem
+```
+
+## API reference
+
+### EmojiAppearanceToggleGroup
+
+Renders shadcn's [`ToggleGroup`](https://ui.shadcn.com/docs/components/base/toggle-group) and takes every prop
+it takes except `value`, `defaultValue`, `onValueChange` and `multiple`, plus:
+
+| Prop            | Type                                | Default  |
+| --------------- | ----------------------------------- | -------- |
+| `value`         | `FluentEmojiStyle`                  | required |
+| `onValueChange` | `(style: FluentEmojiStyle) => void` | required |
+
+Binds Base UI's array value to the lone style and ignores a deselect, so a style is always chosen. It defaults
+`variant` to `outline`, `spacing` to `2` and `aria-label` to `"Emoji style"`. It sets
+`data-slot="emoji-appearance-toggle-group"`.
+
+### EmojiAppearanceToggleGroupItem
+
+Renders shadcn's [`ToggleGroupItem`](https://ui.shadcn.com/docs/components/base/toggle-group) and takes every
+prop it takes except `value`, plus:
+
+| Prop    | Type               | Default  |
+| ------- | ------------------ | -------- |
+| `value` | `FluentEmojiStyle` | required |
+
+One swatch: draws the sample emoji, hidden from assistive technology, in `value`'s style (an `anim` swatch plays
+its frames) before the consumer's label (`children`), which names the swatch; the preview is drawn as large as
+fits the toggle (`h-8`). It sets `data-slot="emoji-appearance-toggle-group-item"`.

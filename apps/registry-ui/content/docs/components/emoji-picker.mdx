@@ -1,0 +1,151 @@
+---
+title: Emoji Picker
+description: A searchable, categorized emoji grid with an optional frequent row and a category nav, windowed so opening the catalog renders only what is in view.
+---
+
+<ComponentPreview name="emoji-picker-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/emoji-picker.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add @zeroxsolutions/fluent-emoji lucide-react
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button input-group scroll-area toggle-group utils https://lucide-animated.com/r/clock.json https://lucide-animated.com/r/coffee.json https://lucide-animated.com/r/leaf.json https://lucide-animated.com/r/search.json https://lucide-animated.com/r/smile.json
+```
+
+<Step>Copy the component into `components/data-entry/emoji-picker.tsx`.</Step>
+
+<ComponentSource name="emoji-picker" title="components/data-entry/emoji-picker.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  EmojiPicker,
+  EmojiPickerContent,
+  EmojiPickerEmpty,
+  EmojiPickerNav,
+  EmojiPickerSearch,
+} from '@/components/data-entry/emoji-picker';
+```
+
+```tsx
+<EmojiPicker onSelect={setEmoji}>
+  <EmojiPickerSearch />
+  <EmojiPickerContent>
+    <EmojiPickerEmpty>
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>No emoji found</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    </EmojiPickerEmpty>
+  </EmojiPickerContent>
+  <EmojiPickerNav aria-label="Categories" />
+</EmojiPicker>
+```
+
+The root owns the query, the active category and the rows, and renders nothing of its own; the grid is windowed,
+so opening the roughly 1900-emoji catalog renders one screenful and fetches only the artwork in view. Use it to
+pick an emoji glyph; for the Fluent artwork **style** itself, use
+[Emoji Appearance Toggle Group](/docs/components/emoji-appearance-toggle-group).
+
+## Composition
+
+```text
+EmojiPicker
+|-- EmojiPickerSearch
+|-- EmojiPickerContent
+|   `-- EmojiPickerEmpty
+`-- EmojiPickerNav
+```
+
+## API reference
+
+### EmojiPicker
+
+Holds the query, the active category and the rows in context, and renders nothing of its own:
+
+| Prop       | Type                      | Default  |
+| ---------- | ------------------------- | -------- |
+| `onSelect` | `(emoji: string) => void` | required |
+| `frequent` | `EmojiPickerFrequent`     | -        |
+| `children` | `ReactNode`               | required |
+
+The consumer composes `EmojiPickerSearch`, `EmojiPickerContent` (holding `EmojiPickerEmpty`) and
+`EmojiPickerNav` as `children`. `frequent` names the recently used row and lists its emoji, most recent first;
+an empty or omitted `frequent` keeps the nav item disabled and drops the section.
+
+### EmojiPickerSearch
+
+Renders shadcn's [`InputGroupInput`](https://ui.shadcn.com/docs/components/base/input-group) inside an
+`InputGroup`, and takes every prop an `input` takes except `value` and `onChange`. Search box bound to the
+picker's query; `placeholder` defaults to `"Search"` and `aria-label` to `"Search emoji"`, and `className`
+places the group. Its search glyph plays on the group's hover and while the box takes focus. It sets
+`data-slot="emoji-picker-search"`.
+
+### EmojiPickerContent
+
+Renders a `div` and takes every prop a `div` takes except `style`, plus:
+
+| Prop   | Type                   | Default |
+| ------ | ---------------------- | ------- |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'`  |
+
+Windowed, scrollable grid body: a region of the `size` height, holding a `ScrollArea` that fills it; it draws
+the rows itself, and `children` sit in the same viewport after them, which is where an `EmojiPickerEmpty` goes.
+Only the rows in (and near) the viewport mount, and the section header covering the top of the viewport is
+pinned. It sets `data-slot="emoji-picker-content"`.
+
+### EmojiPickerEmpty
+
+Renders a `div` and takes every prop a `div` takes. The no-results state: renders, with its `children` (an
+upstream `Empty` the consumer composes), only while a search matches nothing, as upstream's `ComboboxEmpty`
+does. Place it in `EmojiPickerContent`. It sets `data-slot="emoji-picker-empty"`.
+
+### EmojiPickerNav
+
+Renders shadcn's [`ToggleGroup`](https://ui.shadcn.com/docs/components/base/toggle-group) and takes every prop
+it takes except `value`, `defaultValue`, `onValueChange` and `multiple`. Category jump-nav, joined
+(`spacing={0}`): one item per category, the active one always pressed. Each item's accessible name is its
+category's name; give the group its own `aria-label`. Hidden while searching. It sets
+`data-slot="emoji-picker-nav"`.
+
+### EmojiPickerGroupLabel
+
+Renders a `div` and takes every prop a `div` takes. Sticky section heading - what the frequent row's name or a
+category's name draws as, styled as the preset's own group labels (`ComboboxLabel`, `SelectLabel`), on the
+popover surface so rows scrolling under it stay hidden. It sets `data-slot="emoji-picker-group-label"`.

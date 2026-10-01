@@ -1,0 +1,134 @@
+---
+title: Language Combobox
+description: A searchable language picker over upstream Combobox that maps a BCP-47 code or code-language id to its option and reports the value the consumer picks.
+---
+
+<ComponentPreview name="language-combobox-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/language-combobox.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add @base-ui/react @zeroxsolutions/icons
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add combobox
+```
+
+<Step>Copy the component into `components/data-entry/language-combobox.tsx`.</Step>
+
+<ComponentSource name="language-combobox" title="components/data-entry/language-combobox.tsx" />
+
+<Step>Copy the language-options hook into `hooks/use-language-options.ts`.</Step>
+
+<ComponentSource
+  name="language-combobox"
+  file="registry/bases/base-ui/hooks/use-language-options.ts"
+  title="hooks/use-language-options.ts"
+/>
+
+<Step>Copy the built-in option lists into `lib/language-options.tsx`.</Step>
+
+<ComponentSource
+  name="language-combobox"
+  file="registry/bases/base-ui/lib/language-options.tsx"
+  title="lib/language-options.tsx"
+/>
+
+<Step>Copy the option types into `lib/language-option.ts`.</Step>
+
+<ComponentSource
+  name="language-combobox"
+  file="registry/bases/base-ui/types/language-option.ts"
+  title="lib/language-option.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { LanguageCombobox } from '@/components/data-entry/language-combobox';
+```
+
+```tsx
+<LanguageCombobox kind="code" value={value} onValueChange={setValue}>
+  <ComboboxTrigger render={<Button variant="outline" size="sm" />} aria-label="Select language">
+    <ComboboxValue>
+      {(option) => (
+        <>
+          {option?.icon}
+          <span>{option?.label ?? 'Select'}</span>
+        </>
+      )}
+    </ComboboxValue>
+  </ComboboxTrigger>
+  <ComboboxContent>
+    <ComboboxEmpty>No results.</ComboboxEmpty>
+    <ComboboxList>
+      {(option) => (
+        <ComboboxItem key={option.value} value={option}>
+          {option.icon}
+          <span>{option.label}</span>
+        </ComboboxItem>
+      )}
+    </ComboboxList>
+  </ComboboxContent>
+</LanguageCombobox>
+```
+
+The root owns the option set and maps the string `value` to and from its option; the consumer composes every
+visible part inside it: a `ComboboxTrigger` (holding a `ComboboxValue`, whose render function receives the
+current `LanguageOption`), and a `ComboboxContent` with an optional `ComboboxInput`, a `ComboboxEmpty` and a
+`ComboboxList` whose render function receives each `LanguageOption`. Use `kind="locale"` for a UI language
+picker and `kind="code"` for a code block's language; pass explicit `options` to override either built-in set.
+
+## API reference
+
+### LanguageCombobox
+
+Renders shadcn's [`Combobox`](https://ui.shadcn.com/docs/components/base/combobox) and takes every prop it
+takes except `items`, `value`, `defaultValue`, `onValueChange`, `multiple`, `itemToStringLabel` and
+`isItemEqualToValue`, plus:
+
+| Prop            | Type                      | Default    |
+| --------------- | ------------------------- | ---------- |
+| `kind`          | `'locale' \| 'code'`      | `'locale'` |
+| `options`       | `LanguageOption[]`        | -          |
+| `locales`       | `readonly string[]`       | -          |
+| `value`         | `string`                  | required   |
+| `onValueChange` | `(value: string) => void` | required   |
+
+Maps the string `value` to and from its option (`isItemEqualToValue`, `itemToStringLabel`); `kind` selects the
+built-in option set - UI locale names, or code-language ids - when `options` is omitted. For `kind="locale"`
+without `options`, `locales` picks which BCP-47 codes to offer; omitted, only the current `value` is offered, so
+the picker still shows what is selected, and an empty `value` then offers nothing. It sets no `data-slot`.

@@ -1,0 +1,145 @@
+---
+title: Frontmatter Form
+description: A frontmatter editor whose root holds the document and field setters for the consumer's composed fields.
+---
+
+<ComponentPreview name="frontmatter-form-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/frontmatter-form.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add field
+```
+
+<Step>Copy the component into `components/data-entry/frontmatter-form.tsx`.</Step>
+
+<ComponentSource name="frontmatter-form" title="components/data-entry/frontmatter-form.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  FrontmatterForm,
+  FrontmatterFormField,
+  FrontmatterFormFieldControl,
+  FrontmatterFormFieldError,
+  FrontmatterFormFieldLabel,
+} from '@/components/data-entry/frontmatter-form';
+```
+
+```tsx
+<FrontmatterForm value={value} onValueChange={setValue}>
+  <FrontmatterFormField name="name">
+    <FrontmatterFormFieldLabel>Name</FrontmatterFormFieldLabel>
+    <FrontmatterFormFieldControl render={<Input placeholder="my-skill" />} />
+    <FrontmatterFormFieldError />
+  </FrontmatterFormField>
+</FrontmatterForm>
+```
+
+The consumer composes one `FrontmatterFormField` per key and owns every label, hint (upstream
+`FieldDescription`), control and validation rule - the component ships no rules of its own. Use it for a
+frontmatter (YAML metadata) editor; bind a non-text control, such as a `Switch`, through
+`useFrontmatterFormField` instead of `FrontmatterFormFieldControl`.
+
+## Composition
+
+```text
+FrontmatterForm
+`-- FrontmatterFormField
+    |-- FrontmatterFormFieldLabel
+    |-- FrontmatterFormFieldControl
+    `-- FrontmatterFormFieldError
+```
+
+## API reference
+
+### useFrontmatterFormField
+
+`useFrontmatterFormField(): { name: string; value: unknown; setValue: (fieldValue: unknown) => void; error:
+string | undefined; controlId: string; errorId: string }` - reads the current field's binding. Use it to bind a
+control `FrontmatterFormFieldControl` does not cover (a `Switch`, a tag input). Throws outside a
+`FrontmatterFormField`.
+
+### FrontmatterForm
+
+Renders shadcn's [`FieldGroup`](https://ui.shadcn.com/docs/components/base/field) and takes every prop it takes
+except `onChange`, plus:
+
+| Prop            | Type                                    | Default  |
+| --------------- | --------------------------------------- | -------- |
+| `value`         | `FrontmatterFormValue`                  | required |
+| `onValueChange` | `(value: FrontmatterFormValue) => void` | required |
+| `errors`        | `Record<string, string>`                | `{}`     |
+
+A frontmatter (YAML metadata) editor, an upstream `FieldGroup` of fields. The root holds the document and its
+field setters in context; `FrontmatterFormValue` is an object of arbitrary keys, values usually strings. It
+sets `data-slot="frontmatter-form"`.
+
+### FrontmatterFormField
+
+Renders shadcn's [`Field`](https://ui.shadcn.com/docs/components/base/field) and takes every prop it takes,
+plus:
+
+| Prop   | Type     | Default  |
+| ------ | -------- | -------- |
+| `name` | `string` | required |
+
+One field of a `FrontmatterForm`, bound to `name`: an upstream `Field` that carries `data-invalid` while the
+root's `errors` holds `name`. It keeps upstream's `data-slot="field"`, which `FrontmatterFormFieldLabel` selects
+on.
+
+### FrontmatterFormFieldLabel
+
+Renders shadcn's [`FieldLabel`](https://ui.shadcn.com/docs/components/base/field) and takes every prop it
+takes. Label for the current field, pointed (`htmlFor`) at its control. It sets no `data-slot` of its own,
+keeping `FieldLabel`'s own.
+
+### FrontmatterFormFieldControl
+
+Clones `render` with the current field's `id`, string `value` and invalid-state attributes, which replace its
+own; its own `onChange` still runs, before the field's:
+
+| Prop     | Type                                                    | Default  |
+| -------- | ------------------------------------------------------- | -------- |
+| `render` | `ReactElement<FrontmatterFormFieldControlElementProps>` | required |
+
+`render` is the text control to bind, such as `<Input placeholder="my-skill" />` or `<Textarea />`; it must
+accept `id`, `value`, `onChange`, `aria-invalid` and `aria-describedby` (`FrontmatterFormFieldControlElementProps`,
+picked from an `input`'s own props). For a non-text control use `useFrontmatterFormField` instead. It renders no
+element of its own, so it sets no `data-slot`.
+
+### FrontmatterFormFieldError
+
+Renders shadcn's [`FieldError`](https://ui.shadcn.com/docs/components/base/field) and takes every prop it
+takes. The current field's message from the root's `errors`; renders nothing while the field is valid. It sets
+`data-slot="frontmatter-form-field-error"`.

@@ -16,6 +16,13 @@
     "markdown-view",
     "model-info-card",
     "tree-item",
+    "---Data entry---",
+    "avatar-picker",
+    "chat-suggestion-item",
+    "emoji-appearance-toggle-group",
+    "emoji-picker",
+    "frontmatter-form",
+    "language-combobox",
     "---Feedback---",
     "status-indicator"
   ]
