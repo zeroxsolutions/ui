@@ -101,6 +101,7 @@ except `children`, which it supplies as the [Unsaved Indicator](/docs/components
 close icon.
 
 It is named "Close" unless given its own `aria-label`. On a dirty tab it shows the unsaved dot; the close
-icon takes its place, and plays its hover or focus animation, while the tab is hovered or active, or while
-the button has keyboard focus. A click on it does not reach the tab, so closing a tab does not also activate
-it. It sets `data-slot="editor-tab-close-button"`.
+icon takes its place while the tab is hovered or active, or while the button has keyboard focus. The icon
+plays its animation only while the button itself is hovered or focused, not merely while the tab is active.
+A click on it does not reach the tab, so closing a tab does not also activate it. It sets
+`data-slot="editor-tab-close-button"`.
