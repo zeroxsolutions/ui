@@ -166,4 +166,4 @@ function startHomeShaderField(container: HTMLElement, canvas: HTMLCanvasElement)
   };
 }
 
-export { startHomeShaderField };
+export { startHomeShaderField, COLUMN_HALF_WIDTH };
