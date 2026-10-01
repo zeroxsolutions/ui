@@ -11,6 +11,9 @@ test('every component page renders its preview, fits a phone, and throws nothing
 
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(`${page.url()}: ${error.message}`));
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(`${page.url()}: ${message.text()}`);
+  });
   await page.setViewportSize({ width: 390, height: 844 });
 
   for (const { name, title } of components) {
