@@ -102,7 +102,7 @@
       "name": "data-table",
       "type": "registry:component",
       "title": "Data Table",
-      "description": "The composable parts of a @tanstack/react-table view - toolbar, view, column header actions, pagination and view options - reading one shared table instance from context.",
+      "description": "The composable parts of a @tanstack/react-table view - toolbar, view, pagination and view options - reading one shared table instance from context.",
       "categories": ["data-display"],
       "dependencies": ["@tanstack/react-table", "lucide-react"],
       "registryDependencies": [
@@ -111,16 +111,34 @@
         "@shadcn/empty",
         "@shadcn/table",
         "@shadcn/utils",
+        "https://lucide-animated.com/r/chevron-left.json",
+        "https://lucide-animated.com/r/chevron-right.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-display/data-table.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-header",
+      "type": "registry:component",
+      "title": "Data Table Column Header",
+      "description": "A @tanstack/react-table column's sort-and-hide menu, taking the column directly rather than a shared table instance.",
+      "categories": ["data-display"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/dropdown-menu",
+        "@shadcn/utils",
         "https://lucide-animated.com/r/arrow-down.json",
         "https://lucide-animated.com/r/arrow-up.json",
-        "https://lucide-animated.com/r/chevron-left.json",
-        "https://lucide-animated.com/r/chevron-right.json",
         "https://lucide-animated.com/r/chevrons-up-down.json",
         "https://lucide-animated.com/r/eye-off.json"
       ],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/data-display/data-table.tsx",
+          "path": "registry/bases/base-ui/components/data-display/data-table-column-header.tsx",
           "type": "registry:component"
         }
       ]
@@ -904,10 +922,33 @@
       "description": "A small, paginated file table with sortable columns and a view-options menu.",
       "categories": ["examples"],
       "dependencies": ["@tanstack/react-table"],
-      "registryDependencies": ["@shadcn/dropdown-menu", "https://ui.zeroxsolutions.com/r/data-table.json"],
+      "registryDependencies": [
+        "@shadcn/dropdown-menu",
+        "https://ui.zeroxsolutions.com/r/data-table-column-header.json",
+        "https://ui.zeroxsolutions.com/r/data-table.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/data-table-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-header-demo",
+      "type": "registry:example",
+      "title": "Data Table Column Header Demo",
+      "description": "A table header row whose Name column opens a sort-and-hide menu from DataTableColumnHeader.",
+      "categories": ["examples"],
+      "dependencies": ["@tanstack/react-table"],
+      "registryDependencies": [
+        "@shadcn/dropdown-menu",
+        "@shadcn/table",
+        "https://ui.zeroxsolutions.com/r/data-table-column-header.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/data-table-column-header-demo.tsx",
           "type": "registry:example"
         }
       ]

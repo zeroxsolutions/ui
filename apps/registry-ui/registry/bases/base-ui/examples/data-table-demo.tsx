@@ -11,12 +11,6 @@ import type { ReactNode } from 'react';
 
 import {
   DataTable,
-  DataTableColumnHeader,
-  DataTableColumnHeaderContent,
-  DataTableColumnHeaderHide,
-  DataTableColumnHeaderSortAscending,
-  DataTableColumnHeaderSortDescending,
-  DataTableColumnHeaderTrigger,
   DataTablePagination,
   DataTablePaginationNext,
   DataTablePaginationPrevious,
@@ -24,6 +18,14 @@ import {
   DataTableView,
   DataTableViewOptions,
 } from '@/registry/bases/base-ui/components/data-display/data-table';
+import {
+  DataTableColumnHeader,
+  DataTableColumnHeaderContent,
+  DataTableColumnHeaderHide,
+  DataTableColumnHeaderSortAscending,
+  DataTableColumnHeaderSortDescending,
+  DataTableColumnHeaderTrigger,
+} from '@/registry/bases/base-ui/components/data-display/data-table-column-header';
 import { DropdownMenuSeparator } from '@/registry/bases/base-ui/ui/dropdown-menu';
 
 interface FileRow {
