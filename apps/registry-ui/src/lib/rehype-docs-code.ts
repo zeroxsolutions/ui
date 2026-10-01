@@ -24,7 +24,7 @@ interface HastNode {
 }
 
 /** The components whose source this step reads and highlights for them. */
-const SOURCE_COMPONENTS = new Set(['ComponentPreview', 'ComponentSource']);
+const SOURCE_COMPONENTS = new Set(['ComponentPreview', 'BlockPreview', 'ComponentSource']);
 
 function textOf(node: HastNode): string {
   return node.type === 'text' ? (node.value ?? '') : (node.children ?? []).map(textOf).join('');
@@ -36,9 +36,9 @@ function stringAttribute(node: HastNode, name: string): string | undefined {
 }
 
 /**
- * The file a `ComponentPreview` or `ComponentSource` shows: its demo's or item's first file, or the one
- * `file` names. Throws for a name the examples index lacks or a file the item does not ship, so a page
- * naming either fails its build.
+ * The file a `ComponentPreview`, `BlockPreview` or `ComponentSource` shows: its demo's or item's first
+ * file, or the one `file` names. Throws for a name the examples index lacks or a file the item does not
+ * ship, so a page naming either fails its build.
  */
 function sourceFileOf(name: string, file?: string): string {
   const entry = Index[name];
@@ -81,8 +81,8 @@ async function highlightSource(element: HastNode): Promise<void> {
 /**
  * Highlights a docs page's code as the page compiles, with the registry's own highlighter, so nothing
  * the server runs to render a page imports Shiki. A fence's `pre` gets its `title` from the fence's
- * meta and its tokenized `lines` as JSON. A `ComponentPreview` or `ComponentSource` gets the source of
- * the file it shows as `code`, its `language`, and its `lines` as JSON. It runs after fumadocs has kept
+ * meta and its tokenized `lines` as JSON. A `ComponentPreview`, `BlockPreview` or `ComponentSource` gets
+ * the source of the file it shows as `code`, its `language`, and its `lines` as JSON. It runs after fumadocs has kept
  * the page's Markdown, so none of this reaches the page's `.md`. A demo's source is read once, as its
  * page compiles, so under `next dev` an edited demo shows its old source until the page's `.mdx` is saved.
  */

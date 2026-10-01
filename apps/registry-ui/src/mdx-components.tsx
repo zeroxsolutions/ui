@@ -1,7 +1,8 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
-import { ExamplePreview } from '@/components/data-display/example-preview';
+import { BlockPreview } from '@/components/data-display/block-preview';
 import { ComponentSource } from '@/components/data-display/component-source';
+import { ExamplePreview } from '@/components/data-display/example-preview';
 import {
   SourceCodeBlock,
   SourceCodeBlockActions,
@@ -131,6 +132,7 @@ export const mdxComponents = {
   AlertTitle,
   AlertDescription,
   ComponentPreview: ExamplePreview,
+  BlockPreview,
   ComponentSource: ({ file, ...props }: ComponentProps<typeof ComponentSource>) => (
     <ComponentSource file={file} className="mt-6" {...props}>
       <SourceCodeBlockHeader>

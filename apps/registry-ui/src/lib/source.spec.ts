@@ -144,21 +144,21 @@ function missingInstallCommands(sources: Record<string, string>, items: Map<stri
     .map(([slug, name]) => `${slug}: has no \`${installCommand(name, items)}\``);
 }
 
-const NAMED_SOURCE = /<(ComponentPreview|ComponentSource)\b[^>]*?\bname="([^"]+)"/g;
+const NAMED_SOURCE = /<(ComponentPreview|BlockPreview|ComponentSource)\b[^>]*?\bname="([^"]+)"/g;
 
-/** Every `ComponentPreview` or `ComponentSource` name the index lacks, as `<slug>: <name>`. */
+/** Every `ComponentPreview`, `BlockPreview` or `ComponentSource` name the index lacks, as `<slug>: <name>`. */
 function unresolvedNames(sources: Record<string, string>, index: Set<string>): string[] {
   return Object.entries(sources).flatMap(([slug, source]) =>
     [...source.matchAll(NAMED_SOURCE)].filter(([, , name]) => !index.has(name)).map(([, , name]) => `${slug}: ${name}`),
   );
 }
 
-/** Every item page under `components/` or `blocks/` whose first `ComponentPreview` is not `<name>-demo`. */
+/** Every item page under `components/` or `blocks/` whose first `ComponentPreview` or `BlockPreview` is not `<name>-demo`. */
 function misplacedFirstPreviews(sources: Record<string, string>, items: Set<string>): string[] {
   return Object.entries(sources)
     .filter(([slug]) => /^(components|blocks)\//.test(slug) && items.has(slug.split('/').pop() ?? ''))
     .filter(([slug, source]) => {
-      const first = [...source.matchAll(NAMED_SOURCE)].find(([, component]) => component === 'ComponentPreview');
+      const first = [...source.matchAll(NAMED_SOURCE)].find(([, component]) => component !== 'ComponentSource');
       return first?.[2] !== `${slug.split('/').pop()}-demo`;
     })
     .map(([slug]) => slug);
@@ -213,6 +213,14 @@ describe('content/docs', () => {
       'components/status-indicator',
       'components/tag-input',
     ]);
+  });
+
+  it('takes a block page whose first preview is a BlockPreview of the demo', () => {
+    const pages = {
+      'blocks/ai-provider-picker': '<BlockPreview name="ai-provider-picker-demo" block="ai-provider-picker" />',
+    };
+
+    expect(misplacedFirstPreviews(pages, new Set(['ai-provider-picker']))).toEqual([]);
   });
 
   it("documents only registry items, and repeats an item's title and description", () => {
