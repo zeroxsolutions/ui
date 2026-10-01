@@ -62,15 +62,15 @@ function homeShaderInk(element: HTMLElement): [number, number, number] {
  */
 function startHomeShaderField(container: HTMLElement, canvas: HTMLCanvasElement): () => void {
   const gl = canvas.getContext('webgl', { alpha: true, antialias: false, premultipliedAlpha: false });
-  if (!gl) return () => undefined;
+  if (!gl || gl.isContextLost()) return () => undefined;
   const release = (): void => gl.getExtension('WEBGL_lose_context')?.loseContext();
   const program = gl.createProgram();
   for (const [type, text] of [
     [gl.VERTEX_SHADER, VERTEX_SHADER],
     [gl.FRAGMENT_SHADER, FRAGMENT_SHADER],
   ] as const) {
-    const unit = gl.createShader(type);
-    if (!unit) break;
+    // The context was just confirmed live, so createShader cannot return null here.
+    const unit = gl.createShader(type)!;
     gl.shaderSource(unit, text);
     gl.compileShader(unit);
     gl.attachShader(program, unit);
