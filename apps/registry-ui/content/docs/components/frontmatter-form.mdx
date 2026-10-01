@@ -119,7 +119,9 @@ plus:
 | `name` | `string` | required |
 
 One field of a `FrontmatterForm`, bound to `name`: an upstream `Field` that carries `data-invalid` while the
-root's `errors` holds `name`. It keeps upstream's `data-slot="field"`, which shadcn's `FieldLabel` selects on.
+root's `errors` holds `name`. It sets `data-slot="frontmatter-form-field"`. Shadcn's `FieldLabel` has one rule
+naming the `field` slot, for a `Field` nested _inside_ a label (the checkbox-row pattern); this family nests
+the other way around, so that rule never reached this part.
 
 ### FrontmatterFormFieldLabel
 
@@ -138,10 +140,11 @@ which replace its own; its own `onChange` still runs, before the field's:
 | `render` | `ReactElement<FrontmatterFormFieldControlElementProps>` | required |
 
 `render` is the text control to bind, such as `<Input placeholder="my-skill" />` or `<Textarea />`; it must
-accept `id`, `value`, `onChange`, `aria-invalid`, `aria-describedby` and `data-slot`
-(`FrontmatterFormFieldControlElementProps`, picked from an `input`'s own props). For a non-text control use
-`useFrontmatterFormField` instead. It renders no element of its own, so the `data-slot` it sets
-(`frontmatter-form-field-control`) lands on `render`, replacing its own.
+accept `id`, `value`, `onChange`, `aria-invalid` and `aria-describedby`, picked from an `input`'s own props
+(`FrontmatterFormFieldControlElementProps`), plus a `data-slot` the type adds on top of that pick. It renders
+no element of its own, so the `data-slot` it sets (`frontmatter-form-field-control`) lands on `render`,
+replacing whatever `render` set for itself. A `render={<InputGroupInput />}` loses `InputGroupInput`'s own
+`input-group-control` slot this way. For a non-text control use `useFrontmatterFormField` instead.
 
 ### FrontmatterFormFieldError
 

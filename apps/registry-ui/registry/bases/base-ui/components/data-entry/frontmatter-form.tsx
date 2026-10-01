@@ -86,8 +86,12 @@ interface FrontmatterFormFieldProps extends React.ComponentProps<typeof Field> {
 
 /**
  * One field of a `FrontmatterForm`, bound to `name`: an upstream `Field`,
- * marked invalid when the root's `errors` hold `name`. It keeps upstream's
- * `data-slot="field"`, which `FieldLabel` selects on.
+ * marked invalid when the root's `errors` hold `name`. It sets its own
+ * `data-slot="frontmatter-form-field"`. `FieldLabel`'s only rule naming the
+ * `field` slot (`has-[>[data-slot=field]]`, the checkbox-row pattern) matches
+ * a `Field` nested *inside* a label; this family nests the other way
+ * (`FrontmatterFormFieldLabel` is always a descendant of the `Field` it
+ * labels, never an ancestor), so that rule can never reach this part.
  */
 function FrontmatterFormField({ name, ...props }: FrontmatterFormFieldProps): React.ReactNode {
   const ctx = useFrontmatterFormContext();
@@ -106,7 +110,7 @@ function FrontmatterFormField({ name, ...props }: FrontmatterFormFieldProps): Re
 
   return (
     <FrontmatterFormFieldContext.Provider value={fieldCtx}>
-      <Field data-invalid={error ? true : undefined} {...props} />
+      <Field data-slot="frontmatter-form-field" data-invalid={error ? true : undefined} {...props} />
     </FrontmatterFormFieldContext.Provider>
   );
 }
