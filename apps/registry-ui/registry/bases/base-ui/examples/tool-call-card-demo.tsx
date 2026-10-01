@@ -18,7 +18,7 @@ import {
   ToolCallCardStatus,
   ToolCallCardTitle,
   ToolCallCardTrigger,
-} from '@/registry/bases/base-ui/components/layout/tool-call-card';
+} from '@/registry/bases/base-ui/components/feedback/tool-call-card';
 import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/ui/search';
 
 const PARAMETERS = JSON.stringify({ query: 'design system tokens', limit: 5 }, null, 2);

@@ -5,7 +5,7 @@ import {
   FileTreeGroup,
   FileTreeItem,
   FileTreeLabel,
-} from '@/registry/bases/base-ui/components/layout/file-tree';
+} from '@/registry/bases/base-ui/components/data-display/file-tree';
 
 /** A small file tree with one folder expanded and a leaf selected by default. */
 function FileTreeDemo(): ReactNode {

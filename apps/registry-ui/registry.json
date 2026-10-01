@@ -635,11 +635,11 @@
       "type": "registry:component",
       "title": "File Tree",
       "description": "An accessible file tree that drives keyboard navigation and owns selection and folder expansion, controlled or uncontrolled.",
-      "categories": ["layout"],
+      "categories": ["data-display"],
       "registryDependencies": ["@shadcn/utils", "https://lucide-animated.com/r/chevron-right.json"],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/layout/file-tree.tsx",
+          "path": "registry/bases/base-ui/components/data-display/file-tree.tsx",
           "type": "registry:component"
         },
         {
@@ -779,7 +779,7 @@
       "type": "registry:component",
       "title": "Tool Call Card",
       "description": "One tool invocation in a chat transcript: a trigger row over collapsible sections, whose status badge follows the call's lifecycle state.",
-      "categories": ["layout"],
+      "categories": ["feedback"],
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "@shadcn/badge",
@@ -804,7 +804,7 @@
       },
       "files": [
         {
-          "path": "registry/bases/base-ui/components/layout/tool-call-card.tsx",
+          "path": "registry/bases/base-ui/components/feedback/tool-call-card.tsx",
           "type": "registry:component"
         }
       ]
