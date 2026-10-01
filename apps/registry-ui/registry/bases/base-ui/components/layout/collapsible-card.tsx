@@ -28,8 +28,8 @@ type CollapsibleCardProps = ComponentProps<typeof Collapsible> & VariantProps<ty
  * `data-variant`: `default` the card surface, `muted` a borderless fill for a
  * block nested in another card, `plain` no surface and a rule underneath, for a
  * titled group of rows in a panel, `flush` no surface at all, for a block filling a
- * surface its container draws. `default` and `muted` rule the header off from the
- * body while it is open.
+ * surface its container draws. `default` and `muted` rule the body off from the
+ * header, on the body, so the header keeps its height as the card opens and closes.
  */
 function CollapsibleCard({
   className,
@@ -54,7 +54,7 @@ function CollapsibleCardHeader({ className, ...props }: ComponentProps<'div'>): 
     <div
       data-slot="collapsible-card-header"
       className={cn(
-        'flex items-center gap-1.5 px-3 py-1.5 group-data-[variant=default]/collapsible-card:group-data-open/collapsible-card:border-b group-data-[variant=muted]/collapsible-card:group-data-open/collapsible-card:border-b group-data-[variant=plain]/collapsible-card:px-2.5 has-data-[slot=collapsible-card-actions]:justify-between',
+        'flex items-center gap-1.5 px-3 py-1.5 group-data-[variant=plain]/collapsible-card:px-2.5 has-data-[slot=collapsible-card-actions]:justify-between',
         className,
       )}
       {...props}
@@ -67,10 +67,11 @@ function CollapsibleCardTitle({ className, ...props }: ComponentProps<'div'>): R
   return (
     <div
       data-slot="collapsible-card-title"
-      // A child combinator, so an icon inside a nested control the title holds
-      // (a combobox trigger) keeps its own size.
+      // As tall as the icon button the actions hold (`size="icon"`, size-8), so the header is one
+      // height whether or not it holds actions. A child combinator, so an icon inside a nested
+      // control the title holds (a combobox trigger) keeps its own size.
       className={cn(
-        "text-muted-foreground flex min-w-0 items-center gap-1.5 font-medium [&>svg]:shrink-0 [&>svg:not([class*='size-'])]:size-4",
+        "text-muted-foreground flex h-8 min-w-0 items-center gap-1.5 font-medium [&>svg]:shrink-0 [&>svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -137,7 +138,14 @@ function CollapsibleCardTrigger({
 /** The body that the trigger opens and closes; unmounted while closed. */
 function CollapsibleCardContent({ className, ...props }: ComponentProps<typeof CollapsibleContent>): ReactNode {
   return (
-    <CollapsibleContent data-slot="collapsible-card-content" className={cn('overflow-hidden', className)} {...props} />
+    <CollapsibleContent
+      data-slot="collapsible-card-content"
+      className={cn(
+        'overflow-hidden group-data-[variant=default]/collapsible-card:border-t group-data-[variant=muted]/collapsible-card:border-t',
+        className,
+      )}
+      {...props}
+    />
   );
 }
 
