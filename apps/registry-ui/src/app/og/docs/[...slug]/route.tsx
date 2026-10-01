@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { notFound } from 'next/navigation';
 
+import { SiteLogo } from '@/components/general/site-logo';
 import { docsPageImage, source } from '@/lib/source';
 import { docsShareImageRoute } from '@/routes/app-routes';
 
@@ -44,14 +45,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 32, color: MUTED_FOREGROUND }}>
-        <svg width={40} height={40} viewBox="0 0 24 24" fill={FOREGROUND}>
-          <rect x="2" y="2" width="6" height="6" rx="1" />
-          <rect x="9" y="2" width="6" height="6" rx="1" />
-          <rect x="2" y="9" width="6" height="6" rx="1" />
-          <rect x="16" y="9" width="6" height="6" rx="1" />
-          <rect x="9" y="16" width="6" height="6" rx="1" />
-          <rect x="16" y="16" width="6" height="6" rx="1" />
-        </svg>
+        <SiteLogo width={40} height={40} style={{ color: FOREGROUND }} />
         ZeroXSolutions UI
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
