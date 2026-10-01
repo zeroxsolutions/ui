@@ -110,7 +110,7 @@ test('a wheel over the sidebar past the end of its list leaves the page where it
 
 test('a wheel over the TOC past the end of its list leaves the page where it was', async ({ page }) => {
   // Short enough that this page's headings overflow the TOC column, so its list has an end to wheel past.
-  await page.setViewportSize({ width: 1440, height: 320 });
+  await page.setViewportSize({ width: 1440, height: 240 });
   await page.goto(LONGEST_PAGE);
 
   expect(await pageMovedWheelingPastRail(page, toc(page))).toBe(false);
