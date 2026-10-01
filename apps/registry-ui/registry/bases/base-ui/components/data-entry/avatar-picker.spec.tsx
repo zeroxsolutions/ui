@@ -23,7 +23,7 @@ import {
   type AvatarPickerUploadContentProps,
   type AvatarPickerValue,
 } from './avatar-picker';
-import { EmojiPickerContent, EmojiPickerSearch } from './emoji-picker';
+import { EmojiPickerContent, EmojiPickerEmpty, EmojiPickerSearch } from './emoji-picker';
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn();
@@ -100,7 +100,9 @@ function EmojiPane() {
   return (
     <AvatarPickerEmojiContent>
       <EmojiPickerSearch />
-      <EmojiPickerContent />
+      <EmojiPickerContent>
+        <EmojiPickerEmpty>No emoji found</EmojiPickerEmpty>
+      </EmojiPickerContent>
     </AvatarPickerEmojiContent>
   );
 }
@@ -146,6 +148,20 @@ describe('AvatarPicker', () => {
     ]);
     fireEvent.click(screen.getByRole('tab', { name: 'Color' }));
     expect(screen.getByRole('button', { name: '#6366f1' })).toBeTruthy();
+  });
+
+  it('shows "No emoji found" when a search in the emoji pane matches nothing', async () => {
+    render(
+      <Picker defaultTab="emoji">
+        <EmojiPane />
+      </Picker>,
+    );
+    openEditor();
+
+    fireEvent.change(screen.getByLabelText('Search emoji'), { target: { value: 'zzzznotanemoji' } });
+    await act(async () => {});
+
+    expect(screen.getByText('No emoji found')).toBeTruthy();
   });
 
   it('keeps a pane wrapped in a consumer component reachable through its tab', () => {

@@ -17,6 +17,7 @@ import {
 } from '@/registry/bases/base-ui/components/data-entry/avatar-picker';
 import {
   EmojiPickerContent,
+  EmojiPickerEmpty,
   EmojiPickerNav,
   EmojiPickerSearch,
 } from '@/registry/bases/base-ui/components/data-entry/emoji-picker';
@@ -85,7 +86,9 @@ function AvatarPickerDemo(): ReactNode {
           </div>
           <AvatarPickerEmojiContent>
             <EmojiPickerSearch />
-            <EmojiPickerContent />
+            <EmojiPickerContent>
+              <EmojiPickerEmpty>No emoji found</EmojiPickerEmpty>
+            </EmojiPickerContent>
             <EmojiPickerNav />
           </AvatarPickerEmojiContent>
           <AvatarPickerUploadContent>

@@ -68,7 +68,11 @@ interface AvatarPickerProps extends React.ComponentProps<typeof Popover> {
  *           <AvatarPickerRemoveButton className="ml-auto" />
  *         </div>
  *         <AvatarPickerEmojiContent>
- *           <EmojiPickerSearch /><EmojiPickerContent /><EmojiPickerNav />
+ *           <EmojiPickerSearch />
+ *           <EmojiPickerContent>
+ *             <EmojiPickerEmpty>No emoji found</EmojiPickerEmpty>
+ *           </EmojiPickerContent>
+ *           <EmojiPickerNav />
  *         </AvatarPickerEmojiContent>
  *         <AvatarPickerColorContent>
  *           <AvatarPickerColorGroup aria-label="Colors" />
