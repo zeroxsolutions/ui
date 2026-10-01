@@ -11,7 +11,7 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
  *
  *   <Tooltip>
  *     <TooltipTrigger render={<IconMedia aria-label="Vision input" className="bg-muted text-muted-foreground" />}>
- *       <EyeIcon />
+ *       <EyeIcon aria-hidden />
  *     </TooltipTrigger>
  *     <TooltipContent>Vision input</TooltipContent>
  *   </Tooltip>

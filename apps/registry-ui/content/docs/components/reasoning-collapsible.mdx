@@ -98,10 +98,10 @@ outside `<ReasoningCollapsible>`.
 Renders shadcn's [`Collapsible`](https://ui.shadcn.com/docs/components/base/collapsible) and takes every
 prop it takes except `open`, plus:
 
-| Prop          | Type      | Default     |
-| ------------- | --------- | ----------- |
-| `streaming`   | `boolean` | `false`     |
-| `defaultOpen` | `boolean` | `streaming` |
+| Prop          | Type      | Default              |
+| ------------- | --------- | -------------------- |
+| `streaming`   | `boolean` | `false`              |
+| `defaultOpen` | `boolean` | value of `streaming` |
 
 A thinking / reasoning disclosure. It opens while `streaming` is true (unless `defaultOpen` is `false`),
 closes itself once about a second after the stream ends, and carries `data-streaming` while streaming. It

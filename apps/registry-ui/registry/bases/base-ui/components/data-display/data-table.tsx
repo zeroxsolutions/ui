@@ -122,9 +122,9 @@ function DataTableEmpty({ children, ...props }: React.ComponentProps<typeof Tabl
 }
 
 /**
- * The pager's row, reading the table from <DataTable> context. `children` are its content: a status
+ * The pager's row, a plain flex row with no context of its own. `children` are its content: a status
  * line such as "Page X of Y" (the consumer's i18n owns that copy) and the step buttons,
- * `DataTablePaginationPrevious` and `DataTablePaginationNext`.
+ * `DataTablePaginationPrevious` and `DataTablePaginationNext`, which read the table themselves.
  */
 function DataTablePagination({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   return (
