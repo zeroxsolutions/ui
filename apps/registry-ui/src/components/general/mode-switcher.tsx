@@ -18,7 +18,7 @@ function ModeSwitcher(): ReactNode {
   }, [resolvedTheme, setTheme]);
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme} {...icon.handlers}>
+    <Button data-slot="mode-switcher" variant="ghost" size="icon" onClick={toggleTheme} {...icon.handlers}>
       <SunMoonIcon ref={icon.ref} />
       <span className="sr-only">Toggle theme</span>
     </Button>
