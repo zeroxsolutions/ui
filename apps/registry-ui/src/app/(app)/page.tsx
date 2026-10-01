@@ -38,7 +38,7 @@ const INSTALL_STEPS = [
   {
     title: 'Import it and compose',
     language: 'tsx',
-    code: 'import { StatusIndicator } from \'@/components/feedback/status-indicator\';\n\n<StatusIndicator tone="online" />',
+    code: 'import { StatusIndicator } from \'@/components/feedback/status-indicator\';\n\n<div className="flex items-center gap-2">\n  <StatusIndicator tone="online" />\n  <span>Online</span>\n</div>',
   },
 ];
 
