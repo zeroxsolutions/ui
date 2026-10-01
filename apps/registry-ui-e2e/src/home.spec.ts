@@ -2,7 +2,21 @@ import { expect, test } from '@playwright/test';
 
 const ITEMS = ['Chat Message', 'Code Block', 'File Tree', 'Tag Input', 'Password Input', 'Status Indicator'];
 
+// Mirrors the hero's own `homePageInstallCommand('status-indicator')`; the e2e project does not
+// import the app's internals, so the URL is rebuilt here against the registry's published homepage.
+const INSTALL_COMMAND = `pnpm dlx shadcn@latest add ${new URL('/r/status-indicator.json', 'https://ui.zeroxsolutions.com').href}`;
+
+// WebKit and Firefox under Playwright do not grant clipboard-write permission the way Chromium does,
+// so the real API is replaced with one that records what it was called with on `window`.
+const STUB_CLIPBOARD = `(() => {
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText: (text) => { window.__copiedText = text; return Promise.resolve(); } },
+  });
+})()`;
+
 test('/ says what the registry is, shows its items live, fits a phone, and links on', async ({ page, browserName }) => {
+  await page.addInitScript(STUB_CLIPBOARD);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await expect.poll(() => page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth')).toBe(false);
@@ -10,7 +24,10 @@ test('/ says what the registry is, shows its items live, fits a phone, and links
   await page.setViewportSize({ width: 1440, height: 900 });
   const main = page.getByRole('main');
   await expect(main.getByRole('heading', { level: 1 })).toHaveText('Composed React components for shadcn, on Base UI.');
-  await expect(main.getByRole('button', { name: 'Copy code' }).first()).toBeVisible();
+  const copyButton = main.getByRole('button', { name: 'Copy code' }).first();
+  await expect(copyButton).toBeVisible();
+  await copyButton.click();
+  await expect.poll(() => page.evaluate('window.__copiedText')).toBe(INSTALL_COMMAND);
   for (const item of ITEMS) await expect(main.getByText(item, { exact: true })).toBeVisible();
   await expect(main.getByTitle('AI Provider Picker')).toBeVisible();
 
