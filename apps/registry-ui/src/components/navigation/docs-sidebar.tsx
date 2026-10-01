@@ -35,7 +35,7 @@ function DocsSidebar({ tree, children, ...props }: DocsSidebarProps): ReactNode 
   const pathname = usePathname();
 
   return (
-    <Sidebar role="navigation" aria-label="Docs" collapsible="none" {...props}>
+    <Sidebar data-slot="docs-sidebar" role="navigation" aria-label="Docs" collapsible="none" {...props}>
       <SidebarContent className="overscroll-none">
         {children}
         {pageTreeGroups(tree).map((group) => (
