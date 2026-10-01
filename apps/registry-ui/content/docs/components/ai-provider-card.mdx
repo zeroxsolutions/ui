@@ -66,8 +66,8 @@ import {
 } from '@/components/data-display/ai-provider-card';
 ```
 
-The consumer composes `CardHeader` and `CardTitle` for the brand mark and name, a `CardFooter` holding the label
-and the action, and a trigger that covers the card:
+The consumer composes a `CardHeader` holding `CardTitle` and an `AiProviderCardDescription` for the brand mark,
+name and blurb, a `CardFooter` holding the label and the action, and a trigger that covers the card:
 
 ```tsx
 <AiProviderCard status="online">
@@ -92,8 +92,8 @@ Use it for a grid the user picks one provider from; for the models within a prov
 ```text
 AiProviderCard
 |-- CardHeader
-|   `-- CardTitle
-|-- AiProviderCardDescription
+|   |-- CardTitle
+|   `-- AiProviderCardDescription
 |-- CardFooter
 |   |-- AiProviderCardLabel
 |   `-- AiProviderCardAction

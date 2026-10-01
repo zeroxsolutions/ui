@@ -124,7 +124,9 @@ the body only while there are no rows - a `DataTableEmpty`. It sets `data-slot="
 
 Renders shadcn's [`TableCell`](https://ui.shadcn.com/docs/components/base/table) and takes every prop it takes.
 The one row a `DataTableView` shows when there are no rows: a cell spanning every column, its `children` centred
-in an upstream `Empty`. It defaults `colSpan` to the table's leaf column count. It sets `data-slot="data-table-empty"`.
+in an upstream `Empty`. It defaults `colSpan` to the table's leaf column count. The cell keeps `TableCell`'s
+`whitespace-nowrap`, so a long message widens the table rather than wrapping; keep it short. It sets
+`data-slot="data-table-empty"`.
 
 ### useDataTable
 
@@ -133,8 +135,9 @@ in an upstream `Empty`. It defaults `colSpan` to the table's leaf column count. 
 
 ### DataTablePagination
 
-Renders a `div` and takes every prop a `div` takes. The pager's row, reading the table from `DataTable` context;
-`children` are its content, such as a status line and the step buttons. It sets `data-slot="data-table-pagination"`.
+Renders a `div` and takes every prop a `div` takes. A right-aligned flex row for the pager; `children` are its
+content, such as a status line and the step buttons, which read the table themselves. It sets
+`data-slot="data-table-pagination"`.
 
 ### DataTablePaginationPrevious
 
