@@ -1,0 +1,78 @@
+---
+title: Font Preview
+description: A specimen of a font file at several sizes, one row per size, loaded through an @font-face scoped to the instance.
+---
+
+<ComponentPreview name="font-preview-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/font-preview.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/data-display/font-preview.tsx`.</Step>
+
+<ComponentSource name="font-preview" title="components/data-display/font-preview.tsx" />
+
+<Step>Copy the format lookup into `lib/font-format.ts`.</Step>
+
+<ComponentSource name="font-preview" file="registry/bases/base-ui/lib/font-format.ts" title="lib/font-format.ts" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { FontPreview } from '@/components/data-display/font-preview';
+```
+
+```tsx
+<FontPreview src={fontUrl} />
+```
+
+The consumer places and pads its wrapper; it renders one row per size, largest first. Use it to compare a font
+file's weights before shipping it; for a previewed image rather than type, use Image Preview.
+
+## API reference
+
+### FontPreview
+
+Renders a `div` and takes every prop a `div` takes, plus:
+
+| Prop       | Type        | Default                                         |
+| ---------- | ----------- | ----------------------------------------------- |
+| `src`      | `string`    | required                                        |
+| `format`   | `string`    | -                                               |
+| `sizes`    | `number[]`  | `[36, 24, 18, 14]`                              |
+| `children` | `ReactNode` | `'The quick brown fox jumps over the lazy dog'` |
+
+`format` is derived from `src`'s extension when omitted. It scopes a unique `@font-face` to the instance, so
+several previews on one page never collide, and sets `data-slot="font-preview"`.

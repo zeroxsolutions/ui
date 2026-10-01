@@ -9,6 +9,13 @@
     "data-table",
     "data-table-column-header",
     "file-tree",
+    "file-type-icon",
+    "font-preview",
+    "highlighted-code",
+    "image-preview",
+    "markdown-view",
+    "model-info-card",
+    "tree-item",
     "---Feedback---",
     "status-indicator"
   ]

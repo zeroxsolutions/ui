@@ -1,0 +1,132 @@
+---
+title: Model Info Card
+description: 'The detail panel for one model: an identity header composed from Item parts over titled sections.'
+---
+
+<ComponentPreview name="model-info-card-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/model-info-card.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add class-variance-authority
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/data-display/model-info-card.tsx`.</Step>
+
+<ComponentSource name="model-info-card" title="components/data-display/model-info-card.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { ModelInfoCard, ModelInfoCardIndicator, ModelInfoCardSection } from '@/components/data-display/model-info-card';
+```
+
+```tsx
+<ModelInfoCard>
+  <Item size="xs">
+    <ItemMedia>
+      <AiProviderIcon provider="openai" />
+    </ItemMedia>
+    <ItemContent>
+      <ItemTitle>GPT-4o</ItemTitle>
+      <ItemDescription>OpenAI</ItemDescription>
+    </ItemContent>
+    <ItemFooter>
+      <code className="text-muted-foreground text-xs">gpt-4o</code>
+    </ItemFooter>
+  </Item>
+  <ModelInfoCardSection>
+    <Item size="xs">
+      <ItemMedia>
+        <ModelInfoCardIndicator tone="chart-1" />
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle>Context length</ItemTitle>
+      </ItemContent>
+      <ItemActions>128K tokens</ItemActions>
+    </Item>
+  </ModelInfoCardSection>
+</ModelInfoCard>
+```
+
+It is meant for the shipped `HoverCardContent`: compose the identity header from `Item` parts, then one
+`ModelInfoCardSection` per detail. Use it for a model's own info panel; for a provider's tile in a picker grid,
+use AI Provider Card instead.
+
+## Composition
+
+```text
+ModelInfoCard
+|-- Item
+|   |-- ItemMedia
+|   |-- ItemContent
+|   |   |-- ItemTitle
+|   |   `-- ItemDescription
+|   `-- ItemFooter
+`-- ModelInfoCardSection
+    `-- Item
+        |-- ItemMedia
+        |   `-- ModelInfoCardIndicator
+        |-- ItemContent
+        |   `-- ItemTitle
+        `-- ItemActions
+```
+
+## API reference
+
+### ModelInfoCard
+
+Renders a `div` and takes every prop a `div` takes. The identity header and every section stack in a vertical
+flex. It sets `data-slot="model-info-card"`.
+
+### ModelInfoCardIndicator
+
+Renders a `span` and takes every prop a `span` takes, plus:
+
+| Prop   | Type                                                                       | Default |
+| ------ | -------------------------------------------------------------------------- | ------- |
+| `tone` | `'muted' \| 'chart-1' \| 'chart-2' \| 'chart-3' \| 'chart-4' \| 'chart-5'` | `muted` |
+
+The accent bar beside a section's title, in one of the theme's chart colours, or muted when no tone is given. It
+is hidden from assistive technology. It sets `data-slot="model-info-card-indicator"` and `aria-hidden`.
+
+### ModelInfoCardSection
+
+Renders a `div` and takes every prop a `div` takes. A titled section inside a `ModelInfoCard`: an `Item` heading
+row (a `ModelInfoCardIndicator` in its `ItemMedia`, an `ItemTitle`, and an optional `ItemActions` value) over the
+detail lines. It sets `data-slot="model-info-card-section"`.

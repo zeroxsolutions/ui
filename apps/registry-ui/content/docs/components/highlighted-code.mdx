@@ -1,0 +1,96 @@
+---
+title: Highlighted Code
+description: A mono code element that renders tokenized lines from the shared Shiki highlighter, falling back to its raw children until they arrive.
+---
+
+<ComponentPreview name="highlighted-code-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/highlighted-code.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add @shikijs/langs shiki
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/data-display/highlighted-code.tsx`.</Step>
+
+<ComponentSource name="highlighted-code" title="components/data-display/highlighted-code.tsx" />
+
+<Step>Copy the Shiki theme into `lib/code-theme.ts`.</Step>
+
+<ComponentSource name="highlighted-code" file="registry/bases/base-ui/lib/code-theme.ts" title="lib/code-theme.ts" />
+
+<Step>Copy the vendored Mermaid grammar into `lib/mermaid-grammar.ts`.</Step>
+
+<ComponentSource
+  name="highlighted-code"
+  file="registry/bases/base-ui/lib/mermaid-grammar.ts"
+  title="lib/mermaid-grammar.ts"
+/>
+
+<Step>Copy the shared Shiki highlighter into `lib/shiki.ts`.</Step>
+
+<ComponentSource name="highlighted-code" file="registry/bases/base-ui/lib/shiki.ts" title="lib/shiki.ts" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { HighlightedCode } from '@/components/data-display/highlighted-code';
+```
+
+```tsx
+<pre className="bg-muted rounded-md p-3 text-xs leading-relaxed">
+  <HighlightedCode lines={lines}>{code}</HighlightedCode>
+</pre>
+```
+
+`lines` is what `highlightToLines` resolves to; while it is still `null`, `children` (the raw source) keeps the
+code readable before the grammar loads. Use it for already-tokenized source with no card chrome; for a
+self-contained, read-only block with a header, copy action and line numbers, compose Code Block instead.
+
+## API reference
+
+### HighlightedCode
+
+Renders a `code` and takes every prop a `code` takes, plus:
+
+| Prop    | Type                      | Default  |
+| ------- | ------------------------- | -------- |
+| `lines` | `HighlightLine[] \| null` | required |
+
+Tokenized lines render as styled spans in order, with a newline between lines; while `lines` is `null` it
+renders `children` instead. It sets `data-slot="highlighted-code"`.

@@ -1,0 +1,75 @@
+---
+title: File Type Icon
+description: A lucide icon chosen for a file's type from its extension, decorative unless paired with the visible file name or given an aria-label.
+---
+
+<ComponentPreview name="file-type-icon-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/file-type-icon.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add lucide-react
+```
+
+<Step>Copy the component into `components/data-display/file-type-icon.tsx`.</Step>
+
+<ComponentSource name="file-type-icon" title="components/data-display/file-type-icon.tsx" />
+
+<Step>Copy the extension-to-icon map into `lib/file-type.ts`.</Step>
+
+<ComponentSource name="file-type-icon" file="registry/bases/base-ui/lib/file-type.ts" title="lib/file-type.ts" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { FileTypeIcon } from '@/components/data-display/file-type-icon';
+```
+
+```tsx
+<FileTypeIcon name="run.py" className="text-muted-foreground size-4" />
+```
+
+It is decorative, so pair it with the visible file name, or give it an `aria-label` where it stands alone.
+
+## API reference
+
+### FileTypeIcon
+
+Renders the lucide icon its name maps to by extension (a generic file icon when none matches) and takes every
+prop a lucide icon takes, plus:
+
+| Prop   | Type     | Default  |
+| ------ | -------- | -------- |
+| `name` | `string` | required |
+
+Every glyph is a static `lucide-react` icon, `FileText` included even where an animated twin is vendored
+elsewhere, so every file type takes the same props. It sets `data-slot="file-type-icon"`.

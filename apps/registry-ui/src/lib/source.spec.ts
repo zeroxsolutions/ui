@@ -100,10 +100,17 @@ function nonComponentPages(sources: Record<string, string>, components: Set<stri
     .map((slug) => `${slug}: names no registry:component item`);
 }
 
-/** A page's frontmatter `title` and `description`, each an unquoted value on one line. */
+/**
+ * A page's frontmatter `title` and `description`, each a value on one line, unquoted unless YAML requires
+ * quoting (a value with its own `: ` must be quoted so the frontmatter parses; prettier picks single or double
+ * quotes, and either is stripped here so it still compares equal to the item's unquoted text).
+ */
 function readFrontmatter(source: string): Partial<ItemText> {
   const block = /^---\n([\s\S]*?)\n---/.exec(source)?.[1] ?? '';
-  const field = (key: string): string | undefined => new RegExp(`^${key}: *(.*)$`, 'm').exec(block)?.[1];
+  const field = (key: string): string | undefined => {
+    const value = new RegExp(`^${key}: *(.*)$`, 'm').exec(block)?.[1];
+    return value === undefined ? undefined : /^(['"])[\s\S]*\1$/.test(value) ? value.slice(1, -1) : value;
+  };
   return { title: field('title'), description: field('description') };
 }
 
@@ -192,18 +199,12 @@ const UNDOCUMENTED = new Set([
   'editor-tab',
   'emoji-appearance-toggle-group',
   'emoji-picker',
-  'file-type-icon',
   'floating-toolbar',
-  'font-preview',
   'frontmatter-form',
-  'highlighted-code',
   'icon-label',
   'icon-media',
-  'image-preview',
   'language-combobox',
   'language-toggle-group',
-  'markdown-view',
-  'model-info-card',
   'model-list',
   'number-field',
   'page-container',
@@ -216,7 +217,6 @@ const UNDOCUMENTED = new Set([
   'resize-handle',
   'tag-input',
   'tool-call-card',
-  'tree-item',
   'unsaved-indicator',
 ]);
 
@@ -325,6 +325,8 @@ const PROPS_READ_ELSEWHERE: Record<string, string> = {
     'takes DataTablePaginationStepProps, declared for the unexported DataTablePaginationStep both share.',
   DataTablePaginationNext:
     'takes DataTablePaginationStepProps, declared for the unexported DataTablePaginationStep both share.',
+  ModelInfoCardIndicator:
+    'takes ComponentProps<"span"> & VariantProps<typeof modelInfoCardIndicatorVariants>; tone is the variant key of modelInfoCardIndicatorVariants, which this check does not parse from an intersection type.',
 };
 
 /**

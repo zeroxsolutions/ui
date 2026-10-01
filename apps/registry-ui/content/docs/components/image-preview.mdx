@@ -1,0 +1,79 @@
+---
+title: Image Preview
+description: A frame that shows an image contained within it, over a checkerboard so transparent pixels read clearly.
+---
+
+<ComponentPreview name="image-preview-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/image-preview.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/data-display/image-preview.tsx`.</Step>
+
+<ComponentSource name="image-preview" title="components/data-display/image-preview.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { ImagePreview, ImagePreviewImage } from '@/components/data-display/image-preview';
+```
+
+```tsx
+<ImagePreview>
+  <ImagePreviewImage src={src} alt="Logo" />
+</ImagePreview>
+```
+
+It fills the space it is given, so size its wrapper rather than the frame itself. For a font file's specimen
+instead of an image, use Font Preview.
+
+## Composition
+
+```text
+ImagePreview
+`-- ImagePreviewImage
+```
+
+## API reference
+
+### ImagePreview
+
+Renders a `div` and takes every prop a `div` takes. It sets `data-slot="image-preview"`.
+
+### ImagePreviewImage
+
+Renders an `img` and takes every prop an `img` takes. It defaults `alt` to empty, since the image usually sits
+decoratively over the checkerboard; give it real text when the image conveys information. It sets
+`data-slot="image-preview-image"`.
