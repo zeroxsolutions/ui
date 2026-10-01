@@ -91,6 +91,14 @@ function readComponentNames(): Set<string> {
   return new Set(items.filter((item) => item.type === 'registry:component').map((item) => item.name));
 }
 
+/** The names registry.json publishes as `registry:example`. */
+function readExampleNames(): string[] {
+  const { items } = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as {
+    items: { name: string; type: string }[];
+  };
+  return items.filter((item) => item.type === 'registry:example').map((item) => item.name);
+}
+
 /** Every page directly under `components/`, its own index aside, that names nothing `registry.json` publishes as a `registry:component`. */
 function nonComponentPages(sources: Record<string, string>, components: Set<string>): string[] {
   return Object.keys(sources)
@@ -147,10 +155,20 @@ function installCommand(name: string, items: Map<string, ItemText>): string {
     : `pnpm dlx shadcn@latest add ${name}`;
 }
 
-/** Every item or primitive page with no line that is exactly its install command. */
+/** A page's `<TabsContent value="cli">...</TabsContent>` block, where its install command lives. */
+function cliBlock(source: string): string {
+  return /<TabsContent value="cli">([\s\S]*?)<\/TabsContent>/.exec(source)?.[1] ?? '';
+}
+
+/** Every item or primitive page whose CLI tab has no line that is exactly its install command. */
 function missingInstallCommands(sources: Record<string, string>, items: Map<string, ItemText>): string[] {
   return namedPages(sources)
-    .filter(([, name, source]) => !source.split('\n').some((line) => line.trim() === installCommand(name, items)))
+    .filter(
+      ([, name, source]) =>
+        !cliBlock(source)
+          .split('\n')
+          .some((line) => line.trim() === installCommand(name, items)),
+    )
     .map(([slug, name]) => `${slug}: has no \`${installCommand(name, items)}\``);
 }
 
@@ -165,16 +183,28 @@ interface ComponentItem {
   name: string;
   files: RegistryFile[];
   dependencies: string[];
+  registryDependencies: string[];
 }
 
 /** The items registry.json publishes as `registry:component`. */
 function readComponentItems(): ComponentItem[] {
   const { items } = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as {
-    items: { name: string; type: string; files: RegistryFile[]; dependencies?: string[] }[];
+    items: {
+      name: string;
+      type: string;
+      files: RegistryFile[];
+      dependencies?: string[];
+      registryDependencies?: string[];
+    }[];
   };
   return items
     .filter((item) => item.type === 'registry:component')
-    .map(({ name, files, dependencies }) => ({ name, files, dependencies: dependencies ?? [] }));
+    .map(({ name, files, dependencies, registryDependencies }) => ({
+      name,
+      files,
+      dependencies: dependencies ?? [],
+      registryDependencies: registryDependencies ?? [],
+    }));
 }
 
 /** The registry's source root, which the CLI drops from a component's path. */
@@ -191,18 +221,9 @@ function installTarget({ path, type }: RegistryFile): string {
   return path.slice(SOURCE_ROOT.length);
 }
 
-/** Every component with no page that is not still to be written, and every one still listed as such that has a page. */
-function pagelessComponents(
-  sources: Record<string, string>,
-  components: ComponentItem[],
-  pending: Set<string>,
-): string[] {
-  return components.flatMap(({ name }) => {
-    const documented = `components/${name}` in sources;
-    if (!documented && !pending.has(name)) return [`${name}: has no page`];
-    if (documented && pending.has(name)) return [`${name}: has a page, so it leaves UNDOCUMENTED`];
-    return [];
-  });
+/** Every component with no page. */
+function pagelessComponents(sources: Record<string, string>, components: ComponentItem[]): string[] {
+  return components.flatMap(({ name }) => (`components/${name}` in sources ? [] : [`${name}: has no page`]));
 }
 
 const COMPONENT_SOURCE = /<ComponentSource\b([^>]*?)\/>/g;
@@ -212,13 +233,26 @@ function attribute(attributes: string, key: string): string | undefined {
   return new RegExp(`\\b${key}="([^"]*)"`).exec(attributes)?.[1];
 }
 
+/** A page's `<TabsContent value="manual">...</TabsContent>` block, where its Manual tab's steps live. */
+function manualBlock(source: string): string {
+  return /<TabsContent value="manual">([\s\S]*?)<\/TabsContent>/.exec(source)?.[1] ?? '';
+}
+
+/** What `pnpm dlx shadcn@latest add` takes for a registryDependencies list: `@shadcn/x` bare, a URL as given, in order. */
+function registryDependencyNames(registryDependencies: string[]): string[] {
+  return registryDependencies.map((dependency) =>
+    dependency.startsWith('@shadcn/') ? dependency.slice('@shadcn/'.length) : dependency,
+  );
+}
+
 /**
  * Every way a component page's Manual tab disagrees with its item: a file with no `ComponentSource`,
- * one titled with another path than the CLI writes it to, and `pnpm add` lines naming other packages
- * than the item's `dependencies`.
+ * one titled with another path than the CLI writes it to, two `ComponentSource` blocks naming the same
+ * file, `pnpm add` lines naming other packages than the item's `dependencies`, and a
+ * `pnpm dlx shadcn@latest add` line naming other names than its `registryDependencies`, in another order.
  */
 function manualProblems(sources: Record<string, string>, components: ComponentItem[]): string[] {
-  return components.flatMap(({ name, files, dependencies }) => {
+  return components.flatMap(({ name, files, dependencies, registryDependencies }) => {
     const slug = `components/${name}`;
     const source = sources[slug];
     if (source === undefined) return [];
@@ -235,16 +269,34 @@ function manualProblems(sources: Record<string, string>, components: ComponentIt
       const target = installTarget(file);
       return block.title === target ? [] : [`${slug}: titles ${file.path} "${block.title ?? ''}", not "${target}"`];
     });
+    const duplicateProblems = [...new Set(blocks.map((block) => block.file))].flatMap((file) => {
+      const count = blocks.filter((block) => block.file === file).length;
+      return count > 1 ? [`${slug}: has ${count} ComponentSource blocks for ${file}`] : [];
+    });
     const installs = source
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.startsWith('pnpm add '));
-    const expected = dependencies.length > 0 ? [`pnpm add ${dependencies.join(' ')}`] : [];
+    const expectedInstalls = dependencies.length > 0 ? [`pnpm add ${dependencies.join(' ')}`] : [];
     const dependencyProblems =
-      installs.join('\n') === expected.join('\n')
+      installs.join('\n') === expectedInstalls.join('\n')
         ? []
-        : [`${slug}: installs ${installs.join('; ') || 'no package'}, not ${expected[0] ?? 'no package'}`];
-    return [...fileProblems, ...dependencyProblems];
+        : [`${slug}: installs ${installs.join('; ') || 'no package'}, not ${expectedInstalls[0] ?? 'no package'}`];
+    // Scoped to the Manual tab so this never reads the CLI tab's own `pnpm dlx shadcn@latest add
+    // https://.../<name>.json` line, which installs the item itself, not its registryDependencies.
+    const adds = manualBlock(source)
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith('pnpm dlx shadcn@latest add '));
+    const expectedAdds =
+      registryDependencies.length > 0
+        ? [`pnpm dlx shadcn@latest add ${registryDependencyNames(registryDependencies).join(' ')}`]
+        : [];
+    const registryProblems =
+      adds.join('\n') === expectedAdds.join('\n')
+        ? []
+        : [`${slug}: adds ${adds.join('; ') || 'nothing'}, not ${expectedAdds[0] ?? 'nothing'}`];
+    return [...fileProblems, ...duplicateProblems, ...dependencyProblems, ...registryProblems];
   });
 }
 
@@ -277,35 +329,83 @@ function tableProps(page: string, part: string): string[] {
   const body = apiReference(page)
     .split(/^### /m)
     .find((chunk) => chunk.startsWith(`${part}\n`));
-  return [...(body ?? '').matchAll(/^\| `(\w+)`/gm)].map(([, prop = '']) => prop);
+  return [...(body ?? '').matchAll(/^\| `([\w-]+)`/gm)].map(([, prop = '']) => prop);
 }
 
-/** The members of `<Part>Props` in a family's source, as an interface or a type literal; undefined where it declares none. */
-function declaredProps(source: string, part: string): Set<string> | undefined {
-  const body = new RegExp(`^(?:export )?(?:interface|type) ${part}Props\\b[^{]*\\{([\\s\\S]*?)^\\}`, 'm').exec(
+/** The group names (`tone`, `variant`, ...) of a `cva` config's own `variants` object, read by their fixed indent. */
+function variantKeys(source: string, cvaName: string): string[] {
+  const from = new RegExp(`\\b${cvaName} = cva\\(`).exec(source);
+  if (!from) return [];
+  const variants = /^ {2}variants: \{\n([\s\S]*?)^ {2}\}/m.exec(source.slice(from.index))?.[1];
+  return [...(variants ?? '').matchAll(/^ {4}([\w-]+):/gm)].map(([, key = '']) => key);
+}
+
+/** The `VariantProps<typeof x>` keys a type's own header (an alias's `=` or an interface's `extends`) reads off `x`'s `cva` config. */
+function headerVariantProps(header: string, source: string): string[] {
+  return [...header.matchAll(/VariantProps<typeof (\w+)>/g)].flatMap(([, cvaName = '']) =>
+    variantKeys(source, cvaName),
+  );
+}
+
+/**
+ * The members `<Name>` declares as an interface or a type alias: its own object-literal body (quoted
+ * keys included), plus the variant keys of a `VariantProps<typeof x>` named in its header (an alias's
+ * `=` or an interface's `extends`). A header-only alias (no object-literal body) and an empty interface
+ * (`{}` on one line, so no member ever starts its own line) both skip the body; undefined where neither
+ * a body nor a `VariantProps` is found, so a stale reference does not read into the next statement.
+ */
+function propsBody(source: string, name: string): Set<string> | undefined {
+  const match = new RegExp(`^(?:export )?(?:interface|type) ${name}\\b([^{;]*)(?:\\{\\n([\\s\\S]*?)^\\})?`, 'm').exec(
     source,
-  )?.[1];
-  return body === undefined
-    ? undefined
-    : new Set([...body.matchAll(/^ {2}(?:readonly )?(\w+)\??:/gm)].map(([, prop = '']) => prop));
+  );
+  if (!match) return undefined;
+  const [, header = '', body] = match;
+  const members =
+    body === undefined
+      ? []
+      : [...body.matchAll(/^ {2}(?:readonly )?(?:(\w+)|'([\w-]+)')\??:/gm)].map(
+          ([, bare, quoted]) => bare ?? quoted ?? '',
+        );
+  const variants = headerVariantProps(header, source);
+  return body === undefined && variants.length === 0 ? undefined : new Set([...members, ...variants]);
+}
+
+/** The identifier a component's own parameter is annotated with, read off `function <name>(` or `function <name>({`. */
+function parameterType(source: string, name: string): string | undefined {
+  const params = new RegExp(`\\bfunction ${name}\\s*(?:<[^>]*>)?\\(([^)]*)\\)`).exec(source)?.[1];
+  return params === undefined ? undefined : /:\s*(\w+)\s*$/.exec(params.trim())?.[1];
+}
+
+/**
+ * The members of `<Part>Props` in a family's source; undefined where it declares none. Where the part
+ * has no `<Part>Props` of its own, follows its parameter's own type alias (`DataTablePaginationPrevious`
+ * takes the unexported `DataTablePaginationStep`'s `DataTablePaginationStepProps`).
+ */
+function declaredProps(source: string, part: string): Set<string> | undefined {
+  const own = propsBody(source, `${part}Props`);
+  if (own) return own;
+  const alias = parameterType(source, part);
+  return alias === undefined ? own : propsBody(source, alias);
+}
+
+/** What a `PROPS_READ_ELSEWHERE` entry allows: the props it lists skip the declared-prop check, for the reason given. */
+interface ReadElsewhere {
+  props: string[];
+  reason: string;
 }
 
 /** Parts whose table lists props their own file does not declare as `<Part>Props`, with where those props come from. */
-const PROPS_READ_ELSEWHERE: Record<string, string> = {
-  DataTablePaginationPrevious:
-    'takes DataTablePaginationStepProps, declared for the unexported DataTablePaginationStep both share.',
-  DataTablePaginationNext:
-    'takes DataTablePaginationStepProps, declared for the unexported DataTablePaginationStep both share.',
-  ModelInfoCardIndicator:
-    'takes ComponentProps<"span"> & VariantProps<typeof modelInfoCardIndicatorVariants>; tone is the variant key of modelInfoCardIndicatorVariants, which this check does not parse from an intersection type.',
-  LanguageCombobox:
-    "takes LanguageOptionSource (kind, options, locales - declared in types/language-option.ts) & Omit<ComboboxPrimitive.Root.Props<LanguageOption>, ...> & { value; onValueChange }; this check reads only two-space-indented members, and the intersection's own value/onValueChange sit four spaces in.",
-  Center:
-    "takes useRender.ComponentProps<'div'> & VariantProps<typeof centerVariants> inline on the function's parameter, declaring no named CenterProps for this check to find.",
-  CollapsibleCard:
-    'declares CollapsibleCardProps as ComponentProps<typeof Collapsible> & VariantProps<typeof collapsibleCardVariants>, a type alias with no object literal body for this check to parse.',
-  PageContainer:
-    "declares PageContainerProps as an empty interface extending ComponentProps<'div'> and VariantProps<typeof pageContainerVariants>, with no object-literal body for this check to read members from.",
+const PROPS_READ_ELSEWHERE: Record<string, ReadElsewhere> = {
+  LanguageCombobox: {
+    props: ['kind', 'options', 'locales', 'value', 'onValueChange'],
+    reason:
+      "takes LanguageOptionSource (kind, options, locales - declared in types/language-option.ts) & Omit<ComboboxPrimitive.Root.Props<LanguageOption>, ...> & { value; onValueChange }; this check reads only two-space-indented members, and the intersection's own value/onValueChange sit four spaces in, inside a destructured parameter this check also walks into.",
+  },
+  Center: {
+    props: ['inline', 'render'],
+    reason:
+      "takes useRender.ComponentProps<'div'> & VariantProps<typeof centerVariants> inline on the function's parameter, declaring no named CenterProps for this check to find.",
+  },
 };
 
 /**
@@ -316,7 +416,7 @@ function apiProblems(
   sources: Record<string, string>,
   components: ComponentItem[],
   sourceOf: (item: ComponentItem) => string,
-  readElsewhere: Record<string, string>,
+  readElsewhere: Record<string, ReadElsewhere>,
 ): string[] {
   return components.flatMap((item) => {
     const slug = `components/${item.name}`;
@@ -331,10 +431,12 @@ function apiProblems(
         : [`${slug}: API reference documents ${headings.join(', ') || 'nothing'}, not ${parts.join(', ')}`];
     const propProblems = parts.flatMap((part) => {
       const listed = tableProps(page, part);
-      if (listed.length === 0 || part in readElsewhere) return [];
+      const allowed = readElsewhere[part]?.props ?? [];
+      const unexempt = listed.filter((prop) => !allowed.includes(prop));
+      if (unexempt.length === 0) return [];
       const declared = declaredProps(code, part);
       if (!declared) return [`${slug}: ${part} lists props, but its source declares no ${part}Props`];
-      return listed.filter((prop) => !declared.has(prop)).map((prop) => `${slug}: ${part} has no prop \`${prop}\``);
+      return unexempt.filter((prop) => !declared.has(prop)).map((prop) => `${slug}: ${part} has no prop \`${prop}\``);
     });
     return [...headingProblems, ...propProblems];
   });
@@ -343,6 +445,29 @@ function apiProblems(
 /** An item's first file, which holds its family. */
 function familySource(item: ComponentItem): string {
   return readFileSync(join(APP, item.files[0]?.path ?? ''), 'utf8');
+}
+
+/**
+ * Every `PROPS_READ_ELSEWHERE` entry gone stale: its key names no exported part of a documented
+ * component, that part's page has no table for it, or an allowed prop is not in that table.
+ */
+function readElsewhereProblems(
+  sources: Record<string, string>,
+  components: ComponentItem[],
+  readElsewhere: Record<string, ReadElsewhere>,
+  sourceOf: (item: ComponentItem) => string = familySource,
+): string[] {
+  return Object.entries(readElsewhere).flatMap(([part, { props }]) => {
+    const owner = components.find(
+      (item) => sources[`components/${item.name}`] !== undefined && exportedNames(sourceOf(item)).includes(part),
+    );
+    if (!owner) return [`${part}: is not an exported part of any documented component`];
+    const listed = tableProps(sources[`components/${owner.name}`] ?? '', part);
+    if (listed.length === 0) return [`${part}: has no table in its page`];
+    return props
+      .filter((prop) => !listed.includes(prop))
+      .map((prop) => `${part}: allows \`${prop}\`, which its table does not list`);
+  });
 }
 
 const NAMED_SOURCE = /<(ComponentPreview|BlockPreview|ComponentSource)\b[^>]*?\bname="([^"]+)"/g;
@@ -363,6 +488,18 @@ function misplacedFirstPreviews(sources: Record<string, string>, items: Set<stri
       return first?.[2] !== `${slug.split('/').pop()}-demo`;
     })
     .map(([slug]) => slug);
+}
+
+/** Every `registry:example` no page's `ComponentPreview` or `BlockPreview` names (a `ComponentSource` aside, which names a file, not an example). */
+function unusedExamples(sources: Record<string, string>, examples: string[]): string[] {
+  const named = new Set(
+    Object.values(sources).flatMap((source) =>
+      [...source.matchAll(NAMED_SOURCE)]
+        .filter(([, component]) => component !== 'ComponentSource')
+        .map(([, , name]) => name),
+    ),
+  );
+  return examples.filter((name) => !named.has(name)).map((name) => `${name}: is named by no page's preview`);
 }
 
 describe('content/docs', () => {
@@ -394,6 +531,23 @@ describe('content/docs', () => {
 
     expect(unresolvedNames(sources, new Set(['status-indicator', 'status-indicator-demo']))).toEqual([
       'components/status-indicator: status-indicator-missing',
+    ]);
+  });
+
+  it("names every registry:example in some page's preview", () => {
+    expect(unusedExamples(readPageSources(CONTENT), readExampleNames())).toEqual([]);
+  });
+
+  it('reports an example no page previews, naming it in a ComponentSource aside', () => {
+    const sources = {
+      'components/status-indicator': [
+        '<ComponentPreview name="status-indicator-demo" />',
+        '<ComponentSource name="status-indicator-tones" />',
+      ].join('\n'),
+    };
+
+    expect(unusedExamples(sources, ['status-indicator-demo', 'status-indicator-tones'])).toEqual([
+      "status-indicator-tones: is named by no page's preview",
     ]);
   });
 
@@ -504,11 +658,23 @@ describe('content/docs', () => {
     expect(missingInstallCommands(readPageSources(CONTENT), readItems())).toEqual([]);
   });
 
-  it('reports a page that installs its subject some other way', () => {
+  it('reports a page that installs its subject some other way, even where the right line sits in its Manual tab', () => {
     const items = new Map([['status-indicator', { title: 'Status Indicator', description: 'A small dot.' }]]);
     const sources = {
-      'components/button': '```bash\npnpm dlx shadcn@latest add button-group\n```',
-      'components/status-indicator': '```bash\npnpm dlx shadcn@latest add status-indicator\n```',
+      'components/button':
+        '<TabsContent value="cli">\n```bash\npnpm dlx shadcn@latest add button-group\n```\n</TabsContent>',
+      'components/status-indicator': [
+        '<TabsContent value="cli">',
+        '```bash',
+        'pnpm dlx shadcn@latest add status-indicator',
+        '```',
+        '</TabsContent>',
+        '<TabsContent value="manual">',
+        '```bash',
+        'pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json',
+        '```',
+        '</TabsContent>',
+      ].join('\n'),
     };
 
     expect(missingInstallCommands(sources, items)).toEqual([
@@ -517,22 +683,18 @@ describe('content/docs', () => {
     ]);
   });
 
-  it('gives every component a page, apart from those still to be written', () => {
-    expect(pagelessComponents(readPageSources(CONTENT), readComponentItems(), new Set())).toEqual([]);
+  it('gives every component a page', () => {
+    expect(pagelessComponents(readPageSources(CONTENT), readComponentItems())).toEqual([]);
   });
 
-  it('reports a component with no page, and one listed as still to be written that has one', () => {
+  it('reports a component with no page', () => {
     const components = [
-      { name: 'status-indicator', files: [], dependencies: [] },
-      { name: 'tag-input', files: [], dependencies: [] },
-      { name: 'center', files: [], dependencies: [] },
+      { name: 'status-indicator', files: [], dependencies: [], registryDependencies: [] },
+      { name: 'tag-input', files: [], dependencies: [], registryDependencies: [] },
     ];
-    const sources = { 'components/status-indicator': '', 'components/center': '' };
+    const sources = { 'components/status-indicator': '' };
 
-    expect(pagelessComponents(sources, components, new Set(['center']))).toEqual([
-      'tag-input: has no page',
-      'center: has a page, so it leaves UNDOCUMENTED',
-    ]);
+    expect(pagelessComponents(sources, components)).toEqual(['tag-input: has no page']);
   });
 
   it('writes each file to the path the shadcn CLI installs it at', () => {
@@ -554,7 +716,7 @@ describe('content/docs', () => {
     expect(manualProblems(readPageSources(CONTENT), readComponentItems())).toEqual([]);
   });
 
-  it('reports a missing file, a file titled with the wrong path, and the wrong packages', () => {
+  it('reports a missing file, a file titled with the wrong path, a file two blocks name, and the wrong packages', () => {
     const components = [
       {
         name: 'status-indicator',
@@ -563,17 +725,30 @@ describe('content/docs', () => {
           { path: 'registry/bases/base-ui/types/status-tone.ts', type: 'registry:lib' },
         ],
         dependencies: ['lucide-react'],
+        registryDependencies: ['@shadcn/utils', 'https://lucide-animated.com/r/circle.json'],
       },
     ];
     const sources = {
-      'components/status-indicator':
-        '<ComponentSource name="status-indicator" title="components/status-indicator.tsx" />\n```bash\npnpm add react\n```',
+      'components/status-indicator': [
+        '<ComponentSource name="status-indicator" title="components/status-indicator.tsx" />',
+        '<ComponentSource name="status-indicator" title="components/feedback/status-indicator.tsx" />',
+        '<TabsContent value="manual">',
+        '```bash',
+        'pnpm add react',
+        '```',
+        '```bash',
+        'pnpm dlx shadcn@latest add utils',
+        '```',
+        '</TabsContent>',
+      ].join('\n'),
     };
 
     expect(manualProblems(sources, components)).toEqual([
       'components/status-indicator: titles registry/bases/base-ui/components/feedback/status-indicator.tsx "components/status-indicator.tsx", not "components/feedback/status-indicator.tsx"',
       'components/status-indicator: has no ComponentSource for registry/bases/base-ui/types/status-tone.ts',
+      'components/status-indicator: has 2 ComponentSource blocks for registry/bases/base-ui/components/feedback/status-indicator.tsx',
       'components/status-indicator: installs pnpm add react, not pnpm add lucide-react',
+      'components/status-indicator: adds pnpm dlx shadcn@latest add utils, not pnpm dlx shadcn@latest add utils https://lucide-animated.com/r/circle.json',
     ]);
   });
 
@@ -582,7 +757,7 @@ describe('content/docs', () => {
   });
 
   it('reports a missing part, and a prop the part does not declare', () => {
-    const item = { name: 'tag-input', files: [], dependencies: [] };
+    const item = { name: 'tag-input', files: [], dependencies: [], registryDependencies: [] };
     const code = [
       'interface TagInputProps {',
       '  value: string[];',
@@ -609,8 +784,86 @@ describe('content/docs', () => {
     ]);
   });
 
+  it('reports a hyphenated prop a quoted key does not declare, and takes one that it does', () => {
+    const item = { name: 'status-chip', files: [], dependencies: [], registryDependencies: [] };
+    const missing = ['interface StatusChipProps {', '  label: string;', '}', 'export { StatusChip };'].join('\n');
+    const declared = ['interface StatusChipProps {', "  'aria-label': string;", '}', 'export { StatusChip };'].join(
+      '\n',
+    );
+    const page = [
+      '## API reference',
+      '',
+      '### StatusChip',
+      '',
+      '| Prop | Type | Default |',
+      '| --- | --- | --- |',
+      '| `aria-label` | `string` | required |',
+    ].join('\n');
+
+    expect(apiProblems({ 'components/status-chip': page }, [item], () => missing, {})).toEqual([
+      'components/status-chip: StatusChip has no prop `aria-label`',
+    ]);
+    expect(apiProblems({ 'components/status-chip': page }, [item], () => declared, {})).toEqual([]);
+  });
+
+  it('exempts only the props a PROPS_READ_ELSEWHERE entry lists, not the whole part', () => {
+    const item = { name: 'status-chip', files: [], dependencies: [], registryDependencies: [] };
+    const code = ['interface StatusChipProps {', '  tone: string;', '}', 'export { StatusChip };'].join('\n');
+    const page = [
+      '## API reference',
+      '',
+      '### StatusChip',
+      '',
+      '| Prop | Type | Default |',
+      '| --- | --- | --- |',
+      '| `tone` | `string` | required |',
+      '| `size` | `string` | required |',
+    ].join('\n');
+    const readElsewhere = { StatusChip: { props: ['size'], reason: 'test fixture' } };
+
+    expect(apiProblems({ 'components/status-chip': page }, [item], () => code, readElsewhere)).toEqual([]);
+
+    const withoutTone = ['interface StatusChipProps {', '}', 'export { StatusChip };'].join('\n');
+    expect(apiProblems({ 'components/status-chip': page }, [item], () => withoutTone, readElsewhere)).toEqual([
+      'components/status-chip: StatusChip has no prop `tone`',
+    ]);
+  });
+
+  it('allows every PROPS_READ_ELSEWHERE entry, each a real part with a table listing every allowed prop', () => {
+    expect(readElsewhereProblems(readPageSources(CONTENT), readComponentItems(), PROPS_READ_ELSEWHERE)).toEqual([]);
+  });
+
+  it('reports an allowed prop its table drops, a part with no table, and an entry for no documented part', () => {
+    const item = { name: 'status-chip', files: [], dependencies: [], registryDependencies: [] };
+    const code = ['export { StatusChip, StatusChipIcon };'].join('\n');
+    const sources = {
+      'components/status-chip': [
+        '## API reference',
+        '',
+        '### StatusChip',
+        '',
+        '| Prop | Type | Default |',
+        '| --- | --- | --- |',
+        '| `tone` | `string` | required |',
+        '',
+        '### StatusChipIcon',
+      ].join('\n'),
+    };
+    const readElsewhere = {
+      StatusChip: { props: ['tone', 'size'], reason: 'test fixture' },
+      StatusChipIcon: { props: ['tone'], reason: 'test fixture' },
+      Nonexistent: { props: [], reason: 'test fixture' },
+    };
+
+    expect(readElsewhereProblems(sources, [item], readElsewhere, () => code)).toEqual([
+      'StatusChip: allows `size`, which its table does not list',
+      'StatusChipIcon: has no table in its page',
+      'Nonexistent: is not an exported part of any documented component',
+    ]);
+  });
+
   it('names an aliased export by the name it exports as, skips a type export, and keeps a lowercase export', () => {
-    const item = { name: 'markdown-view', files: [], dependencies: [] };
+    const item = { name: 'markdown-view', files: [], dependencies: [], registryDependencies: [] };
     const code = [
       'export type MarkdownViewProps = { markdown: string };',
       'function MemoizedMarkdownView(props: MarkdownViewProps) { return null; }',

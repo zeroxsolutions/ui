@@ -260,14 +260,11 @@ function familyProblems(items: RegistryItem[], families: string[]): string[] {
 }
 
 /**
- * The published item an example belongs to: its `<name>-demo`, or a further `<name>-<state>` example
- * for a state the demo itself never reaches (the longest matching name wins, so `avatar-picker` does
- * not also claim an example actually owned by a longer sibling name).
+ * Whether some published item owns the example: its `<name>-demo`, or a further `<name>-<state>`
+ * example for a state the demo itself never reaches.
  */
-function demoOwner(example: RegistryItem, names: string[]): string | undefined {
-  return names
-    .filter((name) => example.name === `${name}-demo` || example.name.startsWith(`${name}-`))
-    .sort((a, b) => b.length - a.length)[0];
+function hasOwner(example: RegistryItem, names: string[]): boolean {
+  return names.some((name) => example.name === `${name}-demo` || example.name.startsWith(`${name}-`));
 }
 
 /**
@@ -284,7 +281,7 @@ function demoProblems(items: RegistryItem[]): string[] {
       return count === 1 ? [] : [`${name}: has ${count} ${name}-demo examples`];
     }),
     ...examples
-      .filter((example) => demoOwner(example, names) === undefined)
+      .filter((example) => !hasOwner(example, names))
       .map((example) => `${example.name}: is the demo of no item`),
     ...examples.flatMap((example) => {
       const expected = { path: `${BASE}/examples/${example.name}.tsx`, type: 'registry:example' };
