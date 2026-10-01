@@ -103,7 +103,10 @@ function nonComponentPages(sources: Record<string, string>, components: Set<stri
 /**
  * A page's frontmatter `title` and `description`, each a value on one line, unquoted unless YAML requires
  * quoting (a value with its own `: ` must be quoted so the frontmatter parses; prettier picks single or double
- * quotes, and either is stripped here so it still compares equal to the item's unquoted text).
+ * quotes - double when the text has its own apostrophe, to avoid a doubled `''` escape, single otherwise -
+ * and either is stripped here so it still compares equal to the item's unquoted text). A quote prettier picks
+ * never needs un-escaping: it always picks the style that needs none, so this strips a matching outer pair and
+ * does not unescape `''` inside a single-quoted value.
  */
 function readFrontmatter(source: string): Partial<ItemText> {
   const block = /^---\n([\s\S]*?)\n---/.exec(source)?.[1] ?? '';
@@ -461,6 +464,48 @@ describe('content/docs', () => {
       'components/card: is not a registry item',
       'components/status-indicator: title is not "Status Indicator"',
     ]);
+  });
+
+  it('matches a single- or double-quoted frontmatter description to the item it quotes', () => {
+    const items = new Map([
+      ['model-info-card', { title: 'Model Info Card', description: 'The detail panel: an identity header.' }],
+      ['tool-call-card', { title: 'Tool Call Card', description: "One tool call: the call's status." }],
+    ]);
+    const sources = {
+      // Single-quoted: no quote character of its own to escape.
+      'components/model-info-card': [
+        '---',
+        'title: Model Info Card',
+        "description: 'The detail panel: an identity header.'",
+        '---',
+      ].join('\n'),
+      // Double-quoted: its own apostrophe would need doubling inside single quotes, so it quotes with
+      // double instead (prettier's own choice - confirmed by running it on a fixture with this text).
+      'components/tool-call-card': [
+        '---',
+        'title: Tool Call Card',
+        'description: "One tool call: the call\'s status."',
+        '---',
+      ].join('\n'),
+    };
+
+    expect(unnamedPages(sources, items)).toEqual([]);
+  });
+
+  it('reports a quoted frontmatter description that does not match the item', () => {
+    const items = new Map([
+      ['model-info-card', { title: 'Model Info Card', description: 'The detail panel: an identity header.' }],
+    ]);
+    const sources = {
+      'components/model-info-card': [
+        '---',
+        'title: Model Info Card',
+        "description: 'A different panel: not the item.'",
+        '---',
+      ].join('\n'),
+    };
+
+    expect(unnamedPages(sources, items)).toEqual(["components/model-info-card: description is not the item's"]);
   });
 
   it('documents only registry:component items under components/, its own index aside', () => {
