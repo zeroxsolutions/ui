@@ -5,7 +5,6 @@ import {
   ComponentPreviewExcerpt,
   ComponentPreviewSource,
 } from '@/components/data-display/component-preview';
-import { ComponentSource } from '@/components/data-display/component-source';
 import {
   SourceCodeBlockActions,
   SourceCodeBlockCode,
@@ -16,6 +15,8 @@ import {
   SourceCodeBlockLineNumbers,
   SourceCodeBlockTitle,
 } from '@/components/data-display/source-code-block';
+
+import { ComponentSource } from './component-source';
 
 /** How many of the source's first lines show before `View code`. */
 const EXCERPT_LINES = 3;

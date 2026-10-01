@@ -1,8 +1,13 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import {
+  SourceCodeBlockCode,
+  SourceCodeBlockContent,
+  SourceCodeBlockCopy,
+} from '@/components/data-display/source-code-block';
+
 import { ComponentSource } from './component-source';
-import { SourceCodeBlockCode, SourceCodeBlockContent, SourceCodeBlockCopy } from './source-code-block';
 
 afterEach(cleanup);
 

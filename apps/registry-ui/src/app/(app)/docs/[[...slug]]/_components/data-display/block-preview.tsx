@@ -2,9 +2,10 @@ import type { ReactNode } from 'react';
 
 import { BlockFrame } from '@/components/data-display/block-frame';
 import { ComponentPreview } from '@/components/data-display/component-preview';
-import { ExampleSource } from '@/components/data-display/example-source';
 import { publishedBlocks } from '@/lib/registry';
 import { Index } from '@/registry/bases/base-ui/examples/__index__';
+
+import { ExampleSource } from './example-source';
 
 interface BlockPreviewProps {
   /** The demo whose source shows under the frame. */

@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
 
 import { ComponentPreview, ComponentPreviewStage } from '@/components/data-display/component-preview';
-import { ExampleSource } from '@/components/data-display/example-source';
 import { RegistryExample } from '@/components/data-display/registry-example';
 import { Index } from '@/registry/bases/base-ui/examples/__index__';
+
+import { ExampleSource } from './example-source';
 
 interface ExamplePreviewProps {
   /** A demo name in the examples index. */

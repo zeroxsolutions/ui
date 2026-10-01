@@ -2,14 +2,15 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { DocsNeighbourLink } from '@/components/navigation/docs-neighbour-link';
-import { DocsPager } from '@/components/navigation/docs-pager';
-import { DocsToc } from '@/components/navigation/docs-toc';
 import { pageNeighbours } from '@/lib/page-tree';
 import { docsLlms, docsPageImage, source } from '@/lib/source';
 import { mdxComponents } from '@/mdx-components';
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
+
+import { DocsNeighbourLink } from './_components/navigation/docs-neighbour-link';
+import { DocsPager } from './_components/navigation/docs-pager';
+import { DocsToc } from './_components/navigation/docs-toc';
 
 export const revalidate = false;
 export const dynamic = 'force-static';

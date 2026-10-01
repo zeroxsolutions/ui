@@ -4,7 +4,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mdxComponents } from './mdx-components';
 
 // The components list reads the compiled docs, which only a build generates; these cases never render it.
-vi.mock('@/components/navigation/components-list', () => ({ ComponentsList: () => null }));
+vi.mock('@/app/(app)/docs/[[...slug]]/_components/data-display/components-list', () => ({
+  ComponentsList: () => null,
+}));
 
 const { pre: Pre } = mdxComponents;
 

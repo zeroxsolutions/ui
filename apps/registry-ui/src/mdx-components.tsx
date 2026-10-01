@@ -1,8 +1,5 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
-import { BlockPreview } from '@/components/data-display/block-preview';
-import { ComponentSource } from '@/components/data-display/component-source';
-import { ExamplePreview } from '@/components/data-display/example-preview';
 import {
   SourceCodeBlock,
   SourceCodeBlockActions,
@@ -16,11 +13,18 @@ import {
   SourceCodeBlockTitle,
   SourceCodeBlockTrigger,
 } from '@/components/data-display/source-code-block';
-import { ComponentsList } from '@/components/navigation/components-list';
 import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
 import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
 import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+
+// This MDX override map is the docs route's composition root, so importing docs-only components
+// from the route's own private folder (never a route segment, for the `_` prefix) is expected here,
+// even though this file sits at `src/` because Next/fumadocs requires it there.
+import { BlockPreview } from '@/app/(app)/docs/[[...slug]]/_components/data-display/block-preview';
+import { ComponentsList } from '@/app/(app)/docs/[[...slug]]/_components/data-display/components-list';
+import { ComponentSource } from '@/app/(app)/docs/[[...slug]]/_components/data-display/component-source';
+import { ExamplePreview } from '@/app/(app)/docs/[[...slug]]/_components/data-display/example-preview';
 
 /** The text a node renders, as a reader would copy it. */
 function nodeText(node: ReactNode): string {
