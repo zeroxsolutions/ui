@@ -1,0 +1,85 @@
+---
+title: Page Container
+description: The centered, max-width content column of a full-width surface, sized from a named max-width scale.
+---
+
+<ComponentPreview name="page-container-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/page-container.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add class-variance-authority
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/layout/page-container.tsx`.</Step>
+
+<ComponentSource name="page-container" title="components/layout/page-container.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { PageContainer } from '@/components/layout/page-container';
+```
+
+```tsx
+<PageContainer size="lg" className="px-6 py-6">
+  ...
+</PageContainer>
+```
+
+Pick the width with `size`; `className` carries the surface's own padding and vertical rhythm. It centres
+only the column's width, not its content on both axes - for that, use [Center](/docs/components/center)
+instead.
+
+## API reference
+
+### PageContainer
+
+Renders a `div` and takes every prop a `div` takes, plus:
+
+| Prop   | Type                             | Default |
+| ------ | -------------------------------- | ------- |
+| `size` | `'sm' \| 'md' \| 'lg' \| 'full'` | `'md'`  |
+
+The centred, max-width content column of a full-width surface, so content does not stretch edge to edge on
+a wide screen. `size` picks the width from the max-width scale; `className` carries the surface's own
+padding and vertical rhythm. It sets `data-slot="page-container"`.
+
+### pageContainerVariants
+
+The `size` variant: `sm` `max-w-3xl`, `md` (the default) `max-w-5xl`, `lg` `max-w-7xl`, `full` `max-w-none`.

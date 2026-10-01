@@ -1,0 +1,162 @@
+---
+title: Model List
+description: 'The frame for a model list section: a header over a scrolling content area that dims any item marked unavailable.'
+---
+
+<ComponentPreview name="model-list-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/model-list.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add lucide-react
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button item scroll-area skeleton utils
+```
+
+<Step>Copy the component into `components/layout/model-list.tsx`.</Step>
+
+<ComponentSource name="model-list" title="components/layout/model-list.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  ModelList,
+  ModelListAction,
+  ModelListContent,
+  ModelListHeader,
+  ModelListRemoveButton,
+  ModelListTitle,
+} from '@/components/layout/model-list';
+```
+
+```tsx
+<ModelList>
+  <ModelListHeader>
+    <ModelListTitle>Model list</ModelListTitle>
+    <ModelListAction>
+      <span className="text-muted-foreground text-xs">3 models</span>
+    </ModelListAction>
+  </ModelListHeader>
+  <ModelListContent>
+    <ItemGroup>
+      <Item size="sm" data-unavailable={unavailable}>
+        <ItemMedia>
+          <AiProviderIcon provider="openai" />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>GPT-4o</ItemTitle>
+          <ItemDescription>gpt-4o</ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <Switch checked={enabled} disabled={unavailable} onCheckedChange={setEnabled} />
+          <ModelListRemoveButton onClick={remove} />
+        </ItemActions>
+      </Item>
+    </ItemGroup>
+  </ModelListContent>
+</ModelList>
+```
+
+It owns no list state: filtering, grouping, sorting and pagination are the caller's. Place it in a
+height-constrained flex parent so `ModelListContent` scrolls, and swap in `ModelListSkeleton` for the item
+group while the list loads.
+
+## Composition
+
+```text
+ModelList
+|-- ModelListHeader
+|   |-- ModelListTitle
+|   `-- ModelListAction
+`-- ModelListContent
+    `-- ItemGroup
+        `-- Item
+            |-- ItemMedia
+            |-- ItemContent
+            |   |-- ItemTitle
+            |   `-- ItemDescription
+            `-- ItemActions
+                |-- Switch
+                `-- ModelListRemoveButton
+```
+
+## API reference
+
+### ModelList
+
+Renders a `div` and takes every prop a `div` takes. The frame for a model list section: a `ModelListHeader`
+over a scrolling `ModelListContent`. It owns no list state, so it does not filter, group, sort or paginate;
+place it in a height-constrained flex parent so the content scrolls. It sets `data-slot="model-list"`.
+
+### ModelListAction
+
+Renders a `div` and takes every prop a `div` takes. Trailing header controls, such as search or refresh. It
+sets `data-slot="model-list-action"`.
+
+### ModelListContent
+
+Renders shadcn's [`ScrollArea`](https://ui.shadcn.com/docs/components/base/scroll-area) and takes every prop
+it takes. The scrolling region filling the rest of the frame: item groups, an empty state or a
+`ModelListSkeleton`, stacked. An `Item` inside it with `data-unavailable={true}` is dimmed from here, because
+upstream `Item` has no disabled variant to carry it. It sets `data-slot="model-list-content"`.
+
+### ModelListHeader
+
+Renders a `div` and takes every prop a `div` takes. The row above the list: a title and trailing controls; a
+`TabsList` placed in it takes a line of its own. It sets `data-slot="model-list-header"`.
+
+### ModelListRemoveButton
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button) and takes every prop it
+takes. The ghost remove button for one model item, labelled "Remove model" unless an `aria-label` is given;
+`children` replace its trash icon. It sets `data-slot="model-list-remove-button"`.
+
+### ModelListSkeleton
+
+Renders a `div` and takes every prop a `div` takes, plus:
+
+| Prop    | Type     | Default |
+| ------- | -------- | ------- |
+| `count` | `number` | `6`     |
+
+Placeholder items shown while a model list loads, each a small `Item` in the shape of a model item: a media
+placeholder, two text lines and a trailing control. It sets `data-slot="model-list-skeleton"`.
+
+### ModelListTitle
+
+Renders an `h3` and takes every prop an `h3` takes. The section's heading, growing to push the header's
+controls to its end. It sets `data-slot="model-list-title"`.

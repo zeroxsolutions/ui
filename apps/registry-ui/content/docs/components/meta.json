@@ -40,6 +40,12 @@
     "---Layout---",
     "center",
     "collapsible-card",
-    "floating-toolbar"
+    "floating-toolbar",
+    "model-list",
+    "page-container",
+    "panel-field-group",
+    "panel-header",
+    "panel-row",
+    "reasoning-collapsible"
   ]
 }

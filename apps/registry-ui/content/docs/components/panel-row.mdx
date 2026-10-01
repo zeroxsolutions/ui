@@ -1,0 +1,101 @@
+---
+title: Panel Row
+description: One row of a property section, its fields beside a trailing action column that keeps every row's right edge aligned.
+---
+
+<ComponentPreview name="panel-row-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/panel-row.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/layout/panel-row.tsx`.</Step>
+
+<ComponentSource name="panel-row" title="components/layout/panel-row.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { PanelRow, PanelRowAction } from '@/components/layout/panel-row';
+```
+
+```tsx
+<PanelRow>
+  <PanelFieldGroup cols={2}>
+    <Field>
+      <FieldLabel htmlFor="x">X</FieldLabel>
+      <Input id="x" defaultValue="100" />
+    </Field>
+    <Field>
+      <FieldLabel htmlFor="y">Y</FieldLabel>
+      <Input id="y" defaultValue="200" />
+    </Field>
+  </PanelFieldGroup>
+  <PanelRowAction>
+    <Button variant="ghost" size="icon" aria-label="Lock aspect ratio">
+      <LockIcon aria-hidden />
+    </Button>
+  </PanelRowAction>
+</PanelRow>
+```
+
+Compose a [Panel Field Group](/docs/components/panel-field-group) for the fields; leave `PanelRowAction`
+empty rather than omitting it, so the row still reserves its action column and every row in the panel keeps
+the same right edge.
+
+## Composition
+
+```text
+PanelRow
+|-- PanelFieldGroup
+|   `-- Field
+|       |-- FieldLabel
+|       `-- Input
+`-- PanelRowAction
+    `-- Button
+```
+
+## API reference
+
+### PanelRow
+
+Renders a `div` and takes every prop a `div` takes. One row of a property section: the fields (usually a
+`PanelFieldGroup`) and a trailing `PanelRowAction`. The action column is part of the row's template, at
+least one default icon button (`size="icon"`) wide whether an action is composed or not, so every row in a
+panel shares the same right edge. It sets `data-slot="panel-row"`.
+
+### PanelRowAction
+
+Renders a `div` and takes every prop a `div` takes. The trailing action of a `PanelRow`, such as an
+aspect-lock toggle or a reset button, centred in its column. It sets `data-slot="panel-row-action"`.

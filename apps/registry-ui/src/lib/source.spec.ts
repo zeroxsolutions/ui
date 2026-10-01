@@ -192,16 +192,7 @@ function installTarget({ path, type }: RegistryFile): string {
 }
 
 /** Components whose page is still to be written. Each kind's task removes its names; the last task removes the set. */
-const UNDOCUMENTED = new Set([
-  'command-menu',
-  'editor-tab',
-  'model-list',
-  'page-container',
-  'panel-field-group',
-  'panel-header',
-  'panel-row',
-  'reasoning-collapsible',
-]);
+const UNDOCUMENTED = new Set(['command-menu', 'editor-tab']);
 
 /** Every component with no page that is not still to be written, and every one still listed as such that has a page. */
 function pagelessComponents(
@@ -316,6 +307,8 @@ const PROPS_READ_ELSEWHERE: Record<string, string> = {
     "takes useRender.ComponentProps<'div'> & VariantProps<typeof centerVariants> inline on the function's parameter, declaring no named CenterProps for this check to find.",
   CollapsibleCard:
     'declares CollapsibleCardProps as ComponentProps<typeof Collapsible> & VariantProps<typeof collapsibleCardVariants>, a type alias with no object literal body for this check to parse.',
+  PageContainer:
+    "declares PageContainerProps as an empty interface extending ComponentProps<'div'> and VariantProps<typeof pageContainerVariants>, with no object-literal body for this check to read members from.",
 };
 
 /**

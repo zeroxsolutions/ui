@@ -1,0 +1,122 @@
+---
+title: Reasoning Collapsible
+description: A thinking disclosure that opens itself while a reasoning stream is live and closes shortly after the stream ends.
+---
+
+<ComponentPreview name="reasoning-collapsible-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/reasoning-collapsible.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button collapsible utils https://lucide-animated.com/r/brain.json https://lucide-animated.com/r/chevron-down.json
+```
+
+<Step>Copy the component into `components/layout/reasoning-collapsible.tsx`.</Step>
+
+<ComponentSource name="reasoning-collapsible" title="components/layout/reasoning-collapsible.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  ReasoningCollapsible,
+  ReasoningCollapsibleContent,
+  ReasoningCollapsibleTrigger,
+  useReasoningCollapsible,
+} from '@/components/layout/reasoning-collapsible';
+```
+
+```tsx
+function ReasoningLabel() {
+  const { streaming, duration } = useReasoningCollapsible();
+  return streaming ? 'Thinking...' : `Thought for ${duration ?? 'a few'} seconds`;
+}
+
+<ReasoningCollapsible streaming={isLive}>
+  <ReasoningCollapsibleTrigger>
+    <ReasoningLabel />
+  </ReasoningCollapsibleTrigger>
+  <ReasoningCollapsibleContent>
+    <MarkdownView>{text}</MarkdownView>
+  </ReasoningCollapsibleContent>
+</ReasoningCollapsible>;
+```
+
+The label and the body are the consumer's; `useReasoningCollapsible` hands the label its timing. It opens
+while `streaming` is true (unless `defaultOpen` is `false`) and closes about a second after the stream
+ends, once only, so a reader who reopens old reasoning keeps it open.
+
+## Composition
+
+```text
+ReasoningCollapsible
+|-- ReasoningCollapsibleTrigger
+`-- ReasoningCollapsibleContent
+    `-- MarkdownView
+```
+
+## API reference
+
+### useReasoningCollapsible
+
+`useReasoningCollapsible(): { streaming: boolean; isOpen: boolean; duration: number | undefined }` - reads
+the live reasoning state from inside a `<ReasoningCollapsible>`, such as to word the trigger's label;
+`duration` is the last stream's whole seconds, rounded up, undefined until one has ended. Throws when used
+outside `<ReasoningCollapsible>`.
+
+### ReasoningCollapsible
+
+Renders shadcn's [`Collapsible`](https://ui.shadcn.com/docs/components/base/collapsible) and takes every
+prop it takes except `open`, plus:
+
+| Prop          | Type      | Default     |
+| ------------- | --------- | ----------- |
+| `streaming`   | `boolean` | `false`     |
+| `defaultOpen` | `boolean` | `streaming` |
+
+A thinking / reasoning disclosure. It opens while `streaming` is true (unless `defaultOpen` is `false`),
+closes itself once about a second after the stream ends, and carries `data-streaming` while streaming. It
+sets `data-slot="reasoning-collapsible"`.
+
+### ReasoningCollapsibleTrigger
+
+Renders shadcn's [`CollapsibleTrigger`](https://ui.shadcn.com/docs/components/base/collapsible), as a
+full-width ghost [`Button`](https://ui.shadcn.com/docs/components/base/button), and takes every prop it
+takes. The toggle row; `children` are the label, which pulses while the root is streaming. Its brain and
+chevron icons play while the row is hovered or focused, and the chevron turns over while the body is open.
+It sets `data-slot="reasoning-collapsible-trigger"`.
+
+### ReasoningCollapsibleContent
+
+Renders shadcn's [`CollapsibleContent`](https://ui.shadcn.com/docs/components/base/collapsible) and takes
+every prop it takes. The reasoning body, in muted text under the trigger; unmounted while closed. It sets
+`data-slot="reasoning-collapsible-content"`.

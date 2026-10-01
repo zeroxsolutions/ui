@@ -1,0 +1,96 @@
+---
+title: Panel Header
+description: 'The top strip of a side panel: one or more rows of a title and trailing actions over a bottom border.'
+---
+
+<ComponentPreview name="panel-header-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/panel-header.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/layout/panel-header.tsx`.</Step>
+
+<ComponentSource name="panel-header" title="components/layout/panel-header.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { PanelHeader, PanelHeaderActions, PanelHeaderRow, PanelHeaderTitle } from '@/components/layout/panel-header';
+```
+
+```tsx
+<PanelHeader>
+  <PanelHeaderRow>
+    <PanelHeaderTitle>title + menu trigger</PanelHeaderTitle>
+    <PanelHeaderActions>collapse button</PanelHeaderActions>
+  </PanelHeaderRow>
+</PanelHeader>
+```
+
+It paints no background, so it takes its panel's own (usually `bg-card`). Stack a second
+`PanelHeaderRow` for a header with a second line, such as a tab strip.
+
+## Composition
+
+```text
+PanelHeader
+`-- PanelHeaderRow
+    |-- PanelHeaderTitle
+    `-- PanelHeaderActions
+        `-- Button
+```
+
+## API reference
+
+### PanelHeader
+
+Renders a `div` and takes every prop a `div` takes. The top strip of a side panel: one or more
+`PanelHeaderRow`s over a bottom border; it paints no background, so it takes its panel's own (usually
+`bg-card`). It sets `data-slot="panel-header"`.
+
+### PanelHeaderRow
+
+Renders a `div` and takes every prop a `div` takes. One fixed-height row of the header. It sets
+`data-slot="panel-header-row"`.
+
+### PanelHeaderTitle
+
+Renders a `div` and takes every prop a `div` takes. The row's growing leading part: the title and anything
+inline with it. It sets `data-slot="panel-header-title"`.
+
+### PanelHeaderActions
+
+Renders a `div` and takes every prop a `div` takes. The row's trailing buttons; never shrinks. It sets
+`data-slot="panel-header-actions"`.

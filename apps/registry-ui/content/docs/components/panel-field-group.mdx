@@ -1,0 +1,82 @@
+---
+title: Panel Field Group
+description: The tight grid for paired and triplet inputs in a property panel, with any number of columns.
+---
+
+<ComponentPreview name="panel-field-group-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/panel-field-group.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/layout/panel-field-group.tsx`.</Step>
+
+<ComponentSource name="panel-field-group" title="components/layout/panel-field-group.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { PanelFieldGroup } from '@/components/layout/panel-field-group';
+```
+
+```tsx
+<PanelFieldGroup cols={2}>
+  <Field>
+    <FieldLabel htmlFor="x">X</FieldLabel>
+    <Input id="x" defaultValue="0" />
+  </Field>
+  <Field>
+    <FieldLabel htmlFor="y">Y</FieldLabel>
+    <Input id="y" defaultValue="0" />
+  </Field>
+</PanelFieldGroup>
+```
+
+Omit `cols` for one column, or pass a `grid-cols-*` class directly, which replaces the template. Use it for
+paired or tripled inputs (X + Y, W + H) in a property panel; for a single row that also needs a trailing
+action, wrap it in [Panel Row](/docs/components/panel-row) instead.
+
+## API reference
+
+### PanelFieldGroup
+
+Renders a `div` and takes every prop a `div` takes, plus:
+
+| Prop   | Type     | Default |
+| ------ | -------- | ------- |
+| `cols` | `number` | -       |
+
+Column count, written to the `--cols` CSS variable the grid template reads, so a count known only at
+runtime (`cols={axes.length}`) works. Omit it for one column, or pass a `grid-cols-*` class, which replaces
+the template. It sets `data-slot="panel-field-group"`.
