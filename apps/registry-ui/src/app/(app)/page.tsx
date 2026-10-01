@@ -61,10 +61,11 @@ const INSTALL_STEPS = [
   },
 ];
 
-/** A short source block: its language, a copy button and the code, unhighlighted (this page is no MDX). */
+/** A short source block: its language, a copy button and the code, which the block highlights itself
+ * on the client, as the Code Block demo above it does (this page is no MDX). */
 function HomePageCode({ code, language }: { code: string; language: string }): ReactNode {
   return (
-    <SourceCodeBlock code={code} language={language} lines={null}>
+    <SourceCodeBlock code={code} language={language}>
       <SourceCodeBlockHeader>
         <SourceCodeBlockTitle>
           <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
