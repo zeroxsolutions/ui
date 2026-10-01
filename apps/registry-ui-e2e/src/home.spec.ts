@@ -55,8 +55,20 @@ test('the site carries its logo: the header link home, and the icons', async ({ 
   const svg = await icon.text();
   expect(svg).toContain('prefers-color-scheme: dark');
   expect(svg.match(/<rect /g)).toHaveLength(6);
-  expect((await request.get('/favicon.ico')).ok()).toBe(true);
-  expect((await request.get('/apple-icon.png')).ok()).toBe(true);
+
+  const favicon = await request.get('/favicon.ico');
+  expect(favicon.ok()).toBe(true);
+  expect(favicon.headers()['content-type']).toMatch(/^image\/(x-icon|vnd\.microsoft\.icon)$/);
+  const icoBytes = await favicon.body();
+  expect([...icoBytes.subarray(0, 4)]).toEqual([0x00, 0x00, 0x01, 0x00]);
+  expect(icoBytes[6]).toBe(32);
+
+  const appleIcon = await request.get('/apple-icon.png');
+  expect(appleIcon.ok()).toBe(true);
+  expect(appleIcon.headers()['content-type']).toBe('image/png');
+  const pngBytes = await appleIcon.body();
+  expect(pngBytes.readUInt32BE(16)).toBe(180);
+  expect(pngBytes.readUInt32BE(20)).toBe(180);
 });
 
 // Counts WebGL contexts and animation frames, records when the first WebGL context was asked for
