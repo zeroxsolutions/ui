@@ -77,6 +77,20 @@ test('the page never rubber-bands', async ({ page }) => {
 });
 
 /**
+ * Whether the scroller at `scrollerSelector`, inside the element named `railSelector` picks out,
+ * overflows its own box - the precondition for a wheel over it to have an end to stop at before
+ * the page. Asserting this first turns a column that stopped overflowing into a failure that names
+ * that, rather than one that reads as "the page moved".
+ */
+async function railOverflows(page: Page, railSelector: string, scrollerSelector: string): Promise<boolean> {
+  return Boolean(
+    await page.evaluate(
+      `(() => { const el = document.querySelector('${railSelector} [data-slot="${scrollerSelector}"]'); return Boolean(el) && el.scrollHeight > el.clientHeight; })()`,
+    ),
+  );
+}
+
+/**
  * Wheels over `rail` until its last link is in view, then wheels on past the list's end, and reports
  * whether the page moved at any point. Until the list's end every wheel scrolls the list; past it, a
  * wheel either stops at the rail or moves the page.
@@ -104,14 +118,17 @@ test('a wheel over the sidebar past the end of its list leaves the page where it
   // Short enough that the sidebar's own list overflows its column, so its list has an end to wheel past.
   await page.setViewportSize({ width: 1440, height: 320 });
   await page.goto(LONGEST_PAGE);
+  await expect.poll(() => railOverflows(page, '[aria-label="Docs"]', 'sidebar-content')).toBe(true);
 
   expect(await pageMovedWheelingPastRail(page, sidebar(page))).toBe(false);
 });
 
 test('a wheel over the TOC past the end of its list leaves the page where it was', async ({ page }) => {
-  // Short enough that this page's headings overflow the TOC column, so its list has an end to wheel past.
-  await page.setViewportSize({ width: 1440, height: 320 });
+  // At 320 this page's TOC fits its column exactly, with no overflow to wheel past; 240 is short
+  // enough that it overflows, so the list has an end to wheel past.
+  await page.setViewportSize({ width: 1440, height: 240 });
   await page.goto(LONGEST_PAGE);
+  await expect.poll(() => railOverflows(page, '[aria-label="On this page"]', 'scroll-area-viewport')).toBe(true);
 
   expect(await pageMovedWheelingPastRail(page, toc(page))).toBe(false);
 });
