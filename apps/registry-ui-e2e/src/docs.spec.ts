@@ -9,5 +9,5 @@ test('/docs renders the introduction page', async ({ page }) => {
 test("a docs page's title carries the site's suffix", async ({ page }) => {
   await page.goto('/docs');
 
-  await expect(page).toHaveTitle('Introduction - ZeroXSolutions UI');
+  await expect(page).toHaveTitle('Introduction - ZUI');
 });

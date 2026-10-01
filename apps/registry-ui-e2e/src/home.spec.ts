@@ -54,7 +54,7 @@ test('/ says what the registry is, shows its items live, fits a phone, and links
 
 test('the site carries its logo: the header link home, and the icons', async ({ page, request }) => {
   await page.goto('/docs');
-  const home = page.getByRole('banner').getByRole('link', { name: 'ZeroXSolutions UI' });
+  const home = page.getByRole('banner').getByRole('link', { name: 'ZUI' });
   await expect(home).toBeVisible();
   await home.click();
   await expect(page).toHaveURL(/\/$/);

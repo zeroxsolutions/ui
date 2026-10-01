@@ -32,12 +32,13 @@ at 16 pixels.
 **It is one colour, `currentColor`,** so it takes the foreground token in light and dark and needs
 no second file per theme.
 
-**The wordmark is "ZeroXSolutions UI" in the site's own sans (Geist), never "ZeroX" alone.**
+**The wordmark is "ZUI" in the site's own sans (Geist), never "ZeroX".** The user shortened it from
+"ZeroXSolutions UI" on 2026-10-01.
 
 - A live registration of "ZEROX" covers software services (class 042, serial 88245661, per the
   Trademarkia record).
 - The 0x Protocol's wordmark is the characters "0" and "x" set side by side (0x.org media kit).
-- So the mark draws no "0" or "x" glyph, and the name is always the full house name.
+- So the mark draws no "0" or "x" glyph, and the name never spells "ZeroX".
 - Geist is OFL 1.1 and may be used unmodified in a logo lockup.
 
 **Which shapes are out, and why.** The mark stays clear of:
@@ -57,7 +58,7 @@ this site. Until then it is the site's logo and nothing more.
 **Where it appears:**
 
 - **The header.** The mark and the wordmark, at the start of the header, link to the home page with
-  the accessible name `ZeroXSolutions UI`. The `Home` item leaves the nav, as upstream's header uses
+  the accessible name `ZUI`. The `Home` item leaves the nav, as upstream's header uses
   its logo for home.
 - **The favicon.** `app/icon.svg` from the mark, plus a 32-pixel `favicon.ico` in place of the Next
   default. At 16 pixels on a 1x screen the module gaps render soft, which the user accepted when
@@ -236,7 +237,7 @@ Each item below was in c2's scope and did not ship.
 - The e2e suite passes on the worker, and it adds two cases:
   - **The home page.** The headline is the page's first heading. The install command copies. Each
     of the six items renders. The block frame loads. The header's logo link has the name
-    `ZeroXSolutions UI` and leads home.
+    `ZUI` and leads home.
   - **The shader.** With `prefers-reduced-motion: reduce` emulated, the page starts no WebGL
     context. Without it, the shader starts and stops requesting frames within five seconds.
 - The favicon, the apple icon and the share image are fetched from the worker and are the mark.

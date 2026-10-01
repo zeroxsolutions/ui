@@ -46,7 +46,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 32, color: MUTED_FOREGROUND }}>
         <SiteLogo width={40} height={40} style={{ color: FOREGROUND }} />
-        ZeroXSolutions UI
+        ZUI
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ fontSize: 72 }}>{page.data.title}</div>

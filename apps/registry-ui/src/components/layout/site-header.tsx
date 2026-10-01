@@ -32,7 +32,7 @@ function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
       <div className="mx-auto flex h-(--header-height) w-full items-center gap-2 px-6">
         <Link href={homeRoute.build()} className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
           <SiteLogo />
-          ZeroXSolutions UI
+          ZUI
         </Link>
         <div className="lg:hidden">
           <MobileNav tree={tree} items={navItems} />

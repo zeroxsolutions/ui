@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 
 /**
- * The ZeroXSolutions UI mark: a 3x3 grid of modules with the centre and the two anti-diagonal corners
+ * The ZUI mark: a 3x3 grid of modules with the centre and the two anti-diagonal corners
  * left out. It draws in the text colour around it, so it follows the theme; it is decorative, and
  * the link or heading around it carries the name.
  */
