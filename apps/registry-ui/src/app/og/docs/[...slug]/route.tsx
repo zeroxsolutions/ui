@@ -43,7 +43,17 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
         color: FOREGROUND,
       }}
     >
-      <div style={{ fontSize: 32, color: MUTED_FOREGROUND }}>ZeroXSolutions UI</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 32, color: MUTED_FOREGROUND }}>
+        <svg width={40} height={40} viewBox="0 0 24 24" fill={FOREGROUND}>
+          <rect x="2" y="2" width="6" height="6" rx="1" />
+          <rect x="9" y="2" width="6" height="6" rx="1" />
+          <rect x="2" y="9" width="6" height="6" rx="1" />
+          <rect x="16" y="9" width="6" height="6" rx="1" />
+          <rect x="9" y="16" width="6" height="6" rx="1" />
+          <rect x="16" y="16" width="6" height="6" rx="1" />
+        </svg>
+        ZeroXSolutions UI
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ fontSize: 72 }}>{page.data.title}</div>
         <div style={{ fontSize: 32, color: MUTED_FOREGROUND }}>{page.data.description}</div>

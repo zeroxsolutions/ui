@@ -1,11 +1,14 @@
 import type { Root } from 'fumadocs-core/page-tree';
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { ModeSwitcher } from '@/components/general/mode-switcher';
+import { SiteLogo } from '@/components/general/site-logo';
 import { DocsSearch } from '@/components/navigation/docs-search';
 import { MainNav } from '@/components/navigation/main-nav';
 import { MobileNav } from '@/components/navigation/mobile-nav';
 import { docsPageUrl } from '@/lib/source';
+import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import { blocksRoute, docsRoute, homeRoute } from '@/routes/app-routes';
 import type { SiteNavItem } from '@/types/site-nav-item';
@@ -19,7 +22,6 @@ interface SiteHeaderProps {
 function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
   const components = docsPageUrl(['components']);
   const navItems: SiteNavItem[] = [
-    { href: homeRoute.build(), label: 'Home', pattern: homeRoute.pathname },
     { href: docsRoute.build(), label: 'Docs', pattern: `${docsRoute.pathname}{/*rest}` },
     { href: components, label: 'Components', pattern: `${components}{/*rest}` },
     { href: blocksRoute.build(), label: 'Blocks', pattern: blocksRoute.pathname },
@@ -28,6 +30,10 @@ function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
   return (
     <header className="bg-background sticky top-0 z-50 w-full">
       <div className="mx-auto flex h-(--header-height) w-full items-center gap-2 px-6">
+        <Link href={homeRoute.build()} className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+          <SiteLogo />
+          ZeroXSolutions UI
+        </Link>
         <div className="lg:hidden">
           <MobileNav tree={tree} items={navItems} />
         </div>
