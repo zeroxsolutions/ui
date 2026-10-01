@@ -1,0 +1,83 @@
+---
+title: Center
+description: A box that centers its children on both axes, in block or inline flow, with its element swappable through render.
+---
+
+<ComponentPreview name="center-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/center.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add @base-ui/react class-variance-authority
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/layout/center.tsx`.</Step>
+
+<ComponentSource name="center" title="components/layout/center.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Center } from '@/components/layout/center';
+```
+
+```tsx
+<Center>Centered content</Center>
+```
+
+The centring is fixed, unlike a plain flex box: reach for `flex items-center justify-center` directly
+when the caller needs to change the alignment itself.
+
+## API reference
+
+### Center
+
+Renders a `div` and takes every prop a `div` takes, plus:
+
+| Prop     | Type                                               | Default |
+| -------- | -------------------------------------------------- | ------- |
+| `inline` | `boolean`                                          | `false` |
+| `render` | `ReactElement \| ((props, state) => ReactElement)` | -       |
+
+Size, spacing and placement (`h-screen`, `gap-2`) come from `className`; `inline` picks inline flow
+over block flow, and `render` swaps the element, whose semantics are then the caller's. It sets
+`data-slot="center"`.
+
+### centerVariants
+
+The `inline` variant: `false` (the default) renders `flex`, `true` renders `inline-flex`.

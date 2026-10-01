@@ -1,0 +1,71 @@
+---
+title: Floating Toolbar
+description: A floating, blurred card-color toolbar shell, a toolbar landmark around the tools the caller composes.
+---
+
+<ComponentPreview name="floating-toolbar-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/floating-toolbar.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/layout/floating-toolbar.tsx`.</Step>
+
+<ComponentSource name="floating-toolbar" title="components/layout/floating-toolbar.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { FloatingToolbar } from '@/components/layout/floating-toolbar';
+```
+
+```tsx
+<FloatingToolbar aria-label="Text formatting">
+  <Button variant="ghost" size="icon-sm" aria-label="Bold">
+    <BoldIcon aria-hidden />
+  </Button>
+</FloatingToolbar>
+```
+
+Use it for the floating tool palette of an editor canvas; place it with the caller's `className`, for
+example `absolute bottom-3 left-1/2 -translate-x-1/2 z-20`.
+
+## API reference
+
+### FloatingToolbar
+
+Renders a `div` and takes every prop a `div` takes. A rounded, blurred card-colour bar with a hairline
+ring and a shadow, around the tools the caller composes. It is a `toolbar` landmark, so give it an
+`aria-label`. `pointer-events-auto` keeps it clickable inside a `pointer-events-none` canvas overlay.
+It sets `data-slot="floating-toolbar"` and `role="toolbar"`.

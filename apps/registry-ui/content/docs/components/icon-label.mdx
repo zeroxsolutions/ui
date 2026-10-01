@@ -1,0 +1,72 @@
+---
+title: Icon Label
+description: A label whose icon stands in for a field's text in a dense panel, tied to its control through htmlFor and sizing an unclassed child svg to a compact glyph.
+---
+
+<ComponentPreview name="icon-label-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/icon-label.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/general/icon-label.tsx`.</Step>
+
+<ComponentSource name="icon-label" title="components/general/icon-label.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { IconLabel } from '@/components/general/icon-label';
+```
+
+```tsx
+<Tooltip>
+  <TooltipTrigger render={<IconLabel htmlFor="rotation" />}>
+    <RotateCw aria-hidden />
+    <span className="sr-only">Rotation</span>
+  </TooltipTrigger>
+  <TooltipContent>Rotation</TooltipContent>
+</Tooltip>
+<Input id="rotation" type="number" />
+```
+
+Use it to stand in for a field's own text label in a dense panel. For a glyph that carries no field of
+its own, such as a model ability, use [Icon Media](/docs/components/icon-media) instead.
+
+## API reference
+
+### IconLabel
+
+Renders a `label` and takes every prop a `label` takes. An svg child with no `size-*` class of its own
+is drawn at `size-3`. It sets `data-slot="icon-label"`.

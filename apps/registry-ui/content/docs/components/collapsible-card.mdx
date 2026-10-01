@@ -1,0 +1,145 @@
+---
+title: Collapsible Card
+description: A collapsible card with a header and body, open by default, on a card, muted or plain surface.
+---
+
+<ComponentPreview name="collapsible-card-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/collapsible-card.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add class-variance-authority
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button collapsible utils https://lucide-animated.com/r/chevron-down.json
+```
+
+<Step>Copy the component into `components/layout/collapsible-card.tsx`.</Step>
+
+<ComponentSource name="collapsible-card" title="components/layout/collapsible-card.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  CollapsibleCard,
+  CollapsibleCardActions,
+  CollapsibleCardContent,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardTrigger,
+} from '@/components/layout/collapsible-card';
+```
+
+```tsx
+<CollapsibleCard>
+  <CollapsibleCardHeader>
+    <CollapsibleCardTitle>Layers</CollapsibleCardTitle>
+    <CollapsibleCardActions>
+      <CollapsibleCardTrigger />
+    </CollapsibleCardActions>
+  </CollapsibleCardHeader>
+  <CollapsibleCardContent>Background, shadow, text</CollapsibleCardContent>
+</CollapsibleCard>
+```
+
+Use it for a card whose body the reader can hide, such as a code block's wrapper or a preview pane.
+
+## Composition
+
+```text
+CollapsibleCard
+|-- CollapsibleCardHeader
+|   |-- CollapsibleCardTitle
+|   `-- CollapsibleCardActions
+|       `-- CollapsibleCardTrigger
+`-- CollapsibleCardContent
+```
+
+## Variants
+
+<ComponentPreview name="collapsible-card-variants" />
+
+## API reference
+
+### CollapsibleCard
+
+Renders shadcn's [`Collapsible`](https://ui.shadcn.com/docs/components/base/collapsible) and takes every
+prop it takes, plus:
+
+| Prop      | Type                                         | Default     |
+| --------- | -------------------------------------------- | ----------- |
+| `variant` | `'default' \| 'muted' \| 'plain' \| 'flush'` | `'default'` |
+
+`variant` picks the surface, stamped on the root as `data-variant`: `default` the card surface, `muted` a
+borderless fill for a block nested in another card, `plain` no surface and a rule underneath for a titled
+group of rows in a panel, `flush` no surface at all for a block filling a surface its container draws.
+`default` and `muted` rule the body off from the header, on the body, so the header keeps its height as the
+card opens and closes. It opens by default (`defaultOpen` defaults to `true`, rather than `Collapsible`'s
+own `false`). It sets `data-slot="collapsible-card"` and `data-variant` to its variant.
+
+### CollapsibleCardHeader
+
+Renders a `div` and takes every prop a `div` takes. The row above the body: a title, and the actions
+pushed to the far end when there are any. It sets `data-slot="collapsible-card-header"`.
+
+### CollapsibleCardTitle
+
+Renders a `div` and takes every prop a `div` takes. The header's muted title; a direct svg child is sized
+as its leading icon. It sets `data-slot="collapsible-card-title"`.
+
+### CollapsibleCardActions
+
+Renders a `div` and takes every prop a `div` takes. The header's trailing controls, such as a copy button
+and the `CollapsibleCardTrigger`. It sets `data-slot="collapsible-card-actions"`.
+
+### CollapsibleCardTrigger
+
+Renders shadcn's [`CollapsibleTrigger`](https://ui.shadcn.com/docs/components/base/collapsible), as a
+ghost, icon-sized [`Button`](https://ui.shadcn.com/docs/components/base/button), and takes every prop it
+takes. The button that opens and closes the body, named "Toggle" unless an `aria-label` is given. Its
+default content is a chevron that turns over while the body is open and plays while the button is hovered
+or focused; `children` replace it. It sets `data-slot="collapsible-card-trigger"`.
+
+### CollapsibleCardContent
+
+Renders shadcn's [`CollapsibleContent`](https://ui.shadcn.com/docs/components/base/collapsible) and takes
+every prop it takes. The body that the trigger opens and closes; unmounted while closed. It sets
+`data-slot="collapsible-card-content"`.
+
+### collapsibleCardVariants
+
+The `variant` variant: `default` (the default) adds the card ring and surface, `muted` a borderless muted
+fill, `plain` a bottom border only, `flush` no surface classes at all.

@@ -193,13 +193,8 @@ function installTarget({ path, type }: RegistryFile): string {
 
 /** Components whose page is still to be written. Each kind's task removes its names; the last task removes the set. */
 const UNDOCUMENTED = new Set([
-  'center',
-  'collapsible-card',
   'command-menu',
   'editor-tab',
-  'floating-toolbar',
-  'icon-label',
-  'icon-media',
   'model-list',
   'page-container',
   'panel-field-group',
@@ -317,6 +312,10 @@ const PROPS_READ_ELSEWHERE: Record<string, string> = {
     'takes ComponentProps<"span"> & VariantProps<typeof modelInfoCardIndicatorVariants>; tone is the variant key of modelInfoCardIndicatorVariants, which this check does not parse from an intersection type.',
   LanguageCombobox:
     "takes LanguageOptionSource (kind, options, locales - declared in types/language-option.ts) & Omit<ComboboxPrimitive.Root.Props<LanguageOption>, ...> & { value; onValueChange }; this check reads only two-space-indented members, and the intersection's own value/onValueChange sit four spaces in.",
+  Center:
+    "takes useRender.ComponentProps<'div'> & VariantProps<typeof centerVariants> inline on the function's parameter, declaring no named CenterProps for this check to find.",
+  CollapsibleCard:
+    'declares CollapsibleCardProps as ComponentProps<typeof Collapsible> & VariantProps<typeof collapsibleCardVariants>, a type alias with no object literal body for this check to parse.',
 };
 
 /**

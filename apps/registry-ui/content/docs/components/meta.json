@@ -33,6 +33,13 @@
     "permission-card",
     "status-indicator",
     "tool-call-card",
-    "unsaved-indicator"
+    "unsaved-indicator",
+    "---General---",
+    "icon-label",
+    "icon-media",
+    "---Layout---",
+    "center",
+    "collapsible-card",
+    "floating-toolbar"
   ]
 }

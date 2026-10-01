@@ -1366,6 +1366,20 @@
       ]
     },
     {
+      "name": "collapsible-card-variants",
+      "type": "registry:example",
+      "title": "Collapsible Card Variants",
+      "description": "The card's four surfaces stacked: default, muted, plain and flush.",
+      "categories": ["examples"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/collapsible-card.json"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/collapsible-card-variants.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
       "name": "file-tree-demo",
       "type": "registry:example",
       "title": "File Tree Demo",

@@ -1,0 +1,72 @@
+---
+title: Icon Media
+description: A small square that holds one glyph, tinted through the caller's className.
+---
+
+<ComponentPreview name="icon-media-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/icon-media.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/general/icon-media.tsx`.</Step>
+
+<ComponentSource name="icon-media" title="components/general/icon-media.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { IconMedia } from '@/components/general/icon-media';
+```
+
+```tsx
+<Tooltip>
+  <TooltipTrigger render={<IconMedia aria-label="Vision input" className="bg-muted text-muted-foreground" />}>
+    <EyeIcon />
+  </TooltipTrigger>
+  <TooltipContent>Vision input</TooltipContent>
+</Tooltip>
+```
+
+It carries no meaning of its own, so one serves a model ability, a generation type or any icon the
+caller picks; give it an `aria-label`, and compose a tooltip around it when the glyph needs words. For
+a field's own text label, use [Icon Label](/docs/components/icon-label) instead.
+
+## API reference
+
+### IconMedia
+
+Renders a `span` and takes every prop a `span` takes. The design system ships no tint for it; the
+caller's `className` supplies the colours. An svg child with no `size-*` class of its own is drawn at
+`size-3`. It sets `data-slot="icon-media"`.
