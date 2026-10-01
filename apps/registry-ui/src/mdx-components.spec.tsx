@@ -51,3 +51,13 @@ describe('mdxComponents.pre', () => {
     expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
   });
 });
+
+describe('mdxComponents.ComponentSource', () => {
+  it('heads the source with the path its title gives', async () => {
+    const { ComponentSource } = mdxComponents;
+    render(<ComponentSource name="status-indicator" code="export {};" language="tsx" title="lib/status-tone.ts" />);
+    await act(async () => {});
+
+    expect(screen.getByText('lib/status-tone.ts')).toBeTruthy();
+  });
+});

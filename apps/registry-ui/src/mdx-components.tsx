@@ -137,12 +137,12 @@ export const mdxComponents = {
   AlertDescription,
   ComponentPreview: ExamplePreview,
   BlockPreview,
-  ComponentSource: ({ file, ...props }: ComponentProps<typeof ComponentSource>) => (
+  ComponentSource: ({ file, title, ...props }: ComponentProps<typeof ComponentSource>) => (
     <ComponentSource file={file} className="mt-6" {...props}>
       <SourceCodeBlockHeader>
         <SourceCodeBlockTitle>
           <SourceCodeBlockLanguage>{props.language}</SourceCodeBlockLanguage>
-          {file ? <SourceCodeBlockFile>{file.split('/').pop()}</SourceCodeBlockFile> : null}
+          {title || file ? <SourceCodeBlockFile>{title ?? file?.split('/').pop()}</SourceCodeBlockFile> : null}
         </SourceCodeBlockTitle>
         <SourceCodeBlockActions>
           <SourceCodeBlockCopy />
