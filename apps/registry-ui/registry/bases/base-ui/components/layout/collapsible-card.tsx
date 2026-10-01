@@ -28,7 +28,8 @@ type CollapsibleCardProps = ComponentProps<typeof Collapsible> & VariantProps<ty
  * `data-variant`: `default` the card surface, `muted` a borderless fill for a
  * block nested in another card, `plain` no surface and a rule underneath, for a
  * titled group of rows in a panel, `flush` no surface at all, for a block filling a
- * surface its container draws.
+ * surface its container draws. `default` and `muted` rule the header off from the
+ * body while it is open.
  */
 function CollapsibleCard({
   className,
@@ -53,7 +54,7 @@ function CollapsibleCardHeader({ className, ...props }: ComponentProps<'div'>): 
     <div
       data-slot="collapsible-card-header"
       className={cn(
-        'flex items-center gap-1.5 px-3 py-1.5 group-data-[variant=plain]/collapsible-card:px-2.5 has-data-[slot=collapsible-card-actions]:justify-between',
+        'flex items-center gap-1.5 px-3 py-1.5 group-data-[variant=default]/collapsible-card:group-data-open/collapsible-card:border-b group-data-[variant=muted]/collapsible-card:group-data-open/collapsible-card:border-b group-data-[variant=plain]/collapsible-card:px-2.5 has-data-[slot=collapsible-card-actions]:justify-between',
         className,
       )}
       {...props}
