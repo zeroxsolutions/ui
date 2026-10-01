@@ -102,8 +102,9 @@ the research:
   in the foreground token at low opacity, so it reads as the mark at scale and stays monochrome.
 - **Hidden from assistive technology.** The canvas is `aria-hidden` and carries no content, since a
   canvas's pixels are invisible to assistive technology (MDN, `canvas`).
-- **Static by default.** The server renders a static poster, a CSS background matching the first
-  frame. The shader starts on the client once the page is idle. It never starts under any of these:
+- **Static by default.** The server renders no animation. The static layer is the page's own
+  background, and the shader fades the field in from nothing over 0.6 seconds, so the switch is not
+  visible. The shader starts on the client once the page is idle. It never starts under any of these:
   - `prefers-reduced-motion: reduce`;
   - no WebGL;
   - no JavaScript.
@@ -130,7 +131,8 @@ the one page that uses it.
 ### Live items, within the first two screens
 
 A static grid of six registry items, each rendered by its own demo, not by a screenshot. Each card
-names the item and links to its docs page. The items are:
+names the item, and links to its docs page where one exists; today only Status Indicator has one,
+and a card without a page names the item unlinked, as the components index already does. The items are:
 
 - Chat Message
 - Code Block
