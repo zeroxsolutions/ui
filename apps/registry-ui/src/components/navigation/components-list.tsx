@@ -17,7 +17,7 @@ function categoryLabel(category: string): string {
  */
 function ComponentsList({ className, ...props }: ComponentProps<'div'>): ReactNode {
   return (
-    <div className={cn('flex flex-col gap-8', className)} {...props}>
+    <div data-slot="components-list" className={cn('flex flex-col gap-8', className)} {...props}>
       {[...Map.groupBy(publishedItems, (item) => item.category)].map(([category, items]) => (
         <section key={category} className="flex flex-col gap-3">
           <h2 className="text-xl font-semibold tracking-tight">{categoryLabel(category)}</h2>
