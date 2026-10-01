@@ -24,7 +24,7 @@ function HomeShader({ className, ...props }: ComponentProps<'div'>): ReactNode {
     let unmounted = false;
     let stop: (() => void) | undefined;
     const start = async (): Promise<void> => {
-      const { startHomeShaderField, COLUMN_HALF_WIDTH } = await import('./home-shader-field');
+      const { startHomeShaderField, COLUMN_HALF_WIDTH } = await import('../../_lib/home-shader-field');
       // Narrower than twice the clear half-width, the whole container sits inside the band the field
       // never draws into.
       if (!unmounted && container.clientWidth > 2 * COLUMN_HALF_WIDTH) stop = startHomeShaderField(container, element);
