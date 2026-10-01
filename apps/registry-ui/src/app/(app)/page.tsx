@@ -24,6 +24,8 @@ import { docsPageUrl, source } from '@/lib/source';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { blocksRoute } from '@/routes/app-routes';
 
+import registryData from '../../../registry.json';
+
 /** The items the home page shows live, by registry name; each renders its `<name>-demo`. */
 const HOME_ITEMS = ['chat-message', 'code-block', 'file-tree', 'tag-input', 'password-input', 'status-indicator'];
 
@@ -32,9 +34,21 @@ function homePageInstallCommand(name: string): string {
   return `pnpm dlx shadcn@latest add ${new URL(`/r/${name}.json`, registryHomepage).href}`;
 }
 
+/** The paths an item's files land at in a consuming app: `registry.json`'s own paths, their shared
+ * source prefix dropped. */
+function homePageInstallFilePaths(name: string): string[] {
+  const item = registryData.items.find((entry) => entry.name === name);
+  if (!item) throw new Error(`HomePage: "${name}" is not in registry.json`);
+  return item.files.map((file) => file.path.replace('registry/bases/base-ui/', ''));
+}
+
 const INSTALL_STEPS = [
   { title: 'Add an item with the shadcn CLI', language: 'bash', code: homePageInstallCommand('status-indicator') },
-  { title: 'The CLI writes it into your app', language: 'text', code: 'components/feedback/status-indicator.tsx' },
+  {
+    title: 'The CLI writes it into your app',
+    language: 'text',
+    code: homePageInstallFilePaths('status-indicator').join('\n'),
+  },
   {
     title: 'Import it and compose',
     language: 'tsx',
