@@ -42,59 +42,85 @@ test('the site carries its logo: the header link home, and the icons', async ({ 
   expect((await request.get('/apple-icon.png')).ok()).toBe(true);
 });
 
-// Counts WebGL contexts and animation frames, and, with `noWebgl`, makes WebGL unavailable.
+// Counts WebGL contexts and animation frames, records when the first WebGL context was asked for
+// (`__startedAt`) and when the last frame was requested (`__lastFrameAt`), and, with `noWebgl`, makes
+// WebGL unavailable.
 const instrument = (noWebgl: boolean): string => `(() => {
   const original = HTMLCanvasElement.prototype.getContext;
-  window.__contexts = 0; window.__frames = 0;
+  window.__contexts = 0; window.__frames = 0; window.__startedAt = 0; window.__lastFrameAt = 0;
   HTMLCanvasElement.prototype.getContext = function (kind, ...rest) {
-    if (String(kind).startsWith('webgl')) { window.__contexts++; if (${noWebgl}) return null; }
+    if (String(kind).startsWith('webgl')) {
+      if (window.__contexts === 0) window.__startedAt = performance.now();
+      window.__contexts++;
+      if (${noWebgl}) return null;
+    }
     return original.call(this, kind, ...rest);
   };
   const raf = window.requestAnimationFrame.bind(window);
-  window.requestAnimationFrame = (callback) => { window.__frames++; return raf(callback); };
+  window.requestAnimationFrame = (callback) => {
+    window.__frames++; window.__lastFrameAt = performance.now();
+    return raf(callback);
+  };
 })()`;
+
+// Resolves on the page's next idle callback, or after 200ms where there is none (Safari), which is when
+// the shader would have started.
+const NEXT_IDLE = `new Promise((resolve) =>
+  typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback(() => resolve()) : setTimeout(resolve, 200))`;
 
 test('the hero shader holds still under reduced motion or without WebGL, and otherwise settles', async ({
   browser,
 }) => {
   const reduced = await browser.newContext({ reducedMotion: 'reduce' });
-  const still = await reduced.newPage();
-  await still.addInitScript(instrument(false));
-  await still.goto('/');
-  await expect(still.getByRole('heading', { level: 1 })).toBeVisible();
-  await still.waitForTimeout(1_000);
-  expect(await still.evaluate('window.__contexts')).toBe(0);
-  await reduced.close();
+  try {
+    const still = await reduced.newPage();
+    await still.addInitScript(instrument(false));
+    await still.goto('/');
+    await expect(still.getByRole('heading', { level: 1 })).toBeVisible();
+    // The shader would start on the first idle callback; the second gives its lazy chunk a turn to arrive.
+    await still.evaluate(NEXT_IDLE);
+    await still.evaluate(NEXT_IDLE);
+    expect(await still.evaluate('window.__contexts')).toBe(0);
+  } finally {
+    await reduced.close();
+  }
 
   const bare = await browser.newContext({ reducedMotion: 'no-preference' });
-  const fallback = await bare.newPage();
-  const errors: string[] = [];
-  fallback.on('pageerror', (error) => errors.push(error.message));
-  await fallback.addInitScript(instrument(true));
-  await fallback.goto('/');
-  // The shader starts once the page is idle; ten seconds covers a cold worker on a shared runner.
-  await expect.poll(() => fallback.evaluate('window.__contexts'), { timeout: 10_000 }).toBeGreaterThan(0);
-  await expect(fallback.getByRole('heading', { level: 1 })).toBeVisible();
-  expect(errors).toEqual([]);
-  await bare.close();
+  try {
+    const fallback = await bare.newPage();
+    const errors: string[] = [];
+    fallback.on('pageerror', (error) => errors.push(error.message));
+    await fallback.addInitScript(instrument(true));
+    await fallback.goto('/');
+    // The shader starts once the page is idle; ten seconds covers a cold worker on a shared runner.
+    await expect.poll(() => fallback.evaluate('window.__contexts'), { timeout: 10_000 }).toBeGreaterThan(0);
+    await expect(fallback.getByRole('heading', { level: 1 })).toBeVisible();
+    expect(errors).toEqual([]);
+  } finally {
+    await bare.close();
+  }
 
   const moving = await browser.newContext({ reducedMotion: 'no-preference' });
-  const page = await moving.newPage();
-  await page.addInitScript(instrument(false));
-  await page.goto('/');
-  await expect.poll(() => page.evaluate('window.__contexts'), { timeout: 10_000 }).toBeGreaterThan(0);
-  // Settled is no frame requested across half a second. The field settles within five seconds of
-  // starting, and fifteen also covers the start's own wait on a slow runner.
-  await expect
-    .poll(
-      async () => {
-        const before = (await page.evaluate('window.__frames')) as number;
-        // eslint-disable-next-line playwright/no-wait-for-timeout -- the window frames are counted over, not a wait for a state
-        await page.waitForTimeout(500);
-        return ((await page.evaluate('window.__frames')) as number) - before;
-      },
-      { timeout: 15_000 },
-    )
-    .toBe(0);
-  await moving.close();
+  try {
+    const page = await moving.newPage();
+    await page.addInitScript(instrument(false));
+    await page.goto('/');
+    await expect.poll(() => page.evaluate('window.__contexts'), { timeout: 10_000 }).toBeGreaterThan(0);
+    // Settled is no frame requested across half a second. Fifteen seconds covers the start's own wait
+    // on a slow runner; the five-second bound is asserted on the page's own clock below.
+    await expect
+      .poll(
+        async () => {
+          const before = (await page.evaluate('window.__frames')) as number;
+          // eslint-disable-next-line playwright/no-wait-for-timeout -- the window frames are counted over, not a wait for a state
+          await page.waitForTimeout(500);
+          return ((await page.evaluate('window.__frames')) as number) - before;
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(0);
+    expect(await page.evaluate('window.__lastFrameAt - window.__startedAt')).toBeLessThan(5_000);
+  } finally {
+    await moving.close();
+  }
 });
