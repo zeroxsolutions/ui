@@ -26,8 +26,17 @@ test('/ says what the registry is, shows its items live, fits a phone, and links
   await expect(main.getByRole('heading', { level: 1 })).toHaveText('Composed React components for shadcn, on Base UI.');
   const copyButton = main.getByRole('button', { name: 'Copy code' }).first();
   await expect(copyButton).toBeVisible();
-  await copyButton.click();
-  await expect.poll(() => page.evaluate('window.__copiedText')).toBe(INSTALL_COMMAND);
+  // Retries the click itself, not just the read after it: clicked before React hydrates the button,
+  // it is a plain DOM click with no handler attached, and the first attempt is sometimes that one.
+  await expect
+    .poll(
+      async () => {
+        await copyButton.click();
+        return page.evaluate('window.__copiedText');
+      },
+      { timeout: 10_000 },
+    )
+    .toBe(INSTALL_COMMAND);
   for (const item of ITEMS) await expect(main.getByText(item, { exact: true })).toBeVisible();
   await expect(main.getByTitle('AI Provider Picker')).toBeVisible();
 
