@@ -8,8 +8,6 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Item, ItemTitle } from '@/registry/bases/base-ui/ui/item';
 import { XIcon, type XIconHandle } from '@/registry/bases/base-ui/ui/x';
 
-const EditorTabContext = React.createContext<{ dirty: boolean }>({ dirty: false });
-
 interface EditorTabProps extends Omit<React.ComponentProps<typeof Item>, 'variant' | 'size'> {
   /** The tab of the document on show; carried as `data-active`. */
   active?: boolean;
@@ -28,17 +26,15 @@ interface EditorTabProps extends Omit<React.ComponentProps<typeof Item>, 'varian
  */
 function EditorTab({ active = false, dirty = false, className, ...props }: EditorTabProps): React.ReactNode {
   return (
-    <EditorTabContext.Provider value={{ dirty }}>
-      <Item
-        data-slot="editor-tab"
-        data-active={active ? '' : undefined}
-        data-dirty={dirty ? '' : undefined}
-        variant="outline"
-        size="xs"
-        className={cn('group/editor-tab w-fit', className)}
-        {...props}
-      />
-    </EditorTabContext.Provider>
+    <Item
+      data-slot="editor-tab"
+      data-active={active ? '' : undefined}
+      data-dirty={dirty ? '' : undefined}
+      variant="outline"
+      size="xs"
+      className={cn('group/editor-tab w-fit', className)}
+      {...props}
+    />
   );
 }
 
@@ -59,7 +55,8 @@ function EditorTabTitle({ className, ...props }: React.ComponentProps<typeof Ite
  * while the tab is hovered or active, or while the button has keyboard focus.
  * A click never reaches the tab, so closing a tab does not also activate it.
  * The X plays while the button is hovered or focused; a caller's pointer and
- * focus handlers still run.
+ * focus handlers still run. Both glyphs are always in the tree, and the
+ * root's `data-dirty` / `group/editor-tab` decide which one shows.
  */
 function EditorTabCloseButton({
   className,
@@ -70,7 +67,6 @@ function EditorTabCloseButton({
   onBlur,
   ...props
 }: Omit<React.ComponentProps<typeof Button>, 'children'>): React.ReactNode {
-  const { dirty } = React.useContext(EditorTabContext);
   const iconRef = React.useRef<XIconHandle>(null);
 
   return (
@@ -103,9 +99,7 @@ function EditorTabCloseButton({
       }}
       {...props}
     >
-      {dirty && (
-        <UnsavedIndicator className="group-hover/editor-tab:hidden group-focus-visible/editor-tab-close-button:hidden group-data-active/editor-tab:hidden" />
-      )}
+      <UnsavedIndicator className="hidden group-data-dirty/editor-tab:block group-data-dirty/editor-tab:group-hover/editor-tab:hidden group-data-dirty/editor-tab:group-focus-visible/editor-tab-close-button:hidden group-data-dirty/editor-tab:group-data-active/editor-tab:hidden" />
       <XIcon
         ref={iconRef}
         aria-hidden

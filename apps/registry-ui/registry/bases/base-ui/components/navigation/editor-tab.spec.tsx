@@ -21,15 +21,18 @@ function Tab({ dirty, onClose, onActivate }: { dirty?: boolean; onClose?: () => 
 }
 
 describe('EditorTab', () => {
-  it('shows the unsaved mark inside the close button of a dirty tab', () => {
+  it('shows the unsaved mark inside the close button', () => {
     render(<Tab dirty />);
     const button = screen.getByRole('button', { name: 'Close page.tsx' });
     expect(within(button).getByRole('img', { name: 'Unsaved changes' })).toBeTruthy();
   });
 
-  it('shows no unsaved mark on a clean tab', () => {
-    render(<Tab />);
-    expect(screen.queryByRole('img', { name: 'Unsaved changes' })).toBeNull();
+  it('carries data-dirty on the root exactly when the tab is dirty, which the stylesheet keys the mark off', () => {
+    const { container, rerender } = render(<Tab />);
+    expect(container.querySelector('[data-slot="editor-tab"]')?.hasAttribute('data-dirty')).toBe(false);
+
+    rerender(<Tab dirty />);
+    expect(container.querySelector('[data-slot="editor-tab"]')?.hasAttribute('data-dirty')).toBe(true);
   });
 
   it('closes without also activating the tab', () => {
