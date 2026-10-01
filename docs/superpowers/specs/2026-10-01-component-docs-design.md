@@ -30,7 +30,8 @@ other, because the table's demo composes the header.
 ## A page's shape
 
 The page follows upstream shadcn's component pages (`apps/v4/content/docs/components/base/*.mdx`),
-written by hand as upstream writes them. Nothing on a page is generated.
+written by hand as upstream writes them. Nothing on a page is generated. Its headings are sentence
+case (`API reference`, not upstream's `API Reference`), as every heading on this site is.
 
 ```
 ---
@@ -41,7 +42,7 @@ title, description            the item's title and description in registry.json
 ## Usage                      the import, then the smallest composition that works
 ## Composition                a text tree of how the parts nest; only for a family of two or more parts
 ## <a feature or a state>     only where the demo cannot show it; one ComponentPreview each
-## API Reference
+## API reference
 ### <Part>                    one per exported part
 ```
 
@@ -65,7 +66,7 @@ from it.
 disabled or invalid state the demo never reaches. Each one is a new `registry:example` with its own entry in
 `registry.json`. A demo that already shows every state gets none, as c3 settled for Status Indicator.
 
-**API Reference.** One `### <Part>` for each part the file exports, in export order:
+**API reference.** One `### <Part>` for each part the file exports, in export order:
 
 - A part with props of its own gets a `| Prop | Type | Default |` table, written from its
   `<Part>Props` interface, as upstream does for Button and Sidebar.
@@ -87,7 +88,7 @@ goes red the day its item changes rather than drifting. `src/lib/source.spec.ts`
 - The Command tab's command installs the item by its URL.
 - The Manual tab has one `<ComponentSource>` per file of the item, each titled with the path the CLI
   writes it to, and its install command names exactly the item's `dependencies`.
-- The `###` headings under API Reference are exactly the parts in the file's `export { }`, in order.
+- The `###` headings under API reference are exactly the parts in the file's `export { }`, in order.
 - Every prop in a part's table is a member of that part's `<Part>Props` interface, read from the
   source. A part whose props cannot be read this way is listed in `source.spec.ts` with the reason.
 
