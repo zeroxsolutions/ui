@@ -132,14 +132,18 @@ function CodeBlockContent({ children, ...props }: ComponentProps<typeof Collapsi
   );
 }
 
-/** A gutter numbering each line of the block's code, hidden from assistive technology and left out of a copy. */
+/**
+ * A gutter numbering each line of the block's code, hidden from assistive technology and left out of a
+ * copy. It is at least three digits wide, so the code starts at the same place in a 9-line block and a
+ * 999-line one, and does not move when a block grows past line 9.
+ */
 function CodeBlockLineNumbers({ className, ...props }: ComponentProps<'span'>): ReactNode {
   const { code } = useCodeBlock();
   return (
     <span
       aria-hidden
       data-slot="code-block-line-numbers"
-      className={cn('text-muted-foreground text-right select-none', className)}
+      className={cn('text-muted-foreground min-w-6 shrink-0 text-right select-none', className)}
       {...props}
     >
       {code
