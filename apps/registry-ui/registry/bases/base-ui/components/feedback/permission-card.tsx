@@ -73,6 +73,7 @@ function PermissionCardStatus({ children, ...props }: ComponentProps<typeof Badg
           aria-hidden
           className="hidden group-data-[status=pending]/permission-card:block"
         />
+        {/* Badge sizes only its direct svg children; an animated icon's svg sits inside the icon's own div, so `size` gives it the Badge's icon size. */}
         <CircleCheckIcon
           data-icon="inline-start"
           aria-hidden
