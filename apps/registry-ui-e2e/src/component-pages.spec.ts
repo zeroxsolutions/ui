@@ -20,6 +20,10 @@ test('every component page renders its preview, fits a phone, and throws nothing
     await expect
       .poll(() => page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth'), { message: name })
       .toBe(false);
+    // WebKit reports a prefetch aborted by navigation as a page error, so let this page's own
+    // header-link prefetches settle before leaving it for the next one.
+    // eslint-disable-next-line playwright/no-networkidle
+    await page.waitForLoadState('networkidle');
   }
   expect(errors).toEqual([]);
 });
