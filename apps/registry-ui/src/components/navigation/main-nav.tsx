@@ -19,7 +19,7 @@ function MainNav({ items, className, ...props }: MainNavProps): ReactNode {
   const current = currentSiteNavItem(items, pathname);
 
   return (
-    <nav aria-label="Main" className={cn('flex items-center', className)} {...props}>
+    <nav aria-label="Main" data-slot="main-nav" className={cn('flex items-center', className)} {...props}>
       {items.map((item) => (
         <Link
           key={item.href}
