@@ -1,0 +1,168 @@
+---
+title: Data Table
+description: The composable parts of a @tanstack/react-table view - toolbar, view, pagination and view options - reading one shared table instance from context.
+---
+
+<ComponentPreview name="data-table-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/data-table.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add @tanstack/react-table lucide-react
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button dropdown-menu empty table utils https://lucide-animated.com/r/chevron-left.json https://lucide-animated.com/r/chevron-right.json
+```
+
+<Step>Copy the component into `components/data-display/data-table.tsx`.</Step>
+
+<ComponentSource name="data-table" title="components/data-display/data-table.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  DataTable,
+  DataTablePagination,
+  DataTablePaginationNext,
+  DataTablePaginationPrevious,
+  DataTableToolbar,
+  DataTableView,
+  DataTableViewOptions,
+} from '@/components/data-display/data-table';
+```
+
+The consumer owns `useReactTable` and the column defs; this family ships only the composable parts:
+
+```tsx
+const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+
+<DataTable table={table}>
+  <DataTableToolbar>
+    <DataTableViewOptions />
+  </DataTableToolbar>
+  <DataTableView />
+  <DataTablePagination>
+    <DataTablePaginationPrevious aria-label="Previous page" />
+    <DataTablePaginationNext aria-label="Next page" />
+  </DataTablePagination>
+</DataTable>;
+```
+
+Give a column a sortable, hideable header with [Data Table Column Header](/docs/components/data-table-column-header).
+
+## Composition
+
+```text
+DataTable
+|-- DataTableToolbar
+|   `-- DataTableViewOptions
+|-- DataTableView
+|   `-- DataTableEmpty
+`-- DataTablePagination
+    |-- DataTablePaginationPrevious
+    `-- DataTablePaginationNext
+```
+
+## API reference
+
+### DataTable
+
+Renders a `div` and takes every prop a `div` takes, plus:
+
+| Prop    | Type                   | Default  |
+| ------- | ---------------------- | -------- |
+| `table` | `TanstackTable<TData>` | required |
+
+Holds the `@tanstack/react-table` instance in context, so every part reads it without prop-drilling. It sets
+`data-slot="data-table"`.
+
+### DataTableToolbar
+
+Renders a `div` and takes every prop a `div` takes. A flex row for filters and actions above the table. It sets
+`data-slot="data-table-toolbar"`.
+
+### DataTableView
+
+Renders a `div` and takes every prop a `div` takes. Renders the table's header and body from the context table
+instance, in a bordered frame that scrolls sideways when the columns are wider than it. Its `children` render in
+the body only while there are no rows - a `DataTableEmpty`. It sets `data-slot="data-table-view"`.
+
+### DataTableEmpty
+
+Renders shadcn's [`TableCell`](https://ui.shadcn.com/docs/components/base/table) and takes every prop it takes.
+The one row a `DataTableView` shows when there are no rows: a cell spanning every column, its `children` centred
+in an upstream `Empty`. It defaults `colSpan` to the table's leaf column count. It sets `data-slot="data-table-empty"`.
+
+### useDataTable
+
+`useDataTable<TData>(): TanstackTable<TData>` - reads the `@tanstack/react-table` instance the surrounding
+`DataTable` provides; throws outside one.
+
+### DataTablePagination
+
+Renders a `div` and takes every prop a `div` takes. The pager's row, reading the table from `DataTable` context;
+`children` are its content, such as a status line and the step buttons. It sets `data-slot="data-table-pagination"`.
+
+### DataTablePaginationPrevious
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button) and takes every prop it takes
+except `children`, plus:
+
+| Prop         | Type     | Default  |
+| ------------ | -------- | -------- |
+| `aria-label` | `string` | required |
+
+Steps the table back one page, disabled on the first; its animated chevron plays while it is hovered or focused.
+It sets `data-slot="data-table-pagination-previous"`.
+
+### DataTablePaginationNext
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button) and takes every prop it takes
+except `children`, plus:
+
+| Prop         | Type     | Default  |
+| ------------ | -------- | -------- |
+| `aria-label` | `string` | required |
+
+Steps the table on one page, disabled on the last; its animated chevron plays while it is hovered or focused. It
+sets `data-slot="data-table-pagination-next"`.
+
+### DataTableViewOptions
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button) and takes every prop it takes. A
+column-visibility toggle reading the table from `DataTable` context: icon-only by default, named "Toggle columns"
+unless an `aria-label` is given, and renders nothing when no column can hide. It sets
+`data-slot="data-table-view-options"`.

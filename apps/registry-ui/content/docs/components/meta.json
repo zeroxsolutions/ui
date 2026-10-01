@@ -1,4 +1,15 @@
 {
   "title": "Components",
-  "pages": ["index", "---Feedback---", "status-indicator"]
+  "pages": [
+    "index",
+    "---Data display---",
+    "ai-provider-card",
+    "chat-message",
+    "code-block",
+    "data-table",
+    "data-table-column-header",
+    "file-tree",
+    "---Feedback---",
+    "status-indicator"
+  ]
 }

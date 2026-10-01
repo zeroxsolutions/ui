@@ -1,0 +1,137 @@
+---
+title: Data Table Column Header
+description: A @tanstack/react-table column's sort-and-hide menu, taking the column directly rather than a shared table instance.
+---
+
+<ComponentPreview name="data-table-column-header-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/data-table-column-header.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button dropdown-menu utils https://lucide-animated.com/r/arrow-down.json https://lucide-animated.com/r/arrow-up.json https://lucide-animated.com/r/chevrons-up-down.json https://lucide-animated.com/r/eye-off.json
+```
+
+<Step>Copy the component into `components/data-display/data-table-column-header.tsx`.</Step>
+
+<ComponentSource name="data-table-column-header" title="components/data-display/data-table-column-header.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  DataTableColumnHeader,
+  DataTableColumnHeaderContent,
+  DataTableColumnHeaderHide,
+  DataTableColumnHeaderSortAscending,
+  DataTableColumnHeaderSortDescending,
+  DataTableColumnHeaderTrigger,
+} from '@/components/data-display/data-table-column-header';
+```
+
+It takes the column directly, since column defs live outside the render tree, as a column's `header` inside
+[Data Table](/docs/components/data-table):
+
+```tsx
+{
+  accessorKey: 'name',
+  header: ({ column }) => (
+    <DataTableColumnHeader column={column}>
+      <DataTableColumnHeaderTrigger>Name</DataTableColumnHeaderTrigger>
+      <DataTableColumnHeaderContent>
+        <DataTableColumnHeaderSortAscending />
+        <DataTableColumnHeaderSortDescending />
+        <DataTableColumnHeaderHide />
+      </DataTableColumnHeaderContent>
+    </DataTableColumnHeader>
+  ),
+}
+```
+
+A column that neither sorts nor hides takes its title as plain `children`, with no menu.
+
+## Composition
+
+```text
+DataTableColumnHeader
+|-- DataTableColumnHeaderTrigger
+`-- DataTableColumnHeaderContent
+    |-- DataTableColumnHeaderSortAscending
+    |-- DataTableColumnHeaderSortDescending
+    |-- DropdownMenuSeparator
+    `-- DataTableColumnHeaderHide
+```
+
+## API reference
+
+### DataTableColumnHeader
+
+Renders a `div` and takes every prop a `div` takes, plus:
+
+| Prop     | Type                    | Default  |
+| -------- | ----------------------- | -------- |
+| `column` | `Column<TData, TValue>` | required |
+
+Hands the column to its parts over context, which compose the column menu. It sets
+`data-slot="data-table-column-header"`.
+
+### DataTableColumnHeaderTrigger
+
+Renders shadcn's [`DropdownMenuTrigger`](https://ui.shadcn.com/docs/components/base/dropdown-menu) and takes
+every prop it takes. The ghost button that opens the column menu: `children` are the column's title, followed by
+an animated icon for the column's sort direction that plays while the button is hovered or focused. It sets
+`data-slot="data-table-column-header-trigger"`.
+
+### DataTableColumnHeaderContent
+
+Renders shadcn's [`DropdownMenuContent`](https://ui.shadcn.com/docs/components/base/dropdown-menu) and takes
+every prop it takes. It defaults `align` to `start`. It sets `data-slot="data-table-column-header-content"`.
+
+### DataTableColumnHeaderSortAscending
+
+Renders shadcn's [`DropdownMenuItem`](https://ui.shadcn.com/docs/components/base/dropdown-menu) and takes every
+prop it takes. Sorts the header's column ascending; `children` default to "Asc" and override the copy. A
+caller's `onClick` runs first, and calling `event.preventDefault()` in it skips the sort. It sets
+`data-slot="data-table-column-header-sort-ascending"`.
+
+### DataTableColumnHeaderSortDescending
+
+Renders shadcn's [`DropdownMenuItem`](https://ui.shadcn.com/docs/components/base/dropdown-menu) and takes every
+prop it takes. Sorts the header's column descending; `children` default to "Desc" and override the copy. A
+caller's `onClick` runs first, and calling `event.preventDefault()` in it skips the sort. It sets
+`data-slot="data-table-column-header-sort-descending"`.
+
+### DataTableColumnHeaderHide
+
+Renders shadcn's [`DropdownMenuItem`](https://ui.shadcn.com/docs/components/base/dropdown-menu) and takes every
+prop it takes. Hides the header's column; `children` default to "Hide" and override the copy. A caller's
+`onClick` runs first, and calling `event.preventDefault()` in it skips the hide. It sets
+`data-slot="data-table-column-header-hide"`.

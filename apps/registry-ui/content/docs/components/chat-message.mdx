@@ -1,0 +1,98 @@
+---
+title: Chat Message
+description: One chat message row over upstream Message, with a line beside its leading edge while its text is still streaming.
+---
+
+<ComponentPreview name="chat-message-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/chat-message.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add message utils
+```
+
+<Step>Copy the component into `components/data-display/chat-message.tsx`.</Step>
+
+<ComponentSource name="chat-message" title="components/data-display/chat-message.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { ChatMessage, ChatMessageAccent } from '@/components/data-display/chat-message';
+```
+
+The consumer composes the row from upstream `Message` parts, and adds a `ChatMessageAccent` while the row
+streams:
+
+```tsx
+<ChatMessage streaming style={{ '--chat-message-accent': agent.color } as CSSProperties}>
+  <ChatMessageAccent />
+  <MessageContent>
+    <MessageHeader>{agent.name}</MessageHeader>
+    <Bubble variant="ghost">
+      <BubbleContent>{text}</BubbleContent>
+    </Bubble>
+  </MessageContent>
+</ChatMessage>
+```
+
+Use it to mark a row as still streaming; a static row needs only upstream `Message`.
+
+## Composition
+
+```text
+ChatMessage
+|-- ChatMessageAccent
+`-- MessageContent
+    |-- MessageHeader
+    `-- Bubble
+        `-- BubbleContent
+```
+
+## API reference
+
+### ChatMessage
+
+Renders shadcn's [`Message`](https://ui.shadcn.com/docs/components/base/message) and takes every prop it takes,
+plus:
+
+| Prop        | Type      | Default |
+| ----------- | --------- | ------- |
+| `streaming` | `boolean` | `false` |
+
+It sets `data-slot="chat-message"` and `data-streaming` while streaming.
+
+### ChatMessageAccent
+
+Renders a `span` and takes every prop a `span` takes. It is hidden from assistive technology, shown only while
+its row streams, and painted in `--chat-message-accent` (any CSS colour set on the row, such as the agent's), or
+`--primary` when that is unset. It sets `data-slot="chat-message-accent"` and `aria-hidden`.

@@ -1,0 +1,195 @@
+---
+title: Code Block
+description: Read-only source over a collapsible card, highlighted through the shared Shiki highlighter and falling back to plain mono while the grammar loads.
+---
+
+<ComponentPreview name="code-block-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/code-block.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add @base-ui/react @shikijs/langs @zeroxsolutions/icons shiki
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add scroll-area utils https://ui.zeroxsolutions.com/r/collapsible-card.json https://ui.zeroxsolutions.com/r/copy-button.json https://ui.zeroxsolutions.com/r/highlighted-code.json
+```
+
+<Step>Copy the component into `components/data-display/code-block.tsx`.</Step>
+
+<ComponentSource name="code-block" title="components/data-display/code-block.tsx" />
+
+<Step>Copy the hook that highlights the block's code into `hooks/use-highlighted-lines.ts`.</Step>
+
+<ComponentSource
+  name="code-block"
+  file="registry/bases/base-ui/hooks/use-highlighted-lines.ts"
+  title="hooks/use-highlighted-lines.ts"
+/>
+
+<Step>Copy the plain-language check and language display names into `lib/code-language.ts`.</Step>
+
+<ComponentSource name="code-block" file="registry/bases/base-ui/lib/code-language.ts" title="lib/code-language.ts" />
+
+<Step>Copy the Shiki theme into `lib/code-theme.ts`.</Step>
+
+<ComponentSource name="code-block" file="registry/bases/base-ui/lib/code-theme.ts" title="lib/code-theme.ts" />
+
+<Step>Copy the language icon lookup into `lib/language-options.tsx`.</Step>
+
+<ComponentSource
+  name="code-block"
+  file="registry/bases/base-ui/lib/language-options.tsx"
+  title="lib/language-options.tsx"
+/>
+
+<Step>Copy the vendored Mermaid grammar into `lib/mermaid-grammar.ts`.</Step>
+
+<ComponentSource
+  name="code-block"
+  file="registry/bases/base-ui/lib/mermaid-grammar.ts"
+  title="lib/mermaid-grammar.ts"
+/>
+
+<Step>Copy the shared Shiki highlighter into `lib/shiki.ts`.</Step>
+
+<ComponentSource name="code-block" file="registry/bases/base-ui/lib/shiki.ts" title="lib/shiki.ts" />
+
+<Step>Copy the language option types into `lib/language-option.ts`.</Step>
+
+<ComponentSource
+  name="code-block"
+  file="registry/bases/base-ui/types/language-option.ts"
+  title="lib/language-option.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockCode,
+  CodeBlockContent,
+  CodeBlockCopy,
+  CodeBlockLanguage,
+  CodeBlockLineNumbers,
+} from '@/components/data-display/code-block';
+```
+
+The root holds the code; its parts show it. Compose a header from `CollapsibleCard` parts, then the body:
+
+```tsx
+<CodeBlock code={source} language="ts">
+  <CollapsibleCardHeader>
+    <CollapsibleCardTitle>
+      <CodeBlockLanguage />
+    </CollapsibleCardTitle>
+    <CollapsibleCardActions>
+      <CodeBlockCopy />
+      <CollapsibleCardTrigger />
+    </CollapsibleCardActions>
+  </CollapsibleCardHeader>
+  <CodeBlockContent>
+    <CodeBlockLineNumbers />
+    <CodeBlockCode />
+  </CodeBlockContent>
+</CodeBlock>
+```
+
+A block with no header floats its copy action over the code instead, inside `CodeBlockActions` placed before
+`CodeBlockContent`: `<CodeBlockActions><CodeBlockCopy variant="secondary" /></CodeBlockActions>`. Use it for a
+self-contained, read-only block; for already-tokenized source with no card chrome, compose `HighlightedCode`
+directly.
+
+## Composition
+
+```text
+CodeBlock
+|-- CollapsibleCardHeader
+|   |-- CollapsibleCardTitle
+|   |   `-- CodeBlockLanguage
+|   `-- CollapsibleCardActions
+|       |-- CodeBlockCopy
+|       `-- CollapsibleCardTrigger
+`-- CodeBlockContent
+    |-- CodeBlockLineNumbers
+    `-- CodeBlockCode
+```
+
+## API reference
+
+### CodeBlock
+
+Renders `CollapsibleCard` and takes every prop it takes, plus:
+
+| Prop       | Type                      | Default  |
+| ---------- | ------------------------- | -------- |
+| `code`     | `string`                  | required |
+| `language` | `string`                  | -        |
+| `lines`    | `HighlightLine[] \| null` | -        |
+
+It defaults `variant` to `muted`. It sets `data-slot="code-block"` and `data-language` to its language.
+
+### CodeBlockActions
+
+Renders a `div` and takes every prop a `div` takes. It floats over the code's top-right corner, shown while the
+block is hovered or one of its children holds keyboard focus; use it for a block with no header. It sets
+`data-slot="code-block-actions"`.
+
+### CodeBlockContent
+
+Renders `CollapsibleCardContent` and takes every prop it takes. Its viewport scrolls the code both ways and
+carries `data-slot="code-block-viewport"`. It sets `data-slot="code-block-content"`.
+
+### CodeBlockLineNumbers
+
+Renders a `span` and takes every prop a `span` takes. It numbers every line of the block's code, at least three
+digits wide, hidden from assistive technology and left out of a copy. It sets `data-slot="code-block-line-numbers"`
+and `aria-hidden`.
+
+### CodeBlockCode
+
+Renders `HighlightedCode` and takes every prop it takes except `lines` and `children`, which it supplies from the
+block's code and highlighted lines. It sets `data-slot="code-block-code"`.
+
+### CodeBlockLanguage
+
+Renders a `span` and takes every prop a `span` takes. It shows the block's language as an icon and display name,
+"Plain text" when it has none; `children` replace the name. It sets `data-slot="code-block-language"`.
+
+### CodeBlockCopy
+
+Renders `CopyButton` and takes every prop it takes except `value`, which it supplies as the block's code. `label`
+defaults to `Copy code` and `size` to `icon`. It sets `data-slot="code-block-copy"`.

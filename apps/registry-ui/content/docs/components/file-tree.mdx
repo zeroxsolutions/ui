@@ -1,0 +1,137 @@
+---
+title: File Tree
+description: An accessible file tree that drives keyboard navigation and owns selection and folder expansion, controlled or uncontrolled.
+---
+
+<ComponentPreview name="file-tree-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/file-tree.json
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils https://lucide-animated.com/r/chevron-right.json
+```
+
+<Step>Copy the component into `components/data-display/file-tree.tsx`.</Step>
+
+<ComponentSource name="file-tree" title="components/data-display/file-tree.tsx" />
+
+<Step>Copy the controllable-state hook into `hooks/use-controllable-state.ts`.</Step>
+
+<ComponentSource
+  name="file-tree"
+  file="registry/bases/base-ui/hooks/use-controllable-state.ts"
+  title="hooks/use-controllable-state.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { FileTree, FileTreeGroup, FileTreeItem, FileTreeLabel } from '@/components/data-display/file-tree';
+```
+
+The consumer composes `FileTreeItem` / `FileTreeLabel` / `FileTreeGroup` and owns every visible label and icon;
+the root ships no copy, so give it an `aria-label`:
+
+```tsx
+<FileTree aria-label="Files" defaultExpanded={['src']} defaultValue="src/index.ts">
+  <FileTreeItem value="src">
+    <FileTreeLabel>src</FileTreeLabel>
+    <FileTreeGroup>
+      <FileTreeItem value="src/index.ts">
+        <FileTreeLabel>index.ts</FileTreeLabel>
+      </FileTreeItem>
+    </FileTreeGroup>
+  </FileTreeItem>
+  <FileTreeItem value="README.md">
+    <FileTreeLabel>README.md</FileTreeLabel>
+  </FileTreeItem>
+</FileTree>
+```
+
+File Tree and `TreeItem` (data-display/tree-item) draw a similar row, and stay separate families until a change
+shows the two move together.
+
+## Composition
+
+```text
+FileTree
+|-- FileTreeItem
+|   |-- FileTreeLabel
+|   `-- FileTreeGroup
+|       `-- FileTreeItem
+|           `-- FileTreeLabel
+`-- FileTreeItem
+    `-- FileTreeLabel
+```
+
+## API reference
+
+### FileTree
+
+Renders a `ul` and takes every prop a `ul` takes except `onSelect`, plus:
+
+| Prop               | Type                           | Default |
+| ------------------ | ------------------------------ | ------- |
+| `value`            | `string`                       | -       |
+| `defaultValue`     | `string`                       | -       |
+| `onValueChange`    | `(value: string) => void`      | -       |
+| `expanded`         | `string[]`                     | -       |
+| `defaultExpanded`  | `string[]`                     | `[]`    |
+| `onExpandedChange` | `(expanded: string[]) => void` | -       |
+
+A WAI-ARIA APG Tree View (compound + context): the root owns selection and folder expansion, each controlled or
+uncontrolled, and drives keyboard navigation (Up/Down/Home/End move, Left/Right collapse/expand, Enter/Space
+select). It sets `data-slot="file-tree"` and `role="tree"`.
+
+### FileTreeItem
+
+Renders a `li` and takes every prop a `li` takes, plus:
+
+| Prop    | Type     | Default  |
+| ------- | -------- | -------- |
+| `value` | `string` | required |
+
+A node in a `FileTree`. It is a folder when it contains a `FileTreeGroup` (then it carries `aria-expanded`),
+otherwise a leaf. It sets `data-slot="file-tree-item"` and `data-value` to its value.
+
+### FileTreeLabel
+
+Renders a `div` and takes every prop a `div` takes. The clickable row of a `FileTreeItem`: a chevron (folders
+only, its animated icon playing while the row is hovered or its item focused), then the consumer's icon and file
+name as `children`, indented by depth. Clicking selects the item and toggles a folder. It sets
+`data-slot="file-tree-label"` and `data-selected` while selected.
+
+### FileTreeGroup
+
+Renders a `ul` and takes every prop a `ul` takes. The nested children of a folder `FileTreeItem`; rendered only
+while its parent item is expanded, and deepens `aria-level` for its descendants. It sets
+`data-slot="file-tree-group"` and `role="group"`.

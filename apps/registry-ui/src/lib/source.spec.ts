@@ -183,21 +183,15 @@ function installTarget({ path, type }: RegistryFile): string {
 
 /** Components whose page is still to be written. Each kind's task removes its names; the last task removes the set. */
 const UNDOCUMENTED = new Set([
-  'ai-provider-card',
   'avatar-picker',
   'center',
-  'chat-message',
   'chat-suggestion-item',
-  'code-block',
   'collapsible-card',
   'command-menu',
   'copy-button',
-  'data-table',
-  'data-table-column-header',
   'editor-tab',
   'emoji-appearance-toggle-group',
   'emoji-picker',
-  'file-tree',
   'file-type-icon',
   'floating-toolbar',
   'font-preview',
@@ -326,7 +320,12 @@ function declaredProps(source: string, part: string): Set<string> | undefined {
 }
 
 /** Parts whose table lists props their own file does not declare as `<Part>Props`, with where those props come from. */
-const PROPS_READ_ELSEWHERE: Record<string, string> = {};
+const PROPS_READ_ELSEWHERE: Record<string, string> = {
+  DataTablePaginationPrevious:
+    'takes DataTablePaginationStepProps, declared for the unexported DataTablePaginationStep both share.',
+  DataTablePaginationNext:
+    'takes DataTablePaginationStepProps, declared for the unexported DataTablePaginationStep both share.',
+};
 
 /**
  * Every component page whose API reference documents other parts than its file exports, in another
