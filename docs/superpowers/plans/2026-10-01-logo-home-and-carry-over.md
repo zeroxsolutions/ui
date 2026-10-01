@@ -34,6 +34,8 @@ Testing Library, Playwright on the worker preview (port 8787), nx, pnpm.
 - The wordmark is always `ZeroXSolutions UI`, never `ZeroX` alone. The mark draws no `0` or `x`
   glyph.
 - No shader or animation library is added. The shader is hand-written WebGL 1.
+- The unit runner is jsdom. A browser fact (layout, a media query, WebGL, animation frames) is asserted
+  in the e2e on the worker, never by patching a global inside a unit spec.
 - Tests hold behaviour a user or caller meets, located role first. No test asserts a class string or
   a `data-slot`. An e2e locates a code block by its slot only because a code block has no role.
 - Never `--no-verify` or `HUSKY=0`. Each commit passes the pre-commit hook (lint, typecheck, build,
@@ -54,15 +56,14 @@ Testing Library, Playwright on the worker preview (port 8787), nx, pnpm.
 ## Review Focus
 
 1. **A browser with WebGL disabled, or a context lost mid-animation.** The hero shows the static
-   poster, and nothing throws to the console. Task 6 adds a spec for the no-WebGL path.
+   poster, and nothing throws. Task 6's e2e runs a context with WebGL unavailable and listens for page errors.
 2. **A narrow screen, 390 wide.** The hero, the command block and the item grid fit with no sideways
    page scroll, and the command scrolls inside its block. Task 5's e2e asserts it.
 3. **Dark mode.** The mark and the shader take the dark tokens, and the favicon has a dark variant.
    Task 4's e2e loads `icon.svg` and finds the dark rule. Task 6 reads the colour from the computed
    token, not from a constant.
 4. **Keyboard.** The logo link, both hero actions, the copy button and each card's link are reachable
-   by Tab in reading order, with a visible focus ring. Task 5's e2e tabs from the logo to `Get
-started`.
+   by Tab in reading order. Task 5's e2e focuses `Browse components`, presses Tab, and expects `Get started` to hold focus.
 5. **A docs page with a nested route** (`/docs/components/status-indicator`). Exactly one header link
    is current, and it is `Components`, not `Docs`. Task 3's unit spec asserts it.
 
@@ -92,6 +93,9 @@ which parts render. After this task, every caller composes the parts.
   - `SourceCodeBlockLanguage`, `SourceCodeBlockCopy`, `SourceCodeBlockContent`,
     `SourceCodeBlockLineNumbers` and `SourceCodeBlockCode`, the `CodeBlock` parts;
   - `SourceCodeBlockFile`, a new `span` that holds a file's name.
+  - The aliased parts are the registry's parts, so they keep the registry's slots (`code-block-*`,
+    `collapsible-card-*`). Only `SourceCodeBlockFile`, the one part declared here, carries
+    `source-code-block-file`.
 - Produces `ComponentSource({ name, file?, code?, language?, lines?, maxLines?, ...CodeBlock props,
 children })`. It reads and cuts the source and renders `SourceCodeBlock` around its `children`.
 
@@ -685,12 +689,20 @@ export function currentSiteNavItem(items: SiteNavItem[], pathname: string): Site
 }
 ```
 
-In `site-header.tsx`, each item gets its pattern:
+In `site-header.tsx`, each item builds its pattern from the route unit or page URL it already links
+to, so no path is spelled twice:
 
-- `Home`: `'/'`
-- `Docs`: `'/docs{/*rest}'`
-- `Components`: `'/docs/components{/*rest}'`
-- `Blocks`: `'/blocks'`
+```ts
+const components = docsPageUrl(['components']);
+const navItems: SiteNavItem[] = [
+  { href: homeRoute.build(), label: 'Home', pattern: homeRoute.pathname },
+  { href: docsRoute.build(), label: 'Docs', pattern: `${docsRoute.pathname}{/*rest}` },
+  { href: components, label: 'Components', pattern: `${components}{/*rest}` },
+  { href: blocksRoute.build(), label: 'Blocks', pattern: blocksRoute.pathname },
+];
+```
+
+The unit spec's literal patterns stand in for these, which is all a spec of the matcher needs.
 
 In `main-nav.tsx`, compute `const current = currentSiteNavItem(items, pathname);` and set
 `aria-current={item === current ? 'page' : undefined}`. In `mobile-nav.tsx`, do the same for both
@@ -729,15 +741,13 @@ Expected: pass. `mobile-nav.spec.tsx` still passes; its mock pathname is `/docs`
 Append to `home.spec.ts`:
 
 ```ts
-test('the header names the site with its logo, and the logo leads home', async ({ page }) => {
+test('the site carries its logo: the header link home, and the icons', async ({ page, request }) => {
   await page.goto('/docs');
   const home = page.getByRole('banner').getByRole('link', { name: 'ZeroXSolutions UI' });
   await expect(home).toBeVisible();
   await home.click();
   await expect(page).toHaveURL(/\/$/);
-});
 
-test('the site serves its mark as the icon, with a dark variant', async ({ request }) => {
   const icon = await request.get('/icon.svg');
   expect(icon.ok()).toBe(true);
   const svg = await icon.text();
@@ -751,7 +761,7 @@ test('the site serves its mark as the icon, with a dark variant', async ({ reque
 - [ ] **Step 2: Run them and see them fail**
 
 Run: `pnpm nx e2e @zeroxsolutions/registry-ui-e2e -- src/home.spec.ts`
-Expected: FAIL. There is no link named `ZeroXSolutions UI` in the banner, and `/icon.svg` returns 404.
+Expected: FAIL. There is no link named `ZeroXSolutions UI` in the banner.
 
 - [ ] **Step 3: Write `SiteLogo`**
 
@@ -856,7 +866,7 @@ The renderer draws no React component it cannot inline, so the rects are written
 - [ ] **Step 8: Run the e2e and the gate**
 
 Run: `pnpm nx run-many -t lint typecheck build test`, then `pnpm nx e2e @zeroxsolutions/registry-ui-e2e`
-Expected: all pass, including the two new cases. Fetch one share image from the worker and open it.
+Expected: all pass, including the new case. Fetch one share image from the worker and open it.
 
 - [ ] **Step 9: Commit**
 
@@ -870,6 +880,8 @@ Expected: all pass, including the two new cases. Fetch one share image from the 
 
 - Modify: `apps/registry-ui/src/components/data-display/component-preview.tsx` (add `ComponentPreviewCaption`)
 - Modify: `apps/registry-ui/src/app/(app)/page.tsx` (whole file)
+- Create: `apps/registry-ui/src/app/(app)/_components/general/home-shader.tsx`, a stub that returns `null`,
+  which Task 6 replaces
 - Modify: `apps/registry-ui-e2e/src/home.spec.ts`
 
 **Interfaces:**
@@ -885,32 +897,25 @@ Replace the first test in `home.spec.ts`:
 ```ts
 const ITEMS = ['Chat Message', 'Code Block', 'File Tree', 'Tag Input', 'Password Input', 'Status Indicator'];
 
-test('/ says what the registry is, shows its items live, and links on', async ({ page }) => {
+test('/ says what the registry is, shows its items live, fits a phone, and links on', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
+  expect(await page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth')).toBe(false);
 
+  await page.setViewportSize({ width: 1440, height: 900 });
   const main = page.getByRole('main');
   await expect(main.getByRole('heading', { level: 1 })).toHaveText('Composed React components for shadcn, on Base UI.');
   await expect(main.getByRole('button', { name: 'Copy code' }).first()).toBeVisible();
   for (const item of ITEMS) await expect(main.getByText(item, { exact: true })).toBeVisible();
   await expect(main.getByTitle('AI Provider Picker')).toBeVisible();
 
-  await main.getByRole('link', { name: 'Browse components' }).click();
+  const browse = main.getByRole('link', { name: 'Browse components' });
+  await browse.focus();
+  await page.keyboard.press('Tab');
+  await expect(main.getByRole('link', { name: 'Get started' })).toBeFocused();
+
+  await browse.click();
   await expect(page.getByRole('heading', { level: 1, name: 'Components' })).toBeVisible();
-});
-
-test('at 390 wide the home page does not scroll sideways, and Tab walks it in reading order', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  expect(await page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth')).toBe(false);
-
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.getByRole('banner').getByRole('link', { name: 'ZeroXSolutions UI' }).focus();
-  const order: string[] = [];
-  for (let step = 0; step < 12 && !order.includes('Get started'); step++) {
-    await page.keyboard.press('Tab');
-    order.push(await page.evaluate('document.activeElement?.textContent?.trim() ?? ""'));
-  }
-  expect(order.indexOf('Browse components')).toBeLessThan(order.indexOf('Get started'));
 });
 ```
 
@@ -950,7 +955,7 @@ function ComponentPreviewCaption({ className, ...props }: ComponentProps<'div'>)
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { HomeShader } from './_components/home-shader';
+import { HomeShader } from './_components/general/home-shader';
 import { BlockFrame } from '@/components/data-display/block-frame';
 import {
   ComponentPreview,
@@ -976,11 +981,13 @@ import { blocksRoute } from '@/routes/app-routes';
 /** The items the home page shows live, by registry name; each renders its `<name>-demo`. */
 const HOME_ITEMS = ['chat-message', 'code-block', 'file-tree', 'tag-input', 'password-input', 'status-indicator'];
 
-const commandFor = (name: string): string =>
-  `pnpm dlx shadcn@latest add ${new URL(`/r/${name}.json`, registryHomepage).href}`;
+/** The shadcn CLI command that installs one registry item from its URL. */
+function homePageInstallCommand(name: string): string {
+  return `pnpm dlx shadcn@latest add ${new URL(`/r/${name}.json`, registryHomepage).href}`;
+}
 
 const INSTALL_STEPS = [
-  { title: 'Add an item with the shadcn CLI', language: 'bash', code: commandFor('status-indicator') },
+  { title: 'Add an item with the shadcn CLI', language: 'bash', code: homePageInstallCommand('status-indicator') },
   { title: 'The CLI writes it into your app', language: 'text', code: 'components/feedback/status-indicator.tsx' },
   {
     title: 'Import it and compose',
@@ -990,7 +997,7 @@ const INSTALL_STEPS = [
 ];
 
 /** A short source block: its language, a copy button and the code, unhighlighted (this page is no MDX). */
-function homeCode(code: string, language: string): ReactNode {
+function HomePageCode({ code, language }: { code: string; language: string }): ReactNode {
   return (
     <SourceCodeBlock code={code} language={language} lines={null}>
       <SourceCodeBlockHeader>
@@ -1037,7 +1044,9 @@ export default function HomePage(): ReactNode {
               Get started
             </Link>
           </div>
-          <div className="w-full max-w-xl text-left">{homeCode(commandFor('status-indicator'), 'bash')}</div>
+          <div className="w-full max-w-xl text-left">
+            <HomePageCode code={homePageInstallCommand('status-indicator')} language="bash" />
+          </div>
         </div>
       </section>
 
@@ -1083,7 +1092,7 @@ export default function HomePage(): ReactNode {
               <h3 className="font-medium">
                 {index + 1}. {step.title}
               </h3>
-              {homeCode(step.code, step.language)}
+              <HomePageCode code={step.code} language={step.language} />
             </li>
           ))}
         </ol>
@@ -1100,7 +1109,7 @@ Before writing the page, make two checks:
 - Read `registry.json` for each `HOME_ITEMS` name's file path, so step 2's path is the real one.
 
 Correct the code to what both say, not the other way round. `HomeShader` comes from Task 6. Until
-then, this task renders a stub that returns `null` in `_components/home-shader.tsx`, and Task 6
+then, this task renders a stub that returns `null` in `_components/general/home-shader.tsx`, and Task 6
 replaces it.
 
 - [ ] **Step 5: Run the e2e and the gate**
@@ -1121,8 +1130,7 @@ screenshot.
 
 **Files:**
 
-- Modify: `apps/registry-ui/src/app/(app)/_components/home-shader.tsx` (replace the stub)
-- Create: `apps/registry-ui/src/app/(app)/_components/home-shader.spec.tsx`
+- Modify: `apps/registry-ui/src/app/(app)/_components/general/home-shader.tsx` (replace the stub)
 - Modify: `apps/registry-ui-e2e/src/home.spec.ts`
 
 **Interfaces:**
@@ -1130,104 +1138,77 @@ screenshot.
 - Produces `HomeShader(props: ComponentProps<'div'>)`. It fills its positioned parent and is
   `aria-hidden`.
 
-- [ ] **Step 1: Write the failing specs**
+- [ ] **Step 1: Write the failing e2e**
 
-`home-shader.spec.tsx` covers the paths a jsdom can reach: no WebGL, and reduced motion.
-
-```tsx
-import { cleanup, render } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { HomeShader } from './home-shader';
-
-// jsdom has neither, and the shader reads both before it draws.
-beforeEach(() => {
-  vi.stubGlobal(
-    'IntersectionObserver',
-    class {
-      observe(): void {}
-      disconnect(): void {}
-    },
-  );
-});
-
-afterEach(() => {
-  cleanup();
-  vi.unstubAllGlobals();
-  vi.restoreAllMocks();
-});
-
-/** Longer than the 200 ms the shader waits for where `requestIdleCallback` is missing, as in jsdom. */
-const AFTER_START = 400;
-
-describe('HomeShader', () => {
-  it('asks for no context under reduced motion', async () => {
-    vi.stubGlobal(
-      'matchMedia',
-      vi.fn(() => ({ matches: true })),
-    );
-    const getContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext');
-    render(<HomeShader />);
-    await new Promise((resolve) => setTimeout(resolve, AFTER_START));
-    expect(getContext).not.toHaveBeenCalledWith('webgl', expect.anything());
-  });
-
-  it('asks for a context, gets none, and throws nothing where WebGL is missing', async () => {
-    vi.stubGlobal(
-      'matchMedia',
-      vi.fn(() => ({ matches: false })),
-    );
-    const getContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
-    const error = vi.spyOn(console, 'error');
-    render(<HomeShader />);
-    await new Promise((resolve) => setTimeout(resolve, AFTER_START));
-    expect(getContext).toHaveBeenCalledWith('webgl', expect.anything());
-    expect(error).not.toHaveBeenCalled();
-  });
-});
-```
-
-Add the e2e case to `home.spec.ts`:
+Every behaviour of the shader depends on the browser: whether reduced motion is set, whether WebGL
+exists, whether frames are requested. The unit runner is jsdom, where none of these is real, so the
+shader is covered by one e2e on the worker, in three browser contexts. Add to `home.spec.ts`:
 
 ```ts
-test('the hero shader starts no context under reduced motion, and otherwise stops within five seconds', async ({
+// Counts WebGL contexts and animation frames, and, with `noWebgl`, makes WebGL unavailable.
+const instrument = (noWebgl: boolean): string => `(() => {
+  const original = HTMLCanvasElement.prototype.getContext;
+  window.__contexts = 0; window.__frames = 0;
+  HTMLCanvasElement.prototype.getContext = function (kind, ...rest) {
+    if (String(kind).startsWith('webgl')) { window.__contexts++; if (${noWebgl}) return null; }
+    return original.call(this, kind, ...rest);
+  };
+  const raf = window.requestAnimationFrame.bind(window);
+  window.requestAnimationFrame = (callback) => { window.__frames++; return raf(callback); };
+})()`;
+
+test('the hero shader holds still under reduced motion or without WebGL, and otherwise settles', async ({
   browser,
 }) => {
-  const count = `(() => { const original = HTMLCanvasElement.prototype.getContext; window.__contexts = 0;
-    HTMLCanvasElement.prototype.getContext = function (...args) { if (String(args[0]).startsWith('webgl')) window.__contexts++; return original.apply(this, args); };
-    const raf = window.requestAnimationFrame; window.__frames = 0;
-    window.requestAnimationFrame = (cb) => { window.__frames++; return raf(cb); }; })()`;
-
   const reduced = await browser.newContext({ reducedMotion: 'reduce' });
   const still = await reduced.newPage();
-  await still.addInitScript(count);
+  await still.addInitScript(instrument(false));
   await still.goto('/');
+  await expect(still.getByRole('heading', { level: 1 })).toBeVisible();
   await still.waitForTimeout(1_000);
   expect(await still.evaluate('window.__contexts')).toBe(0);
   await reduced.close();
 
+  const bare = await browser.newContext({ reducedMotion: 'no-preference' });
+  const fallback = await bare.newPage();
+  const errors: string[] = [];
+  fallback.on('pageerror', (error) => errors.push(error.message));
+  await fallback.addInitScript(instrument(true));
+  await fallback.goto('/');
+  // The shader starts once the page is idle; ten seconds covers a cold worker on a shared runner.
+  await expect.poll(() => fallback.evaluate('window.__contexts'), { timeout: 10_000 }).toBeGreaterThan(0);
+  await expect(fallback.getByRole('heading', { level: 1 })).toBeVisible();
+  expect(errors).toEqual([]);
+  await bare.close();
+
   const moving = await browser.newContext({ reducedMotion: 'no-preference' });
   const page = await moving.newPage();
-  await page.addInitScript(count);
+  await page.addInitScript(instrument(false));
   await page.goto('/');
   await expect.poll(() => page.evaluate('window.__contexts'), { timeout: 10_000 }).toBeGreaterThan(0);
-  await page.waitForTimeout(6_000);
-  const before = (await page.evaluate('window.__frames')) as number;
-  await page.waitForTimeout(1_000);
-  expect(await page.evaluate('window.__frames')).toBe(before);
+  // Settled is no frame requested across half a second. The field settles within five seconds of
+  // starting, and fifteen also covers the start's own wait on a slow runner.
+  await expect
+    .poll(
+      async () => {
+        const before = (await page.evaluate('window.__frames')) as number;
+        await page.waitForTimeout(500);
+        return ((await page.evaluate('window.__frames')) as number) - before;
+      },
+      { timeout: 15_000 },
+    )
+    .toBe(0);
   await moving.close();
 });
 ```
 
-The poll carries a 10-second deadline because a worker started cold and a compiled shader are timed
-by the slowest runner. The case needs WebGL, which headless Chromium provides through SwiftShader. If
-a browser in the suite has none, the case is skipped for that browser by name, with the reason
-written beside the skip.
+The third context needs WebGL, which headless Chromium provides through SwiftShader. A browser in the
+suite without it is skipped for that context by name, with the reason beside the skip.
 
-- [ ] **Step 2: Run them and see them fail**
+- [ ] **Step 2: Run it and see it fail**
 
-Run: `pnpm nx test @zeroxsolutions/registry-ui -- 'src/app/(app)/_components/home-shader.spec.tsx'`
-Expected: FAIL. The stub never asks for a context, so the second case fails.
+Run: `pnpm nx e2e @zeroxsolutions/registry-ui-e2e -- src/home.spec.ts -g "hero shader"`
+Expected: FAIL at the second context, because the stub never asks for a context.
 
 - [ ] **Step 3: Implement `home-shader.tsx`**
 
@@ -1247,13 +1228,13 @@ const FRAME_MS = 1000 / 30;
 /** Above this device pixel ratio the field looks the same and costs more fill. */
 const MAX_DPR = 1.5;
 
-const VERTEX = `attribute vec2 p; void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
+const VERTEX_SHADER = `attribute vec2 p; void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
 
 // A field of square modules on a 28-pixel grid. Each module's opacity drifts on its own phase while
 // `amp` is above zero and holds the base opacity once it reaches zero. The field fades out towards the
 // centre, so the hero's text sits on the plain background, and `fade` brings the whole field in from
 // nothing, so the first frame matches the static background it replaces.
-const FRAGMENT = `precision mediump float;
+const FRAGMENT_SHADER = `precision mediump float;
 uniform vec2 res; uniform float t; uniform float amp; uniform float fade; uniform vec3 ink; uniform float dpr;
 float hash(vec2 c) { return fract(sin(dot(c, vec2(12.9898, 78.233))) * 43758.5453); }
 void main() {
@@ -1308,8 +1289,8 @@ function HomeShader({ className, ...props }: ComponentProps<'div'>): ReactNode {
         gl.attachShader(program, unit);
       };
       if (!program) return;
-      shader(gl.VERTEX_SHADER, VERTEX);
-      shader(gl.FRAGMENT_SHADER, FRAGMENT);
+      shader(gl.VERTEX_SHADER, VERTEX_SHADER);
+      shader(gl.FRAGMENT_SHADER, FRAGMENT_SHADER);
       gl.linkProgram(program);
       if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
       gl.useProgram(program);
@@ -1394,10 +1375,7 @@ The field's opacity peaks at 6.5% of the text colour, and the field fades out to
 where the headline sits. That keeps it inside the spec's contrast budget, which the step below
 measures.
 
-- [ ] **Step 4: Run the specs, then the gate and the e2e**
-
-Run: `pnpm nx test @zeroxsolutions/registry-ui -- 'src/app/(app)/_components/home-shader.spec.tsx'`
-Expected: PASS, 2 tests.
+- [ ] **Step 4: Run the gate and the e2e**
 
 Run: `pnpm nx run-many -t lint typecheck build test`, then `pnpm nx e2e @zeroxsolutions/registry-ui-e2e`
 Expected: all pass.
