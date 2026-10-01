@@ -20,7 +20,7 @@ function DocsToc({ toc }: DocsTocProps): ReactNode {
 
   return (
     <AnchorProvider toc={toc}>
-      <div className="flex flex-col gap-2 px-6 text-sm">
+      <div data-slot="docs-toc" className="flex flex-col gap-2 px-6 text-sm">
         <p className="text-muted-foreground text-xs font-medium">On this page</p>
         {toc.map((item) => (
           <DocsTocLink key={item.url} item={item} />
