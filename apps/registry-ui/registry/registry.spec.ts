@@ -259,7 +259,21 @@ function familyProblems(items: RegistryItem[], families: string[]): string[] {
   return [...unowned, ...misnamed];
 }
 
-/** Each component or block item has exactly one `<name>-demo` example, and every example is one of those. */
+/**
+ * The published item an example belongs to: its `<name>-demo`, or a further `<name>-<state>` example
+ * for a state the demo itself never reaches (the longest matching name wins, so `avatar-picker` does
+ * not also claim an example actually owned by a longer sibling name).
+ */
+function demoOwner(example: RegistryItem, names: string[]): string | undefined {
+  return names
+    .filter((name) => example.name === `${name}-demo` || example.name.startsWith(`${name}-`))
+    .sort((a, b) => b.length - a.length)[0];
+}
+
+/**
+ * Each component or block item has exactly one `<name>-demo` example; every example is that demo or a
+ * further `<name>-<state>` example of the same item, for a state the demo never reaches.
+ */
 function demoProblems(items: RegistryItem[]): string[] {
   const names = items.filter((item) => PUBLISHED.includes(item.type)).map((item) => item.name);
   const examples = items.filter((item) => item.type === 'registry:example');
@@ -270,7 +284,7 @@ function demoProblems(items: RegistryItem[]): string[] {
       return count === 1 ? [] : [`${name}: has ${count} ${name}-demo examples`];
     }),
     ...examples
-      .filter((example) => !names.some((name) => example.name === `${name}-demo`))
+      .filter((example) => demoOwner(example, names) === undefined)
       .map((example) => `${example.name}: is the demo of no item`),
     ...examples.flatMap((example) => {
       const expected = { path: `${BASE}/examples/${example.name}.tsx`, type: 'registry:example' };
@@ -543,6 +557,15 @@ describe('familyProblems', () => {
 describe('demoProblems', () => {
   it('reports nothing when each item has one demo and each example is a demo', () => {
     expect(demoProblems([...familyItems, treeItemDemo, aiProviderPickerDemo])).toEqual([]);
+  });
+
+  it('accepts a further <name>-<state> example for a state the demo never reaches', () => {
+    const treeItemExpanded = {
+      name: 'tree-item-expanded',
+      type: 'registry:example',
+      files: [{ path: `${BASE}/examples/tree-item-expanded.tsx`, type: 'registry:example' }],
+    };
+    expect(demoProblems([...familyItems, treeItemDemo, aiProviderPickerDemo, treeItemExpanded])).toEqual([]);
   });
 
   it('reports an item with no demo', () => {

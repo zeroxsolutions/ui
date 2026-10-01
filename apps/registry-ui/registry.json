@@ -1324,6 +1324,27 @@
       ]
     },
     {
+      "name": "avatar-picker-uploading",
+      "type": "registry:example",
+      "title": "Avatar Picker Uploading",
+      "description": "The upload pane mid-upload, its onUpload never resolving.",
+      "categories": ["examples"],
+      "registryDependencies": [
+        "@shadcn/avatar",
+        "@shadcn/empty",
+        "@shadcn/spinner",
+        "@shadcn/tabs",
+        "https://lucide-animated.com/r/upload.json",
+        "https://ui.zeroxsolutions.com/r/avatar-picker.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/avatar-picker-uploading.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
       "name": "center-demo",
       "type": "registry:example",
       "title": "Center Demo",
@@ -1399,6 +1420,24 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/frontmatter-form-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "frontmatter-form-invalid",
+      "type": "registry:example",
+      "title": "Frontmatter Form Invalid",
+      "description": "A frontmatter form with its name field left blank, showing the invalid state.",
+      "categories": ["examples"],
+      "registryDependencies": [
+        "@shadcn/field",
+        "@shadcn/input",
+        "https://ui.zeroxsolutions.com/r/frontmatter-form.json"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/frontmatter-form-invalid.tsx",
           "type": "registry:example"
         }
       ]

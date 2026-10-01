@@ -81,6 +81,10 @@ FrontmatterForm
     `-- FrontmatterFormFieldError
 ```
 
+## Invalid fields
+
+<ComponentPreview name="frontmatter-form-invalid" />
+
 ## API reference
 
 ### useFrontmatterFormField
@@ -115,8 +119,7 @@ plus:
 | `name` | `string` | required |
 
 One field of a `FrontmatterForm`, bound to `name`: an upstream `Field` that carries `data-invalid` while the
-root's `errors` holds `name`. It keeps upstream's `data-slot="field"`, which `FrontmatterFormFieldLabel` selects
-on.
+root's `errors` holds `name`. It keeps upstream's `data-slot="field"`, which shadcn's `FieldLabel` selects on.
 
 ### FrontmatterFormFieldLabel
 
