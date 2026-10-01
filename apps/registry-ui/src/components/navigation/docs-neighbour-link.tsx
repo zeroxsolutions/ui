@@ -23,6 +23,7 @@ function DocsNeighbourLink({ direction, href }: DocsNeighbourLinkProps): ReactNo
   return (
     <Link
       href={href}
+      data-slot="docs-neighbour-link"
       aria-label={direction === 'previous' ? 'Previous page' : 'Next page'}
       className={buttonVariants({ variant: 'secondary', size: 'icon-sm' })}
       {...arrow.handlers}
