@@ -70,7 +70,9 @@ interface AvatarPickerProps extends React.ComponentProps<typeof Popover> {
  *         <AvatarPickerEmojiContent>
  *           <EmojiPickerSearch />
  *           <EmojiPickerContent>
- *             <EmojiPickerEmpty>No emoji found</EmojiPickerEmpty>
+ *             <EmojiPickerEmpty>
+ *               <Empty><EmptyHeader><EmptyTitle>No emoji found</EmptyTitle></EmptyHeader></Empty>
+ *             </EmojiPickerEmpty>
  *           </EmojiPickerContent>
  *           <EmojiPickerNav />
  *         </AvatarPickerEmojiContent>

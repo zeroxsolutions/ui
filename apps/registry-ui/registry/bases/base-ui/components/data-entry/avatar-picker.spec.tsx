@@ -150,7 +150,7 @@ describe('AvatarPicker', () => {
     expect(screen.getByRole('button', { name: '#6366f1' })).toBeTruthy();
   });
 
-  it('shows "No emoji found" when a search in the emoji pane matches nothing', async () => {
+  it('shows "No emoji found" when a search in the emoji pane matches nothing', () => {
     render(
       <Picker defaultTab="emoji">
         <EmojiPane />
@@ -159,7 +159,6 @@ describe('AvatarPicker', () => {
     openEditor();
 
     fireEvent.change(screen.getByLabelText('Search emoji'), { target: { value: 'zzzznotanemoji' } });
-    await act(async () => {});
 
     expect(screen.getByText('No emoji found')).toBeTruthy();
   });

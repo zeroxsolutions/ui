@@ -1263,6 +1263,7 @@
       "title": "Avatar Picker Demo",
       "description": "A color-tinted avatar that opens an emoji, upload and color editor over AvatarPicker.",
       "categories": ["examples"],
+      "dependencies": ["lucide-react"],
       "registryDependencies": [
         "@shadcn/avatar",
         "@shadcn/empty",

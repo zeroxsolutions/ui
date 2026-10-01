@@ -1,5 +1,6 @@
 'use client';
 
+import { SearchX } from 'lucide-react';
 import { useRef, useState, type ReactNode } from 'react';
 
 import {
@@ -22,7 +23,14 @@ import {
   EmojiPickerSearch,
 } from '@/registry/bases/base-ui/components/data-entry/emoji-picker';
 import { Avatar, AvatarFallback, AvatarImage } from '@/registry/bases/base-ui/ui/avatar';
-import { EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/registry/bases/base-ui/ui/empty';
 import { PaletteIcon, type PaletteIconHandle } from '@/registry/bases/base-ui/ui/palette';
 import { SmileIcon, type SmileIconHandle } from '@/registry/bases/base-ui/ui/smile';
 import { Spinner } from '@/registry/bases/base-ui/ui/spinner';
@@ -87,7 +95,16 @@ function AvatarPickerDemo(): ReactNode {
           <AvatarPickerEmojiContent>
             <EmojiPickerSearch />
             <EmojiPickerContent>
-              <EmojiPickerEmpty>No emoji found</EmojiPickerEmpty>
+              <EmojiPickerEmpty>
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <SearchX />
+                    </EmptyMedia>
+                    <EmptyTitle>No emoji found</EmptyTitle>
+                  </EmptyHeader>
+                </Empty>
+              </EmojiPickerEmpty>
             </EmojiPickerContent>
             <EmojiPickerNav />
           </AvatarPickerEmojiContent>
