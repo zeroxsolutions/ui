@@ -2,31 +2,40 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { ComponentSource } from './component-source';
-
-const code = ['const a = 1;', 'const b = 2;', 'const c = 3;'].join('\n');
-const lines = JSON.stringify(code.split('\n').map((line) => [{ content: line }]));
+import { SourceCodeBlockCode, SourceCodeBlockContent, SourceCodeBlockCopy } from './source-code-block';
 
 afterEach(cleanup);
 
+const CODE = 'const a = 1;\nconst b = 2;\nconst c = 3;\nconst d = 4;';
+
 describe('ComponentSource', () => {
-  it('numbers each line, beside a copy of the source as it is', () => {
-    const { container } = render(<ComponentSource name="demo" code={code} language="ts" lines={lines} />);
-
-    expect(container.querySelector('pre')?.textContent).toBe(`1\n2\n3${code}`);
-    expect(container.querySelector('code')?.textContent).toBe(code);
-    expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
-  });
-
-  it('cut to its first lines, shows those alone and offers nothing to copy', () => {
-    const { container } = render(
-      <ComponentSource name="demo" code={code} language="ts" lines={lines} maxLines={2} copyable={false} />,
+  it('shows the parts its caller composes, and nothing else', () => {
+    render(
+      <ComponentSource name="x" code={CODE} language="ts">
+        <SourceCodeBlockContent>
+          <SourceCodeBlockCode />
+        </SourceCodeBlockContent>
+      </ComponentSource>,
     );
-
-    expect(container.querySelector('code')?.textContent).toBe('const a = 1;\nconst b = 2;');
+    expect(screen.getByText(/const d = 4;/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();
   });
 
+  it('cuts the source to its first lines when asked', () => {
+    render(
+      <ComponentSource name="x" code={CODE} language="ts" maxLines={2}>
+        <SourceCodeBlockCopy />
+        <SourceCodeBlockContent>
+          <SourceCodeBlockCode />
+        </SourceCodeBlockContent>
+      </ComponentSource>,
+    );
+    expect(screen.getByText(/const b = 2;/)).toBeTruthy();
+    expect(screen.queryByText(/const c = 3;/)).toBeNull();
+    expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
+  });
+
   it('throws outside a docs page, where nothing read its source', () => {
-    expect(() => render(<ComponentSource name="demo" />)).toThrow(/demo/);
+    expect(() => render(<ComponentSource name="x" />)).toThrow(/has no source/);
   });
 });

@@ -16,49 +16,27 @@ import {
   CollapsibleCardTitle,
   CollapsibleCardTrigger,
 } from '@/registry/bases/base-ui/components/layout/collapsible-card';
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-interface SourceCodeBlockProps extends ComponentProps<typeof CodeBlock> {
-  /** What the header names beside the language, such as the file's name. */
-  children?: ReactNode;
-  /** Adds the card's own trigger, so a long file can be folded away. */
-  collapsible?: boolean;
-  /** Adds the copy button at the header's end; on by default. */
-  copyable?: boolean;
-  /** Numbers each line in a gutter beside the code, which a copy leaves out. */
-  lineNumbers?: boolean;
+// The registry's code block and its header parts, across the client boundary their hooks need on a
+// server-rendered page. A page composes them: header (title: language, file; actions: copy, trigger),
+// then content (line numbers, code).
+
+/** A file's name in a source block's title, beside its language; it truncates when the header is narrow. */
+function SourceCodeBlockFile({ className, ...props }: ComponentProps<'span'>): ReactNode {
+  return <span data-slot="source-code-block-file" className={cn('min-w-0 truncate font-mono', className)} {...props} />;
 }
 
-/**
- * The registry's `CodeBlock` with a header: the language's icon and its id as the fence spells it
- * (`tsx`, `bash`), the block's children (a file's name) beside them, and the copy button at the
- * header's end, outside the code's scroller. The client boundary the block's hooks need on a
- * server-rendered page.
- */
-function SourceCodeBlock({
-  children,
-  collapsible = false,
-  copyable = true,
-  lineNumbers = false,
-  ...props
-}: SourceCodeBlockProps): ReactNode {
-  return (
-    <CodeBlock {...props}>
-      <CollapsibleCardHeader>
-        <CollapsibleCardTitle>
-          <CodeBlockLanguage>{props.language}</CodeBlockLanguage>
-          {children ? <span className="min-w-0 truncate font-mono">{children}</span> : null}
-        </CollapsibleCardTitle>
-        <CollapsibleCardActions>
-          {copyable ? <CodeBlockCopy /> : null}
-          {collapsible ? <CollapsibleCardTrigger /> : null}
-        </CollapsibleCardActions>
-      </CollapsibleCardHeader>
-      <CodeBlockContent>
-        {lineNumbers ? <CodeBlockLineNumbers /> : null}
-        <CodeBlockCode />
-      </CodeBlockContent>
-    </CodeBlock>
-  );
-}
-
-export { SourceCodeBlock };
+export {
+  CodeBlock as SourceCodeBlock,
+  CollapsibleCardHeader as SourceCodeBlockHeader,
+  CollapsibleCardTitle as SourceCodeBlockTitle,
+  CodeBlockLanguage as SourceCodeBlockLanguage,
+  SourceCodeBlockFile,
+  CollapsibleCardActions as SourceCodeBlockActions,
+  CodeBlockCopy as SourceCodeBlockCopy,
+  CollapsibleCardTrigger as SourceCodeBlockTrigger,
+  CodeBlockContent as SourceCodeBlockContent,
+  CodeBlockLineNumbers as SourceCodeBlockLineNumbers,
+  CodeBlockCode as SourceCodeBlockCode,
+};

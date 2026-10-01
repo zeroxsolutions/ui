@@ -2,7 +2,19 @@ import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
 import { ExamplePreview } from '@/components/data-display/example-preview';
 import { ComponentSource } from '@/components/data-display/component-source';
-import { SourceCodeBlock } from '@/components/data-display/source-code-block';
+import {
+  SourceCodeBlock,
+  SourceCodeBlockActions,
+  SourceCodeBlockCode,
+  SourceCodeBlockContent,
+  SourceCodeBlockCopy,
+  SourceCodeBlockFile,
+  SourceCodeBlockHeader,
+  SourceCodeBlockLanguage,
+  SourceCodeBlockLineNumbers,
+  SourceCodeBlockTitle,
+  SourceCodeBlockTrigger,
+} from '@/components/data-display/source-code-block';
 import { ComponentsList } from '@/components/navigation/components-list';
 import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
 import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
@@ -91,7 +103,18 @@ export const mdxComponents = {
         lines={lines ? (JSON.parse(lines) as HighlightLine[] | null) : null}
         className="mt-6"
       >
-        {title}
+        <SourceCodeBlockHeader>
+          <SourceCodeBlockTitle>
+            <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
+            {title ? <SourceCodeBlockFile>{title}</SourceCodeBlockFile> : null}
+          </SourceCodeBlockTitle>
+          <SourceCodeBlockActions>
+            <SourceCodeBlockCopy />
+          </SourceCodeBlockActions>
+        </SourceCodeBlockHeader>
+        <SourceCodeBlockContent>
+          <SourceCodeBlockCode />
+        </SourceCodeBlockContent>
       </SourceCodeBlock>
     );
   },
@@ -108,6 +131,23 @@ export const mdxComponents = {
   AlertTitle,
   AlertDescription,
   ComponentPreview: ExamplePreview,
-  ComponentSource: (props: ComponentProps<typeof ComponentSource>) => <ComponentSource className="mt-6" {...props} />,
+  ComponentSource: ({ file, ...props }: ComponentProps<typeof ComponentSource>) => (
+    <ComponentSource file={file} className="mt-6" {...props}>
+      <SourceCodeBlockHeader>
+        <SourceCodeBlockTitle>
+          <SourceCodeBlockLanguage>{props.language}</SourceCodeBlockLanguage>
+          {file ? <SourceCodeBlockFile>{file.split('/').pop()}</SourceCodeBlockFile> : null}
+        </SourceCodeBlockTitle>
+        <SourceCodeBlockActions>
+          <SourceCodeBlockCopy />
+          <SourceCodeBlockTrigger />
+        </SourceCodeBlockActions>
+      </SourceCodeBlockHeader>
+      <SourceCodeBlockContent>
+        <SourceCodeBlockLineNumbers />
+        <SourceCodeBlockCode />
+      </SourceCodeBlockContent>
+    </ComponentSource>
+  ),
   ComponentsList: () => <ComponentsList className="mt-8" />,
 };

@@ -1,7 +1,16 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { SourceCodeBlock } from '@/components/data-display/source-code-block';
+import {
+  SourceCodeBlock,
+  SourceCodeBlockActions,
+  SourceCodeBlockCode,
+  SourceCodeBlockContent,
+  SourceCodeBlockCopy,
+  SourceCodeBlockHeader,
+  SourceCodeBlockLanguage,
+  SourceCodeBlockTitle,
+} from '@/components/data-display/source-code-block';
 import { registryHomepage } from '@/lib/registry';
 import { docsPageUrl } from '@/lib/source';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
@@ -20,7 +29,19 @@ export default function HomePage(): ReactNode {
         </p>
       </header>
       {/* Shown plain: this page is no MDX, so `rehypeDocsCode` never highlights it, and one command reads as well unhighlighted. */}
-      <SourceCodeBlock code={INSTALL} language="bash" lines={null} />
+      <SourceCodeBlock code={INSTALL} language="bash" lines={null}>
+        <SourceCodeBlockHeader>
+          <SourceCodeBlockTitle>
+            <SourceCodeBlockLanguage>bash</SourceCodeBlockLanguage>
+          </SourceCodeBlockTitle>
+          <SourceCodeBlockActions>
+            <SourceCodeBlockCopy />
+          </SourceCodeBlockActions>
+        </SourceCodeBlockHeader>
+        <SourceCodeBlockContent>
+          <SourceCodeBlockCode />
+        </SourceCodeBlockContent>
+      </SourceCodeBlock>
       <div className="flex flex-wrap gap-3">
         <Link href={docsPageUrl(['components'])} className={buttonVariants()}>
           Browse components

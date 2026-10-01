@@ -10,6 +10,16 @@ import {
 } from '@/components/data-display/component-preview';
 import { ComponentSource } from '@/components/data-display/component-source';
 import { RegistryExample } from '@/components/data-display/registry-example';
+import {
+  SourceCodeBlockActions,
+  SourceCodeBlockCode,
+  SourceCodeBlockContent,
+  SourceCodeBlockCopy,
+  SourceCodeBlockHeader,
+  SourceCodeBlockLanguage,
+  SourceCodeBlockLineNumbers,
+  SourceCodeBlockTitle,
+} from '@/components/data-display/source-code-block';
 import { publishedBlocks } from '@/lib/registry';
 import { Index } from '@/registry/bases/base-ui/examples/__index__';
 
@@ -36,7 +46,7 @@ function ExamplePreview({ name, view, code, language, lines }: ExamplePreviewPro
   if (!Index[name]) throw new Error(`ComponentPreview: "${name}" is not in the examples index`);
   const block = view === undefined ? undefined : publishedBlocks.find((item) => item.name === view);
   if (view !== undefined && !block) throw new Error(`ComponentPreview: "${view}" is not a published block`);
-  const source = { name, code, language, lines, collapsible: false, variant: 'flush' } as const;
+  const source = { name, code, language, lines, variant: 'flush' } as const;
 
   return (
     <ComponentPreview className="mt-4 mb-12">
@@ -49,10 +59,33 @@ function ExamplePreview({ name, view, code, language, lines }: ExamplePreviewPro
       )}
       <ComponentPreviewSource>
         <ComponentPreviewExcerpt>
-          <ComponentSource {...source} maxLines={EXCERPT_LINES} copyable={false} />
+          <ComponentSource {...source} maxLines={EXCERPT_LINES}>
+            <SourceCodeBlockHeader>
+              <SourceCodeBlockTitle>
+                <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
+              </SourceCodeBlockTitle>
+            </SourceCodeBlockHeader>
+            <SourceCodeBlockContent>
+              <SourceCodeBlockLineNumbers />
+              <SourceCodeBlockCode />
+            </SourceCodeBlockContent>
+          </ComponentSource>
         </ComponentPreviewExcerpt>
         <ComponentPreviewCode>
-          <ComponentSource {...source} />
+          <ComponentSource {...source}>
+            <SourceCodeBlockHeader>
+              <SourceCodeBlockTitle>
+                <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
+              </SourceCodeBlockTitle>
+              <SourceCodeBlockActions>
+                <SourceCodeBlockCopy />
+              </SourceCodeBlockActions>
+            </SourceCodeBlockHeader>
+            <SourceCodeBlockContent>
+              <SourceCodeBlockLineNumbers />
+              <SourceCodeBlockCode />
+            </SourceCodeBlockContent>
+          </ComponentSource>
         </ComponentPreviewCode>
       </ComponentPreviewSource>
     </ComponentPreview>
