@@ -28,7 +28,7 @@ function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
   ];
 
   return (
-    <header className="bg-background sticky top-0 z-50 w-full">
+    <header data-slot="site-header" className="bg-background sticky top-0 z-50 w-full">
       <div className="mx-auto flex h-(--header-height) w-full items-center gap-2 px-6">
         <Link href={homeRoute.build()} className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
           <SiteLogo />
