@@ -29,7 +29,7 @@ pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/frontmatter-form.json
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add field
+pnpm dlx shadcn@latest add field utils
 ```
 
 <Step>Copy the component into `components/data-entry/frontmatter-form.tsx`.</Step>
@@ -124,22 +124,24 @@ root's `errors` holds `name`. It keeps upstream's `data-slot="field"`, which sha
 ### FrontmatterFormFieldLabel
 
 Renders shadcn's [`FieldLabel`](https://ui.shadcn.com/docs/components/base/field) and takes every prop it
-takes. Label for the current field, pointed (`htmlFor`) at its control. It sets no `data-slot` of its own,
-keeping `FieldLabel`'s own.
+takes. Label for the current field, pointed (`htmlFor`) at its control. It sets
+`data-slot="frontmatter-form-field-label"` in place of `FieldLabel`'s own, carrying the `flex-auto` rule
+the label would otherwise lose when `FrontmatterFormField`'s `orientation` is `horizontal` or `responsive`.
 
 ### FrontmatterFormFieldControl
 
-Clones `render` with the current field's `id`, string `value` and invalid-state attributes, which replace its
-own; its own `onChange` still runs, before the field's:
+Clones `render` with the current field's `id`, string `value`, `data-slot` and invalid-state attributes,
+which replace its own; its own `onChange` still runs, before the field's:
 
 | Prop     | Type                                                    | Default  |
 | -------- | ------------------------------------------------------- | -------- |
 | `render` | `ReactElement<FrontmatterFormFieldControlElementProps>` | required |
 
 `render` is the text control to bind, such as `<Input placeholder="my-skill" />` or `<Textarea />`; it must
-accept `id`, `value`, `onChange`, `aria-invalid` and `aria-describedby` (`FrontmatterFormFieldControlElementProps`,
-picked from an `input`'s own props). For a non-text control use `useFrontmatterFormField` instead. It renders no
-element of its own, so it sets no `data-slot`.
+accept `id`, `value`, `onChange`, `aria-invalid`, `aria-describedby` and `data-slot`
+(`FrontmatterFormFieldControlElementProps`, picked from an `input`'s own props). For a non-text control use
+`useFrontmatterFormField` instead. It renders no element of its own, so the `data-slot` it sets
+(`frontmatter-form-field-control`) lands on `render`, replacing its own.
 
 ### FrontmatterFormFieldError
 

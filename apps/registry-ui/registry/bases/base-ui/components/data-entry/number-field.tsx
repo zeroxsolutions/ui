@@ -54,10 +54,11 @@ function useNumberField(): NumberFieldContextValue {
  * to `min`/`max` and steps on the arrow keys; the consumer composes a
  * `NumberFieldInput` and any `InputGroupAddon` / `InputGroupText` around it (a
  * label before, a unit or a trigger after). Controlled - the consumer owns the
- * number. The root carries `data-mixed` while `mixed` and `data-editing` while
- * the input holds a draft. `NumberFieldInput` keeps upstream's
- * `data-slot="input-group-control"`, which the group's focus and invalid
- * rings select on.
+ * number. The root carries `data-mixed` while `mixed`, `data-editing` while
+ * the input holds a draft, and `data-disabled` while `disabled`.
+ * `NumberFieldInput` sets its own `data-slot="number-field-input"`, and the
+ * root's focus ring reads that slot in place of upstream's
+ * `input-group-control`.
  */
 function NumberField({
   value,
@@ -139,7 +140,10 @@ function NumberField({
         data-mixed={mixed || undefined}
         data-editing={editing || undefined}
         data-disabled={disabled || undefined}
-        className={className}
+        className={cn(
+          'has-[[data-slot=number-field-input]:focus-visible]:border-ring has-[[data-slot=number-field-input]:focus-visible]:ring-ring/50 has-[[data-slot=number-field-input]:focus-visible]:ring-3',
+          className,
+        )}
         {...props}
       >
         {children}
@@ -156,8 +160,9 @@ type NumberFieldInputProps = Omit<
 /**
  * The value input of a `NumberField`. It shows the field's value (or its draft
  * while focused) and hands every edit to the root; its `placeholder` shows only
- * while the field is `mixed`. It keeps upstream's `input-group-control` slot,
- * which the group's focus ring reads.
+ * while the field is `mixed`. It sets its own `data-slot="number-field-input"`;
+ * the root's focus ring reads that slot in place of upstream's
+ * `input-group-control`.
  */
 function NumberFieldInput({
   placeholder,
@@ -171,6 +176,7 @@ function NumberFieldInput({
   const field = useNumberField();
   return (
     <InputGroupInput
+      data-slot="number-field-input"
       type="text"
       inputMode="decimal"
       value={field.text}

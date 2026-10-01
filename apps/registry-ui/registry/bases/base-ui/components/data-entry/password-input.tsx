@@ -5,6 +5,7 @@ import * as React from 'react';
 import { EyeIcon, type EyeIconHandle } from '@/registry/bases/base-ui/ui/eye';
 import { EyeOffIcon, type EyeOffIconHandle } from '@/registry/bases/base-ui/ui/eye-off';
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 interface PasswordInputContextValue {
   visible: boolean;
@@ -32,27 +33,39 @@ function usePasswordInput(): PasswordInputContextValue {
  *     </InputGroupAddon>
  *   </PasswordInput>
  *
- * `className` places the group.
+ * `className` places the group. `PasswordInputInput` sets its own
+ * `data-slot="password-input-input"`, and the root's focus ring reads that
+ * slot in place of upstream's `input-group-control`.
  */
-function PasswordInput(props: React.ComponentProps<typeof InputGroup>): React.ReactNode {
+function PasswordInput({ className, ...props }: React.ComponentProps<typeof InputGroup>): React.ReactNode {
   const [visible, setVisible] = React.useState(false);
   const context = React.useMemo(() => ({ visible, toggle: () => setVisible((current) => !current) }), [visible]);
   return (
     <PasswordInputContext.Provider value={context}>
-      <InputGroup data-slot="password-input" data-visible={visible || undefined} {...props} />
+      <InputGroup
+        data-slot="password-input"
+        data-visible={visible || undefined}
+        className={cn(
+          'has-[[data-slot=password-input-input]:focus-visible]:border-ring has-[[data-slot=password-input-input]:focus-visible]:ring-ring/50 has-[[data-slot=password-input-input]:focus-visible]:ring-3',
+          className,
+        )}
+        {...props}
+      />
     </PasswordInputContext.Provider>
   );
 }
 
 /**
  * The password input, upstream's `InputGroupInput`, typed `password` or `text`
- * as the root says. It keeps upstream's `data-slot="input-group-control"`,
- * which the group's focus ring and invalid ring select on. Every other prop (`ref`/`onChange` for RHF `register`,
+ * as the root says. It sets its own `data-slot="password-input-input"`; the
+ * root's focus ring reads that slot in place of upstream's
+ * `input-group-control` (the invalid ring reads any `data-slot`, so it still
+ * applies unchanged). Every other prop (`ref`/`onChange` for RHF `register`,
  * ref-as-prop in React 19) flows straight to the input.
  */
 function PasswordInputInput(props: Omit<React.ComponentProps<typeof InputGroupInput>, 'type'>): React.ReactNode {
   const { visible } = usePasswordInput();
-  return <InputGroupInput {...props} type={visible ? 'text' : 'password'} />;
+  return <InputGroupInput data-slot="password-input-input" {...props} type={visible ? 'text' : 'password'} />;
 }
 
 /**

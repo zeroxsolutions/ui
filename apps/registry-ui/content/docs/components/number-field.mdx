@@ -101,7 +101,8 @@ Parses the draft with `parseRaw`, or as arithmetic by default, and clamps the re
 `step` moves the value on the arrow keys, clamped the same way. `displayText` shows a label (such as "Hug" or
 "Fill") in place of the number until the field is focused. The root carries `data-mixed` while `mixed`,
 `data-editing` while the input holds a draft, and `data-disabled` while `disabled`. It sets
-`data-slot="number-field"`.
+`data-slot="number-field"`, and its focus ring reads `NumberFieldInput`'s own slot in place of upstream's
+`input-group-control`.
 
 ### NumberFieldInput
 
@@ -109,4 +110,5 @@ Renders shadcn's [`InputGroupInput`](https://ui.shadcn.com/docs/components/base/
 prop it takes except `value`, `defaultValue`, `type` and `disabled`.
 
 Shows the field's value, or its draft while focused; its `placeholder` shows only while the field is `mixed`.
-It keeps upstream's `data-slot="input-group-control"`, which the group's focus and invalid rings select on.
+It sets `data-slot="number-field-input"` in place of upstream's `input-group-control`, which the root's
+focus ring reads (the invalid ring reads any `data-slot`, so it still applies unchanged).

@@ -27,7 +27,9 @@ type LanguageComboboxProps = LanguageOptionSource &
  * every visible part inside it: a `ComboboxTrigger` (holding a `ComboboxValue`,
  * whose render function receives the current `LanguageOption`), and a
  * `ComboboxContent` with an optional `ComboboxInput`, a `ComboboxEmpty` and a
- * `ComboboxList` whose render function receives each `LanguageOption`.
+ * `ComboboxList` whose render function receives each `LanguageOption`. It sets
+ * `data-slot="language-combobox"`; upstream's `Combobox` renders no element of
+ * its own to carry it, same as `AvatarPicker`'s `Popover`.
  */
 function LanguageCombobox({
   kind = 'locale',
@@ -41,6 +43,7 @@ function LanguageCombobox({
   const current = findLanguageOption(items, value, kind);
   return (
     <Combobox
+      data-slot="language-combobox"
       items={items}
       value={current ?? null}
       onValueChange={(option: LanguageOption | null) => {

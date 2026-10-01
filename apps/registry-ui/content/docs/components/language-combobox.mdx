@@ -131,4 +131,6 @@ takes except `items`, `value`, `defaultValue`, `onValueChange`, `multiple`, `ite
 Maps the string `value` to and from its option (`isItemEqualToValue`, `itemToStringLabel`); `kind` selects the
 built-in option set - UI locale names, or code-language ids - when `options` is omitted. For `kind="locale"`
 without `options`, `locales` picks which BCP-47 codes to offer; omitted, only the current `value` is offered, so
-the picker still shows what is selected, and an empty `value` then offers nothing. It sets no `data-slot`.
+the picker still shows what is selected, and an empty `value` then offers nothing. It sets
+`data-slot="language-combobox"`; upstream's `Combobox` renders no element of its own to carry it, same as
+[Avatar Picker](/docs/components/avatar-picker)'s `Popover`.

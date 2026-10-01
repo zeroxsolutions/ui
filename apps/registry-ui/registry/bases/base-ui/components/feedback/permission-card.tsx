@@ -48,7 +48,12 @@ function PermissionCard({ status, size = 'sm', className, ...props }: Permission
       data-slot="permission-card"
       data-status={status}
       size={size}
-      className={cn('group/permission-card', className)}
+      className={cn(
+        'group/permission-card',
+        'has-data-[slot=permission-card-actions]:pb-0 has-data-[slot=permission-card-resolved]:pb-0',
+        'data-[size=sm]:has-data-[slot=permission-card-actions]:pb-0 data-[size=sm]:has-data-[slot=permission-card-resolved]:pb-0',
+        className,
+      )}
       {...props}
     />
   );
@@ -93,12 +98,14 @@ function PermissionCardStatus({ children, ...props }: ComponentProps<typeof Badg
 
 /**
  * The decision row, a `CardFooter` shown only while the request is `pending`.
- * It keeps upstream's `data-slot="card-footer"`, which the Card recipe reads to
- * drop its bottom padding.
+ * It sets its own `data-slot="permission-card-actions"`; the root reads that
+ * slot (and `permission-card-resolved`) to drop a footer's bottom padding, in
+ * place of upstream's `card-footer`.
  */
 function PermissionCardActions({ className, ...props }: ComponentProps<typeof CardFooter>): ReactNode {
   return (
     <CardFooter
+      data-slot="permission-card-actions"
       className={cn(
         'justify-end gap-2 group-data-[status=approved]/permission-card:hidden group-data-[status=denied]/permission-card:hidden',
         className,
@@ -110,11 +117,16 @@ function PermissionCardActions({ className, ...props }: ComponentProps<typeof Ca
 
 /**
  * The persisted outcome, a `CardFooter` shown once the request is `approved` or
- * `denied`. Like `PermissionCardActions`, it keeps upstream's `card-footer` slot.
+ * `denied`. Like `PermissionCardActions`, it sets its own `data-slot`
+ * (`permission-card-resolved`) in place of upstream's `card-footer`.
  */
 function PermissionCardResolved({ className, ...props }: ComponentProps<typeof CardFooter>): ReactNode {
   return (
-    <CardFooter className={cn('gap-2 group-data-[status=pending]/permission-card:hidden', className)} {...props} />
+    <CardFooter
+      data-slot="permission-card-resolved"
+      className={cn('gap-2 group-data-[status=pending]/permission-card:hidden', className)}
+      {...props}
+    />
   );
 }
 

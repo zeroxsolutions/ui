@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/registry/bases/base-ui/ui/field';
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /** A frontmatter document: arbitrary keys, values usually strings. */
 type FrontmatterFormValue = Record<string, unknown>;
@@ -110,29 +111,50 @@ function FrontmatterFormField({ name, ...props }: FrontmatterFormFieldProps): Re
   );
 }
 
-/** Label for the current field, pointed at its control. */
-function FrontmatterFormFieldLabel(props: React.ComponentProps<typeof FieldLabel>): React.ReactNode {
+/**
+ * Label for the current field, pointed at its control. It sets its own
+ * `data-slot="frontmatter-form-field-label"`, carrying the `flex-auto` rule
+ * `FieldLabel` would otherwise lose when `FrontmatterFormField`'s `orientation`
+ * is `horizontal` or `responsive`.
+ */
+function FrontmatterFormFieldLabel({ className, ...props }: React.ComponentProps<typeof FieldLabel>): React.ReactNode {
   const field = useFrontmatterFormField();
-  return <FieldLabel htmlFor={field.controlId} {...props} />;
+  return (
+    <FieldLabel
+      data-slot="frontmatter-form-field-label"
+      htmlFor={field.controlId}
+      className={cn(
+        'group-data-[orientation=horizontal]/field:flex-auto @md/field-group:group-data-[orientation=responsive]/field:flex-auto',
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 type FrontmatterFormFieldControlElementProps = Pick<
   React.ComponentProps<'input'>,
   'id' | 'value' | 'onChange' | 'aria-invalid' | 'aria-describedby'
->;
+> & {
+  'data-slot'?: string;
+};
 
 interface FrontmatterFormFieldControlProps {
   /**
    * The text control to bind, such as `<Input placeholder="my-skill" />` or
-   * `<Textarea />`. It receives the field's `id`, string `value` and the
-   * invalid-state attributes, which replace its own; its own `onChange` still
-   * runs, before the field's. For a non-text control use
+   * `<Textarea />`. It receives the field's `id`, string `value`, `data-slot`
+   * and the invalid-state attributes, which replace its own; its own
+   * `onChange` still runs, before the field's. For a non-text control use
    * `useFrontmatterFormField()` instead.
    */
   render: React.ReactElement<FrontmatterFormFieldControlElementProps>;
 }
 
-/** Binds a text control (`Input`, `Textarea`) to the current field's string value. */
+/**
+ * Binds a text control (`Input`, `Textarea`) to the current field's string
+ * value, setting its `data-slot="frontmatter-form-field-control"` in place of
+ * the control's own.
+ */
 function FrontmatterFormFieldControl({ render }: FrontmatterFormFieldControlProps): React.ReactNode {
   const field = useFrontmatterFormField();
   const ownOnChange = render.props.onChange;
@@ -145,6 +167,7 @@ function FrontmatterFormFieldControl({ render }: FrontmatterFormFieldControlProp
     },
     'aria-invalid': field.error ? true : undefined,
     'aria-describedby': field.error ? field.errorId : undefined,
+    'data-slot': 'frontmatter-form-field-control',
   });
 }
 

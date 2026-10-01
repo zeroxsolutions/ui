@@ -132,12 +132,12 @@ inside a `CardAction` that lands it in the header's action corner. Defaults `var
 ### PermissionCardActions
 
 Renders shadcn's [`CardFooter`](https://ui.shadcn.com/docs/components/base/card) and takes every prop it
-takes. The decision row, right-aligned, shown only while `status` is `pending`. It keeps `CardFooter`'s own
-`data-slot="card-footer"` rather than setting its own, which the Card recipe reads to drop the footer's bottom
-padding.
+takes. The decision row, right-aligned, shown only while `status` is `pending`. It sets its own
+`data-slot="permission-card-actions"`; `PermissionCard` reads that slot (and `permission-card-resolved`) to
+drop a footer's bottom padding, in place of `CardFooter`'s own `card-footer`.
 
 ### PermissionCardResolved
 
 Renders shadcn's [`CardFooter`](https://ui.shadcn.com/docs/components/base/card) and takes every prop it
 takes. The persisted outcome, shown once `status` is `approved` or `denied`. Like `PermissionCardActions`, it
-keeps `CardFooter`'s own `data-slot="card-footer"` rather than setting its own.
+sets its own `data-slot` (`permission-card-resolved`) in place of `CardFooter`'s own `card-footer`.
