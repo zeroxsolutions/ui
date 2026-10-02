@@ -119,12 +119,61 @@ describe('setFluentEmojiStyleBase (per-style base)', () => {
   });
 });
 
+describe('fluentEmojiUrl (manifest coverage)', () => {
+  // '🧑‍🩰' (ballet dancer) has no committed file in any assets/<style>/ folder.
+  it('resolves to undefined for a glyph with no committed artwork in the style', () => {
+    expect(fluentEmojiUrl('🧑‍🩰', { base: 'https://cdn.example/emoji' })).toBeUndefined();
+  });
+
+  // '🙂‍↔️' (head shaking horizontally) has a 3d file but, like most non-face glyphs, no anim one.
+  it('resolves for a style the glyph has artwork in and not for one it lacks', () => {
+    expect(fluentEmojiUrl('🙂‍↔️', { base: 'https://cdn.example/emoji', style: '3d' })).toBe(
+      'https://cdn.example/emoji/3d/1f642-200d-2194-fe0f.webp',
+    );
+    expect(fluentEmojiUrl('🙂‍↔️', { base: 'https://cdn.example/emoji', style: 'anim' })).toBeUndefined();
+  });
+
+  it('resolves the phoenix glyph in 3d, flat, modern and mono', () => {
+    const phoenix = '🐦‍🔥';
+    expect(fluentEmojiUrl(phoenix, { base: 'https://cdn.example/emoji', style: '3d' })).toBe(
+      'https://cdn.example/emoji/3d/1f426-200d-1f525.webp',
+    );
+    expect(fluentEmojiUrl(phoenix, { base: 'https://cdn.example/emoji', style: 'flat' })).toBe(
+      'https://cdn.example/emoji/flat/1f426-200d-1f525.svg',
+    );
+    expect(fluentEmojiUrl(phoenix, { base: 'https://cdn.example/emoji', style: 'modern' })).toBe(
+      'https://cdn.example/emoji/modern/1f426-200d-1f525.svg',
+    );
+    expect(fluentEmojiUrl(phoenix, { base: 'https://cdn.example/emoji', style: 'mono' })).toBe(
+      'https://cdn.example/emoji/mono/1f426-200d-1f525.svg',
+    );
+  });
+
+  it('does not resolve the phoenix glyph in anim (no upstream animated artwork)', () => {
+    expect(fluentEmojiUrl('🐦‍🔥', { base: 'https://cdn.example/emoji', style: 'anim' })).toBeUndefined();
+  });
+
+  it('ignores a per-call base for a glyph the manifest has no artwork for', () => {
+    // The manifest describes this package's OWN artwork, so a custom `base` (a different host for
+    // the same files) still resolves to undefined rather than pointing a request at it.
+    expect(fluentEmojiUrl('🧑‍🩰', { base: 'https://anything.example' })).toBeUndefined();
+  });
+});
+
 describe('<FluentEmoji>', () => {
   it('renders an <img> with the resolved src and accessible name', () => {
     render(<FluentEmoji glyph="🤯" name="exploding head" base="https://cdn.example/emoji" />);
     const img = screen.getByRole('img', { name: 'exploding head' });
     expect(img.tagName).toBe('IMG');
     expect(img.getAttribute('src')).toBe('https://cdn.example/emoji/3d/1f92f.webp');
+  });
+
+  it('renders only the native glyph, with no <img>, for a glyph with no committed artwork', () => {
+    render(<FluentEmoji glyph="🧑‍🩰" name="ballet dancer" base="https://cdn.example/emoji" />);
+    expect(document.querySelector('img')).toBeNull();
+    const fallback = screen.getByRole('img', { name: 'ballet dancer' });
+    expect(fallback.tagName).toBe('SPAN');
+    expect(fallback.textContent).toBe('🧑‍🩰');
   });
 
   it('resolves the flat svg when variant="flat"', () => {

@@ -21,16 +21,16 @@ per call with `variant` (component) / `style` (`fluentEmojiUrl`), or set a defau
 with `setFluentEmojiStyle`. (Four ship in the npm tarball; `anim` is self-hosted
 separately — see below.)
 
-| `variant` | source style         | format        |
-| --------- | -------------------- | ------------- |
-| `3d`      | Fluent 3D (default)  | webp          |
-| `flat`    | Fluent Flat          | svg           |
-| `modern`  | Fluent Color (2D)    | svg           |
-| `mono`    | Fluent High Contrast | svg           |
+| `variant` | source style         | format          |
+| --------- | -------------------- | --------------- |
+| `3d`      | Fluent 3D (default)  | webp            |
+| `flat`    | Fluent Flat          | svg             |
+| `modern`  | Fluent Color (2D)    | svg             |
+| `mono`    | Fluent High Contrast | svg             |
 | `anim`    | Fluent Animated      | webp (animated) |
 
 ```tsx
-<FluentEmoji glyph="🎉" name="party popper" variant="anim" />;
+<FluentEmoji glyph="🎉" name="party popper" variant="anim" />
 ```
 
 The **animated** (`anim`) artwork is the heaviest set — animated webp run hundreds
@@ -58,8 +58,13 @@ import { setFluentEmojiBase } from '@zeroxsolutions/fluent-emoji';
 setFluentEmojiBase('/fluent-emoji');
 ```
 
-A missing asset (or a load error) falls back to the native glyph, so nothing
-renders blank.
+A glyph with no committed artwork for the resolved style (tracked in the generated
+manifest, see **Artwork provenance**) resolves to `undefined` with no request made;
+one whose file 404s or fails to load despite the manifest falls back the same way,
+after the attempt. Either way the native glyph renders, so nothing is ever blank.
+`base` only says where to fetch the artwork **from**: it cannot make a glyph the
+manifest has no file for resolve, because the manifest is this package's own, not a
+property of wherever `base` points.
 
 ## Serving every style from one base
 
@@ -83,7 +88,7 @@ setFluentEmojiBase('https://fluent-emoji.zeroxsolutions.com');
 the static styles from your own public directory, say:
 
 ```ts
-setFluentEmojiBase('/fluent-emoji');                                   // 3d/flat/modern/mono
+setFluentEmojiBase('/fluent-emoji'); // 3d/flat/modern/mono
 setFluentEmojiStyleBase('anim', 'https://cdn.example.com/fluent-emoji'); // anim only
 ```
 
@@ -92,12 +97,23 @@ clears the override.
 
 ## Artwork provenance
 
-The artwork under `assets/<style>/` is **pre-generated and committed** — there is
-no in-repo regeneration tooling. It is keyed by codepoint and sourced from
-LobeHub's repackages of Microsoft Fluent Emoji — the static
+The artwork under `assets/<style>/` is **pre-generated and committed**, and there
+is no in-repo regeneration tooling for it. It is keyed by codepoint and sourced
+from LobeHub's repackages of Microsoft Fluent Emoji — the static
 `@lobehub/fluent-emoji-{3d,flat,modern,mono}` and animated
 `@lobehub/fluent-emoji-anim-1`…`-anim-4` packages — plus a few gap-fills from
 `microsoft/fluentui-emoji`. Microsoft only animated a subset of the catalog, so in the `anim` set
 most faces/objects carry real animation frames while many symbols, keycaps, and
 flags are static; glyphs with no upstream artwork fall back to the native glyph,
 by design.
+
+The manifest of which keys have artwork in which style, `src/lib/emoji-manifest.ts`,
+**is** generated, from `assets/` itself. Regenerate it after adding or removing a
+file under `assets/<style>/`:
+
+```sh
+nx emoji-manifest fluent-emoji
+```
+
+`emoji-manifest.spec.ts` fails if the committed file and `assets/` disagree, as a
+reminder to run it.

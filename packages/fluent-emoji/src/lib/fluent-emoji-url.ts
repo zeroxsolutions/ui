@@ -1,4 +1,5 @@
 import { emojiToUnicode } from './emoji-to-unicode';
+import { FLUENT_EMOJI_MANIFEST_KEYS, FLUENT_EMOJI_MANIFEST_MISSING } from './emoji-manifest';
 
 /**
  * The rendering styles we ship, each in its own `assets/<style>/` subfolder:
@@ -19,6 +20,22 @@ const STYLE_ASSET: Record<FluentEmojiStyle, { dir: string; ext: string }> = {
 };
 
 const DEFAULT_STYLE: FluentEmojiStyle = '3d';
+
+const MANIFEST_KEYS = new Set(FLUENT_EMOJI_MANIFEST_KEYS);
+// Built lazily per style on first use, from the (short) committed exception list,
+// rather than eagerly for all five: most calls resolve one or two styles.
+const missingByStyle = new Map<FluentEmojiStyle, Set<string>>();
+
+/** Whether `code` has a committed `assets/<style>/` file, per the generated manifest. */
+function hasArtwork(code: string, style: FluentEmojiStyle): boolean {
+  if (!MANIFEST_KEYS.has(code)) return false;
+  let missing = missingByStyle.get(style);
+  if (!missing) {
+    missing = new Set(FLUENT_EMOJI_MANIFEST_MISSING[style]);
+    missingByStyle.set(style, missing);
+  }
+  return !missing.has(code);
+}
 
 // Default base: the package's own `assets/` dir, resolved relative to this
 // module. It works wherever the package's files are served as-is (Node, a Vite
@@ -81,7 +98,10 @@ export function setFluentEmojiStyle(style: FluentEmojiStyle | undefined): void {
 export interface FluentEmojiUrlOptions {
   /**
    * Serve from this base URL (`<base>/<style>/<codepoint>.<ext>`) — overrides any
-   * base set via {@link setFluentEmojiBase} and the bundled default.
+   * base set via {@link setFluentEmojiBase} and the bundled default. It only
+   * relocates where the artwork is fetched from: the generated manifest still
+   * describes this package's own `assets/`, so a glyph the manifest has no file
+   * for resolves to `undefined` regardless of `base` (see {@link fluentEmojiUrl}).
    */
   base?: string;
   /**
@@ -97,13 +117,17 @@ export interface FluentEmojiUrlOptions {
  * style's base from {@link setFluentEmojiStyleBase}, the global
  * {@link setFluentEmojiBase}, or the package's bundled `assets/` location; and
  * `ext` is `webp` for `3d`/`anim`, `svg` for the rest. Returns `undefined` for an
- * empty glyph. A missing file at the resolved URL is the caller's concern —
- * render the native glyph as a fallback (see {@link FluentEmoji}).
+ * empty glyph, and also for a glyph the generated manifest (`emoji-manifest.ts`,
+ * built from `assets/`) has no file for in that style; a custom `base` does not
+ * change this, since the manifest is about what this package ships, not where it
+ * is served from. Render the native glyph as a fallback for either case (see
+ * {@link FluentEmoji}).
  */
 export function fluentEmojiUrl(glyph: string, options?: FluentEmojiUrlOptions): string | undefined {
   const code = emojiToUnicode(glyph);
   if (!code) return undefined;
   const style = options?.style ?? configuredStyle ?? DEFAULT_STYLE;
+  if (!hasArtwork(code, style)) return undefined;
   const base = options?.base ?? configuredStyleBases[style] ?? configuredBase ?? DEFAULT_BASE;
   const { dir, ext } = STYLE_ASSET[style];
   return `${base.replace(/\/+$/, '')}/${dir}/${code}.${ext}`;

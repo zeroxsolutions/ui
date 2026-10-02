@@ -33,6 +33,15 @@
           "cwd": "{projectRoot}",
           "command": "./tools/rclone-sync.sh"
         }
+      },
+      "emoji-manifest": {
+        "executor": "nx:run-commands",
+        "outputs": ["{projectRoot}/src/lib/emoji-manifest.ts"],
+        "cache": true,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node tools/build-emoji-manifest.mts"
+        }
       }
     }
   }
