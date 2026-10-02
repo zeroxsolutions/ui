@@ -1,5 +1,7 @@
 // Written by tools/build-emoji-manifest.mts from assets/. Regenerate, never hand-edit.
 
+import type { FluentEmojiStyle } from './fluent-emoji-url';
+
 export const FLUENT_EMOJI_MANIFEST_KEYS: readonly string[] = [
   '1f004',
   '1f0cf',
@@ -1879,7 +1881,7 @@ export const FLUENT_EMOJI_MANIFEST_KEYS: readonly string[] = [
   'ae-fe0f',
 ];
 
-export const FLUENT_EMOJI_MANIFEST_MISSING: Readonly<Record<string, readonly string[]>> = {
+export const FLUENT_EMOJI_MANIFEST_MISSING: Readonly<Record<FluentEmojiStyle, readonly string[]>> = {
   '3d': [],
   flat: [
     '1f468-200d-1f466',

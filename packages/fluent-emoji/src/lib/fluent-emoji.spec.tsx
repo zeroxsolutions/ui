@@ -125,7 +125,7 @@ describe('fluentEmojiUrl (manifest coverage)', () => {
     expect(fluentEmojiUrl('🧑‍🩰', { base: 'https://cdn.example/emoji' })).toBeUndefined();
   });
 
-  // '🙂‍↔️' (head shaking horizontally) has a 3d file but, like most non-face glyphs, no anim one.
+  // '🙂‍↔️' (head shaking horizontally) has a 3d file; it is one of the 24 keys (of 1876) with no anim one.
   it('resolves for a style the glyph has artwork in and not for one it lacks', () => {
     expect(fluentEmojiUrl('🙂‍↔️', { base: 'https://cdn.example/emoji', style: '3d' })).toBe(
       'https://cdn.example/emoji/3d/1f642-200d-2194-fe0f.webp',
