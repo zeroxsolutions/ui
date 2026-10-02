@@ -10,6 +10,7 @@ import {
   SourceCodeBlockLanguage,
   SourceCodeBlockLineNumbers,
   SourceCodeBlockTitle,
+  SourceCodeBlockTrigger,
 } from '@/components/data-display/source-code-block';
 
 import { ComponentSource } from './component-source';
@@ -31,8 +32,9 @@ interface ExampleSourceProps {
 }
 
 /**
- * A demo's source under its preview: one block with its language and copy button, showing its first
- * lines until `View code` opens it to the whole file. The header is the same open and closed.
+ * A demo's source under its preview: one block with its language, copy button and toggle, showing
+ * its first lines until `View code` opens it to the whole file; the header's own trigger closes it
+ * again. The header is the same open and closed.
  */
 function ExampleSource({ name, code, language, lines }: ExampleSourceProps): ReactNode {
   const source = { name, code, language, lines, variant: 'flush' } as const;
@@ -45,6 +47,7 @@ function ExampleSource({ name, code, language, lines }: ExampleSourceProps): Rea
           </SourceCodeBlockTitle>
           <SourceCodeBlockActions>
             <SourceCodeBlockCopy />
+            <SourceCodeBlockTrigger />
           </SourceCodeBlockActions>
         </SourceCodeBlockHeader>
         <ComponentPreviewExcerpt>

@@ -62,8 +62,8 @@ function ComponentPreviewCaption({ className, ...props }: ComponentProps<'div'>)
 
 /**
  * The source under the demo, on the code surface and split from it by a rule. It holds one code
- * block, closed until `View code` opens it: closed, the block shows a `ComponentPreviewExcerpt`
- * under its header; open, its own content.
+ * block, closed until `View code` opens it and the header's own trigger closes it again: closed, the
+ * block shows a `ComponentPreviewExcerpt` under its header; open, its own content.
  */
 function ComponentPreviewSource({ className, ...props }: ComponentProps<'div'>): ReactNode {
   return (
