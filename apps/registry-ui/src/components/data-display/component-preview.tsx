@@ -82,9 +82,10 @@ function ComponentPreviewSource({ className, ...props }: ComponentProps<'div'>):
 }
 
 /**
- * The source's first lines, fading into the code surface under the `View code` trigger, which opens
- * the code block it sits in. It shows once that block's own panel is gone, not the instant it starts
- * closing, so it never overlaps the panel while the panel is still shrinking.
+ * The source's first lines under the `View code` trigger, which opens the code block it sits in. It
+ * shows once that block's own panel is gone, not the instant it starts closing, so it takes the
+ * panel's place in the same frame the panel's own shrink reaches the excerpt's height, with nothing
+ * to hand over: the lines on screen do not change.
  */
 function ComponentPreviewExcerpt({ className, children, ...props }: ComponentProps<'div'>): ReactNode {
   return (
@@ -94,10 +95,7 @@ function ComponentPreviewExcerpt({ className, children, ...props }: ComponentPro
       // not on the card's data-open: that flips at once on close, while the panel stays mounted for
       // its own 200ms exit. The `>` excludes the excerpt's own nested code block, which is always
       // mounted and would otherwise match every time.
-      className={cn(
-        'relative transition-opacity duration-200 ease-out group-has-[>[data-slot=code-block-content]]/collapsible-card:hidden motion-reduce:transition-none starting:opacity-0',
-        className,
-      )}
+      className={cn('relative group-has-[>[data-slot=code-block-content]]/collapsible-card:hidden', className)}
       {...props}
     >
       {/* An excerpt, not a scroller: its overflow clips, and it takes no focus. */}
