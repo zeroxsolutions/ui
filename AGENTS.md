@@ -1,7 +1,7 @@
 # AGENTS.md
 
 The house design system: a shadcn registry of composed components, and the UI packages the org's
-frontends install. No app here is deployed for an end user.
+frontends install. The registry site is the one app deployed; it serves the docs and the items' JSON.
 
 ## Workspace
 
@@ -15,14 +15,10 @@ frontends install. No app here is deployed for an end user.
 
 ## This project's choices
 
-- **Nothing ships the registry yet.** `https://ui.zeroxsolutions.com` does not resolve. No project
-  carries a `wrangler:deploy` target, so `cd.yml`'s deploy job matches nothing and exits 0 with
-  `No tasks were run`, and no environment holds `CLOUDFLARE_API_TOKEN`, so the first real deploy
-  target 401s until one does.
-- **The worker is over the free plan's limit.** It is 6410 KiB gzipped (`wrangler deploy --dry-run
-  --env production`, measured 2026-10-02), above the free plan's 3 MiB and below the paid plan's 10
-  MiB. The largest parts are the `next` package, the Shiki grammars and the share images'
-  `resvg.wasm`. A deploy on the free plan needs it cut first.
+- **The registry ships from `cd.yml`.** A push to `development` or `production` runs `wrangler:deploy`
+  with that branch's configuration: `development` on the account's `*.workers.dev`, `production` on the
+  custom domain `ui.zeroxsolutions.com` alone. Each GitHub environment holds `CLOUDFLARE_API_TOKEN` and
+  `CLOUDFLARE_ACCOUNT_ID`; without them the deploy job fails on auth.
 - **The registry publishes composed items only.** Every `components.json` alias points into
   `@/registry/bases/base-ui/*` instead of `@/components`, because the registry serves its files from
   where they live. The primitives there are `shadcn add -o` output and are never published, so an app

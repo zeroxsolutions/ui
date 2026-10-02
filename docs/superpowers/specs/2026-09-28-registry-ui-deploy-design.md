@@ -1,5 +1,7 @@
 # Deploy registry-ui to ui.zeroxsolutions.com
 
+> The deploy target and its checks are `2026-10-02-registry-deploy-design.md`'s; where the two disagree, that one holds.
+
 ## Goal
 
 `apps/registry-ui` ships as a Cloudflare Worker through the OpenNext adapter, so that a
