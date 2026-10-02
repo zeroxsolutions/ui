@@ -101,6 +101,13 @@
           "fumadocs-generate",
           "examples-index"
         ],
+        "inputs": [
+          "default",
+          "^default",
+          {
+            "runtime": "pwd"
+          }
+        ],
         "outputs": [
           "{projectRoot}/.open-next"
         ],
@@ -119,6 +126,24 @@
         "options": {
           "cwd": "{projectRoot}",
           "command": "opennextjs-cloudflare preview --env development"
+        }
+      },
+      "wrangler:deploy": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "wrangler:build"
+        ],
+        "defaultConfiguration": "development",
+        "options": {
+          "cwd": "{projectRoot}"
+        },
+        "configurations": {
+          "development": {
+            "command": "opennextjs-cloudflare deploy --env development"
+          },
+          "production": {
+            "command": "opennextjs-cloudflare deploy --env production"
+          }
         }
       },
       "wrangler:typegen": {
