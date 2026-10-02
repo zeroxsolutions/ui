@@ -19,8 +19,8 @@ frontends install. No app here is deployed for an end user.
   carries a `wrangler:deploy` target, so `cd.yml`'s deploy job matches nothing and exits 0 with
   `No tasks were run`, and no environment holds `CLOUDFLARE_API_TOKEN`, so the first real deploy
   target 401s until one does.
-- **The worker is over the free plan's limit.** It is 5162 KiB gzipped (`wrangler deploy --dry-run
-  --env production`, measured 2026-10-01), above the free plan's 3 MiB and below the paid plan's 10
+- **The worker is over the free plan's limit.** It is 6410 KiB gzipped (`wrangler deploy --dry-run
+  --env production`, measured 2026-10-02), above the free plan's 3 MiB and below the paid plan's 10
   MiB. The largest parts are the `next` package, the Shiki grammars and the share images'
   `resvg.wasm`. A deploy on the free plan needs it cut first.
 - **The registry publishes composed items only.** Every `components.json` alias points into
