@@ -48,7 +48,6 @@
   mix-blend-mode: normal;
 }
 
-::view-transition-group(docs-content),
 ::view-transition-old(docs-content),
 ::view-transition-new(docs-content),
 ::view-transition-group(docs-sidebar-active),
@@ -56,6 +55,34 @@
 ::view-transition-new(docs-sidebar-active) {
   animation-duration: 200ms;
   animation-timing-function: ease-out;
+}
+
+/* The group's own animation is the UA's interpolation of the column's position and size from the old
+   page's rect to the new one. Scrolled, the old rect sits far from the new one (Next resets scroll
+   before the new snapshot), so left running, the column would slide across the sticky header for the
+   whole 200ms transition. Off, the group holds the new page's rect throughout and only the old/new
+   pair above crossfades, in place. */
+::view-transition-group(docs-content) {
+  animation: none;
+}
+
+/* Named so its own snapshot always paints over the column's rather than under it, in case a future
+   content difference still moves the column's box into the header's screen position. */
+[data-slot='site-header'] {
+  view-transition-name: site-header;
+}
+
+/* Same reasoning as root above: the header is identical before and after any docs navigation, so its
+   pair never needs to fade. */
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* A named group with no z-index of its own stacks in document order; the header renders before the
+   column, so without this it would stack beneath it instead of over it. */
+::view-transition-group(site-header) {
+  z-index: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
