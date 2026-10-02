@@ -62,28 +62,40 @@ function ComponentPreviewCaption({ className, ...props }: ComponentProps<'div'>)
 
 /**
  * The source under the demo, on the code surface and split from it by a rule. It holds one code
- * block, closed until `View code` opens it: closed, the block shows a `ComponentPreviewExcerpt`
- * under its header; open, its own content.
+ * block, closed until `View code` opens it and the header's own trigger closes it again: closed, the
+ * block shows a `ComponentPreviewExcerpt` under its header; open, its own content.
  */
 function ComponentPreviewSource({ className, ...props }: ComponentProps<'div'>): ReactNode {
   return (
     <div
       data-slot="component-preview-source"
-      className={cn('bg-code border-foreground/10 border-t **:data-[slot=code-block-viewport]:max-h-96', className)}
+      // Measured from `ExampleSource`'s rendered excerpt (its `EXCERPT_LINES` lines plus the code
+      // block's own padding) at the default 16px root font size; the open block's panel starts and
+      // ends at this height so it grows out of the excerpt rather than from zero.
+      className={cn(
+        'bg-code border-foreground/10 border-t [--component-preview-excerpt-height:4.90625rem] **:data-[slot=code-block-viewport]:max-h-96',
+        className,
+      )}
       {...props}
     />
   );
 }
 
 /**
- * The source's first lines, fading into the code surface under the `View code` trigger, which opens
- * the code block it sits in. It shows only while that block is closed.
+ * The source's first lines under the `View code` trigger, which opens the code block it sits in. It
+ * shows once that block's own panel is gone, not the instant it starts closing, so it takes the
+ * panel's place in the same frame the panel's own shrink reaches the excerpt's height, with nothing
+ * to hand over: the lines on screen do not change.
  */
 function ComponentPreviewExcerpt({ className, children, ...props }: ComponentProps<'div'>): ReactNode {
   return (
     <div
       data-slot="component-preview-excerpt"
-      className={cn('relative group-data-open/collapsible-card:hidden', className)}
+      // Keyed on the open block's own panel being mounted (a direct child of the collapsible card),
+      // not on the card's data-open: that flips at once on close, while the panel stays mounted for
+      // its own 200ms exit. The `>` excludes the excerpt's own nested code block, which is always
+      // mounted and would otherwise match every time.
+      className={cn('relative group-has-[>[data-slot=code-block-content]]/collapsible-card:hidden', className)}
       {...props}
     >
       {/* An excerpt, not a scroller: its overflow clips, and it takes no focus. */}

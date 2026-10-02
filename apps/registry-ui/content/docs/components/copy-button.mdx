@@ -75,4 +75,4 @@ It defaults `variant` to `ghost` and `size` to `icon-xs`. A caller's `onClick` r
 `event.preventDefault()` in it skips the copy; a write the browser refuses, such as a denied clipboard
 permission, leaves the button idle. Its icon plays while the button is hovered or focused, and a caller's own
 pointer and focus handlers still run. It sets `data-slot="copy-button"` and `data-copied` while it shows its
-copied state.
+copied state. The check eases in, and reduced motion shows it at once.

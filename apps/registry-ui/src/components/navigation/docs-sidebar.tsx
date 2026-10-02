@@ -4,6 +4,7 @@ import { isMatch } from '@zeroxsolutions/routing';
 import type { Root } from 'fumadocs-core/page-tree';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ViewTransition } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 
 import { isExternal, pageTreeGroups } from '@/lib/page-tree';
@@ -23,6 +24,12 @@ interface DocsSidebarProps extends ComponentProps<typeof Sidebar> {
   tree: Root;
   /** Groups listed above the docs' own, such as the site's sections on a narrow screen. */
   children?: ReactNode;
+  /**
+   * Names the current page's button for the sidebar's shared-element morph. Off for a copy of this
+   * sidebar that can be mounted at the same time as another, such as the mobile sheet's: two
+   * `ViewTransition`s sharing one name while both are mounted is a view-transition error.
+   */
+  activeViewTransition?: boolean;
 }
 
 /**
@@ -31,7 +38,7 @@ interface DocsSidebarProps extends ComponentProps<typeof Sidebar> {
  * scroll chain, so wheeling past the list's end leaves the page where it is. Where it sits, and how
  * tall it is, is the caller's: `className` places the column.
  */
-function DocsSidebar({ tree, children, ...props }: DocsSidebarProps): ReactNode {
+function DocsSidebar({ tree, children, activeViewTransition = true, ...props }: DocsSidebarProps): ReactNode {
   const pathname = usePathname();
 
   return (
@@ -45,14 +52,30 @@ function DocsSidebar({ tree, children, ...props }: DocsSidebarProps): ReactNode 
               <SidebarMenu>
                 {group.pages.map((page) => {
                   const current = !isExternal(page) && isMatch(page.url, pathname);
+                  const button = (
+                    <SidebarMenuButton
+                      isActive={current}
+                      render={<Link href={page.url} aria-current={current ? 'page' : undefined} />}
+                    >
+                      {page.name}
+                    </SidebarMenuButton>
+                  );
                   return (
                     <SidebarMenuItem key={page.url}>
-                      <SidebarMenuButton
-                        isActive={current}
-                        render={<Link href={page.url} aria-current={current ? 'page' : undefined} />}
-                      >
-                        {page.name}
-                      </SidebarMenuButton>
+                      {/* Wrapping only the active button means it remounts when a page becomes
+                          current; a route change already moves focus to the new page, so losing it
+                          here on the sidebar link costs nothing. */}
+                      {current && activeViewTransition ? (
+                        // `enter`/`exit` "none": unpaired (no other page's active item shares this
+                        // name, such as navigating to "/" or "/blocks"), the browser would otherwise
+                        // fade this highlight in or out over a page that never had one. Paired with
+                        // another page's, `share` (left at its default) still morphs between them.
+                        <ViewTransition name="docs-sidebar-active" enter="none" exit="none">
+                          {button}
+                        </ViewTransition>
+                      ) : (
+                        button
+                      )}
                     </SidebarMenuItem>
                   );
                 })}

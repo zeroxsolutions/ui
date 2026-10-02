@@ -54,7 +54,14 @@ function MobileNav({ tree, items }: MobileNavProps): ReactNode {
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
         <SidebarProvider className="min-h-0 flex-1">
-          <DocsSidebar tree={tree} className="w-full" onClick={closeOnLink}>
+          <DocsSidebar
+            tree={tree}
+            className="w-full"
+            onClick={closeOnLink}
+            // The docs layout's own sidebar keeps the "docs-sidebar-active" name; this sheet copy can be
+            // mounted at the same time, below the breakpoint where that sidebar is only CSS-hidden.
+            activeViewTransition={false}
+          >
             <SidebarGroup>
               <SidebarGroupLabel>Sections</SidebarGroupLabel>
               <SidebarGroupContent>

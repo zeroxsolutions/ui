@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { HomeGrid } from './_components/general/home-grid';
 import { HomeShader } from './_components/general/home-shader';
 import { BlockFrame } from '@/components/data-display/block-frame';
 import {
@@ -96,13 +97,13 @@ export default function HomePage(): ReactNode {
       <section className="relative isolate">
         <HomeShader />
         <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-6 pt-24 pb-16 text-center">
-          <h1 className="text-4xl font-semibold tracking-tight text-balance">
+          <h1 className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-backwards text-4xl font-semibold tracking-tight text-balance delay-0 duration-200 ease-out motion-reduce:animate-none">
             Composed React components for shadcn, on Base UI.
           </h1>
-          <p className="text-muted-foreground text-lg text-pretty">
+          <p className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-backwards text-muted-foreground text-lg text-pretty delay-75 duration-200 ease-out motion-reduce:animate-none">
             Install any item with the shadcn CLI from its URL. The code it writes is yours.
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-backwards flex flex-wrap justify-center gap-3 delay-150 duration-200 ease-out motion-reduce:animate-none">
             <Link href={docsPageUrl(['components'])} className={buttonVariants()}>
               Browse components
             </Link>
@@ -110,7 +111,7 @@ export default function HomePage(): ReactNode {
               Get started
             </Link>
           </div>
-          <div className="w-full text-left">
+          <div className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-backwards w-full text-left delay-200 duration-200 ease-out motion-reduce:animate-none">
             <HomePageCode code={homePageInstallCommand('status-indicator')} language="bash" />
           </div>
         </div>
@@ -120,7 +121,7 @@ export default function HomePage(): ReactNode {
         <h2 id="home-items" className="text-2xl font-semibold tracking-tight">
           Components
         </h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <HomeGrid>
           {items.map((item) => (
             <ComponentPreview key={item.name}>
               <ComponentPreviewStage>
@@ -137,7 +138,7 @@ export default function HomePage(): ReactNode {
               </ComponentPreviewCaption>
             </ComponentPreview>
           ))}
-        </div>
+        </HomeGrid>
       </section>
 
       <section aria-labelledby="home-blocks" className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6">
