@@ -36,3 +36,28 @@
     }
   }
 }
+
+/* Route changes crossfade the docs column alone: the root snapshot is held still, so the header,
+   sidebar and TOC do not fade with it. Timing is nova's. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(docs-content),
+::view-transition-old(docs-content),
+::view-transition-new(docs-content),
+::view-transition-group(docs-sidebar-active),
+::view-transition-old(docs-sidebar-active),
+::view-transition-new(docs-sidebar-active) {
+  animation-duration: 200ms;
+  animation-timing-function: ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
