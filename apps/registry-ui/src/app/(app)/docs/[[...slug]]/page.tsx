@@ -48,7 +48,11 @@ export default async function DocsPage({ params }: DocsPageProps): Promise<React
 
   return (
     <div data-slot="docs" className="flex scroll-mt-24 items-stretch xl:w-full">
-      <ViewTransition name="docs-content">
+      {/* `enter`/`exit` are "none" because this name has no partner on a page without a docs column
+          (such as home or blocks): unpaired, the browser would otherwise fade the column in or out
+          over the page it is leaving or arriving on. Paired with another docs page's, `share` (left
+          at its default) still crossfades the two, per the view-transition rules in global.css. */}
+      <ViewTransition name="docs-content" enter="none" exit="none">
         <div className="mx-auto flex w-full max-w-160 min-w-0 flex-1 flex-col gap-6 px-4 py-6 md:px-0 lg:py-8">
           <div className="flex flex-col gap-2">
             <div className="flex items-start justify-between gap-4">

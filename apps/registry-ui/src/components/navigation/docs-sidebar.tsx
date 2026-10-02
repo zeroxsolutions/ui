@@ -66,7 +66,13 @@ function DocsSidebar({ tree, children, activeViewTransition = true, ...props }: 
                           current; a route change already moves focus to the new page, so losing it
                           here on the sidebar link costs nothing. */}
                       {current && activeViewTransition ? (
-                        <ViewTransition name="docs-sidebar-active">{button}</ViewTransition>
+                        // `enter`/`exit` "none": unpaired (no other page's active item shares this
+                        // name, such as navigating to "/" or "/blocks"), the browser would otherwise
+                        // fade this highlight in or out over a page that never had one. Paired with
+                        // another page's, `share` (left at its default) still morphs between them.
+                        <ViewTransition name="docs-sidebar-active" enter="none" exit="none">
+                          {button}
+                        </ViewTransition>
                       ) : (
                         button
                       )}
