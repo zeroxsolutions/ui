@@ -8,21 +8,21 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**
  * The home page's component grid: each cell below the fold when the page hydrates starts hidden and
- * eases in as it scrolls into view, a beat after the cell before it in its row. A cell already on
- * screen at hydration is never hidden, so nothing waits on JS.
+ * eases in as it scrolls into view, about 30ms after the cell to its left in the same row (its row
+ * read from the rendered layout, so this holds at every column count the grid reflows to). A cell
+ * already on screen at hydration is never hidden, so nothing waits on JS.
  */
 function HomeGrid({ className, children, ...props }: ComponentProps<'div'>): ReactNode {
   return (
     <div data-slot="home-grid" className={cn('grid gap-4 md:grid-cols-2 lg:grid-cols-3', className)} {...props}>
-      {Children.map(children, (child, index) => (
-        <HomeGridCell index={index}>{child}</HomeGridCell>
+      {Children.map(children, (child) => (
+        <HomeGridCell>{child}</HomeGridCell>
       ))}
     </div>
   );
 }
 
-/** One grid cell. `index` is its position among its siblings, which sets its stagger within a row. */
-function HomeGridCell({ index, children }: { index: number; children: ReactNode }): ReactNode {
+function HomeGridCell({ children }: { children: ReactNode }): ReactNode {
   const [scope, animate] = useAnimate<HTMLDivElement>();
   const inView = useInView(scope, { once: true });
   const reduce = useReducedMotion();
@@ -38,15 +38,18 @@ function HomeGridCell({ index, children }: { index: number; children: ReactNode 
   useEffect(() => {
     if (!inView || !scope.current || !('hidden' in scope.current.dataset)) return;
     delete scope.current.dataset.hidden;
-    // The grid is 3 columns from `lg:grid-cols-3` up (2 below it); cycling the stagger on 3 keeps a
-    // row easing in left to right about 30ms apart at the widest breakpoint, and still staggers,
-    // just not strictly by row, at 2 columns and at 1.
-    animate(
-      scope.current,
-      { opacity: 1, transform: 'translateY(0px)' },
-      { duration: 0.2, ease: 'easeOut', delay: (index % 3) * 0.03 },
+    const cell = scope.current;
+    // A sibling shares this cell's row once the grid has laid both out, regardless of which one of
+    // them has eased in yet: `transform` (what easing in animates) never moves a grid track.
+    const row = Array.from(cell.parentElement?.children ?? []).filter(
+      (sibling) => sibling instanceof HTMLElement && sibling.offsetTop === cell.offsetTop,
     );
-  }, [animate, inView, index, scope]);
+    animate(
+      cell,
+      { opacity: 1, transform: 'translateY(0px)' },
+      { duration: 0.2, ease: 'easeOut', delay: Math.max(row.indexOf(cell), 0) * 0.03 },
+    );
+  }, [animate, inView, scope]);
 
   return (
     <div ref={scope} data-slot="home-grid-cell">
