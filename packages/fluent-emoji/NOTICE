@@ -1,9 +1,10 @@
 @zeroxsolutions/fluent-emoji — third-party notices
 
-This package redistributes emoji artwork from Microsoft Fluent Emoji, obtained
-via LobeHub's repackages. The artwork is MIT-licensed; the copyright notices and
-the MIT permission notice below are included as required by that license. The
-wrapper code and the Unicode catalog are the package author's own work.
+This package redistributes emoji artwork from Microsoft Fluent Emoji, via
+LobeHub's repackages plus a few files taken directly from the Microsoft
+repository. The artwork is MIT-licensed; the copyright notices and the MIT
+permission notice below are included as required by that license. The wrapper
+code and the Unicode catalog are the package author's own work.
 
 --------------------------------------------------------------------------------
 Microsoft Fluent Emoji — https://github.com/microsoft/fluentui-emoji
