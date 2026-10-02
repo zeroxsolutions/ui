@@ -52,7 +52,7 @@ function HomeGridCell({ children }: { children: ReactNode }): ReactNode {
   }, [animate, inView, scope]);
 
   return (
-    <div ref={scope} data-slot="home-grid-cell">
+    <div ref={scope} data-slot="home-grid-cell" className="min-w-0">
       {children}
     </div>
   );
