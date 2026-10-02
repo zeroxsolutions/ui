@@ -101,6 +101,13 @@
           "fumadocs-generate",
           "examples-index"
         ],
+        "inputs": [
+          "default",
+          "^default",
+          {
+            "runtime": "pwd"
+          }
+        ],
         "outputs": [
           "{projectRoot}/.open-next"
         ],
