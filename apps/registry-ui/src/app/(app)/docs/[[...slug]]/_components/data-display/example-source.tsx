@@ -14,7 +14,11 @@ import {
 
 import { ComponentSource } from './component-source';
 
-/** How many of the source's first lines show before `View code`. */
+/**
+ * How many of the source's first lines show before `View code`. `ComponentPreviewSource`'s
+ * `--component-preview-excerpt-height` is this excerpt's own measured height, so a change here needs
+ * that measurement retaken.
+ */
 const EXCERPT_LINES = 3;
 
 interface ExampleSourceProps {
@@ -51,7 +55,7 @@ function ExampleSource({ name, code, language, lines }: ExampleSourceProps): Rea
             </SourceCodeBlockContent>
           </ComponentSource>
         </ComponentPreviewExcerpt>
-        <SourceCodeBlockContent>
+        <SourceCodeBlockContent className="h-(--collapsible-panel-height) transition-[height] duration-200 ease-out data-ending-style:h-(--component-preview-excerpt-height) data-starting-style:h-(--component-preview-excerpt-height) motion-reduce:transition-none">
           <SourceCodeBlockLineNumbers />
           <SourceCodeBlockCode />
         </SourceCodeBlockContent>

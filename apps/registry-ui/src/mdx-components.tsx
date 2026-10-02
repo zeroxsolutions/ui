@@ -14,6 +14,7 @@ import {
   SourceCodeBlockTrigger,
 } from '@/components/data-display/source-code-block';
 import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
 import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
@@ -131,7 +132,12 @@ export const mdxComponents = {
   Tabs,
   TabsList: (props: ComponentProps<typeof TabsList>) => <TabsList variant="line" {...props} />,
   TabsTrigger,
-  TabsContent,
+  TabsContent: ({ className, ...props }: ComponentProps<typeof TabsContent>) => (
+    <TabsContent
+      className={cn('animate-in fade-in-0 duration-200 ease-out motion-reduce:animate-none', className)}
+      {...props}
+    />
+  ),
   Callout: (props: ComponentProps<typeof Alert>) => <Alert className="mt-6 first:mt-0" {...props} />,
   AlertTitle,
   AlertDescription,

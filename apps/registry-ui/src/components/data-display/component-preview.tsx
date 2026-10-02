@@ -69,7 +69,13 @@ function ComponentPreviewSource({ className, ...props }: ComponentProps<'div'>):
   return (
     <div
       data-slot="component-preview-source"
-      className={cn('bg-code border-foreground/10 border-t **:data-[slot=code-block-viewport]:max-h-96', className)}
+      // Measured from `ExampleSource`'s rendered excerpt (its `EXCERPT_LINES` lines plus the code
+      // block's own padding) at the default 16px root font size; the open block's panel starts and
+      // ends at this height so it grows out of the excerpt rather than from zero.
+      className={cn(
+        'bg-code border-foreground/10 border-t [--component-preview-excerpt-height:4.90625rem] **:data-[slot=code-block-viewport]:max-h-96',
+        className,
+      )}
       {...props}
     />
   );
@@ -83,7 +89,10 @@ function ComponentPreviewExcerpt({ className, children, ...props }: ComponentPro
   return (
     <div
       data-slot="component-preview-excerpt"
-      className={cn('relative group-data-open/collapsible-card:hidden', className)}
+      className={cn(
+        'relative transition-opacity duration-200 ease-out group-data-open/collapsible-card:hidden motion-reduce:transition-none starting:opacity-0',
+        className,
+      )}
       {...props}
     >
       {/* An excerpt, not a scroller: its overflow clips, and it takes no focus. */}

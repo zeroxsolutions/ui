@@ -24,7 +24,8 @@ interface CopyButtonProps extends Omit<React.ComponentProps<typeof Button>, 'val
 /**
  * A copy-to-clipboard icon button. After a successful copy it shows a check,
  * takes `copiedLabel` as its accessible name and carries `data-copied` for
- * `timeout` ms, then resets. A caller `onClick` runs first, and calling
+ * `timeout` ms, then resets. The check eases in, and reduced motion shows it
+ * at once. A caller `onClick` runs first, and calling
  * `event.preventDefault()` in it skips the copy. Defaults to a `ghost`
  * `icon-xs` `Button`, and every `Button` prop passes through. A write the
  * browser refuses, such as a denied clipboard permission, leaves the button
@@ -96,7 +97,15 @@ function CopyButton({
       }}
       {...props}
     >
-      {copied ? <CheckIcon ref={iconRef} aria-hidden /> : <CopyIcon ref={iconRef} aria-hidden />}
+      {copied ? (
+        <CheckIcon
+          ref={iconRef}
+          aria-hidden
+          className="animate-in fade-in-0 zoom-in-50 duration-200 ease-out motion-reduce:animate-none"
+        />
+      ) : (
+        <CopyIcon ref={iconRef} aria-hidden />
+      )}
     </Button>
   );
 }

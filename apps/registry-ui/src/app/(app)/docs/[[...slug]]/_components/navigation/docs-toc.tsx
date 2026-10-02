@@ -116,6 +116,7 @@ function DocsTocLink({ item, active, ref }: DocsTocLinkProps): ReactNode {
   return (
     <a
       ref={ref}
+      data-slot="docs-toc-link"
       href={item.url}
       aria-current={active ? 'location' : undefined}
       data-active={active}
