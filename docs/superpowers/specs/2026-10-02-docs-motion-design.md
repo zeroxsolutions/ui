@@ -43,8 +43,8 @@ the view-transition animations, and `useReducedMotion` skipping the grid's anima
 4. **View code.** The source panel animates its height the way nova animates Accordion, on Base UI's
    variable: `h-(--collapsible-panel-height)` and a height transition. It starts and ends at the
    excerpt's height (under `data-starting-style` and `data-ending-style`) rather than at 0, so the
-   excerpt hands over to the panel in place and the block never jumps; the excerpt fades back in as
-   the panel closes.
+   excerpt hands over to the panel in place and the block never jumps; the excerpt takes the panel's
+   place once it has shrunk to the excerpt's height.
    (tw-animate-css's `collapsible-down/up` keyframes read Radix, Bits and Reka variables, not Base
    UI's, so they are not used.)
 5. **Command/Manual tabs.** The shown panel enters with `animate-in fade-in-0`. A panel that turns
