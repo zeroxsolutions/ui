@@ -14,8 +14,8 @@ and the home page's shader.
 
 Motion on the site's own shell, in `apps/registry-ui/src/`. The components and blocks the registry
 publishes keep their motion as it is; the ones that fall short of the registry's requirements are
-spec (c6). The one exception is the copy feedback below, because the site's copy button is the
-registry's own `CodeBlockCopy`.
+spec (c6). The one exception is the copy feedback below, because the site's copy buttons are the
+registry's own `CopyButton` (directly, and inside `CodeBlockCopy`).
 
 ## Timing
 
@@ -25,7 +25,7 @@ both engines keep one rhythm with the primitives.
 
 Under `prefers-reduced-motion: reduce` every motion below is off and every state still changes:
 `motion-reduce:` utilities in CSS, an `@media (prefers-reduced-motion: reduce)` rule that turns off
-the view-transition animations, and `MotionConfig reducedMotion="user"` around `motion/react`.
+the view-transition animations, and `useReducedMotion` skipping the grid's animation.
 
 ## The motions
 
@@ -41,25 +41,30 @@ the view-transition animations, and `MotionConfig reducedMotion="user"` around `
    `height`), with `transition-[top,height]`. The active entry changes on scroll, which is not a
    transition, so this is CSS.
 4. **View code.** The source panel animates its height the way nova animates Accordion, on Base UI's
-   variable: `h-(--collapsible-panel-height)`, a height transition, `h-0` under `data-starting-style`
-   and `data-ending-style`. The excerpt fades out as the panel opens and back in as it closes.
+   variable: `h-(--collapsible-panel-height)` and a height transition. It starts and ends at the
+   excerpt's height (under `data-starting-style` and `data-ending-style`) rather than at 0, so the
+   excerpt hands over to the panel in place and the block never jumps; the excerpt fades back in as
+   the panel closes.
    (tw-animate-css's `collapsible-down/up` keyframes read Radix, Bits and Reka variables, not Base
    UI's, so they are not used.)
 5. **Command/Manual tabs.** The shown panel enters with `animate-in fade-in-0`. A panel that turns
    from hidden to shown restarts its animation, so no JS is needed.
-6. **Copy.** `CodeBlockCopy`'s check icon enters with `animate-in zoom-in` when the copied state
-   shows it. This is the one registry change, in the item, so every consumer gets it.
-7. **Home page.** `motion/react` through `LazyMotion` + `m` + `domAnimation`, in the home page's
-   own chunk only: the heading, the lead and the actions arrive in sequence, and the component grid's
-   cells arrive in sequence as they scroll into view (`whileInView`, about 30ms apart). Nothing is
-   hidden before hydration: a cell already on screen at load is visible without JS, and the hidden
-   start state applies only after hydrate. The shader is unchanged.
+6. **Copy.** `CopyButton`'s check icon enters with `animate-in zoom-in` when the copied state shows
+   it. This is the one registry change, in the item, so every consumer gets it, the code blocks'
+   `CodeBlockCopy` included.
+7. **Home page.** The heading, the lead and the actions arrive in sequence by CSS (`animate-in` with
+   staggered delays), which runs before hydration and needs no JS. The component grid's cells arrive
+   in sequence as they scroll into view, about 30ms apart, with `motion`'s smallest entry
+   (`motion/react-mini`'s `useAnimate` with `useInView`), in the home page's own chunk only. Nothing
+   is hidden before hydration: a cell already on screen when the page hydrates is never hidden, and
+   only cells below the fold take the hidden start state. The shader is unchanged.
 
 ## Checks
 
 **Unit (behaviour only).** A closed "View code" panel stays in the DOM for its 200ms exit, so a spec
-that expects it gone waits (`findBy`, `waitFor`) rather than turning motion off. The TOC marker gets
-one case: it follows the active entry when the entry changes. No case asserts a class.
+that expects it gone waits (`findBy`, `waitFor`) rather than turning motion off. No case asserts a class.
+jsdom has no layout, so the TOC marker's position is checked in the e2e: it follows the active
+entry when the entry changes.
 
 **E2e (one case for motion).** Each interaction once, in normal motion: a sidebar navigation, opening
 and closing "View code", a tab switch, a copy click, loading the home page and scrolling its grid.
