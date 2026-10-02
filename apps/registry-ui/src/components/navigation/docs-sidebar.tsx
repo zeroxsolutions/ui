@@ -62,9 +62,10 @@ function DocsSidebar({ tree, children, activeViewTransition = true, ...props }: 
                   );
                   return (
                     <SidebarMenuItem key={page.url}>
-                      {/* `ViewTransition` is a Next canary export; a build on the stable `react`
-                          package alone, such as this component's own test run, never has it. */}
-                      {current && activeViewTransition && ViewTransition ? (
+                      {/* Wrapping only the active button means it remounts when a page becomes
+                          current; a route change already moves focus to the new page, so losing it
+                          here on the sidebar link costs nothing. */}
+                      {current && activeViewTransition ? (
                         <ViewTransition name="docs-sidebar-active">{button}</ViewTransition>
                       ) : (
                         button

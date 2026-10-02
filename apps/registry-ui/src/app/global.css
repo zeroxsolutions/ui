@@ -38,10 +38,14 @@
 }
 
 /* Route changes crossfade the docs column alone: the root snapshot is held still, so the header,
-   sidebar and TOC do not fade with it. Timing is nova's. */
+   sidebar and TOC do not fade with it. Timing is nova's. The UA stylesheet blends old and new with
+   `plus-lighter` for a seamless crossfade; held still instead of fading, that adds the two frozen,
+   near-identical snapshots together for the whole transition, washing the page out, so it is reset
+   to a normal blend here. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
+  mix-blend-mode: normal;
 }
 
 ::view-transition-group(docs-content),

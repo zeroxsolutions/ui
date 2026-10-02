@@ -26,7 +26,7 @@ export default defineConfig({
     watch: false,
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['src/test/setup.ts'],
+    setupFiles: ['src/test/setup.tsx'],
     include: ['*.spec.ts', 'registry/**/*.{test,spec}.{ts,tsx}', 'src/**/*.{test,spec}.{ts,tsx}'],
     reporters: ['default'],
     coverage: {
