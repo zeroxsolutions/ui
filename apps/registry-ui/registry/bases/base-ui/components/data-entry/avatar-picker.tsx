@@ -315,9 +315,27 @@ interface AvatarPickerColorGroupProps extends React.ComponentProps<'div'> {
    * The swatches, each a button named by its colour and pressed while it is the
    * avatar's colour. Defaults to twelve hues spread evenly round the wheel. They
    * are the avatar's own colour, a value the picker hands back, so they stay
-   * literal rather than theme tokens. The pressed swatch carries a white check.
+   * literal rather than theme tokens. The pressed swatch carries a check in white or near-black,
+   * whichever stands out more from it.
    */
   colors?: readonly string[];
+}
+
+/**
+ * The check's colour on a swatch: white or near-black, whichever contrasts more with a `#rgb` or
+ * `#rrggbb` swatch, by WCAG's relative luminance. White for any other colour string, which it cannot read.
+ */
+function avatarPickerCheckColor(swatch: string): string {
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(swatch)?.[1];
+  if (!hex) return '#ffffff';
+  const full = hex.length === 3 ? [...hex].map((digit) => digit + digit).join('') : hex;
+  const [r, g, b] = [0, 2, 4].map((at) => {
+    const channel = Number.parseInt(full.slice(at, at + 2), 16) / 255;
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  // Near-black is #0a0a0a, luminance about 0.003.
+  return 1.05 / (luminance + 0.05) >= (luminance + 0.05) / 0.053 ? '#ffffff' : '#0a0a0a';
 }
 
 /** A grid of colour swatches; a click sets the avatar's colour. Name the group with an `aria-label`. */
@@ -354,8 +372,8 @@ function AvatarPickerColorGroup({
           onClick={() => setColor(c)}
           aria-label={c}
           aria-pressed={value.color === c}
-          style={{ backgroundColor: c }}
-          className="focus-visible:ring-ring/50 flex size-8 items-center justify-center rounded-full text-white outline-none focus-visible:ring-3"
+          style={{ backgroundColor: c, color: avatarPickerCheckColor(c) }}
+          className="focus-visible:ring-ring/50 flex size-8 items-center justify-center rounded-full outline-none focus-visible:ring-3"
         >
           {value.color === c && <Check aria-hidden className="size-4" />}
         </button>
