@@ -138,9 +138,9 @@ and the `CollapsibleCardTrigger`. It sets `data-slot="collapsible-card-actions"`
 Renders shadcn's [`CollapsibleTrigger`](https://ui.shadcn.com/docs/components/base/collapsible), as a
 ghost, icon-sized [`Button`](https://ui.shadcn.com/docs/components/base/button), and takes every prop it
 takes. The button that opens and closes the body. Its default content is a chevron that turns over while
-the body is open and plays while the button is hovered or focused, and it is then named "Toggle content"
-unless an `aria-label` is given; `children` replace the chevron and name the button. It sets
-`data-slot="collapsible-card-trigger"`.
+the body is open and plays while the button is hovered or focused. `children` replace the chevron, and
+text in them names the button; without text, as with the chevron or an icon alone, it is named "Toggle
+content" unless an `aria-label` is given. It sets `data-slot="collapsible-card-trigger"`.
 
 ### CollapsibleCardContent
 

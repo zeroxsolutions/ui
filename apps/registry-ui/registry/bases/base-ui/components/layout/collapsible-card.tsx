@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { useRef, type ComponentProps, type ReactNode } from 'react';
+import { Children, isValidElement, useRef, type ComponentProps, type ReactNode } from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
@@ -85,11 +85,21 @@ function CollapsibleCardActions({ className, ...props }: ComponentProps<'div'>):
   return <div data-slot="collapsible-card-actions" className={cn('flex items-center gap-0.5', className)} {...props} />;
 }
 
+/** Whether `children` carry text of their own, read from strings and numbers anywhere in their elements' `children`. */
+function collapsibleCardHasText(children: ReactNode): boolean {
+  return Children.toArray(children).some((child) =>
+    typeof child === 'string' || typeof child === 'number'
+      ? String(child).trim() !== ''
+      : isValidElement<{ children?: ReactNode }>(child) && collapsibleCardHasText(child.props.children),
+  );
+}
+
 /**
  * The ghost icon button that opens and closes the body. With no `children` it
  * shows a chevron that turns over while the body is open and plays while the
- * button is hovered or focused, and is named "Toggle content" unless an
- * `aria-label` is given; `children` replace the chevron and name the button.
+ * button is hovered or focused. `children` replace the chevron, and text in them
+ * names the button; without text, such as the chevron or an icon alone, it is
+ * named "Toggle content" unless an `aria-label` is given.
  */
 function CollapsibleCardTrigger({
   className,
@@ -105,7 +115,7 @@ function CollapsibleCardTrigger({
   return (
     <CollapsibleTrigger
       data-slot="collapsible-card-trigger"
-      aria-label={children === undefined || children === null ? 'Toggle content' : undefined}
+      aria-label={collapsibleCardHasText(children) ? undefined : 'Toggle content'}
       render={<Button variant="ghost" size="icon" />}
       className={cn('group/collapsible-card-trigger', className)}
       onMouseEnter={(event) => {
