@@ -35,20 +35,21 @@ at request time.
 | ----------------- | ---------------- | ----------------------------------------------------------------------------- |
 | `wrangler:deploy` | `wrangler:build` | `opennextjs-cloudflare deploy --env <configuration>`, from the project's root |
 
-It has the configurations `development` (the default) and `production`. `nx-deploy.yml@v1` runs
-`nx run-many -t wrangler:deploy -c <environment>` with `CLOUDFLARE_API_TOKEN` and
-`CLOUDFLARE_ACCOUNT_ID` from the GitHub environment named for the branch, so `cd.yml` is unchanged.
+It has the one configuration `production` and no default, so a run that names no environment
+deploys nothing. `nx-deploy.yml@v1` runs `nx run-many -t wrangler:deploy -c <environment>` with
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` from the GitHub environment named for the branch;
+`cd.yml` runs that job on a push to `production` alone, as it runs `rclone-sync`.
 `wrangler:build` declares no env input: the app inlines no `NEXT_PUBLIC_*` value, so one artifact
-serves both environments.
+serves every environment.
 
 ## Environments
 
-As `wrangler.jsonc` already declares them, unchanged:
+The registry deploys to production alone. `wrangler.jsonc` keeps its `development` environment for
+`wrangler:dev`, the local preview the e2e suite runs against, which deploys nothing.
 
-| Environment   | Host                                                                     | Ships on push to |
-| ------------- | ------------------------------------------------------------------------ | ---------------- |
-| `development` | `ui-sdk-registry-ui-development.<account>.workers.dev`                   | `development`    |
-| `production`  | `ui.zeroxsolutions.com` (custom domain), no workers.dev, no preview URLs | `production`     |
+| Environment  | Host                                                                     | Ships on push to |
+| ------------ | ------------------------------------------------------------------------ | ---------------- |
+| `production` | `ui.zeroxsolutions.com` (custom domain), no workers.dev, no preview URLs | `production`     |
 
 The custom domain creates its own DNS record, which works only on a zone the account owns
 (Cloudflare's custom-domains page, read 2026-10-02).
@@ -60,11 +61,10 @@ Nothing is deployed from a session. A person:
 1. confirms the `zeroxsolutions.com` zone is on the same Cloudflare account as the worker, and that no
    CNAME or other record already holds `ui.zeroxsolutions.com`;
 2. creates an API token able to deploy a worker and attach its custom domain on that zone;
-3. sets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in both the `development` and `production`
-   GitHub environments.
+3. sets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the `production` GitHub environment.
 
-The first push to `development` proves the token and the account; the first push to `production`
-proves the domain. A 401 or 403 from either names the missing permission, which goes on the token.
+The first `git push origin master:production` proves the token, the account and the domain. A 401 or
+403 names the missing permission, which goes on the token.
 
 ## Checks
 
@@ -73,11 +73,9 @@ worker: `GET /r/registry.json` answers `200` with `name` `zeroxsolutions-ui`, an
 answers `GET /r/<name>.json` with `200` and a non-empty `content` in each of its `files`. This is the
 payload a consumer's `shadcn add` reads, and today nothing checks an item's own file is served.
 
-**After the development deploy, by hand.** On the workers.dev host: `/`, `/docs/components/tag-input`,
-`/og/docs/components/tag-input` and `/r/registry.json` answer `200`, and the worker's logs show no
-error for them.
-
-**After the production deploy, by hand.** The three observations under Why.
+**After the production deploy, by hand.** On `ui.zeroxsolutions.com`: `/`,
+`/docs/components/tag-input`, `/og/docs/components/tag-input` and `/r/registry.json` answer `200`, the
+worker's logs show no error for them, and the three observations under Why hold.
 
 ## Docs
 
