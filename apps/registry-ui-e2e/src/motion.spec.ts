@@ -84,7 +84,7 @@ async function drivesEveryDocsMotionToItsEndState(page: Page): Promise<void> {
     await viewCode.click({ timeout: 1_000 });
     await expect(fullSource).toBeVisible({ timeout: 1_000 });
   }).toPass();
-  const closeTrigger = main.getByRole('button', { name: 'Toggle', exact: true }).first();
+  const closeTrigger = main.getByRole('button', { name: 'Toggle content', exact: true }).first();
   await closeTrigger.click();
   await expect(fullSource).toBeHidden();
   await expect(viewCode).toBeVisible();

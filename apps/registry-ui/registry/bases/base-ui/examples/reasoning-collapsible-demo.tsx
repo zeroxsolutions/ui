@@ -7,8 +7,8 @@ import {
   ReasoningCollapsible,
   ReasoningCollapsibleContent,
   ReasoningCollapsibleTrigger,
-  useReasoningCollapsible,
 } from '@/registry/bases/base-ui/components/layout/reasoning-collapsible';
+import { useReasoningCollapsible } from '@/registry/bases/base-ui/hooks/use-reasoning-collapsible';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 
 const REASONING_TEXT = "Checking the last deploy's logs for the timeout, then narrowing it to the retry policy.";

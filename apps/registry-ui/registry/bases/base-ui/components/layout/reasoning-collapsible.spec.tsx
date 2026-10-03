@@ -6,8 +6,8 @@ import {
   ReasoningCollapsible,
   ReasoningCollapsibleContent,
   ReasoningCollapsibleTrigger,
-  useReasoningCollapsible,
 } from './reasoning-collapsible';
+import { useReasoningCollapsible } from '../../hooks/use-reasoning-collapsible';
 
 afterEach(() => {
   cleanup();

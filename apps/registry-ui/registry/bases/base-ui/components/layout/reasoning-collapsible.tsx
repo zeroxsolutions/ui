@@ -1,33 +1,14 @@
-import { createContext, useContext, useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 
 import { BrainIcon, type BrainIconHandle } from '@/registry/bases/base-ui/ui/brain';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
+import { ReasoningCollapsibleContext } from '@/registry/bases/base-ui/hooks/use-reasoning-collapsible';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 const AUTO_CLOSE_DELAY = 1000;
 const MS_IN_S = 1000;
-
-interface ReasoningCollapsibleContextValue {
-  streaming: boolean;
-  isOpen: boolean;
-  /** Whole seconds the last stream lasted, rounded up; undefined until a stream has ended. */
-  duration: number | undefined;
-}
-
-const ReasoningCollapsibleContext = createContext<ReasoningCollapsibleContextValue | null>(null);
-
-/**
- * Read the live reasoning state (`streaming`, `isOpen`, `duration`) from inside a
- * `<ReasoningCollapsible>`, for example to word the trigger's label. Throws when
- * used outside `<ReasoningCollapsible>`.
- */
-function useReasoningCollapsible(): ReasoningCollapsibleContextValue {
-  const ctx = useContext(ReasoningCollapsibleContext);
-  if (!ctx) throw new Error('ReasoningCollapsible parts must be used within <ReasoningCollapsible>');
-  return ctx;
-}
 
 interface ReasoningCollapsibleProps extends Omit<ComponentProps<typeof Collapsible>, 'open' | 'defaultOpen'> {
   streaming?: boolean;
@@ -39,7 +20,7 @@ interface ReasoningCollapsibleProps extends Omit<ComponentProps<typeof Collapsib
  * ReasoningCollapsible - a thinking / reasoning disclosure. It opens while
  * `streaming` is true, closes itself once about a second after the stream
  * ends, and carries `data-streaming` on the root meanwhile. The label and the
- * body are the consumer's; `useReasoningCollapsible` hands the label its
+ * body are the consumer's; `useReasoningCollapsible` (`hooks/use-reasoning-collapsible`) hands the label its
  * timing:
  *
  *   function ReasoningLabel() {
@@ -156,13 +137,13 @@ function ReasoningCollapsibleTrigger({
       {...props}
     >
       <BrainIcon ref={brainRef} aria-hidden />
-      <span className="min-w-0 flex-1 truncate text-left group-data-streaming/reasoning-collapsible:animate-pulse">
+      <span className="min-w-0 flex-1 truncate text-left group-data-streaming/reasoning-collapsible:motion-safe:animate-pulse">
         {children}
       </span>
       <ChevronDownIcon
         ref={chevronRef}
         aria-hidden
-        className="transition-transform group-aria-expanded/reasoning-collapsible-trigger:rotate-180"
+        className="group-aria-expanded/reasoning-collapsible-trigger:rotate-180 motion-safe:transition-transform"
       />
     </CollapsibleTrigger>
   );
@@ -181,5 +162,5 @@ function ReasoningCollapsibleContent({
   );
 }
 
-export { useReasoningCollapsible, ReasoningCollapsible, ReasoningCollapsibleTrigger, ReasoningCollapsibleContent };
+export { ReasoningCollapsible, ReasoningCollapsibleTrigger, ReasoningCollapsibleContent };
 export type { ReasoningCollapsibleProps };

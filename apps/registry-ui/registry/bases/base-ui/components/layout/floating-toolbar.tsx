@@ -16,7 +16,7 @@ function FloatingToolbar({ className, ...props }: ComponentProps<'div'>): ReactN
       data-slot="floating-toolbar"
       role="toolbar"
       className={cn(
-        'bg-card/95 ring-foreground/10 pointer-events-auto flex flex-row items-center gap-0.5 rounded-sm px-1.5 py-1 shadow-lg ring-1 backdrop-blur-sm',
+        'bg-card/95 ring-foreground/10 pointer-events-auto flex flex-row items-center gap-0.5 rounded-lg px-1.5 py-1 shadow-md ring-1 backdrop-blur-sm',
         className,
       )}
       {...props}

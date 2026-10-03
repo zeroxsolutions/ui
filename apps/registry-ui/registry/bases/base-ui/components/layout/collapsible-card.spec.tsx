@@ -32,7 +32,7 @@ describe('CollapsibleCard', () => {
     renderCard();
     expect(screen.getByText('Body')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Toggle' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle content' }));
 
     expect(screen.queryByText('Body')).toBeNull();
   });
@@ -40,7 +40,7 @@ describe('CollapsibleCard', () => {
   it('starts collapsed when defaultOpen is false', () => {
     renderCard({ defaultOpen: false });
     expect(screen.queryByText('Body')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Toggle' }).getAttribute('aria-expanded')).toBe('false');
+    expect(screen.getByRole('button', { name: 'Toggle content' }).getAttribute('aria-expanded')).toBe('false');
   });
 
   it('stamps its variant on the root, default when none is given', () => {
@@ -66,6 +66,17 @@ describe('CollapsibleCard', () => {
     expect(trigger.textContent).toBe('Layers');
   });
 
+  it('names a trigger with text children by that text', () => {
+    render(
+      <CollapsibleCard>
+        <CollapsibleCardTrigger>Layers</CollapsibleCardTrigger>
+        <CollapsibleCardContent>Body</CollapsibleCardContent>
+      </CollapsibleCard>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Layers' }));
+    expect(screen.queryByText('Body')).toBeNull();
+  });
+
   it("runs the caller's hover and focus handlers on the trigger beside its own", () => {
     const calls: string[] = [];
     render(
@@ -79,7 +90,7 @@ describe('CollapsibleCard', () => {
         <CollapsibleCardContent>Body</CollapsibleCardContent>
       </CollapsibleCard>,
     );
-    const trigger = screen.getByRole('button', { name: 'Toggle' });
+    const trigger = screen.getByRole('button', { name: 'Toggle content' });
     fireEvent.mouseEnter(trigger);
     fireEvent.mouseLeave(trigger);
     fireEvent.focus(trigger);
@@ -95,7 +106,7 @@ describe('CollapsibleCard', () => {
         <CollapsibleCardContent>Body</CollapsibleCardContent>
       </CollapsibleCard>,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Toggle' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle content' }));
     expect(clicks).toBe(1);
     expect(screen.queryByText('Body')).toBeNull();
   });

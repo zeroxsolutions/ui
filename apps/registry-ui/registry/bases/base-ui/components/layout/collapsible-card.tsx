@@ -10,7 +10,7 @@ const collapsibleCardVariants = cva('group/collapsible-card flex w-full flex-col
   variants: {
     variant: {
       default: 'bg-card text-card-foreground ring-foreground/10 rounded-xl ring-1',
-      muted: 'rounded-md bg-muted/50',
+      muted: 'rounded-xl bg-muted/50',
       plain: 'border-b border-border',
       flush: '',
     },
@@ -85,10 +85,10 @@ function CollapsibleCardActions({ className, ...props }: ComponentProps<'div'>):
 }
 
 /**
- * The ghost icon button that opens and closes the body, named "Toggle" unless an
- * `aria-label` is given. Its default content is a chevron that turns over while
- * the body is open and plays while the button is hovered or focused; `children`
- * replace it.
+ * The ghost icon button that opens and closes the body. With no `children` it
+ * shows a chevron that turns over while the body is open and plays while the
+ * button is hovered or focused, and is named "Toggle content" unless an
+ * `aria-label` is given; `children` replace the chevron and name the button.
  */
 function CollapsibleCardTrigger({
   className,
@@ -103,7 +103,7 @@ function CollapsibleCardTrigger({
   return (
     <CollapsibleTrigger
       data-slot="collapsible-card-trigger"
-      aria-label="Toggle"
+      aria-label={children === undefined || children === null ? 'Toggle content' : undefined}
       render={<Button variant="ghost" size="icon" />}
       className={cn('group/collapsible-card-trigger', className)}
       onMouseEnter={(event) => {
@@ -128,7 +128,7 @@ function CollapsibleCardTrigger({
         <ChevronDownIcon
           ref={iconRef}
           aria-hidden
-          className="transition-transform group-aria-expanded/collapsible-card-trigger:rotate-180"
+          className="group-aria-expanded/collapsible-card-trigger:rotate-180 motion-safe:transition-transform"
         />
       )}
     </CollapsibleTrigger>
