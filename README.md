@@ -1,10 +1,10 @@
 <p align="center">
   <a href="https://ui.zeroxsolutions.com">
-    <img src="apps/registry-ui/src/app/icon.svg" alt="ZeroX Solutions UI" width="96" height="96">
+    <img src="apps/registry-ui/src/app/icon.svg" alt="ZUI" width="96" height="96">
   </a>
 </p>
 
-<h1 align="center">ZeroX Solutions UI</h1>
+<h1 align="center">ZUI</h1>
 
 <p align="center">
   Composed React components for shadcn, on Base UI. Copy them in, own the source.
