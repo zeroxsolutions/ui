@@ -140,7 +140,8 @@ does. Place it in `EmojiPickerContent`. It sets `data-slot="emoji-picker-empty"`
 
 Renders shadcn's [`ToggleGroup`](https://ui.shadcn.com/docs/components/base/toggle-group) and takes every prop
 it takes except `value`, `defaultValue`, `onValueChange` and `multiple`. Category jump-nav, joined
-(`spacing={0}`): one item per category, the active one always pressed. Each item's accessible name is its
+(`spacing={0}`): one item per category, the active one always pressed, the items sharing the picker's full
+width. Each item's accessible name is its
 category's name; give the group its own `aria-label`. Hidden while searching. It sets
 `data-slot="emoji-picker-nav"`.
 
