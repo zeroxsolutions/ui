@@ -1,14 +1,9 @@
-# Deploy the pushed branch to the environment of the same name. Only `production`
-# deploys here: the registry has no development environment, so a push to
-# `development` runs the gate only, as the integration branch does. Promotion is a
-# fast-forward, which carries the validated SHA:
+# Deploy a push to `production`, the one environment the registry has. Promotion is a
+# fast-forward, which carries the SHA the master gate validated:
 #
 #   git push origin master:production
 #
-# There is no approval gate on the production job: a free-plan private repo cannot
-# enforce a required reviewer (422) or branch protection (403), so
-# `environment: production` would gate nothing while looking gated. Switch back when
-# the plan allows.
+# The `production` environment sets no required reviewer, so the push is the approval.
 #
 # CI decides when code ships and nothing else: it creates no identity or binding, runs no
 # `terraform apply`, and provisions no secret.
@@ -16,10 +11,13 @@ name: cd
 
 on:
   push:
-    branches: [development, production]
+    branches: [production]
 
 # One deploy at a time per branch, and an in-flight run is left to finish: killing a
 # deploy mid-sweep leaves some workers new and some old.
+permissions:
+  contents: read
+
 concurrency:
   group: cd-${{ github.ref }}
   cancel-in-progress: false
@@ -28,19 +26,15 @@ jobs:
   # Re-run the gate on the pushed commit. The pull-request gate ran on the merge
   # preview, which is not the commit that ships.
   gate:
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
+    uses: ./.github/workflows/nx-gate.yml
     with:
       targets: lint typecheck build test
 
   # `secrets: inherit` is what lets the credentials through - a called workflow gets
   # an empty `secrets` context otherwise; the environment scopes which value wins.
-  #
-  # `production` only, as `rclone-sync` below: the `development` environment holds no
-  # Cloudflare credentials, so a deploy there fails on its first API call.
   deploy:
     needs: [gate]
-    if: github.ref_name == 'production'
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-deploy.yml@v1
+    uses: ./.github/workflows/nx-deploy.yml
     secrets: inherit
     with:
       targets: wrangler:deploy
@@ -50,10 +44,6 @@ jobs:
   # the rest of this file: `run-many` matches no project in a repo that declares none and
   # exits 0, the same way `deploy` does.
   #
-  # `production` only, and not because production is special - because there is one bucket.
-  # The artwork is byte-identical per environment, so a development run would either write
-  # the production bucket or find no variables and fail; neither is a second environment.
-  #
   # Not a job on `nx-deploy`: that workflow forwards only the two Cloudflare deploy secrets,
   # so an R2 key it does not name never reaches the process, and it always passes `-c <env>`,
   # which `rclone:sync` has no configuration for.
@@ -62,18 +52,16 @@ jobs:
   # by path - GitHub has `paths:` at workflow level and nothing at job level. The cost of the
   # run that finds nothing moved is 0 B transferred; the 4m14s it still takes is checkout and
   # install, which a path filter would not have saved either (measured 2026-08-22).
-  #
-  # Until this job is copied to the org's other repos, this cd.yml is the one that differs
-  # from theirs.
   rclone-sync:
     needs: [gate]
-    if: github.ref_name == 'production'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
       name: production
     steps:
-      - uses: zeroxsolutions/github-actions/nx-setup@v1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/nx-setup
 
       # `RCLONE_S3_*` is rclone's own naming - `--s3-<flag>` uppercased - so no step in this
       # pipeline renames a value on its way to the tool.

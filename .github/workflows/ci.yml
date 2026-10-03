@@ -1,6 +1,6 @@
 # The pull-request gate. Two jobs:
 #
-#   gate - the shared `nx-gate` workflow, same targets as the pre-commit hook
+#   gate - the `nx-gate` workflow beside this one, same targets as the pre-commit hook
 #          but scoped by `affected` (the hook sweeps; the gate re-verifies what
 #          the change reaches - keep the asymmetry).
 #   e2e  - gate-only. The hook's set stays inside the gate's and never the
@@ -24,20 +24,23 @@ on:
 #
 # `github.ref` separates a pull request (`refs/pull/N/merge`) from a branch push, so a PR
 # and the master push it later becomes never cancel each other.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   gate:
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
+    uses: ./.github/workflows/nx-gate.yml
     with:
       targets: lint typecheck build test
 
   # Separate from `gate` so its cost is visible and its failure is legible on its
-  # own. `affected` runs it only for changes that can reach it, from the base the
-  # shared workflow resolves out of the event payload.
+  # own. `affected` runs it only for changes that can reach it, from the base
+  # `nx-gate` resolves out of the event payload.
   e2e:
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
+    uses: ./.github/workflows/nx-gate.yml
     with:
       targets: e2e

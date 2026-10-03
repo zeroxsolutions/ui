@@ -36,9 +36,11 @@ at request time.
 | `wrangler:deploy` | `wrangler:build` | `opennextjs-cloudflare deploy --env <configuration>`, from the project's root |
 
 It has the one configuration `production` and no default, so a run that names no environment
-deploys nothing. `nx-deploy.yml@v1` runs `nx run-many -t wrangler:deploy -c <environment>` with
-`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` from the GitHub environment named for the branch;
-`cd.yml` runs that job on a push to `production` alone, as it runs `rclone-sync`.
+deploys nothing. `cd.yml` triggers on a push to `production` alone and calls the repository's own
+`.github/workflows/nx-deploy.yml`, which runs `nx run-many -t wrangler:deploy -c production` on a
+GitHub-hosted runner with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. The workflows live in
+this repository because it is public, and a public repository can neither call a reusable workflow
+from a private one nor safely run a fork's pull request on a self-hosted runner.
 `wrangler:build` declares no env input: the app inlines no `NEXT_PUBLIC_*` value, so one artifact
 serves every environment.
 
