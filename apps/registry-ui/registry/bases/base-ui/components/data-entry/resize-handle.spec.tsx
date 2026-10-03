@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { ResizeHandle } from './resize-handle';
@@ -24,7 +24,7 @@ afterEach(cleanup);
 describe('ResizeHandle', () => {
   it('fires onToggle on double-click', () => {
     const onToggle = vi.fn();
-    const { container } = render(<ResizeHandle onDrag={() => {}} onToggle={onToggle} />);
+    const { container } = render(<ResizeHandle onDrag={() => {}} onToggle={onToggle} value={200} />);
 
     fireEvent.doubleClick(container.firstElementChild!);
     expect(onToggle).toHaveBeenCalledTimes(1);
@@ -36,7 +36,13 @@ describe('ResizeHandle', () => {
     const onDoubleClick = vi.fn();
     const onPointerDown = vi.fn();
     const { container } = render(
-      <ResizeHandle onDrag={onDrag} onToggle={onToggle} onDoubleClick={onDoubleClick} onPointerDown={onPointerDown} />,
+      <ResizeHandle
+        onDrag={onDrag}
+        onToggle={onToggle}
+        onDoubleClick={onDoubleClick}
+        onPointerDown={onPointerDown}
+        value={200}
+      />,
     );
     const handle = container.firstElementChild!;
 
@@ -53,7 +59,7 @@ describe('ResizeHandle', () => {
 
   it('emits onDrag deltas only after the pointer crosses the threshold', () => {
     const onDrag = vi.fn();
-    const { container } = render(<ResizeHandle onDrag={onDrag} onToggle={() => {}} />);
+    const { container } = render(<ResizeHandle onDrag={onDrag} onToggle={() => {}} value={200} />);
     const handle = container.firstElementChild!;
 
     fireEvent.pointerDown(handle, { clientX: 100, pointerId: 1 });
@@ -67,12 +73,70 @@ describe('ResizeHandle', () => {
 
   it('ignores sub-threshold jitter so a click never resizes', () => {
     const onDrag = vi.fn();
-    const { container } = render(<ResizeHandle onDrag={onDrag} onToggle={() => {}} />);
+    const { container } = render(<ResizeHandle onDrag={onDrag} onToggle={() => {}} value={200} />);
     const handle = container.firstElementChild!;
 
     fireEvent.pointerDown(handle, { clientX: 100, pointerId: 1 });
     fireEvent.pointerMove(handle, { clientX: 102, pointerId: 1 });
     expect(onDrag).not.toHaveBeenCalled();
+  });
+
+  it('is a focusable vertical separator reporting the width it is given', () => {
+    render(
+      <ResizeHandle aria-label="Resize panel" value={200} min={120} max={320} onDrag={() => {}} onToggle={() => {}} />,
+    );
+    const handle = screen.getByRole('separator', { name: 'Resize panel' });
+
+    handle.focus();
+    expect(document.activeElement).toBe(handle);
+    expect(handle.getAttribute('aria-orientation')).toBe('vertical');
+    expect(handle.getAttribute('aria-valuenow')).toBe('200');
+    expect(handle.getAttribute('aria-valuemin')).toBe('120');
+    expect(handle.getAttribute('aria-valuemax')).toBe('320');
+  });
+
+  it('resizes by its step on the arrow keys and toggles on Enter', () => {
+    const onDrag = vi.fn();
+    const onToggle = vi.fn();
+    render(<ResizeHandle aria-label="Resize panel" value={200} step={16} onDrag={onDrag} onToggle={onToggle} />);
+    const handle = screen.getByRole('separator', { name: 'Resize panel' });
+
+    fireEvent.keyDown(handle, { key: 'ArrowRight' });
+    fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+    fireEvent.keyDown(handle, { key: 'Enter' });
+
+    expect(onDrag.mock.calls).toEqual([[16], [-16]]);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('resizes by 10px a press when no step is given', () => {
+    const onDrag = vi.fn();
+    render(<ResizeHandle aria-label="Resize panel" value={200} onDrag={onDrag} onToggle={() => {}} />);
+
+    fireEvent.keyDown(screen.getByRole('separator', { name: 'Resize panel' }), { key: 'ArrowRight' });
+
+    expect(onDrag).toHaveBeenCalledWith(10);
+  });
+
+  it("skips its own key action when the caller's onKeyDown prevents the default", () => {
+    const onDrag = vi.fn();
+    const onToggle = vi.fn();
+    render(
+      <ResizeHandle
+        aria-label="Resize panel"
+        value={200}
+        onDrag={onDrag}
+        onToggle={onToggle}
+        onKeyDown={(event) => event.preventDefault()}
+      />,
+    );
+    const handle = screen.getByRole('separator', { name: 'Resize panel' });
+
+    fireEvent.keyDown(handle, { key: 'ArrowRight' });
+    fireEvent.keyDown(handle, { key: 'Enter' });
+
+    expect(onDrag).not.toHaveBeenCalled();
+    expect(onToggle).not.toHaveBeenCalled();
   });
 });
 
@@ -84,6 +148,7 @@ describe('ResizeHandle composed handlers honor a caller preventDefault', () => {
       <ResizeHandle
         onDrag={onDrag}
         onToggle={() => {}}
+        value={200}
         onPointerDown={(event) => {
           onPointerDown(event);
           event.preventDefault();
@@ -107,6 +172,7 @@ describe('ResizeHandle composed handlers honor a caller preventDefault', () => {
       <ResizeHandle
         onDrag={onDrag}
         onToggle={() => {}}
+        value={200}
         onPointerMove={(event) => {
           onPointerMove(event);
           event.preventDefault();
@@ -130,6 +196,7 @@ describe('ResizeHandle composed handlers honor a caller preventDefault', () => {
       <ResizeHandle
         onDrag={() => {}}
         onToggle={onToggle}
+        value={200}
         onDoubleClick={(event) => {
           onDoubleClick(event);
           event.preventDefault();
@@ -152,6 +219,7 @@ describe("ResizeHandle's cleanup handlers ignore a caller preventDefault", () =>
       <ResizeHandle
         onDrag={onDrag}
         onToggle={() => {}}
+        value={200}
         onPointerUp={(event) => {
           onPointerUp(event);
           event.preventDefault();

@@ -329,7 +329,7 @@ const emojiAppearanceToggleGroup: RegistryItem = {
   name: 'emoji-appearance-toggle-group',
   type: 'registry:component',
   dependencies: ['@zeroxsolutions/fluent-emoji'],
-  registryDependencies: ['@shadcn/toggle-group'],
+  registryDependencies: ['@shadcn/toggle-group', '@shadcn/utils'],
   files: [{ path: `${BASE}/components/data-entry/emoji-appearance-toggle-group.tsx`, type: 'registry:component' }],
 };
 

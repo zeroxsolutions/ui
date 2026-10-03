@@ -15,7 +15,7 @@ function EmojiPickerDemo(): ReactNode {
   const [picked, setPicked] = useState('😀');
 
   return (
-    <div className="flex w-72 flex-col gap-2">
+    <div className="flex w-full max-w-72 flex-col gap-2">
       <p className="text-sm">Picked: {picked}</p>
       <EmojiPicker onSelect={setPicked} frequent={{ name: 'Frequently used', emojis: ['🍕', '🎉'] }}>
         <EmojiPickerSearch />

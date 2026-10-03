@@ -56,6 +56,8 @@ import { ResizeHandle } from '@/components/data-entry/resize-handle';
 
 ```tsx
 <ResizeHandle
+  aria-label="Resize panel"
+  value={width}
   onDrag={(dx) => setWidth((current) => current + dx)}
   onToggle={() => setCollapsed((current) => !current)}
 />
@@ -74,9 +76,16 @@ Renders a `div` and takes every prop a `div` takes except `onDrag`, plus:
 | ---------- | ---------------------- | -------- |
 | `onDrag`   | `(dx: number) => void` | required |
 | `onToggle` | `() => void`           | required |
+| `value`    | `number`               | required |
+| `min`      | `number`               | -        |
+| `max`      | `number`               | -        |
+| `step`     | `number`               | `10`     |
 
 A resize only begins once the pointer crosses a small movement threshold, so a click, jitter or double-click
 never nudges the width; it uses pointer capture, so the drag survives the pointer leaving the 1px line.
 Double-click fires `onToggle`. A caller's own `onPointerDown`, `onPointerMove` or `onDoubleClick` runs first,
 and calling `event.preventDefault()` in it skips the matching action; the pointer-up cleanup always ends the
-drag after the caller's own handler runs. It sets `data-slot="resize-handle"`.
+drag after the caller's own handler runs. It is a focusable `separator` with `aria-orientation="vertical"`,
+`aria-valuenow` from `value` and `aria-valuemin`/`aria-valuemax` from `min`/`max`; Left and Right call `onDrag`
+with `-step`/`step`, Enter calls `onToggle`, and a caller's `onKeyDown` that prevents the default skips both.
+Give it an `aria-label`. It sets `data-slot="resize-handle"`.

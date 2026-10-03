@@ -12,10 +12,18 @@ import { shouldStartDrag } from '@/registry/bases/base-ui/lib/resize-drag';
 // `onDrag` below is a resize-width delta, not the native HTML5 drag event - omit
 // the native handler so its signature does not clash with ours.
 interface ResizeHandleProps extends Omit<ComponentProps<'div'>, 'onDrag'> {
-  /** Width delta in px since the last move; apply it to the panel size. */
+  /** Width delta in px since the last move or arrow press; apply it to the panel size. */
   onDrag: (dx: number) => void;
-  /** Double-click action (e.g. collapse/expand the panel). */
+  /** Double-click and Enter action (e.g. collapse/expand the panel). */
   onToggle: () => void;
+  /** The panel's current width in px, reported as the separator's value. */
+  value: number;
+  /** The narrowest width the caller allows, reported as the separator's minimum. */
+  min?: number;
+  /** The widest width the caller allows, reported as the separator's maximum. */
+  max?: number;
+  /** Pixels one Left or Right arrow press resizes by; 10 when omitted. */
+  step?: number;
 }
 
 /**
@@ -27,9 +35,10 @@ interface ResizeHandleProps extends Omit<ComponentProps<'div'>, 'onDrag'> {
  *
  * The recipe is a deliberate fork of upstream's `ResizableHandle` and its
  * handle, because that handle renders a `react-resizable-panels` separator,
- * which throws outside a group. The fork is pointer-only: it has neither
- * upstream's focus ring nor its keyboard resizing, and upstream's recipe
- * fixes do not reach it.
+ * which throws outside a group. It answers the keyboard as upstream's handle
+ * does: a focusable `separator` carrying its orientation and `value`, Left
+ * and Right resize by `step`, Enter fires `onToggle`, under upstream's focus
+ * ring. Upstream's recipe fixes do not reach it.
  *
  * Stable by design: a resize only begins once the pointer crosses a small
  * movement threshold, so a click, jitter, or double-click never nudges the
@@ -41,11 +50,17 @@ interface ResizeHandleProps extends Omit<ComponentProps<'div'>, 'onDrag'> {
  * the matching own action (arming, reporting the drag delta, or toggling). The
  * `onPointerUp` / `onPointerCancel` / `onLostPointerCapture` cleanup always
  * ends the drag after the caller's handler runs, whatever it does - skipping it
- * there would strand the drag armed once the pointer is gone.
+ * there would strand the drag armed once the pointer is gone. A caller's own
+ * `onKeyDown` runs first too, and `preventDefault()` there skips the key's
+ * action.
  */
 function ResizeHandle({
   onDrag,
   onToggle,
+  value,
+  min,
+  max,
+  step = 10,
   className,
   onPointerDown: onPointerDownProp,
   onPointerMove: onPointerMoveProp,
@@ -53,6 +68,7 @@ function ResizeHandle({
   onPointerCancel,
   onLostPointerCapture,
   onDoubleClick,
+  onKeyDown,
   ...props
 }: ResizeHandleProps): ReactNode {
   const downX = useRef(0);
@@ -94,8 +110,14 @@ function ResizeHandle({
   return (
     <div
       data-slot="resize-handle"
+      role="separator"
+      aria-orientation="vertical"
+      aria-valuenow={value}
+      aria-valuemin={min}
+      aria-valuemax={max}
+      tabIndex={0}
       className={cn(
-        'bg-border relative flex w-px shrink-0 cursor-col-resize touch-none items-center justify-center select-none after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2',
+        'bg-border ring-offset-background focus-visible:ring-ring relative flex w-px shrink-0 cursor-col-resize touch-none items-center justify-center select-none after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:outline-hidden',
         className,
       )}
       onPointerDown={(event) => {
@@ -121,6 +143,17 @@ function ResizeHandle({
       onDoubleClick={(event) => {
         onDoubleClick?.(event);
         if (!event.defaultPrevented) onToggle();
+      }}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        if (event.defaultPrevented) return;
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+          event.preventDefault();
+          onDrag(event.key === 'ArrowRight' ? step : -step);
+        } else if (event.key === 'Enter') {
+          event.preventDefault();
+          onToggle();
+        }
       }}
       {...props}
     >

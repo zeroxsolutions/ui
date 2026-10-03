@@ -76,6 +76,8 @@ function NumberField({
 }: NumberFieldProps): React.ReactNode {
   const [editing, setEditing] = React.useState(false);
   const [draft, setDraft] = React.useState('');
+  // Escape blurs the input to end the edit; this tells the blur's commit that the draft was dropped.
+  const cancelled = React.useRef(false);
 
   const clamp = React.useCallback(
     (next: number) => {
@@ -88,6 +90,7 @@ function NumberField({
   );
 
   const begin = React.useCallback(() => {
+    cancelled.current = false;
     setEditing(true);
     setDraft(mixed || displayText ? '' : String(value));
   }, [value, mixed, displayText]);
@@ -102,6 +105,7 @@ function NumberField({
 
   const commit = React.useCallback(() => {
     setEditing(false);
+    if (cancelled.current) return;
     const result = parseRaw ? parseRaw(draft) : evaluateExpression(draft);
     if (result !== null) onValueChange(clamp(result));
   }, [draft, parseRaw, onValueChange, clamp]);
@@ -111,8 +115,8 @@ function NumberField({
       if (event.key === 'Enter') {
         event.currentTarget.blur();
       } else if (event.key === 'Escape') {
+        cancelled.current = true;
         setEditing(false);
-        setDraft(String(value));
         event.currentTarget.blur();
       } else if (step !== undefined && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
         // Step the value (the arrows are inert otherwise - a text cursor in a

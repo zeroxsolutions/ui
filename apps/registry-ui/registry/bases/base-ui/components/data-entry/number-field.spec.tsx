@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { InputGroupAddon, InputGroupText } from '@/registry/bases/base-ui/ui/input-group';
@@ -129,6 +129,35 @@ describe('NumberField', () => {
     expect(onFocus).toHaveBeenCalledTimes(1);
     expect(onBlur).toHaveBeenCalledTimes(1);
     expect(onValueChange).toHaveBeenCalledWith(2);
+  });
+
+  it('drops the draft on Escape and commits nothing', () => {
+    const onValueChange = vi.fn();
+    renderField({ value: 5, onValueChange });
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+
+    act(() => input.focus());
+    fireEvent.change(input, { target: { value: '42' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(input.value).toBe('5');
+    expect(document.activeElement).not.toBe(input);
+  });
+
+  it('commits the next edit after an Escape', () => {
+    const onValueChange = vi.fn();
+    renderField({ value: 5, onValueChange });
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+
+    act(() => input.focus());
+    fireEvent.change(input, { target: { value: '42' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+    act(() => input.focus());
+    fireEvent.change(input, { target: { value: '9' } });
+    act(() => input.blur());
+
+    expect(onValueChange.mock.calls).toEqual([[9]]);
   });
 });
 

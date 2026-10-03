@@ -35,7 +35,7 @@ pnpm add @zeroxsolutions/fluent-emoji
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add toggle-group
+pnpm dlx shadcn@latest add toggle-group utils
 ```
 
 <Step>Copy the component into `components/data-entry/emoji-appearance-toggle-group.tsx`.</Step>
@@ -91,7 +91,8 @@ it takes except `value`, `defaultValue`, `onValueChange` and `multiple`, plus:
 | `onValueChange` | `(style: FluentEmojiStyle) => void` | required |
 
 Binds Base UI's array value to the lone style and ignores a deselect, so a style is always chosen. It defaults
-`variant` to `outline`, `spacing` to `2` and `aria-label` to `"Emoji style"`. It sets
+`variant` to `outline` and `aria-label` to `"Emoji style"`, keeps the toggle group's default spacing, and wraps
+its swatches onto further rows when narrower than they are. It sets
 `data-slot="emoji-appearance-toggle-group"`.
 
 ### EmojiAppearanceToggleGroupItem
@@ -104,5 +105,5 @@ prop it takes except `value`, plus:
 | `value` | `FluentEmojiStyle` | required |
 
 One swatch: draws the sample emoji, hidden from assistive technology, in `value`'s style (an `anim` swatch plays
-its frames) before the consumer's label (`children`), which names the swatch; the preview is drawn as large as
-fits the toggle (`h-8`). It sets `data-slot="emoji-appearance-toggle-group-item"`.
+its frames) before the consumer's label (`children`), which names the swatch; the preview is drawn at `size-6`
+(24px), and the `mono` artwork inverts in the dark theme. It sets `data-slot="emoji-appearance-toggle-group-item"`.

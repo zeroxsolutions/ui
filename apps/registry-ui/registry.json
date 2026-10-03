@@ -277,7 +277,7 @@
       "description": "A single-select row of swatches for choosing the Fluent Emoji artwork style, each previewing the same sample emoji in its own style.",
       "categories": ["data-entry"],
       "dependencies": ["@zeroxsolutions/fluent-emoji"],
-      "registryDependencies": ["@shadcn/toggle-group"],
+      "registryDependencies": ["@shadcn/toggle-group", "@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/emoji-appearance-toggle-group.tsx",
