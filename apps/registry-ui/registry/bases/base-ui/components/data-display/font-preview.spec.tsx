@@ -51,7 +51,7 @@ describe('FontPreview', () => {
       <>
         <div data-testid="sentinel">Sentinel</div>
         <FontPreview
-          src={'/x.woff2"); } [data-testid="sentinel"] { display: none; } @font-face { src: url("'}
+          src={'/x.woff2"); } [data-testid="sentinel"] { display: none; } \\ @font-face { src: url("'}
           format={'woff2") } * { color: red } x { a: ("'}
         />
       </>,
@@ -59,5 +59,11 @@ describe('FontPreview', () => {
     const style = document.querySelector('[data-slot=font-preview] style') as HTMLStyleElement;
     expect(style.sheet?.cssRules).toHaveLength(1);
     expect(getComputedStyle(screen.getByTestId('sentinel')).display).toBe('block');
+  });
+
+  it('keeps a URL with a query string unchanged', () => {
+    const src = 'https://example.com/font.woff2?v=2#x';
+    render(<FontPreview src={src} />);
+    expect(fontFaceText()).toContain(`url("${src}")`);
   });
 });

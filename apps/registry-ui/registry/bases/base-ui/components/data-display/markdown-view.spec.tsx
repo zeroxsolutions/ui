@@ -93,4 +93,11 @@ describe('MarkdownView', () => {
     expect(screen.getAllByRole('checkbox')).toHaveLength(1);
     expect(screen.getByText('Plain note').closest('li')?.getAttribute('data-slot')).toBeNull();
   });
+
+  it('names each task checkbox by its own task text', async () => {
+    render(<MarkdownView>{'- [x] Ship the parser\n- [ ] Document the API\n- Plain note'}</MarkdownView>);
+    await settle();
+    expect(screen.getByRole('checkbox', { name: 'Ship the parser' })).toBeTruthy();
+    expect(screen.getByRole('checkbox', { name: 'Document the API' })).toBeTruthy();
+  });
 });

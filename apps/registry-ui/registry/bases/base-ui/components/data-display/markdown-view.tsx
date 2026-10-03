@@ -1,4 +1,4 @@
-import { memo, type ComponentProps, type ReactNode } from 'react';
+import { createContext, memo, useContext, useId, type ComponentProps, type ReactNode } from 'react';
 import Markdown, { type Components, type ExtraProps } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -46,10 +46,28 @@ function MarkdownViewTable({ node: _node, ...props }: ComponentProps<'table'> & 
   );
 }
 
-/** A GFM task item: its read-only checkbox and its text on one row, with no bullet before them. */
-function MarkdownViewTaskItem({ className, ...props }: ComponentProps<'li'>): ReactNode {
+/** The id `MarkdownViewTaskItem` names itself with, for its checkbox to read a name off. */
+const MarkdownViewTaskItemContext = createContext<string | undefined>(undefined);
+
+/**
+ * A GFM task item: its read-only checkbox and its text on one row, with no bullet before them. Its own
+ * id is the checkbox's `aria-labelledby` target, since GFM's markup gives the checkbox no label element
+ * of its own to read a name from, and Base UI's `Checkbox` is a styled `span`, not an `<input>`, so
+ * wrapping it in a `<label>` would name the hidden native input it renders beside itself, not the span.
+ */
+function MarkdownViewTaskItem({ className, children, ...props }: ComponentProps<'li'>): ReactNode {
+  const id = useId();
   return (
-    <li data-slot="markdown-view-task-item" className={cn('flex list-none items-start gap-2', className)} {...props} />
+    <MarkdownViewTaskItemContext.Provider value={id}>
+      <li
+        id={id}
+        data-slot="markdown-view-task-item"
+        className={cn('flex list-none items-start gap-2', className)}
+        {...props}
+      >
+        {children}
+      </li>
+    </MarkdownViewTaskItemContext.Provider>
   );
 }
 
@@ -73,13 +91,16 @@ const markdownViewComponents: Components = {
     ) : (
       <li className={className} {...props} />
     ),
-  // GFM's task marker, as nova's Checkbox: read-only, so the reader sees the state and cannot change it.
-  input: ({ node: _node, type, checked, disabled: _disabled, ...props }) =>
-    type === 'checkbox' ? (
-      <Checkbox checked={checked === true} readOnly className="mt-1" />
+  // GFM's task marker, as nova's Checkbox: read-only, so the reader sees the state and cannot change it,
+  // and named by the enclosing MarkdownViewTaskItem's own id (see its docblock for why).
+  input: ({ node: _node, type, checked, disabled: _disabled, ...props }) => {
+    const labelledBy = useContext(MarkdownViewTaskItemContext);
+    return type === 'checkbox' ? (
+      <Checkbox checked={checked === true} readOnly aria-labelledby={labelledBy} className="mt-1" />
     ) : (
       <input type={type} {...props} />
-    ),
+    );
+  },
   code: ({ node: _node, className, children, ...props }) => {
     const text = String(children ?? '');
     if (!isBlockCode(className, text)) {
