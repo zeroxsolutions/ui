@@ -112,6 +112,32 @@ describe('CollapsibleCard', () => {
     expect(screen.queryByText('Body')).toBeNull();
   });
 
+  it('names a trigger whose children are an icon alone "Toggle content"', () => {
+    render(
+      <CollapsibleCard>
+        <CollapsibleCardTrigger>
+          <svg aria-hidden />
+        </CollapsibleCardTrigger>
+        <CollapsibleCardContent>Body</CollapsibleCardContent>
+      </CollapsibleCard>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle content' }));
+    expect(screen.queryByText('Body')).toBeNull();
+  });
+
+  it('names a trigger by text nested in its children', () => {
+    render(
+      <CollapsibleCard>
+        <CollapsibleCardTrigger>
+          <svg aria-hidden />
+          <span>Layers</span>
+        </CollapsibleCardTrigger>
+        <CollapsibleCardContent>Body</CollapsibleCardContent>
+      </CollapsibleCard>,
+    );
+    expect(screen.getByRole('button', { name: 'Layers' })).toBeTruthy();
+  });
+
   it("runs the caller's hover and focus handlers on the trigger beside its own", () => {
     const calls: string[] = [];
     render(

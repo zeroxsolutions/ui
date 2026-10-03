@@ -24,7 +24,7 @@ function ResizeHandleDemo(): ReactNode {
         <ResizeHandle
           aria-label="Resize panel"
           value={collapsed ? COLLAPSED_WIDTH : width}
-          min={MIN_WIDTH}
+          min={COLLAPSED_WIDTH}
           max={MAX_WIDTH}
           onDrag={(dx) => {
             if (!collapsed) setWidth((current) => Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, current + dx)));

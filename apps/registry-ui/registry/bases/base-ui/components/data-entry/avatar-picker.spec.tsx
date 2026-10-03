@@ -118,6 +118,22 @@ function ColorPane() {
 
 const openEditor = () => fireEvent.click(screen.getByRole('button', { name: 'Edit avatar' }));
 
+/** WCAG 2 contrast ratio between two computed `rgb()` colours; 1 when either is not one. */
+function contrastRatio(a: string, b: string): number {
+  const luminance = (color: string): number | undefined => {
+    const channels = /rgba?\((\d+), (\d+), (\d+)/.exec(color)?.slice(1).map(Number);
+    if (!channels) return undefined;
+    const [r, g, bl] = channels.map((c) => {
+      const s = c / 255;
+      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  };
+  const [la, lb] = [luminance(a), luminance(b)];
+  if (la === undefined || lb === undefined) return 1;
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
 describe('AvatarPicker', () => {
   it('shows only the pane the consumer composes when it declares no tab strip', () => {
     render(
@@ -330,6 +346,22 @@ describe('AvatarPicker', () => {
     fireEvent.click(screen.getByRole('button', { name: '#6366f1' }));
     expect(onChange).toHaveBeenCalledWith({ color: '#6366f1' });
   });
+
+  it.each(['#f59e0b', '#84cc16', '#6366f1'])(
+    // 3:1 is WCAG's contrast for a graphic, which the check is.
+    'draws the pressed %s swatch with a check that stands out from it at 3:1 or more',
+    (color) => {
+      render(
+        <Picker defaultTab="color" value={{ color }} onValueChange={vi.fn()}>
+          <ColorPane />
+        </Picker>,
+      );
+      openEditor();
+
+      const swatch = getComputedStyle(screen.getByRole('button', { name: color }));
+      expect(contrastRatio(swatch.color, swatch.backgroundColor)).toBeGreaterThanOrEqual(3);
+    },
+  );
 
   it('hands upstream Popover the root props it does not read', async () => {
     const actionsRef = createRef<PopoverPrimitive.Root.Actions>();

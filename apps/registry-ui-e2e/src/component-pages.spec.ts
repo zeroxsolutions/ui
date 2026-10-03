@@ -23,6 +23,12 @@ test('every component page renders its preview, fits a phone without a stage scr
     await page.goto(`/docs/components/${name}`);
     await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
     await expect(page.locator('[data-slot=component-preview-stage]').first()).toBeVisible();
+    // Measured once the page's own requests settle: a demo widened by an image or a font that arrives
+    // late would otherwise pass on the first sample, taken before it lands. WebKit also reports a
+    // prefetch aborted by navigation as a page error, so this lets the page's own header-link
+    // prefetches settle before leaving it for the next one.
+    // eslint-disable-next-line playwright/no-networkidle
+    await page.waitForLoadState('networkidle');
     await expect
       .poll(() => page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth'), { message: name })
       .toBe(false);
@@ -43,10 +49,6 @@ test('every component page renders its preview, fits a phone without a stage scr
         { message: `${name}: a preview stage scrolls sideways` },
       )
       .toEqual([]);
-    // WebKit reports a prefetch aborted by navigation as a page error, so let this page's own
-    // header-link prefetches settle before leaving it for the next one.
-    // eslint-disable-next-line playwright/no-networkidle
-    await page.waitForLoadState('networkidle');
   }
   expect(errors).toEqual([]);
 });
