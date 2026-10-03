@@ -15,10 +15,14 @@ async function pageIsAtItsEnd(page: Page): Promise<boolean> {
   );
 }
 
-/** Wheels the page toward its end a step at a time, the way a reader's scroll crosses every cell. */
+/**
+ * Scrolls toward the end a step at a time, the way a reader's scroll crosses every cell. Scrolled by
+ * script, not by wheel: headless WebKit on a hosted Linux runner leaves the page where it is on a
+ * wheel event.
+ */
 async function scrollToPageEndInSteps(page: Page): Promise<void> {
   for (let step = 0; step < 40 && !(await pageIsAtItsEnd(page)); step += 1) {
-    await page.mouse.wheel(0, 400);
+    await page.evaluate('window.scrollBy(0, 400)');
   }
 }
 

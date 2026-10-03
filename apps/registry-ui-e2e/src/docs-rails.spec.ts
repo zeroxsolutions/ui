@@ -46,7 +46,9 @@ for (const size of [
 test('at 1440x900 the TOC stays where it starts sticking, to the end of a docs page', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(LONGEST_PAGE);
-  await page.mouse.wheel(0, 200);
+  // Scrolled by script, not by wheel: headless WebKit on a hosted Linux runner leaves the page where
+  // it is on a wheel event.
+  await page.evaluate('window.scrollBy(0, 200)');
   await expect.poll(() => pageScrollY(page)).toBeGreaterThan(0);
   const stuck = await toc(page).getByText('On this page').boundingBox();
 
