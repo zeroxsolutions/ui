@@ -23,8 +23,9 @@ interface FontPreviewProps extends ComponentProps<'div'> {
 }
 
 /**
- * A specimen of a font file at several sizes, one row per size. The consumer
- * places and pads the wrapper.
+ * A specimen of a font file at several sizes, one row per size. The consumer places, pads and
+ * widths the wrapper; the root fills that width (`w-full min-w-0`) so each row's specimen
+ * truncates with an ellipsis at it instead of widening a fit-content ancestor.
  */
 function FontPreview({
   src,
@@ -42,7 +43,7 @@ function FontPreview({
   }; font-display: swap; }`;
 
   return (
-    <div data-slot="font-preview" className={cn('flex flex-col gap-4', className)} {...props}>
+    <div data-slot="font-preview" className={cn('flex w-full min-w-0 flex-col gap-4', className)} {...props}>
       <style>{css}</style>
       {sizes.map((size) => (
         <div key={size} className="flex items-baseline gap-3">
