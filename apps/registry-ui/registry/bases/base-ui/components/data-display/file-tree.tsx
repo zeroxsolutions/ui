@@ -375,7 +375,7 @@ function FileTreeLabel({
           ref={iconRef}
           aria-hidden
           size={16}
-          className={cn('flex shrink-0 motion-safe:transition-transform', item.expanded && 'rotate-90')}
+          className={cn('text-primary flex shrink-0 motion-safe:transition-transform', item.expanded && 'rotate-90')}
         />
       ) : (
         <span aria-hidden className="w-4 shrink-0" />
