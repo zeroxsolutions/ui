@@ -1,4 +1,13 @@
-import { createContext, memo, useContext, useId, type ComponentProps, type ReactNode } from 'react';
+import {
+  Children,
+  createContext,
+  isValidElement,
+  memo,
+  useContext,
+  useId,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import Markdown, { type Components, type ExtraProps } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -49,23 +58,31 @@ function MarkdownViewTable({ node: _node, ...props }: ComponentProps<'table'> & 
 /** The id `MarkdownViewTaskItem` names itself with, for its checkbox to read a name off. */
 const MarkdownViewTaskItemContext = createContext<string | undefined>(undefined);
 
+/** Whether a child is a nested list, GFM's own markup for a task item's sub-items. */
+function isNestedList(child: ReactNode): boolean {
+  return isValidElement(child) && (child.type === 'ul' || child.type === 'ol');
+}
+
 /**
- * A GFM task item: its read-only checkbox and its text on one row, with no bullet before them. Its own
- * id is the checkbox's `aria-labelledby` target, since GFM's markup gives the checkbox no label element
- * of its own to read a name from, and Base UI's `Checkbox` is a styled `span`, not an `<input>`, so
+ * A GFM task item: its read-only checkbox and its text on one row, with no bullet before them, and
+ * any nested list (a sub-task's own `ul`) dropped below that row instead of beside the text, since GFM
+ * hands this `li` the nested list as one more child alongside the checkbox and the text. Its own id is
+ * the checkbox's `aria-labelledby` target, since GFM's markup gives the checkbox no label element of
+ * its own to read a name from, and Base UI's `Checkbox` is a styled `span`, not an `<input>`, so
  * wrapping it in a `<label>` would name the hidden native input it renders beside itself, not the span.
  */
 function MarkdownViewTaskItem({ className, children, ...props }: ComponentProps<'li'>): ReactNode {
   const id = useId();
+  const items = Children.toArray(children);
+  const nestedLists = items.filter(isNestedList);
+  const row = items.filter((item) => !isNestedList(item));
   return (
     <MarkdownViewTaskItemContext.Provider value={id}>
-      <li
-        id={id}
-        data-slot="markdown-view-task-item"
-        className={cn('flex list-none items-start gap-2', className)}
-        {...props}
-      >
-        {children}
+      <li id={id} data-slot="markdown-view-task-item" className={cn('list-none', className)} {...props}>
+        <div data-slot="markdown-view-task-item-row" className="flex items-start gap-2">
+          {row}
+        </div>
+        {nestedLists}
       </li>
     </MarkdownViewTaskItemContext.Provider>
   );

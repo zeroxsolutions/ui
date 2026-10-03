@@ -100,4 +100,22 @@ describe('MarkdownView', () => {
     expect(screen.getByRole('checkbox', { name: 'Ship the parser' })).toBeTruthy();
     expect(screen.getByRole('checkbox', { name: 'Document the API' })).toBeTruthy();
   });
+
+  it('drops a nested task list below the parent row instead of beside its text', async () => {
+    render(<MarkdownView>{'- [ ] parent\n  - [ ] child'}</MarkdownView>);
+    await settle();
+
+    const childCheckbox = screen.getByRole('checkbox', { name: 'child' });
+    const parentItem = document.querySelector('[data-slot="markdown-view-task-item"]');
+    const row = parentItem?.querySelector('[data-slot="markdown-view-task-item-row"]');
+
+    // The nested list is a descendant of the parent's <li>, laid out after its row, not inside it.
+    expect(parentItem?.contains(childCheckbox)).toBe(true);
+    expect(row).toBeTruthy();
+    expect(row?.contains(childCheckbox)).toBe(false);
+
+    const nestedList = parentItem?.querySelector('ul');
+    expect(nestedList?.contains(childCheckbox)).toBe(true);
+    expect(row?.compareDocumentPosition(nestedList as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
 });
