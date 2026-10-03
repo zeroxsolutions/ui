@@ -41,16 +41,16 @@ interface TreeItemProps extends React.ComponentProps<'div'> {
  *     <TreeItemIndent depth={0}>
  *       <TreeItemTrigger aria-label="Toggle src" onClick={toggle} />
  *     </TreeItemIndent>
- *     <TreeItemLabel><ItemTitle>src</ItemTitle></TreeItemLabel>
+ *     <TreeItemLabel>src</TreeItemLabel>
  *   </TreeItem>
  *   <TreeItem leaf>
  *     <TreeItemIndent depth={1} />
- *     <TreeItemLabel><ItemTitle>index.ts</ItemTitle></TreeItemLabel>
+ *     <TreeItemLabel>index.ts</TreeItemLabel>
  *   </TreeItem>
  *
- * A `TreeItemRenameInput` replaces the title while renaming, and `ItemActions`
- * holds trailing actions. Selection state and drag handlers go on the row
- * itself. A context menu wraps the row as `ContextMenuTrigger render={<TreeItem />}`.
+ * A `TreeItemRenameInput` replaces the label's text while renaming. Trailing
+ * actions, selection state and drag handlers go on the row itself. A context
+ * menu wraps the row as `ContextMenuTrigger render={<TreeItem />}`.
  *
  * `ref` reaches the row div - a consumer needs it for `scrollIntoView`, and a
  * wrapping Base UI `render` trigger composes its ref through it.
@@ -164,8 +164,8 @@ function TreeItemTrigger({
 }
 
 /**
- * The row's clickable name region, holding `ItemMedia`, `ItemTitle` or a
- * `TreeItemRenameInput`, and any badges after the name. A plain `div`, not a
+ * The row's clickable name region: the consumer's icon and name as `children`, or a
+ * `TreeItemRenameInput` while renaming, and any badges after the name. A plain `div`, not a
  * `<button>`: per the W3C tree view pattern the tree owns activation (roving
  * tabindex + Enter), and a `div` may hold the rename input where a button may
  * not. `onClick` receives the raw event, so a caller can read shift/meta.

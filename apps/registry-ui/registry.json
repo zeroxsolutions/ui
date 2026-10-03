@@ -1219,7 +1219,7 @@
       "title": "Tree Item Demo",
       "description": "A folder over two files, opened and closed by its TreeItemTrigger, each a TreeItem row.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/tree-item.json"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tree-item.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tree-item-demo.tsx",

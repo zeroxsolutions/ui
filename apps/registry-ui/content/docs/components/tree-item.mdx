@@ -73,22 +73,18 @@ import {
   <TreeItemIndent depth={0}>
     <TreeItemTrigger aria-label="Toggle src" onClick={toggle} />
   </TreeItemIndent>
-  <TreeItemLabel>
-    <ItemTitle>src</ItemTitle>
-  </TreeItemLabel>
+  <TreeItemLabel>src</TreeItemLabel>
 </TreeItem>
 <TreeItem leaf>
   <TreeItemIndent depth={1} />
-  <TreeItemLabel>
-    <ItemTitle>index.ts</ItemTitle>
-  </TreeItemLabel>
+  <TreeItemLabel>index.ts</TreeItemLabel>
 </TreeItem>
 ```
 
-The consumer supplies everything else: selection state, drag handling, a `TreeItemRenameInput` while editing a
-name, and `ItemActions` for trailing controls; wrap the row as `ContextMenuTrigger render={<TreeItem />}` for a
-context menu. File Tree draws a similar row and stays a separate family until a change shows the two should move
-together.
+The consumer owns every visible icon and name, and supplies everything else: selection state, drag handling, a
+`TreeItemRenameInput` while editing a name, and trailing controls after the name. Wrap the row as
+`ContextMenuTrigger render={<TreeItem />}` for a context menu. File Tree draws a similar row and stays a separate
+family until a change shows the two should move together.
 
 ## Composition
 
@@ -97,7 +93,6 @@ TreeItem
 |-- TreeItemIndent
 |   `-- TreeItemTrigger
 `-- TreeItemLabel
-    `-- ItemTitle
 ```
 
 ## API reference
@@ -138,9 +133,9 @@ row, so it never selects it; give it an `aria-label`. It sets `data-slot="tree-i
 
 ### TreeItemLabel
 
-Renders a `div` and takes every prop a `div` takes. The row's clickable name region, holding `ItemMedia`,
-`ItemTitle` or a `TreeItemRenameInput`, and any badges after the name; `onClick` receives the raw event, so a
-caller can read shift or meta. It sets `data-slot="tree-item-label"`.
+Renders a `div` and takes every prop a `div` takes. The row's clickable name region: the consumer's icon and
+name as `children`, or a `TreeItemRenameInput` while renaming, and any badges after the name; `onClick` receives
+the raw event, so a caller can read shift or meta. It sets `data-slot="tree-item-label"`.
 
 ### TreeItemRenameInput
 
