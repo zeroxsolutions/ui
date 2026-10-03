@@ -66,6 +66,14 @@
   animation: none;
 }
 
+/* The shorthand above also resets the group's fill mode, which the old/new pair inherits. Without a
+   fill, the old column returns to full opacity when its 200ms fade ends and paints over the new one
+   until the root's 250ms group animation ends the transition. */
+::view-transition-old(docs-content),
+::view-transition-new(docs-content) {
+  animation-fill-mode: both;
+}
+
 /* Named so its own snapshot always paints over the column's rather than under it, in case a future
    content difference still moves the column's box into the header's screen position. */
 [data-slot='site-header'] {

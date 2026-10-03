@@ -140,3 +140,46 @@ test.describe('under reduced motion', () => {
     await drivesEveryDocsMotionToItsEndState(page);
   });
 });
+
+// Records the `ready` promise of each view transition the page starts, so a case can act once the
+// transition's pseudo-elements exist.
+const RECORD_VIEW_TRANSITIONS = `(() => {
+  const start = document.startViewTransition?.bind(document);
+  if (!start) return;
+  window.__viewTransitionsReady = [];
+  document.startViewTransition = (update) => {
+    const transition = start(update);
+    window.__viewTransitionsReady.push(transition.ready);
+    return transition;
+  };
+})()`;
+
+test('the old docs column stays hidden from the end of its fade to the end of the route change', async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== 'chromium', "only Chromium exposes a view transition pseudo-element's computed style");
+  await page.addInitScript(RECORD_VIEW_TRANSITIONS);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/docs/components/collapsible-card');
+  const tagInputLink = page.getByRole('navigation', { name: 'Docs' }).getByRole('link', { name: 'Tag Input' });
+  // Retried for the same reason as the sidebar step above: clicked before hydration, the link is a
+  // plain anchor and the page loads with no transition.
+  await expect(async () => {
+    await page.goto('/docs/components/collapsible-card');
+    await tagInputLink.click();
+    await expect(page).toHaveURL(/\/docs\/components\/tag-input$/, { timeout: 1_000 });
+    expect(await page.evaluate('window.__viewTransitionsReady.length')).toBe(1);
+  }).toPass();
+
+  // Ends the old column's fade while the route change as a whole is still running, and reads what
+  // that frame paints for the old column.
+  const opacityOnceFaded = await page.evaluate(`(async () => {
+    await window.__viewTransitionsReady[0];
+    const pseudo = '::view-transition-old(docs-content)';
+    const fade = document.getAnimations().find((animation) => animation.effect.pseudoElement === pseudo);
+    fade.finish();
+    return getComputedStyle(document.documentElement, pseudo).opacity;
+  })()`);
+  expect(opacityOnceFaded).toBe('0');
+});
