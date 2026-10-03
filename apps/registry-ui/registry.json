@@ -1590,9 +1590,14 @@
       "name": "command-menu-demo",
       "type": "registry:example",
       "title": "Command Menu Demo",
-      "description": "A command palette, reopened by Ctrl/Cmd+K, that reports the chosen file.",
+      "description": "A command palette, opened from its button or by Ctrl/Cmd+K, that reports the chosen file.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/command", "https://ui.zeroxsolutions.com/r/command-menu.json"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/command",
+        "@shadcn/kbd",
+        "https://ui.zeroxsolutions.com/r/command-menu.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/command-menu-demo.tsx",
