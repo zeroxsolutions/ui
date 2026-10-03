@@ -133,14 +133,10 @@
         "dependsOn": [
           "wrangler:build"
         ],
-        "defaultConfiguration": "development",
         "options": {
           "cwd": "{projectRoot}"
         },
         "configurations": {
-          "development": {
-            "command": "opennextjs-cloudflare deploy --env development"
-          },
           "production": {
             "command": "opennextjs-cloudflare deploy --env production"
           }

@@ -1,9 +1,9 @@
-# Deploy the pushed branch to the environment of the same name. Only `development`
-# and `production` deploy; the integration branch runs the gate only. Promotion is a
+# Deploy the pushed branch to the environment of the same name. Only `production`
+# deploys here: the registry has no development environment, so a push to
+# `development` runs the gate only, as the integration branch does. Promotion is a
 # fast-forward, which carries the validated SHA:
 #
-#   git push origin master:development
-#   git push origin development:production
+#   git push origin master:production
 #
 # There is no approval gate on the production job: a free-plan private repo cannot
 # enforce a required reviewer (422) or branch protection (403), so
@@ -34,8 +34,12 @@ jobs:
 
   # `secrets: inherit` is what lets the credentials through - a called workflow gets
   # an empty `secrets` context otherwise; the environment scopes which value wins.
+  #
+  # `production` only, as `rclone-sync` below: the `development` environment holds no
+  # Cloudflare credentials, so a deploy there fails on its first API call.
   deploy:
     needs: [gate]
+    if: github.ref_name == 'production'
     uses: zeroxsolutions/github-actions/.github/workflows/nx-deploy.yml@v1
     secrets: inherit
     with:
