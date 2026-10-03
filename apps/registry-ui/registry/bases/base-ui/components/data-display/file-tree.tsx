@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { useControllableState } from '@/registry/bases/base-ui/hooks/use-controllable-state';
+import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { ChevronRightIcon, type ChevronRightIconHandle } from '@/registry/bases/base-ui/ui/chevron-right';
 
@@ -333,11 +334,13 @@ function FileTreeLabel({
   const iconRef = React.useRef<ChevronRightIconHandle>(null);
   const [hovered, setHovered] = React.useState(false);
   const playing = hovered || item.focused;
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   React.useEffect(() => {
+    if (prefersReducedMotion) return;
     if (playing) iconRef.current?.startAnimation();
     else iconRef.current?.stopAnimation();
-  }, [playing]);
+  }, [playing, prefersReducedMotion]);
 
   return (
     <div

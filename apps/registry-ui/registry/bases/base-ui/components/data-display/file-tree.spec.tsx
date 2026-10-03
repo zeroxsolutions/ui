@@ -1,11 +1,44 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import * as React from 'react';
+import type { ComponentProps } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { FileTree, FileTreeGroup, FileTreeItem, FileTreeLabel, type FileTreeProps } from './file-tree';
 
+const { startAnimation, stopAnimation } = vi.hoisted(() => ({
+  startAnimation: vi.fn(),
+  stopAnimation: vi.fn(),
+}));
+
+vi.mock('@/registry/bases/base-ui/ui/chevron-right', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/registry/bases/base-ui/ui/chevron-right')>();
+  return {
+    ...actual,
+    ChevronRightIcon: React.forwardRef<unknown, ComponentProps<'div'>>((props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation, stopAnimation }));
+      return <div aria-hidden={props['aria-hidden']} className={props.className} />;
+    }),
+  };
+});
+
+function stubPrefersReducedMotion(matches: boolean): void {
+  vi.spyOn(window, 'matchMedia').mockReturnValue({
+    matches,
+    media: '(prefers-reduced-motion: reduce)',
+    onchange: null,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    dispatchEvent: () => false,
+  } as MediaQueryList);
+}
+
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
+  startAnimation.mockClear();
+  stopAnimation.mockClear();
 });
 
 /**
@@ -211,5 +244,19 @@ describe('FileTree - composition', () => {
     const label = screen.getByText('index.ts');
     expect(label.style.opacity).toBe('0.5');
     expect(label.style.paddingInlineStart).toBe('calc(var(--spacing) * 4.5)');
+  });
+});
+
+describe('FileTree - reduced motion', () => {
+  it('skips the chevron hover animation on a folder row when the user prefers reduced motion', () => {
+    stubPrefersReducedMotion(true);
+    renderTree();
+    const srcLabel = screen.getByText('src');
+
+    fireEvent.mouseEnter(srcLabel);
+    fireEvent.mouseLeave(srcLabel);
+
+    expect(startAnimation).not.toHaveBeenCalled();
+    expect(stopAnimation).not.toHaveBeenCalled();
   });
 });

@@ -130,6 +130,10 @@
         {
           "path": "registry/bases/base-ui/components/data-display/data-table-column-header.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
         }
       ]
     },
@@ -445,6 +449,10 @@
           "type": "registry:component"
         },
         {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
+        },
+        {
           "path": "registry/bases/base-ui/lib/ime.ts",
           "type": "registry:lib"
         }
@@ -618,6 +626,10 @@
         {
           "path": "registry/bases/base-ui/components/layout/collapsible-card.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
         }
       ]
     },
@@ -635,6 +647,10 @@
         },
         {
           "path": "registry/bases/base-ui/hooks/use-controllable-state.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
           "type": "registry:hook"
         }
       ]
@@ -764,6 +780,10 @@
           "type": "registry:component"
         },
         {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
+        },
+        {
           "path": "registry/bases/base-ui/hooks/use-reasoning-collapsible.ts",
           "type": "registry:hook"
         }
@@ -801,6 +821,10 @@
         {
           "path": "registry/bases/base-ui/components/feedback/tool-call-card.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
         }
       ]
     },

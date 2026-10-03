@@ -4,6 +4,7 @@ import { useRef, type ComponentProps, type ReactNode } from 'react';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
+import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 const collapsibleCardVariants = cva('group/collapsible-card flex w-full flex-col overflow-hidden text-sm', {
@@ -100,6 +101,7 @@ function CollapsibleCardTrigger({
   ...props
 }: ComponentProps<typeof CollapsibleTrigger>): ReactNode {
   const iconRef = useRef<ChevronDownIconHandle>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
   return (
     <CollapsibleTrigger
       data-slot="collapsible-card-trigger"
@@ -108,19 +110,19 @@ function CollapsibleCardTrigger({
       className={cn('group/collapsible-card-trigger', className)}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
-        iconRef.current?.startAnimation();
+        if (!prefersReducedMotion) iconRef.current?.startAnimation();
       }}
       onMouseLeave={(event) => {
         onMouseLeave?.(event);
-        iconRef.current?.stopAnimation();
+        if (!prefersReducedMotion) iconRef.current?.stopAnimation();
       }}
       onFocus={(event) => {
         onFocus?.(event);
-        iconRef.current?.startAnimation();
+        if (!prefersReducedMotion) iconRef.current?.startAnimation();
       }}
       onBlur={(event) => {
         onBlur?.(event);
-        iconRef.current?.stopAnimation();
+        if (!prefersReducedMotion) iconRef.current?.stopAnimation();
       }}
       {...props}
     >

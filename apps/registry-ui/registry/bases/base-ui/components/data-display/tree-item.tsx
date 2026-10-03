@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ChevronRightIcon, type ChevronRightIconHandle } from '@/registry/bases/base-ui/ui/chevron-right';
 import { Input } from '@/registry/bases/base-ui/ui/input';
+import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { isImeComposing } from '@/registry/bases/base-ui/lib/ime';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
@@ -124,6 +125,7 @@ function TreeItemTrigger({
 }: Omit<React.ComponentProps<typeof Button>, 'children'>): React.ReactNode {
   const { expanded } = useTreeItem();
   const iconRef = React.useRef<ChevronRightIconHandle>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
   return (
     <Button
       data-slot="tree-item-trigger"
@@ -137,19 +139,19 @@ function TreeItemTrigger({
       }}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
-        iconRef.current?.startAnimation();
+        if (!prefersReducedMotion) iconRef.current?.startAnimation();
       }}
       onMouseLeave={(event) => {
         onMouseLeave?.(event);
-        iconRef.current?.stopAnimation();
+        if (!prefersReducedMotion) iconRef.current?.stopAnimation();
       }}
       onFocus={(event) => {
         onFocus?.(event);
-        iconRef.current?.startAnimation();
+        if (!prefersReducedMotion) iconRef.current?.startAnimation();
       }}
       onBlur={(event) => {
         onBlur?.(event);
-        iconRef.current?.stopAnimation();
+        if (!prefersReducedMotion) iconRef.current?.stopAnimation();
       }}
       {...props}
     >

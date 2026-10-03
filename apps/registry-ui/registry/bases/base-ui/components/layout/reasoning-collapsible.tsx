@@ -5,6 +5,7 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { ReasoningCollapsibleContext } from '@/registry/bases/base-ui/hooks/use-reasoning-collapsible';
+import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 const AUTO_CLOSE_DELAY = 1000;
@@ -105,11 +106,14 @@ function ReasoningCollapsibleTrigger({
 }: ComponentProps<typeof CollapsibleTrigger>): ReactNode {
   const brainRef = useRef<BrainIconHandle>(null);
   const chevronRef = useRef<ChevronDownIconHandle>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
   const play = (): void => {
+    if (prefersReducedMotion) return;
     brainRef.current?.startAnimation();
     chevronRef.current?.startAnimation();
   };
   const stop = (): void => {
+    if (prefersReducedMotion) return;
     brainRef.current?.stopAnimation();
     chevronRef.current?.stopAnimation();
   };

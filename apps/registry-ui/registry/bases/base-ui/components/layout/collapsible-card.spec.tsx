@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import * as React from 'react';
 import type { ComponentProps } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   CollapsibleCard,
@@ -11,7 +12,41 @@ import {
   CollapsibleCardTrigger,
 } from './collapsible-card';
 
-afterEach(cleanup);
+const { startAnimation, stopAnimation } = vi.hoisted(() => ({
+  startAnimation: vi.fn(),
+  stopAnimation: vi.fn(),
+}));
+
+vi.mock('@/registry/bases/base-ui/ui/chevron-down', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/registry/bases/base-ui/ui/chevron-down')>();
+  return {
+    ...actual,
+    ChevronDownIcon: React.forwardRef<unknown, ComponentProps<'div'>>((props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation, stopAnimation }));
+      return <div aria-hidden={props['aria-hidden']} className={props.className} />;
+    }),
+  };
+});
+
+function stubPrefersReducedMotion(matches: boolean): void {
+  vi.spyOn(window, 'matchMedia').mockReturnValue({
+    matches,
+    media: '(prefers-reduced-motion: reduce)',
+    onchange: null,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    dispatchEvent: () => false,
+  } as MediaQueryList);
+}
+
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+  startAnimation.mockClear();
+  stopAnimation.mockClear();
+});
 
 function renderCard(props: ComponentProps<typeof CollapsibleCard> = {}) {
   return render(
@@ -109,5 +144,19 @@ describe('CollapsibleCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Toggle content' }));
     expect(clicks).toBe(1);
     expect(screen.queryByText('Body')).toBeNull();
+  });
+
+  it('skips the chevron hover and focus animation when the user prefers reduced motion', () => {
+    stubPrefersReducedMotion(true);
+    renderCard();
+    const trigger = screen.getByRole('button', { name: 'Toggle content' });
+
+    fireEvent.mouseEnter(trigger);
+    fireEvent.focus(trigger);
+    expect(startAnimation).not.toHaveBeenCalled();
+
+    fireEvent.mouseLeave(trigger);
+    fireEvent.blur(trigger);
+    expect(stopAnimation).not.toHaveBeenCalled();
   });
 });

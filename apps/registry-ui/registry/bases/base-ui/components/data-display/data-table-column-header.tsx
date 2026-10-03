@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Column } from '@tanstack/react-table';
 
+import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { ArrowDownIcon } from '@/registry/bases/base-ui/ui/arrow-down';
 import { ArrowUpIcon } from '@/registry/bases/base-ui/ui/arrow-up';
@@ -92,6 +93,7 @@ function DataTableColumnHeaderTrigger({
 }: React.ComponentProps<typeof DropdownMenuTrigger>): React.ReactNode {
   const { column } = useDataTableColumnHeader();
   const iconRef = React.useRef<DataTableColumnHeaderIconHandle>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
   const sorted = column.getIsSorted();
   const SortIcon = sorted === 'desc' ? ArrowDownIcon : sorted === 'asc' ? ArrowUpIcon : ChevronsUpDownIcon;
 
@@ -102,19 +104,19 @@ function DataTableColumnHeaderTrigger({
       render={<Button variant="ghost" className="-ml-2.5" />}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
-        iconRef.current?.startAnimation();
+        if (!prefersReducedMotion) iconRef.current?.startAnimation();
       }}
       onMouseLeave={(event) => {
         onMouseLeave?.(event);
-        iconRef.current?.stopAnimation();
+        if (!prefersReducedMotion) iconRef.current?.stopAnimation();
       }}
       onFocus={(event) => {
         onFocus?.(event);
-        iconRef.current?.startAnimation();
+        if (!prefersReducedMotion) iconRef.current?.startAnimation();
       }}
       onBlur={(event) => {
         onBlur?.(event);
-        iconRef.current?.stopAnimation();
+        if (!prefersReducedMotion) iconRef.current?.stopAnimation();
       }}
       {...props}
     >
@@ -143,23 +145,24 @@ function DataTableColumnHeaderAction({
   ...props
 }: React.ComponentProps<typeof DropdownMenuItem> & { icon: DataTableColumnHeaderIcon }): React.ReactNode {
   const iconRef = React.useRef<DataTableColumnHeaderIconHandle>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
   return (
     <DropdownMenuItem
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
-        iconRef.current?.startAnimation();
+        if (!prefersReducedMotion) iconRef.current?.startAnimation();
       }}
       onMouseLeave={(event) => {
         onMouseLeave?.(event);
-        iconRef.current?.stopAnimation();
+        if (!prefersReducedMotion) iconRef.current?.stopAnimation();
       }}
       onFocus={(event) => {
         onFocus?.(event);
-        iconRef.current?.startAnimation();
+        if (!prefersReducedMotion) iconRef.current?.startAnimation();
       }}
       onBlur={(event) => {
         onBlur?.(event);
-        iconRef.current?.stopAnimation();
+        if (!prefersReducedMotion) iconRef.current?.stopAnimation();
       }}
       {...props}
     >

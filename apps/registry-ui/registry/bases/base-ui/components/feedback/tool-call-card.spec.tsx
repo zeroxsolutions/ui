@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Wrench } from 'lucide-react';
-import { afterEach, describe, expect, it } from 'vitest';
+import * as React from 'react';
+import type { ComponentProps } from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   ToolCallCard,
@@ -14,7 +16,41 @@ import {
   type ToolCallCardState,
 } from './tool-call-card';
 
-afterEach(cleanup);
+const { startAnimation, stopAnimation } = vi.hoisted(() => ({
+  startAnimation: vi.fn(),
+  stopAnimation: vi.fn(),
+}));
+
+vi.mock('@/registry/bases/base-ui/ui/chevron-down', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/registry/bases/base-ui/ui/chevron-down')>();
+  return {
+    ...actual,
+    ChevronDownIcon: React.forwardRef<unknown, ComponentProps<'div'>>((props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation, stopAnimation }));
+      return <div aria-hidden={props['aria-hidden']} className={props.className} />;
+    }),
+  };
+});
+
+function stubPrefersReducedMotion(matches: boolean): void {
+  vi.spyOn(window, 'matchMedia').mockReturnValue({
+    matches,
+    media: '(prefers-reduced-motion: reduce)',
+    onchange: null,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    dispatchEvent: () => false,
+  } as MediaQueryList);
+}
+
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+  startAnimation.mockClear();
+  stopAnimation.mockClear();
+});
 
 function Card({ state, defaultOpen }: { state: ToolCallCardState; defaultOpen?: boolean }) {
   return (
@@ -71,5 +107,19 @@ describe('ToolCallCard', () => {
     fireEvent.click(screen.getByRole('button'));
     expect(clicks).toBe(1);
     expect(screen.getByText('body')).toBeTruthy();
+  });
+
+  it('skips the chevron hover and focus animation when the user prefers reduced motion', () => {
+    stubPrefersReducedMotion(true);
+    render(<Card state="output-available" />);
+    const trigger = screen.getByRole('button');
+
+    fireEvent.mouseEnter(trigger);
+    fireEvent.focus(trigger);
+    expect(startAnimation).not.toHaveBeenCalled();
+
+    fireEvent.mouseLeave(trigger);
+    fireEvent.blur(trigger);
+    expect(stopAnimation).not.toHaveBeenCalled();
   });
 });

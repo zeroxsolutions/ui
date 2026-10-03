@@ -6,7 +6,8 @@ import {
   type Table as TanstackTable,
   useReactTable,
 } from '@tanstack/react-table';
-import type { MouseEvent, ReactNode } from 'react';
+import * as React from 'react';
+import type { ComponentProps, MouseEvent, ReactNode } from 'react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -17,6 +18,35 @@ import {
   DataTableColumnHeaderSortDescending,
   DataTableColumnHeaderTrigger,
 } from './data-table-column-header';
+
+const { startAnimation, stopAnimation } = vi.hoisted(() => ({
+  startAnimation: vi.fn(),
+  stopAnimation: vi.fn(),
+}));
+
+vi.mock('@/registry/bases/base-ui/ui/chevrons-up-down', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/registry/bases/base-ui/ui/chevrons-up-down')>();
+  return {
+    ...actual,
+    ChevronsUpDownIcon: React.forwardRef<unknown, ComponentProps<'div'>>((props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation, stopAnimation }));
+      return <div aria-hidden={props['aria-hidden']} className={props.className} />;
+    }),
+  };
+});
+
+function stubPrefersReducedMotion(matches: boolean): void {
+  vi.spyOn(window, 'matchMedia').mockReturnValue({
+    matches,
+    media: '(prefers-reduced-motion: reduce)',
+    onchange: null,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    dispatchEvent: () => false,
+  } as MediaQueryList);
+}
 
 interface Row {
   name: string;
@@ -38,7 +68,12 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver;
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+  startAnimation.mockClear();
+  stopAnimation.mockClear();
+});
 
 function useRowsTable(rows: Row[]): TanstackTable<Row> {
   return useReactTable({
@@ -154,5 +189,19 @@ describe('DataTableColumnHeader', () => {
 
     expect(screen.getByText('Name')).toBeTruthy();
     expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('skips the sort icon hover and focus animation when the user prefers reduced motion', async () => {
+    stubPrefersReducedMotion(true);
+    await openColumnActions(() => {});
+    const trigger = screen.getByRole('button', { name: 'Name' });
+
+    fireEvent.mouseEnter(trigger);
+    fireEvent.focus(trigger);
+    expect(startAnimation).not.toHaveBeenCalled();
+
+    fireEvent.mouseLeave(trigger);
+    fireEvent.blur(trigger);
+    expect(stopAnimation).not.toHaveBeenCalled();
   });
 });
