@@ -19,7 +19,23 @@ test('/ says what the registry is, shows its items live, fits a phone, and links
   await page.addInitScript(STUB_CLIPBOARD);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
+  // Measured once the page's own requests settle, so a demo widened by a late image or font counts.
+  // eslint-disable-next-line playwright/no-networkidle
+  await page.waitForLoadState('networkidle');
   await expect.poll(() => page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth')).toBe(false);
+  // A cell is `min-w-0`, so a demo too wide for a phone does not widen the page; it overflows its cell.
+  await expect
+    .poll(() =>
+      page
+        .locator('[data-slot=home-grid-cell]')
+        // Named structurally, because this project's tsconfig carries no 'dom' lib.
+        .evaluateAll((cells: { scrollWidth: number; clientWidth: number }[]) =>
+          cells
+            .filter((cell) => cell.scrollWidth > cell.clientWidth)
+            .map((cell) => `${cell.scrollWidth} > ${cell.clientWidth}`),
+        ),
+    )
+    .toEqual([]);
 
   await page.setViewportSize({ width: 1440, height: 900 });
   const main = page.getByRole('main');
