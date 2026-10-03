@@ -1,5 +1,6 @@
 'use client';
 
+import { FluentEmoji } from '@zeroxsolutions/fluent-emoji';
 import { SearchX } from 'lucide-react';
 import { useRef, useState, type ReactNode } from 'react';
 
@@ -51,7 +52,8 @@ function AvatarPickerDemo(): ReactNode {
         <Avatar>
           {avatar.imageUrl ? <AvatarImage src={avatar.imageUrl} alt="" /> : null}
           <AvatarFallback style={{ backgroundColor: avatar.emoji ? undefined : (avatar.color ?? undefined) }}>
-            {avatar.emoji}
+            {/* Drawn in the same Fluent artwork as the picker's cells; the trigger already names the button. */}
+            {avatar.emoji ? <FluentEmoji glyph={avatar.emoji} name="" className="size-5 object-contain" /> : null}
           </AvatarFallback>
         </Avatar>
       </AvatarPickerTrigger>

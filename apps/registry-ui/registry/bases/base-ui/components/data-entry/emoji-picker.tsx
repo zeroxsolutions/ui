@@ -495,19 +495,24 @@ function EmojiPickerEmpty(props: React.ComponentProps<'div'>): React.ReactNode {
 
 /**
  * Category jump-nav, over upstream's `ToggleGroup` joined (`spacing={0}`):
- * one item per category, the active one always pressed. Each item's accessible
- * name is its category's name; give the group its own `aria-label`. Hidden
- * while searching.
+ * one item per category, the active one always pressed, the items sharing the
+ * picker's full width. Each item's accessible name is its category's name; give
+ * the group its own `aria-label`. Hidden while searching.
  */
-function EmojiPickerNav(
-  props: Omit<React.ComponentProps<typeof ToggleGroup>, 'value' | 'defaultValue' | 'onValueChange' | 'multiple'>,
-): React.ReactNode {
+function EmojiPickerNav({
+  className,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof ToggleGroup>,
+  'value' | 'defaultValue' | 'onValueChange' | 'multiple'
+>): React.ReactNode {
   const { results, navCategories, active, scrollToCategory } = useEmojiPicker();
   if (results) return null;
   return (
     <ToggleGroup
       data-slot="emoji-picker-nav"
       spacing={0}
+      className={cn('w-full', className)}
       value={[active]}
       onValueChange={(next: string[]) => {
         // Pressing the active item reports an empty value; the nav never deselects.
@@ -526,6 +531,7 @@ function EmojiPickerNav(
 /** One category item, its glyph from `CATEGORY_ICONS`; an animated glyph plays on the item's hover or focus. */
 function EmojiPickerNavItem({
   value,
+  className,
   onMouseEnter,
   onMouseLeave,
   onFocus,
@@ -538,6 +544,7 @@ function EmojiPickerNavItem({
     <ToggleGroupItem
       data-slot="emoji-picker-nav-item"
       value={value}
+      className={cn('flex-1', className)}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
         iconRef.current?.startAnimation();
