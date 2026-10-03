@@ -148,5 +148,7 @@ category's name; give the group its own `aria-label`. Hidden while searching. It
 
 Renders a `div` and takes every prop a `div` takes. Sticky section heading - what the frequent row's name or a
 category's name draws as, styled as the preset's own group labels (`ComboboxLabel`, `SelectLabel`), on the
-surface the picker sits on, so rows scrolling under it stay hidden: the page background, or
-`--emoji-picker-surface` where a container sets it. It sets `data-slot="emoji-picker-group-label"`.
+surface the picker sits on, so rows scrolling under it stay hidden: the popover's colour inside a
+`PopoverContent`, the card's inside a `Card`, the page background elsewhere, and `--emoji-picker-surface`
+wherever a container sets it, for any other surface or a popover whose content renames its `data-slot`. It
+sets `data-slot="emoji-picker-group-label"`.

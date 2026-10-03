@@ -310,8 +310,10 @@ function EmojiPickerSearch({
  * Sticky section heading - this is what the frequent row's name / a category name is.
  * Drawn as the preset's own group labels (`ComboboxLabel`, `SelectLabel`), on
  * the surface the picker sits on so rows scrolling under it stay hidden: the
- * page background, or `--emoji-picker-surface` where a container sets it (the
- * avatar picker sets its popover's colour).
+ * popover's colour inside a `PopoverContent`, the card's inside a `Card`, the
+ * page background elsewhere, and `--emoji-picker-surface` wherever a container
+ * sets it, for any other surface or a popover whose content renames its
+ * `data-slot` (the avatar picker sets its popover's colour this way).
  */
 function EmojiPickerGroupLabel({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
   return (
@@ -319,6 +321,8 @@ function EmojiPickerGroupLabel({ className, ...props }: React.ComponentProps<'di
       data-slot="emoji-picker-group-label"
       className={cn(
         'text-muted-foreground bg-[var(--emoji-picker-surface,var(--background))] px-2 py-1.5 text-xs',
+        '[[data-slot=card]_&]:bg-[var(--emoji-picker-surface,var(--card))]',
+        '[[data-slot=popover-content]_&]:bg-[var(--emoji-picker-surface,var(--popover))]',
         className,
       )}
       {...props}
