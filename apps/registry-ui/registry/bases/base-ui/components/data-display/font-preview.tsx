@@ -3,6 +3,14 @@ import { useId, type ComponentProps, type ReactNode } from 'react';
 import { formatOf } from '@/registry/bases/base-ui/lib/font-format';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
+/**
+ * `value` as a double-quoted CSS string. Every character outside the set a URL or a format name uses is
+ * written as a CSS hex escape, so no value can close the string, the rule or the `<style>` element.
+ */
+function cssString(value: string): string {
+  return `"${value.replace(/[^\w.~:/?#&=%+,;@!$*'-]/gu, (char) => `\\${char.codePointAt(0)?.toString(16)} `)}"`;
+}
+
 interface FontPreviewProps extends ComponentProps<'div'> {
   /** Font file URL or data URL, loaded through an `@font-face` scoped to this instance. */
   src: string;
@@ -29,8 +37,8 @@ function FontPreview({
   const id = useId();
   const family = `font-${id.replace(/[^a-zA-Z0-9]/g, '')}`;
   const fmt = format ?? formatOf(src);
-  const css = `@font-face { font-family: '${family}'; src: url("${src}")${
-    fmt ? ` format("${fmt}")` : ''
+  const css = `@font-face { font-family: '${family}'; src: url(${cssString(src)})${
+    fmt ? ` format(${cssString(fmt)})` : ''
   }; font-display: swap; }`;
 
   return (
@@ -39,7 +47,10 @@ function FontPreview({
       {sizes.map((size) => (
         <div key={size} className="flex items-baseline gap-3">
           <span className="text-muted-foreground w-10 shrink-0 text-xs tabular-nums">{size}</span>
-          <span className="text-foreground truncate leading-snug" style={{ fontFamily: family, fontSize: size }}>
+          <span
+            className="text-foreground min-w-0 truncate leading-snug"
+            style={{ fontFamily: family, fontSize: size }}
+          >
             {children}
           </span>
         </div>

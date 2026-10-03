@@ -1,6 +1,6 @@
 ---
 title: AI Provider Card
-description: A small card for one AI provider in an overview grid, whose status tones its footer note and whose covering trigger selects it.
+description: A small card for one AI provider in an overview grid, whose footer note carries a status dot and whose covering trigger selects it.
 ---
 
 <ComponentPreview name="ai-provider-card-demo" />
@@ -29,7 +29,7 @@ pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/ai-provider-card.json
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add card utils
+pnpm dlx shadcn@latest add card utils https://ui.zeroxsolutions.com/r/status-indicator.json
 ```
 
 <Step>Copy the component into `components/data-display/ai-provider-card.tsx`.</Step>
@@ -43,8 +43,6 @@ pnpm dlx shadcn@latest add card utils
   file="registry/bases/base-ui/types/status-tone.ts"
   title="lib/status-tone.ts"
 />
-
-<Step>Add the `success` and `warning` colours, as [Installation](/docs/installation#colours) describes.</Step>
 
 <Step>Update the import paths to match your project.</Step>
 
@@ -70,13 +68,13 @@ The consumer composes a `CardHeader` holding `CardTitle` and an `AiProviderCardD
 name and blurb, a `CardFooter` holding the label and the action, and a trigger that covers the card:
 
 ```tsx
-<AiProviderCard status="online">
+<AiProviderCard>
   <CardHeader>
     <CardTitle>OpenAI</CardTitle>
     <AiProviderCardDescription>GPT reasoning and chat models for general-purpose assistance.</AiProviderCardDescription>
   </CardHeader>
   <CardFooter>
-    <AiProviderCardLabel>12 models</AiProviderCardLabel>
+    <AiProviderCardLabel tone="online">12 models</AiProviderCardLabel>
     <AiProviderCardAction>
       <Switch aria-label="Enable OpenAI" />
     </AiProviderCardAction>
@@ -104,13 +102,8 @@ AiProviderCard
 
 ### AiProviderCard
 
-Renders shadcn's [`Card`](https://ui.shadcn.com/docs/components/base/card) and takes every prop it takes, plus:
-
-| Prop     | Type                                        | Default |
-| -------- | ------------------------------------------- | ------- |
-| `status` | `'online' \| 'offline' \| 'busy' \| 'idle'` | -       |
-
-It defaults Card's `size` to `sm`. It sets `data-slot="ai-provider-card"` and `data-status` to its status.
+Renders shadcn's [`Card`](https://ui.shadcn.com/docs/components/base/card) and takes every prop it takes. It
+defaults Card's `size` to `sm`. It sets `data-slot="ai-provider-card"`.
 
 ### AiProviderCardAction
 
@@ -124,9 +117,14 @@ takes. Its text clamps to two lines. It sets `data-slot="ai-provider-card-descri
 
 ### AiProviderCardLabel
 
-Renders a `span` and takes every prop a `span` takes. It shows a model count or an attention message, coloured by
-the card's `status` (destructive for busy, warning for idle, success for online, muted otherwise). It sets
-`data-slot="ai-provider-card-label"`.
+Renders a `span` and takes every prop a `span` takes, plus:
+
+| Prop   | Type                                        | Default |
+| ------ | ------------------------------------------- | ------- |
+| `tone` | `'online' \| 'offline' \| 'busy' \| 'idle'` | -       |
+
+A model count or an attention message in muted text. Given a `tone`, a `StatusIndicator` before the text
+reports the status; the text itself keeps one colour at every tone. It sets `data-slot="ai-provider-card-label"`.
 
 ### AiProviderCardTrigger
 

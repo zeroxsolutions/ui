@@ -7,23 +7,13 @@
       "name": "ai-provider-card",
       "type": "registry:component",
       "title": "AI Provider Card",
-      "description": "A small card for one AI provider in an overview grid, whose status tones its footer note and whose covering trigger selects it.",
+      "description": "A small card for one AI provider in an overview grid, whose footer note carries a status dot and whose covering trigger selects it.",
       "categories": ["data-display"],
-      "registryDependencies": ["@shadcn/card", "@shadcn/utils"],
-      "cssVars": {
-        "theme": {
-          "color-success": "var(--success)",
-          "color-warning": "var(--warning)"
-        },
-        "light": {
-          "success": "oklch(0.627 0.19 149)",
-          "warning": "oklch(0.681 0.162 75.834)"
-        },
-        "dark": {
-          "success": "oklch(0.723 0.19 149)",
-          "warning": "oklch(0.79 0.155 80)"
-        }
-      },
+      "registryDependencies": [
+        "@shadcn/card",
+        "@shadcn/utils",
+        "https://ui.zeroxsolutions.com/r/status-indicator.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/ai-provider-card.tsx",
@@ -234,6 +224,7 @@
       "categories": ["data-display"],
       "dependencies": ["react-markdown", "remark-gfm"],
       "registryDependencies": [
+        "@shadcn/checkbox",
         "@shadcn/table",
         "@shadcn/utils",
         "https://ui.zeroxsolutions.com/r/code-block.json",

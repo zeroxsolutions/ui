@@ -18,6 +18,7 @@ import {
 } from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { isPlainLanguage } from '@/registry/bases/base-ui/lib/code-language';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { Checkbox } from '@/registry/bases/base-ui/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/registry/bases/base-ui/ui/table';
 
 /** Fenced code, told from inline code by a language class or a line break, since react-markdown marks neither. */
@@ -45,10 +46,18 @@ function MarkdownViewTable({ node: _node, ...props }: ComponentProps<'table'> & 
   );
 }
 
+/** A GFM task item: its read-only checkbox and its text on one row, with no bullet before them. */
+function MarkdownViewTaskItem({ className, ...props }: ComponentProps<'li'>): ReactNode {
+  return (
+    <li data-slot="markdown-view-task-item" className={cn('flex list-none items-start gap-2', className)} {...props} />
+  );
+}
+
 /**
- * The renderers: tables as upstream's `Table` parts, and fenced code as a `CodeBlock`, headed with its
- * language when the fence names one; inline code stays a chip. `pre` is unwrapped, because the `code`
- * renderer draws the whole block, and a `CodeBlock` root is a `<div>`, which must not nest in a `<pre>`.
+ * The renderers: tables as upstream's `Table` parts, GFM task items as a read-only `Checkbox`, and
+ * fenced code as a `CodeBlock`, headed with its language when the fence names one; inline code stays
+ * a chip. `pre` is unwrapped, because the `code` renderer draws the whole block, and a `CodeBlock`
+ * root is a `<div>`, which must not nest in a `<pre>`.
  */
 const markdownViewComponents: Components = {
   pre: ({ children }) => <>{children}</>,
@@ -58,6 +67,19 @@ const markdownViewComponents: Components = {
   tr: ({ node: _node, ...props }) => <TableRow {...props} />,
   th: ({ node: _node, ...props }) => <TableHead {...props} />,
   td: ({ node: _node, ...props }) => <TableCell {...props} />,
+  li: ({ node: _node, className, ...props }) =>
+    className?.includes('task-list-item') ? (
+      <MarkdownViewTaskItem className={className} {...props} />
+    ) : (
+      <li className={className} {...props} />
+    ),
+  // GFM's task marker, as nova's Checkbox: read-only, so the reader sees the state and cannot change it.
+  input: ({ node: _node, type, checked, disabled: _disabled, ...props }) =>
+    type === 'checkbox' ? (
+      <Checkbox checked={checked === true} readOnly className="mt-1" />
+    ) : (
+      <input type={type} {...props} />
+    ),
   code: ({ node: _node, className, children, ...props }) => {
     const text = String(children ?? '');
     if (!isBlockCode(className, text)) {

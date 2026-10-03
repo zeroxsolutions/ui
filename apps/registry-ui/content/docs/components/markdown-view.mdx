@@ -35,7 +35,7 @@ pnpm add react-markdown remark-gfm
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add table utils https://ui.zeroxsolutions.com/r/code-block.json https://ui.zeroxsolutions.com/r/collapsible-card.json
+pnpm dlx shadcn@latest add checkbox table utils https://ui.zeroxsolutions.com/r/code-block.json https://ui.zeroxsolutions.com/r/collapsible-card.json
 ```
 
 <Step>Copy the component into `components/data-display/markdown-view.tsx`.</Step>
@@ -80,5 +80,7 @@ Renders a `div` and takes every prop a `div` takes except `children`, plus:
 
 `children` is the Markdown source (GFM: tables, task lists, strikethrough, autolinks). Fenced code becomes a
 `CodeBlock`, headed with its language when the fence names one and left bare when it is plain text; inline code
-stays a muted chip. A wide table or a long code line scrolls sideways inside its own block. It is memoized, so a
-streaming message's settled text does not re-parse on every chunk. It sets `data-slot="markdown-view"`.
+stays a muted chip. A GFM task item is an `li` with `data-slot="markdown-view-task-item"` holding a read-only
+`Checkbox` in its state, with no bullet. A wide table or a long code line scrolls sideways inside its own block.
+It is memoized, so a streaming message's settled text does not re-parse on every chunk. It sets
+`data-slot="markdown-view"`.
