@@ -318,13 +318,7 @@ describe('registry.json', () => {
 const treeItem: RegistryItem = {
   name: 'tree-item',
   type: 'registry:component',
-  registryDependencies: [
-    '@shadcn/button',
-    '@shadcn/input',
-    '@shadcn/item',
-    '@shadcn/utils',
-    `${ANIMATED_ICON_URL}chevron-right.json`,
-  ],
+  registryDependencies: ['@shadcn/button', '@shadcn/input', '@shadcn/utils', `${ANIMATED_ICON_URL}chevron-right.json`],
   files: [
     { path: `${BASE}/components/data-display/tree-item.tsx`, type: 'registry:component' },
     { path: `${BASE}/lib/ime.ts`, type: 'registry:lib' },

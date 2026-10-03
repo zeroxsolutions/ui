@@ -29,7 +29,7 @@ function ModelInfoCard({ className, ...props }: React.ComponentProps<'div'>): Re
  *
  *   <ModelInfoCardSection>
  *     <Item size="xs">
- *       <ItemMedia><ModelInfoCardIndicator tone="chart-1" /></ItemMedia>
+ *       <ItemMedia><ModelInfoCardIndicator tone="chart-2" /></ItemMedia>
  *       <ItemContent><ItemTitle>Context length</ItemTitle></ItemContent>
  *       <ItemActions>128K tokens</ItemActions>
  *     </Item>

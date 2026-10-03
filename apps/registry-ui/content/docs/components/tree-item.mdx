@@ -1,6 +1,6 @@
 ---
 title: Tree Item
-description: One row of a hierarchy tree over upstream Item, with a depth indent, a disclosure trigger, a clickable label and an inline rename input.
+description: One row of a hierarchy tree, drawn as the file tree's rows, with a depth indent, a disclosure trigger, a clickable label and an inline rename input.
 ---
 
 <ComponentPreview name="tree-item-demo" />
@@ -29,7 +29,7 @@ pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/tree-item.json
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add button input item utils https://lucide-animated.com/r/chevron-right.json
+pnpm dlx shadcn@latest add button input utils https://lucide-animated.com/r/chevron-right.json
 ```
 
 <Step>Copy the component into `components/data-display/tree-item.tsx`.</Step>
@@ -96,7 +96,7 @@ TreeItem
 
 ### TreeItem
 
-Renders shadcn's [`Item`](https://ui.shadcn.com/docs/components/base/item) and takes every prop it takes, plus:
+Renders a `div` and takes every prop a `div` takes, plus:
 
 | Prop       | Type      | Default |
 | ---------- | --------- | ------- |
@@ -104,8 +104,8 @@ Renders shadcn's [`Item`](https://ui.shadcn.com/docs/components/base/item) and t
 | `leaf`     | `boolean` | `false` |
 | `editing`  | `boolean` | `false` |
 
-It defaults Item's `size` to `xs` and overrides its `flex-wrap` recipe with `flex-nowrap`, so a long name
-truncates instead of dropping onto a second line. It sets `data-slot="tree-item"`, `data-expanded` while
+The row draws as File Tree's rows do: 28px high, rounded, muted on hover, on one line so a long name
+truncates; it grows to fit a rename input. It sets `data-slot="tree-item"`, `data-expanded` while
 expanded, `data-leaf` while a leaf, and `data-editing` while being renamed.
 
 ### TreeItemIndent
@@ -123,9 +123,10 @@ folder siblings' names. It sets `data-slot="tree-item-indent"`.
 ### TreeItemTrigger
 
 Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button) and takes every prop it takes
-except `children`. The disclosure control of a folder row: a ghost icon button holding a chevron that turns
-while the row is expanded, playing on hover or focus. Its click never reaches the row, so it never selects it;
-give it an `aria-label`. It sets `data-slot="tree-item-trigger"` and `aria-expanded` from the row.
+except `children`. The disclosure control of a folder row: a link icon button, with no fill while expanded,
+holding a chevron that turns while the row is expanded, playing on hover or focus. Its click never reaches the
+row, so it never selects it; give it an `aria-label`. It sets `data-slot="tree-item-trigger"` and
+`aria-expanded` from the row.
 
 ### TreeItemLabel
 

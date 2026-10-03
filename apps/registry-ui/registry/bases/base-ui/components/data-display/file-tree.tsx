@@ -348,7 +348,7 @@ function FileTreeLabel({
       className={cn(
         'text-foreground/80 flex h-7 cursor-pointer items-center gap-1.5 rounded-md pr-2 transition-colors',
         'hover:bg-muted hover:text-foreground',
-        'group-focus-visible/file-tree-item:ring-ring/50 group-focus-visible/file-tree-item:ring-2',
+        'group-focus-visible/file-tree-item:ring-ring/50 group-focus-visible/file-tree-item:ring-3',
         'data-[selected]:bg-muted data-[selected]:text-foreground data-[selected]:font-medium',
         className,
       )}
@@ -372,7 +372,7 @@ function FileTreeLabel({
           ref={iconRef}
           aria-hidden
           size={16}
-          className={cn('flex shrink-0 transition-transform', item.expanded && 'rotate-90')}
+          className={cn('flex shrink-0 motion-safe:transition-transform', item.expanded && 'rotate-90')}
         />
       ) : (
         <span aria-hidden className="w-4 shrink-0" />

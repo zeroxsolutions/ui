@@ -431,12 +431,11 @@
       "name": "tree-item",
       "type": "registry:component",
       "title": "Tree Item",
-      "description": "One row of a hierarchy tree over upstream Item, with a depth indent, a disclosure trigger, a clickable label and an inline rename input.",
+      "description": "One row of a hierarchy tree, drawn as the file tree's rows, with a depth indent, a disclosure trigger, a clickable label and an inline rename input.",
       "categories": ["data-display"],
       "registryDependencies": [
         "@shadcn/button",
         "@shadcn/input",
-        "@shadcn/item",
         "@shadcn/utils",
         "https://lucide-animated.com/r/chevron-right.json"
       ],

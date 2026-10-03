@@ -118,7 +118,8 @@ function CodeBlockContent({ children, ...props }: ComponentProps<typeof Collapsi
     <CollapsibleCardContent data-slot="code-block-content" {...props}>
       {/* A ScrollArea rather than overflow-x-auto, so long lines scroll on the styled rail instead of the OS overlay bar. */}
       {/* The pre's bottom padding clears that rail, which Base UI positions over the viewport's bottom edge. */}
-      <ScrollAreaPrimitive.Root className="w-full overflow-hidden">
+      {/* Inline-size containment keeps the longest line out of the block's own width, so a narrow parent scrolls the code here instead of widening. */}
+      <ScrollAreaPrimitive.Root className="w-full overflow-hidden contain-inline-size">
         <ScrollAreaPrimitive.Viewport data-slot="code-block-viewport" className="w-full">
           <pre className="m-0 px-3 pt-2 pb-3 text-xs leading-relaxed has-data-[slot=code-block-line-numbers]:flex has-data-[slot=code-block-line-numbers]:gap-4">
             {children}

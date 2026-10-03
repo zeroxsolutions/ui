@@ -99,7 +99,7 @@ function DataTableColumnHeaderTrigger({
     // The negative margin lines the button's label up with the column's cells.
     <DropdownMenuTrigger
       data-slot="data-table-column-header-trigger"
-      render={<Button variant="ghost" size="sm" className="-ml-2.5" />}
+      render={<Button variant="ghost" className="-ml-2.5" />}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
         iconRef.current?.startAnimation();
