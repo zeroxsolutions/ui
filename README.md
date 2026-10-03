@@ -1,10 +1,33 @@
-# ZeroX Solutions UI
+<p align="center">
+  <a href="https://ui.zeroxsolutions.com">
+    <img src="apps/registry-ui/src/app/icon.svg" alt="ZeroX Solutions UI" width="96" height="96">
+  </a>
+</p>
+
+<h1 align="center">ZeroX Solutions UI</h1>
+
+<p align="center">
+  Composed React components for shadcn, on Base UI. Copy them in, own the source.
+</p>
+
+<p align="center">
+  <a href="https://github.com/zeroxsolutions/ui-sdk/actions/workflows/ci.yml"><img src="https://github.com/zeroxsolutions/ui-sdk/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
+  <a href="https://www.npmjs.com/package/@zeroxsolutions/icons"><img src="https://img.shields.io/npm/v/@zeroxsolutions/icons?label=icons" alt="@zeroxsolutions/icons on npm"></a>
+  <a href="https://www.npmjs.com/package/@zeroxsolutions/fluent-emoji"><img src="https://img.shields.io/npm/v/@zeroxsolutions/fluent-emoji?label=fluent-emoji" alt="@zeroxsolutions/fluent-emoji on npm"></a>
+  <a href="https://www.npmjs.com/package/@zeroxsolutions/editor-core"><img src="https://img.shields.io/npm/v/@zeroxsolutions/editor-core?label=editor-core" alt="@zeroxsolutions/editor-core on npm"></a>
+</p>
+
+<p align="center">
+  <a href="https://ui.zeroxsolutions.com/docs"><strong>Documentation</strong></a> -
+  <a href="https://ui.zeroxsolutions.com/docs/installation">Installation</a> -
+  <a href="https://ui.zeroxsolutions.com/r/registry.json">Registry index</a>
+</p>
+
+## About
 
 A [shadcn](https://ui.shadcn.com) registry of composed React components, and the npm packages they
 build on. The components are drawn in shadcn's `base-nova` style on [Base UI](https://base-ui.com)
-primitives, and you install them as source you own.
-
-Docs and live previews: [ui.zeroxsolutions.com/docs](https://ui.zeroxsolutions.com/docs)
+primitives, and the shadcn CLI writes them into your app as source you own.
 
 ## Install a component
 
