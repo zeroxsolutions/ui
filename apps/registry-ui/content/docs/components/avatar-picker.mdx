@@ -171,7 +171,8 @@ given; `children` replace its trash icon. It sets `data-slot="avatar-picker-remo
 Renders shadcn's [`TabsContent`](https://ui.shadcn.com/docs/components/base/tabs) and takes every prop it takes
 except `value`. Emoji pane (tab value `emoji`): wraps `children` - the picker's parts, composed by the consumer
 (`EmojiPickerSearch`, `EmojiPickerContent`, `EmojiPickerNav`) - in an `EmojiPicker` whose pick sets the emoji and
-clears any image. It sets `data-slot="avatar-picker-emoji-content"`.
+clears any image. It sets `--emoji-picker-surface` to the popover colour, so the picker's group labels paint the
+popover. It sets `data-slot="avatar-picker-emoji-content"`.
 
 ### AvatarPickerUploadContent
 
@@ -211,8 +212,8 @@ Renders a `div` and takes every prop a `div` takes, plus:
 | `colors` | `readonly string[]` | `['#6366f1', '#8b5cf6', '#a855f7', '#ec4899', '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#14b8a6', '#0ea5e9', '#3b82f6']` |
 
 A grid of colour swatches, each a button named by its own colour and pressed (`aria-pressed`) while it is the
-avatar's colour; a click sets the avatar's colour. `role="group"`; name the group with an `aria-label`. It sets
-`data-slot="avatar-picker-color-group"`.
+avatar's colour; the pressed one carries a check; a click sets the avatar's colour. `role="group"`; name the
+group with an `aria-label`. It sets `data-slot="avatar-picker-color-group"`.
 
 ### AvatarPickerColorField
 

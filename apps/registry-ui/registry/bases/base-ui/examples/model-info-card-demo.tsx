@@ -35,7 +35,7 @@ function ModelInfoCardDemo(): ReactNode {
       <ModelInfoCardSection>
         <Item size="xs">
           <ItemMedia>
-            <ModelInfoCardIndicator tone="chart-1" />
+            <ModelInfoCardIndicator tone="chart-2" />
           </ItemMedia>
           <ItemContent>
             <ItemTitle>Context length</ItemTitle>
@@ -46,7 +46,7 @@ function ModelInfoCardDemo(): ReactNode {
       <ModelInfoCardSection>
         <Item size="xs">
           <ItemMedia>
-            <ModelInfoCardIndicator tone="chart-4" />
+            <ModelInfoCardIndicator tone="chart-3" />
           </ItemMedia>
           <ItemContent>
             <ItemTitle>Pricing</ItemTitle>

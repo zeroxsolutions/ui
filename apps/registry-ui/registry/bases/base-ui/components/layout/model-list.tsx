@@ -41,7 +41,7 @@ function ModelListHeader({ className, ...props }: React.ComponentProps<'div'>): 
   return (
     <div
       data-slot="model-list-header"
-      className={cn('flex flex-wrap items-center gap-2 px-1 pt-1 *:data-[slot=tabs-list]:basis-full', className)}
+      className={cn('flex flex-wrap items-center gap-2 px-3 pt-3 *:data-[slot=tabs-list]:basis-full', className)}
       {...props}
     />
   );

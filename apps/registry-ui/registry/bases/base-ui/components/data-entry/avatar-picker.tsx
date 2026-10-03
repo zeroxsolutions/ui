@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react';
+import { Check, Trash2 } from 'lucide-react';
 import * as React from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
@@ -172,12 +172,18 @@ function AvatarPickerRemoveButton({
  * (`EmojiPickerSearch`, `EmojiPickerContent`, `EmojiPickerNav`).
  */
 function AvatarPickerEmojiContent({
+  className,
   children,
   ...props
 }: Omit<React.ComponentProps<typeof TabsContent>, 'value'>): React.ReactNode {
   const { setEmoji } = useAvatarPicker();
   return (
-    <TabsContent data-slot="avatar-picker-emoji-content" value="emoji" {...props}>
+    <TabsContent
+      data-slot="avatar-picker-emoji-content"
+      value="emoji"
+      className={cn('[--emoji-picker-surface:var(--popover)]', className)}
+      {...props}
+    >
       <EmojiPicker onSelect={setEmoji}>{children}</EmojiPicker>
     </TabsContent>
   );
@@ -309,7 +315,7 @@ interface AvatarPickerColorGroupProps extends React.ComponentProps<'div'> {
    * The swatches, each a button named by its colour and pressed while it is the
    * avatar's colour. Defaults to twelve hues spread evenly round the wheel. They
    * are the avatar's own colour, a value the picker hands back, so they stay
-   * literal rather than theme tokens.
+   * literal rather than theme tokens. The pressed swatch carries a white check.
    */
   colors?: readonly string[];
 }
@@ -349,8 +355,10 @@ function AvatarPickerColorGroup({
           aria-label={c}
           aria-pressed={value.color === c}
           style={{ backgroundColor: c }}
-          className="ring-ring ring-offset-popover size-9 rounded-full ring-offset-2 transition-transform outline-none hover:scale-110 focus-visible:ring-2 aria-pressed:ring-2"
-        />
+          className="focus-visible:ring-ring/50 flex size-8 items-center justify-center rounded-full text-white outline-none focus-visible:ring-3"
+        >
+          {value.color === c && <Check aria-hidden className="size-4" />}
+        </button>
       ))}
     </div>
   );

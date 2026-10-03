@@ -36,13 +36,13 @@ function AiProviderCardDemo(): ReactNode {
     <div className="flex w-full flex-col gap-3">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {PROVIDERS.map((provider) => (
-          <AiProviderCard key={provider.name} status={provider.status}>
+          <AiProviderCard key={provider.name}>
             <CardHeader>
               <CardTitle>{provider.name}</CardTitle>
               <AiProviderCardDescription>{provider.description}</AiProviderCardDescription>
             </CardHeader>
             <CardFooter className="mt-auto justify-between">
-              <AiProviderCardLabel>{provider.note}</AiProviderCardLabel>
+              <AiProviderCardLabel tone={provider.status}>{provider.note}</AiProviderCardLabel>
               <AiProviderCardAction>
                 <Switch
                   size="sm"

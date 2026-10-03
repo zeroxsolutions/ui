@@ -21,7 +21,7 @@ interface AiProviderPickerEntry {
   name: string;
   /** The text under the title, clamped to two lines. */
   description: string;
-  /** The muted footer note, such as "12 models"; omitted, the footer is empty. */
+  /** The muted footer note, such as "12 models"; omitted, the card has no footer. */
   meta?: string;
 }
 
@@ -99,9 +99,11 @@ function AiProviderPicker({
             </CardTitle>
             <AiProviderCardDescription>{entry.description}</AiProviderCardDescription>
           </CardHeader>
-          <CardFooter className="mt-auto">
-            <AiProviderCardLabel>{entry.meta}</AiProviderCardLabel>
-          </CardFooter>
+          {entry.meta && (
+            <CardFooter className="mt-auto">
+              <AiProviderCardLabel>{entry.meta}</AiProviderCardLabel>
+            </CardFooter>
+          )}
           <AiProviderCardTrigger aria-label={`Select ${entry.name}`} onClick={() => onSelect?.(entry.provider)} />
         </AiProviderCard>
       ))}

@@ -26,7 +26,12 @@ interface ComponentPreviewStageProps extends ComponentProps<typeof ScrollArea> {
   align?: 'center' | 'start' | 'end';
 }
 
-/** The area a demo sits in; a demo taller or wider than it scrolls inside rather than spilling out. */
+/**
+ * The area a demo sits in; a demo taller or wider than it scrolls inside rather than spilling out.
+ * Padded `p-4` below `sm`, matching upstream shadcn's own bordered preview-like surface (`LinkedCard`
+ * in `apps/v4/mdx-components.tsx` on shadcn-ui/ui, `p-6 sm:p-10`): a phone's stage otherwise has no
+ * room left for a demo of any real width once `p-10` (40px a side) is taken off both sides of it.
+ */
 function ComponentPreviewStage({
   align = 'center',
   className,
@@ -37,7 +42,7 @@ function ComponentPreviewStage({
     <ScrollArea data-slot="component-preview-stage" className={cn('h-72', className)} {...props}>
       <div
         data-align={align}
-        className="flex min-h-full min-w-fit justify-center p-10 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start"
+        className="flex min-h-full min-w-fit justify-center p-4 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start sm:p-10"
       >
         {children}
       </div>

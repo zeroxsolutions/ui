@@ -36,6 +36,22 @@ pnpm dlx shadcn@latest add button collapsible utils https://lucide-animated.com/
 
 <ComponentSource name="reasoning-collapsible" title="components/layout/reasoning-collapsible.tsx" />
 
+<Step>Copy the hook that reads the reasoning state into `hooks/use-reasoning-collapsible.ts`.</Step>
+
+<ComponentSource
+  name="reasoning-collapsible"
+  file="registry/bases/base-ui/hooks/use-reasoning-collapsible.ts"
+  title="hooks/use-reasoning-collapsible.ts"
+/>
+
+<Step>Copy the reduced-motion hook into `hooks/use-prefers-reduced-motion.ts`.</Step>
+
+<ComponentSource
+  name="reasoning-collapsible"
+  file="registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts"
+  title="hooks/use-prefers-reduced-motion.ts"
+/>
+
 <Step>Update the import paths to match your project.</Step>
 
 </Steps>
@@ -51,8 +67,8 @@ import {
   ReasoningCollapsible,
   ReasoningCollapsibleContent,
   ReasoningCollapsibleTrigger,
-  useReasoningCollapsible,
 } from '@/components/layout/reasoning-collapsible';
+import { useReasoningCollapsible } from '@/hooks/use-reasoning-collapsible';
 ```
 
 ```tsx
@@ -73,7 +89,9 @@ function ReasoningLabel() {
 
 The label and the body are the consumer's; `useReasoningCollapsible` hands the label its timing. It opens
 while `streaming` is true (unless `defaultOpen` is `false`) and closes about a second after the stream
-ends, once only, so a reader who reopens old reasoning keeps it open.
+ends, once only, so a reader who reopens old reasoning keeps it open. `useReasoningCollapsible()` returns
+`{ streaming, isOpen, duration }` from inside a `<ReasoningCollapsible>`; `duration` is the last stream's
+whole seconds, rounded up, undefined until one has ended, and it throws outside one.
 
 ## Composition
 
@@ -85,13 +103,6 @@ ReasoningCollapsible
 ```
 
 ## API reference
-
-### useReasoningCollapsible
-
-`useReasoningCollapsible(): { streaming: boolean; isOpen: boolean; duration: number | undefined }` - reads
-the live reasoning state from inside a `<ReasoningCollapsible>`, such as to word the trigger's label;
-`duration` is the last stream's whole seconds, rounded up, undefined until one has ended. Throws when used
-outside `<ReasoningCollapsible>`.
 
 ### ReasoningCollapsible
 

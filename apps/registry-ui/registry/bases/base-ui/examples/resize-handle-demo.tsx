@@ -8,7 +8,7 @@ const COLLAPSED_WIDTH = 48;
 
 /** A panel floating over a canvas, resized by dragging its edge or toggled shut by a double-click. */
 function ResizeHandleDemo(): ReactNode {
-  const [width, setWidth] = useState(200);
+  const [width, setWidth] = useState(160);
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -22,6 +22,10 @@ function ResizeHandleDemo(): ReactNode {
           {collapsed ? 'Panel' : `Floating panel (${width}px)`}
         </div>
         <ResizeHandle
+          aria-label="Resize panel"
+          value={collapsed ? COLLAPSED_WIDTH : width}
+          min={MIN_WIDTH}
+          max={MAX_WIDTH}
           onDrag={(dx) => {
             if (!collapsed) setWidth((current) => Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, current + dx)));
           }}

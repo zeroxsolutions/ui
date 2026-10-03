@@ -5,7 +5,7 @@ import { HighlightedCode } from '@/registry/bases/base-ui/components/data-displa
 /** Pre-tokenized lines styled with the same tokens the shared Shiki theme paints with. */
 function HighlightedCodeDemo(): ReactNode {
   return (
-    <pre className="bg-muted m-0 rounded-md p-3 text-xs leading-relaxed">
+    <pre className="bg-muted/50 m-0 rounded-xl px-3 pt-2 pb-3 text-xs leading-relaxed">
       <HighlightedCode
         lines={[
           [

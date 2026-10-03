@@ -16,6 +16,7 @@ import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/ba
 import { CircleCheckIcon, type CircleCheckIconHandle } from '@/registry/bases/base-ui/ui/circle-check';
 import { ClockIcon, type ClockIconHandle } from '@/registry/bases/base-ui/ui/clock';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
+import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 type ToolCallCardState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
@@ -65,10 +66,10 @@ function ToolCallCard({ state, className, ...props }: ToolCallCardProps): ReactN
 }
 
 /**
- * The header row that toggles the sections: a full-width ghost button in the
- * card's flow, holding the consumer's icon, title, description and status,
- * then a chevron that turns over while the sections are open and plays while
- * the row is hovered or focused.
+ * The header row that toggles the sections: a full-width link button in the
+ * card's flow, which draws the same open or closed, holding the consumer's
+ * icon, title, description and status, then a chevron that turns over while
+ * the sections are open and plays while the row is hovered or focused.
  */
 function ToolCallCardTrigger({
   className,
@@ -81,11 +82,14 @@ function ToolCallCardTrigger({
 }: ComponentProps<typeof CollapsibleTrigger>): ReactNode {
   const iconRef = useRef<ChevronDownIconHandle>(null);
   const statusIcons = useRef(new Set<ClockIconHandle | CircleCheckIconHandle>());
+  const prefersReducedMotion = usePrefersReducedMotion();
   const startAnimation = (): void => {
+    if (prefersReducedMotion) return;
     iconRef.current?.startAnimation();
     for (const icon of statusIcons.current) icon.startAnimation();
   };
   const stopAnimation = (): void => {
+    if (prefersReducedMotion) return;
     iconRef.current?.stopAnimation();
     for (const icon of statusIcons.current) icon.stopAnimation();
   };
@@ -94,7 +98,7 @@ function ToolCallCardTrigger({
     <ToolCallCardTriggerIcons value={statusIcons}>
       <CollapsibleTrigger
         data-slot="tool-call-card-trigger"
-        render={<Button variant="ghost" />}
+        render={<Button variant="link" />}
         className={cn('group/tool-call-card-trigger w-full justify-start text-left', className)}
         onMouseEnter={(event) => {
           onMouseEnter?.(event);
@@ -118,7 +122,7 @@ function ToolCallCardTrigger({
         <ChevronDownIcon
           ref={iconRef}
           aria-hidden
-          className="transition-transform group-aria-expanded/tool-call-card-trigger:rotate-180"
+          className="group-aria-expanded/tool-call-card-trigger:rotate-180 motion-safe:transition-transform"
         />
       </CollapsibleTrigger>
     </ToolCallCardTriggerIcons>

@@ -11,6 +11,7 @@ vi.mock('../lib/shiki', async (importOriginal) => {
   return { ...actual, highlightToLines: vi.fn().mockResolvedValue(null) };
 });
 
+import { CommandMenuDemo } from './command-menu-demo';
 import { PermissionCardDemo } from './permission-card-demo';
 
 beforeAll(() => {
@@ -63,5 +64,23 @@ describe('examples', () => {
     fireEvent.click(screen.getByRole('button', { name: 'More allow options' }));
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Allow this session' }));
     expect(await screen.findByText('Allowed for this session - 2:14pm')).toBeTruthy();
+  });
+
+  it('command-menu-demo loads closed and opens from its button', async () => {
+    render(<CommandMenuDemo />);
+    await act(async () => {});
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+    expect(await screen.findByRole('dialog')).toBeTruthy();
+  });
+
+  it('command-menu-demo opens on Ctrl+K', async () => {
+    render(<CommandMenuDemo />);
+    await act(async () => {});
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    expect(await screen.findByRole('dialog')).toBeTruthy();
   });
 });

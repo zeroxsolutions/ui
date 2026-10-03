@@ -42,6 +42,14 @@ pnpm dlx shadcn@latest add button collapsible utils https://lucide-animated.com/
 
 <ComponentSource name="collapsible-card" title="components/layout/collapsible-card.tsx" />
 
+<Step>Copy the reduced-motion hook into `hooks/use-prefers-reduced-motion.ts`.</Step>
+
+<ComponentSource
+  name="collapsible-card"
+  file="registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts"
+  title="hooks/use-prefers-reduced-motion.ts"
+/>
+
 <Step>Update the import paths to match your project.</Step>
 
 </Steps>
@@ -71,7 +79,7 @@ import {
       <CollapsibleCardTrigger />
     </CollapsibleCardActions>
   </CollapsibleCardHeader>
-  <CollapsibleCardContent>Background, shadow, text</CollapsibleCardContent>
+  <CollapsibleCardContent className="p-3">Background, shadow, text</CollapsibleCardContent>
 </CollapsibleCard>
 ```
 
@@ -129,14 +137,16 @@ and the `CollapsibleCardTrigger`. It sets `data-slot="collapsible-card-actions"`
 
 Renders shadcn's [`CollapsibleTrigger`](https://ui.shadcn.com/docs/components/base/collapsible), as a
 ghost, icon-sized [`Button`](https://ui.shadcn.com/docs/components/base/button), and takes every prop it
-takes. The button that opens and closes the body, named "Toggle" unless an `aria-label` is given. Its
-default content is a chevron that turns over while the body is open and plays while the button is hovered
-or focused; `children` replace it. It sets `data-slot="collapsible-card-trigger"`.
+takes. The button that opens and closes the body. Its default content is a chevron that turns over while
+the body is open and plays while the button is hovered or focused, and it is then named "Toggle content"
+unless an `aria-label` is given; `children` replace the chevron and name the button. It sets
+`data-slot="collapsible-card-trigger"`.
 
 ### CollapsibleCardContent
 
 Renders shadcn's [`CollapsibleContent`](https://ui.shadcn.com/docs/components/base/collapsible) and takes
-every prop it takes. The body that the trigger opens and closes; unmounted while closed. It sets
+every prop it takes. The body that the trigger opens and closes; unmounted while closed. It pads nothing:
+a text body takes `p-3`, the small card's spacing, and a `CodeBlockContent` pads its own code. It sets
 `data-slot="collapsible-card-content"`.
 
 ### collapsibleCardVariants

@@ -18,14 +18,13 @@ interface LanguageToggleGroupProps extends Omit<
  * Every language shown inline as a single-select toggle group, for a small fixed
  * set (two to four). The consumer composes one `ToggleGroupItem` per option,
  * usually mapping `useLanguageOptions`; the group never deselects, so a language
- * is always chosen. Outlined and joined unless `variant` or `spacing` say otherwise.
+ * is always chosen. Outlined, at the toggle group's default spacing, unless `variant` or `spacing` say otherwise.
  */
 function LanguageToggleGroup({ value, onValueChange, ...props }: LanguageToggleGroupProps): ReactNode {
   return (
     <ToggleGroup
       data-slot="language-toggle-group"
       variant="outline"
-      spacing={0}
       value={value ? [value] : []}
       onValueChange={(groupValue: string[]) => {
         const picked = groupValue.find((v) => v !== value);

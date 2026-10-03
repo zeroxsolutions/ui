@@ -2,6 +2,7 @@ import { FluentEmoji, type FluentEmojiStyle } from '@zeroxsolutions/fluent-emoji
 import type { ComponentProps, ReactNode } from 'react';
 
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 // A glyph present in every Fluent style - each swatch previews it so the user
 // sees the artwork rather than reading a style name.
@@ -22,15 +23,20 @@ interface EmojiAppearanceToggleGroupProps extends Omit<
  * `EmojiAppearanceToggleGroupItem` per style the consumer offers. Each swatch
  * renders the same sample emoji in its style (an `anim` swatch plays its frames)
  * before its label, so the preview is the selector. Single-select, and a style is
- * always chosen. Outlined and spaced apart unless `variant` or `spacing` say
- * otherwise.
+ * always chosen. Outlined, at the toggle group's default spacing, and wrapping
+ * onto further rows when narrower than its swatches.
  *
  * This is an **app-level appearance control**, not part of the emoji glyph picker:
  * the artwork style is a global preference. It's controlled (`value` /
  * `onValueChange`); the consumer owns persistence and applying the choice app-wide
  * (`setFluentEmojiStyle` from `@zeroxsolutions/fluent-emoji`).
  */
-function EmojiAppearanceToggleGroup({ value, onValueChange, ...props }: EmojiAppearanceToggleGroupProps): ReactNode {
+function EmojiAppearanceToggleGroup({
+  value,
+  onValueChange,
+  className,
+  ...props
+}: EmojiAppearanceToggleGroupProps): ReactNode {
   return (
     <ToggleGroup
       // Single-select: Base UI's value is an array; bind the lone style and
@@ -42,8 +48,8 @@ function EmojiAppearanceToggleGroup({ value, onValueChange, ...props }: EmojiApp
         if (picked) onValueChange(picked);
       }}
       variant="outline"
-      spacing={2}
       aria-label="Emoji style"
+      className={cn('flex-wrap', className)}
       {...props}
     />
   );
@@ -57,7 +63,9 @@ interface EmojiAppearanceToggleGroupItemProps extends Omit<ComponentProps<typeof
 /**
  * One swatch: the sample emoji drawn in `value`'s style before the consumer's
  * label (`children`), which names the swatch; the preview itself is decorative,
- * drawn as large as fits the toggle (h-8) so the styles read apart.
+ * drawn at `size-6` (24px), the largest that leaves the 32px toggle its padding,
+ * so the styles read apart. The `mono` artwork is black, so it inverts in the
+ * dark theme.
  */
 function EmojiAppearanceToggleGroupItem({ value, children, ...props }: EmojiAppearanceToggleGroupItemProps): ReactNode {
   return (
@@ -67,7 +75,7 @@ function EmojiAppearanceToggleGroupItem({ value, children, ...props }: EmojiAppe
         name={SAMPLE.name}
         variant={value}
         aria-hidden
-        className="size-6 object-contain"
+        className={cn('size-6 object-contain', value === 'mono' && 'dark:invert')}
       />
       {children}
     </ToggleGroupItem>

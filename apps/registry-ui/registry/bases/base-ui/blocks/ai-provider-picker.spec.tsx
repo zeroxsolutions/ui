@@ -45,4 +45,11 @@ describe('AiProviderPicker', () => {
 
     expect(onSelect).toHaveBeenCalledExactlyOnceWith('claude');
   });
+
+  it('draws a footer only for an entry with a meta note', () => {
+    const { container } = render(<AiProviderPicker entries={ENTRIES} />);
+
+    expect(container.querySelectorAll('[data-slot=card-footer]')).toHaveLength(1);
+    expect(screen.getByText('12 models')).toBeTruthy();
+  });
 });

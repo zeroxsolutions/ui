@@ -54,23 +54,23 @@ describe('AiProviderCard', () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it('carries the status tone on the root for the status note to read', () => {
+  it("draws the label's tone as a status dot before its text", () => {
     const { container } = render(
-      <AiProviderCard status="busy">
+      <AiProviderCard>
         <CardFooter>
-          <AiProviderCardLabel>Command failed</AiProviderCardLabel>
+          <AiProviderCardLabel tone="busy">Command failed</AiProviderCardLabel>
         </CardFooter>
       </AiProviderCard>,
     );
 
-    expect(container.firstElementChild?.getAttribute('data-status')).toBe('busy');
+    expect(container.querySelector('[data-slot=status-indicator]')?.getAttribute('data-tone')).toBe('busy');
     expect(screen.getByText('Command failed')).toBeTruthy();
   });
 
-  it('sets no status when none is given', () => {
-    const { container } = render(<AiProviderCard />);
+  it('draws no dot on a label given no tone', () => {
+    const { container } = render(<AiProviderCardLabel>12 models</AiProviderCardLabel>);
 
-    expect(container.firstElementChild?.hasAttribute('data-status')).toBe(false);
+    expect(container.querySelector('[data-slot=status-indicator]')).toBeNull();
   });
 
   it('renders the composed header and description', () => {

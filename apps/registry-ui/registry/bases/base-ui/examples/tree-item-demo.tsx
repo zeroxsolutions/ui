@@ -8,7 +8,6 @@ import {
   TreeItemLabel,
   TreeItemTrigger,
 } from '@/registry/bases/base-ui/components/data-display/tree-item';
-import { ItemTitle } from '@/registry/bases/base-ui/ui/item';
 
 /** A folder over two files, opened and closed by its trigger. */
 function TreeItemDemo(): ReactNode {
@@ -20,31 +19,23 @@ function TreeItemDemo(): ReactNode {
         <TreeItemIndent depth={0}>
           <TreeItemTrigger aria-label="Toggle src" onClick={() => setOpen((current) => !current)} />
         </TreeItemIndent>
-        <TreeItemLabel>
-          <ItemTitle>src</ItemTitle>
-        </TreeItemLabel>
+        <TreeItemLabel>src</TreeItemLabel>
       </TreeItem>
       {open && (
         <>
           <TreeItem leaf>
             <TreeItemIndent depth={1} />
-            <TreeItemLabel>
-              <ItemTitle>index.ts</ItemTitle>
-            </TreeItemLabel>
+            <TreeItemLabel>index.ts</TreeItemLabel>
           </TreeItem>
           <TreeItem leaf>
             <TreeItemIndent depth={1} />
-            <TreeItemLabel>
-              <ItemTitle>page.tsx</ItemTitle>
-            </TreeItemLabel>
+            <TreeItemLabel>page.tsx</TreeItemLabel>
           </TreeItem>
         </>
       )}
       <TreeItem leaf>
         <TreeItemIndent depth={0} />
-        <TreeItemLabel>
-          <ItemTitle>README.md</ItemTitle>
-        </TreeItemLabel>
+        <TreeItemLabel>README.md</TreeItemLabel>
       </TreeItem>
     </div>
   );

@@ -42,6 +42,14 @@ pnpm dlx shadcn@latest add badge button card collapsible utils https://lucide-an
 
 <ComponentSource name="tool-call-card" title="components/feedback/tool-call-card.tsx" />
 
+<Step>Copy the reduced-motion hook into `hooks/use-prefers-reduced-motion.ts`.</Step>
+
+<ComponentSource
+  name="tool-call-card"
+  file="registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts"
+  title="hooks/use-prefers-reduced-motion.ts"
+/>
+
 <Step>Add the `success` colour, as [Installation](/docs/installation#colours) describes.</Step>
 
 <Step>Update the import paths to match your project.</Step>
@@ -133,10 +141,11 @@ It sets `data-slot="tool-call-card"` and `data-state` to its state.
 ### ToolCallCardTrigger
 
 Renders shadcn's [`CollapsibleTrigger`](https://ui.shadcn.com/docs/components/base/collapsible), as a
-full-width, left-justified, ghost [`Button`](https://ui.shadcn.com/docs/components/base/button), and takes
-every prop `CollapsibleTrigger` takes. Appends a chevron that turns over while the sections are open, and
-plays - along with any `ToolCallCardStatus` icon inside it - while the trigger is hovered or focused; a
-caller's own pointer and focus handlers still run. It sets `data-slot="tool-call-card-trigger"`.
+full-width, left-justified, link [`Button`](https://ui.shadcn.com/docs/components/base/button), and takes
+every prop `CollapsibleTrigger` takes. Appends a chevron that turns over while the sections are open,
+drawing the same open or closed, and plays - along with any `ToolCallCardStatus` icon inside it - while the
+trigger is hovered or focused; a caller's own pointer and focus handlers still run. It sets
+`data-slot="tool-call-card-trigger"`.
 
 ### ToolCallCardTitle
 

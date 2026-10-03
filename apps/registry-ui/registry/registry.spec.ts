@@ -318,15 +318,10 @@ describe('registry.json', () => {
 const treeItem: RegistryItem = {
   name: 'tree-item',
   type: 'registry:component',
-  registryDependencies: [
-    '@shadcn/button',
-    '@shadcn/input',
-    '@shadcn/item',
-    '@shadcn/utils',
-    `${ANIMATED_ICON_URL}chevron-right.json`,
-  ],
+  registryDependencies: ['@shadcn/button', '@shadcn/input', '@shadcn/utils', `${ANIMATED_ICON_URL}chevron-right.json`],
   files: [
     { path: `${BASE}/components/data-display/tree-item.tsx`, type: 'registry:component' },
+    { path: `${BASE}/hooks/use-prefers-reduced-motion.ts`, type: 'registry:hook' },
     { path: `${BASE}/lib/ime.ts`, type: 'registry:lib' },
   ],
 };
@@ -335,7 +330,7 @@ const emojiAppearanceToggleGroup: RegistryItem = {
   name: 'emoji-appearance-toggle-group',
   type: 'registry:component',
   dependencies: ['@zeroxsolutions/fluent-emoji'],
-  registryDependencies: ['@shadcn/toggle-group'],
+  registryDependencies: ['@shadcn/toggle-group', '@shadcn/utils'],
   files: [{ path: `${BASE}/components/data-entry/emoji-appearance-toggle-group.tsx`, type: 'registry:component' }],
 };
 
@@ -353,7 +348,7 @@ describe('declarationProblems', () => {
   });
 
   it('reports a lib file the item imports but does not ship', () => {
-    const item = { ...treeItem, files: treeItem.files.slice(0, 1) };
+    const item = { ...treeItem, files: treeItem.files.filter((file) => file.path !== `${BASE}/lib/ime.ts`) };
     expect(declarationProblems(item, new Map())).toEqual([
       'tree-item: files lacks registry/bases/base-ui/lib/ime.ts (registry:lib)',
     ]);

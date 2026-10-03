@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-test('every component page renders its preview, fits a phone, and throws nothing', async ({ page, request }) => {
+test('every component page renders its preview, fits a phone without a stage scrolling sideways, and throws nothing', async ({
+  page,
+  request,
+}) => {
   // Each page is prerendered, but 42 of them across a cold worker outrun the default deadline.
   test.setTimeout(180_000);
   const response = await request.get('/r/registry.json');
@@ -23,6 +26,23 @@ test('every component page renders its preview, fits a phone, and throws nothing
     await expect
       .poll(() => page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth'), { message: name })
       .toBe(false);
+    // The page itself never scrolls sideways, because each preview stage scrolls its own demo; so a demo
+    // too wide for a phone shows only as its stage scrolling. A stage's viewport is its direct child.
+    await expect
+      .poll(
+        () =>
+          page
+            .locator('[data-slot=component-preview-stage] > [data-slot=scroll-area-viewport]')
+            // Named structurally, because this project's tsconfig carries no 'dom' lib for the
+            // callback's parameter to draw scrollWidth and clientWidth from by its DOM type.
+            .evaluateAll((viewports: { scrollWidth: number; clientWidth: number }[]) =>
+              viewports
+                .filter((viewport) => viewport.scrollWidth > viewport.clientWidth)
+                .map((viewport) => `${viewport.scrollWidth} > ${viewport.clientWidth}`),
+            ),
+        { message: `${name}: a preview stage scrolls sideways` },
+      )
+      .toEqual([]);
     // WebKit reports a prefetch aborted by navigation as a page error, so let this page's own
     // header-link prefetches settle before leaving it for the next one.
     // eslint-disable-next-line playwright/no-networkidle

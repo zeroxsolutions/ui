@@ -1,4 +1,13 @@
-import { memo, type ComponentProps, type ReactNode } from 'react';
+import {
+  Children,
+  createContext,
+  isValidElement,
+  memo,
+  useContext,
+  useId,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import Markdown, { type Components, type ExtraProps } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -18,6 +27,7 @@ import {
 } from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { isPlainLanguage } from '@/registry/bases/base-ui/lib/code-language';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { Checkbox } from '@/registry/bases/base-ui/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/registry/bases/base-ui/ui/table';
 
 /** Fenced code, told from inline code by a language class or a line break, since react-markdown marks neither. */
@@ -45,10 +55,44 @@ function MarkdownViewTable({ node: _node, ...props }: ComponentProps<'table'> & 
   );
 }
 
+/** The id `MarkdownViewTaskItem` names itself with, for its checkbox to read a name off. */
+const MarkdownViewTaskItemContext = createContext<string | undefined>(undefined);
+
+/** Whether a child is a nested list, GFM's own markup for a task item's sub-items. */
+function isNestedList(child: ReactNode): boolean {
+  return isValidElement(child) && (child.type === 'ul' || child.type === 'ol');
+}
+
 /**
- * The renderers: tables as upstream's `Table` parts, and fenced code as a `CodeBlock`, headed with its
- * language when the fence names one; inline code stays a chip. `pre` is unwrapped, because the `code`
- * renderer draws the whole block, and a `CodeBlock` root is a `<div>`, which must not nest in a `<pre>`.
+ * A GFM task item: its read-only checkbox and its text on one row, with no bullet before them, and
+ * any nested list (a sub-task's own `ul`) dropped below that row instead of beside the text, since GFM
+ * hands this `li` the nested list as one more child alongside the checkbox and the text. Its own id is
+ * the checkbox's `aria-labelledby` target, since GFM's markup gives the checkbox no label element of
+ * its own to read a name from, and Base UI's `Checkbox` is a styled `span`, not an `<input>`, so
+ * wrapping it in a `<label>` would name the hidden native input it renders beside itself, not the span.
+ */
+function MarkdownViewTaskItem({ className, children, ...props }: ComponentProps<'li'>): ReactNode {
+  const id = useId();
+  const items = Children.toArray(children);
+  const nestedLists = items.filter(isNestedList);
+  const row = items.filter((item) => !isNestedList(item));
+  return (
+    <MarkdownViewTaskItemContext.Provider value={id}>
+      <li id={id} data-slot="markdown-view-task-item" className={cn('list-none', className)} {...props}>
+        <div data-slot="markdown-view-task-item-row" className="flex items-start gap-2">
+          {row}
+        </div>
+        {nestedLists}
+      </li>
+    </MarkdownViewTaskItemContext.Provider>
+  );
+}
+
+/**
+ * The renderers: tables as upstream's `Table` parts, GFM task items as a read-only `Checkbox`, and
+ * fenced code as a `CodeBlock`, headed with its language when the fence names one; inline code stays
+ * a chip. `pre` is unwrapped, because the `code` renderer draws the whole block, and a `CodeBlock`
+ * root is a `<div>`, which must not nest in a `<pre>`.
  */
 const markdownViewComponents: Components = {
   pre: ({ children }) => <>{children}</>,
@@ -58,6 +102,22 @@ const markdownViewComponents: Components = {
   tr: ({ node: _node, ...props }) => <TableRow {...props} />,
   th: ({ node: _node, ...props }) => <TableHead {...props} />,
   td: ({ node: _node, ...props }) => <TableCell {...props} />,
+  li: ({ node: _node, className, ...props }) =>
+    className?.includes('task-list-item') ? (
+      <MarkdownViewTaskItem className={className} {...props} />
+    ) : (
+      <li className={className} {...props} />
+    ),
+  // GFM's task marker, as nova's Checkbox: read-only, so the reader sees the state and cannot change it,
+  // and named by the enclosing MarkdownViewTaskItem's own id (see its docblock for why).
+  input: ({ node: _node, type, checked, disabled: _disabled, ...props }) => {
+    const labelledBy = useContext(MarkdownViewTaskItemContext);
+    return type === 'checkbox' ? (
+      <Checkbox checked={checked === true} readOnly aria-labelledby={labelledBy} className="mt-1" />
+    ) : (
+      <input type={type} {...props} />
+    );
+  },
   code: ({ node: _node, className, children, ...props }) => {
     const text = String(children ?? '');
     if (!isBlockCode(className, text)) {

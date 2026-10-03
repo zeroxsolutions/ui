@@ -1,13 +1,9 @@
 import * as React from 'react';
 
+import { StatusIndicator } from '@/registry/bases/base-ui/components/feedback/status-indicator';
 import { Card, CardDescription } from '@/registry/bases/base-ui/ui/card';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { StatusTone } from '@/registry/bases/base-ui/types/status-tone';
-
-interface AiProviderCardProps extends React.ComponentProps<typeof Card> {
-  /** Tone of the attention note in `AiProviderCardLabel`; omit for a muted note. */
-  status?: StatusTone;
-}
 
 /**
  * A tile for one AI provider in an overview grid. The consumer composes
@@ -16,11 +12,10 @@ interface AiProviderCardProps extends React.ComponentProps<typeof Card> {
  * and, when the tile selects, an `AiProviderCardTrigger` that covers the card.
  * Defaults to the small card size.
  */
-function AiProviderCard({ status, size = 'sm', className, ...props }: AiProviderCardProps): React.ReactNode {
+function AiProviderCard({ size = 'sm', className, ...props }: React.ComponentProps<typeof Card>): React.ReactNode {
   return (
     <Card
       data-slot="ai-provider-card"
-      data-status={status}
       size={size}
       className={cn('group/ai-provider-card relative h-full', className)}
       {...props}
@@ -38,17 +33,25 @@ function AiProviderCardDescription({
   );
 }
 
-/** The footer note (a model count, or an attention message), toned by the card's `status`. */
-function AiProviderCardLabel({ className, ...props }: React.ComponentProps<'span'>): React.ReactNode {
+interface AiProviderCardLabelProps extends React.ComponentProps<'span'> {
+  /** The status a dot before the note reports; omit for a note with no dot. */
+  tone?: StatusTone;
+}
+
+/**
+ * The footer note (a model count, or an attention message) in muted text. Given a `tone`, a
+ * `StatusIndicator` before it carries the status, so the note stays readable at any tone.
+ */
+function AiProviderCardLabel({ tone, className, children, ...props }: AiProviderCardLabelProps): React.ReactNode {
   return (
     <span
       data-slot="ai-provider-card-label"
-      className={cn(
-        'text-muted-foreground group-data-[status=busy]/ai-provider-card:text-destructive group-data-[status=idle]/ai-provider-card:text-warning group-data-[status=online]/ai-provider-card:text-success truncate text-xs',
-        className,
-      )}
+      className={cn('text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs', className)}
       {...props}
-    />
+    >
+      {tone && <StatusIndicator tone={tone} />}
+      <span className="truncate">{children}</span>
+    </span>
   );
 }
 
@@ -84,4 +87,4 @@ function AiProviderCardTrigger({
 }
 
 export { AiProviderCard, AiProviderCardAction, AiProviderCardDescription, AiProviderCardLabel, AiProviderCardTrigger };
-export type { AiProviderCardProps };
+export type { AiProviderCardLabelProps };

@@ -23,12 +23,17 @@ import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/ui/s
 
 const PARAMETERS = JSON.stringify({ query: 'design system tokens', limit: 5 }, null, 2);
 
-/** A completed search call, its parameters shown under the trigger, its icon playing while the trigger is hovered or focused. */
+/**
+ * A completed search call, its parameters shown under the trigger, its icon playing while the
+ * trigger is hovered or focused. Narrower than `max-w-md`, because the trigger row's icon, title
+ * and status never shrink, so only `ToolCallCardDescription`'s own truncate can give back the
+ * width a phone-width preview stage needs.
+ */
 function ToolCallCardDemo(): ReactNode {
   const iconRef = useRef<SearchIconHandle>(null);
 
   return (
-    <ToolCallCard state="output-available" defaultOpen className="max-w-md">
+    <ToolCallCard state="output-available" defaultOpen className="max-w-60">
       <ToolCallCardTrigger
         onMouseEnter={() => iconRef.current?.startAnimation()}
         onMouseLeave={() => iconRef.current?.stopAnimation()}

@@ -110,7 +110,7 @@ describe('CodeBlock', () => {
       </Block>,
     );
     await settle();
-    fireEvent.click(screen.getByRole('button', { name: 'Toggle' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle content' }));
     expect(screen.queryByText('const x = 1')).toBeNull();
   });
 

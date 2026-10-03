@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ChevronRightIcon, type ChevronRightIconHandle } from '@/registry/bases/base-ui/ui/chevron-right';
 import { Input } from '@/registry/bases/base-ui/ui/input';
-import { Item } from '@/registry/bases/base-ui/ui/item';
+import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { isImeComposing } from '@/registry/bases/base-ui/lib/ime';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
@@ -21,7 +21,7 @@ function useTreeItem(): TreeItemContextValue {
   return context;
 }
 
-interface TreeItemProps extends React.ComponentProps<typeof Item> {
+interface TreeItemProps extends React.ComponentProps<'div'> {
   /** Whether the node's children are shown; sets `data-expanded` and the trigger's `aria-expanded`. */
   expanded?: boolean;
   /** Whether the node has no children; sets `data-leaf`, which keeps the name aligned with its siblings' names. */
@@ -32,25 +32,25 @@ interface TreeItemProps extends React.ComponentProps<typeof Item> {
 
 /**
  * One row of a hierarchy tree (a layer tree, a scene outliner, a file tree),
- * over upstream's `Item` at `size="xs"`. The row owns the shared rhythm and the
- * `group/tree-item` its parts style off; it overrides the Item recipe's
- * `flex-wrap` with `flex-nowrap`, so a long name truncates instead of dropping
- * the actions onto a second line. The consumer composes the rest:
+ * drawn as `FileTree` draws its rows: 28px high, rounded, muted on hover, on one
+ * line, so a long name truncates instead of dropping the actions onto a second
+ * line. It grows to fit a `TreeItemRenameInput` while renaming. The row owns the
+ * `group/tree-item` its parts style off. The consumer composes the rest:
  *
  *   <TreeItem expanded={open}>
  *     <TreeItemIndent depth={0}>
  *       <TreeItemTrigger aria-label="Toggle src" onClick={toggle} />
  *     </TreeItemIndent>
- *     <TreeItemLabel><ItemTitle>src</ItemTitle></TreeItemLabel>
+ *     <TreeItemLabel>src</TreeItemLabel>
  *   </TreeItem>
  *   <TreeItem leaf>
  *     <TreeItemIndent depth={1} />
- *     <TreeItemLabel><ItemTitle>index.ts</ItemTitle></TreeItemLabel>
+ *     <TreeItemLabel>index.ts</TreeItemLabel>
  *   </TreeItem>
  *
- * A `TreeItemRenameInput` replaces the title while renaming, and `ItemActions`
- * holds trailing actions. Selection state and drag handlers go on the row
- * itself. A context menu wraps the row as `ContextMenuTrigger render={<TreeItem />}`.
+ * A `TreeItemRenameInput` replaces the label's text while renaming. Trailing
+ * actions, selection state and drag handlers go on the row itself. A context
+ * menu wraps the row as `ContextMenuTrigger render={<TreeItem />}`.
  *
  * `ref` reaches the row div - a consumer needs it for `scrollIntoView`, and a
  * wrapping Base UI `render` trigger composes its ref through it.
@@ -59,20 +59,21 @@ function TreeItem({
   expanded = false,
   leaf = false,
   editing = false,
-  size = 'xs',
   className,
   ...props
 }: TreeItemProps): React.ReactNode {
   const context = React.useMemo(() => ({ expanded }), [expanded]);
   return (
     <TreeItemContext.Provider value={context}>
-      <Item
+      <div
         data-slot="tree-item"
         data-expanded={expanded || undefined}
         data-leaf={leaf || undefined}
         data-editing={editing || undefined}
-        size={size}
-        className={cn('group/tree-item flex-nowrap', className)}
+        className={cn(
+          'group/tree-item text-foreground/80 hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 flex min-h-7 w-full min-w-0 items-center gap-1.5 rounded-md ps-1.5 pe-2 text-sm transition-colors outline-none focus-visible:ring-3',
+          className,
+        )}
         {...props}
       />
     </TreeItemContext.Provider>
@@ -108,11 +109,11 @@ function TreeItemIndent({ depth, className, style, children, ...props }: TreeIte
 }
 
 /**
- * The disclosure control of a folder row: upstream's ghost `icon-xs` button
- * holding a chevron that turns while the row is `expanded`, with
- * `aria-expanded` from the row. The caller gives it its `aria-label` and its
- * `onClick`; the click never reaches the row, so it never selects it. It goes
- * in the row's `TreeItemIndent`, and a leaf row leaves it out. The chevron plays on the button's hover or focus.
+ * The disclosure control of a folder row: upstream's link `icon-xs` button, which has no expanded
+ * fill, holding a chevron that turns while the row is `expanded`, with `aria-expanded` from the row.
+ * The caller gives it its `aria-label` and its `onClick`; the click never reaches the row, so it
+ * never selects it. It goes in the row's `TreeItemIndent`, and a leaf row leaves it out. The chevron
+ * plays on the button's hover or focus.
  */
 function TreeItemTrigger({
   onClick,
@@ -124,11 +125,12 @@ function TreeItemTrigger({
 }: Omit<React.ComponentProps<typeof Button>, 'children'>): React.ReactNode {
   const { expanded } = useTreeItem();
   const iconRef = React.useRef<ChevronRightIconHandle>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
   return (
     <Button
       data-slot="tree-item-trigger"
       type="button"
-      variant="ghost"
+      variant="link"
       size="icon-xs"
       aria-expanded={expanded}
       onClick={(event) => {
@@ -137,30 +139,33 @@ function TreeItemTrigger({
       }}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
-        iconRef.current?.startAnimation();
+        if (!prefersReducedMotion) iconRef.current?.startAnimation();
       }}
       onMouseLeave={(event) => {
         onMouseLeave?.(event);
-        iconRef.current?.stopAnimation();
+        if (!prefersReducedMotion) iconRef.current?.stopAnimation();
       }}
       onFocus={(event) => {
         onFocus?.(event);
-        iconRef.current?.startAnimation();
+        if (!prefersReducedMotion) iconRef.current?.startAnimation();
       }}
       onBlur={(event) => {
         onBlur?.(event);
-        iconRef.current?.stopAnimation();
+        if (!prefersReducedMotion) iconRef.current?.stopAnimation();
       }}
       {...props}
     >
-      <ChevronRightIcon ref={iconRef} className="transition-transform group-data-expanded/tree-item:rotate-90" />
+      <ChevronRightIcon
+        ref={iconRef}
+        className="group-data-expanded/tree-item:rotate-90 motion-safe:transition-transform"
+      />
     </Button>
   );
 }
 
 /**
- * The row's clickable name region, holding `ItemMedia`, `ItemTitle` or a
- * `TreeItemRenameInput`, and any badges after the name. A plain `div`, not a
+ * The row's clickable name region: the consumer's icon and name as `children`, or a
+ * `TreeItemRenameInput` while renaming, and any badges after the name. A plain `div`, not a
  * `<button>`: per the W3C tree view pattern the tree owns activation (roving
  * tabindex + Enter), and a `div` may hold the rename input where a button may
  * not. `onClick` receives the raw event, so a caller can read shift/meta.

@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { MarkdownView } from './markdown-view';
@@ -73,5 +73,49 @@ describe('MarkdownView', () => {
       expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();
       expect(screen.getByText('npm').tagName).toBe('CODE');
     });
+  });
+
+  it('draws each GFM task item as a read-only checkbox in its state', async () => {
+    render(<MarkdownView>{'- [x] Ship the parser\n- [ ] Document the API'}</MarkdownView>);
+    await settle();
+    const [done, open] = screen.getAllByRole('checkbox');
+    expect(done.getAttribute('aria-checked')).toBe('true');
+    expect(open.getAttribute('aria-checked')).toBe('false');
+    expect(open.getAttribute('aria-readonly')).toBe('true');
+
+    fireEvent.click(open);
+    expect(open.getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('leaves a plain bullet a bullet beside task items', async () => {
+    render(<MarkdownView>{'- [x] Ship the parser\n- Plain note'}</MarkdownView>);
+    await settle();
+    expect(screen.getAllByRole('checkbox')).toHaveLength(1);
+    expect(screen.getByText('Plain note').closest('li')?.getAttribute('data-slot')).toBeNull();
+  });
+
+  it('names each task checkbox by its own task text', async () => {
+    render(<MarkdownView>{'- [x] Ship the parser\n- [ ] Document the API\n- Plain note'}</MarkdownView>);
+    await settle();
+    expect(screen.getByRole('checkbox', { name: 'Ship the parser' })).toBeTruthy();
+    expect(screen.getByRole('checkbox', { name: 'Document the API' })).toBeTruthy();
+  });
+
+  it('drops a nested task list below the parent row instead of beside its text', async () => {
+    render(<MarkdownView>{'- [ ] parent\n  - [ ] child'}</MarkdownView>);
+    await settle();
+
+    const childCheckbox = screen.getByRole('checkbox', { name: 'child' });
+    const parentItem = document.querySelector('[data-slot="markdown-view-task-item"]');
+    const row = parentItem?.querySelector('[data-slot="markdown-view-task-item-row"]');
+
+    // The nested list is a descendant of the parent's <li>, laid out after its row, not inside it.
+    expect(parentItem?.contains(childCheckbox)).toBe(true);
+    expect(row).toBeTruthy();
+    expect(row?.contains(childCheckbox)).toBe(false);
+
+    const nestedList = parentItem?.querySelector('ul');
+    expect(nestedList?.contains(childCheckbox)).toBe(true);
+    expect(row?.compareDocumentPosition(nestedList as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 });

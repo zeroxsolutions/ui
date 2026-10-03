@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { useControllableState } from '@/registry/bases/base-ui/hooks/use-controllable-state';
+import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { ChevronRightIcon, type ChevronRightIconHandle } from '@/registry/bases/base-ui/ui/chevron-right';
 
@@ -333,11 +334,13 @@ function FileTreeLabel({
   const iconRef = React.useRef<ChevronRightIconHandle>(null);
   const [hovered, setHovered] = React.useState(false);
   const playing = hovered || item.focused;
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   React.useEffect(() => {
+    if (prefersReducedMotion) return;
     if (playing) iconRef.current?.startAnimation();
     else iconRef.current?.stopAnimation();
-  }, [playing]);
+  }, [playing, prefersReducedMotion]);
 
   return (
     <div
@@ -348,7 +351,7 @@ function FileTreeLabel({
       className={cn(
         'text-foreground/80 flex h-7 cursor-pointer items-center gap-1.5 rounded-md pr-2 transition-colors',
         'hover:bg-muted hover:text-foreground',
-        'group-focus-visible/file-tree-item:ring-ring/50 group-focus-visible/file-tree-item:ring-2',
+        'group-focus-visible/file-tree-item:ring-ring/50 group-focus-visible/file-tree-item:ring-3',
         'data-[selected]:bg-muted data-[selected]:text-foreground data-[selected]:font-medium',
         className,
       )}
@@ -372,7 +375,7 @@ function FileTreeLabel({
           ref={iconRef}
           aria-hidden
           size={16}
-          className={cn('flex shrink-0 transition-transform', item.expanded && 'rotate-90')}
+          className={cn('flex shrink-0 motion-safe:transition-transform', item.expanded && 'rotate-90')}
         />
       ) : (
         <span aria-hidden className="w-4 shrink-0" />

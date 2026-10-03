@@ -60,8 +60,12 @@ async function drivesEveryDocsMotionToItsEndState(page: Page): Promise<void> {
   // 2. The TOC marker slides to the entry a click sends the URL hash to.
   const toc = page.getByRole('navigation', { name: 'On this page' });
   const apiReferenceLink = toc.getByRole('link', { name: 'API reference' });
-  await apiReferenceLink.click();
-  await expect(page).toHaveURL(/#api-reference$/);
+  // Retried for the same reason, and because a click landing while the crossfade still runs hits the
+  // transition's overlay instead of the link.
+  await expect(async () => {
+    await apiReferenceLink.click();
+    await expect(page).toHaveURL(/#api-reference$/, { timeout: 1_000 });
+  }).toPass();
   const marker = page.locator('[data-slot="docs-toc-marker"]');
   // The marker eases to the entry over 200ms; ten seconds covers a cold worker on a shared runner.
   await expect
@@ -84,7 +88,7 @@ async function drivesEveryDocsMotionToItsEndState(page: Page): Promise<void> {
     await viewCode.click({ timeout: 1_000 });
     await expect(fullSource).toBeVisible({ timeout: 1_000 });
   }).toPass();
-  const closeTrigger = main.getByRole('button', { name: 'Toggle', exact: true }).first();
+  const closeTrigger = main.getByRole('button', { name: 'Toggle content', exact: true }).first();
   await closeTrigger.click();
   await expect(fullSource).toBeHidden();
   await expect(viewCode).toBeVisible();

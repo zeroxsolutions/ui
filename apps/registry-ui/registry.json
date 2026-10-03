@@ -7,23 +7,13 @@
       "name": "ai-provider-card",
       "type": "registry:component",
       "title": "AI Provider Card",
-      "description": "A small card for one AI provider in an overview grid, whose status tones its footer note and whose covering trigger selects it.",
+      "description": "A small card for one AI provider in an overview grid, whose footer note carries a status dot and whose covering trigger selects it.",
       "categories": ["data-display"],
-      "registryDependencies": ["@shadcn/card", "@shadcn/utils"],
-      "cssVars": {
-        "theme": {
-          "color-success": "var(--success)",
-          "color-warning": "var(--warning)"
-        },
-        "light": {
-          "success": "oklch(0.627 0.19 149)",
-          "warning": "oklch(0.681 0.162 75.834)"
-        },
-        "dark": {
-          "success": "oklch(0.723 0.19 149)",
-          "warning": "oklch(0.79 0.155 80)"
-        }
-      },
+      "registryDependencies": [
+        "@shadcn/card",
+        "@shadcn/utils",
+        "https://ui.zeroxsolutions.com/r/status-indicator.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/ai-provider-card.tsx",
@@ -140,6 +130,10 @@
         {
           "path": "registry/bases/base-ui/components/data-display/data-table-column-header.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
         }
       ]
     },
@@ -234,6 +228,7 @@
       "categories": ["data-display"],
       "dependencies": ["react-markdown", "remark-gfm"],
       "registryDependencies": [
+        "@shadcn/checkbox",
         "@shadcn/table",
         "@shadcn/utils",
         "https://ui.zeroxsolutions.com/r/code-block.json",
@@ -286,7 +281,7 @@
       "description": "A single-select row of swatches for choosing the Fluent Emoji artwork style, each previewing the same sample emoji in its own style.",
       "categories": ["data-entry"],
       "dependencies": ["@zeroxsolutions/fluent-emoji"],
-      "registryDependencies": ["@shadcn/toggle-group"],
+      "registryDependencies": ["@shadcn/toggle-group", "@shadcn/utils"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/emoji-appearance-toggle-group.tsx",
@@ -440,12 +435,11 @@
       "name": "tree-item",
       "type": "registry:component",
       "title": "Tree Item",
-      "description": "One row of a hierarchy tree over upstream Item, with a depth indent, a disclosure trigger, a clickable label and an inline rename input.",
+      "description": "One row of a hierarchy tree, drawn as the file tree's rows, with a depth indent, a disclosure trigger, a clickable label and an inline rename input.",
       "categories": ["data-display"],
       "registryDependencies": [
         "@shadcn/button",
         "@shadcn/input",
-        "@shadcn/item",
         "@shadcn/utils",
         "https://lucide-animated.com/r/chevron-right.json"
       ],
@@ -453,6 +447,10 @@
         {
           "path": "registry/bases/base-ui/components/data-display/tree-item.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
         },
         {
           "path": "registry/bases/base-ui/lib/ime.ts",
@@ -628,6 +626,10 @@
         {
           "path": "registry/bases/base-ui/components/layout/collapsible-card.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
         }
       ]
     },
@@ -645,6 +647,10 @@
         },
         {
           "path": "registry/bases/base-ui/hooks/use-controllable-state.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
           "type": "registry:hook"
         }
       ]
@@ -772,6 +778,14 @@
         {
           "path": "registry/bases/base-ui/components/layout/reasoning-collapsible.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-reasoning-collapsible.ts",
+          "type": "registry:hook"
         }
       ]
     },
@@ -807,6 +821,10 @@
         {
           "path": "registry/bases/base-ui/components/feedback/tool-call-card.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
         }
       ]
     },
@@ -1201,7 +1219,7 @@
       "title": "Tree Item Demo",
       "description": "A folder over two files, opened and closed by its TreeItemTrigger, each a TreeItem row.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/tree-item.json"],
+      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tree-item.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tree-item-demo.tsx",
@@ -1551,6 +1569,10 @@
         {
           "path": "registry/bases/base-ui/examples/reasoning-collapsible-demo.tsx",
           "type": "registry:example"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-reasoning-collapsible.ts",
+          "type": "registry:hook"
         }
       ]
     },
@@ -1590,9 +1612,14 @@
       "name": "command-menu-demo",
       "type": "registry:example",
       "title": "Command Menu Demo",
-      "description": "A command palette, reopened by Ctrl/Cmd+K, that reports the chosen file.",
+      "description": "A command palette, opened from its button or by Ctrl/Cmd+K, that reports the chosen file.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/command", "https://ui.zeroxsolutions.com/r/command-menu.json"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/command",
+        "@shadcn/kbd",
+        "https://ui.zeroxsolutions.com/r/command-menu.json"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/command-menu-demo.tsx",
