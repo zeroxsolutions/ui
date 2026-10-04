@@ -23,11 +23,11 @@ import { GeminiMark } from '@zeroxsolutions/icons/brands/gemini';
 import { GithubMark } from '@zeroxsolutions/icons/brands/github-mark';
 import { TypescriptIcon } from '@zeroxsolutions/icons/material/typescript';
 
-<OpenaiMark size="1.25rem" />;          {/* base mark (mono, currentColor) */}
-<GeminiMark.Color size="1.5rem" />;     {/* full brand-colour artwork */}
-<GeminiMark.Avatar size={32} />;        {/* icon on a filled background */}
-<GithubMark className="size-5" />;      {/* the one exception: currentColor, sized via className */}
-<TypescriptIcon size="1.5rem" />;       {/* full-color file icon */}
+<OpenaiMark size="1.25rem" />; // base mark (mono, currentColor)
+<GeminiMark.Color size="1.5rem" />; // full brand-colour artwork
+<GeminiMark.Avatar size={32} />; // icon on a filled background
+<GithubMark className="size-5" />; // the one exception: currentColor, sized via className
+<TypescriptIcon size="1.5rem" />; // full-color file icon
 ```
 
 ## Install
@@ -63,9 +63,9 @@ a sub-component exists only when that variant exists for the icon.
 ```tsx
 import { OpenaiMark } from '@zeroxsolutions/icons/brands/openai';
 
-<OpenaiMark size={24} />;         // base (mono)
-<OpenaiMark.Avatar size={40} />;  // icon on the brand background
-<OpenaiMark.Text />;              // wordmark (Avatar/Text/Combine default size = 24)
+<OpenaiMark size={24} />; // base (mono)
+<OpenaiMark.Avatar size={40} />; // icon on the brand background
+<OpenaiMark.Text />; // wordmark (Avatar/Text/Combine default size = 24)
 ```
 
 ## Categories
@@ -76,28 +76,29 @@ Each mark is `@zeroxsolutions/icons/brands/<name>`; the export symbol is the
 PascalCase of the name plus `Mark` (`openai` -> `OpenaiMark`). The marks span the
 AI ecosystem, dev/infra, social/communication, and workspace/productivity:
 
-| Domain | Source | Examples |
-| --- | --- | --- |
-| Model labs / providers | lobehub | `openai`, `anthropic`, `claude`, `gemini`, `mistral`, `deepseek`, `grok`, `qwen`, `perplexity`, `cohere`, `nvidia`, ... |
-| Inference / hosting | lobehub | `huggingface`, `groq`, `cerebras`, `ollama`, `together`, `fireworks`, `replicate`, `fal`, ... |
-| Voice / speech | lobehub | `elevenlabs`, `assemblyai`, `livekit` (+ existing `deepgram`, `pipecat`, `inworld`) |
-| Generative media | lobehub | `midjourney`, `ideogram`, `runway`, `luma`, `flux`, `suno`, `sora`, `kling`, ... (+ `leonardo`) |
-| Agent / tooling | lobehub | `langchain`, `llamaindex`, `crewai`, `dify`, `n8n`, `zapier`, `mcp`, ... |
-| Vector / data | Simple Icons + others | `qdrant`, `milvus`, `redis`, `mongodb`, `supabase`, `pinecone`, `chroma`, ... |
-| Dev / cloud / infra | lobehub + Simple Icons + others | `aws`, `azure`, `gcp`, `docker`, `kubernetes`, `terraform`, `stripe`, `twilio`, `heroku`, `sendgrid`, `segment`, `github-mark`, ... |
-| Social / communication | Simple Icons + gilbarbara | `facebook`, `messenger`, `instagram`, `threads`, `x`, `linkedin`, `youtube`, `tiktok`, `reddit`, `pinterest`, `snapchat`, `mastodon`, `bluesky`, `whatsapp`, `telegram`, `signal`, `wechat`, `line` |
+| Domain                    | Source                           | Examples                                                                                                                                                                                                   |
+| ------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Model labs / providers    | lobehub                          | `openai`, `anthropic`, `claude`, `gemini`, `mistral`, `deepseek`, `grok`, `qwen`, `perplexity`, `cohere`, `nvidia`, ...                                                                                    |
+| Inference / hosting       | lobehub                          | `huggingface`, `groq`, `cerebras`, `ollama`, `together`, `fireworks`, `replicate`, `fal`, ...                                                                                                              |
+| Voice / speech            | lobehub                          | `elevenlabs`, `assemblyai`, `livekit` (+ existing `deepgram`, `pipecat`, `inworld`)                                                                                                                        |
+| Generative media          | lobehub                          | `midjourney`, `ideogram`, `runway`, `luma`, `flux`, `suno`, `sora`, `kling`, ... (+ `leonardo`)                                                                                                            |
+| Agent / tooling           | lobehub                          | `langchain`, `llamaindex`, `crewai`, `dify`, `n8n`, `zapier`, `mcp`, ...                                                                                                                                   |
+| Vector / data             | Simple Icons + others            | `qdrant`, `milvus`, `redis`, `mongodb`, `supabase`, `pinecone`, `chroma`, ...                                                                                                                              |
+| Dev / cloud / infra       | lobehub + Simple Icons + others  | `aws`, `azure`, `gcp`, `docker`, `kubernetes`, `terraform`, `stripe`, `twilio`, `heroku`, `sendgrid`, `segment`, `github-mark`, ...                                                                        |
+| Social / communication    | Simple Icons + gilbarbara        | `facebook`, `messenger`, `instagram`, `threads`, `x`, `linkedin`, `youtube`, `tiktok`, `reddit`, `pinterest`, `snapchat`, `mastodon`, `bluesky`, `whatsapp`, `telegram`, `signal`, `wechat`, `line`        |
 | Workspace / collaboration | Simple Icons + gilbarbara + svgl | `slack`, `discord`, `microsoft-teams`, `zoom`, `google-meet`, `notion`, `figma`, `trello`, `asana`, `jira`, `confluence`, `linear`, `miro`, `airtable`, `monday`, `clickup`, `dropbox`, `loom`, `calendly` |
-| Mail / office | Simple Icons + gilbarbara + svgl | `gmail`, `google-drive`, `google-docs`, `google-calendar`, `outlook`, `onedrive` |
-| AI Gateway providers | lobehub + vendor | `bedrock`, `vertexai`, `xai`, `parallel` (closing the [Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/usage/providers/) provider gap) |
+| Mail / office             | Simple Icons + gilbarbara + svgl | `gmail`, `google-drive`, `google-docs`, `google-calendar`, `outlook`, `onedrive`                                                                                                                           |
+| App stores                | gilbarbara                       | `apple`, `google-play`                                                                                                                                                                                     |
+| AI Gateway providers      | lobehub + vendor                 | `bedrock`, `vertexai`, `xai`, `parallel` (closing the [Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/usage/providers/) provider gap)                                                 |
 
 Marks are vendored from [`@lobehub/icons`](https://github.com/lobehub/lobe-icons)
 (MIT - the AI brands, with full variants), [Simple Icons](https://simpleicons.org)
 (CC0 - most dev/infra + social/workspace, base + `.Color`/`.Mono`/`.Avatar`),
 [gilbarbara/logos](https://github.com/gilbarbara/logos) (`linkedin`,
-`microsoft-teams`, `onedrive`, `monday`, and existing `hume`, `pinecone`, `heroku`,
+`microsoft-teams`, `onedrive`, `monday`, `apple`, `google-play`, and existing `hume`, `pinecone`, `heroku`,
 `twilio`, `sendgrid`, `segment`), [svgl](https://svgl.app) (`outlook`), and
 `parallel.ai` / vendor SVGs. A **full-colour / gradient** mark (`microsoft-teams`,
-`outlook`, `onedrive`, `monday`) renders its base as the full artwork and ships
+`outlook`, `onedrive`, `monday`, `google-play`) renders its base as the full artwork and ships
 `.Color` **without** `.Mono`. Which variants a mark ships follows its source;
 `.Text`/`.Combine` exist mainly on the lobehub AI marks.
 
