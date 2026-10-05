@@ -10,13 +10,13 @@ export function evaluateExpression(expr: string): number | null {
   if (!/^[\d\s.+\-*/()]+$/.test(trimmed)) return null;
   try {
     let pos = 0;
-    const peek = () => trimmed[pos];
-    const consume = (ch: string) => {
+    const peek = (): string | undefined => trimmed[pos];
+    const consume = (ch: string): void => {
       if (trimmed[pos] !== ch) throw new Error('unexpected');
       pos++;
     };
 
-    function skipWs() {
+    function skipWs(): void {
       while (pos < trimmed.length && trimmed[pos] === ' ') pos++;
     }
 
@@ -24,11 +24,7 @@ export function evaluateExpression(expr: string): number | null {
       skipWs();
       const start = pos;
       if (trimmed[pos] === '-' || trimmed[pos] === '+') pos++;
-      while (
-        pos < trimmed.length &&
-        ((trimmed[pos] >= '0' && trimmed[pos] <= '9') || trimmed[pos] === '.')
-      )
-        pos++;
+      while (pos < trimmed.length && ((trimmed[pos] >= '0' && trimmed[pos] <= '9') || trimmed[pos] === '.')) pos++;
       if (pos === start) throw new Error('expected number');
       return Number(trimmed.slice(start, pos));
     }

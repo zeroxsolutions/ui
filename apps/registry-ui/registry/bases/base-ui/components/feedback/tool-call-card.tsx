@@ -157,7 +157,7 @@ function ToolCallCardStatus({ className, children, ...props }: ComponentProps<'s
     (icon: ClockIconHandle | CircleCheckIconHandle | null) => {
       if (!icon || !triggerIcons) return;
       triggerIcons.current.add(icon);
-      return () => {
+      return (): void => {
         triggerIcons.current.delete(icon);
       };
     },

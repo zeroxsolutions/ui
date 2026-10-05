@@ -56,11 +56,11 @@ function TagInput({ value, onValueChange, disabled = false, className, ...props 
     () => ({
       value,
       disabled,
-      add: (tag) => {
+      add: (tag): void => {
         const trimmed = tag.trim();
         if (trimmed && !value.includes(trimmed)) onValueChange([...value, trimmed]);
       },
-      remove: (tag) => onValueChange(value.filter((t) => t !== tag)),
+      remove: (tag): void => onValueChange(value.filter((t) => t !== tag)),
     }),
     [value, disabled, onValueChange],
   );
@@ -168,7 +168,7 @@ function TagInputInput({
   const { value, disabled, add, remove } = useTagInput();
   const [draft, setDraft] = React.useState('');
 
-  const commit = () => {
+  const commit = (): void => {
     add(draft);
     setDraft('');
   };

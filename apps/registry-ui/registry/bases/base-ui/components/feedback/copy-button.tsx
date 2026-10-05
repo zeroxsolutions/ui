@@ -52,7 +52,7 @@ function CopyButton({
   // The copy and the check icons expose the same handle; whichever is showing holds the ref.
   const iconRef = React.useRef<CopyIconHandle>(null);
 
-  React.useEffect(() => () => clearTimeout(timer.current), []);
+  React.useEffect(() => (): void => clearTimeout(timer.current), []);
 
   const copy = React.useCallback(() => {
     if (!navigator?.clipboard?.writeText) return;
@@ -64,7 +64,9 @@ function CopyButton({
         timer.current = setTimeout(() => setCopied(false), timeout);
         onCopied?.(value);
       })
-      .catch(() => {});
+      .catch(() => {
+        // A refused write leaves the button uncopied, which is all the caller sees of it.
+      });
   }, [value, timeout, onCopied]);
 
   return (

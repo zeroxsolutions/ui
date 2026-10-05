@@ -42,7 +42,7 @@ export const CODE_TOKEN_VARS = [
   '--code-link',
 ] as const;
 
-const v = (name: (typeof CODE_TOKEN_VARS)[number]) => `var(${name})`;
+const v = (name: (typeof CODE_TOKEN_VARS)[number]): string => `var(${name})`;
 
 export const codeTheme: ThemeRegistrationRaw = {
   name: CODE_THEME_NAME,
@@ -60,12 +60,7 @@ export const codeTheme: ThemeRegistrationRaw = {
 
     // Comments — muted + italic.
     {
-      scope: [
-        'comment',
-        'punctuation.definition.comment',
-        'string.comment',
-        'comment.block.documentation',
-      ],
+      scope: ['comment', 'punctuation.definition.comment', 'string.comment', 'comment.block.documentation'],
       settings: { foreground: v('--code-comment'), fontStyle: 'italic' },
     },
 
@@ -105,23 +100,13 @@ export const codeTheme: ThemeRegistrationRaw = {
 
     // Strings.
     {
-      scope: [
-        'string',
-        'string.quoted',
-        'string.template',
-        'string.unquoted',
-        'punctuation.definition.string',
-      ],
+      scope: ['string', 'string.quoted', 'string.template', 'string.unquoted', 'punctuation.definition.string'],
       settings: { foreground: v('--code-string') },
     },
 
     // Escapes / interpolation punctuation inside strings.
     {
-      scope: [
-        'constant.character.escape',
-        'constant.other.placeholder',
-        'punctuation.definition.template-expression',
-      ],
+      scope: ['constant.character.escape', 'constant.other.placeholder', 'punctuation.definition.template-expression'],
       settings: { foreground: v('--code-string-escape') },
     },
 
@@ -207,11 +192,7 @@ export const codeTheme: ThemeRegistrationRaw = {
 
     // Markup / HTML / JSX tags.
     {
-      scope: [
-        'entity.name.tag',
-        'punctuation.definition.tag',
-        'support.class.component',
-      ],
+      scope: ['entity.name.tag', 'punctuation.definition.tag', 'support.class.component'],
       settings: { foreground: v('--code-tag') },
     },
 
@@ -239,11 +220,7 @@ export const codeTheme: ThemeRegistrationRaw = {
     { scope: ['markup.bold'], settings: { fontStyle: 'bold' } },
     { scope: ['markup.italic'], settings: { fontStyle: 'italic' } },
     {
-      scope: [
-        'markup.underline.link',
-        'string.other.link',
-        'constant.other.reference.link',
-      ],
+      scope: ['markup.underline.link', 'string.other.link', 'constant.other.reference.link'],
       settings: { foreground: v('--code-link') },
     },
   ],

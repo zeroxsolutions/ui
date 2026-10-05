@@ -243,7 +243,7 @@ function AvatarPickerUploadContent({
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => setImage(String(reader.result));
+    reader.onload = (): void => setImage(String(reader.result));
     reader.readAsDataURL(file);
   };
 

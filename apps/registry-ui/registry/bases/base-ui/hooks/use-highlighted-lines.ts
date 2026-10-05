@@ -25,7 +25,7 @@ function useHighlightedLines(code: string, language: string | undefined): Highli
       .then((result) => {
         if (active) setLines(result);
       });
-    return () => {
+    return (): void => {
       active = false;
     };
   }, [code, language]);
