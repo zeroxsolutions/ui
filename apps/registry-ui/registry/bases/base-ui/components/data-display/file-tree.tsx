@@ -65,7 +65,7 @@ function fileTreeHandleKeyDown(event: React.KeyboardEvent, ctx: FileTreeContextV
   const current = (event.target as HTMLElement).closest<HTMLLIElement>('[role="treeitem"]');
   const index = current ? items.indexOf(current) : -1;
 
-  const focus = (el: HTMLLIElement | undefined) => {
+  const focus = (el: HTMLLIElement | undefined): void => {
     if (!el) return;
     el.focus();
     if (el.dataset.value) ctx.setActiveValue(el.dataset.value);

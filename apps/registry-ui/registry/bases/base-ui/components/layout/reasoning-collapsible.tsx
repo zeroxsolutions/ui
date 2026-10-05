@@ -68,7 +68,7 @@ function ReasoningCollapsible({
         setIsOpen(false);
         autoClosedRef.current = true;
       }, AUTO_CLOSE_DELAY);
-      return () => clearTimeout(t);
+      return (): void => clearTimeout(t);
     }
     return undefined;
   }, [streaming, isOpen]);

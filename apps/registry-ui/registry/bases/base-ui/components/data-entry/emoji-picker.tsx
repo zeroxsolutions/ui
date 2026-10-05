@@ -85,7 +85,7 @@ function emojiPickerRows(
 ): { rows: EmojiPickerRow[]; headerIndices: number[] } {
   const rows: EmojiPickerRow[] = [];
   const headerIndices: number[] = [];
-  const pushCells = (emojis: EmojiDatum[], keyBase: string) => {
+  const pushCells = (emojis: EmojiDatum[], keyBase: string): void => {
     for (let i = 0; i < emojis.length; i += COLUMNS) {
       rows.push({
         type: 'cells',
@@ -401,14 +401,14 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
   // Let the sibling nav jump to a category by scrolling to its header offset.
   React.useEffect(() => {
     scrollerRef.current = {
-      scrollToIndex: (index) => {
+      scrollToIndex: (index): void => {
         const y = offsetsRef.current[index] ?? 0;
         const vp = viewportRef.current;
         if (vp) vp.scrollTop = y;
         setScrollTop(y);
       },
     };
-    return () => {
+    return (): void => {
       scrollerRef.current = null;
     };
   }, [scrollerRef]);
@@ -422,7 +422,7 @@ function EmojiPickerContent({ className, children, size = 'md', ...props }: Emoj
   // The visible window (+ overscan), found over the fixed offsets.
   const top = scrollTop - overscanPx;
   const bottom = scrollTop + viewportHeight + overscanPx;
-  const rowHeight = (i: number) => (rows[i].type === 'header' ? headerPx : cellRowPx);
+  const rowHeight = (i: number): number => (rows[i].type === 'header' ? headerPx : cellRowPx);
   let start = 0;
   while (start < rows.length && offsets[start] + rowHeight(start) < top) start++;
   let end = start;

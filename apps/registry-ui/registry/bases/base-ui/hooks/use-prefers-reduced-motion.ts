@@ -17,7 +17,7 @@ function usePrefersReducedMotion(): boolean {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
     const onChange = (): void => setPrefersReducedMotion(query.matches);
     query.addEventListener('change', onChange);
-    return () => query.removeEventListener('change', onChange);
+    return (): void => query.removeEventListener('change', onChange);
   }, []);
 
   return prefersReducedMotion;

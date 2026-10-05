@@ -47,7 +47,7 @@ export function useCommandShortcut({
 
   React.useEffect(() => {
     if (!enabled) return;
-    const onKeyDown = (event: KeyboardEvent) => {
+    const onKeyDown = (event: KeyboardEvent): void => {
       const modPressed = mod ? event.metaKey || event.ctrlKey : true;
       if (ignoreEditable && isEditable(event.target)) return;
       if (modPressed && event.key.toLowerCase() === key.toLowerCase()) {
@@ -56,6 +56,6 @@ export function useCommandShortcut({
       }
     };
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
+    return (): void => document.removeEventListener('keydown', onKeyDown);
   }, [key, mod, enabled, ignoreEditable]);
 }

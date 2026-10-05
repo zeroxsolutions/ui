@@ -39,7 +39,7 @@ function usePasswordInput(): PasswordInputContextValue {
  */
 function PasswordInput({ className, ...props }: React.ComponentProps<typeof InputGroup>): React.ReactNode {
   const [visible, setVisible] = React.useState(false);
-  const context = React.useMemo(() => ({ visible, toggle: () => setVisible((current) => !current) }), [visible]);
+  const context = React.useMemo(() => ({ visible, toggle: (): void => setVisible((current) => !current) }), [visible]);
   return (
     <PasswordInputContext.Provider value={context}>
       <InputGroup
