@@ -6,8 +6,15 @@ import type { IconProps } from './internal/types';
 const TITLE = 'Google Play';
 const COLOR_PRIMARY = '#414141';
 
-const Color: FC<IconProps> = ({ size = '1em', ...props }) => (
-  <svg height={size} viewBox="0 0 256 283" width={size} xmlns="http://www.w3.org/2000/svg" {...props}>
+const Color: FC<IconProps> = ({ size = '1em', style, ...props }) => (
+  <svg
+    height={size}
+    style={{ flex: 'none', lineHeight: 1, ...style }}
+    viewBox="0 0 256 283"
+    width={size}
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
     <title>{TITLE}</title>
     <path
       d="M119.553141,134.916362 L1.0599006,259.060547 C3.75619448,268.616998 10.7182836,276.3906 19.9208658,280.119977 C29.1234481,283.849353 39.5331235,283.115716 48.121672,278.132484 L181.448642,202.197919 L119.553141,134.916362 Z"
