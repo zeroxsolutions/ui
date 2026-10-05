@@ -1,3 +1,18 @@
+## 0.1.1 (2026-10-05)
+
+### 🚀 Features
+
+- **icons:** add the apple and google-play brand marks ([#17](https://github.com/zeroxsolutions/ui/issues/17))
+
+### 🩹 Fixes
+
+- **icons:** keep the google-play mark from shrinking in a flex row ([04a373d5](https://github.com/zeroxsolutions/ui/commit/04a373d5))
+
+### ❤️ Thank You
+
+- Claude Opus 5.5
+- luongvantuit
+
 ## 0.1.0 (2026-09-28)
 
 ### 🚀 Features
