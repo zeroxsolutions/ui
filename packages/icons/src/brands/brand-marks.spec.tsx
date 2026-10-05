@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { GithubMark } from './github-mark';
+import { GooglePlayMark } from './google-play';
 
 /**
  * Glob-driven smoke test over the whole `brands/` set (mirrors `material.spec.tsx`).
@@ -19,10 +20,7 @@ type IconComponent = ComponentType<{ size?: string | number }> & {
   Combine?: ComponentType<Record<string, unknown>>;
 };
 
-const modules = import.meta.glob('./*.tsx', { eager: true }) as Record<
-  string,
-  Record<string, unknown>
->;
+const modules = import.meta.glob('./*.tsx', { eager: true }) as Record<string, Record<string, unknown>>;
 
 const marks = Object.entries(modules)
   .filter(([path]) => !path.endsWith('.spec.tsx'))
@@ -71,22 +69,25 @@ describe('brands mark set', () => {
   });
 
   it('GithubMark renders a currentColor svg and forwards arbitrary props', () => {
-    const { container } = render(
-      <GithubMark className="size-4" data-testid="gh" aria-label="GitHub" />,
-    );
+    const { container } = render(<GithubMark className="size-4" data-testid="gh" aria-label="GitHub" />);
     const svg = container.querySelector('svg');
     expect(svg?.getAttribute('fill')).toBe('currentColor');
     expect(svg?.classList.contains('size-4')).toBe(true);
     expect(svg?.getAttribute('data-testid')).toBe('gh');
   });
 
+  it('GooglePlayMark keeps its size in a flex row and keeps a style it is given', () => {
+    const { container } = render(<GooglePlayMark style={{ opacity: 0.5 }} />);
+    const svg = container.querySelector('svg');
+    expect(svg?.style.flex).toBe('0 0 auto');
+    expect(svg?.style.opacity).toBe('0.5');
+  });
+
   it('no two different marks share an internal svg id', () => {
     const ids: string[] = [];
     for (const { Component } of marks) {
       const { container, unmount } = render(<Component />);
-      container
-        .querySelectorAll('[id]')
-        .forEach((el) => ids.push((el as Element).id));
+      container.querySelectorAll('[id]').forEach((el) => ids.push((el as Element).id));
       unmount();
     }
     expect(new Set(ids).size).toBe(ids.length);
