@@ -1,3 +1,5 @@
+'use client';
+
 import { memo, type CSSProperties, type FC } from 'react';
 
 import { BrandMark } from './brand-mark';
@@ -26,9 +28,10 @@ export interface AiProviderIconProps {
 
 const DEFAULT_SIZE = 24;
 
-/** Neutral placeholder rendered when a provider key resolves to no mark. */
-const DefaultMark: FC<{ size?: number; className?: string; style?: CSSProperties }> = ({
+/** Neutral placeholder rendered when a provider key resolves to no mark; named as BrandMark is. */
+const DefaultMark: FC<{ size?: number; label?: string; className?: string; style?: CSSProperties }> = ({
   size = '1em',
+  label,
   style,
   ...rest
 }) => (
@@ -39,9 +42,9 @@ const DefaultMark: FC<{ size?: number; className?: string; style?: CSSProperties
     viewBox="0 0 24 24"
     width={size}
     xmlns="http://www.w3.org/2000/svg"
+    {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     {...rest}
   >
-    <title>AI provider</title>
     <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
   </svg>
 );
@@ -66,7 +69,7 @@ function AiProviderIconBase({
   const mark = resolveAiProviderMark(provider, extra);
 
   if (!mark) {
-    return <DefaultMark size={size} className={className} style={style} />;
+    return <DefaultMark size={size} label={label} className={className} style={style} />;
   }
 
   return (

@@ -10,7 +10,7 @@
 # checksum at a time". One client option fixed that case; rclone absorbs the class upstream.
 set -euo pipefail
 
-# Both missing values fail late and misleadingly (measured 2026-08-22): with no endpoint
+# Both missing values fail late and misleadingly: with no endpoint
 # rclone reaches AWS and returns 403, which reads as a bad credential; with no bucket the
 # destination is bare `:s3:` and it returns `input member Key must not be empty`.
 # ICONS_BUCKET is this package's own name for its bucket, `<CONCERN>_BUCKET` as a

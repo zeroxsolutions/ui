@@ -9,7 +9,7 @@ import dts from 'vite-plugin-dts';
 const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf8'));
 
 // Externalize React and every declared dep (incl. deep imports like
-// `lucide-react/icons`) so the consuming app dedupes a single instance —
+// `lucide-react/icons`) so the consuming app dedupes a single instance -
 // nothing third-party is inlined.
 const external = [
   'react',
@@ -20,7 +20,7 @@ const external = [
 ].map((name) => new RegExp(`^${name}(/.*)?$`));
 
 // One entry per source file, keyed by its `src`-relative path (minus extension)
-// → `dist/<category>/<name>.js`, public as
+// -> `dist/<category>/<name>.js`, public as
 // `@zeroxsolutions/icons/<category>/<name>`. Per-file entries give real
 // tree-shaking (a heavy inline SVG never lands in a bundle that only imports
 // another). Path keys are inherently unique, so a category folder is a real
@@ -31,7 +31,7 @@ for (const file of glob.sync('src/**/*.{ts,tsx}', {
   // src/lib/ holds what the public entries bundle; a file there is not a subpath.
   ignore: ['src/lib/**', 'src/index.ts', 'src/**/*.{test,spec}.{ts,tsx}', 'src/**/*.stories.{ts,tsx}', 'src/**/*.d.ts'],
 })) {
-  // `file` is posix, e.g. `src/material/react.tsx` → key `material/react`.
+  // `file` is posix, e.g. `src/material/react.tsx` -> key `material/react`.
   const name = file.replace(/^src\//, '').replace(/\.(ts|tsx)$/, '');
   entries[name] = resolve(import.meta.dirname, file);
 }

@@ -13,6 +13,10 @@ const NEXT: Record<BrandMarkVariant, BrandMarkVariant | undefined> = {
   mono: undefined,
 };
 
+// Widened so a name missing from the manifest (runtime data cast to BrandMarkName) reads as a mark
+// with no files, falling to the letter, instead of throwing on an undefined entry.
+const MARKS: Readonly<Record<string, Partial<Record<BrandMarkVariant, number>>>> = BRAND_MARKS;
+
 let configuredBase: string | undefined;
 let configuredStyle: BrandMarkVariant | undefined;
 
@@ -33,7 +37,7 @@ export function getBrandMarkStyle(): BrandMarkVariant {
 
 /** `variant` and the variants after it, in fallback order, keeping only those `name` has a file for. */
 export function brandMarkChain(name: BrandMarkName, variant: BrandMarkVariant): BrandMarkVariant[] {
-  const has = BRAND_MARKS[name] as Partial<Record<BrandMarkVariant, number>>;
+  const has = MARKS[name] ?? {};
   const chain: BrandMarkVariant[] = [];
   for (let v: BrandMarkVariant | undefined = variant; v; v = NEXT[v]) if (v in has) chain.push(v);
   return chain;
@@ -41,7 +45,7 @@ export function brandMarkChain(name: BrandMarkName, variant: BrandMarkVariant): 
 
 /** Width over height of `name`'s `variant` file; 1 where it has none. */
 export function brandMarkRatio(name: BrandMarkName, variant: BrandMarkVariant): number {
-  return (BRAND_MARKS[name] as Partial<Record<BrandMarkVariant, number>>)[variant] ?? 1;
+  return (MARKS[name] ?? {})[variant] ?? 1;
 }
 
 /** The URL of `name`'s `variant` file on `base`, the module base, or the default, in that order. */
@@ -56,5 +60,5 @@ export function brandMarkUrl(
   options: { variant?: BrandMarkVariant; base?: string } = {},
 ): string | undefined {
   const variant = options.variant ?? getBrandMarkStyle();
-  return variant in BRAND_MARKS[name] ? brandMarkUrlFor(name, variant, options.base) : undefined;
+  return variant in (MARKS[name] ?? {}) ? brandMarkUrlFor(name, variant, options.base) : undefined;
 }

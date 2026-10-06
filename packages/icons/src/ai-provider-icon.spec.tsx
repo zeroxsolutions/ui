@@ -2,10 +2,10 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { AiProviderIcon } from './ai-provider-icon';
+import { BRAND_MARKS } from './lib/brand-manifest';
 
 afterEach(cleanup);
 
-const titleOf = (container: HTMLElement) => container.querySelector('title')?.textContent;
 const markOf = () => screen.getByRole('img', { name: 'Provider' });
 const urlOf = () => markOf().getAttribute('src') ?? markOf().style.maskImage;
 
@@ -48,19 +48,25 @@ describe('AiProviderIcon', () => {
     expect(markOf().style.borderRadius).toBe('50%');
   });
 
-  it('applies a numeric size to an icon variant', () => {
+  it('applies a numeric size to an icon variant, the width following the file ratio', () => {
     render(<AiProviderIcon provider="openai" type="mono" size={32} label="Provider" />);
     expect(markOf().style.height).toBe('32px');
+    expect(markOf().style.width).toBe(`${32 * BRAND_MARKS.openai.mono}px`);
+    cleanup();
+    render(<AiProviderIcon provider="openai" type="combine" size={32} label="Provider" />);
+    expect(markOf().style.width).toBe(`${32 * BRAND_MARKS.openai.combine}px`);
   });
 
-  it('renders a neutral fallback for an unknown provider key', () => {
+  it('renders a neutral fallback for an unknown provider key, hidden without a label', () => {
     const { container } = render(<AiProviderIcon provider="does-not-exist" />);
-    expect(container.querySelector('svg')).toBeTruthy();
-    expect(titleOf(container)).toBe('AI provider');
+    expect(container.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    expect(container.querySelector('title')).toBeNull();
+    expect(screen.queryByRole('img')).toBeNull();
   });
 
-  it('does not throw for an unknown key', () => {
-    expect(() => render(<AiProviderIcon provider="totally-unknown-provider" />)).not.toThrow();
+  it('names the fallback for an unknown key by its label', () => {
+    render(<AiProviderIcon provider="totally-unknown-provider" label="Provider" />);
+    expect(markOf().tagName.toLowerCase()).toBe('svg');
   });
 
   it('resolves an app-supplied extra mapping', () => {

@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it } from 'vitest';
 
+import type { BrandMarkName } from './brand-manifest';
 import {
   brandMarkChain,
   brandMarkUrl,
@@ -33,6 +34,10 @@ describe('brandMarkUrl', () => {
   it('answers undefined for a variant the mark has no file for', () => {
     // google-play ships no combine file; <BrandMark> falls back, brandMarkUrl reports.
     expect(brandMarkUrl('google-play', { variant: 'combine' })).toBeUndefined();
+  });
+
+  it('answers undefined for a name the manifest does not list', () => {
+    expect(brandMarkUrl('no-such-brand' as BrandMarkName)).toBeUndefined();
   });
 });
 

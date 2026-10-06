@@ -8,6 +8,7 @@ import {
   setBrandMarkBase,
   setBrandMarkStyle,
   useBrandMarkStyle,
+  type BrandMarkName,
 } from './brand-mark';
 
 afterEach(() => {
@@ -101,6 +102,13 @@ describe('BrandMark', () => {
     rerender(<BrandMark name="claude" variant="mono" label="Mark" />);
     rerender(<BrandMark name="openai" variant="mono" label="Mark" />);
     expect(mark().dataset.variant).toBe('mono');
+  });
+
+  it('draws the first letter for a name the manifest does not list', () => {
+    // Runtime data cast to BrandMarkName can name a brand with no files at all.
+    render(<BrandMark name={'no-such-brand' as BrandMarkName} label="Mark" />);
+    expect(mark().textContent).toBe('N');
+    expect(mark().dataset.variant).toBe('letter');
   });
 
   it('treats an image already broken when it mounts as failed', () => {

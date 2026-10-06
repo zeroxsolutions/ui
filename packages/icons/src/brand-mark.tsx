@@ -92,6 +92,7 @@ export function BrandMark({
         className={className}
         style={{
           alignItems: 'center',
+          backgroundColor: 'color-mix(in srgb, currentColor 12%, transparent)',
           borderRadius: '50%',
           display: 'inline-flex',
           flex: 'none',
@@ -126,12 +127,25 @@ export function BrandMark({
           maskPosition: 'center',
           maskRepeat: 'no-repeat',
           maskSize: 'contain',
+          WebkitMaskImage: `url("${src}")`,
+          WebkitMaskPosition: 'center',
+          WebkitMaskRepeat: 'no-repeat',
+          WebkitMaskSize: 'contain',
           ...style,
         }}
         {...named}
       >
-        {/* A mask has no load or error event; this probe of the same URL reports a failure. */}
-        <img ref={probe} data-testid="brand-mark-probe" src={src} alt="" hidden onError={fail} />
+        {/* A mask has no load or error event; this probe of the same URL reports a failure. A mask is
+            fetched in CORS mode, so the probe is too: it fails exactly when the mask would. */}
+        <img
+          ref={probe}
+          data-testid="brand-mark-probe"
+          src={src}
+          crossOrigin="anonymous"
+          alt=""
+          hidden
+          onError={fail}
+        />
       </span>
     );
   }
