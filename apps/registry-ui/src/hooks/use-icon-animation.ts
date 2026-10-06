@@ -1,6 +1,6 @@
 import { useRef, type RefObject } from 'react';
 
-/** What an animated icon from lucide-animated exposes through its ref. */
+/** What one of the registry's animated icons exposes through its ref. */
 interface AnimatedIconHandle {
   startAnimation: () => void;
   stopAnimation: () => void;

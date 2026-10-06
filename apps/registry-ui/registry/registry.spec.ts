@@ -292,9 +292,7 @@ function demoProblems(items: RegistryItem[]): string[] {
 
 describe('registry.json', () => {
   it('names no lucide-animated item', () => {
-    const named = REGISTRY.items.filter((item) =>
-      (item.registryDependencies ?? []).some((dependency) => dependency.includes('lucide-animated.com')),
-    );
+    const named = REGISTRY.items.filter((item) => JSON.stringify(item).includes('lucide-animated.com'));
     expect(named.map((item) => item.name)).toEqual([]);
   });
 

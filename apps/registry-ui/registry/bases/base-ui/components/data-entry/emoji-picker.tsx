@@ -16,8 +16,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**
- * The nav's glyph per category: animated where `@lucide-animated` draws it, a still lucide glyph where it does not.
- * Every `@lucide-animated` icon shares `ClockIcon`'s props and ref handle.
+ * The nav's glyph per category: animated where the registry's animated icons draw it, a still lucide glyph where they do not.
+ * Every animated icon shares `ClockIcon`'s props and ref handle.
  */
 const CATEGORY_ICONS: Record<string, { animated: typeof ClockIcon } | { still: LucideIcon }> = {
   frequent: { animated: ClockIcon },
