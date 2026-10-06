@@ -49,7 +49,10 @@ maps a provider key to a `BrandMarkName` and renders `<BrandMark>`. `material/` 
 | `color`   | `<img src="<base>/color/<name>.svg">`                                                                                                    |
 | `combine` | `<img src="<base>/combine/<name>.svg">`, the mark with its wordmark                                                                      |
 | `mono`    | `<span>` whose `mask-image` is `<base>/mono/<name>.svg` over `background-color: currentColor`, so it takes the text colour and the theme |
-| `avatar`  | a round `<span>` filled with the manifest's `colorPrimary`, the `mono` mask inside it in white                                           |
+| `avatar`  | `<img src="<base>/avatar/<name>.svg">`, rounded by `border-radius` per `shape`                                                           |
+
+`shape` (`'circle' | 'square'`, default `'circle'`) applies to `avatar` alone, so one file serves the
+round and the square avatar `AiProviderIcon` already offers.
 
 An `<img>` cannot take `currentColor`, which is why `mono` is a mask. A mask gives no load or error
 event, so a `mono` mark also renders a hidden `<img>` of the same URL whose `onError` drives the
@@ -58,7 +61,7 @@ fallback below; the browser fetches the file once.
 ### When a variant is missing or fails
 
 The manifest says which variants a mark has, so a missing one is resolved before any request:
-`combine` falls to `color`, `color` falls to `mono`, `avatar` is always composed from `mono`. A file
+`combine` and `avatar` fall to `color`, and `color` falls to `mono`. A file
 the manifest lists that fails to load falls the same way, after the attempt. When `mono` itself
 fails, the mark renders the first letter of its name in a round `<span>`, so nothing is ever blank.
 
@@ -70,12 +73,16 @@ component also treats an `<img>` that is `complete` with a `naturalWidth` of 0 a
 ### One conversion, then files are the source
 
 `packages/icons/tools/export-brand-svgs.mts` runs once. It renders every component's `Base`,
-`.Color`, `.Mono` and `.Combine` with `renderToStaticMarkup` to
+`.Color`, `.Mono`, `.Combine` and `.Avatar` with `renderToStaticMarkup` to
 `packages/icons/assets/brands/<variant>/<name>.svg`:
 
 - `Base` goes to `mono` where the mark has no `.Mono`, and to `color` where it has no `.Color` and
   its base is the full-colour artwork (`microsoft-teams`, `outlook`, `onedrive`, `monday`,
   `google-play`).
+- `.Avatar` renders as an HTML `<span>` around the mark, so the script draws it as SVG instead: a
+  square filled with that avatar's own `background` (a colour or a gradient), the mark's `mono` paths
+  in its `color`, scaled by its `iconMultiple` and centred. Each avatar keeps the parameters its
+  `makeAvatar` call holds today; 191 marks have one, and the 10 without fall to `color`.
 - `.Text` is dropped: `AiProviderIcon` never draws it and no caller imports it.
 - `<title>` is stripped; the name is `<BrandMark>`'s to give.
 - An id `useId` generated becomes a fixed one, which is safe because each file is its own document.
@@ -88,12 +95,11 @@ itself. From then on a brand is added by adding its files.
 
 `brand-manifest` (`nx:run-commands`, `node tools/build-brand-manifest.mts`, output
 `{projectRoot}/src/lib/brand-manifest.ts`) reads `assets/brands/` and writes, for every name, the
-variants it has, its `colorPrimary` and its aspect ratio. It mirrors fluent-emoji's `emoji-manifest`.
+variants it has and its aspect ratio, read from each file's `viewBox`. It mirrors fluent-emoji's `emoji-manifest`.
 The generated file is never edited by hand, and `BrandMarkName` is derived from it.
 
-`colorPrimary` comes from each component's `colorPrimary` during the conversion, written into
-`tools/brand-colors.json`, which the manifest reads; a new brand adds its colour there. It sits outside
-`assets/` so the upload does not publish it.
+No colour is kept beside the files. A logo's colours are in its `color` file and an avatar's in its
+`avatar` file, so `colorPrimary`, a single colour no multi-colour logo fits, goes away.
 
 The manifest lives under `src/lib/`, and the entry glob in `vite.config.mts` gains `src/lib/**` among
 its ignores. Every other file under `src/` is a public subpath, so without that line the generated
@@ -191,7 +197,7 @@ In `packages/icons`, in jsdom as the package's other specs are:
   which globs the components that no longer exist.
 - **`<BrandMark>` draws each variant** as the table above says: the `<img>` and its URL for `color`
   and `combine`; for `mono`, a `mask-image` naming the `mono` URL and a `currentColor` background; for
-  `avatar`, the `colorPrimary` fill.
+  `avatar`, the `<img>` and a `border-radius` per `shape`.
 - **A missing variant falls back with no request**: a mark with no `combine` renders its `color` URL.
 - **A failed file falls back**: an `error` on the `color` image renders the `mono` mask, and an
   `error` on the `mono` probe renders the letter. This is the same seam fluent-emoji's
