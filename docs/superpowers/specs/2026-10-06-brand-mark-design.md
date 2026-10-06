@@ -39,7 +39,7 @@ import { BrandMark, BrandMarkStyleProvider, setBrandMarkBase } from '@zeroxsolut
   no file for that variant, for callers outside React.
 
 Removed, a breaking change: every `@zeroxsolutions/icons/brands/<name>` subpath and the components it
-exported, and `brands/internal/*`. `AiProviderIcon` keeps its props and its `type` values; inside, it
+exported, and `brands/internal/*`. `AiProviderIcon` keeps its props and its `type` values and gains `label`, passed to `<BrandMark>`; inside, it
 maps a provider key to a `BrandMarkName` and renders `<BrandMark>`. `material/` does not change.
 
 ## How each variant draws
@@ -81,8 +81,8 @@ component also treats an `<img>` that is `complete` with a `naturalWidth` of 0 a
   its base is the full-colour artwork (`microsoft-teams`, `outlook`, `onedrive`, `monday`,
   `google-play`).
 - `.Avatar` renders as an HTML `<span>` around the mark, so the script draws it as SVG instead: a
-  square filled with that avatar's own `background` (a colour or a gradient), the mark's `mono` paths
-  in its `color`, scaled by its `iconMultiple` and centred. Each avatar keeps the parameters its
+  square filled with that avatar's own `background` (a colour or a gradient), the glyph its `makeAvatar`
+  call draws today in its `color`, scaled by its `iconMultiple` and centred. Each avatar keeps the parameters its
   `makeAvatar` call holds today; 191 marks have one, and the 10 without fall to `color`.
 - `.Combine` is today an HTML `<span>` holding the mark and the brand's name typed as text in the
   page's font, which a file opened as an image cannot load. The script draws `combine` as SVG
@@ -203,8 +203,8 @@ In `packages/icons`, in jsdom as the package's other specs are:
 - **The manifest and the files agree**: every name and variant in `brand-manifest.ts` has its file
   under `assets/brands/`, and every file is in the manifest. This replaces `brand-marks.spec.tsx`,
   which globs the components that no longer exist.
-- **`<BrandMark>` draws each variant** as the table above says: the `<img>` and its URL for `color`
-  and `combine`; for `mono`, a `mask-image` naming the `mono` URL and a `currentColor` background; for
+- **`<BrandMark>` draws each variant** as the table above says: the `<img>` and its URL for `color`;
+  for `mono` and `combine`, a `mask-image` naming that variant's URL and a `currentColor` background; for
   `avatar`, the `<img>` and a `border-radius` per `shape`.
 - **A missing variant falls back with no request**: a mark with no `combine` renders its `color` URL.
 - **A failed file falls back**: an `error` on the `color` image renders the `mono` mask, and an

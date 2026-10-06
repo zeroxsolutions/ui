@@ -29,36 +29,36 @@
 1. **A recycled instance**: the same `<BrandMark>` re-rendered with a different `name` after its first file failed must try the new mark's files from the top of its chain, not stay on the letter. Pinned in Task 4.
 2. **A non-square mark at a CSS-length size**: `size="1.25rem"` on a mark whose ratio is 3.2 must be `1.25rem` tall and `calc(1.25rem * 3.2)` wide, not square. Pinned in Task 4.
 3. **A base with a trailing slash**: `setBrandMarkBase('/brand-marks/')` must not produce `//color/...`. Pinned in Task 3.
-4. **A failure before hydration**: an `<img>` that is already `complete` with `naturalWidth` 0 when the component mounts must fall back. Pinned in Task 4.
+4. **A failure before hydration, and a success that looks like one**: an `<img>` already `complete` with `naturalWidth` 0 at mount must fall back (pinned in Task 4), and a file that loaded must not look like that, which an svg without `width`/`height` does in Firefox (every file carries its size, pinned in Task 2 Step 4).
 5. **The registry page before the CDN serves files**: the e2e suite must not depend on `icons.zeroxsolutions.com`; it serves the files from the package itself. Pinned in Task 7.
 
 ---
 
 ## File Structure
 
-| Path (under `packages/icons/` unless noted)                       | Responsibility                                                                        |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `tools/export-brand-svgs.mts`                                     | One-time: renders `dist/brands/*.js` to `assets/brands/`. Deleted in Task 6.          |
-| `assets/brands/{color,mono,avatar,combine}/<name>.svg`            | The artwork, the source of truth after Task 6.                                        |
-| `tools/build-brand-manifest.mts`                                  | Writes `src/lib/brand-manifest.ts` from `assets/brands/`.                             |
-| `src/lib/brand-manifest.ts`                                       | Generated: per name, the variants it has and each one's width/height ratio.           |
-| `src/lib/brand-manifest.spec.ts`                                  | The manifest and the files agree.                                                     |
-| `src/lib/brand-mark-url.ts`                                       | Variant type, base and style defaults, fallback chain, `brandMarkUrl`.                |
-| `src/lib/brand-mark-url.spec.ts`                                  | URL and chain resolution.                                                             |
-| `src/lib/brand-mark-style-provider.tsx`                           | `BrandMarkStyleProvider`, `useBrandMarkStyle`, `useAmbientBrandMarkStyle`.            |
-| `src/brand-mark.tsx`                                              | `<BrandMark>`; re-exports the public names of the two `lib` modules.                  |
-| `src/brand-mark.spec.tsx`                                         | Drawing, fallback, naming, ambient style and base.                                    |
-| `src/ai-provider-mappings.ts`                                     | Provider keys to `BrandMarkName`.                                                     |
-| `src/ai-provider-icon.tsx` (+ `.spec.tsx`)                        | Same props, renders `<BrandMark>`.                                                    |
-| `vite.config.mts`                                                 | Ignore `src/lib/**` and `src/brands/**` as entries; copy `assets/` to `dist/assets/`. |
-| `tools/rclone-sync.sh`                                            | Upload `assets/` to `ICONS_BUCKET`.                                                   |
-| `package.json`                                                    | `nx.targets`: `brand-manifest`, `rclone:sync`.                                        |
-| `README.md`                                                       | Brand section rewritten for `<BrandMark>`.                                            |
-| `packages/fluent-emoji/tools/rclone-sync.sh`                      | Reads `FLUENT_EMOJI_BUCKET`.                                                          |
-| `.github/workflows/cd.yml`                                        | `rclone-sync` step passes both bucket variables.                                      |
-| `apps/registry-ui/registry/bases/base-ui/examples/icons-demo.tsx` | Demo on `<BrandMark>`.                                                                |
-| `apps/registry-ui/content/docs/packages/icons.mdx`                | Docs on `<BrandMark>`.                                                                |
-| `apps/registry-ui-e2e/src/icons.spec.ts`                          | A `mono` mark draws as a mask in a real browser.                                      |
+| Path (under `packages/icons/` unless noted)                       | Responsibility                                                               |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `tools/export-brand-svgs.mts`                                     | One-time: renders `dist/brands/*.js` to `assets/brands/`. Deleted in Task 6. |
+| `assets/brands/{color,mono,avatar,combine}/<name>.svg`            | The artwork, the source of truth after Task 6.                               |
+| `tools/build-brand-manifest.mts`                                  | Writes `src/lib/brand-manifest.ts` from `assets/brands/`.                    |
+| `src/lib/brand-manifest.ts`                                       | Generated: per name, the variants it has and each one's width/height ratio.  |
+| `src/lib/brand-manifest.spec.ts`                                  | The manifest and the files agree.                                            |
+| `src/lib/brand-mark-url.ts`                                       | Variant type, base and style defaults, fallback chain, `brandMarkUrl`.       |
+| `src/lib/brand-mark-url.spec.ts`                                  | URL and chain resolution.                                                    |
+| `src/lib/brand-mark-style-provider.tsx`                           | `BrandMarkStyleProvider`, `useBrandMarkStyle`, `useAmbientBrandMarkStyle`.   |
+| `src/brand-mark.tsx`                                              | `<BrandMark>`; re-exports the public names of the two `lib` modules.         |
+| `src/brand-mark.spec.tsx`                                         | Drawing, fallback, naming, ambient style and base.                           |
+| `src/ai-provider-mappings.ts`                                     | Provider keys to `BrandMarkName`.                                            |
+| `src/ai-provider-icon.tsx` (+ `.spec.tsx`)                        | Same props, renders `<BrandMark>`.                                           |
+| `vite.config.mts`                                                 | Ignore `src/lib/**` as entries; copy `assets/` to `dist/assets/`.            |
+| `tools/rclone-sync.sh`                                            | Upload `assets/` to `ICONS_BUCKET`.                                          |
+| `package.json`                                                    | `nx.targets`: `brand-manifest`, `rclone:sync`.                               |
+| `README.md`                                                       | Brand section rewritten for `<BrandMark>`.                                   |
+| `packages/fluent-emoji/tools/rclone-sync.sh`                      | Reads `FLUENT_EMOJI_BUCKET`.                                                 |
+| `.github/workflows/cd.yml`                                        | `rclone-sync` step passes both bucket variables.                             |
+| `apps/registry-ui/registry/bases/base-ui/examples/icons-demo.tsx` | Demo on `<BrandMark>`.                                                       |
+| `apps/registry-ui/content/docs/packages/icons.mdx`                | Docs on `<BrandMark>`.                                                       |
+| `apps/registry-ui-e2e/src/icons.spec.ts`                          | A `mono` mark draws as a mask in a real browser.                             |
 
 ---
 
@@ -97,7 +97,7 @@ and change the comment above it that reads "The bucket name is a `var`" to "Each
 
 - [ ] **Step 3: Check nothing else reads the old name**
 
-Run: `grep -rn "S3_BUCKET" --include='*.sh' --include='*.yml' --include='*.md' . | grep -v node_modules | grep -v RCLONE_S3`
+Run: `grep -rn "S3_BUCKET" --include='*.sh' --include='*.yml' --include='*.md' . | grep -v node_modules | grep -v RCLONE_S3 | grep -v docs/superpowers/`
 Expected: no output.
 
 - [ ] **Step 4: Commit**
@@ -168,21 +168,6 @@ type Mark = ComponentType<Record<string, unknown>> & {
 const render = (C: ComponentType<Record<string, unknown>>, props: Record<string, unknown> = {}) =>
   renderToStaticMarkup(createElement(C, props));
 
-/** Strips what an image file must not carry: the title, inline styles, the size, React's id prefixes. */
-function clean(svg: string, name: string): string {
-  let out = svg
-    .replace(/<title>[^<]*<\/title>/g, '')
-    .replace(/\sstyle="[^"]*"/g, '')
-    .replace(/^<svg([^>]*?)\s(?:width|height)="[^"]*"/, '<svg$1')
-    .replace(/^<svg([^>]*?)\s(?:width|height)="[^"]*"/, '<svg$1');
-  const ids = [...out.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
-  ids.forEach((id, i) => {
-    const fixed = `${name}-${i}`;
-    out = out.split(`id="${id}"`).join(`id="${fixed}"`).split(`#${id}`).join(`#${fixed}`);
-  });
-  return out;
-}
-
 const viewBoxOf = (svg: string): [number, number, number, number] => {
   const m = svg.match(/viewBox="([^"]+)"/);
   if (!m) throw new Error('svg without a viewBox');
@@ -192,9 +177,35 @@ const viewBoxOf = (svg: string): [number, number, number, number] => {
     .map(Number) as [number, number, number, number];
 };
 
+/**
+ * Makes a component's markup a standalone image file: no title, no root inline style, the root's
+ * size set to its viewBox (an <img> of an svg with no width/height reports naturalWidth 0 in
+ * Firefox, which BrandMark reads as a failed load), an xmlns, and React's ids made fixed.
+ */
+function clean(svg: string, name: string): string {
+  const [, , w, h] = viewBoxOf(svg);
+  let out = svg
+    .replace(/<title>[^<]*<\/title>/g, '')
+    .replace(/^<svg([^>]*?)\sstyle="[^"]*"/, '<svg$1')
+    .replace(/^<svg([^>]*?)\s(?:width|height)="[^"]*"/, '<svg$1')
+    .replace(/^<svg([^>]*?)\s(?:width|height)="[^"]*"/, '<svg$1')
+    .replace(/^<svg/, `<svg width="${w}" height="${h}"`);
+  if (!/^<svg[^>]*\sxmlns=/.test(out)) out = out.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+  const ids = [...out.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+  ids.forEach((id, i) => {
+    const fixed = `${name}-${i}`;
+    out = out.split(`id="${id}"`).join(`id="${fixed}"`).split(`#${id}`).join(`#${fixed}`);
+  });
+  return out;
+}
+
 /** Places an <svg> at x,y,w,h inside another, with `color` set so its currentColor resolves. */
 const place = (svg: string, x: number, y: number, w: number, h: number, color: string) =>
-  svg.replace(/^<svg/, `<svg x="${x}" y="${y}" width="${w}" height="${h}" color="${color}"`);
+  svg
+    .replace(/^<svg([^>]*?)\s(?:width|height|color)="[^"]*"/, '<svg$1')
+    .replace(/^<svg([^>]*?)\s(?:width|height|color)="[^"]*"/, '<svg$1')
+    .replace(/^<svg([^>]*?)\s(?:width|height|color)="[^"]*"/, '<svg$1')
+    .replace(/^<svg/, `<svg x="${x}" y="${y}" width="${w}" height="${h}" color="${color}"`);
 
 /** A CSS linear-gradient as an SVG <linearGradient> over the object's box. */
 function gradient(css: string, id: string): string {
@@ -250,7 +261,7 @@ for (const file of readdirSync(DIST)
     write(
       'avatar',
       name,
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${defs}<rect width="100" height="100" fill="${fill}"/>${place(glyph, o, o, icon, icon, color)}</svg>`,
+      `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">${defs}<rect width="100" height="100" fill="${fill}"/>${place(glyph, o, o, icon, icon, color)}</svg>`,
     );
   }
 
@@ -267,7 +278,7 @@ for (const file of readdirSync(DIST)
     write(
       'combine',
       name,
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} 100">${place(mono, 0, 0, iconWidth, 100, '#000')}${place(text, iconWidth + gap, (100 - textHeight) / 2, textWidth, textHeight, '#000')}</svg>`,
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="100" viewBox="0 0 ${width} 100">${place(mono, 0, 0, iconWidth, 100, '#000')}${place(text, iconWidth + gap, (100 - textHeight) / 2, textWidth, textHeight, '#000')}</svg>`,
     );
   }
 }
@@ -291,6 +302,20 @@ const fs=require('fs');const d='packages/icons/assets/brands';
 const rows=['color','mono','avatar','combine'].map(v=>'<h2>'+v+'</h2><div>'+fs.readdirSync(d+'/'+v).map(f=>'<img title=\"'+f+'\" style=\"height:32px;margin:4px;background:#eee\" src=\"'+process.cwd()+'/'+d+'/'+v+'/'+f+'\">').join('')+'</div>');
 fs.writeFileSync(process.argv[1],'<body>'+rows.join('')+'</body>');" "$SHEET"
 ```
+
+Then check every file parses as XML and carries a size (a duplicate attribute or a missing xmlns renders as a broken image):
+
+```bash
+node -e "
+const fs=require('fs');const {JSDOM}=require('jsdom');const d='packages/icons/assets/brands';let bad=0;
+for(const v of fs.readdirSync(d))for(const f of fs.readdirSync(d+'/'+v)){
+  const doc=new JSDOM(fs.readFileSync(d+'/'+v+'/'+f,'utf8'),{contentType:'image/svg+xml'}).window.document;
+  const r=doc.documentElement;
+  if(r.nodeName!=='svg'||!r.getAttribute('width')||!r.getAttribute('height')){bad++;console.log(v+'/'+f)}}
+console.log('bad:',bad)"
+```
+
+Expected: `bad: 0` (a file that fails to parse has a `parsererror` root and is listed). Run it from `packages/icons` with `NODE_PATH=node_modules` if `jsdom` does not resolve from the root.
 
 Open `$SHEET` in a browser (or screenshot it with Playwright) and check: no blank tile, `mono` tiles are black silhouettes, `avatar` tiles are filled squares with the mark centred (the six gradient avatars `lmstudio`, `minimax`, `meta`, `sora`, `stability-ai`, `stable-diffusion` show a gradient), `combine` tiles show the mark then the brand's wordmark at roughly two thirds of its height. Fix the script and re-run Step 3 for anything off.
 
@@ -482,11 +507,9 @@ describe('brandMarkUrl', () => {
     expect(brandMarkUrl('facebook')).toBe('/brand-marks/color/facebook.svg');
   });
 
-  it('resolves a missing variant to the next one the mark has, before any request', () => {
-    // google-play ships no combine and no mono: combine -> color.
-    expect(brandMarkUrl('google-play', { variant: 'combine' })).toBe(
-      `${DEFAULT_BRAND_MARK_BASE}/color/google-play.svg`,
-    );
+  it('answers undefined for a variant the mark has no file for', () => {
+    // google-play ships no combine file; <BrandMark> falls back, brandMarkUrl reports.
+    expect(brandMarkUrl('google-play', { variant: 'combine' })).toBeUndefined();
   });
 });
 
@@ -566,13 +589,13 @@ export function brandMarkUrlFor(name: BrandMarkName, variant: BrandMarkVariant, 
   return `${root}/${variant}/${name}.svg`;
 }
 
-/** Resolves `name` to the URL `<BrandMark>` would load first, for callers outside React. */
+/** The URL of `name`'s file for `variant`, or `undefined` where it has none, for callers outside React. */
 export function brandMarkUrl(
   name: BrandMarkName,
   options: { variant?: BrandMarkVariant; base?: string } = {},
 ): string | undefined {
-  const [first] = brandMarkChain(name, options.variant ?? getBrandMarkStyle());
-  return first && brandMarkUrlFor(name, first, options.base);
+  const variant = options.variant ?? getBrandMarkStyle();
+  return variant in BRAND_MARKS[name] ? brandMarkUrlFor(name, variant, options.base) : undefined;
 }
 ```
 
@@ -650,11 +673,19 @@ git add -- "${P[@]}" && git commit -F "$MSG" -- "${P[@]}"
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { BrandMark, BrandMarkStyleProvider, DEFAULT_BRAND_MARK_BASE, setBrandMarkBase } from './brand-mark';
+import {
+  BrandMark,
+  BrandMarkStyleProvider,
+  DEFAULT_BRAND_MARK_BASE,
+  setBrandMarkBase,
+  setBrandMarkStyle,
+} from './brand-mark';
 
 afterEach(() => {
   cleanup();
   setBrandMarkBase(undefined);
+  // The provider writes the module default, as FluentEmojiStyleProvider does.
+  setBrandMarkStyle(undefined);
   vi.restoreAllMocks();
 });
 
@@ -674,7 +705,7 @@ describe('BrandMark', () => {
     render(<BrandMark name="openai" variant="mono" label="Mark" />);
     expect(mark().tagName).toBe('SPAN');
     expect(mark().style.maskImage).toBe(`url("${B}/mono/openai.svg")`);
-    expect(mark().style.backgroundColor).toBe('currentcolor');
+    expect(mark().style.backgroundColor).toBe('currentColor');
   });
 
   it('draws combine as a mask of the combine file', () => {
@@ -832,9 +863,11 @@ export function useAmbientBrandMarkStyle(): BrandMarkVariant | undefined {
 
 - [ ] **Step 3: Write the component**
 
-`packages/icons/src/brand-mark.tsx`:
+`packages/icons/src/brand-mark.tsx` (it holds state and effects, so a Next.js server component that renders it needs the client directive):
 
 ```tsx
+'use client';
+
 import * as React from 'react';
 import type { CSSProperties } from 'react';
 
@@ -987,10 +1020,13 @@ export function BrandMark({
 }
 ```
 
-- [ ] **Step 4: Run the spec**
+- [ ] **Step 4: Run the spec, and check the directive survives the build**
+
+Run: `pnpm nx build @zeroxsolutions/icons --skip-nx-cache && head -1 packages/icons/dist/brand-mark.js`
+Expected: `'use client';` (or `"use client";`). If the bundler dropped it, add to `rolldownOptions.output` a `banner: (chunk) => (chunk.name === 'brand-mark' ? "'use client';" : '')` and rebuild.
 
 Run: `pnpm nx test @zeroxsolutions/icons -- src/brand-mark.spec.tsx`
-Expected: PASS (13 tests). If jsdom reports `maskImage` empty, it does not know the unprefixed property: set both `maskImage` and `WebkitMaskImage` (and the other three) in the style object and assert on whichever jsdom keeps; the browser check is Task 7's.
+Expected: PASS (13 tests). jsdom keeps `mask-image` and `currentColor` as set (checked against the installed jsdom); the browser check is Task 7's.
 
 - [ ] **Step 5: Commit**
 
@@ -1038,7 +1074,7 @@ const urlOf = () => markOf().getAttribute('src') ?? markOf().style.maskImage;
 - `matches the provider key case-insensitively`: both `urlOf` values contain `/anthropic.svg` and are equal.
 - `resolves an aliased key (claude-code -> Claude)`: `urlOf` contains `/claude.svg`.
 - `renders the color variant for a mark that ships one`: `markOf().dataset.variant` is `'color'` for `gemini`.
-- `renders the mono variant following currentColor`: `markOf().style.backgroundColor` is `'currentcolor'`.
+- `renders the mono variant following currentColor`: `markOf().style.backgroundColor` is `'currentColor'`.
 - `wraps the mark in a rounded container for the avatar variant`: rename to `draws the avatar file, round`; `dataset.variant` is `'avatar'` and `style.borderRadius` is `'50%'`.
 - `applies a numeric size to an icon variant`: `style.height` is `'32px'`.
 - The two unknown-key cases keep asserting the fallback `<svg>` with `<title>AI provider</title>`; that placeholder stays an inline SVG.
@@ -1079,10 +1115,12 @@ return (
 
 with `import { BrandMark } from './brand-mark';`, and add to `AiProviderIconProps`:
 
-````tsx
+```tsx
   /** Accessible name, passed to `<BrandMark>`; omit it where text beside the icon names the provider. */
   label?: string;
-``` Update the docblock: it "renders the provider's mark through `<BrandMark>`, which falls back along its own chain; an unknown key draws a neutral placeholder".
+```
+
+Update the docblock: it "renders the provider's mark through `<BrandMark>`, which falls back along its own chain; an unknown key draws a neutral placeholder".
 
 - [ ] **Step 4: Run the package's tests**
 
@@ -1105,7 +1143,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 EOF
 P=(packages/icons/src/ai-provider-mappings.ts packages/icons/src/ai-provider-icon.tsx packages/icons/src/ai-provider-icon.spec.tsx)
 git add -- "${P[@]}" && git commit -F "$MSG" -- "${P[@]}"
-````
+```
 
 ---
 
@@ -1118,6 +1156,7 @@ git add -- "${P[@]}" && git commit -F "$MSG" -- "${P[@]}"
 - Create: `packages/icons/tools/rclone-sync.sh`
 - Modify: `packages/icons/package.json` (`nx.targets.rclone:sync`)
 - Modify: `packages/icons/README.md`
+- Modify: `packages/icons/vite.config.mts` (comment)
 
 **Interfaces:**
 
@@ -1146,19 +1185,23 @@ git rm -rq packages/icons/src/brands packages/icons/tools/export-brand-svgs.mts
 }
 ```
 
-Run: `cd packages/icons && env -u ICONS_BUCKET ./tools/rclone-sync.sh; echo $?`
+Run: `cd packages/icons && env -i PATH="$PATH" ./tools/rclone-sync.sh; echo $?`
 Expected: `rclone.config.missing: RCLONE_S3_ENDPOINT RCLONE_S3_ACCESS_KEY_ID RCLONE_S3_SECRET_ACCESS_KEY ICONS_BUCKET` and `1` (the guard fires before rclone runs).
 
-- [ ] **Step 4: Rewrite the README's brand section**
+- [ ] **Step 4: Bring the entry-glob comment in `vite.config.mts` up to date**
+
+Its comment still names `brands/deepgram` and `brands/react`. Replace the example paths with `material/react` and `brand-mark`, and the sentence about `brands/react` and `material/react` coexisting with: "Path keys are inherently unique, so a category folder is a real subpath, not a discarded label." Add `packages/icons/vite.config.mts` to this task's `git add`.
+
+- [ ] **Step 5: Rewrite the README's brand section**
 
 In `packages/icons/README.md`, replace the opening example's brand lines, the "Component pattern" section and the `### brands/` section with: the `<BrandMark>` example from the spec's "What changes for a caller"; a variants table (`color`, `mono`, `avatar`, `combine`, and how each draws); the fallback chain; "Serving the artwork" (the CDN default, `setBrandMarkBase` for self-hosting from `dist/assets/brands`, the `v2/` rule for re-sourced artwork); "Adding a brand" (add its files under `assets/brands/<variant>/`, run `nx brand-manifest @zeroxsolutions/icons`, commit both). Keep the sources table and the attribution section; keep `material/` as it is. Every example in it must use only names exported by `src/brand-mark.tsx`.
 
-- [ ] **Step 5: Run the whole package gate**
+- [ ] **Step 6: Run the whole package gate**
 
 Run: `pnpm nx run-many -t lint typecheck build test -p @zeroxsolutions/icons --skip-nx-cache 2>&1 | tail -3`
 Expected: `Successfully ran targets lint, typecheck, build, test for project @zeroxsolutions/icons`. `ls packages/icons/dist` shows `ai-provider-icon.js ai-provider-mappings.js assets brand-mark.js material` and no `brands`.
 
-- [ ] **Step 6: Commit (breaking)**
+- [ ] **Step 7: Commit (breaking)**
 
 ```bash
 MSG=$(mktemp)
@@ -1178,8 +1221,8 @@ Refs: #24
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 EOF
-git add -- packages/icons/tools/rclone-sync.sh packages/icons/package.json packages/icons/README.md
-git diff --cached --name-status   # only the deletions under src/brands/ and tools/, and these three files
+git add -- packages/icons/tools/rclone-sync.sh packages/icons/package.json packages/icons/README.md packages/icons/vite.config.mts
+git diff --cached --name-status   # only the deletions under src/brands/ and tools/, and these four files
 git commit -F "$MSG"
 ```
 
@@ -1262,6 +1305,9 @@ Expected: PASS.
 
 Run: `pnpm nx run-many -t lint typecheck build test -p @zeroxsolutions/registry-ui --skip-nx-cache 2>&1 | tail -3`
 Expected: `Successfully ran targets lint, typecheck, build, test for project @zeroxsolutions/registry-ui`.
+
+Run: `pnpm nx e2e @zeroxsolutions/registry-ui-e2e --skip-nx-cache 2>&1 | tail -3`
+Expected: every spec passes; the spec asks the rest of the suite to stay green.
 
 - [ ] **Step 5: Commit**
 
