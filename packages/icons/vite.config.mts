@@ -1,14 +1,12 @@
 /// <reference types='vitest' />
 import react from '@vitejs/plugin-react';
 import { glob } from 'glob';
-import { readFileSync } from 'node:fs';
+import { cpSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
-const pkg = JSON.parse(
-  readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf8'),
-);
+const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf8'));
 
 // Externalize React and every declared dep (incl. deep imports like
 // `lucide-react/icons`) so the consuming app dedupes a single instance —
@@ -31,12 +29,8 @@ const external = [
 const entries: Record<string, string> = {};
 for (const file of glob.sync('src/**/*.{ts,tsx}', {
   cwd: import.meta.dirname,
-  ignore: [
-    'src/index.ts',
-    'src/**/*.{test,spec}.{ts,tsx}',
-    'src/**/*.stories.{ts,tsx}',
-    'src/**/*.d.ts',
-  ],
+  // src/lib/ holds what the public entries bundle; a file there is not a subpath.
+  ignore: ['src/lib/**', 'src/index.ts', 'src/**/*.{test,spec}.{ts,tsx}', 'src/**/*.stories.{ts,tsx}', 'src/**/*.d.ts'],
 })) {
   // `file` is posix, e.g. `src/brands/deepgram.tsx` → key `brands/deepgram`.
   const name = file.replace(/^src\//, '').replace(/\.(ts|tsx)$/, '');
@@ -54,6 +48,16 @@ export default defineConfig(() => ({
       // Declarations mirror the `src/` tree under `dist/` (e.g.
       // `dist/brands/deepgram.d.ts`), matching the path-keyed `.js` output.
     }),
+    {
+      // The artwork ships as raw files: library mode would inline an imported .svg as a data URL.
+      name: 'copy-brand-assets',
+      closeBundle() {
+        cpSync(resolve(import.meta.dirname, 'assets'), resolve(import.meta.dirname, 'dist/assets'), {
+          recursive: true,
+          force: true,
+        });
+      },
+    },
   ],
   build: {
     outDir: './dist',

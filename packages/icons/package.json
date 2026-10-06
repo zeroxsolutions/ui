@@ -20,5 +20,17 @@
   },
   "devDependencies": {
     "glob": "^13.0.6"
+  },
+  "nx": {
+    "targets": {
+      "brand-manifest": {
+        "executor": "nx:run-commands",
+        "outputs": ["{projectRoot}/src/lib/brand-manifest.ts"],
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node tools/build-brand-manifest.mts"
+        }
+      }
+    }
   }
 }
