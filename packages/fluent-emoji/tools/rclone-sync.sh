@@ -10,7 +10,7 @@
 # checksum at a time". One client option fixed that case; rclone absorbs the class upstream.
 set -euo pipefail
 
-# Both missing values fail late and misleadingly (measured 2026-08-22): with no endpoint
+# Both missing values fail late and misleadingly: with no endpoint
 # rclone reaches AWS and returns 403, which reads as a bad credential; with no bucket the
 # destination is bare `:s3:` and it returns `input member Key must not be empty`.
 # S3_BUCKET keeps a house name because rclone reads no variable for it: the bucket is the
@@ -32,7 +32,7 @@ fi
 # source would empty the bucket. Removing an object stays a deliberate manual step.
 #
 # `--checksum` compares MD5 instead of modification time. A checkout writes fresh mtimes,
-# so without it every run re-uploads all 9217 files.
+# so without it every run re-uploads every file.
 #
 # Keys are `<style>/<codepoint>.<ext>` at the bucket root and are not content-hashed, so
 # artwork re-sourced under the same key serves stale for the year the header below allows.
