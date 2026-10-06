@@ -33,7 +33,7 @@ fi
 # source would empty the bucket. Removing an object stays a deliberate manual step.
 #
 # `--checksum` compares MD5 instead of modification time. A checkout writes fresh mtimes,
-# so without it every run re-uploads all of the roughly 640 files.
+# so without it every run re-uploads every file.
 #
 # Keys are `brands/<variant>/<name>.svg` at the bucket root and are not content-hashed, so
 # artwork re-sourced under the same key serves stale for the year the header below allows.
