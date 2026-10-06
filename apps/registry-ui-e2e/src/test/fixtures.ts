@@ -16,7 +16,12 @@ export const test = base.extend<{ brandArtwork: void }>({
         const file = resolve(assets, new URL(route.request().url()).pathname.replace(/^\/brands\//, ''));
         if (!file.startsWith(assets + sep)) return route.fulfill({ status: 404 });
         try {
-          return route.fulfill({ contentType: 'image/svg+xml', body: readFileSync(file) });
+          // The CDN's own CORS header: a mask-image is fetched in CORS mode and is dropped without it.
+          return route.fulfill({
+            contentType: 'image/svg+xml',
+            headers: { 'access-control-allow-origin': '*' },
+            body: readFileSync(file),
+          });
         } catch (error) {
           if ((error as NodeJS.ErrnoException).code === 'ENOENT') return route.fulfill({ status: 404 });
           throw error;
