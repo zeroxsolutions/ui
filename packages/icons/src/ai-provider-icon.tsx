@@ -1,7 +1,6 @@
 import { memo, type CSSProperties, type FC } from 'react';
 
-import { makeAvatar } from './brands/internal/avatar';
-import type { IconProps } from './brands/internal/types';
+import { BrandMark } from './brand-mark';
 import { resolveAiProviderMark, type AiProviderMapping } from './ai-provider-mappings';
 
 /** Which visual form of the resolved brand mark to render. */
@@ -19,6 +18,8 @@ export interface AiProviderIconProps {
   shape?: 'circle' | 'square';
   /** Extra mappings checked before the built-in registry (app-specific keys). */
   extra?: AiProviderMapping[];
+  /** Accessible name, passed to `<BrandMark>`; omit it where text beside the icon names the provider. */
+  label?: string;
   className?: string;
   style?: CSSProperties;
 }
@@ -26,7 +27,11 @@ export interface AiProviderIconProps {
 const DEFAULT_SIZE = 24;
 
 /** Neutral placeholder rendered when a provider key resolves to no mark. */
-const DefaultMark: FC<IconProps> = ({ size = '1em', style, ...rest }) => (
+const DefaultMark: FC<{ size?: number; className?: string; style?: CSSProperties }> = ({
+  size = '1em',
+  style,
+  ...rest
+}) => (
   <svg
     fill="currentColor"
     height={size}
@@ -43,10 +48,9 @@ const DefaultMark: FC<IconProps> = ({ size = '1em', style, ...rest }) => (
 
 /**
  * Render an AI provider's brand logo from a provider key. Resolves the key to a
- * vendored `@zeroxsolutions/icons` mark and renders the requested `type`
- * variant, degrading to the base mark when a variant is absent, and to a
- * neutral placeholder when the key matches nothing. Suitable for the brand
- * mark inside an `AiProviderCard`'s `CardTitle`.
+ * brand mark name and renders it through `<BrandMark>`, which falls back along
+ * its own chain; an unknown key draws a neutral placeholder. Suitable for the
+ * brand mark inside an `AiProviderCard`'s `CardTitle`.
  * @example <AiProviderIcon provider="openai" type="avatar" size={32} />
  */
 function AiProviderIconBase({
@@ -55,6 +59,7 @@ function AiProviderIconBase({
   type = 'color',
   shape = 'circle',
   extra,
+  label,
   className,
   style,
 }: AiProviderIconProps) {
@@ -64,21 +69,9 @@ function AiProviderIconBase({
     return <DefaultMark size={size} className={className} style={style} />;
   }
 
-  if (type === 'avatar') {
-    const Avatar =
-      mark.Avatar ??
-      makeAvatar((mark.Mono ?? mark) as FC<IconProps>, {
-        background: mark.colorPrimary ?? 'var(--primary)',
-      });
-    return <Avatar size={size} shape={shape} className={className} style={style} />;
-  }
-
-  if (type === 'combine' && mark.Combine) {
-    return <mark.Combine size={size} className={className} style={style} />;
-  }
-
-  const Icon = type === 'color' ? (mark.Color ?? mark.Mono ?? mark) : (mark.Mono ?? mark);
-  return <Icon size={size} className={className} style={style} />;
+  return (
+    <BrandMark name={mark} variant={type} size={size} shape={shape} label={label} className={className} style={style} />
+  );
 }
 
 /** Memoized AI provider logo resolver. See {@link AiProviderIconProps}. */
