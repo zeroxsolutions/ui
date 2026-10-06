@@ -1,4 +1,6 @@
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+
+import { expect, test } from './test/fixtures';
 
 // WebKit and Firefox under Playwright do not grant clipboard-write permission the way Chromium does,
 // so the real API is replaced with one that records what it was called with on `window`.

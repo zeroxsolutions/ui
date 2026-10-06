@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test/fixtures';
 
 test('/sitemap.xml lists the pages at the registry host', async ({ request }) => {
   const response = await request.get('/sitemap.xml');

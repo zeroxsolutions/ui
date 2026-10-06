@@ -8,7 +8,8 @@
     "./*": {
       "types": "./dist/*.d.ts",
       "import": "./dist/*.js"
-    }
+    },
+    "./lib/*": null
   },
   "files": [
     "dist",
@@ -20,5 +21,24 @@
   },
   "devDependencies": {
     "glob": "^13.0.6"
+  },
+  "nx": {
+    "targets": {
+      "brand-manifest": {
+        "executor": "nx:run-commands",
+        "outputs": ["{projectRoot}/src/lib/brand-manifest.ts"],
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node tools/build-brand-manifest.mts"
+        }
+      },
+      "rclone:sync": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "./tools/rclone-sync.sh"
+        }
+      }
+    }
   }
 }

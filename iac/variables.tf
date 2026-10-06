@@ -44,15 +44,15 @@ variable "cloudflare_r2_buckets" {
 }
 
 variable "cloudflare_r2_custom_domains" {
-  type = list(object({
+  type = map(object({
     bucket    = string
     domain    = string
     zone_name = string
     min_tls   = optional(string, "1.2")
     enabled   = optional(bool, true)
   }))
-  description = "Public custom domains attached to R2 buckets. `bucket` is a logical name that must also appear in cloudflare_r2_buckets; `zone_name` is the Cloudflare zone the hostname belongs to. The Cloudflare API provisions the proxied CNAME itself, so no cloudflare_dns_records entry is needed."
-  default     = []
+  description = "Map of logical key => public custom domain attached to an R2 bucket. Key each entry by its hostname: tf-modules v1 keyed the resource by domain, so that key keeps an existing domain's state address. `bucket` is a logical name that must also appear in cloudflare_r2_buckets; `zone_name` is the Cloudflare zone the hostname belongs to. The Cloudflare API provisions the proxied CNAME itself, so no cloudflare_dns_records entry is needed."
+  default     = {}
 }
 
 variable "cloudflare_queues" {
@@ -68,7 +68,7 @@ variable "cloudflare_kv_namespaces" {
 }
 
 variable "cloudflare_dns_records" {
-  type = list(object({
+  type = map(object({
     zone_id = string
     type    = string
     content = string
@@ -77,18 +77,31 @@ variable "cloudflare_dns_records" {
     comment = optional(string, null)
     proxied = optional(bool, true)
   }))
-  description = "DNS records to create"
-  default     = []
+  description = "Map of logical key => DNS record to create"
+  default     = {}
 }
 
 variable "cloudflare_d1_databases" {
-  type = list(object({
-    name                  = string
+  type = map(object({
     jurisdiction          = optional(string, null)
     primary_location_hint = optional(string, null)
+    read_replication_mode = optional(string, "disabled")
   }))
-  description = "D1 databases to create"
-  default     = []
+  description = "Map of logical name => D1 database to create, prefixed with project+workspace at creation"
+  default     = {}
+}
+
+variable "cloudflare_r2_bucket_cors_rules" {
+  type = map(list(object({
+    id              = optional(string)
+    allowed_origins = list(string)
+    allowed_methods = list(string)
+    allowed_headers = optional(list(string))
+    expose_headers  = optional(list(string))
+    max_age_seconds = optional(number)
+  })))
+  description = "Map of logical bucket name => CORS rules. A bucket a browser fetches from in CORS mode (a CSS mask-image, a font, a fetch()) needs one, or the browser drops the response."
+  default     = {}
 }
 
 variable "cloudflare_pages_projects" {

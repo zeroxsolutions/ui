@@ -1,6 +1,4 @@
-import { ClaudeMark } from '@zeroxsolutions/icons/brands/claude';
-import { GeminiMark } from '@zeroxsolutions/icons/brands/gemini';
-import { OpenaiMark } from '@zeroxsolutions/icons/brands/openai';
+import { BrandMark } from '@zeroxsolutions/icons/brand-mark';
 import { TypescriptIcon } from '@zeroxsolutions/icons/material/typescript';
 import type { ReactNode } from 'react';
 
@@ -12,29 +10,29 @@ function IconsDemo(): ReactNode {
     <ItemGroup className="w-full max-w-sm">
       <Item>
         <ItemMedia>
-          <OpenaiMark size={24} />
+          <BrandMark name="openai" variant="mono" size={24} label="OpenAI" />
         </ItemMedia>
         <ItemContent>
-          <ItemTitle>OpenAI, the base mark</ItemTitle>
-          <ItemDescription>{'<OpenaiMark size={24} />'}</ItemDescription>
+          <ItemTitle>OpenAI, in the text colour</ItemTitle>
+          <ItemDescription>{'<BrandMark name="openai" variant="mono" size={24} label="OpenAI" />'}</ItemDescription>
         </ItemContent>
       </Item>
       <Item>
         <ItemMedia>
-          <GeminiMark.Color size={24} />
+          <BrandMark name="gemini" size={24} />
         </ItemMedia>
         <ItemContent>
-          <ItemTitle>Gemini, in colour</ItemTitle>
-          <ItemDescription>{'<GeminiMark.Color size={24} />'}</ItemDescription>
+          <ItemTitle>Gemini, in its own colours</ItemTitle>
+          <ItemDescription>{'<BrandMark name="gemini" size={24} />'}</ItemDescription>
         </ItemContent>
       </Item>
       <Item>
         <ItemMedia>
-          <ClaudeMark.Avatar size={24} />
+          <BrandMark name="claude" variant="avatar" size={24} />
         </ItemMedia>
         <ItemContent>
           <ItemTitle>Claude, as an avatar</ItemTitle>
-          <ItemDescription>{'<ClaudeMark.Avatar size={24} />'}</ItemDescription>
+          <ItemDescription>{'<BrandMark name="claude" variant="avatar" size={24} />'}</ItemDescription>
         </ItemContent>
       </Item>
       <Item>

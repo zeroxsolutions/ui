@@ -69,7 +69,7 @@ jobs:
       # The key is Object Read & Write scoped to the one bucket; an Admin token cannot be
       # bucket-scoped and would carry account-wide R2 write.
       #
-      # The bucket name is a `var`: it grants no access, and reads plainly in the run. The
+      # Each bucket name is a `var`: it grants no access, and reads plainly in the run. The
       # endpoint is a secret although it grants none either, because it carries the account id
       # and this repository's run logs are public.
       - name: Sync to R2
@@ -78,5 +78,6 @@ jobs:
           RCLONE_S3_ENDPOINT: ${{ secrets.RCLONE_S3_ENDPOINT }}
           RCLONE_S3_ACCESS_KEY_ID: ${{ secrets.RCLONE_S3_ACCESS_KEY_ID }}
           RCLONE_S3_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_S3_SECRET_ACCESS_KEY }}
-          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          FLUENT_EMOJI_BUCKET: ${{ vars.FLUENT_EMOJI_BUCKET }}
+          ICONS_BUCKET: ${{ vars.ICONS_BUCKET }}
         run: pnpm nx run-many -t rclone:sync

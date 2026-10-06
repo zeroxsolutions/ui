@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test/fixtures';
 
 test('the command menu finds a page and goes to it', async ({ page }) => {
   await page.goto('/docs');

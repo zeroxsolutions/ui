@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test/fixtures';
 
 test('every component page renders its preview, fits a phone without a stage scrolling sideways, and throws nothing', async ({
   page,
