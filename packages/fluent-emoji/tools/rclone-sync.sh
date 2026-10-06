@@ -13,10 +13,11 @@ set -euo pipefail
 # Both missing values fail late and misleadingly (measured 2026-08-22): with no endpoint
 # rclone reaches AWS and returns 403, which reads as a bad credential; with no bucket the
 # destination is bare `:s3:` and it returns `input member Key must not be empty`.
-# S3_BUCKET keeps a house name because rclone reads no variable for it: the bucket is the
-# destination path. A wrong key passes this check and fails per object with a signature error.
+# FLUENT_EMOJI_BUCKET is this package's own name for its bucket, `<CONCERN>_BUCKET` as a
+# worker's bucket binding; rclone reads no variable for it, since the bucket is the destination
+# path. A wrong key passes this check and fails per object with a signature error.
 missing=()
-for name in RCLONE_S3_ENDPOINT RCLONE_S3_ACCESS_KEY_ID RCLONE_S3_SECRET_ACCESS_KEY S3_BUCKET; do
+for name in RCLONE_S3_ENDPOINT RCLONE_S3_ACCESS_KEY_ID RCLONE_S3_SECRET_ACCESS_KEY FLUENT_EMOJI_BUCKET; do
   [ -n "${!name:-}" ] || missing+=("$name")
 done
 if [ ${#missing[@]} -gt 0 ]; then
@@ -41,7 +42,7 @@ fi
 #
 # Stats print at INFO by default while rclone logs at NOTICE, so they need the level
 # lowered or the run is silent until it ends.
-exec rclone copy assets ":s3:${S3_BUCKET}" \
+exec rclone copy assets ":s3:${FLUENT_EMOJI_BUCKET}" \
   --s3-provider Cloudflare \
   --s3-no-check-bucket \
   --checksum \
