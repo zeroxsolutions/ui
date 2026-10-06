@@ -57,7 +57,9 @@ round and the square avatar `AiProviderIcon` already offers.
 An `<img>` cannot take `currentColor`, which is why `mono` and `combine` are masks; today's
 `.Combine` paints its name in `currentColor` too. A mask gives no load or error event, so a masked
 mark also renders a hidden `<img>` of the same URL whose `onError` drives the fallback below; the
-browser fetches the file once.
+browser fetches the file once. A `mask-image` is fetched in CORS mode, so the bucket serves
+`Access-Control-Allow-Origin`, and the probe fetches with `crossOrigin="anonymous"` so it fails exactly
+when the mask would.
 
 ### When a variant is missing or fails
 
@@ -155,23 +157,39 @@ and stay shared: the one key is granted the second bucket.
 
 These grant access or create infrastructure, so they are not CI's and not an agent's.
 
-1. Add the bucket and its domain to the production var-file `iac/production.tfvars`:
+1. This change moves the root's module to tf-modules `v2.0.1` (`v1.0.3`, the tag it pinned, no longer
+   exists). v2 takes `cloudflare_r2_custom_domains`, `cloudflare_dns_records` and
+   `cloudflare_d1_databases` as maps keyed by a logical name, so the production var-file
+   `iac/production.tfvars` takes the same shapes as `iac/production.tfvars.example`. Add the bucket,
+   its domain and its CORS rule, keying each domain by its hostname: v1 keyed the resource by domain,
+   so that key keeps the live fluent-emoji domain at its state address:
 
    ```hcl
    cloudflare_r2_buckets = ["fluent-emoji", "icons"]
 
-   cloudflare_r2_custom_domains = [
-     {
+   cloudflare_r2_custom_domains = {
+     "fluent-emoji.zeroxsolutions.com" = {
        bucket    = "fluent-emoji"
        domain    = "fluent-emoji.zeroxsolutions.com"
        zone_name = "zeroxsolutions.com"
-     },
-     {
+     }
+     "icons.zeroxsolutions.com" = {
        bucket    = "icons"
        domain    = "icons.zeroxsolutions.com"
        zone_name = "zeroxsolutions.com"
-     },
-   ]
+     }
+   }
+
+   cloudflare_r2_bucket_cors_rules = {
+     icons = [
+       {
+         id              = "public-read"
+         allowed_origins = ["*"]
+         allowed_methods = ["GET", "HEAD"]
+         max_age_seconds = 86400
+       }
+     ]
+   }
    ```
 
    then apply it:
@@ -184,7 +202,9 @@ These grant access or create infrastructure, so they are not CI's and not an age
    terraform apply production.tfplan
    ```
 
-   The plan adds one bucket and one custom domain and changes nothing else.
+   The plan must show 1 bucket, 1 custom domain and 1 CORS rule to add, and no replace of the
+   fluent-emoji domain. A replace of it means a domain key is not its hostname; fix the var-file
+   before applying.
 
 2. In the Cloudflare dashboard, R2, **Manage API tokens**, edit the token whose key is in
    `RCLONE_S3_ACCESS_KEY_ID` and add `ui-sdk-icons-production` under **Apply to specific buckets
@@ -220,7 +240,8 @@ In `packages/icons`, in jsdom as the package's other specs are:
 In `apps/registry-ui`: `icons-demo` and the package's docs page (`content/docs/packages/icons.mdx`)
 move to `<BrandMark>`. A mask is a browser fact jsdom cannot draw, so the registry's e2e suite, in a
 real browser, asserts that a `mono` mark on the icons page has the `mono` URL as its computed
-`mask-image` and a box larger than zero; the rest of the suite stays green.
+`mask-image`, a box larger than zero, and a probe that loaded (`naturalWidth` above zero), which pins
+the CORS fetch the mask depends on; the rest of the suite stays green.
 
 ## Release, in this order
 

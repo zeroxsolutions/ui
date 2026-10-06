@@ -1335,7 +1335,7 @@ git add -- "${P[@]}" && git commit -F "$MSG" -- "${P[@]}"
 
 No code. Each step waits for the one before it.
 
-- [ ] **Step 1: The human provisions the bucket and grants the key** (spec, "What a human does", steps 1 and 2). Confirm with: `curl -sI https://icons.zeroxsolutions.com/ | head -1` answering any HTTP status (the domain resolves).
+- [ ] **Step 1: The human provisions the bucket and grants the key** (spec, "What a human does", steps 1 and 2). Confirm with: `curl -sI https://icons.zeroxsolutions.com/ | head -1` answering any HTTP status (the domain resolves). The CORS rule is checked in Step 4, once an object exists to answer with it.
 - [ ] **Step 2: Push the branch; the pre-push hook runs the workspace sweep.** Open the PR with title `refactor(icons)!: serve brand marks as files behind one BrandMark` and `Closes #24` in its description. Read the CI run for the branch; it must name `@zeroxsolutions/icons`, `fluent-emoji` and `@zeroxsolutions/registry-ui` and be green.
 - [ ] **Step 3: Merge, then promote:** `git push origin master:production`. Read the `cd` run's `rclone-sync` job log for both packages' `copy` lines.
 - [ ] **Step 4: Check both hosts:**
@@ -1343,6 +1343,7 @@ No code. Each step waits for the one before it.
 ```bash
 curl -sI https://icons.zeroxsolutions.com/brands/color/facebook.svg | head -1    # HTTP/2 200
 curl -sI https://fluent-emoji.zeroxsolutions.com/3d/1f92f.webp | head -1        # HTTP/2 200
+curl -sI -H 'Origin: https://example.com' https://icons.zeroxsolutions.com/brands/mono/openai.svg | grep -i access-control-allow-origin    # access-control-allow-origin: *
 ```
 
 - [ ] **Step 5: The human removes `S3_BUCKET`** (spec, step 3).

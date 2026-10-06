@@ -14,22 +14,45 @@ cloudflare_api_key = "<global_api_key>"
 cloudflare_email   = "<account_email>"
 
 # R2 object storage - logical names, prefixed with project+workspace at creation, so
-# `fluent-emoji` becomes `ui-sdk-fluent-emoji-production`. It serves the artwork
-# committed under packages/fluent-emoji/assets.
-cloudflare_r2_buckets = ["fluent-emoji"]
+# `fluent-emoji` becomes `ui-sdk-fluent-emoji-production`. fluent-emoji serves the
+# artwork committed under packages/fluent-emoji/assets; icons serves the brand marks
+# under packages/icons/assets/brands, at the `brands/` key prefix.
+cloudflare_r2_buckets = ["fluent-emoji", "icons"]
 
-# Public hostname for the artwork bucket. One custom domain maps to exactly one bucket
-# and serves from the bucket root, so object key `3d/1f92f.webp` is reachable at
-# https://fluent-emoji.zeroxsolutions.com/3d/1f92f.webp. The Cloudflare API provisions
-# the proxied CNAME in the zone, so cloudflare_dns_records stays empty.
-cloudflare_r2_custom_domains = [
-  {
+# Public hostname per artwork bucket. One custom domain maps to exactly one bucket and
+# serves from the bucket root, so object key `3d/1f92f.webp` is reachable at
+# https://fluent-emoji.zeroxsolutions.com/3d/1f92f.webp. Each entry is keyed by its
+# hostname because tf-modules v1 keyed the resource by domain: the same key keeps the
+# live fluent-emoji domain at its state address, so moving to v2 replaces nothing. The
+# Cloudflare API provisions the proxied CNAME in the zone, so cloudflare_dns_records
+# stays empty.
+cloudflare_r2_custom_domains = {
+  "fluent-emoji.zeroxsolutions.com" = {
     bucket    = "fluent-emoji"
     domain    = "fluent-emoji.zeroxsolutions.com"
     zone_name = "zeroxsolutions.com"
   }
-]
+  "icons.zeroxsolutions.com" = {
+    bucket    = "icons"
+    domain    = "icons.zeroxsolutions.com"
+    zone_name = "zeroxsolutions.com"
+  }
+}
+
+# BrandMark draws its mono and combine variants as a CSS mask-image, and browsers fetch
+# a mask-image in CORS mode: without Access-Control-Allow-Origin on the response the
+# mask never paints. The artwork is public, so any origin may read it.
+cloudflare_r2_bucket_cors_rules = {
+  icons = [
+    {
+      id              = "public-read"
+      allowed_origins = ["*"]
+      allowed_methods = ["GET", "HEAD"]
+      max_age_seconds = 86400
+    }
+  ]
+}
 
 # Nothing else is provisioned here: this repo publishes packages and a shadcn registry,
-# so it has no queue, no D1 database, no KV namespace and no Pages project. Each of
-# these defaults to empty in variables.tf.
+# so it has no queue, no D1 database, no KV namespace, no DNS record and no Pages
+# project. Each of these defaults to empty in variables.tf.

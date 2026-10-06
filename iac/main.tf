@@ -5,7 +5,7 @@ terraform {
 }
 
 module "cloudflare" {
-  source = "git::https://github.com/zeroxsolutions/tf-modules.git//cloudflare?ref=v1.0.3"
+  source = "git::https://github.com/zeroxsolutions/tf-modules.git//cloudflare?ref=v2.0.1"
 
   project_name = var.project_name
   account_id   = var.cloudflare_account_id
@@ -21,13 +21,5 @@ module "cloudflare" {
   d1_databases      = var.cloudflare_d1_databases
   pages_projects    = var.cloudflare_pages_projects
 
-  # The module declares hyperdrive_configs without a default, so it must be passed.
-  # This root has no database layer to point one at - the Neon module that fed it
-  # belonged to a different product.
-  hyperdrive_configs = {}
-
-  # The module provisions a Realtime (Calls) SFU app unless told not to - its
-  # realtime_enabled defaults to true. This repo has no rooms feature, so the
-  # default would create ui-sdk-rooms-production for nothing.
-  realtime_enabled = false
+  r2_bucket_cors_rules = var.cloudflare_r2_bucket_cors_rules
 }
