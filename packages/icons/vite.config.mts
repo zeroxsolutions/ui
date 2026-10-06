@@ -24,15 +24,14 @@ const external = [
 // `@zeroxsolutions/icons/<category>/<name>`. Per-file entries give real
 // tree-shaking (a heavy inline SVG never lands in a bundle that only imports
 // another). Path keys are inherently unique, so a category folder is a real
-// subpath — not a discarded label — and `brands/react` and `material/react`
-// coexist without collision.
+// subpath, not a discarded label.
 const entries: Record<string, string> = {};
 for (const file of glob.sync('src/**/*.{ts,tsx}', {
   cwd: import.meta.dirname,
   // src/lib/ holds what the public entries bundle; a file there is not a subpath.
   ignore: ['src/lib/**', 'src/index.ts', 'src/**/*.{test,spec}.{ts,tsx}', 'src/**/*.stories.{ts,tsx}', 'src/**/*.d.ts'],
 })) {
-  // `file` is posix, e.g. `src/brands/deepgram.tsx` → key `brands/deepgram`.
+  // `file` is posix, e.g. `src/material/react.tsx` → key `material/react`.
   const name = file.replace(/^src\//, '').replace(/\.(ts|tsx)$/, '');
   entries[name] = resolve(import.meta.dirname, file);
 }
@@ -46,7 +45,7 @@ export default defineConfig(() => ({
       entryRoot: 'src',
       tsconfigPath: resolve(import.meta.dirname, 'tsconfig.lib.json'),
       // Declarations mirror the `src/` tree under `dist/` (e.g.
-      // `dist/brands/deepgram.d.ts`), matching the path-keyed `.js` output.
+      // `dist/brand-mark.d.ts`), matching the path-keyed `.js` output.
     }),
     {
       // The artwork ships as raw files: library mode would inline an imported .svg as a data URL.

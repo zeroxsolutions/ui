@@ -30,6 +30,13 @@
           "cwd": "{projectRoot}",
           "command": "node tools/build-brand-manifest.mts"
         }
+      },
+      "rclone:sync": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "./tools/rclone-sync.sh"
+        }
       }
     }
   }
