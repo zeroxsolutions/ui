@@ -1,6 +1,4 @@
-import { expect, test } from '@playwright/test';
-
-import { serveBrandArtwork } from './test/brand-artwork';
+import { expect, test } from './test/fixtures';
 
 test('every component page renders its preview, fits a phone without a stage scrolling sideways, and throws nothing', async ({
   page,
@@ -14,7 +12,6 @@ test('every component page renders its preview, fits a phone without a stage scr
   const components = registry.items.filter((item) => item.type === 'registry:component');
   expect(components.length).toBeGreaterThan(0);
 
-  await serveBrandArtwork(page);
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(`${page.url()}: ${error.message}`));
   page.on('console', (message) => {

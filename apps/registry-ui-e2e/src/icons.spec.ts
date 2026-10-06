@@ -1,10 +1,4 @@
-import { expect, test } from '@playwright/test';
-
-import { serveBrandArtwork } from './test/brand-artwork';
-
-test.beforeEach(async ({ page }) => {
-  await serveBrandArtwork(page);
-});
+import { expect, test } from './test/fixtures';
 
 test('the icons page draws a mono brand mark as a mask in the text colour', async ({ page }) => {
   await page.goto('/docs/packages/icons');

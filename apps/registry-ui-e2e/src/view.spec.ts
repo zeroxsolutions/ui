@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test/fixtures';
 
 test('/view/ai-provider-picker renders the block alone', async ({ page }) => {
   await page.goto('/view/ai-provider-picker');

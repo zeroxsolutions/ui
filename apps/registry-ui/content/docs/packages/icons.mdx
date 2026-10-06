@@ -52,9 +52,9 @@ How each variant draws:
 | Variant   | Element                                                                                                                  |
 | --------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `color`   | an `<img>` of `<base>/color/<name>.svg`                                                                                  |
-| `combine` | a masked `<span>`: the mark beside its wordmark, drawn as `mono` is                                                      |
 | `mono`    | a `<span>` whose `mask-image` is `<base>/mono/<name>.svg` over `currentColor`, so it takes the text colour and the theme |
 | `avatar`  | an `<img>` of `<base>/avatar/<name>.svg`, rounded per `shape`                                                            |
+| `combine` | a masked `<span>`: the mark beside its wordmark, drawn as `mono` is                                                      |
 
 `BrandMarkStyleProvider` makes the variant ambient for every `BrandMark` below it, and a call's own `variant`
 wins. `useBrandMarkStyle()` reads and sets it; outside React, `setBrandMarkStyle(variant)` sets the module

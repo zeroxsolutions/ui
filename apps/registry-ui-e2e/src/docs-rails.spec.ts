@@ -1,4 +1,6 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
+
+import { expect, test } from './test/fixtures';
 
 /** The docs page that runs longest, so its end is furthest below the rails' sticky start. */
 const LONGEST_PAGE = '/docs/blocks/ai-provider-picker';
