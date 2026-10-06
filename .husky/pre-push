@@ -1,0 +1,2 @@
+# Run from pre-commit instead, this froze the machine whenever several worktrees committed at once.
+pnpm nx run-many -t lint typecheck build test

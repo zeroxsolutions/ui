@@ -11,5 +11,3 @@ fi
 files=$(git diff --cached --name-only --diff-filter=ACMR | paste -sd, -)
 [ -z "$files" ] || pnpm nx format:write --files="$files"
 git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 -r git add
-
-pnpm nx run-many -t lint typecheck build test

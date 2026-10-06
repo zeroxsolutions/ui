@@ -1,7 +1,7 @@
 <!--
 Lint, build, test, secret-scanning and project scaffolding are already hard-gated
-by the pre-commit hook and the PreToolUse hooks - a commit that failed them could
-not exist. This template therefore asks only for what no gate can check.
+by the pre-push hook and the PreToolUse hooks - a branch that failed them could
+not be pushed. This template therefore asks only for what no gate can check.
 -->
 
 ## Change
