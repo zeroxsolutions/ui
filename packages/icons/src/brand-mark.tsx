@@ -69,6 +69,8 @@ export function BrandMark({
   const chain = brandMarkChain(name, variant ?? ambient ?? getBrandMarkStyle());
   const key = `${name}|${chain.join(',')}|${base ?? ''}`;
   const [failed, setFailed] = React.useState<{ key: string; count: number }>({ key, count: 0 });
+  // Only the current key's failures count: a key that returns starts again from the top.
+  if (failed.key !== key) setFailed({ key, count: 0 });
   const count = failed.key === key ? failed.count : 0;
   const drawn = chain[count];
   const fail = React.useCallback(() => setFailed({ key, count: count + 1 }), [key, count]);

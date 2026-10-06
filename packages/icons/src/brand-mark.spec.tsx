@@ -7,6 +7,7 @@ import {
   DEFAULT_BRAND_MARK_BASE,
   setBrandMarkBase,
   setBrandMarkStyle,
+  useBrandMarkStyle,
 } from './brand-mark';
 
 afterEach(() => {
@@ -66,6 +67,14 @@ describe('BrandMark', () => {
     expect(mark().dataset.variant).toBe('mono');
   });
 
+  it('asks for the colour file when a mark has no combine file, and never for combine', () => {
+    const { container } = render(<BrandMark name="facebook" variant="combine" label="Mark" />);
+    expect(mark().getAttribute('src')).toBe(`${B}/color/facebook.svg`);
+    const all = Array.from(container.querySelectorAll<HTMLElement>('*'));
+    expect(all.some((el) => (el.getAttribute('src') ?? '').includes('/combine/'))).toBe(false);
+    expect(all.some((el) => el.style.maskImage.includes('/combine/'))).toBe(false);
+  });
+
   it('falls to the next variant after a failed load', () => {
     render(<BrandMark name="claude" label="Mark" />);
     fireEvent.error(mark());
@@ -86,11 +95,19 @@ describe('BrandMark', () => {
     expect(mark().dataset.variant).toBe('mono');
   });
 
+  it('starts again from the top of the chain when a name comes back after another', () => {
+    const { rerender } = render(<BrandMark name="openai" variant="mono" label="Mark" />);
+    failProbe();
+    rerender(<BrandMark name="claude" variant="mono" label="Mark" />);
+    rerender(<BrandMark name="openai" variant="mono" label="Mark" />);
+    expect(mark().dataset.variant).toBe('mono');
+  });
+
   it('treats an image already broken when it mounts as failed', () => {
     vi.spyOn(HTMLImageElement.prototype, 'complete', 'get').mockReturnValue(true);
     vi.spyOn(HTMLImageElement.prototype, 'naturalWidth', 'get').mockReturnValue(0);
     render(<BrandMark name="facebook" label="Mark" />);
-    expect(mark().dataset.variant).not.toBe('color');
+    expect(mark().dataset.variant).toBe('letter');
   });
 
   it('is named by label, and left out of the accessibility tree without it', () => {
@@ -112,9 +129,35 @@ describe('BrandMark', () => {
     expect(mark('Own').dataset.variant).toBe('color');
   });
 
+  it('switches the ambient variant when a child calls setStyle, and tells onStyleChange', () => {
+    const onStyleChange = vi.fn();
+    function Switch() {
+      const { setStyle } = useBrandMarkStyle();
+      return (
+        <button type="button" onClick={() => setStyle('mono')}>
+          switch
+        </button>
+      );
+    }
+    render(
+      <BrandMarkStyleProvider onStyleChange={onStyleChange}>
+        <Switch />
+        <BrandMark name="claude" label="Ambient" />
+      </BrandMarkStyleProvider>,
+    );
+    expect(mark('Ambient').dataset.variant).toBe('color');
+    fireEvent.click(screen.getByRole('button', { name: 'switch' }));
+    expect(mark('Ambient').dataset.variant).toBe('mono');
+    expect(onStyleChange).toHaveBeenCalledTimes(1);
+    expect(onStyleChange).toHaveBeenCalledWith('mono');
+  });
+
   it('serves from the module base, and from a per-call base over it', () => {
     setBrandMarkBase('/marks');
     render(<BrandMark name="facebook" base="/other" label="Mark" />);
     expect(mark().getAttribute('src')).toBe('/other/color/facebook.svg');
+    cleanup();
+    render(<BrandMark name="facebook" label="Module" />);
+    expect(mark('Module').getAttribute('src')).toBe('/marks/color/facebook.svg');
   });
 });
