@@ -47,16 +47,17 @@ maps a provider key to a `BrandMarkName` and renders `<BrandMark>`. `material/` 
 | Variant   | Element                                                                                                                                  |
 | --------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `color`   | `<img src="<base>/color/<name>.svg">`                                                                                                    |
-| `combine` | `<img src="<base>/combine/<name>.svg">`, the mark with its wordmark                                                                      |
+| `combine` | a `<span>` masked by `<base>/combine/<name>.svg` over `currentColor`, the mark beside its wordmark, as `mono` is drawn                   |
 | `mono`    | `<span>` whose `mask-image` is `<base>/mono/<name>.svg` over `background-color: currentColor`, so it takes the text colour and the theme |
 | `avatar`  | `<img src="<base>/avatar/<name>.svg">`, rounded by `border-radius` per `shape`                                                           |
 
 `shape` (`'circle' | 'square'`, default `'circle'`) applies to `avatar` alone, so one file serves the
 round and the square avatar `AiProviderIcon` already offers.
 
-An `<img>` cannot take `currentColor`, which is why `mono` is a mask. A mask gives no load or error
-event, so a `mono` mark also renders a hidden `<img>` of the same URL whose `onError` drives the
-fallback below; the browser fetches the file once.
+An `<img>` cannot take `currentColor`, which is why `mono` and `combine` are masks; today's
+`.Combine` paints its name in `currentColor` too. A mask gives no load or error event, so a masked
+mark also renders a hidden `<img>` of the same URL whose `onError` drives the fallback below; the
+browser fetches the file once.
 
 ### When a variant is missing or fails
 
@@ -83,7 +84,14 @@ component also treats an `<img>` that is `complete` with a `naturalWidth` of 0 a
   square filled with that avatar's own `background` (a colour or a gradient), the mark's `mono` paths
   in its `color`, scaled by its `iconMultiple` and centred. Each avatar keeps the parameters its
   `makeAvatar` call holds today; 191 marks have one, and the 10 without fall to `color`.
-- `.Text` is dropped: `AiProviderIcon` never draws it and no caller imports it.
+- `.Combine` is today an HTML `<span>` holding the mark and the brand's name typed as text in the
+  page's font, which a file opened as an image cannot load. The script draws `combine` as SVG
+  instead, from the brand's own wordmark: the mark's `mono` paths, then its `.Text` paths, placed
+  with the `spaceMultiple` gap and scaled to the `textMultiple` height its `makeCombine` call holds
+  today, all filled black for the mask. 91 marks have both a `.Combine` and a `.Text`; the 4 with a
+  `.Combine` and no `.Text` get no `combine` file and fall to `color`.
+- `.Text` gets no variant of its own: no caller draws a wordmark alone, and it survives inside
+  `combine`.
 - `<title>` is stripped; the name is `<BrandMark>`'s to give.
 - An id `useId` generated becomes a fixed one, which is safe because each file is its own document.
 - A `mono` file is filled black, since a mask reads only its alpha.
