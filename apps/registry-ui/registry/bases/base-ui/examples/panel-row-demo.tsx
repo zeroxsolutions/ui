@@ -7,7 +7,7 @@ import { PanelRow, PanelRowAction } from '@/registry/bases/base-ui/components/la
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Field, FieldLabel } from '@/registry/bases/base-ui/ui/field';
 import { Input } from '@/registry/bases/base-ui/ui/input';
-import { LockIcon, type LockIconHandle } from '@/registry/bases/base-ui/ui/lock';
+import { LockIcon, type LockIconHandle } from '@/registry/bases/base-ui/icons/lock-icon';
 
 /** A two-column `PanelFieldGroup` in a `PanelRow` with a trailing lock action. */
 function PanelRowDemo(): ReactNode {

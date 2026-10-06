@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Input } from '@/registry/bases/base-ui/ui/input';
-import { XIcon, type XIconHandle } from '@/registry/bases/base-ui/ui/x';
+import { XIcon, type XIconHandle } from '@/registry/bases/base-ui/icons/x-icon';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 interface TagInputContextValue {

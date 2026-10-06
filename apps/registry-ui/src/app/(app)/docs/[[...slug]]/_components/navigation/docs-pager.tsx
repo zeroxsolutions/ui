@@ -8,8 +8,8 @@ import { useIconAnimation } from '@/hooks/use-icon-animation';
 
 import { pageNeighbours } from '@/lib/page-tree';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { ArrowLeftIcon, type ArrowLeftIconHandle } from '@/registry/bases/base-ui/ui/arrow-left';
-import { ArrowRightIcon, type ArrowRightIconHandle } from '@/registry/bases/base-ui/ui/arrow-right';
+import { ArrowLeftIcon, type ArrowLeftIconHandle } from '@/registry/bases/base-ui/icons/arrow-left-icon';
+import { ArrowRightIcon, type ArrowRightIconHandle } from '@/registry/bases/base-ui/icons/arrow-right-icon';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 
 interface DocsPagerProps extends ComponentProps<'nav'> {

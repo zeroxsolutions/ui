@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 
-import { BrainIcon, type BrainIconHandle } from '@/registry/bases/base-ui/ui/brain';
+import { BrainIcon, type BrainIconHandle } from '@/registry/bases/base-ui/icons/brain-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
+import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/icons/chevron-down-icon';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { ReasoningCollapsibleContext } from '@/registry/bases/base-ui/hooks/use-reasoning-collapsible';
 import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';

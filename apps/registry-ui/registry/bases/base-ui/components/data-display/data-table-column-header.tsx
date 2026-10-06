@@ -3,17 +3,17 @@ import type { Column } from '@tanstack/react-table';
 
 import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { ArrowDownIcon } from '@/registry/bases/base-ui/ui/arrow-down';
-import { ArrowUpIcon } from '@/registry/bases/base-ui/ui/arrow-up';
+import { ArrowDownIcon } from '@/registry/bases/base-ui/icons/arrow-down-icon';
+import { ArrowUpIcon } from '@/registry/bases/base-ui/icons/arrow-up-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ChevronsUpDownIcon } from '@/registry/bases/base-ui/ui/chevrons-up-down';
+import { ChevronsUpDownIcon } from '@/registry/bases/base-ui/icons/chevrons-up-down-icon';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
-import { EyeOffIcon } from '@/registry/bases/base-ui/ui/eye-off';
+import { EyeOffIcon } from '@/registry/bases/base-ui/icons/eye-off-icon';
 
 /** What every animated icon here exposes, so the control around it can play it. */
 interface DataTableColumnHeaderIconHandle {

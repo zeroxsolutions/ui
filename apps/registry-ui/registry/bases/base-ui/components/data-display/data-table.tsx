@@ -4,8 +4,8 @@ import { Settings2 } from 'lucide-react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ChevronLeftIcon } from '@/registry/bases/base-ui/ui/chevron-left';
-import { ChevronRightIcon } from '@/registry/bases/base-ui/ui/chevron-right';
+import { ChevronLeftIcon } from '@/registry/bases/base-ui/icons/chevron-left-icon';
+import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/chevron-right-icon';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,

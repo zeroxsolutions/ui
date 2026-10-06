@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useControllableState } from '@/registry/bases/base-ui/hooks/use-controllable-state';
 import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { ChevronRightIcon, type ChevronRightIconHandle } from '@/registry/bases/base-ui/ui/chevron-right';
+import { ChevronRightIcon, type ChevronRightIconHandle } from '@/registry/bases/base-ui/icons/chevron-right-icon';
 
 interface FileTreeContextValue {
   selectedValue: string | undefined;

@@ -5,13 +5,13 @@ import { Dumbbell, Flag, Hash, Lightbulb, Plane, type LucideIcon } from 'lucide-
 import * as React from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ClockIcon, type ClockIconHandle } from '@/registry/bases/base-ui/ui/clock';
-import { CoffeeIcon } from '@/registry/bases/base-ui/ui/coffee';
+import { ClockIcon, type ClockIconHandle } from '@/registry/bases/base-ui/icons/clock-icon';
+import { CoffeeIcon } from '@/registry/bases/base-ui/icons/coffee-icon';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
-import { LeafIcon } from '@/registry/bases/base-ui/ui/leaf';
+import { LeafIcon } from '@/registry/bases/base-ui/icons/leaf-icon';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
-import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/ui/search';
-import { SmileIcon } from '@/registry/bases/base-ui/ui/smile';
+import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/icons/search-icon';
+import { SmileIcon } from '@/registry/bases/base-ui/icons/smile-icon';
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 

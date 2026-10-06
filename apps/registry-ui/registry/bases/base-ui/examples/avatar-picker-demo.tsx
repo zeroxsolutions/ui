@@ -32,11 +32,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/registry/bases/base-ui/ui/empty';
-import { PaletteIcon, type PaletteIconHandle } from '@/registry/bases/base-ui/ui/palette';
-import { SmileIcon, type SmileIconHandle } from '@/registry/bases/base-ui/ui/smile';
+import { PaletteIcon, type PaletteIconHandle } from '@/registry/bases/base-ui/icons/palette-icon';
+import { SmileIcon, type SmileIconHandle } from '@/registry/bases/base-ui/icons/smile-icon';
 import { Spinner } from '@/registry/bases/base-ui/ui/spinner';
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
-import { UploadIcon, type UploadIconHandle } from '@/registry/bases/base-ui/ui/upload';
+import { UploadIcon, type UploadIconHandle } from '@/registry/bases/base-ui/icons/upload-icon';
 
 /** An avatar, tinted by the picked colour, that opens an emoji, upload and colour editor. */
 function AvatarPickerDemo(): ReactNode {

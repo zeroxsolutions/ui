@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 
 import { IconLabel } from '@/registry/bases/base-ui/components/general/icon-label';
 import { Input } from '@/registry/bases/base-ui/ui/input';
-import { RotateCWIcon } from '@/registry/bases/base-ui/ui/rotate-cw';
-import { SearchIcon } from '@/registry/bases/base-ui/ui/search';
+import { RotateCWIcon } from '@/registry/bases/base-ui/icons/rotate-cw-icon';
+import { SearchIcon } from '@/registry/bases/base-ui/icons/search-icon';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 
 /** A universally-read field icon beside two others whose meaning is revealed through a composed tooltip. */

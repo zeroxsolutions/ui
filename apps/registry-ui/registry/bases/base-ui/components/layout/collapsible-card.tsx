@@ -2,7 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { Children, isValidElement, useRef, type ComponentProps, type ReactNode } from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
+import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/icons/chevron-down-icon';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';

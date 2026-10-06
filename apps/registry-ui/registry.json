@@ -101,8 +101,8 @@
         "@shadcn/empty",
         "@shadcn/table",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/chevron-left.json",
-        "https://lucide-animated.com/r/chevron-right.json"
+        "https://ui.zeroxsolutions.com/r/chevron-left-icon.json",
+        "https://ui.zeroxsolutions.com/r/chevron-right-icon.json"
       ],
       "files": [
         {
@@ -121,10 +121,10 @@
         "@shadcn/button",
         "@shadcn/dropdown-menu",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/arrow-down.json",
-        "https://lucide-animated.com/r/arrow-up.json",
-        "https://lucide-animated.com/r/chevrons-up-down.json",
-        "https://lucide-animated.com/r/eye-off.json"
+        "https://ui.zeroxsolutions.com/r/arrow-down-icon.json",
+        "https://ui.zeroxsolutions.com/r/arrow-up-icon.json",
+        "https://ui.zeroxsolutions.com/r/chevrons-up-down-icon.json",
+        "https://ui.zeroxsolutions.com/r/eye-off-icon.json"
       ],
       "files": [
         {
@@ -302,11 +302,11 @@
         "@shadcn/scroll-area",
         "@shadcn/toggle-group",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/clock.json",
-        "https://lucide-animated.com/r/coffee.json",
-        "https://lucide-animated.com/r/leaf.json",
-        "https://lucide-animated.com/r/search.json",
-        "https://lucide-animated.com/r/smile.json"
+        "https://ui.zeroxsolutions.com/r/clock-icon.json",
+        "https://ui.zeroxsolutions.com/r/coffee-icon.json",
+        "https://ui.zeroxsolutions.com/r/leaf-icon.json",
+        "https://ui.zeroxsolutions.com/r/search-icon.json",
+        "https://ui.zeroxsolutions.com/r/smile-icon.json"
       ],
       "files": [
         {
@@ -383,8 +383,8 @@
       "registryDependencies": [
         "@shadcn/input-group",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/eye.json",
-        "https://lucide-animated.com/r/eye-off.json"
+        "https://ui.zeroxsolutions.com/r/eye-icon.json",
+        "https://ui.zeroxsolutions.com/r/eye-off-icon.json"
       ],
       "files": [
         {
@@ -422,7 +422,7 @@
         "@shadcn/button",
         "@shadcn/input",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/x.json"
+        "https://ui.zeroxsolutions.com/r/x-icon.json"
       ],
       "files": [
         {
@@ -441,7 +441,7 @@
         "@shadcn/button",
         "@shadcn/input",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/chevron-right.json"
+        "https://ui.zeroxsolutions.com/r/chevron-right-icon.json"
       ],
       "files": [
         {
@@ -466,8 +466,8 @@
       "categories": ["feedback"],
       "registryDependencies": [
         "@shadcn/button",
-        "https://lucide-animated.com/r/check.json",
-        "https://lucide-animated.com/r/copy.json"
+        "https://ui.zeroxsolutions.com/r/check-icon.json",
+        "https://ui.zeroxsolutions.com/r/copy-icon.json"
       ],
       "files": [
         {
@@ -487,7 +487,7 @@
         "@shadcn/badge",
         "@shadcn/card",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/circle-check.json"
+        "https://ui.zeroxsolutions.com/r/circle-check-icon.json"
       ],
       "files": [
         {
@@ -620,7 +620,7 @@
         "@shadcn/button",
         "@shadcn/collapsible",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/chevron-down.json"
+        "https://ui.zeroxsolutions.com/r/chevron-down-icon.json"
       ],
       "files": [
         {
@@ -639,7 +639,7 @@
       "title": "File Tree",
       "description": "An accessible file tree that drives keyboard navigation and owns selection and folder expansion, controlled or uncontrolled.",
       "categories": ["data-display"],
-      "registryDependencies": ["@shadcn/utils", "https://lucide-animated.com/r/chevron-right.json"],
+      "registryDependencies": ["@shadcn/utils", "https://ui.zeroxsolutions.com/r/chevron-right-icon.json"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/file-tree.tsx",
@@ -771,8 +771,8 @@
         "@shadcn/button",
         "@shadcn/collapsible",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/brain.json",
-        "https://lucide-animated.com/r/chevron-down.json"
+        "https://ui.zeroxsolutions.com/r/brain-icon.json",
+        "https://ui.zeroxsolutions.com/r/chevron-down-icon.json"
       ],
       "files": [
         {
@@ -802,9 +802,9 @@
         "@shadcn/card",
         "@shadcn/collapsible",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/chevron-down.json",
-        "https://lucide-animated.com/r/circle-check.json",
-        "https://lucide-animated.com/r/clock.json"
+        "https://ui.zeroxsolutions.com/r/chevron-down-icon.json",
+        "https://ui.zeroxsolutions.com/r/circle-check-icon.json",
+        "https://ui.zeroxsolutions.com/r/clock-icon.json"
       ],
       "cssVars": {
         "theme": {
@@ -852,8 +852,8 @@
         "@shadcn/button",
         "@shadcn/item",
         "@shadcn/utils",
-        "https://lucide-animated.com/r/x.json",
-        "https://ui.zeroxsolutions.com/r/unsaved-indicator.json"
+        "https://ui.zeroxsolutions.com/r/unsaved-indicator.json",
+        "https://ui.zeroxsolutions.com/r/x-icon.json"
       ],
       "files": [
         {
@@ -1068,8 +1068,8 @@
         "@shadcn/empty",
         "@shadcn/item",
         "https://ui.zeroxsolutions.com/r/chat-suggestion-item.json",
-        "https://lucide-animated.com/r/file-text.json",
-        "https://lucide-animated.com/r/sparkles.json"
+        "https://ui.zeroxsolutions.com/r/file-text-icon.json",
+        "https://ui.zeroxsolutions.com/r/sparkles-icon.json"
       ],
       "files": [
         {
@@ -1252,7 +1252,7 @@
         "@shadcn/button-group",
         "@shadcn/card",
         "@shadcn/dropdown-menu",
-        "https://lucide-animated.com/r/chevron-down.json",
+        "https://ui.zeroxsolutions.com/r/chevron-down-icon.json",
         "https://ui.zeroxsolutions.com/r/permission-card.json"
       ],
       "files": [
@@ -1298,10 +1298,10 @@
       "categories": ["examples"],
       "registryDependencies": [
         "@shadcn/tooltip",
-        "https://lucide-animated.com/r/eye.json",
-        "https://lucide-animated.com/r/message-square.json",
-        "https://lucide-animated.com/r/wrench.json",
-        "https://ui.zeroxsolutions.com/r/icon-media.json"
+        "https://ui.zeroxsolutions.com/r/eye-icon.json",
+        "https://ui.zeroxsolutions.com/r/icon-media.json",
+        "https://ui.zeroxsolutions.com/r/message-square-icon.json",
+        "https://ui.zeroxsolutions.com/r/wrench-icon.json"
       ],
       "files": [
         {
@@ -1320,9 +1320,9 @@
       "registryDependencies": [
         "@shadcn/input",
         "@shadcn/tooltip",
-        "https://lucide-animated.com/r/rotate-cw.json",
-        "https://lucide-animated.com/r/search.json",
-        "https://ui.zeroxsolutions.com/r/icon-label.json"
+        "https://ui.zeroxsolutions.com/r/icon-label.json",
+        "https://ui.zeroxsolutions.com/r/rotate-cw-icon.json",
+        "https://ui.zeroxsolutions.com/r/search-icon.json"
       ],
       "files": [
         {
@@ -1343,11 +1343,11 @@
         "@shadcn/empty",
         "@shadcn/spinner",
         "@shadcn/tabs",
-        "https://lucide-animated.com/r/palette.json",
-        "https://lucide-animated.com/r/smile.json",
-        "https://lucide-animated.com/r/upload.json",
         "https://ui.zeroxsolutions.com/r/avatar-picker.json",
-        "https://ui.zeroxsolutions.com/r/emoji-picker.json"
+        "https://ui.zeroxsolutions.com/r/emoji-picker.json",
+        "https://ui.zeroxsolutions.com/r/palette-icon.json",
+        "https://ui.zeroxsolutions.com/r/smile-icon.json",
+        "https://ui.zeroxsolutions.com/r/upload-icon.json"
       ],
       "files": [
         {
@@ -1420,10 +1420,10 @@
       "categories": ["examples"],
       "registryDependencies": [
         "@shadcn/button",
-        "https://lucide-animated.com/r/bold.json",
-        "https://lucide-animated.com/r/italic.json",
-        "https://lucide-animated.com/r/underline.json",
-        "https://ui.zeroxsolutions.com/r/floating-toolbar.json"
+        "https://ui.zeroxsolutions.com/r/bold-icon.json",
+        "https://ui.zeroxsolutions.com/r/floating-toolbar.json",
+        "https://ui.zeroxsolutions.com/r/italic-icon.json",
+        "https://ui.zeroxsolutions.com/r/underline-icon.json"
       ],
       "files": [
         {
@@ -1523,8 +1523,8 @@
       "categories": ["examples"],
       "registryDependencies": [
         "@shadcn/button",
-        "https://lucide-animated.com/r/panel-left-close.json",
-        "https://ui.zeroxsolutions.com/r/panel-header.json"
+        "https://ui.zeroxsolutions.com/r/panel-header.json",
+        "https://ui.zeroxsolutions.com/r/panel-left-close-icon.json"
       ],
       "files": [
         {
@@ -1543,7 +1543,7 @@
         "@shadcn/button",
         "@shadcn/field",
         "@shadcn/input",
-        "https://lucide-animated.com/r/lock.json",
+        "https://ui.zeroxsolutions.com/r/lock-icon.json",
         "https://ui.zeroxsolutions.com/r/panel-field-group.json",
         "https://ui.zeroxsolutions.com/r/panel-row.json"
       ],
@@ -1583,8 +1583,8 @@
       "description": "A completed search call, its parameters shown under the trigger.",
       "categories": ["examples"],
       "registryDependencies": [
-        "https://lucide-animated.com/r/search.json",
         "https://ui.zeroxsolutions.com/r/code-block.json",
+        "https://ui.zeroxsolutions.com/r/search-icon.json",
         "https://ui.zeroxsolutions.com/r/tool-call-card.json"
       ],
       "files": [
@@ -1656,6 +1656,561 @@
         {
           "path": "registry/bases/base-ui/examples/ai-provider-picker-demo.tsx",
           "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "arrow-down-icon",
+      "type": "registry:ui",
+      "title": "Arrow Down Icon",
+      "description": "An animated arrow-down icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/arrow-down-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/arrow-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "arrow-left-icon",
+      "type": "registry:ui",
+      "title": "Arrow Left Icon",
+      "description": "An animated arrow-left icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/arrow-left-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/arrow-left-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "arrow-right-icon",
+      "type": "registry:ui",
+      "title": "Arrow Right Icon",
+      "description": "An animated arrow-right icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/arrow-right-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/arrow-right-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "arrow-up-icon",
+      "type": "registry:ui",
+      "title": "Arrow Up Icon",
+      "description": "An animated arrow-up icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/arrow-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/arrow-up-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "bold-icon",
+      "type": "registry:ui",
+      "title": "Bold Icon",
+      "description": "An animated bold icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/bold-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/bold-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "brain-icon",
+      "type": "registry:ui",
+      "title": "Brain Icon",
+      "description": "An animated brain icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/brain-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/brain-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "check-icon",
+      "type": "registry:ui",
+      "title": "Check Icon",
+      "description": "An animated check icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/check-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/check-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "chevron-down-icon",
+      "type": "registry:ui",
+      "title": "Chevron Down Icon",
+      "description": "An animated chevron-down icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/chevron-down-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/chevron-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "chevron-left-icon",
+      "type": "registry:ui",
+      "title": "Chevron Left Icon",
+      "description": "An animated chevron-left icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/chevron-left-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/chevron-left-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "chevron-right-icon",
+      "type": "registry:ui",
+      "title": "Chevron Right Icon",
+      "description": "An animated chevron-right icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/chevron-right-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/chevron-right-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "chevrons-up-down-icon",
+      "type": "registry:ui",
+      "title": "Chevrons Up Down Icon",
+      "description": "An animated chevrons-up-down icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/chevrons-up-down-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/chevrons-up-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "circle-check-icon",
+      "type": "registry:ui",
+      "title": "Circle Check Icon",
+      "description": "An animated circle-check icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/circle-check-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/circle-check-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "clock-icon",
+      "type": "registry:ui",
+      "title": "Clock Icon",
+      "description": "An animated clock icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/clock-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/clock-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "coffee-icon",
+      "type": "registry:ui",
+      "title": "Coffee Icon",
+      "description": "An animated coffee icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/coffee-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/coffee-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "copy-icon",
+      "type": "registry:ui",
+      "title": "Copy Icon",
+      "description": "An animated copy icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/copy-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/copy-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "corner-down-left-icon",
+      "type": "registry:ui",
+      "title": "Corner Down Left Icon",
+      "description": "An animated corner-down-left icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/corner-down-left-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/corner-down-left-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "eye-icon",
+      "type": "registry:ui",
+      "title": "Eye Icon",
+      "description": "An animated eye icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/eye-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/eye-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "eye-off-icon",
+      "type": "registry:ui",
+      "title": "Eye Off Icon",
+      "description": "An animated eye-off icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/eye-off-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/eye-off-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "file-text-icon",
+      "type": "registry:ui",
+      "title": "File Text Icon",
+      "description": "An animated file-text icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/file-text-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/file-text-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "italic-icon",
+      "type": "registry:ui",
+      "title": "Italic Icon",
+      "description": "An animated italic icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/italic-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/italic-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "leaf-icon",
+      "type": "registry:ui",
+      "title": "Leaf Icon",
+      "description": "An animated leaf icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/leaf-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/leaf-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "loader-circle-icon",
+      "type": "registry:ui",
+      "title": "Loader Circle Icon",
+      "description": "An animated loader-circle icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/loader-circle-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/loader-circle-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lock-icon",
+      "type": "registry:ui",
+      "title": "Lock Icon",
+      "description": "An animated lock icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lock-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lock-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "menu-icon",
+      "type": "registry:ui",
+      "title": "Menu Icon",
+      "description": "An animated menu icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/menu-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/menu-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "message-square-icon",
+      "type": "registry:ui",
+      "title": "Message Square Icon",
+      "description": "An animated message-square icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/message-square-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/message-square-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "palette-icon",
+      "type": "registry:ui",
+      "title": "Palette Icon",
+      "description": "An animated palette icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/palette-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/palette-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "panel-left-close-icon",
+      "type": "registry:ui",
+      "title": "Panel Left Close Icon",
+      "description": "An animated panel-left-close icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/panel-left-close-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/panel-left-close-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "rotate-cw-icon",
+      "type": "registry:ui",
+      "title": "Rotate Cw Icon",
+      "description": "An animated rotate-cw icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/rotate-cw-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/rotate-cw-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "search-icon",
+      "type": "registry:ui",
+      "title": "Search Icon",
+      "description": "An animated search icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/search-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/search-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "sliders-horizontal-icon",
+      "type": "registry:ui",
+      "title": "Sliders Horizontal Icon",
+      "description": "An animated sliders-horizontal icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/sliders-horizontal-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/sliders-horizontal-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "smile-icon",
+      "type": "registry:ui",
+      "title": "Smile Icon",
+      "description": "An animated smile icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/smile-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/smile-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "sparkles-icon",
+      "type": "registry:ui",
+      "title": "Sparkles Icon",
+      "description": "An animated sparkles icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/sparkles-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/sparkles-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "sun-moon-icon",
+      "type": "registry:ui",
+      "title": "Sun Moon Icon",
+      "description": "An animated sun-moon icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/sun-moon-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/sun-moon-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "underline-icon",
+      "type": "registry:ui",
+      "title": "Underline Icon",
+      "description": "An animated underline icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/underline-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/underline-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "upload-icon",
+      "type": "registry:ui",
+      "title": "Upload Icon",
+      "description": "An animated upload icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/upload-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/upload-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "wrench-icon",
+      "type": "registry:ui",
+      "title": "Wrench Icon",
+      "description": "An animated wrench icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/wrench-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/wrench-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "x-icon",
+      "type": "registry:ui",
+      "title": "X Icon",
+      "description": "An animated x icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/x-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/x-icon.tsx"
         }
       ]
     }

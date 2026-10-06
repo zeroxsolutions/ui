@@ -6,7 +6,7 @@ import { useCallback, type ReactNode } from 'react';
 import { useIconAnimation } from '@/hooks/use-icon-animation';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { SunMoonIcon, type SunMoonIconHandle } from '@/registry/bases/base-ui/ui/sun-moon';
+import { SunMoonIcon, type SunMoonIconHandle } from '@/registry/bases/base-ui/icons/sun-moon-icon';
 
 /** A button that switches the site between its light and dark theme; its icon plays on the button's hover or focus. */
 function ModeSwitcher(): ReactNode {

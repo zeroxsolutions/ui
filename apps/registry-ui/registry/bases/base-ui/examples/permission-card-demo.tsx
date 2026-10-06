@@ -12,7 +12,7 @@ import {
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { ButtonGroup } from '@/registry/bases/base-ui/ui/button-group';
 import { CardDescription, CardHeader } from '@/registry/bases/base-ui/ui/card';
-import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
+import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/icons/chevron-down-icon';
 import {
   DropdownMenu,
   DropdownMenuContent,
