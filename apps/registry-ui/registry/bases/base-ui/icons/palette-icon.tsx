@@ -1,7 +1,9 @@
 'use client';
 
+// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+
 import type { Variants } from 'motion/react';
-import { motion, useAnimation } from 'motion/react';
+import { motion, useAnimation, useReducedMotion } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
@@ -12,7 +14,7 @@ export interface PaletteIconHandle {
   stopAnimation: () => void;
 }
 
-interface PaletteIconProps extends HTMLAttributes<HTMLDivElement> {
+interface PaletteIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
@@ -72,18 +74,19 @@ const DOT_VARIANTS: Variants = {
 const PaletteIcon = forwardRef<PaletteIconHandle, PaletteIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
+    const isMotionReduced = useReducedMotion();
     const isControlledRef = useRef(false);
     const isAnimatingRef = useRef(false);
 
     const startAnimation = useCallback(async () => {
-      if (isAnimatingRef.current) return;
+      if (isMotionReduced || isAnimatingRef.current) return;
       isAnimatingRef.current = true;
       try {
         await controls.start('animate');
       } finally {
         isAnimatingRef.current = false;
       }
-    }, [controls]);
+    }, [controls, isMotionReduced]);
 
     const stopAnimation = useCallback(async () => {
       isAnimatingRef.current = false;
@@ -96,7 +99,7 @@ const PaletteIcon = forwardRef<PaletteIconHandle, PaletteIconProps>(
     });
 
     const handleMouseEnter = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
@@ -107,7 +110,7 @@ const PaletteIcon = forwardRef<PaletteIconHandle, PaletteIconProps>(
     );
 
     const handleMouseLeave = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
@@ -118,7 +121,8 @@ const PaletteIcon = forwardRef<PaletteIconHandle, PaletteIconProps>(
     );
 
     return (
-      <div
+      <span
+        data-slot="palette-icon"
         className={cn('inline-flex items-center justify-center', className)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -156,7 +160,7 @@ const PaletteIcon = forwardRef<PaletteIconHandle, PaletteIconProps>(
             ))}
           </motion.g>
         </svg>
-      </div>
+      </span>
     );
   },
 );

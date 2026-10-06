@@ -1,7 +1,9 @@
 'use client';
 
+// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+
 import type { Variants } from 'motion/react';
-import { motion, useAnimation } from 'motion/react';
+import { motion, useAnimation, useReducedMotion } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
@@ -12,33 +14,36 @@ export interface SmileIconHandle {
   stopAnimation: () => void;
 }
 
-interface SmileIconProps extends HTMLAttributes<HTMLDivElement> {
+interface SmileIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
 const SmileIcon = forwardRef<SmileIconHandle, SmileIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
+    const isMotionReduced = useReducedMotion();
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
       return {
-        startAnimation: () => controls.start('animate'),
+        startAnimation: () => {
+          if (!isMotionReduced) controls.start('animate');
+        },
         stopAnimation: () => controls.start('normal'),
       };
     });
 
     const handleMouseEnter = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!isControlledRef.current) controls.start('animate');
+      (e: React.MouseEvent<HTMLSpanElement>) => {
+        if (!isControlledRef.current && !isMotionReduced) controls.start('animate');
         onMouseEnter?.(e);
       },
-      [controls, onMouseEnter],
+      [controls, isMotionReduced, onMouseEnter],
     );
 
     const handleMouseLeave = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (!isControlledRef.current) controls.start('normal');
         onMouseLeave?.(e);
       },
@@ -107,7 +112,13 @@ const SmileIcon = forwardRef<SmileIconHandle, SmileIconProps>(
     };
 
     return (
-      <div className={cn(className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} {...props}>
+      <span
+        data-slot="smile-icon"
+        className={cn('inline-flex', className)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        {...props}
+      >
         <motion.svg
           animate={controls}
           fill="none"
@@ -127,7 +138,7 @@ const SmileIcon = forwardRef<SmileIconHandle, SmileIconProps>(
           <motion.line animate={controls} initial="normal" variants={eyeVariants} x1="9" x2="9.01" y1="9" y2="9" />
           <motion.line animate={controls} initial="normal" variants={eyeVariants} x1="15" x2="15.01" y1="9" y2="9" />
         </motion.svg>
-      </div>
+      </span>
     );
   },
 );

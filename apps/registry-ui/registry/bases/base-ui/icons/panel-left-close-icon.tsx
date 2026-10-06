@@ -1,7 +1,9 @@
 'use client';
 
+// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+
 import type { Transition, Variants } from 'motion/react';
-import { motion, useAnimation } from 'motion/react';
+import { motion, useAnimation, useReducedMotion } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
@@ -12,7 +14,7 @@ export interface PanelLeftCloseIconHandle {
   stopAnimation: () => void;
 }
 
-interface PanelLeftCloseIconProps extends HTMLAttributes<HTMLDivElement> {
+interface PanelLeftCloseIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
@@ -29,29 +31,32 @@ const PATH_VARIANTS: Variants = {
 const PanelLeftCloseIcon = forwardRef<PanelLeftCloseIconHandle, PanelLeftCloseIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
+    const isMotionReduced = useReducedMotion();
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
       return {
-        startAnimation: () => controls.start('animate'),
+        startAnimation: () => {
+          if (!isMotionReduced) controls.start('animate');
+        },
         stopAnimation: () => controls.start('normal'),
       };
     });
 
     const handleMouseEnter = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseEnter?.(e);
-        } else {
+        } else if (!isMotionReduced) {
           controls.start('animate');
         }
       },
-      [controls, onMouseEnter],
+      [controls, isMotionReduced, onMouseEnter],
     );
 
     const handleMouseLeave = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
@@ -62,7 +67,13 @@ const PanelLeftCloseIcon = forwardRef<PanelLeftCloseIconHandle, PanelLeftCloseIc
     );
 
     return (
-      <div className={cn(className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} {...props}>
+      <span
+        data-slot="panel-left-close-icon"
+        className={cn('inline-flex', className)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        {...props}
+      >
         <svg
           fill="none"
           height={size}
@@ -78,7 +89,7 @@ const PanelLeftCloseIcon = forwardRef<PanelLeftCloseIconHandle, PanelLeftCloseIc
           <path d="M9 3v18" />
           <motion.path animate={controls} d="m16 15-3-3 3-3" transition={DEFAULT_TRANSITION} variants={PATH_VARIANTS} />
         </svg>
-      </div>
+      </span>
     );
   },
 );

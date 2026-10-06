@@ -1,7 +1,9 @@
 'use client';
 
+// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+
 import type { Variants } from 'motion/react';
-import { motion, useAnimation } from 'motion/react';
+import { motion, useAnimation, useReducedMotion } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
@@ -12,7 +14,7 @@ export interface SparklesIconHandle {
   stopAnimation: () => void;
 }
 
-interface SparklesIconProps extends HTMLAttributes<HTMLDivElement> {
+interface SparklesIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
@@ -53,6 +55,7 @@ const SparklesIcon = forwardRef<SparklesIconHandle, SparklesIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const starControls = useAnimation();
     const sparkleControls = useAnimation();
+    const isMotionReduced = useReducedMotion();
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
@@ -60,6 +63,7 @@ const SparklesIcon = forwardRef<SparklesIconHandle, SparklesIconProps>(
 
       return {
         startAnimation: () => {
+          if (isMotionReduced) return;
           sparkleControls.start('hover');
           starControls.start('blink', { delay: 1 });
         },
@@ -71,19 +75,19 @@ const SparklesIcon = forwardRef<SparklesIconHandle, SparklesIconProps>(
     });
 
     const handleMouseEnter = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseEnter?.(e);
-        } else {
+        } else if (!isMotionReduced) {
           sparkleControls.start('hover');
           starControls.start('blink', { delay: 1 });
         }
       },
-      [onMouseEnter, sparkleControls, starControls],
+      [isMotionReduced, onMouseEnter, sparkleControls, starControls],
     );
 
     const handleMouseLeave = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
@@ -95,7 +99,13 @@ const SparklesIcon = forwardRef<SparklesIconHandle, SparklesIconProps>(
     );
 
     return (
-      <div className={cn(className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} {...props}>
+      <span
+        data-slot="sparkles-icon"
+        className={cn('inline-flex', className)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        {...props}
+      >
         <svg
           fill="none"
           height={size}
@@ -117,7 +127,7 @@ const SparklesIcon = forwardRef<SparklesIconHandle, SparklesIconProps>(
           <motion.path animate={starControls} d="M4 17v2" variants={STAR_VARIANTS} />
           <motion.path animate={starControls} d="M5 18H3" variants={STAR_VARIANTS} />
         </svg>
-      </div>
+      </span>
     );
   },
 );

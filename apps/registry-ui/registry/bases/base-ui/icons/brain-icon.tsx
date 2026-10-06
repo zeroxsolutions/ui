@@ -1,7 +1,9 @@
 'use client';
 
+// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+
 import type { Variants } from 'motion/react';
-import { motion, useAnimation } from 'motion/react';
+import { motion, useAnimation, useReducedMotion } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
@@ -12,7 +14,7 @@ export interface BrainIconHandle {
   stopAnimation: () => void;
 }
 
-interface BrainIconProps extends HTMLAttributes<HTMLDivElement> {
+interface BrainIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
@@ -75,30 +77,33 @@ const BRAIN_LOWER_ARC_VARIANTS: Variants = {
 const BrainIcon = forwardRef<BrainIconHandle, BrainIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
+    const isMotionReduced = useReducedMotion();
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
 
       return {
-        startAnimation: () => controls.start('animate'),
+        startAnimation: () => {
+          if (!isMotionReduced) controls.start('animate');
+        },
         stopAnimation: () => controls.start('normal'),
       };
     });
 
     const handleMouseEnter = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseEnter?.(e);
-        } else {
+        } else if (!isMotionReduced) {
           controls.start('animate');
         }
       },
-      [controls, onMouseEnter],
+      [controls, isMotionReduced, onMouseEnter],
     );
 
     const handleMouseLeave = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
@@ -109,7 +114,13 @@ const BrainIcon = forwardRef<BrainIconHandle, BrainIconProps>(
     );
 
     return (
-      <div className={cn(className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} {...props}>
+      <span
+        data-slot="brain-icon"
+        className={cn('inline-flex', className)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        {...props}
+      >
         <motion.svg
           animate={controls}
           fill="none"
@@ -157,7 +168,7 @@ const BrainIcon = forwardRef<BrainIconHandle, BrainIconProps>(
           <motion.path animate={controls} d="M6 18a4 4 0 0 1-2-7.464" variants={BRAIN_LOWER_ARC_VARIANTS} />
           <path d="M6.003 5.125a4 4 0 0 0-2.526 5.77" />
         </motion.svg>
-      </div>
+      </span>
     );
   },
 );

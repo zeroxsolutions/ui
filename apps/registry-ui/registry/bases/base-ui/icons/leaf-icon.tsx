@@ -1,7 +1,9 @@
 'use client';
 
+// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+
 import type { Variants } from 'motion/react';
-import { motion, useAnimation } from 'motion/react';
+import { motion, useAnimation, useReducedMotion } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
@@ -12,7 +14,7 @@ export interface LeafIconHandle {
   stopAnimation: () => void;
 }
 
-interface LeafIconProps extends HTMLAttributes<HTMLDivElement> {
+interface LeafIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
@@ -36,29 +38,32 @@ const LEAF_VARIANTS: Variants = {
 const LeafIcon = forwardRef<LeafIconHandle, LeafIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
+    const isMotionReduced = useReducedMotion();
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
       return {
-        startAnimation: () => controls.start('animate'),
+        startAnimation: () => {
+          if (!isMotionReduced) controls.start('animate');
+        },
         stopAnimation: () => controls.start('normal'),
       };
     });
 
     const handleMouseEnter = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseEnter?.(e);
-        } else {
+        } else if (!isMotionReduced) {
           controls.start('animate');
         }
       },
-      [controls, onMouseEnter],
+      [controls, isMotionReduced, onMouseEnter],
     );
 
     const handleMouseLeave = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
@@ -69,7 +74,13 @@ const LeafIcon = forwardRef<LeafIconHandle, LeafIconProps>(
     );
 
     return (
-      <div className={cn(className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} {...props}>
+      <span
+        data-slot="leaf-icon"
+        className={cn('inline-flex', className)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        {...props}
+      >
         <motion.svg
           animate={controls}
           fill="none"
@@ -88,7 +99,7 @@ const LeafIcon = forwardRef<LeafIconHandle, LeafIconProps>(
           <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
           <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
         </motion.svg>
-      </div>
+      </span>
     );
   },
 );

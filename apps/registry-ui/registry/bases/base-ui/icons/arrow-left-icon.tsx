@@ -1,7 +1,9 @@
 'use client';
 
+// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+
 import type { Variants } from 'motion/react';
-import { motion, useAnimation } from 'motion/react';
+import { motion, useAnimation, useReducedMotion } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
@@ -12,7 +14,7 @@ export interface ArrowLeftIconHandle {
   stopAnimation: () => void;
 }
 
-interface ArrowLeftIconProps extends HTMLAttributes<HTMLDivElement> {
+interface ArrowLeftIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
@@ -40,30 +42,33 @@ const SECOND_PATH_VARIANTS: Variants = {
 const ArrowLeftIcon = forwardRef<ArrowLeftIconHandle, ArrowLeftIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
+    const isMotionReduced = useReducedMotion();
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
 
       return {
-        startAnimation: () => controls.start('animate'),
+        startAnimation: () => {
+          if (!isMotionReduced) controls.start('animate');
+        },
         stopAnimation: () => controls.start('normal'),
       };
     });
 
     const handleMouseEnter = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseEnter?.(e);
-        } else {
+        } else if (!isMotionReduced) {
           controls.start('animate');
         }
       },
-      [controls, onMouseEnter],
+      [controls, isMotionReduced, onMouseEnter],
     );
 
     const handleMouseLeave = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
@@ -74,7 +79,13 @@ const ArrowLeftIcon = forwardRef<ArrowLeftIconHandle, ArrowLeftIconProps>(
     );
 
     return (
-      <div className={cn(className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} {...props}>
+      <span
+        data-slot="arrow-left-icon"
+        className={cn('inline-flex', className)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        {...props}
+      >
         <svg
           fill="none"
           height={size}
@@ -89,7 +100,7 @@ const ArrowLeftIcon = forwardRef<ArrowLeftIconHandle, ArrowLeftIconProps>(
           <motion.path animate={controls} d="m12 19-7-7 7-7" variants={PATH_VARIANTS} />
           <motion.path animate={controls} d="M19 12H5" variants={SECOND_PATH_VARIANTS} />
         </svg>
-      </div>
+      </span>
     );
   },
 );
