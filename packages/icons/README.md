@@ -42,7 +42,8 @@ pnpm add @zeroxsolutions/icons react react-dom
 
 `BrandMarkStyleProvider` (`defaultStyle`, `style`, `onStyleChange`) makes the variant ambient for
 every `<BrandMark>` below it; a call's own `variant` wins. `useBrandMarkStyle()` reads and sets it.
-Outside React, `setBrandMarkStyle(variant)` sets the module default and
+A `<BrandMark>` outside any provider reads the module default. Outside React,
+`setBrandMarkStyle(variant)` sets that default and
 `brandMarkUrl(name, { variant, base })` returns a file's URL, or `undefined` where the brand has no
 file for that variant.
 
@@ -101,6 +102,10 @@ import { BrandMark, setBrandMarkBase } from '@zeroxsolutions/icons/brand-mark';
 setBrandMarkBase('/vendor/brands'); // module-wide; `base` on one call wins over it
 <BrandMark name="slack" base="https://cdn.example.com/brands" />;
 ```
+
+Call `setBrandMarkBase` in a module both the server and the client evaluate, or pass `base`: a base set
+on one side alone gives a server-rendered `src` the client's does not match. A base on another origin
+must answer with `Access-Control-Allow-Origin`, since `mono` and `combine` are fetched in CORS mode.
 
 Files are cached with `Cache-Control: public, max-age=31536000, immutable` and keys are not
 content-hashed. Artwork re-sourced under the same key therefore serves stale for the year that

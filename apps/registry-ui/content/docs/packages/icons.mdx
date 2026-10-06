@@ -57,8 +57,9 @@ How each variant draws:
 | `combine` | a masked `<span>`: the mark beside its wordmark, drawn as `mono` is                                                      |
 
 `BrandMarkStyleProvider` makes the variant ambient for every `BrandMark` below it, and a call's own `variant`
-wins. `useBrandMarkStyle()` reads and sets it; outside React, `setBrandMarkStyle(variant)` sets the module
-default and `brandMarkUrl(name, { variant, base })` returns a file's URL.
+wins. `useBrandMarkStyle()` reads and sets it. A `BrandMark` outside any provider reads the module default;
+outside React, `setBrandMarkStyle(variant)` sets that default and `brandMarkUrl(name, { variant, base })`
+returns a file's URL.
 
 A variant a brand lacks is resolved before any request: `combine` and `avatar` fall to `color`, and `color`
 falls to `mono`. A file that fails to load falls the same way, and when `mono` fails the mark renders the first
@@ -73,6 +74,10 @@ import { BrandMark, setBrandMarkBase } from '@zeroxsolutions/icons/brand-mark';
 setBrandMarkBase('/vendor/brands'); // module-wide; `base` on one call wins over it
 <BrandMark name="slack" base="https://cdn.example.com/brands" />;
 ```
+
+Call `setBrandMarkBase` in a module both the server and the client evaluate, or pass `base`: a base set
+on one side alone gives a server-rendered `src` the client's does not match. A base on another origin
+must answer with `Access-Control-Allow-Origin`, since `mono` and `combine` are fetched in CORS mode.
 
 ### material
 
