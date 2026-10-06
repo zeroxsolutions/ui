@@ -2,6 +2,9 @@
   "name": "@zeroxsolutions/registry-ui-e2e",
   "version": "0.0.1",
   "private": true,
+  "devDependencies": {
+    "@zeroxsolutions/icons": "workspace:*"
+  },
   "nx": {
     "implicitDependencies": ["@zeroxsolutions/registry-ui"],
     "targets": {

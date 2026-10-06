@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { serveBrandArtwork } from './test/brand-artwork';
+
 // WebKit and Firefox under Playwright do not grant clipboard-write permission the way Chromium does,
 // so the real API is replaced with one that records what it was called with on `window`.
 const STUB_CLIPBOARD = `(() => {
@@ -47,6 +49,7 @@ async function drivesEveryDocsMotionToItsEndState(page: Page): Promise<void> {
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text());
   });
+  await serveBrandArtwork(page);
   await page.addInitScript(STUB_CLIPBOARD);
   await page.setViewportSize({ width: 1440, height: 900 });
 

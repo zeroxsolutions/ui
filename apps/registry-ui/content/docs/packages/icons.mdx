@@ -1,6 +1,6 @@
 ---
 title: Icons
-description: Brand marks and file-type icons as React components, one import path per icon.
+description: Brand marks through one BrandMark component, and file-type icons as React components.
 ---
 
 `@zeroxsolutions/icons` is an npm package, not a registry item. The AI Provider Picker block depends on it, and an
@@ -18,37 +18,61 @@ pnpm add @zeroxsolutions/icons react react-dom
 
 ## Usage
 
-Each icon has its own import path, `@zeroxsolutions/icons/<category>/<name>`:
+Brand marks come from one component; file-type icons have one import path each.
 
 ```tsx
-import { GeminiMark } from '@zeroxsolutions/icons/brands/gemini';
-import { OpenaiMark } from '@zeroxsolutions/icons/brands/openai';
+import { BrandMark } from '@zeroxsolutions/icons/brand-mark';
 import { TypescriptIcon } from '@zeroxsolutions/icons/material/typescript';
 ```
 
 ```tsx
-<OpenaiMark size="1.25rem" />
-<GeminiMark.Color size="1.5rem" />
-<GeminiMark.Avatar size={32} />
+<BrandMark name="facebook" />
+<BrandMark name="openai" variant="mono" size={24} label="OpenAI" />
+<BrandMark name="claude" variant="avatar" size={32} />
 <TypescriptIcon size="1.5rem" />
 ```
 
 ## Categories
 
-### brands
+### brand-mark
 
-Brand marks: AI labs and inference hosts, developer and cloud tools, social networks and workspace apps. The
-export is the name in PascalCase plus `Mark`, so `brands/openai` exports `OpenaiMark`. The base component draws
-the mark in `currentColor`, and a mark carries the variants its source has, each as a property of the base:
+`<BrandMark name="...">` draws any of about 200 brands: AI labs and inference hosts, developer and cloud
+tools, social networks and workspace apps.
 
-- `.Color`, the brand's own colours
-- `.Mono`, the mark in `currentColor`
-- `.Avatar`, the mark on a filled background
-- `.Text`, the wordmark
-- `.Combine`, the mark and the wordmark together
+- `name` is a union generated from the manifest, so a mistyped name does not compile.
+- `variant` is `'color'`, `'mono'`, `'avatar'` or `'combine'`, and defaults to `'color'`.
+- `size` is a number of pixels or a CSS length, `'1em'` by default; the mark keeps its aspect ratio.
+- `label` gives the mark an accessible name. Without it the mark is decorative, since in a button or a link
+  the text beside it is the name.
+- `shape` is `'circle'` or `'square'` and rounds an `avatar`.
+- `base` serves one call from another origin.
 
-A variant a mark does not have is a type error. `GithubMark` is the one mark that takes standard SVG props and
-is sized with `className`.
+How each variant draws:
+
+| Variant   | Element                                                                                                                  |
+| --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `color`   | an `<img>` of `<base>/color/<name>.svg`                                                                                  |
+| `combine` | a masked `<span>`: the mark beside its wordmark, drawn as `mono` is                                                      |
+| `mono`    | a `<span>` whose `mask-image` is `<base>/mono/<name>.svg` over `currentColor`, so it takes the text colour and the theme |
+| `avatar`  | an `<img>` of `<base>/avatar/<name>.svg`, rounded per `shape`                                                            |
+
+`BrandMarkStyleProvider` makes the variant ambient for every `BrandMark` below it, and a call's own `variant`
+wins. `useBrandMarkStyle()` reads and sets it; outside React, `setBrandMarkStyle(variant)` sets the module
+default and `brandMarkUrl(name, { variant, base })` returns a file's URL.
+
+A variant a brand lacks is resolved before any request: `combine` and `avatar` fall to `color`, and `color`
+falls to `mono`. A file that fails to load falls the same way, and when `mono` fails the mark renders the first
+letter of its name in a round `<span>`, so nothing is blank.
+
+Every file is read from `https://icons.zeroxsolutions.com/brands`. To serve them yourself, copy
+`dist/assets/brands` from the package to your own origin and point the module at it:
+
+```tsx
+import { BrandMark, setBrandMarkBase } from '@zeroxsolutions/icons/brand-mark';
+
+setBrandMarkBase('/vendor/brands'); // module-wide; `base` on one call wins over it
+<BrandMark name="slack" base="https://cdn.example.com/brands" />;
+```
 
 ### material
 
