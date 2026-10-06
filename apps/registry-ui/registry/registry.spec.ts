@@ -35,7 +35,6 @@ interface Declaration {
 const APP = resolve(import.meta.dirname, '..');
 const BASE = 'registry/bases/base-ui';
 const ITEM_URL = 'https://ui.zeroxsolutions.com/r/';
-const ANIMATED_ICON_URL = 'https://lucide-animated.com/r/';
 
 const REGISTRY = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as { items: RegistryItem[] };
 
@@ -46,8 +45,8 @@ const SHIPPED = /^registry\/bases\/base-ui\/(lib|hooks|types)\//;
 const TOKEN_CLASS = /\b(?:bg|text|border|ring|fill|stroke)-(success|warning)(?![\w-])/g;
 const FAMILY = /^registry\/bases\/base-ui\/(?:components\/([^/]+)|(blocks))\/([^/]+)\.tsx$/;
 const PUBLISHED = ['registry:component', 'registry:block'];
-/** What every `@lucide-animated` icon exports beside its component, and no shadcn primitive does. */
-const ANIMATED_ICON = /^export interface \w+IconHandle\b/m;
+/** A file under icons/ is an animated icon this registry owns, published as the item of its file name. */
+const HOUSE_ICON = /^registry\/bases\/base-ui\/icons\/([^/]+)\.tsx$/;
 
 /** The specifiers a source file imports; a type-only import of a package is left out, since nothing installs for it. */
 function importsOf(path: string): string[] {
@@ -75,16 +74,10 @@ function sourceOf(importer: string, specifier: string): string | undefined {
   return found;
 }
 
-/**
- * The upstream item a vendored file is, or undefined for a file this registry owns. A vendored
- * `@lucide-animated` icon is named by its URL, since shadcn's own registry has no item by that name.
- */
+/** The upstream item a vendored file is, or undefined for a file this registry owns. */
 function upstreamOf(source: string): string | undefined {
   const part = /^registry\/bases\/base-ui\/ui\/([^/]+)\.tsx?$/.exec(source);
-  if (part) {
-    const animated = ANIMATED_ICON.test(readFileSync(join(APP, source), 'utf8'));
-    return animated ? `${ANIMATED_ICON_URL}${part[1]}.json` : `@shadcn/${part[1]}`;
-  }
+  if (part) return `@shadcn/${part[1]}`;
   if (source === `${BASE}/lib/utils.ts`) return '@shadcn/utils';
   if (source === `${BASE}/hooks/use-mobile.ts`) return '@shadcn/use-mobile';
   return undefined;
@@ -102,7 +95,12 @@ function ownersOf(items: RegistryItem[]): Map<string, string> {
   return new Map(
     items.flatMap((item) =>
       item.files
-        .filter((file) => file.path.startsWith(`${BASE}/components/`) || file.path.startsWith(`${BASE}/blocks/`))
+        .filter(
+          (file) =>
+            file.path.startsWith(`${BASE}/components/`) ||
+            file.path.startsWith(`${BASE}/blocks/`) ||
+            HOUSE_ICON.test(file.path),
+        )
         .map((file) => [file.path, item.name] as const),
     ),
   );
@@ -293,6 +291,31 @@ function demoProblems(items: RegistryItem[]): string[] {
 }
 
 describe('registry.json', () => {
+  it('names no lucide-animated item', () => {
+    const named = REGISTRY.items.filter((item) => JSON.stringify(item).includes('lucide-animated.com'));
+    expect(named.map((item) => item.name)).toEqual([]);
+  });
+
+  it('publishes each icon under icons/ as the item of its name, landing in the consumer components/general/', () => {
+    const icons = readdirSync(join(APP, BASE, 'icons'))
+      .filter((file) => file.endsWith('.tsx') && !file.endsWith('.spec.tsx'))
+      .map((file) => file.slice(0, -'.tsx'.length))
+      .sort();
+    expect(icons).toHaveLength(37);
+    const problems = icons.flatMap((name) => {
+      const item = REGISTRY.items.find((candidate) => candidate.name === name);
+      if (item === undefined) return [`${name}: no item`];
+      const expected = [
+        { path: `${BASE}/icons/${name}.tsx`, type: 'registry:ui', target: `components/general/${name}.tsx` },
+      ];
+      return [
+        ...(item.type === 'registry:ui' ? [] : [`${name}: type ${item.type}`]),
+        ...(isDeepStrictEqual(item.files, expected) ? [] : [`${name}: files ${JSON.stringify(item.files)}`]),
+      ];
+    });
+    expect(problems).toEqual([]);
+  });
+
   it('declares exactly the files, upstream items and packages each item imports', () => {
     const owners = ownersOf(REGISTRY.items);
     expect(REGISTRY.items.flatMap((item) => declarationProblems(item, owners))).toEqual([]);
@@ -318,7 +341,7 @@ describe('registry.json', () => {
 const treeItem: RegistryItem = {
   name: 'tree-item',
   type: 'registry:component',
-  registryDependencies: ['@shadcn/button', '@shadcn/input', '@shadcn/utils', `${ANIMATED_ICON_URL}chevron-right.json`],
+  registryDependencies: ['@shadcn/button', '@shadcn/input', '@shadcn/utils', `${ITEM_URL}chevron-right-icon.json`],
   files: [
     { path: `${BASE}/components/data-display/tree-item.tsx`, type: 'registry:component' },
     { path: `${BASE}/hooks/use-prefers-reduced-motion.ts`, type: 'registry:hook' },
@@ -342,14 +365,17 @@ const aiProviderPicker: RegistryItem = {
   files: [{ path: `${BASE}/blocks/ai-provider-picker.tsx`, type: 'registry:block' }],
 };
 
+/** The published icons, which the fixtures import and no fixture ships. */
+const ICON_OWNERS = ownersOf(REGISTRY.items.filter((item) => HOUSE_ICON.test(item.files[0]?.path ?? '')));
+
 describe('declarationProblems', () => {
   it('reports nothing for an item declaring exactly what its files import', () => {
-    expect(declarationProblems(treeItem, new Map())).toEqual([]);
+    expect(declarationProblems(treeItem, ICON_OWNERS)).toEqual([]);
   });
 
   it('reports a lib file the item imports but does not ship', () => {
     const item = { ...treeItem, files: treeItem.files.filter((file) => file.path !== `${BASE}/lib/ime.ts`) };
-    expect(declarationProblems(item, new Map())).toEqual([
+    expect(declarationProblems(item, ICON_OWNERS)).toEqual([
       'tree-item: files lacks registry/bases/base-ui/lib/ime.ts (registry:lib)',
     ]);
   });
@@ -359,53 +385,53 @@ describe('declarationProblems', () => {
       ...treeItem,
       files: [...treeItem.files, { path: `${BASE}/types/status-tone.ts`, type: 'registry:lib' }],
     };
-    expect(declarationProblems(item, new Map())).toEqual([
+    expect(declarationProblems(item, ICON_OWNERS)).toEqual([
       'tree-item: files declares registry/bases/base-ui/types/status-tone.ts (registry:lib), which its files do not import',
     ]);
   });
 
   it('reports an upstream part the item imports but does not declare', () => {
     const item = { ...treeItem, registryDependencies: treeItem.registryDependencies?.slice(1) };
-    expect(declarationProblems(item, new Map())).toEqual(['tree-item: registryDependencies lacks @shadcn/button']);
+    expect(declarationProblems(item, ICON_OWNERS)).toEqual(['tree-item: registryDependencies lacks @shadcn/button']);
   });
 
-  it('names a vendored animated icon by its lucide-animated URL', () => {
+  it('names an animated icon by its house item URL', () => {
     const item = { ...treeItem, registryDependencies: treeItem.registryDependencies?.slice(0, -1) };
-    expect(declarationProblems(item, new Map())).toEqual([
-      'tree-item: registryDependencies lacks https://lucide-animated.com/r/chevron-right.json',
+    expect(declarationProblems(item, ICON_OWNERS)).toEqual([
+      'tree-item: registryDependencies lacks https://ui.zeroxsolutions.com/r/chevron-right-icon.json',
     ]);
   });
 
   it('reports a registry dependency no file of the item imports', () => {
     const item = { ...treeItem, registryDependencies: [...(treeItem.registryDependencies ?? []), '@shadcn/card'] };
-    expect(declarationProblems(item, new Map())).toEqual([
+    expect(declarationProblems(item, ICON_OWNERS)).toEqual([
       'tree-item: registryDependencies declares @shadcn/card, which its files do not import',
     ]);
   });
 
   it('reports a package the item imports but does not declare', () => {
     const item = { ...emojiAppearanceToggleGroup, dependencies: [] };
-    expect(declarationProblems(item, new Map())).toEqual([
+    expect(declarationProblems(item, ICON_OWNERS)).toEqual([
       'emoji-appearance-toggle-group: dependencies lacks @zeroxsolutions/fluent-emoji',
     ]);
   });
 
   it('reports a package no file of the item imports', () => {
     const item = { ...emojiAppearanceToggleGroup, dependencies: ['@zeroxsolutions/fluent-emoji', 'shiki'] };
-    expect(declarationProblems(item, new Map())).toEqual([
+    expect(declarationProblems(item, ICON_OWNERS)).toEqual([
       'emoji-appearance-toggle-group: dependencies declares shiki, which its files do not import',
     ]);
   });
 
-  it('names a vendored animated icon by its lucide-animated URL, not as a shadcn item', () => {
+  it('names an animated icon by its house item URL, not as a shadcn item', () => {
     const copyButton: RegistryItem = {
       name: 'copy-button',
       type: 'registry:component',
-      registryDependencies: ['@shadcn/button', '@shadcn/check', `${ANIMATED_ICON_URL}copy.json`],
+      registryDependencies: ['@shadcn/button', '@shadcn/check', `${ITEM_URL}copy-icon.json`],
       files: [{ path: `${BASE}/components/feedback/copy-button.tsx`, type: 'registry:component' }],
     };
-    expect(declarationProblems(copyButton, new Map())).toEqual([
-      `copy-button: registryDependencies lacks ${ANIMATED_ICON_URL}check.json`,
+    expect(declarationProblems(copyButton, ICON_OWNERS)).toEqual([
+      `copy-button: registryDependencies lacks ${ITEM_URL}check-icon.json`,
       'copy-button: registryDependencies declares @shadcn/check, which its files do not import',
     ]);
   });
@@ -416,7 +442,7 @@ describe('declarationProblems', () => {
   });
 
   it('reports a component file the item imports that no item ships', () => {
-    expect(declarationProblems(aiProviderPicker, new Map())).toEqual([
+    expect(declarationProblems(aiProviderPicker, ICON_OWNERS)).toEqual([
       'ai-provider-picker: registry/bases/base-ui/blocks/ai-provider-picker.tsx imports @/registry/bases/base-ui/components/data-display/ai-provider-card, which no registry item ships',
     ]);
   });

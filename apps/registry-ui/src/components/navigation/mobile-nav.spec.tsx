@@ -9,8 +9,8 @@ const { startAnimation, stopAnimation } = vi.hoisted(() => ({ startAnimation: vi
 
 vi.mock('next/navigation', () => ({ usePathname: (): string => '/docs' }));
 
-// The icon's handle is the seam: the button drives it, and the motion behind it is lucide-animated's.
-vi.mock('@/registry/bases/base-ui/ui/menu', () => ({
+// The icon's handle is the seam: the button drives it, and the motion behind it is the icon's own.
+vi.mock('@/registry/bases/base-ui/icons/menu-icon', () => ({
   MenuIcon: forwardRef(function MenuIcon(_props, ref) {
     useImperativeHandle(ref, () => ({ startAnimation, stopAnimation }));
     return null;

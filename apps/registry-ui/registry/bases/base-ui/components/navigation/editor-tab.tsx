@@ -6,7 +6,7 @@ import { UnsavedIndicator } from '@/registry/bases/base-ui/components/feedback/u
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Item, ItemTitle } from '@/registry/bases/base-ui/ui/item';
-import { XIcon, type XIconHandle } from '@/registry/bases/base-ui/ui/x';
+import { XIcon, type XIconHandle } from '@/registry/bases/base-ui/icons/x-icon';
 
 interface EditorTabProps extends Omit<React.ComponentProps<typeof Item>, 'variant' | 'size'> {
   /** The tab of the document on show; carried as `data-active`. */

@@ -9,7 +9,10 @@ import {
   PanelHeaderTitle,
 } from '@/registry/bases/base-ui/components/layout/panel-header';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { PanelLeftCloseIcon, type PanelLeftCloseIconHandle } from '@/registry/bases/base-ui/ui/panel-left-close';
+import {
+  PanelLeftCloseIcon,
+  type PanelLeftCloseIconHandle,
+} from '@/registry/bases/base-ui/icons/panel-left-close-icon';
 
 /** A single-row panel header: a title beside a trailing collapse action. */
 function PanelHeaderDemo(): ReactNode {

@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 
-import { EyeIcon, type EyeIconHandle } from '@/registry/bases/base-ui/ui/eye';
-import { EyeOffIcon, type EyeOffIconHandle } from '@/registry/bases/base-ui/ui/eye-off';
+import { EyeIcon, type EyeIconHandle } from '@/registry/bases/base-ui/icons/eye-icon';
+import { EyeOffIcon, type EyeOffIconHandle } from '@/registry/bases/base-ui/icons/eye-off-icon';
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 

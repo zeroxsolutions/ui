@@ -4,7 +4,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Card, CardAction, CardFooter, CardTitle } from '@/registry/bases/base-ui/ui/card';
-import { CircleCheckIcon } from '@/registry/bases/base-ui/ui/circle-check';
+import { CircleCheckIcon } from '@/registry/bases/base-ui/icons/circle-check-icon';
 
 /** The lifecycle of a consent request - host-driven, like `ToolCallCard`'s state. */
 type PermissionCardStatusValue = 'pending' | 'approved' | 'denied';

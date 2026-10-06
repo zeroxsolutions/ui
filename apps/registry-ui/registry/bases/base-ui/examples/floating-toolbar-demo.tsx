@@ -3,10 +3,10 @@
 import { useRef, type ReactNode } from 'react';
 
 import { FloatingToolbar } from '@/registry/bases/base-ui/components/layout/floating-toolbar';
-import { BoldIcon, type BoldIconHandle } from '@/registry/bases/base-ui/ui/bold';
+import { BoldIcon, type BoldIconHandle } from '@/registry/bases/base-ui/icons/bold-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ItalicIcon, type ItalicIconHandle } from '@/registry/bases/base-ui/ui/italic';
-import { UnderlineIcon, type UnderlineIconHandle } from '@/registry/bases/base-ui/ui/underline';
+import { ItalicIcon, type ItalicIconHandle } from '@/registry/bases/base-ui/icons/italic-icon';
+import { UnderlineIcon, type UnderlineIconHandle } from '@/registry/bases/base-ui/icons/underline-icon';
 
 /** A row of formatting buttons in the toolbar's own shell, each icon playing while its button is hovered or focused. */
 function FloatingToolbarDemo(): ReactNode {

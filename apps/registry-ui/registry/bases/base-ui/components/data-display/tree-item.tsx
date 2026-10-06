@@ -3,7 +3,7 @@
 import * as React from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ChevronRightIcon, type ChevronRightIconHandle } from '@/registry/bases/base-ui/ui/chevron-right';
+import { ChevronRightIcon, type ChevronRightIconHandle } from '@/registry/bases/base-ui/icons/chevron-right-icon';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { isImeComposing } from '@/registry/bases/base-ui/lib/ime';

@@ -15,8 +15,8 @@ const { startAnimation, stopAnimation } = vi.hoisted(() => ({
   stopAnimation: vi.fn(),
 }));
 
-vi.mock('@/registry/bases/base-ui/ui/chevron-down', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/registry/bases/base-ui/ui/chevron-down')>();
+vi.mock('@/registry/bases/base-ui/icons/chevron-down-icon', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/registry/bases/base-ui/icons/chevron-down-icon')>();
   return {
     ...actual,
     ChevronDownIcon: React.forwardRef<unknown, ComponentProps<'div'>>((props, ref) => {

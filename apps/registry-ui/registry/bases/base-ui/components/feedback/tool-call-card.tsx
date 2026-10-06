@@ -12,9 +12,9 @@ import {
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
-import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/ui/chevron-down';
-import { CircleCheckIcon, type CircleCheckIconHandle } from '@/registry/bases/base-ui/ui/circle-check';
-import { ClockIcon, type ClockIconHandle } from '@/registry/bases/base-ui/ui/clock';
+import { ChevronDownIcon, type ChevronDownIconHandle } from '@/registry/bases/base-ui/icons/chevron-down-icon';
+import { CircleCheckIcon, type CircleCheckIconHandle } from '@/registry/bases/base-ui/icons/circle-check-icon';
+import { ClockIcon, type ClockIconHandle } from '@/registry/bases/base-ui/icons/clock-icon';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
 import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';

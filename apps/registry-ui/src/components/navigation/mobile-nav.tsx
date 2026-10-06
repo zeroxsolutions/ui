@@ -9,7 +9,7 @@ import { DocsSidebar } from '@/components/navigation/docs-sidebar';
 import { useIconAnimation } from '@/hooks/use-icon-animation';
 import { currentSiteNavItem } from '@/lib/site-nav';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { MenuIcon, type MenuIconHandle } from '@/registry/bases/base-ui/ui/menu';
+import { MenuIcon, type MenuIconHandle } from '@/registry/bases/base-ui/icons/menu-icon';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/registry/bases/base-ui/ui/sheet';
 import {
   SidebarGroup,
