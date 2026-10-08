@@ -7,7 +7,7 @@
 #          reverse, so a target that starts a runtime lands here instead.
 #
 # Nothing checks `iac/`: it is outside the nx graph, so neither job reaches it,
-# and the pre-commit hook formats with prettier, which does not read `.tf`.
+# and the pre-commit hook formats with oxfmt, which does not read `.tf`.
 #
 # No project and no path is named, and the branch list carries both default-branch
 # spellings, so the file copies to another repository unchanged.

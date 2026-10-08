@@ -70,10 +70,10 @@ ${STYLES.map((style) => `  '${style}': [\n${printKeys(missingByStyle.get(style)!
 `,
 );
 
-// The template above is not prettier-identical (e.g. an empty array prints over two lines, every
+// The template above is not oxfmt-identical (e.g. an empty array prints over two lines, every
 // style key is quoted) - this is the generator's own output, so it formats it rather than leaving a
 // diff for the next person (or the next regeneration) to clean up by hand.
-execFileSync('pnpm', ['exec', 'prettier', '--write', OUT_PATH], { cwd: PACKAGE_ROOT, stdio: 'inherit' });
+execFileSync('pnpm', ['exec', 'oxfmt', '--write', OUT_PATH], { cwd: PACKAGE_ROOT, stdio: 'inherit' });
 
 console.log(
   `emoji manifest: ${universe.length} keys; missing ${STYLES.map((style) => `${style}=${missingByStyle.get(style)!.length}`).join(', ')}`,

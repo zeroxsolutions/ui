@@ -45,5 +45,5 @@ ${body}
 export type BrandMarkName = keyof typeof BRAND_MARKS;
 `,
 );
-execFileSync('pnpm', ['exec', 'prettier', '--write', OUT], { cwd: ROOT, stdio: 'inherit' });
+execFileSync('pnpm', ['exec', 'oxfmt', '--write', OUT], { cwd: ROOT, stdio: 'inherit' });
 console.log(`brand manifest: ${marks.size} marks`);
