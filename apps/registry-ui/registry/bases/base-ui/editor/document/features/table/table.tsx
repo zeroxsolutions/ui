@@ -21,28 +21,21 @@ import type { ReactNodeCodec } from '../../../react-types';
  * registration boundary.
  */
 const cellText = (cell: NodeJSON, serialize: (n: NodeJSON) => string): string =>
-  (cell.content ?? [])
-    .map(serialize)
-    .join(' ')
-    .replace(/\n+/g, ' ')
-    .replace(/\|/g, '\\|')
-    .trim();
+  (cell.content ?? []).map(serialize).join(' ').replace(/\n+/g, ' ').replace(/\|/g, '\\|').trim();
 
 const tableCodec: ReactNodeCodec = {
   node: 'table',
   toMarkdown: (node, ctx) => {
     const rows = node.content ?? [];
     if (rows.length === 0) return '';
-    const toCells = (row: NodeJSON): string[] =>
-      (row.content ?? []).map((cell) => cellText(cell, ctx.serializeNode));
+    const toCells = (row: NodeJSON): string[] => (row.content ?? []).map((cell) => cellText(cell, ctx.serializeNode));
     const header = toCells(rows[0]);
     const separator = header.map(() => '---');
     const body = rows.slice(1).map(toCells);
     const line = (cells: string[]) => `| ${cells.join(' | ')} |`;
     return [line(header), line(separator), ...body.map(line)].join('\n');
   },
-  toHTML: (node, ctx) =>
-    `<table><tbody>${ctx.serializeChildren(node)}</tbody></table>`,
+  toHTML: (node, ctx) => `<table><tbody>${ctx.serializeChildren(node)}</tbody></table>`,
   toReact: (node, ctx) => (
     <table>
       <tbody>{ctx.renderChildren(node)}</tbody>
@@ -54,9 +47,7 @@ const tableCodec: ReactNodeCodec = {
       type: 'tableRow',
       content: (row.children ?? []).map((cell) => ({
         type: rowIndex === 0 ? 'tableHeader' : 'tableCell',
-        content: [
-          { type: 'paragraph', content: ctx.fromMarkdownChildren(cell) },
-        ],
+        content: [{ type: 'paragraph', content: ctx.fromMarkdownChildren(cell) }],
       })),
     }));
     return { type: 'table', content: rows };

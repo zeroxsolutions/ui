@@ -30,14 +30,7 @@ export interface EditorProps {
   onChange?(delta: Delta): void;
 }
 
-export function Editor({
-  features,
-  content,
-  editable = true,
-  className,
-  onReady,
-  onChange,
-}: EditorProps) {
+export function Editor({ features, content, editable = true, className, onReady, onChange }: EditorProps) {
   // The raw engine instance — needed only to hand to `@tiptap/react`'s
   // `EditorContent`, which hosts the React node-view portals (without it, custom
   // node views never mount and render as bare `<div>`s). Typed `unknown`: no
@@ -150,9 +143,7 @@ export function Editor({
     }
     const sync = () => {
       const rect = handleEl.getBoundingClientRect();
-      const hidden =
-        handleEl.classList.contains('hide') ||
-        getComputedStyle(handleEl).display === 'none';
+      const hidden = handleEl.classList.contains('hide') || getComputedStyle(handleEl).display === 'none';
       setPlus({ top: rect.top, left: rect.left, hidden });
     };
     sync();
@@ -180,11 +171,8 @@ export function Editor({
     // `.drag-handle`; listen for the end on `document` so it's caught even if the
     // handle is repositioned mid-drag — that keeps the class from ever sticking.
     const start = (event: DragEvent) => {
-      const handle = (event.target as HTMLElement | null)?.closest?.(
-        '.drag-handle',
-      );
-      if (handle && rootEl.contains(handle))
-        rootEl.classList.add('is-dragging');
+      const handle = (event.target as HTMLElement | null)?.closest?.('.drag-handle');
+      if (handle && rootEl.contains(handle)) rootEl.classList.add('is-dragging');
     };
     const end = () => rootEl.classList.remove('is-dragging');
     document.addEventListener('dragstart', start);
@@ -203,13 +191,9 @@ export function Editor({
       <EditorContent
         editor={engine as never}
         data-editor="document"
-        className={cn(
-          'document-editor prose max-w-none text-base leading-relaxed focus:outline-none',
-          className,
-        )}
+        className={cn('document-editor prose max-w-none text-base leading-relaxed focus:outline-none', className)}
       />
-      {gripHost &&
-        createPortal(<GripVertical size={16} aria-hidden />, gripHost)}
+      {gripHost && createPortal(<GripVertical size={16} aria-hidden />, gripHost)}
       {rootEl &&
         plus &&
         !plus.hidden &&
@@ -233,7 +217,7 @@ export function Editor({
                 });
               }
             }}
-            className="fixed z-40 flex size-6 items-center justify-center rounded-md text-muted-foreground opacity-55 transition hover:bg-accent hover:opacity-100"
+            className="text-muted-foreground hover:bg-accent fixed z-40 flex size-6 items-center justify-center rounded-md opacity-55 transition hover:opacity-100"
             style={{ top: plus.top, left: plus.left - 22 }}
           >
             <Plus size={16} aria-hidden />

@@ -1,9 +1,6 @@
 import type { CodecRegistry } from './codec-registry.js';
 import type { DocJSON, MarkJSON, NodeJSON } from '../core/types/json.js';
-import type {
-  DroppedNode,
-  ImportWarning,
-} from '../core/types/import-result.js';
+import type { DroppedNode, ImportWarning } from '../core/types/import-result.js';
 
 /**
  * The import trust boundary (task 4.6). Every produced node/mark is validated
@@ -17,11 +14,7 @@ export interface ImportReport {
   dropped: DroppedNode[];
 }
 
-export function validateDoc(
-  doc: DocJSON,
-  registry: CodecRegistry,
-  report: ImportReport,
-): DocJSON {
+export function validateDoc(doc: DocJSON, registry: CodecRegistry, report: ImportReport): DocJSON {
   return (
     (validateNode(doc, registry, report) as DocJSON) ?? {
       type: 'doc',
@@ -30,11 +23,7 @@ export function validateDoc(
   );
 }
 
-function validateNode(
-  node: NodeJSON,
-  registry: CodecRegistry,
-  report: ImportReport,
-): NodeJSON | null {
+function validateNode(node: NodeJSON, registry: CodecRegistry, report: ImportReport): NodeJSON | null {
   const result: NodeJSON = { type: node.type };
 
   const schema = registry.nodeSchema(node.type);
@@ -70,11 +59,7 @@ function validateNode(
   return result;
 }
 
-function validateMark(
-  mark: MarkJSON,
-  registry: CodecRegistry,
-  report: ImportReport,
-): MarkJSON | null {
+function validateMark(mark: MarkJSON, registry: CodecRegistry, report: ImportReport): MarkJSON | null {
   const schema = registry.markSchema(mark.type);
   if (!schema) return mark;
   const parsed = schema.safeParse(mark.attrs ?? {});

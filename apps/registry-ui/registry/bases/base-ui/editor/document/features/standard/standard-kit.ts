@@ -7,10 +7,7 @@ import { TaskList } from '@tiptap/extension-task-list';
 import { ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
-import {
-  defineFeature,
-  type EditorFeature,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import { defineFeature, type EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import { TaskItemView } from './task-item-view.js';
 
 /** Options for the standard block set. */
@@ -25,11 +22,7 @@ export interface StandardKitOptions {
   dragHandle?: boolean;
 }
 import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs.js';
-import {
-  standardBubbleItems,
-  standardSlashItems,
-  standardToolbarItems,
-} from './standard-ui.js';
+import { standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui.js';
 
 /**
  * The standard block set (L1–L2): headings, bullet/ordered/task lists,
@@ -76,13 +69,9 @@ export function standardKit(options: StandardKitOptions = {}): EditorFeature {
         Placeholder.configure({
           includeChildren: true,
           placeholder: ({ node }) =>
-            node.type.name === 'heading'
-              ? `Heading ${node.attrs.level as number}`
-              : placeholder,
+            node.type.name === 'heading' ? `Heading ${node.attrs.level as number}` : placeholder,
         }),
-        ...(dragHandle
-          ? [GlobalDragHandle.configure({ dragHandleWidth: 24 })]
-          : []),
+        ...(dragHandle ? [GlobalDragHandle.configure({ dragHandleWidth: 24 })] : []),
       ],
     },
   });

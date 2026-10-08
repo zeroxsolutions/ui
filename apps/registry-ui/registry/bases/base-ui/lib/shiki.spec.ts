@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  highlightToLines,
-  resolveLanguage,
-  styleObjectForToken,
-} from './shiki';
+import { highlightToLines, resolveLanguage, styleObjectForToken } from './shiki';
 
 describe('styleObjectForToken', () => {
   it('emits the color when present', () => {
@@ -88,14 +84,10 @@ describe('highlightToLines', () => {
     const lines = await highlightToLines(code, 'js');
     expect(lines).not.toBeNull();
 
-    const text = (lines ?? [])
-      .map((line) => line.map((token) => token.content).join(''))
-      .join('\n');
+    const text = (lines ?? []).map((line) => line.map((token) => token.content).join('')).join('\n');
     expect(text).toBe(code);
 
-    const hasStyledToken = (lines ?? []).some((line) =>
-      line.some((token) => token.style?.color),
-    );
+    const hasStyledToken = (lines ?? []).some((line) => line.some((token) => token.style?.color));
     expect(hasStyledToken).toBe(true);
   }, 20000);
 

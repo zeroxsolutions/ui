@@ -54,10 +54,7 @@ export class DuplicateRegistrationError extends EditorError {
     readonly kind: 'feature' | 'node' | 'mark' | 'command',
     readonly id: string,
   ) {
-    super(
-      'editor.registration.duplicate',
-      `Duplicate ${kind} registration for "${id}".`,
-    );
+    super('editor.registration.duplicate', `Duplicate ${kind} registration for "${id}".`);
     this.name = 'DuplicateRegistrationError';
   }
 }

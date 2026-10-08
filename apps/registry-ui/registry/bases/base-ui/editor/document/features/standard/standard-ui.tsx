@@ -14,11 +14,7 @@ import {
   TextQuote,
   Underline,
 } from 'lucide-react';
-import type {
-  BubbleItem,
-  SlashItem,
-  ToolbarItem,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import type { BubbleItem, SlashItem, ToolbarItem } from '@zeroxsolutions/editor-core/document/core/index';
 
 /** Slash-menu insert items for the standard blocks. */
 export const standardSlashItems: SlashItem[] = [

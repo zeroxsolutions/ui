@@ -22,9 +22,7 @@ const DEFAULT_SNAPSHOT_DEBOUNCE_MS = 1000;
  * - A settling burst of edits produces at most **one** debounced `Snapshot`;
  *   `getSnapshot`/`requestSnapshot` also produce one on demand.
  */
-export function createPmStepsBackend(
-  init: DocumentBackendInit,
-): IDocumentBackend {
+export function createPmStepsBackend(init: DocumentBackendInit): IDocumentBackend {
   let version = 0;
   let latestDoc: DocJSON = init.doc;
   const debounceMs = init.snapshotDebounceMs ?? DEFAULT_SNAPSHOT_DEBOUNCE_MS;
@@ -77,10 +75,7 @@ export function createPmStepsBackend(
     applyRemoteDelta(delta: Delta): void {
       // Boundary validation of an externally-produced delta.
       if (typeof delta?.version !== 'number') {
-        throw new EditorError(
-          'editor.backend.invalid_remote_delta',
-          'Remote delta is missing a numeric version.',
-        );
+        throw new EditorError('editor.backend.invalid_remote_delta', 'Remote delta is missing a numeric version.');
       }
       // The default backend is single-user: it has no CRDT peer to merge
       // against, so it cannot safely apply a remote change to the document.

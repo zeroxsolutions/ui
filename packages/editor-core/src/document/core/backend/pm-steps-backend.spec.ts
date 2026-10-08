@@ -8,11 +8,11 @@ const doc = (text: string): DocJSON => ({
   content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
 });
 
-const tx = (
-  text: string,
-  changes: unknown,
-  docChanged = true,
-): BackendTransaction => ({ doc: doc(text), changes, docChanged });
+const tx = (text: string, changes: unknown, docChanged = true): BackendTransaction => ({
+  doc: doc(text),
+  changes,
+  docChanged,
+});
 
 describe('PmStepsBackend', () => {
   beforeEach(() => vi.useFakeTimers());
@@ -98,15 +98,13 @@ describe('PmStepsBackend', () => {
 
   it('rejects a malformed remote delta at the boundary', () => {
     const backend = createPmStepsBackend({ doc: doc('') });
-    expect(() =>
-      backend.applyRemoteDelta({ version: undefined as never, changes: [] }),
-    ).toThrow(/missing a numeric version/);
+    expect(() => backend.applyRemoteDelta({ version: undefined as never, changes: [] })).toThrow(
+      /missing a numeric version/,
+    );
   });
 
   it('rejects remote application on the single-user default backend', () => {
     const backend = createPmStepsBackend({ doc: doc('') });
-    expect(() => backend.applyRemoteDelta({ version: 5, changes: [] })).toThrow(
-      /cannot apply remote deltas/,
-    );
+    expect(() => backend.applyRemoteDelta({ version: 5, changes: [] })).toThrow(/cannot apply remote deltas/);
   });
 });

@@ -38,6 +38,7 @@
 ### Task 1: Move the icons into the registry's own folder and publish them
 
 **Files:**
+
 - Move: `registry/bases/base-ui/ui/<name>.tsx` -> `registry/bases/base-ui/icons/<name>-icon.tsx` (37 files)
 - Modify: the 34 files holding the 63 imports of the old paths (listed by the script's output)
 - Modify: `registry.json` (43 dependency URLs, 37 new items)
@@ -47,6 +48,7 @@
 - Create: `tools/move-animated-icons.py`
 
 **Interfaces:**
+
 - Produces: the module path `@/registry/bases/base-ui/icons/<name>-icon` exporting `<Name>Icon` and `<Name>IconHandle`; the item `<name>-icon` in `registry.json`; in `registry.spec.ts`, `HOUSE_ICON = /^registry\/bases\/base-ui\/icons\/([^/]+)\.tsx$/`.
 
 - [ ] **Step 1: Install and confirm the baseline is green**
@@ -99,32 +101,32 @@ Rewrite the two fixtures that named lucide-animated: in `treeItem` (line 321) us
 Add to `describe('registry.json', ...)`:
 
 ```ts
-  it('names no lucide-animated item', () => {
-    const named = REGISTRY.items.filter((item) =>
-      (item.registryDependencies ?? []).some((dependency) => dependency.includes('lucide-animated.com')),
-    );
-    expect(named.map((item) => item.name)).toEqual([]);
-  });
+it('names no lucide-animated item', () => {
+  const named = REGISTRY.items.filter((item) =>
+    (item.registryDependencies ?? []).some((dependency) => dependency.includes('lucide-animated.com')),
+  );
+  expect(named.map((item) => item.name)).toEqual([]);
+});
 
-  it('publishes each icon under icons/ as the item of its name, landing in the consumer components/general/', () => {
-    const icons = readdirSync(join(APP, BASE, 'icons'))
-      .filter((file) => file.endsWith('.tsx') && !file.endsWith('.spec.tsx'))
-      .map((file) => file.slice(0, -'.tsx'.length))
-      .sort();
-    expect(icons).toHaveLength(37);
-    const problems = icons.flatMap((name) => {
-      const item = REGISTRY.items.find((candidate) => candidate.name === name);
-      if (item === undefined) return [`${name}: no item`];
-      const expected = [
-        { path: `${BASE}/icons/${name}.tsx`, type: 'registry:ui', target: `components/general/${name}.tsx` },
-      ];
-      return [
-        ...(item.type === 'registry:ui' ? [] : [`${name}: type ${item.type}`]),
-        ...(isDeepStrictEqual(item.files, expected) ? [] : [`${name}: files ${JSON.stringify(item.files)}`]),
-      ];
-    });
-    expect(problems).toEqual([]);
+it('publishes each icon under icons/ as the item of its name, landing in the consumer components/general/', () => {
+  const icons = readdirSync(join(APP, BASE, 'icons'))
+    .filter((file) => file.endsWith('.tsx') && !file.endsWith('.spec.tsx'))
+    .map((file) => file.slice(0, -'.tsx'.length))
+    .sort();
+  expect(icons).toHaveLength(37);
+  const problems = icons.flatMap((name) => {
+    const item = REGISTRY.items.find((candidate) => candidate.name === name);
+    if (item === undefined) return [`${name}: no item`];
+    const expected = [
+      { path: `${BASE}/icons/${name}.tsx`, type: 'registry:ui', target: `components/general/${name}.tsx` },
+    ];
+    return [
+      ...(item.type === 'registry:ui' ? [] : [`${name}: type ${item.type}`]),
+      ...(isDeepStrictEqual(item.files, expected) ? [] : [`${name}: files ${JSON.stringify(item.files)}`]),
+    ];
   });
+  expect(problems).toEqual([]);
+});
 ```
 
 In `src/lib/source.spec.ts`, change `https://lucide-animated.com/r/circle.json` to `https://ui.zeroxsolutions.com/r/circle-icon.json` at both lines (728 and 751).
@@ -259,11 +261,13 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Task 2: Render a span and stay still under reduced motion
 
 **Files:**
+
 - Create: `registry/bases/base-ui/icons/animated-icons.spec.tsx`
 - Create: `tools/fix-animated-icons.py`
 - Modify: the 37 files in `registry/bases/base-ui/icons/`
 
 **Interfaces:**
+
 - Consumes: Task 1's module paths `@/registry/bases/base-ui/icons/<name>-icon`.
 - Produces: each icon's wrapper `span[data-slot="<name>-icon"]`.
 
@@ -284,7 +288,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const motionState = vi.hoisted(() => ({ reduced: false, starts: [] as unknown[][] }));
 
 vi.mock('motion/react', () => {
-  const MOTION_PROPS = new Set(['animate', 'initial', 'variants', 'transition', 'custom', 'exit', 'whileHover', 'whileTap']);
+  const MOTION_PROPS = new Set([
+    'animate',
+    'initial',
+    'variants',
+    'transition',
+    'custom',
+    'exit',
+    'whileHover',
+    'whileTap',
+  ]);
   const motion = new Proxy(
     {},
     {
@@ -527,15 +540,15 @@ Then guard each start the script left. `isMotionReduced` is already declared in 
   that one function:
 
 ```tsx
-    const startAnimation = useCallback(async () => {
-      if (isMotionReduced || isAnimatingRef.current) return;
-      isAnimatingRef.current = true;
-      try {
-        await controls.start("animate");
-      } finally {
-        isAnimatingRef.current = false;
-      }
-    }, [controls, isMotionReduced]);
+const startAnimation = useCallback(async () => {
+  if (isMotionReduced || isAnimatingRef.current) return;
+  isAnimatingRef.current = true;
+  try {
+    await controls.start('animate');
+  } finally {
+    isAnimatingRef.current = false;
+  }
+}, [controls, isMotionReduced]);
 ```
 
 Confirm nothing was missed:
@@ -584,9 +597,11 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Task 3: Build the registry and read what consumers will receive
 
 **Files:**
+
 - Read only: `public/r/` (build output, never committed by hand)
 
 **Interfaces:**
+
 - Consumes: Tasks 1 and 2.
 
 - [ ] **Step 1: Build and validate**

@@ -1,8 +1,4 @@
-import {
-  DuplicateRegistrationError,
-  EditorError,
-  MissingFeatureDependencyError,
-} from '../errors.js';
+import { DuplicateRegistrationError, EditorError, MissingFeatureDependencyError } from '../errors.js';
 import type { EditorFeature } from '../types/feature.js';
 
 /**
@@ -35,10 +31,7 @@ export function resolveFeatures(features: EditorFeature[]): EditorFeature[] {
   const visit = (feature: EditorFeature): void => {
     if (done.has(feature.id)) return;
     if (onPath.has(feature.id)) {
-      throw new EditorError(
-        'editor.feature.dependency_cycle',
-        `Dependency cycle detected at feature "${feature.id}".`,
-      );
+      throw new EditorError('editor.feature.dependency_cycle', `Dependency cycle detected at feature "${feature.id}".`);
     }
     onPath.add(feature.id);
     for (const dependency of feature.dependsOn ?? []) {

@@ -1,10 +1,6 @@
 import { act, render, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type {
-  DocJSON,
-  IEditor,
-  NodeJSON,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import type { DocJSON, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
 import { ChatInput } from './chat-input.js';
 import { ChatMessageView } from './chat-message-view.js';
@@ -27,13 +23,9 @@ describe('ChatMessageView', () => {
   it('renders the SAME mention pill as ChatInput - one shared render path', async () => {
     // Input side: insert a mention and read the pill the node-view renders.
     let editor!: IEditor;
-    const input = render(
-      <ChatInput onSubmit={vi.fn()} onReady={(e) => (editor = e)} />,
-    );
+    const input = render(<ChatInput onSubmit={vi.fn()} onReady={(e) => (editor = e)} />);
     await waitFor(() => expect(editor).toBeDefined());
-    await waitFor(() =>
-      expect(input.container.querySelector('.ProseMirror')).not.toBeNull(),
-    );
+    await waitFor(() => expect(input.container.querySelector('.ProseMirror')).not.toBeNull());
     act(() => {
       editor.focus();
       editor.run('insertMention', { id: 'u1', label: 'Ada' });
@@ -46,30 +38,20 @@ describe('ChatMessageView', () => {
 
     // View side: the same mention in a submitted payload's doc.
     const view = render(
-      <ChatMessageView
-        message={message(
-          para({ type: 'mention', attrs: { id: 'u1', label: 'Ada' } }),
-        )}
-      />,
+      <ChatMessageView message={message(para({ type: 'mention', attrs: { id: 'u1', label: 'Ada' } }))} />,
     );
     const viewPill = view.container.querySelector('[data-slot="mention"]');
 
     expect(viewPill).not.toBeNull();
     expect(viewPill!.className).toBe(inputPill.className);
-    expect(viewPill!.getAttribute('data-mention-id')).toBe(
-      inputPill.getAttribute('data-mention-id'),
-    );
+    expect(viewPill!.getAttribute('data-mention-id')).toBe(inputPill.getAttribute('data-mention-id'));
     expect(viewPill!.textContent).toBe(inputPill.textContent);
     expect(viewPill!.textContent).toBe('@Ada');
   });
 
   it('renders the label, never the raw id', () => {
     const { getByText, queryByText } = render(
-      <ChatMessageView
-        message={message(
-          para({ type: 'mention', attrs: { id: 'u1', label: 'Ada' } }),
-        )}
-      />,
+      <ChatMessageView message={message(para({ type: 'mention', attrs: { id: 'u1', label: 'Ada' } }))} />,
     );
     expect(getByText('@Ada')).toBeDefined();
     expect(queryByText('u1')).toBeNull();
@@ -100,11 +82,7 @@ describe('ChatMessageView', () => {
   });
 
   it('renders no command pill when the message carries no command', () => {
-    const { container } = render(
-      <ChatMessageView
-        message={message(para({ type: 'text', text: 'hello' }))}
-      />,
-    );
+    const { container } = render(<ChatMessageView message={message(para({ type: 'text', text: 'hello' }))} />);
     expect(container.querySelector('.chat-composer')).not.toBeNull();
     expect(container.querySelector('[data-slot="command"]')).toBeNull();
   });

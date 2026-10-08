@@ -1,15 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  DocJSON,
-  IEditor,
-  NodeJSON,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  createCodecRegistry,
-  importHTML,
-  serialize,
-} from '@zeroxsolutions/editor-core/document/serialize/index';
+import type { DocJSON, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
+import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../../document/features/standard/index.js';
 import { inlineToken } from './inline-token.js';
 
@@ -17,10 +9,7 @@ const editors: IEditor[] = [];
 function build(feature: ReturnType<typeof inlineToken>['feature']): IEditor {
   const element = document.createElement('div');
   document.body.append(element);
-  const editor = createEditor()
-    .use(standardKit())
-    .use(feature)
-    .build({ element });
+  const editor = createEditor().use(standardKit()).use(feature).build({ element });
   editors.push(editor);
   return editor;
 }
@@ -43,11 +32,7 @@ const channel = inlineToken({ kind: 'channel', char: '#', display: 'label' });
 
 const commandRegistry = createCodecRegistry([command.feature]);
 
-const commandDoc = (
-  id = 'image',
-  slug = 'image-gen',
-  label = 'Image',
-): DocJSON => ({
+const commandDoc = (id = 'image', slug = 'image-gen', label = 'Image'): DocJSON => ({
   type: 'doc',
   content: [
     {
@@ -76,9 +61,7 @@ describe('inlineToken - commit', () => {
   });
 
   it('reads the uniform ref back from committed attrs', () => {
-    expect(
-      command.readRef({ id: 'image', label: 'Image', slug: 'image-gen' }),
-    ).toEqual({
+    expect(command.readRef({ id: 'image', label: 'Image', slug: 'image-gen' })).toEqual({
       id: 'image',
       label: 'Image',
       slug: 'image-gen',
@@ -96,9 +79,7 @@ describe('inlineToken - codec round-trip', () => {
   });
 
   it('exports the honest literal token to Markdown', () => {
-    expect(serialize(commandDoc(), 'markdown', commandRegistry)).toContain(
-      '/image-gen',
-    );
+    expect(serialize(commandDoc(), 'markdown', commandRegistry)).toContain('/image-gen');
   });
 
   it('imports a matching span back into the node', () => {
@@ -115,10 +96,7 @@ describe('inlineToken - codec round-trip', () => {
   });
 
   it('declines a span whose kind does not match', () => {
-    const result = importHTML(
-      '<p><span data-token-kind="mention" data-token-id="x">@x</span></p>',
-      commandRegistry,
-    );
+    const result = importHTML('<p><span data-token-kind="mention" data-token-id="x">@x</span></p>', commandRegistry);
     expect(findNode(result.doc, 'command')).toBeUndefined();
   });
 });

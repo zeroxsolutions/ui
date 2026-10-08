@@ -37,14 +37,9 @@ const linkCodec: ReactMarkCodec = {
       {children}
     </a>
   ),
-  fromMarkdown: (token) =>
-    token.type === 'link'
-      ? { type: 'link', attrs: { href: String(token.url ?? '') } }
-      : null,
+  fromMarkdown: (token) => (token.type === 'link' ? { type: 'link', attrs: { href: String(token.url ?? '') } } : null),
   fromHTML: (element) =>
-    element.tagName === 'A'
-      ? { type: 'link', attrs: { href: element.getAttribute('href') ?? '' } }
-      : null,
+    element.tagName === 'A' ? { type: 'link', attrs: { href: element.getAttribute('href') ?? '' } } : null,
 };
 
 /** The chrome renders its own href popover, then calls `setLink`; the item just
@@ -64,8 +59,7 @@ export function link(): EditorFeature {
     commands: {
       setLink: {
         args: linkArgs,
-        run: (editor, args) =>
-          editor.run('setMark', { name: 'link', attrs: { href: args.href } }),
+        run: (editor, args) => editor.run('setMark', { name: 'link', attrs: { href: args.href } }),
       },
       unsetLink: {
         run: (editor) => editor.run('unsetMark', { name: 'link' }),

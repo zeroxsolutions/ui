@@ -13,10 +13,7 @@ import type { ImportResult } from '../core/types/import-result.js';
  * Requires a DOM (`DOMParser`) — available in the browser and under jsdom; a
  * Node-side migration must provide a DOM shim.
  */
-export function importHTML(
-  html: string,
-  registry: CodecRegistry,
-): ImportResult {
+export function importHTML(html: string, registry: CodecRegistry): ImportResult {
   const report: ImportReport = { warnings: [], dropped: [] };
   const parsed = new DOMParser().parseFromString(html, 'text/html');
 
@@ -35,11 +32,7 @@ export function importHTML(
   };
 
   const addMark = (nodes: NodeJSON[], mark: MarkJSON): NodeJSON[] =>
-    nodes.map((node) =>
-      node.type === 'text'
-        ? { ...node, marks: [...(node.marks ?? []), mark] }
-        : node,
-    );
+    nodes.map((node) => (node.type === 'text' ? { ...node, marks: [...(node.marks ?? []), mark] } : node));
 
   function convertElement(element: HTMLElement): NodeJSON[] {
     const mark = matchMark(element);

@@ -4,10 +4,7 @@ import type {
   NodeCodec as CoreNodeCodec,
   SerializeContext as CoreSerializeContext,
 } from '@zeroxsolutions/editor-core/document/core/types/codec';
-import type {
-  MarkJSON,
-  NodeJSON,
-} from '@zeroxsolutions/editor-core/document/core/types/json';
+import type { MarkJSON, NodeJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
 
 /**
  * React-typed aliases for the serialization slots `editor-core` declares opaque.
@@ -29,22 +26,12 @@ export interface ReactSerializeContext extends CoreSerializeContext {
 /** A node codec whose `toReact` builds a React tree. Use this (not the core
  *  `NodeCodec`) so `ctx.renderChildren` and the JSX return typecheck; cast the
  *  codec into the core registry via `as NodeCodec`. */
-export type ReactNodeCodec<A = Record<string, unknown>> = Omit<
-  CoreNodeCodec<A>,
-  'toReact'
-> & {
+export type ReactNodeCodec<A = Record<string, unknown>> = Omit<CoreNodeCodec<A>, 'toReact'> & {
   toReact?(node: NodeJSON<A>, ctx: ReactSerializeContext): ReactNode;
 };
 
 /** A mark codec whose `toReact` wraps a React tree. The chrome React walker
  *  passes the already-rendered children as a `ReactNode`. */
-export type ReactMarkCodec<A = Record<string, unknown>> = Omit<
-  CoreMarkCodec<A>,
-  'toReact'
-> & {
-  toReact?(
-    mark: MarkJSON<A>,
-    children: ReactNode,
-    ctx: ReactSerializeContext,
-  ): ReactNode;
+export type ReactMarkCodec<A = Record<string, unknown>> = Omit<CoreMarkCodec<A>, 'toReact'> & {
+  toReact?(mark: MarkJSON<A>, children: ReactNode, ctx: ReactSerializeContext): ReactNode;
 };

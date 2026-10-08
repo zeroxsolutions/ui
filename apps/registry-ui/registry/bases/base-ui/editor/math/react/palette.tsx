@@ -10,11 +10,7 @@ import {
   CommandList,
   CommandShortcut,
 } from '@/registry/bases/base-ui/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/registry/bases/base-ui/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { SYMBOL_GROUPS } from '@zeroxsolutions/editor-core/math/core/symbols';
 import { MATH_TEMPLATES } from '@zeroxsolutions/editor-core/math/core/templates';
@@ -41,12 +37,7 @@ export interface MathPaletteProps {
   className?: string;
 }
 
-export function MathPalette({
-  onInsert,
-  trigger,
-  nativeButton = true,
-  className,
-}: MathPaletteProps) {
+export function MathPalette({ onInsert, trigger, nativeButton = true, className }: MathPaletteProps) {
   return (
     <Popover>
       <PopoverTrigger render={trigger} nativeButton={nativeButton} />
@@ -78,9 +69,7 @@ export function MathPalette({
                 <CommandItem
                   key={template.label}
                   value={`${template.label} ${template.latex}`}
-                  onSelect={() =>
-                    onInsert(template.latex, template.caretOffset)
-                  }
+                  onSelect={() => onInsert(template.latex, template.caretOffset)}
                 >
                   <span>{template.label}</span>
                   <CommandShortcut>{template.latex}</CommandShortcut>

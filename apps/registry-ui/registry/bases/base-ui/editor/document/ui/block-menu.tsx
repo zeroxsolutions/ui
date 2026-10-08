@@ -9,16 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/registry/bases/base-ui/ui/tooltip';
-import type {
-  BlockMenuItem,
-  IEditor,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
+import type { BlockMenuItem, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 
 /**
  * The block drag-handle menu (task 8.3): a handle that tracks the hovered block
@@ -35,15 +27,11 @@ export interface BlockMenuProps {
   container?: HTMLElement | null;
 }
 
-function blockUnder(
-  container: HTMLElement,
-  clientY: number,
-): HTMLElement | null {
+function blockUnder(container: HTMLElement, clientY: number): HTMLElement | null {
   const surface = container.querySelector('.ProseMirror') ?? container;
   for (const child of Array.from(surface.children)) {
     const rect = child.getBoundingClientRect();
-    if (clientY >= rect.top && clientY <= rect.bottom)
-      return child as HTMLElement;
+    if (clientY >= rect.top && clientY <= rect.bottom) return child as HTMLElement;
   }
   return null;
 }
@@ -65,11 +53,7 @@ export function BlockMenu({ editor, items, container }: BlockMenuProps) {
 
   if (!pos) return null;
   return (
-    <div
-      data-slot="block-menu"
-      className="fixed z-40"
-      style={{ top: pos.top, left: pos.left }}
-    >
+    <div data-slot="block-menu" className="fixed z-40" style={{ top: pos.top, left: pos.left }}>
       <TooltipProvider>
         <DropdownMenu>
           <Tooltip>
@@ -80,7 +64,7 @@ export function BlockMenu({ editor, items, container }: BlockMenuProps) {
                     <button
                       type="button"
                       aria-label="Block actions"
-                      className="flex h-6 w-5 cursor-grab items-center justify-center rounded text-muted-foreground opacity-60 transition hover:bg-accent hover:opacity-100"
+                      className="text-muted-foreground hover:bg-accent flex h-6 w-5 cursor-grab items-center justify-center rounded opacity-60 transition hover:opacity-100"
                     >
                       ⋮⋮
                     </button>

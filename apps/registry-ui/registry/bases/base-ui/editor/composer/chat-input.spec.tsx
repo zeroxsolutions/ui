@@ -1,10 +1,4 @@
-import {
-  act,
-  render,
-  fireEvent,
-  cleanup,
-  waitFor,
-} from '@testing-library/react';
+import { act, render, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { ChatCommand } from '@zeroxsolutions/editor-core/composer/composer-types';
@@ -35,12 +29,8 @@ async function mount(onSubmit = vi.fn()) {
     />,
   );
   await waitFor(() => expect(editor).toBeDefined());
-  const control = utils.container.querySelector(
-    '[data-slot="input-group-control"]',
-  ) as HTMLElement;
-  await waitFor(() =>
-    expect(control.querySelector('.ProseMirror')).not.toBeNull(),
-  );
+  const control = utils.container.querySelector('[data-slot="input-group-control"]') as HTMLElement;
+  await waitFor(() => expect(control.querySelector('.ProseMirror')).not.toBeNull());
   const pm = control.querySelector('.ProseMirror') as HTMLElement;
   act(() => {
     pm.focus();
@@ -96,17 +86,13 @@ describe('ChatInput', () => {
       editor.run('insertContent', { content: 'a portrait of ' });
     });
     // The command is an inline node in the document, not surface state.
-    expect(control.querySelector('[data-slot="command"]')?.textContent).toBe(
-      '/image-gen',
-    );
+    expect(control.querySelector('[data-slot="command"]')?.textContent).toBe('/image-gen');
 
     fireEvent.keyDown(control, { key: 'Enter' });
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     const payload = onSubmit.mock.calls[0][0];
-    expect(payload.tokens.command).toEqual([
-      { id: 'image', label: 'Image', name: 'image-gen' },
-    ]);
+    expect(payload.tokens.command).toEqual([{ id: 'image', label: 'Image', name: 'image-gen' }]);
     expect(payload.text).toBe('/image-gen a portrait of ');
   });
 });

@@ -1,15 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  DocJSON,
-  IEditor,
-  NodeJSON,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  createCodecRegistry,
-  importHTML,
-  serialize,
-} from '@zeroxsolutions/editor-core/document/serialize/index';
+import type { DocJSON, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
+import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../standard/index.js';
 import { mention } from './mention.js';
 
@@ -44,17 +36,13 @@ function findNode(node: NodeJSON, type: string): NodeJSON | undefined {
 
 const mentionDoc = (id = 'u1', label = 'Ada'): DocJSON => ({
   type: 'doc',
-  content: [
-    { type: 'paragraph', content: [{ type: 'mention', attrs: { id, label } }] },
-  ],
+  content: [{ type: 'paragraph', content: [{ type: 'mention', attrs: { id, label } }] }],
 });
 
 describe('mention', () => {
   it('inserts an inline mention via its command', () => {
     const editor = build();
-    expect(editor.run('insertMention', { id: 'u1', label: 'Ada' })).not.toBe(
-      false,
-    );
+    expect(editor.run('insertMention', { id: 'u1', label: 'Ada' })).not.toBe(false);
     const node = findNode(editor.getJSON(), 'mention');
     expect(node?.attrs?.id).toBe('u1');
     expect(node?.attrs?.label).toBe('Ada');
@@ -80,10 +68,7 @@ describe('mention', () => {
   });
 
   it('imports a data-mention-id span back into a mention', () => {
-    const result = importHTML(
-      '<p><span data-mention-id="u2">@Bob</span></p>',
-      registry,
-    );
+    const result = importHTML('<p><span data-mention-id="u2">@Bob</span></p>', registry);
     const node = findNode(result.doc, 'mention');
     expect(node?.attrs?.id).toBe('u2');
     expect(node?.attrs?.label).toBe('Bob');

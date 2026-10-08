@@ -12,9 +12,7 @@
  * parse/render error message. Discriminated on `ok` so a caller can keep the
  * last good render on failure (the mermaid non-destructive-error behavior).
  */
-export type MathRenderResult =
-  | { ok: true; html: string }
-  | { ok: false; error: string };
+export type MathRenderResult = { ok: true; html: string } | { ok: false; error: string };
 
 /**
  * Render configuration for the surface. `displayMode` selects block (centered,

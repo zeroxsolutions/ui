@@ -1,10 +1,6 @@
 import { createContext, useContext } from 'react';
 import { defaultEditorTheme } from './default-theme.js';
-import type {
-  IEditorTheme,
-  ThemeMode,
-  ThemeVariant,
-} from './types/editor-theme.js';
+import type { IEditorTheme, ThemeMode, ThemeVariant } from './types/editor-theme.js';
 
 /** The active theme + resolved mode + the variant selected for that mode. */
 export interface EditorThemeContextValue {
@@ -13,9 +9,7 @@ export interface EditorThemeContextValue {
   variant: ThemeVariant;
 }
 
-export const EditorThemeContext = createContext<EditorThemeContextValue | null>(
-  null,
-);
+export const EditorThemeContext = createContext<EditorThemeContextValue | null>(null);
 
 /**
  * Read the active editor theme. Usable with **no** provider: it falls back to

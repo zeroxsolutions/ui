@@ -3,20 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EditorContent } from '@tiptap/react';
 import { ArrowUp } from 'lucide-react';
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-} from '@/registry/bases/base-ui/ui/input-group';
+import { InputGroup, InputGroupAddon, InputGroupButton } from '@/registry/bases/base-ui/ui/input-group';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { createNodeViewRenderer } from '../document/node-view-adapter';
 import { COMPOSER_TOP_CONTENT, composerKit } from './composer-kit';
-import {
-  defaultComposerTriggers,
-  type ComposerTrigger,
-} from './composer-triggers';
+import { defaultComposerTriggers, type ComposerTrigger } from './composer-triggers';
 import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
 import { docToPayload } from '@zeroxsolutions/editor-core/composer/message-payload';
 import { TriggerLayer } from './triggers/trigger-layer.js';
@@ -48,23 +41,11 @@ export interface ChatInputProps {
 
 const EMPTY_DOC = { type: 'doc' as const, content: [{ type: 'paragraph' }] };
 
-export function ChatInput({
-  triggers,
-  placeholder = 'Message...',
-  onSubmit,
-  onReady,
-  className,
-}: ChatInputProps) {
+export function ChatInput({ triggers, placeholder = 'Message...', onSubmit, onReady, className }: ChatInputProps) {
   // Default to the shipped triggers once; a caller-supplied array should be
   // stable (memoised) since the editor is built from it on mount.
-  const resolvedTriggers = useMemo(
-    () => triggers ?? defaultComposerTriggers(),
-    [triggers],
-  );
-  const tokens = useMemo(
-    () => resolvedTriggers.map((trigger) => trigger.token),
-    [resolvedTriggers],
-  );
+  const resolvedTriggers = useMemo(() => triggers ?? defaultComposerTriggers(), [triggers]);
+  const tokens = useMemo(() => resolvedTriggers.map((trigger) => trigger.token), [resolvedTriggers]);
 
   // The raw engine instance - handed to `@tiptap/react`'s `EditorContent` so the
   // pill node-view portals mount (typed `unknown`: no engine leaks).
@@ -139,26 +120,16 @@ export function ChatInput({
 
   return (
     <>
-      <InputGroup
-        className={cn(
-          'h-auto min-h-9 items-center gap-1.5 px-2 py-1.5',
-          className,
-        )}
-      >
+      <InputGroup className={cn('h-auto min-h-9 items-center gap-1.5 px-2 py-1.5', className)}>
         <div
           ref={wrapperRef}
           data-slot="input-group-control"
-          className="chat-composer min-w-0 flex-1 [&_.ProseMirror]:min-h-6 [&_.ProseMirror]:py-1 [&_.ProseMirror]:text-sm [&_.ProseMirror]:text-foreground"
+          className="chat-composer [&_.ProseMirror]:text-foreground min-w-0 flex-1 [&_.ProseMirror]:min-h-6 [&_.ProseMirror]:py-1 [&_.ProseMirror]:text-sm"
         >
           <EditorContent editor={engine as never} />
         </div>
         <InputGroupAddon align="inline-end" className="py-0 pr-0">
-          <InputGroupButton
-            size="icon-sm"
-            aria-label="Send"
-            onClick={submit}
-            className="ml-auto"
-          >
+          <InputGroupButton size="icon-sm" aria-label="Send" onClick={submit} className="ml-auto">
             <ArrowUp />
           </InputGroupButton>
         </InputGroupAddon>

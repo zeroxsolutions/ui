@@ -11,13 +11,10 @@ import type { NodeCodec } from '../core/types/codec.js';
 
 const docCodec: NodeCodec = {
   node: 'doc',
-  toMarkdown: (node, ctx) =>
-    (node.content ?? []).map((child) => ctx.serializeNode(child)).join('\n\n'),
+  toMarkdown: (node, ctx) => (node.content ?? []).map((child) => ctx.serializeNode(child)).join('\n\n'),
   toHTML: (node, ctx) => ctx.serializeChildren(node),
   fromMarkdown: (token, ctx) =>
-    token.type === 'root'
-      ? { type: 'doc', content: ctx.fromMarkdownChildren(token) }
-      : null,
+    token.type === 'root' ? { type: 'doc', content: ctx.fromMarkdownChildren(token) } : null,
   // Only the document root maps to `doc`; every other element defers to a block
   // codec. (Import builds the top-level `doc` directly, so this rarely fires —
   // but an unconditional match here would greedily wrap every top-level element.)
@@ -32,13 +29,9 @@ const paragraphCodec: NodeCodec = {
   toMarkdown: (node, ctx) => ctx.serializeChildren(node),
   toHTML: (node, ctx) => `<p>${ctx.serializeChildren(node)}</p>`,
   fromMarkdown: (token, ctx) =>
-    token.type === 'paragraph'
-      ? { type: 'paragraph', content: ctx.fromMarkdownChildren(token) }
-      : null,
+    token.type === 'paragraph' ? { type: 'paragraph', content: ctx.fromMarkdownChildren(token) } : null,
   fromHTML: (element, ctx) =>
-    element.tagName === 'P'
-      ? { type: 'paragraph', content: ctx.fromHTMLChildren(element) }
-      : null,
+    element.tagName === 'P' ? { type: 'paragraph', content: ctx.fromHTMLChildren(element) } : null,
 };
 
 export const builtInNodeCodecs: NodeCodec[] = [docCodec, paragraphCodec];

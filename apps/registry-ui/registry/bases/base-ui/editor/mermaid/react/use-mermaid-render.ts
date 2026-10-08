@@ -5,12 +5,7 @@ import { useEditorTheme } from '../../shared/theme/editor-theme-context.js';
 import { renderDiagram } from '@zeroxsolutions/editor-core/mermaid/core/engine';
 
 /** The lifecycle of a debounced render. */
-export type MermaidRenderStatus =
-  | 'idle'
-  | 'rendering'
-  | 'ok'
-  | 'error'
-  | 'empty';
+export type MermaidRenderStatus = 'idle' | 'rendering' | 'ok' | 'error' | 'empty';
 
 export interface MermaidRenderState {
   /** The last successfully rendered SVG (retained across a failing edit). */
@@ -31,10 +26,7 @@ export interface MermaidRenderState {
  * in the effect deps so the `no-provider` theme fallback (a fresh object each
  * render) can't loop the effect.
  */
-export function useMermaidRender(
-  source: string,
-  debounceMs = 250,
-): MermaidRenderState {
+export function useMermaidRender(source: string, debounceMs = 250): MermaidRenderState {
   const { variant } = useEditorTheme();
   const themeName = variant.mermaid.theme;
   const themeVarsRef = useRef(variant.mermaid.themeVariables);

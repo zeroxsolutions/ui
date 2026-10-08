@@ -3,11 +3,7 @@ import { Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Field, FieldLabel } from '@/registry/bases/base-ui/ui/field';
 import { Input } from '@/registry/bases/base-ui/ui/input';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/registry/bases/base-ui/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
 import { z } from 'zod';
 import {
   defineFeature,
@@ -72,22 +68,13 @@ function ImageFigure({
       ) : (
         <span className="text-muted-foreground text-sm">Empty image</span>
       )}
-      {alt ? (
-        <figcaption className="text-muted-foreground mt-1 text-sm">
-          {alt}
-        </figcaption>
-      ) : null}
+      {alt ? <figcaption className="text-muted-foreground mt-1 text-sm">{alt}</figcaption> : null}
       {children}
     </figure>
   );
 }
 
-export function ImageView({
-  attrs,
-  updateAttrs,
-  editable,
-  selected,
-}: NodeViewProps<ImageAttrs>) {
+export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewProps<ImageAttrs>) {
   const altId = useId();
   const widthId = useId();
   return (
@@ -108,7 +95,7 @@ export function ImageView({
           contentEditable={false}
           onMouseDown={(event) => event.stopPropagation()}
           onPointerDown={(event) => event.stopPropagation()}
-          className="absolute right-2 top-2"
+          className="absolute top-2 right-2"
         >
           <Popover>
             <PopoverTrigger
@@ -137,9 +124,7 @@ export function ImageView({
                   defaultValue={attrs.width ?? ''}
                   onBlur={(event) =>
                     updateAttrs({
-                      width: event.target.value
-                        ? Number(event.target.value)
-                        : null,
+                      width: event.target.value ? Number(event.target.value) : null,
                     })
                   }
                 />
@@ -152,8 +137,7 @@ export function ImageView({
   );
 }
 
-const attr = (value: string): string =>
-  value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const attr = (value: string): string => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
 const imageCodec: NodeCodec<ImageAttrs> = {
   node: 'image',
@@ -169,14 +153,7 @@ const imageCodec: NodeCodec<ImageAttrs> = {
   },
   toReact: (node) => {
     const { src = '', alt = '', title = '', width } = node.attrs ?? {};
-    return (
-      <ImageFigure
-        src={src}
-        alt={alt}
-        title={title || undefined}
-        width={width ?? null}
-      />
-    );
+    return <ImageFigure src={src} alt={alt} title={title || undefined} width={width ?? null} />;
   },
   fromHTML: (element) =>
     element.tagName === 'IMG'
@@ -186,9 +163,7 @@ const imageCodec: NodeCodec<ImageAttrs> = {
             src: element.getAttribute('src') ?? '',
             alt: element.getAttribute('alt') ?? '',
             title: element.getAttribute('title') ?? '',
-            width: element.getAttribute('width')
-              ? Number(element.getAttribute('width'))
-              : null,
+            width: element.getAttribute('width') ? Number(element.getAttribute('width')) : null,
           },
         }
       : null,

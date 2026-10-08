@@ -8,10 +8,6 @@ export const RESIZE_DRAG_THRESHOLD = 4;
 
 /** Has the pointer moved far enough from the press point to begin a resize?
  *  Either direction counts. */
-export function shouldStartDrag(
-  downX: number,
-  currentX: number,
-  threshold: number = RESIZE_DRAG_THRESHOLD,
-): boolean {
+export function shouldStartDrag(downX: number, currentX: number, threshold: number = RESIZE_DRAG_THRESHOLD): boolean {
   return Math.abs(currentX - downX) >= threshold;
 }

@@ -13,28 +13,17 @@ import type { NodeJSON } from '../core/types/json.js';
 const NODE_METHOD = { markdown: 'toMarkdown', html: 'toHTML' } as const;
 const MARK_METHOD = { markdown: 'toMarkdown', html: 'toHTML' } as const;
 
-export function serialize(
-  doc: NodeJSON,
-  format: Format,
-  registry: CodecRegistry,
-): string {
+export function serialize(doc: NodeJSON, format: Format, registry: CodecRegistry): string {
   const ctx: SerializeContext = {
     format,
     serializeNode: (node) => serializeNode(node, format, registry, ctx),
     serializeChildren: (node) =>
-      (node.content ?? [])
-        .map((child) => serializeNode(child, format, registry, ctx))
-        .join(''),
+      (node.content ?? []).map((child) => serializeNode(child, format, registry, ctx)).join(''),
   };
   return ctx.serializeNode(doc);
 }
 
-function serializeNode(
-  node: NodeJSON,
-  format: Format,
-  registry: CodecRegistry,
-  ctx: SerializeContext,
-): string {
+function serializeNode(node: NodeJSON, format: Format, registry: CodecRegistry, ctx: SerializeContext): string {
   if (node.type === 'text') return applyMarks(node, format, registry, ctx);
 
   const custom = registry.customNodeSerializer(format, node.type);
@@ -48,18 +37,12 @@ function serializeNode(
   return applyFallback(node, format, registry, ctx);
 }
 
-function applyMarks(
-  node: NodeJSON,
-  format: Format,
-  registry: CodecRegistry,
-  ctx: SerializeContext,
-): string {
+function applyMarks(node: NodeJSON, format: Format, registry: CodecRegistry, ctx: SerializeContext): string {
   let text = node.text ?? '';
   const method = MARK_METHOD[format as keyof typeof MARK_METHOD];
   for (const mark of node.marks ?? []) {
     const codec = registry.markCodec(mark.type);
-    const delimiter =
-      method && codec?.[method] ? codec[method]!(mark, ctx) : undefined;
+    const delimiter = method && codec?.[method] ? codec[method]!(mark, ctx) : undefined;
     if (delimiter) {
       text = `${delimiter.open}${text}${delimiter.close}`;
     } else if (format === 'html') {
@@ -69,12 +52,7 @@ function applyMarks(
   return text;
 }
 
-function applyFallback(
-  node: NodeJSON,
-  format: Format,
-  registry: CodecRegistry,
-  ctx: SerializeContext,
-): string {
+function applyFallback(node: NodeJSON, format: Format, registry: CodecRegistry, ctx: SerializeContext): string {
   const codec = registry.nodeCodec(node.type);
   const strategy = codec?.fallback?.[format] ?? registry.defaultFallback;
   switch (strategy) {

@@ -1,25 +1,9 @@
-import {
-  Extension,
-  InputRule,
-  Mark,
-  Node,
-  markInputRule,
-  mergeAttributes,
-  nodeInputRule,
-} from '@tiptap/core';
+import { Extension, InputRule, Mark, Node, markInputRule, mergeAttributes, nodeInputRule } from '@tiptap/core';
 import type { Plugin } from '@tiptap/pm/state';
 import { facadeFor } from '../engine/facade-registry.js';
-import type {
-  EngineExtensions,
-  EngineHandle,
-} from '../engine/engine-handle.js';
+import type { EngineExtensions, EngineHandle } from '../engine/engine-handle.js';
 import type { EditorFeature } from '../types/feature.js';
-import type {
-  InputRuleSpec,
-  MarkSpec,
-  NodeSpec,
-  NodeViewRenderer,
-} from '../types/node-spec.js';
+import type { InputRuleSpec, MarkSpec, NodeSpec, NodeViewRenderer } from '../types/node-spec.js';
 import { deriveAttributes } from './derive-attributes.js';
 
 /**
@@ -39,8 +23,7 @@ import { deriveAttributes } from './derive-attributes.js';
  */
 
 /** The top node, built per compile so its content expression is configurable. */
-const makeDoc = (topContent: string): Node =>
-  Node.create({ name: 'doc', topNode: true, content: topContent });
+const makeDoc = (topContent: string): Node => Node.create({ name: 'doc', topNode: true, content: topContent });
 
 const Paragraph = Node.create({
   name: 'paragraph',
@@ -91,10 +74,7 @@ function compileMark(spec: MarkSpec): Mark {
     parseHTML: () => [{ tag: spec.htmlTag ?? `[data-mark="${spec.name}"]` }],
     renderHTML: ({ HTMLAttributes }) => [
       spec.htmlTag ?? 'span',
-      mergeAttributes(
-        spec.className ? { class: spec.className } : {},
-        HTMLAttributes,
-      ),
+      mergeAttributes(spec.className ? { class: spec.className } : {}, HTMLAttributes),
       0,
     ],
   });
@@ -109,9 +89,7 @@ function buildInputRule(rule: InputRuleSpec, editor: unknown): InputRule {
       };
     }
   ).schema;
-  const getAttributes = rule.getAttrs
-    ? (match: RegExpMatchArray) => rule.getAttrs?.(match) ?? undefined
-    : undefined;
+  const getAttributes = rule.getAttrs ? (match: RegExpMatchArray) => rule.getAttrs?.(match) ?? undefined : undefined;
 
   if (rule.kind === 'command') {
     return new InputRule({
@@ -139,8 +117,7 @@ function buildInputRule(rule: InputRuleSpec, editor: unknown): InputRule {
 function compileBehavior(features: EditorFeature[]): Extension {
   const inputRules = features.flatMap((feature) => feature.inputRules ?? []);
   const shortcuts: Record<string, string> = {};
-  for (const feature of features)
-    Object.assign(shortcuts, feature.shortcuts ?? {});
+  for (const feature of features) Object.assign(shortcuts, feature.shortcuts ?? {});
 
   return Extension.create({
     name: 'zeroxEditorBehavior',
@@ -170,18 +147,10 @@ export interface CompileOptions {
   nodeViewRenderer?: NodeViewRenderer;
 }
 
-export function compileFeatures(
-  features: EditorFeature[],
-  options: CompileOptions = {},
-): EngineExtensions {
-  const extensions: (Node | Mark | Extension)[] = [
-    makeDoc(options.topContent ?? 'block+'),
-    Paragraph,
-    Text,
-  ];
+export function compileFeatures(features: EditorFeature[], options: CompileOptions = {}): EngineExtensions {
+  const extensions: (Node | Mark | Extension)[] = [makeDoc(options.topContent ?? 'block+'), Paragraph, Text];
   for (const feature of features) {
-    for (const node of feature.nodes ?? [])
-      extensions.push(compileNode(node, options.nodeViewRenderer));
+    for (const node of feature.nodes ?? []) extensions.push(compileNode(node, options.nodeViewRenderer));
     for (const mark of feature.marks ?? []) extensions.push(compileMark(mark));
     compileAdvanced(feature, extensions);
   }
@@ -194,16 +163,11 @@ export function compileFeatures(
  * directly; raw ProseMirror plugins are wrapped in a per-feature extension. Only
  * `advanced` exposes engine primitives — the declarative path stays engine-free.
  */
-function compileAdvanced(
-  feature: EditorFeature,
-  extensions: (Node | Mark | Extension)[],
-): void {
+function compileAdvanced(feature: EditorFeature, extensions: (Node | Mark | Extension)[]): void {
   const advanced = feature.advanced;
   if (!advanced) return;
   if (advanced.engineExtensions?.length) {
-    extensions.push(
-      ...(advanced.engineExtensions as (Node | Mark | Extension)[]),
-    );
+    extensions.push(...(advanced.engineExtensions as (Node | Mark | Extension)[]));
   }
   if (advanced.prosePlugins?.length) {
     const plugins = advanced.prosePlugins as Plugin[];

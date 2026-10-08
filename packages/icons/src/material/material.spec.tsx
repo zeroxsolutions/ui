@@ -13,10 +13,7 @@ type IconComponent = ComponentType<{ size?: string | number }> & {
   Light?: ComponentType<{ size?: string | number }>;
 };
 
-const modules = import.meta.glob('./*.tsx', { eager: true }) as Record<
-  string,
-  Record<string, IconComponent>
->;
+const modules = import.meta.glob('./*.tsx', { eager: true }) as Record<string, Record<string, IconComponent>>;
 
 const icons = Object.entries(modules)
   .filter(([path]) => !path.endsWith('.spec.tsx'))
@@ -57,18 +54,14 @@ describe('material icon set', () => {
   it.each(withLight)('$name.Light renders a non-empty svg', ({ Component }) => {
     const Light = Component.Light!;
     const { container } = render(<Light />);
-    expect((container.querySelector('svg')?.children.length ?? 0) > 0).toBe(
-      true,
-    );
+    expect((container.querySelector('svg')?.children.length ?? 0) > 0).toBe(true);
   });
 
   it('no two different icons share an internal svg id', () => {
     const ids: string[] = [];
     for (const { Component } of icons) {
       const { container, unmount } = render(<Component />);
-      container
-        .querySelectorAll('[id]')
-        .forEach((el) => ids.push((el as Element).id));
+      container.querySelectorAll('[id]').forEach((el) => ids.push((el as Element).id));
       unmount();
     }
     expect(new Set(ids).size).toBe(ids.length);

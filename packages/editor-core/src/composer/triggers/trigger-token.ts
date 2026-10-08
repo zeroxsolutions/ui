@@ -94,21 +94,20 @@ export interface TriggerToken<Kind extends string = string, Ref = unknown> {
 
 /** The wiring a preset caller supplies - the data half of a token, minus the
  *  behaviour the archetype fixes (which stays overridable via `overrides`). */
-export interface TriggerTokenConfig<Kind extends string, Ref>
-  extends Partial<
-    Pick<
-      TriggerToken<Kind, Ref>,
-      | 'gate'
-      | 'multiplicity'
-      | 'commitOnSpace'
-      | 'backspaceRestore'
-      | 'filter'
-      | 'queryField'
-      | 'menuMediaClassName'
-      | 'accentClass'
-      | 'emptyText'
-    >
-  > {
+export interface TriggerTokenConfig<Kind extends string, Ref> extends Partial<
+  Pick<
+    TriggerToken<Kind, Ref>,
+    | 'gate'
+    | 'multiplicity'
+    | 'commitOnSpace'
+    | 'backspaceRestore'
+    | 'filter'
+    | 'queryField'
+    | 'menuMediaClassName'
+    | 'accentClass'
+    | 'emptyText'
+  >
+> {
   nodeName: string;
   source: TriggerToken<Kind, Ref>['source'];
   insert: TriggerToken<Kind, Ref>['insert'];
@@ -140,14 +139,7 @@ export class DuplicateTriggerError extends Error {
 
 const ARCHETYPE_DEFAULTS: Record<
   TriggerArchetype,
-  Pick<
-    TriggerToken,
-    | 'gate'
-    | 'multiplicity'
-    | 'commitOnSpace'
-    | 'backspaceRestore'
-    | 'queryField'
-  >
+  Pick<TriggerToken, 'gate' | 'multiplicity' | 'commitOnSpace' | 'backspaceRestore' | 'queryField'>
 > = {
   reference: {
     gate: 'anywhere',
@@ -189,10 +181,7 @@ export function validateTriggerToken(token: TriggerToken): void {
     );
   }
   if ((token.commitOnSpace || token.backspaceRestore) && !isLineStart) {
-    throw new IncoherentTriggerError(
-      token.kind,
-      "commit-on-space / backspace-restore require gate 'line-start'",
-    );
+    throw new IncoherentTriggerError(token.kind, "commit-on-space / backspace-restore require gate 'line-start'");
   }
 }
 
@@ -287,15 +276,11 @@ export function validateTriggerRegistry(tokens: readonly TriggerToken[]): void {
 /** The default case-insensitive match: an option matches when the query is a
  *  substring of its label or its slug. The generic menu uses this when a token
  *  declares no `filter` override. */
-export function defaultTriggerFilter(
-  options: TriggerOption[],
-  query: string,
-): TriggerOption[] {
+export function defaultTriggerFilter(options: TriggerOption[], query: string): TriggerOption[] {
   const needle = query.trim().toLowerCase();
   if (!needle) return options;
   return options.filter(
     (option) =>
-      option.label.toLowerCase().includes(needle) ||
-      (option.slug ?? option.id).toLowerCase().includes(needle),
+      option.label.toLowerCase().includes(needle) || (option.slug ?? option.id).toLowerCase().includes(needle),
   );
 }

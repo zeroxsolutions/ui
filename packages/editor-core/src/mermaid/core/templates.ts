@@ -9,38 +9,32 @@ export const DIAGRAM_TEMPLATES: readonly DiagramTemplate[] = [
   {
     type: 'flowchart',
     label: 'Flowchart',
-    source:
-      'flowchart TD\n  A[Start] --> B{OK?}\n  B -->|yes| C[Do]\n  B -->|no| D[Stop]',
+    source: 'flowchart TD\n  A[Start] --> B{OK?}\n  B -->|yes| C[Do]\n  B -->|no| D[Stop]',
   },
   {
     type: 'sequence',
     label: 'Sequence',
-    source:
-      'sequenceDiagram\n  participant A as Alice\n  participant B as Bob\n  A->>B: Hello\n  B-->>A: Hi',
+    source: 'sequenceDiagram\n  participant A as Alice\n  participant B as Bob\n  A->>B: Hello\n  B-->>A: Hi',
   },
   {
     type: 'class',
     label: 'Class',
-    source:
-      'classDiagram\n  class Animal {\n    +String name\n    +move()\n  }\n  Animal <|-- Dog',
+    source: 'classDiagram\n  class Animal {\n    +String name\n    +move()\n  }\n  Animal <|-- Dog',
   },
   {
     type: 'state',
     label: 'State',
-    source:
-      'stateDiagram-v2\n  [*] --> Idle\n  Idle --> Running: start\n  Running --> [*]: stop',
+    source: 'stateDiagram-v2\n  [*] --> Idle\n  Idle --> Running: start\n  Running --> [*]: stop',
   },
   {
     type: 'er',
     label: 'Entity Relationship',
-    source:
-      'erDiagram\n  CUSTOMER ||--o{ ORDER : places\n  ORDER ||--|{ LINE_ITEM : contains',
+    source: 'erDiagram\n  CUSTOMER ||--o{ ORDER : places\n  ORDER ||--|{ LINE_ITEM : contains',
   },
   {
     type: 'gantt',
     label: 'Gantt',
-    source:
-      'gantt\n  title Plan\n  dateFormat YYYY-MM-DD\n  section Build\n  Task A :a1, 2026-01-01, 5d',
+    source: 'gantt\n  title Plan\n  dateFormat YYYY-MM-DD\n  section Build\n  Task A :a1, 2026-01-01, 5d',
   },
   {
     type: 'pie',
@@ -55,8 +49,7 @@ export const DIAGRAM_TEMPLATES: readonly DiagramTemplate[] = [
   {
     type: 'gitGraph',
     label: 'Git Graph',
-    source:
-      'gitGraph\n  commit\n  branch feature\n  commit\n  checkout main\n  merge feature',
+    source: 'gitGraph\n  commit\n  branch feature\n  commit\n  checkout main\n  merge feature',
   },
 ];
 

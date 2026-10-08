@@ -24,9 +24,7 @@ describe('CommandRegistry', () => {
       run,
     });
 
-    expect(() => registry.dispatch('setHeading', { level: 9 })).toThrow(
-      CommandArgumentError,
-    );
+    expect(() => registry.dispatch('setHeading', { level: 9 })).toThrow(CommandArgumentError);
     expect(run).not.toHaveBeenCalled(); // no mutation on invalid input
   });
 

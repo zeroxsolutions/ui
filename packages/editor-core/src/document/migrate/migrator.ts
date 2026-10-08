@@ -1,10 +1,6 @@
 import { EditorError, type ImportResult } from '../core/index.js';
 import type { CodecRegistry } from '../serialize/index.js';
-import {
-  htmlSourceAdapter,
-  markdownSourceAdapter,
-  type ISourceAdapter,
-} from './source-adapter.js';
+import { htmlSourceAdapter, markdownSourceAdapter, type ISourceAdapter } from './source-adapter.js';
 
 /**
  * The migrator (task 9.1): orchestrates import codecs across registered source
@@ -44,10 +40,7 @@ export class Migrator implements IMigrator {
   migrate(source: MigrationSource, registry: CodecRegistry): ImportResult {
     const adapter = this.adapters.get(source.format);
     if (!adapter) {
-      throw new EditorError(
-        'MIGRATE_NO_ADAPTER',
-        `No migration adapter for source format "${source.format}".`,
-      );
+      throw new EditorError('MIGRATE_NO_ADAPTER', `No migration adapter for source format "${source.format}".`);
     }
     return adapter.import(source.content, registry);
   }
@@ -57,9 +50,7 @@ export class Migrator implements IMigrator {
  * Build a migrator pre-registered with the generic Markdown + HTML adapters. Pass
  * a custom adapter list to add/override (e.g. a Notion-export adapter).
  */
-export function createMigrator(
-  adapters: ISourceAdapter[] = [markdownSourceAdapter, htmlSourceAdapter],
-): IMigrator {
+export function createMigrator(adapters: ISourceAdapter[] = [markdownSourceAdapter, htmlSourceAdapter]): IMigrator {
   const migrator = new Migrator();
   for (const adapter of adapters) migrator.register(adapter);
   return migrator;

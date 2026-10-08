@@ -20,11 +20,7 @@ export interface FormulaViewerProps {
   className?: string;
 }
 
-export function FormulaViewer({
-  source,
-  displayMode = true,
-  className,
-}: FormulaViewerProps) {
+export function FormulaViewer({ source, displayMode = true, className }: FormulaViewerProps) {
   const { variant } = useEditorTheme();
   const html = renderMathHtml(source, { displayMode });
 

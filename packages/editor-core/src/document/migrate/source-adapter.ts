@@ -1,9 +1,5 @@
 import type { ImportResult } from '../core/index.js';
-import {
-  importHTML,
-  importMarkdown,
-  type CodecRegistry,
-} from '../serialize/index.js';
+import { importHTML, importMarkdown, type CodecRegistry } from '../serialize/index.js';
 
 /**
  * A migration **source adapter**: turns one external source format into editor

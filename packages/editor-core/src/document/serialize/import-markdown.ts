@@ -14,25 +14,11 @@ import type { ImportResult } from '../core/types/import-result.js';
  * the result reports warnings + dropped content (see the `editor-serialization`
  * spec). Engine-free.
  */
-const INLINE_TYPES = new Set([
-  'text',
-  'emphasis',
-  'strong',
-  'delete',
-  'inlineCode',
-  'link',
-  'break',
-  'image',
-]);
+const INLINE_TYPES = new Set(['text', 'emphasis', 'strong', 'delete', 'inlineCode', 'link', 'break', 'image']);
 
-export function importMarkdown(
-  markdown: string,
-  registry: CodecRegistry,
-): ImportResult {
+export function importMarkdown(markdown: string, registry: CodecRegistry): ImportResult {
   const report: ImportReport = { warnings: [], dropped: [] };
-  const tree = remark()
-    .use(remarkGfm)
-    .parse(markdown) as unknown as MarkdownToken;
+  const tree = remark().use(remarkGfm).parse(markdown) as unknown as MarkdownToken;
 
   const ctx: DeserializeContext = {
     warn: (message, source) => report.warnings.push({ message, source }),
@@ -48,10 +34,7 @@ export function importMarkdown(
     return null;
   };
 
-  const convertInline = (
-    token: MarkdownToken,
-    marks: MarkJSON[],
-  ): NodeJSON[] => {
+  const convertInline = (token: MarkdownToken, marks: MarkJSON[]): NodeJSON[] => {
     if (token.type === 'text') return [textNode(token.value ?? '', marks)];
     if (token.type === 'inlineCode') {
       const mark = matchMark(token);
@@ -74,9 +57,7 @@ export function importMarkdown(
       });
     }
     const nextMarks = mark ? [...marks, mark] : marks;
-    return (token.children ?? []).flatMap((child) =>
-      convertInline(child, nextMarks),
-    );
+    return (token.children ?? []).flatMap((child) => convertInline(child, nextMarks));
   };
 
   const convertBlock = (token: MarkdownToken): NodeJSON | null => {

@@ -11,10 +11,7 @@ import type { EditorFeature } from './types/feature.js';
  */
 export function defineFeature(feature: EditorFeature): EditorFeature {
   if (!feature.id || typeof feature.id !== 'string') {
-    throw new EditorError(
-      'editor.feature.invalid',
-      'A feature must declare a non-empty string `id`.',
-    );
+    throw new EditorError('editor.feature.invalid', 'A feature must declare a non-empty string `id`.');
   }
 
   const nodeNames = (feature.nodes ?? []).map((node) => node.name);

@@ -32,12 +32,12 @@ Once this registry changes an icon, the icon is this registry's, and nothing ups
 not here, and not in an app that installed it. So the icon's name, its file and the place it lands all
 differ from lucide-animated's:
 
-| | lucide-animated | This registry |
-| --- | --- | --- |
-| item name | `<name>` | `<name>-icon` |
-| file in this repository | `registry/bases/base-ui/ui/<name>.tsx` | `registry/bases/base-ui/icons/<name>-icon.tsx` |
-| file in a consumer | `components/ui/<name>.tsx` | `components/general/<name>-icon.tsx`, set by the file's `target` |
-| export | `<Name>Icon`, `<Name>IconHandle` | unchanged |
+|                         | lucide-animated                        | This registry                                                    |
+| ----------------------- | -------------------------------------- | ---------------------------------------------------------------- |
+| item name               | `<name>`                               | `<name>-icon`                                                    |
+| file in this repository | `registry/bases/base-ui/ui/<name>.tsx` | `registry/bases/base-ui/icons/<name>-icon.tsx`                   |
+| file in a consumer      | `components/ui/<name>.tsx`             | `components/general/<name>-icon.tsx`, set by the file's `target` |
+| export                  | `<Name>Icon`, `<Name>IconHandle`       | unchanged                                                        |
 
 An app that later runs `shadcn add` for a lucide-animated item writes `components/ui/<name>.tsx`, which
 is not this file, so the fixed icon survives it. `components/general/` is the kind folder
@@ -51,12 +51,12 @@ run once.
 
 ### Each icon is fixed the same way
 
-| Part | Before | After |
-| --- | --- | --- |
-| wrapper | `<div>` typed `HTMLAttributes<HTMLDivElement>` | `<span data-slot="<name>-icon">` typed `HTMLAttributes<HTMLSpanElement>`, `inline-flex` so the box is the one the `div` drew |
-| hover start | `controls.start("animate")` | returns first when `useReducedMotion()` (Motion) reads true |
-| handle `startAnimation` | `controls.start("animate")` | the same check |
-| header | none | one comment naming the source and its licence: `Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.` |
+| Part                    | Before                                         | After                                                                                                                                                             |
+| ----------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| wrapper                 | `<div>` typed `HTMLAttributes<HTMLDivElement>` | `<span data-slot="<name>-icon">` typed `HTMLAttributes<HTMLSpanElement>`, `inline-flex` so the box is the one the `div` drew                                      |
+| hover start             | `controls.start("animate")`                    | returns first when `useReducedMotion()` (Motion) reads true                                                                                                       |
+| handle `startAnimation` | `controls.start("animate")`                    | the same check                                                                                                                                                    |
+| header                  | none                                           | one comment naming the source and its licence: `Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.` |
 
 Nothing else in an icon changes: its drawing, variants, transitions, default size and handle keep
 upstream's values, so a later diff against upstream shows only these four rows.
@@ -67,14 +67,19 @@ upstream's values, so a later diff against upstream shows only these four rows.
 
 ```jsonc
 {
-  "name": "<name>-icon", "type": "registry:ui",
-  "title": "<Name> Icon", "description": "An animated <name> icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+  "name": "<name>-icon",
+  "type": "registry:ui",
+  "title": "<Name> Icon",
+  "description": "An animated <name> icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
   "dependencies": ["motion"],
   "registryDependencies": ["@shadcn/utils"],
-  "files": [{
-    "path": "registry/bases/base-ui/icons/<name>-icon.tsx", "type": "registry:ui",
-    "target": "components/general/<name>-icon.tsx"
-  }]
+  "files": [
+    {
+      "path": "registry/bases/base-ui/icons/<name>-icon.tsx",
+      "type": "registry:ui",
+      "target": "components/general/<name>-icon.tsx",
+    },
+  ],
 }
 ```
 

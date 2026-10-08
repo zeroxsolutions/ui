@@ -23,11 +23,10 @@ export default defineConfig(() => ({
       // `<base>/<codepoint>.webp` and a consumer serves them as static files.
       name: 'copy-emoji-assets',
       closeBundle() {
-        cpSync(
-          resolve(import.meta.dirname, 'assets'),
-          resolve(import.meta.dirname, 'dist/assets'),
-          { recursive: true, force: true },
-        );
+        cpSync(resolve(import.meta.dirname, 'assets'), resolve(import.meta.dirname, 'dist/assets'), {
+          recursive: true,
+          force: true,
+        });
       },
     },
   ],

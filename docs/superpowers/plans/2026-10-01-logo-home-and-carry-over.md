@@ -97,7 +97,7 @@ which parts render. After this task, every caller composes the parts.
     `collapsible-card-*`). Only `SourceCodeBlockFile`, the one part declared here, carries
     `source-code-block-file`.
 - Produces `ComponentSource({ name, file?, code?, language?, lines?, maxLines?, ...CodeBlock props,
-children })`. It reads and cuts the source and renders `SourceCodeBlock` around its `children`.
+  children })`. It reads and cuts the source and renders `SourceCodeBlock` around its `children`.
 
 - [ ] **Step 1: Write the failing spec**
 

@@ -59,10 +59,7 @@ export interface NodeSpec<A = Record<string, unknown>> {
  * the concrete component type stays opaque (`unknown`) so no engine type reaches
  * a public `.d.ts`. Omit it for a headless build whose nodes have no React views.
  */
-export type NodeViewRenderer = (
-  spec: NodeSpec,
-  opts: { as: 'div' | 'span' },
-) => unknown;
+export type NodeViewRenderer = (spec: NodeSpec, opts: { as: 'div' | 'span' }) => unknown;
 
 export interface MarkSpec<A = Record<string, unknown>> {
   /** Unique mark type name (matches the JSON `type`). */

@@ -18,9 +18,6 @@
  *
  * Pass the DOM event — from a React synthetic event use `e.nativeEvent`.
  */
-export function isImeComposing(e: {
-  isComposing: boolean;
-  keyCode: number;
-}): boolean {
+export function isImeComposing(e: { isComposing: boolean; keyCode: number }): boolean {
   return e.isComposing || e.keyCode === 229;
 }

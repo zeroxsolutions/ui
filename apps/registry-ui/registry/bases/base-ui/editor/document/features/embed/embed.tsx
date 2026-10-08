@@ -1,11 +1,7 @@
 import { Frame } from 'lucide-react';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 import { z } from 'zod';
-import {
-  defineFeature,
-  type EditorFeature,
-  type NodeCodec,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
 
 /**
@@ -27,11 +23,7 @@ type EmbedAttrs = z.infer<typeof embedAttrs>;
 
 /** Minimal HTML escape for the codec's string output (attribute + text). */
 const escapeHtml = (value: string): string =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /**
  * Responsive 16:9 iframe frame shared by the editable node view and the static
@@ -41,27 +33,13 @@ const escapeHtml = (value: string): string =>
  */
 function EmbedFrame({ url, title }: { url: string; title: string }) {
   return (
-    <div
-      data-slot="embed"
-      data-embed
-      contentEditable={false}
-      className="my-4 overflow-hidden rounded-lg border"
-    >
-      <iframe
-        src={url}
-        title={title}
-        loading="lazy"
-        className="aspect-video h-full w-full border-0"
-      />
+    <div data-slot="embed" data-embed contentEditable={false} className="my-4 overflow-hidden rounded-lg border">
+      <iframe src={url} title={title} loading="lazy" className="aspect-video h-full w-full border-0" />
     </div>
   );
 }
 
-export function EmbedView({
-  attrs,
-  updateAttrs,
-  editable,
-}: NodeViewProps<EmbedAttrs>) {
+export function EmbedView({ attrs, updateAttrs, editable }: NodeViewProps<EmbedAttrs>) {
   if (attrs.url) {
     return <EmbedFrame url={attrs.url} title={attrs.title} />;
   }
@@ -111,8 +89,7 @@ const embedCodec: NodeCodec<EmbedAttrs> = {
     return <EmbedFrame url={attrs.url} title={attrs.title} />;
   },
   fromHTML: (element) => {
-    const isEmbed =
-      element.hasAttribute('data-embed') || element.tagName === 'IFRAME';
+    const isEmbed = element.hasAttribute('data-embed') || element.tagName === 'IFRAME';
     if (!isEmbed) return null;
     return {
       type: 'embed',

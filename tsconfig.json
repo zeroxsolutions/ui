@@ -18,5 +18,8 @@
     {
       "path": "./packages/editor-core"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0"
+  }
 }

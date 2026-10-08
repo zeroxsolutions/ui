@@ -21,9 +21,7 @@ const badge = defineFeature({
   codecs: [
     {
       node: 'badge',
-      toReact: (node) => (
-        <span className="badge">{String(node.attrs?.label)}</span>
-      ),
+      toReact: (node) => <span className="badge">{String(node.attrs?.label)}</span>,
     },
   ],
 });
@@ -56,9 +54,7 @@ describe('editor viewers', () => {
 
   it('themes the Viewer independently of any editing surface', () => {
     const modeDoc: DocJSON = { type: 'doc', content: [{ type: 'mode' }] };
-    const html = renderToStaticMarkup(
-      <Viewer doc={modeDoc} features={[modeFeature]} forcedMode="dark" />,
-    );
+    const html = renderToStaticMarkup(<Viewer doc={modeDoc} features={[modeFeature]} forcedMode="dark" />);
     expect(html).toContain('data-mode="dark"');
   });
 
@@ -77,9 +73,7 @@ describe('editor viewers', () => {
       />,
     );
     await waitFor(() => {
-      expect(
-        container.querySelector('[contenteditable="false"]'),
-      ).not.toBeNull();
+      expect(container.querySelector('[contenteditable="false"]')).not.toBeNull();
     });
     expect(container.textContent).toContain('readonly');
   });

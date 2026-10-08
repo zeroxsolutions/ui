@@ -63,10 +63,7 @@ export interface NodeCodec<A = Record<string, unknown>> {
    *  React walker calls it and casts; feature authors use the chrome's React
    *  codec alias to write it with full typing. */
   toReact?(node: NodeJSON<A>, ctx: SerializeContext): unknown;
-  fromMarkdown?(
-    token: MarkdownToken,
-    ctx: DeserializeContext,
-  ): NodeJSON<A> | null;
+  fromMarkdown?(token: MarkdownToken, ctx: DeserializeContext): NodeJSON<A> | null;
   fromHTML?(element: HTMLElement, ctx: DeserializeContext): NodeJSON<A> | null;
   /** Per-format override of the registry's default missing-codec fallback. */
   fallback?: Partial<Record<Format, FallbackStrategy>>;
@@ -79,9 +76,6 @@ export interface MarkCodec<A = Record<string, unknown>> {
   toHTML?(mark: MarkJSON<A>, ctx: SerializeContext): MarkDelimiters;
   /** React-tree output - opaque at core (see `NodeCodec.toReact`). */
   toReact?(mark: MarkJSON<A>, children: unknown, ctx: SerializeContext): unknown;
-  fromMarkdown?(
-    token: MarkdownToken,
-    ctx: DeserializeContext,
-  ): MarkJSON<A> | null;
+  fromMarkdown?(token: MarkdownToken, ctx: DeserializeContext): MarkJSON<A> | null;
   fromHTML?(element: HTMLElement, ctx: DeserializeContext): MarkJSON<A> | null;
 }

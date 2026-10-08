@@ -7,10 +7,7 @@ import {
 import type { ReactNode } from 'react';
 import { facadeFor } from '@zeroxsolutions/editor-core/document/core/engine/facade-registry';
 import type { EngineHandle } from '@zeroxsolutions/editor-core/document/core/engine/engine-handle';
-import type {
-  NodeSpec,
-  NodeViewRenderer,
-} from '@zeroxsolutions/editor-core/document/core/types/node-spec';
+import type { NodeSpec, NodeViewRenderer } from '@zeroxsolutions/editor-core/document/core/types/node-spec';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/types/node-view';
 
 /**
@@ -33,10 +30,7 @@ export function buildNodeViewComponent(spec: NodeSpec): unknown {
       children: spec.content ? <NodeViewContent /> : undefined,
     };
     return (
-      <NodeViewWrapper
-        as={spec.group === 'inline' ? 'span' : 'div'}
-        data-type={spec.name}
-      >
+      <NodeViewWrapper as={spec.group === 'inline' ? 'span' : 'div'} data-type={spec.name}>
         {spec.render?.(props) as ReactNode}
       </NodeViewWrapper>
     );
@@ -53,11 +47,7 @@ export function buildNodeViewComponent(spec: NodeSpec): unknown {
 export function createNodeViewRenderer(): NodeViewRenderer {
   return (spec, opts) =>
     ReactNodeViewRenderer(
-      buildNodeViewComponent(spec) as Parameters<
-        typeof ReactNodeViewRenderer
-      >[0],
-      opts.as === 'span'
-        ? ({ as: 'span' } as Parameters<typeof ReactNodeViewRenderer>[1])
-        : undefined,
+      buildNodeViewComponent(spec) as Parameters<typeof ReactNodeViewRenderer>[0],
+      opts.as === 'span' ? ({ as: 'span' } as Parameters<typeof ReactNodeViewRenderer>[1]) : undefined,
     );
 }

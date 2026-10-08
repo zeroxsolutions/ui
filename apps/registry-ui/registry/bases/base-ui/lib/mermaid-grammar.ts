@@ -49,8 +49,7 @@ const mermaidGrammar = {
               name: 'comment',
             },
             {
-              comment:
-                '(group|service)(group id)(icon name)?(title)(in)?(parent)?',
+              comment: '(group|service)(group id)(icon name)?(title)(in)?(parent)?',
               match:
                 '(?i)\\s*(group|service)\\s+([\\w-]+)\\s*(\\()?([\\w\\s-]+)?(:)?([\\w\\s-]+)?(\\))?\\s*(\\[)?([\\w\\s-]+)?\\s*(\\])?\\s*(in)?\\s*([\\w-]+)?',
               captures: {
@@ -93,8 +92,7 @@ const mermaidGrammar = {
               },
             },
             {
-              comment:
-                '(service id)(group id)?:(T|B|L|R) <?-->? (T|B|L|R):(service id)(group id)?',
+              comment: '(service id)(group id)?:(T|B|L|R) <?-->? (T|B|L|R):(service id)(group id)?',
               match:
                 '(?i)\\s*([\\w-]+)\\s*(\\{)?\\s*(group)?(\\})?\\s*(:)\\s*(T|B|L|R)\\s+(<?-->?)\\s+(T|B|L|R)\\s*(:)\\s*([\\w-]+)\\s*(\\{)?\\s*(group)?(\\})?',
               captures: {
@@ -175,8 +173,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'title',
-              match:
-                '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -265,8 +262,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'System without parameters',
-              match:
-                '(?i)^\\s*(System|System_Ext|SystemDb|SystemDb_Ext|SystemQueue|SystemQueue_Ext)\\b',
+              match: '(?i)^\\s*(System|System_Ext|SystemDb|SystemDb_Ext|SystemQueue|SystemQueue_Ext)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -315,8 +311,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'Rel without parameters',
-              match:
-                '(?i)^\\s*(Rel|BiRel|Rel_U|Rel_D|Rel_L|Rel_R|Rel_Up|Rel_Down|Rel_Left|Rel_Right)\\b',
+              match: '(?i)^\\s*(Rel|BiRel|Rel_U|Rel_D|Rel_L|Rel_R|Rel_Up|Rel_Down|Rel_Left|Rel_Right)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -365,8 +360,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'Boundary without parameters',
-              match:
-                '(?i)^\\s*(Boundary|Enterprise_Boundary|System_Boundary)\\b',
+              match: '(?i)^\\s*(Boundary|Enterprise_Boundary|System_Boundary)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -403,8 +397,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'AddElementTag',
-              match:
-                '(?i)^\\s*(AddElementTag|AddRelTag|AddBoundaryTag|AddPersonTag|AddSystemTag)\\b',
+              match: '(?i)^\\s*(AddElementTag|AddRelTag|AddBoundaryTag|AddPersonTag|AddSystemTag)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -516,8 +509,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'title',
-              match:
-                '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -606,8 +598,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'System without parameters',
-              match:
-                '(?i)^\\s*(System|System_Ext|SystemDb|SystemDb_Ext|SystemQueue|SystemQueue_Ext)\\b',
+              match: '(?i)^\\s*(System|System_Ext|SystemDb|SystemDb_Ext|SystemQueue|SystemQueue_Ext)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -706,8 +697,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'Rel without parameters',
-              match:
-                '(?i)^\\s*(Rel|BiRel|Rel_U|Rel_D|Rel_L|Rel_R|Rel_Up|Rel_Down|Rel_Left|Rel_Right)\\b',
+              match: '(?i)^\\s*(Rel|BiRel|Rel_U|Rel_D|Rel_L|Rel_R|Rel_Up|Rel_Down|Rel_Left|Rel_Right)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -756,8 +746,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'Boundary without parameters',
-              match:
-                '(?i)^\\s*(Boundary|Enterprise_Boundary|System_Boundary|Container_Boundary)\\b',
+              match: '(?i)^\\s*(Boundary|Enterprise_Boundary|System_Boundary|Container_Boundary)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -819,8 +808,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'title',
-              match:
-                '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -909,8 +897,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'System without parameters',
-              match:
-                '(?i)^\\s*(System|System_Ext|SystemDb|SystemDb_Ext|SystemQueue|SystemQueue_Ext)\\b',
+              match: '(?i)^\\s*(System|System_Ext|SystemDb|SystemDb_Ext|SystemQueue|SystemQueue_Ext)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -959,8 +946,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'Rel without parameters',
-              match:
-                '(?i)^\\s*(Rel|BiRel|Rel_U|Rel_D|Rel_L|Rel_R|Rel_Up|Rel_Down|Rel_Left|Rel_Right)\\b',
+              match: '(?i)^\\s*(Rel|BiRel|Rel_U|Rel_D|Rel_L|Rel_R|Rel_Up|Rel_Down|Rel_Left|Rel_Right)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -1009,8 +995,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'Boundary without parameters',
-              match:
-                '(?i)^\\s*(Boundary|Enterprise_Boundary|System_Boundary)\\b',
+              match: '(?i)^\\s*(Boundary|Enterprise_Boundary|System_Boundary)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -1047,8 +1032,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'AddElementTag',
-              match:
-                '(?i)^\\s*(AddElementTag|AddRelTag|AddBoundaryTag|AddPersonTag|AddSystemTag)\\b',
+              match: '(?i)^\\s*(AddElementTag|AddRelTag|AddBoundaryTag|AddPersonTag|AddSystemTag)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -1073,8 +1057,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'title',
-              match:
-                '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -1163,8 +1146,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'System without parameters',
-              match:
-                '(?i)^\\s*(System|System_Ext|SystemDb|SystemDb_Ext|SystemQueue|SystemQueue_Ext)\\b',
+              match: '(?i)^\\s*(System|System_Ext|SystemDb|SystemDb_Ext|SystemQueue|SystemQueue_Ext)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -1213,8 +1195,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'Rel without parameters',
-              match:
-                '(?i)^\\s*(Rel|BiRel|Rel_U|Rel_D|Rel_L|Rel_R|Rel_Up|Rel_Down|Rel_Left|Rel_Right)\\b',
+              match: '(?i)^\\s*(Rel|BiRel|Rel_U|Rel_D|Rel_L|Rel_R|Rel_Up|Rel_Down|Rel_Left|Rel_Right)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -1318,8 +1299,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'Boundary without parameters',
-              match:
-                '(?i)^\\s*(Boundary|Enterprise_Boundary|System_Boundary)\\b',
+              match: '(?i)^\\s*(Boundary|Enterprise_Boundary|System_Boundary)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -1356,8 +1336,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'AddElementTag',
-              match:
-                '(?i)^\\s*(AddElementTag|AddRelTag|AddBoundaryTag|AddPersonTag|AddSystemTag)\\b',
+              match: '(?i)^\\s*(AddElementTag|AddRelTag|AddBoundaryTag|AddPersonTag|AddSystemTag)\\b',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -1382,8 +1361,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'note for (class) "note text" (single line)',
-              match:
-                '(?i)^\\s*(note)\\s+(for)\\s+(?:(`)([^`]+)(`)|([\\w.-]+))\\s+("[^"]*")\\s*$',
+              match: '(?i)^\\s*(note)\\s+(for)\\s+(?:(`)([^`]+)(`)|([\\w.-]+))\\s+("[^"]*")\\s*$',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -1429,8 +1407,7 @@ const mermaidGrammar = {
                 },
                 {
                   comment: 'class (class name) ~?(generic type)?~? ({)',
-                  begin:
-                    '(?i)(class)\\s+(?:(`)([^`]+)(`)|([\\w.-]+)(~)?([\\w.-]+)?(~)?)\\s*(\\{)',
+                  begin: '(?i)(class)\\s+(?:(`)([^`]+)(`)|([\\w.-]+)(~)?([\\w.-]+)?(~)?)\\s*(\\{)',
                   beginCaptures: {
                     '1': {
                       name: 'keyword.control.mermaid',
@@ -1483,8 +1460,7 @@ const mermaidGrammar = {
                       patterns: [
                         {
                           comment: '(TBD)',
-                          match:
-                            '(?i)\\s*,?\\s*([\\w.-]+)?(~)?([\\w.-]+)?(~)?\\s?([\\w.-]+)?',
+                          match: '(?i)\\s*,?\\s*([\\w.-]+)?(~)?([\\w.-]+)?(~)?\\s?([\\w.-]+)?',
                           captures: {
                             '1': {
                               name: 'storage.type.mermaid',
@@ -1567,10 +1543,8 @@ const mermaidGrammar = {
                       },
                     },
                     {
-                      comment:
-                        '(visibility)?(datatype/generic data type) (attribute name)$',
-                      match:
-                        '(?i)\\s([\\+~#-])?([\\w.-]+)(~)?([\\w.-]+)?(~)?\\s([\\w.-]+)?$',
+                      comment: '(visibility)?(datatype/generic data type) (attribute name)$',
+                      match: '(?i)\\s([\\+~#-])?([\\w.-]+)(~)?([\\w.-]+)?(~)?\\s([\\w.-]+)?$',
                       captures: {
                         '1': {
                           name: 'keyword.control.mermaid',
@@ -1739,8 +1713,7 @@ const mermaidGrammar = {
               },
             },
             {
-              comment:
-                '(class name) : (visibility)?(datatype/generic data type) (attribute name)$',
+              comment: '(class name) : (visibility)?(datatype/generic data type) (attribute name)$',
               match:
                 '(?i)(?:(`)([^`]+)(`)|([\\w.-]+))\\s?(:)\\s([\\+~#-])?([\\w.-]+)(~)?([\\w.-]+)?(~)?\\s([\\w.-]+)?$',
               captures: {
@@ -1808,8 +1781,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'class (class name) ~?(generic type)?~? ({)',
-              begin:
-                '(?i)(class)\\s+(?:(`)([^`]+)(`)|([\\w.-]+))(~)?([\\w.-]+)?(~)?\\s?({)',
+              begin: '(?i)(class)\\s+(?:(`)([^`]+)(`)|([\\w.-]+))(~)?([\\w.-]+)?(~)?\\s?({)',
               beginCaptures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -1862,8 +1834,7 @@ const mermaidGrammar = {
                   patterns: [
                     {
                       comment: '(TBD)',
-                      match:
-                        '(?i)\\s*,?\\s*([\\w.-]+)?(~)?([\\w.-]+)?(~)?\\s?([\\w.-]+)?',
+                      match: '(?i)\\s*,?\\s*([\\w.-]+)?(~)?([\\w.-]+)?(~)?\\s?([\\w.-]+)?',
                       captures: {
                         '1': {
                           name: 'storage.type.mermaid',
@@ -1946,10 +1917,8 @@ const mermaidGrammar = {
                   },
                 },
                 {
-                  comment:
-                    '(visibility)?(datatype/generic data type) (attribute name)$',
-                  match:
-                    '(?i)\\s([\\+~#-])?([\\w.-]+)(~)?([\\w.-]+)?(~)?\\s([\\w.-]+)?$',
+                  comment: '(visibility)?(datatype/generic data type) (attribute name)$',
+                  match: '(?i)\\s([\\+~#-])?([\\w.-]+)(~)?([\\w.-]+)?(~)?\\s([\\w.-]+)?$',
                   captures: {
                     '1': {
                       name: 'keyword.control.mermaid',
@@ -1999,8 +1968,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'class (class name) ~?(generic type)?~?',
-              match:
-                '(?i)(class)\\s+(?:(`)([^`]+)(`)|([\\w.-]+))(~)?([\\w.-]+)?(~)?',
+              match: '(?i)(class)\\s+(?:(`)([^`]+)(`)|([\\w.-]+))(~)?([\\w.-]+)?(~)?',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2046,8 +2014,7 @@ const mermaidGrammar = {
             },
             {
               comment: '(entity)',
-              match:
-                '(?i)^\\s*([\\w-]+)\\s*(\\[)?\\s*((?:[\\w-]+)|(?:"[\\w\\s-]+"))?\\s*(\\])?$',
+              match: '(?i)^\\s*([\\w-]+)\\s*(\\[)?\\s*((?:[\\w-]+)|(?:"[\\w\\s-]+"))?\\s*(\\])?$',
               captures: {
                 '1': {
                   name: 'variable',
@@ -2065,8 +2032,7 @@ const mermaidGrammar = {
             },
             {
               comment: '(entity) {',
-              begin:
-                '(?i)\\s*([\\w-]+)\\s*(\\[)?\\s*((?:[\\w-]+)|(?:"[\\w\\s-]+"))?\\s*(\\])?\\s*({)',
+              begin: '(?i)\\s*([\\w-]+)\\s*(\\[)?\\s*((?:[\\w-]+)|(?:"[\\w\\s-]+"))?\\s*(\\])?\\s*({)',
               beginCaptures: {
                 '1': {
                   name: 'variable',
@@ -2087,8 +2053,7 @@ const mermaidGrammar = {
               patterns: [
                 {
                   comment: '(type) (name) (constraints)? ("comment")?',
-                  match:
-                    '(?i)\\s*([\\w-]+)\\s+([\\w-]+)\\s+([PFU]K(?:,\\s*[PFU]K){0,2})?\\s*("[^"\\r\\n]*")?\\s*',
+                  match: '(?i)\\s*([\\w-]+)\\s+([\\w-]+)\\s+([PFU]K(?:,\\s*[PFU]K){0,2})?\\s*("[^"\\r\\n]*")?\\s*',
                   captures: {
                     '1': {
                       name: 'storage.type.mermaid',
@@ -2177,8 +2142,7 @@ const mermaidGrammar = {
               },
             },
             {
-              match:
-                '(?i)(tickInterval)\\s+(([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month))',
+              match: '(?i)(tickInterval)\\s+(([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month))',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2189,8 +2153,7 @@ const mermaidGrammar = {
               },
             },
             {
-              match:
-                '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2224,8 +2187,7 @@ const mermaidGrammar = {
               },
             },
             {
-              match:
-                '(?i)^\\s*(section)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(section)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2314,8 +2276,7 @@ const mermaidGrammar = {
                 },
                 {
                   comment: '(tag)(:) ("tag")',
-                  match:
-                    '(?i)\\s*(tag)(:)\\s?("[\\($&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*")',
+                  match: '(?i)\\s*(tag)(:)\\s?("[\\($&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*")',
                   captures: {
                     '1': {
                       name: 'keyword.control.mermaid',
@@ -2345,8 +2306,7 @@ const mermaidGrammar = {
             },
             {
               comment: '(branch) (branch-name) (order)?(:) (number)',
-              match:
-                '(?i)^\\s*(branch)\\s*([^\\s"]*)\\s*(?:(order)(:)\\s?(\\d+))?',
+              match: '(?i)^\\s*(branch)\\s*([^\\s"]*)\\s*(?:(order)(:)\\s?(\\d+))?',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2367,8 +2327,7 @@ const mermaidGrammar = {
             },
             {
               comment: '(merge) (branch-name) (tag: "tag-name")?',
-              match:
-                '(?i)^\\s*(merge)\\s*([^\\s"]*)\\s*(?:(tag)(:)\\s?("[^"\\n]*"))?',
+              match: '(?i)^\\s*(merge)\\s*([^\\s"]*)\\s*(?:(tag)(:)\\s?("[^"\\n]*"))?',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2426,8 +2385,7 @@ const mermaidGrammar = {
             },
             {
               comment: '',
-              match:
-                '(?i)^\\s*(subgraph)\\s+(\\w+)(\\[)("?[\\w\\s*+%=\\\\/:\\.\\-\'`,&^#$!?<>]*"?)(\\])',
+              match: '(?i)^\\s*(subgraph)\\s+(\\w+)(\\[)("?[\\w\\s*+%=\\\\/:\\.\\-\'`,&^#$!?<>]*"?)(\\])',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2474,8 +2432,7 @@ const mermaidGrammar = {
             },
             {
               comment: '(Entity)(Edge/Shape)(Text)(Edge/Shape)',
-              begin:
-                '(?i)(\\b(?:(?!--|==)[-\\w])+\\b\\s*)(\\(\\[|\\[\\[|\\[\\(|\\[|\\(+|\\>|\\{|\\(\\()',
+              begin: '(?i)(\\b(?:(?!--|==)[-\\w])+\\b\\s*)(\\(\\[|\\[\\[|\\[\\(|\\[|\\(+|\\>|\\{|\\(\\()',
               beginCaptures: {
                 '1': {
                   name: 'variable',
@@ -2667,8 +2624,7 @@ const mermaidGrammar = {
             },
             {
               comment: '(Click)(Entity)(Link)?(Tooltip)',
-              match:
-                '(?i)\\s*(click)\\s+(\\b[-\\w]+\\b\\s*)(\\b\\w+\\b)?\\s("*.*")',
+              match: '(?i)\\s*(click)\\s+(\\b[-\\w]+\\b\\s*)(\\b\\w+\\b)?\\s("*.*")',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2749,8 +2705,7 @@ const mermaidGrammar = {
             },
             {
               comment: ':::Text',
-              match:
-                '(?i)(\\s*:::)(\\s*["$&\\^/#.,?!;*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)(\\s*:::)(\\s*["$&\\^/#.,?!;*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2762,8 +2717,7 @@ const mermaidGrammar = {
             },
             {
               comment: '::icon(Text)',
-              match:
-                '(?i)(\\s*::icon)(\\s*\\()(\\s*["$&\\^/#.,?!;*+=<>\\\'\\\\\\-\\w\\s]*)(\\s*\\))',
+              match: '(?i)(\\s*::icon)(\\s*\\()(\\s*["$&\\^/#.,?!;*+=<>\\\'\\\\\\-\\w\\s]*)(\\s*\\))',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2819,8 +2773,7 @@ const mermaidGrammar = {
               name: 'comment',
             },
             {
-              match:
-                '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2865,8 +2818,7 @@ const mermaidGrammar = {
               name: 'comment',
             },
             {
-              match:
-                '(?i)^\\s*(title)\\s*(["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(title)\\s*(["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2878,8 +2830,7 @@ const mermaidGrammar = {
             },
             {
               comment: '(x|y-axis) (text) (-->)? (text)?',
-              begin:
-                "(?i)^\\s*([xy]-axis)\\s+((?:(?!-->)[$&%/#.,?!*+=\\'\\\\\\-\\w\\s])*)",
+              begin: "(?i)^\\s*([xy]-axis)\\s+((?:(?!-->)[$&%/#.,?!*+=\\'\\\\\\-\\w\\s])*)",
               beginCaptures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2905,8 +2856,7 @@ const mermaidGrammar = {
               end: '$',
             },
             {
-              match:
-                '(?i)^\\s*(quadrant-[1234])\\s*(["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(quadrant-[1234])\\s*(["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -2978,8 +2928,7 @@ const mermaidGrammar = {
               patterns: [
                 {
                   comment: '(id:) (variable id)',
-                  match:
-                    "(?i)\\s*(id:)\\s*([$&%\\^/#.,?!;:*+<>_\\'\\\\\\w\\s]+)",
+                  match: "(?i)\\s*(id:)\\s*([$&%\\^/#.,?!;:*+<>_\\'\\\\\\w\\s]+)",
                   captures: {
                     '1': {
                       name: 'keyword.control.mermaid',
@@ -2991,8 +2940,7 @@ const mermaidGrammar = {
                 },
                 {
                   comment: '(text:) (text string)',
-                  match:
-                    "(?i)\\s*(text:)\\s*([$&%\\^/#.,?!;:*+<>_\\'\\\\\\w\\s]+)",
+                  match: "(?i)\\s*(text:)\\s*([$&%\\^/#.,?!;:*+<>_\\'\\\\\\w\\s]+)",
                   captures: {
                     '1': {
                       name: 'keyword.control.mermaid',
@@ -3016,8 +2964,7 @@ const mermaidGrammar = {
                 },
                 {
                   comment: '(verifyMethod)(:) (method)',
-                  match:
-                    '(?i)\\s*(verifymethod:)\\s*(analysis|inspection|test|demonstration)\\s*$',
+                  match: '(?i)\\s*(verifymethod:)\\s*(analysis|inspection|test|demonstration)\\s*$',
                   captures: {
                     '1': {
                       name: 'keyword.control.mermaid',
@@ -3037,8 +2984,7 @@ const mermaidGrammar = {
             },
             {
               comment: '(element) (name) ({)',
-              begin:
-                '(?i)^\\s*(element)\\s*(["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)\\s*({)',
+              begin: '(?i)^\\s*(element)\\s*(["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)\\s*({)',
               beginCaptures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -3053,8 +2999,7 @@ const mermaidGrammar = {
               patterns: [
                 {
                   comment: '(type:) (user type)',
-                  match:
-                    '(?i)\\s*(type:)\\s*(["$&%\\^/#.,?!;:*+<>_\\\'\\\\\\w\\s]+)',
+                  match: '(?i)\\s*(type:)\\s*(["$&%\\^/#.,?!;:*+<>_\\\'\\\\\\w\\s]+)',
                   captures: {
                     '1': {
                       name: 'keyword.control.mermaid',
@@ -3066,8 +3011,7 @@ const mermaidGrammar = {
                 },
                 {
                   comment: '(docref:) (user ref)',
-                  match:
-                    "(?i)\\s*(docref:)\\s*([$&%\\^/#.,?!;:*+<>_\\'\\\\\\w\\s]+)",
+                  match: "(?i)\\s*(docref:)\\s*([$&%\\^/#.,?!;:*+<>_\\'\\\\\\w\\s]+)",
                   captures: {
                     '1': {
                       name: 'keyword.control.mermaid',
@@ -3147,8 +3091,7 @@ const mermaidGrammar = {
             },
             {
               comment: '(title)(title text)',
-              match:
-                '(?i)(title)\\s*(:)?\\s+(\\s*["\\(\\)$&%\\^/#.,?!:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)(title)\\s*(:)?\\s+(\\s*["\\(\\)$&%\\^/#.,?!:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -3182,8 +3125,7 @@ const mermaidGrammar = {
             },
             {
               comment: '(activate/deactivate)(Actor)',
-              match:
-                '(?i)\\s*((?:de)?activate)\\s+(\\b["()$&%^/#.?!*=<>\'\\\\\\w\\s]+\\b\\)?\\s*)',
+              match: '(?i)\\s*((?:de)?activate)\\s+(\\b["()$&%^/#.?!*=<>\'\\\\\\w\\s]+\\b\\)?\\s*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -3243,10 +3185,8 @@ const mermaidGrammar = {
               },
             },
             {
-              comment:
-                '(alt/else/option/par/and/autonumber/critical/opt)(text)',
-              match:
-                '(?i)\\s*(alt|else|option|par|and|rect|autonumber|critical|opt)(?:\\s+([^#;]*))?$',
+              comment: '(alt/else/option/par/and/autonumber/critical/opt)(text)',
+              match: '(?i)\\s*(alt|else|option|par|and|rect|autonumber|critical|opt)(?:\\s+([^#;]*))?$',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -3471,8 +3411,7 @@ const mermaidGrammar = {
             },
             {
               comment: '[*] --> (state) (:)? (transition text)?',
-              match:
-                '(?i)(\\[\\*\\])\\s*(-->)\\s*([\\w-]+)\\s*(:)?\\s*([^\\n:]+)?',
+              match: '(?i)(\\[\\*\\])\\s*(-->)\\s*([\\w-]+)\\s*(:)?\\s*([^\\n:]+)?',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -3493,8 +3432,7 @@ const mermaidGrammar = {
             },
             {
               comment: 'note left|right of (state name)',
-              match:
-                '(?i)^\\s*(note (?:left|right) of)\\s+([\\w-]+)\\s*(:)\\s*([^\\n:]+)',
+              match: '(?i)^\\s*(note (?:left|right) of)\\s+([\\w-]+)\\s*(:)\\s*([^\\n:]+)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -3546,8 +3484,7 @@ const mermaidGrammar = {
               name: 'comment',
             },
             {
-              match:
-                '(?i)^\\s*(title|section)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(title|section)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -3558,8 +3495,7 @@ const mermaidGrammar = {
               },
             },
             {
-              begin:
-                '(?i)\\s*(["\\(\\)$&%\\^/.,?!*+=<>\\\'\\\\\\-\\w\\s]*)\\s*(:)\\s*(\\d+)\\s*(:)',
+              begin: '(?i)\\s*(["\\(\\)$&%\\^/.,?!*+=<>\\\'\\\\\\-\\w\\s]*)\\s*(:)\\s*(\\d+)\\s*(:)',
               beginCaptures: {
                 '1': {
                   name: 'string',
@@ -3604,8 +3540,7 @@ const mermaidGrammar = {
               name: 'comment',
             },
             {
-              match:
-                '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
+              match: '(?i)^\\s*(title)\\s+(\\s*["\\(\\)$&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*)',
               captures: {
                 '1': {
                   name: 'keyword.control.mermaid',
@@ -3626,8 +3561,7 @@ const mermaidGrammar = {
               patterns: [
                 {
                   comment: '(decimal) (-->) (decimal)',
-                  match:
-                    '(?i)\\s*([-+]?\\d+\\.?\\d*)\\s*(-->)\\s*([-+]?\\d+\\.?\\d*)',
+                  match: '(?i)\\s*([-+]?\\d+\\.?\\d*)\\s*(-->)\\s*([-+]?\\d+\\.?\\d*)',
                   captures: {
                     '1': {
                       name: 'constant.numeric.decimal.mermaid',
@@ -3642,8 +3576,7 @@ const mermaidGrammar = {
                 },
                 {
                   comment: '("text")',
-                  match:
-                    '(?i)\\s+("[\\($&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*")',
+                  match: '(?i)\\s+("[\\($&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*")',
                   captures: {
                     '1': {
                       name: 'string',
@@ -3679,8 +3612,7 @@ const mermaidGrammar = {
                     },
                     {
                       comment: '("text")',
-                      match:
-                        '(?i)\\s*("[\\($&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*")',
+                      match: '(?i)\\s*("[\\($&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*")',
                       captures: {
                         '1': {
                           name: 'string',
@@ -3689,8 +3621,7 @@ const mermaidGrammar = {
                     },
                     {
                       comment: '(text)',
-                      match:
-                        "(?i)\\s*([\\($&%\\^/#.?!;:*+=<>\\'\\\\\\-\\w\\s]+)",
+                      match: "(?i)\\s*([\\($&%\\^/#.?!;:*+=<>\\'\\\\\\-\\w\\s]+)",
                       captures: {
                         '1': {
                           name: 'string',
@@ -3728,8 +3659,7 @@ const mermaidGrammar = {
               patterns: [
                 {
                   comment: '(decimal) (-->) (decimal)',
-                  match:
-                    '(?i)\\s*([-+]?\\d+\\.?\\d*)\\s*(-->)\\s*([-+]?\\d+\\.?\\d*)',
+                  match: '(?i)\\s*([-+]?\\d+\\.?\\d*)\\s*(-->)\\s*([-+]?\\d+\\.?\\d*)',
                   captures: {
                     '1': {
                       name: 'constant.numeric.decimal.mermaid',
@@ -3744,8 +3674,7 @@ const mermaidGrammar = {
                 },
                 {
                   comment: '("text")',
-                  match:
-                    '(?i)\\s+("[\\($&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*")',
+                  match: '(?i)\\s+("[\\($&%\\^/#.,?!;:*+=<>\\\'\\\\\\-\\w\\s]*")',
                   captures: {
                     '1': {
                       name: 'string',

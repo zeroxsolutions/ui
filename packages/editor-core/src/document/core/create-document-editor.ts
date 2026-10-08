@@ -9,10 +9,7 @@ import { registerFacade, unregisterFacade } from './engine/facade-registry.js';
 import type { EngineHandle } from './engine/engine-handle.js';
 import { resolveFeatures } from './registry/feature-registry.js';
 import type { Delta, Snapshot } from './types/delta.js';
-import type {
-  DocumentBackendFactory,
-  IDocumentBackend,
-} from './types/document-backend.js';
+import type { DocumentBackendFactory, IDocumentBackend } from './types/document-backend.js';
 import type { EditorSelection, IEditor, TriggerQuery } from './types/editor.js';
 import type { EditorFeature } from './types/feature.js';
 import type { DocJSON } from './types/json.js';
@@ -86,9 +83,7 @@ const slashDecorationPlugin = (): Plugin<SlashDeco> =>
       decorations(state) {
         const deco = SLASH_DECORATION_KEY.getState(state);
         if (!deco) return null;
-        const decorations = [
-          Decoration.inline(deco.from, deco.to, { class: 'slash-active' }),
-        ];
+        const decorations = [Decoration.inline(deco.from, deco.to, { class: 'slash-active' })];
         if (deco.ghost) {
           // A non-editable widget after the caret (`side: 1`) — the faint inline
           // placeholder / autocomplete. Keyed on its text so it only re-renders
@@ -182,12 +177,7 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
     const parentStart = $from.start();
     // The object-replacement char (U+FFFC) keeps inline atoms one char wide, so
     // a text index lines up with a document offset within the block.
-    const textBefore = $from.parent.textBetween(
-      0,
-      caret - parentStart,
-      '\n',
-      '￼',
-    );
+    const textBefore = $from.parent.textBetween(0, caret - parentStart, '\n', '￼');
     const escaped = char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const match = new RegExp(`(?:^|\\s)${escaped}(\\S*)$`).exec(textBefore);
     if (!match) return null;
@@ -211,8 +201,7 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
     isEmpty: () => engine.isEmpty,
     can: (command, args) => registry.can(command, args),
     run: (command, args) => registry.dispatch(command, args),
-    isActive: (name, attributes) =>
-      engine.isActive(name, attributes as Record<string, unknown> | undefined),
+    isActive: (name, attributes) => engine.isActive(name, attributes as Record<string, unknown> | undefined),
     getSelection,
     caretRect: () => {
       // ProseMirror's `coordsAtPos` gives exact viewport coords for any
@@ -248,9 +237,7 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
       engine.view.dispatch(engine.state.tr.setMeta(SLASH_DECORATION_KEY, next));
     },
     focus: (position) => {
-      engine.commands.focus(
-        position as Parameters<typeof engine.commands.focus>[0],
-      );
+      engine.commands.focus(position as Parameters<typeof engine.commands.focus>[0]);
     },
     blur: () => {
       engine.commands.blur();
@@ -293,9 +280,7 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
       registry.register(name, {
         args: descriptor.args,
         run: (args) => descriptor.run(facade, args),
-        can: descriptor.can
-          ? (args) => descriptor.can!(facade, args)
-          : undefined,
+        can: descriptor.can ? (args) => descriptor.can!(facade, args) : undefined,
       });
     }
   }

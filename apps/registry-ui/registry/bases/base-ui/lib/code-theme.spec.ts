@@ -20,29 +20,17 @@ describe('codeTheme', () => {
       const fg = rule.settings?.foreground;
       if (!fg) continue; // a bold/italic-only rule (no color) is allowed
       const match = /^var\((--code-[a-z-]+)\)$/.exec(fg);
-      expect(
-        match,
-        `foreground "${fg}" must be a var(--code-*) reference`,
-      ).not.toBeNull();
+      expect(match, `foreground "${fg}" must be a var(--code-*) reference`).not.toBeNull();
       if (match) referenced.push(match[1]);
     }
     for (const name of referenced) {
-      expect(declared.has(name), `${name} is referenced but not declared`).toBe(
-        true,
-      );
+      expect(declared.has(name), `${name} is referenced but not declared`).toBe(true);
     }
   });
 
   it('maps the core syntax buckets (keyword · function · string · comment)', () => {
-    const fgs = (codeTheme.settings ?? [])
-      .map((r) => r.settings?.foreground)
-      .filter(Boolean);
-    for (const v of [
-      'var(--code-keyword)',
-      'var(--code-function)',
-      'var(--code-string)',
-      'var(--code-comment)',
-    ]) {
+    const fgs = (codeTheme.settings ?? []).map((r) => r.settings?.foreground).filter(Boolean);
+    for (const v of ['var(--code-keyword)', 'var(--code-function)', 'var(--code-string)', 'var(--code-comment)']) {
       expect(fgs).toContain(v);
     }
   });

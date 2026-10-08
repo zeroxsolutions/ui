@@ -14,42 +14,25 @@ import type { ResolvedCommand } from './command-registry.js';
 
 const attrs = z.record(z.string(), z.unknown()).optional();
 const named = z.object({ name: z.string().min(1), attrs });
-const content = z.union([
-  z.string(),
-  z.record(z.string(), z.unknown()),
-  z.array(z.record(z.string(), z.unknown())),
-]);
+const content = z.union([z.string(), z.record(z.string(), z.unknown()), z.array(z.record(z.string(), z.unknown()))]);
 
-export function makeBuiltInCommands(
-  handle: EngineHandle,
-): Record<string, ResolvedCommand> {
+export function makeBuiltInCommands(handle: EngineHandle): Record<string, ResolvedCommand> {
   const editor = handle as unknown as Editor;
-  const attrsOf = (a?: Record<string, unknown>) =>
-    (a ?? {}) as Record<string, unknown>;
+  const attrsOf = (a?: Record<string, unknown>) => (a ?? {}) as Record<string, unknown>;
 
   // Run/probe an engine chain command by name, guarded so it no-ops when the
   // extension that provides it (heading/list/blockquote/hr — contributed by a
   // feature) is not registered. Lets a feature's toolbar/slash command compose
   // structural engine commands through the façade without engine access.
   const runEngine = (name: string, arg?: unknown): boolean => {
-    const chain = editor.chain().focus() as unknown as Record<
-      string,
-      (a?: unknown) => { run: () => boolean }
-    >;
+    const chain = editor.chain().focus() as unknown as Record<string, (a?: unknown) => { run: () => boolean }>;
     const command = chain[name];
-    return typeof command === 'function'
-      ? command.call(chain, arg).run()
-      : false;
+    return typeof command === 'function' ? command.call(chain, arg).run() : false;
   };
   const canEngine = (name: string, arg?: unknown): boolean => {
-    const probe = editor.can() as unknown as Record<
-      string,
-      (a?: unknown) => boolean
-    >;
+    const probe = editor.can() as unknown as Record<string, (a?: unknown) => boolean>;
     const command = probe[name];
-    return typeof command === 'function'
-      ? Boolean(command.call(probe, arg))
-      : false;
+    return typeof command === 'function' ? Boolean(command.call(probe, arg)) : false;
   };
 
   return {
@@ -63,14 +46,12 @@ export function makeBuiltInCommands(
     },
     toggleMark: {
       args: named,
-      run: ({ name, attrs: a }) =>
-        editor.chain().focus().toggleMark(name, attrsOf(a)).run(),
+      run: ({ name, attrs: a }) => editor.chain().focus().toggleMark(name, attrsOf(a)).run(),
       can: ({ name, attrs: a }) => editor.can().toggleMark(name, attrsOf(a)),
     },
     setMark: {
       args: named,
-      run: ({ name, attrs: a }) =>
-        editor.chain().focus().setMark(name, attrsOf(a)).run(),
+      run: ({ name, attrs: a }) => editor.chain().focus().setMark(name, attrsOf(a)).run(),
     },
     unsetMark: {
       args: z.object({ name: z.string().min(1) }),
@@ -78,8 +59,7 @@ export function makeBuiltInCommands(
     },
     setNode: {
       args: named,
-      run: ({ name, attrs: a }) =>
-        editor.chain().focus().setNode(name, attrsOf(a)).run(),
+      run: ({ name, attrs: a }) => editor.chain().focus().setNode(name, attrsOf(a)).run(),
       can: ({ name, attrs: a }) => editor.can().setNode(name, attrsOf(a)),
     },
     toggleNode: {
@@ -88,16 +68,14 @@ export function makeBuiltInCommands(
         toggleTo: z.string().min(1).default('paragraph'),
         attrs,
       }),
-      run: ({ name, toggleTo, attrs: a }) =>
-        editor.chain().focus().toggleNode(name, toggleTo, attrsOf(a)).run(),
+      run: ({ name, toggleTo, attrs: a }) => editor.chain().focus().toggleNode(name, toggleTo, attrsOf(a)).run(),
     },
     updateAttributes: {
       args: z.object({
         name: z.string().min(1),
         attrs: z.record(z.string(), z.unknown()),
       }),
-      run: ({ name, attrs: a }) =>
-        editor.chain().updateAttributes(name, a).run(),
+      run: ({ name, attrs: a }) => editor.chain().updateAttributes(name, a).run(),
     },
     setParagraph: {
       run: () => editor.chain().focus().setNode('paragraph').run(),
@@ -115,8 +93,7 @@ export function makeBuiltInCommands(
         from: z.number().int().min(0),
         to: z.number().int().min(0),
       }),
-      run: ({ from, to }) =>
-        editor.chain().focus().deleteRange({ from, to }).run(),
+      run: ({ from, to }) => editor.chain().focus().deleteRange({ from, to }).run(),
     },
     // The block "+" affordance: insert an empty paragraph after the top-level
     // block at viewport `y` (the block the drag handle points at), move the
@@ -135,9 +112,7 @@ export function makeBuiltInCommands(
               return y >= rect.top && y <= rect.bottom;
             }) ?? blocks.at(-1);
           if (!target) return false;
-          const after = view.state.doc
-            .resolve(view.posAtDOM(target, 0))
-            .after(1);
+          const after = view.state.doc.resolve(view.posAtDOM(target, 0)).after(1);
           return editor
             .chain()
             .insertContentAt(after, { type: 'paragraph' })
@@ -160,9 +135,7 @@ export function makeBuiltInCommands(
     },
     focus: {
       run: (a) => {
-        const position = (
-          a as { position?: 'start' | 'end' | 'all' | number } | undefined
-        )?.position;
+        const position = (a as { position?: 'start' | 'end' | 'all' | number } | undefined)?.position;
         return editor.chain().focus(position).run();
       },
     },

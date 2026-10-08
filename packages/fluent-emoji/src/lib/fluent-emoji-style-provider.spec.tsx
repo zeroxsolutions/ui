@@ -3,10 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { setFluentEmojiBase, setFluentEmojiStyle } from './fluent-emoji-url';
 import { FluentEmoji } from './fluent-emoji';
-import {
-  FluentEmojiStyleProvider,
-  useFluentEmojiStyle,
-} from './fluent-emoji-style-provider';
+import { FluentEmojiStyleProvider, useFluentEmojiStyle } from './fluent-emoji-style-provider';
 
 const BASE = 'https://cdn.example/emoji';
 const src = () => screen.getByRole('img').getAttribute('src');
@@ -100,9 +97,7 @@ describe('FluentEmojiStyleProvider', () => {
 
 describe('useFluentEmojiStyle', () => {
   it('throws when used outside a provider', () => {
-    expect(() => renderHook(() => useFluentEmojiStyle())).toThrow(
-      /within <FluentEmojiStyleProvider>/,
-    );
+    expect(() => renderHook(() => useFluentEmojiStyle())).toThrow(/within <FluentEmojiStyleProvider>/);
   });
 });
 

@@ -18,9 +18,7 @@ describe('detectDiagramType', () => {
   });
 
   it('ignores leading blank lines', () => {
-    expect(detectDiagramType('\n\n  sequenceDiagram\n  A->>B: hi')).toBe(
-      'sequence',
-    );
+    expect(detectDiagramType('\n\n  sequenceDiagram\n  A->>B: hi')).toBe('sequence');
   });
 
   it('returns "unknown" for unrecognized or empty source', () => {
