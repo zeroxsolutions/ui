@@ -1,3 +1,22 @@
+## 0.1.1 (2026-10-08)
+
+### 🚀 Features
+
+- **fluent-emoji:** resolve only glyphs that have artwork ([51bc14a3](https://github.com/zeroxsolutions/ui-sdk/commit/51bc14a3))
+- **fluent-emoji:** add the phoenix artwork from Microsoft ([1dc156da](https://github.com/zeroxsolutions/ui-sdk/commit/1dc156da))
+
+### 🩹 Fixes
+
+- **fluent-emoji:** harden the manifest generator and its types ([6dd422c3](https://github.com/zeroxsolutions/ui-sdk/commit/6dd422c3))
+- **fluent-emoji:** sentence-case the emoji category labels ([5f2addf5](https://github.com/zeroxsolutions/ui-sdk/commit/5f2addf5))
+- **fluent-emoji:** build the default base without new URL ([4db5e813](https://github.com/zeroxsolutions/ui-sdk/commit/4db5e813))
+
+### ❤️ Thank You
+
+- Claude Opus 5.5
+- Claude Sonnet 5
+- Lương Văn Tú
+
 ## 0.1.0 (2026-09-28)
 
 ### 🚀 Features
