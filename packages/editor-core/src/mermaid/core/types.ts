@@ -22,9 +22,7 @@ export type DiagramType =
   | 'unknown';
 
 /** The outcome of a render attempt: a rendered SVG string, or a parse/render error. */
-export type MermaidRenderResult =
-  | { ok: true; svg: string }
-  | { ok: false; error: string; line?: number };
+export type MermaidRenderResult = { ok: true; svg: string } | { ok: false; error: string; line?: number };
 
 /** Theme values passed to the engine — the active editor theme's `variant.mermaid`. */
 export interface RenderThemeConfig {

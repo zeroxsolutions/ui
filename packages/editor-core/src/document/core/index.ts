@@ -9,10 +9,7 @@
 export * from './types/index.js';
 
 export { createEditor } from './builder/create-editor.js';
-export type {
-  EditorBuilder,
-  EditorMountOptions,
-} from './builder/create-editor.js';
+export type { EditorBuilder, EditorMountOptions } from './builder/create-editor.js';
 
 export { createDocumentEditor } from './create-document-editor.js';
 export type { DocumentEditorConfig } from './create-document-editor.js';

@@ -4,7 +4,12 @@ type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
 
 /** serverless — Material Icon Theme (MIT). */
 const ServerlessIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={size} height={size} {...props}><path fill="#ef5350" d="M12.897 6H2v4h9.613zm4.201 0-1.284 4H30V6zm-2.568 8-1.283 4H30v-4zm-4.2 0H2v4h7.046zm1.633 8-1.283 4H30v-4zm-4.201 0H2v4h4.479z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={size} height={size} {...props}>
+    <path
+      fill="#ef5350"
+      d="M12.897 6H2v4h9.613zm4.201 0-1.284 4H30V6zm-2.568 8-1.283 4H30v-4zm-4.2 0H2v4h7.046zm1.633 8-1.283 4H30v-4zm-4.201 0H2v4h4.479z"
+    />
+  </svg>
 );
 
 export { ServerlessIcon };

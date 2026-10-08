@@ -1,11 +1,6 @@
 import type { ZodType } from 'zod';
 import type { EditorFeature } from '../core/types/feature.js';
-import type {
-  FallbackStrategy,
-  Format,
-  MarkCodec,
-  NodeCodec,
-} from '../core/types/codec.js';
+import type { FallbackStrategy, Format, MarkCodec, NodeCodec } from '../core/types/codec.js';
 import type { NodeJSON } from '../core/types/json.js';
 
 /**
@@ -30,10 +25,7 @@ export class CodecRegistry {
   private readonly markCodecs = new Map<string, MarkCodec>();
   private readonly nodeSchemas = new Map<string, ZodType>();
   private readonly markSchemas = new Map<string, ZodType>();
-  private readonly customSerializers = new Map<
-    string,
-    Map<string, CustomNodeSerializer>
-  >();
+  private readonly customSerializers = new Map<string, Map<string, CustomNodeSerializer>>();
   readonly defaultFallback: FallbackStrategy;
 
   constructor(options: CodecRegistryOptions = {}) {
@@ -58,14 +50,8 @@ export class CodecRegistry {
 
   /** Register a serializer for a *new named format* without touching the walker
    *  or the registry core (see "Format Extensibility"). */
-  registerNodeSerializer(
-    format: Format,
-    nodeType: string,
-    serialize: CustomNodeSerializer,
-  ): void {
-    const byType =
-      this.customSerializers.get(format) ??
-      new Map<string, CustomNodeSerializer>();
+  registerNodeSerializer(format: Format, nodeType: string, serialize: CustomNodeSerializer): void {
+    const byType = this.customSerializers.get(format) ?? new Map<string, CustomNodeSerializer>();
     byType.set(nodeType, serialize);
     this.customSerializers.set(format, byType);
   }
@@ -86,10 +72,7 @@ export class CodecRegistry {
     return this.markSchemas.get(name);
   }
 
-  customNodeSerializer(
-    format: Format,
-    nodeType: string,
-  ): CustomNodeSerializer | undefined {
+  customNodeSerializer(format: Format, nodeType: string): CustomNodeSerializer | undefined {
     return this.customSerializers.get(format)?.get(nodeType);
   }
 
@@ -118,8 +101,7 @@ export function buildCodecRegistry(
 
   for (const feature of features) {
     for (const codec of feature.codecs ?? []) registry.registerNodeCodec(codec);
-    for (const codec of feature.markCodecs ?? [])
-      registry.registerMarkCodec(codec);
+    for (const codec of feature.markCodecs ?? []) registry.registerMarkCodec(codec);
     for (const node of feature.nodes ?? []) {
       if (node.attrs) registry.registerNodeSchema(node.name, node.attrs);
     }

@@ -8,9 +8,4 @@ export { CodeEditor, CodeEditorContent, useCodeEditor } from './code-editor.js';
 export type { CodeEditorContentProps, CodeEditorProps } from './code-editor.js';
 
 export { FileContentRouter, fileView } from './file-content-router.js';
-export type {
-  FileContentRouterProps,
-  FileView,
-  FileViewKind,
-  RoutedFile,
-} from './file-content-router.js';
+export type { FileContentRouterProps, FileView, FileViewKind, RoutedFile } from './file-content-router.js';

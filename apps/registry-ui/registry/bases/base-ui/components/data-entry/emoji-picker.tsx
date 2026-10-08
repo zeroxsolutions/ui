@@ -76,7 +76,8 @@ interface EmojiPickerSection {
 
 /** One virtual row: a sticky section heading or a row of up to `COLUMNS` emoji. */
 type EmojiPickerRow =
-  { type: 'header'; key: string; id: string; name: string } | { type: 'cells'; key: string; emojis: EmojiDatum[] };
+  | { type: 'header'; key: string; id: string; name: string }
+  | { type: 'cells'; key: string; emojis: EmojiDatum[] };
 
 /** Sections (or flat search results) flattened into the window's row list, with the indices that are headings. */
 function emojiPickerRows(

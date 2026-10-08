@@ -4,7 +4,12 @@ type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
 
 /** liquid — Material Icon Theme (MIT). */
 const LiquidIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={size} height={size} {...props}><path fill="#29b6f6" d="M12 21.669a6.927 6.927 0 0 1-6.927-6.927C5.073 10.124 12 2.33 12 2.33s6.927 7.793 6.927 12.41A6.927 6.927 0 0 1 12 21.67z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={size} height={size} {...props}>
+    <path
+      fill="#29b6f6"
+      d="M12 21.669a6.927 6.927 0 0 1-6.927-6.927C5.073 10.124 12 2.33 12 2.33s6.927 7.793 6.927 12.41A6.927 6.927 0 0 1 12 21.67z"
+    />
+  </svg>
 );
 
 export { LiquidIcon };

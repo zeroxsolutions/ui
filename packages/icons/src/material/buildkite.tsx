@@ -4,7 +4,10 @@ type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
 
 /** buildkite — Material Icon Theme (MIT). */
 const BuildkiteIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={size} height={size} {...props}><path fill="#00e676" d="m12 22-8-4V8l8 4zm8-14v10h4l4-4"/><path fill="#00c853" d="m12 22 8-4V8l-8 4zm8 6 8-4V14l-8 4z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={size} height={size} {...props}>
+    <path fill="#00e676" d="m12 22-8-4V8l8 4zm8-14v10h4l4-4" />
+    <path fill="#00c853" d="m12 22 8-4V8l-8 4zm8 6 8-4V14l-8 4z" />
+  </svg>
 );
 
 export { BuildkiteIcon };

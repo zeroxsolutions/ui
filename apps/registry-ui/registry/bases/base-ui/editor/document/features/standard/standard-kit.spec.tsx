@@ -1,14 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  DocJSON,
-  IEditor,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  createCodecRegistry,
-  importMarkdown,
-  serialize,
-} from '@zeroxsolutions/editor-core/document/serialize/index';
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { createCodecRegistry, importMarkdown, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from './standard-kit.js';
 
 const editors: IEditor[] = [];
@@ -68,18 +61,14 @@ describe('standardKit', () => {
           content: [
             {
               type: 'listItem',
-              content: [
-                { type: 'paragraph', content: [{ type: 'text', text: 'one' }] },
-              ],
+              content: [{ type: 'paragraph', content: [{ type: 'text', text: 'one' }] }],
             },
             {
               type: 'listItem',
               content: [
                 {
                   type: 'paragraph',
-                  content: [
-                    { type: 'text', text: 'two', marks: [{ type: 'bold' }] },
-                  ],
+                  content: [{ type: 'text', text: 'two', marks: [{ type: 'bold' }] }],
                 },
               ],
             },

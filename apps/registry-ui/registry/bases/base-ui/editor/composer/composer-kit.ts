@@ -1,9 +1,6 @@
 import { Placeholder } from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit';
-import {
-  defineFeature,
-  type EditorFeature,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import { defineFeature, type EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
 
 /**
  * The composer's base kit — the minimal engine set for a compact, single-line

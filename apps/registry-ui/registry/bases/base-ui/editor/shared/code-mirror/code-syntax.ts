@@ -1,16 +1,5 @@
-import {
-  Decoration,
-  type DecorationSet,
-  EditorView,
-  ViewPlugin,
-  type ViewUpdate,
-} from '@codemirror/view';
-import {
-  type Extension,
-  Facet,
-  RangeSetBuilder,
-  StateEffect,
-} from '@codemirror/state';
+import { Decoration, type DecorationSet, EditorView, ViewPlugin, type ViewUpdate } from '@codemirror/view';
+import { type Extension, Facet, RangeSetBuilder, StateEffect } from '@codemirror/state';
 import type { Highlighter } from 'shiki';
 import type { ThemedToken } from 'shiki/types';
 
@@ -26,11 +15,7 @@ import {
 // Re-exported for back-compat: these pure helpers moved to the framework-agnostic
 // core (`@/registry/bases/base-ui/lib/shiki`) but several call-sites + specs import them
 // from here.
-export {
-  styleForToken,
-  tokensToRanges,
-  type SyntaxRange,
-} from '@/registry/bases/base-ui/lib/shiki';
+export { styleForToken, tokensToRanges, type SyntaxRange } from '@/registry/bases/base-ui/lib/shiki';
 
 /**
  * Syntax highlighting for the CodeMirror surface, powered by Shiki — a thin,
@@ -44,10 +29,7 @@ export {
 const rehighlight = StateEffect.define<null>();
 
 /** The Shiki language id to tokenize the document as; `undefined` = no highlight. */
-export const syntaxLanguage = Facet.define<
-  string | undefined,
-  string | undefined
->({ combine: (values) => values[0] });
+export const syntaxLanguage = Facet.define<string | undefined, string | undefined>({ combine: (values) => values[0] });
 
 function requestRehighlight(view: EditorView): void {
   // The async load may resolve after the view is torn down.
@@ -113,12 +95,8 @@ const shikiPlugin = ViewPlugin.fromClass(
     }
 
     update(update: ViewUpdate): void {
-      const languageChanged =
-        update.startState.facet(syntaxLanguage) !==
-        update.state.facet(syntaxLanguage);
-      const asked = update.transactions.some((t) =>
-        t.effects.some((e) => e.is(rehighlight)),
-      );
+      const languageChanged = update.startState.facet(syntaxLanguage) !== update.state.facet(syntaxLanguage);
+      const asked = update.transactions.some((t) => t.effects.some((e) => e.is(rehighlight)));
       if (update.docChanged || languageChanged || asked) {
         this.decorations = buildDecorations(update.view);
       }
@@ -167,8 +145,7 @@ export const editorTheme: Extension = EditorView.theme({
   },
   '.cm-scroller::-webkit-scrollbar-corner': { backgroundColor: 'transparent' },
   '.cm-content': {
-    fontFamily:
-      'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
+    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
     padding: '0.75rem 0',
     caretColor: 'var(--foreground)',
   },

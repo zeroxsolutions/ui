@@ -1,14 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  DocJSON,
-  IEditor,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  createCodecRegistry,
-  importMarkdown,
-  serialize,
-} from '@zeroxsolutions/editor-core/document/serialize/index';
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { createCodecRegistry, importMarkdown, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../standard/index.js';
 import { table } from './table.js';
 
@@ -16,10 +9,7 @@ const editors: IEditor[] = [];
 function build(): IEditor {
   const element = document.createElement('div');
   document.body.append(element);
-  const editor = createEditor()
-    .use(standardKit())
-    .use(table())
-    .build({ element });
+  const editor = createEditor().use(standardKit()).use(table()).build({ element });
   editors.push(editor);
   return editor;
 }
@@ -28,9 +18,7 @@ afterEach(() => {
 });
 
 const registry = createCodecRegistry([standardKit(), table()]);
-const cell = (text: string): DocJSON['content'] => [
-  { type: 'paragraph', content: [{ type: 'text', text }] },
-];
+const cell = (text: string): DocJSON['content'] => [{ type: 'paragraph', content: [{ type: 'text', text }] }];
 const tableDoc: DocJSON = {
   type: 'doc',
   content: [
@@ -60,9 +48,7 @@ describe('table', () => {
   it('inserts a table via insertTable', () => {
     const editor = build();
     editor.run('insertTable');
-    expect(editor.getJSON().content?.some((n) => n.type === 'table')).toBe(
-      true,
-    );
+    expect(editor.getJSON().content?.some((n) => n.type === 'table')).toBe(true);
   });
 
   it('exports a GFM Markdown table', () => {
@@ -80,10 +66,7 @@ describe('table', () => {
   });
 
   it('imports a GFM Markdown table', () => {
-    const result = importMarkdown(
-      '| A | B |\n| --- | --- |\n| 1 | 2 |',
-      registry,
-    );
+    const result = importMarkdown('| A | B |\n| --- | --- |\n| 1 | 2 |', registry);
     const node = result.doc.content?.[0];
     expect(node?.type).toBe('table');
     expect(node?.content?.[0]?.content?.[0]?.type).toBe('tableHeader');

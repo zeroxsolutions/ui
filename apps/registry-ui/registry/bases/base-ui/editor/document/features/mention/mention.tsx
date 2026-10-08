@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import {
-  defineFeature,
-  type EditorFeature,
-  type NodeCodec,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
 
 /**
@@ -23,32 +19,20 @@ type MentionAttrs = z.infer<typeof mentionAttrs>;
 
 /** Minimal HTML escape for the codec's string output (attribute + text). */
 const escapeHtml = (value: string): string =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /**
  * The inline pill — a rounded chip on the design-system `primary` token that
  * reads as one unit. Shared by the editable node view and the static `toReact`
  * codec so both surfaces render identically.
  */
-function MentionPill({
-  id,
-  label,
-  contentEditable,
-}: {
-  id: string;
-  label: string;
-  contentEditable?: boolean;
-}) {
+function MentionPill({ id, label, contentEditable }: { id: string; label: string; contentEditable?: boolean }) {
   return (
     <span
       data-slot="mention"
       data-mention-id={id}
       contentEditable={contentEditable}
-      className="inline-flex items-center rounded-md bg-primary/10 px-1.5 py-0.5 text-sm font-medium text-primary"
+      className="bg-primary/10 text-primary inline-flex items-center rounded-md px-1.5 py-0.5 text-sm font-medium"
     >
       @{label || id}
     </span>
@@ -58,9 +42,7 @@ function MentionPill({
 function MentionView({ attrs }: NodeViewProps<MentionAttrs>) {
   // Inline atom: no editable content slot, no engine — a static pill. The label
   // falls back to the id so an unresolved mention still renders something.
-  return (
-    <MentionPill id={attrs.id} label={attrs.label} contentEditable={false} />
-  );
+  return <MentionPill id={attrs.id} label={attrs.label} contentEditable={false} />;
 }
 
 const mentionCodec: NodeCodec<MentionAttrs> = {

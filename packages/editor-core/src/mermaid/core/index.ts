@@ -12,10 +12,6 @@ export type {
   RenderThemeConfig,
 } from './types.js';
 export { detectDiagramType, DIAGRAM_TYPE_LABEL } from './detect.js';
-export {
-  DEFAULT_DIAGRAM_SOURCE,
-  DIAGRAM_TEMPLATES,
-  templateFor,
-} from './templates.js';
+export { DEFAULT_DIAGRAM_SOURCE, DIAGRAM_TEMPLATES, templateFor } from './templates.js';
 export { renderDiagram } from './engine.js';
 export { copySvg, copyText, downloadPng, downloadSvg } from './export.js';

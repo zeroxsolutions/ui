@@ -19,14 +19,8 @@ function inlineNodes(doc: DocJSON): NodeJSON[] {
 
 /** The literal text a committed token contributes to the flattened line - the
  *  char plus the field the token reads its query against (slug or label). */
-function tokenText(
-  token: TriggerToken,
-  attrs: Record<string, unknown>,
-): string {
-  const value =
-    token.queryField === 'slug'
-      ? (attrs.slug ?? attrs.id ?? '')
-      : (attrs.label ?? attrs.id ?? '');
+function tokenText(token: TriggerToken, attrs: Record<string, unknown>): string {
+  const value = token.queryField === 'slug' ? (attrs.slug ?? attrs.id ?? '') : (attrs.label ?? attrs.id ?? '');
   return `${token.char}${String(value)}`;
 }
 
@@ -37,10 +31,7 @@ function tokenText(
  * `one-leading` token (a `/command`) is followed by a space in the flat text
  * when more content follows, since the document keeps no literal space there.
  */
-export function docToPayload(
-  doc: DocJSON,
-  tokens: readonly TriggerToken[],
-): ChatMessagePayload {
+export function docToPayload(doc: DocJSON, tokens: readonly TriggerToken[]): ChatMessagePayload {
   const byNode = new Map(tokens.map((token) => [token.nodeName, token]));
   const buckets: Partial<Record<string, unknown[]>> = {};
   for (const token of tokens) buckets[token.kind] = [];

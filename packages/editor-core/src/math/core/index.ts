@@ -13,10 +13,6 @@ export type {
   MathTemplate,
 } from './types.js';
 export { renderMath, renderMathHtml } from './render.js';
-export {
-  DEFAULT_MATH_SOURCE,
-  MATH_TEMPLATES,
-  templateFor,
-} from './templates.js';
+export { DEFAULT_MATH_SOURCE, MATH_TEMPLATES, templateFor } from './templates.js';
 export { SYMBOL_GROUPS } from './symbols.js';
 export { copyLatex, copyMathML } from './export.js';

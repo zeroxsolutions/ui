@@ -28,8 +28,7 @@ export function selectionRect(): Point | null {
 export function selectionWithin(container: HTMLElement | null): boolean {
   if (typeof window === 'undefined') return false;
   const selection = window.getSelection();
-  if (!selection || selection.isCollapsed || selection.rangeCount === 0)
-    return false;
+  if (!selection || selection.isCollapsed || selection.rangeCount === 0) return false;
   if (!container) return true;
   const range = selection.getRangeAt(0);
   return container.contains(range.commonAncestorContainer);

@@ -32,10 +32,7 @@ export interface MathRenderState {
  * exposed so the caller can show an `Alert`; empty source resolves to `empty`,
  * never an error. The color rides the active editor theme's `variant.math`.
  */
-export function useMathRender(
-  source: string,
-  options?: { displayMode?: boolean },
-): MathRenderState {
+export function useMathRender(source: string, options?: { displayMode?: boolean }): MathRenderState {
   const { variant } = useEditorTheme();
   const color = variant.math.color;
   const displayMode = options?.displayMode ?? true;

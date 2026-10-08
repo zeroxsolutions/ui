@@ -549,7 +549,7 @@ shell; this task redoes it that way on top of 9d52613.
       `copy-button.tsx`, `docs-copy-page.tsx` and the code parts of `mdx-components.tsx` live.
 - [ ] **Step 2: Write the failing unit specs.** `highlightCode('const a = 1', 'ts')` returns HTML
       holding both themes' colours; `CodeBlockCommand` given `npx shadcn@latest add x` shows `pnpm dlx
-shadcn@latest add x` under `pnpm`, switches to `npx ...` under `npm`, and the copy button copies
+  shadcn@latest add x` under `pnpm`, switches to `npx ...` under `npm`, and the copy button copies
       the visible command; `CopyPageButton` fetches `<url>.md` and writes it to the clipboard. An MDX fence ` ```tsx ` renders a block whose header shows `tsx`; one with `title="app.tsx"` shows the title too.
 - [ ] **Step 3: Build them.** Preview: one card, demo above, source below collapsed with a
       `View code` button, no `Preview`/`Code` tabs. Install: package-manager tabs remembered in

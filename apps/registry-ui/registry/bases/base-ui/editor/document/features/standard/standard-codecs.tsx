@@ -1,9 +1,5 @@
 import { createElement } from 'react';
-import type {
-  MarkCodec,
-  MarkdownToken,
-  NodeCodec,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import type { MarkCodec, MarkdownToken, NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import type { ReactNodeCodec } from '../../../react-types';
 
@@ -19,23 +15,16 @@ import type { ReactNodeCodec } from '../../../react-types';
  * core's opaque `toReact` slot.
  */
 
-const clampLevel = (value: unknown): number =>
-  Math.min(6, Math.max(1, Number(value) || 1));
+const clampLevel = (value: unknown): number => Math.min(6, Math.max(1, Number(value) || 1));
 const levelOf = (node: NodeJSON): number => clampLevel(node.attrs?.level);
-const blocks = (
-  node: NodeJSON,
-  join: (parts: string[]) => string,
-  serialize: (n: NodeJSON) => string,
-) => join((node.content ?? []).map(serialize));
+const blocks = (node: NodeJSON, join: (parts: string[]) => string, serialize: (n: NodeJSON) => string) =>
+  join((node.content ?? []).map(serialize));
 
 const heading: ReactNodeCodec = {
   node: 'heading',
-  toMarkdown: (node, ctx) =>
-    `${'#'.repeat(levelOf(node))} ${ctx.serializeChildren(node)}`,
-  toHTML: (node, ctx) =>
-    `<h${levelOf(node)}>${ctx.serializeChildren(node)}</h${levelOf(node)}>`,
-  toReact: (node, ctx) =>
-    createElement(`h${levelOf(node)}`, null, ctx.renderChildren(node)),
+  toMarkdown: (node, ctx) => `${'#'.repeat(levelOf(node))} ${ctx.serializeChildren(node)}`,
+  toHTML: (node, ctx) => `<h${levelOf(node)}>${ctx.serializeChildren(node)}</h${levelOf(node)}>`,
+  toReact: (node, ctx) => createElement(`h${levelOf(node)}`, null, ctx.renderChildren(node)),
   fromMarkdown: (token, ctx) =>
     token.type === 'heading'
       ? {
@@ -61,17 +50,12 @@ const blockquote: ReactNodeCodec = {
       .split('\n')
       .map((line) => (line ? `> ${line}` : '>'))
       .join('\n'),
-  toHTML: (node, ctx) =>
-    `<blockquote>${blocks(node, (p) => p.join(''), ctx.serializeNode)}</blockquote>`,
+  toHTML: (node, ctx) => `<blockquote>${blocks(node, (p) => p.join(''), ctx.serializeNode)}</blockquote>`,
   toReact: (node, ctx) => <blockquote>{ctx.renderChildren(node)}</blockquote>,
   fromMarkdown: (token, ctx) =>
-    token.type === 'blockquote'
-      ? { type: 'blockquote', content: ctx.fromMarkdownChildren(token) }
-      : null,
+    token.type === 'blockquote' ? { type: 'blockquote', content: ctx.fromMarkdownChildren(token) } : null,
   fromHTML: (element, ctx) =>
-    element.tagName === 'BLOCKQUOTE'
-      ? { type: 'blockquote', content: ctx.fromHTMLChildren(element) }
-      : null,
+    element.tagName === 'BLOCKQUOTE' ? { type: 'blockquote', content: ctx.fromHTMLChildren(element) } : null,
 };
 
 const horizontalRule: NodeCodec = {
@@ -79,10 +63,8 @@ const horizontalRule: NodeCodec = {
   toMarkdown: () => '---',
   toHTML: () => '<hr>',
   toReact: () => <hr />,
-  fromMarkdown: (token) =>
-    token.type === 'thematicBreak' ? { type: 'horizontalRule' } : null,
-  fromHTML: (element) =>
-    element.tagName === 'HR' ? { type: 'horizontalRule' } : null,
+  fromMarkdown: (token) => (token.type === 'thematicBreak' ? { type: 'horizontalRule' } : null),
+  fromHTML: (element) => (element.tagName === 'HR' ? { type: 'horizontalRule' } : null),
 };
 
 const hardBreak: NodeCodec = {
@@ -90,66 +72,48 @@ const hardBreak: NodeCodec = {
   toMarkdown: () => '  \n',
   toHTML: () => '<br>',
   toReact: () => <br />,
-  fromMarkdown: (token) =>
-    token.type === 'break' ? { type: 'hardBreak' } : null,
-  fromHTML: (element) =>
-    element.tagName === 'BR' ? { type: 'hardBreak' } : null,
+  fromMarkdown: (token) => (token.type === 'break' ? { type: 'hardBreak' } : null),
+  fromHTML: (element) => (element.tagName === 'BR' ? { type: 'hardBreak' } : null),
 };
 
 const listItem: ReactNodeCodec = {
   node: 'listItem',
-  toMarkdown: (node, ctx) =>
-    blocks(node, (p) => p.join('\n'), ctx.serializeNode),
-  toHTML: (node, ctx) =>
-    `<li>${blocks(node, (p) => p.join(''), ctx.serializeNode)}</li>`,
+  toMarkdown: (node, ctx) => blocks(node, (p) => p.join('\n'), ctx.serializeNode),
+  toHTML: (node, ctx) => `<li>${blocks(node, (p) => p.join(''), ctx.serializeNode)}</li>`,
   toReact: (node, ctx) => <li>{ctx.renderChildren(node)}</li>,
   fromMarkdown: (token, ctx) =>
     token.type === 'listItem' && token.checked == null
       ? { type: 'listItem', content: ctx.fromMarkdownChildren(token) }
       : null,
   fromHTML: (element, ctx) =>
-    element.tagName === 'LI' &&
-    !element.querySelector(':scope > input[type="checkbox"]')
+    element.tagName === 'LI' && !element.querySelector(':scope > input[type="checkbox"]')
       ? { type: 'listItem', content: ctx.fromHTMLChildren(element) }
       : null,
 };
 
 const bulletList: ReactNodeCodec = {
   node: 'bulletList',
-  toMarkdown: (node, ctx) =>
-    (node.content ?? [])
-      .map((item) => `- ${ctx.serializeNode(item)}`)
-      .join('\n'),
-  toHTML: (node, ctx) =>
-    `<ul>${blocks(node, (p) => p.join(''), ctx.serializeNode)}</ul>`,
+  toMarkdown: (node, ctx) => (node.content ?? []).map((item) => `- ${ctx.serializeNode(item)}`).join('\n'),
+  toHTML: (node, ctx) => `<ul>${blocks(node, (p) => p.join(''), ctx.serializeNode)}</ul>`,
   toReact: (node, ctx) => <ul>{ctx.renderChildren(node)}</ul>,
   fromMarkdown: (token, ctx) =>
     token.type === 'list' && !token.ordered && !hasTaskItems(token)
       ? { type: 'bulletList', content: ctx.fromMarkdownChildren(token) }
       : null,
   fromHTML: (element, ctx) =>
-    element.tagName === 'UL'
-      ? { type: 'bulletList', content: ctx.fromHTMLChildren(element) }
-      : null,
+    element.tagName === 'UL' ? { type: 'bulletList', content: ctx.fromHTMLChildren(element) } : null,
 };
 
 const orderedList: ReactNodeCodec = {
   node: 'orderedList',
   toMarkdown: (node, ctx) =>
-    (node.content ?? [])
-      .map((item, index) => `${index + 1}. ${ctx.serializeNode(item)}`)
-      .join('\n'),
-  toHTML: (node, ctx) =>
-    `<ol>${blocks(node, (p) => p.join(''), ctx.serializeNode)}</ol>`,
+    (node.content ?? []).map((item, index) => `${index + 1}. ${ctx.serializeNode(item)}`).join('\n'),
+  toHTML: (node, ctx) => `<ol>${blocks(node, (p) => p.join(''), ctx.serializeNode)}</ol>`,
   toReact: (node, ctx) => <ol>{ctx.renderChildren(node)}</ol>,
   fromMarkdown: (token, ctx) =>
-    token.type === 'list' && token.ordered
-      ? { type: 'orderedList', content: ctx.fromMarkdownChildren(token) }
-      : null,
+    token.type === 'list' && token.ordered ? { type: 'orderedList', content: ctx.fromMarkdownChildren(token) } : null,
   fromHTML: (element, ctx) =>
-    element.tagName === 'OL'
-      ? { type: 'orderedList', content: ctx.fromHTMLChildren(element) }
-      : null,
+    element.tagName === 'OL' ? { type: 'orderedList', content: ctx.fromHTMLChildren(element) } : null,
 };
 
 const taskItem: ReactNodeCodec = {
@@ -158,11 +122,7 @@ const taskItem: ReactNodeCodec = {
     `- [${node.attrs?.checked ? 'x' : ' '}] ${blocks(node, (p) => p.join('\n'), ctx.serializeNode)}`,
   toHTML: (node, ctx) =>
     `<li data-checked="${Boolean(node.attrs?.checked)}">${blocks(node, (p) => p.join(''), ctx.serializeNode)}</li>`,
-  toReact: (node, ctx) => (
-    <li data-checked={Boolean(node.attrs?.checked)}>
-      {ctx.renderChildren(node)}
-    </li>
-  ),
+  toReact: (node, ctx) => <li data-checked={Boolean(node.attrs?.checked)}>{ctx.renderChildren(node)}</li>,
   fromMarkdown: (token, ctx) =>
     token.type === 'listItem' && token.checked != null
       ? {
@@ -175,13 +135,9 @@ const taskItem: ReactNodeCodec = {
 
 const taskList: ReactNodeCodec = {
   node: 'taskList',
-  toMarkdown: (node, ctx) =>
-    (node.content ?? []).map((item) => ctx.serializeNode(item)).join('\n'),
-  toHTML: (node, ctx) =>
-    `<ul data-type="taskList">${blocks(node, (p) => p.join(''), ctx.serializeNode)}</ul>`,
-  toReact: (node, ctx) => (
-    <ul data-type="taskList">{ctx.renderChildren(node)}</ul>
-  ),
+  toMarkdown: (node, ctx) => (node.content ?? []).map((item) => ctx.serializeNode(item)).join('\n'),
+  toHTML: (node, ctx) => `<ul data-type="taskList">${blocks(node, (p) => p.join(''), ctx.serializeNode)}</ul>`,
+  toReact: (node, ctx) => <ul data-type="taskList">{ctx.renderChildren(node)}</ul>,
   fromMarkdown: (token, ctx) =>
     token.type === 'list' && !token.ordered && hasTaskItems(token)
       ? { type: 'taskList', content: ctx.fromMarkdownChildren(token) }
@@ -193,9 +149,7 @@ const taskList: ReactNodeCodec = {
 };
 
 function hasTaskItems(token: MarkdownToken): boolean {
-  return (token.children ?? []).some(
-    (child) => (child as { checked?: unknown }).checked != null,
-  );
+  return (token.children ?? []).some((child) => (child as { checked?: unknown }).checked != null);
 }
 
 export const standardNodeCodecs = [
@@ -213,8 +167,7 @@ export const standardNodeCodecs = [
 
 // ── Mark codecs ──────────────────────────────────────────────────────────────
 
-const wrap = (Tag: string) => (_mark: unknown, children: unknown) =>
-  createElement(Tag, null, children as never);
+const wrap = (Tag: string) => (_mark: unknown, children: unknown) => createElement(Tag, null, children as never);
 
 const bold: MarkCodec = {
   mark: 'bold',
@@ -222,8 +175,7 @@ const bold: MarkCodec = {
   toHTML: () => ({ open: '<strong>', close: '</strong>' }),
   toReact: wrap('strong'),
   fromMarkdown: (token) => (token.type === 'strong' ? { type: 'bold' } : null),
-  fromHTML: (element) =>
-    /^(STRONG|B)$/.test(element.tagName) ? { type: 'bold' } : null,
+  fromHTML: (element) => (/^(STRONG|B)$/.test(element.tagName) ? { type: 'bold' } : null),
 };
 
 const italic: MarkCodec = {
@@ -231,10 +183,8 @@ const italic: MarkCodec = {
   toMarkdown: () => ({ open: '_', close: '_' }),
   toHTML: () => ({ open: '<em>', close: '</em>' }),
   toReact: wrap('em'),
-  fromMarkdown: (token) =>
-    token.type === 'emphasis' ? { type: 'italic' } : null,
-  fromHTML: (element) =>
-    /^(EM|I)$/.test(element.tagName) ? { type: 'italic' } : null,
+  fromMarkdown: (token) => (token.type === 'emphasis' ? { type: 'italic' } : null),
+  fromHTML: (element) => (/^(EM|I)$/.test(element.tagName) ? { type: 'italic' } : null),
 };
 
 const strike: MarkCodec = {
@@ -242,10 +192,8 @@ const strike: MarkCodec = {
   toMarkdown: () => ({ open: '~~', close: '~~' }),
   toHTML: () => ({ open: '<s>', close: '</s>' }),
   toReact: wrap('s'),
-  fromMarkdown: (token) =>
-    token.type === 'delete' ? { type: 'strike' } : null,
-  fromHTML: (element) =>
-    /^(S|DEL|STRIKE)$/.test(element.tagName) ? { type: 'strike' } : null,
+  fromMarkdown: (token) => (token.type === 'delete' ? { type: 'strike' } : null),
+  fromHTML: (element) => (/^(S|DEL|STRIKE)$/.test(element.tagName) ? { type: 'strike' } : null),
 };
 
 const code: MarkCodec = {
@@ -253,8 +201,7 @@ const code: MarkCodec = {
   toMarkdown: () => ({ open: '`', close: '`' }),
   toHTML: () => ({ open: '<code>', close: '</code>' }),
   toReact: wrap('code'),
-  fromMarkdown: (token) =>
-    token.type === 'inlineCode' ? { type: 'code' } : null,
+  fromMarkdown: (token) => (token.type === 'inlineCode' ? { type: 'code' } : null),
   fromHTML: (element) => (element.tagName === 'CODE' ? { type: 'code' } : null),
 };
 
@@ -263,8 +210,7 @@ const underline: MarkCodec = {
   toMarkdown: () => ({ open: '<u>', close: '</u>' }),
   toHTML: () => ({ open: '<u>', close: '</u>' }),
   toReact: wrap('u'),
-  fromHTML: (element) =>
-    element.tagName === 'U' ? { type: 'underline' } : null,
+  fromHTML: (element) => (element.tagName === 'U' ? { type: 'underline' } : null),
 };
 
 const highlight: MarkCodec = {
@@ -272,8 +218,7 @@ const highlight: MarkCodec = {
   toMarkdown: () => ({ open: '==', close: '==' }),
   toHTML: () => ({ open: '<mark>', close: '</mark>' }),
   toReact: wrap('mark'),
-  fromHTML: (element) =>
-    element.tagName === 'MARK' ? { type: 'highlight' } : null,
+  fromHTML: (element) => (element.tagName === 'MARK' ? { type: 'highlight' } : null),
 };
 
 const subscript: MarkCodec = {
@@ -281,8 +226,7 @@ const subscript: MarkCodec = {
   toMarkdown: () => ({ open: '~', close: '~' }),
   toHTML: () => ({ open: '<sub>', close: '</sub>' }),
   toReact: wrap('sub'),
-  fromHTML: (element) =>
-    element.tagName === 'SUB' ? { type: 'subscript' } : null,
+  fromHTML: (element) => (element.tagName === 'SUB' ? { type: 'subscript' } : null),
 };
 
 const superscript: MarkCodec = {
@@ -290,8 +234,7 @@ const superscript: MarkCodec = {
   toMarkdown: () => ({ open: '^', close: '^' }),
   toHTML: () => ({ open: '<sup>', close: '</sup>' }),
   toReact: wrap('sup'),
-  fromHTML: (element) =>
-    element.tagName === 'SUP' ? { type: 'superscript' } : null,
+  fromHTML: (element) => (element.tagName === 'SUP' ? { type: 'superscript' } : null),
 };
 
 export const standardMarkCodecs: MarkCodec[] = [

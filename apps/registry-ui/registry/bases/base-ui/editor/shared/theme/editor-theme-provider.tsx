@@ -3,10 +3,7 @@
 import { useTheme } from 'next-themes';
 import { useMemo, type ReactNode } from 'react';
 import { defaultEditorTheme } from './default-theme.js';
-import {
-  EditorThemeContext,
-  type EditorThemeContextValue,
-} from './editor-theme-context.js';
+import { EditorThemeContext, type EditorThemeContextValue } from './editor-theme-context.js';
 import type { IEditorTheme, ThemeMode } from './types/editor-theme.js';
 
 export interface EditorThemeProviderProps {
@@ -27,14 +24,9 @@ export interface EditorThemeProviderProps {
  * mechanism the design system's `.dark` variant keys off) and provides the
  * matching theme variant, so toggling dark switches them all together.
  */
-export function EditorThemeProvider({
-  theme = defaultEditorTheme,
-  forcedMode,
-  children,
-}: EditorThemeProviderProps) {
+export function EditorThemeProvider({ theme = defaultEditorTheme, forcedMode, children }: EditorThemeProviderProps) {
   const { resolvedTheme } = useTheme();
-  const mode: ThemeMode =
-    forcedMode ?? (resolvedTheme === 'dark' ? 'dark' : 'light');
+  const mode: ThemeMode = forcedMode ?? (resolvedTheme === 'dark' ? 'dark' : 'light');
 
   const value = useMemo<EditorThemeContextValue>(
     () => ({
@@ -45,9 +37,5 @@ export function EditorThemeProvider({
     [theme, mode],
   );
 
-  return (
-    <EditorThemeContext.Provider value={value}>
-      {children}
-    </EditorThemeContext.Provider>
-  );
+  return <EditorThemeContext.Provider value={value}>{children}</EditorThemeContext.Provider>;
 }

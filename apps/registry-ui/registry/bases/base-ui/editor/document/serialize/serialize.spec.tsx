@@ -2,11 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactNode } from 'react';
 import { z } from 'zod';
 import { describe, expect, it } from 'vitest';
-import {
-  defineFeature,
-  type DocJSON,
-  type SerializeContext,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import { defineFeature, type DocJSON, type SerializeContext } from '@zeroxsolutions/editor-core/document/core/index';
 import {
   createCodecRegistry,
   importMarkdown,
@@ -25,10 +21,8 @@ const bold = defineFeature({
       toMarkdown: () => ({ open: '**', close: '**' }),
       toHTML: () => ({ open: '<strong>', close: '</strong>' }),
       toReact: (_mark, children) => <strong>{children as ReactNode}</strong>,
-      fromMarkdown: (token) =>
-        token.type === 'strong' ? { type: 'bold' } : null,
-      fromHTML: (element) =>
-        element.tagName === 'STRONG' ? { type: 'bold' } : null,
+      fromMarkdown: (token) => (token.type === 'strong' ? { type: 'bold' } : null),
+      fromHTML: (element) => (element.tagName === 'STRONG' ? { type: 'bold' } : null),
     },
   ],
 });
@@ -48,13 +42,9 @@ const mermaid = defineFeature({
   codecs: [
     {
       node: 'mermaid',
-      toMarkdown: (node) =>
-        '```mermaid\n' + String(node.attrs?.source ?? '') + '\n```',
-      toHTML: (node) =>
-        `<pre data-type="mermaid">${String(node.attrs?.source ?? '')}</pre>`,
-      toReact: (node) => (
-        <pre data-type="mermaid">{String(node.attrs?.source ?? '')}</pre>
-      ),
+      toMarkdown: (node) => '```mermaid\n' + String(node.attrs?.source ?? '') + '\n```',
+      toHTML: (node) => `<pre data-type="mermaid">${String(node.attrs?.source ?? '')}</pre>`,
+      toReact: (node) => <pre data-type="mermaid">{String(node.attrs?.source ?? '')}</pre>,
       fromMarkdown: (token) =>
         token.type === 'code' && token.lang === 'mermaid'
           ? { type: 'mermaid', attrs: { source: token.value ?? '' } }
@@ -97,9 +87,7 @@ describe('serialization', () => {
   });
 
   it('exports a React tree for the static Viewer', () => {
-    const html = renderToStaticMarkup(
-      <>{renderToReact(sampleDoc, registry)}</>,
-    );
+    const html = renderToStaticMarkup(<>{renderToReact(sampleDoc, registry)}</>);
     expect(html).toContain('<strong>world</strong>');
     expect(html).toContain('data-type="mermaid"');
   });
@@ -111,9 +99,7 @@ describe('serialization', () => {
       content: [
         {
           type: 'unknownWrapper',
-          content: [
-            { type: 'paragraph', content: [{ type: 'text', text: 'x' }] },
-          ],
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'x' }] }],
         },
       ],
     };
@@ -122,10 +108,7 @@ describe('serialization', () => {
   });
 
   it('imports Markdown preserving a custom block via the token path', () => {
-    const result = importMarkdown(
-      'hello **world**\n\n```mermaid\ngraph TD\n```',
-      registry,
-    );
+    const result = importMarkdown('hello **world**\n\n```mermaid\ngraph TD\n```', registry);
     const [paragraph, diagram] = result.doc.content ?? [];
     expect(paragraph?.content?.[1]?.marks?.[0]?.type).toBe('bold');
     expect(diagram?.type).toBe('mermaid');
@@ -140,11 +123,7 @@ describe('serialization', () => {
 
   it('drops nodes whose attributes fail Zod validation on import', () => {
     const report: ImportReport = { warnings: [], dropped: [] };
-    const doc = validateDoc(
-      { type: 'doc', content: [{ type: 'mermaid', attrs: { source: 123 } }] },
-      registry,
-      report,
-    );
+    const doc = validateDoc({ type: 'doc', content: [{ type: 'mermaid', attrs: { source: 123 } }] }, registry, report);
     expect(doc.content).toHaveLength(0);
     expect(report.dropped[0]?.source).toBe('mermaid');
   });
@@ -158,9 +137,7 @@ describe('serialization', () => {
     const out = serialize(
       {
         type: 'doc',
-        content: [
-          { type: 'paragraph', content: [{ type: 'text', text: 'hi' }] },
-        ],
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'hi' }] }],
       },
       'bbcode',
       custom,

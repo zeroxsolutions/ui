@@ -97,9 +97,7 @@ const LANG_LOADERS: Record<string, () => Promise<{ default: unknown }>> = {
  * this module (and Shiki); a runtime picker keeps its own light copy and relies
  * on the sync test rather than importing here.
  */
-export const CODE_LANGUAGE_IDS: readonly string[] = Object.freeze(
-  Object.keys(LANG_LOADERS),
-);
+export const CODE_LANGUAGE_IDS: readonly string[] = Object.freeze(Object.keys(LANG_LOADERS));
 
 /**
  * Common shiki language aliases → the canonical id in {@link LANG_LOADERS}.
@@ -161,9 +159,7 @@ export function ensureLanguage(lang: string): Promise<void> {
       h.getLoadedLanguages().includes(canonical)
         ? undefined
         : LANG_LOADERS[canonical]().then((mod) =>
-            h.loadLanguage(
-              mod.default as Parameters<Highlighter['loadLanguage']>[0],
-            ),
+            h.loadLanguage(mod.default as Parameters<Highlighter['loadLanguage']>[0]),
           ),
     )
     .then(() => undefined)
@@ -201,8 +197,7 @@ export function styleForToken(color?: string, fontStyle?: number): string {
     const decoration: string[] = [];
     if (fontStyle & 4) decoration.push('underline');
     if (fontStyle & 8) decoration.push('line-through');
-    if (decoration.length)
-      parts.push(`text-decoration:${decoration.join(' ')}`);
+    if (decoration.length) parts.push(`text-decoration:${decoration.join(' ')}`);
   }
   return parts.join(';');
 }
@@ -212,10 +207,7 @@ export function styleForToken(color?: string, fontStyle?: number): string {
  * for a `<span style>` rather than a CSS string. Empty object for an unstyled
  * token (e.g. whitespace).
  */
-export function styleObjectForToken(
-  color?: string,
-  fontStyle?: number,
-): CSSProperties {
+export function styleObjectForToken(color?: string, fontStyle?: number): CSSProperties {
   const style: CSSProperties = {};
   if (color) style.color = color;
   if (fontStyle && fontStyle > 0) {
@@ -265,10 +257,7 @@ export type HighlightLine = HighlightToken[];
  * until (and unless) this resolves to real lines. Awaits the lazy grammar load,
  * so the first call for a language returns after Shiki has fetched it.
  */
-export async function highlightToLines(
-  code: string,
-  language: string,
-): Promise<HighlightLine[] | null> {
+export async function highlightToLines(code: string, language: string): Promise<HighlightLine[] | null> {
   const canonical = resolveLanguage(language.trim());
   if (!canonical) return null;
   await ensureLanguage(canonical);
@@ -290,9 +279,7 @@ export async function highlightToLines(
   return tokens.map((line) =>
     line.map((token) => {
       const style = styleObjectForToken(token.color, token.fontStyle);
-      return Object.keys(style).length > 0
-        ? { content: token.content, style }
-        : { content: token.content };
+      return Object.keys(style).length > 0 ? { content: token.content, style } : { content: token.content };
     }),
   );
 }

@@ -19,10 +19,7 @@ import type { MathRenderConfig, MathRenderResult } from './types.js';
  * discriminated `MathRenderResult` - never throws - so a live-editing caller can
  * detect a parse error and keep the last good render.
  */
-export function renderMath(
-  latex: string,
-  config: MathRenderConfig = {},
-): MathRenderResult {
+export function renderMath(latex: string, config: MathRenderConfig = {}): MathRenderResult {
   try {
     const html = katex.renderToString(latex, {
       throwOnError: true,
@@ -44,10 +41,7 @@ export function renderMath(
  * `toReact` export, which render the real formula on first paint with no
  * last-good render to fall back to.
  */
-export function renderMathHtml(
-  latex: string,
-  config: MathRenderConfig = {},
-): string {
+export function renderMathHtml(latex: string, config: MathRenderConfig = {}): string {
   return katex.renderToString(latex, {
     throwOnError: false,
     displayMode: config.displayMode ?? true,

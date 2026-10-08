@@ -44,25 +44,16 @@ export interface CodeSettingsMenuProps {
  * design-system `DropdownMenu`. Selections are reported through `onSettingsChange`
  * and drive `CodeMirrorPane`'s compartments live (no remount).
  */
-export function CodeSettingsMenu({
-  settings,
-  onSettingsChange,
-}: CodeSettingsMenuProps) {
+export function CodeSettingsMenu({ settings, onSettingsChange }: CodeSettingsMenuProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" size="icon" aria-label="Code settings" />
-        }
-      >
+      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label="Code settings" />}>
         <Settings2 />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-48">
         <DropdownMenuRadioGroup
           value={String(settings.tabSize)}
-          onValueChange={(value) =>
-            onSettingsChange({ tabSize: Number(value) })
-          }
+          onValueChange={(value) => onSettingsChange({ tabSize: Number(value) })}
         >
           {/* The label lives inside the RadioGroup: Base UI's `MenuGroupLabel`
               needs a `Menu.Group`/`Menu.RadioGroup` context, so a bare label
@@ -83,9 +74,7 @@ export function CodeSettingsMenu({
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={settings.showLineNumbers}
-          onCheckedChange={(checked) =>
-            onSettingsChange({ showLineNumbers: checked })
-          }
+          onCheckedChange={(checked) => onSettingsChange({ showLineNumbers: checked })}
         >
           Show line numbers
         </DropdownMenuCheckboxItem>

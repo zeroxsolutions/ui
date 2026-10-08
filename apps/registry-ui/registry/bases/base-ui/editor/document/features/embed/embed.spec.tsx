@@ -1,15 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  DocJSON,
-  IEditor,
-  NodeJSON,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  createCodecRegistry,
-  importHTML,
-  serialize,
-} from '@zeroxsolutions/editor-core/document/serialize/index';
+import type { DocJSON, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
+import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../standard/index.js';
 import { embed } from './embed.js';
 
@@ -49,9 +41,7 @@ const embedDoc = (url = 'https://example.com', title = ''): DocJSON => ({
 describe('embed', () => {
   it('inserts an embed via its command', () => {
     const editor = build();
-    expect(editor.run('insertEmbed', { url: 'https://example.com' })).not.toBe(
-      false,
-    );
+    expect(editor.run('insertEmbed', { url: 'https://example.com' })).not.toBe(false);
     const node = findNode(editor.getJSON(), 'embed');
     expect(node?.type).toBe('embed');
     expect(node?.attrs?.url).toBe('https://example.com');
@@ -64,11 +54,7 @@ describe('embed', () => {
   });
 
   it('exports a link line carrying the url to Markdown', () => {
-    const md = serialize(
-      embedDoc('https://example.com', 'Example'),
-      'markdown',
-      registry,
-    );
+    const md = serialize(embedDoc('https://example.com', 'Example'), 'markdown', registry);
     expect(md).toContain('https://example.com');
     expect(md).toContain('[Example]');
   });

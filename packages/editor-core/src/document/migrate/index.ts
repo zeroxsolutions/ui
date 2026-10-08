@@ -11,8 +11,4 @@ export {
   type ImportSummary,
   type MigrationSource,
 } from './migrator.js';
-export {
-  htmlSourceAdapter,
-  markdownSourceAdapter,
-  type ISourceAdapter,
-} from './source-adapter.js';
+export { htmlSourceAdapter, markdownSourceAdapter, type ISourceAdapter } from './source-adapter.js';

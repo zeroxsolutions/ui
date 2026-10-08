@@ -3,17 +3,9 @@
 import type { ReactNode } from 'react';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import { Toggle } from '@/registry/bases/base-ui/ui/toggle';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/registry/bases/base-ui/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import type {
-  IEditor,
-  ToolbarItem,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import type { IEditor, ToolbarItem } from '@zeroxsolutions/editor-core/document/core/index';
 import { useEditorChanges } from './use-editor-changes.js';
 
 /**
@@ -29,33 +21,22 @@ export interface EditorToolbarProps {
   className?: string;
 }
 
-export function EditorToolbar({
-  editor,
-  items,
-  className,
-}: EditorToolbarProps) {
+export function EditorToolbar({ editor, items, className }: EditorToolbarProps) {
   // Subscribe so pressed states track the selection.
   useEditorChanges(editor);
   return (
     <div
       role="toolbar"
       data-slot="editor-toolbar"
-      className={cn(
-        'flex flex-wrap items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-md',
-        className,
-      )}
+      className={cn('flex flex-wrap items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-md', className)}
     >
       <TooltipProvider>
         {items.map((item, index) => {
-          const active = item.activeWhen
-            ? editor.isActive(item.activeWhen)
-            : false;
+          const active = item.activeWhen ? editor.isActive(item.activeWhen) : false;
           const separator = index > 0 && item.id.startsWith('sep');
           return (
             <span key={item.id} className="contents">
-              {separator && (
-                <Separator orientation="vertical" className="mx-0.5 h-5" />
-              )}
+              {separator && <Separator orientation="vertical" className="mx-0.5 h-5" />}
               <Tooltip>
                 <TooltipTrigger
                   render={
@@ -63,9 +44,7 @@ export function EditorToolbar({
                       size="sm"
                       pressed={active}
                       aria-label={item.title}
-                      onPressedChange={() =>
-                        editor.run(item.command, item.args)
-                      }
+                      onPressedChange={() => editor.run(item.command, item.args)}
                     >
                       {(item.icon as ReactNode) ?? item.title}
                     </Toggle>

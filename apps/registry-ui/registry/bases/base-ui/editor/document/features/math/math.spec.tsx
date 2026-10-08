@@ -1,15 +1,8 @@
 import katex from 'katex';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  DocJSON,
-  IEditor,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  createCodecRegistry,
-  importHTML,
-  serialize,
-} from '@zeroxsolutions/editor-core/document/serialize/index';
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../standard/index.js';
 import { math } from './math.js';
 
@@ -40,9 +33,7 @@ const mathBlockDoc = (latex = LATEX): DocJSON => ({
 
 const mathInlineDoc = (latex = LATEX): DocJSON => ({
   type: 'doc',
-  content: [
-    { type: 'paragraph', content: [{ type: 'mathInline', attrs: { latex } }] },
-  ],
+  content: [{ type: 'paragraph', content: [{ type: 'mathInline', attrs: { latex } }] }],
 });
 
 describe('math', () => {

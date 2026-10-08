@@ -2,15 +2,8 @@ import type { ReactNode } from 'react';
 import { FluentEmoji } from '@zeroxsolutions/fluent-emoji';
 import { Info } from 'lucide-react';
 import { z } from 'zod';
-import {
-  defineFeature,
-  type EditorFeature,
-  type NodeCodec,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  NodeJSON,
-  NodeViewProps,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
+import type { NodeJSON, NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
 import type { ReactNodeCodec } from '../../../react-types';
 
 /**
@@ -58,19 +51,9 @@ const ALERT_TO_VARIANT: Record<string, Variant> = {
  * `[data-callout]` (design-system `--info` / `--success` / … tokens that flip
  * with `.dark`), so a callout is themed even in the engine-free Viewer.
  */
-function CalloutShell({
-  variant,
-  children,
-}: {
-  variant: Variant;
-  children: ReactNode;
-}) {
+function CalloutShell({ variant, children }: { variant: Variant; children: ReactNode }) {
   return (
-    <div
-      data-slot="callout"
-      data-callout={variant}
-      className="my-4 flex items-start gap-3 rounded-lg border p-4"
-    >
+    <div data-slot="callout" data-callout={variant} className="my-4 flex items-start gap-3 rounded-lg border p-4">
       <FluentEmoji
         glyph={ICON[variant]}
         name={variant}
@@ -78,17 +61,13 @@ function CalloutShell({
         aria-hidden
         className="mt-0.5 size-5 shrink-0 select-none"
       />
-      <div className="min-w-0 flex-1 [&>:first-child]:mt-0 [&>:last-child]:mb-0">
-        {children}
-      </div>
+      <div className="min-w-0 flex-1 [&>:first-child]:mt-0 [&>:last-child]:mb-0">{children}</div>
     </div>
   );
 }
 
 function CalloutView({ attrs, children }: NodeViewProps<CalloutAttrs>) {
-  return (
-    <CalloutShell variant={attrs.variant}>{children as ReactNode}</CalloutShell>
-  );
+  return <CalloutShell variant={attrs.variant}>{children as ReactNode}</CalloutShell>;
 }
 
 const firstParagraphText = (token: {
@@ -108,22 +87,14 @@ const calloutCodec: ReactNodeCodec<CalloutAttrs> = {
     return [`> [!${VARIANT_TO_ALERT[variant]}]`, ...quoted].join('\n');
   },
   toHTML: (node, ctx) =>
-    `<div data-callout="${node.attrs?.variant ?? 'info'}">${ctx.serializeChildren(
-      node as never,
-    )}</div>`,
+    `<div data-callout="${node.attrs?.variant ?? 'info'}">${ctx.serializeChildren(node as never)}</div>`,
   toReact: (node, ctx) => {
     const v = (node.attrs?.variant ?? 'info') as Variant;
-    return (
-      <CalloutShell variant={v}>
-        {ctx.renderChildren(node as never)}
-      </CalloutShell>
-    );
+    return <CalloutShell variant={v}>{ctx.renderChildren(node as never)}</CalloutShell>;
   },
   fromMarkdown: (token, ctx) => {
     if (token.type !== 'blockquote') return null;
-    const match = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]/i.exec(
-      firstParagraphText(token as never).trim(),
-    );
+    const match = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]/i.exec(firstParagraphText(token as never).trim());
     if (!match) return null;
     const variant = ALERT_TO_VARIANT[match[1].toUpperCase()];
     const content = stripAlertMarker(ctx.fromMarkdownChildren(token));
@@ -144,18 +115,12 @@ const calloutCodec: ReactNodeCodec<CalloutAttrs> = {
 function stripAlertMarker(content: NodeJSON[]): NodeJSON[] {
   const first = content[0];
   const firstText = first?.content?.[0];
-  if (
-    first?.type !== 'paragraph' ||
-    !firstText ||
-    firstText.text === undefined
-  ) {
+  if (first?.type !== 'paragraph' || !firstText || firstText.text === undefined) {
     return content;
   }
   firstText.text = firstText.text.replace(/^\s*\[![A-Za-z]+\]\s*/, '');
   if (!firstText.text) first.content!.shift();
-  return first.content && first.content.length === 0
-    ? content.slice(1)
-    : content;
+  return first.content && first.content.length === 0 ? content.slice(1) : content;
 }
 
 export function callout(): EditorFeature {
@@ -174,9 +139,7 @@ export function callout(): EditorFeature {
     codecs: [calloutCodec as NodeCodec],
     commands: {
       insertCallout: {
-        args: z
-          .object({ variant: z.enum(VARIANTS).default('info') })
-          .optional(),
+        args: z.object({ variant: z.enum(VARIANTS).default('info') }).optional(),
         run: (editor, args) =>
           editor.run('insertContent', {
             content: {

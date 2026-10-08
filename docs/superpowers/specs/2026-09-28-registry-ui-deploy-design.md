@@ -100,7 +100,7 @@ Nothing is deployed from a session.
   only `next build`.
 - **New spec, written to fail first:** against the worker, `GET /r/registry.json`
   answers `200`, `name` is `zeroxsolutions-ui` and `items` has 25 entries; `GET
-/r/<one composed item>.json` answers `200` with a non-empty `files[].content`.
+  /r/<one composed item>.json` answers `200` with a non-empty `files[].content`.
 - **By hand after the first production deploy:** the `curl` and the clean-consumer
   `shadcn add` from the goal.
 

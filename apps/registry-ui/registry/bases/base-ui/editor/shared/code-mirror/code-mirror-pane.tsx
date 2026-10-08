@@ -9,44 +9,26 @@ import {
   lineNumbers,
   placeholder as placeholderExtension,
 } from '@codemirror/view';
-import {
-  defaultKeymap,
-  history,
-  historyKeymap,
-  indentWithTab,
-} from '@codemirror/commands';
-import {
-  bracketMatching,
-  indentOnInput,
-  indentUnit,
-} from '@codemirror/language';
+import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
+import { bracketMatching, indentOnInput, indentUnit } from '@codemirror/language';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import {
-  editorTheme,
-  shikiHighlighting,
-  syntaxLanguage,
-} from './code-syntax.js';
+import { editorTheme, shikiHighlighting, syntaxLanguage } from './code-syntax.js';
 
-const codeMirrorPaneVariants = cva(
-  'h-full overflow-hidden [&_.cm-editor]:h-full [&_.cm-scroller]:overflow-auto',
-  {
-    variants: {
-      size: {
-        sm: 'text-xs [&_.cm-content]:py-2',
-        default: 'text-sm',
-      },
+const codeMirrorPaneVariants = cva('h-full overflow-hidden [&_.cm-editor]:h-full [&_.cm-scroller]:overflow-auto', {
+  variants: {
+    size: {
+      sm: 'text-xs [&_.cm-content]:py-2',
+      default: 'text-sm',
     },
-    defaultVariants: { size: 'default' },
   },
-);
+  defaultVariants: { size: 'default' },
+});
 
 export interface CodeMirrorPaneProps
-  extends Omit<
-      React.ComponentProps<'div'>,
-      'defaultValue' | 'onChange' | 'children'
-    >,
+  extends
+    Omit<React.ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'children'>,
     VariantProps<typeof codeMirrorPaneVariants> {
   /** Document text (controlled). Pair with `onValueChange`. */
   value?: string;
@@ -73,10 +55,7 @@ export interface CodeMirrorPaneProps
 
 /** The tab-width + indent-unit extension the settings menu reconfigures live. */
 function indentExtension(tabSize: number, useTabs: boolean): Extension {
-  return [
-    EditorState.tabSize.of(tabSize),
-    indentUnit.of(useTabs ? '\t' : ' '.repeat(tabSize)),
-  ];
+  return [EditorState.tabSize.of(tabSize), indentUnit.of(useTabs ? '\t' : ' '.repeat(tabSize))];
 }
 
 /**
@@ -119,8 +98,7 @@ export function CodeMirrorPane({
     (node: HTMLDivElement | null) => {
       hostRef.current = node;
       if (typeof ref === 'function') ref(node);
-      else if (ref)
-        (ref as React.RefObject<HTMLDivElement | null>).current = node;
+      else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node;
     },
     [ref],
   );
@@ -159,14 +137,9 @@ export function CodeMirrorPane({
         }),
         shikiHighlighting(),
         languageCompartment.current.of(syntaxLanguage.of(language)),
-        editableCompartment.current.of([
-          EditorView.editable.of(!readOnly),
-          EditorState.readOnly.of(readOnly),
-        ]),
+        editableCompartment.current.of([EditorView.editable.of(!readOnly), EditorState.readOnly.of(readOnly)]),
         wrapCompartment.current.of(wrap ? EditorView.lineWrapping : []),
-        placeholderCompartment.current.of(
-          placeholder ? placeholderExtension(placeholder) : [],
-        ),
+        placeholderCompartment.current.of(placeholder ? placeholderExtension(placeholder) : []),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onValueChangeRef.current?.(update.state.doc.toString());
@@ -197,9 +170,7 @@ export function CodeMirrorPane({
 
   React.useEffect(() => {
     viewRef.current?.dispatch({
-      effects: languageCompartment.current.reconfigure(
-        syntaxLanguage.of(language),
-      ),
+      effects: languageCompartment.current.reconfigure(syntaxLanguage.of(language)),
     });
   }, [language]);
 
@@ -214,33 +185,25 @@ export function CodeMirrorPane({
 
   React.useEffect(() => {
     viewRef.current?.dispatch({
-      effects: wrapCompartment.current.reconfigure(
-        wrap ? EditorView.lineWrapping : [],
-      ),
+      effects: wrapCompartment.current.reconfigure(wrap ? EditorView.lineWrapping : []),
     });
   }, [wrap]);
 
   React.useEffect(() => {
     viewRef.current?.dispatch({
-      effects: placeholderCompartment.current.reconfigure(
-        placeholder ? placeholderExtension(placeholder) : [],
-      ),
+      effects: placeholderCompartment.current.reconfigure(placeholder ? placeholderExtension(placeholder) : []),
     });
   }, [placeholder]);
 
   React.useEffect(() => {
     viewRef.current?.dispatch({
-      effects: indentCompartment.current.reconfigure(
-        indentExtension(tabSize, useTabs),
-      ),
+      effects: indentCompartment.current.reconfigure(indentExtension(tabSize, useTabs)),
     });
   }, [tabSize, useTabs]);
 
   React.useEffect(() => {
     viewRef.current?.dispatch({
-      effects: lineNumbersCompartment.current.reconfigure(
-        showLineNumbers ? lineNumbers() : [],
-      ),
+      effects: lineNumbersCompartment.current.reconfigure(showLineNumbers ? lineNumbers() : []),
     });
   }, [showLineNumbers]);
 

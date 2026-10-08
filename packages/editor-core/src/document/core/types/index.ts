@@ -13,23 +13,10 @@ export type {
   DocumentChangeHandlers,
   IDocumentBackend,
 } from './document-backend.js';
-export type {
-  CaretRect,
-  EditorSelection,
-  EditorStatus,
-  FocusPosition,
-  IEditor,
-  TriggerQuery,
-} from './editor.js';
+export type { CaretRect, EditorSelection, EditorStatus, FocusPosition, IEditor, TriggerQuery } from './editor.js';
 export type { CommandDescriptor, CommandMap } from './command.js';
 export type { NodeViewProps } from './node-view.js';
-export type {
-  ContentExpression,
-  InputRuleSpec,
-  MarkSpec,
-  NodeSpec,
-  NodeViewRenderer,
-} from './node-spec.js';
+export type { ContentExpression, InputRuleSpec, MarkSpec, NodeSpec, NodeViewRenderer } from './node-spec.js';
 export type {
   DeserializeContext,
   FallbackStrategy,
@@ -40,15 +27,6 @@ export type {
   NodeCodec,
   SerializeContext,
 } from './codec.js';
-export type {
-  BlockMenuItem,
-  BubbleItem,
-  SlashItem,
-  ToolbarItem,
-} from './ui-contribution.js';
-export type {
-  DroppedNode,
-  ImportResult,
-  ImportWarning,
-} from './import-result.js';
+export type { BlockMenuItem, BubbleItem, SlashItem, ToolbarItem } from './ui-contribution.js';
+export type { DroppedNode, ImportResult, ImportWarning } from './import-result.js';
 export type { AdvancedContribution, EditorFeature } from './feature.js';

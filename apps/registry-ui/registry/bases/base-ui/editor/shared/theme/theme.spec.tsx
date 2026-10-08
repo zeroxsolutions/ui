@@ -40,9 +40,7 @@ describe('editor theming', () => {
     });
     expect(custom.light.callouts.info.border).toBe('hotpink');
     // Untouched tokens fall back to the base.
-    expect(custom.light.callouts.info.foreground).toBe(
-      defaultEditorTheme.light.callouts.info.foreground,
-    );
+    expect(custom.light.callouts.info.foreground).toBe(defaultEditorTheme.light.callouts.info.foreground);
     expect(custom.dark.code.shiki).toBe('github-dark');
   });
 

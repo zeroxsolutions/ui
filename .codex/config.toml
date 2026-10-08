@@ -15,5 +15,5 @@ enabled = true
 [plugins."superpowers@superpowers-dev"]
 enabled = true
 
-model_auto_compact_token_limit=500000
+model_auto_compact_token_limit = 500000
 model_auto_compact_token_limit_scope = "total"

@@ -61,11 +61,7 @@ describe('archetype presets', () => {
   });
 
   it('an overridden field wins while the rest keep the preset defaults', () => {
-    const token = invocationToken(
-      'command',
-      '/',
-      config({ backspaceRestore: false }),
-    );
+    const token = invocationToken('command', '/', config({ backspaceRestore: false }));
     expect(token.backspaceRestore).toBe(false);
     // untouched invocation defaults remain
     expect(token.gate).toBe('line-start');
@@ -75,27 +71,21 @@ describe('archetype presets', () => {
 
 describe('coherence validation', () => {
   it('rejects line-start placement with many multiplicity', () => {
-    expect(() =>
-      referenceToken('mention', '@', config({ gate: 'line-start' })),
-    ).toThrow(IncoherentTriggerError);
+    expect(() => referenceToken('mention', '@', config({ gate: 'line-start' }))).toThrow(IncoherentTriggerError);
   });
 
   it('rejects one-leading multiplicity with anywhere placement', () => {
-    expect(() =>
-      referenceToken('mention', '@', config({ multiplicity: 'one-leading' })),
-    ).toThrow(IncoherentTriggerError);
+    expect(() => referenceToken('mention', '@', config({ multiplicity: 'one-leading' }))).toThrow(
+      IncoherentTriggerError,
+    );
   });
 
   it('rejects commit-on-space on a non-line-start trigger', () => {
-    expect(() =>
-      referenceToken('mention', '@', config({ commitOnSpace: true })),
-    ).toThrow(IncoherentTriggerError);
+    expect(() => referenceToken('mention', '@', config({ commitOnSpace: true }))).toThrow(IncoherentTriggerError);
   });
 
   it('names the offending kind in the error', () => {
-    expect(() =>
-      referenceToken('mention', '@', config({ commitOnSpace: true })),
-    ).toThrow(/mention/);
+    expect(() => referenceToken('mention', '@', config({ commitOnSpace: true }))).toThrow(/mention/);
   });
 });
 
@@ -103,18 +93,14 @@ describe('registry validation', () => {
   it('rejects two tokens sharing a trigger character', () => {
     const a = referenceToken('mention', '@', config());
     const b = referenceToken('handle', '@', config());
-    expect(() => validateTriggerRegistry([a, b])).toThrow(
-      DuplicateTriggerError,
-    );
+    expect(() => validateTriggerRegistry([a, b])).toThrow(DuplicateTriggerError);
     expect(() => validateTriggerRegistry([a, b])).toThrow(/@/);
   });
 
   it('rejects two tokens sharing a kind', () => {
     const a = referenceToken('mention', '@', config());
     const b = referenceToken('mention', '#', config());
-    expect(() => validateTriggerRegistry([a, b])).toThrow(
-      DuplicateTriggerError,
-    );
+    expect(() => validateTriggerRegistry([a, b])).toThrow(DuplicateTriggerError);
   });
 
   it('accepts a coherent, collision-free registry', () => {

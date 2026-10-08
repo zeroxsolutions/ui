@@ -1,14 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  DocJSON,
-  IEditor,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  createCodecRegistry,
-  importMarkdown,
-  serialize,
-} from '@zeroxsolutions/editor-core/document/serialize/index';
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { createCodecRegistry, importMarkdown, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../standard/index.js';
 import { callout } from './callout.js';
 
@@ -35,9 +28,7 @@ const calloutDoc = (variant = 'warning'): DocJSON => ({
     {
       type: 'callout',
       attrs: { variant },
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Heads up' }] },
-      ],
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Heads up' }] }],
     },
   ],
 });

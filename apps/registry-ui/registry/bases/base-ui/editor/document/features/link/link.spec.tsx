@@ -1,14 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  DocJSON,
-  IEditor,
-} from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  createCodecRegistry,
-  importMarkdown,
-  serialize,
-} from '@zeroxsolutions/editor-core/document/serialize/index';
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { createCodecRegistry, importMarkdown, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../standard/index.js';
 import { link } from './link.js';
 
@@ -55,12 +48,8 @@ describe('link', () => {
   });
 
   it('exports a link to Markdown and HTML', () => {
-    expect(serialize(linkedDoc, 'markdown', registry)).toContain(
-      '[site](https://x.com)',
-    );
-    expect(serialize(linkedDoc, 'html', registry)).toContain(
-      '<a href="https://x.com"',
-    );
+    expect(serialize(linkedDoc, 'markdown', registry)).toContain('[site](https://x.com)');
+    expect(serialize(linkedDoc, 'html', registry)).toContain('<a href="https://x.com"');
   });
 
   it('imports a Markdown link into a link mark', () => {

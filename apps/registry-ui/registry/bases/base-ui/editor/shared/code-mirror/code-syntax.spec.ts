@@ -17,9 +17,7 @@ describe('styleForToken', () => {
 
   it('combines color with multiple style bits', () => {
     // 3 = italic | bold
-    expect(styleForToken('var(--info)', 3)).toBe(
-      'color:var(--info);font-style:italic;font-weight:bold',
-    );
+    expect(styleForToken('var(--info)', 3)).toBe('color:var(--info);font-style:italic;font-weight:bold');
   });
 
   it('is empty for an unstyled token (e.g. whitespace)', () => {

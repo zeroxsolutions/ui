@@ -63,6 +63,4 @@ export interface DocumentBackendInit {
  * A backend factory the builder accepts. Each built editor gets its own backend
  * instance (no shared mutable state across editors).
  */
-export type DocumentBackendFactory = (
-  init: DocumentBackendInit,
-) => IDocumentBackend;
+export type DocumentBackendFactory = (init: DocumentBackendInit) => IDocumentBackend;

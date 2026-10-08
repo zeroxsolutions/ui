@@ -90,9 +90,7 @@ export const badge = () =>
         toHTML: (n) => `<span data-badge>${n.attrs?.label}</span>`,
         toReact: (n) => <span data-badge>{n.attrs?.label}</span>,
         fromHTML: (el) =>
-          el.hasAttribute('data-badge')
-            ? { type: 'badge', attrs: { label: el.textContent ?? '' } }
-            : null,
+          el.hasAttribute('data-badge') ? { type: 'badge', attrs: { label: el.textContent ?? '' } } : null,
       },
     ],
     commands: {
@@ -104,9 +102,7 @@ export const badge = () =>
           }),
       },
     },
-    slash: [
-      { id: 'badge', title: 'Badge', group: 'Inline', command: 'insertBadge' },
-    ],
+    slash: [{ id: 'badge', title: 'Badge', group: 'Inline', command: 'insertBadge' }],
   });
 ```
 
@@ -120,15 +116,8 @@ shipped from the ui registry alongside the React surfaces, not from this package
 ## Serialization & Migrate
 
 ```ts
-import {
-  createCodecRegistry,
-  serialize,
-  importMarkdown,
-} from '@zeroxsolutions/editor-core/document/serialize';
-import {
-  createMigrator,
-  summarizeImport,
-} from '@zeroxsolutions/editor-core/document/migrate';
+import { createCodecRegistry, serialize, importMarkdown } from '@zeroxsolutions/editor-core/document/serialize';
+import { createMigrator, summarizeImport } from '@zeroxsolutions/editor-core/document/migrate';
 
 const registry = createCodecRegistry([myFeature()]);
 serialize(doc, 'markdown', registry); // 'html' | 'react' | custom formats
@@ -149,10 +138,7 @@ The slash / toolbar / bubble / block menu **items** a feature declares are
 aggregated engine-free; the menu **components** themselves are chrome.
 
 ```ts
-import {
-  collectUiContributions,
-  defaultBlockMenuItems,
-} from '@zeroxsolutions/editor-core/document/ui';
+import { collectUiContributions, defaultBlockMenuItems } from '@zeroxsolutions/editor-core/document/ui';
 
 const ui = collectUiContributions(features);
 // ui.toolbar, ui.slash, ui.bubble, ui.blockMenu - the chrome renders these
@@ -178,7 +164,7 @@ a directory barrel is `<subpath>/index`, a standalone module is its file path.
   `createDocumentEditor`, `defineFeature`, the `IEditor` façade, types, errors.
 - `document/serialize`, `document/migrate` - codecs + import/Migrate.
 - `document/ui` - `collectUiContributions` / `defaultBlockMenuItems` (the headless
-  aggregation; the menu *components* are chrome).
+  aggregation; the menu _components_ are chrome).
 - `document/advanced` - the unstable engine escape.
 - `math/core/...`, `mermaid/core/...` - the KaTeX / Mermaid engines.
 - `composer/...` - the headless composer types + trigger tokens.

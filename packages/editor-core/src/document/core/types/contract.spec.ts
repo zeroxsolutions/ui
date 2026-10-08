@@ -1,11 +1,6 @@
 import { z } from 'zod';
 import { describe, expect, it } from 'vitest';
-import type {
-  CommandDescriptor,
-  DocJSON,
-  EditorFeature,
-  NodeSpec,
-} from './index.js';
+import type { CommandDescriptor, DocJSON, EditorFeature, NodeSpec } from './index.js';
 
 /**
  * Smoke tests for the frozen public contract. These assert the *design intent*

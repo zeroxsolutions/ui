@@ -63,35 +63,19 @@ export interface InlineToken {
 
 /** Minimal HTML escape for the codec's string output (attribute + text). */
 const escapeHtml = (value: string): string =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /** The literal token text a pill displays - `char` + label or slug, falling
  *  back to the id so an unresolved token still renders something. */
-function tokenText(
-  spec: InlineTokenSpec,
-  attrs: { label?: string; slug?: string; id?: string },
-): string {
-  const value =
-    spec.display === 'slug'
-      ? attrs.slug || attrs.id || ''
-      : attrs.label || attrs.id || '';
+function tokenText(spec: InlineTokenSpec, attrs: { label?: string; slug?: string; id?: string }): string {
+  const value = spec.display === 'slug' ? attrs.slug || attrs.id || '' : attrs.label || attrs.id || '';
   return `${spec.char}${value}`;
 }
 
 export function inlineToken(spec: InlineTokenSpec): InlineToken {
   const { kind } = spec;
 
-  function TokenPill({
-    attrs,
-    contentEditable,
-  }: {
-    attrs: InlineTokenAttrs;
-    contentEditable?: boolean;
-  }) {
+  function TokenPill({ attrs, contentEditable }: { attrs: InlineTokenAttrs; contentEditable?: boolean }) {
     return (
       <span
         data-slot={kind}
@@ -120,9 +104,7 @@ export function inlineToken(spec: InlineTokenSpec): InlineToken {
       const attrs = node.attrs ?? { id: '', label: '', slug: '' };
       return `<span data-token-kind="${escapeHtml(kind)}" data-token-id="${escapeHtml(attrs.id)}" data-token-label="${escapeHtml(attrs.label)}" data-token-slug="${escapeHtml(attrs.slug)}">${escapeHtml(tokenText(spec, attrs))}</span>`;
     },
-    toReact: (node) => (
-      <TokenPill attrs={node.attrs ?? { id: '', label: '', slug: '' }} />
-    ),
+    toReact: (node) => <TokenPill attrs={node.attrs ?? { id: '', label: '', slug: '' }} />,
     fromHTML: (element) => {
       if (element.getAttribute('data-token-kind') !== kind) return null;
       return {

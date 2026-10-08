@@ -15,12 +15,5 @@ export type {
 } from './types/editor-theme.js';
 export { defaultEditorTheme } from './default-theme.js';
 export { extendTheme } from './extend-theme.js';
-export {
-  EditorThemeContext,
-  useEditorTheme,
-  type EditorThemeContextValue,
-} from './editor-theme-context.js';
-export {
-  EditorThemeProvider,
-  type EditorThemeProviderProps,
-} from './editor-theme-provider.js';
+export { EditorThemeContext, useEditorTheme, type EditorThemeContextValue } from './editor-theme-context.js';
+export { EditorThemeProvider, type EditorThemeProviderProps } from './editor-theme-provider.js';

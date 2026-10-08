@@ -5,10 +5,7 @@ import type { DeepPartial, IEditorTheme } from './types/editor-theme.js';
  * spec). Overridden tokens take effect; everything else falls back to the base.
  * For full replacement, just pass a different `IEditorTheme` to the provider.
  */
-export function extendTheme(
-  base: IEditorTheme,
-  overrides: DeepPartial<IEditorTheme>,
-): IEditorTheme {
+export function extendTheme(base: IEditorTheme, overrides: DeepPartial<IEditorTheme>): IEditorTheme {
   return deepMerge(base, overrides) as IEditorTheme;
 }
 
@@ -25,9 +22,7 @@ function deepMerge<T>(target: T, source: DeepPartial<T>): T {
     if (value === undefined) continue;
     const current = result[key];
     result[key] =
-      isPlainObject(current) && isPlainObject(value)
-        ? deepMerge(current, value as DeepPartial<typeof current>)
-        : value;
+      isPlainObject(current) && isPlainObject(value) ? deepMerge(current, value as DeepPartial<typeof current>) : value;
   }
   return result as T;
 }

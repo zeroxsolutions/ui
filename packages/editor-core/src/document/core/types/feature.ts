@@ -1,12 +1,7 @@
 import type { CommandMap } from './command.js';
 import type { MarkCodec, NodeCodec } from './codec.js';
 import type { InputRuleSpec, MarkSpec, NodeSpec } from './node-spec.js';
-import type {
-  BlockMenuItem,
-  BubbleItem,
-  SlashItem,
-  ToolbarItem,
-} from './ui-contribution.js';
+import type { BlockMenuItem, BubbleItem, SlashItem, ToolbarItem } from './ui-contribution.js';
 
 /**
  * The single declarative unit of extension (see the `editor-feature-api` spec).

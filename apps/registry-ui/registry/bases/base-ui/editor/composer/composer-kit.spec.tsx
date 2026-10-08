@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type {
-  DocJSON,
-  IEditor,
-  NodeJSON,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import type { DocJSON, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { mention } from '../document/features/mention/index.js';
 import { COMPOSER_TOP_CONTENT, composerKit } from './composer-kit.js';
 
@@ -12,11 +8,7 @@ const editors: IEditor[] = [];
 function build(): IEditor {
   const element = document.createElement('div');
   document.body.append(element);
-  const editor = createEditor()
-    .topContent(COMPOSER_TOP_CONTENT)
-    .use(composerKit())
-    .use(mention())
-    .build({ element });
+  const editor = createEditor().topContent(COMPOSER_TOP_CONTENT).use(composerKit()).use(mention()).build({ element });
   editors.push(editor);
   return editor;
 }
@@ -49,9 +41,7 @@ describe('composerKit', () => {
   it('inserts an inline mention atom into the single block', () => {
     const editor = build();
     editor.run('focus', { position: 'end' });
-    expect(editor.run('insertMention', { id: 'u1', label: 'Ada' })).not.toBe(
-      false,
-    );
+    expect(editor.run('insertMention', { id: 'u1', label: 'Ada' })).not.toBe(false);
     const node = findNode(editor.getJSON() as NodeJSON, 'mention');
     expect(node?.attrs?.id).toBe('u1');
     expect(node?.attrs?.label).toBe('Ada');

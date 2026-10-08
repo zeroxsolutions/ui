@@ -36,20 +36,13 @@ export function downloadSvg(svg: string, filename = 'diagram.svg'): void {
  * through SVG `foreignObject` can vary by browser — the SVG paths are the
  * lossless export.
  */
-export async function downloadPng(
-  svg: string,
-  filename = 'diagram.png',
-  scale = 2,
-): Promise<void> {
+export async function downloadPng(svg: string, filename = 'diagram.png', scale = 2): Promise<void> {
   const image = new Image();
-  const svgUrl = URL.createObjectURL(
-    new Blob([svg], { type: 'image/svg+xml' }),
-  );
+  const svgUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
   try {
     await new Promise<void>((resolve, reject) => {
       image.onload = () => resolve();
-      image.onerror = () =>
-        reject(new Error('Failed to load SVG for PNG export'));
+      image.onerror = () => reject(new Error('Failed to load SVG for PNG export'));
       image.src = svgUrl;
     });
     const width = (image.naturalWidth || image.width) * scale;
@@ -60,9 +53,7 @@ export async function downloadPng(
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Canvas 2D context unavailable');
     context.drawImage(image, 0, 0, width, height);
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, 'image/png'),
-    );
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
     if (!blob) throw new Error('Failed to encode PNG');
     download(blob, filename);
   } finally {

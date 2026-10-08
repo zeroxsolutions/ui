@@ -95,12 +95,9 @@ export function createEditor(): EditorBuilder {
         topContent,
         nodeViewRenderer,
         element: options?.element,
-        onChange: changeHandlers.length
-          ? (delta) => changeHandlers.forEach((handler) => handler(delta))
-          : undefined,
+        onChange: changeHandlers.length ? (delta) => changeHandlers.forEach((handler) => handler(delta)) : undefined,
         onSnapshot: snapshotHandlers.length
-          ? (snapshot) =>
-              snapshotHandlers.forEach((handler) => handler(snapshot))
+          ? (snapshot) => snapshotHandlers.forEach((handler) => handler(snapshot))
           : undefined,
       });
     },

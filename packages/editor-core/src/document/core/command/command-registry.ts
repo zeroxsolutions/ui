@@ -59,19 +59,11 @@ export class CommandRegistry {
     return command.can ? command.can(args) : true;
   }
 
-  private validate(
-    name: string,
-    command: ResolvedCommand,
-    rawArgs: unknown,
-  ): unknown {
+  private validate(name: string, command: ResolvedCommand, rawArgs: unknown): unknown {
     if (!command.args) return rawArgs;
     const result = command.args.safeParse(rawArgs);
     if (!result.success) {
-      throw new CommandArgumentError(
-        name,
-        result.error.issues,
-        `Invalid arguments for command "${name}".`,
-      );
+      throw new CommandArgumentError(name, result.error.issues, `Invalid arguments for command "${name}".`);
     }
     return result.data;
   }

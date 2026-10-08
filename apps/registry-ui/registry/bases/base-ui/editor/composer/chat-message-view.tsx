@@ -1,10 +1,7 @@
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { renderToReact } from '../document/serialize/render-to-react';
-import {
-  defaultComposerTriggers,
-  type ComposerTrigger,
-} from './composer-triggers';
+import { defaultComposerTriggers, type ComposerTrigger } from './composer-triggers';
 import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
 
 /**
@@ -28,18 +25,10 @@ export interface ChatMessageViewProps {
 // The default codec registry (shipped mention + command pills plus the built-in
 // doc/paragraph/text substrate) is stateless and pure, so it is built once and
 // shared across every rendered message rather than per-render.
-const defaultRegistry = createCodecRegistry(
-  defaultComposerTriggers().map((trigger) => trigger.feature),
-);
+const defaultRegistry = createCodecRegistry(defaultComposerTriggers().map((trigger) => trigger.feature));
 
-export function ChatMessageView({
-  message,
-  triggers,
-  className,
-}: ChatMessageViewProps) {
-  const registry = triggers
-    ? createCodecRegistry(triggers.map((trigger) => trigger.feature))
-    : defaultRegistry;
+export function ChatMessageView({ message, triggers, className }: ChatMessageViewProps) {
+  const registry = triggers ? createCodecRegistry(triggers.map((trigger) => trigger.feature)) : defaultRegistry;
   const body = renderToReact(message.doc, registry);
   return (
     <div

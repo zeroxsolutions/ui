@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderMath } from './render.js';
-import {
-  DEFAULT_MATH_SOURCE,
-  MATH_TEMPLATES,
-  templateFor,
-} from './templates.js';
+import { DEFAULT_MATH_SOURCE, MATH_TEMPLATES, templateFor } from './templates.js';
 
 describe('MATH_TEMPLATES', () => {
   it('every template renders as valid LaTeX', () => {

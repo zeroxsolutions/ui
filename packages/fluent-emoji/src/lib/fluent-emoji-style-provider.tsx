@@ -10,8 +10,7 @@ interface FluentEmojiStyleContextValue {
   setStyle: (style: FluentEmojiStyle) => void;
 }
 
-const FluentEmojiStyleContext =
-  React.createContext<FluentEmojiStyleContextValue | null>(null);
+const FluentEmojiStyleContext = React.createContext<FluentEmojiStyleContextValue | null>(null);
 
 export interface FluentEmojiStyleProviderProps {
   /** Uncontrolled initial style (defaults to `'3d'`). */
@@ -41,8 +40,7 @@ export function FluentEmojiStyleProvider({
   onStyleChange,
   children,
 }: FluentEmojiStyleProviderProps) {
-  const [uncontrolled, setUncontrolled] =
-    React.useState<FluentEmojiStyle>(defaultStyle);
+  const [uncontrolled, setUncontrolled] = React.useState<FluentEmojiStyle>(defaultStyle);
   const isControlled = controlled !== undefined;
   const style = isControlled ? controlled : uncontrolled;
 
@@ -62,11 +60,7 @@ export function FluentEmojiStyleProvider({
   }, [style]);
 
   const value = React.useMemo(() => ({ style, setStyle }), [style, setStyle]);
-  return (
-    <FluentEmojiStyleContext.Provider value={value}>
-      {children}
-    </FluentEmojiStyleContext.Provider>
-  );
+  return <FluentEmojiStyleContext.Provider value={value}>{children}</FluentEmojiStyleContext.Provider>;
 }
 
 /**
@@ -78,9 +72,7 @@ export function FluentEmojiStyleProvider({
 export function useFluentEmojiStyle(): FluentEmojiStyleContextValue {
   const ctx = React.useContext(FluentEmojiStyleContext);
   if (!ctx) {
-    throw new Error(
-      'useFluentEmojiStyle must be used within <FluentEmojiStyleProvider>',
-    );
+    throw new Error('useFluentEmojiStyle must be used within <FluentEmojiStyleProvider>');
   }
   return ctx;
 }

@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type {
-  DocJSON,
-  NodeJSON,
-} from '@zeroxsolutions/editor-core/document/core/index';
+import type { DocJSON, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { docToPayload } from '@zeroxsolutions/editor-core/composer/message-payload';
-import {
-  channelTrigger,
-  commandTrigger,
-  mentionTrigger,
-} from './composer-triggers.js';
+import { channelTrigger, commandTrigger, mentionTrigger } from './composer-triggers.js';
 
 // The registry the payload derives from - the shipped mention + command tokens.
 const tokens = [mentionTrigger().token, commandTrigger().token];
@@ -32,9 +25,7 @@ describe('docToPayload', () => {
       { type: 'mention', attrs: { id: 'u2', label: 'Bo' } },
     );
     const payload = docToPayload(doc, tokens);
-    expect(payload.tokens.command).toEqual([
-      { id: 'image', label: 'Image', name: 'image-gen' },
-    ]);
+    expect(payload.tokens.command).toEqual([{ id: 'image', label: 'Image', name: 'image-gen' }]);
     expect(payload.tokens.mention).toEqual([
       { id: 'u1', label: 'Ada' },
       { id: 'u2', label: 'Bo' },
@@ -52,9 +43,7 @@ describe('docToPayload', () => {
       { type: 'text', text: 'a portrait of ' },
       { type: 'mention', attrs: { id: 'u1', label: 'Ada' } },
     );
-    expect(docToPayload(doc, tokens).text).toBe(
-      '/image-gen a portrait of @Ada',
-    );
+    expect(docToPayload(doc, tokens).text).toBe('/image-gen a portrait of @Ada');
   });
 
   it('carries the document through as the positional source of truth', () => {

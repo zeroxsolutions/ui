@@ -1,10 +1,4 @@
-import type {
-  BlockMenuItem,
-  BubbleItem,
-  EditorFeature,
-  SlashItem,
-  ToolbarItem,
-} from '../core/index.js';
+import type { BlockMenuItem, BubbleItem, EditorFeature, SlashItem, ToolbarItem } from '../core/index.js';
 
 /**
  * Aggregate the declarative UI contributions across a feature set so the chrome
@@ -20,9 +14,7 @@ export interface UiContributions {
   blockMenu: BlockMenuItem[];
 }
 
-export function collectUiContributions(
-  features: EditorFeature[],
-): UiContributions {
+export function collectUiContributions(features: EditorFeature[]): UiContributions {
   const contributions: UiContributions = {
     slash: [],
     toolbar: [],
@@ -40,26 +32,18 @@ export function collectUiContributions(
 
 /** Filter slash items by a query against title + keywords (pure; the live cmdk
  *  palette filters too, but a non-cmdk consumer can use this directly). */
-export function filterSlashItems(
-  items: SlashItem[],
-  query: string,
-): SlashItem[] {
+export function filterSlashItems(items: SlashItem[], query: string): SlashItem[] {
   const needle = query.trim().toLowerCase();
   if (!needle) return items;
   return items.filter(
     (item) =>
       item.title.toLowerCase().includes(needle) ||
-      (item.keywords ?? []).some((keyword) =>
-        keyword.toLowerCase().includes(needle),
-      ),
+      (item.keywords ?? []).some((keyword) => keyword.toLowerCase().includes(needle)),
   );
 }
 
 /** Group items by their `group` heading, preserving insertion order. */
-export function groupByHeading<T extends { group?: string }>(
-  items: T[],
-  fallback = 'Blocks',
-): Array<[string, T[]]> {
+export function groupByHeading<T extends { group?: string }>(items: T[], fallback = 'Blocks'): Array<[string, T[]]> {
   const groups = new Map<string, T[]>();
   for (const item of items) {
     const key = item.group ?? fallback;

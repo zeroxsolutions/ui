@@ -6,9 +6,7 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
-const pkg = JSON.parse(
-  readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf8'),
-);
+const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf8'));
 
 // Externalize React and every declared dependency — most importantly the engine
 // (`@tiptap/core`, `@tiptap/pm/*`). Nothing engine-related is inlined.
@@ -26,17 +24,9 @@ const entries = Object.fromEntries(
   glob
     .sync('src/**/*.{ts,tsx}', {
       cwd: import.meta.dirname,
-      ignore: [
-        'src/index.ts',
-        'src/**/*.{test,spec}.{ts,tsx}',
-        'src/**/*.stories.{ts,tsx}',
-        'src/**/*.d.ts',
-      ],
+      ignore: ['src/index.ts', 'src/**/*.{test,spec}.{ts,tsx}', 'src/**/*.stories.{ts,tsx}', 'src/**/*.d.ts'],
     })
-    .map((file) => [
-      file.replace(/^src\//, '').replace(/\.(ts|tsx)$/, ''),
-      resolve(import.meta.dirname, file),
-    ]),
+    .map((file) => [file.replace(/^src\//, '').replace(/\.(ts|tsx)$/, ''), resolve(import.meta.dirname, file)]),
 );
 
 export default defineConfig(() => ({
@@ -59,18 +49,13 @@ export default defineConfig(() => ({
       // escape. The public `.d.ts` surface stays engine-free.
       name: 'assert-engine-free-dts',
       closeBundle() {
-        const engineImport =
-          /(?:from|import\()\s*['"](?:@tiptap\/|prosemirror-)/;
+        const engineImport = /(?:from|import\()\s*['"](?:@tiptap\/|prosemirror-)/;
         const offenders = glob
           .sync('dist/**/*.d.ts', {
             cwd: import.meta.dirname,
             ignore: ['dist/**/advanced*.d.ts', 'dist/**/advanced/**'],
           })
-          .filter((file) =>
-            engineImport.test(
-              readFileSync(resolve(import.meta.dirname, file), 'utf8'),
-            ),
-          );
+          .filter((file) => engineImport.test(readFileSync(resolve(import.meta.dirname, file), 'utf8')));
         if (offenders.length > 0) {
           throw new Error(
             `[assert-engine-free-dts] Engine types leaked into the public .d.ts surface ` +

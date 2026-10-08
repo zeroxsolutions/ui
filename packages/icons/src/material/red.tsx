@@ -4,7 +4,16 @@ type IconProps = { size?: string | number } & ComponentPropsWithoutRef<'svg'>;
 
 /** red — Material Icon Theme (MIT). */
 const RedIcon: FC<IconProps> = ({ size = '1em', ...props }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width={size} height={size} {...props}><path fill="#fbc02d" d="M100 60.234V10.322L74.999 47.28z"/><path fill="#b71c1c" d="m100 125.001 57.34-29.893-25.002-36.958L100 75z"/><path fill="#f9a825" d="M100 10.322v49.912l25.001-12.954z"/><path fill="#b71c1c" d="M100 139.766v49.912l89.678-46.65-25.001-36.959z"/><path fill="#e53935" d="M100 139.766 35.323 106.07l-25.001 36.958L100 189.678zm0-14.765V75L67.662 58.15 42.66 95.108z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width={size} height={size} {...props}>
+    <path fill="#fbc02d" d="M100 60.234V10.322L74.999 47.28z" />
+    <path fill="#b71c1c" d="m100 125.001 57.34-29.893-25.002-36.958L100 75z" />
+    <path fill="#f9a825" d="M100 10.322v49.912l25.001-12.954z" />
+    <path fill="#b71c1c" d="M100 139.766v49.912l89.678-46.65-25.001-36.959z" />
+    <path
+      fill="#e53935"
+      d="M100 139.766 35.323 106.07l-25.001 36.958L100 189.678zm0-14.765V75L67.662 58.15 42.66 95.108z"
+    />
+  </svg>
 );
 
 export { RedIcon };

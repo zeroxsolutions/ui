@@ -23,11 +23,7 @@ const doc = (text: string): DocJSON => ({
 });
 
 const editors: IEditor[] = [];
-const build = (
-  configure: (
-    b: ReturnType<typeof createEditor>,
-  ) => ReturnType<typeof createEditor>,
-): IEditor => {
+const build = (configure: (b: ReturnType<typeof createEditor>) => ReturnType<typeof createEditor>): IEditor => {
   const element = document.createElement('div');
   document.body.append(element);
   const editor = configure(createEditor()).build({ element });
@@ -92,9 +88,7 @@ describe('createDocumentEditor', () => {
     });
     const editor = build((b) => b.use(setHeading).content(doc('x')));
     const before = editor.getJSON();
-    expect(() => editor.run('setH', { level: 9 })).toThrow(
-      CommandArgumentError,
-    );
+    expect(() => editor.run('setH', { level: 9 })).toThrow(CommandArgumentError);
     expect(editor.getJSON()).toEqual(before);
   });
 
@@ -120,9 +114,7 @@ describe('createDocumentEditor', () => {
       nodes: [{ name: 'child', group: 'block' }],
     });
     const element = document.createElement('div');
-    expect(() => createEditor().use(child).build({ element })).toThrow(
-      MissingFeatureDependencyError,
-    );
+    expect(() => createEditor().use(child).build({ element })).toThrow(MissingFeatureDependencyError);
   });
 });
 
@@ -160,9 +152,7 @@ describe('topContent substrate', () => {
     // block, so a transaction that would create a second — the composer's
     // Enter/splitBlock, or an inserted paragraph — cannot: the new text merges
     // into the one block. The constraint is structural, not behavioral.
-    const constrained = build((b) =>
-      b.topContent('paragraph').content(doc('one')),
-    );
+    const constrained = build((b) => b.topContent('paragraph').content(doc('one')));
     insertSecondParagraph(constrained);
     expect(constrained.getJSON().content).toHaveLength(1);
   });

@@ -19,20 +19,14 @@ interface TaskItemViewProps {
   editor: { isEditable: boolean };
 }
 
-export function TaskItemView({
-  node,
-  updateAttributes,
-  editor,
-}: TaskItemViewProps): ReactElement {
+export function TaskItemView({ node, updateAttributes, editor }: TaskItemViewProps): ReactElement {
   const checked = node.attrs.checked;
   return (
     <NodeViewWrapper as="li" data-type="taskItem" data-checked={checked}>
       <label contentEditable={false}>
         <Checkbox
           checked={checked}
-          onCheckedChange={(value) =>
-            updateAttributes({ checked: value === true })
-          }
+          onCheckedChange={(value) => updateAttributes({ checked: value === true })}
           disabled={!editor.isEditable}
         />
       </label>

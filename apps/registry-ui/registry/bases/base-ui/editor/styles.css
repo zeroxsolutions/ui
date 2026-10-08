@@ -320,11 +320,7 @@
    * `--info`/`--success`/`--warning`/`--destructive` tokens flip with `.dark`. */
   .document-editor [data-slot='callout'] {
     border-color: var(--border);
-    background: color-mix(
-      in oklab,
-      var(--muted-foreground) 6%,
-      var(--background)
-    );
+    background: color-mix(in oklab, var(--muted-foreground) 6%, var(--background));
   }
   .document-editor [data-callout='info'] {
     border-color: color-mix(in oklab, var(--info) 35%, var(--border));
@@ -457,11 +453,7 @@
  * read-only one (ChatMessageView). Every reference shares the ONE accent hue and
  * is told apart by its glyph (`@` vs `#`), not by colour - the Discord model. */
 .chat-composer :is([data-slot='mention'], [data-slot='channel']) {
-  background-color: color-mix(
-    in oklab,
-    var(--composer-accent) 12%,
-    transparent
-  );
+  background-color: color-mix(in oklab, var(--composer-accent) 12%, transparent);
   color: var(--composer-accent);
 }
 
@@ -471,13 +463,8 @@
  * the same reason as the mention override; scoped to `.chat-composer`, and shared
  * by the editable pill (ChatInput) and the read-only one (ChatMessageView). */
 .chat-composer [data-slot='command'] {
-  background-color: color-mix(
-    in oklab,
-    var(--composer-accent) 14%,
-    transparent
-  );
+  background-color: color-mix(in oklab, var(--composer-accent) 14%, transparent);
   color: var(--composer-accent);
-  box-shadow: inset 0 0 0 1px
-    color-mix(in oklab, var(--composer-accent) 30%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--composer-accent) 30%, transparent);
   margin-right: 0.125rem;
 }

@@ -1,18 +1,8 @@
 'use client';
 
 import { Sigma } from 'lucide-react';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/registry/bases/base-ui/ui/alert';
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/registry/bases/base-ui/ui/empty';
+import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { useMathRender, type MathRenderState } from './use-math-render.js';
 
@@ -35,23 +25,14 @@ export interface FormulaRenderProps {
   className?: string;
 }
 
-export function FormulaRender({
-  state,
-  compact = false,
-  className,
-}: FormulaRenderProps) {
+export function FormulaRender({ state, compact = false, className }: FormulaRenderProps) {
   const { html, status, error, color } = state;
 
   return (
-    <div
-      data-slot="formula-preview"
-      className={cn('flex flex-col gap-2', !compact && 'min-h-32', className)}
-    >
+    <div data-slot="formula-preview" className={cn('flex flex-col gap-2', !compact && 'min-h-32', className)}>
       {status === 'empty' ? (
         compact ? (
-          <span className="text-sm text-muted-foreground italic">
-            Empty formula
-          </span>
+          <span className="text-muted-foreground text-sm italic">Empty formula</span>
         ) : (
           <Empty className="min-h-32 border-0">
             <EmptyHeader>
@@ -59,18 +40,13 @@ export function FormulaRender({
                 <Sigma />
               </EmptyMedia>
               <EmptyTitle>No formula yet</EmptyTitle>
-              <EmptyDescription>
-                Write LaTeX to render a formula.
-              </EmptyDescription>
+              <EmptyDescription>Write LaTeX to render a formula.</EmptyDescription>
             </EmptyHeader>
           </Empty>
         )
       ) : (
         <div
-          className={cn(
-            'flex flex-1 items-center justify-center overflow-x-auto',
-            !compact && 'p-4',
-          )}
+          className={cn('flex flex-1 items-center justify-center overflow-x-auto', !compact && 'p-4')}
           style={{ color }}
           dangerouslySetInnerHTML={{ __html: html }}
         />
@@ -97,14 +73,7 @@ export interface FormulaPreviewProps {
 }
 
 /** Self-contained preview: owns the shared render hook. Used by the block and surface. */
-export function FormulaPreview({
-  source,
-  displayMode = true,
-  compact = false,
-  className,
-}: FormulaPreviewProps) {
+export function FormulaPreview({ source, displayMode = true, compact = false, className }: FormulaPreviewProps) {
   const state = useMathRender(source, { displayMode });
-  return (
-    <FormulaRender state={state} compact={compact} className={className} />
-  );
+  return <FormulaRender state={state} compact={compact} className={className} />;
 }

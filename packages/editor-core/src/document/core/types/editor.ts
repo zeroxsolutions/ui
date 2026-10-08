@@ -94,9 +94,7 @@ export interface IEditor {
    *  `ghost` (when set) renders faint inline text right after the caret — the
    *  Notion `/<placeholder>` hint on an empty query, or the autocomplete
    *  completion of the highlighted item as you type. Pass `null` to clear. */
-  setSlashDecoration(
-    deco: { from: number; to: number; ghost?: string } | null,
-  ): void;
+  setSlashDecoration(deco: { from: number; to: number; ghost?: string } | null): void;
   focus(position?: FocusPosition): void;
   blur(): void;
   isFocused(): boolean;

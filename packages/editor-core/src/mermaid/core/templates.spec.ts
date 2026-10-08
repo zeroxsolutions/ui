@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { detectDiagramType } from './detect.js';
-import {
-  DEFAULT_DIAGRAM_SOURCE,
-  DIAGRAM_TEMPLATES,
-  templateFor,
-} from './templates.js';
+import { DEFAULT_DIAGRAM_SOURCE, DIAGRAM_TEMPLATES, templateFor } from './templates.js';
 
 describe('diagram templates', () => {
   it('each template source detects as its own diagram type', () => {
