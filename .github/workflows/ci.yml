@@ -1,12 +1,13 @@
-# The pull-request gate. Two jobs:
+# The pull-request gate. Three jobs:
 #
 #   gate - the `nx-gate` workflow beside this one, same targets as the pre-push hook
 #          but scoped by `affected` (the hook sweeps; the gate re-verifies what
 #          the change reaches - keep the asymmetry).
 #   e2e  - gate-only. The hook's set stays inside the gate's and never the
 #          reverse, so a target that starts a runtime lands here instead.
+#   format - the whole tree through the formatter, which no nx target runs.
 #
-# Nothing checks `iac/`: it is outside the nx graph, so neither job reaches it,
+# Nothing checks `iac/`: it is outside the nx graph, so no job reaches it,
 # and the pre-commit hook formats with oxfmt, which does not read `.tf`.
 #
 # No project and no path is named, and the branch list carries both default-branch
@@ -36,6 +37,19 @@ jobs:
     uses: ./.github/workflows/nx-gate.yml
     with:
       targets: lint typecheck build test
+
+  # The pre-commit hook formats only what it is given, and git runs no hook at all in a worktree
+  # whose install never created `.husky/_`, so unformatted files reach master and every later
+  # merge reformats them into an unrelated pull request. A sweep, because the files that drift
+  # are docs no project owns and `affected` would never reach.
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/nx-setup
+      - name: Check formatting
+        run: pnpm nx format:check --all
 
   # Separate from `gate` so its cost is visible and its failure is legible on its
   # own. `affected` runs it only for changes that can reach it, from the base
