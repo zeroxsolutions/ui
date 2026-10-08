@@ -1,6 +1,6 @@
 {
   "name": "@zeroxsolutions/fluent-emoji",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -36,7 +36,9 @@
       },
       "emoji-manifest": {
         "executor": "nx:run-commands",
-        "outputs": ["{projectRoot}/src/lib/emoji-manifest.ts"],
+        "outputs": [
+          "{projectRoot}/src/lib/emoji-manifest.ts"
+        ],
         "options": {
           "cwd": "{projectRoot}",
           "command": "node tools/build-emoji-manifest.mts"
