@@ -1,6 +1,14 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "origin/master",
+  "pluginsConfig": {
+    "@nx/js": {
+      // nx's default, "all", marks every project affected by any lockfile change. "auto" marks the
+      // projects depending on the packages that moved, and still marks every project where a change
+      // names no package, such as a new workspace project.
+      "projectsAffectedByDependencyUpdates": "auto"
+    }
+  },
   "analytics": false,
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
