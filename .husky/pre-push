@@ -1,9 +1,5 @@
 # Run from pre-commit instead, this froze the machine whenever several worktrees committed at once.
 # A run-many over every project here re-ran the whole workspace on each push after a merge from
-# origin. `affected` measures from where the branch left origin's default branch, and nx adds the
-# uncommitted and untracked files to that.
-base=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null) || {
-  echo 'pre-push: origin/HEAD is unset, so every project runs; `git remote set-head origin --auto` sets it' >&2
-  exec pnpm nx run-many -t lint typecheck build test
-}
-pnpm nx affected -t lint typecheck build test --base="$base"
+# origin. `affected` diffs from the merge-base with `defaultBase` in nx.json, and adds the
+# uncommitted and untracked files.
+pnpm nx affected -t lint typecheck build test
