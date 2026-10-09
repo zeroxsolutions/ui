@@ -48,8 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/nx-setup
-      - name: Check formatting
-        run: pnpm nx format:check --all
+      - run: pnpm nx format:check --all
 
   # Separate from `gate` so its cost is visible and its failure is legible on its
   # own. `affected` runs it only for changes that can reach it, from the base
