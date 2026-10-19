@@ -21,12 +21,19 @@
     "!**/*.tsbuildinfo"
   ],
   "peerDependencies": {
+    "@types/react": "^19.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
   },
   "nx": {
     "name": "fluent-emoji",
     "targets": {
+      "lint-deps": {},
       "rclone:sync": {
         "executor": "nx:run-commands",
         "options": {

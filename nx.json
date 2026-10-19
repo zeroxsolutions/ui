@@ -83,6 +83,33 @@
     }
   ],
   "targetDefaults": {
+    "lint": {
+      // oxlint does not read `package.json`, so a published package's manifest is checked by
+      // `lint-deps`. Projects that declare no `lint-deps` skip it.
+      "dependsOn": ["lint-deps"]
+    },
+    "lint-deps": {
+      // Declared, as `"lint-deps": {}`, only by the packages `nx release` publishes: a deployable
+      // bundles, so what it never declared still ships. The first run finds what production code
+      // imports without declaring, and what the manifest declares that nothing imports; it reads
+      // type-only imports, which a package's emitted declarations still resolve. The second finds a
+      // devDependency production code imports, which only `--strict` counts as unlisted.
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/package.json",
+        "{projectRoot}/src/**/*",
+        "{workspaceRoot}/knip.jsonc",
+        { "externalDependencies": ["knip"] }
+      ],
+      "options": {
+        "commands": [
+          "knip --workspace {projectRoot} --production --include dependencies,unlisted,unresolved --no-config-hints",
+          "knip --workspace {projectRoot} --strict --include unlisted --no-config-hints"
+        ],
+        "parallel": false
+      }
+    },
     "test": {
       "dependsOn": ["^build"]
     }

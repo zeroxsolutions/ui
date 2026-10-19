@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  // Only the published packages are checked: a deployable bundles, so what it never declared still
+  // ships, and its manifest is not what a consumer installs from.
+  "ignoreWorkspaces": ["apps/**"],
+  "workspaces": {
+    "packages/*": {
+      "project": ["src/**/*.{ts,tsx}!"],
+      // knip maps each `exports` entry back to `src`, and a `./*` export maps to every file there,
+      // specs included, so a spec counts as production code and its `vitest` import as unlisted. A
+      // spec is in no build's entries, so nothing it imports ships.
+      "ignore": ["src/**/*.{spec,test}.{ts,tsx}"],
+      // The emitted declarations import `react`'s types, so a package declares `@types/react` as an
+      // optional peer: a consumer compiling against them already has it, and one that does not
+      // compile TypeScript never needs it. `--strict` counts only required peers as declared.
+      "ignoreDependencies": ["@types/react"],
+    },
+  },
+}
