@@ -45,17 +45,7 @@
     "../../dist/apps/registry-ui/.next/types/**/*.ts",
     "next-env.d.ts"
   ],
-  "exclude": [
-    "out-tsc",
-    "dist",
-    "node_modules",
-    "jest.config.ts",
-    "jest.config.cts",
-    ".next",
-    "eslint.config.js",
-    "eslint.config.cjs",
-    "eslint.config.mjs"
-  ],
+  "exclude": ["out-tsc", "dist", "node_modules", "jest.config.ts", "jest.config.cts", ".next"],
   "references": [
     {
       "path": "../../packages/editor-core"
