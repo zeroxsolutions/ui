@@ -1,0 +1,57 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "extends": ["../../.oxlintrc.jsonc"],
+  // .source is fumadocs-mdx's generated collection code, and the two examples indexes are written by
+  // tools/build-examples-index.mts. The root's list is restated because `extends` does not carry it.
+  "ignorePatterns": [
+    ".next/**",
+    ".source/**",
+    "registry/bases/base-ui/examples/__index__.tsx",
+    "registry/bases/base-ui/examples/__components__.tsx",
+    "**/dist",
+    "**/out-tsc",
+    "**/vite.config.*.timestamp*",
+    "**/vitest.config.*.timestamp*",
+    "**/worker-configuration.d.ts",
+    "**/cloudflare-env.d.ts",
+    "**/test-output",
+    "**/.open-next",
+    "**/.wrangler",
+  ],
+  "overrides": [
+    {
+      // What Nx's `flat/react-typescript` adds that the root's rules do not set again.
+      "files": ["**/*.ts", "**/*.cts", "**/*.mts", "**/*.tsx", "**/*.js", "**/*.cjs", "**/*.mjs", "**/*.jsx"],
+      "rules": {
+        "no-use-before-define": [
+          "warn",
+          { "functions": false, "classes": false, "variables": false, "typedefs": false },
+        ],
+        "no-useless-constructor": "warn",
+      },
+    },
+    {
+      // What the registry ships lands in each consuming app's own tree and is linted by that app's
+      // rules, which hold the house's `explicit-function-return-type` and the preset's
+      // `no-empty-function`. The repo turns the second off and never takes the first, so an item
+      // green here failed lint the moment an org app installed it.
+      "files": ["registry/bases/base-ui/{blocks,components,hooks,lib,types}/**/*.{ts,tsx}"],
+      "rules": {
+        "typescript/explicit-function-return-type": "error",
+        "no-empty-function": "error",
+      },
+      "plugins": ["typescript"],
+    },
+    {
+      // An override has no `ignores`, so the files the one above must skip turn both rules off again.
+      // A spec ships to no app, and `use-mobile.ts` is upstream's, the `sidebar` item's own hook, and
+      // stays as the CLI wrote it.
+      "files": ["registry/bases/base-ui/**/*.spec.{ts,tsx}", "registry/bases/base-ui/hooks/use-mobile.ts"],
+      "rules": {
+        "typescript/explicit-function-return-type": "off",
+        "no-empty-function": "off",
+      },
+      "plugins": ["typescript"],
+    },
+  ],
+}
