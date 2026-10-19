@@ -26,5 +26,10 @@
     "@types/katex": "^0.16.7",
     "glob": "^13.0.6",
     "vite-plugin-lib-inject-css": "^2.2.2"
+  },
+  "nx": {
+    "targets": {
+      "lint-deps": {}
+    }
   }
 }

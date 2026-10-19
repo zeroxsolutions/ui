@@ -16,14 +16,21 @@
     "!**/*.tsbuildinfo"
   ],
   "peerDependencies": {
+    "@types/react": "^19.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "glob": "^13.0.6"
   },
   "nx": {
     "targets": {
+      "lint-deps": {},
       "brand-manifest": {
         "executor": "nx:run-commands",
         "outputs": ["{projectRoot}/src/lib/brand-manifest.ts"],
