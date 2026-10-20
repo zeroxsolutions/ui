@@ -40,8 +40,9 @@ const DROPPED_MODIFIERS = [
 
 /**
  * Utilities with nothing to draw on a device. The clamped radius is
- * `min(var(--radius-md), Npx)`, which neither engine evaluates and which
- * equals `rounded-md` at Vega's radius, so the slot's base `rounded-md` stands.
+ * `min(var(--radius-md), Npx)`, which neither engine evaluates. Vega clamps at 8px
+ * or more, and the theme's `--radius-md` is 0.8 of a 0.625rem `--radius`, 8px, so
+ * the clamp equals the slot's base `rounded-md`, which stands.
  */
 const DROPPED_UTILITIES = [
   /^(outline|ring|ring-offset|transition|duration|ease|whitespace|cursor|scroll)(-|$)/,
@@ -60,15 +61,15 @@ const TYPOGRAPHY_UTILITY =
 
 /**
  * NativeWind 4 runs on Tailwind 3, whose scale steps are one below Tailwind 4's. A Tailwind 4 step
- * past the end of Tailwind 3's scale takes its value as an arbitrary one.
+ * past the end of Tailwind 3's scale takes its value as an arbitrary one. The theme item sets the
+ * radius steps from `sm` to `4xl` to Vega's own on both engines, so only `rounded-xs`, which it
+ * leaves at Tailwind 4's 0.125rem and Tailwind 3 lacks, is renamed.
  */
 const RENAMED_UTILITIES = {
   nativewind: {
     'shadow-xs': 'shadow-sm',
     'shadow-sm': 'shadow',
-    'rounded-xs': 'rounded-sm',
-    'rounded-sm': 'rounded',
-    'rounded-4xl': 'rounded-[2rem]',
+    'rounded-xs': 'rounded-[0.125rem]',
     'blur-xs': 'blur-sm',
     'drop-shadow-xs': 'drop-shadow-sm',
   },

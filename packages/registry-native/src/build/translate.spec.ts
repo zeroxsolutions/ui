@@ -40,7 +40,7 @@ describe('translateClasses', () => {
   });
 
   it.each([
-    ['rounded-4xl', 'rounded-[2rem]'],
+    ['rounded-xs', 'rounded-[0.125rem]'],
     ['drop-shadow-xs', 'drop-shadow-sm'],
   ])('renames %s to its exact Tailwind 3 equal %s for nativewind and keeps it for uniwind', (cls, renamed) => {
     expect(translateClasses([cls], 'nativewind', 'view')).toEqual({ classes: [renamed], unknown: [] });
@@ -74,10 +74,17 @@ describe('translateClasses', () => {
   );
 
   it('renames a Tailwind 4 scale step under a kept modifier for nativewind', () => {
-    const result = translateClasses(['dark:rounded-sm'], 'nativewind', 'view');
+    const result = translateClasses(['dark:shadow-xs'], 'nativewind', 'view');
 
-    expect(result.classes).toEqual(['dark:rounded']);
+    expect(result.classes).toEqual(['dark:shadow-sm']);
   });
+
+  it.each(['rounded-sm', 'rounded-md', 'rounded-4xl', 'dark:rounded-sm'])(
+    "keeps %s for nativewind, whose step the theme's radius scale defines as Vega's",
+    (cls) => {
+      expect(translateClasses([cls], 'nativewind', 'view')).toEqual({ classes: [cls], unknown: [] });
+    },
+  );
 
   it.each(['nativewind', 'uniwind'] as const)(
     'sends the size Vega gives an svg with no size class to the icon part only, for %s',

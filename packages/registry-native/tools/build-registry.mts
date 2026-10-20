@@ -10,7 +10,13 @@ import { dirname, join, resolve } from 'node:path';
 import type { Registry, RegistryItem } from 'shadcn/schema';
 import { aliasImports, emitSource } from '../src/build/emit.ts';
 import { parseSlotMap } from '../src/build/slot-map.ts';
-import { STATUS_TOKENS, themeItem, type UpstreamColors } from '../src/build/theme.ts';
+import {
+  STATUS_TOKENS,
+  parseRadiusScale,
+  themeItem,
+  type RadiusScale,
+  type UpstreamColors,
+} from '../src/build/theme.ts';
 import type { Engine } from '../src/build/translate.ts';
 
 const PROJECT = resolve(import.meta.dirname, '..');
@@ -80,13 +86,14 @@ function buildEngine(
   registry: Registry,
   slots: ReturnType<typeof parseSlotMap>,
   colors: UpstreamColors,
+  radii: RadiusScale,
 ): void {
   const registryRoot = mkdtempSync(join(tmpdir(), `zui-${engine}-${STYLE}-`));
   try {
     const items = registry.items.map((item) => {
       const emitted = emitItem(item, engine, slots, registryRoot);
       return item.name === 'theme'
-        ? withTheme(emitted, themeItem(colors, STATUS_TOKENS, engine), registryRoot)
+        ? withTheme(emitted, themeItem(colors, radii, STATUS_TOKENS, engine), registryRoot)
         : emitted;
     });
     writeFileSync(join(registryRoot, 'registry.json'), `${JSON.stringify({ ...registry, items }, null, 2)}\n`);
@@ -105,10 +112,11 @@ function main(): void {
   const colors = JSON.parse(
     readFileSync(join(PROJECT, 'styles/upstream/colors-neutral.json'), 'utf8'),
   ) as UpstreamColors;
+  const radii = parseRadiusScale(readFileSync(join(PROJECT, 'styles/upstream/globals.css'), 'utf8'));
 
   rmSync(join(PROJECT, 'dist/r'), { recursive: true, force: true });
   for (const engine of Object.keys(ENGINE_PACKAGES) as Engine[]) {
-    buildEngine(engine, registry, slots, colors);
+    buildEngine(engine, registry, slots, colors, radii);
   }
 }
 

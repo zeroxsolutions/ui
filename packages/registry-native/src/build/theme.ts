@@ -15,6 +15,9 @@ export interface TokenSet {
 /** What the theme reads of upstream's base colour file, `styles/upstream/colors-neutral.json`. */
 export type UpstreamColors = Pick<ReturnType<(typeof registryBaseColorSchema)['parse']>, 'cssVars' | 'cssVarsV4'>;
 
+/** Each step of the radius scale, such as `md`, to its CSS value in terms of `var(--radius)`. */
+export type RadiusScale = Readonly<Record<string, string>>;
+
 /** A colour in sRGB, each channel an integer from 0 to 255 and `alpha` from 0 to 1. */
 export interface Srgb {
   red: number;
@@ -61,6 +64,32 @@ const FONT_FAMILIES = {
 } as const satisfies Record<string, string>;
 
 const UNIWIND_THEME_FILE = 'zui-theme.css';
+
+const THEME_INLINE_BLOCK = /@theme inline\s*\{([^}]*)\}/g;
+const RADIUS_STEP = /--radius-([\w-]+):\s*([^;]+);/g;
+
+/**
+ * Reads the radius scale upstream derives from `--radius`, each `--radius-<step>` of the stylesheet's
+ * `@theme inline` blocks, such as `md` to `calc(var(--radius) * 0.8)`.
+ * @param css - upstream's site stylesheet, `styles/upstream/globals.css`
+ * @throws {Error} `radius-<step> does not derive from --radius: <value>` for a step with a fixed value,
+ * and `No --radius-<step> in an @theme inline block` when there is no step at all
+ */
+export function parseRadiusScale(css: string): RadiusScale {
+  const scale: Record<string, string> = {};
+  for (const [, block] of css.matchAll(THEME_INLINE_BLOCK)) {
+    for (const [, step, value] of block.matchAll(RADIUS_STEP)) {
+      if (!value.includes('var(--radius)')) {
+        throw new Error(`radius-${step} does not derive from --radius: ${value.trim()}`);
+      }
+      scale[step] = value.trim();
+    }
+  }
+  if (Object.keys(scale).length === 0) {
+    throw new Error('No --radius-<step> in an @theme inline block');
+  }
+  return scale;
+}
 
 const OKLCH = /^oklch\(\s*([\d.]+%?)\s+([\d.]+%?)\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+%?)\s*)?\)$/;
 
@@ -142,7 +171,7 @@ function splitTokens(set: TokenSet): Tokens {
  * `var()`, so each colour is its channels behind `rgb(... / <alpha-value>)`, the form NativeWind's
  * themes guide uses, and a colour with its own alpha multiplies it into the modifier's.
  */
-function nativewindTheme({ colours, constants }: Tokens): Pick<RegistryItem, 'css' | 'tailwind'> {
+function nativewindTheme({ colours, constants }: Tokens, radii: RadiusScale): Pick<RegistryItem, 'css' | 'tailwind'> {
   const light: Record<string, string> = {};
   const dark: Record<string, string> = {};
   const colors: Record<string, string> = {};
@@ -167,7 +196,8 @@ function nativewindTheme({ colours, constants }: Tokens): Pick<RegistryItem, 'cs
     // `darkMode` is set to. A `.dark:root` rule would need the `dark` class in a content file, since
     // Tailwind 3 drops a layer's rule whose class no content file names.
     css: { '@layer base': { ':root': light, '@media (prefers-color-scheme: dark)': { ':root': dark } } },
-    tailwind: { config: { theme: { extend: { colors, fontFamily } } } },
+    // NativeWind evaluates `calc(var(--radius) * n)` on native, with `rem` at its native 14px.
+    tailwind: { config: { theme: { extend: { colors, borderRadius: { ...radii }, fontFamily } } } },
   };
 }
 
@@ -177,7 +207,7 @@ function nativewindTheme({ colours, constants }: Tokens): Pick<RegistryItem, 'cs
  * Uniwind's own, and its `css` field cannot nest `@variant` in `:root`, so the theme is a file the
  * CSS entry imports.
  */
-function uniwindTheme({ colours, constants }: Tokens): Pick<RegistryItem, 'css' | 'files'> {
+function uniwindTheme({ colours, constants }: Tokens, radii: RadiusScale): Pick<RegistryItem, 'css' | 'files'> {
   const fonts = Object.entries(FONT_FAMILIES).map(([name, family]) => `  --font-${name}: '${family}';`);
   const variant = (scheme: 'light' | 'dark'): string[] => [
     `    @variant ${scheme} {`,
@@ -187,6 +217,10 @@ function uniwindTheme({ colours, constants }: Tokens): Pick<RegistryItem, 'css' 
   const content = [
     '@theme {',
     ...fonts,
+    '}',
+    '',
+    '@theme inline {',
+    ...Object.entries(radii).map(([step, value]) => `  --radius-${step}: ${value};`),
     '}',
     '',
     '@layer theme {',
@@ -215,12 +249,13 @@ function uniwindTheme({ colours, constants }: Tokens): Pick<RegistryItem, 'css' 
 }
 
 /**
- * Builds the `theme` item for `engine` from upstream's colours for the engine's Tailwind major and
- * `extra`, whose tokens win over upstream's of the same name.
+ * Builds the `theme` item for `engine` from upstream's colours for the engine's Tailwind major,
+ * upstream's radius scale `radii` from {@link parseRadiusScale}, and `extra`, whose tokens win over
+ * upstream's of the same name.
  * @throws {Error} `Upstream colours have no <set>.<scheme>` when the snapshot lacks the set, and the
  * errors of a token one scheme lacks or a constant that changes with the scheme
  */
-export function themeItem(colors: UpstreamColors, extra: TokenSet, engine: Engine): RegistryItem {
+export function themeItem(colors: UpstreamColors, radii: RadiusScale, extra: TokenSet, engine: Engine): RegistryItem {
   const setName = UPSTREAM_SETS[engine];
   const upstream = colors[setName];
   if (!upstream?.light || !upstream.dark) {
@@ -230,6 +265,6 @@ export function themeItem(colors: UpstreamColors, extra: TokenSet, engine: Engin
     light: { ...upstream.light, ...extra.light },
     dark: { ...upstream.dark, ...extra.dark },
   });
-  const parts = engine === 'nativewind' ? nativewindTheme(tokens) : uniwindTheme(tokens);
+  const parts = engine === 'nativewind' ? nativewindTheme(tokens, radii) : uniwindTheme(tokens, radii);
   return { name: 'theme', type: 'registry:theme', ...parts };
 }

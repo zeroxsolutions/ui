@@ -1,9 +1,21 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { STATUS_TOKENS, oklchToSrgb, themeItem, type TokenSet, type UpstreamColors } from './theme';
+import { STATUS_TOKENS, oklchToSrgb, parseRadiusScale, themeItem, type TokenSet, type UpstreamColors } from './theme';
 
 const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/colors-neutral.json');
+const GLOBALS_PATH = join(__dirname, '../../styles/upstream/globals.css');
 const colors = JSON.parse(readFileSync(SNAPSHOT_PATH, 'utf8')) as UpstreamColors;
+const radii = parseRadiusScale(readFileSync(GLOBALS_PATH, 'utf8'));
+/** Upstream's derivation at ba1503c, read off apps/v4/app/globals.css by hand. */
+const VEGA_RADII = {
+  sm: 'calc(var(--radius) * 0.6)',
+  md: 'calc(var(--radius) * 0.8)',
+  lg: 'var(--radius)',
+  xl: 'calc(var(--radius) * 1.4)',
+  '2xl': 'calc(var(--radius) * 1.8)',
+  '3xl': 'calc(var(--radius) * 2.2)',
+  '4xl': 'calc(var(--radius) * 2.6)',
+};
 const STATUS_NAMES = ['success', 'success-foreground', 'warning', 'warning-foreground'];
 const GEIST_FAMILIES = {
   sans: 'Geist_400Regular',
@@ -48,8 +60,32 @@ describe('oklchToSrgb', () => {
   });
 });
 
+describe('parseRadiusScale', () => {
+  it("reads each --radius-<step> of the snapshot's @theme inline block", () => {
+    expect(radii).toEqual(VEGA_RADII);
+  });
+
+  it('ignores a --radius-<step> outside the @theme inline block', () => {
+    const css = ':root { --radius-md: 4px; }\n@theme inline {\n  --radius-md: calc(var(--radius) * 0.8);\n}\n';
+
+    expect(parseRadiusScale(css)).toEqual({ md: 'calc(var(--radius) * 0.8)' });
+  });
+
+  it('throws on a step that does not derive from --radius', () => {
+    expect(() => parseRadiusScale('@theme inline {\n  --radius-md: 6px;\n}\n')).toThrow(
+      'radius-md does not derive from --radius: 6px',
+    );
+  });
+
+  it('throws when the stylesheet derives no step', () => {
+    expect(() => parseRadiusScale('@theme inline {\n  --font-sans: x;\n}\n')).toThrow(
+      'No --radius-<step> in an @theme inline block',
+    );
+  });
+});
+
 describe('themeItem for nativewind', () => {
-  const item = themeItem(colors, STATUS_TOKENS, 'nativewind');
+  const item = themeItem(colors, radii, STATUS_TOKENS, 'nativewind');
   const base = item.css?.['@layer base'] as Record<string, Record<string, unknown>>;
   const light = base[':root'] as Record<string, string>;
   const dark = base['@media (prefers-color-scheme: dark)'][':root'] as Record<string, string>;
@@ -94,6 +130,10 @@ describe('themeItem for nativewind', () => {
     expect(tailwindColors['radius']).toBeUndefined();
   });
 
+  it("derives the border radius scale from --radius as Vega's theme does", () => {
+    expect(item.tailwind?.config?.theme?.extend?.borderRadius).toEqual(VEGA_RADII);
+  });
+
   it('holds no oklch colour, which React Native cannot draw', () => {
     expect(JSON.stringify(item)).not.toContain('oklch(');
   });
@@ -109,7 +149,7 @@ describe('themeItem for nativewind', () => {
 });
 
 describe('themeItem for uniwind', () => {
-  const item = themeItem(colors, STATUS_TOKENS, 'uniwind');
+  const item = themeItem(colors, radii, STATUS_TOKENS, 'uniwind');
   const [file] = item.files ?? [];
   const content = file?.content ?? '';
 
@@ -136,6 +176,15 @@ describe('themeItem for uniwind', () => {
     );
   });
 
+  it("derives the radius scale from --radius in @theme inline, as Vega's theme does", () => {
+    const start = content.indexOf('@theme inline {');
+    const block = start < 0 ? '' : content.slice(start, content.indexOf('}', start));
+
+    expect(
+      Object.entries(VEGA_RADII).filter(([step, value]) => !block.includes(`--radius-${step}: ${value};`)),
+    ).toEqual([]);
+  });
+
   it('declares a token that is not a colour once, outside the variants', () => {
     expect(content).toMatch(/:root \{\n\s+--radius: 0\.625rem;/);
     expect(variantBlock('light')).not.toContain('--radius');
@@ -150,7 +199,7 @@ describe('themeItem for uniwind', () => {
   it('refuses a colour token one scheme lacks, which Uniwind rejects', () => {
     const lopsided: TokenSet = { light: { success: 'oklch(0.627 0.19 149)' }, dark: {} };
 
-    expect(() => themeItem(colors, lopsided, 'uniwind')).toThrow('success has no dark value');
+    expect(() => themeItem(colors, radii, lopsided, 'uniwind')).toThrow('success has no dark value');
   });
 });
 

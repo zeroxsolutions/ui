@@ -234,6 +234,16 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
     expect(file.content).toMatch(/xs: 'size-3'/);
   });
 
+  it("gives Button rounded-md, which the theme's scale sets to Vega's 0.8 of --radius", () => {
+    const [file] = item('button')?.files ?? [];
+    const theme = JSON.stringify(item('theme'));
+
+    expect(file.content).toMatch(/\brounded-md\b/);
+    expect(theme).toContain(
+      engine === 'nativewind' ? '"md":"calc(var(--radius) * 0.8)"' : '--radius-md: calc(var(--radius) * 0.8);',
+    );
+  });
+
   it("gives Button Vega's pressed nudge", () => {
     const [file] = item('button')?.files ?? [];
 
@@ -250,7 +260,7 @@ describe('the built nativewind-vega registry', () => {
     const directory = join(STYLES_PATH, 'nativewind-vega');
     for (const file of readdirSync(directory)) {
       expect(readFileSync(join(directory, file), 'utf8')).not.toMatch(
-        /\b(shadow-xs|shadow-2xs|rounded-xs|rounded-4xl|outline-hidden|drop-shadow-xs|inset-shadow-[\w-]+|inset-ring-[\w-]+|bg-linear-[\w-]+|field-sizing-[\w-]+|text-shadow-[\w-]+)\b|[\w\]]!(?=[\s'"])/,
+        /\b(shadow-xs|shadow-2xs|rounded-xs|outline-hidden|drop-shadow-xs|inset-shadow-[\w-]+|inset-ring-[\w-]+|bg-linear-[\w-]+|field-sizing-[\w-]+|text-shadow-[\w-]+)\b|[\w\]]!(?=[\s'"])/,
       );
     }
   });

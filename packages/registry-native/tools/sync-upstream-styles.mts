@@ -5,6 +5,8 @@ const SNAPSHOTS = [
   { upstreamPath: 'apps/v4/registry/styles/style-vega.css', snapshot: '../styles/upstream/style-vega.css' },
   // The file https://ui.shadcn.com/r/colors/neutral.json serves, taken at the same commit as the style.
   { upstreamPath: 'apps/v4/public/r/colors/neutral.json', snapshot: '../styles/upstream/colors-neutral.json' },
+  // The site's stylesheet, whose `@theme inline` block derives the radius scale from `--radius`.
+  { upstreamPath: 'apps/v4/app/globals.css', snapshot: '../styles/upstream/globals.css' },
 ] as const;
 
 async function main(): Promise<void> {
