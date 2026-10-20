@@ -244,8 +244,8 @@ Skills: `wiring-a-task-target`, `writing-e2e-tests`, `deploying-a-frontend-app`,
 
 - Modify: `apps/registry-ui/package.json` (`devDependencies`: `@zeroxsolutions/registry-native:
   workspace:*`; `shadcn-build` `dependsOn` `@zeroxsolutions/registry-native:build-registry`)
-- Modify: `apps/registry-ui/tools/build-registry.mts` (copy `packages/registry-native/dist/r/styles/*`
-  into `public/r/styles/`)
+- Modify: `apps/registry-ui/package.json` (one more `shadcn-build` command, after the copies and
+  before validate: `cp -R ../../packages/registry-native/dist/r/styles/. public/r/styles/`)
 - Modify: `apps/registry-ui-e2e/src/registry.spec.ts`
 
 - [ ] **Step 1: Test first.** Add to `registry.spec.ts`:
