@@ -16,7 +16,7 @@ const BASE_STYLES = ['vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rh
 test('the registry serves every item it lists under each base style, each file with its content', async ({
   request,
 }) => {
-  // 127 items under 8 styles fetched from a cold worker on a shared runner outrun the default deadline.
+  // Every item under every style, fetched from a cold worker on a shared runner, outruns the default deadline.
   test.setTimeout(120_000);
   const problems: string[] = [];
   for (const style of BASE_STYLES) {

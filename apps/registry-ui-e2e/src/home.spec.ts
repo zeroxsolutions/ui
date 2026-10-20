@@ -182,10 +182,8 @@ test('the hero shader holds still under reduced motion or without WebGL, and oth
 test('/ tells a visitor to add the @zui registry before the install command works', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('Add the @zui registry to components.json, then install any item')).toBeVisible();
-  await expect(
-    page.getByRole('heading', { level: 3, name: '1. Add the @zui registry to components.json' }),
-  ).toBeVisible();
-  await expect(
-    page.locator('pre').filter({ hasText: '"@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"' }),
-  ).toBeVisible();
+  const firstStep = page
+    .getByRole('listitem')
+    .filter({ has: page.getByRole('heading', { level: 3, name: '1. Add the @zui registry to components.json' }) });
+  await expect(firstStep).toContainText('"@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"');
 });

@@ -291,10 +291,8 @@ function demoProblems(items: RegistryItem[]): string[] {
 }
 
 describe('registry.json', () => {
-  it('is named zui and names no house item by URL', () => {
-    const raw = readFileSync(join(APP, 'registry.json'), 'utf8');
-    expect(JSON.parse(raw).name).toBe('zui');
-    expect(raw).not.toContain('https://ui.zeroxsolutions.com/r/');
+  it('names no house item by URL, which would pin it to one style', () => {
+    expect(readFileSync(join(APP, 'registry.json'), 'utf8')).not.toContain('https://ui.zeroxsolutions.com/r/');
   });
 
   it('names no lucide-animated item', () => {

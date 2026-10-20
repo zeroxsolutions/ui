@@ -18,8 +18,7 @@ const nextConfig = {
     { source: '/docs.md', destination: '/llms.mdx/docs/content.md' },
     { source: '/docs/:path*.md', destination: '/llms.mdx/docs/:path*/content.md' },
   ],
-  // The items moved under /r/styles/base-<style>/; an app that still adds by the old flat URL gets the
-  // style they are drawn in. The segment excludes a slash, so nothing under /r/styles/ matches.
+  // base-nova is the style the items' own classes are drawn in, which tools/build-registry.mts builds first.
   redirects: async () => [
     { source: '/r/:name([^/]+\\.json)', destination: '/r/styles/base-nova/:name', permanent: true },
   ],
