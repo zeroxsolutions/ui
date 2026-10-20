@@ -18,6 +18,10 @@ const nextConfig = {
     { source: '/docs.md', destination: '/llms.mdx/docs/content.md' },
     { source: '/docs/:path*.md', destination: '/llms.mdx/docs/:path*/content.md' },
   ],
+  // base-nova is the style the items' own classes are drawn in, which tools/build-registry.mts builds first.
+  redirects: async () => [
+    { source: '/r/:name([^/]+\\.json)', destination: '/r/styles/base-nova/:name', permanent: true },
+  ],
 };
 
 const withMDX = createMDX();

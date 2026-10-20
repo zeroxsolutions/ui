@@ -20,7 +20,7 @@ import {
   SourceCodeBlockLanguage,
   SourceCodeBlockTitle,
 } from '@/components/data-display/source-code-block';
-import { publishedBlocks, publishedItems, registryHomepage } from '@/lib/registry';
+import { publishedBlocks, publishedItems } from '@/lib/registry';
 import { docsPageUrl, source } from '@/lib/source';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { blocksRoute } from '@/routes/app-routes';
@@ -30,9 +30,9 @@ import registryData from '../../../registry.json';
 /** The items the home page shows live, by registry name; each renders its `<name>-demo`. */
 const HOME_ITEMS = ['chat-message', 'code-block', 'file-tree', 'tag-input', 'password-input', 'status-indicator'];
 
-/** The shadcn CLI command that installs one registry item from its URL. */
+/** The shadcn CLI command that installs one registry item through the app's `@zui` registry entry. */
 function homePageInstallCommand(name: string): string {
-  return `pnpm dlx shadcn@latest add ${new URL(`/r/${name}.json`, registryHomepage).href}`;
+  return `pnpm dlx shadcn@latest add @zui/${name}`;
 }
 
 /** The paths an item's files land at in a consuming app. A component keeps its path below the
@@ -49,6 +49,11 @@ function homePageInstallFilePaths(name: string): string[] {
 }
 
 const INSTALL_STEPS = [
+  {
+    title: 'Add the @zui registry to components.json',
+    language: 'json',
+    code: '"registries": {\n  "@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"\n}',
+  },
   { title: 'Add an item with the shadcn CLI', language: 'bash', code: homePageInstallCommand('status-indicator') },
   {
     title: 'The CLI writes it into your app',
@@ -101,7 +106,8 @@ export default function HomePage(): ReactNode {
             Composed React components for shadcn, on Base UI.
           </h1>
           <p className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-backwards text-muted-foreground text-lg text-pretty delay-75 duration-200 ease-out motion-reduce:animate-none">
-            Install any item with the shadcn CLI from its URL. The code it writes is yours.
+            Add the @zui registry to components.json, then install any item with the shadcn CLI. The code it writes is
+            yours.
           </p>
           <div className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-backwards flex flex-wrap justify-center gap-3 delay-150 duration-200 ease-out motion-reduce:animate-none">
             <Link href={docsPageUrl(['components'])} className={buttonVariants()}>

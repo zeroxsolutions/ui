@@ -8,22 +8,35 @@ its imports are written.
 
 ## Create components.json
 
-The items compose the Base UI build of shadcn's primitives and are drawn in the nova style, so `components.json`
-names `base-nova` as its `style`. An app that has no `components.json` gets one on that base and style from:
+The items compose the Base UI build of shadcn's primitives, so `style` in `components.json` has to start with
+`base-`. A Radix style installs the Radix build of each primitive, and the items' imports do not match it. Each
+item is published under every base style: the primitives it composes come in the app's own style, and its own
+classes are drawn in nova. An app that has no `components.json` gets one on Base UI and nova from:
 
 ```bash
 pnpm dlx shadcn@latest init --base base --preset nova
 ```
 
-In an app that already has one, `style` has to start with `base-`. A Radix style installs the Radix build of each
-primitive, and the items' imports do not match it.
+## Add the zui registry
+
+`components.json` names this registry under `registries`:
+
+```json
+{
+  "registries": {
+    "@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"
+  }
+}
+```
+
+The CLI fills `{style}` from the app's `style`, so every item comes in that style. Without the entry an item can
+still be added by its URL, `https://ui.zeroxsolutions.com/r/styles/base-nova/<name>.json`.
+An item that uses another zui item installs only with this entry.
 
 ## Install an item
 
-Each item is addressed by its URL:
-
 ```bash
-pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json
+pnpm dlx shadcn@latest add @zui/status-indicator
 ```
 
 The CLI writes the item's files under the aliases in `components.json` and rewrites its imports to match. With
@@ -32,10 +45,9 @@ the aliases `init` writes, Status Indicator lands in `components/feedback/status
 
 ## Items that use other items
 
-An item names each item it composes by that item's URL, `https://ui.zeroxsolutions.com/r/<name>.json`, and each
-shadcn primitive it composes as `@shadcn/<name>`. The CLI fetches the first kind from this registry and the second
-from shadcn's, so `components.json` needs no `registries` entry for either. Editor Tab, for example, names
-`https://ui.zeroxsolutions.com/r/unsaved-indicator.json` and `@shadcn/button`.
+An item names each zui item it composes as `@zui/<name>`, and each shadcn primitive as `@shadcn/<name>`. The CLI
+fetches the first kind through the app's `@zui` entry, in the app's style, and the second from shadcn's registry.
+Editor Tab, for example, names `@zui/unsaved-indicator` and `@shadcn/button`.
 
 ## Colours
 

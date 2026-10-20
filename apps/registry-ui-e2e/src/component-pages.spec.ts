@@ -6,7 +6,7 @@ test('every component page renders its preview, fits a phone without a stage scr
 }) => {
   // Each page is prerendered, but 42 of them across a cold worker outrun the default deadline.
   test.setTimeout(180_000);
-  const response = await request.get('/r/registry.json');
+  const response = await request.get('/r/styles/base-nova/registry.json');
   expect(response.status()).toBe(200);
   const registry = (await response.json()) as { items: { name: string; type: string; title: string }[] };
   const components = registry.items.filter((item) => item.type === 'registry:component');

@@ -148,11 +148,9 @@ function unnamedPages(sources: Record<string, string>, items: Map<string, ItemTe
   });
 }
 
-/** The command a page installs its subject with: an item by its URL here, a primitive by its name at shadcn. */
+/** The command a page installs its subject with: an item by its `@zui/` name, a primitive by its name at shadcn. */
 function installCommand(name: string, items: Map<string, ItemText>): string {
-  return items.has(name)
-    ? `pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/${name}.json`
-    : `pnpm dlx shadcn@latest add ${name}`;
+  return items.has(name) ? `pnpm dlx shadcn@latest add @zui/${name}` : `pnpm dlx shadcn@latest add ${name}`;
 }
 
 /** A page's `<TabsContent value="cli">...</TabsContent>` block, where its install command lives. */
@@ -238,7 +236,7 @@ function manualBlock(source: string): string {
   return /<TabsContent value="manual">([\s\S]*?)<\/TabsContent>/.exec(source)?.[1] ?? '';
 }
 
-/** What `pnpm dlx shadcn@latest add` takes for a registryDependencies list: `@shadcn/x` bare, a URL as given, in order. */
+/** What `pnpm dlx shadcn@latest add` takes for a registryDependencies list: `@shadcn/x` bare, `@zui/x` as given, in order. */
 function registryDependencyNames(registryDependencies: string[]): string[] {
   return registryDependencies.map((dependency) =>
     dependency.startsWith('@shadcn/') ? dependency.slice('@shadcn/'.length) : dependency,
@@ -283,7 +281,7 @@ function manualProblems(sources: Record<string, string>, components: ComponentIt
         ? []
         : [`${slug}: installs ${installs.join('; ') || 'no package'}, not ${expectedInstalls[0] ?? 'no package'}`];
     // Scoped to the Manual tab so this never reads the CLI tab's own `pnpm dlx shadcn@latest add
-    // https://.../<name>.json` line, which installs the item itself, not its registryDependencies.
+    // @zui/<name>` line, which installs the item itself, not its registryDependencies.
     const adds = manualBlock(source)
       .split('\n')
       .map((line) => line.trim())
@@ -654,7 +652,20 @@ describe('content/docs', () => {
     ]);
   });
 
-  it('installs each item by its URL here and each primitive by its name at shadcn', () => {
+  it("sends the introduction's reader to the installation page for the @zui entry", () => {
+    const introduction = readFileSync(join(CONTENT, 'index.mdx'), 'utf8');
+    const install = /## Install an item\n([\s\S]*?)(?=\n## |$)/.exec(introduction)?.[1] ?? '';
+    expect(install).toContain('(/docs/installation)');
+    expect(install).not.toContain('by its URL');
+  });
+
+  it('tells an app to declare the @zui registry before it installs an item', () => {
+    const installation = readFileSync(join(CONTENT, 'installation.mdx'), 'utf8');
+    expect(installation).toContain('"@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"');
+    expect(installation).toContain('An item that uses another zui item installs only with this entry.');
+  });
+
+  it('installs each item by its @zui name and each primitive by its name at shadcn', () => {
     expect(missingInstallCommands(readPageSources(CONTENT), readItems())).toEqual([]);
   });
 
@@ -671,7 +682,7 @@ describe('content/docs', () => {
         '</TabsContent>',
         '<TabsContent value="manual">',
         '```bash',
-        'pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json',
+        'pnpm dlx shadcn@latest add @zui/status-indicator',
         '```',
         '</TabsContent>',
       ].join('\n'),
@@ -679,7 +690,7 @@ describe('content/docs', () => {
 
     expect(missingInstallCommands(sources, items)).toEqual([
       'components/button: has no `pnpm dlx shadcn@latest add button`',
-      'components/status-indicator: has no `pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json`',
+      'components/status-indicator: has no `pnpm dlx shadcn@latest add @zui/status-indicator`',
     ]);
   });
 
@@ -725,7 +736,7 @@ describe('content/docs', () => {
           { path: 'registry/bases/base-ui/types/status-tone.ts', type: 'registry:lib' },
         ],
         dependencies: ['lucide-react'],
-        registryDependencies: ['@shadcn/utils', 'https://ui.zeroxsolutions.com/r/circle-icon.json'],
+        registryDependencies: ['@shadcn/utils', '@zui/circle-icon'],
       },
     ];
     const sources = {
@@ -748,7 +759,7 @@ describe('content/docs', () => {
       'components/status-indicator: has no ComponentSource for registry/bases/base-ui/types/status-tone.ts',
       'components/status-indicator: has 2 ComponentSource blocks for registry/bases/base-ui/components/feedback/status-indicator.tsx',
       'components/status-indicator: installs pnpm add react, not pnpm add lucide-react',
-      'components/status-indicator: adds pnpm dlx shadcn@latest add utils, not pnpm dlx shadcn@latest add utils https://ui.zeroxsolutions.com/r/circle-icon.json',
+      'components/status-indicator: adds pnpm dlx shadcn@latest add utils, not pnpm dlx shadcn@latest add utils @zui/circle-icon',
     ]);
   });
 

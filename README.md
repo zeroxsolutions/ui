@@ -20,14 +20,14 @@
 <p align="center">
   <a href="https://ui.zeroxsolutions.com/docs"><strong>Documentation</strong></a> -
   <a href="https://ui.zeroxsolutions.com/docs/installation">Installation</a> -
-  <a href="https://ui.zeroxsolutions.com/r/registry.json">Registry index</a>
+  <a href="https://ui.zeroxsolutions.com/r/styles/base-nova/registry.json">Registry index</a>
 </p>
 
 ## About
 
-A [shadcn](https://ui.shadcn.com) registry of composed React components, and the npm packages they
-build on. The components are drawn in shadcn's `base-nova` style on [Base UI](https://base-ui.com)
-primitives, and the shadcn CLI writes them into your app as source you own.
+zui: a [shadcn](https://ui.shadcn.com) registry of composed React components, and the npm packages they
+build on. The components are built on [Base UI](https://base-ui.com) primitives and published under every
+shadcn `base-` style, and the shadcn CLI writes them into your app as source you own.
 
 ## Install a component
 
@@ -37,15 +37,25 @@ The app needs a `components.json` on a Base UI style. Create one with:
 pnpm dlx shadcn@latest init --base base --preset nova
 ```
 
-Then add any item by its URL:
+Name the registry in its `components.json`:
+
+```json
+{
+  "registries": {
+    "@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"
+  }
+}
+```
+
+Then add any item:
 
 ```bash
-pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/status-indicator.json
+pnpm dlx shadcn@latest add @zui/status-indicator
 ```
 
 The CLI writes the item's files under your `components.json` aliases, and pulls in every shadcn
 primitive and registry item it composes. The full index is
-[`/r/registry.json`](https://ui.zeroxsolutions.com/r/registry.json); each item's page in the docs
+[`/r/styles/base-nova/registry.json`](https://ui.zeroxsolutions.com/r/styles/base-nova/registry.json); each item's page in the docs
 shows its preview, its source and its API.
 
 ## Packages
