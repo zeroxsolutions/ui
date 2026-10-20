@@ -239,7 +239,7 @@
       "name": "toggle",
       "type": "registry:ui",
       "title": "Toggle",
-      "description": "A two-state button in Vega's default and outline variants and three sizes, on the muted background while pressed, announced as a switch with a dimmed disabled state.",
+      "description": "A two-state button in Vega's default and outline variants and three sizes, on the muted background while pressed, announced as a button that is selected while pressed, with a dimmed disabled state.",
       "dependencies": ["@rn-primitives/toggle", "class-variance-authority"],
       "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
       "files": [

@@ -108,6 +108,35 @@ describe('ToggleGroup', () => {
     expect(classesOf('radio', 'Right')).toContain('rounded-b-md');
   });
 
+  it('rounds all four corners of a lone item at spacing 0', async () => {
+    await render(
+      <ToggleGroup type="single" value={undefined} onValueChange={() => {}} spacing={0}>
+        <ToggleGroupItem value="bold">
+          <Text>Bold</Text>
+        </ToggleGroupItem>
+      </ToggleGroup>,
+    );
+
+    expect(classesOf('radio', 'Bold')).toEqual(expect.arrayContaining(['rounded-l-md', 'rounded-r-md']));
+  });
+
+  it('finds the first and last of items rendered from a list', async () => {
+    await render(
+      <ToggleGroup type="single" value={undefined} onValueChange={() => {}} spacing={0}>
+        {['Left', 'Center', 'Right'].map((name) => (
+          <ToggleGroupItem key={name} value={name}>
+            <Text>{name}</Text>
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>,
+    );
+
+    expect(classesOf('radio', 'Left')).toContain('rounded-l-md');
+    expect(classesOf('radio', 'Center')).not.toContain('rounded-l-md');
+    expect(classesOf('radio', 'Center')).not.toContain('rounded-r-md');
+    expect(classesOf('radio', 'Right')).toContain('rounded-r-md');
+  });
+
   it('disables every item when disabled', async () => {
     const user = userEvent.setup();
     await render(<AlignmentGroup disabled />);

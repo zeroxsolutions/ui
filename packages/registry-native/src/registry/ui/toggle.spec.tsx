@@ -28,18 +28,28 @@ function PressedToggle({ onPressedChange, ...props }: PressedToggleProps) {
 }
 
 describe('Toggle', () => {
-  it('turns on when pressed and announces it checked', async () => {
+  it('is a button that turns on when pressed and announces it selected', async () => {
     const onPressedChange = jest.fn();
     const user = userEvent.setup();
     await render(<PressedToggle onPressedChange={onPressedChange} />);
-    const control = screen.getByRole('switch', { name: 'Bold' });
+    const control = screen.getByRole('button', { name: 'Bold' });
 
-    expect(control.props.accessibilityState.checked).toBe(false);
+    expect(control.props.accessibilityState.selected).toBe(false);
 
     await user.press(control);
 
     expect(onPressedChange).toHaveBeenCalledWith(true);
-    expect(control.props.accessibilityState.checked).toBe(true);
+    expect(control.props.accessibilityState.selected).toBe(true);
+    expect(control.props.accessibilityState.checked).toBeUndefined();
+    expect(control.props['aria-checked']).toBeUndefined();
+  });
+
+  it("keeps a caller's own accessibility state beside selected", async () => {
+    await render(<Toggle pressed onPressedChange={() => {}} aria-label="Bold" accessibilityState={{ busy: true }} />);
+
+    expect(screen.getByRole('button', { name: 'Bold' }).props.accessibilityState).toEqual(
+      expect.objectContaining({ busy: true, selected: true }),
+    );
   });
 
   it('draws the muted background only while pressed', async () => {
@@ -50,14 +60,14 @@ describe('Toggle', () => {
       </>,
     );
 
-    expect(emittedClasses(screen.getByRole('switch', { name: 'On' }).props.className)).toContain('bg-muted');
-    expect(emittedClasses(screen.getByRole('switch', { name: 'Off' }).props.className)).not.toContain('bg-muted');
+    expect(emittedClasses(screen.getByRole('button', { name: 'On' }).props.className)).toContain('bg-muted');
+    expect(emittedClasses(screen.getByRole('button', { name: 'Off' }).props.className)).not.toContain('bg-muted');
   });
 
   it('draws the outline variant and the small size', async () => {
     await render(<Toggle variant="outline" size="sm" pressed={false} onPressedChange={() => {}} aria-label="Bold" />);
 
-    const classes = emittedClasses(screen.getByRole('switch', { name: 'Bold' }).props.className);
+    const classes = emittedClasses(screen.getByRole('button', { name: 'Bold' }).props.className);
 
     expect(classes).toEqual(expect.arrayContaining(['border', 'border-input', 'h-8', 'min-w-8']));
   });
@@ -84,7 +94,7 @@ describe('Toggle', () => {
     const onPressedChange = jest.fn();
     const user = userEvent.setup();
     await render(<PressedToggle disabled onPressedChange={onPressedChange} />);
-    const control = screen.getByRole('switch', { name: 'Bold' });
+    const control = screen.getByRole('button', { name: 'Bold' });
 
     await user.press(control);
 

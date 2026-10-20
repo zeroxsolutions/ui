@@ -38,20 +38,35 @@ type ToggleProps = TogglePrimitive.RootProps &
   };
 
 /**
- * A two-state button, announced as a switch with its checked and disabled state, drawn on the muted
+ * A two-state button, announced as a button with its selected and disabled state, drawn on the muted
  * background while pressed. It is controlled: pressing it calls `onPressedChange` with the new value,
  * and it shows as pressed once `pressed` follows. Its label goes in as a Text child, which takes the
  * label classes, and an Icon child takes a 16px size; an icon-only toggle is named with `aria-label`.
  */
-function Toggle({ className, variant, size, pressed, 'aria-invalid': invalid, ...props }: ToggleProps): ReactNode {
+function Toggle({
+  className,
+  variant,
+  size,
+  pressed,
+  disabled,
+  accessibilityState,
+  'aria-invalid': invalid,
+  ...props
+}: ToggleProps): ReactNode {
   return (
     <TextClassContext.Provider value="cn-toggle/text">
       <IconClassContext.Provider value="cn-toggle/icon">
         <TogglePrimitive.Root
           className={cn(toggleVariants({ variant, size, pressed }), invalid && 'cn-toggle@invalid', className)}
           pressed={pressed}
+          disabled={disabled}
           aria-invalid={invalid}
           {...props}
+          // The primitive sets role switch and aria-checked, and React Native lets an aria-* prop win
+          // over accessibilityState, so both are replaced here, after the caller's props.
+          role="button"
+          aria-checked={undefined}
+          accessibilityState={{ ...accessibilityState, selected: pressed, disabled }}
         />
       </IconClassContext.Provider>
     </TextClassContext.Provider>
