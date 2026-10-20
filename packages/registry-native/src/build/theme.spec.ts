@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { zuiFonts } from '../registry/lib/fonts';
 import { STATUS_TOKENS, oklchToSrgb, parseRadiusScale, themeItem, type TokenSet, type UpstreamColors } from './theme';
 
 const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/colors-neutral.json');
@@ -207,5 +208,11 @@ describe('STATUS_TOKENS', () => {
   it('names success, warning and their foregrounds in both schemes', () => {
     expect(Object.keys(STATUS_TOKENS.light).sort()).toEqual(STATUS_NAMES);
     expect(Object.keys(STATUS_TOKENS.dark).sort()).toEqual(STATUS_NAMES);
+  });
+});
+
+describe('zuiFonts', () => {
+  it('holds a font for every family the theme names', () => {
+    expect(Object.keys(zuiFonts).sort()).toEqual(Object.values(GEIST_FAMILIES).sort());
   });
 });

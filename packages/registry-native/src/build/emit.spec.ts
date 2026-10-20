@@ -260,6 +260,24 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
     }
   });
 
+  it('leaves the theme to setup, so no item depends on it', () => {
+    for (const built of items) {
+      expect({ name: built.name, theme: built.registryDependencies?.includes('@zui/theme') ?? false }).toEqual({
+        name: built.name,
+        theme: false,
+      });
+    }
+    expect(item('text')?.registryDependencies).toBeDefined();
+    expect(item('button')?.registryDependencies).toBeDefined();
+  });
+
+  it('ships fonts.ts as a lib file with no target, so it lands in the lib alias like utils', () => {
+    const fonts = item('theme')?.files.find((file) => file.path.endsWith('/fonts.ts'));
+
+    expect(fonts).toMatchObject({ type: 'registry:lib' });
+    expect(fonts).not.toHaveProperty('target');
+  });
+
   it('ships fonts.ts in the theme with the packages it imports', () => {
     const theme = item('theme');
     const fonts = theme?.files.find((file) => file.path.endsWith('/fonts.ts'));

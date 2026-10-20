@@ -12,8 +12,7 @@
       "files": [
         {
           "path": "src/registry/lib/fonts.ts",
-          "type": "registry:lib",
-          "target": "lib/fonts.ts"
+          "type": "registry:lib"
         }
       ]
     },
@@ -36,7 +35,7 @@
       "title": "Text",
       "description": "Text that takes the text classes of the container around it, such as a Button's label colour.",
       "dependencies": ["@rn-primitives/slot"],
-      "registryDependencies": ["@zui/utils", "@zui/theme"],
+      "registryDependencies": ["@zui/utils"],
       "files": [
         {
           "path": "src/registry/ui/text.tsx",
