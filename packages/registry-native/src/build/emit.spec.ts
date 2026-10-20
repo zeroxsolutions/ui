@@ -132,6 +132,7 @@ interface BuiltItem {
 }
 
 const PLATFORM_PACKAGES: ReadonlySet<string> = new Set(['react', 'react-native']);
+const BARE_WEIGHT = /\bfont-(?:normal|medium|semibold|bold)\b|fontWeight/;
 const IMPORT_SPECIFIER = /from '([^']+)'/g;
 const ALIASED_ITEM = /^@\/(?:components\/ui|lib)\/(.+)$/;
 
@@ -242,6 +243,29 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
     expect(theme).toContain(
       engine === 'nativewind' ? '"md":"calc(var(--radius) * 0.8)"' : '--radius-md: calc(var(--radius) * 0.8);',
     );
+  });
+
+  it("draws Button's label in the medium Geist family", () => {
+    const [file] = item('button')?.files ?? [];
+
+    expect(file.content).toContain('font-sans-medium');
+  });
+
+  it('names no font weight in any file', () => {
+    for (const built of items) {
+      expect({ name: built.name, weight: JSON.stringify(built).match(BARE_WEIGHT) }).toEqual({
+        name: built.name,
+        weight: null,
+      });
+    }
+  });
+
+  it('ships fonts.ts in the theme with the packages it imports', () => {
+    const theme = item('theme');
+    const fonts = theme?.files.find((file) => file.path.endsWith('/fonts.ts'));
+
+    expect(fonts?.content).toContain('Geist_400Regular');
+    expect(theme?.dependencies).toEqual(expect.arrayContaining(['expo-font', '@expo-google-fonts/geist']));
   });
 
   it("gives Button Vega's pressed nudge", () => {

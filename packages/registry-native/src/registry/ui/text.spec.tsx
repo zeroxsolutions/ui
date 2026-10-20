@@ -14,4 +14,10 @@ describe('Text', () => {
     expect(classes).toContain('text-primary-foreground');
     expect(classes).not.toContain('text-foreground');
   });
+
+  it('starts from the regular Geist family', async () => {
+    await render(<Text>Save</Text>);
+
+    expect(screen.getByText('Save').props.className.split(' ')).toContain('font-sans');
+  });
 });

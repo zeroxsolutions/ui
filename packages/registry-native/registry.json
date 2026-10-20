@@ -7,7 +7,15 @@
       "name": "theme",
       "type": "registry:theme",
       "title": "Theme",
-      "description": "Vega's neutral colours, light and dark, with success and warning, and a font family per Geist weight, in the form the engine compiles."
+      "description": "Vega's neutral colours, light and dark, with success and warning, and a font family per Geist weight, in the form the engine compiles, and the fonts map that loads them.",
+      "dependencies": ["expo-font", "@expo-google-fonts/geist"],
+      "files": [
+        {
+          "path": "src/registry/lib/fonts.ts",
+          "type": "registry:lib",
+          "target": "lib/fonts.ts"
+        }
+      ]
     },
     {
       "name": "utils",
@@ -28,7 +36,7 @@
       "title": "Text",
       "description": "Text that takes the text classes of the container around it, such as a Button's label colour.",
       "dependencies": ["@rn-primitives/slot"],
-      "registryDependencies": ["@zui/utils"],
+      "registryDependencies": ["@zui/utils", "@zui/theme"],
       "files": [
         {
           "path": "src/registry/ui/text.tsx",

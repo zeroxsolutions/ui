@@ -127,14 +127,34 @@ describe('translateClasses', () => {
   });
 
   it('sends typography under a kept modifier to the text part', () => {
-    const slot = ['active:text-foreground', 'font-medium', 'underline-offset-4', 'p-2'];
+    const slot = ['active:text-foreground', 'font-sans-medium', 'underline-offset-4', 'p-2'];
 
     expect(translateClasses(slot, 'uniwind', 'text').classes).toEqual([
       'active:text-foreground',
-      'font-medium',
+      'font-sans-medium',
       'underline-offset-4',
     ]);
     expect(translateClasses(slot, 'uniwind', 'view').classes).toEqual(['p-2']);
+  });
+
+  it.each(['nativewind', 'uniwind'] as const)('draws a font weight as a Geist family for %s', (engine) => {
+    const weights = ['font-normal', 'font-medium', 'font-semibold', 'font-bold'];
+
+    expect(translateClasses(weights, engine, 'text')).toEqual({
+      classes: ['font-sans', 'font-sans-medium', 'font-sans-semibold', 'font-sans-bold'],
+      unknown: [],
+    });
+  });
+
+  it.each(['nativewind', 'uniwind'] as const)('reports a weight Geist has no family for in %s', (engine) => {
+    expect(translateClasses(['font-light'], engine, 'text').unknown).toEqual(['font-light']);
+  });
+
+  it('keeps a family class as it is', () => {
+    expect(translateClasses(['font-sans-medium', 'font-mono'], 'uniwind', 'text').classes).toEqual([
+      'font-sans-medium',
+      'font-mono',
+    ]);
   });
 
   it('drops a radius clamped by a theme variable', () => {

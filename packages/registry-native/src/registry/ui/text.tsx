@@ -18,7 +18,7 @@ function Text({ className, asChild = false, ...props }: TextProps): ReactNode {
   const textClass = useContext(TextClassContext);
   const Component = asChild ? Slot : NativeText;
 
-  return <Component className={cn('text-foreground text-base', textClass, className)} {...props} />;
+  return <Component className={cn('font-sans text-foreground text-base', textClass, className)} {...props} />;
 }
 
 export { Text, TextClassContext };

@@ -60,6 +60,17 @@ const TYPOGRAPHY_UTILITY =
   /^(text-|font-|tracking-|leading-|italic$|underline$|underline-offset-|line-through$|uppercase$|lowercase$|capitalize$)/;
 
 /**
+ * The theme item maps each Geist weight to its own font family, because Android picks a custom
+ * font's weight by family. A weight utility is renamed to that family's class, on both engines.
+ */
+const GEIST_FAMILY_UTILITIES = {
+  'font-normal': 'font-sans',
+  'font-medium': 'font-sans-medium',
+  'font-semibold': 'font-sans-semibold',
+  'font-bold': 'font-sans-bold',
+} as const satisfies Readonly<Record<string, string>>;
+
+/**
  * NativeWind 4 runs on Tailwind 3, whose scale steps are one below Tailwind 4's. A Tailwind 4 step
  * past the end of Tailwind 3's scale takes its value as an arbitrary one. The theme item sets the
  * radius steps from `sm` to `4xl` to Vega's own on both engines, so only `rounded-xs`, which it
@@ -67,14 +78,18 @@ const TYPOGRAPHY_UTILITY =
  */
 const RENAMED_UTILITIES = {
   nativewind: {
+    ...GEIST_FAMILY_UTILITIES,
     'shadow-xs': 'shadow-sm',
     'shadow-sm': 'shadow',
     'rounded-xs': 'rounded-[0.125rem]',
     'blur-xs': 'blur-sm',
     'drop-shadow-xs': 'drop-shadow-sm',
   },
-  uniwind: {},
+  uniwind: GEIST_FAMILY_UTILITIES,
 } as const satisfies Record<Engine, Readonly<Record<string, string>>>;
+
+/** Weights the theme has no Geist family for, so a font cannot draw them. */
+const UNLOADED_WEIGHTS = [/^font-(thin|extralight|light|extrabold|black)$/] as const satisfies readonly RegExp[];
 
 /**
  * Tailwind 4 utilities the engine's Tailwind has no exact equal of, reported rather than renamed to
@@ -83,6 +98,7 @@ const RENAMED_UTILITIES = {
  */
 const UNTRANSLATABLE_UTILITIES = {
   nativewind: [
+    ...UNLOADED_WEIGHTS,
     /!$/,
     /^shadow-2xs$/,
     /^inset-shadow-/,
@@ -91,7 +107,7 @@ const UNTRANSLATABLE_UTILITIES = {
     /^field-sizing-/,
     /^text-shadow-/,
   ],
-  uniwind: [/!$/],
+  uniwind: [...UNLOADED_WEIGHTS, /!$/],
 } as const satisfies Record<Engine, readonly RegExp[]>;
 
 function partOf(utility: string, onIcon: boolean): Part {
