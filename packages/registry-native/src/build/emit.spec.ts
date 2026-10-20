@@ -94,6 +94,36 @@ describe('emitSource', () => {
     );
   });
 
+  it.each(ENGINES)('replaces a state token with the classes Vega puts behind that state for %s', (engine) => {
+    const emitted = emitSource("['cn-switch', 'cn-switch@checked']", slots, engine, 'switch.tsx');
+
+    expect(emitted).toBe(`['${viewClasses('cn-switch', engine).join(' ')}', 'bg-primary']`);
+  });
+
+  it('replaces a compound state token and a text state token', () => {
+    expect(emitSource("'cn-switch-thumb@size=sm+checked'", slots, 'nativewind', 'switch.tsx')).toBe(
+      "'translate-x-[10px]'",
+    );
+    expect(emitSource("'cn-checkbox/text@checked'", slots, 'uniwind', 'checkbox.tsx')).toBe(
+      "'text-primary-foreground'",
+    );
+  });
+
+  it('throws on a state outside the state vocabulary, naming the slot and the file', () => {
+    expect(() => emitSource("'cn-switch@cheked'", slots, 'uniwind', 'switch.tsx')).toThrow(
+      'Unknown state cheked for cn-switch in switch.tsx',
+    );
+  });
+
+  it('throws on a state token whose translation is empty, so a typo cannot ship as nothing', () => {
+    expect(() => emitSource("'cn-switch@pressed'", slots, 'uniwind', 'switch.tsx')).toThrow(
+      'Empty state pressed for cn-switch in switch.tsx',
+    );
+    expect(() => emitSource("'cn-switch/text@checked'", slots, 'uniwind', 'switch.tsx')).toThrow(
+      'Empty state checked for cn-switch in switch.tsx',
+    );
+  });
+
   it('throws when a token is left outside a quoted string', () => {
     expect(() => emitSource('const a = `cn-button`;', slots, 'uniwind', 'button.tsx')).toThrow(
       'Unreplaced cn-button in button.tsx',
