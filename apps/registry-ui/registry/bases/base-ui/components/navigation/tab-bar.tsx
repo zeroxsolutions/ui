@@ -33,15 +33,23 @@ const tabBarVariants = cva('group/tab-bar fixed z-50 flex text-foreground', {
       solid: 'bg-background',
     },
     shape: {
-      attached: 'shadow-md',
+      attached: '',
       floating: 'rounded-full p-1.5 shadow-lg',
     },
   },
   compoundVariants: [
-    { shape: 'attached', side: 'top', className: 'inset-x-0 top-0 p-2' },
-    { shape: 'attached', side: 'bottom', className: 'inset-x-0 bottom-0 p-2' },
-    { shape: 'attached', side: 'left', className: 'inset-y-0 left-0 w-22 px-2 py-3' },
-    { shape: 'attached', side: 'right', className: 'inset-y-0 right-0 w-22 px-2 py-3' },
+    { shape: 'attached', side: 'top', className: 'inset-x-0 top-0 p-2 shadow-[0_2px_12px_rgb(0_0_0/0.08)]' },
+    { shape: 'attached', side: 'bottom', className: 'inset-x-0 bottom-0 p-2 shadow-[0_-2px_12px_rgb(0_0_0/0.08)]' },
+    {
+      shape: 'attached',
+      side: 'left',
+      className: 'inset-y-0 left-0 w-22 px-2 py-3 shadow-[2px_0_12px_rgb(0_0_0/0.08)]',
+    },
+    {
+      shape: 'attached',
+      side: 'right',
+      className: 'inset-y-0 right-0 w-22 px-2 py-3 shadow-[-2px_0_12px_rgb(0_0_0/0.08)]',
+    },
     { shape: 'floating', side: 'top', className: 'inset-x-4 top-4' },
     { shape: 'floating', side: 'bottom', className: 'inset-x-4 bottom-4' },
     { shape: 'floating', side: 'left', className: 'inset-y-4 left-4 my-auto h-fit' },
@@ -64,7 +72,6 @@ function useTabBar(): TabBarContextValue {
 interface TabBarItemContextValue {
   active: boolean;
   badgeId: string;
-  setHasBadge: (hasBadge: boolean) => void;
 }
 
 const TabBarItemContext = React.createContext<TabBarItemContextValue | null>(null);
@@ -140,21 +147,22 @@ interface TabBarItemProps extends useRender.ComponentProps<'a'> {
  */
 function TabBarItem({ active = false, className, render, ...props }: TabBarItemProps): React.ReactNode {
   const badgeId = React.useId();
-  const [hasBadge, setHasBadge] = React.useState(false);
-  const context = React.useMemo(() => ({ active, badgeId, setHasBadge }), [active, badgeId]);
+  const context = React.useMemo(() => ({ active, badgeId }), [active, badgeId]);
   const element = useRender({
     defaultTagName: 'a',
     render,
     props: mergeProps<'a'>(
       {
         'aria-current': active ? 'page' : undefined,
-        'aria-describedby': hasBadge ? badgeId : undefined,
         className: cn(
-          'group/tab-bar-item relative flex min-w-16 flex-col items-center justify-center gap-1 p-1 text-muted-foreground outline-none select-none group-data-[orientation=horizontal]/tab-bar:flex-1 data-active:text-primary',
+          'group/tab-bar-item relative flex min-h-12 min-w-16 flex-col items-center justify-center gap-1 p-1 text-muted-foreground outline-none select-none group-data-[orientation=horizontal]/tab-bar:flex-1 data-active:text-primary',
           className,
         ),
       },
       props,
+      // An id that names no element adds nothing to the description, so an item without a badge is not
+      // described.
+      { 'aria-describedby': [props['aria-describedby'], badgeId].filter(Boolean).join(' ') },
     ),
     state: { slot: 'tab-bar-item', active },
     stateAttributesMapping: { active: (value) => (value ? { 'data-active': '' } : null) },
@@ -206,11 +214,7 @@ interface TabBarBadgeProps extends Omit<React.ComponentProps<typeof Badge>, 'var
  * item's name and describes the item instead, so a screen reader hears "Inbox, link, 3 new".
  */
 function TabBarBadge({ countLabel = 'new', className, children, ...props }: TabBarBadgeProps): React.ReactNode {
-  const { badgeId, setHasBadge } = useTabBarItem();
-  React.useEffect(() => {
-    setHasBadge(true);
-    return (): void => setHasBadge(false);
-  }, [setHasBadge]);
+  const { badgeId } = useTabBarItem();
   return (
     <Badge
       data-slot="tab-bar-badge"

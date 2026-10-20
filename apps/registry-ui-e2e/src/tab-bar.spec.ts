@@ -15,6 +15,8 @@ test('the tab bar names every destination, shows only the active label, and move
   const searchLabel = search.getByText('Search');
   expect((await searchLabel.boundingBox())?.width ?? 0).toBeLessThanOrEqual(1);
   expect((await home.getByText('Home').boundingBox())?.width ?? 0).toBeGreaterThan(1);
+  // An item whose label is hidden keeps a 48px target.
+  expect((await search.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(48);
 
   // A click before hydration only follows the fragment, so each try clicks again.
   await expect(async () => {

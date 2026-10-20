@@ -1,5 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import type { ComponentProps, ReactNode } from 'react';
+import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
@@ -159,6 +160,34 @@ describe('TabBarBadge', () => {
     render(bar());
 
     expect(screen.getByRole('link', { name: 'Inbox', description: '3 new' })).toBeTruthy();
+  });
+
+  it('describes its item in the server-rendered markup, before any effect runs', () => {
+    const container = document.createElement('div');
+    container.innerHTML = renderToString(bar());
+    const inbox = container.querySelector<HTMLElement>('a[href="/inbox"]');
+    const badge = container.querySelector<HTMLElement>('[data-slot=tab-bar-badge]');
+
+    expect(badge?.id).toBeTruthy();
+    expect(inbox?.getAttribute('aria-describedby')).toBe(badge?.id);
+  });
+
+  it("keeps the caller's own aria-describedby beside the badge", () => {
+    render(
+      <>
+        <p id="inbox-hint">Messages from your team</p>
+        <TabBar aria-label="Main">
+          <TabBarItem href="/inbox" aria-describedby="inbox-hint">
+            <TabBarIndicator>
+              <TabBarBadge>3</TabBarBadge>
+            </TabBarIndicator>
+            <TabBarLabel>Inbox</TabBarLabel>
+          </TabBarItem>
+        </TabBar>
+      </>,
+    );
+
+    expect(screen.getByRole('link', { name: 'Inbox', description: 'Messages from your team 3 new' })).toBeTruthy();
   });
 
   it('says what the count counts in the words the caller passes', () => {

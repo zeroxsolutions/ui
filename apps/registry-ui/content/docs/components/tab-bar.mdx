@@ -122,7 +122,7 @@ separates by blur and shadow.
 | `shape`      | `'attached' \| 'floating'`               | `'attached'`    |
 
 `translucent` is `bg-background/70 backdrop-blur`, and `solid` is `bg-background`. `attached` runs edge to
-edge, and `floating` is a pill 16px in from the edges. It carries `data-side`, `data-orientation`
+edge and casts its shadow away from that edge, and `floating` is a pill 16px in from the edges. It carries `data-side`, `data-orientation`
 (`horizontal` or `vertical`), `data-labels`, `data-surface` and `data-shape`, and sets
 `data-slot="tab-bar"`.
 
@@ -136,7 +136,9 @@ link. Its name is its `TabBarLabel`.
 | `active` | `boolean` | `false` |
 
 `active` sets `aria-current="page"`, lights the indicator and keeps the label under `labels="selected"`. In
-a row the items share the width; in a column each is as wide as the bar. It carries `data-active` while
+a row the items share the width; in a column each is as wide as the bar. Each is at least 48px high,
+with its label hidden or not. An `aria-describedby` the caller passes is kept, and the badge's id is added
+to it. It carries `data-active` while
 active and sets `data-slot="tab-bar-item"`.
 
 ### TabBarIndicator
