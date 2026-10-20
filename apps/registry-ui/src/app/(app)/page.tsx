@@ -49,6 +49,11 @@ function homePageInstallFilePaths(name: string): string[] {
 }
 
 const INSTALL_STEPS = [
+  {
+    title: 'Add the @zui registry to components.json',
+    language: 'json',
+    code: '"registries": {\n  "@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"\n}',
+  },
   { title: 'Add an item with the shadcn CLI', language: 'bash', code: homePageInstallCommand('status-indicator') },
   {
     title: 'The CLI writes it into your app',
@@ -101,7 +106,8 @@ export default function HomePage(): ReactNode {
             Composed React components for shadcn, on Base UI.
           </h1>
           <p className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-backwards text-muted-foreground text-lg text-pretty delay-75 duration-200 ease-out motion-reduce:animate-none">
-            Install any item with the shadcn CLI from its URL. The code it writes is yours.
+            Add the @zui registry to components.json, then install any item with the shadcn CLI. The code it writes is
+            yours.
           </p>
           <div className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-backwards flex flex-wrap justify-center gap-3 delay-150 duration-200 ease-out motion-reduce:animate-none">
             <Link href={docsPageUrl(['components'])} className={buttonVariants()}>

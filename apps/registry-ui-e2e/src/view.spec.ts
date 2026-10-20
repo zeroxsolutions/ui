@@ -8,7 +8,7 @@ test('/view/ai-provider-picker renders the block alone', async ({ page }) => {
 });
 
 test('every published block fits a phone-wide frame without scrolling sideways', async ({ page, request }) => {
-  const response = await request.get('/r/registry.json');
+  const response = await request.get('/r/styles/base-nova/registry.json');
   const registry = (await response.json()) as { items: { name: string; type: string }[] };
   const blocks = registry.items.filter((item) => item.type === 'registry:block');
   expect(blocks.length).toBeGreaterThan(0);

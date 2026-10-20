@@ -652,6 +652,13 @@ describe('content/docs', () => {
     ]);
   });
 
+  it("sends the introduction's reader to the installation page for the @zui entry", () => {
+    const introduction = readFileSync(join(CONTENT, 'index.mdx'), 'utf8');
+    const install = /## Install an item\n([\s\S]*?)(?=\n## |$)/.exec(introduction)?.[1] ?? '';
+    expect(install).toContain('(/docs/installation)');
+    expect(install).not.toContain('by its URL');
+  });
+
   it('tells an app to declare the @zui registry before it installs an item', () => {
     const installation = readFileSync(join(CONTENT, 'installation.mdx'), 'utf8');
     expect(installation).toContain('"@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"');
