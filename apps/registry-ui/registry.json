@@ -1,6 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "zeroxsolutions-ui",
+  "name": "zui",
   "homepage": "https://ui.zeroxsolutions.com",
   "items": [
     {
@@ -9,11 +9,7 @@
       "title": "AI Provider Card",
       "description": "A small card for one AI provider in an overview grid, whose footer note carries a status dot and whose covering trigger selects it.",
       "categories": ["data-display"],
-      "registryDependencies": [
-        "@shadcn/card",
-        "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/status-indicator.json"
-      ],
+      "registryDependencies": ["@shadcn/card", "@shadcn/utils", "@zui/status-indicator"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/ai-provider-card.tsx",
@@ -49,9 +45,9 @@
       "registryDependencies": [
         "@shadcn/scroll-area",
         "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/collapsible-card.json",
-        "https://ui.zeroxsolutions.com/r/copy-button.json",
-        "https://ui.zeroxsolutions.com/r/highlighted-code.json"
+        "@zui/collapsible-card",
+        "@zui/copy-button",
+        "@zui/highlighted-code"
       ],
       "files": [
         {
@@ -101,8 +97,8 @@
         "@shadcn/empty",
         "@shadcn/table",
         "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/chevron-left-icon.json",
-        "https://ui.zeroxsolutions.com/r/chevron-right-icon.json"
+        "@zui/chevron-left-icon",
+        "@zui/chevron-right-icon"
       ],
       "files": [
         {
@@ -121,10 +117,10 @@
         "@shadcn/button",
         "@shadcn/dropdown-menu",
         "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/arrow-down-icon.json",
-        "https://ui.zeroxsolutions.com/r/arrow-up-icon.json",
-        "https://ui.zeroxsolutions.com/r/chevrons-up-down-icon.json",
-        "https://ui.zeroxsolutions.com/r/eye-off-icon.json"
+        "@zui/arrow-down-icon",
+        "@zui/arrow-up-icon",
+        "@zui/chevrons-up-down-icon",
+        "@zui/eye-off-icon"
       ],
       "files": [
         {
@@ -231,8 +227,8 @@
         "@shadcn/checkbox",
         "@shadcn/table",
         "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/code-block.json",
-        "https://ui.zeroxsolutions.com/r/collapsible-card.json"
+        "@zui/code-block",
+        "@zui/collapsible-card"
       ],
       "files": [
         {
@@ -302,11 +298,11 @@
         "@shadcn/scroll-area",
         "@shadcn/toggle-group",
         "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/clock-icon.json",
-        "https://ui.zeroxsolutions.com/r/coffee-icon.json",
-        "https://ui.zeroxsolutions.com/r/leaf-icon.json",
-        "https://ui.zeroxsolutions.com/r/search-icon.json",
-        "https://ui.zeroxsolutions.com/r/smile-icon.json"
+        "@zui/clock-icon",
+        "@zui/coffee-icon",
+        "@zui/leaf-icon",
+        "@zui/search-icon",
+        "@zui/smile-icon"
       ],
       "files": [
         {
@@ -380,12 +376,7 @@
       "title": "Password Input",
       "description": "A password field over upstream InputGroup whose composed toggle shows or hides the password.",
       "categories": ["data-entry"],
-      "registryDependencies": [
-        "@shadcn/input-group",
-        "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/eye-icon.json",
-        "https://ui.zeroxsolutions.com/r/eye-off-icon.json"
-      ],
+      "registryDependencies": ["@shadcn/input-group", "@shadcn/utils", "@zui/eye-icon", "@zui/eye-off-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/password-input.tsx",
@@ -417,13 +408,7 @@
       "title": "Tag Input",
       "description": "A tag editor with removable chips above an input that commits a new tag on Enter, comma, or blur.",
       "categories": ["data-entry"],
-      "registryDependencies": [
-        "@shadcn/badge",
-        "@shadcn/button",
-        "@shadcn/input",
-        "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/x-icon.json"
-      ],
+      "registryDependencies": ["@shadcn/badge", "@shadcn/button", "@shadcn/input", "@shadcn/utils", "@zui/x-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-entry/tag-input.tsx",
@@ -437,12 +422,7 @@
       "title": "Tree Item",
       "description": "One row of a hierarchy tree, drawn as the file tree's rows, with a depth indent, a disclosure trigger, a clickable label and an inline rename input.",
       "categories": ["data-display"],
-      "registryDependencies": [
-        "@shadcn/button",
-        "@shadcn/input",
-        "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/chevron-right-icon.json"
-      ],
+      "registryDependencies": ["@shadcn/button", "@shadcn/input", "@shadcn/utils", "@zui/chevron-right-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/tree-item.tsx",
@@ -464,11 +444,7 @@
       "title": "Copy Button",
       "description": "An icon button that copies its value to the clipboard, showing a check and carrying data-copied until its timeout resets it.",
       "categories": ["feedback"],
-      "registryDependencies": [
-        "@shadcn/button",
-        "https://ui.zeroxsolutions.com/r/check-icon.json",
-        "https://ui.zeroxsolutions.com/r/copy-icon.json"
-      ],
+      "registryDependencies": ["@shadcn/button", "@zui/check-icon", "@zui/copy-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/feedback/copy-button.tsx",
@@ -483,12 +459,7 @@
       "description": "An inline, non-modal AI-consent request that stays in scrollback after it resolves, switching between its decision and resolved parts as the host settles its status.",
       "categories": ["feedback"],
       "dependencies": ["lucide-react"],
-      "registryDependencies": [
-        "@shadcn/badge",
-        "@shadcn/card",
-        "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/circle-check-icon.json"
-      ],
+      "registryDependencies": ["@shadcn/badge", "@shadcn/card", "@shadcn/utils", "@zui/circle-check-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/feedback/permission-card.tsx",
@@ -585,7 +556,7 @@
         "@shadcn/popover",
         "@shadcn/tabs",
         "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/emoji-picker.json"
+        "@zui/emoji-picker"
       ],
       "files": [
         {
@@ -616,12 +587,7 @@
       "description": "A collapsible card with a header and body, open by default, on a card, muted or plain surface.",
       "categories": ["layout"],
       "dependencies": ["class-variance-authority"],
-      "registryDependencies": [
-        "@shadcn/button",
-        "@shadcn/collapsible",
-        "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/chevron-down-icon.json"
-      ],
+      "registryDependencies": ["@shadcn/button", "@shadcn/collapsible", "@shadcn/utils", "@zui/chevron-down-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/layout/collapsible-card.tsx",
@@ -639,7 +605,7 @@
       "title": "File Tree",
       "description": "An accessible file tree that drives keyboard navigation and owns selection and folder expansion, controlled or uncontrolled.",
       "categories": ["data-display"],
-      "registryDependencies": ["@shadcn/utils", "https://ui.zeroxsolutions.com/r/chevron-right-icon.json"],
+      "registryDependencies": ["@shadcn/utils", "@zui/chevron-right-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/file-tree.tsx",
@@ -771,8 +737,8 @@
         "@shadcn/button",
         "@shadcn/collapsible",
         "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/brain-icon.json",
-        "https://ui.zeroxsolutions.com/r/chevron-down-icon.json"
+        "@zui/brain-icon",
+        "@zui/chevron-down-icon"
       ],
       "files": [
         {
@@ -802,9 +768,9 @@
         "@shadcn/card",
         "@shadcn/collapsible",
         "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/chevron-down-icon.json",
-        "https://ui.zeroxsolutions.com/r/circle-check-icon.json",
-        "https://ui.zeroxsolutions.com/r/clock-icon.json"
+        "@zui/chevron-down-icon",
+        "@zui/circle-check-icon",
+        "@zui/clock-icon"
       ],
       "cssVars": {
         "theme": {
@@ -852,8 +818,8 @@
         "@shadcn/button",
         "@shadcn/item",
         "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/unsaved-indicator.json",
-        "https://ui.zeroxsolutions.com/r/x-icon.json"
+        "@zui/unsaved-indicator",
+        "@zui/x-icon"
       ],
       "files": [
         {
@@ -869,11 +835,7 @@
       "description": "A responsive grid of AI provider cards, from the host's entries or a sample, that calls back with the provider key a card selects.",
       "categories": ["blocks"],
       "dependencies": ["@zeroxsolutions/icons"],
-      "registryDependencies": [
-        "@shadcn/card",
-        "@shadcn/utils",
-        "https://ui.zeroxsolutions.com/r/ai-provider-card.json"
-      ],
+      "registryDependencies": ["@shadcn/card", "@shadcn/utils", "@zui/ai-provider-card"],
       "files": [
         {
           "path": "registry/bases/base-ui/blocks/ai-provider-picker.tsx",
@@ -887,11 +849,7 @@
       "title": "AI Provider Card Demo",
       "description": "Two AiProviderCard tiles - one online, one idle - each toggled independently and reporting the last selection.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/card",
-        "@shadcn/switch",
-        "https://ui.zeroxsolutions.com/r/ai-provider-card.json"
-      ],
+      "registryDependencies": ["@shadcn/card", "@shadcn/switch", "@zui/ai-provider-card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/ai-provider-card-demo.tsx",
@@ -905,11 +863,7 @@
       "title": "Chat Message Demo",
       "description": "A user bubble and the assistant's reply, still streaming, each a ChatMessage row.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/bubble",
-        "@shadcn/message",
-        "https://ui.zeroxsolutions.com/r/chat-message.json"
-      ],
+      "registryDependencies": ["@shadcn/bubble", "@shadcn/message", "@zui/chat-message"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/chat-message-demo.tsx",
@@ -923,10 +877,7 @@
       "title": "Code Block Demo",
       "description": "A collapsible TypeScript block with its language, a copy action and a collapse toggle.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "https://ui.zeroxsolutions.com/r/code-block.json",
-        "https://ui.zeroxsolutions.com/r/collapsible-card.json"
-      ],
+      "registryDependencies": ["@zui/code-block", "@zui/collapsible-card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/code-block-demo.tsx",
@@ -941,11 +892,7 @@
       "description": "A small, paginated file table with sortable columns and a view-options menu.",
       "categories": ["examples"],
       "dependencies": ["@tanstack/react-table"],
-      "registryDependencies": [
-        "@shadcn/dropdown-menu",
-        "https://ui.zeroxsolutions.com/r/data-table-column-header.json",
-        "https://ui.zeroxsolutions.com/r/data-table.json"
-      ],
+      "registryDependencies": ["@shadcn/dropdown-menu", "@zui/data-table-column-header", "@zui/data-table"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/data-table-demo.tsx",
@@ -960,11 +907,7 @@
       "description": "A table header row whose Name column opens a sort-and-hide menu from DataTableColumnHeader.",
       "categories": ["examples"],
       "dependencies": ["@tanstack/react-table"],
-      "registryDependencies": [
-        "@shadcn/dropdown-menu",
-        "@shadcn/table",
-        "https://ui.zeroxsolutions.com/r/data-table-column-header.json"
-      ],
+      "registryDependencies": ["@shadcn/dropdown-menu", "@shadcn/table", "@zui/data-table-column-header"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/data-table-column-header-demo.tsx",
@@ -978,7 +921,7 @@
       "title": "File Type Icon Demo",
       "description": "A row of file names, each with the icon FileTypeIcon resolves for its extension.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/file-type-icon.json"],
+      "registryDependencies": ["@zui/file-type-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/file-type-icon-demo.tsx",
@@ -992,7 +935,7 @@
       "title": "Font Preview Demo",
       "description": "A specimen of a variable sans-serif at its four default sizes.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/font-preview.json"],
+      "registryDependencies": ["@zui/font-preview"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/font-preview-demo.tsx",
@@ -1006,7 +949,7 @@
       "title": "Highlighted Code Demo",
       "description": "Pre-tokenized lines styled with the same tokens the shared Shiki theme paints with.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/highlighted-code.json"],
+      "registryDependencies": ["@zui/highlighted-code"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/highlighted-code-demo.tsx",
@@ -1020,7 +963,7 @@
       "title": "Image Preview Demo",
       "description": "A small sample graphic over the transparency checkerboard, contained within its sized wrapper.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/image-preview.json"],
+      "registryDependencies": ["@zui/image-preview"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/image-preview-demo.tsx",
@@ -1034,7 +977,7 @@
       "title": "Markdown View Demo",
       "description": "A short GFM document: a heading, bold text, a link, a task list and a table.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/markdown-view.json"],
+      "registryDependencies": ["@zui/markdown-view"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/markdown-view-demo.tsx",
@@ -1049,7 +992,7 @@
       "description": "The identity header for one model over two detail sections: context length and pricing.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/icons"],
-      "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/model-info-card.json"],
+      "registryDependencies": ["@shadcn/item", "@zui/model-info-card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/model-info-card-demo.tsx",
@@ -1067,9 +1010,9 @@
       "registryDependencies": [
         "@shadcn/empty",
         "@shadcn/item",
-        "https://ui.zeroxsolutions.com/r/chat-suggestion-item.json",
-        "https://ui.zeroxsolutions.com/r/file-text-icon.json",
-        "https://ui.zeroxsolutions.com/r/sparkles-icon.json"
+        "@zui/chat-suggestion-item",
+        "@zui/file-text-icon",
+        "@zui/sparkles-icon"
       ],
       "files": [
         {
@@ -1084,7 +1027,7 @@
       "title": "Emoji Appearance Toggle Group Demo",
       "description": "Every Fluent artwork style previewed and picked from one EmojiAppearanceToggleGroup row.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/emoji-appearance-toggle-group.json"],
+      "registryDependencies": ["@zui/emoji-appearance-toggle-group"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/emoji-appearance-toggle-group-demo.tsx",
@@ -1099,7 +1042,7 @@
       "description": "The EmojiPicker composed from its parts over a small frequent row, with an empty state for a search that matches nothing.",
       "categories": ["examples"],
       "dependencies": ["lucide-react"],
-      "registryDependencies": ["@shadcn/empty", "https://ui.zeroxsolutions.com/r/emoji-picker.json"],
+      "registryDependencies": ["@shadcn/empty", "@zui/emoji-picker"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/emoji-picker-demo.tsx",
@@ -1113,11 +1056,7 @@
       "title": "Language Combobox Demo",
       "description": "The built-in code-language options, picked from a LanguageCombobox trigger showing the current one.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/button",
-        "@shadcn/combobox",
-        "https://ui.zeroxsolutions.com/r/language-combobox.json"
-      ],
+      "registryDependencies": ["@shadcn/button", "@shadcn/combobox", "@zui/language-combobox"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/language-combobox-demo.tsx",
@@ -1131,7 +1070,7 @@
       "title": "Language Toggle Group Demo",
       "description": "A fixed three-language LanguageToggleGroup, always one language pressed.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/toggle-group", "https://ui.zeroxsolutions.com/r/language-toggle-group.json"],
+      "registryDependencies": ["@shadcn/toggle-group", "@zui/language-toggle-group"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/language-toggle-group-demo.tsx",
@@ -1145,7 +1084,7 @@
       "title": "Number Field Demo",
       "description": "A NumberField for a width, with unit addons, its arithmetic input clamped and stepped.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/input-group", "https://ui.zeroxsolutions.com/r/number-field.json"],
+      "registryDependencies": ["@shadcn/input-group", "@zui/number-field"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/number-field-demo.tsx",
@@ -1159,7 +1098,7 @@
       "title": "Number Field Mixed",
       "description": "A NumberField over three selected shapes with differing widths, showing the mixed state until one width is set for all.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/input-group", "https://ui.zeroxsolutions.com/r/number-field.json"],
+      "registryDependencies": ["@shadcn/input-group", "@zui/number-field"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/number-field-mixed.tsx",
@@ -1173,11 +1112,7 @@
       "title": "Password Input Demo",
       "description": "A labelled PasswordInput with its show or hide toggle.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/field",
-        "@shadcn/input-group",
-        "https://ui.zeroxsolutions.com/r/password-input.json"
-      ],
+      "registryDependencies": ["@shadcn/field", "@shadcn/input-group", "@zui/password-input"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/password-input-demo.tsx",
@@ -1191,7 +1126,7 @@
       "title": "Resize Handle Demo",
       "description": "A panel floating over a canvas, resized by dragging its ResizeHandle or collapsed by a double-click.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/resize-handle.json"],
+      "registryDependencies": ["@zui/resize-handle"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/resize-handle-demo.tsx",
@@ -1205,7 +1140,7 @@
       "title": "Tag Input Demo",
       "description": "A TagInput over two starting tags.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tag-input.json"],
+      "registryDependencies": ["@zui/tag-input"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tag-input-demo.tsx",
@@ -1219,7 +1154,7 @@
       "title": "Tree Item Demo",
       "description": "A folder over two files, opened and closed by its TreeItemTrigger, each a TreeItem row.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tree-item.json"],
+      "registryDependencies": ["@zui/tree-item"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tree-item-demo.tsx",
@@ -1233,7 +1168,7 @@
       "title": "Copy Button Demo",
       "description": "An install command with its own copy button, announcing the copy inline.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/copy-button.json"],
+      "registryDependencies": ["@zui/copy-button"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/copy-button-demo.tsx",
@@ -1252,8 +1187,8 @@
         "@shadcn/button-group",
         "@shadcn/card",
         "@shadcn/dropdown-menu",
-        "https://ui.zeroxsolutions.com/r/chevron-down-icon.json",
-        "https://ui.zeroxsolutions.com/r/permission-card.json"
+        "@zui/chevron-down-icon",
+        "@zui/permission-card"
       ],
       "files": [
         {
@@ -1268,7 +1203,7 @@
       "title": "Status Indicator Demo",
       "description": "Every status tone beside its label, with a pulsing connecting state.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/status-indicator.json"],
+      "registryDependencies": ["@zui/status-indicator"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/status-indicator-demo.tsx",
@@ -1282,7 +1217,7 @@
       "title": "Unsaved Indicator Demo",
       "description": "The unsaved dot beside a tab label with pending edits.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/unsaved-indicator.json"],
+      "registryDependencies": ["@zui/unsaved-indicator"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/unsaved-indicator-demo.tsx",
@@ -1298,10 +1233,10 @@
       "categories": ["examples"],
       "registryDependencies": [
         "@shadcn/tooltip",
-        "https://ui.zeroxsolutions.com/r/eye-icon.json",
-        "https://ui.zeroxsolutions.com/r/icon-media.json",
-        "https://ui.zeroxsolutions.com/r/message-square-icon.json",
-        "https://ui.zeroxsolutions.com/r/wrench-icon.json"
+        "@zui/eye-icon",
+        "@zui/icon-media",
+        "@zui/message-square-icon",
+        "@zui/wrench-icon"
       ],
       "files": [
         {
@@ -1320,9 +1255,9 @@
       "registryDependencies": [
         "@shadcn/input",
         "@shadcn/tooltip",
-        "https://ui.zeroxsolutions.com/r/icon-label.json",
-        "https://ui.zeroxsolutions.com/r/rotate-cw-icon.json",
-        "https://ui.zeroxsolutions.com/r/search-icon.json"
+        "@zui/icon-label",
+        "@zui/rotate-cw-icon",
+        "@zui/search-icon"
       ],
       "files": [
         {
@@ -1343,11 +1278,11 @@
         "@shadcn/empty",
         "@shadcn/spinner",
         "@shadcn/tabs",
-        "https://ui.zeroxsolutions.com/r/avatar-picker.json",
-        "https://ui.zeroxsolutions.com/r/emoji-picker.json",
-        "https://ui.zeroxsolutions.com/r/palette-icon.json",
-        "https://ui.zeroxsolutions.com/r/smile-icon.json",
-        "https://ui.zeroxsolutions.com/r/upload-icon.json"
+        "@zui/avatar-picker",
+        "@zui/emoji-picker",
+        "@zui/palette-icon",
+        "@zui/smile-icon",
+        "@zui/upload-icon"
       ],
       "files": [
         {
@@ -1362,7 +1297,7 @@
       "title": "Center Demo",
       "description": "A dashed frame with its content centered on both axes.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/center.json"],
+      "registryDependencies": ["@zui/center"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/center-demo.tsx",
@@ -1376,7 +1311,7 @@
       "title": "Collapsible Card Demo",
       "description": "A bordered card whose body collapses behind its own trigger.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/collapsible-card.json"],
+      "registryDependencies": ["@zui/collapsible-card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/collapsible-card-demo.tsx",
@@ -1390,7 +1325,7 @@
       "title": "Collapsible Card Variants",
       "description": "The card's four surfaces stacked: default, muted, plain and flush.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/collapsible-card.json"],
+      "registryDependencies": ["@zui/collapsible-card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/collapsible-card-variants.tsx",
@@ -1404,7 +1339,7 @@
       "title": "File Tree Demo",
       "description": "A small file tree with one folder expanded and a leaf selected by default.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/file-tree.json"],
+      "registryDependencies": ["@zui/file-tree"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/file-tree-demo.tsx",
@@ -1420,10 +1355,10 @@
       "categories": ["examples"],
       "registryDependencies": [
         "@shadcn/button",
-        "https://ui.zeroxsolutions.com/r/bold-icon.json",
-        "https://ui.zeroxsolutions.com/r/floating-toolbar.json",
-        "https://ui.zeroxsolutions.com/r/italic-icon.json",
-        "https://ui.zeroxsolutions.com/r/underline-icon.json"
+        "@zui/bold-icon",
+        "@zui/floating-toolbar",
+        "@zui/italic-icon",
+        "@zui/underline-icon"
       ],
       "files": [
         {
@@ -1438,11 +1373,7 @@
       "title": "Frontmatter Form Demo",
       "description": "A skill's frontmatter, a name and its description, each bound through FrontmatterFormFieldControl.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/field",
-        "@shadcn/input",
-        "https://ui.zeroxsolutions.com/r/frontmatter-form.json"
-      ],
+      "registryDependencies": ["@shadcn/field", "@shadcn/input", "@zui/frontmatter-form"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/frontmatter-form-demo.tsx",
@@ -1456,11 +1387,7 @@
       "title": "Frontmatter Form Invalid",
       "description": "A frontmatter form with its name field left blank, showing the invalid state.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/field",
-        "@shadcn/input",
-        "https://ui.zeroxsolutions.com/r/frontmatter-form.json"
-      ],
+      "registryDependencies": ["@shadcn/field", "@shadcn/input", "@zui/frontmatter-form"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/frontmatter-form-invalid.tsx",
@@ -1475,7 +1402,7 @@
       "description": "A model list of three providers, one dimmed as unavailable, each toggleable and removable.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/icons"],
-      "registryDependencies": ["@shadcn/item", "@shadcn/switch", "https://ui.zeroxsolutions.com/r/model-list.json"],
+      "registryDependencies": ["@shadcn/item", "@shadcn/switch", "@zui/model-list"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/model-list-demo.tsx",
@@ -1489,7 +1416,7 @@
       "title": "Page Container Demo",
       "description": "A small, centered content column inside a wider surface.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/card", "https://ui.zeroxsolutions.com/r/page-container.json"],
+      "registryDependencies": ["@shadcn/card", "@zui/page-container"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/page-container-demo.tsx",
@@ -1503,11 +1430,7 @@
       "title": "Panel Field Group Demo",
       "description": "A three-column PanelFieldGroup for a position's X, Y and Z.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/field",
-        "@shadcn/input",
-        "https://ui.zeroxsolutions.com/r/panel-field-group.json"
-      ],
+      "registryDependencies": ["@shadcn/field", "@shadcn/input", "@zui/panel-field-group"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/panel-field-group-demo.tsx",
@@ -1521,11 +1444,7 @@
       "title": "Panel Header Demo",
       "description": "A single-row panel header: a title beside a trailing collapse action.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/button",
-        "https://ui.zeroxsolutions.com/r/panel-header.json",
-        "https://ui.zeroxsolutions.com/r/panel-left-close-icon.json"
-      ],
+      "registryDependencies": ["@shadcn/button", "@zui/panel-header", "@zui/panel-left-close-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/panel-header-demo.tsx",
@@ -1543,9 +1462,9 @@
         "@shadcn/button",
         "@shadcn/field",
         "@shadcn/input",
-        "https://ui.zeroxsolutions.com/r/lock-icon.json",
-        "https://ui.zeroxsolutions.com/r/panel-field-group.json",
-        "https://ui.zeroxsolutions.com/r/panel-row.json"
+        "@zui/lock-icon",
+        "@zui/panel-field-group",
+        "@zui/panel-row"
       ],
       "files": [
         {
@@ -1560,11 +1479,7 @@
       "title": "Reasoning Collapsible Demo",
       "description": "A reasoning disclosure the caller starts and stops streaming, its body a rendered Markdown note.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/button",
-        "https://ui.zeroxsolutions.com/r/markdown-view.json",
-        "https://ui.zeroxsolutions.com/r/reasoning-collapsible.json"
-      ],
+      "registryDependencies": ["@shadcn/button", "@zui/markdown-view", "@zui/reasoning-collapsible"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/reasoning-collapsible-demo.tsx",
@@ -1582,11 +1497,7 @@
       "title": "Tool Call Card Demo",
       "description": "A completed search call, its parameters shown under the trigger.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "https://ui.zeroxsolutions.com/r/code-block.json",
-        "https://ui.zeroxsolutions.com/r/search-icon.json",
-        "https://ui.zeroxsolutions.com/r/tool-call-card.json"
-      ],
+      "registryDependencies": ["@zui/code-block", "@zui/search-icon", "@zui/tool-call-card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tool-call-card-demo.tsx",
@@ -1600,7 +1511,7 @@
       "title": "Tool Call Card Error",
       "description": "A failed search call, its error shown under the trigger.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/tool-call-card.json"],
+      "registryDependencies": ["@zui/tool-call-card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tool-call-card-error.tsx",
@@ -1614,12 +1525,7 @@
       "title": "Command Menu Demo",
       "description": "A command palette, opened from its button or by Ctrl/Cmd+K, that reports the chosen file.",
       "categories": ["examples"],
-      "registryDependencies": [
-        "@shadcn/button",
-        "@shadcn/command",
-        "@shadcn/kbd",
-        "https://ui.zeroxsolutions.com/r/command-menu.json"
-      ],
+      "registryDependencies": ["@shadcn/button", "@shadcn/command", "@shadcn/kbd", "@zui/command-menu"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/command-menu-demo.tsx",
@@ -1637,7 +1543,7 @@
       "title": "Editor Tab Demo",
       "description": "A tab strip: the active tab, and one with unsaved changes.",
       "categories": ["examples"],
-      "registryDependencies": ["@shadcn/item", "https://ui.zeroxsolutions.com/r/editor-tab.json"],
+      "registryDependencies": ["@shadcn/item", "@zui/editor-tab"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/editor-tab-demo.tsx",
@@ -1651,7 +1557,7 @@
       "title": "AI Provider Picker Demo",
       "description": "The AiProviderPicker block over its sample providers.",
       "categories": ["examples"],
-      "registryDependencies": ["https://ui.zeroxsolutions.com/r/ai-provider-picker.json"],
+      "registryDependencies": ["@zui/ai-provider-picker"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/ai-provider-picker-demo.tsx",
