@@ -12,7 +12,7 @@ type TextareaProps = ComponentProps<typeof TextInput> & {
 };
 
 /**
- * A multiline text field at least four lines tall, which grows with its text. It takes the focus
+ * A multiline text field 64px tall at least, which grows with its text. It takes the focus
  * border while it holds focus and the destructive border while `aria-invalid`, and
  * `editable={false}` dims it and announces it disabled. Uniwind draws the placeholder through `placeholderTextColorClassName`, which takes an `accent-` class.
  */

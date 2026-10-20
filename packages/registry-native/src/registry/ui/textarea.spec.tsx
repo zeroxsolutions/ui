@@ -7,7 +7,7 @@ function classesOf(testID: string): string[] {
 }
 
 describe('Textarea', () => {
-  it('is a multiline field with room for four lines', async () => {
+  it('is a multiline field 64px tall at least', async () => {
     await render(<Textarea testID="field" />);
 
     expect(screen.getByTestId('field').props.multiline).toBe(true);
