@@ -23,9 +23,10 @@ import { Text } from '@/components/ui/text';
 <Text className="text-sm font-sans-semibold text-muted-foreground">Last edited today</Text>
 ```
 
-Write a weight with the theme's classes, `font-sans-medium`, `font-sans-semibold` or `font-sans-bold`. A
-`fontWeight`, or a class such as `font-bold`, keeps the regular family and leaves the platform to fake the
-weight.
+Write a weight with the theme's classes, `font-sans-medium`, `font-sans-semibold` or `font-sans-bold`. Text
+also renames `font-normal`, `font-medium`, `font-semibold` and `font-bold` in its `className` to those
+classes, so each draws its own Geist family. A `fontWeight` in `style` keeps the regular family and leaves
+the platform to fake the weight.
 
 ## API reference
 

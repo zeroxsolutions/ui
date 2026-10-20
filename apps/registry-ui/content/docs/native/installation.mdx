@@ -168,6 +168,17 @@ pnpm dlx shadcn@latest add @zui/theme
 Add it first, and once. No component installs it, and adding it again writes its tokens back over any you
 edited. [Theme](/docs/native/theme) lists what it writes.
 
+## Install an item
+
+The fonts step below imports Button, so install it first:
+
+```bash
+pnpm dlx shadcn@latest add @zui/button
+```
+
+The CLI writes the item's files under the aliases in `components.json`, here `components/ui/button.tsx`, and
+installs the items it uses, Text, Icon and Utils.
+
 ## Load the fonts
 
 Text draws Geist, which loads at runtime. Install the splash screen, which stays up until the fonts load:
@@ -213,17 +224,23 @@ export default function App() {
 }
 ```
 
-## Install an item
+## Follow the device colour scheme
 
-```bash
-pnpm dlx shadcn@latest add @zui/button
+`create-expo-app`'s blank-typescript template sets `"userInterfaceStyle": "light"` in `app.json`, which makes iOS
+and Android report light whatever the device uses. Set it to `automatic`:
+
+```json title="app.json"
+{
+  "expo": {
+    "userInterfaceStyle": "automatic"
+  }
+}
 ```
 
-The CLI writes the item's files under the aliases in `components.json`, here `components/ui/button.tsx`, and
-installs the items it uses, Text, Icon and Utils.
+The setting is native config, so rebuild the app, or run `npx expo prebuild`, for it to apply.
 
 ## Dark mode
 
-On iOS and Android the theme follows the app's colour scheme, which is the device's setting until the app sets
-one with `useColorScheme().setColorScheme` from `nativewind` or `Uniwind.setTheme` from `uniwind`. On Expo web
-the theme follows the operating system's setting only.
+With `userInterfaceStyle` set to `automatic`, the theme on iOS and Android follows the app's colour scheme,
+which is the device's setting until the app sets one with `useColorScheme().setColorScheme` from `nativewind`
+or `Uniwind.setTheme` from `uniwind`. On Expo web the theme follows the operating system's setting only.
