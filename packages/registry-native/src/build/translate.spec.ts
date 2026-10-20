@@ -39,6 +39,40 @@ describe('translateClasses', () => {
     expect(translateClasses(['shadow-xs'], 'uniwind', 'view').classes).toEqual(['shadow-xs']);
   });
 
+  it.each([
+    ['rounded-4xl', 'rounded-[2rem]'],
+    ['drop-shadow-xs', 'drop-shadow-sm'],
+  ])('renames %s to its exact Tailwind 3 equal %s for nativewind and keeps it for uniwind', (cls, renamed) => {
+    expect(translateClasses([cls], 'nativewind', 'view')).toEqual({ classes: [renamed], unknown: [] });
+    expect(translateClasses([cls], 'uniwind', 'view')).toEqual({ classes: [cls], unknown: [] });
+  });
+
+  it.each([
+    'shadow-2xs',
+    'inset-shadow-sm',
+    'inset-ring-2',
+    'bg-linear-to-r',
+    'field-sizing-content',
+    'text-shadow-sm',
+  ])('reports %s, which Tailwind 3 has no equal of, as unknown for nativewind and keeps it for uniwind', (cls) => {
+    for (const part of ['view', 'text'] as const) {
+      expect(translateClasses([cls], 'nativewind', part).unknown).toEqual([cls]);
+    }
+    expect(translateClasses([cls], 'uniwind', 'view').unknown).toEqual([]);
+    expect(translateClasses([cls], 'uniwind', 'text').unknown).toEqual([]);
+    expect([
+      ...translateClasses([cls], 'uniwind', 'view').classes,
+      ...translateClasses([cls], 'uniwind', 'text').classes,
+    ]).toEqual([cls]);
+  });
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    'reports the important suffix of rounded-r-md! as unknown for %s',
+    (engine) => {
+      expect(translateClasses(['rounded-r-md!'], engine, 'view')).toEqual({ classes: [], unknown: ['rounded-r-md!'] });
+    },
+  );
+
   it('renames a Tailwind 4 scale step under a kept modifier for nativewind', () => {
     const result = translateClasses(['dark:rounded-sm'], 'nativewind', 'view');
 

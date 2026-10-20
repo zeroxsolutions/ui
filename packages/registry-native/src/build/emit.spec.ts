@@ -224,7 +224,9 @@ describe('the built nativewind-vega registry', () => {
   it('carries no Tailwind 4 class name that Tailwind 3 lacks', () => {
     const directory = join(STYLES_PATH, 'nativewind-vega');
     for (const file of readdirSync(directory)) {
-      expect(readFileSync(join(directory, file), 'utf8')).not.toMatch(/\b(shadow-xs|rounded-xs|outline-hidden)\b/);
+      expect(readFileSync(join(directory, file), 'utf8')).not.toMatch(
+        /\b(shadow-xs|shadow-2xs|rounded-xs|rounded-4xl|outline-hidden|drop-shadow-xs|inset-shadow-[\w-]+|inset-ring-[\w-]+|bg-linear-[\w-]+|field-sizing-[\w-]+|text-shadow-[\w-]+)\b|[\w\]]!(?=[\s'"])/,
+      );
     }
   });
 });

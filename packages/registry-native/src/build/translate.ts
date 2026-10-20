@@ -52,17 +52,40 @@ const DROPPED_UTILITIES = [
 const TYPOGRAPHY_UTILITY =
   /^(text-|font-|tracking-|leading-|italic$|underline$|underline-offset-|line-through$|uppercase$|lowercase$|capitalize$)/;
 
-/** NativeWind 4 runs on Tailwind 3, whose scale steps are one below Tailwind 4's. */
+/**
+ * NativeWind 4 runs on Tailwind 3, whose scale steps are one below Tailwind 4's. A Tailwind 4 step
+ * past the end of Tailwind 3's scale takes its value as an arbitrary one.
+ */
 const RENAMED_UTILITIES = {
   nativewind: {
     'shadow-xs': 'shadow-sm',
     'shadow-sm': 'shadow',
     'rounded-xs': 'rounded-sm',
     'rounded-sm': 'rounded',
+    'rounded-4xl': 'rounded-[2rem]',
     'blur-xs': 'blur-sm',
+    'drop-shadow-xs': 'drop-shadow-sm',
   },
   uniwind: {},
 } as const satisfies Record<Engine, Readonly<Record<string, string>>>;
+
+/**
+ * Tailwind 4 utilities the engine's Tailwind has no exact equal of, reported rather than renamed to
+ * a near one. The `!` suffix is Tailwind 4's spelling of important; neither engine's native styles
+ * have an important to give it.
+ */
+const UNTRANSLATABLE_UTILITIES = {
+  nativewind: [
+    /!$/,
+    /^shadow-2xs$/,
+    /^inset-shadow-/,
+    /^inset-ring-/,
+    /^bg-linear-/,
+    /^field-sizing-/,
+    /^text-shadow-/,
+  ],
+  uniwind: [/!$/],
+} as const satisfies Record<Engine, readonly RegExp[]>;
 
 /** Splits on `:` outside brackets, so `[&_svg:not(x)]:size-4` keeps its selector whole. */
 function splitVariants(cls: string): string[] {
@@ -91,6 +114,7 @@ export function translateClasses(classes: readonly string[], engine: Engine, par
   const kept: string[] = [];
   const unknown: string[] = [];
   const renamed: Readonly<Record<string, string>> = RENAMED_UTILITIES[engine];
+  const untranslatable: readonly RegExp[] = UNTRANSLATABLE_UTILITIES[engine];
 
   for (const cls of classes) {
     const variants = splitVariants(cls);
@@ -103,6 +127,10 @@ export function translateClasses(classes: readonly string[], engine: Engine, par
       continue;
     }
     if (DROPPED_UTILITIES.some((rule) => rule.test(utility))) continue;
+    if (untranslatable.some((rule) => rule.test(utility))) {
+      unknown.push(cls);
+      continue;
+    }
 
     if (TYPOGRAPHY_UTILITY.test(utility) !== (part === 'text')) continue;
     kept.push([...modifiers, renamed[utility] ?? utility].join(':'));
