@@ -35,7 +35,7 @@ component batches.
   file `apps/v4/registry/styles/style-vega.css`.
 - Code taken from React Native Reusables (founded-labs/react-native-reusables
   `385834c2196f8a303cbc9057d1ac768f3bde0a3b`, MIT, Copyright (c) 2025 Founded Labs) keeps that
-  notice: the repo carries the licence text, and each derived file's first line names it.
+  notice: the project's `NOTICE` carries the licence text, and each derived file's first line names it.
 - Every task runs through nx by the scoped project name (`@zeroxsolutions/registry-native`,
   `@zeroxsolutions/registry-ui`, `@zeroxsolutions/registry-ui-e2e`).
 - Before each task, open the gundam skill for every kind of file it touches; the task lists them.
@@ -64,7 +64,7 @@ Skills: `adding-a-project`, `declaring-a-dependency`, `wiring-a-task-target`.
 - Create (generator): `packages/registry-native/` with `package.json` named
   `@zeroxsolutions/registry-native`, private, a Jest config on the `jest-expo` preset.
 - Modify (generator): `nx.json`, `package.json`, `pnpm-lock.yaml`, `tsconfig.base.json` or project references.
-- Create: `packages/registry-native/THIRD_PARTY_LICENSES.md` (RNR's MIT text, verbatim from its `LICENSE`).
+- Create: `packages/registry-native/NOTICE` (third-party notices, as `packages/fluent-emoji/NOTICE` is: RNR's MIT text, verbatim from its `LICENSE`).
 
 - [ ] **Step 1:** `pnpm exec nx add @nx/expo` (version 23.3.0, matching nx).
 - [ ] **Step 2:** Dry run, then read the printed file list:
@@ -86,6 +86,8 @@ Skills: `writing-unit-tests`, `declaring-a-type`, `naming-a-declaration`, `writi
 
 - Create: `packages/registry-native/styles/upstream/style-vega.css` (verbatim at the pinned commit)
 - Create: `packages/registry-native/tools/sync-upstream-styles.mts`
+- Modify: `packages/registry-native/package.json` (target `sync-upstream-styles`, run by hand with the
+  commit as its argument; not a dependency of any build)
 - Create: `packages/registry-native/src/build/slot-map.ts`, `slot-map.spec.ts`
 
 **Interfaces:**
