@@ -33,8 +33,9 @@ const SAVE_LABEL: Record<UnsavedChangesToolbarState, string> = {
 /**
  * A profile name, with the toolbar shown while it differs from the saved one. The first save fails, as
  * if the network dropped, so the error state shows; trying again saves. Leaving with the change unsaved
- * asks for attention instead. The preview contains the toolbar, which otherwise floats at the
- * viewport's bottom edge.
+ * asks for attention instead. Reset and a successful save hand focus back to the field before the
+ * toolbar unmounts. The preview contains the toolbar, which otherwise floats at the viewport's bottom
+ * edge.
  */
 function UnsavedChangesToolbarDemo(): ReactNode {
   const [saved, setSaved] = useState('Ada Lovelace');
@@ -42,6 +43,8 @@ function UnsavedChangesToolbarDemo(): ReactNode {
   const [state, setState] = useState<UnsavedChangesToolbarState>('default');
   const [hasFailed, setHasFailed] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
   useEffect(() => () => clearTimeout(timer.current), []);
 
   function save(): void {
@@ -52,12 +55,15 @@ function UnsavedChangesToolbarDemo(): ReactNode {
         setState('error');
         return;
       }
+      // The toolbar unmounts with the save, and focus inside it would fall to the body.
+      if (toolbarRef.current?.contains(document.activeElement)) nameRef.current?.focus();
       setSaved(name);
       setState('default');
     }, SAVE_DELAY_MS);
   }
 
   function reset(): void {
+    nameRef.current?.focus();
     setName(saved);
     setState('default');
   }
@@ -68,6 +74,7 @@ function UnsavedChangesToolbarDemo(): ReactNode {
       <Field className="max-w-64">
         <FieldLabel htmlFor="preview-display-name">Display name</FieldLabel>
         <Input
+          ref={nameRef}
           id="preview-display-name"
           value={name}
           readOnly={state === 'saving'}
@@ -85,7 +92,7 @@ function UnsavedChangesToolbarDemo(): ReactNode {
         Back to settings
       </Button>
       {isDirty && (
-        <UnsavedChangesToolbar state={state}>
+        <UnsavedChangesToolbar ref={toolbarRef} state={state}>
           <UnsavedChangesToolbarMessage>{MESSAGE[state]}</UnsavedChangesToolbarMessage>
           <UnsavedChangesToolbarActions>
             <UnsavedChangesToolbarReset onClick={reset}>Reset</UnsavedChangesToolbarReset>

@@ -1,6 +1,6 @@
 import { expect, test } from './test/fixtures';
 
-test('the unsaved changes toolbar saves without moving focus, and offers a retry when the save fails', async ({
+test('the unsaved changes toolbar saves without moving focus, offers a retry when the save fails, and hands focus back to the field', async ({
   page,
 }) => {
   await page.goto('/docs/components/unsaved-changes-toolbar');
@@ -16,6 +16,14 @@ test('the unsaved changes toolbar saves without moving focus, and offers a retry
   }).toPass();
   await expect(page.getByRole('status').filter({ hasText: 'You have unsaved changes.' })).toBeVisible();
 
+  await toolbar.getByRole('button', { name: 'Reset' }).click();
+  await expect(toolbar).toBeHidden();
+  await expect(name).toHaveValue('Ada Lovelace');
+  await expect(name).toBeFocused();
+
+  await name.fill('Ada King');
+  await expect(toolbar).toBeVisible();
+
   const save = toolbar.getByRole('button', { name: 'Save changes' });
   await save.click();
   const saving = toolbar.getByRole('button', { name: 'Saving...' });
@@ -28,4 +36,5 @@ test('the unsaved changes toolbar saves without moving focus, and offers a retry
   await toolbar.getByRole('button', { name: 'Try again' }).click();
   await expect(toolbar).toBeHidden();
   await expect(name).toHaveValue('Ada King');
+  await expect(name).toBeFocused();
 });

@@ -78,6 +78,11 @@ Render it while the form differs from its saved values, and write every word: th
 change with the state. Use `error` after a save fails, with `Try again` on Save, and `attention` when the
 person tries to leave with changes unsaved. A Save outside the form's markup reaches it through `form`.
 
+The toolbar unmounts once Reset or a successful save makes the form clean, and the button that had focus
+goes with it, so focus would fall to the page's body. Move focus first to an element that stays, such as
+the field that was edited or the form's heading: in Reset's handler, and after a save when focus is inside
+the toolbar.
+
 ## Composition
 
 ```text
