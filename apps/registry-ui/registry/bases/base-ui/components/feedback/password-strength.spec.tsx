@@ -1,6 +1,6 @@
-import { cleanup, render, screen } from '@testing-library/react';
-import type { ReactNode } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { createElement, forwardRef, type ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   PasswordStrength,
@@ -8,6 +8,48 @@ import {
   PasswordStrengthRequirement,
   PasswordStrengthRequirements,
 } from './password-strength';
+
+/**
+ * Motion's hooks are replaced by recording stand-ins: jsdom runs no animation frame, so a case asserts
+ * which controls an icon started, not a value it never animates.
+ */
+const motionState = vi.hoisted(() => ({ starts: [] as unknown[] }));
+
+vi.mock('motion/react', () => {
+  const MOTION_PROPS = new Set(['animate', 'initial', 'variants', 'transition']);
+  const motion = new Proxy(
+    {},
+    {
+      get: (_, tag: string) =>
+        forwardRef<Element, Record<string, unknown>>(function MotionStandIn(props, ref) {
+          const rest = Object.fromEntries(Object.entries(props).filter(([key]) => !MOTION_PROPS.has(key)));
+          return createElement(tag, { ...rest, ref });
+        }),
+    },
+  );
+  return {
+    motion,
+    useAnimation: () => ({
+      start: (variant: unknown) => {
+        motionState.starts.push(variant);
+        return Promise.resolve();
+      },
+      stop: () => undefined,
+      set: () => undefined,
+      mount: () => () => undefined,
+    }),
+    useReducedMotion: () => false,
+  };
+});
+
+/** The starts that play something, leaving out the resets an icon makes on leave. */
+function playStarts(): unknown[] {
+  return motionState.starts.filter((variant) => variant !== 'normal');
+}
+
+beforeEach(() => {
+  motionState.starts = [];
+});
 
 afterEach(cleanup);
 
@@ -100,5 +142,36 @@ describe('PasswordStrength', () => {
     expect(met?.textContent).toMatch(/Erfuellt$/);
     expect(met?.textContent).not.toMatch(/Met$/);
     expect(unmet?.textContent).toMatch(/Nicht erfuellt$/);
+  });
+
+  it('starts no animation when the pointer crosses a requirement', () => {
+    render(
+      <PasswordStrengthRequirements>
+        <PasswordStrengthRequirement met>At least 15 characters</PasswordStrengthRequirement>
+        <PasswordStrengthRequirement met={false}>Not your name or email</PasswordStrengthRequirement>
+      </PasswordStrengthRequirements>,
+    );
+    const [met, unmet] = screen.getAllByRole('listitem');
+
+    fireEvent.mouseEnter(met!.querySelector('[data-slot=circle-check-icon]')!);
+    fireEvent.mouseEnter(unmet!.querySelector('[data-slot=circle-icon]')!);
+
+    expect(playStarts()).toEqual([]);
+  });
+
+  it('plays the circle-check once when the requirement becomes met', () => {
+    const requirement = (met: boolean) => (
+      <PasswordStrengthRequirements>
+        <PasswordStrengthRequirement met={met}>At least 15 characters</PasswordStrengthRequirement>
+      </PasswordStrengthRequirements>
+    );
+    const { rerender } = render(requirement(false));
+    expect(playStarts()).toEqual([]);
+
+    rerender(requirement(true));
+    expect(playStarts()).toEqual(['animate']);
+
+    rerender(requirement(true));
+    expect(playStarts()).toEqual(['animate']);
   });
 });

@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 
-import { CircleCheckIcon } from '@/registry/bases/base-ui/icons/circle-check-icon';
-import { CircleIcon } from '@/registry/bases/base-ui/icons/circle-icon';
+import { CircleCheckIcon, type CircleCheckIconHandle } from '@/registry/bases/base-ui/icons/circle-check-icon';
+import { CircleIcon, type CircleIconHandle } from '@/registry/bases/base-ui/icons/circle-icon';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Card } from '@/registry/bases/base-ui/ui/card';
 import { Progress, ProgressLabel, ProgressValue } from '@/registry/bases/base-ui/ui/progress';
@@ -120,7 +120,8 @@ interface PasswordStrengthRequirementProps extends React.ComponentProps<'li'> {
 /**
  * One requirement: a circle-check and foreground text when met, a circle and muted text when not. The
  * icons are hidden from a screen reader, which hears `metLabel` or `unmetLabel` after the children
- * instead.
+ * instead. The icons stay still under the pointer; the circle-check draws itself in once each time
+ * `met` turns true after the first render.
  */
 function PasswordStrengthRequirement({
   met = false,
@@ -130,6 +131,16 @@ function PasswordStrengthRequirement({
   children,
   ...props
 }: PasswordStrengthRequirementProps): React.ReactNode {
+  // Holding a ref turns each icon's own hover animation off.
+  const metIconRef = React.useRef<CircleCheckIconHandle>(null);
+  const unmetIconRef = React.useRef<CircleIconHandle>(null);
+  const wasMetRef = React.useRef(met);
+
+  React.useEffect(() => {
+    if (met && !wasMetRef.current) metIconRef.current?.startAnimation();
+    wasMetRef.current = met;
+  }, [met]);
+
   return (
     <li
       data-slot="password-strength-requirement"
@@ -138,9 +149,9 @@ function PasswordStrengthRequirement({
       {...props}
     >
       {met ? (
-        <CircleCheckIcon aria-hidden size={16} className="text-foreground shrink-0" />
+        <CircleCheckIcon ref={metIconRef} aria-hidden size={16} className="text-foreground shrink-0" />
       ) : (
-        <CircleIcon aria-hidden size={16} className="text-foreground shrink-0" />
+        <CircleIcon ref={unmetIconRef} aria-hidden size={16} className="text-foreground shrink-0" />
       )}
       <span className="min-w-0 flex-1">
         {children}
