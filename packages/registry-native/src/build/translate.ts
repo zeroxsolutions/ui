@@ -1,5 +1,5 @@
 export type Engine = 'nativewind' | 'uniwind';
-export type Part = 'view' | 'text';
+export type Part = 'view' | 'text' | 'icon';
 
 export interface Translation {
   classes: string[];
@@ -14,6 +14,12 @@ const KEPT_MODIFIERS: ReadonlySet<string> = new Set(['active', 'disabled', 'dark
  * a `Pressable` takes no `aria-haspopup`.
  */
 const HOLDING_MODIFIERS: ReadonlySet<string> = new Set(['not-aria-[haspopup]']);
+
+/**
+ * Vega's selector for an svg inside the slot that names no size of its own. A class behind it goes to
+ * the icon part with the selector removed, and Icon applies it only when it names no size itself.
+ */
+const ICON_MODIFIERS: ReadonlySet<string> = new Set(["[&_svg:not([class*='size-'])]"]);
 
 /** No touch screen produces these states, so the class is dropped with its modifier. */
 const DROPPED_MODIFIERS = [
@@ -87,6 +93,11 @@ const UNTRANSLATABLE_UTILITIES = {
   uniwind: [/!$/],
 } as const satisfies Record<Engine, readonly RegExp[]>;
 
+function partOf(utility: string, onIcon: boolean): Part {
+  if (onIcon) return 'icon';
+  return TYPOGRAPHY_UTILITY.test(utility) ? 'text' : 'view';
+}
+
 /** Splits on `:` outside brackets, so `[&_svg:not(x)]:size-4` keeps its selector whole. */
 function splitVariants(cls: string): string[] {
   const parts: string[] = [];
@@ -107,8 +118,9 @@ function splitVariants(cls: string): string[] {
 
 /**
  * Translates the Tailwind classes of one Vega slot into what `engine` can
- * render on one `part`: `text` keeps the typography classes, `view` the rest.
- * A class with no rule is returned in `unknown`, in both parts, never guessed.
+ * render on one `part`: `icon` keeps the classes Vega gives an svg with no size class, `text` the
+ * typography classes, and `view` the rest.
+ * A class with no rule is returned in `unknown`, in every part, never guessed.
  */
 export function translateClasses(classes: readonly string[], engine: Engine, part: Part): Translation {
   const kept: string[] = [];
@@ -119,7 +131,8 @@ export function translateClasses(classes: readonly string[], engine: Engine, par
   for (const cls of classes) {
     const variants = splitVariants(cls);
     const utility = variants.pop() ?? '';
-    const modifiers = variants.filter((m) => !HOLDING_MODIFIERS.has(m));
+    const modifiers = variants.filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m));
+    const onIcon = variants.some((m) => ICON_MODIFIERS.has(m));
 
     if (modifiers.some((m) => DROPPED_MODIFIERS.some((rule) => rule.test(m)))) continue;
     if (!modifiers.every((m) => KEPT_MODIFIERS.has(m))) {
@@ -132,7 +145,7 @@ export function translateClasses(classes: readonly string[], engine: Engine, par
       continue;
     }
 
-    if (TYPOGRAPHY_UTILITY.test(utility) !== (part === 'text')) continue;
+    if (partOf(utility, onIcon) !== part) continue;
     kept.push([...modifiers, renamed[utility] ?? utility].join(':'));
   }
 

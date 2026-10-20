@@ -47,6 +47,12 @@ describe('emitSource', () => {
     expect(emitSource("'cn-button-variant-outline'", slots, 'uniwind', 'button.tsx')).toContain('shadow-xs');
   });
 
+  it('replaces an icon token with the size the slot gives an icon', () => {
+    const emitted = emitSource("cva('cn-button/icon cn-button-size-xs/icon')", slots, 'uniwind', 'button.tsx');
+
+    expect(emitted).toBe("cva('size-4 size-3')");
+  });
+
   it('removes a token whose translation is empty, with its space', () => {
     const emitted = emitSource(
       "['flex-row cn-button-size-icon/text', 'cn-button-size-icon/text']",
@@ -211,6 +217,13 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
     const [file] = item('button')?.files ?? [];
 
     expect(file.content).toMatch(/size: \{\s*default: '[^']*\bh-9\b/);
+  });
+
+  it("gives an icon in Button Vega's size-4, and size-3 at xs", () => {
+    const [file] = item('button')?.files ?? [];
+
+    expect(file.content).toContain("cva('size-4'");
+    expect(file.content).toMatch(/xs: 'size-3'/);
   });
 
   it("gives Button Vega's pressed nudge", () => {

@@ -9,6 +9,8 @@
     "moduleResolution": "bundler",
     // tools/build-registry.mts runs src/build under node, which resolves an import only by its written extension.
     "allowImportingTsExtensions": true,
+    // Icon has one file per engine and no icon.tsx, so an import of ./icon is checked against NativeWind's.
+    "moduleSuffixes": [".nativewind", ""],
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo"
   },
   "exclude": [

@@ -2,6 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import type { ComponentProps, ReactNode } from 'react';
 import { Pressable } from 'react-native';
 import { cn } from '../lib/utils';
+import { IconClassContext } from './icon';
 import { TextClassContext } from './text';
 
 // A `cn-<slot>` token stands for that Vega slot's view classes and `cn-<slot>/text` for its text
@@ -60,22 +61,43 @@ const buttonTextVariants = cva('cn-button/text', {
   },
 });
 
+const buttonIconVariants = cva('cn-button/icon', {
+  variants: {
+    size: {
+      default: 'cn-button-size-default/icon',
+      xs: 'cn-button-size-xs/icon',
+      sm: 'cn-button-size-sm/icon',
+      lg: 'cn-button-size-lg/icon',
+      icon: 'cn-button-size-icon/icon',
+      'icon-xs': 'cn-button-size-icon-xs/icon',
+      'icon-sm': 'cn-button-size-icon-sm/icon',
+      'icon-lg': 'cn-button-size-icon-lg/icon',
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+  },
+});
+
 type ButtonProps = ComponentProps<typeof Pressable> & VariantProps<typeof buttonVariants>;
 
 /**
  * A pressable control announced as a button. Its label goes in as a Text child, which takes the
- * text classes of the button's variant and size; `disabled` both blocks presses and is announced.
+ * text classes of the button's variant and size, and an Icon child takes the size's icon size;
+ * `disabled` both blocks presses and is announced.
  */
 function Button({ className, variant, size, disabled, accessibilityState, ...props }: ButtonProps): ReactNode {
   return (
     <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
-      <Pressable
-        role="button"
-        accessibilityState={{ ...accessibilityState, disabled }}
-        disabled={disabled}
-        className={cn(buttonVariants({ variant, size }), className)}
-        {...props}
-      />
+      <IconClassContext.Provider value={buttonIconVariants({ size })}>
+        <Pressable
+          role="button"
+          accessibilityState={{ ...accessibilityState, disabled }}
+          disabled={disabled}
+          className={cn(buttonVariants({ variant, size }), className)}
+          {...props}
+        />
+      </IconClassContext.Provider>
     </TextClassContext.Provider>
   );
 }

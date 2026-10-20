@@ -79,6 +79,17 @@ describe('translateClasses', () => {
     expect(result.classes).toEqual(['dark:rounded']);
   });
 
+  it.each(['nativewind', 'uniwind'] as const)(
+    'sends the size Vega gives an svg with no size class to the icon part only, for %s',
+    (engine) => {
+      const slot = ["[&_svg:not([class*='size-'])]:size-4", 'text-sm', 'p-2'];
+
+      expect(translateClasses(slot, engine, 'icon')).toEqual({ classes: ['size-4'], unknown: [] });
+      expect(translateClasses(slot, engine, 'text').classes).toEqual(['text-sm']);
+      expect(translateClasses(slot, engine, 'view').classes).toEqual(['p-2']);
+    },
+  );
+
   it('drops data-open:animate-in with its modifier', () => {
     const result = translateClasses(['data-open:animate-in', 'p-2'], 'uniwind', 'view');
 
@@ -133,7 +144,7 @@ describe('translateClasses', () => {
 
       expect(buttonSlots.length).toBeGreaterThan(10);
       for (const [name, classes] of buttonSlots) {
-        for (const part of ['view', 'text'] as const) {
+        for (const part of ['view', 'text', 'icon'] as const) {
           expect({ name, part, unknown: translateClasses(classes, engine, part).unknown }).toEqual({
             name,
             part,

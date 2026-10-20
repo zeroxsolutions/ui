@@ -50,7 +50,7 @@
       "title": "Button",
       "description": "A pressable control announced as a button, in Vega's variants and sizes.",
       "dependencies": ["class-variance-authority"],
-      "registryDependencies": ["@zui/utils", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
       "files": [
         {
           "path": "src/registry/ui/button.tsx",
