@@ -26,12 +26,14 @@ describe('Progress', () => {
   });
 
   it.each([
-    [-10, '0%'],
-    [250, '100%'],
-  ])('keeps a value of %s inside the track', async (value, width) => {
+    [-10, '0%', 0],
+    [250, '100%', 100],
+    [Number.NaN, '0%', 0],
+  ])('draws and announces a value of %s as %s', async (value, width, now) => {
     await render(<Progress value={value} />);
 
     expect(indicator().props.style).toEqual(expect.objectContaining({ width }));
+    expect(screen.getByRole('progressbar').props.accessibilityValue).toEqual(expect.objectContaining({ now }));
   });
 
   it("draws Vega's muted track and primary indicator", async () => {

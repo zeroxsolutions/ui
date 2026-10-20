@@ -6,7 +6,7 @@ import { cn } from '../lib/utils';
 // the classes translated for the target engine.
 
 type ProgressProps = Omit<ProgressPrimitive.RootProps, 'max' | 'value'> & {
-  /** How far along the task is, from 0 to 100. A value outside that range is held to its nearest end, and none draws an empty bar. */
+  /** How far along the task is, from 0 to 100. A value outside that range is held to its nearest end, and none or NaN draws an empty bar. */
   value?: number;
 };
 
@@ -15,9 +15,9 @@ type ProgressProps = Omit<ProgressPrimitive.RootProps, 'max' | 'value'> & {
  * value as a percentage.
  */
 function Progress({ className, value = 0, ...props }: ProgressProps): ReactNode {
-  const filled = Math.min(100, Math.max(0, value));
+  const filled = Number.isNaN(value) ? 0 : Math.min(100, Math.max(0, value));
   return (
-    <ProgressPrimitive.Root value={value} className={cn('w-full overflow-hidden cn-progress', className)} {...props}>
+    <ProgressPrimitive.Root value={filled} className={cn('w-full overflow-hidden cn-progress', className)} {...props}>
       <ProgressPrimitive.Indicator className="cn-progress-indicator h-full" style={{ width: `${filled}%` }} />
     </ProgressPrimitive.Root>
   );

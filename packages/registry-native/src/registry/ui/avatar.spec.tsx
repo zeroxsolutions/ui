@@ -24,6 +24,13 @@ describe('Avatar', () => {
     expect(screen.getByText('JD')).toBeOnTheScreen();
   });
 
+  it('shows the fallback while the image is still loading', async () => {
+    await renderAvatar({ source: PHOTO });
+
+    expect(screen.getByTestId('fallback')).toBeOnTheScreen();
+    expect(screen.getByRole('img', { name: 'Jane Doe' })).toBe(screen.getByTestId('fallback'));
+  });
+
   it('shows the image and no fallback once the image has loaded', async () => {
     await renderAvatar({ source: PHOTO });
 
