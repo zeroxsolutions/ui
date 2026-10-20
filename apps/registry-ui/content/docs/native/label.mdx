@@ -1,6 +1,6 @@
 ---
 title: Label
-description: The text that names a field, with a nativeID for the field's aria-labelledby and an onPress that focuses it.
+description: The text that names a field, with a nativeID for the field's aria-labelledby on Android and an onPress that focuses it.
 ---
 
 ## Installation
@@ -28,12 +28,13 @@ const input = useRef<TextInput>(null);
 <Label nativeID="email-label" onPress={() => input.current?.focus()}>
   Email
 </Label>
-<Input ref={input} aria-labelledby="email-label" />
+<Input ref={input} aria-label="Email" aria-labelledby="email-label" />
 ```
 
-React Native has no link between a label and its field. A field takes the label's text as its name when its
-`aria-labelledby` holds the label's `nativeID`. Pressing a Label runs only its `onPress`, so point that at the
-field's `focus()`.
+React Native has no link between a label and its field. On Android a field takes the label's text as its name
+when its `aria-labelledby` holds the label's `nativeID`. iOS ignores `aria-labelledby`, so give the field the
+same name in `aria-label` as well. Pressing a Label runs only its `onPress`, so point that at the field's
+`focus()`.
 
 ## API reference
 

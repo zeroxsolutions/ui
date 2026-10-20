@@ -44,4 +44,5 @@ follows. `sm` draws a 24px track and the default is 32px. A disabled switch is d
 `aria-invalid` draws the destructive border. React Native does not announce it, so carry the error in
 `accessibilityHint` or in a Text the user can reach.
 
-Name it with `aria-label`, or with a [Label](/docs/native/label)'s `nativeID` through `aria-labelledby`.
+Name it with `aria-label`, which iOS and Android both read. Android also reads a
+[Label](/docs/native/label)'s `nativeID` through `aria-labelledby`; iOS ignores that prop.

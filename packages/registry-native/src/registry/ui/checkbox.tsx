@@ -21,8 +21,8 @@ type CheckboxProps = CheckboxPrimitive.RootProps & {
 /**
  * A box that is checked or not, announced as a checkbox with its checked and disabled state. It is
  * controlled: pressing it calls `onCheckedChange` with the new value, and the mark shows once
- * `checked` follows. A disabled checkbox is dimmed and ignores presses. Name it with `aria-label`, or
- * with a Label's nativeID through `aria-labelledby`.
+ * `checked` follows. A disabled checkbox is dimmed and ignores presses. Name it with `aria-label`,
+ * which both platforms read; Android also reads a Label's nativeID through `aria-labelledby`.
  */
 function Checkbox({ className, checked, disabled, 'aria-invalid': invalid, ...props }: CheckboxProps): ReactNode {
   return (

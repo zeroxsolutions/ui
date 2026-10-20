@@ -42,7 +42,8 @@ type RadioGroupItemProps = RadioGroupPrimitive.ItemProps & {
 /**
  * One choice in a RadioGroup, announced as a radio with its checked and disabled state and drawn as
  * a dotted circle while selected. A disabled item, or any item of a disabled group, is dimmed and
- * ignores presses. Name it with `aria-label`, or with a Label's nativeID through `aria-labelledby`.
+ * ignores presses. Name it with `aria-label`, which both platforms read; Android also reads a
+ * Label's nativeID through `aria-labelledby`.
  */
 function RadioGroupItem({
   className,

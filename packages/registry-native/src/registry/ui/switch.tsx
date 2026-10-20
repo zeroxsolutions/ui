@@ -51,7 +51,8 @@ type SwitchProps = SwitchPrimitive.RootProps & {
 /**
  * An on/off control, announced as a switch with its checked and disabled state. It is controlled:
  * pressing it calls `onCheckedChange` with the new value, and it moves only once `checked` follows.
- * A disabled switch is dimmed and ignores presses. Name it with `aria-label` or `aria-labelledby`.
+ * A disabled switch is dimmed and ignores presses. Name it with `aria-label`, which both platforms
+ * read; Android also reads a Label's nativeID through `aria-labelledby`.
  */
 function Switch({
   className,

@@ -57,4 +57,5 @@ selected. A disabled item, or any item of a disabled group, is dimmed and ignore
 draws the destructive border while the item is not selected. React Native does not announce it, so carry the
 error in `accessibilityHint` or in a Text the user can reach.
 
-Name an item with `aria-label`, or with a [Label](/docs/native/label)'s `nativeID` through `aria-labelledby`.
+Name an item with `aria-label`, which iOS and Android both read. Android also reads a
+[Label](/docs/native/label)'s `nativeID` through `aria-labelledby`; iOS ignores that prop.

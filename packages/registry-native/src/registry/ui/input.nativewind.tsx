@@ -17,7 +17,8 @@ type InputProps = ComponentProps<typeof TextInput> & {
 /**
  * A single-line text field. It takes the focus border while it holds focus and the destructive
  * border while `aria-invalid`, and `editable={false}` dims it and announces it disabled. Name it with
- * a Label through `aria-labelledby`. NativeWind draws the placeholder through its `placeholder:` variant.
+ * `aria-label`, which both platforms read; Android also reads a Label's nativeID through
+ * `aria-labelledby`. NativeWind draws the placeholder through its `placeholder:` variant.
  */
 function Input({ className, editable, onFocus, onBlur, 'aria-invalid': invalid, ...props }: InputProps): ReactNode {
   const [focused, setFocused] = useState(false);
