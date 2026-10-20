@@ -1,0 +1,124 @@
+---
+title: Unsaved Changes Toolbar
+description: A toolbar floating at the top or bottom of the viewport while a form has unsaved changes, with a polite message and Reset and Save actions that wait while saving.
+---
+
+<ComponentPreview name="unsaved-changes-toolbar-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/unsaved-changes-toolbar
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button spinner utils
+```
+
+<Step>Copy the component into `components/feedback/unsaved-changes-toolbar.tsx`.</Step>
+
+<ComponentSource name="unsaved-changes-toolbar" title="components/feedback/unsaved-changes-toolbar.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  UnsavedChangesToolbar,
+  UnsavedChangesToolbarActions,
+  UnsavedChangesToolbarMessage,
+  UnsavedChangesToolbarReset,
+  UnsavedChangesToolbarSave,
+} from '@/components/feedback/unsaved-changes-toolbar';
+```
+
+```tsx
+{
+  isDirty && (
+    <UnsavedChangesToolbar state={isSaving ? 'saving' : 'default'}>
+      <UnsavedChangesToolbarMessage>
+        {isSaving ? 'Saving your changes...' : 'You have unsaved changes.'}
+      </UnsavedChangesToolbarMessage>
+      <UnsavedChangesToolbarActions>
+        <UnsavedChangesToolbarReset onClick={reset}>Reset</UnsavedChangesToolbarReset>
+        <UnsavedChangesToolbarSave type="submit" form="profile">
+          {isSaving ? 'Saving...' : 'Save changes'}
+        </UnsavedChangesToolbarSave>
+      </UnsavedChangesToolbarActions>
+    </UnsavedChangesToolbar>
+  );
+}
+```
+
+Render it while the form differs from its saved values, and write every word: the message and the labels
+change with the state. Use `error` after a save fails, with `Try again` on Save, and `attention` when the
+person tries to leave with changes unsaved. A Save outside the form's markup reaches it through `form`.
+
+## Composition
+
+```text
+UnsavedChangesToolbar
+|-- UnsavedChangesToolbarMessage
+`-- UnsavedChangesToolbarActions
+    |-- UnsavedChangesToolbarReset
+    `-- UnsavedChangesToolbarSave
+```
+
+## API reference
+
+### UnsavedChangesToolbar
+
+A `div` that takes every prop a `div` takes, fixed 16px in from the viewport's sides and centred, up to
+512px wide, on a toast's surface. `side` is `bottom` (the default) or `top`, the edge it floats at, 16px in.
+`state` is `default` (the default), `saving`, `error` or `attention`: `error` and `attention` turn the
+message destructive, and `attention` the ring too. It is a group named by its message, carries `data-side`
+and `data-state`, and sets `data-slot="unsaved-changes-toolbar"`. Inside an element with `contain: layout`
+it floats at that element's edge instead of the viewport's.
+
+### UnsavedChangesToolbarMessage
+
+A `p` that takes every prop a `p` takes. Its children are the message, which names the toolbar. It is a
+polite live region, so a screen reader reads each new message without moving focus. It sets
+`data-slot="unsaved-changes-toolbar-message"`.
+
+### UnsavedChangesToolbarActions
+
+A `div` that takes every prop a `div` takes, holding the two actions. It sets
+`data-slot="unsaved-changes-toolbar-actions"`.
+
+### UnsavedChangesToolbarReset
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button), small and ghost, and takes
+every prop it takes except `variant` and `size`. Its children are the label. While saving it is disabled
+and stays focusable, so focus does not move. It sets `data-slot="unsaved-changes-toolbar-reset"`.
+
+### UnsavedChangesToolbarSave
+
+Renders shadcn's [`Button`](https://ui.shadcn.com/docs/components/base/button), small, and takes every prop
+it takes except `variant` and `size`. Its children are the label. While saving it is disabled, stays
+focusable so focus does not move, and shows shadcn's `Spinner` before the label, hidden from a screen
+reader, which hears the message instead. It sets `data-slot="unsaved-changes-toolbar-save"`.

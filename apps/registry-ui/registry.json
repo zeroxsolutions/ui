@@ -535,6 +535,20 @@
       ]
     },
     {
+      "name": "unsaved-changes-toolbar",
+      "type": "registry:component",
+      "title": "Unsaved Changes Toolbar",
+      "description": "A toolbar floating at the top or bottom of the viewport while a form has unsaved changes, with a polite message and Reset and Save actions that wait while saving.",
+      "categories": ["feedback"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/spinner", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/feedback/unsaved-changes-toolbar.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "unsaved-indicator",
       "type": "registry:component",
       "title": "Unsaved Indicator",
@@ -1270,6 +1284,20 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/status-indicator-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "unsaved-changes-toolbar-demo",
+      "type": "registry:example",
+      "title": "Unsaved Changes Toolbar Demo",
+      "description": "A display name whose toolbar shows while it differs from the saved one, fails its first save, and asks for attention when the person tries to leave.",
+      "categories": ["examples"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/field", "@shadcn/input", "@zui/unsaved-changes-toolbar"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/unsaved-changes-toolbar-demo.tsx",
           "type": "registry:example"
         }
       ]
