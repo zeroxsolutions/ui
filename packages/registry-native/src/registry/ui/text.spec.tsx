@@ -20,4 +20,23 @@ describe('Text', () => {
 
     expect(screen.getByText('Save').props.className.split(' ')).toContain('font-sans');
   });
+
+  it('draws a caller weight class in the matching Geist family', async () => {
+    await render(<Text className="font-semibold">Save</Text>);
+
+    const classes = screen.getByText('Save').props.className.split(' ');
+
+    expect(classes).toContain('font-sans-semibold');
+    expect(classes).not.toContain('font-semibold');
+    expect(classes).not.toContain('font-sans');
+  });
+
+  it('draws a weight class under a variant in the matching Geist family', async () => {
+    await render(<Text className="dark:font-bold">Save</Text>);
+
+    const classes = screen.getByText('Save').props.className.split(' ');
+
+    expect(classes).toContain('dark:font-sans-bold');
+    expect(classes).not.toContain('dark:font-bold');
+  });
 });

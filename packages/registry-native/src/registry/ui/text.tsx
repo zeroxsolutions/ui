@@ -9,6 +9,27 @@ import { cn } from '../lib/utils';
  */
 const TextClassContext = createContext<string | undefined>(undefined);
 
+/** The Geist family class each weight name draws, because Android picks a custom font's weight by family. */
+const GEIST_FAMILY_CLASSES = {
+  normal: 'font-sans',
+  medium: 'font-sans-medium',
+  semibold: 'font-sans-semibold',
+  bold: 'font-sans-bold',
+} as const satisfies Readonly<Record<string, string>>;
+
+const WEIGHT_CLASS = /^((?:[^:\s]+:)*)font-(normal|medium|semibold|bold)$/;
+
+/** Renames each weight class in `className`, under any variant, to its Geist family class. */
+function toGeistFamilies(className: string | undefined): string | undefined {
+  return className
+    ?.split(/\s+/)
+    .map((token) => {
+      const [, variants, weight] = WEIGHT_CLASS.exec(token) ?? [];
+      return weight ? `${variants}${GEIST_FAMILY_CLASSES[weight as keyof typeof GEIST_FAMILY_CLASSES]}` : token;
+    })
+    .join(' ');
+}
+
 type TextProps = ComponentProps<typeof NativeText> & {
   /** Renders the single child in place of a native Text, with Text's props and classes merged onto it. */
   asChild?: boolean;
@@ -18,7 +39,12 @@ function Text({ className, asChild = false, ...props }: TextProps): ReactNode {
   const textClass = useContext(TextClassContext);
   const Component = asChild ? Slot : NativeText;
 
-  return <Component className={cn('font-sans text-foreground text-base', textClass, className)} {...props} />;
+  return (
+    <Component
+      className={cn('font-sans text-foreground text-base', toGeistFamilies(textClass), toGeistFamilies(className))}
+      {...props}
+    />
+  );
 }
 
 export { Text, TextClassContext };
