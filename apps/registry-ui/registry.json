@@ -878,6 +878,21 @@
       ]
     },
     {
+      "name": "tab-bar",
+      "type": "registry:component",
+      "title": "Tab Bar",
+      "description": "A bar of top-level destinations fixed to one edge of the viewport, translucent or solid, attached or floating, whose labels can show always, only for the active item, or never.",
+      "categories": ["navigation"],
+      "dependencies": ["@base-ui/react", "class-variance-authority"],
+      "registryDependencies": ["@shadcn/badge", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/navigation/tab-bar.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "ai-provider-picker",
       "type": "registry:block",
       "title": "AI Provider Picker",
@@ -1638,6 +1653,21 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/editor-tab-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "tab-bar-demo",
+      "type": "registry:example",
+      "title": "Tab Bar Demo",
+      "description": "A phone-sized screen with five destinations at the bottom, the active label shown and an unread count on Inbox.",
+      "categories": ["examples"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@zui/tab-bar"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/tab-bar-demo.tsx",
           "type": "registry:example"
         }
       ]

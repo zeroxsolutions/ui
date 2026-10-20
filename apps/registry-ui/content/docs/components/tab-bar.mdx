@@ -1,0 +1,170 @@
+---
+title: Tab Bar
+description: A bar of top-level destinations fixed to one edge of the viewport, translucent or solid, attached or floating, whose labels can show always, only for the active item, or never.
+---
+
+<ComponentPreview name="tab-bar-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/tab-bar
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add @base-ui/react class-variance-authority
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add badge utils
+```
+
+<Step>Copy the component into `components/navigation/tab-bar.tsx`.</Step>
+
+<ComponentSource name="tab-bar" title="components/navigation/tab-bar.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  TabBar,
+  TabBarBadge,
+  TabBarIcon,
+  TabBarIndicator,
+  TabBarItem,
+  TabBarLabel,
+} from '@/components/navigation/tab-bar';
+```
+
+```tsx
+<TabBar aria-label="Main" labels="selected">
+  <TabBarItem render={<Link href="/" />} active={pathname === '/'}>
+    <TabBarIndicator>
+      <TabBarIcon>
+        <House />
+      </TabBarIcon>
+    </TabBarIndicator>
+    <TabBarLabel>Home</TabBarLabel>
+  </TabBarItem>
+  <TabBarItem render={<Link href="/inbox" />} active={pathname === '/inbox'}>
+    <TabBarIndicator>
+      <TabBarIcon>
+        <Inbox />
+      </TabBarIcon>
+      <TabBarBadge>3</TabBarBadge>
+    </TabBarIndicator>
+    <TabBarLabel>Inbox</TabBarLabel>
+  </TabBarItem>
+</TabBar>
+```
+
+Each item is a link to a route, and the route the app is on sets `active`. Pass the router's link through
+`render` so the item navigates on the client; without it the item is a plain `<a>`. Give the bar an
+`aria-label` naming what its destinations are, since a page can hold more than one `nav`.
+
+`side` takes the edges shadcn's Sheet names: `bottom` and `top` lay the items in a row, `left` and `right`
+in a column. `labels="selected"` shows only the active label and `labels="none"` shows none; a hidden label
+is visually hidden, so a screen reader still reads every item's name. The bar is fixed to the viewport, so
+leave room for it at the end of the page's content. Inside an element with `contain: layout` it is fixed to
+that element instead, as in the preview.
+
+## Composition
+
+```text
+TabBar
+`-- TabBarItem
+    |-- TabBarIndicator
+    |   |-- TabBarIcon
+    |   `-- TabBarBadge
+    `-- TabBarLabel
+```
+
+## API reference
+
+### TabBar
+
+A `nav` that takes every prop a `nav` takes, and requires `aria-label`. It has no border: the surface
+separates by blur and shadow.
+
+| Prop         | Type                                     | Default         |
+| ------------ | ---------------------------------------- | --------------- |
+| `aria-label` | `string`                                 |                 |
+| `side`       | `'top' \| 'right' \| 'bottom' \| 'left'` | `'bottom'`      |
+| `labels`     | `'always' \| 'selected' \| 'none'`       | `'always'`      |
+| `surface`    | `'translucent' \| 'solid'`               | `'translucent'` |
+| `shape`      | `'attached' \| 'floating'`               | `'attached'`    |
+
+`translucent` is `bg-background/70 backdrop-blur`, and `solid` is `bg-background`. `attached` runs edge to
+edge, and `floating` is a pill 16px in from the edges. It carries `data-side`, `data-orientation`
+(`horizontal` or `vertical`), `data-labels`, `data-surface` and `data-shape`, and sets
+`data-slot="tab-bar"`.
+
+### TabBarItem
+
+An `a` that takes every prop an `a` takes, and `render` to render another element, such as the router's
+link. Its name is its `TabBarLabel`.
+
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| `active` | `boolean` | `false` |
+
+`active` sets `aria-current="page"`, lights the indicator and keeps the label under `labels="selected"`. In
+a row the items share the width; in a column each is as wide as the bar. It carries `data-active` while
+active and sets `data-slot="tab-bar-item"`.
+
+### TabBarIndicator
+
+A `span` that takes every prop a `span` takes: the 56 by 32 pill behind the icon, tinted while its item is
+active, muted while pressed and ringed while the item has keyboard focus. It carries `data-active` and sets
+`data-slot="tab-bar-indicator"`.
+
+### TabBarIcon
+
+A `span` that takes every prop a `span` takes, sizing the glyph in its children to 20px. It is hidden from a
+screen reader, which reads the label. It sets `data-slot="tab-bar-icon"`.
+
+### TabBarBadge
+
+Renders shadcn's [`Badge`](https://ui.shadcn.com/docs/components/base/badge), destructive, at the indicator's
+top right, and takes every prop it takes except `variant`. Its children are the count.
+
+| Prop         | Type     | Default |
+| ------------ | -------- | ------- |
+| `countLabel` | `string` | `'new'` |
+
+The badge is kept out of the item's name and describes the item instead, with `countLabel` read after the
+count, so a screen reader hears "Inbox, link, 3 new". Pass `countLabel` in the app's language. It sets
+`data-slot="tab-bar-badge"`.
+
+### TabBarLabel
+
+A `span` that takes every prop a `span` takes, `text-xs font-medium`. Its children are the destination's
+name. Where the bar's `labels` hides it, it is visually hidden and carries `data-hidden`. It sets
+`data-slot="tab-bar-label"`.

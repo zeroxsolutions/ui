@@ -52,6 +52,7 @@
     "reasoning-collapsible",
     "---Navigation---",
     "command-menu",
-    "editor-tab"
+    "editor-tab",
+    "tab-bar"
   ]
 }
