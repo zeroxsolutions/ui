@@ -1870,7 +1870,7 @@
       "name": "circle-icon",
       "type": "registry:ui",
       "title": "Circle Icon",
-      "description": "An animated circle icon that renders phrasing content and stays still under reduced motion.",
+      "description": "An animated circle icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
       "dependencies": ["motion"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
