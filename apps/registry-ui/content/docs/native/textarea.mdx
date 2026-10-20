@@ -1,0 +1,42 @@
+---
+title: Textarea
+description: A multiline text field at least four lines tall, with the same focus, invalid and disabled states as Input.
+---
+
+## Installation
+
+```bash
+pnpm dlx shadcn@latest add @zui/textarea
+```
+
+The CLI writes `components/ui/textarea.tsx` and installs Utils. The file is the engine's own version, so a
+NativeWind app and a Uniwind app each get theirs.
+
+## Usage
+
+```tsx
+import { Textarea } from '@/components/ui/textarea';
+```
+
+```tsx
+<Textarea placeholder="Tell us more" aria-labelledby="notes-label" />
+```
+
+Name it with a [Label](/docs/native/label) through `aria-labelledby`.
+
+## API reference
+
+### Textarea
+
+Takes every prop React Native's `TextInput` takes, plus:
+
+| Prop           | Type      | Default |
+| -------------- | --------- | ------- |
+| `aria-invalid` | `boolean` | none    |
+
+The field is multiline, at least four lines tall, and grows with its text. It takes the focus border while it
+holds focus. `aria-invalid` draws the destructive border and announces the field as invalid.
+`editable={false}` dims it and announces it disabled.
+
+The placeholder colour differs by engine, as it does for [Input](/docs/native/input): the NativeWind file uses
+the `placeholder:` variant and the Uniwind file uses `placeholderTextColorClassName`.

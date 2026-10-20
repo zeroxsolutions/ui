@@ -1,0 +1,50 @@
+---
+title: Label
+description: The text that names a field, with a nativeID for the field's aria-labelledby and an onPress that focuses it.
+---
+
+## Installation
+
+```bash
+pnpm dlx shadcn@latest add @zui/label
+```
+
+The CLI writes `components/ui/label.tsx`, installs [Text](/docs/native/text) and Utils, and adds
+`@rn-primitives/label`.
+
+## Usage
+
+```tsx
+import { useRef } from 'react';
+import type { TextInput } from 'react-native';
+
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+```
+
+```tsx
+const input = useRef<TextInput>(null);
+
+<Label nativeID="email-label" onPress={() => input.current?.focus()}>
+  Email
+</Label>
+<Input ref={input} aria-labelledby="email-label" />
+```
+
+React Native has no link between a label and its field. A field takes the label's text as its name when its
+`aria-labelledby` holds the label's `nativeID`. Pressing a Label runs only its `onPress`, so point that at the
+field's `focus()`.
+
+## API reference
+
+### Label
+
+Takes every prop of the `@rn-primitives/label` root, plus:
+
+| Prop       | Type        | Default  |
+| ---------- | ----------- | -------- |
+| `children` | `ReactNode` | required |
+| `nativeID` | `string`    | none     |
+| `disabled` | `boolean`   | `false`  |
+
+`disabled` dims the label to match a disabled field. It does not block presses.

@@ -1,0 +1,55 @@
+---
+title: Toggle
+description: A two-state button, announced as a button with its selected state, drawn on the muted background while pressed.
+---
+
+## Installation
+
+```bash
+pnpm dlx shadcn@latest add @zui/toggle
+```
+
+The CLI writes `components/ui/toggle.tsx`, installs [Text](/docs/native/text), [Icon](/docs/native/icon) and
+Utils, and adds `@rn-primitives/toggle` and `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { Bold } from 'lucide-react-native';
+import { useState } from 'react';
+
+import { Icon } from '@/components/ui/icon';
+import { Toggle } from '@/components/ui/toggle';
+```
+
+```tsx
+const [bold, setBold] = useState(false);
+
+<Toggle pressed={bold} onPressedChange={setBold} aria-label="Bold">
+  <Icon as={Bold} />
+</Toggle>;
+```
+
+A Text child is the label and takes the toggle's label classes. An Icon child takes a 16px size. A toggle with
+only an icon has no text for a screen reader, so name it with `aria-label`.
+
+## API reference
+
+### Toggle
+
+Takes every prop of the `@rn-primitives/toggle` root, plus:
+
+| Prop              | Type                         | Default     |
+| ----------------- | ---------------------------- | ----------- |
+| `pressed`         | `boolean`                    | required    |
+| `onPressedChange` | `(pressed: boolean) => void` | required    |
+| `variant`         | `'default' \| 'outline'`     | `'default'` |
+| `size`            | `'default' \| 'sm' \| 'lg'`  | `'default'` |
+
+Toggle is controlled. Pressing it calls `onPressedChange` with the new value, and it draws as pressed once
+`pressed` follows. It is announced as a button with its selected and disabled state. A disabled toggle is
+dimmed and ignores presses.
+
+### toggleVariants
+
+The view classes of each variant and size, for a pressable that is not a Toggle but should look like one.

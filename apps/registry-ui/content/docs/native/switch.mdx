@@ -1,0 +1,46 @@
+---
+title: Switch
+description: An on/off control, announced as a switch with its checked and disabled state.
+---
+
+## Installation
+
+```bash
+pnpm dlx shadcn@latest add @zui/switch
+```
+
+The CLI writes `components/ui/switch.tsx`, installs Utils, and adds `@rn-primitives/switch` and
+`class-variance-authority`.
+
+## Usage
+
+```tsx
+import { useState } from 'react';
+
+import { Switch } from '@/components/ui/switch';
+```
+
+```tsx
+const [airplane, setAirplane] = useState(false);
+
+<Switch checked={airplane} onCheckedChange={setAirplane} aria-label="Airplane mode" />;
+```
+
+## API reference
+
+### Switch
+
+Takes every prop of the `@rn-primitives/switch` root, plus:
+
+| Prop              | Type                         | Default     |
+| ----------------- | ---------------------------- | ----------- |
+| `checked`         | `boolean`                    | required    |
+| `onCheckedChange` | `(checked: boolean) => void` | required    |
+| `size`            | `'default' \| 'sm'`          | `'default'` |
+| `aria-invalid`    | `boolean`                    | none        |
+
+Switch is controlled. Pressing it calls `onCheckedChange` with the new value, and it moves only once `checked`
+follows. `sm` draws a 24px track and the default is 32px. A disabled switch is dimmed and ignores presses.
+`aria-invalid` draws the destructive border and announces the switch as invalid.
+
+Name it with `aria-label`, or with a [Label](/docs/native/label)'s `nativeID` through `aria-labelledby`.

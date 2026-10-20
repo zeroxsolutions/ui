@@ -1,4 +1,31 @@
 {
   "title": "Native",
-  "pages": ["index", "installation", "theme", "text", "icon", "button"]
+  "pages": [
+    "index",
+    "installation",
+    "---Foundations---",
+    "theme",
+    "text",
+    "icon",
+    "---Actions---",
+    "button",
+    "toggle",
+    "toggle-group",
+    "---Forms---",
+    "label",
+    "input",
+    "textarea",
+    "checkbox",
+    "radio-group",
+    "switch",
+    "---Display---",
+    "avatar",
+    "badge",
+    "card",
+    "progress",
+    "separator",
+    "skeleton",
+    "---Navigation---",
+    "tabs"
+  ]
 }

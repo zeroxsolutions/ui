@@ -1,0 +1,89 @@
+---
+title: Tabs
+description: Panels of which the one matching the selected trigger is shown, switched by a row of triggers.
+---
+
+## Installation
+
+```bash
+pnpm dlx shadcn@latest add @zui/tabs
+```
+
+The CLI writes `components/ui/tabs.tsx`, installs [Text](/docs/native/text), [Icon](/docs/native/icon) and
+Utils, and adds `@rn-primitives/tabs` and `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { useState } from 'react';
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+const [tab, setTab] = useState('account');
+
+<Tabs value={tab} onValueChange={setTab}>
+  <TabsList>
+    <TabsTrigger value="account">
+      <Text>Account</Text>
+    </TabsTrigger>
+    <TabsTrigger value="password">
+      <Text>Password</Text>
+    </TabsTrigger>
+  </TabsList>
+  <TabsContent value="account">
+    <Text>Make changes to your account.</Text>
+  </TabsContent>
+  <TabsContent value="password">
+    <Text>Change your password.</Text>
+  </TabsContent>
+</Tabs>;
+```
+
+## API reference
+
+### Tabs
+
+Takes every prop of the `@rn-primitives/tabs` root.
+
+| Prop            | Type                         | Default        |
+| --------------- | ---------------------------- | -------------- |
+| `value`         | `string`                     | required       |
+| `onValueChange` | `(value: string) => void`    | required       |
+| `orientation`   | `'horizontal' \| 'vertical'` | `'horizontal'` |
+
+Tabs is controlled. Pressing a trigger calls `onValueChange` with its value, and the matching panel shows once
+`value` follows. A vertical Tabs puts its list beside the panel.
+
+### TabsList
+
+Takes every prop of the `@rn-primitives/tabs` list, plus:
+
+| Prop      | Type                  | Default     |
+| --------- | --------------------- | ----------- |
+| `variant` | `'default' \| 'line'` | `'default'` |
+
+It is announced as a tab list. `default` draws a muted bar with the selected trigger raised on it. `line`
+draws no bar and underlines the selected trigger. A horizontal list is as wide as its Tabs, and its triggers
+share the width.
+
+### TabsTrigger
+
+Takes every prop of the `@rn-primitives/tabs` trigger, with `value` required.
+
+It is announced as a tab with its selected and disabled state. Its label is a Text child, in the foreground
+colour while selected and dimmed otherwise. An Icon child takes a 16px size. A disabled trigger is dimmed and
+ignores presses.
+
+### TabsContent
+
+Takes every prop of the `@rn-primitives/tabs` content, with `value` required.
+
+It is announced as a tab panel and shown while its `value` is the selected one. The other panels are not
+rendered unless given `forceMount`. A Text child takes Vega's panel text size.
+
+### tabsListVariants
+
+The classes of each list variant and orientation.

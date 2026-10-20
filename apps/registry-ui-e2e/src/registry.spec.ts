@@ -63,7 +63,9 @@ test('serves the react native items for each engine in vega', async ({ request }
     expect(index.status(), `${root}/registry.json`).toBe(200);
     const registry = (await index.json()) as RegistryIndex;
     expect(registry.name).toBe('zui');
-    expect(registry.items.map(({ name }) => name)).toEqual(expect.arrayContaining(['button', 'icon', 'text']));
+    expect(registry.items.map(({ name }) => name)).toEqual(
+      expect.arrayContaining(['button', 'icon', 'text', 'switch', 'tabs']),
+    );
 
     const response = await request.get(`${root}/button.json`);
     expect(response.status(), `${root}/button.json`).toBe(200);
