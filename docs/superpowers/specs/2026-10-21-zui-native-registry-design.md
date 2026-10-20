@@ -63,8 +63,9 @@ and the travel app can build its screens from the first batch below.
 
 ## Anti-goals
 
-- A fork of RNR that drifts: code taken from RNR keeps its MIT notice and is restyled to Vega, not
-  shipped in RNR's own new-york look.
+- A copy of RNR's components. A copied upstream component stops receiving upstream's fixes while still
+  reading as upstream's, and RNR's are drawn in its own new-york look, which no registry can restyle.
+  zui writes its RN components itself; RNR is read for how `@rn-primitives` is wired, never copied.
 - Two hand-maintained source trees, one per engine. RNR has that; its NativeWind and Uniwind files differ
   by import paths in most components, and by a handful of real changes in a few (`icon.tsx`: NativeWind's
   `cssInterop` vs Uniwind's `withUniwind`; `skeleton.tsx`: a CSS `animate-pulse` vs a Reanimated loop;
@@ -124,8 +125,7 @@ All three are created with the nx generators, not by hand.
 ### One source, generated per engine and per style
 
 A component is written once on `@rn-primitives`: its parts, props, accessibility roles and states, and
-its variants as `cva` keys. RNR's code may be the starting point, under MIT, with its notice kept in the
-repo.
+its variants as `cva` keys. zui writes it; no RNR file is copied in.
 
 **Style.** Class strings come from upstream: a script reads each component's
 `https://ui.shadcn.com/r/styles/base-<style>/<name>.json`, splits its classes per part and per variant,

@@ -33,9 +33,8 @@ component batches.
   no `sm:` breakpoint step.
 - Upstream snapshot pinned to shadcn-ui/ui `ba1503c64472b82256d9de95e2e62c5901a38e8b` (2026-10-19),
   file `apps/v4/registry/styles/style-vega.css`.
-- Code taken from React Native Reusables (founded-labs/react-native-reusables
-  `385834c2196f8a303cbc9057d1ac768f3bde0a3b`, MIT, Copyright (c) 2025 Founded Labs) keeps that
-  notice: the project's `NOTICE` carries the licence text, and each derived file's first line names it.
+- zui writes its components; no file of React Native Reusables (RNR) is copied in. RNR may be read for
+  how `@rn-primitives` is wired, and the engines' own docs for the NativeWind and Uniwind wrappers.
 - Every task runs through nx by the scoped project name (`@zeroxsolutions/registry-native`,
   `@zeroxsolutions/registry-ui`, `@zeroxsolutions/registry-ui-e2e`).
 - Before each task, open the gundam skill for every kind of file it touches; the task lists them.
@@ -64,7 +63,6 @@ Skills: `adding-a-project`, `declaring-a-dependency`, `wiring-a-task-target`.
 - Create (generator): `packages/registry-native/` with `package.json` named
   `@zeroxsolutions/registry-native`, private, a Jest config on the `jest-expo` preset.
 - Modify (generator): `nx.json`, `package.json`, `pnpm-lock.yaml`, `tsconfig.base.json` or project references.
-- Create: `packages/registry-native/NOTICE` (third-party notices, as `packages/fluent-emoji/NOTICE` is: RNR's MIT text, verbatim from its `LICENSE`).
 
 - [ ] **Step 1:** `pnpm exec nx add @nx/expo` (version 23.3.0, matching nx).
 - [ ] **Step 2:** Dry run, then read the printed file list:
@@ -165,7 +163,7 @@ Skills: `writing-a-component`, `writing-component-tests`, `writing-unit-tests`, 
 
 **Files:**
 
-- Create: `packages/registry-native/src/registry/lib/utils.ts` (`cn`, as RNR's)
+- Create: `packages/registry-native/src/registry/lib/utils.ts` (`cn`: `twMerge(clsx(inputs))`)
 - Create: `packages/registry-native/src/registry/ui/text.tsx`, `text.spec.tsx`
 - Create: `packages/registry-native/src/registry/ui/icon.nativewind.tsx`, `icon.uniwind.tsx`, `icon.spec.tsx`
 - Create: `packages/registry-native/src/registry/ui/button.tsx`, `button.spec.tsx`
@@ -176,14 +174,14 @@ Skills: `writing-a-component`, `writing-component-tests`, `writing-unit-tests`, 
   `Button`, `buttonVariants`, `ButtonProps` (`button.tsx`), with variants `default outline secondary
   ghost destructive link` and sizes `default xs sm lg icon icon-xs icon-sm icon-lg`, defaults `default`.
 
-Each file starts from RNR's `nativewind` file at the pinned commit, first line
-`// Derived from React Native Reusables (MIT, Copyright (c) 2025 Founded Labs).`. Style-dependent
-classes become upstream's slot names: Button's root `cn-button`, each variant `cn-button-variant-<v>`,
+zui writes each file on `@rn-primitives/slot` and React Native's `Pressable` and `Text`. Style-dependent
+classes are upstream's slot names: Button's root `cn-button`, each variant `cn-button-variant-<v>`,
 each size `cn-button-size-<s>`, in `buttonVariants`; the same slots with a `/text` suffix
 (`cn-button-variant-<v>/text`) in `buttonTextVariants`, which the Button hands its Text through
-`TextClassContext`; Text's and Icon's own classes stay as RNR writes them, minus `web:` and
-`Platform.select({ web })`. Icon's two files are RNR's two `icon.tsx` (NativeWind's `cssInterop`,
-Uniwind's `withUniwind`); Jest maps `icon` to the NativeWind one.
+`TextClassContext`. Text's own class is `text-foreground text-base`, merged under the context's; its
+typography variants come with a later batch. Icon wraps a lucide icon so it takes `className`: the
+NativeWind file with `cssInterop` and the Uniwind file with `withUniwind`, each as that engine's docs
+prescribe; Jest maps `icon` to the NativeWind one.
 
 - [ ] **Step 1: Tests first** (RNTL, `screen.getByRole`):
       `button.spec.tsx`: `it('is a button that runs onPress')`; `it('announces disabled and does not run
