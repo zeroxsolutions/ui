@@ -33,7 +33,10 @@ const toggleVariants = cva('flex-row items-center justify-center disabled:opacit
 
 type ToggleProps = TogglePrimitive.RootProps &
   Omit<VariantProps<typeof toggleVariants>, 'pressed'> & {
-    /** Draws the destructive border and announces the toggle as invalid. */
+    /**
+     * Draws the destructive border. React Native does not announce it, so carry the error in
+     * `accessibilityHint` or in a Text the user can reach.
+     */
     'aria-invalid'?: boolean;
   };
 

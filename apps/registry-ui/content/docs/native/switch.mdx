@@ -41,6 +41,7 @@ Takes every prop of the `@rn-primitives/switch` root, plus:
 
 Switch is controlled. Pressing it calls `onCheckedChange` with the new value, and it moves only once `checked`
 follows. `sm` draws a 24px track and the default is 32px. A disabled switch is dimmed and ignores presses.
-`aria-invalid` draws the destructive border and announces the switch as invalid.
+`aria-invalid` draws the destructive border. React Native does not announce it, so carry the error in
+`accessibilityHint` or in a Text the user can reach.
 
 Name it with `aria-label`, or with a [Label](/docs/native/label)'s `nativeID` through `aria-labelledby`.

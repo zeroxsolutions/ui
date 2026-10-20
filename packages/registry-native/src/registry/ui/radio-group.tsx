@@ -32,7 +32,10 @@ function RadioGroup({ className, value, disabled = false, ...props }: RadioGroup
 }
 
 type RadioGroupItemProps = RadioGroupPrimitive.ItemProps & {
-  /** Draws the destructive border while the item is not selected and announces it as invalid. */
+  /**
+   * Draws the destructive border while the item is not selected. React Native does not announce
+   * it, so carry the error in `accessibilityHint` or in a Text the user can reach.
+   */
   'aria-invalid'?: boolean;
 };
 

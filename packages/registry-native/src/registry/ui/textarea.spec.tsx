@@ -33,7 +33,7 @@ describe('Textarea', () => {
     expect(classesOf('field')).not.toContain('border-ring');
   });
 
-  it('takes the destructive border and announces itself invalid when aria-invalid', async () => {
+  it('draws the destructive border and passes aria-invalid on to the field', async () => {
     await render(<Textarea testID="field" aria-invalid />);
 
     expect(classesOf('field')).toContain('border-destructive');

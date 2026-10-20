@@ -40,6 +40,7 @@ Takes every prop of the `@rn-primitives/checkbox` root, plus:
 
 Checkbox is controlled. Pressing it calls `onCheckedChange` with the new value, and the mark shows once
 `checked` follows. A disabled checkbox is dimmed and ignores presses. `aria-invalid` draws the destructive
-border while the box is unchecked and announces it as invalid.
+border while the box is unchecked. React Native does not announce it, so carry the error in `accessibilityHint`
+or in a Text the user can reach.
 
 Name it with `aria-label`, or with a [Label](/docs/native/label)'s `nativeID` through `aria-labelledby`.

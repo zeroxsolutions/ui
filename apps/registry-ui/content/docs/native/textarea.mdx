@@ -35,8 +35,8 @@ Takes every prop React Native's `TextInput` takes, plus:
 | `aria-invalid` | `boolean` | none    |
 
 The field is multiline, 64px tall at least, and grows with its text. It takes the focus border while it holds
-focus. `aria-invalid` draws the destructive border and announces the field as invalid.
-`editable={false}` dims it and announces it disabled.
+focus. `aria-invalid` draws the destructive border. React Native does not announce it, so carry the error in
+`accessibilityHint` or in a Text the user can reach. `editable={false}` dims it and announces it disabled.
 
 The placeholder colour differs by engine, as it does for [Input](/docs/native/input): the NativeWind file uses
 the `placeholder:` variant and the Uniwind file uses `placeholderTextColorClassName`.

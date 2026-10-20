@@ -41,7 +41,10 @@ const switchThumbVariants = cva('cn-switch-thumb', {
 type SwitchProps = SwitchPrimitive.RootProps & {
   /** `sm` draws a 24px track; the default is 32px. */
   size?: 'default' | 'sm';
-  /** Draws the destructive border and announces the switch as invalid. */
+  /**
+   * Draws the destructive border. React Native does not announce it, so carry the error in
+   * `accessibilityHint` or in a Text the user can reach.
+   */
   'aria-invalid'?: boolean;
 };
 

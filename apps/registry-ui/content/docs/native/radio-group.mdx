@@ -54,6 +54,7 @@ Takes every prop of the `@rn-primitives/radio-group` item, plus:
 
 The item is announced as a radio with its checked and disabled state, and drawn as a dotted circle while
 selected. A disabled item, or any item of a disabled group, is dimmed and ignores presses. `aria-invalid`
-draws the destructive border while the item is not selected.
+draws the destructive border while the item is not selected. React Native does not announce it, so carry the
+error in `accessibilityHint` or in a Text the user can reach.
 
 Name an item with `aria-label`, or with a [Label](/docs/native/label)'s `nativeID` through `aria-labelledby`.

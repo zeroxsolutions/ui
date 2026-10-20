@@ -7,7 +7,10 @@ import { cn } from '../lib/utils';
 // replaces each with the classes translated for the target engine.
 
 type InputProps = ComponentProps<typeof TextInput> & {
-  /** Draws the destructive border and announces the field as invalid. */
+  /**
+   * Draws the destructive border. React Native does not announce it, so carry the error in
+   * `accessibilityHint` or in a Text the user can reach.
+   */
   'aria-invalid'?: boolean;
 };
 

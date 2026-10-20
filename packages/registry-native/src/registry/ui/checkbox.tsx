@@ -11,7 +11,10 @@ import { Icon } from './icon';
 // a device, so the mark takes both as its own classes.
 
 type CheckboxProps = CheckboxPrimitive.RootProps & {
-  /** Draws the destructive border while unchecked and announces the checkbox as invalid. */
+  /**
+   * Draws the destructive border while unchecked. React Native does not announce it, so carry the
+   * error in `accessibilityHint` or in a Text the user can reach.
+   */
   'aria-invalid'?: boolean;
 };
 
