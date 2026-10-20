@@ -1,0 +1,31 @@
+---
+title: Native
+description: React Native items for iOS and Android, drawn in shadcn's Vega style, for NativeWind or Uniwind.
+---
+
+zui native publishes React Native items for iOS and Android apps, installed with the shadcn CLI like the web
+items. Each item draws shadcn's Vega style with its neutral colours, and is published once per styling engine:
+
+| Engine       | `style` in `components.json` | Items served from                                                    |
+| ------------ | ---------------------------- | -------------------------------------------------------------------- |
+| NativeWind 4 | `nativewind-vega`            | `https://ui.zeroxsolutions.com/r/styles/nativewind-vega/<name>.json` |
+| Uniwind      | `uniwind-vega`               | `https://ui.zeroxsolutions.com/r/styles/uniwind-vega/<name>.json`    |
+
+The CLI picks the path from the app's `style`, so an app names its engine once, in `components.json`, as
+[Installation](/docs/native/installation) shows.
+
+## Items
+
+- [Theme](/docs/native/theme): the colours, radius and Geist font families, and the map that loads the fonts.
+- [Text](/docs/native/text): text that takes its container's text classes.
+- [Icon](/docs/native/icon): a lucide icon sized and coloured by classes.
+- [Button](/docs/native/button): a pressable control in Vega's variants and sizes.
+
+Each component also installs `utils`, which gives it `cn`.
+
+These pages show no live preview, because the items render through React Native and this site does not run it.
+
+## macOS and Windows
+
+zui native targets iOS and Android only. A macOS or Windows app uses the [web items](/docs/components) through
+Electron.

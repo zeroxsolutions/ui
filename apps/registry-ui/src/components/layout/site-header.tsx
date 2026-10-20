@@ -21,10 +21,12 @@ interface SiteHeaderProps {
 /** The bar across the top of every page: the site's sections, the search and the theme switch. */
 function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
   const components = docsPageUrl(['components']);
+  const native = docsPageUrl(['native']);
   const navItems: SiteNavItem[] = [
     { href: docsRoute.build(), label: 'Docs', pattern: `${docsRoute.pathname}{/*rest}` },
     { href: components, label: 'Components', pattern: `${components}{/*rest}` },
     { href: blocksRoute.build(), label: 'Blocks', pattern: blocksRoute.pathname },
+    { href: native, label: 'Native', pattern: `${native}{/*rest}` },
   ];
 
   return (
