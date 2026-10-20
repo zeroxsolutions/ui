@@ -20,7 +20,7 @@ import {
   SourceCodeBlockLanguage,
   SourceCodeBlockTitle,
 } from '@/components/data-display/source-code-block';
-import { publishedBlocks, publishedItems, registryHomepage } from '@/lib/registry';
+import { publishedBlocks, publishedItems } from '@/lib/registry';
 import { docsPageUrl, source } from '@/lib/source';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { blocksRoute } from '@/routes/app-routes';
@@ -30,9 +30,9 @@ import registryData from '../../../registry.json';
 /** The items the home page shows live, by registry name; each renders its `<name>-demo`. */
 const HOME_ITEMS = ['chat-message', 'code-block', 'file-tree', 'tag-input', 'password-input', 'status-indicator'];
 
-/** The shadcn CLI command that installs one registry item from its URL. */
+/** The shadcn CLI command that installs one registry item through the app's `@zui` registry entry. */
 function homePageInstallCommand(name: string): string {
-  return `pnpm dlx shadcn@latest add ${new URL(`/r/${name}.json`, registryHomepage).href}`;
+  return `pnpm dlx shadcn@latest add @zui/${name}`;
 }
 
 /** The paths an item's files land at in a consuming app. A component keeps its path below the

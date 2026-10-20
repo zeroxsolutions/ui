@@ -3,8 +3,8 @@ import { expect, test } from './test/fixtures';
 const ITEMS = ['Chat Message', 'Code Block', 'File Tree', 'Tag Input', 'Password Input', 'Status Indicator'];
 
 // Mirrors the hero's own `homePageInstallCommand('status-indicator')`; the e2e project does not
-// import the app's internals, so the URL is rebuilt here against the registry's published homepage.
-const INSTALL_COMMAND = `pnpm dlx shadcn@latest add ${new URL('/r/status-indicator.json', 'https://ui.zeroxsolutions.com').href}`;
+// import the app's internals.
+const INSTALL_COMMAND = 'pnpm dlx shadcn@latest add @zui/status-indicator';
 
 // WebKit and Firefox under Playwright do not grant clipboard-write permission the way Chromium does,
 // so the real API is replaced with one that records what it was called with on `window`.
