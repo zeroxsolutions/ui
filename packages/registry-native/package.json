@@ -1,0 +1,46 @@
+{
+  "name": "@zeroxsolutions/registry-native",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@rn-primitives/slot": "1.5.2",
+    "class-variance-authority": "catalog:",
+    "clsx": "^2.1.1",
+    "lucide-react-native": "1.60.0",
+    "react-native-svg": "^15.16.0",
+    "tailwind-merge": "^3.7.0"
+  },
+  "devDependencies": {
+    "@babel/runtime": "~7.27.6",
+    "@expo/cli": "58.1.13",
+    "@expo/dom-webview": "58.0.2",
+    "@expo/metro-runtime": "58.0.14",
+    "@expo/vector-icons": "15.1.1",
+    "@react-native/jest-preset": "0.88.0",
+    "@testing-library/react-native": "14.1.0",
+    "@types/jest": "~30.0.0",
+    "babel-jest": "~30.3.0",
+    "babel-preset-expo": "58.0.18",
+    "expo": "58.0.16",
+    "jest": "~30.3.0",
+    "jest-environment-jsdom": "~30.3.0",
+    "jest-expo": "58.0.11",
+    "jest-util": "~30.3.0",
+    "nativewind": "4.2.7",
+    "react": "^19.3.0",
+    "react-native": "0.88.0",
+    "react-test-renderer": "^19.3.0",
+    "ts-jest": "^29.4.7",
+    "uniwind": "1.13.0"
+  }
+}

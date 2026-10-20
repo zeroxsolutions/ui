@@ -15,6 +15,8 @@
     "@commitlint/cli": "21.2.3",
     "@commitlint/config-conventional": "21.2.3",
     "@nx/devkit": "23.3.0",
+    "@nx/expo": "23.3.0",
+    "@nx/jest": "23.3.0",
     "@nx/js": "23.3.0",
     "@nx/next": "23.3.0",
     "@nx/oxlint": "23.3.0",
