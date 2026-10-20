@@ -70,6 +70,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.1",
     "@types/katex": "^0.16.7",
+    "@zeroxsolutions/registry-native": "workspace:*",
     "msw": "3.0.0",
     "shadcn": "catalog:",
     "tailwindcss": "^4.3.1",
@@ -151,6 +152,9 @@
       },
       "shadcn-build": {
         "executor": "nx:run-commands",
+        "dependsOn": [
+          "@zeroxsolutions/registry-native:build-registry"
+        ],
         "outputs": [
           "{workspaceRoot}/apps/registry-ui/public/r"
         ],
@@ -160,6 +164,7 @@
             "rm -rf public/r",
             "shadcn build -o public/r/styles/base-nova",
             "for style in vega maia lyra mira luma sera rhea; do cp -R public/r/styles/base-nova public/r/styles/base-$style; done",
+            "cp -R ../../packages/registry-native/dist/r/styles/. public/r/styles/",
             "shadcn registry validate registry.json"
           ],
           "parallel": false

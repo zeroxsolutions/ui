@@ -48,13 +48,16 @@
   "exclude": ["out-tsc", "dist", "node_modules", "jest.config.ts", "jest.config.cts", ".next"],
   "references": [
     {
-      "path": "../../packages/editor-core"
-    },
-    {
       "path": "../../packages/icons"
     },
     {
       "path": "../../packages/fluent-emoji"
+    },
+    {
+      "path": "../../packages/editor-core"
+    },
+    {
+      "path": "../../packages/registry-native"
     }
   ]
 }

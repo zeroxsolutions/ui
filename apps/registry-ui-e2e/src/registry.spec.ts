@@ -8,6 +8,7 @@ interface RegistryIndex {
 interface RegistryItem {
   name: string;
   files?: { path: string; content?: string }[];
+  registryDependencies?: string[];
 }
 
 /** Every base style zui publishes under, as the design names them. */
@@ -52,5 +53,23 @@ test('the old item and index paths redirect once to base-nova', async ({ request
     const response = await request.get(from, { maxRedirects: 0 });
     expect(response.status(), from).toBe(308);
     expect(new URL(response.headers()['location'], 'http://x').pathname).toBe(to);
+  }
+});
+
+test('serves the react native items for each engine in vega', async ({ request }) => {
+  for (const engine of ['nativewind', 'uniwind']) {
+    const root = `/r/styles/${engine}-vega`;
+    const index = await request.get(`${root}/registry.json`);
+    expect(index.status(), `${root}/registry.json`).toBe(200);
+    const registry = (await index.json()) as RegistryIndex;
+    expect(registry.name).toBe('zui');
+    expect(registry.items.map(({ name }) => name)).toEqual(expect.arrayContaining(['button', 'icon', 'text']));
+
+    const response = await request.get(`${root}/button.json`);
+    expect(response.status(), `${root}/button.json`).toBe(200);
+    const button = (await response.json()) as RegistryItem;
+    expect(button.files?.length).toBeGreaterThan(0);
+    for (const file of button.files ?? []) expect(file.content, file.path).toBeTruthy();
+    expect(button.registryDependencies).toContain('@zui/text');
   }
 });
