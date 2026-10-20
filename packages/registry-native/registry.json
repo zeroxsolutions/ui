@@ -1,0 +1,62 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "zui",
+  "homepage": "https://ui.zeroxsolutions.com",
+  "items": [
+    {
+      "name": "utils",
+      "type": "registry:lib",
+      "title": "Utils",
+      "description": "cn, which joins class values and lets a later Tailwind class win over an earlier one.",
+      "dependencies": ["clsx", "tailwind-merge"],
+      "files": [
+        {
+          "path": "src/registry/lib/utils.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "text",
+      "type": "registry:ui",
+      "title": "Text",
+      "description": "Text that takes the text classes of the container around it, such as a Button's label colour.",
+      "dependencies": ["@rn-primitives/slot"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/text.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "icon",
+      "type": "registry:ui",
+      "title": "Icon",
+      "description": "A lucide icon sized and coloured by its classes, matching the label of the container around it.",
+      "dependencies": ["lucide-react-native", "react-native-svg"],
+      "registryDependencies": ["@zui/utils", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/icon.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "A pressable control announced as a button, in Vega's variants and sizes.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/button.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}

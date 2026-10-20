@@ -41,11 +41,33 @@
     "react-native": "0.88.0",
     "react-native-css-interop": "0.2.7",
     "react-test-renderer": "catalog:",
+    "shadcn": "catalog:",
     "ts-jest": "^29.4.7",
     "uniwind": "1.13.0"
   },
   "nx": {
     "targets": {
+      "build-registry": {
+        "executor": "nx:run-commands",
+        "cache": true,
+        "inputs": [
+          "{projectRoot}/registry.json",
+          "{projectRoot}/styles/**/*",
+          "{projectRoot}/tools/build-registry.mts",
+          "{projectRoot}/src/build/**/*",
+          "{projectRoot}/src/registry/**/*",
+          "!{projectRoot}/src/**/*.spec.[jt]s?(x)",
+          { "externalDependencies": ["shadcn"] }
+        ],
+        "outputs": ["{projectRoot}/dist/r"],
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/build-registry.mts"
+        }
+      },
+      "test": {
+        "dependsOn": ["^build", "build-registry"]
+      },
       "sync-upstream-styles": {
         "executor": "nx:run-commands",
         "cache": false,

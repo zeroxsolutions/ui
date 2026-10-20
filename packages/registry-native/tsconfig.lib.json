@@ -7,6 +7,8 @@
     "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "bundler",
+    // tools/build-registry.mts runs src/build under node, which resolves an import only by its written extension.
+    "allowImportingTsExtensions": true,
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo"
   },
   "exclude": [

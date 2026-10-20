@@ -10,4 +10,5 @@ catalog:
   "react": "19.3.1"
   "react-dom": "19.3.1"
   "react-test-renderer": "19.3.1"
+  "shadcn": "^4.21.0"
   "wrangler": "^4.105.0"
