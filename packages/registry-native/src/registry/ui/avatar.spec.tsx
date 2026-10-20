@@ -49,6 +49,21 @@ describe('Avatar', () => {
     expect(screen.getByTestId('fallback')).toBeOnTheScreen();
   });
 
+  it('shows the fallback again once a loaded image is taken away', async () => {
+    await renderAvatar({ source: PHOTO });
+    await fireEvent(screen.getByTestId('photo'), 'load');
+
+    await screen.rerender(
+      <Avatar alt="Jane Doe" testID="avatar">
+        <AvatarFallback testID="fallback">
+          <Text>JD</Text>
+        </AvatarFallback>
+      </Avatar>,
+    );
+
+    expect(screen.getByRole('img', { name: 'Jane Doe' })).toBe(screen.getByTestId('fallback'));
+  });
+
   it('draws a 32px circle by default', async () => {
     await renderAvatar();
     const classes = emittedClasses(screen.getByTestId('avatar').props.className);

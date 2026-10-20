@@ -53,7 +53,10 @@ function AvatarImage({ className, onLoadingStatusChange, source, ...props }: Ava
   const { setLoaded } = useContext(AvatarContext);
 
   const sourceKey = JSON.stringify(source);
-  useEffect(() => setLoaded(false), [sourceKey, setLoaded]);
+  useEffect(() => {
+    setLoaded(false);
+    return () => setLoaded(false);
+  }, [sourceKey, setLoaded]);
 
   return (
     <AvatarPrimitive.Image
