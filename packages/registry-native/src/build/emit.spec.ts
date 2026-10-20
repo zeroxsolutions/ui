@@ -194,7 +194,7 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
 
     expect(index.name).toBe('zui');
     expect([...itemNames].sort()).toEqual(declaredNames);
-    expect(files.sort()).toEqual(declaredNames.map((name) => `${name}.json`));
+    expect(files.sort()).toEqual(declaredNames.map((name) => `${name}.json`).sort());
   });
 
   it("ships theme as a registry:theme item holding Vega's background", () => {

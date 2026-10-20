@@ -234,6 +234,48 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "toggle",
+      "type": "registry:ui",
+      "title": "Toggle",
+      "description": "A two-state button in Vega's default and outline variants and three sizes, on the muted background while pressed, announced as a switch with a dimmed disabled state.",
+      "dependencies": ["@rn-primitives/toggle", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/toggle.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "toggle-group",
+      "type": "registry:ui",
+      "title": "Toggle Group",
+      "description": "A row or column of toggles of which one or several are pressed, spaced apart or joined into one bar, announced as radios or checkboxes.",
+      "dependencies": ["@rn-primitives/toggle-group", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/toggle"],
+      "files": [
+        {
+          "path": "src/registry/ui/toggle-group.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "Panels switched by a row of tabs, on a muted bar or underlined, of which only the selected panel is rendered, announced as a tab list of tabs.",
+      "dependencies": ["@rn-primitives/tabs", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/tabs.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
