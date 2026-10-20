@@ -9,6 +9,12 @@ export interface Translation {
 /** Modifiers React Native has a state for on a `Pressable`, under both engines. */
 const KEPT_MODIFIERS: ReadonlySet<string> = new Set(['active', 'disabled', 'dark']);
 
+/**
+ * Modifiers whose condition always holds on React Native, so they are removed and the class kept:
+ * a `Pressable` takes no `aria-haspopup`.
+ */
+const HOLDING_MODIFIERS: ReadonlySet<string> = new Set(['not-aria-[haspopup]']);
+
 /** No touch screen produces these states, so the class is dropped with its modifier. */
 const DROPPED_MODIFIERS = [
   /^hover$/,
@@ -87,8 +93,9 @@ export function translateClasses(classes: readonly string[], engine: Engine, par
   const renamed: Readonly<Record<string, string>> = RENAMED_UTILITIES[engine];
 
   for (const cls of classes) {
-    const modifiers = splitVariants(cls);
-    const utility = modifiers.pop() ?? '';
+    const variants = splitVariants(cls);
+    const utility = variants.pop() ?? '';
+    const modifiers = variants.filter((m) => !HOLDING_MODIFIERS.has(m));
 
     if (modifiers.some((m) => DROPPED_MODIFIERS.some((rule) => rule.test(m)))) continue;
     if (!modifiers.every((m) => KEPT_MODIFIERS.has(m))) {

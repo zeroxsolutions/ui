@@ -14,14 +14,19 @@ describe('translateClasses', () => {
   });
 
   it('drops a class behind a modifier chain when any modifier is dropped', () => {
-    const result = translateClasses(
-      ['dark:aria-invalid:border-destructive/50', 'active:not-aria-[haspopup]:translate-y-px'],
-      'nativewind',
-      'view',
-    );
+    const result = translateClasses(['dark:aria-invalid:border-destructive/50'], 'nativewind', 'view');
 
     expect(result).toEqual({ classes: [], unknown: [] });
   });
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    'keeps the pressed nudge behind not-aria-[haspopup], which always holds on a Pressable, for %s',
+    (engine) => {
+      const result = translateClasses(['active:not-aria-[haspopup]:translate-y-px'], engine, 'view');
+
+      expect(result).toEqual({ classes: ['active:translate-y-px'], unknown: [] });
+    },
+  );
 
   it('keeps active, disabled and dark', () => {
     const result = translateClasses(['active:bg-muted', 'disabled:opacity-50', 'dark:bg-input/30'], 'uniwind', 'view');

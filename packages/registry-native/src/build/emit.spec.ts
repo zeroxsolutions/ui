@@ -212,6 +212,12 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
 
     expect(file.content).toMatch(/size: \{\s*default: '[^']*\bh-9\b/);
   });
+
+  it("gives Button Vega's pressed nudge", () => {
+    const [file] = item('button')?.files ?? [];
+
+    expect(file.content).toContain('active:translate-y-px');
+  });
 });
 
 describe('the built nativewind-vega registry', () => {
