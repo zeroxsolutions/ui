@@ -1,0 +1,95 @@
+---
+title: Code Input
+description: A six-character one-time code over upstream InputOTP, in one group of six or two of three, whose slots fill the container's width.
+---
+
+<ComponentPreview name="code-input-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/code-input
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add input-otp
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add input-otp utils
+```
+
+<Step>Copy the component into `components/data-entry/code-input.tsx`.</Step>
+
+<ComponentSource name="code-input" title="components/data-entry/code-input.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { CodeInput } from '@/components/data-entry/code-input';
+```
+
+```tsx
+<Field>
+  <FieldLabel htmlFor="code">Verification code</FieldLabel>
+  <CodeInput id="code" pattern="3-3" value={code} onChange={setCode} aria-invalid={isWrong} />
+</Field>
+```
+
+Use it for a one-time code in a form whose button spans the width. Beside other controls in a row, use
+shadcn's `InputOTP` as it is. Pick `3-3` for a code the person reads off a message in two halves.
+
+## Composition
+
+```text
+CodeInput
+`-- InputOTPGroup (one, or two with an InputOTPSeparator between)
+    `-- CodeInputSlot
+```
+
+## API reference
+
+### CodeInput
+
+Renders shadcn's [`InputOTP`](https://ui.shadcn.com/docs/components/base/input-otp) and takes every prop it
+takes except `maxLength`, `pattern`, `render`, `children` and `containerClassName`. The code is six
+characters long. `pattern` is `6` (the default), one group of six slots, or `3-3`, two groups of three with
+a separator between. `allowedCharacters` is a regular expression's source each character must match,
+digits when omitted; a character outside it is refused as it is typed or pasted. `value` and `onChange` take
+the code as a string. `aria-invalid` marks the input invalid and draws every slot in the destructive tone.
+`autoComplete` is `one-time-code` unless you pass another. `className`, `data-slot="code-input"` and
+`data-pattern` land on the one real input under the slots.
+
+### CodeInputSlot
+
+Renders shadcn's `InputOTPSlot` and takes every prop it takes: one character, 48px tall, sharing its group's
+width. The active slot draws all four of its borders, where upstream leaves its left edge to the slot before
+it. `CodeInput` renders these itself; compose them inside `InputOTP` and `InputOTPGroup` only for a grouping
+neither pattern draws. It sets `data-slot="code-input-slot"`.

@@ -271,6 +271,21 @@
       ]
     },
     {
+      "name": "code-input",
+      "type": "registry:component",
+      "title": "Code Input",
+      "description": "A six-character one-time code over upstream InputOTP, in one group of six or two of three, whose slots fill the container's width.",
+      "categories": ["data-entry"],
+      "dependencies": ["input-otp"],
+      "registryDependencies": ["@shadcn/input-otp", "@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/data-entry/code-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "emoji-appearance-toggle-group",
       "type": "registry:component",
       "title": "Emoji Appearance Toggle Group",
@@ -1037,6 +1052,20 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/chat-suggestion-item-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "code-input-demo",
+      "type": "registry:example",
+      "title": "Code Input Demo",
+      "description": "A labelled six-digit sign-in code in two groups of three, above a verify button that spans the form.",
+      "categories": ["examples"],
+      "registryDependencies": ["@shadcn/button", "@shadcn/field", "@zui/code-input"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/code-input-demo.tsx",
           "type": "registry:example"
         }
       ]
