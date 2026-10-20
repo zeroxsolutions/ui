@@ -325,6 +325,52 @@ describe('translateClasses with a state', () => {
     expect(translateClasses(slot('cn-input'), 'uniwind', 'text').classes).toEqual(['text-base']);
   });
 
+  describe("with Vega's hairline ring", () => {
+    it.each(['nativewind', 'uniwind'] as const)('draws the ring of Card as a border for %s', (engine) => {
+      const classes = translateClasses(slot('cn-card'), engine, 'view').classes;
+
+      expect(classes).toEqual(expect.arrayContaining(['border', 'border-foreground/10']));
+      expect(classes.some((cls) => cls.startsWith('ring'))).toBe(false);
+    });
+
+    it('keeps the border a slot has and adds nothing from its ring', () => {
+      const result = translateClasses(['border', 'border-border', 'ring-1', 'ring-foreground/10'], 'uniwind', 'view');
+
+      expect(result).toEqual({ classes: ['border', 'border-border'], unknown: [] });
+      expect(translateClasses(['border-2', 'ring-1', 'ring-ring'], 'uniwind', 'view').classes).toEqual(['border-2']);
+    });
+
+    it('leaves Badge outline with its one border', () => {
+      const classes = [...slot('cn-badge'), ...slot('cn-badge-variant-outline')];
+
+      expect(translateClasses(classes, 'uniwind', 'view').classes.filter((cls) => cls === 'border')).toHaveLength(1);
+    });
+
+    it.each([
+      ['focus-visible:ring-3'],
+      ['focus-visible:ring-1'],
+      ['aria-invalid:ring-destructive/20'],
+      ['ring-0'],
+      ['ring-3'],
+    ])('keeps %s dropped next to a ring-1', (cls) => {
+      const result = translateClasses(['ring-1', 'ring-foreground/10', cls], 'uniwind', 'view');
+
+      expect(result.classes).toEqual(['border', 'border-foreground/10']);
+      expect(translateClasses([cls], 'uniwind', 'view').classes).toEqual([]);
+    });
+
+    it('draws no border for a ring colour with no ring-1 beside it', () => {
+      expect(translateClasses(['ring-background', 'ring-3'], 'uniwind', 'view').classes).toEqual([]);
+    });
+  });
+
+  it('lists a class once when the slot repeats it', () => {
+    expect(translateClasses(['opacity-50', 'peer-disabled:opacity-50'], 'uniwind', 'view', 'disabled').classes).toEqual(
+      ['opacity-50'],
+    );
+    expect(translateClasses(['p-2', 'p-2'], 'uniwind', 'view').classes).toEqual(['p-2']);
+  });
+
   describe("with Card's spacing variable", () => {
     it.each(['nativewind', 'uniwind'] as const)(
       "resolves Card's spacing variable to spacing steps, which Tailwind 3 cannot compile, for %s",
@@ -332,7 +378,16 @@ describe('translateClasses with a state', () => {
         const shadow = engine === 'nativewind' ? 'shadow-sm' : 'shadow-xs';
 
         expect(translateClasses(slot('cn-card'), engine, 'view')).toEqual({
-          classes: ['bg-card', 'gap-6', 'overflow-hidden', 'rounded-xl', 'py-6', shadow],
+          classes: [
+            'border-foreground/10',
+            'bg-card',
+            'gap-6',
+            'overflow-hidden',
+            'rounded-xl',
+            'py-6',
+            shadow,
+            'border',
+          ],
           unknown: [],
         });
         expect(translateClasses(slot('cn-card'), engine, 'view', 'size=sm')).toEqual({

@@ -114,6 +114,15 @@ const SPACING_VARIABLES = {
 const SPACING_DEFINITION = /^\[(--[\w-]+):--spacing\([\d.]+\)\]$/;
 const SPACING_READ = /^([a-z]+(?:-[a-z]+)*)-\((--[\w-]+)\)$/;
 
+/**
+ * Vega draws the hairline edge of a card or popup as `ring-1 ring-<colour>`, a box-shadow a device
+ * has no counterpart of, so an unmodified one becomes the border it looks like. Only a slot with no
+ * border of its own is given one, and a ring behind a state, `ring-0` and any other width stay dropped.
+ */
+const RING_WIDTH_UTILITY = 'ring-1';
+const RING_COLOUR = /^ring-(?!\d|inset|offset)([\w-]+(?:\/[\w.]+)?)$/;
+const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
+
 /** The px of one step of the spacing scale, 0.25rem at the 16px rem the theme's setup sets. */
 const SPACING_STEP_PX = 4;
 
@@ -287,6 +296,21 @@ function resolveSpacingVariables(cls: SlotClass): SlotClass[] {
   }));
 }
 
+/** Whether the slot draws a ring edge and has no border to draw it as already. */
+function drawsRingAsBorder(slot: readonly SlotClass[]): boolean {
+  const unmodified = slot.flatMap((cls) =>
+    cls.reading === 'read' && cls.states.length === 0 && cls.kept.length === 0 ? [cls.utility] : [],
+  );
+  return unmodified.includes(RING_WIDTH_UTILITY) && !unmodified.some((utility) => BORDER_WIDTH.test(utility));
+}
+
+/** The border an unmodified ring becomes, or the utility itself when it is not one. */
+function ringAsBorder(utility: string): string {
+  if (utility === RING_WIDTH_UTILITY) return 'border';
+  const colour = RING_COLOUR.exec(utility)?.[1];
+  return colour === undefined ? utility : `border-${colour}`;
+}
+
 /**
  * Resolves a translate by the part's own size less a length to px, from the size the slot gives the
  * part in the class's own state or the nearest state it holds. Left as it is when the slot names no
@@ -332,13 +356,20 @@ export function translateClasses(
   const wanted = stateKeyOf(state.split('+').filter(Boolean));
   const slot = classes.flatMap((cls) => resolveSpacingVariables(readClass(cls)));
 
+  const ringBorder = drawsRingAsBorder(slot);
+
   for (const cls of slot) {
     if (cls.reading === 'dropped') continue;
     if (cls.reading === 'unknown') {
       unknown.push(cls.source);
       continue;
     }
-    const utility = resolveOwnSizeTranslate(cls.utility, cls.states, slot);
+    const unmodified = cls.states.length === 0 && cls.kept.length === 0;
+    const utility = resolveOwnSizeTranslate(
+      ringBorder && unmodified ? ringAsBorder(cls.utility) : cls.utility,
+      cls.states,
+      slot,
+    );
     if (DROPPED_UTILITIES.some((rule) => rule.test(utility))) continue;
     if (untranslatable.some((rule) => rule.test(utility))) {
       unknown.push(cls.source);
@@ -349,5 +380,5 @@ export function translateClasses(
     kept.push([...cls.kept, renamed[utility] ?? utility].join(':'));
   }
 
-  return { classes: kept, unknown };
+  return { classes: [...new Set(kept)], unknown };
 }
