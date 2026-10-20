@@ -156,12 +156,7 @@
         ],
         "options": {
           "cwd": "{projectRoot}",
-          "commands": [
-            "rm -rf public/r",
-            "shadcn build -o public/r",
-            "shadcn registry validate registry.json"
-          ],
-          "parallel": false
+          "command": "node tools/build-registry.mts"
         }
       },
       "fumadocs-generate": {
