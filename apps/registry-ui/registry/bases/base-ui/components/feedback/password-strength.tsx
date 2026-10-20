@@ -57,9 +57,10 @@ interface PasswordStrengthMeterProps extends Omit<
 }
 
 /**
- * Upstream's `Progress` filled one step of three for weak, two for fair and three for strong, under
- * its name and the strength in words. A screen reader hears the new words politely when the strength
- * changes; the bar's own value text is not announced on a change.
+ * Upstream's `Progress` with the root's strength as one step of three (weak), two (fair) or three
+ * (strong), its children as the bar's name and `valueText` beside it and as the bar's value text. A
+ * polite live region beside the bar reads `valueText` out each time it changes, which a progressbar's
+ * own value text does not.
  */
 function PasswordStrengthMeter({
   children,
@@ -104,15 +105,27 @@ function PasswordStrengthRequirements({ className, ...props }: React.ComponentPr
 interface PasswordStrengthRequirementProps extends React.ComponentProps<'li'> {
   /** Whether the password meets it; carried as `data-met`. */
   met?: boolean;
+  /**
+   * Read after the requirement while it is met; `Met` when omitted. A string, because a screen reader
+   * reads it and the app translates it.
+   */
+  metLabel?: string;
+  /**
+   * Read after the requirement while it is not met; `Not met` when omitted. A string, because a screen
+   * reader reads it and the app translates it.
+   */
+  unmetLabel?: string;
 }
 
 /**
- * One requirement: a circle-check and foreground text when met, a circle and muted text when not.
- * The icons are hidden from a screen reader, so the caller says in the children whether it is met,
- * as a visually hidden word, where a screen reader user needs to know.
+ * One requirement: a circle-check and foreground text when met, a circle and muted text when not. The
+ * icons are hidden from a screen reader, which hears `metLabel` or `unmetLabel` after the children
+ * instead.
  */
 function PasswordStrengthRequirement({
   met = false,
+  metLabel = 'Met',
+  unmetLabel = 'Not met',
   className,
   children,
   ...props
@@ -129,7 +142,10 @@ function PasswordStrengthRequirement({
       ) : (
         <CircleIcon aria-hidden size={16} className="text-foreground shrink-0" />
       )}
-      <span className="min-w-0 flex-1">{children}</span>
+      <span className="min-w-0 flex-1">
+        {children}
+        <span className="sr-only">, {met ? metLabel : unmetLabel}</span>
+      </span>
     </li>
   );
 }

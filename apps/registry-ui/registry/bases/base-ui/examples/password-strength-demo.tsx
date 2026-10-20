@@ -27,7 +27,7 @@ const STRENGTH_WORD: Record<PasswordStrengthValue, string> = { weak: 'Weak', fai
 /**
  * A new password checked as NIST SP 800-63B rev 4 asks: by its length and against the person's own
  * name and email, with no rule about character classes. It is strong at 15 characters free of
- * personal data, fair at 8, and weak below that.
+ * personal data, fair at 8, and weak below that. An empty password meets neither requirement.
  */
 function PasswordStrengthDemo(): ReactNode {
   const [password, setPassword] = useState('');
@@ -56,14 +56,8 @@ function PasswordStrengthDemo(): ReactNode {
       <PasswordStrength strength={strength}>
         <PasswordStrengthMeter valueText={STRENGTH_WORD[strength]}>Password strength</PasswordStrengthMeter>
         <PasswordStrengthRequirements>
-          <PasswordStrengthRequirement met={isLongEnough}>
-            At least {MIN_LENGTH} characters
-            <span className="sr-only">{isLongEnough ? ', met' : ', not met'}</span>
-          </PasswordStrengthRequirement>
-          <PasswordStrengthRequirement met={isImpersonal}>
-            Not your name or email
-            <span className="sr-only">{isImpersonal ? ', met' : ', not met'}</span>
-          </PasswordStrengthRequirement>
+          <PasswordStrengthRequirement met={isLongEnough}>At least {MIN_LENGTH} characters</PasswordStrengthRequirement>
+          <PasswordStrengthRequirement met={isImpersonal}>Not your name or email</PasswordStrengthRequirement>
         </PasswordStrengthRequirements>
       </PasswordStrength>
     </div>

@@ -59,14 +59,46 @@ describe('PasswordStrength', () => {
     );
     const [met, unmet] = screen.getAllByRole('listitem');
 
-    expect(met?.textContent).toBe('At least 15 characters');
+    expect(met?.textContent).toMatch(/^At least 15 characters/);
     expect(met?.hasAttribute('data-met')).toBe(true);
     expect(met?.querySelector('[data-slot=circle-check-icon]')).not.toBeNull();
     expect(met?.querySelector('[data-slot=circle-icon]')).toBeNull();
 
-    expect(unmet?.textContent).toBe('Not your name or email');
+    expect(unmet?.textContent).toMatch(/^Not your name or email/);
     expect(unmet?.hasAttribute('data-met')).toBe(false);
     expect(unmet?.querySelector('[data-slot=circle-icon]')).not.toBeNull();
     expect(unmet?.querySelector('[data-slot=circle-check-icon]')).toBeNull();
+  });
+
+  it('says after the requirement whether it is met', () => {
+    render(
+      <PasswordStrengthRequirements>
+        <PasswordStrengthRequirement met>At least 15 characters</PasswordStrengthRequirement>
+        <PasswordStrengthRequirement met={false}>Not your name or email</PasswordStrengthRequirement>
+      </PasswordStrengthRequirements>,
+    );
+    const [met, unmet] = screen.getAllByRole('listitem');
+
+    expect(met?.textContent).toMatch(/Met$/);
+    expect(met?.textContent).not.toMatch(/Not met$/);
+    expect(unmet?.textContent).toMatch(/Not met$/);
+  });
+
+  it('says it in the words the caller passes', () => {
+    render(
+      <PasswordStrengthRequirements>
+        <PasswordStrengthRequirement met metLabel="Erfuellt" unmetLabel="Nicht erfuellt">
+          Mindestens 15 Zeichen
+        </PasswordStrengthRequirement>
+        <PasswordStrengthRequirement met={false} metLabel="Erfuellt" unmetLabel="Nicht erfuellt">
+          Nicht Ihr Name
+        </PasswordStrengthRequirement>
+      </PasswordStrengthRequirements>,
+    );
+    const [met, unmet] = screen.getAllByRole('listitem');
+
+    expect(met?.textContent).toMatch(/Erfuellt$/);
+    expect(met?.textContent).not.toMatch(/Met$/);
+    expect(unmet?.textContent).toMatch(/Nicht erfuellt$/);
   });
 });
