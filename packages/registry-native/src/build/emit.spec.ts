@@ -6,6 +6,7 @@ import { translateClasses, type Engine } from './translate';
 
 const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-vega.css');
 const STYLES_PATH = join(__dirname, '../../dist/r/styles');
+const REGISTRY_PATH = join(__dirname, '../../registry.json');
 const ENGINES = ['nativewind', 'uniwind'] as const satisfies readonly Engine[];
 const OTHER_ENGINE_PACKAGE = {
   nativewind: /uniwind/i,
@@ -187,10 +188,13 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
   const items = files.map((file) => JSON.parse(readFileSync(join(directory, file), 'utf8')) as BuiltItem);
   const item = (name: string): BuiltItem | undefined => items.find((built) => built.name === name);
 
-  it('is named zui and lists utils, text, icon, button and theme', () => {
+  it('is named zui and lists every item registry.json declares', () => {
+    const declared = (JSON.parse(readFileSync(REGISTRY_PATH, 'utf8')) as { items: { name: string }[] }).items;
+    const declaredNames = declared.map((declaredItem) => declaredItem.name).sort();
+
     expect(index.name).toBe('zui');
-    expect([...itemNames].sort()).toEqual(['button', 'icon', 'text', 'theme', 'utils']);
-    expect(files.sort()).toEqual(['button.json', 'icon.json', 'text.json', 'theme.json', 'utils.json']);
+    expect([...itemNames].sort()).toEqual(declaredNames);
+    expect(files.sort()).toEqual(declaredNames.map((name) => `${name}.json`));
   });
 
   it("ships theme as a registry:theme item holding Vega's background", () => {

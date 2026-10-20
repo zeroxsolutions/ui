@@ -7,8 +7,9 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'html', 'tsx', 'jsx'],
   moduleNameMapper: {
     '[.]svg$': '@nx/expo/plugins/jest/svg-mock',
-    // Icon has one file per engine, and the registry ships one of them as icon.tsx; the specs run NativeWind's.
+    // Icon and Skeleton have one file per engine, and the registry ships one of them as icon.tsx and skeleton.tsx; the specs run NativeWind's.
     '^[.]/icon$': '<rootDir>/src/registry/ui/icon.nativewind.tsx',
+    '^[.]/skeleton$': '<rootDir>/src/registry/ui/skeleton.nativewind.tsx',
   },
   // jest-expo's preset list plus lucide-react-native and @rn-primitives. Under pnpm a package sits in
   // a nested node_modules the preset leaves untransformed unless it names the package;

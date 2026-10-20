@@ -70,6 +70,74 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "separator",
+      "type": "registry:ui",
+      "title": "Separator",
+      "description": "A one-pixel rule between groups of content, horizontal or vertical, hidden from screen readers unless it marks a real boundary.",
+      "dependencies": ["@rn-primitives/separator", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/separator.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "skeleton",
+      "type": "registry:ui",
+      "title": "Skeleton",
+      "description": "A muted placeholder block that pulses while content loads.",
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/skeleton.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "label",
+      "type": "registry:ui",
+      "title": "Label",
+      "description": "The text that names a field, with a nativeID for the field's aria-labelledby and an onPress for the caller to focus it.",
+      "dependencies": ["@rn-primitives/label"],
+      "registryDependencies": ["@zui/utils", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/label.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "description": "A small pill for a status or a count, in Vega's variants, with its label and icon taking the variant's colours.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/badge.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "card",
+      "type": "registry:ui",
+      "title": "Card",
+      "description": "A surface with a header, title, description, content and footer, in Vega's default and small spacing.",
+      "registryDependencies": ["@zui/utils", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/card.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

@@ -102,6 +102,18 @@ const STATE_WORDS: ReadonlySet<string> = new Set(STATE_MODIFIERS.values());
 const OWN_SIZE_TRANSLATE = /^translate-([xy])-\[calc\(100%-([\d.]+)px\)\]$/;
 const SIZE_UTILITY = /^(size|w|h)-(?:([\d.]+)|\[([\d.]+)px\])$/;
 
+/**
+ * Spacing variables Vega defines on one slot and reads in the slots inside it. Tailwind 3 compiles
+ * neither `[--name:--spacing(N)]` nor `<utility>-(--name)`, so a read becomes the spacing step the
+ * variable holds, once for no state and once for each state that changes it.
+ */
+const SPACING_VARIABLES = {
+  '--card-spacing': { '': 6, 'size=sm': 4 },
+} as const satisfies Readonly<Record<string, Readonly<Record<StateKey, number>>>>;
+
+const SPACING_DEFINITION = /^\[(--[\w-]+):--spacing\([\d.]+\)\]$/;
+const SPACING_READ = /^([a-z]+(?:-[a-z]+)*)-\((--[\w-]+)\)$/;
+
 /** The px of one step of the spacing scale, 0.25rem at the 16px rem the theme's setup sets. */
 const SPACING_STEP_PX = 4;
 
@@ -230,7 +242,7 @@ function stateOf(modifier: string): StateKey | undefined {
 type SlotClass =
   | { reading: 'dropped' }
   | { reading: 'unknown'; source: string }
-  | { reading: 'read'; utility: string; kept: string[]; states: string[]; onIcon: boolean };
+  | { reading: 'read'; source: string; utility: string; kept: string[]; states: string[]; onIcon: boolean };
 
 function readClass(cls: string): SlotClass {
   const variants = splitVariants(cls);
@@ -249,7 +261,30 @@ function readClass(cls: string): SlotClass {
     if (!state) return { reading: 'unknown', source: cls };
     states.push(state);
   }
-  return { reading: 'read', utility, kept, states, onIcon: variants.some((m) => ICON_MODIFIERS.has(m)) };
+  return { reading: 'read', source: cls, utility, kept, states, onIcon: variants.some((m) => ICON_MODIFIERS.has(m)) };
+}
+
+/**
+ * Replaces a definition of a spacing variable with nothing and a read of one with the classes of its
+ * steps, each behind the state that sets it. A variable that has no entry in
+ * {@link SPACING_VARIABLES} is left unknown.
+ */
+function resolveSpacingVariables(cls: SlotClass): SlotClass[] {
+  if (cls.reading !== 'read') return [cls];
+  const definition = SPACING_DEFINITION.exec(cls.utility);
+  const read = SPACING_READ.exec(cls.utility);
+  const variable = definition?.[1] ?? read?.[2];
+  if (variable === undefined) return [cls];
+  const steps: Readonly<Record<StateKey, number>> | undefined = Object.hasOwn(SPACING_VARIABLES, variable)
+    ? SPACING_VARIABLES[variable as keyof typeof SPACING_VARIABLES]
+    : undefined;
+  if (!steps) return [{ reading: 'unknown', source: cls.source }];
+  if (!read) return [];
+  return Object.entries(steps).map(([state, step]) => ({
+    ...cls,
+    utility: `${read[1]}-${step}`,
+    states: state === '' ? cls.states : [...cls.states, state],
+  }));
 }
 
 /**
@@ -295,9 +330,9 @@ export function translateClasses(
   const renamed: Readonly<Record<string, string>> = RENAMED_UTILITIES[engine];
   const untranslatable: readonly RegExp[] = UNTRANSLATABLE_UTILITIES[engine];
   const wanted = stateKeyOf(state.split('+').filter(Boolean));
-  const slot = classes.map(readClass);
+  const slot = classes.flatMap((cls) => resolveSpacingVariables(readClass(cls)));
 
-  for (const [index, cls] of slot.entries()) {
+  for (const cls of slot) {
     if (cls.reading === 'dropped') continue;
     if (cls.reading === 'unknown') {
       unknown.push(cls.source);
@@ -306,7 +341,7 @@ export function translateClasses(
     const utility = resolveOwnSizeTranslate(cls.utility, cls.states, slot);
     if (DROPPED_UTILITIES.some((rule) => rule.test(utility))) continue;
     if (untranslatable.some((rule) => rule.test(utility))) {
-      unknown.push(classes[index]);
+      unknown.push(cls.source);
       continue;
     }
 

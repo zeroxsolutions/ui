@@ -325,6 +325,39 @@ describe('translateClasses with a state', () => {
     expect(translateClasses(slot('cn-input'), 'uniwind', 'text').classes).toEqual(['text-base']);
   });
 
+  describe("with Card's spacing variable", () => {
+    it.each(['nativewind', 'uniwind'] as const)(
+      "resolves Card's spacing variable to spacing steps, which Tailwind 3 cannot compile, for %s",
+      (engine) => {
+        const shadow = engine === 'nativewind' ? 'shadow-sm' : 'shadow-xs';
+
+        expect(translateClasses(slot('cn-card'), engine, 'view')).toEqual({
+          classes: ['bg-card', 'gap-6', 'overflow-hidden', 'rounded-xl', 'py-6', shadow],
+          unknown: [],
+        });
+        expect(translateClasses(slot('cn-card'), engine, 'view', 'size=sm')).toEqual({
+          classes: ['gap-4', 'py-4'],
+          unknown: [],
+        });
+        expect(translateClasses(slot('cn-card-header'), engine, 'view', 'size=sm').classes).toEqual(['px-4']);
+        expect(translateClasses(slot('cn-card-footer'), engine, 'view').classes).toEqual(['rounded-b-xl', 'px-6']);
+      },
+    );
+
+    it("takes the step of each size from the values Vega's Card slot gives the variable", () => {
+      const defined = slot('cn-card').filter((cls) => cls.includes('[--card-spacing:--spacing('));
+
+      expect(defined).toEqual(['[--card-spacing:--spacing(6)]', 'data-[size=sm]:[--card-spacing:--spacing(4)]']);
+    });
+
+    it('reports a variable it has no value for rather than passing it through', () => {
+      expect(translateClasses(['px-(--gutter)'], 'uniwind', 'view').unknown).toEqual(['px-(--gutter)']);
+      expect(translateClasses(['[--gutter:--spacing(3)]'], 'uniwind', 'view').unknown).toEqual([
+        '[--gutter:--spacing(3)]',
+      ]);
+    });
+  });
+
   it.each(['nativewind', 'uniwind'] as const)(
     "translates every Base UI slot of the batch's components for %s with nothing unknown",
     (engine) => {
