@@ -138,6 +138,34 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "avatar",
+      "type": "registry:ui",
+      "title": "Avatar",
+      "description": "A round picture of a person or account in three sizes, with a fallback that shows when the image is missing or fails to load.",
+      "dependencies": ["@rn-primitives/avatar"],
+      "registryDependencies": ["@zui/utils", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/avatar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "progress",
+      "type": "registry:ui",
+      "title": "Progress",
+      "description": "A bar showing how far a task has got from 0 to 100, announced as a progress bar with its value.",
+      "dependencies": ["@rn-primitives/progress"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/progress.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

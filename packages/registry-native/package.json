@@ -13,7 +13,9 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@rn-primitives/avatar": "1.5.2",
     "@rn-primitives/label": "1.5.2",
+    "@rn-primitives/progress": "1.5.2",
     "@rn-primitives/separator": "1.5.2",
     "@rn-primitives/slot": "1.5.2",
     "class-variance-authority": "catalog:",
