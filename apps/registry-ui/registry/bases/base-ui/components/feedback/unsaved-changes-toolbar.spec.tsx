@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
+import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -57,6 +58,15 @@ describe('UnsavedChangesToolbar', () => {
     expect(status.getAttribute('aria-live')).toBe('polite');
     expect(status.textContent).toBe('You have unsaved changes.');
     expect(screen.getByRole('group', { name: 'You have unsaved changes.' })).toBe(root());
+  });
+
+  it('mounts its live region empty and fills it after, so the first message is announced', () => {
+    const first = document.createElement('div');
+    first.innerHTML = renderToString(toolbar('default'));
+    expect(first.querySelector('[role=status]')?.textContent).toBe('');
+
+    render(toolbar('default'));
+    expect(screen.getByRole('status').textContent).toBe('You have unsaved changes.');
   });
 
   it('while saving disables both actions and shows a spinner in Save, keeping focus on it', () => {

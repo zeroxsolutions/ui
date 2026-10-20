@@ -102,7 +102,8 @@ it floats at that element's edge instead of the viewport's.
 ### UnsavedChangesToolbarMessage
 
 A `p` that takes every prop a `p` takes. Its children are the message, which names the toolbar. It is a
-polite live region, so a screen reader reads each new message without moving focus. It sets
+polite live region, so a screen reader reads each new message without moving focus. Its children render
+one pass after it mounts, so the first message is read when the toolbar appears. It sets
 `data-slot="unsaved-changes-toolbar-message"`.
 
 ### UnsavedChangesToolbarActions

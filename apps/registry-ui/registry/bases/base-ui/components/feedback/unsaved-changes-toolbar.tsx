@@ -78,10 +78,14 @@ function UnsavedChangesToolbar({
 
 /**
  * What the toolbar says, which also names it. A polite live region, so a screen reader reads each new
- * message, such as a failed save, without leaving what the person is doing.
+ * message, such as a failed save, without leaving what the person is doing. Its children arrive one
+ * render after it mounts, so the first message is announced when the toolbar appears.
  */
-function UnsavedChangesToolbarMessage({ className, ...props }: React.ComponentProps<'p'>): React.ReactNode {
+function UnsavedChangesToolbarMessage({ className, children, ...props }: React.ComponentProps<'p'>): React.ReactNode {
   const { messageId } = useUnsavedChangesToolbar();
+  // A screen reader announces changes to a live region already in the page, not the text it mounted with.
+  const [isMounted, setIsMounted] = React.useState(false);
+  React.useEffect(() => setIsMounted(true), []);
   return (
     <p
       data-slot="unsaved-changes-toolbar-message"
@@ -93,7 +97,9 @@ function UnsavedChangesToolbarMessage({ className, ...props }: React.ComponentPr
         className,
       )}
       {...props}
-    />
+    >
+      {isMounted ? children : null}
+    </p>
   );
 }
 
