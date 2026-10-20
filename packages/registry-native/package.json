@@ -42,5 +42,17 @@
     "react-test-renderer": "catalog:",
     "ts-jest": "^29.4.7",
     "uniwind": "1.13.0"
+  },
+  "nx": {
+    "targets": {
+      "sync-upstream-styles": {
+        "executor": "nx:run-commands",
+        "cache": false,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node tools/sync-upstream-styles.mts {args.commit}"
+        }
+      }
+    }
   }
 }
