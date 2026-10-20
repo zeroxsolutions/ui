@@ -64,7 +64,7 @@ function CodeInput({
     >
       {groups.map(([start, length], groupIndex) => (
         <React.Fragment key={start}>
-          {groupIndex > 0 && <InputOTPSeparator />}
+          {groupIndex > 0 && <InputOTPSeparator role="presentation" aria-hidden />}
           <InputOTPGroup className={cn('w-full', groups.length > 1 && 'flex-1')}>
             {Array.from({ length }, (_, offset) => (
               <CodeInputSlot key={start + offset} index={start + offset} aria-invalid={ariaInvalid} />

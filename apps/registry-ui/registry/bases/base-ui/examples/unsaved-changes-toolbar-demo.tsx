@@ -77,7 +77,11 @@ function UnsavedChangesToolbarDemo(): ReactNode {
           }}
         />
       </Field>
-      <Button variant="outline" className="self-start" onClick={() => isDirty && setState('attention')}>
+      <Button
+        variant="outline"
+        className="self-start"
+        onClick={() => isDirty && state !== 'saving' && setState('attention')}
+      >
         Back to settings
       </Button>
       {isDirty && (

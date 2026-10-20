@@ -33,6 +33,12 @@ describe('CodeInput', () => {
     expect(screen.getAllByRole('textbox')).toHaveLength(1);
   });
 
+  it('keeps the separator between the groups out of what a screen reader reads', () => {
+    render(<CodeInput aria-label="Verification code" pattern="3-3" />);
+
+    expect(screen.queryAllByRole('separator')).toEqual([]);
+  });
+
   it('fills the slots left to right as the code is typed', () => {
     const onChange = vi.fn();
     const { container } = render(<CodeInput aria-label="Verification code" onChange={onChange} />);

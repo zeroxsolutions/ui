@@ -127,7 +127,7 @@ function UnsavedChangesToolbarReset({
       size="sm"
       disabled={state === 'saving' || disabled}
       focusableWhenDisabled
-      className={cn('data-disabled:opacity-50', className)}
+      className={cn('data-disabled:pointer-events-none data-disabled:opacity-50', className)}
       {...props}
     />
   );
@@ -152,7 +152,7 @@ function UnsavedChangesToolbarSave({
       size="sm"
       disabled={saving || disabled}
       focusableWhenDisabled
-      className={cn('data-disabled:opacity-50', className)}
+      className={cn('data-disabled:pointer-events-none data-disabled:opacity-50', className)}
       {...props}
     >
       {saving && <Spinner data-icon="inline-start" aria-hidden />}
