@@ -100,11 +100,11 @@ for (const [width, height] of [
   });
 }
 
-test('at 390 wide a long command scrolls inside its block, and the page does not scroll sideways', async ({ page }) => {
+test('at 390 wide a long line scrolls inside its block, and the page does not scroll sideways', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/docs/installation');
 
-  const block = page.locator('[data-slot=code-block]').filter({ hasText: 'status-indicator.json' }).first();
+  const block = page.locator('[data-slot=code-block]').filter({ hasText: 'r/styles/{style}/{name}.json' }).first();
   const viewport = block.locator('[data-slot=code-block-viewport]').first();
   await expect(viewport).toBeVisible();
 
