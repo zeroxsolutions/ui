@@ -125,6 +125,7 @@ describe('aliasImports', () => {
 
 interface BuiltItem {
   name: string;
+  type: string;
   dependencies?: string[];
   registryDependencies?: string[];
   files: { path: string; content: string }[];
@@ -155,10 +156,17 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
   const items = files.map((file) => JSON.parse(readFileSync(join(directory, file), 'utf8')) as BuiltItem);
   const item = (name: string): BuiltItem | undefined => items.find((built) => built.name === name);
 
-  it('is named zui and lists utils, text, icon and button', () => {
+  it('is named zui and lists utils, text, icon, button and theme', () => {
     expect(index.name).toBe('zui');
-    expect([...itemNames].sort()).toEqual(['button', 'icon', 'text', 'utils']);
-    expect(files.sort()).toEqual(['button.json', 'icon.json', 'text.json', 'utils.json']);
+    expect([...itemNames].sort()).toEqual(['button', 'icon', 'text', 'theme', 'utils']);
+    expect(files.sort()).toEqual(['button.json', 'icon.json', 'text.json', 'theme.json', 'utils.json']);
+  });
+
+  it("ships theme as a registry:theme item holding Vega's background", () => {
+    const theme = item('theme');
+
+    expect(theme?.type).toBe('registry:theme');
+    expect(JSON.stringify(theme)).toMatch(/--(color-)?background\b/);
   });
 
   it("holds no slot token, web class or the other engine's package", () => {
@@ -234,6 +242,10 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
 });
 
 describe('the built nativewind-vega registry', () => {
+  it('holds no oklch colour in its theme', () => {
+    expect(readFileSync(join(STYLES_PATH, 'nativewind-vega', 'theme.json'), 'utf8')).not.toContain('oklch(');
+  });
+
   it('carries no Tailwind 4 class name that Tailwind 3 lacks', () => {
     const directory = join(STYLES_PATH, 'nativewind-vega');
     for (const file of readdirSync(directory)) {

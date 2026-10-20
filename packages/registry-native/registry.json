@@ -4,6 +4,12 @@
   "homepage": "https://ui.zeroxsolutions.com",
   "items": [
     {
+      "name": "theme",
+      "type": "registry:theme",
+      "title": "Theme",
+      "description": "Vega's neutral colours, light and dark, with success and warning, and a font family per Geist weight, in the form the engine compiles."
+    },
+    {
       "name": "utils",
       "type": "registry:lib",
       "title": "Utils",
