@@ -468,6 +468,26 @@
       ]
     },
     {
+      "name": "password-strength",
+      "type": "registry:component",
+      "title": "Password Strength",
+      "description": "How strong a password is, as a three-step meter announced on change, and which of its requirements it meets, in a small card.",
+      "categories": ["feedback"],
+      "registryDependencies": [
+        "@shadcn/card",
+        "@shadcn/progress",
+        "@shadcn/utils",
+        "@zui/circle-check-icon",
+        "@zui/circle-icon"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/feedback/password-strength.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "status-indicator",
       "type": "registry:component",
       "title": "Status Indicator",
@@ -1198,6 +1218,20 @@
       ]
     },
     {
+      "name": "password-strength-demo",
+      "type": "registry:example",
+      "title": "Password Strength Demo",
+      "description": "A new password field whose strength and requirements follow what is typed, checked by length and against the person's name and email.",
+      "categories": ["examples"],
+      "registryDependencies": ["@shadcn/field", "@shadcn/input-group", "@zui/password-input", "@zui/password-strength"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/password-strength-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
       "name": "status-indicator-demo",
       "type": "registry:example",
       "title": "Status Indicator Demo",
@@ -1742,6 +1776,21 @@
           "path": "registry/bases/base-ui/icons/circle-check-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/circle-check-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "circle-icon",
+      "type": "registry:ui",
+      "title": "Circle Icon",
+      "description": "An animated circle icon that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/circle-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/circle-icon.tsx"
         }
       ]
     },
