@@ -14,10 +14,13 @@
   },
   "dependencies": {
     "@rn-primitives/avatar": "1.5.2",
+    "@rn-primitives/checkbox": "1.5.2",
     "@rn-primitives/label": "1.5.2",
     "@rn-primitives/progress": "1.5.2",
+    "@rn-primitives/radio-group": "1.5.2",
     "@rn-primitives/separator": "1.5.2",
     "@rn-primitives/slot": "1.5.2",
+    "@rn-primitives/switch": "1.5.2",
     "class-variance-authority": "catalog:",
     "clsx": "^2.1.1",
     "lucide-react-native": "1.60.0",

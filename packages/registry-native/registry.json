@@ -192,6 +192,48 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "Switch",
+      "description": "An on/off control in Vega's default and small sizes, announced as a switch, with an invalid border and a dimmed disabled state.",
+      "dependencies": ["@rn-primitives/switch", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/switch.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "checkbox",
+      "type": "registry:ui",
+      "title": "Checkbox",
+      "description": "A box with a check mark when checked, announced as a checkbox, with an invalid border and a dimmed disabled state.",
+      "dependencies": ["@rn-primitives/checkbox", "lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/checkbox.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "radio-group",
+      "type": "registry:ui",
+      "title": "Radio Group",
+      "description": "A column of round choices of which one is selected, announced as radios, with an invalid border and a dimmed disabled state per item or for the group.",
+      "dependencies": ["@rn-primitives/radio-group"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/radio-group.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
