@@ -143,7 +143,8 @@ interface TabBarItemProps extends useRender.ComponentProps<'a'> {
 /**
  * One destination, an `<a>` unless `render` passes the router's own link, such as
  * `render={<Link href="/inbox" />}`, so it navigates on the client. Its name is its `TabBarLabel`, and a
- * `TabBarBadge` describes it. Carries `data-active` when active.
+ * `TabBarBadge` describes it. Ringed while it has keyboard focus, unless a `TabBarIndicator` inside
+ * it carries the ring. Carries `data-active` when active.
  */
 function TabBarItem({ active = false, className, render, ...props }: TabBarItemProps): React.ReactNode {
   const badgeId = React.useId();
@@ -155,7 +156,7 @@ function TabBarItem({ active = false, className, render, ...props }: TabBarItemP
       {
         'aria-current': active ? 'page' : undefined,
         className: cn(
-          'group/tab-bar-item relative flex min-h-12 min-w-16 flex-col items-center justify-center gap-1 p-1 text-muted-foreground outline-none select-none group-data-[orientation=horizontal]/tab-bar:flex-1 data-active:text-primary',
+          'group/tab-bar-item relative flex min-h-12 min-w-16 flex-col items-center justify-center gap-1 p-1 text-muted-foreground rounded-lg outline-none select-none group-data-[orientation=horizontal]/tab-bar:flex-1 not-has-data-[slot=tab-bar-indicator]:focus-visible:ring-2 not-has-data-[slot=tab-bar-indicator]:focus-visible:ring-ring data-active:text-primary',
           className,
         ),
       },

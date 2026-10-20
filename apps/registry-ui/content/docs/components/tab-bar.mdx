@@ -138,8 +138,8 @@ link. Its name is its `TabBarLabel`.
 `active` sets `aria-current="page"`, lights the indicator and keeps the label under `labels="selected"`. In
 a row the items share the width; in a column each is as wide as the bar. Each is at least 48px high,
 with its label hidden or not. An `aria-describedby` the caller passes is kept, and the badge's id is added
-to it. It carries `data-active` while
-active and sets `data-slot="tab-bar-item"`.
+to it. While it has keyboard focus its `TabBarIndicator` is ringed, or the item itself when it holds no
+indicator. It carries `data-active` while active and sets `data-slot="tab-bar-item"`.
 
 ### TabBarIndicator
 
