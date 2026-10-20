@@ -11,8 +11,7 @@ const RadioGroupContext = createContext<{ value: string | undefined; disabled: b
 
 // A `cn-<slot>` token stands for that Vega slot's classes and `cn-<slot>@<state>` for the classes
 // Vega puts behind that state; the registry build replaces each with the classes translated for the
-// target engine. Vega lays the group out as a grid, which neither engine draws, so `flex` replaces
-// it as a column with the slot's gap.
+// target engine.
 
 /**
  * A set of RadioGroupItem children of which one is selected, announced as a radio group. It is
@@ -23,7 +22,7 @@ function RadioGroup({ className, value, disabled = false, ...props }: RadioGroup
   return (
     <RadioGroupContext.Provider value={{ value, disabled }}>
       <RadioGroupPrimitive.Root
-        className={cn('cn-radio-group flex', className)}
+        className={cn('cn-radio-group', className)}
         value={value}
         disabled={disabled}
         {...props}

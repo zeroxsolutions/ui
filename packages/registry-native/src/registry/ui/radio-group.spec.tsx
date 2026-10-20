@@ -86,6 +86,17 @@ describe('RadioGroup', () => {
     expect(dotOf(other)).toBeUndefined();
   });
 
+  it("centres the dot with the indicator's flex rather than an offset and a translate", async () => {
+    await render(<PlanPicker />);
+    const selected = screen.getByRole('radio', { name: 'Free' });
+
+    const indicator = emittedClasses(onlyChildOf(selected)?.props.className);
+    const dot = emittedClasses(dotOf(selected)?.props.className);
+
+    expect(indicator).toEqual(expect.arrayContaining(['size-4', 'items-center', 'justify-center']));
+    expect(dot.filter((name) => /^(-?translate-|absolute$|top-|left-)/.test(name))).toEqual([]);
+  });
+
   it('announces a disabled item, dims it and ignores its presses', async () => {
     const onValueChange = jest.fn();
     const user = userEvent.setup();

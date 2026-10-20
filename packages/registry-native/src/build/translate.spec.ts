@@ -440,3 +440,33 @@ describe('translateClasses with a state', () => {
     }
   });
 });
+
+describe('translateClasses for a named slot', () => {
+  const slots = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));
+  const slot = (name: string): readonly string[] => slots.get(name) ?? [];
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    "draws the radio dot at its size and colour, leaving its centring to the indicator's flex, for %s",
+    (engine) => {
+      const { classes } = translateClasses(
+        slot('cn-radio-group-indicator-icon'),
+        engine,
+        'view',
+        '',
+        'cn-radio-group-indicator-icon',
+      );
+
+      expect(classes).toEqual(['bg-primary-foreground', 'size-2', 'rounded-full']);
+    },
+  );
+
+  it.each(['nativewind', 'uniwind'] as const)('lays the radio group out with its gap and no grid for %s', (engine) => {
+    expect(translateClasses(slot('cn-radio-group'), engine, 'view', '', 'cn-radio-group').classes).toEqual(['gap-3']);
+  });
+
+  it("keeps the radio dot's classes for a slot of another name", () => {
+    expect(translateClasses(slot('cn-radio-group-indicator-icon'), 'uniwind', 'view').classes).toContain(
+      '-translate-x-1/2',
+    );
+  });
+});

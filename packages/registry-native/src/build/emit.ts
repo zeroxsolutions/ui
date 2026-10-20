@@ -51,7 +51,7 @@ function slotClasses(
   if (unknownState !== undefined) {
     throw new Error(`Unknown state ${unknownState} for ${slot} in ${file}`);
   }
-  const translation = translateClasses(classes, engine, part, state);
+  const translation = translateClasses(classes, engine, part, state, slot);
   if (translation.unknown.length > 0) {
     throw new Error(`Untranslated ${translation.unknown[0]} in ${slot}`);
   }

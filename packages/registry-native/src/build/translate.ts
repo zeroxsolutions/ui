@@ -123,6 +123,21 @@ const RING_WIDTH_UTILITY = 'ring-1';
 const RING_COLOUR = /^ring-(?!\d|inset|offset)([\w-]+(?:\/[\w.]+)?)$/;
 const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
 
+/**
+ * Classes of one named slot that a device draws another way, unmodified as Vega writes them. Vega
+ * centres the radio dot with an absolute 50% offset and a -50% translate; the indicator around it
+ * already centres its child with flex, which both engines draw alike, where a percentage translate
+ * is the engine's to resolve. The radio group's grid is a display neither engine draws, and a View
+ * stacks its items in a column already.
+ */
+const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
+  ['cn-radio-group', new Set(['grid'])],
+  [
+    'cn-radio-group-indicator-icon',
+    new Set(['absolute', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2']),
+  ],
+]);
+
 /** The px of one step of the spacing scale, 0.25rem at the 16px rem the theme's setup sets. */
 const SPACING_STEP_PX = 4;
 
@@ -342,19 +357,25 @@ function resolveOwnSizeTranslate(utility: string, states: readonly string[], slo
  * @param state - with no state, the classes Vega puts behind no state; with one, only the classes
  * Vega puts behind exactly that state, its modifiers removed and `dark:` kept. Its parts may come in
  * any order.
+ * @param slotName - the slot's name, such as `cn-radio-group`, which drops the classes
+ * {@link SLOT_DROPPED_CLASSES} lists for it; with none, no class is dropped by name
  */
 export function translateClasses(
   classes: readonly string[],
   engine: Engine,
   part: Part,
   state: StateKey = '',
+  slotName?: string,
 ): Translation {
   const kept: string[] = [];
   const unknown: string[] = [];
   const renamed: Readonly<Record<string, string>> = RENAMED_UTILITIES[engine];
   const untranslatable: readonly RegExp[] = UNTRANSLATABLE_UTILITIES[engine];
   const wanted = stateKeyOf(state.split('+').filter(Boolean));
-  const slot = classes.flatMap((cls) => resolveSpacingVariables(readClass(cls)));
+  const droppedByName = (slotName === undefined ? undefined : SLOT_DROPPED_CLASSES.get(slotName)) ?? new Set();
+  const slot = classes
+    .filter((cls) => !droppedByName.has(cls))
+    .flatMap((cls) => resolveSpacingVariables(readClass(cls)));
 
   const ringBorder = drawsRingAsBorder(slot);
 
