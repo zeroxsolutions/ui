@@ -31,8 +31,8 @@ const ICON_MODIFIERS: ReadonlySet<string> = new Set(["[&_svg:not([class*='size-'
 /**
  * No touch screen produces these conditions, or nothing on a device matches the selector, so the
  * class is dropped with its modifier. A phone is narrower than `md`, so the base class Vega widens
- * at `md` stands. `data-open` and `data-closed` draw only enter and exit animations, which neither
- * engine runs from these utilities.
+ * at `md` stands. Vega puts only exit animations behind `data-closed`, which neither engine runs from
+ * these utilities.
  */
 const DROPPED_MODIFIERS = [
   /^hover$/,
@@ -41,7 +41,7 @@ const DROPPED_MODIFIERS = [
   /^print$/,
   /^file$/,
   /^after$/,
-  /^data-(open|closed)$/,
+  /^data-closed$/,
   /^has-data-\[icon=inline-(start|end)\]$/,
   /^(group-)?(not-)?has-\[/,
   /^in-data-\[slot=/,
@@ -79,6 +79,7 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'focus-visible': 'focused',
     'data-focus-visible': 'focused',
     'aria-expanded': 'expanded',
+    'data-open': 'open',
     'data-horizontal': 'orientation=horizontal',
     'data-vertical': 'orientation=vertical',
     first: 'position=first',
@@ -94,6 +95,12 @@ const GROUP_NAME = /\/[\w-]+$/;
 const CHILD_PREFIX = /^has-/;
 
 const STATE_WORDS: ReadonlySet<string> = new Set(STATE_MODIFIERS.values());
+
+/**
+ * The enter animations Vega puts behind `data-open`, which neither engine runs from these utilities;
+ * the colours it puts there stay, in the `open` state.
+ */
+const OPEN_ANIMATION_UTILITY = /^(animate|fade|zoom|slide|spin)-/;
 
 /**
  * A translate by a percentage less a length. On the web the percentage is of the part's own size;
@@ -285,6 +292,7 @@ function readClass(cls: string): SlotClass {
     if (!state) return { reading: 'unknown', source: cls };
     states.push(state);
   }
+  if (states.includes('open') && OPEN_ANIMATION_UTILITY.test(utility)) return { reading: 'dropped' };
   return { reading: 'read', source: cls, utility, kept, states, onIcon: variants.some((m) => ICON_MODIFIERS.has(m)) };
 }
 

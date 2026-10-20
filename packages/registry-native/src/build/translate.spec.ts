@@ -98,10 +98,27 @@ describe('translateClasses', () => {
     },
   );
 
-  it('drops data-open:animate-in with its modifier', () => {
-    const result = translateClasses(['data-open:animate-in', 'p-2'], 'uniwind', 'view');
+  it.each(['data-open:animate-in', 'data-open:fade-in-0', 'data-open:zoom-in-95', 'data-closed:animate-out'])(
+    'drops %s, an animation neither engine runs, in the base and the open state',
+    (cls) => {
+      for (const state of [undefined, 'open']) {
+        expect(translateClasses([cls, 'p-2'], 'uniwind', 'view', state)).toEqual({
+          classes: state ? [] : ['p-2'],
+          unknown: [],
+        });
+      }
+    },
+  );
 
-    expect(result).toEqual({ classes: ['p-2'], unknown: [] });
+  it('puts a colour behind data-open in the open state and leaves it out of the base', () => {
+    const slot = ['p-2', 'data-open:bg-accent', 'data-open:text-accent-foreground'];
+
+    expect(translateClasses(slot, 'nativewind', 'view')).toEqual({ classes: ['p-2'], unknown: [] });
+    expect(translateClasses(slot, 'nativewind', 'view', 'open')).toEqual({ classes: ['bg-accent'], unknown: [] });
+    expect(translateClasses(slot, 'nativewind', 'text', 'open')).toEqual({
+      classes: ['text-accent-foreground'],
+      unknown: [],
+    });
   });
 
   it('drops the classes no touch screen uses', () => {
