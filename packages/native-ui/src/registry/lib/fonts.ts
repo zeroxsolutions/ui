@@ -8,11 +8,11 @@ import type { FontSource } from 'expo-font';
  * The Geist faces the theme's `font-sans` classes name, keyed by the family name the theme gives
  * each one. Pass it to `useFonts` and hold the first render until the fonts have loaded.
  */
-const zuiFonts: Record<string, FontSource> = {
+const zuiFonts = {
   Geist_400Regular,
   Geist_500Medium,
   Geist_600SemiBold,
   Geist_700Bold,
-};
+} as const satisfies Record<string, FontSource>;
 
 export { zuiFonts };

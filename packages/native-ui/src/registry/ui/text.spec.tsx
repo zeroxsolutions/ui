@@ -39,4 +39,17 @@ describe('Text', () => {
     expect(classes).toContain('dark:font-sans-bold');
     expect(classes).not.toContain('dark:font-bold');
   });
+
+  it.each([
+    ['!font-bold', '!font-sans-bold'],
+    ['font-bold!', 'font-sans-bold!'],
+    ['dark:!font-medium', 'dark:!font-sans-medium'],
+  ])('draws the important form %s in the matching Geist family', async (given, drawn) => {
+    await render(<Text className={given}>Save</Text>);
+
+    const classes = screen.getByText('Save').props.className.split(' ');
+
+    expect(classes).toContain(drawn);
+    expect(classes).not.toContain(given);
+  });
 });

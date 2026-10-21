@@ -16,7 +16,9 @@ type IconProps = LucideProps & {
   as: LucideIcon;
 };
 
-function IconGlyph({ as: Glyph, ...props }: IconProps): ReactNode {
+// withUniwind hands the component its className as well as the props it mapped from it; the glyph
+// takes the mapped ones, so the className stops here rather than reaching the Svg.
+function IconGlyph({ as: Glyph, className: _mapped, ...props }: IconProps): ReactNode {
   return <Glyph {...props} />;
 }
 

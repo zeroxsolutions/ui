@@ -17,15 +17,18 @@ const GEIST_FAMILY_CLASSES = {
   bold: 'font-sans-bold',
 } as const satisfies Readonly<Record<string, string>>;
 
-const WEIGHT_CLASS = /^((?:[^:\s]+:)*)font-(normal|medium|semibold|bold)$/;
+// The important modifier is a prefix (`!font-bold`) or a suffix (`font-bold!`), and stays where it was.
+const WEIGHT_CLASS = /^((?:[^:\s]+:)*!?)font-(normal|medium|semibold|bold)(!?)$/;
 
 /** Renames each weight class in `className`, under any variant, to its Geist family class. */
 function toGeistFamilies(className: string | undefined): string | undefined {
   return className
     ?.split(/\s+/)
     .map((token) => {
-      const [, variants, weight] = WEIGHT_CLASS.exec(token) ?? [];
-      return weight ? `${variants}${GEIST_FAMILY_CLASSES[weight as keyof typeof GEIST_FAMILY_CLASSES]}` : token;
+      const [, variants, weight, important] = WEIGHT_CLASS.exec(token) ?? [];
+      return weight
+        ? `${variants}${GEIST_FAMILY_CLASSES[weight as keyof typeof GEIST_FAMILY_CLASSES]}${important}`
+        : token;
     })
     .join(' ');
 }
