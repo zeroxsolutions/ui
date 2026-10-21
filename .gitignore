@@ -100,3 +100,13 @@ __screenshots__/
 .vitest-attachments/
 
 gate.log
+
+# Expo's local state, and the signing files an Expo build may write (from @nx/expo:application)
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/

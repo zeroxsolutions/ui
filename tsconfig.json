@@ -20,6 +20,9 @@
     },
     {
       "path": "./packages/native-ui"
+    },
+    {
+      "path": "./apps/native-preview"
     }
   ],
   "compilerOptions": {

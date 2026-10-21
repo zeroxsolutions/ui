@@ -1,0 +1,83 @@
+{
+  "name": "@zeroxsolutions/native-preview",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@expo-google-fonts/geist": "catalog:",
+    "@expo/metro-runtime": "catalog:expo",
+    "@rn-primitives/avatar": "catalog:rn-primitives",
+    "@rn-primitives/checkbox": "catalog:rn-primitives",
+    "@rn-primitives/label": "catalog:rn-primitives",
+    "@rn-primitives/progress": "catalog:rn-primitives",
+    "@rn-primitives/radio-group": "catalog:rn-primitives",
+    "@rn-primitives/separator": "catalog:rn-primitives",
+    "@rn-primitives/slot": "catalog:rn-primitives",
+    "@rn-primitives/switch": "catalog:rn-primitives",
+    "@rn-primitives/tabs": "catalog:rn-primitives",
+    "@rn-primitives/toggle": "catalog:rn-primitives",
+    "@rn-primitives/toggle-group": "catalog:rn-primitives",
+    "@zeroxsolutions/native-ui": "workspace:*",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "expo": "catalog:expo",
+    "expo-font": "catalog:expo",
+    "expo-splash-screen": "~58.0.10",
+    "expo-status-bar": "~58.0.3",
+    "lucide-react-native": "catalog:",
+    "nativewind": "4.2.7",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-native": "catalog:expo",
+    "react-native-css-interop": "catalog:",
+    "react-native-reanimated": "4.7.1",
+    "react-native-safe-area-context": "~5.10.1",
+    "react-native-svg": "catalog:expo",
+    "react-native-web": "~0.21.4",
+    "react-native-worklets": "0.13.0",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "catalog:",
+    "@types/jest": "catalog:",
+    "babel-jest": "catalog:",
+    "babel-preset-expo": "catalog:expo",
+    "jest": "catalog:",
+    "jest-expo": "catalog:expo",
+    "react-test-renderer": "catalog:",
+    "tailwindcss": "^3.4.17"
+  },
+  "nx": {
+    "targets": {
+      "export-web": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "^build-registry"
+        ],
+        "cache": true,
+        "inputs": [
+          "default",
+          "^default",
+          {
+            "externalDependencies": [
+              "expo",
+              "nativewind",
+              "tailwindcss"
+            ]
+          }
+        ],
+        "outputs": [
+          "{projectRoot}/dist/web"
+        ],
+        "options": {
+          "cwd": "{projectRoot}",
+          "parallel": false,
+          "commands": [
+            "rm -rf dist/web",
+            "for style in vega nova; do STYLE=$style expo export --platform web --clear --output-dir dist/web/$style || exit 1; done",
+            "for style in vega nova; do for demo in $(ls ../../packages/native-ui/src/examples | sed -n 's/[.]tsx$//p' | grep -- '-demo$'); do cp dist/web/$style/index.html dist/web/$style/$demo.html; done; done"
+          ]
+        }
+      }
+    }
+  }
+}
