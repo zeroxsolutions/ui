@@ -52,6 +52,14 @@ describe('Toggle', () => {
     );
   });
 
+  it('takes a role from the caller and announces pressed over a caller aria-selected', async () => {
+    await render(<Toggle pressed onPressedChange={() => {}} aria-label="Bold" role="checkbox" aria-selected={false} />);
+
+    const control = screen.getByRole('checkbox', { name: 'Bold' });
+
+    expect(control).toBeSelected();
+  });
+
   it('draws the muted background only while pressed', async () => {
     await render(
       <>

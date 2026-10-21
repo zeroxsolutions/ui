@@ -41,7 +41,7 @@ type ToggleProps = TogglePrimitive.RootProps &
   };
 
 /**
- * A two-state button, announced as a button with its selected and disabled state, drawn on the muted
+ * A two-state button, announced as a button, or the `role` given, with its selected and disabled state, drawn on the muted
  * background while pressed. It is controlled: pressing it calls `onPressedChange` with the new value,
  * and it shows as pressed once `pressed` follows. Its label goes in as a Text child, which takes the
  * label classes, and an Icon child takes a 16px size; an icon-only toggle is named with `aria-label`.
@@ -52,6 +52,7 @@ function Toggle({
   size,
   pressed,
   disabled,
+  role = 'button',
   accessibilityState,
   'aria-invalid': invalid,
   ...props
@@ -66,9 +67,11 @@ function Toggle({
           aria-invalid={invalid}
           {...props}
           // The primitive sets role switch and aria-checked, and React Native lets an aria-* prop win
-          // over accessibilityState, so both are replaced here, after the caller's props.
-          role="button"
+          // over accessibilityState, so the role, aria-checked and aria-selected are set here, after
+          // the caller's props, which may still name the role.
+          role={role}
           aria-checked={undefined}
+          aria-selected={pressed}
           accessibilityState={{ ...accessibilityState, selected: pressed, disabled }}
         />
       </IconClassContext.Provider>

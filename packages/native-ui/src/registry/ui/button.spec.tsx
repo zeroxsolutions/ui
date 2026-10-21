@@ -29,6 +29,22 @@ function registerIconSizes(): void {
 }
 
 describe('Button', () => {
+  it("merges a caller's accessibility state with disabled, and keeps the caller's disabled when none is given", async () => {
+    await render(
+      <>
+        <Button accessibilityState={{ busy: true }} disabled aria-label="Both" />
+        <Button accessibilityState={{ disabled: true }} aria-label="Caller" />
+      </>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Both' }).props.accessibilityState).toEqual(
+      expect.objectContaining({ busy: true, disabled: true }),
+    );
+    expect(screen.getByRole('button', { name: 'Caller' }).props.accessibilityState).toEqual(
+      expect.objectContaining({ disabled: true }),
+    );
+  });
+
   it('is a button that runs onPress', async () => {
     const onPress = jest.fn();
     const user = userEvent.setup();

@@ -92,7 +92,7 @@ function Button({ className, variant, size, disabled, accessibilityState, ...pro
       <IconClassContext.Provider value={buttonIconVariants({ size })}>
         <Pressable
           role="button"
-          accessibilityState={{ ...accessibilityState, disabled }}
+          accessibilityState={{ ...accessibilityState, ...(disabled === undefined ? {} : { disabled }) }}
           disabled={disabled}
           className={cn(buttonVariants({ variant, size }), className)}
           {...props}
