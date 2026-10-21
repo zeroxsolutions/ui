@@ -1,0 +1,72 @@
+---
+title: Alert
+description: A box that calls attention to a message, with an optional icon and action.
+---
+
+<NativePreview name="alert-demo" />
+
+## Installation
+
+<InstallCommand name="alert" />
+
+The CLI writes `components/ui/alert.tsx`, installs [Text](/native/components/nativewind/text),
+[Icon](/native/components/nativewind/icon) and Utils, and adds `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { CircleAlert } from 'lucide-react-native';
+
+import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Alert variant="destructive">
+  <Icon as={CircleAlert} />
+  <AlertTitle>Payment failed</AlertTitle>
+  <AlertDescription>Your card was declined.</AlertDescription>
+  <AlertAction>
+    <Button size="xs" variant="outline">
+      <Text>Update</Text>
+    </Button>
+  </AlertAction>
+</Alert>
+```
+
+## API reference
+
+### Alert
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop      | Type                         | Default     |
+| --------- | ---------------------------- | ----------- |
+| `variant` | `'default' \| 'destructive'` | `'default'` |
+
+It carries the `alert` role. An Icon placed as a direct child is drawn at 16px beside the title and
+description, in the colour of the variant's text. `destructive` draws the title, the description and the
+icon in the destructive colour.
+
+### AlertTitle, AlertDescription
+
+Each takes every prop of [Text](/native/components/nativewind/text). The title is the medium-weight line,
+and the description is muted, or destructive in a destructive Alert.
+
+### AlertAction
+
+Takes every prop of React Native's `View`. It is pinned to the top right of the Alert, and the Alert's
+text keeps clear of it.
+
+## Differences from upstream
+
+- Upstream lays the alert out as a grid that puts an icon in a first column. Neither engine draws a grid,
+  so the native Alert finds an Icon among its direct children and sets it in a row beside a column holding
+  the rest. Pass the Icon, the title, the description and the action as direct children for that to work.
+- Upstream nudges the icon 2px down to line up with the title. The native icon sits at the top of the row.
+- Upstream's alert is a live region that a screen reader reads as soon as it appears. React Native's
+  `alert` role names the box but does not announce it, and the box is not grouped into one element, so a
+  screen reader still reaches its action.
+- `text-balance` on the description has no React Native counterpart and is dropped.

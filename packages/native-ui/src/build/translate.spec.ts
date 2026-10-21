@@ -692,3 +692,57 @@ describe('translateClasses for a direct child in a variant', () => {
     expect(translateClasses(slot, 'uniwind', 'view', 'slot=field')).toEqual({ classes: [], unknown: [] });
   });
 });
+
+describe('translateClasses for a direct child', () => {
+  it("gives a direct child svg's size to the icon part", () => {
+    expect(translateClasses(["*:[svg:not([class*='size-'])]:size-4", 'p-2'], 'uniwind', 'icon').classes).toEqual([
+      'size-4',
+    ]);
+  });
+
+  it('puts a class for the direct child of a slot behind the state part=<slot>, for the child to apply', () => {
+    const slot = ['text-destructive', '*:data-[slot=alert-description]:text-destructive/90'];
+
+    expect(translateClasses(slot, 'uniwind', 'text').classes).toEqual(['text-destructive']);
+    expect(translateClasses(slot, 'uniwind', 'text', 'part=alert-description').classes).toEqual([
+      'text-destructive/90',
+    ]);
+  });
+});
+
+describe('translateClasses for an alert', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const alert = (style: keyof typeof styles, engine: Engine, state = ''): string[] =>
+    translateClasses(styles[style].get('cn-alert') ?? [], engine, 'view', state, { name: 'cn-alert' }).classes;
+
+  it.each(STYLE_ENGINES)('lays the alert out with no grid for %s in %s', (engine, style) => {
+    expect(alert(style, engine)).not.toContain('grid');
+    expect(alert(style, engine, 'slot=icon')).not.toContain('grid-cols-[auto_1fr]');
+  });
+
+  it.each([
+    ['vega', 'gap-x-2.5'],
+    ['nova', 'gap-x-2'],
+  ] as const)('spaces %s alert icon from its text by %s while it holds an icon', (style, gap) => {
+    expect(alert(style, 'uniwind', 'slot=icon')).toEqual([gap]);
+  });
+
+  it('makes room for an action by a Tailwind 4 step Tailwind 3 lacks, as its px for nativewind', () => {
+    expect(alert('vega', 'uniwind', 'slot=alert-action')).toEqual(['relative', 'pr-18']);
+    expect(alert('vega', 'nativewind', 'slot=alert-action')).toEqual(['relative', 'pr-[72px]']);
+  });
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    'drops text-balance, a text wrap neither engine draws, from the description for %s',
+    (engine) => {
+      expect(
+        translateClasses(styles.vega.get('cn-alert-description') ?? [], engine, 'text', '', {
+          name: 'cn-alert-description',
+        }).classes,
+      ).toEqual(['text-muted-foreground', 'text-sm']);
+    },
+  );
+});

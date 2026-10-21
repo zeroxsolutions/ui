@@ -41,7 +41,11 @@ const HOLDING_MODIFIERS: ReadonlySet<string> = new Set(['not-aria-[haspopup]']);
  * A class behind one goes to the icon part with the selector removed, and Icon applies it only when it
  * names no size itself.
  */
-const ICON_MODIFIERS: ReadonlySet<string> = new Set(["[&_svg:not([class*='size-'])]", "[&>svg:not([class*='size-'])]"]);
+const ICON_MODIFIERS: ReadonlySet<string> = new Set([
+  "[&_svg:not([class*='size-'])]",
+  "[&>svg:not([class*='size-'])]",
+  "*:[svg:not([class*='size-'])]",
+]);
 
 /**
  * No touch screen produces these conditions, or nothing on a device matches the selector, so the
@@ -110,8 +114,19 @@ const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
   Object.entries({
     'has-[[data-slot=input-group-control]:focus-visible]': 'focused',
     'has-[[data-slot][aria-invalid=true]]': 'invalid',
+    'has-[>svg]': 'slot=icon',
   }),
 );
+
+/**
+ * `*:data-[slot=<part>]`, the classes a slot gives its direct child of that slot, such as the colour a
+ * destructive Alert gives its description, is the state `part=<part>`, which that child applies.
+ */
+const CHILD_SLOT = /^data-\[slot=([\w-]+)\]$/;
+const CHILD_PART_MODIFIER = /^\*:data-\[slot=([\w-]+)\]$/;
+
+/** `*:[svg...]`, upstream's other spelling of a direct child svg with no size of its own. */
+const CHILD_ICON = "[svg:not([class*='size-'])]";
 
 /**
  * A direct child in an alignment, such as `has-[>[data-align=block-end]]`, is the part's own variant
@@ -167,7 +182,8 @@ const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
  * centres the radio dot with an absolute 50% offset and a -50% translate; the indicator around it
  * already centres its child with flex, which both engines draw alike, where a percentage translate
  * is the engine's to resolve. The radio group's grid is a display neither engine draws, and a View
- * stacks its items in a column already. The one-time code's caret blinks by an animation upstream
+ * stacks its items in a column already, as does the alert, whose component sets its icon beside its text
+ * in a row. The one-time code's caret blinks by an animation upstream
  * defines in its own stylesheet, which neither engine's theme carries, so the caret is drawn steady.
  */
 const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
@@ -177,6 +193,7 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
     new Set(['absolute', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2']),
   ],
   ['cn-input-otp-caret-line', new Set(['animate-caret-blink'])],
+  ['cn-alert', new Set(['grid', 'has-[>svg]:grid-cols-[auto_1fr]'])],
 ]);
 
 /**
@@ -206,6 +223,7 @@ const REM_LENGTH = /^([\d.]+)rem$/;
 /**
  * Utilities with nothing to draw on a device. Neither engine draws a `fit-content` width; a view is as
  * wide as its content once its parent does not stretch it, which the component sets with `self-start`.
+ * React Native has no `text-wrap` to balance a line with.
  */
 const DROPPED_UTILITIES = [
   /^(outline|ring|ring-offset|transition|duration|ease|whitespace|cursor|scroll)(-|$)/,
@@ -213,6 +231,7 @@ const DROPPED_UTILITIES = [
   /^bg-clip-padding$/,
   /^group\//,
   /^w-fit$/,
+  /^text-(balance|pretty)$/,
 ] as const satisfies readonly RegExp[];
 
 /**
@@ -241,6 +260,24 @@ const GEIST_FAMILY_UTILITIES = {
   'font-semibold': 'font-sans-semibold',
   'font-bold': 'font-sans-bold',
 } as const satisfies Readonly<Record<string, string>>;
+
+/**
+ * A utility on the spacing scale. Tailwind 4 draws any multiple of 0.25 as a step, where Tailwind 3,
+ * which NativeWind 4 runs on, draws only the steps of its default scale and nothing for another, such
+ * as the `pr-18` an Alert makes room for its action with.
+ */
+const SPACING_STEP_UTILITY =
+  /^(-?(?:p|m)[xytrblse]?|gap(?:-[xy])?|w|h|size|min-w|min-h|-?inset(?:-[xy])?|-?(?:top|right|bottom|left|start|end)|-?translate-[xy])-(\d+(?:\.\d+)?)$/;
+const TAILWIND_3_SPACING_STEPS: ReadonlySet<string> = new Set(
+  '0 0.5 1 1.5 2 2.5 3 3.5 4 5 6 7 8 9 10 11 12 14 16 20 24 28 32 36 40 44 48 52 56 60 64 72 80 96'.split(' '),
+);
+
+/** For NativeWind, a spacing step Tailwind 3 lacks as its px in an arbitrary value; any other utility as it is. */
+function toTailwind3Spacing(utility: string, engine: Engine): string {
+  const step = engine === 'nativewind' ? SPACING_STEP_UTILITY.exec(utility) : null;
+  if (!step || TAILWIND_3_SPACING_STEPS.has(step[2])) return utility;
+  return `${step[1]}-[${Number(step[2]) * SPACING_STEP_PX}px]`;
+}
 
 /**
  * NativeWind 4 runs on Tailwind 3, whose scale steps are one below Tailwind 4's. A Tailwind 4 step
@@ -327,6 +364,8 @@ function stateOf(modifier: string): StateKey | undefined {
   if (childState) return childState;
   const childVariant = CHILD_VARIANT_MODIFIER.exec(modifier);
   if (childVariant) return `${childVariant[1]}=${childVariant[2]}`;
+  const childPart = CHILD_PART_MODIFIER.exec(modifier);
+  if (childPart) return `part=${childPart[1]}`;
   const own = modifier.replace(RELATIVE_PREFIX, '').replace(GROUP_NAME, '').replace(CHILD_PREFIX, '');
   for (const candidate of new Set([modifier, own])) {
     const state = STATE_MODIFIERS.get(candidate);
@@ -343,9 +382,25 @@ type SlotClass =
   | { reading: 'unknown'; source: string }
   | { reading: 'read'; source: string; utility: string; kept: string[]; states: string[]; onIcon: boolean };
 
+/** Joins each `*` with the modifier after it when the pair names a direct child the build reads. */
+function joinChildModifiers(modifiers: readonly string[]): string[] {
+  const joined: string[] = [];
+  for (let i = 0; i < modifiers.length; i += 1) {
+    const next = modifiers[i + 1];
+    if (modifiers[i] === '*' && next !== undefined && (next === CHILD_ICON || CHILD_SLOT.test(next))) {
+      joined.push(`*:${next}`);
+      i += 1;
+    } else {
+      joined.push(modifiers[i]);
+    }
+  }
+  return joined;
+}
+
 function readClass(cls: string, stateModifiers: ReadonlySet<string> = new Set()): SlotClass {
-  const variants = splitVariants(cls);
-  const utility = variants.pop() ?? '';
+  const split = splitVariants(cls);
+  const utility = split.pop() ?? '';
+  const variants = joinChildModifiers(split);
   const modifiers = variants.filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m));
   const isChildState = (m: string): boolean => CHILD_STATE_MODIFIERS.has(m) || CHILD_VARIANT_MODIFIER.test(m);
   if (modifiers.some((m) => !isChildState(m) && DROPPED_MODIFIERS.some((rule) => rule.test(m)))) {
@@ -550,7 +605,8 @@ export function translateClasses(
     }
 
     if (stateKeyOf(cls.states) !== wanted || partOf(utility, cls.onIcon) !== part) continue;
-    kept.push([...cls.kept, Object.hasOwn(renamed, utility) ? renamed[utility] : utility].join(':'));
+    const drawn = Object.hasOwn(renamed, utility) ? renamed[utility] : toTailwind3Spacing(utility, engine);
+    kept.push([...cls.kept, drawn].join(':'));
   }
 
   return { classes: [...new Set(kept)], unknown };

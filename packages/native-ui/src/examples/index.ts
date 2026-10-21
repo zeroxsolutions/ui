@@ -5,6 +5,7 @@
  */
 import type { ComponentType } from 'react';
 
+import { AlertDemo } from './alert-demo';
 import { AvatarDemo } from './avatar-demo';
 import { BadgeDemo } from './badge-demo';
 import { ButtonDemo } from './button-demo';
@@ -36,6 +37,7 @@ import { UnsavedChangesToolbarDemo } from './unsaved-changes-toolbar-demo';
 
 /** Each demo by its name, the file's name without `.tsx`, such as `button-demo`. */
 const demos: Readonly<Record<string, ComponentType>> = {
+  'alert-demo': AlertDemo,
   'avatar-demo': AvatarDemo,
   'badge-demo': BadgeDemo,
   'button-demo': ButtonDemo,
