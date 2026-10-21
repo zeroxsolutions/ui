@@ -4,12 +4,13 @@ import { join, resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { COMPONENT_BASES } from '@/constants/component-bases';
 import { Index } from '@/registry/bases/base-ui/examples/__index__';
 
 const APP = resolve(import.meta.dirname, '../..');
 const CONTENT = join(APP, 'content/docs');
 
-/** The content tree: every page's slug (`components/button`), and each folder's `meta.json` pages by folder (`''` is the root). */
+/** The content tree: every page's slug (`components/base/button`), and each folder's `meta.json` pages by folder (`''` is the root). */
 interface DocsTree {
   pages: string[];
   metas: Record<string, string[]>;
@@ -99,11 +100,11 @@ function readExampleNames(): string[] {
   return items.filter((item) => item.type === 'registry:example').map((item) => item.name);
 }
 
-/** Every page directly under `components/`, its own index aside, that names nothing `registry.json` publishes as a `registry:component`. */
+/** Every page directly under `components/base/`, its own index aside, that names nothing `registry.json` publishes as a `registry:component`. */
 function nonComponentPages(sources: Record<string, string>, components: Set<string>): string[] {
   return Object.keys(sources)
-    .filter((slug) => /^components\/[^/]+$/.test(slug) && slug !== 'components/index')
-    .filter((slug) => !components.has(slug.slice('components/'.length)))
+    .filter((slug) => /^components\/base\/[^/]+$/.test(slug) && slug !== 'components/base/index')
+    .filter((slug) => !components.has(slug.slice('components/base/'.length)))
     .sort()
     .map((slug) => `${slug}: names no registry:component item`);
 }
@@ -125,15 +126,15 @@ function readFrontmatter(source: string): Partial<ItemText> {
   return { title: field('title'), description: field('description') };
 }
 
-/** The pages under `components/` and `blocks/` that document one registry item each, which leaves out a folder's index. */
+/** The pages under `components/base/` and `blocks/` that document one registry item each, which leaves out a folder's index. */
 function namedPages(sources: Record<string, string>): [slug: string, name: string, source: string][] {
   return Object.entries(sources)
-    .filter(([slug]) => /^(components|blocks)\/[^/]+$/.test(slug) && !slug.endsWith('/index'))
-    .map(([slug, source]) => [slug, slug.split('/')[1] ?? '', source]);
+    .filter(([slug]) => /^(components\/base|blocks)\/[^/]+$/.test(slug) && !slug.endsWith('/index'))
+    .map(([slug, source]) => [slug, slug.split('/').pop() ?? '', source]);
 }
 
 /**
- * Every page under `components/` or `blocks/` that names no registry item, and every item page
+ * Every page under `components/base/` or `blocks/` that names no registry item, and every item page
  * whose title or description is not the item's.
  */
 function unnamedPages(sources: Record<string, string>, items: Map<string, ItemText>): string[] {
@@ -221,7 +222,7 @@ function installTarget({ path, type }: RegistryFile): string {
 
 /** Every component with no page. */
 function pagelessComponents(sources: Record<string, string>, components: ComponentItem[]): string[] {
-  return components.flatMap(({ name }) => (`components/${name}` in sources ? [] : [`${name}: has no page`]));
+  return components.flatMap(({ name }) => (`components/base/${name}` in sources ? [] : [`${name}: has no page`]));
 }
 
 const COMPONENT_SOURCE = /<ComponentSource\b([^>]*?)\/>/g;
@@ -251,7 +252,7 @@ function registryDependencyNames(registryDependencies: string[]): string[] {
  */
 function manualProblems(sources: Record<string, string>, components: ComponentItem[]): string[] {
   return components.flatMap(({ name, files, dependencies, registryDependencies }) => {
-    const slug = `components/${name}`;
+    const slug = `components/base/${name}`;
     const source = sources[slug];
     if (source === undefined) return [];
     const blocks = [...source.matchAll(COMPONENT_SOURCE)]
@@ -417,7 +418,7 @@ function apiProblems(
   readElsewhere: Record<string, ReadElsewhere>,
 ): string[] {
   return components.flatMap((item) => {
-    const slug = `components/${item.name}`;
+    const slug = `components/base/${item.name}`;
     const page = sources[slug];
     if (page === undefined) return [];
     const code = sourceOf(item);
@@ -457,10 +458,10 @@ function readElsewhereProblems(
 ): string[] {
   return Object.entries(readElsewhere).flatMap(([part, { props }]) => {
     const owner = components.find(
-      (item) => sources[`components/${item.name}`] !== undefined && exportedNames(sourceOf(item)).includes(part),
+      (item) => sources[`components/base/${item.name}`] !== undefined && exportedNames(sourceOf(item)).includes(part),
     );
     if (!owner) return [`${part}: is not an exported part of any documented component`];
-    const listed = tableProps(sources[`components/${owner.name}`] ?? '', part);
+    const listed = tableProps(sources[`components/base/${owner.name}`] ?? '', part);
     if (listed.length === 0) return [`${part}: has no table in its page`];
     return props
       .filter((prop) => !listed.includes(prop))
@@ -477,10 +478,10 @@ function unresolvedNames(sources: Record<string, string>, index: Set<string>): s
   );
 }
 
-/** Every item page under `components/` or `blocks/` whose first `ComponentPreview` or `BlockPreview` is not `<name>-demo`. */
+/** Every item page under `components/base/` or `blocks/` whose first `ComponentPreview` or `BlockPreview` is not `<name>-demo`. */
 function misplacedFirstPreviews(sources: Record<string, string>, items: Set<string>): string[] {
   return Object.entries(sources)
-    .filter(([slug]) => /^(components|blocks)\//.test(slug) && items.has(slug.split('/').pop() ?? ''))
+    .filter(([slug]) => /^(components\/base|blocks)\//.test(slug) && items.has(slug.split('/').pop() ?? ''))
     .filter(([slug, source]) => {
       const first = [...source.matchAll(NAMED_SOURCE)].find(([, component]) => component !== 'ComponentSource');
       return first?.[2] !== `${slug.split('/').pop()}-demo`;
@@ -523,12 +524,12 @@ describe('content/docs', () => {
 
   it('reports a name the examples index lacks', () => {
     const sources = {
-      'components/status-indicator':
+      'components/base/status-indicator':
         '<ComponentPreview name="status-indicator-demo" />\n<ComponentSource name="status-indicator-missing" />',
     };
 
     expect(unresolvedNames(sources, new Set(['status-indicator', 'status-indicator-demo']))).toEqual([
-      'components/status-indicator: status-indicator-missing',
+      'components/base/status-indicator: status-indicator-missing',
     ]);
   });
 
@@ -538,7 +539,7 @@ describe('content/docs', () => {
 
   it('reports an example no page previews, naming it in a ComponentSource aside', () => {
     const sources = {
-      'components/status-indicator': [
+      'components/base/status-indicator': [
         '<ComponentPreview name="status-indicator-demo" />',
         '<ComponentSource name="status-indicator-tones" />',
       ].join('\n'),
@@ -556,15 +557,15 @@ describe('content/docs', () => {
   it("reports an item page whose first preview is not the item's demo", () => {
     const sources = {
       'blocks/ai-provider-picker': '<ComponentPreview name="ai-provider-picker-demo" />',
-      'components/button': '<ComponentPreview name="button-outline" />',
-      'components/status-indicator':
+      'components/base/button': '<ComponentPreview name="button-outline" />',
+      'components/base/status-indicator':
         '<ComponentPreview name="status-indicator-tones" />\n<ComponentPreview name="status-indicator-demo" />',
-      'components/tag-input': '<ComponentSource name="tag-input" />',
+      'components/base/tag-input': '<ComponentSource name="tag-input" />',
     };
 
     expect(misplacedFirstPreviews(sources, new Set(['ai-provider-picker', 'status-indicator', 'tag-input']))).toEqual([
-      'components/status-indicator',
-      'components/tag-input',
+      'components/base/status-indicator',
+      'components/base/tag-input',
     ]);
   });
 
@@ -583,14 +584,14 @@ describe('content/docs', () => {
   it('reports a page for nothing published, and an item page that renames its item', () => {
     const items = new Map([['status-indicator', { title: 'Status Indicator', description: 'A small dot.' }]]);
     const sources = {
-      'components/index': '---\ntitle: Components\n---',
-      'components/card': '---\ntitle: Card\n---',
-      'components/status-indicator': '---\ntitle: Status\ndescription: A small dot.\n---',
+      'components/base/index': '---\ntitle: Components\n---',
+      'components/base/card': '---\ntitle: Card\n---',
+      'components/base/status-indicator': '---\ntitle: Status\ndescription: A small dot.\n---',
     };
 
     expect(unnamedPages(sources, items)).toEqual([
-      'components/card: is not a registry item',
-      'components/status-indicator: title is not "Status Indicator"',
+      'components/base/card: is not a registry item',
+      'components/base/status-indicator: title is not "Status Indicator"',
     ]);
   });
 
@@ -601,7 +602,7 @@ describe('content/docs', () => {
     ]);
     const sources = {
       // Single-quoted: no quote character of its own to escape.
-      'components/model-info-card': [
+      'components/base/model-info-card': [
         '---',
         'title: Model Info Card',
         "description: 'The detail panel: an identity header.'",
@@ -609,7 +610,7 @@ describe('content/docs', () => {
       ].join('\n'),
       // Double-quoted: its own apostrophe would need doubling inside single quotes, so it quotes with
       // double instead (oxfmt's own choice - confirmed by running it on a fixture with this text).
-      'components/tool-call-card': [
+      'components/base/tool-call-card': [
         '---',
         'title: Tool Call Card',
         'description: "One tool call: the call\'s status."',
@@ -625,7 +626,7 @@ describe('content/docs', () => {
       ['model-info-card', { title: 'Model Info Card', description: 'The detail panel: an identity header.' }],
     ]);
     const sources = {
-      'components/model-info-card': [
+      'components/base/model-info-card': [
         '---',
         'title: Model Info Card',
         "description: 'A different panel: not the item.'",
@@ -633,22 +634,32 @@ describe('content/docs', () => {
       ].join('\n'),
     };
 
-    expect(unnamedPages(sources, items)).toEqual(["components/model-info-card: description is not the item's"]);
+    expect(unnamedPages(sources, items)).toEqual(["components/base/model-info-card: description is not the item's"]);
   });
 
-  it('documents only registry:component items under components/, its own index aside', () => {
+  it('keeps the component pages in one folder per base the routes build, and none beside them', () => {
+    const entries = readdirSync(join(CONTENT, 'components'), { withFileTypes: true }).filter(
+      (entry) => entry.name !== 'meta.json',
+    );
+
+    expect(entries.map((entry) => (entry.isDirectory() ? entry.name : `${entry.name}: not in a base`)).sort()).toEqual(
+      [...COMPONENT_BASES].sort(),
+    );
+  });
+
+  it('documents only registry:component items under components/base/, its own index aside', () => {
     expect(nonComponentPages(readPageSources(CONTENT), readComponentNames())).toEqual([]);
   });
 
   it('reports a components page for nothing registry.json publishes as a registry:component', () => {
     const sources = {
-      'components/index': '---\ntitle: Components\n---',
-      'components/status-indicator': '---\ntitle: Status Indicator\n---',
-      'components/button': '---\ntitle: Button\n---',
+      'components/base/index': '---\ntitle: Components\n---',
+      'components/base/status-indicator': '---\ntitle: Status Indicator\n---',
+      'components/base/button': '---\ntitle: Button\n---',
     };
 
     expect(nonComponentPages(sources, new Set(['status-indicator']))).toEqual([
-      'components/button: names no registry:component item',
+      'components/base/button: names no registry:component item',
     ]);
   });
 
@@ -672,9 +683,9 @@ describe('content/docs', () => {
   it('reports a page that installs its subject some other way, even where the right line sits in its Manual tab', () => {
     const items = new Map([['status-indicator', { title: 'Status Indicator', description: 'A small dot.' }]]);
     const sources = {
-      'components/button':
+      'components/base/button':
         '<TabsContent value="cli">\n```bash\npnpm dlx shadcn@latest add button-group\n```\n</TabsContent>',
-      'components/status-indicator': [
+      'components/base/status-indicator': [
         '<TabsContent value="cli">',
         '```bash',
         'pnpm dlx shadcn@latest add status-indicator',
@@ -689,8 +700,8 @@ describe('content/docs', () => {
     };
 
     expect(missingInstallCommands(sources, items)).toEqual([
-      'components/button: has no `pnpm dlx shadcn@latest add button`',
-      'components/status-indicator: has no `pnpm dlx shadcn@latest add @zui/status-indicator`',
+      'components/base/button: has no `pnpm dlx shadcn@latest add button`',
+      'components/base/status-indicator: has no `pnpm dlx shadcn@latest add @zui/status-indicator`',
     ]);
   });
 
@@ -703,7 +714,7 @@ describe('content/docs', () => {
       { name: 'status-indicator', files: [], dependencies: [], registryDependencies: [] },
       { name: 'tag-input', files: [], dependencies: [], registryDependencies: [] },
     ];
-    const sources = { 'components/status-indicator': '' };
+    const sources = { 'components/base/status-indicator': '' };
 
     expect(pagelessComponents(sources, components)).toEqual(['tag-input: has no page']);
   });
@@ -740,7 +751,7 @@ describe('content/docs', () => {
       },
     ];
     const sources = {
-      'components/status-indicator': [
+      'components/base/status-indicator': [
         '<ComponentSource name="status-indicator" title="components/status-indicator.tsx" />',
         '<ComponentSource name="status-indicator" title="components/feedback/status-indicator.tsx" />',
         '<TabsContent value="manual">',
@@ -755,11 +766,11 @@ describe('content/docs', () => {
     };
 
     expect(manualProblems(sources, components)).toEqual([
-      'components/status-indicator: titles registry/bases/base-ui/components/feedback/status-indicator.tsx "components/status-indicator.tsx", not "components/feedback/status-indicator.tsx"',
-      'components/status-indicator: has no ComponentSource for registry/bases/base-ui/types/status-tone.ts',
-      'components/status-indicator: has 2 ComponentSource blocks for registry/bases/base-ui/components/feedback/status-indicator.tsx',
-      'components/status-indicator: installs pnpm add react, not pnpm add lucide-react',
-      'components/status-indicator: adds pnpm dlx shadcn@latest add utils, not pnpm dlx shadcn@latest add utils @zui/circle-icon',
+      'components/base/status-indicator: titles registry/bases/base-ui/components/feedback/status-indicator.tsx "components/status-indicator.tsx", not "components/feedback/status-indicator.tsx"',
+      'components/base/status-indicator: has no ComponentSource for registry/bases/base-ui/types/status-tone.ts',
+      'components/base/status-indicator: has 2 ComponentSource blocks for registry/bases/base-ui/components/feedback/status-indicator.tsx',
+      'components/base/status-indicator: installs pnpm add react, not pnpm add lucide-react',
+      'components/base/status-indicator: adds pnpm dlx shadcn@latest add utils, not pnpm dlx shadcn@latest add utils @zui/circle-icon',
     ]);
   });
 
@@ -777,7 +788,7 @@ describe('content/docs', () => {
       'export { TagInput, TagInputItem };',
     ].join('\n');
     const sources = {
-      'components/tag-input': [
+      'components/base/tag-input': [
         '## API reference',
         '',
         '### TagInput',
@@ -790,8 +801,8 @@ describe('content/docs', () => {
     };
 
     expect(apiProblems(sources, [item], () => code, {})).toEqual([
-      'components/tag-input: API reference documents TagInput, not TagInput, TagInputItem',
-      'components/tag-input: TagInput has no prop `max`',
+      'components/base/tag-input: API reference documents TagInput, not TagInput, TagInputItem',
+      'components/base/tag-input: TagInput has no prop `max`',
     ]);
   });
 
@@ -811,10 +822,10 @@ describe('content/docs', () => {
       '| `aria-label` | `string` | required |',
     ].join('\n');
 
-    expect(apiProblems({ 'components/status-chip': page }, [item], () => missing, {})).toEqual([
-      'components/status-chip: StatusChip has no prop `aria-label`',
+    expect(apiProblems({ 'components/base/status-chip': page }, [item], () => missing, {})).toEqual([
+      'components/base/status-chip: StatusChip has no prop `aria-label`',
     ]);
-    expect(apiProblems({ 'components/status-chip': page }, [item], () => declared, {})).toEqual([]);
+    expect(apiProblems({ 'components/base/status-chip': page }, [item], () => declared, {})).toEqual([]);
   });
 
   it('exempts only the props a PROPS_READ_ELSEWHERE entry lists, not the whole part', () => {
@@ -832,11 +843,11 @@ describe('content/docs', () => {
     ].join('\n');
     const readElsewhere = { StatusChip: { props: ['size'], reason: 'test fixture' } };
 
-    expect(apiProblems({ 'components/status-chip': page }, [item], () => code, readElsewhere)).toEqual([]);
+    expect(apiProblems({ 'components/base/status-chip': page }, [item], () => code, readElsewhere)).toEqual([]);
 
     const withoutTone = ['interface StatusChipProps {', '}', 'export { StatusChip };'].join('\n');
-    expect(apiProblems({ 'components/status-chip': page }, [item], () => withoutTone, readElsewhere)).toEqual([
-      'components/status-chip: StatusChip has no prop `tone`',
+    expect(apiProblems({ 'components/base/status-chip': page }, [item], () => withoutTone, readElsewhere)).toEqual([
+      'components/base/status-chip: StatusChip has no prop `tone`',
     ]);
   });
 
@@ -848,7 +859,7 @@ describe('content/docs', () => {
     const item = { name: 'status-chip', files: [], dependencies: [], registryDependencies: [] };
     const code = ['export { StatusChip, StatusChipIcon };'].join('\n');
     const sources = {
-      'components/status-chip': [
+      'components/base/status-chip': [
         '## API reference',
         '',
         '### StatusChip',
@@ -882,7 +893,7 @@ describe('content/docs', () => {
       'export { MemoizedMarkdownView as MarkdownView, useMarkdownCollapse, type MarkdownViewProps };',
     ].join('\n');
     const sources = {
-      'components/markdown-view': ['## API reference', '', '### MarkdownView', '', '### useMarkdownCollapse'].join(
+      'components/base/markdown-view': ['## API reference', '', '### MarkdownView', '', '### useMarkdownCollapse'].join(
         '\n',
       ),
     };

@@ -14,7 +14,7 @@ test('the command menu finds a page and goes to it', async ({ page }) => {
   await expect(option).toHaveCount(1);
   await option.click();
 
-  await expect(page).toHaveURL(/\/docs\/components\/status-indicator$/);
+  await expect(page).toHaveURL(/\/docs\/components\/base\/status-indicator$/);
 });
 
 test('the command menu logs no error while it is opened, arrowed through and typed in', async ({ page }) => {

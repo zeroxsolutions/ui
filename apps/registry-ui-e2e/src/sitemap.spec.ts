@@ -5,6 +5,6 @@ test('/sitemap.xml lists the pages at the registry host', async ({ request }) =>
   expect(response.status()).toBe(200);
 
   const sitemap = await response.text();
-  expect(sitemap).toContain('<loc>https://ui.zeroxsolutions.com/docs/components/status-indicator</loc>');
-  expect(sitemap).toContain('<loc>https://ui.zeroxsolutions.com/blocks</loc>');
+  expect(sitemap).toContain('<loc>https://ui.zeroxsolutions.com/docs/components/base/status-indicator</loc>');
+  expect(sitemap).toContain('<loc>https://ui.zeroxsolutions.com/blocks/base</loc>');
 });

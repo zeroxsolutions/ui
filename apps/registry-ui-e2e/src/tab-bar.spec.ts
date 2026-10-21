@@ -3,7 +3,7 @@ import { expect, test } from './test/fixtures';
 test('the tab bar names every destination, shows only the active label, and moves the current page', async ({
   page,
 }) => {
-  await page.goto('/docs/components/tab-bar');
+  await page.goto('/docs/components/base/tab-bar');
   const bar = page.getByRole('navigation', { name: 'Main' });
   const home = bar.getByRole('link', { name: 'Home' });
   const search = bar.getByRole('link', { name: 'Search' });
@@ -28,7 +28,7 @@ test('the tab bar names every destination, shows only the active label, and move
 });
 
 test('a tab bar with labels="none" still names every destination, with no label taking room', async ({ page }) => {
-  await page.goto('/docs/components/tab-bar');
+  await page.goto('/docs/components/base/tab-bar');
   const bar = page.getByRole('navigation', { name: 'Sections' });
   const links = bar.getByRole('link');
 

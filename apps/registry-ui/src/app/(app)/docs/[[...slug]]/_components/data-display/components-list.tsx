@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 
+import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
 import { publishedItems } from '@/lib/registry';
-import { source } from '@/lib/source';
+import { source, writtenDocsPage } from '@/lib/source';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { componentRoute } from '@/routes/app-routes';
 
 /** A category as a heading: `data-display` reads `Data display`. */
 function categoryLabel(category: string): string {
@@ -23,11 +25,14 @@ function ComponentsList({ className, ...props }: ComponentProps<'div'>): ReactNo
           <h2 className="text-xl font-semibold tracking-tight">{categoryLabel(category)}</h2>
           <ul className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
             {items.map((item) => {
-              const page = source.getPage([item.type === 'registry:block' ? 'blocks' : 'components', item.name]);
+              const url =
+                item.type === 'registry:block'
+                  ? source.getPage(['blocks', item.name])?.url
+                  : writtenDocsPage(componentRoute.build({ base: DEFAULT_COMPONENT_BASE, name: item.name }));
               return (
                 <li key={item.name} className="flex flex-col gap-1">
-                  {page ? (
-                    <Link href={page.url} className="font-medium underline underline-offset-4">
+                  {url ? (
+                    <Link href={url} className="font-medium underline underline-offset-4">
                       {item.title}
                     </Link>
                   ) : (

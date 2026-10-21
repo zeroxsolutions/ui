@@ -4,10 +4,18 @@ import type { ReactNode } from 'react';
 
 import { BlockFrame } from '@/components/data-display/block-frame';
 import { ComponentPreview } from '@/components/data-display/component-preview';
+import { COMPONENT_BASES } from '@/constants/component-bases';
 import { publishedBlocks } from '@/lib/registry';
 import { source } from '@/lib/source';
 
 export const dynamic = 'force-static';
+
+// A base outside the set answers 404 rather than rendering the blocks under a base nobody publishes.
+export const dynamicParams = false;
+
+export function generateStaticParams(): { base: string }[] {
+  return COMPONENT_BASES.map((base) => ({ base }));
+}
 
 export const metadata: Metadata = {
   title: 'Blocks',

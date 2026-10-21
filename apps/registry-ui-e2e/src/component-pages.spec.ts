@@ -20,7 +20,7 @@ test('every component page renders its preview, fits a phone without a stage scr
   await page.setViewportSize({ width: 390, height: 844 });
 
   for (const { name, title } of components) {
-    await page.goto(`/docs/components/${name}`);
+    await page.goto(`/docs/components/base/${name}`);
     await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
     await expect(page.locator('[data-slot=component-preview-stage]').first()).toBeVisible();
     // Measured once the page's own requests settle: a demo widened by an image or a font that arrives

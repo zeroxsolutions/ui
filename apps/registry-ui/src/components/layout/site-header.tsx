@@ -7,10 +7,11 @@ import { SiteLogo } from '@/components/general/site-logo';
 import { DocsSearch } from '@/components/navigation/docs-search';
 import { MainNav } from '@/components/navigation/main-nav';
 import { MobileNav } from '@/components/navigation/mobile-nav';
-import { docsPageUrl } from '@/lib/source';
+import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
+import { docsPageHref, docsPageUrl } from '@/lib/source';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
-import { blocksRoute, docsRoute, homeRoute } from '@/routes/app-routes';
+import { blocksRoute, componentsRoute, docsRoute, homeRoute } from '@/routes/app-routes';
 import type { SiteNavItem } from '@/types/site-nav-item';
 
 interface SiteHeaderProps {
@@ -20,12 +21,12 @@ interface SiteHeaderProps {
 
 /** The bar across the top of every page: the site's sections, the search and the theme switch. */
 function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
-  const components = docsPageUrl(['components']);
+  const components = docsPageHref(componentsRoute.build({ base: DEFAULT_COMPONENT_BASE }));
   const native = docsPageUrl(['native']);
   const navItems: SiteNavItem[] = [
     { href: docsRoute.build(), label: 'Docs', pattern: `${docsRoute.pathname}{/*rest}` },
-    { href: components, label: 'Components', pattern: `${components}{/*rest}` },
-    { href: blocksRoute.build(), label: 'Blocks', pattern: blocksRoute.pathname },
+    { href: components, label: 'Components', pattern: `${componentsRoute.pathname}{/*rest}` },
+    { href: blocksRoute.build({ base: DEFAULT_COMPONENT_BASE }), label: 'Blocks', pattern: blocksRoute.pathname },
     { href: native, label: 'Native', pattern: `${native}{/*rest}` },
   ];
 

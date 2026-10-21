@@ -1,7 +1,7 @@
 import { expect, test } from './test/fixtures';
 
 test('an unknown docs path answers 404 with the not-found page', async ({ page }) => {
-  const response = await page.goto('/docs/components/nope');
+  const response = await page.goto('/docs/components/base/nope');
 
   expect(response?.status()).toBe(404);
   await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();

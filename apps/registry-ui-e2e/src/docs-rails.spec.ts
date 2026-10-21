@@ -69,7 +69,7 @@ test('a docs page has no site footer', async ({ page }) => {
 });
 
 test('a page outside the docs keeps the site footer', async ({ page }) => {
-  await page.goto('/blocks');
+  await page.goto('/blocks/base');
 
   await expect(page.getByRole('contentinfo')).toBeVisible();
 });
