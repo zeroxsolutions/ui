@@ -13,10 +13,12 @@ import {
   SourceCodeBlockLineNumbers,
   SourceCodeBlockTitle,
 } from '@/components/data-display/source-code-block';
+import { EXPO_PROJECT_ID } from '@/constants/native-preview-device';
 import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 
 import { NativePreviewFrame } from './native-preview-frame';
+import { PhonePreviewPopover } from './phone-preview-popover';
 
 interface NativePreviewProps {
   /** A demo's name in `@zeroxsolutions/native-ui/examples`, such as `button-demo`. */
@@ -28,8 +30,8 @@ interface NativePreviewProps {
 }
 
 /**
- * A native component page's `<NativePreview name>`: the demo drawn live under its Preview tab, and its
- * source under its Code tab. Its source is read as the page compiles, so it works only inside a native
+ * A native component page's `<NativePreview name>`: the demo drawn live under its Preview tab, its
+ * source under its Code tab, and beside the tabs a way to open the demo on a phone. Its source is read as the page compiles, so it works only inside a native
  * page; anywhere else it throws.
  */
 function NativePreview({ name, code, language, lines }: NativePreviewProps): ReactNode {
@@ -37,10 +39,13 @@ function NativePreview({ name, code, language, lines }: NativePreviewProps): Rea
 
   return (
     <Tabs data-slot="native-preview" defaultValue="preview" className="mt-4 mb-12">
-      <TabsList variant="line">
-        <TabsTrigger value="preview">Preview</TabsTrigger>
-        <TabsTrigger value="code">Code</TabsTrigger>
-      </TabsList>
+      <div className="flex items-center justify-between gap-2">
+        <TabsList variant="line">
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="code">Code</TabsTrigger>
+        </TabsList>
+        <PhonePreviewPopover demo={name} projectId={EXPO_PROJECT_ID} />
+      </div>
       {/* Kept mounted, so a look at the code and back does not load the frame again. */}
       <TabsContent value="preview" keepMounted className="mt-4">
         <ComponentPreview>

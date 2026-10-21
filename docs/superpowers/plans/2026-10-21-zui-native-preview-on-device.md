@@ -8,7 +8,8 @@ engine on the device.
 
 **Architecture:** `apps/native-preview` (today exported for web per style) is also published with EAS Update,
 one branch per style (`vega`, `nova`), on Expo's free plan. Expo Go loads an update from a URL of the form
-`exp://u.expo.dev/<project-id>?channel-name=<style>` and opens a path inside it with `--/<path>`, so the
+`exp://u.expo.dev/<project-id>?runtime-version=exposdk:58.0.0&channel-name=<style>` (the form
+`qr.expo.dev` writes for Expo Go) and opens a path inside it with `--/<path>`, so the
 QR encodes the demo's route. The docs page builds that URL from the project id, the style and the demo
 name, and draws the QR in the page. A job in the production deploy workflow publishes both updates, so
 the phone shows what the deployed docs show.
@@ -75,7 +76,8 @@ Skills: writing-a-component, writing-component-tests, writing-e2e-tests, writing
 writing-plain-ascii.
 
 - A control beside the native preview: a button that opens a popover with the QR for
-  `exp://u.expo.dev/<project-id>/--/<demo>?channel-name=<style>` (exact shape confirmed in Task 1), the
+  `exp://u.expo.dev/<project-id>/--/<demo>?runtime-version=exposdk%3A58.0.0&channel-name=<style>` (Task 1
+  confirms on a device that Expo Go opens the update and routes the path), the
   link as copyable text, and one line: install Expo Go (SDK 58), scan with the phone's camera (iOS) or from
   Expo Go (Android).
 - The URL builder is one function with unit tests (style, demo name, project id); the QR is drawn at

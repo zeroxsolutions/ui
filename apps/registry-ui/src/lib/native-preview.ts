@@ -1,3 +1,4 @@
+import { EXPO_GO_SDK } from '@/constants/native-preview-device';
 import type { PlatformStyle } from '@/types/platform';
 
 /**
@@ -48,4 +49,26 @@ export function previewHeightOf(data: unknown): number | undefined {
   const { type, height } = data as { type?: unknown; height?: unknown };
   if (type !== NATIVE_PREVIEW_HEIGHT_MESSAGE || typeof height !== 'number') return undefined;
   return Number.isFinite(height) && height > 0 ? Math.ceil(height) : undefined;
+}
+
+/**
+ * The link that opens a native demo in Expo Go: the update `apps/native-preview` published to the
+ * style's channel, at the demo's route. The runtime version is the one Expo Go takes for its SDK, as
+ * `qr.expo.dev` writes it for Expo Go; the demo's route follows the `/--/` that tells Expo Go where the
+ * project's URL ends and the path inside the app begins.
+ */
+export function expoGoUrl({
+  projectId,
+  style,
+  demo,
+}: {
+  /** The EAS project the preview's updates are published to. */
+  projectId: string;
+  /** The style the page shows, whose name is the update's channel. */
+  style: PlatformStyle<'native'>;
+  /** A demo's name in `@zeroxsolutions/native-ui/examples`, such as `button-demo`. */
+  demo: string;
+}): string {
+  const query = new URLSearchParams({ 'runtime-version': `exposdk:${EXPO_GO_SDK}.0.0`, 'channel-name': style });
+  return `exp://u.expo.dev/${encodeURIComponent(projectId)}/--/${encodeURIComponent(demo)}?${query}`;
 }
