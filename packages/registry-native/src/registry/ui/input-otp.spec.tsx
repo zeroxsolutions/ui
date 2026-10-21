@@ -202,4 +202,35 @@ describe('InputOTP', () => {
     expect(field.props['aria-disabled']).toBe(true);
     expect(emittedClasses(field.parent?.props.className)).toContain('opacity-50');
   });
+
+  // The field's style is fixed when the module loads, so each platform loads its own copy of the
+  // component, React Native and the renderer.
+  it.each(['ios', 'android'] as const)(
+    'stays visible to the screen reader and autofill on %s, its text and underline invisible',
+    async (os) => {
+      jest.resetModules();
+      require('react-native').Platform.OS = os;
+      const fresh: typeof import('./input-otp') = require('./input-otp');
+      // The pure entry registers no cleanup hooks, which a test body may not add.
+      const testing: typeof import('@testing-library/react-native') = require('@testing-library/react-native/pure');
+
+      try {
+        await testing.render(
+          <fresh.InputOTP maxLength={6} aria-label="Verification code">
+            <fresh.InputOTPGroup>
+              <fresh.InputOTPSlot index={0} />
+            </fresh.InputOTPGroup>
+          </fresh.InputOTP>,
+        );
+
+        const field = testing.screen.getByLabelText('Verification code');
+        const style = StyleSheet.flatten(field.props.style);
+        expect(style.opacity).toBeGreaterThan(0);
+        expect(style.color).toBe('transparent');
+        expect(field.props.underlineColorAndroid).toBe('transparent');
+      } finally {
+        await testing.cleanup();
+      }
+    },
+  );
 });

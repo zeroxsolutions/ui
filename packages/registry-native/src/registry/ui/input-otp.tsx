@@ -8,7 +8,7 @@ import {
   type ComponentProps,
   type ReactNode,
 } from 'react';
-import { Platform, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 import { cn } from '../lib/utils';
 import { Icon, IconClassContext } from './icon';
 import { Text } from './text';
@@ -135,6 +135,7 @@ function InputOTP({
           onChangeText={change}
           selection={{ start: value.length, end: value.length }}
           caretHidden
+          underlineColorAndroid="transparent"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
           autoComplete="sms-otp"
@@ -160,8 +161,9 @@ const styles = StyleSheet.create({
   field: {
     ...StyleSheet.absoluteFill,
     color: 'transparent',
-    // iOS offers no paste on a field at opacity 0, so it stays just visible, its text transparent.
-    opacity: Platform.OS === 'ios' ? 0.02 : 0,
+    // At opacity 0, iOS offers no paste on the field and Android reports it not visible to the user, so
+    // TalkBack cannot focus it and SMS autofill never fills it. It stays just visible, its text transparent.
+    opacity: 0.02,
   },
 });
 
