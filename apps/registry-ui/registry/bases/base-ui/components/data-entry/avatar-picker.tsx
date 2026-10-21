@@ -169,7 +169,9 @@ function AvatarPickerRemoveButton({
 /**
  * Emoji pane (tab value `emoji`): an `EmojiPicker` whose pick sets the emoji and
  * clears any image. `children` are the picker's parts, composed by the consumer
- * (`EmojiPickerSearch`, `EmojiPickerContent`, `EmojiPickerNav`).
+ * (`EmojiPickerSearch`, `EmojiPickerContent`, `EmojiPickerNav`), stacked in a
+ * column with a gap. Flush against the search, the grid's pinned heading would
+ * paint over the field's focus ring.
  */
 function AvatarPickerEmojiContent({
   className,
@@ -181,7 +183,7 @@ function AvatarPickerEmojiContent({
     <TabsContent
       data-slot="avatar-picker-emoji-content"
       value="emoji"
-      className={cn('[--emoji-picker-surface:var(--popover)]', className)}
+      className={cn('flex flex-col gap-2 [--emoji-picker-surface:var(--popover)]', className)}
       {...props}
     >
       <EmojiPicker onSelect={setEmoji}>{children}</EmojiPicker>
