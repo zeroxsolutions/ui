@@ -10,27 +10,21 @@ function classNameOf(node: RenderedNode): string {
   return String(node.props.className ?? '');
 }
 
-/** The row that holds the groups and the separators, which is the field's parent. */
-function rowChildren(): RenderedNode[] {
-  const field = screen.getByLabelText('Verification code');
-  return (field.parent?.children ?? []).filter((child): child is RenderedNode => typeof child !== 'string');
-}
-
 function groups(): RenderedNode[] {
-  return rowChildren().filter((child) => classNameOf(child).includes('cn-input-otp-group'));
+  return screen.queryAllByTestId(/^code-group-\d$/, HIDDEN);
 }
 
 function slotsOf(group: RenderedNode): RenderedNode[] {
-  return group.children.filter((child): child is RenderedNode => typeof child !== 'string');
+  return within(group).queryAllByTestId(/^code-slot-\d$/, HIDDEN);
 }
 
 function separators(): RenderedNode[] {
-  return rowChildren().filter((child) => classNameOf(child).includes('cn-input-otp-separator'));
+  return screen.queryAllByTestId('code-separator', HIDDEN);
 }
 
 describe('CodeInput', () => {
   it('draws one group of six slots for pattern "6", the default', async () => {
-    await render(<CodeInput aria-label="Verification code" />);
+    await render(<CodeInput testID="code" aria-label="Verification code" />);
 
     expect(groups()).toHaveLength(1);
     expect(slotsOf(groups()[0])).toHaveLength(6);
@@ -38,7 +32,7 @@ describe('CodeInput', () => {
   });
 
   it('draws two groups of three with a separator between for pattern "3-3", still one focusable input', async () => {
-    await render(<CodeInput aria-label="Verification code" pattern="3-3" />);
+    await render(<CodeInput testID="code" aria-label="Verification code" pattern="3-3" />);
 
     expect(groups().map((group) => slotsOf(group).length)).toEqual([3, 3]);
     expect(separators()).toHaveLength(1);
@@ -48,7 +42,7 @@ describe('CodeInput', () => {
 
   it('fills the slots left to right as the code is typed', async () => {
     const onChange = jest.fn();
-    await render(<CodeInput aria-label="Verification code" pattern="3-3" onChange={onChange} />);
+    await render(<CodeInput testID="code" aria-label="Verification code" pattern="3-3" onChange={onChange} />);
 
     await userEvent.setup().type(screen.getByLabelText('Verification code'), '123');
 
@@ -64,7 +58,7 @@ describe('CodeInput', () => {
 
   it('fills all six slots from one paste of a six-digit code', async () => {
     const onChange = jest.fn();
-    await render(<CodeInput aria-label="Verification code" onChange={onChange} />);
+    await render(<CodeInput testID="code" aria-label="Verification code" onChange={onChange} />);
 
     await userEvent.setup().paste(screen.getByLabelText('Verification code'), '123456');
 
@@ -80,7 +74,7 @@ describe('CodeInput', () => {
   });
 
   it('refuses characters outside the digits by default', async () => {
-    await render(<CodeInput aria-label="Verification code" />);
+    await render(<CodeInput testID="code" aria-label="Verification code" />);
 
     await userEvent.setup().type(screen.getByLabelText('Verification code'), '1a2');
 
@@ -88,7 +82,9 @@ describe('CodeInput', () => {
   });
 
   it('refuses characters outside allowedCharacters and takes the ones it names', async () => {
-    await render(<CodeInput aria-label="Verification code" allowedCharacters="^[A-Z0-9]+$" keyboardType="default" />);
+    await render(
+      <CodeInput testID="code" aria-label="Verification code" allowedCharacters="^[A-Z0-9]+$" keyboardType="default" />,
+    );
 
     await userEvent.setup().type(screen.getByLabelText('Verification code'), 'A7b-Z');
 
@@ -96,7 +92,7 @@ describe('CodeInput', () => {
   });
 
   it('marks the input invalid and draws the slots in the destructive tone', async () => {
-    await render(<CodeInput aria-label="Verification code" aria-invalid />);
+    await render(<CodeInput testID="code" aria-label="Verification code" aria-invalid />);
 
     expect(screen.getByLabelText('Verification code').props['aria-invalid']).toBe(true);
     for (const slot of slotsOf(groups()[0])) {
@@ -105,7 +101,7 @@ describe('CodeInput', () => {
   });
 
   it('leaves the input valid and the slots plain without aria-invalid', async () => {
-    await render(<CodeInput aria-label="Verification code" />);
+    await render(<CodeInput testID="code" aria-label="Verification code" />);
 
     expect(screen.getByLabelText('Verification code').props['aria-invalid']).toBeFalsy();
     for (const slot of slotsOf(groups()[0])) {
@@ -114,7 +110,7 @@ describe('CodeInput', () => {
   });
 
   it('lets the OS offer a texted code to the one input', async () => {
-    await render(<CodeInput aria-label="Verification code" />);
+    await render(<CodeInput testID="code" aria-label="Verification code" />);
 
     expect(screen.getByLabelText('Verification code').props).toEqual(
       expect.objectContaining({ textContentType: 'oneTimeCode', autoComplete: 'sms-otp' }),
@@ -122,7 +118,7 @@ describe('CodeInput', () => {
   });
 
   it.each(['vega', 'nova'] as const)('makes every slot 48 square, sharing the row width, in %s', async (style) => {
-    await render(<CodeInput aria-label="Verification code" pattern="3-3" />);
+    await render(<CodeInput testID="code" aria-label="Verification code" pattern="3-3" />);
 
     const slots = groups().flatMap(slotsOf);
     expect(slots).toHaveLength(6);
@@ -132,7 +128,7 @@ describe('CodeInput', () => {
   });
 
   it.each(['vega', 'nova'] as const)('draws each digit in text-lg and font-sans-semibold in %s', async (style) => {
-    await render(<CodeInput aria-label="Verification code" defaultValue="123456" />);
+    await render(<CodeInput testID="code" aria-label="Verification code" defaultValue="123456" />);
 
     const digits = screen.getAllByText(/^\d$/, HIDDEN);
     expect(digits).toHaveLength(6);
@@ -144,7 +140,7 @@ describe('CodeInput', () => {
   });
 
   it.each(['vega', 'nova'] as const)('replaces the style size of a slot with size-12 in %s', async (style) => {
-    await render(<CodeInput aria-label="Verification code" />);
+    await render(<CodeInput testID="code" aria-label="Verification code" />);
 
     const classes = emittedClasses(classNameOf(slotsOf(groups()[0])[0]), style);
     expect(classes.filter((name) => /^(size|h|w)-/.test(name))).toEqual(['size-12']);

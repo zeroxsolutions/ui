@@ -40,21 +40,35 @@ type CodeInputProps = Omit<
 /**
  * A six-character one-time code over InputOTP, its slots filling the row's width. One text field sits
  * under the slots and takes every prop not named here: name it with `aria-label`, mark the code invalid
- * with `aria-invalid` (every slot draws destructive), and take the code with `value` and `onChange`:
+ * with `aria-invalid` (every slot draws destructive), and take the code with `value` and `onChange`.
+ * A `testID` goes to the field and names the parts as `<testID>-group-<n>`, `<testID>-separator` and
+ * `<testID>-slot-<index>`:
  *
  *   <CodeInput aria-label="Verification code" pattern="3-3" value={code} onChange={setCode} />
  */
-function CodeInput({ pattern = '6', allowedCharacters = REGEXP_ONLY_DIGITS, ...props }: CodeInputProps): ReactNode {
+function CodeInput({
+  pattern = '6',
+  allowedCharacters = REGEXP_ONLY_DIGITS,
+  testID,
+  ...props
+}: CodeInputProps): ReactNode {
   const groups = CODE_INPUT_GROUPS[pattern];
+  const part = (name: string): string | undefined => (testID === undefined ? undefined : `${testID}-${name}`);
 
   return (
-    <InputOTP maxLength={CODE_INPUT_LENGTH} pattern={allowedCharacters} containerClassName="w-full gap-2" {...props}>
+    <InputOTP
+      maxLength={CODE_INPUT_LENGTH}
+      pattern={allowedCharacters}
+      containerClassName="w-full gap-2"
+      testID={testID}
+      {...props}
+    >
       {groups.map(([start, length], groupIndex) => (
         <Fragment key={start}>
-          {groupIndex > 0 ? <InputOTPSeparator /> : null}
-          <InputOTPGroup className="flex-1">
+          {groupIndex > 0 ? <InputOTPSeparator testID={part('separator')} /> : null}
+          <InputOTPGroup className="flex-1" testID={part(`group-${groupIndex}`)}>
             {Array.from({ length }, (_, offset) => (
-              <CodeInputSlot key={start + offset} index={start + offset} />
+              <CodeInputSlot key={start + offset} index={start + offset} testID={part(`slot-${start + offset}`)} />
             ))}
           </InputOTPGroup>
         </Fragment>
