@@ -8,11 +8,6 @@ import { Text, TextClassContext, type TextProps } from './text';
 // A `cn-<slot>` token stands for that slot's view classes and `cn-<slot>/text` for its text classes;
 // the registry build replaces each with the classes translated for the target engine.
 
-// Upstream sizes the svg inside a separator and an ellipsis with a child selector, which has no
-// counterpart on a device.
-const SEPARATOR_ICON_CLASS = 'size-3.5';
-const ELLIPSIS_ICON_CLASS = 'size-4';
-
 /**
  * react-native-web writes `aria-current` to the DOM for a screen reader on the web; React Native's own
  * props do not list it, and iOS and Android have no current-page state to give it.
@@ -59,7 +54,8 @@ function BreadcrumbPage({ className, ...props }: TextProps): ReactNode {
 /** The mark between two steps, a chevron unless given children; hidden from screen readers. */
 function BreadcrumbSeparator({ children, className, ...props }: ComponentProps<typeof View>): ReactNode {
   return (
-    <IconClassContext.Provider value={SEPARATOR_ICON_CLASS}>
+    // Upstream sizes the svg inside a separator with a child selector, which has no counterpart on a device.
+    <IconClassContext.Provider value="size-3.5">
       <View role="presentation" aria-hidden className={cn('cn-breadcrumb-separator', className)} {...props}>
         {children ?? <Icon as={ChevronRight} />}
       </View>
@@ -70,7 +66,8 @@ function BreadcrumbSeparator({ children, className, ...props }: ComponentProps<t
 /** Three dots standing for the steps left out of a long trail; hidden from screen readers. */
 function BreadcrumbEllipsis({ className, ...props }: ComponentProps<typeof View>): ReactNode {
   return (
-    <IconClassContext.Provider value={ELLIPSIS_ICON_CLASS}>
+    // Upstream sizes the svg inside an ellipsis with a child selector, which has no counterpart on a device.
+    <IconClassContext.Provider value="size-4">
       <View
         role="presentation"
         aria-hidden

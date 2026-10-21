@@ -24,8 +24,6 @@ const buttonGroupVariants = cva('items-stretch self-start cn-button-group', {
   },
 });
 
-type ButtonGroupOrientation = NonNullable<VariantProps<typeof buttonGroupVariants>['orientation']>;
-
 type ChildPosition = 'first' | 'middle' | 'last';
 
 /**
@@ -33,18 +31,20 @@ type ChildPosition = 'first' | 'middle' | 'last';
  * removes the border the next child would draw twice, with selectors on the group's children that a
  * device has no counterpart of.
  */
-const JOINED_EDGE_CLASSES = {
-  horizontal: {
-    first: 'rounded-r-none',
-    middle: 'rounded-l-none rounded-r-none border-l-0',
-    last: 'rounded-l-none border-l-0',
+const buttonGroupChildVariants = cva('', {
+  variants: {
+    orientation: { horizontal: '', vertical: '' },
+    position: { first: '', middle: '', last: '' },
   },
-  vertical: {
-    first: 'rounded-b-none',
-    middle: 'rounded-t-none rounded-b-none border-t-0',
-    last: 'rounded-t-none border-t-0',
-  },
-} as const satisfies Record<ButtonGroupOrientation, Record<ChildPosition, string>>;
+  compoundVariants: [
+    { orientation: 'horizontal', position: 'first', className: 'rounded-r-none' },
+    { orientation: 'horizontal', position: 'middle', className: 'rounded-l-none rounded-r-none border-l-0' },
+    { orientation: 'horizontal', position: 'last', className: 'rounded-l-none border-l-0' },
+    { orientation: 'vertical', position: 'first', className: 'rounded-b-none' },
+    { orientation: 'vertical', position: 'middle', className: 'rounded-t-none rounded-b-none border-t-0' },
+    { orientation: 'vertical', position: 'last', className: 'rounded-t-none border-t-0' },
+  ],
+});
 
 function positionOf(index: number, count: number): ChildPosition | undefined {
   if (count < 2) return undefined;
@@ -62,7 +62,6 @@ type ButtonGroupProps = ComponentProps<typeof View> & VariantProps<typeof button
 function ButtonGroup({ className, orientation, children, ...props }: ButtonGroupProps): ReactNode {
   const items = Children.toArray(children).filter(isValidElement<{ className?: string }>);
   const holdsGroup = items.some((child) => child.type === ButtonGroup);
-  const edges = JOINED_EDGE_CLASSES[orientation ?? 'horizontal'];
 
   return (
     <View
@@ -74,7 +73,12 @@ function ButtonGroup({ className, orientation, children, ...props }: ButtonGroup
         const position = positionOf(index, items.length);
         return position === undefined
           ? child
-          : cloneElement(child, { className: cn(child.props.className, edges[position]) });
+          : cloneElement(child, {
+              className: cn(
+                child.props.className,
+                buttonGroupChildVariants({ orientation: orientation ?? 'horizontal', position }),
+              ),
+            });
       })}
     </View>
   );
