@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 import { emittedClasses } from '../../../build/slot-tokens.testing';
 import {
   PasswordStrength,
@@ -35,7 +35,10 @@ beforeEach(() => {
 });
 
 // React Native's jest mock makes announceForAccessibility one shared mock, so its calls carry over between tests.
+const initialPlatform = Platform.OS;
+
 afterEach(() => {
+  Platform.OS = initialPlatform;
   jest.clearAllMocks();
   jest.restoreAllMocks();
 });
@@ -73,7 +76,8 @@ describe('PasswordStrengthMeter', () => {
     expect(screen.getByText('weak').props.accessibilityLiveRegion).toBe('polite');
   });
 
-  it('announces the strength when it changes, and not on the first render', async () => {
+  it('announces the strength on iOS when it changes, and not on the first render', async () => {
+    Platform.OS = 'ios';
     const { rerender } = await render(<Example strength="weak" />);
     expect(announce).not.toHaveBeenCalled();
 
@@ -83,6 +87,16 @@ describe('PasswordStrengthMeter', () => {
 
     await rerender(<Example strength="fair" />);
     expect(announce).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the announcing to the live region on Android, so the change is spoken once', async () => {
+    Platform.OS = 'android';
+    const { rerender } = await render(<Example strength="weak" />);
+
+    await rerender(<Example strength="fair" />);
+
+    expect(announce).not.toHaveBeenCalled();
+    expect(screen.getByText('fair').props.accessibilityLiveRegion).toBe('polite');
   });
 
   it('throws when a part is rendered outside PasswordStrength', async () => {

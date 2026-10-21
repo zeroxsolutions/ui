@@ -1,6 +1,6 @@
 import { Circle, CircleCheck } from 'lucide-react-native';
 import { createContext, useContext, useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
-import { AccessibilityInfo, View } from 'react-native';
+import { AccessibilityInfo, Platform, View } from 'react-native';
 import { Card, CardContent } from '../../ui/card';
 import { Icon } from '../../ui/icon';
 import { Progress } from '../../ui/progress';
@@ -53,9 +53,9 @@ type PasswordStrengthMeterProps = Omit<ComponentProps<typeof CardContent>, 'chil
 
 /**
  * A progress bar filled a third for `weak`, two thirds for `fair` and full for `strong`, with its name
- * and `valueText` above it. `valueText` is the bar's value text and sits in a polite live region;
- * when it changes after the first render it is also announced with AccessibilityInfo, which the live
- * region alone does not do on iOS.
+ * and `valueText` above it. `valueText` is the bar's value text and sits in a polite live region,
+ * which Android reads out when it changes. On iOS, where the live region is not read, a change after
+ * the first render is announced with AccessibilityInfo instead, so each platform speaks it once.
  * @throws {Error} when rendered outside a PasswordStrength
  */
 function PasswordStrengthMeter({ children, valueText, className, ...props }: PasswordStrengthMeterProps): ReactNode {
@@ -65,6 +65,7 @@ function PasswordStrengthMeter({ children, valueText, className, ...props }: Pas
   useEffect(() => {
     if (announced.current === valueText) return;
     announced.current = valueText;
+    if (Platform.OS !== 'ios') return;
     AccessibilityInfo.announceForAccessibility(valueText);
   }, [valueText]);
 
