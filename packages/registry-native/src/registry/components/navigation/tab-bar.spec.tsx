@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 import { House, Search } from 'lucide-react-native';
 import { emittedClasses } from '../../../build/slot-tokens.testing';
 import {
@@ -177,6 +177,36 @@ describe('TabBarItem', () => {
 
     expect(classes('home-indicator')).toContain('bg-primary/10');
     expect(classes('inbox-indicator')).not.toContain('bg-primary/10');
+  });
+
+  it('mutes the indicator of an inactive item while it is pressed, and clears it on release', async () => {
+    await render(<Example />);
+    const inbox = screen.getByRole('tab', { name: 'Inbox' });
+    expect(classes('inbox-indicator')).not.toContain('bg-muted');
+
+    await fireEvent(inbox, 'pressIn');
+    expect(classes('inbox-indicator')).toContain('bg-muted');
+
+    await fireEvent(inbox, 'pressOut');
+    expect(classes('inbox-indicator')).not.toContain('bg-muted');
+  });
+
+  it('keeps the active indicator tinted while it is pressed', async () => {
+    await render(<Example />);
+
+    await fireEvent(screen.getByRole('tab', { name: 'Home' }), 'pressIn');
+
+    expect(classes('home-indicator')).toContain('bg-primary/10');
+    expect(classes('home-indicator')).not.toContain('bg-muted');
+  });
+
+  it('uses no group class', async () => {
+    await render(<Example />);
+
+    for (const id of ['home-indicator', 'inbox-indicator']) {
+      expect(classes(id).some((name) => name.includes('group'))).toBe(false);
+    }
+    expect(screen.getByRole('tab', { name: 'Inbox' }).props.className).not.toMatch(/group/);
   });
 });
 

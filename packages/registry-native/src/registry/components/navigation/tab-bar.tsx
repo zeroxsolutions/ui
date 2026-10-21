@@ -56,6 +56,7 @@ function useTabBar(): TabBarContextValue {
 
 interface TabBarItemContextValue {
   active: boolean;
+  pressed: boolean;
   setDescription: Dispatch<SetStateAction<string | undefined>>;
 }
 
@@ -108,7 +109,7 @@ function TabBar({
       <View
         accessibilityRole="tablist"
         className={cn(
-          'text-foreground absolute z-50',
+          'absolute z-50',
           side === 'top' || side === 'bottom' ? 'flex-row items-center justify-between' : 'flex-col gap-1',
           surface === 'solid' ? 'bg-background' : 'bg-background/70',
           shape === 'floating' ? 'rounded-full p-1.5 shadow-lg' : null,
@@ -131,10 +132,19 @@ type TabBarItemProps = ComponentProps<typeof Pressable> & {
  * there. Its name is its `TabBarLabel`, or `accessibilityLabel` where the label is hidden and you want
  * another. A `TabBarBadge` inside it becomes its `accessibilityHint` unless you pass one.
  */
-function TabBarItem({ active = false, accessibilityHint, className, children, ...props }: TabBarItemProps): ReactNode {
+function TabBarItem({
+  active = false,
+  accessibilityHint,
+  onPressIn,
+  onPressOut,
+  className,
+  children,
+  ...props
+}: TabBarItemProps): ReactNode {
   const { side } = useTabBar();
   const [description, setDescription] = useState<string>();
-  const context = useMemo(() => ({ active, setDescription }), [active]);
+  const [pressed, setPressed] = useState(false);
+  const context = useMemo(() => ({ active, pressed, setDescription }), [active, pressed]);
   return (
     <TabBarItemContext.Provider value={context}>
       <TextClassContext.Provider value={active ? 'text-primary' : 'text-muted-foreground'}>
@@ -143,10 +153,18 @@ function TabBarItem({ active = false, accessibilityHint, className, children, ..
           accessibilityState={{ selected: active }}
           accessibilityHint={accessibilityHint ?? description}
           className={cn(
-            'group min-h-12 min-w-16 items-center justify-center gap-1 rounded-lg p-1',
+            'min-h-12 min-w-16 items-center justify-center gap-1 rounded-lg p-1',
             side === 'top' || side === 'bottom' ? 'flex-1' : null,
             className,
           )}
+          onPressIn={(event) => {
+            setPressed(true);
+            onPressIn?.(event);
+          }}
+          onPressOut={(event) => {
+            setPressed(false);
+            onPressOut?.(event);
+          }}
           {...props}
         >
           {children}
@@ -157,16 +175,16 @@ function TabBarItem({ active = false, accessibilityHint, className, children, ..
 }
 
 /**
- * The pill behind the icon: tinted while its item is active and muted while the item is pressed. Holds
+ * The pill behind the icon: tinted while its item is active, and muted while an inactive item is pressed. Holds
  * the `TabBarIcon` and any `TabBarBadge`.
  */
 function TabBarIndicator({ className, ...props }: ComponentProps<typeof View>): ReactNode {
-  const { active } = useTabBarItem();
+  const { active, pressed } = useTabBarItem();
   return (
     <View
       className={cn(
         'relative h-8 w-14 items-center justify-center rounded-full',
-        active ? 'bg-primary/10' : 'group-active:bg-muted',
+        active ? 'bg-primary/10' : pressed && 'bg-muted',
         className,
       )}
       {...props}

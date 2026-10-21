@@ -97,8 +97,8 @@ It has the `tab` role and is announced selected only while `active`. Its name is
 
 ### TabBarIndicator
 
-Takes every prop of `View`. The pill behind the icon: tinted while the item is active, and muted while the item is
-pressed.
+Takes every prop of `View`. The pill behind the icon: tinted while the item is active, and muted while an inactive item is
+pressed. The item tracks the press with `onPressIn` and `onPressOut`, and still calls any you pass.
 
 ### TabBarIcon
 
