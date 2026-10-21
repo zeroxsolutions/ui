@@ -18,7 +18,7 @@ module.exports = {
     '/node_modules/@react-native/babel-preset/',
   ],
   transform: {
-    '[.][jt]sx?$': [
+    '[.]m?[jt]sx?$': [
       'babel-jest',
       {
         configFile: __dirname + '/.babelrc.js',

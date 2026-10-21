@@ -1,12 +1,18 @@
 {
   "expo": {
     "name": "zui native preview",
-    "slug": "native-preview",
+    "slug": "zui-native-preview",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/afb21ed5-e305-4bf1-ad02-1bc6d06853b1"
+    },
     "web": {
       "bundler": "metro",
       "output": "single",
@@ -22,6 +28,12 @@
           "backgroundColor": "#ffffff"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "afb21ed5-e305-4bf1-ad02-1bc6d06853b1"
+      }
+    },
+    "owner": "zeroxsolutions"
   }
 }

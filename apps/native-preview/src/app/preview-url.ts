@@ -2,6 +2,9 @@
 
 type ColorScheme = 'light' | 'dark';
 
+/** Where an Expo link's own address ends and the path it hands the app begins. */
+const DEEP_LINK_SEPARATOR = '/--/';
+
 /**
  * The demo a path names under `baseUrl`, such as `button-demo` for `/native-preview/vega/button-demo`
  * under `/native-preview/vega`. A trailing slash and an `.html` suffix, which a static host may add, are
@@ -19,6 +22,21 @@ function demoNameFromPath(pathname: string, baseUrl: string): string | undefined
 }
 
 /**
+ * The demo a link into the app names, such as `button-demo` for
+ * `exp://u.expo.dev/<project>/--/button-demo?channel-name=nova`. Expo Go hands the app the path after
+ * `/--/`; what comes before it, and the query, choose the update.
+ * @param url - the link the app was opened with; `null` or `undefined` when it was opened without one
+ * @returns the name, or `undefined` when the link carries no path
+ */
+function demoNameFromDeepLink(url: string | null | undefined): string | undefined {
+  const separator = url?.indexOf(DEEP_LINK_SEPARATOR) ?? -1;
+  if (url === null || url === undefined || separator === -1) return undefined;
+  const [path = ''] = url.slice(separator + DEEP_LINK_SEPARATOR.length).split(/[?#]/);
+  const name = path.replace(/\/$/, '');
+  return name === '' ? undefined : name;
+}
+
+/**
  * The colour scheme `?theme=` asks for.
  * @returns `light` or `dark`, or `undefined` when the query holds neither
  */
@@ -27,5 +45,5 @@ function themeFromSearch(search: string): ColorScheme | undefined {
   return theme === 'light' || theme === 'dark' ? theme : undefined;
 }
 
-export { demoNameFromPath, themeFromSearch };
+export { demoNameFromDeepLink, demoNameFromPath, themeFromSearch };
 export type { ColorScheme };

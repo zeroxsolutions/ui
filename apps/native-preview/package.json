@@ -23,6 +23,7 @@
     "expo-font": "catalog:expo",
     "expo-splash-screen": "~58.0.10",
     "expo-status-bar": "~58.0.3",
+    "expo-updates": "~58.0.17",
     "lucide-react-native": "catalog:",
     "nativewind": "4.2.7",
     "react": "catalog:",
@@ -77,6 +78,16 @@
             "for style in vega nova; do STYLE=$style expo export --platform web --clear --output-dir dist/web/$style || exit 1; done",
             "for style in vega nova; do for demo in $(ls ../../packages/native-ui/src/examples | sed -n 's/[.]tsx$//p' | grep -- '-demo$'); do cp dist/web/$style/index.html dist/web/$style/$demo.html; done; done"
           ]
+        }
+      },
+      "publish-update": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "^build-registry"
+        ],
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "for style in vega nova; do STYLE=$style eas update --branch $style --message \"$(git rev-parse HEAD)\" --environment preview --input-dir dist/update/$style --non-interactive || exit 1; done"
         }
       }
     }

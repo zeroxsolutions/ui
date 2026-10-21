@@ -1,4 +1,4 @@
-import { demoNameFromPath, themeFromSearch } from './preview-url';
+import { demoNameFromDeepLink, demoNameFromPath, themeFromSearch } from './preview-url';
 
 describe('demoNameFromPath', () => {
   it("takes the demo's name from the segment under the style's base", () => {
@@ -17,6 +17,29 @@ describe('demoNameFromPath', () => {
 
   it('reads the path from the root with no base, as the dev server serves it', () => {
     expect(demoNameFromPath('/button-demo', '')).toBe('button-demo');
+  });
+});
+
+describe('demoNameFromDeepLink', () => {
+  const update = 'exp://u.expo.dev/afb21ed5-e305-4bf1-ad02-1bc6d06853b1';
+
+  it("takes the demo's name from the path after Expo Go's /--/, before the update's query", () => {
+    expect(demoNameFromDeepLink(`${update}/--/button-demo?runtime-version=exposdk%3A58.0.0&channel-name=nova`)).toBe(
+      'button-demo',
+    );
+  });
+
+  it('reads the name from a dev server link and ignores a trailing slash', () => {
+    expect(demoNameFromDeepLink('exp://192.168.1.20:8081/--/switch-demo/')).toBe('switch-demo');
+  });
+
+  it('has no name when the link carries no path, or an empty one', () => {
+    expect(demoNameFromDeepLink(`${update}?channel-name=vega`)).toBeUndefined();
+    expect(demoNameFromDeepLink(`${update}/--/?channel-name=vega`)).toBeUndefined();
+  });
+
+  it('has no name when the app was opened without a link', () => {
+    expect(demoNameFromDeepLink(null)).toBeUndefined();
   });
 });
 
