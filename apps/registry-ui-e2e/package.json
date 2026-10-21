@@ -6,7 +6,11 @@
     "@zeroxsolutions/icons": "workspace:*"
   },
   "nx": {
-    "implicitDependencies": ["@zeroxsolutions/registry-ui", "@zeroxsolutions/native-preview"],
+    "implicitDependencies": [
+      "@zeroxsolutions/registry-ui",
+      "@zeroxsolutions/native-preview",
+      "@zeroxsolutions/native-preview-uniwind"
+    ],
     "targets": {
       "e2e": {
         "dependsOn": [

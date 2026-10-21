@@ -18,8 +18,8 @@ import {
 /** The native preview's app config, where `eas init` wrote the project its updates are published to. */
 const PREVIEW_APP_CONFIG = join(import.meta.dirname, '../../../native-preview/app.json');
 
-/** The native preview's module that posts the height message, in the app that writes it. */
-const FRAME_HEIGHT_SOURCE = join(import.meta.dirname, '../../../native-preview/src/app/frame-height.ts');
+/** The module that posts the height message, in the preview screen both native previews draw. */
+const FRAME_HEIGHT_SOURCE = join(import.meta.dirname, '../../../../packages/native-ui/src/preview/frame-height.ts');
 
 /** The workspace's catalog, whose `expo` catalog pins the SDK the native preview is built on. */
 const WORKSPACE_CATALOG = join(import.meta.dirname, '../../../../pnpm-workspace.yaml');

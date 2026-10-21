@@ -4,7 +4,8 @@
     "outDir": "./out-tsc/jest",
     "jsx": "react-jsx",
     "types": ["jest", "node"],
-    "moduleSuffixes": [".nativewind", ""]
+    "moduleSuffixes": [".nativewind", ""],
+    "paths": { "@/*": ["./dist/src/nativewind-vega/*"], "@styles/*": ["./dist/src/nativewind-*"] }
   },
   "files": ["src/test-setup.ts"],
   "include": [

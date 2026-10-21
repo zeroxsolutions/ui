@@ -3,7 +3,7 @@ import type { PlatformStyle } from '@/types/platform';
 
 /**
  * The `type` of the message a native preview posts to the page framing it, with the drawn demo's
- * height. The preview's `HEIGHT_MESSAGE` (apps/native-preview/src/app/frame-height.ts) writes it, and
+ * height. The preview's `HEIGHT_MESSAGE` (packages/native-ui/src/preview/frame-height.ts) writes it, and
  * this module's spec fails while the two differ.
  */
 export const NATIVE_PREVIEW_HEIGHT_MESSAGE = 'zui:native-preview-height';

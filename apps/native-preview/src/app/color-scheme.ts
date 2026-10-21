@@ -1,4 +1,4 @@
-import type { ColorScheme } from './preview-url';
+import type { ColorScheme } from '@zeroxsolutions/native-ui/preview';
 
 /** The part of a CSSOM rule this module reads: its text, its nested rules and its media condition. */
 interface CssRuleLike {

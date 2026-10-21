@@ -91,9 +91,11 @@ jobs:
           ICONS_BUCKET: ${{ vars.ICONS_BUCKET }}
         run: pnpm nx run-many -t rclone:sync
 
-  # Publish the native preview's two styles as EAS updates, which is what the docs' "Open on your
-  # phone" QR opens in Expo Go. A job of its own after the site deploy: what fails it is Expo's login
-  # or quota, so the deployed site stays as it is and re-running this job retries the updates alone.
+  # Publish each native preview's two styles as EAS updates, which is what the docs' "Open on your
+  # phone" QR opens in Expo Go. Each project declaring `eas:update` publishes to its own Expo project,
+  # so EXPO_TOKEN has to be allowed to publish to every one of them. A job of its own after
+  # the site deploy: what fails it is Expo's login or quota, so the deployed site stays as it is and
+  # re-running this job retries the updates alone.
   eas-update:
     needs: [deploy]
     uses: ./.github/workflows/nx-deploy.yml

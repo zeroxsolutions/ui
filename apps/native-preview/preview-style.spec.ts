@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { previewSources, previewStyle, sharedThemeFile } from './preview-style';
+import { previewScreenSources, previewSources, previewStyle, sharedThemeFile } from './preview-style';
 
 describe('previewStyle', () => {
   it('takes vega or nova from EXPO_PUBLIC_STYLE', () => {
@@ -19,6 +19,12 @@ describe('previewStyle', () => {
 describe('previewSources', () => {
   it("points at NativeWind's emitted sources of the style", () => {
     expect(previewSources('nova')).toBe(join(__dirname, '../../packages/native-ui/dist/src/nativewind-nova'));
+  });
+});
+
+describe('previewScreenSources', () => {
+  it("points at native-ui's preview screen", () => {
+    expect(previewScreenSources()).toBe(join(__dirname, '../../packages/native-ui/src/preview'));
   });
 });
 

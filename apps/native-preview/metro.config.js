@@ -2,9 +2,17 @@ const { withNxMetro } = require('@nx/expo');
 const { join, sep } = require('node:path');
 const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
-const { DEFAULT_STYLE, PREVIEW_STYLES, previewSources, sharedThemeFile } = require('./preview-style');
+const {
+  DEFAULT_STYLE,
+  PREVIEW_STYLES,
+  previewScreenSources,
+  previewSources,
+  sharedThemeFile,
+} = require('./preview-style');
 
 const trees = PREVIEW_STYLES.map(previewSources);
+/** The emitted sources and the preview screen, whose packages resolve from this app. */
+const appSideTrees = [...trees, previewScreenSources()];
 const appEntry = join(__dirname, 'index.js');
 /** `@styles/<style>/<path>`, which the app imports a style's demos through. */
 const STYLE_ALIAS = /^@styles\/([^/]+)\/(.*)$/;
@@ -14,9 +22,9 @@ const resolveUpstream = config.resolver.resolveRequest;
 
 /**
  * `@/` is the importing file's style's sources, as an app's `@/` is its root, and the default style's
- * for the app's own files. A package the sources or the demos import resolves from this app, as it
- * would in an app that installed them: from where the files sit, it would be native-ui's own copy, a
- * second React Native and Tailwind 4's tailwind-merge.
+ * for the app's own files and the preview screen's. A package the sources, the demos or the preview
+ * screen import resolves from this app, as it would in an app that installed them: from where the files
+ * sit, it would be native-ui's own copy, a second React Native and Tailwind 4's tailwind-merge.
  */
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   const resolve = resolveUpstream ?? context.resolveRequest;
@@ -30,7 +38,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     const tree = originTree ?? previewSources(DEFAULT_STYLE);
     return context.resolveRequest(context, join(tree, moduleName.slice(2)), platform);
   }
-  if (originTree && !moduleName.startsWith('.')) {
+  if (appSideTrees.some((tree) => context.originModulePath.startsWith(tree + sep)) && !moduleName.startsWith('.')) {
     return resolve({ ...context, originModulePath: appEntry }, moduleName, platform);
   }
   return resolve(context, moduleName, platform);

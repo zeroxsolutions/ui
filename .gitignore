@@ -86,8 +86,10 @@ storybook-static
 # Generated shadcn registry JSON (emitted by @zeroxsolutions/registry-ui:shadcn-build)
 apps/registry-ui/public/r
 
-# The native preview's web export (emitted by @zeroxsolutions/native-preview:export)
+# The native previews' web exports (emitted by @zeroxsolutions/native-preview:export and
+# @zeroxsolutions/native-preview-uniwind:export)
 apps/registry-ui/public/native-preview
+apps/registry-ui/public/native-preview-uniwind
 
 # The docs' demo index (emitted by @zeroxsolutions/registry-ui:examples-index)
 apps/registry-ui/registry/bases/base-ui/examples/__index__.tsx

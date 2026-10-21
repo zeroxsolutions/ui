@@ -32,9 +32,9 @@ class DemoBoundary extends Component<DemoBoundaryProps, DemoBoundaryState> {
     const { error } = this.state;
     if (error === undefined) return this.props.children;
     return (
-      <View accessible role="alert" className="gap-1 rounded-md border border-destructive p-4" testID="demo-error">
+      <View accessible role="alert" className="border-destructive gap-1 rounded-md border p-4" testID="demo-error">
         <Text className="font-sans-semibold text-destructive">The {this.props.name} demo threw</Text>
-        <Text className="text-sm text-destructive">{error.message}</Text>
+        <Text className="text-destructive text-sm">{error.message}</Text>
       </View>
     );
   }

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/jest",
+    "jsx": "react-jsx",
+    "types": ["jest", "node"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2023", "dom"],
+    "allowJs": true
+  },
+  "files": ["src/test-setup.ts"],
+  "include": ["jest.config.cts", "preview-style.js", "preview-style.spec.ts", "app-config.spec.ts"],
+  "references": [{ "path": "./tsconfig.app.json" }]
+}

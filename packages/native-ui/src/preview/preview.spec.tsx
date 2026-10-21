@@ -1,0 +1,42 @@
+import { render, screen } from '@testing-library/react-native';
+import { Linking } from 'react-native';
+
+import { Preview } from './preview';
+
+// The provider draws nothing until the device reports its insets, which jest never does; the library's
+// own mock reports zero insets at once.
+jest.mock('react-native-safe-area-context', () => require('react-native-safe-area-context/jest/mock').default);
+
+const UPDATE = 'exp://u.expo.dev/0f6c4b9e-2d1a-4c3b-9e8f-7a6b5c4d3e2f';
+
+describe('Preview', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('draws the demo the link that opened the app names', async () => {
+    jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(`${UPDATE}/--/badge-demo?channel-name=nova`);
+
+    await render(<Preview bundledStyle="nova" applyColorScheme={() => undefined} />);
+
+    expect(await screen.findByText('Overdue')).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'badge-demo' })).toBeNull();
+  });
+
+  it('lists the demos when the app was opened without one', async () => {
+    jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(null);
+
+    await render(<Preview bundledStyle={undefined} applyColorScheme={() => undefined} />);
+
+    expect(await screen.findByRole('link', { name: 'badge-demo' })).toBeTruthy();
+  });
+
+  it('says no demo has the name a link carries, above the list of demos', async () => {
+    jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(`${UPDATE}/--/carousel-demo`);
+
+    await render(<Preview bundledStyle={undefined} applyColorScheme={() => undefined} />);
+
+    expect(await screen.findByRole('heading')).toHaveTextContent('No demo is named carousel-demo.');
+    expect(screen.getByRole('link', { name: 'button-demo' })).toBeTruthy();
+  });
+});

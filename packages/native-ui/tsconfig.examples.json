@@ -6,16 +6,27 @@
     "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "bundler",
-    // The demos import the items as an app does; build-registry writes NativeWind's Vega sources there.
-    "paths": { "@/*": ["./dist/src/nativewind-vega/*"] },
+    "lib": ["es2023", "dom"],
+    // The demos and the preview import the items as an app does; build-registry writes NativeWind's Vega
+    // sources there. The preview imports each style's demos through `@styles/<style>/`.
+    "paths": { "@/*": ["./dist/src/nativewind-vega/*"], "@styles/*": ["./dist/src/nativewind-*"] },
     "tsBuildInfoFile": "out-tsc/examples/tsconfig.examples.tsbuildinfo"
   },
   "files": ["src/nativewind-env.d.ts"],
   "include": [
     "src/examples/**/*.ts",
     "src/examples/**/*.tsx",
+    "src/preview/**/*.ts",
+    "src/preview/**/*.tsx",
+    "dist/src/nativewind-nova/examples/**/*.ts",
+    "dist/src/nativewind-nova/examples/**/*.tsx",
     "dist/src/nativewind-vega/**/*.ts",
     "dist/src/nativewind-vega/**/*.tsx"
   ],
-  "exclude": ["src/examples/**/*.spec.ts", "src/examples/**/*.spec.tsx"]
+  "exclude": [
+    "src/examples/**/*.spec.ts",
+    "src/examples/**/*.spec.tsx",
+    "src/preview/**/*.spec.ts",
+    "src/preview/**/*.spec.tsx"
+  ]
 }

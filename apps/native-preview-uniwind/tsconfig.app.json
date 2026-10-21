@@ -1,0 +1,32 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2023", "dom"],
+    "paths": {
+      "@/*": ["../../packages/native-ui/dist/src/uniwind-vega/*"],
+      "@styles/*": ["../../packages/native-ui/dist/src/uniwind-*"]
+    },
+    "rootDir": "../..",
+    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo"
+  },
+  "files": ["uniwind-types.d.ts", "css.d.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "../../packages/native-ui/dist/src/uniwind-vega/**/*.ts",
+    "../../packages/native-ui/dist/src/uniwind-vega/**/*.tsx",
+    "../../packages/native-ui/dist/src/uniwind-nova/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/uniwind-nova/examples/**/*.tsx"
+  ],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.spec.tsx", "src/test-setup.ts"],
+  "references": [
+    {
+      "path": "../../packages/native-ui/tsconfig.lib.json"
+    }
+  ]
+}

@@ -19,6 +19,8 @@ catalog:
   "react-native-css-interop": "0.2.7"
   "react-test-renderer": "19.3.1"
   "shadcn": "^4.21.0"
+  "tailwind-merge": "^3.7.0"
+  "tailwindcss": "^4.3.3"
   "wrangler": "^4.105.0"
 catalogs:
   # The Expo SDK and the packages it pins, which move together.
@@ -30,6 +32,11 @@ catalogs:
     "babel-preset-expo": "58.0.18"
     "jest-expo": "58.0.11"
     "react-native-svg": "^15.16.0"
+    "expo-splash-screen": "~58.0.10"
+    "expo-status-bar": "~58.0.3"
+    "expo-updates": "~58.0.17"
+    "react-native-safe-area-context": "~5.10.1"
+    "react-native-web": "~0.21.4"
   rn-primitives:
     "@rn-primitives/avatar": "1.5.2"
     "@rn-primitives/checkbox": "1.5.2"

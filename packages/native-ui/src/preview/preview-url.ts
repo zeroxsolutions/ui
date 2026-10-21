@@ -2,7 +2,7 @@
 
 type ColorScheme = 'light' | 'dark';
 
-/** A style the native registries are built in, as `preview-style.js` lists them. */
+/** A style the native registries are built in, as each preview app's `preview-style.js` lists them. */
 type PreviewStyle = 'vega' | 'nova';
 
 /** Where an Expo link's own address ends and the path it hands the app begins. */

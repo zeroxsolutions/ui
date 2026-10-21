@@ -15,6 +15,11 @@
       "import": "./src/examples/index.ts",
       "default": "./src/examples/index.ts"
     },
+    "./preview": {
+      "types": "./src/preview/index.ts",
+      "import": "./src/preview/index.ts",
+      "default": "./src/preview/index.ts"
+    },
     "./package.json": "./package.json"
   },
   "dependencies": {
@@ -33,7 +38,7 @@
     "clsx": "catalog:",
     "lucide-react-native": "catalog:",
     "react-native-svg": "catalog:expo",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "catalog:"
   },
   "devDependencies": {
     "@babel/runtime": "~7.27.6",
@@ -49,6 +54,8 @@
     "babel-preset-expo": "catalog:expo",
     "expo": "catalog:expo",
     "expo-font": "catalog:expo",
+    "expo-splash-screen": "catalog:expo",
+    "expo-status-bar": "catalog:expo",
     "jest": "catalog:",
     "jest-environment-jsdom": "~30.3.0",
     "jest-expo": "catalog:expo",
@@ -57,6 +64,7 @@
     "react": "catalog:",
     "react-native": "catalog:expo",
     "react-native-css-interop": "catalog:",
+    "react-native-safe-area-context": "catalog:expo",
     "react-test-renderer": "catalog:",
     "shadcn": "catalog:",
     "ts-jest": "^29.4.7",
