@@ -74,8 +74,9 @@ Takes every prop of [Button](/native/components/nativewind/button) but `variant`
 | `isActive` | `boolean`           | `false`  |
 | `size`     | the Button's `size` | `'icon'` |
 
-It is announced as a link, and `onPress` navigates. The current page, `isActive`, is outlined and carries
-`aria-current="page"`; the others are ghost. Its number goes in as a Text child.
+It is announced as a link, and `onPress` navigates. The current page, `isActive`, is outlined, announced as
+selected on iOS and Android, and carries `aria-current="page"` on the web; the others are ghost. Its number
+goes in as a Text child.
 
 ### PaginationPrevious, PaginationNext
 
@@ -91,6 +92,6 @@ screen readers.
 
 - Upstream's Previous and Next show a label from the `sm` breakpoint up and the chevron alone below it. A
   phone is below it, so the native ones draw the chevron alone and take no `text`.
-- iOS and Android have no current-page state, so a screen reader there reads the current page as a plain
-  link. On the web it carries `aria-current="page"`, as upstream's does.
+- iOS and Android have no current-page state, so a screen reader there announces the current page as a
+  selected link. On the web it carries `aria-current="page"`, as upstream's does.
 - Upstream renders each link as an anchor with an `href`. The native link navigates through `onPress`.

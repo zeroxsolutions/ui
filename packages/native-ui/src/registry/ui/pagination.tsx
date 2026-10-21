@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react-native';
 import type { ComponentProps, ReactNode } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './button';
 import { Icon, IconClassContext } from './icon';
@@ -10,7 +10,8 @@ import { Icon, IconClassContext } from './icon';
 
 /**
  * react-native-web writes `aria-current` to the DOM for a screen reader on the web; React Native's own
- * props do not list it, and iOS and Android have no current-page state to give it.
+ * props do not list it, and iOS and Android have no current-page state to give it, so on a device the
+ * current page is announced as selected instead, which ARIA does not allow on a web link.
  */
 const CURRENT_PAGE = { 'aria-current': 'page' } as const;
 
@@ -49,8 +50,8 @@ type PaginationLinkProps = Omit<ButtonProps, 'variant'> & {
 };
 
 /**
- * A page the user can go to, a Button announced as a link, ghost unless it is the current page, and
- * square at the `icon` size unless given another. Its number goes in as a Text child; `onPress` navigates.
+ * A page the user can go to, a Button announced as a link, ghost unless it is the current page, which is
+ * outlined and announced as selected on a device, and square at the `icon` size unless given another. Its number goes in as a Text child; `onPress` navigates.
  */
 function PaginationLink({ isActive = false, size = 'icon', ...props }: PaginationLinkProps): ReactNode {
   return (
@@ -58,6 +59,7 @@ function PaginationLink({ isActive = false, size = 'icon', ...props }: Paginatio
       role="link"
       variant={isActive ? 'outline' : 'ghost'}
       size={size}
+      aria-selected={Platform.OS === 'web' ? undefined : isActive}
       {...(isActive ? CURRENT_PAGE : {})}
       {...props}
     />

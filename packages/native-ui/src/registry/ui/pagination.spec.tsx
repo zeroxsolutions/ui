@@ -63,6 +63,8 @@ describe('Pagination', () => {
     expect(emittedClasses(current.props.className)).toContain('border-border');
     expect(current.props['aria-current']).toBe('page');
     expect(page.props['aria-current']).toBeUndefined();
+    expect(current).toBeSelected();
+    expect(page).not.toBeSelected();
   });
 
   it('calls onPress of the page pressed', async () => {
