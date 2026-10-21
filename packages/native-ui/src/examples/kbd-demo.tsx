@@ -8,7 +8,7 @@ import { Text } from '@/components/ui/text';
 
 function KbdDemo(): ReactNode {
   return (
-    <View className="items-center gap-4">
+    <View className="gap-4">
       <KbdGroup>
         <Kbd>
           <Icon as={Command} />
