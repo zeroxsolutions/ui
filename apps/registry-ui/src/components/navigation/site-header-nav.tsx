@@ -10,9 +10,7 @@ import { platformLocation, platformNavItems, type PlatformPages } from '@/lib/pl
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import type { NativeEngine } from '@/types/native-engine';
 
-import { BaseSwitcher } from './base-switcher';
 import { DocsSearch } from './docs-search';
-import { EngineSwitcher } from './engine-switcher';
 import { MainNav } from './main-nav';
 import { MobileNav } from './mobile-nav';
 import { PlatformSwitch } from './platform-switch';
@@ -27,9 +25,8 @@ interface SiteHeaderNavProps {
 
 /**
  * The header's sections and switches for the platform the page is on: Docs, Components and Blocks into
- * its tree, the Web / Native switch, the engine or base switcher where the path holds one, the style
- * picker, the search and the theme switch. A native page whose path holds no engine points into the
- * engine the reader last read.
+ * its tree, the Web / Native switch, the style picker, the search and the theme switch. A native page
+ * whose path holds no engine points into the engine the reader last read.
  */
 function SiteHeaderNav({ pages, trees }: SiteHeaderNavProps): ReactNode {
   const location = platformLocation(usePathname());
@@ -46,10 +43,6 @@ function SiteHeaderNav({ pages, trees }: SiteHeaderNavProps): ReactNode {
       <MainNav items={items} className="hidden lg:flex" />
       <div className="ml-auto flex items-center gap-2">
         <PlatformSwitch pages={pages} />
-        <div className="hidden md:block">
-          <EngineSwitcher />
-          <BaseSwitcher />
-        </div>
         <div className="hidden md:block">
           <StylePicker platform={location.platform} />
         </div>

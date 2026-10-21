@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { EngineSwitcher } from '@/components/navigation/engine-switcher';
 import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
 import { NATIVE_ENGINES } from '@/constants/native-engines';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
@@ -24,7 +25,10 @@ export const metadata: Metadata = {
 export default function NativeBlocksPage(): ReactNode {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 py-10">
-      <h1 className="text-3xl font-semibold tracking-tight">Blocks</h1>
+      <header className="flex flex-col gap-6">
+        <h1 className="text-3xl font-semibold tracking-tight">Blocks</h1>
+        <EngineSwitcher />
+      </header>
       <Empty className="border">
         <EmptyHeader>
           <EmptyTitle>No native blocks yet</EmptyTitle>

@@ -57,28 +57,23 @@ describe('MobileNav', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
 
-  it('offers the engine switch and the style picker on a native page whose path holds an engine', async () => {
+  it('offers the native style picker on a native page', async () => {
     url.pathname = '/native/components/nativewind/button';
     renderNav('native');
 
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
 
     const sheet = await screen.findByRole('dialog');
-    const engines = within(sheet).getByRole('navigation', { name: 'Engine' });
-    expect(within(engines).getByRole('link', { name: 'Uniwind' }).getAttribute('href')).toBe(
-      '/native/components/uniwind/button',
-    );
     expect(within(sheet).getByRole('button', { name: /^Style\s*Vega/ })).toBeTruthy();
   });
 
-  it('offers the web style picker on a web page, and no engine switch', async () => {
+  it('offers the web style picker on a web page', async () => {
     renderNav('web');
 
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
 
     const sheet = await screen.findByRole('dialog');
     expect(within(sheet).getByRole('button', { name: /^Style\s*Nova/ })).toBeTruthy();
-    expect(within(sheet).queryByRole('navigation', { name: 'Engine' })).toBeNull();
   });
 
   it('plays its icon while the button is hovered, and stops it when the pointer leaves', () => {

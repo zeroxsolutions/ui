@@ -60,7 +60,7 @@ test("the web installation's init command and components.json follow the web sty
   );
 });
 
-test.describe('on a phone-width header', () => {
+test.describe('at phone width', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   /** Opens the menu sheet; its button listens only once the page has hydrated, so it is clicked until the sheet opens. */
@@ -73,15 +73,18 @@ test.describe('on a phone-width header', () => {
     return sheet;
   }
 
-  test('the menu sheet switches the engine and picks the style', async ({ page }) => {
+  test('the engine tabs under the title move the page, keeping the style the menu sheet picked', async ({ page }) => {
     await page.goto(BUTTON);
-
-    const sheet = await openMenu(page);
-    await sheet.getByRole('navigation', { name: 'Engine' }).getByRole('link', { name: 'Uniwind' }).click();
-    await expect(page).toHaveURL('/native/components/uniwind/button');
 
     await openMenu(page);
     await pickStyle(page, 'Nova');
+    await expect(page).toHaveURL(`${BUTTON}?style=nova`);
+
+    await page
+      .getByRole('main')
+      .getByRole('navigation', { name: 'Engine' })
+      .getByRole('link', { name: 'Uniwind' })
+      .click();
 
     await expect(page).toHaveURL('/native/components/uniwind/button?style=nova');
     expect(await installUrl(page)).toContain('/r/styles/uniwind-nova/button.json');
