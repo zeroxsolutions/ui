@@ -171,8 +171,9 @@ given; `children` replace its trash icon. It sets `data-slot="avatar-picker-remo
 Renders shadcn's [`TabsContent`](https://ui.shadcn.com/docs/components/base/tabs) and takes every prop it takes
 except `value`. Emoji pane (tab value `emoji`): wraps `children` - the picker's parts, composed by the consumer
 (`EmojiPickerSearch`, `EmojiPickerContent`, `EmojiPickerNav`) - in an `EmojiPicker` whose pick sets the emoji and
-clears any image. It sets `--emoji-picker-surface` to the popover colour, so the picker's group labels paint the
-popover. It sets `data-slot="avatar-picker-emoji-content"`.
+clears any image. It stacks the parts in a column `gap-2` apart, which keeps the grid's pinned group label off the
+search field's focus ring. It sets `--emoji-picker-surface` to the popover colour, so the picker's group labels paint
+the popover. It sets `data-slot="avatar-picker-emoji-content"`.
 
 ### AvatarPickerUploadContent
 
