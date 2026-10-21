@@ -40,7 +40,7 @@ Takes every prop of the `@rn-primitives/switch` root, plus:
 | `aria-invalid`    | `boolean`                    | none        |
 
 Switch is controlled. Pressing it calls `onCheckedChange` with the new value, and it moves only once `checked`
-follows. `sm` draws a 24px track and the default is 32px. A disabled switch is dimmed and ignores presses.
+follows. The thumb slides to the other end in 150ms, or jumps there when the system asks for reduced motion. `sm` draws a 24px track and the default is 32px. A disabled switch is dimmed and ignores presses.
 `aria-invalid` draws the destructive border. React Native does not announce it, so carry the error in
 `accessibilityHint` or in a Text the user can reach.
 

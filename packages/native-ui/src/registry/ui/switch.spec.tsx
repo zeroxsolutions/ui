@@ -1,5 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { useState } from 'react';
+import { AccessibilityInfo, Animated, StyleSheet } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Switch, type SwitchProps } from './switch';
 
@@ -97,6 +98,56 @@ describe('Switch', () => {
 
     expect(thumb).toContain('translate-x-0');
     expect(thumb.some((name) => /^translate-x-\[/.test(name))).toBe(false);
+  });
+
+  describe('moving the thumb', () => {
+    const stoppedTiming = () =>
+      jest.spyOn(Animated, 'timing').mockReturnValue({ start: jest.fn(), stop: jest.fn(), reset: jest.fn() });
+    const offsetOf = () => {
+      const [{ translateX }] = StyleSheet.flatten(thumbOf(screen.getByRole('switch')).props.style).transform as [
+        { translateX: number },
+      ];
+      return translateX;
+    };
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it.each([
+      ['default', 14],
+      ['sm', 10],
+    ] as const)('slides the thumb over 150ms at the %s size when pressed', async (size, travel) => {
+      const timing = stoppedTiming();
+      const user = userEvent.setup();
+      await render(<ToggledSwitch size={size} />);
+
+      expect(timing).not.toHaveBeenCalled();
+      expect(offsetOf()).toBe(0);
+
+      await user.press(screen.getByRole('switch', { name: 'Wi-Fi' }));
+
+      // The classes have already put the thumb at its new end, so it starts back at the old one.
+      expect(offsetOf()).toBe(-travel);
+      expect(timing).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ toValue: 0, duration: 150 }));
+
+      await user.press(screen.getByRole('switch', { name: 'Wi-Fi' }));
+
+      expect(offsetOf()).toBe(travel);
+    });
+
+    it('does not slide when the system asks for reduced motion', async () => {
+      jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
+      const timing = stoppedTiming();
+      const user = userEvent.setup();
+      await render(<ToggledSwitch />);
+
+      await user.press(screen.getByRole('switch', { name: 'Wi-Fi' }));
+
+      expect(screen.getByRole('switch', { name: 'Wi-Fi' })).toBeChecked();
+      expect(timing).not.toHaveBeenCalled();
+      expect(offsetOf()).toBe(0);
+    });
   });
 
   it('announces disabled, is dimmed and ignores presses when disabled', async () => {
