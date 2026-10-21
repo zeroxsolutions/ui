@@ -104,6 +104,7 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'data-highlighted': 'highlighted',
     'data-inset': 'inset',
     'data-placeholder': 'placeholder',
+    'data-empty': 'empty',
     'aria-expanded': 'expanded',
     'data-open': 'open',
     'data-horizontal': 'orientation=horizontal',
@@ -113,6 +114,12 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'not-last': 'position=not-last',
   }),
 );
+
+/**
+ * cmdk's group heading, which upstream selects by its attribute anywhere inside a Command's group; the
+ * group draws the heading itself, as its `group-heading` part.
+ */
+const COMMAND_GROUP_HEADING = '**:[[cmdk-group-heading]]';
 
 /**
  * A state of the control inside the part, of a direct child the part holds, such as an icon in an
@@ -127,6 +134,7 @@ const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'has-[>svg]': 'slot=icon',
     'has-[>[data-slot=button-group]]': 'slot=button-group',
     '[[data-variant=legend]+&]': 'after=legend',
+    [COMMAND_GROUP_HEADING]: 'part=group-heading',
   }),
 );
 
@@ -245,9 +253,16 @@ const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
  * Slots whose important suffix is removed. Pagination's previous and next links mark their side padding
  * important to win over the Button size's; the component merges them after the Button's classes, where
  * tailwind-merge keeps both and each engine draws a side padding over the axis one, so the order wins
- * without the important neither engine has.
+ * without the important neither engine has. A Command marks its rounding, and its input group the height,
+ * rounding and shadow, important over the Dialog's and the InputGroup's, which they are merged after.
  */
-const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set(['cn-pagination-previous', 'cn-pagination-next']);
+const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set([
+  'cn-pagination-previous',
+  'cn-pagination-next',
+  'cn-command',
+  'cn-command-dialog',
+  'cn-command-input-group',
+]);
 const IMPORTANT_SUFFIX = /!$/;
 
 /**
@@ -276,7 +291,7 @@ const REM_LENGTH = /^([\d.]+)rem$/;
  * Utilities with nothing to draw on a device. Neither engine draws a `fit-content` width; a view is as
  * wide as its content once its parent does not stretch it, which the component sets with `self-start`.
  * React Native has no `text-wrap` to balance a line with, no overflow per axis (a ScrollView scrolls
- * one), and no table layout: no caption side and no vertical align in a cell, which a Table lays out
+ * one, and hides its scrollbar by a prop), and no table layout: no caption side and no vertical align in a cell, which a Table lays out
  * itself. Nor has it a grid or a block: a View stacks its children in a flex column, and a component
  * that sets two side by side lays out the row itself.
  */
@@ -284,6 +299,7 @@ const DROPPED_UTILITIES = [
   /^(outline|ring|ring-offset|transition|duration|ease|whitespace|cursor|scroll)(-|$)/,
   /^select-none$/,
   /^bg-clip-padding$/,
+  /^no-scrollbar$/,
   /^group\//,
   /^w-fit$/,
   /^text-(balance|pretty)$/,
@@ -473,7 +489,7 @@ function joinChildModifiers(modifiers: readonly string[]): string[] {
     if (modifiers[i] === '*' && next !== undefined && (next === CHILD_ICON || CHILD_SLOT.test(next))) {
       joined.push(`*:${next}`);
       i += 1;
-    } else if (modifiers[i] === '**' && next === DESCENDANT_ICON_SLOT) {
+    } else if (modifiers[i] === '**' && (next === DESCENDANT_ICON_SLOT || `**:${next}` === COMMAND_GROUP_HEADING)) {
       joined.push(`**:${next}`);
       i += 1;
     } else {
@@ -609,6 +625,20 @@ function resolveRadiusLessLength(utility: string, radius: string | undefined): s
   return `rounded${less[1] ?? ''}-[${Math.round(px * 100) / 100}px]`;
 }
 
+/**
+ * A height of N spacing steps less M, clamped to the screen's available height less M, which only the
+ * web's popup positioner gives as a variable. A device's popup is held to the screen already, so the
+ * clamp becomes the px of N less M steps.
+ */
+const AVAILABLE_HEIGHT_CLAMP =
+  /^max-h-\[min\(calc\(--spacing\(([\d.]+)\)---spacing\(([\d.]+)\)\),calc\(var\(--available-height\)---spacing\(\2\)\)\)\]$/;
+
+function resolveAvailableHeightClamp(utility: string): string {
+  const clamp = AVAILABLE_HEIGHT_CLAMP.exec(utility);
+  if (!clamp) return utility;
+  return `max-h-[${(Number(clamp[1]) - Number(clamp[2])) * SPACING_STEP_PX}px]`;
+}
+
 /** The theme's `rounded-md` for a radius clamped at no less than it, or the utility itself. */
 function resolveClampedRadius(utility: string): string {
   const clamp = CLAMPED_RADIUS.exec(utility);
@@ -682,11 +712,13 @@ export function translateClasses(
       unknown.push(cls.source);
       continue;
     }
-    const utility = resolveClampedRadius(
-      resolveOwnSizeTranslate(
-        ringBorder && unmodified ? ringAsBorder(radiusLessLength) : radiusLessLength,
-        cls.states,
-        read,
+    const utility = resolveAvailableHeightClamp(
+      resolveClampedRadius(
+        resolveOwnSizeTranslate(
+          ringBorder && unmodified ? ringAsBorder(radiusLessLength) : radiusLessLength,
+          cls.states,
+          read,
+        ),
       ),
     )
       .replace(PLACE_ITEMS, 'items-$1')

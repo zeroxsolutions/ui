@@ -1009,7 +1009,8 @@ describe('translateClasses for a menu', () => {
     vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
     nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
   };
-  const MENU_SLOT = /^cn-(dropdown-menu|context-menu|menubar|select)(-(?!.*-(aria|logical)$)[\w-]+)?$/;
+  const MENU_SLOT =
+    /^cn-(dropdown-menu|context-menu|menubar|select|command|combobox)(-(?!chip|.*-(aria|logical)$)[\w-]+)?$/;
   const menu = (style: keyof typeof styles, engine: Engine, name: string, part: 'view' | 'text', state = '') =>
     translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
 
@@ -1058,4 +1059,48 @@ describe('translateClasses for a menu', () => {
   it.each(STYLE_ENGINES)("mutes a select trigger's placeholder for %s in %s", (engine, style) => {
     expect(menu(style, engine, 'cn-select-trigger', 'text', 'placeholder').classes).toEqual(['text-muted-foreground']);
   });
+
+  it.each(STYLE_ENGINES)(
+    "draws a command's group heading through the state part=group-heading for %s in %s",
+    (engine, style) => {
+      expect(menu(style, engine, 'cn-command-group', 'view', 'part=group-heading').classes).toEqual(['px-2', 'py-1.5']);
+      expect(menu(style, engine, 'cn-command-group', 'text', 'part=group-heading').classes).toEqual([
+        'text-muted-foreground',
+        'text-xs',
+        'font-sans-medium',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'keeps the rounding and height a command marks important, which its merge order already lets win, for %s in %s',
+    (engine, style) => {
+      expect(menu(style, engine, 'cn-command', 'view').classes).toContain('rounded-xl');
+      expect(menu(style, engine, 'cn-command-input-group', 'view').classes).toEqual(
+        expect.arrayContaining(['h-8', 'rounded-lg', 'shadow-none']),
+      );
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    "drops a list's scrollbar rule, which a ScrollView draws by a prop, for %s in %s",
+    (engine, style) => {
+      expect(menu(style, engine, 'cn-command-list', 'view').classes).toEqual(['max-h-72']);
+    },
+  );
+
+  it.each(STYLE_ENGINES)("shows a combobox's empty message only in the empty state for %s in %s", (engine, style) => {
+    expect(menu(style, engine, 'cn-combobox-empty', 'view')).toEqual(
+      expect.objectContaining({ classes: expect.arrayContaining(['hidden']) }),
+    );
+    expect(menu(style, engine, 'cn-combobox-empty', 'view', 'empty').classes).toEqual(['flex']);
+  });
+
+  it.each(STYLE_ENGINES)(
+    "holds a combobox's list to the popup's height less its input, which the web clamps to the screen, for %s in %s",
+    (engine, style) => {
+      expect(menu(style, engine, 'cn-combobox-list', 'view').classes).toEqual(['max-h-[252px]', 'p-1']);
+      expect(menu(style, engine, 'cn-combobox-list', 'view', 'empty').classes).toEqual(['p-0']);
+    },
+  );
 });

@@ -728,6 +728,20 @@
       ]
     },
     {
+      "name": "command",
+      "type": "registry:ui",
+      "title": "Command",
+      "description": "A menu of commands searched by typing, whose typed text filters its items by value and keywords, highlighting the first match, moved by the arrow keys and run by the return key, with groups hidden while none of their items match, and a CommandDialog that holds it in a Dialog.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/dialog", "@zui/input-group", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/command.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

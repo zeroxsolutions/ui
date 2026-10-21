@@ -57,6 +57,7 @@
     "dropdown-menu",
     "context-menu",
     "menubar",
+    "command",
     "---Navigation---",
     "tabs",
     "tab-bar",

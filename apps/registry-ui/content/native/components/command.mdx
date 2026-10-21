@@ -1,0 +1,132 @@
+---
+title: Command
+description: A menu of commands searched by typing.
+---
+
+<NativePreview name="command-demo" />
+
+## Installation
+
+<InstallCommand name="command" />
+
+The CLI writes `components/ui/command.tsx`, installs [Dialog](/native/components/nativewind/dialog),
+[Input Group](/native/components/nativewind/input-group), [Icon](/native/components/nativewind/icon),
+[Text](/native/components/nativewind/text) and Utils, and adds `lucide-react-native`. A CommandDialog draws in the
+app's `PortalHost`, as a Dialog does; see [Add a portal host](/native/docs/installation#add-a-portal-host).
+
+## Usage
+
+```tsx
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from '@/components/ui/command';
+```
+
+```tsx
+<Command>
+  <CommandInput placeholder="Type a command or search..." />
+  <CommandList>
+    <CommandEmpty>No results found.</CommandEmpty>
+    <CommandGroup heading="Suggestions">
+      <CommandItem onSelect={openCalendar}>
+        <Text>Calendar</Text>
+      </CommandItem>
+    </CommandGroup>
+    <CommandSeparator />
+    <CommandGroup heading="Settings">
+      <CommandItem value="profile" onSelect={openProfile}>
+        <Text>Profile</Text>
+        <CommandShortcut>P</CommandShortcut>
+      </CommandItem>
+    </CommandGroup>
+  </CommandList>
+</Command>
+```
+
+## API reference
+
+### Command
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop            | Type                                                             | Default |
+| --------------- | ---------------------------------------------------------------- | ------- |
+| `value`         | `string`                                                         | -       |
+| `defaultValue`  | `string`                                                         | -       |
+| `onValueChange` | `(value: string) => void`                                        | -       |
+| `shouldFilter`  | `boolean`                                                        | `true`  |
+| `filter`        | `(value: string, search: string, keywords?: string[]) => number` | -       |
+| `loop`          | `boolean`                                                        | `false` |
+
+`value` is the highlighted item's value. Without it the Command holds the highlight, starting on the first item
+the typed text matches. `filter` returns more than 0 for an item to show; without it an item shows while its value
+or one of its keywords holds the typed text, in any case. With `shouldFilter` off every item shows, for a list
+filtered by its owner. With `loop` the arrow keys wrap round from the last item to the first.
+
+### CommandInput
+
+Takes every prop of [Input Group](/native/components/nativewind/input-group)'s `InputGroupInput`, plus `value` and
+`onValueChange`, the typed text when its owner holds it. On a keyboard ArrowDown, ArrowUp, Home and End move the
+highlight, and the return key runs the highlighted item, on a device's keyboard too.
+
+### CommandList
+
+Takes every prop of React Native's `ScrollView`. It scrolls once its items pass 18rem.
+
+### CommandEmpty
+
+Takes every prop of React Native's `View`. It shows while the typed text matches no item.
+
+### CommandGroup
+
+Takes every prop of React Native's `View`, plus `heading`, the muted heading that names the group, and
+`forceMount`, which keeps the group while none of its items match. Otherwise it is hidden then.
+
+### CommandItem
+
+Takes every prop of React Native's `Pressable`, plus:
+
+| Prop       | Type                      | Default |
+| ---------- | ------------------------- | ------- |
+| `value`    | `string`                  | -       |
+| `keywords` | `string[]`                | -       |
+| `onSelect` | `(value: string) => void` | -       |
+| `checked`  | `boolean`                 | `false` |
+| `disabled` | `boolean`                 | `false` |
+
+Without `value` the item is matched by its text. A press, or the return key while it is highlighted, runs
+`onSelect` with its value. `checked` draws a check mark at its end. A `disabled` item is dimmed, announced as
+disabled, skipped by the arrow keys and ignores presses.
+
+### CommandShortcut
+
+Takes every prop of [Text](/native/components/nativewind/text). It is drawn muted at the item's end, in the
+foreground colour while the item is highlighted.
+
+### CommandSeparator
+
+Takes every prop of React Native's `View`, plus `alwaysRender`. It is hidden while the Command searches unless
+`alwaysRender` is set.
+
+### CommandDialog
+
+Takes every prop of [Dialog](/native/components/nativewind/dialog#dialog), plus `title` (`'Command Palette'`) and
+`description` (`'Search for a command to run...'`), which name and describe the dialog for a screen reader and are
+not drawn, and `showCloseButton` (`false`). It holds the Command it is given.
+
+## Differences from upstream
+
+- Upstream builds on cmdk, which draws only on the web. The native Command is its own, with cmdk's props.
+- cmdk ranks items by a fuzzy score and puts the best matches first. The native Command shows the items that hold
+  the typed text, in the order they are written.
+- React Native has no `listbox` role. On a device the list is a `list`, the field a `searchbox`, and an item is
+  announced as selected while `checked`. The web gives them cmdk's roles, with the highlighted item selected.
+- Upstream's `data-checked` becomes `checked`, which draws the check mark only while it is set.
+- The CommandDialog opens centred, where upstream's opens a third of the way down the screen.
