@@ -7,8 +7,10 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, type ReactNode } from 'react';
 
 import { DEFAULT_PLATFORM_STYLE, PLATFORM_STYLE_LABELS, PLATFORM_STYLES } from '@/constants/platform-styles';
-import { rememberStyle, useRememberedStyle } from '@/hooks/use-remembered-choice';
-import { currentStyle, STYLE_PARAM, styleHref } from '@/lib/style-choice';
+import { useCurrentStyle } from '@/hooks/use-current-style';
+import { useHydrated } from '@/hooks/use-hydrated';
+import { rememberStyle } from '@/hooks/use-remembered-choice';
+import { styleHref } from '@/lib/style-choice';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import {
   DropdownMenu,
@@ -39,9 +41,9 @@ function StylePicker({ platform }: StylePickerProps): ReactNode {
 }
 
 function StylePickerFromUrl({ platform }: StylePickerProps): ReactNode {
-  const searchParams = useSearchParams();
-  const style = currentStyle(platform, searchParams.get(STYLE_PARAM), useRememberedStyle(platform));
-  return <StylePickerMenu platform={platform} style={style} search={searchParams.toString()} />;
+  const search = useSearchParams().toString();
+  // A page rendered once at build holds no query, and hydration keeps the server's href over the client's.
+  return <StylePickerMenu platform={platform} style={useCurrentStyle(platform)} search={useHydrated() ? search : ''} />;
 }
 
 interface StylePickerMenuProps extends StylePickerProps {
