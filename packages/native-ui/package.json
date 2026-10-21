@@ -33,6 +33,7 @@
     "@rn-primitives/checkbox": "catalog:rn-primitives",
     "@rn-primitives/collapsible": "catalog:rn-primitives",
     "@rn-primitives/dialog": "catalog:rn-primitives",
+    "@rn-primitives/dropdown-menu": "catalog:rn-primitives",
     "@rn-primitives/hover-card": "catalog:rn-primitives",
     "@rn-primitives/label": "catalog:rn-primitives",
     "@rn-primitives/popover": "catalog:rn-primitives",

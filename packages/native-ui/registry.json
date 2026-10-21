@@ -55,6 +55,20 @@
       ]
     },
     {
+      "name": "menu",
+      "type": "registry:lib",
+      "title": "Menu",
+      "description": "useHighlight, which tracks whether a menu item is under a finger, the pointer or the keyboard's focus, and useMenuMotion, the fade, grow and slide a menu's content opens and closes with.",
+      "dependencies": ["react-native-reanimated"],
+      "registryDependencies": ["@zui/motion"],
+      "files": [
+        {
+          "path": "src/registry/lib/menu.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "text",
       "type": "registry:ui",
       "title": "Text",
@@ -633,6 +647,25 @@
       "files": [
         {
           "path": "src/registry/ui/hover-card.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:ui",
+      "title": "Dropdown Menu",
+      "description": "A menu of actions that opens from its trigger, with checkbox and radio items, groups, shortcuts and sub-menus, announced as a menu and closed by an item, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/dropdown-menu",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/dropdown-menu.tsx",
           "type": "registry:ui"
         }
       ]

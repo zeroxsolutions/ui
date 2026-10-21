@@ -224,9 +224,9 @@ describe('translateClasses', () => {
   });
 
   it('reports a state modifier the state table has no row for, rather than dropping it', () => {
-    const result = translateClasses(['data-highlighted:bg-accent', 'p-2'], 'uniwind', 'view');
+    const result = translateClasses(['data-starting-style:bg-accent', 'p-2'], 'uniwind', 'view');
 
-    expect(result).toEqual({ classes: ['p-2'], unknown: ['data-highlighted:bg-accent'] });
+    expect(result).toEqual({ classes: ['p-2'], unknown: ['data-starting-style:bg-accent'] });
   });
 
   it.each(['nativewind', 'uniwind'] as const)(
@@ -1001,5 +1001,57 @@ describe('translateClasses for a drawer swipe handle', () => {
       classes: [],
       unknown: [],
     });
+  });
+});
+
+describe('translateClasses for a menu', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const MENU_SLOT = /^cn-dropdown-menu(-(?!.*-(aria|logical)$)[\w-]+)?$/;
+  const menu = (style: keyof typeof styles, engine: Engine, name: string, part: 'view' | 'text', state = '') =>
+    translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
+
+  it.each(STYLE_ENGINES)('translates every slot of a menu for %s in %s with nothing unknown', (engine, style) => {
+    const menuSlots = [...styles[style]].filter(([name]) => MENU_SLOT.test(name));
+
+    expect(menuSlots.length).toBeGreaterThan(10);
+    for (const [name, classes] of menuSlots) {
+      for (const part of ['view', 'text', 'icon'] as const) {
+        expect({ name, part, unknown: translateClasses(classes, engine, part, '', { name }).unknown }).toEqual({
+          name,
+          part,
+          unknown: [],
+        });
+      }
+    }
+  });
+
+  it.each(STYLE_ENGINES)(
+    'puts the colours an item takes under the pointer, keyboard or finger behind highlighted for %s in %s',
+    (engine, style) => {
+      expect(menu(style, engine, 'cn-dropdown-menu-item', 'view', 'highlighted').classes).toEqual(['bg-accent']);
+      expect(menu(style, engine, 'cn-dropdown-menu-item', 'text', 'highlighted').classes).toEqual([
+        'text-accent-foreground',
+      ]);
+      expect(menu(style, engine, 'cn-dropdown-menu-shortcut', 'text', 'highlighted').classes).toEqual([
+        'text-accent-foreground',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)('tints a highlighted destructive item for %s in %s', (engine, style) => {
+    expect(menu(style, engine, 'cn-dropdown-menu-item', 'view', 'highlighted+variant=destructive').classes).toEqual([
+      'bg-destructive/10',
+      'dark:bg-destructive/20',
+    ]);
+  });
+
+  it.each([
+    ['vega', 'pl-8'],
+    ['nova', 'pl-7'],
+  ] as const)('indents an inset %s item to line up with a checked one', (style, indent) => {
+    expect(menu(style, 'uniwind', 'cn-dropdown-menu-item', 'view', 'inset').classes).toEqual([indent]);
   });
 });

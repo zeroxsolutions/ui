@@ -27,7 +27,6 @@ const PENDING = [
   'combobox',
   'command',
   'context-menu',
-  'dropdown-menu',
   'menubar',
   'select',
   'slider',

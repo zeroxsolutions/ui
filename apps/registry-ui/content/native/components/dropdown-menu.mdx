@@ -1,0 +1,197 @@
+---
+title: Dropdown menu
+description: A menu of actions that opens from a button.
+---
+
+<NativePreview name="dropdown-menu-demo" />
+
+## Installation
+
+<InstallCommand name="dropdown-menu" />
+
+The CLI writes `components/ui/dropdown-menu.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs
+[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
+`@rn-primitives/dropdown-menu`, `@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated` and
+`react-native-worklets`. The menu draws in the app's `PortalHost`; see [Add a
+portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing, and logs an error saying
+so while the app is in development.
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="outline">
+      <Text>Open</Text>
+    </Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent className="w-56">
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuItem onPress={openProfile}>
+        <Text>Profile</Text>
+        <DropdownMenuShortcut>{'\u21E7\u2318P'}</DropdownMenuShortcut>
+      </DropdownMenuItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem variant="destructive" onPress={logOut}>
+      <Text>Log out</Text>
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+## Examples
+
+### Checkboxes and radio items
+
+```tsx
+const [statusBar, setStatusBar] = useState(true);
+const [position, setPosition] = useState('bottom');
+
+<DropdownMenuContent>
+  <DropdownMenuCheckboxItem checked={statusBar} onCheckedChange={setStatusBar}>
+    <Text>Status Bar</Text>
+  </DropdownMenuCheckboxItem>
+  <DropdownMenuSeparator />
+  <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+    <DropdownMenuRadioItem value="top">
+      <Text>Top</Text>
+    </DropdownMenuRadioItem>
+    <DropdownMenuRadioItem value="bottom">
+      <Text>Bottom</Text>
+    </DropdownMenuRadioItem>
+  </DropdownMenuRadioGroup>
+</DropdownMenuContent>;
+```
+
+### Sub-menu
+
+```tsx
+<DropdownMenuSub>
+  <DropdownMenuSubTrigger>
+    <Text>Invite users</Text>
+  </DropdownMenuSubTrigger>
+  <DropdownMenuSubContent>
+    <DropdownMenuItem>
+      <Text>Email</Text>
+    </DropdownMenuItem>
+  </DropdownMenuSubContent>
+</DropdownMenuSub>
+```
+
+## API reference
+
+### DropdownMenu
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop           | Type                      | Default |
+| -------------- | ------------------------- | ------- |
+| `open`         | `boolean`                 | -       |
+| `defaultOpen`  | `boolean`                 | `false` |
+| `onOpenChange` | `(open: boolean) => void` | -       |
+
+Without `open` the menu holds its own state, starting from `defaultOpen`. With it, the menu follows `open`, and
+a press on the trigger, an item, outside the menu or the back button only reports the change it asks for
+through `onOpenChange`.
+
+### DropdownMenuTrigger
+
+Takes every prop of React Native's `Pressable`. A press opens the menu, and another closes it. Pass `asChild` to
+make a Button do it. It is announced as expanded or collapsed, and focus returns to it when the menu closes.
+
+### DropdownMenuContent
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type                                     | Default    |
+| ------------- | ---------------------------------------- | ---------- |
+| `side`        | `'top' \| 'right' \| 'bottom' \| 'left'` | `'bottom'` |
+| `sideOffset`  | `number`                                 | `4`        |
+| `align`       | `'start' \| 'center' \| 'end'`           | `'start'`  |
+| `alignOffset` | `number`                                 | `0`        |
+| `portalHost`  | `string`                                 | -          |
+
+It is a `menu`, and accessibility focus moves into it as it opens. Like upstream's, it is modal: VoiceOver stays
+inside it, and TalkBack does once the app hides its screens while an overlay is open (see [Add a portal
+host](/native/docs/installation#add-a-portal-host)). A press outside it, the Android back button, the iOS escape
+gesture (a two-finger Z) and Escape on the web close it. It fades in while growing from 95% and sliding 0.5rem
+away from the trigger over 100ms, and out the same way. When the system asks for reduced motion it appears and
+goes at once. Pass a width class, such as `w-56`, to size it.
+
+### DropdownMenuItem
+
+Takes every prop of React Native's `Pressable`, plus:
+
+| Prop           | Type                         | Default     |
+| -------------- | ---------------------------- | ----------- |
+| `variant`      | `'default' \| 'destructive'` | `'default'` |
+| `inset`        | `boolean`                    | `false`     |
+| `closeOnClick` | `boolean`                    | `true`      |
+
+A `menuitem`. A press runs `onPress` and closes the menu, unless `closeOnClick` is false. It is highlighted while
+a finger is on it, and on the web while the pointer or the keyboard's focus is. `inset` indents it to line up with
+the text of a checkbox or radio item. A `disabled` item is dimmed, announced as disabled and ignores presses.
+
+### DropdownMenuCheckboxItem
+
+Takes every prop of DropdownMenuItem but `variant`, plus:
+
+| Prop              | Type                         | Default |
+| ----------------- | ---------------------------- | ------- |
+| `checked`         | `boolean`                    | -       |
+| `defaultChecked`  | `boolean`                    | `false` |
+| `onCheckedChange` | `(checked: boolean) => void` | -       |
+
+A press toggles it and leaves the menu open, as upstream's does; set `closeOnClick` to close it. A check mark
+shows at its end while it is checked.
+
+### DropdownMenuRadioGroup and DropdownMenuRadioItem
+
+The group takes every prop of React Native's `View`, plus `value`, `defaultValue` and `onValueChange`, and each
+item a `value` and every prop of DropdownMenuCheckboxItem but the checked ones. A press chooses the item and
+leaves the menu open; the chosen one shows a check mark.
+
+### DropdownMenuSub, DropdownMenuSubTrigger and DropdownMenuSubContent
+
+The sub-menu takes `open`, `defaultOpen` and `onOpenChange`. Its trigger is a `menuitem` with a chevron at its
+end, announced as expanded or collapsed, and takes `inset`.
+
+### DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator and DropdownMenuShortcut
+
+The group is a `group`; the label, which takes `inset`, is muted text over it. The separator is a hairline
+between groups, and the shortcut the keys of an item, drawn muted at its end. DropdownMenuPortal is exported so
+upstream's markup ports as it is, and draws its children where it stands.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, and `onClick` becomes `onPress`, as on every native item.
+- On a device the menu opens above or below its trigger, so `left` and `right` open it below. It is kept on the
+  screen but not moved to the other side when there is no room. The web places it on any side, and flips it.
+- On a device a sub-menu opens in place, under its trigger, and a second press on the trigger closes it. The web
+  opens it beside the trigger. DropdownMenuSubContent takes no side or offset, and it appears at once.
+- React Native has no `menuitemcheckbox` or `menuitemradio` role, so on a device a checkbox item is announced as
+  a checkbox and a radio item as a radio button, each with its checked state. The web gives them upstream's
+  roles.
+- Upstream sizes the menu to its trigger's width at least; the native menu is as wide as its items, or as a width
+  class sets. A menu taller than the screen does not scroll.
+- The back button and the iOS escape gesture remove the menu at once, without its exit animation.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.

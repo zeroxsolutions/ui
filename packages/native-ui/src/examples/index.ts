@@ -20,6 +20,7 @@ import { CodeInputDemo } from './code-input-demo';
 import { CollapsibleDemo } from './collapsible-demo';
 import { DialogDemo } from './dialog-demo';
 import { DrawerDemo } from './drawer-demo';
+import { DropdownMenuDemo } from './dropdown-menu-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
 import { HoverCardDemo } from './hover-card-demo';
@@ -70,6 +71,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'collapsible-demo': CollapsibleDemo,
   'dialog-demo': DialogDemo,
   'drawer-demo': DrawerDemo,
+  'dropdown-menu-demo': DropdownMenuDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
   'hover-card-demo': HoverCardDemo,

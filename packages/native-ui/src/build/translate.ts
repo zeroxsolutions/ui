@@ -73,9 +73,10 @@ const DROPPED_MODIFIERS = [
 ] as const satisfies readonly RegExp[];
 
 /**
- * Each modifier a style puts a state behind, and the state it is. A `group-`, `peer-` or `has-` modifier,
- * its `/<group>` name removed, is the same state on the part's group, sibling or child, which the
- * component knows as its own. A bare `disabled:` stays the `Pressable`'s own and reaches this table
+ * Each modifier a style puts a state behind, and the state it is. A menu item's `focus` is the item a
+ * pointer, a key or a finger is on, which the component calls `highlighted`. A `group-`, `peer-` or
+ * `has-` modifier, its `/<group>` name removed, is the same state on the part's group, sibling or child,
+ * which the component knows as its own. A bare `disabled:` stays the `Pressable`'s own and reaches this table
  * only on a slot {@link SLOT_STATE_MODIFIERS} names; its `group-`, `peer-` and `has-` forms always do.
  */
 const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
@@ -99,6 +100,9 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'data-[disabled=true]': 'disabled',
     'focus-visible': 'focused',
     'data-focus-visible': 'focused',
+    focus: 'highlighted',
+    'data-highlighted': 'highlighted',
+    'data-inset': 'inset',
     'aria-expanded': 'expanded',
     'data-open': 'open',
     'data-horizontal': 'orientation=horizontal',

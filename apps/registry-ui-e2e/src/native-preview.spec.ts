@@ -184,6 +184,22 @@ test.describe('in a light colour scheme', () => {
       // Closed, the frame goes back to the demo's own height.
       await expect.poll(async () => (await frame(page, 'Dialog demo').boundingBox())?.height).toBeLessThan(200);
     });
+
+    test(`the ${engine} dropdown menu demo opens, runs a sub-menu's item and closes`, async ({ page }) => {
+      await page.goto(`/native/components/${engine}/dropdown-menu`);
+      const demo = inside(page, 'Dropdown menu demo');
+      const trigger = demo.getByRole('button', { name: 'Open', exact: true });
+      const menu = demo.getByRole('menu').first();
+
+      await trigger.click(DRAWN);
+      await expect(menu).toBeVisible();
+
+      await demo.getByRole('menuitem', { name: 'Invite users' }).click();
+      await demo.getByRole('menuitem', { name: 'Email' }).click();
+
+      await expect(demo.getByRole('menu')).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    });
   }
 
   test("the frame shows the demo's source in its Code tab", async ({ page }) => {
