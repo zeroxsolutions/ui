@@ -1,0 +1,77 @@
+---
+title: Empty
+description: A centred placeholder for a screen or section with nothing to show yet.
+---
+
+<NativePreview name="empty-demo" />
+
+## Installation
+
+<InstallCommand name="empty" />
+
+The CLI writes `components/ui/empty.tsx`, installs [Text](/native/components/nativewind/text),
+[Icon](/native/components/nativewind/icon) and Utils, and adds `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { FolderOpen } from 'lucide-react-native';
+
+import { Button } from '@/components/ui/button';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { Icon } from '@/components/ui/icon';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Empty>
+  <EmptyHeader>
+    <EmptyMedia variant="icon">
+      <Icon as={FolderOpen} />
+    </EmptyMedia>
+    <EmptyTitle>No projects yet</EmptyTitle>
+    <EmptyDescription>Create your first project to start tracking work.</EmptyDescription>
+  </EmptyHeader>
+  <EmptyContent>
+    <Button>
+      <Text>Create project</Text>
+    </Button>
+  </EmptyContent>
+</Empty>
+```
+
+The Empty's border is dashed but has no width; add `border` to draw it, as the demo does.
+
+## API reference
+
+### Empty
+
+Takes every prop of React Native's `View`. It centres its children, and every Text inside is centred.
+
+### EmptyHeader, EmptyContent
+
+Each takes every prop of React Native's `View`. EmptyHeader holds the media, title and description;
+EmptyContent holds actions.
+
+### EmptyMedia
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop      | Type                  | Default     |
+| --------- | --------------------- | ----------- |
+| `variant` | `'default' \| 'icon'` | `'default'` |
+
+`default` draws its child as it is, such as an image. `icon` draws an Icon child on a muted tile, at 24px in
+Vega and 16px in Nova.
+
+### EmptyTitle, EmptyDescription
+
+Each takes every prop of [Text](/native/components/nativewind/text). EmptyDescription is muted.
+
+## Differences from upstream
+
+- Upstream's Empty grows to fill its parent with `flex-1`. Inside a scroll view, which is where most native
+  screens put it, that collapses the box, so the native Empty takes its content's height. Add `flex-1` to
+  fill a parent with a height of its own.
+- Upstream underlines a link inside the description. React Native has no nested link element to select, so
+  style a pressable Text inside it yourself.

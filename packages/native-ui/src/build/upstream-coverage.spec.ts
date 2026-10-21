@@ -36,7 +36,6 @@ const PENDING = [
   'dialog',
   'drawer',
   'dropdown-menu',
-  'empty',
   'field',
   'hover-card',
   'item',

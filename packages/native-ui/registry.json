@@ -347,6 +347,20 @@
       ]
     },
     {
+      "name": "empty",
+      "type": "registry:ui",
+      "title": "Empty",
+      "description": "A centred placeholder for a screen or section with nothing to show yet, with media, a title, a description and actions.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/empty.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",
