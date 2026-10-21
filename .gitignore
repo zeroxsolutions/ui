@@ -104,12 +104,5 @@ __screenshots__/
 
 gate.log
 
-# Expo's local state, and the signing files an Expo build may write (from @nx/expo:application)
+# Expo's local state, which `expo export` writes beside the app (its dist is ignored above)
 .expo/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
