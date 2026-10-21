@@ -41,6 +41,8 @@
     "---Layout---",
     "aspect-ratio",
     "scroll-area",
+    "---Disclosure---",
+    "collapsible",
     "---Navigation---",
     "tabs",
     "tab-bar",

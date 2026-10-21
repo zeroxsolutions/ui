@@ -472,6 +472,20 @@
       ]
     },
     {
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "Collapsible",
+      "description": "A region shown and hidden by a trigger announced as a button with its expanded state, closed or open by default or controlled.",
+      "dependencies": ["@rn-primitives/collapsible"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/collapsible.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

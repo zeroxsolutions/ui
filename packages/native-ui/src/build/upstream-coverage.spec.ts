@@ -26,7 +26,6 @@ const PENDING = [
   'alert-dialog',
   'calendar',
   'carousel',
-  'collapsible',
   'combobox',
   'command',
   'context-menu',
