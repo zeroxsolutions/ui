@@ -1,0 +1,107 @@
+---
+title: Field
+description: The layout of a form, with labels, controls, descriptions and errors.
+---
+
+<NativePreview name="field-demo" />
+
+## Installation
+
+<InstallCommand name="field" />
+
+The CLI writes `components/ui/field.tsx`, installs [Text](/native/components/nativewind/text),
+[Separator](/native/components/nativewind/separator) and Utils, and adds `@rn-primitives/label`.
+
+## Usage
+
+```tsx
+import { useRef } from 'react';
+import type { TextInput } from 'react-native';
+
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+```
+
+```tsx
+const emailRef = useRef<TextInput>(null);
+
+<FieldGroup>
+  <Field invalid={Boolean(error)}>
+    <FieldLabel nativeID="email-label" onPress={() => emailRef.current?.focus()}>
+      Email
+    </FieldLabel>
+    <Input ref={emailRef} aria-labelledby="email-label" aria-invalid={Boolean(error)} />
+    {error ? <FieldError>{error}</FieldError> : <FieldDescription>We never share it.</FieldDescription>}
+  </Field>
+</FieldGroup>;
+```
+
+## API reference
+
+### Field
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type                                         | Default      |
+| ------------- | -------------------------------------------- | ------------ |
+| `orientation` | `'vertical' \| 'horizontal' \| 'responsive'` | `'vertical'` |
+| `invalid`     | `boolean`                                    | `false`      |
+| `disabled`    | `boolean`                                    | `false`      |
+
+It is a `group`. `vertical` stacks its children; `horizontal` sets them in a row, such as a Switch beside its
+label, aligned to the top when the row holds a FieldContent; `responsive` stacks them. `invalid` draws the
+label in the destructive colour, and `disabled` dims the label and the title; pass the control its own
+`aria-invalid` and `disabled`.
+
+### FieldLabel
+
+Takes every prop of the `@rn-primitives/label` root, plus `nativeID`, the id the control names in
+`aria-labelledby`. Its children are the label's text. Pressing it runs `onPress`; point it at the control's
+`focus()`. In a horizontal Field it takes the room the control leaves.
+
+### FieldContent
+
+Takes every prop of React Native's `View`. In a horizontal Field it holds the label and the description
+beside the control.
+
+### FieldTitle, FieldDescription
+
+Each takes every prop of [Text](/native/components/nativewind/text). FieldTitle names content that is not a
+control, drawn as a label is. FieldDescription is the muted help text.
+
+### FieldError
+
+Takes every prop of React Native's `View`, plus `errors`, an array of `{ message }` from a form library. It is
+an `alert` in the destructive colour, drawing its children, or else the messages of `errors`, each once, as a
+list when there are several. With neither, it draws nothing.
+
+### FieldGroup
+
+Takes every prop of React Native's `View`. It spaces its Fields apart, and a FieldGroup inside another more
+tightly.
+
+### FieldSet, FieldLegend
+
+FieldSet takes every prop of React Native's `View` and is a `group` named by its FieldLegend. FieldLegend takes
+every prop of [Text](/native/components/nativewind/text), plus `variant`, `'legend'` (the default, at the
+base size) or `'label'` (at a label's size). A FieldDescription right after the legend sits close under it.
+
+### FieldSeparator
+
+Takes every prop of React Native's `View`. It draws a rule, with its children, such as a string, centred on it
+in the muted colour.
+
+## Differences from upstream
+
+- Upstream marks a field invalid or disabled with `data-invalid` and `data-disabled` attributes. React Native
+  takes no data attributes, so the native Field takes `invalid` and `disabled`.
+- A web label focuses its control through `htmlFor`. React Native has no such link: name the control with
+  `aria-labelledby` and focus it from the label's `onPress`.
+- Upstream's `responsive` Field turns into a row on a wide container. A phone is narrower than that, so it
+  stays stacked.
+- Upstream draws a FieldLabel that wraps a whole Field, such as a checkbox with its text, as a bordered choice
+  card. The native FieldLabel draws no card.
+- Upstream tightens the gap above a FieldSet's description and a field's last description with selectors on
+  their position. The native items tighten only the description right after a legend.
+- Upstream spaces a FieldSet holding a checkbox group or a radio group more tightly. The native FieldSet keeps
+  its own gap.

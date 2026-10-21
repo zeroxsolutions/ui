@@ -812,3 +812,14 @@ describe('translateClasses for a table', () => {
     ).toEqual(['bg-muted']);
   });
 });
+
+describe('translateClasses for a field', () => {
+  it.each(STYLE_ENGINES)('pulls a description up under a legend for %s in %s', (engine, style) => {
+    const slots = parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8'));
+    const description = slots.get('cn-field-description') ?? [];
+    const slot = { name: 'cn-field-description' };
+
+    expect(translateClasses(description, engine, 'view', '', slot)).toEqual({ classes: [], unknown: [] });
+    expect(translateClasses(description, engine, 'view', 'after=legend', slot).classes).toEqual(['-mt-1.5']);
+  });
+});

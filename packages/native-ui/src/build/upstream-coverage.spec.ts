@@ -33,7 +33,6 @@ const PENDING = [
   'dialog',
   'drawer',
   'dropdown-menu',
-  'field',
   'hover-card',
   'menubar',
   'popover',

@@ -13,6 +13,7 @@
     "toggle-group",
     "---Forms---",
     "label",
+    "field",
     "input",
     "input-group",
     "input-otp",

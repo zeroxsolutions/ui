@@ -458,6 +458,20 @@
       ]
     },
     {
+      "name": "field",
+      "type": "registry:ui",
+      "title": "Field",
+      "description": "The layout of a form: fields of a label, a control and a description or an error, in groups and sets named by a legend, stacked or in a row.",
+      "dependencies": ["@rn-primitives/label"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/separator"],
+      "files": [
+        {
+          "path": "src/registry/ui/field.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",
