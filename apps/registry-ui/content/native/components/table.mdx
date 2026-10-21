@@ -1,0 +1,96 @@
+---
+title: Table
+description: Rows of data with a header, a footer and a caption.
+---
+
+<NativePreview name="table-demo" />
+
+## Installation
+
+<InstallCommand name="table" />
+
+The CLI writes `components/ui/table.tsx`, installs [Text](/native/components/nativewind/text) and Utils, and
+adds `@rn-primitives/table`.
+
+## Usage
+
+```tsx
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Table>
+  <TableCaption>A list of your recent invoices.</TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>
+        <Text>Invoice</Text>
+      </TableHead>
+      <TableHead className="items-end">
+        <Text>Amount</Text>
+      </TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>
+        <Text>INV001</Text>
+      </TableCell>
+      <TableCell className="items-end">
+        <Text>250.00</Text>
+      </TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+```
+
+## API reference
+
+### Table
+
+Takes every prop of the `@rn-primitives/table` root. It is announced as a table, inside a box that scrolls
+sideways when the table is wider than the box; give a wide table a minimum width, such as `min-w-[640px]`.
+Every Text inside is small. A TableCaption is drawn below the rows wherever it is placed.
+
+### TableHeader, TableBody, TableFooter
+
+Each takes every prop of its `@rn-primitives/table` part and is announced as a row group. The last row of a
+TableBody or a TableFooter has no border under it. TableFooter draws a muted band in the medium weight.
+
+### TableRow
+
+Takes every prop of the `@rn-primitives/table` row, a Pressable announced as a row. Pass `onPress` to make it
+take a press, and `aria-selected` to draw it on the muted background and announce it as selected.
+
+### TableHead, TableCell
+
+Each takes every prop of its `@rn-primitives/table` part. TableHead is announced as a column header, its Text
+in the foreground colour and medium weight; TableCell is announced as a cell. The cells of a row share its
+width equally and centre their content vertically. Give a cell `items-end` to align it right, a `flex-[2]` to
+take twice the width, or a fixed width such as `w-24`; give the cells of one column the same width in every
+row so the column lines up.
+
+### TableCaption
+
+Takes every prop of [Text](/native/components/nativewind/text), muted.
+
+## Differences from upstream
+
+- A browser sizes a table's columns from the content of every row. React Native has no table layout, so the
+  rows are rows of views and the cells share each row's width; to line a column up, give its cells the same
+  width or flex in every row.
+- Upstream marks a selected row with `data-state="selected"`. The native row takes `aria-selected`, which
+  also announces it.
+- Upstream colours a row when hovered. A touch screen has no hover, and the native row draws no pressed
+  colour.
+- Upstream keeps a header or a cell on one line. A native Text wraps unless given `numberOfLines`.

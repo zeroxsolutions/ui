@@ -444,6 +444,20 @@
       ]
     },
     {
+      "name": "table",
+      "type": "registry:ui",
+      "title": "Table",
+      "description": "Rows of data announced as a table, with a header, a body, a footer and a caption, its cells sharing each row and the table scrolling sideways when wider than its box.",
+      "dependencies": ["@rn-primitives/table"],
+      "registryDependencies": ["@zui/utils", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/table.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

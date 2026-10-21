@@ -234,7 +234,9 @@ const REM_LENGTH = /^([\d.]+)rem$/;
 /**
  * Utilities with nothing to draw on a device. Neither engine draws a `fit-content` width; a view is as
  * wide as its content once its parent does not stretch it, which the component sets with `self-start`.
- * React Native has no `text-wrap` to balance a line with.
+ * React Native has no `text-wrap` to balance a line with, no overflow per axis (a ScrollView scrolls
+ * one), and no table layout: no caption side and no vertical align in a cell, which a Table lays out
+ * itself.
  */
 const DROPPED_UTILITIES = [
   /^(outline|ring|ring-offset|transition|duration|ease|whitespace|cursor|scroll)(-|$)/,
@@ -243,6 +245,9 @@ const DROPPED_UTILITIES = [
   /^group\//,
   /^w-fit$/,
   /^text-(balance|pretty)$/,
+  /^overflow-[xy]-/,
+  /^caption-(top|bottom)$/,
+  /^align-(baseline|top|middle|bottom|text-top|text-bottom|sub|super)$/,
 ] as const satisfies readonly RegExp[];
 
 /**

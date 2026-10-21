@@ -789,3 +789,26 @@ describe('translateClasses for a pagination link', () => {
     expect(translateClasses(['pl-2!'], 'uniwind', 'view', '', { name: 'cn-other' }).unknown).toEqual(['pl-2!']);
   });
 });
+
+describe('translateClasses for a table', () => {
+  const slots = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));
+  const view = (name: string, engine: Engine): string[] =>
+    translateClasses(slots.get(name) ?? [], engine, 'view', '', { name }).classes;
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    'drops the table layout React Native has no counterpart of, a caption side, a vertical align and an axis overflow, for %s',
+    (engine) => {
+      expect(view('cn-table-container', engine)).toEqual(['relative', 'w-full']);
+      expect(view('cn-table', engine)).toEqual(['w-full']);
+      expect(view('cn-table-cell', engine)).toEqual(['p-2']);
+      expect(view('cn-table-head', engine)).toEqual(['h-10', 'px-2']);
+    },
+  );
+
+  it('puts the selected row colour behind the state state=selected', () => {
+    expect(
+      translateClasses(slots.get('cn-table-row') ?? [], 'uniwind', 'view', 'state=selected', { name: 'cn-table-row' })
+        .classes,
+    ).toEqual(['bg-muted']);
+  });
+});

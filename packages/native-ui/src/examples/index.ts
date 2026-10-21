@@ -34,6 +34,7 @@ import { SkeletonDemo } from './skeleton-demo';
 import { SpinnerDemo } from './spinner-demo';
 import { SwitchDemo } from './switch-demo';
 import { TabBarDemo } from './tab-bar-demo';
+import { TableDemo } from './table-demo';
 import { TabsDemo } from './tabs-demo';
 import { TextDemo } from './text-demo';
 import { ThemeDemo } from './theme-demo';
@@ -73,6 +74,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'spinner-demo': SpinnerDemo,
   'switch-demo': SwitchDemo,
   'tab-bar-demo': TabBarDemo,
+  'table-demo': TableDemo,
   'tabs-demo': TabsDemo,
   'text-demo': TextDemo,
   'theme-demo': ThemeDemo,

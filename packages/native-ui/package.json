@@ -36,6 +36,7 @@
     "@rn-primitives/separator": "catalog:rn-primitives",
     "@rn-primitives/slot": "catalog:rn-primitives",
     "@rn-primitives/switch": "catalog:rn-primitives",
+    "@rn-primitives/table": "catalog:rn-primitives",
     "@rn-primitives/tabs": "catalog:rn-primitives",
     "@rn-primitives/toggle": "catalog:rn-primitives",
     "@rn-primitives/toggle-group": "catalog:rn-primitives",

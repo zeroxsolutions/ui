@@ -41,7 +41,6 @@ const PENDING = [
   'sheet',
   'slider',
   'sonner',
-  'table',
   'tooltip',
 ];
 
