@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { EXPO_GO_SDK } from '@/constants/native-preview-device';
+import { EXPO_GO_SDK, EXPO_PROJECT_ID } from '@/constants/native-preview-device';
 
 import {
   expoGoUrl,
@@ -14,6 +14,9 @@ import {
   previewHeightOf,
   previewTheme,
 } from './native-preview';
+
+/** The native preview's app config, where `eas init` wrote the project its updates are published to. */
+const PREVIEW_APP_CONFIG = join(import.meta.dirname, '../../../native-preview/app.json');
 
 /** The native preview's module that posts the height message, in the app that writes it. */
 const FRAME_HEIGHT_SOURCE = join(import.meta.dirname, '../../../native-preview/src/app/frame-height.ts');
@@ -99,5 +102,15 @@ describe('EXPO_GO_SDK', () => {
     const pinned = /^\s+"expo": "(\d+)\./m.exec(readFileSync(WORKSPACE_CATALOG, 'utf8'));
 
     expect(pinned?.[1]).toBe(String(EXPO_GO_SDK));
+  });
+});
+
+describe('EXPO_PROJECT_ID', () => {
+  it('is the EAS project the native preview publishes its updates to, so the QR opens them', () => {
+    const config = JSON.parse(readFileSync(PREVIEW_APP_CONFIG, 'utf8')) as {
+      expo: { extra: { eas: { projectId: string } } };
+    };
+
+    expect(EXPO_PROJECT_ID).toBe(config.expo.extra.eas.projectId);
   });
 });
