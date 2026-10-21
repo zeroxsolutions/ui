@@ -1,0 +1,58 @@
+---
+title: Code Input
+description: A six-character one-time code in a row of slots, as one group or two groups of three.
+---
+
+## Installation
+
+```bash
+pnpm dlx shadcn@latest add @zui/code-input
+```
+
+The CLI writes `components/data-entry/code-input.tsx` and installs [Input OTP](/docs/native/input-otp) with the
+items it needs, and Utils.
+
+## Usage
+
+```tsx
+import { useState } from 'react';
+
+import { CodeInput } from '@/components/data-entry/code-input';
+```
+
+```tsx
+const [code, setCode] = useState('');
+
+<CodeInput aria-label="Verification code" pattern="3-3" value={code} onChange={setCode} onComplete={verify} />;
+```
+
+## API reference
+
+### CodeInput
+
+Takes every prop of [InputOTP](/docs/native/input-otp) except `maxLength`, `pattern`, `children` and
+`containerClassName`, plus:
+
+| Prop                | Type               | Default              |
+| ------------------- | ------------------ | -------------------- |
+| `pattern`           | `'6' \| '3-3'`     | `'6'`                |
+| `allowedCharacters` | `string \| RegExp` | `REGEXP_ONLY_DIGITS` |
+
+The code is six characters long. `pattern` `'6'` draws one group of six slots and `'3-3'` two groups of three
+with a separator between, for a code read off a message. Either way the slots share the row's width, and a
+screen reader meets one text field, named with `aria-label`.
+
+`allowedCharacters` is what the whole code must match for a change to be taken, as InputOTP's `pattern`: the
+exports of [Input OTP](/docs/native/input-otp) such as `REGEXP_ONLY_DIGITS_AND_CHARS` fit, and a change that
+does not match is refused as it is typed or pasted. The field opens the number pad, so pass `keyboardType` too
+for a code that is not digits.
+
+The field is marked for the OS to offer a code from a text message (`textContentType="oneTimeCode"` on iOS,
+`autoComplete="sms-otp"` on Android). `aria-invalid` draws every slot with the destructive border and is passed
+to the field. React Native does not announce it, so carry the error in `accessibilityHint` or in a Text the
+user can reach.
+
+### CodeInputSlot
+
+Takes every prop of [InputOTPSlot](/docs/native/input-otp). One character of the code, 48 high, sharing its
+group's width with its siblings. CodeInput renders these itself.

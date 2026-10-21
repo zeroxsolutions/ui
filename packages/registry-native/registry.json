@@ -348,6 +348,20 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "code-input",
+      "type": "registry:component",
+      "title": "Code Input",
+      "description": "A six-character one-time code over Input OTP, as one group of six slots or two groups of three, with 48 high slots that fill the row.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/input-otp", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/code-input.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

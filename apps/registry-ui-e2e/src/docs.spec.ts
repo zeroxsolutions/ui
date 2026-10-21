@@ -28,6 +28,7 @@ test("the header's Native link opens the native docs, whose pages the sidebar li
     ['Button', 'button'],
     ['Input Group', 'input-group'],
     ['Input OTP', 'input-otp'],
+    ['Code Input', 'code-input'],
     ['Password Input', 'password-input'],
     ['Password Strength', 'password-strength'],
     ['Switch', 'switch'],

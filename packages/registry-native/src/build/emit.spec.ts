@@ -414,6 +414,20 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
     expect(passwordStrength?.files[0].content).toContain("from '@/components/ui/progress'");
   });
 
+  it('ships code-input as a data-entry registry:component over input-otp', () => {
+    const codeInput = item('code-input');
+
+    expect(codeInput).toMatchObject({
+      type: 'registry:component',
+      categories: ['data-entry'],
+      registryDependencies: ['@zui/input-otp', '@zui/utils'],
+    });
+    expect(codeInput?.files).toEqual([
+      expect.objectContaining({ path: 'registry/components/data-entry/code-input.tsx', type: 'registry:component' }),
+    ]);
+    expect(codeInput?.files[0].content).toContain("from '@/components/ui/input-otp'");
+  });
+
   it("gives Button the style's pressed nudge", () => {
     const [file] = item('button')?.files ?? [];
 

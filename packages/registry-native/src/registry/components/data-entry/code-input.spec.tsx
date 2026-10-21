@@ -1,0 +1,133 @@
+import { isHiddenFromAccessibility, render, screen, userEvent, within } from '@testing-library/react-native';
+import { emittedClasses } from '../../../build/slot-tokens.testing';
+import { CodeInput } from './code-input';
+
+type RenderedNode = ReturnType<typeof screen.getByLabelText>;
+
+const HIDDEN = { includeHiddenElements: true } as const;
+
+function classNameOf(node: RenderedNode): string {
+  return String(node.props.className ?? '');
+}
+
+/** The row that holds the groups and the separators, which is the field's parent. */
+function rowChildren(): RenderedNode[] {
+  const field = screen.getByLabelText('Verification code');
+  return (field.parent?.children ?? []).filter((child): child is RenderedNode => typeof child !== 'string');
+}
+
+function groups(): RenderedNode[] {
+  return rowChildren().filter((child) => classNameOf(child).includes('cn-input-otp-group'));
+}
+
+function slotsOf(group: RenderedNode): RenderedNode[] {
+  return group.children.filter((child): child is RenderedNode => typeof child !== 'string');
+}
+
+function separators(): RenderedNode[] {
+  return rowChildren().filter((child) => classNameOf(child).includes('cn-input-otp-separator'));
+}
+
+describe('CodeInput', () => {
+  it('draws one group of six slots for pattern "6", the default', async () => {
+    await render(<CodeInput aria-label="Verification code" />);
+
+    expect(groups()).toHaveLength(1);
+    expect(slotsOf(groups()[0])).toHaveLength(6);
+    expect(separators()).toHaveLength(0);
+  });
+
+  it('draws two groups of three with a separator between for pattern "3-3", still one focusable input', async () => {
+    await render(<CodeInput aria-label="Verification code" pattern="3-3" />);
+
+    expect(groups().map((group) => slotsOf(group).length)).toEqual([3, 3]);
+    expect(separators()).toHaveLength(1);
+    expect(isHiddenFromAccessibility(separators()[0])).toBe(true);
+    expect(screen.getAllByLabelText('Verification code')).toHaveLength(1);
+  });
+
+  it('fills the slots left to right as the code is typed', async () => {
+    const onChange = jest.fn();
+    await render(<CodeInput aria-label="Verification code" pattern="3-3" onChange={onChange} />);
+
+    await userEvent.setup().type(screen.getByLabelText('Verification code'), '123');
+
+    const [first, second] = groups();
+    expect(slotsOf(first).map((slot) => within(slot).queryByText(/^\d$/, HIDDEN)?.props.children)).toEqual([
+      '1',
+      '2',
+      '3',
+    ]);
+    expect(slotsOf(second).map((slot) => within(slot).queryByText(/^\d$/, HIDDEN))).toEqual([null, null, null]);
+    expect(onChange).toHaveBeenLastCalledWith('123');
+  });
+
+  it('fills all six slots from one paste of a six-digit code', async () => {
+    const onChange = jest.fn();
+    await render(<CodeInput aria-label="Verification code" onChange={onChange} />);
+
+    await userEvent.setup().paste(screen.getByLabelText('Verification code'), '123456');
+
+    expect(screen.getAllByText(/^\d$/, HIDDEN).map((node) => node.props.children)).toEqual([
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+    ]);
+    expect(onChange).toHaveBeenLastCalledWith('123456');
+  });
+
+  it('refuses characters outside the digits by default', async () => {
+    await render(<CodeInput aria-label="Verification code" />);
+
+    await userEvent.setup().type(screen.getByLabelText('Verification code'), '1a2');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('12');
+  });
+
+  it('refuses characters outside allowedCharacters and takes the ones it names', async () => {
+    await render(<CodeInput aria-label="Verification code" allowedCharacters="^[A-Z0-9]+$" keyboardType="default" />);
+
+    await userEvent.setup().type(screen.getByLabelText('Verification code'), 'A7b-Z');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('A7Z');
+  });
+
+  it('marks the input invalid and draws the slots in the destructive tone', async () => {
+    await render(<CodeInput aria-label="Verification code" aria-invalid />);
+
+    expect(screen.getByLabelText('Verification code').props['aria-invalid']).toBe(true);
+    for (const slot of slotsOf(groups()[0])) {
+      expect(emittedClasses(classNameOf(slot))).toContain('border-destructive');
+    }
+  });
+
+  it('leaves the input valid and the slots plain without aria-invalid', async () => {
+    await render(<CodeInput aria-label="Verification code" />);
+
+    expect(screen.getByLabelText('Verification code').props['aria-invalid']).toBeFalsy();
+    for (const slot of slotsOf(groups()[0])) {
+      expect(emittedClasses(classNameOf(slot))).not.toContain('border-destructive');
+    }
+  });
+
+  it('lets the OS offer a texted code to the one input', async () => {
+    await render(<CodeInput aria-label="Verification code" />);
+
+    expect(screen.getByLabelText('Verification code').props).toEqual(
+      expect.objectContaining({ textContentType: 'oneTimeCode', autoComplete: 'sms-otp' }),
+    );
+  });
+
+  it.each(['vega', 'nova'] as const)('makes every slot 48 high in %s', async (style) => {
+    await render(<CodeInput aria-label="Verification code" pattern="3-3" />);
+
+    const slots = groups().flatMap(slotsOf);
+    expect(slots).toHaveLength(6);
+    for (const slot of slots) {
+      expect(emittedClasses(classNameOf(slot), style)).toEqual(expect.arrayContaining(['h-12', 'flex-1']));
+    }
+  });
+});
