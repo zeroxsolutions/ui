@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 import { DocsArticle } from '@/components/layout/docs-article';
 import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
-import { nativeDocsSource, nativePageTree } from '@/lib/native-source';
+import { nativeDocsSource, nativePageImage, nativePageTree } from '@/lib/native-source';
 import { pageMarkdown } from '@/lib/source';
 import { nativeMdxComponents } from '@/mdx-components';
 
@@ -24,7 +24,11 @@ export async function generateMetadata({ params }: NativeDocsPageProps): Promise
   const page = nativeDocsSource.getPage((await params).slug);
   if (!page) notFound();
 
-  return { title: page.data.title, description: page.data.description };
+  return {
+    title: page.data.title,
+    description: page.data.description,
+    openGraph: { images: nativePageImage('docs', page.slugs).url },
+  };
 }
 
 export default async function NativeDocsPage({ params }: NativeDocsPageProps): Promise<ReactNode> {

@@ -4,7 +4,12 @@ import type { ReactNode } from 'react';
 
 import { DocsArticle } from '@/components/layout/docs-article';
 import { NATIVE_ENGINES } from '@/constants/native-engines';
-import { nativeComponentsSources, nativePageTree } from '@/lib/native-source';
+import {
+  canonicalNativeComponentUrl,
+  nativeComponentsSources,
+  nativePageImage,
+  nativePageTree,
+} from '@/lib/native-source';
 import { pageMarkdown } from '@/lib/source';
 import { nativeMdxComponents } from '@/mdx-components';
 
@@ -34,7 +39,13 @@ async function componentPage(params: NativeComponentPageProps['params']) {
 
 export async function generateMetadata({ params }: NativeComponentPageProps): Promise<Metadata> {
   const { page } = await componentPage(params);
-  return { title: page.data.title, description: page.data.description };
+  return {
+    title: page.data.title,
+    description: page.data.description,
+    // Every engine's page of one component is one page to a search engine, listed under the default engine.
+    alternates: { canonical: canonicalNativeComponentUrl(page.slugs) },
+    openGraph: { images: nativePageImage('components', page.slugs).url },
+  };
 }
 
 export default async function NativeComponentPage({ params }: NativeComponentPageProps): Promise<ReactNode> {

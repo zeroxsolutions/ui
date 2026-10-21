@@ -6,7 +6,8 @@ frontends install. The registry site is the one app deployed; it serves the docs
 ## Workspace
 
 - `apps/registry-ui` (+ `registry-ui-e2e`) - the registry: the composed items' source, `registry.json`,
-  and the Next.js site on a Cloudflare worker that serves both, with the docs at `/docs`.
+  and the Next.js site on a Cloudflare worker that serves both, with the web docs at `/docs` and the
+  native docs at `/native/docs`.
 - `packages/editor-core` (`@zeroxsolutions/editor-core`) - editor primitives.
 - `packages/fluent-emoji` (`@zeroxsolutions/fluent-emoji`) - Fluent emoji components, and the artwork
   they load from a public bucket.

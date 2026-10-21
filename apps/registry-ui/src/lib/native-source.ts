@@ -1,9 +1,10 @@
 import { nativeComponents, nativeDocs } from 'collections/server';
 import type { Root } from 'fumadocs-core/page-tree';
-import { loader } from 'fumadocs-core/source';
+import { llms, loader } from 'fumadocs-core/source';
 
 import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
-import { nativeComponentsRoute, nativeDocsRoute } from '@/routes/app-routes';
+import { pageMarkdown } from '@/lib/source';
+import { nativeComponentsRoute, nativeDocsRoute, nativeShareImageRoute } from '@/routes/app-routes';
 import type { NativeEngine } from '@/types/native-engine';
 
 /** The native docs pages, `content/native/docs`, under `/native/docs`. */
@@ -42,3 +43,32 @@ export function nativeComponentNames(): string[] {
     .filter((page) => page.slugs.length > 0)
     .map((page) => page.slugs.join('/'));
 }
+
+/**
+ * The native component pages under the default engine, the URLs search engines, the sitemap, search and
+ * `llms.txt` list. A page under another engine is the same MDX with other install commands, and names its
+ * twin here as canonical.
+ */
+export const canonicalNativeComponentsSource = nativeComponentsSources[DEFAULT_NATIVE_ENGINE];
+
+/** The canonical URL of the native component page at `slugs`, under the default engine, whichever engine a reader is on. */
+export function canonicalNativeComponentUrl(slugs: string[]): string {
+  const page = canonicalNativeComponentsSource.getPage(slugs);
+  if (!page) throw new Error(`canonicalNativeComponentUrl: no native component page at "${slugs.join('/')}"`);
+  return page.url;
+}
+
+/**
+ * The address of a native page's share image, which `/og/native/[...slug]` draws at build, and its
+ * segments there: `docs/<slug>` or `components/<name>`, the same for every engine.
+ */
+export function nativePageImage(section: 'docs' | 'components', slugs: string[]): { segments: string[]; url: string } {
+  const segments = [section, ...slugs, 'image.png'];
+  return { segments, url: nativeShareImageRoute.build({ slug: segments.join('/') }) };
+}
+
+/** The native docs as Markdown for a language model, as `docsLlms` is for the web docs. */
+export const nativeDocsLlms = llms(nativeDocsSource, { renderPage: pageMarkdown });
+
+/** The native component pages as Markdown for a language model, at their canonical URLs. */
+export const nativeComponentsLlms = llms(canonicalNativeComponentsSource, { renderPage: pageMarkdown });

@@ -123,6 +123,15 @@ describe('app routes', () => {
     });
   });
 
+  it('builds a native share-image path its own pattern reads the slug back from', () => {
+    const built = appRoutes.nativeShareImageRoute.build({ slug: 'components/button/image.png' });
+
+    expect(built).toBe('/og/native/components/button/image.png');
+    expect(appRoutes.nativeShareImageRoute.matcher(built)).toMatchObject({
+      params: { slug: ['components', 'button', 'image.png'] },
+    });
+  });
+
   it('names only paths a page answers', () => {
     const pages = pagePathnames(APP_DIR);
 

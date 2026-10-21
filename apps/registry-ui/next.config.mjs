@@ -23,6 +23,13 @@ const nextConfig = {
   rewrites: async () => [
     { source: '/docs.md', destination: '/llms.mdx/docs/content.md' },
     { source: '/docs/:path*.md', destination: '/llms.mdx/docs/:path*/content.md' },
+    { source: '/native/docs.md', destination: '/llms.mdx/native/docs/content.md' },
+    { source: '/native/docs/:path*.md', destination: '/llms.mdx/native/docs/:path*/content.md' },
+    { source: '/native/components/:engine.md', destination: '/llms.mdx/native/components/:engine/content.md' },
+    {
+      source: '/native/components/:engine/:path*.md',
+      destination: '/llms.mdx/native/components/:engine/:path*/content.md',
+    },
   ],
   // base-nova is the style the items' own classes are drawn in; the shadcn-build target builds it first.
   // The web components' and blocks' addresses from before the base segment answer 301; `permanent`

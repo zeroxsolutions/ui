@@ -53,7 +53,12 @@ function SiteHeaderNav({ pages, trees }: SiteHeaderNavProps): ReactNode {
         <div className="hidden md:block">
           <StylePicker platform={location.platform} />
         </div>
-        <DocsSearch tree={tree} navItems={items} />
+        <DocsSearch
+          tree={tree}
+          navItems={items}
+          platform={location.platform}
+          engine={location.platform === 'native' ? engine : undefined}
+        />
         <Separator orientation="vertical" className="hidden lg:block" />
         <ModeSwitcher />
       </div>

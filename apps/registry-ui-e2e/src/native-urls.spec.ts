@@ -57,3 +57,26 @@ test('the native blocks page says there are none yet', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Blocks' })).toBeVisible();
   await expect(page.getByText('No native blocks yet')).toBeVisible();
 });
+
+test('a component page under either engine names the NativeWind page canonical and shares one image', async ({
+  page,
+  request,
+}) => {
+  for (const engine of ['nativewind', 'uniwind']) {
+    await page.goto(`/native/components/${engine}/button`);
+
+    // What a search engine and a link preview read; neither has a role on the page.
+    await expect(page.locator('head link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://ui.zeroxsolutions.com/native/components/nativewind/button',
+    );
+    await expect(page.locator('head meta[property="og:image"]')).toHaveAttribute(
+      'content',
+      'https://ui.zeroxsolutions.com/og/native/components/button/image.png',
+    );
+  }
+
+  const image = await request.get('/og/native/components/button/image.png');
+  expect(image.status()).toBe(200);
+  expect(image.headers()['content-type']).toBe('image/png');
+});

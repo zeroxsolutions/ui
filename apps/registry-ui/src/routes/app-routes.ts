@@ -65,3 +65,12 @@ export const docsShareImageRoute = createDynamicRoute<{ slug: string }>(
   '/og/docs/*slug',
   ({ slug }) => `/og/docs/${slug}`,
 );
+
+/**
+ * A native page's share image, which `/og/native/[...slug]` draws once at build. `slug` is `docs/<page>` or
+ * `components/<name>`, with no engine: both engines' pages of one component share the image.
+ */
+export const nativeShareImageRoute = createDynamicRoute<{ slug: string }>(
+  '/og/native/*slug',
+  ({ slug }) => `/og/native/${slug}`,
+);
