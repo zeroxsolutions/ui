@@ -5,12 +5,13 @@ import {
   createContext,
   isValidElement,
   useContext,
+  useEffect,
   useId,
   useMemo,
   type ComponentProps,
   type ReactNode,
 } from 'react';
-import { View } from 'react-native';
+import { AccessibilityInfo, Platform, View } from 'react-native';
 import { cn } from '../lib/utils';
 import { Separator } from './separator';
 import { Text, TextClassContext } from './text';
@@ -212,17 +213,28 @@ function FieldSeparator({ className, children, ...props }: ComponentProps<typeof
   );
 }
 
+/** The mark before each message of a FieldError's list. */
+const BULLET = '\u2022';
+
 type FieldErrorProps = ComponentProps<typeof View> & {
   /** Errors from a form library; the messages are drawn once each, as a list when there are several. */
   errors?: ({ message?: string } | undefined)[];
 };
 
 /**
- * The error of a Field, announced as an alert in the destructive colour: its children, or else the
- * messages of `errors`. With neither, it draws nothing.
+ * The error of a Field in the destructive colour: its children, or else the messages of `errors`. With
+ * neither, it draws nothing. It carries the alert role, and a screen reader announces a text message when
+ * it appears or changes: TalkBack through a polite live region, VoiceOver through an announcement.
  */
 function FieldError({ className, children, errors, ...props }: FieldErrorProps): ReactNode {
   const messages = [...new Set((errors ?? []).flatMap((error) => (error?.message ? [error.message] : [])))];
+  const announcement = typeof children === 'string' ? children : children ? undefined : messages.join(' ');
+
+  // A live region is Android's alone; iOS announces only what it is told to.
+  useEffect(() => {
+    if (announcement && Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(announcement);
+  }, [announcement]);
+
   let content: ReactNode = children;
   if (!content && messages.length === 1) content = messages[0];
   if (!content && messages.length > 1) {
@@ -230,7 +242,7 @@ function FieldError({ className, children, errors, ...props }: FieldErrorProps):
       <View role="list" className="ml-4 flex-col gap-1">
         {messages.map((message) => (
           <Text key={message} role="listitem">
-            {`• ${message}`}
+            {`${BULLET} ${message}`}
           </Text>
         ))}
       </View>
@@ -240,7 +252,7 @@ function FieldError({ className, children, errors, ...props }: FieldErrorProps):
 
   return (
     <TextClassContext.Provider value="cn-field-error/text">
-      <View role="alert" className={className} {...props}>
+      <View role="alert" accessibilityLiveRegion="polite" className={className} {...props}>
         {typeof content === 'string' ? <Text>{content}</Text> : content}
       </View>
     </TextClassContext.Provider>

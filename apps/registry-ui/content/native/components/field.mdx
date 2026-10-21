@@ -71,9 +71,11 @@ control, drawn as a label is. FieldDescription is the muted help text.
 
 ### FieldError
 
-Takes every prop of React Native's `View`, plus `errors`, an array of `{ message }` from a form library. It is
-an `alert` in the destructive colour, drawing its children, or else the messages of `errors`, each once, as a
-list when there are several. With neither, it draws nothing.
+Takes every prop of React Native's `View`, plus `errors`, an array of `{ message }` from a form library. It
+draws its children in the destructive colour, or else the messages of `errors`, each once, as a list when there
+are several. With neither, it draws nothing. It carries the `alert` role, and a screen reader announces a text
+message when it appears or changes: TalkBack through a polite live region, VoiceOver through an announcement.
+Children other than a string are drawn but not announced.
 
 ### FieldGroup
 

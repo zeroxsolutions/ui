@@ -1,5 +1,5 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { Switch as NativeSwitch, TextInput } from 'react-native';
+import { AccessibilityInfo, Switch as NativeSwitch, TextInput } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   Field,
@@ -175,11 +175,29 @@ describe('FieldSeparator', () => {
 });
 
 describe('FieldError', () => {
-  it('announces its message in the destructive colour', async () => {
+  it('carries the alert role and draws its message in the destructive colour', async () => {
     await render(<FieldError testID="error">Enter an email.</FieldError>);
 
     expect(screen.getByTestId('error').props.role).toBe('alert');
     expect(textClassesOf('Enter an email.')).toEqual(expect.arrayContaining(['text-destructive', 'text-sm']));
+  });
+
+  it('is a polite live region, which TalkBack reads when its message changes', async () => {
+    await render(<FieldError testID="error">Enter an email.</FieldError>);
+
+    expect(screen.getByTestId('error').props.accessibilityLiveRegion).toBe('polite');
+  });
+
+  it('announces its message when it appears and when it changes, and not again for the same message', async () => {
+    // React Native's jest setup makes announceForAccessibility one shared mock, so its calls carry over between tests.
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockClear();
+    const { rerender } = await render(<FieldError errors={[]} />);
+
+    await rerender(<FieldError errors={[{ message: 'Too short.' }]} />);
+    await rerender(<FieldError errors={[{ message: 'Too short.' }]} />);
+    await rerender(<FieldError>Enter an email.</FieldError>);
+
+    expect(announce.mock.calls).toEqual([['Too short.'], ['Enter an email.']]);
   });
 
   it('draws the message of a single error', async () => {
