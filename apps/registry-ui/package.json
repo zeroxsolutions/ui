@@ -79,6 +79,14 @@
   },
   "nx": {
     "targets": {
+      "dev": {
+        "dependsOn": [
+          "^build",
+          "shadcn-build",
+          "fumadocs-generate",
+          "examples-index"
+        ]
+      },
       "test": {
         "dependsOn": [
           "^build",
