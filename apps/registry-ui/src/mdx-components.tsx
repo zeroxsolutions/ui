@@ -1,7 +1,7 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
+import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
 import {
-  SourceCodeBlock,
   SourceCodeBlockActions,
   SourceCodeBlockCode,
   SourceCodeBlockContent,
@@ -103,25 +103,13 @@ export const mdxComponents = {
     const language = /language-(\S+)/.exec(code.className ?? '')?.[1];
 
     return (
-      <SourceCodeBlock
+      <DocsCodeBlock
         code={nodeText(code.children).replace(/\n$/, '')}
         language={language}
+        title={title}
         lines={lines ? (JSON.parse(lines) as HighlightLine[] | null) : null}
         className="mt-6"
-      >
-        <SourceCodeBlockHeader>
-          <SourceCodeBlockTitle>
-            <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
-            {title ? <SourceCodeBlockFile>{title}</SourceCodeBlockFile> : null}
-          </SourceCodeBlockTitle>
-          <SourceCodeBlockActions>
-            <SourceCodeBlockCopy />
-          </SourceCodeBlockActions>
-        </SourceCodeBlockHeader>
-        <SourceCodeBlockContent>
-          <SourceCodeBlockCode />
-        </SourceCodeBlockContent>
-      </SourceCodeBlock>
+      />
     );
   },
   // A numbered list of steps, each a heading, with the blocks between them; `steps` numbers them.
