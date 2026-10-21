@@ -1,5 +1,5 @@
 {
-  "name": "@zeroxsolutions/registry-native",
+  "name": "@zeroxsolutions/native-ui",
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
@@ -69,16 +69,25 @@
           "{projectRoot}/src/build/**/*",
           "{projectRoot}/src/registry/**/*",
           "!{projectRoot}/src/**/*.spec.[jt]s?(x)",
-          { "externalDependencies": ["shadcn"] }
+          {
+            "externalDependencies": [
+              "shadcn"
+            ]
+          }
         ],
-        "outputs": ["{projectRoot}/dist/r"],
+        "outputs": [
+          "{projectRoot}/dist/r"
+        ],
         "options": {
           "cwd": "{projectRoot}",
           "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/build-registry.mts"
         }
       },
       "test": {
-        "dependsOn": ["^build", "build-registry"]
+        "dependsOn": [
+          "^build",
+          "build-registry"
+        ]
       },
       "sync-upstream-styles": {
         "executor": "nx:run-commands",
@@ -88,6 +97,7 @@
           "command": "node tools/sync-upstream-styles.mts {args.commit}"
         }
       }
-    }
+    },
+    "name": "@zeroxsolutions/native-ui"
   }
 }
