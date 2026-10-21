@@ -28,4 +28,11 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   return resolve(context, moduleName, platform);
 };
 
-module.exports = withNativeWind(config, { input: join(sources, 'global.css'), inlineRem: 16 });
+// Beyond the docs' options: NativeWind otherwise adds nativewind-env.d.ts to tsconfig.json's `include`
+// on every bundle, which nx's TypeScript sync then answers with a project reference. tsconfig.app.json
+// lists the file instead.
+module.exports = withNativeWind(config, {
+  input: join(sources, 'global.css'),
+  inlineRem: 16,
+  disableTypeScriptGeneration: true,
+});
