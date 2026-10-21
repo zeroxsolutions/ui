@@ -15,6 +15,15 @@ test('the switch goes to the same component on the other platform where it has o
   await expect(page.getByRole('heading', { level: 1, name: 'Tab bar', exact: true })).toBeVisible();
 });
 
+test('the switch on the home page lands on the native docs', async ({ page }) => {
+  await page.goto('/');
+
+  await platformSwitch(page).getByRole('link', { name: 'Native' }).click();
+
+  await expect(page).toHaveURL('/native/docs');
+  await expect(page.getByRole('heading', { level: 1, name: 'Introduction' })).toBeVisible();
+});
+
 test('the switch from a page the other platform lacks lands on that section index', async ({ page }) => {
   await page.goto('/native/components/nativewind/button');
 
