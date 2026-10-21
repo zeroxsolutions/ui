@@ -22,6 +22,7 @@ import { InputGroupDemo } from './input-group-demo';
 import { InputOtpDemo } from './input-otp-demo';
 import { KbdDemo } from './kbd-demo';
 import { LabelDemo } from './label-demo';
+import { PaginationDemo } from './pagination-demo';
 import { PasswordInputDemo } from './password-input-demo';
 import { PasswordStrengthDemo } from './password-strength-demo';
 import { ProgressDemo } from './progress-demo';
@@ -58,6 +59,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'input-otp-demo': InputOtpDemo,
   'kbd-demo': KbdDemo,
   'label-demo': LabelDemo,
+  'pagination-demo': PaginationDemo,
   'password-input-demo': PasswordInputDemo,
   'password-strength-demo': PasswordStrengthDemo,
   'progress-demo': ProgressDemo,

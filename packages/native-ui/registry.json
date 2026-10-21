@@ -403,6 +403,20 @@
       ]
     },
     {
+      "name": "pagination",
+      "type": "registry:ui",
+      "title": "Pagination",
+      "description": "The pages of a long list, a navigation landmark of page links with the current page outlined and marked, previous and next links and an ellipsis.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/pagination.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

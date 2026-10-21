@@ -768,3 +768,24 @@ describe('translateClasses for a button group', () => {
     ).toEqual({ classes: ['gap-2'], unknown: [] });
   });
 });
+
+describe('translateClasses for a pagination link', () => {
+  it.each([
+    ['vega', 'cn-pagination-previous', 'pl-2'],
+    ['vega', 'cn-pagination-next', 'pr-2'],
+    ['nova', 'cn-pagination-previous', 'pl-1.5'],
+  ] as const)("draws %s %s's important side padding as %s, which its component merges last", (style, name, padding) => {
+    const slots = parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8'));
+
+    for (const engine of ['nativewind', 'uniwind'] as const) {
+      expect(translateClasses(slots.get(name) ?? [], engine, 'view', '', { name })).toEqual({
+        classes: [padding],
+        unknown: [],
+      });
+    }
+  });
+
+  it('still reports an important suffix on a slot of another name', () => {
+    expect(translateClasses(['pl-2!'], 'uniwind', 'view', '', { name: 'cn-other' }).unknown).toEqual(['pl-2!']);
+  });
+});

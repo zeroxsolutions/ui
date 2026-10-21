@@ -208,6 +208,15 @@ const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-textarea', new Set(['disabled'])],
 ]);
 
+/**
+ * Slots whose important suffix is removed. Pagination's previous and next links mark their side padding
+ * important to win over the Button size's; the component merges them after the Button's classes, where
+ * tailwind-merge keeps both and each engine draws a side padding over the axis one, so the order wins
+ * without the important neither engine has.
+ */
+const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set(['cn-pagination-previous', 'cn-pagination-next']);
+const IMPORTANT_SUFFIX = /!$/;
+
 /** The px of 1rem, which the theme's setup sets. */
 const REM_PX = 16;
 
@@ -575,8 +584,10 @@ export function translateClasses(
   const droppedByName = (slot.name === undefined ? undefined : SLOT_DROPPED_CLASSES.get(slot.name)) ?? new Set();
   const stateModifiers = (slot.name === undefined ? undefined : SLOT_STATE_MODIFIERS.get(slot.name)) ?? new Set();
   const spacingVariables: SpacingVariables = slot.spacingVariables ?? new Map();
+  const importantRemoved = slot.name !== undefined && SLOT_IMPORTANT_REMOVED.has(slot.name);
   const read = classes
     .filter((cls) => !droppedByName.has(cls))
+    .map((cls) => (importantRemoved ? cls.replace(IMPORTANT_SUFFIX, '') : cls))
     .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers), spacingVariables));
 
   const ringBorder = drawsRingAsBorder(read);

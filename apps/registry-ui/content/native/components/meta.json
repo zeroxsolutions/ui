@@ -40,6 +40,7 @@
     "---Navigation---",
     "tabs",
     "tab-bar",
-    "breadcrumb"
+    "breadcrumb",
+    "pagination"
   ]
 }

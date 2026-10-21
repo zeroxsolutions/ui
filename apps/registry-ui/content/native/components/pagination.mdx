@@ -1,0 +1,96 @@
+---
+title: Pagination
+description: The pages of a long list, with the current page marked and links to the previous and next.
+---
+
+<NativePreview name="pagination-demo" />
+
+## Installation
+
+<InstallCommand name="pagination" />
+
+The CLI writes `components/ui/pagination.tsx`, installs [Button](/native/components/nativewind/button),
+[Icon](/native/components/nativewind/icon) and Utils, and adds `lucide-react-native`.
+
+## Usage
+
+```tsx
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Pagination>
+  <PaginationContent>
+    <PaginationItem>
+      <PaginationPrevious onPress={() => setPage(page - 1)} />
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationLink isActive>
+        <Text>1</Text>
+      </PaginationLink>
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationLink onPress={() => setPage(2)}>
+        <Text>2</Text>
+      </PaginationLink>
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationEllipsis />
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationNext onPress={() => setPage(page + 1)} />
+    </PaginationItem>
+  </PaginationContent>
+</Pagination>
+```
+
+## API reference
+
+### Pagination
+
+Takes every prop of React Native's `View`. It is a `navigation` landmark named Pagination, centred in its row;
+pass `aria-label` to name it otherwise.
+
+### PaginationContent, PaginationItem
+
+Each takes every prop of React Native's `View`. PaginationContent is a `list` laid out in a row, and each
+PaginationItem is a `listitem`.
+
+### PaginationLink
+
+Takes every prop of [Button](/native/components/nativewind/button) but `variant`, plus:
+
+| Prop       | Type                | Default  |
+| ---------- | ------------------- | -------- |
+| `isActive` | `boolean`           | `false`  |
+| `size`     | the Button's `size` | `'icon'` |
+
+It is announced as a link, and `onPress` navigates. The current page, `isActive`, is outlined and carries
+`aria-current="page"`; the others are ghost. Its number goes in as a Text child.
+
+### PaginationPrevious, PaginationNext
+
+Each takes the props of PaginationLink but `children`. They draw a chevron, named Go to previous page and Go
+to next page.
+
+### PaginationEllipsis
+
+Takes every prop of React Native's `View`. It draws three dots for the pages left out, and is hidden from
+screen readers.
+
+## Differences from upstream
+
+- Upstream's Previous and Next show a label from the `sm` breakpoint up and the chevron alone below it. A
+  phone is below it, so the native ones draw the chevron alone and take no `text`.
+- iOS and Android have no current-page state, so a screen reader there reads the current page as a plain
+  link. On the web it carries `aria-current="page"`, as upstream's does.
+- Upstream renders each link as an anchor with an `href`. The native link navigates through `onPress`.
