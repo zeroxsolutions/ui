@@ -37,7 +37,6 @@ const PENDING = [
   'hover-card',
   'menubar',
   'popover',
-  'scroll-area',
   'select',
   'sheet',
   'slider',

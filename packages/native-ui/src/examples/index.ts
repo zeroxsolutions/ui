@@ -28,6 +28,7 @@ import { PasswordInputDemo } from './password-input-demo';
 import { PasswordStrengthDemo } from './password-strength-demo';
 import { ProgressDemo } from './progress-demo';
 import { RadioGroupDemo } from './radio-group-demo';
+import { ScrollAreaDemo } from './scroll-area-demo';
 import { SeparatorDemo } from './separator-demo';
 import { SkeletonDemo } from './skeleton-demo';
 import { SpinnerDemo } from './spinner-demo';
@@ -66,6 +67,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'password-strength-demo': PasswordStrengthDemo,
   'progress-demo': ProgressDemo,
   'radio-group-demo': RadioGroupDemo,
+  'scroll-area-demo': ScrollAreaDemo,
   'separator-demo': SeparatorDemo,
   'skeleton-demo': SkeletonDemo,
   'spinner-demo': SpinnerDemo,

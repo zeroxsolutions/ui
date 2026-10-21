@@ -38,6 +38,7 @@
     "skeleton",
     "---Layout---",
     "aspect-ratio",
+    "scroll-area",
     "---Navigation---",
     "tabs",
     "tab-bar",
