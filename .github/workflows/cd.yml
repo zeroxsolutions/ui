@@ -121,4 +121,4 @@ jobs:
         shell: bash
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: pnpm exec nx run @zeroxsolutions/native-preview:publish-update
+        run: pnpm nx run-many -t publish-update
