@@ -1,7 +1,7 @@
 /**
  * The `type` of the message that tells the docs site framing the preview how tall the drawn demo is.
- * The site's `NATIVE_PREVIEW_HEIGHT_MESSAGE` (apps/registry-ui/src/lib/native-preview.ts) reads it, so
- * the two change together.
+ * The site's `NATIVE_PREVIEW_HEIGHT_MESSAGE` (apps/registry-ui/src/lib/native-preview.ts) reads it, and
+ * that module's spec fails while the two differ.
  */
 const HEIGHT_MESSAGE = 'zui:native-preview-height';
 

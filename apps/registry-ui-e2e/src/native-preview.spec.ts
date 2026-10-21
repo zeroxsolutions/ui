@@ -7,8 +7,9 @@ const BUTTON = '/native/components/nativewind/button';
 // The preview is an Expo web export, which loads its bundle and its fonts before it draws.
 const DRAWN = { timeout: 30_000 };
 
+/** The frame drawing the demo a reader knows as `demo`, such as `Button demo`. */
 function frame(page: Page, demo: string): Locator {
-  return page.getByTitle(`${demo} preview`);
+  return page.getByTitle(`${demo} preview`, { exact: true });
 }
 
 function inside(page: Page, demo: string): FrameLocator {
@@ -31,7 +32,7 @@ test.describe('in a light colour scheme', () => {
   test("the theme page draws the theme's colours and its font weights", async ({ page }) => {
     await page.goto('/native/components/nativewind/theme');
 
-    const theme = inside(page, 'theme-demo');
+    const theme = inside(page, 'Theme demo');
     await expect(theme.getByText('primary', { exact: true })).toBeVisible(DRAWN);
     await expect(theme.getByText('Bold 700', { exact: true })).toBeVisible();
   });
@@ -40,8 +41,8 @@ test.describe('in a light colour scheme', () => {
     page,
   }) => {
     for (const [path, demo, label] of [
-      [BUTTON, 'button-demo', 'Continue'],
-      ['/native/components/uniwind/card', 'card-demo', 'Pay'],
+      [BUTTON, 'Button demo', 'Continue'],
+      ['/native/components/uniwind/card', 'Card demo', 'Pay'],
     ] as const) {
       await page.goto(path);
 
@@ -72,12 +73,12 @@ test.describe('in a light colour scheme', () => {
 
   test('picking another style reloads the frame in that style', async ({ page }) => {
     await page.goto(BUTTON);
-    const continueButton = inside(page, 'button-demo').getByRole('button', { name: 'Continue', exact: true });
+    const continueButton = inside(page, 'Button demo').getByRole('button', { name: 'Continue', exact: true });
     await expect(continueButton).toHaveCSS('height', '36px', DRAWN);
 
     await pickStyle(page, 'Nova');
 
-    await expect(frame(page, 'button-demo')).toHaveAttribute('src', /^\/native-preview\/nova\/button-demo\b/);
+    await expect(frame(page, 'Button demo')).toHaveAttribute('src', /^\/native-preview\/nova\/button-demo\b/);
     await expect(continueButton).toHaveCSS('height', '32px', DRAWN);
   });
 
@@ -95,6 +96,18 @@ test.describe('in a light colour scheme', () => {
 
     await expect(page.getByRole('alert').filter({ hasText: 'The preview did not load' })).toBeVisible();
   });
+
+  test('a frame whose page is missing says so at once, not after the wait for a slow draw', async ({ page }) => {
+    await page.route('**/native-preview/**', (route) =>
+      route.fulfill({ status: 404, contentType: 'text/html', body: '<!doctype html><title>Not found</title>' }),
+    );
+    await page.goto(BUTTON);
+
+    // Well under the 15 seconds a frame is given to draw before it reads as failed.
+    await expect(page.getByRole('alert').filter({ hasText: 'The preview did not load' })).toBeVisible({
+      timeout: 5_000,
+    });
+  });
 });
 
 test.describe('in a dark colour scheme', () => {
@@ -102,7 +115,7 @@ test.describe('in a dark colour scheme', () => {
 
   test("the site's dark mode reaches the frame, and switching the site to light redraws it light", async ({ page }) => {
     await page.goto(BUTTON);
-    const continueButton = inside(page, 'button-demo').getByRole('button', { name: 'Continue', exact: true });
+    const continueButton = inside(page, 'Button demo').getByRole('button', { name: 'Continue', exact: true });
     await expect(continueButton).toHaveCSS('background-color', 'rgb(229, 229, 229)', DRAWN);
 
     const toggle = page.getByRole('button', { name: 'Toggle theme' });

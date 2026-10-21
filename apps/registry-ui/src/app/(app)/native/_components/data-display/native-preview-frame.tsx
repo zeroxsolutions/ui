@@ -4,11 +4,14 @@ import { useTheme } from 'next-themes';
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
 
 import { useCurrentStyle } from '@/hooks/use-current-style';
-import { nativePreviewSrc, previewHeightOf, previewTheme } from '@/lib/native-preview';
+import { nativePreviewSrc, nativePreviewTitle, previewHeightOf, previewTheme } from '@/lib/native-preview';
 import { Spinner } from '@/registry/bases/base-ui/ui/spinner';
 
 /** The frame's height, in CSS pixels, until the preview posts its own: the web preview stage's `h-72`. */
 const FALLBACK_HEIGHT = 288;
+
+/** The node the Expo web export mounts the preview in; a page loaded into the frame without it is not the preview. */
+const PREVIEW_ROOT_ID = 'root';
 
 /**
  * How long a frame may take to post its height before it reads as failed. The preview loads its bundle
@@ -53,7 +56,7 @@ function NativePreviewFrameFromPage({ demo }: NativePreviewFrameProps): ReactNod
   return (
     <NativePreviewFrameDocument
       src={nativePreviewSrc({ style, demo, theme: previewTheme(resolvedTheme) })}
-      title={`${demo} preview`}
+      title={nativePreviewTitle(demo)}
     />
   );
 }
@@ -88,9 +91,10 @@ function NativePreviewFrameDocument({ src, title }: { src: string; title: string
   }, [src, status]);
 
   // The preview is served from the site's own origin; a frame whose document the page cannot read holds
-  // the browser's error page instead.
+  // the browser's error page instead, and one with no mount node holds the site's 404 page.
   const onLoad = (): void => {
-    if (frame.current?.contentDocument === null) setOutcome({ src, status: 'failed' });
+    const loaded = frame.current?.contentDocument;
+    if (loaded === null || (loaded && !loaded.getElementById(PREVIEW_ROOT_ID))) setOutcome({ src, status: 'failed' });
   };
 
   return (
@@ -108,6 +112,8 @@ function NativePreviewFrameDocument({ src, title }: { src: string; title: string
         src={src}
         title={title}
         onLoad={onLoad}
+        // Under the spinner it would still take focus and be read out, though nothing in it can be seen.
+        inert={status === 'loading'}
         className="block h-(--native-preview-height) w-full in-data-[status=failed]:invisible"
       />
       {status === 'loading' && (
