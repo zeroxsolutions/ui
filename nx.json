@@ -85,8 +85,8 @@
     },
     {
       "plugin": "@nx/expo/plugin",
-      // The plugin infers `build` as an EAS cloud build, which CI does not have; the preview's own
-      // export-web is declared by hand.
+      // The native preview takes the two entries below instead: under this one its `build` would be an
+      // EAS cloud build, which the gate's `build` would then run with no Expo account.
       "exclude": ["apps/native-preview/**"],
       "options": {
         "startTargetName": "start",
@@ -100,6 +100,26 @@
         "runAndroidTargetName": "run-android",
         "buildDepsTargetName": "build-deps",
         "watchDepsTargetName": "watch-deps"
+      }
+    },
+    // The native preview is exported once per style, and the site's build depends on both exports. A
+    // dependency names a target but never a configuration, so each style is its own export target, one
+    // per entry, and reads its STYLE from the project's `.env.<target>`. Every other target the two
+    // entries infer is the same, under the same name.
+    {
+      "plugin": "@nx/expo/plugin",
+      "include": ["apps/native-preview/**"],
+      "options": {
+        "buildTargetName": "eas:build",
+        "exportTargetName": "export-vega"
+      }
+    },
+    {
+      "plugin": "@nx/expo/plugin",
+      "include": ["apps/native-preview/**"],
+      "options": {
+        "buildTargetName": "eas:build",
+        "exportTargetName": "export-nova"
       }
     },
     {

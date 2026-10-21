@@ -1,22 +1,15 @@
-import { demoNameFromDeepLink, demoNameFromPath, initialDemoName, themeFromSearch } from './preview-url';
+import { demoNameFromDeepLink, demoNameFromSearch, initialDemoName, themeFromSearch } from './preview-url';
 
-describe('demoNameFromPath', () => {
-  it("takes the demo's name from the segment under the style's base", () => {
-    expect(demoNameFromPath('/native-preview/vega/button-demo', '/native-preview/vega')).toBe('button-demo');
+describe('demoNameFromSearch', () => {
+  it("takes the demo's name from ?demo=, beside the theme", () => {
+    expect(demoNameFromSearch('?demo=button-demo')).toBe('button-demo');
+    expect(demoNameFromSearch('?demo=button-demo&theme=dark')).toBe('button-demo');
   });
 
-  it('ignores a trailing slash and an .html suffix, as a static host may add either', () => {
-    expect(demoNameFromPath('/native-preview/nova/button-demo/', '/native-preview/nova')).toBe('button-demo');
-    expect(demoNameFromPath('/native-preview/nova/button-demo.html', '/native-preview/nova')).toBe('button-demo');
-  });
-
-  it('has no name for the base itself or its index.html', () => {
-    expect(demoNameFromPath('/native-preview/vega/', '/native-preview/vega')).toBeUndefined();
-    expect(demoNameFromPath('/native-preview/vega/index.html', '/native-preview/vega')).toBeUndefined();
-  });
-
-  it('reads the path from the root with no base, as the dev server serves it', () => {
-    expect(demoNameFromPath('/button-demo', '')).toBe('button-demo');
+  it('has no name when ?demo= is absent or empty', () => {
+    expect(demoNameFromSearch('')).toBeUndefined();
+    expect(demoNameFromSearch('?theme=light')).toBeUndefined();
+    expect(demoNameFromSearch('?demo=')).toBeUndefined();
   });
 });
 

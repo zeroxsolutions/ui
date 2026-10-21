@@ -6,19 +6,13 @@ type ColorScheme = 'light' | 'dark';
 const DEEP_LINK_SEPARATOR = '/--/';
 
 /**
- * The demo a path names under `baseUrl`, such as `button-demo` for `/native-preview/vega/button-demo`
- * under `/native-preview/vega`. A trailing slash and an `.html` suffix, which a static host may add, are
- * dropped.
- * @param baseUrl - the base the app is served under, `''` at the root
- * @returns the name, or `undefined` for the base itself or its `index.html`
+ * The demo `?demo=` names, such as `button-demo` for `/native-preview/vega/index.html?demo=button-demo`.
+ * The style's one `index.html` draws every demo.
+ * @returns the name, or `undefined` when the query names none
  */
-function demoNameFromPath(pathname: string, baseUrl: string): string | undefined {
-  const underBase = pathname.startsWith(baseUrl) ? pathname.slice(baseUrl.length) : pathname;
-  const name = underBase
-    .replace(/\/$/, '')
-    .replace(/\.html$/, '')
-    .replace(/^\//, '');
-  return name === '' || name === 'index' ? undefined : name;
+function demoNameFromSearch(search: string): string | undefined {
+  const name = new URLSearchParams(search).get('demo');
+  return name === null || name === '' ? undefined : name;
 }
 
 /**
@@ -58,5 +52,5 @@ function themeFromSearch(search: string): ColorScheme | undefined {
   return theme === 'light' || theme === 'dark' ? theme : undefined;
 }
 
-export { demoNameFromDeepLink, demoNameFromPath, initialDemoName, themeFromSearch };
+export { demoNameFromDeepLink, demoNameFromSearch, initialDemoName, themeFromSearch };
 export type { ColorScheme };

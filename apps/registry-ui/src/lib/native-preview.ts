@@ -12,9 +12,9 @@ export const NATIVE_PREVIEW_HEIGHT_MESSAGE = 'zui:native-preview-height';
 export type NativePreviewTheme = 'light' | 'dark';
 
 /**
- * Where a native demo is drawn: its page in the style's web export, under `public/native-preview`.
- * The `.html` form is served by `next dev` and by Cloudflare's assets alike; Cloudflare answers it with
- * a redirect to the extensionless path, the query kept.
+ * Where a native demo is drawn: the style's web export, under `public/native-preview`, which draws the
+ * demo `?demo=` names. The `index.html` form is served by `next dev` and by Cloudflare's assets alike;
+ * Cloudflare answers it with a redirect to the folder, the query kept.
  */
 export function nativePreviewSrc({
   style,
@@ -26,7 +26,7 @@ export function nativePreviewSrc({
   demo: string;
   theme: NativePreviewTheme;
 }): string {
-  return `/native-preview/${style}/${demo}.html?theme=${theme}`;
+  return `/native-preview/${style}/index.html?demo=${demo}&theme=${theme}`;
 }
 
 /** A frame's accessible name for `demo`, as a reader says it: `button-demo` is `Button demo preview`. */

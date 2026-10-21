@@ -1,6 +1,6 @@
 /**
  * One demo per drawn registry item, written as an app writes it, importing the items through `@/`.
- * The native preview draws each one at `/native-preview/<style>/<key>`.
+ * The native preview draws each one at `/native-preview/<style>/index.html?demo=<key>`.
  */
 import type { ComponentType } from 'react';
 

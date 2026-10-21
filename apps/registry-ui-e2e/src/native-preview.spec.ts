@@ -90,7 +90,10 @@ test.describe('in a light colour scheme', () => {
 
     await pickStyle(page, 'Nova');
 
-    await expect(frame(page, 'Button demo')).toHaveAttribute('src', /^\/native-preview\/nova\/button-demo\b/);
+    await expect(frame(page, 'Button demo')).toHaveAttribute(
+      'src',
+      /^\/native-preview\/nova\/index\.html\?demo=button-demo&/,
+    );
     await expect(continueButton).toHaveCSS('height', '32px', DRAWN);
   });
 

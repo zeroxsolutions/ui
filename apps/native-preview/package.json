@@ -50,33 +50,41 @@
   },
   "nx": {
     "targets": {
-      "export-web": {
-        "executor": "nx:run-commands",
+      "export-vega": {
         "dependsOn": [
+          "...",
           "^build-registry"
         ],
-        "cache": true,
-        "inputs": [
-          "default",
-          "^default",
-          {
-            "externalDependencies": [
-              "expo",
-              "nativewind",
-              "tailwindcss"
-            ]
-          }
+        "outputs": [
+          "{workspaceRoot}/apps/registry-ui/public/native-preview/vega"
+        ],
+        "parallelism": false,
+        "options": {
+          "args": [
+            "...",
+            "--platform",
+            "web",
+            "--output-dir",
+            "../registry-ui/public/native-preview/vega"
+          ]
+        }
+      },
+      "export-nova": {
+        "dependsOn": [
+          "...",
+          "^build-registry"
         ],
         "outputs": [
-          "{projectRoot}/dist/web"
+          "{workspaceRoot}/apps/registry-ui/public/native-preview/nova"
         ],
+        "parallelism": false,
         "options": {
-          "cwd": "{projectRoot}",
-          "parallel": false,
-          "commands": [
-            "rm -rf dist/web",
-            "for style in vega nova; do STYLE=$style expo export --platform web --clear --output-dir dist/web/$style || exit 1; done",
-            "for style in vega nova; do for demo in $(ls ../../packages/native-ui/src/examples | sed -n 's/[.]tsx$//p' | grep -- '-demo$'); do cp dist/web/$style/index.html dist/web/$style/$demo.html; done; done"
+          "args": [
+            "...",
+            "--platform",
+            "web",
+            "--output-dir",
+            "../registry-ui/public/native-preview/nova"
           ]
         }
       },

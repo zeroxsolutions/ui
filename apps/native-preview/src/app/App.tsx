@@ -16,7 +16,7 @@ import { pinColorScheme } from './color-scheme';
 import { DemoBoundary } from './demo-boundary';
 import { findDemo } from './find-demo';
 import { postHeightToHost } from './frame-height';
-import { demoNameFromDeepLink, demoNameFromPath, initialDemoName, themeFromSearch } from './preview-url';
+import { demoNameFromDeepLink, demoNameFromSearch, initialDemoName, themeFromSearch } from './preview-url';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -44,7 +44,7 @@ function DemoList({ missing, onOpen }: { missing: string | undefined; onOpen: (n
 }
 
 /**
- * The demo the app was opened on: the page's path on web; on native the path after `/--/` of the link
+ * The demo the app was opened on: the page's `?demo=` on web; on native the path after `/--/` of the link
  * that opened it, then of each link that reaches it while open, as Expo Go hands a scanned link to the
  * running app.
  * @returns the name, `undefined` for none, or {@link LINK_UNREAD} until native has read the link; and a
@@ -52,7 +52,7 @@ function DemoList({ missing, onOpen }: { missing: string | undefined; onOpen: (n
  */
 function useDemoName(): [string | undefined | typeof LINK_UNREAD, (name: string) => void] {
   const [name, setName] = useState<string | undefined | typeof LINK_UNREAD>(() =>
-    location ? demoNameFromPath(location.pathname, process.env.EXPO_BASE_URL ?? '') : LINK_UNREAD,
+    location ? demoNameFromSearch(location.search) : LINK_UNREAD,
   );
 
   useEffect(() => {
@@ -65,14 +65,19 @@ function useDemoName(): [string | undefined | typeof LINK_UNREAD, (name: string)
   }, []);
 
   const open = (next: string): void => {
-    if (location) location.assign(next);
-    else setName(next);
+    if (!location) {
+      setName(next);
+      return;
+    }
+    const search = new URLSearchParams(location.search);
+    search.set('demo', next);
+    location.search = search.toString();
   };
   return [name, open];
 }
 
 /**
- * Draws the demo the path names, such as `/native-preview/vega/button-demo` on web or
+ * Draws the demo the address names, such as `/native-preview/vega/index.html?demo=button-demo` on web or
  * `exp://u.expo.dev/<project>/--/button-demo` in Expo Go, in the colour scheme `?theme=light|dark` asks
  * for on web, or the system's without one; a name no demo has says so above the list of demos, and no
  * name lists them. In a frame, it posts the drawn content's height to the page framing it each time
