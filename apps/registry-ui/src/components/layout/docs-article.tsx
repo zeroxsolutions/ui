@@ -10,15 +10,26 @@ import { pageNeighbours } from '@/lib/page-tree';
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 
-interface DocsArticleProps {
+/** What Copy page copies: the page as Markdown, or a Copy page control of the page's own that picks it. */
+type DocsArticleCopy =
+  | {
+      /** The page as Markdown, which Copy page copies; give it what the page's `.md` URL serves, so the two match. */
+      markdown: string;
+      copyPage?: never;
+    }
+  | {
+      /** Copy page in place of one copying `markdown`, for a page whose Markdown depends on what the browser reads. */
+      copyPage: ReactNode;
+      markdown?: never;
+    };
+
+type DocsArticleProps = DocsArticleCopy & {
   /** The page's frontmatter title, its heading. */
   title: string;
   /** The page's frontmatter description, under the heading. */
   description?: string;
   /** Links to this page under each engine or base, under the description, on a page whose path holds one. */
   tabs?: ReactNode;
-  /** The page as Markdown, which Copy page copies; give it what the page's `.md` URL serves, so the two match. */
-  markdown: string;
   /** The tree the page sits in, which the previous and next links and the pager step through. */
   tree: Root;
   /** The page's own URL in `tree`. */
@@ -27,14 +38,24 @@ interface DocsArticleProps {
   toc: TableOfContents;
   /** The page's compiled body. */
   children: ReactNode;
-}
+};
 
 /**
  * One docs page: its heading with Copy page and the previous and next links, the engine or base tabs
  * where given, its body, the pager, and the headings column beside them. Web and native docs pages both
  * render through it.
  */
-function DocsArticle({ title, description, tabs, markdown, tree, url, toc, children }: DocsArticleProps): ReactNode {
+function DocsArticle({
+  title,
+  description,
+  tabs,
+  markdown,
+  copyPage,
+  tree,
+  url,
+  toc,
+  children,
+}: DocsArticleProps): ReactNode {
   const neighbours = pageNeighbours(tree, url);
 
   return (
@@ -49,7 +70,7 @@ function DocsArticle({ title, description, tabs, markdown, tree, url, toc, child
             <div className="flex items-start justify-between gap-4">
               <h1 className="scroll-m-24 text-3xl font-semibold tracking-tight">{title}</h1>
               <div className="flex items-center gap-2">
-                <CopyButton value={markdown} label="Copy page" variant="secondary" size="icon-sm" />
+                {copyPage ?? <CopyButton value={markdown ?? ''} label="Copy page" variant="secondary" size="icon-sm" />}
                 {neighbours.previous && <DocsNeighbourLink direction="previous" href={neighbours.previous.url} />}
                 {neighbours.next && <DocsNeighbourLink direction="next" href={neighbours.next.url} />}
               </div>

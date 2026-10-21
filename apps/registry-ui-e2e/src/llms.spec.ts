@@ -50,4 +50,9 @@ test("a native component page's Markdown is written for its engine, with no JSX 
     expect(prose, path).not.toMatch(/<[A-Z]/);
     expect(prose, path).not.toContain('/native/components/nativewind/');
   }
+
+  // The theme page's NativeWind tab names `tailwind.config.js`; under Uniwind only its own tab is kept.
+  const theme = await (await request.get('/native/components/uniwind/theme.md')).text();
+  expect(theme).toContain('`zui-theme.css` at the project root');
+  expect(theme).not.toContain('`tailwind.config.js` gains');
 });

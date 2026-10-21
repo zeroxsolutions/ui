@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { registryHomepage } from '@/lib/registry';
 
-import { nativePageMarkdown } from './native-page-markdown';
+import { nativePageMarkdown, nativePageMarkdownByStyle } from './native-page-markdown';
 
 /**
  * A native page's body in the form `remarkLLMs` compiles with `output: 'function'`: its Markdown as
@@ -104,5 +104,13 @@ describe('nativePageMarkdown', () => {
     expect(markdown).toContain('[Theme](/native/components/uniwind/theme#tokens)');
     expect(markdown).toContain('[Installation](/native/docs/installation)');
     expect(markdown).not.toContain('/native/components/nativewind/');
+  });
+
+  it('gives the page once per native style, each with its own install URL', async () => {
+    const byStyle = await nativePageMarkdownByStyle(buttonPage, 'uniwind');
+
+    expect(Object.keys(byStyle).sort()).toEqual(['nova', 'vega']);
+    expect(byStyle.vega).toContain('r/styles/uniwind-vega/button.json');
+    expect(byStyle.nova).toContain('r/styles/uniwind-nova/button.json');
   });
 });

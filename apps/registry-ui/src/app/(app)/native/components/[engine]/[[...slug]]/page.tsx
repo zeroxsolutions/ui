@@ -5,15 +5,16 @@ import type { ReactNode } from 'react';
 import { DocsArticle } from '@/components/layout/docs-article';
 import { EngineSwitcher } from '@/components/navigation/engine-switcher';
 import { NATIVE_ENGINES } from '@/constants/native-engines';
-import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
 import {
   canonicalNativeComponentUrl,
   nativeComponentsSources,
   nativePageImage,
   nativePageTree,
 } from '@/lib/native-source';
-import { nativePageMarkdown } from '@/lib/native-page-markdown';
+import { nativePageMarkdownByStyle } from '@/lib/native-page-markdown';
 import { nativeMdxComponents } from '@/mdx-components';
+
+import { NativeCopyPageButton } from '../../../_components/general/native-copy-page-button';
 
 export const revalidate = false;
 export const dynamic = 'force-static';
@@ -59,7 +60,7 @@ export default async function NativeComponentPage({ params }: NativeComponentPag
       title={page.data.title}
       description={page.data.description}
       tabs={<EngineSwitcher />}
-      markdown={await nativePageMarkdown(page, { engine, style: DEFAULT_PLATFORM_STYLE.native })}
+      copyPage={<NativeCopyPageButton markdown={await nativePageMarkdownByStyle(page, engine)} />}
       tree={nativePageTree(engine)}
       url={page.url}
       toc={page.data.toc}

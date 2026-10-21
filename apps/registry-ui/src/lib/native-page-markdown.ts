@@ -2,6 +2,7 @@ import { asMarkdown } from 'fumadocs-core/server';
 import { Children, isValidElement, type ReactNode } from 'react';
 
 import { DEFAULT_NATIVE_ENGINE, NATIVE_ENGINE_LABELS } from '@/constants/native-engines';
+import { PLATFORM_STYLES } from '@/constants/platform-styles';
 import { nativeComponentsJson, nativeInstallCommands } from '@/lib/native-install';
 import type { nativeDocsSource } from '@/lib/native-source';
 import { pageMarkdownDocument } from '@/lib/page-markdown';
@@ -90,4 +91,15 @@ export async function nativePageMarkdown(page: NativeMarkdownPage, of: NativeMar
   const { engine } = of;
   if (!engine) return markdown;
   return markdown.replace(NATIVE_COMPONENT_LINK, (_link, href: string) => `](${withNativeEngine(href, engine)})`);
+}
+
+/** The page's Markdown in each native style, for a Copy page that copies the style the page shows. */
+export async function nativePageMarkdownByStyle(
+  page: NativeMarkdownPage,
+  engine?: NativeEngine,
+): Promise<Record<PlatformStyle<'native'>, string>> {
+  const entries = await Promise.all(
+    PLATFORM_STYLES.native.map(async (style) => [style, await nativePageMarkdown(page, { engine, style })] as const),
+  );
+  return Object.fromEntries(entries) as Record<PlatformStyle<'native'>, string>;
 }
