@@ -207,6 +207,31 @@ export default function App() {
 }
 ```
 
+## Add a portal host
+
+Dialog, Popover, Select and the other overlays draw their content into a `PortalHost` from
+`@rn-primitives/portal`, on both engines. Without one, an overlay opens and draws nothing. Install it:
+
+```bash
+npx expo install @rn-primitives/portal
+```
+
+Render one host, as the last child of the app's root, so an overlay draws above every screen. In an Expo
+Router app the root is `app/_layout.tsx`; in the app above it is `App.tsx`:
+
+```tsx title="App.tsx"
+import { PortalHost } from '@rn-primitives/portal';
+
+// ...
+
+return (
+  <>
+    <View className="flex-1 items-center justify-center bg-background">{/* ... */}</View>
+    <PortalHost />
+  </>
+);
+```
+
 ## Follow the device colour scheme
 
 `create-expo-app`'s blank-typescript template sets `"userInterfaceStyle": "light"` in `app.json`, which makes iOS

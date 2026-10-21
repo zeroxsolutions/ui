@@ -1,3 +1,4 @@
+import { PortalHost } from '@rn-primitives/portal';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -145,12 +146,14 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
  * that height changes. The splash screen stays up until the fonts and, on native, the link are read.
  *
  * A preview app renders it as its root, after importing its engine's stylesheet; `@/` in this module and
- * the demos' `@/` resolve to that app's emitted sources.
+ * the demos' `@/` resolve to that app's emitted sources. It holds the app's `PortalHost`, so the app adds none
+ * of its own; a demo's overlay draws there, above the demo and inside the safe area's provider.
  */
 function Preview(props: PreviewProps): ReactNode {
   return (
     <SafeAreaProvider>
       <PreviewScreen {...props} />
+      <PortalHost />
     </SafeAreaProvider>
   );
 }

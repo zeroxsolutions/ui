@@ -1,6 +1,8 @@
+import { Portal } from '@rn-primitives/portal';
 import { render, screen } from '@testing-library/react-native';
-import { Linking } from 'react-native';
+import { Linking, Text } from 'react-native';
 
+import * as findDemoModule from './find-demo';
 import { Preview } from './preview';
 
 // The provider draws nothing until the device reports its insets, which jest never does; the library's
@@ -38,5 +40,20 @@ describe('Preview', () => {
 
     expect(await screen.findByRole('heading')).toHaveTextContent('No demo is named carousel-demo.');
     expect(screen.getByRole('link', { name: 'button-demo' })).toBeTruthy();
+  });
+
+  it("draws an overlay's portalled content, as a demo's dialog or menu opens one", async () => {
+    jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(`${UPDATE}/--/overlay-demo`);
+    jest.spyOn(findDemoModule, 'findDemo').mockReturnValue(function OverlayDemo() {
+      return (
+        <Portal name="overlay-demo">
+          <Text>Portalled</Text>
+        </Portal>
+      );
+    });
+
+    await render(<Preview bundledStyle={undefined} applyColorScheme={() => undefined} />);
+
+    expect(await screen.findByText('Portalled')).toBeTruthy();
   });
 });
