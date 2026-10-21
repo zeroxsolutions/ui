@@ -65,8 +65,9 @@ Takes every prop of `View`, plus:
 | `side`  | `'top' \| 'bottom'`                               | `'bottom'`  |
 | `state` | `'default' \| 'saving' \| 'error' \| 'attention'` | `'default'` |
 
-It is a group for a screen reader, named by its message through `aria-labelledby`; pass `aria-label` or
-`accessibilityLabel` to name it yourself. It sits 16px from the screen's `side` edge and from both sides, and on a
+It is a group for a screen reader, named by its message, through `aria-labelledby` on Android and
+through `accessibilityLabel` set to the message's text on iOS, which does not read `aria-labelledby`; pass `aria-label`
+or `accessibilityLabel` to name it yourself. It sits 16px from the screen's `side` edge and from both sides, and on a
 screen wider than 512px (`max-w-lg`) it is centred at that width. A `testID` goes to the group, and
 `<testID>-wrapper` to the full-width box that places it. `className` styles the group, and the wrapper places it. `error` and `attention` turn the message destructive, and
 `attention` turns the border destructive too.

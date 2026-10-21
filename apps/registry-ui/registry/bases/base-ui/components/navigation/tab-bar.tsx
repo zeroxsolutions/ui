@@ -123,8 +123,8 @@ interface TabBarProps extends React.ComponentProps<'nav'> {
  *
  * Fixed to the viewport, it can cover content and take focus from it: pad the page to match. At the top
  * and bottom it adds the device's safe-area inset to its own padding, which needs `viewport-fit=cover`
- * on the page's viewport meta. Carries `data-side`, `data-orientation` (`horizontal` or `vertical`), `data-labels`, `data-surface`
- * and `data-shape`.
+ * on the page's viewport meta. Carries `data-side`, `data-orientation` (`horizontal` or `vertical`), `data-labels`,
+ * `data-surface` and `data-shape`.
  */
 function TabBar({
   side = 'bottom',
