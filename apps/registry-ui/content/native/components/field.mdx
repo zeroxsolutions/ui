@@ -30,7 +30,7 @@ const emailRef = useRef<TextInput>(null);
     <FieldLabel nativeID="email-label" onPress={() => emailRef.current?.focus()}>
       Email
     </FieldLabel>
-    <Input ref={emailRef} aria-labelledby="email-label" aria-invalid={Boolean(error)} />
+    <Input ref={emailRef} aria-label="Email" aria-labelledby="email-label" aria-invalid={Boolean(error)} />
     {error ? <FieldError>{error}</FieldError> : <FieldDescription>We never share it.</FieldDescription>}
   </Field>
 </FieldGroup>;
@@ -56,7 +56,7 @@ label in the destructive colour, and `disabled` dims the label and the title; pa
 ### FieldLabel
 
 Takes every prop of the `@rn-primitives/label` root, plus `nativeID`, the id the control names in
-`aria-labelledby`. Its children are the label's text. Pressing it runs `onPress`; point it at the control's
+`aria-labelledby`, which Android reads and iOS ignores; give the control the label's text as `aria-label` too. Its children are the label's text. Pressing it runs `onPress`; point it at the control's
 `focus()`. In a horizontal Field it takes the room the control leaves.
 
 ### FieldContent
@@ -97,8 +97,9 @@ in the muted colour.
 
 - Upstream marks a field invalid or disabled with `data-invalid` and `data-disabled` attributes. React Native
   takes no data attributes, so the native Field takes `invalid` and `disabled`.
-- A web label focuses its control through `htmlFor`. React Native has no such link: name the control with
-  `aria-labelledby` and focus it from the label's `onPress`.
+- A web label names and focuses its control through `htmlFor`. React Native has no such link: name the
+  control with `aria-label`, which iOS and Android both read, and with `aria-labelledby`, which only Android
+  reads, and focus it from the label's `onPress`.
 - Upstream's `responsive` Field turns into a row on a wide container. A phone is narrower than that, so it
   stays stacked.
 - Upstream draws a FieldLabel that wraps a whole Field, such as a checkbox with its text, as a bordered choice

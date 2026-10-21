@@ -28,11 +28,12 @@ function FieldDemo(): ReactNode {
       <FieldGroup>
         <Field>
           <FieldLabel nativeID="field-demo-name">Full name</FieldLabel>
-          <Input aria-labelledby="field-demo-name" placeholder="Ana Silva" />
+          <Input aria-label="Full name" aria-labelledby="field-demo-name" placeholder="Ana Silva" />
         </Field>
         <Field invalid={invalid}>
           <FieldLabel nativeID="field-demo-email">Email</FieldLabel>
           <Input
+            aria-label="Email"
             aria-labelledby="field-demo-email"
             aria-invalid={invalid}
             value={email}
