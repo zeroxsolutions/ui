@@ -40,7 +40,8 @@ Takes every prop of [InputOTP](/docs/native/input-otp) except `maxLength`, `patt
 
 The code is six characters long. `pattern` `'6'` draws one group of six slots and `'3-3'` two groups of three
 with a separator between, for a code read off a message. Either way the slots share the row's width, and a
-screen reader meets one text field, named with `aria-label`.
+screen reader meets one text field, named with `aria-label` or
+`accessibilityLabel`, one of which the type requires.
 
 `allowedCharacters` is what the whole code must match for a change to be taken, as InputOTP's `pattern`: the
 exports of [Input OTP](/docs/native/input-otp) such as `REGEXP_ONLY_DIGITS_AND_CHARS` fit, and a change that
