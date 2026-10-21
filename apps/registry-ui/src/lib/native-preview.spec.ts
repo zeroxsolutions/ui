@@ -29,10 +29,10 @@ const PROJECT_ID = '0f6c4b9e-2d1a-4c3b-9e8f-7a6b5c4d3e2f';
 describe('nativePreviewSrc', () => {
   it("points at the style's export, with the demo and the theme in its query", () => {
     expect(nativePreviewSrc({ style: 'nova', demo: 'button-demo', theme: 'dark' })).toBe(
-      '/native-preview/nova/index.html?demo=button-demo&theme=dark',
+      '/native-preview/index.html?style=nova&demo=button-demo&theme=dark',
     );
     expect(nativePreviewSrc({ style: 'vega', demo: 'password-input-demo', theme: 'light' })).toBe(
-      '/native-preview/vega/index.html?demo=password-input-demo&theme=light',
+      '/native-preview/index.html?style=vega&demo=password-input-demo&theme=light',
     );
   });
 });

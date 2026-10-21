@@ -50,41 +50,21 @@
   },
   "nx": {
     "targets": {
-      "export-vega": {
+      "export": {
         "dependsOn": [
           "...",
           "^build-registry"
         ],
         "outputs": [
-          "{workspaceRoot}/apps/registry-ui/public/native-preview/vega"
+          "{workspaceRoot}/apps/registry-ui/public/native-preview"
         ],
-        "parallelism": false,
         "options": {
           "args": [
             "...",
             "--platform",
             "web",
             "--output-dir",
-            "../registry-ui/public/native-preview/vega"
-          ]
-        }
-      },
-      "export-nova": {
-        "dependsOn": [
-          "...",
-          "^build-registry"
-        ],
-        "outputs": [
-          "{workspaceRoot}/apps/registry-ui/public/native-preview/nova"
-        ],
-        "parallelism": false,
-        "options": {
-          "args": [
-            "...",
-            "--platform",
-            "web",
-            "--output-dir",
-            "../registry-ui/public/native-preview/nova"
+            "../registry-ui/public/native-preview"
           ]
         }
       }

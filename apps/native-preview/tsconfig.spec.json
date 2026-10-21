@@ -8,7 +8,12 @@
     "moduleResolution": "bundler",
     "lib": ["es2023", "dom"],
     // preview-style.js is CommonJS, for the Metro, Tailwind and Expo configs that require it.
-    "allowJs": true
+    "allowJs": true,
+    // As tsconfig.app.json maps them, for a spec importing a style's demos.
+    "paths": {
+      "@/*": ["../../packages/native-ui/dist/src/nativewind-vega/*"],
+      "@styles/*": ["../../packages/native-ui/dist/src/nativewind-*"]
+    }
   },
   "files": ["src/test-setup.ts"],
   "include": [

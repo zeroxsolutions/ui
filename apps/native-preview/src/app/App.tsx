@@ -1,6 +1,5 @@
 import '@/global.css';
 
-import { demos } from '@zeroxsolutions/native-ui/examples';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -14,14 +13,29 @@ import { zuiFonts } from '@/lib/fonts';
 
 import { pinColorScheme } from './color-scheme';
 import { DemoBoundary } from './demo-boundary';
-import { findDemo } from './find-demo';
+import { DEMO_NAMES, findDemo } from './find-demo';
 import { postHeightToHost } from './frame-height';
-import { demoNameFromDeepLink, demoNameFromSearch, initialDemoName, themeFromSearch } from './preview-url';
+import {
+  demoNameFromDeepLink,
+  demoNameFromSearch,
+  initialDemoName,
+  styleFromSearch,
+  styleOf,
+  themeFromSearch,
+  type PreviewStyle,
+} from './preview-url';
 
 void SplashScreen.preventAutoHideAsync();
 
 /** The page's location on web; native has none, and reads the demo from the link that opened it. */
 const location = Platform.OS === 'web' ? window.location : undefined;
+
+/**
+ * The style the preview draws: the page's `?style=` on web, and on native the style the update was
+ * bundled in; `vega`, the native default, without either.
+ */
+const style: PreviewStyle =
+  (location ? styleFromSearch(location.search) : styleOf(process.env.EXPO_PUBLIC_STYLE)) ?? 'vega';
 
 /** The demo a link names until the app has read the link, on native, where reading it is async. */
 const LINK_UNREAD = Symbol('link unread');
@@ -34,7 +48,7 @@ function DemoList({ missing, onOpen }: { missing: string | undefined; onOpen: (n
           No demo is named {missing}.
         </Text>
       )}
-      {Object.keys(demos).map((name) => (
+      {DEMO_NAMES.map((name) => (
         <Text key={name} role="link" className="text-primary underline" onPress={() => onOpen(name)}>
           {name}
         </Text>
@@ -77,7 +91,8 @@ function useDemoName(): [string | undefined | typeof LINK_UNREAD, (name: string)
 }
 
 /**
- * Draws the demo the address names, such as `/native-preview/vega/index.html?demo=button-demo` on web or
+ * Draws the demo the address names, in its style, such as
+ * `/native-preview/index.html?style=nova&demo=button-demo` on web or
  * `exp://u.expo.dev/<project>/--/button-demo` in Expo Go, in the colour scheme `?theme=light|dark` asks
  * for on web, or the system's without one; a name no demo has says so above the list of demos, and no
  * name lists them. In a frame, it posts the drawn content's height to the page framing it each time
@@ -101,7 +116,7 @@ function Preview(): ReactNode {
   }, [ready]);
 
   if (!ready) return null;
-  const Demo = name === undefined ? undefined : findDemo(name);
+  const Demo = name === undefined ? undefined : findDemo(style, name);
 
   return (
     <ScrollView

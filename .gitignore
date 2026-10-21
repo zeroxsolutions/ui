@@ -63,12 +63,10 @@ out
 test-output
 
 # Local secrets: nx loads the root .env into every task, which is how `rclone:sync` reads its keys
-# locally. Commit only *.example, and the native preview's style per export target, which is no secret.
+# locally. Commit only *.example.
 .env
 .env.*
 !.env.example
-!apps/native-preview/.env.export-vega
-!apps/native-preview/.env.export-nova
 
 # Local wrangler dev secrets (.dev.vars mirrors prod secrets for `wrangler dev`) - never commit.
 .dev.vars*
@@ -88,7 +86,7 @@ storybook-static
 # Generated shadcn registry JSON (emitted by @zeroxsolutions/registry-ui:shadcn-build)
 apps/registry-ui/public/r
 
-# The native preview's web exports (emitted by @zeroxsolutions/native-preview:export-vega and export-nova)
+# The native preview's web export (emitted by @zeroxsolutions/native-preview:export)
 apps/registry-ui/public/native-preview
 
 # The docs' demo index (emitted by @zeroxsolutions/registry-ui:examples-index)

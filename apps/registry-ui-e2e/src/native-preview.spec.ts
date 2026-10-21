@@ -92,7 +92,7 @@ test.describe('in a light colour scheme', () => {
 
     await expect(frame(page, 'Button demo')).toHaveAttribute(
       'src',
-      /^\/native-preview\/nova\/index\.html\?demo=button-demo&/,
+      /^\/native-preview\/index\.html\?style=nova&demo=button-demo&/,
     );
     await expect(continueButton).toHaveCSS('height', '32px', DRAWN);
   });

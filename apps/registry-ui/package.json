@@ -87,8 +87,7 @@
         "dependsOn": [
           "^build",
           "shadcn-build",
-          "@zeroxsolutions/native-preview:export-vega",
-          "@zeroxsolutions/native-preview:export-nova",
+          "@zeroxsolutions/native-preview:export",
           "fumadocs-generate",
           "examples-index"
         ]
@@ -104,8 +103,7 @@
         "dependsOn": [
           "^build",
           "shadcn-build",
-          "@zeroxsolutions/native-preview:export-vega",
-          "@zeroxsolutions/native-preview:export-nova",
+          "@zeroxsolutions/native-preview:export",
           "fumadocs-generate",
           "examples-index"
         ]
@@ -115,8 +113,7 @@
         "dependsOn": [
           "^build",
           "shadcn-build",
-          "@zeroxsolutions/native-preview:export-vega",
-          "@zeroxsolutions/native-preview:export-nova",
+          "@zeroxsolutions/native-preview:export",
           "fumadocs-generate",
           "examples-index"
         ],

@@ -1,13 +1,16 @@
-/** Reads which demo the preview draws, and in which colour scheme, from its URL. */
+/** Reads which demo the preview draws, in which style and colour scheme, from its URL. */
 
 type ColorScheme = 'light' | 'dark';
+
+/** A style the native registries are built in, as `preview-style.js` lists them. */
+type PreviewStyle = 'vega' | 'nova';
 
 /** Where an Expo link's own address ends and the path it hands the app begins. */
 const DEEP_LINK_SEPARATOR = '/--/';
 
 /**
- * The demo `?demo=` names, such as `button-demo` for `/native-preview/vega/index.html?demo=button-demo`.
- * The style's one `index.html` draws every demo.
+ * The demo `?demo=` names, such as `button-demo` for
+ * `/native-preview/index.html?style=nova&demo=button-demo`. The one `index.html` draws every demo.
  * @returns the name, or `undefined` when the query names none
  */
 function demoNameFromSearch(search: string): string | undefined {
@@ -44,6 +47,23 @@ async function initialDemoName(getInitialUrl: () => Promise<string | null | unde
 }
 
 /**
+ * The style `value` names, such as the page's `?style=` or the `EXPO_PUBLIC_STYLE` a native update was
+ * bundled with.
+ * @returns `vega` or `nova`, or `undefined` for none or any other value
+ */
+function styleOf(value: string | null | undefined): PreviewStyle | undefined {
+  return value === 'vega' || value === 'nova' ? value : undefined;
+}
+
+/**
+ * The style `?style=` asks for.
+ * @returns `vega` or `nova`, or `undefined` when the query holds neither
+ */
+function styleFromSearch(search: string): PreviewStyle | undefined {
+  return styleOf(new URLSearchParams(search).get('style'));
+}
+
+/**
  * The colour scheme `?theme=` asks for.
  * @returns `light` or `dark`, or `undefined` when the query holds neither
  */
@@ -52,5 +72,5 @@ function themeFromSearch(search: string): ColorScheme | undefined {
   return theme === 'light' || theme === 'dark' ? theme : undefined;
 }
 
-export { demoNameFromDeepLink, demoNameFromSearch, initialDemoName, themeFromSearch };
-export type { ColorScheme };
+export { demoNameFromDeepLink, demoNameFromSearch, initialDemoName, styleFromSearch, styleOf, themeFromSearch };
+export type { ColorScheme, PreviewStyle };

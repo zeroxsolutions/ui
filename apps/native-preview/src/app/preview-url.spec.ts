@@ -1,4 +1,11 @@
-import { demoNameFromDeepLink, demoNameFromSearch, initialDemoName, themeFromSearch } from './preview-url';
+import {
+  demoNameFromDeepLink,
+  demoNameFromSearch,
+  initialDemoName,
+  styleFromSearch,
+  styleOf,
+  themeFromSearch,
+} from './preview-url';
 
 describe('demoNameFromSearch', () => {
   it("takes the demo's name from ?demo=, beside the theme", () => {
@@ -33,6 +40,28 @@ describe('demoNameFromDeepLink', () => {
 
   it('has no name when the app was opened without a link', () => {
     expect(demoNameFromDeepLink(null)).toBeUndefined();
+  });
+});
+
+describe('styleFromSearch', () => {
+  it('reads vega or nova from ?style=, beside the demo and the theme', () => {
+    expect(styleFromSearch('?style=nova&demo=button-demo&theme=dark')).toBe('nova');
+    expect(styleFromSearch('?style=vega')).toBe('vega');
+  });
+
+  it('has no style when ?style= is absent or names a style the registries are not built in', () => {
+    expect(styleFromSearch('?demo=button-demo')).toBeUndefined();
+    expect(styleFromSearch('?style=lyra')).toBeUndefined();
+  });
+});
+
+describe('styleOf', () => {
+  it('reads the style a native update was bundled with', () => {
+    expect(styleOf('nova')).toBe('nova');
+  });
+
+  it('has no style for an unset value', () => {
+    expect(styleOf(undefined)).toBeUndefined();
   });
 });
 

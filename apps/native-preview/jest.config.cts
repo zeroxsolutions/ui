@@ -8,6 +8,7 @@ module.exports = {
   moduleNameMapper: {
     // The app's `@/` is NativeWind's Vega sources from build-registry, as tsconfig.app.json maps it.
     '^@/(.*)$': '<rootDir>/../../packages/native-ui/dist/src/nativewind-vega/$1',
+    '^@styles/([^/]+)/(.*)$': '<rootDir>/../../packages/native-ui/dist/src/nativewind-$1/$2',
   },
   // jest-expo's preset list plus lucide-react-native and @rn-primitives, which the sources import. Under
   // pnpm a package sits in a nested node_modules the preset leaves untransformed unless it names the
