@@ -83,6 +83,7 @@
         "dependsOn": [
           "^build",
           "shadcn-build",
+          "native-preview-build",
           "fumadocs-generate",
           "examples-index"
         ]
@@ -98,6 +99,7 @@
         "dependsOn": [
           "^build",
           "shadcn-build",
+          "native-preview-build",
           "fumadocs-generate",
           "examples-index"
         ]
@@ -107,6 +109,7 @@
         "dependsOn": [
           "^build",
           "shadcn-build",
+          "native-preview-build",
           "fumadocs-generate",
           "examples-index"
         ],
@@ -174,6 +177,23 @@
             "for style in vega maia lyra mira luma sera rhea; do cp -R public/r/styles/base-nova public/r/styles/base-$style; done",
             "cp -R ../../packages/native-ui/dist/r/styles/. public/r/styles/",
             "shadcn registry validate registry.json"
+          ],
+          "parallel": false
+        }
+      },
+      "native-preview-build": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "@zeroxsolutions/native-preview:export-web"
+        ],
+        "outputs": [
+          "{workspaceRoot}/apps/registry-ui/public/native-preview"
+        ],
+        "options": {
+          "cwd": "{projectRoot}",
+          "commands": [
+            "rm -rf public/native-preview",
+            "cp -R ../native-preview/dist/web public/native-preview"
           ],
           "parallel": false
         }
