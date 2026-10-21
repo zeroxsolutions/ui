@@ -1,0 +1,107 @@
+---
+title: Sheet
+description: A panel that slides over the screen from one of its edges.
+---
+
+<NativePreview name="sheet-demo" />
+
+## Installation
+
+<InstallCommand name="sheet" />
+
+The CLI writes `components/ui/sheet.tsx` and `lib/motion.ts`, installs [Button](/native/components/nativewind/button),
+[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
+`@rn-primitives/dialog`, `@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated` and
+`react-native-worklets`. The content draws in the app's `PortalHost`; see
+[Add a portal host](/native/docs/installation#add-a-portal-host).
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Sheet>
+  <SheetTrigger asChild>
+    <Button variant="outline">
+      <Text>Open</Text>
+    </Button>
+  </SheetTrigger>
+  <SheetContent side="bottom">
+    <SheetHeader>
+      <SheetTitle>Edit profile</SheetTitle>
+      <SheetDescription>Make changes to your profile here.</SheetDescription>
+    </SheetHeader>
+    <SheetFooter>
+      <SheetClose asChild>
+        <Button>
+          <Text>Save changes</Text>
+        </Button>
+      </SheetClose>
+    </SheetFooter>
+  </SheetContent>
+</Sheet>
+```
+
+## API reference
+
+### Sheet
+
+Takes every prop of React Native's `View`, plus `open`, `defaultOpen` and `onOpenChange(open)`. Without `open`
+the Sheet holds its own state, starting from `defaultOpen`.
+
+### SheetTrigger and SheetClose
+
+Take every prop of React Native's `Pressable`. SheetTrigger opens the Sheet and SheetClose closes it. Pass
+`asChild` to make a Button do it. Focus returns to the trigger when the Sheet closes.
+
+### SheetContent
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop              | Type                                     | Default   |
+| ----------------- | ---------------------------------------- | --------- |
+| `side`            | `'top' \| 'right' \| 'bottom' \| 'left'` | `'right'` |
+| `showCloseButton` | `boolean`                                | `true`    |
+| `portalHost`      | `string`                                 | -         |
+
+`side` attaches the panel to that edge: across the top or bottom at its content's height, or down the left or right
+at three quarters of the screen's width. The panel is a modal `dialog` named by its SheetTitle, over a dimmed
+overlay. Accessibility focus moves into it as it opens. A press on the overlay, the Android back button, the iOS
+escape gesture (a two-finger Z) and Escape on the web close it. It fades in while sliding 2.5rem in from its side
+over 200ms, and out the same way. When the system asks for reduced motion it appears and goes at once.
+
+The panel runs to the screen's edge, under the status bar or the home indicator. Pad it by the safe area's insets
+where it meets them, such as with `useSafeAreaInsets` from `react-native-safe-area-context`.
+
+### SheetHeader and SheetFooter
+
+Take every prop of React Native's `View`. The footer is pushed to the end of the panel and stacks its children.
+
+### SheetTitle and SheetDescription
+
+Take every prop of [Text](/native/components/nativewind/text). The title is a heading.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- On iOS, VoiceOver does not read `aria-labelledby`, so the sheet is not announced by its title's name there.
+  Focus moves into the content, where the title is the first thing read. Android and the web read the name.
+- The overlay fades over the sheet's 200ms rather than upstream's 150ms, as one animation drives both.
+- Upstream caps a side panel at `max-w-sm` from `sm` and blurs the screen behind the overlay. A phone is narrower
+  than `sm`, and React Native has no backdrop blur.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.

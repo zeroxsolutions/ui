@@ -47,6 +47,7 @@
     "---Overlays---",
     "alert-dialog",
     "dialog",
+    "sheet",
     "---Navigation---",
     "tabs",
     "tab-bar",

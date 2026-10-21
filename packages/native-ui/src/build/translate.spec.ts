@@ -951,3 +951,12 @@ describe('translateClasses for a dialog', () => {
     },
   );
 });
+
+describe('translateClasses for a fixed position', () => {
+  it.each(['nativewind', 'uniwind'] as const)(
+    'places a fixed part absolutely for %s, inside the portal host that fills the screen',
+    (engine) => {
+      expect(translateClasses(['fixed', 'inset-x-0'], engine, 'view').classes).toEqual(['absolute', 'inset-x-0']);
+    },
+  );
+});

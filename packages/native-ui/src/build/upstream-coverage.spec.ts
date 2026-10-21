@@ -33,7 +33,6 @@ const PENDING = [
   'menubar',
   'popover',
   'select',
-  'sheet',
   'slider',
   'sonner',
   'tooltip',

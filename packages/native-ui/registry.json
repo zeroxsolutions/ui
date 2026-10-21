@@ -551,6 +551,25 @@
       ]
     },
     {
+      "name": "sheet",
+      "type": "registry:ui",
+      "title": "Sheet",
+      "description": "A panel attached to one edge of the screen over a dimmed overlay, announced as a modal dialog named by its title, closed by its close buttons, a press outside it, the back button or Escape, sliding in from its side unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/dialog",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/sheet.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

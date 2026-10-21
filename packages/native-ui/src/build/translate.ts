@@ -334,6 +334,15 @@ function toTailwind3Spacing(utility: string, engine: Engine): string {
 }
 
 /**
+ * Renames on both engines. React Native has no fixed position; an overlay's parts are drawn in a portal host
+ * that fills the screen, where an absolute position is the fixed one.
+ */
+const SHARED_RENAMED_UTILITIES = {
+  ...GEIST_FAMILY_UTILITIES,
+  fixed: 'absolute',
+} as const satisfies Readonly<Record<string, string>>;
+
+/**
  * NativeWind 4 runs on Tailwind 3, whose scale steps are one below Tailwind 4's. A Tailwind 4 step
  * past the end of Tailwind 3's scale takes its value as an arbitrary one. The theme item sets the
  * radius steps from `sm` to `4xl` to upstream's own on both engines, so only `rounded-xs`, which it
@@ -341,14 +350,14 @@ function toTailwind3Spacing(utility: string, engine: Engine): string {
  */
 const RENAMED_UTILITIES = {
   nativewind: {
-    ...GEIST_FAMILY_UTILITIES,
+    ...SHARED_RENAMED_UTILITIES,
     'shadow-xs': 'shadow-sm',
     'shadow-sm': 'shadow',
     'rounded-xs': 'rounded-[0.125rem]',
     'blur-xs': 'blur-sm',
     'drop-shadow-xs': 'drop-shadow-sm',
   },
-  uniwind: GEIST_FAMILY_UTILITIES,
+  uniwind: SHARED_RENAMED_UTILITIES,
 } as const satisfies Record<Engine, Readonly<Record<string, string>>>;
 
 /** Weights the theme has no Geist family for, so a font cannot draw them. */

@@ -35,6 +35,7 @@ import { ProgressDemo } from './progress-demo';
 import { RadioGroupDemo } from './radio-group-demo';
 import { ScrollAreaDemo } from './scroll-area-demo';
 import { SeparatorDemo } from './separator-demo';
+import { SheetDemo } from './sheet-demo';
 import { SkeletonDemo } from './skeleton-demo';
 import { SpinnerDemo } from './spinner-demo';
 import { SwitchDemo } from './switch-demo';
@@ -80,6 +81,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'radio-group-demo': RadioGroupDemo,
   'scroll-area-demo': ScrollAreaDemo,
   'separator-demo': SeparatorDemo,
+  'sheet-demo': SheetDemo,
   'skeleton-demo': SkeletonDemo,
   'spinner-demo': SpinnerDemo,
   'switch-demo': SwitchDemo,
