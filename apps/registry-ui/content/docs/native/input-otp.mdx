@@ -64,7 +64,8 @@ requires, and the slots are hidden from it. The field opens the number pad unles
 
 Leave `value` out to let the field hold the code, or pass `value` and `onChange` to control it. `onChange` runs
 after each change the `pattern` accepts and `onComplete` once the code is `maxLength` long. A change that does
-not match `pattern` is refused, and the field is left as it was. `pattern` is tested against the whole code as it
+not match `pattern` is refused, and the field is left as it was. An empty code always passes, so clearing the field never needs
+to match `pattern`. `pattern` is tested against the whole code as it
 stands after the change, partial codes included, so a pattern that only a full code matches, such as `^\d{6}$`,
 refuses every keystroke before the sixth and takes the code only from a paste or an autofill. Write it as
 `^\d{1,6}$` to let the code be typed. `pasteTransformer` runs on every change. A text that fits in `maxLength` is the
@@ -94,7 +95,7 @@ Takes every prop of a React Native `View`, plus:
 | `textClassName` | `string`  | none     |
 
 Shows the character of the code at `index`, counted from 0. The slot the next character goes in takes the
-focus border and a caret while the code holds focus. `aria-invalid` on a slot overrides the code's. `textClassName` sets the classes of the character and wins over
+focus border while the code holds focus, and a caret while that slot is empty. On a full code the last slot is the active one, with no caret. `aria-invalid` on a slot overrides the code's. `textClassName` sets the classes of the character and wins over
 the style's text size.
 
 ### InputOTPSeparator

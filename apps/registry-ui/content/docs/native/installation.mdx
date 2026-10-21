@@ -24,8 +24,9 @@ Set the engine up by its own guide, then make the changes zui needs on top of it
 
 <TabsContent value="nativewind">
 
-Install NativeWind 4 with `tailwindcss@^3.4.17` by [NativeWind's Expo guide](https://www.nativewind.dev/docs/getting-started/installation).
-The items were tested on NativeWind 4.2.7.
+Install NativeWind 4.2.7 or later, 4.x only, with `tailwindcss@^3.4.17`, `react-native-reanimated` and
+`react-native-safe-area-context`, by [NativeWind's Expo guide](https://www.nativewind.dev/docs/getting-started/installation).
+The guide lists the two react-native packages beside NativeWind, and the items were tested on NativeWind 4.2.7.
 
 In `metro.config.js`, pass `inlineRem: 16`. NativeWind draws `1rem` as 14 points on iOS and Android by
 default, which draws every Vega size at 7/8 of its height; Vega's sizes are written for a 16-point rem.
@@ -91,7 +92,8 @@ The items import each other through `@/`, so `tsconfig.json` maps it to the proj
 ```
 
 TypeScript 6 checks that a side-effect import resolves, so `import './global.css'` fails to compile until a
-declaration file in the project declares CSS modules:
+declaration file in the project declares CSS modules. Put it at the project root, next to `tsconfig.json`. A
+`tsconfig.json` with no `include` picks it up, and one with an `include` must match it:
 
 ```ts title="css.d.ts"
 declare module '*.css';
