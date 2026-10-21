@@ -14,7 +14,7 @@ configure({ defaultIncludeHiddenElements: true });
 /** Where a device lays the trigger out on the screen: 100px wide and 40px tall, its top left at (50, 200). */
 const TRIGGER = { x: 50, y: 200, width: 100, height: 40 };
 
-function NextjsCard(props: Omit<HoverCardContentProps, 'children'>) {
+function NextjsCard({ withHost = true, ...props }: Omit<HoverCardContentProps, 'children'> & { withHost?: boolean }) {
   return (
     <>
       <HoverCard>
@@ -27,7 +27,7 @@ function NextjsCard(props: Omit<HoverCardContentProps, 'children'>) {
           <Text>The React Framework, created and maintained by @vercel.</Text>
         </HoverCardContent>
       </HoverCard>
-      <PortalHost />
+      {withHost && <PortalHost />}
     </>
   );
 }
@@ -202,5 +202,16 @@ describe('HoverCard', () => {
 
     await user.press(outside());
     expect(screen.queryByTestId('content')).toBeNull();
+  });
+
+  it('reports, while developing, opening with no PortalHost to draw it', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<NextjsCard withHost={false} />);
+
+    await user.press(trigger());
+    await elapse(1_000);
+
+    expect(error).toHaveBeenCalledWith(expect.stringMatching(/^HoverCard opened, but no <PortalHost \/>/));
   });
 });

@@ -43,6 +43,18 @@
       ]
     },
     {
+      "name": "overlay",
+      "type": "registry:lib",
+      "title": "Overlay",
+      "description": "usePortalHostCheck, which reports in development an overlay shown while no PortalHost draws it.",
+      "files": [
+        {
+          "path": "src/registry/lib/overlay.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "text",
       "type": "registry:ui",
       "title": "Text",
@@ -523,7 +535,7 @@
       "title": "Alert dialog",
       "description": "A dialog that interrupts to confirm or acknowledge something, announced as a modal alertdialog named by its title, which a press outside it does not close, with a cancel button that does and an action button, fading in unless the system asks for reduced motion.",
       "dependencies": ["@rn-primitives/alert-dialog", "@rn-primitives/portal", "react-native-reanimated"],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/button", "@zui/icon", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/alert-dialog.tsx",
@@ -542,7 +554,7 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/button", "@zui/icon", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/dialog.tsx",
@@ -561,7 +573,7 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/button", "@zui/icon", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/sheet.tsx",
@@ -575,7 +587,7 @@
       "title": "Drawer",
       "description": "A panel attached to an edge of the screen over a dimmed overlay, announced as a modal dialog named by its title, closed by a swipe toward its edge, a press outside it, the back button or Escape, sliding in unless the system asks for reduced motion.",
       "dependencies": ["@rn-primitives/dialog", "@rn-primitives/portal", "react-native-reanimated"],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/drawer.tsx",
@@ -589,7 +601,7 @@
       "title": "Popover",
       "description": "A floating panel beside its trigger, announced as a dialog named by its title, closed by its trigger, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
       "dependencies": ["@rn-primitives/popover", "@rn-primitives/portal", "react-native-reanimated"],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/popover.tsx",
@@ -603,7 +615,7 @@
       "title": "Tooltip",
       "description": "A short label beside a control, opened by a press on a device and by hover or focus on the web, announced as a tooltip, closed by its trigger, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
       "dependencies": ["@rn-primitives/tooltip", "@rn-primitives/portal", "react-native-reanimated"],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/tooltip.tsx",
@@ -617,7 +629,7 @@
       "title": "Hover Card",
       "description": "A preview of what a link leads to, beside it, opened by a press on a device and by hover on the web, closed by its trigger, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
       "dependencies": ["@rn-primitives/hover-card", "@rn-primitives/portal", "react-native-reanimated"],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/hover-card.tsx",

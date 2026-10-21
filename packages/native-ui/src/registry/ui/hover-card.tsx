@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
 import { usePresence } from '../lib/motion';
+import { usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { TextClassContext } from './text';
 
@@ -89,6 +90,8 @@ function HoverCardContent({
     };
   });
 
+  const hostCheck = usePortalHostCheck(present, 'HoverCard', portalHost);
+
   if (!present) return null;
 
   const content = (
@@ -124,6 +127,7 @@ function HoverCardContent({
               go out. */}
           <Pressable accessible={false} style={StyleSheet.absoluteFill} onPress={() => onOpenChange(false)} />
           {content}
+          {hostCheck}
         </View>
       )}
     </HoverCardPrimitive.Portal>

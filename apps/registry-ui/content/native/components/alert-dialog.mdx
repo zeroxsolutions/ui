@@ -9,11 +9,12 @@ description: A dialog that asks to confirm or acknowledge something before going
 
 <InstallCommand name="alert-dialog" />
 
-The CLI writes `components/ui/alert-dialog.tsx` and `lib/motion.ts`, installs
+The CLI writes `components/ui/alert-dialog.tsx`, `lib/motion.ts` and `lib/overlay.ts`, installs
 [Button](/native/components/nativewind/button), [Icon](/native/components/nativewind/icon),
-[Text](/native/components/nativewind/text) and Utils, and adds `@rn-primitives/alert-dialog`, `@rn-primitives/portal`,
-`react-native-reanimated` and `react-native-worklets`. The content draws in the app's `PortalHost`; see
-[Add a portal host](/native/docs/installation#add-a-portal-host).
+[Text](/native/components/nativewind/text) and Utils, and adds `@rn-primitives/alert-dialog`,
+`@rn-primitives/portal`, `react-native-reanimated` and `react-native-worklets`. The content draws in the app's
+`PortalHost`; see [Add a portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing,
+and logs an error saying so while the app is in development.
 
 ## Usage
 

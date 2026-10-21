@@ -21,7 +21,7 @@ import { Text } from './text';
 // open drawer from them; the specs on its motion read the animated style instead.
 configure({ defaultIncludeHiddenElements: true });
 
-function MoveGoal(props: DrawerProps) {
+function MoveGoal({ withHost = true, ...props }: DrawerProps & { withHost?: boolean }) {
   return (
     <>
       <Drawer {...props}>
@@ -44,7 +44,7 @@ function MoveGoal(props: DrawerProps) {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <PortalHost />
+      {withHost && <PortalHost />}
     </>
   );
 }
@@ -269,5 +269,16 @@ describe('Drawer', () => {
 
     await user.press(screen.getByRole('button', { name: 'Cancel' }));
     expect(screen.queryByTestId('content')).toBeNull();
+  });
+
+  it('reports, while developing, opening with no PortalHost to draw it', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<MoveGoal withHost={false} />);
+
+    await user.press(trigger());
+    await elapse(1_000);
+
+    expect(error).toHaveBeenCalledWith(expect.stringMatching(/^Drawer opened, but no <PortalHost \/>/));
   });
 });

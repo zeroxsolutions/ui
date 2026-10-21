@@ -21,7 +21,11 @@ import { Text } from './text';
 // open dialog from them; the specs on its motion read the animated style instead.
 configure({ defaultIncludeHiddenElements: true });
 
-function DeleteAccount({ onDelete, ...props }: AlertDialogProps & { onDelete?: () => void }) {
+function DeleteAccount({
+  onDelete,
+  withHost = true,
+  ...props
+}: AlertDialogProps & { onDelete?: () => void; withHost?: boolean }) {
   return (
     <>
       <AlertDialog {...props}>
@@ -45,7 +49,7 @@ function DeleteAccount({ onDelete, ...props }: AlertDialogProps & { onDelete?: (
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <PortalHost />
+      {withHost && <PortalHost />}
     </>
   );
 }
@@ -210,5 +214,16 @@ describe('AlertDialog', () => {
 
     await user.press(screen.getByRole('button', { name: 'Cancel' }));
     expect(screen.queryByTestId('content')).toBeNull();
+  });
+
+  it('reports, while developing, opening with no PortalHost to draw it', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<DeleteAccount withHost={false} />);
+
+    await user.press(trigger());
+    await elapse(1_000);
+
+    expect(error).toHaveBeenCalledWith(expect.stringMatching(/^AlertDialog opened, but no <PortalHost \/>/));
   });
 });

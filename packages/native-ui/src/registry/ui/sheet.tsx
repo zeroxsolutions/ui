@@ -4,6 +4,7 @@ import { createContext, useContext, useId, type ComponentProps, type ReactNode }
 import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
 import { usePresence } from '../lib/motion';
+import { usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { Icon } from './icon';
@@ -102,10 +103,13 @@ function SheetContent({
     };
   });
 
+  const hostCheck = usePortalHostCheck(present, 'Sheet', portalHost);
+
   if (!present) return null;
 
   return (
     <SheetPrimitive.Portal hostName={portalHost} forceMount>
+      {hostCheck}
       {/* The portal draws outside this tree, so the title's id is handed in again. */}
       <SheetTitleIdContext.Provider value={titleId}>
         {/* Closing, it lets presses through to the screen while it fades. */}

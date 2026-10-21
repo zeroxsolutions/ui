@@ -15,7 +15,7 @@ configure({ defaultIncludeHiddenElements: true });
 /** Where a device lays the trigger out on the screen: 100px wide and 40px tall, its top left at (50, 200). */
 const TRIGGER = { x: 50, y: 200, width: 100, height: 40 };
 
-function Dimensions(props: Omit<PopoverContentProps, 'children'>) {
+function Dimensions({ withHost = true, ...props }: Omit<PopoverContentProps, 'children'> & { withHost?: boolean }) {
   return (
     <>
       <Popover>
@@ -31,7 +31,7 @@ function Dimensions(props: Omit<PopoverContentProps, 'children'>) {
           </PopoverHeader>
         </PopoverContent>
       </Popover>
-      <PortalHost />
+      {withHost && <PortalHost />}
     </>
   );
 }
@@ -209,5 +209,16 @@ describe('Popover', () => {
 
     await user.press(outside());
     expect(screen.queryByTestId('content')).toBeNull();
+  });
+
+  it('reports, while developing, opening with no PortalHost to draw it', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<Dimensions withHost={false} />);
+
+    await user.press(trigger());
+    await elapse(1_000);
+
+    expect(error).toHaveBeenCalledWith(expect.stringMatching(/^Popover opened, but no <PortalHost \/>/));
   });
 });

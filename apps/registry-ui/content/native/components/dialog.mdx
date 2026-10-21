@@ -9,11 +9,12 @@ description: A window over the screen that the person deals with before going ba
 
 <InstallCommand name="dialog" />
 
-The CLI writes `components/ui/dialog.tsx` and `lib/motion.ts`, installs [Button](/native/components/nativewind/button),
-[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
-`@rn-primitives/dialog`, `@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated` and
-`react-native-worklets`. The content draws in the app's `PortalHost`; see
-[Add a portal host](/native/docs/installation#add-a-portal-host).
+The CLI writes `components/ui/dialog.tsx`, `lib/motion.ts` and `lib/overlay.ts`, installs
+[Button](/native/components/nativewind/button), [Icon](/native/components/nativewind/icon),
+[Text](/native/components/nativewind/text) and Utils, and adds `@rn-primitives/dialog`, `@rn-primitives/portal`,
+`lucide-react-native`, `react-native-reanimated` and `react-native-worklets`. The content draws in the app's
+`PortalHost`; see [Add a portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing,
+and logs an error saying so while the app is in development.
 
 ## Usage
 

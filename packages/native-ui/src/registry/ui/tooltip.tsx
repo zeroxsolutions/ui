@@ -3,6 +3,7 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
 import { usePresence } from '../lib/motion';
+import { usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { TextClassContext } from './text';
 
@@ -126,10 +127,13 @@ function TooltipContent({
     };
   });
 
+  const hostCheck = usePortalHostCheck(present, 'Tooltip', portalHost);
+
   if (!present) return null;
 
   return (
     <TooltipPrimitive.Portal hostName={portalHost} forceMount>
+      {hostCheck}
       {/* The portal draws outside this tree, so whether the Tooltip is open is handed in again. */}
       <TooltipOpenContext.Provider value={open}>
         {/* Closing, it lets presses through to the screen while it fades. */}

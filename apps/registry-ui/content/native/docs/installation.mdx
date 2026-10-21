@@ -210,7 +210,8 @@ export default function App() {
 ## Add a portal host
 
 Dialog, Popover, Select and the other overlays draw their content into a `PortalHost` from
-`@rn-primitives/portal`, on both engines. Without one, an overlay opens and draws nothing. Install it:
+`@rn-primitives/portal`, on both engines. Without one, an overlay opens and draws nothing, and in development logs
+an error naming the missing host. Install it:
 
 ```bash
 npx expo install @rn-primitives/portal

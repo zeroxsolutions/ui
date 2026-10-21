@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { usePresence } from '../lib/motion';
+import { usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Text, TextClassContext } from './text';
 
@@ -196,10 +197,13 @@ function DrawerContent({ className, children, portalHost, onLayout, ...props }: 
   const stillFade = useAnimatedStyle(() => ({ opacity: swiped() }));
   const stillSlide = useAnimatedStyle(() => ({ transform: toEdge(drag.value) }));
 
+  const hostCheck = usePortalHostCheck(present, 'Drawer', portalHost);
+
   if (!present) return null;
 
   return (
     <DrawerPortal hostName={portalHost} forceMount>
+      {hostCheck}
       {/* The portal draws outside this tree, so the Drawer's state is handed in again. */}
       <DrawerContext.Provider value={drawer}>
         {/* Closing, it lets presses through to the screen while it slides out. */}

@@ -14,7 +14,7 @@ configure({ defaultIncludeHiddenElements: true });
 /** Where a device lays the trigger out on the screen: 100px wide and 40px tall, its top left at (50, 200). */
 const TRIGGER = { x: 50, y: 200, width: 100, height: 40 };
 
-function AddToLibrary(props: Omit<TooltipContentProps, 'children'>) {
+function AddToLibrary({ withHost = true, ...props }: Omit<TooltipContentProps, 'children'> & { withHost?: boolean }) {
   return (
     <>
       <Tooltip>
@@ -27,7 +27,7 @@ function AddToLibrary(props: Omit<TooltipContentProps, 'children'>) {
           <Text>Add to library</Text>
         </TooltipContent>
       </Tooltip>
-      <PortalHost />
+      {withHost && <PortalHost />}
     </>
   );
 }
@@ -187,5 +187,16 @@ describe('Tooltip', () => {
 
     await user.press(trigger());
     expect(screen.queryByTestId('content')).toBeNull();
+  });
+
+  it('reports, while developing, opening with no PortalHost to draw it', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<AddToLibrary withHost={false} />);
+
+    await user.press(trigger());
+    await elapse(1_000);
+
+    expect(error).toHaveBeenCalledWith(expect.stringMatching(/^Tooltip opened, but no <PortalHost \/>/));
   });
 });

@@ -19,7 +19,7 @@ import { Text } from './text';
 // open dialog from them; the specs on its motion read the animated style instead.
 configure({ defaultIncludeHiddenElements: true });
 
-function EditProfile(props: DialogProps) {
+function EditProfile({ withHost = true, ...props }: DialogProps & { withHost?: boolean }) {
   return (
     <>
       <Dialog {...props}>
@@ -40,7 +40,7 @@ function EditProfile(props: DialogProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <PortalHost />
+      {withHost && <PortalHost />}
     </>
   );
 }
@@ -217,5 +217,16 @@ describe('Dialog', () => {
 
     await user.press(screen.getByLabelText('Close'));
     expect(screen.queryByTestId('content')).toBeNull();
+  });
+
+  it('reports, while developing, opening with no PortalHost to draw it', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<EditProfile withHost={false} />);
+
+    await user.press(trigger());
+    await elapse(1_000);
+
+    expect(error).toHaveBeenCalledWith(expect.stringMatching(/^Dialog opened, but no <PortalHost \/>/));
   });
 });

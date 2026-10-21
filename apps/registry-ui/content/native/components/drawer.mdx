@@ -9,10 +9,11 @@ description: A panel attached to an edge of the screen that a swipe closes.
 
 <InstallCommand name="drawer" />
 
-The CLI writes `components/ui/drawer.tsx` and `lib/motion.ts`, installs [Text](/native/components/nativewind/text)
-and Utils, and adds `@rn-primitives/dialog`, `@rn-primitives/portal`, `react-native-reanimated` and
-`react-native-worklets`. The content draws in the app's `PortalHost`; see
-[Add a portal host](/native/docs/installation#add-a-portal-host).
+The CLI writes `components/ui/drawer.tsx`, `lib/motion.ts` and `lib/overlay.ts`, installs
+[Text](/native/components/nativewind/text) and Utils, and adds `@rn-primitives/dialog`, `@rn-primitives/portal`,
+`react-native-reanimated` and `react-native-worklets`. The content draws in the app's `PortalHost`; see [Add a
+portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing, and logs an error saying
+so while the app is in development.
 
 ## Usage
 

@@ -4,6 +4,7 @@ import { createContext, useContext, useId, type ComponentProps, type ReactNode }
 import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
 import { usePresence } from '../lib/motion';
+import { usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { Icon } from './icon';
@@ -97,10 +98,13 @@ function DialogContent({
   const fade = useAnimatedStyle(() => ({ opacity: progress.value }));
   const zoom = useAnimatedStyle(() => ({ transform: [{ scale: 0.95 + 0.05 * progress.value }] }));
 
+  const hostCheck = usePortalHostCheck(present, 'Dialog', portalHost);
+
   if (!present) return null;
 
   return (
     <DialogPortal hostName={portalHost} forceMount>
+      {hostCheck}
       {/* The portal draws outside this tree, so the title's id is handed in again. */}
       <DialogTitleIdContext.Provider value={titleId}>
         {/* Closing, it lets presses through to the screen while it fades. */}

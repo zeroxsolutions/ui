@@ -22,7 +22,11 @@ import { Text } from './text';
 // open sheet from them; the specs on its motion read the animated style instead.
 configure({ defaultIncludeHiddenElements: true });
 
-function EditProfile({ side, ...props }: SheetProps & Pick<SheetContentProps, 'side'>) {
+function EditProfile({
+  side,
+  withHost = true,
+  ...props
+}: SheetProps & Pick<SheetContentProps, 'side'> & { withHost?: boolean }) {
   return (
     <>
       <Sheet {...props}>
@@ -45,7 +49,7 @@ function EditProfile({ side, ...props }: SheetProps & Pick<SheetContentProps, 's
           </SheetFooter>
         </SheetContent>
       </Sheet>
-      <PortalHost />
+      {withHost && <PortalHost />}
     </>
   );
 }
@@ -221,5 +225,16 @@ describe('Sheet', () => {
 
     await user.press(screen.getByLabelText('Close'));
     expect(screen.queryByTestId('content')).toBeNull();
+  });
+
+  it('reports, while developing, opening with no PortalHost to draw it', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<EditProfile withHost={false} />);
+
+    await user.press(trigger());
+    await elapse(1_000);
+
+    expect(error).toHaveBeenCalledWith(expect.stringMatching(/^Sheet opened, but no <PortalHost \/>/));
   });
 });

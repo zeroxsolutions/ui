@@ -12,6 +12,7 @@ import {
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
 import { usePresence } from '../lib/motion';
+import { usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Text, TextClassContext } from './text';
 
@@ -136,10 +137,13 @@ function PopoverContent({
     };
   });
 
+  const hostCheck = usePortalHostCheck(present, 'Popover', portalHost);
+
   if (!present) return null;
 
   return (
     <PopoverPrimitive.Portal hostName={portalHost} forceMount>
+      {hostCheck}
       {/* The portal draws outside this tree, so the title is handed in again. */}
       <PopoverTitleContext.Provider value={title}>
         {/* Closing, it lets presses through to the screen while it fades. */}
