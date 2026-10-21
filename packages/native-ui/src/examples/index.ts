@@ -20,6 +20,7 @@ import { IconDemo } from './icon-demo';
 import { InputDemo } from './input-demo';
 import { InputGroupDemo } from './input-group-demo';
 import { InputOtpDemo } from './input-otp-demo';
+import { ItemDemo } from './item-demo';
 import { KbdDemo } from './kbd-demo';
 import { LabelDemo } from './label-demo';
 import { PaginationDemo } from './pagination-demo';
@@ -57,6 +58,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'input-demo': InputDemo,
   'input-group-demo': InputGroupDemo,
   'input-otp-demo': InputOtpDemo,
+  'item-demo': ItemDemo,
   'kbd-demo': KbdDemo,
   'label-demo': LabelDemo,
   'pagination-demo': PaginationDemo,

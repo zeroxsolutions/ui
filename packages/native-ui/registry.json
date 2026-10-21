@@ -417,6 +417,20 @@
       ]
     },
     {
+      "name": "item",
+      "type": "registry:ui",
+      "title": "Item",
+      "description": "A row of content with media, a title, a description and actions, outlined or muted at three sizes, and a group that lists items.",
+      "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/separator"],
+      "files": [
+        {
+          "path": "src/registry/ui/item.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",
