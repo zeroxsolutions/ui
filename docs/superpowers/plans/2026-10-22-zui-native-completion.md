@@ -2,7 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** The native registry ships React Native Reusables' 31 primitives on both engines and both styles; a
+**Goal:** The native registry is shadcn upstream ported to React Native (every upstream item with a native
+meaning, both engines, both styles, kept in step with upstream); a
 Uniwind page draws its demo with Uniwind; a native page's markdown is rendered for its engine; the docs name
 each engine's own setup; native component pages hydrate without error.
 
@@ -25,8 +26,9 @@ Reanimated 4, Next 16 + fumadocs, Vitest, Jest (jest-expo), Playwright, nx 23 wi
   file kind, plain ASCII, tests first for behaviour.
 - `pnpm nx run @zeroxsolutions/native-ui:build-registry` prints "Registry is valid." four times
   (`nativewind-vega`, `nativewind-nova`, `uniwind-vega`, `uniwind-nova`).
-- Primitives: RNR's component (`founded-labs/react-native-reusables`, `packages/registry/src/{nativewind,uniwind}/components/ui`)
-  for behaviour, props and accessibility, built on `@rn-primitives/*`; classes from the style CSS via `cn-<slot>`.
+- Items follow upstream (`https://ui.shadcn.com/r/styles/base-vega/<name>.json`): its part names, props and
+  style slots; built on `@rn-primitives/*`; RNR (`founded-labs/react-native-reusables`) is the reference for
+  how a primitive behaves on a phone; classes from the style CSS via `cn-<slot>`.
 - Every new item has: a `registry.json` entry, a spec beside the source, `src/examples/<name>-demo.tsx`, a page
   `apps/registry-ui/content/native/components/<name>.mdx` listed in that folder's `meta.json` and the index list.
 - Overlays render through `@rn-primitives/portal`; `PortalHost` sits in the app root (preview apps and docs).
@@ -39,15 +41,15 @@ Reanimated 4, Next 16 + fumadocs, Vitest, Jest (jest-expo), Playwright, nx 23 wi
 ## Review Focus
 
 1. An overlay opened inside the preview frame or on a phone sits above the page and closes on back/outside
-   press; with no `PortalHost` mounted it fails loudly in dev, not silently (Tasks 6-7).
+   press; with no `PortalHost` mounted it fails loudly in dev, not silently (Tasks 9-10).
 2. A Uniwind page's QR names the Uniwind project/channel and its web frame draws the Uniwind export; a
    NativeWind page is unchanged (Task 5).
 3. A native page's `.md`, on Uniwind, has no `<` JSX tag left, the `uniwind-<style>` install command, and only
    the Uniwind tab's text (Task 3).
 4. Select, dropdown-menu and context-menu are reachable by screen readers: trigger role and expanded state,
-   items announced with their checked state (Task 7).
+   items announced with their checked state (Task 10).
 5. A reader with reduced motion gets no enter/exit animation on accordion, collapsible and overlays
-   (Tasks 6-7).
+   (Tasks 8-9).
 
 ---
 
@@ -131,40 +133,91 @@ select component, `content/native/docs/index.mdx` (the preview paragraph).
       project id and the style's channel; component test: a uniwind page's frame src and QR link; e2e on
       `/native/components/uniwind/button?style=nova`; commit.
 
-### Task 6: PortalHost and the non-overlay primitives
+### Task 6: the upstream snapshot, the coverage test, and the portal host
 
-Skills: writing-a-component, writing-component-tests (jest-expo), declaring-a-dependency, writing-prose,
-animating-a-component.
+Skills: wiring-a-task-target, writing-unit-tests, writing-prose, declaring-a-dependency.
 
-Items: alert, aspect-ratio, collapsible, accordion. Plus the PortalHost setup the overlays need.
+Files: `packages/native-ui/styles/upstream/` (snapshot), a refresh tool under `packages/native-ui/tools/`, a
+not-ported list `packages/native-ui/upstream-coverage.json`, a coverage spec, both preview apps' roots,
+`apps/registry-ui/content/native/docs/installation.mdx`.
 
-- [ ] Per item, spec first (render, role/state, the variant classes resolve per style through the build's
-      slot map), then source, demo, registry entry, docs page; accordion and collapsible animate with
-      Reanimated and skip animation under reduced motion (spec asserts it).
-- [ ] `PortalHost` in both preview apps' roots; the installation page gains a "Portal host" step for both
-      engines (RNR's form).
-- [ ] `build-registry` valid x4; `git diff` of `dist/r` limited to the new items; commit per item
+- [ ] Coverage spec first: reads the upstream item list from the snapshot (`registry:ui` names of
+      `https://ui.shadcn.com/r/styles/base-vega/registry.json`, saved as `styles/upstream/registry-ui-items.json`)
+      and fails naming every upstream item that has neither a `registry.json` item nor an entry in
+      `upstream-coverage.json` (`{ "notPorted": { "<name>": "<reason>" }, "deferred": { "<name>": "<reason>" } }`).
+      Seed the file with the spec's Non-goals (direction, native-select, resizable, navigation-menu, sidebar,
+      form, toast as not ported; chart and the eight AI items as deferred). The spec fails until Tasks 7-11
+      land; mark the still-missing names as an explicit `pending` list in the test that later tasks shrink, so
+      the suite is green at every commit.
+- [ ] Refresh tool: an nx target inferred or declared per `wiring-a-task-target` (`pnpm nx run
+      @zeroxsolutions/native-ui:upstream-refresh`) that fetches `style-vega.css`, `style-nova.css`,
+      `globals.css`, `colors-neutral.json` and the item list into the snapshot; run it once and commit only
+      if upstream changed (say what changed in the commit body; re-run `build-registry` valid x4).
+- [ ] `PortalHost` (`@rn-primitives/portal`) in both preview apps' roots; installation page gains a "Portal
+      host" step for both engines; commit.
+
+### Task 7: display and layout items
+
+Skills: writing-a-component, writing-component-tests (jest-expo), declaring-a-dependency, writing-prose.
+
+Items: alert, aspect-ratio, breadcrumb, button-group, empty, field, item, kbd, pagination, scroll-area, table.
+
+- [ ] Per item: read upstream's source for it (`https://ui.shadcn.com/r/styles/base-vega/<name>.json`) and its
+      slots in the style CSS; spec first (renders its parts, roles: alert `alert`, breadcrumb a `navigation`
+      named Breadcrumb with the current page marked, pagination `navigation`; the variant classes resolve per
+      style through the build's slot map); source on React Native primitives with upstream's part names and
+      props; demo; registry entry; docs page saying where it departs from upstream and why.
+- [ ] `build-registry` valid x4; remove the items from the coverage spec's `pending` list; commit per item
       (`feat(native-ui): add <name>`).
 
-### Task 7: the overlay primitives
+### Task 8: disclosure items
 
-Skills: as Task 6, plus writing-e2e-tests.
+Skills: as Task 7, plus animating-a-component.
 
-Items, in this order: dialog, alert-dialog, popover, tooltip, hover-card, dropdown-menu, context-menu, menubar,
-select.
+Items: collapsible, accordion.
 
-- [ ] Per item as in Task 6; specs cover open/close by trigger, outside press and back (`onRequestClose` /
-      escape on web), focus moved into the content and returned to the trigger, roles and
-      `aria-expanded`/checked states announced, reduced motion.
-- [ ] e2e on the docs: dialog, select and dropdown-menu demos open and close in the web preview frame on both
-      engines.
-- [ ] `build-registry` valid x4; commit per item.
+- [ ] As Task 7; specs: trigger role `button` with `aria-expanded`, content hidden when closed, accordion
+      `type="single"` closes the open item when another opens and `collapsible` lets it close; open/close
+      animates with Reanimated and does not under reduced motion (spec asserts it); commit per item.
 
-### Task 8: indexes and the native home
+### Task 9: overlays
+
+Skills: as Task 8, plus writing-e2e-tests.
+
+Items, in order: dialog, alert-dialog, sheet, drawer, popover, tooltip, hover-card.
+
+- [ ] As Task 7, through `@rn-primitives/portal`; specs: opens by trigger, closes on outside press and back
+      (`onRequestClose`, Escape on web), alert-dialog does not close on outside press, focus moves into the
+      content and returns to the trigger, role `dialog` / `alertdialog` named by its title, reduced motion.
+      sheet and drawer take upstream's `side` / direction props.
+- [ ] e2e: the dialog demo opens and closes in the web preview frame on both engines; commit per item.
+
+### Task 10: menus and pickers
+
+Skills: as Task 9.
+
+Items, in order: dropdown-menu, context-menu, menubar, select, command, combobox.
+
+- [ ] As Task 9; specs: trigger `aria-expanded`, items `menuitem` / `menuitemcheckbox` / `menuitemradio` /
+      `option` with checked state announced, sub-menus open and close, context-menu opens on long press,
+      select shows the chosen value's label, command filters by typed text, combobox = popover + command.
+- [ ] e2e: select and dropdown-menu demos open, pick, close in the web frame on both engines; commit per item.
+
+### Task 11: heavier inputs and feedback
+
+Skills: as Task 8; adopting-a-library for any new dependency (Expo Go 58 module set only).
+
+Items: slider, calendar, carousel, sonner.
+
+- [ ] As Task 7; slider `adjustable` role with value text and increment/decrement actions; calendar a grid
+      of days with the selected and today marked, month navigation; carousel swipes and has previous/next
+      controls named; sonner a toast queue with a `Toaster` at the root and `toast()` calls, announced to
+      screen readers; commit per item.
+
+### Task 12: indexes, the coverage spec, and the native home
 
 Skills: writing-prose, writing-e2e-tests.
 
-- [ ] The native components index, `meta.json` order, search, sitemap and llms list all 31 primitives plus the
-      zui items; `/native` home's demo grid unchanged unless a new item reads better (one swap at most);
-      the coverage audit's table is now all "yes" (re-run the audit's comparison as a unit test over
-      `registry.json` names against the RNR list pinned in the test); commit.
+- [ ] The coverage spec's `pending` list is empty; the native components index, `meta.json` order, search,
+      sitemap and llms list every item; `/native` home's demo grid swaps in at most one new item if it reads
+      better; commit.
