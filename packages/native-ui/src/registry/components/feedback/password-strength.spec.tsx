@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
+import { Circle, CircleCheck } from 'lucide-react-native';
 import { AccessibilityInfo, Platform } from 'react-native';
 import { emittedClasses } from '../../../build/slot-tokens.testing';
 import {
@@ -9,6 +10,15 @@ import {
   type PasswordStrengthValue,
 } from './password-strength';
 
+// Stands in for Icon so a spec reads which icon component the row passes, not the path it draws.
+jest.mock('../../ui/icon', () => {
+  const { createElement } = jest.requireActual<typeof import('react')>('react');
+  return {
+    ...jest.requireActual('../../ui/icon'),
+    Icon: ({ as }: { as: unknown }) => createElement('View', { testID: 'requirement-icon', icon: as }),
+  };
+});
+
 function Example({ strength }: { strength: PasswordStrengthValue }) {
   return (
     <PasswordStrength strength={strength}>
@@ -17,15 +27,8 @@ function Example({ strength }: { strength: PasswordStrengthValue }) {
   );
 }
 
-// The check icon draws the path `m16 9-5.5 5.5L8 12` over the circle that both icons draw.
-const CHECK_PATH = 'm16 9-5.5 5.5L8 12';
-
-function drawsCheck(): boolean {
-  return JSON.stringify(screen.toJSON()).includes(CHECK_PATH);
-}
-
-function drawsCircle(): boolean {
-  return JSON.stringify(screen.toJSON()).includes('"r":"10"');
+function iconDrawn(): unknown {
+  return screen.getByTestId('requirement-icon').props.icon;
 }
 
 let announce: jest.SpyInstance;
@@ -116,7 +119,7 @@ describe('PasswordStrengthRequirement', () => {
       </PasswordStrengthRequirement>,
     );
 
-    expect(drawsCheck()).toBe(true);
+    expect(iconDrawn()).toBe(CircleCheck);
     const classes = emittedClasses(screen.getByText('At least 15 characters').props.className);
     expect(classes).toContain('text-foreground');
     expect(classes).not.toContain('text-muted-foreground');
@@ -126,8 +129,7 @@ describe('PasswordStrengthRequirement', () => {
   it('shows a circle and muted text while unmet, and says Not met', async () => {
     await render(<PasswordStrengthRequirement testID="row">At least 15 characters</PasswordStrengthRequirement>);
 
-    expect(drawsCircle()).toBe(true);
-    expect(drawsCheck()).toBe(false);
+    expect(iconDrawn()).toBe(Circle);
     const classes = emittedClasses(screen.getByText('At least 15 characters').props.className);
     expect(classes).toContain('text-muted-foreground');
     expect(classes).not.toContain('text-foreground');
