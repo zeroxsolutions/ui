@@ -5,8 +5,8 @@ import { cn } from '../lib/utils';
 import { IconClassContext } from './icon';
 import { TextClassContext } from './text';
 
-// A `cn-<slot>` token stands for that Vega slot's view classes, `cn-<slot>/text` and `cn-<slot>/icon`
-// for its text and icon classes, and `cn-<slot>@<state>` for the classes Vega puts behind that state;
+// A `cn-<slot>` token stands for that slot's view classes, `cn-<slot>/text` and `cn-<slot>/icon`
+// for its text and icon classes, and `cn-<slot>@<state>` for the classes the style puts behind that state;
 // the registry build replaces each with the classes translated for the target engine.
 const toggleVariants = cva('flex-row items-center justify-center disabled:opacity-50 cn-toggle', {
   variants: {

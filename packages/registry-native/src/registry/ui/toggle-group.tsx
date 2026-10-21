@@ -12,8 +12,8 @@ type ToggleSize = NonNullable<VariantProps<typeof toggleVariants>['size']>;
 /** The gap between items in steps of the spacing scale; `0` joins them into one bar. */
 type ToggleGroupSpacing = 0 | 1 | 2 | 3 | 4;
 
-// A `cn-<slot>` token stands for that Vega slot's classes and `cn-<slot>@<state>` for the classes
-// Vega puts behind that state, such as `@spacing=0` for a state of the group; the registry build
+// A `cn-<slot>` token stands for that slot's classes and `cn-<slot>@<state>` for the classes
+// the style puts behind that state, such as `@spacing=0` for a state of the group; the registry build
 // replaces each with the classes translated for the target engine.
 const toggleGroupVariants = cva('flex-row items-center self-start cn-toggle-group', {
   variants: {

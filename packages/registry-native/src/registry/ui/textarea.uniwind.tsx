@@ -2,7 +2,7 @@ import { useState, type ComponentProps, type ReactNode } from 'react';
 import { TextInput } from 'react-native';
 import { cn } from '../lib/utils';
 
-// A `cn-<slot>` token stands for that Vega slot's view classes and `cn-<slot>/text` for its text
+// A `cn-<slot>` token stands for that slot's view classes and `cn-<slot>/text` for its text
 // classes, and `@focused` and `@invalid` for the classes behind those states; the registry build
 // replaces each with the classes translated for the target engine.
 

@@ -5,7 +5,7 @@ import { cn } from '../lib/utils';
 import { IconClassContext } from './icon';
 import { TextClassContext } from './text';
 
-// A `cn-<slot>` token stands for that Vega slot's view classes and `cn-<slot>/text` for its text
+// A `cn-<slot>` token stands for that slot's view classes and `cn-<slot>/text` for its text
 // classes; the registry build replaces each with the classes translated for the target engine.
 const buttonVariants = cva('flex-row items-center justify-center shrink-0 disabled:opacity-50 cn-button', {
   variants: {

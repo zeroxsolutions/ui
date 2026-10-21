@@ -70,6 +70,25 @@ describe('Card', () => {
     expect(classes).not.toContain('text-base');
   });
 
+  it("drops its bottom padding in Nova when it holds a footer, whose own padding meets the card's edge", async () => {
+    await renderCard();
+
+    expect(emittedClasses(screen.getByTestId('card').props.className, 'nova')).toContain('pb-0');
+    expect(emittedClasses(screen.getByTestId('card').props.className, 'vega')).not.toContain('pb-0');
+  });
+
+  it('keeps its bottom padding in Nova with no footer', async () => {
+    await render(
+      <Card testID="card">
+        <CardContent>
+          <Text>Body</Text>
+        </CardContent>
+      </Card>,
+    );
+
+    expect(emittedClasses(screen.getByTestId('card').props.className, 'nova')).not.toContain('pb-0');
+  });
+
   it("hands the text inside the card's foreground colour", async () => {
     await renderCard();
 

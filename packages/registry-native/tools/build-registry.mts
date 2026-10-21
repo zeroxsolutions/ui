@@ -1,6 +1,6 @@
 /**
- * Writes one shadcn registry per engine in Vega, to `dist/r/styles/<engine>-vega/`, from the
- * engine-neutral `registry.json` and sources. Each engine's sources are emitted into a temporary
+ * Writes one shadcn registry per engine and style, to `dist/r/styles/<engine>-<style>/`, from the
+ * engine-neutral `registry.json` and sources. Each registry's sources are emitted into a temporary
  * registry, which `shadcn build` turns into the served JSON and `shadcn registry validate` checks.
  */
 import { execFileSync } from 'node:child_process';
@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import type { Registry, RegistryItem } from 'shadcn/schema';
 import { aliasImports, emitSource } from '../src/build/emit.ts';
-import { parseSlotMap } from '../src/build/slot-map.ts';
+import { parseSlotMap, type SlotMap } from '../src/build/slot-map.ts';
 import {
   STATUS_TOKENS,
   parseRadiusScale,
@@ -21,7 +21,9 @@ import type { Engine } from '../src/build/translate.ts';
 
 const PROJECT = resolve(import.meta.dirname, '..');
 const SOURCE_ROOT = 'src/';
-const STYLE = 'vega';
+/** Each upstream style the registries are built in, read from `styles/upstream/style-<style>.css`. */
+const STYLES = ['vega', 'nova'] as const;
+type Style = (typeof STYLES)[number];
 
 const ENGINE_PACKAGES = {
   nativewind: 'nativewind@^4',
@@ -40,12 +42,13 @@ function sourceFor(path: string, engine: Engine): string {
   return existsSync(join(PROJECT, engineFile)) ? engineFile : path;
 }
 
-function emitItem(
-  item: RegistryItem,
-  engine: Engine,
-  slots: ReturnType<typeof parseSlotMap>,
-  registryRoot: string,
-): RegistryItem {
+/** The slots the registry's sources are emitted against, and those of the styles beside it. */
+interface StyleSlots {
+  slots: SlotMap;
+  otherStyles: readonly SlotMap[];
+}
+
+function emitItem(item: RegistryItem, engine: Engine, style: StyleSlots, registryRoot: string): RegistryItem {
   const pins: Readonly<Record<string, string>> = PINNED_RANGES[engine];
   let importsEngine = false;
   const files = (item.files ?? []).map((file) => {
@@ -53,7 +56,10 @@ function emitItem(
     const registryPath = file.path.slice(SOURCE_ROOT.length);
     const pathUnderRegistry = registryPath.replace(/^registry\//, '');
     const source = readFileSync(join(PROJECT, sourcePath), 'utf8');
-    const emitted = aliasImports(emitSource(source, slots, engine, sourcePath), pathUnderRegistry);
+    const emitted = aliasImports(
+      emitSource(source, style.slots, engine, sourcePath, style.otherStyles),
+      pathUnderRegistry,
+    );
     importsEngine ||= emitted.includes(`from '${engine}'`);
 
     const target = join(registryRoot, registryPath);
@@ -81,24 +87,30 @@ function withTheme(item: RegistryItem, theme: RegistryItem, registryRoot: string
   return { ...item, ...theme, files: [...(item.files ?? []), ...generated] };
 }
 
-function buildEngine(
+/**
+ * Builds and validates the registry of `engine` in `styleName` into `dist/r/styles/<engine>-<style>/`.
+ * Every style takes the same theme, from the neutral colours and the site's radius scale, since no
+ * style sheet defines a token of its own.
+ */
+function buildRegistry(
   engine: Engine,
+  styleName: Style,
+  style: StyleSlots,
   registry: Registry,
-  slots: ReturnType<typeof parseSlotMap>,
   colors: UpstreamColors,
   radii: RadiusScale,
 ): void {
-  const registryRoot = mkdtempSync(join(tmpdir(), `zui-${engine}-${STYLE}-`));
+  const registryRoot = mkdtempSync(join(tmpdir(), `zui-${engine}-${styleName}-`));
   try {
     const items = registry.items.map((item) => {
-      const emitted = emitItem(item, engine, slots, registryRoot);
+      const emitted = emitItem(item, engine, style, registryRoot);
       return item.name === 'theme'
         ? withTheme(emitted, themeItem(colors, radii, STATUS_TOKENS, engine), registryRoot)
         : emitted;
     });
     writeFileSync(join(registryRoot, 'registry.json'), `${JSON.stringify({ ...registry, items }, null, 2)}\n`);
 
-    const output = join(PROJECT, 'dist/r/styles', `${engine}-${STYLE}`);
+    const output = join(PROJECT, 'dist/r/styles', `${engine}-${styleName}`);
     execFileSync('shadcn', ['build', '-o', output], { cwd: registryRoot, stdio: 'inherit' });
     execFileSync('shadcn', ['registry', 'validate'], { cwd: registryRoot, stdio: 'inherit' });
   } finally {
@@ -108,15 +120,23 @@ function buildEngine(
 
 function main(): void {
   const registry = JSON.parse(readFileSync(join(PROJECT, 'registry.json'), 'utf8')) as Registry;
-  const slots = parseSlotMap(readFileSync(join(PROJECT, `styles/upstream/style-${STYLE}.css`), 'utf8'));
+  const slotsByStyle = new Map(
+    STYLES.map((style) => [
+      style,
+      parseSlotMap(readFileSync(join(PROJECT, `styles/upstream/style-${style}.css`), 'utf8')),
+    ]),
+  );
   const colors = JSON.parse(
     readFileSync(join(PROJECT, 'styles/upstream/colors-neutral.json'), 'utf8'),
   ) as UpstreamColors;
   const radii = parseRadiusScale(readFileSync(join(PROJECT, 'styles/upstream/globals.css'), 'utf8'));
 
   rmSync(join(PROJECT, 'dist/r'), { recursive: true, force: true });
-  for (const engine of Object.keys(ENGINE_PACKAGES) as Engine[]) {
-    buildEngine(engine, registry, slots, colors, radii);
+  for (const [styleName, slots] of slotsByStyle) {
+    const otherStyles = [...slotsByStyle].flatMap(([other, otherSlots]) => (other === styleName ? [] : [otherSlots]));
+    for (const engine of Object.keys(ENGINE_PACKAGES) as Engine[]) {
+      buildRegistry(engine, styleName, { slots, otherStyles }, registry, colors, radii);
+    }
   }
 }
 

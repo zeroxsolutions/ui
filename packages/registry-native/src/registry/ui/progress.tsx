@@ -2,7 +2,7 @@ import * as ProgressPrimitive from '@rn-primitives/progress';
 import type { ReactNode } from 'react';
 import { cn } from '../lib/utils';
 
-// A `cn-<slot>` token stands for that Vega slot's classes; the registry build replaces each with
+// A `cn-<slot>` token stands for that slot's classes; the registry build replaces each with
 // the classes translated for the target engine.
 
 type ProgressProps = Omit<ProgressPrimitive.RootProps, 'max' | 'value'> & {

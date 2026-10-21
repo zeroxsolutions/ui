@@ -5,6 +5,7 @@ import { parseSlotMap } from './slot-map';
 import { translateClasses, type Engine } from './translate';
 
 const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-vega.css');
+const NOVA_SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-nova.css');
 const STYLES_PATH = join(__dirname, '../../dist/r/styles');
 const REGISTRY_PATH = join(__dirname, '../../registry.json');
 const ENGINES = ['nativewind', 'uniwind'] as const satisfies readonly Engine[];
@@ -18,6 +19,7 @@ const TAILWIND_MERGE = {
 } as const satisfies Record<Engine, string>;
 
 const slots = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));
+const novaSlots = parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8'));
 
 function viewClasses(slot: string, engine: Engine): string[] {
   return translateClasses(slots.get(slot) ?? [], engine, 'view').classes;
@@ -41,6 +43,17 @@ describe('emitSource', () => {
     for (const engine of ENGINES) {
       expect(emitSource("'cn-button-size-default'", slots, engine, 'button.tsx')).toBe("'h-9 gap-1.5 px-2.5'");
     }
+  });
+
+  it("gives Button's default size Nova's own height for both engines", () => {
+    for (const engine of ENGINES) {
+      expect(emitSource("'cn-button-size-default'", novaSlots, engine, 'button.tsx')).toBe("'h-8 gap-1.5 px-2.5'");
+    }
+  });
+
+  it("spaces Card by the steps the emitted style's own Card slot defines", () => {
+    expect(emitSource("'cn-card-header@size=sm'", slots, 'uniwind', 'card.tsx')).toBe("'px-4'");
+    expect(emitSource("'cn-card-header@size=sm'", novaSlots, 'uniwind', 'card.tsx')).toBe("'px-3'");
   });
 
   it('renames a Tailwind 4 step to its Tailwind 3 name for nativewind only', () => {
@@ -125,6 +138,27 @@ describe('emitSource', () => {
     );
   });
 
+  it('removes a state token another style puts classes behind and this style does not', () => {
+    const source = "'cn-toggle-group@spacing=0+variant=outline'";
+
+    expect(emitSource(source, novaSlots, 'uniwind', 'toggle-group.tsx', [slots])).toBe("''");
+    expect(emitSource(source, slots, 'uniwind', 'toggle-group.tsx', [novaSlots])).toBe("'shadow-xs'");
+  });
+
+  it('throws on a state token no style puts a class behind, so a typo cannot ship as nothing', () => {
+    expect(() => emitSource("'cn-switch@pressed'", novaSlots, 'uniwind', 'switch.tsx', [slots])).toThrow(
+      'Empty state pressed for cn-switch in switch.tsx',
+    );
+  });
+
+  it('throws on a slot this style lacks even when another style declares it', () => {
+    const other = new Map([['cn-only-elsewhere', ['p-2']]]);
+
+    expect(() => emitSource("'cn-only-elsewhere'", slots, 'uniwind', 'thing.tsx', [other])).toThrow(
+      'Unknown slot cn-only-elsewhere in thing.tsx',
+    );
+  });
+
   it('throws when a token is left outside a quoted string', () => {
     expect(() => emitSource('const a = `cn-button`;', slots, 'uniwind', 'button.tsx')).toThrow(
       'Unreplaced cn-button in button.tsx',
@@ -177,8 +211,23 @@ function withoutRange(dependency: string): string {
   return at > 0 ? dependency.slice(0, at) : dependency;
 }
 
-describe.each(ENGINES)('the built %s-vega registry', (engine) => {
-  const directory = join(STYLES_PATH, `${engine}-vega`);
+const STYLES = ['vega', 'nova'] as const;
+const REGISTRIES = STYLES.flatMap((style) =>
+  ENGINES.map((engine): [`${Engine}-${(typeof STYLES)[number]}`, Engine, (typeof STYLES)[number]] => [
+    `${engine}-${style}`,
+    engine,
+    style,
+  ]),
+);
+
+/** What each style gives Button: its default height, its radius, and that radius step in the theme. */
+const BUTTON_SHAPE = {
+  vega: { height: 'h-9', radius: 'rounded-md', step: 'md', scale: 'calc(var(--radius) * 0.8)' },
+  nova: { height: 'h-8', radius: 'rounded-lg', step: 'lg', scale: 'var(--radius)' },
+} as const;
+
+describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => {
+  const directory = join(STYLES_PATH, registry);
   const index = JSON.parse(readFileSync(join(directory, 'registry.json'), 'utf8')) as {
     name: string;
     items: { name: string }[];
@@ -197,7 +246,7 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
     expect(files.sort()).toEqual(declaredNames.map((name) => `${name}.json`).sort());
   });
 
-  it("ships theme as a registry:theme item holding Vega's background", () => {
+  it("ships theme as a registry:theme item holding the style's background", () => {
     const theme = item('theme');
 
     expect(theme?.type).toBe('registry:theme');
@@ -256,27 +305,35 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
     expect(file.content).toContain(`from '${engine}'`);
   });
 
-  it('gives Button size="default" the h-9 height', () => {
+  it('gives Button size="default" the style\'s own height', () => {
     const [file] = item('button')?.files ?? [];
 
-    expect(file.content).toMatch(/size: \{\s*default: '[^']*\bh-9\b/);
+    expect(file.content).toMatch(new RegExp(`size: \\{\\s*default: '[^']*\\b${BUTTON_SHAPE[style].height}\\b`));
   });
 
-  it("gives an icon in Button Vega's size-4, and size-3 at xs", () => {
+  it("gives an icon in Button the style's size-4, and size-3 at xs", () => {
     const [file] = item('button')?.files ?? [];
 
     expect(file.content).toContain("cva('size-4'");
     expect(file.content).toMatch(/xs: 'size-3'/);
   });
 
-  it("gives Button rounded-md, which the theme's scale sets to Vega's 0.8 of --radius", () => {
+  it("gives Button the style's radius step, which the theme's scale derives from --radius", () => {
     const [file] = item('button')?.files ?? [];
     const theme = JSON.stringify(item('theme'));
+    const { radius, step, scale } = BUTTON_SHAPE[style];
 
-    expect(file.content).toMatch(/\brounded-md\b/);
-    expect(theme).toContain(
-      engine === 'nativewind' ? '"md":"calc(var(--radius) * 0.8)"' : '--radius-md: calc(var(--radius) * 0.8);',
-    );
+    expect(file.content).toMatch(new RegExp(`\\b${radius}\\b`));
+    expect(theme).toContain(engine === 'nativewind' ? `"${step}":"${scale}"` : `--radius-${step}: ${scale};`);
+  });
+
+  it("spaces Card by the style's own Card spacing", () => {
+    const [file] = item('card')?.files ?? [];
+    const spacing = style === 'vega' ? ['gap-6', 'py-6'] : ['gap-4', 'py-4'];
+
+    for (const cls of spacing) {
+      expect(file.content).toMatch(new RegExp(`\\b${cls}\\b`));
+    }
   });
 
   it("draws Button's label in the medium Geist family", () => {
@@ -320,23 +377,33 @@ describe.each(ENGINES)('the built %s-vega registry', (engine) => {
     expect(theme?.dependencies).toEqual(expect.arrayContaining(['expo-font', '@expo-google-fonts/geist']));
   });
 
-  it("gives Button Vega's pressed nudge", () => {
+  it("gives Button the style's pressed nudge", () => {
     const [file] = item('button')?.files ?? [];
 
     expect(file.content).toContain('active:translate-y-px');
   });
 });
 
-describe('the built nativewind-vega registry', () => {
+describe.each(STYLES)('the built nativewind-%s registry', (style) => {
   it('holds no oklch colour in its theme', () => {
-    expect(readFileSync(join(STYLES_PATH, 'nativewind-vega', 'theme.json'), 'utf8')).not.toContain('oklch(');
+    expect(readFileSync(join(STYLES_PATH, `nativewind-${style}`, 'theme.json'), 'utf8')).not.toContain('oklch(');
   });
 
   it('carries no Tailwind 4 class name that Tailwind 3 lacks', () => {
-    const directory = join(STYLES_PATH, 'nativewind-vega');
+    const directory = join(STYLES_PATH, `nativewind-${style}`);
     for (const file of readdirSync(directory)) {
       expect(readFileSync(join(directory, file), 'utf8')).not.toMatch(
         /\b(shadow-xs|shadow-2xs|rounded-xs|outline-hidden|drop-shadow-xs|inset-shadow-[\w-]+|inset-ring-[\w-]+|bg-linear-[\w-]+|field-sizing-[\w-]+|text-shadow-[\w-]+)\b|[\w\]]!(?=[\s'"])/,
+      );
+    }
+  });
+});
+
+describe('the built registries of the two styles', () => {
+  it('ship the same theme, since Nova and Vega share the neutral colours and the radius scale', () => {
+    for (const engine of ENGINES) {
+      expect(readFileSync(join(STYLES_PATH, `${engine}-nova`, 'theme.json'), 'utf8')).toBe(
+        readFileSync(join(STYLES_PATH, `${engine}-vega`, 'theme.json'), 'utf8'),
       );
     }
   });

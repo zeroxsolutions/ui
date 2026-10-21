@@ -1,9 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseSlotMap } from './slot-map';
-import { translateClasses } from './translate';
+import { parseSpacingVariables, translateClasses, type Engine } from './translate';
 
 const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-vega.css');
+const NOVA_SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-nova.css');
+const SNAPSHOT_PATHS = { vega: SNAPSHOT_PATH, nova: NOVA_SNAPSHOT_PATH } as const;
+const STYLE_ENGINES = (['vega', 'nova'] as const).flatMap((style) =>
+  (['nativewind', 'uniwind'] as const).map((engine): [Engine, keyof typeof SNAPSHOT_PATHS] => [engine, style]),
+);
 const BUTTON_SLOT = /^cn-button(-variant-[\w-]+|-size-[\w-]+)?$/;
 
 describe('translateClasses', () => {
@@ -175,10 +180,20 @@ describe('translateClasses', () => {
     ]);
   });
 
-  it('drops a radius clamped by a theme variable', () => {
-    const result = translateClasses(['rounded-[min(var(--radius-md),8px)]'], 'uniwind', 'view');
+  it("draws a radius clamped at 8px or more as the theme's 8px rounded-md, which the clamp never cuts", () => {
+    const result = translateClasses(
+      ['rounded-[min(var(--radius-md),12px)]', 'rounded-l-[min(var(--radius-md),8px)]'],
+      'uniwind',
+      'view',
+    );
 
-    expect(result).toEqual({ classes: [], unknown: [] });
+    expect(result).toEqual({ classes: ['rounded-md', 'rounded-l-md'], unknown: [] });
+  });
+
+  it('reports a radius clamped below the theme rounded-md', () => {
+    const result = translateClasses(['rounded-[min(var(--radius-md),6px)]'], 'uniwind', 'view');
+
+    expect(result).toEqual({ classes: [], unknown: ['rounded-[min(var(--radius-md),6px)]'] });
   });
 
   it('reports a state modifier the state table has no row for, rather than dropping it', () => {
@@ -196,10 +211,10 @@ describe('translateClasses', () => {
     },
   );
 
-  it.each(['nativewind', 'uniwind'] as const)(
-    'translates every Button slot of the pinned snapshot for %s with nothing unknown',
-    (engine) => {
-      const slots = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));
+  it.each(STYLE_ENGINES)(
+    'translates every Button slot of the pinned snapshot for %s in %s with nothing unknown',
+    (engine, style) => {
+      const slots = parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8'));
       const buttonSlots = [...slots].filter(([name]) => BUTTON_SLOT.test(name));
 
       expect(buttonSlots.length).toBeGreaterThan(10);
@@ -389,12 +404,14 @@ describe('translateClasses with a state', () => {
   });
 
   describe("with Card's spacing variable", () => {
+    const spacingVariables = parseSpacingVariables(slots);
+
     it.each(['nativewind', 'uniwind'] as const)(
       "resolves Card's spacing variable to spacing steps, which Tailwind 3 cannot compile, for %s",
       (engine) => {
         const shadow = engine === 'nativewind' ? 'shadow-sm' : 'shadow-xs';
 
-        expect(translateClasses(slot('cn-card'), engine, 'view')).toEqual({
+        expect(translateClasses(slot('cn-card'), engine, 'view', '', { spacingVariables })).toEqual({
           classes: [
             'border-foreground/10',
             'bg-card',
@@ -407,42 +424,76 @@ describe('translateClasses with a state', () => {
           ],
           unknown: [],
         });
-        expect(translateClasses(slot('cn-card'), engine, 'view', 'size=sm')).toEqual({
+        expect(translateClasses(slot('cn-card'), engine, 'view', 'size=sm', { spacingVariables })).toEqual({
           classes: ['gap-4', 'py-4'],
           unknown: [],
         });
-        expect(translateClasses(slot('cn-card-header'), engine, 'view', 'size=sm').classes).toEqual(['px-4']);
-        expect(translateClasses(slot('cn-card-footer'), engine, 'view').classes).toEqual(['rounded-b-xl', 'px-6']);
+        expect(
+          translateClasses(slot('cn-card-header'), engine, 'view', 'size=sm', { spacingVariables }).classes,
+        ).toEqual(['px-4']);
+        expect(translateClasses(slot('cn-card-footer'), engine, 'view', '', { spacingVariables }).classes).toEqual([
+          'rounded-b-xl',
+          'px-6',
+        ]);
       },
     );
 
-    it("takes the step of each size from the values Vega's Card slot gives the variable", () => {
-      const defined = slot('cn-card').filter((cls) => cls.includes('[--card-spacing:--spacing('));
+    it("reads each size's step from the values the style's Card slot gives the variable", () => {
+      const nova = parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8'));
 
-      expect(defined).toEqual(['[--card-spacing:--spacing(6)]', 'data-[size=sm]:[--card-spacing:--spacing(4)]']);
+      expect(spacingVariables.get('--card-spacing')).toEqual({ '': 6, 'size=sm': 4 });
+      expect(parseSpacingVariables(nova).get('--card-spacing')).toEqual({ '': 4, 'size=sm': 3 });
+    });
+
+    it("spaces Nova's Card by Nova's steps, not Vega's", () => {
+      const nova = parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8'));
+      const context = { spacingVariables: parseSpacingVariables(nova) };
+      const novaSlot = (name: string): readonly string[] => nova.get(name) ?? [];
+
+      expect(translateClasses(novaSlot('cn-card'), 'uniwind', 'view', '', context).classes).toEqual(
+        expect.arrayContaining(['gap-4', 'py-4']),
+      );
+      expect(translateClasses(novaSlot('cn-card'), 'uniwind', 'view', 'size=sm', context).classes).toEqual([
+        'gap-3',
+        'py-3',
+      ]);
+      expect(translateClasses(novaSlot('cn-card-footer'), 'uniwind', 'view', '', context).classes).toContain('p-4');
+    });
+
+    it('throws on a variable one slot defines twice for the same state with different steps', () => {
+      const twice = new Map([
+        ['cn-a', ['[--gap:--spacing(2)]']],
+        ['cn-b', ['[--gap:--spacing(3)]']],
+      ]);
+
+      expect(() => parseSpacingVariables(twice)).toThrow('--gap is defined as both 2 and 3');
     });
 
     it('reports a variable it has no value for rather than passing it through', () => {
-      expect(translateClasses(['px-(--gutter)'], 'uniwind', 'view').unknown).toEqual(['px-(--gutter)']);
+      expect(translateClasses(['px-(--gutter)'], 'uniwind', 'view', '', { spacingVariables }).unknown).toEqual([
+        'px-(--gutter)',
+      ]);
       expect(translateClasses(['[--gutter:--spacing(3)]'], 'uniwind', 'view').unknown).toEqual([
         '[--gutter:--spacing(3)]',
       ]);
     });
   });
 
-  it.each(['nativewind', 'uniwind'] as const)(
-    "translates every Base UI slot of the batch's components for %s with nothing unknown",
-    (engine) => {
-      const batchSlots = [...slots].filter(([name]) => BATCH_SLOT.test(name) && !RADIX_SLOT.test(name));
+  it.each(STYLE_ENGINES)(
+    "translates every Base UI slot of the batch's components for %s in %s with nothing unknown",
+    (engine, style) => {
+      const styleSlots = parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8'));
+      const spacingVariables = parseSpacingVariables(styleSlots);
+      const batchSlots = [...styleSlots].filter(([name]) => BATCH_SLOT.test(name) && !RADIX_SLOT.test(name));
 
       expect(batchSlots.length).toBeGreaterThan(30);
       for (const [name, classes] of batchSlots) {
         for (const part of ['view', 'text', 'icon'] as const) {
-          expect({ name, part, unknown: translateClasses(classes, engine, part).unknown }).toEqual({
+          expect({
             name,
             part,
-            unknown: [],
-          });
+            unknown: translateClasses(classes, engine, part, '', { name, spacingVariables }).unknown,
+          }).toEqual({ name, part, unknown: [] });
         }
       }
     },
@@ -465,20 +516,26 @@ describe('translateClasses for a named slot', () => {
   it.each(['nativewind', 'uniwind'] as const)(
     "draws the radio dot at its size and colour, leaving its centring to the indicator's flex, for %s",
     (engine) => {
-      const { classes } = translateClasses(
-        slot('cn-radio-group-indicator-icon'),
-        engine,
-        'view',
-        '',
-        'cn-radio-group-indicator-icon',
-      );
+      const { classes } = translateClasses(slot('cn-radio-group-indicator-icon'), engine, 'view', '', {
+        name: 'cn-radio-group-indicator-icon',
+      });
 
       expect(classes).toEqual(['bg-primary-foreground', 'size-2', 'rounded-full']);
     },
   );
 
   it.each(['nativewind', 'uniwind'] as const)('lays the radio group out with its gap and no grid for %s', (engine) => {
-    expect(translateClasses(slot('cn-radio-group'), engine, 'view', '', 'cn-radio-group').classes).toEqual(['gap-3']);
+    expect(translateClasses(slot('cn-radio-group'), engine, 'view', '', { name: 'cn-radio-group' }).classes).toEqual([
+      'gap-3',
+    ]);
+  });
+
+  it("lays Nova's radio group out with Nova's gap and no grid", () => {
+    const nova = parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8'));
+
+    expect(
+      translateClasses(nova.get('cn-radio-group') ?? [], 'uniwind', 'view', '', { name: 'cn-radio-group' }).classes,
+    ).toEqual(['gap-2']);
   });
 
   it("keeps the radio dot's classes for a slot of another name", () => {

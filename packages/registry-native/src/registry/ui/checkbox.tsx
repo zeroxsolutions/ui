@@ -4,9 +4,9 @@ import type { ReactNode } from 'react';
 import { cn } from '../lib/utils';
 import { Icon } from './icon';
 
-// A `cn-<slot>` token stands for that Vega slot's view classes, `cn-<slot>/text` for its text
-// classes and `cn-<slot>@<state>` for the classes Vega puts behind that state; the registry build
-// replaces each with the classes translated for the target engine. Vega sizes the check mark with
+// A `cn-<slot>` token stands for that slot's view classes, `cn-<slot>/text` for its text
+// classes and `cn-<slot>@<state>` for the classes the style puts behind that state; the registry build
+// replaces each with the classes translated for the target engine. Upstream sizes the check mark with
 // a descendant selector and colours it through the text colour, neither of which reaches an svg on
 // a device, so the mark takes both as its own classes.
 

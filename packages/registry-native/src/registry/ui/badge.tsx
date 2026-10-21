@@ -5,7 +5,7 @@ import { cn } from '../lib/utils';
 import { IconClassContext } from './icon';
 import { TextClassContext } from './text';
 
-// A `cn-<slot>` token stands for that Vega slot's view classes and `cn-<slot>/text` for its text
+// A `cn-<slot>` token stands for that slot's view classes and `cn-<slot>/text` for its text
 // classes; the registry build replaces each with the classes translated for the target engine.
 const badgeVariants = cva('flex-row items-center justify-center self-start shrink-0 overflow-hidden cn-badge', {
   variants: {
@@ -39,7 +39,7 @@ const badgeTextVariants = cva('cn-badge/text', {
   },
 });
 
-// Vega sizes an svg inside a badge with a descendant selector, which has no counterpart on a device.
+// Upstream sizes an svg inside a badge with a descendant selector, which has no counterpart on a device.
 const BADGE_ICON_CLASS = 'size-3';
 
 type BadgeProps = ComponentProps<typeof View> & VariantProps<typeof badgeVariants>;

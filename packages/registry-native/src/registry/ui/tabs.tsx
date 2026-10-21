@@ -12,8 +12,8 @@ const TabsOrientationContext = createContext<'horizontal' | 'vertical'>('horizon
 /** The variant of the TabsList a TabsTrigger sits in. */
 const TabsListVariantContext = createContext<'default' | 'line'>('default');
 
-// A `cn-<slot>` token stands for that Vega slot's view classes, `cn-<slot>/text` and `cn-<slot>/icon`
-// for its text and icon classes, and `cn-<slot>@<state>` for the classes Vega puts behind that state,
+// A `cn-<slot>` token stands for that slot's view classes, `cn-<slot>/text` and `cn-<slot>/icon`
+// for its text and icon classes, and `cn-<slot>@<state>` for the classes the style puts behind that state,
 // such as `@selected+variant=line`; the registry build replaces each with the classes translated for
 // the target engine.
 const tabsVariants = cva('cn-tabs', {
@@ -156,7 +156,7 @@ type TabsContentProps = TabsPrimitive.ContentProps;
 
 /**
  * The panel shown while its `value` is the selected one, announced as a tab panel; the others are not
- * rendered unless given `forceMount`. A Text child takes Vega's panel text size.
+ * rendered unless given `forceMount`. A Text child takes the style's panel text size.
  */
 function TabsContent({ className, ...props }: TabsContentProps): ReactNode {
   return (

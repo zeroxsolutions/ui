@@ -17,7 +17,7 @@ type AvatarState = {
 /** What the parts of an Avatar share: its size, its alt, and whether its image has loaded. */
 const AvatarContext = createContext<AvatarState>({ size: 'default', alt: '', loaded: false, setLoaded: () => {} });
 
-// A `cn-<slot>` token stands for that Vega slot's view classes and `cn-<slot>/text` for its text
+// A `cn-<slot>` token stands for that slot's view classes and `cn-<slot>/text` for its text
 // classes, and `@size=sm` for the classes behind the small size; the registry build replaces each
 // with the classes translated for the target engine.
 

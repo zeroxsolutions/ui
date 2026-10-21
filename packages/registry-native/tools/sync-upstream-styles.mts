@@ -3,6 +3,7 @@ import { writeFile } from 'node:fs/promises';
 /** Each upstream file the build reads, by its path in shadcn-ui/ui and the snapshot it overwrites. */
 const SNAPSHOTS = [
   { upstreamPath: 'apps/v4/registry/styles/style-vega.css', snapshot: '../styles/upstream/style-vega.css' },
+  { upstreamPath: 'apps/v4/registry/styles/style-nova.css', snapshot: '../styles/upstream/style-nova.css' },
   // The file https://ui.shadcn.com/r/colors/neutral.json serves, taken at the same commit as the style.
   { upstreamPath: 'apps/v4/public/r/colors/neutral.json', snapshot: '../styles/upstream/colors-neutral.json' },
   // The site's stylesheet, whose `@theme inline` block derives the radius scale from `--radius`.

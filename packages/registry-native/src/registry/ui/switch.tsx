@@ -3,8 +3,8 @@ import { cva } from 'class-variance-authority';
 import type { ReactNode } from 'react';
 import { cn } from '../lib/utils';
 
-// A `cn-<slot>` token stands for that Vega slot's classes and `cn-<slot>@<state>` for the classes
-// Vega puts behind that state, such as `@checked+size=sm`; the registry build replaces each with the
+// A `cn-<slot>` token stands for that slot's classes and `cn-<slot>@<state>` for the classes
+// the style puts behind that state, such as `@checked+size=sm`; the registry build replaces each with the
 // classes translated for the target engine.
 const switchVariants = cva('flex-row items-center cn-switch', {
   variants: {

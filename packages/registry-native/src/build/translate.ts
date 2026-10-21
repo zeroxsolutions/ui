@@ -1,3 +1,5 @@
+import type { SlotMap } from './slot-map';
+
 export type Engine = 'nativewind' | 'uniwind';
 export type Part = 'view' | 'text' | 'icon';
 
@@ -23,15 +25,15 @@ const KEPT_MODIFIERS: ReadonlySet<string> = new Set(['active', 'disabled', 'dark
 const HOLDING_MODIFIERS: ReadonlySet<string> = new Set(['not-aria-[haspopup]']);
 
 /**
- * Vega's selector for an svg inside the slot that names no size of its own. A class behind it goes to
+ * Upstream's selector for an svg inside the slot that names no size of its own. A class behind it goes to
  * the icon part with the selector removed, and Icon applies it only when it names no size itself.
  */
 const ICON_MODIFIERS: ReadonlySet<string> = new Set(["[&_svg:not([class*='size-'])]"]);
 
 /**
  * No touch screen produces these conditions, or nothing on a device matches the selector, so the
- * class is dropped with its modifier. A phone is narrower than `md`, so the base class Vega widens
- * at `md` stands. Vega puts only exit animations behind `data-closed`, which neither engine runs from
+ * class is dropped with its modifier. A phone is narrower than `md`, so the base class a style widens
+ * at `md` stands. The styles put only exit animations behind `data-closed`, which neither engine runs from
  * these utilities.
  */
 const DROPPED_MODIFIERS = [
@@ -52,7 +54,7 @@ const DROPPED_MODIFIERS = [
 ] as const satisfies readonly RegExp[];
 
 /**
- * Each modifier Vega puts a state behind, and the state it is. A `group-`, `peer-` or `has-` modifier,
+ * Each modifier a style puts a state behind, and the state it is. A `group-`, `peer-` or `has-` modifier,
  * its `/<group>` name removed, is the same state on the part's group, sibling or child, which the
  * component knows as its own. A bare `disabled:` stays the `Pressable`'s own and never reaches this
  * table; only its `group-`, `peer-` and `has-` forms do.
@@ -97,7 +99,7 @@ const CHILD_PREFIX = /^has-/;
 const STATE_WORDS: ReadonlySet<string> = new Set(STATE_MODIFIERS.values());
 
 /**
- * The enter animations Vega puts behind `data-open`, which neither engine runs from these utilities;
+ * The enter animations a style puts behind `data-open`, which neither engine runs from these utilities;
  * the colours it puts there stay, in the `open` state.
  */
 const OPEN_ANIMATION_UTILITY = /^(animate|fade|zoom|slide|spin)-/;
@@ -110,19 +112,18 @@ const OWN_SIZE_TRANSLATE = /^translate-([xy])-\[calc\(100%-([\d.]+)px\)\]$/;
 const SIZE_UTILITY = /^(size|w|h)-(?:([\d.]+)|\[([\d.]+)px\])$/;
 
 /**
- * Spacing variables Vega defines on one slot and reads in the slots inside it. Tailwind 3 compiles
- * neither `[--name:--spacing(N)]` nor `<utility>-(--name)`, so a read becomes the spacing step the
- * variable holds, once for no state and once for each state that changes it.
+ * Each spacing variable a style defines on one slot and reads in the slots inside it, such as Card's
+ * `--card-spacing`, to the spacing step it holds with no state and in each state that changes it.
+ * Tailwind 3 compiles neither `[--name:--spacing(N)]` nor `<utility>-(--name)`, so a read becomes
+ * these steps.
  */
-const SPACING_VARIABLES = {
-  '--card-spacing': { '': 6, 'size=sm': 4 },
-} as const satisfies Readonly<Record<string, Readonly<Record<StateKey, number>>>>;
+export type SpacingVariables = ReadonlyMap<string, Readonly<Record<StateKey, number>>>;
 
-const SPACING_DEFINITION = /^\[(--[\w-]+):--spacing\([\d.]+\)\]$/;
+const SPACING_DEFINITION = /^\[(--[\w-]+):--spacing\(([\d.]+)\)\]$/;
 const SPACING_READ = /^([a-z]+(?:-[a-z]+)*)-\((--[\w-]+)\)$/;
 
 /**
- * Vega draws the hairline edge of a card or popup as `ring-1 ring-<colour>`, a box-shadow a device
+ * A style draws the hairline edge of a card or popup as `ring-1 ring-<colour>`, a box-shadow a device
  * has no counterpart of, so an unmodified one becomes the border it looks like. Only a slot with no
  * border of its own is given one, and a ring behind a state, `ring-0` and any other width stay dropped.
  */
@@ -131,7 +132,7 @@ const RING_COLOUR = /^ring-(?!\d|inset|offset)([\w-]+(?:\/[\w.]+)?)$/;
 const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
 
 /**
- * Classes of one named slot that a device draws another way, unmodified as Vega writes them. Vega
+ * Classes of one named slot that a device draws another way, unmodified as the styles write them. Upstream
  * centres the radio dot with an absolute 50% offset and a -50% translate; the indicator around it
  * already centres its child with flex, which both engines draw alike, where a percentage translate
  * is the engine's to resolve. The radio group's grid is a display neither engine draws, and a View
@@ -148,19 +149,22 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
 /** The px of one step of the spacing scale, 0.25rem at the 16px rem the theme's setup sets. */
 const SPACING_STEP_PX = 4;
 
-/**
- * Utilities with nothing to draw on a device. The clamped radius is
- * `min(var(--radius-md), Npx)`, which neither engine evaluates. Vega clamps at 8px
- * or more, and the theme's `--radius-md` is 0.8 of a 0.625rem `--radius`, 8px, so
- * the clamp equals the slot's base `rounded-md`, which stands.
- */
+/** Utilities with nothing to draw on a device. */
 const DROPPED_UTILITIES = [
   /^(outline|ring|ring-offset|transition|duration|ease|whitespace|cursor|scroll)(-|$)/,
   /^select-none$/,
   /^bg-clip-padding$/,
   /^group\//,
-  /^rounded(-[a-z]+)?-\[min\(var\(--[\w-]+\),[\d.]+px\)\]$/,
 ] as const satisfies readonly RegExp[];
+
+/**
+ * A radius `min(var(--radius-md), Npx)`, which neither engine evaluates. The theme's `--radius-md` is
+ * 0.8 of a 0.625rem `--radius`, 8px, so a clamp at 8px or more is `rounded-md`, a size's own radius
+ * over the base slot's, such as Nova's `rounded-lg` Button. A consumer who raises `--radius` past the
+ * clamp gets `--radius-md` where the web draws the clamp.
+ */
+const CLAMPED_RADIUS = /^rounded(-[a-z]+)?-\[min\(var\(--radius-md\),([\d.]+)px\)\]$/;
+const RADIUS_MD_PX = 8;
 
 /**
  * A `Pressable` ignores `text-*`, so these go to the label through
@@ -183,7 +187,7 @@ const GEIST_FAMILY_UTILITIES = {
 /**
  * NativeWind 4 runs on Tailwind 3, whose scale steps are one below Tailwind 4's. A Tailwind 4 step
  * past the end of Tailwind 3's scale takes its value as an arbitrary one. The theme item sets the
- * radius steps from `sm` to `4xl` to Vega's own on both engines, so only `rounded-xs`, which it
+ * radius steps from `sm` to `4xl` to upstream's own on both engines, so only `rounded-xs`, which it
  * leaves at Tailwind 4's 0.125rem and Tailwind 3 lacks, is renamed.
  */
 const RENAMED_UTILITIES = {
@@ -204,7 +208,8 @@ const UNLOADED_WEIGHTS = [/^font-(thin|extralight|light|extrabold|black)$/] as c
 /**
  * Tailwind 4 utilities the engine's Tailwind has no exact equal of, reported rather than renamed to
  * a near one. The `!` suffix is Tailwind 4's spelling of important; neither engine's native styles
- * have an important to give it. Neither engine computes a calc that mixes a percentage with a length.
+ * have an important to give it. Neither engine computes a calc that mixes a percentage with a length,
+ * nor a radius clamped below `rounded-md`.
  */
 const UNTRANSLATABLE_UTILITIES = {
   nativewind: [
@@ -217,8 +222,9 @@ const UNTRANSLATABLE_UTILITIES = {
     /^bg-linear-/,
     /^field-sizing-/,
     /^text-shadow-/,
+    CLAMPED_RADIUS,
   ],
-  uniwind: [...UNLOADED_WEIGHTS, /!$/, /\[calc\([^\]]*%/],
+  uniwind: [...UNLOADED_WEIGHTS, /!$/, /\[calc\([^\]]*%/, CLAMPED_RADIUS],
 } as const satisfies Record<Engine, readonly RegExp[]>;
 
 function partOf(utility: string, onIcon: boolean): Part {
@@ -297,19 +303,43 @@ function readClass(cls: string): SlotClass {
 }
 
 /**
- * Replaces a definition of a spacing variable with nothing and a read of one with the classes of its
- * steps, each behind the state that sets it. A variable that has no entry in
- * {@link SPACING_VARIABLES} is left unknown.
+ * Reads every `[--name:--spacing(N)]` definition of a style's slots, under the state its modifiers
+ * put it behind, such as Card's `--card-spacing` at 6 and at 4 under `size=sm`.
+ * @throws {Error} `<name> is defined as both <N> and <M> under state '<state>'` when two definitions
+ * of one variable in one state disagree
  */
-function resolveSpacingVariables(cls: SlotClass): SlotClass[] {
+export function parseSpacingVariables(slots: SlotMap): SpacingVariables {
+  const variables = new Map<string, Record<StateKey, number>>();
+  for (const classes of slots.values()) {
+    for (const cls of classes.map(readClass)) {
+      const definition = cls.reading === 'read' ? SPACING_DEFINITION.exec(cls.utility) : null;
+      if (cls.reading !== 'read' || !definition) continue;
+      const [, variable, step] = definition;
+      const state = stateKeyOf(cls.states);
+      const steps = variables.get(variable) ?? {};
+      const defined = steps[state];
+      if (defined !== undefined && defined !== Number(step)) {
+        throw new Error(`${variable} is defined as both ${defined} and ${step} under state '${state}'`);
+      }
+      steps[state] = Number(step);
+      variables.set(variable, steps);
+    }
+  }
+  return variables;
+}
+
+/**
+ * Replaces a definition of a spacing variable with nothing and a read of one with the classes of its
+ * steps, each behind the state that sets it. A variable `spacingVariables` has no entry for is left
+ * unknown.
+ */
+function resolveSpacingVariables(cls: SlotClass, spacingVariables: SpacingVariables): SlotClass[] {
   if (cls.reading !== 'read') return [cls];
   const definition = SPACING_DEFINITION.exec(cls.utility);
   const read = SPACING_READ.exec(cls.utility);
   const variable = definition?.[1] ?? read?.[2];
   if (variable === undefined) return [cls];
-  const steps: Readonly<Record<StateKey, number>> | undefined = Object.hasOwn(SPACING_VARIABLES, variable)
-    ? SPACING_VARIABLES[variable as keyof typeof SPACING_VARIABLES]
-    : undefined;
+  const steps = spacingVariables.get(variable);
   if (!steps) return [{ reading: 'unknown', source: cls.source }];
   if (!read) return [];
   return Object.entries(steps).map(([state, step]) => ({
@@ -357,47 +387,66 @@ function resolveOwnSizeTranslate(utility: string, states: readonly string[], slo
   return `translate-${axis}-[${px - Number(less)}px]`;
 }
 
+/** The theme's `rounded-md` for a radius clamped at no less than it, or the utility itself. */
+function resolveClampedRadius(utility: string): string {
+  const clamp = CLAMPED_RADIUS.exec(utility);
+  if (!clamp || Number(clamp[2]) < RADIUS_MD_PX) return utility;
+  return `rounded${clamp[1] ?? ''}-md`;
+}
+
+/** What the translation of one slot reads besides its classes. */
+export interface SlotContext {
+  /**
+   * The slot's name, such as `cn-radio-group`, which drops the classes {@link SLOT_DROPPED_CLASSES}
+   * lists for it; with none, no class is dropped by name.
+   */
+  name?: string;
+  /**
+   * The spacing variables of the slot's style, from {@link parseSpacingVariables}; with none, every
+   * definition and read of a spacing variable is unknown.
+   */
+  spacingVariables?: SpacingVariables;
+}
+
 /**
- * Translates the Tailwind classes of one Vega slot into what `engine` can
- * render on one `part`: `icon` keeps the classes Vega gives an svg with no size class, `text` the
+ * Translates the Tailwind classes of one slot of a style, such as Vega or Nova, into what `engine` can
+ * render on one `part`: `icon` keeps the classes the style gives an svg with no size class, `text` the
  * typography classes, and `view` the rest.
  * A class with no rule is returned in `unknown`, in every part and every state, never guessed.
- * @param state - with no state, the classes Vega puts behind no state; with one, only the classes
- * Vega puts behind exactly that state, its modifiers removed and `dark:` kept. Its parts may come in
+ * @param state - with no state, the classes the style puts behind no state; with one, only the classes
+ * it puts behind exactly that state, its modifiers removed and `dark:` kept. Its parts may come in
  * any order.
- * @param slotName - the slot's name, such as `cn-radio-group`, which drops the classes
- * {@link SLOT_DROPPED_CLASSES} lists for it; with none, no class is dropped by name
+ * @param slot - the slot's name and its style's spacing variables
  */
 export function translateClasses(
   classes: readonly string[],
   engine: Engine,
   part: Part,
   state: StateKey = '',
-  slotName?: string,
+  slot: SlotContext = {},
 ): Translation {
   const kept: string[] = [];
   const unknown: string[] = [];
   const renamed: Readonly<Record<string, string>> = RENAMED_UTILITIES[engine];
   const untranslatable: readonly RegExp[] = UNTRANSLATABLE_UTILITIES[engine];
   const wanted = stateKeyOf(state.split('+').filter(Boolean));
-  const droppedByName = (slotName === undefined ? undefined : SLOT_DROPPED_CLASSES.get(slotName)) ?? new Set();
-  const slot = classes
+  const droppedByName = (slot.name === undefined ? undefined : SLOT_DROPPED_CLASSES.get(slot.name)) ?? new Set();
+  const spacingVariables: SpacingVariables = slot.spacingVariables ?? new Map();
+  const read = classes
     .filter((cls) => !droppedByName.has(cls))
-    .flatMap((cls) => resolveSpacingVariables(readClass(cls)));
+    .flatMap((cls) => resolveSpacingVariables(readClass(cls), spacingVariables));
 
-  const ringBorder = drawsRingAsBorder(slot);
+  const ringBorder = drawsRingAsBorder(read);
 
-  for (const cls of slot) {
+  for (const cls of read) {
     if (cls.reading === 'dropped') continue;
     if (cls.reading === 'unknown') {
       unknown.push(cls.source);
       continue;
     }
     const unmodified = cls.states.length === 0 && cls.kept.length === 0;
-    const utility = resolveOwnSizeTranslate(
-      ringBorder && unmodified ? ringAsBorder(cls.utility) : cls.utility,
-      cls.states,
-      slot,
+    const utility = resolveClampedRadius(
+      resolveOwnSizeTranslate(ringBorder && unmodified ? ringAsBorder(cls.utility) : cls.utility, cls.states, read),
     );
     if (DROPPED_UTILITIES.some((rule) => rule.test(utility))) continue;
     if (untranslatable.some((rule) => rule.test(utility))) {

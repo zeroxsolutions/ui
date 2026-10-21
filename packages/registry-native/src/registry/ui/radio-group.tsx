@@ -9,8 +9,8 @@ const RadioGroupContext = createContext<{ value: string | undefined; disabled: b
   disabled: false,
 });
 
-// A `cn-<slot>` token stands for that Vega slot's classes and `cn-<slot>@<state>` for the classes
-// Vega puts behind that state; the registry build replaces each with the classes translated for the
+// A `cn-<slot>` token stands for that slot's classes and `cn-<slot>@<state>` for the classes
+// the style puts behind that state; the registry build replaces each with the classes translated for the
 // target engine.
 
 /**
