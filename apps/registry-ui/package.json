@@ -78,6 +78,9 @@
     "wrangler": "catalog:"
   },
   "nx": {
+    "implicitDependencies": [
+      "@zeroxsolutions/native-preview"
+    ],
     "targets": {
       "dev": {
         "dependsOn": [
