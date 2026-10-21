@@ -690,6 +690,25 @@
       ]
     },
     {
+      "name": "menubar",
+      "type": "registry:ui",
+      "title": "Menubar",
+      "description": "A bar of menus, one open at a time, each with checkbox and radio items, groups, shortcuts and sub-menus, announced as a menubar of menus and closed by an item, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/menubar",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/menubar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

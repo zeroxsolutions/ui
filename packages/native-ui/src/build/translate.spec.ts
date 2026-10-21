@@ -1009,14 +1009,14 @@ describe('translateClasses for a menu', () => {
     vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
     nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
   };
-  const MENU_SLOT = /^cn-dropdown-menu(-(?!.*-(aria|logical)$)[\w-]+)?$/;
+  const MENU_SLOT = /^cn-(dropdown-menu|context-menu|menubar)(-(?!.*-(aria|logical)$)[\w-]+)?$/;
   const menu = (style: keyof typeof styles, engine: Engine, name: string, part: 'view' | 'text', state = '') =>
     translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
 
   it.each(STYLE_ENGINES)('translates every slot of a menu for %s in %s with nothing unknown', (engine, style) => {
     const menuSlots = [...styles[style]].filter(([name]) => MENU_SLOT.test(name));
 
-    expect(menuSlots.length).toBeGreaterThan(10);
+    expect(menuSlots.length).toBeGreaterThan(30);
     for (const [name, classes] of menuSlots) {
       for (const part of ['view', 'text', 'icon'] as const) {
         expect({ name, part, unknown: translateClasses(classes, engine, part, '', { name }).unknown }).toEqual({

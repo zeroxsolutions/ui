@@ -1,0 +1,108 @@
+---
+title: Menubar
+description: A bar of menus, such as File, Edit and View.
+---
+
+<NativePreview name="menubar-demo" />
+
+## Installation
+
+<InstallCommand name="menubar" />
+
+The CLI writes `components/ui/menubar.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs
+[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
+`@rn-primitives/menubar`, `@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated` and
+`react-native-worklets`. The menus draw in the app's `PortalHost`; see [Add a
+portal host](/native/docs/installation#add-a-portal-host). Without one they draw nothing, and log an error saying
+so while the app is in development.
+
+## Usage
+
+```tsx
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarShortcut,
+  MenubarTrigger,
+} from '@/components/ui/menubar';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Menubar>
+  <MenubarMenu>
+    <MenubarTrigger>
+      <Text>File</Text>
+    </MenubarTrigger>
+    <MenubarContent>
+      <MenubarItem onPress={newTab}>
+        <Text>New Tab</Text>
+        <MenubarShortcut>{'\u2318T'}</MenubarShortcut>
+      </MenubarItem>
+      <MenubarSeparator />
+      <MenubarItem onPress={print}>
+        <Text>Print...</Text>
+      </MenubarItem>
+    </MenubarContent>
+  </MenubarMenu>
+</Menubar>
+```
+
+## API reference
+
+### Menubar
+
+Takes every prop of React Native's `View`. It is a `menubar`, a row with a border, and one of its menus is open
+at a time.
+
+### MenubarMenu
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop           | Type                      | Default |
+| -------------- | ------------------------- | ------- |
+| `open`         | `boolean`                 | -       |
+| `defaultOpen`  | `boolean`                 | `false` |
+| `onOpenChange` | `(open: boolean) => void` | -       |
+
+Without `open` the menu holds its own state, starting from `defaultOpen`. With it, the menu follows `open`, and a
+press on its trigger, an item, outside the menu or the back button only reports the change it asks for through
+`onOpenChange`. Opening a menu closes the bar's other one.
+
+### MenubarTrigger
+
+Takes every prop of React Native's `Pressable`. It is the menu's name in the bar: a press opens the menu, and
+another closes it. It is announced as expanded or collapsed and drawn pressed in while its menu is open, and focus
+returns to it when the menu closes.
+
+### MenubarContent
+
+Takes the props of [DropdownMenuContent](/native/components/nativewind/dropdown-menu#dropdownmenucontent), with
+upstream's menubar defaults: `sideOffset` `8` and `alignOffset` `-4`, so the menu opens 8px below its trigger and
+4px before its start.
+
+### The items
+
+MenubarItem, MenubarCheckboxItem, MenubarRadioGroup, MenubarRadioItem, MenubarSub, MenubarSubTrigger,
+MenubarSubContent, MenubarGroup, MenubarLabel, MenubarSeparator, MenubarShortcut and MenubarPortal take the props
+of their [Dropdown menu](/native/components/nativewind/dropdown-menu#dropdownmenuitem) counterparts and behave as
+they do. A checkbox or radio item draws its check mark at its start, as upstream's menubar does.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, and `onClick` becomes `onPress`, as on every native item.
+- On a device an open menu covers the bar with the layer that closes it on a press outside, so moving to another
+  menu takes two presses: one to close the open menu and one on the other trigger. The web moves between menus
+  with the arrow keys and the pointer, as upstream does.
+- On a device a menu opens above or below its trigger, and a sub-menu opens in place, under its trigger.
+- React Native has no `menuitemcheckbox` or `menuitemradio` role, so on a device a checkbox item is announced as
+  a checkbox and a radio item as a radio button, each with its checked state. The web gives them upstream's
+  roles.
+- The back button and the iOS escape gesture remove the menu at once, without its exit animation. On the web every
+  menu goes at once: one still fading would close the bar as the arrow keys move to the next menu.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added on MenubarContent, for an app that draws overlays into a `PortalHost` of its own.

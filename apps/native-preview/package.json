@@ -16,6 +16,7 @@
     "@rn-primitives/dropdown-menu": "catalog:rn-primitives",
     "@rn-primitives/hover-card": "catalog:rn-primitives",
     "@rn-primitives/label": "catalog:rn-primitives",
+    "@rn-primitives/menubar": "catalog:rn-primitives",
     "@rn-primitives/popover": "catalog:rn-primitives",
     "@rn-primitives/portal": "catalog:rn-primitives",
     "@rn-primitives/progress": "catalog:rn-primitives",
