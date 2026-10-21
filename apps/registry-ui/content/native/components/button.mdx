@@ -1,0 +1,50 @@
+---
+title: Button
+description: A pressable control announced as a button, in the style's variants and sizes.
+---
+
+## Installation
+
+<InstallCommand name="button" />
+
+The CLI writes `components/ui/button.tsx`, installs [Text](/native/components/nativewind/text), [Icon](/native/components/nativewind/icon) and
+Utils, and adds `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { Plus } from 'lucide-react-native';
+
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Button variant="outline" onPress={addItem}>
+  <Icon as={Plus} />
+  <Text>Add</Text>
+</Button>
+```
+
+The label goes in as a Text child, which takes the colour and size of the button's variant and size; an Icon
+child takes the label's colour and the size's icon size.
+
+## API reference
+
+### Button
+
+Takes every prop React Native's `Pressable` takes, plus:
+
+| Prop      | Type                                                                                 | Default     |
+| --------- | ------------------------------------------------------------------------------------ | ----------- |
+| `variant` | `'default' \| 'outline' \| 'secondary' \| 'ghost' \| 'destructive' \| 'link'`        | `'default'` |
+| `size`    | `'default' \| 'xs' \| 'sm' \| 'lg' \| 'icon' \| 'icon-xs' \| 'icon-sm' \| 'icon-lg'` | `'default'` |
+
+It sets `role="button"`. `disabled` blocks presses and is announced through `accessibilityState`. The `icon`
+sizes are square, for a button whose only child is an Icon.
+
+### buttonVariants
+
+The view classes of each variant and size, for a pressable that is not a Button but should look like one.
+`buttonTextVariants` gives the matching label classes.

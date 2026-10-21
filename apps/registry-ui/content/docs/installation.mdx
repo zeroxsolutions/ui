@@ -11,11 +11,9 @@ its imports are written.
 The items compose the Base UI build of shadcn's primitives, so `style` in `components.json` has to start with
 `base-`. A Radix style installs the Radix build of each primitive, and the items' imports do not match it. Each
 item is published under every base style: the primitives it composes come in the app's own style, and its own
-classes are drawn in nova. An app that has no `components.json` gets one on Base UI and nova from:
+classes are drawn in nova. An app that has no `components.json` gets one on Base UI, in the style the header's Style picker shows, from:
 
-```bash
-pnpm dlx shadcn@latest init --base base --preset nova
-```
+<InitCommand />
 
 ## Add the zui registry
 

@@ -8,3 +8,9 @@ export const COMPONENT_BASES = ['base'] as const satisfies readonly string[];
 
 /** The base the header and the home page link to. */
 export const DEFAULT_COMPONENT_BASE = 'base' satisfies (typeof COMPONENT_BASES)[number];
+
+/** Each base as the site names it to a reader. */
+export const COMPONENT_BASE_LABELS = { base: 'Base UI' } as const satisfies Record<
+  (typeof COMPONENT_BASES)[number],
+  string
+>;

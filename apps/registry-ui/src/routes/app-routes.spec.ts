@@ -79,6 +79,41 @@ describe('app routes', () => {
     expect(appRoutes.blocksRoute.matcher(built)).toMatchObject({ params: { base: 'base' } });
   });
 
+  it('builds a web docs page from its slug, and reads the segments back', () => {
+    const built = appRoutes.docsPageRoute.build({ slug: 'blocks/ai-provider-picker' });
+
+    expect(built).toBe('/docs/blocks/ai-provider-picker');
+    expect(appRoutes.docsPageRoute.matcher(built)).toMatchObject({
+      params: { slug: ['blocks', 'ai-provider-picker'] },
+    });
+  });
+
+  it('builds a native docs page from its slug, and reads the segments back', () => {
+    const built = appRoutes.nativeDocsPageRoute.build({ slug: 'installation' });
+
+    expect(built).toBe('/native/docs/installation');
+    expect(appRoutes.nativeDocsPageRoute.matcher(built)).toMatchObject({ params: { slug: ['installation'] } });
+  });
+
+  it('builds the native components index and the blocks page under an engine, and reads the engine back', () => {
+    const components = appRoutes.nativeComponentsRoute.build({ engine: 'uniwind' });
+    const blocks = appRoutes.nativeBlocksRoute.build({ engine: 'uniwind' });
+
+    expect(components).toBe('/native/components/uniwind');
+    expect(blocks).toBe('/native/blocks/uniwind');
+    expect(appRoutes.nativeComponentsRoute.matcher(components)).toMatchObject({ params: { engine: 'uniwind' } });
+    expect(appRoutes.nativeBlocksRoute.matcher(blocks)).toMatchObject({ params: { engine: 'uniwind' } });
+  });
+
+  it('builds a native component page under its engine, and reads the engine and the name back', () => {
+    const built = appRoutes.nativeComponentRoute.build({ engine: 'nativewind', name: 'button' });
+
+    expect(built).toBe('/native/components/nativewind/button');
+    expect(appRoutes.nativeComponentRoute.matcher(built)).toMatchObject({
+      params: { engine: 'nativewind', name: 'button' },
+    });
+  });
+
   it('builds a share-image path its own pattern reads the slug back from', () => {
     const built = appRoutes.docsShareImageRoute.build({ slug: 'components/button/image.png' });
 

@@ -1,0 +1,41 @@
+---
+title: Badge
+description: A small pill that labels a status or a count, in the style's variants.
+---
+
+## Installation
+
+<InstallCommand name="badge" />
+
+The CLI writes `components/ui/badge.tsx`, installs [Text](/native/components/nativewind/text), [Icon](/native/components/nativewind/icon) and
+Utils, and adds `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { Badge } from '@/components/ui/badge';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Badge variant="secondary">
+  <Text>New</Text>
+</Badge>
+```
+
+The label goes in as a Text child, which takes the text classes of the variant. An Icon child is drawn at 12px.
+
+## API reference
+
+### Badge
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop      | Type                                                                          | Default     |
+| --------- | ----------------------------------------------------------------------------- | ----------- |
+| `variant` | `'default' \| 'secondary' \| 'destructive' \| 'outline' \| 'ghost' \| 'link'` | `'default'` |
+
+### badgeVariants
+
+The view classes of each variant, for a view that is not a Badge but should look like one.
+`badgeTextVariants` gives the matching label classes.

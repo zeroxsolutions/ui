@@ -1,0 +1,40 @@
+---
+title: Separator
+description: A one-pixel rule between groups of content, hidden from screen readers unless it marks a real boundary.
+---
+
+## Installation
+
+<InstallCommand name="separator" />
+
+The CLI writes `components/ui/separator.tsx`, installs Utils, and adds `@rn-primitives/separator` and
+`class-variance-authority`.
+
+## Usage
+
+```tsx
+import { Separator } from '@/components/ui/separator';
+```
+
+```tsx
+<Separator />
+<Separator orientation="vertical" className="h-6" />
+```
+
+## API reference
+
+### Separator
+
+Takes every prop of the `@rn-primitives/separator` root, plus:
+
+| Prop          | Type                         | Default        |
+| ------------- | ---------------------------- | -------------- |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` |
+| `decorative`  | `boolean`                    | `true`         |
+
+A decorative separator is hidden from assistive technology. Pass `decorative={false}` when it marks a real
+boundary a screen reader should announce.
+
+### separatorVariants
+
+The classes of each orientation, for a view that is not a Separator but should look like one.

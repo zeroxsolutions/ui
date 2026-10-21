@@ -5,6 +5,7 @@ import { createMDX } from 'fumadocs-mdx/next';
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
 
 import { COMPONENT_BASES } from './src/constants/component-bases.config.mjs';
+import { DEFAULT_NATIVE_ENGINE } from './src/constants/native-engines.config.mjs';
 
 // A base's own index, and its Markdown at `<base>.md`, are already under the base.
 const UNDER_A_BASE = `(?:${COMPONENT_BASES.join('|')})(?:\\.md)?$`;
@@ -35,6 +36,15 @@ const nextConfig = {
       statusCode: 301,
     },
     { source: '/blocks', destination: '/blocks/base', statusCode: 301 },
+    // The native pages' addresses from before /native, a fixed set: its introduction, its installation, and
+    // one page per item, which now answers under an engine.
+    { source: '/docs/native', destination: '/native/docs', statusCode: 301 },
+    { source: '/docs/native/installation', destination: '/native/docs/installation', statusCode: 301 },
+    {
+      source: '/docs/native/:name',
+      destination: `/native/components/${DEFAULT_NATIVE_ENGINE}/:name`,
+      statusCode: 301,
+    },
   ],
 };
 

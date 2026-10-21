@@ -1,0 +1,63 @@
+---
+title: Theme
+description: The neutral colours, light and dark, with success and warning, and a font family per Geist weight, in the form the engine compiles, and the fonts map that loads them.
+---
+
+## Installation
+
+<InstallCommand name="theme" />
+
+Add it once, before any component. No component installs it, and adding it again writes its tokens back over
+any you edited.
+
+## What it writes
+
+Both engines get `lib/fonts.ts`, which exports `zuiFonts`, and the packages `expo-font` and
+`@expo-google-fonts/geist`. The tokens go where the engine reads them:
+
+<EngineTabs>
+
+<EngineTab engine="nativewind">
+
+- `global.css` gains each colour as RGB channels under `:root`, and the dark values under
+  `@media (prefers-color-scheme: dark)`.
+- `tailwind.config.js` gains `theme.extend.colors` as `rgb(var(--<token>) / <alpha-value>)`, so opacity
+  classes such as `bg-destructive/10` work, the radius steps `sm` to `4xl` from `--radius`, and the four
+  Geist families.
+
+</EngineTab>
+
+<EngineTab engine="uniwind">
+
+- `zui-theme.css` at the project root holds the colours under `@variant light` and `@variant dark`, the radius
+  steps from `--radius`, and the four Geist families.
+- `global.css` gains `@import "./zui-theme.css";`.
+
+</EngineTab>
+
+</EngineTabs>
+
+## Tokens
+
+The colours are shadcn's neutral theme: `background`, `foreground`, `card`, `popover`, `primary`, `secondary`,
+`muted` and `accent`, each with its `-foreground`, then `destructive`, `border`, `input`, `ring`, `chart-1`
+to `chart-5` and the `sidebar` set. `success` and `warning`, with their `-foreground`, take the values the
+web items use. `--radius` is `0.625rem`, so `rounded-md` is 8 points.
+
+## Fonts
+
+| Class                | Family              |
+| -------------------- | ------------------- |
+| `font-sans`          | `Geist_400Regular`  |
+| `font-sans-medium`   | `Geist_500Medium`   |
+| `font-sans-semibold` | `Geist_600SemiBold` |
+| `font-sans-bold`     | `Geist_700Bold`     |
+
+Each weight is its own family, because React Native picks a custom font by its family name. `zuiFonts` maps
+each family to its file; load it with `useFonts` before the first render, as
+[Installation](/native/docs/installation#load-the-fonts) shows. Without the theme, `font-sans` names no Geist family
+and Text draws in the system font, with no error.
+
+```tsx
+import { zuiFonts } from '@/lib/fonts';
+```

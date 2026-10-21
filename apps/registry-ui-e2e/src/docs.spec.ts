@@ -12,35 +12,37 @@ test("a docs page's title carries the site's suffix", async ({ page }) => {
   await expect(page).toHaveTitle('Introduction - ZUI');
 });
 
-test("the header's Native link opens the native docs, whose pages the sidebar lists", async ({ page }) => {
+test('the Web / Native switch opens the native docs, whose pages the sidebar lists', async ({ page }) => {
   await page.goto('/docs');
-  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Native', exact: true }).click();
+  await page.getByRole('navigation', { name: 'Platform' }).getByRole('link', { name: 'Native', exact: true }).click();
 
-  await expect(page).toHaveURL(/\/docs\/native$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Native' })).toBeVisible();
+  await expect(page).toHaveURL(/\/native\/docs$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Introduction' })).toBeVisible();
   const sidebar = page.getByRole('navigation', { name: 'Docs' });
-  await expect(sidebar.getByText('Native', { exact: true })).toBeVisible();
+  await expect(sidebar.getByRole('link', { name: 'Installation', exact: true })).toHaveAttribute(
+    'href',
+    '/native/docs/installation',
+  );
   for (const [name, slug] of [
-    ['Installation', 'installation'],
-    ['Theme', 'theme'],
-    ['Text', 'text'],
-    ['Icon', 'icon'],
-    ['Button', 'button'],
-    ['Input group', 'input-group'],
-    ['Input OTP', 'input-otp'],
-    ['Code input', 'code-input'],
-    ['Password input', 'password-input'],
-    ['Password strength', 'password-strength'],
-    ['Switch', 'switch'],
-    ['Spinner', 'spinner'],
-    ['Unsaved changes toolbar', 'unsaved-changes-toolbar'],
-    ['Tabs', 'tabs'],
-    ['Tab bar', 'tab-bar'],
+    ['Components', ''],
+    ['Theme', '/theme'],
+    ['Text', '/text'],
+    ['Icon', '/icon'],
+    ['Button', '/button'],
+    ['Input group', '/input-group'],
+    ['Input OTP', '/input-otp'],
+    ['Code input', '/code-input'],
+    ['Password input', '/password-input'],
+    ['Password strength', '/password-strength'],
+    ['Switch', '/switch'],
+    ['Spinner', '/spinner'],
+    ['Unsaved changes toolbar', '/unsaved-changes-toolbar'],
+    ['Tabs', '/tabs'],
+    ['Tab bar', '/tab-bar'],
   ]) {
-    // The last of its name: the web docs' own Installation is listed above the native group.
-    await expect(sidebar.getByRole('link', { name, exact: true }).last()).toHaveAttribute(
+    await expect(sidebar.getByRole('link', { name, exact: true })).toHaveAttribute(
       'href',
-      `/docs/native/${slug}`,
+      `/native/components/nativewind${slug}`,
     );
   }
 });
@@ -53,7 +55,7 @@ test('an item page of each native section renders with its install command', asy
     ['Progress', 'progress'],
     ['Tabs', 'tabs'],
   ]) {
-    await page.goto(`/docs/native/${slug}`);
+    await page.goto(`/native/components/nativewind/${slug}`);
 
     await expect(page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
     await expect(page.getByText(`add @zui/${slug}`).first()).toBeVisible();
@@ -61,7 +63,7 @@ test('an item page of each native section renders with its install command', asy
 });
 
 test('the native installation names a vega and a nova style for each engine', async ({ page }) => {
-  await page.goto('/docs/native/installation');
+  await page.goto('/native/docs/installation');
 
   const article = page.getByRole('main');
   for (const style of ['nativewind-vega', 'nativewind-nova', 'uniwind-vega', 'uniwind-nova']) {
@@ -70,7 +72,7 @@ test('the native installation names a vega and a nova style for each engine', as
 });
 
 test("the native installation's Uniwind tab says how to write Uniwind's types before a typecheck", async ({ page }) => {
-  await page.goto('/docs/native/installation');
+  await page.goto('/native/docs/installation');
 
   await page.getByRole('tab', { name: 'Uniwind', exact: true }).first().click();
 

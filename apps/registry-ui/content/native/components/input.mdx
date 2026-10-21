@@ -1,0 +1,41 @@
+---
+title: Input
+description: A single-line text field with a focus border, an invalid state and a dimmed disabled state.
+---
+
+## Installation
+
+<InstallCommand name="input" />
+
+The CLI writes `components/ui/input.tsx` and installs Utils. The file is the engine's own version, so a
+NativeWind app and a Uniwind app each get theirs.
+
+## Usage
+
+```tsx
+import { Input } from '@/components/ui/input';
+```
+
+```tsx
+<Input placeholder="you@example.com" keyboardType="email-address" aria-label="Email" aria-labelledby="email-label" />
+```
+
+Name it with `aria-label`, which iOS and Android both read. Android also reads a
+[Label](/native/components/nativewind/label)'s `nativeID` through `aria-labelledby`; iOS ignores that prop.
+
+## API reference
+
+### Input
+
+Takes every prop React Native's `TextInput` takes, plus:
+
+| Prop           | Type      | Default |
+| -------------- | --------- | ------- |
+| `aria-invalid` | `boolean` | none    |
+
+The field takes the focus border while it holds focus. `aria-invalid` draws the destructive border.
+React Native does not announce it, so carry the error in `accessibilityHint` or in a Text the user can reach.
+`editable={false}` dims it, tints it in the input colour on Nova, and announces it disabled.
+
+The placeholder colour differs by engine. The NativeWind file draws it through the `placeholder:` variant. The
+Uniwind file draws it through `placeholderTextColorClassName`, which takes an `accent-` class.

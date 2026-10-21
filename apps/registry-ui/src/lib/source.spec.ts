@@ -506,6 +506,11 @@ describe('content/docs', () => {
     expect(unreachedPages(readDocsTree(CONTENT))).toEqual([]);
   });
 
+  it('reaches every native docs and component page from its own meta.json', () => {
+    expect(unreachedPages(readDocsTree(join(APP, 'content/native/docs')))).toEqual([]);
+    expect(unreachedPages(readDocsTree(join(APP, 'content/native/components')))).toEqual([]);
+  });
+
   it('reports a page no meta.json lists or links', () => {
     const tree: DocsTree = {
       pages: ['blocks/ai-provider-picker', 'blocks/chat', 'components/button', 'index', 'installation'],
