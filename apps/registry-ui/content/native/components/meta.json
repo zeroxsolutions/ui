@@ -24,6 +24,7 @@
     "checkbox",
     "radio-group",
     "select",
+    "combobox",
     "switch",
     "---Display---",
     "alert",

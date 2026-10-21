@@ -742,6 +742,20 @@
       ]
     },
     {
+      "name": "combobox",
+      "type": "registry:ui",
+      "title": "Combobox",
+      "description": "A field that picks one of a long list of choices: a trigger announced as a combobox showing the chosen label, opening a Popover that holds a Command whose typed text filters the choices, the chosen one announced as selected with a check mark, closed by a choice.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/command", "@zui/popover", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/combobox.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

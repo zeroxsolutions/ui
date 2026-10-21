@@ -1,0 +1,120 @@
+---
+title: Combobox
+description: A field that picks one of a long list of choices, searched by typing.
+---
+
+<NativePreview name="combobox-demo" />
+
+## Installation
+
+<InstallCommand name="combobox" />
+
+The CLI writes `components/ui/combobox.tsx`, installs [Button](/native/components/nativewind/button),
+[Command](/native/components/nativewind/command), [Popover](/native/components/nativewind/popover),
+[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
+`lucide-react-native`. The list draws in the app's `PortalHost`; see [Add a
+portal host](/native/docs/installation#add-a-portal-host).
+
+## Usage
+
+```tsx
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
+} from '@/components/ui/combobox';
+```
+
+```tsx
+const frameworks = ['Next.js', 'SvelteKit', 'Nuxt.js'];
+
+<Combobox items={frameworks} value={framework} onValueChange={setFramework}>
+  <ComboboxTrigger aria-label="Framework" className="w-64">
+    <ComboboxValue placeholder="Select a framework" />
+  </ComboboxTrigger>
+  <ComboboxContent className="w-64">
+    <ComboboxInput placeholder="Search framework..." />
+    <ComboboxEmpty>No items found.</ComboboxEmpty>
+    <ComboboxList>
+      {(item) => (
+        <ComboboxItem key={item.value} value={item.value}>
+          {item.label}
+        </ComboboxItem>
+      )}
+    </ComboboxList>
+  </ComboboxContent>
+</Combobox>;
+```
+
+## API reference
+
+### Combobox
+
+| Prop            | Type                                             | Default |
+| --------------- | ------------------------------------------------ | ------- |
+| `items`         | `string[] \| { label: string; value: string }[]` | -       |
+| `value`         | `string`                                         | -       |
+| `defaultValue`  | `string`                                         | -       |
+| `onValueChange` | `(value: string) => void`                        | -       |
+| `open`          | `boolean`                                        | -       |
+| `defaultOpen`   | `boolean`                                        | `false` |
+| `onOpenChange`  | `(open: boolean) => void`                        | -       |
+
+Without `value` the Combobox holds the chosen value, starting from `defaultValue`. `items` gives each value its
+label, so the trigger shows it before the list has first been opened, and gives a function child of ComboboxList
+its items; a string is its own label and value.
+
+### ComboboxTrigger
+
+Takes every prop of [Button](/native/components/nativewind/button). It is an outline Button with a chevron at its
+end, announced as a `combobox`, expanded while the list is open; name it with `aria-label`.
+
+### ComboboxValue
+
+Takes every prop of [Text](/native/components/nativewind/text), plus `placeholder`, shown muted while nothing is
+chosen.
+
+### ComboboxContent
+
+Takes every prop of [PopoverContent](/native/components/nativewind/popover#popovercontent), with `align`
+(`'start'`) and `sideOffset` (`6`). It holds a [Command](/native/components/nativewind/command), so its parts
+filter and are run as a Command's are. It opens with the chosen item highlighted.
+
+### ComboboxInput
+
+Takes every prop of [CommandInput](/native/components/nativewind/command#commandinput). It is focused as the list
+opens, which raises the keyboard on a device.
+
+### ComboboxList
+
+Takes every prop of [CommandList](/native/components/nativewind/command#commandlist). Its children may be a function
+of each of the Combobox's `items`, given as `{ label, value }`.
+
+### ComboboxItem
+
+Takes every prop of [CommandItem](/native/components/nativewind/command#commanditem) but `onSelect`, `checked` and
+`keywords`, plus `value` and `label`. Text children are its label; give `label` when the children draw something
+else. It is announced as selected while chosen, with a check mark at its end. A press, or the return key while it
+is highlighted, chooses it and closes the list.
+
+### ComboboxGroup, ComboboxLabel, ComboboxEmpty and ComboboxSeparator
+
+The group holds items that belong together and is hidden while none of them match; the label is the muted
+heading over it. The empty message shows while the typed text matches no item, and the separator is a hairline
+between groups.
+
+## Differences from upstream
+
+- Upstream builds on Base UI's Combobox, which draws only on the web. The native one is a Popover holding a
+  [Command](/native/components/nativewind/command), as upstream's popup example lays it out: the input sits in
+  the list's panel, not in the field.
+- The input draws a search icon at its start, as a Command's does. `showTrigger` and `showClear` are left out.
+- A function child of ComboboxList gets each item as `{ label, value }`, a string item included.
+- The highlighted item is drawn in the muted colour a Command uses, where upstream's uses the accent colour. The
+  neutral theme gives both the same colour.
+- `multiple`, the chips and `useComboboxAnchor` are left out.
