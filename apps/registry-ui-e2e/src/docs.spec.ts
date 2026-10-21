@@ -26,7 +26,10 @@ test("the header's Native link opens the native docs, whose pages the sidebar li
     ['Text', 'text'],
     ['Icon', 'icon'],
     ['Button', 'button'],
+    ['Input Group', 'input-group'],
+    ['Input OTP', 'input-otp'],
     ['Switch', 'switch'],
+    ['Spinner', 'spinner'],
     ['Tabs', 'tabs'],
   ]) {
     // The last of its name: the web docs' own Installation is listed above the native group.

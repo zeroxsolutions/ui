@@ -1,0 +1,38 @@
+---
+title: Spinner
+description: A circle that turns while something loads, announced as a busy progress bar and still when the system reduces motion.
+---
+
+## Installation
+
+```bash
+pnpm dlx shadcn@latest add @zui/spinner
+```
+
+The CLI writes `components/ui/spinner.tsx`, installs [Icon](/docs/native/icon) and Utils, and adds
+`lucide-react-native`.
+
+## Usage
+
+```tsx
+import { Spinner } from '@/components/ui/spinner';
+```
+
+```tsx
+<Spinner aria-label="Saving" />
+```
+
+## API reference
+
+### Spinner
+
+Takes every prop of [Icon](/docs/native/icon) except `as`, plus:
+
+| Prop         | Type     | Default     |
+| ------------ | -------- | ----------- |
+| `aria-label` | `string` | `'Loading'` |
+
+It is announced as a busy progress bar named by `aria-label`. `className` styles the icon, which is 16px by
+default. Inside a [Button](/docs/native/button) it takes the button's label colour.
+
+It stands still while the system's reduce motion setting is on, and while that setting is being read.

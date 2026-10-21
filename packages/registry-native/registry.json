@@ -7,7 +7,7 @@
       "name": "theme",
       "type": "registry:theme",
       "title": "Theme",
-      "description": "Vega's neutral colours, light and dark, with success and warning, and a font family per Geist weight, in the form the engine compiles, and the fonts map that loads them.",
+      "description": "The neutral colours, light and dark, with success and warning, and a font family per Geist weight, in the form the engine compiles, and the fonts map that loads them.",
       "dependencies": ["expo-font", "@expo-google-fonts/geist"],
       "files": [
         {
@@ -61,7 +61,7 @@
       "name": "button",
       "type": "registry:ui",
       "title": "Button",
-      "description": "A pressable control announced as a button, in Vega's variants and sizes.",
+      "description": "A pressable control announced as a button, in the style's variants and sizes.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
       "files": [
@@ -116,7 +116,7 @@
       "name": "badge",
       "type": "registry:ui",
       "title": "Badge",
-      "description": "A small pill for a status or a count, in Vega's variants, with its label and icon taking the variant's colours.",
+      "description": "A small pill for a status or a count, in the style's variants, with its label and icon taking the variant's colours.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
       "files": [
@@ -130,7 +130,7 @@
       "name": "card",
       "type": "registry:ui",
       "title": "Card",
-      "description": "A surface with a header, title, description, content and footer, in Vega's default and small spacing.",
+      "description": "A surface with a header, title, description, content and footer, in the style's default and small spacing.",
       "registryDependencies": ["@zui/utils", "@zui/text"],
       "files": [
         {
@@ -171,7 +171,7 @@
       "name": "input",
       "type": "registry:ui",
       "title": "Input",
-      "description": "A single-line text field in Vega's look, with a focus border, an invalid state and a dimmed disabled state.",
+      "description": "A single-line text field in the style's look, with a focus border, an invalid state and a dimmed disabled state.",
       "registryDependencies": ["@zui/utils"],
       "files": [
         {
@@ -197,7 +197,7 @@
       "name": "switch",
       "type": "registry:ui",
       "title": "Switch",
-      "description": "An on/off control in Vega's default and small sizes, announced as a switch, with an invalid border and a dimmed disabled state.",
+      "description": "An on/off control in the style's default and small sizes, announced as a switch, with an invalid border and a dimmed disabled state.",
       "dependencies": ["@rn-primitives/switch", "class-variance-authority"],
       "registryDependencies": ["@zui/utils"],
       "files": [
@@ -239,7 +239,7 @@
       "name": "toggle",
       "type": "registry:ui",
       "title": "Toggle",
-      "description": "A two-state button in Vega's default and outline variants and three sizes, on the muted background while pressed, announced as a button that is selected while pressed, with a dimmed disabled state.",
+      "description": "A two-state button in the style's default and outline variants and three sizes, on the muted background while pressed, announced as a button that is selected while pressed, with a dimmed disabled state.",
       "dependencies": ["@rn-primitives/toggle", "class-variance-authority"],
       "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
       "files": [
