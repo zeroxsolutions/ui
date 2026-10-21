@@ -74,6 +74,7 @@ test('serves the react native items for each engine in vega and nova', async ({ 
         'input-group',
         'input-otp',
         'password-input',
+        'password-strength',
       ]),
     );
 

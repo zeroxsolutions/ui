@@ -400,6 +400,20 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
     expect(passwordInput?.files[0].content).toContain("from '@/components/ui/input-group'");
   });
 
+  it('ships password-strength as a feedback registry:component under components/', () => {
+    const passwordStrength = item('password-strength');
+
+    expect(passwordStrength).toMatchObject({ type: 'registry:component', categories: ['feedback'] });
+    expect(passwordStrength?.files).toEqual([
+      expect.objectContaining({
+        path: 'registry/components/feedback/password-strength.tsx',
+        type: 'registry:component',
+      }),
+    ]);
+    expect(passwordStrength?.files[0]).not.toHaveProperty('target');
+    expect(passwordStrength?.files[0].content).toContain("from '@/components/ui/progress'");
+  });
+
   it("gives Button the style's pressed nudge", () => {
     const [file] = item('button')?.files ?? [];
 

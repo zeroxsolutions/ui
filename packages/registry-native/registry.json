@@ -333,6 +333,21 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "password-strength",
+      "type": "registry:component",
+      "title": "Password Strength",
+      "description": "How strong a password is, as a three-step meter announced when it changes, and which of its requirements it meets, in a small card.",
+      "categories": ["feedback"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/card", "@zui/icon", "@zui/progress", "@zui/text", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/feedback/password-strength.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }
