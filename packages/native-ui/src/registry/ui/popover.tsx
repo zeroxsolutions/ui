@@ -188,39 +188,46 @@ function PopoverContent({
 
   if (!present) return null;
 
+  const content = (
+    <PopoverPrimitive.Content
+      forceMount
+      ref={ref}
+      align={align}
+      alignOffset={alignOffset}
+      // The web's primitive takes every side, though its type names only the two a device's takes.
+      side={side as PopoverPrimitive.ContentProps['side']}
+      sideOffset={sideOffset}
+      {...(Platform.OS === 'web' ? {} : { 'aria-labelledby': labelledBy })}
+      {...props}
+    >
+      <TextClassContext.Provider value="cn-popover-content/text">
+        {/* Not every engine styles an Animated.View by its className, so the box is a View inside it. */}
+        <Animated.View style={[{ transformOrigin: TRANSFORM_ORIGIN[placed] }, !reduced && motion]}>
+          <View className={cn('w-72 cn-popover-content', className)}>{children}</View>
+        </Animated.View>
+      </TextClassContext.Provider>
+    </PopoverPrimitive.Content>
+  );
+
   return (
     <PopoverPrimitive.Portal hostName={portalHost} forceMount>
-      {hostCheck}
-      {/* The portal draws outside this tree, so the title is handed in again. */}
-      <PopoverTitleContext.Provider value={title}>
-        {/* Closing, it lets presses through to the screen while it fades. */}
-        <View style={[StyleSheet.absoluteFill, { pointerEvents: open ? 'box-none' : 'none' }]}>
-          {/* A press outside the content lands here. The web's primitive closes on one itself. It closes
-              through the open state alone: the primitive's own close forgets where the trigger is, which
-              removes the content before it can go out. */}
-          {Platform.OS !== 'web' && (
+      {/* The web's portal slots its one child into the page, where Radix places the content and closes it on a
+          press outside; a device draws the content in a full-screen layer of its own. */}
+      {Platform.OS === 'web' ? (
+        content
+      ) : (
+        // The portal draws outside this tree, so the title is handed in again.
+        <PopoverTitleContext.Provider value={title}>
+          {/* Closing, it lets presses through to the screen while it fades. */}
+          <View style={[StyleSheet.absoluteFill, { pointerEvents: open ? 'box-none' : 'none' }]}>
+            {hostCheck}
+            {/* A press outside the content lands here. It closes through the open state alone: the primitive's
+                own close forgets where the trigger is, which removes the content before it can go out. */}
             <Pressable accessible={false} style={StyleSheet.absoluteFill} onPress={() => onOpenChange(false)} />
-          )}
-          <PopoverPrimitive.Content
-            forceMount
-            ref={ref}
-            align={align}
-            alignOffset={alignOffset}
-            // The web's primitive takes every side, though its type names only the two a device's takes.
-            side={side as PopoverPrimitive.ContentProps['side']}
-            sideOffset={sideOffset}
-            {...(Platform.OS === 'web' ? {} : { 'aria-labelledby': labelledBy })}
-            {...props}
-          >
-            <TextClassContext.Provider value="cn-popover-content/text">
-              {/* Not every engine styles an Animated.View by its className, so the box is a View inside it. */}
-              <Animated.View style={[{ transformOrigin: TRANSFORM_ORIGIN[placed] }, !reduced && motion]}>
-                <View className={cn('w-72 cn-popover-content', className)}>{children}</View>
-              </Animated.View>
-            </TextClassContext.Provider>
-          </PopoverPrimitive.Content>
-        </View>
-      </PopoverTitleContext.Provider>
+            {content}
+          </View>
+        </PopoverTitleContext.Provider>
+      )}
     </PopoverPrimitive.Portal>
   );
 }
