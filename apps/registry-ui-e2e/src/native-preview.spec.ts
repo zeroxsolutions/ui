@@ -200,6 +200,20 @@ test.describe('in a light colour scheme', () => {
       await expect(demo.getByRole('menu')).toHaveCount(0);
       await expect(trigger).toBeFocused();
     });
+
+    test(`the ${engine} select demo opens, shows the picked fruit and closes`, async ({ page }) => {
+      await page.goto(`/native/components/${engine}/select`);
+      const demo = inside(page, 'Select demo');
+      const select = demo.getByRole('combobox', { name: 'Fruit' });
+
+      await expect(select).toHaveText('Select a fruit', DRAWN);
+      await select.click();
+      await demo.getByRole('option', { name: 'Blueberry' }).click();
+
+      await expect(demo.getByRole('listbox')).toHaveCount(0);
+      await expect(select).toHaveText('Blueberry');
+      await expect(select).toBeFocused();
+    });
   }
 
   test("the frame shows the demo's source in its Code tab", async ({ page }) => {

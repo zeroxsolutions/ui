@@ -709,6 +709,25 @@
       ]
     },
     {
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "A field that picks one of a list of options, announced as a combobox whose options carry their selected state, showing the chosen option's label, closed by a choice, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/select",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/select.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

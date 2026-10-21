@@ -1,0 +1,122 @@
+---
+title: Select
+description: A field that picks one of a list of options.
+---
+
+<NativePreview name="select-demo" />
+
+## Installation
+
+<InstallCommand name="select" />
+
+The CLI writes `components/ui/select.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs
+[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
+`@rn-primitives/select`, `@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated` and
+`react-native-worklets`. The list draws in the app's `PortalHost`; see [Add a
+portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing, and logs an error saying
+so while the app is in development.
+
+## Usage
+
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+```
+
+```tsx
+const fruits = [
+  { label: 'Apple', value: 'apple' },
+  { label: 'Banana', value: 'banana' },
+];
+
+<Select items={fruits} value={fruit} onValueChange={setFruit}>
+  <SelectTrigger aria-label="Fruit" className="w-48">
+    <SelectValue placeholder="Select a fruit" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      <SelectLabel>Fruits</SelectLabel>
+      {fruits.map((fruit) => (
+        <SelectItem key={fruit.value} value={fruit.value}>
+          {fruit.label}
+        </SelectItem>
+      ))}
+    </SelectGroup>
+  </SelectContent>
+</Select>;
+```
+
+## API reference
+
+### Select
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop            | Type                                                                   | Default |
+| --------------- | ---------------------------------------------------------------------- | ------- |
+| `value`         | `string`                                                               | -       |
+| `defaultValue`  | `string`                                                               | -       |
+| `onValueChange` | `(value: string) => void`                                              | -       |
+| `items`         | `{ label: string; value: string \| null }[] \| Record<string, string>` | -       |
+| `open`          | `boolean`                                                              | -       |
+| `defaultOpen`   | `boolean`                                                              | `false` |
+| `onOpenChange`  | `(open: boolean) => void`                                              | -       |
+| `disabled`      | `boolean`                                                              | `false` |
+
+Without `value` the Select holds the chosen value, starting from `defaultValue`. `items` gives each value's label,
+so the trigger shows the chosen option's label before the list has first been opened; a `null` value's label is
+the placeholder. Without `items` the trigger shows the value itself until the list has drawn its options. `open`,
+`defaultOpen` and `onOpenChange` work as on [Popover](/native/components/nativewind/popover#popover).
+
+### SelectTrigger
+
+Takes every prop of React Native's `Pressable`, plus `size` (`'sm' | 'default'`, default `'default'`) and
+`aria-invalid`, which draws the destructive border. It is a `combobox`, announced as expanded or collapsed; name it
+with `aria-label`. Focus returns to it when the list closes.
+
+### SelectValue
+
+Takes every prop of [Text](/native/components/nativewind/text), plus `placeholder`. It shows the chosen option's
+label, or the placeholder, muted, while nothing is chosen.
+
+### SelectContent
+
+Takes every prop of React Native's `View`, plus `side`, `sideOffset` (`4`), `align` (`'center'`), `alignOffset`
+(`0`) and `portalHost`, as on [Popover](/native/components/nativewind/popover#popovercontent). The list is at least
+as wide as its trigger. Accessibility focus moves into it as it opens. Like upstream's, it is modal: VoiceOver
+stays inside it, and TalkBack does once the app hides its screens while an overlay is open. A press outside it,
+the Android back button, the iOS escape gesture and Escape on the web close it.
+
+### SelectItem
+
+Takes every prop of React Native's `Pressable`, plus `value` and `label`. Text children are its label; give
+`label` when the children draw something else. It is announced with its selected state, and shows a check mark at
+its end while chosen. A press chooses it and closes the list. A `disabled` option is dimmed, announced as disabled
+and ignores presses.
+
+### SelectGroup, SelectLabel, SelectSeparator, SelectScrollUpButton and SelectScrollDownButton
+
+The group is a `group` of options, the label the muted heading over it, and the separator a hairline between
+groups. The scroll buttons are the chevrons the web draws at the ends of a list too long for the screen; a device
+scrolls the list by a swipe, so they draw nothing there.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- Upstream opens the list over the trigger with the chosen option on it (`alignItemWithTrigger`). The native list
+  opens below the trigger, and above it on a device only for `side="top"`.
+- React Native has no `listbox` role. On a device the list is a `list`, and each option is announced with its
+  selected state. The web gives them upstream's roles.
+- A list taller than the screen does not scroll on a device.
+- The web's list goes at once when it closes, without its exit animation, and so do the device's on the back
+  button and the iOS escape gesture.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `multiple` is left out.

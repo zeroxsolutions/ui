@@ -103,6 +103,7 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     focus: 'highlighted',
     'data-highlighted': 'highlighted',
     'data-inset': 'inset',
+    'data-placeholder': 'placeholder',
     'aria-expanded': 'expanded',
     'data-open': 'open',
     'data-horizontal': 'orientation=horizontal',

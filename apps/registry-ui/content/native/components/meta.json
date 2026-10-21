@@ -23,6 +23,7 @@
     "textarea",
     "checkbox",
     "radio-group",
+    "select",
     "switch",
     "---Display---",
     "alert",

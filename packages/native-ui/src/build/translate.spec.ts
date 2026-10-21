@@ -1009,7 +1009,7 @@ describe('translateClasses for a menu', () => {
     vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
     nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
   };
-  const MENU_SLOT = /^cn-(dropdown-menu|context-menu|menubar)(-(?!.*-(aria|logical)$)[\w-]+)?$/;
+  const MENU_SLOT = /^cn-(dropdown-menu|context-menu|menubar|select)(-(?!.*-(aria|logical)$)[\w-]+)?$/;
   const menu = (style: keyof typeof styles, engine: Engine, name: string, part: 'view' | 'text', state = '') =>
     translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
 
@@ -1053,5 +1053,9 @@ describe('translateClasses for a menu', () => {
     ['nova', 'pl-7'],
   ] as const)('indents an inset %s item to line up with a checked one', (style, indent) => {
     expect(menu(style, 'uniwind', 'cn-dropdown-menu-item', 'view', 'inset').classes).toEqual([indent]);
+  });
+
+  it.each(STYLE_ENGINES)("mutes a select trigger's placeholder for %s in %s", (engine, style) => {
+    expect(menu(style, engine, 'cn-select-trigger', 'text', 'placeholder').classes).toEqual(['text-muted-foreground']);
   });
 });

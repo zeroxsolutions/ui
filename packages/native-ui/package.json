@@ -42,6 +42,7 @@
     "@rn-primitives/portal": "catalog:rn-primitives",
     "@rn-primitives/progress": "catalog:rn-primitives",
     "@rn-primitives/radio-group": "catalog:rn-primitives",
+    "@rn-primitives/select": "catalog:rn-primitives",
     "@rn-primitives/separator": "catalog:rn-primitives",
     "@rn-primitives/slot": "catalog:rn-primitives",
     "@rn-primitives/switch": "catalog:rn-primitives",

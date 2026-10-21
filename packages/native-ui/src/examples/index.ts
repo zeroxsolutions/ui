@@ -40,6 +40,7 @@ import { PopoverDemo } from './popover-demo';
 import { ProgressDemo } from './progress-demo';
 import { RadioGroupDemo } from './radio-group-demo';
 import { ScrollAreaDemo } from './scroll-area-demo';
+import { SelectDemo } from './select-demo';
 import { SeparatorDemo } from './separator-demo';
 import { SheetDemo } from './sheet-demo';
 import { SkeletonDemo } from './skeleton-demo';
@@ -93,6 +94,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'progress-demo': ProgressDemo,
   'radio-group-demo': RadioGroupDemo,
   'scroll-area-demo': ScrollAreaDemo,
+  'select-demo': SelectDemo,
   'separator-demo': SeparatorDemo,
   'sheet-demo': SheetDemo,
   'skeleton-demo': SkeletonDemo,
