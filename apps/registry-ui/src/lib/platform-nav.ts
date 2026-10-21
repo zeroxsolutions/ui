@@ -6,11 +6,13 @@ import {
   componentsRoute,
   docsPageRoute,
   docsRoute,
+  homeRoute,
   nativeBlocksRoute,
   nativeComponentRoute,
   nativeComponentsRoute,
   nativeDocsPageRoute,
   nativeDocsRoute,
+  nativeHomeRoute,
 } from '@/routes/app-routes';
 import type { NativeEngine } from '@/types/native-engine';
 import type { Platform } from '@/types/platform';
@@ -19,14 +21,16 @@ import type { SiteNavItem } from '@/types/site-nav-item';
 /**
  * Where a pathname sits in the site's two trees. `slug` is a docs page's segments joined with `/`, `''`
  * for a tree's introduction. On native, `engine` is absent where the path's engine segment is outside
- * the known set, which is a 404. `other` is every web page outside the docs, components and blocks, such
- * as home.
+ * the known set, which is a 404. `other` is every web page outside home, the docs, components and blocks,
+ * such as a block's own view.
  */
 export type PlatformLocation =
+  | { platform: 'web'; section: 'home' }
   | { platform: 'web'; section: 'other' }
   | { platform: 'web'; section: 'docs'; slug: string }
   | { platform: 'web'; section: 'components'; base: string; name?: string }
   | { platform: 'web'; section: 'blocks'; base: string }
+  | { platform: 'native'; section: 'home' }
   | { platform: 'native'; section: 'docs'; slug: string }
   | { platform: 'native'; section: 'components'; engine?: NativeEngine; name?: string }
   | { platform: 'native'; section: 'blocks'; engine?: NativeEngine };
@@ -48,6 +52,8 @@ function slugOf(slug: string | string[]): string {
 
 /** Reads which platform, section and page `pathname` is. */
 export function platformLocation(pathname: string): PlatformLocation {
+  if (homeRoute.matcher(pathname)) return { platform: 'web', section: 'home' };
+  if (nativeHomeRoute.matcher(pathname)) return { platform: 'native', section: 'home' };
   const nativeComponent = nativeComponentRoute.matcher(pathname);
   if (nativeComponent) {
     const engine = knownEngine(nativeComponent.params.engine);
@@ -88,13 +94,15 @@ export function platformLocation(pathname: string): PlatformLocation {
 }
 
 /**
- * The same page on the other platform: the docs page with the same slug, the component with the same
- * name, or the blocks page. Where the other platform has no such page, its section index, so the switch
+ * The same page on the other platform: the home page, the docs page with the same slug, the component
+ * with the same name, or the blocks page. Where the other platform has no such page, its section index, so the switch
  * never lands on a 404. `engine` is the native engine a web page switches into.
  */
 export function platformCounterpart(location: PlatformLocation, pages: PlatformPages, engine: NativeEngine): string {
   if (location.platform === 'web') {
     switch (location.section) {
+      case 'home':
+        return nativeHomeRoute.build();
       case 'docs':
         if (location.slug === '' || !pages.native.docs.includes(location.slug)) return nativeDocsRoute.build();
         return nativeDocsPageRoute.build({ slug: location.slug });
@@ -111,6 +119,8 @@ export function platformCounterpart(location: PlatformLocation, pages: PlatformP
 
   const base = DEFAULT_COMPONENT_BASE;
   switch (location.section) {
+    case 'home':
+      return homeRoute.build();
     case 'docs':
       if (location.slug === '' || !pages.web.docs.includes(location.slug)) return docsRoute.build();
       return docsPageRoute.build({ slug: location.slug });
@@ -121,6 +131,11 @@ export function platformCounterpart(location: PlatformLocation, pages: PlatformP
     case 'blocks':
       return blocksRoute.build({ base });
   }
+}
+
+/** Where `platform`'s home link points: that platform's home page. */
+export function platformHome(platform: Platform): string {
+  return platform === 'native' ? nativeHomeRoute.build() : homeRoute.build();
 }
 
 /** The header's Docs, Components and Blocks, each pointing into `platform`'s tree; on native, under `engine`. */

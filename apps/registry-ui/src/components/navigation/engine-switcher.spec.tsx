@@ -1,4 +1,5 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EngineSwitcher } from './engine-switcher';
@@ -32,6 +33,18 @@ describe('EngineSwitcher', () => {
     expect(within(nav).getByRole('link', { name: 'Uniwind' }).getAttribute('href')).toBe(
       '/native/components/uniwind/button?style=nova',
     );
+  });
+
+  it("keeps the page's query once a page prerendered without it has hydrated", async () => {
+    url.pathname = '/native/components/nativewind/button';
+    const container = document.body.appendChild(document.createElement('div'));
+    container.innerHTML = renderToString(<EngineSwitcher />);
+    url.search = '?style=nova';
+
+    render(<EngineSwitcher />, { container, hydrate: true });
+
+    const uniwind = within(screen.getByRole('navigation', { name: 'Engine' })).getByRole('link', { name: 'Uniwind' });
+    await waitFor(() => expect(uniwind.getAttribute('href')).toBe('/native/components/uniwind/button?style=nova'));
   });
 
   it('remembers the engine of the page being read, for the native pages whose path holds none', () => {

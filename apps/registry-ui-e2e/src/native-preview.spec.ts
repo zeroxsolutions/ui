@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { type FrameLocator, type Locator, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 
 import { expect, test } from './test/fixtures';
+import { DRAWN, frame, inside } from './test/native-preview';
 
 const BUTTON = '/native/components/nativewind/button';
 
@@ -13,18 +14,6 @@ const EXPO_PROJECT_ID = (
     expo: { extra: { eas: { projectId: string } } };
   }
 ).expo.extra.eas.projectId;
-
-// The preview is an Expo web export, which loads its bundle and its fonts before it draws.
-const DRAWN = { timeout: 30_000 };
-
-/** The frame drawing the demo a reader knows as `demo`, such as `Button demo`. */
-function frame(page: Page, demo: string): Locator {
-  return page.getByTitle(`${demo} preview`, { exact: true });
-}
-
-function inside(page: Page, demo: string): FrameLocator {
-  return frame(page, demo).contentFrame();
-}
 
 /** Picks `style` from the header's picker; the menu opens only once the page has hydrated, so it is clicked until it does. */
 async function pickStyle(page: Page, style: string): Promise<void> {

@@ -15,6 +15,20 @@ test('the switch goes to the same component on the other platform where it has o
   await expect(page.getByRole('heading', { level: 1, name: 'Tab bar', exact: true })).toBeVisible();
 });
 
+test('the switch on a home page lands on the other platform home page', async ({ page }) => {
+  await page.goto('/');
+
+  await platformSwitch(page).getByRole('link', { name: 'Native' }).click();
+
+  await expect(page).toHaveURL('/native');
+  await expect(page.getByRole('heading', { level: 1, name: /^Composed React Native components/ })).toBeVisible();
+
+  await platformSwitch(page).getByRole('link', { name: 'Web' }).click();
+
+  await expect(page).toHaveURL('/');
+  await expect(page.getByRole('heading', { level: 1, name: /^Composed React components/ })).toBeVisible();
+});
+
 test('the switch from a page the other platform lacks lands on that section index', async ({ page }) => {
   await page.goto('/native/components/nativewind/button');
 
@@ -30,13 +44,19 @@ test('the switch from a page the other platform lacks lands on that section inde
   await expect(page.getByRole('heading', { level: 1, name: 'Introduction' })).toBeVisible();
 });
 
-test("the header's sections point into the native tree, and the engine switch moves the page", async ({ page }) => {
+test("the header's sections point into the native tree, and the engine tabs under the title move the page", async ({
+  page,
+}) => {
   await page.goto('/native/components/nativewind/button');
   const main = page.getByRole('navigation', { name: 'Main' });
   await expect(main.getByRole('link', { name: 'Docs' })).toHaveAttribute('href', '/native/docs');
   await expect(main.getByRole('link', { name: 'Blocks' })).toHaveAttribute('href', '/native/blocks/nativewind');
 
-  await page.getByRole('navigation', { name: 'Engine' }).getByRole('link', { name: 'Uniwind' }).click();
+  await page
+    .getByRole('main')
+    .getByRole('navigation', { name: 'Engine' })
+    .getByRole('link', { name: 'Uniwind' })
+    .click();
 
   await expect(page).toHaveURL('/native/components/uniwind/button');
   await expect(main.getByRole('link', { name: 'Components' })).toHaveAttribute('href', '/native/components/uniwind');

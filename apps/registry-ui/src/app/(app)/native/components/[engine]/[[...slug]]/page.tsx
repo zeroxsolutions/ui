@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { DocsArticle } from '@/components/layout/docs-article';
+import { EngineSwitcher } from '@/components/navigation/engine-switcher';
 import { NATIVE_ENGINES } from '@/constants/native-engines';
 import {
   canonicalNativeComponentUrl,
@@ -56,6 +57,7 @@ export default async function NativeComponentPage({ params }: NativeComponentPag
     <DocsArticle
       title={page.data.title}
       description={page.data.description}
+      tabs={<EngineSwitcher />}
       markdown={await pageMarkdown(page)}
       tree={nativePageTree(engine)}
       url={page.url}

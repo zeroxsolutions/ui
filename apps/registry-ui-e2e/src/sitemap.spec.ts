@@ -14,6 +14,7 @@ test('/sitemap.xml lists the pages at the registry host', async ({ request }) =>
 test('/sitemap.xml lists each native page once, a component under NativeWind only', async ({ request }) => {
   const sitemap = await (await request.get('/sitemap.xml')).text();
 
+  expect(sitemap).toContain(`<loc>${HOST}/native</loc>`);
   expect(sitemap).toContain(`<loc>${HOST}/native/docs</loc>`);
   expect(sitemap).toContain(`<loc>${HOST}/native/docs/installation</loc>`);
   expect(sitemap).toContain(`<loc>${HOST}/native/components/nativewind</loc>`);

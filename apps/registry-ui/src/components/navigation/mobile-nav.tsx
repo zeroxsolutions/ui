@@ -23,8 +23,6 @@ import {
 import type { Platform } from '@/types/platform';
 import type { SiteNavItem } from '@/types/site-nav-item';
 
-import { BaseSwitcher } from './base-switcher';
-import { EngineSwitcher } from './engine-switcher';
 import { StylePicker } from './style-picker';
 
 interface MobileNavProps {
@@ -37,9 +35,8 @@ interface MobileNavProps {
 
 /**
  * The site's sections and the docs' pages in a sheet from the left, behind a `Menu` button, for a
- * screen too narrow for the header's nav and the sidebar, with the engine or base switch and the style
- * picker the header hides at that width. Following a link closes it. The button's icon plays on its
- * hover or focus.
+ * screen too narrow for the header's nav and the sidebar, with the style picker the header hides at
+ * that width. Following a link closes it. The button's icon plays on its hover or focus.
  */
 function MobileNav({ tree, items, platform }: MobileNavProps): ReactNode {
   const pathname = usePathname();
@@ -61,8 +58,6 @@ function MobileNav({ tree, items, platform }: MobileNavProps): ReactNode {
         <SheetHeader>
           <SheetTitle>Menu</SheetTitle>
           <div className="flex flex-wrap items-center gap-2" onClick={closeOnLink}>
-            <EngineSwitcher />
-            <BaseSwitcher />
             <StylePicker platform={platform} />
           </div>
         </SheetHeader>
