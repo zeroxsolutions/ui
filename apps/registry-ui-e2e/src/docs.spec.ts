@@ -36,3 +36,12 @@ test("the header's Native link opens the native docs, whose pages the sidebar li
     );
   }
 });
+
+test('the native installation names a vega and a nova style for each engine', async ({ page }) => {
+  await page.goto('/docs/native/installation');
+
+  const article = page.getByRole('main');
+  for (const style of ['nativewind-vega', 'nativewind-nova', 'uniwind-vega', 'uniwind-nova']) {
+    await expect(article.getByText(style, { exact: true }).first()).toBeVisible();
+  }
+});

@@ -56,9 +56,9 @@ test('the old item and index paths redirect once to base-nova', async ({ request
   }
 });
 
-test('serves the react native items for each engine in vega', async ({ request }) => {
-  for (const engine of ['nativewind', 'uniwind']) {
-    const root = `/r/styles/${engine}-vega`;
+test('serves the react native items for each engine in vega and nova', async ({ request }) => {
+  for (const nativeStyle of ['nativewind-vega', 'uniwind-vega', 'nativewind-nova', 'uniwind-nova']) {
+    const root = `/r/styles/${nativeStyle}`;
     const index = await request.get(`${root}/registry.json`);
     expect(index.status(), `${root}/registry.json`).toBe(200);
     const registry = (await index.json()) as RegistryIndex;

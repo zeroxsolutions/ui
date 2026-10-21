@@ -1,17 +1,20 @@
 ---
 title: Native
-description: React Native items for iOS and Android, drawn in shadcn's Vega style, for NativeWind or Uniwind.
+description: React Native items for iOS and Android, drawn in shadcn's Vega or Nova style, for NativeWind or Uniwind.
 ---
 
 zui native publishes React Native items for iOS and Android apps, installed with the shadcn CLI like the web
-items. Each item draws shadcn's Vega style with its neutral colours, and is published once per styling engine:
+items. Each item draws shadcn's Vega or Nova style with its neutral colours, and is published once per styling
+engine and style:
 
-| Engine       | `style` in `components.json` | Items served from                                                    |
-| ------------ | ---------------------------- | -------------------------------------------------------------------- |
-| NativeWind 4 | `nativewind-vega`            | `https://ui.zeroxsolutions.com/r/styles/nativewind-vega/<name>.json` |
-| Uniwind      | `uniwind-vega`               | `https://ui.zeroxsolutions.com/r/styles/uniwind-vega/<name>.json`    |
+| Engine       | Style | `style` in `components.json` | Items served from                                                    |
+| ------------ | ----- | ---------------------------- | -------------------------------------------------------------------- |
+| NativeWind 4 | Vega  | `nativewind-vega`            | `https://ui.zeroxsolutions.com/r/styles/nativewind-vega/<name>.json` |
+| NativeWind 4 | Nova  | `nativewind-nova`            | `https://ui.zeroxsolutions.com/r/styles/nativewind-nova/<name>.json` |
+| Uniwind      | Vega  | `uniwind-vega`               | `https://ui.zeroxsolutions.com/r/styles/uniwind-vega/<name>.json`    |
+| Uniwind      | Nova  | `uniwind-nova`               | `https://ui.zeroxsolutions.com/r/styles/uniwind-nova/<name>.json`    |
 
-The CLI picks the path from the app's `style`, so an app names its engine once, in `components.json`, as
+The CLI picks the path from the app's `style`, so an app names its engine and style once, in `components.json`, as
 [Installation](/docs/native/installation) shows.
 
 ## Items
@@ -19,7 +22,7 @@ The CLI picks the path from the app's `style`, so an app names its engine once, 
 - [Theme](/docs/native/theme): the colours, radius and Geist font families, and the map that loads the fonts.
 - [Text](/docs/native/text): text that takes its container's text classes.
 - [Icon](/docs/native/icon): a lucide icon sized and coloured by classes.
-- [Button](/docs/native/button): a pressable control in Vega's variants and sizes.
+- [Button](/docs/native/button): a pressable control in the style's variants and sizes.
 - [Toggle](/docs/native/toggle): a two-state button, announced as selected while pressed.
 - [Toggle group](/docs/native/toggle-group): toggles of which one or several are pressed.
 - [Label](/docs/native/label): the text that names a field.
