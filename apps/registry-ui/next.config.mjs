@@ -47,6 +47,8 @@ const nextConfig = {
     // one page per item, which now answers under an engine.
     { source: '/docs/native', destination: '/native/docs', statusCode: 301 },
     { source: '/docs/native/installation', destination: '/native/docs/installation', statusCode: 301 },
+    { source: '/docs/native.md', destination: '/native/docs.md', statusCode: 301 },
+    { source: '/docs/native/installation.md', destination: '/native/docs/installation.md', statusCode: 301 },
     {
       source: '/docs/native/:name',
       destination: `/native/components/${DEFAULT_NATIVE_ENGINE}/:name`,

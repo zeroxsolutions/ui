@@ -4,6 +4,9 @@ test('the native pages from before /native answer 301 with their new address, th
   for (const [old, location] of [
     ['/docs/native', '/native/docs'],
     ['/docs/native/installation', '/native/docs/installation'],
+    ['/docs/native.md', '/native/docs.md'],
+    ['/docs/native/installation.md', '/native/docs/installation.md'],
+    ['/docs/native/button.md', '/native/components/nativewind/button.md'],
     ['/docs/native/button', '/native/components/nativewind/button'],
     ['/docs/native/tab-bar?style=nova', '/native/components/nativewind/tab-bar?style=nova'],
   ]) {
