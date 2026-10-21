@@ -25,10 +25,11 @@ const KEPT_MODIFIERS: ReadonlySet<string> = new Set(['active', 'disabled', 'dark
 const HOLDING_MODIFIERS: ReadonlySet<string> = new Set(['not-aria-[haspopup]']);
 
 /**
- * Upstream's selector for an svg inside the slot that names no size of its own. A class behind it goes to
- * the icon part with the selector removed, and Icon applies it only when it names no size itself.
+ * Upstream's selectors for an svg inside the slot, or directly inside it, that names no size of its own.
+ * A class behind one goes to the icon part with the selector removed, and Icon applies it only when it
+ * names no size itself.
  */
-const ICON_MODIFIERS: ReadonlySet<string> = new Set(["[&_svg:not([class*='size-'])]"]);
+const ICON_MODIFIERS: ReadonlySet<string> = new Set(["[&_svg:not([class*='size-'])]", "[&>svg:not([class*='size-'])]"]);
 
 /**
  * No touch screen produces these conditions, or nothing on a device matches the selector, so the
@@ -89,6 +90,23 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
   }),
 );
 
+/**
+ * A state of the control inside the part, which upstream selects with an arbitrary `has-[...]` the
+ * dropped `has-[` rule would otherwise remove, and which the component learns from its control.
+ */
+const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
+  Object.entries({
+    'has-[[data-slot=input-group-control]:focus-visible]': 'focused',
+    'has-[[data-slot][aria-invalid=true]]': 'invalid',
+  }),
+);
+
+/**
+ * A direct child in a variant, such as `has-[>[data-align=block-end]]`, is the part's own variant state
+ * `align=block-end`, which the component learns from its children.
+ */
+const CHILD_VARIANT_MODIFIER = /^has-\[>\[data-([\w-]+)=([\w.-]+)\]\]$/;
+
 /** `data-[size=sm]` is the variant state `size=sm`. */
 const VARIANT_MODIFIER = /^data-\[([\w-]+)=([\w.-]+)\]$/;
 const VARIANT_STATE = /^[\w-]+=[\w.-]+$/;
@@ -136,7 +154,8 @@ const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
  * centres the radio dot with an absolute 50% offset and a -50% translate; the indicator around it
  * already centres its child with flex, which both engines draw alike, where a percentage translate
  * is the engine's to resolve. The radio group's grid is a display neither engine draws, and a View
- * stacks its items in a column already.
+ * stacks its items in a column already. The one-time code's caret blinks by an animation upstream
+ * defines in its own stylesheet, which neither engine's theme carries, so the caret is drawn steady.
  */
 const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-radio-group', new Set(['grid'])],
@@ -144,6 +163,7 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
     'cn-radio-group-indicator-icon',
     new Set(['absolute', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2']),
   ],
+  ['cn-input-otp-caret-line', new Set(['animate-caret-blink'])],
 ]);
 
 /** The px of one step of the spacing scale, 0.25rem at the 16px rem the theme's setup sets. */
@@ -265,6 +285,10 @@ export function findUnknownState(state: StateKey): string | undefined {
 }
 
 function stateOf(modifier: string): StateKey | undefined {
+  const childState = CHILD_STATE_MODIFIERS.get(modifier);
+  if (childState) return childState;
+  const childVariant = CHILD_VARIANT_MODIFIER.exec(modifier);
+  if (childVariant) return `${childVariant[1]}=${childVariant[2]}`;
   const own = modifier.replace(RELATIVE_PREFIX, '').replace(GROUP_NAME, '').replace(CHILD_PREFIX, '');
   for (const candidate of new Set([modifier, own])) {
     const state = STATE_MODIFIERS.get(candidate);
@@ -285,7 +309,10 @@ function readClass(cls: string): SlotClass {
   const variants = splitVariants(cls);
   const utility = variants.pop() ?? '';
   const modifiers = variants.filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m));
-  if (modifiers.some((m) => DROPPED_MODIFIERS.some((rule) => rule.test(m)))) return { reading: 'dropped' };
+  const isChildState = (m: string): boolean => CHILD_STATE_MODIFIERS.has(m) || CHILD_VARIANT_MODIFIER.test(m);
+  if (modifiers.some((m) => !isChildState(m) && DROPPED_MODIFIERS.some((rule) => rule.test(m)))) {
+    return { reading: 'dropped' };
+  }
 
   const kept: string[] = [];
   const states: string[] = [];

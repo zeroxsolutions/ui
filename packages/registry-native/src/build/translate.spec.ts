@@ -544,3 +544,48 @@ describe('translateClasses for a named slot', () => {
     );
   });
 });
+
+describe('translateClasses for an input group', () => {
+  const vega = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));
+  const nova = parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8'));
+  const group = vega.get('cn-input-group') ?? [];
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    "puts the group's border colour behind its control's focus and invalid states for %s",
+    (engine) => {
+      expect(translateClasses(group, engine, 'view', 'focused').classes).toEqual(['border-ring']);
+      expect(translateClasses(group, engine, 'view', 'invalid').classes).toEqual(['border-destructive']);
+      expect(translateClasses(group, engine, 'view').classes).not.toContain('border-ring');
+    },
+  );
+
+  it('stacks the group in a column while it holds a block addon', () => {
+    expect(translateClasses(group, 'uniwind', 'view', 'align=block-start').classes).toEqual(['h-auto', 'flex-col']);
+    expect(translateClasses(group, 'uniwind', 'view', 'align=block-end').classes).toEqual(['h-auto', 'flex-col']);
+  });
+
+  it("dims Nova's group while its control is disabled, which Vega's leaves to the control", () => {
+    expect(translateClasses(nova.get('cn-input-group') ?? [], 'uniwind', 'view', 'disabled').classes).toEqual(
+      expect.arrayContaining(['bg-input/50', 'opacity-50']),
+    );
+    expect(translateClasses(group, 'uniwind', 'view', 'disabled').classes).toEqual([]);
+  });
+
+  it('gives an icon directly inside an addon its size on the icon part', () => {
+    expect(translateClasses(vega.get('cn-input-group-addon') ?? [], 'uniwind', 'icon').classes).toEqual(['size-4']);
+  });
+});
+
+describe('translateClasses for an input otp caret', () => {
+  it.each(['nativewind', 'uniwind'] as const)(
+    'drops the caret-blink animation neither engine defines and keeps the line for %s',
+    (engine) => {
+      const caret = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')).get('cn-input-otp-caret-line') ?? [];
+
+      expect(translateClasses(caret, engine, 'view', '', { name: 'cn-input-otp-caret-line' })).toEqual({
+        classes: ['bg-foreground', 'h-4', 'w-px'],
+        unknown: [],
+      });
+    },
+  );
+});

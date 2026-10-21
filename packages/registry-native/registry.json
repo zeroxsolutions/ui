@@ -276,6 +276,48 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "spinner",
+      "type": "registry:ui",
+      "title": "Spinner",
+      "description": "A circle that turns while something loads, announced as a busy progress bar named Loading, standing still when the system is set to reduce motion.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/spinner.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "input-group",
+      "type": "registry:ui",
+      "title": "Input Group",
+      "description": "An input with text, icons or buttons beside, above or below it, drawn as one field that takes the focus, invalid and disabled states of its input.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/button", "@zui/input"],
+      "files": [
+        {
+          "path": "src/registry/ui/input-group.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "input-otp",
+      "type": "registry:ui",
+      "title": "Input OTP",
+      "description": "A one-time code in a row of slots, typed, pasted or filled from a texted code into one hidden field, with a caret on the next slot and an invalid state.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/input-otp.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

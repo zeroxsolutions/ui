@@ -1,0 +1,159 @@
+import { fireEvent, isHiddenFromAccessibility, render, screen } from '@testing-library/react-native';
+import type { ReactElement } from 'react';
+import { emittedClasses } from '../../build/slot-tokens.testing';
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot, REGEXP_ONLY_DIGITS_AND_CHARS } from './input-otp';
+
+// The slots are hidden from screen readers, which the default queries skip.
+const HIDDEN = { includeHiddenElements: true } as const;
+
+type RenderedNode = ReturnType<typeof screen.getByTestId>;
+
+function classesOf(testID: string): string[] {
+  return emittedClasses(screen.getByTestId(testID, HIDDEN).props.className);
+}
+
+/** Whether the node, or a node inside it, draws the caret line. */
+function holdsCaret(node: RenderedNode): boolean {
+  if (emittedClasses(node.props.className).includes('w-px')) return true;
+  return node.children.some((child) => typeof child !== 'string' && holdsCaret(child));
+}
+
+function sixDigitCode(props: Partial<Parameters<typeof InputOTP>[0]> = {}): ReactElement {
+  return (
+    <InputOTP maxLength={6} aria-label="Verification code" {...props}>
+      <InputOTPGroup testID="first-group">
+        <InputOTPSlot index={0} testID="slot-0" />
+        <InputOTPSlot index={1} testID="slot-1" />
+        <InputOTPSlot index={2} testID="slot-2" />
+      </InputOTPGroup>
+      <InputOTPSeparator testID="separator" />
+      <InputOTPGroup>
+        <InputOTPSlot index={3} testID="slot-3" />
+        <InputOTPSlot index={4} testID="slot-4" />
+        <InputOTPSlot index={5} testID="slot-5" />
+      </InputOTPGroup>
+    </InputOTP>
+  );
+}
+
+describe('InputOTP', () => {
+  it('is one text field for the whole code, which the OS offers a texted code to', async () => {
+    await render(sixDigitCode());
+
+    const field = screen.getByLabelText('Verification code');
+    expect(field.props).toEqual(
+      expect.objectContaining({ keyboardType: 'number-pad', textContentType: 'oneTimeCode', autoComplete: 'sms-otp' }),
+    );
+    expect(isHiddenFromAccessibility(screen.getByTestId('slot-0', HIDDEN))).toBe(true);
+    expect(isHiddenFromAccessibility(screen.getByTestId('separator', HIDDEN))).toBe(true);
+  });
+
+  it('shows each typed character in its slot and reports the code', async () => {
+    const onChange = jest.fn();
+    await render(sixDigitCode({ onChange }));
+
+    await fireEvent.changeText(screen.getByLabelText('Verification code'), '12');
+
+    expect(screen.getByText('1', HIDDEN)).toBeOnTheScreen();
+    expect(screen.getByText('2', HIDDEN)).toBeOnTheScreen();
+    expect(onChange).toHaveBeenLastCalledWith('12');
+  });
+
+  it('fills every slot from one paste of the code, spaces removed, and reports it complete', async () => {
+    const onComplete = jest.fn();
+    await render(sixDigitCode({ onComplete }));
+
+    await fireEvent.changeText(screen.getByLabelText('Verification code'), '123 456');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('123456');
+    expect(['1', '2', '3', '4', '5', '6'].map((char) => screen.getByText(char, HIDDEN))).toHaveLength(6);
+    expect(onComplete).toHaveBeenCalledWith('123456');
+  });
+
+  it('keeps no more characters than the code has', async () => {
+    await render(sixDigitCode());
+
+    await fireEvent.changeText(screen.getByLabelText('Verification code'), '12345678');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('123456');
+  });
+
+  it('refuses a character outside the code alphabet, digits by default', async () => {
+    const onChange = jest.fn();
+    await render(sixDigitCode({ onChange }));
+    const field = screen.getByLabelText('Verification code');
+
+    await fireEvent.changeText(field, '1');
+    await fireEvent.changeText(field, '1a');
+
+    expect(field.props.value).toBe('1');
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('takes letters under a pattern that allows them', async () => {
+    await render(sixDigitCode({ pattern: REGEXP_ONLY_DIGITS_AND_CHARS, keyboardType: 'default' }));
+
+    await fireEvent.changeText(screen.getByLabelText('Verification code'), 'a1B');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('a1B');
+  });
+
+  it('shows the value a caller controls', async () => {
+    await render(sixDigitCode({ value: '42' }));
+
+    expect(screen.getByText('4', HIDDEN)).toBeOnTheScreen();
+    expect(screen.getByLabelText('Verification code').props.value).toBe('42');
+  });
+
+  it('draws the focus border and a caret on the next empty slot while it holds focus', async () => {
+    await render(sixDigitCode({ defaultValue: '12' }));
+
+    expect(holdsCaret(screen.getByTestId('slot-2', HIDDEN))).toBe(false);
+
+    await fireEvent(screen.getByLabelText('Verification code'), 'focus');
+
+    expect(classesOf('slot-2')).toContain('border-ring');
+    expect(holdsCaret(screen.getByTestId('slot-2', HIDDEN))).toBe(true);
+    expect(classesOf('slot-1')).not.toContain('border-ring');
+    expect(holdsCaret(screen.getByTestId('slot-1', HIDDEN))).toBe(false);
+
+    await fireEvent(screen.getByLabelText('Verification code'), 'blur');
+
+    expect(holdsCaret(screen.getByTestId('slot-2', HIDDEN))).toBe(false);
+  });
+
+  it('keeps the last slot active without a caret once the code is full', async () => {
+    await render(sixDigitCode({ defaultValue: '123456' }));
+
+    await fireEvent(screen.getByLabelText('Verification code'), 'focus');
+
+    expect(classesOf('slot-5')).toContain('border-ring');
+    expect(holdsCaret(screen.getByTestId('slot-5', HIDDEN))).toBe(false);
+  });
+
+  it('draws every slot destructive and passes aria-invalid on to the field', async () => {
+    await render(sixDigitCode({ 'aria-invalid': true }));
+
+    expect(screen.getByLabelText('Verification code').props['aria-invalid']).toBe(true);
+    expect(classesOf('slot-0')).toContain('border-destructive');
+    expect(classesOf('slot-4')).toContain('border-destructive');
+  });
+
+  it('rounds and closes only the outer edges of each group', async () => {
+    await render(sixDigitCode());
+
+    expect(classesOf('slot-0')).toEqual(expect.arrayContaining(['rounded-l-md', 'border-l']));
+    expect(classesOf('slot-1')).not.toContain('rounded-l-md');
+    expect(classesOf('slot-2')).toContain('rounded-r-md');
+    expect(classesOf('slot-3')).toContain('border-l');
+  });
+
+  it('is not editable, dimmed and announced disabled when editable is false', async () => {
+    await render(sixDigitCode({ editable: false }));
+    const field = screen.getByLabelText('Verification code');
+
+    expect(field.props.editable).toBe(false);
+    expect(field.props['aria-disabled']).toBe(true);
+    expect(emittedClasses(field.parent?.props.className)).toContain('opacity-50');
+  });
+});
