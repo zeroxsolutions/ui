@@ -38,8 +38,18 @@ const tabBarVariants = cva('group/tab-bar fixed z-50 flex text-foreground', {
     },
   },
   compoundVariants: [
-    { shape: 'attached', side: 'top', className: 'inset-x-0 top-0 p-2 shadow-[0_2px_12px_rgb(0_0_0/0.08)]' },
-    { shape: 'attached', side: 'bottom', className: 'inset-x-0 bottom-0 p-2 shadow-[0_-2px_12px_rgb(0_0_0/0.08)]' },
+    {
+      shape: 'attached',
+      side: 'top',
+      className:
+        'inset-x-0 top-0 p-2 pt-[calc(--spacing(2)+env(safe-area-inset-top))] shadow-[0_2px_12px_rgb(0_0_0/0.08)]',
+    },
+    {
+      shape: 'attached',
+      side: 'bottom',
+      className:
+        'inset-x-0 bottom-0 p-2 pb-[calc(--spacing(2)+env(safe-area-inset-bottom))] shadow-[0_-2px_12px_rgb(0_0_0/0.08)]',
+    },
     {
       shape: 'attached',
       side: 'left',
@@ -50,8 +60,12 @@ const tabBarVariants = cva('group/tab-bar fixed z-50 flex text-foreground', {
       side: 'right',
       className: 'inset-y-0 right-0 w-22 px-2 py-3 shadow-[-2px_0_12px_rgb(0_0_0/0.08)]',
     },
-    { shape: 'floating', side: 'top', className: 'inset-x-4 top-4' },
-    { shape: 'floating', side: 'bottom', className: 'inset-x-4 bottom-4' },
+    { shape: 'floating', side: 'top', className: 'inset-x-4 top-[calc(--spacing(4)+env(safe-area-inset-top))]' },
+    {
+      shape: 'floating',
+      side: 'bottom',
+      className: 'inset-x-4 bottom-[calc(--spacing(4)+env(safe-area-inset-bottom))]',
+    },
     { shape: 'floating', side: 'left', className: 'inset-y-4 left-4 my-auto h-fit' },
     { shape: 'floating', side: 'right', className: 'inset-y-4 right-4 my-auto h-fit' },
   ],
@@ -107,8 +121,10 @@ interface TabBarProps extends React.ComponentProps<'nav'> {
  *     </TabBarItem>
  *   </TabBar>
  *
- * Carries `data-side`, `data-orientation` (`horizontal` or `vertical`), `data-labels`, `data-surface`
- * and `data-shape`.
+ * Fixed to the viewport, it can cover content and take focus from it: pad the page to match. At the top
+ * and bottom it adds the device's safe-area inset to its own padding, which needs `viewport-fit=cover`
+ * on the page's viewport meta. Carries `data-side`, `data-orientation` (`horizontal` or `vertical`), `data-labels`,
+ * `data-surface` and `data-shape`.
  */
 function TabBar({
   side = 'bottom',

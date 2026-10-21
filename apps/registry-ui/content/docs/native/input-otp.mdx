@@ -45,26 +45,34 @@ const [code, setCode] = useState('');
 Takes every prop of React Native's `TextInput` except `defaultValue`, `onChange`, `onChangeText` and `maxLength`,
 which it redefines, plus:
 
-| Prop                 | Type                         | Default                   |
-| -------------------- | ---------------------------- | ------------------------- |
-| `maxLength`          | `number`                     | required                  |
-| `value`              | `string`                     | none                      |
-| `defaultValue`       | `string`                     | `''`                      |
-| `onChange`           | `(value: string) => void`    | none                      |
-| `onComplete`         | `(value: string) => void`    | none                      |
-| `pattern`            | `string \| RegExp`           | `REGEXP_ONLY_DIGITS`      |
-| `pasteTransformer`   | `(pasted: string) => string` | removes spaces and dashes |
-| `containerClassName` | `string`                     | none                      |
-| `aria-invalid`       | `boolean`                    | none                      |
+| Prop                 | Type                         | Default                           |
+| -------------------- | ---------------------------- | --------------------------------- |
+| `maxLength`          | `number`                     | required                          |
+| `value`              | `string`                     | none                              |
+| `defaultValue`       | `string`                     | `''`                              |
+| `onChange`           | `(value: string) => void`    | none                              |
+| `onComplete`         | `(value: string) => void`    | none                              |
+| `pattern`            | `string \| RegExp`           | `REGEXP_ONLY_DIGITS`              |
+| `pasteTransformer`   | `(pasted: string) => string` | removes spaces and dashes         |
+| `containerClassName` | `string`                     | none                              |
+| `aria-invalid`       | `boolean`                    | none                              |
+| `aria-label`         | `string`                     | required, or `accessibilityLabel` |
 
 One text field, hidden under the slots, takes the keystrokes, a paste and the code the OS offers from a text
-message. A screen reader meets one field, named with `aria-label`, and the slots are hidden from it. The field
-opens the number pad unless given another `keyboardType`.
+message. A screen reader meets one field, named with `aria-label` or `accessibilityLabel`, one of which the type
+requires, and the slots are hidden from it. The field opens the number pad unless given another `keyboardType`.
 
-Leave `value` out to let the field hold the code, or pass `value` and `onChange` to control it. `onChange` runs
-after each change the `pattern` accepts and `onComplete` once the code is `maxLength` long. A change that does
-not match `pattern` is refused. The patterns the file exports are `REGEXP_ONLY_DIGITS`, `REGEXP_ONLY_CHARS`
-and `REGEXP_ONLY_DIGITS_AND_CHARS`.
+Leave `value` out to let the field hold the code, or pass `value` and `onChange` to control it. `onChange` runs after
+each change the `pattern` accepts and `onComplete` once the code is `maxLength` long. A change that does not match
+`pattern` is refused, and the field is left as it was. An empty code always passes, so clearing the field never needs to
+match `pattern`. `pattern` is tested against the whole code as it stands after the change, partial codes included, so a
+pattern that only a full code matches, such as `^\d{6}$`, refuses every keystroke before the sixth and takes the code
+only from a paste or an autofill. Write it as `^\d{1,6}$` to let the code be typed. `pasteTransformer` runs on every
+change. A text that fits in `maxLength` is the new code, which is how typing, deleting, an autofill and a short paste,
+appended to the code, arrive. A paste that overflows `maxLength`, being text that grows by more than one character at
+once, replaces the code: the text after the old code, or the whole text when it does not start with the old code, is cut
+to `maxLength`. The patterns the file exports are `REGEXP_ONLY_DIGITS`, `REGEXP_ONLY_CHARS` and
+`REGEXP_ONLY_DIGITS_AND_CHARS`.
 
 `aria-invalid` draws every slot with the destructive border. React Native does not announce it, so carry the
 error in `accessibilityHint` or in a Text the user can reach. `editable={false}` dims it and announces it
@@ -86,8 +94,9 @@ Takes every prop of a React Native `View`, plus:
 | `aria-invalid`  | `boolean` | none     |
 | `textClassName` | `string`  | none     |
 
-Shows the character of the code at `index`, counted from 0. The slot the next character goes in takes the
-focus border and a caret while the code holds focus. `aria-invalid` on a slot overrides the code's. `textClassName` sets the classes of the character and wins over
+Shows the character of the code at `index`, counted from 0. The slot the next character goes in takes the focus border
+while the code holds focus, and a caret while that slot is empty. On a full code the last slot is the active one, with
+no caret. `aria-invalid` on a slot overrides the code's. `textClassName` sets the classes of the character and wins over
 the style's text size.
 
 ### InputOTPSeparator

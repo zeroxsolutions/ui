@@ -19,7 +19,7 @@
       "path": "./packages/editor-core"
     },
     {
-      "path": "./packages/registry-native"
+      "path": "./packages/native-ui"
     }
   ],
   "compilerOptions": {

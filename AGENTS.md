@@ -11,4 +11,6 @@ frontends install. The registry site is the one app deployed; it serves the docs
 - `packages/fluent-emoji` (`@zeroxsolutions/fluent-emoji`) - Fluent emoji components, and the artwork
   they load from a public bucket.
 - `packages/icons` (`@zeroxsolutions/icons`) - the org's icon set.
+- `packages/native-ui` (`@zeroxsolutions/native-ui`) - the React Native items and the build that
+  publishes them as the `nativewind-*` and `uniwind-*` registries the registry site serves.
 - `iac/` - Terraform, outside the nx graph: the one R2 bucket that serves the emoji artwork.

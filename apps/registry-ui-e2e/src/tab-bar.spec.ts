@@ -26,3 +26,16 @@ test('the tab bar names every destination, shows only the active label, and move
   await expect(home).not.toHaveAttribute('aria-current');
   await expect.poll(async () => (await searchLabel.boundingBox())?.width ?? 0).toBeGreaterThan(1);
 });
+
+test('a tab bar with labels="none" still names every destination, with no label taking room', async ({ page }) => {
+  await page.goto('/docs/components/tab-bar');
+  const bar = page.getByRole('navigation', { name: 'Sections' });
+  const links = bar.getByRole('link');
+
+  await expect(links).toHaveCount(3);
+  for (const name of ['Home', 'Search', 'Profile']) {
+    const link = bar.getByRole('link', { name });
+    await expect(link).toBeVisible();
+    expect((await link.getByText(name).boundingBox())?.width ?? 0).toBeLessThanOrEqual(1);
+  }
+});
