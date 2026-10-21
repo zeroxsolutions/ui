@@ -35,7 +35,13 @@ function frameHeightOf(contentHeight: number, overlayOpen: boolean): number {
 
 /** The part of a document {@link showsOverlay} reads: the elements directly in its body. */
 interface OverlayDocument {
-  readonly body: { readonly children: ArrayLike<{ readonly tagName: string; readonly id: string }> };
+  readonly body: {
+    readonly children: ArrayLike<{
+      readonly tagName: string;
+      readonly id: string;
+      readonly style?: { readonly visibility: string; readonly display: string };
+    }>;
+  };
 }
 
 /** The elements of the page itself, which an Expo web export puts in the body beside the app's root. */
@@ -43,11 +49,16 @@ const PAGE_ELEMENTS: ReadonlySet<string> = new Set(['SCRIPT', 'NOSCRIPT', 'STYLE
 
 /**
  * Whether the web page shows an overlay. The primitives an overlay is built on render it on the web into
- * an element they append to the body, beside the app's `#root`, and remove when it closes.
+ * an element they append to the body, beside the app's `#root`, and remove when it closes. The safe area
+ * provider, which measures the insets with one, and Uniwind keep hidden elements there too.
  */
 function showsOverlay(document: OverlayDocument): boolean {
   return Array.from(document.body.children).some(
-    (element) => element.id !== 'root' && !PAGE_ELEMENTS.has(element.tagName),
+    (element) =>
+      element.id !== 'root' &&
+      !PAGE_ELEMENTS.has(element.tagName) &&
+      element.style?.visibility !== 'hidden' &&
+      element.style?.display !== 'none',
   );
 }
 

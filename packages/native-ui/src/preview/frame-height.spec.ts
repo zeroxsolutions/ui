@@ -49,16 +49,32 @@ describe('frameHeightOf', () => {
   });
 });
 
-/** A document whose body holds elements with these tag names and ids, the app's root first. */
-function documentHolding(...elements: [tagName: string, id?: string][]): OverlayDocument {
+/** A document whose body holds elements with these tag names, ids and inline styles. */
+function documentHolding(
+  ...elements: [tagName: string, id?: string, style?: Partial<{ visibility: string; display: string }>][]
+): OverlayDocument {
   return {
-    body: { children: elements.map(([tagName, id = '']) => ({ tagName, id })) },
+    body: {
+      children: elements.map(([tagName, id = '', style = {}]) => ({
+        tagName,
+        id,
+        style: { visibility: '', display: '', ...style },
+      })),
+    },
   };
 }
 
 describe('showsOverlay', () => {
   it("is false while the body holds only the app's root and the page's own markup", () => {
     expect(showsOverlay(documentHolding(['NOSCRIPT'], ['DIV', 'root'], ['SCRIPT']))).toBe(false);
+  });
+
+  it('is false while the body holds hidden elements beside the root, as the safe area provider and Uniwind keep', () => {
+    expect(
+      showsOverlay(
+        documentHolding(['DIV', 'root'], ['DIV', '', { visibility: 'hidden' }], ['DIV', '', { display: 'none' }]),
+      ),
+    ).toBe(false);
   });
 
   it('is true while the body holds an element portalled beside the root, as an open dialog is on the web', () => {
