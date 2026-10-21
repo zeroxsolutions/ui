@@ -59,3 +59,4 @@ catalogs:
     "@rn-primitives/tabs": "1.5.2"
     "@rn-primitives/toggle": "1.5.2"
     "@rn-primitives/toggle-group": "1.5.2"
+    "@rn-primitives/tooltip": "1.5.2"

@@ -50,6 +50,7 @@
     "sheet",
     "drawer",
     "popover",
+    "tooltip",
     "---Navigation---",
     "tabs",
     "tab-bar",

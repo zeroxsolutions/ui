@@ -1,0 +1,89 @@
+---
+title: Tooltip
+description: A short label for a control, shown beside it.
+---
+
+<NativePreview name="tooltip-demo" />
+
+## Installation
+
+<InstallCommand name="tooltip" />
+
+The CLI writes `components/ui/tooltip.tsx` and `lib/motion.ts`, installs [Text](/native/components/nativewind/text)
+and Utils, and adds `@rn-primitives/tooltip`, `@rn-primitives/portal`, `react-native-reanimated` and
+`react-native-worklets`. The content draws in the app's `PortalHost`; see
+[Add a portal host](/native/docs/installation#add-a-portal-host).
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+```
+
+```tsx
+<Tooltip>
+  <TooltipTrigger asChild>
+    <Button variant="outline">
+      <Text>Hover</Text>
+    </Button>
+  </TooltipTrigger>
+  <TooltipContent>
+    <Text>Add to library</Text>
+  </TooltipContent>
+</Tooltip>
+```
+
+## API reference
+
+### TooltipProvider
+
+Takes `delay`, how long in ms the pointer rests on a trigger before the web opens its tooltip, for every Tooltip
+inside it; `0` by default. A Tooltip outside a provider waits 600ms. On a device it does nothing.
+
+### Tooltip
+
+Takes every prop of React Native's `View`, plus `onOpenChange(open)`, called each time it opens or closes. On the
+web it opens while the pointer rests on its trigger or the trigger has focus. On a device, which has no pointer
+to rest, a press on the trigger opens it and another closes it.
+
+### TooltipTrigger
+
+Takes every prop of React Native's `Pressable`. Pass `asChild` to make a Button the trigger. Focus returns to it
+when the Tooltip closes.
+
+### TooltipContent
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type                                     | Default    |
+| ------------- | ---------------------------------------- | ---------- |
+| `side`        | `'top' \| 'right' \| 'bottom' \| 'left'` | `'top'`    |
+| `sideOffset`  | `number`                                 | `4`        |
+| `align`       | `'start' \| 'center' \| 'end'`           | `'center'` |
+| `alignOffset` | `number`                                 | `0`        |
+| `portalHost`  | `string`                                 | -          |
+
+`side` is the side of the trigger the label opens on, `sideOffset` its gap from the trigger in px, and `align`
+lines it up with the trigger's start, centre or end, moved along by `alignOffset`. The label is drawn in the
+foreground colour, up to 20rem wide, and announced as a `tooltip`. On a device accessibility focus moves into it
+as it opens, and a press outside it, the Android back button and the iOS escape gesture (a two-finger Z) close
+it. On the web the pointer leaving the trigger and Escape close it. It fades in while growing from 95% and
+sliding 0.5rem away from the trigger over 150ms. When the system asks for reduced motion it appears at once.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- A press opens the tooltip on a device, where upstream's opens on hover and focus alone.
+- The Tooltip holds its own open state, so it takes no `open` or `defaultOpen`: the primitive it is built on
+  has no controlled mode.
+- The arrow is left out. Upstream places it with a `calc()` offset and an important `top-1/2!`, which React
+  Native's styles cannot take.
+- On a device the label opens above or below its trigger, so `left` and `right` open it above. The web places
+  it on any side, and flips it when there is no room.
+- On a device it goes at once when a press outside it, the back button or the escape gesture closes it: the
+  primitive removes it as it closes. Closed by its trigger, it fades out.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.

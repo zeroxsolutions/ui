@@ -45,6 +45,7 @@
     "@rn-primitives/tabs": "catalog:rn-primitives",
     "@rn-primitives/toggle": "catalog:rn-primitives",
     "@rn-primitives/toggle-group": "catalog:rn-primitives",
+    "@rn-primitives/tooltip": "catalog:rn-primitives",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "lucide-react-native": "catalog:",

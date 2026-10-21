@@ -598,6 +598,20 @@
       ]
     },
     {
+      "name": "tooltip",
+      "type": "registry:ui",
+      "title": "Tooltip",
+      "description": "A short label beside a control, opened by a press on a device and by hover or focus on the web, announced as a tooltip, closed by its trigger, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": ["@rn-primitives/tooltip", "@rn-primitives/portal", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/tooltip.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

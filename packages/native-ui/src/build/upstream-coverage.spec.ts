@@ -33,7 +33,6 @@ const PENDING = [
   'select',
   'slider',
   'sonner',
-  'tooltip',
 ];
 
 describe('the native registry against upstream', () => {

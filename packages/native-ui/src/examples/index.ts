@@ -49,6 +49,7 @@ import { ThemeDemo } from './theme-demo';
 import { TextareaDemo } from './textarea-demo';
 import { ToggleDemo } from './toggle-demo';
 import { ToggleGroupDemo } from './toggle-group-demo';
+import { TooltipDemo } from './tooltip-demo';
 import { UnsavedChangesToolbarDemo } from './unsaved-changes-toolbar-demo';
 
 /** Each demo by its name, the file's name without `.tsx`, such as `button-demo`. */
@@ -97,6 +98,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'textarea-demo': TextareaDemo,
   'toggle-demo': ToggleDemo,
   'toggle-group-demo': ToggleGroupDemo,
+  'tooltip-demo': TooltipDemo,
   'unsaved-changes-toolbar-demo': UnsavedChangesToolbarDemo,
 };
 

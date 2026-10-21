@@ -24,6 +24,7 @@
     "@rn-primitives/tabs": "catalog:rn-primitives",
     "@rn-primitives/toggle": "catalog:rn-primitives",
     "@rn-primitives/toggle-group": "catalog:rn-primitives",
+    "@rn-primitives/tooltip": "catalog:rn-primitives",
     "@zeroxsolutions/native-ui": "workspace:*",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
