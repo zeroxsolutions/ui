@@ -86,7 +86,7 @@ type InputOTPProps = Omit<
  * slots, takes the keystrokes, a paste and the code the OS offers from a text message, so the code
  * is one field to a screen reader, named with `aria-label`, and the slots are hidden from it. It opens
  * the number pad unless given another `keyboardType`. `editable={false}` dims it and announces it
- * disabled.
+ * disabled. A `style` goes to the hidden field, under what hides it.
  */
 function InputOTP({
   maxLength,
@@ -101,6 +101,7 @@ function InputOTP({
   'aria-invalid': invalid,
   onFocus,
   onBlur,
+  style,
   children,
   ...props
 }: InputOTPProps): ReactNode {
@@ -117,7 +118,7 @@ function InputOTP({
   const change = (text: string): void => {
     const pasted = text.length > value.length + 1;
     const next = (pasted ? pasteTransformer(text) : text).slice(0, maxLength);
-    if (next.length > 0 && !new RegExp(pattern).test(next)) return;
+    if (next === value || (next.length > 0 && !new RegExp(pattern).test(next))) return;
     if (controlledValue === undefined) setHeldValue(next);
     onChange?.(next);
     if (next.length === maxLength) onComplete?.(next);
@@ -129,7 +130,7 @@ function InputOTP({
         {children}
         {/* No maxLength here: the OS would cut a pasted code shown with spaces before they are removed. */}
         <TextInput
-          style={styles.field}
+          style={[style, styles.field]}
           value={value}
           onChangeText={change}
           selection={{ start: value.length, end: value.length }}

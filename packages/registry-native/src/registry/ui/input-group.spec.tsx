@@ -2,7 +2,7 @@ import { fireEvent, render, screen, userEvent } from '@testing-library/react-nat
 import { Search, X } from 'lucide-react-native';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { createRef } from 'react';
+import { createRef, type ReactElement } from 'react';
 import type { TextInputInstance } from 'react-native';
 import { registerCSS } from 'react-native-css-interop/test';
 import { parseSlotMap } from '../../build/slot-map';
@@ -51,6 +51,40 @@ describe('InputGroup', () => {
     await fireEvent(screen.getByTestId('field'), 'focus');
     expect(classesOf('group')).toContain('border-destructive');
     expect(classesOf('group')).not.toContain('border-ring');
+  });
+
+  it('lets go of the focus and invalid borders when its input goes away', async () => {
+    function Group({ withInput }: { withInput: boolean }): ReactElement {
+      return (
+        <InputGroup testID="group">{withInput ? <InputGroupInput testID="field" aria-invalid /> : null}</InputGroup>
+      );
+    }
+    const { rerender } = await render(<Group withInput />);
+    await fireEvent(screen.getByTestId('field'), 'focus');
+
+    await rerender(<Group withInput={false} />);
+
+    expect(classesOf('group')).not.toContain('border-destructive');
+    expect(classesOf('group')).not.toContain('border-ring');
+  });
+
+  it('lets go of the dimming when its disabled input goes away', async () => {
+    function Group({ withInput }: { withInput: boolean }): ReactElement {
+      return (
+        <InputGroup testID="group">
+          <InputGroupAddon testID="addon">
+            <Icon as={Search} />
+          </InputGroupAddon>
+          {withInput ? <InputGroupInput editable={false} /> : null}
+        </InputGroup>
+      );
+    }
+    const { rerender } = await render(<Group withInput />);
+
+    await rerender(<Group withInput={false} />);
+
+    expect(classesOf('addon')).not.toContain('opacity-50');
+    expect(classesOf('group', 'nova')).not.toContain('opacity-50');
   });
 
   it('dims its addons and announces its input disabled when the input is not editable', async () => {

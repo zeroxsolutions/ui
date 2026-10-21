@@ -1,4 +1,5 @@
-import { fireEvent, isHiddenFromAccessibility, render, screen } from '@testing-library/react-native';
+import { fireEvent, isHiddenFromAccessibility, render, screen, userEvent } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import type { ReactElement } from 'react';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot, REGEXP_ONLY_DIGITS_AND_CHARS } from './input-otp';
@@ -52,7 +53,7 @@ describe('InputOTP', () => {
     const onChange = jest.fn();
     await render(sixDigitCode({ onChange }));
 
-    await fireEvent.changeText(screen.getByLabelText('Verification code'), '12');
+    await userEvent.setup().type(screen.getByLabelText('Verification code'), '12');
 
     expect(screen.getByText('1', HIDDEN)).toBeOnTheScreen();
     expect(screen.getByText('2', HIDDEN)).toBeOnTheScreen();
@@ -63,19 +64,41 @@ describe('InputOTP', () => {
     const onComplete = jest.fn();
     await render(sixDigitCode({ onComplete }));
 
-    await fireEvent.changeText(screen.getByLabelText('Verification code'), '123 456');
+    await userEvent.setup().paste(screen.getByLabelText('Verification code'), '123 456');
 
     expect(screen.getByLabelText('Verification code').props.value).toBe('123456');
     expect(['1', '2', '3', '4', '5', '6'].map((char) => screen.getByText(char, HIDDEN))).toHaveLength(6);
     expect(onComplete).toHaveBeenCalledWith('123456');
   });
 
-  it('keeps no more characters than the code has', async () => {
+  it('completes once when typed in full', async () => {
+    const onComplete = jest.fn();
+    await render(sixDigitCode({ onComplete }));
+
+    await userEvent.setup().type(screen.getByLabelText('Verification code'), '123456');
+
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledWith('123456');
+  });
+
+  it('keeps no more characters than the code has from a paste', async () => {
     await render(sixDigitCode());
 
-    await fireEvent.changeText(screen.getByLabelText('Verification code'), '12345678');
+    await userEvent.setup().paste(screen.getByLabelText('Verification code'), '12345678');
 
     expect(screen.getByLabelText('Verification code').props.value).toBe('123456');
+  });
+
+  it('ignores a keystroke on a full code, reporting no change and no second completion', async () => {
+    const onChange = jest.fn();
+    const onComplete = jest.fn();
+    await render(sixDigitCode({ defaultValue: '123456', onChange, onComplete }));
+
+    await userEvent.setup().type(screen.getByLabelText('Verification code'), '7');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('123456');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onComplete).not.toHaveBeenCalled();
   });
 
   it('refuses a character outside the code alphabet, digits by default', async () => {
@@ -83,8 +106,7 @@ describe('InputOTP', () => {
     await render(sixDigitCode({ onChange }));
     const field = screen.getByLabelText('Verification code');
 
-    await fireEvent.changeText(field, '1');
-    await fireEvent.changeText(field, '1a');
+    await userEvent.setup().type(field, '1a');
 
     expect(field.props.value).toBe('1');
     expect(onChange).toHaveBeenCalledTimes(1);
@@ -93,9 +115,17 @@ describe('InputOTP', () => {
   it('takes letters under a pattern that allows them', async () => {
     await render(sixDigitCode({ pattern: REGEXP_ONLY_DIGITS_AND_CHARS, keyboardType: 'default' }));
 
-    await fireEvent.changeText(screen.getByLabelText('Verification code'), 'a1B');
+    await userEvent.setup().type(screen.getByLabelText('Verification code'), 'a1B');
 
     expect(screen.getByLabelText('Verification code').props.value).toBe('a1B');
+  });
+
+  it('stays hidden under the slots whatever style a caller gives the field', async () => {
+    await render(sixDigitCode({ style: { opacity: 1, color: 'black' } }));
+
+    const style = StyleSheet.flatten(screen.getByLabelText('Verification code').props.style);
+    expect(style.opacity).toBeLessThan(0.05);
+    expect(style.color).toBe('transparent');
   });
 
   it('shows the value a caller controls', async () => {

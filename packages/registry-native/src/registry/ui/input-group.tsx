@@ -5,7 +5,7 @@ import {
   isValidElement,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ComponentProps,
@@ -236,9 +236,12 @@ function InputGroupInput({
   const setControl = group?.setControl;
   const controlRef = group?.controlRef;
 
-  useEffect(() => {
+  // Before paint, so a group whose input starts invalid is never drawn without its border.
+  useLayoutEffect(() => {
     setControl?.({ invalid: invalid === true, disabled: editable === false });
   }, [setControl, invalid, editable]);
+
+  useLayoutEffect(() => () => setControl?.({ focused: false, invalid: false, disabled: false }), [setControl]);
 
   const attach = useCallback(
     (node: TextInputInstance | null) => {
