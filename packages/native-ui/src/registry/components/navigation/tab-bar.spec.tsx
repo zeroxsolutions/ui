@@ -124,6 +124,30 @@ describe('TabBar', () => {
     expect(classes('bar')).toEqual(expect.arrayContaining(['rounded-full', 'bottom-4', 'inset-x-4']));
   });
 
+  it.each([
+    ['left', 'left-4'],
+    ['right', 'right-4'],
+  ] as const)('centres a floating bar on the %s edge vertically, 16px in', async (side, edge) => {
+    await render(<Example side={side} shape="floating" />);
+
+    expect(classes('bar-wrapper')).toEqual(expect.arrayContaining(['absolute', 'inset-y-0', 'justify-center', edge]));
+    expect(screen.getByTestId('bar-wrapper').props.pointerEvents).toBe('box-none');
+    expect(classes('bar')).toEqual(expect.arrayContaining(['flex-col', 'rounded-full']));
+    expect(classes('bar')).not.toContain('absolute');
+  });
+
+  it.each(['top', 'bottom'] as const)('places a floating bar on the %s edge without a wrapper', async (side) => {
+    await render(<Example side={side} shape="floating" />);
+
+    expect(screen.queryByTestId('bar-wrapper')).toBeNull();
+  });
+
+  it('places an attached bar on the left edge without a wrapper', async () => {
+    await render(<Example side="left" />);
+
+    expect(screen.queryByTestId('bar-wrapper')).toBeNull();
+  });
+
   it('throws when a part is rendered outside a TabBar', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
 

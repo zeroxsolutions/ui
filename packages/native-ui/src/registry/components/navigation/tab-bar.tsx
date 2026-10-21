@@ -34,11 +34,12 @@ const ATTACHED_EDGE: Readonly<Record<TabBarSide, string>> = {
   right: 'inset-y-0 right-0 w-[88px] px-2 py-3 shadow-md',
 };
 
+/** Where a floating bar sits. Left and right are the box that centres the bar between the top and bottom edges. */
 const FLOATING_EDGE: Readonly<Record<TabBarSide, string>> = {
   top: 'inset-x-4 top-4',
   bottom: 'inset-x-4 bottom-4',
-  left: 'left-4 top-4',
-  right: 'right-4 top-4',
+  left: 'absolute inset-y-0 left-4 z-50 justify-center',
+  right: 'absolute inset-y-0 right-4 z-50 justify-center',
 };
 
 interface TabBarContextValue {
@@ -94,7 +95,8 @@ type TabBarProps = ComponentProps<typeof View> & {
  *     </TabBarItem>
  *   </TabBar>
  *
- * It draws no blur: `translucent` is a 70% background.
+ * It draws no blur: `translucent` is a 70% background. A `testID` goes to the bar, and `<testID>-wrapper` to
+ * the box that centres a floating bar on the left or right.
  */
 function TabBar({
   side = 'bottom',
@@ -102,25 +104,42 @@ function TabBar({
   surface = 'translucent',
   shape = 'attached',
   className,
+  testID,
   ...props
 }: TabBarProps): ReactNode {
   const context = useMemo(() => ({ side, labels }), [side, labels]);
+  const floating = shape === 'floating';
+  const wrapped = floating && (side === 'left' || side === 'right');
+  const bar = (
+    <View
+      // React Native maps tablist to no iOS trait; tabbar is the TabBar trait, under which VoiceOver
+      // reads each item as a tab.
+      accessibilityRole={Platform.OS === 'ios' ? 'tabbar' : 'tablist'}
+      className={cn(
+        wrapped ? null : 'absolute z-50',
+        side === 'top' || side === 'bottom' ? 'flex-row items-center justify-between' : 'flex-col gap-1',
+        surface === 'solid' ? 'bg-background' : 'bg-background/70',
+        floating ? 'rounded-full p-1.5 shadow-lg' : null,
+        floating ? (wrapped ? null : FLOATING_EDGE[side]) : ATTACHED_EDGE[side],
+        className,
+      )}
+      testID={testID}
+      {...props}
+    />
+  );
   return (
     <TabBarContext.Provider value={context}>
-      <View
-        // React Native maps tablist to no iOS trait; tabbar is the TabBar trait, under which VoiceOver
-        // reads each item as a tab.
-        accessibilityRole={Platform.OS === 'ios' ? 'tabbar' : 'tablist'}
-        className={cn(
-          'absolute z-50',
-          side === 'top' || side === 'bottom' ? 'flex-row items-center justify-between' : 'flex-col gap-1',
-          surface === 'solid' ? 'bg-background' : 'bg-background/70',
-          shape === 'floating' ? 'rounded-full p-1.5 shadow-lg' : null,
-          shape === 'floating' ? FLOATING_EDGE[side] : ATTACHED_EDGE[side],
-          className,
-        )}
-        {...props}
-      />
+      {wrapped ? (
+        <View
+          pointerEvents="box-none"
+          className={FLOATING_EDGE[side]}
+          testID={testID === undefined ? undefined : `${testID}-wrapper`}
+        >
+          {bar}
+        </View>
+      ) : (
+        bar
+      )}
     </TabBarContext.Provider>
   );
 }
