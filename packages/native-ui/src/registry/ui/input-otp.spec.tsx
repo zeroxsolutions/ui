@@ -82,12 +82,60 @@ describe('InputOTP', () => {
     expect(onChange).toHaveBeenLastCalledWith('123456');
   });
 
-  it('keeps only the characters of a paste the pattern accepts', async () => {
-    await render(sixDigitCode());
+  it('takes an autofill of the whole code over a partly filled one as the code', async () => {
+    await render(sixDigitCode({ defaultValue: '12' }));
 
-    await userEvent.setup().paste(screen.getByLabelText('Verification code'), '12-ab-34');
+    await fireEvent.changeText(screen.getByLabelText('Verification code'), '123456');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('123456');
+  });
+
+  it('appends a short paste that still fits the code', async () => {
+    await render(sixDigitCode({ defaultValue: '12' }));
+
+    await fireEvent.changeText(screen.getByLabelText('Verification code'), '1234');
 
     expect(screen.getByLabelText('Verification code').props.value).toBe('1234');
+  });
+
+  it('leaves the code and reports no change when every pasted character is refused', async () => {
+    const onChange = jest.fn();
+    await render(sixDigitCode({ defaultValue: '12', onChange }));
+
+    await fireEvent.changeText(screen.getByLabelText('Verification code'), '12abc');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('12');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('refuses a paste with a character the pattern rejects, whatever its length', async () => {
+    const onChange = jest.fn();
+    await render(sixDigitCode({ defaultValue: '12', onChange }));
+
+    await fireEvent.changeText(screen.getByLabelText('Verification code'), '12abcdefgh');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('12');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('tests the whole code against a pattern with the global flag every time', async () => {
+    await render(sixDigitCode({ pattern: /^\d+$/g }));
+    const field = screen.getByLabelText('Verification code');
+
+    await userEvent.setup().type(field, '1234');
+
+    expect(field.props.value).toBe('1234');
+  });
+
+  it('lets a pattern that wants six digits take the code only once it is whole', async () => {
+    await render(sixDigitCode({ pattern: '^\\d{6}$' }));
+    const field = screen.getByLabelText('Verification code');
+
+    await userEvent.setup().type(field, '123');
+    expect(field.props.value).toBe('');
+
+    await userEvent.setup().paste(field, '123456');
+    expect(field.props.value).toBe('123456');
   });
 
   it('completes once when typed in full', async () => {

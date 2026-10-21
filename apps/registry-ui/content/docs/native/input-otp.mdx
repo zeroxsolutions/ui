@@ -64,9 +64,13 @@ requires, and the slots are hidden from it. The field opens the number pad unles
 
 Leave `value` out to let the field hold the code, or pass `value` and `onChange` to control it. `onChange` runs
 after each change the `pattern` accepts and `onComplete` once the code is `maxLength` long. A change that does
-not match `pattern` is refused. A paste, which is text that grows by more than one character at once, replaces
-the code: `pasteTransformer` runs on the pasted text alone, the characters `pattern` does not accept are dropped,
-and the rest is cut to `maxLength`. The patterns the file exports are `REGEXP_ONLY_DIGITS`, `REGEXP_ONLY_CHARS`
+not match `pattern` is refused, and the field is left as it was. `pattern` is tested against the whole code as it
+stands after the change, partial codes included, so a pattern that only a full code matches, such as `^\d{6}$`,
+refuses every keystroke before the sixth and takes the code only from a paste or an autofill. Write it as
+`^\d{1,6}$` to let the code be typed. `pasteTransformer` runs on every change. A text that fits in `maxLength` is the
+new code, which is how typing, deleting, an autofill and a short paste, appended to the code, arrive. A paste that
+overflows `maxLength`, being text that grows by more than one character at once, replaces the code: the text after
+the old code, or the whole text when it does not start with the old code, is cut to `maxLength`. The patterns the file exports are `REGEXP_ONLY_DIGITS`, `REGEXP_ONLY_CHARS`
 and `REGEXP_ONLY_DIGITS_AND_CHARS`.
 
 `aria-invalid` draws every slot with the destructive border. React Native does not announce it, so carry the

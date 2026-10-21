@@ -124,17 +124,16 @@ function InputOTP({
   }));
 
   // The caret is kept at the end of the code, so the OS reports a paste as the old code followed by the
-  // pasted text, and an autofill as the whole text; either way the pasted characters become the code.
-  const pastedCode = (text: string): string => {
-    const pasted = pasteTransformer(text.startsWith(value) ? text.slice(value.length) : text);
-    const accepts = new RegExp(pattern);
-    return Array.from(pasted)
-      .filter((char) => accepts.test(char))
-      .join('');
+  // pasted text. A text that fits is the new code, as typing, deleting and an autofill give it. A paste
+  // that overflows the code replaces it, so the old code is not kept in front of the pasted one.
+  const candidate = (text: string): string => {
+    const whole = pasteTransformer(text);
+    if (whole.length <= maxLength || text.length <= value.length + 1) return whole.slice(0, maxLength);
+    return pasteTransformer(text.startsWith(value) ? text.slice(value.length) : text).slice(0, maxLength);
   };
 
   const change = (text: string): void => {
-    const next = (text.length > value.length + 1 ? pastedCode(text) : text).slice(0, maxLength);
+    const next = candidate(text);
     if (next === value || (next.length > 0 && !new RegExp(pattern).test(next))) return;
     if (controlledValue === undefined) setHeldValue(next);
     onChange?.(next);
