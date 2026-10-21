@@ -756,3 +756,15 @@ describe('translateClasses for an alert', () => {
     },
   );
 });
+
+describe('translateClasses for a button group', () => {
+  it.each(STYLE_ENGINES)('spaces a group of groups apart for %s in %s', (engine, style) => {
+    const slots = parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8'));
+
+    expect(
+      translateClasses(slots.get('cn-button-group') ?? [], engine, 'view', 'slot=button-group', {
+        name: 'cn-button-group',
+      }),
+    ).toEqual({ classes: ['gap-2'], unknown: [] });
+  });
+});

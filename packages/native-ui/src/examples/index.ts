@@ -11,6 +11,7 @@ import { AvatarDemo } from './avatar-demo';
 import { BadgeDemo } from './badge-demo';
 import { BreadcrumbDemo } from './breadcrumb-demo';
 import { ButtonDemo } from './button-demo';
+import { ButtonGroupDemo } from './button-group-demo';
 import { CardDemo } from './card-demo';
 import { CheckboxDemo } from './checkbox-demo';
 import { CodeInputDemo } from './code-input-demo';
@@ -46,6 +47,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'badge-demo': BadgeDemo,
   'breadcrumb-demo': BreadcrumbDemo,
   'button-demo': ButtonDemo,
+  'button-group-demo': ButtonGroupDemo,
   'card-demo': CardDemo,
   'checkbox-demo': CheckboxDemo,
   'code-input-demo': CodeInputDemo,

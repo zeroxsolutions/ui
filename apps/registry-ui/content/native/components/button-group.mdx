@@ -1,0 +1,75 @@
+---
+title: Button group
+description: Buttons, and the text and separators beside them, joined into one control.
+---
+
+<NativePreview name="button-group-demo" />
+
+## Installation
+
+<InstallCommand name="button-group" />
+
+The CLI writes `components/ui/button-group.tsx`, installs [Text](/native/components/nativewind/text),
+[Icon](/native/components/nativewind/icon), [Separator](/native/components/nativewind/separator) and Utils,
+and adds `@rn-primitives/slot` and `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { ChevronDown } from 'lucide-react-native';
+
+import { Button } from '@/components/ui/button';
+import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group';
+import { Icon } from '@/components/ui/icon';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<ButtonGroup aria-label="Save">
+  <Button>
+    <Text>Save</Text>
+  </Button>
+  <ButtonGroupSeparator />
+  <Button size="icon" aria-label="More save options">
+    <Icon as={ChevronDown} />
+  </Button>
+</ButtonGroup>
+```
+
+## API reference
+
+### ButtonGroup
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type                         | Default        |
+| ------------- | ---------------------------- | -------------- |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` |
+
+It is a `group`; name it with `aria-label`. It is as wide as its children, and joins them: the edges two
+children share are square, and the border between them is drawn once. A ButtonGroup of ButtonGroups spaces
+them apart instead.
+
+### ButtonGroupText
+
+Takes every prop of React Native's `View`, plus `asChild`, which renders its single child in place of the
+View with the cell's classes merged on. It draws a muted bordered cell; its Text child takes the cell's text,
+and an Icon child is drawn at 16px.
+
+### ButtonGroupSeparator
+
+Takes every prop of [Separator](/native/components/nativewind/separator), vertical by default. It is drawn in
+the input colour and as tall as the group.
+
+### buttonGroupVariants
+
+The classes of each orientation.
+
+## Differences from upstream
+
+- Upstream joins the children with selectors on the group's children, which a device has no counterpart of.
+  The native ButtonGroup adds the joining classes to each direct child's `className`, so the joined children
+  are its direct children and each takes `className`, as Button, Input and ButtonGroupText do.
+- Upstream's ButtonGroupText takes a `render` prop. The native one takes `asChild`.
+- Upstream raises a focused child above its neighbours so its focus ring shows. The native items draw no
+  focus ring, so there is nothing to raise.

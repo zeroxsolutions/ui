@@ -8,6 +8,7 @@
     "icon",
     "---Actions---",
     "button",
+    "button-group",
     "toggle",
     "toggle-group",
     "---Forms---",

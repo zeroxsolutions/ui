@@ -107,14 +107,16 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
 );
 
 /**
- * A state of the control inside the part, which upstream selects with an arbitrary `has-[...]` the
- * dropped `has-[` rule would otherwise remove, and which the component learns from its control.
+ * A state of the control inside the part, or a direct child the part holds, such as an icon in an
+ * Alert or a group in a ButtonGroup, which upstream selects with an arbitrary `has-[...]` the dropped
+ * `has-[` rule would otherwise remove, and which the component learns from its control or its children.
  */
 const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
   Object.entries({
     'has-[[data-slot=input-group-control]:focus-visible]': 'focused',
     'has-[[data-slot][aria-invalid=true]]': 'invalid',
     'has-[>svg]': 'slot=icon',
+    'has-[>[data-slot=button-group]]': 'slot=button-group',
   }),
 );
 
