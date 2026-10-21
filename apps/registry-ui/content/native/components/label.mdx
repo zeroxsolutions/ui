@@ -16,14 +16,14 @@ The CLI writes `components/ui/label.tsx`, installs [Text](/native/components/nat
 
 ```tsx
 import { useRef } from 'react';
-import type { TextInput } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 ```
 
 ```tsx
-const input = useRef<TextInput>(null);
+const input = useRef<TextInputInstance>(null);
 
 <Label nativeID="email-label" onPress={() => input.current?.focus()}>
   Email
