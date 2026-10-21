@@ -2,27 +2,30 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { ThemeProvider } from 'next-themes';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { NativeEngine } from '@/types/native-engine';
+
 import { NativePreview } from './native-preview';
 
 const PROJECT_ID = '0f6c4b9e-2d1a-4c3b-9e8f-7a6b5c4d3e2f';
+const UNIWIND_PROJECT_ID = '5d2e8a14-7b3c-4f90-a1d6-3c8e9b0f2a47';
 
 const url = vi.hoisted(() => ({ search: '' }));
-const device = vi.hoisted(() => ({ projectId: null as string | null }));
+const device = vi.hoisted(() => ({ ids: {} as Record<string, string | null> }));
 
 vi.mock('next/navigation', () => ({
   useSearchParams: (): URLSearchParams => new URLSearchParams(url.search),
 }));
 
 vi.mock('@/constants/native-preview-device', () => ({
-  get EXPO_PROJECT_ID(): string | null {
-    return device.projectId;
+  get EXPO_PROJECT_IDS(): Record<string, string | null> {
+    return device.ids;
   },
   EXPO_GO_SDK: 58,
 }));
 
 beforeEach(() => {
   url.search = '';
-  device.projectId = PROJECT_ID;
+  device.ids = { nativewind: PROJECT_ID, uniwind: UNIWIND_PROJECT_ID };
 });
 
 afterEach(() => {
@@ -30,10 +33,10 @@ afterEach(() => {
   localStorage.clear();
 });
 
-function renderPreview(): void {
+function renderPreview(engine: NativeEngine = 'nativewind'): void {
   render(
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-      <NativePreview name="button-demo" code="export {};" language="tsx" />
+      <NativePreview engine={engine} name="button-demo" code="export {};" language="tsx" />
     </ThemeProvider>,
   );
 }
@@ -67,12 +70,38 @@ describe('NativePreview', () => {
     await choosePlatform('Native');
 
     const link = `exp://u.expo.dev/${PROJECT_ID}/--/button-demo?runtime-version=exposdk%3A58.0.0&channel-name=nova`;
-    expect(screen.getByRole('img', { name: 'QR code that opens this demo in Expo Go' })).toBeTruthy();
+    expect(
+      screen.getByRole('img', {
+        name: 'QR code that opens this demo in Expo Go',
+      }),
+    ).toBeTruthy();
     expect(screen.getByText('Scan to preview.')).toBeTruthy();
     expect(screen.getByRole('link', { name: link }).getAttribute('href')).toBe(link);
     expect(screen.getByRole('button', { name: 'Copy the link' })).toBeTruthy();
     expect(screen.getByText(/Expo Go for SDK 58/)).toBeTruthy();
     expect(screen.queryByTitle('Button demo preview')).toBeNull();
+  });
+
+  it("frames a Uniwind page's demo with the Uniwind export, and opens it from the Uniwind project", async () => {
+    url.search = '?style=nova';
+    renderPreview('uniwind');
+
+    expect(screen.getByTitle('Button demo preview').getAttribute('src')).toMatch(
+      /^\/native-preview-uniwind\/index\.html\?style=nova&/,
+    );
+
+    await choosePlatform('Native');
+
+    const link = `exp://u.expo.dev/${UNIWIND_PROJECT_ID}/--/button-demo?runtime-version=exposdk%3A58.0.0&channel-name=nova`;
+    expect(screen.getByRole('link', { name: link }).getAttribute('href')).toBe(link);
+  });
+
+  it('offers no Native platform on a page whose engine has no Expo project, while the other engine has one', () => {
+    device.ids.uniwind = null;
+
+    renderPreview('uniwind');
+
+    expect(screen.queryByRole('combobox', { name: 'Platform' })).toBeNull();
   });
 
   it('shows the web frame again once Web is picked back', async () => {
@@ -98,7 +127,7 @@ describe('NativePreview', () => {
 
   it('offers no Native platform while the preview app has no Expo project, whatever the reader picked before', () => {
     localStorage.setItem('zui:native-preview-platform', 'native');
-    device.projectId = null;
+    device.ids.nativewind = null;
 
     renderPreview();
 

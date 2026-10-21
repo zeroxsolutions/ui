@@ -1,5 +1,6 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
+import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
 import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
 import {
   SourceCodeBlockActions,
@@ -174,7 +175,10 @@ export function nativeMdxComponents(engine?: NativeEngine) {
     ...mdxComponents,
     a: ({ href, ...props }: ComponentProps<'a'>) =>
       engine ? (
-        mdxComponents.a({ href: href ? withNativeEngine(href, engine) : href, ...props })
+        mdxComponents.a({
+          href: href ? withNativeEngine(href, engine) : href,
+          ...props,
+        })
       ) : (
         <NativeDocsLink href={href} {...props} />
       ),
@@ -186,6 +190,8 @@ export function nativeMdxComponents(engine?: NativeEngine) {
     ComponentsJson: (props: Omit<ComponentProps<typeof ComponentsJson>, 'origin'>) => (
       <ComponentsJson origin={registryHomepage} {...props} />
     ),
-    NativePreview,
+    NativePreview: (props: Omit<ComponentProps<typeof NativePreview>, 'engine'>) => (
+      <NativePreview engine={engine ?? DEFAULT_NATIVE_ENGINE} {...props} />
+    ),
   };
 }

@@ -2,9 +2,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EXPO_GO_SDK, EXPO_PROJECT_ID } from '@/constants/native-preview-device';
+import { EXPO_GO_SDK } from '@/constants/native-preview-device';
+import type { NativeEngine } from '@/types/native-engine';
 
 import {
   expoGoUrl,
@@ -15,8 +16,11 @@ import {
   previewTheme,
 } from './native-preview';
 
-/** The native preview's app config, where `eas init` wrote the project its updates are published to. */
-const PREVIEW_APP_CONFIG = join(import.meta.dirname, '../../../native-preview/app.json');
+/** Each engine's preview app config, where `eas init` wrote the project its updates are published to. */
+const PREVIEW_APP_CONFIGS = {
+  nativewind: join(import.meta.dirname, '../../../native-preview/app.json'),
+  uniwind: join(import.meta.dirname, '../../../native-preview-uniwind/app.json'),
+};
 
 /** The module that posts the height message, in the preview screen both native previews draw. */
 const FRAME_HEIGHT_SOURCE = join(import.meta.dirname, '../../../../packages/native-ui/src/preview/frame-height.ts');
@@ -24,16 +28,40 @@ const FRAME_HEIGHT_SOURCE = join(import.meta.dirname, '../../../../packages/nati
 /** The workspace's catalog, whose `expo` catalog pins the SDK the native preview is built on. */
 const WORKSPACE_CATALOG = join(import.meta.dirname, '../../../../pnpm-workspace.yaml');
 
-const PROJECT_ID = '0f6c4b9e-2d1a-4c3b-9e8f-7a6b5c4d3e2f';
+const NATIVEWIND_ID = '0f6c4b9e-2d1a-4c3b-9e8f-7a6b5c4d3e2f';
+const UNIWIND_ID = '5d2e8a14-7b3c-4f90-a1d6-3c8e9b0f2a47';
+
+const device = vi.hoisted(() => ({ ids: {} as Record<string, string | null> }));
+
+vi.mock('@/constants/native-preview-device', async (importActual) => ({
+  ...(await importActual<typeof import('@/constants/native-preview-device')>()),
+  get EXPO_PROJECT_IDS(): Record<string, string | null> {
+    return device.ids;
+  },
+}));
+
+beforeEach(() => {
+  device.ids = { nativewind: NATIVEWIND_ID, uniwind: UNIWIND_ID };
+});
 
 describe('nativePreviewSrc', () => {
-  it("points at the style's export, with the demo and the theme in its query", () => {
-    expect(nativePreviewSrc({ style: 'nova', demo: 'button-demo', theme: 'dark' })).toBe(
-      '/native-preview/index.html?style=nova&demo=button-demo&theme=dark',
-    );
-    expect(nativePreviewSrc({ style: 'vega', demo: 'password-input-demo', theme: 'light' })).toBe(
-      '/native-preview/index.html?style=vega&demo=password-input-demo&theme=light',
-    );
+  it("points at the engine's export, with the style, the demo and the theme in its query", () => {
+    expect(
+      nativePreviewSrc({
+        engine: 'nativewind',
+        style: 'nova',
+        demo: 'button-demo',
+        theme: 'dark',
+      }),
+    ).toBe('/native-preview/index.html?style=nova&demo=button-demo&theme=dark');
+    expect(
+      nativePreviewSrc({
+        engine: 'uniwind',
+        style: 'vega',
+        demo: 'password-input-demo',
+        theme: 'light',
+      }),
+    ).toBe('/native-preview-uniwind/index.html?style=vega&demo=password-input-demo&theme=light');
   });
 });
 
@@ -55,8 +83,18 @@ describe('previewHeightOf', () => {
     expect(previewHeightOf({ type: 'other', height: 148 })).toBeUndefined();
     expect(previewHeightOf({ type: NATIVE_PREVIEW_HEIGHT_MESSAGE, height: '148' })).toBeUndefined();
     expect(previewHeightOf({ type: NATIVE_PREVIEW_HEIGHT_MESSAGE, height: 0 })).toBeUndefined();
-    expect(previewHeightOf({ type: NATIVE_PREVIEW_HEIGHT_MESSAGE, height: Number.NaN })).toBeUndefined();
-    expect(previewHeightOf({ type: NATIVE_PREVIEW_HEIGHT_MESSAGE, height: Infinity })).toBeUndefined();
+    expect(
+      previewHeightOf({
+        type: NATIVE_PREVIEW_HEIGHT_MESSAGE,
+        height: Number.NaN,
+      }),
+    ).toBeUndefined();
+    expect(
+      previewHeightOf({
+        type: NATIVE_PREVIEW_HEIGHT_MESSAGE,
+        height: Infinity,
+      }),
+    ).toBeUndefined();
     expect(previewHeightOf('148')).toBeUndefined();
     expect(previewHeightOf(null)).toBeUndefined();
   });
@@ -78,22 +116,23 @@ describe('nativePreviewTitle', () => {
 });
 
 describe('expoGoUrl', () => {
-  it("opens the demo in Expo Go from the style's channel of the project's updates", () => {
-    expect(expoGoUrl({ projectId: PROJECT_ID, style: 'nova', demo: 'button-demo' })).toBe(
-      `exp://u.expo.dev/${PROJECT_ID}/--/button-demo?runtime-version=exposdk%3A58.0.0&channel-name=nova`,
+  it("opens the demo in Expo Go from the style's channel of the engine's project", () => {
+    expect(expoGoUrl({ engine: 'nativewind', style: 'nova', demo: 'button-demo' })).toBe(
+      `exp://u.expo.dev/${NATIVEWIND_ID}/--/button-demo?runtime-version=exposdk%3A58.0.0&channel-name=nova`,
     );
+    expect(
+      expoGoUrl({
+        engine: 'uniwind',
+        style: 'vega',
+        demo: 'password-input-demo',
+      }),
+    ).toBe(`exp://u.expo.dev/${UNIWIND_ID}/--/password-input-demo?runtime-version=exposdk%3A58.0.0&channel-name=vega`);
   });
 
-  it('names the vega channel on a vega page, and the demo it was given', () => {
-    expect(expoGoUrl({ projectId: PROJECT_ID, style: 'vega', demo: 'password-input-demo' })).toBe(
-      `exp://u.expo.dev/${PROJECT_ID}/--/password-input-demo?runtime-version=exposdk%3A58.0.0&channel-name=vega`,
-    );
-  });
+  it('has no link while the engine has no project', () => {
+    device.ids.uniwind = null;
 
-  it('carries the project it was given', () => {
-    expect(expoGoUrl({ projectId: 'another-project', style: 'vega', demo: 'button-demo' })).toMatch(
-      /^exp:\/\/u\.expo\.dev\/another-project\/--\//,
-    );
+    expect(expoGoUrl({ engine: 'uniwind', style: 'vega', demo: 'button-demo' })).toBeNull();
   });
 });
 
@@ -105,12 +144,18 @@ describe('EXPO_GO_SDK', () => {
   });
 });
 
-describe('EXPO_PROJECT_ID', () => {
-  it('is the EAS project the native preview publishes its updates to, so the QR opens them', () => {
-    const config = JSON.parse(readFileSync(PREVIEW_APP_CONFIG, 'utf8')) as {
-      expo: { extra: { eas: { projectId: string } } };
-    };
+describe('EXPO_PROJECT_IDS', () => {
+  it.each(Object.entries(PREVIEW_APP_CONFIGS))(
+    'is the EAS project the %s preview publishes its updates to, so the QR opens them',
+    async (engine, path) => {
+      const config = JSON.parse(readFileSync(path, 'utf8')) as {
+        expo: { extra: { eas: { projectId: string } } };
+      };
+      const { EXPO_PROJECT_IDS } = await vi.importActual<typeof import('@/constants/native-preview-device')>(
+        '@/constants/native-preview-device',
+      );
 
-    expect(EXPO_PROJECT_ID).toBe(config.expo.extra.eas.projectId);
-  });
+      expect(EXPO_PROJECT_IDS[engine as NativeEngine]).toBe(config.expo.extra.eas.projectId);
+    },
+  );
 });

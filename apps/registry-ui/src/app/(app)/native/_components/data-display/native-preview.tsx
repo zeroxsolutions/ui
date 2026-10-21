@@ -13,13 +13,16 @@ import {
   SourceCodeBlockLineNumbers,
   SourceCodeBlockTitle,
 } from '@/components/data-display/source-code-block';
-import { EXPO_PROJECT_ID } from '@/constants/native-preview-device';
+import { EXPO_PROJECT_IDS } from '@/constants/native-preview-device';
 import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
+import type { NativeEngine } from '@/types/native-engine';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 
 import { NativePreviewPlatform, NativePreviewPlatformSelect } from './native-preview-platform';
 
 interface NativePreviewProps {
+  /** The engine the page is read under, whose preview app draws the demo; `nativeMdxComponents` sets it. */
+  engine: NativeEngine;
   /** A demo's name in `@zeroxsolutions/native-ui/examples`, such as `button-demo`. */
   name: string;
   /** The demo's source, its language and its lines as JSON, which `rehypeDocsCode` sets as the page compiles. */
@@ -31,10 +34,10 @@ interface NativePreviewProps {
 /**
  * A native component page's `<NativePreview name>`: the demo drawn live under its Preview tab, its
  * source under its Code tab, and beside the tabs a pick between drawing the demo on the web and a QR code
- * that opens it on a phone, offered only while the preview has an Expo project. Its source is read
+ * that opens it on a phone, offered only while the page's engine has an Expo project. Its source is read
  * as the page compiles, so it works only inside a native page; anywhere else it throws.
  */
-function NativePreview({ name, code, language, lines }: NativePreviewProps): ReactNode {
+function NativePreview({ engine, name, code, language, lines }: NativePreviewProps): ReactNode {
   if (code === undefined) throw new Error(`NativePreview: "${name}" has no source; only a native page reads it`);
 
   return (
@@ -44,12 +47,12 @@ function NativePreview({ name, code, language, lines }: NativePreviewProps): Rea
           <TabsTrigger value="preview">Preview</TabsTrigger>
           <TabsTrigger value="code">Code</TabsTrigger>
         </TabsList>
-        {EXPO_PROJECT_ID !== null && <NativePreviewPlatformSelect />}
+        {EXPO_PROJECT_IDS[engine] !== null && <NativePreviewPlatformSelect />}
       </div>
       {/* Kept mounted, so a look at the code and back does not load the frame again. */}
       <TabsContent value="preview" keepMounted className="mt-4">
         <ComponentPreview>
-          <NativePreviewPlatform demo={name} projectId={EXPO_PROJECT_ID} />
+          <NativePreviewPlatform demo={name} engine={engine} />
         </ComponentPreview>
       </TabsContent>
       <TabsContent value="code" className="mt-4">

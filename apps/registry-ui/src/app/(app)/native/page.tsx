@@ -50,7 +50,9 @@ export default function NativeHomePage(): ReactNode {
           </p>
           <div className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-backwards flex flex-wrap justify-center gap-3 delay-150 duration-200 ease-out motion-reduce:animate-none">
             <NativeEngineLink
-              href={nativeComponentsRoute.build({ engine: DEFAULT_NATIVE_ENGINE })}
+              href={nativeComponentsRoute.build({
+                engine: DEFAULT_NATIVE_ENGINE,
+              })}
               className={buttonVariants()}
             >
               Browse components
@@ -77,7 +79,7 @@ export default function NativeHomePage(): ReactNode {
             <ComponentPreview key={item.name} className="h-full">
               {/* Takes the row's height, so every caption in a row sits on one line. */}
               <div className="flex-1">
-                <NativePreviewFrame demo={`${item.name}-demo`} />
+                <NativePreviewFrame engine={DEFAULT_NATIVE_ENGINE} demo={`${item.name}-demo`} />
               </div>
               <ComponentPreviewCaption>
                 <NativeEngineLink href={item.url} className="underline underline-offset-4">

@@ -8,26 +8,25 @@ import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
 import { useCurrentStyle } from '@/hooks/use-current-style';
 import { expoGoUrl } from '@/lib/native-preview';
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
+import type { NativeEngine } from '@/types/native-engine';
 import type { PlatformStyle } from '@/types/platform';
 
 interface NativePreviewQrCodeProps {
   /** A demo's name in `@zeroxsolutions/native-ui/examples`, such as `button-demo`. */
   demo: string;
-  /** The EAS project the preview's updates are published to. */
-  projectId: string;
+  /** The engine of the page, whose EAS project holds the updates. */
+  engine: NativeEngine;
 }
 
 /**
  * A QR code that opens `demo` in Expo Go, in the style the page shows, and under it the same link as
  * text to copy, with the Expo Go release a phone has to have.
  */
-function NativePreviewQrCode({ demo, projectId }: NativePreviewQrCodeProps): ReactNode {
+function NativePreviewQrCode({ demo, engine }: NativePreviewQrCodeProps): ReactNode {
   return (
     // Until the search params are read on the client, a statically rendered page links the default style.
-    <Suspense
-      fallback={<NativePreviewQrCodeBody demo={demo} projectId={projectId} style={DEFAULT_PLATFORM_STYLE.native} />}
-    >
-      <NativePreviewQrCodeFromUrl demo={demo} projectId={projectId} />
+    <Suspense fallback={<NativePreviewQrCodeBody demo={demo} engine={engine} style={DEFAULT_PLATFORM_STYLE.native} />}>
+      <NativePreviewQrCodeFromUrl demo={demo} engine={engine} />
     </Suspense>
   );
 }
@@ -38,10 +37,11 @@ function NativePreviewQrCodeFromUrl(props: NativePreviewQrCodeProps): ReactNode 
 
 function NativePreviewQrCodeBody({
   demo,
-  projectId,
+  engine,
   style,
 }: NativePreviewQrCodeProps & { style: PlatformStyle<'native'> }): ReactNode {
-  const url = expoGoUrl({ projectId, style, demo });
+  const url = expoGoUrl({ engine, style, demo });
+  if (url === null) return null;
 
   return (
     <div data-slot="native-preview-qr-code" className="flex flex-col items-center gap-3 px-4 py-10 text-center">

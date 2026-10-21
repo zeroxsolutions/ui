@@ -7,20 +7,27 @@ import { expect, test } from './test/fixtures';
 import { DRAWN, frame, inside } from './test/native-preview';
 
 const BUTTON = '/native/components/nativewind/button';
+const UNIWIND_BUTTON = '/native/components/uniwind/button';
 
-/** The EAS project the native preview publishes its updates to, as `eas init` wrote it into the app's config. */
-const EXPO_PROJECT_ID = (
-  JSON.parse(readFileSync(join(__dirname, '../../native-preview/app.json'), 'utf8')) as {
+/** The EAS project an engine's preview publishes its updates to, as `eas init` wrote it into the app's config. */
+function projectIdOf(app: 'native-preview' | 'native-preview-uniwind'): string {
+  const config = JSON.parse(readFileSync(join(__dirname, `../../${app}/app.json`), 'utf8')) as {
     expo: { extra: { eas: { projectId: string } } };
-  }
-).expo.extra.eas.projectId;
+  };
+  return config.expo.extra.eas.projectId;
+}
+
+const EXPO_PROJECT_ID = projectIdOf('native-preview');
+const UNIWIND_PROJECT_ID = projectIdOf('native-preview-uniwind');
 
 /** Picks `style` from the header's picker; the menu opens only once the page has hydrated, so it is clicked until it does. */
 async function pickStyle(page: Page, style: string): Promise<void> {
   const picker = page.getByRole('button', { name: /^Style/ });
   await expect(async () => {
     await picker.click();
-    await expect(page.getByRole('menuitem', { name: style })).toBeVisible({ timeout: 1_000 });
+    await expect(page.getByRole('menuitem', { name: style })).toBeVisible({
+      timeout: 1_000,
+    });
   }).toPass();
   await page.getByRole('menuitem', { name: style }).click();
 }
@@ -39,9 +46,10 @@ test.describe('in a light colour scheme', () => {
   test("a native component page draws its demo in a frame, and the frame grows to the demo's height", async ({
     page,
   }) => {
-    for (const [path, demo, label] of [
-      [BUTTON, 'Button demo', 'Continue'],
-      ['/native/components/uniwind/card', 'Card demo', 'Pay'],
+    // The same neutral, which the Uniwind export serialises in the lab space Tailwind 4 writes it in.
+    for (const [path, demo, label, background] of [
+      [BUTTON, 'Button demo', 'Continue', 'rgb(23, 23, 23)'],
+      ['/native/components/uniwind/card', 'Card demo', 'Pay', 'lab(7.78201 -0.0000149012 0)'],
     ] as const) {
       await page.goto(path);
 
@@ -49,7 +57,7 @@ test.describe('in a light colour scheme', () => {
       // Drawn light, on a page that is light.
       await expect(inside(page, demo).getByRole('button', { name: label, exact: true })).toHaveCSS(
         'background-color',
-        'rgb(23, 23, 23)',
+        background,
       );
       // The frame takes the demo's height: nothing in it scrolls, and no empty band sits under the demo.
       await expect
@@ -74,7 +82,10 @@ test.describe('in a light colour scheme', () => {
 
   test('picking another style reloads the frame in that style', async ({ page }) => {
     await page.goto(BUTTON);
-    const continueButton = inside(page, 'Button demo').getByRole('button', { name: 'Continue', exact: true });
+    const continueButton = inside(page, 'Button demo').getByRole('button', {
+      name: 'Continue',
+      exact: true,
+    });
     await expect(continueButton).toHaveCSS('height', '36px', DRAWN);
 
     await pickStyle(page, 'Nova');
@@ -96,16 +107,52 @@ test.describe('in a light colour scheme', () => {
     // The picker opens only once the page has hydrated, so it is clicked until it does.
     await expect(async () => {
       await platform.click();
-      await expect(page.getByRole('option', { name: 'Native' })).toBeVisible({ timeout: 1_000 });
+      await expect(page.getByRole('option', { name: 'Native' })).toBeVisible({
+        timeout: 1_000,
+      });
     }).toPass();
     await page.getByRole('option', { name: 'Native' }).click();
 
-    await expect(page.getByRole('img', { name: 'QR code that opens this demo in Expo Go' })).toBeVisible();
+    await expect(
+      page.getByRole('img', {
+        name: 'QR code that opens this demo in Expo Go',
+      }),
+    ).toBeVisible();
     await expect(page.getByText('Scan to preview.')).toBeVisible();
     await expect(frame(page, 'Button demo')).toHaveCount(0);
     await expect(page.getByRole('link', { name: /^exp:/ })).toHaveAttribute(
       'href',
       `exp://u.expo.dev/${EXPO_PROJECT_ID}/--/button-demo?runtime-version=exposdk%3A58.0.0&channel-name=nova`,
+    );
+  });
+
+  test("a Uniwind page frames the Uniwind export, and its QR opens the Uniwind project's updates", async ({ page }) => {
+    await page.goto(`${UNIWIND_BUTTON}?style=nova`);
+
+    await expect(frame(page, 'Button demo')).toHaveAttribute(
+      'src',
+      /^\/native-preview-uniwind\/index\.html\?style=nova&demo=button-demo&/,
+    );
+    await expect(
+      inside(page, 'Button demo').getByRole('button', {
+        name: 'Continue',
+        exact: true,
+      }),
+    ).toBeVisible(DRAWN);
+
+    const platform = page.getByRole('combobox', { name: 'Platform' });
+    // The picker opens only once the page has hydrated, so it is clicked until it does.
+    await expect(async () => {
+      await platform.click();
+      await expect(page.getByRole('option', { name: 'Native' })).toBeVisible({
+        timeout: 1_000,
+      });
+    }).toPass();
+    await page.getByRole('option', { name: 'Native' }).click();
+
+    await expect(page.getByRole('link', { name: /^exp:/ })).toHaveAttribute(
+      'href',
+      `exp://u.expo.dev/${UNIWIND_PROJECT_ID}/--/button-demo?runtime-version=exposdk%3A58.0.0&channel-name=nova`,
     );
   });
 
@@ -130,7 +177,11 @@ test.describe('in a light colour scheme', () => {
 
   test('a frame whose page is missing says so at once, not after the wait for a slow draw', async ({ page }) => {
     await page.route('**/native-preview/**', (route) =>
-      route.fulfill({ status: 404, contentType: 'text/html', body: '<!doctype html><title>Not found</title>' }),
+      route.fulfill({
+        status: 404,
+        contentType: 'text/html',
+        body: '<!doctype html><title>Not found</title>',
+      }),
     );
     await page.goto(BUTTON);
 
@@ -146,14 +197,19 @@ test.describe('in a dark colour scheme', () => {
 
   test("the site's dark mode reaches the frame, and switching the site to light redraws it light", async ({ page }) => {
     await page.goto(BUTTON);
-    const continueButton = inside(page, 'Button demo').getByRole('button', { name: 'Continue', exact: true });
+    const continueButton = inside(page, 'Button demo').getByRole('button', {
+      name: 'Continue',
+      exact: true,
+    });
     await expect(continueButton).toHaveCSS('background-color', 'rgb(229, 229, 229)', DRAWN);
 
     const toggle = page.getByRole('button', { name: 'Toggle theme' });
     // The switch listens only once the page has hydrated, so it is clicked until the theme changes.
     await expect(async () => {
       await toggle.click();
-      await expect(page.locator('html')).not.toHaveClass(/\bdark\b/, { timeout: 1_000 });
+      await expect(page.locator('html')).not.toHaveClass(/\bdark\b/, {
+        timeout: 1_000,
+      });
     }).toPass();
 
     await expect(continueButton).toHaveCSS('background-color', 'rgb(23, 23, 23)', DRAWN);

@@ -5,6 +5,7 @@ import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type CSSPr
 
 import { useCurrentStyle } from '@/hooks/use-current-style';
 import { nativePreviewSrc, nativePreviewTitle, previewHeightOf, previewTheme } from '@/lib/native-preview';
+import type { NativeEngine } from '@/types/native-engine';
 import { Spinner } from '@/registry/bases/base-ui/ui/spinner';
 
 /** The frame's height, in CSS pixels, until the preview posts its own: the web preview stage's `h-72`. */
@@ -20,21 +21,23 @@ const PREVIEW_ROOT_ID = 'root';
 const DRAW_TIMEOUT_MS = 15_000;
 
 interface NativePreviewFrameProps {
+  /** The engine of the page, whose preview app draws the demo. */
+  engine: NativeEngine;
   /** A demo's name in `@zeroxsolutions/native-ui/examples`, such as `button-demo`. */
   demo: string;
 }
 
 /**
- * A native demo drawn by the native preview, in a frame as tall as the demo, in the style the page
+ * A native demo drawn by the page's engine's native preview, in a frame as tall as the demo, in the style the page
  * shows and the site's light or dark mode. A change of either loads the frame again. It shows a spinner
  * until the demo has drawn, and says so, with a link to the preview's own page, if it never does.
  */
-function NativePreviewFrame({ demo }: NativePreviewFrameProps): ReactNode {
+function NativePreviewFrame({ engine, demo }: NativePreviewFrameProps): ReactNode {
   return (
     // The style is read from the search params, and the mode once the page has hydrated; until both
     // are known the frame is left out, so it loads once, in the reader's style and mode.
     <Suspense fallback={<NativePreviewFrameLoading />}>
-      <NativePreviewFrameFromPage demo={demo} />
+      <NativePreviewFrameFromPage engine={engine} demo={demo} />
     </Suspense>
   );
 }
@@ -43,7 +46,7 @@ function subscribeToNothing(): () => void {
   return () => undefined;
 }
 
-function NativePreviewFrameFromPage({ demo }: NativePreviewFrameProps): ReactNode {
+function NativePreviewFrameFromPage({ engine, demo }: NativePreviewFrameProps): ReactNode {
   const style = useCurrentStyle('native');
   const { resolvedTheme } = useTheme();
   const hydrated = useSyncExternalStore(
@@ -55,7 +58,12 @@ function NativePreviewFrameFromPage({ demo }: NativePreviewFrameProps): ReactNod
 
   return (
     <NativePreviewFrameDocument
-      src={nativePreviewSrc({ style, demo, theme: previewTheme(resolvedTheme) })}
+      src={nativePreviewSrc({
+        engine,
+        style,
+        demo,
+        theme: previewTheme(resolvedTheme),
+      })}
       title={nativePreviewTitle(demo)}
     />
   );
@@ -69,7 +77,10 @@ function NativePreviewFrameDocument({ src, title }: { src: string; title: string
   // Kept across a change of `src`, so a new style or mode reloads the frame without it jumping back to
   // the fallback height first.
   const [height, setHeight] = useState(FALLBACK_HEIGHT);
-  const [outcome, setOutcome] = useState<{ src: string; status: Exclude<FrameStatus, 'loading'> }>();
+  const [outcome, setOutcome] = useState<{
+    src: string;
+    status: Exclude<FrameStatus, 'loading'>;
+  }>();
   const status: FrameStatus = outcome?.src === src ? outcome.status : 'loading';
 
   useEffect(() => {

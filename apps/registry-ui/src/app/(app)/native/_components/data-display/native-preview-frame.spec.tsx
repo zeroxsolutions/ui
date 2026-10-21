@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { NATIVE_PREVIEW_HEIGHT_MESSAGE } from '@/lib/native-preview';
 
+import type { NativeEngine } from '@/types/native-engine';
+
 import { NativePreviewFrame } from './native-preview-frame';
 
 const url = vi.hoisted(() => ({ search: '' }));
@@ -22,10 +24,10 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-function renderFrame(theme: 'light' | 'dark' = 'light'): void {
+function renderFrame(theme: 'light' | 'dark' = 'light', engine: NativeEngine = 'nativewind'): void {
   render(
     <ThemeProvider attribute="class" defaultTheme={theme} enableSystem={false}>
-      <NativePreviewFrame demo="button-demo" />
+      <NativePreviewFrame engine={engine} demo="button-demo" />
     </ThemeProvider>,
   );
 }
@@ -37,7 +39,13 @@ function frame(): HTMLIFrameElement {
 /** A message as the preview page in the frame posts it to the site. */
 function postFromFrame(data: unknown, source: MessageEventSource | null = frame().contentWindow): void {
   act(() => {
-    window.dispatchEvent(new MessageEvent('message', { data, source, origin: window.location.origin }));
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data,
+        source,
+        origin: window.location.origin,
+      }),
+    );
   });
 }
 
@@ -48,6 +56,16 @@ describe('NativePreviewFrame', () => {
     renderFrame('dark');
 
     expect(frame().getAttribute('src')).toBe('/native-preview/index.html?style=nova&demo=button-demo&theme=dark');
+  });
+
+  it("frames a Uniwind page's demo with the Uniwind export", () => {
+    url.search = '?style=nova';
+
+    renderFrame('light', 'uniwind');
+
+    expect(frame().getAttribute('src')).toBe(
+      '/native-preview-uniwind/index.html?style=nova&demo=button-demo&theme=light',
+    );
   });
 
   it('frames the default style in light where the page names no style and the site is light', () => {

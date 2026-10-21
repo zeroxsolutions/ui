@@ -2,8 +2,10 @@
 
 import { useId, type ReactNode } from 'react';
 
+import { EXPO_PROJECT_IDS } from '@/constants/native-preview-device';
 import { PREVIEW_PLATFORM_LABELS, PREVIEW_PLATFORMS } from '@/constants/preview-platforms';
 import { rememberPreviewPlatform, useRememberedPreviewPlatform } from '@/hooks/use-remembered-choice';
+import type { NativeEngine } from '@/types/native-engine';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/registry/bases/base-ui/ui/select';
 
 import { NativePreviewFrame } from './native-preview-frame';
@@ -17,8 +19,8 @@ const PLATFORM_ITEMS = PREVIEW_PLATFORMS.map((platform) => ({
 interface NativePreviewPlatformProps {
   /** A demo's name in `@zeroxsolutions/native-ui/examples`, such as `button-demo`. */
   demo: string;
-  /** The EAS project the preview's updates are published to; with `null` the demo is only ever shown on the web. */
-  projectId: string | null;
+  /** The engine of the page; while its preview app has no EAS project the demo is only ever shown on the web. */
+  engine: NativeEngine;
 }
 
 /**
@@ -26,11 +28,12 @@ interface NativePreviewPlatformProps {
  * web, or as a QR code that opens it in Expo Go. The pick is remembered in the browser rather than in the
  * URL, so every native page shows the same platform and a shared link opens on the web.
  */
-function NativePreviewPlatform({ demo, projectId }: NativePreviewPlatformProps): ReactNode {
+function NativePreviewPlatform({ demo, engine }: NativePreviewPlatformProps): ReactNode {
   const platform = useRememberedPreviewPlatform();
 
-  if (platform === 'native' && projectId !== null) return <NativePreviewQrCode demo={demo} projectId={projectId} />;
-  return <NativePreviewFrame demo={demo} />;
+  if (platform === 'native' && EXPO_PROJECT_IDS[engine] !== null)
+    return <NativePreviewQrCode demo={demo} engine={engine} />;
+  return <NativePreviewFrame demo={demo} engine={engine} />;
 }
 
 /** The picker between the platforms a `NativePreviewPlatform` shows its demo on, named Platform. */
