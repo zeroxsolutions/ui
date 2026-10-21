@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { useState } from 'react';
 import { AccessibilityInfo, Animated, StyleSheet } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
@@ -23,11 +23,22 @@ function ToggledSwitch({
   );
 }
 
-/** The thumb, which the switch draws as its one child. */
-function thumbOf(control: ReturnType<typeof screen.getByRole>) {
-  const [thumb] = control.children;
-  if (typeof thumb === 'string' || thumb === undefined) throw new Error('The switch drew no thumb');
-  return thumb;
+type HostElement = ReturnType<typeof screen.getByRole>;
+
+function onlyChildOf(element: HostElement) {
+  const [child] = element.children;
+  if (typeof child === 'string' || child === undefined) throw new Error('The element drew no child');
+  return child;
+}
+
+/** The wrapper that carries the slide's offset, which the switch draws as its one child. */
+function slideOf(control: HostElement) {
+  return onlyChildOf(control);
+}
+
+/** The thumb inside the wrapper, which carries the classes. */
+function thumbOf(control: HostElement) {
+  return onlyChildOf(slideOf(control));
 }
 
 describe('Switch', () => {
@@ -104,7 +115,7 @@ describe('Switch', () => {
     const stoppedTiming = () =>
       jest.spyOn(Animated, 'timing').mockReturnValue({ start: jest.fn(), stop: jest.fn(), reset: jest.fn() });
     const offsetOf = () => {
-      const [{ translateX }] = StyleSheet.flatten(thumbOf(screen.getByRole('switch')).props.style).transform as [
+      const [{ translateX }] = StyleSheet.flatten(slideOf(screen.getByRole('switch')).props.style).transform as [
         { translateX: number },
       ];
       return translateX;
@@ -134,6 +145,51 @@ describe('Switch', () => {
       await user.press(screen.getByRole('switch', { name: 'Wi-Fi' }));
 
       expect(offsetOf()).toBe(travel);
+    });
+
+    it('keeps the checked translate on the thumb and the offset on its wrapper, so neither replaces the other', async () => {
+      const user = userEvent.setup();
+      await render(<ToggledSwitch />);
+      const control = screen.getByRole('switch', { name: 'Wi-Fi' });
+
+      await user.press(control);
+
+      expect(emittedClasses(thumbOf(control).props.className)).toContain('translate-x-[14px]');
+      expect(thumbOf(control).props.style).toBeUndefined();
+      expect(emittedClasses(slideOf(control).props.className)).toEqual([]);
+    });
+
+    it('settles the offset at 0 once the slide has run', async () => {
+      // The native driver runs nowhere in Jest, so the slide runs on the JS driver here.
+      const timing = Animated.timing;
+      jest
+        .spyOn(Animated, 'timing')
+        .mockImplementation((value, config) => timing(value, { ...config, useNativeDriver: false }));
+      const user = userEvent.setup();
+      await render(<ToggledSwitch />);
+
+      await user.press(screen.getByRole('switch', { name: 'Wi-Fi' }));
+      await act(() => new Promise((resolve) => setTimeout(resolve, 300)));
+
+      expect(offsetOf()).toBe(0);
+    });
+
+    it('settles the offset at 0 when reduced motion is turned on mid-slide', async () => {
+      let setReduced: (reduced: boolean) => void = () => {};
+      jest.spyOn(AccessibilityInfo, 'addEventListener').mockImplementation((_event, handler) => {
+        setReduced = handler as (reduced: boolean) => void;
+        return { remove: jest.fn() };
+      });
+      stoppedTiming();
+      const user = userEvent.setup();
+      await render(<ToggledSwitch />);
+
+      await user.press(screen.getByRole('switch', { name: 'Wi-Fi' }));
+      expect(offsetOf()).toBe(-14);
+
+      await act(() => setReduced(true));
+
+      expect(offsetOf()).toBe(0);
     });
 
     it('does not slide when the system asks for reduced motion', async () => {

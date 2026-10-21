@@ -43,8 +43,6 @@ const switchThumbVariants = cva('cn-switch-thumb', {
 const THUMB_TRAVEL = { default: 14, sm: 10 } as const;
 const THUMB_SLIDE_MS = 150;
 
-const AnimatedThumb = Animated.createAnimatedComponent(SwitchPrimitive.Thumb);
-
 /** Whether the system asks for less motion, kept up to date while the component is mounted. */
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -63,8 +61,8 @@ function useReducedMotion(): boolean {
 }
 
 /**
- * The thumb. The classes put it at its end at once, so on a change it starts back at the end it
- * came from and slides to its own, unless the system asks for reduced motion.
+ * The thumb. Its classes put it at its end at once, so on a change its wrapper starts back at the end
+ * it came from and slides to its own, unless the system asks for reduced motion.
  */
 function SwitchThumb({ size, checked }: { size: 'default' | 'sm'; checked: boolean }): ReactNode {
   const offset = useRef(new Animated.Value(0)).current;
@@ -72,9 +70,14 @@ function SwitchThumb({ size, checked }: { size: 'default' | 'sm'; checked: boole
   const reduced = useReducedMotion();
 
   useLayoutEffect(() => {
+    if (reduced) {
+      // Settle where the classes put the thumb, also when the setting flips mid-slide.
+      offset.setValue(0);
+      previous.current = checked;
+      return;
+    }
     if (previous.current === checked) return;
     previous.current = checked;
-    if (reduced) return;
     const travel = THUMB_TRAVEL[size];
     offset.setValue(checked ? -travel : travel);
     const slide = Animated.timing(offset, {
@@ -87,8 +90,12 @@ function SwitchThumb({ size, checked }: { size: 'default' | 'sm'; checked: boole
     return () => slide.stop();
   }, [checked, size, reduced, offset]);
 
+  // The wrapper carries only the slide's offset and the thumb only its classes, whose translate puts it
+  // at its end; one element holding both transforms would have one replace the other.
   return (
-    <AnimatedThumb className={switchThumbVariants({ size, checked })} style={{ transform: [{ translateX: offset }] }} />
+    <Animated.View style={{ transform: [{ translateX: offset }] }}>
+      <SwitchPrimitive.Thumb className={switchThumbVariants({ size, checked })} />
+    </Animated.View>
   );
 }
 
