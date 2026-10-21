@@ -30,6 +30,7 @@ import { ComponentsList } from '@/app/(app)/docs/[[...slug]]/_components/data-di
 import { ComponentSource } from '@/app/(app)/docs/[[...slug]]/_components/data-display/component-source';
 import { ExamplePreview } from '@/app/(app)/docs/[[...slug]]/_components/data-display/example-preview';
 import { InitCommand } from '@/app/(app)/docs/[[...slug]]/_components/data-display/init-command';
+import { WebComponentsJson } from '@/app/(app)/docs/[[...slug]]/_components/data-display/web-components-json';
 import { ComponentsJson } from '@/app/(app)/native/_components/data-display/components-json';
 import { EngineTab, EngineTabs } from '@/app/(app)/native/_components/data-display/engine-tabs';
 import { InstallCommand } from '@/app/(app)/native/_components/data-display/install-command';
@@ -159,6 +160,7 @@ export const mdxComponents = {
   ),
   ComponentsList: () => <ComponentsList className="mt-8" />,
   InitCommand,
+  WebComponentsJson: () => <WebComponentsJson origin={registryHomepage} />,
 };
 
 /**

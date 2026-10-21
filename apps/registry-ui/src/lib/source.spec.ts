@@ -677,7 +677,8 @@ describe('content/docs', () => {
 
   it('tells an app to declare the @zui registry before it installs an item', () => {
     const installation = readFileSync(join(CONTENT, 'installation.mdx'), 'utf8');
-    expect(installation).toContain('"@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"');
+    // The block prints the `@zui` entry; the e2e reads it off the page.
+    expect(installation).toContain('<WebComponentsJson />');
     expect(installation).toContain('An item that uses another zui item installs only with this entry.');
   });
 

@@ -17,15 +17,9 @@ classes are drawn in nova. An app that has no `components.json` gets one on Base
 
 ## Add the zui registry
 
-`components.json` names this registry under `registries`:
+`components.json` names this registry under `registries`, beside the `style` the init wrote:
 
-```json
-{
-  "registries": {
-    "@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"
-  }
-}
-```
+<WebComponentsJson />
 
 The CLI fills `{style}` from the app's `style`, so every item comes in that style. Without the entry an item can
 still be added by its URL, `https://ui.zeroxsolutions.com/r/styles/base-nova/<name>.json`.

@@ -49,10 +49,15 @@ test('the picker writes no ?style= for the default, and a page with none shows t
   expect(await installUrl(page)).toContain('/r/styles/nativewind-nova/card.json');
 });
 
-test("the web installation's init command follows the web style picked", async ({ page }) => {
+test("the web installation's init command and components.json follow the web style picked", async ({ page }) => {
   await page.goto('/docs/installation?style=rhea');
 
   await expect(page.getByText('pnpm dlx shadcn@latest init --base base --preset rhea')).toBeVisible();
+  // The highlighter splits the JSON into one span per token, so the line is matched by its text.
+  await expect(page.getByRole('main')).toContainText('"style": "base-rhea"');
+  await expect(page.getByRole('main')).toContainText(
+    '"@zui": "https://ui.zeroxsolutions.com/r/styles/{style}/{name}.json"',
+  );
 });
 
 test.describe('on a phone-width header', () => {
