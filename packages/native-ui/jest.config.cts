@@ -12,6 +12,8 @@ module.exports = {
     '^(?:[.]|[.][.]/[.][.]/ui)/icon$': '<rootDir>/src/registry/ui/icon.nativewind.tsx',
     '^[.]/input$': '<rootDir>/src/registry/ui/input.nativewind.tsx',
     '^[.]/skeleton$': '<rootDir>/src/registry/ui/skeleton.nativewind.tsx',
+    // The demos import the items as an app does; build-registry writes NativeWind's Vega sources there.
+    '^@/(.*)$': '<rootDir>/dist/src/nativewind-vega/$1',
   },
   // jest-expo's preset list plus lucide-react-native and @rn-primitives. Under pnpm a package sits in
   // a nested node_modules the preset leaves untransformed unless it names the package;

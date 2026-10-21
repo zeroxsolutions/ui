@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "out-tsc/examples",
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    // The demos import the items as an app does; build-registry writes NativeWind's Vega sources there.
+    "paths": { "@/*": ["./dist/src/nativewind-vega/*"] },
+    "tsBuildInfoFile": "out-tsc/examples/tsconfig.examples.tsbuildinfo"
+  },
+  "files": ["src/nativewind-env.d.ts"],
+  "include": [
+    "src/examples/**/*.ts",
+    "src/examples/**/*.tsx",
+    "dist/src/nativewind-vega/**/*.ts",
+    "dist/src/nativewind-vega/**/*.tsx"
+  ],
+  "exclude": ["src/examples/**/*.spec.ts", "src/examples/**/*.spec.tsx"]
+}

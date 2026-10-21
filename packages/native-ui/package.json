@@ -10,6 +10,11 @@
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./examples": {
+      "types": "./src/examples/index.ts",
+      "import": "./src/examples/index.ts",
+      "default": "./src/examples/index.ts"
+    },
     "./package.json": "./package.json"
   },
   "dependencies": {
@@ -87,6 +92,12 @@
       "test": {
         "dependsOn": [
           "^build",
+          "build-registry"
+        ]
+      },
+      "typecheck": {
+        "dependsOn": [
+          "^typecheck",
           "build-registry"
         ]
       },
