@@ -54,3 +54,31 @@ test("the web installation's init command follows the web style picked", async (
 
   await expect(page.getByText('pnpm dlx shadcn@latest init --base base --preset rhea')).toBeVisible();
 });
+
+test.describe('on a phone-width header', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  /** Opens the menu sheet; its button listens only once the page has hydrated, so it is clicked until the sheet opens. */
+  async function openMenu(page: Page): Promise<Locator> {
+    const sheet = page.getByRole('dialog', { name: 'Menu' });
+    await expect(async () => {
+      await page.getByRole('button', { name: 'Menu' }).click();
+      await expect(sheet).toBeVisible({ timeout: 1_000 });
+    }).toPass();
+    return sheet;
+  }
+
+  test('the menu sheet switches the engine and picks the style', async ({ page }) => {
+    await page.goto(BUTTON);
+
+    const sheet = await openMenu(page);
+    await sheet.getByRole('navigation', { name: 'Engine' }).getByRole('link', { name: 'Uniwind' }).click();
+    await expect(page).toHaveURL('/native/components/uniwind/button');
+
+    await openMenu(page);
+    await pickStyle(page, 'Nova');
+
+    await expect(page).toHaveURL('/native/components/uniwind/button?style=nova');
+    expect(await installUrl(page)).toContain('/r/styles/uniwind-nova/button.json');
+  });
+});

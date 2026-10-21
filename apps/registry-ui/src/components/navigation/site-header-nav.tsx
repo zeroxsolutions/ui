@@ -41,7 +41,7 @@ function SiteHeaderNav({ pages, trees }: SiteHeaderNavProps): ReactNode {
   return (
     <>
       <div className="lg:hidden">
-        <MobileNav tree={tree} items={items} />
+        <MobileNav tree={tree} items={items} platform={location.platform} />
       </div>
       <MainNav items={items} className="hidden lg:flex" />
       <div className="ml-auto flex items-center gap-2">
