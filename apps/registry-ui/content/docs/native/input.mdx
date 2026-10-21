@@ -37,7 +37,7 @@ Takes every prop React Native's `TextInput` takes, plus:
 
 The field takes the focus border while it holds focus. `aria-invalid` draws the destructive border.
 React Native does not announce it, so carry the error in `accessibilityHint` or in a Text the user can reach.
-`editable={false}` dims it and announces it disabled.
+`editable={false}` dims it, tints it in the input colour on Nova, and announces it disabled.
 
 The placeholder colour differs by engine. The NativeWind file draws it through the `placeholder:` variant. The
 Uniwind file draws it through `placeholderTextColorClassName`, which takes an `accent-` class.

@@ -576,6 +576,38 @@ describe('translateClasses for an input group', () => {
   });
 });
 
+describe('translateClasses for a text field', () => {
+  const vega = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));
+  const nova = parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8'));
+  const FIELD_SLOTS = ['cn-input', 'cn-textarea'] as const;
+  const cases = FIELD_SLOTS.flatMap((name) =>
+    (['nativewind', 'uniwind'] as const).map((engine) => [name, engine] as const),
+  );
+
+  it.each(cases)(
+    "puts Nova's disabled tint on %s behind the disabled state, which a read-only TextInput applies, for %s",
+    (name, engine) => {
+      const classes = nova.get(name) ?? [];
+
+      expect(translateClasses(classes, engine, 'view', 'disabled', { name }).classes).toEqual([
+        'bg-input/50',
+        'dark:bg-input/80',
+      ]);
+      expect(
+        translateClasses(classes, engine, 'view', '', { name }).classes.filter((cls) => cls.includes('disabled:')),
+      ).toEqual([]);
+    },
+  );
+
+  it.each(FIELD_SLOTS)("draws nothing behind the disabled state of Vega's %s", (name) => {
+    expect(translateClasses(vega.get(name) ?? [], 'nativewind', 'view', 'disabled', { name }).classes).toEqual([]);
+  });
+
+  it("keeps a disabled: class as the Pressable's own when the slot is not named", () => {
+    expect(translateClasses(nova.get('cn-input') ?? [], 'uniwind', 'view').classes).toContain('disabled:bg-input/50');
+  });
+});
+
 describe('translateClasses for an input otp caret', () => {
   it.each(['nativewind', 'uniwind'] as const)(
     'drops the caret-blink animation neither engine defines and keeps the line for %s',

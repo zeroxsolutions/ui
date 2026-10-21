@@ -89,4 +89,15 @@ describe('Input', () => {
     expect(classesOf('field')).toContain('h-12');
     expect(classesOf('field')).not.toContain('h-9');
   });
+
+  it("tints Nova's read-only field in the input colour, light and dark, and leaves an editable one clear", async () => {
+    await render(<Input testID="read-only" editable={false} />);
+    const readOnly = emittedClasses(screen.getByTestId('read-only').props.className, 'nova');
+
+    expect(readOnly).toEqual(expect.arrayContaining(['bg-input/50', 'dark:bg-input/80']));
+    expect(readOnly.filter((cls) => cls.includes('disabled:'))).toEqual([]);
+
+    await render(<Input testID="editable" />);
+    expect(emittedClasses(screen.getByTestId('editable').props.className, 'nova')).not.toContain('bg-input/50');
+  });
 });

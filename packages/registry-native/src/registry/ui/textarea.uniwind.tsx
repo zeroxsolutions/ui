@@ -3,7 +3,7 @@ import { TextInput } from 'react-native';
 import { cn } from '../lib/utils';
 
 // A `cn-<slot>` token stands for that slot's view classes and `cn-<slot>/text` for its text
-// classes, and `@focused` and `@invalid` for the classes behind those states; the registry build
+// classes, and `@focused`, `@invalid` and `@disabled` for the classes behind those states; the registry build
 // replaces each with the classes translated for the target engine.
 
 type TextareaProps = ComponentProps<typeof TextInput> & {
@@ -17,7 +17,7 @@ type TextareaProps = ComponentProps<typeof TextInput> & {
 /**
  * A multiline text field 64px tall at least, which grows with its text. It takes the focus
  * border while it holds focus and the destructive border while `aria-invalid`, and
- * `editable={false}` dims it and announces it disabled. Uniwind draws the placeholder through `placeholderTextColorClassName`, which takes an `accent-` class.
+ * `editable={false}` dims it, tints it where the style does, and announces it disabled. Uniwind draws the placeholder through `placeholderTextColorClassName`, which takes an `accent-` class.
  */
 function Textarea({
   className,
@@ -38,7 +38,7 @@ function Textarea({
         'min-h-16 cn-textarea cn-textarea/text text-foreground',
         focused && 'cn-textarea@focused',
         invalid && 'cn-textarea@invalid',
-        disabled && 'opacity-50',
+        disabled && 'opacity-50 cn-textarea@disabled',
         className,
       )}
       placeholderTextColorClassName="accent-muted-foreground"

@@ -3,7 +3,7 @@ import { TextInput } from 'react-native';
 import { cn } from '../lib/utils';
 
 // A `cn-<slot>` token stands for that slot's view classes and `cn-<slot>/text` for its text
-// classes, and `@focused` and `@invalid` for the classes behind those states; the registry build
+// classes, and `@focused`, `@invalid` and `@disabled` for the classes behind those states; the registry build
 // replaces each with the classes translated for the target engine.
 
 type InputProps = ComponentProps<typeof TextInput> & {
@@ -16,8 +16,8 @@ type InputProps = ComponentProps<typeof TextInput> & {
 
 /**
  * A single-line text field. It takes the focus border while it holds focus and the destructive
- * border while `aria-invalid`, and `editable={false}` dims it and announces it disabled. Name it with
- * `aria-label`, which both platforms read; Android also reads a Label's nativeID through
+ * border while `aria-invalid`, and `editable={false}` dims it, tints it where the style does, and
+ * announces it disabled. Name it with `aria-label`, which both platforms read; Android also reads a Label's nativeID through
  * `aria-labelledby`. NativeWind draws the placeholder through its `placeholder:` variant.
  */
 function Input({ className, editable, onFocus, onBlur, 'aria-invalid': invalid, ...props }: InputProps): ReactNode {
@@ -30,7 +30,7 @@ function Input({ className, editable, onFocus, onBlur, 'aria-invalid': invalid, 
         'cn-input cn-input/text text-foreground placeholder:text-muted-foreground',
         focused && 'cn-input@focused',
         invalid && 'cn-input@invalid',
-        disabled && 'opacity-50',
+        disabled && 'opacity-50 cn-input@disabled',
         className,
       )}
       editable={editable}

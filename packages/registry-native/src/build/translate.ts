@@ -57,8 +57,8 @@ const DROPPED_MODIFIERS = [
 /**
  * Each modifier a style puts a state behind, and the state it is. A `group-`, `peer-` or `has-` modifier,
  * its `/<group>` name removed, is the same state on the part's group, sibling or child, which the
- * component knows as its own. A bare `disabled:` stays the `Pressable`'s own and never reaches this
- * table; only its `group-`, `peer-` and `has-` forms do.
+ * component knows as its own. A bare `disabled:` stays the `Pressable`'s own and reaches this table
+ * only on a slot {@link SLOT_STATE_MODIFIERS} names; its `group-`, `peer-` and `has-` forms always do.
  */
 const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
   Object.entries({
@@ -165,6 +165,16 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
     new Set(['absolute', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2']),
   ],
   ['cn-input-otp-caret-line', new Set(['animate-caret-blink'])],
+]);
+
+/**
+ * Modifiers of one named slot that are a state the component applies rather than kept for the engine.
+ * Both engines key `disabled:` on a `disabled` prop, which a `TextInput` does not take, so a text
+ * field's disabled classes go behind the `disabled` state its component applies while it is not editable.
+ */
+const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
+  ['cn-input', new Set(['disabled'])],
+  ['cn-textarea', new Set(['disabled'])],
 ]);
 
 /** The px of 1rem, which the theme's setup sets. */
@@ -317,7 +327,7 @@ type SlotClass =
   | { reading: 'unknown'; source: string }
   | { reading: 'read'; source: string; utility: string; kept: string[]; states: string[]; onIcon: boolean };
 
-function readClass(cls: string): SlotClass {
+function readClass(cls: string, stateModifiers: ReadonlySet<string> = new Set()): SlotClass {
   const variants = splitVariants(cls);
   const utility = variants.pop() ?? '';
   const modifiers = variants.filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m));
@@ -329,7 +339,7 @@ function readClass(cls: string): SlotClass {
   const kept: string[] = [];
   const states: string[] = [];
   for (const modifier of modifiers) {
-    if (KEPT_MODIFIERS.has(modifier)) {
+    if (KEPT_MODIFIERS.has(modifier) && !stateModifiers.has(modifier)) {
       kept.push(modifier);
       continue;
     }
@@ -350,7 +360,7 @@ function readClass(cls: string): SlotClass {
 export function parseSpacingVariables(slots: SlotMap): SpacingVariables {
   const variables = new Map<string, Record<StateKey, number>>();
   for (const classes of slots.values()) {
-    for (const cls of classes.map(readClass)) {
+    for (const cls of classes.map((cls) => readClass(cls))) {
       const definition = cls.reading === 'read' ? SPACING_DEFINITION.exec(cls.utility) : null;
       if (cls.reading !== 'read' || !definition) continue;
       const [, variable, step] = definition;
@@ -449,7 +459,8 @@ function resolveClampedRadius(utility: string): string {
 export interface SlotContext {
   /**
    * The slot's name, such as `cn-radio-group`, which drops the classes {@link SLOT_DROPPED_CLASSES}
-   * lists for it; with none, no class is dropped by name.
+   * lists for it and reads the modifiers {@link SLOT_STATE_MODIFIERS} lists for it as states; with
+   * none, no class is dropped or read as a state by name.
    */
   name?: string;
   /**
@@ -487,10 +498,11 @@ export function translateClasses(
   const untranslatable: readonly RegExp[] = UNTRANSLATABLE_UTILITIES[engine];
   const wanted = stateKeyOf(state.split('+').filter(Boolean));
   const droppedByName = (slot.name === undefined ? undefined : SLOT_DROPPED_CLASSES.get(slot.name)) ?? new Set();
+  const stateModifiers = (slot.name === undefined ? undefined : SLOT_STATE_MODIFIERS.get(slot.name)) ?? new Set();
   const spacingVariables: SpacingVariables = slot.spacingVariables ?? new Map();
   const read = classes
     .filter((cls) => !droppedByName.has(cls))
-    .flatMap((cls) => resolveSpacingVariables(readClass(cls), spacingVariables));
+    .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers), spacingVariables));
 
   const ringBorder = drawsRingAsBorder(read);
 
