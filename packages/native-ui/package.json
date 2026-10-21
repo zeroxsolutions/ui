@@ -76,7 +76,8 @@
           }
         ],
         "outputs": [
-          "{projectRoot}/dist/r"
+          "{projectRoot}/dist/r",
+          "{projectRoot}/dist/src"
         ],
         "options": {
           "cwd": "{projectRoot}",
