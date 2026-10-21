@@ -65,16 +65,20 @@ Takes every prop of `View`, plus:
 | `side`  | `'top' \| 'bottom'`                               | `'bottom'`  |
 | `state` | `'default' \| 'saving' \| 'error' \| 'attention'` | `'default'` |
 
-It is a group for a screen reader and sits 16px from the screen's `side` edge and from both sides. `error` and
-`attention` turn the message destructive, and `attention` turns the border destructive too.
+It is a group for a screen reader, named by its message through `aria-labelledby`; pass `aria-label` or
+`accessibilityLabel` to name it yourself. It sits 16px from the screen's `side` edge and from both sides, and on a
+screen wider than 512px (`max-w-lg`) it is centred at that width. A `testID` goes to the group, and
+`<testID>-wrapper` to the full-width box that places it. `error` and `attention` turn the message destructive, and
+`attention` turns the border destructive too.
 
 ### UnsavedChangesToolbarMessage
 
 Takes every prop of [Text](/docs/native/text) except `children`, plus `children: string`.
 
-It is a text with `accessibilityLiveRegion="polite"`, which Android reads out when it changes. On iOS a change after
-the first render is passed to `AccessibilityInfo.announceForAccessibility` instead, so each platform speaks it once.
-The first message is not announced.
+It names the group, and is a text with `accessibilityLiveRegion="polite"`, which Android reads out when it changes.
+The first message is passed to `AccessibilityInfo.announceForAccessibility` when the toolbar appears, on both
+platforms. On iOS a later change is passed to it as well, since iOS does not read the live region, so each platform
+speaks a change once.
 
 ### UnsavedChangesToolbarActions
 

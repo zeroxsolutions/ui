@@ -40,6 +40,11 @@ function toolbarClasses(): string[] {
   return emittedClasses(screen.getByTestId('toolbar').props.className);
 }
 
+/** The full-width box that places the toolbar on its edge. */
+function wrapperClasses(): string[] {
+  return emittedClasses(screen.getByTestId('toolbar-wrapper').props.className);
+}
+
 function messageClasses(): string[] {
   return emittedClasses(screen.getByText('You have unsaved changes.').props.className);
 }
@@ -63,15 +68,40 @@ describe('UnsavedChangesToolbar', () => {
   it('floats 16px from the bottom edge by default', async () => {
     await render(<Example />);
 
-    expect(toolbarClasses()).toEqual(expect.arrayContaining(['absolute', 'bottom-4', 'inset-x-4']));
-    expect(toolbarClasses()).not.toContain('top-4');
+    expect(wrapperClasses()).toEqual(expect.arrayContaining(['absolute', 'bottom-4', 'inset-x-4']));
+    expect(wrapperClasses()).not.toContain('top-4');
   });
 
   it('floats 16px from the top edge for side "top"', async () => {
     await render(<Example side="top" />);
 
-    expect(toolbarClasses()).toEqual(expect.arrayContaining(['absolute', 'top-4']));
-    expect(toolbarClasses()).not.toContain('bottom-4');
+    expect(wrapperClasses()).toEqual(expect.arrayContaining(['absolute', 'top-4']));
+    expect(wrapperClasses()).not.toContain('bottom-4');
+  });
+
+  it('centres on a wide screen, at most max-w-lg across, and leaves the screen beneath it touchable', async () => {
+    await render(<Example />);
+
+    expect(wrapperClasses()).toContain('items-center');
+    expect(toolbarClasses()).toEqual(expect.arrayContaining(['w-full', 'max-w-lg']));
+    expect(screen.getByTestId('toolbar-wrapper').props.pointerEvents).toBe('box-none');
+  });
+
+  it('is named by its message', async () => {
+    await render(<Example message="Could not save." />);
+
+    expect(screen.getByLabelText('Could not save.')).toBe(screen.getByTestId('toolbar'));
+  });
+
+  it('keeps a name the caller gives it', async () => {
+    await render(
+      <UnsavedChangesToolbar accessibilityLabel="Form actions" testID="toolbar">
+        <UnsavedChangesToolbarMessage>Could not save.</UnsavedChangesToolbarMessage>
+      </UnsavedChangesToolbar>,
+    );
+
+    expect(screen.getByLabelText('Form actions')).toBe(screen.getByTestId('toolbar'));
+    expect(screen.queryByLabelText('Could not save.')).toBeNull();
   });
 
   it('is a group for a screen reader', async () => {
@@ -181,10 +211,19 @@ describe('UnsavedChangesToolbarMessage', () => {
     expect(screen.getByText('You have unsaved changes.').props.accessibilityLiveRegion).toBe('polite');
   });
 
-  it('announces a changed message on iOS, and not the first render', async () => {
+  it.each(['ios', 'android'] as const)('announces its first message when it appears, on %s', async (os) => {
+    Platform.OS = os;
+
+    await render(<Example message="You have unsaved changes." />);
+
+    expect(announce).toHaveBeenCalledTimes(1);
+    expect(announce).toHaveBeenLastCalledWith('You have unsaved changes.');
+  });
+
+  it('announces a changed message on iOS once more, and not a re-render of the same one', async () => {
     Platform.OS = 'ios';
     const { rerender } = await render(<Example message="You have unsaved changes." />);
-    expect(announce).not.toHaveBeenCalled();
+    announce.mockClear();
 
     await rerender(<Example message="Could not save." state="error" />);
     expect(announce).toHaveBeenCalledTimes(1);
@@ -197,6 +236,7 @@ describe('UnsavedChangesToolbarMessage', () => {
   it('leaves the announcing to the live region on Android, so the change is spoken once', async () => {
     Platform.OS = 'android';
     const { rerender } = await render(<Example />);
+    announce.mockClear();
 
     await rerender(<Example message="Could not save." state="error" />);
 

@@ -1,4 +1,13 @@
-import { createContext, useContext, useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import { AccessibilityInfo, Platform, View } from 'react-native';
 import { Button } from '../../ui/button';
 import { Spinner } from '../../ui/spinner';
@@ -14,12 +23,18 @@ type UnsavedChangesToolbarSide = 'top' | 'bottom';
  */
 type UnsavedChangesToolbarState = 'default' | 'saving' | 'error' | 'attention';
 
-const UnsavedChangesToolbarContext = createContext<UnsavedChangesToolbarState | null>(null);
+interface UnsavedChangesToolbarContextValue {
+  state: UnsavedChangesToolbarState;
+  /** The `nativeID` of the message, which names the group. */
+  messageId: string;
+}
 
-function useUnsavedChangesToolbar(): UnsavedChangesToolbarState {
-  const state = useContext(UnsavedChangesToolbarContext);
-  if (state === null) throw new Error('UnsavedChangesToolbar parts must be used within <UnsavedChangesToolbar>');
-  return state;
+const UnsavedChangesToolbarContext = createContext<UnsavedChangesToolbarContextValue | null>(null);
+
+function useUnsavedChangesToolbar(): UnsavedChangesToolbarContextValue {
+  const context = useContext(UnsavedChangesToolbarContext);
+  if (context === null) throw new Error('UnsavedChangesToolbar parts must be used within <UnsavedChangesToolbar>');
+  return context;
 }
 
 type UnsavedChangesToolbarProps = ComponentProps<typeof View> & {
@@ -31,8 +46,10 @@ type UnsavedChangesToolbarProps = ComponentProps<typeof View> & {
 
 /**
  * A toolbar floating at the top or bottom of its parent while a form differs from its saved values, on
- * a popover's surface. It is absolutely positioned, so render it inside a full-screen parent. The
- * caller renders it only while there are changes, and writes every word:
+ * a popover's surface, centred and at most `max-w-lg` wide. It is absolutely positioned, so render it
+ * inside a full-screen parent. A screen reader reads it as a group named by its message, unless you pass
+ * `aria-labelledby`, `aria-label` or `accessibilityLabel`. The caller renders it only while there are changes, and writes
+ * every word. A `testID` goes to the group, and `<testID>-wrapper` to the box that places it:
  *
  *   <UnsavedChangesToolbar state={state}>
  *     <UnsavedChangesToolbarMessage>You have unsaved changes.</UnsavedChangesToolbarMessage>
@@ -48,20 +65,31 @@ function UnsavedChangesToolbar({
   side = 'bottom',
   state = 'default',
   className,
+  testID,
   ...props
 }: UnsavedChangesToolbarProps): ReactNode {
+  const messageId = useId();
+  const named = props.accessibilityLabel !== undefined || props['aria-label'] !== undefined;
+  const context = useMemo(() => ({ state, messageId }), [state, messageId]);
   return (
-    <UnsavedChangesToolbarContext.Provider value={state}>
+    <UnsavedChangesToolbarContext.Provider value={context}>
       <View
-        role="group"
-        className={cn(
-          'bg-popover border-foreground/10 absolute inset-x-4 z-50 flex-row items-center gap-3 rounded-2xl border py-2 pr-2 pl-4 shadow-lg',
-          side === 'top' ? 'top-4' : 'bottom-4',
-          state === 'attention' && 'border-destructive',
-          className,
-        )}
-        {...props}
-      />
+        pointerEvents="box-none"
+        className={cn('absolute inset-x-4 z-50 items-center', side === 'top' ? 'top-4' : 'bottom-4')}
+        testID={testID === undefined ? undefined : `${testID}-wrapper`}
+      >
+        <View
+          role="group"
+          aria-labelledby={named ? undefined : messageId}
+          testID={testID}
+          className={cn(
+            'bg-popover border-foreground/10 w-full max-w-lg flex-row items-center gap-3 rounded-2xl border py-2 pr-2 pl-4 shadow-lg',
+            state === 'attention' && 'border-destructive',
+            className,
+          )}
+          {...props}
+        />
+      </View>
     </UnsavedChangesToolbarContext.Provider>
   );
 }
@@ -72,25 +100,25 @@ type UnsavedChangesToolbarMessageProps = Omit<ComponentProps<typeof Text>, 'chil
 };
 
 /**
- * What the toolbar says, in a polite live region that Android reads out when it changes. On iOS, where
- * the live region is not read, a change after the first render is passed to
- * AccessibilityInfo.announceForAccessibility instead, so each platform speaks it once. The first
- * message is not announced.
+ * What the toolbar says, and the name of its group. It is announced through
+ * AccessibilityInfo.announceForAccessibility when it first renders and, on iOS, each time it changes.
+ * Android reads a change from the message's polite live region instead, which iOS does not read, so each
+ * platform speaks a change once.
  * @throws {Error} when rendered outside an UnsavedChangesToolbar
  */
 function UnsavedChangesToolbarMessage({ className, children, ...props }: UnsavedChangesToolbarMessageProps): ReactNode {
-  const state = useUnsavedChangesToolbar();
-  const announced = useRef(children);
+  const { state, messageId } = useUnsavedChangesToolbar();
+  const mounted = useRef(false);
 
   useEffect(() => {
-    if (announced.current === children) return;
-    announced.current = children;
-    if (Platform.OS !== 'ios') return;
-    AccessibilityInfo.announceForAccessibility(children);
+    const first = !mounted.current;
+    mounted.current = true;
+    if (first || Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(children);
   }, [children]);
 
   return (
     <Text
+      nativeID={messageId}
       accessibilityLiveRegion="polite"
       className={cn(
         'font-sans-medium min-w-0 flex-1 text-sm',
@@ -120,7 +148,7 @@ type UnsavedChangesToolbarActionProps = Omit<ComponentProps<typeof Button>, 'var
  * @throws {Error} when rendered outside an UnsavedChangesToolbar
  */
 function UnsavedChangesToolbarReset({ disabled, children, ...props }: UnsavedChangesToolbarActionProps): ReactNode {
-  const state = useUnsavedChangesToolbar();
+  const { state } = useUnsavedChangesToolbar();
   return (
     <Button variant="ghost" size="sm" disabled={state === 'saving' || disabled} {...props}>
       <Text>{children}</Text>
@@ -136,7 +164,7 @@ function UnsavedChangesToolbarReset({ disabled, children, ...props }: UnsavedCha
  * @throws {Error} when rendered outside an UnsavedChangesToolbar
  */
 function UnsavedChangesToolbarSave({ disabled, children, ...props }: UnsavedChangesToolbarActionProps): ReactNode {
-  const state = useUnsavedChangesToolbar();
+  const { state } = useUnsavedChangesToolbar();
   const saving = state === 'saving';
   return (
     <Button size="sm" disabled={saving || disabled} {...props}>
