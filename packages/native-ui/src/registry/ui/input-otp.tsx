@@ -50,7 +50,12 @@ function withoutSeparators(pasted: string): string {
   return pasted.replace(/[\s-]/g, '');
 }
 
-type InputOTPProps = Omit<
+/** The name a screen reader reads for the field, as `aria-label` or `accessibilityLabel`; one of them is required. */
+type InputOTPLabelProps =
+  | { 'aria-label': string; accessibilityLabel?: string }
+  | { accessibilityLabel: string; 'aria-label'?: string };
+
+type InputOTPFieldProps = Omit<
   ComponentProps<typeof TextInput>,
   'value' | 'defaultValue' | 'onChange' | 'onChangeText' | 'maxLength' | 'children'
 > & {
@@ -81,12 +86,15 @@ type InputOTPProps = Omit<
   children: ReactNode;
 };
 
+type InputOTPProps = InputOTPFieldProps & InputOTPLabelProps;
+
 /**
  * A one-time code entered in a row of slots, one character each. One text field, hidden under the
  * slots, takes the keystrokes, a paste and the code the OS offers from a text message, so the code
- * is one field to a screen reader, named with `aria-label`, and the slots are hidden from it. It opens
- * the number pad unless given another `keyboardType`. `editable={false}` dims it and announces it
- * disabled. A `style` goes to the hidden field, under what hides it.
+ * is one field to a screen reader, and the slots are hidden from it. The field is named with
+ * `aria-label` or `accessibilityLabel`, and one of them is required. It opens the number pad unless
+ * given another `keyboardType`. `editable={false}` dims it and announces it disabled. A `style` goes
+ * to the hidden field, under what hides it.
  */
 function InputOTP({
   maxLength,
@@ -264,4 +272,4 @@ export {
   REGEXP_ONLY_DIGITS,
   REGEXP_ONLY_DIGITS_AND_CHARS,
 };
-export type { InputOTPProps, InputOTPSlotProps };
+export type { InputOTPLabelProps, InputOTPProps, InputOTPSlotProps };

@@ -1,6 +1,13 @@
 import { Fragment, type ComponentProps, type ReactNode } from 'react';
 import { cn } from '../../lib/utils';
-import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot, REGEXP_ONLY_DIGITS } from '../../ui/input-otp';
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+  REGEXP_ONLY_DIGITS,
+  type InputOTPLabelProps,
+} from '../../ui/input-otp';
 
 /** How the six characters are grouped: one group of six, or two groups of three. */
 type CodeInputPattern = '6' | '3-3';
@@ -17,17 +24,18 @@ const CODE_INPUT_LENGTH = 6;
 
 type CodeInputProps = Omit<
   ComponentProps<typeof InputOTP>,
-  'maxLength' | 'pattern' | 'children' | 'containerClassName'
-> & {
-  /** `6` (the default) draws one group of six slots; `3-3` two groups of three, for a code read off a message. */
-  pattern?: CodeInputPattern;
-  /**
-   * What the whole code must match for a change to be taken, as the `pattern` of InputOTP, such as
-   * `REGEXP_ONLY_DIGITS_AND_CHARS`; digits when omitted. A change that does not match is refused. Pass
-   * `keyboardType` too when the code is not digits, since the field opens the number pad.
-   */
-  allowedCharacters?: string | RegExp;
-};
+  'maxLength' | 'pattern' | 'children' | 'containerClassName' | keyof InputOTPLabelProps
+> &
+  InputOTPLabelProps & {
+    /** `6` (the default) draws one group of six slots; `3-3` two groups of three, for a code read off a message. */
+    pattern?: CodeInputPattern;
+    /**
+     * What the whole code must match for a change to be taken, as the `pattern` of InputOTP, such as
+     * `REGEXP_ONLY_DIGITS_AND_CHARS`; digits when omitted. A change that does not match is refused. Pass
+     * `keyboardType` too when the code is not digits, since the field opens the number pad.
+     */
+    allowedCharacters?: string | RegExp;
+  };
 
 /**
  * A six-character one-time code over InputOTP, its slots filling the row's width. One text field sits

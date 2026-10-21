@@ -233,4 +233,27 @@ describe('InputOTP', () => {
       }
     },
   );
+
+  it('requires a label for the field, as aria-label or accessibilityLabel', async () => {
+    const children = <InputOTPGroup />;
+    const labelled = (
+      <>
+        <InputOTP maxLength={4} aria-label="Code">
+          {children}
+        </InputOTP>
+        <InputOTP maxLength={4} accessibilityLabel="Other code">
+          {children}
+        </InputOTP>
+      </>
+    );
+    const unlabelled = (
+      // @ts-expect-error a field with no label is refused by type
+      <InputOTP maxLength={4}>{children}</InputOTP>
+    );
+
+    await render(labelled);
+    expect(screen.getByLabelText('Code')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Other code')).toBeOnTheScreen();
+    expect(unlabelled).toBeDefined();
+  });
 });

@@ -45,20 +45,22 @@ const [code, setCode] = useState('');
 Takes every prop of React Native's `TextInput` except `defaultValue`, `onChange`, `onChangeText` and `maxLength`,
 which it redefines, plus:
 
-| Prop                 | Type                         | Default                   |
-| -------------------- | ---------------------------- | ------------------------- |
-| `maxLength`          | `number`                     | required                  |
-| `value`              | `string`                     | none                      |
-| `defaultValue`       | `string`                     | `''`                      |
-| `onChange`           | `(value: string) => void`    | none                      |
-| `onComplete`         | `(value: string) => void`    | none                      |
-| `pattern`            | `string \| RegExp`           | `REGEXP_ONLY_DIGITS`      |
-| `pasteTransformer`   | `(pasted: string) => string` | removes spaces and dashes |
-| `containerClassName` | `string`                     | none                      |
-| `aria-invalid`       | `boolean`                    | none                      |
+| Prop                 | Type                         | Default                           |
+| -------------------- | ---------------------------- | --------------------------------- |
+| `maxLength`          | `number`                     | required                          |
+| `value`              | `string`                     | none                              |
+| `defaultValue`       | `string`                     | `''`                              |
+| `onChange`           | `(value: string) => void`    | none                              |
+| `onComplete`         | `(value: string) => void`    | none                              |
+| `pattern`            | `string \| RegExp`           | `REGEXP_ONLY_DIGITS`              |
+| `pasteTransformer`   | `(pasted: string) => string` | removes spaces and dashes         |
+| `containerClassName` | `string`                     | none                              |
+| `aria-invalid`       | `boolean`                    | none                              |
+| `aria-label`         | `string`                     | required, or `accessibilityLabel` |
 
 One text field, hidden under the slots, takes the keystrokes, a paste and the code the OS offers from a text
-message. A screen reader meets one field, named with `aria-label`, and the slots are hidden from it. The field
+message. A screen reader meets one field, named with `aria-label` or `accessibilityLabel`, one of which the type
+requires, and the slots are hidden from it. The field
 opens the number pad unless given another `keyboardType`.
 
 Leave `value` out to let the field hold the code, or pass `value` and `onChange` to control it. `onChange` runs
