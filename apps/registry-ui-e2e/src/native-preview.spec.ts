@@ -86,15 +86,24 @@ test.describe('in a light colour scheme', () => {
     await expect(continueButton).toHaveCSS('height', '32px', DRAWN);
   });
 
-  test("the phone link opens the page's style from the project's updates in Expo Go", async ({ page }) => {
+  test("picking Native shows a QR code that opens the page's style from the project's updates in Expo Go", async ({
+    page,
+  }) => {
     await page.goto(BUTTON);
     await pickStyle(page, 'Nova');
 
-    await page.getByRole('button', { name: 'Open on your phone' }).click();
+    const platform = page.getByRole('combobox', { name: 'Platform' });
+    // The picker opens only once the page has hydrated, so it is clicked until it does.
+    await expect(async () => {
+      await platform.click();
+      await expect(page.getByRole('option', { name: 'Native' })).toBeVisible({ timeout: 1_000 });
+    }).toPass();
+    await page.getByRole('option', { name: 'Native' }).click();
 
-    const dialog = page.getByRole('dialog', { name: 'Open on your phone' });
-    await expect(dialog.getByRole('img', { name: 'QR code that opens this demo in Expo Go' })).toBeVisible();
-    await expect(dialog.getByRole('link')).toHaveAttribute(
+    await expect(page.getByRole('img', { name: 'QR code that opens this demo in Expo Go' })).toBeVisible();
+    await expect(page.getByText('Scan to preview.')).toBeVisible();
+    await expect(frame(page, 'Button demo')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /^exp:/ })).toHaveAttribute(
       'href',
       `exp://u.expo.dev/${EXPO_PROJECT_ID}/--/button-demo?runtime-version=exposdk%3A58.0.0&channel-name=nova`,
     );

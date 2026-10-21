@@ -1,13 +1,17 @@
 import { useSyncExternalStore } from 'react';
 
 import { DEFAULT_NATIVE_ENGINE, NATIVE_ENGINES } from '@/constants/native-engines';
+import { DEFAULT_PREVIEW_PLATFORM, PREVIEW_PLATFORMS } from '@/constants/preview-platforms';
 import type { NativeEngine } from '@/types/native-engine';
 import type { Platform, PlatformStyle } from '@/types/platform';
+import type { PreviewPlatform } from '@/types/preview-platform';
 
 // `storage` fires only in the other tabs, so a write here announces itself to this tab's readers too.
 const CHANGED = 'zui:remembered-choice';
 
 const ENGINE_KEY = 'zui:native-engine';
+
+const PREVIEW_PLATFORM_KEY = 'zui:native-preview-platform';
 
 function styleKey(platform: Platform): string {
   return `zui:style:${platform}`;
@@ -68,4 +72,18 @@ export function useRememberedEngine(): NativeEngine {
 /** Remembers `engine` as the one the reader is reading native pages under. */
 export function rememberEngine(engine: NativeEngine): void {
   write(ENGINE_KEY, engine);
+}
+
+/**
+ * The platform the reader last picked for a native page's preview, or the default; the default too while
+ * the page renders on the server and hydrates.
+ */
+export function useRememberedPreviewPlatform(): PreviewPlatform {
+  const stored = useStored(PREVIEW_PLATFORM_KEY);
+  return PREVIEW_PLATFORMS.find((platform) => platform === stored) ?? DEFAULT_PREVIEW_PLATFORM;
+}
+
+/** Remembers `platform` as the one every native page's preview shows. */
+export function rememberPreviewPlatform(platform: PreviewPlatform): void {
+  write(PREVIEW_PLATFORM_KEY, platform);
 }
