@@ -1,7 +1,8 @@
 /**
  * The primitive libraries a web component is documented on, each the `<base>` segment of
  * `/docs/components/<base>` and `/blocks/<base>`: `base` is Base UI. A base's pages live in
- * `content/docs/components/<base>`, so one added here needs that folder before its links resolve.
+ * `content/docs/components/<base>`, so one added here needs that folder before its links resolve, and
+ * `component-bases.mjs`, which the Next config's redirects read, lists it too.
  */
 export const COMPONENT_BASES = ['base'] as const satisfies readonly string[];
 
