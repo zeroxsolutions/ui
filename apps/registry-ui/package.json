@@ -50,6 +50,7 @@
     "motion": "^12.40.0",
     "next": "catalog:",
     "next-themes": "^0.4.6",
+    "qrcode.react": "^4.2.0",
     "react": "catalog:",
     "react-day-picker": "^10.0.1",
     "react-dom": "catalog:",
@@ -78,15 +79,12 @@
     "wrangler": "catalog:"
   },
   "nx": {
-    "implicitDependencies": [
-      "@zeroxsolutions/native-preview"
-    ],
     "targets": {
       "dev": {
         "dependsOn": [
           "^build",
           "shadcn-build",
-          "native-preview-build",
+          "@zeroxsolutions/native-preview:export",
           "fumadocs-generate",
           "examples-index"
         ]
@@ -102,7 +100,7 @@
         "dependsOn": [
           "^build",
           "shadcn-build",
-          "native-preview-build",
+          "@zeroxsolutions/native-preview:export",
           "fumadocs-generate",
           "examples-index"
         ]
@@ -112,7 +110,7 @@
         "dependsOn": [
           "^build",
           "shadcn-build",
-          "native-preview-build",
+          "@zeroxsolutions/native-preview:export",
           "fumadocs-generate",
           "examples-index"
         ],
@@ -180,23 +178,6 @@
             "for style in vega maia lyra mira luma sera rhea; do cp -R public/r/styles/base-nova public/r/styles/base-$style; done",
             "cp -R ../../packages/native-ui/dist/r/styles/. public/r/styles/",
             "shadcn registry validate registry.json"
-          ],
-          "parallel": false
-        }
-      },
-      "native-preview-build": {
-        "executor": "nx:run-commands",
-        "dependsOn": [
-          "@zeroxsolutions/native-preview:export-web"
-        ],
-        "outputs": [
-          "{workspaceRoot}/apps/registry-ui/public/native-preview"
-        ],
-        "options": {
-          "cwd": "{projectRoot}",
-          "commands": [
-            "rm -rf public/native-preview",
-            "cp -R ../native-preview/dist/web public/native-preview"
           ],
           "parallel": false
         }

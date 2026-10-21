@@ -28,12 +28,21 @@ jobs:
   gate:
     uses: ./.github/workflows/nx-gate.yml
     with:
-      targets: lint typecheck build test
+      targets: lint typecheck test
+
+  # `--exclude` covers every target of the run, so `build` runs alone, less the projects whose build
+  # runs on a vendor's servers; their lint, typecheck and test ran in `gate`.
+  build:
+    needs: [gate]
+    uses: ./.github/workflows/nx-gate.yml
+    with:
+      targets: build
+      exclude: tag:build:remote
 
   # `secrets: inherit` is what lets the credentials through - a called workflow gets
   # an empty `secrets` context otherwise; the environment scopes which value wins.
   deploy:
-    needs: [gate]
+    needs: [gate, build]
     uses: ./.github/workflows/nx-deploy.yml
     secrets: inherit
     with:
@@ -44,7 +53,7 @@ jobs:
   # the rest of this file: `run-many` matches no project in a repo that declares none and
   # exits 0, the same way `deploy` does.
   #
-  # Not a job on `nx-deploy`: that workflow forwards only the two Cloudflare deploy secrets,
+  # Not a job on `nx-deploy`: that workflow forwards only the deploy secrets it names,
   # so an R2 key it does not name never reaches the process, and it always passes `-c <env>`,
   # which `rclone:sync` has no configuration for.
   #
@@ -53,7 +62,7 @@ jobs:
   # run that finds nothing moved is 0 B transferred; the 4m14s it still takes is checkout and
   # install, which a path filter would not have saved either (measured 2026-08-22).
   rclone-sync:
-    needs: [gate]
+    needs: [gate, build]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
@@ -81,3 +90,14 @@ jobs:
           FLUENT_EMOJI_BUCKET: ${{ vars.FLUENT_EMOJI_BUCKET }}
           ICONS_BUCKET: ${{ vars.ICONS_BUCKET }}
         run: pnpm nx run-many -t rclone:sync
+
+  # Publish the native preview's two styles as EAS updates, which is what the docs' "Open on your
+  # phone" QR opens in Expo Go. A job of its own after the site deploy: what fails it is Expo's login
+  # or quota, so the deployed site stays as it is and re-running this job retries the updates alone.
+  eas-update:
+    needs: [deploy]
+    uses: ./.github/workflows/nx-deploy.yml
+    secrets: inherit
+    with:
+      targets: eas:update
+      environment: ${{ github.ref_name }}

@@ -73,6 +73,7 @@
           "{projectRoot}/tools/build-registry.mts",
           "{projectRoot}/src/build/**/*",
           "{projectRoot}/src/registry/**/*",
+          "{projectRoot}/src/examples/**/*",
           "!{projectRoot}/src/**/*.spec.[jt]s?(x)",
           {
             "externalDependencies": [

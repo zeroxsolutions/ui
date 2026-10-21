@@ -7,8 +7,12 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "lib": ["es2023", "dom"],
-    // The app's typecheck reads Vega's sources; metro points `@/` at the STYLE being built.
-    "paths": { "@/*": ["../../packages/native-ui/dist/src/nativewind-vega/*"] },
+    // The app's typecheck reads Vega's sources, Nova's demos included; metro points each style's `@/`
+    // at its own.
+    "paths": {
+      "@/*": ["../../packages/native-ui/dist/src/nativewind-vega/*"],
+      "@styles/*": ["../../packages/native-ui/dist/src/nativewind-*"]
+    },
     // The emitted sources sit outside the app, so the root is the workspace's.
     "rootDir": "../..",
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo"
@@ -19,15 +23,10 @@
     "src/**/*.tsx",
     "../../packages/native-ui/dist/src/nativewind-vega/**/*.ts",
     "../../packages/native-ui/dist/src/nativewind-vega/**/*.tsx",
-    "../../packages/native-ui/src/examples/**/*.ts",
-    "../../packages/native-ui/src/examples/**/*.tsx"
+    "../../packages/native-ui/dist/src/nativewind-nova/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/nativewind-nova/examples/**/*.tsx"
   ],
-  "exclude": [
-    "src/**/*.spec.ts",
-    "src/**/*.spec.tsx",
-    "src/test-setup.ts",
-    "../../packages/native-ui/src/examples/**/*.spec.tsx"
-  ],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.spec.tsx", "src/test-setup.ts"],
   "references": [
     {
       "path": "../../packages/native-ui/tsconfig.lib.json"

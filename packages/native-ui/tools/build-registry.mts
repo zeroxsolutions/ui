@@ -3,10 +3,11 @@
  * engine-neutral `registry.json` and sources. Each registry's sources are emitted into a temporary
  * registry, which `shadcn build` turns into the served JSON and `shadcn registry validate` checks.
  * The same sources, and the files the theme item writes, also go to `dist/src/<engine>-<style>/` laid
- * out as an app holds them after `shadcn add`, for the native preview to import through `@/`.
+ * out as an app holds them after `shadcn add`, with the demos of `src/examples` beside them in
+ * `examples/`, for the native preview to import through `@/`.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import type { Registry, RegistryItem } from 'shadcn/schema';
@@ -25,6 +26,9 @@ import type { Engine } from '../src/build/translate.ts';
 
 const PROJECT = resolve(import.meta.dirname, '..');
 const SOURCE_ROOT = 'src/';
+/** The demos, written as an app writes them; their `@/` resolves to the tree they are copied into. */
+const EXAMPLES = join(PROJECT, 'src/examples');
+const SPEC_FILE = /\.spec\.[jt]sx?$/;
 /** Each upstream style the registries are built in, read from `styles/upstream/style-<style>.css`. */
 const STYLES = ['vega', 'nova'] as const;
 type Style = (typeof STYLES)[number];
@@ -165,6 +169,7 @@ function buildRegistry(
         : emitted;
     });
     writeFileSync(join(registryRoot, 'registry.json'), `${JSON.stringify({ ...registry, items }, null, 2)}\n`);
+    cpSync(EXAMPLES, join(sourcesRoot, 'examples'), { recursive: true, filter: (path) => !SPEC_FILE.test(path) });
 
     const output = join(PROJECT, 'dist/r/styles', `${engine}-${styleName}`);
     execFileSync('shadcn', ['build', '-o', output], { cwd: registryRoot, stdio: 'inherit' });

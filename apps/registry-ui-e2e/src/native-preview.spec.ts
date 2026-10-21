@@ -1,8 +1,18 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { type FrameLocator, type Locator, type Page } from '@playwright/test';
 
 import { expect, test } from './test/fixtures';
 
 const BUTTON = '/native/components/nativewind/button';
+
+/** The EAS project the native preview publishes its updates to, as `eas init` wrote it into the app's config. */
+const EXPO_PROJECT_ID = (
+  JSON.parse(readFileSync(join(__dirname, '../../native-preview/app.json'), 'utf8')) as {
+    expo: { extra: { eas: { projectId: string } } };
+  }
+).expo.extra.eas.projectId;
 
 // The preview is an Expo web export, which loads its bundle and its fonts before it draws.
 const DRAWN = { timeout: 30_000 };
@@ -80,8 +90,25 @@ test.describe('in a light colour scheme', () => {
 
     await pickStyle(page, 'Nova');
 
-    await expect(frame(page, 'Button demo')).toHaveAttribute('src', /^\/native-preview\/nova\/button-demo\b/);
+    await expect(frame(page, 'Button demo')).toHaveAttribute(
+      'src',
+      /^\/native-preview\/index\.html\?style=nova&demo=button-demo&/,
+    );
     await expect(continueButton).toHaveCSS('height', '32px', DRAWN);
+  });
+
+  test("the phone link opens the page's style from the project's updates in Expo Go", async ({ page }) => {
+    await page.goto(BUTTON);
+    await pickStyle(page, 'Nova');
+
+    await page.getByRole('button', { name: 'Open on your phone' }).click();
+
+    const dialog = page.getByRole('dialog', { name: 'Open on your phone' });
+    await expect(dialog.getByRole('img', { name: 'QR code that opens this demo in Expo Go' })).toBeVisible();
+    await expect(dialog.getByRole('link')).toHaveAttribute(
+      'href',
+      `exp://u.expo.dev/${EXPO_PROJECT_ID}/--/button-demo?runtime-version=exposdk%3A58.0.0&channel-name=nova`,
+    );
   });
 
   test("the frame shows the demo's source in its Code tab", async ({ page }) => {

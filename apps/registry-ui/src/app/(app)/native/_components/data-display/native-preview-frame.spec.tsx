@@ -47,13 +47,13 @@ describe('NativePreviewFrame', () => {
 
     renderFrame('dark');
 
-    expect(frame().getAttribute('src')).toBe('/native-preview/nova/button-demo.html?theme=dark');
+    expect(frame().getAttribute('src')).toBe('/native-preview/index.html?style=nova&demo=button-demo&theme=dark');
   });
 
   it('frames the default style in light where the page names no style and the site is light', () => {
     renderFrame();
 
-    expect(frame().getAttribute('src')).toBe('/native-preview/vega/button-demo.html?theme=light');
+    expect(frame().getAttribute('src')).toBe('/native-preview/index.html?style=vega&demo=button-demo&theme=light');
   });
 
   it('shows it is loading until the preview posts its height, then takes that height', () => {
@@ -87,7 +87,7 @@ describe('NativePreviewFrame', () => {
 
     expect(screen.getByRole('alert').textContent).toContain('The preview did not load');
     expect(screen.getByRole('link', { name: /open it/i }).getAttribute('href')).toBe(
-      '/native-preview/vega/button-demo.html?theme=light',
+      '/native-preview/index.html?style=vega&demo=button-demo&theme=light',
     );
   });
 

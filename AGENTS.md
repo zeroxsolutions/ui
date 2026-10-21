@@ -8,6 +8,9 @@ frontends install. The registry site is the one app deployed; it serves the docs
 - `apps/registry-ui` (+ `registry-ui-e2e`) - the registry: the composed items' source, `registry.json`,
   and the Next.js site on a Cloudflare worker that serves both, with the web docs at `/docs` and the
   native docs at `/native/docs`.
+- `apps/native-preview` (`@zeroxsolutions/native-preview`) - the Expo app that draws the native items'
+  demos: exported for web into the site's `/native-preview`, and published per style as EAS updates
+  that the docs' QR opens in Expo Go.
 - `packages/editor-core` (`@zeroxsolutions/editor-core`) - editor primitives.
 - `packages/fluent-emoji` (`@zeroxsolutions/fluent-emoji`) - Fluent emoji components, and the artwork
   they load from a public bucket.

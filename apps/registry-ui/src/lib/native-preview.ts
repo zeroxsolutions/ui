@@ -1,3 +1,4 @@
+import { EXPO_GO_SDK } from '@/constants/native-preview-device';
 import type { PlatformStyle } from '@/types/platform';
 
 /**
@@ -11,9 +12,9 @@ export const NATIVE_PREVIEW_HEIGHT_MESSAGE = 'zui:native-preview-height';
 export type NativePreviewTheme = 'light' | 'dark';
 
 /**
- * Where a native demo is drawn: its page in the style's web export, under `public/native-preview`.
- * The `.html` form is served by `next dev` and by Cloudflare's assets alike; Cloudflare answers it with
- * a redirect to the extensionless path, the query kept.
+ * Where a native demo is drawn: the preview's web export, under `public/native-preview`, which draws the
+ * demo `?demo=` names in the style `?style=` names. The `index.html` form is served by `next dev` and by
+ * Cloudflare's assets alike; Cloudflare answers it with a redirect to the folder, the query kept.
  */
 export function nativePreviewSrc({
   style,
@@ -25,7 +26,7 @@ export function nativePreviewSrc({
   demo: string;
   theme: NativePreviewTheme;
 }): string {
-  return `/native-preview/${style}/${demo}.html?theme=${theme}`;
+  return `/native-preview/index.html?style=${style}&demo=${demo}&theme=${theme}`;
 }
 
 /** A frame's accessible name for `demo`, as a reader says it: `button-demo` is `Button demo preview`. */
@@ -48,4 +49,26 @@ export function previewHeightOf(data: unknown): number | undefined {
   const { type, height } = data as { type?: unknown; height?: unknown };
   if (type !== NATIVE_PREVIEW_HEIGHT_MESSAGE || typeof height !== 'number') return undefined;
   return Number.isFinite(height) && height > 0 ? Math.ceil(height) : undefined;
+}
+
+/**
+ * The link that opens a native demo in Expo Go: the update `apps/native-preview` published to the
+ * style's channel, at the demo's route. The runtime version is the one Expo Go takes for its SDK, as
+ * `qr.expo.dev` writes it for Expo Go; the demo's route follows the `/--/` that tells Expo Go where the
+ * project's URL ends and the path inside the app begins.
+ */
+export function expoGoUrl({
+  projectId,
+  style,
+  demo,
+}: {
+  /** The EAS project the preview's updates are published to. */
+  projectId: string;
+  /** The style the page shows, whose name is the update's channel. */
+  style: PlatformStyle<'native'>;
+  /** A demo's name in `@zeroxsolutions/native-ui/examples`, such as `button-demo`. */
+  demo: string;
+}): string {
+  const query = new URLSearchParams({ 'runtime-version': `exposdk:${EXPO_GO_SDK}.0.0`, 'channel-name': style });
+  return `exp://u.expo.dev/${encodeURIComponent(projectId)}/--/${encodeURIComponent(demo)}?${query}`;
 }

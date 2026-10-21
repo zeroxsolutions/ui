@@ -17,6 +17,14 @@ on:
         required: false
         type: string
         default: affected
+      exclude:
+        description: >
+          Projects the run leaves out, as nx's `--exclude` takes them, e.g. "tag:build:remote". It
+          covers every target of the run, so a caller passes it only on a run of the one target the
+          projects must skip.
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -72,9 +80,12 @@ jobs:
         env:
           NX_BASE: ${{ steps.range.outputs.base }}
           NX_HEAD: ${{ github.sha }}
+          EXCLUDE: ${{ inputs.exclude }}
         run: |
+          exclude=()
+          [ -z "$EXCLUDE" ] || exclude=("--exclude=$EXCLUDE")
           if [ '${{ steps.range.outputs.mode }}' = 'affected' ]; then
-            pnpm nx affected -t ${{ inputs.targets }}
+            pnpm nx affected -t ${{ inputs.targets }} "${exclude[@]}"
           else
-            pnpm nx run-many -t ${{ inputs.targets }}
+            pnpm nx run-many -t ${{ inputs.targets }} "${exclude[@]}"
           fi

@@ -85,9 +85,6 @@
     },
     {
       "plugin": "@nx/expo/plugin",
-      // The plugin infers `build` as an EAS cloud build, which CI does not have; the preview's own
-      // export-web is declared by hand.
-      "exclude": ["apps/native-preview/**"],
       "options": {
         "startTargetName": "start",
         "buildTargetName": "build",
