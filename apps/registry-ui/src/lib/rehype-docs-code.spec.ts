@@ -72,6 +72,23 @@ describe('rehypeDocsCode', () => {
     );
   });
 
+  it("gives a NativePreview its demo's source from native-ui's examples, its language and its lines", async () => {
+    const preview = jsx('NativePreview', { name: 'button-demo' });
+
+    await run(preview);
+
+    expect(attribute(preview, 'code')).toContain('function ButtonDemo');
+    expect(attribute(preview, 'language')).toBe('tsx');
+    expect(JSON.parse(String(attribute(preview, 'lines')))).toHaveLength(
+      String(attribute(preview, 'code')).split('\n').length,
+    );
+  });
+
+  it('fails the page on a NativePreview naming no native demo, a path outside the examples included', async () => {
+    await expect(run(jsx('NativePreview', { name: 'no-such-demo' }))).rejects.toThrow(/no-such-demo/);
+    await expect(run(jsx('NativePreview', { name: '../index' }))).rejects.toThrow(/\.\.\/index/);
+  });
+
   it('fails the page on a name the examples index lacks', async () => {
     await expect(run(jsx('ComponentPreview', { name: 'no-such-demo' }))).rejects.toThrow(/no-such-demo/);
   });

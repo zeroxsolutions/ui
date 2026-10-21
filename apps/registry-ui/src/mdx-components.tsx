@@ -33,6 +33,7 @@ import { InitCommand } from '@/app/(app)/docs/[[...slug]]/_components/data-displ
 import { ComponentsJson } from '@/app/(app)/native/_components/data-display/components-json';
 import { EngineTab, EngineTabs } from '@/app/(app)/native/_components/data-display/engine-tabs';
 import { InstallCommand } from '@/app/(app)/native/_components/data-display/install-command';
+import { NativePreview } from '@/app/(app)/native/_components/data-display/native-preview';
 
 /** The text a node renders, as a reader would copy it. */
 function nodeText(node: ReactNode): string {
@@ -178,5 +179,6 @@ export function nativeMdxComponents(engine?: NativeEngine) {
     ComponentsJson: (props: Omit<ComponentProps<typeof ComponentsJson>, 'origin'>) => (
       <ComponentsJson origin={registryHomepage} {...props} />
     ),
+    NativePreview,
   };
 }

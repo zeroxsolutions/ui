@@ -24,7 +24,13 @@ interface HastNode {
 }
 
 /** The components whose source this step reads and highlights for them. */
-const SOURCE_COMPONENTS = new Set(['ComponentPreview', 'BlockPreview', 'ComponentSource']);
+const SOURCE_COMPONENTS = new Set(['ComponentPreview', 'BlockPreview', 'ComponentSource', 'NativePreview']);
+
+/** Where native-ui keeps its demos, relative to the app, which is where the build runs. */
+const NATIVE_EXAMPLES_DIR = '../../packages/native-ui/src/examples';
+
+/** A native demo's name, such as `button-demo`; anything else, a path included, names no demo. */
+const NATIVE_DEMO_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*-demo$/;
 
 function textOf(node: HastNode): string {
   return node.type === 'text' ? (node.value ?? '') : (node.children ?? []).map(textOf).join('');
@@ -48,6 +54,20 @@ function sourceFileOf(name: string, file?: string): string {
   return path;
 }
 
+/**
+ * The file a `NativePreview` shows: its demo in native-ui's examples. Throws for a name that is not a
+ * demo's, so a page naming one fails its build.
+ */
+async function nativeDemoSourceOf(name: string): Promise<string> {
+  const path = NATIVE_DEMO_NAME.test(name) ? join(process.cwd(), NATIVE_EXAMPLES_DIR, `${name}.tsx`) : undefined;
+  try {
+    if (path) return await readFile(path, 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+  throw new Error(`rehypeDocsCode: "${name}" is not a demo in ${NATIVE_EXAMPLES_DIR}`);
+}
+
 async function highlightFence(pre: HastNode): Promise<void> {
   const code = pre.children?.[0];
   if (code?.tagName !== 'code') return;
@@ -66,9 +86,17 @@ async function highlightFence(pre: HastNode): Promise<void> {
 }
 
 async function highlightSource(element: HastNode): Promise<void> {
-  const path = sourceFileOf(stringAttribute(element, 'name') ?? '', stringAttribute(element, 'file'));
-  // Read relative to the app, which is where the build runs.
-  const code = (await readFile(join(process.cwd(), path), 'utf8')).trimEnd();
+  const name = stringAttribute(element, 'name') ?? '';
+  let path: string;
+  let code: string;
+  if (element.name === 'NativePreview') {
+    path = `${name}.tsx`;
+    code = (await nativeDemoSourceOf(name)).trimEnd();
+  } else {
+    path = sourceFileOf(name, stringAttribute(element, 'file'));
+    // Read relative to the app, which is where the build runs.
+    code = (await readFile(join(process.cwd(), path), 'utf8')).trimEnd();
+  }
   const language = stringAttribute(element, 'language') ?? path.split('.').pop() ?? 'tsx';
   element.attributes = [
     ...(element.attributes ?? []),
@@ -81,8 +109,8 @@ async function highlightSource(element: HastNode): Promise<void> {
 /**
  * Highlights a docs page's code as the page compiles, with the registry's own highlighter, so nothing
  * the server runs to render a page imports Shiki. A fence's `pre` gets its `title` from the fence's
- * meta and its tokenized `lines` as JSON. A `ComponentPreview`, `BlockPreview` or `ComponentSource` gets
- * the source of the file it shows as `code`, its `language`, and its `lines` as JSON. It runs after fumadocs has kept
+ * meta and its tokenized `lines` as JSON. A `ComponentPreview`, `BlockPreview`, `ComponentSource` or
+ * native page's `NativePreview` gets the source of the file it shows as `code`, its `language`, and its `lines` as JSON. It runs after fumadocs has kept
  * the page's Markdown, so none of this reaches the page's `.md`. A demo's source is read once, as its
  * page compiles, so under `next dev` an edited demo shows its old source until the page's `.mdx` is saved.
  */
