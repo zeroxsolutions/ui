@@ -428,6 +428,20 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
     expect(codeInput?.files[0].content).toContain("from '@/components/ui/input-otp'");
   });
 
+  it('ships unsaved-changes-toolbar as a feedback registry:component over button and spinner', () => {
+    const toolbar = item('unsaved-changes-toolbar');
+
+    expect(toolbar).toMatchObject({ type: 'registry:component', categories: ['feedback'] });
+    expect(toolbar?.files).toEqual([
+      expect.objectContaining({
+        path: 'registry/components/feedback/unsaved-changes-toolbar.tsx',
+        type: 'registry:component',
+      }),
+    ]);
+    expect(toolbar?.files[0]).not.toHaveProperty('target');
+    expect(toolbar?.files[0].content).toContain("from '@/components/ui/spinner'");
+  });
+
   it("gives Button the style's pressed nudge", () => {
     const [file] = item('button')?.files ?? [];
 

@@ -76,6 +76,7 @@ test('serves the react native items for each engine in vega and nova', async ({ 
         'password-input',
         'code-input',
         'password-strength',
+        'unsaved-changes-toolbar',
       ]),
     );
 

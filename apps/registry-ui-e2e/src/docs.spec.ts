@@ -33,6 +33,7 @@ test("the header's Native link opens the native docs, whose pages the sidebar li
     ['Password Strength', 'password-strength'],
     ['Switch', 'switch'],
     ['Spinner', 'spinner'],
+    ['Unsaved Changes Toolbar', 'unsaved-changes-toolbar'],
     ['Tabs', 'tabs'],
   ]) {
     // The last of its name: the web docs' own Installation is listed above the native group.
