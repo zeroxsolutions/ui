@@ -41,6 +41,7 @@
     "@types/jest": "catalog:",
     "babel-jest": "catalog:",
     "babel-preset-expo": "catalog:expo",
+    "eas-cli": "25.3.0",
     "jest": "catalog:",
     "jest-expo": "catalog:expo",
     "react-test-renderer": "catalog:",
