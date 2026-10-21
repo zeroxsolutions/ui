@@ -45,9 +45,10 @@ Takes every prop of the `@rn-primitives/toggle` root, plus:
 | `onPressedChange` | `(pressed: boolean) => void` | required    |
 | `variant`         | `'default' \| 'outline'`     | `'default'` |
 | `size`            | `'default' \| 'sm' \| 'lg'`  | `'default'` |
+| `role`            | `AccessibilityRole`          | `'button'`  |
 
 Toggle is controlled. Pressing it calls `onPressedChange` with the new value, and it draws as pressed once
-`pressed` follows. It is announced as a button with its selected and disabled state. A disabled toggle is
+`pressed` follows. It is announced as a button, or as the `role` given, with its selected and disabled state. A disabled toggle is
 dimmed and ignores presses.
 
 ### toggleVariants

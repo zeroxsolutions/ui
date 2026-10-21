@@ -72,7 +72,11 @@ function Toggle({
           role={role}
           aria-checked={undefined}
           aria-selected={pressed}
-          accessibilityState={{ ...accessibilityState, selected: pressed, disabled }}
+          accessibilityState={{
+            ...accessibilityState,
+            selected: pressed,
+            ...(disabled === undefined ? {} : { disabled }),
+          }}
         />
       </IconClassContext.Provider>
     </TextClassContext.Provider>

@@ -52,6 +52,16 @@ describe('Toggle', () => {
     );
   });
 
+  it("keeps a caller's disabled in its accessibility state when no disabled prop is given", async () => {
+    await render(
+      <Toggle pressed onPressedChange={() => {}} aria-label="Bold" accessibilityState={{ disabled: true }} />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Bold' }).props.accessibilityState).toEqual(
+      expect.objectContaining({ disabled: true, selected: true }),
+    );
+  });
+
   it('takes a role from the caller and announces pressed over a caller aria-selected', async () => {
     await render(<Toggle pressed onPressedChange={() => {}} aria-label="Bold" role="checkbox" aria-selected={false} />);
 
