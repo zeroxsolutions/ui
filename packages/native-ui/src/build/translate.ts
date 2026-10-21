@@ -182,6 +182,26 @@ const RING_COLOUR = /^ring-(?!\d|inset|offset)([\w-]+(?:\/[\w.]+)?)$/;
 const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
 
 /**
+ * Upstream's base layer colours every border `border-border`, and a device draws a border with no colour
+ * black, so a slot that draws a border width and names no colour for it is given that colour after the
+ * width, where a colour a variant's slot names after it still wins.
+ */
+const BASE_BORDER_COLOUR = 'border-border';
+const BORDER_STYLE = /^border-(dashed|solid|dotted|double|none|hidden)$/;
+const BORDER_COLOUR = /^border(-[xytrblse])?-[a-z]/;
+
+function namesBorderColour(utility: string): boolean {
+  return BORDER_COLOUR.test(utility) && !BORDER_WIDTH.test(utility) && !BORDER_STYLE.test(utility);
+}
+
+/** `classes` with the base border colour after the first border width, when they name no colour. */
+function withBaseBorderColour(classes: readonly string[]): string[] {
+  const width = classes.findIndex((cls) => BORDER_WIDTH.test(cls) && !cls.endsWith('-0'));
+  if (width === -1 || classes.some(namesBorderColour)) return [...classes];
+  return [...classes.slice(0, width + 1), BASE_BORDER_COLOUR, ...classes.slice(width + 1)];
+}
+
+/**
  * Classes of one named slot that a device draws another way, unmodified as the styles write them. Upstream
  * centres the radio dot with an absolute 50% offset and a -50% translate; the indicator around it
  * already centres its child with flex, which both engines draw alike, where a percentage translate
@@ -629,5 +649,6 @@ export function translateClasses(
     kept.push([...cls.kept, drawn].join(':'));
   }
 
-  return { classes: [...new Set(kept)], unknown };
+  const drawn = wanted === '' && part === 'view' ? withBaseBorderColour(kept) : kept;
+  return { classes: [...new Set(drawn)], unknown };
 }

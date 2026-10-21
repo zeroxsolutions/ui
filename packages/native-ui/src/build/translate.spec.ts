@@ -396,7 +396,10 @@ describe('translateClasses with a state', () => {
       const result = translateClasses(['border', 'border-border', 'ring-1', 'ring-foreground/10'], 'uniwind', 'view');
 
       expect(result).toEqual({ classes: ['border', 'border-border'], unknown: [] });
-      expect(translateClasses(['border-2', 'ring-1', 'ring-ring'], 'uniwind', 'view').classes).toEqual(['border-2']);
+      expect(translateClasses(['border-2', 'ring-1', 'ring-ring'], 'uniwind', 'view').classes).toEqual([
+        'border-2',
+        'border-border',
+      ]);
     });
 
     it('leaves Badge outline with its one border', () => {
@@ -821,5 +824,37 @@ describe('translateClasses for a field', () => {
 
     expect(translateClasses(description, engine, 'view', '', slot)).toEqual({ classes: [], unknown: [] });
     expect(translateClasses(description, engine, 'view', 'after=legend', slot).classes).toEqual(['-mt-1.5']);
+  });
+});
+
+describe("translateClasses for a border upstream's base layer colours", () => {
+  it.each(['nativewind', 'uniwind'] as const)(
+    'gives a border width with no colour of its own the border colour for %s',
+    (engine) => {
+      expect(translateClasses(['rounded-lg', 'border', 'px-4'], engine, 'view').classes).toEqual([
+        'rounded-lg',
+        'border',
+        'border-border',
+        'px-4',
+      ]);
+      expect(translateClasses(['border-b'], engine, 'view').classes).toEqual(['border-b', 'border-border']);
+    },
+  );
+
+  it('keeps a colour the slot names, and adds none to a slot with no border width', () => {
+    expect(translateClasses(['border', 'border-input'], 'uniwind', 'view').classes).toEqual(['border', 'border-input']);
+    expect(translateClasses(['border-dashed', 'p-6'], 'uniwind', 'view').classes).toEqual(['border-dashed', 'p-6']);
+    expect(translateClasses(['border-0', 'p-6'], 'uniwind', 'view').classes).toEqual(['border-0', 'p-6']);
+    expect(translateClasses(['border', 'border-dashed'], 'uniwind', 'view').classes).toEqual([
+      'border',
+      'border-border',
+      'border-dashed',
+    ]);
+  });
+
+  it('adds no colour to the classes behind a state', () => {
+    expect(translateClasses(['border', 'data-checked:bg-primary'], 'uniwind', 'view', 'checked').classes).toEqual([
+      'bg-primary',
+    ]);
   });
 });
