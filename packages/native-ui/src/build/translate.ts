@@ -49,14 +49,14 @@ const ICON_MODIFIERS: ReadonlySet<string> = new Set([
 
 /**
  * No touch screen produces these conditions, or nothing on a device matches the selector, so the
- * class is dropped with its modifier. A phone is narrower than `md`, so the base class a style widens
- * at `md` stands. The styles put only exit animations behind `data-closed`, which neither engine runs from
- * these utilities.
+ * class is dropped with its modifier. A phone held upright is narrower than `sm`, so the base class a
+ * style widens at `sm` or `md` stands. The styles put only exit animations behind `data-closed`, which
+ * neither engine runs from these utilities.
  */
 const DROPPED_MODIFIERS = [
   /^hover$/,
   /^focus-within$/,
-  /^md$/,
+  /^(sm|md)$/,
   /^print$/,
   /^file$/,
   /^after$/,

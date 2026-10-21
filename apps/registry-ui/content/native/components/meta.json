@@ -38,6 +38,7 @@
     "aspect-ratio",
     "---Navigation---",
     "tabs",
-    "tab-bar"
+    "tab-bar",
+    "breadcrumb"
   ]
 }

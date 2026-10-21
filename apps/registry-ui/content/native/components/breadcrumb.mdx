@@ -1,0 +1,86 @@
+---
+title: Breadcrumb
+description: The trail from the top of the app to the current screen.
+---
+
+<NativePreview name="breadcrumb-demo" />
+
+## Installation
+
+<InstallCommand name="breadcrumb" />
+
+The CLI writes `components/ui/breadcrumb.tsx`, installs [Text](/native/components/nativewind/text),
+[Icon](/native/components/nativewind/icon) and Utils, and adds `lucide-react-native`.
+
+## Usage
+
+```tsx
+import { Link } from 'expo-router';
+
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+```
+
+```tsx
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink asChild>
+        <Link href="/">Home</Link>
+      </BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>Settings</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+```
+
+## API reference
+
+### Breadcrumb
+
+Takes every prop of React Native's `View`. It is a `navigation` landmark named Breadcrumb; pass `aria-label`
+to name it otherwise.
+
+### BreadcrumbList, BreadcrumbItem
+
+Each takes every prop of React Native's `View`. BreadcrumbList is a `list` laid out in a wrapping row of
+muted small text, and each BreadcrumbItem is a `listitem`.
+
+### BreadcrumbLink
+
+Takes every prop of [Text](/native/components/nativewind/text). It is announced as a link, and `onPress`
+navigates. With `asChild`, it renders its single child instead, such as expo-router's `Link`, with the link's
+classes merged on.
+
+### BreadcrumbPage
+
+Takes every prop of [Text](/native/components/nativewind/text). It is the current screen, announced as a
+disabled link marked as the current page, in the foreground colour.
+
+### BreadcrumbSeparator
+
+Takes every prop of React Native's `View`. It draws a chevron unless given children, such as a slash in a
+Text, and is hidden from screen readers.
+
+### BreadcrumbEllipsis
+
+Takes every prop of React Native's `View`. It draws three dots for the steps a long trail leaves out, and is
+hidden from screen readers.
+
+## Differences from upstream
+
+- Upstream's BreadcrumbLink takes a `render` prop for a router's link. The native one takes `asChild`, as
+  React Native's Text in this registry does.
+- iOS and Android have no current-page state, so a screen reader there announces the page as a disabled
+  link. On the web the page carries `aria-current="page"`, as upstream's does.
+- Upstream widens the gap between steps on screens wider than a phone. The native trail keeps the narrow gap.
+- Upstream flips the chevron in a right-to-left layout. The native chevron always points right.

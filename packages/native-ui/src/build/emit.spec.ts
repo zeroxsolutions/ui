@@ -109,10 +109,10 @@ describe('emitSource', () => {
   });
 
   it('throws when a slot holds a class with no rule, naming the registry', () => {
-    const custom = new Map([['cn-thing', ['sm:h-9']]]);
+    const custom = new Map([['cn-thing', ['starting:h-9']]]);
 
     expect(() => emitSource("'cn-thing'", { name: 'vega', slots: custom }, 'nativewind', 'thing.tsx')).toThrow(
-      'Untranslated sm:h-9 in cn-thing (nativewind-vega)',
+      'Untranslated starting:h-9 in cn-thing (nativewind-vega)',
     );
   });
 

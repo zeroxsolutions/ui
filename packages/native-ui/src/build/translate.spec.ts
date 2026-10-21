@@ -136,6 +136,16 @@ describe('translateClasses', () => {
     });
   });
 
+  it.each(['sm', 'md'])(
+    'keeps the base class a style widens at %s, which a phone held upright is below',
+    (breakpoint) => {
+      expect(translateClasses(['gap-1.5', `${breakpoint}:gap-2.5`], 'uniwind', 'view')).toEqual({
+        classes: ['gap-1.5'],
+        unknown: [],
+      });
+    },
+  );
+
   it('drops the classes no touch screen uses', () => {
     const result = translateClasses(
       ['outline-hidden', 'ring-2', 'transition-all', 'select-none', 'cursor-pointer', 'p-2'],

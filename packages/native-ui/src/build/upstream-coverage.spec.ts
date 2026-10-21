@@ -24,7 +24,6 @@ const deferred = Object.keys(coverage.deferred);
 const PENDING = [
   'accordion',
   'alert-dialog',
-  'breadcrumb',
   'button-group',
   'calendar',
   'carousel',

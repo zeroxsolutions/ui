@@ -9,6 +9,7 @@ import { AlertDemo } from './alert-demo';
 import { AspectRatioDemo } from './aspect-ratio-demo';
 import { AvatarDemo } from './avatar-demo';
 import { BadgeDemo } from './badge-demo';
+import { BreadcrumbDemo } from './breadcrumb-demo';
 import { ButtonDemo } from './button-demo';
 import { CardDemo } from './card-demo';
 import { CheckboxDemo } from './checkbox-demo';
@@ -43,6 +44,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'aspect-ratio-demo': AspectRatioDemo,
   'avatar-demo': AvatarDemo,
   'badge-demo': BadgeDemo,
+  'breadcrumb-demo': BreadcrumbDemo,
   'button-demo': ButtonDemo,
   'card-demo': CardDemo,
   'checkbox-demo': CheckboxDemo,
