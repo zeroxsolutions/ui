@@ -96,7 +96,11 @@ test.describe('in a light colour scheme', () => {
     await page.route('**/native-preview/**', (route) => route.abort());
     await page.goto(BUTTON);
 
-    await expect(page.getByRole('alert').filter({ hasText: 'The preview did not load' })).toBeVisible();
+    // Firefox and WebKit fire no load event for an aborted frame, so there the frame reads as failed only
+    // once the 15 seconds it is given to draw have passed.
+    await expect(page.getByRole('alert').filter({ hasText: 'The preview did not load' })).toBeVisible({
+      timeout: 20_000,
+    });
   });
 
   test('a frame whose page is missing says so at once, not after the wait for a slow draw', async ({ page }) => {
