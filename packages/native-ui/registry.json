@@ -30,6 +30,19 @@
       ]
     },
     {
+      "name": "motion",
+      "type": "registry:lib",
+      "title": "Motion",
+      "description": "usePresence, which keeps an overlay drawn while it animates in and out, and useReducedMotion, which reads whether the system asks for reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-worklets"],
+      "files": [
+        {
+          "path": "src/registry/lib/motion.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "text",
       "type": "registry:ui",
       "title": "Text",
@@ -500,6 +513,25 @@
       "files": [
         {
           "path": "src/registry/ui/accordion.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "dialog",
+      "type": "registry:ui",
+      "title": "Dialog",
+      "description": "A window centred over a dimmed screen, announced as a modal dialog named by its title, closed by its close buttons, a press outside it, the back button or Escape, fading in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/dialog",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/dialog.tsx",
           "type": "registry:ui"
         }
       ]

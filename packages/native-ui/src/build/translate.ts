@@ -212,19 +212,18 @@ function withBaseBorderColour(classes: readonly string[]): string[] {
  * Classes of one named slot that a device draws another way, unmodified as the styles write them. Upstream
  * centres the radio dot with an absolute 50% offset and a -50% translate; the indicator around it
  * already centres its child with flex, which both engines draw alike, where a percentage translate
- * is the engine's to resolve. The radio group's grid is a display neither engine draws, and a View
- * stacks its items in a column already, as does the alert, whose component sets its icon beside its text
- * in a row. The one-time code's caret blinks by an animation upstream
+ * is the engine's to resolve. The one-time code's caret blinks by an animation upstream
  * defines in its own stylesheet, which neither engine's theme carries, so the caret is drawn steady.
+ * A dialog's content is as wide as the screen less 2rem, a percentage less a length neither engine
+ * computes; its component holds it 1rem in from each edge instead.
  */
 const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
-  ['cn-radio-group', new Set(['grid'])],
   [
     'cn-radio-group-indicator-icon',
     new Set(['absolute', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2']),
   ],
   ['cn-input-otp-caret-line', new Set(['animate-caret-blink'])],
-  ['cn-alert', new Set(['grid', 'has-[>svg]:grid-cols-[auto_1fr]'])],
+  ['cn-dialog-content', new Set(['max-w-[calc(100%-2rem)]'])],
 ]);
 
 /**
@@ -265,7 +264,8 @@ const REM_LENGTH = /^([\d.]+)rem$/;
  * wide as its content once its parent does not stretch it, which the component sets with `self-start`.
  * React Native has no `text-wrap` to balance a line with, no overflow per axis (a ScrollView scrolls
  * one), and no table layout: no caption side and no vertical align in a cell, which a Table lays out
- * itself.
+ * itself. Nor has it a grid: a View stacks its children in a column, and a component that sets two
+ * side by side lays out the row itself.
  */
 const DROPPED_UTILITIES = [
   /^(outline|ring|ring-offset|transition|duration|ease|whitespace|cursor|scroll)(-|$)/,
@@ -277,7 +277,16 @@ const DROPPED_UTILITIES = [
   /^overflow-[xy]-/,
   /^caption-(top|bottom)$/,
   /^align-(baseline|top|middle|bottom|text-top|text-bottom|sub|super)$/,
+  /^grid$/,
+  /^grid-(rows|cols)-/,
+  /^(row|col)-(span|start|end)-/,
 ] as const satisfies readonly RegExp[];
+
+/**
+ * A grid's `place-items-<align>`, which aligns each item across its cell; in the column a View stacks its
+ * children in, that is the cross axis `items-<align>` aligns.
+ */
+const PLACE_ITEMS = /^place-items-(start|end|center|stretch|baseline)$/;
 
 /**
  * A radius `min(var(--radius-md), Npx)`, which neither engine evaluates. The theme's `--radius-md` is
@@ -650,7 +659,7 @@ export function translateClasses(
         cls.states,
         read,
       ),
-    );
+    ).replace(PLACE_ITEMS, 'items-$1');
     if (DROPPED_UTILITIES.some((rule) => rule.test(utility))) continue;
     if (untranslatable.some((rule) => rule.test(utility))) {
       unknown.push(cls.source);

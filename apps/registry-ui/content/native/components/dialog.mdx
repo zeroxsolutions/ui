@@ -1,0 +1,115 @@
+---
+title: Dialog
+description: A window over the screen that the person deals with before going back to it.
+---
+
+<NativePreview name="dialog-demo" />
+
+## Installation
+
+<InstallCommand name="dialog" />
+
+The CLI writes `components/ui/dialog.tsx` and `lib/motion.ts`, installs [Button](/native/components/nativewind/button),
+[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
+`@rn-primitives/dialog`, `@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated` and
+`react-native-worklets`. The content draws in the app's `PortalHost`; see
+[Add a portal host](/native/docs/installation#add-a-portal-host).
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Dialog>
+  <DialogTrigger asChild>
+    <Button variant="outline">
+      <Text>Edit profile</Text>
+    </Button>
+  </DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Edit profile</DialogTitle>
+      <DialogDescription>Make changes to your profile here.</DialogDescription>
+    </DialogHeader>
+    <DialogFooter>
+      <DialogClose asChild>
+        <Button variant="outline">
+          <Text>Cancel</Text>
+        </Button>
+      </DialogClose>
+      <Button>
+        <Text>Save changes</Text>
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+## API reference
+
+### Dialog
+
+Takes every prop of React Native's `View`, plus `open`, `defaultOpen` and `onOpenChange(open)`. Without `open`
+the Dialog holds its own state, starting from `defaultOpen`.
+
+### DialogTrigger
+
+Takes every prop of React Native's `Pressable`. Pressing it opens the Dialog. Pass `asChild` to make a Button the
+trigger. Focus returns to it when the Dialog closes.
+
+### DialogContent
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop              | Type      | Default |
+| ----------------- | --------- | ------- |
+| `showCloseButton` | `boolean` | `true`  |
+| `portalHost`      | `string`  | -       |
+
+The content is centred over a dimmed overlay, 1rem in from the sides of the screen. It is a modal `dialog` named by
+its DialogTitle. Accessibility focus moves into it as it opens. A press on the overlay, the Android back button,
+the iOS escape gesture (a two-finger Z) and Escape on the web close it. `showCloseButton` draws a ghost button named
+Close in the top right corner. `portalHost` names the `PortalHost` to draw in when it is not the app's own.
+
+It fades in and zooms from 95% over 100ms, and out the same way. When the system asks for reduced motion it
+appears and goes at once.
+
+### DialogHeader and DialogFooter
+
+Take every prop of React Native's `View`. The footer stacks its children with the first at the bottom. Put Cancel
+first so the main action sits on top. `showCloseButton` on the footer adds an outline Close button.
+
+### DialogTitle and DialogDescription
+
+Take every prop of [Text](/native/components/nativewind/text). The title is a heading.
+
+### DialogClose, DialogOverlay and DialogPortal
+
+DialogClose closes the Dialog when pressed; pass `asChild` to make a Button do it. DialogContent already draws a
+DialogOverlay inside a DialogPortal, so you only need them to build content of your own.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- On iOS, VoiceOver does not read `aria-labelledby`, so the dialog is not announced by its title's name there.
+  Focus moves into the content, where the title is the first thing read. Android and the web read the name.
+- The footer always stacks its buttons. Upstream sets them in a row from the `sm` breakpoint, which a phone held
+  upright does not reach.
+- Upstream widens the content to `max-w-md` from `sm` and blurs the screen behind the overlay. A phone is narrower
+  than `sm`, and React Native has no backdrop blur.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.

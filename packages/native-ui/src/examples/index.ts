@@ -17,6 +17,7 @@ import { CardDemo } from './card-demo';
 import { CheckboxDemo } from './checkbox-demo';
 import { CodeInputDemo } from './code-input-demo';
 import { CollapsibleDemo } from './collapsible-demo';
+import { DialogDemo } from './dialog-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
 import { IconDemo } from './icon-demo';
@@ -60,6 +61,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'checkbox-demo': CheckboxDemo,
   'code-input-demo': CodeInputDemo,
   'collapsible-demo': CollapsibleDemo,
+  'dialog-demo': DialogDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
   'icon-demo': IconDemo,

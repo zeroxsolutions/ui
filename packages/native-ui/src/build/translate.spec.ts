@@ -914,3 +914,40 @@ describe('translateClasses for an accordion', () => {
     expect(translateClasses(['**:data-[slot=kbd]:rounded-sm'], 'uniwind', 'icon').classes).toEqual([]);
   });
 });
+
+describe('translateClasses for a grid', () => {
+  it.each(['nativewind', 'uniwind'] as const)(
+    'drops a grid and its tracks, a layout neither engine draws, for %s',
+    (engine) => {
+      const slot = ['grid', 'grid-rows-[auto_1fr]', 'grid-cols-2', 'row-span-2', 'col-start-2', 'gap-1.5'];
+
+      expect(translateClasses(slot, engine, 'view')).toEqual({ classes: ['gap-1.5'], unknown: [] });
+    },
+  );
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    "centres a grid's items across a View's column with items-center for %s",
+    (engine) => {
+      expect(translateClasses(['place-items-center'], engine, 'view').classes).toEqual(['items-center']);
+    },
+  );
+});
+
+describe('translateClasses for a dialog', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+
+  it.each(STYLE_ENGINES)(
+    "draws the dialog's content with no width less a length, which the component's margin gives, for %s in %s",
+    (engine, style) => {
+      const { classes, unknown } = translateClasses(styles[style].get('cn-dialog-content') ?? [], engine, 'view', '', {
+        name: 'cn-dialog-content',
+      });
+
+      expect(unknown).toEqual([]);
+      expect(classes.filter((cls) => cls.startsWith('max-w-'))).toEqual([]);
+    },
+  );
+});

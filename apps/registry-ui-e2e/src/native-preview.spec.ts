@@ -156,6 +156,36 @@ test.describe('in a light colour scheme', () => {
     );
   });
 
+  for (const engine of ['nativewind', 'uniwind'] as const) {
+    test(`the ${engine} dialog demo opens inside its frame and closes on Escape and on Cancel`, async ({ page }) => {
+      await page.goto(`/native/components/${engine}/dialog`);
+      const demo = inside(page, 'Dialog demo');
+      const dialog = demo.getByRole('dialog', { name: 'Edit profile' });
+
+      await demo.getByRole('button', { name: 'Open Dialog', exact: true }).click(DRAWN);
+      await expect(dialog).toBeVisible();
+      // The frame grows to hold the open dialog, which no part of it is clipped from.
+      await expect
+        .poll(async () => {
+          const [outer, inner] = await Promise.all([frame(page, 'Dialog demo').boundingBox(), dialog.boundingBox()]);
+          return (
+            outer !== null && inner !== null && inner.y >= outer.y && inner.y + inner.height <= outer.y + outer.height
+          );
+        })
+        .toBe(true);
+
+      await page.keyboard.press('Escape');
+      await expect(dialog).toHaveCount(0);
+      await expect(demo.getByRole('button', { name: 'Open Dialog', exact: true })).toBeFocused();
+
+      await demo.getByRole('button', { name: 'Open Dialog', exact: true }).click();
+      await demo.getByRole('button', { name: 'Cancel', exact: true }).click();
+      await expect(dialog).toHaveCount(0);
+      // Closed, the frame goes back to the demo's own height.
+      await expect.poll(async () => (await frame(page, 'Dialog demo').boundingBox())?.height).toBeLessThan(200);
+    });
+  }
+
   test("the frame shows the demo's source in its Code tab", async ({ page }) => {
     await page.goto(BUTTON);
 

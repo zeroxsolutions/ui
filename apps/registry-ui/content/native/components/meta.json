@@ -44,6 +44,8 @@
     "---Disclosure---",
     "accordion",
     "collapsible",
+    "---Overlays---",
+    "dialog",
     "---Navigation---",
     "tabs",
     "tab-bar",
