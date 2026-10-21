@@ -1,9 +1,19 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CodeInput } from './code-input';
 
-afterEach(cleanup);
+// input-otp schedules timers of up to five seconds after mount; on real timers they fire after the
+// file's jsdom is torn down and React throws `window is not defined` outside any test.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+});
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllTimers();
+  vi.useRealTimers();
+});
 
 function groups(container: HTMLElement): HTMLElement[] {
   return [...container.querySelectorAll<HTMLElement>('[data-slot=input-otp-group]')];
