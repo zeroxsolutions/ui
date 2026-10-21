@@ -87,16 +87,6 @@
             "../registry-ui/public/native-preview/nova"
           ]
         }
-      },
-      "publish-update": {
-        "executor": "nx:run-commands",
-        "dependsOn": [
-          "^build-registry"
-        ],
-        "options": {
-          "cwd": "{projectRoot}",
-          "command": "for style in vega nova; do STYLE=$style eas update --branch $style --message \"$(git rev-parse HEAD)\" --environment preview --input-dir dist/update/$style --non-interactive || exit 1; done"
-        }
       }
     }
   }

@@ -115,10 +115,27 @@ jobs:
       - if: steps.token.outputs.publish == 'true'
         uses: ./.github/actions/nx-setup
 
-      # eas-cli reads `EXPO_TOKEN` from the environment, so the target takes no argument for it.
-      - name: Publish the updates
+      # The preview's `@/` alias points at the emitted sources of its style, so they exist before
+      # eas bundles it.
+      - name: Build the native registries
         if: steps.token.outputs.publish == 'true'
-        shell: bash
+        run: pnpm nx run-many -t build-registry
+
+      # @nx/expo infers no update target, and its `@nx/expo:update` executor runs `expo install`
+      # from the workspace root first, where `expo` is not installed. eas-cli reads `EXPO_TOKEN`
+      # from the environment; `STYLE` picks the style the app is bundled in.
+      - name: Publish the vega update
+        if: steps.token.outputs.publish == 'true'
+        working-directory: apps/native-preview
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: pnpm nx run-many -t publish-update
+          STYLE: vega
+        run: pnpm exec eas update --branch vega --message "$GITHUB_SHA" --environment preview --input-dir dist/update/vega --non-interactive
+
+      - name: Publish the nova update
+        if: steps.token.outputs.publish == 'true'
+        working-directory: apps/native-preview
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          STYLE: nova
+        run: pnpm exec eas update --branch nova --message "$GITHUB_SHA" --environment preview --input-dir dist/update/nova --non-interactive
