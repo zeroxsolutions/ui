@@ -15,6 +15,8 @@ interface DocsArticleProps {
   title: string;
   /** The page's frontmatter description, under the heading. */
   description?: string;
+  /** Links to this page under each engine or base, under the description, on a page whose path holds one. */
+  tabs?: ReactNode;
   /** The page as Markdown, which Copy page copies; give it what the page's `.md` URL serves, so the two match. */
   markdown: string;
   /** The tree the page sits in, which the previous and next links and the pager step through. */
@@ -28,10 +30,11 @@ interface DocsArticleProps {
 }
 
 /**
- * One docs page: its heading with Copy page and the previous and next links, its body, the pager, and
- * the headings column beside them. Web and native docs pages both render through it.
+ * One docs page: its heading with Copy page and the previous and next links, the engine or base tabs
+ * where given, its body, the pager, and the headings column beside them. Web and native docs pages both
+ * render through it.
  */
-function DocsArticle({ title, description, markdown, tree, url, toc, children }: DocsArticleProps): ReactNode {
+function DocsArticle({ title, description, tabs, markdown, tree, url, toc, children }: DocsArticleProps): ReactNode {
   const neighbours = pageNeighbours(tree, url);
 
   return (
@@ -53,6 +56,7 @@ function DocsArticle({ title, description, markdown, tree, url, toc, children }:
             </div>
             {description && <p className="text-muted-foreground text-balance">{description}</p>}
           </div>
+          {tabs}
           <div className="w-full flex-1 leading-7 wrap-break-word">{children}</div>
           <DocsPager tree={tree} url={url} />
         </div>
