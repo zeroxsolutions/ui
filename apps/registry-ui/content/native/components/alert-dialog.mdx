@@ -87,6 +87,10 @@ Android back button, the iOS escape gesture (a two-finger Z) and Escape on the w
 footer's two buttons side by side at equal widths. It fades in and zooms from 95% over 100ms, and out the same way.
 When the system asks for reduced motion it appears and goes at once.
 
+VoiceOver stays inside the alert dialog while it is open. TalkBack does once the app hides its screens from screen
+readers while an overlay is shown, as [Add a portal host](/native/docs/installation#add-a-portal-host) shows; the
+web hides the rest of the page itself.
+
 ### AlertDialogHeader and AlertDialogFooter
 
 Take every prop of React Native's `View`. The header centres its children. The footer stacks its children with the

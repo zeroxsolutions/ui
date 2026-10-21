@@ -14,7 +14,7 @@ import {
   DrawerTrigger,
   type DrawerProps,
 } from './drawer';
-import { catchBackPress, followAccessibilityFocus, swipe } from './overlay.testing';
+import { catchBackPress, followAccessibilityFocus, swipe, AppScreen, outermostView } from './overlay.testing';
 import { Text } from './text';
 
 // Jest runs no Reanimated frame into the props a query reads, so the opacity the fade starts at hides the
@@ -98,7 +98,7 @@ describe('Drawer', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it('opens a modal dialog named by its title when the trigger is pressed', async () => {
+  it('opens a dialog named by its title when the trigger is pressed', async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await render(<MoveGoal />);
 
@@ -106,7 +106,6 @@ describe('Drawer', () => {
     await finishMotion();
 
     expect(drawer()).toHaveProp('role', 'dialog');
-    expect(drawer()).toHaveProp('aria-modal', true);
     expect(screen.getByRole('heading', { name: 'Move Goal' })).toHaveProp(
       'nativeID',
       drawer().props['aria-labelledby'],
@@ -280,5 +279,24 @@ describe('Drawer', () => {
     await elapse(1_000);
 
     expect(error).toHaveBeenCalledWith(expect.stringMatching(/^Drawer opened, but no <PortalHost \/>/));
+  });
+
+  it('hides the screen behind it from screen readers while open, and keeps VoiceOver in its layer', async () => {
+    await render(
+      <>
+        <AppScreen />
+        <MoveGoal defaultOpen />
+      </>,
+    );
+    await finishMotion();
+
+    expect(screen.queryByTestId('app-screen', { includeHiddenElements: false })).toBeNull();
+    expect(outermostView(drawer())).toHaveProp('accessibilityViewIsModal', true);
+
+    await act(async () => {
+      drawer().props.onAccessibilityEscape();
+    });
+    await finishMotion();
+    expect(screen.getByTestId('app-screen', { includeHiddenElements: false })).toBeOnTheScreen();
   });
 });

@@ -223,15 +223,25 @@ Router app the root is `app/_layout.tsx`; in the app above it is `App.tsx`:
 ```tsx title="App.tsx"
 import { PortalHost } from '@rn-primitives/portal';
 
+import { useModalOverlayShown } from '@/lib/overlay';
+
 // ...
+
+const overlayShown = useModalOverlayShown();
 
 return (
   <>
-    <View className="flex-1 items-center justify-center bg-background">{/* ... */}</View>
+    <View aria-hidden={overlayShown} className="flex-1 items-center justify-center bg-background">
+      {/* ... */}
+    </View>
     <PortalHost />
   </>
 );
 ```
+
+`aria-hidden` hides the app's screens from screen readers while a Dialog, Alert dialog, Sheet or Drawer is open,
+which Android's TalkBack needs to stay inside it; the overlay itself keeps VoiceOver inside it on iOS.
+`lib/overlay.ts` comes with each of those items.
 
 ## Follow the device colour scheme
 

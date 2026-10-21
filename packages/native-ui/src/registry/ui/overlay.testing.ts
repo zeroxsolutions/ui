@@ -2,10 +2,12 @@
  * Helpers the overlay specs share for what Jest's renderer does not do as a device does: deliver the
  * Android back button, tell which view accessibility focus was moved to, and drag a finger across a view.
  */
-import { act } from '@testing-library/react-native';
+import { act, type screen } from '@testing-library/react-native';
+import { createElement, type ReactElement } from 'react';
 import type * as ReactNative from 'react-native';
 import { BackHandler, type NativeEventSubscription } from 'react-native';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, View } from 'react-native';
+import { useModalOverlayShown } from '../lib/overlay';
 
 /**
  * Catches the listeners an overlay adds for the Android back button; call before rendering it.
@@ -94,4 +96,21 @@ async function swipe(view: { props: Record<string, unknown> }, { dx = 0, dy = 0,
   await handle('onResponderRelease', touchHistoryOf(start, end, false));
 }
 
-export { catchBackPress, followAccessibilityFocus, swipe };
+export { AppScreen, outermostView, catchBackPress, followAccessibilityFocus, swipe };
+
+type HostView = ReturnType<typeof screen.getByTestId>;
+
+/**
+ * The app's screen as the install docs have an app draw it, beside the PortalHost: hidden from screen
+ * readers while a modal overlay is shown. Its `testID` is `app-screen`.
+ */
+function AppScreen(): ReactElement {
+  return createElement(View, { testID: 'app-screen', 'aria-hidden': useModalOverlayShown() });
+}
+
+/** The outermost view an overlay drew around `view`: the one its PortalHost holds beside the app's screen. */
+function outermostView(view: HostView): HostView {
+  let outer = view;
+  while (outer.parent !== null && outer.parent.parent !== null) outer = outer.parent;
+  return outer;
+}

@@ -4,7 +4,7 @@ import { createContext, useContext, useId, type ComponentProps, type ReactNode }
 import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
 import { usePresence } from '../lib/motion';
-import { usePortalHostCheck } from '../lib/overlay';
+import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { Icon } from './icon';
@@ -104,6 +104,8 @@ function SheetContent({
   });
 
   const hostCheck = usePortalHostCheck(present, 'Sheet', portalHost);
+  // Drawn beside the app's screens, the outermost layer is the one that keeps VoiceOver inside the overlay.
+  const modalLayer = useModalOverlay(present);
 
   if (!present) return null;
 
@@ -113,7 +115,7 @@ function SheetContent({
       {/* The portal draws outside this tree, so the title's id is handed in again. */}
       <SheetTitleIdContext.Provider value={titleId}>
         {/* Closing, it lets presses through to the screen while it fades. */}
-        <View style={[StyleSheet.absoluteFill, { pointerEvents: open ? 'box-none' : 'none' }]}>
+        <View {...modalLayer} style={[StyleSheet.absoluteFill, { pointerEvents: open ? 'box-none' : 'none' }]}>
           <Animated.View style={[StyleSheet.absoluteFill, !reduced && fade]}>
             <SheetPrimitive.Overlay forceMount className="cn-sheet-overlay absolute inset-0" />
           </Animated.View>

@@ -85,6 +85,10 @@ the app's own. A bottom or top drawer is as tall as its content, up to 6rem shor
 centred; a side drawer is three quarters of the screen's width. The drawer is a modal `dialog` named by its
 DrawerTitle, over a dimmed overlay, and accessibility focus moves into it as it opens.
 
+VoiceOver stays inside the drawer while it is open. TalkBack does once the app hides its screens from screen
+readers while an overlay is shown, as [Add a portal host](/native/docs/installation#add-a-portal-host) shows; the
+web hides the rest of the page itself.
+
 A swipe toward its edge moves it with the finger. Let go past a quarter of its size, or flicked, it closes;
 otherwise it settles back. A press on the overlay, the Android back button, the iOS escape gesture (a two-finger Z)
 and Escape on the web close it too. It slides in from its edge over 450ms and out over 400ms. When the system asks

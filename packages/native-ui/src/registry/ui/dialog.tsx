@@ -4,7 +4,7 @@ import { createContext, useContext, useId, type ComponentProps, type ReactNode }
 import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
 import { usePresence } from '../lib/motion';
-import { usePortalHostCheck } from '../lib/overlay';
+import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { Icon } from './icon';
@@ -99,6 +99,8 @@ function DialogContent({
   const zoom = useAnimatedStyle(() => ({ transform: [{ scale: 0.95 + 0.05 * progress.value }] }));
 
   const hostCheck = usePortalHostCheck(present, 'Dialog', portalHost);
+  // Drawn beside the app's screens, the outermost layer is the one that keeps VoiceOver inside the overlay.
+  const modalLayer = useModalOverlay(present);
 
   if (!present) return null;
 
@@ -109,6 +111,7 @@ function DialogContent({
       <DialogTitleIdContext.Provider value={titleId}>
         {/* Closing, it lets presses through to the screen while it fades. */}
         <Animated.View
+          {...modalLayer}
           style={[StyleSheet.absoluteFill, { pointerEvents: open ? 'box-none' : 'none' }, !reduced && fade]}
         >
           <DialogOverlay forceMount />

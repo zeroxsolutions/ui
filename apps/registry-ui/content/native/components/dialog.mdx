@@ -85,6 +85,10 @@ its DialogTitle. Accessibility focus moves into it as it opens. A press on the o
 the iOS escape gesture (a two-finger Z) and Escape on the web close it. `showCloseButton` draws a ghost button named
 Close in the top right corner. `portalHost` names the `PortalHost` to draw in when it is not the app's own.
 
+VoiceOver stays inside the dialog while it is open. TalkBack does once the app hides its screens from screen
+readers while an overlay is shown, as [Add a portal host](/native/docs/installation#add-a-portal-host) shows; the
+web hides the rest of the page itself.
+
 It fades in and zooms from 95% over 100ms, and out the same way. When the system asks for reduced motion it
 appears and goes at once.
 

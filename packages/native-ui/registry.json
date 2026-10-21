@@ -46,7 +46,7 @@
       "name": "overlay",
       "type": "registry:lib",
       "title": "Overlay",
-      "description": "usePortalHostCheck, which reports in development an overlay shown while no PortalHost draws it.",
+      "description": "usePortalHostCheck, which reports in development an overlay shown while no PortalHost draws it, and useModalOverlay and useModalOverlayShown, which keep screen readers inside an open modal overlay.",
       "files": [
         {
           "path": "src/registry/lib/overlay.ts",

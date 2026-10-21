@@ -8,6 +8,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 
 import { Text } from '@/components/ui/text';
 import { zuiFonts } from '@/lib/fonts';
+import { useModalOverlayShown } from '@/lib/overlay';
 
 import { DemoBoundary } from './demo-boundary';
 import { DEMO_NAMES, findDemo } from './find-demo';
@@ -137,6 +138,7 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
     }
   }, [contentHeight, overlayShown]);
 
+  const modalShown = useModalOverlayShown();
   if (!ready) return null;
   const Demo = name === undefined ? undefined : findDemo(style, name);
 
@@ -146,7 +148,12 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
       contentContainerClassName="p-6"
       onContentSizeChange={(_width, height) => setContentHeight(height)}
     >
-      <View style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+      {/* An open modal overlay hides the demo from screen readers on a device; the web's primitives hide
+          the page themselves, and focus returns into it while the overlay goes out. */}
+      <View
+        aria-hidden={Platform.OS !== 'web' && modalShown}
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+      >
         {Demo !== undefined && name !== undefined ? (
           <DemoBoundary key={name} name={name}>
             <Demo />

@@ -12,7 +12,7 @@ import {
   DialogTrigger,
   type DialogProps,
 } from './dialog';
-import { catchBackPress, followAccessibilityFocus } from './overlay.testing';
+import { catchBackPress, followAccessibilityFocus, AppScreen, outermostView } from './overlay.testing';
 import { Text } from './text';
 
 // Jest runs no Reanimated frame into the props a query reads, so the opacity the fade starts at hides the
@@ -82,7 +82,7 @@ describe('Dialog', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it('opens a modal dialog named by its title when the trigger is pressed', async () => {
+  it('opens a dialog named by its title when the trigger is pressed', async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await render(<EditProfile />);
 
@@ -90,7 +90,6 @@ describe('Dialog', () => {
     await finishMotion();
 
     expect(dialog()).toHaveProp('role', 'dialog');
-    expect(dialog()).toHaveProp('aria-modal', true);
     expect(screen.getByRole('heading', { name: 'Profile' })).toHaveProp('nativeID', dialog().props['aria-labelledby']);
     expect(screen.getByText('Make changes to your profile here.')).toBeOnTheScreen();
     expect(trigger()).toBeExpanded();
@@ -228,5 +227,24 @@ describe('Dialog', () => {
     await elapse(1_000);
 
     expect(error).toHaveBeenCalledWith(expect.stringMatching(/^Dialog opened, but no <PortalHost \/>/));
+  });
+
+  it('hides the screen behind it from screen readers while open, and keeps VoiceOver in its layer', async () => {
+    await render(
+      <>
+        <AppScreen />
+        <EditProfile defaultOpen />
+      </>,
+    );
+    await finishMotion();
+
+    expect(screen.queryByTestId('app-screen', { includeHiddenElements: false })).toBeNull();
+    expect(outermostView(dialog())).toHaveProp('accessibilityViewIsModal', true);
+
+    await act(async () => {
+      dialog().props.onAccessibilityEscape();
+    });
+    await finishMotion();
+    expect(screen.getByTestId('app-screen', { includeHiddenElements: false })).toBeOnTheScreen();
   });
 });

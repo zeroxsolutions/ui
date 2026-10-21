@@ -84,6 +84,10 @@ overlay. Accessibility focus moves into it as it opens. A press on the overlay, 
 escape gesture (a two-finger Z) and Escape on the web close it. It fades in while sliding 2.5rem in from its side
 over 200ms, and out the same way. When the system asks for reduced motion it appears and goes at once.
 
+VoiceOver stays inside the sheet while it is open. TalkBack does once the app hides its screens from screen
+readers while an overlay is shown, as [Add a portal host](/native/docs/installation#add-a-portal-host) shows; the
+web hides the rest of the page itself.
+
 The panel runs to the screen's edge, under the status bar or the home indicator. Pad it by the safe area's insets
 where it meets them, such as with `useSafeAreaInsets` from `react-native-safe-area-context`.
 

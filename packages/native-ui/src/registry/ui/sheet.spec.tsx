@@ -3,7 +3,7 @@ import { act, configure, render, screen, userEvent } from '@testing-library/reac
 import { AccessibilityInfo } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Button } from './button';
-import { catchBackPress, followAccessibilityFocus } from './overlay.testing';
+import { catchBackPress, followAccessibilityFocus, AppScreen, outermostView } from './overlay.testing';
 import {
   Sheet,
   SheetClose,
@@ -93,7 +93,7 @@ describe('Sheet', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it('opens a modal dialog named by its title when the trigger is pressed', async () => {
+  it('opens a dialog named by its title when the trigger is pressed', async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await render(<EditProfile />);
 
@@ -101,7 +101,6 @@ describe('Sheet', () => {
     await finishMotion();
 
     expect(sheet()).toHaveProp('role', 'dialog');
-    expect(sheet()).toHaveProp('aria-modal', true);
     expect(screen.getByRole('heading', { name: 'Edit profile' })).toHaveProp(
       'nativeID',
       sheet().props['aria-labelledby'],
@@ -236,5 +235,24 @@ describe('Sheet', () => {
     await elapse(1_000);
 
     expect(error).toHaveBeenCalledWith(expect.stringMatching(/^Sheet opened, but no <PortalHost \/>/));
+  });
+
+  it('hides the screen behind it from screen readers while open, and keeps VoiceOver in its layer', async () => {
+    await render(
+      <>
+        <AppScreen />
+        <EditProfile defaultOpen />
+      </>,
+    );
+    await finishMotion();
+
+    expect(screen.queryByTestId('app-screen', { includeHiddenElements: false })).toBeNull();
+    expect(outermostView(sheet())).toHaveProp('accessibilityViewIsModal', true);
+
+    await act(async () => {
+      sheet().props.onAccessibilityEscape();
+    });
+    await finishMotion();
+    expect(screen.getByTestId('app-screen', { includeHiddenElements: false })).toBeOnTheScreen();
   });
 });
