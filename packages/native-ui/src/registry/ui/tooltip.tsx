@@ -151,7 +151,7 @@ function TooltipContent({
             <TextClassContext.Provider value="text-background cn-tooltip-content/text">
               {/* Not every engine styles an Animated.View by its className, so the box is a View inside it. */}
               <Animated.View style={[{ transformOrigin: TRANSFORM_ORIGIN[placed] }, !reduced && motion]}>
-                <View className={cn('max-w-xs flex-row bg-foreground cn-tooltip-content', className)}>{children}</View>
+                <View className={cn('max-w-xs bg-foreground cn-tooltip-content', className)}>{children}</View>
               </Animated.View>
             </TextClassContext.Provider>
           </TooltipPrimitive.Content>

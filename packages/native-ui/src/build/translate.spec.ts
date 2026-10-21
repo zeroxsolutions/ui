@@ -931,6 +931,16 @@ describe('translateClasses for a grid', () => {
       expect(translateClasses(['place-items-center'], engine, 'view').classes).toEqual(['items-center']);
     },
   );
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    "lays an inline-flex box's children in a row, as the web's inline-flex does, with flex-row for %s",
+    (engine) => {
+      expect(translateClasses(['inline-flex', 'items-center'], engine, 'view')).toEqual({
+        classes: ['flex-row', 'items-center'],
+        unknown: [],
+      });
+    },
+  );
 });
 
 describe('translateClasses for a dialog', () => {

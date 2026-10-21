@@ -297,6 +297,9 @@ const DROPPED_UTILITIES = [
  */
 const PLACE_ITEMS = /^place-items-(start|end|center|stretch|baseline)$/;
 
+/** The web's `inline-flex`, which lays its children in a row; a View is a flex box already, in a column. */
+const INLINE_FLEX = /^inline-flex$/;
+
 /**
  * A radius `min(var(--radius-md), Npx)`, which neither engine evaluates. The theme's `--radius-md` is
  * 0.8 of a 0.625rem `--radius`, 8px, so a clamp at 8px or more is `rounded-md`, a size's own radius
@@ -680,7 +683,9 @@ export function translateClasses(
         cls.states,
         read,
       ),
-    ).replace(PLACE_ITEMS, 'items-$1');
+    )
+      .replace(PLACE_ITEMS, 'items-$1')
+      .replace(INLINE_FLEX, 'flex-row');
     if (DROPPED_UTILITIES.some((rule) => rule.test(utility))) continue;
     if (untranslatable.some((rule) => rule.test(utility))) {
       unknown.push(cls.source);
