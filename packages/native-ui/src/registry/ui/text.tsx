@@ -17,7 +17,7 @@ const GEIST_FAMILY_CLASSES = {
   bold: 'font-sans-bold',
 } as const satisfies Readonly<Record<string, string>>;
 
-// The important modifier is a prefix (`!font-bold`) or a suffix (`font-bold!`), and stays where it was.
+// The important modifier is a prefix or a suffix of the class, and stays where it was.
 const WEIGHT_CLASS = /^((?:[^:\s]+:)*!?)font-(normal|medium|semibold|bold)(!?)$/;
 
 /** Renames each weight class in `className`, under any variant, to its Geist family class. */
