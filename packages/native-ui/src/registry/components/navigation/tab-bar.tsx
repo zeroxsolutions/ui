@@ -189,6 +189,9 @@ function TabBarItem({
             onPressOut?.(event);
           }}
           {...props}
+          // React Native lets an aria-* prop win over accessibilityState, so a caller's aria-selected
+          // is overridden here, after their props.
+          aria-selected={active}
         >
           {children}
         </Pressable>

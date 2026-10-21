@@ -66,7 +66,7 @@ type PasswordInputToggleProps = Omit<InputGroupButtonProps, 'children' | 'size'>
 /**
  * The show/hide toggle, a ghost `icon-xs` InputGroupButton announced as a button, drawing an eye while
  * the password is hidden and a struck eye while it shows. Its name follows the state, `showLabel`
- * then `hideLabel`, which an app passes translated. Pressing it leaves focus in the field.
+ * then `hideLabel`, which an app passes translated. Pressing it does not move focus.
  * @throws {Error} when rendered outside a PasswordInput
  */
 function PasswordInputToggle({

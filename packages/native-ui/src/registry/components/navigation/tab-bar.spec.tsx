@@ -205,6 +205,18 @@ describe('TabBarItem', () => {
     });
   });
 
+  it("keeps a caller's aria-selected from overriding the active state", async () => {
+    await render(
+      <TabBar accessibilityLabel="Main">
+        <TabBarItem active aria-selected={false}>
+          <TabBarLabel>Home</TabBarLabel>
+        </TabBarItem>
+      </TabBar>,
+    );
+
+    expect(screen.getByRole('tab', { name: 'Home', selected: true })).toBeOnTheScreen();
+  });
+
   it('calls onPress when pressed', async () => {
     const user = userEvent.setup();
     const onPressInbox = jest.fn();

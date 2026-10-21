@@ -104,6 +104,36 @@ describe('UnsavedChangesToolbar', () => {
     expect(screen.queryByLabelText('Could not save.')).toBeNull();
   });
 
+  it("names the group with the message's text on iOS, which ignores aria-labelledby", async () => {
+    Platform.OS = 'ios';
+    const { rerender } = await render(<Example message="Could not save." />);
+
+    expect(screen.getByTestId('toolbar').props.accessibilityLabel).toBe('Could not save.');
+
+    await rerender(<Example message="Saved." />);
+
+    expect(screen.getByTestId('toolbar').props.accessibilityLabel).toBe('Saved.');
+  });
+
+  it('leaves the name to aria-labelledby on Android', async () => {
+    Platform.OS = 'android';
+    await render(<Example message="Could not save." />);
+
+    expect(screen.getByTestId('toolbar').props.accessibilityLabel).toBeUndefined();
+  });
+
+  it('does not replace an aria-label the caller gives it on iOS', async () => {
+    Platform.OS = 'ios';
+    await render(
+      <UnsavedChangesToolbar aria-label="Form actions" testID="toolbar">
+        <UnsavedChangesToolbarMessage>Could not save.</UnsavedChangesToolbarMessage>
+      </UnsavedChangesToolbar>,
+    );
+
+    expect(screen.getByTestId('toolbar').props.accessibilityLabel).toBeUndefined();
+    expect(screen.getByTestId('toolbar').props['aria-label']).toBe('Form actions');
+  });
+
   it('is a group for a screen reader', async () => {
     await render(<Example />);
 

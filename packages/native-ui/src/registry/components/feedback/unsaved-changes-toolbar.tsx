@@ -5,6 +5,7 @@ import {
   useId,
   useMemo,
   useRef,
+  useState,
   type ComponentProps,
   type ReactNode,
 } from 'react';
@@ -27,6 +28,8 @@ interface UnsavedChangesToolbarContextValue {
   state: UnsavedChangesToolbarState;
   /** The `nativeID` of the message, which names the group. */
   messageId: string;
+  /** Hands the message's text to the group, which iOS needs to name it. */
+  setMessageText: (text: string) => void;
 }
 
 const UnsavedChangesToolbarContext = createContext<UnsavedChangesToolbarContextValue | null>(null);
@@ -48,7 +51,8 @@ type UnsavedChangesToolbarProps = ComponentProps<typeof View> & {
  * A toolbar floating at the top or bottom of its parent while a form differs from its saved values, on
  * a popover's surface, centred and at most `max-w-lg` wide. It is absolutely positioned, so render it
  * inside a full-screen parent. A screen reader reads it as a group named by its message, unless you pass
- * `aria-labelledby`, `aria-label` or `accessibilityLabel`. The caller renders it only while there are changes, and writes
+ * `aria-labelledby`, `aria-label` or `accessibilityLabel`. React Native reads `aria-labelledby` on Android
+ * only, so on iOS the group's `accessibilityLabel` is the message's text. The caller renders it only while there are changes, and writes
  * every word. A `testID` goes to the group, and `<testID>-wrapper` to the box that places it:
  *
  *   <UnsavedChangesToolbar state={state}>
@@ -70,7 +74,8 @@ function UnsavedChangesToolbar({
 }: UnsavedChangesToolbarProps): ReactNode {
   const messageId = useId();
   const named = props.accessibilityLabel !== undefined || props['aria-label'] !== undefined;
-  const context = useMemo(() => ({ state, messageId }), [state, messageId]);
+  const [messageText, setMessageText] = useState<string>();
+  const context = useMemo(() => ({ state, messageId, setMessageText }), [state, messageId]);
   return (
     <UnsavedChangesToolbarContext.Provider value={context}>
       <View
@@ -81,6 +86,7 @@ function UnsavedChangesToolbar({
         <View
           role="group"
           aria-labelledby={named ? undefined : messageId}
+          accessibilityLabel={!named && Platform.OS === 'ios' ? messageText : undefined}
           testID={testID}
           className={cn(
             'bg-popover border-foreground/10 w-full max-w-lg flex-row items-center gap-3 rounded-2xl border py-2 pr-2 pl-4 shadow-lg',
@@ -107,8 +113,12 @@ type UnsavedChangesToolbarMessageProps = Omit<ComponentProps<typeof Text>, 'chil
  * @throws {Error} when rendered outside an UnsavedChangesToolbar
  */
 function UnsavedChangesToolbarMessage({ className, children, ...props }: UnsavedChangesToolbarMessageProps): ReactNode {
-  const { state, messageId } = useUnsavedChangesToolbar();
+  const { state, messageId, setMessageText } = useUnsavedChangesToolbar();
   const mounted = useRef(false);
+
+  useEffect(() => {
+    setMessageText(children);
+  }, [children, setMessageText]);
 
   useEffect(() => {
     const first = !mounted.current;
