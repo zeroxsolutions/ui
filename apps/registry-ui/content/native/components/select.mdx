@@ -119,4 +119,7 @@ scrolls the list by a swipe, so they draw nothing there.
   button and the iOS escape gesture.
 - Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
   for reduced motion.
+- Radix closes the web's list when the window is resized. The native list stays open through a resize and is
+  placed again, because a page that grows to hold the open list, such as the frame these docs draw demos in,
+  resizes its window as the list opens and would close it at once.
 - `multiple` is left out.
