@@ -123,9 +123,18 @@ function InputOTP({
     active: focused && index === Math.min(value.length, maxLength - 1),
   }));
 
+  // The caret is kept at the end of the code, so the OS reports a paste as the old code followed by the
+  // pasted text, and an autofill as the whole text; either way the pasted characters become the code.
+  const pastedCode = (text: string): string => {
+    const pasted = pasteTransformer(text.startsWith(value) ? text.slice(value.length) : text);
+    const accepts = new RegExp(pattern);
+    return Array.from(pasted)
+      .filter((char) => accepts.test(char))
+      .join('');
+  };
+
   const change = (text: string): void => {
-    const pasted = text.length > value.length + 1;
-    const next = (pasted ? pasteTransformer(text) : text).slice(0, maxLength);
+    const next = (text.length > value.length + 1 ? pastedCode(text) : text).slice(0, maxLength);
     if (next === value || (next.length > 0 && !new RegExp(pattern).test(next))) return;
     if (controlledValue === undefined) setHeldValue(next);
     onChange?.(next);

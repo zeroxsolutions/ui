@@ -65,7 +65,9 @@ opens the number pad unless given another `keyboardType`.
 
 Leave `value` out to let the field hold the code, or pass `value` and `onChange` to control it. `onChange` runs
 after each change the `pattern` accepts and `onComplete` once the code is `maxLength` long. A change that does
-not match `pattern` is refused. The patterns the file exports are `REGEXP_ONLY_DIGITS`, `REGEXP_ONLY_CHARS`
+not match `pattern` is refused. A paste, which is text that grows by more than one character at once, replaces
+the code: `pasteTransformer` runs on the pasted text alone, the characters `pattern` does not accept are dropped,
+and the rest is cut to `maxLength`. The patterns the file exports are `REGEXP_ONLY_DIGITS`, `REGEXP_ONLY_CHARS`
 and `REGEXP_ONLY_DIGITS_AND_CHARS`.
 
 `aria-invalid` draws every slot with the destructive border. React Native does not announce it, so carry the

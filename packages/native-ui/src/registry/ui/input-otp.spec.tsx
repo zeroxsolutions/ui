@@ -71,6 +71,25 @@ describe('InputOTP', () => {
     expect(onComplete).toHaveBeenCalledWith('123456');
   });
 
+  it('replaces a partly filled code with the pasted one, not a concatenation', async () => {
+    const onChange = jest.fn();
+    await render(sixDigitCode({ defaultValue: '12', onChange }));
+
+    // The caret sits at the end of the code, so the OS reports a paste as the old code with the new text after it.
+    await fireEvent.changeText(screen.getByLabelText('Verification code'), '12123456');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('123456');
+    expect(onChange).toHaveBeenLastCalledWith('123456');
+  });
+
+  it('keeps only the characters of a paste the pattern accepts', async () => {
+    await render(sixDigitCode());
+
+    await userEvent.setup().paste(screen.getByLabelText('Verification code'), '12-ab-34');
+
+    expect(screen.getByLabelText('Verification code').props.value).toBe('1234');
+  });
+
   it('completes once when typed in full', async () => {
     const onComplete = jest.fn();
     await render(sixDigitCode({ onComplete }));

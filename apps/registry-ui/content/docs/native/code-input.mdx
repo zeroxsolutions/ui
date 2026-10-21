@@ -44,7 +44,7 @@ screen reader meets one text field, named with `aria-label`.
 
 `allowedCharacters` is what the whole code must match for a change to be taken, as InputOTP's `pattern`: the
 exports of [Input OTP](/docs/native/input-otp) such as `REGEXP_ONLY_DIGITS_AND_CHARS` fit, and a change that
-does not match is refused as it is typed or pasted. The field opens the number pad, so pass `keyboardType` too
+does not match is refused as it is typed, and a paste keeps only the characters it accepts and replaces the code. The field opens the number pad, so pass `keyboardType` too
 for a code that is not digits.
 
 The field is marked for the OS to offer a code from a text message (`textContentType="oneTimeCode"` on iOS,
