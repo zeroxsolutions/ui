@@ -245,6 +245,14 @@ const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
 const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set(['cn-pagination-previous', 'cn-pagination-next']);
 const IMPORTANT_SUFFIX = /!$/;
 
+/**
+ * Slots whose `::after` pseudo-element draws something a component draws as a child instead, so a class
+ * behind `after:` is the state `part=after`, which that child applies, rather than dropped. The drawer's
+ * swipe handle draws its bar this way.
+ */
+const SLOT_AFTER_PARTS: ReadonlySet<string> = new Set(['cn-drawer-swipe-handle']);
+const AFTER_PART_MODIFIER = '*:data-[slot=after]';
+
 /** The px of 1rem, which the theme's setup sets. */
 const REM_PX = 16;
 
@@ -264,8 +272,8 @@ const REM_LENGTH = /^([\d.]+)rem$/;
  * wide as its content once its parent does not stretch it, which the component sets with `self-start`.
  * React Native has no `text-wrap` to balance a line with, no overflow per axis (a ScrollView scrolls
  * one), and no table layout: no caption side and no vertical align in a cell, which a Table lays out
- * itself. Nor has it a grid: a View stacks its children in a column, and a component that sets two
- * side by side lays out the row itself.
+ * itself. Nor has it a grid or a block: a View stacks its children in a flex column, and a component
+ * that sets two side by side lays out the row itself.
  */
 const DROPPED_UTILITIES = [
   /^(outline|ring|ring-offset|transition|duration|ease|whitespace|cursor|scroll)(-|$)/,
@@ -277,6 +285,7 @@ const DROPPED_UTILITIES = [
   /^overflow-[xy]-/,
   /^caption-(top|bottom)$/,
   /^align-(baseline|top|middle|bottom|text-top|text-bottom|sub|super)$/,
+  /^block$/,
   /^grid$/,
   /^grid-(rows|cols)-/,
   /^(row|col)-(span|start|end)-/,
@@ -466,11 +475,13 @@ function joinChildModifiers(modifiers: readonly string[]): string[] {
   return joined;
 }
 
-function readClass(cls: string, stateModifiers: ReadonlySet<string> = new Set()): SlotClass {
+function readClass(cls: string, stateModifiers: ReadonlySet<string> = new Set(), afterPart = false): SlotClass {
   const split = splitVariants(cls);
   const utility = split.pop() ?? '';
   const variants = joinChildModifiers(split);
-  const modifiers = variants.filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m));
+  const modifiers = variants
+    .filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m))
+    .map((m) => (afterPart && m === 'after' ? AFTER_PART_MODIFIER : m));
   const isChildState = (m: string): boolean => CHILD_STATE_MODIFIERS.has(m) || CHILD_VARIANT_MODIFIER.test(m);
   if (modifiers.some((m) => !isChildState(m) && DROPPED_MODIFIERS.some((rule) => rule.test(m)))) {
     return { reading: 'dropped' };
@@ -643,10 +654,11 @@ export function translateClasses(
   const stateModifiers = (slot.name === undefined ? undefined : SLOT_STATE_MODIFIERS.get(slot.name)) ?? new Set();
   const spacingVariables: SpacingVariables = slot.spacingVariables ?? new Map();
   const importantRemoved = slot.name !== undefined && SLOT_IMPORTANT_REMOVED.has(slot.name);
+  const afterPart = slot.name !== undefined && SLOT_AFTER_PARTS.has(slot.name);
   const read = classes
     .filter((cls) => !droppedByName.has(cls))
     .map((cls) => (importantRemoved ? cls.replace(IMPORTANT_SUFFIX, '') : cls))
-    .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers), spacingVariables));
+    .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers, afterPart), spacingVariables));
 
   const ringBorder = drawsRingAsBorder(read);
 

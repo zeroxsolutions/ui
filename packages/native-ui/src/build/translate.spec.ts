@@ -960,3 +960,36 @@ describe('translateClasses for a fixed position', () => {
     },
   );
 });
+
+describe('translateClasses for a drawer swipe handle', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const handle = (style: keyof typeof styles, engine: Engine, state: string): string[] =>
+    translateClasses(styles[style].get('cn-drawer-swipe-handle') ?? [], engine, 'view', state, {
+      name: 'cn-drawer-swipe-handle',
+    }).classes;
+
+  it.each(STYLE_ENGINES)(
+    'gives the bar its ::after draws to the part=after child, with no display block, for %s in %s',
+    (engine, style) => {
+      expect([...handle(style, engine, 'part=after')].sort()).toEqual(['bg-muted', 'rounded-full', 'shrink-0']);
+    },
+  );
+
+  it.each([
+    ['vega', ['h-1.5', 'w-[100px]'], ['h-[100px]', 'w-1.5']],
+    ['nova', ['h-1', 'w-24'], ['h-24', 'w-1']],
+  ] as const)('sizes the %s bar across the axis it is swiped along', (style, across, along) => {
+    expect(handle(style, 'uniwind', 'part=after+swipe-axis=y')).toEqual(across);
+    expect(handle(style, 'uniwind', 'part=after+swipe-axis=x')).toEqual(along);
+  });
+
+  it('keeps dropping ::after classes for any other slot', () => {
+    expect(translateClasses(['after:bg-muted'], 'uniwind', 'view', 'part=after', { name: 'cn-field-label' })).toEqual({
+      classes: [],
+      unknown: [],
+    });
+  });
+});

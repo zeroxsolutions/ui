@@ -48,6 +48,7 @@
     "alert-dialog",
     "dialog",
     "sheet",
+    "drawer",
     "---Navigation---",
     "tabs",
     "tab-bar",

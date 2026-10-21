@@ -570,6 +570,20 @@
       ]
     },
     {
+      "name": "drawer",
+      "type": "registry:ui",
+      "title": "Drawer",
+      "description": "A panel attached to an edge of the screen over a dimmed overlay, announced as a modal dialog named by its title, closed by a swipe toward its edge, a press outside it, the back button or Escape, sliding in unless the system asks for reduced motion.",
+      "dependencies": ["@rn-primitives/dialog", "@rn-primitives/portal", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/drawer.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

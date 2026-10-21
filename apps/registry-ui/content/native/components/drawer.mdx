@@ -1,0 +1,122 @@
+---
+title: Drawer
+description: A panel attached to an edge of the screen that a swipe closes.
+---
+
+<NativePreview name="drawer-demo" />
+
+## Installation
+
+<InstallCommand name="drawer" />
+
+The CLI writes `components/ui/drawer.tsx` and `lib/motion.ts`, installs [Text](/native/components/nativewind/text)
+and Utils, and adds `@rn-primitives/dialog`, `@rn-primitives/portal`, `react-native-reanimated` and
+`react-native-worklets`. The content draws in the app's `PortalHost`; see
+[Add a portal host](/native/docs/installation#add-a-portal-host).
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Drawer showSwipeHandle>
+  <DrawerTrigger asChild>
+    <Button variant="outline">
+      <Text>Open Drawer</Text>
+    </Button>
+  </DrawerTrigger>
+  <DrawerContent>
+    <DrawerHeader>
+      <DrawerTitle>Move Goal</DrawerTitle>
+      <DrawerDescription>Set your daily activity goal.</DrawerDescription>
+    </DrawerHeader>
+    <DrawerFooter>
+      <DrawerClose asChild>
+        <Button variant="outline">
+          <Text>Cancel</Text>
+        </Button>
+      </DrawerClose>
+    </DrawerFooter>
+  </DrawerContent>
+</Drawer>
+```
+
+## API reference
+
+### Drawer
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop              | Type                                  | Default  |
+| ----------------- | ------------------------------------- | -------- |
+| `swipeDirection`  | `'down' \| 'up' \| 'left' \| 'right'` | `'down'` |
+| `showSwipeHandle` | `boolean`                             | `false`  |
+| `open`            | `boolean`                             | -        |
+| `defaultOpen`     | `boolean`                             | -        |
+| `onOpenChange`    | `(open: boolean) => void`             | -        |
+
+`swipeDirection` is the way a swipe closes the drawer, which also attaches it to that edge: `down` to the bottom,
+`up` to the top, and `left` or `right` to that side. `showSwipeHandle` draws a bar on the drawer's inner edge.
+Without `open` the Drawer holds its own state, starting from `defaultOpen`.
+
+### DrawerTrigger and DrawerClose
+
+Take every prop of React Native's `Pressable`. DrawerTrigger opens the Drawer and DrawerClose closes it. Pass
+`asChild` to make a Button do it. Focus returns to the trigger when the Drawer closes.
+
+### DrawerContent
+
+Takes every prop of React Native's `View`, plus `portalHost`, the name of the `PortalHost` to draw in when it is not
+the app's own. A bottom or top drawer is as tall as its content, up to 6rem short of the screen, with its header
+centred; a side drawer is three quarters of the screen's width. The drawer is a modal `dialog` named by its
+DrawerTitle, over a dimmed overlay, and accessibility focus moves into it as it opens.
+
+A swipe toward its edge moves it with the finger. Let go past a quarter of its size, or flicked, it closes;
+otherwise it settles back. A press on the overlay, the Android back button, the iOS escape gesture (a two-finger Z)
+and Escape on the web close it too. It slides in from its edge over 450ms and out over 400ms. When the system asks
+for reduced motion it appears and goes at once; a swipe still moves it.
+
+The drawer runs to the screen's edge, under the home indicator or the status bar. Pad it by the safe area's insets
+where it meets them, such as with `useSafeAreaInsets` from `react-native-safe-area-context`.
+
+### DrawerHeader and DrawerFooter
+
+Take every prop of React Native's `View`. The footer is pushed to the end of the drawer and stacks its children.
+
+### DrawerTitle and DrawerDescription
+
+Take every prop of [Text](/native/components/nativewind/text). The title is a heading.
+
+### DrawerSwipeHandle, DrawerOverlay and DrawerPortal
+
+DrawerContent draws a DrawerSwipeHandle when the Drawer has `showSwipeHandle`, and a DrawerOverlay inside a
+DrawerPortal, so you only need them to build content of your own. The handle is hidden from screen readers.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- `snapPoints`, `modal`, nested drawers and their stacking are left out. A drawer here is always modal and opens
+  to its full size.
+- On iOS, VoiceOver does not read `aria-labelledby`, so the drawer is not announced by its title's name there.
+  Focus moves into the content, where the title is the first thing read. Android and the web read the name.
+- The close after a swipe runs over 400ms whatever the swipe's speed, where upstream scales it by the swipe's
+  strength. The overlay fades with the swipe, as upstream's does.
+- On the web, a drag that starts on text selects the text rather than moving the drawer.
+- Upstream widens a side drawer to 24rem from `sm` and blurs the screen behind the overlay. A phone is narrower
+  than `sm`, and React Native has no backdrop blur.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.
