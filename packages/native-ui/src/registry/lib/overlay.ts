@@ -48,17 +48,34 @@ function usePortalHostCheck(shown: boolean, part: string, hostName?: string): Re
 }
 
 /** How many modal overlays are shown, across the app, and who to tell when that changes. */
-let modalOverlays = 0;
-const modalListeners = new Set<() => void>();
+interface ModalOverlays {
+  shown: number;
+  listeners: Set<() => void>;
+}
+
+/**
+ * The app's one count, kept on the global object rather than in this module: an app can bundle more than one
+ * copy of this file, such as one per style, and an overlay from one copy has to hide a screen read through
+ * another.
+ */
+const MODAL_OVERLAYS_KEY = Symbol.for('zui.modalOverlays');
+
+function modalOverlays(): ModalOverlays {
+  const shared = globalThis as typeof globalThis & { [MODAL_OVERLAYS_KEY]?: ModalOverlays };
+  shared[MODAL_OVERLAYS_KEY] ??= { shown: 0, listeners: new Set() };
+  return shared[MODAL_OVERLAYS_KEY];
+}
 
 function subscribeToModalOverlays(listener: () => void): () => void {
-  modalListeners.add(listener);
-  return () => modalListeners.delete(listener);
+  const { listeners } = modalOverlays();
+  listeners.add(listener);
+  return () => listeners.delete(listener);
 }
 
 function changeModalOverlays(by: number): void {
-  modalOverlays += by;
-  for (const listener of modalListeners) listener();
+  const overlays = modalOverlays();
+  overlays.shown += by;
+  for (const listener of overlays.listeners) listener();
 }
 
 /**
@@ -69,7 +86,7 @@ function changeModalOverlays(by: number): void {
 function useModalOverlayShown(): boolean {
   return useSyncExternalStore(
     subscribeToModalOverlays,
-    () => modalOverlays > 0,
+    () => modalOverlays().shown > 0,
     () => false,
   );
 }

@@ -1,5 +1,7 @@
 import { Portal, PortalHost } from '@rn-primitives/portal';
 import { act, render, screen } from '@testing-library/react-native';
+import * as React from 'react';
+import * as ReactNative from 'react-native';
 import { Platform, View } from 'react-native';
 import { useModalOverlay, useModalOverlayShown, usePortalHostCheck } from './overlay';
 
@@ -166,5 +168,47 @@ describe('useModalOverlay', () => {
     await render(<ModalLayer shown testID="layer" />);
 
     expect(screen.getByTestId('layer')).not.toHaveProp('accessibilityViewIsModal');
+  });
+
+  it('shares the count across copies of the module, as an app whose styles each ship one has', async () => {
+    type Overlay = typeof import('./overlay');
+    const load = (): Overlay => {
+      let copy: Overlay | undefined;
+      jest.isolateModules(() => {
+        // The copies share the app's one React and React Native, as an app's style folders do.
+        jest.doMock('react', () => React);
+        jest.doMock('react-native', () => ReactNative);
+        copy = jest.requireActual<Overlay>('./overlay');
+      });
+      if (copy === undefined) throw new Error('The overlay module did not load');
+      return copy;
+    };
+    const vega = load();
+    const nova = load();
+    expect(nova).not.toBe(vega);
+
+    function NovaDialog({ shown }: { shown: boolean }) {
+      nova.useModalOverlay(shown);
+      return null;
+    }
+    function VegaScreen() {
+      return <View testID="screen" aria-hidden={vega.useModalOverlayShown()} />;
+    }
+
+    const view = await render(
+      <>
+        <VegaScreen />
+        <NovaDialog shown />
+      </>,
+    );
+    expect(screenHidden()).toBe(true);
+
+    await view.rerender(
+      <>
+        <VegaScreen />
+        <NovaDialog shown={false} />
+      </>,
+    );
+    expect(screenHidden()).toBe(false);
   });
 });
