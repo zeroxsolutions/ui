@@ -13,6 +13,7 @@ import { zuiFonts } from '@/lib/fonts';
 
 import { pinColorScheme } from './color-scheme';
 import { DemoBoundary } from './demo-boundary';
+import { postHeightToHost } from './frame-height';
 import { demoNameFromPath, themeFromSearch } from './preview-url';
 
 void SplashScreen.preventAutoHideAsync();
@@ -35,7 +36,8 @@ function DemoList({ missing }: { missing: string | undefined }): ReactNode {
 
 /**
  * Draws the demo the path names, such as `/native-preview/vega/button-demo`, in the colour scheme
- * `?theme=light|dark` asks for, or the system's without one; any other path lists the demos.
+ * `?theme=light|dark` asks for, or the system's without one; any other path lists the demos. In a frame,
+ * it posts the drawn content's height to the page framing it each time that height changes.
  */
 function App(): ReactNode {
   const [loaded, error] = useFonts(zuiFonts);
@@ -56,7 +58,13 @@ function App(): ReactNode {
   if (!loaded && !error) return null;
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="p-6">
+    <ScrollView
+      className="flex-1 bg-background"
+      contentContainerClassName="p-6"
+      onContentSizeChange={(_width, height) => {
+        if (Platform.OS === 'web') postHeightToHost(window, height);
+      }}
+    >
       {Demo !== undefined && name !== undefined ? (
         <DemoBoundary name={name}>
           <Demo />
