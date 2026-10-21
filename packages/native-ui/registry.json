@@ -486,6 +486,25 @@
       ]
     },
     {
+      "name": "accordion",
+      "type": "registry:ui",
+      "title": "Accordion",
+      "description": "A stack of sections whose triggers, announced as buttons with their expanded state, open one section at a time or several, each growing open and shrinking closed unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/accordion",
+        "lucide-react-native",
+        "react-native-reanimated",
+        "react-native-worklets"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/accordion.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

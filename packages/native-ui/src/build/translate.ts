@@ -37,7 +37,8 @@ const KEPT_MODIFIERS: ReadonlySet<string> = new Set(['active', 'disabled', 'dark
 const HOLDING_MODIFIERS: ReadonlySet<string> = new Set(['not-aria-[haspopup]']);
 
 /**
- * Upstream's selectors for an svg inside the slot, or directly inside it, that names no size of its own.
+ * Upstream's selectors for an svg inside the slot, or directly inside it, that names no size of its own,
+ * and for the accordion trigger's chevron, which upstream selects by its slot anywhere inside the trigger.
  * A class behind one goes to the icon part with the selector removed, and Icon applies it only when it
  * names no size itself.
  */
@@ -45,6 +46,7 @@ const ICON_MODIFIERS: ReadonlySet<string> = new Set([
   "[&_svg:not([class*='size-'])]",
   "[&>svg:not([class*='size-'])]",
   "*:[svg:not([class*='size-'])]",
+  '**:data-[slot=accordion-trigger-icon]',
 ]);
 
 /**
@@ -103,6 +105,7 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'data-vertical': 'orientation=vertical',
     first: 'position=first',
     last: 'position=last',
+    'not-last': 'position=not-last',
   }),
 );
 
@@ -131,6 +134,9 @@ const CHILD_PART_MODIFIER = /^\*:data-\[slot=([\w-]+)\]$/;
 
 /** `*:[svg...]`, upstream's other spelling of a direct child svg with no size of its own. */
 const CHILD_ICON = "[svg:not([class*='size-'])]";
+
+/** The slot `**:` selects as an icon anywhere inside the part; any other slot behind `**:` is dropped. */
+const DESCENDANT_ICON_SLOT = 'data-[slot=accordion-trigger-icon]';
 
 /**
  * A direct child in an alignment, such as `has-[>[data-align=block-end]]`, is the part's own variant
@@ -421,13 +427,19 @@ type SlotClass =
   | { reading: 'unknown'; source: string }
   | { reading: 'read'; source: string; utility: string; kept: string[]; states: string[]; onIcon: boolean };
 
-/** Joins each `*` with the modifier after it when the pair names a direct child the build reads. */
+/**
+ * Joins each `*` with the modifier after it when the pair names a direct child the build reads, and
+ * each `**` when the pair names the descendant icon it reads.
+ */
 function joinChildModifiers(modifiers: readonly string[]): string[] {
   const joined: string[] = [];
   for (let i = 0; i < modifiers.length; i += 1) {
     const next = modifiers[i + 1];
     if (modifiers[i] === '*' && next !== undefined && (next === CHILD_ICON || CHILD_SLOT.test(next))) {
       joined.push(`*:${next}`);
+      i += 1;
+    } else if (modifiers[i] === '**' && next === DESCENDANT_ICON_SLOT) {
+      joined.push(`**:${next}`);
       i += 1;
     } else {
       joined.push(modifiers[i]);

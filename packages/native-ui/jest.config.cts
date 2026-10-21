@@ -4,6 +4,7 @@ module.exports = {
   displayName: '@zeroxsolutions/native-ui',
   preset: 'jest-expo',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  resolver: '<rootDir>/jest.resolver.cjs',
   // The CI gate runs these specs beside the native preview's Metro web exports, which take every core;
   // there a spec that settles an Animated value in well under a second locally ran past jest's 5s default.
   testTimeout: 30_000,

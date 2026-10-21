@@ -877,3 +877,40 @@ describe("translateClasses for a border upstream's base layer colours", () => {
     ).toEqual(['border-l']);
   });
 });
+
+describe('translateClasses for an accordion', () => {
+  const slotOf = (style: keyof typeof SNAPSHOT_PATHS, name: string): readonly string[] =>
+    parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8')).get(name) ?? [];
+
+  it.each(STYLE_ENGINES)(
+    'draws the border under every item but the last, in the border colour, for %s in %s',
+    (engine, style) => {
+      const name = 'cn-accordion-item';
+      const item = slotOf(style, name);
+
+      expect(translateClasses(item, engine, 'view', '', { name })).toEqual({ classes: [], unknown: [] });
+      expect(translateClasses(item, engine, 'view', 'position=not-last', { name }).classes).toEqual([
+        'border-b',
+        'border-border',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    "gives the trigger's chevron its size and colour on the icon part for %s in %s",
+    (engine, style) => {
+      const name = 'cn-accordion-trigger';
+
+      expect(translateClasses(slotOf(style, name), engine, 'icon', '', { name }).classes).toEqual([
+        'text-muted-foreground',
+        'ml-auto',
+        'size-4',
+      ]);
+    },
+  );
+
+  it('keeps dropping a class for any other slot inside a part, such as a kbd', () => {
+    expect(translateClasses(['**:data-[slot=kbd]:rounded-sm', 'p-2'], 'uniwind', 'view').classes).toEqual(['p-2']);
+    expect(translateClasses(['**:data-[slot=kbd]:rounded-sm'], 'uniwind', 'icon').classes).toEqual([]);
+  });
+});

@@ -5,6 +5,7 @@
  */
 import type { ComponentType } from 'react';
 
+import { AccordionDemo } from './accordion-demo';
 import { AlertDemo } from './alert-demo';
 import { AspectRatioDemo } from './aspect-ratio-demo';
 import { AvatarDemo } from './avatar-demo';
@@ -47,6 +48,7 @@ import { UnsavedChangesToolbarDemo } from './unsaved-changes-toolbar-demo';
 
 /** Each demo by its name, the file's name without `.tsx`, such as `button-demo`. */
 const demos: Readonly<Record<string, ComponentType>> = {
+  'accordion-demo': AccordionDemo,
   'alert-demo': AlertDemo,
   'aspect-ratio-demo': AspectRatioDemo,
   'avatar-demo': AvatarDemo,

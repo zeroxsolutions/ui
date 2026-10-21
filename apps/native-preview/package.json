@@ -5,6 +5,7 @@
   "dependencies": {
     "@expo-google-fonts/geist": "catalog:",
     "@expo/metro-runtime": "catalog:expo",
+    "@rn-primitives/accordion": "catalog:rn-primitives",
     "@rn-primitives/aspect-ratio": "catalog:rn-primitives",
     "@rn-primitives/avatar": "catalog:rn-primitives",
     "@rn-primitives/checkbox": "catalog:rn-primitives",
@@ -34,11 +35,11 @@
     "react-dom": "catalog:",
     "react-native": "catalog:expo",
     "react-native-css-interop": "catalog:",
-    "react-native-reanimated": "4.7.1",
+    "react-native-reanimated": "catalog:expo",
     "react-native-safe-area-context": "catalog:expo",
     "react-native-svg": "catalog:expo",
     "react-native-web": "catalog:expo",
-    "react-native-worklets": "0.13.0",
+    "react-native-worklets": "catalog:expo",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
