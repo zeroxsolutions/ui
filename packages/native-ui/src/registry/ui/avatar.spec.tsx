@@ -24,10 +24,18 @@ describe('Avatar', () => {
     expect(screen.getByText('JD')).toBeOnTheScreen();
   });
 
-  it('shows the fallback while the image is still loading', async () => {
+  it('keeps the fallback on screen while the image is loading, and names the avatar once', async () => {
     await renderAvatar({ source: PHOTO });
 
-    expect(screen.getByTestId('fallback')).toBeOnTheScreen();
+    expect(screen.getByTestId('fallback', { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.getAllByLabelText('Jane Doe')).toHaveLength(1);
+  });
+
+  it('names the avatar through the fallback again once the image fails to load', async () => {
+    await renderAvatar({ source: PHOTO });
+
+    await fireEvent(screen.getByTestId('photo'), 'error');
+
     expect(screen.getByRole('img', { name: 'Jane Doe' })).toBe(screen.getByTestId('fallback'));
   });
 
@@ -62,6 +70,22 @@ describe('Avatar', () => {
     );
 
     expect(screen.getByRole('img', { name: 'Jane Doe' })).toBe(screen.getByTestId('fallback'));
+  });
+
+  it('shows the fallback again when the image source changes after a load', async () => {
+    await renderAvatar({ source: PHOTO });
+    await fireEvent(screen.getByTestId('photo'), 'load');
+
+    await screen.rerender(
+      <Avatar alt="Jane Doe" testID="avatar">
+        <AvatarImage source={{ uri: 'https://example.com/other.png' }} testID="photo" />
+        <AvatarFallback testID="fallback">
+          <Text>JD</Text>
+        </AvatarFallback>
+      </Avatar>,
+    );
+
+    expect(screen.getByTestId('fallback', { includeHiddenElements: true })).toBeOnTheScreen();
   });
 
   it('draws a 32px circle by default', async () => {
