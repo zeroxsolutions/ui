@@ -34,6 +34,7 @@
     "@rn-primitives/collapsible": "catalog:rn-primitives",
     "@rn-primitives/dialog": "catalog:rn-primitives",
     "@rn-primitives/label": "catalog:rn-primitives",
+    "@rn-primitives/popover": "catalog:rn-primitives",
     "@rn-primitives/portal": "catalog:rn-primitives",
     "@rn-primitives/progress": "catalog:rn-primitives",
     "@rn-primitives/radio-group": "catalog:rn-primitives",

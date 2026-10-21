@@ -32,6 +32,7 @@ import { LabelDemo } from './label-demo';
 import { PaginationDemo } from './pagination-demo';
 import { PasswordInputDemo } from './password-input-demo';
 import { PasswordStrengthDemo } from './password-strength-demo';
+import { PopoverDemo } from './popover-demo';
 import { ProgressDemo } from './progress-demo';
 import { RadioGroupDemo } from './radio-group-demo';
 import { ScrollAreaDemo } from './scroll-area-demo';
@@ -79,6 +80,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'pagination-demo': PaginationDemo,
   'password-input-demo': PasswordInputDemo,
   'password-strength-demo': PasswordStrengthDemo,
+  'popover-demo': PopoverDemo,
   'progress-demo': ProgressDemo,
   'radio-group-demo': RadioGroupDemo,
   'scroll-area-demo': ScrollAreaDemo,

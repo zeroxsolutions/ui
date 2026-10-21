@@ -584,6 +584,20 @@
       ]
     },
     {
+      "name": "popover",
+      "type": "registry:ui",
+      "title": "Popover",
+      "description": "A floating panel beside its trigger, announced as a dialog named by its title, closed by its trigger, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": ["@rn-primitives/popover", "@rn-primitives/portal", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/popover.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

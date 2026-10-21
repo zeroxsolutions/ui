@@ -1,0 +1,95 @@
+---
+title: Popover
+description: A floating panel beside the control that opened it.
+---
+
+<NativePreview name="popover-demo" />
+
+## Installation
+
+<InstallCommand name="popover" />
+
+The CLI writes `components/ui/popover.tsx` and `lib/motion.ts`, installs [Text](/native/components/nativewind/text)
+and Utils, and adds `@rn-primitives/popover`, `@rn-primitives/portal`, `react-native-reanimated` and
+`react-native-worklets`. The content draws in the app's `PortalHost`; see
+[Add a portal host](/native/docs/installation#add-a-portal-host).
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Popover>
+  <PopoverTrigger asChild>
+    <Button variant="outline">
+      <Text>Open popover</Text>
+    </Button>
+  </PopoverTrigger>
+  <PopoverContent>
+    <PopoverHeader>
+      <PopoverTitle>Dimensions</PopoverTitle>
+      <PopoverDescription>Set the dimensions for the layer.</PopoverDescription>
+    </PopoverHeader>
+  </PopoverContent>
+</Popover>
+```
+
+## API reference
+
+### Popover
+
+Takes every prop of React Native's `View`, plus `onOpenChange(open)`, called each time it opens or closes.
+
+### PopoverTrigger
+
+Takes every prop of React Native's `Pressable`. A press opens the Popover, and another closes it. Pass `asChild`
+to make a Button do it. Focus returns to the trigger when the Popover closes.
+
+### PopoverContent
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type                                     | Default    |
+| ------------- | ---------------------------------------- | ---------- |
+| `side`        | `'top' \| 'right' \| 'bottom' \| 'left'` | `'bottom'` |
+| `sideOffset`  | `number`                                 | `4`        |
+| `align`       | `'start' \| 'center' \| 'end'`           | `'center'` |
+| `alignOffset` | `number`                                 | `0`        |
+| `portalHost`  | `string`                                 | -          |
+
+`side` is the side of the trigger the panel opens on, `sideOffset` its gap from the trigger in px, and `align`
+lines it up with the trigger's start, centre or end, moved along by `alignOffset`. The panel is 18rem wide; pass
+a width class to change it. It is a `dialog` named by its PopoverTitle, and accessibility focus moves into it as
+it opens. A press outside it, the Android back button, the iOS escape gesture (a two-finger Z) and Escape on the
+web close it. It fades in while growing from 95% and sliding 0.5rem away from the trigger over 100ms, and out the
+same way. When the system asks for reduced motion it appears and goes at once.
+
+### PopoverHeader, PopoverTitle and PopoverDescription
+
+PopoverHeader takes every prop of React Native's `View`, and the other two every prop of
+[Text](/native/components/nativewind/text). The title is a heading.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- The Popover holds its own open state, so it takes no `open` or `defaultOpen`: the primitive it is built on
+  has no controlled mode.
+- On a device the panel opens above or below its trigger, so `left` and `right` open it below. It is kept on
+  the screen but not moved to the other side when there is no room. The web places it on any side, and flips
+  it.
+- On iOS, VoiceOver does not read `aria-labelledby`, so the panel is not announced by its title's name there.
+  Focus moves into the content, where the title is the first thing read. Android and the web read the name.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.

@@ -49,6 +49,7 @@
     "dialog",
     "sheet",
     "drawer",
+    "popover",
     "---Navigation---",
     "tabs",
     "tab-bar",
