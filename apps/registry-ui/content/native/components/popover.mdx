@@ -50,7 +50,35 @@ import { Text } from '@/components/ui/text';
 
 ### Popover
 
-Takes every prop of React Native's `View`, plus `onOpenChange(open)`, called each time it opens or closes.
+Takes every prop of React Native's `View`, plus:
+
+| Prop           | Type                      | Default |
+| -------------- | ------------------------- | ------- |
+| `open`         | `boolean`                 | -       |
+| `defaultOpen`  | `boolean`                 | `false` |
+| `onOpenChange` | `(open: boolean) => void` | -       |
+
+Without `open` the Popover holds its own state, starting from `defaultOpen`. With it, the Popover follows `open`,
+and a press on the trigger, outside the content or the back button only reports the change it asks for through
+`onOpenChange`. Hold the state to close the Popover from inside it, such as from a form's Save button:
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<Popover open={open} onOpenChange={setOpen}>
+  <PopoverTrigger asChild>
+    <Button variant="outline">
+      <Text>Rename</Text>
+    </Button>
+  </PopoverTrigger>
+  <PopoverContent>
+    {/* the form's fields */}
+    <Button onPress={() => setOpen(false)}>
+      <Text>Save</Text>
+    </Button>
+  </PopoverContent>
+</Popover>;
+```
 
 ### PopoverTrigger
 
@@ -84,8 +112,6 @@ PopoverHeader takes every prop of React Native's `View`, and the other two every
 ## Differences from upstream
 
 - Upstream's `render` prop becomes `asChild`, as on every native item.
-- The Popover holds its own open state, so it takes no `open` or `defaultOpen`: the primitive it is built on
-  has no controlled mode.
 - On a device the panel opens above or below its trigger, so `left` and `right` open it below. It is kept on
   the screen but not moved to the other side when there is no room. The web places it on any side, and flips
   it.

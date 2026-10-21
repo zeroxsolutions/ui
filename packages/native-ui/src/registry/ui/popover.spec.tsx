@@ -1,10 +1,11 @@
 import { PortalHost } from '@rn-primitives/portal';
+import { useState } from 'react';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo, View } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
 import { Button } from './button';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from './popover';
-import type { PopoverContentProps } from './popover';
+import type { PopoverContentProps, PopoverProps } from './popover';
 import { catchBackPress, followAccessibilityFocus } from './overlay.testing';
 import { Text } from './text';
 
@@ -15,10 +16,14 @@ configure({ defaultIncludeHiddenElements: true });
 /** Where a device lays the trigger out on the screen: 100px wide and 40px tall, its top left at (50, 200). */
 const TRIGGER = { x: 50, y: 200, width: 100, height: 40 };
 
-function Dimensions({ withHost = true, ...props }: Omit<PopoverContentProps, 'children'> & { withHost?: boolean }) {
+function Dimensions({
+  withHost = true,
+  root,
+  ...props
+}: Omit<PopoverContentProps, 'children'> & { withHost?: boolean; root?: PopoverProps }) {
   return (
     <>
-      <Popover>
+      <Popover {...root}>
         <PopoverTrigger asChild>
           <Button variant="outline" testID="trigger">
             <Text>Open popover</Text>
@@ -32,6 +37,28 @@ function Dimensions({ withHost = true, ...props }: Omit<PopoverContentProps, 'ch
         </PopoverContent>
       </Popover>
       {withHost && <PortalHost />}
+    </>
+  );
+}
+
+/** A form in a popover, as upstream's examples hold one, which its own Save button closes. */
+function RenameLayer() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline">
+            <Text>Open popover</Text>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent testID="content">
+          <Button onPress={() => setOpen(false)}>
+            <Text>Save</Text>
+          </Button>
+        </PopoverContent>
+      </Popover>
+      <PortalHost />
     </>
   );
 }
@@ -220,5 +247,50 @@ describe('Popover', () => {
     await elapse(1_000);
 
     expect(error).toHaveBeenCalledWith(expect.stringMatching(/^Popover opened, but no <PortalHost \/>/));
+  });
+
+  it('opens from the start with defaultOpen, and still closes on a press outside', async () => {
+    await render(<Dimensions root={{ defaultOpen: true }} />);
+    await finishMotion();
+    expect(popover()).toBeOnTheScreen();
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await user.press(outside());
+    await finishMotion();
+    expect(screen.queryByTestId('content')).toBeNull();
+  });
+
+  it('follows open, and reports a press on its trigger through onOpenChange without opening itself', async () => {
+    const onOpenChange = jest.fn();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const view = await render(<Dimensions root={{ open: false, onOpenChange }} />);
+
+    await user.press(trigger());
+    await finishMotion();
+    expect(onOpenChange.mock.calls).toEqual([[true]]);
+    expect(screen.queryByTestId('content')).toBeNull();
+
+    await view.rerender(<Dimensions root={{ open: true, onOpenChange }} />);
+    await finishMotion();
+    expect(popover()).toBeOnTheScreen();
+    expect(trigger()).toBeExpanded();
+
+    await view.rerender(<Dimensions root={{ open: false, onOpenChange }} />);
+    await finishMotion();
+    expect(screen.queryByTestId('content')).toBeNull();
+    expect(onOpenChange.mock.calls).toEqual([[true]]);
+  });
+
+  it('closes a form it holds when the form is saved', async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<RenameLayer />);
+    await user.press(trigger());
+    await finishMotion();
+
+    await user.press(screen.getByRole('button', { name: 'Save' }));
+    await finishMotion();
+
+    expect(screen.queryByTestId('content')).toBeNull();
+    expect(trigger()).toBeCollapsed();
   });
 });

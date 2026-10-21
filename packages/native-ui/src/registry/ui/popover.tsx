@@ -1,6 +1,7 @@
 import * as PopoverPrimitive from '@rn-primitives/popover';
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useId,
@@ -8,6 +9,7 @@ import {
   useState,
   type ComponentProps,
   type ReactNode,
+  type RefObject,
 } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
@@ -45,27 +47,72 @@ interface PopoverTitle {
 
 const PopoverTitleContext = createContext<PopoverTitle | undefined>(undefined);
 
-type PopoverProps = PopoverPrimitive.RootProps;
+type PopoverProps = PopoverPrimitive.RootProps & {
+  /** Whether the Popover is open, when its owner holds the state; follow `onOpenChange` to change it. */
+  open?: boolean;
+  /** Whether the Popover starts open, when it holds its own state. */
+  defaultOpen?: boolean;
+};
+
+/** The open Popover's trigger, through which its root opens and closes it. */
+const PopoverTriggerRefContext = createContext<RefObject<PopoverPrimitive.TriggerRef | null> | undefined>(undefined);
 
 /**
  * A floating panel beside its trigger, for content the screen does not show in full. It holds its own open
- * state and reports each change through `onOpenChange`. Holds a PopoverTrigger and a PopoverContent.
+ * state from `defaultOpen`, or follows `open`; either way it reports each open and close a press asks for
+ * through `onOpenChange`. Holds a PopoverTrigger and a PopoverContent.
  */
-function Popover({ children, ...props }: PopoverProps): ReactNode {
+function Popover({ open, defaultOpen = false, onOpenChange, children, ...props }: PopoverProps): ReactNode {
   const id = useId();
   const [shown, setShown] = useState(false);
+  const trigger = useRef<PopoverPrimitive.TriggerRef>(null);
+  // The primitive keeps its open state to itself, and opens and closes only through its trigger.
+  const [primitiveOpen, setPrimitiveOpen] = useState(false);
+
+  // Only the first render's defaultOpen counts, as upstream's does.
+  const startsOpen = useRef(defaultOpen && open === undefined);
+  useEffect(() => {
+    if (startsOpen.current) trigger.current?.open();
+  }, []);
+
+  useEffect(() => {
+    if (open === undefined || open === primitiveOpen) return;
+    if (open) trigger.current?.open();
+    else trigger.current?.close();
+  }, [open, primitiveOpen]);
+
   return (
     <PopoverTitleContext.Provider value={{ id, shown, setShown }}>
-      <PopoverPrimitive.Root {...props}>{children}</PopoverPrimitive.Root>
+      <PopoverTriggerRefContext.Provider value={trigger}>
+        <PopoverPrimitive.Root
+          onOpenChange={(next) => {
+            setPrimitiveOpen(next);
+            // Following `open` itself is no change the owner asked for.
+            if (next !== open) onOpenChange?.(next);
+          }}
+          {...props}
+        >
+          {children}
+        </PopoverPrimitive.Root>
+      </PopoverTriggerRefContext.Provider>
     </PopoverTitleContext.Provider>
   );
 }
 
-type PopoverTriggerProps = PopoverPrimitive.TriggerProps;
+type PopoverTriggerProps = ComponentProps<typeof PopoverPrimitive.Trigger>;
 
 /** Opens the Popover when pressed, and closes it when pressed again; pass `asChild` to make a Button the trigger. */
-function PopoverTrigger(props: PopoverTriggerProps): ReactNode {
-  return <PopoverPrimitive.Trigger {...props} />;
+function PopoverTrigger({ ref, ...props }: PopoverTriggerProps): ReactNode {
+  const rootRef = useContext(PopoverTriggerRefContext);
+  const composed = useCallback(
+    (node: PopoverPrimitive.TriggerRef | null) => {
+      if (rootRef !== undefined) rootRef.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    [rootRef, ref],
+  );
+  return <PopoverPrimitive.Trigger ref={composed} {...props} />;
 }
 
 /** The part of a DOM element the web's naming reads and writes; the library is typed without the DOM. */
