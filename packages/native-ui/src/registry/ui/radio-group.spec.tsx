@@ -91,6 +91,7 @@ describe('RadioGroup', () => {
     const selected = screen.getByRole('radio', { name: 'Free' });
 
     const indicator = emittedClasses(onlyChildOf(selected)?.props.className);
+    expect(dotOf(selected)).toBeDefined();
     const dot = emittedClasses(dotOf(selected)?.props.className);
 
     expect(indicator).toEqual(expect.arrayContaining(['size-4', 'items-center', 'justify-center']));
