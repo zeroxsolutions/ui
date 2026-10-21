@@ -53,7 +53,7 @@ jobs:
   # the rest of this file: `run-many` matches no project in a repo that declares none and
   # exits 0, the same way `deploy` does.
   #
-  # Not a job on `nx-deploy`: that workflow forwards only the two Cloudflare deploy secrets,
+  # Not a job on `nx-deploy`: that workflow forwards only the deploy secrets it names,
   # so an R2 key it does not name never reaches the process, and it always passes `-c <env>`,
   # which `rclone:sync` has no configuration for.
   #
@@ -92,59 +92,12 @@ jobs:
         run: pnpm nx run-many -t rclone:sync
 
   # Publish the native preview's two styles as EAS updates, which is what the docs' "Open on your
-  # phone" QR opens in Expo Go. It runs after the site deploy, so a failure here turns this run red
-  # and leaves the deployed site as it is; re-run the job to retry.
-  #
-  # `EXPO_TOKEN` is the one input. Without it the job ends green with a notice, so a repository
-  # that has not set the secret still deploys. `secrets` is not readable in a step `if`, hence the
-  # check in its own step and the `publish` output the later steps read.
-  native-preview:
+  # phone" QR opens in Expo Go. A job of its own after the site deploy: what fails it is Expo's login
+  # or quota, so the deployed site stays as it is and re-running this job retries the updates alone.
+  eas-update:
     needs: [deploy]
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    environment:
-      name: production
-    steps:
-      - name: Check for the Expo token
-        id: token
-        shell: bash
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: |
-          if [ -z "$EXPO_TOKEN" ]; then
-            echo "::notice::EXPO_TOKEN is not set, so the native preview was not published."
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - if: steps.token.outputs.publish == 'true'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - if: steps.token.outputs.publish == 'true'
-        uses: ./.github/actions/nx-setup
-
-      # The preview's `@/` alias points at the emitted sources of its style, so they exist before
-      # eas bundles it.
-      - name: Build the native registries
-        if: steps.token.outputs.publish == 'true'
-        run: pnpm nx run-many -t build-registry
-
-      # @nx/expo infers no update target, and its `@nx/expo:update` executor runs `expo install`
-      # from the workspace root first, where `expo` is not installed. eas-cli reads `EXPO_TOKEN`
-      # from the environment; `STYLE` picks the style the app is bundled in.
-      - name: Publish the vega update
-        if: steps.token.outputs.publish == 'true'
-        working-directory: apps/native-preview
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          STYLE: vega
-        run: pnpm exec eas update --branch vega --message "$GITHUB_SHA" --environment preview --input-dir dist/update/vega --non-interactive
-
-      - name: Publish the nova update
-        if: steps.token.outputs.publish == 'true'
-        working-directory: apps/native-preview
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          STYLE: nova
-        run: pnpm exec eas update --branch nova --message "$GITHUB_SHA" --environment preview --input-dir dist/update/nova --non-interactive
+    uses: ./.github/workflows/nx-deploy.yml
+    secrets: inherit
+    with:
+      targets: eas:update
+      environment: ${{ github.ref_name }}

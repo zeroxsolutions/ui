@@ -42,7 +42,6 @@
     "@types/jest": "catalog:",
     "babel-jest": "catalog:",
     "babel-preset-expo": "catalog:expo",
-    "eas-cli": "25.3.0",
     "jest": "catalog:",
     "jest-expo": "catalog:expo",
     "react-test-renderer": "catalog:",
@@ -66,6 +65,24 @@
             "--output-dir",
             "../registry-ui/public/native-preview"
           ]
+        }
+      },
+      "eas:update": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "^build-registry"
+        ],
+        "options": {
+          "cwd": "{projectRoot}",
+          "parallel": false
+        },
+        "configurations": {
+          "production": {
+            "commands": [
+              "EXPO_PUBLIC_STYLE=vega eas update --branch vega --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/vega --non-interactive",
+              "EXPO_PUBLIC_STYLE=nova eas update --branch nova --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/nova --non-interactive"
+            ]
+          }
         }
       }
     },
