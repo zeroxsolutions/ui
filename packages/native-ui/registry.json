@@ -612,6 +612,20 @@
       ]
     },
     {
+      "name": "hover-card",
+      "type": "registry:ui",
+      "title": "Hover Card",
+      "description": "A preview of what a link leads to, beside it, opened by a press on a device and by hover on the web, closed by its trigger, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": ["@rn-primitives/hover-card", "@rn-primitives/portal", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/hover-card.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

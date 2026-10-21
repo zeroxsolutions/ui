@@ -51,6 +51,7 @@
     "drawer",
     "popover",
     "tooltip",
+    "hover-card",
     "---Navigation---",
     "tabs",
     "tab-bar",

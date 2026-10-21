@@ -22,6 +22,7 @@ import { DialogDemo } from './dialog-demo';
 import { DrawerDemo } from './drawer-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
+import { HoverCardDemo } from './hover-card-demo';
 import { IconDemo } from './icon-demo';
 import { InputDemo } from './input-demo';
 import { InputGroupDemo } from './input-group-demo';
@@ -71,6 +72,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'drawer-demo': DrawerDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
+  'hover-card-demo': HoverCardDemo,
   'icon-demo': IconDemo,
   'input-demo': InputDemo,
   'input-group-demo': InputGroupDemo,
