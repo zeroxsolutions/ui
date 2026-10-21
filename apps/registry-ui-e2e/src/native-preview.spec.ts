@@ -58,13 +58,15 @@ test.describe('in a light colour scheme', () => {
           () =>
             inside(page, demo)
               .locator('body')
-              .evaluate(() => {
-                const scroller = [...document.querySelectorAll<HTMLElement>('#root *')].find((element) =>
-                  ['auto', 'scroll'].includes(getComputedStyle(element).overflowY),
-                );
-                const content = scroller?.firstElementChild as HTMLElement | null | undefined;
-                return scroller && content ? scroller.clientHeight - content.offsetHeight : undefined;
-              }),
+              .evaluate<number | undefined>(
+                `(() => {
+                  const scroller = [...document.querySelectorAll('#root *')].find((element) =>
+                    ['auto', 'scroll'].includes(getComputedStyle(element).overflowY),
+                  );
+                  const content = scroller?.firstElementChild;
+                  return scroller && content ? scroller.clientHeight - content.offsetHeight : undefined;
+                })()`,
+              ),
           { message: path },
         )
         .toBe(0);
