@@ -3,7 +3,8 @@ import type { Root } from 'fumadocs-core/page-tree';
 import { llms, loader } from 'fumadocs-core/source';
 
 import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
-import { pageMarkdown } from '@/lib/source';
+import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
+import { nativePageMarkdown } from '@/lib/native-page-markdown';
 import { nativeComponentsRoute, nativeDocsRoute, nativeShareImageRoute } from '@/routes/app-routes';
 import type { NativeEngine } from '@/types/native-engine';
 
@@ -67,8 +68,13 @@ export function nativePageImage(section: 'docs' | 'components', slugs: string[])
   return { segments, url: nativeShareImageRoute.build({ slug: segments.join('/') }) };
 }
 
-/** The native docs as Markdown for a language model, as `docsLlms` is for the web docs. */
-export const nativeDocsLlms = llms(nativeDocsSource, { renderPage: pageMarkdown });
+/** The native docs as Markdown for a language model, as `docsLlms` is for the web docs, in the default style. */
+export const nativeDocsLlms = llms(nativeDocsSource, {
+  renderPage: (page) => nativePageMarkdown(page, { style: DEFAULT_PLATFORM_STYLE.native }),
+});
 
-/** The native component pages as Markdown for a language model, at their canonical URLs. */
-export const nativeComponentsLlms = llms(canonicalNativeComponentsSource, { renderPage: pageMarkdown });
+/** The native component pages as Markdown for a language model, at their canonical URLs, in the default style. */
+export const nativeComponentsLlms = llms(canonicalNativeComponentsSource, {
+  renderPage: (page) =>
+    nativePageMarkdown(page, { engine: DEFAULT_NATIVE_ENGINE, style: DEFAULT_PLATFORM_STYLE.native }),
+});

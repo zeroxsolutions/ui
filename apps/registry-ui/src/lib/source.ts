@@ -1,6 +1,7 @@
 import { docs } from 'collections/server';
 import { llms, loader } from 'fumadocs-core/source';
 
+import { pageMarkdown } from '@/lib/page-markdown';
 import { docsRoute, docsShareImageRoute } from '@/routes/app-routes';
 
 export const source = loader({
@@ -32,14 +33,6 @@ export function docsPageHref(href: string): string {
  * a component such as `ComponentPreview` stays as its JSX line.
  */
 export const docsLlms = llms(source, { renderPage: pageMarkdown });
-
-/** One page as Markdown: its title and URL over the Markdown fumadocs-mdx keeps of its body. */
-export async function pageMarkdown(page: {
-  url: string;
-  data: { title?: string; getText: (type: 'processed') => Promise<string> };
-}): Promise<string> {
-  return `# ${page.data.title} (${page.url})\n\n${await page.data.getText('processed')}`;
-}
 
 /** The address of a docs page's share image, which `/og/docs/[...slug]` draws at build, and its segments there. */
 export function docsPageImage(page: { slugs: string[] }): { segments: string[]; url: string } {

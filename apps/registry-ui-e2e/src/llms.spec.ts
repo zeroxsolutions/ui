@@ -39,3 +39,15 @@ test('a native page answers as Markdown at its URL plus .md, under either engine
     expect(await response.text(), path).toContain(heading);
   }
 });
+
+test("a native component page's Markdown is written for its engine, with no JSX left", async ({ request }) => {
+  for (const path of ['/native/components/uniwind/theme.md', '/native/components/uniwind/button.md']) {
+    const text = await (await request.get(path)).text();
+    const prose = text.replace(/^```[^\n]*\n[\s\S]*?^```$/gm, '');
+
+    expect(text, path).toContain('/r/styles/uniwind-vega/');
+    expect(text, path).toMatch(/```tsx title="[a-z-]+-demo\.tsx"\n/);
+    expect(prose, path).not.toMatch(/<[A-Z]/);
+    expect(prose, path).not.toContain('/native/components/nativewind/');
+  }
+});

@@ -4,8 +4,7 @@ import type { ReactNode } from 'react';
 
 import { DocsArticle } from '@/components/layout/docs-article';
 import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
-import { nativeDocsSource, nativePageImage, nativePageTree } from '@/lib/native-source';
-import { pageMarkdown } from '@/lib/source';
+import { nativeDocsLlms, nativeDocsSource, nativePageImage, nativePageTree } from '@/lib/native-source';
 import { nativeMdxComponents } from '@/mdx-components';
 
 export const revalidate = false;
@@ -41,7 +40,7 @@ export default async function NativeDocsPage({ params }: NativeDocsPageProps): P
     <DocsArticle
       title={page.data.title}
       description={page.data.description}
-      markdown={await pageMarkdown(page)}
+      markdown={await nativeDocsLlms.page(page)}
       // The pager steps on into the components under the default engine; the page itself names none.
       tree={nativePageTree(DEFAULT_NATIVE_ENGINE)}
       url={page.url}

@@ -6,7 +6,7 @@ import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
 import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
 import { useCurrentStyle } from '@/hooks/use-current-style';
 import { useRememberedEngine } from '@/hooks/use-remembered-choice';
-import { registryStyle } from '@/lib/style-choice';
+import { nativeInstallCommands } from '@/lib/native-install';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import type { NativeEngine } from '@/types/native-engine';
 import type { PlatformStyle } from '@/types/platform';
@@ -52,7 +52,7 @@ interface InstallCommandTabsProps extends Required<InstallCommandProps> {
 }
 
 function InstallCommandTabs({ name, engine, origin, style }: InstallCommandTabsProps): ReactNode {
-  const url = new URL(`r/styles/${registryStyle({ platform: 'native', engine, style })}/${name}.json`, origin);
+  const commands = nativeInstallCommands(name, { engine, style, origin });
 
   return (
     <Tabs data-slot="install-command" defaultValue="registry" className="mt-6">
@@ -61,10 +61,10 @@ function InstallCommandTabs({ name, engine, origin, style }: InstallCommandTabsP
         <TabsTrigger value="url">URL</TabsTrigger>
       </TabsList>
       <TabsContent value="registry">
-        <DocsCodeBlock code={`pnpm dlx shadcn@latest add @zui/${name}`} language="bash" className="mt-6" />
+        <DocsCodeBlock code={commands.registry} language="bash" className="mt-6" />
       </TabsContent>
       <TabsContent value="url">
-        <DocsCodeBlock code={`pnpm dlx shadcn@latest add ${url.href}`} language="bash" className="mt-6" />
+        <DocsCodeBlock code={commands.url} language="bash" className="mt-6" />
       </TabsContent>
     </Tabs>
   );

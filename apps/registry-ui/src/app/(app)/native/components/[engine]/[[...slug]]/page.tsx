@@ -5,13 +5,14 @@ import type { ReactNode } from 'react';
 import { DocsArticle } from '@/components/layout/docs-article';
 import { EngineSwitcher } from '@/components/navigation/engine-switcher';
 import { NATIVE_ENGINES } from '@/constants/native-engines';
+import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
 import {
   canonicalNativeComponentUrl,
   nativeComponentsSources,
   nativePageImage,
   nativePageTree,
 } from '@/lib/native-source';
-import { pageMarkdown } from '@/lib/source';
+import { nativePageMarkdown } from '@/lib/native-page-markdown';
 import { nativeMdxComponents } from '@/mdx-components';
 
 export const revalidate = false;
@@ -58,7 +59,7 @@ export default async function NativeComponentPage({ params }: NativeComponentPag
       title={page.data.title}
       description={page.data.description}
       tabs={<EngineSwitcher />}
-      markdown={await pageMarkdown(page)}
+      markdown={await nativePageMarkdown(page, { engine, style: DEFAULT_PLATFORM_STYLE.native })}
       tree={nativePageTree(engine)}
       url={page.url}
       toc={page.data.toc}
