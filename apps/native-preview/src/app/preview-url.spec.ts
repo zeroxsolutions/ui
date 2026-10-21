@@ -1,4 +1,4 @@
-import { demoNameFromDeepLink, demoNameFromPath, themeFromSearch } from './preview-url';
+import { demoNameFromDeepLink, demoNameFromPath, initialDemoName, themeFromSearch } from './preview-url';
 
 describe('demoNameFromPath', () => {
   it("takes the demo's name from the segment under the style's base", () => {
@@ -21,7 +21,7 @@ describe('demoNameFromPath', () => {
 });
 
 describe('demoNameFromDeepLink', () => {
-  const update = 'exp://u.expo.dev/afb21ed5-e305-4bf1-ad02-1bc6d06853b1';
+  const update = 'exp://u.expo.dev/0f6c4b9e-2d1a-4c3b-9e8f-7a6b5c4d3e2f';
 
   it("takes the demo's name from the path after Expo Go's /--/, before the update's query", () => {
     expect(demoNameFromDeepLink(`${update}/--/button-demo?runtime-version=exposdk%3A58.0.0&channel-name=nova`)).toBe(
@@ -52,5 +52,21 @@ describe('themeFromSearch', () => {
   it('has no theme when ?theme= is absent or holds another value', () => {
     expect(themeFromSearch('')).toBeUndefined();
     expect(themeFromSearch('?theme=sepia')).toBeUndefined();
+  });
+});
+
+describe('initialDemoName', () => {
+  it('reads the demo from the link the app was opened with', async () => {
+    await expect(initialDemoName(() => Promise.resolve('exp://host/--/button-demo'))).resolves.toBe('button-demo');
+  });
+
+  it('has no name when the app was opened without a link', async () => {
+    await expect(initialDemoName(() => Promise.resolve(null))).resolves.toBeUndefined();
+  });
+
+  it('has no name when reading the link fails, so the list of demos shows rather than a blank app', async () => {
+    await expect(
+      initialDemoName(() => Promise.reject(new Error('Could not get the initial URL'))),
+    ).resolves.toBeUndefined();
   });
 });

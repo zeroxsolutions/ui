@@ -16,7 +16,7 @@ import { pinColorScheme } from './color-scheme';
 import { DemoBoundary } from './demo-boundary';
 import { findDemo } from './find-demo';
 import { postHeightToHost } from './frame-height';
-import { demoNameFromDeepLink, demoNameFromPath, themeFromSearch } from './preview-url';
+import { demoNameFromDeepLink, demoNameFromPath, initialDemoName, themeFromSearch } from './preview-url';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -57,8 +57,8 @@ function useDemoName(): [string | undefined | typeof LINK_UNREAD, (name: string)
 
   useEffect(() => {
     if (location) return;
-    void Linking.getInitialURL().then((url) =>
-      setName((read) => (read === LINK_UNREAD ? demoNameFromDeepLink(url) : read)),
+    void initialDemoName(() => Linking.getInitialURL()).then((initial) =>
+      setName((read) => (read === LINK_UNREAD ? initial : read)),
     );
     const subscription = Linking.addEventListener('url', ({ url }) => setName(demoNameFromDeepLink(url)));
     return () => subscription.remove();

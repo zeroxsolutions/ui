@@ -37,6 +37,19 @@ function demoNameFromDeepLink(url: string | null | undefined): string | undefine
 }
 
 /**
+ * The demo the app was opened on, read through `getInitialUrl`, which rejects on Android when the
+ * launching intent cannot be read.
+ * @returns the name, or `undefined` when there is no link, no path in it, or reading it failed
+ */
+async function initialDemoName(getInitialUrl: () => Promise<string | null | undefined>): Promise<string | undefined> {
+  try {
+    return demoNameFromDeepLink(await getInitialUrl());
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * The colour scheme `?theme=` asks for.
  * @returns `light` or `dark`, or `undefined` when the query holds neither
  */
@@ -45,5 +58,5 @@ function themeFromSearch(search: string): ColorScheme | undefined {
   return theme === 'light' || theme === 'dark' ? theme : undefined;
 }
 
-export { demoNameFromDeepLink, demoNameFromPath, themeFromSearch };
+export { demoNameFromDeepLink, demoNameFromPath, initialDemoName, themeFromSearch };
 export type { ColorScheme };
