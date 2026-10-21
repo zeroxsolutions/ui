@@ -7,11 +7,25 @@ test('an old component, components index or blocks URL answers 301 with its page
     ['/docs/components/status-indicator', '/docs/components/base/status-indicator'],
     ['/docs/components', '/docs/components/base'],
     ['/blocks', '/blocks/base'],
+    // A pasted link keeps its query, such as the style it was shared in.
+    ['/docs/components/status-indicator?style=vega', '/docs/components/base/status-indicator?style=vega'],
+    ['/blocks?style=vega', '/blocks/base?style=vega'],
+    ['/docs/components/status-indicator.md', '/docs/components/base/status-indicator.md'],
   ]) {
     const response = await request.get(from, { maxRedirects: 0 });
 
     expect(response.status(), from).toBe(301);
-    expect(new URL(response.headers()['location'] ?? '', 'http://localhost').pathname, from).toBe(to);
+    const location = new URL(response.headers()['location'] ?? '', 'http://localhost');
+    expect(`${location.pathname}${location.search}`, from).toBe(to);
+  }
+});
+
+test("a page's Markdown under the base answers without a redirect", async ({ request }) => {
+  for (const path of ['/docs/components/base/status-indicator.md', '/docs/components/base.md']) {
+    const response = await request.get(path, { maxRedirects: 0 });
+
+    expect(response.status(), path).toBe(200);
+    expect(response.headers()['content-type'], path).toContain('text/markdown');
   }
 });
 
