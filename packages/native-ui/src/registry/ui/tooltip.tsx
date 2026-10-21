@@ -131,32 +131,42 @@ function TooltipContent({
 
   if (!present) return null;
 
+  const content = (
+    <TooltipPrimitive.Content
+      forceMount
+      align={align}
+      alignOffset={alignOffset}
+      side={side}
+      sideOffset={sideOffset}
+      {...props}
+    >
+      <TextClassContext.Provider value="text-background cn-tooltip-content/text">
+        {/* Not every engine styles an Animated.View by its className, so the box is a View inside it. */}
+        <Animated.View style={[{ transformOrigin: TRANSFORM_ORIGIN[placed] }, !reduced && motion]}>
+          <View className={cn('max-w-xs bg-foreground cn-tooltip-content', className)}>{children}</View>
+        </Animated.View>
+      </TextClassContext.Provider>
+    </TooltipPrimitive.Content>
+  );
+
   return (
     <TooltipPrimitive.Portal hostName={portalHost} forceMount>
-      {hostCheck}
-      {/* The portal draws outside this tree, so whether the Tooltip is open is handed in again. */}
-      <TooltipOpenContext.Provider value={open}>
-        {/* Closing, it lets presses through to the screen while it fades. */}
-        <View style={[StyleSheet.absoluteFill, { pointerEvents: open ? 'box-none' : 'none' }]}>
-          {/* A press outside the content lands here on a device; the web's tooltip closes as the pointer leaves. */}
-          {Platform.OS !== 'web' && <TooltipPrimitive.Overlay style={StyleSheet.absoluteFill} />}
-          <TooltipPrimitive.Content
-            forceMount
-            align={align}
-            alignOffset={alignOffset}
-            side={side}
-            sideOffset={sideOffset}
-            {...props}
-          >
-            <TextClassContext.Provider value="text-background cn-tooltip-content/text">
-              {/* Not every engine styles an Animated.View by its className, so the box is a View inside it. */}
-              <Animated.View style={[{ transformOrigin: TRANSFORM_ORIGIN[placed] }, !reduced && motion]}>
-                <View className={cn('max-w-xs bg-foreground cn-tooltip-content', className)}>{children}</View>
-              </Animated.View>
-            </TextClassContext.Provider>
-          </TooltipPrimitive.Content>
-        </View>
-      </TooltipOpenContext.Provider>
+      {/* The web's portal slots its one child into the page, where Radix places the tooltip and closes it as the
+          pointer leaves; a device draws the tooltip in a full-screen layer of its own. */}
+      {Platform.OS === 'web' ? (
+        content
+      ) : (
+        // The portal draws outside this tree, so whether the Tooltip is open is handed in again.
+        <TooltipOpenContext.Provider value={open}>
+          {/* Closing, it lets presses through to the screen while it fades. */}
+          <View style={[StyleSheet.absoluteFill, { pointerEvents: open ? 'box-none' : 'none' }]}>
+            {hostCheck}
+            {/* A press outside the content lands here. */}
+            <TooltipPrimitive.Overlay style={StyleSheet.absoluteFill} />
+            {content}
+          </View>
+        </TooltipOpenContext.Provider>
+      )}
     </TooltipPrimitive.Portal>
   );
 }

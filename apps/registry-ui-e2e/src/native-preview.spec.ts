@@ -185,20 +185,86 @@ test.describe('in a light colour scheme', () => {
       await expect.poll(async () => (await frame(page, 'Dialog demo').boundingBox())?.height).toBeLessThan(200);
     });
 
-    test(`the ${engine} dropdown menu demo opens, runs a sub-menu's item and closes`, async ({ page }) => {
+    test(`the ${engine} dropdown menu demo opens, picks a sub-menu's item and closes`, async ({ page }) => {
       await page.goto(`/native/components/${engine}/dropdown-menu`);
       const demo = inside(page, 'Dropdown menu demo');
-      const trigger = demo.getByRole('button', { name: 'Open', exact: true });
+      // Radix hides the rest of the page from assistive tech while the menu is open.
+      const trigger = demo.getByRole('button', { name: 'Open', exact: true, includeHidden: true });
       const menu = demo.getByRole('menu').first();
 
-      await trigger.click(DRAWN);
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false', DRAWN);
+      await trigger.click();
       await expect(menu).toBeVisible();
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
       await demo.getByRole('menuitem', { name: 'Invite users' }).click();
       await demo.getByRole('menuitem', { name: 'Email' }).click();
 
       await expect(demo.getByRole('menu')).toHaveCount(0);
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false');
       await expect(trigger).toBeFocused();
+    });
+
+    test(`the ${engine} context menu demo announces its checkbox and radio items with their checked state`, async ({
+      page,
+    }) => {
+      await page.goto(`/native/components/${engine}/context-menu`);
+      const demo = inside(page, 'Context menu demo');
+
+      await demo.getByText('Right click here').click({ button: 'right', ...DRAWN });
+      const fullUrls = demo.getByRole('menuitemcheckbox', { name: 'Show Full URLs' });
+      await expect(demo.getByRole('menuitemcheckbox', { name: 'Show Bookmarks' })).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
+      await expect(fullUrls).toHaveAttribute('aria-checked', 'false');
+      await expect(demo.getByRole('menuitemradio', { name: 'Pedro Duarte' })).toHaveAttribute('aria-checked', 'true');
+      await expect(demo.getByRole('menuitemradio', { name: 'Colm Tuite' })).toHaveAttribute('aria-checked', 'false');
+
+      // A checkbox item leaves the menu open.
+      await fullUrls.click();
+      await expect(fullUrls).toHaveAttribute('aria-checked', 'true');
+    });
+
+    test(`the ${engine} menubar demo opens a menu whose checkbox items carry their checked state`, async ({ page }) => {
+      await page.goto(`/native/components/${engine}/menubar`);
+      const demo = inside(page, 'Menubar demo');
+
+      await demo.getByRole('menuitem', { name: 'View', exact: true }).click(DRAWN);
+
+      await expect(demo.getByRole('menuitemcheckbox', { name: 'Always Show Full URLs' })).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
+      await expect(demo.getByRole('menuitemcheckbox', { name: 'Always Show Bookmarks Bar' })).toHaveAttribute(
+        'aria-checked',
+        'false',
+      );
+    });
+
+    test(`the ${engine} combobox demo opens, filters by typed text, picks an item and closes`, async ({ page }) => {
+      await page.goto(`/native/components/${engine}/combobox`);
+      const demo = inside(page, 'Combobox demo');
+      const combobox = demo.getByRole('combobox', { name: 'Framework' });
+
+      await expect(combobox).toHaveText('Select a framework', DRAWN);
+      await combobox.click();
+      await demo.getByRole('combobox', { name: 'Search framework...' }).pressSequentially('nu');
+      await expect(demo.getByRole('option', { name: 'Next.js' })).toHaveCount(0);
+      await demo.getByRole('option', { name: 'Nuxt.js' }).click();
+
+      await expect(demo.getByRole('listbox')).toHaveCount(0);
+      await expect(combobox).toHaveText('Nuxt.js');
+      await expect(combobox).toBeFocused();
+    });
+
+    test(`the ${engine} tooltip demo shows its label while the pointer rests on the trigger`, async ({ page }) => {
+      await page.goto(`/native/components/${engine}/tooltip`);
+      const demo = inside(page, 'Tooltip demo');
+
+      await demo.getByRole('button', { name: 'Hover', exact: true }).hover(DRAWN);
+
+      await expect(demo.getByRole('tooltip')).toHaveText('Add to library');
     });
 
     test(`the ${engine} select demo opens, shows the picked fruit and closes`, async ({ page }) => {
