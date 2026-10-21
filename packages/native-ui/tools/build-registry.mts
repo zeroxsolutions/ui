@@ -2,6 +2,8 @@
  * Writes one shadcn registry per engine and style, to `dist/r/styles/<engine>-<style>/`, from the
  * engine-neutral `registry.json` and sources. Each registry's sources are emitted into a temporary
  * registry, which `shadcn build` turns into the served JSON and `shadcn registry validate` checks.
+ * The same sources, and the files the theme item writes, also go to `dist/src/<engine>-<style>/` laid
+ * out as an app holds them after `shadcn add`, for the native preview to import through `@/`.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -9,6 +11,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import type { Registry, RegistryItem } from 'shadcn/schema';
 import { aliasImports, emitSource, type UpstreamStyle } from '../src/build/emit.ts';
+import { appPath, nativewindGlobalCss, type CssTree } from '../src/build/sources.ts';
 import { parseSlotMap, type SlotMap } from '../src/build/slot-map.ts';
 import {
   STATUS_TOKENS,
@@ -59,10 +62,17 @@ interface StyleSlots extends UpstreamStyle {
   otherStyles: readonly SlotMap[];
 }
 
+/** Writes `content` to `path`, making its folders. */
+function writeFileWithFolders(path: string, content: string): void {
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, content);
+}
+
 /**
  * @param enginePackage - the dependency an item whose emitted source imports `engine` declares, from
  * {@link engineRange}
  * @param radius - the theme's `--radius` for `engine`, which a slot's radius less a length is computed from
+ * @param sourcesRoot - the app-shaped folder each emitted file is also written to, at its {@link appPath}
  */
 function emitItem(
   item: RegistryItem,
@@ -71,6 +81,7 @@ function emitItem(
   style: StyleSlots,
   radius: string,
   registryRoot: string,
+  sourcesRoot: string,
 ): RegistryItem {
   const pins: Readonly<Record<string, string>> = PINNED_RANGES[engine];
   let importsEngine = false;
@@ -85,9 +96,8 @@ function emitItem(
     );
     importsEngine ||= emitted.includes(`from '${engine}'`);
 
-    const target = join(registryRoot, registryPath);
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, emitted);
+    writeFileWithFolders(join(registryRoot, registryPath), emitted);
+    writeFileWithFolders(join(sourcesRoot, appPath({ ...file, path: registryPath })), emitted);
     return { ...file, path: registryPath };
   });
 
@@ -98,20 +108,33 @@ function emitItem(
 
 /**
  * Lays the generated theme over the `theme` entry of `registry.json`, writing each file it generates
- * into the temporary registry for `shadcn build` to read.
+ * into the temporary registry for `shadcn build` to read, and into `sourcesRoot` where an app holds it.
+ * NativeWind's theme writes no file of its own but changes the app's `global.css` and Tailwind config,
+ * so `sourcesRoot` gets that `global.css` and the config's `theme` as `tailwind-theme.json`.
  */
-function withTheme(item: RegistryItem, theme: RegistryItem, registryRoot: string): RegistryItem {
+function withTheme(
+  item: RegistryItem,
+  theme: RegistryItem,
+  engine: Engine,
+  registryRoot: string,
+  sourcesRoot: string,
+): RegistryItem {
   const generated = (theme.files ?? []).map(({ content = '', ...file }) => {
-    const target = join(registryRoot, file.path);
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, content);
+    writeFileWithFolders(join(registryRoot, file.path), content);
+    writeFileWithFolders(join(sourcesRoot, appPath(file)), content);
     return file;
   });
+  if (engine === 'nativewind') {
+    writeFileWithFolders(join(sourcesRoot, 'global.css'), nativewindGlobalCss((theme.css ?? {}) as CssTree));
+    const tailwindTheme: unknown = theme.tailwind?.config?.theme ?? {};
+    writeFileWithFolders(join(sourcesRoot, 'tailwind-theme.json'), `${JSON.stringify(tailwindTheme, null, 2)}\n`);
+  }
   return { ...item, ...theme, files: [...(item.files ?? []), ...generated] };
 }
 
 /**
- * Builds and validates the registry of `engine` in `styleName` into `dist/r/styles/<engine>-<style>/`.
+ * Builds and validates the registry of `engine` in `styleName` into `dist/r/styles/<engine>-<style>/`,
+ * and writes its sources to `dist/src/<engine>-<style>/`.
  * Every style takes the same theme, from the neutral colours and the site's radius scale, since no
  * style sheet defines a token of its own.
  */
@@ -125,11 +148,20 @@ function buildRegistry(
   radii: RadiusScale,
 ): void {
   const registryRoot = mkdtempSync(join(tmpdir(), `zui-${engine}-${styleName}-`));
+  const sourcesRoot = join(PROJECT, 'dist/src', `${engine}-${styleName}`);
   try {
     const items = registry.items.map((item) => {
-      const emitted = emitItem(item, engine, enginePackage, style, themeRadius(colors, engine), registryRoot);
+      const emitted = emitItem(
+        item,
+        engine,
+        enginePackage,
+        style,
+        themeRadius(colors, engine),
+        registryRoot,
+        sourcesRoot,
+      );
       return item.name === 'theme'
-        ? withTheme(emitted, themeItem(colors, radii, STATUS_TOKENS, engine), registryRoot)
+        ? withTheme(emitted, themeItem(colors, radii, STATUS_TOKENS, engine), engine, registryRoot, sourcesRoot)
         : emitted;
     });
     writeFileSync(join(registryRoot, 'registry.json'), `${JSON.stringify({ ...registry, items }, null, 2)}\n`);
@@ -159,6 +191,7 @@ function main(): void {
   const radii = parseRadiusScale(readFileSync(join(PROJECT, 'styles/upstream/globals.css'), 'utf8'));
 
   rmSync(join(PROJECT, 'dist/r'), { recursive: true, force: true });
+  rmSync(join(PROJECT, 'dist/src'), { recursive: true, force: true });
   for (const [styleName, slots] of slotsByStyle) {
     const otherStyles = [...slotsByStyle].flatMap(([other, otherSlots]) => (other === styleName ? [] : [otherSlots]));
     for (const engine of ENGINES) {

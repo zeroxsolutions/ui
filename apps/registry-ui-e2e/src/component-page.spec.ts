@@ -2,7 +2,7 @@ import { type Locator, type Page } from '@playwright/test';
 
 import { expect, test } from './test/fixtures';
 
-const PAGE = '/docs/components/status-indicator';
+const PAGE = '/docs/components/base/status-indicator';
 
 /** Whether two boxes share any area. */
 function intersects(

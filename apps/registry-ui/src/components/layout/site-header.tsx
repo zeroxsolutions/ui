@@ -1,33 +1,34 @@
-import type { Root } from 'fumadocs-core/page-tree';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { ModeSwitcher } from '@/components/general/mode-switcher';
 import { SiteLogo } from '@/components/general/site-logo';
-import { DocsSearch } from '@/components/navigation/docs-search';
-import { MainNav } from '@/components/navigation/main-nav';
-import { MobileNav } from '@/components/navigation/mobile-nav';
-import { docsPageUrl } from '@/lib/source';
+import { SiteHeaderNav } from '@/components/navigation/site-header-nav';
+import { nativeComponentNames, nativeDocsSource, nativePageTree } from '@/lib/native-source';
+import type { PlatformPages } from '@/lib/platform-nav';
+import { source } from '@/lib/source';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
-import { Separator } from '@/registry/bases/base-ui/ui/separator';
-import { blocksRoute, docsRoute, homeRoute } from '@/routes/app-routes';
-import type { SiteNavItem } from '@/types/site-nav-item';
+import { homeRoute } from '@/routes/app-routes';
 
-interface SiteHeaderProps {
-  /** The docs page tree, which the search and the menu on a narrow screen list. */
-  tree: Root;
+/** Each web docs page's slug and each web component's name, read off the docs content. */
+function webPages(): PlatformPages['web'] {
+  const slugs = source.getPages().map((page) => page.slugs.join('/'));
+  const components = slugs.flatMap((slug) => /^components\/[^/]+\/([^/]+)$/.exec(slug)?.[1] ?? []);
+  return { docs: slugs, components: [...new Set(components)] };
 }
 
-/** The bar across the top of every page: the site's sections, the search and the theme switch. */
-function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
-  const components = docsPageUrl(['components']);
-  const native = docsPageUrl(['native']);
-  const navItems: SiteNavItem[] = [
-    { href: docsRoute.build(), label: 'Docs', pattern: `${docsRoute.pathname}{/*rest}` },
-    { href: components, label: 'Components', pattern: `${components}{/*rest}` },
-    { href: blocksRoute.build(), label: 'Blocks', pattern: blocksRoute.pathname },
-    { href: native, label: 'Native', pattern: `${native}{/*rest}` },
-  ];
+/** The bar across the top of every page: the logo, then the current platform's sections and switches. */
+function SiteHeader(): ReactNode {
+  const pages: PlatformPages = {
+    web: webPages(),
+    native: {
+      docs: nativeDocsSource.getPages().map((page) => page.slugs.join('/')),
+      components: nativeComponentNames(),
+    },
+  };
+  const trees = {
+    web: source.pageTree,
+    native: { nativewind: nativePageTree('nativewind'), uniwind: nativePageTree('uniwind') },
+  };
 
   return (
     <header data-slot="site-header" className="bg-background sticky top-0 z-50 w-full">
@@ -36,15 +37,7 @@ function SiteHeader({ tree }: SiteHeaderProps): ReactNode {
           <SiteLogo />
           ZUI
         </Link>
-        <div className="lg:hidden">
-          <MobileNav tree={tree} items={navItems} />
-        </div>
-        <MainNav items={navItems} className="hidden lg:flex" />
-        <div className="ml-auto flex items-center gap-2">
-          <DocsSearch tree={tree} navItems={navItems} />
-          <Separator orientation="vertical" className="hidden lg:block" />
-          <ModeSwitcher />
-        </div>
+        <SiteHeaderNav pages={pages} trees={trees} />
       </div>
     </header>
   );

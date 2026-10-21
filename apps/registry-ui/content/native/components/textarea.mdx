@@ -1,0 +1,43 @@
+---
+title: Textarea
+description: A multiline text field 64px tall at least, with the same focus, invalid and disabled states as Input.
+---
+
+<NativePreview name="textarea-demo" />
+
+## Installation
+
+<InstallCommand name="textarea" />
+
+The CLI writes `components/ui/textarea.tsx` and installs Utils. The file is the engine's own version, so a
+NativeWind app and a Uniwind app each get theirs.
+
+## Usage
+
+```tsx
+import { Textarea } from '@/components/ui/textarea';
+```
+
+```tsx
+<Textarea placeholder="Tell us more" aria-label="Notes" aria-labelledby="notes-label" />
+```
+
+Name it with `aria-label`, which iOS and Android both read. Android also reads a
+[Label](/native/components/nativewind/label)'s `nativeID` through `aria-labelledby`, and iOS ignores that prop.
+
+## API reference
+
+### Textarea
+
+Takes every prop React Native's `TextInput` takes, plus:
+
+| Prop           | Type      | Default |
+| -------------- | --------- | ------- |
+| `aria-invalid` | `boolean` | none    |
+
+The field is multiline, 64px tall at least, and grows with its text. It takes the focus border while it holds
+focus. `aria-invalid` draws the destructive border. React Native does not announce it, so carry the error in
+`accessibilityHint` or in a Text the user can reach. `editable={false}` dims it, tints it in the input colour on Nova, and announces it disabled.
+
+The placeholder colour differs by engine, as it does for [Input](/native/components/nativewind/input): the NativeWind file uses
+the `placeholder:` variant and the Uniwind file uses `placeholderTextColorClassName`.

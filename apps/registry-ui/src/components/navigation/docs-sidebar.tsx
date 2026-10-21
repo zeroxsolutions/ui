@@ -67,7 +67,7 @@ function DocsSidebar({ tree, children, activeViewTransition = true, ...props }: 
                           here on the sidebar link costs nothing. */}
                       {current && activeViewTransition ? (
                         // `enter`/`exit` "none": unpaired (no other page's active item shares this
-                        // name, such as navigating to "/" or "/blocks"), the browser would otherwise
+                        // name, such as navigating to "/" or "/blocks/base"), the browser would otherwise
                         // fade this highlight in or out over a page that never had one. Paired with
                         // another page's, `share` (left at its default) still morphs between them.
                         <ViewTransition name="docs-sidebar-active" enter="none" exit="none">

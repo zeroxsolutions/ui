@@ -25,6 +25,7 @@
     "**/*.test.jsx",
     "**/*.spec.jsx",
     "src/test-setup.ts",
+    "src/examples",
     "jest.config.ts",
     "jest.config.cts",
     "src/**/*.spec.ts",

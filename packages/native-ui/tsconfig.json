@@ -7,6 +7,9 @@
       "path": "./tsconfig.lib.json"
     },
     {
+      "path": "./tsconfig.examples.json"
+    },
+    {
       "path": "./tsconfig.spec.json"
     }
   ],

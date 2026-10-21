@@ -1,0 +1,61 @@
+---
+title: Card
+description: A surface that groups related content, composed from a header, content and a footer.
+---
+
+<NativePreview name="card-demo" />
+
+## Installation
+
+<InstallCommand name="card" />
+
+The CLI writes `components/ui/card.tsx` and installs [Text](/native/components/nativewind/text) and Utils.
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle>Invoice 1042</CardTitle>
+    <CardDescription>Due on the 30th</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <Text>Three line items, 480 USD.</Text>
+  </CardContent>
+  <CardFooter>
+    <Button>
+      <Text>Pay</Text>
+    </Button>
+  </CardFooter>
+</Card>
+```
+
+The Text inside a Card takes the card's text colour and size.
+
+## API reference
+
+### Card
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop   | Type                | Default     |
+| ------ | ------------------- | ----------- |
+| `size` | `'default' \| 'sm'` | `'default'` |
+
+`sm` tightens the spacing inside the card from 24px to 16px, in every part.
+
+### CardHeader, CardContent, CardFooter
+
+Each takes every prop of React Native's `View`. CardHeader holds the title and description. CardFooter lays
+its children out in a row, such as actions.
+
+### CardTitle, CardDescription
+
+Each takes every prop of [Text](/native/components/nativewind/text). CardTitle is announced as a heading, and CardDescription
+is the muted line under it.

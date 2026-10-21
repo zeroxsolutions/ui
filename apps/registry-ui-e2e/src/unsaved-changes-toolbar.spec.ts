@@ -3,7 +3,7 @@ import { expect, test } from './test/fixtures';
 test('the unsaved changes toolbar saves without moving focus, offers a retry when the save fails, and hands focus back to the field', async ({
   page,
 }) => {
-  await page.goto('/docs/components/unsaved-changes-toolbar');
+  await page.goto('/docs/components/base/unsaved-changes-toolbar');
   const name = page.getByLabel('Display name');
   const toolbar = page.getByRole('group', { name: /changes/ });
 

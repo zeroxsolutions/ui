@@ -53,13 +53,13 @@ async function drivesEveryDocsMotionToItsEndState(page: Page): Promise<void> {
   await page.setViewportSize({ width: 1440, height: 900 });
 
   // 1. A sidebar navigation crossfades the docs column.
-  await page.goto('/docs/components/collapsible-card');
+  await page.goto('/docs/components/base/collapsible-card');
   const tagInputLink = page.getByRole('navigation', { name: 'Docs' }).getByRole('link', { name: 'Tag Input' });
   // Retries the click itself, not just the read after it: clicked before React hydrates the link, it
   // is a plain DOM anchor with no client-side handler attached, and the first attempt is sometimes that one.
   await expect(async () => {
     await tagInputLink.click();
-    await expect(page).toHaveURL(/\/docs\/components\/tag-input$/, { timeout: 1_000 });
+    await expect(page).toHaveURL(/\/docs\/components\/base\/tag-input$/, { timeout: 1_000 });
   }).toPass();
   await expect(page.getByRole('heading', { level: 1, name: 'Tag Input' })).toBeVisible();
 
@@ -163,14 +163,14 @@ test('the old docs column stays hidden from the end of its fade to the end of th
   test.skip(browserName !== 'chromium', "only Chromium exposes a view transition pseudo-element's computed style");
   await page.addInitScript(RECORD_VIEW_TRANSITIONS);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/docs/components/collapsible-card');
+  await page.goto('/docs/components/base/collapsible-card');
   const tagInputLink = page.getByRole('navigation', { name: 'Docs' }).getByRole('link', { name: 'Tag Input' });
   // Retried for the same reason as the sidebar step above: clicked before hydration, the link is a
   // plain anchor and the page loads with no transition.
   await expect(async () => {
-    await page.goto('/docs/components/collapsible-card');
+    await page.goto('/docs/components/base/collapsible-card');
     await tagInputLink.click();
-    await expect(page).toHaveURL(/\/docs\/components\/tag-input$/, { timeout: 1_000 });
+    await expect(page).toHaveURL(/\/docs\/components\/base\/tag-input$/, { timeout: 1_000 });
     expect(await page.evaluate('window.__viewTransitionsReady.length')).toBe(1);
   }).toPass();
 

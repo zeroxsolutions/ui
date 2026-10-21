@@ -14,7 +14,7 @@ test('the command menu finds a page and goes to it', async ({ page }) => {
   await expect(option).toHaveCount(1);
   await option.click();
 
-  await expect(page).toHaveURL(/\/docs\/components\/status-indicator$/);
+  await expect(page).toHaveURL(/\/docs\/components\/base\/status-indicator$/);
 });
 
 test('the command menu logs no error while it is opened, arrowed through and typed in', async ({ page }) => {
@@ -47,5 +47,38 @@ test.describe('on a phone-width header', () => {
       await page.getByRole('button', { name: 'Search documentation' }).filter({ visible: true }).click();
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1_000 });
     }).toPass();
+  });
+});
+
+test.describe('the index is split by platform', () => {
+  test("a native page's search finds native text and keeps the page's engine", async ({ page }) => {
+    await page.goto('/native/components/uniwind/button');
+
+    await expect(async () => {
+      await page.keyboard.press('ControlOrMeta+k');
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1_000 });
+    }).toPass();
+    await page.getByRole('combobox').fill('nativeID');
+    const results = page.getByRole('group', { name: 'Search results' });
+    await expect(results.getByRole('option').first()).toBeVisible();
+    await results.getByRole('option').first().click();
+
+    await expect(page).toHaveURL(/\/native\/components\/uniwind\/[a-z-]+(#.*)?$/);
+  });
+
+  test("a web page's search leaves the native pages' text out", async ({ page }) => {
+    await page.goto('/docs');
+
+    await expect(async () => {
+      await page.keyboard.press('ControlOrMeta+k');
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1_000 });
+    }).toPass();
+    // A hit first, so the index has loaded before the absence below is read.
+    await page.getByRole('combobox').fill('status');
+    const results = page.getByRole('group', { name: 'Search results' });
+    await expect(results).toBeVisible();
+    await page.getByRole('combobox').fill('nativeID');
+
+    await expect(results).toHaveCount(0);
   });
 });

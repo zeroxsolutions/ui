@@ -21,9 +21,10 @@ import {
   SourceCodeBlockTitle,
 } from '@/components/data-display/source-code-block';
 import { publishedBlocks, publishedItems } from '@/lib/registry';
-import { docsPageUrl, source } from '@/lib/source';
+import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
+import { docsPageHref, docsPageUrl, writtenDocsPage } from '@/lib/source';
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
-import { blocksRoute } from '@/routes/app-routes';
+import { blocksRoute, componentRoute, componentsRoute } from '@/routes/app-routes';
 
 import registryData from '../../../registry.json';
 
@@ -91,8 +92,7 @@ export default function HomePage(): ReactNode {
   const items = HOME_ITEMS.map((name) => {
     const item = publishedItems.find((entry) => entry.name === name);
     if (!item) throw new Error(`HomePage: "${name}" is not a published item`);
-    const page = source.getPage(['components', name]);
-    return { ...item, url: page?.url };
+    return { ...item, url: writtenDocsPage(componentRoute.build({ base: DEFAULT_COMPONENT_BASE, name })) };
   });
   const block = publishedBlocks.find((entry) => entry.name === 'ai-provider-picker');
   if (!block) throw new Error('HomePage: "ai-provider-picker" is not a published block');
@@ -110,7 +110,10 @@ export default function HomePage(): ReactNode {
             yours.
           </p>
           <div className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-backwards flex flex-wrap justify-center gap-3 delay-150 duration-200 ease-out motion-reduce:animate-none">
-            <Link href={docsPageUrl(['components'])} className={buttonVariants()}>
+            <Link
+              href={docsPageHref(componentsRoute.build({ base: DEFAULT_COMPONENT_BASE }))}
+              className={buttonVariants()}
+            >
               Browse components
             </Link>
             <Link href={docsPageUrl(['installation'])} className={buttonVariants({ variant: 'outline' })}>
@@ -152,7 +155,10 @@ export default function HomePage(): ReactNode {
           <h2 id="home-blocks" className="text-2xl font-semibold tracking-tight">
             Blocks
           </h2>
-          <Link href={blocksRoute.build()} className={buttonVariants({ variant: 'link' })}>
+          <Link
+            href={blocksRoute.build({ base: DEFAULT_COMPONENT_BASE })}
+            className={buttonVariants({ variant: 'link' })}
+          >
             See the blocks
           </Link>
         </div>

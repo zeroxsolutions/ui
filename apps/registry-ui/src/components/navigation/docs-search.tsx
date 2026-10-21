@@ -8,16 +8,25 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { useIconAnimation } from '@/hooks/use-icon-animation';
 import { pageTreeGroups } from '@/lib/page-tree';
+import { withNativeEngine } from '@/lib/platform-nav';
 import { CommandMenu, CommandMenuItem } from '@/registry/bases/base-ui/components/navigation/command-menu';
 import { useCommandShortcut } from '@/registry/bases/base-ui/hooks/use-command-shortcut';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { CommandEmpty, CommandGroup, CommandInput, CommandList } from '@/registry/bases/base-ui/ui/command';
 import { Kbd, KbdGroup } from '@/registry/bases/base-ui/ui/kbd';
 import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/icons/search-icon';
+import type { NativeEngine } from '@/types/native-engine';
+import type { Platform } from '@/types/platform';
 import type { SiteNavItem } from '@/types/site-nav-item';
 
-/** Reads the index `/api/search` exports at build, once, and searches it in the browser. */
-const searchClient = staticClient();
+/**
+ * Each platform's search over the index `/api/search` exports at build, which the browser reads once and
+ * searches; each finds only the pages its platform tagged.
+ */
+const searchClients: Record<Platform, ReturnType<typeof staticClient>> = {
+  web: staticClient({ tag: 'web' }),
+  native: staticClient({ tag: 'native' }),
+};
 
 /** Whether this browser runs on macOS, where the search shortcut is Command-K rather than Ctrl+K. */
 function isMac(): boolean {
@@ -29,6 +38,10 @@ interface DocsSearchProps {
   tree: Root;
   /** The site's sections, listed first. */
   navItems?: SiteNavItem[];
+  /** The platform whose pages' text the index searches. */
+  platform?: Platform;
+  /** On native, the engine a found component page opens under; the index lists each under the default engine. */
+  engine?: NativeEngine;
 }
 
 /**
@@ -37,7 +50,7 @@ interface DocsSearchProps {
  * them the headings and text the search index finds. Choosing one navigates to it; closing it drops
  * the query.
  */
-function DocsSearch({ tree, navItems = [] }: DocsSearchProps): ReactNode {
+function DocsSearch({ tree, navItems = [], platform = 'web', engine }: DocsSearchProps): ReactNode {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   // Stable for the server and the first client render, then corrected once mounted, so hydration
@@ -45,7 +58,7 @@ function DocsSearch({ tree, navItems = [] }: DocsSearchProps): ReactNode {
   // as the place-of-interest sign, which the source spells as an escape to stay plain ASCII.
   const [modifierKey, setModifierKey] = useState('Ctrl');
   const searchIcon = useIconAnimation<SearchIconHandle>();
-  const { search, setSearch, query } = useDocsSearch({ client: searchClient });
+  const { search, setSearch, query } = useDocsSearch({ client: searchClients[platform] });
   const groups = useMemo(() => pageTreeGroups(tree), [tree]);
 
   useEffect(() => {
@@ -122,7 +135,11 @@ function DocsSearch({ tree, navItems = [] }: DocsSearchProps): ReactNode {
               ))}
             </CommandGroup>
           ))}
-          <DocsSearchResults query={query} search={search} onSelect={(url) => router.push(url)} />
+          <DocsSearchResults
+            query={query}
+            search={search}
+            onSelect={(url) => router.push(engine ? withNativeEngine(url, engine) : url)}
+          />
         </CommandList>
       </CommandMenu>
     </>

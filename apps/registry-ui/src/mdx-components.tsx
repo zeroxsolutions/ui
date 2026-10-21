@@ -1,7 +1,7 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
+import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
 import {
-  SourceCodeBlock,
   SourceCodeBlockActions,
   SourceCodeBlockCode,
   SourceCodeBlockContent,
@@ -13,11 +13,14 @@ import {
   SourceCodeBlockTitle,
   SourceCodeBlockTrigger,
 } from '@/components/data-display/source-code-block';
+import { withNativeEngine } from '@/lib/platform-nav';
+import { registryHomepage } from '@/lib/registry';
 import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
 import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+import type { NativeEngine } from '@/types/native-engine';
 
 // This MDX override map is the docs route's composition root, so importing docs-only components
 // from the route's own private folder (never a route segment, for the `_` prefix) is expected here,
@@ -26,6 +29,12 @@ import { BlockPreview } from '@/app/(app)/docs/[[...slug]]/_components/data-disp
 import { ComponentsList } from '@/app/(app)/docs/[[...slug]]/_components/data-display/components-list';
 import { ComponentSource } from '@/app/(app)/docs/[[...slug]]/_components/data-display/component-source';
 import { ExamplePreview } from '@/app/(app)/docs/[[...slug]]/_components/data-display/example-preview';
+import { InitCommand } from '@/app/(app)/docs/[[...slug]]/_components/data-display/init-command';
+import { WebComponentsJson } from '@/app/(app)/docs/[[...slug]]/_components/data-display/web-components-json';
+import { ComponentsJson } from '@/app/(app)/native/_components/data-display/components-json';
+import { EngineTab, EngineTabs } from '@/app/(app)/native/_components/data-display/engine-tabs';
+import { InstallCommand } from '@/app/(app)/native/_components/data-display/install-command';
+import { NativePreview } from '@/app/(app)/native/_components/data-display/native-preview';
 
 /** The text a node renders, as a reader would copy it. */
 function nodeText(node: ReactNode): string {
@@ -103,25 +112,13 @@ export const mdxComponents = {
     const language = /language-(\S+)/.exec(code.className ?? '')?.[1];
 
     return (
-      <SourceCodeBlock
+      <DocsCodeBlock
         code={nodeText(code.children).replace(/\n$/, '')}
         language={language}
+        title={title}
         lines={lines ? (JSON.parse(lines) as HighlightLine[] | null) : null}
         className="mt-6"
-      >
-        <SourceCodeBlockHeader>
-          <SourceCodeBlockTitle>
-            <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
-            {title ? <SourceCodeBlockFile>{title}</SourceCodeBlockFile> : null}
-          </SourceCodeBlockTitle>
-          <SourceCodeBlockActions>
-            <SourceCodeBlockCopy />
-          </SourceCodeBlockActions>
-        </SourceCodeBlockHeader>
-        <SourceCodeBlockContent>
-          <SourceCodeBlockCode />
-        </SourceCodeBlockContent>
-      </SourceCodeBlock>
+      />
     );
   },
   // A numbered list of steps, each a heading, with the blocks between them; `steps` numbers them.
@@ -162,4 +159,28 @@ export const mdxComponents = {
     </ComponentSource>
   ),
   ComponentsList: () => <ComponentsList className="mt-8" />,
+  InitCommand,
+  WebComponentsJson: () => <WebComponentsJson origin={registryHomepage} />,
 };
+
+/**
+ * Every element and component a page in `content/native` may use. `engine` is the one a component page
+ * is read under, and is absent on a native docs page: it moves the page's links to other component
+ * pages onto it, and shows only its part of each `EngineTabs`.
+ */
+export function nativeMdxComponents(engine?: NativeEngine) {
+  return {
+    ...mdxComponents,
+    a: ({ href, ...props }: ComponentProps<'a'>) =>
+      mdxComponents.a({ href: engine && href ? withNativeEngine(href, engine) : href, ...props }),
+    EngineTabs: (props: Omit<ComponentProps<typeof EngineTabs>, 'engine'>) => <EngineTabs engine={engine} {...props} />,
+    EngineTab,
+    InstallCommand: (props: Omit<ComponentProps<typeof InstallCommand>, 'engine' | 'origin'>) => (
+      <InstallCommand engine={engine} origin={registryHomepage} {...props} />
+    ),
+    ComponentsJson: (props: Omit<ComponentProps<typeof ComponentsJson>, 'origin'>) => (
+      <ComponentsJson origin={registryHomepage} {...props} />
+    ),
+    NativePreview,
+  };
+}

@@ -1,0 +1,87 @@
+---
+title: Input group
+description: An input with text, icons or buttons beside, above or below it, drawn as one field.
+---
+
+<NativePreview name="input-group-demo" />
+
+## Installation
+
+<InstallCommand name="input-group" />
+
+The CLI writes `components/ui/input-group.tsx`, installs [Text](/native/components/nativewind/text), [Icon](/native/components/nativewind/icon),
+[Button](/native/components/nativewind/button), [Input](/native/components/nativewind/input) and Utils, and adds `class-variance-authority`.
+
+## Usage
+
+```tsx
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupText,
+} from '@/components/ui/input-group';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<InputGroup>
+  <InputGroupAddon>
+    <InputGroupText>https://</InputGroupText>
+  </InputGroupAddon>
+  <InputGroupInput placeholder="example.com" aria-label="Website" />
+  <InputGroupAddon align="inline-end">
+    <InputGroupButton aria-label="Copy">
+      <Text>Copy</Text>
+    </InputGroupButton>
+  </InputGroupAddon>
+</InputGroup>
+```
+
+## API reference
+
+### InputGroup
+
+Takes every prop of a React Native `View`. It is announced as a group.
+
+Its children are one InputGroupInput and the InputGroupAddons, as direct children, because the group reads each
+addon's `align` to place it: a start addon goes before the input and an end addon after it. A block addon
+stacks the group into a column. The group draws the focus border while its input holds focus, the destructive
+border while the input is `aria-invalid`, and the dimming of a disabled input.
+
+### InputGroupInput
+
+Takes every prop of [Input](/native/components/nativewind/input), plus a `ref` to the text field.
+
+It draws no border of its own. Its focus, `aria-invalid` and `editable={false}` are drawn around it and its
+addons by the group.
+
+### InputGroupAddon
+
+Takes every prop of a React Native `Pressable`, plus:
+
+| Prop    | Type                                                             | Default          |
+| ------- | ---------------------------------------------------------------- | ---------------- |
+| `align` | `'inline-start' \| 'inline-end' \| 'block-start' \| 'block-end'` | `'inline-start'` |
+
+Holds text, icons or buttons in the muted colour, and an Icon inside takes 16px. `inline-start` and
+`inline-end` sit at the start and end of the line. `block-start` and `block-end` take a line of their own above
+or below the input. Pressing the addon focuses the input, and a button inside it takes its own press.
+
+### InputGroupButton
+
+Takes every prop of [Button](/native/components/nativewind/button) except `size`, plus:
+
+| Prop   | Type                             | Default |
+| ------ | -------------------------------- | ------- |
+| `size` | `'xs' \| 'icon-xs' \| 'icon-sm'` | `'xs'`  |
+
+A Button sized to sit inside an addon, `ghost` unless given another `variant`. `xs` fits a short label.
+`icon-xs` and `icon-sm` fit an icon alone, which needs an `aria-label`.
+
+### InputGroupText
+
+Takes every prop of [Text](/native/components/nativewind/text).
+
+A label or a unit inside an addon, such as `https://` or `USD`, in the addon's muted colour.

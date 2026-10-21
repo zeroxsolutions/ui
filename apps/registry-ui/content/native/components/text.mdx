@@ -1,0 +1,56 @@
+---
+title: Text
+description: Text that takes the text classes of the container around it, such as a Button's label colour.
+---
+
+<NativePreview name="text-demo" />
+
+## Installation
+
+<InstallCommand name="text" />
+
+The CLI writes `components/ui/text.tsx`, installs Utils for `cn`, and adds
+`@rn-primitives/slot`. Text draws Geist, so the app needs the [Theme](/native/components/nativewind/theme) and its fonts loaded.
+
+## Usage
+
+```tsx
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Text>Saved</Text>
+<Text className="text-sm font-sans-semibold text-muted-foreground">Last edited today</Text>
+```
+
+Write a weight with the theme's classes, `font-sans-medium`, `font-sans-semibold` or `font-sans-bold`. Text
+also renames `font-normal`, `font-medium`, `font-semibold` and `font-bold` in its `className` to those
+classes, so each draws its own Geist family. A `fontWeight` in `style` keeps the regular family and leaves
+the platform to fake the weight.
+
+## API reference
+
+### Text
+
+Takes every prop React Native's `Text` takes, plus:
+
+| Prop      | Type      | Default |
+| --------- | --------- | ------- |
+| `asChild` | `boolean` | `false` |
+
+`asChild` renders its single child in place of a native `Text`, with Text's props and classes merged onto it.
+Text's own classes are `font-sans text-foreground text-base`; the classes of the container around it go over
+them, and `className` goes over both.
+
+### TextClassContext
+
+The text classes a container hands every Text inside it. Button provides it with its label's classes.
+
+```tsx
+import { Text, TextClassContext } from '@/components/ui/text';
+
+<TextClassContext.Provider value="text-sm text-muted-foreground">
+  <Text>Both lines take the muted colour.</Text>
+  <Text>So does this one.</Text>
+</TextClassContext.Provider>;
+```

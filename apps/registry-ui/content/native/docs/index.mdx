@@ -1,0 +1,33 @@
+---
+title: Introduction
+description: React Native items for iOS and Android, drawn in shadcn's Vega or Nova style, for NativeWind or Uniwind.
+---
+
+zui native publishes React Native items for iOS and Android apps, installed with the shadcn CLI like the web
+items. Each item draws shadcn's Vega or Nova style with its neutral colours, and is published once per styling
+engine and style:
+
+| Engine       | Style | `style` in `components.json` | Items served from                                                    |
+| ------------ | ----- | ---------------------------- | -------------------------------------------------------------------- |
+| NativeWind 4 | Vega  | `nativewind-vega`            | `https://ui.zeroxsolutions.com/r/styles/nativewind-vega/<name>.json` |
+| NativeWind 4 | Nova  | `nativewind-nova`            | `https://ui.zeroxsolutions.com/r/styles/nativewind-nova/<name>.json` |
+| Uniwind      | Vega  | `uniwind-vega`               | `https://ui.zeroxsolutions.com/r/styles/uniwind-vega/<name>.json`    |
+| Uniwind      | Nova  | `uniwind-nova`               | `https://ui.zeroxsolutions.com/r/styles/uniwind-nova/<name>.json`    |
+
+The CLI picks the path from the app's `style`, so an app names its engine and style once, in `components.json`, as
+[Installation](/native/docs/installation) shows.
+
+## Components
+
+[Components](/native/components/nativewind) lists every item. A component page is read under one engine, and the
+NativeWind / Uniwind switch in the header, or in its Menu on a narrow screen, moves it to the other.
+
+Each component page opens on a live preview: the item's demo drawn by React Native for Web, in the style the
+header's picker shows and the site's light or dark mode. Its Code tab holds the demo's source. A web build can
+differ from a device in fonts, shadows and gestures, so check an item on iOS and Android before relying on a
+detail the preview shows.
+
+## macOS and Windows
+
+zui native targets iOS and Android only. A macOS or Windows app uses the [web items](/docs/components/base) through
+Electron.

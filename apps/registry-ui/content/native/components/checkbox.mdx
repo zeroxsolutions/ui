@@ -1,0 +1,47 @@
+---
+title: Checkbox
+description: A box that is checked or not, announced as a checkbox with its checked and disabled state.
+---
+
+<NativePreview name="checkbox-demo" />
+
+## Installation
+
+<InstallCommand name="checkbox" />
+
+The CLI writes `components/ui/checkbox.tsx`, installs [Icon](/native/components/nativewind/icon) and Utils, and adds
+`@rn-primitives/checkbox` and `lucide-react-native`.
+
+## Usage
+
+```tsx
+import { useState } from 'react';
+
+import { Checkbox } from '@/components/ui/checkbox';
+```
+
+```tsx
+const [accepted, setAccepted] = useState(false);
+
+<Checkbox checked={accepted} onCheckedChange={setAccepted} aria-label="Accept the terms" />;
+```
+
+## API reference
+
+### Checkbox
+
+Takes every prop of the `@rn-primitives/checkbox` root, plus:
+
+| Prop              | Type                         | Default  |
+| ----------------- | ---------------------------- | -------- |
+| `checked`         | `boolean`                    | required |
+| `onCheckedChange` | `(checked: boolean) => void` | required |
+| `aria-invalid`    | `boolean`                    | none     |
+
+Checkbox is controlled. Pressing it calls `onCheckedChange` with the new value, and the mark shows once
+`checked` follows. A disabled checkbox is dimmed and ignores presses. `aria-invalid` draws the destructive
+border while the box is unchecked. React Native does not announce it, so carry the error in `accessibilityHint`
+or in a Text the user can reach.
+
+Name it with `aria-label`, which iOS and Android both read. Android also reads a
+[Label](/native/components/nativewind/label)'s `nativeID` through `aria-labelledby`; iOS ignores that prop.

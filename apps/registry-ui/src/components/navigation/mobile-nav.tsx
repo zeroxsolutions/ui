@@ -20,20 +20,28 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from '@/registry/bases/base-ui/ui/sidebar';
+import type { Platform } from '@/types/platform';
 import type { SiteNavItem } from '@/types/site-nav-item';
+
+import { BaseSwitcher } from './base-switcher';
+import { EngineSwitcher } from './engine-switcher';
+import { StylePicker } from './style-picker';
 
 interface MobileNavProps {
   /** The docs page tree, listed group by group under the site's sections. */
   tree: Root;
   items: SiteNavItem[];
+  /** The platform the page is on, whose styles the sheet's picker lists. */
+  platform: Platform;
 }
 
 /**
  * The site's sections and the docs' pages in a sheet from the left, behind a `Menu` button, for a
- * screen too narrow for the header's nav and the sidebar. Following a link closes it. The button's
- * icon plays on its hover or focus.
+ * screen too narrow for the header's nav and the sidebar, with the engine or base switch and the style
+ * picker the header hides at that width. Following a link closes it. The button's icon plays on its
+ * hover or focus.
  */
-function MobileNav({ tree, items }: MobileNavProps): ReactNode {
+function MobileNav({ tree, items, platform }: MobileNavProps): ReactNode {
   const pathname = usePathname();
   const current = currentSiteNavItem(items, pathname);
   const [open, setOpen] = useState(false);
@@ -52,6 +60,11 @@ function MobileNav({ tree, items }: MobileNavProps): ReactNode {
       <SheetContent side="left">
         <SheetHeader>
           <SheetTitle>Menu</SheetTitle>
+          <div className="flex flex-wrap items-center gap-2" onClick={closeOnLink}>
+            <EngineSwitcher />
+            <BaseSwitcher />
+            <StylePicker platform={platform} />
+          </div>
         </SheetHeader>
         <SidebarProvider className="min-h-0 flex-1">
           <DocsSidebar

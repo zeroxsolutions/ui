@@ -1,0 +1,99 @@
+---
+title: Unsaved changes toolbar
+description: A toolbar floating at the top or bottom of its parent while a form has unsaved changes, with a live message and Reset and Save buttons that are disabled while saving.
+---
+
+<NativePreview name="unsaved-changes-toolbar-demo" />
+
+## Installation
+
+<InstallCommand name="unsaved-changes-toolbar" />
+
+The CLI writes `components/feedback/unsaved-changes-toolbar.tsx` and installs [Button](/native/components/nativewind/button),
+[Spinner](/native/components/nativewind/spinner), [Text](/native/components/nativewind/text) and Utils.
+
+## Usage
+
+```tsx
+import {
+  UnsavedChangesToolbar,
+  UnsavedChangesToolbarActions,
+  UnsavedChangesToolbarMessage,
+  UnsavedChangesToolbarReset,
+  UnsavedChangesToolbarSave,
+} from '@/components/feedback/unsaved-changes-toolbar';
+```
+
+```tsx
+{
+  isDirty && (
+    <UnsavedChangesToolbar state={isSaving ? 'saving' : 'default'}>
+      <UnsavedChangesToolbarMessage>
+        {isSaving ? 'Saving your changes...' : 'You have unsaved changes.'}
+      </UnsavedChangesToolbarMessage>
+      <UnsavedChangesToolbarActions>
+        <UnsavedChangesToolbarReset onPress={reset}>Reset</UnsavedChangesToolbarReset>
+        <UnsavedChangesToolbarSave onPress={save}>{isSaving ? 'Saving...' : 'Save changes'}</UnsavedChangesToolbarSave>
+      </UnsavedChangesToolbarActions>
+    </UnsavedChangesToolbar>
+  );
+}
+```
+
+The toolbar is absolutely positioned, so render it inside a parent that fills the screen. Render it only while the form
+differs from its saved values, and write every word: the message and the labels change with the state. Use `error`
+after a save fails, with `Try again` on Save, and `attention` when the person tries to leave with changes unsaved.
+
+## Composition
+
+```text
+UnsavedChangesToolbar
+|-- UnsavedChangesToolbarMessage
+`-- UnsavedChangesToolbarActions
+    |-- UnsavedChangesToolbarReset
+    `-- UnsavedChangesToolbarSave
+```
+
+## API reference
+
+### UnsavedChangesToolbar
+
+Takes every prop of `View`, plus:
+
+| Prop    | Type                                              | Default     |
+| ------- | ------------------------------------------------- | ----------- |
+| `side`  | `'top' \| 'bottom'`                               | `'bottom'`  |
+| `state` | `'default' \| 'saving' \| 'error' \| 'attention'` | `'default'` |
+
+It is a group for a screen reader, named by its message, through `aria-labelledby` on Android and
+through `accessibilityLabel` set to the message's text on iOS, which does not read `aria-labelledby`; pass `aria-label`
+or `accessibilityLabel` to name it yourself. It sits 16px from the screen's `side` edge and from both sides, and on a
+screen wider than 512px (`max-w-lg`) it is centred at that width. A `testID` goes to the group, and
+`<testID>-wrapper` to the full-width box that places it. `className` styles the group, and the wrapper places it. `error` and `attention` turn the message destructive, and
+`attention` turns the border destructive too.
+
+### UnsavedChangesToolbarMessage
+
+Takes every prop of [Text](/native/components/nativewind/text) except `children`, plus `children: string`.
+
+It names the group, and is a text with `accessibilityLiveRegion="polite"`, which Android reads out when it changes.
+The first message is passed to `AccessibilityInfo.announceForAccessibility` when the toolbar appears, on both
+platforms. On iOS a later change is passed to it as well, since iOS does not read the live region, so each platform
+speaks a change once.
+
+### UnsavedChangesToolbarActions
+
+Takes every prop of `View`. Its children are the Reset and Save buttons.
+
+### UnsavedChangesToolbarReset
+
+Takes every prop of [Button](/native/components/nativewind/button) except `variant`, `size` and `children`, plus `children: string`.
+It is a small ghost button, disabled while the toolbar's `state` is `saving`.
+
+### UnsavedChangesToolbarSave
+
+Takes every prop of [Button](/native/components/nativewind/button) except `variant`, `size` and `children`, plus `children: string`.
+It is a small button. While the toolbar's `state` is `saving` it is disabled and draws a
+[Spinner](/native/components/nativewind/spinner) before its label, which you change to say so, such as `Saving...`. A disabled
+`Pressable` is still an element a screen reader reaches, announced as disabled, so a screen reader's focus stays on
+Save. The spinner is hidden from a screen reader, which hears the message.

@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/jest",
+    "jsx": "react-jsx",
+    "types": ["jest", "node"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2023", "dom"],
+    // preview-style.js is CommonJS, for the Metro, Tailwind and Expo configs that require it.
+    "allowJs": true
+  },
+  "files": ["src/test-setup.ts"],
+  "include": ["jest.config.cts", "preview-style.js", "preview-style.spec.ts", "src/**/*.spec.ts", "src/**/*.spec.tsx"],
+  "references": [{ "path": "./tsconfig.app.json" }]
+}

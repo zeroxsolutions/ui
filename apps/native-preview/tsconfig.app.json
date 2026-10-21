@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2023", "dom"],
+    // The app's typecheck reads Vega's sources; metro points `@/` at the STYLE being built.
+    "paths": { "@/*": ["../../packages/native-ui/dist/src/nativewind-vega/*"] },
+    // The emitted sources sit outside the app, so the root is the workspace's.
+    "rootDir": "../..",
+    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo"
+  },
+  "files": ["nativewind-env.d.ts", "css.d.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "../../packages/native-ui/dist/src/nativewind-vega/**/*.ts",
+    "../../packages/native-ui/dist/src/nativewind-vega/**/*.tsx",
+    "../../packages/native-ui/src/examples/**/*.ts",
+    "../../packages/native-ui/src/examples/**/*.tsx"
+  ],
+  "exclude": [
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/test-setup.ts",
+    "../../packages/native-ui/src/examples/**/*.spec.tsx"
+  ],
+  "references": [
+    {
+      "path": "../../packages/native-ui/tsconfig.lib.json"
+    }
+  ]
+}

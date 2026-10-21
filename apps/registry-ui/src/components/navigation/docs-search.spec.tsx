@@ -7,7 +7,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 
 import { DocsSearch } from './docs-search';
 
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: () => undefined }) }));
+const push = vi.hoisted(() => vi.fn<(href: string) => void>());
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 
 const tree: Root = {
   name: 'Docs',
@@ -17,7 +19,7 @@ const tree: Root = {
   ],
 };
 
-/** The search index `/api/search` exports at build, here built from one page by the same library. */
+/** The search index `/api/search` exports at build, here built from a web page and a native one by the same library. */
 const searchAPI = createSearchAPI('advanced', {
   indexes: [
     {
@@ -25,9 +27,20 @@ const searchAPI = createSearchAPI('advanced', {
       title: 'Status Indicator',
       description: 'A dot and a label for a status.',
       url: '/docs/components/status-indicator',
+      tag: 'web',
       structuredData: {
         headings: [],
         contents: [{ heading: undefined, content: 'It sets `data-slot` on its root element.' }],
+      },
+    },
+    {
+      id: '/native/components/nativewind/label',
+      title: 'Label',
+      url: '/native/components/nativewind/label',
+      tag: 'native',
+      structuredData: {
+        headings: [],
+        contents: [{ heading: undefined, content: 'Give the field the label nativeID in aria-labelledby.' }],
       },
     },
   ],
@@ -39,6 +52,7 @@ beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  push.mockClear();
 });
 afterAll(() => server.close());
 
@@ -113,6 +127,27 @@ describe('DocsSearch', () => {
 
     const result = await screen.findByRole('option', { name: /on its root element/ }, { timeout: 3_000 });
     expect(result.textContent).toBe('It sets data-slot on its root element.');
+  });
+
+  it("searches only its own platform's pages", async () => {
+    render(<DocsSearch tree={tree} />);
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'root element' } });
+    await screen.findByRole('option', { name: /on its root element/ }, { timeout: 3_000 });
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'nativeID labelledby' } });
+
+    await waitFor(() => expect(screen.queryByRole('group', { name: 'Search results' })).toBeNull());
+  });
+
+  it("opens a native result under the reader's engine, not the one the index lists it under", async () => {
+    render(<DocsSearch tree={tree} platform="native" engine="uniwind" />);
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'nativeID labelledby' } });
+    fireEvent.click(await screen.findByRole('option', { name: /label nativeID/ }, { timeout: 3_000 }));
+
+    expect(push).toHaveBeenCalledWith(expect.stringMatching(/^\/native\/components\/uniwind\/label(#.*)?$/));
   });
 
   it('names the search button once, whichever of its labels and shortcut hint are drawn', () => {

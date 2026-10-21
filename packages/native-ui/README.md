@@ -10,3 +10,7 @@ zui's React Native items, and the build that publishes them as four shadcn regis
   `nx run @zeroxsolutions/native-ui:sync-upstream-styles <commit>` refreshes them.
 - `nx run @zeroxsolutions/native-ui:build-registry` writes the registries to `dist/r/styles/`.
   `@zeroxsolutions/registry-ui` copies them into its site, which serves them under `/r/styles/`.
+  It also writes each registry's sources to `dist/src/<engine>-<style>/` as an app holds them after
+  `shadcn add`, with NativeWind's `global.css` and `tailwind-theme.json`, for the native preview to import.
+- `src/examples/` holds one demo per drawn item, `<name>-demo.tsx`, importing the items through `@/` as an
+  app does; `@zeroxsolutions/native-ui/examples` exports them by name for the native preview.

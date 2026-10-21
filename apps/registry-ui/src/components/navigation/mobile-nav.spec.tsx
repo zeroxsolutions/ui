@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { Root } from 'fumadocs-core/page-tree';
 import { forwardRef, useImperativeHandle } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -7,7 +7,12 @@ import { MobileNav } from './mobile-nav';
 
 const { startAnimation, stopAnimation } = vi.hoisted(() => ({ startAnimation: vi.fn(), stopAnimation: vi.fn() }));
 
-vi.mock('next/navigation', () => ({ usePathname: (): string => '/docs' }));
+const url = vi.hoisted(() => ({ pathname: '/docs' }));
+
+vi.mock('next/navigation', () => ({
+  usePathname: (): string => url.pathname,
+  useSearchParams: (): URLSearchParams => new URLSearchParams(),
+}));
 
 // The icon's handle is the seam: the button drives it, and the motion behind it is the icon's own.
 vi.mock('@/registry/bases/base-ui/icons/menu-icon', () => ({
@@ -19,13 +24,17 @@ vi.mock('@/registry/bases/base-ui/icons/menu-icon', () => ({
 
 const tree: Root = { name: 'Docs', children: [{ type: 'page', name: 'Introduction', url: '/docs' }] };
 
-function renderNav(): void {
-  render(<MobileNav tree={tree} items={[{ href: '/blocks', label: 'Blocks', pattern: '/blocks' }]} />);
+function renderNav(platform: 'web' | 'native' = 'web'): void {
+  render(
+    <MobileNav tree={tree} items={[{ href: '/blocks', label: 'Blocks', pattern: '/blocks' }]} platform={platform} />,
+  );
 }
 
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  localStorage.clear();
+  url.pathname = '/docs';
 });
 
 describe('MobileNav', () => {
@@ -46,6 +55,30 @@ describe('MobileNav', () => {
     fireEvent.click(await screen.findByRole('link', { name: 'Blocks' }));
 
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  });
+
+  it('offers the engine switch and the style picker on a native page whose path holds an engine', async () => {
+    url.pathname = '/native/components/nativewind/button';
+    renderNav('native');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    const sheet = await screen.findByRole('dialog');
+    const engines = within(sheet).getByRole('navigation', { name: 'Engine' });
+    expect(within(engines).getByRole('link', { name: 'Uniwind' }).getAttribute('href')).toBe(
+      '/native/components/uniwind/button',
+    );
+    expect(within(sheet).getByRole('button', { name: /^Style\s*Vega/ })).toBeTruthy();
+  });
+
+  it('offers the web style picker on a web page, and no engine switch', async () => {
+    renderNav('web');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    const sheet = await screen.findByRole('dialog');
+    expect(within(sheet).getByRole('button', { name: /^Style\s*Nova/ })).toBeTruthy();
+    expect(within(sheet).queryByRole('navigation', { name: 'Engine' })).toBeNull();
   });
 
   it('plays its icon while the button is hovered, and stops it when the pointer leaves', () => {

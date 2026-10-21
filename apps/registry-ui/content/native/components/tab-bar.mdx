@@ -1,0 +1,125 @@
+---
+title: Tab bar
+description: A bar of top-level destinations at one edge of the screen, a tablist of pressable tab items with an indicator, an icon, a label and a count badge.
+---
+
+<NativePreview name="tab-bar-demo" />
+
+## Installation
+
+<InstallCommand name="tab-bar" />
+
+The CLI writes `components/navigation/tab-bar.tsx` and installs [Badge](/native/components/nativewind/badge),
+[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils.
+
+## Usage
+
+```tsx
+import { House, Inbox } from 'lucide-react-native';
+
+import {
+  TabBar,
+  TabBarBadge,
+  TabBarIcon,
+  TabBarIndicator,
+  TabBarItem,
+  TabBarLabel,
+} from '@/components/navigation/tab-bar';
+import { Icon } from '@/components/ui/icon';
+```
+
+```tsx
+<TabBar accessibilityLabel="Main" labels="selected">
+  <TabBarItem active={route === 'home'} onPress={() => navigate('home')}>
+    <TabBarIndicator>
+      <TabBarIcon>
+        <Icon as={House} />
+      </TabBarIcon>
+    </TabBarIndicator>
+    <TabBarLabel>Home</TabBarLabel>
+  </TabBarItem>
+  <TabBarItem active={route === 'inbox'} onPress={() => navigate('inbox')}>
+    <TabBarIndicator>
+      <TabBarIcon>
+        <Icon as={Inbox} />
+      </TabBarIcon>
+      <TabBarBadge countLabel="unread">3</TabBarBadge>
+    </TabBarIndicator>
+    <TabBarLabel>Inbox</TabBarLabel>
+  </TabBarItem>
+</TabBar>
+```
+
+The bar is absolutely positioned, so render it inside a parent that fills the screen. It does not handle safe areas:
+your app pads it for the home indicator. It draws no blur, so `translucent` is a 70% background. Each item calls
+`onPress`, where you navigate and set `active` on the destination now shown.
+
+## Composition
+
+```text
+TabBar
+`-- TabBarItem
+    |-- TabBarIndicator
+    |   |-- TabBarIcon
+    |   `-- TabBarBadge
+    `-- TabBarLabel
+```
+
+## API reference
+
+### TabBar
+
+Takes every prop of `View`, plus:
+
+| Prop                 | Type                                     | Default         |
+| -------------------- | ---------------------------------------- | --------------- |
+| `accessibilityLabel` | `string` (required)                      |                 |
+| `side`               | `'top' \| 'right' \| 'bottom' \| 'left'` | `'bottom'`      |
+| `labels`             | `'always' \| 'selected' \| 'none'`       | `'always'`      |
+| `surface`            | `'translucent' \| 'solid'`               | `'translucent'` |
+| `shape`              | `'attached' \| 'floating'`               | `'attached'`    |
+
+It is named by `accessibilityLabel`. Its role is `tabbar` on iOS, which VoiceOver reads as a tab bar, and `tablist` on
+Android. Top and bottom lay the items in a row, left and right in a column. `attached` runs edge to edge, and `floating`
+is a `rounded-full` pill 16px from the edges; floating on the left or right is 16px from that edge, as tall as its items
+and centred between the top and bottom edges, in a box a `testID` names `<testID>-wrapper`. `className` styles the bar,
+and the wrapper places it.
+
+### TabBarItem
+
+Takes every prop of `Pressable`, plus:
+
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| `active` | `boolean` | `false` |
+
+It has the `tab` role and is announced selected only while `active`. Its name is its `TabBarLabel`. Pass
+`accessibilityLabel` to name it otherwise, such as when `labels` hides the label. A `TabBarBadge` inside it becomes its
+`accessibilityHint`, unless you pass one.
+
+### TabBarIndicator
+
+Takes every prop of `View`. The pill behind the icon: tinted while the item is active, and muted while an inactive item
+is pressed. The item tracks the press with `onPressIn` and `onPressOut`, and still calls any you pass.
+
+### TabBarIcon
+
+Takes every prop of `View`. It holds an [Icon](/native/components/nativewind/icon) at 20px in the item's colour, and a screen reader
+skips it.
+
+### TabBarBadge
+
+Takes every prop of [Badge](/native/components/nativewind/badge) except `variant` and `children`, plus:
+
+| Prop         | Type               | Default |
+| ------------ | ------------------ | ------- |
+| `children`   | `string \| number` |         |
+| `countLabel` | `string`           | `'new'` |
+
+A destructive badge at the indicator's top right. A screen reader skips it, and the item's hint is the count and
+`countLabel`, so `3` is heard as "3 new". Both are words a person hears, so your app translates them.
+
+### TabBarLabel
+
+Takes every prop of [Text](/native/components/nativewind/text). It is `text-xs`, primary on the active item and muted on the others.
+Where `labels` hides it, it stays in the item, transparent and out of the layout, so it still names the item.

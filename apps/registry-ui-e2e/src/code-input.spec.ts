@@ -1,6 +1,6 @@
 import { expect, test } from './test/fixtures';
 
-const PAGE = '/docs/components/code-input';
+const PAGE = '/docs/components/base/code-input';
 
 test('a code input fills its slots as the code is typed, the next slot active', async ({ page }) => {
   await page.goto(PAGE);

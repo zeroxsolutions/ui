@@ -1,0 +1,207 @@
+---
+title: Installation
+description: Set up an Expo app to install zui native items with the shadcn CLI, on NativeWind or Uniwind.
+---
+
+These steps start from a new Expo app. An existing app skips the first step and checks each of the others.
+
+## Create an Expo app
+
+```bash
+npx create-expo-app@latest my-app --template blank-typescript
+```
+
+## Set up the engine
+
+Set the engine up by its own guide, then make the changes zui needs on top of it.
+
+<EngineTabs>
+
+<EngineTab engine="nativewind">
+
+Install NativeWind 4.2.7 or later, 4.x only, with `tailwindcss@^3.4.17`, `react-native-reanimated` and
+`react-native-safe-area-context`, by [NativeWind's Expo guide](https://www.nativewind.dev/docs/getting-started/installation).
+The items were tested on NativeWind 4.2.7.
+
+In `metro.config.js`, pass `inlineRem: 16`. NativeWind draws `1rem` as 14 points on iOS and Android by
+default, which draws every Vega size at 7/8 of its height; Vega's sizes are written for a 16-point rem.
+
+```js title="metro.config.js"
+const { getDefaultConfig } = require('expo/metro-config');
+const { withNativeWind } = require('nativewind/metro');
+
+const config = getDefaultConfig(__dirname);
+
+module.exports = withNativeWind(config, { input: './global.css', inlineRem: 16 });
+```
+
+In `tailwind.config.js`, set `darkMode` before adding the theme:
+
+```js title="tailwind.config.js"
+module.exports = {
+  darkMode: ['class', '.dark'],
+  // content, presets and the rest as NativeWind's guide writes them
+};
+```
+
+Without it the CLI writes `darkMode: ["class"]`, which NativeWind 4.2.7 reads as dark mode off, so every
+`dark:` class applies in light mode too. The CLI keeps a `darkMode` that already holds `"class"`.
+
+</EngineTab>
+
+<EngineTab engine="uniwind">
+
+Install Uniwind 1.13.0 or later with `tailwindcss` 4.3.3 or later by [Uniwind's guide](https://docs.uniwind.dev/quickstart).
+
+Keep `global.css` at the project root. The theme writes `zui-theme.css` to the root and imports it from
+`global.css` as `./zui-theme.css`, so a `global.css` anywhere else imports a file that is not there.
+
+Uniwind gives React Native's components their `className` prop in `uniwind-types.d.ts`, which Metro writes
+the first time it bundles `global.css`, such as on `npx expo export` or when a device opens the app from
+`npx expo start`. Until then `tsc` reports every `className` in the items. To typecheck before the app has
+been bundled, write the file with Uniwind's CLI:
+
+```bash
+npx uniwind generate-artifacts --css ./global.css
+```
+
+It writes `uniwind-types.d.ts` to the project root. If `withUniwindConfig` in `metro.config.js` sets
+`dtsFile`, pass the same path with `--dts`.
+
+</EngineTab>
+
+</EngineTabs>
+
+## Set up TypeScript
+
+The items import each other through `@/`, so `tsconfig.json` maps it to the project root:
+
+```json title="tsconfig.json"
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": { "@/*": ["./*"] }
+  }
+}
+```
+
+TypeScript 6 checks that a side-effect import resolves, so `import './global.css'` fails to compile until a
+declaration file in the project declares CSS modules. Put it at the project root, next to `tsconfig.json`. A
+`tsconfig.json` with no `include` picks it up, and one with an `include` must match it:
+
+```ts title="css.d.ts"
+declare module '*.css';
+```
+
+## Create components.json
+
+`style` names the engine and the shadcn style the items draw: `nativewind-vega` or `nativewind-nova` for
+NativeWind, `uniwind-vega` or `uniwind-nova` for Uniwind. Both styles take the same theme; Nova draws its
+controls a step smaller, such as a 32px Button where Vega's is 36px. The `@zui` entry under `registries` is
+where the CLI fetches each item, and the CLI fills `{style}` from `style`. The file below is in the style the
+header's Style picker shows.
+
+<EngineTabs>
+
+<EngineTab engine="nativewind">
+
+<ComponentsJson engine="nativewind" />
+
+</EngineTab>
+
+<EngineTab engine="uniwind">
+
+Tailwind 4 has no config file, so `tailwind.config` is empty.
+
+<ComponentsJson engine="uniwind" />
+
+</EngineTab>
+
+</EngineTabs>
+
+## Add the theme
+
+```bash
+pnpm dlx shadcn@latest add @zui/theme
+```
+
+Add it first, and once. No component installs it, and adding it again writes its tokens back over any you
+edited. [Theme](/native/components/nativewind/theme) lists what it writes.
+
+## Install an item
+
+The fonts step below imports Button, so install it first:
+
+```bash
+pnpm dlx shadcn@latest add @zui/button
+```
+
+The CLI writes the item's files under the aliases in `components.json`, here `components/ui/button.tsx`, and
+installs the items it uses, Text, Icon and Utils.
+
+## Load the fonts
+
+Text draws Geist, which loads at runtime. Install the splash screen, which stays up until the fonts load:
+
+```bash
+npx expo install expo-splash-screen
+```
+
+Then load `zuiFonts`, which the theme wrote to `lib/fonts.ts`, before the app's first render:
+
+```tsx title="App.tsx"
+import './global.css';
+
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { View } from 'react-native';
+
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+import { zuiFonts } from '@/lib/fonts';
+
+SplashScreen.preventAutoHideAsync();
+
+export default function App() {
+  const [loaded, error] = useFonts(zuiFonts);
+
+  useEffect(() => {
+    if (loaded || error) SplashScreen.hideAsync();
+  }, [loaded, error]);
+
+  if (!loaded && !error) return null;
+
+  return (
+    <View className="flex-1 items-center justify-center bg-background">
+      <Button>
+        <Text>Continue</Text>
+      </Button>
+      <StatusBar style="auto" />
+    </View>
+  );
+}
+```
+
+## Follow the device colour scheme
+
+`create-expo-app`'s blank-typescript template sets `"userInterfaceStyle": "light"` in `app.json`, which makes iOS
+and Android report light whatever the device uses. Set it to `automatic`:
+
+```json title="app.json"
+{
+  "expo": {
+    "userInterfaceStyle": "automatic"
+  }
+}
+```
+
+The setting is native config, so rebuild the app, or run `npx expo prebuild`, for it to apply.
+
+## Dark mode
+
+With `userInterfaceStyle` set to `automatic`, the theme on iOS and Android follows the app's colour scheme,
+which is the device's setting until the app sets one with `useColorScheme().setColorScheme` from `nativewind`
+or `Uniwind.setTheme` from `uniwind`. On Expo web the theme follows the operating system's setting only.

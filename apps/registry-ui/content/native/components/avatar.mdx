@@ -1,0 +1,52 @@
+---
+title: Avatar
+description: A round picture of a person or an account, with a fallback that shows until the image has loaded.
+---
+
+<NativePreview name="avatar-demo" />
+
+## Installation
+
+<InstallCommand name="avatar" />
+
+The CLI writes `components/ui/avatar.tsx`, installs [Text](/native/components/nativewind/text) and Utils, and adds
+`@rn-primitives/avatar`.
+
+## Usage
+
+```tsx
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Avatar alt="Ada Lovelace">
+  <AvatarImage source={{ uri: 'https://example.com/ada.png' }} />
+  <AvatarFallback>
+    <Text>AL</Text>
+  </AvatarFallback>
+</Avatar>
+```
+
+## API reference
+
+### Avatar
+
+Takes every prop of the `@rn-primitives/avatar` root, plus:
+
+| Prop   | Type                        | Default     |
+| ------ | --------------------------- | ----------- |
+| `alt`  | `string`                    | required    |
+| `size` | `'default' \| 'sm' \| 'lg'` | `'default'` |
+
+`alt` names the avatar. The image carries it, and so does the fallback while it stands in. `sm` draws 24px,
+`lg` 40px, and the default is 32px.
+
+### AvatarImage
+
+Takes every prop of the `@rn-primitives/avatar` image. It draws nothing if it fails to load.
+
+### AvatarFallback
+
+Shows until the image has loaded, and for good when there is no image or it failed. Its child is usually
+initials as a Text. It is announced as an image named by the avatar's `alt`.
