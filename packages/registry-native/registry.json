@@ -318,6 +318,21 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "password-input",
+      "type": "registry:component",
+      "title": "Password Input",
+      "description": "A password field over Input Group whose toggle, named Show password or Hide password, shows or hides the password and leaves focus in the field.",
+      "categories": ["data-entry"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/icon", "@zui/input-group"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/password-input.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

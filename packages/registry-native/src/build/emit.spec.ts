@@ -175,6 +175,14 @@ describe('aliasImports', () => {
     );
   });
 
+  it("points a composed component's relative imports at the consumer's ui and lib aliases", () => {
+    const source = "import { cn } from '../../lib/utils';\nimport { Input } from '../../ui/input';";
+
+    expect(aliasImports(source, 'components/data-entry/password-input.tsx')).toBe(
+      "import { cn } from '@/lib/utils';\nimport { Input } from '@/components/ui/input';",
+    );
+  });
+
   it('leaves a package import alone', () => {
     const source = "import { Pressable } from 'react-native';";
 
@@ -191,6 +199,7 @@ describe('aliasImports', () => {
 interface BuiltItem {
   name: string;
   type: string;
+  categories?: string[];
   dependencies?: string[];
   registryDependencies?: string[];
   files: { path: string; content: string }[];
@@ -375,6 +384,20 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
 
     expect(fonts?.content).toContain('Geist_400Regular');
     expect(theme?.dependencies).toEqual(expect.arrayContaining(['expo-font', '@expo-google-fonts/geist']));
+  });
+
+  it('ships password-input as a data-entry registry:component under components/, which the CLI keeps below the components alias', () => {
+    const passwordInput = item('password-input');
+
+    expect(passwordInput).toMatchObject({ type: 'registry:component', categories: ['data-entry'] });
+    expect(passwordInput?.files).toEqual([
+      expect.objectContaining({
+        path: 'registry/components/data-entry/password-input.tsx',
+        type: 'registry:component',
+      }),
+    ]);
+    expect(passwordInput?.files[0]).not.toHaveProperty('target');
+    expect(passwordInput?.files[0].content).toContain("from '@/components/ui/input-group'");
   });
 
   it("gives Button the style's pressed nudge", () => {

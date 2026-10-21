@@ -8,7 +8,8 @@ module.exports = {
   moduleNameMapper: {
     '[.]svg$': '@nx/expo/plugins/jest/svg-mock',
     // Icon, Input and Skeleton have one file per engine, and the registry ships one of them as icon.tsx, input.tsx and skeleton.tsx; the specs run NativeWind's.
-    '^[.]/icon$': '<rootDir>/src/registry/ui/icon.nativewind.tsx',
+    // A composed component under components/<category>/ imports Icon as ../../ui/icon.
+    '^(?:[.]|[.][.]/[.][.]/ui)/icon$': '<rootDir>/src/registry/ui/icon.nativewind.tsx',
     '^[.]/input$': '<rootDir>/src/registry/ui/input.nativewind.tsx',
     '^[.]/skeleton$': '<rootDir>/src/registry/ui/skeleton.nativewind.tsx',
   },

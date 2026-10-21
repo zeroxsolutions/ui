@@ -16,6 +16,7 @@
     "input",
     "input-group",
     "input-otp",
+    "password-input",
     "textarea",
     "checkbox",
     "radio-group",
