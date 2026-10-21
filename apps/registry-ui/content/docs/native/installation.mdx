@@ -60,6 +60,18 @@ Install Uniwind 1.13.0 or later with `tailwindcss` 4.3.3 or later by [Uniwind's 
 Keep `global.css` at the project root. The theme writes `zui-theme.css` to the root and imports it from
 `global.css` as `./zui-theme.css`, so a `global.css` anywhere else imports a file that is not there.
 
+Uniwind gives React Native's components their `className` prop in `uniwind-types.d.ts`, which Metro writes
+the first time it bundles `global.css`, such as on `npx expo export` or when a device opens the app from
+`npx expo start`. Until then `tsc` reports every `className` in the items. To typecheck before the app has
+been bundled, write the file with Uniwind's CLI:
+
+```bash
+npx uniwind generate-artifacts --css ./global.css
+```
+
+It writes `uniwind-types.d.ts` to the project root. If `withUniwindConfig` in `metro.config.js` sets
+`dtsFile`, pass the same path with `--dts`.
+
 </TabsContent>
 
 </CodeTabs>

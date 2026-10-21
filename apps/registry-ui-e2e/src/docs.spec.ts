@@ -53,3 +53,11 @@ test('the native installation names a vega and a nova style for each engine', as
     await expect(article.getByText(style, { exact: true }).first()).toBeVisible();
   }
 });
+
+test("the native installation's Uniwind tab says how to write Uniwind's types before a typecheck", async ({ page }) => {
+  await page.goto('/docs/native/installation');
+
+  await page.getByRole('tab', { name: 'Uniwind', exact: true }).first().click();
+
+  await expect(page.getByText('npx uniwind generate-artifacts --css ./global.css')).toBeVisible();
+});
