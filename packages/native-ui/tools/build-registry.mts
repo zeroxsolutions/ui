@@ -8,7 +8,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import type { Registry, RegistryItem } from 'shadcn/schema';
-import { aliasImports, emitSource } from '../src/build/emit.ts';
+import { aliasImports, emitSource, type UpstreamStyle } from '../src/build/emit.ts';
 import { parseSlotMap, type SlotMap } from '../src/build/slot-map.ts';
 import {
   STATUS_TOKENS,
@@ -43,9 +43,8 @@ function sourceFor(path: string, engine: Engine): string {
   return existsSync(join(PROJECT, engineFile)) ? engineFile : path;
 }
 
-/** The slots the registry's sources are emitted against, and those of the styles beside it. */
-interface StyleSlots {
-  slots: SlotMap;
+/** The style the registry's sources are emitted in, and the slots of the styles beside it. */
+interface StyleSlots extends UpstreamStyle {
   otherStyles: readonly SlotMap[];
 }
 
@@ -67,7 +66,7 @@ function emitItem(
     const pathUnderRegistry = registryPath.replace(/^registry\//, '');
     const source = readFileSync(join(PROJECT, sourcePath), 'utf8');
     const emitted = aliasImports(
-      emitSource(source, style.slots, engine, sourcePath, style.otherStyles, radius),
+      emitSource(source, style, engine, sourcePath, style.otherStyles, radius),
       pathUnderRegistry,
     );
     importsEngine ||= emitted.includes(`from '${engine}'`);
@@ -145,7 +144,7 @@ function main(): void {
   for (const [styleName, slots] of slotsByStyle) {
     const otherStyles = [...slotsByStyle].flatMap(([other, otherSlots]) => (other === styleName ? [] : [otherSlots]));
     for (const engine of Object.keys(ENGINE_PACKAGES) as Engine[]) {
-      buildRegistry(engine, styleName, { slots, otherStyles }, registry, colors, radii);
+      buildRegistry(engine, styleName, { name: styleName, slots, otherStyles }, registry, colors, radii);
     }
   }
 }

@@ -1,10 +1,19 @@
 import type { SlotMap } from './slot-map';
 
+/** The styling engine a registry is built for, which decides the Tailwind a class must exist in. */
 export type Engine = 'nativewind' | 'uniwind';
+
+/**
+ * The element of a component a class lands on: `view` the container, `text` its label, which takes
+ * the typography a `Pressable` ignores, and `icon` an icon that names no size of its own.
+ */
 export type Part = 'view' | 'text' | 'icon';
 
+/** What {@link translateClasses} gives back for one slot, part and state. */
 export interface Translation {
+  /** The classes the engine draws on the part, each once, in the slot's order. */
   classes: string[];
+  /** The slot's classes no rule translates, as the style wrote them; any entry fails the build. */
   unknown: string[];
 }
 
@@ -15,7 +24,10 @@ export interface Translation {
  */
 export type StateKey = string;
 
-/** Modifiers React Native has a state for on a `Pressable`, under both engines. */
+/**
+ * Modifiers both engines apply themselves: `active` and `disabled` from a `Pressable`'s state, and
+ * `dark` from the colour scheme.
+ */
 const KEPT_MODIFIERS: ReadonlySet<string> = new Set(['active', 'disabled', 'dark']);
 
 /**
@@ -437,15 +449,17 @@ function resolveOwnSizeTranslate(utility: string, states: readonly string[], slo
 }
 
 /**
- * The px radius a radius less a length comes to at the theme's `radius`, such as `0.625rem`; with no
- * radius, or one not in rem, `undefined`, so the class is reported. Any other utility is returned as it is.
+ * The px radius a radius less a length comes to at the theme's `radius`, such as `0.625rem`, rounded to
+ * 2 decimals and no less than 0; with no radius, or one not in rem, `undefined`, so the class is reported.
+ * Any other utility is returned as it is.
  */
 function resolveRadiusLessLength(utility: string, radius: string | undefined): string | undefined {
   const less = RADIUS_LESS_LENGTH.exec(utility);
   if (!less) return utility;
   const rem = radius === undefined ? undefined : REM_LENGTH.exec(radius.trim());
   if (!rem) return undefined;
-  return `rounded${less[1] ?? ''}-[${Number(rem[1]) * REM_PX - Number(less[2])}px]`;
+  const px = Math.max(0, Number(rem[1]) * REM_PX - Number(less[2]));
+  return `rounded${less[1] ?? ''}-[${Math.round(px * 100) / 100}px]`;
 }
 
 /** The theme's `rounded-md` for a radius clamped at no less than it, or the utility itself. */
@@ -532,7 +546,7 @@ export function translateClasses(
     }
 
     if (stateKeyOf(cls.states) !== wanted || partOf(utility, cls.onIcon) !== part) continue;
-    kept.push([...cls.kept, renamed[utility] ?? utility].join(':'));
+    kept.push([...cls.kept, Object.hasOwn(renamed, utility) ? renamed[utility] : utility].join(':'));
   }
 
   return { classes: [...new Set(kept)], unknown };

@@ -24,6 +24,13 @@ const RADIUS = themeRadius(
  */
 export function emittedClasses(className: string | undefined, style: Style = 'vega'): string[] {
   const otherStyles = Object.entries(STYLE_SLOTS).flatMap(([name, slots]) => (name === style ? [] : [slots]));
-  const emitted = emitSource(`"${className ?? ''}"`, STYLE_SLOTS[style], 'nativewind', 'spec', otherStyles, RADIUS);
+  const emitted = emitSource(
+    `"${className ?? ''}"`,
+    { name: style, slots: STYLE_SLOTS[style] },
+    'nativewind',
+    'spec',
+    otherStyles,
+    RADIUS,
+  );
   return cn(emitted.slice(1, -1)).split(/\s+/).filter(Boolean);
 }

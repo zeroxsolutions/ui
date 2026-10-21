@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { aliasImports, emitSource } from './emit';
+import { aliasImports, emitSource, type UpstreamStyle } from './emit';
 import { parseSlotMap } from './slot-map';
 import { translateClasses, type Engine } from './translate';
 
@@ -20,6 +20,8 @@ const TAILWIND_MERGE = {
 
 const slots = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));
 const novaSlots = parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8'));
+const vega: UpstreamStyle = { name: 'vega', slots };
+const nova: UpstreamStyle = { name: 'nova', slots: novaSlots };
 
 function viewClasses(slot: string, engine: Engine): string[] {
   return translateClasses(slots.get(slot) ?? [], engine, 'view').classes;
@@ -27,42 +29,42 @@ function viewClasses(slot: string, engine: Engine): string[] {
 
 describe('emitSource', () => {
   it.each(ENGINES)("replaces each view token with its slot's classes for %s", (engine) => {
-    const emitted = emitSource("cva('cn-button cn-button-variant-default')", slots, engine, 'button.tsx');
+    const emitted = emitSource("cva('cn-button cn-button-variant-default')", vega, engine, 'button.tsx');
 
     const classes = [...viewClasses('cn-button', engine), ...viewClasses('cn-button-variant-default', engine)];
     expect(emitted).toBe(`cva('${classes.join(' ')}')`);
   });
 
   it('replaces a text token with the slot classes a label takes', () => {
-    const emitted = emitSource("cva('cn-button-variant-default/text')", slots, 'uniwind', 'button.tsx');
+    const emitted = emitSource("cva('cn-button-variant-default/text')", vega, 'uniwind', 'button.tsx');
 
     expect(emitted).toBe("cva('text-primary-foreground')");
   });
 
   it("gives Button's default size Vega's height for both engines", () => {
     for (const engine of ENGINES) {
-      expect(emitSource("'cn-button-size-default'", slots, engine, 'button.tsx')).toBe("'h-9 gap-1.5 px-2.5'");
+      expect(emitSource("'cn-button-size-default'", vega, engine, 'button.tsx')).toBe("'h-9 gap-1.5 px-2.5'");
     }
   });
 
   it("gives Button's default size Nova's own height for both engines", () => {
     for (const engine of ENGINES) {
-      expect(emitSource("'cn-button-size-default'", novaSlots, engine, 'button.tsx')).toBe("'h-8 gap-1.5 px-2.5'");
+      expect(emitSource("'cn-button-size-default'", nova, engine, 'button.tsx')).toBe("'h-8 gap-1.5 px-2.5'");
     }
   });
 
   it("spaces Card by the steps the emitted style's own Card slot defines", () => {
-    expect(emitSource("'cn-card-header@size=sm'", slots, 'uniwind', 'card.tsx')).toBe("'px-4'");
-    expect(emitSource("'cn-card-header@size=sm'", novaSlots, 'uniwind', 'card.tsx')).toBe("'px-3'");
+    expect(emitSource("'cn-card-header@size=sm'", vega, 'uniwind', 'card.tsx')).toBe("'px-4'");
+    expect(emitSource("'cn-card-header@size=sm'", nova, 'uniwind', 'card.tsx')).toBe("'px-3'");
   });
 
   it('renames a Tailwind 4 step to its Tailwind 3 name for nativewind only', () => {
-    expect(emitSource("'cn-button-variant-outline'", slots, 'nativewind', 'button.tsx')).toContain('shadow-sm');
-    expect(emitSource("'cn-button-variant-outline'", slots, 'uniwind', 'button.tsx')).toContain('shadow-xs');
+    expect(emitSource("'cn-button-variant-outline'", vega, 'nativewind', 'button.tsx')).toContain('shadow-sm');
+    expect(emitSource("'cn-button-variant-outline'", vega, 'uniwind', 'button.tsx')).toContain('shadow-xs');
   });
 
   it('replaces an icon token with the size the slot gives an icon', () => {
-    const emitted = emitSource("cva('cn-button/icon cn-button-size-xs/icon')", slots, 'uniwind', 'button.tsx');
+    const emitted = emitSource("cva('cn-button/icon cn-button-size-xs/icon')", vega, 'uniwind', 'button.tsx');
 
     expect(emitted).toBe("cva('size-4 size-3')");
   });
@@ -70,7 +72,7 @@ describe('emitSource', () => {
   it('removes a token whose translation is empty, with its space', () => {
     const emitted = emitSource(
       "['flex-row cn-button-size-icon/text', 'cn-button-size-icon/text']",
-      slots,
+      vega,
       'uniwind',
       'button.tsx',
     );
@@ -81,7 +83,7 @@ describe('emitSource', () => {
   it('leaves a string literal with no token as it was', () => {
     const source = "const a = 'items-center  justify-center';";
 
-    expect(emitSource(source, slots, 'uniwind', 'button.tsx')).toBe(source);
+    expect(emitSource(source, vega, 'uniwind', 'button.tsx')).toBe(source);
   });
 
   it('drops a line comment run that describes the tokens', () => {
@@ -91,76 +93,74 @@ describe('emitSource', () => {
       "const a = 'cn-button-size-icon';",
     ].join('\n');
 
-    expect(emitSource(source, slots, 'uniwind', 'button.tsx')).toBe("const a = 'size-9';");
+    expect(emitSource(source, vega, 'uniwind', 'button.tsx')).toBe("const a = 'size-9';");
   });
 
-  it('throws on a slot Vega does not declare, naming the file', () => {
-    expect(() => emitSource("'cn-buton'", slots, 'uniwind', 'button.tsx')).toThrow(
-      'Unknown slot cn-buton in button.tsx',
+  it('throws on a slot Vega does not declare, naming the file and the registry', () => {
+    expect(() => emitSource("'cn-buton'", vega, 'uniwind', 'button.tsx')).toThrow(
+      'Unknown slot cn-buton in button.tsx (uniwind-vega)',
     );
   });
 
-  it('throws when a slot holds a class with no rule', () => {
+  it('throws when a slot holds a class with no rule, naming the registry', () => {
     const custom = new Map([['cn-thing', ['sm:h-9']]]);
 
-    expect(() => emitSource("'cn-thing'", custom, 'nativewind', 'thing.tsx')).toThrow(
-      'Untranslated sm:h-9 in cn-thing',
+    expect(() => emitSource("'cn-thing'", { name: 'vega', slots: custom }, 'nativewind', 'thing.tsx')).toThrow(
+      'Untranslated sm:h-9 in cn-thing (nativewind-vega)',
     );
   });
 
   it.each(ENGINES)('replaces a state token with the classes Vega puts behind that state for %s', (engine) => {
-    const emitted = emitSource("['cn-switch', 'cn-switch@checked']", slots, engine, 'switch.tsx');
+    const emitted = emitSource("['cn-switch', 'cn-switch@checked']", vega, engine, 'switch.tsx');
 
     expect(emitted).toBe(`['${viewClasses('cn-switch', engine).join(' ')}', 'bg-primary']`);
   });
 
   it('replaces a compound state token and a text state token', () => {
-    expect(emitSource("'cn-switch-thumb@size=sm+checked'", slots, 'nativewind', 'switch.tsx')).toBe(
+    expect(emitSource("'cn-switch-thumb@size=sm+checked'", vega, 'nativewind', 'switch.tsx')).toBe(
       "'translate-x-[10px]'",
     );
-    expect(emitSource("'cn-checkbox/text@checked'", slots, 'uniwind', 'checkbox.tsx')).toBe(
-      "'text-primary-foreground'",
-    );
+    expect(emitSource("'cn-checkbox/text@checked'", vega, 'uniwind', 'checkbox.tsx')).toBe("'text-primary-foreground'");
   });
 
-  it('throws on a state outside the state vocabulary, naming the slot and the file', () => {
-    expect(() => emitSource("'cn-switch@cheked'", slots, 'uniwind', 'switch.tsx')).toThrow(
-      'Unknown state cheked for cn-switch in switch.tsx',
+  it('throws on a state outside the state vocabulary, naming the slot, the file and the registry', () => {
+    expect(() => emitSource("'cn-switch@cheked'", vega, 'uniwind', 'switch.tsx')).toThrow(
+      'Unknown state cheked for cn-switch in switch.tsx (uniwind-vega)',
     );
   });
 
   it('throws on a state token whose translation is empty, so a typo cannot ship as nothing', () => {
-    expect(() => emitSource("'cn-switch@pressed'", slots, 'uniwind', 'switch.tsx')).toThrow(
-      'Empty state pressed for cn-switch in switch.tsx',
+    expect(() => emitSource("'cn-switch@pressed'", vega, 'uniwind', 'switch.tsx')).toThrow(
+      'Empty state pressed for cn-switch in switch.tsx (uniwind-vega)',
     );
-    expect(() => emitSource("'cn-switch/text@checked'", slots, 'uniwind', 'switch.tsx')).toThrow(
-      'Empty state checked for cn-switch in switch.tsx',
+    expect(() => emitSource("'cn-switch/text@checked'", vega, 'uniwind', 'switch.tsx')).toThrow(
+      'Empty state checked for cn-switch in switch.tsx (uniwind-vega)',
     );
   });
 
   it('removes a state token another style puts classes behind and this style does not', () => {
     const source = "'cn-toggle-group@spacing=0+variant=outline'";
 
-    expect(emitSource(source, novaSlots, 'uniwind', 'toggle-group.tsx', [slots])).toBe("''");
-    expect(emitSource(source, slots, 'uniwind', 'toggle-group.tsx', [novaSlots])).toBe("'shadow-xs'");
+    expect(emitSource(source, nova, 'uniwind', 'toggle-group.tsx', [slots])).toBe("''");
+    expect(emitSource(source, vega, 'uniwind', 'toggle-group.tsx', [novaSlots])).toBe("'shadow-xs'");
   });
 
   it('throws on a state token no style puts a class behind, so a typo cannot ship as nothing', () => {
-    expect(() => emitSource("'cn-switch@pressed'", novaSlots, 'uniwind', 'switch.tsx', [slots])).toThrow(
-      'Empty state pressed for cn-switch in switch.tsx',
+    expect(() => emitSource("'cn-switch@pressed'", nova, 'uniwind', 'switch.tsx', [slots])).toThrow(
+      'Empty state pressed for cn-switch in switch.tsx (uniwind-nova)',
     );
   });
 
   it('throws on a slot this style lacks even when another style declares it', () => {
     const other = new Map([['cn-only-elsewhere', ['p-2']]]);
 
-    expect(() => emitSource("'cn-only-elsewhere'", slots, 'uniwind', 'thing.tsx', [other])).toThrow(
-      'Unknown slot cn-only-elsewhere in thing.tsx',
+    expect(() => emitSource("'cn-only-elsewhere'", vega, 'uniwind', 'thing.tsx', [other])).toThrow(
+      'Unknown slot cn-only-elsewhere in thing.tsx (uniwind-vega)',
     );
   });
 
   it('throws when a token is left outside a quoted string', () => {
-    expect(() => emitSource('const a = `cn-button`;', slots, 'uniwind', 'button.tsx')).toThrow(
+    expect(() => emitSource('const a = `cn-button`;', vega, 'uniwind', 'button.tsx')).toThrow(
       'Unreplaced cn-button in button.tsx',
     );
   });
@@ -308,8 +308,10 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
   });
 
   it("ships the engine's icon as icon.tsx", () => {
-    const [file] = item('icon')?.files ?? [];
+    const icon = item('icon');
 
+    expect(icon).toBeDefined();
+    const [file] = icon?.files ?? [];
     expect(file.path).toMatch(/\/ui\/icon\.tsx$/);
     expect(file.content).toContain(`from '${engine}'`);
   });

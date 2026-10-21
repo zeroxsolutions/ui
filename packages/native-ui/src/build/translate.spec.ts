@@ -40,6 +40,16 @@ describe('translateClasses', () => {
     expect(result.classes).toEqual(['active:bg-muted', 'disabled:opacity-50', 'dark:bg-input/30']);
   });
 
+  it.each(['nativewind', 'uniwind'] as const)(
+    "keeps a utility named like an Object prototype member as it is for %s, since the rename table's own keys are its only renames",
+    (engine) => {
+      expect(translateClasses(['constructor', 'toString'], engine, 'view').classes).toEqual([
+        'constructor',
+        'toString',
+      ]);
+    },
+  );
+
   it('renames shadow-xs to shadow-sm for nativewind and keeps it for uniwind', () => {
     expect(translateClasses(['shadow-xs'], 'nativewind', 'view').classes).toEqual(['shadow-sm']);
     expect(translateClasses(['shadow-xs'], 'uniwind', 'view').classes).toEqual(['shadow-xs']);
@@ -645,6 +655,18 @@ describe('translateClasses for a radius less a length', () => {
     expect(
       translateClasses(['rounded-[calc(var(--radius)-5px)]'], 'uniwind', 'view', '', { radius: '0.75rem' }).classes,
     ).toEqual(['rounded-[7px]']);
+  });
+
+  it('rounds the px it comes to at 2 decimals', () => {
+    expect(
+      translateClasses(['rounded-[calc(var(--radius)-2px)]'], 'uniwind', 'view', '', { radius: '0.33rem' }).classes,
+    ).toEqual(['rounded-[3.28px]']);
+  });
+
+  it('draws a length past the theme radius as no radius', () => {
+    expect(
+      translateClasses(['rounded-[calc(var(--radius)-6px)]'], 'uniwind', 'view', '', { radius: '0.3rem' }).classes,
+    ).toEqual(['rounded-[0px]']);
   });
 
   it('reports the radius when it is given no theme radius', () => {

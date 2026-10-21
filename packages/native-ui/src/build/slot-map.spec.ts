@@ -36,6 +36,21 @@ describe('parseSlotMap', () => {
     expect(slots.get('cn-empty')).toEqual([]);
   });
 
+  it('reads no slot from a commented-out rule, and no rule end from a comment in a body', () => {
+    const css = `.style-vega {
+  /* .cn-retired { @apply px-9; } */
+  .cn-badge {
+    /* a } in a comment */
+    @apply px-2;
+  }
+}`;
+
+    const slots = parseSlotMap(css);
+
+    expect([...slots.keys()]).toEqual(['cn-badge']);
+    expect(slots.get('cn-badge')).toEqual(['px-2']);
+  });
+
   it('reads the pinned snapshot, cn-button-size-sm included', () => {
     const slots = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));
 

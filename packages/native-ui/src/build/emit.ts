@@ -1,5 +1,5 @@
 import { posix } from 'node:path';
-import type { SlotMap } from './slot-map';
+import type { SlotMap } from './slot-map.ts';
 import {
   findUnknownState,
   parseSpacingVariables,
@@ -43,6 +43,16 @@ function dropTokenComments(source: string): string {
   return kept.join('\n');
 }
 
+/**
+ * One upstream style a registry is emitted in.
+ * @property name - the style's name, such as `vega`, which build errors name with the engine
+ * @property slots - the slots its style sheet declares
+ */
+export interface UpstreamStyle {
+  name: string;
+  slots: SlotMap;
+}
+
 /** A style's slots with the spacing variables they define, and the theme's `--radius`. */
 interface StyleSlots {
   slots: SlotMap;
@@ -61,15 +71,17 @@ function slotClasses(
   style: StyleSlots,
   otherStyles: readonly StyleSlots[],
   engine: Engine,
+  styleName: string,
   file: string,
 ): string {
+  const registry = `${engine}-${styleName}`;
   const classes = style.slots.get(slot);
   if (!classes) {
-    throw new Error(`Unknown slot ${slot} in ${file}`);
+    throw new Error(`Unknown slot ${slot} in ${file} (${registry})`);
   }
   const unknownState = state === undefined ? undefined : findUnknownState(state);
   if (unknownState !== undefined) {
-    throw new Error(`Unknown state ${unknownState} for ${slot} in ${file}`);
+    throw new Error(`Unknown state ${unknownState} for ${slot} in ${file} (${registry})`);
   }
   const translation = translateClasses(classes, engine, part, state, {
     name: slot,
@@ -77,7 +89,7 @@ function slotClasses(
     radius: style.radius,
   });
   if (translation.unknown.length > 0) {
-    throw new Error(`Untranslated ${translation.unknown[0]} in ${slot}`);
+    throw new Error(`Untranslated ${translation.unknown[0]} in ${slot} (${registry})`);
   }
   const drawnElsewhere = (): boolean =>
     otherStyles.some(
@@ -89,13 +101,13 @@ function slotClasses(
         }).classes.length > 0,
     );
   if (state !== undefined && translation.classes.length === 0 && !drawnElsewhere()) {
-    throw new Error(`Empty state ${state} for ${slot} in ${file}`);
+    throw new Error(`Empty state ${state} for ${slot} in ${file} (${registry})`);
   }
   return translation.classes.join(' ');
 }
 
 /**
- * Writes one registry source for `engine` in the style whose slots are `slots`: every `cn-<slot>`
+ * Writes one registry source for `engine` in the `upstream` style: every `cn-<slot>`
  * token inside a quoted string becomes that slot's view classes, every `cn-<slot>/text` token its
  * text classes and every `cn-<slot>/icon` token the classes it gives an icon with no size of its
  * own, and a token whose
@@ -109,28 +121,28 @@ function slotClasses(
  * state is a style's own choice or a typo
  * @param radius - the theme's `--radius`, such as `0.625rem`, which a slot's radius less a length is
  * computed from; with none, such a radius is untranslated
- * @throws {Error} `Unknown slot <slot> in <file>` for a slot the style does not declare,
- * `Unknown state <part> for <slot> in <file>` for a state outside the state vocabulary,
- * `Untranslated <class> in <slot>` for a slot class with no rule,
- * `Empty state <state> for <slot> in <file>` for a state token no style puts a class of that part behind,
- * and `Unreplaced <token> in <file>` for a token left outside a quoted string.
+ * @throws {Error} `Unknown slot <slot> in <file> (<engine>-<style>)` for a slot the style does not declare,
+ * `Unknown state <part> for <slot> in <file> (<engine>-<style>)` for a state outside the state vocabulary,
+ * `Untranslated <class> in <slot> (<engine>-<style>)` for a slot class with no rule,
+ * `Empty state <state> for <slot> in <file> (<engine>-<style>)` for a state token no style puts a class of
+ * that part behind, and `Unreplaced <token> in <file>` for a token left outside a quoted string.
  */
 export function emitSource(
   source: string,
-  slots: SlotMap,
+  upstream: UpstreamStyle,
   engine: Engine,
   file: string,
   otherStyles: readonly SlotMap[] = [],
   radius?: string,
 ): string {
-  const style = styleSlots(slots, radius);
+  const style = styleSlots(upstream.slots, radius);
   const others = otherStyles.map((other) => styleSlots(other, radius));
   const emitted = dropTokenComments(source).replace(QUOTED_STRING, (literal, quote: string, content: string) => {
     if (!content.includes('cn-')) return literal;
     const classes = content.replace(
       SLOT_TOKEN,
       (_token, slot: string, part: 'text' | 'icon' | undefined, state: StateKey | undefined) =>
-        slotClasses(slot, part ?? 'view', state, style, others, engine, file),
+        slotClasses(slot, part ?? 'view', state, style, others, engine, upstream.name, file),
     );
     return `${quote}${classes.split(/\s+/).filter(Boolean).join(' ')}${quote}`;
   });
