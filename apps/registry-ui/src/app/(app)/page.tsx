@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { HomePageCode } from './_components/data-display/home-page-code';
 import { HomeGrid } from './_components/general/home-grid';
 import { HomeShader } from './_components/general/home-shader';
 import { BlockFrame } from '@/components/data-display/block-frame';
@@ -10,16 +11,6 @@ import {
   ComponentPreviewStage,
 } from '@/components/data-display/component-preview';
 import { RegistryExample } from '@/components/data-display/registry-example';
-import {
-  SourceCodeBlock,
-  SourceCodeBlockActions,
-  SourceCodeBlockCode,
-  SourceCodeBlockContent,
-  SourceCodeBlockCopy,
-  SourceCodeBlockHeader,
-  SourceCodeBlockLanguage,
-  SourceCodeBlockTitle,
-} from '@/components/data-display/source-code-block';
 import { publishedBlocks, publishedItems } from '@/lib/registry';
 import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
 import { docsPageHref, docsPageUrl, writtenDocsPage } from '@/lib/source';
@@ -67,26 +58,6 @@ const INSTALL_STEPS = [
     code: 'import { StatusIndicator } from \'@/components/feedback/status-indicator\';\n\n<div className="flex items-center gap-2">\n  <StatusIndicator tone="online" />\n  <span>Online</span>\n</div>',
   },
 ];
-
-/** A short source block: its language, a copy button and the code, which the block highlights itself
- * on the client, as the Code Block demo above it does (this page is no MDX). */
-function HomePageCode({ code, language }: { code: string; language: string }): ReactNode {
-  return (
-    <SourceCodeBlock code={code} language={language}>
-      <SourceCodeBlockHeader>
-        <SourceCodeBlockTitle>
-          <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
-        </SourceCodeBlockTitle>
-        <SourceCodeBlockActions>
-          <SourceCodeBlockCopy />
-        </SourceCodeBlockActions>
-      </SourceCodeBlockHeader>
-      <SourceCodeBlockContent>
-        <SourceCodeBlockCode />
-      </SourceCodeBlockContent>
-    </SourceCodeBlock>
-  );
-}
 
 export default function HomePage(): ReactNode {
   const items = HOME_ITEMS.map((name) => {

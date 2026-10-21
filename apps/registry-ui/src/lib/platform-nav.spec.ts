@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
   platformCounterpart,
   platformLocation,
+  platformHome,
   platformNavItems,
   withLocationEngine,
   withNativeEngine,
@@ -17,7 +18,8 @@ const PAGES: PlatformPages = {
 
 describe('platformLocation', () => {
   it.each([
-    ['/', { platform: 'web', section: 'other' }],
+    ['/', { platform: 'web', section: 'home' }],
+    ['/native', { platform: 'native', section: 'home' }],
     ['/view/ai-provider-picker', { platform: 'web', section: 'other' }],
     ['/docs', { platform: 'web', section: 'docs', slug: '' }],
     ['/docs/blocks/ai-provider-picker', { platform: 'web', section: 'docs', slug: 'blocks/ai-provider-picker' }],
@@ -48,6 +50,8 @@ describe('platformLocation', () => {
 
 describe('platformCounterpart', () => {
   it.each([
+    ['/', '/native'],
+    ['/native', '/'],
     ['/docs/installation', '/native/docs/installation'],
     ['/docs', '/native/docs'],
     ['/docs/components/base/tab-bar', '/native/components/uniwind/tab-bar'],
@@ -66,9 +70,16 @@ describe('platformCounterpart', () => {
     ['/docs/blocks/ai-provider-picker', '/native/docs'],
     ['/docs/components/base/copy-button', '/native/components/nativewind'],
     ['/native/components/uniwind/button', '/docs/components/base'],
-    ['/', '/native/docs'],
+    ['/view/ai-provider-picker', '/native/docs'],
   ])('sends %s, which the other platform lacks, to that section index, %s', (pathname, index) => {
     expect(platformCounterpart(platformLocation(pathname), PAGES, 'nativewind')).toBe(index);
+  });
+});
+
+describe('platformHome', () => {
+  it("points each platform's home link at that platform's home page", () => {
+    expect(platformHome('web')).toBe('/');
+    expect(platformHome('native')).toBe('/native');
   });
 });
 

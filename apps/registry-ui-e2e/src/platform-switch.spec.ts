@@ -15,13 +15,18 @@ test('the switch goes to the same component on the other platform where it has o
   await expect(page.getByRole('heading', { level: 1, name: 'Tab bar', exact: true })).toBeVisible();
 });
 
-test('the switch on the home page lands on the native docs', async ({ page }) => {
+test('the switch on a home page lands on the other platform home page', async ({ page }) => {
   await page.goto('/');
 
   await platformSwitch(page).getByRole('link', { name: 'Native' }).click();
 
-  await expect(page).toHaveURL('/native/docs');
-  await expect(page.getByRole('heading', { level: 1, name: 'Introduction' })).toBeVisible();
+  await expect(page).toHaveURL('/native');
+  await expect(page.getByRole('heading', { level: 1, name: /^Composed React Native components/ })).toBeVisible();
+
+  await platformSwitch(page).getByRole('link', { name: 'Web' }).click();
+
+  await expect(page).toHaveURL('/');
+  await expect(page.getByRole('heading', { level: 1, name: /^Composed React components/ })).toBeVisible();
 });
 
 test('the switch from a page the other platform lacks lands on that section index', async ({ page }) => {
