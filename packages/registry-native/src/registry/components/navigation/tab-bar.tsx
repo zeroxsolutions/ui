@@ -9,7 +9,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from 'react';
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import { Badge } from '../../ui/badge';
 import { IconClassContext } from '../../ui/icon';
 import { Text, TextClassContext } from '../../ui/text';
@@ -83,8 +83,9 @@ type TabBarProps = ComponentProps<typeof View> & {
 
 /**
  * A bar of top-level destinations absolutely positioned at one edge of its parent, so render it inside
- * a full-screen parent. The app pads for the home indicator; the bar does not. It is a tablist
- * named by `accessibilityLabel`, and each destination is a `TabBarItem`, the current one `active`:
+ * a full-screen parent. The app pads for the home indicator; the bar does not. A screen reader reads
+ * it as a tab bar named by `accessibilityLabel`, and each destination is a `TabBarItem`, the current
+ * one `active`:
  *
  *   <TabBar accessibilityLabel="Main" labels="selected">
  *     <TabBarItem active onPress={() => go('home')}>
@@ -107,7 +108,9 @@ function TabBar({
   return (
     <TabBarContext.Provider value={context}>
       <View
-        accessibilityRole="tablist"
+        // React Native maps tablist to no iOS trait; tabbar is the TabBar trait, under which VoiceOver
+        // reads each item as a tab.
+        accessibilityRole={Platform.OS === 'ios' ? 'tabbar' : 'tablist'}
         className={cn(
           'absolute z-50',
           side === 'top' || side === 'bottom' ? 'flex-row items-center justify-between' : 'flex-col gap-1',
@@ -135,6 +138,7 @@ type TabBarItemProps = ComponentProps<typeof Pressable> & {
 function TabBarItem({
   active = false,
   accessibilityHint,
+  accessibilityState,
   onPressIn,
   onPressOut,
   className,
@@ -150,7 +154,7 @@ function TabBarItem({
       <TextClassContext.Provider value={active ? 'text-primary' : 'text-muted-foreground'}>
         <Pressable
           accessibilityRole="tab"
-          accessibilityState={{ selected: active }}
+          accessibilityState={{ ...accessibilityState, selected: active }}
           accessibilityHint={accessibilityHint ?? description}
           className={cn(
             'min-h-12 min-w-16 items-center justify-center gap-1 rounded-lg p-1',

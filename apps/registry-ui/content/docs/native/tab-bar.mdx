@@ -79,9 +79,10 @@ Takes every prop of `View`, plus:
 | `surface`            | `'translucent' \| 'solid'`               | `'translucent'` |
 | `shape`              | `'attached' \| 'floating'`               | `'attached'`    |
 
-It has the `tablist` role, named by `accessibilityLabel`. Top and bottom lay the items in a row, left and right in a
-column. `attached` runs edge to edge, and `floating` is a `rounded-full` pill 16px from the edges; floating on the left
-or right sits 16px from the top corner and is as tall as its items, so place it with `className`.
+It is named by `accessibilityLabel`. Its role is `tabbar` on iOS, which VoiceOver reads as a tab bar, and `tablist`
+on Android. Top and bottom lay the items in a row, left and right in a column. `attached` runs edge to edge, and
+`floating` is a `rounded-full` pill 16px from the edges; floating on the left or right sits 16px from the top corner
+and is as tall as its items, so place it with `className`.
 
 ### TabBarItem
 

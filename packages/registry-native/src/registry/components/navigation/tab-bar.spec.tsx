@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 import { House, Search } from 'lucide-react-native';
+import { Platform } from 'react-native';
 import { emittedClasses } from '../../../build/slot-tokens.testing';
 import {
   TabBar,
@@ -57,14 +58,29 @@ function classes(testID: string): string[] {
   return emittedClasses(screen.getByTestId(testID).props.className);
 }
 
-describe('TabBar', () => {
-  it('is a tablist named by its label', async () => {
-    await render(<Example />);
+const initialPlatform = Platform.OS;
 
-    const bar = screen.getByLabelText('Main');
-    expect(bar.props.accessibilityRole).toBe('tablist');
-    expect(bar).toBe(screen.getByTestId('bar'));
-  });
+afterEach(() => {
+  Platform.OS = initialPlatform;
+});
+
+describe('TabBar', () => {
+  // React Native gives tablist no iOS trait; tabbar is UIAccessibilityTraitTabBar, under which
+  // VoiceOver reads each item as a tab. TalkBack reads tablist.
+  it.each([
+    ['ios', 'tabbar'],
+    ['android', 'tablist'],
+  ] as const)(
+    'is named by its label and carries the role a screen reader on %s reads as a tab bar',
+    async (os, role) => {
+      Platform.OS = os;
+      await render(<Example />);
+
+      const bar = screen.getByLabelText('Main');
+      expect(bar.props.accessibilityRole).toBe(role);
+      expect(bar).toBe(screen.getByTestId('bar'));
+    },
+  );
 
   it('announces only the active item as selected', async () => {
     await render(<Example />);
@@ -150,6 +166,21 @@ describe('TabBarLabel', () => {
 });
 
 describe('TabBarItem', () => {
+  it("keeps a caller's accessibilityState beside the selected state it announces", async () => {
+    await render(
+      <TabBar accessibilityLabel="Main">
+        <TabBarItem active accessibilityState={{ disabled: true }}>
+          <TabBarLabel>Home</TabBarLabel>
+        </TabBarItem>
+      </TabBar>,
+    );
+
+    expect(screen.getByRole('tab', { name: 'Home' }).props.accessibilityState).toMatchObject({
+      selected: true,
+      disabled: true,
+    });
+  });
+
   it('calls onPress when pressed', async () => {
     const user = userEvent.setup();
     const onPressInbox = jest.fn();
