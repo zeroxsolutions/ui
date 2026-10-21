@@ -18,6 +18,12 @@ const TAILWIND_MERGE = {
   uniwind: 'tailwind-merge@^3',
 } as const satisfies Record<Engine, string>;
 
+/** The engine version each install check app ran, and so the lowest the icon item may declare. */
+const INSTALL_CHECKED_ENGINE = {
+  nativewind: 'nativewind@^4.2.7',
+  uniwind: 'uniwind@^1.13.0',
+} as const satisfies Record<Engine, string>;
+
 const slots = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));
 const novaSlots = parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8'));
 const vega: UpstreamStyle = { name: 'vega', slots };
@@ -314,6 +320,10 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
     const [file] = icon?.files ?? [];
     expect(file.path).toMatch(/\/ui\/icon\.tsx$/);
     expect(file.content).toContain(`from '${engine}'`);
+  });
+
+  it('declares the range of the engine the install check ran the icon against', () => {
+    expect(item('icon')?.dependencies).toContain(INSTALL_CHECKED_ENGINE[engine]);
   });
 
   it('gives Button size="default" the style\'s own height', () => {

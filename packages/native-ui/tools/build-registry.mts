@@ -26,16 +26,27 @@ const SOURCE_ROOT = 'src/';
 const STYLES = ['vega', 'nova'] as const;
 type Style = (typeof STYLES)[number];
 
-const ENGINE_PACKAGES = {
-  nativewind: 'nativewind@^4',
-  uniwind: 'uniwind@^1.12.0',
-} as const satisfies Record<Engine, string>;
+const ENGINES = ['nativewind', 'uniwind'] as const satisfies readonly Engine[];
+const EXACT_VERSION = /^\d+\.\d+\.\d+$/;
 
 // tailwind-merge 3 knows only Tailwind 4's class names, and NativeWind 4 runs on Tailwind 3.
 const PINNED_RANGES = {
   nativewind: { 'tailwind-merge': '^2' },
   uniwind: { 'tailwind-merge': '^3' },
 } as const satisfies Record<Engine, Readonly<Record<string, string>>>;
+
+/**
+ * The range an item that imports `engine` declares it at: from the exact version this package's
+ * devDependencies pin, which the specs and the install check ran against, up to its next major.
+ * @throws {Error} `<engine> is not pinned to an exact version in devDependencies` otherwise
+ */
+function engineRange(engine: Engine, devDependencies: Readonly<Record<string, string>>): string {
+  const version = devDependencies[engine];
+  if (version === undefined || !EXACT_VERSION.test(version)) {
+    throw new Error(`${engine} is not pinned to an exact version in devDependencies`);
+  }
+  return `${engine}@^${version}`;
+}
 
 /** The engine's own file, such as `icon.uniwind.tsx`, when the source has one, else the shared file. */
 function sourceFor(path: string, engine: Engine): string {
@@ -49,11 +60,14 @@ interface StyleSlots extends UpstreamStyle {
 }
 
 /**
+ * @param enginePackage - the dependency an item whose emitted source imports `engine` declares, from
+ * {@link engineRange}
  * @param radius - the theme's `--radius` for `engine`, which a slot's radius less a length is computed from
  */
 function emitItem(
   item: RegistryItem,
   engine: Engine,
+  enginePackage: string,
   style: StyleSlots,
   radius: string,
   registryRoot: string,
@@ -78,7 +92,7 @@ function emitItem(
   });
 
   const dependencies = (item.dependencies ?? []).map((name) => (pins[name] ? `${name}@${pins[name]}` : name));
-  if (importsEngine) dependencies.push(ENGINE_PACKAGES[engine]);
+  if (importsEngine) dependencies.push(enginePackage);
   return { ...item, ...(dependencies.length > 0 ? { dependencies } : {}), files };
 }
 
@@ -103,6 +117,7 @@ function withTheme(item: RegistryItem, theme: RegistryItem, registryRoot: string
  */
 function buildRegistry(
   engine: Engine,
+  enginePackage: string,
   styleName: Style,
   style: StyleSlots,
   registry: Registry,
@@ -112,7 +127,7 @@ function buildRegistry(
   const registryRoot = mkdtempSync(join(tmpdir(), `zui-${engine}-${styleName}-`));
   try {
     const items = registry.items.map((item) => {
-      const emitted = emitItem(item, engine, style, themeRadius(colors, engine), registryRoot);
+      const emitted = emitItem(item, engine, enginePackage, style, themeRadius(colors, engine), registryRoot);
       return item.name === 'theme'
         ? withTheme(emitted, themeItem(colors, radii, STATUS_TOKENS, engine), registryRoot)
         : emitted;
@@ -129,6 +144,9 @@ function buildRegistry(
 
 function main(): void {
   const registry = JSON.parse(readFileSync(join(PROJECT, 'registry.json'), 'utf8')) as Registry;
+  const { devDependencies } = JSON.parse(readFileSync(join(PROJECT, 'package.json'), 'utf8')) as {
+    devDependencies: Record<string, string>;
+  };
   const slotsByStyle = new Map(
     STYLES.map((style) => [
       style,
@@ -143,8 +161,16 @@ function main(): void {
   rmSync(join(PROJECT, 'dist/r'), { recursive: true, force: true });
   for (const [styleName, slots] of slotsByStyle) {
     const otherStyles = [...slotsByStyle].flatMap(([other, otherSlots]) => (other === styleName ? [] : [otherSlots]));
-    for (const engine of Object.keys(ENGINE_PACKAGES) as Engine[]) {
-      buildRegistry(engine, styleName, { name: styleName, slots, otherStyles }, registry, colors, radii);
+    for (const engine of ENGINES) {
+      buildRegistry(
+        engine,
+        engineRange(engine, devDependencies),
+        styleName,
+        { name: styleName, slots, otherStyles },
+        registry,
+        colors,
+        radii,
+      );
     }
   }
 }
