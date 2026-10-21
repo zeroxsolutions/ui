@@ -70,7 +70,9 @@ TableBody or a TableFooter has no border under it. TableFooter draws a muted ban
 ### TableRow
 
 Takes every prop of the `@rn-primitives/table` row, a Pressable announced as a row. Pass `onPress` to make it
-take a press, and `aria-selected` to draw it on the muted background and announce it as selected.
+take a press, and `aria-selected` to draw it on the muted background and announce it as selected. A row with
+no `onPress` lets a screen reader reach each cell, and a control in one, on its own; a row with `onPress` is a
+single element, so put no control in its cells, or pass `accessible={false}`.
 
 ### TableHead, TableCell
 

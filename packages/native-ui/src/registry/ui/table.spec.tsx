@@ -1,6 +1,7 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from './table';
+import { Button } from './button';
 import { Text } from './text';
 
 function classesOf(testID: string): string[] {
@@ -109,5 +110,40 @@ describe('Table', () => {
     const caption = screen.getByText('Recent invoices');
     expect(table.children.at(-1)).toBe(caption);
     expect(emittedClasses(caption.props.className)).toEqual(expect.arrayContaining(['text-muted-foreground', 'mt-4']));
+  });
+
+  it('leaves a control in a cell of a row with no onPress reachable on its own', async () => {
+    await render(
+      <Table>
+        <TableBody>
+          <TableRow testID="row">
+            <TableCell>
+              <Button aria-label="Delete INV001">
+                <Text>Delete</Text>
+              </Button>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+
+    expect(screen.getByTestId('row').props.accessible).toBe(false);
+    expect(screen.getByRole('button', { name: 'Delete INV001' })).toBeOnTheScreen();
+  });
+
+  it('makes a row with onPress one element that takes the press', async () => {
+    await render(
+      <Table>
+        <TableBody>
+          <TableRow testID="row" onPress={() => undefined}>
+            <TableCell>
+              <Text>INV001</Text>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+
+    expect(screen.getByTestId('row').props.accessible).toBe(true);
   });
 });

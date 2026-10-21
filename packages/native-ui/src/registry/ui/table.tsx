@@ -70,12 +70,16 @@ function TableFooter({ className, children, ...props }: TablePrimitive.FooterPro
 
 /**
  * A row of TableHeads or TableCells, a Pressable announced as a row; `onPress` makes it take a press.
- * `aria-selected` draws it on the muted background and announces it as selected.
+ * With no `onPress` a screen reader reaches each cell, and a control in one, on its own; with one, the
+ * row is a single element, unless `accessible` says otherwise. `aria-selected` draws it on the muted
+ * background and announces it as selected.
  */
-function TableRow({ className, 'aria-selected': selected, ...props }: TablePrimitive.RowProps): ReactNode {
+function TableRow({ className, 'aria-selected': selected, accessible, ...props }: TablePrimitive.RowProps): ReactNode {
   const last = useContext(LastRowContext);
   return (
     <TablePrimitive.Row
+      // A Pressable is one accessible element by default, which on iOS hides the controls in its cells.
+      accessible={accessible ?? props.onPress != null}
       aria-selected={selected}
       className={cn(
         'flex-row cn-table-row',
