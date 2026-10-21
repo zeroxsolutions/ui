@@ -31,8 +31,8 @@ interface NativePreviewProps {
 
 /**
  * A native component page's `<NativePreview name>`: the demo drawn live under its Preview tab, its
- * source under its Code tab, and beside the tabs a way to open the demo on a phone. Its source is read as the page compiles, so it works only inside a native
- * page; anywhere else it throws.
+ * source under its Code tab, and beside the tabs a way to open the demo on a phone. Its source is read
+ * as the page compiles, so it works only inside a native page; anywhere else it throws.
  */
 function NativePreview({ name, code, language, lines }: NativePreviewProps): ReactNode {
   if (code === undefined) throw new Error(`NativePreview: "${name}" has no source; only a native page reads it`);
