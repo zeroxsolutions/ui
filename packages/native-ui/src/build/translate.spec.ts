@@ -852,9 +852,28 @@ describe("translateClasses for a border upstream's base layer colours", () => {
     ]);
   });
 
-  it('adds no colour to the classes behind a state', () => {
+  it('adds no colour to the classes behind a state that draw no border', () => {
     expect(translateClasses(['border', 'data-checked:bg-primary'], 'uniwind', 'view', 'checked').classes).toEqual([
       'bg-primary',
     ]);
+  });
+
+  it.each(STYLE_ENGINES)(
+    "gives a border width behind a state the border colour when the slot names none, as Sheet's side does, for %s in %s",
+    (engine, style) => {
+      const slots = parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8'));
+      const name = 'cn-sheet-content';
+
+      expect(translateClasses(slots.get(name) ?? [], engine, 'view', 'side=bottom', { name }).classes).toEqual(
+        expect.arrayContaining(['border-t', 'border-border']),
+      );
+    },
+  );
+
+  it('leaves a border width behind a state to the colour the slot names with no state', () => {
+    expect(
+      translateClasses(['border-y', 'border-input', 'data-[side=left]:border-l'], 'uniwind', 'view', 'side=left')
+        .classes,
+    ).toEqual(['border-l']);
   });
 });

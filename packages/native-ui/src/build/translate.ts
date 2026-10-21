@@ -184,7 +184,8 @@ const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
 /**
  * Upstream's base layer colours every border `border-border`, and a device draws a border with no colour
  * black, so a slot that draws a border width and names no colour for it is given that colour after the
- * width, where a colour a variant's slot names after it still wins.
+ * width, where a colour a variant's slot names after it still wins. A width behind a state is given it
+ * too, unless the slot names a colour with no state, which the component applies beside the state.
  */
 const BASE_BORDER_COLOUR = 'border-border';
 const BORDER_STYLE = /^border-(dashed|solid|dotted|double|none|hidden)$/;
@@ -649,6 +650,10 @@ export function translateClasses(
     kept.push([...cls.kept, drawn].join(':'));
   }
 
-  const drawn = wanted === '' && part === 'view' ? withBaseBorderColour(kept) : kept;
+  const baseNamesColour = read.some(
+    (cls) =>
+      cls.reading === 'read' && cls.states.length === 0 && cls.kept.length === 0 && namesBorderColour(cls.utility),
+  );
+  const drawn = part === 'view' && (wanted === '' || !baseNamesColour) ? withBaseBorderColour(kept) : kept;
   return { classes: [...new Set(drawn)], unknown };
 }
