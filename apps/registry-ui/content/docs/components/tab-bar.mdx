@@ -91,9 +91,26 @@ Each item is a link to a route, and the route the app is on sets `active`. Pass 
 
 `side` takes the edges shadcn's Sheet names: `bottom` and `top` lay the items in a row, `left` and `right`
 in a column. `labels="selected"` shows only the active label and `labels="none"` shows none; a hidden label
-is visually hidden, so a screen reader still reads every item's name. The bar is fixed to the viewport, so
-leave room for it at the end of the page's content. Inside an element with `contain: layout` it is fixed to
+is visually hidden, so a screen reader still reads every item's name. Inside an element with `contain: layout` it is fixed to
 that element instead, as in the preview.
+
+<ComponentPreview name="tab-bar-icons-only" />
+
+## Clearing the bar and the device
+
+A fixed bar sits over the page, so it can cover the last content and a focused control that scrolls under
+it. Pad the page by the bar's height on its side, for example `pb-24` for a bottom bar, and give anything
+that takes focus a `scroll-margin` of the same amount so the browser scrolls it clear of the bar.
+
+On a phone with a home indicator or a notch, the top and bottom bars add `env(safe-area-inset-top)` or
+`env(safe-area-inset-bottom)` to their padding, so the indicator does not cover the items. The browser
+reports those insets as zero unless the page's viewport meta tag includes `viewport-fit=cover`:
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+```
+
+In Next.js, set `viewportFit: 'cover'` in the `viewport` export.
 
 ## Composition
 

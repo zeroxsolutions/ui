@@ -1673,6 +1673,21 @@
       ]
     },
     {
+      "name": "tab-bar-icons-only",
+      "type": "registry:example",
+      "title": "Tab Bar Icons Only",
+      "description": "A tab bar with labels set to none: only the icons show, and each hidden label still names its link.",
+      "categories": ["examples"],
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["@zui/tab-bar"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/tab-bar-icons-only.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
       "name": "ai-provider-picker-demo",
       "type": "registry:example",
       "title": "AI Provider Picker Demo",
