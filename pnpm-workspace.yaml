@@ -38,6 +38,7 @@ catalogs:
     "react-native-safe-area-context": "~5.10.1"
     "react-native-web": "~0.21.4"
   rn-primitives:
+    "@rn-primitives/aspect-ratio": "1.5.2"
     "@rn-primitives/avatar": "1.5.2"
     "@rn-primitives/checkbox": "1.5.2"
     "@rn-primitives/label": "1.5.2"
