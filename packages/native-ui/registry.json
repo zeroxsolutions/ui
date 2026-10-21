@@ -518,6 +518,20 @@
       ]
     },
     {
+      "name": "alert-dialog",
+      "type": "registry:ui",
+      "title": "Alert dialog",
+      "description": "A dialog that interrupts to confirm or acknowledge something, announced as a modal alertdialog named by its title, which a press outside it does not close, with a cancel button that does and an action button, fading in unless the system asks for reduced motion.",
+      "dependencies": ["@rn-primitives/alert-dialog", "@rn-primitives/portal", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/alert-dialog.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "dialog",
       "type": "registry:ui",
       "title": "Dialog",

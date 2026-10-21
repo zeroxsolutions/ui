@@ -7,6 +7,7 @@ import type { ComponentType } from 'react';
 
 import { AccordionDemo } from './accordion-demo';
 import { AlertDemo } from './alert-demo';
+import { AlertDialogDemo } from './alert-dialog-demo';
 import { AspectRatioDemo } from './aspect-ratio-demo';
 import { AvatarDemo } from './avatar-demo';
 import { BadgeDemo } from './badge-demo';
@@ -51,6 +52,7 @@ import { UnsavedChangesToolbarDemo } from './unsaved-changes-toolbar-demo';
 const demos: Readonly<Record<string, ComponentType>> = {
   'accordion-demo': AccordionDemo,
   'alert-demo': AlertDemo,
+  'alert-dialog-demo': AlertDialogDemo,
   'aspect-ratio-demo': AspectRatioDemo,
   'avatar-demo': AvatarDemo,
   'badge-demo': BadgeDemo,

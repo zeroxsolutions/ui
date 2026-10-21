@@ -22,7 +22,6 @@ const deferred = Object.keys(coverage.deferred);
 
 /** Upstream items still to be ported; the task that ports one takes its name off this list. */
 const PENDING = [
-  'alert-dialog',
   'calendar',
   'carousel',
   'combobox',

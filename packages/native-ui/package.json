@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@rn-primitives/accordion": "catalog:rn-primitives",
+    "@rn-primitives/alert-dialog": "catalog:rn-primitives",
     "@rn-primitives/aspect-ratio": "catalog:rn-primitives",
     "@rn-primitives/avatar": "catalog:rn-primitives",
     "@rn-primitives/checkbox": "catalog:rn-primitives",

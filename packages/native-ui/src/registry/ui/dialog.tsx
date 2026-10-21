@@ -15,6 +15,14 @@ import { Text, TextClassContext } from './text';
 /** Upstream's 100ms fade and zoom from 95%, on tw-animate's default `ease`. */
 const DIALOG_MOTION = { duration: 100, easing: Easing.bezier(0.25, 0.1, 0.25, 1) } as const;
 
+/**
+ * The props that name the content by its title on a device. The web's primitive names it itself, and a key
+ * given here, even undefined, would replace the id it passes down.
+ */
+function dialogLabelledBy(titleId: string | undefined): { 'aria-labelledby'?: string } {
+  return Platform.OS === 'web' ? {} : { 'aria-labelledby': titleId };
+}
+
 /** The `nativeID` of the open Dialog's DialogTitle, which names its content on Android. */
 const DialogTitleIdContext = createContext<string | undefined>(undefined);
 
@@ -105,8 +113,7 @@ function DialogContent({
               <TextClassContext.Provider value="cn-dialog-content/text">
                 <DialogPrimitive.Content
                   forceMount
-                  // The web's primitive names it by its title itself.
-                  aria-labelledby={Platform.OS === 'web' ? undefined : titleId}
+                  {...dialogLabelledBy(titleId)}
                   className={cn('cn-dialog-content', className)}
                   {...props}
                 >

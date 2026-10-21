@@ -45,6 +45,7 @@
     "accordion",
     "collapsible",
     "---Overlays---",
+    "alert-dialog",
     "dialog",
     "---Navigation---",
     "tabs",

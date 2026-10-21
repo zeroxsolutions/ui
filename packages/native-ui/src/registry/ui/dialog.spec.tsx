@@ -1,7 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
-import type * as ReactNative from 'react-native';
-import { AccessibilityInfo, BackHandler, type NativeEventSubscription } from 'react-native';
+import { AccessibilityInfo } from 'react-native';
 import { Button } from './button';
 import {
   Dialog,
@@ -13,6 +12,7 @@ import {
   DialogTrigger,
   type DialogProps,
 } from './dialog';
+import { catchBackPress, followAccessibilityFocus } from './overlay.testing';
 import { Text } from './text';
 
 // Jest runs no Reanimated frame into the props a query reads, so the opacity the fade starts at hides the
@@ -131,18 +131,11 @@ describe('Dialog', () => {
   });
 
   it('closes on the back button, and takes the press so the screen does not go back', async () => {
-    const handlers: Parameters<typeof BackHandler.addEventListener>[1][] = [];
-    jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_event, handler): NativeEventSubscription => {
-      handlers.push(handler);
-      return { remove: () => undefined };
-    });
+    const pressBack = catchBackPress();
     await render(<EditProfile defaultOpen />);
     await finishMotion();
 
-    let handled: boolean | undefined;
-    await act(async () => {
-      handled = handlers.at(-1)?.({ type: 'hardwareBackPress', timeStamp: 0 });
-    });
+    const handled = await pressBack();
     await finishMotion();
 
     expect(handled).toBe(true);
@@ -178,17 +171,7 @@ describe('Dialog', () => {
   });
 
   it('moves accessibility focus into the content as it opens, and back to the trigger as it closes', async () => {
-    // Jest's renderer has no native tags, so each view is given one; the primitives focus a view by its tag.
-    const views: unknown[] = [];
-    const tagOf: typeof ReactNative.findNodeHandle = (view) =>
-      views.includes(view) ? views.indexOf(view) : views.push(view) - 1;
-    // react-native exports findNodeHandle through a getter, which a spy replaces only as a property.
-    jest
-      .spyOn(jest.requireActual<{ findNodeHandle: unknown }>('react-native'), 'findNodeHandle', 'get')
-      .mockReturnValue(tagOf);
-    const focus = jest.spyOn(AccessibilityInfo, 'setAccessibilityFocus');
-    const focused = () =>
-      (views[focus.mock.lastCall?.[0] ?? -1] as { props: { testID?: string } } | undefined)?.props.testID;
+    const focused = followAccessibilityFocus();
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await render(<EditProfile />);
 
