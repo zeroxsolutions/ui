@@ -19,7 +19,7 @@ import { Text } from '@/components/ui/text';
 ```
 
 ```tsx
-<ScrollArea className="h-56 rounded-md border">
+<ScrollArea className="h-56 rounded-md border border-border">
   <Text>Long content</Text>
 </ScrollArea>
 ```
@@ -27,7 +27,7 @@ import { Text } from '@/components/ui/text';
 To scroll sideways, add a horizontal ScrollBar, as upstream does:
 
 ```tsx
-<ScrollArea className="rounded-md border">
+<ScrollArea className="rounded-md border border-border">
   <View className="flex-row gap-4 p-4">{photos}</View>
   <ScrollBar orientation="horizontal" />
 </ScrollArea>

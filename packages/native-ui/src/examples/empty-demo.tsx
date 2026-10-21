@@ -8,7 +8,7 @@ import { Text } from '@/components/ui/text';
 
 function EmptyDemo(): ReactNode {
   return (
-    <Empty className="border">
+    <Empty className="border-border border">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Icon as={FolderOpen} />

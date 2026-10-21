@@ -11,7 +11,7 @@ const ALBUMS = ['Ornella', 'Tom', 'Vaishali', 'Ana', 'Bao', 'Kenji'];
 function ScrollAreaDemo(): ReactNode {
   return (
     <View className="gap-6">
-      <ScrollArea className="h-56 rounded-md border">
+      <ScrollArea className="border-border h-56 rounded-md border">
         <View className="p-4">
           <Text className="mb-4 text-sm font-medium">Tags</Text>
           {TAGS.map((tag) => (
@@ -22,7 +22,7 @@ function ScrollAreaDemo(): ReactNode {
           ))}
         </View>
       </ScrollArea>
-      <ScrollArea className="rounded-md border">
+      <ScrollArea className="border-border rounded-md border">
         <View className="flex-row gap-4 p-4">
           {ALBUMS.map((name) => (
             <View key={name} className="gap-2">
