@@ -69,6 +69,18 @@
       ]
     },
     {
+      "name": "command-score",
+      "type": "registry:lib",
+      "title": "Command score",
+      "description": "commandScore, cmdk's fuzzy scorer, which Command filters its items with: how well the typed letters match a value and its keywords, in order.",
+      "files": [
+        {
+          "path": "src/registry/lib/command-score.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "text",
       "type": "registry:ui",
       "title": "Text",
@@ -731,9 +743,16 @@
       "name": "command",
       "type": "registry:ui",
       "title": "Command",
-      "description": "A menu of commands searched by typing, whose typed text filters its items by value and keywords, highlighting the first match, moved by the arrow keys and run by the return key, with groups hidden while none of their items match, and a CommandDialog that holds it in a Dialog.",
+      "description": "A menu of commands searched by typing, whose typed text filters its items by cmdk's fuzzy score on value and keywords, highlighting the first match, moved by the arrow keys and run by the return key, with groups hidden while none of their items match, and a CommandDialog that holds it in a Dialog.",
       "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/utils", "@zui/dialog", "@zui/input-group", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/command-score",
+        "@zui/dialog",
+        "@zui/input-group",
+        "@zui/icon",
+        "@zui/text"
+      ],
       "files": [
         {
           "path": "src/registry/ui/command.tsx",

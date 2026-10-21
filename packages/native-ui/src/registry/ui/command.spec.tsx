@@ -119,6 +119,16 @@ describe('Command', () => {
     expect(queryOption('Profile')).toBeNull();
   });
 
+  it('finds an item by letters it holds in order with others between them, as upstream does', async () => {
+    const user = setUp();
+    await render(<Palette />);
+
+    await user.type(input(), 'clndr');
+
+    expect(option('Calendar')).toBeOnTheScreen();
+    expect(queryOption('Calculator')).toBeNull();
+  });
+
   it('says so when nothing matches', async () => {
     const user = setUp();
     await render(<Palette />);

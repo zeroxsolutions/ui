@@ -66,8 +66,9 @@ Takes every prop of React Native's `View`, plus:
 | `loop`          | `boolean`                                                        | `false` |
 
 `value` is the highlighted item's value. Without it the Command holds the highlight, starting on the first item
-the typed text matches. `filter` returns more than 0 for an item to show; without it an item shows while its value
-or one of its keywords holds the typed text, in any case. With `shouldFilter` off every item shows, for a list
+the typed text matches. `filter` returns more than 0 for an item to show; without it the Command scores items with
+cmdk's own fuzzy scorer, which shows an item while its value or keywords hold the typed letters in order, in any
+case. With `shouldFilter` off every item shows, for a list
 filtered by its owner. With `loop` the arrow keys wrap round from the last item to the first.
 
 ### CommandInput
@@ -124,8 +125,8 @@ not drawn, and `showCloseButton` (`false`). It holds the Command it is given.
 ## Differences from upstream
 
 - Upstream builds on cmdk, which draws only on the web. The native Command is its own, with cmdk's props.
-- cmdk ranks items by a fuzzy score and puts the best matches first. The native Command shows the items that hold
-  the typed text, in the order they are written.
+- cmdk puts the best-scoring items first by moving their DOM nodes. React Native cannot reorder children the
+  caller wrote, so the native Command matches with cmdk's scorer but keeps the items in the order they are written.
 - React Native has no `listbox` role. On a device the list is a `list`, the field a `searchbox`, and an item is
   announced as selected while `checked`. The web gives them cmdk's roles, with the highlighted item selected.
 - Upstream's `data-checked` becomes `checked`, which draws the check mark only while it is set.

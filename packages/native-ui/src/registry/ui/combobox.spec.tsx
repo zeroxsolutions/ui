@@ -1,6 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { useState } from 'react';
-import { act, configure, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import { act, configure, fireEvent, render, screen, userEvent, within } from '@testing-library/react-native';
 import { AccessibilityInfo, View } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
@@ -14,6 +14,7 @@ import {
   ComboboxValue,
 } from './combobox';
 import type { ComboboxProps } from './combobox';
+import { Text } from './text';
 
 // Jest runs no Reanimated frame into the props a query reads, so the opacity the fade starts at hides the
 // open list from them.
@@ -137,11 +138,48 @@ describe('Combobox', () => {
     expect(screen.getAllByTestId('command-check')).toHaveLength(1);
   });
 
-  it('highlights the chosen item as the list opens', async () => {
+  it("highlights the chosen item as the list opens, in the combobox's accent colour", async () => {
     await open({ defaultValue: 'nuxt' });
 
-    expect(emittedClasses(option('Nuxt.js').props.className)).toContain('bg-muted');
-    expect(emittedClasses(option('Next.js').props.className)).not.toContain('bg-muted');
+    expect(emittedClasses(option('Nuxt.js').props.className)).toContain('bg-accent');
+    expect(emittedClasses(option('Next.js').props.className)).not.toContain('bg-accent');
+    expect(emittedClasses(within(option('Nuxt.js')).getByText('Nuxt.js').props.className)).toContain(
+      'text-accent-foreground',
+    );
+  });
+
+  it('keeps apart two items that share a label, highlighting and choosing each by its value', async () => {
+    const onValueChange = jest.fn();
+    const user = setUp();
+    await render(
+      <>
+        <Combobox defaultValue="paris-tx" onValueChange={onValueChange}>
+          <ComboboxTrigger testID="trigger" aria-label="City">
+            <ComboboxValue placeholder="Select a city" />
+          </ComboboxTrigger>
+          <ComboboxContent>
+            <ComboboxInput placeholder="Search framework..." />
+            <ComboboxList>
+              <ComboboxItem value="paris-fr" label="Paris" testID="france">
+                <Text>Paris, France</Text>
+              </ComboboxItem>
+              <ComboboxItem value="paris-tx" label="Paris" testID="texas">
+                <Text>Paris, Texas</Text>
+              </ComboboxItem>
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+        <PortalHost />
+      </>,
+    );
+    await user.press(trigger());
+    await finishMotion();
+
+    expect(emittedClasses(screen.getByTestId('texas').props.className)).toContain('bg-accent');
+    expect(emittedClasses(screen.getByTestId('france').props.className)).not.toContain('bg-accent');
+
+    await fireEvent(search(), 'submitEditing');
+    expect(onValueChange).toHaveBeenCalledWith('paris-tx');
   });
 
   it('shows the label of a value it starts with before it is opened', async () => {

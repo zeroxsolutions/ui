@@ -9,6 +9,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandItemClassesContext,
   CommandList,
   CommandSeparator,
 } from './command';
@@ -190,13 +191,22 @@ function ComboboxContent({
     >
       {/* The portal draws outside this tree, so the Combobox is handed in again. */}
       <ComboboxContext.Provider value={combobox}>
-        {/* The content is drawn afresh at each open, so the chosen item is highlighted each time. */}
-        <Command
-          className="p-0"
-          defaultValue={combobox.value === undefined ? undefined : combobox.labelOf(combobox.value)}
+        {/* The items draw with the combobox's own slots in place of a Command's. */}
+        <CommandItemClassesContext.Provider
+          value={{
+            // The check mark is drawn in the row rather than over upstream's pr-8, so that padding goes.
+            item: 'cn-combobox-item pr-2',
+            highlighted: 'cn-combobox-item@highlighted',
+            text: 'cn-combobox-item/text',
+            highlightedText: 'cn-combobox-item/text@highlighted',
+            icon: 'cn-combobox-item/icon',
+          }}
         >
-          {children}
-        </Command>
+          {/* The content is drawn afresh at each open, so the chosen item is highlighted each time. */}
+          <Command className="p-0" defaultValue={combobox.value}>
+            {children}
+          </Command>
+        </CommandItemClassesContext.Provider>
       </ComboboxContext.Provider>
     </PopoverContent>
   );
@@ -240,11 +250,12 @@ function ComboboxItem({ className, value, label, children, ...props }: ComboboxI
   const name = label ?? (typeof children === 'string' ? children : combobox.labelOf(value));
   return (
     <CommandItem
-      value={name}
+      value={value}
+      // The typed text finds the item by its label too, which the trigger shows.
+      keywords={[name]}
       checked={combobox.value === value}
       onSelect={() => combobox.choose(value, name)}
-      // The check mark sits in the end padding upstream leaves for it.
-      className={cn('cn-combobox-item pr-2', className)}
+      className={className}
       {...props}
     >
       {typeof children === 'string' ? <Text>{children}</Text> : children}

@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Platform, Pressable, ScrollView, View, type Role, type TextInputKeyPressEvent } from 'react-native';
+import { commandScore } from '../lib/command-score';
 import { cn } from '../lib/utils';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog';
 import type { DialogProps } from './dialog';
@@ -31,12 +32,6 @@ import { Text, TextClassContext } from './text';
  * @param keywords - the item's other names, when it has some
  */
 type CommandFilter = (value: string, search: string, keywords?: readonly string[]) => number;
-
-/** Shows an item whose value or a keyword holds the typed text, in any case. */
-const containsSearch: CommandFilter = (value, search, keywords = []) => {
-  const wanted = search.toLowerCase();
-  return [value, ...keywords].some((name) => name.toLowerCase().includes(wanted)) ? 1 : 0;
-};
 
 /** What the Command knows of one of its items, kept up to date as the item draws. */
 interface CommandItemRecord {
@@ -95,7 +90,7 @@ type CommandProps = ComponentProps<typeof View> & {
   onValueChange?: (value: string) => void;
   /** Whether the typed text hides the items it does not match; turn it off to filter the items yourself. */
   shouldFilter?: boolean;
-  /** Decides which items the typed text shows, in place of a case-insensitive match on value and keywords. */
+  /** Decides which items the typed text shows, in place of upstream's fuzzy match on value and keywords. */
   filter?: CommandFilter;
   /** Whether the arrow keys wrap round from the last item to the first, and back. */
   loop?: boolean;
@@ -112,7 +107,7 @@ function Command({
   defaultValue,
   onValueChange,
   shouldFilter = true,
-  filter = containsSearch,
+  filter = commandScore,
   loop = false,
   children,
   ...props
@@ -403,6 +398,26 @@ function CommandSeparator({ className, alwaysRender = false, ...props }: Command
 /** Whether the item around a CommandShortcut is highlighted, which the shortcut's colour follows. */
 const CommandItemSelectedContext = createContext(false);
 
+/**
+ * The classes a CommandItem draws itself with, plain and while highlighted, for its row, its text and its
+ * icons. A part built on the Command, such as a Combobox's list, provides its own slots here.
+ */
+interface CommandItemClasses {
+  item: string;
+  highlighted: string;
+  text: string;
+  highlightedText: string;
+  icon: string;
+}
+
+const CommandItemClassesContext = createContext<CommandItemClasses>({
+  item: 'cn-command-item',
+  highlighted: 'cn-command-item@selected',
+  text: 'cn-command-item/text',
+  highlightedText: 'cn-command-item/text@selected',
+  icon: 'cn-command-item/icon',
+});
+
 type CommandItemProps = Omit<ComponentProps<typeof Pressable>, 'children' | 'onPress'> & {
   children?: ReactNode;
   /** What the typed text is matched against and what `onSelect` gets; the item's text when not given. */
@@ -434,6 +449,7 @@ function CommandItem({
   ...props
 }: CommandItemProps): ReactNode {
   const command = useCommand('CommandItem');
+  const classes = useContext(CommandItemClassesContext);
   const group = useContext(CommandGroupContext);
   const id = useId();
   const [pressed, setPressed] = useState(false);
@@ -459,8 +475,8 @@ function CommandItem({
 
   return (
     <CommandItemSelectedContext.Provider value={highlighted}>
-      <TextClassContext.Provider value={cn('cn-command-item/text', highlighted && 'cn-command-item/text@selected')}>
-        <IconClassContext.Provider value="cn-command-item/icon">
+      <TextClassContext.Provider value={cn(classes.text, highlighted && classes.highlightedText)}>
+        <IconClassContext.Provider value={classes.icon}>
           <Pressable
             role="option"
             nativeID={id}
@@ -473,9 +489,10 @@ function CommandItem({
             disabled={off}
             aria-disabled={off}
             className={cn(
-              'relative flex-row items-center cn-command-item',
+              'relative flex-row items-center',
+              classes.item,
               off && 'opacity-50',
-              highlighted && 'cn-command-item@selected',
+              highlighted && classes.highlighted,
               className,
             )}
             onHoverIn={(event) => {
@@ -526,6 +543,7 @@ function CommandShortcut({ className, ...props }: CommandShortcutProps): ReactNo
 export {
   Command,
   CommandDialog,
+  CommandItemClassesContext,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -536,6 +554,7 @@ export {
 };
 export type {
   CommandDialogProps,
+  CommandItemClasses,
   CommandEmptyProps,
   CommandFilter,
   CommandGroupProps,
