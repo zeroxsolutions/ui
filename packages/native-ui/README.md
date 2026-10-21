@@ -6,8 +6,13 @@ zui's React Native items, and the build that publishes them as four shadcn regis
 - `src/registry/` holds the items. A class written as a `cn-<slot>` token is replaced at build time by
   the classes that style draws for that slot, in the form each engine compiles; any other class ships as
   written, so it has to work in NativeWind 4 (Tailwind 3.4) and in Uniwind (Tailwind 4).
-- `styles/upstream/` holds the pinned shadcn style and colour snapshots the tokens are read from.
-  `nx run @zeroxsolutions/native-ui:sync-upstream-styles <commit>` refreshes them.
+- `styles/upstream/` holds the pinned shadcn style and colour snapshots the tokens are read from, and
+  `registry-ui-items.json`, the `registry:ui` names upstream's base-vega registry lists.
+  `nx run @zeroxsolutions/native-ui:upstream-refresh [commit]` refreshes them from a shadcn-ui/ui commit,
+  the head of `main` without one; the commit that lands a refresh names the commit it read.
+- `upstream-coverage.json` lists the upstream items not ported to native, and those deferred, each with
+  its reason; `src/build/upstream-coverage.spec.ts` fails on an upstream item that is neither there nor a
+  registry item.
 - `nx run @zeroxsolutions/native-ui:build-registry` writes the registries to `dist/r/styles/`.
   `@zeroxsolutions/registry-ui` copies them into its site, which serves them under `/r/styles/`.
   It also writes each registry's sources to `dist/src/<engine>-<style>/` as an app holds them after

@@ -22,6 +22,9 @@
     },
     "./package.json": "./package.json"
   },
+  "scripts": {
+    "upstream-refresh": "node tools/upstream-refresh.mts"
+  },
   "dependencies": {
     "@rn-primitives/avatar": "catalog:rn-primitives",
     "@rn-primitives/checkbox": "catalog:rn-primitives",
@@ -109,14 +112,6 @@
           "^typecheck",
           "build-registry"
         ]
-      },
-      "sync-upstream-styles": {
-        "executor": "nx:run-commands",
-        "cache": false,
-        "options": {
-          "cwd": "{projectRoot}",
-          "command": "node tools/sync-upstream-styles.mts {args.commit}"
-        }
       }
     },
     "name": "@zeroxsolutions/native-ui"
