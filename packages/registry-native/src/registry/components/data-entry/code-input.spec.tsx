@@ -121,13 +121,32 @@ describe('CodeInput', () => {
     );
   });
 
-  it.each(['vega', 'nova'] as const)('makes every slot 48 high in %s', async (style) => {
+  it.each(['vega', 'nova'] as const)('makes every slot 48 square, sharing the row width, in %s', async (style) => {
     await render(<CodeInput aria-label="Verification code" pattern="3-3" />);
 
     const slots = groups().flatMap(slotsOf);
     expect(slots).toHaveLength(6);
     for (const slot of slots) {
-      expect(emittedClasses(classNameOf(slot), style)).toEqual(expect.arrayContaining(['h-12', 'flex-1']));
+      expect(emittedClasses(classNameOf(slot), style)).toEqual(expect.arrayContaining(['size-12', 'flex-1']));
     }
+  });
+
+  it.each(['vega', 'nova'] as const)('draws each digit in text-lg and font-sans-semibold in %s', async (style) => {
+    await render(<CodeInput aria-label="Verification code" defaultValue="123456" />);
+
+    const digits = screen.getAllByText(/^\d$/, HIDDEN);
+    expect(digits).toHaveLength(6);
+    for (const digit of digits) {
+      const classes = emittedClasses(digit.props.className, style);
+      expect(classes).toEqual(expect.arrayContaining(['text-lg', 'font-sans-semibold']));
+      expect(classes).not.toContain('text-sm');
+    }
+  });
+
+  it.each(['vega', 'nova'] as const)('replaces the style size of a slot with size-12 in %s', async (style) => {
+    await render(<CodeInput aria-label="Verification code" />);
+
+    const classes = emittedClasses(classNameOf(slotsOf(groups()[0])[0]), style);
+    expect(classes.filter((name) => /^(size|h|w)-/.test(name))).toEqual(['size-12']);
   });
 });

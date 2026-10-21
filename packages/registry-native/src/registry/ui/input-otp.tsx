@@ -196,13 +196,21 @@ type InputOTPSlotProps = ComponentProps<typeof View> & {
   index: number;
   /** Draws this slot with the destructive border, as the code's `aria-invalid` draws every slot. */
   'aria-invalid'?: boolean;
+  /** Classes of the character, merged after the style's text classes so they win. */
+  textClassName?: string;
 };
 
 /**
  * One character of the code, with the focus border and a caret while it is the slot the next
  * character goes in.
  */
-function InputOTPSlot({ className, index, 'aria-invalid': ownInvalid, ...props }: InputOTPSlotProps): ReactNode {
+function InputOTPSlot({
+  className,
+  index,
+  textClassName,
+  'aria-invalid': ownInvalid,
+  ...props
+}: InputOTPSlotProps): ReactNode {
   const otp = useContext(InputOTPContext);
   const { first, last } = useContext(InputOTPSlotPositionContext);
   const { char, active } = otp.slots[index] ?? { char: undefined, active: false };
@@ -224,7 +232,7 @@ function InputOTPSlot({ className, index, 'aria-invalid': ownInvalid, ...props }
       )}
       {...props}
     >
-      {char === undefined ? null : <Text className="cn-input-otp-slot/text">{char}</Text>}
+      {char === undefined ? null : <Text className={cn('cn-input-otp-slot/text', textClassName)}>{char}</Text>}
       {active && char === undefined ? (
         <View className="absolute inset-0 items-center justify-center">
           <View className="cn-input-otp-caret-line" />

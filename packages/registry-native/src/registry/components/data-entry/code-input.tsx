@@ -1,4 +1,5 @@
 import { Fragment, type ComponentProps, type ReactNode } from 'react';
+import { cn } from '../../lib/utils';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot, REGEXP_ONLY_DIGITS } from '../../ui/input-otp';
 
 /** How the six characters are grouped: one group of six, or two groups of three. */
@@ -55,11 +56,18 @@ function CodeInput({ pattern = '6', allowedCharacters = REGEXP_ONLY_DIGITS, ...p
 }
 
 /**
- * One character of the code: an InputOTPSlot 48 high that shares its group's width with its siblings.
+ * One character of the code: an InputOTPSlot 48 high, its digit in large semibold text, that shares its
+ * group's width with its siblings.
  * CodeInput renders these itself.
  */
-function CodeInputSlot({ className, ...props }: ComponentProps<typeof InputOTPSlot>): ReactNode {
-  return <InputOTPSlot className={['h-12 flex-1', className].filter(Boolean).join(' ')} {...props} />;
+function CodeInputSlot({ className, textClassName, ...props }: ComponentProps<typeof InputOTPSlot>): ReactNode {
+  return (
+    <InputOTPSlot
+      className={cn('size-12 flex-1', className)}
+      textClassName={cn('text-lg font-sans-semibold', textClassName)}
+      {...props}
+    />
+  );
 }
 
 export { CodeInput, CodeInputSlot };

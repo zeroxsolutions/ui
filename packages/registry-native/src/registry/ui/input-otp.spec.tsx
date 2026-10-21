@@ -169,6 +169,22 @@ describe('InputOTP', () => {
     expect(classesOf('slot-4')).toContain('border-destructive');
   });
 
+  it("merges a slot's textClassName after the style's text classes so it wins", async () => {
+    await render(
+      <InputOTP maxLength={2} aria-label="Verification code" defaultValue="12">
+        <InputOTPGroup>
+          <InputOTPSlot index={0} textClassName="text-lg font-sans-semibold" />
+          <InputOTPSlot index={1} />
+        </InputOTPGroup>
+      </InputOTP>,
+    );
+
+    const styled = emittedClasses(screen.getByText('1', HIDDEN).props.className);
+    expect(styled).toEqual(expect.arrayContaining(['text-lg', 'font-sans-semibold']));
+    expect(styled).not.toContain('text-sm');
+    expect(emittedClasses(screen.getByText('2', HIDDEN).props.className)).toContain('text-sm');
+  });
+
   it('rounds and closes only the outer edges of each group', async () => {
     await render(sixDigitCode());
 

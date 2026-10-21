@@ -80,13 +80,15 @@ Draws its slots joined and rounded on the outside. The slots are its direct chil
 
 Takes every prop of a React Native `View`, plus:
 
-| Prop           | Type      | Default  |
-| -------------- | --------- | -------- |
-| `index`        | `number`  | required |
-| `aria-invalid` | `boolean` | none     |
+| Prop            | Type      | Default  |
+| --------------- | --------- | -------- |
+| `index`         | `number`  | required |
+| `aria-invalid`  | `boolean` | none     |
+| `textClassName` | `string`  | none     |
 
 Shows the character of the code at `index`, counted from 0. The slot the next character goes in takes the
-focus border and a caret while the code holds focus. `aria-invalid` on a slot overrides the code's.
+focus border and a caret while the code holds focus. `aria-invalid` on a slot overrides the code's. `textClassName` sets the classes of the character and wins over
+the style's text size.
 
 ### InputOTPSeparator
 
