@@ -11,7 +11,7 @@ import { zuiFonts } from '@/lib/fonts';
 
 import { DemoBoundary } from './demo-boundary';
 import { DEMO_NAMES, findDemo } from './find-demo';
-import { postHeightToHost } from './frame-height';
+import { frameHeightOf, postHeightToHost, showsOverlay } from './frame-height';
 import {
   demoNameFromDeepLink,
   demoNameFromSearch,
@@ -81,6 +81,23 @@ function useDemoName(): [string | undefined | typeof LINK_UNREAD, (name: string)
   return [name, open];
 }
 
+/**
+ * Whether the web page shows an overlay, such as an open dialog, kept up to date as overlays open and close;
+ * always false on native, which posts no height.
+ */
+function useOverlayShown(): boolean {
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const update = (): void => setShown(showsOverlay(document));
+    const observer = new MutationObserver(update);
+    observer.observe(document.body, { childList: true });
+    update();
+    return () => observer.disconnect();
+  }, []);
+  return shown;
+}
+
 interface PreviewProps {
   /**
    * `process.env.EXPO_PUBLIC_STYLE`, the style a native update was bundled in, which Expo writes only
@@ -101,6 +118,8 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
   const [loaded, error] = useFonts(zuiFonts);
   const [name, open] = useDemoName();
   const insets = useSafeAreaInsets();
+  const [contentHeight, setContentHeight] = useState<number>();
+  const overlayShown = useOverlayShown();
 
   useLayoutEffect(() => {
     const scheme = location ? themeFromSearch(location.search) : undefined;
@@ -112,6 +131,12 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
     if (ready) void SplashScreen.hideAsync();
   }, [ready]);
 
+  useEffect(() => {
+    if (Platform.OS === 'web' && contentHeight !== undefined) {
+      postHeightToHost(window, frameHeightOf(contentHeight, overlayShown));
+    }
+  }, [contentHeight, overlayShown]);
+
   if (!ready) return null;
   const Demo = name === undefined ? undefined : findDemo(style, name);
 
@@ -119,9 +144,7 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
     <ScrollView
       className="bg-background flex-1"
       contentContainerClassName="p-6"
-      onContentSizeChange={(_width, height) => {
-        if (Platform.OS === 'web') postHeightToHost(window, height);
-      }}
+      onContentSizeChange={(_width, height) => setContentHeight(height)}
     >
       <View style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
         {Demo !== undefined && name !== undefined ? (
@@ -143,7 +166,7 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
  * `exp://u.expo.dev/<project>/--/button-demo` in Expo Go, in the colour scheme `?theme=light|dark` asks
  * for on web, or the system's without one; a name no demo has says so above the list of demos, and no
  * name lists them. In a frame, it posts the drawn content's height to the page framing it each time
- * that height changes. The splash screen stays up until the fonts and, on native, the link are read.
+ * that height changes, and a taller one while the demo shows an overlay. The splash screen stays up until the fonts and, on native, the link are read.
  *
  * A preview app renders it as its root, after importing its engine's stylesheet; `@/` in this module and
  * the demos' `@/` resolve to that app's emitted sources. It holds the app's `PortalHost`, so the app adds none

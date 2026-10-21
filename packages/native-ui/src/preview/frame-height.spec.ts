@@ -1,4 +1,12 @@
-import { HEIGHT_MESSAGE, postHeightToHost, type FramedWindow } from './frame-height';
+import {
+  HEIGHT_MESSAGE,
+  OVERLAY_FRAME_HEIGHT,
+  frameHeightOf,
+  postHeightToHost,
+  showsOverlay,
+  type FramedWindow,
+  type OverlayDocument,
+} from './frame-height';
 
 const ORIGIN = 'https://ui.zeroxsolutions.com';
 
@@ -27,5 +35,33 @@ describe('postHeightToHost', () => {
     postHeightToHost(alone, 148);
 
     expect(posted).toEqual([]);
+  });
+});
+
+describe('frameHeightOf', () => {
+  it("is the demo's height while no overlay is open", () => {
+    expect(frameHeightOf(148, false)).toBe(148);
+  });
+
+  it('is at least the overlay height while an overlay is open, so the overlay is not clipped', () => {
+    expect(frameHeightOf(148, true)).toBe(OVERLAY_FRAME_HEIGHT);
+    expect(frameHeightOf(OVERLAY_FRAME_HEIGHT + 100, true)).toBe(OVERLAY_FRAME_HEIGHT + 100);
+  });
+});
+
+/** A document whose body holds elements with these tag names and ids, the app's root first. */
+function documentHolding(...elements: [tagName: string, id?: string][]): OverlayDocument {
+  return {
+    body: { children: elements.map(([tagName, id = '']) => ({ tagName, id })) },
+  };
+}
+
+describe('showsOverlay', () => {
+  it("is false while the body holds only the app's root and the page's own markup", () => {
+    expect(showsOverlay(documentHolding(['NOSCRIPT'], ['DIV', 'root'], ['SCRIPT']))).toBe(false);
+  });
+
+  it('is true while the body holds an element portalled beside the root, as an open dialog is on the web', () => {
+    expect(showsOverlay(documentHolding(['NOSCRIPT'], ['DIV', 'root'], ['SCRIPT'], ['DIV']))).toBe(true);
   });
 });

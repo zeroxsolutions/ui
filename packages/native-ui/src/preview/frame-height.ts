@@ -21,5 +21,35 @@ function postHeightToHost(self: FramedWindow, height: number): void {
   self.parent.postMessage({ type: HEIGHT_MESSAGE, height }, self.location.origin);
 }
 
-export { HEIGHT_MESSAGE, postHeightToHost };
-export type { FramedWindow };
+/**
+ * The least height, in CSS pixels, of a frame while its demo shows an overlay. An overlay is drawn over the
+ * whole page rather than in the demo's own height, so a frame as tall as a demo's trigger alone would clip
+ * the dialog, sheet or popover it opens.
+ */
+const OVERLAY_FRAME_HEIGHT = 560;
+
+/** The height a frame takes for a demo `contentHeight` tall, in CSS pixels, with or without an open overlay. */
+function frameHeightOf(contentHeight: number, overlayOpen: boolean): number {
+  return overlayOpen ? Math.max(contentHeight, OVERLAY_FRAME_HEIGHT) : contentHeight;
+}
+
+/** The part of a document {@link showsOverlay} reads: the elements directly in its body. */
+interface OverlayDocument {
+  readonly body: { readonly children: ArrayLike<{ readonly tagName: string; readonly id: string }> };
+}
+
+/** The elements of the page itself, which an Expo web export puts in the body beside the app's root. */
+const PAGE_ELEMENTS: ReadonlySet<string> = new Set(['SCRIPT', 'NOSCRIPT', 'STYLE', 'TEMPLATE', 'LINK']);
+
+/**
+ * Whether the web page shows an overlay. The primitives an overlay is built on render it on the web into
+ * an element they append to the body, beside the app's `#root`, and remove when it closes.
+ */
+function showsOverlay(document: OverlayDocument): boolean {
+  return Array.from(document.body.children).some(
+    (element) => element.id !== 'root' && !PAGE_ELEMENTS.has(element.tagName),
+  );
+}
+
+export { HEIGHT_MESSAGE, OVERLAY_FRAME_HEIGHT, frameHeightOf, postHeightToHost, showsOverlay };
+export type { FramedWindow, OverlayDocument };
