@@ -20,7 +20,7 @@ describe('demos', () => {
     expect(existsSync(join(__dirname, `${name}-demo.tsx`))).toBe(true);
   });
 
-  it.each(Object.entries(demos))('renders %s without throwing', (_name, Demo) => {
-    expect(() => render(<Demo />)).not.toThrow();
+  it.each(Object.entries(demos))('renders %s without throwing', async (_name, Demo) => {
+    await expect(render(<Demo />)).resolves.toBeDefined();
   });
 });
