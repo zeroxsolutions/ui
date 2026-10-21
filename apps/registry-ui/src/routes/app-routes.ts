@@ -30,6 +30,9 @@ export const blocksRoute = createDynamicRoute<{ base: ComponentBase }>(
   ({ base }) => `/blocks/${base}`,
 );
 
+/** The native registry's home page, the native counterpart of `homeRoute`. */
+export const nativeHomeRoute = createStaticRoute('/native', () => '/native');
+
 /** The native docs' introduction; the native docs loader serves every page beneath this path. */
 export const nativeDocsRoute = createStaticRoute('/native/docs', () => '/native/docs');
 
