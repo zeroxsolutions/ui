@@ -28,6 +28,14 @@ async function pickStyle(page: Page, style: string): Promise<void> {
 test.describe('in a light colour scheme', () => {
   test.use({ colorScheme: 'light' });
 
+  test("the theme page draws the theme's colours and its font weights", async ({ page }) => {
+    await page.goto('/native/components/nativewind/theme');
+
+    const theme = inside(page, 'theme-demo');
+    await expect(theme.getByText('primary', { exact: true })).toBeVisible(DRAWN);
+    await expect(theme.getByText('Bold 700', { exact: true })).toBeVisible();
+  });
+
   test("a native component page draws its demo in a frame, and the frame grows to the demo's height", async ({
     page,
   }) => {

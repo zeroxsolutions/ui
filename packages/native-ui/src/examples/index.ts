@@ -26,6 +26,7 @@ import { SwitchDemo } from './switch-demo';
 import { TabBarDemo } from './tab-bar-demo';
 import { TabsDemo } from './tabs-demo';
 import { TextDemo } from './text-demo';
+import { ThemeDemo } from './theme-demo';
 import { TextareaDemo } from './textarea-demo';
 import { ToggleDemo } from './toggle-demo';
 import { ToggleGroupDemo } from './toggle-group-demo';
@@ -55,6 +56,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'tab-bar-demo': TabBarDemo,
   'tabs-demo': TabsDemo,
   'text-demo': TextDemo,
+  'theme-demo': ThemeDemo,
   'textarea-demo': TextareaDemo,
   'toggle-demo': ToggleDemo,
   'toggle-group-demo': ToggleGroupDemo,
