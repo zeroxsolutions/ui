@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 
 import { BlockFrame } from '@/components/data-display/block-frame';
 import { ComponentPreview } from '@/components/data-display/component-preview';
+import { BaseSwitcher } from '@/components/navigation/base-switcher';
 import { COMPONENT_BASES } from '@/constants/component-bases';
 import { publishedBlocks } from '@/lib/registry';
 import { source } from '@/lib/source';
@@ -31,6 +32,7 @@ export default function BlocksPage(): ReactNode {
           A block is a whole surface composed from this registry&apos;s components. Each is framed at the width of this
           column, so its layout answers to the frame and not to the window.
         </p>
+        <BaseSwitcher className="mt-4" />
       </header>
       {publishedBlocks.map((block) => {
         const page = source.getPage(['blocks', block.name]);

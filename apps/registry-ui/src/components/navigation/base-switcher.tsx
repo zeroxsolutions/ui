@@ -7,32 +7,32 @@ import { COMPONENT_BASE_LABELS, COMPONENT_BASES } from '@/constants/component-ba
 import { platformLocation } from '@/lib/platform-nav';
 import { blocksRoute, componentRoute, componentsRoute } from '@/routes/app-routes';
 
-import { LinkSwitch, LinkSwitchItem } from './link-switch';
+import { LinkTabs, LinkTabsItem } from './link-tabs';
 
 /**
  * The bases a web component is documented on, as links to this page on each, the current one marked,
- * on a page whose path holds a base; nothing elsewhere.
+ * keeping the page's query, on a page whose path holds a base; nothing elsewhere.
  */
-function BaseSwitcher(props: Omit<ComponentProps<typeof LinkSwitch>, 'aria-label'>): ReactNode {
+function BaseSwitcher(props: Omit<ComponentProps<typeof LinkTabs>, 'aria-label'>): ReactNode {
   const location = platformLocation(usePathname());
   if (location.platform !== 'web' || (location.section !== 'components' && location.section !== 'blocks')) return null;
 
   return (
-    <LinkSwitch aria-label="Base" data-slot="base-switcher" {...props}>
+    <LinkTabs aria-label="Base" data-slot="base-switcher" {...props}>
       {COMPONENT_BASES.map((base) => {
-        const href =
+        const path =
           location.section === 'blocks'
             ? blocksRoute.build({ base })
             : location.name
               ? componentRoute.build({ base, name: location.name })
               : componentsRoute.build({ base });
         return (
-          <LinkSwitchItem key={base} href={href} current={location.base === base}>
+          <LinkTabsItem key={base} path={path} current={location.base === base}>
             {COMPONENT_BASE_LABELS[base]}
-          </LinkSwitchItem>
+          </LinkTabsItem>
         );
       })}
-    </LinkSwitch>
+    </LinkTabs>
   );
 }
 

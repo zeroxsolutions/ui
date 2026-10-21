@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { DocsArticle } from '@/components/layout/docs-article';
+import { BaseSwitcher } from '@/components/navigation/base-switcher';
+import { platformLocation } from '@/lib/platform-nav';
 import { docsLlms, docsPageImage, source } from '@/lib/source';
 import { mdxComponents } from '@/mdx-components';
 
@@ -39,6 +41,7 @@ export default async function DocsPage({ params }: DocsPageProps): Promise<React
     <DocsArticle
       title={page.data.title}
       description={page.data.description}
+      tabs={platformLocation(page.url).section === 'components' ? <BaseSwitcher /> : undefined}
       markdown={await docsLlms.page(page)}
       tree={source.pageTree}
       url={page.url}
