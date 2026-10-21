@@ -14,6 +14,7 @@ import {
   STATUS_TOKENS,
   parseRadiusScale,
   themeItem,
+  themeRadius,
   type RadiusScale,
   type UpstreamColors,
 } from '../src/build/theme.ts';
@@ -48,7 +49,16 @@ interface StyleSlots {
   otherStyles: readonly SlotMap[];
 }
 
-function emitItem(item: RegistryItem, engine: Engine, style: StyleSlots, registryRoot: string): RegistryItem {
+/**
+ * @param radius - the theme's `--radius` for `engine`, which a slot's radius less a length is computed from
+ */
+function emitItem(
+  item: RegistryItem,
+  engine: Engine,
+  style: StyleSlots,
+  radius: string,
+  registryRoot: string,
+): RegistryItem {
   const pins: Readonly<Record<string, string>> = PINNED_RANGES[engine];
   let importsEngine = false;
   const files = (item.files ?? []).map((file) => {
@@ -57,7 +67,7 @@ function emitItem(item: RegistryItem, engine: Engine, style: StyleSlots, registr
     const pathUnderRegistry = registryPath.replace(/^registry\//, '');
     const source = readFileSync(join(PROJECT, sourcePath), 'utf8');
     const emitted = aliasImports(
-      emitSource(source, style.slots, engine, sourcePath, style.otherStyles),
+      emitSource(source, style.slots, engine, sourcePath, style.otherStyles, radius),
       pathUnderRegistry,
     );
     importsEngine ||= emitted.includes(`from '${engine}'`);
@@ -103,7 +113,7 @@ function buildRegistry(
   const registryRoot = mkdtempSync(join(tmpdir(), `zui-${engine}-${styleName}-`));
   try {
     const items = registry.items.map((item) => {
-      const emitted = emitItem(item, engine, style, registryRoot);
+      const emitted = emitItem(item, engine, style, themeRadius(colors, engine), registryRoot);
       return item.name === 'theme'
         ? withTheme(emitted, themeItem(colors, radii, STATUS_TOKENS, engine), registryRoot)
         : emitted;

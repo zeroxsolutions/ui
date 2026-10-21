@@ -589,3 +589,45 @@ describe('translateClasses for an input otp caret', () => {
     },
   );
 });
+
+describe('translateClasses for a radius less a length', () => {
+  const radiusSlot = (style: 'vega' | 'nova'): readonly string[] =>
+    parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8')).get('cn-input-group-button-size-xs') ?? [];
+  const radius = '0.625rem';
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    "draws Vega's xs input group button at the theme radius less 5px for %s",
+    (engine) => {
+      expect(translateClasses(radiusSlot('vega'), engine, 'view', '', { radius }).classes).toContain('rounded-[5px]');
+    },
+  );
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    "draws Nova's xs input group button at the theme radius less 3px for %s",
+    (engine) => {
+      expect(translateClasses(radiusSlot('nova'), engine, 'view', '', { radius }).classes).toContain('rounded-[7px]');
+    },
+  );
+
+  it('follows the theme radius it is given', () => {
+    expect(
+      translateClasses(['rounded-[calc(var(--radius)-5px)]'], 'uniwind', 'view', '', { radius: '0.75rem' }).classes,
+    ).toEqual(['rounded-[7px]']);
+  });
+
+  it('reports the radius when it is given no theme radius', () => {
+    expect(translateClasses(['rounded-[calc(var(--radius)-5px)]'], 'uniwind', 'view')).toEqual({
+      classes: [],
+      unknown: ['rounded-[calc(var(--radius)-5px)]'],
+    });
+  });
+});
+
+describe('translateClasses for a direct child in a variant', () => {
+  it('drops a direct child selector on any attribute but data-align', () => {
+    const slot = ['has-[>[data-slot=field]]:border'];
+
+    expect(translateClasses(slot, 'uniwind', 'view')).toEqual({ classes: [], unknown: [] });
+    expect(translateClasses(slot, 'uniwind', 'view', 'slot=field')).toEqual({ classes: [], unknown: [] });
+  });
+});

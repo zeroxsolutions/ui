@@ -249,6 +249,20 @@ function uniwindTheme({ colours, constants }: Tokens, radii: RadiusScale): Pick<
 }
 
 /**
+ * The `--radius` the theme item gives `engine`, such as `0.625rem`, from upstream's colours for the
+ * engine's Tailwind major.
+ * @throws {Error} `Upstream colours have no <set>.light.radius` when the snapshot lacks it
+ */
+export function themeRadius(colors: UpstreamColors, engine: Engine): string {
+  const setName = UPSTREAM_SETS[engine];
+  const radius = colors[setName]?.light?.radius;
+  if (radius === undefined) {
+    throw new Error(`Upstream colours have no ${setName}.light.radius`);
+  }
+  return radius;
+}
+
+/**
  * Builds the `theme` item for `engine` from upstream's colours for the engine's Tailwind major,
  * upstream's radius scale `radii` from {@link parseRadiusScale}, and `extra`, whose tokens win over
  * upstream's of the same name.

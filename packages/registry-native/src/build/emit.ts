@@ -43,14 +43,15 @@ function dropTokenComments(source: string): string {
   return kept.join('\n');
 }
 
-/** A style's slots with the spacing variables they define. */
+/** A style's slots with the spacing variables they define, and the theme's `--radius`. */
 interface StyleSlots {
   slots: SlotMap;
   spacingVariables: SpacingVariables;
+  radius: string | undefined;
 }
 
-function styleSlots(slots: SlotMap): StyleSlots {
-  return { slots, spacingVariables: parseSpacingVariables(slots) };
+function styleSlots(slots: SlotMap, radius: string | undefined): StyleSlots {
+  return { slots, spacingVariables: parseSpacingVariables(slots), radius };
 }
 
 function slotClasses(
@@ -73,6 +74,7 @@ function slotClasses(
   const translation = translateClasses(classes, engine, part, state, {
     name: slot,
     spacingVariables: style.spacingVariables,
+    radius: style.radius,
   });
   if (translation.unknown.length > 0) {
     throw new Error(`Untranslated ${translation.unknown[0]} in ${slot}`);
@@ -83,6 +85,7 @@ function slotClasses(
         translateClasses(other.slots.get(slot) ?? [], engine, part, state, {
           name: slot,
           spacingVariables: other.spacingVariables,
+          radius: other.radius,
         }).classes.length > 0,
     );
   if (state !== undefined && translation.classes.length === 0 && !drawnElsewhere()) {
@@ -104,6 +107,8 @@ function slotClasses(
  * @param file - the source's name, used only in error messages
  * @param otherStyles - the slots of the registry's other styles, which only decide whether an empty
  * state is a style's own choice or a typo
+ * @param radius - the theme's `--radius`, such as `0.625rem`, which a slot's radius less a length is
+ * computed from; with none, such a radius is untranslated
  * @throws {Error} `Unknown slot <slot> in <file>` for a slot the style does not declare,
  * `Unknown state <part> for <slot> in <file>` for a state outside the state vocabulary,
  * `Untranslated <class> in <slot>` for a slot class with no rule,
@@ -116,9 +121,10 @@ export function emitSource(
   engine: Engine,
   file: string,
   otherStyles: readonly SlotMap[] = [],
+  radius?: string,
 ): string {
-  const style = styleSlots(slots);
-  const others = otherStyles.map(styleSlots);
+  const style = styleSlots(slots, radius);
+  const others = otherStyles.map((other) => styleSlots(other, radius));
   const emitted = dropTokenComments(source).replace(QUOTED_STRING, (literal, quote: string, content: string) => {
     if (!content.includes('cn-')) return literal;
     const classes = content.replace(

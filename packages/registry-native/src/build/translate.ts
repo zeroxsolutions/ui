@@ -102,10 +102,11 @@ const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
 );
 
 /**
- * A direct child in a variant, such as `has-[>[data-align=block-end]]`, is the part's own variant state
- * `align=block-end`, which the component learns from its children.
+ * A direct child in an alignment, such as `has-[>[data-align=block-end]]`, is the part's own variant
+ * state `align=block-end`, which the component learns from its children. A direct child on any other
+ * attribute stays dropped.
  */
-const CHILD_VARIANT_MODIFIER = /^has-\[>\[data-([\w-]+)=([\w.-]+)\]\]$/;
+const CHILD_VARIANT_MODIFIER = /^has-\[>\[data-(align)=([\w.-]+)\]\]$/;
 
 /** `data-[size=sm]` is the variant state `size=sm`. */
 const VARIANT_MODIFIER = /^data-\[([\w-]+)=([\w.-]+)\]$/;
@@ -166,8 +167,19 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-input-otp-caret-line', new Set(['animate-caret-blink'])],
 ]);
 
-/** The px of one step of the spacing scale, 0.25rem at the 16px rem the theme's setup sets. */
-const SPACING_STEP_PX = 4;
+/** The px of 1rem, which the theme's setup sets. */
+const REM_PX = 16;
+
+/** The px of one step of the spacing scale, 0.25rem. */
+const SPACING_STEP_PX = REM_PX / 4;
+
+/**
+ * A radius of the theme's `--radius` less a length, which neither engine is sure to evaluate against a
+ * rem variable, so it becomes the px it comes to at the theme's radius. A consumer who changes
+ * `--radius` keeps the radius the build computed here.
+ */
+const RADIUS_LESS_LENGTH = /^rounded(-[a-z]+)?-\[calc\(var\(--radius\)-([\d.]+)px\)\]$/;
+const REM_LENGTH = /^([\d.]+)rem$/;
 
 /** Utilities with nothing to draw on a device. */
 const DROPPED_UTILITIES = [
@@ -414,6 +426,18 @@ function resolveOwnSizeTranslate(utility: string, states: readonly string[], slo
   return `translate-${axis}-[${px - Number(less)}px]`;
 }
 
+/**
+ * The px radius a radius less a length comes to at the theme's `radius`, such as `0.625rem`; with no
+ * radius, or one not in rem, `undefined`, so the class is reported. Any other utility is returned as it is.
+ */
+function resolveRadiusLessLength(utility: string, radius: string | undefined): string | undefined {
+  const less = RADIUS_LESS_LENGTH.exec(utility);
+  if (!less) return utility;
+  const rem = radius === undefined ? undefined : REM_LENGTH.exec(radius.trim());
+  if (!rem) return undefined;
+  return `rounded${less[1] ?? ''}-[${Number(rem[1]) * REM_PX - Number(less[2])}px]`;
+}
+
 /** The theme's `rounded-md` for a radius clamped at no less than it, or the utility itself. */
 function resolveClampedRadius(utility: string): string {
   const clamp = CLAMPED_RADIUS.exec(utility);
@@ -433,6 +457,11 @@ export interface SlotContext {
    * definition and read of a spacing variable is unknown.
    */
   spacingVariables?: SpacingVariables;
+  /**
+   * The theme's `--radius`, such as `0.625rem`, which a radius less a length is computed from; with
+   * none, every such radius is unknown.
+   */
+  radius?: string;
 }
 
 /**
@@ -472,8 +501,17 @@ export function translateClasses(
       continue;
     }
     const unmodified = cls.states.length === 0 && cls.kept.length === 0;
+    const radiusLessLength = resolveRadiusLessLength(cls.utility, slot.radius);
+    if (radiusLessLength === undefined) {
+      unknown.push(cls.source);
+      continue;
+    }
     const utility = resolveClampedRadius(
-      resolveOwnSizeTranslate(ringBorder && unmodified ? ringAsBorder(cls.utility) : cls.utility, cls.states, read),
+      resolveOwnSizeTranslate(
+        ringBorder && unmodified ? ringAsBorder(radiusLessLength) : radiusLessLength,
+        cls.states,
+        read,
+      ),
     );
     if (DROPPED_UTILITIES.some((rule) => rule.test(utility))) continue;
     if (untranslatable.some((rule) => rule.test(utility))) {
