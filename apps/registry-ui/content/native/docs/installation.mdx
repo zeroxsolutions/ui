@@ -19,9 +19,31 @@ Set the engine up by its own guide, then make the changes zui needs on top of it
 
 <EngineTab engine="nativewind">
 
-Install NativeWind 4.2.7 or later, 4.x only, with `tailwindcss@^3.4.17`, `react-native-reanimated` and
-`react-native-safe-area-context`, by [NativeWind's Expo guide](https://www.nativewind.dev/docs/getting-started/installation).
-The items were tested on NativeWind 4.2.7.
+Install NativeWind 4.2.7 or later, 4.x only, with `tailwindcss@^3.4.17`, by
+[NativeWind's Expo guide](https://www.nativewind.dev/docs/getting-started/installation). The items were tested
+on NativeWind 4.2.7. Expo SDK 57 and later run Reanimated 4, which needs `react-native-worklets` beside it:
+
+```bash
+npx expo install react-native-reanimated react-native-worklets react-native-safe-area-context
+```
+
+`className` needs NativeWind's Babel preset. In `babel.config.js`:
+
+```js title="babel.config.js"
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: [['babel-preset-expo', { jsxImportSource: 'nativewind' }], 'nativewind/babel'],
+  };
+};
+```
+
+For TypeScript, put NativeWind's types in a declaration file at the project root, such as
+`nativewind-env.d.ts`. Do not name it `nativewind.d.ts`, which TypeScript does not pick up:
+
+```ts title="nativewind-env.d.ts"
+/// <reference types="nativewind/types" />
+```
 
 In `metro.config.js`, pass `inlineRem: 16`. NativeWind draws `1rem` as 14 points on iOS and Android by
 default, which draws every Vega size at 7/8 of its height; Vega's sizes are written for a 16-point rem.
@@ -203,5 +225,34 @@ The setting is native config, so rebuild the app, or run `npx expo prebuild`, fo
 ## Dark mode
 
 With `userInterfaceStyle` set to `automatic`, the theme on iOS and Android follows the app's colour scheme,
-which is the device's setting until the app sets one with `useColorScheme().setColorScheme` from `nativewind`
-or `Uniwind.setTheme` from `uniwind`. On Expo web the theme follows the operating system's setting only.
+which is the device's setting until the app sets one. On Expo web the theme follows the operating system's
+setting only.
+
+<EngineTabs>
+
+<EngineTab engine="nativewind">
+
+Set the scheme with `useColorScheme().setColorScheme` from `nativewind`:
+
+```tsx
+import { useColorScheme } from 'nativewind';
+
+const { setColorScheme } = useColorScheme();
+setColorScheme('dark');
+```
+
+</EngineTab>
+
+<EngineTab engine="uniwind">
+
+Set the theme with `Uniwind.setTheme` from `uniwind`:
+
+```tsx
+import { Uniwind } from 'uniwind';
+
+Uniwind.setTheme('dark');
+```
+
+</EngineTab>
+
+</EngineTabs>
