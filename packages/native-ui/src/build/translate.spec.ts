@@ -146,6 +146,13 @@ describe('translateClasses', () => {
     expect(result).toEqual({ classes: ['p-2'], unknown: [] });
   });
 
+  it.each(['nativewind', 'uniwind'] as const)(
+    'drops w-fit, a width neither engine draws, for the self-start the component sets, for %s',
+    (engine) => {
+      expect(translateClasses(['w-fit', 'h-5'], engine, 'view')).toEqual({ classes: ['h-5'], unknown: [] });
+    },
+  );
+
   it('reports starting:opacity-0 as unknown', () => {
     const result = translateClasses(['starting:opacity-0', 'p-2'], 'uniwind', 'view');
 

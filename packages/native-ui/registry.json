@@ -320,6 +320,19 @@
       ]
     },
     {
+      "name": "kbd",
+      "type": "registry:ui",
+      "title": "Kbd",
+      "description": "A keyboard key or shortcut drawn as a small muted cap, alone or with the other keys of a shortcut in a group.",
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/kbd.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

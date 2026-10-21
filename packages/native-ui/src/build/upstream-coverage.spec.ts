@@ -41,7 +41,6 @@ const PENDING = [
   'field',
   'hover-card',
   'item',
-  'kbd',
   'menubar',
   'pagination',
   'popover',

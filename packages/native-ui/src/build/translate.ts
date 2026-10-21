@@ -203,12 +203,16 @@ const SPACING_STEP_PX = REM_PX / 4;
 const RADIUS_LESS_LENGTH = /^rounded(-[a-z]+)?-\[calc\(var\(--radius\)-([\d.]+)px\)\]$/;
 const REM_LENGTH = /^([\d.]+)rem$/;
 
-/** Utilities with nothing to draw on a device. */
+/**
+ * Utilities with nothing to draw on a device. Neither engine draws a `fit-content` width; a view is as
+ * wide as its content once its parent does not stretch it, which the component sets with `self-start`.
+ */
 const DROPPED_UTILITIES = [
   /^(outline|ring|ring-offset|transition|duration|ease|whitespace|cursor|scroll)(-|$)/,
   /^select-none$/,
   /^bg-clip-padding$/,
   /^group\//,
+  /^w-fit$/,
 ] as const satisfies readonly RegExp[];
 
 /**

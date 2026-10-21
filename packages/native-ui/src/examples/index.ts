@@ -15,6 +15,7 @@ import { IconDemo } from './icon-demo';
 import { InputDemo } from './input-demo';
 import { InputGroupDemo } from './input-group-demo';
 import { InputOtpDemo } from './input-otp-demo';
+import { KbdDemo } from './kbd-demo';
 import { LabelDemo } from './label-demo';
 import { PasswordInputDemo } from './password-input-demo';
 import { PasswordStrengthDemo } from './password-strength-demo';
@@ -45,6 +46,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'input-demo': InputDemo,
   'input-group-demo': InputGroupDemo,
   'input-otp-demo': InputOtpDemo,
+  'kbd-demo': KbdDemo,
   'label-demo': LabelDemo,
   'password-input-demo': PasswordInputDemo,
   'password-strength-demo': PasswordStrengthDemo,
