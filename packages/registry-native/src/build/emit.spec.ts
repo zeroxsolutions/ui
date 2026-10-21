@@ -442,6 +442,17 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
     expect(toolbar?.files[0].content).toContain("from '@/components/ui/spinner'");
   });
 
+  it('ships tab-bar as a navigation registry:component over badge, icon and text', () => {
+    const tabBar = item('tab-bar');
+
+    expect(tabBar).toMatchObject({ type: 'registry:component', categories: ['navigation'] });
+    expect(tabBar?.files).toEqual([
+      expect.objectContaining({ path: 'registry/components/navigation/tab-bar.tsx', type: 'registry:component' }),
+    ]);
+    expect(tabBar?.files[0]).not.toHaveProperty('target');
+    expect(tabBar?.files[0].content).toContain("from '@/components/ui/badge'");
+  });
+
   it("gives Button the style's pressed nudge", () => {
     const [file] = item('button')?.files ?? [];
 

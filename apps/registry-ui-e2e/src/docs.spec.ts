@@ -35,6 +35,7 @@ test("the header's Native link opens the native docs, whose pages the sidebar li
     ['Spinner', 'spinner'],
     ['Unsaved Changes Toolbar', 'unsaved-changes-toolbar'],
     ['Tabs', 'tabs'],
+    ['Tab Bar', 'tab-bar'],
   ]) {
     // The last of its name: the web docs' own Installation is listed above the native group.
     await expect(sidebar.getByRole('link', { name, exact: true }).last()).toHaveAttribute(

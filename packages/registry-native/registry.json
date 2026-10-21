@@ -376,6 +376,20 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "tab-bar",
+      "type": "registry:component",
+      "title": "Tab Bar",
+      "description": "A bar of top-level destinations at one edge of the screen, a tablist of pressable tab items with an indicator, an icon, a label and a count badge.",
+      "categories": ["navigation"],
+      "registryDependencies": ["@zui/badge", "@zui/icon", "@zui/text", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/navigation/tab-bar.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

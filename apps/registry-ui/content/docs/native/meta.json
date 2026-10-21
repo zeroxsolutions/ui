@@ -33,6 +33,7 @@
     "separator",
     "skeleton",
     "---Navigation---",
-    "tabs"
+    "tabs",
+    "tab-bar"
   ]
 }
