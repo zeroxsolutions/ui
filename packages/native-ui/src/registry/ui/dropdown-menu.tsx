@@ -11,9 +11,10 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, View, type GestureResponderEvent, type Role } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, View, type GestureResponderEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { useHighlight, useMenuMotion, useMenuScrollHeight, type MenuSide } from '../lib/menu';
+import { pressClosing, useHighlight, useMenuScrollHeight, webItemRole } from '../lib/menu';
+import { usePopupMotion, type PopupSide } from '../lib/motion';
 import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Icon, IconClassContext } from './icon';
@@ -106,7 +107,7 @@ type DropdownMenuContentProps = Omit<
    * The side of the trigger the menu opens on. On a device it opens above or below the trigger, so `left`
    * and `right` open it below.
    */
-  side?: MenuSide;
+  side?: PopupSide;
   /** The `name` of the PortalHost to draw in, when it is not the app's own. */
   portalHost?: string;
 };
@@ -131,7 +132,7 @@ function DropdownMenuContent({
   const { open, onOpenChange } = DropdownMenuPrimitive.useRootContext();
   // The primitive places the menu above or below its trigger on a device; the web's places it on any side.
   const placed = Platform.OS === 'web' || side === 'top' ? side : 'bottom';
-  const { present, style } = useMenuMotion(open, placed);
+  const { present, style } = usePopupMotion(open, placed);
   const scrollHeight = useMenuScrollHeight();
   const hostCheck = usePortalHostCheck(present, 'DropdownMenu', portalHost);
   // Upstream's menu is modal: the screen behind it is out of a screen reader's reach while it is open.
@@ -221,15 +222,7 @@ const DropdownMenuItemHighlightContext = createContext(false);
 /** What pressing an item does to the menu: runs the item, then closes the menu unless told not to. */
 function usePressClosing(closeOnClick: boolean, onPress: ((event: GestureResponderEvent) => void) | undefined) {
   const { onOpenChange } = DropdownMenuPrimitive.useRootContext();
-  return {
-    // On a device the menu closes through the open state alone, so it can go out; the web's primitive
-    // closes it itself.
-    closeOnPress: Platform.OS === 'web' ? closeOnClick : false,
-    onPress: (event: GestureResponderEvent) => {
-      onPress?.(event);
-      if (closeOnClick && Platform.OS !== 'web') onOpenChange(false);
-    },
-  };
+  return pressClosing(closeOnClick, onPress, () => onOpenChange(false));
 }
 
 type DropdownMenuItemProps = Omit<DropdownMenuPrimitive.ItemProps, 'closeOnPress'> & {
@@ -286,16 +279,6 @@ function DropdownMenuItem({
       </TextClassContext.Provider>
     </DropdownMenuItemHighlightContext.Provider>
   );
-}
-
-/**
- * The role a checkbox or radio item takes on the web, where Radix draws the menu. A device has no such role,
- * so there the primitive's `checkbox` or `radio` stands, which announces the checked state.
- */
-function webItemRole(role: 'menuitemcheckbox' | 'menuitemradio'): {
-  role?: Role;
-} {
-  return Platform.OS === 'web' ? { role: role as Role } : {};
 }
 
 type DropdownMenuCheckboxItemProps = Omit<

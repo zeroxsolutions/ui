@@ -1,12 +1,15 @@
 /**
- * What the menus share: the highlight an item draws while a pointer, a key or a finger is on it, the
- * motion their content opens and closes with, and the height their items scroll past on a device.
+ * What the menus share: the highlight an item draws while a pointer, a key or a finger is on it, what
+ * pressing an item does to its menu, an item's role on the web, and the height items scroll past on a device.
  */
 import { useState } from 'react';
-import type { ComponentProps } from 'react';
-import { useWindowDimensions, type PressableProps } from 'react-native';
-import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
-import { usePresence } from './motion';
+import {
+  Platform,
+  useWindowDimensions,
+  type GestureResponderEvent,
+  type PressableProps,
+  type Role,
+} from 'react-native';
 
 /** The events of a Pressable that start and end a highlight. */
 type HighlightEvents = Pick<
@@ -63,57 +66,38 @@ function useHighlight(events: HighlightEvents): Highlight {
   };
 }
 
-/** Upstream's 100ms fade, zoom from 95% and 0.5rem slide in from the trigger's side. */
-const MENU_MOTION = {
-  duration: 100,
-  easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-} as const;
-
-/** Upstream's `slide-in-from-*-2`, the 0.5rem the content slides in by, in px at the theme's 16px rem. */
-const MENU_SLIDE = 8;
-
-/** The side of its trigger a menu's content opens on. */
-type MenuSide = 'top' | 'right' | 'bottom' | 'left';
-
-/** The content grows out of the edge that faces its trigger. */
-const TRANSFORM_ORIGIN: Readonly<Record<MenuSide, string>> = {
-  top: 'bottom',
-  right: 'left',
-  bottom: 'top',
-  left: 'right',
-};
-
-/** What {@link useMenuMotion} gives back. */
-interface MenuMotion {
-  /** Whether the content is drawn: while it is open, and while it goes out after closing. */
-  present: boolean;
-  /** The style of the animated layer around the content's box. */
-  style: ComponentProps<typeof Animated.View>['style'];
+/** What pressing an item does to its menu, as props for the primitive's item. */
+interface PressClosing {
+  closeOnPress: boolean;
+  onPress: (event: GestureResponderEvent) => void;
 }
 
 /**
- * The motion of a menu's content opening on `side` of its trigger: it fades in while growing from 95% and
- * sliding 0.5rem away from the trigger over 100ms, and out the same way, or appears and goes at once when
- * the system asks for reduced motion.
+ * What pressing an item does: runs `onPress`, then closes the menu through `close` unless `closeOnClick` is
+ * false. On a device the menu closes through its open state alone, so it can go out; the web's primitive
+ * closes it itself.
  */
-function useMenuMotion(open: boolean, side: MenuSide): MenuMotion {
-  const { present, progress, reduced } = usePresence(open, MENU_MOTION);
-  const motion = useAnimatedStyle(() => {
-    const offset = (1 - progress.value) * MENU_SLIDE;
-    return {
-      opacity: progress.value,
-      transform: [
-        side === 'top' || side === 'bottom'
-          ? { translateY: side === 'top' ? offset : -offset }
-          : { translateX: side === 'left' ? offset : -offset },
-        { scale: 0.95 + progress.value * 0.05 },
-      ],
-    };
-  });
+function pressClosing(
+  closeOnClick: boolean,
+  onPress: ((event: GestureResponderEvent) => void) | undefined,
+  close: () => void,
+): PressClosing {
   return {
-    present,
-    style: [{ transformOrigin: TRANSFORM_ORIGIN[side] }, !reduced && motion],
+    closeOnPress: Platform.OS === 'web' ? closeOnClick : false,
+    onPress: (event) => {
+      onPress?.(event);
+      if (closeOnClick && Platform.OS !== 'web') close();
+    },
   };
+}
+
+/**
+ * The role an item takes on the web, where the primitive draws an item as a `button` inside Radix's menu. A
+ * device has no checkbox or radio menu item role, so there the primitive's `checkbox` or `radio` stands,
+ * which announces the checked state.
+ */
+function webItemRole(role: 'menuitem' | 'menuitemcheckbox' | 'menuitemradio'): { role?: Role } {
+  return Platform.OS === 'web' ? { role: role as Role } : {};
 }
 
 /** How far in from the screen's top and bottom edges a menu's items stop, in px. */
@@ -128,5 +112,5 @@ function useMenuScrollHeight(): number {
   return useWindowDimensions().height - 2 * MENU_SCREEN_MARGIN;
 }
 
-export { useHighlight, useMenuMotion, useMenuScrollHeight };
-export type { Highlight, MenuMotion, MenuSide };
+export { pressClosing, useHighlight, useMenuScrollHeight, webItemRole };
+export type { Highlight, PressClosing };

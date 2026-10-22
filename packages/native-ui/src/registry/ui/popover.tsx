@@ -12,8 +12,8 @@ import {
   type RefObject,
 } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
-import { usePresence } from '../lib/motion';
+import Animated from 'react-native-reanimated';
+import { usePopupMotion, type PopupSide } from '../lib/motion';
 import { usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Text, TextClassContext } from './text';
@@ -21,22 +21,6 @@ import { Text, TextClassContext } from './text';
 // A `cn-<slot>` token stands for that slot's view classes, `cn-<slot>/text` for its text classes, and
 // `cn-<slot>@<state>` for the classes the style puts behind that state; the registry build replaces each
 // with the classes translated for the target engine.
-
-/** Upstream's 100ms fade, zoom from 95% and 0.5rem slide in from the trigger's side. */
-const POPOVER_MOTION = { duration: 100, easing: Easing.bezier(0.25, 0.1, 0.25, 1) } as const;
-
-/** Upstream's `slide-in-from-*-2`, the 0.5rem the content slides in by, in px at the theme's 16px rem. */
-const POPOVER_SLIDE = 8;
-
-type PopoverSide = 'top' | 'right' | 'bottom' | 'left';
-
-/** The content grows out of the edge that faces its trigger. */
-const TRANSFORM_ORIGIN: Readonly<Record<PopoverSide, string>> = {
-  top: 'bottom',
-  right: 'left',
-  bottom: 'top',
-  left: 'right',
-};
 
 /** The id of the open Popover's PopoverTitle, and whether one is drawn, so the content names itself by it. */
 interface PopoverTitle {
@@ -143,7 +127,7 @@ type PopoverContentProps = Omit<PopoverPrimitive.ContentProps, 'side' | 'insets'
    * The side of the trigger the content opens on. On a device it opens above or below the trigger, so
    * `left` and `right` open it below.
    */
-  side?: PopoverSide;
+  side?: PopupSide;
   /** The `name` of the PortalHost to draw in, when it is not the app's own. */
   portalHost?: string;
 };
@@ -168,21 +152,9 @@ function PopoverContent({
   const { open, onOpenChange } = PopoverPrimitive.useRootContext();
   const title = useContext(PopoverTitleContext);
   const { ref, labelledBy } = useWebDialogName(title, open);
-  const { present, progress, reduced } = usePresence(open, POPOVER_MOTION);
   // The primitive places the content above or below its trigger on a device; the web's places it on any side.
   const placed = Platform.OS === 'web' || side === 'top' ? side : 'bottom';
-  const motion = useAnimatedStyle(() => {
-    const offset = (1 - progress.value) * POPOVER_SLIDE;
-    return {
-      opacity: progress.value,
-      transform: [
-        placed === 'top' || placed === 'bottom'
-          ? { translateY: placed === 'top' ? offset : -offset }
-          : { translateX: placed === 'left' ? offset : -offset },
-        { scale: 0.95 + progress.value * 0.05 },
-      ],
-    };
-  });
+  const { present, style } = usePopupMotion(open, placed);
 
   const hostCheck = usePortalHostCheck(present, 'Popover', portalHost);
 
@@ -202,7 +174,7 @@ function PopoverContent({
     >
       <TextClassContext.Provider value="cn-popover-content/text">
         {/* Not every engine styles an Animated.View by its className, so the box is a View inside it. */}
-        <Animated.View style={[{ transformOrigin: TRANSFORM_ORIGIN[placed] }, !reduced && motion]}>
+        <Animated.View style={style}>
           <View className={cn('w-72 cn-popover-content', className)}>{children}</View>
         </Animated.View>
       </TextClassContext.Provider>

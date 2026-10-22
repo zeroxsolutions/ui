@@ -21,7 +21,8 @@ import {
   type ViewStyle,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { useHighlight, useMenuMotion, useMenuScrollHeight, type MenuSide } from '../lib/menu';
+import { useHighlight, useMenuScrollHeight } from '../lib/menu';
+import { usePopupMotion, type PopupSide } from '../lib/motion';
 import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Icon, IconClassContext } from './icon';
@@ -252,7 +253,7 @@ type SelectContentProps = Omit<
    * The side of the trigger the list opens on. On a device it opens above or below the trigger, so `left`
    * and `right` open it below.
    */
-  side?: MenuSide;
+  side?: PopupSide;
   /** The `name` of the PortalHost to draw in, when it is not the app's own. */
   portalHost?: string;
 };
@@ -280,7 +281,7 @@ function SelectContent({
   const { open, onOpenChange } = root;
   // The primitive places the list above or below its trigger on a device; the web's places it on any side.
   const placed = Platform.OS === 'web' || side === 'top' ? side : 'bottom';
-  const { present, style } = useMenuMotion(open, placed);
+  const { present, style } = usePopupMotion(open, placed);
   const scrollHeight = useMenuScrollHeight();
   const hostCheck = usePortalHostCheck(present, 'Select', portalHost);
   // Upstream's list is modal: the screen behind it is out of a screen reader's reach while it is open.

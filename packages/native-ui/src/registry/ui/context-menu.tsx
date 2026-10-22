@@ -1,9 +1,10 @@
 import * as ContextMenuPrimitive from '@rn-primitives/context-menu';
 import { Check, ChevronRight } from 'lucide-react-native';
 import { createContext, useContext, useState, type ComponentProps, type ReactNode } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, View, type GestureResponderEvent, type Role } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, View, type GestureResponderEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { useHighlight, useMenuMotion, useMenuScrollHeight, type MenuSide } from '../lib/menu';
+import { pressClosing, useHighlight, useMenuScrollHeight, webItemRole } from '../lib/menu';
+import { usePopupMotion, type PopupSide } from '../lib/motion';
 import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Icon, IconClassContext } from './icon';
@@ -52,7 +53,7 @@ type ContextMenuContentProps = Omit<
    * The side of the long press the menu opens on, on a device: above it for `top`, and below it otherwise.
    * The web opens the menu at the pointer.
    */
-  side?: MenuSide;
+  side?: PopupSide;
   /** The `name` of the PortalHost to draw in, when it is not the app's own. */
   portalHost?: string;
 };
@@ -78,7 +79,7 @@ function ContextMenuContent({
   // A device places the menu above or below the long press; the web's primitive opens it to the right of the
   // pointer, whatever `side` says.
   const placed = Platform.OS === 'web' ? 'right' : side === 'top' ? 'top' : 'bottom';
-  const { present, style } = useMenuMotion(open, placed);
+  const { present, style } = usePopupMotion(open, placed);
   const scrollHeight = useMenuScrollHeight();
   const hostCheck = usePortalHostCheck(present, 'ContextMenu', portalHost);
   // Upstream's menu is modal: the screen behind it is out of a screen reader's reach while it is open.
@@ -168,15 +169,7 @@ const ContextMenuItemHighlightContext = createContext(false);
 /** What pressing an item does to the menu: runs the item, then closes the menu unless told not to. */
 function usePressClosing(closeOnClick: boolean, onPress: ((event: GestureResponderEvent) => void) | undefined) {
   const { onOpenChange } = ContextMenuPrimitive.useRootContext();
-  return {
-    // On a device the menu closes through the open state alone, so it can go out; the web's primitive
-    // closes it itself.
-    closeOnPress: Platform.OS === 'web' ? closeOnClick : false,
-    onPress: (event: GestureResponderEvent) => {
-      onPress?.(event);
-      if (closeOnClick && Platform.OS !== 'web') onOpenChange(false);
-    },
-  };
+  return pressClosing(closeOnClick, onPress, () => onOpenChange(false));
 }
 
 type ContextMenuItemProps = Omit<ContextMenuPrimitive.ItemProps, 'closeOnPress'> & {
@@ -234,17 +227,6 @@ function ContextMenuItem({
       </TextClassContext.Provider>
     </ContextMenuItemHighlightContext.Provider>
   );
-}
-
-/**
- * The role an item takes on the web, where the primitive draws each item as a `button` inside Radix's. A device
- * has no checkbox or radio menu item role, so there the primitive's `checkbox` or `radio` stands, which
- * announces the checked state.
- */
-function webItemRole(role: 'menuitem' | 'menuitemcheckbox' | 'menuitemradio'): {
-  role?: Role;
-} {
-  return Platform.OS === 'web' ? { role: role as Role } : {};
 }
 
 type ContextMenuCheckboxItemProps = Omit<

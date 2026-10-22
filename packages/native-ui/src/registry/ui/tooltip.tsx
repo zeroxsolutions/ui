@@ -1,8 +1,8 @@
 import * as TooltipPrimitive from '@rn-primitives/tooltip';
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
-import { usePresence } from '../lib/motion';
+import Animated, { Easing } from 'react-native-reanimated';
+import { usePopupMotion, type PopupSide } from '../lib/motion';
 import { usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { TextClassContext } from './text';
@@ -14,21 +14,8 @@ import { TextClassContext } from './text';
 /** Upstream's 150ms fade, zoom from 95% and 0.5rem slide in from the trigger's side. */
 const TOOLTIP_MOTION = { duration: 150, easing: Easing.bezier(0.25, 0.1, 0.25, 1) } as const;
 
-/** Upstream's `slide-in-from-*-2`, the 0.5rem the content slides in by, in px at the theme's 16px rem. */
-const TOOLTIP_SLIDE = 8;
-
 /** How long the pointer rests on a trigger outside a TooltipProvider before the web opens its tooltip. */
 const TOOLTIP_DEFAULT_DELAY = 600;
-
-type TooltipSide = 'top' | 'right' | 'bottom' | 'left';
-
-/** The content grows out of the edge that faces its trigger. */
-const TRANSFORM_ORIGIN: Readonly<Record<TooltipSide, string>> = {
-  top: 'bottom',
-  right: 'left',
-  bottom: 'top',
-  left: 'right',
-};
 
 /** The delay a TooltipProvider sets for the tooltips inside it. */
 const TooltipDelayContext = createContext(TOOLTIP_DEFAULT_DELAY);
@@ -88,7 +75,7 @@ type TooltipContentProps = Omit<TooltipPrimitive.ContentProps, 'side' | 'insets'
    * The side of the trigger the content opens on. On a device it opens above or below the trigger, so
    * `left` and `right` open it above.
    */
-  side?: TooltipSide;
+  side?: PopupSide;
   /** The `name` of the PortalHost to draw in, when it is not the app's own. */
   portalHost?: string;
 };
@@ -111,21 +98,9 @@ function TooltipContent({
   ...props
 }: TooltipContentProps): ReactNode {
   const open = useContext(TooltipOpenContext);
-  const { present, progress, reduced } = usePresence(open, TOOLTIP_MOTION);
   // The primitive places the content above or below its trigger on a device; the web's places it on any side.
   const placed = Platform.OS === 'web' || side === 'bottom' ? side : 'top';
-  const motion = useAnimatedStyle(() => {
-    const offset = (1 - progress.value) * TOOLTIP_SLIDE;
-    return {
-      opacity: progress.value,
-      transform: [
-        placed === 'top' || placed === 'bottom'
-          ? { translateY: placed === 'top' ? offset : -offset }
-          : { translateX: placed === 'left' ? offset : -offset },
-        { scale: 0.95 + progress.value * 0.05 },
-      ],
-    };
-  });
+  const { present, style } = usePopupMotion(open, placed, TOOLTIP_MOTION);
 
   const hostCheck = usePortalHostCheck(present, 'Tooltip', portalHost);
 
@@ -142,7 +117,7 @@ function TooltipContent({
     >
       <TextClassContext.Provider value="text-background cn-tooltip-content/text">
         {/* Not every engine styles an Animated.View by its className, so the box is a View inside it. */}
-        <Animated.View style={[{ transformOrigin: TRANSFORM_ORIGIN[placed] }, !reduced && motion]}>
+        <Animated.View style={style}>
           <View className={cn('max-w-xs bg-foreground cn-tooltip-content', className)}>{children}</View>
         </Animated.View>
       </TextClassContext.Provider>

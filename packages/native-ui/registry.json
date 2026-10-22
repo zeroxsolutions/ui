@@ -33,7 +33,7 @@
       "name": "motion",
       "type": "registry:lib",
       "title": "Motion",
-      "description": "usePresence, which keeps an overlay drawn while it animates in and out, and useReducedMotion, which reads whether the system asks for reduced motion.",
+      "description": "usePresence, which keeps an overlay drawn while it animates in and out, useReducedMotion, which reads whether the system asks for reduced motion, and usePopupMotion, the fade, grow and slide a menu, popover or tooltip opens and closes with.",
       "dependencies": ["react-native-reanimated", "react-native-worklets"],
       "files": [
         {
@@ -58,9 +58,7 @@
       "name": "menu",
       "type": "registry:lib",
       "title": "Menu",
-      "description": "useHighlight, which tracks whether a menu item is under a finger, the pointer or the keyboard's focus, and useMenuMotion, the fade, grow and slide a menu's content opens and closes with.",
-      "dependencies": ["react-native-reanimated"],
-      "registryDependencies": ["@zui/motion"],
+      "description": "useHighlight, which tracks whether a menu item is under a finger, the pointer or the keyboard's focus, pressClosing, what pressing an item does to its menu, webItemRole, an item's role on the web, and useMenuScrollHeight, the height a device scrolls a menu's items past.",
       "files": [
         {
           "path": "src/registry/lib/menu.ts",
@@ -674,7 +672,7 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/dropdown-menu.tsx",
@@ -693,7 +691,7 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/context-menu.tsx",
@@ -712,7 +710,7 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/menubar.tsx",
@@ -731,7 +729,7 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/select.tsx",
