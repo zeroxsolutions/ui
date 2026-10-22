@@ -56,3 +56,20 @@ test("a native component page's Markdown is written for its engine, with no JSX 
   expect(theme).toContain('`zui-theme.css` at the project root');
   expect(theme).not.toContain('`tailwind.config.js` gains');
 });
+
+test('/llms.txt lists the later native components, and each answers as Markdown under both engines', async ({
+  request,
+}) => {
+  const index = await (await request.get('/llms.txt')).text();
+
+  for (const name of ['dialog', 'select', 'calendar', 'sonner']) {
+    expect(index, name).toContain(`(/native/components/nativewind/${name})`);
+
+    for (const engine of ['nativewind', 'uniwind']) {
+      const response = await request.get(`/native/components/${engine}/${name}.md`);
+
+      expect(response.status(), `${engine} ${name}`).toBe(200);
+      expect(await response.text(), `${engine} ${name}`).toContain(`(/native/components/${engine}/${name})`);
+    }
+  }
+});

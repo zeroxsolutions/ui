@@ -20,27 +20,24 @@ const coverage = readJson<UpstreamCoverage>('upstream-coverage.json');
 const notPorted = Object.keys(coverage.notPorted);
 const deferred = Object.keys(coverage.deferred);
 
-/** Upstream items still to be ported; the task that ports one takes its name off this list. */
-const PENDING: readonly string[] = [];
-
 describe('the native registry against upstream', () => {
   it('reads a non-empty upstream item list', () => {
     expect(upstreamItems.length).toBeGreaterThan(0);
   });
 
-  it('ports every upstream item, or lists it as not ported, deferred or pending', () => {
-    const listed = new Set([...notPorted, ...deferred, ...PENDING]);
+  it('ports every upstream item, or lists it as not ported or deferred', () => {
+    const listed = new Set([...notPorted, ...deferred]);
 
     expect(upstreamItems.filter((name) => !ported.has(name) && !listed.has(name))).toEqual([]);
   });
 
-  it('lists no ported item as pending, not ported or deferred', () => {
-    expect([...PENDING, ...notPorted, ...deferred].filter((name) => ported.has(name))).toEqual([]);
+  it('lists no ported item as not ported or deferred', () => {
+    expect([...notPorted, ...deferred].filter((name) => ported.has(name))).toEqual([]);
   });
 
   it('lists only names upstream still has', () => {
     const upstream = new Set(upstreamItems);
 
-    expect([...PENDING, ...notPorted, ...deferred].filter((name) => !upstream.has(name))).toEqual([]);
+    expect([...notPorted, ...deferred].filter((name) => !upstream.has(name))).toEqual([]);
   });
 });
