@@ -371,7 +371,7 @@ function Slider({
               const { width, height } = event.nativeEvent.layout;
               setThumbSize(vertical ? height : width);
             }}
-            // The merge drops Nova's `relative` for `absolute`; passed as one string, Uniwind draws `relative`.
+            // The merge drops Nova's `relative` for `absolute`; passed as one string, one engine draws `relative`.
             className={cn('cn-slider-thumb absolute shrink-0')}
             style={
               vertical ? { bottom: offsetOf(fractions[index], false) } : { left: offsetOf(fractions[index], false) }
