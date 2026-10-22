@@ -21,6 +21,7 @@ import {
   useSidebar,
   type SidebarProps,
   type SidebarProviderProps,
+  type SidebarRailProps,
 } from './sidebar';
 
 // Jest runs no Reanimated frame into the props a query reads, so the opacity a sheet fades in from hides it
@@ -59,9 +60,14 @@ const report = () =>
 
 function App({
   sidebar,
+  rail,
   showOnHover = false,
   ...props
-}: SidebarProviderProps & { sidebar?: SidebarProps; showOnHover?: boolean }) {
+}: SidebarProviderProps & {
+  sidebar?: SidebarProps;
+  rail?: SidebarRailProps;
+  showOnHover?: boolean;
+}) {
   return (
     <>
       <SidebarProvider {...props}>
@@ -84,7 +90,7 @@ function App({
               </SidebarMenu>
             </SidebarGroup>
           </SidebarContent>
-          <SidebarRail />
+          <SidebarRail {...rail} />
         </Sidebar>
         <SidebarInset>
           <SidebarTrigger />
@@ -313,6 +319,18 @@ describe('Sidebar', () => {
       await render(<App />);
 
       expect(StyleSheet.flatten(rail().props.style)).toMatchObject({ cursor: 'ew-resize' });
+    });
+
+    it("leaves the rail's cursor to a caller's cursor class or style on the web", async () => {
+      jest.replaceProperty(Platform, 'OS', 'web');
+      const page = { addEventListener: () => undefined, removeEventListener: () => undefined };
+      jest.replaceProperty(globalThis as unknown as { window: unknown }, 'window', page);
+
+      await render(<App rail={{ className: 'cursor-pointer' }} />);
+      expect(StyleSheet.flatten(rail().props.style)?.cursor).toBeUndefined();
+
+      await render(<App rail={{ style: { cursor: 'pointer' } }} />);
+      expect(StyleSheet.flatten(rail().props.style)).toMatchObject({ cursor: 'pointer' });
     });
 
     it('opens and closes on Cmd+B or Ctrl+B on the web', async () => {

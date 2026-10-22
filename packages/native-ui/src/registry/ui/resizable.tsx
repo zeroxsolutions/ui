@@ -884,6 +884,9 @@ type ResizableHandleProps = Omit<ViewProps, 'id' | 'role'> & {
  * The browser's own handling a handle turns off, and the cursor it shows: a drag on the handle would
  * otherwise pan the page, and a press draw the focus outline over the ring the handle draws itself.
  */
+/** A cursor class, under any variant, which a style would otherwise outrank on the web. */
+const CURSOR_CLASS = /(^|[\s:])cursor-/;
+
 function webHandleStyle(cursor: 'not-allowed' | 'row-resize' | 'col-resize' | undefined): ViewStyle {
   // React Native Web reads these values, which React Native's style type does not list.
   return { touchAction: 'none', outlineWidth: 0, cursor: cursor as ViewStyle['cursor'] } as ViewStyle;
@@ -1048,12 +1051,11 @@ function ResizableHandle({
         className,
       )}
       // Above the panel after it, which would otherwise take the touches on that side of its widened area.
+      // The web's own handling goes first, so a caller's style replaces it.
       style={[
-        style,
-        { flexGrow: 0, flexShrink: 0, zIndex: 1 },
         web
           ? webHandleStyle(
-              group.disableCursor || group.disabled
+              group.disableCursor || group.disabled || CURSOR_CLASS.test(className ?? '')
                 ? undefined
                 : disabled
                   ? 'not-allowed'
@@ -1062,6 +1064,8 @@ function ResizableHandle({
                     : 'col-resize',
             )
           : undefined,
+        style,
+        { flexGrow: 0, flexShrink: 0, zIndex: 1 },
       ]}
       {...props}
     >

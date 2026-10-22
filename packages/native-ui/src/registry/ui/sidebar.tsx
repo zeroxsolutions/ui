@@ -386,12 +386,18 @@ type SidebarRailProps = ComponentProps<typeof Pressable>;
  * A strip along the panel's edge that opens and closes the sidebar when pressed, named Toggle Sidebar and
  * left out of the keyboard's order; on the web a line marks it while the pointer is over it.
  */
-function SidebarRail({ className, ...props }: SidebarRailProps): ReactNode {
+function SidebarRail({ className, style, ...props }: SidebarRailProps): ReactNode {
   const { toggleSidebar } = useSidebar();
   const { railHost } = useContext(SidebarFrameContext);
   const [hovered, setHovered] = useState(false);
   const name = useId();
   if (railHost === undefined) return null;
+  // React Native Web reads this cursor, which React Native's style type does not list. A caller's cursor class
+  // or style wins over it.
+  const cursor =
+    Platform.OS === 'web' && !/(^|[\s:])cursor-/.test(className ?? '')
+      ? { cursor: 'ew-resize' as ViewStyle['cursor'] }
+      : undefined;
   return (
     <Portal name={name} hostName={railHost}>
       <Pressable
@@ -404,8 +410,7 @@ function SidebarRail({ className, ...props }: SidebarRailProps): ReactNode {
         onHoverIn={() => setHovered(true)}
         onHoverOut={() => setHovered(false)}
         className={cn('h-full w-full items-center cn-sidebar-rail', className)}
-        // React Native Web reads this cursor, which React Native's style type does not list.
-        style={Platform.OS === 'web' ? { cursor: 'ew-resize' as ViewStyle['cursor'] } : undefined}
+        style={(state) => [cursor, typeof style === 'function' ? style(state) : style]}
         {...props}
       >
         <View className={cn('h-full w-[2px]', hovered && 'bg-sidebar-border')} />

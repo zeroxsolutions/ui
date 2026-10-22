@@ -377,6 +377,26 @@ describe('Resizable', () => {
       expect(styleOf(handle())).toMatchObject({ cursor: 'row-resize' });
     });
 
+    it("leaves the cursor to a caller's cursor class, and lets a caller's style replace it", async () => {
+      await render(
+        <ResizablePanelGroup testID="group">
+          <ResizablePanel defaultSize="50%" />
+          <ResizableHandle testID="handle" className="cursor-pointer" />
+          <ResizablePanel defaultSize="50%" />
+        </ResizablePanelGroup>,
+      );
+      expect(styleOf(handle()).cursor).toBeUndefined();
+
+      await render(
+        <ResizablePanelGroup testID="group">
+          <ResizablePanel defaultSize="50%" />
+          <ResizableHandle testID="handle" style={{ cursor: 'pointer' }} />
+          <ResizablePanel defaultSize="50%" />
+        </ResizablePanelGroup>,
+      );
+      expect(styleOf(handle())).toMatchObject({ cursor: 'pointer', touchAction: 'none' });
+    });
+
     it('shows a not-allowed cursor on a disabled handle, and none where the group disables the cursor', async () => {
       await render(
         <ResizablePanelGroup testID="group">
