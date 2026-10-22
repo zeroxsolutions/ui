@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { type Page } from '@playwright/test';
+import { type FrameLocator, type Page } from '@playwright/test';
 
 import { expect, test } from './test/fixtures';
 import { DRAWN, frame, inside } from './test/native-preview';
@@ -32,6 +32,20 @@ async function pickStyle(page: Page, style: string): Promise<void> {
   await page.getByRole('menuitem', { name: style }).click();
 }
 
+/** `color` as the browser in `frame` reports a computed colour, which differs by browser for a lab() colour. */
+async function asSerialised(frame: FrameLocator, color: string): Promise<string> {
+  return frame.locator('body').evaluate<string>(
+    `(() => {
+      const probe = document.createElement('div');
+      probe.style.backgroundColor = ${JSON.stringify(color)};
+      document.body.append(probe);
+      const serialised = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      return serialised;
+    })()`,
+  );
+}
+
 test.describe('in a light colour scheme', () => {
   test.use({ colorScheme: 'light' });
 
@@ -54,10 +68,11 @@ test.describe('in a light colour scheme', () => {
       await page.goto(path);
 
       await expect(inside(page, demo).getByRole('button', { name: label, exact: true })).toBeVisible(DRAWN);
-      // Drawn light, on a page that is light.
+      // Drawn light, on a page that is light. WebKit rounds a lab() component to fewer digits than Chromium
+      // and Firefox, so the colour is compared as this browser serialises it.
       await expect(inside(page, demo).getByRole('button', { name: label, exact: true })).toHaveCSS(
         'background-color',
-        background,
+        await asSerialised(inside(page, demo), background),
       );
       // The frame takes the demo's height: nothing in it scrolls, and no empty band sits under the demo.
       await expect
