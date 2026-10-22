@@ -1,5 +1,19 @@
 import { render, screen } from '@testing-library/react-native';
-import { Bar, BarChart, Radar, RadarChart, RadialBar, RadialBarChart, YAxis } from './charts';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  Radar,
+  RadarChart,
+  RadialBar,
+  RadialBarChart,
+  YAxis,
+} from './charts';
 
 const mockMotion = { reduced: false };
 
@@ -61,19 +75,43 @@ describe('YAxis', () => {
   });
 });
 
+/** The y of the top edge of the bar `index` of `desktop`, where its path starts. */
+function barTop(index = 0): number {
+  const d = String(screen.getByTestId(`chart-bar-desktop-${index}`, HIDDEN).props.d);
+  return Number(/^M[-\d.e]+,([-\d.e]+)/.exec(d)?.[1]);
+}
+
+/** Every point a path names, after `M`, `L`, or at the end of an arc. */
+function pathPoints(testID: string): number[][] {
+  const d = String(screen.getByTestId(testID, HIDDEN).props.d);
+  return d
+    .split(/(?=[MLAZ])/)
+    .filter((part) => part[0] !== 'Z')
+    .map((part) =>
+      part
+        .slice(1)
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number)
+        .slice(-2),
+    );
+}
+
 // Reanimated's jest setup runs the entrance without drawing its frames onto the svg, so these read the frame a
-// chart starts from.
+// chart starts from. The plot runs from 5px to the axis at 195px, and its values to 320.
 describe('a chart entrance', () => {
   beforeEach(() => {
     mockMotion.reduced = false;
   });
 
-  // The bars are drawn through a clip that rises from the axis, at the plot's 195px bottom, to the top.
-  it('starts the bars from the axis', async () => {
+  it('starts each bar with no height on the axis', async () => {
     await render(<Bars />);
 
-    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('y', 195);
-    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('height', 5);
+    expect(barTop()).toBe(195);
+    expect(String(screen.getByTestId('chart-bar-desktop-0', HIDDEN).props.d).match(/V[-\d.e]+/g)).toEqual([
+      'V195',
+      'V195',
+    ]);
   });
 
   it('draws the bars whole from the start where the system asks for reduced motion', async () => {
@@ -81,33 +119,7 @@ describe('a chart entrance', () => {
 
     await render(<Bars />);
 
-    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('y', 0);
-    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('height', 200);
-  });
-
-  // A radar grows out of its middle, through a disc that starts with no radius.
-  it('grows a radar from its middle', async () => {
-    await render(
-      <RadarChart data={data} width={320} height={200}>
-        <Radar dataKey="desktop" fill="#2563eb" />
-      </RadarChart>,
-    );
-
-    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('r', 0);
-    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('cx', 160);
-  });
-
-  // A radial bar is swept round through a mask whose dash starts with nothing drawn.
-  it('sweeps a radial bar round from its start', async () => {
-    await render(
-      <RadialBarChart data={data} width={320} height={200}>
-        <RadialBar dataKey="desktop" />
-      </RadialBarChart>,
-    );
-
-    const entrance = screen.getByTestId('chart-entrance', HIDDEN);
-    expect(entrance.props.strokeDashoffset).toBeCloseTo(Number(entrance.props.strokeDasharray[0]));
-    expect(screen.getByTestId('chart-series-desktop', HIDDEN).props.mask).toBeDefined();
+    expect(barTop()).toBeCloseTo(195 - (190 * 186) / 320);
   });
 
   it('draws a series at once whose isAnimationActive is false', async () => {
@@ -117,6 +129,62 @@ describe('a chart entrance', () => {
       </BarChart>,
     );
 
-    expect(screen.getByTestId('chart-series-desktop', HIDDEN).props.clipPath).toBeUndefined();
+    expect(barTop(1)).toBeCloseTo(195 - (190 * 305) / 320);
+  });
+
+  it('starts a line with its whole length dashed off, and its dots hidden', async () => {
+    await render(
+      <LineChart data={data} width={320} height={200}>
+        <Line dataKey="desktop" stroke="#2563eb" />
+      </LineChart>,
+    );
+
+    const line = screen.getByTestId('chart-line-desktop', HIDDEN);
+    expect(line.props.strokeDasharray[0]).toBeGreaterThan(300);
+    expect(line.props.strokeDashoffset).toBeCloseTo(Number(line.props.strokeDasharray[0]));
+    expect(screen.getByTestId('chart-dots-desktop', HIDDEN).props.opacity).toBe(0);
+  });
+
+  it('starts an area flat on the axis', async () => {
+    await render(
+      <AreaChart data={data} width={320} height={200}>
+        <Area dataKey="desktop" fill="#2563eb" />
+      </AreaChart>,
+    );
+
+    expect(new Set(pathPoints('chart-area-desktop').map(([, y]) => y))).toEqual(new Set([195]));
+  });
+
+  it('starts a pie with no slice swept', async () => {
+    await render(
+      <PieChart width={320} height={200}>
+        <Pie data={data} dataKey="desktop" nameKey="month" />
+      </PieChart>,
+    );
+
+    expect(screen.getByTestId('chart-slice-0', HIDDEN).props.d).toBe('');
+  });
+
+  it('starts a radar with every point in its middle', async () => {
+    await render(
+      <RadarChart data={data} width={320} height={200}>
+        <Radar dataKey="desktop" fill="#2563eb" />
+      </RadarChart>,
+    );
+
+    expect(pathPoints('chart-radar-desktop')).toEqual([
+      [160, 100],
+      [160, 100],
+    ]);
+  });
+
+  it('starts a radial bar with no sweep', async () => {
+    await render(
+      <RadialBarChart data={data} width={320} height={200}>
+        <RadialBar dataKey="desktop" />
+      </RadialBarChart>,
+    );
+
+    expect(screen.getByTestId('chart-radial-bar-desktop-0', HIDDEN).props.d).toBe('');
   });
 });

@@ -1,5 +1,4 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { arc } from 'd3-shape';
 import { processColor } from 'react-native';
 import { G } from 'react-native-svg';
 import { Text } from './text';
@@ -295,13 +294,39 @@ function SafariShape({ tooltip = null }: { tooltip?: React.ReactNode }): React.R
   );
 }
 
-/** The path of the ring from `inner` to `outer` between two angles anticlockwise from three o'clock. */
-function ringPath(inner: number, outer: number, startAngle: number, endAngle: number): string | null {
-  return arc()({
-    innerRadius: inner,
-    outerRadius: outer,
-    startAngle: ((90 - startAngle) * Math.PI) / 180,
-    endAngle: ((90 - endAngle) * Math.PI) / 180,
+/**
+ * The corners of a part of a ring drawn around 0, 0: where its outer edge starts and ends, then where its inner
+ * edge starts and ends, each the point a path's `M` or `L` names or an arc ends on.
+ */
+function cornersOf(d: unknown): number[][] {
+  return String(d)
+    .split(/(?=[MLAZ])/)
+    .filter((part) => part[0] !== 'Z')
+    .map((part) =>
+      part
+        .slice(1)
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number)
+        .slice(-2),
+    );
+}
+
+/** The corners of the part of a ring from `inner` to `outer` between two angles anticlockwise from three o'clock. */
+function ringCorners(inner: number, outer: number, startAngle: number, endAngle: number): number[][] {
+  const at = (radius: number, angle: number) => [
+    radius * Math.cos((angle * Math.PI) / 180),
+    -radius * Math.sin((angle * Math.PI) / 180),
+  ];
+  return [at(outer, startAngle), at(outer, endAngle), at(inner, endAngle), at(inner, startAngle)];
+}
+
+/** Whether two lists of points match to a hundredth of a pixel. */
+function expectPoints(actual: number[][], expected: number[][]): void {
+  expect(actual).toHaveLength(expected.length);
+  actual.forEach((point, index) => {
+    expect(point[0]).toBeCloseTo(expected[index]?.[0] ?? Number.NaN);
+    expect(point[1]).toBeCloseTo(expected[index]?.[1] ?? Number.NaN);
   });
 }
 
@@ -603,6 +628,33 @@ describe('Chart', () => {
       expect(typeof text === 'object' ? text.props.x : undefined).toEqual([160]);
     });
 
+    it("sets a label's text in the theme's Geist face for its weight", async () => {
+      await render(
+        <PieChart width={320} height={200}>
+          <Pie data={browserData} dataKey="visitors" isAnimationActive={false}>
+            <Label
+              content={({ viewBox }) => (
+                <>
+                  <ChartText testID="total" x={viewBox.cx} y={viewBox.cy} fontWeight="bold">
+                    762
+                  </ChartText>
+                  <ChartText testID="caption" x={viewBox.cx} y={viewBox.cy}>
+                    Visitors
+                  </ChartText>
+                </>
+              )}
+            />
+          </Pie>
+        </PieChart>,
+      );
+
+      expect(screen.getByTestId('total', HIDDEN).props.font).toEqual({ fontFamily: 'Geist_700Bold', fontSize: 14 });
+      expect(screen.getByTestId('caption', HIDDEN).props.font).toEqual({
+        fontFamily: 'Geist_400Regular',
+        fontSize: 14,
+      });
+    });
+
     it('leaves no gap after the last slice of a part of a turn', async () => {
       await render(
         <ChartContainer config={browserConfig}>
@@ -741,7 +793,7 @@ describe('Chart', () => {
 
       const bar = screen.getByTestId('chart-radial-bar-visitors-0', HIDDEN);
 
-      expect(bar.props.d).toBe(ringPath(67, 91, 0, 100));
+      expectPoints(cornersOf(bar.props.d), ringCorners(67, 91, 0, 100));
       expect(fillOf(bar)).toBe(processColor('#60a5fa'));
     });
 
@@ -754,8 +806,19 @@ describe('Chart', () => {
         </ChartContainer>,
       );
 
-      expect(screen.getByTestId('chart-radial-bar-visitors-0', HIDDEN).props.d).toBe(ringPath(32, 48, 0, 360));
-      expect(screen.getByTestId('chart-radial-bar-visitors-1', HIDDEN).props.d).toBe(ringPath(52, 68, 0, 180));
+      // A whole turn is a ring round a hole: two half circles out at 48px, then two in at 32px.
+      expectPoints(cornersOf(screen.getByTestId('chart-radial-bar-visitors-0', HIDDEN).props.d), [
+        [48, 0],
+        [-48, 0],
+        [48, 0],
+        [32, 0],
+        [-32, 0],
+        [32, 0],
+      ]);
+      expectPoints(
+        cornersOf(screen.getByTestId('chart-radial-bar-visitors-1', HIDDEN).props.d),
+        ringCorners(52, 68, 0, 180),
+      );
     });
 
     it('runs a muted track behind the bar over the whole sweep', async () => {
@@ -764,7 +827,7 @@ describe('Chart', () => {
       await render(<SafariShape />);
 
       const track = screen.getByTestId('chart-track-visitors-0', HIDDEN);
-      expect(track.props.d).toBe(ringPath(67, 91, 0, 100));
+      expectPoints(cornersOf(track.props.d), ringCorners(67, 91, 0, 100));
       expect(fillOf(track)).toBe(processColor('rgb(244, 244, 245)'));
     });
 
@@ -867,6 +930,18 @@ describe('Chart', () => {
         nativeEvent: { pointerType: 'mouse' },
       });
       expect(screen.queryByText('February')).toBeNull();
+    });
+
+    it('keeps the tooltip of the category a mouse hovers when it clicks there', async () => {
+      await render(<MonthBars />);
+
+      await fireEvent(surface(), 'pointerMove', {
+        nativeEvent: { pointerType: 'mouse', offsetX: 80, offsetY: 40 },
+      });
+      await fireEvent(surface(), 'pointerDown', { nativeEvent: { pointerType: 'mouse' } });
+      await tapAt(80);
+
+      expect(screen.getByText('February')).toBeOnTheScreen();
     });
   });
 

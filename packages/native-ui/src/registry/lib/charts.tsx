@@ -2,7 +2,8 @@
  * The chart parts upstream's chart demos take from Recharts, in Recharts' names and with the props those
  * demos use, drawn with react-native-svg so they run on a device and in the browser. They are the responsive
  * container; the bar, line and area charts and their series; the pie chart, its slices, its label and the
- * text it draws; the axes, the grid, the tooltip and the legend. A part reads its colours, such as
+ * text it draws; the radar and radial bar charts with their polar grid and axes; the axes, the grid, the tooltip
+ * and the legend. A part reads its colours, such as
  * `var(--color-desktop)`, through the palette the chart's container provides.
  */
 import { scaleBand, scaleLinear, scalePoint } from 'd3-scale';
@@ -16,7 +17,6 @@ import {
   curveStep,
   curveStepAfter,
   curveStepBefore,
-  arc as arcPath,
   area as areaPath,
   line as linePath,
   type CurveFactory,
@@ -28,7 +28,6 @@ import {
   isValidElement,
   useContext,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
@@ -54,7 +53,7 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Circle, ClipPath, Defs, G, Line as SvgLine, Mask, Path, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, G, Line as SvgLine, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { useReducedMotion } from './motion';
 
 /** One row of a chart's `data`, such as `{ month: "January", desktop: 186 }`. */
@@ -138,8 +137,8 @@ function useChartSize(width: number | undefined, height: number | undefined): Ch
 const ENTRANCE_MS = 1500;
 const EASE = Easing.bezier(0.25, 0.1, 0.25, 1);
 
-const AnimatedRect = Animated.createAnimatedComponent(Rect);
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
  * The share of a chart's entrance drawn so far, from 0 to 1, run by Reanimated so the chart is not drawn
@@ -155,99 +154,212 @@ function useEntrance(animate: boolean, duration: number): SharedValue<number> {
   return progress;
 }
 
-/** Where an entrance comes in from: up from the axis for bars, from a side for lines and areas. */
-type EntranceDirection = 'up' | 'right' | 'left';
+/** One command of an svg path and its numbers, such as `C` and its three points. */
+interface PathSegment {
+  command: string;
+  values: number[];
+}
+
+/** The commands of a path d3 wrote, which uses only `M`, `L`, `C`, `Q` and `Z`. */
+function parsePath(d: string | null): PathSegment[] {
+  return [...(d ?? '').matchAll(/([MLCQZ])([^MLCQZ]*)/g)].map(([, command = '', values = '']) => ({
+    command,
+    values: values
+      .split(/[\s,]+/)
+      .filter((value) => value !== '')
+      .map(Number),
+  }));
+}
+
+/** `segments` drawn with each point moved towards `ox`, `oy` by the shares `sx` across and `sy` down. */
+function scaledPath(segments: readonly PathSegment[], ox: number, oy: number, sx: number, sy: number): string {
+  'worklet';
+  let d = '';
+  for (const segment of segments) {
+    d += segment.command;
+    for (let at = 0; at + 1 < segment.values.length; at += 2) {
+      const x = segment.values[at] ?? 0;
+      const y = segment.values[at + 1] ?? 0;
+      d += `${at === 0 ? '' : ' '}${ox + (x - ox) * sx},${oy + (y - oy) * sy}`;
+    }
+  }
+  return d;
+}
+
+/** How long `segments` run, with each curve measured along 32 straight steps. */
+function pathLength(segments: readonly PathSegment[]): number {
+  let length = 0;
+  let [x, y, startX, startY] = [0, 0, 0, 0];
+  for (const { command, values } of segments) {
+    if (command === 'M') {
+      [x, y] = [values[0] ?? 0, values[1] ?? 0];
+      [startX, startY] = [x, y];
+    } else if (command === 'Z') {
+      length += Math.hypot(startX - x, startY - y);
+      [x, y] = [startX, startY];
+    } else {
+      // A line is one step; a curve's control points weigh each step as a Bezier curve does.
+      const points = [[x, y]];
+      for (let at = 0; at + 1 < values.length; at += 2) points.push([values[at] ?? 0, values[at + 1] ?? 0]);
+      const steps = command === 'L' ? 1 : 32;
+      for (let step = 1; step <= steps; step++) {
+        let level = points.map((point) => [...point]);
+        while (level.length > 1) {
+          level = level.slice(1).map((point, index) => {
+            const before = level[index] ?? point;
+            return [
+              (before[0] ?? 0) + ((point[0] ?? 0) - (before[0] ?? 0)) * (step / steps),
+              (before[1] ?? 0) + ((point[1] ?? 0) - (before[1] ?? 0)) * (step / steps),
+            ];
+          });
+        }
+        const [nextX = x, nextY = y] = level[0] ?? [];
+        length += Math.hypot(nextX - x, nextY - y);
+        [x, y] = [nextX, nextY];
+      }
+    }
+  }
+  return length;
+}
 
 /**
- * A clip path, named `id`, over the part of the chart its entrance has reached, which the series drawn
- * through it grow into.
+ * The ring between `inner` and `outer` around 0, 0 from `startAngle` to `endAngle`, in degrees anticlockwise
+ * from three o'clock; a whole turn is drawn as a ring with a hole.
  */
-function EntranceClip({
-  id,
-  progress,
-  plot,
-  size,
-  direction,
-}: {
-  id: string;
+function sectorPath(inner: number, outer: number, startAngle: number, endAngle: number): string {
+  'worklet';
+  const sweep = endAngle - startAngle;
+  if (Math.abs(sweep) < 1e-6 || outer <= 0) return '';
+  if (Math.abs(sweep) >= 360 - 1e-6) {
+    const ring = `M${outer},0 A${outer},${outer} 0 1 0 ${-outer},0 A${outer},${outer} 0 1 0 ${outer},0 Z`;
+    return inner <= 0
+      ? ring
+      : `${ring} M${inner},0 A${inner},${inner} 0 1 1 ${-inner},0 A${inner},${inner} 0 1 1 ${inner},0 Z`;
+  }
+  const radians = Math.PI / 180;
+  const at = (radius: number, angle: number): string =>
+    `${radius * Math.cos(angle * radians)},${-radius * Math.sin(angle * radians)}`;
+  // Anticlockwise on the screen is svg's negative direction, a sweep flag of 0.
+  const large = Math.abs(sweep) > 180 ? 1 : 0;
+  const flag = sweep > 0 ? 0 : 1;
+  const outerArc = `M${at(outer, startAngle)} A${outer},${outer} 0 ${large} ${flag} ${at(outer, endAngle)}`;
+  const back =
+    inner <= 0 ? 'L0,0' : `L${at(inner, endAngle)} A${inner},${inner} 0 ${large} ${1 - flag} ${at(inner, startAngle)}`;
+  return `${outerArc} ${back} Z`;
+}
+
+/** The props every drawn shape passes on to its Path. */
+type ShapeProps = Omit<ComponentProps<typeof Path>, 'd'> & {
   progress: SharedValue<number>;
-  plot: Plot;
-  size: ChartSize;
-  direction: EntranceDirection;
+  /** Whether the shape is drawn whole from the start, as a series whose `isAnimationActive` is false is. */
+  still: boolean;
+};
+
+/** A bar that grows up from `base` to its full `height` over the entrance, as Recharts' does. */
+function GrowingBar({
+  progress,
+  still,
+  x,
+  base,
+  width,
+  height,
+  radius,
+  ...props
+}: ShapeProps & {
+  x: number;
+  base: number;
+  width: number;
+  height: number;
+  radius: number | readonly [number, number, number, number];
 }): ReactNode {
-  // The clip reaches past the plot's edge by the room a point's circle takes.
-  const reach = 8;
-  const span = plot.right - plot.left + reach;
   const animatedProps = useAnimatedProps(() => {
-    const share = progress.value;
-    if (direction === 'up') {
-      const top = plot.bottom * (1 - share);
-      return { x: 0, y: top, width: size.width, height: size.height - top };
-    }
-    const width = plot.left + span * share;
-    return {
-      x: direction === 'right' ? 0 : size.width - width,
-      y: 0,
-      width,
-      height: size.height,
-    };
+    const grown = height * (still ? 1 : progress.value);
+    return { d: roundedRect(x, base - grown, width, grown, radius) };
   });
+  return <AnimatedPath {...props} animatedProps={animatedProps} />;
+}
+
+/**
+ * A path whose points move out from `ox`, `oy` to where they belong over the entrance: down the y axis
+ * only for an area rising from its baseline, or both ways for a radar growing from its middle.
+ */
+function GrowingPath({
+  progress,
+  still,
+  segments,
+  ox,
+  oy,
+  across,
+  ...props
+}: ShapeProps & { segments: readonly PathSegment[]; ox: number; oy: number; across: boolean }): ReactNode {
+  const animatedProps = useAnimatedProps(() => {
+    const share = still ? 1 : progress.value;
+    return { d: scaledPath(segments, ox, oy, across ? share : 1, share) };
+  });
+  return <AnimatedPath {...props} animatedProps={animatedProps} />;
+}
+
+/** A line drawn from its start over the entrance, as Recharts' is, by its dash's offset. */
+function DrawnLine({
+  progress,
+  still,
+  segments,
+  ...props
+}: ShapeProps & { segments: readonly PathSegment[] }): ReactNode {
+  const length = pathLength(segments);
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: length * (1 - (still ? 1 : progress.value)),
+  }));
   return (
-    <Defs>
-      <ClipPath id={id}>
-        <AnimatedRect testID="chart-entrance" animatedProps={animatedProps} />
-      </ClipPath>
-    </Defs>
+    <AnimatedPath
+      {...props}
+      d={scaledPath(segments, 0, 0, 1, 1)}
+      strokeDasharray={[length, length]}
+      animatedProps={animatedProps}
+    />
   );
 }
 
 /**
- * A mask, named `id`, over the sector of a ring its entrance has swept, from `startAngle` towards
- * `endAngle` in degrees anticlockwise from three o'clock, as Recharts sweeps a pie in.
+ * A slice or a radial bar swept round from `origin` over the entrance: its angles open out from `origin`
+ * to `startAngle` and `endAngle`, as Recharts sweeps a pie and a radial bar in.
  */
-function SweepMask({
-  id,
+function SweptSector({
   progress,
-  cx,
-  cy,
-  radius,
+  still,
+  inner,
+  outer,
+  origin,
   startAngle,
   endAngle,
+  ...props
+}: ShapeProps & { inner: number; outer: number; origin: number; startAngle: number; endAngle: number }): ReactNode {
+  const animatedProps = useAnimatedProps(() => {
+    const share = still ? 1 : progress.value;
+    return {
+      d: sectorPath(inner, outer, origin + (startAngle - origin) * share, origin + (endAngle - origin) * share),
+    };
+  });
+  return <AnimatedPath {...props} animatedProps={animatedProps} />;
+}
+
+/** Marks shown once the entrance has finished, as Recharts draws a line's dots. */
+function ShownWhenDrawn({
+  progress,
+  still,
+  testID,
+  children,
 }: {
-  id: string;
   progress: SharedValue<number>;
-  cx: number;
-  cy: number;
-  radius: number;
-  startAngle: number;
-  endAngle: number;
+  still: boolean;
+  testID?: string;
+  children: ReactNode;
 }): ReactNode {
-  // A circle of half the radius stroked as wide as the radius covers the ring out to it; its dash, which
-  // starts at three o'clock and runs clockwise, is the swept sector.
-  const half = radius / 2;
-  const circumference = 2 * Math.PI * half;
-  const sweep = Math.min(360, Math.abs(endAngle - startAngle)) / 360;
-  const animatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: circumference * (1 - sweep * progress.value),
-  }));
-  const mirror = endAngle > startAngle ? ` translate(0 ${2 * cy}) scale(1 -1)` : '';
+  const animatedProps = useAnimatedProps(() => ({ opacity: still || progress.value >= 1 ? 1 : 0 }));
   return (
-    <Defs>
-      <Mask id={id} maskUnits="userSpaceOnUse" x={cx - radius} y={cy - radius} width={radius * 2} height={radius * 2}>
-        <AnimatedCircle
-          testID="chart-entrance"
-          cx={cx}
-          cy={cy}
-          r={half}
-          fill="none"
-          stroke="white"
-          strokeWidth={radius + 2}
-          strokeDasharray={[circumference, circumference]}
-          transform={`rotate(${-startAngle} ${cx} ${cy})${mirror}`}
-          animatedProps={animatedProps}
-        />
-      </Mask>
-    </Defs>
+    <AnimatedG testID={testID} animatedProps={animatedProps}>
+      {children}
+    </AnimatedG>
   );
 }
 
@@ -595,6 +707,7 @@ function roundedRect(
   height: number,
   radius: number | readonly [number, number, number, number],
 ): string {
+  'worklet';
   const most = Math.min(width, height) / 2;
   const [tl, tr, br, bl] = (typeof radius === 'number' ? [radius, radius, radius, radius] : radius).map((value) =>
     Math.max(0, Math.min(most, value)),
@@ -619,6 +732,9 @@ function labelWidth(text: string): number {
 }
 
 const TICK_FONT_SIZE = 12;
+
+/** The theme's regular Geist face, which the axes' labels are set in. */
+const GEIST_REGULAR = 'Geist_400Regular';
 
 /** How far below `y`, in ems, Recharts sets text whose top, middle or bottom sits on `y`. */
 const VERTICAL_SHIFT = { start: 0.71, middle: 0.355, end: 0 } as const;
@@ -807,7 +923,9 @@ function ChartSurface({
 }): ReactNode {
   const web = Platform.OS === 'web';
   const surface = useRef<ComponentRef<typeof View>>(null);
-  const press = useRef<{ dismiss: boolean }>({ dismiss: false });
+  // A second press on the active category hides it, unless a mouse pressed: a mouse shows a category by
+  // hovering, so its click lands on the active one.
+  const press = useRef<{ dismiss: boolean; mouse: boolean }>({ dismiss: false, mouse: false });
   const latest = useRef(onActive);
   latest.current = onActive;
   const hide = useRef((): void => latest.current(undefined)).current;
@@ -846,7 +964,8 @@ function ChartSurface({
 
   const onGrant = (event: GestureResponderEvent): void => {
     const point = interaction.pointAt(event.nativeEvent.locationX, event.nativeEvent.locationY);
-    press.current.dismiss = point !== undefined && active !== undefined && point.index === active.index;
+    press.current.dismiss =
+      !press.current.mouse && point !== undefined && active !== undefined && point.index === active.index;
     if (point !== undefined && !press.current.dismiss) show(point);
   };
   const onMove = (event: GestureResponderEvent): void => {
@@ -911,6 +1030,9 @@ function ChartSurface({
       onResponderRelease={onRelease}
       onResponderTerminationRequest={() => true}
       onResponderTerminate={() => onActive(undefined)}
+      onPointerDown={(event: PointerEvent) => {
+        press.current.mouse = event.nativeEvent.pointerType === 'mouse';
+      }}
       onPointerMove={onPointerMove}
       onPointerLeave={(event: PointerEvent) => {
         if (event.nativeEvent.pointerType === 'mouse') onActive(undefined);
@@ -975,7 +1097,6 @@ function CartesianChart({
   const tooltip = parts.tooltip;
   const [active, setActive] = useState<ActivePoint | undefined>(undefined);
   const [touched, setTouched] = useState(false);
-  const clipId = `chart-clip-${useId().replace(/[^\w-]/g, '')}`;
 
   if (size === undefined || size.width <= 0 || size.height <= 0) return null;
 
@@ -1155,6 +1276,7 @@ function CartesianChart({
                     x={x.center(index)}
                     y={plot.bottom + 6 + (parts.xAxis?.tickMargin ?? 2) + VERTICAL_SHIFT.start * TICK_FONT_SIZE}
                     fontSize={TICK_FONT_SIZE}
+                    fontFamily={GEIST_REGULAR}
                     fill={tickColor}
                     textAnchor="middle"
                   >
@@ -1180,6 +1302,7 @@ function CartesianChart({
                   x={plot.left - 6 - (parts.yAxis?.tickMargin ?? 2)}
                   y={y(tick) + VERTICAL_SHIFT.middle * TICK_FONT_SIZE}
                   fontSize={TICK_FONT_SIZE}
+                  fontFamily={GEIST_REGULAR}
                   fill={tickColor}
                   textAnchor="end"
                 >
@@ -1189,35 +1312,27 @@ function CartesianChart({
             ))}
           </G>
         )}
-        <EntranceClip
-          id={clipId}
-          progress={progress}
-          plot={plot}
-          size={size}
-          direction={banded ? 'up' : reversed ? 'left' : 'right'}
-        />
         {series.map((item, order) => {
           const key = `${item.props.dataKey}-${order}`;
-          const clipPath = item.props.isAnimationActive === false ? undefined : `url(#${clipId})`;
+          const still = item.props.isAnimationActive === false;
           if (item.kind === 'bar') {
             const props = item.props;
             return (
-              <G key={key} testID={`chart-series-${props.dataKey}`} clipPath={clipPath}>
+              <G key={key} testID={`chart-series-${props.dataKey}`}>
                 {data.map((datum, index) => {
-                  const barTop = y(numberAt(datum, props.dataKey));
-                  const barHeight = Math.abs(y(0) - barTop);
-                  if (barHeight === 0 || barWidth === 0) return null;
+                  const barHeight = y(0) - y(numberAt(datum, props.dataKey));
+                  if (barHeight <= 0 || barWidth === 0) return null;
                   return (
-                    <Path
+                    <GrowingBar
                       key={index}
                       testID={`chart-bar-${props.dataKey}-${index}`}
-                      d={roundedRect(
-                        x.start(index) + categoryGap + order * (barWidth + barGap),
-                        Math.min(barTop, y(0)),
-                        barWidth,
-                        barHeight,
-                        props.radius ?? 0,
-                      )}
+                      progress={progress}
+                      still={still}
+                      x={x.start(index) + categoryGap + order * (barWidth + barGap)}
+                      base={y(0)}
+                      width={barWidth}
+                      height={barHeight}
+                      radius={props.radius ?? 0}
                       fill={resolve(props.fill ?? DEFAULT_SERIES_COLOR)}
                       fillOpacity={props.fillOpacity}
                     />
@@ -1232,39 +1347,59 @@ function CartesianChart({
           // A Line draws its points unless told not to, an Area only when told to.
           const dot = props.dot ?? item.kind === 'line';
           const points = data.map((datum, index) => [x.center(index), y(numberAt(datum, props.dataKey))] as const);
+          const line = parsePath(linePath().curve(curve)(points.map(([px, py]) => [px, py])));
+          const stroke = { fill: 'none', stroke: color, strokeWidth: props.strokeWidth ?? 1 };
           return (
             <G key={key} testID={`chart-series-${props.dataKey}`}>
-              <G clipPath={clipPath}>
-                {item.kind === 'area' ? (
-                  <Path
+              {item.kind === 'area' ? (
+                <>
+                  <GrowingPath
                     testID={`chart-area-${props.dataKey}`}
-                    d={areaPath().curve(curve).y0(y(0))(points.map(([px, py]) => [px, py])) ?? ''}
+                    progress={progress}
+                    still={still}
+                    segments={parsePath(areaPath().curve(curve).y0(y(0))(points.map(([px, py]) => [px, py])))}
+                    ox={0}
+                    oy={y(0)}
+                    across={false}
                     fill={resolve(item.props.fill) ?? color}
                     fillOpacity={item.props.fillOpacity ?? 0.6}
                   />
-                ) : null}
-                <Path
+                  <GrowingPath
+                    testID={`chart-line-${props.dataKey}`}
+                    progress={progress}
+                    still={still}
+                    segments={line}
+                    ox={0}
+                    oy={y(0)}
+                    across={false}
+                    {...stroke}
+                  />
+                </>
+              ) : (
+                <DrawnLine
                   testID={`chart-line-${props.dataKey}`}
-                  d={linePath().curve(curve)(points.map(([px, py]) => [px, py])) ?? ''}
-                  fill="none"
-                  stroke={color}
-                  strokeWidth={props.strokeWidth ?? 1}
+                  progress={progress}
+                  still={still}
+                  segments={line}
+                  {...stroke}
                 />
-                {dot === false
-                  ? null
-                  : points.map(([px, py], index) => (
-                      <Circle
-                        key={index}
-                        testID={`chart-dot-${props.dataKey}-${index}`}
-                        cx={px}
-                        cy={py}
-                        r={(typeof dot === 'object' ? dot.r : undefined) ?? 3}
-                        fill={resolve((typeof dot === 'object' ? dot.fill : undefined) ?? THEME.surface)}
-                        stroke={resolve(typeof dot === 'object' ? dot.stroke : undefined) ?? color}
-                        strokeWidth={(typeof dot === 'object' ? dot.strokeWidth : undefined) ?? props.strokeWidth ?? 1}
-                      />
-                    ))}
-              </G>
+              )}
+              {dot === false ? null : (
+                <ShownWhenDrawn progress={progress} still={still} testID={`chart-dots-${props.dataKey}`}>
+                  {points.map(([px, py], index) => (
+                    <Circle
+                      key={index}
+                      testID={`chart-dot-${props.dataKey}-${index}`}
+                      cx={px}
+                      cy={py}
+                      r={(typeof dot === 'object' ? dot.r : undefined) ?? 3}
+                      fill={resolve((typeof dot === 'object' ? dot.fill : undefined) ?? THEME.surface)}
+                      stroke={resolve(typeof dot === 'object' ? dot.stroke : undefined) ?? color}
+                      strokeWidth={(typeof dot === 'object' ? dot.strokeWidth : undefined) ?? props.strokeWidth ?? 1}
+                    />
+                  ))}
+                </ShownWhenDrawn>
+              )}
               {props.activeDot === false || activeIndex === undefined || tooltip === undefined ? null : (
                 <Circle
                   testID={`chart-active-dot-${props.dataKey}`}
@@ -1398,17 +1533,36 @@ type TextProps = Omit<ComponentProps<typeof SvgText>, 'fill'> & {
   fill?: string;
 };
 
+/** The theme's Geist face for a font weight, such as `bold` or `600`, since a device picks the weight by family. */
+function geistFace(weight: TextProps['fontWeight']): string {
+  const value = weight === 'bold' ? 700 : Number(weight ?? 400);
+  if (value >= 700) return 'Geist_700Bold';
+  if (value >= 600) return 'Geist_600SemiBold';
+  if (value >= 500) return 'Geist_500Medium';
+  return GEIST_REGULAR;
+}
+
 /**
- * Text inside a chart's svg, in a colour from the chart's palette, taking react-native-svg's text props such
- * as `textAnchor` and `fontSize`.
+ * Text inside a chart's svg, in a colour from the chart's palette and the theme's face for its `fontWeight`,
+ * taking react-native-svg's text props such as `textAnchor` and `fontSize`.
  */
-function Text({ y, verticalAnchor = 'end', fill, fontSize = 14, ...props }: TextProps): ReactNode {
+function Text({
+  y,
+  verticalAnchor = 'end',
+  fill,
+  fontSize = 14,
+  fontWeight,
+  fontFamily,
+  ...props
+}: TextProps): ReactNode {
   const palette = useContext(ChartPaletteContext);
   return (
     <SvgText
       y={Number(y ?? 0) + VERTICAL_SHIFT[verticalAnchor] * Number(fontSize)}
       fill={palette.resolveColor(fill ?? 'var(--foreground)')}
       fontSize={fontSize}
+      // The face carries the weight; a weight on it too would have the browser thicken a bold face again.
+      {...(fontFamily === undefined ? { fontFamily: geistFace(fontWeight) } : { fontFamily, fontWeight })}
       {...props}
     />
   );
@@ -1492,19 +1646,6 @@ function polar(cx: number, cy: number, radius: number, angle: number): { x: numb
   };
 }
 
-/** A slice of a pie, or of a ring with an `inner` radius, as an svg path around 0, 0. */
-function slicePath(slice: Pick<Slice, 'startAngle' | 'endAngle'>, inner: number, outer: number): string {
-  // d3's angles run clockwise from twelve o'clock.
-  return (
-    arcPath()({
-      innerRadius: inner,
-      outerRadius: outer,
-      startAngle: (90 - slice.startAngle) * RADIANS,
-      endAngle: (90 - slice.endAngle) * RADIANS,
-    }) ?? ''
-  );
-}
-
 /** A pie, or a ring, of the Pie inside it, with its tooltip and its legend. */
 function PieChart({ margin, title, width, height, children }: PieChartProps): ReactNode {
   const size = useChartSize(width, height);
@@ -1528,7 +1669,6 @@ function PieChart({ margin, title, width, height, children }: PieChartProps): Re
   const [legendHeight, setLegendHeight] = useState(0);
   const pie = parts.pie;
   const progress = useEntrance(pie?.isAnimationActive !== false, pie?.animationDuration ?? ENTRANCE_MS);
-  const maskId = `chart-mask-${useId().replace(/[^\w-]/g, '')}`;
   const [active, setActive] = useState<ActivePoint | undefined>(undefined);
   const [touched, setTouched] = useState(false);
 
@@ -1619,32 +1759,25 @@ function PieChart({ margin, title, width, height, children }: PieChartProps): Re
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
       >
-        {pie.isAnimationActive === false ? null : (
-          <SweepMask
-            id={maskId}
-            progress={progress}
-            cx={cx}
-            cy={cy}
-            radius={outer + 1}
-            startAngle={pie.startAngle ?? 0}
-            endAngle={pie.endAngle ?? 360}
-          />
-        )}
-        <G mask={pie.isAnimationActive === false ? undefined : `url(#${maskId})`}>
-          <G x={cx} y={cy}>
-            {slices.map((slice) =>
-              slice.value > 0 && slice.endAngle !== slice.startAngle ? (
-                <Path
-                  key={slice.index}
-                  testID={`chart-slice-${slice.index}`}
-                  d={slicePath(slice, inner, outer)}
-                  fill={resolve(slice.fill ?? DEFAULT_SERIES_COLOR)}
-                  stroke={resolve(pie.stroke)}
-                  strokeWidth={pie.stroke === undefined ? 0 : (pie.strokeWidth ?? 1)}
-                />
-              ) : null,
-            )}
-          </G>
+        <G x={cx} y={cy}>
+          {slices.map((slice) =>
+            slice.value > 0 && slice.endAngle !== slice.startAngle ? (
+              <SweptSector
+                key={slice.index}
+                testID={`chart-slice-${slice.index}`}
+                progress={progress}
+                still={pie.isAnimationActive === false}
+                inner={inner}
+                outer={outer}
+                origin={pie.startAngle ?? 0}
+                startAngle={slice.startAngle}
+                endAngle={slice.endAngle}
+                fill={resolve(slice.fill ?? DEFAULT_SERIES_COLOR)}
+                stroke={resolve(pie.stroke)}
+                strokeWidth={pie.stroke === undefined ? 0 : (pie.strokeWidth ?? 1)}
+              />
+            ) : null,
+          )}
         </G>
         {labels}
         {parts.other}
@@ -1835,32 +1968,6 @@ function PolarGridDrawing({
   );
 }
 
-/** A clip, named `id`, over a disc around `cx`, `cy` that grows to `radius` over the entrance. */
-function GrowClip({
-  id,
-  progress,
-  cx,
-  cy,
-  radius,
-}: {
-  id: string;
-  progress: SharedValue<number>;
-  cx: number;
-  cy: number;
-  radius: number;
-}): ReactNode {
-  const animatedProps = useAnimatedProps(() => ({
-    r: radius * progress.value,
-  }));
-  return (
-    <Defs>
-      <ClipPath id={id}>
-        <AnimatedCircle testID="chart-entrance" cx={cx} cy={cy} animatedProps={animatedProps} />
-      </ClipPath>
-    </Defs>
-  );
-}
-
 /** The middle and the radii of a polar chart laid out in `size`, less its margin and its legend. */
 function polarFrame(
   props: PolarChartProps,
@@ -1920,7 +2027,6 @@ function RadarChart(props: PolarChartProps): ReactNode {
   const series = parts.series.filter((item) => item.hide !== true);
   const animate = series.some((item) => item.isAnimationActive !== false);
   const progress = useEntrance(animate, Math.max(...series.map((item) => item.animationDuration ?? ENTRANCE_MS), 0));
-  const clipId = `chart-clip-${useId().replace(/[^\w-]/g, '')}`;
   const [active, setActive] = useState<ActivePoint | undefined>(undefined);
   const [touched, setTouched] = useState(false);
 
@@ -2053,6 +2159,7 @@ function RadarChart(props: PolarChartProps): ReactNode {
                   x={at.x}
                   y={at.y + (0.355 - 0.355 * Math.sin(angle * RADIANS)) * TICK_FONT_SIZE}
                   fontSize={TICK_FONT_SIZE}
+                  fontFamily={GEIST_REGULAR}
                   fill={tickColor}
                   textAnchor={anchorAt(angle)}
                 >
@@ -2065,7 +2172,15 @@ function RadarChart(props: PolarChartProps): ReactNode {
           : ticks.map((tick) => {
               const at = polar(cx, cy, radius(tick), axisAngle);
               return (
-                <SvgText key={tick} x={at.x} y={at.y} fontSize={TICK_FONT_SIZE} fill={tickColor} textAnchor="start">
+                <SvgText
+                  key={tick}
+                  x={at.x}
+                  y={at.y}
+                  fontSize={TICK_FONT_SIZE}
+                  fontFamily={GEIST_REGULAR}
+                  fill={tickColor}
+                  textAnchor="start"
+                >
                   {String(tick)}
                 </SvgText>
               );
@@ -2079,34 +2194,33 @@ function RadarChart(props: PolarChartProps): ReactNode {
             stroke={tickColor}
           />
         )}
-        {animate ? <GrowClip id={clipId} progress={progress} cx={cx} cy={cy} radius={outer + 8} /> : null}
         {series.map((item, order) => {
           const color = resolve(colorOf(item));
           const points = data.map((datum, index) =>
             polar(cx, cy, radius(numberAt(datum, item.dataKey)), angles[index] ?? 0),
           );
           const dot = item.dot ?? false;
+          const still = item.isAnimationActive === false;
           return (
-            <G
-              key={`${item.dataKey}-${order}`}
-              testID={`chart-series-${item.dataKey}`}
-              clipPath={item.isAnimationActive === false ? undefined : `url(#${clipId})`}
-            >
-              <Path
+            <G key={`${item.dataKey}-${order}`} testID={`chart-series-${item.dataKey}`}>
+              <GrowingPath
                 testID={`chart-radar-${item.dataKey}`}
-                d={
-                  points.length === 0
-                    ? ''
-                    : `${points.map((point, index) => `${index === 0 ? 'M' : 'L'}${point.x},${point.y}`).join(' ')} Z`
-                }
+                progress={progress}
+                still={still}
+                segments={points
+                  .map((point, index) => ({ command: index === 0 ? 'M' : 'L', values: [point.x, point.y] }))
+                  .concat(points.length === 0 ? [] : [{ command: 'Z', values: [] }])}
+                ox={cx}
+                oy={cy}
+                across
                 fill={resolve(item.fill) ?? 'none'}
                 fillOpacity={item.fillOpacity}
                 stroke={resolve(item.stroke)}
                 strokeWidth={item.strokeWidth ?? 1}
               />
-              {dot === false
-                ? null
-                : points.map((point, index) => (
+              {dot === false ? null : (
+                <ShownWhenDrawn progress={progress} still={still}>
+                  {points.map((point, index) => (
                     <Circle
                       key={index}
                       cx={point.x}
@@ -2115,6 +2229,8 @@ function RadarChart(props: PolarChartProps): ReactNode {
                       fill={resolve(typeof dot === 'object' ? dot.fill : undefined) ?? color}
                     />
                   ))}
+                </ShownWhenDrawn>
+              )}
             </G>
           );
         })}
@@ -2239,7 +2355,6 @@ function RadialBarChart(props: RadialBarChartProps): ReactNode {
   const series = parts.series.filter((item) => item.hide !== true);
   const animate = series.some((item) => item.isAnimationActive !== false);
   const progress = useEntrance(animate, Math.max(...series.map((item) => item.animationDuration ?? ENTRANCE_MS), 0));
-  const maskId = `chart-mask-${useId().replace(/[^\w-]/g, '')}`;
   const [active, setActive] = useState<ActivePoint | undefined>(undefined);
   const [touched, setTouched] = useState(false);
 
@@ -2308,8 +2423,6 @@ function RadialBarChart(props: RadialBarChartProps): ReactNode {
       payload: datum,
     })),
   );
-  const arc = (from: number, to: number, start: number, end: number): string =>
-    slicePath({ startAngle: start, endAngle: end }, from, to);
   const viewBox: PolarViewBox = { cx, cy, innerRadius: inner, outerRadius: outer, startAngle, endAngle };
   const label = title ?? 'Radial bar chart';
 
@@ -2333,17 +2446,6 @@ function RadialBarChart(props: RadialBarChartProps): ReactNode {
             resolve={resolve}
           />
         )}
-        {animate ? (
-          <SweepMask
-            id={maskId}
-            progress={progress}
-            cx={cx}
-            cy={cy}
-            radius={outer + 1}
-            startAngle={startAngle}
-            endAngle={endAngle}
-          />
-        ) : null}
         <G x={cx} y={cy}>
           {series.map((item, order) =>
             item.background === true
@@ -2353,7 +2455,7 @@ function RadialBarChart(props: RadialBarChartProps): ReactNode {
                     <Path
                       key={`track-${item.dataKey}-${index}`}
                       testID={`chart-track-${item.dataKey}-${index}`}
-                      d={arc(ring.from, ring.to, startAngle, endAngle)}
+                      d={sectorPath(ring.from, ring.to, startAngle, endAngle)}
                       fill={resolve(THEME.track)}
                     />
                   );
@@ -2362,25 +2464,25 @@ function RadialBarChart(props: RadialBarChartProps): ReactNode {
           )}
         </G>
         {series.map((item, order) => (
-          <G
-            key={`${item.dataKey}-${order}`}
-            testID={`chart-series-${item.dataKey}`}
-            mask={item.isAnimationActive === false ? undefined : `url(#${maskId})`}
-          >
-            <G x={cx} y={cy}>
-              {data.map((datum, index) => {
-                const ring = ringOf(index, order);
-                const value = numberAt(datum, item.dataKey);
-                return value <= 0 ? null : (
-                  <Path
-                    key={index}
-                    testID={`chart-radial-bar-${item.dataKey}-${index}`}
-                    d={arc(ring.from, ring.to, startAngle, angleOf(value))}
-                    fill={resolve(fillOf(item, index))}
-                  />
-                );
-              })}
-            </G>
+          <G key={`${item.dataKey}-${order}`} testID={`chart-series-${item.dataKey}`} x={cx} y={cy}>
+            {data.map((datum, index) => {
+              const ring = ringOf(index, order);
+              const value = numberAt(datum, item.dataKey);
+              return value <= 0 ? null : (
+                <SweptSector
+                  key={index}
+                  testID={`chart-radial-bar-${item.dataKey}-${index}`}
+                  progress={progress}
+                  still={item.isAnimationActive === false}
+                  inner={ring.from}
+                  outer={ring.to}
+                  origin={startAngle}
+                  startAngle={startAngle}
+                  endAngle={angleOf(value)}
+                  fill={resolve(fillOf(item, index))}
+                />
+              );
+            })}
           </G>
         ))}
         {drawLabels(parts.radiusAxis?.children, viewBox)}
