@@ -61,7 +61,7 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "rough-notation": "^0.5.1",
-    "shiki": "^4.2.0",
+    "shiki": "catalog:",
     "sonner": "^2.0.7",
     "tiptap-extension-global-drag-handle": "^0.1.18",
     "unified": "^11.0.5",

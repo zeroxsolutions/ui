@@ -28,9 +28,13 @@ describe('appPath', () => {
     );
   });
 
-  it('throws on a path outside ui, components and lib with no target', () => {
-    expect(() => appPath({ path: 'registry/hooks/use-x.ts', type: 'registry:hook' })).toThrow(
-      'No app path for registry/hooks/use-x.ts',
+  it('puts a hook under hooks, where the hooks alias points', () => {
+    expect(appPath({ path: 'registry/hooks/use-x.ts', type: 'registry:hook' })).toBe('hooks/use-x.ts');
+  });
+
+  it('throws on a path outside ui, components, lib and hooks with no target', () => {
+    expect(() => appPath({ path: 'registry/theme/x.ts', type: 'registry:file' })).toThrow(
+      'No app path for registry/theme/x.ts',
     );
   });
 });

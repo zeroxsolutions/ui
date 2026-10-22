@@ -56,9 +56,11 @@
     "d3-scale": "catalog:",
     "d3-shape": "catalog:",
     "date-fns": "catalog:",
+    "expo-clipboard": "catalog:expo",
     "lucide-react-native": "catalog:",
     "react-hook-form": "catalog:",
     "react-native-svg": "catalog:expo",
+    "shiki": "catalog:",
     "tailwind-merge": "catalog:"
   },
   "devDependencies": {

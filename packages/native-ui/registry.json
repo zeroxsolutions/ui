@@ -1040,6 +1040,38 @@
       ]
     },
     {
+      "name": "use-highlighted-code",
+      "type": "registry:hook",
+      "title": "Use highlighted code",
+      "description": "useHighlightedCode, which highlights code with Shiki's JavaScript engine into one node per line for a CodeBlockLine, in the light or dark theme the app draws, loading each language the first time it is used.",
+      "dependencies": ["shiki"],
+      "registryDependencies": ["@zui/chart-theme"],
+      "files": [
+        {
+          "path": "src/registry/hooks/use-highlighted-code.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/registry/lib/highlighter.tsx",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "code-block",
+      "type": "registry:ui",
+      "title": "Code Block",
+      "description": "Code, terminal output and diffs with an optional header, line numbers, highlighted lines and a copy button that tells screen readers it copied; long lines scroll sideways unless they wrap.",
+      "dependencies": ["class-variance-authority", "expo-clipboard", "lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/text", "@zui/use-highlighted-code"],
+      "files": [
+        {
+          "path": "src/registry/ui/code-block.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

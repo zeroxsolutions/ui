@@ -1052,6 +1052,73 @@ describe('translateClasses for a drawer swipe handle', () => {
   });
 });
 
+describe('translateClasses for a code block', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const slot = (
+    style: keyof typeof styles,
+    name: string,
+    engine: Engine,
+    part: 'view' | 'text',
+    state = '',
+  ): Translation => translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
+
+  it.each(STYLE_ENGINES)('translates every class of every code-block slot for %s in %s', (engine, style) => {
+    const names = [...styles[style].keys()].filter((name) => name.startsWith('cn-code-block'));
+
+    expect(names.length).toBeGreaterThan(0);
+    for (const name of names) {
+      expect({ name, unknown: slot(style, name, engine, 'view').unknown }).toEqual({ name, unknown: [] });
+    }
+  });
+
+  it.each([
+    ['vega', ['top-3', 'end-3', 'm-0']],
+    ['nova', ['top-2', 'end-2', 'm-0']],
+  ] as const)(
+    'places %s actions straight inside the block at its top end, as the state parent=code-block',
+    (style, placed) => {
+      expect([...slot(style, 'cn-code-block-actions', 'uniwind', 'view', 'parent=code-block').classes].sort()).toEqual(
+        [...placed].sort(),
+      );
+    },
+  );
+
+  it('gives each button of floating actions the background, as the state part=button', () => {
+    expect(slot('vega', 'cn-code-block-actions', 'uniwind', 'view', 'parent=code-block+part=button').classes).toEqual([
+      'bg-background',
+    ]);
+  });
+
+  it('spaces a numbered line from its number, as the state numbered', () => {
+    expect(slot('vega', 'cn-code-block-line', 'uniwind', 'view', 'numbered').classes).toEqual(['gap-x-3']);
+  });
+
+  it('gives the number its ::before draws to the part=before child', () => {
+    expect(slot('vega', 'cn-code-block-line', 'uniwind', 'view', 'part=before').classes).toEqual(['min-w-6']);
+    expect(slot('vega', 'cn-code-block-line', 'uniwind', 'text', 'part=before').classes).toEqual([
+      'text-end',
+      'text-muted-foreground',
+    ]);
+  });
+
+  it('gives the diff marker its ::after draws to the part=after child, leaving the sign to the component', () => {
+    expect(slot('vega', 'cn-code-block-line', 'uniwind', 'view', 'part=after').classes).toEqual(['start-1']);
+    expect(slot('vega', 'cn-code-block-line', 'uniwind', 'text', 'part=after').classes).toEqual([
+      'text-muted-foreground',
+    ]);
+    expect(slot('vega', 'cn-code-block-line-variant-removed', 'uniwind', 'text', 'part=after').classes).toEqual([
+      'text-destructive',
+    ]);
+    expect(slot('vega', 'cn-code-block-line-variant-added', 'uniwind', 'view', 'part=after')).toEqual({
+      classes: [],
+      unknown: [],
+    });
+  });
+});
+
 describe('translateClasses for a menu', () => {
   const styles = {
     vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),

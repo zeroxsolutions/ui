@@ -116,6 +116,7 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'aria-expanded': 'expanded',
     'data-open': 'open',
     'data-popup-open': 'open',
+    'in-data-numbered': 'numbered',
     'data-horizontal': 'orientation=horizontal',
     'data-vertical': 'orientation=vertical',
     first: 'position=first',
@@ -132,9 +133,10 @@ const COMMAND_GROUP_HEADING = '**:[[cmdk-group-heading]]';
 
 /**
  * A state of the control inside the part, of a direct child the part holds, such as an icon in an
- * Alert or a group in a ButtonGroup, or of the part just before it, such as the legend a FieldDescription
- * follows, which upstream selects with an arbitrary selector the dropped rules would otherwise remove or
- * not read, and which the component learns from its control, its children or its parent.
+ * Alert or a group in a ButtonGroup, of the part just before it, such as the legend a FieldDescription
+ * follows, or of the part it sits straight inside, such as CodeBlockActions floating in a CodeBlock rather
+ * than sitting in its header, which upstream selects with an arbitrary selector the dropped rules would
+ * otherwise remove or not read, and which the component learns from its control, its children or its parent.
  */
 const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
   Object.entries({
@@ -143,6 +145,7 @@ const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'has-[>svg]': 'slot=icon',
     'has-[>[data-slot=button-group]]': 'slot=button-group',
     '[[data-variant=legend]+&]': 'after=legend',
+    '[[data-slot=code-block]>&]': 'parent=code-block',
     [COMMAND_GROUP_HEADING]: 'part=group-heading',
   }),
 );
@@ -156,6 +159,13 @@ const CHILD_PART_MODIFIER = /^\*:data-\[slot=([\w-]+)\]$/;
 
 /** `*:[svg...]`, upstream's other spelling of a direct child svg with no size of its own. */
 const CHILD_ICON = "[svg:not([class*='size-'])]";
+
+/**
+ * `*:[button]`, the classes a slot gives each button straight inside it, such as the background of a code
+ * block's floating actions, is the state `part=button`, which the component gives each child it holds.
+ */
+const CHILD_BUTTON = '[button]';
+const CHILD_BUTTON_MODIFIER = `*:${CHILD_BUTTON}`;
 
 /** The slot `**:` selects as an icon anywhere inside the part; any other slot behind `**:` is dropped. */
 const DESCENDANT_ICON_SLOT = 'data-[slot=accordion-trigger-icon]';
@@ -306,10 +316,27 @@ const IMPORTANT_SUFFIX = /!$/;
 /**
  * Slots whose `::after` pseudo-element draws something a component draws as a child instead, so a class
  * behind `after:` is the state `part=after`, which that child applies, rather than dropped. The drawer's
- * swipe handle draws its bar this way.
+ * swipe handle draws its bar this way, and a code block's line its diff marker, whose sign the component
+ * writes, so the `content-[...]` that sets it on the web is dropped.
  */
-const SLOT_AFTER_PARTS: ReadonlySet<string> = new Set(['cn-drawer-swipe-handle']);
+const SLOT_AFTER_PARTS: ReadonlySet<string> = new Set([
+  'cn-drawer-swipe-handle',
+  'cn-code-block-line',
+  'cn-code-block-line-variant-added',
+  'cn-code-block-line-variant-removed',
+]);
 const AFTER_PART_MODIFIER = '*:data-[slot=after]';
+
+/**
+ * Slots whose `::before` pseudo-element draws something a component draws as a child instead, so a class
+ * behind `before:` is the state `part=before`, which that child applies. A code block's line draws its
+ * number this way.
+ */
+const SLOT_BEFORE_PARTS: ReadonlySet<string> = new Set(['cn-code-block-line']);
+const BEFORE_PART_MODIFIER = '*:data-[slot=before]';
+
+/** The text a pseudo-element draws, which a component that draws the part as a child writes itself. */
+const PSEUDO_CONTENT = /^content-\[/;
 
 /** The px of 1rem, which the theme's setup sets. */
 const REM_PX = 16;
@@ -500,6 +527,7 @@ function stateOf(modifier: string): StateKey | undefined {
   if (childVariant) return `${childVariant[1]}=${childVariant[2]}`;
   const childPart = CHILD_PART_MODIFIER.exec(modifier);
   if (childPart) return `part=${childPart[1]}`;
+  if (modifier === CHILD_BUTTON_MODIFIER) return 'part=button';
   const own = modifier.replace(RELATIVE_PREFIX, '').replace(GROUP_NAME, '').replace(CHILD_PREFIX, '');
   for (const candidate of new Set([modifier, own])) {
     const state = STATE_MODIFIERS.get(candidate);
@@ -524,7 +552,11 @@ function joinChildModifiers(modifiers: readonly string[]): string[] {
   const joined: string[] = [];
   for (let i = 0; i < modifiers.length; i += 1) {
     const next = modifiers[i + 1];
-    if (modifiers[i] === '*' && next !== undefined && (next === CHILD_ICON || CHILD_SLOT.test(next))) {
+    if (
+      modifiers[i] === '*' &&
+      next !== undefined &&
+      (next === CHILD_ICON || next === CHILD_BUTTON || CHILD_SLOT.test(next))
+    ) {
       joined.push(`*:${next}`);
       i += 1;
     } else if (modifiers[i] === '**' && (next === DESCENDANT_ICON_SLOT || `**:${next}` === COMMAND_GROUP_HEADING)) {
@@ -537,13 +569,22 @@ function joinChildModifiers(modifiers: readonly string[]): string[] {
   return joined;
 }
 
-function readClass(cls: string, stateModifiers: ReadonlySet<string> = new Set(), afterPart = false): SlotClass {
+function readClass(
+  cls: string,
+  stateModifiers: ReadonlySet<string> = new Set(),
+  afterPart = false,
+  beforePart = false,
+): SlotClass {
   const split = splitVariants(cls);
   const utility = split.pop() ?? '';
   const variants = joinChildModifiers(split);
   const modifiers = variants
     .filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m))
-    .map((m) => (afterPart && m === 'after' ? AFTER_PART_MODIFIER : m));
+    .map((m) => (afterPart && m === 'after' ? AFTER_PART_MODIFIER : m))
+    .map((m) => (beforePart && m === 'before' ? BEFORE_PART_MODIFIER : m));
+  if ((afterPart || beforePart) && PSEUDO_CONTENT.test(utility)) {
+    return { reading: 'dropped' };
+  }
   const isChildState = (m: string): boolean => CHILD_STATE_MODIFIERS.has(m) || CHILD_VARIANT_MODIFIER.test(m);
   const dropped = (m: string): boolean =>
     !isChildState(m) && !stateModifiers.has(m) && DROPPED_MODIFIERS.some((rule) => rule.test(m));
@@ -733,11 +774,12 @@ export function translateClasses(
   const spacingVariables: SpacingVariables = slot.spacingVariables ?? new Map();
   const importantRemoved = slot.name !== undefined && SLOT_IMPORTANT_REMOVED.has(slot.name);
   const afterPart = slot.name !== undefined && SLOT_AFTER_PARTS.has(slot.name);
+  const beforePart = slot.name !== undefined && SLOT_BEFORE_PARTS.has(slot.name);
   const componentClasses = (slot.name === undefined ? undefined : SLOT_COMPONENT_CLASSES.get(slot.name)) ?? [];
   const read = [...classes, ...componentClasses]
     .filter((cls) => !droppedByName.has(cls))
     .map((cls) => (importantRemoved ? cls.replace(IMPORTANT_SUFFIX, '') : cls))
-    .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers, afterPart), spacingVariables));
+    .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers, afterPart, beforePart), spacingVariables));
 
   const ringBorder = drawsRingAsBorder(read);
 

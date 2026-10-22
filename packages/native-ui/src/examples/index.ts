@@ -19,6 +19,7 @@ import { CardDemo } from './card-demo';
 import { CarouselDemo } from './carousel-demo';
 import { ChartDemo } from './chart-demo';
 import { CheckboxDemo } from './checkbox-demo';
+import { CodeBlockDemo } from './code-block-demo';
 import { CodeInputDemo } from './code-input-demo';
 import { CollapsibleDemo } from './collapsible-demo';
 import { ComboboxDemo } from './combobox-demo';
@@ -87,6 +88,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'carousel-demo': CarouselDemo,
   'chart-demo': ChartDemo,
   'checkbox-demo': CheckboxDemo,
+  'code-block-demo': CodeBlockDemo,
   'code-input-demo': CodeInputDemo,
   'collapsible-demo': CollapsibleDemo,
   'combobox-demo': ComboboxDemo,
