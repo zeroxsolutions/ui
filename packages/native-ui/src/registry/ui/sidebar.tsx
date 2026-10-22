@@ -24,6 +24,7 @@ import {
   type MouseEvent,
   type NativeSyntheticEvent,
   type TargetedEvent,
+  type ViewStyle,
 } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useReducedMotion } from '../lib/motion';
@@ -402,7 +403,9 @@ function SidebarRail({ className, ...props }: SidebarRailProps): ReactNode {
         onPress={toggleSidebar}
         onHoverIn={() => setHovered(true)}
         onHoverOut={() => setHovered(false)}
-        className={cn('h-full w-full items-center web:cursor-ew-resize cn-sidebar-rail', className)}
+        className={cn('h-full w-full items-center cn-sidebar-rail', className)}
+        // React Native Web reads this cursor, which React Native's style type does not list.
+        style={Platform.OS === 'web' ? { cursor: 'ew-resize' as ViewStyle['cursor'] } : undefined}
         {...props}
       >
         <View className={cn('h-full w-[2px]', hovered && 'bg-sidebar-border')} />

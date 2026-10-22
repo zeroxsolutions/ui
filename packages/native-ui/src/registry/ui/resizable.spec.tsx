@@ -353,9 +353,42 @@ describe('Resizable', () => {
     expect(panelRef.current?.getSize()).toEqual({ asPercentage: 40, inPixels: 160 });
   });
 
+  it('sets no web cursor or touch action on a device', async () => {
+    await render(<Pair />);
+
+    expect(styleOf(handle())).not.toHaveProperty('cursor');
+    expect(styleOf(handle())).not.toHaveProperty('touchAction');
+  });
+
   describe('on the web', () => {
     beforeEach(() => {
       jest.replaceProperty(Platform, 'OS', 'web');
+    });
+
+    it('shows a resize cursor across the group, and keeps the browser from panning under a drag', async () => {
+      await render(<Pair />);
+
+      expect(styleOf(handle())).toMatchObject({ cursor: 'col-resize', touchAction: 'none', outlineWidth: 0 });
+    });
+
+    it('shows a row-resize cursor in a vertical group', async () => {
+      await render(<Pair orientation="vertical" />);
+
+      expect(styleOf(handle())).toMatchObject({ cursor: 'row-resize' });
+    });
+
+    it('shows a not-allowed cursor on a disabled handle, and none where the group disables the cursor', async () => {
+      await render(
+        <ResizablePanelGroup testID="group">
+          <ResizablePanel defaultSize="50%" />
+          <ResizableHandle testID="handle" disabled />
+          <ResizablePanel defaultSize="50%" />
+        </ResizablePanelGroup>,
+      );
+      expect(styleOf(handle())).toMatchObject({ cursor: 'not-allowed' });
+
+      await render(<Pair disableCursor />);
+      expect(styleOf(handle()).cursor).toBeUndefined();
     });
 
     it('is a focusable separator across the group', async () => {

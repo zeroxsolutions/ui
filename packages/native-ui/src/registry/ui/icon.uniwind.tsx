@@ -25,7 +25,7 @@ function IconGlyph({ as: Glyph, className: _mapped, ...props }: IconProps): Reac
 
 // The colour is read from `color`, not Uniwind's `accent-*`, so the text classes a Button hands
 // its label colour the icon beside it too. `style` takes every other class, such as a margin or a
-// shrink, so the svg sits in its row as it does under NativeWind.
+// shrink, so the svg sits in its row as a View with those classes would.
 const StyledIconGlyph = withUniwind(IconGlyph, {
   style: {
     fromClassName: 'className',

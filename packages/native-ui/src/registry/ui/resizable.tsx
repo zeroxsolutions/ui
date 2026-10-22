@@ -22,6 +22,7 @@ import {
   type KeyDownEvent,
   type LayoutChangeEvent,
   type ViewProps,
+  type ViewStyle,
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import { cn } from '../lib/utils';
@@ -880,6 +881,15 @@ type ResizableHandleProps = Omit<ViewProps, 'id' | 'role'> & {
 };
 
 /**
+ * The browser's own handling a handle turns off, and the cursor it shows: a drag on the handle would
+ * otherwise pan the page, and a press draw the focus outline over the ring the handle draws itself.
+ */
+function webHandleStyle(cursor: 'not-allowed' | 'row-resize' | 'col-resize' | undefined): ViewStyle {
+  // React Native Web reads these values, which React Native's style type does not list.
+  return { touchAction: 'none', outlineWidth: 0, cursor: cursor as ViewStyle['cursor'] } as ViewStyle;
+}
+
+/**
  * The handle between two panels, dragged to move room from one to the other. A drag on it is kept from a
  * scrolling parent. It is announced as adjustable, valued at the size of the panel before it, and a screen
  * reader's swipe up or down grows or shrinks that panel. On the web it is a focusable separator: the arrow keys
@@ -1032,16 +1042,27 @@ function ResizableHandle({
         onLayout?.(event);
       }}
       className={cn(
-        'relative items-center justify-center bg-border web:touch-none web:outline-none',
+        'relative items-center justify-center bg-border',
         vertical ? 'h-px w-full' : 'w-px',
         focused && 'ring-1 ring-ring',
-        !group.disableCursor &&
-          !group.disabled &&
-          (disabled ? 'web:cursor-not-allowed' : vertical ? 'web:cursor-row-resize' : 'web:cursor-col-resize'),
         className,
       )}
       // Above the panel after it, which would otherwise take the touches on that side of its widened area.
-      style={[style, { flexGrow: 0, flexShrink: 0, zIndex: 1 }]}
+      style={[
+        style,
+        { flexGrow: 0, flexShrink: 0, zIndex: 1 },
+        web
+          ? webHandleStyle(
+              group.disableCursor || group.disabled
+                ? undefined
+                : disabled
+                  ? 'not-allowed'
+                  : vertical
+                    ? 'row-resize'
+                    : 'col-resize',
+            )
+          : undefined,
+      ]}
       {...props}
     >
       {web ? (

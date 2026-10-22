@@ -65,7 +65,7 @@ interface NavigationMenuState {
   /** Opens the item of `value`, or closes the open one with `null`. */
   change: (value: unknown, reason: OpenReason) => void;
   openedBy: OpenReason;
-  /** On the web: opens `value` once the pointer has rested `delay` ms, or closes after `closeDelay` ms. */
+  /** On the web, opens `value` once the pointer has rested `delay` ms, or closes after `closeDelay` ms. */
   hoverOpen: (value: unknown) => void;
   hoverClose: () => void;
   cancelHoverClose: () => void;

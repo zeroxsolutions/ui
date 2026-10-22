@@ -1,6 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { act, configure, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
-import { AccessibilityInfo, Platform, Text as NativeText, View } from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet, Text as NativeText, View } from 'react-native';
 import { catchBackPress } from './overlay.testing';
 import {
   Sidebar,
@@ -304,6 +304,15 @@ describe('Sidebar', () => {
       await render(<App />);
 
       expect(screen.getByRole('button', { name: 'Playground' })).toBeSelected();
+    });
+
+    it('shows a resize cursor over the rail on the web', async () => {
+      jest.replaceProperty(Platform, 'OS', 'web');
+      const page = { addEventListener: () => undefined, removeEventListener: () => undefined };
+      jest.replaceProperty(globalThis as unknown as { window: unknown }, 'window', page);
+      await render(<App />);
+
+      expect(StyleSheet.flatten(rail().props.style)).toMatchObject({ cursor: 'ew-resize' });
     });
 
     it('opens and closes on Cmd+B or Ctrl+B on the web', async () => {
