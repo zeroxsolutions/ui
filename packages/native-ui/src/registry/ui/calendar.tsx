@@ -41,6 +41,7 @@ import {
 } from 'react-native';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './button';
+import { useDirection } from './direction';
 import { Icon } from './icon';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import { Text } from './text';
@@ -425,13 +426,23 @@ function dayKey(date: Date): string {
   return format(date, 'yyyy-MM-dd');
 }
 
-/** Where a key moves the focused day, as react-day-picker moves it. */
-function movedBy(key: string, shiftKey: boolean, date: Date, weekStartsOn: Day, locale: Locale): Date | undefined {
+/**
+ * Where a key moves the focused day, as react-day-picker moves it: the left and right arrows go to the day
+ * drawn on that side, the day before in text read left to right and the day after in text read right to left.
+ */
+function movedBy(
+  key: string,
+  shiftKey: boolean,
+  date: Date,
+  weekStartsOn: Day,
+  locale: Locale,
+  rtl: boolean,
+): Date | undefined {
   switch (key) {
     case 'ArrowLeft':
-      return addDays(date, -1);
+      return addDays(date, rtl ? 1 : -1);
     case 'ArrowRight':
-      return addDays(date, 1);
+      return addDays(date, rtl ? -1 : 1);
     case 'ArrowUp':
       return addWeeks(date, -1);
     case 'ArrowDown':
@@ -455,7 +466,11 @@ function movedBy(key: string, shiftKey: boolean, date: Date, weekStartsOn: Day, 
  * with "Today" before it and "selected" after it. On the web the months are grids, and the arrow keys, Page
  * Up and Page Down (with Shift, a year), Home and End move between the days.
  */
+/** Mirrors an arrow drawn for text read left to right, so it points the same way in text read right to left. */
+const MIRRORED = { transform: [{ scaleX: -1 }] };
+
 function Calendar(props: CalendarProps): ReactNode {
+  const rtl = useDirection() === 'rtl';
   const {
     className,
     buttonVariant = 'ghost',
@@ -573,11 +588,11 @@ function Calendar(props: CalendarProps): ReactNode {
 
   const onKeyDown = (date: Date, event: KeyDownEvent): void => {
     const { key, shiftKey } = event.nativeEvent;
-    let next = movedBy(key, shiftKey, date, weekStartsOn, locale);
+    let next = movedBy(key, shiftKey, date, weekStartsOn, locale, rtl);
     if (next === undefined) return;
     event.preventDefault();
     for (let attempt = 0; attempt < 365 && (isDisabled(next) || matchesAny(next, hidden)); attempt += 1) {
-      next = movedBy(key, shiftKey, next, weekStartsOn, locale) ?? next;
+      next = movedBy(key, shiftKey, next, weekStartsOn, locale, rtl) ?? next;
     }
     if (startMonth && isBefore(next, startMonth)) next = startMonth;
     if (endMonth && isAfter(next, endOfMonth(endMonth))) next = endOfMonth(endMonth);
@@ -598,7 +613,11 @@ function Calendar(props: CalendarProps): ReactNode {
       onPress={() => target && goTo(target)}
       className="cn-calendar@part=cell p-0"
     >
-      <Icon as={side === 'previous' ? ChevronLeft : ChevronRight} className="size-4" />
+      <Icon
+        as={side === 'previous' ? ChevronLeft : ChevronRight}
+        className="size-4"
+        style={rtl ? MIRRORED : undefined}
+      />
     </Button>
   );
 

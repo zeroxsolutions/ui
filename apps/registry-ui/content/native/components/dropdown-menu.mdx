@@ -9,8 +9,7 @@ description: A menu of actions that opens from a button.
 
 <InstallCommand name="dropdown-menu" />
 
-The CLI writes `components/ui/dropdown-menu.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs
-[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
+The CLI writes `components/ui/dropdown-menu.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs [Direction](/native/components/nativewind/direction), [Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
 `@rn-primitives/dropdown-menu`, `@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated` and
 `react-native-worklets`. The menu draws in the app's `PortalHost`; see [Add a
 portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing, and logs an error saying
@@ -178,6 +177,11 @@ end, announced as expanded or collapsed, and takes `inset`.
 The group is a `group`; the label, which takes `inset`, is muted text over it. The separator is a hairline
 between groups, and the shortcut the keys of an item, drawn muted at its end. DropdownMenuPortal is exported so
 upstream's markup ports as it is, and draws its children where it stands.
+
+## Right to left
+
+The chevron of a DropdownMenuSubTrigger is mirrored when [Direction](/native/components/nativewind/direction)
+says text reads right to left, as upstream's `cn-rtl-flip` does.
 
 ## Differences from upstream
 

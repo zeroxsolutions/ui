@@ -18,8 +18,14 @@ import { DirectionProvider, useDirection } from '@/components/ui/direction';
 ```
 
 ```tsx
-<DirectionProvider direction="rtl">{/* the app's screens */}</DirectionProvider>
+<DirectionProvider direction="rtl">
+  {/* the app's screens */}
+  <PortalHost />
+</DirectionProvider>
 ```
+
+Put the app's `PortalHost` inside the provider: overlays, such as a menu or a toast, draw there, and read the
+direction from the provider around the host.
 
 ```tsx
 const direction = useDirection(); // 'ltr' or 'rtl'
@@ -42,6 +48,23 @@ from the right, and `ms-*` and `me-*` margins swap sides.
 
 Returns `'ltr'` or `'rtl'`: the nearest DirectionProvider's direction, or the system's outside one.
 
+### useSidesSwapped
+
+Returns whether a device draws `left` and `right` styles swapped: true on a device whose direction is `'rtl'`,
+unless the app called `I18nManager.swapLeftAndRightInRTL(false)`, and false on the web, which keeps them where
+named. A part that moves toward the side it is drawn on, such as a sheet sliding in, reads it.
+
+## The items that read it
+
+[Breadcrumb](/native/components/nativewind/breadcrumb), [Pagination](/native/components/nativewind/pagination),
+[Calendar](/native/components/nativewind/calendar), [Carousel](/native/components/nativewind/carousel) and the
+sub-menu triggers of [Dropdown menu](/native/components/nativewind/dropdown-menu),
+[Context menu](/native/components/nativewind/context-menu) and [Menubar](/native/components/nativewind/menubar)
+mirror their chevrons in text read right to left. Calendar and Carousel also swap their left and right arrow
+keys, Carousel and [Slider](/native/components/nativewind/slider) run from the right, and
+[Sheet](/native/components/nativewind/sheet) and [Drawer](/native/components/nativewind/drawer) move toward the
+side a device draws them on. Each item's page says how.
+
 ## Right to left on a device
 
 A device lays out the whole app in one direction, which `I18nManager` holds for the app's life: rows start from
@@ -60,3 +83,5 @@ both agree.
   `<html dir>`. A React Native app on the web has no `<html>` of its own to set, so the provider here sets `dir`
   on a box around its children.
 - On a device the provider changes no layout, as above.
+- `useSidesSwapped` is added: a sheet or a drawer named `left` is drawn on the right by a device whose text reads
+  right to left, which the web, and so upstream, never does.

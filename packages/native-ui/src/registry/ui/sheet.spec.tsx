@@ -1,8 +1,9 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, I18nManager, Platform } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Button } from './button';
+import { DirectionProvider } from './direction';
 import { catchBackPress, followAccessibilityFocus, AppScreen, outermostView } from './overlay.testing';
 import {
   Sheet,
@@ -211,6 +212,32 @@ describe('Sheet', () => {
     await elapse(150);
     expect(screen.queryByTestId('content')).toBeNull();
   });
+
+  it.each([
+    ['a device that draws left and right swapped', 'ios', true, 1],
+    ['a device told to keep left and right', 'ios', false, -1],
+    ['the web, which keeps left and right', 'web', true, -1],
+  ] as const)(
+    'slides a left sheet in from the side it is drawn on when text reads right to left, on %s',
+    async (_where, os, swaps, sign) => {
+      jest.replaceProperty(Platform, 'OS', os);
+      jest
+        .spyOn(I18nManager, 'getConstants')
+        .mockReturnValue({ ...I18nManager.getConstants(), doLeftAndRightSwapInRTL: swaps });
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      await render(
+        <DirectionProvider direction="rtl">
+          <EditProfile side="left" />
+        </DirectionProvider>,
+      );
+
+      await user.press(trigger());
+      await elapse(100);
+
+      const midway = slide()?.props.jestAnimatedStyle?.value.transform?.[0]?.translateX as number;
+      expect(Math.sign(midway)).toBe(sign);
+    },
+  );
 
   it('appears and goes at once when the system asks for reduced motion', async () => {
     jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);

@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useState, type ReactNode } from 'react';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Slider as NovaSlider } from '@styles/nova/components/ui/slider';
+import { DirectionProvider } from './direction';
 import { Slider, type SliderProps } from './slider';
 
 type Element = ReturnType<typeof screen.getByTestId>;
@@ -236,6 +237,23 @@ describe('Slider', () => {
     await fireEvent(laid, 'responderMove', touch(0, 70));
     expect(values()).toEqual([45, 70]);
     expect(onValueChange).toHaveBeenLastCalledWith([45, 70], { activeThumbIndex: 1 });
+  });
+
+  it('runs from the right when text reads right to left: a press, the arrow keys and the thumb', async () => {
+    await render(
+      <DirectionProvider direction="rtl">
+        <Slider testID="slider" defaultValue={0} />
+      </DirectionProvider>,
+    );
+    const laid = await laidOut(200);
+
+    await fireEvent(laid, 'responderGrant', touch(50, 50));
+    await fireEvent(laid, 'responderRelease', touch(50, 50));
+    expect(values()).toEqual([75]);
+    await fireEvent(thumbs()[0], 'keyDown', { nativeEvent: { key: 'ArrowLeft' }, preventDefault: jest.fn() });
+    expect(values()).toEqual([76]);
+
+    expect(thumbs()[0]).toHaveStyle({ start: 152 });
   });
 
   it('rises from the bottom when vertical', async () => {

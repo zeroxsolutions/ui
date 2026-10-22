@@ -2,6 +2,8 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AccessibilityInfo } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
 import { emittedClasses } from '../../build/slot-tokens.testing';
+import { DirectionProvider } from './direction';
+import { holdsMirrored } from './direction.testing';
 import { Text } from './text';
 import {
   Carousel,
@@ -272,6 +274,44 @@ describe('Carousel', () => {
     });
 
     expect(await translation()).toBe(-300);
+  });
+
+  it('runs from the right when text reads right to left: a swipe right and the left arrow move it on', async () => {
+    await render(
+      <DirectionProvider direction="rtl">
+        <Slides testID="carousel" />
+      </DirectionProvider>,
+    );
+    await layOut(300);
+    const viewport = screen.getByTestId('row').parent?.parent;
+    if (!viewport) throw new Error('No viewport');
+    expect(viewport).toHaveStyle({ transform: [{ scaleX: -1 }] });
+
+    await fireEvent(viewport, 'responderGrant', touch(50, 0));
+    await fireEvent(viewport, 'responderMove', touch(150, 100));
+    expect(await translation()).toBe(-100);
+    await fireEvent(viewport, 'responderRelease', touch(160, 200));
+    expect(await translation()).toBe(-300);
+
+    await fireEvent(screen.getByTestId('carousel'), 'keyDownCapture', {
+      nativeEvent: { key: 'ArrowLeft' },
+      preventDefault: jest.fn(),
+    });
+    expect(await translation()).toBe(-600);
+  });
+
+  it('mirrors its previous and next chevrons when text reads right to left, and only then', async () => {
+    await render(<Slides />);
+    expect(holdsMirrored(previous())).toBe(false);
+
+    await render(
+      <DirectionProvider direction="rtl">
+        <Slides />
+      </DirectionProvider>,
+    );
+
+    expect(holdsMirrored(previous())).toBe(true);
+    expect(holdsMirrored(next())).toBe(true);
   });
 
   it('jumps when the system asks for reduced motion', async () => {

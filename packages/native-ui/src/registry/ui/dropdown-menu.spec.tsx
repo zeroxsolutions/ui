@@ -23,6 +23,8 @@ import {
 } from './dropdown-menu';
 import type { DropdownMenuContentProps, DropdownMenuProps } from './dropdown-menu';
 import { AppScreen, catchBackPress, followAccessibilityFocus, outermostView, scrollerAround } from './overlay.testing';
+import { DirectionProvider } from './direction';
+import { holdsMirrored } from './direction.testing';
 import { Text } from './text';
 
 // Jest runs no Reanimated frame into the props a query reads, so the opacity the fade starts at hides the
@@ -168,6 +170,25 @@ describe('DropdownMenu', () => {
     await finishMotion();
     return user;
   }
+
+  it('draws the chevron of a sub-menu trigger pointing right in text read left to right', async () => {
+    await open();
+
+    expect(holdsMirrored(item('Invite users'))).toBe(false);
+  });
+
+  it('mirrors the chevron of a sub-menu trigger when text reads right to left', async () => {
+    const user = setUp();
+    await render(
+      <DirectionProvider direction="rtl">
+        <Account />
+      </DirectionProvider>,
+    );
+    await user.press(trigger());
+    await finishMotion();
+
+    expect(holdsMirrored(item('Invite users'))).toBe(true);
+  });
 
   it('draws no menu until its trigger is pressed', async () => {
     await render(<Account />);

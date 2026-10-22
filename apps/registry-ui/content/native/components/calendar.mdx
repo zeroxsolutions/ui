@@ -9,7 +9,7 @@ description: A month's grid of days on which a day, several days or a range is s
 
 <InstallCommand name="calendar" />
 
-The CLI writes `components/ui/calendar.tsx`, installs [Button](/native/components/nativewind/button),
+The CLI writes `components/ui/calendar.tsx`, installs [Direction](/native/components/nativewind/direction), [Button](/native/components/nativewind/button),
 [Icon](/native/components/nativewind/icon), [Select](/native/components/nativewind/select),
 [Text](/native/components/nativewind/text) and Utils, and adds `date-fns` and `lucide-react-native`. The
 dropdown caption opens a Select, which draws in the app's `PortalHost`; see [Add a portal
@@ -99,6 +99,12 @@ The button each day is drawn as, which a `components.DayButton` can build on. Ta
 Native's `Pressable`, plus `day` (`{ date, displayMonth, outside }`), `modifiers` (`today`, `selected`,
 `disabled`, `hidden`, `outside`, `focused`, `range_start`, `range_middle`, `range_end`, and each of
 `modifiers` by name) and `locale`.
+
+## Right to left
+
+When [Direction](/native/components/nativewind/direction) says text reads right to left, the month buttons'
+chevrons are mirrored, as upstream's `rtl:` rotation of them does, and the left and right arrow keys move to the
+day drawn on that side: the left arrow to the next day, as react-day-picker does in text read right to left.
 
 ## Differences from upstream
 

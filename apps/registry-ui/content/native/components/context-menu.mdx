@@ -9,8 +9,7 @@ description: A menu of actions on an area, opened by a long press or a right cli
 
 <InstallCommand name="context-menu" />
 
-The CLI writes `components/ui/context-menu.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs
-[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
+The CLI writes `components/ui/context-menu.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs [Direction](/native/components/nativewind/direction), [Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
 `@rn-primitives/context-menu`, `@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated` and
 `react-native-worklets`. The menu draws in the app's `PortalHost`; see [Add a
 portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing, and logs an error saying
@@ -87,6 +86,11 @@ ContextMenuShortcut and ContextMenuPortal take the props of their
 [Dropdown menu](/native/components/nativewind/dropdown-menu#dropdownmenuitem) counterparts and behave as they do:
 an item runs `onPress` and closes the menu unless `closeOnClick` is false, and a checkbox or radio item leaves it
 open.
+
+## Right to left
+
+The chevron of a ContextMenuSubTrigger is mirrored when [Direction](/native/components/nativewind/direction)
+says text reads right to left, as upstream's `cn-rtl-flip` does.
 
 ## Differences from upstream
 

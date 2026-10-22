@@ -1,8 +1,9 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, I18nManager } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Button } from './button';
+import { DirectionProvider } from './direction';
 import {
   Drawer,
   DrawerClose,
@@ -212,6 +213,27 @@ describe('Drawer', () => {
 
     expect(drawer()).toBeOnTheScreen();
     expect(slide()).toHaveAnimatedStyle({ transform: [{ translateY: 0 }] });
+  });
+
+  it('closes a left drawer by a swipe toward the side a device draws it on when text reads right to left', async () => {
+    jest
+      .spyOn(I18nManager, 'getConstants')
+      .mockReturnValue({ ...I18nManager.getConstants(), doLeftAndRightSwapInRTL: true });
+    await render(
+      <DirectionProvider direction="rtl">
+        <MoveGoal swipeDirection="left" defaultOpen />
+      </DirectionProvider>,
+    );
+    await finishMotion();
+    await layOut(300, 800);
+
+    await swipe(drawer(), { dx: -300 });
+    await finishMotion();
+    expect(drawer()).toBeOnTheScreen();
+
+    await swipe(drawer(), { dx: 40, ms: 50 });
+    await finishMotion();
+    expect(screen.queryByTestId('content')).toBeNull();
   });
 
   it('stays open when swiped away from its edge', async () => {

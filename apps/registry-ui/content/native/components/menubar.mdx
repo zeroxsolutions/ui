@@ -9,8 +9,7 @@ description: A bar of menus, such as File, Edit and View.
 
 <InstallCommand name="menubar" />
 
-The CLI writes `components/ui/menubar.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs
-[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
+The CLI writes `components/ui/menubar.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs [Direction](/native/components/nativewind/direction), [Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
 `@rn-primitives/menubar`, `@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated` and
 `react-native-worklets`. The menus draw in the app's `PortalHost`; see [Add a
 portal host](/native/docs/installation#add-a-portal-host). Without one they draw nothing, and log an error saying
@@ -90,6 +89,11 @@ MenubarItem, MenubarCheckboxItem, MenubarRadioGroup, MenubarRadioItem, MenubarSu
 MenubarSubContent, MenubarGroup, MenubarLabel, MenubarSeparator, MenubarShortcut and MenubarPortal take the props
 of their [Dropdown menu](/native/components/nativewind/dropdown-menu#dropdownmenuitem) counterparts and behave as
 they do. A checkbox or radio item draws its check mark at its start, as upstream's menubar does.
+
+## Right to left
+
+The chevron of a MenubarSubTrigger is mirrored when [Direction](/native/components/nativewind/direction) says
+text reads right to left.
 
 ## Differences from upstream
 

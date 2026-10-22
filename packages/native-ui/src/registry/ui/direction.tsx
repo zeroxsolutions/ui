@@ -46,5 +46,15 @@ function useDirection(): TextDirection {
   return useContext(DirectionContext) ?? systemDirection();
 }
 
-export { DirectionProvider, useDirection };
+/**
+ * Whether a device draws `left` and `right` styles swapped, for a part that moves toward the side it is drawn
+ * on: React Native lays out an app whose text reads right to left with each `left` style on the right, unless
+ * the app turned that off with `I18nManager.swapLeftAndRightInRTL(false)`. The web keeps them where named.
+ */
+function useSidesSwapped(): boolean {
+  const rtl = useDirection() === 'rtl';
+  return Platform.OS !== 'web' && rtl && I18nManager.getConstants().doLeftAndRightSwapInRTL;
+}
+
+export { DirectionProvider, useDirection, useSidesSwapped };
 export type { DirectionProviderProps, TextDirection };

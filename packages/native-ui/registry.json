@@ -221,7 +221,7 @@
       "type": "registry:ui",
       "title": "Slider",
       "description": "A value, or a range of values, picked by dragging a thumb along a track, each thumb announced as adjustable with its value.",
-      "registryDependencies": ["@zui/utils"],
+      "registryDependencies": ["@zui/utils", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/slider.tsx",
@@ -235,7 +235,7 @@
       "title": "Calendar",
       "description": "A month's grid of days on which a day, several days or a range is selected, with today marked and buttons to the previous and next month.",
       "dependencies": ["date-fns", "lucide-react-native"],
-      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/select", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/select", "@zui/text", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/calendar.tsx",
@@ -249,7 +249,7 @@
       "title": "Carousel",
       "description": "A row of slides that a swipe or its named previous and next buttons scroll through one snap at a time, with Embla's api.",
       "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-worklets"],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/carousel.tsx",
@@ -489,7 +489,7 @@
       "title": "Breadcrumb",
       "description": "The trail from the top of the app to the current screen, a navigation landmark of links and separators with the current page marked.",
       "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/breadcrumb.tsx",
@@ -517,7 +517,7 @@
       "title": "Pagination",
       "description": "The pages of a long list, a navigation landmark of page links with the current page outlined and marked, previous and next links and an ellipsis.",
       "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/pagination.tsx",
@@ -657,7 +657,15 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/button", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/button",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/direction"
+      ],
       "files": [
         {
           "path": "src/registry/ui/sheet.tsx",
@@ -671,7 +679,7 @@
       "title": "Drawer",
       "description": "A panel attached to an edge of the screen over a dimmed overlay, announced as a modal dialog named by its title, closed by a swipe toward its edge, a press outside it, the back button or Escape, sliding in unless the system asks for reduced motion.",
       "dependencies": ["@rn-primitives/dialog", "@rn-primitives/portal", "react-native-reanimated"],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/drawer.tsx",
@@ -732,7 +740,15 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/menu",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/direction"
+      ],
       "files": [
         {
           "path": "src/registry/ui/dropdown-menu.tsx",
@@ -751,7 +767,15 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/menu",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/direction"
+      ],
       "files": [
         {
           "path": "src/registry/ui/context-menu.tsx",
@@ -770,7 +794,15 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/menu",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/direction"
+      ],
       "files": [
         {
           "path": "src/registry/ui/menubar.tsx",
@@ -836,7 +868,7 @@
       "name": "direction",
       "type": "registry:ui",
       "title": "Direction",
-      "description": "DirectionProvider and useDirection: the direction text reads in, the system's unless a provider sets it, which the web also lays its children out in.",
+      "description": "DirectionProvider and useDirection: the direction text reads in, the system's unless a provider sets it, which the web also lays its children out in; and useSidesSwapped, whether a device draws left and right styles swapped.",
       "files": [
         {
           "path": "src/registry/ui/direction.tsx",
