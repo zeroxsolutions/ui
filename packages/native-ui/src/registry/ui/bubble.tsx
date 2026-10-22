@@ -207,9 +207,13 @@ function BubbleReactions({
 }: BubbleReactionsProps): ReactNode {
   const [height, setHeight] = useState<number | undefined>(undefined);
   const offset = height === undefined ? undefined : height * REACTIONS_OVERLAP * (side === 'top' ? -1 : 1);
-  // React Native replaces a transform rather than merging it, so the caller's goes after the offset in one list.
+  // React Native replaces a transform rather than merging it, so the caller's goes after the offset, in one list
+  // or, for a transform given as a string, in one string.
   const callerTransform = StyleSheet.flatten(style)?.transform;
-  const transform = [{ translateY: offset ?? 0 }, ...(Array.isArray(callerTransform) ? callerTransform : [])];
+  const transform =
+    typeof callerTransform === 'string'
+      ? `translateY(${offset ?? 0}px) ${callerTransform}`
+      : [{ translateY: offset ?? 0 }, ...(Array.isArray(callerTransform) ? callerTransform : [])];
 
   return (
     <TextClassContext.Provider value="cn-bubble-reactions/text">

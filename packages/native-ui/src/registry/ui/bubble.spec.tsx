@@ -226,6 +226,22 @@ describe('BubbleReactions with a transform of its own', () => {
 
     expect(screen.getByTestId('reactions')).toHaveStyle({ transform: [{ translateY: 18 }, { scale: 1.5 }] });
   });
+
+  it('keeps the overlap before a transform given as a string', async () => {
+    await render(
+      <Bubble>
+        <BubbleContent>Nice.</BubbleContent>
+        <BubbleReactions testID="reactions" style={{ transform: 'rotate(5deg)' }}>
+          {'\u{1F44D}'}
+        </BubbleReactions>
+      </Bubble>,
+    );
+    await fireEvent(screen.getByTestId('reactions', { includeHiddenElements: true }), 'layout', {
+      nativeEvent: { layout: { x: 0, y: 0, width: 32, height: 24 } },
+    });
+
+    expect(screen.getByTestId('reactions')).toHaveStyle({ transform: 'translateY(18px) rotate(5deg)' });
+  });
 });
 
 describe('BubbleGroup', () => {
