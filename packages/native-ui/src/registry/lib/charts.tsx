@@ -184,7 +184,12 @@ function EntranceClip({
       return { x: 0, y: top, width: size.width, height: size.height - top };
     }
     const width = plot.left + span * share;
-    return { x: direction === 'right' ? 0 : size.width - width, y: 0, width, height: size.height };
+    return {
+      x: direction === 'right' ? 0 : size.width - width,
+      y: 0,
+      width,
+      height: size.height,
+    };
   });
   return (
     <Defs>
@@ -426,7 +431,12 @@ const CURVES = {
 type CurveType = keyof typeof CURVES;
 
 /** A point's circle: `true` draws Recharts' own, `false` none. */
-type DotProps = { r?: number; fill?: string; stroke?: string; strokeWidth?: number };
+type DotProps = {
+  r?: number;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+};
 
 type LineProps = SeriesProps & {
   /** How the line runs between points. */
@@ -680,7 +690,12 @@ function LegendBox({
   return (
     <View
       onLayout={(event: LayoutChangeEvent) => onHeight(event.nativeEvent.layout.height)}
-      style={{ position: 'absolute', left: 0, right: 0, ...(top ? { top: 0 } : { bottom: 0 }) }}
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        ...(top ? { top: 0 } : { bottom: 0 }),
+      }}
     >
       {drawContent(legend.content, { payload, verticalAlign: legend.verticalAlign ?? 'bottom' }, DefaultLegendContent)}
     </View>
@@ -735,7 +750,12 @@ function TooltipBox({
             : { width: measuredWidth, height: measuredHeight },
         );
       }}
-      style={{ position: 'absolute', left, top, opacity: box === undefined ? 0 : 1 }}
+      style={{
+        position: 'absolute',
+        left,
+        top,
+        opacity: box === undefined ? 0 : 1,
+      }}
     >
       {children}
     </View>
@@ -807,7 +827,9 @@ function ChartSurface({
 
   useEffect(() => {
     if (!web || active === undefined) return undefined;
-    const node = surface.current as unknown as { parentElement?: { contains: (target: unknown) => boolean } } | null;
+    const node = surface.current as unknown as {
+      parentElement?: { contains: (target: unknown) => boolean };
+    } | null;
     const onPointerDown = (event: { target: unknown }): void => {
       if (node?.parentElement?.contains(event.target) !== true) hide();
     };
@@ -923,7 +945,11 @@ function shareOf(gap: number | `${number}%`, of: number): number {
   return typeof gap === 'number' ? gap : (Number.parseFloat(gap) / 100) * of;
 }
 
-const KIND_NAMES: Readonly<Record<SeriesKind, string>> = { bar: 'Bar chart', line: 'Line chart', area: 'Area chart' };
+const KIND_NAMES: Readonly<Record<SeriesKind, string>> = {
+  bar: 'Bar chart',
+  line: 'Line chart',
+  area: 'Area chart',
+};
 
 /** The svg of a bar, line or area chart: the grid, the axes, the cursor and the series, laid out in `size`. */
 function CartesianChart({
@@ -992,7 +1018,11 @@ function CartesianChart({
     `${String(categoryOf(index))}: ${series
       .map((item) => `${nameOf(seriesName(item.props))} ${formatValue(data[index]?.[item.props.dataKey] as number)}`)
       .join(', ')}`;
-  const pointFor = (index: number): ActivePoint => ({ index, x: x.center(index), y: (plot.top + plot.bottom) / 2 });
+  const pointFor = (index: number): ActivePoint => ({
+    index,
+    x: x.center(index),
+    y: (plot.top + plot.bottom) / 2,
+  });
   const interaction: Interaction = {
     count: data.length,
     pointAt: (pointX, pointY) =>
@@ -1336,9 +1366,28 @@ type LabelProps = {
   position?: 'center';
 };
 
-/** A label in the middle of the Pie it is placed in. */
+/** A label in the middle of the Pie or the PolarRadiusAxis it is placed in. */
 function Label(_props: LabelProps): ReactNode {
   return null;
+}
+
+/** Draws each Label among `children` in `viewBox`: its content, or its value in the middle. */
+function drawLabels(children: ReactNode, viewBox: PolarViewBox): ReactNode[] {
+  const labels: ReactNode[] = [];
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child) || child.type !== Label) return;
+    const props = child.props as LabelProps;
+    labels.push(
+      props.content === undefined ? (
+        <Text key={labels.length} x={viewBox.cx} y={viewBox.cy} textAnchor="middle" verticalAnchor="middle">
+          {props.value}
+        </Text>
+      ) : (
+        <G key={labels.length}>{props.content({ viewBox })}</G>
+      ),
+    );
+  });
+  return labels;
 }
 
 type TextProps = Omit<ComponentProps<typeof SvgText>, 'fill'> & {
@@ -1436,7 +1485,10 @@ const RADIANS = Math.PI / 180;
 
 /** A point at `radius` and `angle`, in degrees anticlockwise from three o'clock, around `cx`, `cy`. */
 function polar(cx: number, cy: number, radius: number, angle: number): { x: number; y: number } {
-  return { x: cx + radius * Math.cos(angle * RADIANS), y: cy - radius * Math.sin(angle * RADIANS) };
+  return {
+    x: cx + radius * Math.cos(angle * RADIANS),
+    y: cy - radius * Math.sin(angle * RADIANS),
+  };
 }
 
 /** A slice of a pie, or of a ring with an `inner` radius, as an svg path around 0, 0. */
@@ -1457,7 +1509,12 @@ function PieChart({ margin, title, width, height, children }: PieChartProps): Re
   const size = useChartSize(width, height);
   const palette = useContext(ChartPaletteContext);
   const parts = useMemo(() => {
-    const found: { pie?: PieProps; tooltip?: TooltipProps; legend?: LegendProps; other: ReactNode[] } = { other: [] };
+    const found: {
+      pie?: PieProps;
+      tooltip?: TooltipProps;
+      legend?: LegendProps;
+      other: ReactNode[];
+    } = { other: [] };
     Children.forEach(children, (child) => {
       if (!isValidElement(child)) return;
       if (child.type === Pie) found.pie = child.props as PieProps;
@@ -1550,20 +1607,7 @@ function PieChart({ margin, title, width, height, children }: PieChartProps): Re
     startAngle: pie.startAngle ?? 0,
     endAngle: pie.endAngle ?? 360,
   };
-  const labels: ReactNode[] = [];
-  Children.forEach(pie.children, (child) => {
-    if (!isValidElement(child) || child.type !== Label) return;
-    const props = child.props as LabelProps;
-    labels.push(
-      props.content === undefined ? (
-        <Text key={labels.length} x={cx} y={cy} textAnchor="middle" verticalAnchor="middle">
-          {props.value}
-        </Text>
-      ) : (
-        <G key={labels.length}>{props.content({ viewBox })}</G>
-      ),
-    );
-  });
+  const labels = drawLabels(pie.children, viewBox);
   const label = title ?? 'Pie chart';
 
   return (
@@ -1645,6 +1689,492 @@ function PieChart({ margin, title, width, height, children }: PieChartProps): Re
   );
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// Radar charts
+
+type PolarGridProps = {
+  /** Polygons through the categories' spokes, or circles. */
+  gridType?: 'polygon' | 'circle';
+  /** Whether the grid draws a spoke from the middle to each category. */
+  radialLines?: boolean;
+  /** The radii of the rings, in pixels; the value axis' ticks when left out. */
+  polarRadius?: readonly number[];
+  /** The rings' line colour, or `"none"`. */
+  stroke?: string;
+  /** The rings' fill. */
+  fill?: string;
+  /**
+   * Read for upstream's `fill-*` classes only: `fill-<colour>` fills every ring, `first:fill-<colour>` the
+   * first and `last:fill-<colour>` the last, in the theme's colour of that name.
+   */
+  className?: string;
+};
+
+/** The rings and spokes behind a radar or a radial bar chart. Placed inside one, the chart draws it. */
+function PolarGrid(_props: PolarGridProps): ReactNode {
+  return null;
+}
+
+type PolarAngleAxisProps = {
+  /** The key of each row that names its category, such as `month`. */
+  dataKey?: string;
+  /** Whether each category's name is drawn beyond its spoke. */
+  tick?: boolean;
+  tickFormatter?: (value: never, index: number) => string;
+};
+
+/** The categories around a radar chart. Placed inside one, the chart draws it. */
+function PolarAngleAxis(_props: PolarAngleAxisProps): ReactNode {
+  return null;
+}
+
+type PolarRadiusAxisProps = {
+  /** The spoke, in degrees anticlockwise from three o'clock, the axis' ticks are drawn along. */
+  angle?: number;
+  tick?: boolean;
+  tickLine?: boolean;
+  axisLine?: boolean;
+  tickCount?: number;
+  /** A Label for the middle of the chart. */
+  children?: ReactNode;
+};
+
+/** The value axis along one spoke of a radar or a radial bar chart. Placed inside one, the chart draws it. */
+function PolarRadiusAxis(_props: PolarRadiusAxisProps): ReactNode {
+  return null;
+}
+
+type RadarProps = SeriesProps & {
+  fill?: string;
+  fillOpacity?: number;
+  stroke?: string;
+  strokeWidth?: number;
+  /** The circle at each point; none unless given. */
+  dot?: boolean | DotProps;
+  /** The circle at the point the tooltip shows. */
+  activeDot?: boolean | DotProps;
+};
+
+/** A polygon through each row's value on its category's spoke. Placed inside a RadarChart, the chart draws it. */
+function Radar(_props: RadarProps): ReactNode {
+  return null;
+}
+
+type PolarChartProps = Pick<CartesianChartProps, 'margin' | 'accessibilityLayer' | 'title' | 'width' | 'height'> & {
+  data: readonly ChartDatum[];
+  cx?: Length;
+  cy?: Length;
+  innerRadius?: Length;
+  outerRadius?: Length;
+  /** Where the first category sits, in degrees anticlockwise from three o'clock. */
+  startAngle?: number;
+  endAngle?: number;
+  children?: ReactNode;
+};
+
+/** The theme colour a `fill-<colour>` class names, behind `first:` or `last:` or none. */
+function classFill(className: string | undefined, place: 'first' | 'last' | ''): string | undefined {
+  const prefix = place === '' ? '' : `${place}:`;
+  const token = className?.split(/\s+/).find((name) => name.startsWith(`${prefix}fill-`));
+  return token === undefined ? undefined : `var(--${token.slice(prefix.length + 'fill-'.length)})`;
+}
+
+/** The rings of a polar grid, drawn at `radii`, with spokes along `angles`. */
+function PolarGridDrawing({
+  grid,
+  radii,
+  angles,
+  cx,
+  cy,
+  inner,
+  outer,
+  resolve,
+}: {
+  grid: PolarGridProps;
+  radii: readonly number[];
+  angles: readonly number[];
+  cx: number;
+  cy: number;
+  inner: number;
+  outer: number;
+  resolve: (value: string | undefined) => string | undefined;
+}): ReactNode {
+  const stroke = grid.stroke === 'none' ? undefined : resolve(grid.stroke ?? THEME.grid);
+  const ringFill = (index: number): string | undefined =>
+    resolve(
+      (index === 0 ? classFill(grid.className, 'first') : undefined) ??
+        (index === radii.length - 1 ? classFill(grid.className, 'last') : undefined) ??
+        classFill(grid.className, '') ??
+        grid.fill,
+    ) ?? 'none';
+  return (
+    <G testID="chart-polar-grid">
+      {radii.map((radius, index) =>
+        grid.gridType === 'circle' || angles.length < 3 ? (
+          <Circle key={index} cx={cx} cy={cy} r={radius} fill={ringFill(index)} stroke={stroke} />
+        ) : (
+          <Path
+            key={index}
+            d={`${angles.map((angle, at) => `${at === 0 ? 'M' : 'L'}${polar(cx, cy, radius, angle).x},${polar(cx, cy, radius, angle).y}`).join(' ')} Z`}
+            fill={ringFill(index)}
+            stroke={stroke}
+          />
+        ),
+      )}
+      {grid.radialLines === false
+        ? null
+        : angles.map((angle, index) => {
+            const from = polar(cx, cy, inner, angle);
+            const to = polar(cx, cy, outer, angle);
+            return <SvgLine key={`spoke-${index}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke={stroke} />;
+          })}
+    </G>
+  );
+}
+
+/** A clip, named `id`, over a disc around `cx`, `cy` that grows to `radius` over the entrance. */
+function GrowClip({
+  id,
+  progress,
+  cx,
+  cy,
+  radius,
+}: {
+  id: string;
+  progress: SharedValue<number>;
+  cx: number;
+  cy: number;
+  radius: number;
+}): ReactNode {
+  const animatedProps = useAnimatedProps(() => ({
+    r: radius * progress.value,
+  }));
+  return (
+    <Defs>
+      <ClipPath id={id}>
+        <AnimatedCircle testID="chart-entrance" cx={cx} cy={cy} animatedProps={animatedProps} />
+      </ClipPath>
+    </Defs>
+  );
+}
+
+/** The middle and the radii of a polar chart laid out in `size`, less its margin and its legend. */
+function polarFrame(
+  props: PolarChartProps,
+  size: ChartSize,
+  legendHeight: number,
+  legendTop: boolean,
+): { cx: number; cy: number; inner: number; outer: number } {
+  const { top, right, bottom, left } = { ...DEFAULT_MARGIN, ...props.margin };
+  const plotTop = top + (legendTop ? legendHeight : 0);
+  const plotWidth = size.width - left - right;
+  const plotHeight = size.height - top - bottom - legendHeight;
+  const maxRadius = Math.max(0, Math.min(plotWidth, plotHeight) / 2);
+  return {
+    cx: left + lengthOf(props.cx ?? '50%', plotWidth),
+    cy: plotTop + lengthOf(props.cy ?? '50%', plotHeight),
+    inner: lengthOf(props.innerRadius ?? 0, maxRadius),
+    outer: lengthOf(props.outerRadius ?? '80%', maxRadius),
+  };
+}
+
+/** The anchor that keeps a label beyond the end of a spoke at `angle` clear of the spoke. */
+function anchorAt(angle: number): 'start' | 'middle' | 'end' {
+  const cos = Math.cos(angle * RADIANS);
+  if (cos > 0.01) return 'start';
+  if (cos < -0.01) return 'end';
+  return 'middle';
+}
+
+/** A polygon per series through the categories of `data` on spokes round a middle. */
+function RadarChart(props: PolarChartProps): ReactNode {
+  const { data, title, width, height, children, startAngle = 90, endAngle = -270 } = props;
+  const size = useChartSize(width, height);
+  const palette = useContext(ChartPaletteContext);
+  const parts = useMemo(() => {
+    const found: {
+      series: RadarProps[];
+      grid?: PolarGridProps;
+      angleAxis?: PolarAngleAxisProps;
+      radiusAxis?: PolarRadiusAxisProps;
+      tooltip?: TooltipProps;
+      legend?: LegendProps;
+      other: ReactNode[];
+    } = { series: [], other: [] };
+    Children.forEach(children, (child) => {
+      if (!isValidElement(child)) return;
+      if (child.type === Radar) found.series.push(child.props as RadarProps);
+      else if (child.type === PolarGrid) found.grid = child.props as PolarGridProps;
+      else if (child.type === PolarAngleAxis) found.angleAxis = child.props as PolarAngleAxisProps;
+      else if (child.type === PolarRadiusAxis) found.radiusAxis = child.props as PolarRadiusAxisProps;
+      else if (child.type === Tooltip) found.tooltip = child.props as TooltipProps;
+      else if (child.type === Legend) found.legend = child.props as LegendProps;
+      else found.other.push(child);
+    });
+    return found;
+  }, [children]);
+  const [legendHeight, setLegendHeight] = useState(0);
+  const series = parts.series.filter((item) => item.hide !== true);
+  const animate = series.some((item) => item.isAnimationActive !== false);
+  const progress = useEntrance(animate, Math.max(...series.map((item) => item.animationDuration ?? ENTRANCE_MS), 0));
+  const clipId = `chart-clip-${useId().replace(/[^\w-]/g, '')}`;
+  const [active, setActive] = useState<ActivePoint | undefined>(undefined);
+  const [touched, setTouched] = useState(false);
+
+  if (size === undefined || size.width <= 0 || size.height <= 0) return null;
+
+  const resolve = (value: string | undefined): string | undefined => palette.resolveColor(value);
+  const legendTop = parts.legend?.verticalAlign === 'top';
+  const { cx, cy, inner, outer } = polarFrame(props, size, legendHeight, legendTop);
+  const count = data.length;
+  // A whole turn puts the last category one step short of the first; a part of one reaches its end.
+  const turn = endAngle - startAngle;
+  const stepAngle = count === 0 ? 0 : Math.abs(turn) >= 360 ? turn / count : turn / Math.max(1, count - 1);
+  const angles = data.map((_, index) => startAngle + index * stepAngle);
+  const ticks = niceTicks(
+    Math.max(0, ...data.flatMap((datum) => series.map((item) => numberAt(datum, item.dataKey)))),
+    parts.radiusAxis?.tickCount ?? 5,
+  );
+  const radius = scaleLinear()
+    .domain([0, ticks[ticks.length - 1] ?? 1])
+    .range([inner, outer]);
+  const categoryKey = parts.angleAxis?.dataKey;
+  const categoryOf = (index: number): unknown => (categoryKey === undefined ? index : data[index]?.[categoryKey]);
+  const nameOf = (key: string): string => palette.nameOf(key) ?? key;
+  const describe = (index: number): string =>
+    `${String(categoryOf(index))}: ${series
+      .map((item) => `${nameOf(seriesName(item))} ${formatValue(data[index]?.[item.dataKey] as number)}`)
+      .join(', ')}`;
+  const pointFor = (index: number): ActivePoint => ({
+    index,
+    ...polar(cx, cy, outer, angles[index] ?? 0),
+  });
+  const pointAt = (px: number, py: number): ActivePoint | undefined => {
+    if (count === 0 || Math.hypot(px - cx, py - cy) > outer + 16) return undefined;
+    const angle = Math.atan2(cy - py, px - cx) / RADIANS;
+    let nearest = 0;
+    let gap = Number.POSITIVE_INFINITY;
+    angles.forEach((candidate, index) => {
+      const apart = Math.abs(((((angle - candidate) % 360) + 540) % 360) - 180);
+      if (apart < gap) {
+        gap = apart;
+        nearest = index;
+      }
+    });
+    return { index: nearest, x: px, y: py };
+  };
+  const interaction: Interaction = {
+    count,
+    pointAt,
+    pointFor,
+    summary: data.map((_, index) => describe(index)).join('. '),
+    describe,
+  };
+  const tooltip = parts.tooltip;
+  const shown =
+    active ?? (!touched && tooltip?.defaultIndex !== undefined ? pointFor(tooltip.defaultIndex) : undefined);
+  const activeIndex = shown?.index;
+  const colorOf = (item: RadarProps): string => item.stroke ?? item.fill ?? DEFAULT_SERIES_COLOR;
+  const payloadAt = (index: number): TooltipPayloadItem[] =>
+    series.map((item) => ({
+      dataKey: item.dataKey,
+      name: seriesName(item),
+      value: data[index]?.[item.dataKey] as number | string | undefined,
+      color: colorOf(item),
+      fill: item.fill,
+      stroke: item.stroke,
+      payload: data[index],
+    }));
+  const legendPayload: LegendPayloadItem[] = series.map((item) => ({
+    value: seriesName(item),
+    dataKey: item.dataKey,
+    color: colorOf(item),
+    type: 'rect',
+  }));
+  const tickColor = resolve(THEME.tick);
+  const angleFormat = parts.angleAxis?.tickFormatter;
+  const radiusAxis = parts.radiusAxis;
+  const axisAngle = radiusAxis?.angle ?? startAngle;
+  const viewBox: PolarViewBox = {
+    cx,
+    cy,
+    innerRadius: inner,
+    outerRadius: outer,
+    startAngle,
+    endAngle,
+  };
+  const cursor = tooltip?.cursor ?? true;
+  const label = title ?? 'Radar chart';
+
+  return (
+    <View style={{ width: size.width, height: size.height }}>
+      <Svg
+        width={size.width}
+        height={size.height}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        // Names beyond the spokes may reach past the box, as a long month's does at three o'clock.
+        style={{ overflow: 'visible' }}
+      >
+        {parts.grid === undefined ? null : (
+          <PolarGridDrawing
+            grid={parts.grid}
+            radii={parts.grid.polarRadius ?? ticks.filter((tick) => tick > 0).map((tick) => radius(tick))}
+            angles={angles}
+            cx={cx}
+            cy={cy}
+            inner={inner}
+            outer={outer}
+            resolve={resolve}
+          />
+        )}
+        {cursor === false || activeIndex === undefined || tooltip === undefined ? null : (
+          <SvgLine
+            testID="chart-cursor"
+            x1={cx}
+            y1={cy}
+            x2={polar(cx, cy, outer, angles[activeIndex] ?? 0).x}
+            y2={polar(cx, cy, outer, angles[activeIndex] ?? 0).y}
+            stroke={resolve(THEME.cursorStroke)}
+          />
+        )}
+        {parts.angleAxis === undefined || parts.angleAxis.tick === false
+          ? null
+          : angles.map((angle, index) => {
+              const at = polar(cx, cy, outer + 8, angle);
+              const value = categoryOf(index);
+              return (
+                <SvgText
+                  key={index}
+                  testID={`chart-angle-tick-${index}`}
+                  x={at.x}
+                  y={at.y + (0.355 - 0.355 * Math.sin(angle * RADIANS)) * TICK_FONT_SIZE}
+                  fontSize={TICK_FONT_SIZE}
+                  fill={tickColor}
+                  textAnchor={anchorAt(angle)}
+                >
+                  {angleFormat === undefined ? String(value) : angleFormat(value as never, index)}
+                </SvgText>
+              );
+            })}
+        {radiusAxis === undefined || radiusAxis.tick === false
+          ? null
+          : ticks.map((tick) => {
+              const at = polar(cx, cy, radius(tick), axisAngle);
+              return (
+                <SvgText key={tick} x={at.x} y={at.y} fontSize={TICK_FONT_SIZE} fill={tickColor} textAnchor="start">
+                  {String(tick)}
+                </SvgText>
+              );
+            })}
+        {radiusAxis === undefined || radiusAxis.axisLine === false ? null : (
+          <SvgLine
+            x1={polar(cx, cy, inner, axisAngle).x}
+            y1={polar(cx, cy, inner, axisAngle).y}
+            x2={polar(cx, cy, outer, axisAngle).x}
+            y2={polar(cx, cy, outer, axisAngle).y}
+            stroke={tickColor}
+          />
+        )}
+        {animate ? <GrowClip id={clipId} progress={progress} cx={cx} cy={cy} radius={outer + 8} /> : null}
+        {series.map((item, order) => {
+          const color = resolve(colorOf(item));
+          const points = data.map((datum, index) =>
+            polar(cx, cy, radius(numberAt(datum, item.dataKey)), angles[index] ?? 0),
+          );
+          const dot = item.dot ?? false;
+          return (
+            <G
+              key={`${item.dataKey}-${order}`}
+              testID={`chart-series-${item.dataKey}`}
+              clipPath={item.isAnimationActive === false ? undefined : `url(#${clipId})`}
+            >
+              <Path
+                testID={`chart-radar-${item.dataKey}`}
+                d={
+                  points.length === 0
+                    ? ''
+                    : `${points.map((point, index) => `${index === 0 ? 'M' : 'L'}${point.x},${point.y}`).join(' ')} Z`
+                }
+                fill={resolve(item.fill) ?? 'none'}
+                fillOpacity={item.fillOpacity}
+                stroke={resolve(item.stroke)}
+                strokeWidth={item.strokeWidth ?? 1}
+              />
+              {dot === false
+                ? null
+                : points.map((point, index) => (
+                    <Circle
+                      key={index}
+                      cx={point.x}
+                      cy={point.y}
+                      r={(typeof dot === 'object' ? dot.r : undefined) ?? 3}
+                      fill={resolve(typeof dot === 'object' ? dot.fill : undefined) ?? color}
+                    />
+                  ))}
+            </G>
+          );
+        })}
+        {activeIndex === undefined || tooltip === undefined
+          ? null
+          : series.map((item) =>
+              item.activeDot === false ? null : (
+                <Circle
+                  key={`active-${item.dataKey}`}
+                  testID={`chart-active-dot-${item.dataKey}`}
+                  cx={polar(cx, cy, radius(numberAt(data[activeIndex], item.dataKey)), angles[activeIndex] ?? 0).x}
+                  cy={polar(cx, cy, radius(numberAt(data[activeIndex], item.dataKey)), angles[activeIndex] ?? 0).y}
+                  r={4}
+                  fill={resolve(colorOf(item))}
+                  stroke={resolve(THEME.surface)}
+                  strokeWidth={2}
+                />
+              ),
+            )}
+        {drawLabels(radiusAxis?.children, viewBox)}
+        {parts.other}
+      </Svg>
+      {tooltip === undefined ? (
+        <View
+          accessible
+          testID="chart-summary"
+          aria-label={[label, interaction.summary].join('. ')}
+          className="absolute inset-0"
+          pointerEvents="none"
+        />
+      ) : (
+        <ChartSurface
+          interaction={interaction}
+          active={shown}
+          label={label}
+          onActive={(point) => {
+            setTouched(true);
+            setActive(point);
+          }}
+        />
+      )}
+      {tooltip === undefined || shown === undefined ? null : (
+        <TooltipBox point={shown} size={size} offset={tooltip.offset ?? 10}>
+          {drawContent(
+            tooltip.content,
+            {
+              ...contentPropsOf(tooltip),
+              active: true,
+              payload: payloadAt(shown.index),
+              label: categoryOf(shown.index),
+              coordinate: { x: shown.x, y: shown.y },
+            },
+            DefaultTooltipContent,
+          )}
+        </TooltipBox>
+      )}
+      {parts.legend === undefined ? null : (
+        <LegendBox legend={parts.legend} payload={legendPayload} onHeight={setLegendHeight} />
+      )}
+    </View>
+  );
+}
+
 export {
   Area,
   AreaChart,
@@ -1658,6 +2188,11 @@ export {
   LineChart,
   Pie,
   PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
   ResponsiveContainer,
   Text,
   Tooltip,
@@ -1678,7 +2213,12 @@ export type {
   LineProps,
   PieChartProps,
   PieProps,
+  PolarAngleAxisProps,
+  PolarChartProps,
+  PolarGridProps,
+  PolarRadiusAxisProps,
   PolarViewBox,
+  RadarProps,
   TextProps,
   TooltipContentProps,
   TooltipPayloadItem,

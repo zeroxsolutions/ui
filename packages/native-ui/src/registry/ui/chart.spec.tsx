@@ -13,6 +13,10 @@ import {
   LineChart,
   Pie,
   PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
   Text as ChartText,
   XAxis,
 } from '../lib/charts';
@@ -25,7 +29,10 @@ import {
   type ChartConfig,
 } from './chart';
 
-const mockTheme: { scheme: 'light' | 'dark'; variables: Record<string, unknown> } = {
+const mockTheme: {
+  scheme: 'light' | 'dark';
+  variables: Record<string, unknown>;
+} = {
   scheme: 'light',
   variables: {},
 };
@@ -199,12 +206,19 @@ function surface(): Element {
 
 /** A tap at `x` across the chart: a press and its release. */
 async function tapAt(x: number, chart: Element = surface()): Promise<void> {
-  await fireEvent(chart, 'responderGrant', { nativeEvent: { locationX: x, locationY: 40 } });
-  await fireEvent(chart, 'responderRelease', { nativeEvent: { locationX: x, locationY: 40 } });
+  await fireEvent(chart, 'responderGrant', {
+    nativeEvent: { locationX: x, locationY: 40 },
+  });
+  await fireEvent(chart, 'responderRelease', {
+    nativeEvent: { locationX: x, locationY: 40 },
+  });
 }
 
 async function press(key: string): Promise<void> {
-  await fireEvent(surface(), 'keyDown', { nativeEvent: { key }, preventDefault: () => undefined });
+  await fireEvent(surface(), 'keyDown', {
+    nativeEvent: { key },
+    preventDefault: () => undefined,
+  });
 }
 
 /** A press at `x` across the chart, which is drawn at its initial 320 by 200 until it is laid out. */
@@ -212,6 +226,31 @@ async function pressAt(x: number): Promise<void> {
   await fireEvent(screen.getByTestId('chart-surface'), 'responderGrant', {
     nativeEvent: { locationX: x, locationY: 40 },
   });
+}
+
+function MonthRadar({ grid = <PolarGrid /> }: { grid?: React.ReactNode }): React.ReactNode {
+  return (
+    <ChartContainer config={chartConfig}>
+      <RadarChart data={chartData}>
+        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
+        <PolarAngleAxis dataKey="month" />
+        {grid}
+        <Radar dataKey="desktop" fill="var(--color-desktop)" fillOpacity={0.6} isAnimationActive={false} />
+        <Radar dataKey="mobile" fill="var(--color-mobile)" isAnimationActive={false} />
+      </RadarChart>
+    </ChartContainer>
+  );
+}
+
+/** The points of an svg path of straight lines, such as `M1,2 L3,4 Z`. */
+function pointsOf(d: unknown): number[][] {
+  return [...String(d).matchAll(/(-?[\d.e-]+),(-?[\d.e-]+)/g)].map((match) => [Number(match[1]), Number(match[2])]);
+}
+
+/** The text of the svg text element `id`, which react-native-svg hands its span. */
+function textOf(id: string): unknown {
+  const [span] = screen.getByTestId(id, HIDDEN).children;
+  return typeof span === 'object' ? span.props.content : span;
 }
 
 describe('Chart', () => {
@@ -233,23 +272,41 @@ describe('Chart', () => {
     mockTheme.variables = { '--chart-1': [37, 99, 235] };
 
     await render(
-      <MonthBars config={{ desktop: { label: 'Desktop', color: 'var(--chart-1)' }, mobile: chartConfig.mobile }} />,
+      <MonthBars
+        config={{
+          desktop: { label: 'Desktop', color: 'var(--chart-1)' },
+          mobile: chartConfig.mobile,
+        }}
+      />,
     );
 
     expect(fillOf(screen.getByTestId('chart-bar-desktop-0', HIDDEN))).toBe(processColor('rgb(37, 99, 235)'));
   });
 
   it('draws a theme colour with its alpha', async () => {
-    mockTheme.variables = { '--border': [255, 255, 255], '--border-alpha': 0.1 };
+    mockTheme.variables = {
+      '--border': [255, 255, 255],
+      '--border-alpha': 0.1,
+    };
 
-    await render(<MonthBars config={{ desktop: { color: 'var(--border)' }, mobile: chartConfig.mobile }} />);
+    await render(
+      <MonthBars
+        config={{
+          desktop: { color: 'var(--border)' },
+          mobile: chartConfig.mobile,
+        }}
+      />,
+    );
 
     expect(fillOf(screen.getByTestId('chart-bar-desktop-0', HIDDEN))).toBe(processColor('rgba(255, 255, 255, 0.1)'));
   });
 
   it("draws a key's theme colour for the scheme the app draws", async () => {
     const config = {
-      desktop: { label: 'Desktop', theme: { light: '#2563eb', dark: '#dc2626' } },
+      desktop: {
+        label: 'Desktop',
+        theme: { light: '#2563eb', dark: '#dc2626' },
+      },
       mobile: chartConfig.mobile,
     } satisfies ChartConfig;
 
@@ -316,14 +373,20 @@ describe('Chart', () => {
     expect(surface.props['aria-label']).toContain('January: Desktop 186, Mobile 80');
     expect(surface.props['aria-label']).toContain('June: Desktop 214, Mobile 140');
 
-    await fireEvent(surface, 'accessibilityAction', { nativeEvent: { actionName: 'increment' } });
+    await fireEvent(surface, 'accessibilityAction', {
+      nativeEvent: { actionName: 'increment' },
+    });
     expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('January: Desktop 186, Mobile 80');
     expect(screen.getByText('January')).toBeOnTheScreen();
 
-    await fireEvent(surface, 'accessibilityAction', { nativeEvent: { actionName: 'increment' } });
+    await fireEvent(surface, 'accessibilityAction', {
+      nativeEvent: { actionName: 'increment' },
+    });
     expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('February: Desktop 305, Mobile 200');
 
-    await fireEvent(surface, 'accessibilityAction', { nativeEvent: { actionName: 'decrement' } });
+    await fireEvent(surface, 'accessibilityAction', {
+      nativeEvent: { actionName: 'decrement' },
+    });
     expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('January: Desktop 186, Mobile 80');
   });
 
@@ -471,7 +534,9 @@ describe('Chart', () => {
 
       expect(surface.props['aria-label']).toBe('Pie chart. Chrome: 275. Safari: 200. Firefox: 287');
 
-      await fireEvent(surface, 'accessibilityAction', { nativeEvent: { actionName: 'increment' } });
+      await fireEvent(surface, 'accessibilityAction', {
+        nativeEvent: { actionName: 'increment' },
+      });
       expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('Chrome: 275');
     });
 
@@ -508,7 +573,10 @@ describe('Chart', () => {
       // degrees, 70px out, is inside it.
       const angle = (88 * Math.PI) / 180;
       await fireEvent(surface(), 'responderGrant', {
-        nativeEvent: { locationX: 160 + 70 * Math.cos(angle), locationY: 100 - 70 * Math.sin(angle) },
+        nativeEvent: {
+          locationX: 160 + 70 * Math.cos(angle),
+          locationY: 100 - 70 * Math.sin(angle),
+        },
       });
 
       expect(screen.queryByText('Chrome')).toBeNull();
@@ -520,6 +588,97 @@ describe('Chart', () => {
 
       expect(screen.getByText('Chrome')).toBeOnTheScreen();
       expect(screen.getByText('Firefox')).toBeOnTheScreen();
+    });
+  });
+
+  describe('RadarChart', () => {
+    // At 320 by 200 less a 5px margin the middle is 160, 100 and the outer ring 76px out, 80% of 95; the
+    // values run to 320, and the first month sits at twelve o'clock, the rest clockwise.
+    it("draws a polygon per series through each row's value on its month's spoke", async () => {
+      await render(<MonthRadar />);
+
+      const points = pointsOf(screen.getByTestId('chart-radar-desktop', HIDDEN).props.d);
+
+      expect(points).toHaveLength(6);
+      expect(points[0]?.[0]).toBeCloseTo(160);
+      expect(points[0]?.[1]).toBeCloseTo(100 - (76 * 186) / 320);
+      expect(points[3]?.[1]).toBeCloseTo(100 + (76 * 73) / 320);
+      expect(fillOf(screen.getByTestId('chart-radar-desktop', HIDDEN))).toBe(processColor('#2563eb'));
+      expect(screen.getByTestId('chart-radar-desktop', HIDDEN)).toHaveProp('fillOpacity', 0.6);
+    });
+
+    it('names each month beyond its spoke', async () => {
+      await render(<MonthRadar />);
+
+      expect(textOf('chart-angle-tick-0')).toBe('January');
+      expect(screen.getByTestId('chart-angle-tick-0', HIDDEN).props.font).toMatchObject({ textAnchor: 'middle' });
+      expect(screen.getByTestId('chart-angle-tick-1', HIDDEN).props.font).toMatchObject({ textAnchor: 'start' });
+      expect(screen.getByTestId('chart-angle-tick-4', HIDDEN).props.font).toMatchObject({ textAnchor: 'end' });
+    });
+
+    it('draws a polygon ring per value tick and a spoke per month', async () => {
+      await render(<MonthRadar />);
+
+      const grid = screen.getByTestId('chart-polar-grid', HIDDEN);
+      const marks = grid.children.filter((child) => typeof child === 'object');
+      const rings = marks.filter((child) => child.props.d !== undefined);
+
+      expect(rings).toHaveLength(4);
+      expect(pointsOf(rings.at(-1)?.props.d)).toHaveLength(6);
+      expect(marks).toHaveLength(4 + 6);
+    });
+
+    it('draws circles at the given radii, filled as its first: and last: classes name', async () => {
+      mockTheme.variables = {
+        '--muted': [244, 244, 245],
+        '--background': [255, 255, 255],
+      };
+
+      await render(
+        <MonthRadar
+          grid={
+            <PolarGrid
+              gridType="circle"
+              radialLines={false}
+              polarRadius={[86, 74]}
+              className="first:fill-muted last:fill-background"
+            />
+          }
+        />,
+      );
+
+      const [first, last] = screen
+        .getByTestId('chart-polar-grid', HIDDEN)
+        .children.filter((child) => typeof child === 'object');
+
+      expect(typeof first === 'object' ? first.props.r : undefined).toBe(86);
+      expect(typeof last === 'object' ? last.props.r : undefined).toBe(74);
+      expect(typeof first === 'object' ? fillOf(first) : undefined).toBe(processColor('rgb(244, 244, 245)'));
+      expect(typeof last === 'object' ? fillOf(last) : undefined).toBe(processColor('rgb(255, 255, 255)'));
+    });
+
+    it('shows the values of the month whose spoke is nearest a press', async () => {
+      await render(<MonthRadar />);
+
+      // 30 degrees left of twelve o'clock is closer to June's spoke than to January's.
+      await fireEvent(surface(), 'responderGrant', {
+        nativeEvent: {
+          locationX: 160 - 40 * Math.sin(Math.PI / 4),
+          locationY: 100 - 40 * Math.cos(Math.PI / 4),
+        },
+      });
+
+      expect(screen.getByText('June')).toBeOnTheScreen();
+      expect(screen.getByText('214')).toBeOnTheScreen();
+      expect(screen.getByTestId('chart-active-dot-desktop', HIDDEN)).toBeTruthy();
+    });
+
+    it('reads every month by its values', async () => {
+      await render(<MonthRadar />);
+
+      expect(screen.getByRole('adjustable').props['aria-label']).toMatch(
+        /^Radar chart\. January: Desktop 186, Mobile 80\. February: Desktop 305, Mobile 200\./,
+      );
     });
   });
 
@@ -591,11 +750,17 @@ describe('Chart', () => {
     it('shows the category under a mouse and hides it as the mouse leaves; a pen or a finger moves nothing', async () => {
       await render(<MonthBars />);
 
-      await fireEvent(surface(), 'pointerMove', { nativeEvent: { pointerType: 'touch', offsetX: 80, offsetY: 40 } });
+      await fireEvent(surface(), 'pointerMove', {
+        nativeEvent: { pointerType: 'touch', offsetX: 80, offsetY: 40 },
+      });
       expect(screen.queryByText('February')).toBeNull();
-      await fireEvent(surface(), 'pointerMove', { nativeEvent: { pointerType: 'mouse', offsetX: 80, offsetY: 40 } });
+      await fireEvent(surface(), 'pointerMove', {
+        nativeEvent: { pointerType: 'mouse', offsetX: 80, offsetY: 40 },
+      });
       expect(screen.getByText('February')).toBeOnTheScreen();
-      await fireEvent(surface(), 'pointerLeave', { nativeEvent: { pointerType: 'mouse' } });
+      await fireEvent(surface(), 'pointerLeave', {
+        nativeEvent: { pointerType: 'mouse' },
+      });
       expect(screen.queryByText('February')).toBeNull();
     });
   });
@@ -672,7 +837,10 @@ describe('Chart', () => {
     });
 
     it('names every item by the config key nameKey gives', async () => {
-      const config = { ...chartConfig, views: { label: 'Page Views' } } satisfies ChartConfig;
+      const config = {
+        ...chartConfig,
+        views: { label: 'Page Views' },
+      } satisfies ChartConfig;
       await render(
         <MonthBars config={config} tooltip={<ChartTooltip content={<ChartTooltipContent nameKey="views" />} />} />,
       );

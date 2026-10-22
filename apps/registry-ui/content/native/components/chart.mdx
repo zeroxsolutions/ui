@@ -72,8 +72,8 @@ Mobile 80", and valued "None selected" until a category is active. A screen read
 the next or the previous category and reads its values.
 A chart with no tooltip is announced with the same label.
 
-As Recharts' do, bars grow from the axis, lines and areas draw in from the left and a pie sweeps round over one and a half seconds, run by Reanimated. A series is
-drawn at once where the system asks for reduced motion or the series sets `isAnimationActive={false}`.
+As Recharts' do, bars grow from the axis, lines and areas draw in from the left, a pie sweeps round and a radar grows
+from its middle over one and a half seconds, run by Reanimated. A series is drawn at once where the system asks for reduced motion or the series sets `isAnimationActive={false}`.
 
 ## API reference
 
@@ -132,8 +132,9 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 
 ### Chart parts
 
-`@/lib/charts` holds `ResponsiveContainer`, `BarChart`, `Bar`, `LineChart`, `Line`, `AreaChart`, `Area`, `PieChart`, `Pie`, `Label`,
-`Text`, `XAxis`, `YAxis`, `CartesianGrid`, `Tooltip` and `Legend`, with these props of Recharts':
+`@/lib/charts` holds `ResponsiveContainer`, `BarChart`, `Bar`, `LineChart`, `Line`, `AreaChart`, `Area`, `PieChart`,
+`Pie`, `RadarChart`, `Radar`, `PolarGrid`, `PolarAngleAxis`, `PolarRadiusAxis`, `Label`, `Text`, `XAxis`, `YAxis`,
+`CartesianGrid`, `Tooltip` and `Legend`, with these props of Recharts':
 
 - `BarChart`, `LineChart` and `AreaChart`: `data`, `margin`, `accessibilityLayer`, `width`, `height`, and `title`, which a
   screen reader hears before the values; `BarChart` also `barGap` and `barCategoryGap`.
@@ -151,8 +152,15 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 - `Pie`: `data`, `dataKey`, `nameKey`, `innerRadius`, `outerRadius` (`'80%'`), `cx`, `cy`, `startAngle`, `endAngle`,
   `paddingAngle`, `fill`, `stroke`, `strokeWidth`, `isAnimationActive`, `animationDuration`. A row's own `fill`
   colours its slice.
-- `Label`, inside a `Pie`: `content`, given `{ viewBox }` with the pie's `cx`, `cy` and radii, or `value`, drawn
-  in the middle.
+- `RadarChart`: `data`, `margin`, `cx`, `cy`, `innerRadius`, `outerRadius` (`'80%'`), `startAngle` (`90`),
+  `endAngle` (`-270`), `accessibilityLayer`, `width`, `height`, `title`.
+- `Radar`: `fill`, `fillOpacity`, `stroke`, `strokeWidth`, `dot` (off unless given), `activeDot`.
+- `PolarGrid`: `gridType` (`'polygon'` or `'circle'`), `radialLines`, `polarRadius`, `stroke`, `fill`, and the
+  `fill-*` classes of `className`.
+- `PolarAngleAxis`: `dataKey`, `tick`, `tickFormatter`.
+- `PolarRadiusAxis`: `angle`, `tick`, `tickLine`, `axisLine`, `tickCount`, and a `Label` as its child.
+- `Label`, inside a `Pie` or a `PolarRadiusAxis`: `content`, given `{ viewBox }` with the chart's `cx`, `cy` and
+  radii, or `value`, drawn in the middle.
 - `Text`: react-native-svg's text props, such as `x`, `y`, `textAnchor` and `fontSize`, plus `verticalAnchor` and
   `fill`.
 
@@ -178,6 +186,9 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 - The entrance reveals the series through a clip, or a sweeping mask for a pie, that Reanimated animates, so
   the chart is not drawn again for every frame; bars come up from the axis with their tops cut level until the
   clip reaches them, where Recharts grows each bar's height.
+- `PolarGrid` reads only the `fill-<colour>`, `first:fill-<colour>` and `last:fill-<colour>` classes of its
+  `className`, filling every ring, the first or the last in the theme colour of that name; React Native has no
+  CSS to apply the others to an svg ring.
 - A pie's slices have no stroke unless given one: upstream's container hides Recharts' white one.
 - `accessibilityLayer` is accepted and changes nothing: the chart always takes the keyboard on the web and is
   always read to a screen reader. The focused chart keeps the browser's focus ring, which upstream hides.

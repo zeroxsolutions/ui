@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
-import { Bar, BarChart, YAxis } from './charts';
+import { Bar, BarChart, Radar, RadarChart, YAxis } from './charts';
 
 const mockMotion = { reduced: false };
 
@@ -83,6 +83,18 @@ describe('a chart entrance', () => {
 
     expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('y', 0);
     expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('height', 200);
+  });
+
+  // A radar grows out of its middle, through a disc that starts with no radius.
+  it('grows a radar from its middle', async () => {
+    await render(
+      <RadarChart data={data} width={320} height={200}>
+        <Radar dataKey="desktop" fill="#2563eb" />
+      </RadarChart>,
+    );
+
+    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('r', 0);
+    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('cx', 160);
   });
 
   it('draws a series at once whose isAnimationActive is false', async () => {
