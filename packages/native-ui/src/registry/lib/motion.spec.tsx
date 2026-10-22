@@ -1,8 +1,8 @@
 import { act, render, screen } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion as useSettingAtStart } from 'react-native-reanimated';
-import { usePresence } from './motion';
+import { usePopupMotion, usePresence } from './motion';
 
 jest.mock('react-native-reanimated', () => {
   const actual = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
@@ -119,5 +119,37 @@ describe('usePresence', () => {
 
       expect(screen.getByTestId('part')).toHaveAnimatedStyle({ opacity: 1 });
     });
+  });
+});
+
+/** Draws a popup's layer while `usePopupMotion` keeps it. */
+function Popup({ open }: { open: boolean }): ReactNode {
+  const { present, style } = usePopupMotion(open, 'right');
+  return present ? <Animated.View testID="popup" style={style} /> : null;
+}
+
+describe('usePopupMotion', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  const elapse = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms));
+
+  it('on the web, takes no pointer while the popup comes in, and takes it once the popup is in', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    await render(<Popup open={false} />);
+
+    await screen.rerender(<Popup open />);
+    await elapse(50);
+    expect(screen.getByTestId('popup')).toHaveStyle({ pointerEvents: 'none' });
+
+    await elapse(100);
+    expect(screen.getByTestId('popup')).not.toHaveStyle({ pointerEvents: 'none' });
   });
 });

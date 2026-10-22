@@ -3,7 +3,7 @@
  * drawn while it animates in and out, and the fade, grow and slide a popup beside its trigger moves with.
  */
 import { useEffect, useState, type ComponentProps } from 'react';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -42,6 +42,8 @@ interface Presence {
   present: boolean;
   /** How far the part has come in, from 0, gone, to 1, fully in; drive its animated style from it. */
   progress: SharedValue<number>;
+  /** Whether the part has come fully in and is open: false while it comes in, and from when it closes. */
+  entered: boolean;
   /**
    * Whether the system asks for reduced motion, when the part is drawn still, without its animated style.
    * A portal mounts the part a render after it opens, after `progress` was set, so a still part relies on
@@ -61,22 +63,26 @@ interface Presence {
 function usePresence(open: boolean, enter: WithTimingConfig, exit: WithTimingConfig = enter): Presence {
   const reduced = useReducedMotion();
   const [present, setPresent] = useState(open);
+  const [entered, setEntered] = useState(false);
   const progress = useSharedValue(0);
 
   useEffect(() => {
     const target = open ? 1 : 0;
     if (open) setPresent(true);
+    setEntered(open && reduced);
     if (reduced) {
       progress.value = target;
       if (!open) setPresent(false);
       return;
     }
     progress.value = withTiming(target, open ? enter : exit, (finished) => {
-      if (finished === true && target === 0) scheduleOnRN(setPresent, false);
+      if (finished !== true) return;
+      if (target === 0) scheduleOnRN(setPresent, false);
+      else scheduleOnRN(setEntered, true);
     });
   }, [open, reduced, enter, exit, progress]);
 
-  return { present: present || open, progress, reduced };
+  return { present: present || open, progress, entered: entered && open, reduced };
 }
 
 /** Upstream's 100ms popup motion, on tw-animate's default `ease`. */
@@ -107,11 +113,13 @@ interface PopupMotion {
 /**
  * The motion of a popup opening on `side` of its trigger: it fades in while growing from 95% and sliding
  * 0.5rem away from the trigger, and out the same way, or appears and goes at once when the system asks for
- * reduced motion.
+ * reduced motion. On the web it takes no pointer until it is fully in: the slide can carry it over the
+ * point a held button opened it at, such as a context menu's right click, and Radix's menu turns that
+ * button's release over an item into a click on the item.
  * @param timing - how long it takes, 100ms by default; pass a constant, since a new object restarts it
  */
 function usePopupMotion(open: boolean, side: PopupSide, timing: WithTimingConfig = POPUP_MOTION): PopupMotion {
-  const { present, progress, reduced } = usePresence(open, timing);
+  const { present, progress, entered, reduced } = usePresence(open, timing);
   const motion = useAnimatedStyle(() => {
     const offset = (1 - progress.value) * POPUP_SLIDE;
     return {
@@ -124,7 +132,14 @@ function usePopupMotion(open: boolean, side: PopupSide, timing: WithTimingConfig
       ],
     };
   });
-  return { present, style: [{ transformOrigin: TRANSFORM_ORIGIN[side] }, !reduced && motion] };
+  return {
+    present,
+    style: [
+      { transformOrigin: TRANSFORM_ORIGIN[side] },
+      Platform.OS === 'web' && !entered && { pointerEvents: 'none' },
+      !reduced && motion,
+    ],
+  };
 }
 
 export { usePopupMotion, usePresence, useReducedMotion };
