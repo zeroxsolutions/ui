@@ -92,6 +92,9 @@ Returns the state of the nearest SidebarProvider, and throws outside one:
 | `isMobile`      | `boolean`                   | Whether the window is narrower than `md`, 768px.         |
 | `toggleSidebar` | `() => void`                | Opens or closes the sheet below `md`, the panel from it. |
 
+`isMobile` comes from `useIsMobile` in `hooks/use-mobile`, which the sidebar installs as upstream's does, so code
+moved from the web that imports it keeps working.
+
 ### Sidebar
 
 Takes every prop of React Native's `View`, plus:

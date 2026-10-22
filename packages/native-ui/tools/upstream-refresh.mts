@@ -1,7 +1,7 @@
 /**
  * Overwrites `styles/upstream/` with shadcn's style sheets and colours at one shadcn-ui/ui commit, the
- * one given as the first argument or else the head of `main`, and with the names of the `registry:ui`
- * items upstream's site lists today.
+ * one given as the first argument or else the head of `main`, and with the names of the `registry:ui` and
+ * `registry:hook` items upstream's site lists today.
  */
 import { writeFile } from 'node:fs/promises';
 
@@ -19,6 +19,7 @@ const SNAPSHOTS = [
 // commit; it is the list as the site serves it on the day of the refresh.
 const UPSTREAM_REGISTRY = 'https://ui.shadcn.com/r/styles/base-vega/registry.json';
 const ITEM_LIST = '../styles/upstream/registry-ui-items.json';
+const HOOK_LIST = '../styles/upstream/registry-hook-items.json';
 
 async function fetchOk(url: string, init?: RequestInit): Promise<Response> {
   const response = await fetch(url, init);
@@ -48,10 +49,15 @@ async function main(): Promise<void> {
   const registry = (await (await fetchOk(UPSTREAM_REGISTRY)).json()) as {
     items: { name: string; type: string }[];
   };
-  const names = registry.items.filter((item) => item.type === 'registry:ui').map((item) => item.name);
+  const namesOf = (type: string) => registry.items.filter((item) => item.type === type).map((item) => item.name);
+  const names = namesOf('registry:ui');
+  const hooks = namesOf('registry:hook');
   await writeFile(new URL(ITEM_LIST, import.meta.url), `${JSON.stringify(names.sort(), null, 2)}\n`);
+  await writeFile(new URL(HOOK_LIST, import.meta.url), `${JSON.stringify(hooks.sort(), null, 2)}\n`);
 
-  console.log(`styles/upstream: shadcn-ui/ui ${commit}, ${names.length} registry:ui items`);
+  console.log(
+    `styles/upstream: shadcn-ui/ui ${commit}, ${names.length} registry:ui items, ${hooks.length} registry:hook items`,
+  );
 }
 
 await main();

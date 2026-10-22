@@ -19,7 +19,6 @@ import {
   Pressable,
   ScrollView,
   View,
-  useWindowDimensions,
   type GestureResponderEvent,
   type MouseEvent,
   type NativeSyntheticEvent,
@@ -27,6 +26,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useIsMobile } from '../hooks/use-mobile';
 import { useReducedMotion } from '../lib/motion';
 import { asText } from '../lib/text-children';
 import { cn } from '../lib/utils';
@@ -54,9 +54,6 @@ const SIDEBAR_INSET_ROOM = 16;
 
 /** The width of the strip along the panel's edge that a SidebarRail takes presses on. */
 const SIDEBAR_RAIL_WIDTH = 16;
-
-/** The window width, in px, from which the sidebar is a panel beside the screen: Tailwind's `md`. */
-const MOBILE_BREAKPOINT = 768;
 
 /** The key that toggles the sidebar on the web with Cmd or Ctrl held. */
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
@@ -149,7 +146,7 @@ function SidebarProvider({
   children,
   ...props
 }: SidebarProviderProps): ReactNode {
-  const isMobile = useWindowDimensions().width < MOBILE_BREAKPOINT;
+  const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = useState(false);
   const [ownOpen, setOwnOpen] = useState(defaultOpen);
   const [inset, setInset] = useState(false);

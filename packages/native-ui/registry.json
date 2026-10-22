@@ -766,6 +766,7 @@
       ],
       "registryDependencies": [
         "@zui/utils",
+        "@zui/use-mobile",
         "@zui/text-children",
         "@zui/motion",
         "@zui/button",
@@ -1104,6 +1105,13 @@
           "type": "registry:lib"
         }
       ]
+    },
+    {
+      "name": "use-mobile",
+      "type": "registry:hook",
+      "title": "Use mobile",
+      "description": "useIsMobile, whether the window is narrower than the md width, as a phone's is, following the window as it resizes.",
+      "files": [{ "path": "src/registry/hooks/use-mobile.ts", "type": "registry:hook" }]
     },
     {
       "name": "code-block",
