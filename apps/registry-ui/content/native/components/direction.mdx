@@ -1,0 +1,62 @@
+---
+title: Direction
+description: Sets the direction text reads in, left to right or right to left, for the parts inside it.
+---
+
+<NativePreview name="direction-demo" />
+
+## Installation
+
+<InstallCommand name="direction" />
+
+The CLI writes `components/ui/direction.tsx`. It needs no package.
+
+## Usage
+
+```tsx
+import { DirectionProvider, useDirection } from '@/components/ui/direction';
+```
+
+```tsx
+<DirectionProvider direction="rtl">{/* the app's screens */}</DirectionProvider>
+```
+
+```tsx
+const direction = useDirection(); // 'ltr' or 'rtl'
+```
+
+## API reference
+
+### DirectionProvider
+
+| Prop        | Type             | Default                                |
+| ----------- | ---------------- | -------------------------------------- |
+| `direction` | `'ltr' \| 'rtl'` | the system's, from `I18nManager.isRTL` |
+| `children`  | `ReactNode`      | -                                      |
+
+It tells the parts inside it which way text reads. On the web it also sets `dir` on a box around its children
+that takes no room of its own (`display: contents`), so the page lays them out in that direction: rows start
+from the right, and `ms-*` and `me-*` margins swap sides.
+
+### useDirection
+
+Returns `'ltr'` or `'rtl'`: the nearest DirectionProvider's direction, or the system's outside one.
+
+## Right to left on a device
+
+A device lays out the whole app in one direction, which `I18nManager` holds for the app's life: rows start from
+the right and `start` and `end` swap sides when the system language reads right to left, or after
+`I18nManager.forceRTL(true)` and a restart. A provider cannot change that for part of a screen, so on a device
+it draws nothing around its children and only tells them the direction it was given. Set it from the same
+place as the app's layout direction, such as `expo-localization`'s `getLocales()[0].textDirection`, so that
+both agree.
+
+## Differences from upstream
+
+- `direction` defaults to the system's direction, where upstream's defaults to `'ltr'`: on a device the system
+  sets the layout direction, and a provider that disagreed with it would make the parts reading it disagree
+  with the layout.
+- Upstream's provider re-exports `@base-ui/react`'s, which sets no `dir` itself and leaves it to the page's
+  `<html dir>`. A React Native app on the web has no `<html>` of its own to set, so the provider here sets `dir`
+  on a box around its children.
+- On a device the provider changes no layout, as above.

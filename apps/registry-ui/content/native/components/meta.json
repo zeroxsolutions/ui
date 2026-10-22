@@ -6,6 +6,7 @@
     "theme",
     "text",
     "icon",
+    "direction",
     "---Actions---",
     "button",
     "button-group",

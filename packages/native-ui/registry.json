@@ -833,6 +833,18 @@
       ]
     },
     {
+      "name": "direction",
+      "type": "registry:ui",
+      "title": "Direction",
+      "description": "DirectionProvider and useDirection: the direction text reads in, the system's unless a provider sets it, which the web also lays its children out in.",
+      "files": [
+        {
+          "path": "src/registry/ui/direction.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",
