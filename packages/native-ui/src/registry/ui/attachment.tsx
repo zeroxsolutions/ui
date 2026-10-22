@@ -14,18 +14,10 @@ import {
   type ReactNode,
 } from 'react';
 import { Platform, Pressable, ScrollView, View, type LayoutChangeEvent } from 'react-native';
-import Animated, {
-  cancelAnimation,
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useFocusVisible } from '../lib/focus-visible';
 import { useMessage } from '../lib/message-context';
-import { useReducedMotion } from '../lib/motion';
+import { usePulse } from '../lib/motion';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { IconClassContext } from './icon';
@@ -272,33 +264,16 @@ function AttachmentContent({ className, ...props }: ComponentProps<typeof View>)
   );
 }
 
-/** Half a cycle of the title's pulse: tw-animate's `animate-pulse` timing, which a skeleton pulses with. */
-const SHIMMER_TIMING = { duration: 1000, easing: Easing.bezier(0.4, 0, 0.6, 1) } as const;
-const SHIMMER_LOW_OPACITY = 0.5;
-
 /**
  * The file's name, on one line. While the attachment is `uploading` or `processing` it fades to half
  * opacity and back on a loop, and stands still when the person has asked the system to reduce motion.
  */
 function AttachmentTitle({ className, ...props }: ComponentProps<typeof Text>): ReactNode {
   const { state } = useContext(AttachmentContext);
-  const reduced = useReducedMotion();
-  const pulsing = (state === 'uploading' || state === 'processing') && !reduced;
-  const opacity = useSharedValue(1);
-  const pulseStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
-
-  useEffect(() => {
-    if (!pulsing) return undefined;
-    const fadeTo = (toValue: number) => withTiming(toValue, SHIMMER_TIMING);
-    opacity.value = withRepeat(withSequence(fadeTo(SHIMMER_LOW_OPACITY), fadeTo(1)), -1);
-    return () => {
-      cancelAnimation(opacity);
-      opacity.value = 1;
-    };
-  }, [pulsing, opacity]);
+  const pulseStyle = usePulse(state === 'uploading' || state === 'processing');
 
   return (
-    <Animated.View style={pulsing ? pulseStyle : undefined}>
+    <Animated.View style={pulseStyle}>
       <Text numberOfLines={1} className={cn('cn-attachment-title/text', className)} {...props} />
     </Animated.View>
   );

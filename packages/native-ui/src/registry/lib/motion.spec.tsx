@@ -1,8 +1,8 @@
 import { act, render, screen } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
-import { AccessibilityInfo, Platform } from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion as useSettingAtStart } from 'react-native-reanimated';
-import { usePopupMotion, usePresence } from './motion';
+import { usePopupMotion, usePresence, usePulse } from './motion';
 
 jest.mock('react-native-reanimated', () => {
   const actual = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
@@ -151,5 +151,56 @@ describe('usePopupMotion', () => {
 
     await elapse(100);
     expect(screen.getByTestId('popup')).not.toHaveStyle({ pointerEvents: 'none' });
+  });
+});
+
+/** Draws a part that pulses while `pulsing`. */
+function Pulsing({ pulsing }: { pulsing: boolean }): ReactNode {
+  const style = usePulse(pulsing);
+  return <Animated.View testID="pulsing" style={style} />;
+}
+
+/** The opacity a view is drawn at, or none when nothing sets one. */
+const opacityOf = (testID: string): unknown => StyleSheet.flatten(screen.getByTestId(testID).props.style)?.opacity;
+
+describe('usePulse', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  const elapse = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms));
+
+  it('fades the part to half opacity and back each second while pulsing', async () => {
+    jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(false);
+    await render(<Pulsing pulsing />);
+
+    await elapse(1000);
+    expect(screen.getByTestId('pulsing')).toHaveAnimatedStyle({ opacity: 0.5 });
+    await elapse(1000);
+    expect(screen.getByTestId('pulsing')).toHaveAnimatedStyle({ opacity: 1 });
+  });
+
+  it('sets no opacity while not pulsing, and none once it stops', async () => {
+    jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(false);
+    await render(<Pulsing pulsing={false} />);
+    expect(opacityOf('pulsing')).toBeUndefined();
+
+    await screen.rerender(<Pulsing pulsing />);
+    await elapse(500);
+    await screen.rerender(<Pulsing pulsing={false} />);
+    expect(opacityOf('pulsing')).toBeUndefined();
+  });
+
+  it('sets no opacity when the system asks for reduced motion', async () => {
+    jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
+    await render(<Pulsing pulsing />);
+    await elapse(1000);
+
+    expect(opacityOf('pulsing')).toBeUndefined();
   });
 });

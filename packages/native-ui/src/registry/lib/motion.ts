@@ -1,15 +1,18 @@
 /**
- * The motion the overlays share: whether the system asks for reduced motion, a presence that keeps a part
- * drawn while it animates in and out, the fade, grow and slide a popup beside its trigger moves with, and
- * the swipe that dismisses a toast.
+ * The motion the items share: whether the system asks for reduced motion, a presence that keeps a part
+ * drawn while it animates in and out, the fade, grow and slide a popup beside its trigger moves with, the
+ * swipe that dismisses a toast, and the pulse of a title whose work is under way.
  */
 import { useEffect, useRef, useState, type ComponentProps, type RefObject } from 'react';
 import { AccessibilityInfo, Platform, type GestureResponderEvent, type GestureResponderHandlers } from 'react-native';
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useReducedMotion as useSettingAtStart,
   useSharedValue,
+  withRepeat,
+  withSequence,
   withTiming,
   type SharedValue,
   type WithTimingConfig,
@@ -255,5 +258,34 @@ function useSwipeToDismiss({ directions, enabled, onDismiss, settle, reduced }: 
   return { handlers, x, y, swiped };
 }
 
-export { usePopupMotion, usePresence, useReducedMotion, useSwipeToDismiss };
+/** Half a cycle of a pulse: tw-animate's `animate-pulse` timing, which a skeleton pulses with. */
+const PULSE_TIMING = { duration: 1000, easing: Easing.bezier(0.4, 0, 0.6, 1) } as const;
+const PULSE_LOW_OPACITY = 0.5;
+
+/**
+ * The style of a part that fades to half opacity and back on a loop while `pulsing`, as upstream's shimmer
+ * marks text whose work is under way, such as an uploading file's name. Put it on an `Animated.View` around
+ * the part. It is undefined while the part stands still: while not pulsing, and when the system asks for
+ * reduced motion.
+ */
+function usePulse(pulsing: boolean): ComponentProps<typeof Animated.View>['style'] {
+  const reduced = useReducedMotion();
+  const moving = pulsing && !reduced;
+  const opacity = useSharedValue(1);
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  useEffect(() => {
+    if (!moving) return undefined;
+    const fadeTo = (toValue: number) => withTiming(toValue, PULSE_TIMING);
+    opacity.value = withRepeat(withSequence(fadeTo(PULSE_LOW_OPACITY), fadeTo(1)), -1);
+    return () => {
+      cancelAnimation(opacity);
+      opacity.value = 1;
+    };
+  }, [moving, opacity]);
+
+  return moving ? style : undefined;
+}
+
+export { usePopupMotion, usePresence, usePulse, useReducedMotion, useSwipeToDismiss };
 export type { PopupMotion, PopupSide, Presence, SwipeDirection, SwipeToDismiss };

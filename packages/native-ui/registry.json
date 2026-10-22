@@ -33,7 +33,7 @@
       "name": "motion",
       "type": "registry:lib",
       "title": "Motion",
-      "description": "usePresence, which keeps an overlay drawn while it animates in and out, useReducedMotion, which reads whether the system asks for reduced motion, usePopupMotion, the fade, grow and slide a menu, popover or tooltip opens and closes with, and useSwipeToDismiss, the swipe that closes a toast.",
+      "description": "usePresence, which keeps an overlay drawn while it animates in and out, useReducedMotion, which reads whether the system asks for reduced motion, usePopupMotion, the fade, grow and slide a menu, popover or tooltip opens and closes with, useSwipeToDismiss, the swipe that closes a toast, and usePulse, the fade a title pulses with while its work is under way.",
       "dependencies": ["react-native-reanimated", "react-native-worklets"],
       "files": [
         {
