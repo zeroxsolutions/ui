@@ -62,7 +62,7 @@ test('/llms.txt lists the later native components, and each answers as Markdown 
 }) => {
   const index = await (await request.get('/llms.txt')).text();
 
-  for (const name of ['dialog', 'select', 'calendar', 'sonner']) {
+  for (const name of ['dialog', 'select', 'calendar', 'sonner', 'chart', 'sidebar', 'code-block']) {
     expect(index, name).toContain(`(/native/components/nativewind/${name})`);
 
     for (const engine of ['nativewind', 'uniwind']) {

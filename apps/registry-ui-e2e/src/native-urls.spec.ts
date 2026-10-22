@@ -94,11 +94,23 @@ test('the components index under either engine links the later components under 
       ['Select', 'select'],
       ['Calendar', 'calendar'],
       ['Sonner', 'sonner'],
+      ['Chart', 'chart'],
+      ['Sidebar', 'sidebar'],
+      ['Code Block', 'code-block'],
     ]) {
       await expect(table.getByRole('link', { name: label, exact: true }), `${engine} ${name}`).toHaveAttribute(
         'href',
         `/native/components/${engine}/${name}`,
       );
     }
+  }
+});
+
+test('the form page, whose item ships no files, installs Field under either engine', async ({ page }) => {
+  for (const engine of ['nativewind', 'uniwind']) {
+    await page.goto(`/native/components/${engine}/form`);
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Form', exact: true })).toBeVisible();
+    await expect(page.getByText('pnpm dlx shadcn@latest add @zui/field').filter({ visible: true })).toBeVisible();
   }
 });

@@ -27,7 +27,7 @@ test('/sitemap.xml lists each native page once, a component under NativeWind onl
 test('/sitemap.xml lists the later native components at their NativeWind URLs', async ({ request }) => {
   const sitemap = await (await request.get('/sitemap.xml')).text();
 
-  for (const name of ['dialog', 'select', 'calendar', 'sonner']) {
+  for (const name of ['dialog', 'select', 'calendar', 'sonner', 'chart', 'sidebar', 'code-block']) {
     expect(sitemap, name).toContain(`<loc>${HOST}/native/components/nativewind/${name}</loc>`);
   }
 });
