@@ -1,10 +1,10 @@
 /**
- * What the menus share: the highlight an item draws while a pointer, a key or a finger is on it, and the
- * motion their content opens and closes with.
+ * What the menus share: the highlight an item draws while a pointer, a key or a finger is on it, the
+ * motion their content opens and closes with, and the height their items scroll past on a device.
  */
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
-import type { PressableProps } from 'react-native';
+import { useWindowDimensions, type PressableProps } from 'react-native';
 import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
 import { usePresence } from './motion';
 
@@ -116,5 +116,17 @@ function useMenuMotion(open: boolean, side: MenuSide): MenuMotion {
   };
 }
 
-export { useHighlight, useMenuMotion };
+/** How far in from the screen's top and bottom edges a menu's items stop, in px. */
+const MENU_SCREEN_MARGIN = 16;
+
+/**
+ * The tallest a menu's items are drawn on a device before they scroll: the window's height less a margin at
+ * each edge. The primitive moves content that would pass the screen's bottom up onto it, so the whole height
+ * is room.
+ */
+function useMenuScrollHeight(): number {
+  return useWindowDimensions().height - 2 * MENU_SCREEN_MARGIN;
+}
+
+export { useHighlight, useMenuMotion, useMenuScrollHeight };
 export type { Highlight, MenuMotion, MenuSide };

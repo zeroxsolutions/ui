@@ -96,7 +96,7 @@ async function swipe(view: { props: Record<string, unknown> }, { dx = 0, dy = 0,
   await handle('onResponderRelease', touchHistoryOf(start, end, false));
 }
 
-export { AppScreen, outermostView, catchBackPress, followAccessibilityFocus, swipe };
+export { AppScreen, outermostView, catchBackPress, followAccessibilityFocus, scrollerAround, swipe };
 
 type HostView = ReturnType<typeof screen.getByTestId>;
 
@@ -113,4 +113,12 @@ function outermostView(view: HostView): HostView {
   let outer = view;
   while (outer.parent !== null && outer.parent.parent !== null) outer = outer.parent;
   return outer;
+}
+
+/** The host scroll view nearest around `view`, or null when nothing around it scrolls. */
+function scrollerAround(view: HostView): HostView | null {
+  for (let around = view.parent; around !== null; around = around.parent) {
+    if (around.type === 'RCTScrollView') return around;
+  }
+  return null;
 }

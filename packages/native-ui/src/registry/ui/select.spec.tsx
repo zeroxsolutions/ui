@@ -1,7 +1,7 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { useState } from 'react';
-import { act, configure, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
-import { AccessibilityInfo, View } from 'react-native';
+import { act, configure, fireEvent, render, screen, userEvent, within } from '@testing-library/react-native';
+import { AccessibilityInfo, Dimensions, View } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   Select,
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from './select';
 import type { SelectProps, SelectTriggerProps } from './select';
-import { AppScreen, catchBackPress, followAccessibilityFocus, outermostView } from './overlay.testing';
+import { AppScreen, catchBackPress, followAccessibilityFocus, outermostView, scrollerAround } from './overlay.testing';
 
 // Jest runs no Reanimated frame into the props a query reads, so the opacity the fade starts at hides the
 // open list from them.
@@ -124,6 +124,14 @@ describe('Select', () => {
     expect(screen.getByText('Select a fruit')).toBeOnTheScreen();
     expect(emittedClasses(screen.getByText('Select a fruit').props.className)).toContain('text-muted-foreground');
     expect(screen.queryByTestId('content')).toBeNull();
+  });
+
+  it('scrolls its items on a device once they pass the screen, 16px in from each edge', async () => {
+    await open();
+
+    const scroller = scrollerAround(within(list()).getAllByRole('option')[0]);
+    expect(scroller).not.toBeNull();
+    expect(scroller).toHaveStyle({ maxHeight: Dimensions.get('window').height - 32 });
   });
 
   it('opens a list of options when its trigger is pressed', async () => {

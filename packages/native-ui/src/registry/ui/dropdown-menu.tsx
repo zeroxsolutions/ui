@@ -11,9 +11,9 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
-import { Platform, Pressable, StyleSheet, View, type GestureResponderEvent, type Role } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, View, type GestureResponderEvent, type Role } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { useHighlight, useMenuMotion, type MenuSide } from '../lib/menu';
+import { useHighlight, useMenuMotion, useMenuScrollHeight, type MenuSide } from '../lib/menu';
 import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Icon, IconClassContext } from './icon';
@@ -132,6 +132,7 @@ function DropdownMenuContent({
   // The primitive places the menu above or below its trigger on a device; the web's places it on any side.
   const placed = Platform.OS === 'web' || side === 'top' ? side : 'bottom';
   const { present, style } = useMenuMotion(open, placed);
+  const scrollHeight = useMenuScrollHeight();
   const hostCheck = usePortalHostCheck(present, 'DropdownMenu', portalHost);
   // Upstream's menu is modal: the screen behind it is out of a screen reader's reach while it is open.
   const modalLayer = useModalOverlay(present);
@@ -151,7 +152,16 @@ function DropdownMenuContent({
       <TextClassContext.Provider value="cn-dropdown-menu-content/text">
         {/* Not every engine styles an Animated.View by its className, so the box is a View inside it. */}
         <Animated.View style={style}>
-          <View className={cn('cn-dropdown-menu-content', className)}>{children}</View>
+          <View className={cn('cn-dropdown-menu-content', className)}>
+            {Platform.OS === 'web' ? (
+              children
+            ) : (
+              // On the web Radix scrolls a list too tall for the window; a device scrolls it here.
+              <ScrollView style={{ maxHeight: scrollHeight }} bounces={false} keyboardShouldPersistTaps="handled">
+                {children}
+              </ScrollView>
+            )}
+          </View>
         </Animated.View>
       </TextClassContext.Provider>
     </DropdownMenuPrimitive.Content>

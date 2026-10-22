@@ -11,9 +11,17 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
-import { Platform, Pressable, StyleSheet, View, type GestureResponderEvent, type ViewStyle } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  type GestureResponderEvent,
+  type ViewStyle,
+} from 'react-native';
 import Animated from 'react-native-reanimated';
-import { useHighlight, useMenuMotion, type MenuSide } from '../lib/menu';
+import { useHighlight, useMenuMotion, useMenuScrollHeight, type MenuSide } from '../lib/menu';
 import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Icon, IconClassContext } from './icon';
@@ -273,6 +281,7 @@ function SelectContent({
   // The primitive places the list above or below its trigger on a device; the web's places it on any side.
   const placed = Platform.OS === 'web' || side === 'top' ? side : 'bottom';
   const { present, style } = useMenuMotion(open, placed);
+  const scrollHeight = useMenuScrollHeight();
   const hostCheck = usePortalHostCheck(present, 'Select', portalHost);
   // Upstream's list is modal: the screen behind it is out of a screen reader's reach while it is open.
   const modalLayer = useModalOverlay(present);
@@ -309,7 +318,16 @@ function SelectContent({
           >
             <SelectScrollUpButton />
             {/* Radix's viewport grows from no height, which in a list of no set height scrolls it at its own size. */}
-            <SelectPrimitive.Viewport style={{ flex: '1 1 auto' }}>{children}</SelectPrimitive.Viewport>
+            <SelectPrimitive.Viewport style={{ flex: '1 1 auto' }}>
+              {Platform.OS === 'web' ? (
+                children
+              ) : (
+                // On the web Radix scrolls a list too tall for the window; a device scrolls it here.
+                <ScrollView style={{ maxHeight: scrollHeight }} bounces={false} keyboardShouldPersistTaps="handled">
+                  {children}
+                </ScrollView>
+              )}
+            </SelectPrimitive.Viewport>
             <SelectScrollDownButton />
           </View>
         </Animated.View>

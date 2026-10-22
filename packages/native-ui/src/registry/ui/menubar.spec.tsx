@@ -1,7 +1,7 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { useState } from 'react';
-import { act, configure, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
-import { AccessibilityInfo, View } from 'react-native';
+import { act, configure, fireEvent, render, screen, userEvent, within } from '@testing-library/react-native';
+import { AccessibilityInfo, Dimensions, View } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
@@ -22,7 +22,7 @@ import {
   MenubarTrigger,
 } from './menubar';
 import type { MenubarContentProps, MenubarMenuProps } from './menubar';
-import { AppScreen, catchBackPress, followAccessibilityFocus, outermostView } from './overlay.testing';
+import { AppScreen, catchBackPress, followAccessibilityFocus, outermostView, scrollerAround } from './overlay.testing';
 import { Text } from './text';
 
 // Jest runs no Reanimated frame into the props a query reads, so the opacity the fade starts at hides the
@@ -184,6 +184,14 @@ describe('Menubar', () => {
 
     expect(trigger()).toBeCollapsed();
     expect(screen.queryByTestId('content')).toBeNull();
+  });
+
+  it('scrolls its items on a device once they pass the screen, 16px in from each edge', async () => {
+    await open();
+
+    const scroller = scrollerAround(within(menu()).getAllByRole('menuitem')[0]);
+    expect(scroller).not.toBeNull();
+    expect(scroller).toHaveStyle({ maxHeight: Dimensions.get('window').height - 32 });
   });
 
   it('calls the same hooks on every render as a menu opens and closes', async () => {
