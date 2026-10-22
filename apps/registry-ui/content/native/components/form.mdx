@@ -74,3 +74,6 @@ A schema library plugs in as on the web, through `resolver` and `@hookform/resol
   no label element to tie to a control's id.
 - Field marks its state with `invalid` rather than `data-invalid`, as the [Field](/native/components/nativewind/field)
   page says.
+- The demo validates with each `Controller`'s `rules`, where upstream's validates with a zod schema through
+  `zodResolver`, so that installing it adds no schema library and no `@hookform/resolvers`. A schema plugs in
+  through `resolver` as above.
