@@ -331,9 +331,9 @@ interface WebElement {
   contains(other: unknown): boolean;
 }
 
-/** The part of the web's focus event the viewport reads: where focus went. */
-interface WebFocusEvent {
-  nativeEvent: { relatedTarget?: unknown };
+/** The part of the web's blur event the viewport reads: where focus went. */
+interface WebBlur {
+  relatedTarget?: unknown;
 }
 
 /** The part of the web's document the F6 hotkey listens on. */
@@ -447,8 +447,8 @@ function ToastViewport({ className, style, children, ...props }: ToastViewportPr
       style={[{ bottom: EDGE + (insets?.bottom ?? 0), height: stackHeight }, place, style]}
       // Focus in the stack, from F6 or a tab to a toast's button, spreads it until focus goes elsewhere.
       onFocus={() => setFocused(true)}
-      onBlur={(event: WebFocusEvent) => {
-        const next = event.nativeEvent.relatedTarget;
+      onBlur={(event) => {
+        const next = (event.nativeEvent as WebBlur).relatedTarget;
         const stays =
           next !== null &&
           next !== undefined &&
