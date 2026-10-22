@@ -1,6 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { AccessibilityInfo, Platform } from 'react-native';
+import { AccessibilityInfo, Platform, View } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
 import { Text } from './text';
 import { Toaster, createToastManager, toast, useToastManager, type ToastProviderProps } from './toast';
@@ -357,5 +357,79 @@ describe('Toaster', () => {
     await elapse(20);
 
     expect(screen.queryByText('Saved')).toBeNull();
+  });
+
+  describe('on the web', () => {
+    type KeyListener = (event: { key: string; target?: unknown }) => void;
+    let listeners: KeyListener[];
+
+    beforeEach(() => {
+      jest.replaceProperty(Platform, 'OS', 'web');
+      listeners = [];
+      // The keydown listener goes on the page's document, which React Native's jest environment has none of.
+      Object.assign(globalThis, {
+        document: {
+          addEventListener: (_type: string, listener: KeyListener) => listeners.push(listener),
+          removeEventListener: (_type: string, listener: KeyListener) => {
+            listeners = listeners.filter((entry) => entry !== listener);
+          },
+        },
+      });
+    });
+
+    afterEach(() => {
+      delete (globalThis as { document?: unknown }).document;
+    });
+
+    async function press(key: string, target?: unknown): Promise<void> {
+      await act(async () => {
+        for (const listener of listeners) listener({ key, target });
+      });
+    }
+
+    /**
+     * A spy on `focus` of every View, which React Native's jest environment draws as one class whose `focus` is
+     * already a mock; its calls from earlier tests are cleared.
+     */
+    async function spyOnFocus(): Promise<jest.SpyInstance> {
+      let probe: object | null = null;
+      await render(
+        <View
+          ref={(node) => {
+            probe = node;
+          }}
+        />,
+      );
+      if (probe === null) throw new Error('No View to read the class from');
+      return jest.spyOn(Object.getPrototypeOf(probe) as { focus: () => void }, 'focus').mockClear();
+    }
+
+    it('moves focus to the stack with F6 while a toast is shown, and leaves it where it is with none', async () => {
+      const focus = await spyOnFocus();
+      await show();
+      await raise(() => toast.add({ id: 'saved', title: 'Saved', timeout: 0 }));
+
+      await press('F6');
+      expect(focus).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        toast.close('saved');
+      });
+      await elapse(MOTION_MS);
+      await press('F6');
+      expect(focus).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves focus alone on F6 pressed in the stack itself', async () => {
+      const focus = await spyOnFocus();
+      await show();
+      await raise(() => toast.add({ title: 'Saved', timeout: 0 }));
+      await press('F6');
+      const [stack] = focus.mock.contexts;
+
+      await press('F6', stack);
+
+      expect(focus).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -324,6 +324,7 @@ const WEB = Platform.OS === 'web';
 /** The parts of the web's keydown event the F6 hotkey reads. */
 interface WebKeyEvent {
   key: string;
+  target?: unknown;
 }
 
 /** The part of a web element the viewport reads to tell whether focus left it. */
@@ -351,10 +352,10 @@ type ToastViewportProps = ComponentProps<typeof View>;
 /**
  * Where the toasts stack: across the bottom of the screen, 16px in from its edges and at most 384px wide,
  * or in its bottom right corner from 640px wide, above the safe area's bottom inset. A pointer over the
- * stack or focus in it on the web (F6 moves focus there), or a touch on it on a device, spreads it into a
- * list until the pointer or focus leaves; a touch keeps it spread for 4 seconds after the finger lifts. A
- * new toast is read by screen readers: announced on iOS, and from a polite live region on Android and the
- * web.
+ * stack or focus in it on the web (F6 moves focus there while a toast is up), or a touch on it on a device,
+ * spreads it into a list until the pointer or focus leaves; a touch keeps it spread for 4 seconds after the
+ * finger lifts. A new toast is read by screen readers: announced on iOS, and from a polite live region on
+ * Android and the web.
  */
 function ToastViewport({ className, style, children, ...props }: ToastViewportProps): ReactNode {
   const { toasts } = useToastManager();
@@ -401,9 +402,10 @@ function ToastViewport({ className, style, children, ...props }: ToastViewportPr
 
   useEffect(() => {
     const page = (globalThis as { document?: WebDocument }).document;
-    if (!WEB || page === undefined) return undefined;
+    if (Platform.OS !== 'web' || page === undefined) return undefined;
     const onKeyDown = (event: WebKeyEvent): void => {
-      if (event.key !== 'F6') return;
+      // With no toast up, or with focus already in the stack, F6 is left to the page, as Base UI's viewport leaves it.
+      if (event.key !== 'F6' || shownCount.current === 0 || event.target === container.current) return;
       container.current?.focus();
     };
     page.addEventListener('keydown', onKeyDown);
@@ -414,6 +416,8 @@ function ToastViewport({ className, style, children, ...props }: ToastViewportPr
     () => toasts.filter((entry) => entry.transitionStatus !== 'ending' && entry.limited !== true),
     [toasts],
   );
+  const shownCount = useRef(0);
+  shownCount.current = shown.length;
   // A viewport with nothing up collapses again, so the next stack starts closed.
   useEffect(() => {
     if (shown.length === 0) {
