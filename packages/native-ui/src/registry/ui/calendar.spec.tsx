@@ -163,7 +163,7 @@ describe('Calendar', () => {
     await render(<Calendar mode="single" today={TODAY} locale={es} />);
 
     expect(screen.getByText('octubre 2026')).toBeOnTheScreen();
-    expect(screen.getAllByText(/^(lu|ma|mi|ju|vi|sá|do)$/).map((weekday) => weekday.props.children)[0]).toBe('lu');
+    expect(screen.getAllByText(/^(lu|ma|mi|ju|vi|s\u00e1|do)$/).map((weekday) => weekday.props.children)[0]).toBe('lu');
   });
 
   it('numbers the weeks when asked', async () => {
