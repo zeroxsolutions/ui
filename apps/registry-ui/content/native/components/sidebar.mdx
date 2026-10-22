@@ -123,7 +123,9 @@ opens and closes the sidebar.
 
 Takes every prop of React Native's `Pressable`. A 1rem strip centred on the panel's edge that faces the screen,
 which opens and closes the sidebar, named Toggle Sidebar and left out of the keyboard's order. While the panel is
-off the screen it stays at the provider's edge, within reach. It is drawn from `md` only.
+off the screen it stays at the provider's edge, within reach. It is drawn from `md` only. It is placed against the
+SidebarProvider rather than inside the Sidebar as upstream's is, so keep the Sidebar at the provider's edge: a view
+drawn between them, such as a second sidebar, leaves the rail off the panel's edge.
 
 ### SidebarInset
 

@@ -382,7 +382,9 @@ type SidebarRailProps = ComponentProps<typeof Pressable>;
 
 /**
  * A strip along the panel's edge that opens and closes the sidebar when pressed, named Toggle Sidebar and
- * left out of the keyboard's order; on the web a line marks it while the pointer is over it.
+ * left out of the keyboard's order; on the web a line marks it while the pointer is over it. It is placed
+ * against the SidebarProvider's box, so it meets the panel's edge only while the Sidebar is the provider's
+ * first or last child on its side; anything drawn between them, such as a second sidebar, moves it off the edge.
  */
 function SidebarRail({ className, style, ...props }: SidebarRailProps): ReactNode {
   const { toggleSidebar } = useSidebar();
