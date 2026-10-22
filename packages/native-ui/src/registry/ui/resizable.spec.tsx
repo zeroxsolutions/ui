@@ -411,6 +411,46 @@ describe('Resizable', () => {
       expect(styleOf(handle()).cursor).toBeUndefined();
     });
 
+    /** A focus event whose target answers `:focus-visible` with `visible`, as a browser's does. */
+    const focusFrom = (visible: boolean): object => ({
+      target: { matches: (selector: string) => selector === ':focus-visible' && visible },
+    });
+    const ringed = () => String(handle().props.className).split(' ').includes('ring-1');
+
+    it('rings the handle while it holds keyboard focus, and not after a press focuses it', async () => {
+      await render(<Pair />);
+
+      await fireEvent(handle(), 'focus', focusFrom(false));
+      expect(ringed()).toBe(false);
+
+      await fireEvent(handle(), 'blur');
+      await fireEvent(handle(), 'focus', focusFrom(true));
+      expect(ringed()).toBe(true);
+    });
+
+    it('rings keyboard focus on a handle enabled after a press while it was disabled', async () => {
+      const view = await render(<Pair />);
+      await view.rerender(
+        <ResizablePanelGroup testID="group">
+          <ResizablePanel defaultSize="50%" />
+          <ResizableHandle testID="handle" disabled />
+          <ResizablePanel defaultSize="50%" />
+        </ResizablePanelGroup>,
+      );
+      handle().props.onStartShouldSetResponder();
+
+      await view.rerender(
+        <ResizablePanelGroup testID="group">
+          <ResizablePanel defaultSize="50%" />
+          <ResizableHandle testID="handle" />
+          <ResizablePanel defaultSize="50%" />
+        </ResizablePanelGroup>,
+      );
+      await fireEvent(handle(), 'focus', focusFrom(true));
+
+      expect(ringed()).toBe(true);
+    });
+
     it('is a focusable separator across the group', async () => {
       await render(<Pair />);
 

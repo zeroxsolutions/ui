@@ -25,6 +25,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, type SharedValue } from 'react-native-reanimated';
+import { useFocusVisible } from '../lib/focus-visible';
 import { cn } from '../lib/utils';
 import { useDirectionSides } from './direction';
 
@@ -920,8 +921,7 @@ function ResizableHandle({
   const inactive = disabled || group.disabled;
   const own = useRef<ViewInstance | null>(null);
   const [thickness, setThickness] = useState(1);
-  const [focused, setFocused] = useState(false);
-  const pointer = useRef(false);
+  const { focusVisible, onFocus: focusVisibleOnFocus, onBlur: focusVisibleOnBlur } = useFocusVisible();
   const drag = useRef<{ start: number; moved: boolean } | undefined>(undefined);
   const lastTap = useRef(0);
   const { registerHandle } = group;
@@ -954,7 +954,6 @@ function ResizableHandle({
   const onResponderEnd = (event: GestureResponderEvent | undefined): void => {
     const held = drag.current;
     drag.current = undefined;
-    pointer.current = false;
     if (held === undefined) return;
     group.endDrag();
     if (event === undefined || held.moved || disableDoubleClick) return;
@@ -1020,10 +1019,7 @@ function ResizableHandle({
         if (event.nativeEvent.actionName === 'decrement') group.resizeBy(order, -KEY_STEP);
       }}
       hitSlop={web ? undefined : vertical ? { top: extra, bottom: extra } : { left: extra, right: extra }}
-      onStartShouldSetResponder={() => {
-        pointer.current = true;
-        return !inactive;
-      }}
+      onStartShouldSetResponder={() => !inactive}
       onResponderTerminationRequest={() => false}
       onResponderGrant={onResponderGrant}
       onResponderMove={onResponderMove}
@@ -1031,12 +1027,11 @@ function ResizableHandle({
       onResponderTerminate={() => onResponderEnd(undefined)}
       onKeyDown={handleKeyDown}
       onFocus={(event) => {
-        // A press focuses the handle too; only keyboard focus draws the ring, as `focus-visible` does.
-        setFocused(!pointer.current);
+        focusVisibleOnFocus(event);
         onFocus?.(event);
       }}
       onBlur={(event) => {
-        setFocused(false);
+        focusVisibleOnBlur();
         onBlur?.(event);
       }}
       onLayout={(event: LayoutChangeEvent) => {
@@ -1047,7 +1042,7 @@ function ResizableHandle({
       className={cn(
         'relative items-center justify-center bg-border',
         vertical ? 'h-px w-full' : 'w-px',
-        focused && 'ring-1 ring-ring',
+        focusVisible && 'ring-1 ring-ring',
         className,
       )}
       // Above the panel after it, which would otherwise take the touches on that side of its widened area.

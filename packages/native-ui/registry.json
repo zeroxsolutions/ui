@@ -263,7 +263,7 @@
       "title": "Resizable",
       "description": "Panels side by side or stacked, sized in percent of their group, with handles that drag the room between two, each announced as adjustable and moved by the arrow keys on the web.",
       "dependencies": ["react-native-reanimated", "react-native-worklets"],
-      "registryDependencies": ["@zui/utils", "@zui/direction"],
+      "registryDependencies": ["@zui/utils", "@zui/focus-visible", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/resizable.tsx",
