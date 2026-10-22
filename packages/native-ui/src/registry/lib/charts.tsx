@@ -1,10 +1,23 @@
 /**
  * The chart parts upstream's chart demos take from Recharts, in Recharts' names and with the props those
  * demos use, drawn with react-native-svg so they run on a device and on the web: the responsive container,
- * the bar chart and its bars, the axes, the grid, the tooltip and the legend. A part reads its colours,
+ * the bar and line charts and their series, the axes, the grid, the tooltip and the legend. A part reads its colours,
  * such as `var(--color-desktop)`, through the palette the chart's container provides.
  */
 import { scaleBand, scaleLinear, scalePoint } from 'd3-scale';
+import {
+  curveBasis,
+  curveBumpX,
+  curveLinear,
+  curveMonotoneX,
+  curveMonotoneY,
+  curveNatural,
+  curveStep,
+  curveStepAfter,
+  curveStepBefore,
+  line as linePath,
+  type CurveFactory,
+} from 'd3-shape';
 import {
   Children,
   cloneElement,
@@ -12,6 +25,7 @@ import {
   isValidElement,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useState,
   type ReactElement,
@@ -28,7 +42,7 @@ import {
   type LayoutChangeEvent,
   type PointerEvent,
 } from 'react-native';
-import Svg, { G, Line as SvgLine, Path, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, ClipPath, Defs, G, Line as SvgLine, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { useReducedMotion } from './motion';
 
 /** One row of a chart's `data`, such as `{ month: "January", desktop: 186 }`. */
@@ -295,15 +309,47 @@ function Bar(_props: BarProps): ReactNode {
   return null;
 }
 
+/** Recharts' curve names, each the d3-shape curve it draws with. */
+const CURVES = {
+  basis: curveBasis,
+  bump: curveBumpX,
+  linear: curveLinear,
+  monotone: curveMonotoneX,
+  monotoneX: curveMonotoneX,
+  monotoneY: curveMonotoneY,
+  natural: curveNatural,
+  step: curveStep,
+  stepBefore: curveStepBefore,
+  stepAfter: curveStepAfter,
+} as const satisfies Readonly<Record<string, CurveFactory>>;
+
+type CurveType = keyof typeof CURVES;
+
+/** A point's circle: `true` draws Recharts' own, `false` none. */
+type DotProps = { r?: number; fill?: string; stroke?: string; strokeWidth?: number };
+
+type LineProps = SeriesProps & {
+  /** How the line runs between points. */
+  type?: CurveType;
+  stroke?: string;
+  strokeWidth?: number;
+  /** The circle at each point. */
+  dot?: boolean | DotProps;
+  /** The circle at the point the tooltip shows. */
+  activeDot?: boolean | DotProps;
+};
+
+/** A line through each row of the chart's data. Placed inside a LineChart, the chart draws it. */
+function Line(_props: LineProps): ReactNode {
+  return null;
+}
+
 // ---------------------------------------------------------------------------------------------------------
 // Reading the children
 
-type SeriesKind = 'bar';
+type Series = { kind: 'bar'; props: BarProps } | { kind: 'line'; props: LineProps };
 
-interface Series {
-  kind: SeriesKind;
-  props: BarProps;
-}
+type SeriesKind = Series['kind'];
 
 interface ChartParts {
   series: Series[];
@@ -322,6 +368,7 @@ function readParts(children: ReactNode): ChartParts {
     if (!isValidElement(child)) return;
     const props = child.props as Record<string, unknown>;
     if (child.type === Bar) parts.series.push({ kind: 'bar', props: props as BarProps });
+    else if (child.type === Line) parts.series.push({ kind: 'line', props: props as LineProps });
     else if (child.type === XAxis) parts.xAxis = props as XAxisProps;
     else if (child.type === YAxis) parts.yAxis = props as YAxisProps;
     else if (child.type === CartesianGrid) parts.grid = props as CartesianGridProps;
@@ -448,7 +495,7 @@ function seriesName(props: SeriesProps): string {
 }
 
 function seriesColor(series: Series): string {
-  return series.props.fill ?? DEFAULT_SERIES_COLOR;
+  return (series.kind === 'bar' ? series.props.fill : series.props.stroke) ?? DEFAULT_SERIES_COLOR;
 }
 
 function formatValue(value: number | string | undefined): string {
@@ -663,9 +710,9 @@ function shareOf(gap: number | `${number}%`, of: number): number {
   return typeof gap === 'number' ? gap : (Number.parseFloat(gap) / 100) * of;
 }
 
-const KIND_NAMES: Readonly<Record<SeriesKind, string>> = { bar: 'Bar chart' };
+const KIND_NAMES: Readonly<Record<SeriesKind, string>> = { bar: 'Bar chart', line: 'Line chart' };
 
-/** The svg of a bar chart: the grid, the axes, the cursor and the bars, laid out in `size`. */
+/** The svg of a bar or line chart: the grid, the axes, the cursor and the series, laid out in `size`. */
 function CartesianChart({
   kind,
   data,
@@ -688,6 +735,7 @@ function CartesianChart({
   const tooltip = parts.tooltip;
   const [active, setActive] = useState<ActivePoint | undefined>(undefined);
   const [touched, setTouched] = useState(false);
+  const clipId = `chart-clip-${useId().replace(/[^\w-]/g, '')}`;
 
   if (size === undefined || size.width <= 0 || size.height <= 0) return null;
 
@@ -720,7 +768,8 @@ function CartesianChart({
       name: seriesName(item.props),
       value: data[index]?.[item.props.dataKey] as number | string | undefined,
       color: seriesColor(item),
-      fill: item.props.fill,
+      fill: item.kind === 'bar' ? item.props.fill : undefined,
+      stroke: item.kind === 'line' ? item.props.stroke : undefined,
       payload: data[index],
     }));
 
@@ -776,7 +825,7 @@ function CartesianChart({
     value: seriesName(item.props),
     dataKey: item.props.dataKey,
     color: seriesColor(item),
-    type: 'rect',
+    type: item.kind === 'bar' ? 'rect' : 'line',
   }));
 
   return (
@@ -897,31 +946,81 @@ function CartesianChart({
           </G>
         )}
         {series.map((item, order) => {
+          const share = item.props.isAnimationActive === false ? 1 : progress;
+          const key = `${item.props.dataKey}-${order}`;
+          if (item.kind === 'bar') {
+            const props = item.props;
+            return (
+              <G key={key} testID={`chart-series-${props.dataKey}`}>
+                {data.map((datum, index) => {
+                  const barTop = y(numberAt(datum, props.dataKey) * share);
+                  const barHeight = Math.abs(y(0) - barTop);
+                  if (barHeight === 0 || barWidth === 0) return null;
+                  return (
+                    <Path
+                      key={index}
+                      testID={`chart-bar-${props.dataKey}-${index}`}
+                      d={roundedRect(
+                        x.start(index) + categoryGap + order * (barWidth + barGap),
+                        Math.min(barTop, y(0)),
+                        barWidth,
+                        barHeight,
+                        props.radius ?? 0,
+                      )}
+                      fill={resolve(props.fill ?? DEFAULT_SERIES_COLOR)}
+                      fillOpacity={props.fillOpacity}
+                    />
+                  );
+                })}
+              </G>
+            );
+          }
           const props = item.props;
-          const share = props.isAnimationActive === false ? 1 : progress;
+          const color = resolve(seriesColor(item));
+          const points = data.map((datum, index) => [x.center(index), y(numberAt(datum, props.dataKey))] as const);
+          const clip = `${clipId}-${order}`;
           return (
-            <G key={`${props.dataKey}-${order}`} testID={`chart-series-${props.dataKey}`}>
-              {data.map((datum, index) => {
-                const value = numberAt(datum, props.dataKey);
-                const barTop = y(value * share);
-                const barHeight = Math.abs(y(0) - barTop);
-                if (barHeight === 0 || barWidth === 0) return null;
-                return (
-                  <Path
-                    key={index}
-                    testID={`chart-bar-${props.dataKey}-${index}`}
-                    d={roundedRect(
-                      x.start(index) + categoryGap + order * (barWidth + barGap),
-                      Math.min(barTop, y(0)),
-                      barWidth,
-                      barHeight,
-                      props.radius ?? 0,
-                    )}
-                    fill={resolve(props.fill ?? DEFAULT_SERIES_COLOR)}
-                    fillOpacity={props.fillOpacity}
-                  />
-                );
-              })}
+            <G key={key} testID={`chart-series-${props.dataKey}`}>
+              {/* Recharts draws a line in from the left over its entrance. */}
+              <Defs>
+                <ClipPath id={clip}>
+                  <Rect x={0} y={0} width={plot.left + (plot.right - plot.left) * share + 8} height={size.height} />
+                </ClipPath>
+              </Defs>
+              <G clipPath={`url(#${clip})`}>
+                <Path
+                  testID={`chart-line-${props.dataKey}`}
+                  d={linePath().curve(CURVES[props.type ?? 'linear'])(points.map(([px, py]) => [px, py])) ?? ''}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={props.strokeWidth ?? 1}
+                />
+                {props.dot === false
+                  ? null
+                  : points.map(([px, py], index) => (
+                      <Circle
+                        key={index}
+                        testID={`chart-dot-${props.dataKey}-${index}`}
+                        cx={px}
+                        cy={py}
+                        r={(typeof props.dot === 'object' ? props.dot.r : undefined) ?? 3}
+                        fill={resolve((typeof props.dot === 'object' ? props.dot.fill : undefined) ?? THEME.surface)}
+                        stroke={resolve(typeof props.dot === 'object' ? props.dot.stroke : undefined) ?? color}
+                        strokeWidth={
+                          (typeof props.dot === 'object' ? props.dot.strokeWidth : undefined) ?? props.strokeWidth ?? 1
+                        }
+                      />
+                    ))}
+              </G>
+              {props.activeDot === false || activeIndex === undefined || tooltip === undefined ? null : (
+                <Circle
+                  testID={`chart-active-dot-${props.dataKey}`}
+                  cx={points[activeIndex]?.[0]}
+                  cy={points[activeIndex]?.[1]}
+                  r={(typeof props.activeDot === 'object' ? props.activeDot.r : undefined) ?? 4}
+                  fill={resolve(typeof props.activeDot === 'object' ? props.activeDot.fill : undefined) ?? color}
+                />
+              )}
             </G>
           );
         })}
@@ -982,7 +1081,24 @@ function BarChart(props: CartesianChartProps): ReactNode {
   return <CartesianChart kind="bar" {...props} />;
 }
 
-export { Bar, BarChart, CartesianGrid, ChartPaletteContext, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis };
+/** A line per series through the categories of `data`. */
+function LineChart(props: CartesianChartProps): ReactNode {
+  return <CartesianChart kind="line" {...props} />;
+}
+
+export {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ChartPaletteContext,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+};
 export type {
   BarProps,
   CartesianChartProps,
@@ -992,6 +1108,7 @@ export type {
   LegendContentProps,
   LegendPayloadItem,
   LegendProps,
+  LineProps,
   TooltipContentProps,
   TooltipPayloadItem,
   TooltipProps,

@@ -1,6 +1,6 @@
 ---
 title: Chart
-description: Bar charts drawn in the colours and labels of a chart config, with a tooltip a press, a pointer or the arrow keys move along the categories, a legend, and the values read to screen readers.
+description: Charts drawn in the colours and labels of a chart config, with a tooltip a press, a pointer or the arrow keys move, a legend, and the values read to screen readers.
 ---
 
 <NativePreview name="chart-demo" />
@@ -68,8 +68,8 @@ The chart is announced as adjustable, labelled with every category's values, suc
 Mobile 80". A screen reader's swipe up or down moves to the next or the previous category and reads its values.
 A chart with no tooltip is announced with the same label.
 
-The bars grow in over one and a half seconds as Recharts' do, and are drawn at once where the system asks for
-reduced motion or the series sets `isAnimationActive={false}`.
+As Recharts' do, bars grow from the axis and lines draw in from the left over one and a half seconds. A series is
+drawn at once where the system asks for reduced motion or the series sets `isAnimationActive={false}`.
 
 ## API reference
 
@@ -127,12 +127,15 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 
 ### Chart parts
 
-`@/lib/charts` holds `ResponsiveContainer`, `BarChart`, `Bar`, `XAxis`, `YAxis`, `CartesianGrid`, `Tooltip` and
-`Legend`, with these props of Recharts':
+`@/lib/charts` holds `ResponsiveContainer`, `BarChart`, `Bar`, `LineChart`, `Line`, `XAxis`, `YAxis`,
+`CartesianGrid`, `Tooltip` and `Legend`, with these props of Recharts':
 
-- `BarChart`: `data`, `margin`, `barGap`, `barCategoryGap`, `accessibilityLayer`, `width`, `height`, and `title`,
-  which a screen reader hears before the values.
-- `Bar`: `dataKey`, `name`, `fill`, `fillOpacity`, `radius`, `hide`, `isAnimationActive`, `animationDuration`.
+- `BarChart` and `LineChart`: `data`, `margin`, `accessibilityLayer`, `width`, `height`, and `title`, which a
+  screen reader hears before the values; `BarChart` also `barGap` and `barCategoryGap`.
+- Every series: `dataKey`, `name`, `hide`, `isAnimationActive`, `animationDuration`.
+- `Bar`: `fill`, `fillOpacity`, `radius`.
+- `Line`: `type` (`'linear'`, `'monotone'`, `'natural'`, `'step'`, `'stepBefore'`, `'stepAfter'`, `'basis'`,
+  `'bump'`), `stroke`, `strokeWidth`, `dot`, `activeDot`.
 - `XAxis`: `dataKey`, `hide`, `tickLine`, `axisLine`, `tickMargin`, `tickFormatter`, `height`, `minTickGap`.
 - `YAxis`: `hide`, `tickLine`, `axisLine`, `tickMargin`, `tickFormatter`, `width`, `tickCount`.
 - `CartesianGrid`: `vertical`, `horizontal`, `stroke`, `strokeDasharray`.

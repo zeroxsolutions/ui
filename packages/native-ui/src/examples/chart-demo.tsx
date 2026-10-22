@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/chart';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
-import { Bar, BarChart, CartesianGrid, XAxis } from '@/lib/charts';
+import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from '@/lib/charts';
 
 const chartData = [
   { month: 'January', desktop: 186, mobile: 80 },
@@ -102,11 +102,67 @@ function ChartBarExample(): ReactNode {
   );
 }
 
+const lineChartConfig = {
+  desktop: {
+    label: 'Desktop',
+    color: 'var(--chart-1)',
+  },
+  mobile: {
+    label: 'Mobile',
+    color: 'var(--chart-2)',
+  },
+} satisfies ChartConfig;
+
+function ChartLineExample(): ReactNode {
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Line Chart - Multiple</CardTitle>
+        <CardDescription>January - June 2024</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={lineChartConfig}>
+          <LineChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickFormatter={(value: string) => value.slice(0, 3)}
+            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <Line dataKey="desktop" type="monotone" stroke="var(--color-desktop)" strokeWidth={2} dot={false} />
+            <Line dataKey="mobile" type="monotone" stroke="var(--color-mobile)" strokeWidth={2} dot={false} />
+          </LineChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter>
+        <View className="gap-2">
+          <View className="flex-row items-center gap-2">
+            <Text className="leading-none font-medium">Trending up by 5.2% this month</Text>
+            <Icon as={TrendingUp} className="size-4" />
+          </View>
+          <Text className="text-muted-foreground leading-none">Showing total visitors for the last 6 months</Text>
+        </View>
+      </CardFooter>
+    </Card>
+  );
+}
+
 function ChartDemo(): ReactNode {
   return (
     <View className="w-full gap-6">
       <ChartFirstExample />
       <ChartBarExample />
+      <ChartLineExample />
     </View>
   );
 }

@@ -1002,7 +1002,7 @@
       "name": "chart",
       "type": "registry:ui",
       "title": "Chart",
-      "description": "Bar charts drawn in the colours and labels of a chart config, with a tooltip a press, a pointer or the arrow keys move along the categories, a legend, and the values read to screen readers.",
+      "description": "Charts drawn in the colours and labels of a chart config, with a tooltip a press, a pointer or the arrow keys move, a legend, and the values read to screen readers.",
       "dependencies": ["d3-scale", "d3-shape", "react-native-reanimated", "react-native-svg", "react-native-worklets"],
       "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text", "@zui/icon", "@zui/card"],
       "files": [

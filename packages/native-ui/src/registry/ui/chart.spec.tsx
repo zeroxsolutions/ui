@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { processColor } from 'react-native';
-import { Bar, BarChart, CartesianGrid, XAxis } from '../lib/charts';
+import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from '../lib/charts';
 import {
   ChartContainer,
   ChartLegend,
@@ -70,6 +70,39 @@ function MonthBars({
         <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} isAnimationActive={false} />
         <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} isAnimationActive={false} />
       </BarChart>
+    </ChartContainer>
+  );
+}
+
+/** The colour an svg element draws its stroke with. */
+function strokeOf(element: Element): unknown {
+  return (element.props.stroke as { payload?: unknown } | undefined)?.payload;
+}
+
+function MonthLines({ dot }: { dot?: boolean }): React.ReactNode {
+  return (
+    <ChartContainer config={chartConfig}>
+      <LineChart accessibilityLayer data={chartData} margin={{ left: 12, right: 12 }}>
+        <CartesianGrid vertical={false} />
+        <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <Line
+          dataKey="desktop"
+          type="monotone"
+          stroke="var(--color-desktop)"
+          strokeWidth={2}
+          dot={dot}
+          isAnimationActive={false}
+        />
+        <Line
+          dataKey="mobile"
+          type="monotone"
+          stroke="var(--color-mobile)"
+          strokeWidth={2}
+          dot={dot}
+          isAnimationActive={false}
+        />
+      </LineChart>
     </ChartContainer>
   );
 }
@@ -233,5 +266,48 @@ describe('Chart', () => {
 
     expect(tickText(0)).toBe('Jan');
     expect(tickText(5)).toBe('Jun');
+  });
+
+  describe('LineChart', () => {
+    it('draws a line per series in the colour its config key names, through a point per row', async () => {
+      await render(<MonthLines />);
+
+      expect(strokeOf(screen.getByTestId('chart-line-desktop', HIDDEN))).toBe(processColor('#2563eb'));
+      expect(strokeOf(screen.getByTestId('chart-line-mobile', HIDDEN))).toBe(processColor('#60a5fa'));
+      expect(screen.getAllByTestId(/^chart-dot-desktop-/, HIDDEN)).toHaveLength(6);
+    });
+
+    it('draws no point circles with dot={false}', async () => {
+      await render(<MonthLines dot={false} />);
+
+      expect(screen.queryAllByTestId(/^chart-dot-/, HIDDEN)).toHaveLength(0);
+    });
+
+    it('puts the first and the last points at the plot edges, inside the margin', async () => {
+      await render(<MonthLines />);
+
+      expect(screen.getByTestId('chart-dot-desktop-0', HIDDEN).props.cx).toBe(12);
+      expect(screen.getByTestId('chart-dot-desktop-5', HIDDEN).props.cx).toBe(308);
+    });
+
+    it('shows the values of the nearest point to a press, with a dot on each line there', async () => {
+      await render(<MonthLines />);
+
+      // The points sit 59.2px apart from 12px, so 70px is nearest the second.
+      await pressAt(70);
+
+      expect(screen.getByText('February')).toBeOnTheScreen();
+      expect(screen.getByText('305')).toBeOnTheScreen();
+      expect(screen.getByTestId('chart-active-dot-desktop', HIDDEN).props.cx).toBeCloseTo(71.2);
+      expect(screen.getByTestId('chart-cursor', HIDDEN)).toBeOnTheScreen();
+    });
+
+    it('is announced as a line chart with its values', async () => {
+      await render(<MonthLines />);
+
+      expect(screen.getByRole('adjustable').props['aria-label']).toMatch(
+        /^Line chart\. January: Desktop 186, Mobile 80/,
+      );
+    });
   });
 });
