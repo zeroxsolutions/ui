@@ -318,6 +318,11 @@ type CodeBlockContentProps = ComponentProps<typeof ScrollView> & {
   startLine?: number;
   /** On the web, makes the content focusable so the keyboard scrolls it; -1 removes the tab stop. */
   tabIndex?: 0 | -1;
+  /**
+   * Whether the content scrolls down, such as `false` for a collapsed Show more; when not given, it scrolls
+   * once its code runs past a capped height. Long lines still scroll sideways either way.
+   */
+  scrollEnabled?: boolean;
 };
 
 /**
