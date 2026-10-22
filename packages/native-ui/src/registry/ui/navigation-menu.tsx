@@ -340,13 +340,11 @@ function NavigationMenuTrigger({
         }}
       >
         {labelOf(children)}
-        {/* Not every engine places an icon by its margin, so the chevron's box is a View around it. */}
-        <View
+        <Icon
+          as={ChevronDown}
           aria-hidden
           className={cn('cn-navigation-menu-trigger-icon', open && 'cn-navigation-menu-trigger-icon@open')}
-        >
-          <Icon as={ChevronDown} className="size-full" />
-        </View>
+        />
       </PopoverTrigger>
     </TextClassContext.Provider>
   );

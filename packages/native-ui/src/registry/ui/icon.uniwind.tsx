@@ -1,5 +1,6 @@
 import type { LucideIcon, LucideProps } from 'lucide-react-native';
 import { createContext, useContext, type ReactNode } from 'react';
+import type { TextStyle } from 'react-native';
 import { withUniwind } from 'uniwind';
 import { cn } from '../lib/utils';
 import { TextClassContext } from './text';
@@ -23,8 +24,12 @@ function IconGlyph({ as: Glyph, className: _mapped, ...props }: IconProps): Reac
 }
 
 // The colour is read from `color`, not Uniwind's `accent-*`, so the text classes a Button hands
-// its label colour the icon beside it too.
+// its label colour the icon beside it too. `style` takes every other class, such as a margin or a
+// shrink, so the svg sits in its row as it does under NativeWind.
 const StyledIconGlyph = withUniwind(IconGlyph, {
+  style: {
+    fromClassName: 'className',
+  },
   size: {
     fromClassName: 'className',
     styleProperty: 'width',
@@ -41,14 +46,24 @@ const StyledIconGlyph = withUniwind(IconGlyph, {
  * the size of {@link IconClassContext} unless it names a size itself. An explicit `size` or `color`
  * wins over a class.
  */
-function Icon({ className, ...props }: IconProps): ReactNode {
+function Icon({ className, style, ...props }: IconProps): ReactNode {
   const textClass = useContext(TextClassContext);
   const iconClass = useContext(IconClassContext);
-  const namesSize = props.size !== undefined || className?.includes('size-') === true;
+  const { size, color } = props;
+  const namesSize = size !== undefined || className?.includes('size-') === true;
+
+  // Uniwind lays the caller's style over the classes' style, and the svg's style outranks its own
+  // width and colour, so an explicit size or colour goes in as style too. TextStyle, because the
+  // colour is not a ViewStyle key, and the svg's style is typed as one.
+  const explicitStyle: TextStyle = {
+    ...(size === undefined ? {} : { width: Number(size), height: Number(size) }),
+    ...(color === undefined ? {} : { color }),
+  };
 
   return (
     <StyledIconGlyph
       className={cn('text-foreground', textClass, namesSize ? undefined : iconClass, className)}
+      style={[explicitStyle, style]}
       {...props}
     />
   );

@@ -694,15 +694,7 @@ function SidebarMenuButton({
         onHoverOut?.(event);
       }}
     >
-      {asChild ? (
-        children
-      ) : icons ? (
-        // A rail of icons clips the button to its first icon; held at their own width, the parts after it are
-        // clipped rather than squeezing the icon, which not every engine keeps from shrinking by its class.
-        <View className="shrink-0 flex-row items-center gap-2">{labelOf(children, 1)}</View>
-      ) : (
-        labelOf(children, 1)
-      )}
+      {asChild ? children : labelOf(children, 1)}
     </Component>
   );
   // A device opens a tooltip on the press that runs the button, so it shows none there.

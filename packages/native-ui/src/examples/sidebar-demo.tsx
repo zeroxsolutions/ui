@@ -179,9 +179,11 @@ function NavMainItem({ item }: { item: NavItem }): ReactNode {
           <SidebarMenuButton tooltip={item.title}>
             <Icon as={item.icon} />
             <Text numberOfLines={1}>{item.title}</Text>
-            <View className="ml-auto" style={open ? { transform: [{ rotate: '90deg' }] } : undefined}>
-              <Icon as={ChevronRight} />
-            </View>
+            <Icon
+              as={ChevronRight}
+              className="ml-auto"
+              style={open ? { transform: [{ rotate: '90deg' }] } : undefined}
+            />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
