@@ -328,7 +328,7 @@ function Slider({
               const { width, height } = event.nativeEvent.layout;
               setThumbSize(vertical ? height : width);
             }}
-            className="cn-slider-thumb absolute shrink-0"
+            className={cn('cn-slider-thumb absolute shrink-0')}
             style={
               vertical ? { bottom: offsetOf(fractions[index], false) } : { left: offsetOf(fractions[index], false) }
             }
