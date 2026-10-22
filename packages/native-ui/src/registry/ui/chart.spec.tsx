@@ -1,6 +1,20 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { processColor } from 'react-native';
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from '../lib/charts';
+import { G } from 'react-native-svg';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Label,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  Text as ChartText,
+  XAxis,
+} from '../lib/charts';
 import {
   ChartContainer,
   ChartLegend,
@@ -123,6 +137,48 @@ function MonthArea(): React.ReactNode {
           isAnimationActive={false}
         />
       </AreaChart>
+    </ChartContainer>
+  );
+}
+
+const browserData = [
+  { browser: 'chrome', visitors: 275, fill: 'var(--color-chrome)' },
+  { browser: 'safari', visitors: 200, fill: 'var(--color-safari)' },
+  { browser: 'firefox', visitors: 287, fill: 'var(--color-firefox)' },
+];
+
+const browserConfig = {
+  visitors: { label: 'Visitors' },
+  chrome: { label: 'Chrome', color: '#2563eb' },
+  safari: { label: 'Safari', color: '#60a5fa' },
+  firefox: { label: 'Firefox', color: '#dc2626' },
+} satisfies ChartConfig;
+
+function BrowserDonut({ legend = null }: { legend?: React.ReactNode }): React.ReactNode {
+  return (
+    <ChartContainer config={browserConfig} className="aspect-square">
+      <PieChart>
+        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+        {legend}
+        <Pie
+          data={browserData}
+          dataKey="visitors"
+          nameKey="browser"
+          innerRadius={60}
+          strokeWidth={5}
+          isAnimationActive={false}
+        >
+          <Label
+            content={({ viewBox }) => (
+              <G testID="center-label" x={0} y={0}>
+                <ChartText x={viewBox.cx} y={viewBox.cy} textAnchor="middle" verticalAnchor="middle">
+                  762
+                </ChartText>
+              </G>
+            )}
+          />
+        </Pie>
+      </PieChart>
     </ChartContainer>
   );
 }
@@ -356,6 +412,67 @@ describe('Chart', () => {
       expect(screen.getByText('Desktop')).toBeOnTheScreen();
       expect(screen.getByText('305')).toBeOnTheScreen();
       expect(screen.getByRole('adjustable').props['aria-label']).toMatch(/^Area chart\. January: Desktop 186/);
+    });
+  });
+
+  describe('PieChart', () => {
+    it("draws a slice per row in the colour its row's fill names", async () => {
+      await render(<BrowserDonut />);
+
+      expect(screen.getAllByTestId(/^chart-slice-/, HIDDEN)).toHaveLength(3);
+      expect(fillOf(screen.getByTestId('chart-slice-0', HIDDEN))).toBe(processColor('#2563eb'));
+      expect(fillOf(screen.getByTestId('chart-slice-2', HIDDEN))).toBe(processColor('#dc2626'));
+    });
+
+    it('shows the name and value of the slice a press lands on', async () => {
+      await render(<BrowserDonut />);
+
+      // The ring sits in the middle of 320 by 200, from 60px to 76px out, and the first slice starts at three
+      // o'clock running anticlockwise, so a press 64px up and right of the middle lands in it.
+      await fireEvent(screen.getByTestId('chart-surface'), 'responderGrant', {
+        nativeEvent: { locationX: 160 + 50, locationY: 100 - 40 },
+      });
+
+      expect(screen.getByText('Chrome')).toBeOnTheScreen();
+      expect(screen.getByText('275')).toBeOnTheScreen();
+    });
+
+    it('shows nothing for a press in the hole of the ring', async () => {
+      await render(<BrowserDonut />);
+
+      await fireEvent(screen.getByTestId('chart-surface'), 'responderGrant', {
+        nativeEvent: { locationX: 160, locationY: 100 },
+      });
+
+      expect(screen.queryByText('Chrome')).toBeNull();
+    });
+
+    it('reads every slice by its config label, and steps through them', async () => {
+      await render(<BrowserDonut />);
+      const surface = screen.getByRole('adjustable');
+
+      expect(surface.props['aria-label']).toBe('Pie chart. Chrome: 275. Safari: 200. Firefox: 287');
+
+      await fireEvent(surface, 'accessibilityAction', { nativeEvent: { actionName: 'increment' } });
+      expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('Chrome: 275');
+    });
+
+    it('draws the Label content in the middle of the ring', async () => {
+      await render(<BrowserDonut />);
+
+      const label = screen.getByTestId('center-label', HIDDEN);
+      const [text] = label.children;
+      const [span] = typeof text === 'object' ? text.children : [];
+
+      expect(typeof span === 'object' ? span.props.content : span).toBe('762');
+      expect(typeof text === 'object' ? text.props.x : undefined).toEqual([160]);
+    });
+
+    it('names each slice in the legend by the config label nameKey points at', async () => {
+      await render(<BrowserDonut legend={<ChartLegend content={<ChartLegendContent nameKey="browser" />} />} />);
+
+      expect(screen.getByText('Chrome')).toBeOnTheScreen();
+      expect(screen.getByText('Firefox')).toBeOnTheScreen();
     });
   });
 });

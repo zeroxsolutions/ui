@@ -13,7 +13,20 @@ import {
 } from '@/components/ui/chart';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from '@/lib/charts';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Label,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  Text as ChartText,
+  XAxis,
+} from '@/lib/charts';
 
 const chartData = [
   { month: 'January', desktop: 186, mobile: 80 },
@@ -222,6 +235,96 @@ function ChartLineExample(): ReactNode {
   );
 }
 
+const pieChartData = [
+  { browser: 'chrome', visitors: 275, fill: 'var(--color-chrome)' },
+  { browser: 'safari', visitors: 200, fill: 'var(--color-safari)' },
+  { browser: 'firefox', visitors: 287, fill: 'var(--color-firefox)' },
+  { browser: 'edge', visitors: 173, fill: 'var(--color-edge)' },
+  { browser: 'other', visitors: 190, fill: 'var(--color-other)' },
+];
+
+const pieChartConfig = {
+  visitors: {
+    label: 'Visitors',
+  },
+  chrome: {
+    label: 'Chrome',
+    color: 'var(--chart-1)',
+  },
+  safari: {
+    label: 'Safari',
+    color: 'var(--chart-2)',
+  },
+  firefox: {
+    label: 'Firefox',
+    color: 'var(--chart-3)',
+  },
+  edge: {
+    label: 'Edge',
+    color: 'var(--chart-4)',
+  },
+  other: {
+    label: 'Other',
+    color: 'var(--chart-5)',
+  },
+} satisfies ChartConfig;
+
+const totalVisitors = pieChartData.reduce((acc, curr) => acc + curr.visitors, 0);
+
+function ChartPieExample(): ReactNode {
+  return (
+    <Card className="w-full">
+      <CardHeader className="items-center pb-0">
+        <CardTitle>Pie Chart - Donut with Text</CardTitle>
+        <CardDescription>January - June 2024</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-1 pb-0">
+        <ChartContainer config={pieChartConfig} className="mx-auto aspect-square max-h-[250px]">
+          <PieChart>
+            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+            <Pie data={pieChartData} dataKey="visitors" nameKey="browser" innerRadius={60} strokeWidth={5}>
+              <Label
+                content={({ viewBox }) => (
+                  <>
+                    <ChartText
+                      x={viewBox.cx}
+                      y={viewBox.cy}
+                      textAnchor="middle"
+                      verticalAnchor="middle"
+                      fill="var(--foreground)"
+                      fontSize={30}
+                      fontWeight="bold"
+                    >
+                      {totalVisitors.toLocaleString()}
+                    </ChartText>
+                    <ChartText
+                      x={viewBox.cx}
+                      y={viewBox.cy + 24}
+                      textAnchor="middle"
+                      verticalAnchor="middle"
+                      fill="var(--muted-foreground)"
+                      fontSize={12}
+                    >
+                      Visitors
+                    </ChartText>
+                  </>
+                )}
+              />
+            </Pie>
+          </PieChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col gap-2">
+        <View className="flex-row items-center gap-2">
+          <Text className="leading-none font-medium">Trending up by 5.2% this month</Text>
+          <Icon as={TrendingUp} className="size-4" />
+        </View>
+        <Text className="text-muted-foreground leading-none">Showing total visitors for the last 6 months</Text>
+      </CardFooter>
+    </Card>
+  );
+}
+
 function ChartDemo(): ReactNode {
   return (
     <View className="w-full gap-6">
@@ -229,6 +332,7 @@ function ChartDemo(): ReactNode {
       <ChartAreaExample />
       <ChartBarExample />
       <ChartLineExample />
+      <ChartPieExample />
     </View>
   );
 }

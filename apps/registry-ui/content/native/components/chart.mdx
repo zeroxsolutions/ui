@@ -68,7 +68,7 @@ The chart is announced as adjustable, labelled with every category's values, suc
 Mobile 80". A screen reader's swipe up or down moves to the next or the previous category and reads its values.
 A chart with no tooltip is announced with the same label.
 
-As Recharts' do, bars grow from the axis, and lines and areas draw in from the left over one and a half seconds. A series is
+As Recharts' do, bars grow from the axis, lines and areas draw in from the left and a pie sweeps round over one and a half seconds. A series is
 drawn at once where the system asks for reduced motion or the series sets `isAnimationActive={false}`.
 
 ## API reference
@@ -127,8 +127,8 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 
 ### Chart parts
 
-`@/lib/charts` holds `ResponsiveContainer`, `BarChart`, `Bar`, `LineChart`, `Line`, `AreaChart`, `Area`, `XAxis`, `YAxis`,
-`CartesianGrid`, `Tooltip` and `Legend`, with these props of Recharts':
+`@/lib/charts` holds `ResponsiveContainer`, `BarChart`, `Bar`, `LineChart`, `Line`, `AreaChart`, `Area`, `PieChart`, `Pie`, `Label`,
+`Text`, `XAxis`, `YAxis`, `CartesianGrid`, `Tooltip` and `Legend`, with these props of Recharts':
 
 - `BarChart`, `LineChart` and `AreaChart`: `data`, `margin`, `accessibilityLayer`, `width`, `height`, and `title`, which a
   screen reader hears before the values; `BarChart` also `barGap` and `barCategoryGap`.
@@ -140,6 +140,13 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 - `XAxis`: `dataKey`, `hide`, `tickLine`, `axisLine`, `tickMargin`, `tickFormatter`, `height`, `minTickGap`.
 - `YAxis`: `hide`, `tickLine`, `axisLine`, `tickMargin`, `tickFormatter`, `width`, `tickCount`.
 - `CartesianGrid`: `vertical`, `horizontal`, `stroke`, `strokeDasharray`.
+- `PieChart`: `margin`, `accessibilityLayer`, `width`, `height`, `title`.
+- `Pie`: `data`, `dataKey`, `nameKey`, `innerRadius`, `outerRadius` (`'80%'`), `cx`, `cy`, `startAngle`, `endAngle`,
+  `paddingAngle`, `fill`, `stroke`, `strokeWidth`, `isAnimationActive`, `animationDuration`. A row's own `fill`
+  colours its slice.
+- `Label`, inside a `Pie`: `content`, given `{ viewBox }` with the pie's `cx`, `cy` and radii, or `value`, drawn
+  in the middle.
+- `Text`: `x`, `y`, `textAnchor`, `verticalAnchor`, `fill`, `fontSize`, `fontWeight`.
 
 ## Differences from upstream
 
@@ -156,5 +163,8 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 - The tooltip's value is set in the theme's sans with tabular figures; the theme has no mono font.
 - The tooltip and the legend draw their colour marks with `react-native-svg`, since React Native Web drops a
   `View` background it cannot parse, such as a theme colour on NativeWind.
+- A Label's `content` draws react-native-svg's elements or `Text`, not the DOM's `text` and `tspan`, and colours
+  them with `fill`, such as `fill="var(--muted-foreground)"`, where upstream's demos use a `fill-*` class.
+- A pie's slices have no stroke unless given one: upstream's container hides Recharts' white one.
 - `accessibilityLayer` is accepted and changes nothing: the chart always takes the keyboard on the web and is
   always read to a screen reader.

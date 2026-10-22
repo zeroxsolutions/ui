@@ -1,7 +1,7 @@
 /**
  * The chart parts upstream's chart demos take from Recharts, in Recharts' names and with the props those
  * demos use, drawn with react-native-svg so they run on a device and on the web: the responsive container,
- * the bar, line and area charts and their series, the axes, the grid, the tooltip and the legend. A part reads its colours,
+ * the bar, line and area charts and their series, the pie chart, its slices, its label and the text it draws, the axes, the grid, the tooltip and the legend. A part reads its colours,
  * such as `var(--color-desktop)`, through the palette the chart's container provides.
  */
 import { scaleBand, scaleLinear, scalePoint } from 'd3-scale';
@@ -15,6 +15,7 @@ import {
   curveStep,
   curveStepAfter,
   curveStepBefore,
+  arc as arcPath,
   area as areaPath,
   line as linePath,
   type CurveFactory,
@@ -559,6 +560,27 @@ function drawContent<Props extends object>(
   return fallback(props);
 }
 
+/** Draws a chart's legend over the top or the bottom edge of the chart, reporting the height it takes. */
+function LegendBox({
+  legend,
+  payload,
+  onHeight,
+}: {
+  legend: LegendProps;
+  payload: LegendPayloadItem[];
+  onHeight: (height: number) => void;
+}): ReactNode {
+  const top = legend.verticalAlign === 'top';
+  return (
+    <View
+      onLayout={(event: LayoutChangeEvent) => onHeight(event.nativeEvent.layout.height)}
+      style={{ position: 'absolute', left: 0, right: 0, ...(top ? { top: 0 } : { bottom: 0 }) }}
+    >
+      {drawContent(legend.content, { payload, verticalAlign: legend.verticalAlign ?? 'bottom' }, DefaultLegendContent)}
+    </View>
+  );
+}
+
 interface ActivePoint {
   index: number;
   /** Where the press or the pointer is, in the svg's pixels; the plot's middle for a key or a screen reader. */
@@ -1085,16 +1107,7 @@ function CartesianChart({
         />
       ) : null}
       {parts.legend === undefined ? null : (
-        <View
-          onLayout={(event: LayoutChangeEvent) => setLegendHeight(event.nativeEvent.layout.height)}
-          style={{ position: 'absolute', left: 0, right: 0, ...(legendTop ? { top: 0 } : { bottom: 0 }) }}
-        >
-          {drawContent(
-            parts.legend.content,
-            { payload: legendPayload, verticalAlign: parts.legend.verticalAlign ?? 'bottom' },
-            DefaultLegendContent,
-          )}
-        </View>
+        <LegendBox legend={parts.legend} payload={legendPayload} onHeight={setLegendHeight} />
       )}
     </View>
   );
@@ -1115,6 +1128,343 @@ function LineChart(props: CartesianChartProps): ReactNode {
   return <CartesianChart kind="line" {...props} />;
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// Pie charts
+
+/** A length in pixels, or a share of what it is measured against such as `"80%"`. */
+type Length = number | `${number}%`;
+
+function lengthOf(value: Length, of: number): number {
+  return typeof value === 'number' ? value : (Number.parseFloat(value) / 100) * of;
+}
+
+/** Where a Label is drawn: the middle of the pie, and the slice angles it spans. */
+interface PolarViewBox {
+  cx: number;
+  cy: number;
+  innerRadius: number;
+  outerRadius: number;
+  startAngle: number;
+  endAngle: number;
+}
+
+type LabelProps = {
+  /** Draws the label from the box it is given; react-native-svg's elements, or {@link Text}. */
+  content?: (props: { viewBox: PolarViewBox }) => ReactNode;
+  /** The text drawn in the middle of the pie where there is no `content`. */
+  value?: string | number;
+  position?: 'center';
+};
+
+/** A label in the middle of the Pie it is placed in. */
+function Label(_props: LabelProps): ReactNode {
+  return null;
+}
+
+type TextProps = {
+  x?: number;
+  y?: number;
+  textAnchor?: 'start' | 'middle' | 'end';
+  /** Which part of the text sits on `y`. */
+  verticalAnchor?: 'start' | 'middle' | 'end';
+  /** The text's colour, such as `var(--muted-foreground)`; the theme's foreground when left out. */
+  fill?: string;
+  fontSize?: number;
+  fontWeight?: 'normal' | 'bold' | number;
+  children?: ReactNode;
+};
+
+const VERTICAL_SHIFT = { start: 0.71, middle: 0.355, end: 0 } as const;
+
+/** Text inside a chart's svg, in a colour from the chart's palette. */
+function Text({
+  x,
+  y,
+  textAnchor = 'start',
+  verticalAnchor = 'end',
+  fill,
+  fontSize = 14,
+  fontWeight,
+  children,
+}: TextProps): ReactNode {
+  const palette = useContext(ChartPaletteContext);
+  return (
+    <SvgText
+      x={x}
+      y={(y ?? 0) + VERTICAL_SHIFT[verticalAnchor] * fontSize}
+      textAnchor={textAnchor}
+      fill={palette.resolveColor(fill ?? 'var(--foreground)')}
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+    >
+      {children}
+    </SvgText>
+  );
+}
+
+type PieProps = Omit<SeriesProps, 'hide'> & {
+  data: readonly ChartDatum[];
+  /** The key of each row that names its slice, such as `browser`. */
+  nameKey?: string;
+  innerRadius?: Length;
+  outerRadius?: Length;
+  cx?: Length;
+  cy?: Length;
+  /** Where the first slice starts, in degrees anticlockwise from three o'clock. */
+  startAngle?: number;
+  endAngle?: number;
+  /** The angle left between two slices, in degrees. */
+  paddingAngle?: number;
+  /** The colour of a slice whose row has no `fill`. */
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  /** A Label for the middle of the pie. */
+  children?: ReactNode;
+};
+
+/** A slice for each row of its `data`. Placed inside a PieChart, the chart draws it. */
+function Pie(_props: PieProps): ReactNode {
+  return null;
+}
+
+type PieChartProps = Pick<CartesianChartProps, 'margin' | 'accessibilityLayer' | 'title' | 'width' | 'height'> & {
+  children?: ReactNode;
+};
+
+interface Slice {
+  index: number;
+  name: string;
+  value: number;
+  fill: string | undefined;
+  /** In degrees anticlockwise from three o'clock. */
+  startAngle: number;
+  endAngle: number;
+}
+
+/** Each row's slice of the turn from `startAngle` to `endAngle`, as Recharts lays a pie out. */
+function layoutSlices(props: PieProps, share: number): Slice[] {
+  const { data, dataKey, nameKey = 'name', startAngle = 0, endAngle = 360, paddingAngle = 0 } = props;
+  const values = data.map((datum) => Math.max(0, numberAt(datum, dataKey)));
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const direction = Math.sign(endAngle - startAngle) || 1;
+  const drawn = values.filter((value) => value > 0).length;
+  const room = Math.max(0, Math.abs(endAngle - startAngle) - (drawn > 1 ? paddingAngle * drawn : 0)) * share;
+  let angle = startAngle;
+  return data.map((datum, index) => {
+    const value = values[index] ?? 0;
+    const sweep = total > 0 ? (value / total) * room : 0;
+    const slice: Slice = {
+      index,
+      name: String(datum[nameKey] ?? index),
+      value,
+      fill: typeof datum.fill === 'string' ? datum.fill : props.fill,
+      startAngle: angle,
+      endAngle: angle + direction * sweep,
+    };
+    if (value > 0) angle += direction * (sweep + paddingAngle * share);
+    return slice;
+  });
+}
+
+const RADIANS = Math.PI / 180;
+
+/** A point at `radius` and `angle`, in degrees anticlockwise from three o'clock, around `cx`, `cy`. */
+function polar(cx: number, cy: number, radius: number, angle: number): { x: number; y: number } {
+  return { x: cx + radius * Math.cos(angle * RADIANS), y: cy - radius * Math.sin(angle * RADIANS) };
+}
+
+/** A slice of a pie, or of a ring with an `inner` radius, as an svg path around 0, 0. */
+function slicePath(slice: Slice, inner: number, outer: number): string {
+  // d3's angles run clockwise from twelve o'clock.
+  return (
+    arcPath()({
+      innerRadius: inner,
+      outerRadius: outer,
+      startAngle: (90 - slice.startAngle) * RADIANS,
+      endAngle: (90 - slice.endAngle) * RADIANS,
+    }) ?? ''
+  );
+}
+
+/** A pie, or a ring, of the Pie inside it, with its tooltip and its legend. */
+function PieChart({ margin, title, width, height, children }: PieChartProps): ReactNode {
+  const size = useChartSize(width, height);
+  const palette = useContext(ChartPaletteContext);
+  const parts = useMemo(() => {
+    const found: { pie?: PieProps; tooltip?: TooltipProps; legend?: LegendProps; other: ReactNode[] } = { other: [] };
+    Children.forEach(children, (child) => {
+      if (!isValidElement(child)) return;
+      if (child.type === Pie) found.pie = child.props as PieProps;
+      else if (child.type === Tooltip) found.tooltip = child.props as TooltipProps;
+      else if (child.type === Legend) found.legend = child.props as LegendProps;
+      else found.other.push(child);
+    });
+    return found;
+  }, [children]);
+  const [legendHeight, setLegendHeight] = useState(0);
+  const pie = parts.pie;
+  const progress = useEntrance(pie?.isAnimationActive !== false, pie?.animationDuration ?? ENTRANCE_MS);
+  const [active, setActive] = useState<ActivePoint | undefined>(undefined);
+  const [touched, setTouched] = useState(false);
+
+  if (size === undefined || size.width <= 0 || size.height <= 0 || pie === undefined) return null;
+
+  const resolve = (value: string | undefined): string | undefined => palette.resolveColor(value);
+  const { top, right, bottom, left } = { ...DEFAULT_MARGIN, ...margin };
+  const legendTop = parts.legend?.verticalAlign === 'top';
+  const plotTop = top + (legendTop ? legendHeight : 0);
+  const plotWidth = size.width - left - right;
+  const plotHeight = size.height - top - bottom - legendHeight;
+  const maxRadius = Math.max(0, Math.min(plotWidth, plotHeight) / 2);
+  const cx = left + lengthOf(pie.cx ?? '50%', plotWidth);
+  const cy = plotTop + lengthOf(pie.cy ?? '50%', plotHeight);
+  const inner = lengthOf(pie.innerRadius ?? 0, maxRadius);
+  const outer = lengthOf(pie.outerRadius ?? '80%', maxRadius);
+  const slices = layoutSlices(pie, pie.isAnimationActive === false ? 1 : progress);
+  const fullSlices = layoutSlices(pie, 1);
+  const nameOf = (key: string): string => palette.nameOf(key) ?? key;
+  const describe = (index: number): string => {
+    const slice = fullSlices[index];
+    return slice === undefined ? '' : `${nameOf(slice.name)}: ${formatValue(pie.data[index]?.[pie.dataKey] as number)}`;
+  };
+  const pointFor = (index: number): ActivePoint => {
+    const slice = fullSlices[index];
+    const middle = slice === undefined ? 0 : (slice.startAngle + slice.endAngle) / 2;
+    return { index, ...polar(cx, cy, (inner + outer) / 2, middle) };
+  };
+  const pointAt = (px: number, py: number): ActivePoint | undefined => {
+    const distance = Math.hypot(px - cx, py - cy);
+    if (distance < inner || distance > outer) return undefined;
+    const angle = (Math.atan2(cy - py, px - cx) / RADIANS + 360) % 360;
+    const slice = fullSlices.find((candidate) => {
+      const low = Math.min(candidate.startAngle, candidate.endAngle);
+      const high = Math.max(candidate.startAngle, candidate.endAngle);
+      return [angle - 360, angle, angle + 360].some((turn) => turn >= low && turn < high);
+    });
+    return slice === undefined ? undefined : { index: slice.index, x: px, y: py };
+  };
+  const interaction: Interaction = {
+    count: pie.data.length,
+    pointAt,
+    pointFor,
+    summary: pie.data.map((_, index) => describe(index)).join('. '),
+    describe,
+  };
+  const tooltip = parts.tooltip;
+  const shown =
+    active ?? (!touched && tooltip?.defaultIndex !== undefined ? pointFor(tooltip.defaultIndex) : undefined);
+  const payloadAt = (index: number): TooltipPayloadItem[] => {
+    const slice = fullSlices[index];
+    const datum = pie.data[index];
+    if (slice === undefined || datum === undefined) return [];
+    return [
+      {
+        dataKey: pie.dataKey,
+        name: slice.name,
+        value: datum[pie.dataKey] as number | string | undefined,
+        color: slice.fill,
+        fill: slice.fill,
+        payload: { ...datum, fill: slice.fill },
+      },
+    ];
+  };
+  const legendPayload: LegendPayloadItem[] = fullSlices.map((slice) => ({
+    value: slice.name,
+    dataKey: pie.dataKey,
+    color: slice.fill,
+    type: 'rect',
+    payload: { ...pie.data[slice.index], fill: slice.fill },
+  }));
+  const viewBox: PolarViewBox = {
+    cx,
+    cy,
+    innerRadius: inner,
+    outerRadius: outer,
+    startAngle: pie.startAngle ?? 0,
+    endAngle: pie.endAngle ?? 360,
+  };
+  const labels: ReactNode[] = [];
+  Children.forEach(pie.children, (child) => {
+    if (!isValidElement(child) || child.type !== Label) return;
+    const props = child.props as LabelProps;
+    labels.push(
+      props.content === undefined ? (
+        <Text key={labels.length} x={cx} y={cy} textAnchor="middle" verticalAnchor="middle">
+          {props.value}
+        </Text>
+      ) : (
+        <G key={labels.length}>{props.content({ viewBox })}</G>
+      ),
+    );
+  });
+  const label = title ?? 'Pie chart';
+
+  return (
+    <View style={{ width: size.width, height: size.height }}>
+      <Svg
+        width={size.width}
+        height={size.height}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        <G x={cx} y={cy}>
+          {slices.map((slice) =>
+            slice.value > 0 && slice.endAngle !== slice.startAngle ? (
+              <Path
+                key={slice.index}
+                testID={`chart-slice-${slice.index}`}
+                d={slicePath(slice, inner, outer)}
+                fill={resolve(slice.fill ?? DEFAULT_SERIES_COLOR)}
+                stroke={resolve(pie.stroke)}
+                strokeWidth={pie.stroke === undefined ? 0 : (pie.strokeWidth ?? 1)}
+              />
+            ) : null,
+          )}
+        </G>
+        {labels}
+        {parts.other}
+      </Svg>
+      {tooltip === undefined ? (
+        <View
+          accessible
+          testID="chart-summary"
+          aria-label={[label, interaction.summary].join('. ')}
+          className="absolute inset-0"
+          pointerEvents="none"
+        />
+      ) : (
+        <ChartSurface
+          interaction={interaction}
+          active={shown}
+          label={label}
+          onActive={(point) => {
+            setTouched(true);
+            setActive(point);
+          }}
+        />
+      )}
+      {tooltip === undefined || shown === undefined ? null : (
+        <TooltipBox point={shown} size={size} offset={tooltip.offset ?? 10}>
+          {drawContent(
+            tooltip.content,
+            {
+              active: true,
+              payload: payloadAt(shown.index),
+              label: fullSlices[shown.index]?.name,
+              coordinate: { x: shown.x, y: shown.y },
+            },
+            DefaultTooltipContent,
+          )}
+        </TooltipBox>
+      )}
+      {parts.legend === undefined ? null : (
+        <LegendBox legend={parts.legend} payload={legendPayload} onHeight={setLegendHeight} />
+      )}
+    </View>
+  );
+}
+
 export {
   Area,
   AreaChart,
@@ -1122,10 +1472,14 @@ export {
   BarChart,
   CartesianGrid,
   ChartPaletteContext,
+  Label,
   Legend,
   Line,
   LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
+  Text,
   Tooltip,
   XAxis,
   YAxis,
@@ -1140,7 +1494,12 @@ export type {
   LegendContentProps,
   LegendPayloadItem,
   LegendProps,
+  LabelProps,
   LineProps,
+  PieChartProps,
+  PieProps,
+  PolarViewBox,
+  TextProps,
   TooltipContentProps,
   TooltipPayloadItem,
   TooltipProps,
