@@ -52,8 +52,9 @@ const clipOf = () => screen.getByTestId('content', { includeHiddenElements: true
 
 /** Lays the content out at `height`, as a device does once it is drawn. */
 async function layOut(height: number): Promise<void> {
-  const inner = screen.getByText('10.18.0', { includeHiddenElements: true }).parent;
-  await fireEvent(inner!, 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 300, height } } });
+  // The box around the inner one, which holds the inner box's margins.
+  const measured = screen.getByText('10.18.0', { includeHiddenElements: true }).parent?.parent;
+  await fireEvent(measured!, 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 300, height } } });
 }
 
 describe('Trace', () => {

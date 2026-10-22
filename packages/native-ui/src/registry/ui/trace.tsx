@@ -292,17 +292,19 @@ function TraceCollapsibleContent({
 
   if (!mounted && !open) return null;
 
+  // Measured around the inner box, whose margins lie outside its own height.
   const detail = (
-    <TextClassContext.Provider value="text-muted-foreground cn-trace-collapsible-content-inner/text">
-      <View
-        className={cn('min-w-0 cn-trace-collapsible-content-inner', className)}
-        onLayout={(event: LayoutChangeEvent) => {
-          contentHeight.value = event.nativeEvent.layout.height;
-        }}
-      >
-        {Children.map(children, asText)}
-      </View>
-    </TextClassContext.Provider>
+    <View
+      onLayout={(event: LayoutChangeEvent) => {
+        contentHeight.value = event.nativeEvent.layout.height;
+      }}
+    >
+      <TextClassContext.Provider value="text-muted-foreground cn-trace-collapsible-content-inner/text">
+        <View className={cn('min-w-0 cn-trace-collapsible-content-inner', className)}>
+          {Children.map(children, asText)}
+        </View>
+      </TextClassContext.Provider>
+    </View>
   );
 
   // The ported CollapsibleContent is not drawn once its step closes, so the detail shrinks away outside it.
