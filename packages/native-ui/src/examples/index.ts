@@ -38,6 +38,7 @@ import { ItemDemo } from './item-demo';
 import { KbdDemo } from './kbd-demo';
 import { LabelDemo } from './label-demo';
 import { MenubarDemo } from './menubar-demo';
+import { NativeSelectDemo } from './native-select-demo';
 import { PaginationDemo } from './pagination-demo';
 import { PasswordInputDemo } from './password-input-demo';
 import { PasswordStrengthDemo } from './password-strength-demo';
@@ -99,6 +100,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'kbd-demo': KbdDemo,
   'label-demo': LabelDemo,
   'menubar-demo': MenubarDemo,
+  'native-select-demo': NativeSelectDemo,
   'pagination-demo': PaginationDemo,
   'password-input-demo': PasswordInputDemo,
   'password-strength-demo': PasswordStrengthDemo,

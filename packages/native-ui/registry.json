@@ -845,6 +845,19 @@
       ]
     },
     {
+      "name": "native-select",
+      "type": "registry:ui",
+      "title": "Native select",
+      "description": "Upstream's NativeSelect, NativeSelectOption and NativeSelectOptGroup drawn with Select: a combobox showing its first option until another is chosen, opening a list of its options and named groups.",
+      "registryDependencies": ["@zui/utils", "@zui/select"],
+      "files": [
+        {
+          "path": "src/registry/ui/native-select.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

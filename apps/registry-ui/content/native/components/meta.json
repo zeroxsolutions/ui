@@ -25,6 +25,7 @@
     "checkbox",
     "radio-group",
     "select",
+    "native-select",
     "combobox",
     "slider",
     "calendar",

@@ -1,6 +1,5 @@
 {
   "notPorted": {
-    "native-select": "An HTML `<select>`; `select` is the native one.",
     "resizable": "Pointer-dragged panels, which a touch screen has no use for.",
     "navigation-menu": "Hover menus for desktop web.",
     "sidebar": "A desktop app shell; native has tab-bar.",

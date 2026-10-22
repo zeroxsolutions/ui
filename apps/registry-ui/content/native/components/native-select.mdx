@@ -1,0 +1,101 @@
+---
+title: Native select
+description: A field that picks one of a list of options, written as HTML's select is written.
+---
+
+<NativePreview name="native-select-demo" />
+
+## Installation
+
+<InstallCommand name="native-select" />
+
+The CLI writes `components/ui/native-select.tsx` and installs [Select](/native/components/nativewind/select),
+with what Select installs, and Utils.
+
+## Usage
+
+```tsx
+import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from '@/components/ui/native-select';
+```
+
+```tsx
+<NativeSelect aria-label="Status" onValueChange={setStatus}>
+  <NativeSelectOption value="">Select status</NativeSelectOption>
+  <NativeSelectOption value="todo">Todo</NativeSelectOption>
+  <NativeSelectOption value="done">Done</NativeSelectOption>
+</NativeSelect>
+```
+
+```tsx
+<NativeSelect aria-label="Food">
+  <NativeSelectOptGroup label="Fruits">
+    <NativeSelectOption value="apple">Apple</NativeSelectOption>
+    <NativeSelectOption value="banana">Banana</NativeSelectOption>
+  </NativeSelectOptGroup>
+  <NativeSelectOptGroup label="Vegetables" disabled>
+    <NativeSelectOption value="carrot">Carrot</NativeSelectOption>
+  </NativeSelectOptGroup>
+</NativeSelect>
+```
+
+## API reference
+
+### NativeSelect
+
+Takes every prop of [SelectTrigger](/native/components/nativewind/select#selecttrigger), such as `aria-label`,
+`aria-invalid` and `disabled`, plus:
+
+| Prop            | Type                      | Default                               |
+| --------------- | ------------------------- | ------------------------------------- |
+| `size`          | `'sm' \| 'default'`       | `'default'`                           |
+| `value`         | `string`                  | -                                     |
+| `defaultValue`  | `string`                  | the first option that is not disabled |
+| `onValueChange` | `(value: string) => void` | -                                     |
+| `portalHost`    | `string`                  | -                                     |
+| `className`     | `string`                  | -                                     |
+
+It is drawn with Select: a combobox showing the chosen option's label, with a chevron at its end, whose press
+opens a list of the options. Until another is chosen it shows the first option that is not disabled, as HTML's
+select does, so an option with an empty value, such as `Select status`, asks for a choice. `onValueChange` gets
+the chosen option's value, `''` for an option whose value is empty. `className` goes to the box around the
+field, as upstream's goes to the box around its `<select>`; the other props go to the field. `size="sm"` draws
+it 32px tall rather than 36px, and `aria-invalid` draws the destructive border. Name it with `aria-label`.
+
+### NativeSelectOption
+
+| Prop        | Type        | Default  |
+| ----------- | ----------- | -------- |
+| `value`     | `string`    | its text |
+| `children`  | `ReactNode` | -        |
+| `label`     | `string`    | its text |
+| `disabled`  | `boolean`   | `false`  |
+| `className` | `string`    | -        |
+
+An option of the list, announced with its selected state, with a check mark while chosen. A disabled option is
+dimmed, announced as disabled and ignores presses.
+
+### NativeSelectOptGroup
+
+| Prop        | Type      | Default |
+| ----------- | --------- | ------- |
+| `label`     | `string`  | -       |
+| `disabled`  | `boolean` | `false` |
+| `className` | `string`  | -       |
+
+Options under a muted heading, `label`, announced as a group. `disabled` disables every option in it.
+
+## Differences from upstream
+
+- Upstream draws HTML's `<select>`, which the browser opens in its own picker. React Native has no select
+  element, and the platform pickers come from `@react-native-picker/picker`, which Expo Go does not carry. So
+  the parts keep upstream's names and draw [Select](/native/components/nativewind/select): the list opens over
+  the screen beside the field, on a device and on the web alike, and closes on a choice, a press outside it,
+  the back button or Escape.
+- `onValueChange` gets the chosen value, where upstream's `onChange` gets the DOM's change event: React Native
+  has no change event for it.
+- HTML's form attributes, `name`, `required`, `multiple`, `form` and `autoComplete`, are left out: React Native
+  has no form for them to join.
+- The field is as wide as the chosen option's label and its chevron, where the browser draws a select as wide
+  as its widest option. Give it a width through `className` for a field that keeps its width.
+- The field is drawn by Select's trigger slot. Its height, border and radius are the native select slot's in
+  both styles, and its chevron sits in the row after the label rather than over the field's right padding.
