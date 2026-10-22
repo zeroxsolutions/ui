@@ -518,13 +518,13 @@ function ToastView({
         dismiss(item.id);
         return;
       }
-      swipeX.value = withTiming(0, EXIT_MOTION);
-      swipeY.value = withTiming(0, EXIT_MOTION);
+      swipeX.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
+      swipeY.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
     },
     onResponderTerminate: () => {
       drag.current = undefined;
-      swipeX.value = withTiming(0, EXIT_MOTION);
-      swipeY.value = withTiming(0, EXIT_MOTION);
+      swipeX.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
+      swipeY.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
     },
   };
 
@@ -711,19 +711,29 @@ function Toaster(props: ToasterProps): ReactNode {
     for (const id of announced.current.keys()) {
       if (!all.some((entry) => entry.id === id)) announced.current.delete(id);
     }
+    setHeights((current) => {
+      const gone = [...current.keys()].filter((id) => !all.some((entry) => entry.id === id));
+      if (gone.length === 0) return current;
+      const kept = new Map(current);
+      for (const id of gone) kept.delete(id);
+      return kept;
+    });
   }, [all]);
 
+  // Keyed by the keys, so a hotkey passed as a new array each render keeps one listener.
+  const hotkeyKeys = hotkey.join(' ');
   useEffect(() => {
     const page = (globalThis as { document?: WebDocument }).document;
     if (!WEB || page === undefined) return undefined;
+    const keys = hotkeyKeys.split(' ');
     const onKeyDown = (event: WebKeyEvent): void => {
-      if (!hotkey.every((key) => event[key as keyof WebKeyEvent] === true || event.code === key)) return;
+      if (!keys.every((key) => event[key as keyof WebKeyEvent] === true || event.code === key)) return;
       setHovered(true);
       container.current?.focus();
     };
     page.addEventListener('keydown', onKeyDown);
     return () => page.removeEventListener('keydown', onKeyDown);
-  }, [hotkey]);
+  }, [hotkeyKeys]);
 
   // A toaster with nothing up collapses again, so the next stack starts closed.
   const up = all.filter((entry) => !entry.delete);

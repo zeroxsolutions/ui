@@ -128,3 +128,6 @@ Returns `{ toasts }`, the toasts that are up, kept current.
 - A touch spreads the stack for 4 seconds after the finger lifts, where upstream's spreads while a mouse is over
   it: a finger leaves no pointer resting on the stack.
 - iOS reads no live region, so a new toast is announced through `AccessibilityInfo.announceForAccessibility`.
+- A toast is rounded by the style's `cn-toast` slot (`rounded-2xl`, 16px), which upstream's Toaster also
+  passes; on the web sonner's own stylesheet overrides it with 8px. There is no sonner stylesheet here, so the
+  slot's radius is what draws.

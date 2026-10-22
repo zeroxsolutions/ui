@@ -1,5 +1,5 @@
 import { Portal } from '@rn-primitives/portal';
-import { act, render, screen } from '@testing-library/react-native';
+import { act, render, screen, waitForElementToBeRemoved } from '@testing-library/react-native';
 import { Linking, Text } from 'react-native';
 
 import { toast } from '@styles/nova/components/ui/sonner';
@@ -72,5 +72,7 @@ describe('Preview', () => {
     await act(async () => {
       toast.dismiss();
     });
+    // The queue outlives the render, so the toast is let leave it before the next case.
+    await waitForElementToBeRemoved(() => screen.queryByText('Event has been created'));
   });
 });

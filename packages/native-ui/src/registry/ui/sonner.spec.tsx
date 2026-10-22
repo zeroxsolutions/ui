@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AccessibilityInfo, Platform } from 'react-native';
+import { getAnimatedStyle } from 'react-native-reanimated';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Toaster, toast, useSonner, type ToasterProps } from './sonner';
 import { Text } from './text';
@@ -28,6 +29,14 @@ function liveRegionAround(element: ReturnType<typeof screen.getByText>) {
   let at = element.parent;
   while (at && at.props['aria-live'] === undefined) at = at.parent;
   return at;
+}
+
+/** How far the layer that moves a toast has moved it down, as its animated style says. */
+function lift(box: ReturnType<typeof screen.getByTestId>): number | undefined {
+  const moved = box.parent;
+  if (!moved) throw new Error('No moving layer');
+  const transform = (getAnimatedStyle(moved) as { transform?: Record<string, number>[] }).transform ?? [];
+  return transform.find((entry) => 'translateY' in entry)?.translateY;
 }
 
 function Count() {
@@ -184,6 +193,23 @@ describe('Toaster', () => {
     await elapse(MOTION_MS);
 
     expect(screen.queryByText('Saved')).toBeNull();
+  });
+
+  it('springs back from a short swipe at once when the system asks for reduced motion', async () => {
+    jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
+    await show();
+    await raise(() => toast('Saved', { testId: 'toast' }));
+    const box = screen.getByTestId('toast');
+
+    await fireEvent(box, 'responderGrant', { nativeEvent: { pageX: 0, pageY: 0, timestamp: 0 } });
+    await fireEvent(box, 'responderMove', { nativeEvent: { pageX: 0, pageY: 20, timestamp: 400 } });
+    await elapse(20);
+    expect(lift(box)).toBe(20);
+    await fireEvent(box, 'responderRelease', { nativeEvent: { pageX: 0, pageY: 20, timestamp: 800 } });
+    // A frame, well short of the spring back's animation.
+    await elapse(20);
+
+    expect(lift(box)).toBe(0);
   });
 
   it('lists the toasts that are up through useSonner', async () => {
