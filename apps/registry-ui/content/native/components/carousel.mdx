@@ -106,9 +106,10 @@ Inside a Carousel, returns its `api`, `opts`, `orientation`, `scrollPrev`, `scro
 ## Right to left
 
 When [Direction](/native/components/nativewind/direction) says text reads right to left, a horizontal carousel
-runs from the right: the first slide is drawn at the right, a swipe to the right and the left arrow key move it
-on, Previous sits on the right and Next on the left, and their chevrons are mirrored, as upstream's
-`cn-rtl-flip` mirrors them. The row is laid out left to right and drawn mirrored, with each slide mirrored back,
+runs from the right: the first slide is drawn at the right, a swipe to the right moves it on, Previous sits on
+the right and Next on the left, and their chevrons are mirrored, as upstream's `cn-rtl-flip` mirrors them. The
+arrow keys do as upstream's do whichever way text reads: the right arrow goes to the next slide and the left
+arrow to the previous one. The row is laid out left to right and drawn mirrored, with each slide mirrored back,
 so its scroll is measured as in text read left to right.
 
 ## Differences from upstream

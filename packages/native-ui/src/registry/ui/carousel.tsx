@@ -408,15 +408,12 @@ function Carousel({
 
   const onKeyDown = (event: KeyDownEvent): void => {
     onKeyDownCapture?.(event);
-    // An arrow key goes to the slide drawn on its side: the next one is on the left when text reads right to left.
     if (event.nativeEvent.key === 'ArrowLeft') {
       event.preventDefault();
-      if (rtl) scrollNext();
-      else scrollPrev();
+      scrollPrev();
     } else if (event.nativeEvent.key === 'ArrowRight') {
       event.preventDefault();
-      if (rtl) scrollPrev();
-      else scrollNext();
+      scrollNext();
     }
   };
 

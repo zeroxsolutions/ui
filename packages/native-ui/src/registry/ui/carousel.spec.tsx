@@ -276,7 +276,7 @@ describe('Carousel', () => {
     expect(await translation()).toBe(-300);
   });
 
-  it('runs from the right when text reads right to left: a swipe right and the left arrow move it on', async () => {
+  it('runs from the right when text reads right to left: a swipe right moves it on, the arrow keys as upstream', async () => {
     await render(
       <DirectionProvider direction="rtl">
         <Slides testID="carousel" />
@@ -294,10 +294,15 @@ describe('Carousel', () => {
     expect(await translation()).toBe(-300);
 
     await fireEvent(screen.getByTestId('carousel'), 'keyDownCapture', {
-      nativeEvent: { key: 'ArrowLeft' },
+      nativeEvent: { key: 'ArrowRight' },
       preventDefault: jest.fn(),
     });
     expect(await translation()).toBe(-600);
+    await fireEvent(screen.getByTestId('carousel'), 'keyDownCapture', {
+      nativeEvent: { key: 'ArrowLeft' },
+      preventDefault: jest.fn(),
+    });
+    expect(await translation()).toBe(-300);
   });
 
   it('mirrors its previous and next chevrons when text reads right to left, and only then', async () => {
