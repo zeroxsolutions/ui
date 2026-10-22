@@ -201,6 +201,12 @@ function readKey(event: WebKeyEvent): KeyPress | undefined {
   return press;
 }
 
+/** Whether a handler called earlier asked that the part's own handling be skipped, as upstream reads it. */
+function defaultPrevented(event: unknown): boolean {
+  const synthetic = event as { isDefaultPrevented?: () => boolean; defaultPrevented?: boolean };
+  return synthetic.isDefaultPrevented?.() ?? synthetic.defaultPrevented ?? false;
+}
+
 const modified = (press: KeyPress): boolean => Boolean(press.metaKey || press.ctrlKey || press.altKey);
 
 /** `aria-keyshortcuts` on the web, which React Native's own prop types do not list; nothing on a device. */
@@ -894,7 +900,8 @@ type QuestionnaireChoiceProps = Omit<ComponentProps<typeof Pressable>, 'children
  * One answer, announced as a radio, or as a checkbox in a `multiple` question, and named by its text. A press picks
  * it, and in a `multiple` question a second press unpicks it. It is ringed while it holds focus from a keyboard,
  * and on the web shows the key that picks it when the Questionnaire has `shortcuts`. On the web, Space picks it,
- * Enter goes on once it is picked, and the arrows move to the next or previous answer, picking a radio.
+ * Enter goes on once it is picked, and the arrows move to the next or previous answer, picking a radio. An
+ * `onPress` or `onKeyDown` given to it runs first, and its own handling is skipped when that prevents the default.
  */
 function QuestionnaireChoice({
   className,
@@ -905,10 +912,13 @@ function QuestionnaireChoice({
   onChange,
   onFocus,
   onBlur,
+  onPress,
   children,
   ref,
-  ...props
+  ...rest
 }: QuestionnaireChoiceProps): ReactNode {
+  // A web key handler, which React Native's Pressable props do not list.
+  const { onKeyDown, ...props } = rest as typeof rest & { onKeyDown?: (event: WebKeyEvent) => void };
   const root = useRoot('QuestionnaireChoice');
   const item = useItem('QuestionnaireChoice');
   const id = useId();
@@ -957,11 +967,13 @@ function QuestionnaireChoice({
   );
 
   // React Native Web's press handling stops Enter on a Pressable from reaching the Questionnaire, and does not
-  // press a radio or a checkbox for Space, so both are answered here.
+  // press a radio or a checkbox for Space, so both are answered here. It lets a disabled one's keys through.
   const webKeys =
     Platform.OS === 'web'
       ? ({
           onKeyDown: (event: WebKeyEvent) => {
+            onKeyDown?.(event);
+            if (disabled || defaultPrevented(event)) return;
             const keyPress = readKey(event);
             if (!keyPress) return;
             const { key, repeat } = keyPress;
@@ -992,7 +1004,7 @@ function QuestionnaireChoice({
             }
           },
         } as object)
-      : {};
+      : { onKeyDown };
 
   useLayoutEffect(() => {
     if (checkedProp === undefined) return;
@@ -1035,8 +1047,9 @@ function QuestionnaireChoice({
           onBlur?.(event);
         }}
         onPress={(event) => {
+          onPress?.(event);
           // Enter goes on rather than picking, as on a browser's own radio and checkbox.
-          if ((event as unknown as { key?: string }).key === 'Enter') return;
+          if (defaultPrevented(event) || (event as unknown as { key?: string }).key === 'Enter') return;
           press();
         }}
         {...props}
@@ -1095,7 +1108,8 @@ type QuestionnaireInputProps = ComponentProps<typeof Input>;
 /**
  * A free-text answer, such as "Something else", which answers the question while it holds text. In a question
  * with one answer, typing in it unpicks the choices, and picking a choice leaves its text unsent. Return goes on
- * while it holds the answer; on the web, while it is empty, the up and down arrows move to the other answers.
+ * while it holds the answer, and Shift with Return breaks the line of a `multiline` one; on the web, while it is
+ * empty, the up and down arrows move to the other answers.
  * Name it with `aria-label`.
  */
 function QuestionnaireInput({
@@ -1179,7 +1193,7 @@ function QuestionnaireInput({
           const keyEvent = event as unknown as WebKeyEvent;
           const keyPress = readKey(keyEvent);
           if (!keyPress) return;
-          if (keyPress.key === 'Enter' && !modified(keyPress)) {
+          if (keyPress.key === 'Enter' && !modified(keyPress) && !(keyPress.shiftKey && props.multiline)) {
             // Also keeps the field from submitting and blurring itself.
             keyEvent.preventDefault();
             if (!keyPress.repeat && answering) root.advance();

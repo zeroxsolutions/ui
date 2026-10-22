@@ -106,7 +106,8 @@ const items = [
   answers to `onSubmit`.
 - Each step moves the screen reader to the new question's title on a device, and the keyboard focus to the
   question on the web.
-- Return in a `QuestionnaireInput` that holds the answer goes on or submits.
+- Return in a `QuestionnaireInput` that holds the answer goes on or submits. Shift with Return breaks the line of a
+  `multiline` one.
 - On the web, Ctrl or Cmd with Enter goes on or submits, and so does Enter on a picked choice. Space picks a
   choice. The up and down arrows move between the answers, picking a radio, and the left and right arrows move
   between radios, or step back and forward once the question is answered from anywhere else. With `shortcuts`,
@@ -156,7 +157,8 @@ Takes every prop of React Native's `View`.
 
 Takes every prop of React Native's `Pressable`, plus `value` (`string`), `checked`, `defaultChecked`, `disabled`
 and `onChange`, called with whether the choice is now picked. It is a radio, or a checkbox in a `multiple`
-question, named by its text.
+question, named by its text. An `onPress`, or an `onKeyDown` on the web, runs before the choice's own handling,
+which it skips by calling `preventDefault()`.
 
 ### QuestionnaireInput
 

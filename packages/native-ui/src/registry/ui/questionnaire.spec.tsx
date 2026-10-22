@@ -306,6 +306,39 @@ describe('Questionnaire', () => {
     expect(onStatusChange).toHaveBeenLastCalledWith('answered');
   });
 
+  it('calls the onPress given to a choice before picking it, and does not pick when it prevents the default', async () => {
+    const onPress = jest.fn();
+    await render(
+      <Questionnaire>
+        <QuestionnaireItem name="notes">
+          <QuestionnaireTitle>Anything else?</QuestionnaireTitle>
+          <QuestionnaireChoices>
+            <QuestionnaireChoice value="yes" onPress={onPress}>
+              <Text>Yes</Text>
+            </QuestionnaireChoice>
+            <QuestionnaireChoice value="no" onPress={(event) => event.preventDefault()}>
+              <Text>No</Text>
+            </QuestionnaireChoice>
+          </QuestionnaireChoices>
+        </QuestionnaireItem>
+      </Questionnaire>,
+    );
+
+    await pick('Yes');
+    expect(onPress).toHaveBeenCalled();
+    expect(screen.getByRole('radio', { name: 'Yes' })).toBeChecked();
+
+    // The test renderer's own press event keeps no record of preventDefault, so this one does.
+    let prevented = false;
+    await fireEvent.press(screen.getByRole('radio', { name: 'No' }), {
+      preventDefault: () => {
+        prevented = true;
+      },
+      isDefaultPrevented: () => prevented,
+    });
+    expect(screen.getByRole('radio', { name: 'No' })).not.toBeChecked();
+  });
+
   it('goes on when Return is pressed in an input that holds the answer', async () => {
     const user = userEvent.setup();
     await render(<Plan />);
@@ -470,6 +503,102 @@ describe('Questionnaire', () => {
 
       await keyOn(radio('Tool call timeline Show what the agent ran.'), 'ArrowUp');
       expect(radio('Approval checkpoints')).toBeChecked();
+    });
+
+    /** A key event whose preventDefault is a spy, with `nativeEvent` extras such as a modifier. */
+    const keyEvent = (name: string, extra: object = {}) => {
+      const target = {};
+      return {
+        nativeEvent: { key: name, ...extra },
+        target,
+        currentTarget: target,
+        preventDefault: jest.fn(),
+        stopPropagation: () => undefined,
+        isDefaultPrevented: () => false,
+      };
+    };
+
+    it('calls the onKeyDown given to a choice first, still picking with Space unless it prevents the default', async () => {
+      const onKeyDown = jest.fn();
+      await render(
+        <Questionnaire>
+          <QuestionnaireItem name="notes">
+            <QuestionnaireTitle>Anything else?</QuestionnaireTitle>
+            <QuestionnaireChoices>
+              <QuestionnaireChoice value="yes" {...({ onKeyDown } as object)}>
+                <Text>Yes</Text>
+              </QuestionnaireChoice>
+              <QuestionnaireChoice
+                value="no"
+                {...({ onKeyDown: (event: { preventDefault: () => void }) => event.preventDefault() } as object)}
+              >
+                <Text>No</Text>
+              </QuestionnaireChoice>
+            </QuestionnaireChoices>
+          </QuestionnaireItem>
+        </Questionnaire>,
+      );
+
+      await keyOn(radio('Yes'), ' ');
+      expect(onKeyDown).toHaveBeenCalled();
+      expect(radio('Yes')).toBeChecked();
+
+      let prevented = false;
+      await act(() =>
+        fireEvent(radio('No'), 'keyDown', {
+          ...keyEvent(' '),
+          preventDefault: () => {
+            prevented = true;
+          },
+          isDefaultPrevented: () => prevented,
+        }),
+      );
+      expect(radio('No')).not.toBeChecked();
+    });
+
+    it('lets Shift+Enter break the line in a multiline input', async () => {
+      await render(
+        <Questionnaire>
+          <QuestionnaireItem name="notes">
+            <QuestionnaireTitle>Anything else?</QuestionnaireTitle>
+            <QuestionnaireInput aria-label="Notes" multiline />
+          </QuestionnaireItem>
+        </Questionnaire>,
+      );
+      const event = keyEvent('Enter', { shiftKey: true });
+
+      await act(() => fireEvent(screen.getByLabelText('Notes'), 'keyPress', event));
+
+      expect(event.preventDefault).not.toHaveBeenCalled();
+    });
+
+    it('does not go on for Ctrl+Enter on a disabled choice, which the Questionnaire answers itself', async () => {
+      await render(
+        <Questionnaire>
+          <QuestionnaireItem name="notes">
+            <QuestionnaireTitle>Anything else?</QuestionnaireTitle>
+            <QuestionnaireChoices>
+              <QuestionnaireChoice value="yes" defaultChecked>
+                <Text>Yes</Text>
+              </QuestionnaireChoice>
+              <QuestionnaireChoice value="no" disabled>
+                <Text>No</Text>
+              </QuestionnaireChoice>
+            </QuestionnaireChoices>
+          </QuestionnaireItem>
+          <QuestionnaireItem name="more">
+            <QuestionnaireTitle>More?</QuestionnaireTitle>
+          </QuestionnaireItem>
+        </Questionnaire>,
+      );
+      const event = keyEvent('Enter', { ctrlKey: true });
+
+      // The test renderer takes no events on a disabled Pressable, though a browser hands it the keys while it
+      // holds focus, so its handler is called itself.
+      await act(() => (radio('No').props as { onKeyDown: (event: object) => void }).onKeyDown(event));
+
+      expect(event.preventDefault).not.toHaveBeenCalled();
+      expect(screen.getByText('Anything else?')).toBeVisible();
     });
 
     it('goes on with Enter in the input once it holds the answer', async () => {
