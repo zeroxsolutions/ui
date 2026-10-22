@@ -131,7 +131,8 @@ type MenubarTriggerProps = Omit<ComponentProps<typeof MenubarPrimitive.Trigger>,
 function MenubarTrigger({ className, ref, ...props }: MenubarTriggerProps): ReactNode {
   const menuRef = useContext(MenubarTriggerRefContext);
   const { value } = MenubarPrimitive.useRootContext();
-  const expanded = value !== undefined && value === MenubarPrimitive.useMenuContext().value;
+  const menu = MenubarPrimitive.useMenuContext();
+  const expanded = value !== undefined && value === menu.value;
   const composed = useCallback(
     (node: MenubarPrimitive.TriggerRef | null) => {
       if (menuRef !== undefined) menuRef.current = node;
@@ -183,7 +184,8 @@ function MenubarContent({
   ...props
 }: MenubarContentProps): ReactNode {
   const bar = MenubarPrimitive.useRootContext();
-  const open = bar.value !== undefined && bar.value === MenubarPrimitive.useMenuContext().value;
+  const ownMenu = MenubarPrimitive.useMenuContext();
+  const open = bar.value !== undefined && bar.value === ownMenu.value;
   // The primitive places the menu above or below its trigger on a device; the web's places it on any side.
   const placed = Platform.OS === 'web' || side === 'top' ? side : 'bottom';
   const { present, style } = useMenuMotion(open, placed);

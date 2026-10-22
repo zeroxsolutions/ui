@@ -186,6 +186,16 @@ describe('Menubar', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
+  it('calls the same hooks on every render as a menu opens and closes', async () => {
+    const error = jest.spyOn(console, 'error');
+    const user = await open();
+
+    await user.press(screen.getByTestId('trigger'));
+    await finishMotion();
+
+    expect(error.mock.calls.flat().join(' ')).not.toMatch(/order of Hooks/);
+  });
+
   it('opens a menu of menu items when its trigger is pressed', async () => {
     await open();
 
