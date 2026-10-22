@@ -144,8 +144,10 @@ and for a language not in the list. A trailing newline is ignored. `lib/highligh
 - Copy writes through `expo-clipboard`, where upstream uses `navigator.clipboard`.
 - Actions always show, as upstream's do on a touch screen; there is no hover to reveal them on. Floating
   actions draw upstream's hairline ring around each button as a border, since a device has no ring.
-- The content's edges do not fade as it scrolls, and on the web the block draws no focus ring when its content
-  has keyboard focus: both are CSS upstream reaches through selectors React Native has no equivalent of.
+- The content's edges do not fade as it scrolls, which is CSS upstream reaches through selectors React Native has
+  no equivalent of.
+- While the content has keyboard focus, the block's border takes the ring colour, where upstream draws a 3px
+  ring outside it: a ring is a box-shadow, which a device cannot draw.
 - Numbers are padded with spaces to the widest one in the monospace face, where upstream lines them up with CSS
   counters in a grid.
 - An `overflow-y-hidden` class does not stop a capped content scrolling; pass `scrollEnabled={false}` for a

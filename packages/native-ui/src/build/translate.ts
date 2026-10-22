@@ -158,6 +158,7 @@ const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'has-[>input:focus-visible]': 'focused',
     '[&:not(:has(~[data-slot=questionnaire-description]))]': 'description=none',
     '[[data-slot=code-block]>&]': 'parent=code-block',
+    'has-[>[data-slot=code-block-content]:focus-visible]': 'focused',
     [COMMAND_GROUP_HEADING]: 'part=group-heading',
   }),
 );
@@ -238,12 +239,14 @@ const RING_AS_BORDER_STATE = 'part=button';
 
 /**
  * Slots whose ring behind one state is drawn as a border too: an attachment's focus ring, around a card that
- * draws its hairline as a border already, so the border takes the ring's colour while focused, and a trace
- * trigger's, whose component draws a transparent border for it.
+ * draws its hairline as a border already, so the border takes the ring's colour while focused, a trace
+ * trigger's, whose component draws a transparent border for it, and a code block's, whose variant draws a
+ * border already.
  */
 const SLOT_RING_AS_BORDER_STATES: ReadonlyMap<string, StateKey> = new Map([
   ['cn-attachment', 'focused'],
   ['cn-trace-collapsible-trigger', 'focused'],
+  ['cn-code-block', 'focused'],
 ]);
 const RING_COLOUR = /^ring-(?!\d|inset|offset)([\w-]+(?:\/[\w.]+)?)$/;
 const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;

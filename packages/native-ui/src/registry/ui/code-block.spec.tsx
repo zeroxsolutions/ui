@@ -260,6 +260,47 @@ describe('CodeBlockContent scrolling', () => {
   });
 });
 
+describe('CodeBlock focus on the web', () => {
+  beforeEach(() => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  /** A focus event whose target answers `:focus-visible` with `visible`, as a browser's does. */
+  const focusFrom = (visible: boolean): object => ({
+    target: { matches: (selector: string) => selector === ':focus-visible' && visible },
+  });
+  const blockClasses = () => emittedClasses(screen.getByTestId('block').props.className);
+
+  it.each([
+    ['scrolls sideways', false],
+    ['wraps', true],
+  ])('rings the block while content that %s holds keyboard focus, and not after a press', async (_, wrap) => {
+    await render(
+      <CodeBlock testID="block">
+        <CodeBlockContent testID="content" wrap={wrap}>
+          {output}
+        </CodeBlockContent>
+      </CodeBlock>,
+    );
+    const content = screen.getByTestId('content');
+    const focusable = wrap ? content : sidewaysScrollerIn(content);
+
+    await fireEvent(focusable, 'focus', focusFrom(false));
+    expect(blockClasses()).not.toContain('border-ring');
+
+    await fireEvent(focusable, 'blur');
+    await fireEvent(focusable, 'focus', focusFrom(true));
+    expect(blockClasses()).toContain('border-ring');
+
+    await fireEvent(focusable, 'blur');
+    expect(blockClasses()).not.toContain('border-ring');
+  });
+});
+
 describe('CodeBlockLine', () => {
   it('marks an added line with a plus and a removed one with a minus, read with the line', async () => {
     await render(

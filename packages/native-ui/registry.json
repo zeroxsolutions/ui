@@ -1111,7 +1111,14 @@
       "title": "Code Block",
       "description": "Code, terminal output and diffs with an optional header, line numbers, highlighted lines and a copy button that tells screen readers it copied; long lines scroll sideways unless they wrap.",
       "dependencies": ["class-variance-authority", "expo-clipboard", "lucide-react-native"],
-      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/text", "@zui/use-highlighted-code"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/focus-visible",
+        "@zui/button",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/use-highlighted-code"
+      ],
       "files": [
         {
           "path": "src/registry/ui/code-block.tsx",

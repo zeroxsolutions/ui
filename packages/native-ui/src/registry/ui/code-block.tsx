@@ -14,6 +14,7 @@ import {
   type ReactNode,
 } from 'react';
 import { AccessibilityInfo, Platform, ScrollView, View, type TextStyle } from 'react-native';
+import { useFocusVisible } from '../lib/focus-visible';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { Icon, IconClassContext } from './icon';
@@ -21,10 +22,11 @@ import { Text, TextClassContext } from './text';
 
 // A `cn-<slot>` token stands for that slot's view classes in the registry's style, `cn-<slot>/text` for its
 // text classes and `cn-<slot>/icon` for its icon size, `@size=sm` for the classes behind the small size,
-// `@variant=destructive` for those behind the destructive block, `@slot=code-block-header` for those of
-// content below a header, `@parent=code-block` for actions straight inside the block, `@numbered` for a
-// numbered line, and `@part=before` and `@part=after` for a line's number and diff marker; the registry
-// build replaces each with the classes translated for the target engine.
+// `@variant=destructive` for those behind the destructive block, `@focused` for those while the content holds
+// keyboard focus, `@slot=code-block-header` for those of content below a header, `@parent=code-block` for
+// actions straight inside the block, `@numbered` for a numbered line, and `@part=before` and `@part=after` for a
+// line's number and diff marker; the registry build replaces each with the classes translated for the target
+// engine.
 
 /** The face code is drawn in: the platform's own monospace, since the theme ships none. */
 const MONOSPACE: TextStyle = {
@@ -50,6 +52,8 @@ interface CodeBlockState {
   codeText: string;
   /** Tells the block a row is drawn inside it, however deep; returns the call that says it has gone. */
   holdRow: (row: CodeBlockRow) => () => void;
+  /** Tells the block whether its content holds keyboard focus, which rings the block. */
+  reportFocus: (focusVisible: boolean) => void;
 }
 
 const CodeBlockContext = createContext<CodeBlockState>({
@@ -59,6 +63,7 @@ const CodeBlockContext = createContext<CodeBlockState>({
   hasFooter: false,
   codeText: '',
   holdRow: () => () => {},
+  reportFocus: () => undefined,
 });
 
 /** Tells the CodeBlock around it that `row` is drawn, for as long as the calling part is. */
@@ -113,10 +118,12 @@ function CodeBlock({ className, variant, size = 'default', children, ...props }:
     setHeld((current) => ({ ...current, [row]: current[row] + 1 }));
     return () => setHeld((current) => ({ ...current, [row]: current[row] - 1 }));
   }, []);
+  const [focused, setFocused] = useState(false);
   const state: CodeBlockState = {
     destructive,
     size,
     holdRow,
+    reportFocus: setFocused,
     hasHeader: held.header > 0 || parts.some((part) => isValidElement(part) && part.type === CodeBlockHeader),
     hasFooter: held.footer > 0 || parts.some((part) => isValidElement(part) && part.type === CodeBlockFooter),
     codeText: cn(
@@ -128,7 +135,15 @@ function CodeBlock({ className, variant, size = 'default', children, ...props }:
 
   return (
     <CodeBlockContext.Provider value={state}>
-      <View className={cn(codeBlockVariants({ variant }), className)} {...props}>
+      <View
+        className={cn(
+          codeBlockVariants({ variant }),
+          focused && 'cn-code-block@focused',
+          focused && !destructive && 'cn-code-block-variant-default@focused',
+          className,
+        )}
+        {...props}
+      >
         {children}
       </View>
     </CodeBlockContext.Provider>
@@ -322,7 +337,13 @@ function CodeBlockContent({
   onContentSizeChange,
   ...props
 }: CodeBlockContentProps): ReactNode {
-  const { size, hasHeader, hasFooter, codeText } = useContext(CodeBlockContext);
+  const { size, hasHeader, hasFooter, codeText, reportFocus } = useContext(CodeBlockContext);
+  const { focusVisible, onFocus: focusChanged, onBlur: blurred } = useFocusVisible();
+  useEffect(() => {
+    if (!focusVisible) return undefined;
+    reportFocus(true);
+    return () => reportFocus(false);
+  }, [focusVisible, reportFocus]);
   const tall = useOverflow();
   const wide = useOverflow();
   const sm = size === 'sm';
@@ -358,6 +379,7 @@ function CodeBlockContent({
     </View>
   );
   const web = Platform.OS === 'web';
+  const focusProps = { onFocus: focusChanged, onBlur: blurred };
 
   // Each scroller takes a drag only while its content overflows it, and does not bounce, so a drag on a
   // block whose code fits moves the page around it.
@@ -370,6 +392,7 @@ function CodeBlockContent({
       className={cn('min-h-0 min-w-0', className)}
       style={[{ direction: 'ltr' }, style]}
       tabIndex={web && wrap ? tabIndex : undefined}
+      {...(wrap ? focusProps : {})}
       onLayout={(event) => {
         tall.setViewport(event.nativeEvent.layout.height);
         onLayout?.(event);
@@ -391,6 +414,7 @@ function CodeBlockContent({
           scrollEnabled={wide.overflows}
           contentContainerStyle={{ flexGrow: 1 }}
           tabIndex={web ? tabIndex : undefined}
+          {...focusProps}
           onLayout={(event) => wide.setViewport(event.nativeEvent.layout.width)}
           onContentSizeChange={(width) => wide.setContent(width)}
         >

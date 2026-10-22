@@ -1095,6 +1095,14 @@ describe('translateClasses for a code block', () => {
     },
   );
 
+  it.each(STYLE_ENGINES)(
+    'rings a code block as a border while its content holds keyboard focus, as the state focused, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-code-block', engine, 'view', 'focused').classes).toEqual(['border-ring/50']);
+      expect(slot(style, 'cn-code-block-variant-default', engine, 'view', 'focused').classes).toEqual(['border-ring']);
+    },
+  );
+
   it('spaces a numbered line from its number, as the state numbered', () => {
     expect(slot('vega', 'cn-code-block-line', 'uniwind', 'view', 'numbered').classes).toEqual(['gap-x-3']);
   });
