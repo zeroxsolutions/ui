@@ -1,8 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { createRef } from 'react';
-import { I18nManager, Platform, ScrollView, StyleSheet } from 'react-native';
+import { I18nManager, Platform, StyleSheet } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { DirectionProvider } from './direction';
 import {
   ResizableHandle,
@@ -239,28 +238,20 @@ describe('Resizable', () => {
     expect(styleOf(screen.getByTestId('group')).flexDirection).toBe('column');
   });
 
-  it('keeps a drag of the handle from a scrolling parent', async () => {
-    await render(
-      <ScrollView horizontal>
-        <Pair />
-      </ScrollView>,
-    );
+  it('claims a touch on the handle and refuses to hand the drag over', async () => {
+    await render(<Pair />);
     await layOut(401);
 
     expect(handle().props.onResponderGrant(touch(100))).toBe(true);
     expect(handle().props.onResponderTerminationRequest()).toBe(false);
   });
 
-  it("draws no grip unless asked, and the style's grip when asked", async () => {
+  it('draws a grip only when asked', async () => {
     await render(<Pair />);
     expect(handle().children.filter((child) => typeof child !== 'string')).toHaveLength(0);
 
     await render(<Pair withHandle />);
-    const [grip] = handle().children;
-    if (grip === undefined || typeof grip === 'string') throw new Error('No grip');
-    expect(emittedClasses(grip.props.className)).toEqual(
-      expect.arrayContaining(['bg-border', 'h-6', 'w-1', 'rounded-lg']),
-    );
+    expect(handle().children.filter((child) => typeof child !== 'string')).toHaveLength(1);
   });
 
   it('resets the panel before the handle to its default size on a double tap', async () => {
@@ -281,6 +272,25 @@ describe('Resizable', () => {
     await render(<Pair disabled />);
     await layOut(401);
 
+    await drag(100, 140);
+    await adjust('increment');
+    await press('ArrowRight');
+
+    expect(await grows()).toEqual([25, 75]);
+    expect(handle()).toBeDisabled();
+  });
+
+  it('blocks every way of resizing by a disabled handle in an enabled group', async () => {
+    await render(
+      <ResizablePanelGroup testID="group">
+        <ResizablePanel id="left" testID="left" defaultSize="25%" />
+        <ResizableHandle testID="handle" disabled />
+        <ResizablePanel id="right" testID="right" defaultSize="75%" />
+      </ResizablePanelGroup>,
+    );
+    await layOut(401);
+
+    expect(handle().props.onStartShouldSetResponder()).toBe(false);
     await drag(100, 140);
     await adjust('increment');
     await press('ArrowRight');

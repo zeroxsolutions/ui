@@ -140,8 +140,8 @@ function compare(a: number, b: number): number {
   return a > b ? 1 : -1;
 }
 
-function sameSizes(a: readonly number[], b: readonly number[]): boolean {
-  return a.length === b.length && a.every((size, index) => size === b[index]);
+function sameEntries<T>(a: readonly T[], b: readonly T[]): boolean {
+  return a.length === b.length && a.every((entry, index) => entry === b[index]);
 }
 
 /** `size` in px, or undefined for a percentage while the group's size is unknown. */
@@ -265,7 +265,7 @@ function adjusted({ delta: asked, initial, limits, pivots, previous, trigger }: 
       if (rounded(taken) >= rounded(Math.abs(delta))) break;
     }
   }
-  if (sameSizes(previous, next)) return previous;
+  if (sameEntries(previous, next)) return previous;
 
   const growing = delta < 0 ? second : first;
   const wanted = initial[growing] + taken;
@@ -355,6 +355,7 @@ function flattened(children: ReactNode): ReactNode[] {
 interface ResizableGroupContextValue {
   orientation: 'horizontal' | 'vertical';
   disabled: boolean;
+  disableCursor: boolean;
   /** Each panel's size, which the panels grow by on the UI thread as a drag moves. */
   sizes: SharedValue<ResizableLayout>;
   /** The px a handle's touch area spans at least, across the group's direction. */
@@ -391,6 +392,8 @@ function useResizableGroup(part: string): ResizableGroupContextValue {
 type ResizablePanelGroupProps = Omit<ViewProps, 'id'> & {
   /** The layout to start from, each panel's size by its id; used only where it names every panel. */
   defaultLayout?: ResizableLayout;
+  /** Keeps the handles from showing a resize cursor on the web. */
+  disableCursor?: boolean;
   /** Blocks resizing by every handle. */
   disabled?: boolean;
   elementRef?: Ref<ViewInstance>;
@@ -424,6 +427,7 @@ function ResizablePanelGroup({
   style,
   children,
   defaultLayout: startLayout,
+  disableCursor = false,
   disabled = false,
   elementRef,
   groupRef,
@@ -477,7 +481,7 @@ function ResizablePanelGroup({
   /** Draws `next`, reporting it as it changes; a drag's moves are settled only once it ends. */
   const apply = (next: readonly number[]): void => {
     const { ids, limits, sizes: previous } = state.current;
-    if (sameSizes(previous, next)) return;
+    if (sameEntries(previous, next)) return;
     ids.forEach((panelId, index) => {
       const entry = panels.current.get(panelId);
       const collapses = limits[index].collapsible && near(next[index], limits[index].collapsedSize);
@@ -495,7 +499,7 @@ function ResizablePanelGroup({
 
   const settle = (meta: ResizableLayoutChangedMeta): void => {
     const { ids, sizes: current, settled, groupSize: size } = state.current;
-    if (sameSizes(current, settled)) return;
+    if (sameEntries(current, settled)) return;
     state.current.settled = current;
     const named = keyed(ids, current);
     setSettled(named);
@@ -507,7 +511,7 @@ function ResizablePanelGroup({
     const ids = entries.map((entry) => entry.id);
     const limits = entries.map((entry) => limitsOf(entry, groupSize));
     const was = state.current;
-    const fresh = !sameIds(was.ids, ids) || (was.groupSize === undefined && groupSize !== undefined);
+    const fresh = !sameEntries(was.ids, ids) || (was.groupSize === undefined && groupSize !== undefined);
     let next: readonly number[];
     if (fresh) {
       const given = callbacks.current.startLayout;
@@ -572,6 +576,7 @@ function ResizablePanelGroup({
   const context: ResizableGroupContextValue = {
     orientation,
     disabled,
+    disableCursor,
     sizes,
     targetSize: coarsePointer() ? resizeTargetMinimumSize.coarse : resizeTargetMinimumSize.fine,
     registerPanel: (entry) => {
@@ -765,10 +770,6 @@ function ResizablePanelGroup({
   );
 }
 
-function sameIds(a: readonly string[], b: readonly string[]): boolean {
-  return a.length === b.length && a.every((entry, index) => entry === b[index]);
-}
-
 type ResizablePanelProps = Omit<ViewProps, 'id'> & {
   /** The size a collapsed panel keeps, 0% by default. */
   collapsedSize?: ResizableSize;
@@ -924,7 +925,7 @@ function ResizableHandle({
   };
 
   const onResponderGrant = (event: GestureResponderEvent): boolean => {
-    drag.current = group.startDrag(order) ? { start: along(event), moved: false } : undefined;
+    drag.current = !inactive && group.startDrag(order) ? { start: along(event), moved: false } : undefined;
     // True keeps a scrolling parent from taking the touch from the handle.
     return true;
   };
@@ -1034,9 +1035,13 @@ function ResizableHandle({
         'relative items-center justify-center bg-border web:touch-none web:outline-none',
         vertical ? 'h-px w-full' : 'w-px',
         focused && 'ring-1 ring-ring',
+        !group.disableCursor &&
+          !group.disabled &&
+          (disabled ? 'web:cursor-not-allowed' : vertical ? 'web:cursor-row-resize' : 'web:cursor-col-resize'),
         className,
       )}
-      style={[style, { flexGrow: 0, flexShrink: 0 }]}
+      // Above the panel after it, which would otherwise take the touches on that side of its widened area.
+      style={[style, { flexGrow: 0, flexShrink: 0, zIndex: 1 }]}
       {...props}
     >
       {web ? (

@@ -42,6 +42,7 @@ Takes every prop of React Native's `View` except `id`, plus:
 | `onLayoutChange`          | `(layout: ResizableLayout) => void`                                       | -                          |
 | `onLayoutChanged`         | `(layout: ResizableLayout, meta: { isUserInteraction: boolean }) => void` | -                          |
 | `disabled`                | `boolean`                                                                 | `false`                    |
+| `disableCursor`           | `boolean`                                                                 | `false`                    |
 | `groupRef`                | `Ref<ResizableGroupImperativeHandle>`                                     | -                          |
 | `elementRef`              | `Ref<View>`                                                               | -                          |
 | `id`                      | `string \| number`                                                        | -                          |
@@ -52,7 +53,8 @@ otherwise each panel starts at its `defaultSize`, and the panels with none share
 `onLayoutChange` runs on each move of a drag, and `onLayoutChanged` once a change is finished, with
 `isUserInteraction` true for a drag released, a key pressed or a screen reader's adjustment. Both run once the
 group has been laid out. `groupRef` holds `getLayout()` and `setLayout(layout)`, which holds the layout to the
-panels' limits and returns what it applied.
+panels' limits and returns what it applied. On the web a handle shows a resize cursor, or a not-allowed one when
+it is disabled, unless `disableCursor` is set.
 
 ### ResizablePanel
 
@@ -120,9 +122,8 @@ moves the handle left. A vertical group is unchanged.
   it takes `fine` px for a mouse and `coarse` for a finger, as upstream does.
 - `rem` and `em` are read as 16px: React Native has no root font size to read them from. A size in px is read
   against the group inside its border.
-- `disableCursor` is left out: a device draws no cursor, and React Native's styles take no resize cursor on the
-  web. `data-panel`, `data-separator` and the other `data-*` attributes are left out too, since a View carries
-  none; `id` goes to `nativeID`.
+- `data-panel`, `data-separator` and the other `data-*` attributes are left out, since a View carries none; `id`
+  goes to `nativeID`.
 - The types are named `ResizableLayout`, `ResizablePanelSize`, `ResizableGroupImperativeHandle` and
   `ResizablePanelImperativeHandle`, where upstream's demos import react-resizable-panels' `Layout` and its
   handle types.
