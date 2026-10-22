@@ -24,6 +24,18 @@ jest.mock('uniwind', () => {
         options: Record<string, { fromClassName: string; styleProperty?: string }>,
       ) =>
       (props: Record<string, unknown>) => {
+        if (require('react-native').Platform.OS === 'web') {
+          // On the web the className is removed and each mapping without a styleProperty takes it as a CSS
+          // class, a `$$css` style, under the caller's own.
+          const { [options.style.fromClassName]: className, ...rest } = props;
+          const generated: Record<string, unknown> = {};
+          for (const [propName, option] of Object.entries(options)) {
+            if (option.styleProperty === undefined) {
+              generated[propName] = [{ $$css: true, tailwind: className }, props[propName]];
+            }
+          }
+          return require('react').createElement(Component, { ...rest, ...generated });
+        }
         const generated: Record<string, unknown> = {};
         for (const [propName, option] of Object.entries(options)) {
           const className = props[option.fromClassName];
@@ -67,5 +79,39 @@ describe('Icon on Uniwind', () => {
     );
 
     expect(screen.getByRole('img', { name: 'Saved' })).toHaveStyle({ width: 24, height: 24, color: 'blue' });
+  });
+
+  describe('on the web', () => {
+    beforeEach(() => {
+      jest.replaceProperty(require('react-native').Platform, 'OS', 'web');
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("hands the svg its classes as a CSS class, under an explicit size and the caller's style", async () => {
+      await render(
+        <Icon
+          as={Check}
+          className="ml-auto"
+          size={24}
+          style={{ opacity: 0.5 }}
+          accessible
+          role="img"
+          aria-label="Saved"
+        />,
+      );
+      const svg = screen.getByRole('img', { name: 'Saved' });
+      const mapped = (svg.props.style as unknown[]).find(
+        (entry) => Array.isArray(entry) && (entry[0] as { $$css?: boolean } | undefined)?.$$css === true,
+      );
+
+      expect(svg.props.className).not.toMatch(/ml-auto|text-foreground/);
+      expect(mapped).toEqual([
+        { $$css: true, tailwind: 'text-foreground ml-auto' },
+        [{ width: 24, height: 24 }, { opacity: 0.5 }],
+      ]);
+    });
   });
 });
