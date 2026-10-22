@@ -1014,10 +1014,23 @@
       ]
     },
     {
+      "name": "color-scheme",
+      "type": "registry:lib",
+      "title": "Color scheme",
+      "description": "useColorScheme, which reads the colour scheme the app draws, light or dark, as the engine holds it.",
+      "files": [
+        {
+          "path": "src/registry/lib/color-scheme.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "chart-theme",
       "type": "registry:lib",
       "title": "Chart theme",
       "description": "useChartTheme, which reads the colour scheme the app draws and the theme colours a chart names, such as var(--chart-1), as the engine holds them.",
+      "registryDependencies": ["@zui/color-scheme"],
       "files": [
         {
           "path": "src/registry/lib/chart-theme.ts",
@@ -1045,7 +1058,7 @@
       "title": "Use highlighted code",
       "description": "useHighlightedCode, which highlights code with Shiki's JavaScript engine into one node per line for a CodeBlockLine, in the light or dark theme the app draws, loading each language the first time it is used.",
       "dependencies": ["shiki"],
-      "registryDependencies": ["@zui/chart-theme"],
+      "registryDependencies": ["@zui/color-scheme"],
       "files": [
         {
           "path": "src/registry/hooks/use-highlighted-code.ts",

@@ -31,7 +31,7 @@ catalogs:
   # The Expo SDK and the packages it pins, which move together.
   expo:
     "expo": "58.0.16"
-    "expo-clipboard": "~58.0.3"
+    "expo-clipboard": "58.0.4"
     "react-native": "0.88.0"
     "@expo/metro-runtime": "58.0.14"
     "expo-font": "58.0.9"

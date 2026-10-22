@@ -2,9 +2,10 @@ import type { ReactNode } from 'react';
 import { Text } from 'react-native';
 import { createHighlighterCore, type GrammarState, type HighlighterCore, type ThemedToken } from 'shiki/core';
 import { createJavaScriptRegexEngine, defaultJavaScriptRegexConstructor } from 'shiki/engine/javascript';
-import { useChartTheme } from './chart-theme';
+import { useColorScheme } from './color-scheme';
 
-// Add the languages you need. Each one loads the first time it is used.
+// Add the languages you need and remove the rest: a device's bundle carries every one listed, and each is
+// parsed the first time it is used.
 const languages = {
   bash: () => import('shiki/langs/shellscript.mjs'),
   css: () => import('shiki/langs/css.mjs'),
@@ -35,6 +36,9 @@ const aliases: Record<string, keyof typeof languages> = {
 
 let matchAllKeepsGroups: boolean | undefined;
 
+/** The engine's own matchAll, while {@link matchAllByExec} stands in for it. */
+let ownMatchAll = String.prototype.matchAll;
+
 /** Each match of `regexp` in `text` from its `lastIndex`, as `exec` finds them. */
 function* execMatches(regexp: RegExp, text: string): Generator<RegExpExecArray, undefined> {
   const unicode = regexp.flags.includes('u') || regexp.flags.includes('v');
@@ -51,6 +55,9 @@ function* execMatches(regexp: RegExp, text: string): Generator<RegExpExecArray, 
  * without its named `groups`, which the regex engine's conversion of a recursive pattern reads.
  */
 function matchAllByExec(this: string, regexp: RegExp): RegExpStringIterator<RegExpExecArray> {
+  // The engine's own throws for a string or a regexp without the global flag, where `exec` would never
+  // move on from the first match.
+  if (!(regexp instanceof RegExp) || !regexp.global) return ownMatchAll.call(this, regexp);
   const copy = new RegExp(regexp.source, regexp.flags);
   copy.lastIndex = regexp.lastIndex;
   // A generator is the iterator matchAll returns, short of the toStringTag its type names.
@@ -65,12 +72,12 @@ function matchAllByExec(this: string, regexp: RegExp): RegExpStringIterator<RegE
 function toRegExp(pattern: string): RegExp {
   matchAllKeepsGroups ??= 'a'.matchAll(/(?<a>a)/g).next().value?.groups !== undefined;
   if (matchAllKeepsGroups) return defaultJavaScriptRegexConstructor(pattern);
-  const nativeMatchAll = String.prototype.matchAll;
+  ownMatchAll = String.prototype.matchAll;
   String.prototype.matchAll = matchAllByExec;
   try {
     return defaultJavaScriptRegexConstructor(pattern);
   } finally {
-    String.prototype.matchAll = nativeMatchAll;
+    String.prototype.matchAll = ownMatchAll;
   }
 }
 
@@ -102,7 +109,7 @@ function getLanguage(language: string): keyof typeof languages | 'ansi' | null {
 
 /** One line's tokens, each a Text in its colour for the scheme the app draws, inside the line's Text. */
 function HighlightedTokens({ tokens }: { tokens: readonly ThemedToken[] }): ReactNode {
-  const { colorScheme } = useChartTheme();
+  const colorScheme = useColorScheme();
 
   return tokens.map((token, index) => (
     <Text key={index} style={{ color: token.htmlStyle?.[colorScheme === 'dark' ? '--shiki-dark' : '--shiki-light'] }}>

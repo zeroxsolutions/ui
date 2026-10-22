@@ -1086,11 +1086,14 @@ describe('translateClasses for a code block', () => {
     },
   );
 
-  it('gives each button of floating actions the background, as the state part=button', () => {
-    expect(slot('vega', 'cn-code-block-actions', 'uniwind', 'view', 'parent=code-block+part=button').classes).toEqual([
-      'bg-background',
-    ]);
-  });
+  it.each(STYLE_ENGINES)(
+    'gives each button of floating actions the background and its ring as a hairline border, for %s in %s',
+    (engine, style) => {
+      expect(
+        [...slot(style, 'cn-code-block-actions', engine, 'view', 'parent=code-block+part=button').classes].sort(),
+      ).toEqual(['bg-background', 'border', 'border-foreground/10']);
+    },
+  );
 
   it('spaces a numbered line from its number, as the state numbered', () => {
     expect(slot('vega', 'cn-code-block-line', 'uniwind', 'view', 'numbered').classes).toEqual(['gap-x-3']);

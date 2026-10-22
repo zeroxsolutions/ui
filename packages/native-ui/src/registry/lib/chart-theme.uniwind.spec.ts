@@ -3,6 +3,9 @@ import { useChartTheme } from './chart-theme.uniwind';
 
 const mockUniwind: { theme: string; variables: Record<string, string | undefined> } = { theme: 'light', variables: {} };
 
+// The specs map ./color-scheme to NativeWind's file; this file's engine reads Uniwind's.
+jest.mock('./color-scheme', () => jest.requireActual<object>('./color-scheme.uniwind'));
+
 // The jest run has no Uniwind engine; this stands in for the theme it would hold.
 jest.mock('uniwind', () => ({
   useUniwind: () => ({ theme: mockUniwind.theme, hasAdaptiveThemes: true }),

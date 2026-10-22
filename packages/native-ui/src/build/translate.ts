@@ -213,9 +213,16 @@ const SPACING_READ = /^([a-z]+(?:-[a-z]+)*)-\((--[\w-]+)\)$/;
 /**
  * A style draws the hairline edge of a card or popup as `ring-1 ring-<colour>`, a box-shadow a device
  * has no counterpart of, so an unmodified one becomes the border it looks like. Only a slot with no
- * border of its own is given one, and a ring behind a state, `ring-0` and any other width stay dropped.
+ * border of its own is given one, and a ring behind a state other than {@link RING_AS_BORDER_STATE}, `ring-0` and any
+ * other width stay dropped.
  */
 const RING_WIDTH_UTILITY = 'ring-1';
+
+/**
+ * The child state whose ring is drawn as a border too: the hairline a code block's floating actions put
+ * around each of their buttons, which a Button draws with no ring of its own to lose.
+ */
+const RING_AS_BORDER_STATE = 'part=button';
 const RING_COLOUR = /^ring-(?!\d|inset|offset)([\w-]+(?:\/[\w.]+)?)$/;
 const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
 
@@ -798,7 +805,9 @@ export function translateClasses(
     const utility = resolveAvailableHeightClamp(
       resolveClampedRadius(
         resolveOwnSizeTranslate(
-          ringBorder && unmodified ? ringAsBorder(radiusLessLength) : radiusLessLength,
+          (ringBorder && unmodified) || cls.states.includes(RING_AS_BORDER_STATE)
+            ? ringAsBorder(radiusLessLength)
+            : radiusLessLength,
           cls.states,
           read,
         ),

@@ -11,13 +11,14 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'html', 'tsx', 'jsx'],
   moduleNameMapper: {
     '[.]svg$': '@nx/expo/plugins/jest/svg-mock',
-    // Icon, Input, Skeleton and the chart's theme have one file per engine, and the registry ships one of them as icon.tsx, input.tsx, skeleton.tsx and lib/chart-theme.ts; the specs run NativeWind's.
+    // Icon, Input, Skeleton, the chart's theme and the colour scheme have one file per engine, and the registry ships one of them as icon.tsx, input.tsx, skeleton.tsx, lib/chart-theme.ts and lib/color-scheme.ts; the specs run NativeWind's.
     // A composed component under components/<category>/ imports Icon as ../../ui/icon, and a lib file the chart's
-    // theme as ./chart-theme.
+    // theme and the colour scheme as ./chart-theme and ./color-scheme.
     '^(?:[.]|[.][.]/[.][.]/ui)/icon$': '<rootDir>/src/registry/ui/icon.nativewind.tsx',
     '^[.]/input$': '<rootDir>/src/registry/ui/input.nativewind.tsx',
     '^[.]/skeleton$': '<rootDir>/src/registry/ui/skeleton.nativewind.tsx',
     '^(?:[.]|[.][.]/lib)/chart-theme$': '<rootDir>/src/registry/lib/chart-theme.nativewind.ts',
+    '^(?:[.]|[.][.]/lib)/color-scheme$': '<rootDir>/src/registry/lib/color-scheme.nativewind.ts',
     // The demos import the items as an app does; build-registry writes NativeWind's Vega sources there.
     '^@/(.*)$': '<rootDir>/dist/src/nativewind-vega/$1',
     // The preview imports each style's demos through `@styles/<style>/`, which each preview app points at

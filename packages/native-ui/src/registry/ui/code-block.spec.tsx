@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import * as Clipboard from 'expo-clipboard';
+import type { ReactNode } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 import {
   CodeBlock,
@@ -11,6 +12,7 @@ import {
   CodeBlockLine,
   CodeBlockTitle,
 } from './code-block';
+import { emittedClasses } from '../../build/slot-tokens.testing';
 
 jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn() }));
 
@@ -67,6 +69,60 @@ describe('CodeBlock', () => {
     expect(screen.getByRole('button', { name: 'Copy' })).toBeOnTheScreen();
     expect(screen.getByText(output)).toBeOnTheScreen();
     expect(screen.getByTestId('footer')).toBeOnTheScreen();
+  });
+});
+
+/** The box CodeBlockContent pads its lines with, around the line drawing `text`. */
+function contentBoxAround(text: string) {
+  const box = screen.getByText(text).parent?.parent;
+  if (!box) throw new Error(`No content box around ${text}`);
+  return box;
+}
+
+function FileHeader({ children }: { children: ReactNode }) {
+  return (
+    <CodeBlockHeader>
+      <CodeBlockTitle>{children}</CodeBlockTitle>
+    </CodeBlockHeader>
+  );
+}
+
+describe('CodeBlock rows around the content', () => {
+  it('draws the content closer under a header', async () => {
+    await render(
+      <CodeBlock>
+        <CodeBlockHeader>
+          <CodeBlockTitle>route.ts</CodeBlockTitle>
+        </CodeBlockHeader>
+        <CodeBlockContent>code</CodeBlockContent>
+      </CodeBlock>,
+    );
+
+    expect(emittedClasses(contentBoxAround('code').props.className)).toContain('pt-2');
+  });
+
+  it('draws it closer under a header an app wraps in a component of its own', async () => {
+    await render(
+      <CodeBlock>
+        <FileHeader>route.ts</FileHeader>
+        <CodeBlockContent>code</CodeBlockContent>
+      </CodeBlock>,
+    );
+
+    expect(emittedClasses(contentBoxAround('code').props.className)).toContain('pt-2');
+  });
+
+  it('keeps the full padding with no header', async () => {
+    await render(
+      <CodeBlock>
+        <CodeBlockContent>code</CodeBlockContent>
+      </CodeBlock>,
+    );
+
+    const classes = emittedClasses(contentBoxAround('code').props.className);
+
+    expect(classes).toContain('py-4');
+    expect(classes).not.toContain('pt-2');
   });
 });
 
@@ -141,6 +197,66 @@ describe('CodeBlockContent', () => {
     );
 
     expect(screen.queryByText('1', { includeHiddenElements: true })).toBeNull();
+  });
+});
+
+type HostElement = ReturnType<typeof screen.getByTestId>;
+
+/** The horizontal scroller inside `content`, the CodeBlockContent's own scroller. */
+function sidewaysScrollerIn(content: HostElement): HostElement {
+  const queue: HostElement[] = [...(content.children as HostElement[])];
+  for (let at = queue.shift(); at; at = queue.shift()) {
+    if (typeof at === 'object' && at.props.horizontal === true) return at;
+    if (typeof at === 'object') queue.push(...(at.children as HostElement[]));
+  }
+  throw new Error('No sideways scroller');
+}
+
+/** Lays `scroller` out at `viewport` long along `axis` around content `content` long. */
+async function layOut(scroller: HostElement, axis: 'width' | 'height', viewport: number, content: number) {
+  const size = (length: number) => ({ width: 0, height: 0, [axis]: length });
+  await fireEvent(scroller, 'layout', { nativeEvent: { layout: { x: 0, y: 0, ...size(viewport) } } });
+  const { width, height } = size(content);
+  await fireEvent(scroller, 'contentSizeChange', width, height);
+}
+
+describe('CodeBlockContent scrolling', () => {
+  async function renderContent(props: { scrollEnabled?: boolean } = {}) {
+    await render(
+      <CodeBlock>
+        <CodeBlockContent testID="content" {...props}>
+          {output}
+        </CodeBlockContent>
+      </CodeBlock>,
+    );
+    return screen.getByTestId('content');
+  }
+
+  it('leaves a drag to the page while the code fits, and neither scroller bounces', async () => {
+    const content = await renderContent();
+    await layOut(content, 'height', 200, 120);
+    await layOut(sidewaysScrollerIn(content), 'width', 300, 280);
+
+    expect(content).toHaveProp('scrollEnabled', false);
+    expect(content).toHaveProp('bounces', false);
+    expect(sidewaysScrollerIn(content)).toHaveProp('scrollEnabled', false);
+    expect(sidewaysScrollerIn(content)).toHaveProp('bounces', false);
+  });
+
+  it('scrolls a long line sideways, and a capped block down, once the code runs past them', async () => {
+    const content = await renderContent();
+    await layOut(content, 'height', 200, 480);
+    await layOut(sidewaysScrollerIn(content), 'width', 300, 720);
+
+    expect(content).toHaveProp('scrollEnabled', true);
+    expect(sidewaysScrollerIn(content)).toHaveProp('scrollEnabled', true);
+  });
+
+  it("takes the caller's scrollEnabled over its own", async () => {
+    const content = await renderContent({ scrollEnabled: false });
+    await layOut(content, 'height', 200, 480);
+
+    expect(content).toHaveProp('scrollEnabled', false);
   });
 });
 

@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
-import { useCSSVariable, useUniwind } from 'uniwind';
+import { useCSSVariable } from 'uniwind';
+import { useColorScheme } from './color-scheme';
 
 /** The scheme the app draws, and each theme colour a chart can name, such as `var(--chart-1)`. */
 interface ChartTheme {
@@ -85,10 +86,10 @@ const usePlatformColors = Platform.OS === 'web' ? (): undefined => undefined : u
 
 /** Reads the colour scheme and the theme colours a chart draws with. */
 function useChartTheme(): ChartTheme {
-  const { theme } = useUniwind();
+  const colorScheme = useColorScheme();
   const device = usePlatformColors();
   return {
-    colorScheme: theme === 'dark' ? 'dark' : 'light',
+    colorScheme,
     themeColor: (name) => {
       const variable = colorVariable(name);
       if (device === undefined) return `var(${variable})`;

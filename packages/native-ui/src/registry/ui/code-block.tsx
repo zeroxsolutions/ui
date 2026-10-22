@@ -6,6 +6,7 @@ import {
   cloneElement,
   createContext,
   isValidElement,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -36,6 +37,9 @@ const MONOSPACE: TextStyle = {
 
 type CodeBlockSize = 'default' | 'sm';
 
+/** A row a CodeBlock may hold around its content. */
+type CodeBlockRow = 'header' | 'footer';
+
 /** What a CodeBlock tells the parts inside it: its tone and size, and which rows it holds around the content. */
 interface CodeBlockState {
   destructive: boolean;
@@ -44,6 +48,8 @@ interface CodeBlockState {
   hasFooter: boolean;
   /** The text classes of the code, in the block's tone and size. */
   codeText: string;
+  /** Tells the block a row is drawn inside it, however deep; returns the call that says it has gone. */
+  holdRow: (row: CodeBlockRow) => () => void;
 }
 
 const CodeBlockContext = createContext<CodeBlockState>({
@@ -52,7 +58,14 @@ const CodeBlockContext = createContext<CodeBlockState>({
   hasHeader: false,
   hasFooter: false,
   codeText: '',
+  holdRow: () => () => {},
 });
+
+/** Tells the CodeBlock around it that `row` is drawn, for as long as the calling part is. */
+function useHeldRow(row: CodeBlockRow): void {
+  const { holdRow } = useContext(CodeBlockContext);
+  useEffect(() => holdRow(row), [holdRow, row]);
+}
 
 /** Whether a CodeBlockActions sits in a CodeBlockHeader, rather than floating over the content. */
 const CodeBlockHeaderContext = createContext(false);
@@ -93,11 +106,19 @@ type CodeBlockProps = ComponentProps<typeof View> &
 function CodeBlock({ className, variant, size = 'default', children, ...props }: CodeBlockProps): ReactNode {
   const parts = Children.toArray(children);
   const destructive = variant === 'destructive';
+  // A row straight inside is known on the first draw; one inside an app's own component tells the block
+  // once it is drawn.
+  const [held, setHeld] = useState<Readonly<Record<CodeBlockRow, number>>>({ header: 0, footer: 0 });
+  const holdRow = useCallback((row: CodeBlockRow) => {
+    setHeld((current) => ({ ...current, [row]: current[row] + 1 }));
+    return () => setHeld((current) => ({ ...current, [row]: current[row] - 1 }));
+  }, []);
   const state: CodeBlockState = {
     destructive,
     size,
-    hasHeader: parts.some((part) => isValidElement(part) && part.type === CodeBlockHeader),
-    hasFooter: parts.some((part) => isValidElement(part) && part.type === CodeBlockFooter),
+    holdRow,
+    hasHeader: held.header > 0 || parts.some((part) => isValidElement(part) && part.type === CodeBlockHeader),
+    hasFooter: held.footer > 0 || parts.some((part) => isValidElement(part) && part.type === CodeBlockFooter),
     codeText: cn(
       'cn-code-block/text',
       size === 'sm' && 'cn-code-block/text@size=sm',
@@ -117,6 +138,7 @@ function CodeBlock({ className, variant, size = 'default', children, ...props }:
 /** A row above the content for a CodeBlockTitle and CodeBlockActions, in the block's muted text. */
 function CodeBlockHeader({ className, ...props }: ComponentProps<typeof View>): ReactNode {
   const { destructive, size } = useContext(CodeBlockContext);
+  useHeldRow('header');
 
   return (
     <CodeBlockHeaderContext.Provider value>
@@ -295,9 +317,14 @@ function CodeBlockContent({
   lineNumbers = false,
   startLine = 1,
   tabIndex = 0,
+  scrollEnabled,
+  onLayout,
+  onContentSizeChange,
   ...props
 }: CodeBlockContentProps): ReactNode {
   const { size, hasHeader, hasFooter, codeText } = useContext(CodeBlockContext);
+  const tall = useOverflow();
+  const wide = useOverflow();
   const sm = size === 'sm';
   let lines = children;
   if (typeof children === 'string') {
@@ -332,12 +359,25 @@ function CodeBlockContent({
   );
   const web = Platform.OS === 'web';
 
+  // Each scroller takes a drag only while its content overflows it, and does not bounce, so a drag on a
+  // block whose code fits moves the page around it.
   return (
     <ScrollView
       nestedScrollEnabled
+      alwaysBounceVertical={false}
+      bounces={false}
+      scrollEnabled={scrollEnabled ?? tall.overflows}
       className={cn('min-h-0 min-w-0', className)}
       style={[{ direction: 'ltr' }, style]}
       tabIndex={web && wrap ? tabIndex : undefined}
+      onLayout={(event) => {
+        tall.setViewport(event.nativeEvent.layout.height);
+        onLayout?.(event);
+      }}
+      onContentSizeChange={(width, height) => {
+        tall.setContent(height);
+        onContentSizeChange?.(width, height);
+      }}
       {...props}
     >
       {wrap ? (
@@ -346,14 +386,31 @@ function CodeBlockContent({
         <ScrollView
           horizontal
           nestedScrollEnabled
+          alwaysBounceHorizontal={false}
+          bounces={false}
+          scrollEnabled={wide.overflows}
           contentContainerStyle={{ flexGrow: 1 }}
           tabIndex={web ? tabIndex : undefined}
+          onLayout={(event) => wide.setViewport(event.nativeEvent.layout.width)}
+          onContentSizeChange={(width) => wide.setContent(width)}
         >
           {body}
         </ScrollView>
       )}
     </ScrollView>
   );
+}
+
+/** Whether a scroller's content runs past it along one axis, from the two lengths its layout reports. */
+function useOverflow(): {
+  overflows: boolean;
+  setViewport: (length: number) => void;
+  setContent: (length: number) => void;
+} {
+  const [viewport, setViewport] = useState(0);
+  const [content, setContent] = useState(0);
+  // Below a pixel is rounding between the two measures, not code out of sight.
+  return { overflows: content - viewport >= 1, setViewport, setContent };
 }
 
 /** Hands each line whether it wraps, its text classes, and its number from `startLine` when `lineNumbers` is set. */
@@ -466,6 +523,7 @@ function CodeBlockLine({ className, variant = 'default', children, ...props }: C
 /** A row below the content, such as for a Show more Button. */
 function CodeBlockFooter({ className, ...props }: ComponentProps<typeof View>): ReactNode {
   const { size } = useContext(CodeBlockContext);
+  useHeldRow('footer');
 
   return (
     <TextClassContext.Provider value="cn-code-block-footer/text">

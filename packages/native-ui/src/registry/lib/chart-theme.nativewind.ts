@@ -1,5 +1,6 @@
-import { useColorScheme, useUnstableNativeVariable } from 'nativewind';
+import { useUnstableNativeVariable } from 'nativewind';
 import { Platform } from 'react-native';
+import { useColorScheme } from './color-scheme';
 
 /** The scheme the app draws, and each theme colour a chart can name, such as `var(--chart-1)`. */
 interface ChartTheme {
@@ -133,10 +134,10 @@ function webColor(name: string): string {
 
 /** Reads the colour scheme and the theme colours a chart draws with. */
 function useChartTheme(): ChartTheme {
-  const { colorScheme } = useColorScheme();
+  const colorScheme = useColorScheme();
   const device = usePlatformColors();
   return {
-    colorScheme: colorScheme === 'dark' ? 'dark' : 'light',
+    colorScheme,
     themeColor: (name) => {
       if (device === undefined) return webColor(name);
       const token = name.replace(/^--/, '');
