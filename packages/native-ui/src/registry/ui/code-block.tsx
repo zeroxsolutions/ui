@@ -340,6 +340,8 @@ function CodeBlockContent({
   scrollEnabled,
   onLayout,
   onContentSizeChange,
+  onFocus,
+  onBlur,
   ...props
 }: CodeBlockContentProps): ReactNode {
   const { size, hasHeader, hasFooter, codeText, reportFocus } = useContext(CodeBlockContext);
@@ -384,7 +386,16 @@ function CodeBlockContent({
     </View>
   );
   const web = Platform.OS === 'web';
-  const focusProps = { onFocus: focusChanged, onBlur: blurred };
+  const focusProps = {
+    onFocus: (event: Parameters<NonNullable<typeof onFocus>>[0]) => {
+      onFocus?.(event);
+      focusChanged(event);
+    },
+    onBlur: (event: Parameters<NonNullable<typeof onBlur>>[0]) => {
+      onBlur?.(event);
+      blurred();
+    },
+  };
 
   // Each scroller takes a drag only while its content overflows it, and does not bounce, so a drag on a
   // block whose code fits moves the page around it.
@@ -397,7 +408,7 @@ function CodeBlockContent({
       className={cn('min-h-0 min-w-0', className)}
       style={[{ direction: 'ltr' }, style]}
       tabIndex={web && wrap ? tabIndex : undefined}
-      {...(wrap ? focusProps : {})}
+      {...(wrap ? focusProps : { onFocus, onBlur })}
       onLayout={(event) => {
         tall.setViewport(event.nativeEvent.layout.height);
         onLayout?.(event);
@@ -419,7 +430,8 @@ function CodeBlockContent({
           scrollEnabled={wide.overflows}
           contentContainerStyle={{ flexGrow: 1 }}
           tabIndex={web ? tabIndex : undefined}
-          {...focusProps}
+          onFocus={focusChanged}
+          onBlur={blurred}
           onLayout={(event) => wide.setViewport(event.nativeEvent.layout.width)}
           onContentSizeChange={(width) => wide.setContent(width)}
         >

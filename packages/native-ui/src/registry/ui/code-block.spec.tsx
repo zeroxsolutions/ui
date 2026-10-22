@@ -299,6 +299,27 @@ describe('CodeBlock focus on the web', () => {
     await fireEvent(focusable, 'blur');
     expect(blockClasses()).not.toContain('border-ring');
   });
+
+  it("rings wrapped content and still calls the caller's focus handlers", async () => {
+    const onFocus = jest.fn();
+    const onBlur = jest.fn();
+    await render(
+      <CodeBlock testID="block">
+        <CodeBlockContent testID="content" wrap onFocus={onFocus} onBlur={onBlur}>
+          {output}
+        </CodeBlockContent>
+      </CodeBlock>,
+    );
+    const content = screen.getByTestId('content');
+
+    await fireEvent(content, 'focus', focusFrom(true));
+    expect(blockClasses()).toContain('border-ring');
+    expect(onFocus).toHaveBeenCalledTimes(1);
+
+    await fireEvent(content, 'blur');
+    expect(blockClasses()).not.toContain('border-ring');
+    expect(onBlur).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('CodeBlockLine', () => {
