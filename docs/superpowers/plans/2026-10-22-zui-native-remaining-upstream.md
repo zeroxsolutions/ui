@@ -10,7 +10,7 @@ tokens from the style CSS, translated per engine by `src/build`; overlays throug
 motion through `src/registry/lib/motion.ts`; touch through React Native's responder and Reanimated, as the
 slider and carousel do.
 
-**Tech Stack:** plan 10's, plus `d3-scale`, `d3-shape`, `prism-react-renderer`, `expo-clipboard`.
+**Tech Stack:** plan 10's, plus `d3-scale`, `d3-shape`, `shiki`, `expo-clipboard`.
 
 **Spec:** `docs/superpowers/specs/2026-10-22-zui-native-remaining-upstream-design.md` (research:
 `.superpowers/research-remaining-upstream.md`).
@@ -80,7 +80,7 @@ Skills: adopting-a-library, declaring-a-dependency, writing-a-component; dataviz
 
 Skills: adopting-a-library, declaring-a-dependency.
 
-- [ ] Upstream's parts and props; `prism-react-renderer` tokens into nested `Text` with the style's colours;
+- [ ] Upstream's parts and props; shiki tokens (JavaScript regex engine) into nested `Text` with the style's colours;
       horizontal scroll for long lines; copy through `expo-clipboard` with an announced result; commit.
 
 ### Task 6: attachment, bubble, message, marker

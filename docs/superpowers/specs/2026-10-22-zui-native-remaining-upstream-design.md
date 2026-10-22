@@ -31,7 +31,9 @@ between web and native finds the same names. Research behind the calls below:
 4. chart keeps upstream's `ChartContainer`, `ChartConfig`, `ChartTooltip(Content)` and `ChartLegend(Content)`,
    and draws the chart types upstream's chart demos use (bar, line, area, pie) with `react-native-svg` plus
    `d3-scale` and `d3-shape`, in Recharts' part names.
-5. code-block highlights with `prism-react-renderer` into nested `Text`, and copies with `expo-clipboard`.
+5. code-block highlights with upstream's shiki on its JavaScript regex engine (no WASM) into nested `Text`, and
+   copies with `expo-clipboard`. Hermes' `matchAll` drops named groups, which the engine's pattern conversion
+   reads, so the item converts with an `exec`-based `matchAll`.
 6. The AI items follow upstream's parts and props. message-scroller and questionnaire re-implement
    `@shadcn/react`'s state and hooks as React Native context, since that package draws DOM elements.
 
@@ -52,7 +54,7 @@ between web and native finds the same names. Research behind the calls below:
 
 Plan 10's Global Constraints hold unchanged (four valid registries, upstream's markup, props and slots on
 `@rn-primitives/*`, portal for overlays, Reanimated with reduced motion, tests first, no local broad gate, plain
-ASCII). New dependencies (`d3-scale`, `d3-shape`, `prism-react-renderer`, `expo-clipboard`) are declared by the
+ASCII). New dependencies (`d3-scale`, `d3-shape`, `shiki`, `expo-clipboard`) are declared by the
 items that import them, through the catalog where two projects declare them.
 
 ## Calls made without asking (check these)
@@ -60,5 +62,3 @@ items that import them, through the catalog where two projects declare them.
 - The nearest-phone behaviour in Goal 3 for direction, native-select, navigation-menu, sidebar and resizable.
 - chart on `react-native-svg` + d3 rather than Skia/`victory-native`: Expo Go 58 bundles Skia 2.14.0 and
   `victory-native` 43 needs 2.15.1 or newer; Skia on the web needs CanvasKit WASM.
-- code-block on `prism-react-renderer` rather than upstream's shiki: shiki's regex engine on Hermes is untested
-  on a device.
