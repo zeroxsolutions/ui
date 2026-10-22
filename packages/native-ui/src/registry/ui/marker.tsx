@@ -7,6 +7,7 @@ import {
   isValidElement,
   useContext,
   useEffect,
+  useRef,
   type ComponentProps,
   type ReactElement,
   type ReactNode,
@@ -114,8 +115,12 @@ function MarkerContent({ className, children, ...props }: ComponentProps<typeof 
   const { variant, status } = useContext(MarkerContext);
   const announcement = status ? textOf(children) : '';
 
-  // A live region is Android's alone; iOS announces only what it is told to.
+  // A live region is Android's alone, and reads a change, not the text it mounts with; iOS announces only what
+  // it is told to, so it is told the same changes.
+  const announced = useRef(announcement);
   useEffect(() => {
+    if (announced.current === announcement) return;
+    announced.current = announcement;
     if (announcement && Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(announcement);
   }, [announcement]);
 

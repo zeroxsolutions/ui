@@ -98,7 +98,7 @@ describe('Marker', () => {
     expect(marker.props['aria-live']).toBe('polite');
   });
 
-  it('announces the text of a status marker on iOS as it appears and changes, nested text included', async () => {
+  it('announces the text of a status marker on iOS as it changes, not as it appears, nested text included', async () => {
     const os = Platform.OS;
     Platform.OS = 'ios';
     // React Native's jest setup makes announceForAccessibility one shared mock, so its calls carry over between tests.
@@ -122,7 +122,7 @@ describe('Marker', () => {
         </Marker>,
       );
 
-      expect(announce.mock.calls).toEqual([['Thinking...'], ['Oliver is typing...']]);
+      expect(announce.mock.calls).toEqual([['Oliver is typing...']]);
     } finally {
       Platform.OS = os;
     }
