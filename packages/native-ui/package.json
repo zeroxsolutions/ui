@@ -55,6 +55,7 @@
     "clsx": "catalog:",
     "date-fns": "catalog:",
     "lucide-react-native": "catalog:",
+    "react-hook-form": "catalog:",
     "react-native-svg": "catalog:expo",
     "tailwind-merge": "catalog:"
   },
@@ -81,7 +82,6 @@
     "nativewind": "4.2.7",
     "react": "catalog:",
     "react-native": "catalog:expo",
-    "react-hook-form": "catalog:",
     "react-native-css-interop": "catalog:",
     "react-native-reanimated": "catalog:expo",
     "react-native-safe-area-context": "catalog:expo",

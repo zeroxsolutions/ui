@@ -17,7 +17,7 @@ catalog:
   "next": "16.3.7"
   "react": "19.3.1"
   "react-dom": "19.3.1"
-  "react-hook-form": "^7.80.0"
+  "react-hook-form": "7.81.0"
   "react-native-css-interop": "0.2.7"
   "react-test-renderer": "19.3.1"
   "shadcn": "^4.21.0"
