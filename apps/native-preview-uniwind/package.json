@@ -33,6 +33,7 @@
     "@zeroxsolutions/native-ui": "workspace:*",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
+    "date-fns": "catalog:",
     "expo": "catalog:expo",
     "expo-font": "catalog:expo",
     "expo-splash-screen": "catalog:expo",

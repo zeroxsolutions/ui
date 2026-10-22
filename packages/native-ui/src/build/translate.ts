@@ -238,6 +238,26 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ],
   ['cn-input-otp-caret-line', new Set(['animate-caret-blink'])],
   ['cn-dialog-content', new Set(['max-w-[calc(100%-2rem)]'])],
+  ['cn-calendar', new Set(['[--cell-radius:var(--radius-md)]'])],
+]);
+
+/**
+ * Classes upstream's component writes inline that read a variable the slot defines, which the build adds
+ * to the slot behind the part state of the child that applies them, so the child takes the style's value.
+ * A calendar's day cells and navigation buttons are `--cell-size` square, its weekday columns that wide,
+ * and its caption that high with that room either side for the buttons. Upstream's `--cell-radius` is
+ * `--radius-md` in every style, which the component writes as `rounded-md`, so its definition is dropped.
+ */
+const SLOT_COMPONENT_CLASSES: ReadonlyMap<string, readonly string[]> = new Map([
+  [
+    'cn-calendar',
+    [
+      '*:data-[slot=cell]:size-(--cell-size)',
+      '*:data-[slot=column]:w-(--cell-size)',
+      '*:data-[slot=caption]:h-(--cell-size)',
+      '*:data-[slot=caption]:px-(--cell-size)',
+    ],
+  ],
 ]);
 
 /**
@@ -694,7 +714,8 @@ export function translateClasses(
   const spacingVariables: SpacingVariables = slot.spacingVariables ?? new Map();
   const importantRemoved = slot.name !== undefined && SLOT_IMPORTANT_REMOVED.has(slot.name);
   const afterPart = slot.name !== undefined && SLOT_AFTER_PARTS.has(slot.name);
-  const read = classes
+  const componentClasses = (slot.name === undefined ? undefined : SLOT_COMPONENT_CLASSES.get(slot.name)) ?? [];
+  const read = [...classes, ...componentClasses]
     .filter((cls) => !droppedByName.has(cls))
     .map((cls) => (importantRemoved ? cls.replace(IMPORTANT_SUFFIX, '') : cls))
     .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers, afterPart), spacingVariables));

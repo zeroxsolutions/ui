@@ -230,6 +230,20 @@
       ]
     },
     {
+      "name": "calendar",
+      "type": "registry:ui",
+      "title": "Calendar",
+      "description": "A month's grid of days on which a day, several days or a range is selected, with today marked and buttons to the previous and next month.",
+      "dependencies": ["date-fns", "lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/select", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/calendar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "input",
       "type": "registry:ui",
       "title": "Input",

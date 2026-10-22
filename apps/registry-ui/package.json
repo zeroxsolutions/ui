@@ -39,7 +39,7 @@
     "class-variance-authority": "catalog:",
     "cmdk": "^1.1.1",
     "cn": "^0.4.0",
-    "date-fns": "^4.4.0",
+    "date-fns": "catalog:",
     "embla-carousel-react": "^8.6.0",
     "fumadocs-core": "16.15.17",
     "fumadocs-mdx": "15.4.5",

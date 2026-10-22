@@ -26,6 +26,7 @@
     "select",
     "combobox",
     "slider",
+    "calendar",
     "switch",
     "---Display---",
     "alert",

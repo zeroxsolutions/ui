@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseSlotMap } from './slot-map';
-import { parseSpacingVariables, translateClasses, type Engine } from './translate';
+import { parseSpacingVariables, translateClasses, type Engine, type Translation } from './translate';
 
 const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-vega.css');
 const NOVA_SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-nova.css');
@@ -1101,6 +1101,36 @@ describe('translateClasses for a menu', () => {
     (engine, style) => {
       expect(menu(style, engine, 'cn-combobox-list', 'view').classes).toEqual(['max-h-[252px]', 'p-1']);
       expect(menu(style, engine, 'cn-combobox-list', 'view', 'empty').classes).toEqual(['p-0']);
+    },
+  );
+});
+
+describe('translateClasses for a calendar', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const calendar = (style: keyof typeof styles, engine: Engine, state: string): Translation =>
+    translateClasses(styles[style].get('cn-calendar') ?? [], engine, 'view', state, {
+      name: 'cn-calendar',
+      spacingVariables: parseSpacingVariables(styles[style]),
+    });
+
+  it.each(STYLE_ENGINES)('pads the calendar, with no cell variables left, for %s in %s', (engine, style) => {
+    expect(calendar(style, engine, '')).toEqual({ classes: [style === 'vega' ? 'p-3' : 'p-2'], unknown: [] });
+  });
+
+  it.each([
+    ['vega', 'size-8', 'w-8', 'h-8'],
+    ['nova', 'size-7', 'w-7', 'h-7'],
+  ] as const)(
+    "sizes %s's day cells, weekday columns and caption from the style's cell size",
+    (style, cell, column, caption) => {
+      for (const engine of ['nativewind', 'uniwind'] as const) {
+        expect(calendar(style, engine, 'part=cell').classes).toEqual([cell]);
+        expect(calendar(style, engine, 'part=column').classes).toEqual([column]);
+        expect(calendar(style, engine, 'part=caption').classes).toEqual([caption, caption.replace('h-', 'px-')]);
+      }
     },
   );
 });

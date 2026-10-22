@@ -53,6 +53,7 @@
     "@rn-primitives/tooltip": "catalog:rn-primitives",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
+    "date-fns": "catalog:",
     "lucide-react-native": "catalog:",
     "react-native-svg": "catalog:expo",
     "tailwind-merge": "catalog:"
