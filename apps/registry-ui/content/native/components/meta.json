@@ -25,6 +25,7 @@
     "radio-group",
     "select",
     "combobox",
+    "slider",
     "switch",
     "---Display---",
     "alert",
