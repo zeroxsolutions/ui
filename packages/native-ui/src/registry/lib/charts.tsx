@@ -1,8 +1,9 @@
 /**
  * The chart parts upstream's chart demos take from Recharts, in Recharts' names and with the props those
- * demos use, drawn with react-native-svg so they run on a device and on the web: the responsive container,
- * the bar, line and area charts and their series, the pie chart, its slices, its label and the text it draws, the axes, the grid, the tooltip and the legend. A part reads its colours,
- * such as `var(--color-desktop)`, through the palette the chart's container provides.
+ * demos use, drawn with react-native-svg so they run on a device and in the browser. They are the responsive
+ * container; the bar, line and area charts and their series; the pie chart, its slices, its label and the
+ * text it draws; the axes, the grid, the tooltip and the legend. A part reads its colours, such as
+ * `var(--color-desktop)`, through the palette the chart's container provides.
  */
 import { scaleBand, scaleLinear, scalePoint } from 'd3-scale';
 import {
@@ -30,6 +31,7 @@ import {
   useId,
   useMemo,
   useState,
+  type ComponentProps,
   type ReactElement,
   type ReactNode,
 } from 'react';
@@ -718,7 +720,7 @@ function ChartSurface({
       }}
       onKeyDown={onKeyDown}
       onBlur={() => onActive(undefined)}
-      className="web:outline-none absolute inset-0"
+      className="absolute inset-0"
     />
   );
 }
@@ -1161,44 +1163,28 @@ function Label(_props: LabelProps): ReactNode {
   return null;
 }
 
-type TextProps = {
-  x?: number;
-  y?: number;
-  textAnchor?: 'start' | 'middle' | 'end';
+type TextProps = Omit<ComponentProps<typeof SvgText>, 'fill'> & {
   /** Which part of the text sits on `y`. */
   verticalAnchor?: 'start' | 'middle' | 'end';
   /** The text's colour, such as `var(--muted-foreground)`; the theme's foreground when left out. */
   fill?: string;
-  fontSize?: number;
-  fontWeight?: 'normal' | 'bold' | number;
-  children?: ReactNode;
 };
 
 const VERTICAL_SHIFT = { start: 0.71, middle: 0.355, end: 0 } as const;
 
-/** Text inside a chart's svg, in a colour from the chart's palette. */
-function Text({
-  x,
-  y,
-  textAnchor = 'start',
-  verticalAnchor = 'end',
-  fill,
-  fontSize = 14,
-  fontWeight,
-  children,
-}: TextProps): ReactNode {
+/**
+ * Text inside a chart's svg, in a colour from the chart's palette, taking react-native-svg's text props such
+ * as `textAnchor` and `fontSize`.
+ */
+function Text({ y, verticalAnchor = 'end', fill, fontSize = 14, ...props }: TextProps): ReactNode {
   const palette = useContext(ChartPaletteContext);
   return (
     <SvgText
-      x={x}
-      y={(y ?? 0) + VERTICAL_SHIFT[verticalAnchor] * fontSize}
-      textAnchor={textAnchor}
+      y={Number(y ?? 0) + VERTICAL_SHIFT[verticalAnchor] * Number(fontSize)}
       fill={palette.resolveColor(fill ?? 'var(--foreground)')}
       fontSize={fontSize}
-      fontWeight={fontWeight}
-    >
-      {children}
-    </SvgText>
+      {...props}
+    />
   );
 }
 

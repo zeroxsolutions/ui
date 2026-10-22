@@ -11,8 +11,8 @@ import {
   type TooltipContentProps,
   type TooltipPayloadItem,
 } from '../lib/charts';
+import { useChartTheme } from '../lib/chart-theme';
 import { cn } from '../lib/utils';
-import { useChartTheme } from './chart-theme';
 import { IconClassContext } from './icon';
 import { Text, TextClassContext } from './text';
 
@@ -55,6 +55,8 @@ function useChart(): ChartContextProps {
   return context;
 }
 
+// A theme colour reaches a device only while some class of the app reads it, and nothing else reads the
+// chart colours a config names, so these do: text-chart-1 text-chart-2 text-chart-3 text-chart-4 text-chart-5
 const VARIABLE = /^var\(\s*(--[\w-]+)\s*(?:,\s*(.+))?\)$/;
 /** A colour naming a variable that names another, deeper than any config needs, is taken as a loop. */
 const MOST_REFERENCES = 8;
@@ -233,14 +235,14 @@ function ChartTooltipContent({
     const value = !labelKey && typeof label === 'string' ? (config[label]?.label ?? label) : itemConfig?.label;
 
     if (labelFormatter) {
-      return <ChartText className={cn('font-medium', labelClassName)}>{labelFormatter(value, payload)}</ChartText>;
+      return <ChartText className={cn('font-sans-medium', labelClassName)}>{labelFormatter(value, payload)}</ChartText>;
     }
 
     if (!value) {
       return null;
     }
 
-    return <ChartText className={cn('font-medium', labelClassName)}>{value}</ChartText>;
+    return <ChartText className={cn('font-sans-medium', labelClassName)}>{value}</ChartText>;
   }, [label, labelFormatter, payload, hideLabel, labelClassName, config, labelKey]);
 
   if (!active || !payload?.length) {
@@ -286,7 +288,7 @@ function ChartTooltipContent({
                           <ChartText className="text-muted-foreground">{itemConfig?.label ?? item.name}</ChartText>
                         </View>
                         {item.value != null && (
-                          <Text className="text-foreground font-medium tabular-nums">
+                          <Text className="text-foreground font-sans-medium tabular-nums">
                             {typeof item.value === 'number' ? item.value.toLocaleString() : String(item.value)}
                           </Text>
                         )}

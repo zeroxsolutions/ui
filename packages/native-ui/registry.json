@@ -999,24 +999,42 @@
       ]
     },
     {
+      "name": "charts",
+      "type": "registry:lib",
+      "title": "Charts",
+      "description": "Recharts' chart parts in Recharts' names, drawn with react-native-svg: bar, line, area and pie charts with their axes, grid, tooltip and legend, coloured through the palette a ChartContainer provides.",
+      "dependencies": ["d3-scale", "d3-shape", "react-native-reanimated", "react-native-svg", "react-native-worklets"],
+      "registryDependencies": ["@zui/motion"],
+      "files": [
+        {
+          "path": "src/registry/lib/charts.tsx",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "chart-theme",
+      "type": "registry:lib",
+      "title": "Chart theme",
+      "description": "useChartTheme, which reads the colour scheme the app draws and the theme colours a chart names, such as var(--chart-1), as the engine holds them.",
+      "files": [
+        {
+          "path": "src/registry/lib/chart-theme.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "chart",
       "type": "registry:ui",
       "title": "Chart",
       "description": "Charts drawn in the colours and labels of a chart config, with a tooltip a press, a pointer or the arrow keys move, a legend, and the values read to screen readers.",
-      "dependencies": ["d3-scale", "d3-shape", "react-native-reanimated", "react-native-svg", "react-native-worklets"],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text", "@zui/icon", "@zui/card"],
+      "dependencies": ["react-native-svg"],
+      "registryDependencies": ["@zui/utils", "@zui/charts", "@zui/chart-theme", "@zui/text", "@zui/icon", "@zui/card"],
       "files": [
         {
           "path": "src/registry/ui/chart.tsx",
           "type": "registry:ui"
-        },
-        {
-          "path": "src/registry/ui/chart-theme.ts",
-          "type": "registry:ui"
-        },
-        {
-          "path": "src/registry/lib/charts.tsx",
-          "type": "registry:lib"
         }
       ]
     },

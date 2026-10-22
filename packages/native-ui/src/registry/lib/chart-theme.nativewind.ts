@@ -38,8 +38,8 @@ function channelsOf(value: unknown): string | undefined {
   return undefined;
 }
 
-// NativeWind compiles a variable into the app only while a class reads it, and no other item reads the
-// chart colours, so these do: text-chart-1 text-chart-2 text-chart-3 text-chart-4 text-chart-5
+// NativeWind compiles a variable into the app only while a class reads it; chart.tsx's classes read the chart
+// colours, since no other item does.
 function useThemeChannel(name: ThemeColorName): string | undefined {
   const channels = channelsOf(useUnstableNativeVariable(`--${name}`));
   const alpha: unknown = useUnstableNativeVariable(`--${name}-alpha`);

@@ -9,9 +9,9 @@ description: Charts drawn in the colours and labels of a chart config, with a to
 
 <InstallCommand name="chart" />
 
-The CLI writes `components/ui/chart.tsx`, `components/ui/chart-theme.ts` and `lib/charts.tsx`, installs Card,
-Icon, Text, Motion and Utils, and adds `d3-scale`, `d3-shape`, `react-native-svg`, `react-native-reanimated` and
-`react-native-worklets`.
+The CLI writes `components/ui/chart.tsx`, and installs Charts (`lib/charts.tsx`, the chart parts), Chart theme
+(`lib/chart-theme.ts`), Card, Icon, Text, Motion and Utils, adding `d3-scale`, `d3-shape`, `react-native-svg`,
+`react-native-reanimated` and `react-native-worklets`.
 
 ## Usage
 
@@ -146,7 +146,8 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
   colours its slice.
 - `Label`, inside a `Pie`: `content`, given `{ viewBox }` with the pie's `cx`, `cy` and radii, or `value`, drawn
   in the middle.
-- `Text`: `x`, `y`, `textAnchor`, `verticalAnchor`, `fill`, `fontSize`, `fontWeight`.
+- `Text`: react-native-svg's text props, such as `x`, `y`, `textAnchor` and `fontSize`, plus `verticalAnchor` and
+  `fill`.
 
 ## Differences from upstream
 
@@ -167,4 +168,4 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
   them with `fill`, such as `fill="var(--muted-foreground)"`, where upstream's demos use a `fill-*` class.
 - A pie's slices have no stroke unless given one: upstream's container hides Recharts' white one.
 - `accessibilityLayer` is accepted and changes nothing: the chart always takes the keyboard on the web and is
-  always read to a screen reader.
+  always read to a screen reader. The focused chart keeps the browser's focus ring, which upstream hides.
