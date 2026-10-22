@@ -20,6 +20,8 @@
     "src/preview/**/*.tsx",
     "dist/src/nativewind-nova/examples/**/*.ts",
     "dist/src/nativewind-nova/examples/**/*.tsx",
+    // The preview draws each style's Toaster, whose queue only that style's demos raise toasts into.
+    "dist/src/nativewind-nova/components/ui/sonner.tsx",
     "dist/src/nativewind-vega/**/*.ts",
     "dist/src/nativewind-vega/**/*.tsx"
   ],
