@@ -61,7 +61,7 @@ function AttachmentDemo(): ReactNode {
           <AttachmentDescription>Uploading - 64%</AttachmentDescription>
         </AttachmentContent>
         <AttachmentActions>
-          <AttachmentAction aria-label="Cancel upload">
+          <AttachmentAction aria-label="Cancel uploading sales-dashboard.pdf">
             <Icon as={X} />
           </AttachmentAction>
         </AttachmentActions>

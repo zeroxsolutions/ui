@@ -13,7 +13,8 @@ The CLI writes `components/ui/attachment.tsx`, installs [Button](/native/compone
 [Spinner](/native/components/nativewind/spinner), [Text](/native/components/nativewind/text),
 [Icon](/native/components/nativewind/icon), Motion (`lib/motion.ts`, which reads whether the system asks for
 reduced motion), Message context (`lib/message-context.ts`, which tells an attachment the side of the
-[Message](/native/components/nativewind/message) it sits in) and Utils, and adds `@rn-primitives/slot` and
+[Message](/native/components/nativewind/message) it sits in), Focus visible (`lib/focus-visible.ts`, which rings
+the card for keyboard focus and not after a press) and Utils, and adds `@rn-primitives/slot` and
 `class-variance-authority`.
 
 ## Usage
@@ -105,7 +106,8 @@ and is a `ghost` button at size `icon-xs`.
 ### AttachmentTrigger
 
 Takes every prop of React Native's `Pressable`, plus `asChild` (`boolean`, default `false`). It is a `button`
-over the whole card; with `asChild` it renders its single child in its place, such as a link.
+over the whole card; with `asChild` it renders its single child in its place, such as a link. While the trigger
+or an action holds keyboard focus, the card's border takes the ring colour.
 
 ### AttachmentGroup
 
@@ -119,7 +121,9 @@ attachment at its start. Give it an `aria-label` when its attachments take no pr
   another dependency, so the native title fades to half opacity and back.
 - Upstream sizes an `img` inside image media with a child selector. Size the native image `size-full` yourself.
 - Upstream fades the group's edges with a CSS mask. The native group draws no fade.
-- Upstream rings the card while a control inside it holds focus, and colours a pressable card when hovered. The
-  native card draws neither.
+- Upstream rings the card with a box-shadow while a control inside it holds focus. A device has no box-shadow
+  ring, so the native card's border takes the ring colour while its trigger or an action holds keyboard focus.
+- Upstream colours a pressable card when hovered. A touch screen has no hover, and the native card draws no
+  pressed colour.
 - Upstream's media and content padding come from `:has()` selectors. The native parts tell the card they are
   there.

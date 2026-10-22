@@ -9,12 +9,21 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
   type ComponentProps,
   type ReactNode,
 } from 'react';
-import { Animated, Easing, Platform, Pressable, ScrollView, View, type LayoutChangeEvent } from 'react-native';
+import { Platform, Pressable, ScrollView, View, type LayoutChangeEvent } from 'react-native';
+import Animated, {
+  cancelAnimation,
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+import { useFocusVisible } from '../lib/focus-visible';
 import { useMessage } from '../lib/message-context';
 import { useReducedMotion } from '../lib/motion';
 import { cn } from '../lib/utils';
@@ -82,7 +91,48 @@ const AttachmentContext = createContext<{
   orientation: AttachmentOrientation;
   /** Counts a mounted AttachmentMedia, `media`, or AttachmentContent, `content`, in, `1`, or out, `-1`. */
   countPart: (part: 'media' | 'content', change: 1 | -1) => void;
-}>({ state: 'done', size: 'default', orientation: 'horizontal', countPart: () => undefined });
+  /** Says whether a control on the card, its trigger or an action, holds keyboard focus, which rings the card. */
+  reportFocus: (focusVisible: boolean) => void;
+}>({
+  state: 'done',
+  size: 'default',
+  orientation: 'horizontal',
+  countPart: () => undefined,
+  reportFocus: () => undefined,
+});
+
+/** The handlers a control of the card takes, with the caller's own called beside them. */
+interface CardFocusHandlers<Event> {
+  onFocus: (event: Event) => void;
+  onBlur: (event: Event) => void;
+}
+
+/** Tracks keyboard focus on a control of the card, beside the caller's own handlers, and reports it to the card while it holds. */
+function useCardFocus<Event>(
+  onFocus: ((event: Event) => void) | null | undefined,
+  onBlur: ((event: Event) => void) | null | undefined,
+): CardFocusHandlers<Event> {
+  const { reportFocus } = useContext(AttachmentContext);
+  const focus = useFocusVisible();
+  const { focusVisible } = focus;
+
+  useEffect(() => {
+    if (!focusVisible) return undefined;
+    reportFocus(true);
+    return () => reportFocus(false);
+  }, [focusVisible, reportFocus]);
+
+  return {
+    onFocus: (event: Event) => {
+      focus.onFocus(event);
+      onFocus?.(event);
+    },
+    onBlur: (event: Event) => {
+      focus.onBlur();
+      onBlur?.(event);
+    },
+  };
+}
 
 /** Counts the part in while it is mounted, before paint, so the Attachment is never drawn with the wrong padding. */
 function useCountedPart(part: 'media' | 'content'): void {
@@ -115,8 +165,9 @@ function Attachment({ className, state = 'done', size, orientation, ...props }: 
       setCounts((current) => ({ ...current, [part]: current[part] + change })),
     [],
   );
+  const [focused, setFocused] = useState(false);
   const context = useMemo(
-    () => ({ state, size: drawnSize, orientation: drawnOrientation, countPart }),
+    () => ({ state, size: drawnSize, orientation: drawnOrientation, countPart, reportFocus: setFocused }),
     [state, drawnSize, drawnOrientation, countPart],
   );
 
@@ -134,6 +185,7 @@ function Attachment({ className, state = 'done', size, orientation, ...props }: 
               'cn-attachment-orientation-vertical@slot=attachment-content',
             state === 'idle' && 'border-dashed',
             state === 'error' && 'border-destructive/30',
+            focused && 'cn-attachment@focused',
             className,
           )}
           {...props}
@@ -220,7 +272,8 @@ function AttachmentContent({ className, ...props }: ComponentProps<typeof View>)
   );
 }
 
-const SHIMMER_HALF_CYCLE_MS = 1000;
+/** Half a cycle of the title's pulse: tw-animate's `animate-pulse` timing, which a skeleton pulses with. */
+const SHIMMER_TIMING = { duration: 1000, easing: Easing.bezier(0.4, 0, 0.6, 1) } as const;
 const SHIMMER_LOW_OPACITY = 0.5;
 
 /**
@@ -231,27 +284,21 @@ function AttachmentTitle({ className, ...props }: ComponentProps<typeof Text>): 
   const { state } = useContext(AttachmentContext);
   const reduced = useReducedMotion();
   const pulsing = (state === 'uploading' || state === 'processing') && !reduced;
-  const opacity = useRef(new Animated.Value(1)).current;
+  const opacity = useSharedValue(1);
+  const pulseStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
   useEffect(() => {
     if (!pulsing) return undefined;
-    const fadeTo = (toValue: number): Animated.CompositeAnimation =>
-      Animated.timing(opacity, {
-        toValue,
-        duration: SHIMMER_HALF_CYCLE_MS,
-        easing: Easing.bezier(0.4, 0, 0.6, 1),
-        useNativeDriver: Platform.OS !== 'web',
-      });
-    const pulse = Animated.loop(Animated.sequence([fadeTo(SHIMMER_LOW_OPACITY), fadeTo(1)]));
-    pulse.start();
+    const fadeTo = (toValue: number) => withTiming(toValue, SHIMMER_TIMING);
+    opacity.value = withRepeat(withSequence(fadeTo(SHIMMER_LOW_OPACITY), fadeTo(1)), -1);
     return () => {
-      pulse.stop();
-      opacity.setValue(1);
+      cancelAnimation(opacity);
+      opacity.value = 1;
     };
   }, [pulsing, opacity]);
 
   return (
-    <Animated.View style={pulsing ? { opacity } : undefined}>
+    <Animated.View style={pulsing ? pulseStyle : undefined}>
       <Text numberOfLines={1} className={cn('cn-attachment-title/text', className)} {...props} />
     </Animated.View>
   );
@@ -289,8 +336,15 @@ function AttachmentActions({ className, ...props }: ComponentProps<typeof View>)
 }
 
 /** A ghost icon Button in AttachmentActions; give it an `aria-label`, since it holds only an icon. */
-function AttachmentAction({ variant, size = 'icon-xs', ...props }: ComponentProps<typeof Button>): ReactNode {
-  return <Button variant={variant ?? 'ghost'} size={size} {...props} />;
+function AttachmentAction({
+  variant,
+  size = 'icon-xs',
+  onFocus,
+  onBlur,
+  ...props
+}: ComponentProps<typeof Button>): ReactNode {
+  const focus = useCardFocus(onFocus, onBlur);
+  return <Button variant={variant ?? 'ghost'} size={size} {...focus} {...props} />;
 }
 
 type AttachmentTriggerProps = ComponentProps<typeof Pressable> & {
@@ -302,10 +356,22 @@ type AttachmentTriggerProps = ComponentProps<typeof Pressable> & {
  * A press area over the whole Attachment, under its actions, that opens it, such as in a dialog or a link;
  * a `button` unless `asChild` renders another element. Name it with an `aria-label`, such as "Open report.pdf".
  */
-function AttachmentTrigger({ className, asChild = false, ...props }: AttachmentTriggerProps): ReactNode {
+function AttachmentTrigger({
+  className,
+  asChild = false,
+  onFocus,
+  onBlur,
+  ...props
+}: AttachmentTriggerProps): ReactNode {
+  const focus = useCardFocus(onFocus, onBlur);
   const Component = asChild ? Slot : Pressable;
   return (
-    <Component role={asChild ? undefined : 'button'} className={cn('cn-attachment-trigger', className)} {...props} />
+    <Component
+      role={asChild ? undefined : 'button'}
+      className={cn('cn-attachment-trigger', className)}
+      {...focus}
+      {...props}
+    />
   );
 }
 

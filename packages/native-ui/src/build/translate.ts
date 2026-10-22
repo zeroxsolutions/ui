@@ -127,6 +127,7 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     last: 'position=last',
     'not-last': 'position=not-last',
     '[button,a]': 'pressable',
+    'focus-within': 'focused',
   }),
 );
 
@@ -228,6 +229,12 @@ const RING_WIDTH_UTILITY = 'ring-1';
  * around each of their buttons, which a Button draws with no ring of its own to lose.
  */
 const RING_AS_BORDER_STATE = 'part=button';
+
+/**
+ * Slots whose ring behind one state is drawn as a border too: an attachment's focus ring, around a card that
+ * draws its hairline as a border already, so the border takes the ring's colour while focused.
+ */
+const SLOT_RING_AS_BORDER_STATES: ReadonlyMap<string, StateKey> = new Map([['cn-attachment', 'focused']]);
 const RING_COLOUR = /^ring-(?!\d|inset|offset)([\w-]+(?:\/[\w.]+)?)$/;
 const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
 
@@ -331,13 +338,15 @@ const SLOT_COMPONENT_CLASSES: ReadonlyMap<string, readonly string[]> = new Map([
  * field's disabled classes go behind the `disabled` state its component applies while it is not editable.
  * A sidebar menu item's action and badge take the accent colour while the pointer is over the item's button,
  * which the component tracks on the web, so their `peer-hover` classes go behind the `hovered` state rather
- * than being dropped with every other hover.
+ * than being dropped with every other hover. An attachment is ringed while a control inside it holds focus,
+ * which its trigger reports to the card as keyboard focus, so its `focus-within` classes go behind `focused`.
  */
 const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-input', new Set(['disabled'])],
   ['cn-textarea', new Set(['disabled'])],
   ['cn-sidebar-menu-action', new Set(['peer-hover/menu-button'])],
   ['cn-sidebar-menu-badge', new Set(['peer-hover/menu-button'])],
+  ['cn-attachment', new Set(['focus-within'])],
 ]);
 
 /**
@@ -839,6 +848,7 @@ export function translateClasses(
     .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers, afterPart, beforePart), spacingVariables));
 
   const ringBorder = drawsRingAsBorder(read);
+  const ringStateAsBorder = slot.name === undefined ? undefined : SLOT_RING_AS_BORDER_STATES.get(slot.name);
 
   for (const cls of read) {
     if (cls.reading === 'dropped') continue;
@@ -855,7 +865,9 @@ export function translateClasses(
     const utility = resolveAvailableHeightClamp(
       resolveClampedRadius(
         resolveOwnSizeTranslate(
-          (ringBorder && unmodified) || cls.states.includes(RING_AS_BORDER_STATE)
+          (ringBorder && unmodified) ||
+            cls.states.includes(RING_AS_BORDER_STATE) ||
+            (ringStateAsBorder !== undefined && stateKeyOf(cls.states) === ringStateAsBorder)
             ? ringAsBorder(radiusLessLength)
             : radiusLessLength,
           cls.states,

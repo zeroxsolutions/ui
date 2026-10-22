@@ -1310,6 +1310,20 @@ describe('translateClasses for the conversation items', () => {
     expect(slot('vega', 'cn-bubble-content', 'uniwind', 'view', 'focused+pressable').classes).toEqual(['border-ring']);
   });
 
+  it.each(STYLE_ENGINES)(
+    'rings an attachment as a border while its trigger holds keyboard focus, as the state focused, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-attachment', engine, 'view', 'focused').classes).toEqual(['border', 'border-ring/50']);
+    },
+  );
+
+  it('keeps dropping focus-within on any other slot', () => {
+    expect(translateClasses(['focus-within:ring-1'], 'uniwind', 'view', 'focused', { name: 'cn-card' })).toEqual({
+      classes: [],
+      unknown: [],
+    });
+  });
+
   it('sizes a spinner in vertical attachment media, as the state part=spinner', () => {
     expect(slot('vega', 'cn-attachment-media', 'uniwind', 'view', 'orientation=vertical+part=spinner').classes).toEqual(
       ['size-6'],

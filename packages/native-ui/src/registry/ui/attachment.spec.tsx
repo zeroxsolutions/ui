@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 import { FileText, X } from 'lucide-react-native';
 import { useContext, type ReactNode } from 'react';
-import { AccessibilityInfo, Animated, Pressable } from 'react-native';
+import { AccessibilityInfo, Platform, Pressable, StyleSheet } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { MessageContext } from '../lib/message-context';
 import {
@@ -106,30 +106,104 @@ describe('Attachment', () => {
     expect(emittedClasses(screen.getByText('PDF - 2.4 MB').props.className)).toContain('text-destructive/80');
   });
 
-  it.each(['uploading', 'processing'] as const)('pulses its title while %s', async (state) => {
-    reduceMotion(false);
-    const loop = jest.spyOn(Animated, 'loop');
-    await render(<File state={state} />);
-    await act(async () => undefined);
+  describe('its title', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
 
-    expect(loop).toHaveBeenCalledTimes(1);
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    /** The view the title pulses in, which is the title's own when it stands still. */
+    const titleView = () => screen.getByText('sales-dashboard.pdf').parent;
+
+    /** Lets `ms` pass on Jest's clock, running the animation frames due in it. */
+    const elapse = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms));
+
+    /** The opacity the title is drawn at, after `ms` pass, or none when it is not animated. */
+    const titleOpacityAfter = async (ms: number): Promise<unknown> => {
+      await elapse(ms);
+      return StyleSheet.flatten(titleView()?.props.style)?.opacity;
+    };
+
+    it.each(['uploading', 'processing'] as const)('fades to half opacity and back while %s', async (state) => {
+      reduceMotion(false);
+      await render(<File state={state} />);
+
+      await elapse(1000);
+      expect(titleView()).toHaveAnimatedStyle({ opacity: 0.5 });
+      await elapse(1000);
+      expect(titleView()).toHaveAnimatedStyle({ opacity: 1 });
+    });
+
+    it('stands still once done', async () => {
+      reduceMotion(false);
+      await render(<File state="done" />);
+
+      expect(await titleOpacityAfter(1000)).toBeUndefined();
+    });
+
+    it('stands still while uploading when the person asked to reduce motion', async () => {
+      reduceMotion(true);
+      await render(<File state="uploading" />);
+
+      expect(await titleOpacityAfter(1000)).toBeUndefined();
+    });
   });
 
-  it('keeps its title still once done', async () => {
-    reduceMotion(false);
-    const loop = jest.spyOn(Animated, 'loop');
-    await render(<File state="done" />);
-    await act(async () => undefined);
+  describe('on the web', () => {
+    const os = Platform.OS;
+    beforeEach(() => {
+      Platform.OS = 'web';
+    });
+    afterEach(() => {
+      Platform.OS = os;
+    });
 
-    expect(loop).not.toHaveBeenCalled();
-  });
+    /** A focus event whose target answers `:focus-visible` with `visible`, as a browser's does. */
+    const focusFrom = (visible: boolean): object => ({
+      target: { matches: (selector: string) => selector === ':focus-visible' && visible },
+    });
 
-  it('stops pulsing its title when the person asked to reduce motion', async () => {
-    reduceMotion(true);
-    await render(<File state="uploading" />);
-    await act(async () => undefined);
+    it.each([
+      ['its trigger', 'Open report.pdf'],
+      ['an action', 'Remove report.pdf'],
+    ])('rings the card while %s holds keyboard focus', async (_control, name) => {
+      reduceMotion(false);
+      await render(
+        <Attachment testID="attachment">
+          <AttachmentContent>
+            <AttachmentTitle>report.pdf</AttachmentTitle>
+          </AttachmentContent>
+          <AttachmentActions>
+            <AttachmentAction aria-label="Remove report.pdf">
+              <Icon as={X} />
+            </AttachmentAction>
+          </AttachmentActions>
+          <AttachmentTrigger aria-label="Open report.pdf" />
+        </Attachment>,
+      );
 
-    expect(screen.getByText('sales-dashboard.pdf').parent?.parent?.props.style).toBeUndefined();
+      await fireEvent(screen.getByRole('button', { name }), 'focus', focusFrom(true));
+      expect(classesOf('attachment')).toContain('border-ring/50');
+
+      await fireEvent(screen.getByRole('button', { name }), 'blur');
+      expect(classesOf('attachment')).not.toContain('border-ring/50');
+    });
+
+    it('draws no ring when a press focused the trigger', async () => {
+      reduceMotion(false);
+      await render(
+        <Attachment testID="attachment">
+          <AttachmentTrigger aria-label="Open report.pdf" />
+        </Attachment>,
+      );
+
+      await fireEvent(screen.getByRole('button'), 'focus', focusFrom(false));
+
+      expect(classesOf('attachment')).not.toContain('border-ring/50');
+    });
   });
 
   it('stacks a vertical attachment, its media full width and its actions over the top end', async () => {
