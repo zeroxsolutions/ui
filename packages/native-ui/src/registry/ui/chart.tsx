@@ -55,8 +55,10 @@ function useChart(): ChartContextProps {
   return context;
 }
 
-// A theme colour reaches a device only while some class of the app reads it, and nothing else reads the
-// chart colours a config names, so these do: text-chart-1 text-chart-2 text-chart-3 text-chart-4 text-chart-5
+// Read by the app's Tailwind scan, the one reader of the chart colours: a theme colour no class names can be
+// left out of what a device can draw, so deleting the next line can leave var(--chart-N) colourless there.
+// text-chart-1 text-chart-2 text-chart-3 text-chart-4 text-chart-5
+
 const VARIABLE = /^var\(\s*(--[\w-]+)\s*(?:,\s*(.+))?\)$/;
 /** A colour naming a variable that names another, deeper than any config needs, is taken as a loop. */
 const MOST_REFERENCES = 8;
@@ -147,13 +149,14 @@ function ChartTooltipIndicator({
 }): ReactNode {
   if (indicator === 'dot') {
     return (
-      <Svg width={10} height={10} className="shrink-0">
+      <Svg testID="chart-indicator-dot" width={10} height={10} className="shrink-0">
         <Rect width={10} height={10} rx={2} fill={color} />
       </Svg>
     );
   }
   return (
     <View
+      testID={`chart-indicator-${indicator}`}
       className={cn(
         'shrink-0 self-stretch',
         indicator === 'line' ? 'w-1' : 'w-[3px]',

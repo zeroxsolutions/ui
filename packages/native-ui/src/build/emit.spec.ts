@@ -213,6 +213,7 @@ interface BuiltItem {
   type: string;
   categories?: string[];
   dependencies?: string[];
+  devDependencies?: string[];
   registryDependencies?: string[];
   files: { path: string; content: string }[];
 }
@@ -313,6 +314,10 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
         }
       }
     }
+  });
+
+  it('gives an app the types of the untyped d3 modules the chart parts import', () => {
+    expect(item('charts')?.devDependencies).toEqual(['@types/d3-scale', '@types/d3-shape']);
   });
 
   it("pins tailwind-merge to the major of the engine's Tailwind", () => {

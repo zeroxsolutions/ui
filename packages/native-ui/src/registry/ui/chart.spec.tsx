@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { processColor } from 'react-native';
 import { G } from 'react-native-svg';
+import { Text } from './text';
 import {
   Area,
   AreaChart,
@@ -63,10 +64,12 @@ function MonthBars({
   config = chartConfig,
   tooltip = <ChartTooltip content={<ChartTooltipContent />} />,
   legend = null,
+  reversed = false,
 }: {
   config?: ChartConfig;
   tooltip?: React.ReactNode;
   legend?: React.ReactNode;
+  reversed?: boolean;
 }): React.ReactNode {
   return (
     <ChartContainer config={config} className="min-h-[200px] w-full">
@@ -78,6 +81,7 @@ function MonthBars({
           tickMargin={10}
           axisLine={false}
           tickFormatter={(value: string) => value.slice(0, 3)}
+          reversed={reversed}
         />
         {tooltip}
         {legend}
@@ -187,6 +191,20 @@ function BrowserDonut({ legend = null }: { legend?: React.ReactNode }): React.Re
 function tickText(index: number): unknown {
   const [span] = screen.getByTestId(`chart-x-tick-${index}`, HIDDEN).children;
   return typeof span === 'object' ? span.props.content : span;
+}
+
+function surface(): Element {
+  return screen.getByTestId('chart-surface');
+}
+
+/** A tap at `x` across the chart: a press and its release. */
+async function tapAt(x: number, chart: Element = surface()): Promise<void> {
+  await fireEvent(chart, 'responderGrant', { nativeEvent: { locationX: x, locationY: 40 } });
+  await fireEvent(chart, 'responderRelease', { nativeEvent: { locationX: x, locationY: 40 } });
+}
+
+async function press(key: string): Promise<void> {
+  await fireEvent(surface(), 'keyDown', { nativeEvent: { key }, preventDefault: () => undefined });
 }
 
 /** A press at `x` across the chart, which is drawn at its initial 320 by 200 until it is laid out. */
@@ -468,11 +486,223 @@ describe('Chart', () => {
       expect(typeof text === 'object' ? text.props.x : undefined).toEqual([160]);
     });
 
+    it('leaves no gap after the last slice of a part of a turn', async () => {
+      await render(
+        <ChartContainer config={browserConfig}>
+          <PieChart>
+            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+            <Pie
+              data={browserData.slice(0, 2).map((row) => ({ ...row, visitors: 100 }))}
+              dataKey="visitors"
+              nameKey="browser"
+              startAngle={180}
+              endAngle={0}
+              paddingAngle={10}
+              isAnimationActive={false}
+            />
+          </PieChart>
+        </ChartContainer>,
+      );
+
+      // Two equal slices share 170 degrees of the half turn, leaving the one gap from 95 to 85 degrees; 88
+      // degrees, 70px out, is inside it.
+      const angle = (88 * Math.PI) / 180;
+      await fireEvent(surface(), 'responderGrant', {
+        nativeEvent: { locationX: 160 + 70 * Math.cos(angle), locationY: 100 - 70 * Math.sin(angle) },
+      });
+
+      expect(screen.queryByText('Chrome')).toBeNull();
+      expect(screen.queryByText('Safari')).toBeNull();
+    });
+
     it('names each slice in the legend by the config label nameKey points at', async () => {
       await render(<BrowserDonut legend={<ChartLegend content={<ChartLegendContent nameKey="browser" />} />} />);
 
       expect(screen.getByText('Chrome')).toBeOnTheScreen();
       expect(screen.getByText('Firefox')).toBeOnTheScreen();
     });
+  });
+
+  describe('dismissing the tooltip', () => {
+    it('hides it when a scrolling parent takes the touch', async () => {
+      await render(<MonthBars />);
+
+      await pressAt(80);
+      await fireEvent(surface(), 'responderTerminate');
+
+      expect(screen.queryByText('February')).toBeNull();
+    });
+
+    it('hides it on a second tap on the same category, and moves it on a tap on another', async () => {
+      await render(<MonthBars />);
+
+      await tapAt(80);
+      expect(screen.getByText('February')).toBeOnTheScreen();
+      await tapAt(300);
+      expect(screen.getByText('June')).toBeOnTheScreen();
+      await tapAt(300);
+      expect(screen.queryByText('June')).toBeNull();
+    });
+
+    it('hides the tooltip of another chart when one is pressed', async () => {
+      await render(
+        <>
+          <MonthBars />
+          <MonthBars />
+        </>,
+      );
+      const [first, second] = screen.getAllByTestId('chart-surface');
+
+      await tapAt(80, first);
+      await tapAt(300, second);
+
+      expect(screen.queryByText('February')).toBeNull();
+      expect(screen.getByText('June')).toBeOnTheScreen();
+    });
+
+    it('hides it when the focus leaves the chart', async () => {
+      await render(<MonthBars />);
+
+      await press('ArrowRight');
+      await fireEvent(surface(), 'blur');
+
+      expect(screen.queryByText('January')).toBeNull();
+    });
+  });
+
+  describe('on the web', () => {
+    it('moves the tooltip with the arrow keys, Home and End, and hides it with Escape', async () => {
+      await render(<MonthBars />);
+
+      await press('ArrowRight');
+      expect(screen.getByText('January')).toBeOnTheScreen();
+      await press('ArrowRight');
+      expect(screen.getByText('February')).toBeOnTheScreen();
+      await press('ArrowLeft');
+      expect(screen.getByText('January')).toBeOnTheScreen();
+      await press('End');
+      expect(screen.getByText('June')).toBeOnTheScreen();
+      await press('Home');
+      expect(screen.getByText('January')).toBeOnTheScreen();
+      await press('Escape');
+      expect(screen.queryByText('January')).toBeNull();
+    });
+
+    it('shows the category under a mouse and hides it as the mouse leaves; a pen or a finger moves nothing', async () => {
+      await render(<MonthBars />);
+
+      await fireEvent(surface(), 'pointerMove', { nativeEvent: { pointerType: 'touch', offsetX: 80, offsetY: 40 } });
+      expect(screen.queryByText('February')).toBeNull();
+      await fireEvent(surface(), 'pointerMove', { nativeEvent: { pointerType: 'mouse', offsetX: 80, offsetY: 40 } });
+      expect(screen.getByText('February')).toBeOnTheScreen();
+      await fireEvent(surface(), 'pointerLeave', { nativeEvent: { pointerType: 'mouse' } });
+      expect(screen.queryByText('February')).toBeNull();
+    });
+  });
+
+  describe('a reversed x axis', () => {
+    it('runs the categories right to left, and takes a press by where it lands', async () => {
+      await render(<MonthBars reversed />);
+
+      expect(Number(screen.getByTestId('chart-x-tick-0', HIDDEN).props.x)).toBeGreaterThan(
+        Number(screen.getByTestId('chart-x-tick-5', HIDDEN).props.x),
+      );
+      expect(tickText(0)).toBe('Jan');
+
+      // From the right edge, 80px falls in the fifth category.
+      await pressAt(80);
+      expect(screen.getByText('May')).toBeOnTheScreen();
+    });
+
+    it('steps right with the right arrow, back through the categories', async () => {
+      await render(<MonthBars reversed />);
+
+      await press('ArrowRight');
+      expect(screen.getByText('June')).toBeOnTheScreen();
+      await press('ArrowRight');
+      expect(screen.getByText('May')).toBeOnTheScreen();
+    });
+  });
+
+  describe('ChartTooltipContent', () => {
+    it('formats the label with labelFormatter, given on the content or on ChartTooltip', async () => {
+      const { rerender } = await render(
+        <MonthBars
+          tooltip={
+            <ChartTooltip content={<ChartTooltipContent labelFormatter={(label) => `Month of ${String(label)}`} />} />
+          }
+        />,
+      );
+      await pressAt(80);
+      expect(screen.getByText('Month of February')).toBeOnTheScreen();
+
+      await rerender(
+        <MonthBars
+          tooltip={
+            <ChartTooltip
+              content={<ChartTooltipContent />}
+              labelFormatter={(label: unknown) => `In ${String(label)}`}
+            />
+          }
+        />,
+      );
+      await pressAt(80);
+      expect(screen.getByText('In February')).toBeOnTheScreen();
+    });
+
+    it('draws each item with formatter in place of its indicator, name and value', async () => {
+      await render(
+        <MonthBars
+          tooltip={
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  formatter={(value, name) => <Text key={name}>{`${name}=${String(value)}`}</Text>}
+                />
+              }
+            />
+          }
+        />,
+      );
+
+      await pressAt(80);
+
+      expect(screen.getByText('desktop=305')).toBeOnTheScreen();
+      expect(screen.queryByText('Desktop')).toBeNull();
+    });
+
+    it('names every item by the config key nameKey gives', async () => {
+      const config = { ...chartConfig, views: { label: 'Page Views' } } satisfies ChartConfig;
+      await render(
+        <MonthBars config={config} tooltip={<ChartTooltip content={<ChartTooltipContent nameKey="views" />} />} />,
+      );
+
+      await pressAt(80);
+
+      expect(screen.getAllByText('Page Views')).toHaveLength(2);
+    });
+
+    it.each(['dot', 'line', 'dashed'] as const)('draws the %s indicator beside each item', async (indicator) => {
+      await render(<MonthBars tooltip={<ChartTooltip content={<ChartTooltipContent indicator={indicator} />} />} />);
+
+      await pressAt(80);
+
+      expect(screen.getAllByTestId(`chart-indicator-${indicator}`, HIDDEN)).toHaveLength(2);
+    });
+
+    it('draws no indicator with hideIndicator', async () => {
+      await render(<MonthBars tooltip={<ChartTooltip content={<ChartTooltipContent hideIndicator />} />} />);
+
+      await pressAt(80);
+
+      expect(screen.queryAllByTestId(/^chart-indicator-/, HIDDEN)).toHaveLength(0);
+      expect(screen.getByText('Desktop')).toBeOnTheScreen();
+    });
+  });
+
+  it('tells a screen reader no point is selected until one is', async () => {
+    await render(<MonthBars />);
+
+    expect(surface().props['aria-valuetext']).toBe('None selected');
   });
 });

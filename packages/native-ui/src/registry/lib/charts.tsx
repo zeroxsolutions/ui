@@ -30,8 +30,10 @@ import {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
   type ComponentProps,
+  type ComponentRef,
   type ReactElement,
   type ReactNode,
 } from 'react';
@@ -188,6 +190,8 @@ interface CursorProps {
 }
 
 type TooltipProps = {
+  /** Every other prop is handed to `content`, as Recharts hands it, such as ChartTooltipContent's `labelClassName`. */
+  [prop: string]: unknown;
   /** The element drawn for the active point, cloned with {@link TooltipContentProps}, or a function drawing it. */
   content?: ReactElement | ((props: TooltipContentProps) => ReactNode);
   /** The band or the line drawn behind the active point; `false` draws none. */
@@ -250,6 +254,8 @@ type XAxisProps = {
   height?: number;
   /** The least room between two tick labels before one is left out, in pixels. */
   minTickGap?: number;
+  /** Whether the categories run right to left, as a chart read right to left draws them. */
+  reversed?: boolean;
 };
 
 /** The category axis under the plot. Placed inside a chart, the chart draws it. */
@@ -281,6 +287,8 @@ type CartesianGridProps = {
   horizontal?: boolean;
   stroke?: string;
   strokeDasharray?: string;
+  /** The side of the value axis the grid's lines start from; the lines span the plot either way. */
+  orientation?: 'left' | 'right';
 };
 
 /** The lines behind the plot. Placed inside a chart, the chart draws it. */
@@ -402,7 +410,8 @@ function readParts(children: ReactNode): ChartParts {
 
 /**
  * The ticks Recharts gives a value axis from 0 to `max`: `count` of them, a step rounded up to the next
- * multiple of 5 in its second digit, so 305 over five ticks runs 0, 80, 160, 240, 320.
+ * multiple of 5 in its second digit, or of 1 for a one-digit step, so 305 over five ticks runs 0 to 320 and
+ * 21 runs 0 to 24.
  */
 function niceTicks(max: number, count: number): number[] {
   const intervals = Math.max(1, count - 1);
@@ -410,7 +419,8 @@ function niceTicks(max: number, count: number): number[] {
   const rough = max / intervals;
   const digits = Math.floor(Math.log10(rough)) + 1;
   const unit = 10 ** digits;
-  const step = (Math.ceil(rough / unit / 0.05) * 0.05 * unit).toPrecision(12);
+  const ratio = digits === 1 ? 0.1 : 0.05;
+  const step = (Math.ceil(rough / unit / ratio) * ratio * unit).toPrecision(12);
   return Array.from({ length: intervals + 1 }, (_, index) => Number(step) * index);
 }
 
@@ -449,26 +459,29 @@ interface CategoryScale {
   indexAt: (x: number) => number;
 }
 
-function categoryScale(count: number, plot: Plot, banded: boolean): CategoryScale {
+function categoryScale(count: number, plot: Plot, banded: boolean, reversed: boolean): CategoryScale {
   const indices = Array.from({ length: count }, (_, index) => index);
   const clamp = (index: number): number => Math.min(count - 1, Math.max(0, index));
+  const range: [number, number] = reversed ? [plot.right, plot.left] : [plot.left, plot.right];
+  // How far `x` lies along the categories, from the edge the first one sits at.
+  const along = (x: number): number => (reversed ? plot.right - x : x - plot.left);
   if (banded) {
-    const band = scaleBand<number>().domain(indices).range([plot.left, plot.right]);
+    const band = scaleBand<number>().domain(indices).range(range);
     const width = band.bandwidth();
     return {
       start: (index) => band(index) ?? plot.left,
       bandwidth: width,
       center: (index) => (band(index) ?? plot.left) + width / 2,
-      indexAt: (x) => clamp(Math.floor((x - plot.left) / (width || 1))),
+      indexAt: (x) => clamp(Math.floor(along(x) / (width || 1))),
     };
   }
-  const point = scalePoint<number>().domain(indices).range([plot.left, plot.right]);
+  const point = scalePoint<number>().domain(indices).range(range);
   const step = point.step();
   return {
     start: (index) => point(index) ?? plot.left,
     bandwidth: 0,
     center: (index) => point(index) ?? plot.left,
-    indexAt: (x) => clamp(Math.round((x - plot.left) / (step || 1))),
+    indexAt: (x) => clamp(Math.round(along(x) / (step || 1))),
   };
 }
 
@@ -507,6 +520,9 @@ function labelWidth(text: string): number {
 }
 
 const TICK_FONT_SIZE = 12;
+
+/** How far below `y`, in ems, Recharts sets text whose top, middle or bottom sits on `y`. */
+const VERTICAL_SHIFT = { start: 0.71, middle: 0.355, end: 0 } as const;
 
 function seriesName(props: SeriesProps): string {
   return props.name ?? props.dataKey;
@@ -583,6 +599,17 @@ function LegendBox({
   );
 }
 
+/** The props of a Tooltip that Recharts hands its content, its own settings aside. */
+function contentPropsOf({
+  content: _content,
+  cursor: _cursor,
+  defaultIndex: _index,
+  offset: _offset,
+  ...rest
+}: TooltipProps): object {
+  return rest;
+}
+
 interface ActivePoint {
   index: number;
   /** Where the press or the pointer is, in the svg's pixels; the plot's middle for a key or a screen reader. */
@@ -643,26 +670,83 @@ interface Interaction {
   describe: (index: number) => string;
 }
 
+/** Hides the tooltip of the chart that showed one last, so a page shows one tooltip at a time. */
+let hideShownTooltip: (() => void) | undefined;
+
+/** What the surface leaves a screen reader with while no point is active. */
+const NOTHING_ACTIVE = 'None selected';
+
 /**
  * The layer over the plot that a press, a pointer on the web, the arrow keys on the web and a screen
- * reader's swipes move the active point with. A drag along it moves the point; a scrolling parent may
- * still take a drag that runs across it.
+ * reader's swipes move the active point with. A drag along it moves the point. A press on the active point
+ * again hides it, and so does a scrolling parent taking the touch, a press on another chart, and on the web a
+ * press outside the chart, the pointer leaving it or the focus leaving it.
+ * @param reversed - whether the points run right to left, so the right arrow steps back through them
  */
 function ChartSurface({
   interaction,
   active,
   onActive,
   label,
+  reversed = false,
 }: {
   interaction: Interaction;
   active: ActivePoint | undefined;
   onActive: (point: ActivePoint | undefined) => void;
   label: string | undefined;
+  reversed?: boolean;
 }): ReactNode {
   const web = Platform.OS === 'web';
-  const fromTouch = (event: GestureResponderEvent): void => {
+  const surface = useRef<ComponentRef<typeof View>>(null);
+  const press = useRef<{ dismiss: boolean }>({ dismiss: false });
+  const latest = useRef(onActive);
+  latest.current = onActive;
+  const hide = useRef((): void => latest.current(undefined)).current;
+  const show = (point: ActivePoint | undefined): void => {
+    if (point !== undefined && hideShownTooltip !== hide) {
+      hideShownTooltip?.();
+      hideShownTooltip = hide;
+    }
+    onActive(point);
+  };
+
+  useEffect(
+    () => () => {
+      if (hideShownTooltip === hide) hideShownTooltip = undefined;
+    },
+    [hide],
+  );
+
+  useEffect(() => {
+    if (!web || active === undefined) return undefined;
+    const node = surface.current as unknown as { parentElement?: { contains: (target: unknown) => boolean } } | null;
+    const onPointerDown = (event: { target: unknown }): void => {
+      if (node?.parentElement?.contains(event.target) !== true) hide();
+    };
+    const page = globalThis as unknown as {
+      document: {
+        addEventListener: (type: string, listener: (event: { target: unknown }) => void, capture: boolean) => void;
+        removeEventListener: (type: string, listener: (event: { target: unknown }) => void, capture: boolean) => void;
+      };
+    };
+    page.document.addEventListener('pointerdown', onPointerDown, true);
+    return () => page.document.removeEventListener('pointerdown', onPointerDown, true);
+  }, [web, hide, active === undefined]);
+
+  const onGrant = (event: GestureResponderEvent): void => {
     const point = interaction.pointAt(event.nativeEvent.locationX, event.nativeEvent.locationY);
-    if (point !== undefined) onActive(point);
+    press.current.dismiss = point !== undefined && active !== undefined && point.index === active.index;
+    if (point !== undefined && !press.current.dismiss) show(point);
+  };
+  const onMove = (event: GestureResponderEvent): void => {
+    const point = interaction.pointAt(event.nativeEvent.locationX, event.nativeEvent.locationY);
+    if (point === undefined || point.index === active?.index) return;
+    press.current.dismiss = false;
+    show(point);
+  };
+  const onRelease = (): void => {
+    if (press.current.dismiss) onActive(undefined);
+    press.current.dismiss = false;
   };
   const step = (delta: number): void => {
     if (interaction.count === 0) return;
@@ -672,14 +756,15 @@ function ChartSurface({
           ? 0
           : interaction.count - 1
         : Math.min(interaction.count - 1, Math.max(0, active.index + delta));
-    onActive(interaction.pointFor(index));
+    show(interaction.pointFor(index));
   };
+  const along = reversed ? -1 : 1;
   const onKeyDown = (event: KeyDownEvent): void => {
     const moves: Readonly<Record<string, () => void>> = {
-      ArrowRight: () => step(1),
-      ArrowLeft: () => step(-1),
-      Home: () => onActive(interaction.pointFor(0)),
-      End: () => onActive(interaction.pointFor(interaction.count - 1)),
+      ArrowRight: () => step(along),
+      ArrowLeft: () => step(-along),
+      Home: () => show(interaction.pointFor(0)),
+      End: () => show(interaction.pointFor(interaction.count - 1)),
       Escape: () => onActive(undefined),
     };
     const move = moves[event.nativeEvent.key];
@@ -689,13 +774,12 @@ function ChartSurface({
   };
   const onPointerMove = (event: PointerEvent): void => {
     if (event.nativeEvent.pointerType !== 'mouse') return;
-    const point = interaction.pointAt(event.nativeEvent.offsetX, event.nativeEvent.offsetY);
-    onActive(point);
+    show(interaction.pointAt(event.nativeEvent.offsetX, event.nativeEvent.offsetY));
   };
-  const described = active === undefined ? undefined : interaction.describe(active.index);
 
   return (
     <View
+      ref={surface}
       testID="chart-surface"
       accessible
       focusable
@@ -704,16 +788,18 @@ function ChartSurface({
       aria-valuemin={0}
       aria-valuemax={Math.max(0, interaction.count - 1)}
       aria-valuenow={active?.index ?? 0}
-      aria-valuetext={described ?? interaction.summary}
+      aria-valuetext={active === undefined ? NOTHING_ACTIVE : interaction.describe(active.index)}
       accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
       onAccessibilityAction={(event: AccessibilityActionEvent) => {
         if (event.nativeEvent.actionName === 'increment') step(1);
         if (event.nativeEvent.actionName === 'decrement') step(-1);
       }}
       onStartShouldSetResponder={() => true}
-      onResponderGrant={fromTouch}
-      onResponderMove={fromTouch}
+      onResponderGrant={onGrant}
+      onResponderMove={onMove}
+      onResponderRelease={onRelease}
       onResponderTerminationRequest={() => true}
+      onResponderTerminate={() => onActive(undefined)}
       onPointerMove={onPointerMove}
       onPointerLeave={(event: PointerEvent) => {
         if (event.nativeEvent.pointerType === 'mouse') onActive(undefined);
@@ -790,7 +876,8 @@ function CartesianChart({
     bottom: size.height - bottom - xAxisHeight - (legendTop ? 0 : legendHeight),
   };
   const banded = kind === 'bar';
-  const x = categoryScale(data.length, plot, banded);
+  const reversed = parts.xAxis?.reversed === true;
+  const x = categoryScale(data.length, plot, banded, reversed);
   const ticks = niceTicks(
     Math.max(0, ...data.flatMap((datum) => series.map((item) => numberAt(datum, item.props.dataKey)))),
     parts.yAxis?.tickCount ?? 5,
@@ -844,11 +931,11 @@ function CartesianChart({
     const value = categoryOf(index);
     return xTickFormat === undefined ? String(value) : xTickFormat(value as never, index);
   });
-  // Recharts leaves a label out where it would run into the one before, keeping the last.
+  // Recharts leaves a label out where it would run into its neighbour, keeping the one at the right end.
   const minGap = parts.xAxis?.minTickGap ?? 5;
   const shownLabels = new Set<number>();
   let edge = Number.POSITIVE_INFINITY;
-  for (let index = data.length - 1; index >= 0; index -= 1) {
+  for (const index of data.map((_, at) => at).sort((a, b) => x.center(b) - x.center(a))) {
     const half = labelWidth(xLabels[index] ?? '') / 2;
     const center = x.center(index);
     if (center + half + minGap <= edge) {
@@ -947,11 +1034,10 @@ function CartesianChart({
                   <SvgText
                     testID={`chart-x-tick-${index}`}
                     x={x.center(index)}
-                    y={plot.bottom + 6 + (parts.xAxis?.tickMargin ?? 2) + TICK_FONT_SIZE * 0.35}
+                    y={plot.bottom + 6 + (parts.xAxis?.tickMargin ?? 2) + VERTICAL_SHIFT.start * TICK_FONT_SIZE}
                     fontSize={TICK_FONT_SIZE}
                     fill={tickColor}
                     textAnchor="middle"
-                    alignmentBaseline="hanging"
                   >
                     {xLabels[index]}
                   </SvgText>
@@ -973,7 +1059,7 @@ function CartesianChart({
                 <SvgText
                   testID={`chart-y-tick-${index}`}
                   x={plot.left - 6 - (parts.yAxis?.tickMargin ?? 2)}
-                  y={y(tick) + TICK_FONT_SIZE * 0.35}
+                  y={y(tick) + VERTICAL_SHIFT.middle * TICK_FONT_SIZE}
                   fontSize={TICK_FONT_SIZE}
                   fill={tickColor}
                   textAnchor="end"
@@ -1067,6 +1153,8 @@ function CartesianChart({
                   cy={points[activeIndex]?.[1]}
                   r={(typeof props.activeDot === 'object' ? props.activeDot.r : undefined) ?? 4}
                   fill={resolve(typeof props.activeDot === 'object' ? props.activeDot.fill : undefined) ?? color}
+                  stroke={resolve(THEME.surface)}
+                  strokeWidth={2}
                 />
               )}
             </G>
@@ -1079,6 +1167,7 @@ function CartesianChart({
           interaction={interaction}
           active={shown}
           label={title ?? KIND_NAMES[kind]}
+          reversed={reversed}
           onActive={(point) => {
             setTouched(true);
             setActive(point);
@@ -1090,6 +1179,7 @@ function CartesianChart({
           {drawContent(
             tooltip.content,
             {
+              ...contentPropsOf(tooltip),
               active: true,
               payload: payloadAt(shown.index),
               label: categoryOf(shown.index),
@@ -1170,8 +1260,6 @@ type TextProps = Omit<ComponentProps<typeof SvgText>, 'fill'> & {
   fill?: string;
 };
 
-const VERTICAL_SHIFT = { start: 0.71, middle: 0.355, end: 0 } as const;
-
 /**
  * Text inside a chart's svg, in a colour from the chart's palette, taking react-native-svg's text props such
  * as `textAnchor` and `fontSize`.
@@ -1235,7 +1323,10 @@ function layoutSlices(props: PieProps, share: number): Slice[] {
   const total = values.reduce((sum, value) => sum + value, 0);
   const direction = Math.sign(endAngle - startAngle) || 1;
   const drawn = values.filter((value) => value > 0).length;
-  const room = Math.max(0, Math.abs(endAngle - startAngle) - (drawn > 1 ? paddingAngle * drawn : 0)) * share;
+  const turn = Math.abs(endAngle - startAngle);
+  // A whole turn has a gap after every slice; a part of one has none after the last.
+  const gaps = Math.max(0, turn >= 360 ? drawn : drawn - 1);
+  const room = Math.max(0, turn - paddingAngle * gaps) * share;
   let angle = startAngle;
   return data.map((datum, index) => {
     const value = values[index] ?? 0;
@@ -1435,6 +1526,7 @@ function PieChart({ margin, title, width, height, children }: PieChartProps): Re
           {drawContent(
             tooltip.content,
             {
+              ...contentPropsOf(tooltip),
               active: true,
               payload: payloadAt(shown.index),
               label: fullSlices[shown.index]?.name,

@@ -50,6 +50,11 @@ describe('YAxis', () => {
     expect(yTicks()).toEqual(['0', '350', '700', '1050', '1400']);
   });
 
+  it('rounds a one-digit step up to a whole number, so 21 runs to 24', async () => {
+    await render(<ValueAxis values={[21]} />);
+    expect(yTicks()).toEqual(['0', '6', '12', '18', '24']);
+  });
+
   it('counts up from 0 for data with nothing above 0', async () => {
     await render(<ValueAxis values={[0]} />);
     expect(yTicks()).toEqual(['0', '1', '2', '3', '4']);

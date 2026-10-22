@@ -7,25 +7,61 @@ interface ChartTheme {
   /**
    * The colour a part draws for the theme variable `name`, such as `--chart-1`: a colour React Native
    * reads on a device, and a CSS colour the browser resolves on the web. `undefined` for a variable the
-   * theme does not hold, or on a device for one outside {@link THEME_COLORS}.
+   * theme does not hold, or on a device for one outside {@link THEME_COLORS}; in development that is reported
+   * once per name through `console.warn`.
    */
   themeColor: (name: string) => string | undefined;
 }
 
-/** The theme colours a chart reads on a device: the ones its own parts draw, and the five chart colours. */
+/** The theme item's colours, each a chart can name on a device. */
 const THEME_COLORS = [
   'background',
   'foreground',
+  'card',
+  'card-foreground',
+  'popover',
+  'popover-foreground',
+  'primary',
+  'primary-foreground',
+  'secondary',
+  'secondary-foreground',
   'muted',
   'muted-foreground',
+  'accent',
+  'accent-foreground',
+  'destructive',
   'border',
-  'primary',
+  'input',
+  'ring',
   'chart-1',
   'chart-2',
   'chart-3',
   'chart-4',
   'chart-5',
+  'sidebar',
+  'sidebar-foreground',
+  'sidebar-primary',
+  'sidebar-primary-foreground',
+  'sidebar-accent',
+  'sidebar-accent-foreground',
+  'sidebar-border',
+  'sidebar-ring',
+  'success',
+  'success-foreground',
+  'warning',
+  'warning-foreground',
 ] as const;
+
+const reported = new Set<string>();
+
+/** Reports once, in development, a theme variable a device cannot draw, which would draw black or nothing. */
+function reportMissing(name: string): undefined {
+  if (__DEV__ && !reported.has(name)) {
+    reported.add(name);
+    console.warn(`Chart: no theme colour ${name} on this device; the part naming it draws no colour.`);
+  }
+  return undefined;
+}
 
 /** Uniwind's theme holds `--chart-1` as the colour `--color-chart-1`. */
 function colorVariable(name: string): string {
@@ -53,7 +89,11 @@ function useChartTheme(): ChartTheme {
   const device = usePlatformColors();
   return {
     colorScheme: theme === 'dark' ? 'dark' : 'light',
-    themeColor: (name) => (device === undefined ? `var(${colorVariable(name)})` : device.get(colorVariable(name))),
+    themeColor: (name) => {
+      const variable = colorVariable(name);
+      if (device === undefined) return `var(${variable})`;
+      return device.get(variable) ?? reportMissing(name);
+    },
   };
 }
 
