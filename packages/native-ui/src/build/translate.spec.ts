@@ -136,6 +136,22 @@ describe('translateClasses', () => {
     });
   });
 
+  it("puts a colour behind base-ui's data-popup-open in the open state", () => {
+    const slot = ['px-4', 'data-popup-open:bg-muted/50'];
+
+    expect(translateClasses(slot, 'nativewind', 'view')).toEqual({ classes: ['px-4'], unknown: [] });
+    expect(translateClasses(slot, 'nativewind', 'view', 'open')).toEqual({ classes: ['bg-muted/50'], unknown: [] });
+  });
+
+  it.each([
+    'data-starting-style:scale-90',
+    'data-ending-style:opacity-0',
+    'data-[motion=from-end]:slide-in-from-right-52',
+    'data-[motion^=from-]:animate-in',
+  ])("drops %s, a frame of base-ui's motion a component draws itself", (cls) => {
+    expect(translateClasses([cls, 'p-2'], 'uniwind', 'view')).toEqual({ classes: ['p-2'], unknown: [] });
+  });
+
   it.each(['sm', 'md'])(
     'keeps the base class a style widens at %s, which a phone held upright is below',
     (breakpoint) => {
@@ -224,9 +240,9 @@ describe('translateClasses', () => {
   });
 
   it('reports a state modifier the state table has no row for, rather than dropping it', () => {
-    const result = translateClasses(['data-starting-style:bg-accent', 'p-2'], 'uniwind', 'view');
+    const result = translateClasses(['data-swiping:bg-accent', 'p-2'], 'uniwind', 'view');
 
-    expect(result).toEqual({ classes: ['p-2'], unknown: ['data-starting-style:bg-accent'] });
+    expect(result).toEqual({ classes: ['p-2'], unknown: ['data-swiping:bg-accent'] });
   });
 
   it.each(['nativewind', 'uniwind'] as const)(

@@ -53,7 +53,10 @@ const ICON_MODIFIERS: ReadonlySet<string> = new Set([
  * No touch screen produces these conditions, or nothing on a device matches the selector, so the
  * class is dropped with its modifier. A phone held upright is narrower than `sm`, so the base class a
  * style widens at `sm` or `md` stands. The styles put only exit animations behind `data-closed`, which
- * neither engine runs from these utilities.
+ * neither engine runs from these utilities, and base-ui's `data-starting-style` and `data-ending-style` hold
+ * the frames an enter or exit animation starts and ends on, which a component draws with Reanimated. A
+ * navigation menu's `data-[motion=...]` slides one item's content out and the next in within one shared
+ * popup, where each item here opens a popup of its own.
  */
 const DROPPED_MODIFIERS = [
   /^hover$/,
@@ -63,6 +66,8 @@ const DROPPED_MODIFIERS = [
   /^file$/,
   /^after$/,
   /^data-closed$/,
+  /^data-(starting|ending)-style$/,
+  /^data-\[motion/,
   /^has-data-\[icon=inline-(start|end)\]$/,
   /^(group-)?(not-)?has-\[/,
   /^in-data-\[slot=/,
@@ -108,6 +113,7 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'data-empty': 'empty',
     'aria-expanded': 'expanded',
     'data-open': 'open',
+    'data-popup-open': 'open',
     'data-horizontal': 'orientation=horizontal',
     'data-vertical': 'orientation=vertical',
     first: 'position=first',

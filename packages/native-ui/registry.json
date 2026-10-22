@@ -716,6 +716,35 @@
       ]
     },
     {
+      "name": "navigation-menu",
+      "type": "registry:ui",
+      "title": "Navigation Menu",
+      "description": "Links to the app's sections in a navigation landmark, with triggers that open a panel of more links on a press, or as the pointer rests on them on the web, one at a time, closed by a second press, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/popover",
+        "@rn-primitives/portal",
+        "@rn-primitives/slot",
+        "class-variance-authority",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/menu",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/icon",
+        "@zui/popover",
+        "@zui/text"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/navigation-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "tooltip",
       "type": "registry:ui",
       "title": "Tooltip",

@@ -71,6 +71,7 @@
     "---Navigation---",
     "tabs",
     "tab-bar",
+    "navigation-menu",
     "breadcrumb",
     "pagination"
   ]

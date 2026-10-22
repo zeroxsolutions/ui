@@ -1,6 +1,5 @@
 {
   "notPorted": {
-    "navigation-menu": "Hover menus for desktop web.",
     "sidebar": "A desktop app shell; native has tab-bar."
   },
   "deferred": {
