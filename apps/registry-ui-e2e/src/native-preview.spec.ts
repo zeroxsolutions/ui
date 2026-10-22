@@ -273,6 +273,26 @@ test.describe('in a light colour scheme', () => {
       await expect(trigger).toBeFocused();
     });
 
+    test(`the ${engine} sonner demo raises a toast inside its frame, in a polite live region`, async ({ page }) => {
+      await page.goto(`/native/components/${engine}/sonner`);
+      const demo = inside(page, 'Sonner demo');
+      const toast = demo.getByRole('status').filter({ hasText: 'Event has been created' });
+
+      await demo.getByRole('button', { name: 'Show Toast', exact: true }).click(DRAWN);
+
+      await expect(toast).toBeVisible();
+      await expect(demo.getByRole('region', { name: 'Notifications alt+T' })).toHaveAttribute('aria-live', 'polite');
+      // The frame grows to hold the toast at its bottom edge, which no part of it is clipped from.
+      await expect
+        .poll(async () => {
+          const [outer, inner] = await Promise.all([frame(page, 'Sonner demo').boundingBox(), toast.boundingBox()]);
+          return (
+            outer !== null && inner !== null && inner.y >= outer.y && inner.y + inner.height <= outer.y + outer.height
+          );
+        })
+        .toBe(true);
+    });
+
     test(`the ${engine} tooltip demo shows its label while the pointer rests on the trigger`, async ({ page }) => {
       await page.goto(`/native/components/${engine}/tooltip`);
       const demo = inside(page, 'Tooltip demo');
