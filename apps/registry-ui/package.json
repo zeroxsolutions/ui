@@ -85,7 +85,7 @@
           "^build",
           "shadcn-build",
           "@zeroxsolutions/native-preview:export",
-        "@zeroxsolutions/native-preview-uniwind:export",
+          "@zeroxsolutions/native-preview-uniwind:export",
           "fumadocs-generate",
           "examples-index"
         ]
@@ -102,7 +102,7 @@
           "^build",
           "shadcn-build",
           "@zeroxsolutions/native-preview:export",
-        "@zeroxsolutions/native-preview-uniwind:export",
+          "@zeroxsolutions/native-preview-uniwind:export",
           "fumadocs-generate",
           "examples-index"
         ]
@@ -113,7 +113,7 @@
           "^build",
           "shadcn-build",
           "@zeroxsolutions/native-preview:export",
-        "@zeroxsolutions/native-preview-uniwind:export",
+          "@zeroxsolutions/native-preview-uniwind:export",
           "fumadocs-generate",
           "examples-index"
         ],
