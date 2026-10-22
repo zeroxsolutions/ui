@@ -143,8 +143,7 @@ and for a language not in the list. A trailing newline is ignored. `lib/highligh
   no mono font.
 - Copy writes through `expo-clipboard`, where upstream uses `navigator.clipboard`.
 - Actions always show, as upstream's do on a touch screen; there is no hover to reveal them on. Floating
-  actions put each button on the background without upstream's hairline ring, which a device has no
-  counterpart of.
+  actions draw upstream's hairline ring around each button as a border, since a device has no ring.
 - The content's edges do not fade as it scrolls, and on the web the block draws no focus ring when its content
   has keyboard focus: both are CSS upstream reaches through selectors React Native has no equivalent of.
 - Numbers are padded with spaces to the widest one in the monospace face, where upstream lines them up with CSS
