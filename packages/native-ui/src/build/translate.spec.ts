@@ -159,6 +159,13 @@ describe('translateClasses', () => {
     });
   });
 
+  it('drops a group-hover on a slot that does not name it, as a pointer over its group no touch screen has', () => {
+    const slot = ['group-hover/item:bg-accent', 'p-2'];
+
+    expect(translateClasses(slot, 'nativewind', 'view')).toEqual({ classes: ['p-2'], unknown: [] });
+    expect(translateClasses(slot, 'nativewind', 'view', 'hovered')).toEqual({ classes: [], unknown: [] });
+  });
+
   it.each(['cn-sidebar-menu-action', 'cn-sidebar-menu-badge'])(
     "puts %s's colour behind the hovered state of the button beside it",
     (name) => {

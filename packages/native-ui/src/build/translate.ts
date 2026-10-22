@@ -61,7 +61,7 @@ const ICON_MODIFIERS: ReadonlySet<string> = new Set([
  */
 const DROPPED_MODIFIERS = [
   /^hover$/,
-  /^peer-hover(\/[\w-]+)?$/,
+  /^(group|peer)-hover(\/[\w-]+)?$/,
   /^focus-within$/,
   /^(sm|md)$/,
   /^print$/,
