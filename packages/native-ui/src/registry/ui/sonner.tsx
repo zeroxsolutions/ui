@@ -615,9 +615,9 @@ function ToastView({
 /**
  * Where toasts come up: put one at the app's root, after its PortalHost, and raise toasts with `toast()` from
  * anywhere. Newer toasts stack in front of older ones, which a pointer over them on the web, or a touch on a
- * device, spreads into a list until Escape, or until one toast or none is left; each closes after its duration, by a swipe toward its edge, or from its
- * buttons. A new toast is read by screen readers: announced on iOS, and from a polite live region on Android
- * and the web.
+ * device, spreads into a list until Escape, or until one toast or none is left; each closes after its
+ * duration, by a swipe toward its edge, or from its buttons. A new toast is read by screen readers: announced
+ * on iOS, and from a polite live region on Android and the web.
  */
 function Toaster(props: ToasterProps): ReactNode {
   const {

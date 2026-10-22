@@ -352,8 +352,9 @@ type ToastViewportProps = ComponentProps<typeof View>;
  * Where the toasts stack: across the bottom of the screen, 16px in from its edges and at most 384px wide,
  * or in its bottom right corner from 640px wide, above the safe area's bottom inset. A pointer over the
  * stack or focus in it on the web (F6 moves focus there), or a touch on it on a device, spreads it into a
- * list until the pointer or focus leaves; a touch keeps it spread for 4 seconds after the finger lifts. A new toast is read by screen readers: announced on iOS, and from a
- * polite live region on Android and the web.
+ * list until the pointer or focus leaves; a touch keeps it spread for 4 seconds after the finger lifts. A
+ * new toast is read by screen readers: announced on iOS, and from a polite live region on Android and the
+ * web.
  */
 function ToastViewport({ className, style, children, ...props }: ToastViewportProps): ReactNode {
   const { toasts } = useToastManager();
