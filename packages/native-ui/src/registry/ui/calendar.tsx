@@ -27,13 +27,17 @@ import { enUS } from 'date-fns/locale/en-US';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useEffect, useRef, useState, type ComponentRef, type ComponentType, type ReactNode, type Ref } from 'react';
 import {
+  AccessibilityInfo,
   Platform,
   Pressable,
   View,
+  type GestureResponderEvent,
   type KeyDownEvent,
   type PressableProps,
   type Role,
+  type StyleProp,
   type ViewProps,
+  type ViewStyle,
 } from 'react-native';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './button';
@@ -73,8 +77,9 @@ interface CalendarDay {
   outside: boolean;
 }
 
-/** What a day is, as its button draws and announces it. */
+/** What a day is, as its button draws and announces it, with a key for each of the `modifiers` passed. */
 interface DayModifiers {
+  [modifier: string]: boolean;
   today: boolean;
   selected: boolean;
   disabled: boolean;
@@ -290,6 +295,16 @@ interface CalendarSharedProps {
   disabled?: Matcher | readonly Matcher[];
   /** Days drawn as blank space. */
   hidden?: Matcher | readonly Matcher[];
+  /** Modifiers of your own, each the days it matches, which the day's `modifiers` then carry by name. */
+  modifiers?: Record<string, Matcher | readonly Matcher[] | undefined>;
+  /** Classes added to the cell of each day a modifier, built in or your own, is true for. */
+  modifiersClassNames?: Record<string, string>;
+  /** Styles added to the cell of each day a modifier, built in or your own, is true for. */
+  modifiersStyles?: Record<string, StyleProp<ViewStyle>>;
+  /** Called with a pressed day and its modifiers; with it the days are buttons even without a `mode`. */
+  onDayClick?: (date: Date, modifiers: DayModifiers, event: GestureResponderEvent) => void;
+  /** Drawn under the months, in a polite live region; a string is drawn as text. */
+  footer?: ReactNode;
   formatters?: Partial<Formatters>;
   labels?: Partial<Labels>;
   /** The component each day is drawn with, such as one built on CalendarDayButton. */
@@ -463,6 +478,11 @@ function Calendar(props: CalendarProps): ReactNode {
     today: todayProp,
     disabled,
     hidden,
+    modifiers: customModifiers,
+    modifiersClassNames,
+    modifiersStyles,
+    onDayClick,
+    footer,
     formatters: formattersProp,
     labels: labelsProp,
     components,
@@ -512,6 +532,8 @@ function Calendar(props: CalendarProps): ReactNode {
     if (isSameMonth(next, firstMonth)) return;
     setOwnMonth(next);
     onMonthChange?.(next);
+    // iOS reads no live region, so the caption's change is announced there.
+    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(formatters.formatCaption(next, options));
   };
 
   const step = pagedNavigation ? numberOfMonths : 1;
@@ -687,6 +709,12 @@ function Calendar(props: CalendarProps): ReactNode {
                   {week.map((date, column) => {
                     const outside = !isSameMonth(date, month);
                     const modifiers: DayModifiers = {
+                      ...Object.fromEntries(
+                        Object.entries(customModifiers ?? {}).map(([name, matcher]) => [
+                          name,
+                          matchesAny(date, matcher),
+                        ]),
+                      ),
                       today: isSameDay(date, today),
                       selected: selection.isSelected(date),
                       disabled: isDisabled(date),
@@ -700,6 +728,7 @@ function Calendar(props: CalendarProps): ReactNode {
                     // A range's strip is rounded where a week starts or ends inside it.
                     const weekStart = rangeMiddle && column === 0;
                     const weekEnd = rangeMiddle && column === week.length - 1;
+                    const active = Object.keys(modifiers).filter((name) => modifiers[name]);
                     return (
                       <View
                         key={dayKey(date)}
@@ -713,9 +742,11 @@ function Calendar(props: CalendarProps): ReactNode {
                           rangeMiddle && 'bg-muted',
                           weekStart && 'overflow-hidden rounded-l-md',
                           weekEnd && 'overflow-hidden rounded-r-md',
+                          active.map((name) => modifiersClassNames?.[name]),
                         )}
+                        style={modifiersStyles && active.map((name) => modifiersStyles[name])}
                       >
-                        {modifiers.hidden ? null : mode === undefined ? (
+                        {modifiers.hidden ? null : mode === undefined && onDayClick === undefined ? (
                           <View className="flex-1 items-center justify-center">
                             <Text className={cn('text-sm', outside && 'text-muted-foreground')}>
                               {formatters.formatDay(date, options)}
@@ -732,15 +763,15 @@ function Calendar(props: CalendarProps): ReactNode {
                             modifiers={modifiers}
                             locale={locale}
                             aria-label={labels.labelDayButton(date, modifiers, options)}
-                            aria-selected={modifiers.selected}
                             aria-disabled={modifiers.disabled}
                             disabled={modifiers.disabled}
                             tabIndex={WEB ? (ownsTabStop ? 0 : -1) : undefined}
                             onFocus={() => setFocused(date)}
                             onKeyDown={(event: KeyDownEvent) => onKeyDown(date, event)}
-                            onPress={() => {
+                            onPress={(event: GestureResponderEvent) => {
                               setFocused(date);
                               selection.select(date);
+                              onDayClick?.(date, modifiers, event);
                             }}
                           >
                             {formatters.formatDay(date, options)}
@@ -755,6 +786,11 @@ function Calendar(props: CalendarProps): ReactNode {
           </View>
         ))}
       </View>
+      {footer !== undefined && (
+        <View role={WEB ? 'status' : undefined} aria-live="polite" className="mt-4">
+          {typeof footer === 'string' ? <Text className="text-sm">{footer}</Text> : footer}
+        </View>
+      )}
     </View>
   );
 }

@@ -34,36 +34,41 @@ const [date, setDate] = useState<Date | undefined>(new Date());
 Takes every prop of React Native's `View` except `children`, and react-day-picker's props below, with the same
 meaning:
 
-| Prop                | Type                                                             | Default            |
-| ------------------- | ---------------------------------------------------------------- | ------------------ |
-| `mode`              | `'single' \| 'multiple' \| 'range'`                              | -                  |
-| `selected`          | `Date`, `Date[]` or `DateRange`, by `mode`                       | -                  |
-| `onSelect`          | `(selected, triggerDate: Date) => void`                          | -                  |
-| `required`          | `boolean`                                                        | `false`            |
-| `min`, `max`        | `number` (`multiple` and `range`)                                | -                  |
-| `month`             | `Date`                                                           | -                  |
-| `defaultMonth`      | `Date`                                                           | today's month      |
-| `onMonthChange`     | `(month: Date) => void`                                          | -                  |
-| `startMonth`        | `Date`                                                           | -                  |
-| `endMonth`          | `Date`                                                           | -                  |
-| `numberOfMonths`    | `number`                                                         | `1`                |
-| `pagedNavigation`   | `boolean`                                                        | `false`            |
-| `disableNavigation` | `boolean`                                                        | `false`            |
-| `hideNavigation`    | `boolean`                                                        | `false`            |
-| `captionLayout`     | `'label' \| 'dropdown' \| 'dropdown-months' \| 'dropdown-years'` | `'label'`          |
-| `reverseYears`      | `boolean`                                                        | `false`            |
-| `showOutsideDays`   | `boolean`                                                        | `true`             |
-| `fixedWeeks`        | `boolean`                                                        | `false`            |
-| `showWeekNumber`    | `boolean`                                                        | `false`            |
-| `weekStartsOn`      | `0` to `6`                                                       | the locale's       |
-| `locale`            | a date-fns `Locale`                                              | English (US)       |
-| `today`             | `Date`                                                           | the device's today |
-| `disabled`          | `Matcher \| Matcher[]`                                           | -                  |
-| `hidden`            | `Matcher \| Matcher[]`                                           | -                  |
-| `formatters`        | `Partial<Formatters>`                                            | -                  |
-| `labels`            | `Partial<Labels>`                                                | -                  |
-| `components`        | `{ DayButton?: ComponentType<CalendarDayButtonProps> }`          | -                  |
-| `buttonVariant`     | the Button's `variant`                                           | `'ghost'`          |
+| Prop                  | Type                                                             | Default            |
+| --------------------- | ---------------------------------------------------------------- | ------------------ |
+| `mode`                | `'single' \| 'multiple' \| 'range'`                              | -                  |
+| `selected`            | `Date`, `Date[]` or `DateRange`, by `mode`                       | -                  |
+| `onSelect`            | `(selected, triggerDate: Date) => void`                          | -                  |
+| `required`            | `boolean`                                                        | `false`            |
+| `min`, `max`          | `number` (`multiple` and `range`)                                | -                  |
+| `month`               | `Date`                                                           | -                  |
+| `defaultMonth`        | `Date`                                                           | today's month      |
+| `onMonthChange`       | `(month: Date) => void`                                          | -                  |
+| `startMonth`          | `Date`                                                           | -                  |
+| `endMonth`            | `Date`                                                           | -                  |
+| `numberOfMonths`      | `number`                                                         | `1`                |
+| `pagedNavigation`     | `boolean`                                                        | `false`            |
+| `disableNavigation`   | `boolean`                                                        | `false`            |
+| `hideNavigation`      | `boolean`                                                        | `false`            |
+| `captionLayout`       | `'label' \| 'dropdown' \| 'dropdown-months' \| 'dropdown-years'` | `'label'`          |
+| `reverseYears`        | `boolean`                                                        | `false`            |
+| `showOutsideDays`     | `boolean`                                                        | `true`             |
+| `fixedWeeks`          | `boolean`                                                        | `false`            |
+| `showWeekNumber`      | `boolean`                                                        | `false`            |
+| `weekStartsOn`        | `0` to `6`                                                       | the locale's       |
+| `locale`              | a date-fns `Locale`                                              | English (US)       |
+| `today`               | `Date`                                                           | the device's today |
+| `disabled`            | `Matcher \| Matcher[]`                                           | -                  |
+| `hidden`              | `Matcher \| Matcher[]`                                           | -                  |
+| `modifiers`           | `Record<string, Matcher \| Matcher[]>`                           | -                  |
+| `modifiersClassNames` | `Record<string, string>`                                         | -                  |
+| `modifiersStyles`     | `Record<string, StyleProp<ViewStyle>>`                           | -                  |
+| `onDayClick`          | `(date: Date, modifiers, event) => void`                         | -                  |
+| `footer`              | `ReactNode`                                                      | -                  |
+| `formatters`          | `Partial<Formatters>`                                            | -                  |
+| `labels`              | `Partial<Labels>`                                                | -                  |
+| `components`          | `{ DayButton?: ComponentType<CalendarDayButtonProps> }`          | -                  |
+| `buttonVariant`       | the Button's `variant`                                           | `'ghost'`          |
 
 With `onSelect` the calendar follows `selected`; without it the calendar holds its own selection, starting from
 `selected`. In `single` mode a press on the selected day clears it unless `required`. In `range` mode the first
@@ -73,9 +78,15 @@ A `Matcher` is a `Date`, a `Date[]`, a `DateRange`, `{ before }`, `{ after }`, `
 `{ dayOfWeek }`, a function of the day, or `true`. A disabled day takes no press and is announced disabled; a
 hidden one is blank space.
 
+`modifiers` names days of your own, such as booked ones, and each day's `modifiers` then carries that name as
+`true` or `false`. `modifiersClassNames` and `modifiersStyles` add to the cell of each day a modifier, built in
+or your own, is true for. `onDayClick` is called on every press of a day, after the selection changes; with it
+the days are buttons even without a `mode`. `footer` is drawn under the months in a polite live region.
+
 Each day is a button announced by its full date, with "Today" before it and "selected" after it, and the
 previous and next buttons are named "Go to the Previous Month" and "Go to the Next Month"; `labels` changes
-them. With a label caption, the caption is a polite live region, so the new month is read as it changes. On the
+them. When the month changes, iOS announces the new caption, and Android and the web read it from the caption's
+polite live region. On the
 web each month is a grid named by its month, one day is the tab stop, and the arrow keys move a day or a week,
 Page Up and Page Down a month (with Shift, a year), and Home and End to the start and end of the week, moving
 to another month when the day is not drawn.
@@ -87,7 +98,8 @@ hundred years ago to this year unless `startMonth` and `endMonth` say otherwise.
 
 The button each day is drawn as, which a `components.DayButton` can build on. Takes every prop of React
 Native's `Pressable`, plus `day` (`{ date, displayMonth, outside }`), `modifiers` (`today`, `selected`,
-`disabled`, `hidden`, `outside`, `focused`, `range_start`, `range_middle`, `range_end`) and `locale`.
+`disabled`, `hidden`, `outside`, `focused`, `range_start`, `range_middle`, `range_end`, and each of
+`modifiers` by name) and `locale`.
 
 ## Differences from upstream
 
@@ -100,5 +112,17 @@ Native's `Pressable`, plus `day` (`{ date, displayMonth, outside }`), `modifiers
   Native has no such selector, so pass `className="bg-transparent"` there.
 - The grid, row and cell roles are written on the web only: iOS has no grid role, and a device reads each day's
   button by its full date.
-- Left out: react-day-picker's `timeZone`, `ISOWeek`, `broadcastCalendar`, `modifiers`, `onDayClick`, `footer`,
-  `dir` and every component but `DayButton`, which neither upstream's demos nor its blocks use.
+- A day's selected state is in its name only ("..., selected"), where upstream also marks its cell selected: a
+  device reads a button's name and then its state, so a day marked both would be read "selected, selected". The
+  web's grid cells still carry `aria-selected`.
+- `modifiersClassNames` adds to the day's cell, as upstream's does, but a selector into the cell such as
+  upstream's `[&>button]:line-through` reaches nothing: React Native styles carry no selectors. Style the
+  button from its `modifiers` in a `components.DayButton` instead.
+- The cells take the style's size (`size-8` in Vega, `size-7` in Nova), where upstream's take the
+  `--cell-size` variable, which a class such as `[--cell-size:--spacing(10)]` on the calendar changes. A React
+  Native view reads no CSS variable its parent sets, so change the size in the installed `calendar.tsx`: the
+  cells' `size-8` and the weekday columns' `w-8`.
+- Not ported, though the platform does not stop them: react-day-picker's `timeZone`, `ISOWeek` and
+  `broadcastCalendar`, which change which day a date falls on and which weeks a month draws, and every
+  component but `DayButton`. `dir` is left out because React
+  Native lays out right to left from `I18nManager`, for the whole app, not per component.
