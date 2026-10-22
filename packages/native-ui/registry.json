@@ -282,7 +282,14 @@
         "react-native-safe-area-context",
         "react-native-worklets"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/icon", "@zui/spinner", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/motion",
+        "@zui/icon",
+        "@zui/spinner",
+        "@zui/text"
+      ],
       "files": [
         {
           "path": "src/registry/ui/sonner.tsx",
@@ -586,7 +593,7 @@
       "title": "Field",
       "description": "The layout of a form: fields of a label, a control and a description or an error, in groups and sets named by a legend, stacked or in a row.",
       "dependencies": ["@rn-primitives/label"],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/separator"],
+      "registryDependencies": ["@zui/utils", "@zui/text-children", "@zui/text", "@zui/separator"],
       "files": [
         {
           "path": "src/registry/ui/field.tsx",
@@ -730,6 +737,7 @@
       ],
       "registryDependencies": [
         "@zui/utils",
+        "@zui/text-children",
         "@zui/menu",
         "@zui/motion",
         "@zui/overlay",
@@ -758,6 +766,7 @@
       ],
       "registryDependencies": [
         "@zui/utils",
+        "@zui/text-children",
         "@zui/motion",
         "@zui/button",
         "@zui/direction",
@@ -896,7 +905,15 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/menu",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/icon",
+        "@zui/text"
+      ],
       "files": [
         {
           "path": "src/registry/ui/select.tsx",
@@ -932,7 +949,15 @@
       "title": "Combobox",
       "description": "A field that picks one of a long list of choices: a trigger announced as a combobox showing the chosen label, opening a Popover that holds a Command whose typed text filters the choices, the chosen one announced as selected with a check mark, closed by a choice.",
       "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/command", "@zui/popover", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/button",
+        "@zui/command",
+        "@zui/popover",
+        "@zui/icon",
+        "@zui/text"
+      ],
       "files": [
         {
           "path": "src/registry/ui/combobox.tsx",
@@ -985,6 +1010,7 @@
       ],
       "registryDependencies": [
         "@zui/utils",
+        "@zui/text-children",
         "@zui/motion",
         "@zui/overlay",
         "@zui/button",

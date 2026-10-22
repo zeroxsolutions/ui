@@ -116,6 +116,34 @@ describe('Combobox', () => {
     expect(screen.getByText('No framework found.')).toBeOnTheScreen();
   });
 
+  it('sets an item and an empty message written with a value inside them in one Text, and names the item by it', async () => {
+    const user = setUp();
+    const seats = 4;
+    await render(
+      <>
+        <Combobox items={[{ label: 'Team', value: 'team' }]}>
+          <ComboboxTrigger testID="trigger" aria-label="Plan">
+            <ComboboxValue placeholder="Select a plan" />
+          </ComboboxTrigger>
+          <ComboboxContent>
+            <ComboboxInput placeholder="Search framework..." />
+            <ComboboxEmpty>No plan with {seats} seats.</ComboboxEmpty>
+            <ComboboxList>
+              <ComboboxItem value="team">Team ({seats} seats)</ComboboxItem>
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+        <PortalHost />
+      </>,
+    );
+    await user.press(trigger());
+    await finishMotion();
+
+    expect(option('Team (4 seats)')).toBeOnTheScreen();
+    await user.type(search(), 'zz');
+    expect(screen.getByText('No plan with 4 seats.')).toBeOnTheScreen();
+  });
+
   it("shows the chosen item's label, closes, and reports its value", async () => {
     const onValueChange = jest.fn();
     const user = await open({ onValueChange });

@@ -10,6 +10,7 @@ import {
   SidebarInset,
   SidebarMenu,
   SidebarMenuAction,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -138,6 +139,37 @@ describe('Sidebar', () => {
 
   describe('from the md width', () => {
     beforeEach(() => windowOf(1024));
+
+    it('sets text written with a value inside it in one line of text, as a lone string is', async () => {
+      const count = 3;
+      await render(
+        <SidebarProvider>
+          <Sidebar>
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupLabel>Projects ({count})</SidebarGroupLabel>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton>Inbox {count}</SidebarMenuButton>
+                    <SidebarMenuBadge>{count} new</SidebarMenuBadge>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton>Drafts {count}</SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroup>
+            </SidebarContent>
+          </Sidebar>
+        </SidebarProvider>,
+      );
+
+      expect(screen.getByText('Projects (3)')).toBeOnTheScreen();
+      expect(screen.getByText('Inbox 3')).toHaveProp('numberOfLines', 1);
+      expect(screen.getByText('3 new')).toBeOnTheScreen();
+      expect(screen.getByText('Drafts 3')).toHaveProp('numberOfLines', 1);
+    });
 
     it('is a 16rem panel beside the screen, open by default, and not a mobile sidebar', async () => {
       await render(<App />);

@@ -139,6 +139,19 @@ describe('Command', () => {
     expect(screen.queryAllByRole('option')).toHaveLength(0);
   });
 
+  it('sets an empty message written with a value inside it in one Text', async () => {
+    const query = 'zzz';
+    await render(
+      <Command>
+        <CommandList>
+          <CommandEmpty>No results for {query}.</CommandEmpty>
+        </CommandList>
+      </Command>,
+    );
+
+    expect(screen.getByText('No results for zzz.')).toBeOnTheScreen();
+  });
+
   it("runs an item's onSelect with its value when it is pressed", async () => {
     const onSelect = jest.fn();
     const user = setUp();

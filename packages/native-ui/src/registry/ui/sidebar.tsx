@@ -28,6 +28,7 @@ import {
 } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useReducedMotion } from '../lib/motion';
+import { asText } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { DirectionProvider, useDirectionSides, useMirrored, type TextDirection } from './direction';
@@ -486,15 +487,6 @@ function SidebarGroup({ className, ...props }: SidebarSectionProps): ReactNode {
   return <View className={cn('relative w-full min-w-0 flex-col cn-sidebar-group', className)} {...props} />;
 }
 
-/** Its Text children, or its string wrapped in one. */
-function labelOf(children: ReactNode, numberOfLines?: number): ReactNode {
-  return typeof children === 'string' || typeof children === 'number' ? (
-    <Text numberOfLines={numberOfLines}>{children}</Text>
-  ) : (
-    children
-  );
-}
-
 type SidebarGroupLabelProps = ComponentProps<typeof View> & {
   /** Renders the single child with the label's props and classes merged on. */
   asChild?: boolean;
@@ -516,7 +508,7 @@ function SidebarGroupLabel({ className, asChild = false, children, ...props }: S
           )}
           {...props}
         >
-          {asChild ? children : labelOf(children)}
+          {asChild ? children : asText(children)}
         </Component>
       </IconClassContext.Provider>
     </TextClassContext.Provider>
@@ -702,7 +694,7 @@ function SidebarMenuButton({
         onHoverOut?.(event);
       }}
     >
-      {asChild ? children : labelOf(children, 1)}
+      {asChild ? children : asText(children, { numberOfLines: 1 })}
     </Component>
   );
   // A device opens a tooltip on the press that runs the button, so it shows none there.
@@ -816,7 +808,7 @@ function SidebarMenuBadge({ className, children, ...props }: SidebarSectionProps
         )}
         {...props}
       >
-        {labelOf(children)}
+        {asText(children)}
       </View>
     </TextClassContext.Provider>
   );
@@ -890,7 +882,7 @@ function SidebarMenuSubButton({
           )}
           {...props}
         >
-          {asChild ? children : labelOf(children, 1)}
+          {asChild ? children : asText(children, { numberOfLines: 1 })}
         </Component>
       </IconClassContext.Provider>
     </TextClassContext.Provider>

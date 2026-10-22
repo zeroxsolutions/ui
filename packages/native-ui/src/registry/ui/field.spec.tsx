@@ -172,6 +172,13 @@ describe('FieldSeparator', () => {
     expect(classesOf('separator')).toEqual(expect.arrayContaining(['h-5', '-my-2']));
     expect(textClassesOf('Or continue with')).toContain('text-muted-foreground');
   });
+
+  it('sets text written with a value inside it in one Text', async () => {
+    const provider = 'GitHub';
+    await render(<FieldSeparator>Or use {provider}</FieldSeparator>);
+
+    expect(screen.getByText('Or use GitHub')).toBeOnTheScreen();
+  });
 });
 
 describe('FieldError', () => {
@@ -198,6 +205,15 @@ describe('FieldError', () => {
     await rerender(<FieldError>Enter an email.</FieldError>);
 
     expect(announce.mock.calls).toEqual([['Too short.'], ['Enter an email.']]);
+  });
+
+  it('draws and announces a message written with a value inside it', async () => {
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockClear();
+    const min = 8;
+    await render(<FieldError>Use at least {min} characters.</FieldError>);
+
+    expect(screen.getByText('Use at least 8 characters.')).toBeOnTheScreen();
+    expect(announce).toHaveBeenCalledWith('Use at least 8 characters.');
   });
 
   it('draws the message of a single error', async () => {

@@ -121,6 +121,26 @@ describe('Questionnaire', () => {
     expect(progress).toHaveAccessibilityValue({ min: 1, max: 3, now: 1, text: 'Question 1 of 3' });
   });
 
+  it('sets a choice or a button written as text with a value inside it in one Text', async () => {
+    const count = 2;
+    await render(
+      <Questionnaire items={[{ name: 'size', choices: [{ value: 'small' }] }]}>
+        <QuestionnaireItem name="size">
+          <QuestionnaireTitle>How big?</QuestionnaireTitle>
+          <QuestionnaireChoices>
+            <QuestionnaireChoice value="small">Small ({count} seats)</QuestionnaireChoice>
+          </QuestionnaireChoices>
+        </QuestionnaireItem>
+        <QuestionnaireActions>
+          <QuestionnaireSubmit>Save {count} answers</QuestionnaireSubmit>
+        </QuestionnaireActions>
+      </Questionnaire>,
+    );
+
+    expect(screen.getByText('Small (2 seats)')).toBeOnTheScreen();
+    expect(screen.getByText('Save 2 answers')).toBeOnTheScreen();
+  });
+
   it('names each question group by its title, a radio group for one answer and a group for several', async () => {
     await render(<Plan />);
 

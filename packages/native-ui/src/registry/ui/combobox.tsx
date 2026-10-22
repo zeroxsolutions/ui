@@ -1,5 +1,6 @@
 import { ChevronDown } from 'lucide-react-native';
 import { createContext, useContext, useRef, useState, type ComponentProps, type ReactNode } from 'react';
+import { asText, isText, textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import type { ButtonProps } from './button';
@@ -247,7 +248,7 @@ type ComboboxItemProps = Omit<CommandItemProps, 'value' | 'onSelect' | 'checked'
  */
 function ComboboxItem({ className, value, label, children, ...props }: ComboboxItemProps): ReactNode {
   const combobox = useCombobox('ComboboxItem');
-  const name = label ?? (typeof children === 'string' ? children : combobox.labelOf(value));
+  const name = label ?? (isText(children) ? textOf(children) : combobox.labelOf(value));
   return (
     <CommandItem
       value={value}
@@ -258,7 +259,7 @@ function ComboboxItem({ className, value, label, children, ...props }: ComboboxI
       className={className}
       {...props}
     >
-      {typeof children === 'string' ? <Text>{children}</Text> : children}
+      {asText(children)}
     </CommandItem>
   );
 }
@@ -283,7 +284,7 @@ type ComboboxEmptyProps = CommandEmptyProps;
 function ComboboxEmpty({ className, children, ...props }: ComboboxEmptyProps): ReactNode {
   return (
     <CommandEmpty className={cn('cn-combobox-empty cn-combobox-empty@empty', className)} {...props}>
-      {typeof children === 'string' ? <Text className="cn-combobox-empty/text">{children}</Text> : children}
+      {asText(children, { className: 'cn-combobox-empty/text' })}
     </CommandEmpty>
   );
 }

@@ -297,7 +297,7 @@ function TraceCollapsibleContent({
     >
       <TextClassContext.Provider value="text-muted-foreground cn-trace-collapsible-content-inner/text">
         <View className={cn('min-w-0 cn-trace-collapsible-content-inner', className)}>
-          {Children.map(children, asText)}
+          {Children.map(children, (child) => asText(child))}
         </View>
       </TextClassContext.Provider>
     </View>

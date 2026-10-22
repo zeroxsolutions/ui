@@ -107,6 +107,21 @@ describe('Toaster', () => {
     expect(around(screen.getByText('Event created'), 'aria-live')).toHaveProp('aria-live', 'polite');
   });
 
+  it('announces the text of a title given as an element, and draws an action label with a value inside it', async () => {
+    const count = 3;
+    await show();
+
+    await raise(() =>
+      toast.add({
+        title: <Text>Moved {count} files</Text>,
+        actionProps: { children: ['Undo ', count] },
+      }),
+    );
+
+    expect(announce).toHaveBeenCalledWith('Moved 3 files', { queue: true });
+    expect(screen.getByRole('button', { name: 'Undo 3' })).toBeOnTheScreen();
+  });
+
   it('announces a high priority toast at once on iOS, and assertively for Android', async () => {
     await show();
 

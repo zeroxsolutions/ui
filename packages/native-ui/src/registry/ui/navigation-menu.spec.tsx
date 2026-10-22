@@ -107,6 +107,25 @@ describe('NavigationMenu', () => {
     expect(screen.getByRole('link', { name: 'Docs' })).toBeOnTheScreen();
   });
 
+  it('sets a label written with a value inside it in one Text, as a lone string is', async () => {
+    const version = 4;
+    await render(
+      <NavigationMenu>
+        <NavigationMenuList>
+          <NavigationMenuItem value="docs">
+            <NavigationMenuTrigger>Docs v{version}</NavigationMenuTrigger>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink>Blog {version}</NavigationMenuLink>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>,
+    );
+
+    expect(screen.getByText('Docs v4')).toBeOnTheScreen();
+    expect(screen.getByText('Blog 4')).toBeOnTheScreen();
+  });
+
   it('takes the name it is given', async () => {
     await render(<Menu aria-label="Docs sections" />);
 

@@ -1,4 +1,4 @@
-import { Children, isValidElement, type ReactNode } from 'react';
+import { Children, isValidElement, type ComponentProps, type ReactElement, type ReactNode } from 'react';
 import { Text } from '../ui/text';
 
 /**
@@ -13,18 +13,23 @@ function textOf(node: ReactNode, separator = ''): string {
   return '';
 }
 
-/**
- * `children` set in one Text when they are only strings and numbers, which a View cannot hold bare; anything else,
- * a function child included, as given.
- */
-function asText(children: ReactNode): ReactNode {
-  if (typeof children === 'function') return children;
+/** Whether `children` are only strings and numbers, one or several, which a View cannot hold bare. */
+function isText(children: ReactNode): boolean {
+  if (typeof children === 'function') return false;
   const parts = Children.toArray(children);
-  return parts.length > 0 && parts.every((part) => typeof part === 'string' || typeof part === 'number') ? (
-    <Text>{children}</Text>
-  ) : (
-    children
-  );
+  return parts.length > 0 && parts.every((part) => typeof part === 'string' || typeof part === 'number');
 }
 
-export { asText, textOf };
+/**
+ * `children` set in one Text when they are only strings and numbers; anything else, a function child included,
+ * as given.
+ * @param props - given to that Text, such as `numberOfLines` or a `className`
+ */
+function asText<Given extends ReactNode | ((...args: never[]) => ReactNode)>(
+  children: Given,
+  props?: ComponentProps<typeof Text>,
+): Given | ReactElement {
+  return isText(children as ReactNode) ? <Text {...props}>{children as ReactNode}</Text> : children;
+}
+
+export { asText, isText, textOf };

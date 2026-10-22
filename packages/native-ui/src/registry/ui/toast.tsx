@@ -19,6 +19,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useReducedMotion, useSwipeToDismiss, type SwipeDirection } from '../lib/motion';
 import { usePortalHostCheck } from '../lib/overlay';
+import { asText, textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './button';
 import { Icon } from './icon';
@@ -341,10 +342,6 @@ interface WebBlur {
 interface WebDocument {
   addEventListener(type: 'keydown', listener: (event: WebKeyEvent) => void): void;
   removeEventListener(type: 'keydown', listener: (event: WebKeyEvent) => void): void;
-}
-
-function textOf(node: ReactNode): string | undefined {
-  return typeof node === 'string' || typeof node === 'number' ? String(node) : undefined;
 }
 
 type ToastViewportProps = ComponentProps<typeof View>;
@@ -724,7 +721,7 @@ function ToastAction({ className, children, variant = 'outline', size = 'sm', ..
   if (item.actionProps === undefined && children === undefined) return null;
   return (
     <Button variant={variant} size={size} className={cn('shrink-0', actionClassName, className)} {...action} {...props}>
-      {typeof content === 'string' ? <Text>{content}</Text> : content}
+      {asText(content)}
     </Button>
   );
 }

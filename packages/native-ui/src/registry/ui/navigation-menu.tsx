@@ -27,10 +27,11 @@ import Animated, { Easing, useAnimatedStyle } from 'react-native-reanimated';
 import { useHighlight } from '../lib/menu';
 import { usePresence, type PopupSide } from '../lib/motion';
 import { usePortalHostCheck } from '../lib/overlay';
+import { asText } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Icon, IconClassContext } from './icon';
 import { Popover, PopoverTrigger } from './popover';
-import { Text, TextClassContext } from './text';
+import { TextClassContext } from './text';
 
 // A `cn-<slot>` token stands for that slot's view classes, `cn-<slot>/text` and `cn-<slot>/icon` for its
 // text and icon classes, and `cn-<slot>@<state>` for the classes the style puts behind that state; the
@@ -278,11 +279,6 @@ const navigationMenuTriggerStyle = cva(
 /** Props that clear the popup kind the web's primitive gives a trigger, which spreads a child's props last. */
 const NO_POPUP = { 'aria-haspopup': undefined } as const;
 
-/** Its Text children, or its string wrapped in one. */
-function labelOf(children: ReactNode): ReactNode {
-  return typeof children === 'string' || typeof children === 'number' ? <Text>{children}</Text> : children;
-}
-
 type NavigationMenuTriggerProps = Omit<ComponentProps<typeof PopoverTrigger>, 'children'> & {
   children?: ReactNode;
 };
@@ -337,7 +333,7 @@ function NavigationMenuTrigger({
           menu.hoverClose();
         }}
       >
-        {labelOf(children)}
+        {asText(children)}
         <Icon
           as={ChevronDown}
           aria-hidden
@@ -538,7 +534,7 @@ function NavigationMenuLink({
             if (closeOnClick) menu.change(null, 'press');
           }}
         >
-          {labelOf(children)}
+          {asText(children)}
         </Component>
       </IconClassContext.Provider>
     </TextClassContext.Provider>

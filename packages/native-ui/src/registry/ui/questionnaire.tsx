@@ -17,7 +17,7 @@ import {
 } from 'react';
 import { AccessibilityInfo, Platform, Pressable, View, type ViewStyle } from 'react-native';
 import { useFocusVisible } from '../lib/focus-visible';
-import { textOf } from '../lib/text-children';
+import { asText, textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { Icon, IconClassContext } from './icon';
@@ -1073,7 +1073,7 @@ function QuestionnaireChoice({
           ) : null}
         </View>
         <TextClassContext.Provider value="leading-snug cn-questionnaire-choice/text">
-          <View className="cn-questionnaire-choice-content min-w-0 flex-1 flex-col">{children}</View>
+          <View className="cn-questionnaire-choice-content min-w-0 flex-1 flex-col">{asText(children)}</View>
         </TextClassContext.Provider>
         {shortcut === null ? null : (
           <View
@@ -1264,7 +1264,7 @@ type QuestionnaireButtonProps = ComponentProps<typeof Button> & {
 function StepButton({ label, children, className, ...props }: QuestionnaireButtonProps & { label: string }): ReactNode {
   return (
     <Button className={cn('min-h-11', className)} {...props}>
-      {children === undefined || typeof children === 'string' ? <Text>{children ?? label}</Text> : children}
+      {asText(children ?? label)}
     </Button>
   );
 }

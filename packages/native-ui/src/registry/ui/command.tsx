@@ -12,7 +12,7 @@ import {
 } from 'react';
 import { Platform, Pressable, ScrollView, View, type Role, type TextInputKeyPressEvent } from 'react-native';
 import { commandScore } from '../lib/command-score';
-import { textOf } from '../lib/text-children';
+import { asText, textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog';
 import type { DialogProps } from './dialog';
@@ -326,7 +326,7 @@ function CommandEmpty({ className, children, ...props }: CommandEmptyProps): Rea
   return (
     <TextClassContext.Provider value="cn-command-empty/text">
       <View className={cn('cn-command-empty', className)} {...props}>
-        {typeof children === 'string' || typeof children === 'number' ? <Text>{children}</Text> : children}
+        {asText(children)}
       </View>
     </TextClassContext.Provider>
   );

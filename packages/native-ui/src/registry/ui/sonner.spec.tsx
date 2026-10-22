@@ -88,6 +88,15 @@ describe('Toaster', () => {
     expect(liveRegionAround(screen.getByText('Event has been created'))).toHaveProp('aria-live', 'polite');
   });
 
+  it('announces the text of a title given as an element or a function', async () => {
+    const count = 3;
+    await show();
+
+    await raise(() => toast(<Text>Moved {count} files</Text>, { description: () => 'To the archive' }));
+
+    expect(announce).toHaveBeenCalledWith('Moved 3 files, To the archive');
+  });
+
   it('closes after its duration, four seconds by default, and says so', async () => {
     const onAutoClose = jest.fn();
     await show();

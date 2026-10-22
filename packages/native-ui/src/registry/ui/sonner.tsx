@@ -25,6 +25,7 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from '
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useReducedMotion, useSwipeToDismiss, type SwipeDirection as Swipe } from '../lib/motion';
+import { textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Icon } from './icon';
 import { Spinner } from './spinner';
@@ -340,9 +341,9 @@ function edgeOffsets(offset: Offset | undefined, fallback: number) {
   return { top: px(offset.top), right: px(offset.right), bottom: px(offset.bottom), left: px(offset.left) };
 }
 
-function textOf(node: TitleT): string | undefined {
-  const value = typeof node === 'function' ? node() : node;
-  return typeof value === 'string' || typeof value === 'number' ? String(value) : undefined;
+/** The text a title or a description draws, which a function draws when it is called. */
+function wordsOf(node: TitleT): string {
+  return textOf(typeof node === 'function' ? node() : node);
 }
 
 function isAction(action: unknown): action is Action {
@@ -654,7 +655,7 @@ function Toaster(props: ToasterProps): ReactNode {
   useEffect(() => {
     for (const entry of all) {
       if (entry.delete) continue;
-      const words = [textOf(entry.title), textOf(entry.description)].filter(Boolean).join(', ');
+      const words = [wordsOf(entry.title), wordsOf(entry.description)].filter(Boolean).join(', ');
       if (words.length === 0 || announced.current.get(entry.id) === words) continue;
       announced.current.set(entry.id, words);
       if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(words);
