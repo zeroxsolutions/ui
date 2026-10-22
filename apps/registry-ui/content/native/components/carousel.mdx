@@ -1,0 +1,112 @@
+---
+title: Carousel
+description: A row of slides that a swipe or its previous and next buttons scroll through.
+---
+
+<NativePreview name="carousel-demo" />
+
+## Installation
+
+<InstallCommand name="carousel" />
+
+The CLI writes `components/ui/carousel.tsx` and `lib/motion.ts`, installs
+[Button](/native/components/nativewind/button), [Icon](/native/components/nativewind/icon) and Utils, and adds
+`lucide-react-native`, `react-native-reanimated` and `react-native-worklets`.
+
+## Usage
+
+```tsx
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+```
+
+```tsx
+<Carousel className="mx-12">
+  <CarouselContent>
+    <CarouselItem>...</CarouselItem>
+    <CarouselItem>...</CarouselItem>
+    <CarouselItem>...</CarouselItem>
+  </CarouselContent>
+  <CarouselPrevious />
+  <CarouselNext />
+</Carousel>
+```
+
+The previous and next buttons sit 3rem outside the carousel's sides, as upstream's do, so leave that room
+beside it or move them with a class.
+
+## API reference
+
+### Carousel
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type                                      | Default        |
+| ------------- | ----------------------------------------- | -------------- |
+| `opts`        | `CarouselOptions`                         | -              |
+| `orientation` | `'horizontal' \| 'vertical'`              | `'horizontal'` |
+| `setApi`      | `(api: CarouselApi \| undefined) => void` | -              |
+
+`opts` takes these of Embla's options, with Embla's meaning:
+
+| Option          | Type                                  | Default       |
+| --------------- | ------------------------------------- | ------------- |
+| `align`         | `'start' \| 'center' \| 'end'`        | `'center'`    |
+| `loop`          | `boolean`                             | `false`       |
+| `startIndex`    | `number`                              | `0`           |
+| `watchDrag`     | `boolean`                             | `true`        |
+| `containScroll` | `'trimSnaps' \| 'keepSnaps' \| false` | `'trimSnaps'` |
+
+A swipe along the carousel moves the slides with the finger, and on release they settle on the snap nearest
+where the swipe was heading; a swipe across a quarter of the view moves at least one snap. A swipe that starts
+on a button in a slide takes over from the button once it has moved 8px along the carousel. Past either end the
+slides follow at a third of the finger's pace and spring back. With `loop` the last slide is followed by the
+first; when the slides are too few to fill the view and one more, they do not loop, as Embla's do not. A
+scroll to a snap takes 300ms, and none when the system asks for reduced motion.
+
+`setApi` is called with an api shaped as Embla's: `scrollPrev`, `scrollNext`, `scrollTo(index)`,
+`canScrollPrev`, `canScrollNext`, `selectedScrollSnap`, `previousScrollSnap`, `scrollSnapList` and `on` and
+`off` for the `init`, `reInit`, `select`, `settle`, `pointerDown` and `pointerUp` events, each listener called
+with the api and the event's name:
+
+```tsx
+const [api, setApi] = useState<CarouselApi>();
+const [current, setCurrent] = useState(0);
+
+useEffect(() => {
+  api?.on('select', () => setCurrent(api.selectedScrollSnap() + 1));
+}, [api]);
+
+<Carousel setApi={setApi}>...</Carousel>;
+```
+
+On the web the carousel is a region described as a carousel, each slide a group described as a slide, and the
+left and right arrow keys move it.
+
+### CarouselContent
+
+Takes every prop of React Native's `View`, which go to the row of slides inside the view they scroll through.
+
+### CarouselItem
+
+Takes every prop of React Native's `View`. A slide is the whole view wide, less the row's 1rem gap; a basis
+class such as `basis-1/2` sets how much of it the slide takes.
+
+### CarouselPrevious and CarouselNext
+
+Take every prop of [Button](/native/components/nativewind/button) except `children`, with `variant` `'outline'`
+and `size` `'icon-sm'` by default. They are named "Previous slide" and "Next slide", and each is disabled when
+there is no snap that way. Vertical, they sit above and below the carousel, turned a quarter.
+
+### useCarousel
+
+Inside a Carousel, returns its `api`, `opts`, `orientation`, `scrollPrev`, `scrollNext`, `canScrollPrev` and
+`canScrollNext`. It throws outside one.
+
+## Differences from upstream
+
+- Built on React Native views moved by Reanimated, where upstream is Embla, which scrolls DOM nodes. `opts`
+  takes the Embla options above, and `plugins` is left out: Embla's plugins drive Embla's own engine.
+- The api has the methods and events listed above, out of Embla's larger set.
+- The previous and next buttons each sit in a View that places them, so their `className` reaches the button
+  and not its place; React Native has no percentage translate to centre an absolute child by.
+- useCarousel returns no `carouselRef`, which only Embla reads.

@@ -34,11 +34,11 @@ describe('Preview', () => {
   });
 
   it('says no demo has the name a link carries, above the list of demos', async () => {
-    jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(`${UPDATE}/--/carousel-demo`);
+    jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(`${UPDATE}/--/no-such-demo`);
 
     await render(<Preview bundledStyle={undefined} applyColorScheme={() => undefined} />);
 
-    expect(await screen.findByRole('heading')).toHaveTextContent('No demo is named carousel-demo.');
+    expect(await screen.findByRole('heading')).toHaveTextContent('No demo is named no-such-demo.');
     expect(screen.getByRole('link', { name: 'button-demo' })).toBeTruthy();
   });
 

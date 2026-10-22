@@ -13,7 +13,7 @@ describe('findDemo', () => {
   });
 
   it('finds nothing for a name the list lacks', () => {
-    expect(findDemo('vega', 'carousel-demo')).toBeUndefined();
+    expect(findDemo('vega', 'no-such-demo')).toBeUndefined();
   });
 
   it('finds nothing for a name every object inherits, so a link to it shows the missing demo', () => {

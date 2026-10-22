@@ -244,6 +244,20 @@
       ]
     },
     {
+      "name": "carousel",
+      "type": "registry:ui",
+      "title": "Carousel",
+      "description": "A row of slides that a swipe or its named previous and next buttons scroll through one snap at a time, with Embla's api.",
+      "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-worklets"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/carousel.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "input",
       "type": "registry:ui",
       "title": "Input",

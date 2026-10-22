@@ -16,6 +16,7 @@ import { ButtonDemo } from './button-demo';
 import { ButtonGroupDemo } from './button-group-demo';
 import { CalendarDemo } from './calendar-demo';
 import { CardDemo } from './card-demo';
+import { CarouselDemo } from './carousel-demo';
 import { CheckboxDemo } from './checkbox-demo';
 import { CodeInputDemo } from './code-input-demo';
 import { CollapsibleDemo } from './collapsible-demo';
@@ -74,6 +75,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'button-group-demo': ButtonGroupDemo,
   'calendar-demo': CalendarDemo,
   'card-demo': CardDemo,
+  'carousel-demo': CarouselDemo,
   'checkbox-demo': CheckboxDemo,
   'code-input-demo': CodeInputDemo,
   'collapsible-demo': CollapsibleDemo,
