@@ -18,6 +18,7 @@ import {
   View,
   useWindowDimensions,
   type GestureResponderEvent,
+  type KeyDownEvent,
   type LayoutChangeEvent,
 } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -614,7 +615,7 @@ function ToastView({
 /**
  * Where toasts come up: put one at the app's root, after its PortalHost, and raise toasts with `toast()` from
  * anywhere. Newer toasts stack in front of older ones, which a pointer over them on the web, or a touch on a
- * device, spreads into a list; each closes after its duration, by a swipe toward its edge, or from its
+ * device, spreads into a list until Escape, or until one toast or none is left; each closes after its duration, by a swipe toward its edge, or from its
  * buttons. A new toast is read by screen readers: announced on iOS, and from a polite live region on Android
  * and the web.
  */
@@ -685,10 +686,16 @@ function Toaster(props: ToasterProps): ReactNode {
     return () => page.removeEventListener('keydown', onKeyDown);
   }, [hotkeyKeys]);
 
-  // A toaster with nothing up collapses again, so the next stack starts closed.
+  const collapse = (): void => {
+    clearTimeout(touchTimer.current);
+    setHovered(false);
+    setTouched(false);
+  };
+
+  // As upstream's, a stack of one toast or none collapses, so the next stack starts closed.
   const up = all.filter((entry) => !entry.delete);
   useEffect(() => {
-    if (up.length === 0) setHovered(false);
+    if (up.length <= 1) collapse();
   }, [up.length]);
 
   const expanded = expand || hovered || touched;
@@ -706,6 +713,10 @@ function Toaster(props: ToasterProps): ReactNode {
       pointerEvents="box-none"
       style={StyleSheet.absoluteFill}
       aria-live="polite"
+      // A key reaches the container only while focus is in it, where upstream's Escape collapses the stack.
+      onKeyDown={(event: KeyDownEvent) => {
+        if (event.nativeEvent.key === 'Escape') collapse();
+      }}
       {...(WEB
         ? {
             role: 'region' as const,
@@ -739,6 +750,7 @@ function Toaster(props: ToasterProps): ReactNode {
             className={className}
             style={[styles.stack, horizontal, vertical, { width: toastWidth, height: frontHeight }]}
             onPointerEnter={WEB ? () => setHovered(true) : undefined}
+            onPointerMove={WEB ? () => setHovered(true) : undefined}
             onPointerLeave={WEB ? () => setHovered(false) : undefined}
             onTouchStart={
               WEB
