@@ -1,0 +1,82 @@
+---
+title: Message
+description: One message in a conversation, with an avatar, a header and a footer, on either side of the row.
+---
+
+<NativePreview name="message-demo" />
+
+## Installation
+
+<InstallCommand name="message" />
+
+The CLI writes `components/ui/message.tsx`, installs [Text](/native/components/nativewind/text), Message context
+(`lib/message-context.ts`, which tells a [Bubble](/native/components/nativewind/bubble) or an
+[Attachment](/native/components/nativewind/attachment) inside the message its side) and Utils.
+
+## Usage
+
+```tsx
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Bubble, BubbleContent } from '@/components/ui/bubble';
+import { Message, MessageAvatar, MessageContent, MessageFooter } from '@/components/ui/message';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Message align="end">
+  <MessageAvatar>
+    <Avatar alt="@me">
+      <AvatarImage source={{ uri: avatarUrl }} />
+      <AvatarFallback>
+        <Text>ME</Text>
+      </AvatarFallback>
+    </Avatar>
+  </MessageAvatar>
+  <MessageContent>
+    <Bubble>
+      <BubbleContent>It's a one-line change.</BubbleContent>
+    </Bubble>
+    <MessageFooter>Delivered</MessageFooter>
+  </MessageContent>
+</Message>
+```
+
+For a message still being written, put a [Marker](/native/components/nativewind/marker) with `role="status"`
+below it.
+
+## API reference
+
+### Message
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop    | Type               | Default   |
+| ------- | ------------------ | --------- |
+| `align` | `'start' \| 'end'` | `'start'` |
+
+`end` puts the avatar on the other side and moves the content's parts to the end of the row.
+
+### MessageAvatar
+
+Takes every prop of React Native's `View`. Sits at the bottom of the message; while the message has a
+MessageFooter, it is lifted level with the last bubble rather than the footer.
+
+### MessageContent
+
+Takes every prop of React Native's `View`, and takes the width the avatar leaves.
+
+### MessageHeader, MessageFooter
+
+Each takes every prop of React Native's `View`, and sets text given straight to it in a small muted Text. Both
+are inset to line up with a framed bubble, and drop the inset while the message holds a `ghost` bubble. Put
+message actions, such as copy or retry buttons, in the footer.
+
+### MessageGroup
+
+Takes every prop of React Native's `View`, and stacks consecutive messages from one sender.
+
+## Differences from upstream
+
+- Upstream's message finds its footer and a ghost bubble with `:has()` selectors. The native parts tell the
+  message they are there, and a Bubble or an Attachment reads the message's side, through `lib/message-context.ts`.
+- Upstream's demo shimmers "is typing..." with shadcn's `shimmer` class, which has no native counterpart.

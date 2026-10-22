@@ -1099,6 +1099,19 @@
       ]
     },
     {
+      "name": "message",
+      "type": "registry:ui",
+      "title": "Message",
+      "description": "One message in a conversation: an avatar beside its bubbles, with a header and a footer, on either side of the row.",
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/message-context"],
+      "files": [
+        {
+          "path": "src/registry/ui/message.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "message-context",
       "type": "registry:lib",
       "title": "Message context",

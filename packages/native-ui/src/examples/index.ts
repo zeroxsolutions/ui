@@ -43,6 +43,7 @@ import { KbdDemo } from './kbd-demo';
 import { LabelDemo } from './label-demo';
 import { MarkerDemo } from './marker-demo';
 import { MenubarDemo } from './menubar-demo';
+import { MessageDemo } from './message-demo';
 import { NativeSelectDemo } from './native-select-demo';
 import { NavigationMenuDemo } from './navigation-menu-demo';
 import { PaginationDemo } from './pagination-demo';
@@ -114,6 +115,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'label-demo': LabelDemo,
   'marker-demo': MarkerDemo,
   'menubar-demo': MenubarDemo,
+  'message-demo': MessageDemo,
   'native-select-demo': NativeSelectDemo,
   'navigation-menu-demo': NavigationMenuDemo,
   'pagination-demo': PaginationDemo,
