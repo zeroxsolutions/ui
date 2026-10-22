@@ -7,6 +7,7 @@ import { AccessibilityInfo } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
+  useReducedMotion as useSettingAtStart,
   useSharedValue,
   withTiming,
   type SharedValue,
@@ -14,9 +15,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
-/** Whether the system asks for less motion, kept up to date while the component is mounted; false until read. */
+/**
+ * Whether the system asks for less motion, kept up to date while the component is mounted. The first render
+ * already holds the setting as of app start, so a part open from the start never draws a frame of motion.
+ */
 function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
+  const [reduced, setReduced] = useState(useSettingAtStart);
   useEffect(() => {
     let mounted = true;
     void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
