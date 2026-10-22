@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { processColor } from 'react-native';
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from '../lib/charts';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from '../lib/charts';
 import {
   ChartContainer,
   ChartLegend,
@@ -103,6 +103,26 @@ function MonthLines({ dot }: { dot?: boolean }): React.ReactNode {
           isAnimationActive={false}
         />
       </LineChart>
+    </ChartContainer>
+  );
+}
+
+function MonthArea(): React.ReactNode {
+  return (
+    <ChartContainer config={chartConfig}>
+      <AreaChart accessibilityLayer data={chartData} margin={{ left: 12, right: 12 }}>
+        <CartesianGrid vertical={false} />
+        <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
+        <Area
+          dataKey="desktop"
+          type="natural"
+          fill="var(--color-desktop)"
+          fillOpacity={0.4}
+          stroke="var(--color-desktop)"
+          isAnimationActive={false}
+        />
+      </AreaChart>
     </ChartContainer>
   );
 }
@@ -308,6 +328,34 @@ describe('Chart', () => {
       expect(screen.getByRole('adjustable').props['aria-label']).toMatch(
         /^Line chart\. January: Desktop 186, Mobile 80/,
       );
+    });
+  });
+
+  describe('AreaChart', () => {
+    it('fills the area under its line in the colour its config key names, at the opacity it is given', async () => {
+      await render(<MonthArea />);
+      const area = screen.getByTestId('chart-area-desktop', HIDDEN);
+
+      expect(fillOf(area)).toBe(processColor('#2563eb'));
+      expect(area.props.fillOpacity).toBe(0.4);
+      expect(strokeOf(screen.getByTestId('chart-line-desktop', HIDDEN))).toBe(processColor('#2563eb'));
+    });
+
+    it('draws no point circles unless given dot', async () => {
+      await render(<MonthArea />);
+
+      expect(screen.queryAllByTestId(/^chart-dot-/, HIDDEN)).toHaveLength(0);
+    });
+
+    it('shows the label and value of the nearest point, with its name beside the line indicator', async () => {
+      await render(<MonthArea />);
+
+      await pressAt(70);
+
+      expect(screen.getByText('February')).toBeOnTheScreen();
+      expect(screen.getByText('Desktop')).toBeOnTheScreen();
+      expect(screen.getByText('305')).toBeOnTheScreen();
+      expect(screen.getByRole('adjustable').props['aria-label']).toMatch(/^Area chart\. January: Desktop 186/);
     });
   });
 });

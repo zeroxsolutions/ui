@@ -1,7 +1,7 @@
 /**
  * The chart parts upstream's chart demos take from Recharts, in Recharts' names and with the props those
  * demos use, drawn with react-native-svg so they run on a device and on the web: the responsive container,
- * the bar and line charts and their series, the axes, the grid, the tooltip and the legend. A part reads its colours,
+ * the bar, line and area charts and their series, the axes, the grid, the tooltip and the legend. A part reads its colours,
  * such as `var(--color-desktop)`, through the palette the chart's container provides.
  */
 import { scaleBand, scaleLinear, scalePoint } from 'd3-scale';
@@ -15,6 +15,7 @@ import {
   curveStep,
   curveStepAfter,
   curveStepBefore,
+  area as areaPath,
   line as linePath,
   type CurveFactory,
 } from 'd3-shape';
@@ -344,10 +345,23 @@ function Line(_props: LineProps): ReactNode {
   return null;
 }
 
+type AreaProps = LineProps & {
+  fill?: string;
+  fillOpacity?: number;
+};
+
+/** The area under a line through each row of the chart's data. Placed inside an AreaChart, the chart draws it. */
+function Area(_props: AreaProps): ReactNode {
+  return null;
+}
+
 // ---------------------------------------------------------------------------------------------------------
 // Reading the children
 
-type Series = { kind: 'bar'; props: BarProps } | { kind: 'line'; props: LineProps };
+type Series =
+  | { kind: 'bar'; props: BarProps }
+  | { kind: 'line'; props: LineProps }
+  | { kind: 'area'; props: AreaProps };
 
 type SeriesKind = Series['kind'];
 
@@ -369,6 +383,7 @@ function readParts(children: ReactNode): ChartParts {
     const props = child.props as Record<string, unknown>;
     if (child.type === Bar) parts.series.push({ kind: 'bar', props: props as BarProps });
     else if (child.type === Line) parts.series.push({ kind: 'line', props: props as LineProps });
+    else if (child.type === Area) parts.series.push({ kind: 'area', props: props as AreaProps });
     else if (child.type === XAxis) parts.xAxis = props as XAxisProps;
     else if (child.type === YAxis) parts.yAxis = props as YAxisProps;
     else if (child.type === CartesianGrid) parts.grid = props as CartesianGridProps;
@@ -710,9 +725,9 @@ function shareOf(gap: number | `${number}%`, of: number): number {
   return typeof gap === 'number' ? gap : (Number.parseFloat(gap) / 100) * of;
 }
 
-const KIND_NAMES: Readonly<Record<SeriesKind, string>> = { bar: 'Bar chart', line: 'Line chart' };
+const KIND_NAMES: Readonly<Record<SeriesKind, string>> = { bar: 'Bar chart', line: 'Line chart', area: 'Area chart' };
 
-/** The svg of a bar or line chart: the grid, the axes, the cursor and the series, laid out in `size`. */
+/** The svg of a bar, line or area chart: the grid, the axes, the cursor and the series, laid out in `size`. */
 function CartesianChart({
   kind,
   data,
@@ -769,7 +784,7 @@ function CartesianChart({
       value: data[index]?.[item.props.dataKey] as number | string | undefined,
       color: seriesColor(item),
       fill: item.kind === 'bar' ? item.props.fill : undefined,
-      stroke: item.kind === 'line' ? item.props.stroke : undefined,
+      stroke: item.kind === 'bar' ? undefined : item.props.stroke,
       payload: data[index],
     }));
 
@@ -825,7 +840,7 @@ function CartesianChart({
     value: seriesName(item.props),
     dataKey: item.props.dataKey,
     color: seriesColor(item),
-    type: item.kind === 'bar' ? 'rect' : 'line',
+    type: item.kind === 'line' ? 'line' : 'rect',
   }));
 
   return (
@@ -977,6 +992,9 @@ function CartesianChart({
           }
           const props = item.props;
           const color = resolve(seriesColor(item));
+          const curve = CURVES[props.type ?? 'linear'];
+          // A Line draws its points unless told not to, an Area only when told to.
+          const dot = props.dot ?? item.kind === 'line';
           const points = data.map((datum, index) => [x.center(index), y(numberAt(datum, props.dataKey))] as const);
           const clip = `${clipId}-${order}`;
           return (
@@ -988,14 +1006,22 @@ function CartesianChart({
                 </ClipPath>
               </Defs>
               <G clipPath={`url(#${clip})`}>
+                {item.kind === 'area' ? (
+                  <Path
+                    testID={`chart-area-${props.dataKey}`}
+                    d={areaPath().curve(curve).y0(y(0))(points.map(([px, py]) => [px, py])) ?? ''}
+                    fill={resolve(item.props.fill) ?? color}
+                    fillOpacity={item.props.fillOpacity ?? 0.6}
+                  />
+                ) : null}
                 <Path
                   testID={`chart-line-${props.dataKey}`}
-                  d={linePath().curve(CURVES[props.type ?? 'linear'])(points.map(([px, py]) => [px, py])) ?? ''}
+                  d={linePath().curve(curve)(points.map(([px, py]) => [px, py])) ?? ''}
                   fill="none"
                   stroke={color}
                   strokeWidth={props.strokeWidth ?? 1}
                 />
-                {props.dot === false
+                {dot === false
                   ? null
                   : points.map(([px, py], index) => (
                       <Circle
@@ -1003,12 +1029,10 @@ function CartesianChart({
                         testID={`chart-dot-${props.dataKey}-${index}`}
                         cx={px}
                         cy={py}
-                        r={(typeof props.dot === 'object' ? props.dot.r : undefined) ?? 3}
-                        fill={resolve((typeof props.dot === 'object' ? props.dot.fill : undefined) ?? THEME.surface)}
-                        stroke={resolve(typeof props.dot === 'object' ? props.dot.stroke : undefined) ?? color}
-                        strokeWidth={
-                          (typeof props.dot === 'object' ? props.dot.strokeWidth : undefined) ?? props.strokeWidth ?? 1
-                        }
+                        r={(typeof dot === 'object' ? dot.r : undefined) ?? 3}
+                        fill={resolve((typeof dot === 'object' ? dot.fill : undefined) ?? THEME.surface)}
+                        stroke={resolve(typeof dot === 'object' ? dot.stroke : undefined) ?? color}
+                        strokeWidth={(typeof dot === 'object' ? dot.strokeWidth : undefined) ?? props.strokeWidth ?? 1}
                       />
                     ))}
               </G>
@@ -1081,12 +1105,19 @@ function BarChart(props: CartesianChartProps): ReactNode {
   return <CartesianChart kind="bar" {...props} />;
 }
 
+/** An area per series under a line through the categories of `data`. */
+function AreaChart(props: CartesianChartProps): ReactNode {
+  return <CartesianChart kind="area" {...props} />;
+}
+
 /** A line per series through the categories of `data`. */
 function LineChart(props: CartesianChartProps): ReactNode {
   return <CartesianChart kind="line" {...props} />;
 }
 
 export {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -1100,6 +1131,7 @@ export {
   YAxis,
 };
 export type {
+  AreaProps,
   BarProps,
   CartesianChartProps,
   CartesianGridProps,

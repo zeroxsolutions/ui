@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/chart';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from '@/lib/charts';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from '@/lib/charts';
 
 const chartData = [
   { month: 'January', desktop: 186, mobile: 80 },
@@ -53,6 +53,71 @@ function ChartFirstExample(): ReactNode {
         <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
       </BarChart>
     </ChartContainer>
+  );
+}
+
+const areaChartData = [
+  { month: 'January', desktop: 186 },
+  { month: 'February', desktop: 305 },
+  { month: 'March', desktop: 237 },
+  { month: 'April', desktop: 73 },
+  { month: 'May', desktop: 209 },
+  { month: 'June', desktop: 214 },
+];
+
+const areaChartConfig = {
+  desktop: {
+    label: 'Desktop',
+    color: 'var(--chart-1)',
+  },
+} satisfies ChartConfig;
+
+function ChartAreaExample(): ReactNode {
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Area Chart</CardTitle>
+        <CardDescription>Showing total visitors for the last 6 months</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={areaChartConfig}>
+          <AreaChart
+            accessibilityLayer
+            data={areaChartData}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickFormatter={(value: string) => value.slice(0, 3)}
+            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
+            <Area
+              dataKey="desktop"
+              type="natural"
+              fill="var(--color-desktop)"
+              fillOpacity={0.4}
+              stroke="var(--color-desktop)"
+            />
+          </AreaChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter>
+        <View className="gap-2">
+          <View className="flex-row items-center gap-2">
+            <Text className="leading-none font-medium">Trending up by 5.2% this month</Text>
+            <Icon as={TrendingUp} className="size-4" />
+          </View>
+          <Text className="text-muted-foreground leading-none">January - June 2024</Text>
+        </View>
+      </CardFooter>
+    </Card>
   );
 }
 
@@ -161,6 +226,7 @@ function ChartDemo(): ReactNode {
   return (
     <View className="w-full gap-6">
       <ChartFirstExample />
+      <ChartAreaExample />
       <ChartBarExample />
       <ChartLineExample />
     </View>
