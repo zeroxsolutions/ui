@@ -1134,6 +1134,18 @@
       ]
     },
     {
+      "name": "focus-visible",
+      "type": "registry:lib",
+      "title": "Focus visible",
+      "description": "useFocusVisible, which says whether a control's focus came from the keyboard, so a focus ring is drawn for it and not after a press.",
+      "files": [
+        {
+          "path": "src/registry/lib/focus-visible.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "message-context",
       "type": "registry:lib",
       "title": "Message context",
@@ -1151,7 +1163,7 @@
       "title": "Bubble",
       "description": "A message's framed surface in seven variants, at the start or end of the row, with reactions overlapping its edge and content that can take a press.",
       "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/message-context"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/message-context", "@zui/focus-visible"],
       "files": [
         {
           "path": "src/registry/ui/bubble.tsx",

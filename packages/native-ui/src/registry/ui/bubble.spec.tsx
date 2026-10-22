@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
-import { Pressable } from 'react-native';
+import { Platform, Pressable } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { MessageContext } from '../lib/message-context';
 import { Bubble, BubbleContent, BubbleGroup, BubbleReactions } from './bubble';
@@ -116,25 +116,54 @@ describe('Bubble', () => {
     expect(classesOf(button.props.className)).toEqual(expect.arrayContaining(['bg-background', 'border-border']));
   });
 
-  it('rings pressable content while it holds keyboard focus, not after a press', async () => {
-    await render(
-      <Bubble>
-        <BubbleContent asChild>
-          <Pressable role="button">Open</Pressable>
-        </BubbleContent>
-      </Bubble>,
-    );
-    const button = screen.getByRole('button', { name: 'Open' });
+  describe('on the web', () => {
+    const os = Platform.OS;
+    beforeEach(() => {
+      Platform.OS = 'web';
+    });
+    afterEach(() => {
+      Platform.OS = os;
+    });
 
-    await fireEvent(button, 'focus');
-    expect(classesOf(screen.getByRole('button').props.className)).toContain('border-ring');
+    /** A focus event whose target answers `:focus-visible` with `visible`, as a browser's does. */
+    const focusFrom = (visible: boolean): object => ({
+      target: { matches: (selector: string) => selector === ':focus-visible' && visible },
+    });
 
-    await fireEvent(button, 'blur');
-    expect(classesOf(screen.getByRole('button').props.className)).not.toContain('border-ring');
+    it('rings pressable content while it holds keyboard focus', async () => {
+      await render(
+        <Bubble>
+          <BubbleContent asChild>
+            <Pressable role="button">Open</Pressable>
+          </BubbleContent>
+        </Bubble>,
+      );
 
-    await fireEvent(button, 'pressIn');
-    await fireEvent(button, 'focus');
-    expect(classesOf(screen.getByRole('button').props.className)).not.toContain('border-ring');
+      await fireEvent(screen.getByRole('button'), 'focus', focusFrom(true));
+      expect(classesOf(screen.getByRole('button').props.className)).toContain('border-ring');
+
+      await fireEvent(screen.getByRole('button'), 'blur');
+      expect(classesOf(screen.getByRole('button').props.className)).not.toContain('border-ring');
+    });
+
+    it('draws no ring after a mouse press focuses it, which comes before the press, and rings the next Tab', async () => {
+      await render(
+        <Bubble>
+          <BubbleContent asChild>
+            <Pressable role="button">Open</Pressable>
+          </BubbleContent>
+        </Bubble>,
+      );
+
+      await fireEvent(screen.getByRole('button'), 'focus', focusFrom(false));
+      await fireEvent(screen.getByRole('button'), 'pressIn');
+      await fireEvent(screen.getByRole('button'), 'pressOut');
+      expect(classesOf(screen.getByRole('button').props.className)).not.toContain('border-ring');
+
+      await fireEvent(screen.getByRole('button'), 'blur');
+      await fireEvent(screen.getByRole('button'), 'focus', focusFrom(true));
+      expect(classesOf(screen.getByRole('button').props.className)).toContain('border-ring');
+    });
   });
 });
 
@@ -179,6 +208,24 @@ describe('BubbleReactions', () => {
       expect(screen.getByTestId('reactions')).toHaveStyle({ transform: [{ translateY: 24 * share }] });
     },
   );
+});
+
+describe('BubbleReactions with a transform of its own', () => {
+  it("keeps the overlap and applies the caller's transform after it", async () => {
+    await render(
+      <Bubble>
+        <BubbleContent>Nice.</BubbleContent>
+        <BubbleReactions testID="reactions" style={{ transform: [{ scale: 1.5 }] }}>
+          {'\u{1F44D}'}
+        </BubbleReactions>
+      </Bubble>,
+    );
+    await fireEvent(screen.getByTestId('reactions', { includeHiddenElements: true }), 'layout', {
+      nativeEvent: { layout: { x: 0, y: 0, width: 32, height: 24 } },
+    });
+
+    expect(screen.getByTestId('reactions')).toHaveStyle({ transform: [{ translateY: 18 }, { scale: 1.5 }] });
+  });
 });
 
 describe('BubbleGroup', () => {

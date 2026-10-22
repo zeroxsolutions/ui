@@ -7,13 +7,13 @@ import {
   isValidElement,
   useContext,
   useLayoutEffect,
-  useRef,
   useState,
   type ComponentProps,
   type ReactElement,
   type ReactNode,
 } from 'react';
-import { View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native';
+import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { useFocusVisible } from '../lib/focus-visible';
 import { useMessage } from '../lib/message-context';
 import { cn } from '../lib/utils';
 import { Text, TextClassContext } from './text';
@@ -143,19 +143,16 @@ function BubbleContent({
   children,
   onFocus,
   onBlur,
-  onPressIn,
   ...props
-}: BubbleContentProps & { onPressIn?: (event: GestureResponderEvent) => void }): ReactNode {
+}: BubbleContentProps): ReactNode {
   const { variant, align } = useContext(BubbleContext);
-  const [focused, setFocused] = useState(false);
-  // A press focuses a pressable on the web too; only keyboard focus draws the ring, as `focus-visible` does.
-  const pressing = useRef(false);
+  const focus = useFocusVisible();
 
   const classes = cn(
     'min-w-0 max-w-full self-start overflow-hidden cn-bubble-content',
     CONTENT_VARIANT_CLASSES[variant],
     align === 'end' && 'cn-bubble-content@align=end',
-    asChild && focused && 'cn-bubble-content@focused+pressable',
+    asChild && focus.focusVisible && 'cn-bubble-content@focused+pressable',
     className,
   );
 
@@ -165,17 +162,12 @@ function BubbleContent({
     drawn = (
       <Slot
         className={classes}
-        onPressIn={(event: GestureResponderEvent) => {
-          pressing.current = true;
-          onPressIn?.(event);
-        }}
         onFocus={(event: Parameters<NonNullable<BubbleContentProps['onFocus']>>[0]) => {
-          setFocused(!pressing.current);
-          pressing.current = false;
+          focus.onFocus(event);
           onFocus?.(event);
         }}
         onBlur={(event: Parameters<NonNullable<BubbleContentProps['onBlur']>>[0]) => {
-          setFocused(false);
+          focus.onBlur();
           onBlur?.(event);
         }}
         {...props}
@@ -225,6 +217,9 @@ function BubbleReactions({
 }: BubbleReactionsProps): ReactNode {
   const [height, setHeight] = useState<number | undefined>(undefined);
   const offset = height === undefined ? undefined : height * REACTIONS_OVERLAP * (side === 'top' ? -1 : 1);
+  // React Native replaces a transform rather than merging it, so the caller's goes after the offset in one list.
+  const callerTransform = StyleSheet.flatten(style)?.transform;
+  const transform = [{ translateY: offset ?? 0 }, ...(Array.isArray(callerTransform) ? callerTransform : [])];
 
   return (
     <TextClassContext.Provider value="cn-bubble-reactions/text">
@@ -236,7 +231,7 @@ function BubbleReactions({
           className,
         )}
         // Hidden until measured, so the reactions never show a frame before they overlap the edge.
-        style={[offset === undefined ? { opacity: 0 } : { transform: [{ translateY: offset }] }, style]}
+        style={[style, offset === undefined ? { opacity: 0 } : { transform }]}
         // A named row is read once, by its name, rather than glyph by glyph.
         accessible={accessible ?? (props['aria-label'] !== undefined || undefined)}
         onLayout={(event: LayoutChangeEvent) => {
