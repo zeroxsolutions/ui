@@ -12,6 +12,7 @@ import {
   type TooltipPayloadItem,
 } from '../lib/charts';
 import { useChartTheme } from '../lib/chart-theme';
+import { asText } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { IconClassContext } from './icon';
 import { Text, TextClassContext } from './text';
@@ -177,11 +178,7 @@ function ChartTooltipIndicator({
 
 /** A label from the config, which may be a string or a node of its own. */
 function ChartText({ className, children }: { className?: string; children: ReactNode }): ReactNode {
-  return typeof children === 'string' || typeof children === 'number' ? (
-    <Text className={className}>{children}</Text>
-  ) : (
-    children
-  );
+  return asText(children, { className });
 }
 
 type ChartTooltipContentProps = TooltipContentProps &

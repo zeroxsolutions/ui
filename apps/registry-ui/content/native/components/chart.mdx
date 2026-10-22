@@ -67,8 +67,10 @@ hides it on leaving, a click keeps it, a press outside the chart hides it, and t
 move along the categories, Home and End go to the first and the last, and Escape or leaving the chart hides it.
 On a reversed x axis the right arrow still moves right, back through the categories.
 
-The chart is announced as adjustable, labelled with every category's values, such as "January: Desktop 186,
-Mobile 80", and valued "None selected" until a category is active. A screen reader's swipe up or down moves to
+The chart is announced as adjustable, labelled with every category's values, such as "Jan: Desktop 186,
+Mobile 80", and valued "None selected" until a category is active. Each category is read as the tooltip's
+`labelFormatter` draws it, else as its axis tick reads, else as the data holds it, so a translated chart is read in
+its own language. A screen reader's swipe up or down moves to
 the next or the previous category and reads its values.
 A chart with no tooltip is announced with the same label.
 

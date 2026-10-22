@@ -1032,7 +1032,7 @@
       "description": "Recharts' chart parts in Recharts' names, drawn with react-native-svg: bar, line, area, pie, radar and radial bar charts with their axes, grid, tooltip and legend, coloured through the palette a ChartContainer provides.",
       "dependencies": ["d3-scale", "d3-shape", "react-native-reanimated", "react-native-svg"],
       "devDependencies": ["@types/d3-scale", "@types/d3-shape"],
-      "registryDependencies": ["@zui/motion"],
+      "registryDependencies": ["@zui/motion", "@zui/text-children"],
       "files": [
         {
           "path": "src/registry/lib/charts.tsx",
@@ -1071,7 +1071,15 @@
       "title": "Chart",
       "description": "Charts drawn in the colours and labels of a chart config, with a tooltip a press, a pointer or the arrow keys move, a legend, and the values read to screen readers.",
       "dependencies": ["react-native-svg"],
-      "registryDependencies": ["@zui/utils", "@zui/charts", "@zui/chart-theme", "@zui/text", "@zui/icon", "@zui/card"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/charts",
+        "@zui/chart-theme",
+        "@zui/text",
+        "@zui/icon",
+        "@zui/card"
+      ],
       "files": [
         {
           "path": "src/registry/ui/chart.tsx",

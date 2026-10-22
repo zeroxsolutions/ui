@@ -447,30 +447,62 @@ describe('Chart', () => {
     await render(<MonthBars />);
     const surface = screen.getByRole('adjustable');
 
-    expect(surface.props['aria-label']).toContain('January: Desktop 186, Mobile 80');
-    expect(surface.props['aria-label']).toContain('June: Desktop 214, Mobile 140');
+    expect(surface.props['aria-label']).toContain('Jan: Desktop 186, Mobile 80');
+    expect(surface.props['aria-label']).toContain('Jun: Desktop 214, Mobile 140');
 
     await fireEvent(surface, 'accessibilityAction', {
       nativeEvent: { actionName: 'increment' },
     });
-    expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('January: Desktop 186, Mobile 80');
+    expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('Jan: Desktop 186, Mobile 80');
     expect(screen.getByText('January')).toBeOnTheScreen();
 
     await fireEvent(surface, 'accessibilityAction', {
       nativeEvent: { actionName: 'increment' },
     });
-    expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('February: Desktop 305, Mobile 200');
+    expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('Feb: Desktop 305, Mobile 200');
 
     await fireEvent(surface, 'accessibilityAction', {
       nativeEvent: { actionName: 'decrement' },
     });
-    expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('January: Desktop 186, Mobile 80');
+    expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('Jan: Desktop 186, Mobile 80');
   });
 
-  it('gives a chart with no tooltip its values as a label', async () => {
+  it('gives a chart with no tooltip its values as a label, each category as its axis tick reads', async () => {
     await render(<MonthBars tooltip={null} />);
 
-    expect(screen.getByLabelText(/January: Desktop 186, Mobile 80/)).toBeOnTheScreen();
+    expect(screen.getByLabelText(/Jan: Desktop 186, Mobile 80/)).toBeOnTheScreen();
+  });
+
+  it("reads each category as the tooltip's labelFormatter draws it, which may mix text and values", async () => {
+    const year = 2024;
+    await render(
+      <MonthBars
+        tooltip={
+          <ChartTooltip content={<ChartTooltipContent labelFormatter={(value) => [String(value), ' ', year]} />} />
+        }
+      />,
+    );
+    const surface = screen.getByRole('adjustable');
+
+    expect(surface.props['aria-label']).toContain('January 2024: Desktop 186, Mobile 80');
+    await pressAt(80);
+    expect(screen.getByText('February 2024')).toBeOnTheScreen();
+    expect(screen.getByRole('adjustable').props['aria-valuetext']).toBe('February 2024: Desktop 305, Mobile 200');
+  });
+
+  it('reads each category by a labelFormatter given to the tooltip itself', async () => {
+    await render(
+      <MonthBars
+        tooltip={
+          <ChartTooltip
+            labelFormatter={(value: unknown) => `Month of ${String(value)}`}
+            content={<ChartTooltipContent />}
+          />
+        }
+      />,
+    );
+
+    expect(screen.getByRole('adjustable').props['aria-label']).toContain('Month of January: Desktop 186, Mobile 80');
   });
 
   it('names each series in the legend by its config label', async () => {
@@ -775,6 +807,22 @@ describe('Chart', () => {
       expect(screen.getByText('June')).toBeOnTheScreen();
       expect(screen.getByText('214')).toBeOnTheScreen();
       expect(screen.getByTestId('chart-active-dot-desktop', HIDDEN)).toBeTruthy();
+    });
+
+    it("reads every month as the tooltip's labelFormatter draws it", async () => {
+      await render(
+        <ChartContainer config={chartConfig}>
+          <RadarChart data={chartData}>
+            <ChartTooltip content={<ChartTooltipContent labelFormatter={(value) => `Month of ${String(value)}`} />} />
+            <PolarAngleAxis dataKey="month" />
+            <Radar dataKey="desktop" fill="var(--color-desktop)" isAnimationActive={false} />
+          </RadarChart>
+        </ChartContainer>,
+      );
+
+      expect(screen.getByRole('adjustable').props['aria-label']).toMatch(
+        /^Radar chart\. Month of January: Desktop 186\. Month of February: Desktop 305\./,
+      );
     });
 
     it('reads every month by its values', async () => {

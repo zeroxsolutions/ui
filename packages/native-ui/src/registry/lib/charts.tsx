@@ -55,6 +55,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, G, Line as SvgLine, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { useReducedMotion } from './motion';
+import { textOf } from './text-children';
 
 /** One row of a chart's `data`, such as `{ month: "January", desktop: 186 }`. */
 type ChartDatum = Readonly<Record<string, unknown>>;
@@ -406,6 +407,8 @@ type TooltipProps = {
   defaultIndex?: number;
   /** The distance from the active point to the tooltip, in pixels. */
   offset?: number;
+  /** Draws the label of the active point, handed to `content` as Recharts hands it; a screen reader hears its text. */
+  labelFormatter?: (label: unknown, payload: TooltipPayloadItem[]) => ReactNode;
 };
 
 /**
@@ -750,6 +753,26 @@ function seriesColor(series: Series): string {
 function formatValue(value: number | string | undefined): string {
   if (typeof value === 'number') return value.toLocaleString();
   return value === undefined ? '' : String(value);
+}
+
+/**
+ * The text a screen reader hears for the category of point `index`: the text the tooltip's `labelFormatter`
+ * draws for it, given to the Tooltip or to its content, or else the axis tick's text, or else the category as
+ * it is.
+ */
+function categoryText(
+  category: unknown,
+  index: number,
+  payload: () => TooltipPayloadItem[],
+  tooltip: TooltipProps | undefined,
+  tickFormatter: ((value: never, index: number) => string) | undefined,
+): string {
+  const content = tooltip?.content;
+  const labelFormatter =
+    tooltip?.labelFormatter ??
+    (isValidElement<Pick<TooltipProps, 'labelFormatter'>>(content) ? content.props.labelFormatter : undefined);
+  if (labelFormatter !== undefined) return textOf(labelFormatter(category, payload()));
+  return tickFormatter === undefined ? String(category) : tickFormatter(category as never, index);
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -1137,7 +1160,7 @@ function CartesianChart({
 
   const nameOf = (key: string): string => palette.nameOf(key) ?? key;
   const describe = (index: number): string =>
-    `${String(categoryOf(index))}: ${series
+    `${categoryText(categoryOf(index), index, () => payloadAt(index), parts.tooltip, parts.xAxis?.tickFormatter)}: ${series
       .map((item) => `${nameOf(seriesName(item.props))} ${formatValue(data[index]?.[item.props.dataKey] as number)}`)
       .join(', ')}`;
   const pointFor = (index: number): ActivePoint => ({
@@ -2040,8 +2063,19 @@ function RadarChart(props: PolarChartProps): ReactNode {
   const categoryKey = parts.angleAxis?.dataKey;
   const categoryOf = (index: number): unknown => (categoryKey === undefined ? index : data[index]?.[categoryKey]);
   const nameOf = (key: string): string => palette.nameOf(key) ?? key;
+  const colorOf = (item: RadarProps): string => item.stroke ?? item.fill ?? DEFAULT_SERIES_COLOR;
+  const payloadAt = (index: number): TooltipPayloadItem[] =>
+    series.map((item) => ({
+      dataKey: item.dataKey,
+      name: seriesName(item),
+      value: data[index]?.[item.dataKey] as number | string | undefined,
+      color: colorOf(item),
+      fill: item.fill,
+      stroke: item.stroke,
+      payload: data[index],
+    }));
   const describe = (index: number): string =>
-    `${String(categoryOf(index))}: ${series
+    `${categoryText(categoryOf(index), index, () => payloadAt(index), parts.tooltip, parts.angleAxis?.tickFormatter)}: ${series
       .map((item) => `${nameOf(seriesName(item))} ${formatValue(data[index]?.[item.dataKey] as number)}`)
       .join(', ')}`;
   const pointFor = (index: number): ActivePoint => ({
@@ -2073,17 +2107,6 @@ function RadarChart(props: PolarChartProps): ReactNode {
   const shown =
     active ?? (!touched && tooltip?.defaultIndex !== undefined ? pointFor(tooltip.defaultIndex) : undefined);
   const activeIndex = shown?.index;
-  const colorOf = (item: RadarProps): string => item.stroke ?? item.fill ?? DEFAULT_SERIES_COLOR;
-  const payloadAt = (index: number): TooltipPayloadItem[] =>
-    series.map((item) => ({
-      dataKey: item.dataKey,
-      name: seriesName(item),
-      value: data[index]?.[item.dataKey] as number | string | undefined,
-      color: colorOf(item),
-      fill: item.fill,
-      stroke: item.stroke,
-      payload: data[index],
-    }));
   const legendPayload: LegendPayloadItem[] = series.map((item) => ({
     value: seriesName(item),
     dataKey: item.dataKey,
