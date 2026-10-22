@@ -55,8 +55,8 @@ function* execMatches(regexp: RegExp, text: string): Generator<RegExpExecArray, 
  * without its named `groups`, which the regex engine's conversion of a recursive pattern reads.
  */
 function matchAllByExec(this: string, regexp: RegExp): RegExpStringIterator<RegExpExecArray> {
-  // The engine's own throws for a string or a regexp without the global flag, where `exec` would never
-  // move on from the first match.
+  // The engine's own takes a string as a pattern, and throws for a regexp without the global flag, where `exec`
+  // would never move on from the first match.
   if (!(regexp instanceof RegExp) || !regexp.global) return ownMatchAll.call(this, regexp);
   const copy = new RegExp(regexp.source, regexp.flags);
   copy.lastIndex = regexp.lastIndex;
