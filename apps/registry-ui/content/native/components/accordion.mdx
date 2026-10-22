@@ -79,6 +79,6 @@ children: space several Text children with a gap, such as `gap-4`.
   React Native has no selectors, so space the children with a gap and style a link where you place it.
 - Upstream's height animation runs whatever the system's motion setting. The native one is skipped when the
   system asks for reduced motion.
-- No hover underline and no focus ring on the trigger. A phone has no pointer and no keyboard focus.
+- No hover underline and no focus ring on the trigger; the native items draw no focus ring.
 - `orientation`, `loopFocus`, `keepMounted` and `hiddenUntilFound` are left out: they serve arrow-key focus,
   a closed panel kept in the DOM, and the browser's find-in-page, none of which a device has.
