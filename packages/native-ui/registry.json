@@ -33,7 +33,7 @@
       "name": "motion",
       "type": "registry:lib",
       "title": "Motion",
-      "description": "usePresence, which keeps an overlay drawn while it animates in and out, useReducedMotion, which reads whether the system asks for reduced motion, and usePopupMotion, the fade, grow and slide a menu, popover or tooltip opens and closes with.",
+      "description": "usePresence, which keeps an overlay drawn while it animates in and out, useReducedMotion, which reads whether the system asks for reduced motion, usePopupMotion, the fade, grow and slide a menu, popover or tooltip opens and closes with, and useSwipeToDismiss, the swipe that closes a toast.",
       "dependencies": ["react-native-reanimated", "react-native-worklets"],
       "files": [
         {
@@ -862,6 +862,34 @@
       "type": "registry:ui",
       "title": "Form",
       "description": "No files, as upstream's: a form is Field bound to a form library, such as react-hook-form's Controller."
+    },
+    {
+      "name": "toast",
+      "type": "registry:ui",
+      "title": "Toast",
+      "description": "Upstream's base-ui toast: a Toaster at the app's root and a toast manager whose add, update, close and promise raise toasts from anywhere, stacked, closed by a timeout, a swipe or their close button, and read by screen readers.",
+      "dependencies": [
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated",
+        "react-native-safe-area-context",
+        "react-native-worklets"
+      ],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/button",
+        "@zui/icon",
+        "@zui/spinner",
+        "@zui/text"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/toast.tsx",
+          "type": "registry:ui"
+        }
+      ]
     },
     {
       "name": "password-input",

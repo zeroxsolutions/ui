@@ -60,6 +60,7 @@ import { TableDemo } from './table-demo';
 import { TabsDemo } from './tabs-demo';
 import { TextDemo } from './text-demo';
 import { ThemeDemo } from './theme-demo';
+import { ToastDemo } from './toast-demo';
 import { TextareaDemo } from './textarea-demo';
 import { ToggleDemo } from './toggle-demo';
 import { ToggleGroupDemo } from './toggle-group-demo';
@@ -123,6 +124,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'tabs-demo': TabsDemo,
   'text-demo': TextDemo,
   'theme-demo': ThemeDemo,
+  'toast-demo': ToastDemo,
   'textarea-demo': TextareaDemo,
   'toggle-demo': ToggleDemo,
   'toggle-group-demo': ToggleGroupDemo,

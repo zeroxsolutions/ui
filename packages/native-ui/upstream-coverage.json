@@ -2,8 +2,7 @@
   "notPorted": {
     "resizable": "Pointer-dragged panels, which a touch screen has no use for.",
     "navigation-menu": "Hover menus for desktop web.",
-    "sidebar": "A desktop app shell; native has tab-bar.",
-    "toast": "Upstream replaced it with sonner."
+    "sidebar": "A desktop app shell; native has tab-bar."
   },
   "deferred": {
     "chart": "Upstream draws with recharts; a native chart needs Skia or Victory Native, a decision of its own.",

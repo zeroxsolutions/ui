@@ -1,8 +1,9 @@
 import { Portal } from '@rn-primitives/portal';
-import { act, render, screen, waitForElementToBeRemoved } from '@testing-library/react-native';
+import { act, render, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react-native';
 import { Linking, Text } from 'react-native';
 
 import { toast } from '@styles/nova/components/ui/sonner';
+import { toast as baseToast } from '@styles/nova/components/ui/toast';
 
 import * as findDemoModule from './find-demo';
 import { Preview } from './preview';
@@ -74,5 +75,22 @@ describe('Preview', () => {
     });
     // The queue outlives the render, so the toast is let leave it before the next case.
     await waitForElementToBeRemoved(() => screen.queryByText('Event has been created'));
+  });
+
+  it("draws a toast that the style's toast manager adds, as a demo's button adds one", async () => {
+    jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(`${UPDATE}/--/badge-demo`);
+    await render(<Preview bundledStyle="nova" applyColorScheme={() => undefined} />);
+    await screen.findByText('Overdue');
+
+    await act(async () => {
+      baseToast.add({ title: 'Event created' });
+    });
+
+    expect(await screen.findByText('Event created')).toBeTruthy();
+    await act(async () => {
+      baseToast.close();
+    });
+    // The manager outlives the render, so the toast is let leave it before the next case.
+    await waitFor(() => expect(screen.queryByText('Event created')).toBeNull());
   });
 });

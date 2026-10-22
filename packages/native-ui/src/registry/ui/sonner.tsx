@@ -23,7 +23,7 @@ import {
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
-import { useReducedMotion } from '../lib/motion';
+import { useReducedMotion, useSwipeToDismiss, type SwipeDirection as Swipe } from '../lib/motion';
 import { cn } from '../lib/utils';
 import { Icon } from './icon';
 import { Spinner } from './spinner';
@@ -291,9 +291,6 @@ const TOAST_LIFETIME = 4000;
 const TOAST_WIDTH = 356;
 const GAP = 14;
 const MOBILE_WIDTH = 600;
-/** How far a swipe goes, in px, or how fast, in px per ms, to close a toast. */
-const SWIPE_THRESHOLD = 45;
-const SWIPE_VELOCITY = 0.11;
 /** How long a touch keeps a stack open on a device after the finger lifts. */
 const TOUCH_EXPAND_MS = 4000;
 
@@ -398,9 +395,6 @@ function ToastView({
   const y = useSharedValue(0);
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
-  const swipeX = useSharedValue(0);
-  const swipeY = useSharedValue(0);
-  const swiped = useRef<SwipeDirection | undefined>(undefined);
   const removing = useRef(false);
 
   const type = item.type ?? 'default';
@@ -408,6 +402,16 @@ function ToastView({
   const dismissible = item.dismissible !== false;
   const unstyled = item.unstyled ?? options.unstyled ?? false;
   const classNames = { ...options.classNames, ...item.classNames };
+  const swipe = useSwipeToDismiss({
+    directions: swipeDirections.map((direction): Swipe =>
+      direction === 'top' ? 'up' : direction === 'bottom' ? 'down' : direction,
+    ),
+    enabled: dismissible,
+    onDismiss: () => dismiss(item.id),
+    settle: EXIT_MOTION,
+    reduced,
+  });
+  const { x: swipeX, y: swipeY, swiped } = swipe;
 
   useEffect(() => {
     mounted.value = reduced ? 1 : withTiming(1, MOTION);
@@ -458,7 +462,7 @@ function ToastView({
     if (swiped.current === 'left' || swiped.current === 'right') {
       swipeX.value = withTiming(swipeX.value + (swiped.current === 'left' ? -size * 3 : size * 3), EXIT_MOTION);
     } else if (swiped.current) {
-      swipeY.value = withTiming(swipeY.value + (swiped.current === 'top' ? -size : size), EXIT_MOTION);
+      swipeY.value = withTiming(swipeY.value + (swiped.current === 'up' ? -size : size), EXIT_MOTION);
     } else if (front) {
       y.value = withTiming(-lift * size, EXIT_MOTION);
     }
@@ -473,60 +477,6 @@ function ToastView({
       { scale: scale.value },
     ],
   }));
-
-  // The swipe in progress: where it started, and its last sample for its speed.
-  const drag = useRef<{ x: number; y: number; time: number } | undefined>(undefined);
-  const allowed = (direction: SwipeDirection): boolean => swipeDirections.includes(direction);
-  const touchStart = useRef<{ x: number; y: number } | undefined>(undefined);
-  const responder = {
-    onStartShouldSetResponderCapture: (event: GestureResponderEvent) => {
-      touchStart.current = { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY };
-      return false;
-    },
-    // A finger that moves takes the toast from its buttons, so a swipe that starts on one still closes it.
-    onMoveShouldSetResponderCapture: (event: GestureResponderEvent) => {
-      const start = touchStart.current;
-      if (!dismissible || start === undefined) return false;
-      return Math.hypot(event.nativeEvent.pageX - start.x, event.nativeEvent.pageY - start.y) > 4;
-    },
-    onResponderTerminationRequest: () => false,
-    onResponderGrant: (event: GestureResponderEvent) => {
-      drag.current = { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY, time: event.nativeEvent.timestamp };
-    },
-    onResponderMove: (event: GestureResponderEvent) => {
-      const start = drag.current;
-      if (start === undefined) return;
-      const dx = event.nativeEvent.pageX - start.x;
-      const dy = event.nativeEvent.pageY - start.y;
-      // A swipe the toast cannot be closed by moves it a little, with growing resistance.
-      const resist = (delta: number): number => delta / (1.5 + Math.abs(delta) / 20);
-      swipeX.value = (dx < 0 ? allowed('left') : allowed('right')) ? dx : resist(dx);
-      swipeY.value = (dy < 0 ? allowed('top') : allowed('bottom')) ? dy : resist(dy);
-    },
-    onResponderRelease: (event: GestureResponderEvent) => {
-      const start = drag.current;
-      drag.current = undefined;
-      if (start === undefined) return;
-      const dx = event.nativeEvent.pageX - start.x;
-      const dy = event.nativeEvent.pageY - start.y;
-      const along = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      const amount = along === 'x' ? dx : dy;
-      const direction: SwipeDirection = along === 'x' ? (dx < 0 ? 'left' : 'right') : dy < 0 ? 'top' : 'bottom';
-      const elapsed = Math.max(1, event.nativeEvent.timestamp - start.time);
-      if (allowed(direction) && (Math.abs(amount) >= SWIPE_THRESHOLD || Math.abs(amount) / elapsed > SWIPE_VELOCITY)) {
-        swiped.current = direction;
-        dismiss(item.id);
-        return;
-      }
-      swipeX.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
-      swipeY.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
-    },
-    onResponderTerminate: () => {
-      drag.current = undefined;
-      swipeX.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
-      swipeY.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
-    },
-  };
 
   const collapsedBehind = !expanded && !front;
   const icon =
@@ -608,7 +558,7 @@ function ToastView({
                 classNames[type === 'normal' || type === 'action' ? 'default' : type],
               )
         }
-        {...responder}
+        {...swipe.handlers}
       >
         <TextClassContext.Provider value={textColour}>
           <View
