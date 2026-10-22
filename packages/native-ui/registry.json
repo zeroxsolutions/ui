@@ -1173,6 +1173,15 @@
       ]
     },
     {
+      "name": "message-scroller",
+      "type": "registry:ui",
+      "title": "Message scroller",
+      "description": "A conversation's scrolling transcript that opens at its end or its last turn, brings each new turn near the top, follows a streamed reply while the reader is at the end, keeps its place as history loads above, and has a button and hooks to jump to either end or to any message.",
+      "dependencies": ["lucide-react-native", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/motion"],
+      "files": [{ "path": "src/registry/ui/message-scroller.tsx", "type": "registry:ui" }]
+    },
+    {
       "name": "trace",
       "type": "registry:ui",
       "title": "Trace",
