@@ -72,7 +72,7 @@ Mobile 80", and valued "None selected" until a category is active. A screen read
 the next or the previous category and reads its values.
 A chart with no tooltip is announced with the same label.
 
-As Recharts' do, bars grow from the axis, lines and areas draw in from the left and a pie sweeps round over one and a half seconds. A series is
+As Recharts' do, bars grow from the axis, lines and areas draw in from the left and a pie sweeps round over one and a half seconds, run by Reanimated. A series is
 drawn at once where the system asks for reduced motion or the series sets `isAnimationActive={false}`.
 
 ## API reference
@@ -175,6 +175,9 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
   `View` background it cannot parse, such as a theme colour on NativeWind.
 - A Label's `content` draws react-native-svg's elements or `Text`, not the DOM's `text` and `tspan`, and colours
   them with `fill`, such as `fill="var(--muted-foreground)"`, where upstream's demos use a `fill-*` class.
+- The entrance reveals the series through a clip, or a sweeping mask for a pie, that Reanimated animates, so
+  the chart is not drawn again for every frame; bars come up from the axis with their tops cut level until the
+  clip reaches them, where Recharts grows each bar's height.
 - A pie's slices have no stroke unless given one: upstream's container hides Recharts' white one.
 - `accessibilityLayer` is accepted and changes nothing: the chart always takes the keyboard on the web and is
   always read to a screen reader. The focused chart keeps the browser's focus ring, which upstream hides.

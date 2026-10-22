@@ -38,7 +38,6 @@ import {
   type ReactNode,
 } from 'react';
 import {
-  Easing,
   Platform,
   Text as NativeText,
   View,
@@ -48,7 +47,14 @@ import {
   type LayoutChangeEvent,
   type PointerEvent,
 } from 'react-native';
-import Svg, { Circle, ClipPath, Defs, G, Line as SvgLine, Path, Rect, Text as SvgText } from 'react-native-svg';
+import Animated, {
+  Easing,
+  useAnimatedProps,
+  useSharedValue,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
+import Svg, { Circle, ClipPath, Defs, G, Line as SvgLine, Mask, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { useReducedMotion } from './motion';
 
 /** One row of a chart's `data`, such as `{ month: "January", desktop: 186 }`. */
@@ -131,30 +137,112 @@ function useChartSize(width: number | undefined, height: number | undefined): Ch
 const ENTRANCE_MS = 1500;
 const EASE = Easing.bezier(0.25, 0.1, 0.25, 1);
 
+const AnimatedRect = Animated.createAnimatedComponent(Rect);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
 /**
- * The share of a chart's entrance drawn so far, from 0 to 1. It is 1 from the start where `animate` is
- * false or the system asks for reduced motion.
+ * The share of a chart's entrance drawn so far, from 0 to 1, run by Reanimated so the chart is not drawn
+ * again for each frame. It is 1 from the start where `animate` is false or the system asks for reduced motion.
  */
-function useEntrance(animate: boolean, duration: number): number {
+function useEntrance(animate: boolean, duration: number): SharedValue<number> {
   const reduced = useReducedMotion();
   const still = !animate || reduced;
-  const [progress, setProgress] = useState(still ? 1 : 0);
+  const progress = useSharedValue(still ? 1 : 0);
   useEffect(() => {
-    if (still) {
-      setProgress(1);
-      return undefined;
-    }
-    let frame = 0;
-    const start = Date.now();
-    const step = (): void => {
-      const share = Math.min(1, (Date.now() - start) / duration);
-      setProgress(EASE(share));
-      if (share < 1) frame = requestAnimationFrame(step);
-    };
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [still, duration]);
+    progress.value = still ? 1 : withTiming(1, { duration, easing: EASE });
+  }, [progress, still, duration]);
   return progress;
+}
+
+/** Where an entrance comes in from: up from the axis for bars, from a side for lines and areas. */
+type EntranceDirection = 'up' | 'right' | 'left';
+
+/**
+ * A clip path, named `id`, over the part of the chart its entrance has reached, which the series drawn
+ * through it grow into.
+ */
+function EntranceClip({
+  id,
+  progress,
+  plot,
+  size,
+  direction,
+}: {
+  id: string;
+  progress: SharedValue<number>;
+  plot: Plot;
+  size: ChartSize;
+  direction: EntranceDirection;
+}): ReactNode {
+  // The clip reaches past the plot's edge by the room a point's circle takes.
+  const reach = 8;
+  const span = plot.right - plot.left + reach;
+  const animatedProps = useAnimatedProps(() => {
+    const share = progress.value;
+    if (direction === 'up') {
+      const top = plot.bottom * (1 - share);
+      return { x: 0, y: top, width: size.width, height: size.height - top };
+    }
+    const width = plot.left + span * share;
+    return { x: direction === 'right' ? 0 : size.width - width, y: 0, width, height: size.height };
+  });
+  return (
+    <Defs>
+      <ClipPath id={id}>
+        <AnimatedRect testID="chart-entrance" animatedProps={animatedProps} />
+      </ClipPath>
+    </Defs>
+  );
+}
+
+/**
+ * A mask, named `id`, over the sector of a ring its entrance has swept, from `startAngle` towards
+ * `endAngle` in degrees anticlockwise from three o'clock, as Recharts sweeps a pie in.
+ */
+function SweepMask({
+  id,
+  progress,
+  cx,
+  cy,
+  radius,
+  startAngle,
+  endAngle,
+}: {
+  id: string;
+  progress: SharedValue<number>;
+  cx: number;
+  cy: number;
+  radius: number;
+  startAngle: number;
+  endAngle: number;
+}): ReactNode {
+  // A circle of half the radius stroked as wide as the radius covers the ring out to it; its dash, which
+  // starts at three o'clock and runs clockwise, is the swept sector.
+  const half = radius / 2;
+  const circumference = 2 * Math.PI * half;
+  const sweep = Math.min(360, Math.abs(endAngle - startAngle)) / 360;
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: circumference * (1 - sweep * progress.value),
+  }));
+  const mirror = endAngle > startAngle ? ` translate(0 ${2 * cy}) scale(1 -1)` : '';
+  return (
+    <Defs>
+      <Mask id={id} maskUnits="userSpaceOnUse" x={cx - radius} y={cy - radius} width={radius * 2} height={radius * 2}>
+        <AnimatedCircle
+          testID="chart-entrance"
+          cx={cx}
+          cy={cy}
+          r={half}
+          fill="none"
+          stroke="white"
+          strokeWidth={radius + 2}
+          strokeDasharray={[circumference, circumference]}
+          transform={`rotate(${-startAngle} ${cx} ${cy})${mirror}`}
+          animatedProps={animatedProps}
+        />
+      </Mask>
+    </Defs>
+  );
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -1070,15 +1158,22 @@ function CartesianChart({
             ))}
           </G>
         )}
+        <EntranceClip
+          id={clipId}
+          progress={progress}
+          plot={plot}
+          size={size}
+          direction={banded ? 'up' : reversed ? 'left' : 'right'}
+        />
         {series.map((item, order) => {
-          const share = item.props.isAnimationActive === false ? 1 : progress;
           const key = `${item.props.dataKey}-${order}`;
+          const clipPath = item.props.isAnimationActive === false ? undefined : `url(#${clipId})`;
           if (item.kind === 'bar') {
             const props = item.props;
             return (
-              <G key={key} testID={`chart-series-${props.dataKey}`}>
+              <G key={key} testID={`chart-series-${props.dataKey}`} clipPath={clipPath}>
                 {data.map((datum, index) => {
-                  const barTop = y(numberAt(datum, props.dataKey) * share);
+                  const barTop = y(numberAt(datum, props.dataKey));
                   const barHeight = Math.abs(y(0) - barTop);
                   if (barHeight === 0 || barWidth === 0) return null;
                   return (
@@ -1106,16 +1201,9 @@ function CartesianChart({
           // A Line draws its points unless told not to, an Area only when told to.
           const dot = props.dot ?? item.kind === 'line';
           const points = data.map((datum, index) => [x.center(index), y(numberAt(datum, props.dataKey))] as const);
-          const clip = `${clipId}-${order}`;
           return (
             <G key={key} testID={`chart-series-${props.dataKey}`}>
-              {/* Recharts draws a line in from the left over its entrance. */}
-              <Defs>
-                <ClipPath id={clip}>
-                  <Rect x={0} y={0} width={plot.left + (plot.right - plot.left) * share + 8} height={size.height} />
-                </ClipPath>
-              </Defs>
-              <G clipPath={`url(#${clip})`}>
+              <G clipPath={clipPath}>
                 {item.kind === 'area' ? (
                   <Path
                     testID={`chart-area-${props.dataKey}`}
@@ -1317,7 +1405,7 @@ interface Slice {
 }
 
 /** Each row's slice of the turn from `startAngle` to `endAngle`, as Recharts lays a pie out. */
-function layoutSlices(props: PieProps, share: number): Slice[] {
+function layoutSlices(props: PieProps): Slice[] {
   const { data, dataKey, nameKey = 'name', startAngle = 0, endAngle = 360, paddingAngle = 0 } = props;
   const values = data.map((datum) => Math.max(0, numberAt(datum, dataKey)));
   const total = values.reduce((sum, value) => sum + value, 0);
@@ -1326,7 +1414,7 @@ function layoutSlices(props: PieProps, share: number): Slice[] {
   const turn = Math.abs(endAngle - startAngle);
   // A whole turn has a gap after every slice; a part of one has none after the last.
   const gaps = Math.max(0, turn >= 360 ? drawn : drawn - 1);
-  const room = Math.max(0, turn - paddingAngle * gaps) * share;
+  const room = Math.max(0, turn - paddingAngle * gaps);
   let angle = startAngle;
   return data.map((datum, index) => {
     const value = values[index] ?? 0;
@@ -1339,7 +1427,7 @@ function layoutSlices(props: PieProps, share: number): Slice[] {
       startAngle: angle,
       endAngle: angle + direction * sweep,
     };
-    if (value > 0) angle += direction * (sweep + paddingAngle * share);
+    if (value > 0) angle += direction * (sweep + paddingAngle);
     return slice;
   });
 }
@@ -1382,6 +1470,7 @@ function PieChart({ margin, title, width, height, children }: PieChartProps): Re
   const [legendHeight, setLegendHeight] = useState(0);
   const pie = parts.pie;
   const progress = useEntrance(pie?.isAnimationActive !== false, pie?.animationDuration ?? ENTRANCE_MS);
+  const maskId = `chart-mask-${useId().replace(/[^\w-]/g, '')}`;
   const [active, setActive] = useState<ActivePoint | undefined>(undefined);
   const [touched, setTouched] = useState(false);
 
@@ -1398,8 +1487,8 @@ function PieChart({ margin, title, width, height, children }: PieChartProps): Re
   const cy = plotTop + lengthOf(pie.cy ?? '50%', plotHeight);
   const inner = lengthOf(pie.innerRadius ?? 0, maxRadius);
   const outer = lengthOf(pie.outerRadius ?? '80%', maxRadius);
-  const slices = layoutSlices(pie, pie.isAnimationActive === false ? 1 : progress);
-  const fullSlices = layoutSlices(pie, 1);
+  const fullSlices = layoutSlices(pie);
+  const slices = fullSlices;
   const nameOf = (key: string): string => palette.nameOf(key) ?? key;
   const describe = (index: number): string => {
     const slice = fullSlices[index];
@@ -1485,19 +1574,32 @@ function PieChart({ margin, title, width, height, children }: PieChartProps): Re
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
       >
-        <G x={cx} y={cy}>
-          {slices.map((slice) =>
-            slice.value > 0 && slice.endAngle !== slice.startAngle ? (
-              <Path
-                key={slice.index}
-                testID={`chart-slice-${slice.index}`}
-                d={slicePath(slice, inner, outer)}
-                fill={resolve(slice.fill ?? DEFAULT_SERIES_COLOR)}
-                stroke={resolve(pie.stroke)}
-                strokeWidth={pie.stroke === undefined ? 0 : (pie.strokeWidth ?? 1)}
-              />
-            ) : null,
-          )}
+        {pie.isAnimationActive === false ? null : (
+          <SweepMask
+            id={maskId}
+            progress={progress}
+            cx={cx}
+            cy={cy}
+            radius={outer + 1}
+            startAngle={pie.startAngle ?? 0}
+            endAngle={pie.endAngle ?? 360}
+          />
+        )}
+        <G mask={pie.isAnimationActive === false ? undefined : `url(#${maskId})`}>
+          <G x={cx} y={cy}>
+            {slices.map((slice) =>
+              slice.value > 0 && slice.endAngle !== slice.startAngle ? (
+                <Path
+                  key={slice.index}
+                  testID={`chart-slice-${slice.index}`}
+                  d={slicePath(slice, inner, outer)}
+                  fill={resolve(slice.fill ?? DEFAULT_SERIES_COLOR)}
+                  stroke={resolve(pie.stroke)}
+                  strokeWidth={pie.stroke === undefined ? 0 : (pie.strokeWidth ?? 1)}
+                />
+              ) : null,
+            )}
+          </G>
         </G>
         {labels}
         {parts.other}

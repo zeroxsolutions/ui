@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react-native';
+import { render, screen } from '@testing-library/react-native';
 import { Bar, BarChart, YAxis } from './charts';
 
 const mockMotion = { reduced: false };
@@ -61,32 +61,37 @@ describe('YAxis', () => {
   });
 });
 
+// Reanimated's jest setup runs the entrance without drawing its frames onto the svg, so these read the frame a
+// chart starts from.
 describe('a chart entrance', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     mockMotion.reduced = false;
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('grows the bars in from nothing', async () => {
+  // The bars are drawn through a clip that rises from the axis, at the plot's 195px bottom, to the top.
+  it('starts the bars from the axis', async () => {
     await render(<Bars />);
-    expect(screen.queryAllByTestId(/^chart-bar-/, HIDDEN)).toHaveLength(0);
 
-    await act(async () => {
-      jest.advanceTimersByTime(2000);
-    });
-
-    expect(screen.getAllByTestId(/^chart-bar-/, HIDDEN)).toHaveLength(2);
+    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('y', 195);
+    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('height', 5);
   });
 
-  it('draws the bars at once where the system asks for reduced motion', async () => {
+  it('draws the bars whole from the start where the system asks for reduced motion', async () => {
     mockMotion.reduced = true;
 
     await render(<Bars />);
 
-    expect(screen.getAllByTestId(/^chart-bar-/, HIDDEN)).toHaveLength(2);
+    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('y', 0);
+    expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('height', 200);
+  });
+
+  it('draws a series at once whose isAnimationActive is false', async () => {
+    await render(
+      <BarChart data={data} width={320} height={200}>
+        <Bar dataKey="desktop" fill="#2563eb" isAnimationActive={false} />
+      </BarChart>,
+    );
+
+    expect(screen.getByTestId('chart-series-desktop', HIDDEN).props.clipPath).toBeUndefined();
   });
 });
