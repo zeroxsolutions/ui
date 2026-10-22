@@ -93,8 +93,7 @@ const items = [
 ```
 
 `onSubmit` gets each answered question's answer by its `name`: the choice's `value` or the text typed in a
-`QuestionnaireInput`, and a list for a `multiple` question. A skipped question with one answer is left out; a
-skipped `multiple` one gives an empty list.
+`QuestionnaireInput`, and a list for a `multiple` question. A skipped question is left out.
 
 ## How it steps
 
@@ -107,8 +106,13 @@ skipped `multiple` one gives an empty list.
   answers to `onSubmit`.
 - Each step moves the screen reader to the new question's title on a device, and the keyboard focus to the
   question on the web.
-- On the web, Ctrl or Cmd with Enter goes on or submits, and the left and right arrows step back and forward once
-  the question is answered. With `shortcuts`, each choice shows the letter or number that picks it.
+- Return in a `QuestionnaireInput` that holds the answer goes on or submits.
+- On the web, Ctrl or Cmd with Enter goes on or submits, and so does Enter on a picked choice. Space picks a
+  choice. The up and down arrows move between the answers, picking a radio, and the left and right arrows move
+  between radios, or step back and forward once the question is answered from anywhere else. With `shortcuts`,
+  each choice shows the letter or number that picks it. Each part names the keys it answers in
+  `aria-keyshortcuts`.
+- In development, the Questionnaire warns where `items` and the rendered questions disagree.
 
 ## API reference
 
@@ -178,7 +182,4 @@ is labelled with its own word unless given children.
   choice is now picked.
 - Upstream's shortcuts and arrow keys work wherever there is a keyboard. On a device, where a keyboard is rare and
   React Native reports no key presses, there are no shortcuts, and the shortcut letters are not shown.
-- Upstream moves focus between choices with the up and down arrows. The native choices take focus in order with
-  Tab on the web instead.
-- Upstream warns in development when `items` and the rendered questions disagree. The native item does not.
 - Upstream's parts take a `render` prop. The native ones take children.

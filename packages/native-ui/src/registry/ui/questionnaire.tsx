@@ -58,8 +58,15 @@ interface QuestionnaireRootContextValue {
   updateItem: (summary: ItemSummary) => void;
   goNext: () => void;
   goPrevious: () => void;
+  /** Goes on, or submits from the last question, once the question shown can be left. */
+  advance: () => void;
   skipCurrent: () => void;
   submit: () => void;
+  /**
+   * Answers a web key the Questionnaire handles: Ctrl or Cmd with Enter, the side arrows and the shortcuts.
+   * @param typing - whether the key went down in a text field, which keeps its arrows and letters
+   */
+  handleKey: (event: WebKeyEvent, typing: boolean) => void;
 }
 
 /** What the Questionnaire knows of a rendered QuestionnaireItem, which it re-renders on. */
@@ -68,6 +75,8 @@ interface ItemSummary {
   disabled: boolean;
   required: boolean;
   status: QuestionnaireItemStatus;
+  /** The rendered choices in order, each disabled by its own prop, which the development warnings compare. */
+  choices: QuestionnaireChoiceDefinition[];
 }
 
 /** What the Questionnaire asks of a rendered QuestionnaireItem. */
@@ -78,8 +87,8 @@ interface ItemHandle {
   skip: () => void;
   /** The item's answer, or undefined when it has none. */
   value: () => string | string[] | undefined;
-  /** Picks the choice a shortcut key names; false when no choice has it. */
-  chooseByShortcut: (key: string) => boolean;
+  /** Focuses the choice a shortcut key names, and picks it unless the key repeats; false when no choice has it. */
+  chooseByShortcut: (key: string, repeat: boolean) => boolean;
   /** Moves focus to the item, the keyboard's on the web and the screen reader's on a device. */
   focus: () => void;
 }
@@ -89,8 +98,21 @@ interface AnswerRecord {
   id: string;
   type: 'choice' | 'input';
   value: string;
+  /** Disabled by its own prop or by its item's. */
   disabled: boolean;
+  /** Disabled by its own prop. */
+  ownDisabled: boolean;
 }
+
+/** What an item does to one of its answers from the keyboard. */
+interface AnswerControl {
+  focus: () => void;
+  /** What a press does: picks a choice, or toggles it in a `multiple` question. Nothing for the input. */
+  press: () => void;
+}
+
+/** Which way an arrow key moves through a question's answers. */
+type AnswerDirection = 'next' | 'previous';
 
 interface QuestionnaireItemContextValue {
   name: string;
@@ -104,6 +126,14 @@ interface QuestionnaireItemContextValue {
   /** Adds the answer, or updates it, picking it if it is picked at first. */
   registerAnswer: (answer: AnswerRecord, selectedAtFirst: boolean) => void;
   unregisterAnswer: (id: string) => void;
+  /** Lets the item focus and press the answer from the keyboard. */
+  registerControl: (id: string, control: AnswerControl) => () => void;
+  /**
+   * Moves focus to the answer before or after the one with `from`, wrapping, and picks it when it is a radio; from
+   * the question itself (`null`), to its picked answer, or else its first or last. From a radio it moves among the
+   * radios alone, as a browser's radio group does. False when there is nowhere to move.
+   */
+  moveFocus: (from: string | null, direction: AnswerDirection) => boolean;
   select: (id: string, on: boolean) => void;
   setHasDescription: (has: boolean) => void;
   hasDescription: boolean;
@@ -142,11 +172,133 @@ const NO_FOCUS_OUTLINE = (Platform.OS === 'web' ? { outlineStyle: 'none' } : und
 /** A drawn view, which focus can be moved to. */
 type ViewRef = ComponentRef<typeof View>;
 
-/** The web keys the Questionnaire answers, read off the event React Native Web hands a View. */
+/** A key event as React Native Web hands it to a View, a Pressable or a TextInput. */
 type WebKeyEvent = {
   nativeEvent: object;
+  target?: unknown;
+  currentTarget?: unknown;
   preventDefault: () => void;
+  stopPropagation?: () => void;
 };
+
+/** The parts of a browser's key event the Questionnaire reads. */
+type KeyPress = {
+  key?: string;
+  metaKey?: boolean;
+  ctrlKey?: boolean;
+  altKey?: boolean;
+  shiftKey?: boolean;
+  repeat?: boolean;
+  isComposing?: boolean;
+  keyCode?: number;
+  target?: { tagName?: string };
+};
+
+/** The key pressed, or undefined while an input method is composing text, which owns its keys. */
+function readKey(event: WebKeyEvent): KeyPress | undefined {
+  const press = event.nativeEvent as KeyPress;
+  if (press.key === undefined || press.isComposing || press.keyCode === 229) return undefined;
+  return press;
+}
+
+const modified = (press: KeyPress): boolean => Boolean(press.metaKey || press.ctrlKey || press.altKey);
+
+/** `aria-keyshortcuts` on the web, which React Native's own prop types do not list; nothing on a device. */
+function keyShortcuts(...keys: (string | false | null | undefined)[]): object {
+  const value = keys.filter(Boolean).join(' ');
+  return Platform.OS === 'web' && value ? { 'aria-keyshortcuts': value } : {};
+}
+
+/** What upstream warns of in development where `items` and the rendered questions disagree. */
+function definitionWarnings(items: readonly QuestionnaireItemDefinition[], defaultItem: string | undefined): string[] {
+  const warnings: string[] = [];
+  const names = new Set<string>();
+  for (const item of items) {
+    if (names.has(item.name)) warnings.push(`Item name "${item.name}" is defined more than once.`);
+    names.add(item.name);
+    const values = new Set<string>();
+    for (const choice of item.choices ?? []) {
+      if (values.has(choice.value)) {
+        warnings.push(`Choice value "${choice.value}" is defined more than once in item "${item.name}".`);
+      }
+      values.add(choice.value);
+    }
+  }
+  if (defaultItem !== undefined) {
+    const chosen = items.find((item) => item.name === defaultItem);
+    if (!chosen || chosen.disabled) {
+      warnings.push(
+        `defaultItem "${defaultItem}" does not identify an enabled item. The first enabled item will be used instead.`,
+      );
+    }
+  }
+  return warnings;
+}
+
+function renderWarnings(
+  items: readonly QuestionnaireItemDefinition[],
+  rendered: readonly ItemSummary[],
+  shortcuts: QuestionnaireShortcutMode | undefined,
+): string[] {
+  const warnings: string[] = [];
+  const byName = new Map(rendered.map((summary) => [summary.name, summary]));
+  for (const item of items) {
+    const summary = byName.get(item.name);
+    if (!summary) {
+      if (!item.disabled) warnings.push(`Item "${item.name}" is defined but has no rendered QuestionnaireItem.`);
+      continue;
+    }
+    if (summary.disabled !== Boolean(item.disabled)) {
+      warnings.push(`Item "${item.name}" has different disabled values in items and QuestionnaireItem.`);
+    }
+    if (summary.required !== Boolean(item.required)) {
+      warnings.push(`Item "${item.name}" has different required values in items and QuestionnaireItem.`);
+    }
+    const defined = item.choices ?? [];
+    const definedValues = new Set(defined.map((choice) => choice.value));
+    const drawn = new Map(summary.choices.map((choice) => [choice.value, choice]));
+    for (const choice of defined) {
+      const match = drawn.get(choice.value);
+      if (!match) {
+        warnings.push(
+          `Choice "${choice.value}" is defined for item "${item.name}" but has no rendered QuestionnaireChoice.`,
+        );
+      } else if (Boolean(match.disabled) !== Boolean(choice.disabled)) {
+        warnings.push(
+          `Choice "${choice.value}" in item "${item.name}" has different disabled values in items and QuestionnaireChoice.`,
+        );
+      }
+    }
+    if (shortcuts === undefined) continue;
+    for (const choice of summary.choices) {
+      if (!definedValues.has(choice.value)) {
+        warnings.push(
+          `Rendered choice "${choice.value}" in item "${item.name}" is missing from items and will not receive a shortcut.`,
+        );
+      }
+    }
+    const definedOrder = defined.filter((choice) => !choice.disabled).map((choice) => choice.value);
+    const drawnOrder = summary.choices.filter((choice) => !choice.disabled).map((choice) => choice.value);
+    if (
+      definedOrder.length > 0 &&
+      definedOrder.length === drawnOrder.length &&
+      definedOrder.every((value) => drawnOrder.includes(value)) &&
+      definedOrder.some((value, at) => value !== drawnOrder[at])
+    ) {
+      warnings.push(
+        `Choice order for item "${item.name}" differs between items and the rendered QuestionnaireChoice elements.`,
+      );
+    }
+  }
+  for (const summary of rendered) {
+    if (!summary.disabled && !items.some((item) => item.name === summary.name)) {
+      warnings.push(
+        `Rendered item "${summary.name}" is missing from items and is excluded from the questionnaire collection.`,
+      );
+    }
+  }
+  return warnings;
+}
 
 type QuestionnaireProps = Omit<ComponentProps<typeof View>, 'onSubmit'> & {
   /** The questions in order; without it, the rendered QuestionnaireItems in the order they mount. */
@@ -254,6 +406,29 @@ function Questionnaire({
     submit();
   });
 
+  // Each warning once while it holds. The items render and report their choices in the commits after this one,
+  // which cancel the check queued here before it runs.
+  const warned = useRef(new Set<string>());
+  useEffect(() => {
+    if (!__DEV__) return;
+    if (!items) {
+      warned.current.clear();
+      return;
+    }
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      const now = new Set([...definitionWarnings(items, defaultItem), ...renderWarnings(items, summaries, shortcuts)]);
+      for (const warning of now) {
+        if (!warned.current.has(warning)) console.warn(`[Questionnaire] ${warning}`);
+      }
+      warned.current = now;
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [items, defaultItem, summaries, shortcuts]);
+
   const goPrevious = (): void => {
     if (index > 0) change(order[index - 1]);
   };
@@ -296,45 +471,55 @@ function Questionnaire({
       const at = current.findIndex((entry) => entry.name === next.name);
       if (at < 0) return [...current, next];
       const known = current[at];
-      if (known.disabled === next.disabled && known.required === next.required && known.status === next.status) {
+      if (
+        known.disabled === next.disabled &&
+        known.required === next.required &&
+        known.status === next.status &&
+        known.choices.length === next.choices.length &&
+        known.choices.every(
+          (choice, position) =>
+            choice.value === next.choices[position].value && choice.disabled === next.choices[position].disabled,
+        )
+      ) {
         return current;
       }
       return current.map((entry, position) => (position === at ? next : entry));
     });
   }, []);
 
-  // The keys the web answers: a choice's shortcut, Enter with Ctrl or Cmd to go on, and the side arrows to step.
-  const onKeyDown = (event: WebKeyEvent): void => {
-    const { key, metaKey, ctrlKey, altKey, shiftKey, target, repeat } = event.nativeEvent as {
-      key?: string;
-      metaKey?: boolean;
-      ctrlKey?: boolean;
-      altKey?: boolean;
-      shiftKey?: boolean;
-      repeat?: boolean;
-      target?: { tagName?: string };
-    };
-    if (key === undefined) return;
-    const typing = target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA';
-    if (key === 'Enter' && (metaKey || ctrlKey) && !altKey && !shiftKey) {
+  // The keys the web answers here: Enter with Ctrl or Cmd to go on, the side arrows to step, and a choice's
+  // shortcut. Enter on an answer and the arrows between answers are the answers' own.
+  const handleKey = (event: WebKeyEvent, typing: boolean): void => {
+    const press = readKey(event);
+    if (!press?.key) return;
+    const { key, repeat } = press;
+    if (key === 'Enter' && (press.metaKey || press.ctrlKey) && !press.altKey && !press.shiftKey) {
       event.preventDefault();
       if (!repeat) advance();
       return;
     }
-    if (metaKey || ctrlKey || altKey || typing) return;
-    if (key === 'ArrowLeft' || key === 'ArrowRight') {
+    if (modified(press)) return;
+    if ((key === 'ArrowLeft' || key === 'ArrowRight') && !typing) {
       event.preventDefault();
       if (repeat) return;
       if (key === 'ArrowLeft') goPrevious();
       else if (activeItemStatus !== 'unanswered') goNext();
       return;
     }
-    if (shortcuts === undefined) return;
+    if (typing || shortcuts === undefined) return;
     const shortcut = shortcuts === 'letters' ? key.toUpperCase() : key;
     if (!shortcutKeys(shortcuts).includes(shortcut)) return;
-    if (handleOf(currentName)?.chooseByShortcut(shortcut)) event.preventDefault();
+    if (handleOf(currentName)?.chooseByShortcut(shortcut, Boolean(repeat))) event.preventDefault();
   };
-  const webKeys = Platform.OS === 'web' ? ({ onKeyDown } as object) : {};
+  const webKeys =
+    Platform.OS === 'web'
+      ? ({
+          onKeyDown: (event: WebKeyEvent) => {
+            const tag = (event.nativeEvent as KeyPress).target?.tagName;
+            handleKey(event, tag === 'INPUT' || tag === 'TEXTAREA');
+          },
+        } as object)
+      : {};
 
   const context: QuestionnaireRootContextValue = {
     current: index < 0 ? 0 : index + 1,
@@ -350,8 +535,10 @@ function Questionnaire({
     updateItem,
     goNext,
     goPrevious,
+    advance,
     skipCurrent,
     submit,
+    handleKey,
   };
 
   return (
@@ -437,6 +624,7 @@ function QuestionnaireItem({
   const [title, setTitleText] = useState('');
   const titleRef = useRef<RefObject<ViewRef | null> | null>(null);
   const viewRef = useRef<ViewRef>(null);
+  const controls = useRef(new Map<string, AnswerControl>());
 
   const enabledAnswers = answers.filter((answer) => !answer.disabled && !disabled);
   const answered = enabledAnswers.some((answer) => selected.includes(answer.id));
@@ -489,6 +677,38 @@ function QuestionnaireItem({
     setSelected((current) => current.filter((entry) => entry !== id));
   }, []);
 
+  const registerControl = useCallback((id: string, control: AnswerControl) => {
+    controls.current.set(id, control);
+    return () => {
+      if (controls.current.get(id) === control) controls.current.delete(id);
+    };
+  }, []);
+
+  const moveFocus = (from: string | null, direction: AnswerDirection): boolean => {
+    if (enabledAnswers.length === 0) return false;
+    const radios = !multiple;
+    let target: AnswerRecord | undefined;
+    if (from === null) {
+      target =
+        enabledAnswers.find((answer) => selected.includes(answer.id)) ??
+        (direction === 'next' ? enabledAnswers[0] : enabledAnswers[enabledAnswers.length - 1]);
+    } else {
+      const origin = enabledAnswers.find((answer) => answer.id === from);
+      if (!origin) return false;
+      const pool =
+        radios && origin.type === 'choice'
+          ? enabledAnswers.filter((answer) => answer.type === 'choice')
+          : enabledAnswers;
+      const at = pool.indexOf(origin);
+      target = pool[(at + (direction === 'next' ? 1 : -1) + pool.length) % pool.length];
+    }
+    if (!target || target.id === from) return false;
+    const control = controls.current.get(target.id);
+    control?.focus();
+    if (radios && target.type === 'choice') control?.press();
+    return true;
+  };
+
   // A question turned from several answers to one keeps only the first.
   useLayoutEffect(() => {
     if (!multiple) setSelected((current) => (current.length > 1 ? current.slice(0, 1) : current));
@@ -517,16 +737,19 @@ function QuestionnaireItem({
       setSkipped(true);
     },
     value: () => {
-      if (skipped || disabled) return multiple ? [] : undefined;
+      if (skipped || disabled) return undefined;
       const values = enabledAnswers.filter((answer) => selected.includes(answer.id)).map((answer) => answer.value);
       return multiple ? values : values[0];
     },
-    chooseByShortcut: (key) => {
+    chooseByShortcut: (key, repeat) => {
       const choice = enabledAnswers.find(
         (answer) => answer.type === 'choice' && shortcutOf(answer.id, answer.value) === key,
       );
       if (!choice) return false;
-      select(choice.id, multiple ? !selected.includes(choice.id) : true);
+      if (repeat) return true;
+      const control = controls.current.get(choice.id);
+      control?.focus();
+      control?.press();
       return true;
     },
     focus: () => {
@@ -542,8 +765,11 @@ function QuestionnaireItem({
   const { registerItem, updateItem } = root;
   useLayoutEffect(() => registerItem(name, handle), [registerItem, name]);
   useLayoutEffect(() => {
-    updateItem({ name, disabled, required, status });
-  }, [updateItem, name, disabled, required, status]);
+    const choices = answers
+      .filter((answer) => answer.type === 'choice')
+      .map((answer) => ({ value: answer.value, disabled: answer.ownDisabled }));
+    updateItem({ name, disabled, required, status, choices });
+  }, [updateItem, name, disabled, required, status, answers]);
 
   const setTitle = useCallback((text: string, ref: RefObject<ViewRef | null>) => {
     setTitleText(text);
@@ -561,11 +787,26 @@ function QuestionnaireItem({
     shortcutOf,
     registerAnswer,
     unregisterAnswer,
+    registerControl,
+    moveFocus,
     select,
     setHasDescription,
     hasDescription,
     setTitle,
   };
+
+  // Focused itself as a step lands on it, the question moves focus into its answers with the up and down arrows.
+  const webKeys =
+    Platform.OS === 'web'
+      ? ({
+          onKeyDown: (event: WebKeyEvent) => {
+            const press = readKey(event);
+            if (event.target !== event.currentTarget || !press || modified(press)) return;
+            if (press.key !== 'ArrowUp' && press.key !== 'ArrowDown') return;
+            if (moveFocus(null, press.key === 'ArrowDown' ? 'next' : 'previous')) event.preventDefault();
+          },
+        } as object)
+      : {};
 
   return (
     <QuestionnaireItemContext.Provider value={context}>
@@ -575,6 +816,13 @@ function QuestionnaireItem({
         aria-label={title || undefined}
         aria-hidden={!active || undefined}
         tabIndex={Platform.OS === 'web' ? -1 : undefined}
+        {...keyShortcuts(
+          active && 'Meta+Enter Control+Enter',
+          active && enabledAnswers.length > 0 && 'ArrowUp ArrowDown',
+          active && !root.first && 'ArrowLeft',
+          active && !root.last && status !== 'unanswered' && 'ArrowRight',
+        )}
+        {...webKeys}
         className={cn('min-w-0 flex-col cn-questionnaire-item', !active && 'hidden', className)}
         style={[NO_FOCUS_OUTLINE, style]}
         {...props}
@@ -645,7 +893,8 @@ type QuestionnaireChoiceProps = Omit<ComponentProps<typeof Pressable>, 'children
 /**
  * One answer, announced as a radio, or as a checkbox in a `multiple` question, and named by its text. A press picks
  * it, and in a `multiple` question a second press unpicks it. It is ringed while it holds focus from a keyboard,
- * and on the web shows the key that picks it when the Questionnaire has `shortcuts`.
+ * and on the web shows the key that picks it when the Questionnaire has `shortcuts`. On the web, Space picks it,
+ * Enter goes on once it is picked, and the arrows move to the next or previous answer, picking a radio.
  */
 function QuestionnaireChoice({
   className,
@@ -657,8 +906,10 @@ function QuestionnaireChoice({
   onFocus,
   onBlur,
   children,
+  ref,
   ...props
 }: QuestionnaireChoiceProps): ReactNode {
+  const root = useRoot('QuestionnaireChoice');
   const item = useItem('QuestionnaireChoice');
   const id = useId();
   const [hasDescription, setHasDescription] = useState(false);
@@ -669,12 +920,79 @@ function QuestionnaireChoice({
   const radio = !item.multiple;
   const shortcut = Platform.OS === 'web' ? item.shortcutOf(id, value) : null;
   const firstChecked = useRef(controlled ? checkedProp : defaultChecked);
-  const { registerAnswer, unregisterAnswer, select } = item;
+  const pressable = useRef<ComponentRef<typeof Pressable>>(null);
+  const { registerAnswer, unregisterAnswer, registerControl, select } = item;
 
   useLayoutEffect(() => {
-    registerAnswer({ id, type: 'choice', value, disabled }, firstChecked.current === true);
-  }, [registerAnswer, id, value, disabled]);
+    registerAnswer({ id, type: 'choice', value, disabled, ownDisabled: disabledProp }, firstChecked.current === true);
+  }, [registerAnswer, id, value, disabled, disabledProp]);
   useLayoutEffect(() => () => unregisterAnswer(id), [unregisterAnswer, id]);
+
+  const press = (): void => {
+    const next = radio ? true : !checked;
+    if (next === checked) return;
+    onChange?.(next);
+    if (!controlled) select(id, next);
+    // A controlled choice its question skipped is still checked in the caller's state, so the change above
+    // re-renders nothing; the press un-skips the question here instead.
+    else if (item.status === 'skipped' && next === checkedProp) select(id, next);
+  };
+  const latestPress = useRef(press);
+  latestPress.current = press;
+  useLayoutEffect(
+    () =>
+      registerControl(id, {
+        focus: () => (pressable.current as unknown as { focus?: () => void } | null)?.focus?.(),
+        press: () => latestPress.current(),
+      }),
+    [registerControl, id],
+  );
+  const attach = useCallback(
+    (node: ComponentRef<typeof Pressable> | null) => {
+      pressable.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
+  );
+
+  // React Native Web's press handling stops Enter on a Pressable from reaching the Questionnaire, and does not
+  // press a radio or a checkbox for Space, so both are answered here.
+  const webKeys =
+    Platform.OS === 'web'
+      ? ({
+          onKeyDown: (event: WebKeyEvent) => {
+            const keyPress = readKey(event);
+            if (!keyPress) return;
+            const { key, repeat } = keyPress;
+            if (key === 'Enter') {
+              if (keyPress.metaKey || keyPress.ctrlKey) {
+                root.handleKey(event, false);
+                return;
+              }
+              if (keyPress.altKey) return;
+              event.preventDefault();
+              if (!repeat && checked) root.advance();
+              return;
+            }
+            if (modified(keyPress)) return;
+            if (key === ' ') {
+              event.preventDefault();
+              if (!repeat) press();
+              return;
+            }
+            const vertical = key === 'ArrowUp' || key === 'ArrowDown';
+            const sideways = radio && (key === 'ArrowLeft' || key === 'ArrowRight');
+            if (!vertical && !sideways) return;
+            const moved = item.moveFocus(id, key === 'ArrowDown' || key === 'ArrowRight' ? 'next' : 'previous');
+            // The side arrows move between radios, as a browser's radio group does, and do not step the question.
+            if (moved || sideways) {
+              event.preventDefault();
+              event.stopPropagation?.();
+            }
+          },
+        } as object)
+      : {};
 
   useLayoutEffect(() => {
     if (checkedProp === undefined) return;
@@ -685,6 +1003,7 @@ function QuestionnaireChoice({
   return (
     <QuestionnaireChoiceContext.Provider value={setHasDescription}>
       <Pressable
+        ref={attach}
         role={radio ? 'radio' : 'checkbox'}
         // Named by its label and description alone, not by the shortcut key drawn beside them.
         aria-label={
@@ -697,6 +1016,8 @@ function QuestionnaireChoice({
         aria-disabled={disabled || undefined}
         accessibilityState={{ checked, disabled }}
         disabled={disabled}
+        {...keyShortcuts(shortcut, checked && !disabled && 'Enter')}
+        {...webKeys}
         className={cn(
           'relative min-h-11 flex-row items-start cn-questionnaire-choice',
           checked && 'cn-questionnaire-choice@checked',
@@ -713,11 +1034,10 @@ function QuestionnaireChoice({
           blurred();
           onBlur?.(event);
         }}
-        onPress={() => {
-          const next = radio ? true : !checked;
-          if (next === checked) return;
-          onChange?.(next);
-          if (!controlled) select(id, next);
+        onPress={(event) => {
+          // Enter goes on rather than picking, as on a browser's own radio and checkbox.
+          if ((event as unknown as { key?: string }).key === 'Enter') return;
+          press();
         }}
         {...props}
       >
@@ -774,8 +1094,9 @@ type QuestionnaireInputProps = ComponentProps<typeof Input>;
 
 /**
  * A free-text answer, such as "Something else", which answers the question while it holds text. In a question
- * with one answer, typing in it unpicks the choices, and picking a choice leaves its text unsent. Name it with
- * `aria-label`.
+ * with one answer, typing in it unpicks the choices, and picking a choice leaves its text unsent. Return goes on
+ * while it holds the answer; on the web, while it is empty, the up and down arrows move to the other answers.
+ * Name it with `aria-label`.
  */
 function QuestionnaireInput({
   className,
@@ -785,8 +1106,12 @@ function QuestionnaireInput({
   editable,
   onFocus,
   onBlur,
+  onKeyPress,
+  onSubmitEditing,
+  ref,
   ...props
 }: QuestionnaireInputProps): ReactNode {
+  const root = useRoot('QuestionnaireInput');
   const item = useItem('QuestionnaireInput');
   const [focused, setFocused] = useState(false);
   const id = useId();
@@ -795,12 +1120,26 @@ function QuestionnaireInput({
   const filled = text.trim().length > 0;
   const disabled = item.disabled || editable === false;
   const firstFilled = useRef(filled);
-  const { registerAnswer, unregisterAnswer, select } = item;
+  const field = useRef<ComponentRef<typeof Input>>(null);
+  const { registerAnswer, unregisterAnswer, registerControl, select } = item;
+  const answering = filled && !disabled && item.selected.includes(id);
 
   useLayoutEffect(() => {
-    registerAnswer({ id, type: 'input', value: text, disabled }, firstFilled.current);
-  }, [registerAnswer, id, text, disabled]);
+    registerAnswer({ id, type: 'input', value: text, disabled, ownDisabled: editable === false }, firstFilled.current);
+  }, [registerAnswer, id, text, disabled, editable]);
   useLayoutEffect(() => () => unregisterAnswer(id), [unregisterAnswer, id]);
+  useLayoutEffect(
+    () => registerControl(id, { focus: () => field.current?.focus(), press: () => undefined }),
+    [registerControl, id],
+  );
+  const attach = useCallback(
+    (node: ComponentRef<typeof Input> | null) => {
+      field.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
+  );
 
   useLayoutEffect(() => {
     if (valueProp !== undefined) select(id, valueProp.trim().length > 0);
@@ -833,7 +1172,33 @@ function QuestionnaireInput({
           setText(next);
           select(id, next.trim().length > 0);
         }}
+        // React Native Web's field stops its keys from reaching the Questionnaire, so it hands them on here.
+        onKeyPress={(event) => {
+          onKeyPress?.(event);
+          if (Platform.OS !== 'web') return;
+          const keyEvent = event as unknown as WebKeyEvent;
+          const keyPress = readKey(keyEvent);
+          if (!keyPress) return;
+          if (keyPress.key === 'Enter' && !modified(keyPress)) {
+            // Also keeps the field from submitting and blurring itself.
+            keyEvent.preventDefault();
+            if (!keyPress.repeat && answering) root.advance();
+            return;
+          }
+          const vertical = keyPress.key === 'ArrowUp' || keyPress.key === 'ArrowDown';
+          if (vertical && !modified(keyPress) && !filled) {
+            if (item.moveFocus(id, keyPress.key === 'ArrowDown' ? 'next' : 'previous')) keyEvent.preventDefault();
+            return;
+          }
+          root.handleKey(keyEvent, true);
+        }}
+        onSubmitEditing={(event) => {
+          onSubmitEditing?.(event);
+          if (Platform.OS !== 'web' && answering) root.advance();
+        }}
+        {...keyShortcuts(answering && 'Enter')}
         {...props}
+        ref={attach}
       />
     </View>
   );
@@ -944,6 +1309,7 @@ function QuestionnaireNext({ onPress, ...props }: QuestionnaireButtonProps): Rea
         onPress?.(event);
         root.goNext();
       }}
+      {...keyShortcuts(!props.disabled && 'Enter')}
       {...props}
     />
   );
@@ -960,6 +1326,7 @@ function QuestionnaireSubmit({ onPress, ...props }: QuestionnaireButtonProps): R
         onPress?.(event);
         root.submit();
       }}
+      {...keyShortcuts(!props.disabled && 'Enter')}
       {...props}
     />
   );
