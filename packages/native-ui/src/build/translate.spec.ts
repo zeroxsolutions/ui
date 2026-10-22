@@ -1347,3 +1347,70 @@ describe('translateClasses for the conversation items', () => {
     ]);
   });
 });
+
+describe('translateClasses for the questionnaire and trace', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const slot = (
+    style: keyof typeof styles,
+    name: string,
+    engine: Engine,
+    part: 'view' | 'text' | 'icon',
+    state = '',
+  ): Translation => translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
+
+  it.each(STYLE_ENGINES)(
+    'translates every class of every questionnaire and trace slot for %s in %s',
+    (engine, style) => {
+      const names = [...styles[style].keys()].filter((name) => /^cn-(questionnaire|trace)(-|$)/.test(name));
+
+      expect(names.length).toBeGreaterThan(0);
+      for (const name of names) {
+        for (const part of ['view', 'text', 'icon'] as const) {
+          expect({ name, part, unknown: slot(style, name, engine, part).unknown }).toEqual({ name, part, unknown: [] });
+        }
+      }
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'pulls an icon after a trace title back by a step, as the state after=trace-title, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-trace-icon', engine, 'view', 'after=trace-title').classes).toEqual(['-ml-1']);
+      expect(slot(style, 'cn-trace-icon', engine, 'view').classes).toEqual(['size-4']);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'indents trace content by two spacing steps less a pixel, in px, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-trace-collapsible-content-inner', engine, 'view').classes).toContain('ml-[7px]');
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'nudges a questionnaire indicator down by a fraction of a spacing step, in px, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-questionnaire-choice-indicator', engine, 'view').classes).toContain('translate-y-[1.8px]');
+      expect(slot(style, 'cn-questionnaire-shortcut', engine, 'view').classes).toContain('translate-y-[1.8px]');
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'rings a trace trigger as a border while it holds keyboard focus, as the state focused, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-trace-collapsible-trigger', engine, 'view', 'focused').classes).toEqual([
+        'border-ring/50',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'rings a questionnaire choice while its control holds keyboard focus, as the state focused, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-questionnaire-choice', engine, 'view', 'focused').classes).toEqual(['border-ring']);
+    },
+  );
+});

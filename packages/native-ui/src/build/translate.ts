@@ -139,10 +139,12 @@ const COMMAND_GROUP_HEADING = '**:[[cmdk-group-heading]]';
 
 /**
  * A state of the control inside the part, of a direct child the part holds, such as an icon in an
- * Alert or a group in a ButtonGroup, of the part just before it, such as the legend a FieldDescription
- * follows, or of the part it sits straight inside, such as CodeBlockActions floating in a CodeBlock rather
- * than sitting in its header, which upstream selects with an arbitrary selector the dropped rules would
- * otherwise remove or not read, and which the component learns from its control, its children or its parent.
+ * Alert or a group in a ButtonGroup, of a part before it, such as the legend a FieldDescription
+ * follows or the title a TraceIcon comes after, or of the part it sits straight inside, such as CodeBlockActions
+ * floating in a CodeBlock rather than sitting in its header, which upstream selects with an arbitrary selector the
+ * dropped rules would otherwise remove or not read, and which the component learns from its control, its children
+ * or its parent. A questionnaire choice is ringed while the hidden input it holds on the web has keyboard focus,
+ * which the native choice, being the control itself, knows as its own focus.
  */
 const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
   Object.entries({
@@ -151,6 +153,8 @@ const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'has-[>svg]': 'slot=icon',
     'has-[>[data-slot=button-group]]': 'slot=button-group',
     '[[data-variant=legend]+&]': 'after=legend',
+    '[[data-slot=trace-title]~&]': 'after=trace-title',
+    'has-[>input:focus-visible]': 'focused',
     '[[data-slot=code-block]>&]': 'parent=code-block',
     [COMMAND_GROUP_HEADING]: 'part=group-heading',
   }),
@@ -232,9 +236,13 @@ const RING_AS_BORDER_STATE = 'part=button';
 
 /**
  * Slots whose ring behind one state is drawn as a border too: an attachment's focus ring, around a card that
- * draws its hairline as a border already, so the border takes the ring's colour while focused.
+ * draws its hairline as a border already, so the border takes the ring's colour while focused, and a trace
+ * trigger's, whose component draws a transparent border for it.
  */
-const SLOT_RING_AS_BORDER_STATES: ReadonlyMap<string, StateKey> = new Map([['cn-attachment', 'focused']]);
+const SLOT_RING_AS_BORDER_STATES: ReadonlyMap<string, StateKey> = new Map([
+  ['cn-attachment', 'focused'],
+  ['cn-trace-collapsible-trigger', 'focused'],
+]);
 const RING_COLOUR = /^ring-(?!\d|inset|offset)([\w-]+(?:\/[\w.]+)?)$/;
 const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
 
@@ -784,6 +792,22 @@ function resolveAvailableHeightClamp(utility: string): string {
   return `max-h-[${(Number(clamp[1]) - Number(clamp[2])) * SPACING_STEP_PX}px]`;
 }
 
+/**
+ * A length of N spacing steps, or of N steps less M px, written with Tailwind 4's `--spacing()`, which
+ * Tailwind 3 does not compile and Uniwind does not evaluate inside an arbitrary value, such as a trace's
+ * content indented to line up with the middle of the icon above it. It becomes the px it comes to.
+ */
+const SPACING_FUNCTION =
+  /^(-?[a-z]+(?:-[a-z]+)*)-\[(?:--spacing\(([\d.]+)\)|calc\(--spacing\(([\d.]+)\)-([\d.]+)px\))\]$/;
+
+function resolveSpacingFunction(utility: string): string {
+  const length = SPACING_FUNCTION.exec(utility);
+  if (!length) return utility;
+  const [, prefix, steps, calcSteps, less] = length;
+  const px = Number(steps ?? calcSteps) * SPACING_STEP_PX - Number(less ?? 0);
+  return `${prefix}-[${Math.round(px * 100) / 100}px]`;
+}
+
 /** The theme's `rounded-md` for a radius clamped at no less than it, or the utility itself. */
 function resolveClampedRadius(utility: string): string {
   const clamp = CLAMPED_RADIUS.exec(utility);
@@ -862,16 +886,18 @@ export function translateClasses(
       unknown.push(cls.source);
       continue;
     }
-    const utility = resolveAvailableHeightClamp(
-      resolveClampedRadius(
-        resolveOwnSizeTranslate(
-          (ringBorder && unmodified) ||
-            cls.states.includes(RING_AS_BORDER_STATE) ||
-            (ringStateAsBorder !== undefined && stateKeyOf(cls.states) === ringStateAsBorder)
-            ? ringAsBorder(radiusLessLength)
-            : radiusLessLength,
-          cls.states,
-          read,
+    const utility = resolveSpacingFunction(
+      resolveAvailableHeightClamp(
+        resolveClampedRadius(
+          resolveOwnSizeTranslate(
+            (ringBorder && unmodified) ||
+              cls.states.includes(RING_AS_BORDER_STATE) ||
+              (ringStateAsBorder !== undefined && stateKeyOf(cls.states) === ringStateAsBorder)
+              ? ringAsBorder(radiusLessLength)
+              : radiusLessLength,
+            cls.states,
+            read,
+          ),
         ),
       ),
     )

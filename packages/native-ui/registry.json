@@ -1173,6 +1173,22 @@
       ]
     },
     {
+      "name": "trace",
+      "type": "registry:ui",
+      "title": "Trace",
+      "description": "The steps an agent took, one under another, each with an icon, a title that pulses while it runs and a status, and steps whose detail opens under them.",
+      "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-worklets"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text",
+        "@zui/icon",
+        "@zui/collapsible",
+        "@zui/motion",
+        "@zui/focus-visible"
+      ],
+      "files": [{ "path": "src/registry/ui/trace.tsx", "type": "registry:ui" }]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",
