@@ -29,7 +29,7 @@ test("a component page under Uniwind names Uniwind's registry style and links it
   await page.goto('/native/components/uniwind/button');
 
   await expect(page.getByRole('heading', { level: 1, name: 'Button', exact: true })).toBeVisible();
-  await expect(page.getByText('pnpm dlx shadcn@latest add @zui/button').first()).toBeVisible();
+  await expect(page.getByText('pnpm dlx shadcn@latest add @zui/button').filter({ visible: true })).toBeVisible();
   await page.getByRole('tab', { name: 'URL' }).click();
   await expect(
     page.getByText('pnpm dlx shadcn@latest add https://ui.zeroxsolutions.com/r/styles/uniwind-vega/button.json'),
