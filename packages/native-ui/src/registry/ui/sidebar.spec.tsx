@@ -1,6 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal';
-import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
-import { AccessibilityInfo, Platform, Text as NativeText } from 'react-native';
+import { act, configure, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import { AccessibilityInfo, Platform, Text as NativeText, View } from 'react-native';
 import { catchBackPress } from './overlay.testing';
 import {
   Sidebar,
@@ -40,6 +40,15 @@ function Report() {
   return <NativeText testID="report">{JSON.stringify({ state, open, openMobile, isMobile })}</NativeText>;
 }
 
+/** Runs the spec as on the web, with a window that takes the keyboard shortcut's listener. */
+function onTheWeb() {
+  jest.replaceProperty(Platform, 'OS', 'web');
+  jest.replaceProperty(globalThis as unknown as { window: unknown }, 'window', {
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+  });
+}
+
 const report = () =>
   JSON.parse(String(screen.getByTestId('report').props.children)) as {
     state: string;
@@ -48,7 +57,11 @@ const report = () =>
     isMobile: boolean;
   };
 
-function App({ sidebar, ...props }: SidebarProviderProps & { sidebar?: SidebarProps }) {
+function App({
+  sidebar,
+  showOnHover = false,
+  ...props
+}: SidebarProviderProps & { sidebar?: SidebarProps; showOnHover?: boolean }) {
   return (
     <>
       <SidebarProvider {...props}>
@@ -61,7 +74,7 @@ function App({ sidebar, ...props }: SidebarProviderProps & { sidebar?: SidebarPr
                   <SidebarMenuButton isActive tooltip="Playground">
                     Playground
                   </SidebarMenuButton>
-                  <SidebarMenuAction aria-label="More" />
+                  <SidebarMenuAction aria-label="More" showOnHover={showOnHover} />
                   <SidebarMenuSub testID="sub">
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton>History</SidebarMenuSubButton>
@@ -88,6 +101,15 @@ const toggle = () => screen.getAllByRole('button', { name: 'Toggle Sidebar' }).a
 const rail = () => screen.getAllByRole('button', { name: 'Toggle Sidebar' })[0];
 /** The box whose width opens and closes the panel beside the screen. */
 const gap = () => screen.getByTestId('sidebar').parent?.parent as ReturnType<typeof screen.getByTestId>;
+
+/** Cleanups the running case registers, run after it. */
+const cleanups: (() => void)[] = [];
+function afterThis(cleanup: () => void) {
+  cleanups.push(cleanup);
+}
+afterEach(() => {
+  for (const cleanup of cleanups.splice(0)) cleanup();
+});
 
 describe('Sidebar', () => {
   beforeEach(() => {
@@ -142,10 +164,11 @@ describe('Sidebar', () => {
       expect(gap()).toHaveAnimatedStyle({ width: 256 });
     });
 
-    it('opens and closes from its rail', async () => {
+    it('opens and closes from its rail, which the keyboard skips', async () => {
       const user = setup();
       await render(<App />);
 
+      expect(rail()).toHaveProp('tabIndex', -1);
       await user.press(rail());
       expect(report()).toMatchObject({ state: 'collapsed' });
       await user.press(rail());
@@ -216,6 +239,65 @@ describe('Sidebar', () => {
       await elapse(0);
 
       expect(gap()).toHaveAnimatedStyle({ width: 0 });
+    });
+
+    /** The strip the rail is drawn in, beside the panel. */
+    const railStrip = () => rail().parent as ReturnType<typeof screen.getByTestId>;
+
+    it('draws its rail on the panel edge that faces the screen', async () => {
+      await render(<App />);
+      await elapse(300);
+
+      expect(railStrip()).toHaveAnimatedStyle({ left: 248 });
+    });
+
+    it('draws a right sidebar rail on its own panel edge that faces the screen', async () => {
+      await render(<App sidebar={{ side: 'right' }} />);
+      await elapse(300);
+
+      expect(railStrip()).toHaveAnimatedStyle({ right: 248 });
+    });
+
+    it('keeps the rail at the screen edge, within reach, while the panel is off the screen', async () => {
+      const user = setup();
+      await render(<App />);
+      await user.press(toggle());
+      await elapse(300);
+
+      expect(railStrip()).toHaveAnimatedStyle({ left: -8 });
+      await user.press(rail());
+      expect(report()).toMatchObject({ state: 'expanded' });
+    });
+
+    it("shows a button's tooltip on the web while the sidebar is a rail of icons, and on no device", async () => {
+      // Where a device lays the button out; the tooltip opens beside it. Jest lays nothing out.
+      jest
+        .spyOn(View.prototype as unknown as { measure: (callback: (...args: number[]) => void) => void }, 'measure')
+        .mockImplementation((callback) => callback(0, 0, 32, 32, 8, 100));
+      const user = setup();
+      const device = await render(<App sidebar={{ collapsible: 'icon' }} defaultOpen={false} />);
+      await user.press(screen.getByRole('button', { name: 'Playground' }));
+      await elapse(1_000);
+      expect(screen.getAllByText('Playground')).toHaveLength(1);
+      await device.unmount();
+
+      onTheWeb();
+      await render(<App sidebar={{ collapsible: 'icon' }} defaultOpen={false} />);
+      await user.press(screen.getByRole('button', { name: 'Playground' }));
+      await elapse(1_000);
+      expect(screen.getAllByText('Playground')).toHaveLength(2);
+    });
+
+    it('hides a showOnHover action on the web until the pointer is over its item', async () => {
+      onTheWeb();
+      await render(<App showOnHover />);
+      const action = screen.getByRole('button', { name: 'More' });
+      expect(action.props.className).toMatch(/\bopacity-0\b/);
+
+      const item = action.parent as ReturnType<typeof screen.getByTestId>;
+      await fireEvent(item, 'pointerEnter');
+
+      expect(screen.getByRole('button', { name: 'More' }).props.className).not.toMatch(/\bopacity-0\b/);
     });
 
     it('announces the active button as selected', async () => {
@@ -311,7 +393,27 @@ describe('Sidebar', () => {
       expect(report()).toMatchObject({ openMobile: false });
     });
 
-    it('draws no rail and no tooltip', async () => {
+    it('moves the focus back on the web to where it was when the sheet opened', async () => {
+      onTheWeb();
+      const opener = { focus: jest.fn() };
+      const page = globalThis as unknown as { document?: unknown };
+      page.document = { activeElement: opener };
+      afterThis(() => delete page.document);
+      const user = setup();
+      await render(<App />);
+      await user.press(toggle());
+      await elapse(300);
+
+      const preventDefault = jest.fn();
+      await act(async () => {
+        screen.getByTestId('sidebar').props.onCloseAutoFocus({ preventDefault });
+      });
+
+      expect(preventDefault).toHaveBeenCalled();
+      expect(opener.focus).toHaveBeenCalledTimes(1);
+    });
+
+    it('draws no rail', async () => {
       const user = setup();
       await render(<App />);
       await user.press(toggle());

@@ -104,7 +104,8 @@ Takes every prop of React Native's `View`, plus:
 | `dir`         | `'ltr' \| 'rtl'`                     | -             |
 
 Below `md` the sidebar is an 18rem modal sheet named Sidebar, sliding in from `side`; a press outside it, the
-Android back button and Escape on the web close it. From `md` it is a 16rem panel beside the SidebarInset. When
+Android back button and Escape on the web close it, and on the web the focus goes back to where it was when the
+sheet opened. From `md` it is a 16rem panel beside the SidebarInset. When
 it closes, an `offcanvas` panel slides off the screen and an `icon` one shrinks to a 3rem rail of its icons, over
 200ms, or at once when the system asks for reduced motion. A `none` sidebar is always a panel. `floating` draws
 the panel as a card, and `inset` draws the SidebarInset as one. `dir` sets the direction the parts inside read.
@@ -116,8 +117,9 @@ opens and closes the sidebar.
 
 ### SidebarRail
 
-Takes every prop of React Native's `Pressable`. A 1rem strip along the panel's edge that opens and closes the
-sidebar, named Toggle Sidebar and left out of the keyboard's order. It is drawn from `md` only.
+Takes every prop of React Native's `Pressable`. A 1rem strip centred on the panel's edge that faces the screen,
+which opens and closes the sidebar, named Toggle Sidebar and left out of the keyboard's order. While the panel is
+off the screen it stays at the provider's edge, within reach. It is drawn from `md` only.
 
 ### SidebarInset
 
@@ -185,6 +187,7 @@ View cover the item and pass presses through to the button under it:
 ### SidebarMenuBadge
 
 Takes every prop of React Native's `View`. A count at the end of a SidebarMenuItem; not drawn in a rail of icons.
+On the web it, and a SidebarMenuAction, take the accent colour while the pointer is over the item's button.
 
 ### SidebarMenuSkeleton
 

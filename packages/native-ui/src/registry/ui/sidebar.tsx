@@ -1,3 +1,4 @@
+import { Portal, PortalHost } from '@rn-primitives/portal';
 import { Slot } from '@rn-primitives/slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { PanelLeft } from 'lucide-react-native';
@@ -6,7 +7,9 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
+  useRef,
   useState,
   type ComponentProps,
   type ReactNode,
@@ -18,6 +21,7 @@ import {
   View,
   useWindowDimensions,
   type GestureResponderEvent,
+  type MouseEvent,
   type NativeSyntheticEvent,
   type TargetedEvent,
 } from 'react-native';
@@ -45,6 +49,9 @@ const SIDEBAR_WIDTH_ICON = 48;
 
 /** The room a floating or inset sidebar keeps around its panel when collapsed to icons: upstream's spacing(4). */
 const SIDEBAR_INSET_ROOM = 16;
+
+/** The width of the strip along the panel's edge that a SidebarRail takes presses on. */
+const SIDEBAR_RAIL_WIDTH = 16;
 
 /** The window width, in px, from which the sidebar is a panel beside the screen: Tailwind's `md`. */
 const MOBILE_BREAKPOINT = 768;
@@ -100,6 +107,8 @@ function useSidebarLayout(): SidebarContextProps & SidebarLayout {
 interface SidebarFrame {
   /** The Sidebar's `collapsible` while it is collapsed, and `''` while it is open or a sheet. */
   collapsible: '' | 'offcanvas' | 'icon' | 'none';
+  /** The name of the PortalHost a SidebarRail draws in, while the Sidebar is a panel that collapses. */
+  railHost?: string;
 }
 
 const SidebarFrameContext = createContext<SidebarFrame>({ collapsible: '' });
@@ -225,6 +234,8 @@ function Sidebar({
   const reduced = useReducedMotion();
   const width = useSharedValue(target);
   const { sidesSwapped } = useDirectionSides();
+  const railHost = useId();
+  const returnFocus = useReturnFocus(isMobile && openMobile);
 
   useEffect(() => {
     width.value = reduced ? target : withTiming(target, SIDEBAR_MOTION);
@@ -239,6 +250,11 @@ function Sidebar({
   const gap = useAnimatedStyle(() => ({ width: width.value }));
   // An icon rail is as wide as its gap; a panel going off the screen keeps its width and slides out.
   const panel = useAnimatedStyle(() => ({ width: collapsible === 'icon' ? width.value : SIDEBAR_WIDTH }));
+  // The panel is anchored at the edge that faces the screen, so a shrinking gap slides it off its own side.
+  const facing = (side === 'left') !== sidesSwapped ? 'right' : 'left';
+  const ownEdge = facing === 'right' ? 'left' : 'right';
+  // The rail is centred on that edge, measured from the provider's edge the Sidebar sits at.
+  const rail = useAnimatedStyle(() => ({ [ownEdge]: width.value - SIDEBAR_RAIL_WIDTH / 2 }));
 
   const inner = (frame: SidebarFrame, body: ReactNode) => (
     <SidebarFrameContext.Provider value={frame}>
@@ -265,6 +281,7 @@ function Sidebar({
           showCloseButton={false}
           style={{ width: SIDEBAR_WIDTH_MOBILE }}
           className={cn('bg-sidebar p-0 gap-0', className)}
+          onCloseAutoFocus={returnFocus}
           {...props}
         >
           {/* Names the sheet for a screen reader, drawn out of sight. */}
@@ -281,28 +298,62 @@ function Sidebar({
     );
   }
 
-  // The panel is anchored at the edge that faces the screen, so a shrinking gap slides it off its own side.
-  const facing = (side === 'left') !== sidesSwapped ? 'right' : 'left';
-  const edge = (side === 'left') !== sidesSwapped ? 'border-r' : 'border-l';
+  const edge = facing === 'right' ? 'border-r' : 'border-l';
 
   return inner(
-    { collapsible: collapsed ? collapsible : '' },
-    // Not every engine styles an Animated.View by its className, so each box is a View inside one.
-    <Animated.View style={[{ position: 'relative' }, gap]}>
-      <Animated.View style={[{ position: 'absolute', top: 0, bottom: 0, [facing]: 0 }, panel]}>
-        <View className={cn('flex-1', card ? 'p-2' : `${edge} border-border`, className)} {...props}>
-          <View
-            className={cn(
-              'flex-1 w-full flex-col cn-sidebar-inner',
-              variant === 'floating' && 'border border-sidebar-border cn-sidebar-inner@variant=floating',
-            )}
-          >
-            {children}
+    { collapsible: collapsed ? collapsible : '', railHost },
+    <>
+      {/* Not every engine styles an Animated.View by its className, so each box is a View inside one. */}
+      <Animated.View style={[{ position: 'relative' }, gap]}>
+        <Animated.View style={[{ position: 'absolute', top: 0, bottom: 0, [facing]: 0 }, panel]}>
+          <View className={cn('flex-1', card ? 'p-2' : `${edge} border-border`, className)} {...props}>
+            <View
+              className={cn(
+                'flex-1 w-full flex-col cn-sidebar-inner',
+                variant === 'floating' && 'border border-sidebar-border cn-sidebar-inner@variant=floating',
+              )}
+            >
+              {children}
+            </View>
           </View>
-        </View>
+        </Animated.View>
       </Animated.View>
-    </Animated.View>,
+      {/* The rail is drawn beside the panel, in the provider, where a touch reaches it even while the panel is
+        off the screen: Android delivers no touch outside a parent's bounds. */}
+      <Animated.View
+        style={[
+          { position: 'absolute', top: 0, bottom: 0, width: SIDEBAR_RAIL_WIDTH, zIndex: 20, pointerEvents: 'box-none' },
+          rail,
+        ]}
+      >
+        <PortalHost name={railHost} />
+      </Animated.View>
+    </>,
   );
+}
+
+/** The parts of the web's focused element the sheet reads and refocuses; the library is typed without the DOM. */
+interface WebFocusable {
+  focus(): void;
+}
+
+/**
+ * On the web, the element that held the focus when `shown` turned true, and the sheet's close handler that
+ * moves the focus back to it. The sheet has no trigger of its own for its primitive to return the focus to.
+ */
+function useReturnFocus(shown: boolean): (event: { preventDefault(): void }) => void {
+  const previous = useRef<WebFocusable | null>(null);
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !shown) return;
+    previous.current =
+      (globalThis as { document?: { activeElement: WebFocusable | null } }).document?.activeElement ?? null;
+  }, [shown]);
+  return useCallback((event: { preventDefault(): void }) => {
+    if (previous.current === null) return;
+    event.preventDefault();
+    previous.current.focus();
+    previous.current = null;
+  }, []);
 }
 
 type SidebarTriggerProps = ComponentProps<typeof Button>;
@@ -335,25 +386,28 @@ type SidebarRailProps = ComponentProps<typeof Pressable>;
  * left out of the keyboard's order; on the web a line marks it while the pointer is over it.
  */
 function SidebarRail({ className, ...props }: SidebarRailProps): ReactNode {
-  const { toggleSidebar, isMobile } = useSidebar();
+  const { toggleSidebar } = useSidebar();
+  const { railHost } = useContext(SidebarFrameContext);
   const [hovered, setHovered] = useState(false);
-  const { sidesSwapped } = useDirectionSides();
-  if (isMobile) return null;
+  const name = useId();
+  if (railHost === undefined) return null;
   return (
-    <Pressable
-      role="button"
-      aria-label="Toggle Sidebar"
-      focusable={false}
-      onPress={toggleSidebar}
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      // Centred on the panel's edge that faces the screen, half over the panel.
-      style={{ position: 'absolute', top: 0, bottom: 0, width: 16, [sidesSwapped ? 'left' : 'right']: -8 }}
-      className={cn('z-20 items-center web:cursor-ew-resize cn-sidebar-rail', className)}
-      {...props}
-    >
-      <View className={cn('h-full w-[2px]', hovered && 'bg-sidebar-border')} />
-    </Pressable>
+    <Portal name={name} hostName={railHost}>
+      <Pressable
+        key={name}
+        role="button"
+        aria-label="Toggle Sidebar"
+        focusable={false}
+        tabIndex={-1}
+        onPress={toggleSidebar}
+        onHoverIn={() => setHovered(true)}
+        onHoverOut={() => setHovered(false)}
+        className={cn('h-full w-full items-center web:cursor-ew-resize cn-sidebar-rail', className)}
+        {...props}
+      >
+        <View className={cn('h-full w-[2px]', hovered && 'bg-sidebar-border')} />
+      </Pressable>
+    </Portal>
   );
 }
 
@@ -505,6 +559,9 @@ function SidebarMenu({ className, ...props }: SidebarSectionProps): ReactNode {
 interface SidebarMenuItemParts {
   /** Whether the pointer is over the item, on the web. */
   hovered: boolean;
+  /** Whether the pointer is over the item's SidebarMenuButton, on the web. */
+  buttonHovered: boolean;
+  setButtonHovered: (hovered: boolean) => void;
   size: SidebarMenuButtonSize;
   setSize: (size: SidebarMenuButtonSize) => void;
   active: boolean;
@@ -521,9 +578,10 @@ function SidebarMenuItem({ className, ...props }: SidebarSectionProps): ReactNod
   const [active, setActive] = useState(false);
   const [hasAction, setHasAction] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [buttonHovered, setButtonHovered] = useState(false);
   const parts = useMemo(
-    () => ({ hovered, size, setSize, active, setActive, hasAction, setHasAction }),
-    [hovered, size, active, hasAction],
+    () => ({ hovered, buttonHovered, setButtonHovered, size, setSize, active, setActive, hasAction, setHasAction }),
+    [hovered, buttonHovered, size, active, hasAction],
   );
   return (
     <SidebarMenuItemContext.Provider value={parts}>
@@ -599,6 +657,8 @@ function SidebarMenuButton({
   className,
   children,
   accessibilityState,
+  onHoverIn,
+  onHoverOut,
   ...props
 }: SidebarMenuButtonProps): ReactNode {
   const { isMobile, state } = useSidebar();
@@ -625,6 +685,14 @@ function SidebarMenuButton({
         className,
       )}
       {...props}
+      onHoverIn={(event: MouseEvent) => {
+        item?.setButtonHovered(true);
+        onHoverIn?.(event);
+      }}
+      onHoverOut={(event: MouseEvent) => {
+        item?.setButtonHovered(false);
+        onHoverOut?.(event);
+      }}
     >
       {asChild ? (
         children
@@ -693,7 +761,9 @@ function SidebarMenuAction({
   // A pointer reveals it on the web; a touch screen has none, so it stays shown there.
   const hidden = showOnHover && Platform.OS === 'web' && !isMobile && item?.hovered !== true && !focused && !expanded;
   return (
-    <TextClassContext.Provider value="cn-sidebar-menu-action/text">
+    <TextClassContext.Provider
+      value={cn('cn-sidebar-menu-action/text', item?.buttonHovered === true && 'cn-sidebar-menu-action/text@hovered')}
+    >
       <IconClassContext.Provider value="cn-sidebar-menu-action/icon">
         <Component
           role="button"
@@ -731,6 +801,7 @@ function SidebarMenuBadge({ className, children, ...props }: SidebarSectionProps
     <TextClassContext.Provider
       value={cn(
         'tabular-nums cn-sidebar-menu-badge/text',
+        item?.buttonHovered === true && 'cn-sidebar-menu-badge/text@hovered',
         item?.active === true && 'cn-sidebar-menu-badge/text@selected',
       )}
     >

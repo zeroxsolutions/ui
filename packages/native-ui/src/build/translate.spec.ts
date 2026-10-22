@@ -152,10 +152,26 @@ describe('translateClasses', () => {
     expect(translateClasses([cls, 'p-2'], 'uniwind', 'view')).toEqual({ classes: ['p-2'], unknown: [] });
   });
 
-  it.each(['group-hover/menu-item:opacity-100', 'peer-hover/menu-button:text-sidebar-accent-foreground'])(
-    'drops %s, a pointer over a group or a sibling no touch screen has',
-    (cls) => {
-      expect(translateClasses([cls, 'p-2'], 'nativewind', 'view')).toEqual({ classes: ['p-2'], unknown: [] });
+  it('drops a peer-hover, a pointer over a sibling no touch screen has', () => {
+    expect(translateClasses(['peer-hover/menu-button:text-accent', 'p-2'], 'nativewind', 'view')).toEqual({
+      classes: ['p-2'],
+      unknown: [],
+    });
+  });
+
+  it.each(['cn-sidebar-menu-action', 'cn-sidebar-menu-badge'])(
+    "puts %s's colour behind the hovered state of the button beside it",
+    (name) => {
+      const slot = ['text-sidebar-foreground', 'peer-hover/menu-button:text-sidebar-accent-foreground'];
+
+      expect(translateClasses(slot, 'nativewind', 'text', undefined, { name })).toEqual({
+        classes: ['text-sidebar-foreground'],
+        unknown: [],
+      });
+      expect(translateClasses(slot, 'nativewind', 'text', 'hovered', { name })).toEqual({
+        classes: ['text-sidebar-accent-foreground'],
+        unknown: [],
+      });
     },
   );
 

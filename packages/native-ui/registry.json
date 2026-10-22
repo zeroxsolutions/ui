@@ -750,6 +750,7 @@
       "title": "Sidebar",
       "description": "An app's side navigation: a sheet below the md width and a panel beside the screen from it, collapsing off the screen or to a rail of icons, with its open state in a provider, a toggle button, groups and menus.",
       "dependencies": [
+        "@rn-primitives/portal",
         "@rn-primitives/slot",
         "class-variance-authority",
         "lucide-react-native",

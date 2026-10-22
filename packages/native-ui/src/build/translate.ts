@@ -60,7 +60,7 @@ const ICON_MODIFIERS: ReadonlySet<string> = new Set([
  */
 const DROPPED_MODIFIERS = [
   /^hover$/,
-  /^(group|peer)-hover(\/[\w-]+)?$/,
+  /^peer-hover(\/[\w-]+)?$/,
   /^focus-within$/,
   /^(sm|md)$/,
   /^print$/,
@@ -106,6 +106,7 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'data-disabled': 'disabled',
     'data-[disabled=true]': 'disabled',
     'focus-visible': 'focused',
+    hover: 'hovered',
     'data-focus-visible': 'focused',
     focus: 'highlighted',
     'data-highlighted': 'highlighted',
@@ -271,10 +272,15 @@ const SLOT_COMPONENT_CLASSES: ReadonlyMap<string, readonly string[]> = new Map([
  * Modifiers of one named slot that are a state the component applies rather than kept for the engine.
  * Both engines key `disabled:` on a `disabled` prop, which a `TextInput` does not take, so a text
  * field's disabled classes go behind the `disabled` state its component applies while it is not editable.
+ * A sidebar menu item's action and badge take the accent colour while the pointer is over the item's button,
+ * which the component tracks on the web, so their `peer-hover` classes go behind the `hovered` state rather
+ * than being dropped with every other hover.
  */
 const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-input', new Set(['disabled'])],
   ['cn-textarea', new Set(['disabled'])],
+  ['cn-sidebar-menu-action', new Set(['peer-hover/menu-button'])],
+  ['cn-sidebar-menu-badge', new Set(['peer-hover/menu-button'])],
 ]);
 
 /**
@@ -539,7 +545,9 @@ function readClass(cls: string, stateModifiers: ReadonlySet<string> = new Set(),
     .filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m))
     .map((m) => (afterPart && m === 'after' ? AFTER_PART_MODIFIER : m));
   const isChildState = (m: string): boolean => CHILD_STATE_MODIFIERS.has(m) || CHILD_VARIANT_MODIFIER.test(m);
-  if (modifiers.some((m) => !isChildState(m) && DROPPED_MODIFIERS.some((rule) => rule.test(m)))) {
+  const dropped = (m: string): boolean =>
+    !isChildState(m) && !stateModifiers.has(m) && DROPPED_MODIFIERS.some((rule) => rule.test(m));
+  if (modifiers.some(dropped)) {
     return { reading: 'dropped' };
   }
 
