@@ -1089,7 +1089,7 @@
       "type": "registry:ui",
       "title": "Attachment",
       "description": "A file or an image in a card, with its upload state, three sizes, a horizontal or vertical layout, actions, a press area over the whole card, and a row that scrolls sideways.",
-      "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
+      "dependencies": ["@rn-primitives/slot", "class-variance-authority", "react-native-reanimated"],
       "registryDependencies": [
         "@zui/utils",
         "@zui/text",
