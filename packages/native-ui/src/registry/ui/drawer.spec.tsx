@@ -1,6 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
-import { AccessibilityInfo, I18nManager } from 'react-native';
+import { AccessibilityInfo, I18nManager, Platform } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Button } from './button';
 import { DirectionProvider } from './direction';
@@ -215,26 +215,36 @@ describe('Drawer', () => {
     expect(slide()).toHaveAnimatedStyle({ transform: [{ translateY: 0 }] });
   });
 
-  it('closes a left drawer by a swipe toward the side a device draws it on when text reads right to left', async () => {
-    jest
-      .spyOn(I18nManager, 'getConstants')
-      .mockReturnValue({ ...I18nManager.getConstants(), doLeftAndRightSwapInRTL: true });
-    await render(
-      <DirectionProvider direction="rtl">
-        <MoveGoal swipeDirection="left" defaultOpen />
-      </DirectionProvider>,
-    );
-    await finishMotion();
-    await layOut(300, 800);
+  it.each([
+    ['a device laid out right to left, which draws left and right swapped', 'ios', true, true, 'rtl', 1],
+    ['a device laid out right to left under a left to right provider', 'ios', true, true, 'ltr', 1],
+    ['a device laid out left to right under a right to left provider', 'ios', false, true, 'rtl', -1],
+    ['a device laid out right to left, told to keep left and right', 'ios', true, false, 'rtl', -1],
+    ['the web, which keeps left and right', 'web', false, true, 'rtl', -1],
+  ] as const)(
+    'closes a left drawer by a swipe toward the side it is drawn on, on %s',
+    async (_where, os, isRTL, swaps, direction, toward) => {
+      jest.replaceProperty(Platform, 'OS', os);
+      jest
+        .spyOn(I18nManager, 'getConstants')
+        .mockReturnValue({ ...I18nManager.getConstants(), isRTL, doLeftAndRightSwapInRTL: swaps });
+      await render(
+        <DirectionProvider direction={direction}>
+          <MoveGoal swipeDirection="left" defaultOpen />
+        </DirectionProvider>,
+      );
+      await finishMotion();
+      await layOut(300, 800);
 
-    await swipe(drawer(), { dx: -300 });
-    await finishMotion();
-    expect(drawer()).toBeOnTheScreen();
+      await swipe(drawer(), { dx: -300 * toward });
+      await finishMotion();
+      expect(drawer()).toBeOnTheScreen();
 
-    await swipe(drawer(), { dx: 40, ms: 50 });
-    await finishMotion();
-    expect(screen.queryByTestId('content')).toBeNull();
-  });
+      await swipe(drawer(), { dx: 40 * toward, ms: 50 });
+      await finishMotion();
+      expect(screen.queryByTestId('content')).toBeNull();
+    },
+  );
 
   it('stays open when swiped away from its edge', async () => {
     await render(<MoveGoal defaultOpen />);

@@ -214,19 +214,21 @@ describe('Sheet', () => {
   });
 
   it.each([
-    ['a device that draws left and right swapped', 'ios', true, 1],
-    ['a device told to keep left and right', 'ios', false, -1],
-    ['the web, which keeps left and right', 'web', true, -1],
+    ['a device laid out right to left, which draws left and right swapped', 'ios', true, true, 'rtl', 1],
+    ['a device laid out right to left under a left to right provider', 'ios', true, true, 'ltr', 1],
+    ['a device laid out left to right under a right to left provider', 'ios', false, true, 'rtl', -1],
+    ['a device laid out right to left, told to keep left and right', 'ios', true, false, 'rtl', -1],
+    ['the web, which keeps left and right', 'web', false, true, 'rtl', -1],
   ] as const)(
-    'slides a left sheet in from the side it is drawn on when text reads right to left, on %s',
-    async (_where, os, swaps, sign) => {
+    'slides a left sheet in from the side it is drawn on, on %s',
+    async (_where, os, isRTL, swaps, direction, sign) => {
       jest.replaceProperty(Platform, 'OS', os);
       jest
         .spyOn(I18nManager, 'getConstants')
-        .mockReturnValue({ ...I18nManager.getConstants(), doLeftAndRightSwapInRTL: swaps });
+        .mockReturnValue({ ...I18nManager.getConstants(), isRTL, doLeftAndRightSwapInRTL: swaps });
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       await render(
-        <DirectionProvider direction="rtl">
+        <DirectionProvider direction={direction}>
           <EditProfile side="left" />
         </DirectionProvider>,
       );

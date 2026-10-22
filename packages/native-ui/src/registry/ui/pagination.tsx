@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { Platform, View } from 'react-native';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './button';
-import { useDirection } from './direction';
+import { useMirrored } from './direction';
 import { Icon, IconClassContext } from './icon';
 
 // A `cn-<slot>` token stands for that slot's view classes and `cn-<slot>/icon` for the size it gives an
@@ -69,12 +69,9 @@ function PaginationLink({ isActive = false, size = 'icon', ...props }: Paginatio
 
 type PaginationStepProps = Omit<PaginationLinkProps, 'children'>;
 
-/** Mirrors an arrow drawn for text read left to right, so it points the same way in text read right to left. */
-const MIRRORED = { transform: [{ scaleX: -1 }] };
-
 /** The link to the page before, a chevron pointing back, named Go to previous page. */
 function PaginationPrevious({ className, ...props }: PaginationStepProps): ReactNode {
-  const rtl = useDirection() === 'rtl';
+  const mirrored = useMirrored();
   return (
     <PaginationLink
       aria-label="Go to previous page"
@@ -82,14 +79,14 @@ function PaginationPrevious({ className, ...props }: PaginationStepProps): React
       className={cn('cn-pagination-previous', className)}
       {...props}
     >
-      <Icon as={ChevronLeft} style={rtl ? MIRRORED : undefined} />
+      <Icon as={ChevronLeft} style={mirrored} />
     </PaginationLink>
   );
 }
 
 /** The link to the page after, a chevron pointing on, named Go to next page. */
 function PaginationNext({ className, ...props }: PaginationStepProps): ReactNode {
-  const rtl = useDirection() === 'rtl';
+  const mirrored = useMirrored();
   return (
     <PaginationLink
       aria-label="Go to next page"
@@ -97,7 +94,7 @@ function PaginationNext({ className, ...props }: PaginationStepProps): ReactNode
       className={cn('cn-pagination-next', className)}
       {...props}
     >
-      <Icon as={ChevronRight} style={rtl ? MIRRORED : undefined} />
+      <Icon as={ChevronRight} style={mirrored} />
     </PaginationLink>
   );
 }

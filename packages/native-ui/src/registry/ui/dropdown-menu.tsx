@@ -17,7 +17,7 @@ import { pressClosing, useHighlight, useMenuScrollHeight, webItemRole } from '..
 import { usePopupMotion, type PopupSide } from '../lib/motion';
 import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
-import { useDirection } from './direction';
+import { useMirrored } from './direction';
 import { Icon, IconClassContext } from './icon';
 import { Text, TextClassContext } from './text';
 
@@ -488,15 +488,12 @@ type DropdownMenuSubTriggerProps = Omit<ComponentProps<typeof DropdownMenuPrimit
   inset?: boolean;
 };
 
-/** Mirrors an arrow drawn for text read left to right, so it points the same way in text read right to left. */
-const MIRRORED = { transform: [{ scaleX: -1 }] };
-
 /**
  * The item that opens a sub-menu, with a chevron at its end, mirrored when text reads right to left, announced
  * as a `menuitem` that is expanded or collapsed. A press opens the sub-menu, and on a device another closes it.
  */
 function DropdownMenuSubTrigger({ className, inset, children, ...props }: DropdownMenuSubTriggerProps): ReactNode {
-  const rtl = useDirection() === 'rtl';
+  const mirrored = useMirrored();
   const { open } = DropdownMenuPrimitive.useSubContext();
   const { highlighted, handlers } = useHighlight(props);
   const menuText = useContext(TextClassContext);
@@ -524,7 +521,7 @@ function DropdownMenuSubTrigger({ className, inset, children, ...props }: Dropdo
           {children}
           {/* Not every engine lays out an svg by its className, so the chevron is pushed to the end by a View. */}
           <View className="ml-auto">
-            <Icon as={ChevronRight} style={rtl ? MIRRORED : undefined} />
+            <Icon as={ChevronRight} style={mirrored} />
           </View>
         </DropdownMenuPrimitive.SubTrigger>
       </IconClassContext.Provider>

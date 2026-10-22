@@ -101,8 +101,9 @@ Take every prop of [Text](/native/components/nativewind/text). The title is a he
 ## Right to left
 
 A `left` or `right` sheet stays on the side it names, as upstream's does, which places it with `left-0` and
-`right-0`. A device whose text reads right to left draws `left` styles on the right, unless the app turned that
-off with `I18nManager.swapLeftAndRightInRTL(false)`; there the sheet slides in from the side it is drawn on.
+`right-0`. A device the system lays out right to left draws `left` styles on the right, unless the app turned
+that off with `I18nManager.swapLeftAndRightInRTL(false)`; there the sheet slides in from the side it is drawn on.
+That follows the system's direction, not a provider's, since a provider changes no layout on a device.
 
 ## Differences from upstream
 

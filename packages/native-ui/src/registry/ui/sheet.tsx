@@ -7,7 +7,7 @@ import { usePresence } from '../lib/motion';
 import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
 import { Button } from './button';
-import { useSidesSwapped } from './direction';
+import { useDirectionSides } from './direction';
 import { Icon } from './icon';
 import { Text, TextClassContext } from './text';
 
@@ -93,8 +93,8 @@ function SheetContent({
   const titleId = useContext(SheetTitleIdContext);
   const { present, progress, reduced } = usePresence(open, SHEET_MOTION);
   // It slides in from the edge it is drawn on.
-  const swapped = useSidesSwapped();
-  const fromLeft = (side === 'left') !== swapped;
+  const { sidesSwapped } = useDirectionSides();
+  const fromLeft = (side === 'left') !== sidesSwapped;
   const fade = useAnimatedStyle(() => ({ opacity: progress.value }));
   const slide = useAnimatedStyle(() => {
     const offset = (1 - progress.value) * SHEET_SLIDE;

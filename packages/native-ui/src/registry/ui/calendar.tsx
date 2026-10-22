@@ -41,7 +41,7 @@ import {
 } from 'react-native';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './button';
-import { useDirection } from './direction';
+import { useDirection, useMirrored } from './direction';
 import { Icon } from './icon';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import { Text } from './text';
@@ -466,11 +466,9 @@ function movedBy(
  * with "Today" before it and "selected" after it. On the web the months are grids, and the arrow keys, Page
  * Up and Page Down (with Shift, a year), Home and End move between the days.
  */
-/** Mirrors an arrow drawn for text read left to right, so it points the same way in text read right to left. */
-const MIRRORED = { transform: [{ scaleX: -1 }] };
-
 function Calendar(props: CalendarProps): ReactNode {
   const rtl = useDirection() === 'rtl';
+  const mirrored = useMirrored();
   const {
     className,
     buttonVariant = 'ghost',
@@ -613,11 +611,7 @@ function Calendar(props: CalendarProps): ReactNode {
       onPress={() => target && goTo(target)}
       className="cn-calendar@part=cell p-0"
     >
-      <Icon
-        as={side === 'previous' ? ChevronLeft : ChevronRight}
-        className="size-4"
-        style={rtl ? MIRRORED : undefined}
-      />
+      <Icon as={side === 'previous' ? ChevronLeft : ChevronRight} className="size-4" style={mirrored} />
     </Button>
   );
 

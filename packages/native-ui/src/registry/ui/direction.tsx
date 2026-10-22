@@ -1,5 +1,5 @@
 import { createContext, useContext, type ComponentType, type ReactNode } from 'react';
-import { I18nManager, Platform, View, type ViewProps } from 'react-native';
+import { I18nManager, Platform, View, type ViewProps, type ViewStyle } from 'react-native';
 
 /** The direction text reads in, and so the side a row starts from. */
 type TextDirection = 'ltr' | 'rtl';
@@ -46,15 +46,52 @@ function useDirection(): TextDirection {
   return useContext(DirectionContext) ?? systemDirection();
 }
 
-/**
- * Whether a device draws `left` and `right` styles swapped, for a part that moves toward the side it is drawn
- * on: React Native lays out an app whose text reads right to left with each `left` style on the right, unless
- * the app turned that off with `I18nManager.swapLeftAndRightInRTL(false)`. The web keeps them where named.
- */
-function useSidesSwapped(): boolean {
-  const rtl = useDirection() === 'rtl';
-  return Platform.OS !== 'web' && rtl && I18nManager.getConstants().doLeftAndRightSwapInRTL;
+/** Where an item that places or moves something itself finds its sides. */
+interface DirectionSides {
+  /** Whether the item's arrows, keys and own tracks run right to left: the nearest provider's direction. */
+  rtl: boolean;
+  /**
+   * The direction the platform lays out rows and `start` and `end` styles in around the item: the provider's
+   * on the web, where it sets `dir`, and the system's on a device, where a provider changes no layout.
+   */
+  layout: TextDirection;
+  /**
+   * The style keys that put a child at the side the item starts from and the side it ends at, in `rtl`'s
+   * direction: `start` and `end` where the layout runs the same way, swapped where it does not.
+   */
+  start: 'start' | 'end';
+  end: 'start' | 'end';
+  /**
+   * Whether `left` and `right` styles are drawn swapped: on a device laid out right to left, unless the app
+   * called `I18nManager.swapLeftAndRightInRTL(false)`. The web keeps them where named.
+   */
+  sidesSwapped: boolean;
 }
 
-export { DirectionProvider, useDirection, useSidesSwapped };
-export type { DirectionProviderProps, TextDirection };
+/**
+ * Which way an item runs and how it reaches its sides. A device lays out in the system's direction whatever a
+ * provider says, so an item that runs the provider's way places its own parts with `start` and `end` from here.
+ */
+function useDirectionSides(): DirectionSides {
+  const direction = useDirection();
+  const web = Platform.OS === 'web';
+  const layout = web ? direction : systemDirection();
+  const agrees = layout === direction;
+  return {
+    rtl: direction === 'rtl',
+    layout,
+    start: agrees ? 'start' : 'end',
+    end: agrees ? 'end' : 'start',
+    sidesSwapped: !web && layout === 'rtl' && I18nManager.getConstants().doLeftAndRightSwapInRTL,
+  };
+}
+
+const MIRRORED: ViewStyle = { transform: [{ scaleX: -1 }] };
+
+/** The style that turns an arrow drawn for text read left to right the other way when text reads right to left. */
+function useMirrored(): ViewStyle | undefined {
+  return useDirection() === 'rtl' ? MIRRORED : undefined;
+}
+
+export { DirectionProvider, useDirection, useDirectionSides, useMirrored };
+export type { DirectionProviderProps, DirectionSides, TextDirection };

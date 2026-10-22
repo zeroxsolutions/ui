@@ -8,7 +8,7 @@ import {
   type ViewProps,
 } from 'react-native';
 import { cn } from '../lib/utils';
-import { useDirection } from './direction';
+import { useDirectionSides } from './direction';
 
 // A `cn-<slot>` token stands for that slot's classes; the registry build replaces each with
 // the classes translated for the target engine.
@@ -182,7 +182,8 @@ function Slider({
   latest.current = values;
   const vertical = orientation === 'vertical';
   // In text read right to left a horizontal slider runs from the right, as its row does.
-  const rtl = useDirection() === 'rtl' && !vertical;
+  const sides = useDirectionSides();
+  const rtl = sides.rtl && !vertical;
   const gap = step * minStepsBetweenValues;
 
   const shaped = (next: readonly number[]): number | readonly number[] => (asNumber ? next[0] : next);
@@ -359,7 +360,9 @@ function Slider({
         >
           <View
             className={cn('absolute cn-slider-range', vertical ? 'inset-x-0' : 'inset-y-0')}
-            style={vertical ? { bottom: rangeStart, height: rangeSize } : { start: rangeStart, width: rangeSize }}
+            style={
+              vertical ? { bottom: rangeStart, height: rangeSize } : { [sides.start]: rangeStart, width: rangeSize }
+            }
           />
         </View>
         {values.map((entry, index) => (
@@ -390,7 +393,9 @@ function Slider({
             // The merge drops Nova's `relative` for `absolute`; passed as one string, one engine draws `relative`.
             className={cn('cn-slider-thumb absolute shrink-0')}
             style={
-              vertical ? { bottom: offsetOf(fractions[index], false) } : { start: offsetOf(fractions[index], false) }
+              vertical
+                ? { bottom: offsetOf(fractions[index], false) }
+                : { [sides.start]: offsetOf(fractions[index], false) }
             }
           />
         ))}

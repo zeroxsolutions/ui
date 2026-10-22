@@ -868,7 +868,7 @@
       "name": "direction",
       "type": "registry:ui",
       "title": "Direction",
-      "description": "DirectionProvider and useDirection: the direction text reads in, the system's unless a provider sets it, which the web also lays its children out in; and useSidesSwapped, whether a device draws left and right styles swapped.",
+      "description": "DirectionProvider and useDirection: the direction text reads in, the system's unless a provider sets it, which the web also lays its children out in; useDirectionSides, which way an item runs and the style keys and sides it places its parts by; and useMirrored, the style that turns an arrow for text read right to left.",
       "files": [
         {
           "path": "src/registry/ui/direction.tsx",

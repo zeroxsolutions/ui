@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react-native';
 import { I18nManager, Platform } from 'react-native';
-import { DirectionProvider, useDirection } from './direction';
+import { DirectionProvider, useDirection, useDirectionSides, useMirrored, type TextDirection } from './direction';
 import { Text } from './text';
 
 function Reads() {
@@ -101,5 +101,102 @@ describe('DirectionProvider', () => {
     );
 
     expect(dirAround(screen.getByTestId('reads'))).toBeNull();
+  });
+});
+
+function Sides() {
+  return <Text testID="sides">{JSON.stringify(useDirectionSides())}</Text>;
+}
+
+function Mirrored() {
+  return <Text testID="mirrored">{JSON.stringify(useMirrored() ?? null)}</Text>;
+}
+
+describe('useDirectionSides', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it.each([
+    [
+      "on the web, which lays out in the provider's direction",
+      'web',
+      false,
+      true,
+      'rtl',
+      { rtl: true, layout: 'rtl', start: 'start', end: 'end', sidesSwapped: false },
+    ],
+    [
+      'on a device laid out left to right under a right to left provider',
+      'ios',
+      false,
+      true,
+      'rtl',
+      { rtl: true, layout: 'ltr', start: 'end', end: 'start', sidesSwapped: false },
+    ],
+    [
+      'on a device laid out right to left under a left to right provider',
+      'ios',
+      true,
+      true,
+      'ltr',
+      { rtl: false, layout: 'rtl', start: 'end', end: 'start', sidesSwapped: true },
+    ],
+    [
+      'on a device laid out right to left, told to keep left and right',
+      'android',
+      true,
+      false,
+      'rtl',
+      { rtl: true, layout: 'rtl', start: 'start', end: 'end', sidesSwapped: false },
+    ],
+    [
+      'on a device laid out right to left with no provider',
+      'android',
+      true,
+      true,
+      undefined,
+      { rtl: true, layout: 'rtl', start: 'start', end: 'end', sidesSwapped: true },
+    ],
+  ] as const)(
+    'says which way an item runs and where its start is drawn, %s',
+    async (_where, os, isRTL, swaps, direction: TextDirection | undefined, sides) => {
+      jest.replaceProperty(Platform, 'OS', os);
+      jest
+        .spyOn(I18nManager, 'getConstants')
+        .mockReturnValue({ ...I18nManager.getConstants(), isRTL, doLeftAndRightSwapInRTL: swaps });
+
+      await render(
+        direction === undefined ? (
+          <Sides />
+        ) : (
+          <DirectionProvider direction={direction}>
+            <Sides />
+          </DirectionProvider>
+        ),
+      );
+
+      expect(JSON.parse(String(screen.getByTestId('sides').props.children))).toEqual(sides);
+    },
+  );
+});
+
+describe('useMirrored', () => {
+  it('mirrors side to side when text reads right to left, and leaves alone when it reads left to right', async () => {
+    await render(
+      <DirectionProvider direction="rtl">
+        <Mirrored />
+      </DirectionProvider>,
+    );
+    expect(JSON.parse(String(screen.getByTestId('mirrored').props.children))).toEqual({
+      transform: [{ scaleX: -1 }],
+    });
+
+    await render(
+      <DirectionProvider direction="ltr">
+        <Mirrored />
+      </DirectionProvider>,
+    );
+    expect(JSON.parse(String(screen.getByTestId('mirrored').props.children))).toBeNull();
   });
 });

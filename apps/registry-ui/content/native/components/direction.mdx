@@ -48,11 +48,22 @@ from the right, and `ms-*` and `me-*` margins swap sides.
 
 Returns `'ltr'` or `'rtl'`: the nearest DirectionProvider's direction, or the system's outside one.
 
-### useSidesSwapped
+### useDirectionSides
 
-Returns whether a device draws `left` and `right` styles swapped: true on a device whose direction is `'rtl'`,
-unless the app called `I18nManager.swapLeftAndRightInRTL(false)`, and false on the web, which keeps them where
-named. A part that moves toward the side it is drawn on, such as a sheet sliding in, reads it.
+For a part that places or moves something itself. Returns:
+
+- `rtl`: whether it runs right to left, the provider's direction.
+- `layout`: the direction the platform lays out rows and `start` and `end` styles in around it. On the web that
+  is the provider's, which sets `dir`; on a device it is the system's, whatever a provider says.
+- `start` and `end`: the style keys that put a child at the side it runs from and the side it runs to,
+  `'start'` and `'end'` where `layout` runs the same way as `rtl`, swapped where it does not.
+- `sidesSwapped`: whether `left` and `right` styles are drawn swapped, true on a device the system lays out
+  right to left unless the app called `I18nManager.swapLeftAndRightInRTL(false)`, and false on the web.
+
+### useMirrored
+
+Returns a style that mirrors an arrow drawn for text read left to right when the direction is `'rtl'`, and
+`undefined` when it is `'ltr'`.
 
 ## The items that read it
 
@@ -63,16 +74,19 @@ sub-menu triggers of [Dropdown menu](/native/components/nativewind/dropdown-menu
 mirror their chevrons in text read right to left. Carousel and [Slider](/native/components/nativewind/slider)
 run from the right, Calendar and Slider swap their left and right arrow keys, as upstream's do, and
 [Sheet](/native/components/nativewind/sheet) and [Drawer](/native/components/nativewind/drawer) move toward the
-side a device draws them on. Each item's page says how.
+side a device draws them on. Carousel and Slider place their own parts through `useDirectionSides`, so they run
+the provider's way on a device even where the system lays the app out the other way. The rows the platform lays
+out, such as a breadcrumb's or a calendar's, follow the system's direction there. Each item's page says how.
 
 ## Right to left on a device
 
 A device lays out the whole app in one direction, which `I18nManager` holds for the app's life: rows start from
 the right and `start` and `end` swap sides when the system language reads right to left, or after
 `I18nManager.forceRTL(true)` and a restart. A provider cannot change that for part of a screen, so on a device
-it draws nothing around its children and only tells them the direction it was given. Set it from the same
-place as the app's layout direction, such as `expo-localization`'s `getLocales()[0].textDirection`, so that
-both agree.
+it draws nothing around its children and only tells them the direction it was given. A provider that disagrees
+with the system turns the items' arrows, keys and their own tracks its way while the rows around them run the
+system's way. Set it from the same place as the app's layout direction, such as `expo-localization`'s
+`getLocales()[0].textDirection`, so that both agree.
 
 ## Differences from upstream
 
@@ -83,5 +97,6 @@ both agree.
   `<html dir>`. A React Native app on the web has no `<html>` of its own to set, so the provider here sets `dir`
   on a box around its children.
 - On a device the provider changes no layout, as above.
-- `useSidesSwapped` is added: a sheet or a drawer named `left` is drawn on the right by a device whose text reads
-  right to left, which the web, and so upstream, never does.
+- `useDirectionSides` and `useMirrored` are added. A device lays out in the system's direction whatever a provider
+  says, and draws a sheet or a drawer named `left` on the right when that direction is right to left. Neither
+  happens on the web, so upstream needs neither.
