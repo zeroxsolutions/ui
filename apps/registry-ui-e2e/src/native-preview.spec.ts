@@ -258,6 +258,21 @@ test.describe('in a light colour scheme', () => {
       await expect(combobox).toBeFocused();
     });
 
+    test(`the ${engine} popover demo opens its panel and closes it on Escape`, async ({ page }) => {
+      await page.goto(`/native/components/${engine}/popover`);
+      const demo = inside(page, 'Popover demo');
+      const trigger = demo.getByRole('button', { name: 'Open popover', exact: true });
+      const panel = demo.getByRole('dialog', { name: 'Dimensions' });
+
+      await trigger.click(DRAWN);
+      await expect(panel).toBeVisible();
+      await expect(panel.getByRole('textbox', { name: 'Width', exact: true })).toHaveValue('100%');
+
+      await page.keyboard.press('Escape');
+      await expect(panel).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    });
+
     test(`the ${engine} tooltip demo shows its label while the pointer rests on the trigger`, async ({ page }) => {
       await page.goto(`/native/components/${engine}/tooltip`);
       const demo = inside(page, 'Tooltip demo');
