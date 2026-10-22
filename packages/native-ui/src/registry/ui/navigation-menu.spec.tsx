@@ -96,11 +96,11 @@ describe('NavigationMenu', () => {
   const finishMotion = () => elapse(400);
   const setup = () => userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
-  it('is a navigation landmark named Main holding a list of items, with every content closed', async () => {
+  it('is a navigation landmark with no name of its own holding a list of items, with every content closed', async () => {
     await render(<Menu />);
 
     expect(screen.getByTestId('nav')).toHaveProp('role', 'navigation');
-    expect(screen.getByTestId('nav')).toHaveProp('aria-label', 'Main');
+    expect(screen.getByTestId('nav')).not.toHaveProp('aria-label');
     expect(screen.getByTestId('nav').children[0]).toHaveProp('role', 'list');
     expect(trigger('Getting started')).toBeCollapsed();
     expect(content('start')).toBeNull();

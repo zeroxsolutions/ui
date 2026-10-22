@@ -32,7 +32,7 @@ import { Text } from '@/components/ui/text';
 ```
 
 ```tsx
-<NavigationMenu>
+<NavigationMenu aria-label="Docs">
   <NavigationMenuList>
     <NavigationMenuItem>
       <NavigationMenuTrigger>Getting started</NavigationMenuTrigger>
@@ -70,7 +70,7 @@ Takes every prop of React Native's `View`, plus:
 | `delay`         | `number`                         | `50`      |
 | `closeDelay`    | `number`                         | `50`      |
 | `align`         | `'start' \| 'center' \| 'end'`   | `'start'` |
-| `aria-label`    | `string`                         | `'Main'`  |
+| `aria-label`    | `string`                         | -         |
 
 A navigation landmark, named by `aria-label`. Give each NavigationMenu on a screen a name of its own, so a screen
 reader can tell it from the screen's other navigation. One item's content is open at a time: `value` is the `value` of
@@ -153,8 +153,6 @@ The classes are the trigger's box. Give the label its weight, as above.
   the screen the link opens. On the web it stays open, as upstream's does; pass `closeOnClick` to choose.
 - On a device the content opens above or below its trigger, so a `side` of `left` or `right` opens it below.
 - Upstream's `render` prop becomes `asChild`, as on every native item.
-- Upstream's navigation landmark has no name of its own. Here it is named Main unless given an `aria-label`, so a
-  screen reader can tell it from another landmark.
 - Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
   for reduced motion.
 - `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.

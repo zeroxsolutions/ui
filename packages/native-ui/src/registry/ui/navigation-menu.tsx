@@ -113,7 +113,7 @@ type NavigationMenuProps<Value = string> = Omit<ComponentProps<typeof View>, 'ch
 
 /**
  * Links to the app's sections, with items whose trigger opens a panel of more links. A navigation
- * landmark, named Main unless given an `aria-label`. One item's content is open at a time: a press on its
+ * landmark, named by its `aria-label`. One item's content is open at a time: a press on its
  * trigger opens it and a second press, a press outside it, the Android back button or Escape on the web
  * close it. On the web the pointer resting on a trigger also opens it, and leaving the trigger and its
  * content closes what it opened. It holds the open item from `defaultValue`, or follows `value`, and
@@ -128,7 +128,6 @@ function NavigationMenu<Value = string>({
   align = 'start',
   className,
   children,
-  'aria-label': label = 'Main',
   ...props
 }: NavigationMenuProps<Value>): ReactNode {
   const [ownValue, setOwnValue] = useState<unknown>(defaultValue);
@@ -218,7 +217,6 @@ function NavigationMenu<Value = string>({
     <NavigationMenuContext.Provider value={menu}>
       <View
         role="navigation"
-        aria-label={label}
         className={cn('relative flex-row items-center justify-center self-start cn-navigation-menu', className)}
         {...props}
       >
