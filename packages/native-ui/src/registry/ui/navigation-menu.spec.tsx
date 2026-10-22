@@ -1,5 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { act, configure, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import type { ReactNode } from 'react';
 import { AccessibilityInfo, View } from 'react-native';
 import {
   NavigationMenu,
@@ -8,6 +9,7 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
+  NavigationMenuPositioner,
   NavigationMenuTrigger,
 } from './navigation-menu';
 import type { NavigationMenuProps } from './navigation-menu';
@@ -24,14 +26,17 @@ const TRIGGER = { x: 20, y: 100, width: 120, height: 36 };
 function Menu({
   withHost = true,
   onIntroduction,
+  positioner,
   ...props
 }: NavigationMenuProps & {
   withHost?: boolean;
   onIntroduction?: () => void;
+  positioner?: ReactNode;
 }) {
   return (
     <>
       <NavigationMenu testID="nav" {...props}>
+        {positioner}
         <NavigationMenuList>
           <NavigationMenuItem value="start">
             <NavigationMenuTrigger>Getting started</NavigationMenuTrigger>
@@ -255,21 +260,44 @@ describe('NavigationMenu', () => {
     expect(trigger('With Icon')).toBeExpanded();
   });
 
+  /** Reports the open content's size, as a device's layout would; Jest lays nothing out. */
+  async function layOutContent(id: 'start' | 'icons', width: number, height: number) {
+    await act(async () => {
+      screen.getByTestId(`${id}-content`).props.onLayout({ nativeEvent: { layout: { x: 0, y: 0, width, height } } });
+    });
+  }
+
+  it('opens the content 8px under its trigger, lined up with its start', async () => {
+    const user = setup();
+    await render(<Menu />);
+    await user.press(trigger('Getting started'));
+    await finishMotion();
+    await layOutContent('start', 200, 120);
+
+    expect(screen.getByTestId('start-content')).toHaveStyle({ top: TRIGGER.y + TRIGGER.height + 8, left: TRIGGER.x });
+  });
+
+  it('places the content where a NavigationMenuPositioner drawn inside the menu says', async () => {
+    const user = setup();
+    await render(<Menu positioner={<NavigationMenuPositioner sideOffset={20} />} />);
+    await user.press(trigger('Getting started'));
+    await finishMotion();
+    await layOutContent('start', 200, 120);
+
+    expect(screen.getByTestId('start-content')).toHaveStyle({ top: TRIGGER.y + TRIGGER.height + 20 });
+  });
+
   describe('with a pointer', () => {
     it('opens an item once the pointer has rested on its trigger, and closes it once the pointer leaves', async () => {
       await render(<Menu />);
 
-      await act(async () => {
-        fireEvent(trigger('Getting started'), 'hoverIn', { nativeEvent: {} });
-      });
+      await fireEvent(trigger('Getting started'), 'hoverIn', { nativeEvent: {} });
       expect(content('start')).toBeNull();
       await elapse(50);
       await finishMotion();
       expect(content('start')).toBeOnTheScreen();
 
-      await act(async () => {
-        fireEvent(trigger('Getting started'), 'hoverOut', { nativeEvent: {} });
-      });
+      await fireEvent(trigger('Getting started'), 'hoverOut', { nativeEvent: {} });
       await elapse(50);
       await finishMotion();
       expect(content('start')).toBeNull();
@@ -278,15 +306,11 @@ describe('NavigationMenu', () => {
     it('moves to the item whose trigger the pointer rests on next', async () => {
       await render(<Menu />);
 
-      await act(async () => {
-        fireEvent(trigger('Getting started'), 'hoverIn', { nativeEvent: {} });
-      });
+      await fireEvent(trigger('Getting started'), 'hoverIn', { nativeEvent: {} });
       await elapse(50);
       await finishMotion();
-      await act(async () => {
-        fireEvent(trigger('Getting started'), 'hoverOut', { nativeEvent: {} });
-        fireEvent(trigger('With Icon'), 'hoverIn', { nativeEvent: {} });
-      });
+      await fireEvent(trigger('Getting started'), 'hoverOut', { nativeEvent: {} });
+      await fireEvent(trigger('With Icon'), 'hoverIn', { nativeEvent: {} });
       await elapse(50);
       await finishMotion();
 
@@ -296,19 +320,15 @@ describe('NavigationMenu', () => {
 
     it('keeps the content open while the pointer moves from the trigger into it', async () => {
       await render(<Menu />);
-      await act(async () => {
-        fireEvent(trigger('Getting started'), 'hoverIn', { nativeEvent: {} });
-      });
+      await fireEvent(trigger('Getting started'), 'hoverIn', { nativeEvent: {} });
       await elapse(50);
       await finishMotion();
       const panel = screen.getByTestId('start-content');
       const box = screen.getByRole('link', { name: 'Introduction' }).parent?.parent;
       if (box === undefined || box === null) throw new Error('The content has no box');
 
-      await act(async () => {
-        fireEvent(trigger('Getting started'), 'hoverOut', { nativeEvent: {} });
-        fireEvent(box, 'pointerEnter', { nativeEvent: { pointerType: 'mouse' } });
-      });
+      await fireEvent(trigger('Getting started'), 'hoverOut', { nativeEvent: {} });
+      await fireEvent(box, 'pointerEnter', { nativeEvent: { pointerType: 'mouse' } });
       await elapse(200);
 
       expect(panel).toBeOnTheScreen();
@@ -318,9 +338,7 @@ describe('NavigationMenu', () => {
     it('keeps the content the pointer opened open when its trigger is then pressed, and after the pointer leaves', async () => {
       const user = setup();
       await render(<Menu />);
-      await act(async () => {
-        fireEvent(trigger('Getting started'), 'hoverIn', { nativeEvent: {} });
-      });
+      await fireEvent(trigger('Getting started'), 'hoverIn', { nativeEvent: {} });
       await elapse(50);
       await finishMotion();
 
@@ -328,9 +346,7 @@ describe('NavigationMenu', () => {
       await finishMotion();
       expect(content('start')).toBeOnTheScreen();
 
-      await act(async () => {
-        fireEvent(trigger('Getting started'), 'hoverOut', { nativeEvent: {} });
-      });
+      await fireEvent(trigger('Getting started'), 'hoverOut', { nativeEvent: {} });
       await elapse(200);
       expect(content('start')).toBeOnTheScreen();
     });

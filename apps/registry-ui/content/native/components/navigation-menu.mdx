@@ -72,7 +72,8 @@ Takes every prop of React Native's `View`, plus:
 | `align`         | `'start' \| 'center' \| 'end'`   | `'start'` |
 | `aria-label`    | `string`                         | `'Main'`  |
 
-A navigation landmark, named by `aria-label`. One item's content is open at a time: `value` is the `value` of
+A navigation landmark, named by `aria-label`. Give each NavigationMenu on a screen a name of its own, so a screen
+reader can tell it from the screen's other navigation. One item's content is open at a time: `value` is the `value` of
 that item, and `null` while none is. Without `value` the menu holds its own state, starting from `defaultValue`,
 and `onValueChange` reports each item that opens and the `null` as it closes. On the web the pointer resting on
 a trigger for `delay` ms opens its content, and leaving the trigger and its content for `closeDelay` ms closes
@@ -117,7 +118,8 @@ such as Expo Router's `Link`, with the link's props merged on. A string child is
 ### NavigationMenuPositioner
 
 Takes `side` (`'bottom'`), `sideOffset` (`8`), `align` (`'start'`) and `alignOffset` (`0`), which place every
-item's content against its trigger. NavigationMenu draws one itself, from its own `align`, as upstream's does.
+item's content against its trigger. NavigationMenu draws one itself, from its own `align`, as upstream's does;
+one drawn inside the NavigationMenu overrides it while it is mounted.
 
 ### NavigationMenuIndicator
 

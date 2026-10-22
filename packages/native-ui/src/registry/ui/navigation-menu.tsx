@@ -53,6 +53,9 @@ interface NavigationMenuPlacement {
 
 const DEFAULT_PLACEMENT: NavigationMenuPlacement = { side: 'bottom', sideOffset: 8, align: 'start', alignOffset: 0 };
 
+/** Who placed the content: the positioner the menu draws itself, or one its caller draws. */
+type PlacementSource = 'root' | 'caller';
+
 /** How the open content was opened: a pointer resting on its trigger on the web, or a press. */
 type OpenReason = 'hover' | 'press';
 
@@ -69,7 +72,11 @@ interface NavigationMenuState {
   /** Marks whether a finger, or the pointer's button, is down on a trigger, whose press a close then is. */
   pressTrigger: (down: boolean) => void;
   placement: NavigationMenuPlacement;
-  setPlacement: (placement: NavigationMenuPlacement) => void;
+  /**
+   * Sets where content is placed: `root` from the menu's own positioner, `caller` from one the caller draws,
+   * which wins while it is mounted; `null` withdraws it.
+   */
+  setPlacement: (source: PlacementSource, placement: NavigationMenuPlacement | null) => void;
 }
 
 const NavigationMenuContext = createContext<NavigationMenuState | undefined>(undefined);
@@ -127,7 +134,16 @@ function NavigationMenu<Value = string>({
   const [ownValue, setOwnValue] = useState<unknown>(defaultValue);
   const value = valueProp === undefined ? ownValue : valueProp;
   const [openedBy, setOpenedBy] = useState<OpenReason>('press');
-  const [placement, setPlacement] = useState<NavigationMenuPlacement>({ ...DEFAULT_PLACEMENT, align });
+  const [placements, setPlacements] = useState<Record<PlacementSource, NavigationMenuPlacement | null>>({
+    root: { ...DEFAULT_PLACEMENT, align },
+    caller: null,
+  });
+  const placement = placements.caller ?? placements.root ?? DEFAULT_PLACEMENT;
+  const setPlacement = useCallback(
+    (source: PlacementSource, next: NavigationMenuPlacement | null) =>
+      setPlacements((current) => ({ ...current, [source]: next })),
+    [],
+  );
   const openTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const triggerPressed = useRef(false);
@@ -207,7 +223,7 @@ function NavigationMenu<Value = string>({
         {...props}
       >
         {children}
-        <NavigationMenuPositioner align={align} />
+        <RootPositioner align={align} />
       </View>
     </NavigationMenuContext.Provider>
   );
@@ -261,6 +277,9 @@ const navigationMenuTriggerStyle = cva(
   'flex-row h-9 items-center justify-center disabled:opacity-50 cn-navigation-menu-trigger',
 );
 
+/** Props that clear the popup kind the web's primitive gives a trigger, which spreads a child's props last. */
+const NO_POPUP = { 'aria-haspopup': undefined } as const;
+
 /** Its Text children, or its string wrapped in one. */
 function labelOf(children: ReactNode): ReactNode {
   return typeof children === 'string' || typeof children === 'number' ? <Text>{children}</Text> : children;
@@ -296,6 +315,8 @@ function NavigationMenuTrigger({
           open && highlighted && 'cn-navigation-menu-trigger@highlighted+open',
           className,
         )}
+        // The web's primitive marks its trigger as opening a dialog; the content is none.
+        {...(Platform.OS === 'web' ? NO_POPUP : {})}
         {...props}
         {...handlers}
         onPressIn={(event: GestureResponderEvent) => {
@@ -437,22 +458,38 @@ type NavigationMenuPositionerProps = Partial<NavigationMenuPlacement>;
 
 /**
  * Where every item's content is drawn against its trigger: on `side`, `sideOffset` px off it, lined up by
- * `align` and `alignOffset`. A NavigationMenu draws one itself, from its own `align`; it draws nothing. On
+ * `align` and `alignOffset`. A NavigationMenu draws one itself, from its own `align`, which one drawn inside
+ * the menu overrides while it is mounted; it draws nothing. On
  * a device the content opens above or below its trigger, so `left` and `right` open it below.
  */
-function NavigationMenuPositioner({
-  side = DEFAULT_PLACEMENT.side,
-  sideOffset = DEFAULT_PLACEMENT.sideOffset,
-  align = DEFAULT_PLACEMENT.align,
-  alignOffset = DEFAULT_PLACEMENT.alignOffset,
-}: NavigationMenuPositionerProps): ReactNode {
+function NavigationMenuPositioner(props: NavigationMenuPositionerProps): ReactNode {
+  usePlacement('caller', props);
+  return null;
+}
+
+/** The positioner a NavigationMenu draws itself, which one its caller draws overrides. */
+function RootPositioner(props: NavigationMenuPositionerProps): ReactNode {
+  usePlacement('root', props);
+  return null;
+}
+
+/** Hands the menu where `source` places its content, and withdraws it on unmount. */
+function usePlacement(
+  source: PlacementSource,
+  {
+    side = DEFAULT_PLACEMENT.side,
+    sideOffset = DEFAULT_PLACEMENT.sideOffset,
+    align = DEFAULT_PLACEMENT.align,
+    alignOffset = DEFAULT_PLACEMENT.alignOffset,
+  }: NavigationMenuPositionerProps,
+): void {
   const { setPlacement } = useNavigationMenu('NavigationMenuPositioner');
   // The primitive places the content above or below its trigger on a device; the web's places it on any side.
   const placed = Platform.OS === 'web' || side === 'top' ? side : 'bottom';
   useEffect(() => {
-    setPlacement({ side: placed, sideOffset, align, alignOffset });
-  }, [setPlacement, placed, sideOffset, align, alignOffset]);
-  return null;
+    setPlacement(source, { side: placed, sideOffset, align, alignOffset });
+    return () => setPlacement(source, null);
+  }, [setPlacement, source, placed, sideOffset, align, alignOffset]);
 }
 
 type NavigationMenuLinkProps = Omit<ComponentProps<typeof Pressable>, 'children'> & {
