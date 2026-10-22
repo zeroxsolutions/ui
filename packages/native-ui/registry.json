@@ -605,7 +605,7 @@
         "react-native-reanimated",
         "react-native-worklets"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text", "@zui/icon"],
       "files": [
         {
           "path": "src/registry/ui/accordion.tsx",

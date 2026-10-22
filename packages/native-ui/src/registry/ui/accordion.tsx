@@ -1,9 +1,10 @@
 import * as AccordionPrimitive from '@rn-primitives/accordion';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import { Children, createContext, isValidElement, useContext, useEffect, useState, type ReactNode } from 'react';
-import { AccessibilityInfo, View, type LayoutChangeEvent } from 'react-native';
+import { View, type LayoutChangeEvent } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
+import { useReducedMotion } from '../lib/motion';
 import { cn } from '../lib/utils';
 import { Icon, IconClassContext } from './icon';
 import { TextClassContext } from './text';
@@ -17,23 +18,6 @@ const LastItemContext = createContext(false);
 
 /** Upstream's `accordion-down` and `accordion-up`: 0.2s, CSS's `ease-out`. */
 const PANEL_MOTION = { duration: 200, easing: Easing.bezier(0, 0, 0.58, 1) } as const;
-
-/** Whether the system asks for less motion, kept up to date while the component is mounted. */
-function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    let mounted = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
-      if (mounted) setReduced(enabled);
-    });
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduced);
-    return () => {
-      mounted = false;
-      subscription.remove();
-    };
-  }, []);
-  return reduced;
-}
 
 type AccordionProps = Omit<
   AccordionPrimitive.RootProps,
