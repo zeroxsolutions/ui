@@ -159,6 +159,19 @@ describe('Carousel', () => {
     expect(api?.slidesInView()).toEqual([1, 2, 3]);
   });
 
+  it('counts the slides either side of a centred slide as in view while any of them shows', async () => {
+    let api: CarouselApi | undefined;
+    await render(<Slides setApi={(given) => (api = given)} />);
+    await layOut(300, 200);
+
+    expect(api?.slidesInView()).toEqual([0, 1]);
+
+    await act(() => api?.scrollTo(2, true));
+
+    expect(api?.slidesInView()).toEqual([1, 2, 3]);
+    expect(api?.slidesNotInView()).toEqual([0, 4]);
+  });
+
   it('tells its listeners when a new layout reinitialises it, and that it resized', async () => {
     let api: CarouselApi | undefined;
     const events: string[] = [];

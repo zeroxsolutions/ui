@@ -81,6 +81,14 @@ function roundToStep(value: number, step: number, min: number): number {
   return Number(nearest.toFixed(Math.max(decimalsOf(step), decimalsOf(min))));
 }
 
+/** `value` without the floating-point tail a sum of steps leaves, as Base UI trims it. */
+function trimmed(value: number): number {
+  return Number(value.toFixed(12));
+}
+
+/** How near a dragged thumb comes to its neighbour to meet it, as Base UI's swap allows. */
+const MEET = 1e-7;
+
 function clamp(value: number, low: number, high: number): number {
   return Math.min(high, Math.max(low, value));
 }
@@ -109,16 +117,18 @@ function pushed(
     const high = moved[i + 1] - gap;
     moved[i] = clamp(Math.min(Math.max(moved[i], initial[i]), high), min + i * gap, high);
   }
-  return moved;
+  return moved.map(trimmed);
 }
 
 /** `values` with the thumb at `index` moved to `next`, held between its neighbours less `gap`. */
 function bounded(values: readonly number[], index: number, next: number, gap: number, min: number, max: number) {
   const moved = [...values];
-  moved[index] = clamp(
-    next,
-    values[index - 1] === undefined ? min : values[index - 1] + gap,
-    values[index + 1] === undefined ? max : values[index + 1] - gap,
+  moved[index] = trimmed(
+    clamp(
+      next,
+      values[index - 1] === undefined ? min : values[index - 1] + gap,
+      values[index + 1] === undefined ? max : values[index + 1] - gap,
+    ),
   );
   return moved;
 }
@@ -228,8 +238,8 @@ function Slider({
       return index;
     }
     const held = bounded(current, index, next, gap, min, max);
-    const forward = next > current[index] && index < current.length - 1 && next >= current[index + 1];
-    const backward = next < current[index] && index > 0 && next <= current[index - 1];
+    const forward = next > current[index] && index < current.length - 1 && next >= current[index + 1] - MEET;
+    const backward = next < current[index] && index > 0 && next <= current[index - 1] + MEET;
     if (thumbCollisionBehavior === 'none' || (!forward && !backward)) {
       change(held, index);
       return index;
@@ -247,12 +257,14 @@ function Slider({
       max,
       start,
     );
-    swapped[index] = clamp(
-      held[index],
-      Math.max(swapped[index - 1] === undefined ? min : swapped[index - 1] + gap, min + index * gap),
-      Math.min(
-        swapped[index + 1] === undefined ? max : swapped[index + 1] - gap,
-        max - (swapped.length - 1 - index) * gap,
+    swapped[index] = trimmed(
+      clamp(
+        held[index],
+        Math.max(swapped[index - 1] === undefined ? min : swapped[index - 1] + gap, min + index * gap),
+        Math.min(
+          swapped[index + 1] === undefined ? max : swapped[index + 1] - gap,
+          max - (swapped.length - 1 - index) * gap,
+        ),
       ),
     );
     change(swapped, target);

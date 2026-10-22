@@ -181,6 +181,28 @@ describe('Slider', () => {
     expect(values()).toEqual([30, 50]);
   });
 
+  it('pushes a neighbour to a whole step, with no floating-point tail', async () => {
+    const onValueChange = jest.fn();
+    await render(
+      <Slider
+        testID="slider"
+        defaultValue={[0.3, 0.7]}
+        min={0}
+        max={1}
+        step={0.1}
+        minStepsBetweenValues={1}
+        onValueChange={onValueChange}
+      />,
+    );
+    const laid = await laidOut(100);
+
+    await fireEvent(laid, 'responderGrant', touch(30, 30));
+    await fireEvent(laid, 'responderMove', touch(0, 70));
+
+    expect(values()).toEqual([0.7, 0.8]);
+    expect(onValueChange).toHaveBeenLastCalledWith([0.7, 0.8], { activeThumbIndex: 0 });
+  });
+
   it('stops a thumb short of its neighbour by the gap with no collision', async () => {
     await render(
       <Slider testID="slider" defaultValue={[20, 50]} minStepsBetweenValues={5} thumbCollisionBehavior="none" />,
@@ -234,6 +256,29 @@ describe('Slider', () => {
     expect(laid.props.onStartShouldSetResponder()).toBe(false);
     expect(values()).toEqual([50]);
     expect(thumbs()[0]).toBeDisabled();
+  });
+
+  it('hands the drag back to the thumb before it with swap, keeping the gap', async () => {
+    const onValueChange = jest.fn();
+    await render(
+      <Slider
+        testID="slider"
+        defaultValue={[20, 50]}
+        minStepsBetweenValues={5}
+        thumbCollisionBehavior="swap"
+        onValueChange={onValueChange}
+      />,
+    );
+    const laid = await laidOut(100);
+
+    await fireEvent(laid, 'responderGrant', touch(50, 50));
+    await fireEvent(laid, 'responderMove', touch(0, 20));
+    expect(values()).toEqual([20, 25]);
+    expect(onValueChange).toHaveBeenLastCalledWith([20, 25], { activeThumbIndex: 0 });
+
+    await fireEvent(laid, 'responderMove', touch(0, 10));
+    expect(values()).toEqual([10, 25]);
+    expect(onValueChange).toHaveBeenLastCalledWith([10, 25], { activeThumbIndex: 0 });
   });
 
   it("draws Vega's track, range and thumb, the track thinner across when vertical", async () => {
