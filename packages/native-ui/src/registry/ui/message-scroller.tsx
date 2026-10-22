@@ -853,7 +853,9 @@ type MessageScrollerItemProps = ComponentProps<typeof View> & {
 
 /**
  * One row of the transcript, such as a message, a marker or a typing indicator. Wrap every row of the content
- * in one, so the scroller can measure it, anchor it, keep it in place and scroll to it.
+ * in one, so the scroller can measure it, anchor it, keep it in place and scroll to it. A device announces an
+ * added row by its `aria-label` or `accessibilityLabel`, else by the text written inline among its children; a
+ * row drawn by a component of its own, such as `<ChatMessage message={m} />`, needs the label to be announced.
  */
 function MessageScrollerItem({
   className,
@@ -865,7 +867,7 @@ function MessageScrollerItem({
 }: MessageScrollerItemProps): ReactNode {
   const engine = useEngine('MessageScrollerItem');
   const key = useId();
-  const text = textOf(children, ' ');
+  const text = props['aria-label'] ?? props.accessibilityLabel ?? textOf(children, ' ');
 
   useLayoutEffect(() => {
     engine.registerItem(key, messageId, scrollAnchor, text);

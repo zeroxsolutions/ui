@@ -21,6 +21,8 @@ interface Row {
   anchor?: boolean;
   /** What the row says; `Message <id>` by default. */
   text?: string;
+  /** Draws the row's text through a component of its own, announced by this label. */
+  said?: string;
   y: number;
   height: number;
 }
@@ -37,6 +39,11 @@ const LONG: Row[] = Array.from({ length: 10 }, (_, index) => ({
 const contentHeightOf = (rows: readonly Row[]): number =>
   rows.length === 0 ? 0 : Math.max(...rows.map((row) => row.y + row.height)) + 16;
 
+/** A message drawn by a component of its own, as an app's chat message is. */
+function Said({ text }: { text: string }) {
+  return <Text>{text}</Text>;
+}
+
 function Transcript({
   rows,
   busy,
@@ -49,8 +56,14 @@ function Transcript({
         <MessageScrollerViewport testID="viewport">
           <MessageScrollerContent testID="content" aria-busy={busy}>
             {rows.map((row) => (
-              <MessageScrollerItem key={row.id} testID={row.id} messageId={row.id} scrollAnchor={row.anchor}>
-                <Text>{row.text ?? `Message ${row.id}`}</Text>
+              <MessageScrollerItem
+                key={row.id}
+                testID={row.id}
+                messageId={row.id}
+                scrollAnchor={row.anchor}
+                aria-label={row.said}
+              >
+                {row.said === undefined ? <Text>{row.text ?? `Message ${row.id}`}</Text> : <Said text={row.said} />}
               </MessageScrollerItem>
             ))}
           </MessageScrollerContent>
@@ -406,6 +419,19 @@ describe('MessageScroller', () => {
       await elapse();
 
       expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith('Message m2');
+    });
+
+    it('announces a row drawn by a component of its own by its aria-label', async () => {
+      const rows = LONG.slice(0, 2);
+      await render(<Transcript rows={rows} defaultScrollPosition="start" />);
+      await layOut(rows);
+
+      const added = [...rows, { id: 'm2', y: 248, height: 100, said: 'Ada: Shipped it' }];
+      await screen.rerender(<Transcript rows={added} defaultScrollPosition="start" />);
+      await fireEvent(screen.getByTestId('m2'), 'layout', layout(100, 248));
+      await elapse();
+
+      expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith('Ada: Shipped it');
     });
 
     it('announces a row added with no text once text streams into it', async () => {

@@ -116,7 +116,9 @@ announced once it clears. On a device, a row added with no text yet is announced
 ### MessageScrollerItem
 
 Takes every prop of React Native's `View`, plus `messageId` (`string`) and `scrollAnchor` (`boolean`, `false`
-by default).
+by default). On a device an added row is announced by its `aria-label` or `accessibilityLabel`, else by the text
+written inline among its children. A row drawn by a component of its own, such as
+`<ChatMessage message={m} />`, holds no inline text, so give it the label or it is not announced.
 
 ### MessageScrollerButton
 
@@ -140,8 +142,8 @@ is an arrow named "Scroll to end" or "Scroll to start".
 - Upstream marks the root and viewport with `data-scrollable`, `data-autoscrolling` and `data-pending-scroll`
   for styling. A device has no attribute selectors, so read `useMessageScrollerScrollable` instead.
 - Upstream's content is a log that a screen reader announces additions to. The web keeps that; a device has no
-  log role, so the text of each added row is announced instead, and only rows announce, not the text that
-  streams into them.
+  log role, so each added row is announced instead, by its label or else its inline text, and only rows
+  announce, not the text that streams into them. The row's label is read for this, which upstream has no use for.
 - Upstream skips painting rows far off screen with `content-visibility`, which a device has no counterpart of.
   A transcript of thousands of rows draws every one of them.
 - Upstream's button takes a `render` prop. The native one takes children.
