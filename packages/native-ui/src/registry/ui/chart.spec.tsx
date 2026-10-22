@@ -752,6 +752,43 @@ describe('Chart', () => {
       expect(screen.getByTestId('chart-angle-tick-4', HIDDEN).props.font).toMatchObject({ textAnchor: 'end' });
     });
 
+    it('draws its rings smaller so long names beyond the spokes stay inside the chart', async () => {
+      const parts = [
+        'Morning commute',
+        'Lunch break walks',
+        'Afternoon errands',
+        'Evening commute',
+        'Late night snacks',
+        'Early hours runs',
+      ];
+      await render(
+        <ChartContainer config={chartConfig}>
+          <RadarChart data={parts.map((part, index) => ({ part, desktop: 100 + index * 10 }))}>
+            <PolarAngleAxis dataKey="part" />
+            <Radar dataKey="desktop" fill="var(--color-desktop)" isAnimationActive={false} />
+          </RadarChart>
+        </ChartContainer>,
+      );
+
+      parts.forEach((part, index) => {
+        const tick = screen.getByTestId(`chart-angle-tick-${index}`, HIDDEN);
+        const x = Number(tick.props.x);
+        const y = Number(tick.props.y);
+        // The axes' estimate of a 12px label's width.
+        const width = part.length * 7;
+        const { textAnchor } = tick.props.font as { textAnchor: string };
+        const left = textAnchor === 'start' ? x : textAnchor === 'end' ? x - width : x - width / 2;
+
+        expect({ part, left: left >= 0, right: left + width <= 320, top: y - 12 >= 0, bottom: y <= 200 }).toEqual({
+          part,
+          left: true,
+          right: true,
+          top: true,
+          bottom: true,
+        });
+      });
+    });
+
     it('draws a polygon ring per value tick and a spoke per month', async () => {
       await render(<MonthRadar />);
 

@@ -199,6 +199,8 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 - `PolarGrid` reads only the `fill-<colour>`, `first:fill-<colour>` and `last:fill-<colour>` classes of its
   `className`, filling every ring, the first or the last in the theme colour of that name; React Native has no
   CSS to apply the others to an svg ring.
+- A radar draws its rings smaller where a name beyond a spoke would pass the chart's edge, which a device's svg
+  clips; Recharts keeps the radius and lets the name run over the edge.
 - A pie's slices have no stroke unless given one: upstream's container hides Recharts' white one.
 - `accessibilityLayer` is accepted and changes nothing: the chart always takes the keyboard on the web and is
   always read to a screen reader. The focused chart keeps the browser's focus ring, which upstream hides.

@@ -2009,6 +2009,39 @@ function anchorAt(angle: number): 'start' | 'middle' | 'end' {
   return 'middle';
 }
 
+/** How far a radar's label sits beyond the end of its spoke, in px. */
+const ANGLE_LABEL_GAP = 8;
+
+/** How far below its spoke's end a label at `angle` is moved, so it centres on the spoke at the sides. */
+function angleLabelShift(angle: number): number {
+  return (0.355 - 0.355 * Math.sin(angle * RADIANS)) * TICK_FONT_SIZE;
+}
+
+/**
+ * The largest outer radius, at most `outer` and at least `inner`, at which each label beyond its spoke stays
+ * inside `box`, by the axes' estimate of its width; an svg on a device clips what is drawn past its edge.
+ */
+function radiusFittingLabels(
+  outer: number,
+  inner: number,
+  cx: number,
+  cy: number,
+  box: Plot,
+  labels: readonly { angle: number; width: number }[],
+): number {
+  let fitted = outer;
+  for (const { angle, width } of labels) {
+    const cos = Math.cos(angle * RADIANS);
+    const sin = Math.sin(angle * RADIANS);
+    const shift = angleLabelShift(angle);
+    if (cos > 0.01) fitted = Math.min(fitted, (box.right - cx - width) / cos - ANGLE_LABEL_GAP);
+    if (cos < -0.01) fitted = Math.min(fitted, (cx - box.left - width) / -cos - ANGLE_LABEL_GAP);
+    if (sin > 0.01) fitted = Math.min(fitted, (cy + shift - TICK_FONT_SIZE - box.top) / sin - ANGLE_LABEL_GAP);
+    if (sin < -0.01) fitted = Math.min(fitted, (box.bottom - cy - shift) / -sin - ANGLE_LABEL_GAP);
+  }
+  return Math.max(inner, fitted);
+}
+
 /** A polygon per series through the categories of `data` on spokes round a middle. */
 function RadarChart(props: PolarChartProps): ReactNode {
   const { data, title, width, height, children, startAngle = 90, endAngle = -270 } = props;
@@ -2047,12 +2080,37 @@ function RadarChart(props: PolarChartProps): ReactNode {
 
   const resolve = (value: string | undefined): string | undefined => palette.resolveColor(value);
   const legendTop = parts.legend?.verticalAlign === 'top';
-  const { cx, cy, inner, outer } = polarFrame(props, size, legendHeight, legendTop);
+  const frame = polarFrame(props, size, legendHeight, legendTop);
+  const { cx, cy, inner } = frame;
   const count = data.length;
   // A whole turn puts the last category one step short of the first; a part of one reaches its end.
   const turn = endAngle - startAngle;
   const stepAngle = count === 0 ? 0 : Math.abs(turn) >= 360 ? turn / count : turn / Math.max(1, count - 1);
   const angles = data.map((_, index) => startAngle + index * stepAngle);
+  const categoryKey = parts.angleAxis?.dataKey;
+  const categoryOf = (index: number): unknown => (categoryKey === undefined ? index : data[index]?.[categoryKey]);
+  const angleFormat = parts.angleAxis?.tickFormatter;
+  const angleLabels = data.map((_, index) =>
+    angleFormat === undefined ? String(categoryOf(index)) : angleFormat(categoryOf(index) as never, index),
+  );
+  const labelled = parts.angleAxis !== undefined && parts.angleAxis.tick !== false;
+  // The svg's own box, less the legend: a label may reach into the margin, but not past the svg's edge.
+  const box: Plot = {
+    left: 0,
+    right: size.width,
+    top: legendTop ? legendHeight : 0,
+    bottom: size.height - (legendTop ? 0 : legendHeight),
+  };
+  const outer = labelled
+    ? radiusFittingLabels(
+        frame.outer,
+        inner,
+        cx,
+        cy,
+        box,
+        angles.map((angle, index) => ({ angle, width: labelWidth(angleLabels[index] ?? '') })),
+      )
+    : frame.outer;
   const ticks = niceTicks(
     Math.max(0, ...data.flatMap((datum) => series.map((item) => numberAt(datum, item.dataKey)))),
     parts.radiusAxis?.tickCount ?? 5,
@@ -2060,8 +2118,6 @@ function RadarChart(props: PolarChartProps): ReactNode {
   const radius = scaleLinear()
     .domain([0, ticks[ticks.length - 1] ?? 1])
     .range([inner, outer]);
-  const categoryKey = parts.angleAxis?.dataKey;
-  const categoryOf = (index: number): unknown => (categoryKey === undefined ? index : data[index]?.[categoryKey]);
   const nameOf = (key: string): string => palette.nameOf(key) ?? key;
   const colorOf = (item: RadarProps): string => item.stroke ?? item.fill ?? DEFAULT_SERIES_COLOR;
   const payloadAt = (index: number): TooltipPayloadItem[] =>
@@ -2114,7 +2170,6 @@ function RadarChart(props: PolarChartProps): ReactNode {
     type: 'rect',
   }));
   const tickColor = resolve(THEME.tick);
-  const angleFormat = parts.angleAxis?.tickFormatter;
   const radiusAxis = parts.radiusAxis;
   const axisAngle = radiusAxis?.angle ?? startAngle;
   const viewBox: PolarViewBox = {
@@ -2160,23 +2215,22 @@ function RadarChart(props: PolarChartProps): ReactNode {
             stroke={resolve(THEME.cursorStroke)}
           />
         )}
-        {parts.angleAxis === undefined || parts.angleAxis.tick === false
+        {!labelled
           ? null
           : angles.map((angle, index) => {
-              const at = polar(cx, cy, outer + 8, angle);
-              const value = categoryOf(index);
+              const at = polar(cx, cy, outer + ANGLE_LABEL_GAP, angle);
               return (
                 <SvgText
                   key={index}
                   testID={`chart-angle-tick-${index}`}
                   x={at.x}
-                  y={at.y + (0.355 - 0.355 * Math.sin(angle * RADIANS)) * TICK_FONT_SIZE}
+                  y={at.y + angleLabelShift(angle)}
                   fontSize={TICK_FONT_SIZE}
                   fontFamily={GEIST_REGULAR}
                   fill={tickColor}
                   textAnchor={anchorAt(angle)}
                 >
-                  {angleFormat === undefined ? String(value) : angleFormat(value as never, index)}
+                  {angleLabels[index]}
                 </SvgText>
               );
             })}
