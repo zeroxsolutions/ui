@@ -1099,6 +1099,32 @@
       ]
     },
     {
+      "name": "message-context",
+      "type": "registry:lib",
+      "title": "Message context",
+      "description": "useMessage, which tells a Bubble or an Attachment the side of the Message it sits in, and lets a ghost Bubble tell the Message it is there.",
+      "files": [
+        {
+          "path": "src/registry/lib/message-context.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "bubble",
+      "type": "registry:ui",
+      "title": "Bubble",
+      "description": "A message's framed surface in seven variants, at the start or end of the row, with reactions overlapping its edge and content that can take a press.",
+      "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/message-context"],
+      "files": [
+        {
+          "path": "src/registry/ui/bubble.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

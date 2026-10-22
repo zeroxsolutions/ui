@@ -1,0 +1,98 @@
+---
+title: Bubble
+description: A message's framed surface, in seven variants, with reactions and content that can take a press.
+---
+
+<NativePreview name="bubble-demo" />
+
+## Installation
+
+<InstallCommand name="bubble" />
+
+The CLI writes `components/ui/bubble.tsx`, installs [Text](/native/components/nativewind/text), Message context
+(`lib/message-context.ts`, which tells a bubble the side of the [Message](/native/components/nativewind/message)
+it sits in) and Utils, and adds `@rn-primitives/slot` and `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { Bubble, BubbleContent, BubbleGroup, BubbleReactions } from '@/components/ui/bubble';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<BubbleGroup>
+  <Bubble variant="muted">
+    <BubbleContent>Hey! Want to see chat bubbles?</BubbleContent>
+  </Bubble>
+  <Bubble variant="muted">
+    <BubbleContent>I can group messages and switch sides.</BubbleContent>
+    <BubbleReactions role="img" aria-label="Reaction: thumbs up">
+      <Text>{'\u{1F44D}'}</Text>
+    </BubbleReactions>
+  </Bubble>
+</BubbleGroup>
+```
+
+Text given straight to `BubbleContent` or `BubbleReactions` is set in a Text. Reactions overlap the bubble's
+edge, so leave room between rows of bubbles, such as `gap-8`. Give a row of emoji `role="img"` and an
+`aria-label`, so a screen reader reads it once rather than glyph by glyph.
+
+To make a bubble take a press, give `BubbleContent` `asChild` and a Pressable child:
+
+```tsx
+<Bubble variant="outline">
+  <BubbleContent asChild>
+    <Pressable role="button" onPress={openDiff}>
+      Show the full diff
+    </Pressable>
+  </BubbleContent>
+</Bubble>
+```
+
+## API reference
+
+### Bubble
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop      | Type                                                                                       | Default     |
+| --------- | ------------------------------------------------------------------------------------------ | ----------- |
+| `variant` | `'default' \| 'secondary' \| 'muted' \| 'tinted' \| 'outline' \| 'ghost' \| 'destructive'` | `'default'` |
+| `align`   | `'start' \| 'end'`                                                                         | `'start'`   |
+
+A bubble is as wide as its content, up to 80% of the row. `ghost` draws no frame and may take the full width.
+Inside a Message aligned to the end, the bubble sits at the end whatever its `align`.
+
+### BubbleContent
+
+Takes every prop of React Native's `View`, plus `asChild` (`boolean`, default `false`). With `asChild`, it
+renders its single child in place of the View, with the content's props and classes merged on; text straight
+inside the child is set in a Text, and the child is ringed while it holds keyboard focus.
+
+### BubbleReactions
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop    | Type                | Default    |
+| ------- | ------------------- | ---------- |
+| `side`  | `'top' \| 'bottom'` | `'bottom'` |
+| `align` | `'start' \| 'end'`  | `'end'`    |
+
+### BubbleGroup
+
+Takes every prop of React Native's `View`, and stacks consecutive bubbles from one sender.
+
+## Differences from upstream
+
+- Upstream's BubbleContent takes a `render` prop. The native one takes `asChild`.
+- Upstream mixes the `tinted` colour from the primary colour with CSS relative colours, which neither engine
+  parses. The native bubble draws the primary colour at 10% opacity, 15% in dark mode, which comes to about the
+  same lightness over the neutral theme's background.
+- Upstream rings the reactions in the card colour with a box-shadow. A device has no box-shadow ring, so the
+  native reactions draw a 3px border in that colour.
+- Upstream offsets the reactions by three quarters of their height with a percentage translate. The native
+  reactions measure their height and offset by it, so they are hidden for the frame before that measure.
+- Upstream colours interactive content when hovered. A touch screen has no hover, and the native content draws
+  no pressed colour.
+- Upstream drops the reactions' padding when they hold a button, by a child selector. Pass `p-0` yourself.
