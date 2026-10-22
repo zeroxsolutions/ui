@@ -314,6 +314,38 @@ describe('Toaster', () => {
     expect(screen.getByText('Saved')).toBeOnTheScreen();
   });
 
+  it('keeps a toast added again by its id while it goes out', async () => {
+    const onRemove = jest.fn();
+    await show();
+    const id = await raise(() => toast.add({ title: 'Saved', timeout: 0, onRemove }));
+
+    await act(async () => {
+      toast.close(id);
+    });
+    await elapse(100);
+    await raise(() => toast.add({ id, title: 'Saved again', timeout: 0, onRemove }));
+    await elapse(MOTION_MS);
+
+    expect(screen.getByText('Saved again')).toBeOnTheScreen();
+    expect(onRemove).not.toHaveBeenCalled();
+    expect(lift('Saved again')).toBe(0);
+  });
+
+  it('stops its time while focus is in the stack, and runs it again once focus leaves', async () => {
+    await show();
+    await raise(() => toast.add({ title: 'Saved' }));
+    const viewport = around(screen.getByText('Saved'), 'onFocus');
+    if (!viewport) throw new Error('No viewport takes focus');
+
+    await fireEvent(viewport, 'focus');
+    await elapse(10_000);
+    expect(screen.getByText('Saved')).toBeOnTheScreen();
+
+    await fireEvent(viewport, 'blur', { nativeEvent: { relatedTarget: null } });
+    await elapse(5_000 + MOTION_MS);
+    expect(screen.queryByText('Saved')).toBeNull();
+  });
+
   it('removes a toast at once when the system asks for reduced motion', async () => {
     jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
     await show();

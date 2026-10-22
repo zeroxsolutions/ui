@@ -194,7 +194,8 @@ function createToastManager<Data extends object = object>(): ToastManager<Data> 
     },
     remove: (id) => {
       const gone = toasts.find((entry) => entry.id === id);
-      if (gone === undefined) return;
+      // A toast added again by its id while it went out stays.
+      if (gone === undefined || gone.transitionStatus !== 'ending') return;
       publish(toasts.filter((entry) => entry.id !== id));
       gone.onRemove?.();
     },
@@ -325,6 +326,16 @@ interface WebKeyEvent {
   key: string;
 }
 
+/** The part of a web element the viewport reads to tell whether focus left it. */
+interface WebElement {
+  contains(other: unknown): boolean;
+}
+
+/** The part of the web's focus event the viewport reads: where focus went. */
+interface WebFocusEvent {
+  nativeEvent: { relatedTarget?: unknown };
+}
+
 /** The part of the web's document the F6 hotkey listens on. */
 interface WebDocument {
   addEventListener(type: 'keydown', listener: (event: WebKeyEvent) => void): void;
@@ -340,8 +351,8 @@ type ToastViewportProps = ComponentProps<typeof View>;
 /**
  * Where the toasts stack: across the bottom of the screen, 16px in from its edges and at most 384px wide,
  * or in its bottom right corner from 640px wide, above the safe area's bottom inset. A pointer over the
- * stack on the web, F6 there, or a touch on it on a device, spreads it into a list; a touch keeps it spread
- * for 4 seconds after the finger lifts. A new toast is read by screen readers: announced on iOS, and from a
+ * stack or focus in it on the web (F6 moves focus there), or a touch on it on a device, spreads it into a
+ * list until the pointer or focus leaves; a touch keeps it spread for 4 seconds after the finger lifts. A new toast is read by screen readers: announced on iOS, and from a
  * polite live region on Android and the web.
  */
 function ToastViewport({ className, style, children, ...props }: ToastViewportProps): ReactNode {
@@ -349,6 +360,7 @@ function ToastViewport({ className, style, children, ...props }: ToastViewportPr
   const { width } = useWindowDimensions();
   const insets = useContext(SafeAreaInsetsContext);
   const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [touched, setTouched] = useState(false);
   const [active, setActive] = useState(AppState.currentState !== 'background');
   const [heights, setHeights] = useState<ReadonlyMap<string, number>>(new Map());
@@ -391,7 +403,6 @@ function ToastViewport({ className, style, children, ...props }: ToastViewportPr
     if (!WEB || page === undefined) return undefined;
     const onKeyDown = (event: WebKeyEvent): void => {
       if (event.key !== 'F6') return;
-      setHovered(true);
       container.current?.focus();
     };
     page.addEventListener('keydown', onKeyDown);
@@ -404,10 +415,13 @@ function ToastViewport({ className, style, children, ...props }: ToastViewportPr
   );
   // A viewport with nothing up collapses again, so the next stack starts closed.
   useEffect(() => {
-    if (shown.length === 0) setHovered(false);
+    if (shown.length === 0) {
+      setHovered(false);
+      setFocused(false);
+    }
   }, [shown.length]);
 
-  const expanded = hovered || touched;
+  const expanded = hovered || focused || touched;
   const onHeight = (id: string, height: number): void =>
     setHeights((current) => (current.get(id) === height ? current : new Map(current).set(id, height)));
   const state: ToastViewportState = { expanded, paused: expanded || !active, shown, heights, onHeight };
@@ -431,6 +445,16 @@ function ToastViewport({ className, style, children, ...props }: ToastViewportPr
       aria-live="polite"
       className={cn('absolute z-50', className)}
       style={[{ bottom: EDGE + (insets?.bottom ?? 0), height: stackHeight }, place, style]}
+      // Focus in the stack, from F6 or a tab to a toast's button, spreads it until focus goes elsewhere.
+      onFocus={() => setFocused(true)}
+      onBlur={(event: WebFocusEvent) => {
+        const next = event.nativeEvent.relatedTarget;
+        const stays =
+          next !== null &&
+          next !== undefined &&
+          (container.current as unknown as WebElement | null)?.contains(next) === true;
+        if (!stays) setFocused(false);
+      }}
       onPointerEnter={WEB ? () => setHovered(true) : undefined}
       onPointerLeave={WEB ? () => setHovered(false) : undefined}
       onTouchStart={
@@ -560,9 +584,21 @@ function Toast({
     };
   }, [paused, ending, timeout, item.updateKey, item.id, manager]);
 
-  // A closed toast goes out the way it was swiped, or down, or fades if hidden, then leaves the list.
+  // A closed toast goes out the way it was swiped, or down, or fades if hidden, then leaves the list; one added
+  // again by its id while it goes out comes back into place.
+  const wentOut = useRef(false);
   useEffect(() => {
-    if (!ending) return;
+    if (!ending) {
+      if (!wentOut.current) return;
+      wentOut.current = false;
+      swipe.swiped.current = undefined;
+      swipe.x.value = reduced ? 0 : withTiming(0, MOTION);
+      swipe.y.value = reduced ? 0 : withTiming(0, MOTION);
+      entered.value = reduced ? 1 : withTiming(1, MOTION);
+      opacity.value = reduced ? (limited ? 0 : 1) : withTiming(limited ? 0 : 1, MOTION);
+      return;
+    }
+    wentOut.current = true;
     const leave = (): void => store.remove(item.id);
     if (reduced) {
       leave();

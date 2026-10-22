@@ -118,8 +118,9 @@ included, kept current, and the provider's manager's methods.
 
 Takes every prop of React Native's `View`. The toasts stack across the bottom of the screen, 16px in from its
 edges and at most 384px wide, or in its bottom right corner from 640px wide, above the safe area's bottom inset
-when a `SafeAreaProvider` is mounted. A pointer over the stack on the web, F6 there, or a touch on it on a device,
-spreads it into a list 12px apart; a touch keeps it spread for 4 seconds after the finger lifts.
+when a `SafeAreaProvider` is mounted. A pointer over the stack or focus in it on the web, where F6 moves focus to
+it, or a touch on it on a device, spreads it into a list 12px apart until the pointer or focus leaves; a touch
+keeps it spread for 4 seconds after the finger lifts.
 
 Screen readers read each new toast, and each change to one, as its title and description: iOS announces it,
 waiting its turn, or at once for a `high` priority toast, and on Android and the web the viewport is a polite
