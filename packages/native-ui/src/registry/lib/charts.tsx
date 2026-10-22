@@ -1,0 +1,1000 @@
+/**
+ * The chart parts upstream's chart demos take from Recharts, in Recharts' names and with the props those
+ * demos use, drawn with react-native-svg so they run on a device and on the web: the responsive container,
+ * the bar chart and its bars, the axes, the grid, the tooltip and the legend. A part reads its colours,
+ * such as `var(--color-desktop)`, through the palette the chart's container provides.
+ */
+import { scaleBand, scaleLinear, scalePoint } from 'd3-scale';
+import {
+  Children,
+  cloneElement,
+  createContext,
+  isValidElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
+import {
+  Easing,
+  Platform,
+  Text as NativeText,
+  View,
+  type AccessibilityActionEvent,
+  type GestureResponderEvent,
+  type KeyDownEvent,
+  type LayoutChangeEvent,
+  type PointerEvent,
+} from 'react-native';
+import Svg, { G, Line as SvgLine, Path, Rect, Text as SvgText } from 'react-native-svg';
+import { useReducedMotion } from './motion';
+
+/** One row of a chart's `data`, such as `{ month: "January", desktop: 186 }`. */
+type ChartDatum = Readonly<Record<string, unknown>>;
+
+/**
+ * How a chart's parts read colours and names: the container of upstream's chart provides it, as its
+ * stylesheet provides the `--color-<key>` variables on the web.
+ */
+interface ChartPalette {
+  /**
+   * The colour to draw for `value` as a part is given it: `var(--color-<key>)`, a theme variable such as
+   * `var(--chart-1)`, or a colour. `undefined` for none.
+   */
+  resolveColor: (value: string | undefined) => string | undefined;
+  /** The name a screen reader hears for the series or the category `key`, such as `Desktop` for `desktop`. */
+  nameOf: (key: string) => string | undefined;
+}
+
+const ChartPaletteContext = createContext<ChartPalette>({
+  resolveColor: (value) => value,
+  nameOf: () => undefined,
+});
+
+/** The colours a part draws where upstream's chart container styles Recharts' own. */
+const THEME = {
+  tick: 'var(--muted-foreground)',
+  grid: 'var(--border)',
+  cursorFill: 'var(--muted)',
+  cursorStroke: 'var(--border)',
+  surface: 'var(--background)',
+} as const;
+
+/** Recharts' colour for a series given none. */
+const DEFAULT_SERIES_COLOR = '#3182bd';
+
+// ---------------------------------------------------------------------------------------------------------
+// Size
+
+interface ChartSize {
+  width: number;
+  height: number;
+}
+
+const ChartSizeContext = createContext<ChartSize | undefined>(undefined);
+
+type ResponsiveContainerProps = {
+  /** The size drawn before the container has been measured. */
+  initialDimension?: ChartSize;
+  children?: ReactNode;
+};
+
+/** Fills its parent and gives the chart inside it the size it was laid out at. */
+function ResponsiveContainer({
+  initialDimension = { width: 320, height: 200 },
+  children,
+}: ResponsiveContainerProps): ReactNode {
+  const [size, setSize] = useState<ChartSize>(initialDimension);
+  const onLayout = (event: LayoutChangeEvent): void => {
+    const { width, height } = event.nativeEvent.layout;
+    setSize((current) => (current.width === width && current.height === height ? current : { width, height }));
+  };
+  return (
+    <View onLayout={onLayout} className="w-full flex-1 self-stretch">
+      <ChartSizeContext.Provider value={size}>{children}</ChartSizeContext.Provider>
+    </View>
+  );
+}
+
+function useChartSize(width: number | undefined, height: number | undefined): ChartSize | undefined {
+  const measured = useContext(ChartSizeContext);
+  if (width !== undefined && height !== undefined) return { width, height };
+  return measured;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Motion
+
+/** Recharts' entrance: one and a half seconds on CSS's `ease`. */
+const ENTRANCE_MS = 1500;
+const EASE = Easing.bezier(0.25, 0.1, 0.25, 1);
+
+/**
+ * The share of a chart's entrance drawn so far, from 0 to 1. It is 1 from the start where `animate` is
+ * false or the system asks for reduced motion.
+ */
+function useEntrance(animate: boolean, duration: number): number {
+  const reduced = useReducedMotion();
+  const still = !animate || reduced;
+  const [progress, setProgress] = useState(still ? 1 : 0);
+  useEffect(() => {
+    if (still) {
+      setProgress(1);
+      return undefined;
+    }
+    let frame = 0;
+    const start = Date.now();
+    const step = (): void => {
+      const share = Math.min(1, (Date.now() - start) / duration);
+      setProgress(EASE(share));
+      if (share < 1) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [still, duration]);
+  return progress;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Configuration parts: each draws nothing itself, and the chart around it reads its props.
+
+/** An item of the payload a tooltip's content is given, one per series at the active point. */
+interface TooltipPayloadItem {
+  dataKey?: string;
+  name?: string;
+  value?: number | string;
+  /** The series' colour as the series was given it, such as `var(--color-desktop)`. */
+  color?: string;
+  fill?: string;
+  stroke?: string;
+  /** The row of data the point comes from. */
+  payload?: ChartDatum;
+  type?: string;
+}
+
+/** What a tooltip's `content` is drawn with, as Recharts hands it. */
+interface TooltipContentProps {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  /** The active category, such as `January`. */
+  label?: unknown;
+  coordinate?: { x: number; y: number };
+}
+
+interface CursorProps {
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+}
+
+type TooltipProps = {
+  /** The element drawn for the active point, cloned with {@link TooltipContentProps}, or a function drawing it. */
+  content?: ReactElement | ((props: TooltipContentProps) => ReactNode);
+  /** The band or the line drawn behind the active point; `false` draws none. */
+  cursor?: boolean | CursorProps;
+  /** The point active before anyone presses the chart. */
+  defaultIndex?: number;
+  /** The distance from the active point to the tooltip, in pixels. */
+  offset?: number;
+};
+
+/**
+ * Shows the values at the point a press, a pointer or the arrow keys make active. Placed inside a chart,
+ * it draws nothing itself.
+ */
+function Tooltip(_props: TooltipProps): ReactNode {
+  return null;
+}
+
+/** An item of the payload a legend's content is given, one per series, or per slice of a pie. */
+interface LegendPayloadItem {
+  /** The series' name, such as `desktop`. */
+  value?: string;
+  dataKey?: string;
+  color?: string;
+  type?: string;
+  payload?: ChartDatum;
+}
+
+/** What a legend's `content` is drawn with, as Recharts hands it. */
+interface LegendContentProps {
+  payload?: LegendPayloadItem[];
+  verticalAlign?: 'top' | 'middle' | 'bottom';
+}
+
+type LegendProps = {
+  /** The element drawn for the legend, cloned with {@link LegendContentProps}, or a function drawing it. */
+  content?: ReactElement | ((props: LegendContentProps) => ReactNode);
+  /** Whether the legend sits above or below the plot. */
+  verticalAlign?: 'top' | 'bottom';
+};
+
+/** Names each series under or over the chart. Placed inside a chart, it draws nothing itself. */
+function Legend(_props: LegendProps): ReactNode {
+  return null;
+}
+
+type XAxisProps = {
+  /** The key of each row that names its category, such as `month`. */
+  dataKey?: string;
+  hide?: boolean;
+  /** Whether each tick draws a short line to the axis. */
+  tickLine?: boolean;
+  /** Whether the axis draws its line. */
+  axisLine?: boolean;
+  /** The room between a tick's label and the axis, in pixels. */
+  tickMargin?: number;
+  /** The text a tick shows for its category. */
+  tickFormatter?: (value: never, index: number) => string;
+  /** The room the axis takes under the plot, in pixels. */
+  height?: number;
+  /** The least room between two tick labels before one is left out, in pixels. */
+  minTickGap?: number;
+};
+
+/** The category axis under the plot. Placed inside a chart, the chart draws it. */
+function XAxis(_props: XAxisProps): ReactNode {
+  return null;
+}
+
+type YAxisProps = {
+  hide?: boolean;
+  tickLine?: boolean;
+  axisLine?: boolean;
+  tickMargin?: number;
+  tickFormatter?: (value: number, index: number) => string;
+  /** The room the axis takes beside the plot, in pixels. */
+  width?: number;
+  /** How many ticks the axis aims for. */
+  tickCount?: number;
+};
+
+/** The value axis beside the plot. Placed inside a chart, the chart draws it. */
+function YAxis(_props: YAxisProps): ReactNode {
+  return null;
+}
+
+type CartesianGridProps = {
+  /** Whether the grid draws a line at each category. */
+  vertical?: boolean;
+  /** Whether the grid draws a line at each value tick. */
+  horizontal?: boolean;
+  stroke?: string;
+  strokeDasharray?: string;
+};
+
+/** The lines behind the plot. Placed inside a chart, the chart draws it. */
+function CartesianGrid(_props: CartesianGridProps): ReactNode {
+  return null;
+}
+
+/** What every series of a chart takes. */
+type SeriesProps = {
+  /** The key of each row the series draws, such as `desktop`. */
+  dataKey: string;
+  /** The series' name in the tooltip and the legend, `dataKey` when left out. */
+  name?: string;
+  hide?: boolean;
+  /** Whether the series grows in as the chart is first drawn. */
+  isAnimationActive?: boolean;
+  /** How long the entrance takes, in milliseconds. */
+  animationDuration?: number;
+};
+
+type BarProps = SeriesProps & {
+  fill?: string;
+  fillOpacity?: number;
+  /** The corner radius of each bar, one for all four corners or `[topLeft, topRight, bottomRight, bottomLeft]`. */
+  radius?: number | readonly [number, number, number, number];
+};
+
+/** A bar for each row of the chart's data. Placed inside a BarChart, the chart draws it. */
+function Bar(_props: BarProps): ReactNode {
+  return null;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Reading the children
+
+type SeriesKind = 'bar';
+
+interface Series {
+  kind: SeriesKind;
+  props: BarProps;
+}
+
+interface ChartParts {
+  series: Series[];
+  xAxis?: XAxisProps;
+  yAxis?: YAxisProps;
+  grid?: CartesianGridProps;
+  tooltip?: TooltipProps;
+  legend?: LegendProps;
+  other: ReactNode[];
+}
+
+/** Sorts a chart's children into its series and its configuration parts, as Recharts reads them by type. */
+function readParts(children: ReactNode): ChartParts {
+  const parts: ChartParts = { series: [], other: [] };
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) return;
+    const props = child.props as Record<string, unknown>;
+    if (child.type === Bar) parts.series.push({ kind: 'bar', props: props as BarProps });
+    else if (child.type === XAxis) parts.xAxis = props as XAxisProps;
+    else if (child.type === YAxis) parts.yAxis = props as YAxisProps;
+    else if (child.type === CartesianGrid) parts.grid = props as CartesianGridProps;
+    else if (child.type === Tooltip) parts.tooltip = props as TooltipProps;
+    else if (child.type === Legend) parts.legend = props as LegendProps;
+    else parts.other.push(child);
+  });
+  return parts;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Scales
+
+/**
+ * The ticks Recharts gives a value axis from 0 to `max`: `count` of them, a step rounded up to the next
+ * multiple of 5 in its second digit, so 305 over five ticks runs 0, 80, 160, 240, 320.
+ */
+function niceTicks(max: number, count: number): number[] {
+  const intervals = Math.max(1, count - 1);
+  if (!(max > 0)) return Array.from({ length: intervals + 1 }, (_, index) => index);
+  const rough = max / intervals;
+  const digits = Math.floor(Math.log10(rough)) + 1;
+  const unit = 10 ** digits;
+  const step = (Math.ceil(rough / unit / 0.05) * 0.05 * unit).toPrecision(12);
+  return Array.from({ length: intervals + 1 }, (_, index) => Number(step) * index);
+}
+
+function numberAt(datum: ChartDatum | undefined, key: string): number {
+  const value = Number(datum?.[key]);
+  return Number.isFinite(value) ? value : 0;
+}
+
+interface Margin {
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+}
+
+/** Recharts' margin around the plot. */
+const DEFAULT_MARGIN = { top: 5, right: 5, bottom: 5, left: 5 } as const;
+
+/** The plot's box inside the chart, in the svg's pixels. */
+interface Plot {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+/** Where each category sits along the x axis, as a band for bars or a point for lines and areas. */
+interface CategoryScale {
+  /** The left of category `index`'s band, or its point. */
+  start: (index: number) => number;
+  /** The width of a band; 0 for points. */
+  bandwidth: number;
+  /** The middle of category `index`. */
+  center: (index: number) => number;
+  /** The category under `x`, the nearest one for points. */
+  indexAt: (x: number) => number;
+}
+
+function categoryScale(count: number, plot: Plot, banded: boolean): CategoryScale {
+  const indices = Array.from({ length: count }, (_, index) => index);
+  const clamp = (index: number): number => Math.min(count - 1, Math.max(0, index));
+  if (banded) {
+    const band = scaleBand<number>().domain(indices).range([plot.left, plot.right]);
+    const width = band.bandwidth();
+    return {
+      start: (index) => band(index) ?? plot.left,
+      bandwidth: width,
+      center: (index) => (band(index) ?? plot.left) + width / 2,
+      indexAt: (x) => clamp(Math.floor((x - plot.left) / (width || 1))),
+    };
+  }
+  const point = scalePoint<number>().domain(indices).range([plot.left, plot.right]);
+  const step = point.step();
+  return {
+    start: (index) => point(index) ?? plot.left,
+    bandwidth: 0,
+    center: (index) => point(index) ?? plot.left,
+    indexAt: (x) => clamp(Math.round((x - plot.left) / (step || 1))),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Drawing helpers
+
+/** A rectangle with each corner rounded by up to half its shorter side, as Recharts draws a bar. */
+function roundedRect(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number | readonly [number, number, number, number],
+): string {
+  const most = Math.min(width, height) / 2;
+  const [tl, tr, br, bl] = (typeof radius === 'number' ? [radius, radius, radius, radius] : radius).map((value) =>
+    Math.max(0, Math.min(most, value)),
+  );
+  return [
+    `M${x + tl},${y}`,
+    `H${x + width - tr}`,
+    `A${tr},${tr} 0 0 1 ${x + width},${y + tr}`,
+    `V${y + height - br}`,
+    `A${br},${br} 0 0 1 ${x + width - br},${y + height}`,
+    `H${x + bl}`,
+    `A${bl},${bl} 0 0 1 ${x},${y + height - bl}`,
+    `V${y + tl}`,
+    `A${tl},${tl} 0 0 1 ${x + tl},${y}`,
+    'Z',
+  ].join(' ');
+}
+
+/** The width a label of `text` takes at the axes' 12px, near enough to keep labels from running together. */
+function labelWidth(text: string): number {
+  return text.length * 7;
+}
+
+const TICK_FONT_SIZE = 12;
+
+function seriesName(props: SeriesProps): string {
+  return props.name ?? props.dataKey;
+}
+
+function seriesColor(series: Series): string {
+  return series.props.fill ?? DEFAULT_SERIES_COLOR;
+}
+
+function formatValue(value: number | string | undefined): string {
+  if (typeof value === 'number') return value.toLocaleString();
+  return value === undefined ? '' : String(value);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Tooltip and legend drawing
+
+/** Recharts' tooltip when it is given no content: the label over a line per series. */
+function DefaultTooltipContent({ active, payload, label }: TooltipContentProps): ReactNode {
+  if (!active || !payload?.length) return null;
+  return (
+    <View className="border-border bg-background gap-1 rounded-md border px-2.5 py-1.5">
+      {label === undefined ? null : <NativeText className="text-foreground text-xs">{String(label)}</NativeText>}
+      {payload.map((item, index) => (
+        <NativeText key={index} className="text-foreground text-xs">
+          {`${item.name ?? ''} : ${formatValue(item.value)}`}
+        </NativeText>
+      ))}
+    </View>
+  );
+}
+
+/** Recharts' legend when it is given no content: a row of names. */
+function DefaultLegendContent({ payload }: LegendContentProps): ReactNode {
+  return (
+    <View className="flex-row flex-wrap items-center justify-center gap-4">
+      {payload?.map((item, index) => (
+        <NativeText key={index} className="text-foreground text-xs">
+          {item.value}
+        </NativeText>
+      ))}
+    </View>
+  );
+}
+
+function drawContent<Props extends object>(
+  content: ReactElement | ((props: Props) => ReactNode) | undefined,
+  props: Props,
+  fallback: (props: Props) => ReactNode,
+): ReactNode {
+  if (typeof content === 'function') return content(props);
+  if (isValidElement(content)) return cloneElement(content, props as Partial<unknown>);
+  return fallback(props);
+}
+
+interface ActivePoint {
+  index: number;
+  /** Where the press or the pointer is, in the svg's pixels; the plot's middle for a key or a screen reader. */
+  x: number;
+  y: number;
+}
+
+/** Places the tooltip `offset` from the active point, on the side where it fits inside the chart. */
+function TooltipBox({
+  point,
+  size,
+  offset,
+  children,
+}: {
+  point: { x: number; y: number };
+  size: ChartSize;
+  offset: number;
+  children: ReactNode;
+}): ReactNode {
+  const [box, setBox] = useState<ChartSize | undefined>(undefined);
+  const width = box?.width ?? 0;
+  const height = box?.height ?? 0;
+  const right = point.x + offset;
+  const left = right + width > size.width ? Math.max(0, point.x - offset - width) : right;
+  const below = point.y + offset;
+  const top = below + height > size.height ? Math.max(0, point.y - offset - height) : below;
+  return (
+    <View
+      pointerEvents="none"
+      onLayout={(event: LayoutChangeEvent) => {
+        const { width: measuredWidth, height: measuredHeight } = event.nativeEvent.layout;
+        setBox((current) =>
+          current?.width === measuredWidth && current.height === measuredHeight
+            ? current
+            : { width: measuredWidth, height: measuredHeight },
+        );
+      }}
+      style={{ position: 'absolute', left, top, opacity: box === undefined ? 0 : 1 }}
+    >
+      {children}
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Interaction
+
+/** What a chart's surface needs to move its active point. */
+interface Interaction {
+  /** The point under `x`, `y` in the svg's pixels, or `undefined` outside anything that has one. */
+  pointAt: (x: number, y: number) => ActivePoint | undefined;
+  /** The point `index` as a key or a screen reader makes it active. */
+  pointFor: (index: number) => ActivePoint;
+  count: number;
+  /** What a screen reader hears for the whole chart. */
+  summary: string;
+  /** What a screen reader hears for point `index`. */
+  describe: (index: number) => string;
+}
+
+/**
+ * The layer over the plot that a press, a pointer on the web, the arrow keys on the web and a screen
+ * reader's swipes move the active point with. A drag along it moves the point; a scrolling parent may
+ * still take a drag that runs across it.
+ */
+function ChartSurface({
+  interaction,
+  active,
+  onActive,
+  label,
+}: {
+  interaction: Interaction;
+  active: ActivePoint | undefined;
+  onActive: (point: ActivePoint | undefined) => void;
+  label: string | undefined;
+}): ReactNode {
+  const web = Platform.OS === 'web';
+  const fromTouch = (event: GestureResponderEvent): void => {
+    const point = interaction.pointAt(event.nativeEvent.locationX, event.nativeEvent.locationY);
+    if (point !== undefined) onActive(point);
+  };
+  const step = (delta: number): void => {
+    if (interaction.count === 0) return;
+    const index =
+      active === undefined
+        ? delta > 0
+          ? 0
+          : interaction.count - 1
+        : Math.min(interaction.count - 1, Math.max(0, active.index + delta));
+    onActive(interaction.pointFor(index));
+  };
+  const onKeyDown = (event: KeyDownEvent): void => {
+    const moves: Readonly<Record<string, () => void>> = {
+      ArrowRight: () => step(1),
+      ArrowLeft: () => step(-1),
+      Home: () => onActive(interaction.pointFor(0)),
+      End: () => onActive(interaction.pointFor(interaction.count - 1)),
+      Escape: () => onActive(undefined),
+    };
+    const move = moves[event.nativeEvent.key];
+    if (move === undefined || interaction.count === 0) return;
+    event.preventDefault();
+    move();
+  };
+  const onPointerMove = (event: PointerEvent): void => {
+    if (event.nativeEvent.pointerType !== 'mouse') return;
+    const point = interaction.pointAt(event.nativeEvent.offsetX, event.nativeEvent.offsetY);
+    onActive(point);
+  };
+  const described = active === undefined ? undefined : interaction.describe(active.index);
+
+  return (
+    <View
+      testID="chart-surface"
+      accessible
+      focusable
+      {...(web ? { role: 'slider' as const } : { accessibilityRole: 'adjustable' as const })}
+      aria-label={[label, interaction.summary].filter(Boolean).join('. ')}
+      aria-valuemin={0}
+      aria-valuemax={Math.max(0, interaction.count - 1)}
+      aria-valuenow={active?.index ?? 0}
+      aria-valuetext={described ?? interaction.summary}
+      accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+      onAccessibilityAction={(event: AccessibilityActionEvent) => {
+        if (event.nativeEvent.actionName === 'increment') step(1);
+        if (event.nativeEvent.actionName === 'decrement') step(-1);
+      }}
+      onStartShouldSetResponder={() => true}
+      onResponderGrant={fromTouch}
+      onResponderMove={fromTouch}
+      onResponderTerminationRequest={() => true}
+      onPointerMove={onPointerMove}
+      onPointerLeave={(event: PointerEvent) => {
+        if (event.nativeEvent.pointerType === 'mouse') onActive(undefined);
+      }}
+      onKeyDown={onKeyDown}
+      onBlur={() => onActive(undefined)}
+      className="web:outline-none absolute inset-0"
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Cartesian charts
+
+type CartesianChartProps = {
+  data: readonly ChartDatum[];
+  margin?: Margin;
+  /** Recharts' switch for keyboard and screen reader access; this chart always has both. */
+  accessibilityLayer?: boolean;
+  /** The room between two bars of one category, in pixels. */
+  barGap?: number;
+  /** The room around each category's bars, in pixels or as a share of the category such as `"10%"`. */
+  barCategoryGap?: number | `${number}%`;
+  /** What a screen reader hears before the chart's values, such as `Visitors by month`. */
+  title?: string;
+  /** The chart's size where no ResponsiveContainer gives it one. */
+  width?: number;
+  height?: number;
+  children?: ReactNode;
+};
+
+function shareOf(gap: number | `${number}%`, of: number): number {
+  return typeof gap === 'number' ? gap : (Number.parseFloat(gap) / 100) * of;
+}
+
+const KIND_NAMES: Readonly<Record<SeriesKind, string>> = { bar: 'Bar chart' };
+
+/** The svg of a bar chart: the grid, the axes, the cursor and the bars, laid out in `size`. */
+function CartesianChart({
+  kind,
+  data,
+  margin,
+  barGap = 4,
+  barCategoryGap = '10%',
+  title,
+  width,
+  height,
+  children,
+}: CartesianChartProps & { kind: SeriesKind }): ReactNode {
+  const size = useChartSize(width, height);
+  const palette = useContext(ChartPaletteContext);
+  const parts = useMemo(() => readParts(children), [children]);
+  const [legendHeight, setLegendHeight] = useState(0);
+  const series = parts.series.filter((item) => item.props.hide !== true);
+  const animate = series.some((item) => item.props.isAnimationActive !== false);
+  const duration = Math.max(...series.map((item) => item.props.animationDuration ?? ENTRANCE_MS), 0);
+  const progress = useEntrance(animate, duration);
+  const tooltip = parts.tooltip;
+  const [active, setActive] = useState<ActivePoint | undefined>(undefined);
+  const [touched, setTouched] = useState(false);
+
+  if (size === undefined || size.width <= 0 || size.height <= 0) return null;
+
+  const resolve = (value: string | undefined): string | undefined => palette.resolveColor(value);
+  const { top, right, bottom, left } = { ...DEFAULT_MARGIN, ...margin };
+  const xAxisHeight = parts.xAxis !== undefined && parts.xAxis.hide !== true ? (parts.xAxis.height ?? 30) : 0;
+  const yAxisWidth = parts.yAxis !== undefined && parts.yAxis.hide !== true ? (parts.yAxis.width ?? 60) : 0;
+  const legendTop = parts.legend?.verticalAlign === 'top';
+  const plot: Plot = {
+    left: left + yAxisWidth,
+    right: size.width - right,
+    top: top + (legendTop ? legendHeight : 0),
+    bottom: size.height - bottom - xAxisHeight - (legendTop ? 0 : legendHeight),
+  };
+  const banded = kind === 'bar';
+  const x = categoryScale(data.length, plot, banded);
+  const ticks = niceTicks(
+    Math.max(0, ...data.flatMap((datum) => series.map((item) => numberAt(datum, item.props.dataKey)))),
+    parts.yAxis?.tickCount ?? 5,
+  );
+  const y = scaleLinear()
+    .domain([0, ticks[ticks.length - 1] ?? 1])
+    .range([plot.bottom, plot.top]);
+  const categoryKey = parts.xAxis?.dataKey;
+  const categoryOf = (index: number): unknown => (categoryKey === undefined ? index : data[index]?.[categoryKey]);
+
+  const payloadAt = (index: number): TooltipPayloadItem[] =>
+    series.map((item) => ({
+      dataKey: item.props.dataKey,
+      name: seriesName(item.props),
+      value: data[index]?.[item.props.dataKey] as number | string | undefined,
+      color: seriesColor(item),
+      fill: item.props.fill,
+      payload: data[index],
+    }));
+
+  const nameOf = (key: string): string => palette.nameOf(key) ?? key;
+  const describe = (index: number): string =>
+    `${String(categoryOf(index))}: ${series
+      .map((item) => `${nameOf(seriesName(item.props))} ${formatValue(data[index]?.[item.props.dataKey] as number)}`)
+      .join(', ')}`;
+  const pointFor = (index: number): ActivePoint => ({ index, x: x.center(index), y: (plot.top + plot.bottom) / 2 });
+  const interaction: Interaction = {
+    count: data.length,
+    pointAt: (pointX, pointY) =>
+      pointX < plot.left || pointX > plot.right || data.length === 0
+        ? undefined
+        : { index: x.indexAt(pointX), x: pointX, y: pointY },
+    pointFor,
+    summary: data.map((_, index) => describe(index)).join('. '),
+    describe,
+  };
+
+  const shown =
+    active ?? (!touched && tooltip?.defaultIndex !== undefined ? pointFor(tooltip.defaultIndex) : undefined);
+  const activeIndex = shown?.index;
+
+  // Bars of one category share its band less the category gap on each side, with `barGap` between them.
+  const band = x.bandwidth;
+  const categoryGap = shareOf(barCategoryGap, band);
+  const barWidth =
+    series.length === 0 ? 0 : Math.max(0, (band - 2 * categoryGap - (series.length - 1) * barGap) / series.length);
+
+  const xTickFormat = parts.xAxis?.tickFormatter;
+  const xLabels = data.map((_, index) => {
+    const value = categoryOf(index);
+    return xTickFormat === undefined ? String(value) : xTickFormat(value as never, index);
+  });
+  // Recharts leaves a label out where it would run into the one before, keeping the last.
+  const minGap = parts.xAxis?.minTickGap ?? 5;
+  const shownLabels = new Set<number>();
+  let edge = Number.POSITIVE_INFINITY;
+  for (let index = data.length - 1; index >= 0; index -= 1) {
+    const half = labelWidth(xLabels[index] ?? '') / 2;
+    const center = x.center(index);
+    if (center + half + minGap <= edge) {
+      shownLabels.add(index);
+      edge = center - half;
+    }
+  }
+
+  const cursor = tooltip?.cursor ?? true;
+  const cursorProps = typeof cursor === 'object' ? cursor : {};
+  const tickColor = resolve(THEME.tick);
+  const legendPayload: LegendPayloadItem[] = series.map((item) => ({
+    value: seriesName(item.props),
+    dataKey: item.props.dataKey,
+    color: seriesColor(item),
+    type: 'rect',
+  }));
+
+  return (
+    <View style={{ width: size.width, height: size.height }}>
+      <Svg
+        width={size.width}
+        height={size.height}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        {parts.grid === undefined ? null : (
+          <G>
+            {parts.grid.horizontal === false
+              ? null
+              : ticks.map((tick) => (
+                  <SvgLine
+                    key={`h${tick}`}
+                    x1={plot.left}
+                    x2={plot.right}
+                    y1={y(tick)}
+                    y2={y(tick)}
+                    stroke={resolve(parts.grid?.stroke ?? THEME.grid)}
+                    strokeOpacity={parts.grid?.stroke === undefined ? 0.5 : 1}
+                    strokeDasharray={parts.grid?.strokeDasharray}
+                  />
+                ))}
+            {parts.grid.vertical === false
+              ? null
+              : data.map((_, index) => (
+                  <SvgLine
+                    key={`v${index}`}
+                    x1={x.center(index)}
+                    x2={x.center(index)}
+                    y1={plot.top}
+                    y2={plot.bottom}
+                    stroke={resolve(parts.grid?.stroke ?? THEME.grid)}
+                    strokeOpacity={parts.grid?.stroke === undefined ? 0.5 : 1}
+                    strokeDasharray={parts.grid?.strokeDasharray}
+                  />
+                ))}
+          </G>
+        )}
+        {cursor === false || activeIndex === undefined || tooltip === undefined ? null : banded ? (
+          <Rect
+            testID="chart-cursor"
+            x={x.start(activeIndex)}
+            y={plot.top}
+            width={band}
+            height={plot.bottom - plot.top}
+            fill={resolve(cursorProps.fill ?? THEME.cursorFill)}
+          />
+        ) : (
+          <SvgLine
+            testID="chart-cursor"
+            x1={x.center(activeIndex)}
+            x2={x.center(activeIndex)}
+            y1={plot.top}
+            y2={plot.bottom}
+            stroke={resolve(cursorProps.stroke ?? THEME.cursorStroke)}
+            strokeWidth={cursorProps.strokeWidth ?? 1}
+          />
+        )}
+        {parts.xAxis === undefined || parts.xAxis.hide === true ? null : (
+          <G>
+            {parts.xAxis.axisLine === false ? null : (
+              <SvgLine x1={plot.left} x2={plot.right} y1={plot.bottom} y2={plot.bottom} stroke={tickColor} />
+            )}
+            {data.map((_, index) =>
+              shownLabels.has(index) ? (
+                <G key={index}>
+                  {parts.xAxis?.tickLine === false ? null : (
+                    <SvgLine
+                      x1={x.center(index)}
+                      x2={x.center(index)}
+                      y1={plot.bottom}
+                      y2={plot.bottom + 6}
+                      stroke={tickColor}
+                    />
+                  )}
+                  <SvgText
+                    testID={`chart-x-tick-${index}`}
+                    x={x.center(index)}
+                    y={plot.bottom + 6 + (parts.xAxis?.tickMargin ?? 2) + TICK_FONT_SIZE * 0.35}
+                    fontSize={TICK_FONT_SIZE}
+                    fill={tickColor}
+                    textAnchor="middle"
+                    alignmentBaseline="hanging"
+                  >
+                    {xLabels[index]}
+                  </SvgText>
+                </G>
+              ) : null,
+            )}
+          </G>
+        )}
+        {parts.yAxis === undefined || parts.yAxis.hide === true ? null : (
+          <G>
+            {parts.yAxis.axisLine === false ? null : (
+              <SvgLine x1={plot.left} x2={plot.left} y1={plot.top} y2={plot.bottom} stroke={tickColor} />
+            )}
+            {ticks.map((tick, index) => (
+              <G key={tick}>
+                {parts.yAxis?.tickLine === false ? null : (
+                  <SvgLine x1={plot.left - 6} x2={plot.left} y1={y(tick)} y2={y(tick)} stroke={tickColor} />
+                )}
+                <SvgText
+                  testID={`chart-y-tick-${index}`}
+                  x={plot.left - 6 - (parts.yAxis?.tickMargin ?? 2)}
+                  y={y(tick) + TICK_FONT_SIZE * 0.35}
+                  fontSize={TICK_FONT_SIZE}
+                  fill={tickColor}
+                  textAnchor="end"
+                >
+                  {parts.yAxis?.tickFormatter === undefined ? String(tick) : parts.yAxis.tickFormatter(tick, index)}
+                </SvgText>
+              </G>
+            ))}
+          </G>
+        )}
+        {series.map((item, order) => {
+          const props = item.props;
+          const share = props.isAnimationActive === false ? 1 : progress;
+          return (
+            <G key={`${props.dataKey}-${order}`} testID={`chart-series-${props.dataKey}`}>
+              {data.map((datum, index) => {
+                const value = numberAt(datum, props.dataKey);
+                const barTop = y(value * share);
+                const barHeight = Math.abs(y(0) - barTop);
+                if (barHeight === 0 || barWidth === 0) return null;
+                return (
+                  <Path
+                    key={index}
+                    testID={`chart-bar-${props.dataKey}-${index}`}
+                    d={roundedRect(
+                      x.start(index) + categoryGap + order * (barWidth + barGap),
+                      Math.min(barTop, y(0)),
+                      barWidth,
+                      barHeight,
+                      props.radius ?? 0,
+                    )}
+                    fill={resolve(props.fill ?? DEFAULT_SERIES_COLOR)}
+                    fillOpacity={props.fillOpacity}
+                  />
+                );
+              })}
+            </G>
+          );
+        })}
+        {parts.other}
+      </Svg>
+      {tooltip === undefined ? null : (
+        <ChartSurface
+          interaction={interaction}
+          active={shown}
+          label={title ?? KIND_NAMES[kind]}
+          onActive={(point) => {
+            setTouched(true);
+            setActive(point);
+          }}
+        />
+      )}
+      {tooltip === undefined || shown === undefined ? null : (
+        <TooltipBox point={shown} size={size} offset={tooltip.offset ?? 10}>
+          {drawContent(
+            tooltip.content,
+            {
+              active: true,
+              payload: payloadAt(shown.index),
+              label: categoryOf(shown.index),
+              coordinate: { x: shown.x, y: shown.y },
+            },
+            DefaultTooltipContent,
+          )}
+        </TooltipBox>
+      )}
+      {tooltip === undefined ? (
+        <View
+          accessible
+          testID="chart-summary"
+          aria-label={[title ?? KIND_NAMES[kind], interaction.summary].join('. ')}
+          className="absolute inset-0"
+          pointerEvents="none"
+        />
+      ) : null}
+      {parts.legend === undefined ? null : (
+        <View
+          onLayout={(event: LayoutChangeEvent) => setLegendHeight(event.nativeEvent.layout.height)}
+          style={{ position: 'absolute', left: 0, right: 0, ...(legendTop ? { top: 0 } : { bottom: 0 }) }}
+        >
+          {drawContent(
+            parts.legend.content,
+            { payload: legendPayload, verticalAlign: parts.legend.verticalAlign ?? 'bottom' },
+            DefaultLegendContent,
+          )}
+        </View>
+      )}
+    </View>
+  );
+}
+
+/** Bars side by side for each category of `data`. */
+function BarChart(props: CartesianChartProps): ReactNode {
+  return <CartesianChart kind="bar" {...props} />;
+}
+
+export { Bar, BarChart, CartesianGrid, ChartPaletteContext, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis };
+export type {
+  BarProps,
+  CartesianChartProps,
+  CartesianGridProps,
+  ChartDatum,
+  ChartPalette,
+  LegendContentProps,
+  LegendPayloadItem,
+  LegendProps,
+  TooltipContentProps,
+  TooltipPayloadItem,
+  TooltipProps,
+  XAxisProps,
+  YAxisProps,
+};
