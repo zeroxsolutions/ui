@@ -1,0 +1,128 @@
+---
+title: Resizable
+description: Panels side by side or stacked, with handles that drag the room between two of them.
+---
+
+<NativePreview name="resizable-demo" />
+
+## Installation
+
+<InstallCommand name="resizable" />
+
+The CLI writes `components/ui/resizable.tsx`, installs [Direction](/native/components/nativewind/direction) and
+Utils, and adds `react-native-reanimated` and `react-native-worklets`.
+
+## Usage
+
+```tsx
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+```
+
+```tsx
+<ResizablePanelGroup orientation="horizontal">
+  <ResizablePanel defaultSize="25%">...</ResizablePanel>
+  <ResizableHandle />
+  <ResizablePanel defaultSize="75%">...</ResizablePanel>
+</ResizablePanelGroup>
+```
+
+## API reference
+
+A size is a number of px, or a string: a percentage of the group, with or without `%`, unless it ends in `px`,
+`rem`, `em`, `vh` or `vw`. Layouts, `onResize` and the refs give sizes as percentages of the group.
+
+### ResizablePanelGroup
+
+Takes every prop of React Native's `View` except `id`, plus:
+
+| Prop                      | Type                                                                      | Default                    |
+| ------------------------- | ------------------------------------------------------------------------- | -------------------------- |
+| `orientation`             | `'horizontal' \| 'vertical'`                                              | `'horizontal'`             |
+| `defaultLayout`           | `ResizableLayout`                                                         | -                          |
+| `onLayoutChange`          | `(layout: ResizableLayout) => void`                                       | -                          |
+| `onLayoutChanged`         | `(layout: ResizableLayout, meta: { isUserInteraction: boolean }) => void` | -                          |
+| `disabled`                | `boolean`                                                                 | `false`                    |
+| `groupRef`                | `Ref<ResizableGroupImperativeHandle>`                                     | -                          |
+| `elementRef`              | `Ref<View>`                                                               | -                          |
+| `id`                      | `string \| number`                                                        | -                          |
+| `resizeTargetMinimumSize` | `{ coarse: number; fine: number }`                                        | `{ coarse: 20, fine: 10 }` |
+
+`ResizableLayout` is each panel's size by its `id`. `defaultLayout` is used only where it names every panel;
+otherwise each panel starts at its `defaultSize`, and the panels with none share what the others leave.
+`onLayoutChange` runs on each move of a drag, and `onLayoutChanged` once a change is finished, with
+`isUserInteraction` true for a drag released, a key pressed or a screen reader's adjustment. Both run once the
+group has been laid out. `groupRef` holds `getLayout()` and `setLayout(layout)`, which holds the layout to the
+panels' limits and returns what it applied.
+
+### ResizablePanel
+
+Takes every prop of React Native's `View` except `id`, plus:
+
+| Prop                  | Type                                                | Default                    |
+| --------------------- | --------------------------------------------------- | -------------------------- |
+| `defaultSize`         | `number \| string`                                  | an even share              |
+| `minSize`             | `number \| string`                                  | `0%`                       |
+| `maxSize`             | `number \| string`                                  | `100%`                     |
+| `collapsible`         | `boolean`                                           | `false`                    |
+| `collapsedSize`       | `number \| string`                                  | `0%`                       |
+| `disabled`            | `boolean`                                           | `false`                    |
+| `groupResizeBehavior` | `'preserve-relative-size' \| 'preserve-pixel-size'` | `'preserve-relative-size'` |
+| `onResize`            | `(size: ResizablePanelSize, id, previous?) => void` | -                          |
+| `panelRef`            | `Ref<ResizablePanelImperativeHandle>`               | -                          |
+| `elementRef`          | `Ref<View>`                                         | -                          |
+| `id`                  | `string \| number`                                  | -                          |
+
+`className`, `style` and `children` go to a box inside the panel that fills it; the other props go to the box
+the group sizes. A collapsible panel dragged below half its `minSize` snaps to `collapsedSize`, and opens again
+once a drag passes half way back. A disabled panel keeps its size whatever a handle does. `onResize` gets the
+size as `{ asPercentage, inPixels }`, the panel's `id`, and the size before. `panelRef` holds `collapse()`,
+`expand()`, `isCollapsed()`, `getSize()` and `resize(size)`.
+
+### ResizableHandle
+
+Takes every prop of React Native's `View` except `id` and `role`, plus:
+
+| Prop                 | Type               | Default |
+| -------------------- | ------------------ | ------- |
+| `withHandle`         | `boolean`          | `false` |
+| `disabled`           | `boolean`          | `false` |
+| `disableDoubleClick` | `boolean`          | `false` |
+| `elementRef`         | `Ref<View>`        | -       |
+| `id`                 | `string \| number` | -       |
+
+A drag on the handle moves the room between the panels either side of it, as far as their `minSize` and
+`maxSize` allow and on through the panels beyond. A scrolling parent does not take the drag from it. A double
+tap or double click resets the panel either side that has a `defaultSize` to it.
+
+The handle is announced as adjustable, valued at the size of the panel before it, from the smallest to the
+largest that panel can be made, and a screen reader's swipe up or down grows or shrinks it by 5%. On the web it
+is a focusable separator: the arrow keys along the group move it 5%, Home and End as far as it goes, Enter
+collapses or opens a collapsible panel before it, and F6 moves focus to the group's next handle, Shift+F6 to the
+one before.
+
+## Right to left
+
+When [Direction](/native/components/nativewind/direction) says text reads right to left, a horizontal group runs
+from the right: the first panel is at the right edge. On a device it does so even where the system lays the app
+out the other way. The arrow keys stay as upstream's: the right arrow grows the panel before the handle, which
+moves the handle left. A vertical group is unchanged.
+
+## Differences from upstream
+
+- Built on React Native's touch responder and Reanimated, where upstream is react-resizable-panels, which reads
+  DOM pointer events and sizes.
+- A drag in a group running right to left follows the finger. Upstream measures a drag from the left whatever
+  the direction, so its handle moves away from the pointer there.
+- On a device the handle is announced as adjustable and its value is read as text, such as "25%"; without it
+  iOS reads the value as a share of the handle's range rather than the panel's size. The web keeps upstream's
+  separator.
+- The handle takes touches `resizeTargetMinimumSize.coarse` px wide on a device, around a 1px line; on the web
+  it takes `fine` px for a mouse and `coarse` for a finger, as upstream does.
+- `rem` and `em` are read as 16px: React Native has no root font size to read them from. A size in px is read
+  against the group inside its border.
+- `disableCursor` is left out: a device draws no cursor, and React Native's styles take no resize cursor on the
+  web. `data-panel`, `data-separator` and the other `data-*` attributes are left out too, since a View carries
+  none; `id` goes to `nativeID`.
+- The types are named `ResizableLayout`, `ResizablePanelSize`, `ResizableGroupImperativeHandle` and
+  `ResizablePanelImperativeHandle`, where upstream's demos import react-resizable-panels' `Layout` and its
+  handle types.

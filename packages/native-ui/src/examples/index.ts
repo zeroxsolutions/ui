@@ -46,6 +46,7 @@ import { PasswordStrengthDemo } from './password-strength-demo';
 import { PopoverDemo } from './popover-demo';
 import { ProgressDemo } from './progress-demo';
 import { RadioGroupDemo } from './radio-group-demo';
+import { ResizableDemo } from './resizable-demo';
 import { ScrollAreaDemo } from './scroll-area-demo';
 import { SelectDemo } from './select-demo';
 import { SeparatorDemo } from './separator-demo';
@@ -110,6 +111,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'popover-demo': PopoverDemo,
   'progress-demo': ProgressDemo,
   'radio-group-demo': RadioGroupDemo,
+  'resizable-demo': ResizableDemo,
   'scroll-area-demo': ScrollAreaDemo,
   'select-demo': SelectDemo,
   'separator-demo': SeparatorDemo,

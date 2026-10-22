@@ -51,6 +51,7 @@
     "aspect-ratio",
     "scroll-area",
     "carousel",
+    "resizable",
     "---Disclosure---",
     "accordion",
     "collapsible",
