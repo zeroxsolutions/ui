@@ -64,9 +64,11 @@ first; when the slides are too few to fill the view and one more, they do not lo
 scroll to a snap takes 300ms, and none when the system asks for reduced motion.
 
 `setApi` is called with an api shaped as Embla's: `scrollPrev`, `scrollNext`, `scrollTo(index)`,
-`canScrollPrev`, `canScrollNext`, `selectedScrollSnap`, `previousScrollSnap`, `scrollSnapList` and `on` and
-`off` for the `init`, `reInit`, `select`, `settle`, `pointerDown` and `pointerUp` events, each listener called
-with the api and the event's name:
+`canScrollPrev`, `canScrollNext`, `selectedScrollSnap`, `previousScrollSnap`, `scrollSnapList`,
+`scrollProgress`, `slidesInView`, `slidesNotInView` and `on` and `off` for the `init`, `reInit`, `resize`,
+`select`, `settle`, `pointerDown` and `pointerUp` events, each listener called with the api and the event's
+name. A new layout, such as a turned phone, fires `reInit` and then `resize`; `settle` fires when a scroll
+ends, at once after a jump or with reduced motion:
 
 ```tsx
 const [api, setApi] = useState<CarouselApi>();
@@ -106,7 +108,12 @@ Inside a Carousel, returns its `api`, `opts`, `orientation`, `scrollPrev`, `scro
 
 - Built on React Native views moved by Reanimated, where upstream is Embla, which scrolls DOM nodes. `opts`
   takes the Embla options above, and `plugins` is left out: Embla's plugins drive Embla's own engine.
-- The api has the methods and events listed above, out of Embla's larger set.
+- The api leaves out Embla's `rootNode`, `containerNode`, `slideNodes` and `slideRegistry`, which hand out DOM
+  nodes React Native does not have, and `internalEngine` and `plugins`, which are Embla's engine. The `scroll`
+  event is left out because the scroll runs on the UI thread, and a listener on each frame would call into
+  JavaScript on every one. `reInit` and `destroy` are left out because React owns both: the carousel follows a
+  new `opts` and every new layout itself, and unmounting it destroys it. `emit` and the `slidesChanged` and
+  `slideFocus` events are not ported, though the platform does not stop them.
 - The previous and next buttons each sit in a View that places them, so their `className` reaches the button
   and not its place; React Native has no percentage translate to centre an absolute child by.
 - useCarousel returns no `carouselRef`, which only Embla reads.

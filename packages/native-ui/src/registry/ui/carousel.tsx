@@ -26,7 +26,7 @@ import { Icon } from './icon';
 // the classes translated for the target engine.
 
 /** What the carousel tells its listeners about. */
-type CarouselEvent = 'init' | 'reInit' | 'select' | 'settle' | 'pointerDown' | 'pointerUp';
+type CarouselEvent = 'init' | 'reInit' | 'resize' | 'select' | 'settle' | 'pointerDown' | 'pointerUp';
 
 type CarouselListener = (api: CarouselApi, event: CarouselEvent) => void;
 
@@ -46,6 +46,12 @@ interface CarouselApi {
   previousScrollSnap: () => number;
   /** Each snap as a fraction of the scroll, from 0 to 1. */
   scrollSnapList: () => number[];
+  /** How far the carousel has scrolled, from 0 to 1, past either end while a swipe pulls it there. */
+  scrollProgress: () => number;
+  /** The indexes of the slides any part of which is in the view. */
+  slidesInView: () => number[];
+  /** The indexes of the slides wholly out of the view. */
+  slidesNotInView: () => number[];
   /** Calls `listener` on each `event`; returns the api, so calls chain. */
   on: (event: CarouselEvent, listener: CarouselListener) => CarouselApi;
   off: (event: CarouselEvent, listener: CarouselListener) => CarouselApi;
@@ -197,8 +203,18 @@ function Carousel({
   const maxScroll = snaps.length === 0 ? 0 : (loopLength > 0 ? loopLength : snaps[lastSnap]) || 1;
 
   // The api is one object for the carousel's life, which reads the latest state through this ref.
-  const latest = useRef({ index, snaps, loopLength, canScrollPrev, canScrollNext, maxScroll, reduced });
-  latest.current = { index, snaps, loopLength, canScrollPrev, canScrollNext, maxScroll, reduced };
+  const latest = useRef({
+    index,
+    snaps,
+    loopLength,
+    canScrollPrev,
+    canScrollNext,
+    maxScroll,
+    reduced,
+    slides,
+    rowSize,
+  });
+  latest.current = { index, snaps, loopLength, canScrollPrev, canScrollNext, maxScroll, reduced, slides, rowSize };
 
   const [{ api, emit, scrollToSnap }] = useState(() => {
     const emitEvent = (event: CarouselEvent): void => {
@@ -207,7 +223,7 @@ function Carousel({
 
     /** Moves to the snap at `target`; in a loop `direction` says which way round, the shorter way when left out. */
     const toSnap = (target: number, jump = false, direction?: 1 | -1): void => {
-      const { snaps: list, loopLength: length, reduced: still, index: from } = latest.current;
+      const { snaps: list, loopLength: length, reduced: reducedNow, index: from } = latest.current;
       if (list.length === 0) return;
       const to = length > 0 ? wrap(target, list.length) : Math.min(list.length - 1, Math.max(0, target));
       let destination = list[to];
@@ -220,7 +236,8 @@ function Carousel({
       }
       heading.current = destination;
       cancelAnimation(scroll);
-      if (jump || still) scroll.value = destination;
+      const still = jump || reducedNow;
+      if (still) scroll.value = destination;
       else {
         scroll.value = withTiming(destination, SCROLL_MOTION, (finished) => {
           if (finished === true) scheduleOnRN(emitEvent, 'settle');
@@ -232,6 +249,20 @@ function Carousel({
         setSelected(to);
         emitEvent('select');
       }
+      if (still) emitEvent('settle');
+    };
+
+    /** Whether each slide has any part in the view, by its index. */
+    const inView = (): boolean[] => {
+      const { slides: list, rowSize: size, loopLength: length } = latest.current;
+      if (size === undefined || list.length === 0) return list.map(() => false);
+      const at = length > 0 ? wrap(scroll.value, length) : scroll.value;
+      return list.map(({ offset, size: slide }) => {
+        const start = offset - list[0].offset - at;
+        // In a loop a slide behind the view is also drawn after the last one, a loop's length on.
+        const starts = length > 0 ? [start, start + length, start - length] : [start];
+        return starts.some((edge) => edge < size && edge + slide > 0);
+      });
     };
 
     const self: CarouselApi = {
@@ -247,6 +278,12 @@ function Carousel({
       selectedScrollSnap: () => latest.current.index,
       previousScrollSnap: () => previous.current,
       scrollSnapList: () => latest.current.snaps.map((snap) => snap / latest.current.maxScroll),
+      scrollProgress: () => {
+        const { loopLength: length, maxScroll: most } = latest.current;
+        return length > 0 ? wrap(scroll.value, length) / length : scroll.value / most;
+      },
+      slidesInView: () => inView().flatMap((shown, i) => (shown ? [i] : [])),
+      slidesNotInView: () => inView().flatMap((shown, i) => (shown ? [] : [i])),
       on: (event, listener) => {
         const set = listeners.current.get(event) ?? new Set();
         set.add(listener);
@@ -274,7 +311,10 @@ function Carousel({
     cancelAnimation(scroll);
     heading.current = list[Math.min(latest.current.index, list.length - 1)];
     scroll.value = heading.current;
-    emit(initialised.current ? 'reInit' : 'init');
+    if (initialised.current) {
+      emit('reInit');
+      emit('resize');
+    } else emit('init');
     initialised.current = true;
   }, [snapKey, scroll, emit]);
 

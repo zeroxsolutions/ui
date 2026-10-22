@@ -74,6 +74,7 @@ describe('Carousel', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('names its previous and next buttons, and disables previous on the first slide', async () => {
@@ -122,6 +123,66 @@ describe('Carousel', () => {
     expect(api?.canScrollNext()).toBe(true);
     expect(onSelect).toHaveBeenCalledWith(api, 'select');
     expect(await translation()).toBe(-900);
+  });
+
+  it('settles at once after a jump', async () => {
+    let api: CarouselApi | undefined;
+    const onSettle = jest.fn();
+    await render(
+      <Slides
+        setApi={(given) => {
+          api = given;
+          given?.on('settle', onSettle);
+        }}
+      />,
+    );
+    await layOut(300);
+
+    await act(() => api?.scrollTo(2, true));
+
+    expect(onSettle).toHaveBeenCalledTimes(1);
+    expect(onSettle).toHaveBeenCalledWith(api, 'settle');
+  });
+
+  it('reports its progress and the slides in view', async () => {
+    let api: CarouselApi | undefined;
+    await render(<Slides opts={{ align: 'start' }} setApi={(given) => (api = given)} />);
+    await layOut(300, 120);
+
+    expect(api?.scrollProgress()).toBe(0);
+    expect(api?.slidesInView()).toEqual([0, 1, 2]);
+    expect(api?.slidesNotInView()).toEqual([3, 4]);
+
+    await act(() => api?.scrollTo(1, true));
+
+    expect(api?.scrollProgress()).toBe(0.4);
+    expect(api?.slidesInView()).toEqual([1, 2, 3]);
+  });
+
+  it('tells its listeners when a new layout reinitialises it, and that it resized', async () => {
+    let api: CarouselApi | undefined;
+    const events: string[] = [];
+    await render(
+      <Slides
+        setApi={(given) => {
+          api = given;
+          given?.on('init', (_, event) => events.push(event));
+          given?.on('reInit', (_, event) => events.push(event));
+          given?.on('resize', (_, event) => events.push(event));
+        }}
+      />,
+    );
+    await layOut(300);
+    expect(events[0]).toBe('init');
+    events.length = 0;
+
+    // A turned phone: the view widens and the slides stay as they were.
+    await fireEvent(screen.getByTestId('row'), 'layout', {
+      nativeEvent: { layout: { x: -16, y: 0, width: 400, height: 100 } },
+    });
+
+    expect(api).toBeDefined();
+    expect(events).toEqual(['reInit', 'resize']);
   });
 
   it('follows a swipe and settles on the next slide', async () => {
