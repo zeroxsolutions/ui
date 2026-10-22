@@ -169,8 +169,9 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 - `Label`, inside a `Pie` or a `PolarRadiusAxis`: `content`, given `{ viewBox }` with the chart's `cx`, `cy` and
   radii, or `value`, drawn in the middle.
 - `Text`: react-native-svg's text props, such as `x`, `y`, `textAnchor` and `fontSize`, plus `verticalAnchor` and
-  `fill`. Its `fontWeight` picks the theme's Geist face for that weight, such as `Geist_700Bold` for `bold`,
-  unless it is given a `fontFamily`; the axes' labels are set in `Geist_400Regular`.
+  `fill`. It is set in the theme's `Geist_400Regular`, as the axes' labels are; a weight is set by its face, such
+  as `fontFamily="Geist_700Bold"` where upstream's demos use `font-bold`, since a device picks a custom font's
+  weight by its family.
 
 ## Differences from upstream
 

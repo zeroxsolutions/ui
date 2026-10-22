@@ -1533,26 +1533,17 @@ type TextProps = Omit<ComponentProps<typeof SvgText>, 'fill'> & {
   fill?: string;
 };
 
-/** The theme's Geist face for a font weight, such as `bold` or `600`, since a device picks the weight by family. */
-function geistFace(weight: TextProps['fontWeight']): string {
-  const value = weight === 'bold' ? 700 : Number(weight ?? 400);
-  if (value >= 700) return 'Geist_700Bold';
-  if (value >= 600) return 'Geist_600SemiBold';
-  if (value >= 500) return 'Geist_500Medium';
-  return GEIST_REGULAR;
-}
-
 /**
- * Text inside a chart's svg, in a colour from the chart's palette and the theme's face for its `fontWeight`,
- * taking react-native-svg's text props such as `textAnchor` and `fontSize`.
+ * Text inside a chart's svg, in a colour from the chart's palette and the theme's regular Geist face, taking
+ * react-native-svg's text props such as `textAnchor` and `fontSize`. A weight is set by its face, such as
+ * `fontFamily="Geist_700Bold"`, since a device picks a custom font's weight by its family.
  */
 function Text({
   y,
   verticalAnchor = 'end',
   fill,
   fontSize = 14,
-  fontWeight,
-  fontFamily,
+  fontFamily = GEIST_REGULAR,
   ...props
 }: TextProps): ReactNode {
   const palette = useContext(ChartPaletteContext);
@@ -1561,8 +1552,7 @@ function Text({
       y={Number(y ?? 0) + VERTICAL_SHIFT[verticalAnchor] * Number(fontSize)}
       fill={palette.resolveColor(fill ?? 'var(--foreground)')}
       fontSize={fontSize}
-      // The face carries the weight; a weight on it too would have the browser thicken a bold face again.
-      {...(fontFamily === undefined ? { fontFamily: geistFace(fontWeight) } : { fontFamily, fontWeight })}
+      fontFamily={fontFamily}
       {...props}
     />
   );

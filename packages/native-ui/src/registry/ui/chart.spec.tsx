@@ -628,14 +628,14 @@ describe('Chart', () => {
       expect(typeof text === 'object' ? text.props.x : undefined).toEqual([160]);
     });
 
-    it("sets a label's text in the theme's Geist face for its weight", async () => {
+    it("sets a label's text in the theme's regular Geist face, or the face it is given", async () => {
       await render(
         <PieChart width={320} height={200}>
           <Pie data={browserData} dataKey="visitors" isAnimationActive={false}>
             <Label
               content={({ viewBox }) => (
                 <>
-                  <ChartText testID="total" x={viewBox.cx} y={viewBox.cy} fontWeight="bold">
+                  <ChartText testID="total" x={viewBox.cx} y={viewBox.cy} fontFamily="Geist_700Bold">
                     762
                   </ChartText>
                   <ChartText testID="caption" x={viewBox.cx} y={viewBox.cy}>

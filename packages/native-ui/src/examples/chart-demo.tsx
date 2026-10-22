@@ -434,7 +434,7 @@ function ChartPieExample(): ReactNode {
                       verticalAnchor="middle"
                       fill="var(--foreground)"
                       fontSize={30}
-                      fontWeight="bold"
+                      fontFamily="Geist_700Bold"
                     >
                       {totalVisitors.toLocaleString()}
                     </ChartText>
@@ -507,7 +507,7 @@ function ChartRadialExample(): ReactNode {
                       verticalAnchor="middle"
                       fill="var(--foreground)"
                       fontSize={36}
-                      fontWeight="bold"
+                      fontFamily="Geist_700Bold"
                     >
                       {radialChartData[0]?.visitors.toLocaleString()}
                     </ChartText>
