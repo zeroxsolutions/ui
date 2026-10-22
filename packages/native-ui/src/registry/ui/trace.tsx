@@ -14,6 +14,7 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from '
 import { scheduleOnRN } from 'react-native-worklets';
 import { useFocusVisible } from '../lib/focus-visible';
 import { usePulse, useReducedMotion } from '../lib/motion';
+import { asText } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './collapsible';
 import { Icon, IconClassContext } from './icon';
@@ -46,11 +47,6 @@ const TraceLineStatusContext = createContext<TraceStatus | undefined>(undefined)
 
 /** Whether a TraceIcon comes after the TraceTitle of its line, which pulls it back towards the title. */
 const TraceAfterTitleContext = createContext(false);
-
-/** `node` with each string or number in it drawn as a Text, which a View cannot hold bare. */
-function asText(node: ReactNode): ReactNode {
-  return typeof node === 'string' || typeof node === 'number' ? <Text>{node}</Text> : node;
-}
 
 /**
  * The steps an agent took, one under another: a TraceLine for each, or a TraceCollapsible for a step whose

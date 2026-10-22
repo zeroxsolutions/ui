@@ -1,5 +1,4 @@
 import {
-  Children,
   createContext,
   useCallback,
   useContext,
@@ -11,8 +10,9 @@ import {
 } from 'react';
 import { View } from 'react-native';
 import { MessageContext, useMessage } from '../lib/message-context';
+import { asText } from '../lib/text-children';
 import { cn } from '../lib/utils';
-import { Text, TextClassContext } from './text';
+import { TextClassContext } from './text';
 
 // A `cn-<slot>` token stands for that slot's view classes, `cn-<slot>/text` for its text classes, and
 // `cn-<slot>@<state>` for the classes behind that state, such as `@slot=message-footer` on the avatar of a
@@ -95,16 +95,6 @@ function MessageContent({ className, ...props }: ComponentProps<typeof View>): R
       className={cn('min-w-0 flex-1 flex-col cn-message-content', align === 'end' && 'items-end', className)}
       {...props}
     />
-  );
-}
-
-/** `children` set in one Text when they are only text, which a View cannot hold bare. */
-function asText(children: ReactNode): ReactNode {
-  const parts = Children.toArray(children);
-  return parts.length > 0 && parts.every((part) => typeof part === 'string' || typeof part === 'number') ? (
-    <Text>{children}</Text>
-  ) : (
-    children
   );
 }
 

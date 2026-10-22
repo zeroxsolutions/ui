@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from 'react';
 import { AccessibilityInfo, Platform, View } from 'react-native';
+import { textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { IconClassContext } from './icon';
 import { Text, TextClassContext } from './text';
@@ -103,14 +104,6 @@ function MarkerIcon({ className, ...props }: ComponentProps<typeof View>): React
       <View aria-hidden className={cn('shrink-0 items-center justify-center cn-marker-icon', className)} {...props} />
     </IconClassContext.Provider>
   );
-}
-
-/** The text `node` reads as, the text of nested elements included. */
-function textOf(node: ReactNode): string {
-  if (typeof node === 'string' || typeof node === 'number') return String(node);
-  if (Array.isArray(node)) return node.map(textOf).join('');
-  if (isValidElement<{ children?: ReactNode }>(node)) return textOf(node.props.children);
-  return '';
 }
 
 /**

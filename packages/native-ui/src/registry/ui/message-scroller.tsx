@@ -1,7 +1,6 @@
 import { ArrowDown } from 'lucide-react-native';
 import {
   createContext,
-  isValidElement,
   useCallback,
   useContext,
   useEffect,
@@ -25,6 +24,7 @@ import {
 } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useReducedMotion } from '../lib/motion';
+import { textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { Icon } from './icon';
@@ -142,14 +142,6 @@ interface ScrollerConfig {
   scrollEdgeThreshold: number;
   scrollPreviousItemPeek: number;
   scrollMargin: number;
-}
-
-/** The text `node` reads as, the text of nested elements included. */
-function textOf(node: ReactNode): string {
-  if (typeof node === 'string' || typeof node === 'number') return String(node);
-  if (Array.isArray(node)) return node.map(textOf).join(' ');
-  if (isValidElement<{ children?: ReactNode }>(node)) return textOf(node.props.children);
-  return '';
 }
 
 /**
@@ -868,7 +860,7 @@ function MessageScrollerItem({
 }: MessageScrollerItemProps): ReactNode {
   const engine = useEngine('MessageScrollerItem');
   const key = useId();
-  const text = textOf(children);
+  const text = textOf(children, ' ');
 
   useLayoutEffect(() => {
     engine.registerItem(key, messageId, scrollAnchor, text);

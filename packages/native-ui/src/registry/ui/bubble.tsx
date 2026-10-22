@@ -15,8 +15,9 @@ import {
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { useFocusVisible } from '../lib/focus-visible';
 import { useMessage } from '../lib/message-context';
+import { asText } from '../lib/text-children';
 import { cn } from '../lib/utils';
-import { Text, TextClassContext } from './text';
+import { TextClassContext } from './text';
 
 // A `cn-<slot>` token stands for that slot's view classes, `cn-<slot>/text` for its text classes, and
 // `cn-<slot>@<state>` for the classes behind that state, such as `@part=bubble-content`, the classes a
@@ -111,17 +112,6 @@ function Bubble({ variant, align = 'start', className, ...props }: BubbleProps):
         {...props}
       />
     </BubbleContext.Provider>
-  );
-}
-
-/** `children` with a run of strings and numbers set in one Text, which a View cannot hold bare. */
-function asText(children: ReactNode): ReactNode {
-  if (typeof children === 'function') return children;
-  const parts = Children.toArray(children);
-  return parts.length > 0 && parts.every((part) => typeof part === 'string' || typeof part === 'number') ? (
-    <Text>{children}</Text>
-  ) : (
-    children
   );
 }
 

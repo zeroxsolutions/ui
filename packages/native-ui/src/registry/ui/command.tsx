@@ -1,7 +1,6 @@
 import { Check, Search } from 'lucide-react-native';
 import {
   createContext,
-  isValidElement,
   useContext,
   useEffect,
   useId,
@@ -13,6 +12,7 @@ import {
 } from 'react';
 import { Platform, Pressable, ScrollView, View, type Role, type TextInputKeyPressEvent } from 'react-native';
 import { commandScore } from '../lib/command-score';
+import { textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog';
 import type { DialogProps } from './dialog';
@@ -66,14 +66,6 @@ function useCommand(part: string): CommandState {
   const command = useContext(CommandContext);
   if (command === undefined) throw new Error(`${part} must be inside a Command`);
   return command;
-}
-
-/** The text a node draws, which an item with no `value` is searched by, as upstream's reads it. */
-function textOf(node: ReactNode): string {
-  if (typeof node === 'string' || typeof node === 'number') return String(node);
-  if (Array.isArray(node)) return node.map(textOf).join('');
-  if (isValidElement<{ children?: ReactNode }>(node)) return textOf(node.props.children);
-  return '';
 }
 
 /** The web's `document`, through which the highlighted item is scrolled into the list's view. */

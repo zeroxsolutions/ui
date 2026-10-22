@@ -912,6 +912,7 @@
       "dependencies": ["lucide-react-native"],
       "registryDependencies": [
         "@zui/utils",
+        "@zui/text-children",
         "@zui/command-score",
         "@zui/dialog",
         "@zui/input-group",
@@ -1113,7 +1114,7 @@
       "title": "Marker",
       "description": "A line in a conversation that is not a message: a status announced as it changes, a system note, a row ruled underneath, or a label between two lines.",
       "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "registryDependencies": ["@zui/utils", "@zui/text-children", "@zui/text", "@zui/icon"],
       "files": [
         {
           "path": "src/registry/ui/marker.tsx",
@@ -1126,7 +1127,7 @@
       "type": "registry:ui",
       "title": "Message",
       "description": "One message in a conversation: an avatar beside its bubbles, with a header and a footer, on either side of the row.",
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/message-context"],
+      "registryDependencies": ["@zui/utils", "@zui/text-children", "@zui/text", "@zui/message-context"],
       "files": [
         {
           "path": "src/registry/ui/message.tsx",
@@ -1142,6 +1143,19 @@
       "files": [
         {
           "path": "src/registry/lib/focus-visible.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "text-children",
+      "type": "registry:lib",
+      "title": "Text children",
+      "description": "textOf, which reads the text a node draws, nested elements included, and asText, which sets children that are only strings and numbers in one Text, which a View cannot hold bare.",
+      "registryDependencies": ["@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/lib/text-children.tsx",
           "type": "registry:lib"
         }
       ]
@@ -1164,7 +1178,13 @@
       "title": "Bubble",
       "description": "A message's framed surface in seven variants, at the start or end of the row, with reactions overlapping its edge and content that can take a press.",
       "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/message-context", "@zui/focus-visible"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/text",
+        "@zui/message-context",
+        "@zui/focus-visible"
+      ],
       "files": [
         {
           "path": "src/registry/ui/bubble.tsx",
@@ -1178,7 +1198,7 @@
       "title": "Message scroller",
       "description": "A conversation's scrolling transcript that opens at its end or its last turn, brings each new turn near the top, follows a streamed reply while the reader is at the end, keeps its place as history loads above, and has a button and hooks to jump to either end or to any message.",
       "dependencies": ["lucide-react-native", "react-native-reanimated"],
-      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/motion"],
+      "registryDependencies": ["@zui/utils", "@zui/text-children", "@zui/button", "@zui/icon", "@zui/motion"],
       "files": [{ "path": "src/registry/ui/message-scroller.tsx", "type": "registry:ui" }]
     },
     {
@@ -1189,6 +1209,7 @@
       "dependencies": ["lucide-react-native"],
       "registryDependencies": [
         "@zui/utils",
+        "@zui/text-children",
         "@zui/text",
         "@zui/icon",
         "@zui/button",
@@ -1205,6 +1226,7 @@
       "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-worklets"],
       "registryDependencies": [
         "@zui/utils",
+        "@zui/text-children",
         "@zui/text",
         "@zui/icon",
         "@zui/collapsible",

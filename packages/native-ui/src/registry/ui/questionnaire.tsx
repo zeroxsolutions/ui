@@ -2,7 +2,6 @@ import { Check } from 'lucide-react-native';
 import {
   Children,
   createContext,
-  isValidElement,
   useCallback,
   useContext,
   useEffect,
@@ -18,6 +17,7 @@ import {
 } from 'react';
 import { AccessibilityInfo, Platform, Pressable, View, type ViewStyle } from 'react-native';
 import { useFocusVisible } from '../lib/focus-visible';
+import { textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { Icon, IconClassContext } from './icon';
@@ -125,14 +125,6 @@ function useItem(part: string): QuestionnaireItemContextValue {
   const item = useContext(QuestionnaireItemContext);
   if (!item) throw new Error(`${part} must be used within a QuestionnaireItem.`);
   return item;
-}
-
-/** The text `node` reads as, the text of nested elements included. */
-function textOf(node: ReactNode): string {
-  if (typeof node === 'string' || typeof node === 'number') return String(node);
-  if (Array.isArray(node)) return node.map(textOf).join('');
-  if (isValidElement<{ children?: ReactNode }>(node)) return textOf(node.props.children);
-  return '';
 }
 
 function shortcutKeys(mode: QuestionnaireShortcutMode | null): string[] {
@@ -695,7 +687,12 @@ function QuestionnaireChoice({
       <Pressable
         role={radio ? 'radio' : 'checkbox'}
         // Named by its label and description alone, not by the shortcut key drawn beside them.
-        aria-label={Children.toArray(children).map(textOf).filter(Boolean).join(' ') || undefined}
+        aria-label={
+          Children.toArray(children)
+            .map((child) => textOf(child))
+            .filter(Boolean)
+            .join(' ') || undefined
+        }
         aria-checked={checked}
         aria-disabled={disabled || undefined}
         accessibilityState={{ checked, disabled }}
