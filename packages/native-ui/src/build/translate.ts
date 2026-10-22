@@ -139,12 +139,13 @@ const COMMAND_GROUP_HEADING = '**:[[cmdk-group-heading]]';
 
 /**
  * A state of the control inside the part, of a direct child the part holds, such as an icon in an
- * Alert or a group in a ButtonGroup, of a part before it, such as the legend a FieldDescription
- * follows or the title a TraceIcon comes after, or of the part it sits straight inside, such as CodeBlockActions
- * floating in a CodeBlock rather than sitting in its header, which upstream selects with an arbitrary selector the
- * dropped rules would otherwise remove or not read, and which the component learns from its control, its children
- * or its parent. A questionnaire choice is ringed while the hidden input it holds on the web has keyboard focus,
- * which the native choice, being the control itself, knows as its own focus.
+ * Alert or a group in a ButtonGroup, of a part before it, such as the legend a FieldDescription follows or the
+ * title a TraceIcon comes after, of a part after it, such as the description whose absence spaces a
+ * QuestionnaireTitle from the choices, or of the part it sits straight inside, such as CodeBlockActions floating in
+ * a CodeBlock rather than sitting in its header, which upstream selects with an arbitrary selector the dropped rules
+ * would otherwise remove or not read, and which the component learns from its control, its children or its parent.
+ * A questionnaire choice is ringed while the hidden input it holds on the web has keyboard focus, which the native
+ * choice, being the control itself, knows as its own focus.
  */
 const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
   Object.entries({
@@ -155,6 +156,7 @@ const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     '[[data-variant=legend]+&]': 'after=legend',
     '[[data-slot=trace-title]~&]': 'after=trace-title',
     'has-[>input:focus-visible]': 'focused',
+    '[&:not(:has(~[data-slot=questionnaire-description]))]': 'description=none',
     '[[data-slot=code-block]>&]': 'parent=code-block',
     [COMMAND_GROUP_HEADING]: 'part=group-heading',
   }),

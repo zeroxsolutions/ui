@@ -1408,6 +1408,15 @@ describe('translateClasses for the questionnaire and trace', () => {
   );
 
   it.each(STYLE_ENGINES)(
+    'spaces a questionnaire title from the choices when no description follows it, as the state description=none, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-questionnaire-title', engine, 'view', 'description=none').classes).toEqual([
+        style === 'vega' ? 'mb-5' : 'mb-4',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
     'rings a questionnaire choice while its control holds keyboard focus, as the state focused, for %s in %s',
     (engine, style) => {
       expect(slot(style, 'cn-questionnaire-choice', engine, 'view', 'focused').classes).toEqual(['border-ring']);

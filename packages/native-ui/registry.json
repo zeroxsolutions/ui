@@ -1182,6 +1182,22 @@
       "files": [{ "path": "src/registry/ui/message-scroller.tsx", "type": "registry:ui" }]
     },
     {
+      "name": "questionnaire",
+      "type": "registry:ui",
+      "title": "Questionnaire",
+      "description": "A form that asks one question at a time: progress, choices announced as radios or checkboxes, a free-text answer, an error for a required question left unanswered, and steps back, forward, skipped and submitted.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text",
+        "@zui/icon",
+        "@zui/button",
+        "@zui/input",
+        "@zui/focus-visible"
+      ],
+      "files": [{ "path": "src/registry/ui/questionnaire.tsx", "type": "registry:ui" }]
+    },
+    {
       "name": "trace",
       "type": "registry:ui",
       "title": "Trace",

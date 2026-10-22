@@ -1,0 +1,184 @@
+---
+title: Questionnaire
+description: A form that asks one question at a time, with choices, a free-text answer, validation and steps.
+---
+
+<NativePreview name="questionnaire-demo" />
+
+## Installation
+
+<InstallCommand name="questionnaire" />
+
+The CLI writes `components/ui/questionnaire.tsx`, installs [Button](/native/components/nativewind/button),
+[Input](/native/components/nativewind/input), [Text](/native/components/nativewind/text),
+[Icon](/native/components/nativewind/icon), Focus visible and Utils, and adds `lucide-react-native`.
+
+## Usage
+
+```tsx
+import {
+  Questionnaire,
+  QuestionnaireActions,
+  QuestionnaireChoice,
+  QuestionnaireChoiceDescription,
+  QuestionnaireChoices,
+  QuestionnaireDescription,
+  QuestionnaireError,
+  QuestionnaireInput,
+  QuestionnaireItem,
+  QuestionnaireNext,
+  QuestionnairePrevious,
+  QuestionnaireProgress,
+  QuestionnaireSkip,
+  QuestionnaireSubmit,
+  QuestionnaireTitle,
+  type QuestionnaireValues,
+} from '@/components/ui/questionnaire';
+```
+
+Define the questions once, pass them to `Questionnaire` for the order of the steps, and map them into the parts:
+
+```tsx
+const items = [
+  {
+    name: 'direction',
+    required: true,
+    prompt: 'What should we prototype next?',
+    description: 'Choose a direction or write your own.',
+    choices: [
+      { value: 'delegation', label: 'Delegation', description: 'Show how work moves to a specialist.' },
+      { value: 'both', label: 'Both together' },
+    ],
+  },
+  {
+    name: 'detail',
+    required: false,
+    prompt: 'How much detail should it include?',
+    description: 'Skip this if you are not sure yet.',
+    choices: [
+      { value: 'focused', label: 'Focused' },
+      { value: 'complete', label: 'Complete flow' },
+    ],
+  },
+] as const;
+```
+
+```tsx
+<Questionnaire items={items} onSubmit={(answers: QuestionnaireValues) => save(answers)}>
+  <QuestionnaireProgress />
+  {items.map((question) => (
+    <QuestionnaireItem key={question.name} name={question.name} required={question.required}>
+      <QuestionnaireTitle>{question.prompt}</QuestionnaireTitle>
+      <QuestionnaireDescription>{question.description}</QuestionnaireDescription>
+      <QuestionnaireChoices>
+        {question.choices.map((choice) => (
+          <QuestionnaireChoice key={choice.value} value={choice.value}>
+            <Text className="font-medium">{choice.label}</Text>
+            {'description' in choice ? (
+              <QuestionnaireChoiceDescription>{choice.description}</QuestionnaireChoiceDescription>
+            ) : null}
+          </QuestionnaireChoice>
+        ))}
+      </QuestionnaireChoices>
+      <QuestionnaireError />
+    </QuestionnaireItem>
+  ))}
+  <QuestionnaireActions>
+    <QuestionnairePrevious />
+    <QuestionnaireSkip />
+    <QuestionnaireNext />
+    <QuestionnaireSubmit />
+  </QuestionnaireActions>
+</Questionnaire>
+```
+
+`onSubmit` gets each answered question's answer by its `name`: the choice's `value` or the text typed in a
+`QuestionnaireInput`, and a list for a `multiple` question. A skipped question with one answer is left out; a
+skipped `multiple` one gives an empty list.
+
+## How it steps
+
+- Only the question shown is drawn. The others keep their answers while hidden.
+- **Next** goes on once the question can be left: answered, or `invalid` is not set. A required question left
+  unanswered shows its `QuestionnaireError`, which a screen reader announces.
+- **Skip** shows for a question that is not required. It clears the answer, marks the question skipped and goes
+  on, or finishes on the last question.
+- **Submit** shows on the last question. It goes back to the first question that cannot be left yet, or hands the
+  answers to `onSubmit`.
+- Each step moves the screen reader to the new question's title on a device, and the keyboard focus to the
+  question on the web.
+- On the web, Ctrl or Cmd with Enter goes on or submits, and the left and right arrows step back and forward once
+  the question is answered. With `shortcuts`, each choice shows the letter or number that picks it.
+
+## API reference
+
+### Questionnaire
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop           | Type                                    | Default |
+| -------------- | --------------------------------------- | ------- |
+| `items`        | `QuestionnaireItemDefinition[]`         | -       |
+| `item`         | `string`                                | -       |
+| `defaultItem`  | `string`                                | -       |
+| `onItemChange` | `(item: string) => void`                | -       |
+| `shortcuts`    | `'letters' \| 'numbers'`                | -       |
+| `onSubmit`     | `(values: QuestionnaireValues) => void` | -       |
+
+Without `items`, the steps are the rendered questions in the order they mount.
+
+### QuestionnaireProgress
+
+Takes every prop of [Text](/native/components/nativewind/text). Reads "Question 2 of 3" unless given its own
+children, announced as a progress bar and read out as it changes.
+
+### QuestionnaireItem
+
+Takes every prop of React Native's `View`, plus `name` (`string`), `multiple`, `required`, `invalid` and
+`disabled` (each `boolean`, `false` by default), and `onStatusChange`, called with `'unanswered'`, `'answered'`
+or `'skipped'`. It is a radio group, or a group for `multiple`, named by its title.
+
+### QuestionnaireTitle, QuestionnaireDescription, QuestionnaireChoiceDescription, QuestionnaireError
+
+Each takes every prop of [Text](/native/components/nativewind/text). The error reads "Choose an answer to
+continue." for a required question and "Choose an answer or skip this question." for another, unless given its
+own text.
+
+### QuestionnaireChoices
+
+Takes every prop of React Native's `View`.
+
+### QuestionnaireChoice
+
+Takes every prop of React Native's `Pressable`, plus `value` (`string`), `checked`, `defaultChecked`, `disabled`
+and `onChange`, called with whether the choice is now picked. It is a radio, or a checkbox in a `multiple`
+question, named by its text.
+
+### QuestionnaireInput
+
+Takes every prop of [Input](/native/components/nativewind/input). It answers the question while it holds text.
+Name it with `aria-label`.
+
+### QuestionnaireActions
+
+Takes every prop of React Native's `View`.
+
+### QuestionnairePrevious, QuestionnaireSkip, QuestionnaireNext, QuestionnaireSubmit
+
+Each takes every prop of [Button](/native/components/nativewind/button). Previous and Skip are `outline`, and each
+is labelled with its own word unless given children.
+
+## Differences from upstream
+
+- Upstream's behaviour comes from `@shadcn/react`, which draws a form, fieldsets and inputs. A device has none of
+  those, so the native item keeps the parts and props and holds the answers in the Questionnaire itself.
+- Upstream's `onSubmit` gets the form's submit event and reads the answers from its form data. A device has no form
+  to submit, so `onSubmit` gets the answers.
+- Upstream's `QuestionnaireChoice` takes the input's change event in `onChange`. The native one takes whether the
+  choice is now picked.
+- Upstream's shortcuts and arrow keys work wherever there is a keyboard. On a device, where a keyboard is rare and
+  React Native reports no key presses, there are no shortcuts, and the shortcut letters are not shown.
+- Upstream moves focus between choices with the up and down arrows. The native choices take focus in order with
+  Tab on the web instead.
+- Upstream warns in development when `items` and the rendered questions disagree. The native item does not.
+- Upstream's parts take a `render` prop. The native ones take children.
