@@ -72,6 +72,7 @@
     "tabs",
     "tab-bar",
     "navigation-menu",
+    "sidebar",
     "breadcrumb",
     "pagination"
   ]

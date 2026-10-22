@@ -52,6 +52,7 @@ import { ScrollAreaDemo } from './scroll-area-demo';
 import { SelectDemo } from './select-demo';
 import { SeparatorDemo } from './separator-demo';
 import { SheetDemo } from './sheet-demo';
+import { SidebarDemo } from './sidebar-demo';
 import { SkeletonDemo } from './skeleton-demo';
 import { SliderDemo } from './slider-demo';
 import { SonnerDemo } from './sonner-demo';
@@ -118,6 +119,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'select-demo': SelectDemo,
   'separator-demo': SeparatorDemo,
   'sheet-demo': SheetDemo,
+  'sidebar-demo': SidebarDemo,
   'skeleton-demo': SkeletonDemo,
   'slider-demo': SliderDemo,
   'sonner-demo': SonnerDemo,

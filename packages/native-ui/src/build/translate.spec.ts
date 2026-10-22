@@ -152,6 +152,22 @@ describe('translateClasses', () => {
     expect(translateClasses([cls, 'p-2'], 'uniwind', 'view')).toEqual({ classes: ['p-2'], unknown: [] });
   });
 
+  it.each(['group-hover/menu-item:opacity-100', 'peer-hover/menu-button:text-sidebar-accent-foreground'])(
+    'drops %s, a pointer over a group or a sibling no touch screen has',
+    (cls) => {
+      expect(translateClasses([cls, 'p-2'], 'nativewind', 'view')).toEqual({ classes: ['p-2'], unknown: [] });
+    },
+  );
+
+  it("draws a sidebar menu button's rail size without the important neither engine has", () => {
+    const slot = ['p-2', 'group-data-[collapsible=icon]:size-8!', 'group-data-[collapsible=icon]:p-2!'];
+
+    expect(translateClasses(slot, 'uniwind', 'view', 'collapsible=icon', { name: 'cn-sidebar-menu-button' })).toEqual({
+      classes: ['size-8', 'p-2'],
+      unknown: [],
+    });
+  });
+
   it.each(['sm', 'md'])(
     'keeps the base class a style widens at %s, which a phone held upright is below',
     (breakpoint) => {

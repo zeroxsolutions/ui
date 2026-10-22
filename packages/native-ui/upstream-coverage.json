@@ -1,7 +1,5 @@
 {
-  "notPorted": {
-    "sidebar": "A desktop app shell; native has tab-bar."
-  },
+  "notPorted": {},
   "deferred": {
     "chart": "Upstream draws with recharts; a native chart needs Skia or Victory Native, a decision of its own.",
     "attachment": "An AI item, left to a later spec.",

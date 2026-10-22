@@ -745,6 +745,37 @@
       ]
     },
     {
+      "name": "sidebar",
+      "type": "registry:ui",
+      "title": "Sidebar",
+      "description": "An app's side navigation: a sheet below the md width and a panel beside the screen from it, collapsing off the screen or to a rail of icons, with its open state in a provider, a toggle button, groups and menus.",
+      "dependencies": [
+        "@rn-primitives/slot",
+        "class-variance-authority",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/motion",
+        "@zui/button",
+        "@zui/direction",
+        "@zui/icon",
+        "@zui/input",
+        "@zui/separator",
+        "@zui/sheet",
+        "@zui/skeleton",
+        "@zui/text",
+        "@zui/tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/sidebar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "tooltip",
       "type": "registry:ui",
       "title": "Tooltip",

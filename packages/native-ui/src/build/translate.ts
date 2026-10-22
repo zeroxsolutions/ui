@@ -60,6 +60,7 @@ const ICON_MODIFIERS: ReadonlySet<string> = new Set([
  */
 const DROPPED_MODIFIERS = [
   /^hover$/,
+  /^(group|peer)-hover(\/[\w-]+)?$/,
   /^focus-within$/,
   /^(sm|md)$/,
   /^print$/,
@@ -281,7 +282,9 @@ const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
  * important to win over the Button size's; the component merges them after the Button's classes, where
  * tailwind-merge keeps both and each engine draws a side padding over the axis one, so the order wins
  * without the important neither engine has. A Command marks its rounding, and its input group the height,
- * rounding and shadow, important over the Dialog's and the InputGroup's, which they are merged after.
+ * rounding and shadow, important over the Dialog's and the InputGroup's, which they are merged after. A
+ * sidebar's menu button marks its size and padding in a rail of icons important over its size's, which the
+ * component merges after them.
  */
 const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set([
   'cn-pagination-previous',
@@ -289,6 +292,8 @@ const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set([
   'cn-command',
   'cn-command-dialog',
   'cn-command-input-group',
+  'cn-sidebar-menu-button',
+  'cn-sidebar-menu-button-size-lg',
 ]);
 const IMPORTANT_SUFFIX = /!$/;
 
