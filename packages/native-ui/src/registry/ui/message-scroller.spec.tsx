@@ -487,7 +487,7 @@ describe('MessageScroller', () => {
 
       await user.press(screen.getByRole('button', { name: 'Scroll to end' }));
 
-      expect(focus).toHaveBeenCalled();
+      expect(focus).toHaveBeenCalledWith({ preventScroll: true });
       delete (ScrollView.prototype as unknown as { focus?: () => void }).focus;
     });
 

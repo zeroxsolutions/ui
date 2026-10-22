@@ -891,6 +891,9 @@ function MessageScrollerItem({
 const BUTTON_IN = { duration: 200, easing: Easing.bezier(0.23, 1, 0.32, 1) } as const;
 const BUTTON_OUT = { duration: 400, easing: Easing.bezier(0.7, 0, 0.84, 0) } as const;
 
+/** The viewport's element on the web, which focus can move to. */
+type WebFocusable = { focus?: (options?: { preventScroll?: boolean }) => void };
+
 type MessageScrollerButtonProps = Omit<ComponentProps<typeof Button>, 'children'> & {
   /** The edge it scrolls to, `end` by default. */
   direction?: MessageScrollerButtonDirection;
@@ -964,8 +967,11 @@ function MessageScrollerButton({
             if (direction === 'start') engine.scrollToStart(scroll);
             else engine.scrollToEnd(scroll);
             // The button hides itself once the viewport is at the edge, so on the web focus moves to the viewport,
-            // which stays, rather than staying on a button no key reaches.
-            if (Platform.OS === 'web') (engine.scrollView as unknown as { focus?: () => void } | null)?.focus?.();
+            // which stays, rather than staying on a button no key reaches. A browser cancels a smooth scroll of an
+            // element focused without `preventScroll`.
+            if (Platform.OS === 'web') {
+              (engine.scrollView as unknown as WebFocusable | null)?.focus?.({ preventScroll: true });
+            }
           }}
           {...props}
         >
