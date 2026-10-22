@@ -81,6 +81,7 @@
     "nativewind": "4.2.7",
     "react": "catalog:",
     "react-native": "catalog:expo",
+    "react-hook-form": "catalog:",
     "react-native-css-interop": "catalog:",
     "react-native-reanimated": "catalog:expo",
     "react-native-safe-area-context": "catalog:expo",

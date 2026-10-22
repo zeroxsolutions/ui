@@ -858,6 +858,12 @@
       ]
     },
     {
+      "name": "form",
+      "type": "registry:ui",
+      "title": "Form",
+      "description": "No files, as upstream's: a form is Field bound to a form library, such as react-hook-form's Controller."
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

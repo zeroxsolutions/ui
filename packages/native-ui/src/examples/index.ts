@@ -29,6 +29,7 @@ import { DrawerDemo } from './drawer-demo';
 import { DropdownMenuDemo } from './dropdown-menu-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
+import { FormDemo } from './form-demo';
 import { HoverCardDemo } from './hover-card-demo';
 import { IconDemo } from './icon-demo';
 import { InputDemo } from './input-demo';
@@ -91,6 +92,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'dropdown-menu-demo': DropdownMenuDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
+  'form-demo': FormDemo,
   'hover-card-demo': HoverCardDemo,
   'icon-demo': IconDemo,
   'input-demo': InputDemo,
