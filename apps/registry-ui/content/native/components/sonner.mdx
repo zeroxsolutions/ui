@@ -13,6 +13,10 @@ The CLI writes `components/ui/sonner.tsx` and `lib/motion.ts`, installs [Icon](/
 [Spinner](/native/components/nativewind/spinner), [Text](/native/components/nativewind/text), Text children and Utils, and adds
 `lucide-react-native`, `react-native-reanimated`, `react-native-safe-area-context` and `react-native-worklets`.
 
+Sonner reads `useSwipeToDismiss` from `lib/motion.ts`, which older copies of that file lack. Adding sonner,
+toast, trace or attachment again writes the current one, so let the CLI overwrite `lib/motion.ts` when it asks;
+keeping the old file fails the bundle with a missing export.
+
 Put one `Toaster` at the app's root, after its `PortalHost`, so toasts draw above the screen and its overlays:
 
 ```tsx
