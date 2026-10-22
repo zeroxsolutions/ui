@@ -20,7 +20,8 @@ import { scheduleOnRN } from 'react-native-worklets';
  * already holds the setting as of app start, so a part open from the start never draws a frame of motion.
  */
 function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(useSettingAtStart);
+  const atStart = useSettingAtStart();
+  const [reduced, setReduced] = useState(atStart);
   useEffect(() => {
     let mounted = true;
     void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
