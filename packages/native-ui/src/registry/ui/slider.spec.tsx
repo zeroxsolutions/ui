@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useState, type ReactNode } from 'react';
 import { emittedClasses } from '../../build/slot-tokens.testing';
+import { Slider as NovaSlider } from '@styles/nova/components/ui/slider';
 import { Slider, type SliderProps } from './slider';
 
 type Element = ReturnType<typeof screen.getByTestId>;
@@ -164,6 +165,57 @@ describe('Slider', () => {
     expect(values()).toEqual([20, 70]);
   });
 
+  it('pushes the neighbour along a gap, and lets it back to where it started as the drag returns', async () => {
+    const onValueChange = jest.fn();
+    await render(
+      <Slider testID="slider" defaultValue={[20, 50]} minStepsBetweenValues={5} onValueChange={onValueChange} />,
+    );
+    const laid = await laidOut(100);
+
+    await fireEvent(laid, 'responderGrant', touch(20, 20));
+    await fireEvent(laid, 'responderMove', touch(0, 70));
+    expect(values()).toEqual([70, 75]);
+    expect(onValueChange).toHaveBeenLastCalledWith([70, 75], { activeThumbIndex: 0 });
+
+    await fireEvent(laid, 'responderMove', touch(0, 30));
+    expect(values()).toEqual([30, 50]);
+  });
+
+  it('stops a thumb short of its neighbour by the gap with no collision', async () => {
+    await render(
+      <Slider testID="slider" defaultValue={[20, 50]} minStepsBetweenValues={5} thumbCollisionBehavior="none" />,
+    );
+    const laid = await laidOut(100);
+
+    await fireEvent(laid, 'responderGrant', touch(20, 20));
+    await fireEvent(laid, 'responderMove', touch(0, 70));
+
+    expect(values()).toEqual([45, 50]);
+  });
+
+  it('hands the drag to the neighbour it meets with swap, keeping the gap', async () => {
+    const onValueChange = jest.fn();
+    await render(
+      <Slider
+        testID="slider"
+        defaultValue={[20, 50]}
+        minStepsBetweenValues={5}
+        thumbCollisionBehavior="swap"
+        onValueChange={onValueChange}
+      />,
+    );
+    const laid = await laidOut(100);
+
+    await fireEvent(laid, 'responderGrant', touch(20, 20));
+    await fireEvent(laid, 'responderMove', touch(0, 50));
+    expect(values()).toEqual([45, 50]);
+    expect(onValueChange).toHaveBeenLastCalledWith([45, 50], { activeThumbIndex: 1 });
+
+    await fireEvent(laid, 'responderMove', touch(0, 70));
+    expect(values()).toEqual([45, 70]);
+    expect(onValueChange).toHaveBeenLastCalledWith([45, 70], { activeThumbIndex: 1 });
+  });
+
   it('rises from the bottom when vertical', async () => {
     await render(<Slider testID="slider" defaultValue={0} orientation="vertical" />);
     const laid = await laidOut(16, 100);
@@ -197,5 +249,14 @@ describe('Slider', () => {
 
     await render(<Slider testID="slider" defaultValue={50} orientation="vertical" />);
     expect(emittedClasses(track().props.className)).toEqual(expect.arrayContaining(['w-1.5', 'h-full']));
+  });
+
+  it("lays Nova's thumbs over the track, though Nova's thumb is relative", async () => {
+    await render(<NovaSlider defaultValue={50} />);
+
+    // The built item's own classes, unmerged: a device draws whatever the item passes.
+    const classes: string[] = thumbs()[0].props.className.split(/\s+/);
+    expect(classes).toContain('absolute');
+    expect(classes).not.toContain('relative');
   });
 });

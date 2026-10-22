@@ -25,6 +25,7 @@ function SliderDemo(): ReactNode {
           max={1}
           step={0.1}
           aria-labelledby="slider-demo-temperature"
+          aria-label="Temperature"
         />
       </View>
       <View className="h-40 flex-row items-center gap-6">

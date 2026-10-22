@@ -85,12 +85,30 @@ function clamp(value: number, low: number, high: number): number {
   return Math.min(high, Math.max(low, value));
 }
 
-/** `values` with the thumb at `index` moved to `next`, the thumbs either side of it pushed along to keep `gap`. */
-function pushed(values: readonly number[], index: number, next: number, gap: number, min: number, max: number) {
+/**
+ * `values` with the thumb at `index` moved to `next`, the thumbs either side of it pushed along to keep `gap`,
+ * and let back towards where they were at `initial`, the drag's start, as the moved thumb returns.
+ */
+function pushed(
+  values: readonly number[],
+  index: number,
+  next: number,
+  gap: number,
+  min: number,
+  max: number,
+  initial: readonly number[] = values,
+) {
   const moved = [...values];
-  moved[index] = clamp(next, min + index * gap, max - (values.length - 1 - index) * gap);
-  for (let i = index + 1; i < moved.length; i += 1) moved[i] = Math.max(moved[i], moved[i - 1] + gap);
-  for (let i = index - 1; i >= 0; i -= 1) moved[i] = Math.min(moved[i], moved[i + 1] - gap);
+  const last = moved.length - 1;
+  moved[index] = clamp(next, min + index * gap, max - (last - index) * gap);
+  for (let i = index + 1; i <= last; i += 1) {
+    const low = moved[i - 1] + gap;
+    moved[i] = clamp(Math.max(Math.min(moved[i], initial[i]), low), low, max - (last - i) * gap);
+  }
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const high = moved[i + 1] - gap;
+    moved[i] = clamp(Math.min(Math.max(moved[i], initial[i]), high), min + i * gap, high);
+  }
   return moved;
 }
 
@@ -105,11 +123,15 @@ function bounded(values: readonly number[], index: number, next: number, gap: nu
   return moved;
 }
 
-/** The pointer or finger dragging a thumb: where it started, on the screen and in the control, and the thumb. */
+/**
+ * The pointer or finger dragging a thumb: where it started, on the screen and in the control, the thumb, and
+ * the values at the start, which a pushed thumb goes back towards.
+ */
 interface Drag {
   page: number;
   location: number;
   index: number;
+  initial: readonly number[];
 }
 
 /**
@@ -197,24 +219,44 @@ function Slider({
     return roundToStep(min + (vertical ? 1 - along : along) * (max - min), step, min);
   };
 
-  const dragTo = (location: number, index: number): number => {
+  const dragTo = (location: number, index: number, initial: readonly number[]): number => {
     const next = valueAt(location);
     if (next === undefined) return index;
     const current = latest.current;
     if (thumbCollisionBehavior === 'push') {
-      change(pushed(current, index, next, gap, min, max), index);
+      change(pushed(current, index, next, gap, min, max, initial), index);
       return index;
     }
-    if (thumbCollisionBehavior === 'none') {
-      change(bounded(current, index, next, gap, min, max), index);
+    const held = bounded(current, index, next, gap, min, max);
+    const forward = next > current[index] && index < current.length - 1 && next >= current[index + 1];
+    const backward = next < current[index] && index > 0 && next <= current[index - 1];
+    if (thumbCollisionBehavior === 'none' || (!forward && !backward)) {
+      change(held, index);
       return index;
     }
-    const swapped = [...current];
-    swapped[index] = next;
-    const sorted = [...swapped].sort((a, b) => a - b);
-    const moved = sorted.lastIndexOf(next) === index ? index : sorted.indexOf(next);
-    change(sorted, moved);
-    return moved;
+    // Base UI's swap: the dragged thumb stays a gap short of the one it met, and the drag goes on with that
+    // one, which is pushed from where it is; the others go back towards where they started.
+    const target = forward ? index + 1 : index - 1;
+    const start = held.map((entry, i) => (i === index ? entry : initial[i]));
+    const swapped = pushed(
+      held,
+      target,
+      forward ? Math.max(next, held[target]) : Math.min(next, held[target]),
+      gap,
+      min,
+      max,
+      start,
+    );
+    swapped[index] = clamp(
+      held[index],
+      Math.max(swapped[index - 1] === undefined ? min : swapped[index - 1] + gap, min + index * gap),
+      Math.min(
+        swapped[index + 1] === undefined ? max : swapped[index + 1] - gap,
+        max - (swapped.length - 1 - index) * gap,
+      ),
+    );
+    change(swapped, target);
+    return target;
   };
 
   const locationOf = (event: GestureResponderEvent): number =>
@@ -234,13 +276,14 @@ function Slider({
           : best,
       0,
     );
-    drag.current = { page: pageOf(event), location, index: dragTo(location, nearest) };
+    const initial = latest.current;
+    drag.current = { page: pageOf(event), location, initial, index: dragTo(location, nearest, initial) };
   };
 
   const onResponderMove = (event: GestureResponderEvent): void => {
     const held = drag.current;
     if (held === undefined) return;
-    held.index = dragTo(held.location + pageOf(event) - held.page, held.index);
+    held.index = dragTo(held.location + pageOf(event) - held.page, held.index, held.initial);
   };
 
   const onResponderEnd = (): void => {
@@ -328,6 +371,7 @@ function Slider({
               const { width, height } = event.nativeEvent.layout;
               setThumbSize(vertical ? height : width);
             }}
+            // The merge drops Nova's `relative` for `absolute`; passed as one string, Uniwind draws `relative`.
             className={cn('cn-slider-thumb absolute shrink-0')}
             style={
               vertical ? { bottom: offsetOf(fractions[index], false) } : { left: offsetOf(fractions[index], false) }

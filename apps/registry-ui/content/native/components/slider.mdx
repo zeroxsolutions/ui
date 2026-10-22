@@ -54,7 +54,8 @@ finished: a drag released, a key pressed or a screen reader's adjustment.
 
 A press on the track moves the nearest thumb there, and the thumb follows the finger or the pointer until it
 lets go. Every value is rounded to a multiple of `step` from `min`. A thumb dragged into its neighbour pushes it
-along, swaps places with it or stops there, by `thumbCollisionBehavior`; the keyboard and a screen reader stop
+along, hands the drag on to it or stops there, by `thumbCollisionBehavior`, keeping `minStepsBetweenValues`
+steps between them, as Base UI does; the keyboard and a screen reader stop
 it there. A vertical slider rises from `min` at the bottom, and takes its height from its parent or a class.
 
 Each thumb is announced as adjustable, with the slider's range, its value, and its value as text: the value
@@ -62,7 +63,7 @@ written by `format` and `locale`, followed in a two-thumb range by "start range"
 `getAriaValueText` returns. A screen reader's swipe up or down moves it a step. On the web each thumb takes
 focus, and the arrow keys move it a step, Page Up, Page Down and a Shift-held arrow key move it `largeStep`, and
 Home and End move it to the end of its room. Every thumb takes its name from `aria-label` or the Label
-`aria-labelledby` names.
+`aria-labelledby` names; iOS reads only `aria-label`, so pass the Label's text there too.
 
 ## Differences from upstream
 
