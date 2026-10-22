@@ -1,0 +1,78 @@
+---
+title: Marker
+description: A status, a system note, a ruled row or a labelled separator in a conversation.
+---
+
+<NativePreview name="marker-demo" />
+
+## Installation
+
+<InstallCommand name="marker" />
+
+The CLI writes `components/ui/marker.tsx`, installs [Text](/native/components/nativewind/text),
+[Icon](/native/components/nativewind/icon) and Utils, and adds `@rn-primitives/slot` and
+`class-variance-authority`.
+
+## Usage
+
+```tsx
+import { GitBranch } from 'lucide-react-native';
+
+import { Icon } from '@/components/ui/icon';
+import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
+```
+
+```tsx
+<Marker>
+  <MarkerIcon>
+    <Icon as={GitBranch} />
+  </MarkerIcon>
+  <MarkerContent>Switched to a new branch</MarkerContent>
+</Marker>
+```
+
+Give a marker that streams progress, such as "Thinking...", `role="status"`. To make a marker take a press, give
+it `asChild` and a Pressable child:
+
+```tsx
+<Marker asChild variant="separator">
+  <Pressable role="button" onPress={loadEarlier}>
+    <MarkerContent>Show earlier messages</MarkerContent>
+  </Pressable>
+</Marker>
+```
+
+## API reference
+
+### Marker
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop      | Type                                   | Default     |
+| --------- | -------------------------------------- | ----------- |
+| `variant` | `'default' \| 'separator' \| 'border'` | `'default'` |
+| `asChild` | `boolean`                              | `false`     |
+
+`separator` draws a line either side of the text, and `border` rules a line under the row. With
+`role="status"`, Android announces the marker each time it changes. With `asChild`, the marker renders its
+single child in place of the View, with the marker's props and classes merged on and a separator's lines
+inside it. The file also exports `markerVariants`.
+
+### MarkerIcon
+
+Takes every prop of React Native's `View`. Draws an Icon child at 16px and hides it from screen readers.
+
+### MarkerContent
+
+Takes every prop of [Text](/native/components/nativewind/text). Nest a Text in it to set part of the text
+apart, such as a name with `font-medium`.
+
+## Differences from upstream
+
+- Upstream's Marker takes a `render` prop. The native one takes `asChild`.
+- Upstream draws a separator's lines as `::before` and `::after`. The native Marker draws them as two Views
+  around its children.
+- iOS has no live region, so a status marker is not announced when it changes there; Android announces it.
+- Upstream underlines a link inside the marker by its tag. A device has no link tag, so underline a link
+  yourself with `underline`.
+- Upstream's demo shimmers "Thinking..." with shadcn's `shimmer` class, which has no native counterpart.

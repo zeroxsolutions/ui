@@ -1085,6 +1085,20 @@
       ]
     },
     {
+      "name": "marker",
+      "type": "registry:ui",
+      "title": "Marker",
+      "description": "A line in a conversation that is not a message: a status announced as it changes, a system note, a row ruled underneath, or a label between two lines.",
+      "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/marker.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "password-input",
       "type": "registry:component",
       "title": "Password input",

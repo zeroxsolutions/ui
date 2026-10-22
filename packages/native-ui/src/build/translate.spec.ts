@@ -1252,3 +1252,84 @@ describe('translateClasses for a calendar', () => {
     },
   );
 });
+
+describe('translateClasses for the conversation items', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const slot = (
+    style: keyof typeof styles,
+    name: string,
+    engine: Engine,
+    part: 'view' | 'text' | 'icon',
+    state = '',
+  ): Translation => translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
+
+  it.each(STYLE_ENGINES)(
+    'translates every class of every bubble, attachment, marker and message slot for %s in %s',
+    (engine, style) => {
+      const names = [...styles[style].keys()].filter((name) =>
+        /^cn-(bubble|attachment|marker|message)(-|$)/.test(name),
+      );
+
+      expect(names.length).toBeGreaterThan(0);
+      for (const name of names) {
+        for (const part of ['view', 'text', 'icon'] as const) {
+          expect({ name, part, unknown: slot(style, name, engine, part).unknown }).toEqual({ name, part, unknown: [] });
+        }
+      }
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    "tints a tinted bubble's content with the primary colour over the background, for %s in %s",
+    (engine, style) => {
+      expect(slot(style, 'cn-bubble-variant-tinted', engine, 'view', 'part=bubble-content').classes).toEqual([
+        'bg-primary/10',
+        'dark:bg-primary/15',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    "draws the card-coloured ring around a bubble's reactions as a border, for %s in %s",
+    (engine, style) => {
+      expect(slot(style, 'cn-bubble-reactions', engine, 'view').classes).toEqual(
+        expect.arrayContaining(['border-[3px]', 'border-card']),
+      );
+    },
+  );
+
+  it('leaves the reactions offset by their own height to the component', () => {
+    expect(slot('vega', 'cn-bubble-reactions-side-top', 'uniwind', 'view').classes).toEqual(['top-0']);
+    expect(slot('vega', 'cn-bubble-reactions-side-bottom', 'uniwind', 'view').classes).toEqual(['bottom-0']);
+  });
+
+  it('rings bubble content that takes a press while it holds keyboard focus, as the state pressable+focused', () => {
+    expect(slot('vega', 'cn-bubble-content', 'uniwind', 'view', 'focused+pressable').classes).toEqual(['border-ring']);
+  });
+
+  it('sizes a spinner in vertical attachment media, as the state part=spinner', () => {
+    expect(slot('vega', 'cn-attachment-media', 'uniwind', 'view', 'orientation=vertical+part=spinner').classes).toEqual(
+      ['size-6'],
+    );
+  });
+
+  it("gives the lines a separator marker's ::before and ::after draw to its part=before and part=after children", () => {
+    expect(slot('vega', 'cn-marker-variant-separator', 'uniwind', 'view', 'part=before').classes).toEqual([
+      'h-px',
+      'min-w-0',
+      'flex-1',
+      'bg-border',
+      'mr-1',
+    ]);
+    expect(slot('vega', 'cn-marker-variant-separator', 'uniwind', 'view', 'part=after').classes).toEqual([
+      'h-px',
+      'min-w-0',
+      'flex-1',
+      'bg-border',
+      'ml-1',
+    ]);
+  });
+});
