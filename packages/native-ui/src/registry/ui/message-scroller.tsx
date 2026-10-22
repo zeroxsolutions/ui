@@ -184,7 +184,7 @@ class MessageScrollerEngine {
   private frame: number | null = null;
   private contentChanged = false;
   private visibilityFrame: number | null = null;
-  private readonly unannounced: string[] = [];
+  private unannounced: string[] = [];
 
   constructor(config: ScrollerConfig) {
     this.config = config;
@@ -212,8 +212,10 @@ class MessageScrollerEngine {
     const known = this.items.get(key);
     if (known) {
       const changed = known.anchor !== anchor || known.messageId !== messageId;
+      const filled = known.text === '' && text !== '';
       Object.assign(known, { messageId, anchor, text });
       if (changed) this.schedule('content');
+      if (filled && !this.busy && this.unannounced.includes(key)) this.announceAdditions();
       return;
     }
     this.items.set(key, { key, order: this.nextOrder++, messageId, anchor, y: 0, height: 0, laidOut: false, text });
@@ -608,14 +610,16 @@ class MessageScrollerEngine {
   }
 
   // The web reads the content as a log, which announces the rows added to it; a device has no log role, so
-  // each added row is told to the screen reader instead.
+  // each added row is told to the screen reader instead. A row added with no text yet, such as a reply about to
+  // stream, waits until it has some.
   private announceAdditions(): void {
-    const keys = this.unannounced.splice(0);
-    const text = keys
-      .map((key) => this.items.get(key)?.text ?? '')
-      .filter(Boolean)
-      .join('\n');
-    if (text) AccessibilityInfo.announceForAccessibility(text);
+    const texts: string[] = [];
+    this.unannounced = this.unannounced.filter((key) => {
+      const item = this.items.get(key);
+      if (item?.text) texts.push(item.text);
+      return item !== undefined && item.text === '';
+    });
+    if (texts.length > 0) AccessibilityInfo.announceForAccessibility(texts.join('\n'));
   }
 }
 
@@ -759,6 +763,7 @@ function MessageScrollerViewport({
   return (
     <ScrollView
       ref={setScrollView}
+      role="region"
       aria-label={ariaLabel}
       tabIndex={Platform.OS === 'web' ? 0 : undefined}
       scrollEventThrottle={16}
@@ -889,7 +894,7 @@ const BUTTON_OUT = { duration: 400, easing: Easing.bezier(0.7, 0, 0.84, 0) } as 
 type MessageScrollerButtonProps = Omit<ComponentProps<typeof Button>, 'children'> & {
   /** The edge it scrolls to, `end` by default. */
   direction?: MessageScrollerButtonDirection;
-  /** `smooth` by default. */
+  /** `smooth` by default; a jump while the system asks for reduced motion. */
   behavior?: MessageScrollerScrollBehavior;
   /** Its content; an arrow named "Scroll to end" or "Scroll to start" by default. */
   children?: ReactNode;
@@ -898,8 +903,8 @@ type MessageScrollerButtonProps = Omit<ComponentProps<typeof Button>, 'children'
 /**
  * A button over the viewport's bottom edge, or its top for `direction="start"`, that scrolls to that edge. It
  * shows only while there is more transcript that way: it rises and fades in, and sinks and fades out when
- * there is not, when it takes no press and no focus and is hidden from screen readers. It appears and goes at
- * once when the system asks for reduced motion.
+ * there is not, when it takes no press and no focus and is hidden from screen readers. It appears, goes and
+ * scrolls at once when the system asks for reduced motion.
  */
 function MessageScrollerButton({
   direction = 'end',
@@ -955,8 +960,12 @@ function MessageScrollerButton({
           onPress={(event) => {
             if (!active) return;
             onPress?.(event);
-            if (direction === 'start') engine.scrollToStart({ behavior });
-            else engine.scrollToEnd({ behavior });
+            const scroll = { behavior: reduced ? ('auto' as const) : behavior };
+            if (direction === 'start') engine.scrollToStart(scroll);
+            else engine.scrollToEnd(scroll);
+            // The button hides itself once the viewport is at the edge, so on the web focus moves to the viewport,
+            // which stays, rather than staying on a button no key reaches.
+            if (Platform.OS === 'web') (engine.scrollView as unknown as { focus?: () => void } | null)?.focus?.();
           }}
           {...props}
         >

@@ -104,13 +104,14 @@ Takes every prop of React Native's `View`.
 
 ### MessageScrollerViewport
 
-Takes every prop of React Native's `ScrollView`, plus `preserveScrollOnPrepend` (`true` by default). It is
-named "Messages" unless given another `aria-label`, and on the web it is focusable, so the keyboard scrolls it.
+Takes every prop of React Native's `ScrollView`, plus `preserveScrollOnPrepend` (`true` by default). It is a
+region named "Messages" unless given another `role` or `aria-label`, and on the web it is focusable, so the
+keyboard scrolls it.
 
 ### MessageScrollerContent
 
 Takes every prop of React Native's `View`. Pass `aria-busy` while a reply streams: the rows added meanwhile are
-announced once it clears.
+announced once it clears. On a device, a row added with no text yet is announced once text reaches it.
 
 ### MessageScrollerItem
 
@@ -128,7 +129,8 @@ Takes every prop of [Button](/native/components/nativewind/button), with `varian
 | `behavior`  | `'auto' \| 'instant' \| 'smooth'` | `'smooth'` |
 
 It sits over the bottom edge of the viewport, or the top for `start`, and shows only while there is more
-transcript that way. While hidden it takes no press and no focus and screen readers skip it. Its default content
+transcript that way. While hidden it takes no press and no focus and screen readers skip it; on the web a press
+moves focus to the viewport. While the system asks for reduced motion it jumps rather than scrolls smoothly. Its default content
 is an arrow named "Scroll to end" or "Scroll to start".
 
 ## Differences from upstream

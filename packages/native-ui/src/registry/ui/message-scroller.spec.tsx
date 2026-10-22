@@ -19,6 +19,8 @@ import { Text } from './text';
 interface Row {
   id: string;
   anchor?: boolean;
+  /** What the row says; `Message <id>` by default. */
+  text?: string;
   y: number;
   height: number;
 }
@@ -48,7 +50,7 @@ function Transcript({
           <MessageScrollerContent testID="content" aria-busy={busy}>
             {rows.map((row) => (
               <MessageScrollerItem key={row.id} testID={row.id} messageId={row.id} scrollAnchor={row.anchor}>
-                <Text>{`Message ${row.id}`}</Text>
+                <Text>{row.text ?? `Message ${row.id}`}</Text>
               </MessageScrollerItem>
             ))}
           </MessageScrollerContent>
@@ -115,7 +117,8 @@ describe('MessageScroller', () => {
   it('is a region named Messages holding the transcript as a log', async () => {
     await render(<Transcript rows={LONG.slice(0, 2)} />);
 
-    expect(viewport().props['aria-label']).toBe('Messages');
+    // A role query finds only accessible elements, and a scroll view made one would hide its rows from VoiceOver.
+    expect(viewport().props).toMatchObject({ role: 'region', 'aria-label': 'Messages' });
     expect(screen.getByTestId('content').props.role).toBe('log');
   });
 
@@ -248,6 +251,7 @@ describe('MessageScroller', () => {
     });
 
     it('shows while there is more below, and scrolls smoothly to the end when pressed', async () => {
+      jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(false);
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       await render(<Transcript rows={LONG} />);
       await layOut(LONG);
@@ -256,6 +260,18 @@ describe('MessageScroller', () => {
       await user.press(screen.getByRole('button', { name: 'Scroll to end' }));
 
       expect(lastScroll()).toEqual({ y: contentHeightOf(LONG) - VIEWPORT, animated: true });
+    });
+
+    it('jumps to the end when pressed while the system asks for reduced motion', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      await render(<Transcript rows={LONG} />);
+      await act(async () => {});
+      await layOut(LONG);
+      await scrollTo(100);
+
+      await user.press(screen.getByRole('button', { name: 'Scroll to end' }));
+
+      expect(lastScroll()).toEqual({ y: contentHeightOf(LONG) - VIEWPORT, animated: false });
     });
 
     it('fades in over 200ms as there comes to be more below', async () => {
@@ -285,6 +301,7 @@ describe('MessageScroller', () => {
     });
 
     it('scrolls to the start for direction start, shown once the reader has scrolled down', async () => {
+      jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(false);
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       await render(
         <MessageScrollerProvider defaultScrollPosition="start">
@@ -391,6 +408,21 @@ describe('MessageScroller', () => {
       expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith('Message m2');
     });
 
+    it('announces a row added with no text once text streams into it', async () => {
+      const rows = LONG.slice(0, 2);
+      await render(<Transcript rows={rows} defaultScrollPosition="start" />);
+      await layOut(rows);
+
+      const reply = { id: 'm2', y: 248, height: 100 };
+      await screen.rerender(<Transcript rows={[...rows, { ...reply, text: '' }]} defaultScrollPosition="start" />);
+      await fireEvent(screen.getByTestId('m2'), 'layout', layout(100, 248));
+      await elapse();
+      expect(AccessibilityInfo.announceForAccessibility).not.toHaveBeenCalled();
+
+      await screen.rerender(<Transcript rows={[...rows, { ...reply, text: 'Here' }]} defaultScrollPosition="start" />);
+      expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith('Here');
+    });
+
     it('holds the rows added while the content is busy until it is not', async () => {
       const rows = LONG.slice(0, 2);
       await render(<Transcript rows={rows} busy defaultScrollPosition="start" />);
@@ -443,6 +475,20 @@ describe('MessageScroller', () => {
       await fireEvent(viewport(), 'keyDown', { nativeEvent: { key: 'PageUp' } });
       await layOut(LONG.map((row, index) => (index === 9 ? { ...row, height: 500 } : row)));
       expect(scrolls.mock.calls).toHaveLength(calls);
+    });
+
+    it('moves focus to the viewport once the button is pressed, as the button hides', async () => {
+      const focus = jest.fn();
+      (ScrollView.prototype as unknown as { focus: () => void }).focus = focus;
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      await render(<Transcript rows={LONG} />);
+      await layOut(LONG);
+      await scrollTo(100);
+
+      await user.press(screen.getByRole('button', { name: 'Scroll to end' }));
+
+      expect(focus).toHaveBeenCalled();
+      delete (ScrollView.prototype as unknown as { focus?: () => void }).focus;
     });
 
     it('leaves announcing to the log', async () => {
