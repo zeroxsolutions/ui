@@ -1,4 +1,4 @@
-const { PREVIEW_STYLES, previewSources, sharedThemeFile } = require('./preview-style');
+const { PREVIEW_STYLES, previewScreenSources, previewSources, sharedThemeFile } = require('./preview-style');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -7,6 +7,7 @@ module.exports = {
   content: [
     './index.js',
     './src/**/*.{ts,tsx}',
+    `${previewScreenSources()}/**/*.{ts,tsx}`,
     ...PREVIEW_STYLES.map((style) => `${previewSources(style)}/**/*.{ts,tsx}`),
   ],
   presets: [require('nativewind/preset')],

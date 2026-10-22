@@ -37,6 +37,15 @@ function previewSources(style) {
 }
 
 /**
+ * The folder of native-ui's preview screen, which the app renders as its root and which imports the
+ * emitted sources through `@/` as they do.
+ * @returns {string}
+ */
+function previewScreenSources() {
+  return join(dirname(require.resolve('@zeroxsolutions/native-ui/package.json')), 'src/preview');
+}
+
+/**
  * The theme file `name` the styles share, such as `global.css`: one stylesheet and one Tailwind theme
  * serve every style the bundle holds.
  * @param {string} name - a file the theme item writes into each style's sources
@@ -52,4 +61,4 @@ function sharedThemeFile(name) {
   return join(previewSources(DEFAULT_STYLE), name);
 }
 
-module.exports = { DEFAULT_STYLE, PREVIEW_STYLES, previewSources, previewStyle, sharedThemeFile };
+module.exports = { DEFAULT_STYLE, PREVIEW_STYLES, previewScreenSources, previewSources, previewStyle, sharedThemeFile };

@@ -1,0 +1,106 @@
+---
+title: Context menu
+description: A menu of actions on an area, opened by a long press or a right click.
+---
+
+<NativePreview name="context-menu-demo" />
+
+## Installation
+
+<InstallCommand name="context-menu" />
+
+The CLI writes `components/ui/context-menu.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs
+[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text) and Utils, and adds
+`@rn-primitives/context-menu`, `@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated` and
+`react-native-worklets`. The menu draws in the app's `PortalHost`; see [Add a
+portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing, and logs an error saying
+so while the app is in development.
+
+## Usage
+
+```tsx
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<ContextMenu>
+  <ContextMenuTrigger className="h-36 items-center justify-center rounded-md border border-dashed border-border">
+    <Text>Long press here</Text>
+  </ContextMenuTrigger>
+  <ContextMenuContent className="w-52">
+    <ContextMenuItem onPress={goBack}>
+      <Text>Back</Text>
+      <ContextMenuShortcut>{'\u2318['}</ContextMenuShortcut>
+    </ContextMenuItem>
+    <ContextMenuItem variant="destructive" onPress={remove}>
+      <Text>Delete</Text>
+    </ContextMenuItem>
+  </ContextMenuContent>
+</ContextMenu>
+```
+
+## API reference
+
+### ContextMenu
+
+Takes every prop of React Native's `View`, plus `onOpenChange`, called with `true` when the menu opens and `false`
+when it closes.
+
+### ContextMenuTrigger
+
+Takes every prop of React Native's `Pressable`. It is the area the menu belongs to: a long press opens the menu
+below the finger on a device, and a right click or a long press opens it at the pointer on the web. Screen
+readers reach it as a button, announced as expanded or collapsed, whose long-press action opens the menu. Focus
+returns to it when the menu closes.
+
+### ContextMenuContent
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type                                     | Default   |
+| ------------- | ---------------------------------------- | --------- |
+| `side`        | `'top' \| 'right' \| 'bottom' \| 'left'` | `'right'` |
+| `sideOffset`  | `number`                                 | `0`       |
+| `align`       | `'start' \| 'center' \| 'end'`           | `'start'` |
+| `alignOffset` | `number`                                 | `4`       |
+| `portalHost`  | `string`                                 | -         |
+
+On a device the menu opens above the long press for `top`, and below it for any other side, `alignOffset` px
+along from it. It is a `menu`, and accessibility focus moves into it as it opens. Like upstream's, it is modal:
+VoiceOver stays inside it, and TalkBack does once the app hides its screens while an overlay is open (see [Add a
+portal host](/native/docs/installation#add-a-portal-host)). A press outside it, the Android back button, the iOS
+escape gesture (a two-finger Z) and Escape on the web close it. It fades in while growing from 95% and sliding
+0.5rem over 100ms, and out the same way. When the system asks for reduced motion it appears and goes at once.
+
+### The items
+
+ContextMenuItem, ContextMenuCheckboxItem, ContextMenuRadioGroup, ContextMenuRadioItem, ContextMenuSub,
+ContextMenuSubTrigger, ContextMenuSubContent, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator,
+ContextMenuShortcut and ContextMenuPortal take the props of their
+[Dropdown menu](/native/components/nativewind/dropdown-menu#dropdownmenuitem) counterparts and behave as they do:
+an item runs `onPress` and closes the menu unless `closeOnClick` is false, and a checkbox or radio item leaves it
+open.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, and `onClick` becomes `onPress`, as on every native item.
+- The menu takes no `open` or `defaultOpen`: neither the device's primitive nor the web's Radix one lets its owner
+  open it, so it opens only from its area. `onOpenChange` reports what it does.
+- A device opens the menu where the finger pressed, above or below it; `left` and `right` open it below. The web
+  opens it at the pointer, as upstream does, whatever `side` says.
+- On a device a sub-menu opens in place, under its trigger, and a second press on the trigger closes it. The web
+  opens it beside the trigger.
+- React Native has no `menuitemcheckbox` or `menuitemradio` role, so on a device a checkbox item is announced as
+  a checkbox and a radio item as a radio button, each with its checked state. The web gives them upstream's
+  roles.
+- The back button and the iOS escape gesture remove the menu at once, without its exit animation.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.

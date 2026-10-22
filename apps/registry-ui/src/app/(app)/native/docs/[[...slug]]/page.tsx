@@ -4,9 +4,11 @@ import type { ReactNode } from 'react';
 
 import { DocsArticle } from '@/components/layout/docs-article';
 import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
+import { nativePageMarkdownByStyle } from '@/lib/native-page-markdown';
 import { nativeDocsSource, nativePageImage, nativePageTree } from '@/lib/native-source';
-import { pageMarkdown } from '@/lib/source';
 import { nativeMdxComponents } from '@/mdx-components';
+
+import { NativeCopyPageButton } from '../../_components/general/native-copy-page-button';
 
 export const revalidate = false;
 export const dynamic = 'force-static';
@@ -41,7 +43,7 @@ export default async function NativeDocsPage({ params }: NativeDocsPageProps): P
     <DocsArticle
       title={page.data.title}
       description={page.data.description}
-      markdown={await pageMarkdown(page)}
+      copyPage={<NativeCopyPageButton markdown={await nativePageMarkdownByStyle(page)} />}
       // The pager steps on into the components under the default engine; the page itself names none.
       tree={nativePageTree(DEFAULT_NATIVE_ENGINE)}
       url={page.url}

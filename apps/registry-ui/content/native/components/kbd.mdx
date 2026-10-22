@@ -1,0 +1,50 @@
+---
+title: Kbd
+description: A keyboard key or shortcut drawn as a small muted cap.
+---
+
+<NativePreview name="kbd-demo" />
+
+## Installation
+
+<InstallCommand name="kbd" />
+
+The CLI writes `components/ui/kbd.tsx` and installs [Text](/native/components/nativewind/text),
+[Icon](/native/components/nativewind/icon) and Utils.
+
+## Usage
+
+```tsx
+import { Kbd, KbdGroup } from '@/components/ui/kbd';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<KbdGroup>
+  <Kbd>
+    <Text>Ctrl</Text>
+  </Kbd>
+  <Kbd>
+    <Text>B</Text>
+  </Kbd>
+</KbdGroup>
+```
+
+## API reference
+
+### Kbd
+
+Takes every prop of React Native's `View`. Its label is a Text child, which takes the cap's small muted text,
+and an Icon child is drawn at 12px. A Kbd is as wide as its label.
+
+### KbdGroup
+
+Takes every prop of React Native's `View`, and lays the keys inside it out in a row.
+
+## Differences from upstream
+
+- Upstream's Kbd is an inline `<kbd>` that sits inside a line of text. React Native cannot lay a view out
+  inside a Text on every platform, so put a Kbd beside its sentence in a row, as the demo does.
+- Upstream sizes the key to its content with `w-fit`, which neither engine draws. The native Kbd keeps to the
+  width of its label by not stretching in its parent.
+- Inside a tooltip, upstream draws the key in the tooltip's colours. The native Kbd keeps its own colours.

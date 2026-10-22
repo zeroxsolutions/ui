@@ -1,0 +1,78 @@
+---
+title: Slider
+description: A value, or a range of values, picked by dragging a thumb along a track.
+---
+
+<NativePreview name="slider-demo" />
+
+## Installation
+
+<InstallCommand name="slider" />
+
+The CLI writes `components/ui/slider.tsx` and installs Utils. It adds no package.
+
+## Usage
+
+```tsx
+import { Slider } from '@/components/ui/slider';
+```
+
+```tsx
+<Slider defaultValue={50} max={100} step={1} aria-label="Volume" />
+```
+
+## API reference
+
+### Slider
+
+Takes every prop of React Native's `View` except `children`, plus:
+
+| Prop                     | Type                                                                          | Default        |
+| ------------------------ | ----------------------------------------------------------------------------- | -------------- |
+| `value`                  | `number \| readonly number[]`                                                 | -              |
+| `defaultValue`           | `number \| readonly number[]`                                                 | `[min, max]`   |
+| `onValueChange`          | `(value: number \| readonly number[], details: { activeThumbIndex }) => void` | -              |
+| `onValueCommitted`       | `(value: number \| readonly number[]) => void`                                | -              |
+| `min`                    | `number`                                                                      | `0`            |
+| `max`                    | `number`                                                                      | `100`          |
+| `step`                   | `number`                                                                      | `1`            |
+| `largeStep`              | `number`                                                                      | `10`           |
+| `minStepsBetweenValues`  | `number`                                                                      | `0`            |
+| `thumbCollisionBehavior` | `'push' \| 'swap' \| 'none'`                                                  | `'push'`       |
+| `orientation`            | `'horizontal' \| 'vertical'`                                                  | `'horizontal'` |
+| `disabled`               | `boolean`                                                                     | `false`        |
+| `format`                 | `Intl.NumberFormatOptions`                                                    | -              |
+| `locale`                 | `Intl.LocalesArgument`                                                        | -              |
+| `getAriaValueText`       | `(formattedValue: string, value: number, index: number) => string`            | -              |
+| `aria-label`             | `string`                                                                      | -              |
+| `aria-labelledby`        | `string`                                                                      | -              |
+
+A number draws one thumb and an array one thumb per entry. With neither `value` nor `defaultValue`, two thumbs
+sit at `min` and `max`. `onValueChange` gets the value in the shape it was given in; with `value` passed, the
+thumbs follow `value` and a drag only reports the change through it. `onValueCommitted` runs once a change is
+finished: a drag released, a key pressed or a screen reader's adjustment.
+
+A press on the track moves the nearest thumb there, and the thumb follows the finger or the pointer until it
+lets go. Every value is rounded to a multiple of `step` from `min`. A thumb dragged into its neighbour pushes it
+along, hands the drag on to it or stops there, by `thumbCollisionBehavior`, keeping `minStepsBetweenValues`
+steps between them, as Base UI does; the keyboard and a screen reader stop
+it there. A vertical slider rises from `min` at the bottom, and takes its height from its parent or a class.
+
+Each thumb is announced as adjustable, with the slider's range, its value, and its value as text: the value
+written by `format` and `locale`, followed in a two-thumb range by "start range" or "end range", or what
+`getAriaValueText` returns. A screen reader's swipe up or down moves it a step. On the web each thumb takes
+focus, and the arrow keys move it a step, Page Up, Page Down and a Shift-held arrow key move it `largeStep`, and
+Home and End move it to the end of its room. Every thumb takes its name from `aria-label` or the Label
+`aria-labelledby` names; iOS reads only `aria-label`, so pass the Label's text there too.
+
+## Differences from upstream
+
+- Built on React Native's touch responder, where upstream is Base UI's Slider. `@rn-primitives/slider` holds one
+  value, and drags nothing on a device.
+- Upstream's `onValueChange` passes Base UI's event details; this one passes only `activeThumbIndex`, since a
+  device's touch has no event to cancel.
+- `name`, `form` and `inputRef` are left out: React Native has no form for a hidden input to submit with.
+- On a device a thumb's value is always read as text. Without it iOS reads the value as a percentage of the
+  range, so a slider from 0 to 1 at 0.3 would be read as "30%".
+- The track takes presses 12px above and below itself on a device, where upstream's hit area is the track
+  alone, so a thumb is reachable by a finger.

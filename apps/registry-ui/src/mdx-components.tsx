@@ -1,5 +1,6 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
+import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
 import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
 import {
   SourceCodeBlockActions,
@@ -34,6 +35,7 @@ import { WebComponentsJson } from '@/app/(app)/docs/[[...slug]]/_components/data
 import { ComponentsJson } from '@/app/(app)/native/_components/data-display/components-json';
 import { EngineTab, EngineTabs } from '@/app/(app)/native/_components/data-display/engine-tabs';
 import { InstallCommand } from '@/app/(app)/native/_components/data-display/install-command';
+import { NativeDocsLink } from '@/app/(app)/native/_components/data-display/native-docs-link';
 import { NativePreview } from '@/app/(app)/native/_components/data-display/native-preview';
 
 /** The text a node renders, as a reader would copy it. */
@@ -172,7 +174,14 @@ export function nativeMdxComponents(engine?: NativeEngine) {
   return {
     ...mdxComponents,
     a: ({ href, ...props }: ComponentProps<'a'>) =>
-      mdxComponents.a({ href: engine && href ? withNativeEngine(href, engine) : href, ...props }),
+      engine ? (
+        mdxComponents.a({
+          href: href ? withNativeEngine(href, engine) : href,
+          ...props,
+        })
+      ) : (
+        <NativeDocsLink href={href} {...props} />
+      ),
     EngineTabs: (props: Omit<ComponentProps<typeof EngineTabs>, 'engine'>) => <EngineTabs engine={engine} {...props} />,
     EngineTab,
     InstallCommand: (props: Omit<ComponentProps<typeof InstallCommand>, 'engine' | 'origin'>) => (
@@ -181,6 +190,8 @@ export function nativeMdxComponents(engine?: NativeEngine) {
     ComponentsJson: (props: Omit<ComponentProps<typeof ComponentsJson>, 'origin'>) => (
       <ComponentsJson origin={registryHomepage} {...props} />
     ),
-    NativePreview,
+    NativePreview: (props: Omit<ComponentProps<typeof NativePreview>, 'engine'>) => (
+      <NativePreview engine={engine ?? DEFAULT_NATIVE_ENGINE} {...props} />
+    ),
   };
 }

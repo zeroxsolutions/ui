@@ -15,7 +15,7 @@
       "@styles/*": ["../../packages/native-ui/dist/src/nativewind-*"]
     }
   },
-  "files": ["src/test-setup.ts"],
+  "files": ["src/test-setup.ts", "nativewind-env.d.ts", "css.d.ts"],
   "include": [
     "jest.config.cts",
     "preview-style.js",

@@ -15,25 +15,48 @@
       "import": "./src/examples/index.ts",
       "default": "./src/examples/index.ts"
     },
+    "./preview": {
+      "types": "./src/preview/index.ts",
+      "import": "./src/preview/index.ts",
+      "default": "./src/preview/index.ts"
+    },
     "./package.json": "./package.json"
   },
+  "scripts": {
+    "upstream-refresh": "node tools/upstream-refresh.mts"
+  },
   "dependencies": {
+    "@rn-primitives/accordion": "catalog:rn-primitives",
+    "@rn-primitives/alert-dialog": "catalog:rn-primitives",
+    "@rn-primitives/aspect-ratio": "catalog:rn-primitives",
     "@rn-primitives/avatar": "catalog:rn-primitives",
     "@rn-primitives/checkbox": "catalog:rn-primitives",
+    "@rn-primitives/collapsible": "catalog:rn-primitives",
+    "@rn-primitives/context-menu": "catalog:rn-primitives",
+    "@rn-primitives/dialog": "catalog:rn-primitives",
+    "@rn-primitives/dropdown-menu": "catalog:rn-primitives",
+    "@rn-primitives/hover-card": "catalog:rn-primitives",
     "@rn-primitives/label": "catalog:rn-primitives",
+    "@rn-primitives/menubar": "catalog:rn-primitives",
+    "@rn-primitives/popover": "catalog:rn-primitives",
+    "@rn-primitives/portal": "catalog:rn-primitives",
     "@rn-primitives/progress": "catalog:rn-primitives",
     "@rn-primitives/radio-group": "catalog:rn-primitives",
+    "@rn-primitives/select": "catalog:rn-primitives",
     "@rn-primitives/separator": "catalog:rn-primitives",
     "@rn-primitives/slot": "catalog:rn-primitives",
     "@rn-primitives/switch": "catalog:rn-primitives",
+    "@rn-primitives/table": "catalog:rn-primitives",
     "@rn-primitives/tabs": "catalog:rn-primitives",
     "@rn-primitives/toggle": "catalog:rn-primitives",
     "@rn-primitives/toggle-group": "catalog:rn-primitives",
+    "@rn-primitives/tooltip": "catalog:rn-primitives",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
+    "date-fns": "catalog:",
     "lucide-react-native": "catalog:",
     "react-native-svg": "catalog:expo",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "catalog:"
   },
   "devDependencies": {
     "@babel/runtime": "~7.27.6",
@@ -49,6 +72,8 @@
     "babel-preset-expo": "catalog:expo",
     "expo": "catalog:expo",
     "expo-font": "catalog:expo",
+    "expo-splash-screen": "catalog:expo",
+    "expo-status-bar": "catalog:expo",
     "jest": "catalog:",
     "jest-environment-jsdom": "~30.3.0",
     "jest-expo": "catalog:expo",
@@ -57,6 +82,9 @@
     "react": "catalog:",
     "react-native": "catalog:expo",
     "react-native-css-interop": "catalog:",
+    "react-native-reanimated": "catalog:expo",
+    "react-native-safe-area-context": "catalog:expo",
+    "react-native-worklets": "catalog:expo",
     "react-test-renderer": "catalog:",
     "shadcn": "catalog:",
     "ts-jest": "^29.4.7",
@@ -101,14 +129,6 @@
           "^typecheck",
           "build-registry"
         ]
-      },
-      "sync-upstream-styles": {
-        "executor": "nx:run-commands",
-        "cache": false,
-        "options": {
-          "cwd": "{projectRoot}",
-          "command": "node tools/sync-upstream-styles.mts {args.commit}"
-        }
       }
     },
     "name": "@zeroxsolutions/native-ui"

@@ -109,10 +109,10 @@ describe('emitSource', () => {
   });
 
   it('throws when a slot holds a class with no rule, naming the registry', () => {
-    const custom = new Map([['cn-thing', ['sm:h-9']]]);
+    const custom = new Map([['cn-thing', ['starting:h-9']]]);
 
     expect(() => emitSource("'cn-thing'", { name: 'vega', slots: custom }, 'nativewind', 'thing.tsx')).toThrow(
-      'Untranslated sm:h-9 in cn-thing (nativewind-vega)',
+      'Untranslated starting:h-9 in cn-thing (nativewind-vega)',
     );
   });
 
@@ -157,11 +157,17 @@ describe('emitSource', () => {
     );
   });
 
-  it('throws on a slot this style lacks even when another style declares it', () => {
+  it('removes a slot this style lacks and another style declares, as upstream draws nothing for it', () => {
     const other = new Map([['cn-only-elsewhere', ['p-2']]]);
 
-    expect(() => emitSource("'cn-only-elsewhere'", vega, 'uniwind', 'thing.tsx', [other])).toThrow(
-      'Unknown slot cn-only-elsewhere in thing.tsx (uniwind-vega)',
+    expect(emitSource("'flex-row cn-only-elsewhere'", vega, 'uniwind', 'thing.tsx', [other])).toBe("'flex-row'");
+  });
+
+  it('throws on a slot no style declares, so a typo cannot ship as nothing', () => {
+    const other = new Map([['cn-only-elsewhere', ['p-2']]]);
+
+    expect(() => emitSource("'cn-only-elswhere'", vega, 'uniwind', 'thing.tsx', [other])).toThrow(
+      'Unknown slot cn-only-elswhere in thing.tsx (uniwind-vega)',
     );
   });
 

@@ -5,7 +5,7 @@ import { Suspense, type ReactNode } from 'react';
 import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
 import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
 import { useCurrentStyle } from '@/hooks/use-current-style';
-import { registryStyle } from '@/lib/style-choice';
+import { nativeComponentsJson } from '@/lib/native-install';
 import type { NativeEngine } from '@/types/native-engine';
 import type { PlatformStyle } from '@/types/platform';
 
@@ -35,29 +35,13 @@ function ComponentsJsonBlock({
   origin,
   style,
 }: ComponentsJsonProps & { style: PlatformStyle<'native'> }): ReactNode {
-  const json = {
-    $schema: 'https://ui.shadcn.com/schema.json',
-    style: registryStyle({ platform: 'native', engine, style }),
-    rsc: false,
-    tsx: true,
-    tailwind: {
-      config: engine === 'nativewind' ? 'tailwind.config.js' : '',
-      css: 'global.css',
-      baseColor: 'neutral',
-      cssVariables: true,
-    },
-    aliases: {
-      components: '@/components',
-      ui: '@/components/ui',
-      lib: '@/lib',
-      utils: '@/lib/utils',
-      hooks: '@/hooks',
-    },
-    registries: { '@zui': `${origin}/r/styles/{style}/{name}.json` },
-  };
-
   return (
-    <DocsCodeBlock code={JSON.stringify(json, null, 2)} language="json" title="components.json" className="mt-6" />
+    <DocsCodeBlock
+      code={nativeComponentsJson({ engine, style, origin })}
+      language="json"
+      title="components.json"
+      className="mt-6"
+    />
   );
 }
 

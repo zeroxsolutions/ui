@@ -1,0 +1,80 @@
+---
+title: Collapsible
+description: A region a trigger shows and hides.
+---
+
+<NativePreview name="collapsible-demo" />
+
+## Installation
+
+<InstallCommand name="collapsible" />
+
+The CLI writes `components/ui/collapsible.tsx`, installs Utils, and adds `@rn-primitives/collapsible`.
+
+## Usage
+
+```tsx
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Collapsible>
+  <CollapsibleTrigger>
+    <Text>Can I use this in my project?</Text>
+  </CollapsibleTrigger>
+  <CollapsibleContent>
+    <Text>Yes. Free to use for personal and commercial projects.</Text>
+  </CollapsibleContent>
+</Collapsible>
+```
+
+To make a [Button](/native/components/nativewind/button) the trigger, pass `asChild` and name an icon-only
+Button with `aria-label`:
+
+```tsx
+<CollapsibleTrigger asChild>
+  <Button variant="ghost" size="icon" aria-label="Toggle">
+    <Icon as={ChevronsUpDown} />
+  </Button>
+</CollapsibleTrigger>
+```
+
+## API reference
+
+### Collapsible
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop           | Type                      | Default |
+| -------------- | ------------------------- | ------- |
+| `open`         | `boolean`                 | -       |
+| `defaultOpen`  | `boolean`                 | `false` |
+| `onOpenChange` | `(open: boolean) => void` | -       |
+| `disabled`     | `boolean`                 | `false` |
+
+Without `open` it holds its own state, starting from `defaultOpen`. With `open` it follows it, and a press
+calls `onOpenChange` with the new value. It draws nothing of its own.
+
+### CollapsibleTrigger
+
+Takes every prop of React Native's `Pressable`, plus `asChild`. It is announced as a button with its expanded
+state, named by its Text children. A disabled Collapsible's trigger is announced disabled and ignores
+presses.
+
+### CollapsibleContent
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type      | Default |
+| ------------- | --------- | ------- |
+| `keepMounted` | `boolean` | `false` |
+
+A closed content is not rendered, so what it holds loses its state. With `keepMounted` it stays rendered
+while closed, hidden and out of the screen reader's reach.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- Upstream's `hiddenUntilFound` is left out: it lets the browser's find-in-page open the panel, and a
+  device has no find-in-page.

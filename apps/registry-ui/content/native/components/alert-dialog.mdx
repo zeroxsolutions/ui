@@ -1,0 +1,130 @@
+---
+title: Alert dialog
+description: A dialog that asks to confirm or acknowledge something before going on.
+---
+
+<NativePreview name="alert-dialog-demo" />
+
+## Installation
+
+<InstallCommand name="alert-dialog" />
+
+The CLI writes `components/ui/alert-dialog.tsx`, `lib/motion.ts` and `lib/overlay.ts`, installs
+[Button](/native/components/nativewind/button), [Icon](/native/components/nativewind/icon),
+[Text](/native/components/nativewind/text) and Utils, and adds `@rn-primitives/alert-dialog`,
+`@rn-primitives/portal`, `react-native-reanimated` and `react-native-worklets`. The content draws in the app's
+`PortalHost`; see [Add a portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing,
+and logs an error saying so while the app is in development.
+
+## Usage
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<AlertDialog open={open} onOpenChange={setOpen}>
+  <AlertDialogTrigger asChild>
+    <Button variant="outline">
+      <Text>Delete account</Text>
+    </Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+      <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>
+        <Text>Cancel</Text>
+      </AlertDialogCancel>
+      <AlertDialogAction onPress={() => deleteAccount().then(() => setOpen(false))}>
+        <Text>Continue</Text>
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>;
+```
+
+## API reference
+
+### AlertDialog
+
+Takes every prop of React Native's `View`, plus `open`, `defaultOpen` and `onOpenChange(open)`. Without `open`
+the AlertDialog holds its own state, starting from `defaultOpen`.
+
+### AlertDialogTrigger
+
+Takes every prop of React Native's `Pressable`. Pressing it opens the AlertDialog. Pass `asChild` to make a Button
+the trigger. Focus returns to it when the AlertDialog closes.
+
+### AlertDialogContent
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop         | Type                | Default     |
+| ------------ | ------------------- | ----------- |
+| `size`       | `'default' \| 'sm'` | `'default'` |
+| `portalHost` | `string`            | -           |
+
+The content is centred over a dimmed overlay, at the style's narrow width. It is a modal `alertdialog` named by its
+AlertDialogTitle. Accessibility focus moves into it as it opens. A press on the overlay does not close it. The
+Android back button, the iOS escape gesture (a two-finger Z) and Escape on the web do. `size="sm"` sets the
+footer's two buttons side by side at equal widths. It fades in and zooms from 95% over 100ms, and out the same way.
+When the system asks for reduced motion it appears and goes at once.
+
+VoiceOver stays inside the alert dialog while it is open. TalkBack does once the app hides its screens from screen
+readers while an overlay is shown, as [Add a portal host](/native/docs/installation#add-a-portal-host) shows; the
+web hides the rest of the page itself.
+
+### AlertDialogHeader and AlertDialogFooter
+
+Take every prop of React Native's `View`. The header centres its children. The footer stacks its children with the
+first at the bottom; put AlertDialogCancel first so the action sits on top.
+
+### AlertDialogMedia
+
+Takes every prop of React Native's `View`: a square tile above the title for an
+[Icon](/native/components/nativewind/icon), which it sizes.
+
+### AlertDialogTitle and AlertDialogDescription
+
+Take every prop of [Text](/native/components/nativewind/text). The title is a heading.
+
+### AlertDialogAction and AlertDialogCancel
+
+Both are [Buttons](/native/components/nativewind/button) and take its props. AlertDialogCancel is outline by
+default and closes the AlertDialog. AlertDialogAction does not close it: close it from `onPress` through `open` and
+`onOpenChange` once the action has run, as the usage above does.
+
+### AlertDialogOverlay and AlertDialogPortal
+
+AlertDialogContent already draws an AlertDialogOverlay inside an AlertDialogPortal, so you only need them to build
+content of your own.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- On iOS, VoiceOver does not read `aria-labelledby`, so the dialog is not announced by its title's name there.
+  Focus moves into the content, where the title is the first thing read. Android and the web read the name.
+- The header stays centred and the footer stacks its buttons. Upstream aligns the default size to the left, sets
+  the media beside the title and the footer in a row from the `sm` breakpoint, which a phone held upright does not
+  reach.
+- Upstream blurs the screen behind the overlay. React Native has no backdrop blur.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseSlotMap } from './slot-map';
-import { parseSpacingVariables, translateClasses, type Engine } from './translate';
+import { parseSpacingVariables, translateClasses, type Engine, type Translation } from './translate';
 
 const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-vega.css');
 const NOVA_SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-nova.css');
@@ -136,6 +136,16 @@ describe('translateClasses', () => {
     });
   });
 
+  it.each(['sm', 'md'])(
+    'keeps the base class a style widens at %s, which a phone held upright is below',
+    (breakpoint) => {
+      expect(translateClasses(['gap-1.5', `${breakpoint}:gap-2.5`], 'uniwind', 'view')).toEqual({
+        classes: ['gap-1.5'],
+        unknown: [],
+      });
+    },
+  );
+
   it('drops the classes no touch screen uses', () => {
     const result = translateClasses(
       ['outline-hidden', 'ring-2', 'transition-all', 'select-none', 'cursor-pointer', 'p-2'],
@@ -145,6 +155,13 @@ describe('translateClasses', () => {
 
     expect(result).toEqual({ classes: ['p-2'], unknown: [] });
   });
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    'drops w-fit, a width neither engine draws, for the self-start the component sets, for %s',
+    (engine) => {
+      expect(translateClasses(['w-fit', 'h-5'], engine, 'view')).toEqual({ classes: ['h-5'], unknown: [] });
+    },
+  );
 
   it('reports starting:opacity-0 as unknown', () => {
     const result = translateClasses(['starting:opacity-0', 'p-2'], 'uniwind', 'view');
@@ -207,9 +224,9 @@ describe('translateClasses', () => {
   });
 
   it('reports a state modifier the state table has no row for, rather than dropping it', () => {
-    const result = translateClasses(['data-highlighted:bg-accent', 'p-2'], 'uniwind', 'view');
+    const result = translateClasses(['data-starting-style:bg-accent', 'p-2'], 'uniwind', 'view');
 
-    expect(result).toEqual({ classes: ['p-2'], unknown: ['data-highlighted:bg-accent'] });
+    expect(result).toEqual({ classes: ['p-2'], unknown: ['data-starting-style:bg-accent'] });
   });
 
   it.each(['nativewind', 'uniwind'] as const)(
@@ -379,7 +396,10 @@ describe('translateClasses with a state', () => {
       const result = translateClasses(['border', 'border-border', 'ring-1', 'ring-foreground/10'], 'uniwind', 'view');
 
       expect(result).toEqual({ classes: ['border', 'border-border'], unknown: [] });
-      expect(translateClasses(['border-2', 'ring-1', 'ring-ring'], 'uniwind', 'view').classes).toEqual(['border-2']);
+      expect(translateClasses(['border-2', 'ring-1', 'ring-ring'], 'uniwind', 'view').classes).toEqual([
+        'border-2',
+        'border-border',
+      ]);
     });
 
     it('leaves Badge outline with its one border', () => {
@@ -684,4 +704,433 @@ describe('translateClasses for a direct child in a variant', () => {
     expect(translateClasses(slot, 'uniwind', 'view')).toEqual({ classes: [], unknown: [] });
     expect(translateClasses(slot, 'uniwind', 'view', 'slot=field')).toEqual({ classes: [], unknown: [] });
   });
+});
+
+describe('translateClasses for a direct child', () => {
+  it("gives a direct child svg's size to the icon part", () => {
+    expect(translateClasses(["*:[svg:not([class*='size-'])]:size-4", 'p-2'], 'uniwind', 'icon').classes).toEqual([
+      'size-4',
+    ]);
+  });
+
+  it('puts a class for the direct child of a slot behind the state part=<slot>, for the child to apply', () => {
+    const slot = ['text-destructive', '*:data-[slot=alert-description]:text-destructive/90'];
+
+    expect(translateClasses(slot, 'uniwind', 'text').classes).toEqual(['text-destructive']);
+    expect(translateClasses(slot, 'uniwind', 'text', 'part=alert-description').classes).toEqual([
+      'text-destructive/90',
+    ]);
+  });
+});
+
+describe('translateClasses for an alert', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const alert = (style: keyof typeof styles, engine: Engine, state = ''): string[] =>
+    translateClasses(styles[style].get('cn-alert') ?? [], engine, 'view', state, { name: 'cn-alert' }).classes;
+
+  it.each(STYLE_ENGINES)('lays the alert out with no grid for %s in %s', (engine, style) => {
+    expect(alert(style, engine)).not.toContain('grid');
+    expect(alert(style, engine, 'slot=icon')).not.toContain('grid-cols-[auto_1fr]');
+  });
+
+  it.each([
+    ['vega', 'gap-x-2.5'],
+    ['nova', 'gap-x-2'],
+  ] as const)('spaces %s alert icon from its text by %s while it holds an icon', (style, gap) => {
+    expect(alert(style, 'uniwind', 'slot=icon')).toEqual([gap]);
+  });
+
+  it('makes room for an action by a Tailwind 4 step Tailwind 3 lacks, as its px for nativewind', () => {
+    expect(alert('vega', 'uniwind', 'slot=alert-action')).toEqual(['relative', 'pr-18']);
+    expect(alert('vega', 'nativewind', 'slot=alert-action')).toEqual(['relative', 'pr-[72px]']);
+  });
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    'drops text-balance, a text wrap neither engine draws, from the description for %s',
+    (engine) => {
+      expect(
+        translateClasses(styles.vega.get('cn-alert-description') ?? [], engine, 'text', '', {
+          name: 'cn-alert-description',
+        }).classes,
+      ).toEqual(['text-muted-foreground', 'text-sm']);
+    },
+  );
+});
+
+describe('translateClasses for a button group', () => {
+  it.each(STYLE_ENGINES)('spaces a group of groups apart for %s in %s', (engine, style) => {
+    const slots = parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8'));
+
+    expect(
+      translateClasses(slots.get('cn-button-group') ?? [], engine, 'view', 'slot=button-group', {
+        name: 'cn-button-group',
+      }),
+    ).toEqual({ classes: ['gap-2'], unknown: [] });
+  });
+});
+
+describe('translateClasses for a pagination link', () => {
+  it.each([
+    ['vega', 'cn-pagination-previous', 'pl-2'],
+    ['vega', 'cn-pagination-next', 'pr-2'],
+    ['nova', 'cn-pagination-previous', 'pl-1.5'],
+  ] as const)("draws %s %s's important side padding as %s, which its component merges last", (style, name, padding) => {
+    const slots = parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8'));
+
+    for (const engine of ['nativewind', 'uniwind'] as const) {
+      expect(translateClasses(slots.get(name) ?? [], engine, 'view', '', { name })).toEqual({
+        classes: [padding],
+        unknown: [],
+      });
+    }
+  });
+
+  it('still reports an important suffix on a slot of another name', () => {
+    expect(translateClasses(['pl-2!'], 'uniwind', 'view', '', { name: 'cn-other' }).unknown).toEqual(['pl-2!']);
+  });
+});
+
+describe('translateClasses for a table', () => {
+  const slots = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));
+  const view = (name: string, engine: Engine): string[] =>
+    translateClasses(slots.get(name) ?? [], engine, 'view', '', { name }).classes;
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    'drops the table layout React Native has no counterpart of, a caption side, a vertical align and an axis overflow, for %s',
+    (engine) => {
+      expect(view('cn-table-container', engine)).toEqual(['relative', 'w-full']);
+      expect(view('cn-table', engine)).toEqual(['w-full']);
+      expect(view('cn-table-cell', engine)).toEqual(['p-2']);
+      expect(view('cn-table-head', engine)).toEqual(['h-10', 'px-2']);
+    },
+  );
+
+  it('puts the selected row colour behind the state state=selected', () => {
+    expect(
+      translateClasses(slots.get('cn-table-row') ?? [], 'uniwind', 'view', 'state=selected', { name: 'cn-table-row' })
+        .classes,
+    ).toEqual(['bg-muted']);
+  });
+});
+
+describe('translateClasses for a field', () => {
+  it.each(STYLE_ENGINES)('pulls a description up under a legend for %s in %s', (engine, style) => {
+    const slots = parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8'));
+    const description = slots.get('cn-field-description') ?? [];
+    const slot = { name: 'cn-field-description' };
+
+    expect(translateClasses(description, engine, 'view', '', slot)).toEqual({ classes: [], unknown: [] });
+    expect(translateClasses(description, engine, 'view', 'after=legend', slot).classes).toEqual(['-mt-1.5']);
+  });
+});
+
+describe("translateClasses for a border upstream's base layer colours", () => {
+  it.each(['nativewind', 'uniwind'] as const)(
+    'gives a border width with no colour of its own the border colour for %s',
+    (engine) => {
+      expect(translateClasses(['rounded-lg', 'border', 'px-4'], engine, 'view').classes).toEqual([
+        'rounded-lg',
+        'border',
+        'border-border',
+        'px-4',
+      ]);
+      expect(translateClasses(['border-b'], engine, 'view').classes).toEqual(['border-b', 'border-border']);
+    },
+  );
+
+  it('keeps a colour the slot names, and adds none to a slot with no border width', () => {
+    expect(translateClasses(['border', 'border-input'], 'uniwind', 'view').classes).toEqual(['border', 'border-input']);
+    expect(translateClasses(['border-dashed', 'p-6'], 'uniwind', 'view').classes).toEqual(['border-dashed', 'p-6']);
+    expect(translateClasses(['border-0', 'p-6'], 'uniwind', 'view').classes).toEqual(['border-0', 'p-6']);
+    expect(translateClasses(['border', 'border-dashed'], 'uniwind', 'view').classes).toEqual([
+      'border',
+      'border-border',
+      'border-dashed',
+    ]);
+  });
+
+  it('adds no colour to the classes behind a state that draw no border', () => {
+    expect(translateClasses(['border', 'data-checked:bg-primary'], 'uniwind', 'view', 'checked').classes).toEqual([
+      'bg-primary',
+    ]);
+  });
+
+  it.each(STYLE_ENGINES)(
+    "gives a border width behind a state the border colour when the slot names none, as Sheet's side does, for %s in %s",
+    (engine, style) => {
+      const slots = parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8'));
+      const name = 'cn-sheet-content';
+
+      expect(translateClasses(slots.get(name) ?? [], engine, 'view', 'side=bottom', { name }).classes).toEqual(
+        expect.arrayContaining(['border-t', 'border-border']),
+      );
+    },
+  );
+
+  it('leaves a border width behind a state to the colour the slot names with no state', () => {
+    expect(
+      translateClasses(['border-y', 'border-input', 'data-[side=left]:border-l'], 'uniwind', 'view', 'side=left')
+        .classes,
+    ).toEqual(['border-l']);
+  });
+});
+
+describe('translateClasses for an accordion', () => {
+  const slotOf = (style: keyof typeof SNAPSHOT_PATHS, name: string): readonly string[] =>
+    parseSlotMap(readFileSync(SNAPSHOT_PATHS[style], 'utf8')).get(name) ?? [];
+
+  it.each(STYLE_ENGINES)(
+    'draws the border under every item but the last, in the border colour, for %s in %s',
+    (engine, style) => {
+      const name = 'cn-accordion-item';
+      const item = slotOf(style, name);
+
+      expect(translateClasses(item, engine, 'view', '', { name })).toEqual({ classes: [], unknown: [] });
+      expect(translateClasses(item, engine, 'view', 'position=not-last', { name }).classes).toEqual([
+        'border-b',
+        'border-border',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    "gives the trigger's chevron its size and colour on the icon part for %s in %s",
+    (engine, style) => {
+      const name = 'cn-accordion-trigger';
+
+      expect(translateClasses(slotOf(style, name), engine, 'icon', '', { name }).classes).toEqual([
+        'text-muted-foreground',
+        'ml-auto',
+        'size-4',
+      ]);
+    },
+  );
+
+  it('keeps dropping a class for any other slot inside a part, such as a kbd', () => {
+    expect(translateClasses(['**:data-[slot=kbd]:rounded-sm', 'p-2'], 'uniwind', 'view').classes).toEqual(['p-2']);
+    expect(translateClasses(['**:data-[slot=kbd]:rounded-sm'], 'uniwind', 'icon').classes).toEqual([]);
+  });
+});
+
+describe('translateClasses for a grid', () => {
+  it.each(['nativewind', 'uniwind'] as const)(
+    'drops a grid and its tracks, a layout neither engine draws, for %s',
+    (engine) => {
+      const slot = ['grid', 'grid-rows-[auto_1fr]', 'grid-cols-2', 'row-span-2', 'col-start-2', 'gap-1.5'];
+
+      expect(translateClasses(slot, engine, 'view')).toEqual({ classes: ['gap-1.5'], unknown: [] });
+    },
+  );
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    "centres a grid's items across a View's column with items-center for %s",
+    (engine) => {
+      expect(translateClasses(['place-items-center'], engine, 'view').classes).toEqual(['items-center']);
+    },
+  );
+
+  it.each(['nativewind', 'uniwind'] as const)(
+    "lays an inline-flex box's children in a row, as the web's inline-flex does, with flex-row for %s",
+    (engine) => {
+      expect(translateClasses(['inline-flex', 'items-center'], engine, 'view')).toEqual({
+        classes: ['flex-row', 'items-center'],
+        unknown: [],
+      });
+    },
+  );
+});
+
+describe('translateClasses for a dialog', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+
+  it.each(STYLE_ENGINES)(
+    "draws the dialog's content with no width less a length, which the component's margin gives, for %s in %s",
+    (engine, style) => {
+      const { classes, unknown } = translateClasses(styles[style].get('cn-dialog-content') ?? [], engine, 'view', '', {
+        name: 'cn-dialog-content',
+      });
+
+      expect(unknown).toEqual([]);
+      expect(classes.filter((cls) => cls.startsWith('max-w-'))).toEqual([]);
+    },
+  );
+});
+
+describe('translateClasses for a fixed position', () => {
+  it.each(['nativewind', 'uniwind'] as const)(
+    'places a fixed part absolutely for %s, inside the portal host that fills the screen',
+    (engine) => {
+      expect(translateClasses(['fixed', 'inset-x-0'], engine, 'view').classes).toEqual(['absolute', 'inset-x-0']);
+    },
+  );
+});
+
+describe('translateClasses for a drawer swipe handle', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const handle = (style: keyof typeof styles, engine: Engine, state: string): string[] =>
+    translateClasses(styles[style].get('cn-drawer-swipe-handle') ?? [], engine, 'view', state, {
+      name: 'cn-drawer-swipe-handle',
+    }).classes;
+
+  it.each(STYLE_ENGINES)(
+    'gives the bar its ::after draws to the part=after child, with no display block, for %s in %s',
+    (engine, style) => {
+      expect([...handle(style, engine, 'part=after')].sort()).toEqual(['bg-muted', 'rounded-full', 'shrink-0']);
+    },
+  );
+
+  it.each([
+    ['vega', ['h-1.5', 'w-[100px]'], ['h-[100px]', 'w-1.5']],
+    ['nova', ['h-1', 'w-24'], ['h-24', 'w-1']],
+  ] as const)('sizes the %s bar across the axis it is swiped along', (style, across, along) => {
+    expect(handle(style, 'uniwind', 'part=after+swipe-axis=y')).toEqual(across);
+    expect(handle(style, 'uniwind', 'part=after+swipe-axis=x')).toEqual(along);
+  });
+
+  it('keeps dropping ::after classes for any other slot', () => {
+    expect(translateClasses(['after:bg-muted'], 'uniwind', 'view', 'part=after', { name: 'cn-field-label' })).toEqual({
+      classes: [],
+      unknown: [],
+    });
+  });
+});
+
+describe('translateClasses for a menu', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const MENU_SLOT =
+    /^cn-(dropdown-menu|context-menu|menubar|select|command|combobox)(-(?!chip|.*-(aria|logical)$)[\w-]+)?$/;
+  const menu = (style: keyof typeof styles, engine: Engine, name: string, part: 'view' | 'text', state = '') =>
+    translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
+
+  it.each(STYLE_ENGINES)('translates every slot of a menu for %s in %s with nothing unknown', (engine, style) => {
+    const menuSlots = [...styles[style]].filter(([name]) => MENU_SLOT.test(name));
+
+    expect(menuSlots.length).toBeGreaterThan(30);
+    for (const [name, classes] of menuSlots) {
+      for (const part of ['view', 'text', 'icon'] as const) {
+        expect({ name, part, unknown: translateClasses(classes, engine, part, '', { name }).unknown }).toEqual({
+          name,
+          part,
+          unknown: [],
+        });
+      }
+    }
+  });
+
+  it.each(STYLE_ENGINES)(
+    'puts the colours an item takes under the pointer, keyboard or finger behind highlighted for %s in %s',
+    (engine, style) => {
+      expect(menu(style, engine, 'cn-dropdown-menu-item', 'view', 'highlighted').classes).toEqual(['bg-accent']);
+      expect(menu(style, engine, 'cn-dropdown-menu-item', 'text', 'highlighted').classes).toEqual([
+        'text-accent-foreground',
+      ]);
+      expect(menu(style, engine, 'cn-dropdown-menu-shortcut', 'text', 'highlighted').classes).toEqual([
+        'text-accent-foreground',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)('tints a highlighted destructive item for %s in %s', (engine, style) => {
+    expect(menu(style, engine, 'cn-dropdown-menu-item', 'view', 'highlighted+variant=destructive').classes).toEqual([
+      'bg-destructive/10',
+      'dark:bg-destructive/20',
+    ]);
+  });
+
+  it.each([
+    ['vega', 'pl-8'],
+    ['nova', 'pl-7'],
+  ] as const)('indents an inset %s item to line up with a checked one', (style, indent) => {
+    expect(menu(style, 'uniwind', 'cn-dropdown-menu-item', 'view', 'inset').classes).toEqual([indent]);
+  });
+
+  it.each(STYLE_ENGINES)("mutes a select trigger's placeholder for %s in %s", (engine, style) => {
+    expect(menu(style, engine, 'cn-select-trigger', 'text', 'placeholder').classes).toEqual(['text-muted-foreground']);
+  });
+
+  it.each(STYLE_ENGINES)(
+    "draws a command's group heading through the state part=group-heading for %s in %s",
+    (engine, style) => {
+      expect(menu(style, engine, 'cn-command-group', 'view', 'part=group-heading').classes).toEqual(['px-2', 'py-1.5']);
+      expect(menu(style, engine, 'cn-command-group', 'text', 'part=group-heading').classes).toEqual([
+        'text-muted-foreground',
+        'text-xs',
+        'font-sans-medium',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'keeps the rounding and height a command marks important, which its merge order already lets win, for %s in %s',
+    (engine, style) => {
+      expect(menu(style, engine, 'cn-command', 'view').classes).toContain('rounded-xl');
+      expect(menu(style, engine, 'cn-command-input-group', 'view').classes).toEqual(
+        expect.arrayContaining(['h-8', 'rounded-lg', 'shadow-none']),
+      );
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    "drops a list's scrollbar rule, which a ScrollView draws by a prop, for %s in %s",
+    (engine, style) => {
+      expect(menu(style, engine, 'cn-command-list', 'view').classes).toEqual(['max-h-72']);
+    },
+  );
+
+  it.each(STYLE_ENGINES)("shows a combobox's empty message only in the empty state for %s in %s", (engine, style) => {
+    expect(menu(style, engine, 'cn-combobox-empty', 'view')).toEqual(
+      expect.objectContaining({ classes: expect.arrayContaining(['hidden']) }),
+    );
+    expect(menu(style, engine, 'cn-combobox-empty', 'view', 'empty').classes).toEqual(['flex']);
+  });
+
+  it.each(STYLE_ENGINES)(
+    "holds a combobox's list to the popup's height less its input, which the web clamps to the screen, for %s in %s",
+    (engine, style) => {
+      expect(menu(style, engine, 'cn-combobox-list', 'view').classes).toEqual(['max-h-[252px]', 'p-1']);
+      expect(menu(style, engine, 'cn-combobox-list', 'view', 'empty').classes).toEqual(['p-0']);
+    },
+  );
+});
+
+describe('translateClasses for a calendar', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const calendar = (style: keyof typeof styles, engine: Engine, state: string): Translation =>
+    translateClasses(styles[style].get('cn-calendar') ?? [], engine, 'view', state, {
+      name: 'cn-calendar',
+      spacingVariables: parseSpacingVariables(styles[style]),
+    });
+
+  it.each(STYLE_ENGINES)('pads the calendar, with no cell variables left, for %s in %s', (engine, style) => {
+    expect(calendar(style, engine, '')).toEqual({ classes: [style === 'vega' ? 'p-3' : 'p-2'], unknown: [] });
+  });
+
+  it.each([
+    ['vega', 'size-8', 'w-8', 'h-8'],
+    ['nova', 'size-7', 'w-7', 'h-7'],
+  ] as const)(
+    "sizes %s's day cells, weekday columns and caption from the style's cell size",
+    (style, cell, column, caption) => {
+      for (const engine of ['nativewind', 'uniwind'] as const) {
+        expect(calendar(style, engine, 'part=cell').classes).toEqual([cell]);
+        expect(calendar(style, engine, 'part=column').classes).toEqual([column]);
+        expect(calendar(style, engine, 'part=caption').classes).toEqual([caption, caption.replace('h-', 'px-')]);
+      }
+    },
+  );
 });

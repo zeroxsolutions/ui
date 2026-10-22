@@ -37,22 +37,28 @@ const KEPT_MODIFIERS: ReadonlySet<string> = new Set(['active', 'disabled', 'dark
 const HOLDING_MODIFIERS: ReadonlySet<string> = new Set(['not-aria-[haspopup]']);
 
 /**
- * Upstream's selectors for an svg inside the slot, or directly inside it, that names no size of its own.
+ * Upstream's selectors for an svg inside the slot, or directly inside it, that names no size of its own,
+ * and for the accordion trigger's chevron, which upstream selects by its slot anywhere inside the trigger.
  * A class behind one goes to the icon part with the selector removed, and Icon applies it only when it
  * names no size itself.
  */
-const ICON_MODIFIERS: ReadonlySet<string> = new Set(["[&_svg:not([class*='size-'])]", "[&>svg:not([class*='size-'])]"]);
+const ICON_MODIFIERS: ReadonlySet<string> = new Set([
+  "[&_svg:not([class*='size-'])]",
+  "[&>svg:not([class*='size-'])]",
+  "*:[svg:not([class*='size-'])]",
+  '**:data-[slot=accordion-trigger-icon]',
+]);
 
 /**
  * No touch screen produces these conditions, or nothing on a device matches the selector, so the
- * class is dropped with its modifier. A phone is narrower than `md`, so the base class a style widens
- * at `md` stands. The styles put only exit animations behind `data-closed`, which neither engine runs from
- * these utilities.
+ * class is dropped with its modifier. A phone held upright is narrower than `sm`, so the base class a
+ * style widens at `sm` or `md` stands. The styles put only exit animations behind `data-closed`, which
+ * neither engine runs from these utilities.
  */
 const DROPPED_MODIFIERS = [
   /^hover$/,
   /^focus-within$/,
-  /^md$/,
+  /^(sm|md)$/,
   /^print$/,
   /^file$/,
   /^after$/,
@@ -67,9 +73,11 @@ const DROPPED_MODIFIERS = [
 ] as const satisfies readonly RegExp[];
 
 /**
- * Each modifier a style puts a state behind, and the state it is. A `group-`, `peer-` or `has-` modifier,
- * its `/<group>` name removed, is the same state on the part's group, sibling or child, which the
- * component knows as its own. A bare `disabled:` stays the `Pressable`'s own and reaches this table
+ * Each modifier a style puts a state behind, and the state it is. `focus` is `highlighted` on every slot:
+ * the part a pointer, a key or a finger is on, which a component applies itself, since a device has no
+ * focus a press moves; a part whose focus is its keyboard focus uses `focus-visible`. A `group-`, `peer-` or
+ * `has-` modifier, its `/<group>` name removed, is the same state on the part's group, sibling or child,
+ * which the component knows as its own. A bare `disabled:` stays the `Pressable`'s own and reaches this table
  * only on a slot {@link SLOT_STATE_MODIFIERS} names; its `group-`, `peer-` and `has-` forms always do.
  */
 const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
@@ -93,25 +101,56 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'data-[disabled=true]': 'disabled',
     'focus-visible': 'focused',
     'data-focus-visible': 'focused',
+    focus: 'highlighted',
+    'data-highlighted': 'highlighted',
+    'data-inset': 'inset',
+    'data-placeholder': 'placeholder',
+    'data-empty': 'empty',
     'aria-expanded': 'expanded',
     'data-open': 'open',
     'data-horizontal': 'orientation=horizontal',
     'data-vertical': 'orientation=vertical',
     first: 'position=first',
     last: 'position=last',
+    'not-last': 'position=not-last',
   }),
 );
 
 /**
- * A state of the control inside the part, which upstream selects with an arbitrary `has-[...]` the
- * dropped `has-[` rule would otherwise remove, and which the component learns from its control.
+ * cmdk's group heading, which upstream selects by its attribute anywhere inside a Command's group; the
+ * group draws the heading itself, as its `group-heading` part.
+ */
+const COMMAND_GROUP_HEADING = '**:[[cmdk-group-heading]]';
+
+/**
+ * A state of the control inside the part, of a direct child the part holds, such as an icon in an
+ * Alert or a group in a ButtonGroup, or of the part just before it, such as the legend a FieldDescription
+ * follows, which upstream selects with an arbitrary selector the dropped rules would otherwise remove or
+ * not read, and which the component learns from its control, its children or its parent.
  */
 const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
   Object.entries({
     'has-[[data-slot=input-group-control]:focus-visible]': 'focused',
     'has-[[data-slot][aria-invalid=true]]': 'invalid',
+    'has-[>svg]': 'slot=icon',
+    'has-[>[data-slot=button-group]]': 'slot=button-group',
+    '[[data-variant=legend]+&]': 'after=legend',
+    [COMMAND_GROUP_HEADING]: 'part=group-heading',
   }),
 );
+
+/**
+ * `*:data-[slot=<part>]`, the classes a slot gives its direct child of that slot, such as the colour a
+ * destructive Alert gives its description, is the state `part=<part>`, which that child applies.
+ */
+const CHILD_SLOT = /^data-\[slot=([\w-]+)\]$/;
+const CHILD_PART_MODIFIER = /^\*:data-\[slot=([\w-]+)\]$/;
+
+/** `*:[svg...]`, upstream's other spelling of a direct child svg with no size of its own. */
+const CHILD_ICON = "[svg:not([class*='size-'])]";
+
+/** The slot `**:` selects as an icon anywhere inside the part; any other slot behind `**:` is dropped. */
+const DESCENDANT_ICON_SLOT = 'data-[slot=accordion-trigger-icon]';
 
 /**
  * A direct child in an alignment, such as `has-[>[data-align=block-end]]`, is the part's own variant
@@ -163,20 +202,62 @@ const RING_COLOUR = /^ring-(?!\d|inset|offset)([\w-]+(?:\/[\w.]+)?)$/;
 const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
 
 /**
+ * Upstream's base layer colours every border `border-border`, and a device draws a border with no colour
+ * black, so a slot that draws a border width and names no colour for it is given that colour after the
+ * width, where a colour a variant's slot names after it still wins. A width behind a state is given it
+ * too, unless the slot names a colour with no state, which the component applies beside the state.
+ */
+const BASE_BORDER_COLOUR = 'border-border';
+const BORDER_STYLE = /^border-(dashed|solid|dotted|double|none|hidden)$/;
+const BORDER_COLOUR = /^border(-[xytrblse])?-[a-z]/;
+
+function namesBorderColour(utility: string): boolean {
+  return BORDER_COLOUR.test(utility) && !BORDER_WIDTH.test(utility) && !BORDER_STYLE.test(utility);
+}
+
+/** `classes` with the base border colour after the first border width, when they name no colour. */
+function withBaseBorderColour(classes: readonly string[]): string[] {
+  const width = classes.findIndex((cls) => BORDER_WIDTH.test(cls) && !cls.endsWith('-0'));
+  if (width === -1 || classes.some(namesBorderColour)) return [...classes];
+  return [...classes.slice(0, width + 1), BASE_BORDER_COLOUR, ...classes.slice(width + 1)];
+}
+
+/**
  * Classes of one named slot that a device draws another way, unmodified as the styles write them. Upstream
  * centres the radio dot with an absolute 50% offset and a -50% translate; the indicator around it
  * already centres its child with flex, which both engines draw alike, where a percentage translate
- * is the engine's to resolve. The radio group's grid is a display neither engine draws, and a View
- * stacks its items in a column already. The one-time code's caret blinks by an animation upstream
+ * is the engine's to resolve. The one-time code's caret blinks by an animation upstream
  * defines in its own stylesheet, which neither engine's theme carries, so the caret is drawn steady.
+ * A dialog's content is as wide as the screen less 2rem, a percentage less a length neither engine
+ * computes; its component holds it 1rem in from each edge instead.
  */
 const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
-  ['cn-radio-group', new Set(['grid'])],
   [
     'cn-radio-group-indicator-icon',
     new Set(['absolute', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2']),
   ],
   ['cn-input-otp-caret-line', new Set(['animate-caret-blink'])],
+  ['cn-dialog-content', new Set(['max-w-[calc(100%-2rem)]'])],
+  ['cn-calendar', new Set(['[--cell-radius:var(--radius-md)]'])],
+]);
+
+/**
+ * Classes upstream's component writes inline that read a variable the slot defines, which the build adds
+ * to the slot behind the part state of the child that applies them, so the child takes the style's value.
+ * A calendar's day cells and navigation buttons are `--cell-size` square, its weekday columns that wide,
+ * and its caption that high with that room either side for the buttons. Upstream's `--cell-radius` is
+ * `--radius-md` in every style, which the component writes as `rounded-md`, so its definition is dropped.
+ */
+const SLOT_COMPONENT_CLASSES: ReadonlyMap<string, readonly string[]> = new Map([
+  [
+    'cn-calendar',
+    [
+      '*:data-[slot=cell]:size-(--cell-size)',
+      '*:data-[slot=column]:w-(--cell-size)',
+      '*:data-[slot=caption]:h-(--cell-size)',
+      '*:data-[slot=caption]:px-(--cell-size)',
+    ],
+  ],
 ]);
 
 /**
@@ -188,6 +269,30 @@ const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-input', new Set(['disabled'])],
   ['cn-textarea', new Set(['disabled'])],
 ]);
+
+/**
+ * Slots whose important suffix is removed. Pagination's previous and next links mark their side padding
+ * important to win over the Button size's; the component merges them after the Button's classes, where
+ * tailwind-merge keeps both and each engine draws a side padding over the axis one, so the order wins
+ * without the important neither engine has. A Command marks its rounding, and its input group the height,
+ * rounding and shadow, important over the Dialog's and the InputGroup's, which they are merged after.
+ */
+const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set([
+  'cn-pagination-previous',
+  'cn-pagination-next',
+  'cn-command',
+  'cn-command-dialog',
+  'cn-command-input-group',
+]);
+const IMPORTANT_SUFFIX = /!$/;
+
+/**
+ * Slots whose `::after` pseudo-element draws something a component draws as a child instead, so a class
+ * behind `after:` is the state `part=after`, which that child applies, rather than dropped. The drawer's
+ * swipe handle draws its bar this way.
+ */
+const SLOT_AFTER_PARTS: ReadonlySet<string> = new Set(['cn-drawer-swipe-handle']);
+const AFTER_PART_MODIFIER = '*:data-[slot=after]';
 
 /** The px of 1rem, which the theme's setup sets. */
 const REM_PX = 16;
@@ -203,13 +308,39 @@ const SPACING_STEP_PX = REM_PX / 4;
 const RADIUS_LESS_LENGTH = /^rounded(-[a-z]+)?-\[calc\(var\(--radius\)-([\d.]+)px\)\]$/;
 const REM_LENGTH = /^([\d.]+)rem$/;
 
-/** Utilities with nothing to draw on a device. */
+/**
+ * Utilities with nothing to draw on a device. Neither engine draws a `fit-content` width; a view is as
+ * wide as its content once its parent does not stretch it, which the component sets with `self-start`.
+ * React Native has no `text-wrap` to balance a line with, no overflow per axis (a ScrollView scrolls
+ * one, and hides its scrollbar by a prop), and no table layout: no caption side and no vertical align in a cell, which a Table lays out
+ * itself. Nor has it a grid or a block: a View stacks its children in a flex column, and a component
+ * that sets two side by side lays out the row itself.
+ */
 const DROPPED_UTILITIES = [
   /^(outline|ring|ring-offset|transition|duration|ease|whitespace|cursor|scroll)(-|$)/,
   /^select-none$/,
   /^bg-clip-padding$/,
+  /^no-scrollbar$/,
   /^group\//,
+  /^w-fit$/,
+  /^text-(balance|pretty)$/,
+  /^overflow-[xy]-/,
+  /^caption-(top|bottom)$/,
+  /^align-(baseline|top|middle|bottom|text-top|text-bottom|sub|super)$/,
+  /^block$/,
+  /^grid$/,
+  /^grid-(rows|cols)-/,
+  /^(row|col)-(span|start|end)-/,
 ] as const satisfies readonly RegExp[];
+
+/**
+ * A grid's `place-items-<align>`, which aligns each item across its cell; in the column a View stacks its
+ * children in, that is the cross axis `items-<align>` aligns.
+ */
+const PLACE_ITEMS = /^place-items-(start|end|center|stretch|baseline)$/;
+
+/** The web's `inline-flex`, which lays its children in a row; a View is a flex box already, in a column. */
+const INLINE_FLEX = /^inline-flex$/;
 
 /**
  * A radius `min(var(--radius-md), Npx)`, which neither engine evaluates. The theme's `--radius-md` is
@@ -239,6 +370,33 @@ const GEIST_FAMILY_UTILITIES = {
 } as const satisfies Readonly<Record<string, string>>;
 
 /**
+ * A utility on the spacing scale. Tailwind 4 draws any multiple of 0.25 as a step, where Tailwind 3,
+ * which NativeWind 4 runs on, draws only the steps of its default scale and nothing for another, such
+ * as the `pr-18` an Alert makes room for its action with.
+ */
+const SPACING_STEP_UTILITY =
+  /^(-?(?:p|m)[xytrblse]?|gap(?:-[xy])?|w|h|size|min-w|min-h|-?inset(?:-[xy])?|-?(?:top|right|bottom|left|start|end)|-?translate-[xy])-(\d+(?:\.\d+)?)$/;
+const TAILWIND_3_SPACING_STEPS: ReadonlySet<string> = new Set(
+  '0 0.5 1 1.5 2 2.5 3 3.5 4 5 6 7 8 9 10 11 12 14 16 20 24 28 32 36 40 44 48 52 56 60 64 72 80 96'.split(' '),
+);
+
+/** For NativeWind, a spacing step Tailwind 3 lacks as its px in an arbitrary value; any other utility as it is. */
+function toTailwind3Spacing(utility: string, engine: Engine): string {
+  const step = engine === 'nativewind' ? SPACING_STEP_UTILITY.exec(utility) : null;
+  if (!step || TAILWIND_3_SPACING_STEPS.has(step[2])) return utility;
+  return `${step[1]}-[${Number(step[2]) * SPACING_STEP_PX}px]`;
+}
+
+/**
+ * Renames on both engines. React Native has no fixed position; an overlay's parts are drawn in a portal host
+ * that fills the screen, where an absolute position is the fixed one.
+ */
+const SHARED_RENAMED_UTILITIES = {
+  ...GEIST_FAMILY_UTILITIES,
+  fixed: 'absolute',
+} as const satisfies Readonly<Record<string, string>>;
+
+/**
  * NativeWind 4 runs on Tailwind 3, whose scale steps are one below Tailwind 4's. A Tailwind 4 step
  * past the end of Tailwind 3's scale takes its value as an arbitrary one. The theme item sets the
  * radius steps from `sm` to `4xl` to upstream's own on both engines, so only `rounded-xs`, which it
@@ -246,14 +404,14 @@ const GEIST_FAMILY_UTILITIES = {
  */
 const RENAMED_UTILITIES = {
   nativewind: {
-    ...GEIST_FAMILY_UTILITIES,
+    ...SHARED_RENAMED_UTILITIES,
     'shadow-xs': 'shadow-sm',
     'shadow-sm': 'shadow',
     'rounded-xs': 'rounded-[0.125rem]',
     'blur-xs': 'blur-sm',
     'drop-shadow-xs': 'drop-shadow-sm',
   },
-  uniwind: GEIST_FAMILY_UTILITIES,
+  uniwind: SHARED_RENAMED_UTILITIES,
 } as const satisfies Record<Engine, Readonly<Record<string, string>>>;
 
 /** Weights the theme has no Geist family for, so a font cannot draw them. */
@@ -323,6 +481,8 @@ function stateOf(modifier: string): StateKey | undefined {
   if (childState) return childState;
   const childVariant = CHILD_VARIANT_MODIFIER.exec(modifier);
   if (childVariant) return `${childVariant[1]}=${childVariant[2]}`;
+  const childPart = CHILD_PART_MODIFIER.exec(modifier);
+  if (childPart) return `part=${childPart[1]}`;
   const own = modifier.replace(RELATIVE_PREFIX, '').replace(GROUP_NAME, '').replace(CHILD_PREFIX, '');
   for (const candidate of new Set([modifier, own])) {
     const state = STATE_MODIFIERS.get(candidate);
@@ -339,10 +499,34 @@ type SlotClass =
   | { reading: 'unknown'; source: string }
   | { reading: 'read'; source: string; utility: string; kept: string[]; states: string[]; onIcon: boolean };
 
-function readClass(cls: string, stateModifiers: ReadonlySet<string> = new Set()): SlotClass {
-  const variants = splitVariants(cls);
-  const utility = variants.pop() ?? '';
-  const modifiers = variants.filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m));
+/**
+ * Joins each `*` with the modifier after it when the pair names a direct child the build reads, and
+ * each `**` when the pair names the descendant icon it reads.
+ */
+function joinChildModifiers(modifiers: readonly string[]): string[] {
+  const joined: string[] = [];
+  for (let i = 0; i < modifiers.length; i += 1) {
+    const next = modifiers[i + 1];
+    if (modifiers[i] === '*' && next !== undefined && (next === CHILD_ICON || CHILD_SLOT.test(next))) {
+      joined.push(`*:${next}`);
+      i += 1;
+    } else if (modifiers[i] === '**' && (next === DESCENDANT_ICON_SLOT || `**:${next}` === COMMAND_GROUP_HEADING)) {
+      joined.push(`**:${next}`);
+      i += 1;
+    } else {
+      joined.push(modifiers[i]);
+    }
+  }
+  return joined;
+}
+
+function readClass(cls: string, stateModifiers: ReadonlySet<string> = new Set(), afterPart = false): SlotClass {
+  const split = splitVariants(cls);
+  const utility = split.pop() ?? '';
+  const variants = joinChildModifiers(split);
+  const modifiers = variants
+    .filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m))
+    .map((m) => (afterPart && m === 'after' ? AFTER_PART_MODIFIER : m));
   const isChildState = (m: string): boolean => CHILD_STATE_MODIFIERS.has(m) || CHILD_VARIANT_MODIFIER.test(m);
   if (modifiers.some((m) => !isChildState(m) && DROPPED_MODIFIERS.some((rule) => rule.test(m)))) {
     return { reading: 'dropped' };
@@ -462,6 +646,20 @@ function resolveRadiusLessLength(utility: string, radius: string | undefined): s
   return `rounded${less[1] ?? ''}-[${Math.round(px * 100) / 100}px]`;
 }
 
+/**
+ * A height of N spacing steps less M, clamped to the screen's available height less M, which only the
+ * web's popup positioner gives as a variable. A device's popup is held to the screen already, so the
+ * clamp becomes the px of N less M steps.
+ */
+const AVAILABLE_HEIGHT_CLAMP =
+  /^max-h-\[min\(calc\(--spacing\(([\d.]+)\)---spacing\(([\d.]+)\)\),calc\(var\(--available-height\)---spacing\(\2\)\)\)\]$/;
+
+function resolveAvailableHeightClamp(utility: string): string {
+  const clamp = AVAILABLE_HEIGHT_CLAMP.exec(utility);
+  if (!clamp) return utility;
+  return `max-h-[${(Number(clamp[1]) - Number(clamp[2])) * SPACING_STEP_PX}px]`;
+}
+
 /** The theme's `rounded-md` for a radius clamped at no less than it, or the utility itself. */
 function resolveClampedRadius(utility: string): string {
   const clamp = CLAMPED_RADIUS.exec(utility);
@@ -514,9 +712,13 @@ export function translateClasses(
   const droppedByName = (slot.name === undefined ? undefined : SLOT_DROPPED_CLASSES.get(slot.name)) ?? new Set();
   const stateModifiers = (slot.name === undefined ? undefined : SLOT_STATE_MODIFIERS.get(slot.name)) ?? new Set();
   const spacingVariables: SpacingVariables = slot.spacingVariables ?? new Map();
-  const read = classes
+  const importantRemoved = slot.name !== undefined && SLOT_IMPORTANT_REMOVED.has(slot.name);
+  const afterPart = slot.name !== undefined && SLOT_AFTER_PARTS.has(slot.name);
+  const componentClasses = (slot.name === undefined ? undefined : SLOT_COMPONENT_CLASSES.get(slot.name)) ?? [];
+  const read = [...classes, ...componentClasses]
     .filter((cls) => !droppedByName.has(cls))
-    .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers), spacingVariables));
+    .map((cls) => (importantRemoved ? cls.replace(IMPORTANT_SUFFIX, '') : cls))
+    .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers, afterPart), spacingVariables));
 
   const ringBorder = drawsRingAsBorder(read);
 
@@ -532,13 +734,17 @@ export function translateClasses(
       unknown.push(cls.source);
       continue;
     }
-    const utility = resolveClampedRadius(
-      resolveOwnSizeTranslate(
-        ringBorder && unmodified ? ringAsBorder(radiusLessLength) : radiusLessLength,
-        cls.states,
-        read,
+    const utility = resolveAvailableHeightClamp(
+      resolveClampedRadius(
+        resolveOwnSizeTranslate(
+          ringBorder && unmodified ? ringAsBorder(radiusLessLength) : radiusLessLength,
+          cls.states,
+          read,
+        ),
       ),
-    );
+    )
+      .replace(PLACE_ITEMS, 'items-$1')
+      .replace(INLINE_FLEX, 'flex-row');
     if (DROPPED_UTILITIES.some((rule) => rule.test(utility))) continue;
     if (untranslatable.some((rule) => rule.test(utility))) {
       unknown.push(cls.source);
@@ -546,8 +752,14 @@ export function translateClasses(
     }
 
     if (stateKeyOf(cls.states) !== wanted || partOf(utility, cls.onIcon) !== part) continue;
-    kept.push([...cls.kept, Object.hasOwn(renamed, utility) ? renamed[utility] : utility].join(':'));
+    const drawn = Object.hasOwn(renamed, utility) ? renamed[utility] : toTailwind3Spacing(utility, engine);
+    kept.push([...cls.kept, drawn].join(':'));
   }
 
-  return { classes: [...new Set(kept)], unknown };
+  const baseNamesColour = read.some(
+    (cls) =>
+      cls.reading === 'read' && cls.states.length === 0 && cls.kept.length === 0 && namesBorderColour(cls.utility),
+  );
+  const drawn = part === 'view' && (wanted === '' || !baseNamesColour) ? withBaseBorderColour(kept) : kept;
+  return { classes: [...new Set(drawn)], unknown };
 }

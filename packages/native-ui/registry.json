@@ -30,6 +30,55 @@
       ]
     },
     {
+      "name": "motion",
+      "type": "registry:lib",
+      "title": "Motion",
+      "description": "usePresence, which keeps an overlay drawn while it animates in and out, useReducedMotion, which reads whether the system asks for reduced motion, and usePopupMotion, the fade, grow and slide a menu, popover or tooltip opens and closes with.",
+      "dependencies": ["react-native-reanimated", "react-native-worklets"],
+      "files": [
+        {
+          "path": "src/registry/lib/motion.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "overlay",
+      "type": "registry:lib",
+      "title": "Overlay",
+      "description": "usePortalHostCheck, which reports in development an overlay shown while no PortalHost draws it, and useModalOverlay and useModalOverlayShown, which keep screen readers inside an open modal overlay.",
+      "files": [
+        {
+          "path": "src/registry/lib/overlay.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "menu",
+      "type": "registry:lib",
+      "title": "Menu",
+      "description": "useHighlight, which tracks whether a menu item is under a finger, the pointer or the keyboard's focus, pressClosing, what pressing an item does to its menu, webItemRole, an item's role on the web, and useMenuScrollHeight, the height a device scrolls a menu's items past.",
+      "files": [
+        {
+          "path": "src/registry/lib/menu.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "command-score",
+      "type": "registry:lib",
+      "title": "Command score",
+      "description": "commandScore, cmdk's fuzzy scorer, which Command filters its items with: how well the typed letters match a value and its keywords, in order.",
+      "files": [
+        {
+          "path": "src/registry/lib/command-score.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "text",
       "type": "registry:ui",
       "title": "Text",
@@ -163,6 +212,66 @@
       "files": [
         {
           "path": "src/registry/ui/progress.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "slider",
+      "type": "registry:ui",
+      "title": "Slider",
+      "description": "A value, or a range of values, picked by dragging a thumb along a track, each thumb announced as adjustable with its value.",
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/slider.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "calendar",
+      "type": "registry:ui",
+      "title": "Calendar",
+      "description": "A month's grid of days on which a day, several days or a range is selected, with today marked and buttons to the previous and next month.",
+      "dependencies": ["date-fns", "lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/select", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/calendar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "carousel",
+      "type": "registry:ui",
+      "title": "Carousel",
+      "description": "A row of slides that a swipe or its named previous and next buttons scroll through one snap at a time, with Embla's api.",
+      "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-worklets"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/carousel.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "sonner",
+      "type": "registry:ui",
+      "title": "Sonner",
+      "description": "Toasts raised with toast() from anywhere into a Toaster at the app's root, stacked, closed by a timer, a swipe or their buttons, and read by screen readers.",
+      "dependencies": [
+        "lucide-react-native",
+        "react-native-reanimated",
+        "react-native-safe-area-context",
+        "react-native-worklets"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/icon", "@zui/spinner", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/sonner.tsx",
           "type": "registry:ui"
         }
       ]
@@ -315,6 +424,410 @@
       "files": [
         {
           "path": "src/registry/ui/input-otp.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "kbd",
+      "type": "registry:ui",
+      "title": "Kbd",
+      "description": "A keyboard key or shortcut drawn as a small muted cap, alone or with the other keys of a shortcut in a group.",
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/kbd.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "alert",
+      "type": "registry:ui",
+      "title": "Alert",
+      "description": "A bordered box announced as an alert, with a title, a description, an optional icon beside them and an optional action at the top right, in a default or destructive variant.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/alert.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "empty",
+      "type": "registry:ui",
+      "title": "Empty",
+      "description": "A centred placeholder for a screen or section with nothing to show yet, with media, a title, a description and actions.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/empty.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "aspect-ratio",
+      "type": "registry:ui",
+      "title": "Aspect ratio",
+      "description": "A frame whose height follows its width at a given ratio, for an image, a video or a map.",
+      "dependencies": ["@rn-primitives/aspect-ratio"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/aspect-ratio.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "breadcrumb",
+      "type": "registry:ui",
+      "title": "Breadcrumb",
+      "description": "The trail from the top of the app to the current screen, a navigation landmark of links and separators with the current page marked.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/breadcrumb.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "button-group",
+      "type": "registry:ui",
+      "title": "Button group",
+      "description": "Buttons, and the text and separators beside them, joined into one control in a row or a column, announced as a group.",
+      "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/separator"],
+      "files": [
+        {
+          "path": "src/registry/ui/button-group.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "pagination",
+      "type": "registry:ui",
+      "title": "Pagination",
+      "description": "The pages of a long list, a navigation landmark of page links with the current page outlined and marked, previous and next links and an ellipsis.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/pagination.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "item",
+      "type": "registry:ui",
+      "title": "Item",
+      "description": "A row of content with media, a title, a description and actions, outlined or muted at three sizes, and a group that lists items.",
+      "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/separator"],
+      "files": [
+        {
+          "path": "src/registry/ui/item.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "scroll-area",
+      "type": "registry:ui",
+      "title": "Scroll area",
+      "description": "A box of fixed size whose content scrolls inside it, vertically or sideways, with the platform scroll indicator.",
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/scroll-area.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "table",
+      "type": "registry:ui",
+      "title": "Table",
+      "description": "Rows of data announced as a table, with a header, a body, a footer and a caption, its cells sharing each row and the table scrolling sideways when wider than its box.",
+      "dependencies": ["@rn-primitives/table"],
+      "registryDependencies": ["@zui/utils", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/table.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "field",
+      "type": "registry:ui",
+      "title": "Field",
+      "description": "The layout of a form: fields of a label, a control and a description or an error, in groups and sets named by a legend, stacked or in a row.",
+      "dependencies": ["@rn-primitives/label"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/separator"],
+      "files": [
+        {
+          "path": "src/registry/ui/field.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "Collapsible",
+      "description": "A region shown and hidden by a trigger announced as a button with its expanded state, closed or open by default or controlled.",
+      "dependencies": ["@rn-primitives/collapsible"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/ui/collapsible.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "accordion",
+      "type": "registry:ui",
+      "title": "Accordion",
+      "description": "A stack of sections whose triggers, announced as buttons with their expanded state, open one section at a time or several, each growing open and shrinking closed unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/accordion",
+        "lucide-react-native",
+        "react-native-reanimated",
+        "react-native-worklets"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/accordion.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "alert-dialog",
+      "type": "registry:ui",
+      "title": "Alert dialog",
+      "description": "A dialog that interrupts to confirm or acknowledge something, announced as a modal alertdialog named by its title, which a press outside it does not close, with a cancel button that does and an action button, fading in unless the system asks for reduced motion.",
+      "dependencies": ["@rn-primitives/alert-dialog", "@rn-primitives/portal", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/button", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/alert-dialog.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "dialog",
+      "type": "registry:ui",
+      "title": "Dialog",
+      "description": "A window centred over a dimmed screen, announced as a modal dialog named by its title, closed by its close buttons, a press outside it, the back button or Escape, fading in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/dialog",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/button", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/dialog.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "sheet",
+      "type": "registry:ui",
+      "title": "Sheet",
+      "description": "A panel attached to one edge of the screen over a dimmed overlay, announced as a modal dialog named by its title, closed by its close buttons, a press outside it, the back button or Escape, sliding in from its side unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/dialog",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/button", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/sheet.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "drawer",
+      "type": "registry:ui",
+      "title": "Drawer",
+      "description": "A panel attached to an edge of the screen over a dimmed overlay, announced as a modal dialog named by its title, closed by a swipe toward its edge, a press outside it, the back button or Escape, sliding in unless the system asks for reduced motion.",
+      "dependencies": ["@rn-primitives/dialog", "@rn-primitives/portal", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/drawer.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "popover",
+      "type": "registry:ui",
+      "title": "Popover",
+      "description": "A floating panel beside its trigger, announced as a dialog named by its title, closed by its trigger, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": ["@rn-primitives/popover", "@rn-primitives/portal", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/popover.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:ui",
+      "title": "Tooltip",
+      "description": "A short label beside a control, opened by a press on a device and by hover or focus on the web, announced as a tooltip, closed by its trigger, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": ["@rn-primitives/tooltip", "@rn-primitives/portal", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/tooltip.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "hover-card",
+      "type": "registry:ui",
+      "title": "Hover Card",
+      "description": "A preview of what a link leads to, beside it, opened by a press on a device and by hover on the web, closed by its trigger, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": ["@rn-primitives/hover-card", "@rn-primitives/portal", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/hover-card.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:ui",
+      "title": "Dropdown Menu",
+      "description": "A menu of actions that opens from its trigger, with checkbox and radio items, groups, shortcuts and sub-menus, announced as a menu and closed by an item, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/dropdown-menu",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/dropdown-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "context-menu",
+      "type": "registry:ui",
+      "title": "Context Menu",
+      "description": "A menu of actions on an area of the screen, opened by a long press or a right click where it landed, with checkbox and radio items, groups, shortcuts and sub-menus, announced as a menu and closed by an item, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/context-menu",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/context-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "menubar",
+      "type": "registry:ui",
+      "title": "Menubar",
+      "description": "A bar of menus, one open at a time, each with checkbox and radio items, groups, shortcuts and sub-menus, announced as a menubar of menus and closed by an item, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/menubar",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/menubar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "A field that picks one of a list of options, announced as a combobox whose options carry their selected state, showing the chosen option's label, closed by a choice, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/select",
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/select.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "command",
+      "type": "registry:ui",
+      "title": "Command",
+      "description": "A menu of commands searched by typing, whose typed text filters its items by cmdk's fuzzy score on value and keywords, highlighting the first match, moved by the arrow keys and run by the return key, with groups hidden while none of their items match, and a CommandDialog that holds it in a Dialog.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/command-score",
+        "@zui/dialog",
+        "@zui/input-group",
+        "@zui/icon",
+        "@zui/text"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/command.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "combobox",
+      "type": "registry:ui",
+      "title": "Combobox",
+      "description": "A field that picks one of a long list of choices: a trigger announced as a combobox showing the chosen label, opening a Popover that holds a Command whose typed text filters the choices, the chosen one announced as selected with a check mark, closed by a choice.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/command", "@zui/popover", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/combobox.tsx",
           "type": "registry:ui"
         }
       ]

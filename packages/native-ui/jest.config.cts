@@ -4,6 +4,7 @@ module.exports = {
   displayName: '@zeroxsolutions/native-ui',
   preset: 'jest-expo',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  resolver: '<rootDir>/jest.resolver.cjs',
   // The CI gate runs these specs beside the native preview's Metro web exports, which take every core;
   // there a spec that settles an Animated value in well under a second locally ran past jest's 5s default.
   testTimeout: 30_000,
@@ -17,6 +18,9 @@ module.exports = {
     '^[.]/skeleton$': '<rootDir>/src/registry/ui/skeleton.nativewind.tsx',
     // The demos import the items as an app does; build-registry writes NativeWind's Vega sources there.
     '^@/(.*)$': '<rootDir>/dist/src/nativewind-vega/$1',
+    // The preview imports each style's demos through `@styles/<style>/`, which each preview app points at
+    // its engine's sources.
+    '^@styles/([^/]+)/(.*)$': '<rootDir>/dist/src/nativewind-$1/$2',
   },
   // jest-expo's preset list plus lucide-react-native and @rn-primitives. Under pnpm a package sits in
   // a nested node_modules the preset leaves untransformed unless it names the package;

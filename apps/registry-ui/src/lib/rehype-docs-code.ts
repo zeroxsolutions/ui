@@ -58,7 +58,7 @@ function sourceFileOf(name: string, file?: string): string {
  * The file a `NativePreview` shows: its demo in native-ui's examples. Throws for a name that is not a
  * demo's, so a page naming one fails its build.
  */
-async function nativeDemoSourceOf(name: string): Promise<string> {
+export async function nativeDemoSourceOf(name: string): Promise<string> {
   const path = NATIVE_DEMO_NAME.test(name) ? join(process.cwd(), NATIVE_EXAMPLES_DIR, `${name}.tsx`) : undefined;
   try {
     if (path) return await readFile(path, 'utf8');

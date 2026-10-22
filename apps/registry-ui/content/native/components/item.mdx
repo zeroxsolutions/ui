@@ -1,0 +1,112 @@
+---
+title: Item
+description: A row of content with media, a title, a description and actions.
+---
+
+<NativePreview name="item-demo" />
+
+## Installation
+
+<InstallCommand name="item" />
+
+The CLI writes `components/ui/item.tsx`, installs [Text](/native/components/nativewind/text),
+[Icon](/native/components/nativewind/icon), [Separator](/native/components/nativewind/separator) and Utils,
+and adds `@rn-primitives/slot` and `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { ShieldAlert } from 'lucide-react-native';
+
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
+import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Item variant="outline">
+  <ItemMedia variant="icon">
+    <Icon as={ShieldAlert} />
+  </ItemMedia>
+  <ItemContent>
+    <ItemTitle>Two-factor authentication</ItemTitle>
+    <ItemDescription>Protect your account with a code from your phone.</ItemDescription>
+  </ItemContent>
+  <ItemActions>
+    <Button size="sm" variant="outline">
+      <Text>Enable</Text>
+    </Button>
+  </ItemActions>
+</Item>
+```
+
+To make the whole row take a press, give it `asChild` and a Pressable child:
+
+```tsx
+<Item asChild>
+  <Pressable role="button" onPress={openProfile}>
+    <ItemContent>
+      <ItemTitle>Profile</ItemTitle>
+    </ItemContent>
+  </Pressable>
+</Item>
+```
+
+## API reference
+
+### Item
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop      | Type                                | Default     |
+| --------- | ----------------------------------- | ----------- |
+| `variant` | `'default' \| 'outline' \| 'muted'` | `'default'` |
+| `size`    | `'default' \| 'sm' \| 'xs'`         | `'default'` |
+| `asChild` | `boolean`                           | `false`     |
+
+`default` draws no border, `outline` a border, and `muted` a muted background. `size` sets the spacing; at
+`xs` the description is smaller. With `asChild`, the Item renders its single child in place of the View, with
+the item's props and classes merged on.
+
+### ItemMedia
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop      | Type                             | Default     |
+| --------- | -------------------------------- | ----------- |
+| `variant` | `'default' \| 'icon' \| 'image'` | `'default'` |
+
+`icon` draws an Icon child at 16px. `image` clips its child to a rounded square that shrinks with the Item's
+size; size the image `size-full`. The media is centred, or aligned to the top while the Item holds an
+ItemDescription.
+
+### ItemContent
+
+Takes every prop of React Native's `View`, and takes the width the media and actions leave.
+
+### ItemTitle, ItemDescription
+
+Each takes every prop of [Text](/native/components/nativewind/text). The title is one line; the description is
+muted and at most two lines.
+
+### ItemActions, ItemHeader, ItemFooter
+
+Each takes every prop of React Native's `View`. ItemActions lays its controls out in a row. ItemHeader and
+ItemFooter each take a line of their own and spread their children to both ends.
+
+### ItemGroup, ItemSeparator
+
+ItemGroup takes every prop of React Native's `View` and is a `list`, spaced by the size of the Items directly
+inside it. ItemSeparator takes every prop of [Separator](/native/components/nativewind/separator) and draws a
+horizontal rule between two Items.
+
+## Differences from upstream
+
+- Upstream's Item takes a `render` prop. The native one takes `asChild`.
+- Upstream's ItemTitle is a box that can hold a badge beside its text. The native ItemTitle is a Text, so put
+  a badge beside it in a row instead.
+- Upstream sizes an `img` inside image media with a child selector. Size the native image `size-full`
+  yourself.
+- Upstream colours an Item that is a link when hovered. A touch screen has no hover, and the native Item
+  draws no pressed colour.

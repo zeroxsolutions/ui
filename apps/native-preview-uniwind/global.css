@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+@import 'uniwind';
+@import '../../packages/native-ui/dist/src/uniwind-vega/zui-theme.css';
+
+@source '../../packages/native-ui/dist/src/uniwind-vega';
+@source '../../packages/native-ui/dist/src/uniwind-nova';
+@source '../../packages/native-ui/src/preview';

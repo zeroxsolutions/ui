@@ -41,6 +41,7 @@
     "apps/registry-ui/registry/bases/base-ui/ui",
     "apps/registry-ui/registry/bases/base-ui/hooks/use-mobile.ts",
     "apps/registry-ui/registry/bases/base-ui/lib/utils.ts",
+    "packages/native-ui/styles/upstream",
     "**/worker-configuration.d.ts",
     "**/cloudflare-env.d.ts",
     "**/next-env.d.ts",

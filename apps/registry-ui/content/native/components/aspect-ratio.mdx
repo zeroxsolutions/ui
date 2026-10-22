@@ -1,0 +1,44 @@
+---
+title: Aspect ratio
+description: A frame whose height follows its width at a given ratio.
+---
+
+<NativePreview name="aspect-ratio-demo" />
+
+## Installation
+
+<InstallCommand name="aspect-ratio" />
+
+The CLI writes `components/ui/aspect-ratio.tsx`, installs Utils, and adds `@rn-primitives/aspect-ratio`.
+
+## Usage
+
+```tsx
+import { Image } from 'react-native';
+
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+```
+
+```tsx
+<AspectRatio ratio={16 / 9} className="overflow-hidden rounded-lg">
+  <Image source={{ uri: 'https://example.com/cover.jpg' }} className="size-full" />
+</AspectRatio>
+```
+
+## API reference
+
+### AspectRatio
+
+Takes every prop of the `@rn-primitives/aspect-ratio` root, plus:
+
+| Prop    | Type     | Default  |
+| ------- | -------- | -------- |
+| `ratio` | `number` | required |
+
+`ratio` is width over height. The frame is as wide as its parent lets it be, and its height follows. A child
+sized `size-full` or `absolute inset-0` fills it.
+
+## Differences from upstream
+
+- Upstream passes the ratio to CSS as a custom property. The native frame takes React Native's own
+  `aspectRatio` style, which both engines draw.

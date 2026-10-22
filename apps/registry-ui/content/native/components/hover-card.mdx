@@ -1,0 +1,90 @@
+---
+title: Hover card
+description: A preview of what a link leads to, shown beside it.
+---
+
+<NativePreview name="hover-card-demo" />
+
+## Installation
+
+<InstallCommand name="hover-card" />
+
+The CLI writes `components/ui/hover-card.tsx`, `lib/motion.ts` and `lib/overlay.ts`, installs
+[Text](/native/components/nativewind/text) and Utils, and adds `@rn-primitives/hover-card`,
+`@rn-primitives/portal`, `react-native-reanimated` and `react-native-worklets`. The content draws in the app's
+`PortalHost`; see [Add a portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing,
+and logs an error saying so while the app is in development.
+
+## Usage
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<HoverCard>
+  <HoverCardTrigger asChild>
+    <Button variant="link">
+      <Text>@nextjs</Text>
+    </Button>
+  </HoverCardTrigger>
+  <HoverCardContent>
+    <Text>The React Framework, created and maintained by @vercel.</Text>
+  </HoverCardContent>
+</HoverCard>
+```
+
+## API reference
+
+### HoverCard
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop           | Type                      | Default |
+| -------------- | ------------------------- | ------- |
+| `openDelay`    | `number`                  | `600`   |
+| `closeDelay`   | `number`                  | `300`   |
+| `onOpenChange` | `(open: boolean) => void` | -       |
+
+On the web the card opens once the pointer has rested on its trigger for `openDelay` ms, and closes `closeDelay`
+ms after it leaves both. On a device, which has no pointer to rest, a press on the trigger opens it and another
+closes it, and the delays do nothing.
+
+### HoverCardTrigger
+
+Takes every prop of React Native's `Pressable`. Pass `asChild` to make a Button the trigger.
+
+### HoverCardContent
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type                                     | Default    |
+| ------------- | ---------------------------------------- | ---------- |
+| `side`        | `'top' \| 'right' \| 'bottom' \| 'left'` | `'bottom'` |
+| `sideOffset`  | `number`                                 | `4`        |
+| `align`       | `'start' \| 'center' \| 'end'`           | `'center'` |
+| `alignOffset` | `number`                                 | `4`        |
+| `portalHost`  | `string`                                 | -          |
+
+`side` is the side of the trigger the card opens on, `sideOffset` its gap from the trigger in px, and `align`
+lines it up with the trigger's start, centre or end, moved along by `alignOffset`. The card is 16rem wide; pass a
+width class to change it. On a device it is announced as a `dialog`, accessibility focus moves into it as it
+opens and returns to the trigger as it closes, and a press outside it, the Android back button and the iOS escape
+gesture (a two-finger Z) close it. On the web the pointer leaving it and its trigger, and Escape, close it. It
+fades in while growing from 95% and sliding 0.5rem away from the trigger over 100ms, and out the same way. When
+the system asks for reduced motion it appears and goes at once.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- A press opens the card on a device, where upstream's opens on hover and focus alone.
+- The delays are props of the HoverCard, where upstream takes them on its trigger as `delay` and `closeDelay`.
+- The HoverCard holds its own open state, so it takes no `open` or `defaultOpen`: the primitive it is built on
+  has no controlled mode.
+- On a device the card opens above or below its trigger, so `left` and `right` open it below. The web places it
+  on any side, and flips it when there is no room.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.

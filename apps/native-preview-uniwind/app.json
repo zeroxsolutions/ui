@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "zui native preview uniwind",
+    "slug": "zui-native-preview-uniwind",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/613f58a3-a59a-4259-865a-19b01d7a8df9"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ]
+    ],
+    "owner": "zeroxsolutions",
+    "extra": {
+      "eas": {
+        "projectId": "613f58a3-a59a-4259-865a-19b01d7a8df9"
+      }
+    }
+  }
+}

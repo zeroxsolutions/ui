@@ -1,0 +1,59 @@
+---
+title: Scroll area
+description: A box of fixed size whose content scrolls inside it.
+---
+
+<NativePreview name="scroll-area-demo" />
+
+## Installation
+
+<InstallCommand name="scroll-area" />
+
+The CLI writes `components/ui/scroll-area.tsx` and installs Utils.
+
+## Usage
+
+```tsx
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<ScrollArea className="h-56 rounded-md border border-border">
+  <Text>Long content</Text>
+</ScrollArea>
+```
+
+To scroll sideways, add a horizontal ScrollBar, as upstream does:
+
+```tsx
+<ScrollArea className="rounded-md border border-border">
+  <View className="flex-row gap-4 p-4">{photos}</View>
+  <ScrollBar orientation="horizontal" />
+</ScrollArea>
+```
+
+## API reference
+
+### ScrollArea
+
+Takes every prop of React Native's `ScrollView`. Give it a height, or a width for a sideways one. It scrolls
+vertically, or sideways when it holds a horizontal ScrollBar or is given `horizontal`. Inside a scrolling
+screen it keeps scrolling on Android (`nestedScrollEnabled`).
+
+### ScrollBar
+
+| Prop          | Type                         | Default      |
+| ------------- | ---------------------------- | ------------ |
+| `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` |
+
+It sets the axis of the ScrollArea it sits in and draws nothing itself.
+
+## Differences from upstream
+
+- Upstream draws its own scrollbar with a rounded thumb in the border colour. A ScrollView's indicator is
+  the platform's and cannot be styled, so the native ScrollBar draws nothing and the style's scrollbar and
+  thumb classes are not used.
+- Upstream can scroll both ways at once, with a vertical and a horizontal scrollbar. A ScrollView scrolls along
+  one axis; nest a horizontal ScrollArea in a vertical one to scroll both ways.
+- Upstream's viewport draws a focus ring when focused from the keyboard. The native ScrollArea draws none.

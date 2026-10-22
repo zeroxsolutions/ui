@@ -1,0 +1,107 @@
+{
+  "name": "@zeroxsolutions/native-preview-uniwind",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@expo-google-fonts/geist": "catalog:",
+    "@expo/metro-runtime": "catalog:expo",
+    "@rn-primitives/accordion": "catalog:rn-primitives",
+    "@rn-primitives/alert-dialog": "catalog:rn-primitives",
+    "@rn-primitives/aspect-ratio": "catalog:rn-primitives",
+    "@rn-primitives/avatar": "catalog:rn-primitives",
+    "@rn-primitives/checkbox": "catalog:rn-primitives",
+    "@rn-primitives/collapsible": "catalog:rn-primitives",
+    "@rn-primitives/context-menu": "catalog:rn-primitives",
+    "@rn-primitives/dialog": "catalog:rn-primitives",
+    "@rn-primitives/dropdown-menu": "catalog:rn-primitives",
+    "@rn-primitives/hover-card": "catalog:rn-primitives",
+    "@rn-primitives/label": "catalog:rn-primitives",
+    "@rn-primitives/menubar": "catalog:rn-primitives",
+    "@rn-primitives/popover": "catalog:rn-primitives",
+    "@rn-primitives/portal": "catalog:rn-primitives",
+    "@rn-primitives/progress": "catalog:rn-primitives",
+    "@rn-primitives/radio-group": "catalog:rn-primitives",
+    "@rn-primitives/select": "catalog:rn-primitives",
+    "@rn-primitives/separator": "catalog:rn-primitives",
+    "@rn-primitives/slot": "catalog:rn-primitives",
+    "@rn-primitives/switch": "catalog:rn-primitives",
+    "@rn-primitives/table": "catalog:rn-primitives",
+    "@rn-primitives/tabs": "catalog:rn-primitives",
+    "@rn-primitives/toggle": "catalog:rn-primitives",
+    "@rn-primitives/toggle-group": "catalog:rn-primitives",
+    "@rn-primitives/tooltip": "catalog:rn-primitives",
+    "@zeroxsolutions/native-ui": "workspace:*",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "date-fns": "catalog:",
+    "expo": "catalog:expo",
+    "expo-font": "catalog:expo",
+    "expo-splash-screen": "catalog:expo",
+    "expo-status-bar": "catalog:expo",
+    "expo-updates": "catalog:expo",
+    "lucide-react-native": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-native": "catalog:expo",
+    "react-native-reanimated": "catalog:expo",
+    "react-native-safe-area-context": "catalog:expo",
+    "react-native-svg": "catalog:expo",
+    "react-native-web": "catalog:expo",
+    "react-native-worklets": "catalog:expo",
+    "tailwind-merge": "catalog:",
+    "tailwindcss": "catalog:",
+    "uniwind": "1.13.0"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "catalog:",
+    "@types/jest": "catalog:",
+    "babel-jest": "catalog:",
+    "babel-preset-expo": "catalog:expo",
+    "jest": "catalog:",
+    "jest-expo": "catalog:expo",
+    "react-test-renderer": "catalog:"
+  },
+  "nx": {
+    "targets": {
+      "export": {
+        "dependsOn": [
+          "...",
+          "^build-registry"
+        ],
+        "outputs": [
+          "{workspaceRoot}/apps/registry-ui/public/native-preview-uniwind"
+        ],
+        "options": {
+          "args": [
+            "...",
+            "--platform",
+            "web",
+            "--output-dir",
+            "../registry-ui/public/native-preview-uniwind"
+          ]
+        }
+      },
+      "eas:update": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "^build-registry"
+        ],
+        "options": {
+          "cwd": "{projectRoot}",
+          "parallel": false
+        },
+        "configurations": {
+          "production": {
+            "commands": [
+              "EXPO_PUBLIC_STYLE=vega eas update --branch vega --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/vega --non-interactive",
+              "EXPO_PUBLIC_STYLE=nova eas update --branch nova --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/nova --non-interactive"
+            ]
+          }
+        }
+      }
+    },
+    "tags": [
+      "build:remote"
+    ]
+  }
+}

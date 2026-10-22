@@ -1,0 +1,84 @@
+---
+title: Accordion
+description: A stack of sections, each opened and closed by its trigger.
+---
+
+<NativePreview name="accordion-demo" />
+
+## Installation
+
+<InstallCommand name="accordion" />
+
+The CLI writes `components/ui/accordion.tsx`, installs [Text](/native/components/nativewind/text),
+[Icon](/native/components/nativewind/icon) and Utils, and adds `@rn-primitives/accordion`, `lucide-react-native`,
+`react-native-reanimated` and `react-native-worklets`. An Expo app built with `babel-preset-expo` compiles
+Reanimated's worklets with no further setup.
+
+## Usage
+
+```tsx
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Accordion defaultValue={['item-1']}>
+  <AccordionItem value="item-1">
+    <AccordionTrigger>
+      <Text>Is it accessible?</Text>
+    </AccordionTrigger>
+    <AccordionContent>
+      <Text>Yes. Each trigger is announced as a button with its expanded state.</Text>
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+## API reference
+
+### Accordion
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop            | Type                        | Default |
+| --------------- | --------------------------- | ------- |
+| `value`         | `string[]`                  | -       |
+| `defaultValue`  | `string[]`                  | `[]`    |
+| `onValueChange` | `(value: string[]) => void` | -       |
+| `multiple`      | `boolean`                   | `false` |
+| `disabled`      | `boolean`                   | `false` |
+
+`value` lists the open items. Without it the Accordion holds its own, starting from `defaultValue`. One item
+is open at a time: opening another closes it. With `multiple`, several can be open. Pressing an open item's
+trigger closes it in both cases.
+
+### AccordionItem
+
+Takes every prop of React Native's `View`, plus a required `value` that names it and `disabled`. Every item
+but the last draws a border under it. This holds for items placed directly inside the Accordion, including an
+array from `map`; an item wrapped in a component of your own is not known to be the last.
+
+### AccordionTrigger
+
+Takes every prop of React Native's `Pressable`. It is announced as a button with its expanded and disabled
+state. Its title goes in as a Text child, which wraps beside a chevron that points down while the item is
+closed and up while it is open. A disabled trigger is dimmed and ignores presses.
+
+### AccordionContent
+
+Takes every prop of React Native's `View`. A closed item's content is not rendered. As the item opens, the
+content grows from no height to its own over 200ms, and it shrinks back as the item closes. When the system
+asks for reduced motion, it appears and goes at once. Its `className` goes on the padded box around the
+children: space several Text children with a gap, such as `gap-4`.
+
+## Differences from upstream
+
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- The trigger takes its title as a Text child, not a string.
+- Upstream spaces paragraphs in the content with a margin and underlines links in it through CSS selectors.
+  React Native has no selectors, so space the children with a gap and style a link where you place it.
+- Upstream's height animation runs whatever the system's motion setting. The native one is skipped when the
+  system asks for reduced motion.
+- No hover underline and no focus ring on the trigger; the native items draw no focus ring.
+- `orientation`, `loopFocus`, `keepMounted` and `hiddenUntilFound` are left out: they serve arrow-key focus,
+  a closed panel kept in the DOM, and the browser's find-in-page, none of which a device has.

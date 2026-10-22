@@ -77,6 +77,8 @@ function slotClasses(
   const registry = `${engine}-${styleName}`;
   const classes = style.slots.get(slot);
   if (!classes) {
+    // Upstream's components name every style's slots, and a style that declares no rule for one draws nothing.
+    if (otherStyles.some((other) => other.slots.has(slot))) return '';
     throw new Error(`Unknown slot ${slot} in ${file} (${registry})`);
   }
   const unknownState = state === undefined ? undefined : findUnknownState(state);
@@ -108,7 +110,8 @@ function slotClasses(
 
 /**
  * Writes one registry source for `engine` in the `upstream` style: every `cn-<slot>`
- * token inside a quoted string becomes that slot's view classes, every `cn-<slot>/text` token its
+ * token inside a quoted string becomes that slot's view classes, or nothing when only one of
+ * `otherStyles` declares the slot, every `cn-<slot>/text` token its
  * text classes and every `cn-<slot>/icon` token the classes it gives an icon with no size of its
  * own, and a token whose
  * translation is empty is removed. A token ending `@<state>`, such as `cn-switch@checked` or
@@ -118,10 +121,10 @@ function slotClasses(
  * A string holding a token has its whitespace collapsed; every other string is left as written.
  * @param file - the source's name, used only in error messages
  * @param otherStyles - the slots of the registry's other styles, which only decide whether an empty
- * state is a style's own choice or a typo
+ * state, or a slot this style lacks, is a style's own choice or a typo
  * @param radius - the theme's `--radius`, such as `0.625rem`, which a slot's radius less a length is
  * computed from; with none, such a radius is untranslated
- * @throws {Error} `Unknown slot <slot> in <file> (<engine>-<style>)` for a slot the style does not declare,
+ * @throws {Error} `Unknown slot <slot> in <file> (<engine>-<style>)` for a slot no style declares,
  * `Unknown state <part> for <slot> in <file> (<engine>-<style>)` for a state outside the state vocabulary,
  * `Untranslated <class> in <slot> (<engine>-<style>)` for a slot class with no rule,
  * `Empty state <state> for <slot> in <file> (<engine>-<style>)` for a state token no style puts a class of

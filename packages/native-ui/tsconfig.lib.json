@@ -26,10 +26,12 @@
     "**/*.spec.jsx",
     "src/test-setup.ts",
     "src/examples",
+    "src/preview",
     "jest.config.ts",
     "jest.config.cts",
     "src/**/*.spec.ts",
-    "src/**/*.test.ts"
+    "src/**/*.test.ts",
+    "src/**/*.testing.ts"
   ],
   "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"]
 }
