@@ -9,6 +9,7 @@ import { AccordionDemo } from './accordion-demo';
 import { AlertDemo } from './alert-demo';
 import { AlertDialogDemo } from './alert-dialog-demo';
 import { AspectRatioDemo } from './aspect-ratio-demo';
+import { AttachmentDemo } from './attachment-demo';
 import { AvatarDemo } from './avatar-demo';
 import { BadgeDemo } from './badge-demo';
 import { BreadcrumbDemo } from './breadcrumb-demo';
@@ -81,6 +82,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'alert-demo': AlertDemo,
   'alert-dialog-demo': AlertDialogDemo,
   'aspect-ratio-demo': AspectRatioDemo,
+  'attachment-demo': AttachmentDemo,
   'avatar-demo': AvatarDemo,
   'badge-demo': BadgeDemo,
   'breadcrumb-demo': BreadcrumbDemo,

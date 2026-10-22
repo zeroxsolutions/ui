@@ -1,10 +1,16 @@
 import { LoaderCircle } from 'lucide-react-native';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Animated, Easing } from 'react-native';
 import { cn } from '../lib/utils';
 import { Icon, type IconProps } from './icon';
 
 const TURN_MS = 1000;
+
+/**
+ * The classes a container gives every Spinner inside it, merged over the spinner's own 16px and under its
+ * `className`, such as the larger size attachment media gives a spinner when it stands above the text.
+ */
+const SpinnerClassContext = createContext<string | undefined>(undefined);
 
 type SpinnerProps = Omit<IconProps, 'as'> & {
   /** What is loading, read by screen readers; defaults to "Loading". */
@@ -17,6 +23,7 @@ type SpinnerProps = Omit<IconProps, 'as'> & {
  * icon, 16px by default, and inside a Button it takes the button's label colour.
  */
 function Spinner({ className, 'aria-label': label = 'Loading', ...props }: SpinnerProps): ReactNode {
+  const spinnerClass = useContext(SpinnerClassContext);
   // Unknown until the setting is read, and still until then, so a person who reduces motion never sees a turn.
   const [reducedMotion, setReducedMotion] = useState<boolean | undefined>(undefined);
   const rotation = useRef(new Animated.Value(0)).current;
@@ -53,10 +60,10 @@ function Spinner({ className, 'aria-label': label = 'Loading', ...props }: Spinn
       aria-busy
       style={turning ? { transform: [{ rotate }] } : undefined}
     >
-      <Icon as={LoaderCircle} className={cn('size-4', className)} {...props} />
+      <Icon as={LoaderCircle} className={cn('size-4', spinnerClass, className)} {...props} />
     </Animated.View>
   );
 }
 
-export { Spinner };
+export { Spinner, SpinnerClassContext };
 export type { SpinnerProps };
