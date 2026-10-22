@@ -1,6 +1,8 @@
 import { Portal } from '@rn-primitives/portal';
-import { render, screen } from '@testing-library/react-native';
+import { act, render, screen } from '@testing-library/react-native';
 import { Linking, Text } from 'react-native';
+
+import { toast } from '@styles/nova/components/ui/sonner';
 
 import * as findDemoModule from './find-demo';
 import { Preview } from './preview';
@@ -55,5 +57,20 @@ describe('Preview', () => {
     await render(<Preview bundledStyle={undefined} applyColorScheme={() => undefined} />);
 
     expect(await screen.findByText('Portalled')).toBeTruthy();
+  });
+
+  it("draws a toast that the style's sonner raises, as a demo's button raises one", async () => {
+    jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(`${UPDATE}/--/badge-demo`);
+    await render(<Preview bundledStyle="nova" applyColorScheme={() => undefined} />);
+    await screen.findByText('Overdue');
+
+    await act(async () => {
+      toast('Event has been created');
+    });
+
+    expect(await screen.findByText('Event has been created')).toBeTruthy();
+    await act(async () => {
+      toast.dismiss();
+    });
   });
 });

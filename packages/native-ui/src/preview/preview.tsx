@@ -9,6 +9,8 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import { Text } from '@/components/ui/text';
 import { zuiFonts } from '@/lib/fonts';
 import { useModalOverlayShown } from '@/lib/overlay';
+import { Toaster as NovaToaster, useSonner as useNovaSonner } from '@styles/nova/components/ui/sonner';
+import { Toaster as VegaToaster, useSonner as useVegaSonner } from '@styles/vega/components/ui/sonner';
 
 import { DemoBoundary } from './demo-boundary';
 import { DEMO_NAMES, findDemo } from './find-demo';
@@ -28,6 +30,15 @@ void SplashScreen.preventAutoHideAsync();
 
 /** The page's location on web; native has none, and reads the demo from the link that opened it. */
 const location = Platform.OS === 'web' ? window.location : undefined;
+
+/**
+ * Each style's Toaster, and its hook on the toasts that are up. A style's demos raise toasts through that
+ * style's own sonner, whose queue only its own Toaster draws.
+ */
+const TOASTERS = {
+  vega: { Toaster: VegaToaster, useSonner: useVegaSonner },
+  nova: { Toaster: NovaToaster, useSonner: useNovaSonner },
+} as const satisfies Record<PreviewStyle, unknown>;
 
 /** The demo a link names until the app has read the link, on native, where reading it is async. */
 const LINK_UNREAD = Symbol('link unread');
@@ -114,13 +125,21 @@ interface PreviewProps {
   applyColorScheme: (scheme: ColorScheme) => void;
 }
 
+/** The style the preview draws: the page's `?style=` on web, the bundled one on native, `vega` without either. */
+function previewStyleOf(bundledStyle: string | undefined): PreviewStyle {
+  return (location ? styleFromSearch(location.search) : styleOf(bundledStyle)) ?? 'vega';
+}
+
 function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactNode {
-  const style: PreviewStyle = (location ? styleFromSearch(location.search) : styleOf(bundledStyle)) ?? 'vega';
+  const style = previewStyleOf(bundledStyle);
   const [loaded, error] = useFonts(zuiFonts);
   const [name, open] = useDemoName();
   const insets = useSafeAreaInsets();
   const [contentHeight, setContentHeight] = useState<number>();
   const overlayShown = useOverlayShown();
+  // A toast draws over the page like an overlay, at the frame's bottom edge, so the frame grows for it too.
+  // The style is fixed for the app's life, so the same hook runs on every render.
+  const toastShown = TOASTERS[style].useSonner().toasts.length > 0;
 
   useLayoutEffect(() => {
     const scheme = location ? themeFromSearch(location.search) : undefined;
@@ -134,9 +153,9 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
 
   useEffect(() => {
     if (Platform.OS === 'web' && contentHeight !== undefined) {
-      postHeightToHost(window, frameHeightOf(contentHeight, overlayShown));
+      postHeightToHost(window, frameHeightOf(contentHeight, overlayShown || toastShown));
     }
-  }, [contentHeight, overlayShown]);
+  }, [contentHeight, overlayShown, toastShown]);
 
   const modalShown = useModalOverlayShown();
   if (!ready) return null;
@@ -176,14 +195,17 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
  * that height changes, and a taller one while the demo shows an overlay. The splash screen stays up until the fonts and, on native, the link are read.
  *
  * A preview app renders it as its root, after importing its engine's stylesheet; `@/` in this module and
- * the demos' `@/` resolve to that app's emitted sources. It holds the app's `PortalHost`, so the app adds none
- * of its own; a demo's overlay draws there, above the demo and inside the safe area's provider.
+ * the demos' `@/` resolve to that app's emitted sources. It holds the app's `PortalHost` and `Toaster`, so the
+ * app adds neither; a demo's overlay draws there, above the demo and inside the safe area's provider, and its
+ * toasts above that.
  */
 function Preview(props: PreviewProps): ReactNode {
+  const { Toaster } = TOASTERS[previewStyleOf(props.bundledStyle)];
   return (
     <SafeAreaProvider>
       <PreviewScreen {...props} />
       <PortalHost />
+      <Toaster />
     </SafeAreaProvider>
   );
 }

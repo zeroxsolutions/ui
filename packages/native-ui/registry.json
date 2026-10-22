@@ -258,6 +258,25 @@
       ]
     },
     {
+      "name": "sonner",
+      "type": "registry:ui",
+      "title": "Sonner",
+      "description": "Toasts raised with toast() from anywhere into a Toaster at the app's root, stacked, closed by a timer, a swipe or their buttons, and read by screen readers.",
+      "dependencies": [
+        "lucide-react-native",
+        "react-native-reanimated",
+        "react-native-safe-area-context",
+        "react-native-worklets"
+      ],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/icon", "@zui/spinner", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/ui/sonner.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "input",
       "type": "registry:ui",
       "title": "Input",

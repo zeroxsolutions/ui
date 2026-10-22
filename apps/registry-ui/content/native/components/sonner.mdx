@@ -1,0 +1,130 @@
+---
+title: Sonner
+description: Short messages that come up over the screen and go after a few seconds.
+---
+
+<NativePreview name="sonner-demo" />
+
+## Installation
+
+<InstallCommand name="sonner" />
+
+The CLI writes `components/ui/sonner.tsx` and `lib/motion.ts`, installs [Icon](/native/components/nativewind/icon),
+[Spinner](/native/components/nativewind/spinner), [Text](/native/components/nativewind/text) and Utils, and adds
+`lucide-react-native`, `react-native-reanimated`, `react-native-safe-area-context` and `react-native-worklets`.
+
+Put one `Toaster` at the app's root, after its `PortalHost`, so toasts draw above the screen and its overlays:
+
+```tsx
+import { PortalHost } from '@rn-primitives/portal';
+import { Toaster } from '@/components/ui/sonner';
+
+export default function RootLayout() {
+  return (
+    <>
+      <Stack />
+      <PortalHost />
+      <Toaster />
+    </>
+  );
+}
+```
+
+## Usage
+
+```tsx
+import { toast } from '@/components/ui/sonner';
+```
+
+```tsx
+<Button onPress={() => toast('Event has been created', { description: 'Monday, January 3rd at 6:00pm' })}>
+  <Text>Show Toast</Text>
+</Button>
+```
+
+## API reference
+
+### toast
+
+`toast(message, options?)` raises a toast and returns its id; `toast.success`, `toast.info`, `toast.warning`,
+`toast.error` and `toast.loading` raise one with that type's icon, and `toast.message` one with none. Pass an
+`id` to update the toast with that id in place, such as a loading toast once its work is done.
+`toast.dismiss(id?)` closes the toast with `id`, or every toast. `toast.promise(promise, { loading, success,
+error, description, finally })` shows `loading` while the promise runs, then `success` or `error`, each a node or
+a function of the result, and returns `{ unwrap }`, which gives the promise back. `toast.custom((id) => node)`
+draws your node in place of the toast's parts. `toast.getToasts()` lists the toasts that are up.
+
+Options, with sonner's meaning:
+
+| Option                                            | Type                                  |
+| ------------------------------------------------- | ------------------------------------- |
+| `id`                                              | `number \| string`                    |
+| `description`                                     | `ReactNode \| () => ReactNode`        |
+| `duration`                                        | `number` (ms; `Infinity` keeps it up) |
+| `icon`                                            | `ReactNode`                           |
+| `action`, `cancel`                                | `{ label, onClick(event) }` or a node |
+| `onDismiss`, `onAutoClose`                        | `(toast) => void`                     |
+| `dismissible`                                     | `boolean`, `true` by default          |
+| `closeButton`, `richColors`, `invert`             | `boolean`                             |
+| `position`                                        | the Toaster's `position`              |
+| `unstyled`                                        | `boolean`                             |
+| `className`, `descriptionClassName`, `classNames` | `string`, `string`, `ToastClassnames` |
+| `testId`                                          | `string`                              |
+
+A toast stays up for its `duration`, the Toaster's, or 4 seconds, and a loading toast until it is updated or
+dismissed. Its time stops while the stack is spread open, and while the app is in the background. A press on
+`action` or `cancel` runs its `onClick` and closes the toast. `onAutoClose` runs when its time is up, and
+`onDismiss` when it is closed any other way.
+
+### Toaster
+
+| Prop                 | Type                                                                                                     | Default              |
+| -------------------- | -------------------------------------------------------------------------------------------------------- | -------------------- |
+| `position`           | `'top-left' \| 'top-center' \| 'top-right' \| 'bottom-left' \| 'bottom-center' \| 'bottom-right'`        | `'bottom-right'`     |
+| `expand`             | `boolean`                                                                                                | `false`              |
+| `visibleToasts`      | `number`                                                                                                 | `3`                  |
+| `duration`           | `number`                                                                                                 | `4000`               |
+| `gap`                | `number`                                                                                                 | `14`                 |
+| `offset`             | `number \| string \| { top, right, bottom, left }`                                                       | `24`                 |
+| `mobileOffset`       | `number \| string \| { top, right, bottom, left }`                                                       | `16`                 |
+| `closeButton`        | `boolean`                                                                                                | `false`              |
+| `richColors`         | `boolean`                                                                                                | `false`              |
+| `invert`             | `boolean`                                                                                                | `false`              |
+| `swipeDirections`    | `('top' \| 'right' \| 'bottom' \| 'left')[]`                                                             | its edge and side    |
+| `toastOptions`       | `{ className, classNames, descriptionClassName, duration, closeButton, unstyled, closeButtonAriaLabel }` | -                    |
+| `icons`              | `{ success, info, warning, error, loading, close }`                                                      | -                    |
+| `hotkey`             | `string[]`                                                                                               | `['altKey', 'KeyT']` |
+| `containerAriaLabel` | `string`                                                                                                 | `'Notifications'`    |
+| `className`          | `string`                                                                                                 | -                    |
+
+Newer toasts stack in front of older ones, each older one 14px behind and 5% smaller, and only the first
+`visibleToasts` show. A pointer over the stack on the web, or a touch on it on a device, spreads it into a list
+`gap` apart; a touch keeps it spread for 4 seconds after the finger lifts. On a screen 600px wide or less a
+toast is as wide as the screen less `mobileOffset` either side; on a wider one it is 356px wide, `offset` from
+its corner. The bottom and top offsets add the safe area's insets when a `SafeAreaProvider` is mounted. A toast
+slides in from its edge over 400ms and fades out over 200ms, and appears and goes at once when the system asks
+for reduced motion. A swipe of 45px toward one of `swipeDirections`, or a quick flick, closes it; a swipe any
+other way pulls against it and springs back.
+
+Screen readers read each new toast, and each change to one, as its title and description: iOS announces it, and
+on Android and the web the toaster is a polite live region. On the web it is a region named by
+`containerAriaLabel` and the hotkey, each toast is a status, and the hotkey spreads the stack and moves focus to
+it.
+
+### useSonner
+
+Returns `{ toasts }`, the toasts that are up, kept current.
+
+## Differences from upstream
+
+- `toast` comes from `@/components/ui/sonner`, where upstream imports it from the `sonner` package: sonner draws
+  HTML, so the toaster and its queue are written here, on React Native views and Reanimated.
+- `theme` is left out: the toasts take the app's colour scheme through the theme's `dark:` colours, as every
+  native item does.
+- An action's `onClick` gets React Native's press event, not a mouse event.
+- `dir`, `style`, `actionButtonStyle` and `cancelButtonStyle` are left out, as React Native styles by class here,
+  and so are the Toaster's `id` and a toast's `toasterId`, which pair toasts to one of several Toasters: an app
+  has one.
+- A touch spreads the stack for 4 seconds after the finger lifts, where upstream's spreads while a mouse is over
+  it: a finger leaves no pointer resting on the stack.
+- iOS reads no live region, so a new toast is announced through `AccessibilityInfo.announceForAccessibility`.
