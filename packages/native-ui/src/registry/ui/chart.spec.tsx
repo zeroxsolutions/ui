@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { arc } from 'd3-shape';
 import { processColor } from 'react-native';
 import { G } from 'react-native-svg';
 import { Text } from './text';
@@ -15,8 +16,11 @@ import {
   PieChart,
   PolarAngleAxis,
   PolarGrid,
+  PolarRadiusAxis,
   Radar,
   RadarChart,
+  RadialBar,
+  RadialBarChart,
   Text as ChartText,
   XAxis,
 } from '../lib/charts';
@@ -251,6 +255,54 @@ function pointsOf(d: unknown): number[][] {
 function textOf(id: string): unknown {
   const [span] = screen.getByTestId(id, HIDDEN).children;
   return typeof span === 'object' ? span.props.content : span;
+}
+
+const radialConfig = {
+  visitors: { label: 'Visitors' },
+  chrome: { label: 'Chrome', color: '#2563eb' },
+  safari: { label: 'Safari', color: '#60a5fa' },
+} satisfies ChartConfig;
+
+function SafariShape({ tooltip = null }: { tooltip?: React.ReactNode }): React.ReactNode {
+  return (
+    <ChartContainer config={radialConfig}>
+      <RadialBarChart
+        data={[{ browser: 'safari', visitors: 1260, fill: 'var(--color-safari)' }]}
+        endAngle={100}
+        innerRadius={64}
+        outerRadius={94}
+      >
+        {tooltip}
+        <PolarGrid
+          gridType="circle"
+          radialLines={false}
+          stroke="none"
+          className="first:fill-muted last:fill-background"
+          polarRadius={[86, 74]}
+        />
+        <RadialBar dataKey="visitors" background isAnimationActive={false} />
+        <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+          <Label
+            content={({ viewBox }) => (
+              <ChartText testID="radial-label" x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
+                1,260
+              </ChartText>
+            )}
+          />
+        </PolarRadiusAxis>
+      </RadialBarChart>
+    </ChartContainer>
+  );
+}
+
+/** The path of the ring from `inner` to `outer` between two angles anticlockwise from three o'clock. */
+function ringPath(inner: number, outer: number, startAngle: number, endAngle: number): string | null {
+  return arc()({
+    innerRadius: inner,
+    outerRadius: outer,
+    startAngle: ((90 - startAngle) * Math.PI) / 180,
+    endAngle: ((90 - endAngle) * Math.PI) / 180,
+  });
 }
 
 describe('Chart', () => {
@@ -679,6 +731,59 @@ describe('Chart', () => {
       expect(screen.getByRole('adjustable').props['aria-label']).toMatch(
         /^Radar chart\. January: Desktop 186, Mobile 80\. February: Desktop 305, Mobile 200\./,
       );
+    });
+  });
+
+  describe('RadialBarChart', () => {
+    // A row's ring runs from 64px to 94px out, less 10% of it each side: 67px to 91px.
+    it("sweeps a row's bar from the start as far as its value reaches", async () => {
+      await render(<SafariShape />);
+
+      const bar = screen.getByTestId('chart-radial-bar-visitors-0', HIDDEN);
+
+      expect(bar.props.d).toBe(ringPath(67, 91, 0, 100));
+      expect(fillOf(bar)).toBe(processColor('#60a5fa'));
+    });
+
+    it('sweeps each row as far as its share of the largest value', async () => {
+      await render(
+        <ChartContainer config={radialConfig}>
+          <RadialBarChart data={[{ visitors: 200 }, { visitors: 100 }]} innerRadius={30} outerRadius={70}>
+            <RadialBar dataKey="visitors" isAnimationActive={false} />
+          </RadialBarChart>
+        </ChartContainer>,
+      );
+
+      expect(screen.getByTestId('chart-radial-bar-visitors-0', HIDDEN).props.d).toBe(ringPath(32, 48, 0, 360));
+      expect(screen.getByTestId('chart-radial-bar-visitors-1', HIDDEN).props.d).toBe(ringPath(52, 68, 0, 180));
+    });
+
+    it('runs a muted track behind the bar over the whole sweep', async () => {
+      mockTheme.variables = { '--muted': [244, 244, 245] };
+
+      await render(<SafariShape />);
+
+      const track = screen.getByTestId('chart-track-visitors-0', HIDDEN);
+      expect(track.props.d).toBe(ringPath(67, 91, 0, 100));
+      expect(fillOf(track)).toBe(processColor('rgb(244, 244, 245)'));
+    });
+
+    it("draws the radius axis' Label in the middle", async () => {
+      await render(<SafariShape />);
+
+      expect(screen.getByTestId('radial-label', HIDDEN).props.x).toEqual([160]);
+    });
+
+    it('reads each row by its value, and shows the row a press lands on', async () => {
+      await render(
+        <SafariShape tooltip={<ChartTooltip content={<ChartTooltipContent hideLabel nameKey="browser" />} />} />,
+      );
+
+      expect(screen.getByRole('adjustable').props['aria-label']).toMatch(/^Radial bar chart\. Visitors: 1,?260$/);
+
+      await fireEvent(surface(), 'responderGrant', { nativeEvent: { locationX: 160 + 80, locationY: 100 } });
+
+      expect(screen.getByText('Safari')).toBeOnTheScreen();
     });
   });
 

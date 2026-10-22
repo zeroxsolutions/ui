@@ -86,6 +86,7 @@ const THEME = {
   cursorFill: 'var(--muted)',
   cursorStroke: 'var(--border)',
   surface: 'var(--background)',
+  track: 'var(--muted)',
 } as const;
 
 /** Recharts' colour for a series given none. */
@@ -1492,7 +1493,7 @@ function polar(cx: number, cy: number, radius: number, angle: number): { x: numb
 }
 
 /** A slice of a pie, or of a ring with an `inner` radius, as an svg path around 0, 0. */
-function slicePath(slice: Slice, inner: number, outer: number): string {
+function slicePath(slice: Pick<Slice, 'startAngle' | 'endAngle'>, inner: number, outer: number): string {
   // d3's angles run clockwise from twelve o'clock.
   return (
     arcPath()({
@@ -1729,6 +1730,8 @@ function PolarAngleAxis(_props: PolarAngleAxisProps): ReactNode {
 }
 
 type PolarRadiusAxisProps = {
+  /** The key of each row that names its ring in a radial bar chart, such as `browser`. */
+  dataKey?: string;
   /** The spoke, in degrees anticlockwise from three o'clock, the axis' ticks are drawn along. */
   angle?: number;
   tick?: boolean;
@@ -2175,6 +2178,255 @@ function RadarChart(props: PolarChartProps): ReactNode {
   );
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// Radial bar charts
+
+type RadialBarProps = SeriesProps & {
+  /** The bars' colour, where a row has no `fill` of its own. */
+  fill?: string;
+  /** Whether a track runs behind each bar over the chart's whole sweep. */
+  background?: boolean;
+};
+
+/** An arc for each row, as long as its value. Placed inside a RadialBarChart, the chart draws it. */
+function RadialBar(_props: RadialBarProps): ReactNode {
+  return null;
+}
+
+type RadialBarChartProps = PolarChartProps & {
+  /** The space around each row's ring, a share of it such as `'10%'` or pixels. */
+  barCategoryGap?: Length;
+  /** The pixels between the bars of the same row. */
+  barGap?: number;
+};
+
+/** One ring per row of `data`, its arcs swept as far round as their values reach. */
+function RadialBarChart(props: RadialBarChartProps): ReactNode {
+  const {
+    data,
+    title,
+    width,
+    height,
+    children,
+    startAngle = 0,
+    endAngle = 360,
+    barCategoryGap = '10%',
+    barGap = 4,
+  } = props;
+  const size = useChartSize(width, height);
+  const palette = useContext(ChartPaletteContext);
+  const parts = useMemo(() => {
+    const found: {
+      series: RadialBarProps[];
+      grid?: PolarGridProps;
+      radiusAxis?: PolarRadiusAxisProps;
+      tooltip?: TooltipProps;
+      legend?: LegendProps;
+      other: ReactNode[];
+    } = { series: [], other: [] };
+    Children.forEach(children, (child) => {
+      if (!isValidElement(child) || child.type === PolarAngleAxis) return;
+      if (child.type === RadialBar) found.series.push(child.props as RadialBarProps);
+      else if (child.type === PolarGrid) found.grid = child.props as PolarGridProps;
+      else if (child.type === PolarRadiusAxis) found.radiusAxis = child.props as PolarRadiusAxisProps;
+      else if (child.type === Tooltip) found.tooltip = child.props as TooltipProps;
+      else if (child.type === Legend) found.legend = child.props as LegendProps;
+      else found.other.push(child);
+    });
+    return found;
+  }, [children]);
+  const [legendHeight, setLegendHeight] = useState(0);
+  const series = parts.series.filter((item) => item.hide !== true);
+  const animate = series.some((item) => item.isAnimationActive !== false);
+  const progress = useEntrance(animate, Math.max(...series.map((item) => item.animationDuration ?? ENTRANCE_MS), 0));
+  const maskId = `chart-mask-${useId().replace(/[^\w-]/g, '')}`;
+  const [active, setActive] = useState<ActivePoint | undefined>(undefined);
+  const [touched, setTouched] = useState(false);
+
+  if (size === undefined || size.width <= 0 || size.height <= 0) return null;
+
+  const resolve = (value: string | undefined): string | undefined => palette.resolveColor(value);
+  const legendTop = parts.legend?.verticalAlign === 'top';
+  const { cx, cy, inner, outer } = polarFrame(props, size, legendHeight, legendTop);
+  const count = data.length;
+  // As Recharts' does, the sweep runs from 0 to the largest value, and each row takes an equal ring.
+  const max = Math.max(0, ...data.flatMap((datum) => series.map((item) => numberAt(datum, item.dataKey))));
+  const angleOf = (value: number): number => startAngle + ((endAngle - startAngle) * value) / (max === 0 ? 1 : max);
+  const band = count === 0 ? 0 : (outer - inner) / count;
+  const gap = lengthOf(barCategoryGap, band);
+  const barSize = series.length === 0 ? 0 : (band - 2 * gap - (series.length - 1) * barGap) / series.length;
+  const ringOf = (index: number, order: number): { from: number; to: number } => {
+    const from = inner + index * band + gap + order * (barSize + barGap);
+    return { from, to: from + barSize };
+  };
+  const fillOf = (item: RadialBarProps, index: number): string => {
+    const own = data[index]?.fill;
+    return typeof own === 'string' ? own : (item.fill ?? DEFAULT_SERIES_COLOR);
+  };
+  const categoryKey = parts.radiusAxis?.dataKey;
+  const nameAt = (item: RadialBarProps, index: number): string =>
+    categoryKey === undefined ? seriesName(item) : String(data[index]?.[categoryKey] ?? index);
+  const nameOf = (key: string): string => palette.nameOf(key) ?? key;
+  const describe = (index: number): string =>
+    series
+      .map((item) => `${nameOf(nameAt(item, index))}: ${formatValue(data[index]?.[item.dataKey] as number)}`)
+      .join(', ');
+  const pointFor = (index: number): ActivePoint => {
+    const ring = ringOf(index, 0);
+    const value = numberAt(data[index], series[0]?.dataKey ?? '');
+    return { index, ...polar(cx, cy, (ring.from + ring.to) / 2, (startAngle + angleOf(value)) / 2) };
+  };
+  const pointAt = (px: number, py: number): ActivePoint | undefined => {
+    const index = Math.floor((Math.hypot(px - cx, py - cy) - inner) / band);
+    return band <= 0 || index < 0 || index >= count ? undefined : { index, x: px, y: py };
+  };
+  const interaction: Interaction = {
+    count,
+    pointAt,
+    pointFor,
+    summary: data.map((_, index) => describe(index)).join('. '),
+    describe,
+  };
+  const tooltip = parts.tooltip;
+  const shown =
+    active ?? (!touched && tooltip?.defaultIndex !== undefined ? pointFor(tooltip.defaultIndex) : undefined);
+  const payloadAt = (index: number): TooltipPayloadItem[] =>
+    series.map((item) => ({
+      dataKey: item.dataKey,
+      name: nameAt(item, index),
+      value: data[index]?.[item.dataKey] as number | string | undefined,
+      color: fillOf(item, index),
+      fill: fillOf(item, index),
+      payload: data[index],
+    }));
+  const legendPayload: LegendPayloadItem[] = data.flatMap((datum, index) =>
+    series.map((item) => ({
+      value: nameAt(item, index),
+      dataKey: item.dataKey,
+      color: fillOf(item, index),
+      type: 'rect' as const,
+      payload: datum,
+    })),
+  );
+  const arc = (from: number, to: number, start: number, end: number): string =>
+    slicePath({ startAngle: start, endAngle: end }, from, to);
+  const viewBox: PolarViewBox = { cx, cy, innerRadius: inner, outerRadius: outer, startAngle, endAngle };
+  const label = title ?? 'Radial bar chart';
+
+  return (
+    <View style={{ width: size.width, height: size.height }}>
+      <Svg
+        width={size.width}
+        height={size.height}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        {parts.grid === undefined ? null : (
+          <PolarGridDrawing
+            grid={parts.grid}
+            radii={parts.grid.polarRadius ?? data.map((_, index) => inner + (index + 0.5) * band)}
+            angles={[]}
+            cx={cx}
+            cy={cy}
+            inner={inner}
+            outer={outer}
+            resolve={resolve}
+          />
+        )}
+        {animate ? (
+          <SweepMask
+            id={maskId}
+            progress={progress}
+            cx={cx}
+            cy={cy}
+            radius={outer + 1}
+            startAngle={startAngle}
+            endAngle={endAngle}
+          />
+        ) : null}
+        <G x={cx} y={cy}>
+          {series.map((item, order) =>
+            item.background === true
+              ? data.map((_, index) => {
+                  const ring = ringOf(index, order);
+                  return (
+                    <Path
+                      key={`track-${item.dataKey}-${index}`}
+                      testID={`chart-track-${item.dataKey}-${index}`}
+                      d={arc(ring.from, ring.to, startAngle, endAngle)}
+                      fill={resolve(THEME.track)}
+                    />
+                  );
+                })
+              : null,
+          )}
+        </G>
+        {series.map((item, order) => (
+          <G
+            key={`${item.dataKey}-${order}`}
+            testID={`chart-series-${item.dataKey}`}
+            mask={item.isAnimationActive === false ? undefined : `url(#${maskId})`}
+          >
+            <G x={cx} y={cy}>
+              {data.map((datum, index) => {
+                const ring = ringOf(index, order);
+                const value = numberAt(datum, item.dataKey);
+                return value <= 0 ? null : (
+                  <Path
+                    key={index}
+                    testID={`chart-radial-bar-${item.dataKey}-${index}`}
+                    d={arc(ring.from, ring.to, startAngle, angleOf(value))}
+                    fill={resolve(fillOf(item, index))}
+                  />
+                );
+              })}
+            </G>
+          </G>
+        ))}
+        {drawLabels(parts.radiusAxis?.children, viewBox)}
+        {parts.other}
+      </Svg>
+      {tooltip === undefined ? (
+        <View
+          accessible
+          testID="chart-summary"
+          aria-label={[label, interaction.summary].join('. ')}
+          className="absolute inset-0"
+          pointerEvents="none"
+        />
+      ) : (
+        <ChartSurface
+          interaction={interaction}
+          active={shown}
+          label={label}
+          onActive={(point) => {
+            setTouched(true);
+            setActive(point);
+          }}
+        />
+      )}
+      {tooltip === undefined || shown === undefined ? null : (
+        <TooltipBox point={shown} size={size} offset={tooltip.offset ?? 10}>
+          {drawContent(
+            tooltip.content,
+            {
+              ...contentPropsOf(tooltip),
+              active: true,
+              payload: payloadAt(shown.index),
+              label: series[0] === undefined ? undefined : nameAt(series[0], shown.index),
+              coordinate: { x: shown.x, y: shown.y },
+            },
+            DefaultTooltipContent,
+          )}
+        </TooltipBox>
+      )}
+      {parts.legend === undefined ? null : (
+        <LegendBox legend={parts.legend} payload={legendPayload} onHeight={setLegendHeight} />
+      )}
+    </View>
+  );
+}
+
 export {
   Area,
   AreaChart,
@@ -2193,6 +2445,8 @@ export {
   PolarRadiusAxis,
   Radar,
   RadarChart,
+  RadialBar,
+  RadialBarChart,
   ResponsiveContainer,
   Text,
   Tooltip,
@@ -2219,6 +2473,8 @@ export type {
   PolarRadiusAxisProps,
   PolarViewBox,
   RadarProps,
+  RadialBarChartProps,
+  RadialBarProps,
   TextProps,
   TooltipContentProps,
   TooltipPayloadItem,

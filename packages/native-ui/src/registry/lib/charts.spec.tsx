@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
-import { Bar, BarChart, Radar, RadarChart, YAxis } from './charts';
+import { Bar, BarChart, Radar, RadarChart, RadialBar, RadialBarChart, YAxis } from './charts';
 
 const mockMotion = { reduced: false };
 
@@ -95,6 +95,19 @@ describe('a chart entrance', () => {
 
     expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('r', 0);
     expect(screen.getByTestId('chart-entrance', HIDDEN)).toHaveProp('cx', 160);
+  });
+
+  // A radial bar is swept round through a mask whose dash starts with nothing drawn.
+  it('sweeps a radial bar round from its start', async () => {
+    await render(
+      <RadialBarChart data={data} width={320} height={200}>
+        <RadialBar dataKey="desktop" />
+      </RadialBarChart>,
+    );
+
+    const entrance = screen.getByTestId('chart-entrance', HIDDEN);
+    expect(entrance.props.strokeDashoffset).toBeCloseTo(Number(entrance.props.strokeDasharray[0]));
+    expect(screen.getByTestId('chart-series-desktop', HIDDEN).props.mask).toBeDefined();
   });
 
   it('draws a series at once whose isAnimationActive is false', async () => {

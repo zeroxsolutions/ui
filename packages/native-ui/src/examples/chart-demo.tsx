@@ -28,8 +28,11 @@ import {
   PieChart,
   PolarAngleAxis,
   PolarGrid,
+  PolarRadiusAxis,
   Radar,
   RadarChart,
+  RadialBar,
+  RadialBarChart,
   Text as ChartText,
   XAxis,
 } from '@/lib/charts';
@@ -463,6 +466,79 @@ function ChartPieExample(): ReactNode {
   );
 }
 
+const radialChartData = [{ browser: 'safari', visitors: 1260, fill: 'var(--color-safari)' }];
+
+const radialChartConfig = {
+  visitors: {
+    label: 'Visitors',
+  },
+  safari: {
+    label: 'Safari',
+    color: 'var(--chart-2)',
+  },
+} satisfies ChartConfig;
+
+function ChartRadialExample(): ReactNode {
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Radial Chart - Shape</CardTitle>
+        <CardDescription>January - June 2024</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-1 pb-0">
+        <ChartContainer config={radialChartConfig} className="mx-auto aspect-square max-h-[210px]">
+          <RadialBarChart data={radialChartData} endAngle={100} innerRadius={64} outerRadius={94}>
+            <PolarGrid
+              gridType="circle"
+              radialLines={false}
+              stroke="none"
+              className="first:fill-muted last:fill-background"
+              polarRadius={[86, 74]}
+            />
+            <RadialBar dataKey="visitors" background />
+            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+              <Label
+                content={({ viewBox }) => (
+                  <>
+                    <ChartText
+                      x={viewBox.cx}
+                      y={viewBox.cy}
+                      textAnchor="middle"
+                      verticalAnchor="middle"
+                      fill="var(--foreground)"
+                      fontSize={36}
+                      fontWeight="bold"
+                    >
+                      {radialChartData[0]?.visitors.toLocaleString()}
+                    </ChartText>
+                    <ChartText
+                      x={viewBox.cx}
+                      y={viewBox.cy + 24}
+                      textAnchor="middle"
+                      verticalAnchor="middle"
+                      fill="var(--muted-foreground)"
+                      fontSize={12}
+                    >
+                      Visitors
+                    </ChartText>
+                  </>
+                )}
+              />
+            </PolarRadiusAxis>
+          </RadialBarChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col gap-2">
+        <View className="flex-row items-center gap-2">
+          <Text className="leading-none font-medium">Trending up by 5.2% this month</Text>
+          <Icon as={TrendingUp} className="size-4" />
+        </View>
+        <Text className="text-muted-foreground leading-none">Showing total visitors for the last 6 months</Text>
+      </CardFooter>
+    </Card>
+  );
+}
+
 const radarChartData = [
   { month: 'January', desktop: 186, mobile: 80 },
   { month: 'February', desktop: 305, mobile: 200 },
@@ -582,6 +658,7 @@ function ChartDemo(): ReactNode {
       <ChartBarExample />
       <ChartLineExample />
       <ChartPieExample />
+      <ChartRadialExample />
       <ChartRadarExample />
       <ChartRtlExample />
     </View>

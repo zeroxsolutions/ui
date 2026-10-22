@@ -72,8 +72,9 @@ Mobile 80", and valued "None selected" until a category is active. A screen read
 the next or the previous category and reads its values.
 A chart with no tooltip is announced with the same label.
 
-As Recharts' do, bars grow from the axis, lines and areas draw in from the left, a pie sweeps round and a radar grows
-from its middle over one and a half seconds, run by Reanimated. A series is drawn at once where the system asks for reduced motion or the series sets `isAnimationActive={false}`.
+As Recharts' do, bars grow from the axis, lines and areas draw in from the left, a pie and radial bars sweep round
+and a radar grows from its middle over one and a half seconds, run by Reanimated. A series is drawn at once where
+the system asks for reduced motion or the series sets `isAnimationActive={false}`.
 
 ## API reference
 
@@ -133,8 +134,8 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 ### Chart parts
 
 `@/lib/charts` holds `ResponsiveContainer`, `BarChart`, `Bar`, `LineChart`, `Line`, `AreaChart`, `Area`, `PieChart`,
-`Pie`, `RadarChart`, `Radar`, `PolarGrid`, `PolarAngleAxis`, `PolarRadiusAxis`, `Label`, `Text`, `XAxis`, `YAxis`,
-`CartesianGrid`, `Tooltip` and `Legend`, with these props of Recharts':
+`Pie`, `RadarChart`, `Radar`, `RadialBarChart`, `RadialBar`, `PolarGrid`, `PolarAngleAxis`, `PolarRadiusAxis`,
+`Label`, `Text`, `XAxis`, `YAxis`, `CartesianGrid`, `Tooltip` and `Legend`, with these props of Recharts':
 
 - `BarChart`, `LineChart` and `AreaChart`: `data`, `margin`, `accessibilityLayer`, `width`, `height`, and `title`, which a
   screen reader hears before the values; `BarChart` also `barGap` and `barCategoryGap`.
@@ -155,10 +156,15 @@ Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verti
 - `RadarChart`: `data`, `margin`, `cx`, `cy`, `innerRadius`, `outerRadius` (`'80%'`), `startAngle` (`90`),
   `endAngle` (`-270`), `accessibilityLayer`, `width`, `height`, `title`.
 - `Radar`: `fill`, `fillOpacity`, `stroke`, `strokeWidth`, `dot` (off unless given), `activeDot`.
+- `RadialBarChart`: the props of `RadarChart`, with `startAngle` (`0`) and `endAngle` (`360`), plus
+  `barCategoryGap` (`'10%'`) and `barGap` (`4`). Each row takes an equal ring, and a bar sweeps as far round as its
+  share of the largest value.
+- `RadialBar`: `fill` and `background`, a muted track over the whole sweep. A row's own `fill` colours its bar.
 - `PolarGrid`: `gridType` (`'polygon'` or `'circle'`), `radialLines`, `polarRadius`, `stroke`, `fill`, and the
   `fill-*` classes of `className`.
 - `PolarAngleAxis`: `dataKey`, `tick`, `tickFormatter`.
-- `PolarRadiusAxis`: `angle`, `tick`, `tickLine`, `axisLine`, `tickCount`, and a `Label` as its child.
+- `PolarRadiusAxis`: a `Label` as its child; `dataKey`, which names each ring of a radial bar chart; and, drawn
+  in a radar chart only, `angle`, `tick`, `axisLine` and `tickCount`. `tickLine` is accepted and draws nothing.
 - `Label`, inside a `Pie` or a `PolarRadiusAxis`: `content`, given `{ viewBox }` with the chart's `cx`, `cy` and
   radii, or `value`, drawn in the middle.
 - `Text`: react-native-svg's text props, such as `x`, `y`, `textAnchor` and `fontSize`, plus `verticalAnchor` and
