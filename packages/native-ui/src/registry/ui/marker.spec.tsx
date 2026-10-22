@@ -1,6 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { GitBranch } from 'lucide-react-native';
-import { Pressable } from 'react-native';
+import { AccessibilityInfo, Platform, Pressable } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Icon } from './icon';
 import { Marker, MarkerContent, MarkerIcon } from './marker';
@@ -86,7 +86,7 @@ describe('Marker', () => {
     );
   });
 
-  it('announces a status marker politely as it changes', async () => {
+  it('is a polite live region while it is a status, which TalkBack reads as it changes', async () => {
     await render(
       <Marker role="status" testID="marker">
         <MarkerContent>Thinking...</MarkerContent>
@@ -96,6 +96,53 @@ describe('Marker', () => {
     const marker = screen.getByTestId('marker');
     expect(marker.props.role).toBe('status');
     expect(marker.props['aria-live']).toBe('polite');
+  });
+
+  it('announces the text of a status marker on iOS as it appears and changes, nested text included', async () => {
+    const os = Platform.OS;
+    Platform.OS = 'ios';
+    // React Native's jest setup makes announceForAccessibility one shared mock, so its calls carry over between tests.
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockClear();
+    try {
+      const { rerender } = await render(
+        <Marker role="status">
+          <MarkerContent>Thinking...</MarkerContent>
+        </Marker>,
+      );
+      await rerender(
+        <Marker role="status">
+          <MarkerContent>Thinking...</MarkerContent>
+        </Marker>,
+      );
+      await rerender(
+        <Marker role="status">
+          <MarkerContent>
+            <Text>Oliver</Text> is typing...
+          </MarkerContent>
+        </Marker>,
+      );
+
+      expect(announce.mock.calls).toEqual([['Thinking...'], ['Oliver is typing...']]);
+    } finally {
+      Platform.OS = os;
+    }
+  });
+
+  it('announces nothing for a marker that is not a status', async () => {
+    const os = Platform.OS;
+    Platform.OS = 'ios';
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockClear();
+    try {
+      await render(
+        <Marker>
+          <MarkerContent>Explored 4 files</MarkerContent>
+        </Marker>,
+      );
+
+      expect(announce).not.toHaveBeenCalled();
+    } finally {
+      Platform.OS = os;
+    }
   });
 
   it('renders its child in its place with asChild, keeping the lines of a separator inside it', async () => {

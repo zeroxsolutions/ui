@@ -54,9 +54,9 @@ Takes every prop of React Native's `View`, plus:
 | `asChild` | `boolean`                              | `false`     |
 
 `separator` draws a line either side of the text, and `border` rules a line under the row. With
-`role="status"`, Android announces the marker each time it changes. With `asChild`, the marker renders its
-single child in place of the View, with the marker's props and classes merged on and a separator's lines
-inside it. The file also exports `markerVariants`.
+`role="status"`, a screen reader announces the marker's text as it appears and changes. With `asChild`, the
+marker renders its single child in place of the View, with the marker's props and classes merged on and a
+separator's lines inside it. The file also exports `markerVariants`.
 
 ### MarkerIcon
 
@@ -72,7 +72,6 @@ apart, such as a name with `font-medium`.
 - Upstream's Marker takes a `render` prop. The native one takes `asChild`.
 - Upstream draws a separator's lines as `::before` and `::after`. The native Marker draws them as two Views
   around its children.
-- iOS has no live region, so a status marker is not announced when it changes there; Android announces it.
 - Upstream underlines a link inside the marker by its tag. A device has no link tag, so underline a link
   yourself with `underline`.
 - Upstream's demo shimmers "Thinking..." with shadcn's `shimmer` class, which has no native counterpart.

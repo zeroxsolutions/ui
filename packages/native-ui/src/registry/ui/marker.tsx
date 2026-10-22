@@ -6,11 +6,12 @@ import {
   createContext,
   isValidElement,
   useContext,
+  useEffect,
   type ComponentProps,
   type ReactElement,
   type ReactNode,
 } from 'react';
-import { View } from 'react-native';
+import { AccessibilityInfo, Platform, View } from 'react-native';
 import { cn } from '../lib/utils';
 import { IconClassContext } from './icon';
 import { Text, TextClassContext } from './text';
@@ -35,8 +36,11 @@ const markerVariants = cva('relative w-full flex-row items-center cn-marker', {
 
 type MarkerVariant = NonNullable<VariantProps<typeof markerVariants>['variant']>;
 
-/** The variant of the Marker a MarkerContent sits in, which a separator's text keeps to its own width for. */
-const MarkerContext = createContext<MarkerVariant>('default');
+/**
+ * What a MarkerContent reads from its Marker: the variant, which a separator's text keeps to its own width for,
+ * and whether the marker is a status, whose text is announced as it changes.
+ */
+const MarkerContext = createContext<{ variant: MarkerVariant; status: boolean }>({ variant: 'default', status: false });
 
 type MarkerProps = ComponentProps<typeof View> &
   VariantProps<typeof markerVariants> & {
@@ -50,7 +54,7 @@ type MarkerProps = ComponentProps<typeof View> &
 /**
  * A line in a conversation that is not a message: a status, a system note, a row ruled underneath
  * (`border`), or a label between two lines (`separator`). Its text is small and muted. With
- * `role="status"`, the marker is announced politely each time it changes on Android; iOS announces no change.
+ * `role="status"`, a screen reader announces its MarkerContent as it appears and changes.
  */
 function Marker({ className, variant, asChild = false, role, children, ...props }: MarkerProps): ReactNode {
   const separator = variant === 'separator';
@@ -84,7 +88,7 @@ function Marker({ className, variant, asChild = false, role, children, ...props 
   }
 
   return (
-    <MarkerContext.Provider value={variant ?? 'default'}>
+    <MarkerContext.Provider value={{ variant: variant ?? 'default', status: role === 'status' }}>
       <TextClassContext.Provider value="cn-marker/text">
         <IconClassContext.Provider value="cn-marker/icon">{drawn}</IconClassContext.Provider>
       </TextClassContext.Provider>
@@ -101,12 +105,27 @@ function MarkerIcon({ className, ...props }: ComponentProps<typeof View>): React
   );
 }
 
+/** The text `node` reads as, the text of nested elements included. */
+function textOf(node: ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(textOf).join('');
+  if (isValidElement<{ children?: ReactNode }>(node)) return textOf(node.props.children);
+  return '';
+}
+
 /**
  * The text of a Marker, wrapping in the width the icon leaves; inside a separator, centred and only as wide
  * as it needs. Nest a Text in it to set part of the text apart, such as a name in a medium weight.
  */
-function MarkerContent({ className, ...props }: ComponentProps<typeof Text>): ReactNode {
-  const variant = useContext(MarkerContext);
+function MarkerContent({ className, children, ...props }: ComponentProps<typeof Text>): ReactNode {
+  const { variant, status } = useContext(MarkerContext);
+  const announcement = status ? textOf(children) : '';
+
+  // A live region is Android's alone; iOS announces only what it is told to.
+  useEffect(() => {
+    if (announcement && Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(announcement);
+  }, [announcement]);
+
   return (
     <Text
       className={cn(
@@ -115,7 +134,9 @@ function MarkerContent({ className, ...props }: ComponentProps<typeof Text>): Re
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+    </Text>
   );
 }
 
