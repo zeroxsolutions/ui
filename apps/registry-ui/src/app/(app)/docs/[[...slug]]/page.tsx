@@ -35,7 +35,7 @@ export default async function DocsPage({ params }: DocsPageProps): Promise<React
   const page = source.getPage((await params).slug);
   if (!page) notFound();
 
-  const Body = page.data.body;
+  const { body: Body, toc } = await page.data.load();
 
   return (
     <DocsArticle
@@ -45,7 +45,7 @@ export default async function DocsPage({ params }: DocsPageProps): Promise<React
       markdown={await docsLlms.page(page)}
       tree={source.pageTree}
       url={page.url}
-      toc={page.data.toc}
+      toc={toc}
     >
       <Body components={mdxComponents} />
     </DocsArticle>

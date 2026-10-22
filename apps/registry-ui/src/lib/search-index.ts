@@ -7,16 +7,16 @@ import type { Platform } from '@/types/platform';
 
 interface IndexedPage {
   url: string;
-  data: { title?: string; description?: string; structuredData: StructuredData };
+  data: { title?: string; description?: string; structuredData: () => Promise<StructuredData> };
 }
 
-function pageIndex(page: IndexedPage, platform: Platform): AdvancedIndex {
+async function pageIndex(page: IndexedPage, platform: Platform): Promise<AdvancedIndex> {
   return {
     id: page.url,
     url: page.url,
     title: page.data.title ?? page.url,
     description: page.data.description,
-    structuredData: page.data.structuredData,
+    structuredData: await page.data.structuredData(),
     tag: platform,
   };
 }
@@ -26,10 +26,10 @@ function pageIndex(page: IndexedPage, platform: Platform): AdvancedIndex {
  * native component is listed once, at its canonical URL; the search on another engine's page moves the
  * result to that engine.
  */
-export function searchIndexes(): AdvancedIndex[] {
-  return [
+export async function searchIndexes(): Promise<AdvancedIndex[]> {
+  return Promise.all([
     ...source.getPages().map((page) => pageIndex(page, 'web')),
     ...nativeDocsSource.getPages().map((page) => pageIndex(page, 'native')),
     ...canonicalNativeComponentsSource.getPages().map((page) => pageIndex(page, 'native')),
-  ];
+  ]);
 }

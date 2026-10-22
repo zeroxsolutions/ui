@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: NativeComponentPageProps): Pr
 
 export default async function NativeComponentPage({ params }: NativeComponentPageProps): Promise<ReactNode> {
   const { engine, page } = await componentPage(params);
-  const Body = page.data.body;
+  const { body: Body, toc } = await page.data.load();
 
   return (
     <DocsArticle
@@ -63,7 +63,7 @@ export default async function NativeComponentPage({ params }: NativeComponentPag
       copyPage={<NativeCopyPageButton markdown={await nativePageMarkdownByStyle(page, engine)} />}
       tree={nativePageTree(engine)}
       url={page.url}
-      toc={page.data.toc}
+      toc={toc}
     >
       <Body components={nativeMdxComponents(engine)} />
     </DocsArticle>
