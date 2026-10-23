@@ -123,6 +123,7 @@ AvatarPicker
         |   |   `-- EmojiPickerEmpty
         |   `-- EmojiPickerNav
         |-- AvatarPickerUploadContent
+        |   |-- AvatarPickerUploadPreview
         |   `-- AvatarPickerUploadTrigger
         `-- AvatarPickerColorContent
             |-- AvatarPickerColorGroup
@@ -185,11 +186,23 @@ except `value`, plus:
 | `onUpload` | `(file: File) => string \| null \| Promise<string \| null>` | -       |
 
 Upload pane (tab value `upload`): an `Empty` frame holding the file input, whose copy the consumer composes as
-`children` (`EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`) with an `AvatarPickerUploadTrigger`
-inside `EmptyContent`. A picked file goes to `onUpload` and the resolved URL becomes `imageUrl`, or - when
-`onUpload` is omitted - is read inline as a data URL. While `onUpload` is pending the pane is `aria-busy` and
-carries `data-uploading`, so the children can swap their copy with `group-data-uploading/avatar-picker-upload:`
-classes. It sets `data-slot="avatar-picker-upload-content"`.
+`children` (`EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`) with an `AvatarPickerUploadPreview`
+and an `AvatarPickerUploadTrigger` inside `EmptyContent`. A picked file, or an image dropped anywhere on the
+pane, goes to `onUpload` and the resolved URL becomes `imageUrl`, or - when `onUpload` is omitted - is read
+inline as a data URL. A dropped file that is not an image is ignored, and so is a drop while an upload is
+pending.
+
+The pane carries its state on `data-*` attributes, so the children can swap their copy with
+`group-data-<state>/avatar-picker-upload:` classes: `data-uploading` while `onUpload` is pending (the pane is
+also `aria-busy` then), `data-dragging` while files are dragged over the pane, and `data-has-image` while the
+avatar is an image. While dragging, the frame takes a primary border. It sets
+`data-slot="avatar-picker-upload-content"`.
+
+### AvatarPickerUploadPreview
+
+Renders an `img` and takes every prop an `img` takes. The avatar's current image, drawn round and cropped to fill
+like the `Avatar` it becomes; it renders nothing while the avatar is not an image. Name it with `alt`. It sets
+`data-slot="avatar-picker-upload-preview"`.
 
 ### AvatarPickerUploadTrigger
 
