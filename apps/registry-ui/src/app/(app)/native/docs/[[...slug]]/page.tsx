@@ -37,7 +37,7 @@ export default async function NativeDocsPage({ params }: NativeDocsPageProps): P
   const page = nativeDocsSource.getPage((await params).slug);
   if (!page) notFound();
 
-  const Body = page.data.body;
+  const { body: Body, toc } = await page.data.load();
 
   return (
     <DocsArticle
@@ -47,7 +47,7 @@ export default async function NativeDocsPage({ params }: NativeDocsPageProps): P
       // The pager steps on into the components under the default engine; the page itself names none.
       tree={nativePageTree(DEFAULT_NATIVE_ENGINE)}
       url={page.url}
-      toc={page.data.toc}
+      toc={toc}
     >
       <Body components={nativeMdxComponents()} />
     </DocsArticle>
