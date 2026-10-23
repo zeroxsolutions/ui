@@ -305,7 +305,13 @@ function AvatarPickerUploadContent({
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={(e) => onFile(e.target.files?.[0] ?? undefined)}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            // The browser fires no change for a pick that matches the input's value, so picking the
+            // same file again would do nothing.
+            e.target.value = '';
+            onFile(file);
+          }}
         />
         <Empty className="group-data-dragging/avatar-picker-upload:border-primary group-data-dragging/avatar-picker-upload:bg-muted/50 border border-transparent">
           {children}
