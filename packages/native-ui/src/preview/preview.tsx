@@ -11,6 +11,8 @@ import { zuiFonts } from '@/lib/fonts';
 import { useModalOverlayShown } from '@/lib/overlay';
 import { Toaster as NovaToaster, useSonner as useNovaSonner } from '@styles/nova/components/ui/sonner';
 import { Toaster as VegaToaster, useSonner as useVegaSonner } from '@styles/vega/components/ui/sonner';
+import { Toaster as NovaBaseToaster, useToastManager as useNovaToastManager } from '@styles/nova/components/ui/toast';
+import { Toaster as VegaBaseToaster, useToastManager as useVegaToastManager } from '@styles/vega/components/ui/toast';
 
 import { DemoBoundary } from './demo-boundary';
 import { DEMO_NAMES, findDemo } from './find-demo';
@@ -32,12 +34,22 @@ void SplashScreen.preventAutoHideAsync();
 const location = Platform.OS === 'web' ? window.location : undefined;
 
 /**
- * Each style's Toaster, and its hook on the toasts that are up. A style's demos raise toasts through that
- * style's own sonner, whose queue only its own Toaster draws.
+ * Each style's Toasters, sonner's and toast's, and their hooks on the toasts that are up. A style's demos
+ * raise toasts through that style's own sonner and toast manager, whose toasts only its own Toasters draw.
  */
 const TOASTERS = {
-  vega: { Toaster: VegaToaster, useSonner: useVegaSonner },
-  nova: { Toaster: NovaToaster, useSonner: useNovaSonner },
+  vega: {
+    Toaster: VegaToaster,
+    useSonner: useVegaSonner,
+    BaseToaster: VegaBaseToaster,
+    useToastManager: useVegaToastManager,
+  },
+  nova: {
+    Toaster: NovaToaster,
+    useSonner: useNovaSonner,
+    BaseToaster: NovaBaseToaster,
+    useToastManager: useNovaToastManager,
+  },
 } as const satisfies Record<PreviewStyle, unknown>;
 
 /** The demo a link names until the app has read the link, on native, where reading it is async. */
@@ -139,7 +151,9 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
   const overlayShown = useOverlayShown();
   // A toast draws over the page like an overlay, at the frame's bottom edge, so the frame grows for it too.
   // The style is fixed for the app's life, so the same hook runs on every render.
-  const toastShown = TOASTERS[style].useSonner().toasts.length > 0;
+  const sonnerToasts = TOASTERS[style].useSonner().toasts;
+  const baseToasts = TOASTERS[style].useToastManager().toasts;
+  const toastShown = sonnerToasts.length > 0 || baseToasts.length > 0;
 
   useLayoutEffect(() => {
     const scheme = location ? themeFromSearch(location.search) : undefined;
@@ -195,15 +209,17 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
  * that height changes, and a taller one while the demo shows an overlay. The splash screen stays up until the fonts and, on native, the link are read.
  *
  * A preview app renders it as its root, after importing its engine's stylesheet; `@/` in this module and
- * the demos' `@/` resolve to that app's emitted sources. It holds the app's `PortalHost` and `Toaster`, so the
- * app adds neither; a demo's overlay draws there, above the demo and inside the safe area's provider, and its
+ * the demos' `@/` resolve to that app's emitted sources. It holds the app's `PortalHost` and both Toasters, so
+ * the app adds none; a demo's overlay draws there, above the demo and inside the safe area's provider, and its
  * toasts above that.
  */
 function Preview(props: PreviewProps): ReactNode {
-  const { Toaster } = TOASTERS[previewStyleOf(props.bundledStyle)];
+  const { Toaster, BaseToaster } = TOASTERS[previewStyleOf(props.bundledStyle)];
   return (
     <SafeAreaProvider>
-      <PreviewScreen {...props} />
+      <BaseToaster>
+        <PreviewScreen {...props} />
+      </BaseToaster>
       <PortalHost />
       <Toaster />
     </SafeAreaProvider>

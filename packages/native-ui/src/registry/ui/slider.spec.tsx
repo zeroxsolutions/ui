@@ -1,7 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useState, type ReactNode } from 'react';
+import { I18nManager, Platform, StyleSheet } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Slider as NovaSlider } from '@styles/nova/components/ui/slider';
+import { DirectionProvider } from './direction';
 import { Slider, type SliderProps } from './slider';
 
 type Element = ReturnType<typeof screen.getByTestId>;
@@ -54,6 +56,10 @@ function Controlled(props: SliderProps): ReactNode {
 }
 
 describe('Slider', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('announces one adjustable thumb with its range, value and value text', async () => {
     await render(<Slider testID="slider" defaultValue={50} aria-label="Volume" />);
 
@@ -237,6 +243,50 @@ describe('Slider', () => {
     expect(values()).toEqual([45, 70]);
     expect(onValueChange).toHaveBeenLastCalledWith([45, 70], { activeThumbIndex: 1 });
   });
+
+  it('runs from the right when text reads right to left: a press, the arrow keys and the thumb', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    await render(
+      <DirectionProvider direction="rtl">
+        <Slider testID="slider" defaultValue={0} />
+      </DirectionProvider>,
+    );
+    const laid = await laidOut(200);
+
+    await fireEvent(laid, 'responderGrant', touch(50, 50));
+    await fireEvent(laid, 'responderRelease', touch(50, 50));
+    expect(values()).toEqual([75]);
+    await fireEvent(thumbs()[0], 'keyDown', { nativeEvent: { key: 'ArrowLeft' }, preventDefault: jest.fn() });
+    expect(values()).toEqual([76]);
+
+    expect(thumbs()[0]).toHaveStyle({ start: 152 });
+  });
+
+  it.each([
+    ["the web, which lays out in the provider's direction", 'web', false, 'rtl', 75, 'start'],
+    ['a device laid out left to right under a right to left provider', 'ios', false, 'rtl', 75, 'end'],
+    ['a device laid out right to left under a left to right provider', 'ios', true, 'ltr', 25, 'end'],
+    ['a device laid out right to left under a right to left provider', 'ios', true, 'rtl', 75, 'start'],
+  ] as const)(
+    "runs the provider's way and places its thumb from that side, on %s",
+    async (_where, os, isRTL, direction, pressed, key) => {
+      jest.replaceProperty(Platform, 'OS', os);
+      jest.spyOn(I18nManager, 'getConstants').mockReturnValue({ ...I18nManager.getConstants(), isRTL });
+      await render(
+        <DirectionProvider direction={direction}>
+          <Slider testID="slider" defaultValue={0} />
+        </DirectionProvider>,
+      );
+      const laid = await laidOut(200);
+
+      await fireEvent(laid, 'responderGrant', touch(50, 50));
+      await fireEvent(laid, 'responderRelease', touch(50, 50));
+      expect(values()).toEqual([pressed]);
+
+      const placed = StyleSheet.flatten(thumbs()[0].props.style) as Record<string, unknown>;
+      expect(Object.keys(placed).filter((side) => side === 'start' || side === 'end')).toEqual([key]);
+    },
+  );
 
   it('rises from the bottom when vertical', async () => {
     await render(<Slider testID="slider" defaultValue={0} orientation="vertical" />);

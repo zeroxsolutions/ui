@@ -1,0 +1,130 @@
+---
+title: Trace
+description: The steps an agent took, such as its reasoning, tool calls and sources, each able to open on its detail.
+---
+
+<NativePreview name="trace-demo" />
+
+## Installation
+
+<InstallCommand name="trace" />
+
+The CLI writes `components/ui/trace.tsx`, installs [Collapsible](/native/components/nativewind/collapsible),
+[Text](/native/components/nativewind/text), [Icon](/native/components/nativewind/icon), Motion, Focus visible
+and Utils, and adds `lucide-react-native`, `react-native-reanimated` and `react-native-worklets`. An Expo app
+built with `babel-preset-expo` compiles Reanimated's worklets with no further setup.
+
+## Usage
+
+```tsx
+import { Search, Terminal } from 'lucide-react-native';
+
+import { Icon } from '@/components/ui/icon';
+import {
+  Trace,
+  TraceCollapsible,
+  TraceCollapsibleContent,
+  TraceCollapsibleTrigger,
+  TraceIcon,
+  TraceLine,
+  TraceTitle,
+} from '@/components/ui/trace';
+```
+
+A step with no detail is a `TraceLine`:
+
+```tsx
+<Trace>
+  <TraceLine>
+    <TraceIcon>
+      <Icon as={Search} />
+    </TraceIcon>
+    <TraceTitle>Searched for minimumReleaseAge</TraceTitle>
+  </TraceLine>
+</Trace>
+```
+
+Put the line in a `TraceCollapsible` to open its detail under it:
+
+```tsx
+<Trace>
+  <TraceCollapsible>
+    <TraceCollapsibleTrigger>
+      <TraceLine>
+        <TraceIcon>
+          <Icon as={Terminal} />
+        </TraceIcon>
+        <TraceTitle>Ran node --version</TraceTitle>
+      </TraceLine>
+    </TraceCollapsibleTrigger>
+    <TraceCollapsibleContent>v24.18.0</TraceCollapsibleContent>
+  </TraceCollapsible>
+</Trace>
+```
+
+To make a step take a press, such as a source that opens a page, put the line in a Pressable with `self-start`,
+so the Pressable is only as wide as the line, and name it:
+
+```tsx
+<Pressable role="link" aria-label="pnpm.io (opens in the browser)" className="self-start" onPress={open}>
+  <TraceLine>
+    <TraceTitle>pnpm.io</TraceTitle>
+  </TraceLine>
+</Pressable>
+```
+
+## API reference
+
+### Trace
+
+Takes every prop of React Native's `View`. Stacks its lines with the style's gap.
+
+### TraceLine
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop     | Type                                | Default |
+| -------- | ----------------------------------- | ------- |
+| `status` | `'running' \| 'error' \| 'pending'` | -       |
+
+`running` pulses the title, `error` turns the line destructive, and `pending` dims it. The line is small and
+muted, and only as wide as it needs.
+
+### TraceIcon
+
+Takes every prop of React Native's `View`. Draws an Icon child at 16px in the line's colour and hides it from
+screen readers. An icon after the title is pulled back towards it.
+
+### TraceTitle
+
+Takes every prop of [Text](/native/components/nativewind/text). Draws one line, cut short where the row runs
+out of room.
+
+### TraceDescription
+
+Takes every prop of [Text](/native/components/nativewind/text). A detail after the title, such as how long the
+step took, fainter than the line.
+
+### TraceCollapsible
+
+Takes the props of [Collapsible](/native/components/nativewind/collapsible): `defaultOpen`, or `open` together
+with `onOpenChange`.
+
+### TraceCollapsibleTrigger
+
+Takes the props of `CollapsibleTrigger`. Announced as a button with its expanded state and named by its line.
+Its chevron points down while open, and turns destructive when its line's `status` is `error`.
+
+### TraceCollapsibleContent
+
+Takes the props of `CollapsibleContent`. Draws its children in muted text beside a line under the trigger's
+icon. Its `className` goes on the box around its children. It grows open and shrinks closed over 200ms.
+
+## Differences from upstream
+
+- A running title fades to half opacity and back, where upstream's sweeps a shimmer across the text, which has
+  no native counterpart.
+- Upstream styles a link or button around a line through the Trace, by the line inside it. A device has no
+  selector for that, so give the Pressable `self-start` yourself.
+- Upstream draws a focus ring around a focused trigger. The native trigger draws it as its border, which a
+  ring on a device has no counterpart of.

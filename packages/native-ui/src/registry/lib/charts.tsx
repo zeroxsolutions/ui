@@ -1,0 +1,2653 @@
+/**
+ * The chart parts upstream's chart demos take from Recharts, in Recharts' names and with the props those
+ * demos use, drawn with react-native-svg so they run on a device and in the browser. They are the responsive
+ * container; the bar, line and area charts and their series; the pie chart, its slices, its label and the
+ * text it draws; the radar and radial bar charts with their polar grid and axes; the axes, the grid, the tooltip
+ * and the legend. A part reads its colours, such as
+ * `var(--color-desktop)`, through the palette the chart's container provides.
+ */
+import { scaleBand, scaleLinear, scalePoint } from 'd3-scale';
+import {
+  curveBasis,
+  curveBumpX,
+  curveLinear,
+  curveMonotoneX,
+  curveMonotoneY,
+  curveNatural,
+  curveStep,
+  curveStepAfter,
+  curveStepBefore,
+  area as areaPath,
+  line as linePath,
+  type CurveFactory,
+} from 'd3-shape';
+import {
+  Children,
+  cloneElement,
+  createContext,
+  isValidElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ComponentRef,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
+import {
+  Platform,
+  Text as NativeText,
+  View,
+  type AccessibilityActionEvent,
+  type GestureResponderEvent,
+  type KeyDownEvent,
+  type LayoutChangeEvent,
+  type PointerEvent,
+} from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedProps,
+  useSharedValue,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
+import Svg, { Circle, G, Line as SvgLine, Path, Rect, Text as SvgText } from 'react-native-svg';
+import { useReducedMotion } from './motion';
+import { textOf } from './text-children';
+
+/** One row of a chart's `data`, such as `{ month: "January", desktop: 186 }`. */
+type ChartDatum = Readonly<Record<string, unknown>>;
+
+/**
+ * How a chart's parts read colours and names: the container of upstream's chart provides it, as its
+ * stylesheet provides the `--color-<key>` variables on the web.
+ */
+interface ChartPalette {
+  /**
+   * The colour to draw for `value` as a part is given it: `var(--color-<key>)`, a theme variable such as
+   * `var(--chart-1)`, or a colour. `undefined` for none.
+   */
+  resolveColor: (value: string | undefined) => string | undefined;
+  /** The name a screen reader hears for the series or the category `key`, such as `Desktop` for `desktop`. */
+  nameOf: (key: string) => string | undefined;
+}
+
+const ChartPaletteContext = createContext<ChartPalette>({
+  resolveColor: (value) => value,
+  nameOf: () => undefined,
+});
+
+/** The colours a part draws where upstream's chart container styles Recharts' own. */
+const THEME = {
+  tick: 'var(--muted-foreground)',
+  grid: 'var(--border)',
+  cursorFill: 'var(--muted)',
+  cursorStroke: 'var(--border)',
+  surface: 'var(--background)',
+  track: 'var(--muted)',
+} as const;
+
+/** Recharts' colour for a series given none. */
+const DEFAULT_SERIES_COLOR = '#3182bd';
+
+// ---------------------------------------------------------------------------------------------------------
+// Size
+
+interface ChartSize {
+  width: number;
+  height: number;
+}
+
+const ChartSizeContext = createContext<ChartSize | undefined>(undefined);
+
+type ResponsiveContainerProps = {
+  /** The size drawn before the container has been measured. */
+  initialDimension?: ChartSize;
+  children?: ReactNode;
+};
+
+/** Fills its parent and gives the chart inside it the size it was laid out at. */
+function ResponsiveContainer({
+  initialDimension = { width: 320, height: 200 },
+  children,
+}: ResponsiveContainerProps): ReactNode {
+  const [size, setSize] = useState<ChartSize>(initialDimension);
+  const onLayout = (event: LayoutChangeEvent): void => {
+    const { width, height } = event.nativeEvent.layout;
+    setSize((current) => (current.width === width && current.height === height ? current : { width, height }));
+  };
+  return (
+    <View onLayout={onLayout} className="w-full flex-1 self-stretch">
+      <ChartSizeContext.Provider value={size}>{children}</ChartSizeContext.Provider>
+    </View>
+  );
+}
+
+function useChartSize(width: number | undefined, height: number | undefined): ChartSize | undefined {
+  const measured = useContext(ChartSizeContext);
+  if (width !== undefined && height !== undefined) return { width, height };
+  return measured;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Motion
+
+/** Recharts' entrance: one and a half seconds on CSS's `ease`. */
+const ENTRANCE_MS = 1500;
+const EASE = Easing.bezier(0.25, 0.1, 0.25, 1);
+
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+const AnimatedG = Animated.createAnimatedComponent(G);
+
+/**
+ * The share of a chart's entrance drawn so far, from 0 to 1, run by Reanimated so the chart is not drawn
+ * again for each frame. It is 1 from the start where `animate` is false or the system asks for reduced motion.
+ */
+function useEntrance(animate: boolean, duration: number): SharedValue<number> {
+  const reduced = useReducedMotion();
+  const still = !animate || reduced;
+  const progress = useSharedValue(still ? 1 : 0);
+  useEffect(() => {
+    progress.value = still ? 1 : withTiming(1, { duration, easing: EASE });
+  }, [progress, still, duration]);
+  return progress;
+}
+
+/** One command of an svg path and its numbers, such as `C` and its three points. */
+interface PathSegment {
+  command: string;
+  values: number[];
+}
+
+/** The commands of a path d3 wrote, which uses only `M`, `L`, `C`, `Q` and `Z`. */
+function parsePath(d: string | null): PathSegment[] {
+  return [...(d ?? '').matchAll(/([MLCQZ])([^MLCQZ]*)/g)].map(([, command = '', values = '']) => ({
+    command,
+    values: values
+      .split(/[\s,]+/)
+      .filter((value) => value !== '')
+      .map(Number),
+  }));
+}
+
+/** `segments` drawn with each point moved towards `ox`, `oy` by the shares `sx` across and `sy` down. */
+function scaledPath(segments: readonly PathSegment[], ox: number, oy: number, sx: number, sy: number): string {
+  'worklet';
+  let d = '';
+  for (const segment of segments) {
+    d += segment.command;
+    for (let at = 0; at + 1 < segment.values.length; at += 2) {
+      const x = segment.values[at] ?? 0;
+      const y = segment.values[at + 1] ?? 0;
+      d += `${at === 0 ? '' : ' '}${ox + (x - ox) * sx},${oy + (y - oy) * sy}`;
+    }
+  }
+  return d;
+}
+
+/** How long `segments` run, with each curve measured along 32 straight steps. */
+function pathLength(segments: readonly PathSegment[]): number {
+  let length = 0;
+  let [x, y, startX, startY] = [0, 0, 0, 0];
+  for (const { command, values } of segments) {
+    if (command === 'M') {
+      [x, y] = [values[0] ?? 0, values[1] ?? 0];
+      [startX, startY] = [x, y];
+    } else if (command === 'Z') {
+      length += Math.hypot(startX - x, startY - y);
+      [x, y] = [startX, startY];
+    } else {
+      // A line is one step; a curve's control points weigh each step as a Bezier curve does.
+      const points = [[x, y]];
+      for (let at = 0; at + 1 < values.length; at += 2) points.push([values[at] ?? 0, values[at + 1] ?? 0]);
+      const steps = command === 'L' ? 1 : 32;
+      for (let step = 1; step <= steps; step++) {
+        let level = points.map((point) => [...point]);
+        while (level.length > 1) {
+          level = level.slice(1).map((point, index) => {
+            const before = level[index] ?? point;
+            return [
+              (before[0] ?? 0) + ((point[0] ?? 0) - (before[0] ?? 0)) * (step / steps),
+              (before[1] ?? 0) + ((point[1] ?? 0) - (before[1] ?? 0)) * (step / steps),
+            ];
+          });
+        }
+        const [nextX = x, nextY = y] = level[0] ?? [];
+        length += Math.hypot(nextX - x, nextY - y);
+        [x, y] = [nextX, nextY];
+      }
+    }
+  }
+  return length;
+}
+
+/**
+ * The ring between `inner` and `outer` around 0, 0 from `startAngle` to `endAngle`, in degrees anticlockwise
+ * from three o'clock; a whole turn is drawn as a ring with a hole.
+ */
+function sectorPath(inner: number, outer: number, startAngle: number, endAngle: number): string {
+  'worklet';
+  const sweep = endAngle - startAngle;
+  if (Math.abs(sweep) < 1e-6 || outer <= 0) return '';
+  if (Math.abs(sweep) >= 360 - 1e-6) {
+    const ring = `M${outer},0 A${outer},${outer} 0 1 0 ${-outer},0 A${outer},${outer} 0 1 0 ${outer},0 Z`;
+    return inner <= 0
+      ? ring
+      : `${ring} M${inner},0 A${inner},${inner} 0 1 1 ${-inner},0 A${inner},${inner} 0 1 1 ${inner},0 Z`;
+  }
+  const radians = Math.PI / 180;
+  const at = (radius: number, angle: number): string =>
+    `${radius * Math.cos(angle * radians)},${-radius * Math.sin(angle * radians)}`;
+  // Anticlockwise on the screen is svg's negative direction, a sweep flag of 0.
+  const large = Math.abs(sweep) > 180 ? 1 : 0;
+  const flag = sweep > 0 ? 0 : 1;
+  const outerArc = `M${at(outer, startAngle)} A${outer},${outer} 0 ${large} ${flag} ${at(outer, endAngle)}`;
+  const back =
+    inner <= 0 ? 'L0,0' : `L${at(inner, endAngle)} A${inner},${inner} 0 ${large} ${1 - flag} ${at(inner, startAngle)}`;
+  return `${outerArc} ${back} Z`;
+}
+
+/** The props every drawn shape passes on to its Path. */
+type ShapeProps = Omit<ComponentProps<typeof Path>, 'd'> & {
+  progress: SharedValue<number>;
+  /** Whether the shape is drawn whole from the start, as a series whose `isAnimationActive` is false is. */
+  still: boolean;
+};
+
+/** A bar that grows up from `base` to its full `height` over the entrance, as Recharts' does. */
+function GrowingBar({
+  progress,
+  still,
+  x,
+  base,
+  width,
+  height,
+  radius,
+  ...props
+}: ShapeProps & {
+  x: number;
+  base: number;
+  width: number;
+  height: number;
+  radius: number | readonly [number, number, number, number];
+}): ReactNode {
+  const animatedProps = useAnimatedProps(() => {
+    const grown = height * (still ? 1 : progress.value);
+    return { d: roundedRect(x, base - grown, width, grown, radius) };
+  });
+  return <AnimatedPath {...props} animatedProps={animatedProps} />;
+}
+
+/**
+ * A path whose points move out from `ox`, `oy` to where they belong over the entrance: down the y axis
+ * only for an area rising from its baseline, or both ways for a radar growing from its middle.
+ */
+function GrowingPath({
+  progress,
+  still,
+  segments,
+  ox,
+  oy,
+  across,
+  ...props
+}: ShapeProps & { segments: readonly PathSegment[]; ox: number; oy: number; across: boolean }): ReactNode {
+  const animatedProps = useAnimatedProps(() => {
+    const share = still ? 1 : progress.value;
+    return { d: scaledPath(segments, ox, oy, across ? share : 1, share) };
+  });
+  return <AnimatedPath {...props} animatedProps={animatedProps} />;
+}
+
+/** A line drawn from its start over the entrance, as Recharts' is, by its dash's offset. */
+function DrawnLine({
+  progress,
+  still,
+  segments,
+  ...props
+}: ShapeProps & { segments: readonly PathSegment[] }): ReactNode {
+  const length = pathLength(segments);
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: length * (1 - (still ? 1 : progress.value)),
+  }));
+  return (
+    <AnimatedPath
+      {...props}
+      d={scaledPath(segments, 0, 0, 1, 1)}
+      strokeDasharray={[length, length]}
+      animatedProps={animatedProps}
+    />
+  );
+}
+
+/**
+ * A slice or a radial bar swept round from `origin` over the entrance: its angles open out from `origin`
+ * to `startAngle` and `endAngle`, as Recharts sweeps a pie and a radial bar in.
+ */
+function SweptSector({
+  progress,
+  still,
+  inner,
+  outer,
+  origin,
+  startAngle,
+  endAngle,
+  ...props
+}: ShapeProps & { inner: number; outer: number; origin: number; startAngle: number; endAngle: number }): ReactNode {
+  const animatedProps = useAnimatedProps(() => {
+    const share = still ? 1 : progress.value;
+    return {
+      d: sectorPath(inner, outer, origin + (startAngle - origin) * share, origin + (endAngle - origin) * share),
+    };
+  });
+  return <AnimatedPath {...props} animatedProps={animatedProps} />;
+}
+
+/** Marks shown once the entrance has finished, as Recharts draws a line's dots. */
+function ShownWhenDrawn({
+  progress,
+  still,
+  testID,
+  children,
+}: {
+  progress: SharedValue<number>;
+  still: boolean;
+  testID?: string;
+  children: ReactNode;
+}): ReactNode {
+  const animatedProps = useAnimatedProps(() => ({ opacity: still || progress.value >= 1 ? 1 : 0 }));
+  return (
+    <AnimatedG testID={testID} animatedProps={animatedProps}>
+      {children}
+    </AnimatedG>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Configuration parts: each draws nothing itself, and the chart around it reads its props.
+
+/** An item of the payload a tooltip's content is given, one per series at the active point. */
+interface TooltipPayloadItem {
+  dataKey?: string;
+  name?: string;
+  value?: number | string;
+  /** The series' colour as the series was given it, such as `var(--color-desktop)`. */
+  color?: string;
+  fill?: string;
+  stroke?: string;
+  /** The row of data the point comes from. */
+  payload?: ChartDatum;
+  type?: string;
+}
+
+/** What a tooltip's `content` is drawn with, as Recharts hands it. */
+interface TooltipContentProps {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  /** The active category, such as `January`. */
+  label?: unknown;
+  coordinate?: { x: number; y: number };
+}
+
+interface CursorProps {
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+}
+
+type TooltipProps = {
+  /** Every other prop is handed to `content`, as Recharts hands it, such as ChartTooltipContent's `labelClassName`. */
+  [prop: string]: unknown;
+  /** The element drawn for the active point, cloned with {@link TooltipContentProps}, or a function drawing it. */
+  content?: ReactElement | ((props: TooltipContentProps) => ReactNode);
+  /** The band or the line drawn behind the active point; `false` draws none. */
+  cursor?: boolean | CursorProps;
+  /** The point active before anyone presses the chart. */
+  defaultIndex?: number;
+  /** The distance from the active point to the tooltip, in pixels. */
+  offset?: number;
+  /** Draws the label of the active point, handed to `content` as Recharts hands it; a screen reader hears its text. */
+  labelFormatter?: (label: unknown, payload: TooltipPayloadItem[]) => ReactNode;
+};
+
+/**
+ * Shows the values at the point a press, a pointer or the arrow keys make active. Placed inside a chart,
+ * it draws nothing itself.
+ */
+function Tooltip(_props: TooltipProps): ReactNode {
+  return null;
+}
+
+/** An item of the payload a legend's content is given, one per series, or per slice of a pie. */
+interface LegendPayloadItem {
+  /** The series' name, such as `desktop`. */
+  value?: string;
+  dataKey?: string;
+  color?: string;
+  type?: string;
+  payload?: ChartDatum;
+}
+
+/** What a legend's `content` is drawn with, as Recharts hands it. */
+interface LegendContentProps {
+  payload?: LegendPayloadItem[];
+  verticalAlign?: 'top' | 'middle' | 'bottom';
+}
+
+type LegendProps = {
+  /** The element drawn for the legend, cloned with {@link LegendContentProps}, or a function drawing it. */
+  content?: ReactElement | ((props: LegendContentProps) => ReactNode);
+  /** Whether the legend sits above or below the plot. */
+  verticalAlign?: 'top' | 'bottom';
+};
+
+/** Names each series under or over the chart. Placed inside a chart, it draws nothing itself. */
+function Legend(_props: LegendProps): ReactNode {
+  return null;
+}
+
+type XAxisProps = {
+  /** The key of each row that names its category, such as `month`. */
+  dataKey?: string;
+  hide?: boolean;
+  /** Whether each tick draws a short line to the axis. */
+  tickLine?: boolean;
+  /** Whether the axis draws its line. */
+  axisLine?: boolean;
+  /** The room between a tick's label and the axis, in pixels. */
+  tickMargin?: number;
+  /** The text a tick shows for its category. */
+  tickFormatter?: (value: never, index: number) => string;
+  /** The room the axis takes under the plot, in pixels. */
+  height?: number;
+  /** The least room between two tick labels before one is left out, in pixels. */
+  minTickGap?: number;
+  /** Whether the categories run right to left, as a chart read right to left draws them. */
+  reversed?: boolean;
+};
+
+/** The category axis under the plot. Placed inside a chart, the chart draws it. */
+function XAxis(_props: XAxisProps): ReactNode {
+  return null;
+}
+
+type YAxisProps = {
+  hide?: boolean;
+  tickLine?: boolean;
+  axisLine?: boolean;
+  tickMargin?: number;
+  tickFormatter?: (value: number, index: number) => string;
+  /** The room the axis takes beside the plot, in pixels. */
+  width?: number;
+  /** How many ticks the axis aims for. */
+  tickCount?: number;
+};
+
+/** The value axis beside the plot. Placed inside a chart, the chart draws it. */
+function YAxis(_props: YAxisProps): ReactNode {
+  return null;
+}
+
+type CartesianGridProps = {
+  /** Whether the grid draws a line at each category. */
+  vertical?: boolean;
+  /** Whether the grid draws a line at each value tick. */
+  horizontal?: boolean;
+  stroke?: string;
+  strokeDasharray?: string;
+  /** The side of the value axis the grid's lines start from; the lines span the plot either way. */
+  orientation?: 'left' | 'right';
+};
+
+/** The lines behind the plot. Placed inside a chart, the chart draws it. */
+function CartesianGrid(_props: CartesianGridProps): ReactNode {
+  return null;
+}
+
+/** What every series of a chart takes. */
+type SeriesProps = {
+  /** The key of each row the series draws, such as `desktop`. */
+  dataKey: string;
+  /** The series' name in the tooltip and the legend, `dataKey` when left out. */
+  name?: string;
+  hide?: boolean;
+  /** Whether the series grows in as the chart is first drawn. */
+  isAnimationActive?: boolean;
+  /** How long the entrance takes, in milliseconds. */
+  animationDuration?: number;
+};
+
+type BarProps = SeriesProps & {
+  fill?: string;
+  fillOpacity?: number;
+  /** The corner radius of each bar, one for all four corners or `[topLeft, topRight, bottomRight, bottomLeft]`. */
+  radius?: number | readonly [number, number, number, number];
+};
+
+/** A bar for each row of the chart's data. Placed inside a BarChart, the chart draws it. */
+function Bar(_props: BarProps): ReactNode {
+  return null;
+}
+
+/** Recharts' curve names, each the d3-shape curve it draws with. */
+const CURVES = {
+  basis: curveBasis,
+  bump: curveBumpX,
+  linear: curveLinear,
+  monotone: curveMonotoneX,
+  monotoneX: curveMonotoneX,
+  monotoneY: curveMonotoneY,
+  natural: curveNatural,
+  step: curveStep,
+  stepBefore: curveStepBefore,
+  stepAfter: curveStepAfter,
+} as const satisfies Readonly<Record<string, CurveFactory>>;
+
+type CurveType = keyof typeof CURVES;
+
+/** A point's circle: `true` draws Recharts' own, `false` none. */
+type DotProps = {
+  r?: number;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+};
+
+type LineProps = SeriesProps & {
+  /** How the line runs between points. */
+  type?: CurveType;
+  stroke?: string;
+  strokeWidth?: number;
+  /** The circle at each point. */
+  dot?: boolean | DotProps;
+  /** The circle at the point the tooltip shows. */
+  activeDot?: boolean | DotProps;
+};
+
+/** A line through each row of the chart's data. Placed inside a LineChart, the chart draws it. */
+function Line(_props: LineProps): ReactNode {
+  return null;
+}
+
+type AreaProps = LineProps & {
+  fill?: string;
+  fillOpacity?: number;
+};
+
+/** The area under a line through each row of the chart's data. Placed inside an AreaChart, the chart draws it. */
+function Area(_props: AreaProps): ReactNode {
+  return null;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Reading the children
+
+type Series =
+  | { kind: 'bar'; props: BarProps }
+  | { kind: 'line'; props: LineProps }
+  | { kind: 'area'; props: AreaProps };
+
+type SeriesKind = Series['kind'];
+
+interface ChartParts {
+  series: Series[];
+  xAxis?: XAxisProps;
+  yAxis?: YAxisProps;
+  grid?: CartesianGridProps;
+  tooltip?: TooltipProps;
+  legend?: LegendProps;
+  other: ReactNode[];
+}
+
+/** Sorts a chart's children into its series and its configuration parts, as Recharts reads them by type. */
+function readParts(children: ReactNode): ChartParts {
+  const parts: ChartParts = { series: [], other: [] };
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) return;
+    const props = child.props as Record<string, unknown>;
+    if (child.type === Bar) parts.series.push({ kind: 'bar', props: props as BarProps });
+    else if (child.type === Line) parts.series.push({ kind: 'line', props: props as LineProps });
+    else if (child.type === Area) parts.series.push({ kind: 'area', props: props as AreaProps });
+    else if (child.type === XAxis) parts.xAxis = props as XAxisProps;
+    else if (child.type === YAxis) parts.yAxis = props as YAxisProps;
+    else if (child.type === CartesianGrid) parts.grid = props as CartesianGridProps;
+    else if (child.type === Tooltip) parts.tooltip = props as TooltipProps;
+    else if (child.type === Legend) parts.legend = props as LegendProps;
+    else parts.other.push(child);
+  });
+  return parts;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Scales
+
+/**
+ * The ticks Recharts gives a value axis from 0 to `max`: `count` of them, a step rounded up to the next
+ * multiple of 5 in its second digit, or of 1 for a one-digit step, so 305 over five ticks runs 0 to 320 and
+ * 21 runs 0 to 24.
+ */
+function niceTicks(max: number, count: number): number[] {
+  const intervals = Math.max(1, count - 1);
+  if (!(max > 0)) return Array.from({ length: intervals + 1 }, (_, index) => index);
+  const rough = max / intervals;
+  const digits = Math.floor(Math.log10(rough)) + 1;
+  const unit = 10 ** digits;
+  const ratio = digits === 1 ? 0.1 : 0.05;
+  const step = (Math.ceil(rough / unit / ratio) * ratio * unit).toPrecision(12);
+  return Array.from({ length: intervals + 1 }, (_, index) => Number(step) * index);
+}
+
+function numberAt(datum: ChartDatum | undefined, key: string): number {
+  const value = Number(datum?.[key]);
+  return Number.isFinite(value) ? value : 0;
+}
+
+interface Margin {
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+}
+
+/** Recharts' margin around the plot. */
+const DEFAULT_MARGIN = { top: 5, right: 5, bottom: 5, left: 5 } as const;
+
+/** The plot's box inside the chart, in the svg's pixels. */
+interface Plot {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+/** Where each category sits along the x axis, as a band for bars or a point for lines and areas. */
+interface CategoryScale {
+  /** The left of category `index`'s band, or its point. */
+  start: (index: number) => number;
+  /** The width of a band; 0 for points. */
+  bandwidth: number;
+  /** The middle of category `index`. */
+  center: (index: number) => number;
+  /** The category under `x`, the nearest one for points. */
+  indexAt: (x: number) => number;
+}
+
+function categoryScale(count: number, plot: Plot, banded: boolean, reversed: boolean): CategoryScale {
+  const indices = Array.from({ length: count }, (_, index) => index);
+  const clamp = (index: number): number => Math.min(count - 1, Math.max(0, index));
+  const range: [number, number] = reversed ? [plot.right, plot.left] : [plot.left, plot.right];
+  // How far `x` lies along the categories, from the edge the first one sits at.
+  const along = (x: number): number => (reversed ? plot.right - x : x - plot.left);
+  if (banded) {
+    const band = scaleBand<number>().domain(indices).range(range);
+    const width = band.bandwidth();
+    return {
+      start: (index) => band(index) ?? plot.left,
+      bandwidth: width,
+      center: (index) => (band(index) ?? plot.left) + width / 2,
+      indexAt: (x) => clamp(Math.floor(along(x) / (width || 1))),
+    };
+  }
+  const point = scalePoint<number>().domain(indices).range(range);
+  const step = point.step();
+  return {
+    start: (index) => point(index) ?? plot.left,
+    bandwidth: 0,
+    center: (index) => point(index) ?? plot.left,
+    indexAt: (x) => clamp(Math.round(along(x) / (step || 1))),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Drawing helpers
+
+/** A rectangle with each corner rounded by up to half its shorter side, as Recharts draws a bar. */
+function roundedRect(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number | readonly [number, number, number, number],
+): string {
+  'worklet';
+  const most = Math.min(width, height) / 2;
+  const [tl, tr, br, bl] = (typeof radius === 'number' ? [radius, radius, radius, radius] : radius).map((value) =>
+    Math.max(0, Math.min(most, value)),
+  );
+  return [
+    `M${x + tl},${y}`,
+    `H${x + width - tr}`,
+    `A${tr},${tr} 0 0 1 ${x + width},${y + tr}`,
+    `V${y + height - br}`,
+    `A${br},${br} 0 0 1 ${x + width - br},${y + height}`,
+    `H${x + bl}`,
+    `A${bl},${bl} 0 0 1 ${x},${y + height - bl}`,
+    `V${y + tl}`,
+    `A${tl},${tl} 0 0 1 ${x + tl},${y}`,
+    'Z',
+  ].join(' ');
+}
+
+/** The width a label of `text` takes at the axes' 12px, near enough to keep labels from running together. */
+function labelWidth(text: string): number {
+  return text.length * 7;
+}
+
+const TICK_FONT_SIZE = 12;
+
+/** The theme's regular Geist face, which the axes' labels are set in. */
+const GEIST_REGULAR = 'Geist_400Regular';
+
+/** How far below `y`, in ems, Recharts sets text whose top, middle or bottom sits on `y`. */
+const VERTICAL_SHIFT = { start: 0.71, middle: 0.355, end: 0 } as const;
+
+function seriesName(props: SeriesProps): string {
+  return props.name ?? props.dataKey;
+}
+
+function seriesColor(series: Series): string {
+  return (series.kind === 'bar' ? series.props.fill : series.props.stroke) ?? DEFAULT_SERIES_COLOR;
+}
+
+function formatValue(value: number | string | undefined): string {
+  if (typeof value === 'number') return value.toLocaleString();
+  return value === undefined ? '' : String(value);
+}
+
+/**
+ * The text a screen reader hears for the category of point `index`: the text the tooltip's `labelFormatter`
+ * draws for it, given to the Tooltip or to its content, or else the axis tick's text, or else the category as
+ * it is.
+ */
+function categoryText(
+  category: unknown,
+  index: number,
+  payload: () => TooltipPayloadItem[],
+  tooltip: TooltipProps | undefined,
+  tickFormatter: ((value: never, index: number) => string) | undefined,
+): string {
+  const content = tooltip?.content;
+  const labelFormatter =
+    tooltip?.labelFormatter ??
+    (isValidElement<Pick<TooltipProps, 'labelFormatter'>>(content) ? content.props.labelFormatter : undefined);
+  if (labelFormatter !== undefined) return textOf(labelFormatter(category, payload()));
+  return tickFormatter === undefined ? String(category) : tickFormatter(category as never, index);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Tooltip and legend drawing
+
+/** Recharts' tooltip when it is given no content: the label over a line per series. */
+function DefaultTooltipContent({ active, payload, label }: TooltipContentProps): ReactNode {
+  if (!active || !payload?.length) return null;
+  return (
+    <View className="border-border bg-background gap-1 rounded-md border px-2.5 py-1.5">
+      {label === undefined ? null : <NativeText className="text-foreground text-xs">{String(label)}</NativeText>}
+      {payload.map((item, index) => (
+        <NativeText key={index} className="text-foreground text-xs">
+          {`${item.name ?? ''} : ${formatValue(item.value)}`}
+        </NativeText>
+      ))}
+    </View>
+  );
+}
+
+/** Recharts' legend when it is given no content: a row of names. */
+function DefaultLegendContent({ payload }: LegendContentProps): ReactNode {
+  return (
+    <View className="flex-row flex-wrap items-center justify-center gap-4">
+      {payload?.map((item, index) => (
+        <NativeText key={index} className="text-foreground text-xs">
+          {item.value}
+        </NativeText>
+      ))}
+    </View>
+  );
+}
+
+function drawContent<Props extends object>(
+  content: ReactElement | ((props: Props) => ReactNode) | undefined,
+  props: Props,
+  fallback: (props: Props) => ReactNode,
+): ReactNode {
+  if (typeof content === 'function') return content(props);
+  if (isValidElement(content)) return cloneElement(content, props as Partial<unknown>);
+  return fallback(props);
+}
+
+/** Draws a chart's legend over the top or the bottom edge of the chart, reporting the height it takes. */
+function LegendBox({
+  legend,
+  payload,
+  onHeight,
+}: {
+  legend: LegendProps;
+  payload: LegendPayloadItem[];
+  onHeight: (height: number) => void;
+}): ReactNode {
+  const top = legend.verticalAlign === 'top';
+  return (
+    <View
+      onLayout={(event: LayoutChangeEvent) => onHeight(event.nativeEvent.layout.height)}
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        ...(top ? { top: 0 } : { bottom: 0 }),
+      }}
+    >
+      {drawContent(legend.content, { payload, verticalAlign: legend.verticalAlign ?? 'bottom' }, DefaultLegendContent)}
+    </View>
+  );
+}
+
+/** The props of a Tooltip that Recharts hands its content, its own settings aside. */
+function contentPropsOf({
+  content: _content,
+  cursor: _cursor,
+  defaultIndex: _index,
+  offset: _offset,
+  ...rest
+}: TooltipProps): object {
+  return rest;
+}
+
+interface ActivePoint {
+  index: number;
+  /** Where the press or the pointer is, in the svg's pixels; the plot's middle for a key or a screen reader. */
+  x: number;
+  y: number;
+}
+
+/** Places the tooltip `offset` from the active point, on the side where it fits inside the chart. */
+function TooltipBox({
+  point,
+  size,
+  offset,
+  children,
+}: {
+  point: { x: number; y: number };
+  size: ChartSize;
+  offset: number;
+  children: ReactNode;
+}): ReactNode {
+  const [box, setBox] = useState<ChartSize | undefined>(undefined);
+  const width = box?.width ?? 0;
+  const height = box?.height ?? 0;
+  const right = point.x + offset;
+  const left = right + width > size.width ? Math.max(0, point.x - offset - width) : right;
+  const below = point.y + offset;
+  const top = below + height > size.height ? Math.max(0, point.y - offset - height) : below;
+  return (
+    <View
+      pointerEvents="none"
+      onLayout={(event: LayoutChangeEvent) => {
+        const { width: measuredWidth, height: measuredHeight } = event.nativeEvent.layout;
+        setBox((current) =>
+          current?.width === measuredWidth && current.height === measuredHeight
+            ? current
+            : { width: measuredWidth, height: measuredHeight },
+        );
+      }}
+      style={{
+        position: 'absolute',
+        left,
+        top,
+        opacity: box === undefined ? 0 : 1,
+      }}
+    >
+      {children}
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Interaction
+
+/** What a chart's surface needs to move its active point. */
+interface Interaction {
+  /** The point under `x`, `y` in the svg's pixels, or `undefined` outside anything that has one. */
+  pointAt: (x: number, y: number) => ActivePoint | undefined;
+  /** The point `index` as a key or a screen reader makes it active. */
+  pointFor: (index: number) => ActivePoint;
+  count: number;
+  /** What a screen reader hears for the whole chart. */
+  summary: string;
+  /** What a screen reader hears for point `index`. */
+  describe: (index: number) => string;
+}
+
+/** Hides the tooltip of the chart that showed one last, so a page shows one tooltip at a time. */
+let hideShownTooltip: (() => void) | undefined;
+
+/** What the surface leaves a screen reader with while no point is active. */
+const NOTHING_ACTIVE = 'None selected';
+
+/**
+ * The layer over the plot that a press, a pointer on the web, the arrow keys on the web and a screen
+ * reader's swipes move the active point with. A drag along it moves the point. A press on the active point
+ * again hides it, and so does a scrolling parent taking the touch, a press on another chart, and on the web a
+ * press outside the chart, the pointer leaving it or the focus leaving it.
+ * @param reversed - whether the points run right to left, so the right arrow steps back through them
+ */
+function ChartSurface({
+  interaction,
+  active,
+  onActive,
+  label,
+  reversed = false,
+}: {
+  interaction: Interaction;
+  active: ActivePoint | undefined;
+  onActive: (point: ActivePoint | undefined) => void;
+  label: string | undefined;
+  reversed?: boolean;
+}): ReactNode {
+  const web = Platform.OS === 'web';
+  const surface = useRef<ComponentRef<typeof View>>(null);
+  // A second press on the active category hides it, unless a mouse pressed: a mouse shows a category by
+  // hovering, so its click lands on the active one.
+  const press = useRef<{ dismiss: boolean; mouse: boolean }>({ dismiss: false, mouse: false });
+  const latest = useRef(onActive);
+  latest.current = onActive;
+  const hide = useRef((): void => latest.current(undefined)).current;
+  const show = (point: ActivePoint | undefined): void => {
+    if (point !== undefined && hideShownTooltip !== hide) {
+      hideShownTooltip?.();
+      hideShownTooltip = hide;
+    }
+    onActive(point);
+  };
+
+  useEffect(
+    () => () => {
+      if (hideShownTooltip === hide) hideShownTooltip = undefined;
+    },
+    [hide],
+  );
+
+  useEffect(() => {
+    if (!web || active === undefined) return undefined;
+    const node = surface.current as unknown as {
+      parentElement?: { contains: (target: unknown) => boolean };
+    } | null;
+    const onPointerDown = (event: { target: unknown }): void => {
+      if (node?.parentElement?.contains(event.target) !== true) hide();
+    };
+    const page = globalThis as unknown as {
+      document: {
+        addEventListener: (type: string, listener: (event: { target: unknown }) => void, capture: boolean) => void;
+        removeEventListener: (type: string, listener: (event: { target: unknown }) => void, capture: boolean) => void;
+      };
+    };
+    page.document.addEventListener('pointerdown', onPointerDown, true);
+    return () => page.document.removeEventListener('pointerdown', onPointerDown, true);
+  }, [web, hide, active === undefined]);
+
+  const onGrant = (event: GestureResponderEvent): void => {
+    const point = interaction.pointAt(event.nativeEvent.locationX, event.nativeEvent.locationY);
+    press.current.dismiss =
+      !press.current.mouse && point !== undefined && active !== undefined && point.index === active.index;
+    if (point !== undefined && !press.current.dismiss) show(point);
+  };
+  const onMove = (event: GestureResponderEvent): void => {
+    const point = interaction.pointAt(event.nativeEvent.locationX, event.nativeEvent.locationY);
+    if (point === undefined || point.index === active?.index) return;
+    press.current.dismiss = false;
+    show(point);
+  };
+  const onRelease = (): void => {
+    if (press.current.dismiss) onActive(undefined);
+    press.current.dismiss = false;
+  };
+  const step = (delta: number): void => {
+    if (interaction.count === 0) return;
+    const index =
+      active === undefined
+        ? delta > 0
+          ? 0
+          : interaction.count - 1
+        : Math.min(interaction.count - 1, Math.max(0, active.index + delta));
+    show(interaction.pointFor(index));
+  };
+  const along = reversed ? -1 : 1;
+  const onKeyDown = (event: KeyDownEvent): void => {
+    const moves: Readonly<Record<string, () => void>> = {
+      ArrowRight: () => step(along),
+      ArrowLeft: () => step(-along),
+      Home: () => show(interaction.pointFor(0)),
+      End: () => show(interaction.pointFor(interaction.count - 1)),
+      Escape: () => onActive(undefined),
+    };
+    const move = moves[event.nativeEvent.key];
+    if (move === undefined || interaction.count === 0) return;
+    event.preventDefault();
+    move();
+  };
+  const onPointerMove = (event: PointerEvent): void => {
+    if (event.nativeEvent.pointerType !== 'mouse') return;
+    show(interaction.pointAt(event.nativeEvent.offsetX, event.nativeEvent.offsetY));
+  };
+
+  return (
+    <View
+      ref={surface}
+      testID="chart-surface"
+      accessible
+      focusable
+      {...(web ? { role: 'slider' as const } : { accessibilityRole: 'adjustable' as const })}
+      aria-label={[label, interaction.summary].filter(Boolean).join('. ')}
+      aria-valuemin={0}
+      aria-valuemax={Math.max(0, interaction.count - 1)}
+      aria-valuenow={active?.index ?? 0}
+      aria-valuetext={active === undefined ? NOTHING_ACTIVE : interaction.describe(active.index)}
+      accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+      onAccessibilityAction={(event: AccessibilityActionEvent) => {
+        if (event.nativeEvent.actionName === 'increment') step(1);
+        if (event.nativeEvent.actionName === 'decrement') step(-1);
+      }}
+      onStartShouldSetResponder={() => true}
+      onResponderGrant={onGrant}
+      onResponderMove={onMove}
+      onResponderRelease={onRelease}
+      onResponderTerminationRequest={() => true}
+      onResponderTerminate={() => onActive(undefined)}
+      onPointerDown={(event: PointerEvent) => {
+        press.current.mouse = event.nativeEvent.pointerType === 'mouse';
+      }}
+      onPointerMove={onPointerMove}
+      onPointerLeave={(event: PointerEvent) => {
+        if (event.nativeEvent.pointerType === 'mouse') onActive(undefined);
+      }}
+      onKeyDown={onKeyDown}
+      onBlur={() => onActive(undefined)}
+      className="absolute inset-0"
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Cartesian charts
+
+type CartesianChartProps = {
+  data: readonly ChartDatum[];
+  margin?: Margin;
+  /** Recharts' switch for keyboard and screen reader access; this chart always has both. */
+  accessibilityLayer?: boolean;
+  /** The room between two bars of one category, in pixels. */
+  barGap?: number;
+  /** The room around each category's bars, in pixels or as a share of the category such as `"10%"`. */
+  barCategoryGap?: number | `${number}%`;
+  /** What a screen reader hears before the chart's values, such as `Visitors by month`. */
+  title?: string;
+  /** The chart's size where no ResponsiveContainer gives it one. */
+  width?: number;
+  height?: number;
+  children?: ReactNode;
+};
+
+function shareOf(gap: number | `${number}%`, of: number): number {
+  return typeof gap === 'number' ? gap : (Number.parseFloat(gap) / 100) * of;
+}
+
+const KIND_NAMES: Readonly<Record<SeriesKind, string>> = {
+  bar: 'Bar chart',
+  line: 'Line chart',
+  area: 'Area chart',
+};
+
+/** The svg of a bar, line or area chart: the grid, the axes, the cursor and the series, laid out in `size`. */
+function CartesianChart({
+  kind,
+  data,
+  margin,
+  barGap = 4,
+  barCategoryGap = '10%',
+  title,
+  width,
+  height,
+  children,
+}: CartesianChartProps & { kind: SeriesKind }): ReactNode {
+  const size = useChartSize(width, height);
+  const palette = useContext(ChartPaletteContext);
+  const parts = useMemo(() => readParts(children), [children]);
+  const [legendHeight, setLegendHeight] = useState(0);
+  const series = parts.series.filter((item) => item.props.hide !== true);
+  const animate = series.some((item) => item.props.isAnimationActive !== false);
+  const duration = Math.max(...series.map((item) => item.props.animationDuration ?? ENTRANCE_MS), 0);
+  const progress = useEntrance(animate, duration);
+  const tooltip = parts.tooltip;
+  const [active, setActive] = useState<ActivePoint | undefined>(undefined);
+  const [touched, setTouched] = useState(false);
+
+  if (size === undefined || size.width <= 0 || size.height <= 0) return null;
+
+  const resolve = (value: string | undefined): string | undefined => palette.resolveColor(value);
+  const { top, right, bottom, left } = { ...DEFAULT_MARGIN, ...margin };
+  const xAxisHeight = parts.xAxis !== undefined && parts.xAxis.hide !== true ? (parts.xAxis.height ?? 30) : 0;
+  const yAxisWidth = parts.yAxis !== undefined && parts.yAxis.hide !== true ? (parts.yAxis.width ?? 60) : 0;
+  const legendTop = parts.legend?.verticalAlign === 'top';
+  const plot: Plot = {
+    left: left + yAxisWidth,
+    right: size.width - right,
+    top: top + (legendTop ? legendHeight : 0),
+    bottom: size.height - bottom - xAxisHeight - (legendTop ? 0 : legendHeight),
+  };
+  const banded = kind === 'bar';
+  const reversed = parts.xAxis?.reversed === true;
+  const x = categoryScale(data.length, plot, banded, reversed);
+  const ticks = niceTicks(
+    Math.max(0, ...data.flatMap((datum) => series.map((item) => numberAt(datum, item.props.dataKey)))),
+    parts.yAxis?.tickCount ?? 5,
+  );
+  const y = scaleLinear()
+    .domain([0, ticks[ticks.length - 1] ?? 1])
+    .range([plot.bottom, plot.top]);
+  const categoryKey = parts.xAxis?.dataKey;
+  const categoryOf = (index: number): unknown => (categoryKey === undefined ? index : data[index]?.[categoryKey]);
+
+  const payloadAt = (index: number): TooltipPayloadItem[] =>
+    series.map((item) => ({
+      dataKey: item.props.dataKey,
+      name: seriesName(item.props),
+      value: data[index]?.[item.props.dataKey] as number | string | undefined,
+      color: seriesColor(item),
+      fill: item.kind === 'bar' ? item.props.fill : undefined,
+      stroke: item.kind === 'bar' ? undefined : item.props.stroke,
+      payload: data[index],
+    }));
+
+  const nameOf = (key: string): string => palette.nameOf(key) ?? key;
+  const describe = (index: number): string =>
+    `${categoryText(categoryOf(index), index, () => payloadAt(index), parts.tooltip, parts.xAxis?.tickFormatter)}: ${series
+      .map((item) => `${nameOf(seriesName(item.props))} ${formatValue(data[index]?.[item.props.dataKey] as number)}`)
+      .join(', ')}`;
+  const pointFor = (index: number): ActivePoint => ({
+    index,
+    x: x.center(index),
+    y: (plot.top + plot.bottom) / 2,
+  });
+  const interaction: Interaction = {
+    count: data.length,
+    pointAt: (pointX, pointY) =>
+      pointX < plot.left || pointX > plot.right || data.length === 0
+        ? undefined
+        : { index: x.indexAt(pointX), x: pointX, y: pointY },
+    pointFor,
+    summary: data.map((_, index) => describe(index)).join('. '),
+    describe,
+  };
+
+  const shown =
+    active ?? (!touched && tooltip?.defaultIndex !== undefined ? pointFor(tooltip.defaultIndex) : undefined);
+  const activeIndex = shown?.index;
+
+  // Bars of one category share its band less the category gap on each side, with `barGap` between them.
+  const band = x.bandwidth;
+  const categoryGap = shareOf(barCategoryGap, band);
+  const barWidth =
+    series.length === 0 ? 0 : Math.max(0, (band - 2 * categoryGap - (series.length - 1) * barGap) / series.length);
+
+  const xTickFormat = parts.xAxis?.tickFormatter;
+  const xLabels = data.map((_, index) => {
+    const value = categoryOf(index);
+    return xTickFormat === undefined ? String(value) : xTickFormat(value as never, index);
+  });
+  // Recharts leaves a label out where it would run into its neighbour, keeping the one at the right end.
+  const minGap = parts.xAxis?.minTickGap ?? 5;
+  const shownLabels = new Set<number>();
+  let edge = Number.POSITIVE_INFINITY;
+  for (const index of data.map((_, at) => at).sort((a, b) => x.center(b) - x.center(a))) {
+    const half = labelWidth(xLabels[index] ?? '') / 2;
+    const center = x.center(index);
+    if (center + half + minGap <= edge) {
+      shownLabels.add(index);
+      edge = center - half;
+    }
+  }
+
+  const cursor = tooltip?.cursor ?? true;
+  const cursorProps = typeof cursor === 'object' ? cursor : {};
+  const tickColor = resolve(THEME.tick);
+  const legendPayload: LegendPayloadItem[] = series.map((item) => ({
+    value: seriesName(item.props),
+    dataKey: item.props.dataKey,
+    color: seriesColor(item),
+    type: item.kind === 'line' ? 'line' : 'rect',
+  }));
+
+  return (
+    <View style={{ width: size.width, height: size.height }}>
+      <Svg
+        width={size.width}
+        height={size.height}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        {parts.grid === undefined ? null : (
+          <G>
+            {parts.grid.horizontal === false
+              ? null
+              : ticks.map((tick) => (
+                  <SvgLine
+                    key={`h${tick}`}
+                    x1={plot.left}
+                    x2={plot.right}
+                    y1={y(tick)}
+                    y2={y(tick)}
+                    stroke={resolve(parts.grid?.stroke ?? THEME.grid)}
+                    strokeOpacity={parts.grid?.stroke === undefined ? 0.5 : 1}
+                    strokeDasharray={parts.grid?.strokeDasharray}
+                  />
+                ))}
+            {parts.grid.vertical === false
+              ? null
+              : data.map((_, index) => (
+                  <SvgLine
+                    key={`v${index}`}
+                    x1={x.center(index)}
+                    x2={x.center(index)}
+                    y1={plot.top}
+                    y2={plot.bottom}
+                    stroke={resolve(parts.grid?.stroke ?? THEME.grid)}
+                    strokeOpacity={parts.grid?.stroke === undefined ? 0.5 : 1}
+                    strokeDasharray={parts.grid?.strokeDasharray}
+                  />
+                ))}
+          </G>
+        )}
+        {cursor === false || activeIndex === undefined || tooltip === undefined ? null : banded ? (
+          <Rect
+            testID="chart-cursor"
+            x={x.start(activeIndex)}
+            y={plot.top}
+            width={band}
+            height={plot.bottom - plot.top}
+            fill={resolve(cursorProps.fill ?? THEME.cursorFill)}
+          />
+        ) : (
+          <SvgLine
+            testID="chart-cursor"
+            x1={x.center(activeIndex)}
+            x2={x.center(activeIndex)}
+            y1={plot.top}
+            y2={plot.bottom}
+            stroke={resolve(cursorProps.stroke ?? THEME.cursorStroke)}
+            strokeWidth={cursorProps.strokeWidth ?? 1}
+          />
+        )}
+        {parts.xAxis === undefined || parts.xAxis.hide === true ? null : (
+          <G>
+            {parts.xAxis.axisLine === false ? null : (
+              <SvgLine x1={plot.left} x2={plot.right} y1={plot.bottom} y2={plot.bottom} stroke={tickColor} />
+            )}
+            {data.map((_, index) =>
+              shownLabels.has(index) ? (
+                <G key={index}>
+                  {parts.xAxis?.tickLine === false ? null : (
+                    <SvgLine
+                      x1={x.center(index)}
+                      x2={x.center(index)}
+                      y1={plot.bottom}
+                      y2={plot.bottom + 6}
+                      stroke={tickColor}
+                    />
+                  )}
+                  <SvgText
+                    testID={`chart-x-tick-${index}`}
+                    x={x.center(index)}
+                    y={plot.bottom + 6 + (parts.xAxis?.tickMargin ?? 2) + VERTICAL_SHIFT.start * TICK_FONT_SIZE}
+                    fontSize={TICK_FONT_SIZE}
+                    fontFamily={GEIST_REGULAR}
+                    fill={tickColor}
+                    textAnchor="middle"
+                  >
+                    {xLabels[index]}
+                  </SvgText>
+                </G>
+              ) : null,
+            )}
+          </G>
+        )}
+        {parts.yAxis === undefined || parts.yAxis.hide === true ? null : (
+          <G>
+            {parts.yAxis.axisLine === false ? null : (
+              <SvgLine x1={plot.left} x2={plot.left} y1={plot.top} y2={plot.bottom} stroke={tickColor} />
+            )}
+            {ticks.map((tick, index) => (
+              <G key={tick}>
+                {parts.yAxis?.tickLine === false ? null : (
+                  <SvgLine x1={plot.left - 6} x2={plot.left} y1={y(tick)} y2={y(tick)} stroke={tickColor} />
+                )}
+                <SvgText
+                  testID={`chart-y-tick-${index}`}
+                  x={plot.left - 6 - (parts.yAxis?.tickMargin ?? 2)}
+                  y={y(tick) + VERTICAL_SHIFT.middle * TICK_FONT_SIZE}
+                  fontSize={TICK_FONT_SIZE}
+                  fontFamily={GEIST_REGULAR}
+                  fill={tickColor}
+                  textAnchor="end"
+                >
+                  {parts.yAxis?.tickFormatter === undefined ? String(tick) : parts.yAxis.tickFormatter(tick, index)}
+                </SvgText>
+              </G>
+            ))}
+          </G>
+        )}
+        {series.map((item, order) => {
+          const key = `${item.props.dataKey}-${order}`;
+          const still = item.props.isAnimationActive === false;
+          if (item.kind === 'bar') {
+            const props = item.props;
+            return (
+              <G key={key} testID={`chart-series-${props.dataKey}`}>
+                {data.map((datum, index) => {
+                  const barHeight = y(0) - y(numberAt(datum, props.dataKey));
+                  if (barHeight <= 0 || barWidth === 0) return null;
+                  return (
+                    <GrowingBar
+                      key={index}
+                      testID={`chart-bar-${props.dataKey}-${index}`}
+                      progress={progress}
+                      still={still}
+                      x={x.start(index) + categoryGap + order * (barWidth + barGap)}
+                      base={y(0)}
+                      width={barWidth}
+                      height={barHeight}
+                      radius={props.radius ?? 0}
+                      fill={resolve(props.fill ?? DEFAULT_SERIES_COLOR)}
+                      fillOpacity={props.fillOpacity}
+                    />
+                  );
+                })}
+              </G>
+            );
+          }
+          const props = item.props;
+          const color = resolve(seriesColor(item));
+          const curve = CURVES[props.type ?? 'linear'];
+          // A Line draws its points unless told not to, an Area only when told to.
+          const dot = props.dot ?? item.kind === 'line';
+          const points = data.map((datum, index) => [x.center(index), y(numberAt(datum, props.dataKey))] as const);
+          const line = parsePath(linePath().curve(curve)(points.map(([px, py]) => [px, py])));
+          const stroke = { fill: 'none', stroke: color, strokeWidth: props.strokeWidth ?? 1 };
+          return (
+            <G key={key} testID={`chart-series-${props.dataKey}`}>
+              {item.kind === 'area' ? (
+                <>
+                  <GrowingPath
+                    testID={`chart-area-${props.dataKey}`}
+                    progress={progress}
+                    still={still}
+                    segments={parsePath(areaPath().curve(curve).y0(y(0))(points.map(([px, py]) => [px, py])))}
+                    ox={0}
+                    oy={y(0)}
+                    across={false}
+                    fill={resolve(item.props.fill) ?? color}
+                    fillOpacity={item.props.fillOpacity ?? 0.6}
+                  />
+                  <GrowingPath
+                    testID={`chart-line-${props.dataKey}`}
+                    progress={progress}
+                    still={still}
+                    segments={line}
+                    ox={0}
+                    oy={y(0)}
+                    across={false}
+                    {...stroke}
+                  />
+                </>
+              ) : (
+                <DrawnLine
+                  testID={`chart-line-${props.dataKey}`}
+                  progress={progress}
+                  still={still}
+                  segments={line}
+                  {...stroke}
+                />
+              )}
+              {dot === false ? null : (
+                <ShownWhenDrawn progress={progress} still={still} testID={`chart-dots-${props.dataKey}`}>
+                  {points.map(([px, py], index) => (
+                    <Circle
+                      key={index}
+                      testID={`chart-dot-${props.dataKey}-${index}`}
+                      cx={px}
+                      cy={py}
+                      r={(typeof dot === 'object' ? dot.r : undefined) ?? 3}
+                      fill={resolve((typeof dot === 'object' ? dot.fill : undefined) ?? THEME.surface)}
+                      stroke={resolve(typeof dot === 'object' ? dot.stroke : undefined) ?? color}
+                      strokeWidth={(typeof dot === 'object' ? dot.strokeWidth : undefined) ?? props.strokeWidth ?? 1}
+                    />
+                  ))}
+                </ShownWhenDrawn>
+              )}
+              {props.activeDot === false || activeIndex === undefined || tooltip === undefined ? null : (
+                <Circle
+                  testID={`chart-active-dot-${props.dataKey}`}
+                  cx={points[activeIndex]?.[0]}
+                  cy={points[activeIndex]?.[1]}
+                  r={(typeof props.activeDot === 'object' ? props.activeDot.r : undefined) ?? 4}
+                  fill={resolve(typeof props.activeDot === 'object' ? props.activeDot.fill : undefined) ?? color}
+                  stroke={resolve(THEME.surface)}
+                  strokeWidth={2}
+                />
+              )}
+            </G>
+          );
+        })}
+        {parts.other}
+      </Svg>
+      {tooltip === undefined ? null : (
+        <ChartSurface
+          interaction={interaction}
+          active={shown}
+          label={title ?? KIND_NAMES[kind]}
+          reversed={reversed}
+          onActive={(point) => {
+            setTouched(true);
+            setActive(point);
+          }}
+        />
+      )}
+      {tooltip === undefined || shown === undefined ? null : (
+        <TooltipBox point={shown} size={size} offset={tooltip.offset ?? 10}>
+          {drawContent(
+            tooltip.content,
+            {
+              ...contentPropsOf(tooltip),
+              active: true,
+              payload: payloadAt(shown.index),
+              label: categoryOf(shown.index),
+              coordinate: { x: shown.x, y: shown.y },
+            },
+            DefaultTooltipContent,
+          )}
+        </TooltipBox>
+      )}
+      {tooltip === undefined ? (
+        <View
+          accessible
+          testID="chart-summary"
+          aria-label={[title ?? KIND_NAMES[kind], interaction.summary].join('. ')}
+          className="absolute inset-0"
+          pointerEvents="none"
+        />
+      ) : null}
+      {parts.legend === undefined ? null : (
+        <LegendBox legend={parts.legend} payload={legendPayload} onHeight={setLegendHeight} />
+      )}
+    </View>
+  );
+}
+
+/** Bars side by side for each category of `data`. */
+function BarChart(props: CartesianChartProps): ReactNode {
+  return <CartesianChart kind="bar" {...props} />;
+}
+
+/** An area per series under a line through the categories of `data`. */
+function AreaChart(props: CartesianChartProps): ReactNode {
+  return <CartesianChart kind="area" {...props} />;
+}
+
+/** A line per series through the categories of `data`. */
+function LineChart(props: CartesianChartProps): ReactNode {
+  return <CartesianChart kind="line" {...props} />;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Pie charts
+
+/** A length in pixels, or a share of what it is measured against such as `"80%"`. */
+type Length = number | `${number}%`;
+
+function lengthOf(value: Length, of: number): number {
+  return typeof value === 'number' ? value : (Number.parseFloat(value) / 100) * of;
+}
+
+/** Where a Label is drawn: the middle of the pie, and the slice angles it spans. */
+interface PolarViewBox {
+  cx: number;
+  cy: number;
+  innerRadius: number;
+  outerRadius: number;
+  startAngle: number;
+  endAngle: number;
+}
+
+type LabelProps = {
+  /** Draws the label from the box it is given; react-native-svg's elements, or {@link Text}. */
+  content?: (props: { viewBox: PolarViewBox }) => ReactNode;
+  /** The text drawn in the middle of the pie where there is no `content`. */
+  value?: string | number;
+  position?: 'center';
+};
+
+/** A label in the middle of the Pie or the PolarRadiusAxis it is placed in. */
+function Label(_props: LabelProps): ReactNode {
+  return null;
+}
+
+/** Draws each Label among `children` in `viewBox`: its content, or its value in the middle. */
+function drawLabels(children: ReactNode, viewBox: PolarViewBox): ReactNode[] {
+  const labels: ReactNode[] = [];
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child) || child.type !== Label) return;
+    const props = child.props as LabelProps;
+    labels.push(
+      props.content === undefined ? (
+        <Text key={labels.length} x={viewBox.cx} y={viewBox.cy} textAnchor="middle" verticalAnchor="middle">
+          {props.value}
+        </Text>
+      ) : (
+        <G key={labels.length}>{props.content({ viewBox })}</G>
+      ),
+    );
+  });
+  return labels;
+}
+
+type TextProps = Omit<ComponentProps<typeof SvgText>, 'fill'> & {
+  /** Which part of the text sits on `y`. */
+  verticalAnchor?: 'start' | 'middle' | 'end';
+  /** The text's colour, such as `var(--muted-foreground)`; the theme's foreground when left out. */
+  fill?: string;
+};
+
+/**
+ * Text inside a chart's svg, in a colour from the chart's palette and the theme's regular Geist face, taking
+ * react-native-svg's text props such as `textAnchor` and `fontSize`. A weight is set by its face, such as
+ * `fontFamily="Geist_700Bold"`, since a device picks a custom font's weight by its family.
+ */
+function Text({
+  y,
+  verticalAnchor = 'end',
+  fill,
+  fontSize = 14,
+  fontFamily = GEIST_REGULAR,
+  ...props
+}: TextProps): ReactNode {
+  const palette = useContext(ChartPaletteContext);
+  return (
+    <SvgText
+      y={Number(y ?? 0) + VERTICAL_SHIFT[verticalAnchor] * Number(fontSize)}
+      fill={palette.resolveColor(fill ?? 'var(--foreground)')}
+      fontSize={fontSize}
+      fontFamily={fontFamily}
+      {...props}
+    />
+  );
+}
+
+type PieProps = Omit<SeriesProps, 'hide'> & {
+  data: readonly ChartDatum[];
+  /** The key of each row that names its slice, such as `browser`. */
+  nameKey?: string;
+  innerRadius?: Length;
+  outerRadius?: Length;
+  cx?: Length;
+  cy?: Length;
+  /** Where the first slice starts, in degrees anticlockwise from three o'clock. */
+  startAngle?: number;
+  endAngle?: number;
+  /** The angle left between two slices, in degrees. */
+  paddingAngle?: number;
+  /** The colour of a slice whose row has no `fill`. */
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  /** A Label for the middle of the pie. */
+  children?: ReactNode;
+};
+
+/** A slice for each row of its `data`. Placed inside a PieChart, the chart draws it. */
+function Pie(_props: PieProps): ReactNode {
+  return null;
+}
+
+type PieChartProps = Pick<CartesianChartProps, 'margin' | 'accessibilityLayer' | 'title' | 'width' | 'height'> & {
+  children?: ReactNode;
+};
+
+interface Slice {
+  index: number;
+  name: string;
+  value: number;
+  fill: string | undefined;
+  /** In degrees anticlockwise from three o'clock. */
+  startAngle: number;
+  endAngle: number;
+}
+
+/** Each row's slice of the turn from `startAngle` to `endAngle`, as Recharts lays a pie out. */
+function layoutSlices(props: PieProps): Slice[] {
+  const { data, dataKey, nameKey = 'name', startAngle = 0, endAngle = 360, paddingAngle = 0 } = props;
+  const values = data.map((datum) => Math.max(0, numberAt(datum, dataKey)));
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const direction = Math.sign(endAngle - startAngle) || 1;
+  const drawn = values.filter((value) => value > 0).length;
+  const turn = Math.abs(endAngle - startAngle);
+  // A whole turn has a gap after every slice; a part of one has none after the last.
+  const gaps = Math.max(0, turn >= 360 ? drawn : drawn - 1);
+  const room = Math.max(0, turn - paddingAngle * gaps);
+  let angle = startAngle;
+  return data.map((datum, index) => {
+    const value = values[index] ?? 0;
+    const sweep = total > 0 ? (value / total) * room : 0;
+    const slice: Slice = {
+      index,
+      name: String(datum[nameKey] ?? index),
+      value,
+      fill: typeof datum.fill === 'string' ? datum.fill : props.fill,
+      startAngle: angle,
+      endAngle: angle + direction * sweep,
+    };
+    if (value > 0) angle += direction * (sweep + paddingAngle);
+    return slice;
+  });
+}
+
+const RADIANS = Math.PI / 180;
+
+/** A point at `radius` and `angle`, in degrees anticlockwise from three o'clock, around `cx`, `cy`. */
+function polar(cx: number, cy: number, radius: number, angle: number): { x: number; y: number } {
+  return {
+    x: cx + radius * Math.cos(angle * RADIANS),
+    y: cy - radius * Math.sin(angle * RADIANS),
+  };
+}
+
+/** A pie, or a ring, of the Pie inside it, with its tooltip and its legend. */
+function PieChart({ margin, title, width, height, children }: PieChartProps): ReactNode {
+  const size = useChartSize(width, height);
+  const palette = useContext(ChartPaletteContext);
+  const parts = useMemo(() => {
+    const found: {
+      pie?: PieProps;
+      tooltip?: TooltipProps;
+      legend?: LegendProps;
+      other: ReactNode[];
+    } = { other: [] };
+    Children.forEach(children, (child) => {
+      if (!isValidElement(child)) return;
+      if (child.type === Pie) found.pie = child.props as PieProps;
+      else if (child.type === Tooltip) found.tooltip = child.props as TooltipProps;
+      else if (child.type === Legend) found.legend = child.props as LegendProps;
+      else found.other.push(child);
+    });
+    return found;
+  }, [children]);
+  const [legendHeight, setLegendHeight] = useState(0);
+  const pie = parts.pie;
+  const progress = useEntrance(pie?.isAnimationActive !== false, pie?.animationDuration ?? ENTRANCE_MS);
+  const [active, setActive] = useState<ActivePoint | undefined>(undefined);
+  const [touched, setTouched] = useState(false);
+
+  if (size === undefined || size.width <= 0 || size.height <= 0 || pie === undefined) return null;
+
+  const resolve = (value: string | undefined): string | undefined => palette.resolveColor(value);
+  const { top, right, bottom, left } = { ...DEFAULT_MARGIN, ...margin };
+  const legendTop = parts.legend?.verticalAlign === 'top';
+  const plotTop = top + (legendTop ? legendHeight : 0);
+  const plotWidth = size.width - left - right;
+  const plotHeight = size.height - top - bottom - legendHeight;
+  const maxRadius = Math.max(0, Math.min(plotWidth, plotHeight) / 2);
+  const cx = left + lengthOf(pie.cx ?? '50%', plotWidth);
+  const cy = plotTop + lengthOf(pie.cy ?? '50%', plotHeight);
+  const inner = lengthOf(pie.innerRadius ?? 0, maxRadius);
+  const outer = lengthOf(pie.outerRadius ?? '80%', maxRadius);
+  const fullSlices = layoutSlices(pie);
+  const slices = fullSlices;
+  const nameOf = (key: string): string => palette.nameOf(key) ?? key;
+  const describe = (index: number): string => {
+    const slice = fullSlices[index];
+    return slice === undefined ? '' : `${nameOf(slice.name)}: ${formatValue(pie.data[index]?.[pie.dataKey] as number)}`;
+  };
+  const pointFor = (index: number): ActivePoint => {
+    const slice = fullSlices[index];
+    const middle = slice === undefined ? 0 : (slice.startAngle + slice.endAngle) / 2;
+    return { index, ...polar(cx, cy, (inner + outer) / 2, middle) };
+  };
+  const pointAt = (px: number, py: number): ActivePoint | undefined => {
+    const distance = Math.hypot(px - cx, py - cy);
+    if (distance < inner || distance > outer) return undefined;
+    const angle = (Math.atan2(cy - py, px - cx) / RADIANS + 360) % 360;
+    const slice = fullSlices.find((candidate) => {
+      const low = Math.min(candidate.startAngle, candidate.endAngle);
+      const high = Math.max(candidate.startAngle, candidate.endAngle);
+      return [angle - 360, angle, angle + 360].some((turn) => turn >= low && turn < high);
+    });
+    return slice === undefined ? undefined : { index: slice.index, x: px, y: py };
+  };
+  const interaction: Interaction = {
+    count: pie.data.length,
+    pointAt,
+    pointFor,
+    summary: pie.data.map((_, index) => describe(index)).join('. '),
+    describe,
+  };
+  const tooltip = parts.tooltip;
+  const shown =
+    active ?? (!touched && tooltip?.defaultIndex !== undefined ? pointFor(tooltip.defaultIndex) : undefined);
+  const payloadAt = (index: number): TooltipPayloadItem[] => {
+    const slice = fullSlices[index];
+    const datum = pie.data[index];
+    if (slice === undefined || datum === undefined) return [];
+    return [
+      {
+        dataKey: pie.dataKey,
+        name: slice.name,
+        value: datum[pie.dataKey] as number | string | undefined,
+        color: slice.fill,
+        fill: slice.fill,
+        payload: { ...datum, fill: slice.fill },
+      },
+    ];
+  };
+  const legendPayload: LegendPayloadItem[] = fullSlices.map((slice) => ({
+    value: slice.name,
+    dataKey: pie.dataKey,
+    color: slice.fill,
+    type: 'rect',
+    payload: { ...pie.data[slice.index], fill: slice.fill },
+  }));
+  const viewBox: PolarViewBox = {
+    cx,
+    cy,
+    innerRadius: inner,
+    outerRadius: outer,
+    startAngle: pie.startAngle ?? 0,
+    endAngle: pie.endAngle ?? 360,
+  };
+  const labels = drawLabels(pie.children, viewBox);
+  const label = title ?? 'Pie chart';
+
+  return (
+    <View style={{ width: size.width, height: size.height }}>
+      <Svg
+        width={size.width}
+        height={size.height}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        <G x={cx} y={cy}>
+          {slices.map((slice) =>
+            slice.value > 0 && slice.endAngle !== slice.startAngle ? (
+              <SweptSector
+                key={slice.index}
+                testID={`chart-slice-${slice.index}`}
+                progress={progress}
+                still={pie.isAnimationActive === false}
+                inner={inner}
+                outer={outer}
+                origin={pie.startAngle ?? 0}
+                startAngle={slice.startAngle}
+                endAngle={slice.endAngle}
+                fill={resolve(slice.fill ?? DEFAULT_SERIES_COLOR)}
+                stroke={resolve(pie.stroke)}
+                strokeWidth={pie.stroke === undefined ? 0 : (pie.strokeWidth ?? 1)}
+              />
+            ) : null,
+          )}
+        </G>
+        {labels}
+        {parts.other}
+      </Svg>
+      {tooltip === undefined ? (
+        <View
+          accessible
+          testID="chart-summary"
+          aria-label={[label, interaction.summary].join('. ')}
+          className="absolute inset-0"
+          pointerEvents="none"
+        />
+      ) : (
+        <ChartSurface
+          interaction={interaction}
+          active={shown}
+          label={label}
+          onActive={(point) => {
+            setTouched(true);
+            setActive(point);
+          }}
+        />
+      )}
+      {tooltip === undefined || shown === undefined ? null : (
+        <TooltipBox point={shown} size={size} offset={tooltip.offset ?? 10}>
+          {drawContent(
+            tooltip.content,
+            {
+              ...contentPropsOf(tooltip),
+              active: true,
+              payload: payloadAt(shown.index),
+              label: fullSlices[shown.index]?.name,
+              coordinate: { x: shown.x, y: shown.y },
+            },
+            DefaultTooltipContent,
+          )}
+        </TooltipBox>
+      )}
+      {parts.legend === undefined ? null : (
+        <LegendBox legend={parts.legend} payload={legendPayload} onHeight={setLegendHeight} />
+      )}
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Radar charts
+
+type PolarGridProps = {
+  /** Polygons through the categories' spokes, or circles. */
+  gridType?: 'polygon' | 'circle';
+  /** Whether the grid draws a spoke from the middle to each category. */
+  radialLines?: boolean;
+  /** The radii of the rings, in pixels; the value axis' ticks when left out. */
+  polarRadius?: readonly number[];
+  /** The rings' line colour, or `"none"`. */
+  stroke?: string;
+  /** The rings' fill. */
+  fill?: string;
+  /**
+   * Read for upstream's `fill-*` classes only: `fill-<colour>` fills every ring, `first:fill-<colour>` the
+   * first and `last:fill-<colour>` the last, in the theme's colour of that name.
+   */
+  className?: string;
+};
+
+/** The rings and spokes behind a radar or a radial bar chart. Placed inside one, the chart draws it. */
+function PolarGrid(_props: PolarGridProps): ReactNode {
+  return null;
+}
+
+type PolarAngleAxisProps = {
+  /** The key of each row that names its category, such as `month`. */
+  dataKey?: string;
+  /** Whether each category's name is drawn beyond its spoke. */
+  tick?: boolean;
+  tickFormatter?: (value: never, index: number) => string;
+};
+
+/** The categories around a radar chart. Placed inside one, the chart draws it. */
+function PolarAngleAxis(_props: PolarAngleAxisProps): ReactNode {
+  return null;
+}
+
+type PolarRadiusAxisProps = {
+  /** The key of each row that names its ring in a radial bar chart, such as `browser`. */
+  dataKey?: string;
+  /** The spoke, in degrees anticlockwise from three o'clock, the axis' ticks are drawn along. */
+  angle?: number;
+  tick?: boolean;
+  tickLine?: boolean;
+  axisLine?: boolean;
+  tickCount?: number;
+  /** A Label for the middle of the chart. */
+  children?: ReactNode;
+};
+
+/** The value axis along one spoke of a radar or a radial bar chart. Placed inside one, the chart draws it. */
+function PolarRadiusAxis(_props: PolarRadiusAxisProps): ReactNode {
+  return null;
+}
+
+type RadarProps = SeriesProps & {
+  fill?: string;
+  fillOpacity?: number;
+  stroke?: string;
+  strokeWidth?: number;
+  /** The circle at each point; none unless given. */
+  dot?: boolean | DotProps;
+  /** The circle at the point the tooltip shows. */
+  activeDot?: boolean | DotProps;
+};
+
+/** A polygon through each row's value on its category's spoke. Placed inside a RadarChart, the chart draws it. */
+function Radar(_props: RadarProps): ReactNode {
+  return null;
+}
+
+type PolarChartProps = Pick<CartesianChartProps, 'margin' | 'accessibilityLayer' | 'title' | 'width' | 'height'> & {
+  data: readonly ChartDatum[];
+  cx?: Length;
+  cy?: Length;
+  innerRadius?: Length;
+  outerRadius?: Length;
+  /** Where the first category sits, in degrees anticlockwise from three o'clock. */
+  startAngle?: number;
+  endAngle?: number;
+  children?: ReactNode;
+};
+
+/** The theme colour a `fill-<colour>` class names, behind `first:` or `last:` or none. */
+function classFill(className: string | undefined, place: 'first' | 'last' | ''): string | undefined {
+  const prefix = place === '' ? '' : `${place}:`;
+  const token = className?.split(/\s+/).find((name) => name.startsWith(`${prefix}fill-`));
+  return token === undefined ? undefined : `var(--${token.slice(prefix.length + 'fill-'.length)})`;
+}
+
+/** The rings of a polar grid, drawn at `radii`, with spokes along `angles`. */
+function PolarGridDrawing({
+  grid,
+  radii,
+  angles,
+  cx,
+  cy,
+  inner,
+  outer,
+  resolve,
+}: {
+  grid: PolarGridProps;
+  radii: readonly number[];
+  angles: readonly number[];
+  cx: number;
+  cy: number;
+  inner: number;
+  outer: number;
+  resolve: (value: string | undefined) => string | undefined;
+}): ReactNode {
+  const stroke = grid.stroke === 'none' ? undefined : resolve(grid.stroke ?? THEME.grid);
+  const ringFill = (index: number): string | undefined =>
+    resolve(
+      (index === 0 ? classFill(grid.className, 'first') : undefined) ??
+        (index === radii.length - 1 ? classFill(grid.className, 'last') : undefined) ??
+        classFill(grid.className, '') ??
+        grid.fill,
+    ) ?? 'none';
+  return (
+    <G testID="chart-polar-grid">
+      {radii.map((radius, index) =>
+        grid.gridType === 'circle' || angles.length < 3 ? (
+          <Circle key={index} cx={cx} cy={cy} r={radius} fill={ringFill(index)} stroke={stroke} />
+        ) : (
+          <Path
+            key={index}
+            d={`${angles.map((angle, at) => `${at === 0 ? 'M' : 'L'}${polar(cx, cy, radius, angle).x},${polar(cx, cy, radius, angle).y}`).join(' ')} Z`}
+            fill={ringFill(index)}
+            stroke={stroke}
+          />
+        ),
+      )}
+      {grid.radialLines === false
+        ? null
+        : angles.map((angle, index) => {
+            const from = polar(cx, cy, inner, angle);
+            const to = polar(cx, cy, outer, angle);
+            return <SvgLine key={`spoke-${index}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke={stroke} />;
+          })}
+    </G>
+  );
+}
+
+/** The middle and the radii of a polar chart laid out in `size`, less its margin and its legend. */
+function polarFrame(
+  props: PolarChartProps,
+  size: ChartSize,
+  legendHeight: number,
+  legendTop: boolean,
+): { cx: number; cy: number; inner: number; outer: number } {
+  const { top, right, bottom, left } = { ...DEFAULT_MARGIN, ...props.margin };
+  const plotTop = top + (legendTop ? legendHeight : 0);
+  const plotWidth = size.width - left - right;
+  const plotHeight = size.height - top - bottom - legendHeight;
+  const maxRadius = Math.max(0, Math.min(plotWidth, plotHeight) / 2);
+  return {
+    cx: left + lengthOf(props.cx ?? '50%', plotWidth),
+    cy: plotTop + lengthOf(props.cy ?? '50%', plotHeight),
+    inner: lengthOf(props.innerRadius ?? 0, maxRadius),
+    outer: lengthOf(props.outerRadius ?? '80%', maxRadius),
+  };
+}
+
+/** The anchor that keeps a label beyond the end of a spoke at `angle` clear of the spoke. */
+function anchorAt(angle: number): 'start' | 'middle' | 'end' {
+  const cos = Math.cos(angle * RADIANS);
+  if (cos > 0.01) return 'start';
+  if (cos < -0.01) return 'end';
+  return 'middle';
+}
+
+/** How far a radar's label sits beyond the end of its spoke, in px. */
+const ANGLE_LABEL_GAP = 8;
+
+/** How far below its spoke's end a label at `angle` is moved, so it centres on the spoke at the sides. */
+function angleLabelShift(angle: number): number {
+  return (0.355 - 0.355 * Math.sin(angle * RADIANS)) * TICK_FONT_SIZE;
+}
+
+/**
+ * The largest outer radius, at most `outer` and at least `inner`, at which each label beyond its spoke stays
+ * inside `box`, by the axes' estimate of its width; an svg on a device clips what is drawn past its edge.
+ */
+function radiusFittingLabels(
+  outer: number,
+  inner: number,
+  cx: number,
+  cy: number,
+  box: Plot,
+  labels: readonly { angle: number; width: number }[],
+): number {
+  let fitted = outer;
+  for (const { angle, width } of labels) {
+    const cos = Math.cos(angle * RADIANS);
+    const sin = Math.sin(angle * RADIANS);
+    const shift = angleLabelShift(angle);
+    if (cos > 0.01) fitted = Math.min(fitted, (box.right - cx - width) / cos - ANGLE_LABEL_GAP);
+    if (cos < -0.01) fitted = Math.min(fitted, (cx - box.left - width) / -cos - ANGLE_LABEL_GAP);
+    if (sin > 0.01) fitted = Math.min(fitted, (cy + shift - TICK_FONT_SIZE - box.top) / sin - ANGLE_LABEL_GAP);
+    if (sin < -0.01) fitted = Math.min(fitted, (box.bottom - cy - shift) / -sin - ANGLE_LABEL_GAP);
+  }
+  return Math.max(inner, fitted);
+}
+
+/** A polygon per series through the categories of `data` on spokes round a middle. */
+function RadarChart(props: PolarChartProps): ReactNode {
+  const { data, title, width, height, children, startAngle = 90, endAngle = -270 } = props;
+  const size = useChartSize(width, height);
+  const palette = useContext(ChartPaletteContext);
+  const parts = useMemo(() => {
+    const found: {
+      series: RadarProps[];
+      grid?: PolarGridProps;
+      angleAxis?: PolarAngleAxisProps;
+      radiusAxis?: PolarRadiusAxisProps;
+      tooltip?: TooltipProps;
+      legend?: LegendProps;
+      other: ReactNode[];
+    } = { series: [], other: [] };
+    Children.forEach(children, (child) => {
+      if (!isValidElement(child)) return;
+      if (child.type === Radar) found.series.push(child.props as RadarProps);
+      else if (child.type === PolarGrid) found.grid = child.props as PolarGridProps;
+      else if (child.type === PolarAngleAxis) found.angleAxis = child.props as PolarAngleAxisProps;
+      else if (child.type === PolarRadiusAxis) found.radiusAxis = child.props as PolarRadiusAxisProps;
+      else if (child.type === Tooltip) found.tooltip = child.props as TooltipProps;
+      else if (child.type === Legend) found.legend = child.props as LegendProps;
+      else found.other.push(child);
+    });
+    return found;
+  }, [children]);
+  const [legendHeight, setLegendHeight] = useState(0);
+  const series = parts.series.filter((item) => item.hide !== true);
+  const animate = series.some((item) => item.isAnimationActive !== false);
+  const progress = useEntrance(animate, Math.max(...series.map((item) => item.animationDuration ?? ENTRANCE_MS), 0));
+  const [active, setActive] = useState<ActivePoint | undefined>(undefined);
+  const [touched, setTouched] = useState(false);
+
+  if (size === undefined || size.width <= 0 || size.height <= 0) return null;
+
+  const resolve = (value: string | undefined): string | undefined => palette.resolveColor(value);
+  const legendTop = parts.legend?.verticalAlign === 'top';
+  const frame = polarFrame(props, size, legendHeight, legendTop);
+  const { cx, cy, inner } = frame;
+  const count = data.length;
+  // A whole turn puts the last category one step short of the first; a part of one reaches its end.
+  const turn = endAngle - startAngle;
+  const stepAngle = count === 0 ? 0 : Math.abs(turn) >= 360 ? turn / count : turn / Math.max(1, count - 1);
+  const angles = data.map((_, index) => startAngle + index * stepAngle);
+  const categoryKey = parts.angleAxis?.dataKey;
+  const categoryOf = (index: number): unknown => (categoryKey === undefined ? index : data[index]?.[categoryKey]);
+  const angleFormat = parts.angleAxis?.tickFormatter;
+  const angleLabels = data.map((_, index) =>
+    angleFormat === undefined ? String(categoryOf(index)) : angleFormat(categoryOf(index) as never, index),
+  );
+  const labelled = parts.angleAxis !== undefined && parts.angleAxis.tick !== false;
+  // The svg's own box, less the legend: a label may reach into the margin, but not past the svg's edge.
+  const box: Plot = {
+    left: 0,
+    right: size.width,
+    top: legendTop ? legendHeight : 0,
+    bottom: size.height - (legendTop ? 0 : legendHeight),
+  };
+  const outer = labelled
+    ? radiusFittingLabels(
+        frame.outer,
+        inner,
+        cx,
+        cy,
+        box,
+        angles.map((angle, index) => ({ angle, width: labelWidth(angleLabels[index] ?? '') })),
+      )
+    : frame.outer;
+  const ticks = niceTicks(
+    Math.max(0, ...data.flatMap((datum) => series.map((item) => numberAt(datum, item.dataKey)))),
+    parts.radiusAxis?.tickCount ?? 5,
+  );
+  const radius = scaleLinear()
+    .domain([0, ticks[ticks.length - 1] ?? 1])
+    .range([inner, outer]);
+  const nameOf = (key: string): string => palette.nameOf(key) ?? key;
+  const colorOf = (item: RadarProps): string => item.stroke ?? item.fill ?? DEFAULT_SERIES_COLOR;
+  const payloadAt = (index: number): TooltipPayloadItem[] =>
+    series.map((item) => ({
+      dataKey: item.dataKey,
+      name: seriesName(item),
+      value: data[index]?.[item.dataKey] as number | string | undefined,
+      color: colorOf(item),
+      fill: item.fill,
+      stroke: item.stroke,
+      payload: data[index],
+    }));
+  const describe = (index: number): string =>
+    `${categoryText(categoryOf(index), index, () => payloadAt(index), parts.tooltip, parts.angleAxis?.tickFormatter)}: ${series
+      .map((item) => `${nameOf(seriesName(item))} ${formatValue(data[index]?.[item.dataKey] as number)}`)
+      .join(', ')}`;
+  const pointFor = (index: number): ActivePoint => ({
+    index,
+    ...polar(cx, cy, outer, angles[index] ?? 0),
+  });
+  const pointAt = (px: number, py: number): ActivePoint | undefined => {
+    if (count === 0 || Math.hypot(px - cx, py - cy) > outer + 16) return undefined;
+    const angle = Math.atan2(cy - py, px - cx) / RADIANS;
+    let nearest = 0;
+    let gap = Number.POSITIVE_INFINITY;
+    angles.forEach((candidate, index) => {
+      const apart = Math.abs(((((angle - candidate) % 360) + 540) % 360) - 180);
+      if (apart < gap) {
+        gap = apart;
+        nearest = index;
+      }
+    });
+    return { index: nearest, x: px, y: py };
+  };
+  const interaction: Interaction = {
+    count,
+    pointAt,
+    pointFor,
+    summary: data.map((_, index) => describe(index)).join('. '),
+    describe,
+  };
+  const tooltip = parts.tooltip;
+  const shown =
+    active ?? (!touched && tooltip?.defaultIndex !== undefined ? pointFor(tooltip.defaultIndex) : undefined);
+  const activeIndex = shown?.index;
+  const legendPayload: LegendPayloadItem[] = series.map((item) => ({
+    value: seriesName(item),
+    dataKey: item.dataKey,
+    color: colorOf(item),
+    type: 'rect',
+  }));
+  const tickColor = resolve(THEME.tick);
+  const radiusAxis = parts.radiusAxis;
+  const axisAngle = radiusAxis?.angle ?? startAngle;
+  const viewBox: PolarViewBox = {
+    cx,
+    cy,
+    innerRadius: inner,
+    outerRadius: outer,
+    startAngle,
+    endAngle,
+  };
+  const cursor = tooltip?.cursor ?? true;
+  const label = title ?? 'Radar chart';
+
+  return (
+    <View style={{ width: size.width, height: size.height }}>
+      <Svg
+        width={size.width}
+        height={size.height}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        // Names beyond the spokes may reach past the box, as a long month's does at three o'clock.
+        style={{ overflow: 'visible' }}
+      >
+        {parts.grid === undefined ? null : (
+          <PolarGridDrawing
+            grid={parts.grid}
+            radii={parts.grid.polarRadius ?? ticks.filter((tick) => tick > 0).map((tick) => radius(tick))}
+            angles={angles}
+            cx={cx}
+            cy={cy}
+            inner={inner}
+            outer={outer}
+            resolve={resolve}
+          />
+        )}
+        {cursor === false || activeIndex === undefined || tooltip === undefined ? null : (
+          <SvgLine
+            testID="chart-cursor"
+            x1={cx}
+            y1={cy}
+            x2={polar(cx, cy, outer, angles[activeIndex] ?? 0).x}
+            y2={polar(cx, cy, outer, angles[activeIndex] ?? 0).y}
+            stroke={resolve(THEME.cursorStroke)}
+          />
+        )}
+        {!labelled
+          ? null
+          : angles.map((angle, index) => {
+              const at = polar(cx, cy, outer + ANGLE_LABEL_GAP, angle);
+              return (
+                <SvgText
+                  key={index}
+                  testID={`chart-angle-tick-${index}`}
+                  x={at.x}
+                  y={at.y + angleLabelShift(angle)}
+                  fontSize={TICK_FONT_SIZE}
+                  fontFamily={GEIST_REGULAR}
+                  fill={tickColor}
+                  textAnchor={anchorAt(angle)}
+                >
+                  {angleLabels[index]}
+                </SvgText>
+              );
+            })}
+        {radiusAxis === undefined || radiusAxis.tick === false
+          ? null
+          : ticks.map((tick) => {
+              const at = polar(cx, cy, radius(tick), axisAngle);
+              return (
+                <SvgText
+                  key={tick}
+                  x={at.x}
+                  y={at.y}
+                  fontSize={TICK_FONT_SIZE}
+                  fontFamily={GEIST_REGULAR}
+                  fill={tickColor}
+                  textAnchor="start"
+                >
+                  {String(tick)}
+                </SvgText>
+              );
+            })}
+        {radiusAxis === undefined || radiusAxis.axisLine === false ? null : (
+          <SvgLine
+            x1={polar(cx, cy, inner, axisAngle).x}
+            y1={polar(cx, cy, inner, axisAngle).y}
+            x2={polar(cx, cy, outer, axisAngle).x}
+            y2={polar(cx, cy, outer, axisAngle).y}
+            stroke={tickColor}
+          />
+        )}
+        {series.map((item, order) => {
+          const color = resolve(colorOf(item));
+          const points = data.map((datum, index) =>
+            polar(cx, cy, radius(numberAt(datum, item.dataKey)), angles[index] ?? 0),
+          );
+          const dot = item.dot ?? false;
+          const still = item.isAnimationActive === false;
+          return (
+            <G key={`${item.dataKey}-${order}`} testID={`chart-series-${item.dataKey}`}>
+              <GrowingPath
+                testID={`chart-radar-${item.dataKey}`}
+                progress={progress}
+                still={still}
+                segments={points
+                  .map((point, index) => ({ command: index === 0 ? 'M' : 'L', values: [point.x, point.y] }))
+                  .concat(points.length === 0 ? [] : [{ command: 'Z', values: [] }])}
+                ox={cx}
+                oy={cy}
+                across
+                fill={resolve(item.fill) ?? 'none'}
+                fillOpacity={item.fillOpacity}
+                stroke={resolve(item.stroke)}
+                strokeWidth={item.strokeWidth ?? 1}
+              />
+              {dot === false ? null : (
+                <ShownWhenDrawn progress={progress} still={still}>
+                  {points.map((point, index) => (
+                    <Circle
+                      key={index}
+                      cx={point.x}
+                      cy={point.y}
+                      r={(typeof dot === 'object' ? dot.r : undefined) ?? 3}
+                      fill={resolve(typeof dot === 'object' ? dot.fill : undefined) ?? color}
+                    />
+                  ))}
+                </ShownWhenDrawn>
+              )}
+            </G>
+          );
+        })}
+        {activeIndex === undefined || tooltip === undefined
+          ? null
+          : series.map((item) =>
+              item.activeDot === false ? null : (
+                <Circle
+                  key={`active-${item.dataKey}`}
+                  testID={`chart-active-dot-${item.dataKey}`}
+                  cx={polar(cx, cy, radius(numberAt(data[activeIndex], item.dataKey)), angles[activeIndex] ?? 0).x}
+                  cy={polar(cx, cy, radius(numberAt(data[activeIndex], item.dataKey)), angles[activeIndex] ?? 0).y}
+                  r={4}
+                  fill={resolve(colorOf(item))}
+                  stroke={resolve(THEME.surface)}
+                  strokeWidth={2}
+                />
+              ),
+            )}
+        {drawLabels(radiusAxis?.children, viewBox)}
+        {parts.other}
+      </Svg>
+      {tooltip === undefined ? (
+        <View
+          accessible
+          testID="chart-summary"
+          aria-label={[label, interaction.summary].join('. ')}
+          className="absolute inset-0"
+          pointerEvents="none"
+        />
+      ) : (
+        <ChartSurface
+          interaction={interaction}
+          active={shown}
+          label={label}
+          onActive={(point) => {
+            setTouched(true);
+            setActive(point);
+          }}
+        />
+      )}
+      {tooltip === undefined || shown === undefined ? null : (
+        <TooltipBox point={shown} size={size} offset={tooltip.offset ?? 10}>
+          {drawContent(
+            tooltip.content,
+            {
+              ...contentPropsOf(tooltip),
+              active: true,
+              payload: payloadAt(shown.index),
+              label: categoryOf(shown.index),
+              coordinate: { x: shown.x, y: shown.y },
+            },
+            DefaultTooltipContent,
+          )}
+        </TooltipBox>
+      )}
+      {parts.legend === undefined ? null : (
+        <LegendBox legend={parts.legend} payload={legendPayload} onHeight={setLegendHeight} />
+      )}
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Radial bar charts
+
+type RadialBarProps = SeriesProps & {
+  /** The bars' colour, where a row has no `fill` of its own. */
+  fill?: string;
+  /** Whether a track runs behind each bar over the chart's whole sweep. */
+  background?: boolean;
+};
+
+/** An arc for each row, as long as its value. Placed inside a RadialBarChart, the chart draws it. */
+function RadialBar(_props: RadialBarProps): ReactNode {
+  return null;
+}
+
+type RadialBarChartProps = PolarChartProps & {
+  /** The space around each row's ring, a share of it such as `'10%'` or pixels. */
+  barCategoryGap?: Length;
+  /** The pixels between the bars of the same row. */
+  barGap?: number;
+};
+
+/** One ring per row of `data`, its arcs swept as far round as their values reach. */
+function RadialBarChart(props: RadialBarChartProps): ReactNode {
+  const {
+    data,
+    title,
+    width,
+    height,
+    children,
+    startAngle = 0,
+    endAngle = 360,
+    barCategoryGap = '10%',
+    barGap = 4,
+  } = props;
+  const size = useChartSize(width, height);
+  const palette = useContext(ChartPaletteContext);
+  const parts = useMemo(() => {
+    const found: {
+      series: RadialBarProps[];
+      grid?: PolarGridProps;
+      radiusAxis?: PolarRadiusAxisProps;
+      tooltip?: TooltipProps;
+      legend?: LegendProps;
+      other: ReactNode[];
+    } = { series: [], other: [] };
+    Children.forEach(children, (child) => {
+      if (!isValidElement(child) || child.type === PolarAngleAxis) return;
+      if (child.type === RadialBar) found.series.push(child.props as RadialBarProps);
+      else if (child.type === PolarGrid) found.grid = child.props as PolarGridProps;
+      else if (child.type === PolarRadiusAxis) found.radiusAxis = child.props as PolarRadiusAxisProps;
+      else if (child.type === Tooltip) found.tooltip = child.props as TooltipProps;
+      else if (child.type === Legend) found.legend = child.props as LegendProps;
+      else found.other.push(child);
+    });
+    return found;
+  }, [children]);
+  const [legendHeight, setLegendHeight] = useState(0);
+  const series = parts.series.filter((item) => item.hide !== true);
+  const animate = series.some((item) => item.isAnimationActive !== false);
+  const progress = useEntrance(animate, Math.max(...series.map((item) => item.animationDuration ?? ENTRANCE_MS), 0));
+  const [active, setActive] = useState<ActivePoint | undefined>(undefined);
+  const [touched, setTouched] = useState(false);
+
+  if (size === undefined || size.width <= 0 || size.height <= 0) return null;
+
+  const resolve = (value: string | undefined): string | undefined => palette.resolveColor(value);
+  const legendTop = parts.legend?.verticalAlign === 'top';
+  const { cx, cy, inner, outer } = polarFrame(props, size, legendHeight, legendTop);
+  const count = data.length;
+  // As Recharts' does, the sweep runs from 0 to the largest value, and each row takes an equal ring.
+  const max = Math.max(0, ...data.flatMap((datum) => series.map((item) => numberAt(datum, item.dataKey))));
+  const angleOf = (value: number): number => startAngle + ((endAngle - startAngle) * value) / (max === 0 ? 1 : max);
+  const band = count === 0 ? 0 : (outer - inner) / count;
+  const gap = lengthOf(barCategoryGap, band);
+  const barSize = series.length === 0 ? 0 : (band - 2 * gap - (series.length - 1) * barGap) / series.length;
+  const ringOf = (index: number, order: number): { from: number; to: number } => {
+    const from = inner + index * band + gap + order * (barSize + barGap);
+    return { from, to: from + barSize };
+  };
+  const fillOf = (item: RadialBarProps, index: number): string => {
+    const own = data[index]?.fill;
+    return typeof own === 'string' ? own : (item.fill ?? DEFAULT_SERIES_COLOR);
+  };
+  const categoryKey = parts.radiusAxis?.dataKey;
+  const nameAt = (item: RadialBarProps, index: number): string =>
+    categoryKey === undefined ? seriesName(item) : String(data[index]?.[categoryKey] ?? index);
+  const nameOf = (key: string): string => palette.nameOf(key) ?? key;
+  const describe = (index: number): string =>
+    series
+      .map((item) => `${nameOf(nameAt(item, index))}: ${formatValue(data[index]?.[item.dataKey] as number)}`)
+      .join(', ');
+  const pointFor = (index: number): ActivePoint => {
+    const ring = ringOf(index, 0);
+    const value = numberAt(data[index], series[0]?.dataKey ?? '');
+    return { index, ...polar(cx, cy, (ring.from + ring.to) / 2, (startAngle + angleOf(value)) / 2) };
+  };
+  const pointAt = (px: number, py: number): ActivePoint | undefined => {
+    const index = Math.floor((Math.hypot(px - cx, py - cy) - inner) / band);
+    return band <= 0 || index < 0 || index >= count ? undefined : { index, x: px, y: py };
+  };
+  const interaction: Interaction = {
+    count,
+    pointAt,
+    pointFor,
+    summary: data.map((_, index) => describe(index)).join('. '),
+    describe,
+  };
+  const tooltip = parts.tooltip;
+  const shown =
+    active ?? (!touched && tooltip?.defaultIndex !== undefined ? pointFor(tooltip.defaultIndex) : undefined);
+  const payloadAt = (index: number): TooltipPayloadItem[] =>
+    series.map((item) => ({
+      dataKey: item.dataKey,
+      name: nameAt(item, index),
+      value: data[index]?.[item.dataKey] as number | string | undefined,
+      color: fillOf(item, index),
+      fill: fillOf(item, index),
+      payload: data[index],
+    }));
+  const legendPayload: LegendPayloadItem[] = data.flatMap((datum, index) =>
+    series.map((item) => ({
+      value: nameAt(item, index),
+      dataKey: item.dataKey,
+      color: fillOf(item, index),
+      type: 'rect' as const,
+      payload: datum,
+    })),
+  );
+  const viewBox: PolarViewBox = { cx, cy, innerRadius: inner, outerRadius: outer, startAngle, endAngle };
+  const label = title ?? 'Radial bar chart';
+
+  return (
+    <View style={{ width: size.width, height: size.height }}>
+      <Svg
+        width={size.width}
+        height={size.height}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        {parts.grid === undefined ? null : (
+          <PolarGridDrawing
+            grid={parts.grid}
+            radii={parts.grid.polarRadius ?? data.map((_, index) => inner + (index + 0.5) * band)}
+            angles={[]}
+            cx={cx}
+            cy={cy}
+            inner={inner}
+            outer={outer}
+            resolve={resolve}
+          />
+        )}
+        <G x={cx} y={cy}>
+          {series.map((item, order) =>
+            item.background === true
+              ? data.map((_, index) => {
+                  const ring = ringOf(index, order);
+                  return (
+                    <Path
+                      key={`track-${item.dataKey}-${index}`}
+                      testID={`chart-track-${item.dataKey}-${index}`}
+                      d={sectorPath(ring.from, ring.to, startAngle, endAngle)}
+                      fill={resolve(THEME.track)}
+                    />
+                  );
+                })
+              : null,
+          )}
+        </G>
+        {series.map((item, order) => (
+          <G key={`${item.dataKey}-${order}`} testID={`chart-series-${item.dataKey}`} x={cx} y={cy}>
+            {data.map((datum, index) => {
+              const ring = ringOf(index, order);
+              const value = numberAt(datum, item.dataKey);
+              return value <= 0 ? null : (
+                <SweptSector
+                  key={index}
+                  testID={`chart-radial-bar-${item.dataKey}-${index}`}
+                  progress={progress}
+                  still={item.isAnimationActive === false}
+                  inner={ring.from}
+                  outer={ring.to}
+                  origin={startAngle}
+                  startAngle={startAngle}
+                  endAngle={angleOf(value)}
+                  fill={resolve(fillOf(item, index))}
+                />
+              );
+            })}
+          </G>
+        ))}
+        {drawLabels(parts.radiusAxis?.children, viewBox)}
+        {parts.other}
+      </Svg>
+      {tooltip === undefined ? (
+        <View
+          accessible
+          testID="chart-summary"
+          aria-label={[label, interaction.summary].join('. ')}
+          className="absolute inset-0"
+          pointerEvents="none"
+        />
+      ) : (
+        <ChartSurface
+          interaction={interaction}
+          active={shown}
+          label={label}
+          onActive={(point) => {
+            setTouched(true);
+            setActive(point);
+          }}
+        />
+      )}
+      {tooltip === undefined || shown === undefined ? null : (
+        <TooltipBox point={shown} size={size} offset={tooltip.offset ?? 10}>
+          {drawContent(
+            tooltip.content,
+            {
+              ...contentPropsOf(tooltip),
+              active: true,
+              payload: payloadAt(shown.index),
+              label: series[0] === undefined ? undefined : nameAt(series[0], shown.index),
+              coordinate: { x: shown.x, y: shown.y },
+            },
+            DefaultTooltipContent,
+          )}
+        </TooltipBox>
+      )}
+      {parts.legend === undefined ? null : (
+        <LegendBox legend={parts.legend} payload={legendPayload} onHeight={setLegendHeight} />
+      )}
+    </View>
+  );
+}
+
+export {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ChartPaletteContext,
+  Label,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  RadialBar,
+  RadialBarChart,
+  ResponsiveContainer,
+  Text,
+  Tooltip,
+  XAxis,
+  YAxis,
+};
+export type {
+  AreaProps,
+  BarProps,
+  CartesianChartProps,
+  CartesianGridProps,
+  ChartDatum,
+  ChartPalette,
+  LegendContentProps,
+  LegendPayloadItem,
+  LegendProps,
+  LabelProps,
+  LineProps,
+  PieChartProps,
+  PieProps,
+  PolarAngleAxisProps,
+  PolarChartProps,
+  PolarGridProps,
+  PolarRadiusAxisProps,
+  PolarViewBox,
+  RadarProps,
+  RadialBarChartProps,
+  RadialBarProps,
+  TextProps,
+  TooltipContentProps,
+  TooltipPayloadItem,
+  TooltipProps,
+  XAxisProps,
+  YAxisProps,
+};

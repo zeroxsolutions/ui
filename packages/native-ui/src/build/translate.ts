@@ -53,22 +53,30 @@ const ICON_MODIFIERS: ReadonlySet<string> = new Set([
  * No touch screen produces these conditions, or nothing on a device matches the selector, so the
  * class is dropped with its modifier. A phone held upright is narrower than `sm`, so the base class a
  * style widens at `sm` or `md` stands. The styles put only exit animations behind `data-closed`, which
- * neither engine runs from these utilities.
+ * neither engine runs from these utilities, and base-ui's `data-starting-style` and `data-ending-style` hold
+ * the frames an enter or exit animation starts and ends on, which a component draws with Reanimated. A
+ * navigation menu's `data-[motion=...]` slides one item's content out and the next in within one shared
+ * popup, where each item here opens a popup of its own. `[a]:` styles a marker rendered as a link by its tag,
+ * which no element on a device has.
  */
 const DROPPED_MODIFIERS = [
   /^hover$/,
+  /^(group|peer)-hover(\/[\w-]+)?$/,
   /^focus-within$/,
   /^(sm|md)$/,
   /^print$/,
   /^file$/,
   /^after$/,
   /^data-closed$/,
+  /^data-(starting|ending)-style$/,
+  /^data-\[motion/,
   /^has-data-\[icon=inline-(start|end)\]$/,
   /^(group-)?(not-)?has-\[/,
   /^in-data-\[slot=/,
   /^\*{1,2}$/,
   /^\[&/,
   /^\[\./,
+  /^\[a\]$/,
   /^supports-/,
 ] as const satisfies readonly RegExp[];
 
@@ -79,6 +87,8 @@ const DROPPED_MODIFIERS = [
  * `has-` modifier, its `/<group>` name removed, is the same state on the part's group, sibling or child,
  * which the component knows as its own. A bare `disabled:` stays the `Pressable`'s own and reaches this table
  * only on a slot {@link SLOT_STATE_MODIFIERS} names; its `group-`, `peer-` and `has-` forms always do.
+ * `[button,a]` selects a part rendered as a button or a link, which is `pressable`: the component knows it
+ * renders a pressable child in its place.
  */
 const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
   Object.entries({
@@ -100,6 +110,7 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'data-disabled': 'disabled',
     'data-[disabled=true]': 'disabled',
     'focus-visible': 'focused',
+    hover: 'hovered',
     'data-focus-visible': 'focused',
     focus: 'highlighted',
     'data-highlighted': 'highlighted',
@@ -108,11 +119,15 @@ const STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'data-empty': 'empty',
     'aria-expanded': 'expanded',
     'data-open': 'open',
+    'data-popup-open': 'open',
+    'in-data-numbered': 'numbered',
     'data-horizontal': 'orientation=horizontal',
     'data-vertical': 'orientation=vertical',
     first: 'position=first',
     last: 'position=last',
     'not-last': 'position=not-last',
+    '[button,a]': 'pressable',
+    'focus-within': 'focused',
   }),
 );
 
@@ -124,9 +139,13 @@ const COMMAND_GROUP_HEADING = '**:[[cmdk-group-heading]]';
 
 /**
  * A state of the control inside the part, of a direct child the part holds, such as an icon in an
- * Alert or a group in a ButtonGroup, or of the part just before it, such as the legend a FieldDescription
- * follows, which upstream selects with an arbitrary selector the dropped rules would otherwise remove or
- * not read, and which the component learns from its control, its children or its parent.
+ * Alert or a group in a ButtonGroup, of a part before it, such as the legend a FieldDescription follows or the
+ * title a TraceIcon comes after, of a part after it, such as the description whose absence spaces a
+ * QuestionnaireTitle from the choices, or of the part it sits straight inside, such as CodeBlockActions floating in
+ * a CodeBlock rather than sitting in its header, which upstream selects with an arbitrary selector the dropped rules
+ * would otherwise remove or not read, and which the component learns from its control, its children or its parent.
+ * A questionnaire choice is ringed while the hidden input it holds on the web has keyboard focus, which the native
+ * choice, being the control itself, knows as its own focus.
  */
 const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
   Object.entries({
@@ -135,6 +154,11 @@ const CHILD_STATE_MODIFIERS: ReadonlyMap<string, StateKey> = new Map(
     'has-[>svg]': 'slot=icon',
     'has-[>[data-slot=button-group]]': 'slot=button-group',
     '[[data-variant=legend]+&]': 'after=legend',
+    '[[data-slot=trace-title]~&]': 'after=trace-title',
+    'has-[>input:focus-visible]': 'focused',
+    '[&:not(:has(~[data-slot=questionnaire-description]))]': 'description=none',
+    '[[data-slot=code-block]>&]': 'parent=code-block',
+    'has-[>[data-slot=code-block-content]:focus-visible]': 'focused',
     [COMMAND_GROUP_HEADING]: 'part=group-heading',
   }),
 );
@@ -148,6 +172,13 @@ const CHILD_PART_MODIFIER = /^\*:data-\[slot=([\w-]+)\]$/;
 
 /** `*:[svg...]`, upstream's other spelling of a direct child svg with no size of its own. */
 const CHILD_ICON = "[svg:not([class*='size-'])]";
+
+/**
+ * `*:[button]`, the classes a slot gives each button straight inside it, such as the background of a code
+ * block's floating actions, is the state `part=button`, which the component gives each child it holds.
+ */
+const CHILD_BUTTON = '[button]';
+const CHILD_BUTTON_MODIFIER = `*:${CHILD_BUTTON}`;
 
 /** The slot `**:` selects as an icon anywhere inside the part; any other slot behind `**:` is dropped. */
 const DESCENDANT_ICON_SLOT = 'data-[slot=accordion-trigger-icon]';
@@ -195,9 +226,28 @@ const SPACING_READ = /^([a-z]+(?:-[a-z]+)*)-\((--[\w-]+)\)$/;
 /**
  * A style draws the hairline edge of a card or popup as `ring-1 ring-<colour>`, a box-shadow a device
  * has no counterpart of, so an unmodified one becomes the border it looks like. Only a slot with no
- * border of its own is given one, and a ring behind a state, `ring-0` and any other width stay dropped.
+ * border of its own is given one, and a ring behind a state other than {@link RING_AS_BORDER_STATE}, `ring-0` and any
+ * other width stay dropped.
  */
 const RING_WIDTH_UTILITY = 'ring-1';
+
+/**
+ * The child state whose ring is drawn as a border too: the hairline a code block's floating actions put
+ * around each of their buttons, which a Button draws with no ring of its own to lose.
+ */
+const RING_AS_BORDER_STATE = 'part=button';
+
+/**
+ * Slots whose ring behind one state is drawn as a border too: an attachment's focus ring, around a card that
+ * draws its hairline as a border already, so the border takes the ring's colour while focused, a trace
+ * trigger's, whose component draws a transparent border for it, and a code block's, whose variant draws a
+ * border already.
+ */
+const SLOT_RING_AS_BORDER_STATES: ReadonlyMap<string, StateKey> = new Map([
+  ['cn-attachment', 'focused'],
+  ['cn-trace-collapsible-trigger', 'focused'],
+  ['cn-code-block', 'focused'],
+]);
 const RING_COLOUR = /^ring-(?!\d|inset|offset)([\w-]+(?:\/[\w.]+)?)$/;
 const BORDER_WIDTH = /^border(-[xytrblse])?(-(\d+|\[[\d.]+px\]))?$/;
 
@@ -229,7 +279,9 @@ function withBaseBorderColour(classes: readonly string[]): string[] {
  * is the engine's to resolve. The one-time code's caret blinks by an animation upstream
  * defines in its own stylesheet, which neither engine's theme carries, so the caret is drawn steady.
  * A dialog's content is as wide as the screen less 2rem, a percentage less a length neither engine
- * computes; its component holds it 1rem in from each edge instead.
+ * computes; its component holds it 1rem in from each edge instead. A bubble's reactions overlap its edge by
+ * three quarters of their own height, which the component measures and offsets them by, since a percentage
+ * translate is the engine's to resolve.
  */
 const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   [
@@ -239,6 +291,39 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-input-otp-caret-line', new Set(['animate-caret-blink'])],
   ['cn-dialog-content', new Set(['max-w-[calc(100%-2rem)]'])],
   ['cn-calendar', new Set(['[--cell-radius:var(--radius-md)]'])],
+  ['cn-bubble-reactions-side-top', new Set(['-translate-y-3/4'])],
+  ['cn-bubble-reactions-side-bottom', new Set(['translate-y-3/4'])],
+]);
+
+/**
+ * Classes of one named slot that a device draws with another class, each to the one it becomes. A tinted
+ * bubble mixes the primary colour to a fixed lightness with the relative colour syntax, which neither engine
+ * parses; the primary colour at a low opacity over the background comes to about the same lightness in the
+ * neutral theme. A bubble's reactions are ringed in the card colour by a box-shadow, which a device has no
+ * counterpart of, so the ring becomes a border as wide; the reactions are placed absolutely, so the border
+ * moves nothing around them.
+ */
+const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map([
+  [
+    'cn-bubble-variant-tinted',
+    new Map([
+      [
+        '*:data-[slot=bubble-content]:bg-[oklch(from_var(--primary)_0.93_calc(c*0.4)_h)]',
+        '*:data-[slot=bubble-content]:bg-primary/10',
+      ],
+      [
+        'dark:*:data-[slot=bubble-content]:bg-[oklch(from_var(--primary)_0.3_calc(c*0.4)_h)]',
+        'dark:*:data-[slot=bubble-content]:bg-primary/15',
+      ],
+    ]),
+  ],
+  [
+    'cn-bubble-reactions',
+    new Map([
+      ['ring-3', 'border-[3px]'],
+      ['ring-card', 'border-card'],
+    ]),
+  ],
 ]);
 
 /**
@@ -264,10 +349,17 @@ const SLOT_COMPONENT_CLASSES: ReadonlyMap<string, readonly string[]> = new Map([
  * Modifiers of one named slot that are a state the component applies rather than kept for the engine.
  * Both engines key `disabled:` on a `disabled` prop, which a `TextInput` does not take, so a text
  * field's disabled classes go behind the `disabled` state its component applies while it is not editable.
+ * A sidebar menu item's action and badge take the accent colour while the pointer is over the item's button,
+ * which the component tracks on the web, so their `peer-hover` classes go behind the `hovered` state rather
+ * than being dropped with every other hover. An attachment is ringed while a control inside it holds focus,
+ * which its trigger reports to the card as keyboard focus, so its `focus-within` classes go behind `focused`.
  */
 const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-input', new Set(['disabled'])],
   ['cn-textarea', new Set(['disabled'])],
+  ['cn-sidebar-menu-action', new Set(['peer-hover/menu-button'])],
+  ['cn-sidebar-menu-badge', new Set(['peer-hover/menu-button'])],
+  ['cn-attachment', new Set(['focus-within'])],
 ]);
 
 /**
@@ -275,7 +367,10 @@ const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
  * important to win over the Button size's; the component merges them after the Button's classes, where
  * tailwind-merge keeps both and each engine draws a side padding over the axis one, so the order wins
  * without the important neither engine has. A Command marks its rounding, and its input group the height,
- * rounding and shadow, important over the Dialog's and the InputGroup's, which they are merged after.
+ * rounding and shadow, important over the Dialog's and the InputGroup's, which they are merged after. A
+ * sidebar's menu button marks its size and padding in a rail of icons important over its size's, which the
+ * component merges after them. Attachment media marks the size of a spinner in a vertical attachment important over
+ * the spinner's own, which the spinner merges after it.
  */
 const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set([
   'cn-pagination-previous',
@@ -283,16 +378,38 @@ const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set([
   'cn-command',
   'cn-command-dialog',
   'cn-command-input-group',
+  'cn-sidebar-menu-button',
+  'cn-sidebar-menu-button-size-lg',
+  'cn-attachment-media',
 ]);
 const IMPORTANT_SUFFIX = /!$/;
 
 /**
  * Slots whose `::after` pseudo-element draws something a component draws as a child instead, so a class
  * behind `after:` is the state `part=after`, which that child applies, rather than dropped. The drawer's
- * swipe handle draws its bar this way.
+ * swipe handle draws its bar this way, and a code block's line its diff marker, whose sign the component
+ * writes, so the `content-[...]` that sets it on the web is dropped. A separator marker draws the line after its
+ * text this way, and the line before it with `::before`.
  */
-const SLOT_AFTER_PARTS: ReadonlySet<string> = new Set(['cn-drawer-swipe-handle']);
+const SLOT_AFTER_PARTS: ReadonlySet<string> = new Set([
+  'cn-drawer-swipe-handle',
+  'cn-code-block-line',
+  'cn-code-block-line-variant-added',
+  'cn-code-block-line-variant-removed',
+  'cn-marker-variant-separator',
+]);
 const AFTER_PART_MODIFIER = '*:data-[slot=after]';
+
+/**
+ * Slots whose `::before` pseudo-element draws something a component draws as a child instead, so a class
+ * behind `before:` is the state `part=before`, which that child applies. A code block's line draws its
+ * number this way, and a separator marker the line before its text.
+ */
+const SLOT_BEFORE_PARTS: ReadonlySet<string> = new Set(['cn-code-block-line', 'cn-marker-variant-separator']);
+const BEFORE_PART_MODIFIER = '*:data-[slot=before]';
+
+/** The text a pseudo-element draws, which a component that draws the part as a child writes itself. */
+const PSEUDO_CONTENT = /^content-\[/;
 
 /** The px of 1rem, which the theme's setup sets. */
 const REM_PX = 16;
@@ -414,6 +531,9 @@ const RENAMED_UTILITIES = {
   uniwind: SHARED_RENAMED_UTILITIES,
 } as const satisfies Record<Engine, Readonly<Record<string, string>>>;
 
+/** A colour made from a theme colour with the relative colour syntax, such as `oklch(from var(--primary) ...)`. */
+const RELATIVE_COLOUR = /\[oklch\(from_/;
+
 /** Weights the theme has no Geist family for, so a font cannot draw them. */
 const UNLOADED_WEIGHTS = [/^font-(thin|extralight|light|extrabold|black)$/] as const satisfies readonly RegExp[];
 
@@ -421,7 +541,7 @@ const UNLOADED_WEIGHTS = [/^font-(thin|extralight|light|extrabold|black)$/] as c
  * Tailwind 4 utilities the engine's Tailwind has no exact equal of, reported rather than renamed to
  * a near one. The `!` suffix is Tailwind 4's spelling of important; neither engine's native styles
  * have an important to give it. Neither engine computes a calc that mixes a percentage with a length,
- * nor a radius clamped below `rounded-md`.
+ * nor a radius clamped below `rounded-md`, nor parses a colour made from another with the relative colour syntax.
  */
 const UNTRANSLATABLE_UTILITIES = {
   nativewind: [
@@ -435,8 +555,9 @@ const UNTRANSLATABLE_UTILITIES = {
     /^field-sizing-/,
     /^text-shadow-/,
     CLAMPED_RADIUS,
+    RELATIVE_COLOUR,
   ],
-  uniwind: [...UNLOADED_WEIGHTS, /!$/, /\[calc\([^\]]*%/, CLAMPED_RADIUS],
+  uniwind: [...UNLOADED_WEIGHTS, /!$/, /\[calc\([^\]]*%/, CLAMPED_RADIUS, RELATIVE_COLOUR],
 } as const satisfies Record<Engine, readonly RegExp[]>;
 
 function partOf(utility: string, onIcon: boolean): Part {
@@ -483,6 +604,7 @@ function stateOf(modifier: string): StateKey | undefined {
   if (childVariant) return `${childVariant[1]}=${childVariant[2]}`;
   const childPart = CHILD_PART_MODIFIER.exec(modifier);
   if (childPart) return `part=${childPart[1]}`;
+  if (modifier === CHILD_BUTTON_MODIFIER) return 'part=button';
   const own = modifier.replace(RELATIVE_PREFIX, '').replace(GROUP_NAME, '').replace(CHILD_PREFIX, '');
   for (const candidate of new Set([modifier, own])) {
     const state = STATE_MODIFIERS.get(candidate);
@@ -507,7 +629,11 @@ function joinChildModifiers(modifiers: readonly string[]): string[] {
   const joined: string[] = [];
   for (let i = 0; i < modifiers.length; i += 1) {
     const next = modifiers[i + 1];
-    if (modifiers[i] === '*' && next !== undefined && (next === CHILD_ICON || CHILD_SLOT.test(next))) {
+    if (
+      modifiers[i] === '*' &&
+      next !== undefined &&
+      (next === CHILD_ICON || next === CHILD_BUTTON || CHILD_SLOT.test(next))
+    ) {
       joined.push(`*:${next}`);
       i += 1;
     } else if (modifiers[i] === '**' && (next === DESCENDANT_ICON_SLOT || `**:${next}` === COMMAND_GROUP_HEADING)) {
@@ -520,15 +646,26 @@ function joinChildModifiers(modifiers: readonly string[]): string[] {
   return joined;
 }
 
-function readClass(cls: string, stateModifiers: ReadonlySet<string> = new Set(), afterPart = false): SlotClass {
+function readClass(
+  cls: string,
+  stateModifiers: ReadonlySet<string> = new Set(),
+  afterPart = false,
+  beforePart = false,
+): SlotClass {
   const split = splitVariants(cls);
   const utility = split.pop() ?? '';
   const variants = joinChildModifiers(split);
   const modifiers = variants
     .filter((m) => !HOLDING_MODIFIERS.has(m) && !ICON_MODIFIERS.has(m))
-    .map((m) => (afterPart && m === 'after' ? AFTER_PART_MODIFIER : m));
+    .map((m) => (afterPart && m === 'after' ? AFTER_PART_MODIFIER : m))
+    .map((m) => (beforePart && m === 'before' ? BEFORE_PART_MODIFIER : m));
+  if ((afterPart || beforePart) && PSEUDO_CONTENT.test(utility)) {
+    return { reading: 'dropped' };
+  }
   const isChildState = (m: string): boolean => CHILD_STATE_MODIFIERS.has(m) || CHILD_VARIANT_MODIFIER.test(m);
-  if (modifiers.some((m) => !isChildState(m) && DROPPED_MODIFIERS.some((rule) => rule.test(m)))) {
+  const dropped = (m: string): boolean =>
+    !isChildState(m) && !stateModifiers.has(m) && DROPPED_MODIFIERS.some((rule) => rule.test(m));
+  if (modifiers.some(dropped)) {
     return { reading: 'dropped' };
   }
 
@@ -660,6 +797,22 @@ function resolveAvailableHeightClamp(utility: string): string {
   return `max-h-[${(Number(clamp[1]) - Number(clamp[2])) * SPACING_STEP_PX}px]`;
 }
 
+/**
+ * A length of N spacing steps, or of N steps less M px, written with Tailwind 4's `--spacing()`, which
+ * Tailwind 3 does not compile and Uniwind does not evaluate inside an arbitrary value, such as a trace's
+ * content indented to line up with the middle of the icon above it. It becomes the px it comes to.
+ */
+const SPACING_FUNCTION =
+  /^(-?[a-z]+(?:-[a-z]+)*)-\[(?:--spacing\(([\d.]+)\)|calc\(--spacing\(([\d.]+)\)-([\d.]+)px\))\]$/;
+
+function resolveSpacingFunction(utility: string): string {
+  const length = SPACING_FUNCTION.exec(utility);
+  if (!length) return utility;
+  const [, prefix, steps, calcSteps, less] = length;
+  const px = Number(steps ?? calcSteps) * SPACING_STEP_PX - Number(less ?? 0);
+  return `${prefix}-[${Math.round(px * 100) / 100}px]`;
+}
+
 /** The theme's `rounded-md` for a radius clamped at no less than it, or the utility itself. */
 function resolveClampedRadius(utility: string): string {
   const clamp = CLAMPED_RADIUS.exec(utility);
@@ -714,13 +867,17 @@ export function translateClasses(
   const spacingVariables: SpacingVariables = slot.spacingVariables ?? new Map();
   const importantRemoved = slot.name !== undefined && SLOT_IMPORTANT_REMOVED.has(slot.name);
   const afterPart = slot.name !== undefined && SLOT_AFTER_PARTS.has(slot.name);
+  const beforePart = slot.name !== undefined && SLOT_BEFORE_PARTS.has(slot.name);
   const componentClasses = (slot.name === undefined ? undefined : SLOT_COMPONENT_CLASSES.get(slot.name)) ?? [];
+  const replacedByName = (slot.name === undefined ? undefined : SLOT_REPLACED_CLASSES.get(slot.name)) ?? new Map();
   const read = [...classes, ...componentClasses]
     .filter((cls) => !droppedByName.has(cls))
+    .map((cls) => replacedByName.get(cls) ?? cls)
     .map((cls) => (importantRemoved ? cls.replace(IMPORTANT_SUFFIX, '') : cls))
-    .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers, afterPart), spacingVariables));
+    .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers, afterPart, beforePart), spacingVariables));
 
   const ringBorder = drawsRingAsBorder(read);
+  const ringStateAsBorder = slot.name === undefined ? undefined : SLOT_RING_AS_BORDER_STATES.get(slot.name);
 
   for (const cls of read) {
     if (cls.reading === 'dropped') continue;
@@ -734,12 +891,18 @@ export function translateClasses(
       unknown.push(cls.source);
       continue;
     }
-    const utility = resolveAvailableHeightClamp(
-      resolveClampedRadius(
-        resolveOwnSizeTranslate(
-          ringBorder && unmodified ? ringAsBorder(radiusLessLength) : radiusLessLength,
-          cls.states,
-          read,
+    const utility = resolveSpacingFunction(
+      resolveAvailableHeightClamp(
+        resolveClampedRadius(
+          resolveOwnSizeTranslate(
+            (ringBorder && unmodified) ||
+              cls.states.includes(RING_AS_BORDER_STATE) ||
+              (ringStateAsBorder !== undefined && stateKeyOf(cls.states) === ringStateAsBorder)
+              ? ringAsBorder(radiusLessLength)
+              : radiusLessLength,
+            cls.states,
+            read,
+          ),
         ),
       ),
     )

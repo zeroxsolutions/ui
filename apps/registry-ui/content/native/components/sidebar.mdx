@@ -1,0 +1,221 @@
+---
+title: Sidebar
+description: An app's side navigation, a sheet on a phone and a panel beside the screen from the md width.
+---
+
+<NativePreview name="sidebar-demo" />
+
+## Installation
+
+<InstallCommand name="sidebar" />
+
+The CLI writes `components/ui/sidebar.tsx` and `lib/motion.ts`, installs [Button](/native/components/nativewind/button),
+[Direction](/native/components/nativewind/direction), [Icon](/native/components/nativewind/icon),
+[Input](/native/components/nativewind/input), [Separator](/native/components/nativewind/separator),
+[Sheet](/native/components/nativewind/sheet), [Skeleton](/native/components/nativewind/skeleton),
+[Text](/native/components/nativewind/text), [Tooltip](/native/components/nativewind/tooltip), Text children, Use mobile
+(`hooks/use-mobile.ts`) and Utils, and adds
+`@rn-primitives/slot`, `class-variance-authority`, `lucide-react-native`, `react-native-reanimated` and
+`react-native-worklets`. Below the `md` width the sidebar is a Sheet, which draws in the app's `PortalHost`; see
+[Add a portal host](/native/docs/installation#add-a-portal-host).
+
+## Usage
+
+```tsx
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
+```
+
+```tsx
+<SidebarProvider>
+  <Sidebar>
+    <SidebarContent>
+      <SidebarGroup>
+        <SidebarGroupLabel>Application</SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton isActive onPress={() => router.push('/')}>
+              <Icon as={Home} />
+              <Text>Home</Text>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+    </SidebarContent>
+  </Sidebar>
+  <SidebarInset>
+    <SidebarTrigger />
+    {/* the screen */}
+  </SidebarInset>
+</SidebarProvider>
+```
+
+SidebarProvider fills its parent, so give it a parent that has a height, such as the screen's root `View` with
+`flex-1`.
+
+## API reference
+
+### SidebarProvider
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop           | Type                      | Default |
+| -------------- | ------------------------- | ------- |
+| `defaultOpen`  | `boolean`                 | `true`  |
+| `open`         | `boolean`                 | -       |
+| `onOpenChange` | `(open: boolean) => void` | -       |
+
+It holds whether the panel is open, from `defaultOpen`, or follows `open` and reports each change through
+`onOpenChange`. The sheet below `md` has an open state of its own, which starts closed. On the web, Cmd+B or
+Ctrl+B opens and closes the sidebar.
+
+### useSidebar
+
+Returns the state of the nearest SidebarProvider, and throws outside one:
+
+| Field           | Type                        | What it is                                               |
+| --------------- | --------------------------- | -------------------------------------------------------- |
+| `state`         | `'expanded' \| 'collapsed'` | Whether the panel is open.                               |
+| `open`          | `boolean`                   | Whether the panel is open.                               |
+| `setOpen`       | `(open: boolean) => void`   | Opens or closes the panel.                               |
+| `openMobile`    | `boolean`                   | Whether the sheet is open.                               |
+| `setOpenMobile` | `(open: boolean) => void`   | Opens or closes the sheet.                               |
+| `isMobile`      | `boolean`                   | Whether the window is narrower than `md`, 768px.         |
+| `toggleSidebar` | `() => void`                | Opens or closes the sheet below `md`, the panel from it. |
+
+`isMobile` comes from `useIsMobile` in `hooks/use-mobile`, which the sidebar installs as upstream's does, so code
+moved from the web that imports it keeps working.
+
+### Sidebar
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type                                 | Default       |
+| ------------- | ------------------------------------ | ------------- |
+| `side`        | `'left' \| 'right'`                  | `'left'`      |
+| `variant`     | `'sidebar' \| 'floating' \| 'inset'` | `'sidebar'`   |
+| `collapsible` | `'offcanvas' \| 'icon' \| 'none'`    | `'offcanvas'` |
+| `dir`         | `'ltr' \| 'rtl'`                     | -             |
+
+Below `md` the sidebar is an 18rem modal sheet named Sidebar, sliding in from `side`; a press outside it, the
+Android back button and Escape on the web close it, and on the web the focus goes back to where it was when the
+sheet opened. From `md` it is a 16rem panel beside the SidebarInset. When
+it closes, an `offcanvas` panel slides off the screen and an `icon` one shrinks to a 3rem rail of its icons, over
+200ms, or at once when the system asks for reduced motion. A `none` sidebar is always a panel. `floating` draws
+the panel as a card, and `inset` draws the SidebarInset as one. `dir` sets the direction the parts inside read.
+
+### SidebarTrigger
+
+Takes every prop of [Button](/native/components/nativewind/button). A ghost icon button named Toggle Sidebar that
+opens and closes the sidebar.
+
+### SidebarRail
+
+Takes every prop of React Native's `Pressable`. A 1rem strip centred on the panel's edge that faces the screen,
+which opens and closes the sidebar, named Toggle Sidebar and left out of the keyboard's order. While the panel is
+off the screen it stays at the provider's edge, within reach. It is drawn from `md` only. It is placed against the
+SidebarProvider rather than inside the Sidebar as upstream's is, so keep the Sidebar at the provider's edge: a view
+drawn between them, such as a second sidebar, leaves the rail off the panel's edge.
+
+### SidebarInset
+
+Takes every prop of React Native's `View`. The screen beside the sidebar, announced as the main content.
+
+### SidebarHeader, SidebarFooter, SidebarContent and SidebarSeparator
+
+The header and footer take every prop of React Native's `View`, and sit above and below the SidebarContent,
+which takes every prop of `ScrollView` and scrolls between them; a rail of icons does not scroll. The separator
+takes every prop of [Separator](/native/components/nativewind/separator).
+
+### SidebarInput
+
+Takes every prop of [Input](/native/components/nativewind/input), sized for the sidebar.
+
+### SidebarGroup, SidebarGroupLabel, SidebarGroupAction and SidebarGroupContent
+
+A section with its heading, a button in its corner and its body. The label and the action take `asChild`. In a
+rail of icons the label slides up out of sight and the action is not drawn.
+
+### SidebarMenu and SidebarMenuItem
+
+A list and one of its entries, both taking every prop of React Native's `View`.
+
+### SidebarMenuButton
+
+Takes every prop of React Native's `Pressable`, plus:
+
+| Prop       | Type                            | Default     |
+| ---------- | ------------------------------- | ----------- |
+| `isActive` | `boolean`                       | `false`     |
+| `variant`  | `'default' \| 'outline'`        | `'default'` |
+| `size`     | `'default' \| 'sm' \| 'lg'`     | `'default'` |
+| `tooltip`  | `string \| TooltipContentProps` | -           |
+| `asChild`  | `boolean`                       | `false`     |
+
+A button, drawn in the accent colour and announced as selected while `isActive`. Its Icon and Text children are
+its content; a string child is drawn as one line of text. In a rail of icons it shrinks to its icon, and on the
+web its `tooltip` shows beside it. Pass `asChild` to render its single child, or make it the child of a
+`CollapsibleTrigger` or `DropdownMenuTrigger` with `asChild`, as the demo does.
+
+### SidebarMenuAction
+
+Takes every prop of React Native's `Pressable`, plus `asChild` and `showOnHover`. A button at the end of a
+SidebarMenuItem; on the web `showOnHover` shows it only while the pointer is over its item, it holds the focus or
+its menu is open. A touch screen has no pointer, so there it is always shown. It is not drawn in a rail of icons.
+
+The action is placed against the View it is drawn in. A DropdownMenu around it is a View of its own, so let that
+View cover the item and pass presses through to the button under it:
+
+```tsx
+<SidebarMenuItem>
+  <SidebarMenuButton>{/* ... */}</SidebarMenuButton>
+  <DropdownMenu className="absolute inset-0" pointerEvents="box-none">
+    <DropdownMenuTrigger asChild>
+      <SidebarMenuAction aria-label="More">
+        <Icon as={MoreHorizontal} />
+      </SidebarMenuAction>
+    </DropdownMenuTrigger>
+    {/* the menu's content */}
+  </DropdownMenu>
+</SidebarMenuItem>
+```
+
+### SidebarMenuBadge
+
+Takes every prop of React Native's `View`. A count at the end of a SidebarMenuItem; not drawn in a rail of icons.
+On the web it, and a SidebarMenuAction, take the accent colour while the pointer is over the item's button.
+
+### SidebarMenuSkeleton
+
+Takes every prop of React Native's `View`, plus `showIcon`. A placeholder for a menu item while it loads.
+
+### SidebarMenuSub, SidebarMenuSubItem and SidebarMenuSubButton
+
+A nested list ruled along its start, one of its entries, and a link in it. The sub-button takes every prop of
+`Pressable`, plus `size` (`'sm'` or `'md'`, by default `'md'`), `isActive` and `asChild`; it is announced as a link, and
+`onPress` navigates. The nested list is not drawn in a rail of icons.
+
+## Differences from upstream
+
+- Upstream keeps the panel's state in a `sidebar_state` cookie, which its server reads on the next page load. A
+  device has no cookie, so the state lives in the provider only; hold it yourself, through `open` and
+  `onOpenChange`, to keep it across launches.
+- Upstream's panel is fixed to the page's edge whatever it sits in. Here it takes its place in the provider's
+  row, so place a `right` Sidebar after the SidebarInset.
+- Upstream fills the page's height. SidebarProvider fills its parent, which needs a height of its own.
+- On a device a press on a button opens a tooltip as well as running it, so `tooltip` shows on the web only.
+- A touch screen has no pointer to rest on an item, so `showOnHover` hides an action on the web only.
+- A DropdownMenu around a SidebarMenuAction is a View of its own, which upstream's is not; see SidebarMenuAction.
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.

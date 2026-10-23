@@ -7,6 +7,7 @@ import { pressClosing, useHighlight, useMenuScrollHeight, webItemRole } from '..
 import { usePopupMotion, type PopupSide } from '../lib/motion';
 import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
+import { useMirrored } from './direction';
 import { Icon, IconClassContext } from './icon';
 import { Text, TextClassContext } from './text';
 
@@ -436,10 +437,11 @@ type ContextMenuSubTriggerProps = Omit<ComponentProps<typeof ContextMenuPrimitiv
 };
 
 /**
- * The item that opens a sub-menu, with a chevron at its end, announced as a `menuitem` that is expanded or
- * collapsed. A press opens the sub-menu, and on a device another closes it.
+ * The item that opens a sub-menu, with a chevron at its end, mirrored when text reads right to left, announced
+ * as a `menuitem` that is expanded or collapsed. A press opens the sub-menu, and on a device another closes it.
  */
 function ContextMenuSubTrigger({ className, inset, children, ...props }: ContextMenuSubTriggerProps): ReactNode {
+  const mirrored = useMirrored();
   const { open } = ContextMenuPrimitive.useSubContext();
   const { highlighted, handlers } = useHighlight(props);
   const menuText = useContext(TextClassContext);
@@ -467,7 +469,7 @@ function ContextMenuSubTrigger({ className, inset, children, ...props }: Context
           {children}
           {/* Not every engine lays out an svg by its className, so the chevron is pushed to the end by a View. */}
           <View className="ml-auto">
-            <Icon as={ChevronRight} />
+            <Icon as={ChevronRight} style={mirrored} />
           </View>
         </ContextMenuPrimitive.SubTrigger>
       </IconClassContext.Provider>

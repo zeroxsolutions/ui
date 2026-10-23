@@ -24,6 +24,7 @@ import Animated from 'react-native-reanimated';
 import { useHighlight, useMenuScrollHeight } from '../lib/menu';
 import { usePopupMotion, type PopupSide } from '../lib/motion';
 import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
+import { isText, textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Icon, IconClassContext } from './icon';
 import { Text, TextClassContext } from './text';
@@ -387,7 +388,7 @@ type SelectItemProps = Omit<SelectPrimitive.ItemProps, 'label' | 'closeOnPress' 
  * the web. A disabled option is dimmed, announced as disabled and ignores presses.
  */
 function SelectItem({ className, value, label, children, onPress, ...props }: SelectItemProps): ReactNode {
-  const text = label ?? (typeof children === 'string' ? children : value);
+  const text = label ?? (isText(children) ? textOf(children) : value);
   const { register } = useContext(SelectStateContext);
   useEffect(() => register(value, text), [register, value, text]);
   const { onOpenChange } = SelectPrimitive.useRootContext();
@@ -423,7 +424,7 @@ function SelectItem({ className, value, label, children, onPress, ...props }: Se
           {...props}
           {...events}
         >
-          {typeof children === 'string' ? (
+          {isText(children) ? (
             <SelectPrimitive.ItemText className="cn-select-item-text cn-select-item-text/text" />
           ) : (
             children

@@ -7,6 +7,7 @@ import {
   type KeyDownEvent,
   type LayoutChangeEvent,
   type ViewProps,
+  type ViewStyle,
 } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -20,6 +21,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { useReducedMotion } from '../lib/motion';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './button';
+import { useDirectionSides, useMirrored, type DirectionSides } from './direction';
 import { Icon } from './icon';
 
 // A `cn-<slot>` token stands for that slot's classes; the registry build replaces each with
@@ -105,6 +107,8 @@ interface CarouselTrackValue {
   setRowSize: (size: number) => void;
   placeSlide: (id: string, place: SlidePlace | undefined) => void;
   responder: ViewProps;
+  /** The text direction's sides; a vertical carousel never runs right to left. */
+  sides: DirectionSides;
 }
 
 const CarouselContext = createContext<CarouselContextValue | null>(null);
@@ -179,6 +183,9 @@ function Carousel({
 }: CarouselProps): ReactNode {
   const options = opts ?? {};
   const vertical = orientation === 'vertical';
+  const read = useDirectionSides();
+  const rtl = read.rtl && !vertical;
+  const sides = rtl === read.rtl ? read : { ...read, rtl };
   const reduced = useReducedMotion();
   const scroll = useSharedValue(0);
   const [rowSize, setRowSize] = useState<number>();
@@ -321,8 +328,9 @@ function Carousel({
   // The swipe in progress: where it started, the scroll it started from, and its last two samples for its speed.
   const touchStart = useRef<{ along: number; across: number } | undefined>(undefined);
   const drag = useRef<{ page: number; scroll: number; samples: Array<{ page: number; time: number }> }>(undefined);
+  // Read right to left, the row is drawn mirrored, so a finger moving left moves it on.
   const along = (event: GestureResponderEvent): number =>
-    vertical ? event.nativeEvent.pageY : event.nativeEvent.pageX;
+    vertical ? event.nativeEvent.pageY : rtl ? -event.nativeEvent.pageX : event.nativeEvent.pageX;
   const across = (event: GestureResponderEvent): number =>
     vertical ? event.nativeEvent.pageX : event.nativeEvent.pageY;
 
@@ -415,7 +423,7 @@ function Carousel({
 
   return (
     <CarouselContext.Provider value={{ api, opts, orientation, scrollPrev, scrollNext, canScrollPrev, canScrollNext }}>
-      <CarouselTrackContext.Provider value={{ scroll, loopLength, setRowSize, placeSlide, responder }}>
+      <CarouselTrackContext.Provider value={{ scroll, loopLength, setRowSize, placeSlide, responder, sides }}>
         <View
           role="region"
           {...(WEB ? { 'aria-roledescription': 'carousel' } : {})}
@@ -430,17 +438,38 @@ function Carousel({
   );
 }
 
-/** The row of slides, inside the view they scroll through; its props and classes go to the row. */
+/**
+ * Lays a horizontal row out left to right, as its scroll is measured, whatever direction the platform lays out
+ * in around it, and draws it mirrored so it runs from the right when text reads right to left.
+ */
+function rowStyle({ rtl, layout }: DirectionSides): ViewStyle | undefined {
+  if (!rtl && layout === 'ltr') return undefined;
+  return rtl ? { direction: 'ltr', transform: [{ scaleX: -1 }] } : { direction: 'ltr' };
+}
+
+/** Gives a slide's content back the platform's direction inside that row, mirrored back where the row is. */
+function slideStyle({ rtl, layout }: DirectionSides): ViewStyle | undefined {
+  if (!rtl && layout === 'ltr') return undefined;
+  return rtl ? { direction: layout, transform: [{ scaleX: -1 }] } : { direction: layout };
+}
+
+/** How far outside the carousel its previous and next buttons sit, in px: upstream's 3rem. */
+const BUTTON_OUTSET = -48;
+
+/**
+ * The row of slides, inside the view they scroll through; its props and classes go to the row. When text reads
+ * right to left a horizontal row runs from the right.
+ */
 function CarouselContent({ className, onLayout, ...props }: ViewProps): ReactNode {
   const { orientation } = useCarousel();
-  const { scroll, setRowSize, responder } = useCarouselTrack();
+  const { scroll, setRowSize, responder, sides } = useCarouselTrack();
   const vertical = orientation === 'vertical';
   const moved = useAnimatedStyle(() =>
     vertical ? { transform: [{ translateY: -scroll.value }] } : { transform: [{ translateX: -scroll.value }] },
   );
 
   return (
-    <View className="overflow-hidden" {...responder}>
+    <View className="overflow-hidden" style={vertical ? undefined : rowStyle(sides)} {...responder}>
       {/* Not every engine styles an Animated.View by its className, so the row is a View inside it. */}
       <Animated.View style={moved}>
         <View
@@ -463,8 +492,9 @@ function CarouselContent({ className, onLayout, ...props }: ViewProps): ReactNod
  */
 function CarouselItem({ className, children, onLayout, ...props }: ViewProps): ReactNode {
   const { orientation } = useCarousel();
-  const { scroll, loopLength, placeSlide } = useCarouselTrack();
+  const { scroll, loopLength, placeSlide, sides } = useCarouselTrack();
   const vertical = orientation === 'vertical';
+  const restored = vertical ? undefined : slideStyle(sides);
   const id = useId();
   const [place, setPlace] = useState<SlidePlace>();
 
@@ -493,7 +523,7 @@ function CarouselItem({ className, children, onLayout, ...props }: ViewProps): R
       }}
       {...props}
     >
-      <Animated.View style={looped}>{children}</Animated.View>
+      <Animated.View style={looped}>{restored ? <View style={restored}>{children}</View> : children}</Animated.View>
     </View>
   );
 }
@@ -506,11 +536,14 @@ type CarouselButtonProps = Omit<ButtonProps, 'children'>;
  */
 function CarouselPrevious({ className, variant = 'outline', size = 'icon-sm', ...props }: CarouselButtonProps) {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel();
+  const { sides } = useCarouselTrack();
+  const mirrored = useMirrored();
   const vertical = orientation === 'vertical';
   return (
     <View
       pointerEvents="box-none"
-      className={cn('absolute', vertical ? '-top-12 inset-x-0 items-center' : 'inset-y-0 -left-12 justify-center')}
+      style={vertical ? undefined : { [sides.start]: BUTTON_OUTSET }}
+      className={cn('absolute', vertical ? '-top-12 inset-x-0 items-center' : 'inset-y-0 justify-center')}
     >
       <Button
         variant={variant}
@@ -521,7 +554,7 @@ function CarouselPrevious({ className, variant = 'outline', size = 'icon-sm', ..
         onPress={scrollPrev}
         {...props}
       >
-        <Icon as={ChevronLeft} />
+        <Icon as={ChevronLeft} style={vertical ? undefined : mirrored} />
       </Button>
     </View>
   );
@@ -533,11 +566,14 @@ function CarouselPrevious({ className, variant = 'outline', size = 'icon-sm', ..
  */
 function CarouselNext({ className, variant = 'outline', size = 'icon-sm', ...props }: CarouselButtonProps) {
   const { orientation, scrollNext, canScrollNext } = useCarousel();
+  const { sides } = useCarouselTrack();
+  const mirrored = useMirrored();
   const vertical = orientation === 'vertical';
   return (
     <View
       pointerEvents="box-none"
-      className={cn('absolute', vertical ? '-bottom-12 inset-x-0 items-center' : 'inset-y-0 -right-12 justify-center')}
+      style={vertical ? undefined : { [sides.end]: BUTTON_OUTSET }}
+      className={cn('absolute', vertical ? '-bottom-12 inset-x-0 items-center' : 'inset-y-0 justify-center')}
     >
       <Button
         variant={variant}
@@ -548,7 +584,7 @@ function CarouselNext({ className, variant = 'outline', size = 'icon-sm', ...pro
         onPress={scrollNext}
         {...props}
       >
-        <Icon as={ChevronRight} />
+        <Icon as={ChevronRight} style={vertical ? undefined : mirrored} />
       </Button>
     </View>
   );

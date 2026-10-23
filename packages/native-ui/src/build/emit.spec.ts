@@ -201,9 +201,15 @@ describe('aliasImports', () => {
     expect(aliasImports(source, 'ui/button.tsx')).toBe(source);
   });
 
-  it('throws on a relative import outside ui and lib', () => {
-    expect(() => aliasImports("import x from '../hooks/x';", 'ui/button.tsx')).toThrow(
-      'No alias for ../hooks/x in ui/button.tsx',
+  it('rewrites an import of a hook to the hooks alias', () => {
+    expect(aliasImports("import { useX } from '../hooks/use-x';", 'ui/code-block.tsx')).toBe(
+      "import { useX } from '@/hooks/use-x';",
+    );
+  });
+
+  it('throws on a relative import outside ui, lib and hooks', () => {
+    expect(() => aliasImports("import x from '../theme/x';", 'ui/button.tsx')).toThrow(
+      'No alias for ../theme/x in ui/button.tsx',
     );
   });
 });
@@ -213,6 +219,7 @@ interface BuiltItem {
   type: string;
   categories?: string[];
   dependencies?: string[];
+  devDependencies?: string[];
   registryDependencies?: string[];
   files: { path: string; content: string }[];
 }
@@ -220,7 +227,7 @@ interface BuiltItem {
 const PLATFORM_PACKAGES: ReadonlySet<string> = new Set(['react', 'react-native']);
 const BARE_WEIGHT = /\bfont-(?:normal|medium|semibold|bold)\b|fontWeight/;
 const IMPORT_SPECIFIER = /from '([^']+)'/g;
-const ALIASED_ITEM = /^@\/(?:components\/ui|lib)\/(.+)$/;
+const ALIASED_ITEM = /^@\/(?:components\/ui|lib|hooks)\/(.+)$/;
 
 function packageName(specifier: string): string {
   const segments = specifier.split('/');
@@ -299,10 +306,23 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
   it('covers every import of every file with a dependency or another item', () => {
     for (const built of items) {
       const packages = (built.dependencies ?? []).map(withoutRange);
+      // An item that ships several files, as use-highlighted-code ships its hook and lib/highlighter, covers
+      // their imports of each other.
+      const ownFiles = new Set(
+        built.files.map(
+          (file) =>
+            `@/${file.path
+              .replace(/^registry\//, '')
+              .replace(/^ui\//, 'components/ui/')
+              .replace(/[.][jt]sx?$/, '')}`,
+        ),
+      );
       for (const file of built.files) {
         for (const [, specifier] of file.content.matchAll(IMPORT_SPECIFIER)) {
           const aliased = ALIASED_ITEM.exec(specifier);
-          if (aliased) {
+          if (ownFiles.has(specifier)) {
+            continue;
+          } else if (aliased) {
             expect({ file: file.path, needs: `@zui/${aliased[1]}` }).toEqual({
               file: file.path,
               needs: built.registryDependencies?.find((dependency) => dependency === `@zui/${aliased[1]}`),
@@ -313,6 +333,10 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
         }
       }
     }
+  });
+
+  it('gives an app the types of the untyped d3 modules the chart parts import', () => {
+    expect(item('charts')?.devDependencies).toEqual(['@types/d3-scale', '@types/d3-shape']);
   });
 
   it("pins tailwind-merge to the major of the engine's Tailwind", () => {

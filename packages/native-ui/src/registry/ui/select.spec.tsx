@@ -157,6 +157,28 @@ describe('Select', () => {
     expect(emittedClasses(screen.getByText('Banana').props.className)).not.toContain('text-muted-foreground');
   });
 
+  it('draws an option written as text with a value inside it as its label', async () => {
+    const user = setUp();
+    const size = 6;
+    await render(
+      <>
+        <Select>
+          <SelectTrigger testID="trigger" aria-label="Box">
+            <SelectValue placeholder="Select a box" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="small">Box of {size}</SelectItem>
+          </SelectContent>
+        </Select>
+        <PortalHost />
+      </>,
+    );
+    await user.press(trigger());
+    await finishMotion();
+
+    expect(within(option('Box of 6')).getByText('Box of 6')).toBeOnTheScreen();
+  });
+
   it('announces the chosen option as selected, with a check mark beside it', async () => {
     const user = await open({ root: { defaultValue: 'blueberry' } });
 

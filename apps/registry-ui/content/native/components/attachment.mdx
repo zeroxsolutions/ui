@@ -1,0 +1,129 @@
+---
+title: Attachment
+description: A file or an image in a card, with its upload state, actions and a press area over the whole card.
+---
+
+<NativePreview name="attachment-demo" />
+
+## Installation
+
+<InstallCommand name="attachment" />
+
+The CLI writes `components/ui/attachment.tsx`, installs [Button](/native/components/nativewind/button),
+[Spinner](/native/components/nativewind/spinner), [Text](/native/components/nativewind/text),
+[Icon](/native/components/nativewind/icon), Motion (`lib/motion.ts`, which reads whether the system asks for
+reduced motion), Message context (`lib/message-context.ts`, which tells an attachment the side of the
+[Message](/native/components/nativewind/message) it sits in), Focus visible (`lib/focus-visible.ts`, which rings
+the card for keyboard focus and not after a press) and Utils, and adds `@rn-primitives/slot`,
+`class-variance-authority` and `react-native-reanimated`.
+
+## Usage
+
+```tsx
+import { FileText, X } from 'lucide-react-native';
+
+import {
+  Attachment,
+  AttachmentAction,
+  AttachmentActions,
+  AttachmentContent,
+  AttachmentDescription,
+  AttachmentMedia,
+  AttachmentTitle,
+} from '@/components/ui/attachment';
+import { Icon } from '@/components/ui/icon';
+```
+
+```tsx
+<Attachment>
+  <AttachmentMedia>
+    <Icon as={FileText} />
+  </AttachmentMedia>
+  <AttachmentContent>
+    <AttachmentTitle>sales-dashboard.pdf</AttachmentTitle>
+    <AttachmentDescription>PDF - 2.4 MB</AttachmentDescription>
+  </AttachmentContent>
+  <AttachmentActions>
+    <AttachmentAction aria-label="Remove sales-dashboard.pdf">
+      <Icon as={X} />
+    </AttachmentAction>
+  </AttachmentActions>
+</Attachment>
+```
+
+For an image, give `AttachmentMedia` `variant="image"` and an `Image` sized `size-full`, and stack it above the
+content with `orientation="vertical"`. Put a row of attachments in `AttachmentGroup`, which scrolls sideways.
+To open the attachment on a press anywhere on the card, add an `AttachmentTrigger` with an `aria-label`; the
+actions stay above it and take their own presses:
+
+```tsx
+<AttachmentTrigger aria-label="Open sales-dashboard.pdf" onPress={openPreview} />
+```
+
+Keep the reason for a failure in `AttachmentDescription`, so the `error` state is not told by colour alone.
+
+## API reference
+
+### Attachment
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type                                                         | Default        |
+| ------------- | ------------------------------------------------------------ | -------------- |
+| `state`       | `'idle' \| 'uploading' \| 'processing' \| 'error' \| 'done'` | `'done'`       |
+| `size`        | `'default' \| 'sm' \| 'xs'`                                  | `'default'`    |
+| `orientation` | `'horizontal' \| 'vertical'`                                 | `'horizontal'` |
+
+`idle` dashes the border, `uploading` and `processing` pulse the title, and `error` draws the card in the
+destructive colour. The card is as wide as its content; give it `w-full` to fill the row. Inside a Message
+aligned to the end, it sits at the end.
+
+### AttachmentMedia
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop      | Type                | Default  |
+| --------- | ------------------- | -------- |
+| `variant` | `'icon' \| 'image'` | `'icon'` |
+
+Holds an Icon, a Spinner or an image. `image` dims the image until the upload is `done` or `idle`.
+
+### AttachmentContent
+
+Takes every prop of React Native's `View`, and holds the title and description.
+
+### AttachmentTitle, AttachmentDescription
+
+Each takes every prop of [Text](/native/components/nativewind/text), on one line. The title pulses while the
+attachment is `uploading` or `processing`, and stands still when the system asks for reduced motion.
+
+### AttachmentActions, AttachmentAction
+
+AttachmentActions takes every prop of React Native's `View`, and floats over the media's top end when the
+attachment is vertical. AttachmentAction takes every prop of [Button](/native/components/nativewind/button)
+and is a `ghost` button at size `icon-xs`.
+
+### AttachmentTrigger
+
+Takes every prop of React Native's `Pressable`, plus `asChild` (`boolean`, default `false`). It is a `button`
+over the whole card; with `asChild` it renders its single child in its place, such as a link. While the trigger
+or an action holds keyboard focus, the card's border takes the ring colour.
+
+### AttachmentGroup
+
+Takes every prop of React Native's `ScrollView`. It scrolls its attachments sideways and comes to rest with an
+attachment at its start. Give it an `aria-label` when its attachments take no press.
+
+## Differences from upstream
+
+- Upstream's AttachmentTrigger takes a `render` prop. The native one takes `asChild`.
+- Upstream shimmers the title with a gradient sweep. Text on a device cannot be masked by a gradient without
+  another dependency, so the native title fades to half opacity and back.
+- Upstream sizes an `img` inside image media with a child selector. Size the native image `size-full` yourself.
+- Upstream fades the group's edges with a CSS mask. The native group draws no fade.
+- Upstream rings the card with a box-shadow while a control inside it holds focus. A device has no box-shadow
+  ring, so the native card's border takes the ring colour while its trigger or an action holds keyboard focus.
+- Upstream colours a pressable card when hovered. A touch screen has no hover, and the native card draws no
+  pressed colour.
+- Upstream's media and content padding come from `:has()` selectors. The native parts tell the card they are
+  there.

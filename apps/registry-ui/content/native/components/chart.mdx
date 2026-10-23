@@ -1,0 +1,206 @@
+---
+title: Chart
+description: Charts drawn in the colours and labels of a chart config, with a tooltip a press, a pointer or the arrow keys move, a legend, and the values read to screen readers.
+---
+
+<NativePreview name="chart-demo" />
+
+## Installation
+
+<InstallCommand name="chart" />
+
+The CLI writes `components/ui/chart.tsx`, and installs Charts (`lib/charts.tsx`, the chart parts), Chart theme
+(`lib/chart-theme.ts`), Color scheme (`lib/color-scheme.ts`), Card, Icon, Text, Text children, Motion and Utils, adding
+`d3-scale`, `d3-shape`, `react-native-svg`, `react-native-reanimated` and `react-native-worklets`, and
+`@types/d3-scale` and `@types/d3-shape` as development dependencies, since the d3 modules ship no types.
+
+## Usage
+
+Upstream's charts are Recharts components inside a `ChartContainer`. Here the same parts come from
+`@/lib/charts`, so a chart written for upstream changes only the line that imports `recharts`.
+
+```tsx
+import { Bar, BarChart, CartesianGrid, XAxis } from '@/lib/charts';
+
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
+```
+
+```tsx
+const chartConfig = {
+  desktop: { label: 'Desktop', color: 'var(--chart-1)' },
+  mobile: { label: 'Mobile', color: 'var(--chart-2)' },
+} satisfies ChartConfig;
+
+<ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+  <BarChart accessibilityLayer data={chartData}>
+    <CartesianGrid vertical={false} />
+    <XAxis
+      dataKey="month"
+      tickLine={false}
+      tickMargin={10}
+      axisLine={false}
+      tickFormatter={(value) => value.slice(0, 3)}
+    />
+    <ChartTooltip content={<ChartTooltipContent />} />
+    <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
+    <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
+  </BarChart>
+</ChartContainer>;
+```
+
+## Colours
+
+A key's colour in the config is drawn wherever a part is given `var(--color-<key>)`, as a fill, a stroke or a
+row's `fill`. A colour is one of:
+
+- a theme colour, such as `var(--chart-1)` to `var(--chart-5)`, `var(--primary)` or `var(--destructive)`: any
+  colour the theme item defines;
+- a colour React Native reads, such as `#2563eb`, `rgb(37, 99, 235)` or `hsl(220, 98%, 61%)`;
+- a `theme` of one colour for `light` and one for `dark`, picked by the scheme the app draws.
+
+## Interaction and accessibility
+
+A press on the plot shows the tooltip for the category under it, and a drag moves it along. It stays after the
+finger lifts, until a tap on the same category, a press on another chart, or a scrolling parent taking the touch
+hides it; a scroll that starts on a chart leaves no tooltip behind. On the web a mouse shows it on hover and
+hides it on leaving, a click keeps it, a press outside the chart hides it, and the chart is focusable: the left and right arrows
+move along the categories, Home and End go to the first and the last, and Escape or leaving the chart hides it.
+On a reversed x axis the right arrow still moves right, back through the categories.
+
+The chart is announced as adjustable, labelled with every category's values, such as "Jan: Desktop 186,
+Mobile 80", and valued "None selected" until a category is active. Each category is read as the tooltip's
+`labelFormatter` draws it, else as its axis tick reads, else as the data holds it, so a translated chart is read in
+its own language. A screen reader's swipe up or down moves to
+the next or the previous category and reads its values.
+A chart with no tooltip is announced with the same label.
+
+As Recharts' do, bars grow up from the axis, lines draw in from their start, a pie and radial bars sweep round and
+a radar grows from its middle, over one and a half seconds, with a line's dots shown once it is drawn. Reanimated
+runs each shape's own entrance, so the chart is not drawn again for every frame. A series is drawn at once where
+the system asks for reduced motion or the series sets `isAnimationActive={false}`.
+
+## API reference
+
+### ChartContainer
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop               | Type                                | Default                       |
+| ------------------ | ----------------------------------- | ----------------------------- |
+| `config`           | `ChartConfig`                       | -                             |
+| `initialDimension` | `{ width: number; height: number }` | `{ width: 320, height: 200 }` |
+| `id`               | `string`                            | -                             |
+
+The container is 16:9 unless its classes size it otherwise, such as `h-[200px]` or `aspect-auto`. The chart is
+drawn at `initialDimension` until the container has been laid out.
+
+### ChartStyle
+
+Takes `id`, `config` and `children`, and gives the parts inside it the config's colours. ChartContainer draws it.
+
+### ChartTooltip
+
+Recharts' `Tooltip`. Its other props go to `content` as Recharts hands them, so `labelClassName`,
+`labelFormatter` or `formatter` set on it reach ChartTooltipContent.
+
+| Prop           | Type                                                                  | Default |
+| -------------- | --------------------------------------------------------------------- | ------- |
+| `content`      | `ReactElement \| (props: TooltipContentProps) => ReactNode`           | -       |
+| `cursor`       | `boolean \| { fill?: string; stroke?: string; strokeWidth?: number }` | `true`  |
+| `defaultIndex` | `number`                                                              | -       |
+| `offset`       | `number`                                                              | `10`    |
+
+### ChartTooltipContent
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop             | Type                                               | Default |
+| ---------------- | -------------------------------------------------- | ------- |
+| `indicator`      | `'dot' \| 'line' \| 'dashed'`                      | `'dot'` |
+| `hideLabel`      | `boolean`                                          | `false` |
+| `hideIndicator`  | `boolean`                                          | `false` |
+| `labelKey`       | `string`                                           | -       |
+| `nameKey`        | `string`                                           | -       |
+| `labelClassName` | `string`                                           | -       |
+| `labelFormatter` | `(label, payload) => ReactNode`                    | -       |
+| `formatter`      | `(value, name, item, index, payload) => ReactNode` | -       |
+| `color`          | `string`                                           | -       |
+
+### ChartLegend
+
+Recharts' `Legend`, with `content` and `verticalAlign` (`'top'` or `'bottom'`, the default).
+
+### ChartLegendContent
+
+Takes every prop of React Native's `View`, plus `hideIcon`, `nameKey` and `verticalAlign`.
+
+### Chart parts
+
+`@/lib/charts` holds `ResponsiveContainer`, `BarChart`, `Bar`, `LineChart`, `Line`, `AreaChart`, `Area`, `PieChart`,
+`Pie`, `RadarChart`, `Radar`, `RadialBarChart`, `RadialBar`, `PolarGrid`, `PolarAngleAxis`, `PolarRadiusAxis`,
+`Label`, `Text`, `XAxis`, `YAxis`, `CartesianGrid`, `Tooltip` and `Legend`, with these props of Recharts':
+
+- `BarChart`, `LineChart` and `AreaChart`: `data`, `margin`, `accessibilityLayer`, `width`, `height`, and `title`, which a
+  screen reader hears before the values; `BarChart` also `barGap` and `barCategoryGap`.
+- Every series: `dataKey`, `name`, `hide`, `isAnimationActive`, `animationDuration`.
+- `Bar`: `fill`, `fillOpacity`, `radius`.
+- `Line`: `type` (`'linear'`, `'monotone'`, `'natural'`, `'step'`, `'stepBefore'`, `'stepAfter'`, `'basis'`,
+  `'bump'`), `stroke`, `strokeWidth`, `dot`, `activeDot`.
+- `Area`: the props of `Line`, with `dot` off unless given, plus `fill` and `fillOpacity` (`0.6`).
+- `XAxis`: `dataKey`, `hide`, `tickLine`, `axisLine`, `tickMargin`, `tickFormatter`, `height`, `minTickGap`,
+  `reversed`.
+- `YAxis`: `hide`, `tickLine`, `axisLine`, `tickMargin`, `tickFormatter`, `width`, `tickCount`.
+- `CartesianGrid`: `vertical`, `horizontal`, `stroke`, `strokeDasharray`, and `orientation`, which changes
+  nothing: the lines span the plot from either side.
+- `PieChart`: `margin`, `accessibilityLayer`, `width`, `height`, `title`.
+- `Pie`: `data`, `dataKey`, `nameKey`, `innerRadius`, `outerRadius` (`'80%'`), `cx`, `cy`, `startAngle`, `endAngle`,
+  `paddingAngle`, `fill`, `stroke`, `strokeWidth`, `isAnimationActive`, `animationDuration`. A row's own `fill`
+  colours its slice.
+- `RadarChart`: `data`, `margin`, `cx`, `cy`, `innerRadius`, `outerRadius` (`'80%'`), `startAngle` (`90`),
+  `endAngle` (`-270`), `accessibilityLayer`, `width`, `height`, `title`.
+- `Radar`: `fill`, `fillOpacity`, `stroke`, `strokeWidth`, `dot` (off unless given), `activeDot`.
+- `RadialBarChart`: the props of `RadarChart`, with `startAngle` (`0`) and `endAngle` (`360`), plus
+  `barCategoryGap` (`'10%'`) and `barGap` (`4`). Each row takes an equal ring, and a bar sweeps as far round as its
+  share of the largest value.
+- `RadialBar`: `fill` and `background`, a muted track over the whole sweep. A row's own `fill` colours its bar.
+- `PolarGrid`: `gridType` (`'polygon'` or `'circle'`), `radialLines`, `polarRadius`, `stroke`, `fill`, and the
+  `fill-*` classes of `className`.
+- `PolarAngleAxis`: `dataKey`, `tick`, `tickFormatter`.
+- `PolarRadiusAxis`: a `Label` as its child; `dataKey`, which names each ring of a radial bar chart; and, drawn
+  in a radar chart only, `angle`, `tick`, `axisLine` and `tickCount`. `tickLine` is accepted and draws nothing.
+- `Label`, inside a `Pie` or a `PolarRadiusAxis`: `content`, given `{ viewBox }` with the chart's `cx`, `cy` and
+  radii, or `value`, drawn in the middle.
+- `Text`: react-native-svg's text props, such as `x`, `y`, `textAnchor` and `fontSize`, plus `verticalAnchor` and
+  `fill`. It is set in the theme's `Geist_400Regular`, as the axes' labels are; a weight is set by its face, such
+  as `fontFamily="Geist_700Bold"` where upstream's demos use `font-bold`, since a device picks a custom font's
+  weight by its family.
+
+## Differences from upstream
+
+- Recharts draws with the DOM, so the parts are this registry's own, drawn with `react-native-svg`, `d3-scale` and
+  `d3-shape`, in Recharts' names and with the props upstream's chart demos use. Props outside that list, other
+  chart types, and Recharts' transitions between data sets are not there.
+- `ChartStyle` cannot write a stylesheet on a device, so it provides the config's colours to the parts inside it
+  and takes `children`.
+- A colour in `oklch()`, or a variable the theme item does not define, is drawn on the web only: React Native
+  reads neither, and in development the chart warns of such a variable on a device. On NativeWind a theme colour
+  is readable on a device only once a class uses it, which the item's own source does for the chart colours.
+- On a device a press elsewhere on the screen does not hide the tooltip: React Native gives a view no event for
+  a press outside it. A tap on the same category, a press on another chart or a scroll does.
+- A config `icon` is a component drawing an `Icon`, such as `() => <Icon as={Monitor} />`, which takes the
+  indicator's size and colour; a raw lucide icon keeps its own.
+- The tooltip's value is set in the theme's sans with tabular figures; the theme has no mono font.
+- The tooltip and the legend draw their colour marks with `react-native-svg`, since React Native Web drops a
+  `View` background it cannot parse, such as a theme colour on NativeWind.
+- A Label's `content` draws react-native-svg's elements or `Text`, not the DOM's `text` and `tspan`, and colours
+  them with `fill`, such as `fill="var(--muted-foreground)"`, where upstream's demos use a `fill-*` class.
+- An area rises from its axis, where Recharts wipes it in from the left through a clip: every entrance here moves
+  the shape itself, since an animated clip or mask is not sure to be redrawn on a device.
+- `PolarGrid` reads only the `fill-<colour>`, `first:fill-<colour>` and `last:fill-<colour>` classes of its
+  `className`, filling every ring, the first or the last in the theme colour of that name; React Native has no
+  CSS to apply the others to an svg ring.
+- A radar draws its rings smaller where a name beyond a spoke would pass the chart's edge, which a device's svg
+  clips; Recharts keeps the radius and lets the name run over the edge.
+- A pie's slices have no stroke unless given one: upstream's container hides Recharts' white one.
+- `accessibilityLayer` is accepted and changes nothing: the chart always takes the keyboard on the web and is
+  always read to a screen reader. The focused chart keeps the browser's focus ring, which upstream hides.

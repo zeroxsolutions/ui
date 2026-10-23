@@ -1,7 +1,9 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, I18nManager, Platform, StyleSheet } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
 import { emittedClasses } from '../../build/slot-tokens.testing';
+import { DirectionProvider } from './direction';
+import { holdsMirrored } from './direction.testing';
 import { Text } from './text';
 import {
   Carousel,
@@ -61,6 +63,22 @@ function previous() {
 
 function next() {
   return screen.getByRole('button', { name: 'Next slide' });
+}
+
+type Drawn = ReturnType<typeof screen.getByTestId>;
+
+/** The flattened style of `element`, or `{}` for none. */
+function styleOf(element: Drawn | null): Record<string, unknown> {
+  return (StyleSheet.flatten(element?.props.style) as Record<string, unknown> | undefined) ?? {};
+}
+
+/** The side, `start` or `end`, that places the button `button` outside the carousel. */
+function placedFrom(button: Drawn): string | undefined {
+  for (let at: Drawn | null = button; at; at = at.parent) {
+    const side = Object.keys(styleOf(at)).find((key) => key === 'start' || key === 'end');
+    if (side) return side;
+  }
+  return undefined;
 }
 
 function touch(page: number, timestamp: number, axis: 'x' | 'y' = 'x') {
@@ -272,6 +290,95 @@ describe('Carousel', () => {
     });
 
     expect(await translation()).toBe(-300);
+  });
+
+  it('runs from the right when text reads right to left: a swipe right moves it on, the arrow keys as upstream', async () => {
+    await render(
+      <DirectionProvider direction="rtl">
+        <Slides testID="carousel" />
+      </DirectionProvider>,
+    );
+    await layOut(300);
+    const viewport = screen.getByTestId('row').parent?.parent;
+    if (!viewport) throw new Error('No viewport');
+    expect(viewport).toHaveStyle({ transform: [{ scaleX: -1 }] });
+
+    await fireEvent(viewport, 'responderGrant', touch(50, 0));
+    await fireEvent(viewport, 'responderMove', touch(150, 100));
+    expect(await translation()).toBe(-100);
+    await fireEvent(viewport, 'responderRelease', touch(160, 200));
+    expect(await translation()).toBe(-300);
+
+    await fireEvent(screen.getByTestId('carousel'), 'keyDownCapture', {
+      nativeEvent: { key: 'ArrowRight' },
+      preventDefault: jest.fn(),
+    });
+    expect(await translation()).toBe(-600);
+    await fireEvent(screen.getByTestId('carousel'), 'keyDownCapture', {
+      nativeEvent: { key: 'ArrowLeft' },
+      preventDefault: jest.fn(),
+    });
+    expect(await translation()).toBe(-300);
+  });
+
+  it.each([
+    [
+      "the web, which lays out in the provider's direction",
+      'web',
+      false,
+      'rtl',
+      { direction: 'ltr', transform: [{ scaleX: -1 }] },
+      'start',
+      'rtl',
+    ],
+    [
+      'a device laid out left to right under a right to left provider',
+      'ios',
+      false,
+      'rtl',
+      { direction: 'ltr', transform: [{ scaleX: -1 }] },
+      'end',
+      'ltr',
+    ],
+    [
+      'a device laid out right to left under a left to right provider',
+      'ios',
+      true,
+      'ltr',
+      { direction: 'ltr' },
+      'end',
+      'rtl',
+    ],
+  ] as const)(
+    "runs the provider's way and places its buttons from that side, on %s",
+    async (_where, os, isRTL, direction, row, previousFrom, slideDirection) => {
+      jest.replaceProperty(Platform, 'OS', os);
+      jest.spyOn(I18nManager, 'getConstants').mockReturnValue({ ...I18nManager.getConstants(), isRTL });
+      await render(
+        <DirectionProvider direction={direction}>
+          <Slides />
+        </DirectionProvider>,
+      );
+
+      expect(styleOf(screen.getByTestId('row').parent?.parent ?? null)).toEqual(row);
+      expect(placedFrom(previous())).toBe(previousFrom);
+      expect(placedFrom(next())).toBe(previousFrom === 'start' ? 'end' : 'start');
+      expect(styleOf(screen.getByText('1').parent).direction).toBe(slideDirection);
+    },
+  );
+
+  it('mirrors its previous and next chevrons when text reads right to left, and only then', async () => {
+    await render(<Slides />);
+    expect(holdsMirrored(previous())).toBe(false);
+
+    await render(
+      <DirectionProvider direction="rtl">
+        <Slides />
+      </DirectionProvider>,
+    );
+
+    expect(holdsMirrored(previous())).toBe(true);
+    expect(holdsMirrored(next())).toBe(true);
   });
 
   it('jumps when the system asks for reduced motion', async () => {

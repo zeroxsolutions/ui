@@ -18,12 +18,14 @@ import {
   View,
   useWindowDimensions,
   type GestureResponderEvent,
+  type KeyDownEvent,
   type LayoutChangeEvent,
 } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
-import { useReducedMotion } from '../lib/motion';
+import { useReducedMotion, useSwipeToDismiss, type SwipeDirection as Swipe } from '../lib/motion';
+import { textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Icon } from './icon';
 import { Spinner } from './spinner';
@@ -291,9 +293,6 @@ const TOAST_LIFETIME = 4000;
 const TOAST_WIDTH = 356;
 const GAP = 14;
 const MOBILE_WIDTH = 600;
-/** How far a swipe goes, in px, or how fast, in px per ms, to close a toast. */
-const SWIPE_THRESHOLD = 45;
-const SWIPE_VELOCITY = 0.11;
 /** How long a touch keeps a stack open on a device after the finger lifts. */
 const TOUCH_EXPAND_MS = 4000;
 
@@ -342,9 +341,9 @@ function edgeOffsets(offset: Offset | undefined, fallback: number) {
   return { top: px(offset.top), right: px(offset.right), bottom: px(offset.bottom), left: px(offset.left) };
 }
 
-function textOf(node: TitleT): string | undefined {
-  const value = typeof node === 'function' ? node() : node;
-  return typeof value === 'string' || typeof value === 'number' ? String(value) : undefined;
+/** The text a title or a description draws, which a function draws when it is called. */
+function wordsOf(node: TitleT): string {
+  return textOf(typeof node === 'function' ? node() : node);
 }
 
 function isAction(action: unknown): action is Action {
@@ -398,9 +397,6 @@ function ToastView({
   const y = useSharedValue(0);
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
-  const swipeX = useSharedValue(0);
-  const swipeY = useSharedValue(0);
-  const swiped = useRef<SwipeDirection | undefined>(undefined);
   const removing = useRef(false);
 
   const type = item.type ?? 'default';
@@ -408,6 +404,16 @@ function ToastView({
   const dismissible = item.dismissible !== false;
   const unstyled = item.unstyled ?? options.unstyled ?? false;
   const classNames = { ...options.classNames, ...item.classNames };
+  const swipe = useSwipeToDismiss({
+    directions: swipeDirections.map((direction): Swipe =>
+      direction === 'top' ? 'up' : direction === 'bottom' ? 'down' : direction,
+    ),
+    enabled: dismissible,
+    onDismiss: () => dismiss(item.id),
+    settle: EXIT_MOTION,
+    reduced,
+  });
+  const { x: swipeX, y: swipeY, swiped } = swipe;
 
   useEffect(() => {
     mounted.value = reduced ? 1 : withTiming(1, MOTION);
@@ -458,7 +464,7 @@ function ToastView({
     if (swiped.current === 'left' || swiped.current === 'right') {
       swipeX.value = withTiming(swipeX.value + (swiped.current === 'left' ? -size * 3 : size * 3), EXIT_MOTION);
     } else if (swiped.current) {
-      swipeY.value = withTiming(swipeY.value + (swiped.current === 'top' ? -size : size), EXIT_MOTION);
+      swipeY.value = withTiming(swipeY.value + (swiped.current === 'up' ? -size : size), EXIT_MOTION);
     } else if (front) {
       y.value = withTiming(-lift * size, EXIT_MOTION);
     }
@@ -473,60 +479,6 @@ function ToastView({
       { scale: scale.value },
     ],
   }));
-
-  // The swipe in progress: where it started, and its last sample for its speed.
-  const drag = useRef<{ x: number; y: number; time: number } | undefined>(undefined);
-  const allowed = (direction: SwipeDirection): boolean => swipeDirections.includes(direction);
-  const touchStart = useRef<{ x: number; y: number } | undefined>(undefined);
-  const responder = {
-    onStartShouldSetResponderCapture: (event: GestureResponderEvent) => {
-      touchStart.current = { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY };
-      return false;
-    },
-    // A finger that moves takes the toast from its buttons, so a swipe that starts on one still closes it.
-    onMoveShouldSetResponderCapture: (event: GestureResponderEvent) => {
-      const start = touchStart.current;
-      if (!dismissible || start === undefined) return false;
-      return Math.hypot(event.nativeEvent.pageX - start.x, event.nativeEvent.pageY - start.y) > 4;
-    },
-    onResponderTerminationRequest: () => false,
-    onResponderGrant: (event: GestureResponderEvent) => {
-      drag.current = { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY, time: event.nativeEvent.timestamp };
-    },
-    onResponderMove: (event: GestureResponderEvent) => {
-      const start = drag.current;
-      if (start === undefined) return;
-      const dx = event.nativeEvent.pageX - start.x;
-      const dy = event.nativeEvent.pageY - start.y;
-      // A swipe the toast cannot be closed by moves it a little, with growing resistance.
-      const resist = (delta: number): number => delta / (1.5 + Math.abs(delta) / 20);
-      swipeX.value = (dx < 0 ? allowed('left') : allowed('right')) ? dx : resist(dx);
-      swipeY.value = (dy < 0 ? allowed('top') : allowed('bottom')) ? dy : resist(dy);
-    },
-    onResponderRelease: (event: GestureResponderEvent) => {
-      const start = drag.current;
-      drag.current = undefined;
-      if (start === undefined) return;
-      const dx = event.nativeEvent.pageX - start.x;
-      const dy = event.nativeEvent.pageY - start.y;
-      const along = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      const amount = along === 'x' ? dx : dy;
-      const direction: SwipeDirection = along === 'x' ? (dx < 0 ? 'left' : 'right') : dy < 0 ? 'top' : 'bottom';
-      const elapsed = Math.max(1, event.nativeEvent.timestamp - start.time);
-      if (allowed(direction) && (Math.abs(amount) >= SWIPE_THRESHOLD || Math.abs(amount) / elapsed > SWIPE_VELOCITY)) {
-        swiped.current = direction;
-        dismiss(item.id);
-        return;
-      }
-      swipeX.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
-      swipeY.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
-    },
-    onResponderTerminate: () => {
-      drag.current = undefined;
-      swipeX.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
-      swipeY.value = reduced ? 0 : withTiming(0, EXIT_MOTION);
-    },
-  };
 
   const collapsedBehind = !expanded && !front;
   const icon =
@@ -608,7 +560,7 @@ function ToastView({
                 classNames[type === 'normal' || type === 'action' ? 'default' : type],
               )
         }
-        {...responder}
+        {...swipe.handlers}
       >
         <TextClassContext.Provider value={textColour}>
           <View
@@ -664,9 +616,9 @@ function ToastView({
 /**
  * Where toasts come up: put one at the app's root, after its PortalHost, and raise toasts with `toast()` from
  * anywhere. Newer toasts stack in front of older ones, which a pointer over them on the web, or a touch on a
- * device, spreads into a list; each closes after its duration, by a swipe toward its edge, or from its
- * buttons. A new toast is read by screen readers: announced on iOS, and from a polite live region on Android
- * and the web.
+ * device, spreads into a list until Escape, or until one toast or none is left; each closes after its
+ * duration, by a swipe toward its edge, or from its buttons. A new toast is read by screen readers: announced
+ * on iOS, and from a polite live region on Android and the web.
  */
 function Toaster(props: ToasterProps): ReactNode {
   const {
@@ -703,7 +655,7 @@ function Toaster(props: ToasterProps): ReactNode {
   useEffect(() => {
     for (const entry of all) {
       if (entry.delete) continue;
-      const words = [textOf(entry.title), textOf(entry.description)].filter(Boolean).join(', ');
+      const words = [wordsOf(entry.title), wordsOf(entry.description)].filter(Boolean).join(', ');
       if (words.length === 0 || announced.current.get(entry.id) === words) continue;
       announced.current.set(entry.id, words);
       if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(words);
@@ -735,10 +687,16 @@ function Toaster(props: ToasterProps): ReactNode {
     return () => page.removeEventListener('keydown', onKeyDown);
   }, [hotkeyKeys]);
 
-  // A toaster with nothing up collapses again, so the next stack starts closed.
+  const collapse = (): void => {
+    clearTimeout(touchTimer.current);
+    setHovered(false);
+    setTouched(false);
+  };
+
+  // As upstream's, a stack of one toast or none collapses, so the next stack starts closed.
   const up = all.filter((entry) => !entry.delete);
   useEffect(() => {
-    if (up.length === 0) setHovered(false);
+    if (up.length <= 1) collapse();
   }, [up.length]);
 
   const expanded = expand || hovered || touched;
@@ -756,6 +714,10 @@ function Toaster(props: ToasterProps): ReactNode {
       pointerEvents="box-none"
       style={StyleSheet.absoluteFill}
       aria-live="polite"
+      // A key reaches the container only while focus is in it, where upstream's Escape collapses the stack.
+      onKeyDown={(event: KeyDownEvent) => {
+        if (event.nativeEvent.key === 'Escape') collapse();
+      }}
       {...(WEB
         ? {
             role: 'region' as const,
@@ -789,6 +751,7 @@ function Toaster(props: ToasterProps): ReactNode {
             className={className}
             style={[styles.stack, horizontal, vertical, { width: toastWidth, height: frontHeight }]}
             onPointerEnter={WEB ? () => setHovered(true) : undefined}
+            onPointerMove={WEB ? () => setHovered(true) : undefined}
             onPointerLeave={WEB ? () => setHovered(false) : undefined}
             onTouchStart={
               WEB

@@ -1,6 +1,7 @@
 import { act, render, screen } from '@testing-library/react-native';
 import { AccessibilityInfo, Animated } from 'react-native';
-import { Spinner } from './spinner';
+import { registerCSS } from 'react-native-css-interop/test';
+import { Spinner, SpinnerClassContext } from './spinner';
 
 type ReduceMotionListener = (enabled: boolean) => void;
 
@@ -80,5 +81,21 @@ describe('Spinner', () => {
 
     expect(stop).toHaveBeenCalledTimes(1);
     expect(setting.remove).toHaveBeenCalledTimes(1);
+  });
+
+  it("takes the size its container gives a spinner over its own, and a caller's class over both", async () => {
+    reduceMotion(true);
+    registerCSS(
+      '.size-3 { width: 12px; height: 12px; } .size-4 { width: 16px; height: 16px; } .size-6 { width: 24px; height: 24px; }',
+    );
+    await render(
+      <SpinnerClassContext.Provider value="size-6">
+        <Spinner />
+        <Spinner className="size-3" />
+      </SpinnerClassContext.Provider>,
+    );
+
+    const glyphs = screen.getAllByRole('progressbar').map((bar) => bar.children[0]);
+    expect(glyphs.map((glyph) => typeof glyph !== 'string' && glyph.props.width)).toEqual([24, 12]);
   });
 });

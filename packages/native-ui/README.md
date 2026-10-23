@@ -10,9 +10,7 @@ zui's React Native items, and the build that publishes them as four shadcn regis
   `registry-ui-items.json`, the `registry:ui` names upstream's base-vega registry lists.
   `nx run @zeroxsolutions/native-ui:upstream-refresh [commit]` refreshes them from a shadcn-ui/ui commit,
   the head of `main` without one; the commit that lands a refresh names the commit it read.
-- `upstream-coverage.json` lists the upstream items not ported to native, and those deferred, each with
-  its reason; `src/build/upstream-coverage.spec.ts` fails on an upstream item that is neither there nor a
-  registry item.
+- `src/build/upstream-coverage.spec.ts` fails on an upstream item that has no registry item.
 - `nx run @zeroxsolutions/native-ui:build-registry` writes the registries to `dist/r/styles/`.
   `@zeroxsolutions/registry-ui` copies them into its site, which serves them under `/r/styles/`.
   It also writes each registry's sources to `dist/src/<engine>-<style>/` as an app holds them after

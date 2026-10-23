@@ -9,7 +9,7 @@ description: The trail from the top of the app to the current screen.
 
 <InstallCommand name="breadcrumb" />
 
-The CLI writes `components/ui/breadcrumb.tsx`, installs [Text](/native/components/nativewind/text),
+The CLI writes `components/ui/breadcrumb.tsx`, installs [Direction](/native/components/nativewind/direction), [Text](/native/components/nativewind/text),
 [Icon](/native/components/nativewind/icon) and Utils, and adds `lucide-react-native`.
 
 ## Usage
@@ -75,6 +75,11 @@ Text, and is hidden from screen readers.
 
 Takes every prop of React Native's `View`. It draws three dots for the steps a long trail leaves out, and is
 hidden from screen readers.
+
+## Right to left
+
+The separator's chevron is mirrored when [Direction](/native/components/nativewind/direction) says text reads right
+to left, so it points to the next step, as upstream's `cn-rtl-flip` does.
 
 ## Differences from upstream
 

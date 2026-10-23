@@ -9,8 +9,7 @@ description: A panel attached to an edge of the screen that a swipe closes.
 
 <InstallCommand name="drawer" />
 
-The CLI writes `components/ui/drawer.tsx`, `lib/motion.ts` and `lib/overlay.ts`, installs
-[Text](/native/components/nativewind/text) and Utils, and adds `@rn-primitives/dialog`, `@rn-primitives/portal`,
+The CLI writes `components/ui/drawer.tsx`, `lib/motion.ts` and `lib/overlay.ts`, installs [Direction](/native/components/nativewind/direction), [Text](/native/components/nativewind/text) and Utils, and adds `@rn-primitives/dialog`, `@rn-primitives/portal`,
 `react-native-reanimated` and `react-native-worklets`. The content draws in the app's `PortalHost`; see [Add a
 portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing, and logs an error saying
 so while the app is in development.
@@ -109,6 +108,13 @@ Take every prop of [Text](/native/components/nativewind/text). The title is a he
 
 DrawerContent draws a DrawerSwipeHandle when the Drawer has `showSwipeHandle`, and a DrawerOverlay inside a
 DrawerPortal, so you only need them to build content of your own. The handle is hidden from screen readers.
+
+## Right to left
+
+A drawer swiped `left` or `right` stays on the edge it names, as upstream's does, which places it with `left-0`
+and `right-0`. A device the system lays out right to left draws `left` styles on the right, unless the app
+turned that off with `I18nManager.swapLeftAndRightInRTL(false)`; there a swipe toward the edge it is drawn on
+closes it. That follows the system's direction, not a provider's, since a provider changes no layout on a device.
 
 ## Differences from upstream
 

@@ -9,6 +9,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from './pagination';
+import { DirectionProvider } from './direction';
+import { holdsMirrored } from './direction.testing';
 import { Text } from './text';
 
 function renderPages(onPage = jest.fn()) {
@@ -86,6 +88,22 @@ describe('Pagination', () => {
     expect(previous).toEqual(expect.arrayContaining(['h-9', 'pl-2']));
     expect(emittedClasses(screen.getByTestId('next').props.className)).toContain('pr-2');
     expect(emittedClasses(screen.getByTestId('next').props.className, 'nova')).toContain('pr-1.5');
+  });
+
+  it('mirrors the previous and next chevrons when text reads right to left, and only then', async () => {
+    await renderPages();
+    expect(holdsMirrored(screen.getByTestId('previous'))).toBe(false);
+    expect(holdsMirrored(screen.getByTestId('next'))).toBe(false);
+
+    await render(
+      <DirectionProvider direction="rtl">
+        <PaginationPrevious testID="rtl-previous" />
+        <PaginationNext testID="rtl-next" />
+      </DirectionProvider>,
+    );
+
+    expect(holdsMirrored(screen.getByTestId('rtl-previous'))).toBe(true);
+    expect(holdsMirrored(screen.getByTestId('rtl-next'))).toBe(true);
   });
 
   it('hides the ellipsis from screen readers', async () => {

@@ -5,6 +5,8 @@ import { useState, type ReactNode } from 'react';
 import { AccessibilityInfo, View } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Calendar, CalendarDayButton, type CalendarDayButtonProps, type DateRange } from './calendar';
+import { DirectionProvider } from './direction';
+import { holdsMirrored } from './direction.testing';
 
 /** A Thursday, so October 2026 opens on today's weekday. */
 const TODAY = new Date(2026, 9, 22);
@@ -203,6 +205,35 @@ describe('Calendar', () => {
     });
 
     expect(screen.getByText('November 2026')).toBeOnTheScreen();
+  });
+
+  it("moves to the day drawn on the arrow key's side when text reads right to left", async () => {
+    await render(
+      <DirectionProvider direction="rtl">
+        <Calendar mode="single" today={TODAY} />
+      </DirectionProvider>,
+    );
+
+    await fireEvent(day('Saturday, October 31st, 2026'), 'keyDown', {
+      nativeEvent: { key: 'ArrowLeft' },
+      preventDefault: jest.fn(),
+    });
+
+    expect(screen.getByText('November 2026')).toBeOnTheScreen();
+  });
+
+  it('mirrors the chevrons of its month buttons when text reads right to left, and only then', async () => {
+    await render(<Calendar mode="single" today={TODAY} />);
+    expect(holdsMirrored(screen.getByRole('button', { name: 'Go to the Next Month' }))).toBe(false);
+
+    await render(
+      <DirectionProvider direction="rtl">
+        <Calendar mode="single" today={TODAY} />
+      </DirectionProvider>,
+    );
+
+    expect(holdsMirrored(screen.getByRole('button', { name: 'Go to the Previous Month' }))).toBe(true);
+    expect(holdsMirrored(screen.getByRole('button', { name: 'Go to the Next Month' }))).toBe(true);
   });
 
   it('picks the month and the year from dropdowns in the dropdown caption', async () => {

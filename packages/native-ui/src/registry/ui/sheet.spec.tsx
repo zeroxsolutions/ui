@@ -1,8 +1,9 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, I18nManager, Platform } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Button } from './button';
+import { DirectionProvider } from './direction';
 import { catchBackPress, followAccessibilityFocus, AppScreen, outermostView } from './overlay.testing';
 import {
   Sheet,
@@ -211,6 +212,34 @@ describe('Sheet', () => {
     await elapse(150);
     expect(screen.queryByTestId('content')).toBeNull();
   });
+
+  it.each([
+    ['a device laid out right to left, which draws left and right swapped', 'ios', true, true, 'rtl', 1],
+    ['a device laid out right to left under a left to right provider', 'ios', true, true, 'ltr', 1],
+    ['a device laid out left to right under a right to left provider', 'ios', false, true, 'rtl', -1],
+    ['a device laid out right to left, told to keep left and right', 'ios', true, false, 'rtl', -1],
+    ['the web, which keeps left and right', 'web', false, true, 'rtl', -1],
+  ] as const)(
+    'slides a left sheet in from the side it is drawn on, on %s',
+    async (_where, os, isRTL, swaps, direction, sign) => {
+      jest.replaceProperty(Platform, 'OS', os);
+      jest
+        .spyOn(I18nManager, 'getConstants')
+        .mockReturnValue({ ...I18nManager.getConstants(), isRTL, doLeftAndRightSwapInRTL: swaps });
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      await render(
+        <DirectionProvider direction={direction}>
+          <EditProfile side="left" />
+        </DirectionProvider>,
+      );
+
+      await user.press(trigger());
+      await elapse(100);
+
+      const midway = slide()?.props.jestAnimatedStyle?.value.transform?.[0]?.translateX as number;
+      expect(Math.sign(midway)).toBe(sign);
+    },
+  );
 
   it('appears and goes at once when the system asks for reduced motion', async () => {
     jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);

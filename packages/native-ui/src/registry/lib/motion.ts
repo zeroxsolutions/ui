@@ -1,14 +1,18 @@
 /**
- * The motion the overlays share: whether the system asks for reduced motion, a presence that keeps a part
- * drawn while it animates in and out, and the fade, grow and slide a popup beside its trigger moves with.
+ * The motion the items share: whether the system asks for reduced motion, a presence that keeps a part
+ * drawn while it animates in and out, the fade, grow and slide a popup beside its trigger moves with, the
+ * swipe that dismisses a toast, and the pulse of a title whose work is under way.
  */
-import { useEffect, useState, type ComponentProps } from 'react';
-import { AccessibilityInfo, Platform } from 'react-native';
+import { useEffect, useRef, useState, type ComponentProps, type RefObject } from 'react';
+import { AccessibilityInfo, Platform, type GestureResponderEvent, type GestureResponderHandlers } from 'react-native';
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useReducedMotion as useSettingAtStart,
   useSharedValue,
+  withRepeat,
+  withSequence,
   withTiming,
   type SharedValue,
   type WithTimingConfig,
@@ -142,5 +146,146 @@ function usePopupMotion(open: boolean, side: PopupSide, timing: WithTimingConfig
   };
 }
 
-export { usePopupMotion, usePresence, useReducedMotion };
-export type { PopupMotion, PopupSide, Presence };
+/** A way a finger swipes a part off the screen. */
+type SwipeDirection = 'up' | 'down' | 'left' | 'right';
+
+/** How far a swipe goes, in px, or how fast, in px per ms, to dismiss. */
+const SWIPE_THRESHOLD = 45;
+const SWIPE_VELOCITY = 0.11;
+
+/** How far a finger moves, in px, before a swipe takes the touch from the part's buttons. */
+const SWIPE_SLOP = 4;
+
+interface SwipeToDismissOptions {
+  /** The ways a swipe dismisses the part; a swipe any other way pulls against it and springs back. */
+  directions: readonly SwipeDirection[];
+  /** Whether a swipe can dismiss the part at all; when false, no swipe takes the touch. */
+  enabled: boolean;
+  /** Called once a swipe has gone far or fast enough one of `directions`, with that direction. */
+  onDismiss: (direction: SwipeDirection) => void;
+  /** The timing a short swipe springs back with; pass a constant. */
+  settle: WithTimingConfig;
+  /** Whether the system asks for reduced motion, when a short swipe springs back at once. */
+  reduced: boolean;
+}
+
+/** What {@link useSwipeToDismiss} gives back. */
+interface SwipeToDismiss {
+  /** The responder handlers to spread on the view a finger swipes. */
+  handlers: Pick<
+    GestureResponderHandlers,
+    | 'onStartShouldSetResponderCapture'
+    | 'onMoveShouldSetResponderCapture'
+    | 'onResponderTerminationRequest'
+    | 'onResponderGrant'
+    | 'onResponderMove'
+    | 'onResponderRelease'
+    | 'onResponderTerminate'
+  >;
+  /** How far the swipe in progress has moved the part across, in px; drive its translateX from it. */
+  x: SharedValue<number>;
+  /** How far it has moved the part down, in px; drive its translateY from it. */
+  y: SharedValue<number>;
+  /** The direction the swipe that dismissed the part went, for the way it goes out; unset before one. */
+  swiped: RefObject<SwipeDirection | undefined>;
+}
+
+/**
+ * A swipe that dismisses a part, such as a toast, on React Native's responder: the part follows the finger
+ * one of `directions`, and with growing resistance any other way. Let go after 45px, or a quick flick, one
+ * of `directions`, it calls `onDismiss`; otherwise it springs back. A finger that moves takes the touch from
+ * the part's buttons, so a swipe that starts on one still dismisses it.
+ */
+function useSwipeToDismiss({ directions, enabled, onDismiss, settle, reduced }: SwipeToDismissOptions): SwipeToDismiss {
+  const x = useSharedValue(0);
+  const y = useSharedValue(0);
+  const swiped = useRef<SwipeDirection | undefined>(undefined);
+  const touchStart = useRef<{ x: number; y: number } | undefined>(undefined);
+  // The swipe in progress: where it started, and when, for its speed.
+  const drag = useRef<{ x: number; y: number; time: number } | undefined>(undefined);
+  const allowed = (direction: SwipeDirection): boolean => directions.includes(direction);
+  const springBack = (): void => {
+    x.value = reduced ? 0 : withTiming(0, settle);
+    y.value = reduced ? 0 : withTiming(0, settle);
+  };
+
+  const handlers: SwipeToDismiss['handlers'] = {
+    onStartShouldSetResponderCapture: (event: GestureResponderEvent) => {
+      touchStart.current = { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY };
+      return false;
+    },
+    onMoveShouldSetResponderCapture: (event: GestureResponderEvent) => {
+      const start = touchStart.current;
+      if (!enabled || start === undefined) return false;
+      return Math.hypot(event.nativeEvent.pageX - start.x, event.nativeEvent.pageY - start.y) > SWIPE_SLOP;
+    },
+    onResponderTerminationRequest: () => false,
+    onResponderGrant: (event: GestureResponderEvent) => {
+      drag.current = { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY, time: event.nativeEvent.timestamp };
+    },
+    onResponderMove: (event: GestureResponderEvent) => {
+      const start = drag.current;
+      if (start === undefined) return;
+      const dx = event.nativeEvent.pageX - start.x;
+      const dy = event.nativeEvent.pageY - start.y;
+      const resist = (delta: number): number => delta / (1.5 + Math.abs(delta) / 20);
+      x.value = (dx < 0 ? allowed('left') : allowed('right')) ? dx : resist(dx);
+      y.value = (dy < 0 ? allowed('up') : allowed('down')) ? dy : resist(dy);
+    },
+    onResponderRelease: (event: GestureResponderEvent) => {
+      const start = drag.current;
+      drag.current = undefined;
+      if (start === undefined) return;
+      const dx = event.nativeEvent.pageX - start.x;
+      const dy = event.nativeEvent.pageY - start.y;
+      const across = Math.abs(dx) > Math.abs(dy);
+      const amount = across ? dx : dy;
+      const direction: SwipeDirection = across ? (dx < 0 ? 'left' : 'right') : dy < 0 ? 'up' : 'down';
+      const elapsed = Math.max(1, event.nativeEvent.timestamp - start.time);
+      if (allowed(direction) && (Math.abs(amount) >= SWIPE_THRESHOLD || Math.abs(amount) / elapsed > SWIPE_VELOCITY)) {
+        swiped.current = direction;
+        onDismiss(direction);
+        return;
+      }
+      springBack();
+    },
+    onResponderTerminate: () => {
+      drag.current = undefined;
+      springBack();
+    },
+  };
+
+  return { handlers, x, y, swiped };
+}
+
+/** Half a cycle of a pulse: tw-animate's `animate-pulse` timing, which a skeleton pulses with. */
+const PULSE_TIMING = { duration: 1000, easing: Easing.bezier(0.4, 0, 0.6, 1) } as const;
+const PULSE_LOW_OPACITY = 0.5;
+
+/**
+ * The style of a part that fades to half opacity and back on a loop while `pulsing`, as upstream's shimmer
+ * marks text whose work is under way, such as an uploading file's name. Put it on an `Animated.View` around
+ * the part. It is undefined while the part stands still: while not pulsing, and when the system asks for
+ * reduced motion.
+ */
+function usePulse(pulsing: boolean): ComponentProps<typeof Animated.View>['style'] {
+  const reduced = useReducedMotion();
+  const moving = pulsing && !reduced;
+  const opacity = useSharedValue(1);
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  useEffect(() => {
+    if (!moving) return undefined;
+    const fadeTo = (toValue: number) => withTiming(toValue, PULSE_TIMING);
+    opacity.value = withRepeat(withSequence(fadeTo(PULSE_LOW_OPACITY), fadeTo(1)), -1);
+    return () => {
+      cancelAnimation(opacity);
+      opacity.value = 1;
+    };
+  }, [moving, opacity]);
+
+  return moving ? style : undefined;
+}
+
+export { usePopupMotion, usePresence, usePulse, useReducedMotion, useSwipeToDismiss };
+export type { PopupMotion, PopupSide, Presence, SwipeDirection, SwipeToDismiss };

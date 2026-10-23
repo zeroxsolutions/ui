@@ -1,0 +1,79 @@
+---
+title: Form
+description: A form built from Field and a form library, such as react-hook-form.
+---
+
+<NativePreview name="form-demo" />
+
+## Installation
+
+Upstream's `form` item ships no files: a form is [Field](/native/components/nativewind/field) bound to a form
+library. So `form` installs nothing; install Field and the controls the form uses, and the form library:
+
+<InstallCommand name="field" />
+
+```bash
+npx expo install react-hook-form
+```
+
+## Usage
+
+Bind each control with react-hook-form's `Controller`, and draw it in a `Field` that is `invalid` while its
+value is, with a `FieldError` of the value's error:
+
+```tsx
+import { Controller, useForm } from 'react-hook-form';
+
+import { Button } from '@/components/ui/button';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+const form = useForm({ defaultValues: { title: '' } });
+
+<FieldGroup>
+  <Controller
+    name="title"
+    control={form.control}
+    rules={{ minLength: { value: 5, message: 'Bug title must be at least 5 characters.' } }}
+    render={({ field, fieldState }) => (
+      <Field invalid={fieldState.invalid}>
+        <FieldLabel nativeID="title-label" onPress={() => form.setFocus('title')}>
+          Bug Title
+        </FieldLabel>
+        <Input
+          ref={field.ref}
+          value={field.value}
+          onChangeText={field.onChange}
+          onBlur={field.onBlur}
+          aria-label="Bug Title"
+          aria-labelledby="title-label"
+          aria-invalid={fieldState.invalid}
+        />
+        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+      </Field>
+    )}
+  />
+  <Button onPress={() => void form.handleSubmit(onSubmit)()}>
+    <Text>Submit</Text>
+  </Button>
+</FieldGroup>;
+```
+
+A schema library plugs in as on the web, through `resolver` and `@hookform/resolvers`.
+
+## Differences from upstream
+
+- A control takes `value`, `onChangeText` and `onBlur` from `field` rather than `{...field}`: React Native's
+  text field reports its text through `onChangeText`, not a DOM change event.
+- There is no `<form>` element to submit, so the submit button calls `form.handleSubmit(onSubmit)()` on its
+  press, and a button outside the form needs no `form` attribute.
+- A label focuses its control through `form.setFocus(name)`, where the web's `htmlFor` does it: React Native has
+  no label element to tie to a control's id.
+- Field marks its state with `invalid` rather than `data-invalid`, as the [Field](/native/components/nativewind/field)
+  page says.
+- The demo validates with each `Controller`'s `rules`, where upstream's validates with a zod schema through
+  `zodResolver`, so that installing it adds no schema library and no `@hookform/resolvers`. A schema plugs in
+  through `resolver` as above.

@@ -8,6 +8,7 @@ import {
   type ViewProps,
 } from 'react-native';
 import { cn } from '../lib/utils';
+import { useDirectionSides } from './direction';
 
 // A `cn-<slot>` token stands for that slot's classes; the registry build replaces each with
 // the classes translated for the target engine.
@@ -180,6 +181,9 @@ function Slider({
   const latest = useRef(values);
   latest.current = values;
   const vertical = orientation === 'vertical';
+  // In text read right to left a horizontal slider runs from the right, as its row does.
+  const sides = useDirectionSides();
+  const rtl = sides.rtl && !vertical;
   const gap = step * minStepsBetweenValues;
 
   const shaped = (next: readonly number[]): number | readonly number[] => (asNumber ? next[0] : next);
@@ -208,9 +212,9 @@ function Slider({
     const arrowStep = shiftKey ? largeStep : step;
     const deltas: Readonly<Record<string, number>> = {
       ArrowUp: arrowStep,
-      ArrowRight: arrowStep,
+      ArrowRight: rtl ? -arrowStep : arrowStep,
       ArrowDown: -arrowStep,
-      ArrowLeft: -arrowStep,
+      ArrowLeft: rtl ? arrowStep : -arrowStep,
       PageUp: largeStep,
       PageDown: -largeStep,
       Home: min - max,
@@ -222,10 +226,11 @@ function Slider({
     nudge(index, delta);
   };
 
-  /** The value at `location` along the control, measured from its left or, when vertical, its bottom. */
+  /** The value at `location` across the control from its left, or, when vertical, down it from its top. */
   const valueAt = (location: number): number | undefined => {
     if (length === undefined || length <= thumbSize) return undefined;
-    const along = clamp((location - thumbSize / 2) / (length - thumbSize), 0, 1);
+    const fromStart = rtl ? length - location : location;
+    const along = clamp((fromStart - thumbSize / 2) / (length - thumbSize), 0, 1);
     return roundToStep(min + (vertical ? 1 - along : along) * (max - min), step, min);
   };
 
@@ -355,7 +360,9 @@ function Slider({
         >
           <View
             className={cn('absolute cn-slider-range', vertical ? 'inset-x-0' : 'inset-y-0')}
-            style={vertical ? { bottom: rangeStart, height: rangeSize } : { left: rangeStart, width: rangeSize }}
+            style={
+              vertical ? { bottom: rangeStart, height: rangeSize } : { [sides.start]: rangeStart, width: rangeSize }
+            }
           />
         </View>
         {values.map((entry, index) => (
@@ -386,7 +393,9 @@ function Slider({
             // The merge drops Nova's `relative` for `absolute`; passed as one string, one engine draws `relative`.
             className={cn('cn-slider-thumb absolute shrink-0')}
             style={
-              vertical ? { bottom: offsetOf(fractions[index], false) } : { left: offsetOf(fractions[index], false) }
+              vertical
+                ? { bottom: offsetOf(fractions[index], false) }
+                : { [sides.start]: offsetOf(fractions[index], false) }
             }
           />
         ))}

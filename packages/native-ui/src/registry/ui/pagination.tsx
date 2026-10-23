@@ -3,6 +3,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { Platform, View } from 'react-native';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './button';
+import { useMirrored } from './direction';
 import { Icon, IconClassContext } from './icon';
 
 // A `cn-<slot>` token stands for that slot's view classes and `cn-<slot>/icon` for the size it gives an
@@ -68,8 +69,9 @@ function PaginationLink({ isActive = false, size = 'icon', ...props }: Paginatio
 
 type PaginationStepProps = Omit<PaginationLinkProps, 'children'>;
 
-/** The link to the page before, a left chevron named Go to previous page. */
+/** The link to the page before, a chevron pointing back, named Go to previous page. */
 function PaginationPrevious({ className, ...props }: PaginationStepProps): ReactNode {
+  const mirrored = useMirrored();
   return (
     <PaginationLink
       aria-label="Go to previous page"
@@ -77,13 +79,14 @@ function PaginationPrevious({ className, ...props }: PaginationStepProps): React
       className={cn('cn-pagination-previous', className)}
       {...props}
     >
-      <Icon as={ChevronLeft} />
+      <Icon as={ChevronLeft} style={mirrored} />
     </PaginationLink>
   );
 }
 
-/** The link to the page after, a right chevron named Go to next page. */
+/** The link to the page after, a chevron pointing on, named Go to next page. */
 function PaginationNext({ className, ...props }: PaginationStepProps): ReactNode {
+  const mirrored = useMirrored();
   return (
     <PaginationLink
       aria-label="Go to next page"
@@ -91,7 +94,7 @@ function PaginationNext({ className, ...props }: PaginationStepProps): ReactNode
       className={cn('cn-pagination-next', className)}
       {...props}
     >
-      <Icon as={ChevronRight} />
+      <Icon as={ChevronRight} style={mirrored} />
     </PaginationLink>
   );
 }

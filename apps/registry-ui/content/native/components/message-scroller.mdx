@@ -1,0 +1,151 @@
+---
+title: Message scroller
+description: A conversation's scrolling transcript that anchors new turns, follows streamed replies, keeps its place as history loads, and jumps to any message.
+---
+
+<NativePreview name="message-scroller-demo" />
+
+## Installation
+
+<InstallCommand name="message-scroller" />
+
+The CLI writes `components/ui/message-scroller.tsx`, installs [Button](/native/components/nativewind/button),
+[Icon](/native/components/nativewind/icon), Motion and Utils, and adds `lucide-react-native` and
+`react-native-reanimated`.
+
+## Usage
+
+```tsx
+import { Message } from '@/components/ui/message';
+import {
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from '@/components/ui/message-scroller';
+```
+
+```tsx
+<MessageScrollerProvider>
+  <MessageScroller>
+    <MessageScrollerViewport>
+      <MessageScrollerContent>
+        {messages.map((message) => (
+          <MessageScrollerItem key={message.id} messageId={message.id} scrollAnchor={message.role === 'user'}>
+            <Message>{/* ... */}</Message>
+          </MessageScrollerItem>
+        ))}
+      </MessageScrollerContent>
+    </MessageScrollerViewport>
+    <MessageScrollerButton />
+  </MessageScroller>
+</MessageScrollerProvider>
+```
+
+`MessageScroller` fills the room its parent gives it, so put it in a parent of a fixed height or one that grows,
+such as a screen's `flex-1` column. Wrap every row of the content in a `MessageScrollerItem`, directly inside
+`MessageScrollerContent`: the scroller places the viewport by the rows' laid-out offsets.
+
+## How it moves
+
+- **Opening.** `defaultScrollPosition` opens the transcript at its `end` (the default), its `start`, or its
+  `last-anchor`: the start of the last row with `scrollAnchor`, with the reply below it. `last-anchor` opens at
+  the end when there is no anchored row or the last turn fits in the viewport. The viewport stays hidden until
+  it is at `end` or `last-anchor`, so the reader does not see it jump there.
+- **A new turn.** When a row with `scrollAnchor` is added, the viewport brings it near the top and keeps
+  `scrollPreviousItemPeek` px (64 by default) of the row before it in view. Room is made under the content while
+  the reply below is too short to let the row reach the top.
+- **Following.** With `autoScroll`, the viewport follows the end while rows are added and grow, as long as the
+  reader is there. A drag, the wheel or a scroll key lets go; `scrollToEnd` or the button takes it up again.
+- **History.** When earlier rows are added above, the rows on screen stay where they are. Turn this off with
+  `preserveScrollOnPrepend={false}` on the viewport. Give rows a stable `messageId`, which this needs.
+
+## Hooks
+
+Each hook works in any component inside the `MessageScrollerProvider`, including controls outside the
+`MessageScroller`.
+
+```tsx
+const { scrollToEnd, scrollToMessage, scrollToStart } = useMessageScroller();
+const { start, end } = useMessageScrollerScrollable();
+const { currentAnchorId, visibleMessageIds } = useMessageScrollerVisibility();
+```
+
+- `scrollToMessage(messageId, options)` scrolls to the row with that `messageId`. Before any row has mounted it
+  queues the target and returns `true`; once rows have mounted, an id no row has returns `false`. Each command
+  takes `{ align, behavior, scrollMargin }`: `align` is `'start'` (the default), `'center'`, `'end'` or
+  `'nearest'`, and `behavior: 'smooth'` animates the scroll.
+- `useMessageScrollerScrollable` reports the edges the viewport can still scroll toward. At the end is `!end`.
+  While the viewport follows the end under `autoScroll`, `end` is `false`.
+- `useMessageScrollerVisibility` reports the `messageId` of the last anchored row at or above the top of the
+  viewport, which stays set once it has scrolled past, and of each row on screen, in order. Rows are measured
+  only while a component reads it.
+
+## API reference
+
+### MessageScrollerProvider
+
+| Prop                     | Type                                | Default |
+| ------------------------ | ----------------------------------- | ------- |
+| `autoScroll`             | `boolean`                           | `false` |
+| `defaultScrollPosition`  | `'start' \| 'end' \| 'last-anchor'` | `'end'` |
+| `scrollEdgeThreshold`    | `number`                            | `8`     |
+| `scrollPreviousItemPeek` | `number`                            | `64`    |
+| `scrollMargin`           | `number`                            | `0`     |
+
+`scrollEdgeThreshold` is how near an edge, in px, counts as at it, and `scrollMargin` the room left between a
+row scrolled to and the viewport's edge.
+
+### MessageScroller
+
+Takes every prop of React Native's `View`.
+
+### MessageScrollerViewport
+
+Takes every prop of React Native's `ScrollView`, plus `preserveScrollOnPrepend` (`true` by default). It is a
+region named "Messages" unless given another `role` or `aria-label`, and on the web it is focusable, so the
+keyboard scrolls it.
+
+### MessageScrollerContent
+
+Takes every prop of React Native's `View`. Pass `aria-busy` while a reply streams: the rows added meanwhile are
+announced once it clears. On a device, a row added with no text yet is announced once text reaches it.
+
+### MessageScrollerItem
+
+Takes every prop of React Native's `View`, plus `messageId` (`string`) and `scrollAnchor` (`boolean`, `false`
+by default). On a device an added row is announced by its `aria-label` or `accessibilityLabel`, else by the text
+written inline among its children. A row drawn by a component of its own, such as
+`<ChatMessage message={m} />`, holds no inline text, so give it the label or it is not announced.
+
+### MessageScrollerButton
+
+Takes every prop of [Button](/native/components/nativewind/button), with `variant` `'secondary'` and `size`
+`'icon-sm'` by default, plus:
+
+| Prop        | Type                              | Default    |
+| ----------- | --------------------------------- | ---------- |
+| `direction` | `'start' \| 'end'`                | `'end'`    |
+| `behavior`  | `'auto' \| 'instant' \| 'smooth'` | `'smooth'` |
+
+It sits over the bottom edge of the viewport, or the top for `start`, and shows only while there is more
+transcript that way. While hidden it takes no press and no focus and screen readers skip it; on the web a press
+moves focus to the viewport. While the system asks for reduced motion it jumps rather than scrolls smoothly. Its default content
+is an arrow named "Scroll to end" or "Scroll to start".
+
+## Differences from upstream
+
+- Upstream's behaviour comes from `@shadcn/react`, which drives a DOM scroll container. The native item keeps
+  its parts, props and hooks and drives a `ScrollView` from the rows' layout and scroll events.
+- Upstream marks the root and viewport with `data-scrollable`, `data-autoscrolling` and `data-pending-scroll`
+  for styling. A device has no attribute selectors, so read `useMessageScrollerScrollable` instead.
+- Upstream's content is a log that a screen reader announces additions to. The web keeps that; a device has no
+  log role, so each added row is announced instead, by its label or else its inline text, and only rows
+  announce, not the text that streams into them. The row's label is read for this, which upstream has no use for.
+- Upstream skips painting rows far off screen with `content-visibility`, which a device has no counterpart of.
+  A transcript of thousands of rows draws every one of them.
+- Upstream's button takes a `render` prop. The native one takes children.
+- Upstream's page shows an inline script that opens a server-rendered transcript at its end before hydration.
+  An app on a device renders on the device, so it has nothing to hydrate.

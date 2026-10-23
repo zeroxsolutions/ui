@@ -39,6 +39,14 @@ function lift(box: ReturnType<typeof screen.getByTestId>): number | undefined {
   return transform.find((entry) => 'translateY' in entry)?.translateY;
 }
 
+/** The nearest element at or above the one showing `title` that takes the prop `prop`. */
+function around(title: string, prop: string) {
+  let at: ReturnType<typeof screen.getByText> | null = screen.getByText(title);
+  while (at && at.props[prop] === undefined) at = at.parent;
+  if (!at) throw new Error(`Nothing around ${title} takes ${prop}`);
+  return at;
+}
+
 function Count() {
   const { toasts } = useSonner();
   return <Text>{`${toasts.length} toasts`}</Text>;
@@ -78,6 +86,15 @@ describe('Toaster', () => {
     expect(Platform.OS).toBe('ios');
     expect(announce).toHaveBeenCalledWith('Event has been created, Monday, January 3rd at 6:00pm');
     expect(liveRegionAround(screen.getByText('Event has been created'))).toHaveProp('aria-live', 'polite');
+  });
+
+  it('announces the text of a title given as an element or a function', async () => {
+    const count = 3;
+    await show();
+
+    await raise(() => toast(<Text>Moved {count} files</Text>, { description: () => 'To the archive' }));
+
+    expect(announce).toHaveBeenCalledWith('Moved 3 files, To the archive');
   });
 
   it('closes after its duration, four seconds by default, and says so', async () => {
@@ -224,6 +241,36 @@ describe('Toaster', () => {
     await raise(() => toast('Two'));
 
     expect(screen.getByText('2 toasts')).toBeOnTheScreen();
+  });
+
+  it('collapses on Escape with focus in the stack, as upstream does, and runs its time again', async () => {
+    await show();
+    await raise(() => toast('One'));
+    await raise(() => toast('Two'));
+    await fireEvent(around('Two', 'onTouchStart'), 'touchStart');
+    await elapse(10_000);
+    expect(screen.getByText('One')).toBeOnTheScreen();
+
+    await fireEvent(around('Two', 'onKeyDown'), 'keyDown', { nativeEvent: { key: 'Escape' } });
+    await elapse(4_000 + MOTION_MS);
+
+    expect(screen.queryByText('One')).toBeNull();
+    expect(screen.queryByText('Two')).toBeNull();
+  });
+
+  it('collapses once one toast or fewer is left, as upstream does, and runs its time again', async () => {
+    await show();
+    await raise(() => toast('One'));
+    const id = await raise(() => toast('Two'));
+    await fireEvent(around('Two', 'onTouchStart'), 'touchStart');
+    await fireEvent(around('Two', 'onTouchEnd'), 'touchEnd');
+
+    await act(async () => {
+      toast.dismiss(id);
+    });
+    await elapse(3_000 + MOTION_MS);
+
+    expect(screen.queryByText('One')).toBeNull();
   });
 
   it('removes a toast at once when the system asks for reduced motion', async () => {

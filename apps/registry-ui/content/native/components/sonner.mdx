@@ -10,8 +10,12 @@ description: Short messages that come up over the screen and go after a few seco
 <InstallCommand name="sonner" />
 
 The CLI writes `components/ui/sonner.tsx` and `lib/motion.ts`, installs [Icon](/native/components/nativewind/icon),
-[Spinner](/native/components/nativewind/spinner), [Text](/native/components/nativewind/text) and Utils, and adds
+[Spinner](/native/components/nativewind/spinner), [Text](/native/components/nativewind/text), Text children and Utils, and adds
 `lucide-react-native`, `react-native-reanimated`, `react-native-safe-area-context` and `react-native-worklets`.
+
+Sonner reads `useSwipeToDismiss` from `lib/motion.ts`, which older copies of that file lack. Adding sonner,
+toast, trace or attachment again writes the current one, so let the CLI overwrite `lib/motion.ts` when it asks;
+keeping the old file fails the bundle with a missing export.
 
 Put one `Toaster` at the app's root, after its `PortalHost`, so toasts draw above the screen and its overlays:
 
@@ -99,7 +103,8 @@ dismissed. Its time stops while the stack is spread open, and while the app is i
 
 Newer toasts stack in front of older ones, each older one 14px behind and 5% smaller, and only the first
 `visibleToasts` show. A pointer over the stack on the web, or a touch on it on a device, spreads it into a list
-`gap` apart; a touch keeps it spread for 4 seconds after the finger lifts. On a screen 600px wide or less a
+`gap` apart; a touch keeps it spread for 4 seconds after the finger lifts. As upstream's, it closes up again
+on Escape while focus is in it, and once one toast or none is left. On a screen 600px wide or less a
 toast is as wide as the screen less `mobileOffset` either side; on a wider one it is 356px wide, `offset` from
 its corner. The bottom and top offsets add the safe area's insets when a `SafeAreaProvider` is mounted. A toast
 slides in from its edge over 400ms and fades out over 200ms, and appears and goes at once when the system asks
@@ -109,7 +114,8 @@ other way pulls against it and springs back.
 Screen readers read each new toast, and each change to one, as its title and description: iOS announces it, and
 on Android and the web the toaster is a polite live region. On the web it is a region named by
 `containerAriaLabel` and the hotkey, each toast is a status, and the hotkey spreads the stack and moves focus to
-it.
+it. The stack stays spread when focus then leaves it, as upstream's does, until Escape or a pointer leaving it
+closes it up.
 
 ### useSonner
 

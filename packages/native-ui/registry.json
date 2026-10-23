@@ -33,7 +33,7 @@
       "name": "motion",
       "type": "registry:lib",
       "title": "Motion",
-      "description": "usePresence, which keeps an overlay drawn while it animates in and out, useReducedMotion, which reads whether the system asks for reduced motion, and usePopupMotion, the fade, grow and slide a menu, popover or tooltip opens and closes with.",
+      "description": "usePresence, which keeps an overlay drawn while it animates in and out, useReducedMotion, which reads whether the system asks for reduced motion, usePopupMotion, the fade, grow and slide a menu, popover or tooltip opens and closes with, useSwipeToDismiss, the swipe that closes a toast, and usePulse, the fade a title pulses with while its work is under way.",
       "dependencies": ["react-native-reanimated", "react-native-worklets"],
       "files": [
         {
@@ -221,7 +221,7 @@
       "type": "registry:ui",
       "title": "Slider",
       "description": "A value, or a range of values, picked by dragging a thumb along a track, each thumb announced as adjustable with its value.",
-      "registryDependencies": ["@zui/utils"],
+      "registryDependencies": ["@zui/utils", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/slider.tsx",
@@ -235,7 +235,7 @@
       "title": "Calendar",
       "description": "A month's grid of days on which a day, several days or a range is selected, with today marked and buttons to the previous and next month.",
       "dependencies": ["date-fns", "lucide-react-native"],
-      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/select", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/select", "@zui/text", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/calendar.tsx",
@@ -249,10 +249,24 @@
       "title": "Carousel",
       "description": "A row of slides that a swipe or its named previous and next buttons scroll through one snap at a time, with Embla's api.",
       "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-worklets"],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/button", "@zui/icon", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/carousel.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "resizable",
+      "type": "registry:ui",
+      "title": "Resizable",
+      "description": "Panels side by side or stacked, sized in percent of their group, with handles that drag the room between two, each announced as adjustable and moved by the arrow keys on the web.",
+      "dependencies": ["react-native-reanimated", "react-native-worklets"],
+      "registryDependencies": ["@zui/utils", "@zui/focus-visible", "@zui/direction"],
+      "files": [
+        {
+          "path": "src/registry/ui/resizable.tsx",
           "type": "registry:ui"
         }
       ]
@@ -268,7 +282,14 @@
         "react-native-safe-area-context",
         "react-native-worklets"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/icon", "@zui/spinner", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/motion",
+        "@zui/icon",
+        "@zui/spinner",
+        "@zui/text"
+      ],
       "files": [
         {
           "path": "src/registry/ui/sonner.tsx",
@@ -489,7 +510,7 @@
       "title": "Breadcrumb",
       "description": "The trail from the top of the app to the current screen, a navigation landmark of links and separators with the current page marked.",
       "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/breadcrumb.tsx",
@@ -517,7 +538,7 @@
       "title": "Pagination",
       "description": "The pages of a long list, a navigation landmark of page links with the current page outlined and marked, previous and next links and an ellipsis.",
       "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon"],
+      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/icon", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/pagination.tsx",
@@ -572,7 +593,7 @@
       "title": "Field",
       "description": "The layout of a form: fields of a label, a control and a description or an error, in groups and sets named by a legend, stacked or in a row.",
       "dependencies": ["@rn-primitives/label"],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/separator"],
+      "registryDependencies": ["@zui/utils", "@zui/text-children", "@zui/text", "@zui/separator"],
       "files": [
         {
           "path": "src/registry/ui/field.tsx",
@@ -657,7 +678,15 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/button", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/button",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/direction"
+      ],
       "files": [
         {
           "path": "src/registry/ui/sheet.tsx",
@@ -671,7 +700,7 @@
       "title": "Drawer",
       "description": "A panel attached to an edge of the screen over a dimmed overlay, announced as a modal dialog named by its title, closed by a swipe toward its edge, a press outside it, the back button or Escape, sliding in unless the system asks for reduced motion.",
       "dependencies": ["@rn-primitives/dialog", "@rn-primitives/portal", "react-native-reanimated"],
-      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text", "@zui/direction"],
       "files": [
         {
           "path": "src/registry/ui/drawer.tsx",
@@ -689,6 +718,70 @@
       "files": [
         {
           "path": "src/registry/ui/popover.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "navigation-menu",
+      "type": "registry:ui",
+      "title": "Navigation Menu",
+      "description": "Links to the app's sections in a navigation landmark, with triggers that open a panel of more links on a press, or as the pointer rests on them on the web, one at a time, closed by a second press, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
+      "dependencies": [
+        "@rn-primitives/popover",
+        "@rn-primitives/portal",
+        "@rn-primitives/slot",
+        "class-variance-authority",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/menu",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/icon",
+        "@zui/popover",
+        "@zui/text"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/navigation-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "sidebar",
+      "type": "registry:ui",
+      "title": "Sidebar",
+      "description": "An app's side navigation: a sheet below the md width and a panel beside the screen from it, collapsing off the screen or to a rail of icons, with its open state in a provider, a toggle button, groups and menus.",
+      "dependencies": [
+        "@rn-primitives/portal",
+        "@rn-primitives/slot",
+        "class-variance-authority",
+        "lucide-react-native",
+        "react-native-reanimated"
+      ],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/use-mobile",
+        "@zui/text-children",
+        "@zui/motion",
+        "@zui/button",
+        "@zui/direction",
+        "@zui/icon",
+        "@zui/input",
+        "@zui/separator",
+        "@zui/sheet",
+        "@zui/skeleton",
+        "@zui/text",
+        "@zui/tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/sidebar.tsx",
           "type": "registry:ui"
         }
       ]
@@ -732,7 +825,15 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/menu",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/direction"
+      ],
       "files": [
         {
           "path": "src/registry/ui/dropdown-menu.tsx",
@@ -751,7 +852,15 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/menu",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/direction"
+      ],
       "files": [
         {
           "path": "src/registry/ui/context-menu.tsx",
@@ -770,7 +879,15 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/menu",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/direction"
+      ],
       "files": [
         {
           "path": "src/registry/ui/menubar.tsx",
@@ -789,7 +906,15 @@
         "lucide-react-native",
         "react-native-reanimated"
       ],
-      "registryDependencies": ["@zui/utils", "@zui/menu", "@zui/motion", "@zui/overlay", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/menu",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/icon",
+        "@zui/text"
+      ],
       "files": [
         {
           "path": "src/registry/ui/select.tsx",
@@ -805,6 +930,7 @@
       "dependencies": ["lucide-react-native"],
       "registryDependencies": [
         "@zui/utils",
+        "@zui/text-children",
         "@zui/command-score",
         "@zui/dialog",
         "@zui/input-group",
@@ -824,13 +950,339 @@
       "title": "Combobox",
       "description": "A field that picks one of a long list of choices: a trigger announced as a combobox showing the chosen label, opening a Popover that holds a Command whose typed text filters the choices, the chosen one announced as selected with a check mark, closed by a choice.",
       "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/utils", "@zui/button", "@zui/command", "@zui/popover", "@zui/icon", "@zui/text"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/button",
+        "@zui/command",
+        "@zui/popover",
+        "@zui/icon",
+        "@zui/text"
+      ],
       "files": [
         {
           "path": "src/registry/ui/combobox.tsx",
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "direction",
+      "type": "registry:ui",
+      "title": "Direction",
+      "description": "DirectionProvider and useDirection: the direction text reads in, the system's unless a provider sets it, which the web also lays its children out in; useDirectionSides, which way an item runs and the style keys and sides it places its parts by; and useMirrored, the style that turns an arrow for text read right to left.",
+      "files": [
+        {
+          "path": "src/registry/ui/direction.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "native-select",
+      "type": "registry:ui",
+      "title": "Native select",
+      "description": "Upstream's NativeSelect, NativeSelectOption and NativeSelectOptGroup drawn with Select: a combobox showing its first option until another is chosen, opening a list of its options and named groups.",
+      "registryDependencies": ["@zui/utils", "@zui/select"],
+      "files": [
+        {
+          "path": "src/registry/ui/native-select.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "form",
+      "type": "registry:ui",
+      "title": "Form",
+      "description": "No files, as upstream's: a form is Field bound to a form library, such as react-hook-form's Controller."
+    },
+    {
+      "name": "toast",
+      "type": "registry:ui",
+      "title": "Toast",
+      "description": "Upstream's base-ui toast: a Toaster at the app's root and a toast manager whose add, update, close and promise raise toasts from anywhere, stacked, closed by a timeout, a swipe or their close button, and read by screen readers.",
+      "dependencies": [
+        "@rn-primitives/portal",
+        "lucide-react-native",
+        "react-native-reanimated",
+        "react-native-safe-area-context",
+        "react-native-worklets"
+      ],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/motion",
+        "@zui/overlay",
+        "@zui/button",
+        "@zui/icon",
+        "@zui/spinner",
+        "@zui/text"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/toast.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "charts",
+      "type": "registry:lib",
+      "title": "Charts",
+      "description": "Recharts' chart parts in Recharts' names, drawn with react-native-svg: bar, line, area, pie, radar and radial bar charts with their axes, grid, tooltip and legend, coloured through the palette a ChartContainer provides.",
+      "dependencies": ["d3-scale", "d3-shape", "react-native-reanimated", "react-native-svg"],
+      "devDependencies": ["@types/d3-scale", "@types/d3-shape"],
+      "registryDependencies": ["@zui/motion", "@zui/text-children"],
+      "files": [
+        {
+          "path": "src/registry/lib/charts.tsx",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "color-scheme",
+      "type": "registry:lib",
+      "title": "Color scheme",
+      "description": "useColorScheme, which reads the colour scheme the app draws, light or dark, as the engine holds it.",
+      "files": [
+        {
+          "path": "src/registry/lib/color-scheme.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "chart-theme",
+      "type": "registry:lib",
+      "title": "Chart theme",
+      "description": "useChartTheme, which reads the colour scheme the app draws and the theme colours a chart names, such as var(--chart-1), as the engine holds them.",
+      "registryDependencies": ["@zui/color-scheme"],
+      "files": [
+        {
+          "path": "src/registry/lib/chart-theme.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "chart",
+      "type": "registry:ui",
+      "title": "Chart",
+      "description": "Charts drawn in the colours and labels of a chart config, with a tooltip a press, a pointer or the arrow keys move, a legend, and the values read to screen readers.",
+      "dependencies": ["react-native-svg"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/charts",
+        "@zui/chart-theme",
+        "@zui/text",
+        "@zui/icon",
+        "@zui/card"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/chart.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "use-highlighted-code",
+      "type": "registry:hook",
+      "title": "Use highlighted code",
+      "description": "useHighlightedCode, which highlights code with Shiki's JavaScript engine into one node per line for a CodeBlockLine, in the light or dark theme the app draws, loading each language the first time it is used.",
+      "dependencies": ["shiki"],
+      "registryDependencies": ["@zui/color-scheme"],
+      "files": [
+        {
+          "path": "src/registry/hooks/use-highlighted-code.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/registry/lib/highlighter.tsx",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "use-mobile",
+      "type": "registry:hook",
+      "title": "Use mobile",
+      "description": "useIsMobile, whether the window is narrower than the md width, as a phone's is, following the window as it resizes.",
+      "files": [{ "path": "src/registry/hooks/use-mobile.ts", "type": "registry:hook" }]
+    },
+    {
+      "name": "code-block",
+      "type": "registry:ui",
+      "title": "Code Block",
+      "description": "Code, terminal output and diffs with an optional header, line numbers, highlighted lines and a copy button that tells screen readers it copied; long lines scroll sideways unless they wrap.",
+      "dependencies": ["class-variance-authority", "expo-clipboard", "lucide-react-native"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/focus-visible",
+        "@zui/button",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/use-highlighted-code"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/code-block.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "attachment",
+      "type": "registry:ui",
+      "title": "Attachment",
+      "description": "A file or an image in a card, with its upload state, three sizes, a horizontal or vertical layout, actions, a press area over the whole card, and a row that scrolls sideways.",
+      "dependencies": ["@rn-primitives/slot", "class-variance-authority", "react-native-reanimated"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text",
+        "@zui/icon",
+        "@zui/button",
+        "@zui/spinner",
+        "@zui/motion",
+        "@zui/focus-visible",
+        "@zui/message-context"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/attachment.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "marker",
+      "type": "registry:ui",
+      "title": "Marker",
+      "description": "A line in a conversation that is not a message: a status announced as it changes, a system note, a row ruled underneath, or a label between two lines.",
+      "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/text-children", "@zui/text", "@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/ui/marker.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "message",
+      "type": "registry:ui",
+      "title": "Message",
+      "description": "One message in a conversation: an avatar beside its bubbles, with a header and a footer, on either side of the row.",
+      "registryDependencies": ["@zui/utils", "@zui/text-children", "@zui/text", "@zui/message-context"],
+      "files": [
+        {
+          "path": "src/registry/ui/message.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "focus-visible",
+      "type": "registry:lib",
+      "title": "Focus visible",
+      "description": "useFocusVisible, which says whether a control's focus came from the keyboard, so a focus ring is drawn for it and not after a press.",
+      "files": [
+        {
+          "path": "src/registry/lib/focus-visible.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "text-children",
+      "type": "registry:lib",
+      "title": "Text children",
+      "description": "textOf, which reads the text a node draws, nested elements included, and asText, which sets children that are only strings and numbers in one Text, which a View cannot hold bare.",
+      "registryDependencies": ["@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/lib/text-children.tsx",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "message-context",
+      "type": "registry:lib",
+      "title": "Message context",
+      "description": "useMessage, which tells a Bubble or an Attachment the side of the Message it sits in, and lets a ghost Bubble tell the Message it is there.",
+      "files": [
+        {
+          "path": "src/registry/lib/message-context.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "bubble",
+      "type": "registry:ui",
+      "title": "Bubble",
+      "description": "A message's framed surface in seven variants, at the start or end of the row, with reactions overlapping its edge and content that can take a press.",
+      "dependencies": ["@rn-primitives/slot", "class-variance-authority"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/text",
+        "@zui/message-context",
+        "@zui/focus-visible"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ui/bubble.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "message-scroller",
+      "type": "registry:ui",
+      "title": "Message scroller",
+      "description": "A conversation's scrolling transcript that opens at its end or its last turn, brings each new turn near the top, follows a streamed reply while the reader is at the end, keeps its place as history loads above, and has a button and hooks to jump to either end or to any message.",
+      "dependencies": ["lucide-react-native", "react-native-reanimated"],
+      "registryDependencies": ["@zui/utils", "@zui/text-children", "@zui/button", "@zui/icon", "@zui/motion"],
+      "files": [{ "path": "src/registry/ui/message-scroller.tsx", "type": "registry:ui" }]
+    },
+    {
+      "name": "questionnaire",
+      "type": "registry:ui",
+      "title": "Questionnaire",
+      "description": "A form that asks one question at a time: progress, choices announced as radios or checkboxes, a free-text answer, an error for a required question left unanswered, and steps back, forward, skipped and submitted.",
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/text",
+        "@zui/icon",
+        "@zui/button",
+        "@zui/input",
+        "@zui/focus-visible"
+      ],
+      "files": [{ "path": "src/registry/ui/questionnaire.tsx", "type": "registry:ui" }]
+    },
+    {
+      "name": "trace",
+      "type": "registry:ui",
+      "title": "Trace",
+      "description": "The steps an agent took, one under another, each with an icon, a title that pulses while it runs and a status, and steps whose detail opens under them.",
+      "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-worklets"],
+      "registryDependencies": [
+        "@zui/utils",
+        "@zui/text-children",
+        "@zui/text",
+        "@zui/icon",
+        "@zui/collapsible",
+        "@zui/motion",
+        "@zui/focus-visible"
+      ],
+      "files": [{ "path": "src/registry/ui/trace.tsx", "type": "registry:ui" }]
     },
     {
       "name": "password-input",

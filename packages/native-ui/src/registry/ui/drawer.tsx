@@ -13,6 +13,7 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from '
 import { usePresence } from '../lib/motion';
 import { useModalOverlay, usePortalHostCheck } from '../lib/overlay';
 import { cn } from '../lib/utils';
+import { useDirectionSides } from './direction';
 import { Text, TextClassContext } from './text';
 
 // A `cn-<slot>` token stands for that slot's view classes, `cn-<slot>/text` for its text classes, and
@@ -156,7 +157,9 @@ function DrawerContent({ className, children, portalHost, onLayout, ...props }: 
   const drawer = useContext(DrawerContext);
   const { swipeDirection, showSwipeHandle } = drawer;
   const alongY = drawerAlongY(swipeDirection);
-  const sign = drawerSign(swipeDirection);
+  // Along x it moves toward the edge it is drawn on.
+  const { sidesSwapped } = useDirectionSides();
+  const sign = drawerSign(swipeDirection) * (!alongY && sidesSwapped ? -1 : 1);
   const window = useWindowDimensions();
   const { present, progress, reduced } = usePresence(open, DRAWER_OPEN_MOTION, DRAWER_CLOSE_MOTION);
   // The panel's size along its axis once laid out, else the screen's, and how far a swipe has moved it.

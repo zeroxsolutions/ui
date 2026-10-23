@@ -2,6 +2,7 @@ import { ChevronRight, MoreHorizontal } from 'lucide-react-native';
 import type { ComponentProps, ReactNode } from 'react';
 import { View } from 'react-native';
 import { cn } from '../lib/utils';
+import { useMirrored } from './direction';
 import { Icon, IconClassContext } from './icon';
 import { Text, TextClassContext, type TextProps } from './text';
 
@@ -51,13 +52,17 @@ function BreadcrumbPage({ className, ...props }: TextProps): ReactNode {
   );
 }
 
-/** The mark between two steps, a chevron unless given children; hidden from screen readers. */
+/**
+ * The mark between two steps, a chevron pointing to the next step unless given children, mirrored when text
+ * reads right to left; hidden from screen readers.
+ */
 function BreadcrumbSeparator({ children, className, ...props }: ComponentProps<typeof View>): ReactNode {
+  const mirrored = useMirrored();
   return (
     // Upstream sizes the svg inside a separator with a child selector, which has no counterpart on a device.
     <IconClassContext.Provider value="size-3.5">
       <View role="presentation" aria-hidden className={cn('cn-breadcrumb-separator', className)} {...props}>
-        {children ?? <Icon as={ChevronRight} />}
+        {children ?? <Icon as={ChevronRight} style={mirrored} />}
       </View>
     </IconClassContext.Provider>
   );

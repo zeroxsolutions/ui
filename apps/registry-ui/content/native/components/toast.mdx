@@ -1,0 +1,163 @@
+---
+title: Toast
+description: Short messages raised through a toast manager, stacked over the screen and gone after a few seconds.
+---
+
+<NativePreview name="toast-demo" />
+
+## Installation
+
+<InstallCommand name="toast" />
+
+The CLI writes `components/ui/toast.tsx`, `lib/motion.ts` and `lib/overlay.ts`, installs
+[Button](/native/components/nativewind/button), [Icon](/native/components/nativewind/icon),
+[Spinner](/native/components/nativewind/spinner), [Text](/native/components/nativewind/text), Text children and Utils, and adds
+`@rn-primitives/portal`, `lucide-react-native`, `react-native-reanimated`, `react-native-safe-area-context` and
+`react-native-worklets`.
+
+Put one `Toaster` at the app's root, around its screens or beside them, with the app's `PortalHost` after it:
+the toasts draw in the `PortalHost`, above the screen.
+
+```tsx
+import { PortalHost } from '@rn-primitives/portal';
+import { Toaster } from '@/components/ui/toast';
+
+export default function RootLayout() {
+  return (
+    <>
+      <Toaster>
+        <Stack />
+      </Toaster>
+      <PortalHost />
+    </>
+  );
+}
+```
+
+## Usage
+
+```tsx
+import { toast } from '@/components/ui/toast';
+```
+
+```tsx
+<Button onPress={() => toast.add({ title: 'Event created', description: 'Sunday, December 3 at 9:00 AM' })}>
+  <Text>Show Toast</Text>
+</Button>
+```
+
+```tsx
+const id = toast.add({
+  title: 'Event created',
+  description: 'You can undo this action.',
+  actionProps: { children: 'Undo', onPress: () => toast.close(id) },
+});
+```
+
+```tsx
+toast.promise(createEvent(), {
+  loading: 'Creating event...',
+  success: (data) => `${data.name} created.`,
+  error: 'Could not create event.',
+});
+```
+
+## API reference
+
+### toast, createToastManager
+
+`toast` is the app's toast manager, which `Toaster` draws; `createToastManager()` makes another, for a
+`Toaster` or `ToastProvider` given it as `toastManager`. A manager has:
+
+- `add(options)`: raises a toast and returns its id. Adding with the `id` of a toast that is up updates it in
+  place and restarts its time.
+- `update(id, options)`: changes the toast with `id`, with options or a function of the toast giving them.
+- `close(id?)`: closes the toast with `id`, or every toast.
+- `promise(promise, { loading, success, error })`: shows `loading`, kept up, while the promise runs, then
+  `success` or `error`, each a title, options, or a function of the result giving one; returns the promise.
+
+Options, with upstream's meaning:
+
+| Option        | Type                                                                            |
+| ------------- | ------------------------------------------------------------------------------- |
+| `id`          | `string`                                                                        |
+| `title`       | `ReactNode`                                                                     |
+| `description` | `ReactNode`                                                                     |
+| `type`        | `'success' \| 'info' \| 'warning' \| 'error' \| 'loading'`, or your own         |
+| `timeout`     | `number` (ms; `0` keeps it up until closed)                                     |
+| `priority`    | `'low' \| 'high'`, `'low'` by default                                           |
+| `actionProps` | [Button](/native/components/nativewind/button)'s props, its label as `children` |
+| `onClose`     | `() => void`, when it is closed by any means                                    |
+| `onRemove`    | `() => void`, once it has gone out                                              |
+| `data`        | your own data                                                                   |
+
+### Toaster, ToastProvider
+
+| Prop           | Type           | Default |
+| -------------- | -------------- | ------- |
+| `toastManager` | `ToastManager` | `toast` |
+| `limit`        | `number`       | `3`     |
+| `timeout`      | `number`       | `5000`  |
+| `children`     | `ReactNode`    | -       |
+
+`ToastProvider` gives the parts inside it the manager's toasts; without `toastManager` it makes one of its own,
+which only `useToastManager` reaches. `Toaster` is a `ToastProvider` that also draws the toasts, in a
+`ToastPortal` holding a `ToastViewport` of `Toast`s, each with its icon, `ToastTitle`, `ToastDescription`,
+`ToastAction` and `ToastClose`.
+
+A toast stays up for its `timeout`, the provider's, or 5 seconds; its time stops while the stack is spread, and
+while the app is in the background. Only the newest `limit` toasts show; the older ones are marked `limited`
+and hidden until newer ones close.
+
+### useToastManager
+
+Inside a provider, returns `{ toasts, add, update, close, promise }`: the toasts, newest first, those closing
+included, kept current, and the provider's manager's methods.
+
+### ToastViewport
+
+Takes every prop of React Native's `View`. The toasts stack across the bottom of the screen, 16px in from its
+edges and at most 384px wide, or in its bottom right corner from 640px wide, above the safe area's bottom inset
+when a `SafeAreaProvider` is mounted. A pointer over the stack or focus in it on the web, where F6 moves focus to
+it while a toast is shown, or a touch on it on a device, spreads it into a list 12px apart until the pointer or
+focus leaves; a touch keeps it spread for 4 seconds after the finger lifts.
+
+Screen readers read each new toast, and each change to one, as its title and description: iOS announces it,
+waiting its turn, or at once for a `high` priority toast, and on Android and the web the viewport is a polite
+live region, a `high` priority toast an assertive one. On the web the viewport is a region named Notifications,
+and each toast a status, or an alert at `high` priority.
+
+### Toast
+
+Takes every prop of React Native's `View`, plus `toast`, the toast it draws, and `swipeDirection`, the ways a
+swipe closes it: `'up' | 'down' | 'left' | 'right'` or a list of them, `['down', 'right']` by default. The front
+toast shows in full, and each older one sits 12px higher and 10% smaller behind it, its content hidden. A toast
+slides up into place over 500ms and down out of it when closed, and appears and goes at once when the system asks
+for reduced motion. A swipe of 45px, or a quick flick, one of `swipeDirection` closes it; a swipe any other way
+pulls against it and springs back.
+
+### ToastContent, ToastTitle, ToastDescription
+
+ToastContent takes every prop of `View`: the row of the toast's icon, text and buttons. ToastTitle and
+ToastDescription take every prop of [Text](/native/components/nativewind/text), and draw the toast's `title` and
+`description` unless given children.
+
+### ToastAction, ToastClose
+
+Each takes every prop of [Button](/native/components/nativewind/button). ToastAction is an outline small button
+from the toast's `actionProps`, which its own props override; a press runs its `onPress` and leaves the toast up.
+ToastClose is a ghost icon button named Close toast, which closes the toast.
+
+## Differences from upstream
+
+- `actionProps` and ToastAction take a Button's props, so the action's handler is `onPress`, where upstream's
+  `onClick` is a DOM button's: React Native presses, it does not click.
+- Upstream renders through `@base-ui/react`, which draws HTML and moves the stack with CSS variables. Here the
+  manager, the stack and its swipe are written on React Native views and Reanimated, with upstream's names,
+  options and motion, sharing sonner's swipe. The anchored toasts of base-ui's `Positioner` and `Arrow` are left
+  out, as upstream's item draws none.
+- A touch spreads the stack for 4 seconds after the finger lifts, where upstream's spreads while a mouse is over
+  it or focus is in it: a finger leaves no pointer resting on the stack.
+- iOS reads no live region, so a toast is announced through `AccessibilityInfo.announceForAccessibilityWithOptions`.
+- A toast's `ref`, `height` and `positionerProps` are left out: React Native measures the toast itself, and draws
+  no anchored toasts.

@@ -1,0 +1,158 @@
+---
+title: Navigation Menu
+description: Links to the app's sections, with triggers that open a panel of more links.
+---
+
+<NativePreview name="navigation-menu-demo" />
+
+## Installation
+
+<InstallCommand name="navigation-menu" />
+
+The CLI writes `components/ui/navigation-menu.tsx`, `lib/menu.ts`, `lib/motion.ts` and `lib/overlay.ts`, installs
+[Popover](/native/components/nativewind/popover), [Icon](/native/components/nativewind/icon),
+[Text](/native/components/nativewind/text), Text children and Utils, and adds `@rn-primitives/popover`, `@rn-primitives/portal`,
+`@rn-primitives/slot`, `class-variance-authority`, `lucide-react-native`, `react-native-reanimated` and
+`react-native-worklets`. The content draws in the app's `PortalHost`; see [Add a portal
+host](/native/docs/installation#add-a-portal-host). Without one it draws nothing, and logs an error saying so
+while the app is in development.
+
+## Usage
+
+```tsx
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from '@/components/ui/navigation-menu';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<NavigationMenu aria-label="Docs">
+  <NavigationMenuList>
+    <NavigationMenuItem>
+      <NavigationMenuTrigger>Getting started</NavigationMenuTrigger>
+      <NavigationMenuContent>
+        <NavigationMenuLink onPress={() => router.push('/docs')}>
+          <Text>Introduction</Text>
+        </NavigationMenuLink>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
+  </NavigationMenuList>
+</NavigationMenu>
+```
+
+To navigate with Expo Router, wrap its `Link` in the item's link:
+
+```tsx
+<NavigationMenuLink asChild>
+  <Link href="/docs">
+    <Text>Introduction</Text>
+  </Link>
+</NavigationMenuLink>
+```
+
+## API reference
+
+### NavigationMenu
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop            | Type                             | Default   |
+| --------------- | -------------------------------- | --------- |
+| `value`         | `Value \| null`                  | -         |
+| `defaultValue`  | `Value \| null`                  | `null`    |
+| `onValueChange` | `(value: Value \| null) => void` | -         |
+| `delay`         | `number`                         | `50`      |
+| `closeDelay`    | `number`                         | `50`      |
+| `align`         | `'start' \| 'center' \| 'end'`   | `'start'` |
+| `aria-label`    | `string`                         | -         |
+
+A navigation landmark, named by `aria-label`. Give each NavigationMenu on a screen a name of its own, so a screen
+reader can tell it from the screen's other navigation. One item's content is open at a time: `value` is the `value` of
+that item, and `null` while none is. Without `value` the menu holds its own state, starting from `defaultValue`,
+and `onValueChange` reports each item that opens and the `null` as it closes. On the web the pointer resting on
+a trigger for `delay` ms opens its content, and leaving the trigger and its content for `closeDelay` ms closes
+what it opened. `align` lines each content up with its trigger.
+
+### NavigationMenuList and NavigationMenuItem
+
+Both take every prop of React Native's `View`. The list is a row announced as a list, and each item is one of
+its entries. NavigationMenuItem also takes `value`, which names it for the menu's `value`; one is made up when it
+is left out.
+
+### NavigationMenuTrigger
+
+Takes every prop of React Native's `Pressable`. A press opens its item's content, and another press closes it.
+It is a button with its expanded state, and its chevron turns over while the content is open. A string child is
+drawn as its label. On the web, a press on a trigger whose content the pointer opened keeps the content open,
+and it then stays open after the pointer leaves.
+
+### NavigationMenuContent
+
+Takes every prop of React Native's `View`, plus `portalHost`, the `name` of a `PortalHost` of the app's own.
+
+The panel opens 8px under its trigger, lined up with the trigger's start, and is never wider than the screen
+less 8px at each side. A press outside it, the Android back button and Escape on the web close it. It is not
+modal, so a screen reader still reaches the screen behind it. It fades in while growing from 90% over 0.35s,
+and fades out over 150ms. When the system asks for reduced motion it appears and goes at once.
+
+### NavigationMenuLink
+
+Takes every prop of React Native's `Pressable`, plus:
+
+| Prop           | Type      | Default                                |
+| -------------- | --------- | -------------------------------------- |
+| `active`       | `boolean` | `false`                                |
+| `closeOnClick` | `boolean` | `true` on a device, `false` on the web |
+| `asChild`      | `boolean` | `false`                                |
+
+A link, announced as a link; `onPress` navigates. An `active` link is the current page: it is drawn on the muted
+background and announced as selected, and as the current page on the web. `asChild` renders the single child,
+such as Expo Router's `Link`, with the link's props merged on. A string child is drawn as its label.
+
+### NavigationMenuPositioner
+
+Takes `side` (`'bottom'`), `sideOffset` (`8`), `align` (`'start'`) and `alignOffset` (`0`), which place every
+item's content against its trigger. NavigationMenu draws one itself, from its own `align`, as upstream's does;
+one drawn inside the NavigationMenu overrides it while it is mounted.
+
+### NavigationMenuIndicator
+
+Takes every prop of React Native's `View`. Put inside a NavigationMenuItem, it draws a small arrow while the
+item's content is open, hidden from screen readers.
+
+### navigationMenuTriggerStyle
+
+The classes of a trigger, to draw a NavigationMenuLink in the list's row as a trigger:
+
+```tsx
+<NavigationMenuItem>
+  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+    <Text className="font-medium">Docs</Text>
+  </NavigationMenuLink>
+</NavigationMenuItem>
+```
+
+The classes are the trigger's box. Give the label its weight, as above.
+
+## Differences from upstream
+
+- Upstream opens a content when the pointer rests on its trigger. A touch screen has no pointer to rest, so on a
+  device a press opens it and a second press, or a press outside it, closes it. The web does both.
+- Upstream draws every item's content in one shared popup, which slides from one item's content to the next. Here
+  each item's content opens a popup of its own, so moving to another item closes one and opens the other. On a
+  device the press outside the open content closes it first, and a second press opens the other item.
+- Upstream's link is an `a` with an `href`. A device has no `href`, so `onPress` navigates, or `asChild` renders a
+  router's link.
+- On a device a pressed link closes the content by default, because the content would otherwise stay drawn over
+  the screen the link opens. On the web it stays open, as upstream's does; pass `closeOnClick` to choose.
+- On a device the content opens above or below its trigger, so a `side` of `left` or `right` opens it below.
+- Upstream's `render` prop becomes `asChild`, as on every native item.
+- Upstream's animation runs whatever the system's motion setting. The native one is skipped when the system asks
+  for reduced motion.
+- `portalHost` is added, for an app that draws overlays into a `PortalHost` of its own.

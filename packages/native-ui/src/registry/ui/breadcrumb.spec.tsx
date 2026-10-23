@@ -9,6 +9,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from './breadcrumb';
+import { DirectionProvider } from './direction';
+import { holdsMirrored } from './direction.testing';
 import { Text } from './text';
 
 function renderTrail(onHome = jest.fn()) {
@@ -81,6 +83,19 @@ describe('Breadcrumb', () => {
       expect(screen.queryByTestId(testID)).not.toBeOnTheScreen();
     }
     expect(screen.queryAllByRole('link')).toHaveLength(2);
+  });
+
+  it('mirrors the chevron between steps when text reads right to left, and only then', async () => {
+    await renderTrail();
+    expect(holdsMirrored(screen.getByTestId('separator', { includeHiddenElements: true }))).toBe(false);
+
+    await render(
+      <DirectionProvider direction="rtl">
+        <BreadcrumbSeparator testID="rtl-separator" />
+      </DirectionProvider>,
+    );
+
+    expect(holdsMirrored(screen.getByTestId('rtl-separator', { includeHiddenElements: true }))).toBe(true);
   });
 
   it('draws a separator given as children in place of the chevron', async () => {

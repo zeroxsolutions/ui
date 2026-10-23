@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from 'react';
 import { AccessibilityInfo, Platform, View } from 'react-native';
+import { asText, isText, textOf } from '../lib/text-children';
 import { cn } from '../lib/utils';
 import { Separator } from './separator';
 import { Text, TextClassContext } from './text';
@@ -204,9 +205,7 @@ function FieldSeparator({ className, children, ...props }: ComponentProps<typeof
       <Separator className="absolute inset-x-0 top-1/2" />
       {children ? (
         <TextClassContext.Provider value="cn-field-separator/text cn-field-separator-content/text">
-          <View className="bg-background cn-field-separator-content self-center">
-            {typeof children === 'string' ? <Text>{children}</Text> : children}
-          </View>
+          <View className="bg-background cn-field-separator-content self-center">{asText(children)}</View>
         </TextClassContext.Provider>
       ) : null}
     </View>
@@ -228,7 +227,7 @@ type FieldErrorProps = ComponentProps<typeof View> & {
  */
 function FieldError({ className, children, errors, ...props }: FieldErrorProps): ReactNode {
   const messages = [...new Set((errors ?? []).flatMap((error) => (error?.message ? [error.message] : [])))];
-  const announcement = typeof children === 'string' ? children : children ? undefined : messages.join(' ');
+  const announcement = isText(children) ? textOf(children) : children ? undefined : messages.join(' ');
 
   // A live region is Android's alone; iOS announces only what it is told to.
   useEffect(() => {
@@ -253,7 +252,7 @@ function FieldError({ className, children, errors, ...props }: FieldErrorProps):
   return (
     <TextClassContext.Provider value="cn-field-error/text">
       <View role="alert" accessibilityLiveRegion="polite" className={className} {...props}>
-        {typeof content === 'string' ? <Text>{content}</Text> : content}
+        {asText(content)}
       </View>
     </TextClassContext.Provider>
   );

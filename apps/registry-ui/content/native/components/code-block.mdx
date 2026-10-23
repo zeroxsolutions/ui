@@ -1,0 +1,155 @@
+---
+title: Code Block
+description: Code, terminal output and diffs with an optional header, line numbers, highlighted lines and a copy button; long lines scroll sideways unless they wrap.
+---
+
+<NativePreview name="code-block-demo" />
+
+## Installation
+
+<InstallCommand name="code-block" />
+
+The CLI writes `components/ui/code-block.tsx`, and installs Use highlighted code (`hooks/use-highlighted-code.ts`
+and `lib/highlighter.tsx`), Color scheme (`lib/color-scheme.ts`, the scheme the highlighter picks a theme by),
+Button, Icon, Text, Focus visible and Utils, adding `class-variance-authority`, `expo-clipboard`, `lucide-react-native` and
+`shiki`. Expo Go carries `expo-clipboard`; in a development build, install it with `npx expo install
+expo-clipboard` so its version matches the SDK.
+
+## Usage
+
+```tsx
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockContent,
+  CodeBlockCopyButton,
+  CodeBlockFooter,
+  CodeBlockHeader,
+  CodeBlockLine,
+  CodeBlockTitle,
+} from '@/components/ui/code-block';
+```
+
+```tsx
+<CodeBlock>
+  <CodeBlockHeader>
+    <CodeBlockTitle>Terminal</CodeBlockTitle>
+    <CodeBlockActions>
+      <CodeBlockCopyButton value={output} />
+    </CodeBlockActions>
+  </CodeBlockHeader>
+  <CodeBlockContent>{output}</CodeBlockContent>
+</CodeBlock>
+```
+
+`CodeBlockContent` takes a string or a list of `CodeBlockLine`. Put `CodeBlockActions` straight inside
+`CodeBlock`, with no header, and they float over the top end of the content. `lineNumbers` numbers the lines
+from `startLine`, `wrap` wraps long lines instead of scrolling them, and a class such as `max-h-72` caps the
+height, past which the content scrolls inside the block. `variant="added"`, `"removed"` and `"highlighted"` on a
+`CodeBlockLine` tint it, and the first two mark it with a plus or a minus.
+
+## Syntax highlighting
+
+`useHighlightedCode` highlights with [Shiki](https://shiki.style)'s JavaScript engine, as upstream's does, and
+returns one node per line for `CodeBlockLine`:
+
+```tsx
+import { useHighlightedCode } from '@/hooks/use-highlighted-code';
+
+const lines = useHighlightedCode(code, 'json');
+
+<CodeBlock>
+  <CodeBlockContent>
+    {lines.map((line, index) => (
+      <CodeBlockLine key={index}>{line}</CodeBlockLine>
+    ))}
+  </CodeBlockContent>
+</CodeBlock>;
+```
+
+The list in `lib/highlighter.tsx` holds upstream's languages: `bash`, `css`, `diff`, `html`, `javascript`,
+`json`, `jsx`, `markdown`, `python`, `sql`, `tsx`, `typescript` and `yaml`, with aliases such as `ts`, `sh` and
+`yml`, and `ansi` for terminal output. A language not in the list renders as plain text. On the web each
+language loads the first time it is used. A device's bundle has no separate chunks, so every listed grammar
+ships in the app: trim the list to the languages the app shows. While code streams in, only the new lines are
+tokenized.
+
+## API reference
+
+### CodeBlock
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop      | Type                         | Default     |
+| --------- | ---------------------------- | ----------- |
+| `variant` | `'default' \| 'destructive'` | `'default'` |
+| `size`    | `'default' \| 'sm'`          | `'default'` |
+
+### CodeBlockHeader, CodeBlockTitle, CodeBlockActions, CodeBlockFooter
+
+Take every prop of React Native's `View`. A string child of `CodeBlockTitle` is drawn on one line and cut short
+where the row runs out; an `Icon` before it takes the title's icon size.
+
+### CodeBlockCopyButton
+
+Takes every prop of [Button](/native/components/nativewind/button), plus `value`, the text it copies. It is a
+ghost `icon-xs` button by default.
+
+### CodeBlockContent
+
+Takes every prop of React Native's `ScrollView`, plus:
+
+| Prop          | Type      | Default |
+| ------------- | --------- | ------- |
+| `wrap`        | `boolean` | `false` |
+| `lineNumbers` | `boolean` | `false` |
+| `startLine`   | `number`  | `1`     |
+| `tabIndex`    | `0 \| -1` | `0`     |
+
+`tabIndex` applies on the web, where it lets the keyboard focus and scroll the content.
+
+### CodeBlockLine
+
+Takes every prop of React Native's `View`, plus `variant`: `'default'`, `'added'`, `'removed'` or
+`'highlighted'`.
+
+### useHighlightedCode
+
+`useHighlightedCode(code, language)` returns one node per line: plain text until the highlighter has loaded,
+and for a language not in the list. A trailing newline is ignored. `lib/highlighter.tsx` also exports
+`loadHighlighter(language)` and `highlightCode(code, language)`.
+
+## Accessibility
+
+- Copy is announced once it succeeds: VoiceOver through an announcement, TalkBack and the web through a polite
+  live region. The button's label reads Copied for the two seconds it shows the check.
+- Line numbers are hidden from screen readers. A diff line's plus or minus is read with it, so the change does
+  not rest on its tint.
+- The code reads left to right whatever the direction around it; the header follows the page's direction.
+- Each line is selectable, without its number.
+
+## Differences from upstream
+
+- Shiki's JavaScript engine runs on Hermes with one fix. Hermes's `String.prototype.matchAll` yields each match
+  without its named `groups`, which the engine reads while it converts a grammar's recursive patterns; without
+  them those patterns are skipped, and bash, HTML and Markdown lose most of their colours. `lib/highlighter.tsx`
+  converts each pattern with a `matchAll` built on `exec` in place, put back before it returns, and only on an
+  engine whose own drops the groups. Hermes has no RegExp `v` flag either, and the engine's `auto` target
+  writes the patterns without it. With both, all of upstream's languages tokenize on a device as they do in
+  Node.
+- A token is a `Text` in its theme colour, github-light or github-dark by the colour scheme the app draws,
+  where upstream sets both as CSS variables and lets the stylesheet pick.
+- Code is set in the platform's monospace face, Menlo on iOS and `monospace` on Android, since the theme ships
+  no mono font.
+- Copy writes through `expo-clipboard`, where upstream uses `navigator.clipboard`.
+- Actions always show, as upstream's do on a touch screen; there is no hover to reveal them on. Floating
+  actions draw upstream's hairline ring around each button as a border, since a device has no ring.
+- The content's edges do not fade as it scrolls, which is CSS upstream reaches through selectors React Native has
+  no equivalent of.
+- While the content has keyboard focus, the block's border takes the ring colour, where upstream draws a 3px
+  ring outside it: a ring is a box-shadow, which a device cannot draw.
+- Numbers are padded with spaces to the widest one in the monospace face, where upstream lines them up with CSS
+  counters in a grid.
+- An `overflow-y-hidden` class does not stop a capped content scrolling; pass `scrollEnabled={false}` for a
+  collapsed Show more.
+- The demo's Download button opens the share sheet on a device, which has no downloads folder to save to.

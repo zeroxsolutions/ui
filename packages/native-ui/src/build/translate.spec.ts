@@ -136,6 +136,61 @@ describe('translateClasses', () => {
     });
   });
 
+  it("puts a colour behind base-ui's data-popup-open in the open state", () => {
+    const slot = ['px-4', 'data-popup-open:bg-muted/50'];
+
+    expect(translateClasses(slot, 'nativewind', 'view')).toEqual({ classes: ['px-4'], unknown: [] });
+    expect(translateClasses(slot, 'nativewind', 'view', 'open')).toEqual({ classes: ['bg-muted/50'], unknown: [] });
+  });
+
+  it.each([
+    'data-starting-style:scale-90',
+    'data-ending-style:opacity-0',
+    'data-[motion=from-end]:slide-in-from-right-52',
+    'data-[motion^=from-]:animate-in',
+  ])("drops %s, a frame of base-ui's motion a component draws itself", (cls) => {
+    expect(translateClasses([cls, 'p-2'], 'uniwind', 'view')).toEqual({ classes: ['p-2'], unknown: [] });
+  });
+
+  it('drops a peer-hover, a pointer over a sibling no touch screen has', () => {
+    expect(translateClasses(['peer-hover/menu-button:text-accent', 'p-2'], 'nativewind', 'view')).toEqual({
+      classes: ['p-2'],
+      unknown: [],
+    });
+  });
+
+  it('drops a group-hover on a slot that does not name it, as a pointer over its group no touch screen has', () => {
+    const slot = ['group-hover/item:bg-accent', 'p-2'];
+
+    expect(translateClasses(slot, 'nativewind', 'view')).toEqual({ classes: ['p-2'], unknown: [] });
+    expect(translateClasses(slot, 'nativewind', 'view', 'hovered')).toEqual({ classes: [], unknown: [] });
+  });
+
+  it.each(['cn-sidebar-menu-action', 'cn-sidebar-menu-badge'])(
+    "puts %s's colour behind the hovered state of the button beside it",
+    (name) => {
+      const slot = ['text-sidebar-foreground', 'peer-hover/menu-button:text-sidebar-accent-foreground'];
+
+      expect(translateClasses(slot, 'nativewind', 'text', undefined, { name })).toEqual({
+        classes: ['text-sidebar-foreground'],
+        unknown: [],
+      });
+      expect(translateClasses(slot, 'nativewind', 'text', 'hovered', { name })).toEqual({
+        classes: ['text-sidebar-accent-foreground'],
+        unknown: [],
+      });
+    },
+  );
+
+  it("draws a sidebar menu button's rail size without the important neither engine has", () => {
+    const slot = ['p-2', 'group-data-[collapsible=icon]:size-8!', 'group-data-[collapsible=icon]:p-2!'];
+
+    expect(translateClasses(slot, 'uniwind', 'view', 'collapsible=icon', { name: 'cn-sidebar-menu-button' })).toEqual({
+      classes: ['size-8', 'p-2'],
+      unknown: [],
+    });
+  });
+
   it.each(['sm', 'md'])(
     'keeps the base class a style widens at %s, which a phone held upright is below',
     (breakpoint) => {
@@ -224,9 +279,9 @@ describe('translateClasses', () => {
   });
 
   it('reports a state modifier the state table has no row for, rather than dropping it', () => {
-    const result = translateClasses(['data-starting-style:bg-accent', 'p-2'], 'uniwind', 'view');
+    const result = translateClasses(['data-swiping:bg-accent', 'p-2'], 'uniwind', 'view');
 
-    expect(result).toEqual({ classes: ['p-2'], unknown: ['data-starting-style:bg-accent'] });
+    expect(result).toEqual({ classes: ['p-2'], unknown: ['data-swiping:bg-accent'] });
   });
 
   it.each(['nativewind', 'uniwind'] as const)(
@@ -1004,6 +1059,84 @@ describe('translateClasses for a drawer swipe handle', () => {
   });
 });
 
+describe('translateClasses for a code block', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const slot = (
+    style: keyof typeof styles,
+    name: string,
+    engine: Engine,
+    part: 'view' | 'text',
+    state = '',
+  ): Translation => translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
+
+  it.each(STYLE_ENGINES)('translates every class of every code-block slot for %s in %s', (engine, style) => {
+    const names = [...styles[style].keys()].filter((name) => name.startsWith('cn-code-block'));
+
+    expect(names.length).toBeGreaterThan(0);
+    for (const name of names) {
+      expect({ name, unknown: slot(style, name, engine, 'view').unknown }).toEqual({ name, unknown: [] });
+    }
+  });
+
+  it.each([
+    ['vega', ['top-3', 'end-3', 'm-0']],
+    ['nova', ['top-2', 'end-2', 'm-0']],
+  ] as const)(
+    'places %s actions straight inside the block at its top end, as the state parent=code-block',
+    (style, placed) => {
+      expect([...slot(style, 'cn-code-block-actions', 'uniwind', 'view', 'parent=code-block').classes].sort()).toEqual(
+        [...placed].sort(),
+      );
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'gives each button of floating actions the background and its ring as a hairline border, for %s in %s',
+    (engine, style) => {
+      expect(
+        [...slot(style, 'cn-code-block-actions', engine, 'view', 'parent=code-block+part=button').classes].sort(),
+      ).toEqual(['bg-background', 'border', 'border-foreground/10']);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'rings a code block as a border while its content holds keyboard focus, as the state focused, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-code-block', engine, 'view', 'focused').classes).toEqual(['border-ring/50']);
+      expect(slot(style, 'cn-code-block-variant-default', engine, 'view', 'focused').classes).toEqual(['border-ring']);
+    },
+  );
+
+  it('spaces a numbered line from its number, as the state numbered', () => {
+    expect(slot('vega', 'cn-code-block-line', 'uniwind', 'view', 'numbered').classes).toEqual(['gap-x-3']);
+  });
+
+  it('gives the number its ::before draws to the part=before child', () => {
+    expect(slot('vega', 'cn-code-block-line', 'uniwind', 'view', 'part=before').classes).toEqual(['min-w-6']);
+    expect(slot('vega', 'cn-code-block-line', 'uniwind', 'text', 'part=before').classes).toEqual([
+      'text-end',
+      'text-muted-foreground',
+    ]);
+  });
+
+  it('gives the diff marker its ::after draws to the part=after child, leaving the sign to the component', () => {
+    expect(slot('vega', 'cn-code-block-line', 'uniwind', 'view', 'part=after').classes).toEqual(['start-1']);
+    expect(slot('vega', 'cn-code-block-line', 'uniwind', 'text', 'part=after').classes).toEqual([
+      'text-muted-foreground',
+    ]);
+    expect(slot('vega', 'cn-code-block-line-variant-removed', 'uniwind', 'text', 'part=after').classes).toEqual([
+      'text-destructive',
+    ]);
+    expect(slot('vega', 'cn-code-block-line-variant-added', 'uniwind', 'view', 'part=after')).toEqual({
+      classes: [],
+      unknown: [],
+    });
+  });
+});
+
 describe('translateClasses for a menu', () => {
   const styles = {
     vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
@@ -1131,6 +1264,177 @@ describe('translateClasses for a calendar', () => {
         expect(calendar(style, engine, 'part=column').classes).toEqual([column]);
         expect(calendar(style, engine, 'part=caption').classes).toEqual([caption, caption.replace('h-', 'px-')]);
       }
+    },
+  );
+});
+
+describe('translateClasses for the conversation items', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const slot = (
+    style: keyof typeof styles,
+    name: string,
+    engine: Engine,
+    part: 'view' | 'text' | 'icon',
+    state = '',
+  ): Translation => translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
+
+  it.each(STYLE_ENGINES)(
+    'translates every class of every bubble, attachment, marker and message slot for %s in %s',
+    (engine, style) => {
+      const names = [...styles[style].keys()].filter((name) =>
+        /^cn-(bubble|attachment|marker|message)(-|$)/.test(name),
+      );
+
+      expect(names.length).toBeGreaterThan(0);
+      for (const name of names) {
+        for (const part of ['view', 'text', 'icon'] as const) {
+          expect({ name, part, unknown: slot(style, name, engine, part).unknown }).toEqual({ name, part, unknown: [] });
+        }
+      }
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    "tints a tinted bubble's content with the primary colour over the background, for %s in %s",
+    (engine, style) => {
+      expect(slot(style, 'cn-bubble-variant-tinted', engine, 'view', 'part=bubble-content').classes).toEqual([
+        'bg-primary/10',
+        'dark:bg-primary/15',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    "draws the card-coloured ring around a bubble's reactions as a border, for %s in %s",
+    (engine, style) => {
+      expect(slot(style, 'cn-bubble-reactions', engine, 'view').classes).toEqual(
+        expect.arrayContaining(['border-[3px]', 'border-card']),
+      );
+    },
+  );
+
+  it('leaves the reactions offset by their own height to the component', () => {
+    expect(slot('vega', 'cn-bubble-reactions-side-top', 'uniwind', 'view').classes).toEqual(['top-0']);
+    expect(slot('vega', 'cn-bubble-reactions-side-bottom', 'uniwind', 'view').classes).toEqual(['bottom-0']);
+  });
+
+  it('rings bubble content that takes a press while it holds keyboard focus, as the state pressable+focused', () => {
+    expect(slot('vega', 'cn-bubble-content', 'uniwind', 'view', 'focused+pressable').classes).toEqual(['border-ring']);
+  });
+
+  it.each(STYLE_ENGINES)(
+    'rings an attachment as a border while its trigger holds keyboard focus, as the state focused, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-attachment', engine, 'view', 'focused').classes).toEqual(['border', 'border-ring/50']);
+    },
+  );
+
+  it('keeps dropping focus-within on any other slot', () => {
+    expect(translateClasses(['focus-within:ring-1'], 'uniwind', 'view', 'focused', { name: 'cn-card' })).toEqual({
+      classes: [],
+      unknown: [],
+    });
+  });
+
+  it('sizes a spinner in vertical attachment media, as the state part=spinner', () => {
+    expect(slot('vega', 'cn-attachment-media', 'uniwind', 'view', 'orientation=vertical+part=spinner').classes).toEqual(
+      ['size-6'],
+    );
+  });
+
+  it("gives the lines a separator marker's ::before and ::after draw to its part=before and part=after children", () => {
+    expect(slot('vega', 'cn-marker-variant-separator', 'uniwind', 'view', 'part=before').classes).toEqual([
+      'h-px',
+      'min-w-0',
+      'flex-1',
+      'bg-border',
+      'mr-1',
+    ]);
+    expect(slot('vega', 'cn-marker-variant-separator', 'uniwind', 'view', 'part=after').classes).toEqual([
+      'h-px',
+      'min-w-0',
+      'flex-1',
+      'bg-border',
+      'ml-1',
+    ]);
+  });
+});
+
+describe('translateClasses for the questionnaire and trace', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const slot = (
+    style: keyof typeof styles,
+    name: string,
+    engine: Engine,
+    part: 'view' | 'text' | 'icon',
+    state = '',
+  ): Translation => translateClasses(styles[style].get(name) ?? [], engine, part, state, { name });
+
+  it.each(STYLE_ENGINES)(
+    'translates every class of every questionnaire and trace slot for %s in %s',
+    (engine, style) => {
+      const names = [...styles[style].keys()].filter((name) => /^cn-(questionnaire|trace)(-|$)/.test(name));
+
+      expect(names.length).toBeGreaterThan(0);
+      for (const name of names) {
+        for (const part of ['view', 'text', 'icon'] as const) {
+          expect({ name, part, unknown: slot(style, name, engine, part).unknown }).toEqual({ name, part, unknown: [] });
+        }
+      }
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'pulls an icon after a trace title back by a step, as the state after=trace-title, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-trace-icon', engine, 'view', 'after=trace-title').classes).toEqual(['-ml-1']);
+      expect(slot(style, 'cn-trace-icon', engine, 'view').classes).toEqual(['size-4']);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'indents trace content by two spacing steps less a pixel, in px, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-trace-collapsible-content-inner', engine, 'view').classes).toContain('ml-[7px]');
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'nudges a questionnaire indicator down by a fraction of a spacing step, in px, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-questionnaire-choice-indicator', engine, 'view').classes).toContain('translate-y-[1.8px]');
+      expect(slot(style, 'cn-questionnaire-shortcut', engine, 'view').classes).toContain('translate-y-[1.8px]');
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'rings a trace trigger as a border while it holds keyboard focus, as the state focused, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-trace-collapsible-trigger', engine, 'view', 'focused').classes).toEqual([
+        'border-ring/50',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'spaces a questionnaire title from the choices when no description follows it, as the state description=none, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-questionnaire-title', engine, 'view', 'description=none').classes).toEqual([
+        style === 'vega' ? 'mb-5' : 'mb-4',
+      ]);
+    },
+  );
+
+  it.each(STYLE_ENGINES)(
+    'rings a questionnaire choice while its control holds keyboard focus, as the state focused, for %s in %s',
+    (engine, style) => {
+      expect(slot(style, 'cn-questionnaire-choice', engine, 'view', 'focused').classes).toEqual(['border-ring']);
     },
   );
 });

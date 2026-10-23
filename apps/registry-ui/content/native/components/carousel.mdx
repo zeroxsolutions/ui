@@ -9,8 +9,7 @@ description: A row of slides that a swipe or its previous and next buttons scrol
 
 <InstallCommand name="carousel" />
 
-The CLI writes `components/ui/carousel.tsx` and `lib/motion.ts`, installs
-[Button](/native/components/nativewind/button), [Icon](/native/components/nativewind/icon) and Utils, and adds
+The CLI writes `components/ui/carousel.tsx` and `lib/motion.ts`, installs [Direction](/native/components/nativewind/direction), [Button](/native/components/nativewind/button), [Icon](/native/components/nativewind/icon) and Utils, and adds
 `lucide-react-native`, `react-native-reanimated` and `react-native-worklets`.
 
 ## Usage
@@ -103,6 +102,17 @@ there is no snap that way. Vertical, they sit above and below the carousel, turn
 
 Inside a Carousel, returns its `api`, `opts`, `orientation`, `scrollPrev`, `scrollNext`, `canScrollPrev` and
 `canScrollNext`. It throws outside one.
+
+## Right to left
+
+When [Direction](/native/components/nativewind/direction) says text reads right to left, a horizontal carousel
+runs from the right: the first slide is drawn at the right, a swipe to the right moves it on, Previous sits on
+the right and Next on the left, and their chevrons are mirrored, as upstream's `cn-rtl-flip` mirrors them. The
+arrow keys do as upstream's do whichever way text reads: the right arrow goes to the next slide and the left
+arrow to the previous one. The row is laid out left to right and drawn mirrored, with each slide mirrored back,
+so its scroll is measured as in text read left to right. On a device it runs the provider's way even where the
+system lays the app out the other way, placing its buttons and laying out its slides' content as the system
+does.
 
 ## Differences from upstream
 

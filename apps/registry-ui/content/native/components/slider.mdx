@@ -9,7 +9,7 @@ description: A value, or a range of values, picked by dragging a thumb along a t
 
 <InstallCommand name="slider" />
 
-The CLI writes `components/ui/slider.tsx` and installs Utils. It adds no package.
+The CLI writes `components/ui/slider.tsx` and installs [Direction](/native/components/nativewind/direction) and Utils. It adds no package.
 
 ## Usage
 
@@ -64,6 +64,14 @@ written by `format` and `locale`, followed in a two-thumb range by "start range"
 focus, and the arrow keys move it a step, Page Up, Page Down and a Shift-held arrow key move it `largeStep`, and
 Home and End move it to the end of its room. Every thumb takes its name from `aria-label` or the Label
 `aria-labelledby` names; iOS reads only `aria-label`, so pass the Label's text there too.
+
+## Right to left
+
+When [Direction](/native/components/nativewind/direction) says text reads right to left, a horizontal slider
+runs from the right, as Base UI's does: `min` is at the right edge, the range fills from it, and the left arrow
+key raises the value and the right arrow lowers it. A vertical slider is unchanged. On a device it runs the
+provider's way even where the system lays the app out the other way, placing its range and thumbs from the side
+it runs from.
 
 ## Differences from upstream
 

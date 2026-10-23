@@ -9,8 +9,7 @@ description: A panel that slides over the screen from one of its edges.
 
 <InstallCommand name="sheet" />
 
-The CLI writes `components/ui/sheet.tsx`, `lib/motion.ts` and `lib/overlay.ts`, installs
-[Button](/native/components/nativewind/button), [Icon](/native/components/nativewind/icon),
+The CLI writes `components/ui/sheet.tsx`, `lib/motion.ts` and `lib/overlay.ts`, installs [Direction](/native/components/nativewind/direction), [Button](/native/components/nativewind/button), [Icon](/native/components/nativewind/icon),
 [Text](/native/components/nativewind/text) and Utils, and adds `@rn-primitives/dialog`, `@rn-primitives/portal`,
 `lucide-react-native`, `react-native-reanimated` and `react-native-worklets`. The content draws in the app's
 `PortalHost`; see [Add a portal host](/native/docs/installation#add-a-portal-host). Without one it draws nothing,
@@ -98,6 +97,13 @@ Take every prop of React Native's `View`. The footer is pushed to the end of the
 ### SheetTitle and SheetDescription
 
 Take every prop of [Text](/native/components/nativewind/text). The title is a heading.
+
+## Right to left
+
+A `left` or `right` sheet stays on the side it names, as upstream's does, which places it with `left-0` and
+`right-0`. A device the system lays out right to left draws `left` styles on the right, unless the app turned
+that off with `I18nManager.swapLeftAndRightInRTL(false)`; there the sheet slides in from the side it is drawn on.
+That follows the system's direction, not a provider's, since a provider changes no layout on a device.
 
 ## Differences from upstream
 

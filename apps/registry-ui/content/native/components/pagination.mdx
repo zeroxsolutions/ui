@@ -9,7 +9,7 @@ description: The pages of a long list, with the current page marked and links to
 
 <InstallCommand name="pagination" />
 
-The CLI writes `components/ui/pagination.tsx`, installs [Button](/native/components/nativewind/button),
+The CLI writes `components/ui/pagination.tsx`, installs [Direction](/native/components/nativewind/direction), [Button](/native/components/nativewind/button),
 [Icon](/native/components/nativewind/icon) and Utils, and adds `lucide-react-native`.
 
 ## Usage
@@ -87,6 +87,11 @@ to next page.
 
 Takes every prop of React Native's `View`. It draws three dots for the pages left out, and is hidden from
 screen readers.
+
+## Right to left
+
+The previous and next chevrons are mirrored when [Direction](/native/components/nativewind/direction) says text
+reads right to left, so each points the way it goes, as upstream's `cn-rtl-flip` does.
 
 ## Differences from upstream
 
