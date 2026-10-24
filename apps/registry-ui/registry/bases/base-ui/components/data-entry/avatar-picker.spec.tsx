@@ -18,6 +18,7 @@ import {
   AvatarPickerRemoveButton,
   AvatarPickerTrigger,
   AvatarPickerUploadContent,
+  AvatarPickerUploadPreview,
   AvatarPickerUploadTrigger,
   type AvatarPickerTab,
   type AvatarPickerUploadContentProps,
@@ -174,7 +175,9 @@ describe('AvatarPicker', () => {
     );
     openEditor();
 
-    fireEvent.change(screen.getByLabelText('Search emoji'), { target: { value: 'zzzznotanemoji' } });
+    fireEvent.change(screen.getByLabelText('Search emoji'), {
+      target: { value: 'zzzznotanemoji' },
+    });
 
     expect(screen.getByText('No emoji found')).toBeTruthy();
   });
@@ -263,7 +266,10 @@ describe('AvatarPicker', () => {
     resolve('https://cdn.example/a.png');
     await waitFor(() => expect(screen.getByRole('tabpanel').getAttribute('aria-busy')).toBe('false'));
     expect(screen.getByRole('button', { name: 'Choose image' }).hasAttribute('disabled')).toBe(false);
-    expect(onChange).toHaveBeenCalledWith({ imageUrl: 'https://cdn.example/a.png', emoji: null });
+    expect(onChange).toHaveBeenCalledWith({
+      imageUrl: 'https://cdn.example/a.png',
+      emoji: null,
+    });
   });
 
   it('leaves the busy state once a rejected onUpload settles, without adopting a URL', async () => {
@@ -286,6 +292,147 @@ describe('AvatarPicker', () => {
     reject(new Error('upload failed'));
     await waitFor(() => expect(screen.getByRole('tabpanel').getAttribute('aria-busy')).toBe('false'));
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('reads an image dropped on the pane inline as the avatar, clearing the emoji', async () => {
+    const onChange = vi.fn();
+    render(
+      <Picker defaultTab="upload" value={{ emoji: '\u{1F600}' }} onValueChange={onChange}>
+        <UploadPane />
+      </Picker>,
+    );
+    openEditor();
+
+    const file = new File(['x'], 'a.png', { type: 'image/png' });
+    fireEvent.drop(screen.getByRole('tabpanel'), {
+      dataTransfer: { files: [file], types: ['Files'] },
+    });
+
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith({
+        emoji: null,
+        imageUrl: expect.stringMatching(/^data:image\/png;base64,/),
+      }),
+    );
+  });
+
+  it('hands a dropped image to onUpload', () => {
+    const onUpload = vi.fn(() => null);
+    render(
+      <Picker defaultTab="upload">
+        <UploadPane onUpload={onUpload} />
+      </Picker>,
+    );
+    openEditor();
+
+    const file = new File(['x'], 'a.png', { type: 'image/png' });
+    fireEvent.drop(screen.getByRole('tabpanel'), {
+      dataTransfer: { files: [file], types: ['Files'] },
+    });
+
+    expect(onUpload).toHaveBeenCalledWith(file);
+  });
+
+  it('ignores a dropped file that is not an image', () => {
+    const onUpload = vi.fn(() => null);
+    render(
+      <Picker defaultTab="upload">
+        <UploadPane onUpload={onUpload} />
+      </Picker>,
+    );
+    openEditor();
+
+    const file = new File(['x'], 'a.pdf', { type: 'application/pdf' });
+    fireEvent.drop(screen.getByRole('tabpanel'), {
+      dataTransfer: { files: [file], types: ['Files'] },
+    });
+
+    expect(onUpload).not.toHaveBeenCalled();
+  });
+
+  it('marks the pane dragging while files are held over it, until they leave or drop', () => {
+    render(
+      <Picker defaultTab="upload">
+        <UploadPane onUpload={() => null} />
+      </Picker>,
+    );
+    openEditor();
+    const pane = screen.getByRole('tabpanel');
+    const file = new File(['x'], 'a.png', { type: 'image/png' });
+
+    fireEvent.dragEnter(pane, { dataTransfer: { types: ['Files'] } });
+    expect(pane.hasAttribute('data-dragging')).toBe(true);
+    fireEvent.dragLeave(pane);
+    expect(pane.hasAttribute('data-dragging')).toBe(false);
+
+    fireEvent.dragEnter(pane, { dataTransfer: { types: ['Files'] } });
+    fireEvent.drop(pane, { dataTransfer: { files: [file], types: ['Files'] } });
+    expect(pane.hasAttribute('data-dragging')).toBe(false);
+  });
+
+  it('keeps the pane dragging while the drag moves between its own children', () => {
+    render(
+      <Picker defaultTab="upload">
+        <UploadPane />
+      </Picker>,
+    );
+    openEditor();
+    const pane = screen.getByRole('tabpanel');
+
+    const title = screen.getByText('Upload an image');
+
+    fireEvent.dragEnter(pane, { dataTransfer: { types: ['Files'] } });
+    fireEvent.dragEnter(title, { dataTransfer: { types: ['Files'] } });
+    fireEvent.dragLeave(pane);
+    expect(pane.hasAttribute('data-dragging')).toBe(true);
+    fireEvent.dragLeave(title);
+    expect(pane.hasAttribute('data-dragging')).toBe(false);
+  });
+
+  it('shows the preview and marks the pane only while the avatar is an image', () => {
+    const preview = () => document.querySelector('[data-slot="avatar-picker-upload-preview"]');
+    const { rerender } = render(
+      <Picker defaultTab="upload" value={{ imageUrl: 'https://cdn.example/a.png' }}>
+        <AvatarPickerUploadContent>
+          <AvatarPickerUploadPreview alt="Current avatar" />
+        </AvatarPickerUploadContent>
+      </Picker>,
+    );
+    openEditor();
+
+    // jsdom loads no image, so upstream AvatarImage never draws its img here; the root stands for the preview.
+    expect(preview()?.getAttribute('data-size')).toBe('lg');
+    expect(screen.getByRole('tabpanel').hasAttribute('data-has-image')).toBe(true);
+
+    rerender(
+      <Picker defaultTab="upload" value={{ emoji: '\u{1F600}' }}>
+        <AvatarPickerUploadContent>
+          <AvatarPickerUploadPreview alt="Current avatar" />
+        </AvatarPickerUploadContent>
+      </Picker>,
+    );
+    expect(preview()).toBeNull();
+    expect(screen.getByRole('tabpanel').hasAttribute('data-has-image')).toBe(false);
+  });
+
+  it('refuses a drop while an upload is pending, so the browser does not open the file instead', () => {
+    const onUpload = vi.fn(() => new Promise<string | null>(() => {}));
+    render(
+      <Picker defaultTab="upload">
+        <UploadPane onUpload={onUpload} />
+      </Picker>,
+    );
+    openEditor();
+    const pane = screen.getByRole('tabpanel');
+    const file = new File(['x'], 'a.png', { type: 'image/png' });
+    fireEvent.drop(pane, { dataTransfer: { files: [file], types: ['Files'] } });
+
+    fireEvent.dragEnter(pane, { dataTransfer: { types: ['Files'] } });
+    expect(pane.hasAttribute('data-dragging')).toBe(false);
+    // fireEvent returns false once a handler called preventDefault.
+    expect(fireEvent.dragOver(pane, { dataTransfer: { types: ['Files'] } })).toBe(false);
+    expect(fireEvent.drop(pane, { dataTransfer: { files: [file], types: ['Files'] } })).toBe(false);
+    expect(onUpload).toHaveBeenCalledTimes(1);
   });
 
   it('lets children replace the remove button icon', () => {

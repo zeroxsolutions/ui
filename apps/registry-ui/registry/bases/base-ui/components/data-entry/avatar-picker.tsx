@@ -1,6 +1,7 @@
 import { Check, Trash2 } from 'lucide-react';
 import * as React from 'react';
 
+import { Avatar, AvatarImage } from '@/registry/bases/base-ui/ui/avatar';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Empty } from '@/registry/bases/base-ui/ui/empty';
 import { Field, FieldLabel } from '@/registry/bases/base-ui/ui/field';
@@ -212,23 +213,33 @@ interface AvatarPickerUploadContentProps extends Omit<React.ComponentProps<typeo
 /**
  * Upload pane (tab value `upload`): an `Empty` frame holding the file input. The
  * consumer composes its copy as children (`EmptyHeader`, `EmptyMedia`,
- * `EmptyTitle`, `EmptyDescription`) and an `AvatarPickerUploadTrigger` inside
- * `EmptyContent`. A picked file goes to `onUpload`, or is read inline as a data
- * URL when that is omitted.
+ * `EmptyTitle`, `EmptyDescription`), an `AvatarPickerUploadPreview`, and an
+ * `AvatarPickerUploadTrigger` inside `EmptyContent`. A file picked, or an image
+ * dropped on the pane, goes to `onUpload`, or is read inline as a data URL when
+ * that is omitted; a dropped file that is not an image is ignored.
  *
- * While `onUpload` is pending the pane is `aria-busy` and carries
- * `data-uploading`, so the children swap their copy with
- * `group-data-uploading/avatar-picker-upload:` classes.
+ * The pane carries its state for the children's
+ * `group-data-<state>/avatar-picker-upload:` classes: `data-uploading` (and
+ * `aria-busy`) while `onUpload` is pending, `data-dragging` while files are held
+ * over it, and `data-has-image` while the avatar is an image.
  */
 function AvatarPickerUploadContent({
   className,
   children,
   onUpload,
+  onDragEnter,
+  onDragOver,
+  onDragLeave,
+  onDrop,
   ...props
 }: AvatarPickerUploadContentProps): React.ReactNode {
-  const { setImage } = useAvatarPicker();
+  const { value, setImage } = useAvatarPicker();
   const fileRef = React.useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = React.useState(false);
+  const [dragging, setDragging] = React.useState(false);
+  // Entering one of the pane's own children fires dragenter on it before dragleave on the pane, and
+  // Safari leaves dragleave's relatedTarget null, so the drag is over the pane while this is above zero.
+  const dragDepth = React.useRef(0);
 
   const onFile = (file: File | undefined): void => {
     if (!file) return;
@@ -249,14 +260,50 @@ function AvatarPickerUploadContent({
     reader.readAsDataURL(file);
   };
 
+  // A drag that carries no files, such as selected text, is left to the browser. One that does is
+  // always taken, even while uploading: a file drop nobody takes makes the browser open the file in
+  // place of the page.
+  const holdsFiles = (event: React.DragEvent): boolean => event.dataTransfer.types.includes('Files');
+
   return (
     <AvatarPickerUploadContext.Provider value={{ choose: () => fileRef.current?.click(), uploading }}>
       <TabsContent
         data-slot="avatar-picker-upload-content"
         data-uploading={uploading || undefined}
+        data-dragging={(dragging && !uploading) || undefined}
+        data-has-image={value.imageUrl ? true : undefined}
         aria-busy={uploading}
         value="upload"
         className={cn('group/avatar-picker-upload', className)}
+        onDragEnter={(event) => {
+          onDragEnter?.(event);
+          if (!holdsFiles(event)) return;
+          event.preventDefault();
+          dragDepth.current += 1;
+          setDragging(true);
+        }}
+        // Without preventDefault on every dragover the browser refuses the drop.
+        onDragOver={(event) => {
+          onDragOver?.(event);
+          if (!holdsFiles(event)) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = uploading ? 'none' : 'copy';
+        }}
+        onDragLeave={(event) => {
+          onDragLeave?.(event);
+          dragDepth.current = Math.max(0, dragDepth.current - 1);
+          if (dragDepth.current === 0) setDragging(false);
+        }}
+        onDrop={(event) => {
+          onDrop?.(event);
+          dragDepth.current = 0;
+          setDragging(false);
+          if (!holdsFiles(event)) return;
+          event.preventDefault();
+          if (uploading) return;
+          // `accept` filters only the file picker; a drop can carry any file.
+          onFile([...event.dataTransfer.files].find((file) => file.type.startsWith('image/')));
+        }}
         {...props}
       >
         <input
@@ -264,11 +311,45 @@ function AvatarPickerUploadContent({
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={(e) => onFile(e.target.files?.[0] ?? undefined)}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            // The browser fires no change for a pick that matches the input's value, so picking the
+            // same file again would do nothing.
+            e.target.value = '';
+            onFile(file);
+          }}
         />
-        <Empty>{children}</Empty>
+        <Empty className="group-data-dragging/avatar-picker-upload:border-primary group-data-dragging/avatar-picker-upload:bg-muted/50 border border-transparent">
+          {children}
+        </Empty>
       </TabsContent>
     </AvatarPickerUploadContext.Provider>
+  );
+}
+
+interface AvatarPickerUploadPreviewProps extends React.ComponentProps<typeof Avatar> {
+  /** Names the image; empty marks it decorative. */
+  alt?: string;
+}
+
+/**
+ * The avatar's current image, in an `Avatar` at size `lg` unless a `size` is
+ * given; renders nothing while the avatar is not an image. `children` follow the
+ * image, so an `AvatarFallback` there shows while it loads or when it fails.
+ */
+function AvatarPickerUploadPreview({
+  alt = '',
+  size = 'lg',
+  children,
+  ...props
+}: AvatarPickerUploadPreviewProps): React.ReactNode {
+  const { value } = useAvatarPicker();
+  if (!value.imageUrl) return null;
+  return (
+    <Avatar data-slot="avatar-picker-upload-preview" size={size} {...props}>
+      <AvatarImage src={value.imageUrl} alt={alt} />
+      {children}
+    </Avatar>
   );
 }
 
@@ -412,6 +493,7 @@ export {
   AvatarPickerRemoveButton,
   AvatarPickerEmojiContent,
   AvatarPickerUploadContent,
+  AvatarPickerUploadPreview,
   AvatarPickerUploadTrigger,
   AvatarPickerColorContent,
   AvatarPickerColorGroup,
@@ -422,5 +504,6 @@ export type {
   AvatarPickerTab,
   AvatarPickerProps,
   AvatarPickerUploadContentProps,
+  AvatarPickerUploadPreviewProps,
   AvatarPickerColorGroupProps,
 };

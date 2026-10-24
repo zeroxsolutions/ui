@@ -35,7 +35,7 @@ pnpm add lucide-react
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add button empty field input popover tabs utils @zui/emoji-picker
+pnpm dlx shadcn@latest add avatar button empty field input popover tabs utils @zui/emoji-picker
 ```
 
 <Step>Copy the component into `components/data-entry/avatar-picker.tsx`.</Step>
@@ -123,6 +123,7 @@ AvatarPicker
         |   |   `-- EmojiPickerEmpty
         |   `-- EmojiPickerNav
         |-- AvatarPickerUploadContent
+        |   |-- AvatarPickerUploadPreview
         |   `-- AvatarPickerUploadTrigger
         `-- AvatarPickerColorContent
             |-- AvatarPickerColorGroup
@@ -185,11 +186,31 @@ except `value`, plus:
 | `onUpload` | `(file: File) => string \| null \| Promise<string \| null>` | -       |
 
 Upload pane (tab value `upload`): an `Empty` frame holding the file input, whose copy the consumer composes as
-`children` (`EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`) with an `AvatarPickerUploadTrigger`
-inside `EmptyContent`. A picked file goes to `onUpload` and the resolved URL becomes `imageUrl`, or - when
-`onUpload` is omitted - is read inline as a data URL. While `onUpload` is pending the pane is `aria-busy` and
-carries `data-uploading`, so the children can swap their copy with `group-data-uploading/avatar-picker-upload:`
-classes. It sets `data-slot="avatar-picker-upload-content"`.
+`children` (`EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`) with an `AvatarPickerUploadPreview`
+and an `AvatarPickerUploadTrigger` inside `EmptyContent`. A picked file, or an image dropped anywhere on the
+pane, goes to `onUpload` and the resolved URL becomes `imageUrl`, or - when `onUpload` is omitted - is read
+inline as a data URL. A dropped file that is not an image is ignored, and so is a drop while an upload is
+pending.
+
+The pane carries its state on `data-*` attributes, so the children can swap their copy with
+`group-data-<state>/avatar-picker-upload:` classes: `data-uploading` while `onUpload` is pending (the pane is
+also `aria-busy` then), `data-dragging` while files are dragged over the pane, and `data-has-image` while the
+avatar is an image. While dragging, the frame takes a primary border. It sets
+`data-slot="avatar-picker-upload-content"`.
+
+### AvatarPickerUploadPreview
+
+Renders shadcn's [`Avatar`](https://ui.shadcn.com/docs/components/base/avatar) and takes every prop it takes,
+plus:
+
+| Prop  | Type     | Default |
+| ----- | -------- | ------- |
+| `alt` | `string` | `''`    |
+
+The avatar's current image, in an `AvatarImage`; it renders nothing while the avatar is not an image. It
+defaults `size` to `lg`. `alt` names the image, and an empty one marks it decorative. `children` follow the
+image, so an `AvatarFallback` placed there shows while it loads or when it fails. It sets
+`data-slot="avatar-picker-upload-preview"`.
 
 ### AvatarPickerUploadTrigger
 

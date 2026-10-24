@@ -598,6 +598,7 @@
       "categories": ["data-entry"],
       "dependencies": ["lucide-react"],
       "registryDependencies": [
+        "@shadcn/avatar",
         "@shadcn/button",
         "@shadcn/empty",
         "@shadcn/field",

@@ -14,6 +14,7 @@ import {
   AvatarPickerRemoveButton,
   AvatarPickerTrigger,
   AvatarPickerUploadContent,
+  AvatarPickerUploadPreview,
   AvatarPickerUploadTrigger,
   type AvatarPickerValue,
 } from '@/registry/bases/base-ui/components/data-entry/avatar-picker';
@@ -51,14 +52,18 @@ function AvatarPickerDemo(): ReactNode {
       <AvatarPickerTrigger>
         <Avatar>
           {avatar.imageUrl ? <AvatarImage src={avatar.imageUrl} alt="" /> : null}
-          <AvatarFallback style={{ backgroundColor: avatar.emoji ? undefined : (avatar.color ?? undefined) }}>
+          <AvatarFallback
+            style={{
+              backgroundColor: avatar.emoji ? undefined : (avatar.color ?? undefined),
+            }}
+          >
             {/* Drawn in the same Fluent artwork as the picker's cells; the trigger already names the button. */}
             {avatar.emoji ? <FluentEmoji glyph={avatar.emoji} name="" className="size-5 object-contain" /> : null}
           </AvatarFallback>
         </Avatar>
       </AvatarPickerTrigger>
       <AvatarPickerContent>
-        <Tabs defaultValue="emoji">
+        <Tabs defaultValue={avatar.imageUrl ? 'upload' : 'emoji'}>
           <div className="flex items-center gap-1">
             <TabsList variant="line">
               <TabsTrigger
@@ -112,15 +117,19 @@ function AvatarPickerDemo(): ReactNode {
           </AvatarPickerEmojiContent>
           <AvatarPickerUploadContent>
             <EmptyHeader>
-              <EmptyMedia variant="icon">
+              <AvatarPickerUploadPreview alt="Current avatar" />
+              <EmptyMedia variant="icon" className="group-data-has-image/avatar-picker-upload:hidden">
                 <UploadIcon ref={uploadRef} aria-hidden className="group-data-uploading/avatar-picker-upload:hidden" />
                 <Spinner className="hidden group-data-uploading/avatar-picker-upload:block" />
               </EmptyMedia>
-              <EmptyTitle>
-                <span className="group-data-uploading/avatar-picker-upload:hidden">Upload an image</span>
+              <EmptyTitle className="group-data-has-image/avatar-picker-upload:sr-only">
+                <span className="group-data-dragging/avatar-picker-upload:hidden group-data-uploading/avatar-picker-upload:hidden">
+                  Upload an image
+                </span>
+                <span className="hidden group-data-dragging/avatar-picker-upload:inline">Drop to upload</span>
                 <span className="hidden group-data-uploading/avatar-picker-upload:inline">Uploading...</span>
               </EmptyTitle>
-              <EmptyDescription>PNG, JPG or GIF</EmptyDescription>
+              <EmptyDescription>Drag a PNG, JPG or GIF here</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <AvatarPickerUploadTrigger
@@ -129,7 +138,8 @@ function AvatarPickerDemo(): ReactNode {
                 onFocus={() => uploadRef.current?.startAnimation()}
                 onBlur={() => uploadRef.current?.stopAnimation()}
               >
-                Choose image
+                <span className="group-data-has-image/avatar-picker-upload:hidden">Choose image</span>
+                <span className="hidden group-data-has-image/avatar-picker-upload:inline">Replace image</span>
               </AvatarPickerUploadTrigger>
             </EmptyContent>
           </AvatarPickerUploadContent>
