@@ -415,6 +415,26 @@ describe('AvatarPicker', () => {
     expect(screen.getByRole('tabpanel').hasAttribute('data-has-image')).toBe(false);
   });
 
+  it('refuses a drop while an upload is pending, so the browser does not open the file instead', () => {
+    const onUpload = vi.fn(() => new Promise<string | null>(() => {}));
+    render(
+      <Picker defaultTab="upload">
+        <UploadPane onUpload={onUpload} />
+      </Picker>,
+    );
+    openEditor();
+    const pane = screen.getByRole('tabpanel');
+    const file = new File(['x'], 'a.png', { type: 'image/png' });
+    fireEvent.drop(pane, { dataTransfer: { files: [file], types: ['Files'] } });
+
+    fireEvent.dragEnter(pane, { dataTransfer: { types: ['Files'] } });
+    expect(pane.hasAttribute('data-dragging')).toBe(false);
+    // fireEvent returns false once a handler called preventDefault.
+    expect(fireEvent.dragOver(pane, { dataTransfer: { types: ['Files'] } })).toBe(false);
+    expect(fireEvent.drop(pane, { dataTransfer: { files: [file], types: ['Files'] } })).toBe(false);
+    expect(onUpload).toHaveBeenCalledTimes(1);
+  });
+
   it('lets children replace the remove button icon', () => {
     render(
       <AvatarPicker value={{}} onValueChange={vi.fn()} defaultOpen>

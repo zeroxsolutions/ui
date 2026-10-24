@@ -260,15 +260,17 @@ function AvatarPickerUploadContent({
     reader.readAsDataURL(file);
   };
 
-  // A drag that carries no files, such as selected text, is left to the browser.
-  const holdsFiles = (event: React.DragEvent): boolean => !uploading && event.dataTransfer.types.includes('Files');
+  // A drag that carries no files, such as selected text, is left to the browser. One that does is
+  // always taken, even while uploading: a file drop nobody takes makes the browser open the file in
+  // place of the page.
+  const holdsFiles = (event: React.DragEvent): boolean => event.dataTransfer.types.includes('Files');
 
   return (
     <AvatarPickerUploadContext.Provider value={{ choose: () => fileRef.current?.click(), uploading }}>
       <TabsContent
         data-slot="avatar-picker-upload-content"
         data-uploading={uploading || undefined}
-        data-dragging={dragging || undefined}
+        data-dragging={(dragging && !uploading) || undefined}
         data-has-image={value.imageUrl ? true : undefined}
         aria-busy={uploading}
         value="upload"
@@ -283,7 +285,9 @@ function AvatarPickerUploadContent({
         // Without preventDefault on every dragover the browser refuses the drop.
         onDragOver={(event) => {
           onDragOver?.(event);
-          if (holdsFiles(event)) event.preventDefault();
+          if (!holdsFiles(event)) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = uploading ? 'none' : 'copy';
         }}
         onDragLeave={(event) => {
           onDragLeave?.(event);
@@ -296,6 +300,7 @@ function AvatarPickerUploadContent({
           setDragging(false);
           if (!holdsFiles(event)) return;
           event.preventDefault();
+          if (uploading) return;
           // `accept` filters only the file picker; a drop can carry any file.
           onFile([...event.dataTransfer.files].find((file) => file.type.startsWith('image/')));
         }}
