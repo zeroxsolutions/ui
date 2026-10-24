@@ -297,7 +297,7 @@ describe('AvatarPicker', () => {
   it('reads an image dropped on the pane inline as the avatar, clearing the emoji', async () => {
     const onChange = vi.fn();
     render(
-      <Picker defaultTab="upload" value={{ emoji: '😀' }} onValueChange={onChange}>
+      <Picker defaultTab="upload" value={{ emoji: '\u{1F600}' }} onValueChange={onChange}>
         <UploadPane />
       </Picker>,
     );
@@ -389,7 +389,8 @@ describe('AvatarPicker', () => {
     expect(pane.hasAttribute('data-dragging')).toBe(false);
   });
 
-  it('shows the current image in the preview and marks the pane, only while the avatar is an image', () => {
+  it('shows the preview and marks the pane only while the avatar is an image', () => {
+    const preview = () => document.querySelector('[data-slot="avatar-picker-upload-preview"]');
     const { rerender } = render(
       <Picker defaultTab="upload" value={{ imageUrl: 'https://cdn.example/a.png' }}>
         <AvatarPickerUploadContent>
@@ -399,17 +400,18 @@ describe('AvatarPicker', () => {
     );
     openEditor();
 
-    expect(screen.getByRole('img', { name: 'Current avatar' }).getAttribute('src')).toBe('https://cdn.example/a.png');
+    // jsdom loads no image, so upstream AvatarImage never draws its img here; the root stands for the preview.
+    expect(preview()?.getAttribute('data-size')).toBe('lg');
     expect(screen.getByRole('tabpanel').hasAttribute('data-has-image')).toBe(true);
 
     rerender(
-      <Picker defaultTab="upload" value={{ emoji: '😀' }}>
+      <Picker defaultTab="upload" value={{ emoji: '\u{1F600}' }}>
         <AvatarPickerUploadContent>
           <AvatarPickerUploadPreview alt="Current avatar" />
         </AvatarPickerUploadContent>
       </Picker>,
     );
-    expect(screen.queryByRole('img', { name: 'Current avatar' })).toBeNull();
+    expect(preview()).toBeNull();
     expect(screen.getByRole('tabpanel').hasAttribute('data-has-image')).toBe(false);
   });
 

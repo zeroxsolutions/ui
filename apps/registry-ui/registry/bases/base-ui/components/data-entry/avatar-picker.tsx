@@ -1,6 +1,7 @@
 import { Check, Trash2 } from 'lucide-react';
 import * as React from 'react';
 
+import { Avatar, AvatarImage } from '@/registry/bases/base-ui/ui/avatar';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Empty } from '@/registry/bases/base-ui/ui/empty';
 import { Field, FieldLabel } from '@/registry/bases/base-ui/ui/field';
@@ -321,21 +322,29 @@ function AvatarPickerUploadContent({
   );
 }
 
+interface AvatarPickerUploadPreviewProps extends React.ComponentProps<typeof Avatar> {
+  /** Names the image; empty marks it decorative. */
+  alt?: string;
+}
+
 /**
- * The avatar's current image, drawn round and cropped to fill like the `Avatar`
- * it becomes; renders nothing while the avatar is not an image. Name it with
- * `alt`.
+ * The avatar's current image, in an `Avatar` at size `lg` unless a `size` is
+ * given; renders nothing while the avatar is not an image. `children` follow the
+ * image, so an `AvatarFallback` there shows while it loads or when it fails.
  */
-function AvatarPickerUploadPreview({ className, ...props }: React.ComponentProps<'img'>): React.ReactNode {
+function AvatarPickerUploadPreview({
+  alt = '',
+  size = 'lg',
+  children,
+  ...props
+}: AvatarPickerUploadPreviewProps): React.ReactNode {
   const { value } = useAvatarPicker();
   if (!value.imageUrl) return null;
   return (
-    <img
-      data-slot="avatar-picker-upload-preview"
-      src={value.imageUrl}
-      className={cn('size-24 rounded-full object-cover', className)}
-      {...props}
-    />
+    <Avatar data-slot="avatar-picker-upload-preview" size={size} {...props}>
+      <AvatarImage src={value.imageUrl} alt={alt} />
+      {children}
+    </Avatar>
   );
 }
 
@@ -490,5 +499,6 @@ export type {
   AvatarPickerTab,
   AvatarPickerProps,
   AvatarPickerUploadContentProps,
+  AvatarPickerUploadPreviewProps,
   AvatarPickerColorGroupProps,
 };

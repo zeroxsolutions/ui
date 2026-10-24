@@ -35,7 +35,7 @@ pnpm add lucide-react
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add button empty field input popover tabs utils @zui/emoji-picker
+pnpm dlx shadcn@latest add avatar button empty field input popover tabs utils @zui/emoji-picker
 ```
 
 <Step>Copy the component into `components/data-entry/avatar-picker.tsx`.</Step>
@@ -200,8 +200,16 @@ avatar is an image. While dragging, the frame takes a primary border. It sets
 
 ### AvatarPickerUploadPreview
 
-Renders an `img` and takes every prop an `img` takes. The avatar's current image, drawn round and cropped to fill
-like the `Avatar` it becomes; it renders nothing while the avatar is not an image. Name it with `alt`. It sets
+Renders shadcn's [`Avatar`](https://ui.shadcn.com/docs/components/base/avatar) and takes every prop it takes,
+plus:
+
+| Prop  | Type     | Default |
+| ----- | -------- | ------- |
+| `alt` | `string` | `''`    |
+
+The avatar's current image, in an `AvatarImage`; it renders nothing while the avatar is not an image. It
+defaults `size` to `lg`. `alt` names the image, and an empty one marks it decorative. `children` follow the
+image, so an `AvatarFallback` placed there shows while it loads or when it fails. It sets
 `data-slot="avatar-picker-upload-preview"`.
 
 ### AvatarPickerUploadTrigger
