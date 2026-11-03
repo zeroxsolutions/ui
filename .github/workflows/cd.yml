@@ -48,6 +48,7 @@ jobs:
     with:
       targets: wrangler:deploy
       environment: ${{ github.ref_name }}
+      mode: affected
 
   # Publish whatever the workspace declares an `rclone:sync` target for. Identifier-free like
   # the rest of this file: `run-many` matches no project in a repo that declares none and
@@ -95,7 +96,8 @@ jobs:
   # phone" QR opens in Expo Go. Each project declaring `eas:update` publishes to its own Expo project,
   # so EXPO_TOKEN has to be allowed to publish to every one of them. A job of its own after
   # the site deploy: what fails it is Expo's login or quota, so the deployed site stays as it is and
-  # re-running this job retries the updates alone.
+  # re-running this job retries the updates alone. Affected like `deploy`, so a change that reaches
+  # no native preview publishes no update.
   eas-update:
     needs: [deploy]
     uses: ./.github/workflows/nx-deploy.yml
@@ -103,3 +105,4 @@ jobs:
     with:
       targets: eas:update
       environment: ${{ github.ref_name }}
+      mode: affected
