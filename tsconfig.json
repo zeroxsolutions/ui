@@ -38,6 +38,9 @@
     },
     {
       "path": "./apps/registry-native-ui-docs-zone"
+    },
+    {
+      "path": "./apps/registry-native-ui-docs-zone-e2e"
     }
   ],
   "compilerOptions": {

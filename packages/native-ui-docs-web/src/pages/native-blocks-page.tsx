@@ -1,12 +1,11 @@
 import type { ReactNode } from 'react';
 
-import { HostLink } from '@zeroxsolutions/ui/site/components/navigation/host-link';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/empty';
 
 import { EngineSwitcher } from '../components/navigation/engine-switcher';
 
 interface NativeBlocksPageProps {
-  /** The web blocks page, which the empty state points to. */
+  /** The web blocks page, which the empty state points to with a plain anchor, since another app serves it. */
   webBlocksHref: string;
 }
 
@@ -22,8 +21,8 @@ function NativeBlocksPage({ webBlocksHref }: NativeBlocksPageProps): ReactNode {
         <EmptyHeader>
           <EmptyTitle>No native blocks yet</EmptyTitle>
           <EmptyDescription>
-            The registry publishes no React Native block yet. The <HostLink href={webBlocksHref}>web blocks</HostLink>{' '}
-            are composed from the web components.
+            The registry publishes no React Native block yet. The <a href={webBlocksHref}>web blocks</a> are composed
+            from the web components.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

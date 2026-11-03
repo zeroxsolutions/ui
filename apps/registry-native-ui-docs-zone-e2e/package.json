@@ -1,0 +1,26 @@
+{
+  "name": "@zeroxsolutions/registry-native-ui-docs-zone-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "@zeroxsolutions/icons": "workspace:*"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "@zeroxsolutions/registry-native-ui-docs-zone",
+      "@zeroxsolutions/native-preview",
+      "@zeroxsolutions/native-preview-uniwind"
+    ],
+    "targets": {
+      "e2e": {
+        "dependsOn": [
+          {
+            "projects": ["@zeroxsolutions/registry-native-ui-docs-zone"],
+            "target": "wrangler:build"
+          }
+        ],
+        "parallelism": false
+      }
+    }
+  }
+}
