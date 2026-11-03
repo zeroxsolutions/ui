@@ -64,3 +64,14 @@ test("the native installation's Uniwind tab says how to write Uniwind's types be
 
   await expect(page.getByText('npx uniwind generate-artifacts --css ./global.css')).toBeVisible();
 });
+
+test("a native docs page's code block is highlighted, its tokens in more than one colour", async ({ page }) => {
+  await page.goto('/native/docs/installation');
+
+  const block = page.getByRole('main').getByRole('code').filter({ hasText: 'module.exports' }).first();
+  await expect
+    .poll(() =>
+      block.locator('span').evaluateAll((spans) => new Set(spans.map((span) => getComputedStyle(span).color)).size),
+    )
+    .toBeGreaterThan(1);
+});
