@@ -1,0 +1,17 @@
+{
+  "extends": ["../../.oxlintrc.jsonc"],
+  "plugins": ["nextjs", "react", "react-perf", "jsx-a11y", "vitest"],
+  "ignorePatterns": [
+    ".next/**",
+    ".source/**",
+    "**/dist",
+    "**/out-tsc",
+    "**/vite.config.*.timestamp*",
+    "**/vitest.config.*.timestamp*",
+    "**/worker-configuration.d.ts",
+    "**/cloudflare-env.d.ts",
+    "**/test-output",
+    "**/.open-next",
+    "**/.wrangler"
+  ]
+}

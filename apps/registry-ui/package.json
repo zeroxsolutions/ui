@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@base-ui/react": "catalog:",
-    "@opennextjs/cloudflare": "1.20.7",
+    "@opennextjs/cloudflare": "catalog:",
     "@shikijs/langs": "catalog:",
     "@zeroxsolutions/fluent-emoji": "workspace:*",
     "@zeroxsolutions/native-ui-docs-web": "workspace:*",
@@ -12,7 +12,7 @@
     "@zeroxsolutions/ui": "workspace:*",
     "@zeroxsolutions/ui-docs-web": "workspace:*",
     "fumadocs-core": "catalog:",
-    "fumadocs-mdx": "15.4.5",
+    "fumadocs-mdx": "catalog:",
     "lucide-react": "catalog:",
     "next": "catalog:",
     "next-themes": "catalog:",

@@ -1,0 +1,26 @@
+import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
+
+import { NativeBlocksPage } from '@zeroxsolutions/native-ui-docs-web/pages/native-blocks-page';
+import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
+import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
+
+import { webBlocksRoute } from '@/routes/web-routes';
+
+export const dynamic = 'force-static';
+
+// An engine outside the set answers 404.
+export const dynamicParams = false;
+
+export function generateStaticParams(): { engine: string }[] {
+  return NATIVE_ENGINES.map((engine) => ({ engine }));
+}
+
+export const metadata: Metadata = {
+  title: 'Native blocks',
+  description: 'The blocks the registry publishes for React Native: none yet.',
+};
+
+export default function Page(): ReactNode {
+  return <NativeBlocksPage webBlocksHref={webBlocksRoute.build({ base: DEFAULT_COMPONENT_BASE })} />;
+}

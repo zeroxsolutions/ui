@@ -35,6 +35,9 @@
     },
     {
       "path": "./packages/native-ui-docs-web"
+    },
+    {
+      "path": "./apps/registry-native-ui-docs-zone"
     }
   ],
   "compilerOptions": {
