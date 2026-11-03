@@ -5,9 +5,8 @@ frontends install. The registry site is the one app deployed; it serves the docs
 
 ## Workspace
 
-- `apps/registry-ui` (+ `registry-ui-e2e`) - the registry: the composed items' source, `registry.json`,
-  and the Next.js site on a Cloudflare worker that serves both, with the web docs at `/docs` and the
-  native docs at `/native/docs`.
+- `apps/registry-ui` (+ `registry-ui-e2e`) - the Next.js site on a Cloudflare worker that serves the
+  registry's items and their docs, with the web docs at `/docs` and the native docs at `/native/docs`.
 - `apps/native-preview` (`@zeroxsolutions/native-preview`) - the Expo app that draws the native items'
   demos: exported for web into the site's `/native-preview`, and published per style as EAS updates
   that the docs' QR opens in Expo Go.
@@ -15,6 +14,13 @@ frontends install. The registry site is the one app deployed; it serves the docs
 - `packages/fluent-emoji` (`@zeroxsolutions/fluent-emoji`) - Fluent emoji components, and the artwork
   they load from a public bucket.
 - `packages/icons` (`@zeroxsolutions/icons`) - the org's icon set.
+- `packages/ui` (`@zeroxsolutions/ui`) - the web items' source, `registry.json`, and the build that
+  publishes them as the `base-*` registries the registry site serves.
+- `packages/ui-docs-web` (`@zeroxsolutions/ui-docs-web`) - the web docs' content, the pages of `/`,
+  `/docs`, `/blocks` and `/view`, and their route units; the registry site renders the pages.
 - `packages/native-ui` (`@zeroxsolutions/native-ui`) - the React Native items and the build that
   publishes them as the `nativewind-*` and `uniwind-*` registries the registry site serves.
+- `packages/native-ui-docs-web` (`@zeroxsolutions/native-ui-docs-web`) - the native docs' content,
+  the pages of `/native`, `/native/docs`, `/native/components` and `/native/blocks`, and their route
+  units; the registry site renders the pages.
 - `iac/` - Terraform, outside the nx graph: the one R2 bucket that serves the emoji artwork.

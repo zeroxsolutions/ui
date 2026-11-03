@@ -2,9 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { DocsArticle } from '@/components/layout/docs-article';
-import { EngineSwitcher } from '@/components/navigation/engine-switcher';
-import { NATIVE_ENGINES } from '@/constants/native-engines';
+import { NativeComponentPage } from '@zeroxsolutions/native-ui-docs-web/pages/native-component-page';
+import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
 import {
   canonicalNativeComponentUrl,
   nativeComponentsSources,
@@ -14,15 +13,13 @@ import {
 import { nativePageMarkdownByStyle } from '@/lib/native-page-markdown';
 import { nativeMdxComponents } from '@/mdx-components';
 
-import { NativeCopyPageButton } from '../../../_components/general/native-copy-page-button';
-
 export const revalidate = false;
 export const dynamic = 'force-static';
 
 // An engine outside the set answers 404 rather than a page whose snippets name an engine nobody publishes.
 export const dynamicParams = false;
 
-interface NativeComponentPageProps {
+interface NativeComponentRouteProps {
   params: Promise<{ engine: string; slug?: string[] }>;
 }
 
@@ -32,7 +29,7 @@ export function generateStaticParams(): { engine: string; slug: string[] }[] {
   );
 }
 
-async function componentPage(params: NativeComponentPageProps['params']) {
+async function componentPage(params: NativeComponentRouteProps['params']) {
   const { engine: segment, slug } = await params;
   const engine = NATIVE_ENGINES.find((known) => known === segment);
   const page = engine && nativeComponentsSources[engine].getPage(slug);
@@ -40,7 +37,7 @@ async function componentPage(params: NativeComponentPageProps['params']) {
   return { engine, page };
 }
 
-export async function generateMetadata({ params }: NativeComponentPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: NativeComponentRouteProps): Promise<Metadata> {
   const { page } = await componentPage(params);
   return {
     title: page.data.title,
@@ -51,21 +48,18 @@ export async function generateMetadata({ params }: NativeComponentPageProps): Pr
   };
 }
 
-export default async function NativeComponentPage({ params }: NativeComponentPageProps): Promise<ReactNode> {
+export default async function Page({ params }: NativeComponentRouteProps): Promise<ReactNode> {
   const { engine, page } = await componentPage(params);
   const { body: Body, toc } = await page.data.load();
 
   return (
-    <DocsArticle
-      title={page.data.title}
-      description={page.data.description}
-      tabs={<EngineSwitcher />}
-      copyPage={<NativeCopyPageButton markdown={await nativePageMarkdownByStyle(page, engine)} />}
+    <NativeComponentPage
+      page={page}
+      markdown={await nativePageMarkdownByStyle(page, engine)}
       tree={nativePageTree(engine)}
-      url={page.url}
       toc={toc}
     >
       <Body components={nativeMdxComponents(engine)} />
-    </DocsArticle>
+    </NativeComponentPage>
   );
 }

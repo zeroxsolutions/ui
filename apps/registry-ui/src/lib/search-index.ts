@@ -3,7 +3,7 @@ import type { AdvancedIndex } from 'fumadocs-core/search/server';
 
 import { canonicalNativeComponentsSource, nativeDocsSource } from '@/lib/native-source';
 import { source } from '@/lib/source';
-import type { Platform } from '@/types/platform';
+import type { Platform } from '@zeroxsolutions/ui/site/types/platform';
 
 interface IndexedPage {
   url: string;

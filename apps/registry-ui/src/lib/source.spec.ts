@@ -4,11 +4,14 @@ import { join, resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { COMPONENT_BASES } from '@/constants/component-bases';
-import { Index } from '@/registry/bases/base-ui/examples/__index__';
+import { COMPONENT_BASES } from '@zeroxsolutions/ui/site/constants/component-bases';
+import { Index } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__index__';
 
 const APP = resolve(import.meta.dirname, '../..');
-const CONTENT = join(APP, 'content/docs');
+/** The web registry's package, whose `registry.json` paths are relative to it. */
+const UI = resolve(APP, '../../packages/ui');
+const CONTENT = resolve(APP, '../../packages/ui-docs-web/content/docs');
+const NATIVE_CONTENT = resolve(APP, '../../packages/native-ui-docs-web/content/native');
 
 /** The content tree: every page's slug (`components/base/button`), and each folder's `meta.json` pages by folder (`''` is the root). */
 interface DocsTree {
@@ -74,7 +77,7 @@ interface ItemText {
 
 /** The components and the block `registry.json` publishes, by the name an item page is named for. */
 function readItems(): Map<string, ItemText> {
-  const { items } = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as {
+  const { items } = JSON.parse(readFileSync(join(UI, 'registry.json'), 'utf8')) as {
     items: (ItemText & { name: string; type: string })[];
   };
   return new Map(
@@ -86,7 +89,7 @@ function readItems(): Map<string, ItemText> {
 
 /** The registry.json items published as `registry:component`, by name. */
 function readComponentNames(): Set<string> {
-  const { items } = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as {
+  const { items } = JSON.parse(readFileSync(join(UI, 'registry.json'), 'utf8')) as {
     items: { name: string; type: string }[];
   };
   return new Set(items.filter((item) => item.type === 'registry:component').map((item) => item.name));
@@ -94,7 +97,7 @@ function readComponentNames(): Set<string> {
 
 /** The names registry.json publishes as `registry:example`. */
 function readExampleNames(): string[] {
-  const { items } = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as {
+  const { items } = JSON.parse(readFileSync(join(UI, 'registry.json'), 'utf8')) as {
     items: { name: string; type: string }[];
   };
   return items.filter((item) => item.type === 'registry:example').map((item) => item.name);
@@ -187,7 +190,7 @@ interface ComponentItem {
 
 /** The items registry.json publishes as `registry:component`. */
 function readComponentItems(): ComponentItem[] {
-  const { items } = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as {
+  const { items } = JSON.parse(readFileSync(join(UI, 'registry.json'), 'utf8')) as {
     items: {
       name: string;
       type: string;
@@ -443,7 +446,7 @@ function apiProblems(
 
 /** An item's first file, which holds its family. */
 function familySource(item: ComponentItem): string {
-  return readFileSync(join(APP, item.files[0]?.path ?? ''), 'utf8');
+  return readFileSync(join(UI, item.files[0]?.path ?? ''), 'utf8');
 }
 
 /**
@@ -507,8 +510,8 @@ describe('content/docs', () => {
   });
 
   it('reaches every native docs and component page from its own meta.json', () => {
-    expect(unreachedPages(readDocsTree(join(APP, 'content/native/docs')))).toEqual([]);
-    expect(unreachedPages(readDocsTree(join(APP, 'content/native/components')))).toEqual([]);
+    expect(unreachedPages(readDocsTree(join(NATIVE_CONTENT, 'docs')))).toEqual([]);
+    expect(unreachedPages(readDocsTree(join(NATIVE_CONTENT, 'components')))).toEqual([]);
   });
 
   it('reports a page no meta.json lists or links', () => {

@@ -1,8 +1,11 @@
 'use client';
 
 import { setFluentEmojiBase } from '@zeroxsolutions/fluent-emoji';
+import { HostProvider } from '@zeroxsolutions/ui/host';
 import { ThemeProvider } from 'next-themes';
 import type { ReactNode } from 'react';
+
+import { useNextHost } from './next-host';
 
 // Point the whole fluent-emoji resolver at the org's bucket, which serves every style from one root
 // (see the package README's "Serving every style from one base"), so `anim` resolves too, not just the
@@ -14,13 +17,14 @@ import type { ReactNode } from 'react';
 setFluentEmojiBase('https://fluent-emoji.zeroxsolutions.com');
 
 /**
- * The providers every page renders inside. The theme is a class on `<html>`, which the stylesheet's
+ * The providers every page renders inside. The host hands the site components Next's link and router. The theme is a class on `<html>`, which the stylesheet's
  * `dark` variant reads; left unset, the provider follows the system's colour scheme.
  */
 function AppProviders({ children }: { children: ReactNode }): ReactNode {
+  const host = useNextHost();
   return (
     <ThemeProvider attribute="class" disableTransitionOnChange>
-      {children}
+      <HostProvider host={host}>{children}</HostProvider>
     </ThemeProvider>
   );
 }

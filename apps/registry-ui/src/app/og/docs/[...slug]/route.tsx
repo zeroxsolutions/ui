@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { shareImage } from '@/lib/share-image';
 import { docsPageImage, source } from '@/lib/source';
-import { docsShareImageRoute } from '@/routes/app-routes';
+import { docsShareImageRoute } from '@zeroxsolutions/ui-docs-web/routes';
 
 export const revalidate = false;
 export const dynamicParams = false;

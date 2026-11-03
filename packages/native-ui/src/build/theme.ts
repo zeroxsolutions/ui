@@ -27,7 +27,7 @@ export interface Srgb {
 }
 
 /**
- * `success` and `warning` take the values the web registry's items add (apps/registry-ui/registry.json).
+ * `success` and `warning` take the values the web registry's items add (packages/ui/registry.json).
  * The web registry declares no foreground for either; each foreground is Vega's light `foreground`,
  * the neutral that keeps 4.5:1 contrast on both tones in both schemes, where `primary-foreground` does not.
  */

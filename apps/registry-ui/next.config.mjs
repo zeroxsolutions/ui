@@ -4,8 +4,8 @@ import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
 import { createMDX } from 'fumadocs-mdx/next';
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
 
-import { COMPONENT_BASES } from './src/constants/component-bases.config.mjs';
-import { DEFAULT_NATIVE_ENGINE } from './src/constants/native-engines.config.mjs';
+import { COMPONENT_BASES } from '@zeroxsolutions/ui/site/constants/component-bases.config.mjs';
+import { DEFAULT_NATIVE_ENGINE } from '@zeroxsolutions/ui/site/constants/native-engines.config.mjs';
 
 // A base's own index, and its Markdown at `<base>.md`, are already under the base.
 const UNDER_A_BASE = `(?:${COMPONENT_BASES.join('|')})(?:\\.md)?$`;

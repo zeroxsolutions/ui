@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { RegistryExample } from '@/components/data-display/registry-example';
-import { publishedBlocks } from '@/lib/registry';
+import { publishedBlocks } from '@zeroxsolutions/ui-docs-web/lib/published-items';
+import { ViewPage } from '@zeroxsolutions/ui-docs-web/pages/view-page';
 
 export const revalidate = false;
 export const dynamic = 'force-static';
@@ -25,13 +25,6 @@ export async function generateMetadata({ params }: ViewPageProps): Promise<Metad
   return { title: block.title, description: block.description };
 }
 
-/** One block alone, with no site chrome, as the frames on the docs and the blocks page show it. */
-export default async function ViewPage({ params }: ViewPageProps): Promise<ReactNode> {
-  const { name } = await params;
-
-  return (
-    <main className="p-6">
-      <RegistryExample name={name} />
-    </main>
-  );
+export default async function Page({ params }: ViewPageProps): Promise<ReactNode> {
+  return <ViewPage name={(await params).name} />;
 }

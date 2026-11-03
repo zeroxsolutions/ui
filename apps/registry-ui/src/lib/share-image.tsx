@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-import { SiteLogo } from '@/components/general/site-logo';
+import { SiteLogo } from '@zeroxsolutions/ui/site/components/general/site-logo';
 
 /** A share image is 1200 by 630, the size Open Graph readers crop to. */
 const SIZE = { width: 1200, height: 630 };

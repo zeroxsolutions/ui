@@ -74,12 +74,12 @@ Each package's README covers its API.
 
 ## Repository layout
 
-| Path                   | Contents                                                                                |
-| ---------------------- | --------------------------------------------------------------------------------------- |
-| `apps/registry-ui`     | The registry items' source, `registry.json`, and the Next.js docs site that serves both |
-| `apps/registry-ui-e2e` | Playwright tests against the built site                                                 |
-| `packages/*`           | The npm packages above                                                                  |
-| `iac/`                 | Terraform for the bucket that serves the emoji artwork                                  |
+| Path                   | Contents                                                              |
+| ---------------------- | --------------------------------------------------------------------- |
+| `apps/registry-ui`     | The Next.js docs site that serves the registry's items and their docs |
+| `apps/registry-ui-e2e` | Playwright tests against the built site                               |
+| `packages/*`           | The npm packages above                                                |
+| `iac/`                 | Terraform for the bucket that serves the emoji artwork                |
 
 ## Development
 

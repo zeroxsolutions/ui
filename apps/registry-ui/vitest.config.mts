@@ -12,15 +12,15 @@ export default defineConfig({
   // postcss.config.mjs names its plugin as a string, which Next resolves and Vite rejects.
   css: { postcss: { plugins: [tailwindcss()] } },
   resolve: {
-    // Mirror apps/registry-ui/tsconfig.json path mapping. Array form so the more
-    // specific `@/registry` wins over `@` (both would otherwise match a
-    // `@/registry/...` import, since each string `find` matches `find` or
-    // `find + '/'`). `@base-ui/react` etc. start with `@b`, not `@/`, so they
-    // fall through to node_modules untouched.
+    // Mirror apps/registry-ui/tsconfig.json path mapping, where `@/registry` resolves the imports the
+    // items in packages/ui make of each other. Array form so the more specific `@/registry` wins over `@`
+    // (both would otherwise match a `@/registry/...` import, since each string `find` matches `find` or
+    // `find + '/'`). `@base-ui/react` etc. start with `@b`, not `@/`, so they fall through to
+    // node_modules untouched.
     alias: [
       {
         find: '@/registry',
-        replacement: resolve(import.meta.dirname, 'registry'),
+        replacement: resolve(import.meta.dirname, '../../packages/ui/registry'),
       },
       { find: '@', replacement: resolve(import.meta.dirname, 'src') },
     ],
@@ -41,7 +41,7 @@ export default defineConfig({
           name: '@zeroxsolutions/registry-ui',
           environment: 'jsdom',
           setupFiles: ['src/test/setup.tsx'],
-          include: ['*.spec.ts', 'registry/**/*.{test,spec}.{ts,tsx}', 'src/**/*.{test,spec}.{ts,tsx}'],
+          include: ['*.spec.ts', 'src/**/*.{test,spec}.{ts,tsx}'],
           exclude: ['**/*.browser.spec.tsx', '**/node_modules/**'],
         },
       },
@@ -50,7 +50,7 @@ export default defineConfig({
         test: {
           name: '@zeroxsolutions/registry-ui:browser',
           setupFiles: ['src/test/browser-setup.ts'],
-          include: ['registry/**/*.browser.spec.tsx', 'src/**/*.browser.spec.tsx'],
+          include: ['src/**/*.browser.spec.tsx'],
           browser: {
             enabled: true,
             headless: true,

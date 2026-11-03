@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { canonicalNativeComponentsSource, nativeDocsSource, nativePageImage } from '@/lib/native-source';
 import { shareImage } from '@/lib/share-image';
-import { nativeShareImageRoute } from '@/routes/app-routes';
+import { nativeShareImageRoute } from '@zeroxsolutions/native-ui-docs-web/routes';
 
 export const revalidate = false;
 export const dynamicParams = false;

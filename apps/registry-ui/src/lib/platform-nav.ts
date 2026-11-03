@@ -1,5 +1,4 @@
-import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
-import { NATIVE_ENGINES } from '@/constants/native-engines';
+import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import {
   blocksRoute,
   componentRoute,
@@ -7,21 +6,23 @@ import {
   docsPageRoute,
   docsRoute,
   homeRoute,
+} from '@zeroxsolutions/ui-docs-web/routes';
+import { nativeLocation, type NativeLocation } from '@zeroxsolutions/native-ui-docs-web/lib/native-location';
+import {
   nativeBlocksRoute,
   nativeComponentRoute,
   nativeComponentsRoute,
   nativeDocsPageRoute,
   nativeDocsRoute,
   nativeHomeRoute,
-} from '@/routes/app-routes';
-import type { NativeEngine } from '@/types/native-engine';
-import type { Platform } from '@/types/platform';
-import type { SiteNavItem } from '@/types/site-nav-item';
+} from '@zeroxsolutions/native-ui-docs-web/routes';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
+import type { Platform } from '@zeroxsolutions/ui/site/types/platform';
+import type { SiteNavItem } from '@zeroxsolutions/ui/site/types/site-nav-item';
 
 /**
  * Where a pathname sits in the site's two trees. `slug` is a docs page's segments joined with `/`, `''`
- * for a tree's introduction. On native, `engine` is absent where the path's engine segment is outside
- * the known set, which is a 404. `other` is every web page outside home, the docs, components and blocks,
+ * for a tree's introduction. `other` is every web page outside home, the docs, components and blocks,
  * such as a block's own view.
  */
 export type PlatformLocation =
@@ -30,19 +31,12 @@ export type PlatformLocation =
   | { platform: 'web'; section: 'docs'; slug: string }
   | { platform: 'web'; section: 'components'; base: string; name?: string }
   | { platform: 'web'; section: 'blocks'; base: string }
-  | { platform: 'native'; section: 'home' }
-  | { platform: 'native'; section: 'docs'; slug: string }
-  | { platform: 'native'; section: 'components'; engine?: NativeEngine; name?: string }
-  | { platform: 'native'; section: 'blocks'; engine?: NativeEngine };
+  | NativeLocation;
 
 /** The pages each platform has, by docs slug (`''` for the introduction) and by component name, which the switch looks a counterpart up in. */
 export interface PlatformPages {
   web: { docs: readonly string[]; components: readonly string[] };
   native: { docs: readonly string[]; components: readonly string[] };
-}
-
-function knownEngine(segment: string): NativeEngine | undefined {
-  return NATIVE_ENGINES.find((engine) => engine === segment);
 }
 
 // A wildcard's matcher hands back its segments as an array, though the route's params type it as the joined string.
@@ -53,32 +47,8 @@ function slugOf(slug: string | string[]): string {
 /** Reads which platform, section and page `pathname` is. */
 export function platformLocation(pathname: string): PlatformLocation {
   if (homeRoute.matcher(pathname)) return { platform: 'web', section: 'home' };
-  if (nativeHomeRoute.matcher(pathname)) return { platform: 'native', section: 'home' };
-  const nativeComponent = nativeComponentRoute.matcher(pathname);
-  if (nativeComponent) {
-    const engine = knownEngine(nativeComponent.params.engine);
-    const name = nativeComponent.params.name;
-    return engine
-      ? { platform: 'native', section: 'components', engine, name }
-      : { platform: 'native', section: 'components', name };
-  }
-  const nativeComponents = nativeComponentsRoute.matcher(pathname);
-  if (nativeComponents) {
-    const engine = knownEngine(nativeComponents.params.engine);
-    return engine
-      ? { platform: 'native', section: 'components', engine }
-      : { platform: 'native', section: 'components' };
-  }
-  const nativeBlocks = nativeBlocksRoute.matcher(pathname);
-  if (nativeBlocks) {
-    const engine = knownEngine(nativeBlocks.params.engine);
-    return engine ? { platform: 'native', section: 'blocks', engine } : { platform: 'native', section: 'blocks' };
-  }
-  if (nativeDocsRoute.matcher(pathname)) return { platform: 'native', section: 'docs', slug: '' };
-  const nativeDocsPage = nativeDocsPageRoute.matcher(pathname);
-  if (nativeDocsPage) {
-    return { platform: 'native', section: 'docs', slug: slugOf(nativeDocsPage.params.slug) };
-  }
+  const native = nativeLocation(pathname);
+  if (native) return native;
 
   const component = componentRoute.matcher(pathname);
   if (component) return { platform: 'web', section: 'components', ...component.params };
@@ -157,24 +127,4 @@ export function platformNavItems(platform: Platform, engine: NativeEngine): Site
     { href: componentsRoute.build({ base }), label: 'Components', pattern: `${componentsRoute.pathname}{/*rest}` },
     { href: blocksRoute.build({ base }), label: 'Blocks', pattern: blocksRoute.pathname },
   ];
-}
-
-/** The page at `location` under `engine`, for the engine switcher; `undefined` where the path holds no engine. */
-export function withLocationEngine(location: PlatformLocation, engine: NativeEngine): string | undefined {
-  if (location.platform !== 'native' || !('engine' in location) || !location.engine) return undefined;
-  if (location.section === 'blocks') return nativeBlocksRoute.build({ engine });
-  return location.name
-    ? nativeComponentRoute.build({ engine, name: location.name })
-    : nativeComponentsRoute.build({ engine });
-}
-
-/**
- * `href` with its native engine segment swapped for `engine`, keeping its query and fragment. A native
- * component page is one MDX file read under every engine, so its links name one engine and are moved to
- * the engine the page is read under. Any other link comes back as it is.
- */
-export function withNativeEngine(href: string, engine: NativeEngine): string {
-  const [, path = '', rest = ''] = /^([^?#]*)(.*)$/.exec(href) ?? [];
-  const moved = path.startsWith('/') ? withLocationEngine(platformLocation(path), engine) : undefined;
-  return moved ? `${moved}${rest}` : href;
 }
