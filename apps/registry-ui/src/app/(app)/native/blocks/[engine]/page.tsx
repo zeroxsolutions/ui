@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { EngineSwitcher } from '@/components/navigation/engine-switcher';
+import { NativeBlocksPage } from '@zeroxsolutions/native-ui-docs-web/pages/native-blocks-page';
 import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/empty';
 import { blocksRoute } from '@zeroxsolutions/ui-docs-web/routes';
 
 export const dynamic = 'force-static';
@@ -22,23 +20,6 @@ export const metadata: Metadata = {
   description: 'The blocks the registry publishes for React Native: none yet.',
 };
 
-export default function NativeBlocksPage(): ReactNode {
-  return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 py-10">
-      <header className="flex flex-col gap-6">
-        <h1 className="text-3xl font-semibold tracking-tight">Blocks</h1>
-        <EngineSwitcher />
-      </header>
-      <Empty className="border">
-        <EmptyHeader>
-          <EmptyTitle>No native blocks yet</EmptyTitle>
-          <EmptyDescription>
-            The registry publishes no React Native block yet. The{' '}
-            <Link href={blocksRoute.build({ base: DEFAULT_COMPONENT_BASE })}>web blocks</Link> are composed from the web
-            components.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    </div>
-  );
+export default function Page(): ReactNode {
+  return <NativeBlocksPage webBlocksHref={blocksRoute.build({ base: DEFAULT_COMPONENT_BASE })} />;
 }

@@ -1,12 +1,9 @@
 import type { ReactNode } from 'react';
 
-import { DocsColumns } from '@zeroxsolutions/ui/site/components/layout/docs-columns';
+import { NativeDocsLayoutPage } from '@zeroxsolutions/native-ui-docs-web/pages/native-docs-layout-page';
 import { nativePageTree } from '@/lib/native-source';
 
-import { NativeDocsSidebar } from '../_components/navigation/native-docs-sidebar';
-
-/** The native sidebar beside each native docs page. */
 export default function NativeDocsLayout({ children }: { children: ReactNode }): ReactNode {
   const trees = { nativewind: nativePageTree('nativewind'), uniwind: nativePageTree('uniwind') };
-  return <DocsColumns sidebar={<NativeDocsSidebar trees={trees} />}>{children}</DocsColumns>;
+  return <NativeDocsLayoutPage trees={trees}>{children}</NativeDocsLayoutPage>;
 }

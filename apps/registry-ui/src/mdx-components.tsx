@@ -14,7 +14,6 @@ import {
   SourceCodeBlockTitle,
   SourceCodeBlockTrigger,
 } from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
-import { withNativeEngine } from '@/lib/platform-nav';
 import { registryHomepage } from '@/lib/registry';
 import { writtenDocsPage } from '@/lib/source';
 import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
@@ -26,14 +25,12 @@ import { ExamplePreview } from '@zeroxsolutions/ui-docs-web/components/data-disp
 import { InitCommand } from '@zeroxsolutions/ui-docs-web/components/data-display/init-command';
 import { WebComponentsJson } from '@zeroxsolutions/ui-docs-web/components/data-display/web-components-json';
 
-// This MDX override map is the docs routes' composition root, so importing the native docs' components
-// from their route's private folder (never a route segment, for the `_` prefix) is expected here, even
-// though this file sits at `src/` because Next/fumadocs requires it there.
-import { ComponentsJson } from '@/app/(app)/native/_components/data-display/components-json';
-import { EngineTab, EngineTabs } from '@/app/(app)/native/_components/data-display/engine-tabs';
-import { InstallCommand } from '@/app/(app)/native/_components/data-display/install-command';
-import { NativeDocsLink } from '@/app/(app)/native/_components/data-display/native-docs-link';
-import { NativePreview } from '@/app/(app)/native/_components/data-display/native-preview';
+import { ComponentsJson } from '@zeroxsolutions/native-ui-docs-web/components/data-display/components-json';
+import { EngineTab, EngineTabs } from '@zeroxsolutions/native-ui-docs-web/components/data-display/engine-tabs';
+import { InstallCommand } from '@zeroxsolutions/native-ui-docs-web/components/data-display/install-command';
+import { NativeDocsLink } from '@zeroxsolutions/native-ui-docs-web/components/data-display/native-docs-link';
+import { NativePreview } from '@zeroxsolutions/native-ui-docs-web/components/data-display/native-preview';
+import { withNativeEngine } from '@zeroxsolutions/native-ui-docs-web/lib/native-location';
 
 /**
  * Every element and component a page in `content/docs` may use, passed to its compiled body: the site's

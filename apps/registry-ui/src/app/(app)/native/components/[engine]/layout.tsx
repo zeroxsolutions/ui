@@ -1,12 +1,10 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { DocsColumns } from '@zeroxsolutions/ui/site/components/layout/docs-columns';
-import { DocsSidebar } from '@zeroxsolutions/ui/site/components/navigation/docs-sidebar';
+import { NativeComponentsLayoutPage } from '@zeroxsolutions/native-ui-docs-web/pages/native-components-layout-page';
 import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
 import { nativePageTree } from '@/lib/native-source';
 
-/** The native sidebar beside each component page, its component links under the page's engine. */
 export default async function NativeComponentsLayout({
   params,
   children,
@@ -18,5 +16,5 @@ export default async function NativeComponentsLayout({
   const engine = NATIVE_ENGINES.find((known) => known === segment);
   if (!engine) notFound();
 
-  return <DocsColumns sidebar={<DocsSidebar tree={nativePageTree(engine)} />}>{children}</DocsColumns>;
+  return <NativeComponentsLayoutPage tree={nativePageTree(engine)}>{children}</NativeComponentsLayoutPage>;
 }

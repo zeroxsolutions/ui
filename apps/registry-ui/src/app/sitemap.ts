@@ -5,7 +5,7 @@ import { canonicalNativeComponentsSource, nativeDocsSource } from '@/lib/native-
 import { registryHomepage } from '@/lib/registry';
 import { source } from '@/lib/source';
 import { blocksRoute, homeRoute } from '@zeroxsolutions/ui-docs-web/routes';
-import { nativeHomeRoute } from '@/routes/app-routes';
+import { nativeHomeRoute } from '@zeroxsolutions/native-ui-docs-web/routes';
 
 export const revalidate = false;
 

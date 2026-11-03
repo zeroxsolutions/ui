@@ -25,8 +25,7 @@
   "dependencies": {
     "@zeroxsolutions/routing": "catalog:",
     "@zeroxsolutions/ui": "workspace:*",
-    "fumadocs-core": "catalog:",
-    "motion": "catalog:"
+    "fumadocs-core": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:"

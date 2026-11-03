@@ -7,15 +7,15 @@ import {
   ComponentPreviewStage,
 } from '@zeroxsolutions/ui/site/components/data-display/component-preview';
 import { RegistryExample } from '@zeroxsolutions/ui/site/components/data-display/registry-example';
+import { HomePageCode } from '@zeroxsolutions/ui/site/components/data-display/home-page-code';
+import { HomeGrid } from '@zeroxsolutions/ui/site/components/general/home-grid';
+import { HomeShader } from '@zeroxsolutions/ui/site/components/general/home-shader';
 import { HostLink } from '@zeroxsolutions/ui/site/components/navigation/host-link';
 import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 
 import registryData from '@zeroxsolutions/ui/registry.json';
 
-import { HomePageCode } from '../components/data-display/home-page-code';
-import { HomeGrid } from '../components/general/home-grid';
-import { HomeShader } from '../components/general/home-shader';
 import { publishedBlocks, publishedItems } from '../lib/published-items';
 import { blocksRoute, componentRoute, componentsRoute, docsPageRoute, viewRoute } from '../routes';
 

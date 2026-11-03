@@ -1,0 +1,38 @@
+{
+  "name": "@zeroxsolutions/native-ui-docs-web",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./routes": {
+      "types": "./src/routes/index.ts",
+      "default": "./src/routes/index.ts"
+    },
+    "./pages/*": {
+      "types": "./src/pages/*.tsx",
+      "default": "./src/pages/*.tsx"
+    },
+    "./components/*": {
+      "types": "./src/components/*.tsx",
+      "default": "./src/components/*.tsx"
+    },
+    "./lib/*": {
+      "types": "./src/lib/*.ts",
+      "default": "./src/lib/*.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@zeroxsolutions/routing": "catalog:",
+    "@zeroxsolutions/ui": "workspace:*",
+    "fumadocs-core": "catalog:",
+    "qrcode.react": "^4.2.0"
+  },
+  "devDependencies": {
+    "@zeroxsolutions/native-ui": "workspace:*"
+  },
+  "peerDependencies": {
+    "next-themes": "catalog:",
+    "react": "catalog:"
+  }
+}

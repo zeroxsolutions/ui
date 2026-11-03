@@ -6,8 +6,6 @@ import {
   platformLocation,
   platformHome,
   platformNavItems,
-  withLocationEngine,
-  withNativeEngine,
   type PlatformPages,
 } from './platform-nav';
 
@@ -98,46 +96,5 @@ describe('platformNavItems', () => {
       ['Components', '/native/components/uniwind'],
       ['Blocks', '/native/blocks/uniwind'],
     ]);
-  });
-});
-
-describe('withLocationEngine', () => {
-  it('moves a component page, the components index and the blocks page to the other engine', () => {
-    expect(withLocationEngine(platformLocation('/native/components/nativewind/button'), 'uniwind')).toBe(
-      '/native/components/uniwind/button',
-    );
-    expect(withLocationEngine(platformLocation('/native/components/nativewind'), 'uniwind')).toBe(
-      '/native/components/uniwind',
-    );
-    expect(withLocationEngine(platformLocation('/native/blocks/uniwind'), 'nativewind')).toBe(
-      '/native/blocks/nativewind',
-    );
-  });
-
-  it('has nothing to move on a page whose path holds no engine', () => {
-    expect(withLocationEngine(platformLocation('/native/docs/installation'), 'uniwind')).toBeUndefined();
-  });
-});
-
-describe('withNativeEngine', () => {
-  it("rewrites a native component link's engine, keeping its fragment and query", () => {
-    expect(withNativeEngine('/native/components/nativewind/text', 'uniwind')).toBe('/native/components/uniwind/text');
-    expect(withNativeEngine('/native/components/nativewind/theme#fonts', 'uniwind')).toBe(
-      '/native/components/uniwind/theme#fonts',
-    );
-    expect(withNativeEngine('/native/components/nativewind?style=nova', 'uniwind')).toBe(
-      '/native/components/uniwind?style=nova',
-    );
-  });
-
-  it('leaves every other link as it is', () => {
-    for (const href of [
-      '/native/docs/installation#load-the-fonts',
-      '/docs/components/base',
-      'https://nativewind.dev',
-      '#usage',
-    ]) {
-      expect(withNativeEngine(href, 'uniwind')).toBe(href);
-    }
   });
 });

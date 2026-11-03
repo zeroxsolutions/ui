@@ -10,8 +10,8 @@ import {
   platformLocation,
   platformNavItems,
   type PlatformPages,
-  withNativeEngine,
 } from '@/lib/platform-nav';
+import { withNativeEngine } from '@zeroxsolutions/native-ui-docs-web/lib/native-location';
 
 /**
  * Hands the site's header and footer this app's web and native paths. A web page's counterpart switches
