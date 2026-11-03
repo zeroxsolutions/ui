@@ -22,8 +22,8 @@
       // Absent, a versioned preview still gets a *.workers.dev hostname from the account's own
       // subdomain setting; the registry has one public host.
       "preview_urls": false,
-      // The native paths on registry-ui's host. Cloudflare sends a request to the most specific matching
-      // route, so a path listed here is never registry-ui's.
+      // The native paths on registry-ui's host. A route takes precedence over a Custom Domain on the same
+      // hostname, so a path listed here is never registry-ui's.
       "routes": [
         { "pattern": "ui.zeroxsolutions.com/native", "zone_name": "zeroxsolutions.com" },
         { "pattern": "ui.zeroxsolutions.com/native/*", "zone_name": "zeroxsolutions.com" },

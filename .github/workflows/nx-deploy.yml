@@ -32,6 +32,10 @@ jobs:
 
       - uses: ./.github/actions/nx-setup
 
+      - name: Refuse a path two zones both claim
+        shell: bash
+        run: tools/check-zone-routes.sh
+
       - name: Deploy
         shell: bash
         env:
