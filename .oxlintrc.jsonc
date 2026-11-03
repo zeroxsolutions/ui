@@ -235,6 +235,22 @@
             "allow": [],
             "depConstraints": [
               {
+                "sourceTag": "type:context-frontend",
+                "notDependOnLibsWithTags": ["type:context-frontend"],
+              },
+              {
+                "sourceTag": "type:ui",
+                "notDependOnLibsWithTags": ["type:context-frontend"],
+              },
+              {
+                "sourceTag": "context:ui-docs",
+                "onlyDependOnLibsWithTags": ["context:ui-docs", "type:ui"],
+              },
+              {
+                "sourceTag": "context:native-ui-docs",
+                "onlyDependOnLibsWithTags": ["context:native-ui-docs", "type:ui"],
+              },
+              {
                 "sourceTag": "*",
                 "onlyDependOnLibsWithTags": ["*"],
               },

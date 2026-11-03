@@ -34,5 +34,11 @@
   "peerDependencies": {
     "next-themes": "catalog:",
     "react": "catalog:"
+  },
+  "nx": {
+    "tags": [
+      "type:context-frontend",
+      "context:native-ui-docs"
+    ]
   }
 }

@@ -98,6 +98,9 @@
     "uniwind": "1.13.0"
   },
   "nx": {
+    "tags": [
+      "type:ui"
+    ],
     "targets": {
       "build-registry": {
         "executor": "nx:run-commands",

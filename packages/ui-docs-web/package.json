@@ -29,5 +29,11 @@
   },
   "peerDependencies": {
     "react": "catalog:"
+  },
+  "nx": {
+    "tags": [
+      "type:context-frontend",
+      "context:ui-docs"
+    ]
   }
 }
