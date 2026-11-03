@@ -60,6 +60,7 @@
         "inputs": [
           "default",
           "^default",
+          "{workspaceRoot}/tools/check-worker-size.sh",
           {
             "runtime": "pwd"
           }
@@ -70,7 +71,7 @@
         "cache": true,
         "options": {
           "cwd": "{projectRoot}",
-          "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild && mkdir -p .open-next/assets/native-static && mv .open-next/assets/_next .open-next/assets/native-static/_next && test ! -e .open-next/assets/_next"
+          "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild && mkdir -p .open-next/assets/native-static && mv .open-next/assets/_next .open-next/assets/native-static/_next && test ! -e .open-next/assets/_next && ../../tools/check-worker-size.sh"
         }
       },
       "wrangler:dev": {
