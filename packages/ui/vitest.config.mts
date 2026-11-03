@@ -29,7 +29,7 @@ export default defineConfig({
           name: '@zeroxsolutions/ui',
           environment: 'jsdom',
           setupFiles: ['test/setup.ts'],
-          include: ['registry/**/*.{test,spec}.{ts,tsx}'],
+          include: ['registry/**/*.{test,spec}.{ts,tsx}', 'src/**/*.{test,spec}.{ts,tsx}'],
           exclude: ['**/*.browser.spec.tsx', '**/node_modules/**'],
         },
       },

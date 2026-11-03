@@ -27,7 +27,11 @@
     "registry/**/*.spec.js",
     "registry/**/*.test.jsx",
     "registry/**/*.spec.jsx",
-    "registry/**/*.d.ts"
+    "registry/**/*.d.ts",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.tsx"
   ],
   "references": [
     {

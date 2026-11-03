@@ -17,7 +17,7 @@
       "@/registry/*": ["./registry/*"]
     }
   },
-  "include": ["registry/**/*.ts", "registry/**/*.tsx"],
+  "include": ["registry/**/*.ts", "registry/**/*.tsx", "src/**/*.ts", "src/**/*.tsx"],
   "references": [
     {
       "path": "../icons/tsconfig.lib.json"
@@ -41,6 +41,10 @@
     "registry/**/*.test.js",
     "registry/**/*.spec.js",
     "registry/**/*.test.jsx",
-    "registry/**/*.spec.jsx"
+    "registry/**/*.spec.jsx",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.tsx"
   ]
 }

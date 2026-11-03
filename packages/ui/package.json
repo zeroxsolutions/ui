@@ -11,6 +11,10 @@
       ],
       "default": "./registry/*"
     },
+    "./host": {
+      "types": "./src/host/host-provider.tsx",
+      "default": "./src/host/host-provider.tsx"
+    },
     "./registry.json": "./registry.json",
     "./package.json": "./package.json"
   },
