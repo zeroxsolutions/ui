@@ -1,6 +1,6 @@
-import { registryStyle } from '@/lib/style-choice';
-import type { NativeEngine } from '@/types/native-engine';
-import type { PlatformStyle } from '@/types/platform';
+import { registryStyle } from '@zeroxsolutions/ui/site/lib/style-choice';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
+import type { PlatformStyle } from '@zeroxsolutions/ui/site/types/platform';
 
 /** The engine and the style a native page shows its install snippets in, and the origin the registry is served from. */
 export interface NativeInstallOf {

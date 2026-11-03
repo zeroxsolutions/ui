@@ -6,9 +6,9 @@
     "@base-ui/react": "catalog:",
     "@opennextjs/cloudflare": "1.20.7",
     "@zeroxsolutions/fluent-emoji": "workspace:*",
-    "@zeroxsolutions/routing": "0.0.7",
+    "@zeroxsolutions/routing": "catalog:",
     "@zeroxsolutions/ui": "workspace:*",
-    "fumadocs-core": "16.15.17",
+    "fumadocs-core": "catalog:",
     "fumadocs-mdx": "15.4.5",
     "lucide-react": "catalog:",
     "motion": "catalog:",
@@ -23,7 +23,6 @@
   "devDependencies": {
     "@tailwindcss/postcss": "catalog:",
     "@zeroxsolutions/native-ui": "workspace:*",
-    "msw": "3.0.0",
     "tailwindcss": "catalog:",
     "wrangler": "catalog:"
   },

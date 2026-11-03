@@ -1,11 +1,13 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { NextHostWrapper } from '@/test/next-host-wrapper';
 import { NativeRegistryEntry } from './native-registry-entry';
 
 const url = vi.hoisted(() => ({ search: '' }));
 
 vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   useSearchParams: (): URLSearchParams => new URLSearchParams(url.search),
 }));
 
@@ -22,7 +24,7 @@ beforeEach(() => {
 
 describe('NativeRegistryEntry', () => {
   it("names the engine's registry in the default style where neither the URL nor the reader names one", async () => {
-    render(<NativeRegistryEntry engine="nativewind" origin={ORIGIN} />);
+    render(<NativeRegistryEntry engine="nativewind" origin={ORIGIN} />, { wrapper: NextHostWrapper });
 
     expect(await screen.findByText(/"style": "nativewind-vega"/)).toBeTruthy();
     expect(
@@ -34,7 +36,7 @@ describe('NativeRegistryEntry', () => {
     localStorage.setItem('zui:style:native', 'vega');
     url.search = '?style=nova';
 
-    render(<NativeRegistryEntry engine="uniwind" origin={ORIGIN} />);
+    render(<NativeRegistryEntry engine="uniwind" origin={ORIGIN} />, { wrapper: NextHostWrapper });
 
     expect(await screen.findByText(/"style": "uniwind-nova"/)).toBeTruthy();
   });

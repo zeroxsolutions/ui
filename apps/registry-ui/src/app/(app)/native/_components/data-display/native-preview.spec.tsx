@@ -2,8 +2,9 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { ThemeProvider } from 'next-themes';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { NativeEngine } from '@/types/native-engine';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 
+import { NextHostWrapper } from '@/test/next-host-wrapper';
 import { NativePreview } from './native-preview';
 
 const PROJECT_ID = '0f6c4b9e-2d1a-4c3b-9e8f-7a6b5c4d3e2f';
@@ -13,6 +14,7 @@ const url = vi.hoisted(() => ({ search: '' }));
 const device = vi.hoisted(() => ({ ids: {} as Record<string, string | null> }));
 
 vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   useSearchParams: (): URLSearchParams => new URLSearchParams(url.search),
 }));
 
@@ -38,6 +40,7 @@ function renderPreview(engine: NativeEngine = 'nativewind'): void {
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <NativePreview engine={engine} name="button-demo" code="export {};" language="tsx" />
     </ThemeProvider>,
+    { wrapper: NextHostWrapper },
   );
 }
 

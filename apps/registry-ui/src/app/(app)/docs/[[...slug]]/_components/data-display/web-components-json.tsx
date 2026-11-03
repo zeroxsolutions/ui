@@ -2,12 +2,12 @@
 
 import { Suspense, type ReactNode } from 'react';
 
-import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
-import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
-import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
-import { useCurrentStyle } from '@/hooks/use-current-style';
-import { registryStyle } from '@/lib/style-choice';
-import type { PlatformStyle } from '@/types/platform';
+import { DocsCodeBlock } from '@zeroxsolutions/ui/site/components/data-display/docs-code-block';
+import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
+import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
+import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
+import { registryStyle } from '@zeroxsolutions/ui/site/lib/style-choice';
+import type { PlatformStyle } from '@zeroxsolutions/ui/site/types/platform';
 
 interface WebComponentsJsonProps {
   /** The origin the registry is served from, which the MDX components bind. */

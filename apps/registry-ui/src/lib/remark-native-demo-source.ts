@@ -1,4 +1,4 @@
-import { nativeDemoSourceOf } from '@/lib/rehype-docs-code';
+import { nativeDemoSourceOf } from '@zeroxsolutions/ui/site/lib/rehype-docs-code';
 
 interface MdastNode {
   type: string;

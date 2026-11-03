@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
 
-import { PAGE_MARKDOWN_FILE } from '@/constants/page-markdown-file';
-import { NATIVE_ENGINES } from '@/constants/native-engines';
-import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
+import { PAGE_MARKDOWN_FILE } from '@zeroxsolutions/ui/site/constants/page-markdown-file';
+import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
+import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
 import { nativePageMarkdown } from '@/lib/native-page-markdown';
 import { nativeComponentsSources } from '@/lib/native-source';
 

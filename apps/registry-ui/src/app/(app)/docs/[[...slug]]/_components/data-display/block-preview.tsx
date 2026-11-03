@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 
-import { BlockFrame } from '@/components/data-display/block-frame';
-import { ComponentPreview } from '@/components/data-display/component-preview';
+import { BlockFrame } from '@zeroxsolutions/ui/site/components/data-display/block-frame';
+import { ComponentPreview } from '@zeroxsolutions/ui/site/components/data-display/component-preview';
 import { publishedBlocks } from '@/lib/registry';
+import { viewRoute } from '@/routes/app-routes';
 import { Index } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__index__';
 
 import { ExampleSource } from './example-source';
@@ -24,7 +25,7 @@ function BlockPreview({ name, block, ...source }: BlockPreviewProps): ReactNode 
   if (!item) throw new Error(`BlockPreview: "${block}" is not a published block`);
   return (
     <ComponentPreview className="mt-4 mb-12">
-      <BlockFrame name={item.name} title={item.title} />
+      <BlockFrame src={viewRoute.build({ name: item.name })} title={item.title} />
       <ExampleSource name={name} {...source} />
     </ComponentPreview>
   );

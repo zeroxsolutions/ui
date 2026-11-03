@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { COMPONENT_BASES } from '@/constants/component-bases';
+import { COMPONENT_BASES } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { Index } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__index__';
 
 const APP = resolve(import.meta.dirname, '../..');

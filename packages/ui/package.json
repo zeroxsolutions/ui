@@ -11,6 +11,13 @@
       ],
       "default": "./registry/*"
     },
+    "./site/*": {
+      "types": [
+        "./src/site/*.tsx",
+        "./src/site/*.ts"
+      ],
+      "default": "./src/site/*"
+    },
     "./host": {
       "types": "./src/host/host-provider.tsx",
       "default": "./src/host/host-provider.tsx"
@@ -50,11 +57,13 @@
     "@zeroxsolutions/editor-core": "workspace:*",
     "@zeroxsolutions/fluent-emoji": "workspace:*",
     "@zeroxsolutions/icons": "workspace:*",
+    "@zeroxsolutions/routing": "catalog:",
     "class-variance-authority": "catalog:",
     "cmdk": "^1.1.1",
     "cn": "^0.4.0",
     "date-fns": "catalog:",
     "embla-carousel-react": "^8.6.0",
+    "fumadocs-core": "catalog:",
     "input-otp": "^1.4.2",
     "katex": "^0.16.11",
     "lucide-react": "catalog:",
@@ -78,6 +87,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "catalog:",
     "@types/katex": "^0.16.7",
+    "msw": "3.0.0",
     "shadcn": "catalog:",
     "tw-animate-css": "^1.4.0"
   },

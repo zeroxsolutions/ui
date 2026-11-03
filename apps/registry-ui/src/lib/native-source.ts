@@ -2,11 +2,11 @@ import { nativeComponents, nativeDocs } from 'collections/server';
 import type { Root } from 'fumadocs-core/page-tree';
 import { llms, loader } from 'fumadocs-core/source';
 
-import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
-import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
+import { DEFAULT_NATIVE_ENGINE } from '@zeroxsolutions/ui/site/constants/native-engines';
+import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
 import { nativePageMarkdown } from '@/lib/native-page-markdown';
 import { nativeComponentsRoute, nativeDocsRoute, nativeShareImageRoute } from '@/routes/app-routes';
-import type { NativeEngine } from '@/types/native-engine';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 
 /** The native docs pages, `content/native/docs`, under `/native/docs`. */
 export const nativeDocsSource = loader({

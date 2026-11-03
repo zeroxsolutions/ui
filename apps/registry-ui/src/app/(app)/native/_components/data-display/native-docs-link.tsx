@@ -2,10 +2,10 @@
 
 import type { ComponentProps, ReactNode } from 'react';
 
-import { useHydrated } from '@/hooks/use-hydrated';
-import { useRememberedEngine } from '@/hooks/use-remembered-choice';
+import { useHydrated } from '@zeroxsolutions/ui/site/hooks/use-hydrated';
+import { useRememberedEngine } from '@zeroxsolutions/ui/site/hooks/use-remembered-choice';
 import { withNativeEngine } from '@/lib/platform-nav';
-import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
+import { DEFAULT_NATIVE_ENGINE } from '@zeroxsolutions/ui/site/constants/native-engines';
 
 /**
  * A link on a native docs page, which has no engine in its path. A link to a component page follows the

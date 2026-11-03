@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { DocsArticle } from '@/components/layout/docs-article';
+import { DocsArticle } from '@zeroxsolutions/ui/site/components/layout/docs-article';
 import { EngineSwitcher } from '@/components/navigation/engine-switcher';
-import { NATIVE_ENGINES } from '@/constants/native-engines';
+import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
 import {
   canonicalNativeComponentUrl,
   nativeComponentsSources,

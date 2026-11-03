@@ -3,11 +3,11 @@
 import { usePathname } from 'next/navigation';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { COMPONENT_BASE_LABELS, COMPONENT_BASES } from '@/constants/component-bases';
+import { COMPONENT_BASE_LABELS, COMPONENT_BASES } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { platformLocation } from '@/lib/platform-nav';
 import { blocksRoute, componentRoute, componentsRoute } from '@/routes/app-routes';
 
-import { LinkTabs, LinkTabsItem } from './link-tabs';
+import { LinkTabs, LinkTabsItem } from '@zeroxsolutions/ui/site/components/navigation/link-tabs';
 
 /**
  * The bases a web component is documented on, as links to this page on each, the current one marked,

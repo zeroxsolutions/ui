@@ -9,7 +9,7 @@ import {
   SourceCodeBlockHeader,
   SourceCodeBlockLanguage,
   SourceCodeBlockTitle,
-} from '@/components/data-display/source-code-block';
+} from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
 
 /** A short source block on a home page: its language, a copy button and the code, which the block
  * highlights itself on the client, since a home page is no MDX. */

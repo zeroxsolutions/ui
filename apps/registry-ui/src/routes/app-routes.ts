@@ -1,7 +1,7 @@
 import { createDynamicRoute, createStaticRoute } from '@zeroxsolutions/routing';
 
-import type { ComponentBase } from '@/types/component-base';
-import type { NativeEngine } from '@/types/native-engine';
+import type { ComponentBase } from '@zeroxsolutions/ui/site/types/component-base';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 
 /** The registry's home page. */
 export const homeRoute = createStaticRoute('/', () => '/');

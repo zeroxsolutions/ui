@@ -1,6 +1,6 @@
 import { Children, isValidElement, type ReactNode } from 'react';
 
-import type { NativeEngine } from '@/types/native-engine';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 
 import { EngineTabsChooser } from './engine-tabs-chooser';
 

@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react';
 
-import { ComponentPreviewExcerpt, ComponentPreviewSource } from '@/components/data-display/component-preview';
+import {
+  ComponentPreviewExcerpt,
+  ComponentPreviewSource,
+} from '@zeroxsolutions/ui/site/components/data-display/component-preview';
 import {
   SourceCodeBlockActions,
   SourceCodeBlockCode,
@@ -11,7 +14,7 @@ import {
   SourceCodeBlockLineNumbers,
   SourceCodeBlockTitle,
   SourceCodeBlockTrigger,
-} from '@/components/data-display/source-code-block';
+} from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
 
 import { ComponentSource } from './component-source';
 

@@ -3,9 +3,12 @@
 import { useId, type ReactNode } from 'react';
 
 import { EXPO_PROJECT_IDS } from '@/constants/native-preview-device';
-import { PREVIEW_PLATFORM_LABELS, PREVIEW_PLATFORMS } from '@/constants/preview-platforms';
-import { rememberPreviewPlatform, useRememberedPreviewPlatform } from '@/hooks/use-remembered-choice';
-import type { NativeEngine } from '@/types/native-engine';
+import { PREVIEW_PLATFORM_LABELS, PREVIEW_PLATFORMS } from '@zeroxsolutions/ui/site/constants/preview-platforms';
+import {
+  rememberPreviewPlatform,
+  useRememberedPreviewPlatform,
+} from '@zeroxsolutions/ui/site/hooks/use-remembered-choice';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 import {
   Select,
   SelectContent,

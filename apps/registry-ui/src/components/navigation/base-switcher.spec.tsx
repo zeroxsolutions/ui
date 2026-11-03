@@ -1,11 +1,13 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { NextHostWrapper } from '@/test/next-host-wrapper';
 import { BaseSwitcher } from './base-switcher';
 
 const url = vi.hoisted(() => ({ pathname: '', search: '' }));
 
 vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   usePathname: (): string => url.pathname,
   useSearchParams: (): URLSearchParams => new URLSearchParams(url.search),
 }));
@@ -23,7 +25,7 @@ describe('BaseSwitcher', () => {
     url.pathname = '/docs/components/base/button';
     url.search = '?style=rhea';
 
-    render(<BaseSwitcher />);
+    render(<BaseSwitcher />, { wrapper: NextHostWrapper });
 
     const link = within(screen.getByRole('navigation', { name: 'Base' })).getByRole('link', { name: 'Base UI' });
     expect(link.getAttribute('aria-current')).toBe('page');
@@ -33,7 +35,7 @@ describe('BaseSwitcher', () => {
   it('links the blocks page under each base', () => {
     url.pathname = '/blocks/base';
 
-    render(<BaseSwitcher />);
+    render(<BaseSwitcher />, { wrapper: NextHostWrapper });
 
     const nav = screen.getByRole('navigation', { name: 'Base' });
     expect(within(nav).getByRole('link', { name: 'Base UI' }).getAttribute('href')).toBe('/blocks/base');
@@ -42,7 +44,7 @@ describe('BaseSwitcher', () => {
   it('renders nothing on a page whose path holds no base', () => {
     url.pathname = '/docs/installation';
 
-    render(<BaseSwitcher />);
+    render(<BaseSwitcher />, { wrapper: NextHostWrapper });
 
     expect(screen.queryByRole('navigation', { name: 'Base' })).toBeNull();
   });

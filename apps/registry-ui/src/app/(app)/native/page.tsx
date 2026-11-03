@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
-import { ComponentPreview, ComponentPreviewCaption } from '@/components/data-display/component-preview';
-import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
+import {
+  ComponentPreview,
+  ComponentPreviewCaption,
+} from '@zeroxsolutions/ui/site/components/data-display/component-preview';
+import { DEFAULT_NATIVE_ENGINE } from '@zeroxsolutions/ui/site/constants/native-engines';
 import { canonicalNativeComponentsSource } from '@/lib/native-source';
 import { registryHomepage } from '@/lib/registry';
 import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';

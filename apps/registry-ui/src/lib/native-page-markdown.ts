@@ -1,15 +1,15 @@
 import { asMarkdown } from 'fumadocs-core/server';
 import { Children, isValidElement, type ReactNode } from 'react';
 
-import { DEFAULT_NATIVE_ENGINE, NATIVE_ENGINE_LABELS } from '@/constants/native-engines';
-import { PLATFORM_STYLES } from '@/constants/platform-styles';
+import { DEFAULT_NATIVE_ENGINE, NATIVE_ENGINE_LABELS } from '@zeroxsolutions/ui/site/constants/native-engines';
+import { PLATFORM_STYLES } from '@zeroxsolutions/ui/site/constants/platform-styles';
 import { nativeComponentsJson, nativeInstallCommands } from '@/lib/native-install';
 import type { nativeDocsSource } from '@/lib/native-source';
 import { pageMarkdownDocument } from '@/lib/page-markdown';
 import { withNativeEngine } from '@/lib/platform-nav';
 import { registryHomepage } from '@/lib/registry';
-import type { NativeEngine } from '@/types/native-engine';
-import type { PlatformStyle } from '@/types/platform';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
+import type { PlatformStyle } from '@zeroxsolutions/ui/site/types/platform';
 
 /** What a native page's Markdown is rendered for: the engine its path names, absent on a docs page, and the style. */
 export interface NativeMarkdownOf {

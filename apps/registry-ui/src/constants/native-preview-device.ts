@@ -1,4 +1,4 @@
-import type { NativeEngine } from '@/types/native-engine';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 
 /**
  * The EAS project each engine's preview app publishes its updates to, one channel per native style, which

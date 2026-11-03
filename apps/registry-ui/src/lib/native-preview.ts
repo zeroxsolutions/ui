@@ -1,6 +1,6 @@
 import { EXPO_GO_SDK, EXPO_PROJECT_IDS } from '@/constants/native-preview-device';
-import type { NativeEngine } from '@/types/native-engine';
-import type { PlatformStyle } from '@/types/platform';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
+import type { PlatformStyle } from '@zeroxsolutions/ui/site/types/platform';
 
 /**
  * The `type` of the message a native preview posts to the page framing it, with the drawn demo's

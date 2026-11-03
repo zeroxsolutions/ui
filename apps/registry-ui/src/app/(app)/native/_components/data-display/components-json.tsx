@@ -2,12 +2,12 @@
 
 import { Suspense, type ReactNode } from 'react';
 
-import { DocsCodeBlock } from '@/components/data-display/docs-code-block';
-import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
-import { useCurrentStyle } from '@/hooks/use-current-style';
+import { DocsCodeBlock } from '@zeroxsolutions/ui/site/components/data-display/docs-code-block';
+import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
+import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
 import { nativeComponentsJson } from '@/lib/native-install';
-import type { NativeEngine } from '@/types/native-engine';
-import type { PlatformStyle } from '@/types/platform';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
+import type { PlatformStyle } from '@zeroxsolutions/ui/site/types/platform';
 
 interface ComponentsJsonProps {
   /** The engine whose `components.json` it is: NativeWind names its Tailwind 3 config, Uniwind's Tailwind 4 has none. */

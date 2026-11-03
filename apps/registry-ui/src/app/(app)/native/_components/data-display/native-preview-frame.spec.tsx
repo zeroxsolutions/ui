@@ -2,15 +2,17 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { ThemeProvider } from 'next-themes';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { NextHostWrapper } from '@/test/next-host-wrapper';
 import { NATIVE_PREVIEW_HEIGHT_MESSAGE } from '@/lib/native-preview';
 
-import type { NativeEngine } from '@/types/native-engine';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 
 import { NativePreviewFrame } from './native-preview-frame';
 
 const url = vi.hoisted(() => ({ search: '' }));
 
 vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   useSearchParams: (): URLSearchParams => new URLSearchParams(url.search),
 }));
 
@@ -29,6 +31,7 @@ function renderFrame(theme: 'light' | 'dark' = 'light', engine: NativeEngine = '
     <ThemeProvider attribute="class" defaultTheme={theme} enableSystem={false}>
       <NativePreviewFrame engine={engine} demo="button-demo" />
     </ThemeProvider>,
+    { wrapper: NextHostWrapper },
   );
 }
 

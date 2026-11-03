@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
-import { DocsColumns } from '@/components/layout/docs-columns';
-import { DocsSidebar } from '@/components/navigation/docs-sidebar';
+import { DocsColumns } from '@zeroxsolutions/ui/site/components/layout/docs-columns';
+import { DocsSidebar } from '@zeroxsolutions/ui/site/components/navigation/docs-sidebar';
 import { source } from '@/lib/source';
 
 /** The web docs' sidebar beside each page. */

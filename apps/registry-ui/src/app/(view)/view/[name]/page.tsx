@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { RegistryExample } from '@/components/data-display/registry-example';
+import { RegistryExample } from '@zeroxsolutions/ui/site/components/data-display/registry-example';
 import { publishedBlocks } from '@/lib/registry';
 
 export const revalidate = false;

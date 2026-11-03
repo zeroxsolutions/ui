@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { DocsArticle } from '@/components/layout/docs-article';
-import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
+import { DocsArticle } from '@zeroxsolutions/ui/site/components/layout/docs-article';
+import { DEFAULT_NATIVE_ENGINE } from '@zeroxsolutions/ui/site/constants/native-engines';
 import { nativePageMarkdownByStyle } from '@/lib/native-page-markdown';
 import { nativeDocsSource, nativePageImage, nativePageTree } from '@/lib/native-source';
 import { nativeMdxComponents } from '@/mdx-components';

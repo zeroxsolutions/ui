@@ -1,5 +1,5 @@
-import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
-import { NATIVE_ENGINES } from '@/constants/native-engines';
+import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
+import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
 import {
   blocksRoute,
   componentRoute,
@@ -14,9 +14,9 @@ import {
   nativeDocsRoute,
   nativeHomeRoute,
 } from '@/routes/app-routes';
-import type { NativeEngine } from '@/types/native-engine';
-import type { Platform } from '@/types/platform';
-import type { SiteNavItem } from '@/types/site-nav-item';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
+import type { Platform } from '@zeroxsolutions/ui/site/types/platform';
+import type { SiteNavItem } from '@zeroxsolutions/ui/site/types/site-nav-item';
 
 /**
  * Where a pathname sits in the site's two trees. `slug` is a docs page's segments joined with `/`, `''`

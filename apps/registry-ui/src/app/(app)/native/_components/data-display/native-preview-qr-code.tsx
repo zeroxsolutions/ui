@@ -4,12 +4,12 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Suspense, type ReactNode } from 'react';
 
 import { EXPO_GO_SDK } from '@/constants/native-preview-device';
-import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
-import { useCurrentStyle } from '@/hooks/use-current-style';
+import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
+import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
 import { expoGoUrl } from '@/lib/native-preview';
 import { CopyButton } from '@zeroxsolutions/ui/registry/bases/base-ui/components/feedback/copy-button';
-import type { NativeEngine } from '@/types/native-engine';
-import type { PlatformStyle } from '@/types/platform';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
+import type { PlatformStyle } from '@zeroxsolutions/ui/site/types/platform';
 
 interface NativePreviewQrCodeProps {
   /** A demo's name in `@zeroxsolutions/native-ui/examples`, such as `button-demo`. */

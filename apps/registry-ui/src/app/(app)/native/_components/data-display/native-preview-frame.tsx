@@ -3,9 +3,9 @@
 import { useTheme } from 'next-themes';
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
 
-import { useCurrentStyle } from '@/hooks/use-current-style';
+import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
 import { nativePreviewSrc, nativePreviewTitle, previewHeightOf, previewTheme } from '@/lib/native-preview';
-import type { NativeEngine } from '@/types/native-engine';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 import { Spinner } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/spinner';
 
 /** The frame's height, in CSS pixels, until the preview posts its own: the web preview stage's `h-72`. */

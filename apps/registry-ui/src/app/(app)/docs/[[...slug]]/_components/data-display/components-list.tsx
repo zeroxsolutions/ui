@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
+import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { publishedItems } from '@/lib/registry';
 import { source, writtenDocsPage } from '@/lib/source';
 import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';

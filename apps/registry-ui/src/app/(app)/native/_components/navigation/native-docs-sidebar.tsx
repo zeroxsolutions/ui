@@ -3,9 +3,9 @@
 import type { Root } from 'fumadocs-core/page-tree';
 import type { ReactNode } from 'react';
 
-import { DocsSidebar } from '@/components/navigation/docs-sidebar';
-import { useRememberedEngine } from '@/hooks/use-remembered-choice';
-import type { NativeEngine } from '@/types/native-engine';
+import { DocsSidebar } from '@zeroxsolutions/ui/site/components/navigation/docs-sidebar';
+import { useRememberedEngine } from '@zeroxsolutions/ui/site/hooks/use-remembered-choice';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 
 interface NativeDocsSidebarProps {
   /** The native tree under each engine. */

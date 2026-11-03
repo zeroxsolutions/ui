@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { DocsArticle } from '@/components/layout/docs-article';
+import { DocsArticle } from '@zeroxsolutions/ui/site/components/layout/docs-article';
 import { BaseSwitcher } from '@/components/navigation/base-switcher';
 import { platformLocation } from '@/lib/platform-nav';
 import { docsLlms, docsPageImage, source } from '@/lib/source';

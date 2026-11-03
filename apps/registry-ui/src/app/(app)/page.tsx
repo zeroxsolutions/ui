@@ -4,18 +4,18 @@ import type { ReactNode } from 'react';
 import { HomePageCode } from './_components/data-display/home-page-code';
 import { HomeGrid } from './_components/general/home-grid';
 import { HomeShader } from './_components/general/home-shader';
-import { BlockFrame } from '@/components/data-display/block-frame';
+import { BlockFrame } from '@zeroxsolutions/ui/site/components/data-display/block-frame';
 import {
   ComponentPreview,
   ComponentPreviewCaption,
   ComponentPreviewStage,
-} from '@/components/data-display/component-preview';
-import { RegistryExample } from '@/components/data-display/registry-example';
+} from '@zeroxsolutions/ui/site/components/data-display/component-preview';
+import { RegistryExample } from '@zeroxsolutions/ui/site/components/data-display/registry-example';
 import { publishedBlocks, publishedItems } from '@/lib/registry';
-import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
+import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { docsPageHref, docsPageUrl, writtenDocsPage } from '@/lib/source';
 import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
-import { blocksRoute, componentRoute, componentsRoute } from '@/routes/app-routes';
+import { blocksRoute, componentRoute, componentsRoute, viewRoute } from '@/routes/app-routes';
 
 import registryData from '@zeroxsolutions/ui/registry.json';
 
@@ -134,7 +134,7 @@ export default function HomePage(): ReactNode {
           </Link>
         </div>
         <ComponentPreview>
-          <BlockFrame name={block.name} title={block.title} />
+          <BlockFrame src={viewRoute.build({ name: block.name })} title={block.title} />
         </ComponentPreview>
       </section>
 

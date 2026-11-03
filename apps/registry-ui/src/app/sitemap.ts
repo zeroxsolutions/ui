@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-import { COMPONENT_BASES } from '@/constants/component-bases';
+import { COMPONENT_BASES } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { canonicalNativeComponentsSource, nativeDocsSource } from '@/lib/native-source';
 import { registryHomepage } from '@/lib/registry';
 import { source } from '@/lib/source';

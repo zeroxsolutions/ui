@@ -5,7 +5,7 @@ import {
   SourceCodeBlockCode,
   SourceCodeBlockContent,
   SourceCodeBlockCopy,
-} from '@/components/data-display/source-code-block';
+} from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
 
 import { ComponentSource } from './component-source';
 

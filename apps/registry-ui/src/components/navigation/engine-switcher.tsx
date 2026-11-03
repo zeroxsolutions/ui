@@ -3,11 +3,11 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, type ComponentProps, type ReactNode } from 'react';
 
-import { NATIVE_ENGINE_LABELS, NATIVE_ENGINES } from '@/constants/native-engines';
-import { rememberEngine } from '@/hooks/use-remembered-choice';
+import { NATIVE_ENGINE_LABELS, NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
+import { rememberEngine } from '@zeroxsolutions/ui/site/hooks/use-remembered-choice';
 import { platformLocation, withLocationEngine } from '@/lib/platform-nav';
 
-import { LinkTabs, LinkTabsItem } from './link-tabs';
+import { LinkTabs, LinkTabsItem } from '@zeroxsolutions/ui/site/components/navigation/link-tabs';
 
 /**
  * NativeWind and Uniwind as links to this page under each engine, the current one marked, keeping the

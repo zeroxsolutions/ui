@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { useRememberedEngine } from '@/hooks/use-remembered-choice';
+import { useRememberedEngine } from '@zeroxsolutions/ui/site/hooks/use-remembered-choice';
 import { withNativeEngine } from '@/lib/platform-nav';
 
 interface NativeEngineLinkProps extends Omit<ComponentProps<typeof Link>, 'href'> {

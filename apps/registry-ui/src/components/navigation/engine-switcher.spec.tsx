@@ -2,11 +2,13 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import { renderToString } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { NextHostWrapper } from '@/test/next-host-wrapper';
 import { EngineSwitcher } from './engine-switcher';
 
 const url = vi.hoisted(() => ({ pathname: '', search: '' }));
 
 vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   usePathname: (): string => url.pathname,
   useSearchParams: (): URLSearchParams => new URLSearchParams(url.search),
 }));
@@ -25,7 +27,7 @@ describe('EngineSwitcher', () => {
     url.pathname = '/native/components/nativewind/button';
     url.search = '?style=nova';
 
-    render(<EngineSwitcher />);
+    render(<EngineSwitcher />, { wrapper: NextHostWrapper });
 
     const nav = screen.getByRole('navigation', { name: 'Engine' });
     const nativewind = within(nav).getByRole('link', { name: 'NativeWind' });
@@ -38,10 +40,14 @@ describe('EngineSwitcher', () => {
   it("keeps the page's query once a page prerendered without it has hydrated", async () => {
     url.pathname = '/native/components/nativewind/button';
     const container = document.body.appendChild(document.createElement('div'));
-    container.innerHTML = renderToString(<EngineSwitcher />);
+    container.innerHTML = renderToString(
+      <NextHostWrapper>
+        <EngineSwitcher />
+      </NextHostWrapper>,
+    );
     url.search = '?style=nova';
 
-    render(<EngineSwitcher />, { container, hydrate: true });
+    render(<EngineSwitcher />, { container, hydrate: true, wrapper: NextHostWrapper });
 
     const uniwind = within(screen.getByRole('navigation', { name: 'Engine' })).getByRole('link', { name: 'Uniwind' });
     await waitFor(() => expect(uniwind.getAttribute('href')).toBe('/native/components/uniwind/button?style=nova'));
@@ -50,7 +56,7 @@ describe('EngineSwitcher', () => {
   it('remembers the engine of the page being read, for the native pages whose path holds none', () => {
     url.pathname = '/native/blocks/uniwind';
 
-    render(<EngineSwitcher />);
+    render(<EngineSwitcher />, { wrapper: NextHostWrapper });
 
     expect(localStorage.getItem('zui:native-engine')).toBe('uniwind');
   });
@@ -58,7 +64,7 @@ describe('EngineSwitcher', () => {
   it('renders nothing on a page whose path holds no engine', () => {
     url.pathname = '/native/docs/installation';
 
-    render(<EngineSwitcher />);
+    render(<EngineSwitcher />, { wrapper: NextHostWrapper });
 
     expect(screen.queryByRole('navigation', { name: 'Engine' })).toBeNull();
   });

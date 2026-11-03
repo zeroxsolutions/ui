@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { BlockFrame } from '@/components/data-display/block-frame';
-import { ComponentPreview } from '@/components/data-display/component-preview';
+import { BlockFrame } from '@zeroxsolutions/ui/site/components/data-display/block-frame';
+import { ComponentPreview } from '@zeroxsolutions/ui/site/components/data-display/component-preview';
 import { BaseSwitcher } from '@/components/navigation/base-switcher';
-import { COMPONENT_BASES } from '@/constants/component-bases';
+import { COMPONENT_BASES } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { publishedBlocks } from '@/lib/registry';
 import { source } from '@/lib/source';
+import { viewRoute } from '@/routes/app-routes';
 
 export const dynamic = 'force-static';
 
@@ -51,7 +52,7 @@ export default function BlocksPage(): ReactNode {
               <p className="text-muted-foreground text-sm">{block.description}</p>
             </div>
             <ComponentPreview>
-              <BlockFrame name={block.name} title={block.title} />
+              <BlockFrame src={viewRoute.build({ name: block.name })} title={block.title} />
             </ComponentPreview>
           </section>
         );

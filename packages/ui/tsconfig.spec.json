@@ -2,8 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./out-tsc/vitest",
-    "types": ["vitest/globals", "vitest/importMeta", "vite/client", "node", "vitest"],
+    "types": ["vitest/globals", "vitest/importMeta", "vite/client", "node", "vitest", "react/canary"],
     "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
     "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -31,7 +32,8 @@
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.test.tsx",
-    "src/**/*.spec.tsx"
+    "src/**/*.spec.tsx",
+    "src/**/*.config.mjs"
   ],
   "references": [
     {

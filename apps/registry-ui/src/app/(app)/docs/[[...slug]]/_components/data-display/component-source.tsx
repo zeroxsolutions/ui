@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 
-import { SourceCodeBlock } from '@/components/data-display/source-code-block';
+import { SourceCodeBlock } from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
 import type { HighlightLine } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/shiki';
 
 interface ComponentSourceProps extends Omit<ComponentProps<typeof SourceCodeBlock>, 'code' | 'language' | 'lines'> {

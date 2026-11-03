@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { ComponentPreview } from '@/components/data-display/component-preview';
+import { ComponentPreview } from '@zeroxsolutions/ui/site/components/data-display/component-preview';
 import {
   SourceCodeBlock,
   SourceCodeBlockActions,
@@ -12,10 +12,10 @@ import {
   SourceCodeBlockLanguage,
   SourceCodeBlockLineNumbers,
   SourceCodeBlockTitle,
-} from '@/components/data-display/source-code-block';
+} from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
 import { EXPO_PROJECT_IDS } from '@/constants/native-preview-device';
 import type { HighlightLine } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/shiki';
-import type { NativeEngine } from '@/types/native-engine';
+import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/tabs';
 
 import { NativePreviewPlatform, NativePreviewPlatformSelect } from './native-preview-platform';

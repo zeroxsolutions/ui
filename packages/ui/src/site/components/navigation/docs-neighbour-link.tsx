@@ -1,0 +1,37 @@
+'use client';
+
+import type { ReactNode } from 'react';
+
+import { useHost } from '../../../host/host-provider';
+import { useIconAnimation } from '../../hooks/use-icon-animation';
+
+import { ArrowLeftIcon, type ArrowLeftIconHandle } from '../../../../registry/bases/base-ui/icons/arrow-left-icon';
+import { ArrowRightIcon, type ArrowRightIconHandle } from '../../../../registry/bases/base-ui/icons/arrow-right-icon';
+import { buttonVariants } from '../../../../registry/bases/base-ui/ui/button';
+
+interface DocsNeighbourLinkProps {
+  /** Which way the link steps through the docs. */
+  direction: 'previous' | 'next';
+  /** The page it steps to. */
+  href: string;
+}
+
+/** The page header's icon link to the previous or the next page; its arrow plays on hover or focus. */
+function DocsNeighbourLink({ direction, href }: DocsNeighbourLinkProps): ReactNode {
+  const { Link } = useHost();
+  const arrow = useIconAnimation<ArrowLeftIconHandle | ArrowRightIconHandle>();
+
+  return (
+    <Link
+      href={href}
+      data-slot="docs-neighbour-link"
+      aria-label={direction === 'previous' ? 'Previous page' : 'Next page'}
+      className={buttonVariants({ variant: 'secondary', size: 'icon-sm' })}
+      {...arrow.handlers}
+    >
+      {direction === 'previous' ? <ArrowLeftIcon ref={arrow.ref} /> : <ArrowRightIcon ref={arrow.ref} />}
+    </Link>
+  );
+}
+
+export { DocsNeighbourLink };

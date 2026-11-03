@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { PAGE_MARKDOWN_FILE } from '@/constants/page-markdown-file';
+import { PAGE_MARKDOWN_FILE } from '@zeroxsolutions/ui/site/constants/page-markdown-file';
 import { docsLlms, source } from '@/lib/source';
 
 export const revalidate = false;

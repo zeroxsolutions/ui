@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { DocsColumns } from '@/components/layout/docs-columns';
+import { DocsColumns } from '@zeroxsolutions/ui/site/components/layout/docs-columns';
 import { nativePageTree } from '@/lib/native-source';
 
 import { NativeDocsSidebar } from '../_components/navigation/native-docs-sidebar';

@@ -1,6 +1,6 @@
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 
-import { rehypeDocsCode } from '@/lib/rehype-docs-code';
+import { rehypeDocsCode } from '@zeroxsolutions/ui/site/lib/rehype-docs-code';
 import { remarkNativeDemoSource } from '@/lib/remark-native-demo-source';
 
 // Every collection is `async`: a page's compiled body is imported only by the route that loads it, so a

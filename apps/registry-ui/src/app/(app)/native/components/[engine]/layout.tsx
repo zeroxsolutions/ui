@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { DocsColumns } from '@/components/layout/docs-columns';
-import { DocsSidebar } from '@/components/navigation/docs-sidebar';
-import { NATIVE_ENGINES } from '@/constants/native-engines';
+import { DocsColumns } from '@zeroxsolutions/ui/site/components/layout/docs-columns';
+import { DocsSidebar } from '@zeroxsolutions/ui/site/components/navigation/docs-sidebar';
+import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
 import { nativePageTree } from '@/lib/native-source';
 
 /** The native sidebar beside each component page, its component links under the page's engine. */

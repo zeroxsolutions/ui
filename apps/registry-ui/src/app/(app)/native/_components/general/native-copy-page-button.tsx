@@ -2,10 +2,10 @@
 
 import { Suspense, type ReactNode } from 'react';
 
-import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
-import { useCurrentStyle } from '@/hooks/use-current-style';
+import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
+import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
 import { CopyButton } from '@zeroxsolutions/ui/registry/bases/base-ui/components/feedback/copy-button';
-import type { PlatformStyle } from '@/types/platform';
+import type { PlatformStyle } from '@zeroxsolutions/ui/site/types/platform';
 
 interface NativeCopyPageButtonProps {
   /** The page as Markdown in each native style, which the server renders as the page is built. */
