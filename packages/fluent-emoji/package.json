@@ -32,6 +32,7 @@
   },
   "nx": {
     "name": "fluent-emoji",
+    "tags": ["type:ui"],
     "targets": {
       "lint-deps": {},
       "rclone:sync": {

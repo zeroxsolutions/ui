@@ -26,6 +26,7 @@
   },
   "nx": {
     "sourceRoot": "apps/registry-native-ui-docs-zone/src",
+    "tags": ["context:native-ui-docs"],
     "targets": {
       "dev": {
         "dependsOn": [
