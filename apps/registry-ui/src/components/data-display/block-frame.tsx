@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 
-import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
 import { viewRoute } from '@/routes/app-routes';
 
 interface BlockFrameProps extends ComponentProps<'iframe'> {

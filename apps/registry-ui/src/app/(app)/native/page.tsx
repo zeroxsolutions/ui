@@ -5,7 +5,7 @@ import { ComponentPreview, ComponentPreviewCaption } from '@/components/data-dis
 import { DEFAULT_NATIVE_ENGINE } from '@/constants/native-engines';
 import { canonicalNativeComponentsSource } from '@/lib/native-source';
 import { registryHomepage } from '@/lib/registry';
-import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
+import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 import { nativeComponentsRoute, nativeDocsPageRoute } from '@/routes/app-routes';
 
 import { HomePageCode } from '../_components/data-display/home-page-code';

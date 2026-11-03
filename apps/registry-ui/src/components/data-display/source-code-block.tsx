@@ -9,14 +9,14 @@ import {
   CodeBlockCopy,
   CodeBlockLanguage,
   CodeBlockLineNumbers,
-} from '@/registry/bases/base-ui/components/data-display/code-block';
+} from '@zeroxsolutions/ui/registry/bases/base-ui/components/data-display/code-block';
 import {
   CollapsibleCardActions,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
   CollapsibleCardTrigger,
-} from '@/registry/bases/base-ui/components/layout/collapsible-card';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
+} from '@zeroxsolutions/ui/registry/bases/base-ui/components/layout/collapsible-card';
+import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
 
 // The registry's code block and its header parts, across the client boundary their hooks need on a
 // server-rendered page. A page composes them: header (title: language, file; actions: copy, trigger),

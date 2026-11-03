@@ -6,7 +6,7 @@ import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type CSSPr
 import { useCurrentStyle } from '@/hooks/use-current-style';
 import { nativePreviewSrc, nativePreviewTitle, previewHeightOf, previewTheme } from '@/lib/native-preview';
 import type { NativeEngine } from '@/types/native-engine';
-import { Spinner } from '@/registry/bases/base-ui/ui/spinner';
+import { Spinner } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/spinner';
 
 /** The frame's height, in CSS pixels, until the preview posts its own: the web preview stage's `h-72`. */
 const FALLBACK_HEIGHT = 288;

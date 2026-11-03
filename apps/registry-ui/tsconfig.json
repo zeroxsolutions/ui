@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/registry/*": ["./registry/*"],
+      // The items in packages/ui import each other through this alias, which this program resolves for them.
+      "@/registry/*": ["../../packages/ui/registry/*"],
       // Written by the `fumadocs-generate` target, which `build` and `test` run first; a `tsc`
       // run by hand before it fails with `Cannot find module 'collections/server'`.
       "collections/*": ["./.source/*"]
@@ -37,9 +38,6 @@
     "src/**/*.js",
     "src/**/*.mjs",
     "src/**/*.jsx",
-    "registry/**/*.ts",
-    "registry/**/*.tsx",
-    "registry.json",
     "source.config.ts",
     ".source/**/*.ts",
     "../../apps/registry-ui/.next/types/**/*.ts",
@@ -49,13 +47,10 @@
   "exclude": ["out-tsc", "dist", "node_modules", "jest.config.ts", "jest.config.cts", ".next"],
   "references": [
     {
-      "path": "../../packages/icons"
+      "path": "../../packages/ui"
     },
     {
       "path": "../../packages/fluent-emoji"
-    },
-    {
-      "path": "../../packages/editor-core"
     },
     {
       "path": "../../packages/native-ui"

@@ -4,7 +4,7 @@ import { Suspense, type ReactNode } from 'react';
 
 import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
 import { useCurrentStyle } from '@/hooks/use-current-style';
-import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
+import { CopyButton } from '@zeroxsolutions/ui/registry/bases/base-ui/components/feedback/copy-button';
 import type { PlatformStyle } from '@/types/platform';
 
 interface NativeCopyPageButtonProps {

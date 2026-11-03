@@ -1,0 +1,46 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
+    "emitDeclarationOnly": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2023", "dom", "dom.iterable"],
+    // The items under `ui/` stay as the shadcn CLI wrote them, and some import a binding they never read.
+    "noUnusedLocals": false,
+    "paths": {
+      "@/registry/*": ["./registry/*"]
+    }
+  },
+  "include": ["registry/**/*.ts", "registry/**/*.tsx"],
+  "references": [
+    {
+      "path": "../icons/tsconfig.lib.json"
+    },
+    {
+      "path": "../fluent-emoji/tsconfig.lib.json"
+    },
+    {
+      "path": "../editor-core/tsconfig.lib.json"
+    }
+  ],
+  "exclude": [
+    "vite.config.ts",
+    "vite.config.mts",
+    "vitest.config.ts",
+    "vitest.config.mts",
+    "registry/**/*.test.ts",
+    "registry/**/*.spec.ts",
+    "registry/**/*.test.tsx",
+    "registry/**/*.spec.tsx",
+    "registry/**/*.test.js",
+    "registry/**/*.spec.js",
+    "registry/**/*.test.jsx",
+    "registry/**/*.spec.jsx"
+  ]
+}

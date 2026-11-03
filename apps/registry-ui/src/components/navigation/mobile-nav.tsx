@@ -8,9 +8,15 @@ import { useState, type MouseEvent, type ReactNode } from 'react';
 import { DocsSidebar } from '@/components/navigation/docs-sidebar';
 import { useIconAnimation } from '@/hooks/use-icon-animation';
 import { currentSiteNavItem } from '@/lib/site-nav';
-import { Button } from '@/registry/bases/base-ui/ui/button';
-import { MenuIcon, type MenuIconHandle } from '@/registry/bases/base-ui/icons/menu-icon';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/registry/bases/base-ui/ui/sheet';
+import { Button } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
+import { MenuIcon, type MenuIconHandle } from '@zeroxsolutions/ui/registry/bases/base-ui/icons/menu-icon';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@zeroxsolutions/ui/registry/bases/base-ui/ui/sheet';
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -19,7 +25,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-} from '@/registry/bases/base-ui/ui/sidebar';
+} from '@zeroxsolutions/ui/registry/bases/base-ui/ui/sidebar';
 import type { Platform } from '@/types/platform';
 import type { SiteNavItem } from '@/types/site-nav-item';
 

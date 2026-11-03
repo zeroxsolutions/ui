@@ -5,8 +5,8 @@ import { usePathname } from 'next/navigation';
 import type { ComponentProps, ReactNode } from 'react';
 
 import { currentSiteNavItem } from '@/lib/site-nav';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
+import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
+import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 import type { SiteNavItem } from '@/types/site-nav-item';
 
 interface MainNavProps extends ComponentProps<'nav'> {

@@ -16,11 +16,11 @@ import {
 } from '@/components/data-display/source-code-block';
 import { withNativeEngine } from '@/lib/platform-nav';
 import { registryHomepage } from '@/lib/registry';
-import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
-import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+import type { HighlightLine } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/shiki';
+import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/alert';
+import { ScrollArea, ScrollBar } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/tabs';
 import type { NativeEngine } from '@/types/native-engine';
 
 // This MDX override map is the docs route's composition root, so importing docs-only components

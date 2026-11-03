@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 import { NATIVE_ENGINE_LABELS, NATIVE_ENGINES } from '@/constants/native-engines';
 import { rememberEngine, useRememberedEngine } from '@/hooks/use-remembered-choice';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/tabs';
 import type { NativeEngine } from '@/types/native-engine';
 
 interface EngineTabsChooserProps {

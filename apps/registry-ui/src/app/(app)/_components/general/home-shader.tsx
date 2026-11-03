@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 
-import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
 
 /**
  * The hero's background: a slow field of the logo's modules drawn with WebGL. It fills its positioned

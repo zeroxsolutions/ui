@@ -9,12 +9,20 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useIconAnimation } from '@/hooks/use-icon-animation';
 import { pageTreeGroups } from '@/lib/page-tree';
 import { withNativeEngine } from '@/lib/platform-nav';
-import { CommandMenu, CommandMenuItem } from '@/registry/bases/base-ui/components/navigation/command-menu';
-import { useCommandShortcut } from '@/registry/bases/base-ui/hooks/use-command-shortcut';
-import { Button } from '@/registry/bases/base-ui/ui/button';
-import { CommandEmpty, CommandGroup, CommandInput, CommandList } from '@/registry/bases/base-ui/ui/command';
-import { Kbd, KbdGroup } from '@/registry/bases/base-ui/ui/kbd';
-import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/icons/search-icon';
+import {
+  CommandMenu,
+  CommandMenuItem,
+} from '@zeroxsolutions/ui/registry/bases/base-ui/components/navigation/command-menu';
+import { useCommandShortcut } from '@zeroxsolutions/ui/registry/bases/base-ui/hooks/use-command-shortcut';
+import { Button } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
+import {
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandList,
+} from '@zeroxsolutions/ui/registry/bases/base-ui/ui/command';
+import { Kbd, KbdGroup } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/kbd';
+import { SearchIcon, type SearchIconHandle } from '@zeroxsolutions/ui/registry/bases/base-ui/icons/search-icon';
 import type { NativeEngine } from '@/types/native-engine';
 import type { Platform } from '@/types/platform';
 import type { SiteNavItem } from '@/types/site-nav-item';

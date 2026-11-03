@@ -7,7 +7,7 @@ import { DEFAULT_PLATFORM_STYLE } from '@/constants/platform-styles';
 import { useCurrentStyle } from '@/hooks/use-current-style';
 import { useRememberedEngine } from '@/hooks/use-remembered-choice';
 import { nativeInstallCommands } from '@/lib/native-install';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/tabs';
 import type { NativeEngine } from '@/types/native-engine';
 import type { PlatformStyle } from '@/types/platform';
 

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 
-import { Components } from '@/registry/bases/base-ui/examples/__components__';
+import { Components } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__components__';
 
 /**
  * Renders the demo the examples index holds under `name`. The demos and the components they compose

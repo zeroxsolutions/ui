@@ -2,10 +2,10 @@
 
 import type { ComponentProps, ReactNode } from 'react';
 
-import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { Button } from '@/registry/bases/base-ui/ui/button';
-import { CollapsibleTrigger } from '@/registry/bases/base-ui/ui/collapsible';
-import { ScrollArea, ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
+import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
+import { Button } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
+import { CollapsibleTrigger } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/collapsible';
+import { ScrollArea, ScrollBar } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/scroll-area';
 
 /**
  * One frame on the card's ring and radius. Compose what it shows: a `ComponentPreviewStage` holding a

@@ -7,10 +7,16 @@ import type { ComponentProps, ReactNode } from 'react';
 import { useIconAnimation } from '@/hooks/use-icon-animation';
 
 import { pageNeighbours } from '@/lib/page-tree';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { ArrowLeftIcon, type ArrowLeftIconHandle } from '@/registry/bases/base-ui/icons/arrow-left-icon';
-import { ArrowRightIcon, type ArrowRightIconHandle } from '@/registry/bases/base-ui/icons/arrow-right-icon';
-import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
+import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
+import {
+  ArrowLeftIcon,
+  type ArrowLeftIconHandle,
+} from '@zeroxsolutions/ui/registry/bases/base-ui/icons/arrow-left-icon';
+import {
+  ArrowRightIcon,
+  type ArrowRightIconHandle,
+} from '@zeroxsolutions/ui/registry/bases/base-ui/icons/arrow-right-icon';
+import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 
 interface DocsPagerProps extends ComponentProps<'nav'> {
   /** The docs page tree, read in order across its folders. */

@@ -15,7 +15,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 // The icon's handle is the seam: the button drives it, and the motion behind it is the icon's own.
-vi.mock('@/registry/bases/base-ui/icons/menu-icon', () => ({
+vi.mock('@zeroxsolutions/ui/registry/bases/base-ui/icons/menu-icon', () => ({
   MenuIcon: forwardRef(function MenuIcon(_props, ref) {
     useImperativeHandle(ref, () => ({ startAnimation, stopAnimation }));
     return null;

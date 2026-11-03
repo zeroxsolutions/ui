@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
+import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
+import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 
 /** A row of links to one page in each of several variants, such as its platform or engine. `aria-label` names what they switch. */
 function LinkSwitch({ className, ...props }: ComponentProps<'nav'> & { 'aria-label': string }): ReactNode {

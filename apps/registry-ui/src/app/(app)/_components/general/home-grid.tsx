@@ -4,7 +4,7 @@ import { useInView, useReducedMotion } from 'motion/react';
 import { useAnimate } from 'motion/react-mini';
 import { Children, useEffect, type ComponentProps, type ReactNode } from 'react';
 
-import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
 
 /**
  * The home page's component grid: each cell below the fold when the page hydrates starts hidden and

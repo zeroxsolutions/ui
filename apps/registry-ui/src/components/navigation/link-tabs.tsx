@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, type ComponentProps, type ReactNode } from 'react';
 
 import { useHydrated } from '@/hooks/use-hydrated';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
 
 /**
  * A row of underlined text links to one page in each of its variants, such as its engine or base, under

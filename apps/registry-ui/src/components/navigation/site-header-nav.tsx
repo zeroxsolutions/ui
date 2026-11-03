@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
 import { ModeSwitcher } from '@/components/general/mode-switcher';
 import { useRememberedEngine } from '@/hooks/use-remembered-choice';
 import { platformLocation, platformNavItems, type PlatformPages } from '@/lib/platform-nav';
-import { Separator } from '@/registry/bases/base-ui/ui/separator';
+import { Separator } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/separator';
 import type { NativeEngine } from '@/types/native-engine';
 
 import { DocsSearch } from './docs-search';

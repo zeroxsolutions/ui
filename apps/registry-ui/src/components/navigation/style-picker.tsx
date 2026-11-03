@@ -11,14 +11,14 @@ import { useCurrentStyle } from '@/hooks/use-current-style';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { rememberStyle } from '@/hooks/use-remembered-choice';
 import { styleHref } from '@/lib/style-choice';
-import { Button } from '@/registry/bases/base-ui/ui/button';
+import { Button } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from '@/registry/bases/base-ui/ui/dropdown-menu';
+} from '@zeroxsolutions/ui/registry/bases/base-ui/ui/dropdown-menu';
 import type { Platform, PlatformStyle } from '@/types/platform';
 
 interface StylePickerProps {

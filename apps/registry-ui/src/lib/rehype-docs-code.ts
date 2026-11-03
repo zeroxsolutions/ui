@@ -3,6 +3,8 @@ import { join } from 'node:path';
 
 import { parseCodeBlockAttributes } from 'fumadocs-core/mdx-plugins/codeblock-utils';
 
+// fumadocs-mdx bundles `source.config.ts` and leaves a package's import to Node, which cannot load a
+// `.tsx` through `@zeroxsolutions/ui`'s exports; the path alias is bundled with it.
 import { Index } from '@/registry/bases/base-ui/examples/__index__';
 import { highlightToLines } from '@/registry/bases/base-ui/lib/shiki';
 
@@ -25,6 +27,12 @@ interface HastNode {
 
 /** The components whose source this step reads and highlights for them. */
 const SOURCE_COMPONENTS = new Set(['ComponentPreview', 'BlockPreview', 'ComponentSource', 'NativePreview']);
+
+/**
+ * Where the web registry's package sits, relative to the app, which is where the build runs. The paths
+ * the examples index lists, `registry.json`'s, are relative to it.
+ */
+const UI_DIR = '../../packages/ui';
 
 /** Where native-ui keeps its demos, relative to the app, which is where the build runs. */
 const NATIVE_EXAMPLES_DIR = '../../packages/native-ui/src/examples';
@@ -94,8 +102,7 @@ async function highlightSource(element: HastNode): Promise<void> {
     code = (await nativeDemoSourceOf(name)).trimEnd();
   } else {
     path = sourceFileOf(name, stringAttribute(element, 'file'));
-    // Read relative to the app, which is where the build runs.
-    code = (await readFile(join(process.cwd(), path), 'utf8')).trimEnd();
+    code = (await readFile(join(process.cwd(), UI_DIR, path), 'utf8')).trimEnd();
   }
   const language = stringAttribute(element, 'language') ?? path.split('.').pop() ?? 'tsx';
   element.attributes = [

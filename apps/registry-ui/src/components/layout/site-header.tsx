@@ -6,7 +6,7 @@ import { SiteHomeLink } from '@/components/navigation/site-home-link';
 import { nativeComponentNames, nativeDocsSource, nativePageTree } from '@/lib/native-source';
 import type { PlatformPages } from '@/lib/platform-nav';
 import { source } from '@/lib/source';
-import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
+import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 
 /** Each web docs page's slug and each web component's name, read off the docs content. */
 function webPages(): PlatformPages['web'] {

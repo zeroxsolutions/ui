@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
+import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 import { docsRoute } from '@/routes/app-routes';
 
 /** What every unknown path answers, with its 404: a docs path the content lacks and any other. */

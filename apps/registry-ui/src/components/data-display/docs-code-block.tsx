@@ -11,7 +11,7 @@ import {
   SourceCodeBlockLanguage,
   SourceCodeBlockTitle,
 } from '@/components/data-display/source-code-block';
-import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
+import type { HighlightLine } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/shiki';
 
 interface DocsCodeBlockProps {
   code: string;

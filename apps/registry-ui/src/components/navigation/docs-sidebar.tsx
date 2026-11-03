@@ -17,7 +17,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/registry/bases/base-ui/ui/sidebar';
+} from '@zeroxsolutions/ui/registry/bases/base-ui/ui/sidebar';
 
 interface DocsSidebarProps extends ComponentProps<typeof Sidebar> {
   /** The docs page tree; its separators and folders become the sidebar's groups. */
@@ -90,5 +90,5 @@ function DocsSidebar({ tree, children, activeViewTransition = true, ...props }: 
 
 // The vendored sidebar module carries no 'use client' (components.json has `rsc: false`), so the docs
 // layout, a server component, takes the provider through this client module rather than from it directly.
-export { SidebarProvider } from '@/registry/bases/base-ui/ui/sidebar';
+export { SidebarProvider } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/sidebar';
 export { DocsSidebar };

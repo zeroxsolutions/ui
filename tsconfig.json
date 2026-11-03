@@ -26,6 +26,9 @@
     },
     {
       "path": "./apps/native-preview-uniwind"
+    },
+    {
+      "path": "./packages/ui"
     }
   ],
   "compilerOptions": {

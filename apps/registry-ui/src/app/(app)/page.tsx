@@ -14,10 +14,10 @@ import { RegistryExample } from '@/components/data-display/registry-example';
 import { publishedBlocks, publishedItems } from '@/lib/registry';
 import { DEFAULT_COMPONENT_BASE } from '@/constants/component-bases';
 import { docsPageHref, docsPageUrl, writtenDocsPage } from '@/lib/source';
-import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
+import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 import { blocksRoute, componentRoute, componentsRoute } from '@/routes/app-routes';
 
-import registryData from '../../../registry.json';
+import registryData from '@zeroxsolutions/ui/registry.json';
 
 /** The items the home page shows live, by registry name; each renders its `<name>-demo`. */
 const HOME_ITEMS = ['chat-message', 'code-block', 'file-tree', 'tag-input', 'password-input', 'status-indicator'];

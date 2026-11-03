@@ -7,8 +7,8 @@ import { DocsNeighbourLink } from '@/components/navigation/docs-neighbour-link';
 import { DocsPager } from '@/components/navigation/docs-pager';
 import { DocsToc } from '@/components/navigation/docs-toc';
 import { pageNeighbours } from '@/lib/page-tree';
-import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
-import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
+import { CopyButton } from '@zeroxsolutions/ui/registry/bases/base-ui/components/feedback/copy-button';
+import { ScrollArea } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/scroll-area';
 
 /** What Copy page copies: the page as Markdown, or a Copy page control of the page's own that picks it. */
 type DocsArticleCopy =

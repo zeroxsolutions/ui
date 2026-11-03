@@ -6,7 +6,13 @@ import { EXPO_PROJECT_IDS } from '@/constants/native-preview-device';
 import { PREVIEW_PLATFORM_LABELS, PREVIEW_PLATFORMS } from '@/constants/preview-platforms';
 import { rememberPreviewPlatform, useRememberedPreviewPlatform } from '@/hooks/use-remembered-choice';
 import type { NativeEngine } from '@/types/native-engine';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/registry/bases/base-ui/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@zeroxsolutions/ui/registry/bases/base-ui/ui/select';
 
 import { NativePreviewFrame } from './native-preview-frame';
 import { NativePreviewQrCode } from './native-preview-qr-code';

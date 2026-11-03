@@ -14,9 +14,9 @@ import {
   SourceCodeBlockTitle,
 } from '@/components/data-display/source-code-block';
 import { EXPO_PROJECT_IDS } from '@/constants/native-preview-device';
-import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
+import type { HighlightLine } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/shiki';
 import type { NativeEngine } from '@/types/native-engine';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/tabs';
 
 import { NativePreviewPlatform, NativePreviewPlatformSelect } from './native-preview-platform';
 

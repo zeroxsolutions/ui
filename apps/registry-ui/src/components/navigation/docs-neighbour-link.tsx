@@ -5,9 +5,15 @@ import type { ReactNode } from 'react';
 
 import { useIconAnimation } from '@/hooks/use-icon-animation';
 
-import { ArrowLeftIcon, type ArrowLeftIconHandle } from '@/registry/bases/base-ui/icons/arrow-left-icon';
-import { ArrowRightIcon, type ArrowRightIconHandle } from '@/registry/bases/base-ui/icons/arrow-right-icon';
-import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
+import {
+  ArrowLeftIcon,
+  type ArrowLeftIconHandle,
+} from '@zeroxsolutions/ui/registry/bases/base-ui/icons/arrow-left-icon';
+import {
+  ArrowRightIcon,
+  type ArrowRightIconHandle,
+} from '@zeroxsolutions/ui/registry/bases/base-ui/icons/arrow-right-icon';
+import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 
 interface DocsNeighbourLinkProps {
   /** Which way the link steps through the docs. */
