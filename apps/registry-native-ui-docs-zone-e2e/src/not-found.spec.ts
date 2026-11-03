@@ -1,7 +1,26 @@
 import { expect, test } from './test/fixtures';
 
-test('an unknown native path answers 404 with the not-found page', async ({ page }) => {
-  const response = await page.goto('/native/components/nativewind/nope');
+test('a page the native tree lacks answers 404 with its section index', async ({ page }) => {
+  // The web switch links here from the web's copy button, which has no native counterpart.
+  let response = await page.goto('/native/components/nativewind/copy-button');
+
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
+  const components = page.getByRole('region', { name: 'Components' });
+  await expect(components.getByRole('link', { name: 'Button', exact: true })).toHaveAttribute(
+    'href',
+    '/native/components/nativewind/button',
+  );
+
+  response = await page.goto('/native/docs/blocks/ai-provider-picker');
+
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
+  await expect(
+    page.getByRole('region', { name: 'Docs' }).getByRole('link', { name: 'Installation', exact: true }),
+  ).toHaveAttribute('href', '/native/docs/installation');
+
+  response = await page.goto('/native/nope');
 
   expect(response?.status()).toBe(404);
   await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();

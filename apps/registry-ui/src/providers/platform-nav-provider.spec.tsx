@@ -2,8 +2,6 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import { PlatformSwitch } from '@zeroxsolutions/ui/site/components/navigation/platform-switch';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { PlatformPages } from '@/lib/platform-nav';
-
 import { AppProviders } from './app-providers';
 import { PlatformNavProvider } from './platform-nav-provider';
 
@@ -15,11 +13,6 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-const PAGES: PlatformPages = {
-  web: { docs: ['', 'installation'], components: ['tab-bar'] },
-  native: { docs: ['', 'installation'], components: ['tab-bar', 'button'] },
-};
-
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -29,7 +22,7 @@ function renderAt(pathname: string): HTMLElement {
   url.pathname = pathname;
   render(
     <AppProviders>
-      <PlatformNavProvider pages={PAGES}>
+      <PlatformNavProvider>
         <PlatformSwitch />
       </PlatformNavProvider>
     </AppProviders>,
@@ -47,11 +40,12 @@ describe('PlatformNavProvider', () => {
     expect(native.getAttribute('href')).toBe('/native/components/nativewind/tab-bar');
   });
 
-  it('switches from a page the other platform lacks to that section index', () => {
-    const switcher = renderAt('/native/components/uniwind/button');
+  it('links a page the native tree lacks to the same place there, which answers 404 with its section', () => {
+    const switcher = renderAt('/docs/components/base/copy-button');
 
-    expect(within(switcher).getByRole('link', { name: 'Native' }).getAttribute('aria-current')).toBe('page');
-    expect(within(switcher).getByRole('link', { name: 'Web' }).getAttribute('href')).toBe('/docs/components/base');
+    expect(within(switcher).getByRole('link', { name: 'Native' }).getAttribute('href')).toBe(
+      '/native/components/nativewind/copy-button',
+    );
   });
 
   it('switches a web page into the engine the reader last read native pages under', () => {

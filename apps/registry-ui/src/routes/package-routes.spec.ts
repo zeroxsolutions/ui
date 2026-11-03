@@ -5,7 +5,6 @@ import { join } from 'node:path';
 import { isMatch } from '@zeroxsolutions/routing';
 import { describe, expect, it } from 'vitest';
 
-import * as nativeRoutes from '@zeroxsolutions/native-ui-docs-web/routes';
 import * as webRoutes from '@zeroxsolutions/ui-docs-web/routes';
 
 const APP_DIR = join(import.meta.dirname, '..', 'app');
@@ -42,8 +41,8 @@ function answered(pages: readonly string[], pathname: string): boolean {
 }
 
 describe('package routes', () => {
-  // Each package's spec checks its routes' builders; only this app's tree shows a page answers each.
-  const routes = [...Object.values(webRoutes), ...Object.values(nativeRoutes)];
+  // The package's spec checks its routes' builders; only this app's tree shows a page answers each.
+  const routes = Object.values(webRoutes);
 
   it('names only paths a page answers', () => {
     const pages = pagePathnames(APP_DIR);

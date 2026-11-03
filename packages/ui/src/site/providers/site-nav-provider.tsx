@@ -17,7 +17,7 @@ interface SiteNav {
   home(platform: Platform): string;
   /** The header's sections, each pointing into `platform`'s tree; on native, under `engine`. */
   items(platform: Platform, engine: NativeEngine): SiteNavItem[];
-  /** The page at `pathname` on the other platform, or that section's index where it has no such page. */
+  /** The page at `pathname` on the other platform; where it has no such page, that platform's 404 lists the section. */
   counterpart(pathname: string): string;
   /** `href` moved onto `engine` where it is a native component or blocks page; any other link as it is. */
   withEngine(href: string, engine: NativeEngine): string;

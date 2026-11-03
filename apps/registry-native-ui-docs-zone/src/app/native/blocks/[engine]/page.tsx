@@ -5,7 +5,7 @@ import { NativeBlocksPage } from '@zeroxsolutions/native-ui-docs-web/pages/nativ
 import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
 
-import { webBlocksRoute } from '@/routes/web-routes';
+import { webBlocksRoute } from '@/routes/web-paths';
 
 export const dynamic = 'force-static';
 

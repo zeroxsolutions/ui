@@ -2,11 +2,7 @@ import { expect, test } from './test/fixtures';
 
 // A page is rendered once at build, with no query, so a page opened with `?style=` is where what the
 // browser reads first differs from what the server drew.
-const PAGES = [
-  '/native/components/nativewind/button?style=nova',
-  '/native/docs?style=nova',
-  '/docs/installation?style=luma',
-];
+const PAGES = ['/docs/installation?style=luma'];
 
 // React names a mismatch in full in development and only by its number, 418 or 425, in production.
 const HYDRATION_ERROR = /hydrat|Minified React error #4(18|25)/i;

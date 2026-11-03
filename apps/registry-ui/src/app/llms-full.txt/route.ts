@@ -1,10 +1,9 @@
-import { nativeComponentsLlms, nativeDocsLlms } from '@/lib/native-source';
 import { docsLlms } from '@/lib/source';
 
 // Unset, the handler runs on every request; `false` runs it once at build and the worker serves the file.
 export const revalidate = false;
 
+/** Every web page as Markdown; the native pages are the native zone's `/native/llms-full.txt`. */
 export async function GET(): Promise<Response> {
-  const pages = await Promise.all([docsLlms.full(), nativeDocsLlms.full(), nativeComponentsLlms.full()]);
-  return new Response(pages.join('\n\n'));
+  return new Response(await docsLlms.full());
 }

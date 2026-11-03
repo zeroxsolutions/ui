@@ -10,7 +10,8 @@ import { nativeMdxComponents } from '@/mdx-components';
 
 export const revalidate = false;
 export const dynamic = 'force-static';
-export const dynamicParams = false;
+// No `dynamicParams = false`: Next answers a path outside the generated set with the root's not-found,
+// and a slug only the web has should reach this section's, which lists the docs pages.
 
 interface NativeDocsRouteProps {
   params: Promise<{ slug?: string[] }>;

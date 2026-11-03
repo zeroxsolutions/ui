@@ -7,7 +7,6 @@
     "@opennextjs/cloudflare": "catalog:",
     "@shikijs/langs": "catalog:",
     "@zeroxsolutions/fluent-emoji": "workspace:*",
-    "@zeroxsolutions/native-ui-docs-web": "workspace:*",
     "@zeroxsolutions/routing": "catalog:",
     "@zeroxsolutions/ui": "workspace:*",
     "@zeroxsolutions/ui-docs-web": "workspace:*",
@@ -23,18 +22,18 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "catalog:",
-    "@zeroxsolutions/native-ui": "workspace:*",
     "tailwindcss": "catalog:",
     "wrangler": "catalog:"
   },
   "nx": {
+    "tags": [
+      "context:ui-docs"
+    ],
     "targets": {
       "dev": {
         "dependsOn": [
           "^build",
           "shadcn-build",
-          "@zeroxsolutions/native-preview:export",
-          "@zeroxsolutions/native-preview-uniwind:export",
           "fumadocs-generate",
           "@zeroxsolutions/ui:examples-index"
         ]
@@ -51,8 +50,6 @@
           "^build",
           "^typecheck",
           "shadcn-build",
-          "@zeroxsolutions/native-preview:export",
-          "@zeroxsolutions/native-preview-uniwind:export",
           "fumadocs-generate",
           "@zeroxsolutions/ui:examples-index"
         ]
@@ -63,8 +60,6 @@
           "^build",
           "^typecheck",
           "shadcn-build",
-          "@zeroxsolutions/native-preview:export",
-          "@zeroxsolutions/native-preview-uniwind:export",
           "fumadocs-generate",
           "@zeroxsolutions/ui:examples-index"
         ],
@@ -119,8 +114,7 @@
       "shadcn-build": {
         "executor": "nx:run-commands",
         "dependsOn": [
-          "@zeroxsolutions/ui:build-registry",
-          "@zeroxsolutions/native-ui:build-registry"
+          "@zeroxsolutions/ui:build-registry"
         ],
         "outputs": [
           "{workspaceRoot}/apps/registry-ui/public/r"
@@ -130,8 +124,7 @@
           "commands": [
             "rm -rf public/r",
             "mkdir -p public/r/styles",
-            "cp -R ../../packages/ui/dist/r/styles/. public/r/styles/",
-            "cp -R ../../packages/native-ui/dist/r/styles/. public/r/styles/"
+            "cp -R ../../packages/ui/dist/r/styles/. public/r/styles/"
           ],
           "parallel": false
         }

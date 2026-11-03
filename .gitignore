@@ -90,8 +90,6 @@ apps/registry-native-ui-docs-zone/public/r
 
 # The native previews' web exports (emitted by @zeroxsolutions/native-preview:export and
 # @zeroxsolutions/native-preview-uniwind:export)
-apps/registry-ui/public/native-preview
-apps/registry-ui/public/native-preview-uniwind
 apps/registry-native-ui-docs-zone/public/native-preview
 apps/registry-native-ui-docs-zone/public/native-preview-uniwind
 

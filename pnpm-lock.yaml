@@ -830,9 +830,6 @@ importers:
       '@zeroxsolutions/fluent-emoji':
         specifier: workspace:*
         version: link:../../packages/fluent-emoji
-      '@zeroxsolutions/native-ui-docs-web':
-        specifier: workspace:*
-        version: link:../../packages/native-ui-docs-web
       '@zeroxsolutions/routing':
         specifier: 'catalog:'
         version: 0.0.7
@@ -873,9 +870,6 @@ importers:
       '@tailwindcss/postcss':
         specifier: 'catalog:'
         version: 4.3.3
-      '@zeroxsolutions/native-ui':
-        specifier: workspace:*
-        version: link:../../packages/native-ui
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.3

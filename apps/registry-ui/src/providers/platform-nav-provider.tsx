@@ -4,35 +4,25 @@ import { useRememberedEngine } from '@zeroxsolutions/ui/site/hooks/use-remembere
 import { type SiteNav, SiteNavProvider } from '@zeroxsolutions/ui/site/providers/site-nav-provider';
 import { type ReactNode, useMemo } from 'react';
 
-import {
-  platformCounterpart,
-  platformHome,
-  platformLocation,
-  platformNavItems,
-  type PlatformPages,
-} from '@/lib/platform-nav';
-import { withNativeEngine } from '@zeroxsolutions/native-ui-docs-web/lib/native-location';
+import { nativeCounterpart, platformHome, platformNavItems } from '@/lib/platform-nav';
 
 /**
- * Hands the site's header and footer this app's web and native paths. A web page's counterpart switches
- * into the engine the reader last read native pages under.
+ * Hands the site's header and footer this app's web paths, and the native pages the native zone serves
+ * beside them. A page's counterpart switches into the engine the reader last read native pages under.
  */
-function PlatformNavProvider({ pages, children }: { pages: PlatformPages; children: ReactNode }): ReactNode {
+function PlatformNavProvider({ children }: { children: ReactNode }): ReactNode {
   const engine = useRememberedEngine();
   const nav = useMemo<SiteNav>(
     () => ({
-      locate: (pathname) => {
-        const location = platformLocation(pathname);
-        return 'engine' in location && location.engine
-          ? { platform: location.platform, engine: location.engine }
-          : { platform: location.platform };
-      },
+      // Every page this app serves is a web one, the 404 included.
+      locate: () => ({ platform: 'web' }),
       home: platformHome,
       items: platformNavItems,
-      counterpart: (pathname) => platformCounterpart(platformLocation(pathname), pages, engine),
-      withEngine: withNativeEngine,
+      counterpart: (pathname) => nativeCounterpart(pathname, engine),
+      // Only a native page's links name an engine, and this app serves none.
+      withEngine: (href) => href,
     }),
-    [pages, engine],
+    [engine],
   );
   return <SiteNavProvider nav={nav}>{children}</SiteNavProvider>;
 }
