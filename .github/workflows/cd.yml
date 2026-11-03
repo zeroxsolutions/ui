@@ -45,6 +45,11 @@ jobs:
     needs: [gate, build]
     uses: ./.github/workflows/nx-deploy.yml
     secrets: inherit
+    # nx-deploy reads the last successful cd run for its base, and a called workflow
+    # gets no permission its caller did not grant.
+    permissions:
+      contents: read
+      actions: read
     with:
       targets: wrangler:deploy
       environment: ${{ github.ref_name }}
@@ -102,6 +107,11 @@ jobs:
     needs: [deploy]
     uses: ./.github/workflows/nx-deploy.yml
     secrets: inherit
+    # nx-deploy reads the last successful cd run for its base, and a called workflow
+    # gets no permission its caller did not grant.
+    permissions:
+      contents: read
+      actions: read
     with:
       targets: eas:update
       environment: ${{ github.ref_name }}
