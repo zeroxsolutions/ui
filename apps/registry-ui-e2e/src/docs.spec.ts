@@ -18,7 +18,9 @@ test("a docs page's code block is highlighted, its tokens in more than one colou
   const block = page.getByRole('main').getByRole('code').filter({ hasText: 'pnpm dlx shadcn@latest init' }).first();
   await expect
     .poll(() =>
-      block.locator('span').evaluateAll((spans) => new Set(spans.map((span) => getComputedStyle(span).color)).size),
+      block.evaluate(
+        "(code) => new Set([...code.querySelectorAll('span[style]')].map((span) => span.getAttribute('style'))).size",
+      ),
     )
     .toBeGreaterThan(1);
 });
