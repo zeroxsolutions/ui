@@ -2,7 +2,7 @@
 
 import { Suspense, type ReactNode } from 'react';
 
-import { HomePageCode } from '@/app/(app)/_components/data-display/home-page-code';
+import { HomePageCode } from '@zeroxsolutions/ui-docs-web/components/data-display/home-page-code';
 import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
 import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
 import { registryStyle } from '@zeroxsolutions/ui/site/lib/style-choice';

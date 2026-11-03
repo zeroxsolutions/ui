@@ -16,17 +16,19 @@ import {
 } from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
 import { withNativeEngine } from '@/lib/platform-nav';
 import { registryHomepage } from '@/lib/registry';
+import { writtenDocsPage } from '@/lib/source';
 import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 
-// This MDX override map is the docs route's composition root, so importing docs-only components
-// from the route's own private folder (never a route segment, for the `_` prefix) is expected here,
-// even though this file sits at `src/` because Next/fumadocs requires it there.
-import { BlockPreview } from '@/app/(app)/docs/[[...slug]]/_components/data-display/block-preview';
-import { ComponentsList } from '@/app/(app)/docs/[[...slug]]/_components/data-display/components-list';
-import { ComponentSource } from '@/app/(app)/docs/[[...slug]]/_components/data-display/component-source';
-import { ExamplePreview } from '@/app/(app)/docs/[[...slug]]/_components/data-display/example-preview';
-import { InitCommand } from '@/app/(app)/docs/[[...slug]]/_components/data-display/init-command';
-import { WebComponentsJson } from '@/app/(app)/docs/[[...slug]]/_components/data-display/web-components-json';
+import { BlockPreview } from '@zeroxsolutions/ui-docs-web/components/data-display/block-preview';
+import { ComponentsList } from '@zeroxsolutions/ui-docs-web/components/data-display/components-list';
+import { ComponentSource } from '@zeroxsolutions/ui-docs-web/components/data-display/component-source';
+import { ExamplePreview } from '@zeroxsolutions/ui-docs-web/components/data-display/example-preview';
+import { InitCommand } from '@zeroxsolutions/ui-docs-web/components/data-display/init-command';
+import { WebComponentsJson } from '@zeroxsolutions/ui-docs-web/components/data-display/web-components-json';
+
+// This MDX override map is the docs routes' composition root, so importing the native docs' components
+// from their route's private folder (never a route segment, for the `_` prefix) is expected here, even
+// though this file sits at `src/` because Next/fumadocs requires it there.
 import { ComponentsJson } from '@/app/(app)/native/_components/data-display/components-json';
 import { EngineTab, EngineTabs } from '@/app/(app)/native/_components/data-display/engine-tabs';
 import { InstallCommand } from '@/app/(app)/native/_components/data-display/install-command';
@@ -59,7 +61,7 @@ export const mdxComponents = {
       </SourceCodeBlockContent>
     </ComponentSource>
   ),
-  ComponentsList: () => <ComponentsList className="mt-8" />,
+  ComponentsList: () => <ComponentsList className="mt-8" writtenDocsPage={writtenDocsPage} />,
   InitCommand,
   WebComponentsJson: () => <WebComponentsJson origin={registryHomepage} />,
 };

@@ -8,7 +8,7 @@ import { remarkNativeDemoSource } from '@/lib/remark-native-demo-source';
 // Eager, each server route group carried its own copy of every compiled page, and the worker passed
 // Cloudflare's size limit.
 export const docs = defineDocs({
-  dir: 'content/docs',
+  dir: '../../packages/ui-docs-web/content/docs',
   docs: { async: true, postprocess: { includeProcessedMarkdown: true } },
 });
 

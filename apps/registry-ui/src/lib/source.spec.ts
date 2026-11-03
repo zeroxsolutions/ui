@@ -10,7 +10,7 @@ import { Index } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__inde
 const APP = resolve(import.meta.dirname, '../..');
 /** The web registry's package, whose `registry.json` paths are relative to it. */
 const UI = resolve(APP, '../../packages/ui');
-const CONTENT = join(APP, 'content/docs');
+const CONTENT = resolve(APP, '../../packages/ui-docs-web/content/docs');
 
 /** The content tree: every page's slug (`components/base/button`), and each folder's `meta.json` pages by folder (`''` is the root). */
 interface DocsTree {

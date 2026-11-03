@@ -2,10 +2,10 @@ import type { ReactNode } from 'react';
 
 import { BlockFrame } from '@zeroxsolutions/ui/site/components/data-display/block-frame';
 import { ComponentPreview } from '@zeroxsolutions/ui/site/components/data-display/component-preview';
-import { publishedBlocks } from '@/lib/registry';
-import { viewRoute } from '@/routes/app-routes';
 import { Index } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__index__';
 
+import { publishedBlocks } from '../../lib/published-items';
+import { viewRoute } from '../../routes';
 import { ExampleSource } from './example-source';
 
 interface BlockPreviewProps {

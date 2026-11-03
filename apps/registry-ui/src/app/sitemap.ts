@@ -4,7 +4,8 @@ import { COMPONENT_BASES } from '@zeroxsolutions/ui/site/constants/component-bas
 import { canonicalNativeComponentsSource, nativeDocsSource } from '@/lib/native-source';
 import { registryHomepage } from '@/lib/registry';
 import { source } from '@/lib/source';
-import { blocksRoute, homeRoute, nativeHomeRoute } from '@/routes/app-routes';
+import { blocksRoute, homeRoute } from '@zeroxsolutions/ui-docs-web/routes';
+import { nativeHomeRoute } from '@/routes/app-routes';
 
 export const revalidate = false;
 

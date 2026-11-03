@@ -10,10 +10,10 @@ import { canonicalNativeComponentsSource } from '@/lib/native-source';
 import { registryHomepage } from '@/lib/registry';
 import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/button';
 import { nativeComponentsRoute, nativeDocsPageRoute } from '@/routes/app-routes';
+import { HomePageCode } from '@zeroxsolutions/ui-docs-web/components/data-display/home-page-code';
+import { HomeGrid } from '@zeroxsolutions/ui-docs-web/components/general/home-grid';
+import { HomeShader } from '@zeroxsolutions/ui-docs-web/components/general/home-shader';
 
-import { HomePageCode } from '../_components/data-display/home-page-code';
-import { HomeGrid } from '../_components/general/home-grid';
-import { HomeShader } from '../_components/general/home-shader';
 import { EngineTab, EngineTabs } from './_components/data-display/engine-tabs';
 import { NativePreviewFrame } from './_components/data-display/native-preview-frame';
 import { NativeRegistryEntry } from './_components/data-display/native-registry-entry';

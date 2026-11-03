@@ -2,9 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { DocsArticle } from '@zeroxsolutions/ui/site/components/layout/docs-article';
-import { BaseSwitcher } from '@/components/navigation/base-switcher';
-import { platformLocation } from '@/lib/platform-nav';
+import { DocsPage } from '@zeroxsolutions/ui-docs-web/pages/docs-page';
 import { docsLlms, docsPageImage, source } from '@/lib/source';
 import { mdxComponents } from '@/mdx-components';
 
@@ -31,23 +29,15 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
   };
 }
 
-export default async function DocsPage({ params }: DocsPageProps): Promise<ReactNode> {
+export default async function Page({ params }: DocsPageProps): Promise<ReactNode> {
   const page = source.getPage((await params).slug);
   if (!page) notFound();
 
   const { body: Body, toc } = await page.data.load();
 
   return (
-    <DocsArticle
-      title={page.data.title}
-      description={page.data.description}
-      tabs={platformLocation(page.url).section === 'components' ? <BaseSwitcher /> : undefined}
-      markdown={await docsLlms.page(page)}
-      tree={source.pageTree}
-      url={page.url}
-      toc={toc}
-    >
+    <DocsPage page={page} markdown={await docsLlms.page(page)} tree={source.pageTree} toc={toc}>
       <Body components={mdxComponents} />
-    </DocsArticle>
+    </DocsPage>
   );
 }

@@ -9,7 +9,7 @@ const MAX_DPR = 1.5;
 
 /**
  * Half the width, in CSS pixels, of the hero's text column. It matches the `max-w-3xl` (48rem) on the
- * hero's inner column in `(app)/page.tsx`; a wider column there puts text over the field. The field is
+ * hero's inner column in `pages/home-page.tsx`; a wider column there puts text over the field. The field is
  * clear across it: the sub-headline's muted colour holds 4.74:1 on the plain light background, and a
  * module at the base opacity behind it drops that to 4.39:1.
  */

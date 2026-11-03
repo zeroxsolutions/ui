@@ -1,31 +1,28 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ReactNode } from 'react';
+import { afterEach, describe, expect, it } from 'vitest';
 
-import { NextHostWrapper } from '@/test/next-host-wrapper';
+import { TestHost } from '@zeroxsolutions/ui/test/test-host';
+
 import { BaseSwitcher } from './base-switcher';
-
-const url = vi.hoisted(() => ({ pathname: '', search: '' }));
-
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
-  usePathname: (): string => url.pathname,
-  useSearchParams: (): URLSearchParams => new URLSearchParams(url.search),
-}));
-
-beforeEach(() => {
-  url.search = '';
-});
 
 afterEach(() => {
   cleanup();
 });
 
+function renderAt(pathname: string, search = ''): void {
+  render(<BaseSwitcher />, {
+    wrapper: ({ children }: { children: ReactNode }) => (
+      <TestHost pathname={pathname} search={search}>
+        {children}
+      </TestHost>
+    ),
+  });
+}
+
 describe('BaseSwitcher', () => {
   it("links the component under each base, the current one marked, keeping the page's query", () => {
-    url.pathname = '/docs/components/base/button';
-    url.search = '?style=rhea';
-
-    render(<BaseSwitcher />, { wrapper: NextHostWrapper });
+    renderAt('/docs/components/base/button', 'style=rhea');
 
     const link = within(screen.getByRole('navigation', { name: 'Base' })).getByRole('link', { name: 'Base UI' });
     expect(link.getAttribute('aria-current')).toBe('page');
@@ -33,18 +30,14 @@ describe('BaseSwitcher', () => {
   });
 
   it('links the blocks page under each base', () => {
-    url.pathname = '/blocks/base';
-
-    render(<BaseSwitcher />, { wrapper: NextHostWrapper });
+    renderAt('/blocks/base');
 
     const nav = screen.getByRole('navigation', { name: 'Base' });
     expect(within(nav).getByRole('link', { name: 'Base UI' }).getAttribute('href')).toBe('/blocks/base');
   });
 
   it('renders nothing on a page whose path holds no base', () => {
-    url.pathname = '/docs/installation';
-
-    render(<BaseSwitcher />, { wrapper: NextHostWrapper });
+    renderAt('/docs/installation');
 
     expect(screen.queryByRole('navigation', { name: 'Base' })).toBeNull();
   });

@@ -5,8 +5,9 @@
  * docs app and adds only what the docs themselves need. */
 @import '@zeroxsolutions/ui/registry/bases/base-ui/styles.css';
 
-/* Tailwind scans this app's own tree; the items' classes live in packages/ui. */
-@source '../../../../packages/ui/registry';
+/* Tailwind scans this app's own tree; the items, the site components and the web pages live in these packages. */
+@source '../../../../packages/ui';
+@source '../../../../packages/ui-docs-web';
 
 @layer base {
   /* The viewport takes its overscroll from the root element, so a drag at the page's end never rubber-bands. */

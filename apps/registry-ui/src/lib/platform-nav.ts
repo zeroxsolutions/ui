@@ -7,6 +7,8 @@ import {
   docsPageRoute,
   docsRoute,
   homeRoute,
+} from '@zeroxsolutions/ui-docs-web/routes';
+import {
   nativeBlocksRoute,
   nativeComponentRoute,
   nativeComponentsRoute,

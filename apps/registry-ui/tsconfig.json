@@ -53,6 +53,9 @@
       "path": "../../packages/ui"
     },
     {
+      "path": "../../packages/ui-docs-web"
+    },
+    {
       "path": "../../packages/fluent-emoji"
     },
     {

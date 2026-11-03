@@ -6,7 +6,7 @@ import { EngineSwitcher } from '@/components/navigation/engine-switcher';
 import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/empty';
-import { blocksRoute } from '@/routes/app-routes';
+import { blocksRoute } from '@zeroxsolutions/ui-docs-web/routes';
 
 export const dynamic = 'force-static';
 

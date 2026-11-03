@@ -5,6 +5,8 @@ import { join } from 'node:path';
 import { isMatch, type StaticRoute } from '@zeroxsolutions/routing';
 import { describe, expect, it } from 'vitest';
 
+import * as webRoutes from '@zeroxsolutions/ui-docs-web/routes';
+
 import * as appRoutes from './app-routes';
 
 const APP_DIR = join(import.meta.dirname, '..', 'app');
@@ -42,50 +44,14 @@ function answered(pages: readonly string[], pathname: string): boolean {
 
 describe('app routes', () => {
   const routes = Object.values(appRoutes);
+  // The web routes' builders are checked in their package's spec; only this app's tree shows a page answers each.
+  const answeredRoutes = [...routes, ...Object.values(webRoutes)];
   const staticRoutes = routes.filter((route): route is StaticRoute => route.build.length === 0);
 
   // The pathname and the builder are two independent values, so nothing else pairs them.
   it.each(staticRoutes)('$pathname builds and matches its own pathname', (route) => {
     expect(route.build()).toBe(route.pathname);
     expect(route.matcher(route.pathname)).toBeTruthy();
-  });
-
-  it('builds a view path its own pattern reads the name back from', () => {
-    expect(appRoutes.viewRoute.matcher(appRoutes.viewRoute.build({ name: 'ai-provider-picker' }))).toMatchObject({
-      params: { name: 'ai-provider-picker' },
-    });
-  });
-
-  it('builds the components index under a base, and reads the base back', () => {
-    const built = appRoutes.componentsRoute.build({ base: 'base' });
-
-    expect(built).toBe('/docs/components/base');
-    expect(appRoutes.componentsRoute.matcher(built)).toMatchObject({ params: { base: 'base' } });
-  });
-
-  it('builds a component page under its base, and reads the base and the name back', () => {
-    const built = appRoutes.componentRoute.build({ base: 'base', name: 'status-indicator' });
-
-    expect(built).toBe('/docs/components/base/status-indicator');
-    expect(appRoutes.componentRoute.matcher(built)).toMatchObject({
-      params: { base: 'base', name: 'status-indicator' },
-    });
-  });
-
-  it('builds the blocks page under a base, and reads the base back', () => {
-    const built = appRoutes.blocksRoute.build({ base: 'base' });
-
-    expect(built).toBe('/blocks/base');
-    expect(appRoutes.blocksRoute.matcher(built)).toMatchObject({ params: { base: 'base' } });
-  });
-
-  it('builds a web docs page from its slug, and reads the segments back', () => {
-    const built = appRoutes.docsPageRoute.build({ slug: 'blocks/ai-provider-picker' });
-
-    expect(built).toBe('/docs/blocks/ai-provider-picker');
-    expect(appRoutes.docsPageRoute.matcher(built)).toMatchObject({
-      params: { slug: ['blocks', 'ai-provider-picker'] },
-    });
   });
 
   it('builds a native docs page from its slug, and reads the segments back', () => {
@@ -114,15 +80,6 @@ describe('app routes', () => {
     });
   });
 
-  it('builds a share-image path its own pattern reads the slug back from', () => {
-    const built = appRoutes.docsShareImageRoute.build({ slug: 'components/button/image.png' });
-
-    expect(built).toBe('/og/docs/components/button/image.png');
-    expect(appRoutes.docsShareImageRoute.matcher(built)).toMatchObject({
-      params: { slug: ['components', 'button', 'image.png'] },
-    });
-  });
-
   it('builds a native share-image path its own pattern reads the slug back from', () => {
     const built = appRoutes.nativeShareImageRoute.build({ slug: 'components/button/image.png' });
 
@@ -135,6 +92,6 @@ describe('app routes', () => {
   it('names only paths a page answers', () => {
     const pages = pagePathnames(APP_DIR);
 
-    expect(routes.map((route) => route.pathname).filter((pathname) => !answered(pages, pathname))).toEqual([]);
+    expect(answeredRoutes.map((route) => route.pathname).filter((pathname) => !answered(pages, pathname))).toEqual([]);
   });
 });

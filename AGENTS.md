@@ -16,6 +16,8 @@ frontends install. The registry site is the one app deployed; it serves the docs
 - `packages/icons` (`@zeroxsolutions/icons`) - the org's icon set.
 - `packages/ui` (`@zeroxsolutions/ui`) - the web items' source, `registry.json`, and the build that
   publishes them as the `base-*` registries the registry site serves.
+- `packages/ui-docs-web` (`@zeroxsolutions/ui-docs-web`) - the web docs' content, the pages of `/`,
+  `/docs`, `/blocks` and `/view`, and their route units; the registry site renders the pages.
 - `packages/native-ui` (`@zeroxsolutions/native-ui`) - the React Native items and the build that
   publishes them as the `nativewind-*` and `uniwind-*` registries the registry site serves.
 - `iac/` - Terraform, outside the nx graph: the one R2 bucket that serves the emoji artwork.
