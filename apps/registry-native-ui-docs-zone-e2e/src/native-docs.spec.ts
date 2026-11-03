@@ -70,10 +70,9 @@ test("a native docs page's code block is highlighted, its tokens in more than on
 
   const block = page.getByRole('main').getByRole('code').filter({ hasText: 'module.exports' }).first();
   await expect
-    .poll(() =>
-      block.evaluate(
-        "(code) => new Set([...code.querySelectorAll('span[style]')].map((span) => span.getAttribute('style'))).size",
-      ),
-    )
+    .poll(async () => {
+      const tokens = await block.locator('span[style]').all();
+      return new Set(await Promise.all(tokens.map((token) => token.getAttribute('style')))).size;
+    })
     .toBeGreaterThan(1);
 });
