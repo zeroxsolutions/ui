@@ -8,7 +8,6 @@ import {
   homeRoute,
 } from '@zeroxsolutions/ui-docs-web/routes';
 import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
-import type { Platform } from '@zeroxsolutions/ui/site/types/platform';
 import type { SiteNavItem } from '@zeroxsolutions/ui/site/types/site-nav-item';
 
 import {
@@ -77,24 +76,8 @@ export function nativeCounterpart(pathname: string, engine: NativeEngine): strin
   }
 }
 
-/** Where `platform`'s home link points: that platform's home page. */
-export function platformHome(platform: Platform): string {
-  return platform === 'native' ? nativeHomeRoute.build() : homeRoute.build();
-}
-
-/** The header's Docs, Components and Blocks, each pointing into `platform`'s tree; on native, under `engine`. */
-export function platformNavItems(platform: Platform, engine: NativeEngine): SiteNavItem[] {
-  if (platform === 'native') {
-    return [
-      { href: nativeDocsRoute.build(), label: 'Docs', pattern: `${nativeDocsRoute.pathname}{/*rest}` },
-      {
-        href: nativeComponentsRoute.build({ engine }),
-        label: 'Components',
-        pattern: `${nativeComponentsRoute.pathname}{/*rest}`,
-      },
-      { href: nativeBlocksRoute.build({ engine }), label: 'Blocks', pattern: nativeBlocksRoute.pathname },
-    ];
-  }
+/** The header's Docs, Components and Blocks, each pointing into the web tree. */
+export function webNavItems(): SiteNavItem[] {
   const base = DEFAULT_COMPONENT_BASE;
   return [
     { href: docsRoute.build(), label: 'Docs', pattern: `${docsRoute.pathname}{/*rest}` },

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 
-import { nativeCounterpart, platformHome, platformNavItems } from './platform-nav';
+import { nativeCounterpart, webNavItems } from './platform-nav';
 
 describe('nativeCounterpart', () => {
   it.each([
@@ -26,27 +26,12 @@ describe('nativeCounterpart', () => {
   });
 });
 
-describe('platformHome', () => {
-  it("points each platform's home link at that platform's home page", () => {
-    expect(platformHome('web')).toBe('/');
-    expect(platformHome('native')).toBe('/native');
-  });
-});
-
-describe('platformNavItems', () => {
-  it("points web's Docs, Components and Blocks into the web tree", () => {
-    expect(platformNavItems('web', 'uniwind').map(({ label, href }) => [label, href])).toEqual([
+describe('webNavItems', () => {
+  it("points the header's Docs, Components and Blocks into the web tree", () => {
+    expect(webNavItems().map(({ label, href }) => [label, href])).toEqual([
       ['Docs', '/docs'],
       ['Components', '/docs/components/base'],
       ['Blocks', '/blocks/base'],
-    ]);
-  });
-
-  it("points native's Docs, Components and Blocks into the native tree, under the engine given", () => {
-    expect(platformNavItems('native', 'uniwind').map(({ label, href }) => [label, href])).toEqual([
-      ['Docs', '/native/docs'],
-      ['Components', '/native/components/uniwind'],
-      ['Blocks', '/native/blocks/uniwind'],
     ]);
   });
 });

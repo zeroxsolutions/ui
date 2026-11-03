@@ -1,8 +1,9 @@
 'use client';
 
-import { type ReactNode, useId } from 'react';
+import type { ReactNode } from 'react';
 
 import { useHost } from '@zeroxsolutions/ui/host';
+import { SectionNotFound } from '@zeroxsolutions/ui/site/components/feedback/section-not-found';
 import { useRememberedEngine } from '@zeroxsolutions/ui/site/hooks/use-remembered-choice';
 
 import { nativeLocation, withNativeEngine } from '../lib/native-location';
@@ -20,33 +21,15 @@ interface NativeNotFoundPageProps {
  * the engine the missing path names, or else the one the reader last read.
  */
 function NativeNotFoundPage({ section, pages }: NativeNotFoundPageProps): ReactNode {
-  const { Link, usePathname } = useHost();
-  const location = nativeLocation(usePathname());
+  const location = nativeLocation(useHost().usePathname());
   const remembered = useRememberedEngine();
   const engine = (location && 'engine' in location && location.engine) || remembered;
-  const headingId = useId();
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-10">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Page not found</h1>
-        <p className="text-muted-foreground">No native page is published at this address.</p>
-      </header>
-      <section aria-labelledby={headingId} className="flex flex-col gap-3">
-        <h2 id={headingId} className="text-xl font-semibold tracking-tight">
-          {section}
-        </h2>
-        <ul className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
-          {pages.map((page) => (
-            <li key={page.url}>
-              <Link href={withNativeEngine(page.url, engine)} className="underline-offset-4 hover:underline">
-                {page.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </div>
+    <SectionNotFound
+      section={section}
+      pages={pages.map((page) => ({ title: page.title, url: withNativeEngine(page.url, engine) }))}
+    />
   );
 }
 
