@@ -953,7 +953,7 @@
       "name": "combobox",
       "type": "registry:ui",
       "title": "Combobox",
-      "description": "A field that picks one of a long list of choices: a trigger announced as a combobox showing the chosen label, opening a Popover that holds a Command whose typed text filters the choices, the chosen one announced as selected with a check mark, closed by a choice.",
+      "description": "A field that picks one or, with multiple, any number of a long list of choices: a trigger announced as a combobox showing the chosen label, or chips of the chosen items, opening a Popover that holds a Command whose typed text filters the choices, the chosen ones announced as selected with a check mark, with a button that clears them.",
       "dependencies": ["lucide-react-native"],
       "registryDependencies": [
         "@zui/utils",

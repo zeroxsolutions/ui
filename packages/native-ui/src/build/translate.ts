@@ -358,6 +358,7 @@ const SLOT_COMPONENT_CLASSES: ReadonlyMap<string, readonly string[]> = new Map([
  * which the component tracks on the web, so their `peer-hover` classes go behind the `hovered` state rather
  * than being dropped with every other hover. An attachment is ringed while a control inside it holds focus,
  * which its trigger reports to the card as keyboard focus, so its `focus-within` classes go behind `focused`.
+ * A combobox's chips take theirs while the list they open is open, which holds the typed search on a device.
  */
 const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-input', new Set(['disabled'])],
@@ -365,6 +366,7 @@ const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-sidebar-menu-action', new Set(['peer-hover/menu-button'])],
   ['cn-sidebar-menu-badge', new Set(['peer-hover/menu-button'])],
   ['cn-attachment', new Set(['focus-within'])],
+  ['cn-combobox-chips', new Set(['focus-within'])],
 ]);
 
 /**
@@ -805,10 +807,11 @@ function resolveAvailableHeightClamp(utility: string): string {
 /**
  * A length of N spacing steps, or of N steps less M px, written with Tailwind 4's `--spacing()`, which
  * Tailwind 3 does not compile and Uniwind does not evaluate inside an arbitrary value, such as a trace's
- * content indented to line up with the middle of the icon above it. It becomes the px it comes to.
+ * content indented to line up with the middle of the icon above it, or a combobox chip's height of a step
+ * between two the scale has, in a calc of its own. It becomes the px it comes to.
  */
 const SPACING_FUNCTION =
-  /^(-?[a-z]+(?:-[a-z]+)*)-\[(?:--spacing\(([\d.]+)\)|calc\(--spacing\(([\d.]+)\)-([\d.]+)px\))\]$/;
+  /^(-?[a-z]+(?:-[a-z]+)*)-\[(?:--spacing\(([\d.]+)\)|calc\(--spacing\(([\d.]+)\)(?:-([\d.]+)px)?\))\]$/;
 
 function resolveSpacingFunction(utility: string): string {
   const length = SPACING_FUNCTION.exec(utility);
