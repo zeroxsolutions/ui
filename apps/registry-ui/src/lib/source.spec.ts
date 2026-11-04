@@ -600,7 +600,7 @@ describe('content/docs', () => {
   it('matches a single- or double-quoted frontmatter description to the item it quotes', () => {
     const items = new Map([
       ['model-info-card', { title: 'Model Info Card', description: 'The detail panel: an identity header.' }],
-      ['tool-call-card', { title: 'Tool Call Card', description: "One tool call: the call's status." }],
+      ['permission-card', { title: 'Permission Card', description: "One consent request: the user's decision." }],
     ]);
     const sources = {
       // Single-quoted: no quote character of its own to escape.
@@ -612,10 +612,10 @@ describe('content/docs', () => {
       ].join('\n'),
       // Double-quoted: its own apostrophe would need doubling inside single quotes, so it quotes with
       // double instead (oxfmt's own choice - confirmed by running it on a fixture with this text).
-      'components/base/tool-call-card': [
+      'components/base/permission-card': [
         '---',
-        'title: Tool Call Card',
-        'description: "One tool call: the call\'s status."',
+        'title: Permission Card',
+        'description: "One consent request: the user\'s decision."',
         '---',
       ].join('\n'),
     };

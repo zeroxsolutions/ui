@@ -777,45 +777,6 @@
       ]
     },
     {
-      "name": "tool-call-card",
-      "type": "registry:component",
-      "title": "Tool Call Card",
-      "description": "One tool invocation in a chat transcript: a trigger row over collapsible sections, whose status badge follows the call's lifecycle state.",
-      "categories": ["feedback"],
-      "dependencies": ["lucide-react"],
-      "registryDependencies": [
-        "@shadcn/badge",
-        "@shadcn/button",
-        "@shadcn/card",
-        "@shadcn/collapsible",
-        "@shadcn/utils",
-        "@zui/chevron-down-icon",
-        "@zui/circle-check-icon",
-        "@zui/clock-icon"
-      ],
-      "cssVars": {
-        "theme": {
-          "color-success": "var(--success)"
-        },
-        "light": {
-          "success": "oklch(0.627 0.19 149)"
-        },
-        "dark": {
-          "success": "oklch(0.723 0.19 149)"
-        }
-      },
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/feedback/tool-call-card.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
-          "type": "registry:hook"
-        }
-      ]
-    },
-    {
       "name": "command-menu",
       "type": "registry:component",
       "title": "Command Menu",
@@ -1552,34 +1513,6 @@
         {
           "path": "registry/bases/base-ui/hooks/use-reasoning-collapsible.ts",
           "type": "registry:hook"
-        }
-      ]
-    },
-    {
-      "name": "tool-call-card-demo",
-      "type": "registry:example",
-      "title": "Tool Call Card Demo",
-      "description": "A completed search call, its parameters shown under the trigger.",
-      "categories": ["examples"],
-      "registryDependencies": ["@zui/code-card", "@zui/search-icon", "@zui/tool-call-card"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/tool-call-card-demo.tsx",
-          "type": "registry:example"
-        }
-      ]
-    },
-    {
-      "name": "tool-call-card-error",
-      "type": "registry:example",
-      "title": "Tool Call Card Error",
-      "description": "A failed search call, its error shown under the trigger.",
-      "categories": ["examples"],
-      "registryDependencies": ["@zui/tool-call-card"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/tool-call-card-error.tsx",
-          "type": "registry:example"
         }
       ]
     },
