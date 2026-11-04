@@ -16,8 +16,9 @@ import { nativeMdxComponents } from '@/mdx-components';
 export const revalidate = false;
 export const dynamic = 'force-static';
 
-// An engine outside the set answers 404 rather than a page whose snippets name an engine nobody publishes.
-export const dynamicParams = false;
+// No `dynamicParams = false`: Next answers a path outside the generated set with the root's not-found,
+// and a slug only the web has should reach this section's, which lists the components. An engine outside
+// the set still answers 404, from the layout and from `componentPage`.
 
 interface NativeComponentRouteProps {
   params: Promise<{ engine: string; slug?: string[] }>;

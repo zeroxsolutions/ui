@@ -17,7 +17,7 @@ import {
   webDocsPageRoute,
   webDocsRoute,
   webHomeRoute,
-} from '@/routes/web-routes';
+} from '@/routes/web-paths';
 
 /**
  * The web page at the same place as the native page at `pathname`: the home page, the docs page with the

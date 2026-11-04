@@ -8,7 +8,8 @@ import { mdxComponents } from '@/mdx-components';
 
 export const revalidate = false;
 export const dynamic = 'force-static';
-export const dynamicParams = false;
+// No `dynamicParams = false`: Next answers a path outside the generated set with the root's not-found,
+// and a slug only the native docs have should reach this section's, which lists the docs or the components.
 
 interface DocsPageProps {
   params: Promise<{ slug?: string[] }>;

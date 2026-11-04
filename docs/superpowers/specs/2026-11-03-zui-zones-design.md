@@ -255,8 +255,8 @@ the zone is seen answering:
   native zone's own `wrangler:dev`, visiting `/native/...` and its `/native-static/` assets on the zone's
   own port. A cross-zone link is asserted by its `href` and by being an `<a>` without Next's link
   handling, since no local edge joins the two.
-- After the first deploy: every path in the route list answers from the expected worker (the response's
-  `cf-worker` header or the worker's logs), `/native-static/_next/static/...` answers 200, and
+- After the first deploy: every path in the route list answers from the expected worker, read from
+  that worker's logs (no response header names it), `/native-static/_next/static/...` answers 200, and
   `npx shadcn@latest add @zui/button` resolves against both a web and a native style.
 
 ## Left to the builder

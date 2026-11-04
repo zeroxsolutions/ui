@@ -11,7 +11,6 @@ const APP = resolve(import.meta.dirname, '../..');
 /** The web registry's package, whose `registry.json` paths are relative to it. */
 const UI = resolve(APP, '../../packages/ui');
 const CONTENT = resolve(APP, '../../packages/ui-docs-web/content/docs');
-const NATIVE_CONTENT = resolve(APP, '../../packages/native-ui-docs-web/content/native');
 
 /** The content tree: every page's slug (`components/base/button`), and each folder's `meta.json` pages by folder (`''` is the root). */
 interface DocsTree {
@@ -507,11 +506,6 @@ function unusedExamples(sources: Record<string, string>, examples: string[]): st
 describe('content/docs', () => {
   it('reaches every page from a meta.json', () => {
     expect(unreachedPages(readDocsTree(CONTENT))).toEqual([]);
-  });
-
-  it('reaches every native docs and component page from its own meta.json', () => {
-    expect(unreachedPages(readDocsTree(join(NATIVE_CONTENT, 'docs')))).toEqual([]);
-    expect(unreachedPages(readDocsTree(join(NATIVE_CONTENT, 'components')))).toEqual([]);
   });
 
   it('reports a page no meta.json lists or links', () => {

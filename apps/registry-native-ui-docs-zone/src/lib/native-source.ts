@@ -49,6 +49,14 @@ export function nativeComponentNames(): string[] {
     .map((page) => page.slugs.join('/'));
 }
 
+/** The title and URL of each page in a native section, its index first; a component page under the default engine. */
+export function nativeSectionPages(section: 'docs' | 'components'): { title: string; url: string }[] {
+  const source = section === 'docs' ? nativeDocsSource : nativeComponentsSources[DEFAULT_NATIVE_ENGINE];
+  return [...source.getPages()]
+    .sort((a, b) => Number(a.slugs.length > 0) - Number(b.slugs.length > 0))
+    .map((page) => ({ title: page.data.title, url: page.url }));
+}
+
 /**
  * The native component pages under the default engine, the URLs search engines, the sitemap, search and
  * `llms.txt` list. A page under another engine is the same MDX with other install commands, and names its

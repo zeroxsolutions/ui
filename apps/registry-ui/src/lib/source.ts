@@ -26,3 +26,17 @@ export function docsPageImage(page: { slugs: string[] }): { segments: string[]; 
   const segments = [...page.slugs, 'image.png'];
   return { segments, url: docsShareImageRoute.build({ slug: segments.join('/') }) };
 }
+
+/**
+ * The title and URL of each docs page, split into the component pages, their index first, and the rest
+ * of the docs, the introduction first: the lists the docs' 404 shows.
+ */
+export function docsSectionPages(): Record<'docs' | 'components', { title: string; url: string }[]> {
+  const pages = [...source.getPages()].sort((a, b) => a.slugs.length - b.slugs.length);
+  const entry = (page: (typeof pages)[number]) => ({ title: page.data.title, url: page.url });
+  const isComponent = (page: (typeof pages)[number]) => page.slugs[0] === 'components';
+  return {
+    docs: pages.filter((page) => !isComponent(page)).map(entry),
+    components: pages.filter(isComponent).map(entry),
+  };
+}

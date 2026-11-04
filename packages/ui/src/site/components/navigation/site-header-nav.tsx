@@ -16,9 +16,15 @@ import { MobileNav } from './mobile-nav';
 import { PlatformSwitch } from './platform-switch';
 import { StylePicker } from './style-picker';
 
+// The tree of a platform whose pages another app serves: the menu and the search list nothing of it.
+const NO_TREE: Root = { name: 'Docs', children: [] };
+
 interface SiteHeaderNavProps {
-  /** The web docs tree, and the native one under each engine, which the menu and the search list. */
-  trees: { web: Root; native: Record<NativeEngine, Root> };
+  /**
+   * The web docs tree, and the native one under each engine, which the menu and the search list. An app
+   * serving one platform's pages passes that platform's tree alone.
+   */
+  trees: { web?: Root; native?: Record<NativeEngine, Root> };
   /** Where the search index is served, which `DocsSearch` reads. */
   searchApi: string;
 }
@@ -35,7 +41,7 @@ function SiteHeaderNav({ trees, searchApi }: SiteHeaderNavProps): ReactNode {
   const remembered = useRememberedEngine();
   const engine = location.engine ?? remembered;
   const items = nav.items(location.platform, engine);
-  const tree = location.platform === 'native' ? trees.native[engine] : trees.web;
+  const tree = (location.platform === 'native' ? trees.native?.[engine] : trees.web) ?? NO_TREE;
 
   return (
     <>

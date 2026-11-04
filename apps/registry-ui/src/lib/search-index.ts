@@ -1,35 +1,28 @@
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { AdvancedIndex } from 'fumadocs-core/search/server';
 
-import { canonicalNativeComponentsSource, nativeDocsSource } from '@/lib/native-source';
 import { source } from '@/lib/source';
-import type { Platform } from '@zeroxsolutions/ui/site/types/platform';
 
 interface IndexedPage {
   url: string;
   data: { title?: string; description?: string; structuredData: () => Promise<StructuredData> };
 }
 
-async function pageIndex(page: IndexedPage, platform: Platform): Promise<AdvancedIndex> {
+async function pageIndex(page: IndexedPage): Promise<AdvancedIndex> {
   return {
     id: page.url,
     url: page.url,
     title: page.data.title ?? page.url,
     description: page.data.description,
     structuredData: await page.data.structuredData(),
-    tag: platform,
+    tag: 'web',
   };
 }
 
 /**
- * Every page search finds, tagged with its platform so a page searches only its own platform's text. A
- * native component is listed once, at its canonical URL; the search on another engine's page moves the
- * result to that engine.
+ * Every web page search finds, tagged with its platform as the site's search asks; the native pages are
+ * the native zone's `/native/api/search`.
  */
 export async function searchIndexes(): Promise<AdvancedIndex[]> {
-  return Promise.all([
-    ...source.getPages().map((page) => pageIndex(page, 'web')),
-    ...nativeDocsSource.getPages().map((page) => pageIndex(page, 'native')),
-    ...canonicalNativeComponentsSource.getPages().map((page) => pageIndex(page, 'native')),
-  ]);
+  return Promise.all(source.getPages().map(pageIndex));
 }

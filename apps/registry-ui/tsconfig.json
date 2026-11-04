@@ -25,9 +25,6 @@
       // fumadocs-mdx bundles `source.config.ts` and leaves a package's import to Node, which cannot load a
       // `.ts` through the package's exports; a path this program maps is bundled with it.
       "@zeroxsolutions/ui/site/lib/rehype-docs-code": ["../../packages/ui/src/site/lib/rehype-docs-code.ts"],
-      "@zeroxsolutions/native-ui-docs-web/lib/remark-native-demo-source": [
-        "../../packages/native-ui-docs-web/src/lib/remark-native-demo-source.ts"
-      ],
       // Written by the `fumadocs-generate` target, which `build` and `test` run first; a `tsc`
       // run by hand before it fails with `Cannot find module 'collections/server'`.
       "collections/*": ["./.source/*"]
@@ -59,13 +56,7 @@
       "path": "../../packages/ui-docs-web"
     },
     {
-      "path": "../../packages/native-ui-docs-web"
-    },
-    {
       "path": "../../packages/fluent-emoji"
-    },
-    {
-      "path": "../../packages/native-ui"
     }
   ]
 }

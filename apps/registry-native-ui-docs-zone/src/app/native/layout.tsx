@@ -1,4 +1,3 @@
-import type { Root } from 'fumadocs-core/page-tree';
 import type { ReactNode } from 'react';
 
 import { SiteFooter } from '@zeroxsolutions/ui/site/components/layout/site-footer';
@@ -7,12 +6,8 @@ import { SiteHeader } from '@zeroxsolutions/ui/site/components/layout/site-heade
 import { nativePageTree } from '@/lib/native-source';
 import { NativeNavProvider } from '@/providers/native-nav-provider';
 
-// The header shows the web tree only on a web page, and this zone serves none.
-const NO_WEB_TREE: Root = { name: 'Docs', children: [] };
-
 export default function NativeLayout({ children }: { children: ReactNode }): ReactNode {
   const trees = {
-    web: NO_WEB_TREE,
     native: { nativewind: nativePageTree('nativewind'), uniwind: nativePageTree('uniwind') },
   };
 
