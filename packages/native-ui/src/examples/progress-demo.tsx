@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
-import { Progress } from '@/components/ui/progress';
+import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress';
 
 function ProgressDemo(): ReactNode {
   return (
@@ -9,6 +9,10 @@ function ProgressDemo(): ReactNode {
       <Progress value={20} aria-label="Download" />
       <Progress value={60} aria-label="Upload" />
       <Progress value={100} aria-label="Sync" />
+      <Progress value={56}>
+        <ProgressLabel>Upload progress</ProgressLabel>
+        <ProgressValue />
+      </Progress>
     </View>
   );
 }

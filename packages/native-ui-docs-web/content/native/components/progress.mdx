@@ -9,16 +9,26 @@ description: A bar showing how far a task has got, announced as a progress bar f
 
 <InstallCommand name="progress" />
 
-The CLI writes `components/ui/progress.tsx`, installs Utils, and adds `@rn-primitives/progress`.
+The CLI writes `components/ui/progress.tsx`, installs [Text](/native/components/nativewind/text), Text children and
+Utils, and adds `@rn-primitives/progress`.
 
 ## Usage
 
 ```tsx
-import { Progress } from '@/components/ui/progress';
+import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress';
 ```
 
 ```tsx
 <Progress value={60} aria-label="Upload" />
+```
+
+### Label and value
+
+```tsx
+<Progress value={56}>
+  <ProgressLabel>Upload progress</ProgressLabel>
+  <ProgressValue />
+</Progress>
 ```
 
 ## API reference
@@ -33,3 +43,31 @@ Takes every prop of the `@rn-primitives/progress` root except `max` and `value`,
 
 `value` runs from 0 to 100, and the bar is announced with it as a percentage. A value outside that range is
 held to its nearest end, and `NaN` draws an empty bar.
+
+With no children the bar is the Progress itself, and `className` styles the bar. With a ProgressLabel or a
+ProgressValue as children they sit on a row above the bar, `className` styles that row, and the bar is a
+ProgressTrack the Progress draws.
+
+### ProgressLabel
+
+Takes every prop of [Text](/native/components/nativewind/text). What the progress is of, at the start of the row;
+its text names the progress bar unless the Progress has an `aria-label`.
+
+### ProgressValue
+
+Takes every prop of Text, plus `children`, drawn in place of the value. It draws the value as a whole percentage,
+such as `56%`, muted at the end of the row. A function child gets that text and the value, and draws what it
+returns.
+
+### ProgressTrack and ProgressIndicator
+
+The muted bar and its filled part, which a Progress with children draws itself. Each takes every prop of `View`.
+
+## Differences from upstream
+
+- Upstream's Progress always lays out a row of its children over the bar. Here a Progress with no children is the
+  bar alone, so a `className` given to it styles the bar.
+- ProgressValue draws a whole percentage; upstream's formats the value with `Intl.NumberFormat`, which takes a
+  `format` and a `locale` this one leaves out.
+- The label names the progress bar through its `aria-label`, where upstream's links them with `aria-labelledby`,
+  which iOS does not read.
