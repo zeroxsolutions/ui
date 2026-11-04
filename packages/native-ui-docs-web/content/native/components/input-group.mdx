@@ -1,6 +1,6 @@
 ---
 title: Input group
-description: An input with text, icons or buttons beside, above or below it, drawn as one field.
+description: An input or a textarea with text, icons or buttons beside, above or below it, drawn as one field.
 ---
 
 <NativePreview name="input-group-demo" />
@@ -10,7 +10,8 @@ description: An input with text, icons or buttons beside, above or below it, dra
 <InstallCommand name="input-group" />
 
 The CLI writes `components/ui/input-group.tsx`, installs [Text](/native/components/nativewind/text), [Icon](/native/components/nativewind/icon),
-[Button](/native/components/nativewind/button), [Input](/native/components/nativewind/input) and Utils, and adds `class-variance-authority`.
+[Button](/native/components/nativewind/button), [Input](/native/components/nativewind/input),
+[Textarea](/native/components/nativewind/textarea) and Utils, and adds `class-variance-authority`.
 
 ## Usage
 
@@ -21,6 +22,7 @@ import {
   InputGroupButton,
   InputGroupInput,
   InputGroupText,
+  InputGroupTextarea,
 } from '@/components/ui/input-group';
 import { Text } from '@/components/ui/text';
 ```
@@ -39,16 +41,28 @@ import { Text } from '@/components/ui/text';
 </InputGroup>
 ```
 
+### Textarea
+
+```tsx
+<InputGroup>
+  <InputGroupTextarea placeholder="Ask, search or chat..." aria-label="Message" />
+  <InputGroupAddon align="block-end">
+    <InputGroupText>52% used</InputGroupText>
+  </InputGroupAddon>
+</InputGroup>
+```
+
 ## API reference
 
 ### InputGroup
 
 Takes every prop of a React Native `View`. It is announced as a group.
 
-Its children are one InputGroupInput and the InputGroupAddons, as direct children, because the group reads each
+Its children are one InputGroupInput or InputGroupTextarea and the InputGroupAddons, as direct children, because the group reads each
 addon's `align` to place it: a start addon goes before the input and an end addon after it. A block addon
 stacks the group into a column. The group draws the focus border while its input holds focus, the destructive
-border while the input is `aria-invalid`, and the dimming of a disabled input.
+border while the input is `aria-invalid`, and the dimming of a disabled input. A group holding a textarea grows
+with it.
 
 ### InputGroupInput
 
@@ -56,6 +70,13 @@ Takes every prop of [Input](/native/components/nativewind/input), plus a `ref` t
 
 It draws no border of its own. Its focus, `aria-invalid` and `editable={false}` are drawn around it and its
 addons by the group.
+
+### InputGroupTextarea
+
+Takes every prop of [Textarea](/native/components/nativewind/textarea), plus a `ref` to the text field.
+
+A multiline field that draws no border of its own, the group drawing its focus, `aria-invalid` and
+`editable={false}` as it does an InputGroupInput's. A `block-end` addon below it holds a count or a send button.
 
 ### InputGroupAddon
 

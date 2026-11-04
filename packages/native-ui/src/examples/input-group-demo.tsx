@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react-native';
+import { ArrowUp, Search } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
@@ -9,6 +9,7 @@ import {
   InputGroupButton,
   InputGroupInput,
   InputGroupText,
+  InputGroupTextarea,
 } from '@/components/ui/input-group';
 import { Text } from '@/components/ui/text';
 
@@ -31,6 +32,15 @@ function InputGroupDemo(): ReactNode {
           <Icon as={Search} />
         </InputGroupAddon>
         <InputGroupInput placeholder="Search" aria-label="Search" />
+      </InputGroup>
+      <InputGroup>
+        <InputGroupTextarea placeholder="Ask, search or chat..." aria-label="Message" />
+        <InputGroupAddon align="block-end">
+          <InputGroupText>52% used</InputGroupText>
+          <InputGroupButton variant="default" size="icon-xs" aria-label="Send" className="ml-auto rounded-full">
+            <Icon as={ArrowUp} />
+          </InputGroupButton>
+        </InputGroupAddon>
       </InputGroup>
     </View>
   );

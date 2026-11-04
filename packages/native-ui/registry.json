@@ -425,9 +425,9 @@
       "name": "input-group",
       "type": "registry:ui",
       "title": "Input group",
-      "description": "An input with text, icons or buttons beside, above or below it, drawn as one field that takes the focus, invalid and disabled states of its input.",
+      "description": "An input or a multiline textarea with text, icons or buttons beside, above or below it, drawn as one field that takes the focus, invalid and disabled states of its input.",
       "dependencies": ["class-variance-authority"],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/button", "@zui/input"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/button", "@zui/input", "@zui/textarea"],
       "files": [
         {
           "path": "src/registry/ui/input-group.tsx",
