@@ -10,15 +10,15 @@ vi.mock('../../lib/shiki', async (importOriginal) => {
 });
 
 import {
-  CodeBlock,
-  CodeBlockActions,
-  CodeBlockCode,
-  CodeBlockContent,
-  CodeBlockCopy,
-  CodeBlockLanguage,
-  CodeBlockLineNumbers,
-  type CodeBlockProps,
-} from './code-block';
+  CodeCard,
+  CodeCardActions,
+  CodeCardCode,
+  CodeCardContent,
+  CodeCardCopy,
+  CodeCardLanguage,
+  CodeCardLineNumbers,
+  type CodeCardProps,
+} from './code-card';
 import type { ReactNode } from 'react';
 
 import {
@@ -51,18 +51,18 @@ beforeAll(() => {
 afterEach(cleanup);
 
 /** A block whose content is the code alone, with `children` composed before it. */
-function Block({ children, ...props }: Omit<CodeBlockProps, 'children'> & { children?: ReactNode }): ReactNode {
+function Block({ children, ...props }: Omit<CodeCardProps, 'children'> & { children?: ReactNode }): ReactNode {
   return (
-    <CodeBlock {...props}>
+    <CodeCard {...props}>
       {children}
-      <CodeBlockContent>
-        <CodeBlockCode />
-      </CodeBlockContent>
-    </CodeBlock>
+      <CodeCardContent>
+        <CodeCardCode />
+      </CodeCardContent>
+    </CodeCard>
   );
 }
 
-describe('CodeBlock', () => {
+describe('CodeCard', () => {
   it('renders the code string', async () => {
     render(<Block code={'{ "a": 1 }'} />);
     await settle();
@@ -87,10 +87,10 @@ describe('CodeBlock', () => {
       <Block code="const x = 1" language="ts">
         <CollapsibleCardHeader>
           <CollapsibleCardTitle>
-            <CodeBlockLanguage />
+            <CodeCardLanguage />
           </CollapsibleCardTitle>
           <CollapsibleCardActions>
-            <CodeBlockCopy />
+            <CodeCardCopy />
             <CollapsibleCardTrigger />
           </CollapsibleCardActions>
         </CollapsibleCardHeader>
@@ -114,13 +114,13 @@ describe('CodeBlock', () => {
     expect(screen.queryByText('const x = 1')).toBeNull();
   });
 
-  it('copies the root code from CodeBlockCopy', async () => {
+  it('copies the root code from CodeCardCopy', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });
 
     render(
       <Block code="payload" language="json">
-        <CodeBlockCopy label="Copy payload" />
+        <CodeCardCopy label="Copy payload" />
       </Block>,
     );
     await settle();
@@ -133,7 +133,7 @@ describe('CodeBlock', () => {
   it('labels a plain block as plain text', async () => {
     render(
       <Block code="hello">
-        <CodeBlockLanguage />
+        <CodeCardLanguage />
       </Block>,
     );
     await settle();
@@ -182,12 +182,12 @@ describe('CodeBlock', () => {
 
   it('numbers each line in a gutter hidden from assistive technology, apart from the code', async () => {
     const { container } = render(
-      <CodeBlock code={'a\nb\nc'}>
-        <CodeBlockContent>
-          <CodeBlockLineNumbers />
-          <CodeBlockCode />
-        </CodeBlockContent>
-      </CodeBlock>,
+      <CodeCard code={'a\nb\nc'}>
+        <CodeCardContent>
+          <CodeCardLineNumbers />
+          <CodeCardCode />
+        </CodeCardContent>
+      </CodeCard>,
     );
     await settle();
 
@@ -210,9 +210,9 @@ describe('CodeBlock', () => {
 
     render(
       <Block code="payload">
-        <CodeBlockActions>
-          <CodeBlockCopy variant="secondary" />
-        </CodeBlockActions>
+        <CodeCardActions>
+          <CodeCardCopy variant="secondary" />
+        </CodeCardActions>
       </Block>,
     );
     await settle();
@@ -226,7 +226,7 @@ describe('CodeBlock', () => {
     Object.assign(navigator, { clipboard: undefined });
     render(
       <Block code="payload">
-        <CodeBlockCopy />
+        <CodeCardCopy />
       </Block>,
     );
     await settle();
@@ -235,7 +235,7 @@ describe('CodeBlock', () => {
     expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();
   });
 
-  it('throws when a part sits outside a CodeBlock', () => {
-    expect(() => render(<CodeBlockCode />)).toThrow(/inside a CodeBlock/);
+  it('throws when a part sits outside a CodeCard', () => {
+    expect(() => render(<CodeCardCode />)).toThrow(/inside a CodeCard/);
   });
 });

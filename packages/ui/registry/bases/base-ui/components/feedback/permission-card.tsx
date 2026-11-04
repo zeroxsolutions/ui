@@ -27,7 +27,7 @@ interface PermissionCardProps extends ComponentProps<typeof Card> {
  *       <PermissionCardStatus>{statusWord}</PermissionCardStatus>
  *     </CardHeader>
  *     <CardContent>
- *       <CodeBlock code={command} language="bash"><CodeBlockContent><CodeBlockCode /></CodeBlockContent></CodeBlock>
+ *       <CodeCard code={command} language="bash"><CodeCardContent><CodeCardCode /></CodeCardContent></CodeCard>
  *     </CardContent>
  *     <PermissionCardActions>
  *       <Button variant="ghost" onClick={deny}>Deny</Button>

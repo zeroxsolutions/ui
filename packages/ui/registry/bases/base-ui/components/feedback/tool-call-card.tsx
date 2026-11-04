@@ -46,9 +46,9 @@ interface ToolCallCardProps extends ComponentProps<typeof Collapsible> {
  *     <ToolCallCardContent>
  *       <ToolCallCardSection>
  *         <ToolCallCardSectionTitle>Parameters</ToolCallCardSectionTitle>
- *         <CodeBlock code={JSON.stringify(input, null, 2)} language="json">
- *           <CodeBlockContent><CodeBlockCode /></CodeBlockContent>
- *         </CodeBlock>
+ *         <CodeCard code={JSON.stringify(input, null, 2)} language="json">
+ *           <CodeCardContent><CodeCardCode /></CodeCardContent>
+ *         </CodeCard>
  *       </ToolCallCardSection>
  *     </ToolCallCardContent>
  *   </ToolCallCard>

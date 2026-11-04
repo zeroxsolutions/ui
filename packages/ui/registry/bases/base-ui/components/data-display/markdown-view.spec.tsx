@@ -3,7 +3,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { MarkdownView } from './markdown-view';
 
-// A fenced block's CodeBlock renders upstream ScrollArea, which measures
+// A fenced block's CodeCard renders upstream ScrollArea, which measures
 // its viewport in a `queueMicrotask` its layout effect schedules on mount,
 // outside of `render`'s own act() batch; awaiting a no-op act() settles it
 // before the test's assertions run.
@@ -12,7 +12,7 @@ async function settle(): Promise<void> {
 }
 
 beforeAll(() => {
-  // A fenced block renders CodeBlock, which measures via a ResizeObserver
+  // A fenced block renders CodeCard, which measures via a ResizeObserver
   // and queries Element.getAnimations, both absent in jsdom.
   globalThis.ResizeObserver ??= class {
     observe() {}
@@ -48,7 +48,7 @@ describe('MarkdownView', () => {
   });
 
   describe('fenced code', () => {
-    it('renders fenced code as an interactive CodeBlock (copy button)', async () => {
+    it('renders fenced code as an interactive CodeCard (copy button)', async () => {
       render(<MarkdownView>{'```json\n{ "a": 1 }\n```'}</MarkdownView>);
       await settle();
       expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy();

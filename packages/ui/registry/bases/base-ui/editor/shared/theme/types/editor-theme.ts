@@ -19,7 +19,7 @@ export interface CalloutPalette {
 
 /** Code rendering themes for the two code paths. */
 export interface CodeTheme {
-  /** Shiki theme name for read-only code-block highlighting. */
+  /** Shiki theme name for read-only code card highlighting. */
   shiki: string;
   /** CodeMirror theme id for the editable code pane / mermaid source. */
   codeMirror: string;

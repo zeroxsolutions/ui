@@ -5,16 +5,16 @@ import {
   ComponentPreviewSource,
 } from '@zeroxsolutions/ui/site/components/data-display/component-preview';
 import {
-  SourceCodeBlockActions,
-  SourceCodeBlockCode,
-  SourceCodeBlockContent,
-  SourceCodeBlockCopy,
-  SourceCodeBlockHeader,
-  SourceCodeBlockLanguage,
-  SourceCodeBlockLineNumbers,
-  SourceCodeBlockTitle,
-  SourceCodeBlockTrigger,
-} from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
+  SourceCodeCardActions,
+  SourceCodeCardCode,
+  SourceCodeCardContent,
+  SourceCodeCardCopy,
+  SourceCodeCardHeader,
+  SourceCodeCardLanguage,
+  SourceCodeCardLineNumbers,
+  SourceCodeCardTitle,
+  SourceCodeCardTrigger,
+} from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
 
 import { ComponentSource } from './component-source';
 
@@ -44,27 +44,27 @@ function ExampleSource({ name, code, language, lines }: ExampleSourceProps): Rea
   return (
     <ComponentPreviewSource>
       <ComponentSource {...source} defaultOpen={false}>
-        <SourceCodeBlockHeader>
-          <SourceCodeBlockTitle>
-            <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
-          </SourceCodeBlockTitle>
-          <SourceCodeBlockActions>
-            <SourceCodeBlockCopy />
-            <SourceCodeBlockTrigger />
-          </SourceCodeBlockActions>
-        </SourceCodeBlockHeader>
+        <SourceCodeCardHeader>
+          <SourceCodeCardTitle>
+            <SourceCodeCardLanguage>{language}</SourceCodeCardLanguage>
+          </SourceCodeCardTitle>
+          <SourceCodeCardActions>
+            <SourceCodeCardCopy />
+            <SourceCodeCardTrigger />
+          </SourceCodeCardActions>
+        </SourceCodeCardHeader>
         <ComponentPreviewExcerpt>
           <ComponentSource {...source} maxLines={EXCERPT_LINES}>
-            <SourceCodeBlockContent>
-              <SourceCodeBlockLineNumbers />
-              <SourceCodeBlockCode />
-            </SourceCodeBlockContent>
+            <SourceCodeCardContent>
+              <SourceCodeCardLineNumbers />
+              <SourceCodeCardCode />
+            </SourceCodeCardContent>
           </ComponentSource>
         </ComponentPreviewExcerpt>
-        <SourceCodeBlockContent className="h-(--collapsible-panel-height) transition-[height] duration-200 ease-out data-ending-style:h-(--component-preview-excerpt-height) data-starting-style:h-(--component-preview-excerpt-height) motion-reduce:transition-none">
-          <SourceCodeBlockLineNumbers />
-          <SourceCodeBlockCode />
-        </SourceCodeBlockContent>
+        <SourceCodeCardContent className="h-(--collapsible-panel-height) transition-[height] duration-200 ease-out data-ending-style:h-(--component-preview-excerpt-height) data-starting-style:h-(--component-preview-excerpt-height) motion-reduce:transition-none">
+          <SourceCodeCardLineNumbers />
+          <SourceCodeCardCode />
+        </SourceCodeCardContent>
       </ComponentSource>
     </ComponentPreviewSource>
   );

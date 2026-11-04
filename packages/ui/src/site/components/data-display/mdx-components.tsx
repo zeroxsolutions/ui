@@ -1,6 +1,6 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
-import { DocsCodeBlock } from './docs-code-block';
+import { DocsCodeCard } from './docs-code-card';
 import type { HighlightLine } from '../../../../registry/bases/base-ui/lib/shiki';
 import { cn } from '../../../../registry/bases/base-ui/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '../../../../registry/bases/base-ui/ui/alert';
@@ -77,14 +77,14 @@ export const mdxComponents = {
     <th className="border-b py-2 pr-4 text-left font-medium whitespace-nowrap" {...props} />
   ),
   td: (props: ComponentProps<'td'>) => <td className="border-b py-2 pr-4 align-top" {...props} />,
-  // A fence as the registry's `CodeBlock`, painted with the lines `rehypeDocsCode` tokenized as the
+  // A fence as the registry's `CodeCard`, painted with the lines `rehypeDocsCode` tokenized as the
   // page compiled.
   pre: ({ children, title, lines }: ComponentProps<'pre'> & { lines?: string }) => {
     const code = isValidElement<{ className?: string; children?: ReactNode }>(children) ? children.props : {};
     const language = /language-(\S+)/.exec(code.className ?? '')?.[1];
 
     return (
-      <DocsCodeBlock
+      <DocsCodeCard
         code={nodeText(code.children).replace(/\n$/, '')}
         language={language}
         title={title}

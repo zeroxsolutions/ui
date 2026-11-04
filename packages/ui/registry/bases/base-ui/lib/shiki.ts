@@ -7,7 +7,7 @@ import { CODE_THEME_NAME, codeTheme } from './code-theme';
 /**
  * Framework-agnostic Shiki core — the single highlighter instance, lazy grammar
  * loading, and the syntax theme, with NO CodeMirror imports so a static
- * `<pre>` (the chat `CodeBlock`) can highlight without dragging the editor into
+ * `<pre>` (the chat `CodeCard`) can highlight without dragging the editor into
  * its bundle. The read-only renderer here and the CodeMirror bridge in the
  * composite editor package both consume this module, sharing one highlighter +
  * one grammar cache.
@@ -102,7 +102,7 @@ export const CODE_LANGUAGE_IDS: readonly string[] = Object.freeze(Object.keys(LA
 /**
  * Common shiki language aliases → the canonical id in {@link LANG_LOADERS}.
  * The editor passes canonical ids (the file router's `EXTENSION_TO_LANGUAGE`),
- * but a Markdown code fence (chat `CodeBlock`) carries whatever the author typed
+ * but a Markdown code fence (chat `CodeCard`) carries whatever the author typed
  * — `js`, `ts`, `py`, `sh`, ```` ```bash ````, … — so those must map back to the
  * one grammar we load.
  */

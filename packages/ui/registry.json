@@ -36,9 +36,9 @@
       ]
     },
     {
-      "name": "code-block",
+      "name": "code-card",
       "type": "registry:component",
-      "title": "Code Block",
+      "title": "Code Card",
       "description": "Read-only source over a collapsible card, highlighted through the shared Shiki highlighter and falling back to plain mono while the grammar loads.",
       "categories": ["data-display"],
       "dependencies": ["@base-ui/react", "@shikijs/langs", "@zeroxsolutions/icons", "shiki"],
@@ -51,7 +51,7 @@
       ],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/data-display/code-block.tsx",
+          "path": "registry/bases/base-ui/components/data-display/code-card.tsx",
           "type": "registry:component"
         },
         {
@@ -220,14 +220,14 @@
       "name": "markdown-view",
       "type": "registry:component",
       "title": "Markdown View",
-      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code as a CodeBlock.",
+      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code as a CodeCard.",
       "categories": ["data-display"],
       "dependencies": ["react-markdown", "remark-gfm"],
       "registryDependencies": [
         "@shadcn/checkbox",
         "@shadcn/table",
         "@shadcn/utils",
-        "@zui/code-block",
+        "@zui/code-card",
         "@zui/collapsible-card"
       ],
       "files": [
@@ -937,15 +937,15 @@
       ]
     },
     {
-      "name": "code-block-demo",
+      "name": "code-card-demo",
       "type": "registry:example",
-      "title": "Code Block Demo",
+      "title": "Code Card Demo",
       "description": "A collapsible TypeScript block with its language, a copy action and a collapse toggle.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/code-block", "@zui/collapsible-card"],
+      "registryDependencies": ["@zui/code-card", "@zui/collapsible-card"],
       "files": [
         {
-          "path": "registry/bases/base-ui/examples/code-block-demo.tsx",
+          "path": "registry/bases/base-ui/examples/code-card-demo.tsx",
           "type": "registry:example"
         }
       ]
@@ -1604,7 +1604,7 @@
       "title": "Tool Call Card Demo",
       "description": "A completed search call, its parameters shown under the trigger.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/code-block", "@zui/search-icon", "@zui/tool-call-card"],
+      "registryDependencies": ["@zui/code-card", "@zui/search-icon", "@zui/tool-call-card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tool-call-card-demo.tsx",

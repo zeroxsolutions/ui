@@ -42,7 +42,7 @@ beforeAll(() => {
   Element.prototype.releasePointerCapture ??= () => {};
 });
 
-// The read-only path's design-system CodeBlock renders upstream ScrollArea,
+// The read-only path's design-system CodeCard renders upstream ScrollArea,
 // which measures its viewport in a `queueMicrotask` its layout effect
 // schedules on mount, outside of `render`'s own act() batch — awaiting a
 // no-op act() settles it before the test's assertions run.
@@ -170,14 +170,14 @@ describe('mermaid node view (read-only)', () => {
 });
 
 describe('mermaid export codec', () => {
-  it('renders toReact through the read-only design-system CodeBlock', async () => {
+  it('renders toReact through the read-only design-system CodeCard', async () => {
     const rendered = mermaidCodec.toReact?.(
       { type: 'mermaid', attrs: { source: SOURCE } } as never,
       {} as never,
     ) as ReactNode;
     const { container } = render(<>{rendered}</>);
     await settle();
-    expect(container.querySelector('[data-slot="code-block"]')).not.toBeNull();
+    expect(container.querySelector('[data-slot="code-card"]')).not.toBeNull();
     expect(container.textContent).toContain('graph TD');
   });
 });

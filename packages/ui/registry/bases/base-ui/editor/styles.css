@@ -109,27 +109,27 @@
   margin-bottom: 0;
 }
 
-/* The design-system CodeBlock owns its whole surface — a rounded `bg-muted/50`
+/* The design-system CodeCard owns its whole surface — a rounded `bg-muted/50`
  * wrapper with a header and a `<pre>` body. Inside `.prose` the typography plugin
  * ALSO styles that inner `<pre>`/`<code>` (a second background, a border-radius,
  * vertical margin, a forced text color, and backtick quotes on `code`), which
  * double-boxes the block and splits the header↔body seam — so it looks broken in
  * the viewer versus its standalone story. Neutralize the plugin on the DS surface
  * so it renders identically in prose. UNLAYERED to beat the plugin's own rules. */
-.document-editor [data-slot='code-block'] pre {
+.document-editor [data-slot='code-card'] pre {
   margin: 0;
   background: transparent;
   border-radius: 0;
   color: inherit;
 }
-.document-editor [data-slot='code-block'] code {
+.document-editor [data-slot='code-card'] code {
   background: transparent;
   color: inherit;
   font-weight: inherit;
   padding: 0;
 }
-.document-editor [data-slot='code-block'] code::before,
-.document-editor [data-slot='code-block'] code::after {
+.document-editor [data-slot='code-card'] code::before,
+.document-editor [data-slot='code-card'] code::after {
   content: none;
 }
 

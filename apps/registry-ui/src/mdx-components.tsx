@@ -2,17 +2,17 @@ import type { ComponentProps } from 'react';
 
 import { mdxComponents as siteMdxComponents } from '@zeroxsolutions/ui/site/components/data-display/mdx-components';
 import {
-  SourceCodeBlockActions,
-  SourceCodeBlockCode,
-  SourceCodeBlockContent,
-  SourceCodeBlockCopy,
-  SourceCodeBlockFile,
-  SourceCodeBlockHeader,
-  SourceCodeBlockLanguage,
-  SourceCodeBlockLineNumbers,
-  SourceCodeBlockTitle,
-  SourceCodeBlockTrigger,
-} from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
+  SourceCodeCardActions,
+  SourceCodeCardCode,
+  SourceCodeCardContent,
+  SourceCodeCardCopy,
+  SourceCodeCardFile,
+  SourceCodeCardHeader,
+  SourceCodeCardLanguage,
+  SourceCodeCardLineNumbers,
+  SourceCodeCardTitle,
+  SourceCodeCardTrigger,
+} from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
 import { registryHomepage } from '@/lib/registry';
 import { writtenDocsPage } from '@/lib/source';
 
@@ -33,20 +33,20 @@ export const mdxComponents = {
   BlockPreview,
   ComponentSource: ({ file, title, ...props }: ComponentProps<typeof ComponentSource>) => (
     <ComponentSource file={file} className="mt-6" {...props}>
-      <SourceCodeBlockHeader>
-        <SourceCodeBlockTitle>
-          <SourceCodeBlockLanguage>{props.language}</SourceCodeBlockLanguage>
-          {title || file ? <SourceCodeBlockFile>{title ?? file?.split('/').pop()}</SourceCodeBlockFile> : null}
-        </SourceCodeBlockTitle>
-        <SourceCodeBlockActions>
-          <SourceCodeBlockCopy />
-          <SourceCodeBlockTrigger />
-        </SourceCodeBlockActions>
-      </SourceCodeBlockHeader>
-      <SourceCodeBlockContent>
-        <SourceCodeBlockLineNumbers />
-        <SourceCodeBlockCode />
-      </SourceCodeBlockContent>
+      <SourceCodeCardHeader>
+        <SourceCodeCardTitle>
+          <SourceCodeCardLanguage>{props.language}</SourceCodeCardLanguage>
+          {title || file ? <SourceCodeCardFile>{title ?? file?.split('/').pop()}</SourceCodeCardFile> : null}
+        </SourceCodeCardTitle>
+        <SourceCodeCardActions>
+          <SourceCodeCardCopy />
+          <SourceCodeCardTrigger />
+        </SourceCodeCardActions>
+      </SourceCodeCardHeader>
+      <SourceCodeCardContent>
+        <SourceCodeCardLineNumbers />
+        <SourceCodeCardCode />
+      </SourceCodeCardContent>
     </ComponentSource>
   ),
   ComponentsList: () => <ComponentsList className="mt-8" writtenDocsPage={writtenDocsPage} />,

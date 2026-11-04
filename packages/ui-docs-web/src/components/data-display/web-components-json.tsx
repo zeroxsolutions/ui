@@ -2,7 +2,7 @@
 
 import { Suspense, type ReactNode } from 'react';
 
-import { DocsCodeBlock } from '@zeroxsolutions/ui/site/components/data-display/docs-code-block';
+import { DocsCodeCard } from '@zeroxsolutions/ui/site/components/data-display/docs-code-card';
 import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
 import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
@@ -37,9 +37,7 @@ function WebComponentsJsonBlock({
     registries: { '@zui': `${origin}/r/styles/{style}/{name}.json` },
   };
 
-  return (
-    <DocsCodeBlock code={JSON.stringify(json, null, 2)} language="json" title="components.json" className="mt-6" />
-  );
+  return <DocsCodeCard code={JSON.stringify(json, null, 2)} language="json" title="components.json" className="mt-6" />;
 }
 
 export { WebComponentsJson };

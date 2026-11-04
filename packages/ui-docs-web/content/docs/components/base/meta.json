@@ -5,7 +5,7 @@
     "---Data display---",
     "ai-provider-card",
     "chat-message",
-    "code-block",
+    "code-card",
     "data-table",
     "data-table-column-header",
     "file-tree",
