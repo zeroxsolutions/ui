@@ -68,7 +68,7 @@ Takes every prop of React Native's `View`, plus:
 
 `side` is the side of the trigger the label opens on, `sideOffset` its gap from the trigger in px, and `align`
 lines it up with the trigger's start, centre or end, moved along by `alignOffset`. The label is drawn in the
-foreground colour, up to 20rem wide, and announced as a `tooltip`. On a device accessibility focus moves into it
+foreground colour, up to 20rem wide, with an arrow toward the trigger, and announced as a `tooltip`. On a device accessibility focus moves into it
 as it opens, and a press outside it, the Android back button and the iOS escape gesture (a two-finger Z) close
 it. On the web the pointer leaving the trigger and Escape close it. It fades in while growing from 95% and
 sliding 0.5rem away from the trigger over 150ms. When the system asks for reduced motion it appears at once.
@@ -79,8 +79,9 @@ sliding 0.5rem away from the trigger over 150ms. When the system asks for reduce
 - A press opens the tooltip on a device, where upstream's opens on hover and focus alone.
 - The Tooltip holds its own open state, so it takes no `open` or `defaultOpen`: the primitive it is built on
   has no controlled mode.
-- The arrow is left out. Upstream places it with a `calc()` offset and an important `top-1/2!`, which React
-  Native's styles cannot take.
+- The arrow sits halfway along the label's edge that faces the trigger, where upstream's points at the
+  trigger's centre: React Native's popup reports no position for it. It stays on the side asked for when a
+  web label flips for room, and is moved up by 7px where upstream computes half its size and 2px with `calc()`.
 - On a device the label opens above or below its trigger, so `left` and `right` open it above. The web places
   it on any side, and flips it when there is no room.
 - On a device it goes at once when a press outside it, the back button or the escape gesture closes it: the

@@ -1,4 +1,5 @@
 import * as TooltipPrimitive from '@rn-primitives/tooltip';
+import { cva } from 'class-variance-authority';
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { Easing } from 'react-native-reanimated';
@@ -13,6 +14,22 @@ import { TextClassContext } from './text';
 
 /** Upstream's 150ms fade, zoom from 95% and 0.5rem slide in from the trigger's side. */
 const TOOLTIP_MOTION = { duration: 150, easing: Easing.bezier(0.25, 0.1, 0.25, 1) } as const;
+
+/**
+ * Where the arrow sits for each side the content opens on: on the edge that faces the trigger, 2px of it inside
+ * the box, and halfway along that edge. The arrow above or below is moved by its own slot's translate; beside the
+ * box, which only the web draws, it is held level.
+ */
+const tooltipArrowPlacementVariants = cva('absolute', {
+  variants: {
+    side: {
+      top: 'inset-x-0 -bottom-2.5 items-center',
+      bottom: 'inset-x-0 top-1 items-center',
+      left: 'inset-y-0 -right-1 justify-center',
+      right: 'inset-y-0 -left-1 justify-center',
+    } satisfies Record<PopupSide, string>,
+  },
+});
 
 /** How long the pointer rests on a trigger outside a TooltipProvider before the web opens its tooltip. */
 const TOOLTIP_DEFAULT_DELAY = 600;
@@ -82,7 +99,7 @@ type TooltipContentProps = Omit<TooltipPrimitive.ContentProps, 'side' | 'insets'
 
 /**
  * The label itself, drawn beside its trigger, 4px above it and centred on it by default, in the
- * foreground colour. It is announced as a `tooltip`. On a device accessibility focus moves into it as it
+ * foreground colour, with an arrow from the middle of the edge that faces the trigger. It is announced as a `tooltip`. On a device accessibility focus moves into it as it
  * opens; a press outside it, the Android back button and the iOS escape gesture close it. On the web the
  * pointer leaving the trigger and Escape close it. It fades in while growing from 95% and sliding 0.5rem
  * away from the trigger over 150ms, or appears at once when the system asks for reduced motion.
@@ -118,7 +135,18 @@ function TooltipContent({
       <TextClassContext.Provider value="text-background cn-tooltip-content/text">
         {/* Not every engine styles an Animated.View by its className, so the box is a View inside it. */}
         <Animated.View style={style}>
-          <View className={cn('max-w-xs bg-foreground cn-tooltip-content', className)}>{children}</View>
+          <View className={cn('max-w-xs bg-foreground cn-tooltip-content', className)}>
+            {/* Drawn first, so the label's text draws over the part of the arrow inside the box. */}
+            <View aria-hidden pointerEvents="none" className={tooltipArrowPlacementVariants({ side: placed })}>
+              <View
+                className={cn(
+                  'bg-foreground cn-tooltip-arrow',
+                  (placed === 'left' || placed === 'right') && 'translate-y-0',
+                )}
+              />
+            </View>
+            {children}
+          </View>
         </Animated.View>
       </TextClassContext.Provider>
     </TooltipPrimitive.Content>

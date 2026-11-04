@@ -302,7 +302,9 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
  * neutral theme. A bubble's reactions are ringed in the card colour by a box-shadow, which a device has no
  * counterpart of, so the ring becomes a border as wide; the reactions are placed absolutely, so the border
  * moves nothing around them. An avatar's badge is ringed in the background colour the same way, and its
- * component draws the border, as wide as upstream's ring, around a dot that much larger.
+ * component draws the border, as wide as upstream's ring, around a dot that much larger. A tooltip's arrow is
+ * moved up by half its own 10px and 2px more, a percentage less a length neither engine computes, so it is moved
+ * by the 7px that comes to.
  */
 const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map([
   [
@@ -326,6 +328,7 @@ const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = 
     ]),
   ],
   ['cn-avatar-badge', new Map([['ring-background', 'border-background']])],
+  ['cn-tooltip-arrow', new Map([['translate-y-[calc(-50%-2px)]', 'translate-y-[-7px]']])],
 ]);
 
 /**

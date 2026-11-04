@@ -1456,4 +1456,11 @@ describe('translateClasses for the rings and offsets a component draws as a bord
       });
     },
   );
+
+  it.each(STYLE_ENGINES)("moves a tooltip's arrow up by half its size and 2px, for %s in %s", (engine, style) => {
+    expect(slot(style, 'cn-tooltip-arrow', engine)).toEqual({
+      classes: ['size-2.5', 'translate-y-[-7px]', 'rotate-45', 'rounded-[2px]'],
+      unknown: [],
+    });
+  });
 });
