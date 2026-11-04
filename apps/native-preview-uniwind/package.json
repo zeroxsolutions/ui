@@ -55,7 +55,7 @@
     "shiki": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
-    "uniwind": "1.13.0"
+    "uniwind": "1.13.1"
   },
   "devDependencies": {
     "@testing-library/react-native": "catalog:",
