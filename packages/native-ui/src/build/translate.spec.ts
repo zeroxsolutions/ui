@@ -1438,3 +1438,22 @@ describe('translateClasses for the questionnaire and trace', () => {
     },
   );
 });
+
+describe('translateClasses for the rings and offsets a component draws as a border or a length', () => {
+  const styles = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const slot = (style: keyof typeof styles, name: string, engine: Engine): Translation =>
+    translateClasses(styles[style].get(name) ?? [], engine, 'view', '', { name });
+
+  it.each(STYLE_ENGINES)(
+    "colours the border an avatar badge draws for its ring in the ring's colour, for %s in %s",
+    (engine, style) => {
+      expect(slot(style, 'cn-avatar-badge', engine)).toEqual({
+        classes: expect.arrayContaining(['bg-primary', 'border-background']),
+        unknown: [],
+      });
+    },
+  );
+});

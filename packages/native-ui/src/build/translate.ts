@@ -301,7 +301,8 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
  * parses; the primary colour at a low opacity over the background comes to about the same lightness in the
  * neutral theme. A bubble's reactions are ringed in the card colour by a box-shadow, which a device has no
  * counterpart of, so the ring becomes a border as wide; the reactions are placed absolutely, so the border
- * moves nothing around them.
+ * moves nothing around them. An avatar's badge is ringed in the background colour the same way, and its
+ * component draws the border, as wide as upstream's ring, around a dot that much larger.
  */
 const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map([
   [
@@ -324,6 +325,7 @@ const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = 
       ['ring-card', 'border-card'],
     ]),
   ],
+  ['cn-avatar-badge', new Map([['ring-background', 'border-background']])],
 ]);
 
 /**
