@@ -68,3 +68,6 @@ jobs:
     uses: ./.github/workflows/nx-gate.yml
     with:
       targets: e2e
+      # Each zone has its own e2e project, each in three browsers; a change reaching both ran
+      # 14 minutes for the native zone alone and passed 30 (2026-11-03).
+      timeout-minutes: 60

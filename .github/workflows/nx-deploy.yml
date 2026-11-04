@@ -1,8 +1,10 @@
 # Deploy by running an nx target for one environment. The job names that environment, which is what
 # resolves its own credentials and any protection rule set on it.
 #
-# Deploys sweep with run-many rather than affected: workers are coupled at runtime by bindings, which
-# the build graph does not model, so shipping a subset admits version skew between them.
+# A caller may deploy only the projects a change reaches: this repository's zones share no binding
+# or queue, so deploying a subset ships no version skew between them. A repository whose workers call
+# each other through bindings keeps the run-many default, because the build graph does not model
+# those bindings.
 name: nx-deploy
 
 on:
@@ -16,9 +18,19 @@ on:
         description: 'GitHub environment to deploy to; also the nx configuration passed as -c.'
         required: true
         type: string
+      mode:
+        description: >
+          "run-many" deploys every project defining the target. "affected" deploys only what changed
+          since the head commit of the last successful `cd` run on `production`, and falls back to
+          run-many when there is none or the checkout cannot reach it.
+        required: false
+        type: string
+        default: run-many
 
 permissions:
   contents: read
+  # Lists the `cd` workflow's runs, whose last success is the affected base.
+  actions: read
 
 jobs:
   deploy:
@@ -28,9 +40,46 @@ jobs:
     environment:
       name: ${{ inputs.environment }}
     steps:
+      # Full history: a shallow clone holds no earlier commit, so every base would be unreachable and
+      # `affected` would always fall back to run-many.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - uses: ./.github/actions/nx-setup
+
+      # The base is the last successful deploy, not `github.event.before`: after a failed deploy and
+      # another push, `before` names the commit that never shipped, and its changes would never deploy.
+      # A force-push can leave that commit outside the history; either way the run sweeps instead.
+      - name: Resolve the deploy range
+        id: range
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mode='${{ inputs.mode }}'
+          base=''
+          if [ "$mode" = 'affected' ]; then
+            if runs=$(gh api 'repos/{owner}/{repo}/actions/workflows/cd.yml/runs?branch=production&status=completed&per_page=20' --jq '.workflow_runs'); then
+              base=$(node tools/deploy-base.mts <<< "$runs")
+            else
+              echo "::warning::could not list the cd runs; sweeping instead"
+            fi
+            if [ -n "$base" ] && ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+              echo "base $base is not reachable in this checkout; sweeping instead"
+              base=''
+            fi
+            if [ -z "$base" ]; then
+              echo 'no usable base commit; falling back to run-many'
+              mode='run-many'
+            fi
+          fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+
+      - name: Refuse a path two zones both claim
+        shell: bash
+        run: tools/check-zone-routes.sh
 
       - name: Deploy
         shell: bash
@@ -38,4 +87,11 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: pnpm nx run-many -t ${{ inputs.targets }} -c '${{ inputs.environment }}'
+          NX_BASE: ${{ steps.range.outputs.base }}
+          NX_HEAD: ${{ github.sha }}
+        run: |
+          if [ '${{ steps.range.outputs.mode }}' = 'affected' ]; then
+            pnpm nx affected -t ${{ inputs.targets }} -c '${{ inputs.environment }}'
+          else
+            pnpm nx run-many -t ${{ inputs.targets }} -c '${{ inputs.environment }}'
+          fi

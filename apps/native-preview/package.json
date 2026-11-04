@@ -75,7 +75,7 @@
           "^build-registry"
         ],
         "outputs": [
-          "{workspaceRoot}/apps/registry-ui/public/native-preview"
+          "{workspaceRoot}/apps/registry-native-ui-docs-zone/public/native-preview"
         ],
         "options": {
           "args": [
@@ -83,7 +83,7 @@
             "--platform",
             "web",
             "--output-dir",
-            "../registry-ui/public/native-preview"
+            "../registry-native-ui-docs-zone/public/native-preview"
           ]
         }
       },

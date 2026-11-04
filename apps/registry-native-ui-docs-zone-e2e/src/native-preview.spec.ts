@@ -46,6 +46,8 @@ async function asSerialised(frame: FrameLocator, color: string): Promise<string>
   );
 }
 
+test.slow(true, 'a frame may take all of DRAWN to draw, and a test can wait on two draws, outlasting the default');
+
 test.describe('in a light colour scheme', () => {
   test.use({ colorScheme: 'light' });
 

@@ -124,19 +124,17 @@ move with the package that owns that content (`remark-native-demo-source` to `na
 
 Each zone's `wrangler.jsonc` routes, on `ui.zeroxsolutions.com`:
 
-- `apps/registry-ui`: `ui.zeroxsolutions.com/*`.
+- `apps/registry-ui`: the Custom Domain `ui.zeroxsolutions.com`.
 - `apps/registry-native-ui-docs-zone`: `/native`, `/native/*`, `/native-preview/*`,
   `/native-preview-uniwind/*`, `/og/native/*`, `/llms.mdx/native/*`, `/native-static/*`,
   `/r/styles/nativewind-*`, `/r/styles/uniwind-*`.
 
-The most specific route wins, so the native zone's entries take their paths from the default zone's
-`/*`. Each claim is a path plus its subtree, except the two style prefixes: `/r/styles/nativewind-*`
-deliberately takes every nativewind style, so adding a style adds no route.
-
-`registry-ui`'s production config today uses `custom_domain: true`. Whether a custom domain and path
-routes on the same hostname resolve by specificity is read from Cloudflare's Workers docs before the
-first deploy; where they do not, `registry-ui` moves to a `ui.zeroxsolutions.com/*` route with
-`zone_name`, and the proxied DNS record the custom domain created is kept.
+A route takes precedence over a Custom Domain on the same hostname ("Routes can `fetch()` Custom
+Domains and take precedence if configured on the same hostname", Workers "Routes", last updated
+Oct 18, 2026, read 2026-11-03), so the native zone's entries take their paths from `registry-ui`, which
+keeps its `custom_domain: true` and the DNS record that created. Each claim is a path plus its subtree,
+except the two style prefixes: `/r/styles/nativewind-*` deliberately takes every nativewind style, so
+adding a style adds no route.
 
 Both zones set `workers_dev: false` and `preview_urls: false` in production, so the routes are the only
 way in. The native worker is `ui-sdk-registry-native-ui-docs-zone`.

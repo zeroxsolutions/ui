@@ -16,13 +16,20 @@ function LinkSwitch({ className, ...props }: ComponentProps<'nav'> & { 'aria-lab
 interface LinkSwitchItemProps extends ComponentProps<Host['Link']> {
   /** Whether the page is this variant, which marks the link `aria-current`. */
   current: boolean;
+  /**
+   * Whether following the link loads its page as a new document, for a page another app serves: a plain
+   * anchor rather than the host's link, which would prefetch and navigate on the client to a page its app
+   * does not have. The host's link when omitted.
+   */
+  reloadDocument?: boolean;
 }
 
 /** One variant's link in a `LinkSwitch`. */
-function LinkSwitchItem({ current, className, ...props }: LinkSwitchItemProps): ReactNode {
+function LinkSwitchItem({ current, reloadDocument = false, className, ...props }: LinkSwitchItemProps): ReactNode {
   const { Link } = useHost();
+  const Anchor = reloadDocument ? 'a' : Link;
   return (
-    <Link
+    <Anchor
       data-slot="link-switch-item"
       aria-current={current ? 'page' : undefined}
       className={cn(buttonVariants({ variant: current ? 'outline' : 'ghost', size: 'xs' }), className)}

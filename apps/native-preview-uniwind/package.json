@@ -74,7 +74,7 @@
           "^build-registry"
         ],
         "outputs": [
-          "{workspaceRoot}/apps/registry-ui/public/native-preview-uniwind"
+          "{workspaceRoot}/apps/registry-native-ui-docs-zone/public/native-preview-uniwind"
         ],
         "options": {
           "args": [
@@ -82,7 +82,7 @@
             "--platform",
             "web",
             "--output-dir",
-            "../registry-ui/public/native-preview-uniwind"
+            "../registry-native-ui-docs-zone/public/native-preview-uniwind"
           ]
         }
       },
