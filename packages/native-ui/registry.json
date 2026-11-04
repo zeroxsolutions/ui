@@ -193,7 +193,7 @@
       "type": "registry:ui",
       "title": "Avatar",
       "description": "A round picture of a person or account in three sizes, with a fallback that shows when the image is missing or fails to load, a badge on its corner, and a group that overlaps avatars and counts the rest.",
-      "dependencies": ["@rn-primitives/avatar"],
+      "dependencies": ["@rn-primitives/avatar", "class-variance-authority"],
       "registryDependencies": ["@zui/utils", "@zui/icon", "@zui/text"],
       "files": [
         {

@@ -1,4 +1,5 @@
 import * as AvatarPrimitive from '@rn-primitives/avatar';
+import { cva } from 'class-variance-authority';
 import {
   Children,
   createContext,
@@ -115,19 +116,22 @@ function AvatarFallback({ className, ...props }: ComponentProps<typeof View>): R
   );
 }
 
-/** The size of the dot an AvatarBadge draws at each avatar size, its 2px edge included. */
-const BADGE_SIZE = {
-  sm: 'size-3',
-  default: 'size-3.5',
-  lg: 'size-4',
-} as const satisfies Record<AvatarSize, string>;
+/** The dot at each avatar size, its 2px edge included. */
+const avatarBadgeVariants = cva(
+  'absolute -right-0.5 -bottom-0.5 z-10 items-center justify-center rounded-full border-2 cn-avatar-badge',
+  {
+    variants: {
+      size: { sm: 'size-3', default: 'size-3.5', lg: 'size-4' } satisfies Record<AvatarSize, string>,
+    },
+  },
+);
 
-/** The size of an icon inside an AvatarBadge; the small avatar's dot is too small to hold one. */
-const BADGE_ICON_SIZE = {
-  sm: 'hidden',
-  default: 'size-2',
-  lg: 'size-2',
-} as const satisfies Record<AvatarSize, string>;
+/** An icon inside the dot; the small avatar's dot is too small to hold one. */
+const avatarBadgeIconVariants = cva('', {
+  variants: {
+    size: { sm: 'hidden', default: 'size-2', lg: 'size-2' } satisfies Record<AvatarSize, string>,
+  },
+});
 
 /**
  * A dot on the avatar's bottom right corner, in the primary colour with an edge in the background colour,
@@ -138,16 +142,8 @@ function AvatarBadge({ className, ...props }: ComponentProps<typeof View>): Reac
   const { size } = useContext(AvatarContext);
   return (
     <TextClassContext.Provider value="cn-avatar-badge/text">
-      <IconClassContext.Provider value={BADGE_ICON_SIZE[size]}>
-        <View
-          aria-hidden
-          className={cn(
-            'absolute -right-0.5 -bottom-0.5 z-10 items-center justify-center rounded-full border-2 cn-avatar-badge',
-            BADGE_SIZE[size],
-            className,
-          )}
-          {...props}
-        />
+      <IconClassContext.Provider value={avatarBadgeIconVariants({ size })}>
+        <View aria-hidden className={cn(avatarBadgeVariants({ size }), className)} {...props} />
       </IconClassContext.Provider>
     </TextClassContext.Provider>
   );
@@ -180,12 +176,12 @@ function AvatarGroup({ className, children, ...props }: ComponentProps<typeof Vi
   );
 }
 
-/** The size of an icon inside an AvatarGroupCount, by the size of the group's avatars. */
-const GROUP_COUNT_ICON_SIZE = {
-  sm: 'size-3',
-  default: 'size-4',
-  lg: 'size-5',
-} as const satisfies Record<AvatarSize, string>;
+/** An icon inside an AvatarGroupCount, by the size of the group's avatars. */
+const avatarGroupCountIconVariants = cva('', {
+  variants: {
+    size: { sm: 'size-3', default: 'size-4', lg: 'size-5' } satisfies Record<AvatarSize, string>,
+  },
+});
 
 /**
  * The circle at the end of an AvatarGroup, as large as its avatars, holding how many more there are as a
@@ -195,7 +191,7 @@ function AvatarGroupCount({ className, ...props }: ComponentProps<typeof View>):
   const size = useContext(AvatarSizeContext);
   return (
     <TextClassContext.Provider value="cn-avatar-group-count/text">
-      <IconClassContext.Provider value={GROUP_COUNT_ICON_SIZE[size]}>
+      <IconClassContext.Provider value={avatarGroupCountIconVariants({ size })}>
         <View
           className={cn(
             'relative -ml-2 shrink-0 items-center justify-center border-2 border-background cn-avatar-group-count',
