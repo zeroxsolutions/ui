@@ -35,12 +35,20 @@ pnpm add @base-ui/react @shikijs/langs @zeroxsolutions/icons shiki
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add scroll-area utils @zui/collapsible-card @zui/copy-button @zui/highlighted-code
+pnpm dlx shadcn@latest add scroll-area utils @zui/collapsible-card @zui/copy-button
 ```
 
 <Step>Copy the component into `components/data-display/code-card.tsx`.</Step>
 
 <ComponentSource name="code-card" title="components/data-display/code-card.tsx" />
+
+<Step>Copy the element that paints the highlighted lines into `components/data-display/highlighted-code.tsx`.</Step>
+
+<ComponentSource
+  name="code-card"
+  file="registry/bases/base-ui/components/data-display/highlighted-code.tsx"
+  title="components/data-display/highlighted-code.tsx"
+/>
 
 <Step>Copy the hook that highlights the block's code into `hooks/use-highlighted-lines.ts`.</Step>
 

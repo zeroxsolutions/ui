@@ -42,16 +42,14 @@
       "description": "Read-only source over a collapsible card, highlighted through the shared Shiki highlighter and falling back to plain mono while the grammar loads.",
       "categories": ["data-display"],
       "dependencies": ["@base-ui/react", "@shikijs/langs", "@zeroxsolutions/icons", "shiki"],
-      "registryDependencies": [
-        "@shadcn/scroll-area",
-        "@shadcn/utils",
-        "@zui/collapsible-card",
-        "@zui/copy-button",
-        "@zui/highlighted-code"
-      ],
+      "registryDependencies": ["@shadcn/scroll-area", "@shadcn/utils", "@zui/collapsible-card", "@zui/copy-button"],
       "files": [
         {
           "path": "registry/bases/base-ui/components/data-display/code-card.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/components/data-display/highlighted-code.tsx",
           "type": "registry:component"
         },
         {
@@ -165,33 +163,6 @@
         },
         {
           "path": "registry/bases/base-ui/lib/font-format.ts",
-          "type": "registry:lib"
-        }
-      ]
-    },
-    {
-      "name": "highlighted-code",
-      "type": "registry:component",
-      "title": "Highlighted Code",
-      "description": "A mono code element that renders tokenized lines from the shared Shiki highlighter, falling back to its raw children until they arrive.",
-      "categories": ["data-display"],
-      "dependencies": ["@shikijs/langs", "shiki"],
-      "registryDependencies": ["@shadcn/utils"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/data-display/highlighted-code.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/bases/base-ui/lib/code-theme.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "registry/bases/base-ui/lib/mermaid-grammar.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "registry/bases/base-ui/lib/shiki.ts",
           "type": "registry:lib"
         }
       ]
@@ -1004,20 +975,6 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/font-preview-demo.tsx",
-          "type": "registry:example"
-        }
-      ]
-    },
-    {
-      "name": "highlighted-code-demo",
-      "type": "registry:example",
-      "title": "Highlighted Code Demo",
-      "description": "Pre-tokenized lines styled with the same tokens the shared Shiki theme paints with.",
-      "categories": ["examples"],
-      "registryDependencies": ["@zui/highlighted-code"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/highlighted-code-demo.tsx",
           "type": "registry:example"
         }
       ]
