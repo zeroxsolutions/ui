@@ -3,13 +3,13 @@
 import * as React from 'react';
 import { Code } from 'lucide-react';
 import {
-  CodeBlock as CodeBlockSurface,
-  CodeBlockActions,
-  CodeBlockCode,
-  CodeBlockContent,
-  CodeBlockCopy,
-  CodeBlockLanguage,
-} from '@/registry/bases/base-ui/components/data-display/code-block';
+  CodeCard,
+  CodeCardActions,
+  CodeCardCode,
+  CodeCardContent,
+  CodeCardCopy,
+  CodeCardLanguage,
+} from '@/registry/bases/base-ui/components/data-display/code-card';
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
   CollapsibleCard,
@@ -49,7 +49,7 @@ import { CodeSettingsMenu, type CodeMirrorSettings } from './code-settings-menu.
  * `CodeMirrorPane` (CodeMirror + Shiki), with a language picker, a settings menu,
  * and a copy control — so the editor owns its editing surface without a bespoke
  * shell. The **read-only** paths (the live Viewer and the export codec) render the
- * read-only `the ui registry` `CodeBlock` (Shiki `<pre>` + copy). Codec is the
+ * read-only `the ui registry` `CodeCard` (Shiki `<pre>` + copy). Codec is the
  * fenced ```lang block. Engine-free.
  */
 const codeBlockAttrs = z.object({
@@ -148,7 +148,7 @@ function EditableCodeBlock({
 }
 
 /**
- * The read-only surface: the registry `CodeBlock`, with a language header when
+ * The read-only surface: the registry `CodeCard`, with a language header when
  * the block names a real language and the floating copy when it is plain text.
  */
 function ReadOnlyCodeBlock({
@@ -161,26 +161,26 @@ function ReadOnlyCodeBlock({
   className?: string;
 }): React.ReactNode {
   return (
-    <CodeBlockSurface code={code} language={language} className={className}>
+    <CodeCard code={code} language={language} className={className}>
       {PLAIN_LANGUAGES.has(language.toLowerCase()) ? (
-        <CodeBlockActions>
-          <CodeBlockCopy variant="secondary" />
-        </CodeBlockActions>
+        <CodeCardActions>
+          <CodeCardCopy variant="secondary" />
+        </CodeCardActions>
       ) : (
         <CollapsibleCardHeader>
           <CollapsibleCardTitle>
-            <CodeBlockLanguage />
+            <CodeCardLanguage />
           </CollapsibleCardTitle>
           <CollapsibleCardActions>
-            <CodeBlockCopy />
+            <CodeCardCopy />
             <CollapsibleCardTrigger />
           </CollapsibleCardActions>
         </CollapsibleCardHeader>
       )}
-      <CodeBlockContent>
-        <CodeBlockCode />
-      </CodeBlockContent>
-    </CodeBlockSurface>
+      <CodeCardContent>
+        <CodeCardCode />
+      </CodeCardContent>
+    </CodeCard>
   );
 }
 
@@ -188,7 +188,7 @@ function ReadOnlyCodeBlock({
  * The node view inside a `contentEditable={false}` boundary that stops
  * pointer/mouse-down from reaching ProseMirror, so editing the code or picking a
  * language never moves the editor selection. `editable` flips between the live
- * `CodeMirrorPane` surface and the read-only `the ui registry` `CodeBlock`.
+ * `CodeMirrorPane` surface and the read-only `the ui registry` `CodeCard`.
  */
 export function CodeBlockNodeView({ attrs, updateAttrs, editable }: NodeViewProps<CodeBlockAttrs>) {
   return (

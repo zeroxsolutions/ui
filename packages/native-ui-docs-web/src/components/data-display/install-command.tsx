@@ -2,7 +2,7 @@
 
 import { Suspense, type ReactNode } from 'react';
 
-import { DocsCodeBlock } from '@zeroxsolutions/ui/site/components/data-display/docs-code-block';
+import { DocsCodeCard } from '@zeroxsolutions/ui/site/components/data-display/docs-code-card';
 import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
 import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
 import { useRememberedEngine } from '@zeroxsolutions/ui/site/hooks/use-remembered-choice';
@@ -61,10 +61,10 @@ function InstallCommandTabs({ name, engine, origin, style }: InstallCommandTabsP
         <TabsTrigger value="url">URL</TabsTrigger>
       </TabsList>
       <TabsContent value="registry">
-        <DocsCodeBlock code={commands.registry} language="bash" className="mt-6" />
+        <DocsCodeCard code={commands.registry} language="bash" className="mt-6" />
       </TabsContent>
       <TabsContent value="url">
-        <DocsCodeBlock code={commands.url} language="bash" className="mt-6" />
+        <DocsCodeCard code={commands.url} language="bash" className="mt-6" />
       </TabsContent>
     </Tabs>
   );

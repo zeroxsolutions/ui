@@ -13,7 +13,7 @@ import type { ThemeRegistrationRaw } from 'shiki';
  * TextMate scopes are mapped onto ~16 semantic buckets for a full, legible
  * palette across JS/TS, JSON, Python, HTML/JSX, CSS, shell, and Markdown.
  *
- * Shared by the chat `CodeBlock` (static) and the CodeMirror editor (both read
+ * Shared by the chat `CodeCard` (static) and the CodeMirror editor (both read
  * `token.color` straight off `codeToTokens`), so the two surfaces always match.
  */
 

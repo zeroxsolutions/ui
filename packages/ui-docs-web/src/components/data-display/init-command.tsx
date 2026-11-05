@@ -2,7 +2,7 @@
 
 import { Suspense, type ReactNode } from 'react';
 
-import { DocsCodeBlock } from '@zeroxsolutions/ui/site/components/data-display/docs-code-block';
+import { DocsCodeCard } from '@zeroxsolutions/ui/site/components/data-display/docs-code-card';
 import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
 import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
@@ -24,7 +24,7 @@ function InitCommandFromUrl(): ReactNode {
 
 function InitCommandBlock({ style }: { style: PlatformStyle<'web'> }): ReactNode {
   return (
-    <DocsCodeBlock
+    <DocsCodeCard
       code={`pnpm dlx shadcn@latest init --base ${DEFAULT_COMPONENT_BASE} --preset ${style}`}
       language="bash"
       className="mt-6"

@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react';
 
 import {
-  CodeBlock,
-  CodeBlockCode,
-  CodeBlockContent,
-  CodeBlockCopy,
-  CodeBlockLanguage,
-} from '@/registry/bases/base-ui/components/data-display/code-block';
+  CodeCard,
+  CodeCardCode,
+  CodeCardContent,
+  CodeCardCopy,
+  CodeCardLanguage,
+} from '@/registry/bases/base-ui/components/data-display/code-card';
 import {
   CollapsibleCardActions,
   CollapsibleCardHeader,
@@ -17,23 +17,23 @@ import {
 const SOURCE = 'function greet(name: string): string {\n  return `Hello, ${name}!`;\n}';
 
 /** A collapsible TypeScript block with its language, a copy action and a collapse toggle. */
-function CodeBlockDemo(): ReactNode {
+function CodeCardDemo(): ReactNode {
   return (
-    <CodeBlock code={SOURCE} language="ts">
+    <CodeCard code={SOURCE} language="ts">
       <CollapsibleCardHeader>
         <CollapsibleCardTitle>
-          <CodeBlockLanguage />
+          <CodeCardLanguage />
         </CollapsibleCardTitle>
         <CollapsibleCardActions>
-          <CodeBlockCopy />
+          <CodeCardCopy />
           <CollapsibleCardTrigger />
         </CollapsibleCardActions>
       </CollapsibleCardHeader>
-      <CodeBlockContent>
-        <CodeBlockCode />
-      </CodeBlockContent>
-    </CodeBlock>
+      <CodeCardContent>
+        <CodeCardCode />
+      </CodeCardContent>
+    </CodeCard>
   );
 }
 
-export { CodeBlockDemo };
+export { CodeCardDemo };

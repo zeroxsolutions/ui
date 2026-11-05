@@ -2,12 +2,12 @@
 
 import { Eye, PencilLine, Workflow } from 'lucide-react';
 import {
-  CodeBlock,
-  CodeBlockCode,
-  CodeBlockContent,
-  CodeBlockCopy,
-  CodeBlockLanguage,
-} from '@/registry/bases/base-ui/components/data-display/code-block';
+  CodeCard,
+  CodeCardCode,
+  CodeCardContent,
+  CodeCardCopy,
+  CodeCardLanguage,
+} from '@/registry/bases/base-ui/components/data-display/code-card';
 import { CopyButton } from '@/registry/bases/base-ui/components/feedback/copy-button';
 import {
   CollapsibleCard,
@@ -38,9 +38,9 @@ import { DiagramViewer } from '../../../mermaid/react/viewer.js';
  * chevron on the right) over the active tab's panel — the rendered diagram under
  * **View** (`DiagramPreview`, which reuses the `mermaid` surface's shared render +
  * pan/zoom), the in-package `CodeMirrorPane` under **Edit**. It composes the same
- * `CollapsibleCard` chrome the read-only `CodeBlock` does — same header, same copy +
+ * `CollapsibleCard` chrome the read-only `CodeCard` does — same header, same copy +
  * collapse affordances — so the two blocks read identically; only the body differs
- * (Mermaid adds the View/Edit switch and a live engine `CodeBlock` has no reason to
+ * (Mermaid adds the View/Edit switch and a live engine `CodeCard` has no reason to
  * carry). The read-only Viewer renders the diagram with no edit affordance. The
  * active tab is local view-state — never persisted — so `source` stays the only
  * attribute and the fenced ` ```mermaid ` codec is unchanged. Engine-free (the
@@ -52,7 +52,7 @@ const mermaidAttrs = z.object({
 type MermaidAttrs = z.infer<typeof mermaidAttrs>;
 
 // The block's type icon is the design system's full-colour Mermaid mark — the
-// same `codeLanguageIcon` resolver the code-block header uses for its language
+// same `codeLanguageIcon` resolver the code card's header uses for its language
 // icon, so the two headers read identically (a brand mark, not a lucide glyph).
 const MermaidTypeIcon = codeLanguageIcon('mermaid');
 
@@ -77,10 +77,10 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
   const initialTab = attrs.source.trim() === '' ? 'edit' : 'view';
 
   // The header + body come from the shared `CollapsibleCard` compound in its `muted`
-  // variant — the same borderless muted chrome the read-only code-block composes,
+  // variant — the same borderless muted chrome the read-only code card composes,
   // so the two blocks read identically: the diagram-type label fills the title; the
   // View/Edit tabs (the segmented control, 36px) plus the copy + collapse chevron
-  // (the icon-action pair, 32px — matching code-block's copy+chevron grouping) fill
+  // (the icon-action pair, 32px — matching the code card's copy+chevron grouping) fill
   // the actions; the panels fill the collapsible body.
   //
   // `CollapsibleCardContent` carries `keepMounted` so the collapse toggle only *hides* the
@@ -156,22 +156,22 @@ export const mermaidCodec: NodeCodec<MermaidAttrs> = {
   toReact: (node) => (
     // SSR-safe fallback: Mermaid needs a live DOM to produce an SVG, which the
     // static export doesn't have. Render the source through the read-only
-    // design-system `CodeBlock` — Shiki-highlighted and copyable, consistent with
+    // design-system `CodeCard` — Shiki-highlighted and copyable, consistent with
     // every other code block — while the live node view renders the real diagram.
-    <CodeBlock code={String(node.attrs?.source ?? '')} language="mermaid" className="my-4">
+    <CodeCard code={String(node.attrs?.source ?? '')} language="mermaid" className="my-4">
       <CollapsibleCardHeader>
         <CollapsibleCardTitle>
-          <CodeBlockLanguage />
+          <CodeCardLanguage />
         </CollapsibleCardTitle>
         <CollapsibleCardActions>
-          <CodeBlockCopy />
+          <CodeCardCopy />
           <CollapsibleCardTrigger />
         </CollapsibleCardActions>
       </CollapsibleCardHeader>
-      <CodeBlockContent>
-        <CodeBlockCode />
-      </CodeBlockContent>
-    </CodeBlock>
+      <CodeCardContent>
+        <CodeCardCode />
+      </CodeCardContent>
+    </CodeCard>
   ),
 };
 

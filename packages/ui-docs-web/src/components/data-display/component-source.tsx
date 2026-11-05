@@ -1,9 +1,9 @@
 import type { ComponentProps, ReactNode } from 'react';
 
-import { SourceCodeBlock } from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
+import { SourceCodeCard } from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
 import type { HighlightLine } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/shiki';
 
-interface ComponentSourceProps extends Omit<ComponentProps<typeof SourceCodeBlock>, 'code' | 'language' | 'lines'> {
+interface ComponentSourceProps extends Omit<ComponentProps<typeof SourceCodeCard>, 'code' | 'language' | 'lines'> {
   /** A demo or registry item name in the examples index. */
   name: string;
   /** One of the files the item ships, when it is not the first; `rehypeDocsCode` reads it, not this component. */
@@ -17,7 +17,7 @@ interface ComponentSourceProps extends Omit<ComponentProps<typeof SourceCodeBloc
 }
 
 /**
- * A source file of a demo or registry item, as a `SourceCodeBlock` its children compose: its first
+ * A source file of a demo or registry item, as a `SourceCodeCard` its children compose: its first
  * file, or the one `file` names. Its source and highlighting are read as the docs page compiles, so it
  * works only inside a docs page; anywhere else it throws.
  */
@@ -34,7 +34,7 @@ function ComponentSource({
   const highlighted = lines ? (JSON.parse(lines) as HighlightLine[] | null) : null;
 
   return (
-    <SourceCodeBlock
+    <SourceCodeCard
       code={maxLines ? code.split('\n').slice(0, maxLines).join('\n') : code}
       language={language}
       lines={maxLines ? (highlighted?.slice(0, maxLines) ?? null) : highlighted}

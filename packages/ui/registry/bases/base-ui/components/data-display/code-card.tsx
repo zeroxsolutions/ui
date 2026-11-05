@@ -11,21 +11,21 @@ import type { HighlightLine } from '@/registry/bases/base-ui/lib/shiki';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { ScrollBar } from '@/registry/bases/base-ui/ui/scroll-area';
 
-interface CodeBlockContextValue {
+interface CodeCardContextValue {
   code: string;
   language: string | undefined;
   lines: HighlightLine[] | null;
 }
 
-const CodeBlockContext = createContext<CodeBlockContextValue | null>(null);
+const CodeCardContext = createContext<CodeCardContextValue | null>(null);
 
-function useCodeBlock(): CodeBlockContextValue {
-  const context = useContext(CodeBlockContext);
-  if (!context) throw new Error('CodeBlock parts must be placed inside a CodeBlock.');
+function useCodeCard(): CodeCardContextValue {
+  const context = useContext(CodeCardContext);
+  if (!context) throw new Error('CodeCard parts must be placed inside a CodeCard.');
   return context;
 }
 
-interface CodeBlockProps extends ComponentProps<typeof CollapsibleCard> {
+interface CodeCardProps extends ComponentProps<typeof CollapsibleCard> {
   /** The source shown, and what a copy writes to the clipboard. */
   code: string;
   /** Shiki language id (`ts`, `json`, `bash`); absent or plain text renders unhighlighted. */
@@ -44,50 +44,50 @@ interface CodeBlockProps extends ComponentProps<typeof CollapsibleCard> {
  * Compose a header from `CollapsibleCard` parts, then the body:
  *
  * ```tsx
- * <CodeBlock code={source} language="ts">
+ * <CodeCard code={source} language="ts">
  *   <CollapsibleCardHeader>
  *     <CollapsibleCardTitle>
- *       <CodeBlockLanguage />
+ *       <CodeCardLanguage />
  *     </CollapsibleCardTitle>
  *     <CollapsibleCardActions>
- *       <CodeBlockCopy />
+ *       <CodeCardCopy />
  *       <CollapsibleCardTrigger />
  *     </CollapsibleCardActions>
  *   </CollapsibleCardHeader>
- *   <CodeBlockContent>
- *     <CodeBlockLineNumbers />
- *     <CodeBlockCode />
- *   </CodeBlockContent>
- * </CodeBlock>
+ *   <CodeCardContent>
+ *     <CodeCardLineNumbers />
+ *     <CodeCardCode />
+ *   </CodeCardContent>
+ * </CodeCard>
  * ```
  *
  * A block with no header floats its copy over the code instead:
- * `<CodeBlockActions><CodeBlockCopy variant="secondary" /></CodeBlockActions>` before the content.
+ * `<CodeCardActions><CodeCardCopy variant="secondary" /></CodeCardActions>` before the content.
  *
- * The root keeps `data-slot="code-block"`; the editor stylesheet targets it.
+ * The root keeps `data-slot="code-card"`; the editor stylesheet targets it.
  */
-function CodeBlock({
+function CodeCard({
   code,
   language,
   lines: givenLines,
   variant = 'muted',
   className,
   ...props
-}: CodeBlockProps): ReactNode {
+}: CodeCardProps): ReactNode {
   // Given lines, the hook is handed no language, so it neither loads a grammar nor highlights.
   const highlightedLines = useHighlightedLines(code, givenLines === undefined ? language : undefined);
   const lines = givenLines === undefined ? highlightedLines : givenLines;
 
   return (
-    <CodeBlockContext.Provider value={{ code, language, lines }}>
+    <CodeCardContext.Provider value={{ code, language, lines }}>
       <CollapsibleCard
-        data-slot="code-block"
+        data-slot="code-card"
         data-language={language}
         variant={variant}
-        className={cn('group/code-block relative', className)}
+        className={cn('group/code-card relative', className)}
         {...props}
       />
-    </CodeBlockContext.Provider>
+    </CodeCardContext.Provider>
   );
 }
 
@@ -95,12 +95,12 @@ function CodeBlock({
  * The actions of a block with no header, floated over the code's top-right corner and shown while
  * the block is hovered or one of them holds keyboard focus.
  */
-function CodeBlockActions({ className, ...props }: ComponentProps<'div'>): ReactNode {
+function CodeCardActions({ className, ...props }: ComponentProps<'div'>): ReactNode {
   return (
     <div
-      data-slot="code-block-actions"
+      data-slot="code-card-actions"
       className={cn(
-        'absolute top-1 right-1 z-10 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/code-block:opacity-100 has-focus-visible:opacity-100',
+        'absolute top-1 right-1 z-10 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/code-card:opacity-100 has-focus-visible:opacity-100',
         className,
       )}
       {...props}
@@ -110,18 +110,18 @@ function CodeBlockActions({ className, ...props }: ComponentProps<'div'>): React
 
 /**
  * The body the card's trigger folds: a scroller holding the `pre` its children fill, usually
- * `CodeBlockLineNumbers` and `CodeBlockCode`. Its viewport is `data-slot="code-block-viewport"`,
+ * `CodeCardLineNumbers` and `CodeCardCode`. Its viewport is `data-slot="code-card-viewport"`,
  * where a container caps the block's height; the code then scrolls both ways inside it.
  */
-function CodeBlockContent({ children, ...props }: ComponentProps<typeof CollapsibleCardContent>): ReactNode {
+function CodeCardContent({ children, ...props }: ComponentProps<typeof CollapsibleCardContent>): ReactNode {
   return (
-    <CollapsibleCardContent data-slot="code-block-content" {...props}>
+    <CollapsibleCardContent data-slot="code-card-content" {...props}>
       {/* A ScrollArea rather than overflow-x-auto, so long lines scroll on the styled rail instead of the OS overlay bar. */}
       {/* The pre's bottom padding clears that rail, which Base UI positions over the viewport's bottom edge. */}
       {/* Inline-size containment keeps the longest line out of the block's own width, so a narrow parent scrolls the code here instead of widening. */}
       <ScrollAreaPrimitive.Root className="w-full overflow-hidden contain-inline-size">
-        <ScrollAreaPrimitive.Viewport data-slot="code-block-viewport" className="w-full">
-          <pre className="m-0 px-3 pt-2 pb-3 text-xs leading-relaxed has-data-[slot=code-block-line-numbers]:flex has-data-[slot=code-block-line-numbers]:gap-4">
+        <ScrollAreaPrimitive.Viewport data-slot="code-card-viewport" className="w-full">
+          <pre className="m-0 px-3 pt-2 pb-3 text-xs leading-relaxed has-data-[slot=code-card-line-numbers]:flex has-data-[slot=code-card-line-numbers]:gap-4">
             {children}
           </pre>
         </ScrollAreaPrimitive.Viewport>
@@ -138,12 +138,12 @@ function CodeBlockContent({ children, ...props }: ComponentProps<typeof Collapsi
  * copy. It is at least three digits wide, so the code starts at the same place in a 9-line block and a
  * 999-line one, and does not move when a block grows past line 9.
  */
-function CodeBlockLineNumbers({ className, ...props }: ComponentProps<'span'>): ReactNode {
-  const { code } = useCodeBlock();
+function CodeCardLineNumbers({ className, ...props }: ComponentProps<'span'>): ReactNode {
+  const { code } = useCodeCard();
   return (
     <span
       aria-hidden
-      data-slot="code-block-line-numbers"
+      data-slot="code-card-line-numbers"
       className={cn('text-muted-foreground min-w-6 shrink-0 text-right select-none', className)}
       {...props}
     >
@@ -156,24 +156,24 @@ function CodeBlockLineNumbers({ className, ...props }: ComponentProps<'span'>): 
 }
 
 /** The block's code, painted with its highlighted lines once they arrive and plain until then. */
-function CodeBlockCode(props: Omit<ComponentProps<typeof HighlightedCode>, 'lines' | 'children'>): ReactNode {
-  const { code, lines } = useCodeBlock();
+function CodeCardCode(props: Omit<ComponentProps<typeof HighlightedCode>, 'lines' | 'children'>): ReactNode {
+  const { code, lines } = useCodeCard();
   return (
-    <HighlightedCode data-slot="code-block-code" lines={lines} {...props}>
+    <HighlightedCode data-slot="code-card-code" lines={lines} {...props}>
       {code}
     </HighlightedCode>
   );
 }
 
 /** The block's language as its icon and display name, `Plain text` when it has none; `children` replace the name. */
-function CodeBlockLanguage({ className, children, ...props }: ComponentProps<'span'>): ReactNode {
-  const { language } = useCodeBlock();
+function CodeCardLanguage({ className, children, ...props }: ComponentProps<'span'>): ReactNode {
+  const { language } = useCodeCard();
   const plain = isPlainLanguage(language);
   const LanguageIcon = codeLanguageIcon(plain ? 'text' : (language as string));
 
   return (
     <span
-      data-slot="code-block-language"
+      data-slot="code-card-language"
       className={cn('flex min-w-0 items-center gap-1.5 text-xs', className)}
       {...props}
     >
@@ -183,21 +183,21 @@ function CodeBlockLanguage({ className, children, ...props }: ComponentProps<'sp
   );
 }
 
-type CodeBlockCopyProps = Omit<CopyButtonProps, 'value'>;
+type CodeCardCopyProps = Omit<CopyButtonProps, 'value'>;
 
 /** Copies the block's code; takes every `CopyButton` prop but `value`. */
-function CodeBlockCopy({ label = 'Copy code', size = 'icon', ...props }: CodeBlockCopyProps): ReactNode {
-  const { code } = useCodeBlock();
-  return <CopyButton data-slot="code-block-copy" value={code} label={label} size={size} {...props} />;
+function CodeCardCopy({ label = 'Copy code', size = 'icon', ...props }: CodeCardCopyProps): ReactNode {
+  const { code } = useCodeCard();
+  return <CopyButton data-slot="code-card-copy" value={code} label={label} size={size} {...props} />;
 }
 
 export {
-  CodeBlock,
-  CodeBlockActions,
-  CodeBlockContent,
-  CodeBlockLineNumbers,
-  CodeBlockCode,
-  CodeBlockLanguage,
-  CodeBlockCopy,
+  CodeCard,
+  CodeCardActions,
+  CodeCardContent,
+  CodeCardLineNumbers,
+  CodeCardCode,
+  CodeCardLanguage,
+  CodeCardCopy,
 };
-export type { CodeBlockProps, CodeBlockCopyProps };
+export type { CodeCardProps, CodeCardCopyProps };

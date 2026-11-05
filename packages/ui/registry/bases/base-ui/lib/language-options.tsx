@@ -117,7 +117,7 @@ const CODE_ICON_BY_ID: Record<string, LanguageIcon> = Object.fromEntries(CODE_LA
  * The full-color Material icon component for a code-language id, resolving
  * aliases (`ts` -> `typescript`) and falling back to a generic document icon for
  * ids outside the highlightable set. Lets other surfaces (e.g. a read-only
- * code-block header) show the same icons the language picker uses. Self-scales
+ * code card's header) show the same icons the language picker uses. Self-scales
  * at `size="1em"`.
  */
 function codeLanguageIcon(id: string): LanguageIcon {
