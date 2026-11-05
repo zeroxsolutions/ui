@@ -114,7 +114,7 @@ export function shikiHighlighting(): Extension {
  * CodeMirror chrome (gutters, active line, cursor, selection) themed to the
  * design tokens. Syntax token colors are NOT set here — they arrive as
  * `var(--code-*)` references on each `Decoration.mark` from {@link codeTheme},
- * the same brand palette the chat `CodeBlock` uses; because the `--code-*` tokens
+ * the same brand palette the chat `CodeCard` uses; because the `--code-*` tokens
  * flip in `.dark`, the editor follows light/dark with no separate dark theme.
  */
 export const editorTheme: Extension = EditorView.theme({
@@ -126,7 +126,7 @@ export const editorTheme: Extension = EditorView.theme({
   // Long lines scroll on the design system's thin rail, not the browser's default
   // chrome scrollbar — a `var(--border)` rounded thumb over a transparent track,
   // matching the `ScrollBar` primitive (`w-2.5 rounded-full bg-border`) the
-  // read-only CodeBlock uses. `scrollbar-*` covers Firefox; `::-webkit-scrollbar`
+  // read-only CodeCard uses. `scrollbar-*` covers Firefox; `::-webkit-scrollbar`
   // covers Chrome/Safari.
   '.cm-scroller': {
     scrollbarWidth: 'thin',

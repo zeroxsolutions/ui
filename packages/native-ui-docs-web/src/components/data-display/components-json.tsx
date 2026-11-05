@@ -2,7 +2,7 @@
 
 import { Suspense, type ReactNode } from 'react';
 
-import { DocsCodeBlock } from '@zeroxsolutions/ui/site/components/data-display/docs-code-block';
+import { DocsCodeCard } from '@zeroxsolutions/ui/site/components/data-display/docs-code-card';
 import { DEFAULT_PLATFORM_STYLE } from '@zeroxsolutions/ui/site/constants/platform-styles';
 import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
 import { nativeComponentsJson } from '../../lib/native-install';
@@ -36,7 +36,7 @@ function ComponentsJsonBlock({
   style,
 }: ComponentsJsonProps & { style: PlatformStyle<'native'> }): ReactNode {
   return (
-    <DocsCodeBlock
+    <DocsCodeCard
       code={nativeComponentsJson({ engine, style, origin })}
       language="json"
       title="components.json"

@@ -6,7 +6,7 @@ import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Card, CardAction, CardFooter, CardTitle } from '@/registry/bases/base-ui/ui/card';
 import { CircleCheckIcon } from '@/registry/bases/base-ui/icons/circle-check-icon';
 
-/** The lifecycle of a consent request - host-driven, like `ToolCallCard`'s state. */
+/** The lifecycle of a consent request; the host sets it, and nothing inside the card changes it. */
 type PermissionCardStatusValue = 'pending' | 'approved' | 'denied';
 
 interface PermissionCardProps extends ComponentProps<typeof Card> {
@@ -27,7 +27,7 @@ interface PermissionCardProps extends ComponentProps<typeof Card> {
  *       <PermissionCardStatus>{statusWord}</PermissionCardStatus>
  *     </CardHeader>
  *     <CardContent>
- *       <CodeBlock code={command} language="bash"><CodeBlockContent><CodeBlockCode /></CodeBlockContent></CodeBlock>
+ *       <CodeCard code={command} language="bash"><CodeCardContent><CodeCardCode /></CodeCardContent></CodeCard>
  *     </CardContent>
  *     <PermissionCardActions>
  *       <Button variant="ghost" onClick={deny}>Deny</Button>

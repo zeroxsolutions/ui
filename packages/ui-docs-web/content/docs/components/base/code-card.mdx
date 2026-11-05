@@ -1,9 +1,9 @@
 ---
-title: Code Block
+title: Code Card
 description: Read-only source over a collapsible card, highlighted through the shared Shiki highlighter and falling back to plain mono while the grammar loads.
 ---
 
-<ComponentPreview name="code-block-demo" />
+<ComponentPreview name="code-card-demo" />
 
 ## Installation
 
@@ -17,7 +17,7 @@ description: Read-only source over a collapsible card, highlighted through the s
 <TabsContent value="cli">
 
 ```bash
-pnpm dlx shadcn@latest add @zui/code-block
+pnpm dlx shadcn@latest add @zui/code-card
 ```
 
 </TabsContent>
@@ -35,53 +35,57 @@ pnpm add @base-ui/react @shikijs/langs @zeroxsolutions/icons shiki
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add scroll-area utils @zui/collapsible-card @zui/copy-button @zui/highlighted-code
+pnpm dlx shadcn@latest add scroll-area utils @zui/collapsible-card @zui/copy-button
 ```
 
-<Step>Copy the component into `components/data-display/code-block.tsx`.</Step>
+<Step>Copy the component into `components/data-display/code-card.tsx`.</Step>
 
-<ComponentSource name="code-block" title="components/data-display/code-block.tsx" />
+<ComponentSource name="code-card" title="components/data-display/code-card.tsx" />
+
+<Step>Copy the element that paints the highlighted lines into `components/data-display/highlighted-code.tsx`.</Step>
+
+<ComponentSource
+  name="code-card"
+  file="registry/bases/base-ui/components/data-display/highlighted-code.tsx"
+  title="components/data-display/highlighted-code.tsx"
+/>
 
 <Step>Copy the hook that highlights the block's code into `hooks/use-highlighted-lines.ts`.</Step>
 
 <ComponentSource
-  name="code-block"
+  name="code-card"
   file="registry/bases/base-ui/hooks/use-highlighted-lines.ts"
   title="hooks/use-highlighted-lines.ts"
 />
 
 <Step>Copy the plain-language check and language display names into `lib/code-language.ts`.</Step>
 
-<ComponentSource name="code-block" file="registry/bases/base-ui/lib/code-language.ts" title="lib/code-language.ts" />
+<ComponentSource name="code-card" file="registry/bases/base-ui/lib/code-language.ts" title="lib/code-language.ts" />
 
 <Step>Copy the Shiki theme into `lib/code-theme.ts`.</Step>
 
-<ComponentSource name="code-block" file="registry/bases/base-ui/lib/code-theme.ts" title="lib/code-theme.ts" />
+<ComponentSource name="code-card" file="registry/bases/base-ui/lib/code-theme.ts" title="lib/code-theme.ts" />
 
 <Step>Copy the language icon lookup into `lib/language-options.tsx`.</Step>
 
 <ComponentSource
-  name="code-block"
+  name="code-card"
   file="registry/bases/base-ui/lib/language-options.tsx"
   title="lib/language-options.tsx"
 />
 
 <Step>Copy the vendored Mermaid grammar into `lib/mermaid-grammar.ts`.</Step>
 
-<ComponentSource
-  name="code-block"
-  file="registry/bases/base-ui/lib/mermaid-grammar.ts"
-  title="lib/mermaid-grammar.ts"
-/>
+<ComponentSource name="code-card" file="registry/bases/base-ui/lib/mermaid-grammar.ts" title="lib/mermaid-grammar.ts" />
 
 <Step>Copy the shared Shiki highlighter into `lib/shiki.ts`.</Step>
 
-<ComponentSource name="code-block" file="registry/bases/base-ui/lib/shiki.ts" title="lib/shiki.ts" />
+<ComponentSource name="code-card" file="registry/bases/base-ui/lib/shiki.ts" title="lib/shiki.ts" />
 
 <Step>Copy the language option types into `lib/language-option.ts`.</Step>
 
 <ComponentSource
-  name="code-block"
+  name="code-card"
   file="registry/bases/base-ui/types/language-option.ts"
   title="lib/language-option.ts"
 />
@@ -98,59 +102,59 @@ pnpm dlx shadcn@latest add scroll-area utils @zui/collapsible-card @zui/copy-but
 
 ```tsx
 import {
-  CodeBlock,
-  CodeBlockActions,
-  CodeBlockCode,
-  CodeBlockContent,
-  CodeBlockCopy,
-  CodeBlockLanguage,
-  CodeBlockLineNumbers,
-} from '@/components/data-display/code-block';
+  CodeCard,
+  CodeCardActions,
+  CodeCardCode,
+  CodeCardContent,
+  CodeCardCopy,
+  CodeCardLanguage,
+  CodeCardLineNumbers,
+} from '@/components/data-display/code-card';
 ```
 
 The root holds the code; its parts show it. Compose a header from `CollapsibleCard` parts, then the body:
 
 ```tsx
-<CodeBlock code={source} language="ts">
+<CodeCard code={source} language="ts">
   <CollapsibleCardHeader>
     <CollapsibleCardTitle>
-      <CodeBlockLanguage />
+      <CodeCardLanguage />
     </CollapsibleCardTitle>
     <CollapsibleCardActions>
-      <CodeBlockCopy />
+      <CodeCardCopy />
       <CollapsibleCardTrigger />
     </CollapsibleCardActions>
   </CollapsibleCardHeader>
-  <CodeBlockContent>
-    <CodeBlockLineNumbers />
-    <CodeBlockCode />
-  </CodeBlockContent>
-</CodeBlock>
+  <CodeCardContent>
+    <CodeCardLineNumbers />
+    <CodeCardCode />
+  </CodeCardContent>
+</CodeCard>
 ```
 
-A block with no header floats its copy action over the code instead, inside `CodeBlockActions` placed before
-`CodeBlockContent`: `<CodeBlockActions><CodeBlockCopy variant="secondary" /></CodeBlockActions>`. Use it for a
+A block with no header floats its copy action over the code instead, inside `CodeCardActions` placed before
+`CodeCardContent`: `<CodeCardActions><CodeCardCopy variant="secondary" /></CodeCardActions>`. Use it for a
 self-contained, read-only block; for already-tokenized source with no card chrome, compose `HighlightedCode`
 directly.
 
 ## Composition
 
 ```text
-CodeBlock
+CodeCard
 |-- CollapsibleCardHeader
 |   |-- CollapsibleCardTitle
-|   |   `-- CodeBlockLanguage
+|   |   `-- CodeCardLanguage
 |   `-- CollapsibleCardActions
-|       |-- CodeBlockCopy
+|       |-- CodeCardCopy
 |       `-- CollapsibleCardTrigger
-`-- CodeBlockContent
-    |-- CodeBlockLineNumbers
-    `-- CodeBlockCode
+`-- CodeCardContent
+    |-- CodeCardLineNumbers
+    `-- CodeCardCode
 ```
 
 ## API reference
 
-### CodeBlock
+### CodeCard
 
 Renders `CollapsibleCard` and takes every prop it takes, plus:
 
@@ -160,36 +164,36 @@ Renders `CollapsibleCard` and takes every prop it takes, plus:
 | `language` | `string`                  | -        |
 | `lines`    | `HighlightLine[] \| null` | -        |
 
-It defaults `variant` to `muted`. It sets `data-slot="code-block"` and `data-language` to its language.
+It defaults `variant` to `muted`. It sets `data-slot="code-card"` and `data-language` to its language.
 
-### CodeBlockActions
+### CodeCardActions
 
 Renders a `div` and takes every prop a `div` takes. It floats over the code's top-right corner, shown while the
 block is hovered or one of its children holds keyboard focus; use it for a block with no header. It sets
-`data-slot="code-block-actions"`.
+`data-slot="code-card-actions"`.
 
-### CodeBlockContent
+### CodeCardContent
 
 Renders `CollapsibleCardContent` and takes every prop it takes. Its viewport scrolls the code both ways and
-carries `data-slot="code-block-viewport"`. It sets `data-slot="code-block-content"`.
+carries `data-slot="code-card-viewport"`. It sets `data-slot="code-card-content"`.
 
-### CodeBlockLineNumbers
+### CodeCardLineNumbers
 
 Renders a `span` and takes every prop a `span` takes. It numbers every line of the block's code, at least three
-digits wide, hidden from assistive technology and left out of a copy. It sets `data-slot="code-block-line-numbers"`
+digits wide, hidden from assistive technology and left out of a copy. It sets `data-slot="code-card-line-numbers"`
 and `aria-hidden`.
 
-### CodeBlockCode
+### CodeCardCode
 
 Renders `HighlightedCode` and takes every prop it takes except `lines` and `children`, which it supplies from the
-block's code and highlighted lines. It sets `data-slot="code-block-code"`.
+block's code and highlighted lines. It sets `data-slot="code-card-code"`.
 
-### CodeBlockLanguage
+### CodeCardLanguage
 
 Renders a `span` and takes every prop a `span` takes. It shows the block's language as an icon and display name,
-"Plain text" when it has none; `children` replace the name. It sets `data-slot="code-block-language"`.
+"Plain text" when it has none; `children` replace the name. It sets `data-slot="code-card-language"`.
 
-### CodeBlockCopy
+### CodeCardCopy
 
 Renders `CopyButton` and takes every prop it takes except `value`, which it supplies as the block's code. `label`
-defaults to `Copy code` and `size` to `icon`. It sets `data-slot="code-block-copy"`.
+defaults to `Copy code` and `size` to `icon`. It sets `data-slot="code-card-copy"`.

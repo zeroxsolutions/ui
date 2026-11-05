@@ -20,7 +20,7 @@ import { publishedBlocks, publishedItems } from '../lib/published-items';
 import { blocksRoute, componentRoute, componentsRoute, docsPageRoute, viewRoute } from '../routes';
 
 /** The items the home page shows live, by registry name; each renders its `<name>-demo`. */
-const HOME_ITEMS = ['chat-message', 'code-block', 'file-tree', 'tag-input', 'password-input', 'status-indicator'];
+const HOME_ITEMS = ['chat-message', 'code-card', 'file-tree', 'tag-input', 'password-input', 'status-indicator'];
 
 /** The shadcn CLI command that installs one registry item through the app's `@zui` registry entry. */
 function homePageInstallCommand(name: string): string {

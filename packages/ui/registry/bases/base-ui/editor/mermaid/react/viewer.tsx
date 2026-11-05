@@ -1,12 +1,12 @@
 'use client';
 
 import {
-  CodeBlock,
-  CodeBlockCode,
-  CodeBlockContent,
-  CodeBlockCopy,
-  CodeBlockLanguage,
-} from '@/registry/bases/base-ui/components/data-display/code-block';
+  CodeCard,
+  CodeCardCode,
+  CodeCardContent,
+  CodeCardCopy,
+  CodeCardLanguage,
+} from '@/registry/bases/base-ui/components/data-display/code-card';
 import {
   CollapsibleCardActions,
   CollapsibleCardHeader,
@@ -26,7 +26,7 @@ export interface DiagramViewerProps {
 /**
  * Read-only diagram render — no pan/zoom chrome, no controls. SSR-safe: the
  * first paint (and any environment without a live DOM) renders the readable
- * source through the design-system read-only `CodeBlock` (Shiki-highlighted,
+ * source through the design-system read-only `CodeCard` (Shiki-highlighted,
  * copyable), and the client render effect swaps in the rendered SVG once mounted.
  * Used by the in-document block's read-only viewer.
  */
@@ -44,19 +44,19 @@ export function DiagramViewer({ source, className }: DiagramViewerProps) {
   }
 
   return (
-    <CodeBlock code={source} language="mermaid" className={className}>
+    <CodeCard code={source} language="mermaid" className={className}>
       <CollapsibleCardHeader>
         <CollapsibleCardTitle>
-          <CodeBlockLanguage />
+          <CodeCardLanguage />
         </CollapsibleCardTitle>
         <CollapsibleCardActions>
-          <CodeBlockCopy />
+          <CodeCardCopy />
           <CollapsibleCardTrigger />
         </CollapsibleCardActions>
       </CollapsibleCardHeader>
-      <CodeBlockContent>
-        <CodeBlockCode />
-      </CodeBlockContent>
-    </CodeBlock>
+      <CodeCardContent>
+        <CodeCardCode />
+      </CodeCardContent>
+    </CodeCard>
   );
 }

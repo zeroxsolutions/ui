@@ -14,8 +14,8 @@ function intersects(
 
 /** The part of a block's code a reader sees: its text's box cut to the scroller's viewport. */
 async function visibleCodeBox(block: Locator): Promise<{ x: number; y: number; width: number; height: number }> {
-  const viewport = await block.locator('[data-slot=code-block-viewport]').first().boundingBox();
-  const code = await block.locator('[data-slot=code-block-code]').first().boundingBox();
+  const viewport = await block.locator('[data-slot=code-card-viewport]').first().boundingBox();
+  const code = await block.locator('[data-slot=code-card-code]').first().boundingBox();
   if (!viewport || !code) throw new Error('the block has no code in a scroller');
   const x = Math.max(viewport.x, code.x);
   const y = Math.max(viewport.y, code.y);
@@ -63,7 +63,7 @@ test('a component page previews the item, shows its source, and pages on', async
 
   // A usage fence is headed by its language. A code block carries no role, so its slot names it.
   const usage = page
-    .locator('[data-slot=code-block]')
+    .locator('[data-slot=code-card]')
     .filter({ hasText: "import { StatusIndicator } from '@/components/" })
     .first();
   await expect(usage.getByText('tsx', { exact: true })).toBeVisible();
@@ -84,7 +84,7 @@ for (const [width, height] of [
 
     // The install command and a usage fence.
     const copyCode = page.getByRole('button', { name: 'Copy code' }).filter({ visible: true });
-    const blocks = page.locator('[data-slot=code-block]').filter({ has: copyCode });
+    const blocks = page.locator('[data-slot=code-card]').filter({ has: copyCode });
     const count = await blocks.count();
     expect(count).toBeGreaterThanOrEqual(2);
     for (let index = 0; index < count; index++) {
@@ -104,8 +104,8 @@ test('at 390 wide a long line scrolls inside its block, and the page does not sc
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/docs/installation');
 
-  const block = page.locator('[data-slot=code-block]').filter({ hasText: 'r/styles/{style}/{name}.json' }).first();
-  const viewport = block.locator('[data-slot=code-block-viewport]').first();
+  const block = page.locator('[data-slot=code-card]').filter({ hasText: 'r/styles/{style}/{name}.json' }).first();
+  const viewport = block.locator('[data-slot=code-card-viewport]').first();
   await expect(viewport).toBeVisible();
 
   const box = await block.boundingBox();

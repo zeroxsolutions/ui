@@ -3,9 +3,9 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { ComponentType } from 'react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-// code-block-demo renders CodeBlock, which highlights asynchronously through the
+// code-card-demo renders CodeCard, which highlights asynchronously through the
 // shared Shiki highlighter; mocking it keeps this spec deterministic, the same
-// way code-block.spec.tsx does for the component's own tests.
+// way code-card.spec.tsx does for the component's own tests.
 vi.mock('../lib/shiki', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../lib/shiki')>();
   return { ...actual, highlightToLines: vi.fn().mockResolvedValue(null) };

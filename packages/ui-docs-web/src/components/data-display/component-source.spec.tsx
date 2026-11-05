@@ -2,10 +2,10 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
-  SourceCodeBlockCode,
-  SourceCodeBlockContent,
-  SourceCodeBlockCopy,
-} from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
+  SourceCodeCardCode,
+  SourceCodeCardContent,
+  SourceCodeCardCopy,
+} from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
 
 import { ComponentSource } from './component-source';
 
@@ -17,9 +17,9 @@ describe('ComponentSource', () => {
   it('shows the parts its caller composes, and nothing else', () => {
     render(
       <ComponentSource name="x" code={CODE} language="ts">
-        <SourceCodeBlockContent>
-          <SourceCodeBlockCode />
-        </SourceCodeBlockContent>
+        <SourceCodeCardContent>
+          <SourceCodeCardCode />
+        </SourceCodeCardContent>
       </ComponentSource>,
     );
     expect(screen.getByText(/const d = 4;/)).toBeTruthy();
@@ -29,10 +29,10 @@ describe('ComponentSource', () => {
   it('cuts the source to its first lines when asked', () => {
     render(
       <ComponentSource name="x" code={CODE} language="ts" maxLines={2}>
-        <SourceCodeBlockCopy />
-        <SourceCodeBlockContent>
-          <SourceCodeBlockCode />
-        </SourceCodeBlockContent>
+        <SourceCodeCardCopy />
+        <SourceCodeCardContent>
+          <SourceCodeCardCode />
+        </SourceCodeCardContent>
       </ComponentSource>,
     );
     expect(screen.getByText(/const b = 2;/)).toBeTruthy();

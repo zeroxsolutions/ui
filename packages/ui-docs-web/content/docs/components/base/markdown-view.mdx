@@ -1,6 +1,6 @@
 ---
 title: Markdown View
-description: Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code as a CodeBlock.
+description: Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code as a CodeCard.
 ---
 
 <ComponentPreview name="markdown-view-demo" />
@@ -35,7 +35,7 @@ pnpm add react-markdown remark-gfm
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add checkbox table utils @zui/code-block @zui/collapsible-card
+pnpm dlx shadcn@latest add checkbox table utils @zui/code-card @zui/collapsible-card
 ```
 
 <Step>Copy the component into `components/data-display/markdown-view.tsx`.</Step>
@@ -64,9 +64,9 @@ import { MarkdownView } from '@/components/data-display/markdown-view';
 <MarkdownView>{markdown}</MarkdownView>
 ```
 
-GFM renders as tables (upstream `Table`) and fenced code as a `CodeBlock`; raw embedded HTML is never rendered,
+GFM renders as tables (upstream `Table`) and fenced code as a `CodeCard`; raw embedded HTML is never rendered,
 so untrusted markdown is safe. Use it for assistant replies and docs rendered from Markdown source; for literal
-source with no surrounding prose, compose Highlighted Code or Code Block directly.
+source with no surrounding prose, compose Code Card directly.
 
 ## API reference
 
@@ -79,7 +79,7 @@ Renders a `div` and takes every prop a `div` takes except `children`, plus:
 | `children` | `string` | required |
 
 `children` is the Markdown source (GFM: tables, task lists, strikethrough, autolinks). Fenced code becomes a
-`CodeBlock`, headed with its language when the fence names one and left bare when it is plain text; inline code
+`CodeCard`, headed with its language when the fence names one and left bare when it is plain text; inline code
 stays a muted chip. A GFM task item is an `li` with `data-slot="markdown-view-task-item"`; its checkbox and text
 sit in a `data-slot="markdown-view-task-item-row"` row with no bullet, and a nested task list drops below that
 row instead of beside the text. The checkbox's accessible name is the item's own text, by `aria-labelledby` onto

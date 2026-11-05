@@ -233,12 +233,21 @@ function familyFiles(): string[] {
     .sort();
 }
 
-/** Each family file is the first file of exactly one component or block item, which takes its name and kind folder. */
+/**
+ * Each family file is the first file of exactly one component or block item, which takes its name and kind
+ * folder, or else ships as a later file of exactly one such item, as a part only that item publishes.
+ */
 function familyProblems(items: RegistryItem[], families: string[]): string[] {
   const published = items.filter((item) => PUBLISHED.includes(item.type));
   const unowned = families.flatMap((family) => {
     const owners = published.filter((item) => item.files[0]?.path === family).map((item) => item.name);
-    if (owners.length === 0) return [`${family}: is the first file of no item`];
+    if (owners.length === 0) {
+      const carriers = published.filter((item) => item.files.slice(1).some((file) => file.path === family));
+      if (carriers.length === 1) return [];
+      return carriers.length === 0
+        ? [`${family}: is the first file of no item`]
+        : [`${family}: is a part of ${carriers.map((item) => item.name).join(' and ')}`];
+    }
     return owners.length === 1 ? [] : [`${family}: is the first file of ${owners.join(' and ')}`];
   });
   const misnamed = published.flatMap((item) => {
@@ -541,6 +550,23 @@ describe('familyProblems', () => {
     expect(familyProblems(familyItems.slice(1), FAMILIES)).toEqual([
       'registry/bases/base-ui/components/data-display/tree-item.tsx: is the first file of no item',
     ]);
+  });
+
+  it('accepts a family file one item ships as a part', () => {
+    const carrier = {
+      ...familyItems[1],
+      files: [...familyItems[1].files, { path: FAMILIES[1], type: 'registry:component' }],
+    };
+    expect(familyProblems([carrier], FAMILIES)).toEqual([]);
+  });
+
+  it('reports a family file two items ship as a part', () => {
+    const part = { path: FAMILIES[1], type: 'registry:component' };
+    const first = { ...familyItems[1], files: [...familyItems[1].files, part] };
+    const second = { ...first, name: 'ai-provider-grid' };
+    expect(familyProblems([first, second], FAMILIES)).toContain(
+      'registry/bases/base-ui/components/data-display/tree-item.tsx: is a part of ai-provider-picker and ai-provider-grid',
+    );
   });
 
   it('reports a family file two items publish', () => {

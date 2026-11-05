@@ -78,7 +78,7 @@ function ComponentPreviewSource({ className, ...props }: ComponentProps<'div'>):
       // block's own padding) at the default 16px root font size; the open block's panel starts and
       // ends at this height so it grows out of the excerpt rather than from zero.
       className={cn(
-        'bg-code border-foreground/10 border-t [--component-preview-excerpt-height:4.90625rem] **:data-[slot=code-block-viewport]:max-h-96',
+        'bg-code border-foreground/10 border-t [--component-preview-excerpt-height:4.90625rem] **:data-[slot=code-card-viewport]:max-h-96',
         className,
       )}
       {...props}
@@ -100,7 +100,7 @@ function ComponentPreviewExcerpt({ className, children, ...props }: ComponentPro
       // not on the card's data-open: that flips at once on close, while the panel stays mounted for
       // its own 200ms exit. The `>` excludes the excerpt's own nested code block, which is always
       // mounted and would otherwise match every time.
-      className={cn('relative group-has-[>[data-slot=code-block-content]]/collapsible-card:hidden', className)}
+      className={cn('relative group-has-[>[data-slot=code-card-content]]/collapsible-card:hidden', className)}
       {...props}
     >
       {/* An excerpt, not a scroller: its overflow clips, and it takes no focus. */}

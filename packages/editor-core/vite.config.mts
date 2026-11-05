@@ -68,7 +68,9 @@ export default defineConfig(() => ({
   ],
   build: {
     outDir: './dist',
-    emptyOutDir: true,
+    // `typecheck` emits this package's declarations into dist, where a dependent's typecheck reads them
+    // while this build may be running: emptying dist first deletes them under that typecheck.
+    emptyOutDir: false,
     copyPublicDir: false,
     reportCompressedSize: true,
     lib: {

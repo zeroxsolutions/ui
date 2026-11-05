@@ -2,17 +2,17 @@ import type { ReactNode } from 'react';
 
 import { ComponentPreview } from '@zeroxsolutions/ui/site/components/data-display/component-preview';
 import {
-  SourceCodeBlock,
-  SourceCodeBlockActions,
-  SourceCodeBlockCode,
-  SourceCodeBlockContent,
-  SourceCodeBlockCopy,
-  SourceCodeBlockFile,
-  SourceCodeBlockHeader,
-  SourceCodeBlockLanguage,
-  SourceCodeBlockLineNumbers,
-  SourceCodeBlockTitle,
-} from '@zeroxsolutions/ui/site/components/data-display/source-code-block';
+  SourceCodeCard,
+  SourceCodeCardActions,
+  SourceCodeCardCode,
+  SourceCodeCardContent,
+  SourceCodeCardCopy,
+  SourceCodeCardFile,
+  SourceCodeCardHeader,
+  SourceCodeCardLanguage,
+  SourceCodeCardLineNumbers,
+  SourceCodeCardTitle,
+} from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
 import { EXPO_PROJECT_IDS } from '../../constants/native-preview-device';
 import type { HighlightLine } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/shiki';
 import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
@@ -56,25 +56,25 @@ function NativePreview({ engine, name, code, language, lines }: NativePreviewPro
         </ComponentPreview>
       </TabsContent>
       <TabsContent value="code" className="mt-4">
-        <SourceCodeBlock
+        <SourceCodeCard
           code={code}
           language={language}
           lines={lines ? (JSON.parse(lines) as HighlightLine[] | null) : null}
         >
-          <SourceCodeBlockHeader>
-            <SourceCodeBlockTitle>
-              <SourceCodeBlockLanguage>{language}</SourceCodeBlockLanguage>
-              <SourceCodeBlockFile>{`${name}.tsx`}</SourceCodeBlockFile>
-            </SourceCodeBlockTitle>
-            <SourceCodeBlockActions>
-              <SourceCodeBlockCopy />
-            </SourceCodeBlockActions>
-          </SourceCodeBlockHeader>
-          <SourceCodeBlockContent>
-            <SourceCodeBlockLineNumbers />
-            <SourceCodeBlockCode />
-          </SourceCodeBlockContent>
-        </SourceCodeBlock>
+          <SourceCodeCardHeader>
+            <SourceCodeCardTitle>
+              <SourceCodeCardLanguage>{language}</SourceCodeCardLanguage>
+              <SourceCodeCardFile>{`${name}.tsx`}</SourceCodeCardFile>
+            </SourceCodeCardTitle>
+            <SourceCodeCardActions>
+              <SourceCodeCardCopy />
+            </SourceCodeCardActions>
+          </SourceCodeCardHeader>
+          <SourceCodeCardContent>
+            <SourceCodeCardLineNumbers />
+            <SourceCodeCardCode />
+          </SourceCodeCardContent>
+        </SourceCodeCard>
       </TabsContent>
     </Tabs>
   );

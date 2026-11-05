@@ -1,6 +1,6 @@
 import { expect, test } from './test/fixtures';
 
-const ITEMS = ['Chat Message', 'Code Block', 'File Tree', 'Tag Input', 'Password Input', 'Status Indicator'];
+const ITEMS = ['Chat Message', 'Code Card', 'File Tree', 'Tag Input', 'Password Input', 'Status Indicator'];
 
 // Mirrors the hero's own `homePageInstallCommand('status-indicator')`; the e2e project does not
 // import the app's internals.

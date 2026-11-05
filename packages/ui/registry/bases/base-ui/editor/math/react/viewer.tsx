@@ -6,7 +6,7 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**
  * `<FormulaViewer>` - read-only formula render, no editing chrome. Unlike the
- * mermaid `DiagramViewer`, which SSR-fallbacks to a `CodeBlock` because Mermaid
+ * mermaid `DiagramViewer`, which SSR-fallbacks to a `CodeCard` because Mermaid
  * needs a live DOM, KaTeX renders synchronously and SSR-safe: the viewer emits
  * the real formula on the first paint in any environment (leniently, so a stored
  * invalid formula still renders rather than blanking). The color rides the active

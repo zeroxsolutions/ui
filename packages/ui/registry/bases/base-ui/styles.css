@@ -115,7 +115,7 @@
        chromatic family (info-blue, success-green, warning-amber, mark-purple,
        destructive-red, selection-cyan); L/C tuned for the near-white
        `--code-surface`. Consumed by the Shiki theme (lib/code-theme.ts) for both the
-       chat CodeBlock and the editor. */
+       chat CodeCard and the editor. */
   --code-fg: oklch(0.25 0 0);
   --code-comment: oklch(0.6 0.015 250);
   --code-keyword: oklch(0.5 0.2 290);

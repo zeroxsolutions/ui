@@ -6,7 +6,7 @@ import { EditorView } from '@codemirror/view';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
 import { CodeBlockNodeView, codeBlockCodec } from './code-block.js';
 
-// The read-only path's design-system CodeBlock renders upstream ScrollArea,
+// The read-only path's design-system CodeCard renders upstream ScrollArea,
 // which measures its viewport in a `queueMicrotask` its layout effect
 // schedules on mount, outside of `render`'s own act() batch — awaiting a
 // no-op act() settles it before the test's assertions run.
@@ -15,7 +15,7 @@ async function settle(): Promise<void> {
 }
 
 // The editable node view mounts a real CodeMirror editor and a Base UI
-// Combobox/DropdownMenu; the read-only path renders the design-system CodeBlock's
+// Combobox/DropdownMenu; the read-only path renders the design-system CodeCard's
 // ScrollArea. jsdom lacks the layout/animation/pointer APIs all three reach for.
 beforeAll(() => {
   globalThis.ResizeObserver ??= class {
@@ -110,10 +110,10 @@ describe('code-block node view (editable)', () => {
 });
 
 describe('code-block node view (read-only)', () => {
-  it('renders the read-only design-system CodeBlock, not the editing pane', async () => {
+  it('renders the read-only design-system CodeCard, not the editing pane', async () => {
     const { container } = render(<CodeBlockNodeView {...nodeViewProps({ language: 'text', code: 'hello' }, false)} />);
     await settle();
-    expect(container.querySelector('[data-slot="code-block"]')).not.toBeNull();
+    expect(container.querySelector('[data-slot="code-card"]')).not.toBeNull();
     expect(container.querySelector('[data-slot="code-mirror-pane"]')).toBeNull();
     expect(container.querySelector('.cm-content')).toBeNull();
     expect(screen.getByText('hello')).toBeTruthy();
@@ -121,7 +121,7 @@ describe('code-block node view (read-only)', () => {
 });
 
 describe('code-block export codec', () => {
-  it('renders toReact through the read-only design-system CodeBlock', async () => {
+  it('renders toReact through the read-only design-system CodeCard', async () => {
     const rendered = codeBlockCodec.toReact?.(
       {
         type: 'codeBlock',
@@ -131,7 +131,7 @@ describe('code-block export codec', () => {
     ) as ReactNode;
     const { container } = render(<>{rendered}</>);
     await settle();
-    expect(container.querySelector('[data-slot="code-block"]')).not.toBeNull();
+    expect(container.querySelector('[data-slot="code-card"]')).not.toBeNull();
     expect(screen.getByText('exported')).toBeTruthy();
   });
 });

@@ -12,13 +12,13 @@ import Markdown, { type Components, type ExtraProps } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import {
-  CodeBlock,
-  CodeBlockActions,
-  CodeBlockCode,
-  CodeBlockContent,
-  CodeBlockCopy,
-  CodeBlockLanguage,
-} from '@/registry/bases/base-ui/components/data-display/code-block';
+  CodeCard,
+  CodeCardActions,
+  CodeCardCode,
+  CodeCardContent,
+  CodeCardCopy,
+  CodeCardLanguage,
+} from '@/registry/bases/base-ui/components/data-display/code-card';
 import {
   CollapsibleCardActions,
   CollapsibleCardHeader,
@@ -112,8 +112,8 @@ function MarkdownViewTaskCheckbox({
 
 /**
  * The renderers: tables as upstream's `Table` parts, GFM task items as a read-only `Checkbox`, and
- * fenced code as a `CodeBlock`, headed with its language when the fence names one; inline code stays
- * a chip. `pre` is unwrapped, because the `code` renderer draws the whole block, and a `CodeBlock`
+ * fenced code as a `CodeCard`, headed with its language when the fence names one; inline code stays
+ * a chip. `pre` is unwrapped, because the `code` renderer draws the whole block, and a `CodeCard`
  * root is a `<div>`, which must not nest in a `<pre>`.
  */
 const markdownViewComponents: Components = {
@@ -142,26 +142,26 @@ const markdownViewComponents: Components = {
     }
     const language = /language-(\w+)/.exec(className ?? '')?.[1];
     return (
-      <CodeBlock code={text.replace(/\n$/, '')} language={language ?? 'text'} className="my-3">
+      <CodeCard code={text.replace(/\n$/, '')} language={language ?? 'text'} className="my-3">
         {isPlainLanguage(language) ? (
-          <CodeBlockActions>
-            <CodeBlockCopy variant="secondary" />
-          </CodeBlockActions>
+          <CodeCardActions>
+            <CodeCardCopy variant="secondary" />
+          </CodeCardActions>
         ) : (
           <CollapsibleCardHeader>
             <CollapsibleCardTitle>
-              <CodeBlockLanguage />
+              <CodeCardLanguage />
             </CollapsibleCardTitle>
             <CollapsibleCardActions>
-              <CodeBlockCopy />
+              <CodeCardCopy />
               <CollapsibleCardTrigger />
             </CollapsibleCardActions>
           </CollapsibleCardHeader>
         )}
-        <CodeBlockContent>
-          <CodeBlockCode />
-        </CodeBlockContent>
-      </CodeBlock>
+        <CodeCardContent>
+          <CodeCardCode />
+        </CodeCardContent>
+      </CodeCard>
     );
   },
 };
@@ -174,7 +174,7 @@ interface MarkdownViewProps extends Omit<ComponentProps<'div'>, 'children'> {
 /**
  * Renders a Markdown string (GFM: tables, task lists, strikethrough, autolinks)
  * styled to the design tokens, with tables as the upstream `Table` and fenced code
- * as a `CodeBlock` (highlighting, copy, collapse). Raw embedded HTML is not
+ * as a `CodeCard` (highlighting, copy, collapse). Raw embedded HTML is not
  * rendered, so untrusted content is safe. A wide table or a long code line
  * scrolls sideways inside its own block.
  */

@@ -36,22 +36,20 @@
       ]
     },
     {
-      "name": "code-block",
+      "name": "code-card",
       "type": "registry:component",
-      "title": "Code Block",
+      "title": "Code Card",
       "description": "Read-only source over a collapsible card, highlighted through the shared Shiki highlighter and falling back to plain mono while the grammar loads.",
       "categories": ["data-display"],
       "dependencies": ["@base-ui/react", "@shikijs/langs", "@zeroxsolutions/icons", "shiki"],
-      "registryDependencies": [
-        "@shadcn/scroll-area",
-        "@shadcn/utils",
-        "@zui/collapsible-card",
-        "@zui/copy-button",
-        "@zui/highlighted-code"
-      ],
+      "registryDependencies": ["@shadcn/scroll-area", "@shadcn/utils", "@zui/collapsible-card", "@zui/copy-button"],
       "files": [
         {
-          "path": "registry/bases/base-ui/components/data-display/code-block.tsx",
+          "path": "registry/bases/base-ui/components/data-display/code-card.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/components/data-display/highlighted-code.tsx",
           "type": "registry:component"
         },
         {
@@ -170,33 +168,6 @@
       ]
     },
     {
-      "name": "highlighted-code",
-      "type": "registry:component",
-      "title": "Highlighted Code",
-      "description": "A mono code element that renders tokenized lines from the shared Shiki highlighter, falling back to its raw children until they arrive.",
-      "categories": ["data-display"],
-      "dependencies": ["@shikijs/langs", "shiki"],
-      "registryDependencies": ["@shadcn/utils"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/data-display/highlighted-code.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/bases/base-ui/lib/code-theme.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "registry/bases/base-ui/lib/mermaid-grammar.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "registry/bases/base-ui/lib/shiki.ts",
-          "type": "registry:lib"
-        }
-      ]
-    },
-    {
       "name": "image-preview",
       "type": "registry:component",
       "title": "Image Preview",
@@ -220,14 +191,14 @@
       "name": "markdown-view",
       "type": "registry:component",
       "title": "Markdown View",
-      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code as a CodeBlock.",
+      "description": "Renders a GitHub-Flavored Markdown string styled to the design tokens, with tables as the upstream Table and fenced code as a CodeCard.",
       "categories": ["data-display"],
       "dependencies": ["react-markdown", "remark-gfm"],
       "registryDependencies": [
         "@shadcn/checkbox",
         "@shadcn/table",
         "@shadcn/utils",
-        "@zui/code-block",
+        "@zui/code-card",
         "@zui/collapsible-card"
       ],
       "files": [
@@ -806,45 +777,6 @@
       ]
     },
     {
-      "name": "tool-call-card",
-      "type": "registry:component",
-      "title": "Tool Call Card",
-      "description": "One tool invocation in a chat transcript: a trigger row over collapsible sections, whose status badge follows the call's lifecycle state.",
-      "categories": ["feedback"],
-      "dependencies": ["lucide-react"],
-      "registryDependencies": [
-        "@shadcn/badge",
-        "@shadcn/button",
-        "@shadcn/card",
-        "@shadcn/collapsible",
-        "@shadcn/utils",
-        "@zui/chevron-down-icon",
-        "@zui/circle-check-icon",
-        "@zui/clock-icon"
-      ],
-      "cssVars": {
-        "theme": {
-          "color-success": "var(--success)"
-        },
-        "light": {
-          "success": "oklch(0.627 0.19 149)"
-        },
-        "dark": {
-          "success": "oklch(0.723 0.19 149)"
-        }
-      },
-      "files": [
-        {
-          "path": "registry/bases/base-ui/components/feedback/tool-call-card.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
-          "type": "registry:hook"
-        }
-      ]
-    },
-    {
       "name": "command-menu",
       "type": "registry:component",
       "title": "Command Menu",
@@ -937,15 +869,15 @@
       ]
     },
     {
-      "name": "code-block-demo",
+      "name": "code-card-demo",
       "type": "registry:example",
-      "title": "Code Block Demo",
+      "title": "Code Card Demo",
       "description": "A collapsible TypeScript block with its language, a copy action and a collapse toggle.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/code-block", "@zui/collapsible-card"],
+      "registryDependencies": ["@zui/code-card", "@zui/collapsible-card"],
       "files": [
         {
-          "path": "registry/bases/base-ui/examples/code-block-demo.tsx",
+          "path": "registry/bases/base-ui/examples/code-card-demo.tsx",
           "type": "registry:example"
         }
       ]
@@ -1004,20 +936,6 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/font-preview-demo.tsx",
-          "type": "registry:example"
-        }
-      ]
-    },
-    {
-      "name": "highlighted-code-demo",
-      "type": "registry:example",
-      "title": "Highlighted Code Demo",
-      "description": "Pre-tokenized lines styled with the same tokens the shared Shiki theme paints with.",
-      "categories": ["examples"],
-      "registryDependencies": ["@zui/highlighted-code"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/highlighted-code-demo.tsx",
           "type": "registry:example"
         }
       ]
@@ -1595,34 +1513,6 @@
         {
           "path": "registry/bases/base-ui/hooks/use-reasoning-collapsible.ts",
           "type": "registry:hook"
-        }
-      ]
-    },
-    {
-      "name": "tool-call-card-demo",
-      "type": "registry:example",
-      "title": "Tool Call Card Demo",
-      "description": "A completed search call, its parameters shown under the trigger.",
-      "categories": ["examples"],
-      "registryDependencies": ["@zui/code-block", "@zui/search-icon", "@zui/tool-call-card"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/tool-call-card-demo.tsx",
-          "type": "registry:example"
-        }
-      ]
-    },
-    {
-      "name": "tool-call-card-error",
-      "type": "registry:example",
-      "title": "Tool Call Card Error",
-      "description": "A failed search call, its error shown under the trigger.",
-      "categories": ["examples"],
-      "registryDependencies": ["@zui/tool-call-card"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/examples/tool-call-card-error.tsx",
-          "type": "registry:example"
         }
       ]
     },
