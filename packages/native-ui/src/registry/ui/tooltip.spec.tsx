@@ -2,6 +2,7 @@ import { PortalHost } from '@rn-primitives/portal';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo, View } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
+import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Button } from './button';
 import { catchBackPress, followAccessibilityFocus } from './overlay.testing';
 import { Text } from './text';
@@ -37,6 +38,18 @@ const trigger = () => screen.getByRole('button', { name: 'Hover' });
 const tooltip = () => screen.getByTestId('content');
 /** The layer inside the content that fades, grows and slides. */
 const motionLayer = () => tooltip().children[0] as ReturnType<typeof screen.getByTestId>;
+
+/** The box inside the motion layer that draws the label, and the layer that places its arrow on its edge. */
+function box() {
+  const [drawn] = motionLayer().children;
+  if (typeof drawn === 'string') throw new Error('The tooltip draws no box');
+  return drawn;
+}
+function arrowLayer() {
+  const [layer] = box().children;
+  if (typeof layer === 'string') throw new Error('The tooltip draws no arrow');
+  return layer;
+}
 
 /** The layer behind the content that a press outside it lands on. */
 function outside() {
@@ -144,6 +157,30 @@ describe('Tooltip', () => {
     await user.press(trigger());
     await finishMotion();
     expect(focused()).toBe('trigger');
+  });
+
+  it('draws an arrow below the label when it opens above the trigger, which a screen reader skips', async () => {
+    await open();
+
+    expect(arrowLayer().props.className).toContain('-bottom-2.5');
+    expect(arrowLayer()).toHaveProp('aria-hidden', true);
+    expect(tooltip()).toHaveTextContent('Add to library');
+  });
+
+  it('draws the arrow above the label when it opens below the trigger', async () => {
+    await open({ side: 'bottom' });
+
+    expect(arrowLayer().props.className).toContain('top-1');
+  });
+
+  it("draws Vega's arrow, a 10px square turned to a diamond in the tooltip's colour", async () => {
+    await open();
+    const [arrow] = arrowLayer().children;
+    if (typeof arrow === 'string') throw new Error('The arrow layer holds no arrow');
+
+    expect(emittedClasses(arrow.props.className)).toEqual(
+      expect.arrayContaining(['bg-foreground', 'size-2.5', 'rotate-45', 'translate-y-[-7px]']),
+    );
   });
 
   it('opens 4px above its trigger, centred on it', async () => {

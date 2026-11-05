@@ -19,6 +19,7 @@ import { Button, type ButtonProps } from './button';
 import { IconClassContext } from './icon';
 import { Input, type InputProps } from './input';
 import { Text, TextClassContext, type TextProps } from './text';
+import { Textarea, type TextareaProps } from './textarea';
 
 // A `cn-<slot>` token stands for that slot's view classes, `cn-<slot>/text` for its text classes,
 // `cn-<slot>/icon` for the size it gives an icon, and `cn-<slot>@<state>` for the classes behind that
@@ -62,10 +63,10 @@ function addonAlignOf(child: ReactNode): InputGroupAddonAlign | undefined {
 /**
  * An input with addons beside it, above it or below it, drawn as one field: the group takes the
  * focus border while its input holds focus, the destructive border while the input is
- * `aria-invalid`, and the dimming of a disabled input. Its children are one InputGroupInput and
- * InputGroupAddons; each addon is placed by its `align`, a start addon before the input and an end
- * addon after it, and a block addon stacks the group into a column, so the addons are its direct
- * children.
+ * `aria-invalid`, and the dimming of a disabled input. Its children are one InputGroupInput or
+ * InputGroupTextarea and InputGroupAddons; each addon is placed by its `align`, a start addon before the input
+ * and an end addon after it, and a block addon stacks the group into a column, so the addons are its direct
+ * children. A group holding a textarea grows with it.
  */
 function InputGroup({ className, children, ...props }: ComponentProps<typeof View>): ReactNode {
   const [control, setControlState] = useState<InputGroupControlState>({
@@ -83,6 +84,7 @@ function InputGroup({ className, children, ...props }: ComponentProps<typeof Vie
   const aligns = items.map(addonAlignOf);
   const blockStart = aligns.includes('block-start');
   const blockEnd = aligns.includes('block-end');
+  const holdsTextarea = items.some((item) => isValidElement(item) && item.type === InputGroupTextarea);
   const orderOf = (index: number): number => {
     const align = aligns[index];
     return align === undefined ? 0 : ADDON_ORDER[align];
@@ -100,6 +102,7 @@ function InputGroup({ className, children, ...props }: ComponentProps<typeof Vie
           control.disabled && 'cn-input-group@disabled',
           blockStart && 'cn-input-group@align=block-start',
           blockEnd && 'cn-input-group@align=block-end',
+          holdsTextarea && 'h-auto',
           className,
         )}
         {...props}
@@ -219,19 +222,20 @@ type InputGroupInputProps = InputProps & {
   ref?: Ref<TextInputInstance>;
 };
 
+/** The props of the group's text field that report its state to the group. */
+interface InputGroupControlProps {
+  ref?: Ref<TextInputInstance>;
+  editable?: boolean;
+  'aria-invalid'?: boolean;
+  onFocus?: InputProps['onFocus'];
+  onBlur?: InputProps['onBlur'];
+}
+
 /**
- * The group's text field: an Input with no border of its own, whose focus, `aria-invalid` and
- * `editable={false}` the group draws around it and its addons.
+ * The props that tie a text field to the InputGroup around it: its node, held for the addons to focus, and its
+ * focus, `aria-invalid` and `editable={false}`, reported for the group to draw.
  */
-function InputGroupInput({
-  className,
-  ref,
-  editable,
-  'aria-invalid': invalid,
-  onFocus,
-  onBlur,
-  ...props
-}: InputGroupInputProps): ReactNode {
+function useInputGroupControl({ ref, editable, 'aria-invalid': invalid, onFocus, onBlur }: InputGroupControlProps) {
   const group = useContext(InputGroupContext);
   const setControl = group?.setControl;
   const controlRef = group?.controlRef;
@@ -252,24 +256,69 @@ function InputGroupInput({
     [controlRef, ref],
   );
 
+  return {
+    stacked: group?.stacked ?? false,
+    ref: attach,
+    editable,
+    'aria-invalid': invalid,
+    onFocus: ((event) => {
+      setControl?.({ focused: true });
+      onFocus?.(event);
+    }) satisfies InputProps['onFocus'],
+    onBlur: ((event) => {
+      setControl?.({ focused: false });
+      onBlur?.(event);
+    }) satisfies InputProps['onBlur'],
+  };
+}
+
+/**
+ * The group's text field: an Input with no border of its own, whose focus, `aria-invalid` and
+ * `editable={false}` the group draws around it and its addons.
+ */
+function InputGroupInput({
+  className,
+  ref,
+  editable,
+  'aria-invalid': invalid,
+  onFocus,
+  onBlur,
+  ...props
+}: InputGroupInputProps): ReactNode {
+  const { stacked, ...control } = useInputGroupControl({ ref, editable, 'aria-invalid': invalid, onFocus, onBlur });
   return (
-    <Input
-      ref={attach}
-      className={cn('cn-input-group-input', group?.stacked ? 'w-full' : 'flex-1', className)}
-      editable={editable}
-      aria-invalid={invalid}
-      onFocus={(event) => {
-        setControl?.({ focused: true });
-        onFocus?.(event);
-      }}
-      onBlur={(event) => {
-        setControl?.({ focused: false });
-        onBlur?.(event);
-      }}
+    <Input className={cn('cn-input-group-input', stacked ? 'w-full' : 'flex-1', className)} {...control} {...props} />
+  );
+}
+
+type InputGroupTextareaProps = TextareaProps & {
+  /** The textarea, for the caller to focus or read; the group holds it too, to focus it from an addon. */
+  ref?: Ref<TextInputInstance>;
+};
+
+/**
+ * The group's multiline text field: a Textarea with no border of its own, whose focus, `aria-invalid` and
+ * `editable={false}` the group draws around it and its addons. A block addon below it holds a send button or a
+ * count, as on a message composer.
+ */
+function InputGroupTextarea({
+  className,
+  ref,
+  editable,
+  'aria-invalid': invalid,
+  onFocus,
+  onBlur,
+  ...props
+}: InputGroupTextareaProps): ReactNode {
+  const { stacked, ...control } = useInputGroupControl({ ref, editable, 'aria-invalid': invalid, onFocus, onBlur });
+  return (
+    <Textarea
+      className={cn('cn-input-group-textarea', stacked ? 'w-full' : 'flex-1', className)}
+      {...control}
       {...props}
     />
   );
 }
 
-export { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText };
-export type { InputGroupAddonProps, InputGroupButtonProps, InputGroupInputProps };
+export { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText, InputGroupTextarea };
+export type { InputGroupAddonProps, InputGroupButtonProps, InputGroupInputProps, InputGroupTextareaProps };

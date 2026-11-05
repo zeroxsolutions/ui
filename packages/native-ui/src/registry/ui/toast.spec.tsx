@@ -2,6 +2,7 @@ import { PortalHost } from '@rn-primitives/portal';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AccessibilityInfo, Platform, View } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
+import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Text } from './text';
 import { Toaster, createToastManager, toast, useToastManager, type ToastProviderProps } from './toast';
 
@@ -95,6 +96,14 @@ describe('Toaster', () => {
 
     expect(screen.getByText('Event created')).toBeOnTheScreen();
     expect(screen.getByText('Sunday, December 3 at 9:00 AM')).toBeOnTheScreen();
+  });
+
+  it("rounds a toast as the style's toast slot does", async () => {
+    await show();
+
+    await raise(() => toast.add({ title: 'Event created' }));
+
+    expect(emittedClasses(toastHolding('Event created').props.className)).toContain('rounded-2xl');
   });
 
   it('announces a new toast politely on iOS, and draws in a polite live region for Android', async () => {

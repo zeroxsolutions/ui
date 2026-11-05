@@ -9,7 +9,14 @@ import { parseSlotMap } from '../../build/slot-map';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { translateClasses } from '../../build/translate';
 import { Icon } from './icon';
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText } from './input-group';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupText,
+  InputGroupTextarea,
+} from './input-group';
 import { Text } from './text';
 
 const SNAPSHOT_PATH = join(__dirname, '../../../styles/upstream/style-vega.css');
@@ -158,6 +165,80 @@ describe('InputGroup', () => {
       </InputGroup>,
     );
     if (!ref.current) throw new Error('InputGroupInput gave the caller no input');
+    const focus = jest.spyOn(ref.current, 'focus');
+
+    await fireEvent.press(screen.getByTestId('addon'));
+
+    expect(focus).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('InputGroupTextarea', () => {
+  function renderComposer(props: { 'aria-invalid'?: boolean; editable?: boolean } = {}) {
+    return render(
+      <InputGroup testID="group">
+        <InputGroupTextarea testID="field" placeholder="Ask, search or chat..." {...props} />
+        <InputGroupAddon align="block-end" testID="addon">
+          <InputGroupText>52% used</InputGroupText>
+        </InputGroupAddon>
+      </InputGroup>,
+    );
+  }
+
+  it('is a multiline field without a border of its own, spanning the stacked group', async () => {
+    await renderComposer();
+
+    expect(screen.getByTestId('field').props.multiline).toBe(true);
+    expect(classesOf('field')).toEqual(expect.arrayContaining(['border-0', 'py-2', 'w-full']));
+    expect(classesOf('group')).toEqual(expect.arrayContaining(['flex-col', 'h-auto']));
+  });
+
+  it('grows the group with it when no block addon stacks the group', async () => {
+    await render(
+      <InputGroup testID="group">
+        <InputGroupTextarea testID="field" />
+      </InputGroup>,
+    );
+
+    expect(classesOf('group')).toContain('h-auto');
+    expect(classesOf('group')).not.toContain('h-9');
+    expect(classesOf('field')).toContain('flex-1');
+  });
+
+  it('gives the group the focus border while it holds focus', async () => {
+    await renderComposer();
+
+    await fireEvent(screen.getByTestId('field'), 'focus');
+    expect(classesOf('group')).toContain('border-ring');
+
+    await fireEvent(screen.getByTestId('field'), 'blur');
+    expect(classesOf('group')).not.toContain('border-ring');
+  });
+
+  it('gives the group the destructive border while it is invalid', async () => {
+    await renderComposer({ 'aria-invalid': true });
+
+    expect(classesOf('group')).toContain('border-destructive');
+  });
+
+  it('dims the addons and announces itself disabled when it is not editable', async () => {
+    await renderComposer({ editable: false });
+
+    expect(screen.getByTestId('field').props['aria-disabled']).toBe(true);
+    expect(classesOf('addon')).toContain('opacity-50');
+  });
+
+  it('is focused by a press on an addon, and hands the caller the field', async () => {
+    const ref = createRef<TextInputInstance>();
+    await render(
+      <InputGroup>
+        <InputGroupTextarea ref={ref} />
+        <InputGroupAddon align="block-end" testID="addon">
+          <InputGroupText>Send</InputGroupText>
+        </InputGroupAddon>
+      </InputGroup>,
+    );
+    if (!ref.current) throw new Error('InputGroupTextarea gave the caller no field');
     const focus = jest.spyOn(ref.current, 'focus');
 
     await fireEvent.press(screen.getByTestId('addon'));

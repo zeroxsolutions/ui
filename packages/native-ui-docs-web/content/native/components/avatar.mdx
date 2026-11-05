@@ -1,6 +1,6 @@
 ---
 title: Avatar
-description: A round picture of a person or an account, with a fallback that shows until the image has loaded.
+description: A round picture of a person or an account, with a fallback that shows until the image has loaded, a badge, and a group.
 ---
 
 <NativePreview name="avatar-demo" />
@@ -9,13 +9,21 @@ description: A round picture of a person or an account, with a fallback that sho
 
 <InstallCommand name="avatar" />
 
-The CLI writes `components/ui/avatar.tsx`, installs [Text](/native/components/nativewind/text) and Utils, and adds
+The CLI writes `components/ui/avatar.tsx`, installs [Icon](/native/components/nativewind/icon),
+[Text](/native/components/nativewind/text) and Utils, and adds
 `@rn-primitives/avatar`.
 
 ## Usage
 
 ```tsx
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarGroupCount,
+  AvatarImage,
+} from '@/components/ui/avatar';
 import { Text } from '@/components/ui/text';
 ```
 
@@ -26,6 +34,38 @@ import { Text } from '@/components/ui/text';
     <Text>AL</Text>
   </AvatarFallback>
 </Avatar>
+```
+
+### Badge
+
+```tsx
+<Avatar alt="Ada Lovelace, online">
+  <AvatarImage source={{ uri: 'https://example.com/ada.png' }} />
+  <AvatarFallback>
+    <Text>AL</Text>
+  </AvatarFallback>
+  <AvatarBadge className="bg-success" />
+</Avatar>
+```
+
+### Group
+
+```tsx
+<AvatarGroup>
+  <Avatar alt="Ada Lovelace">
+    <AvatarFallback>
+      <Text>AL</Text>
+    </AvatarFallback>
+  </Avatar>
+  <Avatar alt="Grace Hopper">
+    <AvatarFallback>
+      <Text>GH</Text>
+    </AvatarFallback>
+  </Avatar>
+  <AvatarGroupCount>
+    <Text>+3</Text>
+  </AvatarGroupCount>
+</AvatarGroup>
 ```
 
 ## API reference
@@ -50,3 +90,26 @@ Takes every prop of the `@rn-primitives/avatar` image. It draws nothing if it fa
 
 Shows until the image has loaded, and for good when there is no image or it failed. Its child is usually
 initials as a Text. It is announced as an image named by the avatar's `alt`.
+
+### AvatarBadge
+
+Takes every prop of React Native's `View`. A dot on the avatar's bottom right corner, in the primary colour with a
+2px edge in the background colour; give it another colour with `className`. It grows with the avatar, and an
+[Icon](/native/components/nativewind/icon) inside takes 8px, except on the `sm` avatar, whose dot draws none. A
+screen reader skips it, so say what it marks in the avatar's `alt`.
+
+### AvatarGroup
+
+Takes every prop of `View`. A row of its Avatars, each overlapping the one before by 8px and edged in the
+background colour, with an AvatarGroupCount at the end. The avatars and the count are its direct children.
+
+### AvatarGroupCount
+
+Takes every prop of `View`. The muted circle at the end of the group, as large as the group's avatars, holding how
+many more there are as a Text, or an Icon.
+
+## Differences from upstream
+
+- The web draws the badge's edge and a grouped avatar's as a 2px ring outside the circle, which a device cannot
+  draw. The badge draws it as a border on a dot 4px larger, so the dot inside is upstream's size; a grouped avatar
+  and the count draw it as a border inside their edge, so their picture is 4px smaller than upstream's.

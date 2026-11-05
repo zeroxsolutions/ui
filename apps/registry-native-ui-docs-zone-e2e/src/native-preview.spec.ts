@@ -262,7 +262,7 @@ test.describe('in a light colour scheme', () => {
     test(`the ${engine} combobox demo opens, filters by typed text, picks an item and closes`, async ({ page }) => {
       await page.goto(`/native/components/${engine}/combobox`);
       const demo = inside(page, 'Combobox demo');
-      const combobox = demo.getByRole('combobox', { name: 'Framework' });
+      const combobox = demo.getByRole('combobox', { name: 'Framework', exact: true });
 
       await expect(combobox).toHaveText('Select a framework', DRAWN);
       await combobox.click();

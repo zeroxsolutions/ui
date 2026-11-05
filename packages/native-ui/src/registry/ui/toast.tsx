@@ -26,6 +26,9 @@ import { Icon } from './icon';
 import { Spinner } from './spinner';
 import { Text, TextClassContext } from './text';
 
+// A `cn-<slot>` token stands for that slot's classes; the registry build replaces each with the classes
+// translated for the target engine.
+
 /** How a screen reader announces a toast: `low` waits its turn, `high` interrupts. */
 type ToastPriority = 'low' | 'high';
 
@@ -644,7 +647,7 @@ function Toast({
       <View
         role={WEB ? (high ? 'alert' : 'status') : undefined}
         aria-live={high ? 'assertive' : undefined}
-        className={cn('border-border bg-popover w-full overflow-hidden rounded-2xl border shadow-lg', className)}
+        className={cn('border-border bg-popover w-full overflow-hidden border shadow-lg cn-toast', className)}
         style={collapsedBehind && frontHeight > 0 ? { height: frontHeight } : undefined}
         {...swipe.handlers}
         {...props}

@@ -5,6 +5,10 @@ import { AccessibilityInfo, View } from 'react-native';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxClear,
   ComboboxContent,
   ComboboxEmpty,
   ComboboxInput,
@@ -259,5 +263,240 @@ describe('Combobox', () => {
     await finishMotion();
     expect(screen.getByTestId('owner')).toHaveProp('accessibilityLabel', 'nuxt false');
     expect(screen.getByText('Nuxt.js')).toBeOnTheScreen();
+  });
+});
+
+/** Upstream's multiple demo: chips of the chosen frameworks before a field that opens a searched list of them. */
+function Frameworks({ root }: { root?: Omit<Extract<ComboboxProps, { multiple: true }>, 'multiple'> }) {
+  return (
+    <>
+      <Combobox multiple items={FRAMEWORKS} {...root}>
+        <ComboboxChips testID="chips">
+          <ComboboxValue>
+            {(values) =>
+              values.map((value) => (
+                <ComboboxChip key={value} value={value} testID={`chip-${value}`}>
+                  {FRAMEWORKS.find((framework) => framework.value === value)?.label}
+                </ComboboxChip>
+              ))
+            }
+          </ComboboxValue>
+          <ComboboxChipsInput aria-label="Frameworks" placeholder="Add framework" />
+          <ComboboxClear />
+        </ComboboxChips>
+        <ComboboxContent>
+          <ComboboxInput placeholder="Search framework..." />
+          <ComboboxEmpty>No framework found.</ComboboxEmpty>
+          <ComboboxList>
+            {(framework) => (
+              <ComboboxItem key={framework.value} value={framework.value}>
+                {framework.label}
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
+      <PortalHost />
+    </>
+  );
+}
+
+describe('Combobox with multiple', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(false);
+    layOutTrigger();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  const finishMotion = () => act(() => jest.advanceTimersByTimeAsync(300));
+  const setUp = () => userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+  const field = () => screen.getByRole('combobox', { name: 'Frameworks' });
+
+  it('is a collapsed combobox, named by its label, showing its placeholder', async () => {
+    await render(<Frameworks />);
+
+    expect(field()).toBeCollapsed();
+    expect(screen.getByText('Add framework')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Clear' })).toBeNull();
+  });
+
+  it('opens the list from its field, keeping it open as items are chosen, each shown as a chip', async () => {
+    const onValueChange = jest.fn();
+    const user = setUp();
+    await render(<Frameworks root={{ onValueChange }} />);
+
+    await user.press(field());
+    await finishMotion();
+    expect(field()).toBeExpanded();
+
+    await user.press(option('Next.js'));
+    await user.press(option('Nuxt.js'));
+    await finishMotion();
+
+    expect(onValueChange).toHaveBeenLastCalledWith(['next', 'nuxt']);
+    expect(field()).toBeExpanded();
+    expect(option('Next.js')).toBeSelected();
+    expect(option('Nuxt.js')).toBeSelected();
+    expect(screen.getByTestId('chip-next')).toHaveTextContent('Next.js', { exact: false });
+    expect(screen.getByTestId('chip-nuxt')).toHaveTextContent('Nuxt.js', { exact: false });
+  });
+
+  it('lets go of a chosen item pressed again in the list', async () => {
+    const onValueChange = jest.fn();
+    const user = setUp();
+    await render(<Frameworks root={{ defaultValue: ['next', 'nuxt'], onValueChange }} />);
+    await user.press(field());
+    await finishMotion();
+
+    await user.press(option('Next.js'));
+
+    expect(onValueChange).toHaveBeenLastCalledWith(['nuxt']);
+    expect(screen.queryByTestId('chip-next')).toBeNull();
+  });
+
+  it("lets go of a chip's item from its remove button, named by its label", async () => {
+    const onValueChange = jest.fn();
+    const user = setUp();
+    await render(<Frameworks root={{ defaultValue: ['next', 'sveltekit'], onValueChange }} />);
+
+    await user.press(screen.getByRole('button', { name: 'Remove SvelteKit' }));
+
+    expect(onValueChange).toHaveBeenLastCalledWith(['next']);
+    expect(screen.queryByTestId('chip-sveltekit')).toBeNull();
+    expect(screen.getByTestId('chip-next')).toBeOnTheScreen();
+  });
+
+  it('lets go of every item from its clear button, which then draws nothing', async () => {
+    const onValueChange = jest.fn();
+    const user = setUp();
+    await render(<Frameworks root={{ defaultValue: ['next', 'sveltekit'], onValueChange }} />);
+
+    await user.press(screen.getByRole('button', { name: 'Clear' }));
+
+    expect(onValueChange).toHaveBeenLastCalledWith([]);
+    expect(screen.queryByTestId('chip-next')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Clear' })).toBeNull();
+  });
+
+  it('follows the values its owner holds', async () => {
+    function Owned() {
+      const [frameworks, setFrameworks] = useState<string[]>(['remix']);
+      return <Frameworks root={{ value: frameworks, onValueChange: setFrameworks }} />;
+    }
+    const user = setUp();
+    await render(<Owned />);
+    expect(screen.getByTestId('chip-remix')).toBeOnTheScreen();
+
+    await user.press(screen.getByRole('button', { name: 'Remove Remix' }));
+
+    expect(screen.queryByTestId('chip-remix')).toBeNull();
+  });
+
+  it("draws Vega's chips field, with the focus border while the list is open", async () => {
+    const user = setUp();
+    await render(<Frameworks root={{ defaultValue: ['next'] }} />);
+    expect(emittedClasses(screen.getByTestId('chips').props.className)).toEqual(
+      expect.arrayContaining(['border', 'border-input', 'rounded-md', 'min-h-9', 'flex-wrap']),
+    );
+    expect(emittedClasses(screen.getByTestId('chip-next').props.className)).toEqual(
+      expect.arrayContaining(['bg-muted', 'rounded-sm', 'h-[22px]']),
+    );
+
+    await user.press(field());
+    await finishMotion();
+
+    expect(emittedClasses(screen.getByTestId('chips').props.className)).toContain('border-ring');
+  });
+
+  it('draws the destructive border around the chips while they are invalid', async () => {
+    await render(
+      <Combobox multiple items={FRAMEWORKS}>
+        <ComboboxChips testID="chips" aria-invalid>
+          <ComboboxChipsInput aria-label="Frameworks" />
+        </ComboboxChips>
+      </Combobox>,
+    );
+
+    expect(emittedClasses(screen.getByTestId('chips').props.className)).toContain('border-destructive');
+  });
+
+  it("takes a chip's value from its text when none is given", async () => {
+    const onValueChange = jest.fn();
+    const user = setUp();
+    await render(
+      <Combobox multiple items={['Astro', 'Remix']} defaultValue={['Astro', 'Remix']} onValueChange={onValueChange}>
+        <ComboboxChips>
+          <ComboboxValue>
+            {(values) => values.map((value) => <ComboboxChip key={value}>{value}</ComboboxChip>)}
+          </ComboboxValue>
+        </ComboboxChips>
+      </Combobox>,
+    );
+
+    await user.press(screen.getByRole('button', { name: 'Remove Astro' }));
+
+    expect(onValueChange).toHaveBeenLastCalledWith(['Remix']);
+  });
+
+  it('draws a chip without its remove button when asked to', async () => {
+    await render(
+      <Combobox multiple defaultValue={['Astro']}>
+        <ComboboxChips>
+          <ComboboxChip showRemove={false}>Astro</ComboboxChip>
+        </ComboboxChips>
+      </Combobox>,
+    );
+
+    expect(screen.getByText('Astro')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Remove Astro' })).toBeNull();
+  });
+});
+
+describe('ComboboxClear in a single Combobox', () => {
+  it('lets go of the chosen item and shows the placeholder again, calling its onPress and not onValueChange', async () => {
+    const onValueChange = jest.fn();
+    const onPress = jest.fn();
+    const user = userEvent.setup();
+    await render(
+      <Combobox items={FRAMEWORKS} defaultValue="next" onValueChange={onValueChange}>
+        <ComboboxTrigger aria-label="Framework">
+          <ComboboxValue placeholder="Select a framework" />
+        </ComboboxTrigger>
+        <ComboboxClear onPress={onPress} />
+      </Combobox>,
+    );
+    expect(screen.getByText('Next.js')).toBeOnTheScreen();
+
+    await user.press(screen.getByRole('button', { name: 'Clear' }));
+
+    expect(onPress).toHaveBeenCalledTimes(1);
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(screen.getByText('Select a framework')).toBeOnTheScreen();
+  });
+
+  it('is cleared by the owner of its value setting null from the clear button', async () => {
+    function Owned() {
+      const [framework, setFramework] = useState<string | null>('next');
+      return (
+        <Combobox items={FRAMEWORKS} value={framework} onValueChange={setFramework}>
+          <ComboboxTrigger aria-label="Framework">
+            <ComboboxValue placeholder="Select a framework" />
+          </ComboboxTrigger>
+          <ComboboxClear onPress={() => setFramework(null)} />
+        </Combobox>
+      );
+    }
+    const user = userEvent.setup();
+    await render(<Owned />);
+
+    await user.press(screen.getByRole('button', { name: 'Clear' }));
+
+    expect(screen.getByText('Select a framework')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Clear' })).toBeNull();
   });
 });

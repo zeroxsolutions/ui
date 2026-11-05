@@ -192,9 +192,9 @@
       "name": "avatar",
       "type": "registry:ui",
       "title": "Avatar",
-      "description": "A round picture of a person or account in three sizes, with a fallback that shows when the image is missing or fails to load.",
-      "dependencies": ["@rn-primitives/avatar"],
-      "registryDependencies": ["@zui/utils", "@zui/text"],
+      "description": "A round picture of a person or account in three sizes, with a fallback that shows when the image is missing or fails to load, a badge on its corner, and a group that overlaps avatars and counts the rest.",
+      "dependencies": ["@rn-primitives/avatar", "class-variance-authority"],
+      "registryDependencies": ["@zui/utils", "@zui/icon", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/avatar.tsx",
@@ -206,9 +206,9 @@
       "name": "progress",
       "type": "registry:ui",
       "title": "Progress",
-      "description": "A bar showing how far a task has got from 0 to 100, announced as a progress bar with its value.",
+      "description": "A bar showing how far a task has got from 0 to 100, announced as a progress bar with its value, with a label that names it and the value as a percentage above it.",
       "dependencies": ["@rn-primitives/progress"],
-      "registryDependencies": ["@zui/utils"],
+      "registryDependencies": ["@zui/utils", "@zui/text-children", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/progress.tsx",
@@ -425,9 +425,9 @@
       "name": "input-group",
       "type": "registry:ui",
       "title": "Input group",
-      "description": "An input with text, icons or buttons beside, above or below it, drawn as one field that takes the focus, invalid and disabled states of its input.",
+      "description": "An input or a multiline textarea with text, icons or buttons beside, above or below it, drawn as one field that takes the focus, invalid and disabled states of its input.",
       "dependencies": ["class-variance-authority"],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/button", "@zui/input"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon", "@zui/button", "@zui/input", "@zui/textarea"],
       "files": [
         {
           "path": "src/registry/ui/input-group.tsx",
@@ -791,7 +791,12 @@
       "type": "registry:ui",
       "title": "Tooltip",
       "description": "A short label beside a control, opened by a press on a device and by hover or focus on the web, announced as a tooltip, closed by its trigger, a press outside it, the back button or Escape, fading and growing in unless the system asks for reduced motion.",
-      "dependencies": ["@rn-primitives/tooltip", "@rn-primitives/portal", "react-native-reanimated"],
+      "dependencies": [
+        "@rn-primitives/tooltip",
+        "@rn-primitives/portal",
+        "class-variance-authority",
+        "react-native-reanimated"
+      ],
       "registryDependencies": ["@zui/utils", "@zui/motion", "@zui/overlay", "@zui/text"],
       "files": [
         {
@@ -948,7 +953,7 @@
       "name": "combobox",
       "type": "registry:ui",
       "title": "Combobox",
-      "description": "A field that picks one of a long list of choices: a trigger announced as a combobox showing the chosen label, opening a Popover that holds a Command whose typed text filters the choices, the chosen one announced as selected with a check mark, closed by a choice.",
+      "description": "A field that picks one or, with multiple, any number of a long list of choices: a trigger announced as a combobox showing the chosen label, or chips of the chosen items, opening a Popover that holds a Command whose typed text filters the choices, the chosen ones announced as selected with a check mark, with a button that clears them.",
       "dependencies": ["lucide-react-native"],
       "registryDependencies": [
         "@zui/utils",

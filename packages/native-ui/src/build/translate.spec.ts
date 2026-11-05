@@ -1438,3 +1438,49 @@ describe('translateClasses for the questionnaire and trace', () => {
     },
   );
 });
+
+describe('translateClasses for the rings and offsets a component draws as a border or a length', () => {
+  const STYLES = {
+    vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),
+    nova: parseSlotMap(readFileSync(NOVA_SNAPSHOT_PATH, 'utf8')),
+  };
+  const slot = (style: keyof typeof STYLES, name: string, engine: Engine): Translation =>
+    translateClasses(STYLES[style].get(name) ?? [], engine, 'view', '', { name });
+
+  it.each(STYLE_ENGINES)(
+    "colours the border an avatar badge draws for its ring in the ring's colour, for %s in %s",
+    (engine, style) => {
+      expect(slot(style, 'cn-avatar-badge', engine)).toEqual({
+        classes: expect.arrayContaining(['bg-primary', 'border-background']),
+        unknown: [],
+      });
+    },
+  );
+
+  it.each(STYLE_ENGINES)("moves a tooltip's arrow up by half its size and 2px, for %s in %s", (engine, style) => {
+    expect(slot(style, 'cn-tooltip-arrow', engine)).toEqual({
+      classes: ['size-2.5', 'translate-y-[-7px]', 'rotate-45', 'rounded-[2px]'],
+      unknown: [],
+    });
+  });
+
+  it.each([
+    ['vega', '22px'],
+    ['nova', '21px'],
+  ] as const)("draws a combobox chip's height in %s, a step the scale lacks, as the %s it comes to", (style, px) => {
+    for (const engine of ['nativewind', 'uniwind'] as const) {
+      expect(slot(style, 'cn-combobox-chip', engine).classes).toContain(`h-[${px}]`);
+    }
+  });
+
+  it.each(STYLE_ENGINES)(
+    "draws a combobox's chips with the focus border, as the state focused, for %s in %s",
+    (engine, style) => {
+      expect(
+        translateClasses(STYLES[style].get('cn-combobox-chips') ?? [], engine, 'view', 'focused', {
+          name: 'cn-combobox-chips',
+        }).classes,
+      ).toEqual(['border-ring']);
+    },
+  );
+});
