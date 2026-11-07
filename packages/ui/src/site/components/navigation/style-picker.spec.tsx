@@ -61,7 +61,7 @@ describe('StylePicker', () => {
     expect(vega.getAttribute('href')).toBe(`${BUTTON}?q=x`);
     expect(nova.getAttribute('href')).toBe(`${BUTTON}?style=nova&q=x`);
     expect(nova.getAttribute('aria-current')).toBe('page');
-    expect(screen.getAllByRole('menuitem')).toHaveLength(2);
+    expect(screen.getAllByRole('menuitem')).toHaveLength(8);
   });
 
   it('lists the web styles on a web page', async () => {

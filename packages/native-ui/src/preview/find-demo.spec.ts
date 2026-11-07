@@ -3,9 +3,12 @@ import { demos as novaDemos } from '@styles/nova/examples';
 import { DEMO_NAMES, findDemo } from './find-demo';
 
 describe('findDemo', () => {
-  it.each(['vega', 'nova'] as const)('finds each demo by its name in %s', (style) => {
-    for (const name of DEMO_NAMES) expect(findDemo(style, name)).toBeDefined();
-  });
+  it.each(['vega', 'luma', 'lyra', 'maia', 'mira', 'nova', 'rhea', 'sera'] as const)(
+    'finds each demo by its name in %s',
+    (style) => {
+      for (const name of DEMO_NAMES) expect(findDemo(style, name)).toBeDefined();
+    },
+  );
 
   it("draws each style's own copy of a demo", () => {
     expect(findDemo('nova', 'button-demo')).toBe(novaDemos['button-demo']);

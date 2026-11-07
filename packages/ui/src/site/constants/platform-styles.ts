@@ -5,7 +5,7 @@
  */
 export const PLATFORM_STYLES = {
   web: ['nova', 'luma', 'lyra', 'maia', 'mira', 'rhea', 'sera', 'vega'],
-  native: ['vega', 'nova'],
+  native: ['vega', 'luma', 'lyra', 'maia', 'mira', 'nova', 'rhea', 'sera'],
 } as const satisfies Record<'web' | 'native', readonly string[]>;
 
 /** The style a page shows when neither the URL nor the reader's last choice names one. */

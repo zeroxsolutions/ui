@@ -2,8 +2,10 @@
 
 type ColorScheme = 'light' | 'dark';
 
-/** A style the native registries are built in, as each preview app's `preview-style.js` lists them. */
-type PreviewStyle = 'vega' | 'nova';
+/** The styles the native registries are built in, as each preview app's `preview-style.js` lists them. */
+const PREVIEW_STYLES = ['vega', 'luma', 'lyra', 'maia', 'mira', 'nova', 'rhea', 'sera'] as const;
+
+type PreviewStyle = (typeof PREVIEW_STYLES)[number];
 
 /** Where an Expo link's own address ends and the path it hands the app begins. */
 const DEEP_LINK_SEPARATOR = '/--/';
@@ -49,15 +51,15 @@ async function initialDemoName(getInitialUrl: () => Promise<string | null | unde
 /**
  * The style `value` names, such as the page's `?style=` or the `EXPO_PUBLIC_STYLE` a native update was
  * bundled with.
- * @returns `vega` or `nova`, or `undefined` for none or any other value
+ * @returns one of {@link PREVIEW_STYLES}, or `undefined` for none or any other value
  */
 function styleOf(value: string | null | undefined): PreviewStyle | undefined {
-  return value === 'vega' || value === 'nova' ? value : undefined;
+  return PREVIEW_STYLES.find((style) => style === value);
 }
 
 /**
  * The style `?style=` asks for.
- * @returns `vega` or `nova`, or `undefined` when the query holds neither
+ * @returns one of {@link PREVIEW_STYLES}, or `undefined` when the query names none
  */
 function styleFromSearch(search: string): PreviewStyle | undefined {
   return styleOf(new URLSearchParams(search).get('style'));

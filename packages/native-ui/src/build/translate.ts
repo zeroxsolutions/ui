@@ -206,10 +206,10 @@ const STATE_WORDS: ReadonlySet<string> = new Set(STATE_MODIFIERS.values());
 const OPEN_ANIMATION_UTILITY = /^(animate|fade|zoom|slide|spin)-/;
 
 /**
- * A translate by a percentage less a length. On the web the percentage is of the part's own size;
+ * A translate by a percentage less or more a length. On the web the percentage is of the part's own size;
  * css-interop's calc gives up on a percentage mixed with a length, and Uniwind's refuses one.
  */
-const OWN_SIZE_TRANSLATE = /^translate-([xy])-\[calc\(100%-([\d.]+)px\)\]$/;
+const OWN_SIZE_TRANSLATE = /^translate-([xy])-\[calc\(100%([-+])([\d.]+)px\)\]$/;
 const SIZE_UTILITY = /^(size|w|h)-(?:([\d.]+)|\[([\d.]+)px\])$/;
 
 /**
@@ -281,7 +281,10 @@ function withBaseBorderColour(classes: readonly string[]): string[] {
  * A dialog's content is as wide as the screen less 2rem, a percentage less a length neither engine
  * computes; its component holds it 1rem in from each edge instead. A bubble's reactions overlap its edge by
  * three quarters of their own height, which the component measures and offsets them by, since a percentage
- * translate is the engine's to resolve.
+ * translate is the engine's to resolve. A thumb clips its background to its padding box in the light scheme,
+ * which a View has no counterpart of. A drawer's popup takes a stacked shadow while a second drawer is open
+ * inside it, which the native drawer never opens. A combobox chip's remove button takes no pointer while it
+ * is disabled, which a disabled pressable already takes none of.
  */
 const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   [
@@ -293,6 +296,13 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['cn-calendar', new Set(['[--cell-radius:var(--radius-md)]'])],
   ['cn-bubble-reactions-side-top', new Set(['-translate-y-3/4'])],
   ['cn-bubble-reactions-side-bottom', new Set(['translate-y-3/4'])],
+  ['cn-slider-thumb', new Set(['not-dark:bg-clip-padding'])],
+  ['cn-switch-thumb', new Set(['not-dark:bg-clip-padding'])],
+  [
+    'cn-drawer-popup',
+    new Set(['data-[swipe-direction=down]:data-nested-drawer-open:shadow-(--drawer-stacked-shadow)']),
+  ],
+  ['cn-combobox-chip-remove', new Set(['aria-disabled:pointer-events-none'])],
 ]);
 
 /**
@@ -304,7 +314,9 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
  * moves nothing around them. An avatar's badge is ringed in the background colour the same way, and its
  * component draws the border, as wide as upstream's ring, around a dot that much larger. A tooltip's arrow is
  * moved up by half its own 10px and 2px more, a percentage less a length neither engine computes, so it is moved
- * by the 7px that comes to.
+ * by the 7px that comes to. A tab trigger's transparent border is important over the dark input border its
+ * component gives a selected tab of the default variant, so the class becomes the border and the same colour
+ * in that state, which the component merges after its own. A class may become several, space-separated.
  */
 const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map([
   [
@@ -329,6 +341,15 @@ const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = 
   ],
   ['cn-avatar-badge', new Map([['ring-background', 'border-background']])],
   ['cn-tooltip-arrow', new Map([['translate-y-[calc(-50%-2px)]', 'translate-y-[-7px]']])],
+  [
+    'cn-tabs-trigger',
+    new Map([
+      [
+        'border-transparent!',
+        'border-transparent dark:group-data-[variant=default]/tabs-list:data-active:border-transparent',
+      ],
+    ]),
+  ],
 ]);
 
 /**
@@ -377,7 +398,8 @@ const SLOT_STATE_MODIFIERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
  * rounding and shadow, important over the Dialog's and the InputGroup's, which they are merged after. A
  * sidebar's menu button marks its size and padding in a rail of icons important over its size's, which the
  * component merges after them. Attachment media marks the size of a spinner in a vertical attachment important over
- * the spinner's own, which the spinner merges after it.
+ * the spinner's own, which the spinner merges after it. A toast marks its rounding important over the
+ * component's own, which the component merges it after.
  */
 const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set([
   'cn-pagination-previous',
@@ -388,6 +410,7 @@ const SLOT_IMPORTANT_REMOVED: ReadonlySet<string> = new Set([
   'cn-sidebar-menu-button',
   'cn-sidebar-menu-button-size-lg',
   'cn-attachment-media',
+  'cn-toast',
 ]);
 const IMPORTANT_SUFFIX = /!$/;
 
@@ -754,14 +777,10 @@ function ringAsBorder(utility: string): string {
 }
 
 /**
- * Resolves a translate by the part's own size less a length to px, from the size the slot gives the
- * part in the class's own state or the nearest state it holds. Left as it is when the slot names no
- * single such size, so the calc is reported.
+ * The px the slot sizes the part to along `axis`, from the size classes in `states` or the nearest
+ * states they hold; `undefined` when those name no single size.
  */
-function resolveOwnSizeTranslate(utility: string, states: readonly string[], slot: readonly SlotClass[]): string {
-  const translate = OWN_SIZE_TRANSLATE.exec(utility);
-  if (!translate) return utility;
-  const [, axis, less] = translate;
+function ownSizeOf(axis: string, states: readonly string[], slot: readonly SlotClass[]): number | undefined {
   const sizes = slot.flatMap((cls) => {
     if (cls.reading !== 'read' || cls.kept.length > 0 || !cls.states.every((s) => states.includes(s))) return [];
     const size = SIZE_UTILITY.exec(cls.utility);
@@ -771,9 +790,54 @@ function resolveOwnSizeTranslate(utility: string, states: readonly string[], slo
   });
   const nearest = Math.max(...sizes.map((size) => size.specificity));
   const values = new Set(sizes.filter((size) => size.specificity === nearest).map((size) => size.px));
-  if (values.size !== 1) return utility;
-  const [px] = values;
-  return `translate-${axis}-[${px - Number(less)}px]`;
+  return values.size === 1 ? [...values][0] : undefined;
+}
+
+/**
+ * Resolves a translate by the part's own size less or more a length to px, from the size the slot gives
+ * the part in the class's own state or the nearest state it holds. Left as it is when the slot names no
+ * single such size, so the calc is reported or {@link ownSizeTranslatesBySize} resolves it.
+ */
+function resolveOwnSizeTranslate(utility: string, states: readonly string[], slot: readonly SlotClass[]): string {
+  const translate = OWN_SIZE_TRANSLATE.exec(utility);
+  if (!translate) return utility;
+  const [, axis, sign, length] = translate;
+  const px = ownSizeOf(axis, states, slot);
+  if (px === undefined) return utility;
+  return `translate-${axis}-[${sign === '-' ? px - Number(length) : px + Number(length)}px]`;
+}
+
+/**
+ * A translate by the part's own size that the slot gives no single size in the class's own state, such as
+ * a thumb moved by its own width under `checked` whose width differs by Switch size: the translate it comes
+ * to in each state that adds to the class's own the states a size of the part is behind, by that state's
+ * key. `undefined` when the class is no such translate, its own state resolves it, or one of those states
+ * does not, so the calc is reported.
+ */
+function ownSizeTranslatesBySize(
+  utility: string,
+  states: readonly string[],
+  slot: readonly SlotClass[],
+): ReadonlyMap<StateKey, string> | undefined {
+  const translate = OWN_SIZE_TRANSLATE.exec(utility);
+  if (!translate || resolveOwnSizeTranslate(utility, states, slot) !== utility) return undefined;
+  const axis = translate[1];
+  const sized = new Map<StateKey, string[]>();
+  for (const cls of slot) {
+    if (cls.reading !== 'read' || cls.kept.length > 0) continue;
+    const size = SIZE_UTILITY.exec(cls.utility);
+    if (!size || size[1] === (axis === 'x' ? 'h' : 'w')) continue;
+    const added = cls.states.filter((s) => !states.includes(s));
+    if (added.length > 0) sized.set(stateKeyOf([...states, ...added]), [...states, ...added]);
+  }
+  if (sized.size === 0) return undefined;
+  const bySize = new Map<StateKey, string>();
+  for (const [key, sizeStates] of sized) {
+    const resolved = resolveOwnSizeTranslate(utility, sizeStates, slot);
+    if (resolved === utility) return undefined;
+    bySize.set(key, resolved);
+  }
+  return bySize;
 }
 
 /**
@@ -880,7 +944,7 @@ export function translateClasses(
   const replacedByName = (slot.name === undefined ? undefined : SLOT_REPLACED_CLASSES.get(slot.name)) ?? new Map();
   const read = [...classes, ...componentClasses]
     .filter((cls) => !droppedByName.has(cls))
-    .map((cls) => replacedByName.get(cls) ?? cls)
+    .flatMap((cls) => replacedByName.get(cls)?.split(' ') ?? [cls])
     .map((cls) => (importantRemoved ? cls.replace(IMPORTANT_SUFFIX, '') : cls))
     .flatMap((cls) => resolveSpacingVariables(readClass(cls, stateModifiers, afterPart, beforePart), spacingVariables));
 
@@ -897,6 +961,15 @@ export function translateClasses(
     const radiusLessLength = resolveRadiusLessLength(cls.utility, slot.radius);
     if (radiusLessLength === undefined) {
       unknown.push(cls.source);
+      continue;
+    }
+    const bySize = ownSizeTranslatesBySize(radiusLessLength, cls.states, read);
+    if (bySize !== undefined) {
+      const translate = bySize.get(wanted);
+      if (translate !== undefined && partOf(translate, cls.onIcon) === part) {
+        const drawn = Object.hasOwn(renamed, translate) ? renamed[translate] : toTailwind3Spacing(translate, engine);
+        kept.push([...cls.kept, drawn].join(':'));
+      }
       continue;
     }
     const utility = resolveSpacingFunction(

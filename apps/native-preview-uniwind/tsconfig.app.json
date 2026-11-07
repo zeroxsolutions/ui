@@ -20,8 +20,20 @@
     "src/**/*.tsx",
     "../../packages/native-ui/dist/src/uniwind-vega/**/*.ts",
     "../../packages/native-ui/dist/src/uniwind-vega/**/*.tsx",
+    "../../packages/native-ui/dist/src/uniwind-luma/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/uniwind-luma/examples/**/*.tsx",
+    "../../packages/native-ui/dist/src/uniwind-lyra/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/uniwind-lyra/examples/**/*.tsx",
+    "../../packages/native-ui/dist/src/uniwind-maia/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/uniwind-maia/examples/**/*.tsx",
+    "../../packages/native-ui/dist/src/uniwind-mira/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/uniwind-mira/examples/**/*.tsx",
     "../../packages/native-ui/dist/src/uniwind-nova/examples/**/*.ts",
-    "../../packages/native-ui/dist/src/uniwind-nova/examples/**/*.tsx"
+    "../../packages/native-ui/dist/src/uniwind-nova/examples/**/*.tsx",
+    "../../packages/native-ui/dist/src/uniwind-rhea/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/uniwind-rhea/examples/**/*.tsx",
+    "../../packages/native-ui/dist/src/uniwind-sera/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/uniwind-sera/examples/**/*.tsx"
   ],
   "exclude": ["src/**/*.spec.ts", "src/**/*.spec.tsx", "src/test-setup.ts"],
   "references": [
