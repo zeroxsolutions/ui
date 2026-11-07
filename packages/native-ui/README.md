@@ -1,7 +1,8 @@
 # @zeroxsolutions/native-ui
 
-zui's React Native items, and the build that publishes them as four shadcn registries:
-`nativewind-vega`, `uniwind-vega`, `nativewind-nova` and `uniwind-nova`.
+zui's React Native items, and the build that publishes them as sixteen shadcn registries:
+`nativewind-<style>` and `uniwind-<style>` for each of upstream's eight styles (vega, luma, lyra, maia,
+mira, nova, rhea, sera).
 
 - `src/registry/` holds the items. A class written as a `cn-<slot>` token is replaced at build time by
   the classes that style draws for that slot, in the form each engine compiles; any other class ships as

@@ -11,8 +11,9 @@ interface RegistryItem {
   registryDependencies?: string[];
 }
 
-test('serves the react native items for each engine in vega and nova', async ({ request }) => {
-  for (const nativeStyle of ['nativewind-vega', 'uniwind-vega', 'nativewind-nova', 'uniwind-nova']) {
+test('serves the react native items for each engine in each style', async ({ request }) => {
+  const styles = ['vega', 'luma', 'lyra', 'maia', 'mira', 'nova', 'rhea', 'sera'];
+  for (const nativeStyle of styles.flatMap((style) => [`nativewind-${style}`, `uniwind-${style}`])) {
     const root = `/r/styles/${nativeStyle}`;
     const index = await request.get(`${root}/registry.json`);
     expect(index.status(), `${root}/registry.json`).toBe(200);

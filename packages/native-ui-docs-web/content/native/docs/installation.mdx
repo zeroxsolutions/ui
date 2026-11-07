@@ -118,9 +118,10 @@ declare module '*.css';
 
 ## Create components.json
 
-`style` names the engine and the shadcn style the items draw: `nativewind-vega` or `nativewind-nova` for
-NativeWind, `uniwind-vega` or `uniwind-nova` for Uniwind. Both styles take the same theme; Nova draws its
-controls a step smaller, such as a 32px Button where Vega's is 36px. The `@zui` entry under `registries` is
+`style` names the engine and the shadcn style the items draw: `nativewind-<style>` for NativeWind and
+`uniwind-<style>` for Uniwind, where `<style>` is `vega`, `luma`, `lyra`, `maia`, `mira`, `nova`, `rhea` or
+`sera`. Every style takes the same theme and draws the same items its own way, such as a 32px Button in Nova
+where Vega's is 36px. The `@zui` entry under `registries` is
 where the CLI fetches each item, and the CLI fills `{style}` from `style`. The file below is in the style the
 header's Style picker shows.
 

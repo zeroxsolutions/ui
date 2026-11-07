@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { PLATFORM_STYLES } from '@zeroxsolutions/ui/site/constants/platform-styles';
 import { TestHost } from '@zeroxsolutions/ui/test/test-host';
 
 import { NativeCopyPageButton } from './native-copy-page-button';
@@ -26,7 +27,10 @@ afterEach(() => {
   localStorage.clear();
 });
 
-const MARKDOWN = { vega: '# Button, in vega', nova: '# Button, in nova' };
+const MARKDOWN = Object.fromEntries(PLATFORM_STYLES.native.map((style) => [style, `# Button, in ${style}`])) as Record<
+  (typeof PLATFORM_STYLES.native)[number],
+  string
+>;
 
 describe('NativeCopyPageButton', () => {
   it("copies the page in the URL's style", async () => {
