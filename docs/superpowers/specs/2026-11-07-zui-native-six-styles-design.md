@@ -31,11 +31,11 @@ A class none of these rules reaches still stops the build with `Untranslated <cl
 
 - `PLATFORM_STYLES.native` lists the eight, in the web's order, with Vega still the native default.
 - `upstream-refresh` snapshots the six sheets with Vega's and Nova's.
-- The two preview apps draw the eight: `PREVIEW_STYLES`, and one `eas update` per style on a branch
-  and channel of the style's name, for each of the two Expo projects. Each deploy then publishes 16
-  updates instead of 4. The channels `maia` through `rhea` have to exist on both Expo projects before
-  the first deploy that publishes to them; whether `eas update --branch` creates the channel is
-  checked against Expo's docs while planning.
+- The two preview apps draw the eight: `PREVIEW_STYLES`, and one `eas update --channel <style>` per style
+  for each of the two Expo projects, so each deploy publishes 16 updates instead of 4. `--channel`
+  creates a missing channel and a branch of its name and links them (eas-cli 25.3.0,
+  `getBranchFromChannelNameAndCreateAndLinkIfNotExistsAsync`); `--branch` creates only the branch, which
+  no channel would serve. The existing `vega` and `nova` channels keep the branch each serves.
 - The e2e lists of native registries cover the sixteen.
 - A spec that loops over `['vega', 'nova']` to compare the two styles' output stays on those two; one
   that asserts every style is built covers the eight.

@@ -1,6 +1,12 @@
 import type { ComponentType } from 'react';
 
+import { demos as lumaDemos } from '@styles/luma/examples';
+import { demos as lyraDemos } from '@styles/lyra/examples';
+import { demos as maiaDemos } from '@styles/maia/examples';
+import { demos as miraDemos } from '@styles/mira/examples';
 import { demos as novaDemos } from '@styles/nova/examples';
+import { demos as rheaDemos } from '@styles/rhea/examples';
+import { demos as seraDemos } from '@styles/sera/examples';
 import { demos as vegaDemos } from '@styles/vega/examples';
 
 import type { PreviewStyle } from './preview-url';
@@ -8,7 +14,13 @@ import type { PreviewStyle } from './preview-url';
 /** Each style's demos, which import that style's items through their own `@/`. */
 const DEMOS: Readonly<Record<PreviewStyle, Readonly<Record<string, ComponentType>>>> = {
   vega: vegaDemos,
+  luma: lumaDemos,
+  lyra: lyraDemos,
+  maia: maiaDemos,
+  mira: miraDemos,
   nova: novaDemos,
+  rhea: rheaDemos,
+  sera: seraDemos,
 };
 
 /**

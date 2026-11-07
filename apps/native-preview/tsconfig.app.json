@@ -23,8 +23,20 @@
     "src/**/*.tsx",
     "../../packages/native-ui/dist/src/nativewind-vega/**/*.ts",
     "../../packages/native-ui/dist/src/nativewind-vega/**/*.tsx",
+    "../../packages/native-ui/dist/src/nativewind-luma/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/nativewind-luma/examples/**/*.tsx",
+    "../../packages/native-ui/dist/src/nativewind-lyra/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/nativewind-lyra/examples/**/*.tsx",
+    "../../packages/native-ui/dist/src/nativewind-maia/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/nativewind-maia/examples/**/*.tsx",
+    "../../packages/native-ui/dist/src/nativewind-mira/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/nativewind-mira/examples/**/*.tsx",
     "../../packages/native-ui/dist/src/nativewind-nova/examples/**/*.ts",
-    "../../packages/native-ui/dist/src/nativewind-nova/examples/**/*.tsx"
+    "../../packages/native-ui/dist/src/nativewind-nova/examples/**/*.tsx",
+    "../../packages/native-ui/dist/src/nativewind-rhea/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/nativewind-rhea/examples/**/*.tsx",
+    "../../packages/native-ui/dist/src/nativewind-sera/examples/**/*.ts",
+    "../../packages/native-ui/dist/src/nativewind-sera/examples/**/*.tsx"
   ],
   "exclude": ["src/**/*.spec.ts", "src/**/*.spec.tsx", "src/test-setup.ts"],
   "references": [

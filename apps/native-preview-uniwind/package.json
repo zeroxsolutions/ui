@@ -98,8 +98,14 @@
         "configurations": {
           "production": {
             "commands": [
-              "EXPO_PUBLIC_STYLE=vega eas update --branch vega --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/vega --non-interactive",
-              "EXPO_PUBLIC_STYLE=nova eas update --branch nova --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/nova --non-interactive"
+              "EXPO_PUBLIC_STYLE=vega eas update --channel vega --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/vega --non-interactive",
+              "EXPO_PUBLIC_STYLE=luma eas update --channel luma --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/luma --non-interactive",
+              "EXPO_PUBLIC_STYLE=lyra eas update --channel lyra --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/lyra --non-interactive",
+              "EXPO_PUBLIC_STYLE=maia eas update --channel maia --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/maia --non-interactive",
+              "EXPO_PUBLIC_STYLE=mira eas update --channel mira --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/mira --non-interactive",
+              "EXPO_PUBLIC_STYLE=nova eas update --channel nova --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/nova --non-interactive",
+              "EXPO_PUBLIC_STYLE=rhea eas update --channel rhea --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/rhea --non-interactive",
+              "EXPO_PUBLIC_STYLE=sera eas update --channel sera --message \"$GITHUB_SHA\" --environment preview --input-dir dist/update/sera --non-interactive"
             ]
           }
         }

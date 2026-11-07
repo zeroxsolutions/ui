@@ -9,9 +9,21 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import { Text } from '@/components/ui/text';
 import { zuiFonts } from '@/lib/fonts';
 import { useModalOverlayShown } from '@/lib/overlay';
+import { Toaster as LumaToaster, useSonner as useLumaSonner } from '@styles/luma/components/ui/sonner';
+import { Toaster as LyraToaster, useSonner as useLyraSonner } from '@styles/lyra/components/ui/sonner';
+import { Toaster as MaiaToaster, useSonner as useMaiaSonner } from '@styles/maia/components/ui/sonner';
+import { Toaster as MiraToaster, useSonner as useMiraSonner } from '@styles/mira/components/ui/sonner';
 import { Toaster as NovaToaster, useSonner as useNovaSonner } from '@styles/nova/components/ui/sonner';
+import { Toaster as RheaToaster, useSonner as useRheaSonner } from '@styles/rhea/components/ui/sonner';
+import { Toaster as SeraToaster, useSonner as useSeraSonner } from '@styles/sera/components/ui/sonner';
 import { Toaster as VegaToaster, useSonner as useVegaSonner } from '@styles/vega/components/ui/sonner';
+import { Toaster as LumaBaseToaster, useToastManager as useLumaToastManager } from '@styles/luma/components/ui/toast';
+import { Toaster as LyraBaseToaster, useToastManager as useLyraToastManager } from '@styles/lyra/components/ui/toast';
+import { Toaster as MaiaBaseToaster, useToastManager as useMaiaToastManager } from '@styles/maia/components/ui/toast';
+import { Toaster as MiraBaseToaster, useToastManager as useMiraToastManager } from '@styles/mira/components/ui/toast';
 import { Toaster as NovaBaseToaster, useToastManager as useNovaToastManager } from '@styles/nova/components/ui/toast';
+import { Toaster as RheaBaseToaster, useToastManager as useRheaToastManager } from '@styles/rhea/components/ui/toast';
+import { Toaster as SeraBaseToaster, useToastManager as useSeraToastManager } from '@styles/sera/components/ui/toast';
 import { Toaster as VegaBaseToaster, useToastManager as useVegaToastManager } from '@styles/vega/components/ui/toast';
 
 import { DemoBoundary } from './demo-boundary';
@@ -44,11 +56,47 @@ const TOASTERS = {
     BaseToaster: VegaBaseToaster,
     useToastManager: useVegaToastManager,
   },
+  luma: {
+    Toaster: LumaToaster,
+    useSonner: useLumaSonner,
+    BaseToaster: LumaBaseToaster,
+    useToastManager: useLumaToastManager,
+  },
+  lyra: {
+    Toaster: LyraToaster,
+    useSonner: useLyraSonner,
+    BaseToaster: LyraBaseToaster,
+    useToastManager: useLyraToastManager,
+  },
+  maia: {
+    Toaster: MaiaToaster,
+    useSonner: useMaiaSonner,
+    BaseToaster: MaiaBaseToaster,
+    useToastManager: useMaiaToastManager,
+  },
+  mira: {
+    Toaster: MiraToaster,
+    useSonner: useMiraSonner,
+    BaseToaster: MiraBaseToaster,
+    useToastManager: useMiraToastManager,
+  },
   nova: {
     Toaster: NovaToaster,
     useSonner: useNovaSonner,
     BaseToaster: NovaBaseToaster,
     useToastManager: useNovaToastManager,
+  },
+  rhea: {
+    Toaster: RheaToaster,
+    useSonner: useRheaSonner,
+    BaseToaster: RheaBaseToaster,
+    useToastManager: useRheaToastManager,
+  },
+  sera: {
+    Toaster: SeraToaster,
+    useSonner: useSeraSonner,
+    BaseToaster: SeraBaseToaster,
+    useToastManager: useSeraToastManager,
   },
 } as const satisfies Record<PreviewStyle, unknown>;
 
