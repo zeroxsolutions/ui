@@ -86,6 +86,12 @@
           ]
         }
       },
+      "test": {
+        "dependsOn": [
+          "^build",
+          "^build-registry"
+        ]
+      },
       "eas:update": {
         "executor": "nx:run-commands",
         "dependsOn": [
