@@ -54,6 +54,11 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      # nx and its plugins move together through `nx migrate`, which also rewrites the workspace's
+      # config and code for the new version; a bump from here changes the version and skips both.
+      - dependency-name: nx
+      - dependency-name: '@nx/*'
 
   # No terraform ecosystem here, deliberately. A product root declares no
   # `required_providers` of its own - every constraint lives in a module - and the
