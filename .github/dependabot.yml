@@ -55,10 +55,84 @@ updates:
           - minor
           - patch
     ignore:
-      # nx and its plugins move together through `nx migrate`, which also rewrites the workspace's
-      # config and code for the new version; a bump from here changes the version and skips both.
+      # nx-managed:start
+      # Generated from the installed nx plugins' migrations.json by .github/actions/
+      # nx-dependabot; these move through `nx migrate`. Edit outside the markers.
       - dependency-name: nx
       - dependency-name: '@nx/*'
+      - dependency-name: '@babel/runtime' # nx: ~7.27.6
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@expo/cli' # nx: ~56.1.14
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@expo/metro-runtime' # nx: ~56.0.14
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@expo/vector-icons' # nx: ~15.1.0
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@swc-node/register' # nx: ^1.11.1
+        update-types: [version-update:semver-major]
+      - dependency-name: '@swc/cli' # nx: ~0.8.1
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@swc/core' # nx: ^1.15.5
+        update-types: [version-update:semver-major]
+      - dependency-name: '@swc/helpers' # nx: ^0.5.18
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@testing-library/react-native' # nx: ~13.2.0
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@types/jest' # nx: ~30.0.0
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@types/react' # nx: ^19.0.0
+        update-types: [version-update:semver-major]
+      - dependency-name: '@types/react-dom' # nx: ^19.0.0
+        update-types: [version-update:semver-major]
+      - dependency-name: '@vitejs/plugin-react' # nx: ^6.0.0
+        update-types: [version-update:semver-major]
+      - dependency-name: '@vitest/coverage-v8' # nx: ^5.0.0
+        update-types: [version-update:semver-major]
+      - dependency-name: '@vitest/ui' # nx: ^5.0.0
+        update-types: [version-update:semver-major]
+      - dependency-name: babel-jest # nx: ~30.3.0
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: babel-preset-expo # nx: ~56.0.14
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: expo # nx: ~56.0.0
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: expo-splash-screen # nx: ~56.0.10
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: expo-status-bar # nx: ~56.0.4
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: jest # nx: ~30.3.0
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: jest-environment-jsdom # nx: ^30.0.0
+        update-types: [version-update:semver-major]
+      - dependency-name: jest-expo # nx: ~56.0.4
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: jest-util # nx: ^30.0.0
+        update-types: [version-update:semver-major]
+      - dependency-name: jsdom # nx: ^27.1.0
+        update-types: [version-update:semver-major]
+      - dependency-name: next # nx: ~15.5.18
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: react # nx: ^19.0.0
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom # nx: ^19.0.0
+        update-types: [version-update:semver-major]
+      - dependency-name: react-native # nx: 0.85.3
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: react-native-svg # nx: 15.12.1
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: react-native-web # nx: ~0.21.0
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: ts-jest # nx: ^29.4.7
+        update-types: [version-update:semver-major]
+      - dependency-name: typescript # nx: ~6.0.3
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: verdaccio # nx: ^6.3.2
+        update-types: [version-update:semver-major]
+      - dependency-name: vite # nx: ^8.0.0
+        update-types: [version-update:semver-major]
+      - dependency-name: vitest # nx: ^5.0.0
+        update-types: [version-update:semver-major]
+      # nx-managed:end
 
   # No terraform ecosystem here, deliberately. A product root declares no
   # `required_providers` of its own - every constraint lives in a module - and the

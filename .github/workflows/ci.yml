@@ -1,4 +1,4 @@
-# The pull-request gate. Four jobs:
+# The pull-request gate. Five jobs:
 #
 #   gate  - the `nx-gate` workflow beside this one: the pre-push hook's targets plus
 #           `test`, over the projects the change reaches, on a clean checkout.
@@ -8,6 +8,7 @@
 #           reverse, so a target that starts a runtime, or runs every spec, lands
 #           here instead.
 #   format - the whole tree through the formatter, which no nx target runs.
+#   dependabot - the Dependabot config's ignore list checked against what `nx migrate` manages.
 #
 # Nothing checks `iac/`: it is outside the nx graph, so no job reaches it,
 # and the pre-commit hook formats with oxfmt, which does not read `.tf`.
@@ -71,3 +72,11 @@ jobs:
       # Each zone has its own e2e project, each in three browsers; a change reaching both ran
       # 14 minutes for the native zone alone and passed 30 (2026-11-03).
       timeout-minutes: 60
+
+  dependabot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/nx-setup
+      - uses: ./.github/actions/nx-dependabot
