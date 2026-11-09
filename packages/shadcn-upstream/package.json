@@ -1,0 +1,16 @@
+{
+  "name": "@zeroxsolutions/shadcn-upstream",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./snapshot/*": "./snapshot/*",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "upstream-refresh": "node tools/upstream-refresh.mts"
+  },
+  "nx": {
+    "name": "@zeroxsolutions/shadcn-upstream"
+  }
+}

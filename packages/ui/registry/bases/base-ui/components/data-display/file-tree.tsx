@@ -233,7 +233,7 @@ function FileTree({
         <ul
           role="tree"
           data-slot="file-tree"
-          className={cn('text-sm select-none', className)}
+          className={cn('cn-file-tree select-none', className)}
           onKeyDown={(e) => {
             onKeyDown?.(e);
             if (!e.defaultPrevented) fileTreeHandleKeyDown(e, ctx);
@@ -349,7 +349,7 @@ function FileTreeLabel({
       data-selected={item.selected ? '' : undefined}
       style={{ paddingInlineStart: `calc(var(--spacing) * ${(item.level - 1) * 3 + 1.5})`, ...style }}
       className={cn(
-        'text-foreground/80 flex h-7 cursor-pointer items-center gap-1.5 rounded-md pr-2 transition-colors',
+        'cn-file-tree-item text-foreground/80 flex cursor-pointer items-center gap-1.5 pr-2 transition-colors',
         'hover:bg-muted hover:text-foreground',
         'group-focus-visible/file-tree-item:ring-ring/50 group-focus-visible/file-tree-item:ring-3',
         'data-[selected]:bg-muted data-[selected]:text-foreground data-[selected]:font-medium',

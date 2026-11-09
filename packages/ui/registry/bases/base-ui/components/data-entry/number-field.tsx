@@ -144,10 +144,7 @@ function NumberField({
         data-mixed={mixed || undefined}
         data-editing={editing || undefined}
         data-disabled={disabled || undefined}
-        className={cn(
-          'has-[[data-slot=number-field-input]:focus-visible]:border-ring has-[[data-slot=number-field-input]:focus-visible]:ring-ring/50 has-[[data-slot=number-field-input]:focus-visible]:ring-3',
-          className,
-        )}
+        className={cn('cn-number-field', className)}
         {...props}
       >
         {children}

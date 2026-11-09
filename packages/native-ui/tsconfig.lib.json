@@ -33,5 +33,10 @@
     "src/**/*.test.ts",
     "src/**/*.testing.ts"
   ],
-  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"]
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
+  "references": [
+    {
+      "path": "../shadcn-upstream/tsconfig.lib.json"
+    }
+  ]
 }

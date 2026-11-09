@@ -75,7 +75,11 @@ function DataTableView({ children, className, ...props }: React.ComponentProps<'
   const table = useDataTable();
 
   return (
-    <div data-slot="data-table-view" className={cn('overflow-hidden rounded-lg border', className)} {...props}>
+    <div
+      data-slot="data-table-view"
+      className={cn('cn-data-table-container overflow-hidden border', className)}
+      {...props}
+    >
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((group) => (

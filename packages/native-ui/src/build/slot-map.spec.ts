@@ -1,8 +1,7 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { parseSlotMap } from './slot-map';
 
-const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-vega.css');
+const SNAPSHOT_PATH = require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/style-vega.css');
 
 describe('parseSlotMap', () => {
   it('maps each slot to the classes of its @apply, in order', () => {

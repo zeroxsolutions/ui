@@ -37,12 +37,25 @@ test('the registry serves every item it lists under each base style, each file w
         }
         const item = (await response.json()) as RegistryItem;
         if (!item.files?.length) problems.push(`${style}/${name}: no files`);
-        for (const file of item.files ?? [])
+        for (const file of item.files ?? []) {
           if (!file.content) problems.push(`${style}/${name}: ${file.path} has no content`);
+          // A slot is the build's to replace with the style's classes; one left would style nothing.
+          const slot = /\bcn-[a-z0-9-]+/.exec(file.content ?? '');
+          if (slot) problems.push(`${style}/${name}: ${file.path} holds ${slot[0]}`);
+        }
       }),
     );
   }
   expect(problems).toEqual([]);
+});
+
+test("an item is served in each style's classes", async ({ request }) => {
+  const contentOf = async (style: string): Promise<string> => {
+    const item = (await (await request.get(`/r/styles/base-${style}/collapsible-card.json`)).json()) as RegistryItem;
+    return item.files?.[0]?.content ?? '';
+  };
+  expect(await contentOf('nova')).toContain('rounded-xl');
+  expect(await contentOf('lyra')).toContain("default: 'ring-foreground/10 rounded-none ring-1");
 });
 
 test('the old item and index paths redirect once to base-nova', async ({ request }) => {

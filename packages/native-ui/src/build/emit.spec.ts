@@ -4,8 +4,8 @@ import { aliasImports, emitSource, type UpstreamStyle } from './emit';
 import { parseSlotMap } from './slot-map';
 import { translateClasses, type Engine } from './translate';
 
-const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-vega.css');
-const NOVA_SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-nova.css');
+const SNAPSHOT_PATH = require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/style-vega.css');
+const NOVA_SNAPSHOT_PATH = require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/style-nova.css');
 const STYLES_PATH = join(__dirname, '../../dist/r/styles');
 const REGISTRY_PATH = join(__dirname, '../../registry.json');
 const ENGINES = ['nativewind', 'uniwind'] as const satisfies readonly Engine[];

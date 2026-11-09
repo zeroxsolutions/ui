@@ -89,6 +89,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@zeroxsolutions/shadcn-upstream": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "@types/katex": "^0.16.7",
     "msw": "3.0.0",
@@ -116,11 +117,17 @@
           "cwd": "{projectRoot}",
           "commands": [
             "rm -rf dist/r",
-            "shadcn build -o dist/r/styles/base-nova",
-            "for style in vega maia lyra mira luma sera rhea; do cp -R dist/r/styles/base-nova dist/r/styles/base-$style; done",
+            "node tools/build-registry.mts",
             "shadcn registry validate registry.json"
           ],
           "parallel": false
+        }
+      },
+      "sync-primitives": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node tools/sync-primitives.mts"
         }
       },
       "examples-index": {
@@ -144,6 +151,7 @@
       "typecheck": {
         "dependsOn": [
           "^typecheck",
+          "^build",
           "examples-index"
         ]
       }

@@ -8,10 +8,14 @@ function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(join(PROJECT, path), 'utf8')) as T;
 }
 
-/** The `registry:ui` names upstream's base-vega registry lists, as upstream-refresh last saved them. */
-const upstreamItems = readJson<string[]>('styles/upstream/registry-ui-items.json');
+function readSnapshot<T>(file: string): T {
+  return JSON.parse(readFileSync(require.resolve(`@zeroxsolutions/shadcn-upstream/snapshot/${file}`), 'utf8')) as T;
+}
+
+/** The `registry:ui` names upstream's base-vega registry lists, as the snapshot last saved them. */
+const upstreamItems = readSnapshot<string[]>('registry-ui-items.json');
 /** The `registry:hook` names it lists, which an item moved from the web imports from `@/hooks/`. */
-const upstreamHooks = readJson<string[]>('styles/upstream/registry-hook-items.json');
+const upstreamHooks = readSnapshot<string[]>('registry-hook-items.json');
 const ported = new Set(readJson<Registry>('registry.json').items.map((item) => item.name));
 
 describe('the native registry against upstream', () => {

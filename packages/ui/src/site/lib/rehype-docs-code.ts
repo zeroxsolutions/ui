@@ -6,6 +6,7 @@ import { parseCodeBlockAttributes } from 'fumadocs-core/mdx-plugins/codeblock-ut
 // An app's fumadocs-mdx bundles this module into its `source.config.ts` and leaves a package's import to
 // Node, which cannot load a `.tsx` through `@zeroxsolutions/ui`'s exports; it resolves no path alias of
 // this package either. A relative path is bundled with it.
+import { DEFAULT_PLATFORM_STYLE, PLATFORM_STYLES } from '../constants/platform-styles';
 import { Index } from '../../../registry/bases/base-ui/examples/__index__';
 import { highlightToLines } from '../../../registry/bases/base-ui/lib/shiki';
 
@@ -34,6 +35,12 @@ const SOURCE_COMPONENTS = new Set(['ComponentPreview', 'BlockPreview', 'Componen
  * the examples index lists, `registry.json`'s, are relative to it.
  */
 const UI_DIR = '../../packages/ui';
+
+/** Where the web registry's build writes each style's items, relative to the app. */
+const STYLES_DIR = '../../packages/ui/dist/r/styles';
+
+/** A slot a published file writes, which each style's build replaces with its own classes. */
+const SLOT = /\bcn-[a-z0-9-]+/;
 
 /** Where native-ui keeps its demos, relative to the app, which is where the build runs. */
 const NATIVE_EXAMPLES_DIR = '../../packages/native-ui/src/examples';
@@ -94,6 +101,22 @@ async function highlightFence(pre: HastNode): Promise<void> {
   pre.properties = properties;
 }
 
+/**
+ * `path` of registry item `name` as `shadcn add` writes it in each web style, read from the registry's
+ * build, which the docs app's build runs first. Throws where the build lacks the item or the file.
+ */
+async function styledSources(name: string, path: string): Promise<Record<string, string>> {
+  const sources: Record<string, string> = {};
+  for (const style of PLATFORM_STYLES.web) {
+    const json = join(process.cwd(), STYLES_DIR, `base-${style}`, `${name}.json`);
+    const item = JSON.parse(await readFile(json, 'utf8')) as { files?: { path: string; content?: string }[] };
+    const content = item.files?.find((file) => file.path === path)?.content;
+    if (content === undefined) throw new Error(`rehypeDocsCode: ${json} does not ship ${path}`);
+    sources[style] = content.trimEnd();
+  }
+  return sources;
+}
+
 async function highlightSource(element: HastNode): Promise<void> {
   const name = stringAttribute(element, 'name') ?? '';
   let path: string;
@@ -106,8 +129,22 @@ async function highlightSource(element: HastNode): Promise<void> {
     code = (await readFile(join(process.cwd(), UI_DIR, path), 'utf8')).trimEnd();
   }
   const language = stringAttribute(element, 'language') ?? path.split('.').pop() ?? 'tsx';
+  const styled: HastAttribute[] = [];
+  // A file that writes slots reads as each style writes it, never as its slots: the default style's code
+  // in place of the source, and every other style's, highlighted, for the page to show the picker's.
+  if (element.name === 'ComponentSource' && SLOT.test(code)) {
+    const sources = await styledSources(name, path);
+    code = sources[DEFAULT_PLATFORM_STYLE.web];
+    const others: Record<string, { code: string; lines: string }> = {};
+    for (const [style, source] of Object.entries(sources)) {
+      if (style === DEFAULT_PLATFORM_STYLE.web || source === code) continue;
+      others[style] = { code: source, lines: JSON.stringify(await highlightToLines(source, language)) };
+    }
+    styled.push({ type: 'mdxJsxAttribute', name: 'styleSources', value: JSON.stringify(others) });
+  }
   element.attributes = [
     ...(element.attributes ?? []),
+    ...styled,
     { type: 'mdxJsxAttribute', name: 'code', value: code },
     { type: 'mdxJsxAttribute', name: 'language', value: language },
     { type: 'mdxJsxAttribute', name: 'lines', value: JSON.stringify(await highlightToLines(code, language)) },
@@ -118,7 +155,9 @@ async function highlightSource(element: HastNode): Promise<void> {
  * Highlights a docs page's code as the page compiles, with the registry's own highlighter, so nothing
  * the server runs to render a page imports Shiki. A fence's `pre` gets its `title` from the fence's
  * meta and its tokenized `lines` as JSON. A `ComponentPreview`, `BlockPreview`, `ComponentSource` or
- * native page's `NativePreview` gets the source of the file it shows as `code`, its `language`, and its `lines` as JSON. It runs after fumadocs has kept
+ * native page's `NativePreview` gets the source of the file it shows as `code`, its `language`, and its `lines` as JSON;
+ * a `ComponentSource` of a file that writes slots gets the default style's code, and every other style's
+ * that differs as `styleSources`. It runs after fumadocs has kept
  * the page's Markdown, so none of this reaches the page's `.md`. A demo's source is read once, as its
  * page compiles, so under `next dev` an edited demo shows its old source until the page's `.mdx` is saved.
  */

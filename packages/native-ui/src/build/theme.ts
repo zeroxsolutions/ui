@@ -12,7 +12,7 @@ export interface TokenSet {
   dark: Readonly<Record<string, string>>;
 }
 
-/** What the theme reads of upstream's base colour file, `styles/upstream/colors-neutral.json`. */
+/** What the theme reads of upstream's base colour file, `@zeroxsolutions/shadcn-upstream/snapshot/colors-neutral.json`. */
 export type UpstreamColors = Pick<ReturnType<(typeof registryBaseColorSchema)['parse']>, 'cssVars' | 'cssVarsV4'>;
 
 /** Each step of the radius scale, such as `md`, to its CSS value in terms of `var(--radius)`. */
@@ -71,7 +71,7 @@ const RADIUS_STEP = /--radius-([\w-]+):\s*([^;]+);/g;
 /**
  * Reads the radius scale upstream derives from `--radius`, each `--radius-<step>` of the stylesheet's
  * `@theme inline` blocks, such as `md` to `calc(var(--radius) * 0.8)`.
- * @param css - upstream's site stylesheet, `styles/upstream/globals.css`
+ * @param css - upstream's site stylesheet, `@zeroxsolutions/shadcn-upstream/snapshot/globals.css`
  * @throws {Error} `radius-<step> does not derive from --radius: <value>` for a step with a fixed value,
  * and `No --radius-<step> in an @theme inline block` when there is no step at all
  */

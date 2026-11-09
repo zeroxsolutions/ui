@@ -1,10 +1,9 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { parseSlotMap } from './slot-map';
 import { parseSpacingVariables, translateClasses, type Engine, type Translation } from './translate';
 
-const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-vega.css');
-const NOVA_SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/style-nova.css');
+const SNAPSHOT_PATH = require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/style-vega.css');
+const NOVA_SNAPSHOT_PATH = require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/style-nova.css');
 const SNAPSHOT_PATHS = { vega: SNAPSHOT_PATH, nova: NOVA_SNAPSHOT_PATH } as const;
 const STYLE_ENGINES = (['vega', 'nova'] as const).flatMap((style) =>
   (['nativewind', 'uniwind'] as const).map((engine): [Engine, keyof typeof SNAPSHOT_PATHS] => [engine, style]),
@@ -1490,7 +1489,9 @@ describe('translateClasses for the slots luma, sera and rhea write in their own 
   const STYLES = Object.fromEntries(
     (['luma', 'sera', 'rhea'] as const).map((style) => [
       style,
-      parseSlotMap(readFileSync(join(__dirname, `../../styles/upstream/style-${style}.css`), 'utf8')),
+      parseSlotMap(
+        readFileSync(require.resolve(`@zeroxsolutions/shadcn-upstream/snapshot/style-${style}.css`), 'utf8'),
+      ),
     ]),
   ) as Record<'luma' | 'sera' | 'rhea', ReturnType<typeof parseSlotMap>>;
   const slot = (style: keyof typeof STYLES, name: string, engine: Engine, state = ''): Translation =>

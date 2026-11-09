@@ -1,0 +1,18 @@
+/* Every base style's slots, upstream's and zui's, for the page's `style-<style>` class to pick. In the
+ * components layer, so a utility an item is handed in `className` still wins over its slot. */
+@import '@zeroxsolutions/shadcn-upstream/snapshot/style-nova.css' layer(components);
+@import '@zeroxsolutions/shadcn-upstream/snapshot/style-vega.css' layer(components);
+@import '@zeroxsolutions/shadcn-upstream/snapshot/style-maia.css' layer(components);
+@import '@zeroxsolutions/shadcn-upstream/snapshot/style-lyra.css' layer(components);
+@import '@zeroxsolutions/shadcn-upstream/snapshot/style-mira.css' layer(components);
+@import '@zeroxsolutions/shadcn-upstream/snapshot/style-luma.css' layer(components);
+@import '@zeroxsolutions/shadcn-upstream/snapshot/style-sera.css' layer(components);
+@import '@zeroxsolutions/shadcn-upstream/snapshot/style-rhea.css' layer(components);
+@import '../../../registry/styles/style-nova.css' layer(components);
+@import '../../../registry/styles/style-vega.css' layer(components);
+@import '../../../registry/styles/style-maia.css' layer(components);
+@import '../../../registry/styles/style-lyra.css' layer(components);
+@import '../../../registry/styles/style-mira.css' layer(components);
+@import '../../../registry/styles/style-luma.css' layer(components);
+@import '../../../registry/styles/style-sera.css' layer(components);
+@import '../../../registry/styles/style-rhea.css' layer(components);

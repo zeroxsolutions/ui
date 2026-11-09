@@ -1,0 +1,3 @@
+/* Nova's slots alone, upstream's and zui's, for a page drawn in Nova whatever its picker says. */
+@import '@zeroxsolutions/shadcn-upstream/snapshot/style-nova.css' layer(components);
+@import '../../../registry/styles/style-nova.css' layer(components);

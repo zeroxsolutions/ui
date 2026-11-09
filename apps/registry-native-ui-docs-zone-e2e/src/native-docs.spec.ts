@@ -76,3 +76,9 @@ test("a native docs page's code block is highlighted, its tokens in more than on
     })
     .toBeGreaterThan(1);
 });
+
+test("the native docs' chrome stays in Nova whatever native style is picked", async ({ page }) => {
+  await page.goto('/native/docs/installation?style=lyra');
+  await expect(page.locator('html')).toHaveClass(/\bstyle-nova\b/);
+  await expect(page.locator('html')).not.toHaveClass(/\bstyle-lyra\b/);
+});

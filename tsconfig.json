@@ -41,6 +41,9 @@
     },
     {
       "path": "./apps/registry-native-ui-docs-zone-e2e"
+    },
+    {
+      "path": "./packages/shadcn-upstream"
     }
   ],
   "compilerOptions": {

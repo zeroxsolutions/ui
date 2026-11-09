@@ -4,6 +4,7 @@
  * that `shadcn build` ships the exact same CSS consumers install. This file wires that source into the
  * docs app and adds only what the docs themselves need. */
 @import '@zeroxsolutions/ui/registry/bases/base-ui/styles.css';
+@import '@zeroxsolutions/ui/site/styles/styles.css';
 
 /* Tailwind scans this app's own tree; the items, the site components and the web pages live in these packages. */
 @source '../../../../packages/ui';

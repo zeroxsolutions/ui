@@ -17,7 +17,10 @@ function ImagePreview({ className, ...props }: ComponentProps<'div'>): ReactNode
   return (
     <div
       data-slot="image-preview"
-      className={cn('bg-checkerboard flex size-full items-center justify-center overflow-hidden rounded-md', className)}
+      className={cn(
+        'cn-image-preview bg-checkerboard flex size-full items-center justify-center overflow-hidden',
+        className,
+      )}
       {...props}
     />
   );
