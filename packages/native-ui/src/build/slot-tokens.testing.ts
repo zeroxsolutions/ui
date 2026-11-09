@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { cn } from '../registry/lib/utils';
 import { emitSource } from './emit';
 import { parseSlotMap, type SlotMap } from './slot-map';
+import { styleSheetIds } from './style-sheet';
 import { themeRadius, type UpstreamColors } from './theme';
 
 const STYLES = ['vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rhea'] as const;
@@ -11,7 +12,11 @@ type Style = (typeof STYLES)[number];
 const STYLE_SLOTS = Object.fromEntries(
   STYLES.map((style) => [
     style,
-    parseSlotMap(readFileSync(require.resolve(`@zeroxsolutions/shadcn-upstream/snapshot/style-${style}.css`), 'utf8')),
+    parseSlotMap(
+      styleSheetIds(style)
+        .map((id) => readFileSync(require.resolve(id), 'utf8'))
+        .join('\n'),
+    ),
   ]),
 ) as Readonly<Record<Style, SlotMap>>;
 

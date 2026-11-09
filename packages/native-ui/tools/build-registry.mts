@@ -15,6 +15,7 @@ import type { Registry, RegistryItem } from 'shadcn/schema';
 import { aliasImports, emitSource, type UpstreamStyle } from '../src/build/emit.ts';
 import { appPath, nativewindGlobalCss, type CssTree } from '../src/build/sources.ts';
 import { parseSlotMap, type SlotMap } from '../src/build/slot-map.ts';
+import { styleSheetIds } from '../src/build/style-sheet.ts';
 import {
   STATUS_TOKENS,
   parseRadiusScale,
@@ -35,7 +36,7 @@ const SOURCE_ROOT = 'src/';
 /** The demos, written as an app writes them; their `@/` resolves to the tree they are copied into. */
 const EXAMPLES = join(PROJECT, 'src/examples');
 const SPEC_FILE = /\.spec\.[jt]sx?$/;
-/** Each upstream style the registries are built in, read from shadcn-upstream's `snapshot/style-<style>.css`. */
+/** Each upstream style the registries are built in, read from upstream's sheet and zui's (`styleSheetIds`). */
 const STYLES = ['vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rhea'] as const;
 type Style = (typeof STYLES)[number];
 
@@ -191,7 +192,14 @@ function main(): void {
     devDependencies: Record<string, string>;
   };
   const slotsByStyle = new Map(
-    STYLES.map((style) => [style, parseSlotMap(readFileSync(snapshot(`style-${style}.css`), 'utf8'))]),
+    STYLES.map((style) => [
+      style,
+      parseSlotMap(
+        styleSheetIds(style)
+          .map((id) => readFileSync(fileURLToPath(import.meta.resolve(id)), 'utf8'))
+          .join('\n'),
+      ),
+    ]),
   );
   const colors = JSON.parse(readFileSync(snapshot('colors-neutral.json'), 'utf8')) as UpstreamColors;
   const radii = parseRadiusScale(readFileSync(snapshot('globals.css'), 'utf8'));
