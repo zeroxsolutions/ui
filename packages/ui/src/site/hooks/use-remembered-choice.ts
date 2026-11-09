@@ -13,7 +13,8 @@ const ENGINE_KEY = 'zui:native-engine';
 
 const PREVIEW_PLATFORM_KEY = 'zui:native-preview-platform';
 
-function styleKey(platform: Platform): string {
+/** Where the style the reader last picked on `platform` is stored. */
+export function styleKey(platform: Platform): string {
   return `zui:style:${platform}`;
 }
 
