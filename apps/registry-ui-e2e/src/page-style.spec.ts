@@ -17,7 +17,8 @@ test('a web page is drawn in the style its URL names, the popups it opens includ
 });
 
 test('a page with no style in its URL is drawn in the one last picked, from its first paint', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('zui:style:web', 'lyra'));
+  // As text, since the spec compiles without the DOM's types; it runs in the page before its own scripts.
+  await page.addInitScript("localStorage.setItem('zui:style:web', 'lyra')");
   await page.goto('/docs/components/base/collapsible-card', { waitUntil: 'commit' });
 
   await expect(page.locator('html')).toHaveClass(/\bstyle-lyra\b/);
