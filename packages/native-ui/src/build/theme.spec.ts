@@ -1,10 +1,9 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { zuiFonts } from '../registry/lib/fonts';
 import { STATUS_TOKENS, oklchToSrgb, parseRadiusScale, themeItem, type TokenSet, type UpstreamColors } from './theme';
 
-const SNAPSHOT_PATH = join(__dirname, '../../styles/upstream/colors-neutral.json');
-const GLOBALS_PATH = join(__dirname, '../../styles/upstream/globals.css');
+const SNAPSHOT_PATH = require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/colors-neutral.json');
+const GLOBALS_PATH = require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/globals.css');
 const colors = JSON.parse(readFileSync(SNAPSHOT_PATH, 'utf8')) as UpstreamColors;
 const radii = parseRadiusScale(readFileSync(GLOBALS_PATH, 'utf8'));
 /** Upstream's derivation at ba1503c, read off apps/v4/app/globals.css by hand. */

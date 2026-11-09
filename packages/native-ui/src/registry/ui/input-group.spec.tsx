@@ -1,7 +1,6 @@
 import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 import { Search, X } from 'lucide-react-native';
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { createRef, type ReactElement } from 'react';
 import type { TextInputInstance } from 'react-native';
 import { registerCSS } from 'react-native-css-interop/test';
@@ -19,7 +18,7 @@ import {
 } from './input-group';
 import { Text } from './text';
 
-const SNAPSHOT_PATH = join(__dirname, '../../../styles/upstream/style-vega.css');
+const SNAPSHOT_PATH = require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/style-vega.css');
 
 // React Native's jest mock gives every TextInput one shared `focus` mock, so its calls carry over between tests.
 afterEach(() => {

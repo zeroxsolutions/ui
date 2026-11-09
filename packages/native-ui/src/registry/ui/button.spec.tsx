@@ -1,7 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { Check } from 'lucide-react-native';
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { registerCSS } from 'react-native-css-interop/test';
 import { parseSlotMap } from '../../build/slot-map';
 import { translateClasses } from '../../build/translate';
@@ -9,7 +8,7 @@ import { Button, buttonTextVariants } from './button';
 import { Icon } from './icon';
 import { Text } from './text';
 
-const SNAPSHOT_PATH = join(__dirname, '../../../styles/upstream/style-vega.css');
+const SNAPSHOT_PATH = require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/style-vega.css');
 const SIZE_CLASS = /^size-([\d.]+)$/;
 
 /**

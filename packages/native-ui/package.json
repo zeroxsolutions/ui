@@ -22,9 +22,6 @@
     },
     "./package.json": "./package.json"
   },
-  "scripts": {
-    "upstream-refresh": "node tools/upstream-refresh.mts"
-  },
   "dependencies": {
     "@rn-primitives/accordion": "catalog:rn-primitives",
     "@rn-primitives/alert-dialog": "catalog:rn-primitives",
@@ -64,6 +61,7 @@
     "tailwind-merge": "catalog:"
   },
   "devDependencies": {
+    "@zeroxsolutions/shadcn-upstream": "workspace:*",
     "@babel/runtime": "~7.27.6",
     "@expo-google-fonts/geist": "catalog:",
     "@expo/cli": "58.1.13",

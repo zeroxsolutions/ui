@@ -41,7 +41,7 @@
     "packages/ui/registry/bases/base-ui/ui",
     "packages/ui/registry/bases/base-ui/hooks/use-mobile.ts",
     "packages/ui/registry/bases/base-ui/lib/utils.ts",
-    "packages/native-ui/styles/upstream",
+    "packages/shadcn-upstream/snapshot",
     "**/worker-configuration.d.ts",
     "**/cloudflare-env.d.ts",
     "**/next-env.d.ts",

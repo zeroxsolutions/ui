@@ -9,6 +9,7 @@
 import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import type { Registry, RegistryItem } from 'shadcn/schema';
 import { aliasImports, emitSource, type UpstreamStyle } from '../src/build/emit.ts';
@@ -25,11 +26,16 @@ import {
 import type { Engine } from '../src/build/translate.ts';
 
 const PROJECT = resolve(import.meta.dirname, '..');
+
+/** The path of `file` in shadcn-upstream's snapshot. */
+function snapshot(file: string): string {
+  return fileURLToPath(import.meta.resolve(`@zeroxsolutions/shadcn-upstream/snapshot/${file}`));
+}
 const SOURCE_ROOT = 'src/';
 /** The demos, written as an app writes them; their `@/` resolves to the tree they are copied into. */
 const EXAMPLES = join(PROJECT, 'src/examples');
 const SPEC_FILE = /\.spec\.[jt]sx?$/;
-/** Each upstream style the registries are built in, read from `styles/upstream/style-<style>.css`. */
+/** Each upstream style the registries are built in, read from shadcn-upstream's `snapshot/style-<style>.css`. */
 const STYLES = ['vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rhea'] as const;
 type Style = (typeof STYLES)[number];
 
@@ -185,15 +191,10 @@ function main(): void {
     devDependencies: Record<string, string>;
   };
   const slotsByStyle = new Map(
-    STYLES.map((style) => [
-      style,
-      parseSlotMap(readFileSync(join(PROJECT, `styles/upstream/style-${style}.css`), 'utf8')),
-    ]),
+    STYLES.map((style) => [style, parseSlotMap(readFileSync(snapshot(`style-${style}.css`), 'utf8'))]),
   );
-  const colors = JSON.parse(
-    readFileSync(join(PROJECT, 'styles/upstream/colors-neutral.json'), 'utf8'),
-  ) as UpstreamColors;
-  const radii = parseRadiusScale(readFileSync(join(PROJECT, 'styles/upstream/globals.css'), 'utf8'));
+  const colors = JSON.parse(readFileSync(snapshot('colors-neutral.json'), 'utf8')) as UpstreamColors;
+  const radii = parseRadiusScale(readFileSync(snapshot('globals.css'), 'utf8'));
 
   rmSync(join(PROJECT, 'dist/r'), { recursive: true, force: true });
   rmSync(join(PROJECT, 'dist/src'), { recursive: true, force: true });

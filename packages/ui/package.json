@@ -89,6 +89,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@zeroxsolutions/shadcn-upstream": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "@types/katex": "^0.16.7",
     "msw": "3.0.0",

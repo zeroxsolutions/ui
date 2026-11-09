@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { cn } from '../registry/lib/utils';
 import { emitSource } from './emit';
 import { parseSlotMap, type SlotMap } from './slot-map';
@@ -12,12 +11,14 @@ type Style = (typeof STYLES)[number];
 const STYLE_SLOTS = Object.fromEntries(
   STYLES.map((style) => [
     style,
-    parseSlotMap(readFileSync(join(__dirname, `../../styles/upstream/style-${style}.css`), 'utf8')),
+    parseSlotMap(readFileSync(require.resolve(`@zeroxsolutions/shadcn-upstream/snapshot/style-${style}.css`), 'utf8')),
   ]),
 ) as Readonly<Record<Style, SlotMap>>;
 
 const RADIUS = themeRadius(
-  JSON.parse(readFileSync(join(__dirname, '../../styles/upstream/colors-neutral.json'), 'utf8')) as UpstreamColors,
+  JSON.parse(
+    readFileSync(require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/colors-neutral.json'), 'utf8'),
+  ) as UpstreamColors,
   'nativewind',
 );
 

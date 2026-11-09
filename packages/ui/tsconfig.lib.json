@@ -27,6 +27,9 @@
     },
     {
       "path": "../editor-core/tsconfig.lib.json"
+    },
+    {
+      "path": "../shadcn-upstream/tsconfig.lib.json"
     }
   ],
   "exclude": [

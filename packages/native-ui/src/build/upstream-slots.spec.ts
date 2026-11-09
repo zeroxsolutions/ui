@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 const PROJECT = join(__dirname, '../..');
-const UPSTREAM = join(PROJECT, 'styles/upstream');
+const UPSTREAM = dirname(require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/base-item-slots.json'));
 
 /**
  * Slots that hold only a transition, and for the navigation menu's positioner the hover bridge drawn before
