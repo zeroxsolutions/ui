@@ -36,6 +36,8 @@ describe('ImagePreview', () => {
 
     const image = screen.getByRole('img', { name: 'Logo' });
     expect(image.props.resizeMode).toBe('center');
+    // React Native for Web draws only `source`, so the web's `src` arrives there.
+    expect(image.props.source).toEqual({ uri: SAMPLE });
     expect(emittedClasses(image.props.className)).toEqual(expect.arrayContaining(['h-full', 'w-full']));
   });
 

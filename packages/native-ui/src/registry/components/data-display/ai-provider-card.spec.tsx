@@ -50,7 +50,7 @@ describe('AiProviderCard', () => {
     await render(<Example />);
 
     expect(emittedClasses(screen.getByTestId('card').props.className)).toEqual(
-      expect.arrayContaining(['relative', 'h-full', 'py-4']),
+      expect.arrayContaining(['relative', 'py-4']),
     );
   });
 

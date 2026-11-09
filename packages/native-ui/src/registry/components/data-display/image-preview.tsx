@@ -10,11 +10,11 @@ const CHECKER_CELL = 8;
 
 /**
  * Every other square of a checkerboard, in `color`, across the whole of its parent. It takes an icon's props
- * so that Icon draws it, which resolves a colour class to `color` on both engines; its `size` is ignored,
- * and `size-full` stretches it through its style.
+ * so that Icon draws it, which resolves a colour class to `color` on a phone; on the web the class reaches the
+ * svg itself, which draws `currentColor`. Its `size` is ignored, and `size-full` stretches it through its style.
  */
 const Checkerboard: LucideIcon = forwardRef<Svg, LucideProps>(function Checkerboard(
-  { color, size: _size, ...props },
+  { color = 'currentColor', size: _size, ...props },
   ref,
 ) {
   const id = `checkerboard-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
@@ -58,12 +58,14 @@ function ImagePreview({ className, children, ...props }: ComponentProps<typeof V
 /**
  * The previewed image, centred and scaled down to fit the frame, never up, as the web's `max-w-full
  * max-h-full` keeps a small image at its own size. `alt` defaults to empty, which hides it from a screen
- * reader as decorative; given one, it is an image of that name.
+ * reader as decorative; given one, it is an image of that name. `src` is read into `source`, since React
+ * Native for Web reads only `source`.
  */
-function ImagePreviewImage({ alt = '', className, ...props }: ComponentProps<typeof Image>): ReactNode {
+function ImagePreviewImage({ alt = '', src, source, className, ...props }: ComponentProps<typeof Image>): ReactNode {
   const named = alt !== '';
   return (
     <Image
+      source={source ?? (src === undefined ? undefined : { uri: src })}
       alt={alt}
       accessible={named}
       role={named ? 'img' : undefined}

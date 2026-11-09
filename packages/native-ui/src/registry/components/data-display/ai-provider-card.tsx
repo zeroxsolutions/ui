@@ -31,8 +31,10 @@ function AiProviderCard({ size = 'sm', className, children, ...props }: Componen
     (child): child is ReactElement<AiProviderCardTriggerProps> =>
       isValidElement(child) && child.type === AiProviderCardTrigger,
   );
+  // No h-full, unlike the web twin. A row of tiles stretches each to the tallest by default, and in a column a
+  // percentage height reads the screen's height and stretches every tile to it.
   const card = (
-    <Card size={size} className={cn('relative h-full', className)} {...props}>
+    <Card size={size} className={cn('relative', className)} {...props}>
       {children}
     </Card>
   );
@@ -50,7 +52,6 @@ function AiProviderCard({ size = 'sm', className, children, ...props }: Componen
         onPress={trigger.props.onPress}
         onPressIn={() => setPressed(true)}
         onPressOut={() => setPressed(false)}
-        className="h-full"
       >
         {card}
       </Pressable>
