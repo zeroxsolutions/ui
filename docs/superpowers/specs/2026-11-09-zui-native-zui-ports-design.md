@@ -43,10 +43,13 @@ all times, since a phone has no hover to reveal it.
 
 ## The Fluent emoji on native
 
-`@zeroxsolutions/fluent-emoji` renders an `<img>`, and its one entry declares `react-dom` as a peer.
-_(My call:)_ it gains a `./data` entry with the manifest, the categories and the image URL, and no React,
-and is released as a minor version. The native items draw each emoji with React Native's `Image` from that
-URL, through a `fluent-emoji` registry lib in the native registries. The web entry does not change.
+The native items draw each emoji with React Native's `Image` straight from the house CDN,
+`https://fluent-emoji.zeroxsolutions.com/<style>/<codepoint>.<ext>`, which serves every style's artwork,
+through a small `fluent-emoji` registry lib in the native registries that turns a glyph into that URL.
+They do not import `@zeroxsolutions/fluent-emoji`, whose URL module reads `import.meta.url`, which Metro
+does not transform unless an app turns it on; the package does not change. emoji-appearance-toggle-group
+needs only a few glyphs. emoji-picker also needs the emoji catalog (names and categories), which the CDN
+does not serve today; where it comes from is decided with the person before wave 4 starts.
 
 ## What is checked
 
