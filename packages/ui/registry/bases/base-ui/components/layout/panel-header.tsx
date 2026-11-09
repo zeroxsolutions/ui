@@ -19,7 +19,13 @@ function PanelHeader({ className, ...props }: ComponentProps<'div'>): ReactNode 
 
 /** One fixed-height row of the header. */
 function PanelHeaderRow({ className, ...props }: ComponentProps<'div'>): ReactNode {
-  return <div data-slot="panel-header-row" className={cn('flex h-9 items-center gap-1 px-2', className)} {...props} />;
+  return (
+    <div
+      data-slot="panel-header-row"
+      className={cn('cn-panel-header-row flex items-center gap-1 px-2', className)}
+      {...props}
+    />
+  );
 }
 
 /** The row's growing leading part: the title and anything inline with it. */

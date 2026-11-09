@@ -1,3 +1,94 @@
-/* zui's own slots in luma; each names the upstream slot its classes follow. */
+/* zui's own slots in luma. Each holds only what differs between styles, and follows the upstream slot
+ * its comment names, as luma's sheet draws it. */
 .style-luma {
+  /* MARK: Collapsible Card */
+  /* cn-card's text size */
+  .cn-collapsible-card {
+    @apply text-sm;
+  }
+
+  /* cn-card's ring, radius and shadow */
+  .cn-collapsible-card-surface {
+    @apply ring-foreground/5 dark:ring-foreground/10 rounded-4xl shadow-md ring-1;
+  }
+
+  /* cn-card's radius */
+  .cn-collapsible-card-muted {
+    @apply rounded-4xl;
+  }
+
+  /* cn-card's --card-spacing, one step in */
+  .cn-collapsible-card-header {
+    @apply px-5 py-1.5;
+  }
+
+  /* cn-button-size-icon's height, the actions' button */
+  .cn-collapsible-card-title {
+    @apply h-9;
+  }
+
+  /* MARK: AI Provider Card */
+  /* cn-card's radius, the card it covers */
+  .cn-ai-provider-card-trigger {
+    @apply rounded-4xl;
+  }
+
+  /* MARK: Data Table */
+  /* cn-item's radius */
+  .cn-data-table-container {
+    @apply rounded-2xl;
+  }
+
+  /* MARK: File Tree */
+  /* cn-dropdown-menu-item's text size */
+  .cn-file-tree {
+    @apply text-sm;
+  }
+
+  /* cn-dropdown-menu-item's height and radius */
+  .cn-file-tree-item {
+    @apply h-9 rounded-2xl;
+  }
+
+  /* MARK: Image Preview */
+  /* cn-dropdown-menu-item's radius */
+  .cn-image-preview {
+    @apply rounded-2xl;
+  }
+
+  /* MARK: Number Field */
+  /* cn-input-group's focus ring */
+  .cn-number-field {
+    @apply has-[[data-slot=number-field-input]:focus-visible]:border-ring has-[[data-slot=number-field-input]:focus-visible]:ring-ring/30 has-[[data-slot=number-field-input]:focus-visible]:ring-3;
+  }
+
+  /* MARK: Password Input */
+  /* cn-input-group's focus ring */
+  .cn-password-input {
+    @apply has-[[data-slot=password-input-input]:focus-visible]:border-ring has-[[data-slot=password-input-input]:focus-visible]:ring-ring/30 has-[[data-slot=password-input-input]:focus-visible]:ring-3;
+  }
+
+  /* MARK: Tree Item */
+  /* cn-dropdown-menu-item's height, radius and text size */
+  .cn-tree-item {
+    @apply min-h-9 rounded-2xl text-sm;
+  }
+
+  /* MARK: Unsaved Changes Toolbar */
+  /* cn-toast's radius */
+  .cn-unsaved-changes-toolbar {
+    @apply rounded-2xl;
+  }
+
+  /* MARK: Floating Toolbar */
+  /* cn-dropdown-menu-content's ring, radius and shadow */
+  .cn-floating-toolbar {
+    @apply ring-foreground/5 dark:ring-foreground/10 rounded-3xl shadow-lg;
+  }
+
+  /* MARK: Panel Header */
+  /* cn-button-size-icon's height, one step taller */
+  .cn-panel-header-row {
+    @apply h-10;
+  }
 }

@@ -71,7 +71,7 @@ function TreeItem({
         data-leaf={leaf || undefined}
         data-editing={editing || undefined}
         className={cn(
-          'group/tree-item text-foreground/80 hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 flex min-h-7 w-full min-w-0 items-center gap-1.5 rounded-md ps-1.5 pe-2 text-sm transition-colors outline-none focus-visible:ring-3',
+          'group/tree-item text-foreground/80 hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 cn-tree-item flex w-full min-w-0 items-center gap-1.5 ps-1.5 pe-2 transition-colors outline-none focus-visible:ring-3',
           className,
         )}
         {...props}

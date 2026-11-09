@@ -1,3 +1,94 @@
-/* zui's own slots in lyra; each names the upstream slot its classes follow. */
+/* zui's own slots in lyra. Each holds only what differs between styles, and follows the upstream slot
+ * its comment names, as lyra's sheet draws it. */
 .style-lyra {
+  /* MARK: Collapsible Card */
+  /* cn-card's text size */
+  .cn-collapsible-card {
+    @apply text-xs/relaxed;
+  }
+
+  /* cn-card's ring, radius and shadow */
+  .cn-collapsible-card-surface {
+    @apply ring-foreground/10 rounded-none ring-1;
+  }
+
+  /* cn-card's radius */
+  .cn-collapsible-card-muted {
+    @apply rounded-none;
+  }
+
+  /* cn-card's --card-spacing, one step in */
+  .cn-collapsible-card-header {
+    @apply px-3 py-1.5;
+  }
+
+  /* cn-button-size-icon's height, the actions' button */
+  .cn-collapsible-card-title {
+    @apply h-8;
+  }
+
+  /* MARK: AI Provider Card */
+  /* cn-card's radius, the card it covers */
+  .cn-ai-provider-card-trigger {
+    @apply rounded-none;
+  }
+
+  /* MARK: Data Table */
+  /* cn-item's radius */
+  .cn-data-table-container {
+    @apply rounded-none;
+  }
+
+  /* MARK: File Tree */
+  /* cn-dropdown-menu-item's text size */
+  .cn-file-tree {
+    @apply text-xs;
+  }
+
+  /* cn-dropdown-menu-item's height and radius */
+  .cn-file-tree-item {
+    @apply h-8 rounded-none;
+  }
+
+  /* MARK: Image Preview */
+  /* cn-dropdown-menu-item's radius */
+  .cn-image-preview {
+    @apply rounded-none;
+  }
+
+  /* MARK: Number Field */
+  /* cn-input-group's focus ring */
+  .cn-number-field {
+    @apply has-[[data-slot=number-field-input]:focus-visible]:border-ring has-[[data-slot=number-field-input]:focus-visible]:ring-ring/50 has-[[data-slot=number-field-input]:focus-visible]:ring-1;
+  }
+
+  /* MARK: Password Input */
+  /* cn-input-group's focus ring */
+  .cn-password-input {
+    @apply has-[[data-slot=password-input-input]:focus-visible]:border-ring has-[[data-slot=password-input-input]:focus-visible]:ring-ring/50 has-[[data-slot=password-input-input]:focus-visible]:ring-1;
+  }
+
+  /* MARK: Tree Item */
+  /* cn-dropdown-menu-item's height, radius and text size */
+  .cn-tree-item {
+    @apply min-h-8 rounded-none text-xs;
+  }
+
+  /* MARK: Unsaved Changes Toolbar */
+  /* cn-toast's radius */
+  .cn-unsaved-changes-toolbar {
+    @apply rounded-none;
+  }
+
+  /* MARK: Floating Toolbar */
+  /* cn-dropdown-menu-content's ring, radius and shadow */
+  .cn-floating-toolbar {
+    @apply ring-foreground/10 rounded-none shadow-md;
+  }
+
+  /* MARK: Panel Header */
+  /* cn-button-size-icon's height, one step taller */
+  .cn-panel-header-row {
+    @apply h-9;
+  }
 }

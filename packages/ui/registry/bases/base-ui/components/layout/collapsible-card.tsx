@@ -7,11 +7,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/
 import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-const collapsibleCardVariants = cva('group/collapsible-card flex w-full flex-col overflow-hidden text-sm', {
+const collapsibleCardVariants = cva('cn-collapsible-card group/collapsible-card flex w-full flex-col overflow-hidden', {
   variants: {
     variant: {
-      default: 'bg-card text-card-foreground ring-foreground/10 rounded-xl ring-1',
-      muted: 'rounded-xl bg-muted/50',
+      default: 'cn-collapsible-card-surface bg-card text-card-foreground',
+      muted: 'cn-collapsible-card-muted bg-muted/50',
       plain: 'border-b border-border',
       flush: '',
     },
@@ -55,7 +55,7 @@ function CollapsibleCardHeader({ className, ...props }: ComponentProps<'div'>): 
     <div
       data-slot="collapsible-card-header"
       className={cn(
-        'flex items-center gap-1.5 px-3 py-1.5 group-data-[variant=plain]/collapsible-card:px-2.5 has-data-[slot=collapsible-card-actions]:justify-between',
+        'cn-collapsible-card-header flex items-center gap-1.5 group-data-[variant=plain]/collapsible-card:px-2.5 has-data-[slot=collapsible-card-actions]:justify-between',
         className,
       )}
       {...props}
@@ -68,11 +68,11 @@ function CollapsibleCardTitle({ className, ...props }: ComponentProps<'div'>): R
   return (
     <div
       data-slot="collapsible-card-title"
-      // As tall as the icon button the actions hold (`size="icon"`, size-8), so the header is one
+      // As tall as the style's icon button, which the actions hold (`size="icon"`), so the header is one
       // height whether or not it holds actions. A child combinator, so an icon inside a nested
       // control the title holds (a combobox trigger) keeps its own size.
       className={cn(
-        "text-muted-foreground flex h-8 min-w-0 items-center gap-1.5 font-medium [&>svg]:shrink-0 [&>svg:not([class*='size-'])]:size-4",
+        "cn-collapsible-card-title text-muted-foreground flex min-w-0 items-center gap-1.5 font-medium [&>svg]:shrink-0 [&>svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}

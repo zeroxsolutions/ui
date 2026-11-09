@@ -67,7 +67,7 @@ function UnsavedChangesToolbar({
         role="group"
         aria-labelledby={messageId}
         className={cn(
-          'group/unsaved-changes-toolbar fixed inset-x-4 z-50 mx-auto flex max-w-lg items-center gap-3 rounded-2xl bg-popover py-2 pr-2 pl-4 text-popover-foreground shadow-lg ring-1 ring-foreground/10 data-[side=bottom]:bottom-4 data-[side=top]:top-4 data-[state=attention]:ring-destructive',
+          'group/unsaved-changes-toolbar fixed inset-x-4 z-50 mx-auto flex max-w-lg items-center gap-3 cn-unsaved-changes-toolbar bg-popover py-2 pr-2 pl-4 text-popover-foreground shadow-lg ring-1 ring-foreground/10 data-[side=bottom]:bottom-4 data-[side=top]:top-4 data-[state=attention]:ring-destructive',
           className,
         )}
         {...props}

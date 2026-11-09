@@ -45,10 +45,7 @@ function PasswordInput({ className, ...props }: React.ComponentProps<typeof Inpu
       <InputGroup
         data-slot="password-input"
         data-visible={visible || undefined}
-        className={cn(
-          'has-[[data-slot=password-input-input]:focus-visible]:border-ring has-[[data-slot=password-input-input]:focus-visible]:ring-ring/50 has-[[data-slot=password-input-input]:focus-visible]:ring-3',
-          className,
-        )}
+        className={cn('cn-password-input', className)}
         {...props}
       />
     </PasswordInputContext.Provider>
