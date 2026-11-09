@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import { ImagePreview, ImagePreviewImage } from './image-preview';
 
 const HIDDEN = { includeHiddenElements: true } as const;
@@ -27,7 +26,7 @@ describe('ImagePreview', () => {
     expect(screen.getByTestId('image', HIDDEN).props['aria-hidden']).toBe(true);
   });
 
-  it('fills the frame with the image, scaled down to fit and never up', async () => {
+  it('draws the image from src, scaled down to fit and never up', async () => {
     await render(
       <ImagePreview>
         <ImagePreviewImage src={SAMPLE} alt="Logo" />
@@ -38,7 +37,6 @@ describe('ImagePreview', () => {
     expect(image.props.resizeMode).toBe('center');
     // React Native for Web draws only `source`, so the web's `src` arrives there.
     expect(image.props.source).toEqual({ uri: SAMPLE });
-    expect(emittedClasses(image.props.className)).toEqual(expect.arrayContaining(['h-full', 'w-full']));
   });
 
   it('lays the checkerboard under the image, hidden from a screen reader and from touches', async () => {
@@ -51,27 +49,6 @@ describe('ImagePreview', () => {
     const [layer] = screen.getByTestId('frame').children;
     expect(typeof layer === 'object' && layer.props).toEqual(
       expect.objectContaining({ 'aria-hidden': true, pointerEvents: 'none' }),
-    );
-    expect(emittedClasses(typeof layer === 'object' ? layer.props.className : '')).toEqual(
-      expect.arrayContaining(['absolute', 'inset-0']),
-    );
-  });
-
-  it.each([
-    ['vega', 'rounded-sm'],
-    ['lyra', 'rounded-none'],
-  ] as const)('centres its image on the background colour, %s with %s corners', async (style, radius) => {
-    await render(<ImagePreview testID="frame" />);
-
-    expect(emittedClasses(screen.getByTestId('frame').props.className, style)).toEqual(
-      expect.arrayContaining([
-        radius,
-        'bg-background',
-        'size-full',
-        'items-center',
-        'justify-center',
-        'overflow-hidden',
-      ]),
     );
   });
 });

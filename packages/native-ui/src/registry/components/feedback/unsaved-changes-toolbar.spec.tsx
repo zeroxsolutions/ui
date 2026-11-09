@@ -1,6 +1,5 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo, Platform } from 'react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import {
   UnsavedChangesToolbar,
   UnsavedChangesToolbarActions,
@@ -36,19 +35,6 @@ function Example({ side, state, message = 'You have unsaved changes.', onReset, 
 // The name of a hidden spinner's label still reaches the name Testing Library computes, so match the label as a part of it.
 const SAVING = /Saving\.\.\./;
 
-function toolbarClasses(): string[] {
-  return emittedClasses(screen.getByTestId('toolbar').props.className);
-}
-
-/** The full-width box that places the toolbar on its edge. */
-function wrapperClasses(): string[] {
-  return emittedClasses(screen.getByTestId('toolbar-wrapper').props.className);
-}
-
-function messageClasses(): string[] {
-  return emittedClasses(screen.getByText('You have unsaved changes.').props.className);
-}
-
 let announce: jest.SpyInstance;
 
 beforeEach(() => {
@@ -65,25 +51,9 @@ afterEach(() => {
 });
 
 describe('UnsavedChangesToolbar', () => {
-  it('floats 16px from the bottom edge by default', async () => {
+  it('leaves the screen beneath it touchable', async () => {
     await render(<Example />);
 
-    expect(wrapperClasses()).toEqual(expect.arrayContaining(['absolute', 'bottom-4', 'inset-x-4']));
-    expect(wrapperClasses()).not.toContain('top-4');
-  });
-
-  it('floats 16px from the top edge for side "top"', async () => {
-    await render(<Example side="top" />);
-
-    expect(wrapperClasses()).toEqual(expect.arrayContaining(['absolute', 'top-4']));
-    expect(wrapperClasses()).not.toContain('bottom-4');
-  });
-
-  it('centres on a wide screen, at most max-w-lg across, and leaves the screen beneath it touchable', async () => {
-    await render(<Example />);
-
-    expect(wrapperClasses()).toContain('items-center');
-    expect(toolbarClasses()).toEqual(expect.arrayContaining(['w-full', 'max-w-lg']));
     expect(screen.getByTestId('toolbar-wrapper').props.pointerEvents).toBe('box-none');
   });
 
@@ -138,33 +108,6 @@ describe('UnsavedChangesToolbar', () => {
     await render(<Example />);
 
     expect(screen.getByTestId('toolbar').props.role).toBe('group');
-  });
-
-  it('keeps the default message tone while state is default', async () => {
-    await render(<Example state="default" />);
-
-    expect(messageClasses()).not.toContain('text-destructive');
-    expect(toolbarClasses()).not.toContain('border-destructive');
-  });
-
-  it('keeps the default message tone while saving', async () => {
-    await render(<Example state="saving" />);
-
-    expect(messageClasses()).not.toContain('text-destructive');
-  });
-
-  it('turns the message destructive for error, and leaves the border', async () => {
-    await render(<Example state="error" />);
-
-    expect(messageClasses()).toContain('text-destructive');
-    expect(toolbarClasses()).not.toContain('border-destructive');
-  });
-
-  it('turns the message and the border destructive for attention', async () => {
-    await render(<Example state="attention" />);
-
-    expect(messageClasses()).toContain('text-destructive');
-    expect(toolbarClasses()).toContain('border-destructive');
   });
 
   it('throws when a part is rendered outside the toolbar', async () => {

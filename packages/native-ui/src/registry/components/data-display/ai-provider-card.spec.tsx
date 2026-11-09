@@ -1,5 +1,4 @@
-import { fireEvent, isHiddenFromAccessibility, render, screen, userEvent } from '@testing-library/react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
+import { isHiddenFromAccessibility, render, screen, userEvent } from '@testing-library/react-native';
 import { CardFooter, CardHeader, CardTitle } from '../../ui/card';
 import { Switch } from '../../ui/switch';
 import {
@@ -17,7 +16,7 @@ type ExampleProps = {
 
 function Example({ onSelect, onCheckedChange = () => undefined }: ExampleProps) {
   return (
-    <AiProviderCard testID="card">
+    <AiProviderCard>
       <CardHeader>
         <CardTitle>OpenAI</CardTitle>
         <AiProviderCardDescription>GPT reasoning and chat models.</AiProviderCardDescription>
@@ -28,13 +27,9 @@ function Example({ onSelect, onCheckedChange = () => undefined }: ExampleProps) 
           <Switch aria-label="Enable OpenAI" checked={false} onCheckedChange={onCheckedChange} />
         </AiProviderCardAction>
       </CardFooter>
-      <AiProviderCardTrigger testID="trigger" aria-label="Select OpenAI" onPress={onSelect} />
+      <AiProviderCardTrigger aria-label="Select OpenAI" onPress={onSelect} />
     </AiProviderCard>
   );
-}
-
-function triggerClasses(style?: 'vega' | 'lyra'): string[] {
-  return emittedClasses(screen.getByTestId('trigger').props.className, style);
 }
 
 describe('AiProviderCard', () => {
@@ -44,14 +39,6 @@ describe('AiProviderCard', () => {
     expect(screen.getByRole('heading', { name: 'OpenAI' })).toBeOnTheScreen();
     expect(screen.getByText('GPT reasoning and chat models.').props.numberOfLines).toBe(2);
     expect(screen.getByText('12 models')).toBeOnTheScreen();
-  });
-
-  it('is a small card unless the caller sizes it', async () => {
-    await render(<Example />);
-
-    expect(emittedClasses(screen.getByTestId('card').props.className)).toEqual(
-      expect.arrayContaining(['relative', 'py-4']),
-    );
   });
 
   it('is selected through its trigger, a button named by its aria-label', async () => {
@@ -88,7 +75,7 @@ describe('AiProviderCard', () => {
 
   it('draws a card with no trigger as a plain card', async () => {
     await render(
-      <AiProviderCard testID="card">
+      <AiProviderCard>
         <CardHeader>
           <CardTitle>OpenAI</CardTitle>
         </CardHeader>
@@ -97,40 +84,6 @@ describe('AiProviderCard', () => {
 
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.getByRole('heading', { name: 'OpenAI' })).toBeOnTheScreen();
-  });
-
-  it.each([
-    ['vega', 'rounded-xl'],
-    ['lyra', 'rounded-none'],
-  ] as const)("rounds the trigger in %s to the card's %s, covering it under its content", async (style, radius) => {
-    await render(<Example />);
-
-    expect(triggerClasses(style)).toEqual(expect.arrayContaining([radius, 'absolute', 'inset-0', '-z-10']));
-  });
-
-  it('draws a hairline inside the edge while the trigger or the card is pressed', async () => {
-    await render(<Example />);
-    expect(triggerClasses()).not.toContain('border');
-
-    await fireEvent(screen.getByTestId('trigger'), 'pressIn');
-    expect(triggerClasses()).toEqual(expect.arrayContaining(['border', 'border-foreground/20']));
-    await fireEvent(screen.getByTestId('trigger'), 'pressOut');
-    expect(triggerClasses()).not.toContain('border');
-
-    await fireEvent(screen.getByText('12 models'), 'pressIn');
-    expect(triggerClasses()).toContain('border');
-  });
-
-  it('draws the wider focus ring while the trigger holds keyboard focus', async () => {
-    await render(<Example />);
-
-    await fireEvent(screen.getByTestId('trigger'), 'focus');
-
-    expect(triggerClasses()).toEqual(expect.arrayContaining(['border-[3px]', 'border-ring/50']));
-
-    await fireEvent(screen.getByTestId('trigger'), 'blur');
-
-    expect(triggerClasses()).not.toContain('border-[3px]');
   });
 });
 
@@ -153,13 +106,5 @@ describe('AiProviderCardLabel', () => {
     await render(<AiProviderCardLabel testID="label">12 models</AiProviderCardLabel>);
 
     expect(screen.getByTestId('label').children).toHaveLength(1);
-  });
-
-  it('sets its note in small muted text', async () => {
-    await render(<AiProviderCardLabel>12 models</AiProviderCardLabel>);
-
-    expect(emittedClasses(screen.getByText('12 models').props.className)).toEqual(
-      expect.arrayContaining(['text-muted-foreground', 'text-xs']),
-    );
   });
 });

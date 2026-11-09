@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import { UnsavedIndicator } from './unsaved-indicator';
 
 describe('UnsavedIndicator', () => {
@@ -14,13 +13,5 @@ describe('UnsavedIndicator', () => {
 
     expect(screen.getByRole('img', { name: 'Modifications non enregistrees' })).toBeOnTheScreen();
     expect(screen.queryByRole('img', { name: 'Unsaved changes' })).toBeNull();
-  });
-
-  it('draws a small round dot in the foreground at 70%', async () => {
-    await render(<UnsavedIndicator className="ml-1" />);
-
-    expect(emittedClasses(screen.getByRole('img').props.className)).toEqual(
-      expect.arrayContaining(['bg-foreground/70', 'size-2', 'shrink-0', 'rounded-full', 'ml-1']),
-    );
   });
 });

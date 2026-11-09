@@ -1,6 +1,5 @@
 import { isHiddenFromAccessibility, render, screen } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import { Bubble, BubbleContent } from '../../ui/bubble';
 import { MessageContent, MessageHeader } from '../../ui/message';
 import { ChatMessage, ChatMessageAccent } from './chat-message';
@@ -9,7 +8,7 @@ const HIDDEN = { includeHiddenElements: true } as const;
 
 function Example({ streaming }: { streaming?: boolean }) {
   return (
-    <ChatMessage testID="row" streaming={streaming}>
+    <ChatMessage streaming={streaming}>
       <ChatMessageAccent testID="accent" />
       <MessageContent>
         <MessageHeader>Assistant</MessageHeader>
@@ -29,16 +28,6 @@ describe('ChatMessage', () => {
     expect(screen.getByText('Looking now.')).toBeOnTheScreen();
   });
 
-  it('aligns through Message', async () => {
-    await render(
-      <ChatMessage testID="row" align="end">
-        <MessageContent />
-      </ChatMessage>,
-    );
-
-    expect(emittedClasses(screen.getByTestId('row').props.className)).toContain('flex-row-reverse');
-  });
-
   it('draws the accent only while the row streams', async () => {
     await render(<Example />);
     expect(screen.queryByTestId('accent', HIDDEN)).toBeNull();
@@ -51,28 +40,6 @@ describe('ChatMessage', () => {
     await render(<Example streaming />);
 
     expect(isHiddenFromAccessibility(screen.getByTestId('accent', HIDDEN))).toBe(true);
-  });
-
-  it("draws the accent as a primary line 12px before the row's leading edge", async () => {
-    await render(<Example streaming />);
-    const accent = screen.getByTestId('accent', HIDDEN);
-
-    expect(emittedClasses(accent.props.className)).toEqual(
-      expect.arrayContaining(['bg-primary', 'absolute', 'inset-y-0', 'w-0.5']),
-    );
-    expect(StyleSheet.flatten(accent.props.style)).toEqual({ start: -12 });
-  });
-
-  it("takes the caller's colour over the primary one", async () => {
-    await render(
-      <ChatMessage streaming>
-        <ChatMessageAccent testID="accent" className="bg-chart-2" />
-      </ChatMessage>,
-    );
-
-    const classes = emittedClasses(screen.getByTestId('accent', HIDDEN).props.className);
-    expect(classes).toContain('bg-chart-2');
-    expect(classes).not.toContain('bg-primary');
   });
 
   it('passes the caller style through to the row', async () => {

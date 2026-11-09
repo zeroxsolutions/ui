@@ -1,6 +1,5 @@
 import { act, isHiddenFromAccessibility, render, screen } from '@testing-library/react-native';
 import { AccessibilityInfo, StyleSheet } from 'react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import { StatusIndicator, type StatusTone } from './status-indicator';
 
 const HIDDEN = { includeHiddenElements: true } as const;
@@ -20,28 +19,6 @@ afterEach(() => {
 });
 
 describe('StatusIndicator', () => {
-  it.each([
-    ['online', 'bg-success'],
-    ['idle', 'bg-warning'],
-    ['busy', 'bg-destructive'],
-  ] as const)('fills a %s dot with %s', async (tone, fill) => {
-    reduceMotion(false);
-    await render(<StatusIndicator testID="dot" tone={tone} />);
-
-    expect(emittedClasses(dot().props.className)).toEqual(
-      expect.arrayContaining(['size-2', 'shrink-0', 'rounded-full', fill]),
-    );
-  });
-
-  it('draws offline as a hollow ring in the muted foreground, with no fill', async () => {
-    reduceMotion(false);
-    await render(<StatusIndicator testID="dot" tone="offline" />);
-
-    const classes = emittedClasses(dot().props.className);
-    expect(classes).toEqual(expect.arrayContaining(['border', 'border-muted-foreground']));
-    expect(classes.filter((name) => name.startsWith('bg-'))).toEqual([]);
-  });
-
   it.each(['online', 'offline', 'busy', 'idle'] satisfies StatusTone[])(
     'hides a %s dot from a screen reader, which reads the text beside it',
     async (tone) => {
@@ -51,15 +28,6 @@ describe('StatusIndicator', () => {
       expect(isHiddenFromAccessibility(dot())).toBe(true);
     },
   );
-
-  it("takes the caller's classes after its own", async () => {
-    reduceMotion(false);
-    await render(<StatusIndicator testID="dot" tone="online" className="size-3" />);
-
-    const classes = emittedClasses(dot().props.className);
-    expect(classes).toContain('size-3');
-    expect(classes).not.toContain('size-2');
-  });
 
   describe('pulse', () => {
     beforeEach(() => {

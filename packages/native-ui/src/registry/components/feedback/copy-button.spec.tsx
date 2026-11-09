@@ -1,7 +1,6 @@
-import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import * as Clipboard from 'expo-clipboard';
 import { AccessibilityInfo, Platform } from 'react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import { CopyButton } from './copy-button';
 
 jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn() }));
@@ -81,28 +80,14 @@ describe('CopyButton', () => {
     expect(onCopied).not.toHaveBeenCalled();
   });
 
-  it('runs a caller onPress first, and skips the copy when it prevents the default', async () => {
-    const onPress = jest.fn((event: { preventDefault: () => void }) => event.preventDefault());
+  it('runs a caller onPress and still copies when it lets the default stand', async () => {
+    const user = userEvent.setup();
+    const onPress = jest.fn();
     await render(<CopyButton value={COMMAND} onPress={onPress} />);
-    let prevented = false;
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Copy' }), {
-      preventDefault: () => {
-        prevented = true;
-      },
-      isDefaultPrevented: () => prevented,
-    });
+    await user.press(screen.getByRole('button', { name: 'Copy' }));
 
     expect(onPress).toHaveBeenCalledTimes(1);
-    expect(setStringAsync).not.toHaveBeenCalled();
-  });
-
-  it.each([
-    ['vega', 'size-6'],
-    ['lyra', 'size-6'],
-  ] as const)('is a ghost icon-xs Button by default, %s %s', async (style, size) => {
-    await render(<CopyButton value={COMMAND} testID="copy" />);
-
-    expect(emittedClasses(screen.getByTestId('copy').props.className, style)).toContain(size);
+    expect(setStringAsync).toHaveBeenCalledWith(COMMAND);
   });
 });

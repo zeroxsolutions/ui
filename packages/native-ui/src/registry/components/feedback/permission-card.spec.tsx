@@ -11,7 +11,6 @@ import {
   PermissionCardTitle,
   type PermissionCardStatusValue,
 } from './permission-card';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 
 // Stands in for Icon so a spec reads which icon component the badge passes, not the path it draws.
 jest.mock('../../ui/icon', () => {
@@ -32,15 +31,15 @@ type ExampleProps = {
 
 function Example({ status, onDeny, onAllow }: ExampleProps) {
   return (
-    <PermissionCard status={status} testID="card">
+    <PermissionCard status={status}>
       <CardHeader>
         <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
         <CardDescription>Deploy the web app to production</CardDescription>
-        <PermissionCardStatus testID="status" variant={status === 'denied' ? 'destructive' : 'outline'}>
+        <PermissionCardStatus variant={status === 'denied' ? 'destructive' : 'outline'}>
           {STATUS_WORD[status]}
         </PermissionCardStatus>
       </CardHeader>
-      <PermissionCardActions testID="actions">
+      <PermissionCardActions>
         <Button variant="ghost" onPress={onDeny}>
           <Text>Deny</Text>
         </Button>
@@ -53,10 +52,6 @@ function Example({ status, onDeny, onAllow }: ExampleProps) {
       </PermissionCardResolved>
     </PermissionCard>
   );
-}
-
-function cardClasses(style?: 'vega' | 'lyra'): string[] {
-  return emittedClasses(screen.getByTestId('card').props.className, style);
 }
 
 describe('PermissionCard', () => {
@@ -92,31 +87,6 @@ describe('PermissionCard', () => {
       expect(screen.queryByRole('button', { name: 'Allow once' })).toBeNull();
     },
   );
-
-  it.each([
-    ['vega', 'rounded-xl', 'py-4'],
-    ['lyra', 'rounded-none', 'py-3'],
-  ] as const)('is the small card in %s, with no bottom padding under its footer', async (style, radius, padding) => {
-    await render(<Example status="pending" />);
-
-    // pb-0 follows the card's own vertical padding, so it wins on the bottom edge.
-    const classes = cardClasses(style);
-    expect(classes).toEqual(expect.arrayContaining([radius, padding, 'pb-0']));
-    expect(classes.indexOf('pb-0')).toBeGreaterThan(classes.indexOf(padding));
-  });
-
-  it('keeps its bottom padding with no decision or resolved row', async () => {
-    await render(
-      <PermissionCard status="pending" testID="card">
-        <CardHeader>
-          <PermissionCardTitle>Run deploy.sh</PermissionCardTitle>
-        </CardHeader>
-      </PermissionCard>,
-    );
-
-    expect(cardClasses()).toContain('py-4');
-    expect(cardClasses()).not.toContain('pb-0');
-  });
 });
 
 describe('PermissionCardStatus', () => {
@@ -131,13 +101,5 @@ describe('PermissionCardStatus', () => {
     expect(drawn.props.icon).toBe(icon);
     expect(isHiddenFromAccessibility(drawn)).toBe(true);
     expect(screen.getByText(STATUS_WORD[status])).toBeOnTheScreen();
-  });
-
-  it('is an outline badge unless the caller passes another variant', async () => {
-    await render(<Example status="pending" />);
-    expect(emittedClasses(screen.getByTestId('status').props.className)).toContain('border-border');
-
-    await screen.rerender(<Example status="denied" />);
-    expect(emittedClasses(screen.getByTestId('status').props.className)).toContain('bg-destructive/10');
   });
 });

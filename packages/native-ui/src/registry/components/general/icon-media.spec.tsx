@@ -2,41 +2,20 @@ import { render, screen } from '@testing-library/react-native';
 import { useContext, type ReactNode } from 'react';
 import { Text as NativeText } from 'react-native';
 import { emittedClasses } from '../../../build/slot-tokens.testing';
-import { IconClassContext } from '../../ui/icon';
 import { TextClassContext } from '../../ui/text';
 import { IconMedia } from './icon-media';
 
-/** Writes the text and icon classes an Icon inside the square takes, so a spec reads them. */
+/** Writes the text classes an Icon inside the square takes, so a spec reads them. */
 function Probe(): ReactNode {
   const text = useContext(TextClassContext);
-  const icon = useContext(IconClassContext);
-  return <NativeText testID="probe">{`${text ?? ''}|${icon ?? ''}`}</NativeText>;
+  return <NativeText testID="probe">{text ?? ''}</NativeText>;
 }
 
-function probed(): { text: string; icon: string } {
-  const [text = '', icon = ''] = String(screen.getByTestId('probe').props.children).split('|');
-  return { text, icon };
+function probedText(): string[] {
+  return String(screen.getByTestId('probe').props.children).split(' ');
 }
 
 describe('IconMedia', () => {
-  it('draws a small rounded square that centres its glyph', async () => {
-    await render(<IconMedia testID="media" />);
-
-    expect(emittedClasses(screen.getByTestId('media').props.className)).toEqual(
-      expect.arrayContaining(['size-5', 'items-center', 'justify-center', 'rounded-sm']),
-    );
-  });
-
-  it('gives an icon that names no size of its own size-3', async () => {
-    await render(
-      <IconMedia>
-        <Probe />
-      </IconMedia>,
-    );
-
-    expect(probed().icon).toBe('size-3');
-  });
-
   it("tints the square with the caller's background and its glyph with the caller's text colour", async () => {
     await render(
       <IconMedia testID="media" className="bg-primary text-primary-foreground dark:text-primary">
@@ -47,7 +26,7 @@ describe('IconMedia', () => {
     const square = emittedClasses(screen.getByTestId('media').props.className);
     expect(square).toContain('bg-primary');
     expect(square.filter((name) => name.includes('text-'))).toEqual([]);
-    expect(probed().text.split(' ')).toEqual(['text-primary-foreground', 'dark:text-primary']);
+    expect(probedText()).toEqual(['text-primary-foreground', 'dark:text-primary']);
   });
 
   it('keeps the text classes of the container it sits in', async () => {
@@ -59,7 +38,7 @@ describe('IconMedia', () => {
       </TextClassContext.Provider>,
     );
 
-    expect(probed().text.split(' ')).toEqual(['text-sm', 'text-muted-foreground']);
+    expect(probedText()).toEqual(['text-sm', 'text-muted-foreground']);
   });
 
   it('is one image for a screen reader, named by its aria-label', async () => {

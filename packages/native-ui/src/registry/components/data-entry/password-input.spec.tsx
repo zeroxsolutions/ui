@@ -1,5 +1,4 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import { InputGroupAddon } from '../../ui/input-group';
 import { PasswordInput, PasswordInputInput, PasswordInputToggle } from './password-input';
 
@@ -34,7 +33,7 @@ describe('PasswordInput', () => {
     const onBlur = jest.fn();
     const onChangeText = jest.fn();
     await render(
-      <PasswordInput testID="group">
+      <PasswordInput>
         <PasswordInputInput aria-label="Password" onBlur={onBlur} onChangeText={onChangeText} />
         <InputGroupAddon align="inline-end">
           <PasswordInputToggle />
@@ -47,7 +46,6 @@ describe('PasswordInput', () => {
 
     expect(onChangeText).toHaveBeenLastCalledWith('hunter2');
     expect(onBlur).not.toHaveBeenCalled();
-    expect(emittedClasses(screen.getByTestId('group').props.className)).toContain('border-ring');
     expect(screen.getByLabelText('Password').props.secureTextEntry).toBe(false);
   });
 

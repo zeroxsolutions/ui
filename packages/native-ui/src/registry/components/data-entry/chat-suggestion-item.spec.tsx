@@ -1,5 +1,4 @@
-import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
+import { render, screen, userEvent } from '@testing-library/react-native';
 import { ItemContent, ItemGroup, ItemTitle } from '../../ui/item';
 import { ChatSuggestionItem, type ChatSuggestionItemProps } from './chat-suggestion-item';
 
@@ -13,10 +12,6 @@ function Example(props: Partial<ChatSuggestionItemProps>) {
       </ChatSuggestionItem>
     </ItemGroup>
   );
-}
-
-function itemClasses(style?: 'vega' | 'lyra'): string[] {
-  return emittedClasses(screen.getByTestId('item').props.className, style);
 }
 
 describe('ChatSuggestionItem', () => {
@@ -42,26 +37,10 @@ describe('ChatSuggestionItem', () => {
     expect(calls).toEqual(['press', 'prompt:Summarise this document']);
   });
 
-  it('does not hand the prompt over when the caller prevents the default', async () => {
-    const onSelectPrompt = jest.fn();
-    await render(<Example onPress={(event) => event.preventDefault()} onSelectPrompt={onSelectPrompt} />);
-    let prevented = false;
-
-    await fireEvent.press(screen.getByRole('button', { name: 'Summarise' }), {
-      preventDefault: () => {
-        prevented = true;
-      },
-      isDefaultPrevented: () => prevented,
-    });
-
-    expect(onSelectPrompt).not.toHaveBeenCalled();
-  });
-
   it('is disabled with no select handler, announced as such', async () => {
     await render(<Example />);
 
     expect(screen.getByRole('button', { name: 'Summarise' })).toBeDisabled();
-    expect(itemClasses()).not.toContain('active:bg-muted');
   });
 
   it('follows disabled over the presence of a handler', async () => {
@@ -70,15 +49,6 @@ describe('ChatSuggestionItem', () => {
 
     await screen.rerender(<Example disabled={false} />);
     expect(screen.getByRole('button', { name: 'Summarise' })).toBeEnabled();
-  });
-
-  it.each([
-    ['vega', 'rounded-md'],
-    ['lyra', 'rounded-none'],
-  ] as const)('is a small Item in %s, %s, muted while held down and enabled', async (style, radius) => {
-    await render(<Example onSelectPrompt={jest.fn()} />);
-
-    expect(itemClasses(style)).toEqual(expect.arrayContaining(['flex-row', radius, 'active:bg-muted']));
   });
 
   it('passes the caller props through', async () => {

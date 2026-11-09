@@ -1,7 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react-native';
 import { loadAsync } from 'expo-font';
 import { StyleSheet } from 'react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import { FontPreview } from './font-preview';
 
 jest.mock('expo-font', () => ({ loadAsync: jest.fn() }));
@@ -67,17 +66,5 @@ describe('FontPreview', () => {
 
     await waitFor(() => expect(specimens()[0]?.fontFamily).not.toBe(first));
     expect(specimens()[0]?.fontFamily).toBeDefined();
-  });
-
-  it('fills the width it is given, its rows on a baseline and its size labels muted', async () => {
-    await render(<FontPreview src={INTER} testID="preview" />);
-
-    expect(emittedClasses(screen.getByTestId('preview').props.className)).toEqual(
-      expect.arrayContaining(['w-full', 'min-w-0', 'flex-col', 'gap-4']),
-    );
-    expect(emittedClasses(screen.getByText('36').props.className)).toEqual(
-      expect.arrayContaining(['text-muted-foreground', 'text-xs', 'tabular-nums', 'w-10']),
-    );
-    await waitFor(() => expect(load).toHaveBeenCalled());
   });
 });

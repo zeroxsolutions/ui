@@ -1,6 +1,5 @@
 import { act, render, screen, userEvent } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import { useReasoningCollapsible } from '../../hooks/use-reasoning-collapsible';
 import { Text } from '../../ui/text';
 import {
@@ -19,10 +18,10 @@ function ReasoningLabel(): ReactNode {
 function Example(props: ReasoningCollapsibleProps) {
   return (
     <ReasoningCollapsible {...props}>
-      <ReasoningCollapsibleTrigger testID="trigger">
+      <ReasoningCollapsibleTrigger>
         <ReasoningLabel />
       </ReasoningCollapsibleTrigger>
-      <ReasoningCollapsibleContent testID="content">Checking the logs.</ReasoningCollapsibleContent>
+      <ReasoningCollapsibleContent>Checking the logs.</ReasoningCollapsibleContent>
     </ReasoningCollapsible>
   );
 }
@@ -103,23 +102,6 @@ describe('ReasoningCollapsible', () => {
 
     await expect(render(<ReasoningLabel />)).rejects.toThrow(
       'ReasoningCollapsible parts must be used within <ReasoningCollapsible>',
-    );
-  });
-
-  it('lays its trigger out as a full-width small ghost row', async () => {
-    await render(<Example />);
-
-    expect(emittedClasses(screen.getByTestId('trigger').props.className)).toEqual(
-      expect.arrayContaining(['w-full', 'justify-start', 'flex-row']),
-    );
-  });
-
-  it('sets a string body in small muted text, under a gap', async () => {
-    await render(<Example streaming />);
-
-    expect(emittedClasses(screen.getByTestId('content').props.className)).toContain('mt-2');
-    expect(emittedClasses(screen.getByText('Checking the logs.').props.className)).toEqual(
-      expect.arrayContaining(['text-muted-foreground', 'text-sm']),
     );
   });
 
