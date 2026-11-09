@@ -1,0 +1,35 @@
+---
+title: Unsaved indicator
+description: The unsaved-changes dot an editor shows on a tab, announced as an image named Unsaved changes.
+---
+
+<NativePreview name="unsaved-indicator-demo" />
+
+## Installation
+
+<InstallCommand name="unsaved-indicator" />
+
+The CLI writes `components/feedback/unsaved-indicator.tsx` and installs Utils.
+
+## Usage
+
+```tsx
+import { UnsavedIndicator } from '@/components/feedback/unsaved-indicator';
+```
+
+```tsx
+<View className="flex-row items-center gap-2">
+  <Text>page.tsx</Text>
+  <UnsavedIndicator />
+</View>
+```
+
+Use it for a tab's own pending-edit dot; for a presence or connection tone, use
+[Status indicator](/native/components/nativewind/status-indicator) instead.
+
+## API reference
+
+### UnsavedIndicator
+
+Takes every prop of React Native's `View`. It is one element for a screen reader, announced as an image named
+"Unsaved changes"; pass `aria-label` to name it in another language.

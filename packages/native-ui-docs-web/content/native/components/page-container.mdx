@@ -1,0 +1,48 @@
+---
+title: Page container
+description: The centered, max-width content column of a full-width surface, sized from a named max-width scale.
+---
+
+<NativePreview name="page-container-demo" />
+
+## Installation
+
+<InstallCommand name="page-container" />
+
+The CLI writes `components/layout/page-container.tsx`, installs Utils, and adds `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { PageContainer } from '@/components/layout/page-container';
+```
+
+```tsx
+<ScrollView>
+  <PageContainer size="lg" className="px-6 py-6">
+    ...
+  </PageContainer>
+</ScrollView>
+```
+
+Pick the width with `size`; `className` carries the surface's own padding and vertical rhythm. It does not scroll,
+as the web one does not, so put it inside the screen's `ScrollView`. It centres only the column's width, not its
+content on both axes; for that, use [Center](/native/components/nativewind/center) instead.
+
+## API reference
+
+### PageContainer
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop   | Type                             | Default |
+| ------ | -------------------------------- | ------- |
+| `size` | `'sm' \| 'md' \| 'lg' \| 'full'` | `'md'`  |
+
+The centred, max-width content column of a full-width surface, so content does not stretch edge to edge on a
+tablet held sideways; on a phone held upright every size is as wide as the screen. `size` picks the width from the
+max-width scale.
+
+### pageContainerVariants
+
+The `size` variant: `sm` `max-w-3xl`, `md` (the default) `max-w-5xl`, `lg` `max-w-7xl`, `full` `max-w-none`.

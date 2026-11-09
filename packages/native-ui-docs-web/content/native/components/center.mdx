@@ -1,0 +1,54 @@
+---
+title: Center
+description: A box that centers its children on both axes, stretched or kept to its content's width, with its element swappable through render.
+---
+
+<NativePreview name="center-demo" />
+
+## Installation
+
+<InstallCommand name="center" />
+
+The CLI writes `components/layout/center.tsx`, installs Utils, and adds `class-variance-authority`.
+
+## Usage
+
+```tsx
+import { Center } from '@/components/layout/center';
+```
+
+```tsx
+<Center className="h-32">
+  <Text>Centered content</Text>
+</Center>
+```
+
+The centring is fixed, unlike a plain View: reach for `flex-row items-center justify-center` directly when the
+caller needs to change the alignment itself. Its text goes in a [Text](/native/components/nativewind/text), as any
+View's does.
+
+## API reference
+
+### Center
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop     | Type                                               | Default |
+| -------- | -------------------------------------------------- | ------- |
+| `inline` | `boolean`                                          | `false` |
+| `render` | `ReactElement \| ((props, state) => ReactElement)` | -       |
+
+It lays its children out in a row, as the web's flex box does. Size, spacing and placement (`h-32`, `gap-2`) come
+from `className`; `inline` keeps the box to its content's width rather than stretching across its parent.
+`render` draws its element in place of the View, such as a `<Pressable />`, given Center's props under its own and
+its classes after Center's; a function is called with those props and `{ slot: 'center' }`. The element's
+semantics are then the caller's.
+
+### centerVariants
+
+The `inline` variant: `false` (the default) renders `flex`, `true` renders `flex self-start`.
+
+## Differences from the web
+
+- A device has no inline flow, so `inline` keeps the box to its content's width, which is what the web's
+  `inline-flex` changes in a block, instead of placing it in a line of text.

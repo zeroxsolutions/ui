@@ -14,15 +14,6 @@ const NOT_PORTED: ReadonlyMap<string, string> = new Map([
 /** The web items a later wave of the port brings, which the list loses as each wave lands. */
 const PENDING: ReadonlySet<string> = new Set([
   // wave 1
-  'status-indicator',
-  'unsaved-indicator',
-  'icon-media',
-  'icon-label',
-  'center',
-  'page-container',
-  'panel-header',
-  'panel-row',
-  'panel-field-group',
   'collapsible-card',
   'reasoning-collapsible',
   'copy-button',

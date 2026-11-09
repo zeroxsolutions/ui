@@ -1,0 +1,52 @@
+---
+title: Status indicator
+description: A small decorative dot colored by a semantic status tone (online, offline, busy or idle), hidden from screen readers, which can pulse for a state still in progress unless the system asks for reduced motion.
+---
+
+<NativePreview name="status-indicator-demo" />
+
+## Installation
+
+<InstallCommand name="status-indicator" />
+
+The CLI writes `components/feedback/status-indicator.tsx`, installs Motion and Utils, and adds
+`react-native-reanimated`.
+
+## Usage
+
+```tsx
+import { StatusIndicator } from '@/components/feedback/status-indicator';
+```
+
+The dot is hidden from a screen reader, so the text beside it carries the status:
+
+```tsx
+<View className="flex-row items-center gap-2">
+  <StatusIndicator tone="online" />
+  <Text>Online</Text>
+</View>
+```
+
+It is not for an identity colour, and not for an unsaved-changes flag, which is
+[Unsaved indicator](/native/components/nativewind/unsaved-indicator).
+
+## API reference
+
+### StatusIndicator
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop    | Type                                        | Default  |
+| ------- | ------------------------------------------- | -------- |
+| `tone`  | `'online' \| 'offline' \| 'busy' \| 'idle'` | required |
+| `pulse` | `boolean`                                   | `false`  |
+
+Online fills the dot with `success`, idle with `warning` and busy with `destructive`; offline draws a hollow ring
+in the muted foreground. `pulse` fades the dot to half opacity and back on a loop, and it stands still when the
+system asks for reduced motion. The `StatusTone` type is exported from the same file.
+
+## Differences from the web
+
+- The web dot sits in a line of text as an `inline-block`; a device has no inline flow, so place it in a row
+  beside its text.
+- The web's `data-tone` and `data-pulse` attributes are not set; a View takes no data attributes.

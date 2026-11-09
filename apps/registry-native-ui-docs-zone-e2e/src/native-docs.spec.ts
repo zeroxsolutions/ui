@@ -25,6 +25,15 @@ test("the native docs' sidebar lists their pages and the components under the de
     ['Unsaved changes toolbar', '/unsaved-changes-toolbar'],
     ['Tabs', '/tabs'],
     ['Tab bar', '/tab-bar'],
+    ['Status indicator', '/status-indicator'],
+    ['Unsaved indicator', '/unsaved-indicator'],
+    ['Icon media', '/icon-media'],
+    ['Icon label', '/icon-label'],
+    ['Center', '/center'],
+    ['Page container', '/page-container'],
+    ['Panel header', '/panel-header'],
+    ['Panel row', '/panel-row'],
+    ['Panel field group', '/panel-field-group'],
   ]) {
     await expect(sidebar.getByRole('link', { name, exact: true })).toHaveAttribute(
       'href',

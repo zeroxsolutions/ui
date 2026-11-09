@@ -1360,6 +1360,136 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "status-indicator",
+      "type": "registry:component",
+      "title": "Status indicator",
+      "description": "A small decorative dot colored by a semantic status tone (online, offline, busy or idle), hidden from screen readers, which can pulse for a state still in progress unless the system asks for reduced motion.",
+      "categories": ["feedback"],
+      "dependencies": ["react-native-reanimated"],
+      "registryDependencies": ["@zui/motion", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/feedback/status-indicator.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "unsaved-indicator",
+      "type": "registry:component",
+      "title": "Unsaved indicator",
+      "description": "The unsaved-changes dot an editor shows on a tab, announced as an image named Unsaved changes.",
+      "categories": ["feedback"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/feedback/unsaved-indicator.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "icon-media",
+      "type": "registry:component",
+      "title": "Icon media",
+      "description": "A small square that holds one glyph, its background and its glyph tinted through the caller's className, announced as an image when it is given a label.",
+      "categories": ["general"],
+      "registryDependencies": ["@zui/icon", "@zui/text", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/general/icon-media.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "icon-label",
+      "type": "registry:component",
+      "title": "Icon label",
+      "description": "A label whose icon stands in for a field's text in a dense panel, named for a screen reader by its aria-label, tied to its input through nativeID and sizing an Icon with no size of its own to a compact glyph.",
+      "categories": ["general"],
+      "dependencies": ["@rn-primitives/label"],
+      "registryDependencies": ["@zui/icon", "@zui/text", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/general/icon-label.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "center",
+      "type": "registry:component",
+      "title": "Center",
+      "description": "A box that centers its children on both axes, stretched or kept to its content's width, with its element swappable through render.",
+      "categories": ["layout"],
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/layout/center.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "page-container",
+      "type": "registry:component",
+      "title": "Page container",
+      "description": "The centered, max-width content column of a full-width surface, sized from a named max-width scale.",
+      "categories": ["layout"],
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/layout/page-container.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "panel-header",
+      "type": "registry:component",
+      "title": "Panel header",
+      "description": "The top strip of a side panel: one or more rows of a title and trailing actions over a bottom border.",
+      "categories": ["layout"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/layout/panel-header.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "panel-row",
+      "type": "registry:component",
+      "title": "Panel row",
+      "description": "One row of a property section, its fields beside a trailing action column that keeps every row's right edge aligned.",
+      "categories": ["layout"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/layout/panel-row.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "panel-field-group",
+      "type": "registry:component",
+      "title": "Panel field group",
+      "description": "The tight grid for paired and triplet inputs in a property panel, with any number of columns.",
+      "categories": ["layout"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/layout/panel-field-group.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

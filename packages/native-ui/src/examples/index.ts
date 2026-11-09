@@ -19,6 +19,7 @@ import { ButtonGroupDemo } from './button-group-demo';
 import { CalendarDemo } from './calendar-demo';
 import { CardDemo } from './card-demo';
 import { CarouselDemo } from './carousel-demo';
+import { CenterDemo } from './center-demo';
 import { ChartDemo } from './chart-demo';
 import { CheckboxDemo } from './checkbox-demo';
 import { CodeBlockDemo } from './code-block-demo';
@@ -36,6 +37,8 @@ import { FieldDemo } from './field-demo';
 import { FormDemo } from './form-demo';
 import { HoverCardDemo } from './hover-card-demo';
 import { IconDemo } from './icon-demo';
+import { IconLabelDemo } from './icon-label-demo';
+import { IconMediaDemo } from './icon-media-demo';
 import { InputDemo } from './input-demo';
 import { InputGroupDemo } from './input-group-demo';
 import { InputOtpDemo } from './input-otp-demo';
@@ -48,7 +51,11 @@ import { MessageDemo } from './message-demo';
 import { MessageScrollerDemo } from './message-scroller-demo';
 import { NativeSelectDemo } from './native-select-demo';
 import { NavigationMenuDemo } from './navigation-menu-demo';
+import { PageContainerDemo } from './page-container-demo';
 import { PaginationDemo } from './pagination-demo';
+import { PanelFieldGroupDemo } from './panel-field-group-demo';
+import { PanelHeaderDemo } from './panel-header-demo';
+import { PanelRowDemo } from './panel-row-demo';
 import { PasswordInputDemo } from './password-input-demo';
 import { PasswordStrengthDemo } from './password-strength-demo';
 import { PopoverDemo } from './popover-demo';
@@ -65,6 +72,7 @@ import { SkeletonDemo } from './skeleton-demo';
 import { SliderDemo } from './slider-demo';
 import { SonnerDemo } from './sonner-demo';
 import { SpinnerDemo } from './spinner-demo';
+import { StatusIndicatorDemo } from './status-indicator-demo';
 import { SwitchDemo } from './switch-demo';
 import { TabBarDemo } from './tab-bar-demo';
 import { TableDemo } from './table-demo';
@@ -78,6 +86,7 @@ import { ToggleGroupDemo } from './toggle-group-demo';
 import { TooltipDemo } from './tooltip-demo';
 import { TraceDemo } from './trace-demo';
 import { UnsavedChangesToolbarDemo } from './unsaved-changes-toolbar-demo';
+import { UnsavedIndicatorDemo } from './unsaved-indicator-demo';
 
 /** Each demo by its name, the file's name without `.tsx`, such as `button-demo`. */
 const demos: Readonly<Record<string, ComponentType>> = {
@@ -95,6 +104,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'calendar-demo': CalendarDemo,
   'card-demo': CardDemo,
   'carousel-demo': CarouselDemo,
+  'center-demo': CenterDemo,
   'chart-demo': ChartDemo,
   'checkbox-demo': CheckboxDemo,
   'code-block-demo': CodeBlockDemo,
@@ -112,6 +122,8 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'form-demo': FormDemo,
   'hover-card-demo': HoverCardDemo,
   'icon-demo': IconDemo,
+  'icon-label-demo': IconLabelDemo,
+  'icon-media-demo': IconMediaDemo,
   'input-demo': InputDemo,
   'input-group-demo': InputGroupDemo,
   'input-otp-demo': InputOtpDemo,
@@ -124,7 +136,11 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'message-scroller-demo': MessageScrollerDemo,
   'native-select-demo': NativeSelectDemo,
   'navigation-menu-demo': NavigationMenuDemo,
+  'page-container-demo': PageContainerDemo,
   'pagination-demo': PaginationDemo,
+  'panel-field-group-demo': PanelFieldGroupDemo,
+  'panel-header-demo': PanelHeaderDemo,
+  'panel-row-demo': PanelRowDemo,
   'password-input-demo': PasswordInputDemo,
   'password-strength-demo': PasswordStrengthDemo,
   'popover-demo': PopoverDemo,
@@ -141,6 +157,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'slider-demo': SliderDemo,
   'sonner-demo': SonnerDemo,
   'spinner-demo': SpinnerDemo,
+  'status-indicator-demo': StatusIndicatorDemo,
   'switch-demo': SwitchDemo,
   'tab-bar-demo': TabBarDemo,
   'table-demo': TableDemo,
@@ -154,6 +171,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'tooltip-demo': TooltipDemo,
   'trace-demo': TraceDemo,
   'unsaved-changes-toolbar-demo': UnsavedChangesToolbarDemo,
+  'unsaved-indicator-demo': UnsavedIndicatorDemo,
 };
 
 export { demos };

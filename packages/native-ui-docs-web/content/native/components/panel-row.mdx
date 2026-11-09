@@ -1,0 +1,72 @@
+---
+title: Panel row
+description: One row of a property section, its fields beside a trailing action column that keeps every row's right edge aligned.
+---
+
+<NativePreview name="panel-row-demo" />
+
+## Installation
+
+<InstallCommand name="panel-row" />
+
+The CLI writes `components/layout/panel-row.tsx` and installs Utils.
+
+## Usage
+
+```tsx
+import { PanelRow, PanelRowAction } from '@/components/layout/panel-row';
+```
+
+```tsx
+<PanelRow>
+  <PanelFieldGroup cols={2}>
+    <Field>
+      <FieldLabel nativeID="x">X</FieldLabel>
+      <Input aria-label="X" aria-labelledby="x" defaultValue="100" />
+    </Field>
+    <Field>
+      <FieldLabel nativeID="y">Y</FieldLabel>
+      <Input aria-label="Y" aria-labelledby="y" defaultValue="200" />
+    </Field>
+  </PanelFieldGroup>
+  <PanelRowAction>
+    <Button variant="ghost" size="icon" aria-label="Lock aspect ratio">
+      <Icon as={Lock} />
+    </Button>
+  </PanelRowAction>
+</PanelRow>
+```
+
+Compose a [Panel field group](/native/components/nativewind/panel-field-group) for the fields. The row keeps its
+action column whether a `PanelRowAction` is composed or not, so every row in the panel keeps the same right edge.
+
+## Composition
+
+```text
+PanelRow
+|-- PanelFieldGroup
+|   `-- Field
+|       |-- FieldLabel
+|       `-- Input
+`-- PanelRowAction
+    `-- Button
+```
+
+## API reference
+
+### PanelRow
+
+Takes every prop of React Native's `View`. One row of a property section: everything but the action goes in a
+leading column that takes the room left, and the action column after it is at least one default icon button
+(`size="icon"`) wide. The fields and the action line up at their bottom edge. It finds the action by its element,
+so pass `PanelRowAction` itself, not inside a component of your own.
+
+### PanelRowAction
+
+Takes every prop of React Native's `View`. The trailing action of a `PanelRow`, such as an aspect-lock toggle or a
+reset button, centred in its column.
+
+## Differences from the web
+
+- The web row is a CSS grid whose template a `grid-cols-*` class or the `--panel-row-columns` variable can
+  replace; React Native has no grid, so the two columns are fixed.

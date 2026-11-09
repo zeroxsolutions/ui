@@ -34,6 +34,15 @@ test('serves the react native items for each engine in each style', async ({ req
         'password-strength',
         'unsaved-changes-toolbar',
         'tab-bar',
+        'status-indicator',
+        'unsaved-indicator',
+        'icon-media',
+        'icon-label',
+        'center',
+        'page-container',
+        'panel-header',
+        'panel-row',
+        'panel-field-group',
       ]),
     );
 

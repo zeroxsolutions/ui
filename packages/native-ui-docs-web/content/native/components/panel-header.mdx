@@ -1,0 +1,67 @@
+---
+title: Panel header
+description: The top strip of a side panel, one or more rows of a title and trailing actions over a bottom border.
+---
+
+<NativePreview name="panel-header-demo" />
+
+## Installation
+
+<InstallCommand name="panel-header" />
+
+The CLI writes `components/layout/panel-header.tsx` and installs Utils.
+
+## Usage
+
+```tsx
+import { PanelHeader, PanelHeaderActions, PanelHeaderRow, PanelHeaderTitle } from '@/components/layout/panel-header';
+```
+
+```tsx
+<PanelHeader>
+  <PanelHeaderRow>
+    <PanelHeaderTitle>
+      <Text>Properties</Text>
+    </PanelHeaderTitle>
+    <PanelHeaderActions>
+      <Button variant="ghost" size="icon-sm" aria-label="Collapse panel">
+        <Icon as={PanelLeftClose} />
+      </Button>
+    </PanelHeaderActions>
+  </PanelHeaderRow>
+</PanelHeader>
+```
+
+It paints no background, so it takes its panel's own (usually `bg-card`). Stack a second `PanelHeaderRow` for a
+header with a second line, such as a tab strip.
+
+## Composition
+
+```text
+PanelHeader
+`-- PanelHeaderRow
+    |-- PanelHeaderTitle
+    `-- PanelHeaderActions
+        `-- Button
+```
+
+## API reference
+
+### PanelHeader
+
+Takes every prop of React Native's `View`. The top strip of a side panel: one or more `PanelHeaderRow`s over a
+bottom border in the border colour.
+
+### PanelHeaderRow
+
+Takes every prop of React Native's `View`. One fixed-height row of the header, as high as the style's row: 40px in
+Vega, 36px in Lyra and Nova.
+
+### PanelHeaderTitle
+
+Takes every prop of React Native's `View`. The row's growing leading part: the title and anything inline with it.
+Its text goes in a [Text](/native/components/nativewind/text).
+
+### PanelHeaderActions
+
+Takes every prop of React Native's `View`. The row's trailing buttons; never shrinks.

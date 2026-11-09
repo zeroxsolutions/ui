@@ -1,0 +1,51 @@
+---
+title: Icon media
+description: A small square that holds one glyph, its background and its glyph tinted through the caller's className, announced as an image when it is given a label.
+---
+
+<NativePreview name="icon-media-demo" />
+
+## Installation
+
+<InstallCommand name="icon-media" />
+
+The CLI writes `components/general/icon-media.tsx` and installs [Icon](/native/components/nativewind/icon),
+[Text](/native/components/nativewind/text) and Utils.
+
+## Usage
+
+```tsx
+import { IconMedia } from '@/components/general/icon-media';
+```
+
+```tsx
+<Tooltip>
+  <TooltipTrigger aria-label="Vision input">
+    <IconMedia className="bg-muted text-muted-foreground">
+      <Icon as={Eye} />
+    </IconMedia>
+  </TooltipTrigger>
+  <TooltipContent>
+    <Text>Vision input</Text>
+  </TooltipContent>
+</Tooltip>
+```
+
+It carries no meaning of its own, so one serves a model ability, a generation type or any icon the caller picks.
+Give it an `aria-label`, or name the [Tooltip](/native/components/nativewind/tooltip) trigger around it, which a
+press opens. For a field's own text label, use [Icon label](/native/components/nativewind/icon-label) instead.
+
+## API reference
+
+### IconMedia
+
+Takes every prop of React Native's `View`. The design system ships no tint for it; the caller's `className`
+supplies the colours. Its text classes, such as `text-muted-foreground`, go to the Icon and Text inside it, since
+a View draws no text colour, and the rest style the square. An Icon inside it with no `size-*` class of its own
+is drawn at `size-3`. With an `aria-label` it is one element for a screen reader, announced as an image.
+
+## Differences from the web
+
+- The web sizes any child `svg`; the native square sizes an [Icon](/native/components/nativewind/icon), which
+  takes the size through its container.
+- The web tooltip opens on hover; on a device the tooltip trigger around it opens on a press.
