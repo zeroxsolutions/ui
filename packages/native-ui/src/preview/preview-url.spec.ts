@@ -44,14 +44,18 @@ describe('demoNameFromDeepLink', () => {
 });
 
 describe('styleFromSearch', () => {
-  it('reads vega or nova from ?style=, beside the demo and the theme', () => {
+  it('reads the style from ?style=, beside the demo and the theme', () => {
     expect(styleFromSearch('?style=nova&demo=button-demo&theme=dark')).toBe('nova');
     expect(styleFromSearch('?style=vega')).toBe('vega');
   });
 
+  it.each(['luma', 'lyra', 'maia', 'mira', 'rhea', 'sera'])('reads %s, a style after Vega and Nova', (style) => {
+    expect(styleFromSearch(`?style=${style}`)).toBe(style);
+  });
+
   it('has no style when ?style= is absent or names a style the registries are not built in', () => {
     expect(styleFromSearch('?demo=button-demo')).toBeUndefined();
-    expect(styleFromSearch('?style=lyra')).toBeUndefined();
+    expect(styleFromSearch('?style=base-nova')).toBeUndefined();
   });
 });
 

@@ -48,11 +48,11 @@ test('an item page of each native section renders with its install command', asy
   }
 });
 
-test('the native installation names a vega and a nova style for each engine', async ({ page }) => {
+test('the native installation names the style for each engine', async ({ page }) => {
   await page.goto('/native/docs/installation');
 
   const article = page.getByRole('main');
-  for (const style of ['nativewind-vega', 'nativewind-nova', 'uniwind-vega', 'uniwind-nova']) {
+  for (const style of ['nativewind-<style>', 'uniwind-<style>']) {
     await expect(article.getByText(style, { exact: true }).first()).toBeVisible();
   }
 });

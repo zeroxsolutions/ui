@@ -30,7 +30,7 @@ const SOURCE_ROOT = 'src/';
 const EXAMPLES = join(PROJECT, 'src/examples');
 const SPEC_FILE = /\.spec\.[jt]sx?$/;
 /** Each upstream style the registries are built in, read from `styles/upstream/style-<style>.css`. */
-const STYLES = ['vega', 'nova'] as const;
+const STYLES = ['vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rhea'] as const;
 type Style = (typeof STYLES)[number];
 
 const ENGINES = ['nativewind', 'uniwind'] as const satisfies readonly Engine[];

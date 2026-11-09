@@ -109,8 +109,9 @@ describe('nativePageMarkdown', () => {
   it('gives the page once per native style, each with its own install URL', async () => {
     const byStyle = await nativePageMarkdownByStyle(buttonPage, 'uniwind');
 
-    expect(Object.keys(byStyle).sort()).toEqual(['nova', 'vega']);
+    expect(Object.keys(byStyle).sort()).toEqual(['luma', 'lyra', 'maia', 'mira', 'nova', 'rhea', 'sera', 'vega']);
     expect(byStyle.vega).toContain('r/styles/uniwind-vega/button.json');
     expect(byStyle.nova).toContain('r/styles/uniwind-nova/button.json');
+    expect(byStyle.rhea).toContain('r/styles/uniwind-rhea/button.json');
   });
 });

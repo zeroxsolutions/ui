@@ -18,11 +18,11 @@
     "src/examples/**/*.tsx",
     "src/preview/**/*.ts",
     "src/preview/**/*.tsx",
-    "dist/src/nativewind-nova/examples/**/*.ts",
-    "dist/src/nativewind-nova/examples/**/*.tsx",
+    "dist/src/nativewind-*/examples/**/*.ts",
+    "dist/src/nativewind-*/examples/**/*.tsx",
     // The preview draws each style's Toasters, whose toasts only that style's demos raise.
-    "dist/src/nativewind-nova/components/ui/sonner.tsx",
-    "dist/src/nativewind-nova/components/ui/toast.tsx",
+    "dist/src/nativewind-*/components/ui/sonner.tsx",
+    "dist/src/nativewind-*/components/ui/toast.tsx",
     // The slider's spec draws Nova's thumb, whose slot is `relative` where the item lays it `absolute`.
     "dist/src/nativewind-nova/components/ui/slider.tsx",
     "dist/src/nativewind-vega/**/*.ts",

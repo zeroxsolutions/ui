@@ -7,7 +7,8 @@ describe('parseStyle', () => {
   it("takes a style the platform publishes, and nothing else, as a URL's or a store's value", () => {
     expect(parseStyle('native', 'nova')).toBe('nova');
     expect(parseStyle('web', 'rhea')).toBe('rhea');
-    expect(parseStyle('native', 'rhea')).toBeUndefined();
+    expect(parseStyle('native', 'rhea')).toBe('rhea');
+    expect(parseStyle('native', 'base-nova')).toBeUndefined();
     expect(parseStyle('native', 'Nova')).toBeUndefined();
     expect(parseStyle('native', '')).toBeUndefined();
     expect(parseStyle('native', null)).toBeUndefined();
@@ -24,8 +25,8 @@ describe('currentStyle', () => {
   });
 
   it('falls back past a style the platform does not publish, to the last choice and then the default', () => {
-    expect(currentStyle('native', 'rhea', 'nova')).toBe('nova');
-    expect(currentStyle('native', 'rhea', 'luma')).toBe('vega');
+    expect(currentStyle('native', 'base-nova', 'nova')).toBe('nova');
+    expect(currentStyle('native', 'base-nova', 'nativewind-luma')).toBe('vega');
     expect(currentStyle('web', null, null)).toBe('nova');
   });
 });

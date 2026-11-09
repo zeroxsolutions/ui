@@ -1484,3 +1484,84 @@ describe('translateClasses for the rings and offsets a component draws as a bord
     },
   );
 });
+
+describe('translateClasses for the slots luma, sera and rhea write in their own way', () => {
+  const ENGINES = ['nativewind', 'uniwind'] as const;
+  const STYLES = Object.fromEntries(
+    (['luma', 'sera', 'rhea'] as const).map((style) => [
+      style,
+      parseSlotMap(readFileSync(join(__dirname, `../../styles/upstream/style-${style}.css`), 'utf8')),
+    ]),
+  ) as Record<'luma' | 'sera' | 'rhea', ReturnType<typeof parseSlotMap>>;
+  const slot = (style: keyof typeof STYLES, name: string, engine: Engine, state = ''): Translation =>
+    translateClasses(STYLES[style].get(name) ?? [], engine, 'view', state, {
+      name,
+      spacingVariables: parseSpacingVariables(STYLES[style]),
+    });
+
+  it.each([
+    ['luma', 'checked+size=default', 'translate-x-[16px]'],
+    ['luma', 'checked+size=sm', 'translate-x-[8px]'],
+    ['rhea', 'checked+size=default', 'translate-x-[12px]'],
+    ['rhea', 'checked+size=sm', 'translate-x-[8px]'],
+    ['sera', 'checked+size=default', 'translate-x-[16px]'],
+    ['sera', 'checked+size=sm', 'translate-x-[12px]'],
+  ] as const)(
+    "moves %s's Switch thumb at %s by its own width per Switch size, less or more the style's length",
+    (style, state, translate) => {
+      for (const engine of ENGINES) {
+        expect(slot(style, 'cn-switch-thumb', engine, state)).toEqual({ classes: [translate], unknown: [] });
+      }
+    },
+  );
+
+  it('draws no translate behind checked alone where the thumb has no single width', () => {
+    for (const engine of ENGINES) {
+      const checked = slot('luma', 'cn-switch-thumb', engine, 'checked');
+
+      expect(checked.unknown).toEqual([]);
+      expect(checked.classes.some((cls) => cls.startsWith('translate-'))).toBe(false);
+    }
+  });
+
+  it('still reports an own-size translate that no size of the part resolves in any state', () => {
+    for (const engine of ENGINES) {
+      expect(
+        translateClasses(['data-checked:translate-x-[calc(100%-8px)]'], engine, 'view', 'checked', {
+          name: 'cn-switch-thumb',
+        }).unknown,
+      ).toEqual(['data-checked:translate-x-[calc(100%-8px)]']);
+    }
+  });
+
+  it.each([
+    ['luma', 'cn-slider-thumb'],
+    ['rhea', 'cn-switch-thumb'],
+    ['luma', 'cn-drawer-popup'],
+    ['rhea', 'cn-combobox-chip-remove'],
+  ] as const)('translates %s %s with nothing unknown', (style, name) => {
+    for (const engine of ENGINES) {
+      expect(slot(style, name, engine).unknown).toEqual([]);
+    }
+  });
+
+  it("keeps a tab trigger's border transparent in the dark selected state its component borders", () => {
+    for (const engine of ENGINES) {
+      expect(slot('luma', 'cn-tabs-trigger', engine).classes).toEqual(
+        expect.arrayContaining(['border', 'border-transparent']),
+      );
+      expect(slot('luma', 'cn-tabs-trigger', engine, 'selected+variant=default').classes).toEqual([
+        'dark:border-transparent',
+      ]);
+    }
+  });
+
+  it.each([
+    ['rhea', 'rounded-2xl'],
+    ['sera', 'rounded-none'],
+  ] as const)("rounds %s's toast as %s without the important neither engine has", (style, rounded) => {
+    for (const engine of ENGINES) {
+      expect(slot(style, 'cn-toast', engine)).toEqual({ classes: [rounded], unknown: [] });
+    }
+  });
+});
