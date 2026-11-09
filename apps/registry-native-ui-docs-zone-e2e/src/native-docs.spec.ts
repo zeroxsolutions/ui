@@ -40,6 +40,13 @@ test("the native docs' sidebar lists their pages and the components under the de
     ['File type icon', '/file-type-icon'],
     ['Font preview', '/font-preview'],
     ['Image preview', '/image-preview'],
+    ['Permission card', '/permission-card'],
+    ['AI provider card', '/ai-provider-card'],
+    ['Model info card', '/model-info-card'],
+    ['Chat message', '/chat-message'],
+    ['Chat suggestion item', '/chat-suggestion-item'],
+    ['Floating toolbar', '/floating-toolbar'],
+    ['Editor tab', '/editor-tab'],
   ]) {
     await expect(sidebar.getByRole('link', { name, exact: true })).toHaveAttribute(
       'href',

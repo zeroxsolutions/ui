@@ -1,0 +1,79 @@
+---
+title: Editor tab
+description: One tab in an editor's tab strip, muted until active, whose close button shows at all times.
+---
+
+<NativePreview name="editor-tab-demo" />
+
+## Installation
+
+<InstallCommand name="editor-tab" />
+
+The CLI writes `components/navigation/editor-tab.tsx`, installs [Button](/native/components/nativewind/button),
+[Icon](/native/components/nativewind/icon), [Item](/native/components/nativewind/item),
+[Unsaved indicator](/native/components/nativewind/unsaved-indicator) and Utils, and adds `lucide-react-native`.
+
+## Usage
+
+```tsx
+import { EditorTab, EditorTabCloseButton, EditorTabTitle } from '@/components/navigation/editor-tab';
+```
+
+```tsx
+<EditorTab active dirty>
+  <ItemContent>
+    <EditorTabTitle>page.tsx</EditorTabTitle>
+  </ItemContent>
+  <ItemActions>
+    <EditorTabCloseButton aria-label="Close page.tsx" onPress={close} />
+  </ItemActions>
+</EditorTab>
+```
+
+Compose the parts inside [Item](/native/components/nativewind/item)'s `ItemContent` and `ItemActions`. Use it for
+one tab in an editor's tab strip; give it `active` for the document on show and `dirty` while that document has
+unsaved changes.
+
+## Composition
+
+```text
+EditorTab
+|-- ItemContent
+|   `-- EditorTabTitle
+`-- ItemActions
+    `-- EditorTabCloseButton
+```
+
+## API reference
+
+### EditorTab
+
+Takes every prop of [Item](/native/components/nativewind/item) except `variant` and `size`, which it fixes to
+`outline` and `xs`, plus:
+
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| `active` | `boolean` | `false` |
+| `dirty`  | `boolean` | `false` |
+
+It is as wide as its content.
+
+### EditorTabTitle
+
+Takes every prop of `ItemTitle`. It is muted until its tab is active.
+
+### EditorTabCloseButton
+
+Takes every prop of [Button](/native/components/nativewind/button) except `children`, which it supplies: a ghost
+extra-small icon button with an X, named "Close" unless given its own `aria-label`. On a dirty tab that is not
+active, the [Unsaved indicator](/native/components/nativewind/unsaved-indicator) sits before it. A press on it does
+not reach the tab, so closing a tab does not also activate it.
+
+## Differences from the web
+
+- The close button's X shows at all times, since a phone has no hover to reveal it. On a dirty tab the web shows the
+  unsaved dot in the X's place until the tab is hovered, focused or active; here the dot sits before the X while the
+  tab is dirty and not active.
+- `onPress` stands in for the web's `onClick`. The X is a static icon; the web's plays while the button is hovered
+  or focused.
+- The web's `data-slot`, `data-active` and `data-dirty` attributes are not set; a View takes no data attributes.

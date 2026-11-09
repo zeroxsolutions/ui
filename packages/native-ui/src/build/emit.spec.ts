@@ -195,6 +195,14 @@ describe('aliasImports', () => {
     );
   });
 
+  it("points a composed component's import of another at the consumer's components alias", () => {
+    const source = "import { StatusIndicator } from '../feedback/status-indicator';";
+
+    expect(aliasImports(source, 'components/data-display/ai-provider-card.tsx')).toBe(
+      "import { StatusIndicator } from '@/components/feedback/status-indicator';",
+    );
+  });
+
   it('leaves a package import alone', () => {
     const source = "import { Pressable } from 'react-native';";
 
@@ -207,7 +215,7 @@ describe('aliasImports', () => {
     );
   });
 
-  it('throws on a relative import outside ui, lib and hooks', () => {
+  it('throws on a relative import outside ui, components, lib and hooks', () => {
     expect(() => aliasImports("import x from '../theme/x';", 'ui/button.tsx')).toThrow(
       'No alias for ../theme/x in ui/button.tsx',
     );
@@ -227,7 +235,8 @@ interface BuiltItem {
 const PLATFORM_PACKAGES: ReadonlySet<string> = new Set(['react', 'react-native']);
 const BARE_WEIGHT = /\bfont-(?:normal|medium|semibold|bold)\b|fontWeight/;
 const IMPORT_SPECIFIER = /from '([^']+)'/g;
-const ALIASED_ITEM = /^@\/(?:components\/ui|lib|hooks)\/(.+)$/;
+// An item under components/ui, or a composed one under components/<category>, such as a status indicator.
+const ALIASED_ITEM = /^@\/(?:components\/[\w-]+|lib|hooks)\/(.+)$/;
 
 function packageName(specifier: string): string {
   const segments = specifier.split('/');

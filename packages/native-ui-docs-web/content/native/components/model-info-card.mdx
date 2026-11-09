@@ -1,0 +1,97 @@
+---
+title: Model info card
+description: The detail panel for one model, an identity header composed from Item parts over titled sections.
+---
+
+<NativePreview name="model-info-card-demo" />
+
+## Installation
+
+<InstallCommand name="model-info-card" />
+
+The CLI writes `components/data-display/model-info-card.tsx`, installs Utils, and adds
+`class-variance-authority`.
+
+## Usage
+
+```tsx
+import { ModelInfoCard, ModelInfoCardIndicator, ModelInfoCardSection } from '@/components/data-display/model-info-card';
+```
+
+```tsx
+<ModelInfoCard>
+  <Item size="xs">
+    <ItemMedia>
+      <ProviderLogo />
+    </ItemMedia>
+    <ItemContent>
+      <ItemTitle>GPT-4o</ItemTitle>
+      <ItemDescription>OpenAI</ItemDescription>
+    </ItemContent>
+    <ItemFooter>
+      <Text className="text-muted-foreground font-mono text-xs">gpt-4o</Text>
+    </ItemFooter>
+  </Item>
+  <ModelInfoCardSection>
+    <Item size="xs">
+      <ItemMedia>
+        <ModelInfoCardIndicator tone="chart-2" />
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle>Context length</ItemTitle>
+      </ItemContent>
+      <ItemActions>
+        <Text>128K tokens</Text>
+      </ItemActions>
+    </Item>
+  </ModelInfoCardSection>
+</ModelInfoCard>
+```
+
+Use it for the detail panel of one model, such as inside a
+[Hover card](/native/components/nativewind/hover-card)'s content. Compose the header and each section's heading
+row from [Item](/native/components/nativewind/item) parts.
+
+## Composition
+
+```text
+ModelInfoCard
+|-- Item
+|   |-- ItemMedia
+|   |-- ItemContent
+|   |   |-- ItemTitle
+|   |   `-- ItemDescription
+|   `-- ItemFooter
+`-- ModelInfoCardSection
+    `-- Item
+        |-- ItemMedia
+        |   `-- ModelInfoCardIndicator
+        |-- ItemContent
+        |   `-- ItemTitle
+        `-- ItemActions
+```
+
+## API reference
+
+### ModelInfoCard
+
+Takes every prop of React Native's `View`: a column of the header and the sections, 12px apart.
+
+### ModelInfoCardSection
+
+Takes every prop of React Native's `View`: a titled section, its heading row over its detail lines, 6px apart.
+
+### ModelInfoCardIndicator
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop   | Type                                                                       | Default   |
+| ------ | -------------------------------------------------------------------------- | --------- |
+| `tone` | `'muted' \| 'chart-1' \| 'chart-2' \| 'chart-3' \| 'chart-4' \| 'chart-5'` | `'muted'` |
+
+The accent bar beside a section title, in one of the theme's chart colours, or the muted foreground. It is hidden
+from a screen reader, which reads the title beside it.
+
+## Differences from the web
+
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

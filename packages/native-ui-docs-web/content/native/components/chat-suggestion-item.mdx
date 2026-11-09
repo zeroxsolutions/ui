@@ -1,0 +1,65 @@
+---
+title: Chat suggestion item
+description: One starter prompt in an empty conversation, an Item drawn as a button that hands its prompt to onSelectPrompt when pressed.
+---
+
+<NativePreview name="chat-suggestion-item-demo" />
+
+## Installation
+
+<InstallCommand name="chat-suggestion-item" />
+
+The CLI writes `components/data-entry/chat-suggestion-item.tsx` and installs
+[Item](/native/components/nativewind/item) and Utils.
+
+## Usage
+
+```tsx
+import { ChatSuggestionItem } from '@/components/data-entry/chat-suggestion-item';
+```
+
+```tsx
+<Empty>
+  <EmptyHeader>
+    <EmptyTitle>Start a conversation</EmptyTitle>
+  </EmptyHeader>
+  <EmptyContent>
+    <ItemGroup>
+      <ChatSuggestionItem prompt="Summarise this document" onSelectPrompt={send}>
+        <ItemMedia variant="icon">
+          <Icon as={FileText} />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>Summarise</ItemTitle>
+        </ItemContent>
+      </ChatSuggestionItem>
+    </ItemGroup>
+  </EmptyContent>
+</Empty>
+```
+
+Use it for the starter prompts of an empty conversation, inside an
+[Empty](/native/components/nativewind/empty) state.
+
+## API reference
+
+### ChatSuggestionItem
+
+Takes every prop of React Native's `Pressable`, plus:
+
+| Prop             | Type                       | Default  |
+| ---------------- | -------------------------- | -------- |
+| `prompt`         | `string`                   | required |
+| `onSelectPrompt` | `(prompt: string) => void` | -        |
+
+A small [Item](/native/components/nativewind/item), announced as a button named by its content. Pressing it hands
+`prompt` to `onSelectPrompt`, after the caller's `onPress`, unless that handler called `event.preventDefault()`.
+Without `onSelectPrompt` it is disabled, a read-only preview, unless `disabled` says otherwise; a disabled item stays
+announced, as dimmed. Its background turns muted while it is held down and enabled.
+
+## Differences from the web
+
+- `onPress` stands in for the web's `onClick`, and pressing for hovering: the muted background the web draws while
+  the item is hovered shows while it is pressed.
+- The web's `text-left` is not set; a Text starts at the leading edge already.
+- The web's `data-slot` attribute is not set; a Pressable takes no data attributes.

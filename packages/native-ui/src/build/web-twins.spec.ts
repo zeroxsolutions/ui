@@ -13,14 +13,6 @@ const NOT_PORTED: ReadonlyMap<string, string> = new Map([
 
 /** The web items a later wave of the port brings, which the list loses as each wave lands. */
 const PENDING: ReadonlySet<string> = new Set([
-  // wave 1
-  'permission-card',
-  'ai-provider-card',
-  'model-info-card',
-  'chat-message',
-  'chat-suggestion-item',
-  'floating-toolbar',
-  'editor-tab',
   // wave 2
   'number-field',
   'tag-input',

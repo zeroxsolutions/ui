@@ -6,6 +6,7 @@
 import type { ComponentType } from 'react';
 
 import { AccordionDemo } from './accordion-demo';
+import { AiProviderCardDemo } from './ai-provider-card-demo';
 import { AlertDemo } from './alert-demo';
 import { AlertDialogDemo } from './alert-dialog-demo';
 import { AspectRatioDemo } from './aspect-ratio-demo';
@@ -21,6 +22,8 @@ import { CardDemo } from './card-demo';
 import { CarouselDemo } from './carousel-demo';
 import { CenterDemo } from './center-demo';
 import { ChartDemo } from './chart-demo';
+import { ChatMessageDemo } from './chat-message-demo';
+import { ChatSuggestionItemDemo } from './chat-suggestion-item-demo';
 import { CheckboxDemo } from './checkbox-demo';
 import { CodeBlockDemo } from './code-block-demo';
 import { CodeInputDemo } from './code-input-demo';
@@ -34,9 +37,11 @@ import { DialogDemo } from './dialog-demo';
 import { DirectionDemo } from './direction-demo';
 import { DrawerDemo } from './drawer-demo';
 import { DropdownMenuDemo } from './dropdown-menu-demo';
+import { EditorTabDemo } from './editor-tab-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
 import { FileTypeIconDemo } from './file-type-icon-demo';
+import { FloatingToolbarDemo } from './floating-toolbar-demo';
 import { FontPreviewDemo } from './font-preview-demo';
 import { FormDemo } from './form-demo';
 import { HoverCardDemo } from './hover-card-demo';
@@ -54,6 +59,7 @@ import { MarkerDemo } from './marker-demo';
 import { MenubarDemo } from './menubar-demo';
 import { MessageDemo } from './message-demo';
 import { MessageScrollerDemo } from './message-scroller-demo';
+import { ModelInfoCardDemo } from './model-info-card-demo';
 import { NativeSelectDemo } from './native-select-demo';
 import { NavigationMenuDemo } from './navigation-menu-demo';
 import { PageContainerDemo } from './page-container-demo';
@@ -63,6 +69,7 @@ import { PanelHeaderDemo } from './panel-header-demo';
 import { PanelRowDemo } from './panel-row-demo';
 import { PasswordInputDemo } from './password-input-demo';
 import { PasswordStrengthDemo } from './password-strength-demo';
+import { PermissionCardDemo } from './permission-card-demo';
 import { PopoverDemo } from './popover-demo';
 import { ProgressDemo } from './progress-demo';
 import { QuestionnaireDemo } from './questionnaire-demo';
@@ -97,6 +104,7 @@ import { UnsavedIndicatorDemo } from './unsaved-indicator-demo';
 /** Each demo by its name, the file's name without `.tsx`, such as `button-demo`. */
 const demos: Readonly<Record<string, ComponentType>> = {
   'accordion-demo': AccordionDemo,
+  'ai-provider-card-demo': AiProviderCardDemo,
   'alert-demo': AlertDemo,
   'alert-dialog-demo': AlertDialogDemo,
   'aspect-ratio-demo': AspectRatioDemo,
@@ -112,6 +120,8 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'carousel-demo': CarouselDemo,
   'center-demo': CenterDemo,
   'chart-demo': ChartDemo,
+  'chat-message-demo': ChatMessageDemo,
+  'chat-suggestion-item-demo': ChatSuggestionItemDemo,
   'checkbox-demo': CheckboxDemo,
   'code-block-demo': CodeBlockDemo,
   'code-input-demo': CodeInputDemo,
@@ -125,9 +135,11 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'direction-demo': DirectionDemo,
   'drawer-demo': DrawerDemo,
   'dropdown-menu-demo': DropdownMenuDemo,
+  'editor-tab-demo': EditorTabDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
   'file-type-icon-demo': FileTypeIconDemo,
+  'floating-toolbar-demo': FloatingToolbarDemo,
   'font-preview-demo': FontPreviewDemo,
   'form-demo': FormDemo,
   'hover-card-demo': HoverCardDemo,
@@ -145,6 +157,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'menubar-demo': MenubarDemo,
   'message-demo': MessageDemo,
   'message-scroller-demo': MessageScrollerDemo,
+  'model-info-card-demo': ModelInfoCardDemo,
   'native-select-demo': NativeSelectDemo,
   'navigation-menu-demo': NavigationMenuDemo,
   'page-container-demo': PageContainerDemo,
@@ -154,6 +167,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'panel-row-demo': PanelRowDemo,
   'password-input-demo': PasswordInputDemo,
   'password-strength-demo': PasswordStrengthDemo,
+  'permission-card-demo': PermissionCardDemo,
   'popover-demo': PopoverDemo,
   'progress-demo': ProgressDemo,
   'questionnaire-demo': QuestionnaireDemo,

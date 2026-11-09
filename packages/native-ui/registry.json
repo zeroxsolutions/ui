@@ -1603,6 +1603,107 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "permission-card",
+      "type": "registry:component",
+      "title": "Permission card",
+      "description": "An inline, non-modal AI-consent request that stays in scrollback after it resolves, showing its decision row while pending and its resolved row once the host settles its status.",
+      "categories": ["feedback"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/badge", "@zui/card", "@zui/icon", "@zui/text-children", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/feedback/permission-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "ai-provider-card",
+      "type": "registry:component",
+      "title": "AI provider card",
+      "description": "A small card for one AI provider in an overview grid, whose footer note carries a status dot and whose trigger, a button under its content, selects it on a press anywhere but its action.",
+      "categories": ["data-display"],
+      "registryDependencies": ["@zui/card", "@zui/focus-visible", "@zui/status-indicator", "@zui/text", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/ai-provider-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "model-info-card",
+      "type": "registry:component",
+      "title": "Model info card",
+      "description": "The detail panel for one model: an identity header composed from Item parts over titled sections, each marked by an accent bar in a chart colour.",
+      "categories": ["data-display"],
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/model-info-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "chat-message",
+      "type": "registry:component",
+      "title": "Chat message",
+      "description": "One chat message row over Message, with a line before its leading edge, hidden from screen readers, while its text is still streaming.",
+      "categories": ["data-display"],
+      "registryDependencies": ["@zui/direction", "@zui/message", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/chat-message.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "chat-suggestion-item",
+      "type": "registry:component",
+      "title": "Chat suggestion item",
+      "description": "One starter prompt in an empty conversation, an Item drawn as a button that hands its prompt to onSelectPrompt when pressed, and is disabled without it.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/item", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/chat-suggestion-item.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "floating-toolbar",
+      "type": "registry:component",
+      "title": "Floating toolbar",
+      "description": "A floating card-color toolbar shell with a hairline border and a shadow, announced as a toolbar around the tools the caller composes.",
+      "categories": ["layout"],
+      "registryDependencies": ["@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/layout/floating-toolbar.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "editor-tab",
+      "type": "registry:component",
+      "title": "Editor tab",
+      "description": "One tab in an editor's tab strip, muted until active, whose close button shows at all times, with the unsaved dot before it on a dirty tab that is not active.",
+      "categories": ["navigation"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/button", "@zui/icon", "@zui/item", "@zui/unsaved-indicator", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/navigation/editor-tab.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

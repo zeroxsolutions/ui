@@ -327,7 +327,9 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
  * moved up by half its own 10px and 2px more, a percentage less a length neither engine computes, so it is moved
  * by the 7px that comes to. A tab trigger's transparent border is important over the dark input border its
  * component gives a selected tab of the default variant, so the class becomes the border and the same colour
- * in that state, which the component merges after its own. A class may become several, space-separated.
+ * in that state, which the component merges after its own. zui's floating toolbar takes its ring's colour from
+ * the slot and its width from the component, so the slot's colours become a border's, light and dark, and the
+ * component draws the border as wide as the web's ring. A class may become several, space-separated.
  */
 const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map([
   [
@@ -351,6 +353,14 @@ const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = 
     ]),
   ],
   ['cn-avatar-badge', new Map([['ring-background', 'border-background']])],
+  [
+    'cn-floating-toolbar',
+    new Map([
+      ['ring-foreground/10', 'border-foreground/10'],
+      ['ring-foreground/5', 'border-foreground/5'],
+      ['dark:ring-foreground/10', 'dark:border-foreground/10'],
+    ]),
+  ],
   ['cn-tooltip-arrow', new Map([['translate-y-[calc(-50%-2px)]', 'translate-y-[-7px]']])],
   [
     'cn-tabs-trigger',

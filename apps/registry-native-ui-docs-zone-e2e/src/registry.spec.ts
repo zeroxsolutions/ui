@@ -49,6 +49,13 @@ test('serves the react native items for each engine in each style', async ({ req
         'file-type-icon',
         'font-preview',
         'image-preview',
+        'permission-card',
+        'ai-provider-card',
+        'model-info-card',
+        'chat-message',
+        'chat-suggestion-item',
+        'floating-toolbar',
+        'editor-tab',
       ]),
     );
 
