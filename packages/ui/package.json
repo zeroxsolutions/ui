@@ -124,6 +124,13 @@
           "parallel": false
         }
       },
+      "sync-primitives": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node tools/sync-primitives.mts"
+        }
+      },
       "examples-index": {
         "executor": "nx:run-commands",
         "outputs": [
