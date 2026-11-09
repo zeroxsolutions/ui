@@ -43,7 +43,15 @@ import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './button';
 import { useDirection, useMirrored } from './direction';
 import { Icon } from './icon';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectTriggerClassesContext,
+  SelectValue,
+  type SelectTriggerClasses,
+} from './select';
 import { Text } from './text';
 
 // A `cn-<slot>` token stands for that slot's classes; the registry build replaces each with
@@ -221,6 +229,21 @@ type CalendarDayButtonProps = Omit<PressableProps, 'children'> & {
   modifiers: DayModifiers;
   locale?: Locale;
   children?: ReactNode;
+};
+
+/**
+ * A caption dropdown as upstream draws it: a bordered box around the month or the year and a small muted
+ * chevron, in place of a Select's trigger; its list is a Select's.
+ */
+const DROPDOWN_CLASSES: SelectTriggerClasses = {
+  trigger: 'flex-row items-center gap-1 rounded-md cn-calendar-dropdown-root cn-calendar-caption-label',
+  sizeDefault: '',
+  sizeSm: '',
+  invalid: '',
+  disabled: 'opacity-50',
+  text: 'font-sans-medium text-sm cn-calendar-caption-label/text',
+  icon: '',
+  chevron: 'size-3.5 text-muted-foreground',
 };
 
 /**
@@ -618,7 +641,7 @@ function Calendar(props: CalendarProps): ReactNode {
   const caption = (month: Date) => {
     if (captionLayout === 'label') {
       return (
-        <Text aria-live="polite" className="font-sans-medium text-sm">
+        <Text aria-live="polite" className="font-sans-medium cn-calendar-caption/text text-sm">
           {formatters.formatCaption(month, options)}
         </Text>
       );
@@ -644,9 +667,11 @@ function Calendar(props: CalendarProps): ReactNode {
       onChange: (value: string) => void,
     ) => (
       <Select value={value} onValueChange={onChange} items={items}>
-        <SelectTrigger size="sm" aria-label={label} className="cn-calendar-caption-label">
-          <SelectValue />
-        </SelectTrigger>
+        <SelectTriggerClassesContext.Provider value={DROPDOWN_CLASSES}>
+          <SelectTrigger aria-label={label}>
+            <SelectValue />
+          </SelectTrigger>
+        </SelectTriggerClassesContext.Provider>
         <SelectContent>
           {items.map((item) => (
             <SelectItem key={item.value} value={item.value} disabled={item.disabled}>

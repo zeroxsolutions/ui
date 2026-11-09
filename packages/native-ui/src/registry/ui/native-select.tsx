@@ -16,8 +16,10 @@ import {
   SelectItem,
   SelectLabel,
   SelectTrigger,
+  SelectTriggerClassesContext,
   SelectValue,
   type SelectContentProps,
+  type SelectTriggerClasses,
   type SelectTriggerProps,
 } from './select';
 
@@ -34,6 +36,21 @@ function toSelectValue(value: string): string {
 function fromSelectValue(value: string): string {
   return value === EMPTY_VALUE ? '' : value;
 }
+
+/**
+ * The field drawn with upstream's native-select slots in place of a Select's trigger: the chevron sits over
+ * the field's end, and the box around the field, not the field, is dimmed while disabled.
+ */
+const FIELD_CLASSES: SelectTriggerClasses = {
+  trigger: 'flex-row items-center cn-native-select',
+  sizeDefault: '',
+  sizeSm: 'cn-native-select@size=sm',
+  invalid: 'cn-native-select@invalid',
+  disabled: '',
+  text: 'cn-native-select/text',
+  icon: 'cn-native-select/icon',
+  chevron: 'absolute cn-native-select-icon cn-native-select-icon/text',
+};
 
 /** Whether the options inside a NativeSelectOptGroup are disabled with it. */
 const GroupDisabledContext = createContext(false);
@@ -94,7 +111,7 @@ type NativeSelectProps = Omit<SelectTriggerProps, 'children' | 'size'> & {
 };
 
 /**
- * A field that picks one of its options, with a chevron at its end, drawn with Select: a press opens the
+ * A field that picks one of its options, with a chevron at its end; its list is a Select's: a press opens the
  * list of NativeSelectOptions, and choosing one closes it and shows its label. Until another is chosen it
  * shows the first option that is not disabled, as HTML's select does, so an option with an empty value and
  * a label such as "Select a fruit" asks for a choice. It is announced as a combobox; name it with
@@ -114,16 +131,18 @@ function NativeSelect({
   const first = options.find((option) => !option.disabled)?.value;
   const startsWith = defaultValue ?? first;
   return (
-    <View className={cn('relative self-start', className)}>
+    <View className={cn('relative self-start', props.disabled === true && 'opacity-50', className)}>
       <Select
         value={value === undefined ? undefined : toSelectValue(value)}
         defaultValue={startsWith === undefined ? undefined : toSelectValue(startsWith)}
         onValueChange={(chosen) => onValueChange?.(fromSelectValue(chosen))}
         items={options.map((option) => ({ label: option.label, value: toSelectValue(option.value) }))}
       >
-        <SelectTrigger size={size} {...props}>
-          <SelectValue />
-        </SelectTrigger>
+        <SelectTriggerClassesContext.Provider value={FIELD_CLASSES}>
+          <SelectTrigger size={size} {...props}>
+            <SelectValue />
+          </SelectTrigger>
+        </SelectTriggerClassesContext.Provider>
         <SelectContent portalHost={portalHost}>{children}</SelectContent>
       </Select>
     </View>

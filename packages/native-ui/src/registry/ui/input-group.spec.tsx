@@ -271,6 +271,18 @@ describe('InputGroupButton', () => {
     expect(emittedClasses(screen.getByRole('button').props.className)).toContain('size-6');
   });
 
+  it('takes the sm size, which spaces its contents in the styles that space them', async () => {
+    await render(
+      <InputGroupButton size="sm">
+        <Text>Search</Text>
+      </InputGroupButton>,
+    );
+    const button = screen.getByRole('button').props.className as string;
+
+    expect(emittedClasses(button, 'lyra')).toContain('gap-1');
+    expect(button).toContain('cn-input-group-button-size-sm');
+  });
+
   it('draws an icon in its default xs size at 14px', async () => {
     // The spec renders the source, whose icon class is still the slot token, so the token is
     // registered with the size the build translates it to.

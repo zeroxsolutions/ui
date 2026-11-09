@@ -66,7 +66,7 @@ function Accordion({
       collapsible
       value={value}
       onValueChange={handleValueChange}
-      className={cn('w-full flex-col', className)}
+      className={cn('cn-accordion w-full flex-col', className)}
       {...props}
     >
       {items.map((child, index) => (

@@ -12,6 +12,10 @@ mira, nova, rhea, sera).
   `nx run @zeroxsolutions/native-ui:upstream-refresh [commit]` refreshes them from a shadcn-ui/ui commit,
   the head of `main` without one; the commit that lands a refresh names the commit it read.
 - `src/build/upstream-coverage.spec.ts` fails on an upstream item that has no registry item.
+- `styles/upstream/base-item-slots.json` holds the `cn-` tokens each of upstream's base items writes, from
+  the same commit as the style sheets. `src/build/upstream-slots.spec.ts` fails on a slot they write that no
+  native item writes and the spec does not name as one a device cannot draw, and on a slot a native item
+  writes that only another of upstream's bases writes.
 - `nx run @zeroxsolutions/native-ui:build-registry` writes the registries to `dist/r/styles/`.
   `@zeroxsolutions/registry-ui` copies them into its site, which serves them under `/r/styles/`.
   It also writes each registry's sources to `dist/src/<engine>-<style>/` as an app holds them after

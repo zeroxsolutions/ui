@@ -166,6 +166,32 @@ interface WebElement {
   setAttribute(name: string, value: string): void;
 }
 
+/**
+ * The classes a SelectTrigger draws with. A field drawn with a Select under another item's slots, such as a
+ * NativeSelect or a Calendar's month dropdown, provides its own.
+ */
+interface SelectTriggerClasses {
+  trigger: string;
+  sizeDefault: string;
+  sizeSm: string;
+  invalid: string;
+  disabled: string;
+  text: string;
+  icon: string;
+  chevron: string;
+}
+
+const SelectTriggerClassesContext = createContext<SelectTriggerClasses>({
+  trigger: 'flex-row items-center justify-between cn-select-trigger',
+  sizeDefault: 'cn-select-trigger@size=default',
+  sizeSm: 'cn-select-trigger@size=sm',
+  invalid: 'cn-select-trigger@invalid',
+  disabled: 'opacity-50',
+  text: 'cn-select-trigger/text',
+  icon: 'cn-select-trigger/icon',
+  chevron: 'cn-select-trigger-icon cn-select-trigger-icon/text',
+});
+
 type SelectTriggerProps = Omit<ComponentProps<typeof SelectPrimitive.Trigger>, 'children'> & {
   children?: ReactNode;
   /** `sm` draws the trigger 32px tall rather than 36px. */
@@ -190,6 +216,7 @@ function SelectTrigger({
   ref,
   ...props
 }: SelectTriggerProps): ReactNode {
+  const classes = useContext(SelectTriggerClassesContext);
   const rootRef = useContext(SelectTriggerRefContext);
   const composed = useCallback(
     (node: SelectPrimitive.TriggerRef | null) => {
@@ -203,22 +230,22 @@ function SelectTrigger({
     [rootRef, ref],
   );
   return (
-    <TextClassContext.Provider value="cn-select-trigger/text">
-      <IconClassContext.Provider value="cn-select-trigger/icon">
+    <TextClassContext.Provider value={classes.text}>
+      <IconClassContext.Provider value={classes.icon}>
         <SelectPrimitive.Trigger
           ref={composed}
           className={cn(
-            'flex-row items-center justify-between cn-select-trigger',
-            size === 'sm' ? 'cn-select-trigger@size=sm' : 'cn-select-trigger@size=default',
-            invalid && 'cn-select-trigger@invalid',
-            props.disabled === true && 'opacity-50',
+            classes.trigger,
+            size === 'sm' ? classes.sizeSm : classes.sizeDefault,
+            invalid && classes.invalid,
+            props.disabled === true && classes.disabled,
             className,
           )}
           aria-invalid={invalid}
           {...props}
         >
           {children}
-          <Icon as={ChevronDown} className="cn-select-trigger-icon cn-select-trigger-icon/text" />
+          <Icon as={ChevronDown} className={classes.chevron} />
         </SelectPrimitive.Trigger>
       </IconClassContext.Provider>
     </TextClassContext.Provider>
@@ -484,6 +511,7 @@ export {
   SelectScrollUpButton,
   SelectSeparator,
   SelectTrigger,
+  SelectTriggerClassesContext,
   SelectValue,
 };
 export type {
@@ -494,6 +522,7 @@ export type {
   SelectLabelProps,
   SelectProps,
   SelectSeparatorProps,
+  SelectTriggerClasses,
   SelectTriggerProps,
   SelectValueProps,
 };

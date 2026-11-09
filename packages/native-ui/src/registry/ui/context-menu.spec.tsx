@@ -251,6 +251,17 @@ describe('ContextMenu', () => {
     expect(screen.queryByRole('menuitem', { name: 'Email' })).toBeNull();
   });
 
+  it("draws a sub-menu's items in the menu's own box, with the sub-menu's shadow", async () => {
+    const user = await open();
+    await user.press(item('Invite users'));
+    let box = item('Email').parent;
+    while (box && !String(box.props.className).includes('cn-context-menu-subcontent')) box = box.parent;
+    const classes = box?.props.className as string;
+
+    expect(emittedClasses(classes)).toEqual(expect.arrayContaining(['bg-popover', 'shadow-lg']));
+    expect(emittedClasses(classes, 'sera')).toContain('shadow-md');
+  });
+
   it('closes on a press outside its content', async () => {
     const user = await open();
 

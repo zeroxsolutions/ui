@@ -5,12 +5,16 @@ import { emitSource } from './emit';
 import { parseSlotMap, type SlotMap } from './slot-map';
 import { themeRadius, type UpstreamColors } from './theme';
 
-type Style = 'vega' | 'nova';
+const STYLES = ['vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rhea'] as const;
 
-const STYLE_SLOTS: Readonly<Record<Style, SlotMap>> = {
-  vega: parseSlotMap(readFileSync(join(__dirname, '../../styles/upstream/style-vega.css'), 'utf8')),
-  nova: parseSlotMap(readFileSync(join(__dirname, '../../styles/upstream/style-nova.css'), 'utf8')),
-};
+type Style = (typeof STYLES)[number];
+
+const STYLE_SLOTS = Object.fromEntries(
+  STYLES.map((style) => [
+    style,
+    parseSlotMap(readFileSync(join(__dirname, `../../styles/upstream/style-${style}.css`), 'utf8')),
+  ]),
+) as Readonly<Record<Style, SlotMap>>;
 
 const RADIUS = themeRadius(
   JSON.parse(readFileSync(join(__dirname, '../../styles/upstream/colors-neutral.json'), 'utf8')) as UpstreamColors,

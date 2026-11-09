@@ -12,12 +12,13 @@ describe('Separator', () => {
     expect(emittedClasses(rule.props.className)).toEqual(expect.arrayContaining(['bg-border', 'h-px', 'w-full']));
   });
 
-  it('takes the vertical slot when vertical', async () => {
+  it('stretches across its row, one pixel wide, when vertical', async () => {
     await render(<Separator orientation="vertical" decorative={false} testID="rule" />);
     const classes = emittedClasses(screen.getByTestId('rule').props.className);
 
-    expect(classes).toEqual(expect.arrayContaining(['bg-border', 'h-full', 'w-px']));
+    expect(classes).toEqual(expect.arrayContaining(['bg-border', 'self-stretch', 'w-px']));
     expect(classes).not.toContain('h-px');
+    expect(classes).not.toContain('h-full');
     expect(screen.getByTestId('rule').props['aria-orientation']).toBe('vertical');
   });
 

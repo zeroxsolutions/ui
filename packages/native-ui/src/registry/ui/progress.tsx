@@ -38,7 +38,7 @@ function Progress({ className, value = 0, children, 'aria-label': ariaLabel, ...
         <ProgressPrimitive.Root
           value={filled}
           aria-label={ariaLabel}
-          className={cn('w-full overflow-hidden cn-progress', className)}
+          className={cn('w-full overflow-hidden cn-progress-track', className)}
           {...props}
         >
           <ProgressIndicator />

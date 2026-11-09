@@ -170,6 +170,15 @@ describe('Combobox', () => {
     expect(screen.getAllByTestId('command-check')).toHaveLength(1);
   });
 
+  it("draws the check mark over the end of the item's padding, as upstream does", async () => {
+    await open({ defaultValue: 'nuxt' });
+    let box = screen.getByTestId('command-check').parent;
+    while (box && typeof box.props.className !== 'string') box = box.parent;
+
+    expect(emittedClasses(box?.props.className)).toEqual(expect.arrayContaining(['absolute', 'right-2', 'size-4']));
+    expect(emittedClasses(option('Nuxt.js').props.className)).toContain('pr-8');
+  });
+
   it("highlights the chosen item as the list opens, in the combobox's accent colour", async () => {
     await open({ defaultValue: 'nuxt' });
 

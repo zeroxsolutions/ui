@@ -485,8 +485,11 @@ type ContextMenuSubContentProps = ComponentProps<typeof ContextMenuPrimitive.Sub
  */
 function ContextMenuSubContent({ className, ...props }: ContextMenuSubContentProps): ReactNode {
   return (
-    <TextClassContext.Provider value="cn-context-menu-sub-content/text">
-      <ContextMenuPrimitive.SubContent className={cn('cn-context-menu-sub-content', className)} {...props} />
+    <TextClassContext.Provider value="cn-context-menu-content/text">
+      <ContextMenuPrimitive.SubContent
+        className={cn('cn-context-menu-content cn-context-menu-subcontent', className)}
+        {...props}
+      />
     </TextClassContext.Provider>
   );
 }

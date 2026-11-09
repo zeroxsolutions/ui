@@ -400,6 +400,8 @@ interface CommandItemClasses {
   text: string;
   highlightedText: string;
   icon: string;
+  /** The box the check mark of a checked item is drawn in. */
+  indicator: string;
 }
 
 const CommandItemClassesContext = createContext<CommandItemClasses>({
@@ -408,6 +410,7 @@ const CommandItemClassesContext = createContext<CommandItemClasses>({
   text: 'cn-command-item/text',
   highlightedText: 'cn-command-item/text@selected',
   icon: 'cn-command-item/icon',
+  indicator: 'ml-auto',
 });
 
 type CommandItemProps = Omit<ComponentProps<typeof Pressable>, 'children' | 'onPress'> & {
@@ -504,7 +507,7 @@ function CommandItem({
           >
             {children}
             {checked && (
-              <View className="ml-auto">
+              <View className={classes.indicator}>
                 <Icon as={Check} testID="command-check" />
               </View>
             )}

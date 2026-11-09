@@ -236,6 +236,23 @@ describe('Calendar', () => {
     expect(holdsMirrored(screen.getByRole('button', { name: 'Go to the Next Month' }))).toBe(true);
   });
 
+  it('draws each caption dropdown as a bordered box around its label, as upstream does', async () => {
+    await render(<Calendar mode="single" today={TODAY} captionLayout="dropdown" />);
+    const month = screen.getByRole('combobox', { name: 'Choose the Month' }).props.className as string;
+
+    expect(emittedClasses(month)).toEqual(expect.arrayContaining(['border', 'border-input', 'h-8', 'pl-2', 'pr-1']));
+    expect(emittedClasses(month)).not.toContain('justify-between');
+    expect(emittedClasses(month, 'lyra')).toContain('rounded-none');
+  });
+
+  it("writes the caption in the style's caption type", async () => {
+    await render(<Calendar mode="single" today={TODAY} />);
+    const caption = screen.getByText('October 2026').props.className as string;
+
+    expect(emittedClasses(caption, 'sera')).toEqual(expect.arrayContaining(['uppercase', 'tracking-wide']));
+    expect(emittedClasses(caption)).not.toContain('uppercase');
+  });
+
   it('picks the month and the year from dropdowns in the dropdown caption', async () => {
     jest.useFakeTimers();
     jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(false);

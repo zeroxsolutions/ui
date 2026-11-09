@@ -59,6 +59,14 @@ describe('Accordion', () => {
   const elapse = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms));
   const finishMotion = () => elapse(400);
 
+  it('is boxed in the styles that box it', async () => {
+    await render(<Faq testID="faq" />);
+    const root = screen.getByTestId('faq').props.className as string;
+
+    expect(emittedClasses(root, 'maia')).toEqual(expect.arrayContaining(['overflow-hidden', 'rounded-2xl', 'border']));
+    expect(emittedClasses(root)).not.toContain('border');
+  });
+
   it('has triggers announced as collapsed buttons, and renders no content while closed', async () => {
     await render(<Faq />);
 

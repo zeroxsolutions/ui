@@ -163,6 +163,7 @@ const inputGroupButtonVariants = cva('flex-row items-center shadow-none cn-input
   variants: {
     size: {
       xs: 'cn-input-group-button-size-xs',
+      sm: 'cn-input-group-button-size-sm',
       'icon-xs': 'cn-input-group-button-size-icon-xs',
       'icon-sm': 'cn-input-group-button-size-icon-sm',
     },
@@ -176,6 +177,8 @@ const inputGroupButtonIconVariants = cva('', {
   variants: {
     size: {
       xs: 'cn-input-group-button-size-xs/icon',
+      // The sm size leaves its icon at the Button's own size, as upstream's does.
+      sm: '',
       'icon-xs': 'cn-input-group-button-size-icon-xs/icon',
       'icon-sm': 'cn-input-group-button-size-icon-sm/icon',
     },
@@ -189,7 +192,7 @@ type InputGroupButtonProps = Omit<ButtonProps, 'size'> & VariantProps<typeof inp
 
 /**
  * A Button sized to sit inside an addon, `ghost` unless given another variant: `xs`, the default,
- * for a short label, and `icon-xs` or `icon-sm` for an icon alone, which is named with `aria-label`.
+ * for a short label, `sm` for a longer one, and `icon-xs` or `icon-sm` for an icon alone, which is named with `aria-label`.
  */
 function InputGroupButton({
   className,
