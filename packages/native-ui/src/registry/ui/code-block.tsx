@@ -285,7 +285,7 @@ function CodeBlockCopyButton({
         variant={variant}
         size={size}
         aria-label={copied ? 'Copied' : 'Copy'}
-        className={className}
+        className={cn('cn-code-block-copy-button', className)}
         onPress={(event) => {
           onPress?.(event);
           Clipboard.setStringAsync(value)

@@ -1,0 +1,606 @@
+{
+  "accordion": [
+    "cn-accordion",
+    "cn-accordion-content",
+    "cn-accordion-content-inner",
+    "cn-accordion-item",
+    "cn-accordion-trigger",
+    "cn-accordion-trigger-icon"
+  ],
+  "alert-dialog": [
+    "cn-alert-dialog-action",
+    "cn-alert-dialog-cancel",
+    "cn-alert-dialog-content",
+    "cn-alert-dialog-description",
+    "cn-alert-dialog-footer",
+    "cn-alert-dialog-header",
+    "cn-alert-dialog-media",
+    "cn-alert-dialog-overlay",
+    "cn-alert-dialog-title",
+    "cn-font-heading"
+  ],
+  "alert": [
+    "cn-alert",
+    "cn-alert-action",
+    "cn-alert-description",
+    "cn-alert-title",
+    "cn-alert-variant-default",
+    "cn-alert-variant-destructive"
+  ],
+  "aspect-ratio": [],
+  "attachment": [
+    "cn-attachment",
+    "cn-attachment-action",
+    "cn-attachment-actions",
+    "cn-attachment-content",
+    "cn-attachment-description",
+    "cn-attachment-group",
+    "cn-attachment-media",
+    "cn-attachment-media-variant-icon",
+    "cn-attachment-media-variant-image",
+    "cn-attachment-orientation-horizontal",
+    "cn-attachment-orientation-vertical",
+    "cn-attachment-size-default",
+    "cn-attachment-size-sm",
+    "cn-attachment-size-xs",
+    "cn-attachment-title",
+    "cn-attachment-trigger"
+  ],
+  "avatar": [
+    "cn-avatar",
+    "cn-avatar-badge",
+    "cn-avatar-fallback",
+    "cn-avatar-group",
+    "cn-avatar-group-count",
+    "cn-avatar-image"
+  ],
+  "badge": [
+    "cn-badge",
+    "cn-badge-variant-default",
+    "cn-badge-variant-destructive",
+    "cn-badge-variant-ghost",
+    "cn-badge-variant-link",
+    "cn-badge-variant-outline",
+    "cn-badge-variant-secondary"
+  ],
+  "breadcrumb": [
+    "cn-breadcrumb",
+    "cn-breadcrumb-ellipsis",
+    "cn-breadcrumb-item",
+    "cn-breadcrumb-link",
+    "cn-breadcrumb-list",
+    "cn-breadcrumb-page",
+    "cn-breadcrumb-separator",
+    "cn-rtl-flip"
+  ],
+  "bubble": [
+    "cn-bubble",
+    "cn-bubble-content",
+    "cn-bubble-group",
+    "cn-bubble-reactions",
+    "cn-bubble-reactions-align-end",
+    "cn-bubble-reactions-align-start",
+    "cn-bubble-reactions-side-bottom",
+    "cn-bubble-reactions-side-top",
+    "cn-bubble-variant-default",
+    "cn-bubble-variant-destructive",
+    "cn-bubble-variant-ghost",
+    "cn-bubble-variant-muted",
+    "cn-bubble-variant-outline",
+    "cn-bubble-variant-secondary",
+    "cn-bubble-variant-tinted"
+  ],
+  "button-group": [
+    "cn-button-group",
+    "cn-button-group-orientation-horizontal",
+    "cn-button-group-orientation-vertical",
+    "cn-button-group-separator",
+    "cn-button-group-text"
+  ],
+  "button": [
+    "cn-button",
+    "cn-button-size-default",
+    "cn-button-size-icon",
+    "cn-button-size-icon-lg",
+    "cn-button-size-icon-sm",
+    "cn-button-size-icon-xs",
+    "cn-button-size-lg",
+    "cn-button-size-sm",
+    "cn-button-size-xs",
+    "cn-button-variant-default",
+    "cn-button-variant-destructive",
+    "cn-button-variant-ghost",
+    "cn-button-variant-link",
+    "cn-button-variant-outline",
+    "cn-button-variant-secondary"
+  ],
+  "calendar": [
+    "cn-calendar",
+    "cn-calendar-caption",
+    "cn-calendar-caption-label",
+    "cn-calendar-day-button",
+    "cn-calendar-dropdown-root",
+    "cn-rtl-flip"
+  ],
+  "card": [
+    "cn-card",
+    "cn-card-action",
+    "cn-card-content",
+    "cn-card-description",
+    "cn-card-footer",
+    "cn-card-header",
+    "cn-card-title",
+    "cn-font-heading"
+  ],
+  "carousel": [
+    "cn-carousel-next",
+    "cn-carousel-previous",
+    "cn-rtl-flip"
+  ],
+  "chart": [
+    "cn-chart",
+    "cn-chart-tooltip"
+  ],
+  "checkbox": [
+    "cn-checkbox",
+    "cn-checkbox-indicator"
+  ],
+  "code-block": [
+    "cn-code-block",
+    "cn-code-block-actions",
+    "cn-code-block-code",
+    "cn-code-block-content",
+    "cn-code-block-copy-button",
+    "cn-code-block-footer",
+    "cn-code-block-header",
+    "cn-code-block-line",
+    "cn-code-block-line-variant-added",
+    "cn-code-block-line-variant-default",
+    "cn-code-block-line-variant-highlighted",
+    "cn-code-block-line-variant-removed",
+    "cn-code-block-title",
+    "cn-code-block-variant-default",
+    "cn-code-block-variant-destructive"
+  ],
+  "collapsible": [],
+  "combobox": [
+    "cn-combobox-chip",
+    "cn-combobox-chip-indicator-icon",
+    "cn-combobox-chip-input",
+    "cn-combobox-chip-remove",
+    "cn-combobox-chips",
+    "cn-combobox-clear",
+    "cn-combobox-clear-icon",
+    "cn-combobox-content",
+    "cn-combobox-content-logical",
+    "cn-combobox-empty",
+    "cn-combobox-group",
+    "cn-combobox-input",
+    "cn-combobox-item",
+    "cn-combobox-item-indicator",
+    "cn-combobox-item-indicator-icon",
+    "cn-combobox-label",
+    "cn-combobox-list",
+    "cn-combobox-separator",
+    "cn-combobox-trigger",
+    "cn-combobox-trigger-icon",
+    "cn-menu-target",
+    "cn-menu-translucent"
+  ],
+  "command": [
+    "cn-command",
+    "cn-command-dialog",
+    "cn-command-empty",
+    "cn-command-group",
+    "cn-command-input",
+    "cn-command-input-group",
+    "cn-command-input-icon",
+    "cn-command-input-wrapper",
+    "cn-command-item",
+    "cn-command-item-indicator",
+    "cn-command-list",
+    "cn-command-separator",
+    "cn-command-shortcut"
+  ],
+  "context-menu": [
+    "cn-context-menu-checkbox-item",
+    "cn-context-menu-content",
+    "cn-context-menu-content-logical",
+    "cn-context-menu-item",
+    "cn-context-menu-item-indicator",
+    "cn-context-menu-label",
+    "cn-context-menu-radio-item",
+    "cn-context-menu-separator",
+    "cn-context-menu-shortcut",
+    "cn-context-menu-sub-trigger",
+    "cn-context-menu-subcontent",
+    "cn-context-menu-trigger",
+    "cn-menu-target",
+    "cn-menu-translucent",
+    "cn-rtl-flip"
+  ],
+  "dialog": [
+    "cn-dialog-close",
+    "cn-dialog-content",
+    "cn-dialog-description",
+    "cn-dialog-footer",
+    "cn-dialog-header",
+    "cn-dialog-overlay",
+    "cn-dialog-title",
+    "cn-font-heading"
+  ],
+  "direction": [],
+  "drawer": [
+    "cn-drawer-content-base",
+    "cn-drawer-description",
+    "cn-drawer-footer-base",
+    "cn-drawer-header-base",
+    "cn-drawer-overlay",
+    "cn-drawer-popup",
+    "cn-drawer-swipe-handle",
+    "cn-drawer-title",
+    "cn-font-heading"
+  ],
+  "dropdown-menu": [
+    "cn-dropdown-menu-checkbox-item",
+    "cn-dropdown-menu-content",
+    "cn-dropdown-menu-content-logical",
+    "cn-dropdown-menu-item",
+    "cn-dropdown-menu-item-indicator",
+    "cn-dropdown-menu-label",
+    "cn-dropdown-menu-radio-item",
+    "cn-dropdown-menu-separator",
+    "cn-dropdown-menu-shortcut",
+    "cn-dropdown-menu-sub-content",
+    "cn-dropdown-menu-sub-trigger",
+    "cn-menu-target",
+    "cn-menu-translucent",
+    "cn-rtl-flip"
+  ],
+  "empty": [
+    "cn-empty",
+    "cn-empty-content",
+    "cn-empty-description",
+    "cn-empty-header",
+    "cn-empty-media",
+    "cn-empty-media-default",
+    "cn-empty-media-icon",
+    "cn-empty-title",
+    "cn-font-heading"
+  ],
+  "field": [
+    "cn-field",
+    "cn-field-content",
+    "cn-field-description",
+    "cn-field-error",
+    "cn-field-group",
+    "cn-field-label",
+    "cn-field-legend",
+    "cn-field-orientation-horizontal",
+    "cn-field-orientation-responsive",
+    "cn-field-orientation-vertical",
+    "cn-field-separator",
+    "cn-field-separator-content",
+    "cn-field-set",
+    "cn-field-title"
+  ],
+  "hover-card": [
+    "cn-hover-card-content",
+    "cn-hover-card-content-logical"
+  ],
+  "input-group": [
+    "cn-input-group",
+    "cn-input-group-addon",
+    "cn-input-group-addon-align-block-end",
+    "cn-input-group-addon-align-block-start",
+    "cn-input-group-addon-align-inline-end",
+    "cn-input-group-addon-align-inline-start",
+    "cn-input-group-button",
+    "cn-input-group-button-size-icon-sm",
+    "cn-input-group-button-size-icon-xs",
+    "cn-input-group-button-size-sm",
+    "cn-input-group-button-size-xs",
+    "cn-input-group-input",
+    "cn-input-group-text",
+    "cn-input-group-textarea"
+  ],
+  "input-otp": [
+    "cn-input-otp",
+    "cn-input-otp-caret",
+    "cn-input-otp-caret-line",
+    "cn-input-otp-group",
+    "cn-input-otp-input",
+    "cn-input-otp-separator",
+    "cn-input-otp-slot"
+  ],
+  "input": [
+    "cn-input"
+  ],
+  "item": [
+    "cn-item",
+    "cn-item-actions",
+    "cn-item-content",
+    "cn-item-description",
+    "cn-item-footer",
+    "cn-item-group",
+    "cn-item-header",
+    "cn-item-media",
+    "cn-item-media-variant-default",
+    "cn-item-media-variant-icon",
+    "cn-item-media-variant-image",
+    "cn-item-separator",
+    "cn-item-size-default",
+    "cn-item-size-sm",
+    "cn-item-size-xs",
+    "cn-item-title",
+    "cn-item-variant-default",
+    "cn-item-variant-muted",
+    "cn-item-variant-outline"
+  ],
+  "kbd": [
+    "cn-kbd",
+    "cn-kbd-group"
+  ],
+  "label": [
+    "cn-label"
+  ],
+  "marker": [
+    "cn-marker",
+    "cn-marker-content",
+    "cn-marker-icon",
+    "cn-marker-variant-border",
+    "cn-marker-variant-default",
+    "cn-marker-variant-separator"
+  ],
+  "menubar": [
+    "cn-menu-target",
+    "cn-menu-translucent",
+    "cn-menubar",
+    "cn-menubar-checkbox-item",
+    "cn-menubar-checkbox-item-indicator",
+    "cn-menubar-content",
+    "cn-menubar-content-logical",
+    "cn-menubar-item",
+    "cn-menubar-label",
+    "cn-menubar-radio-item",
+    "cn-menubar-radio-item-indicator",
+    "cn-menubar-separator",
+    "cn-menubar-shortcut",
+    "cn-menubar-sub-content",
+    "cn-menubar-sub-trigger",
+    "cn-menubar-trigger"
+  ],
+  "message-scroller": [
+    "cn-message-scroller",
+    "cn-message-scroller-button",
+    "cn-message-scroller-content",
+    "cn-message-scroller-item",
+    "cn-message-scroller-viewport"
+  ],
+  "message": [
+    "cn-message",
+    "cn-message-avatar",
+    "cn-message-content",
+    "cn-message-footer",
+    "cn-message-group",
+    "cn-message-header"
+  ],
+  "native-select": [
+    "cn-native-select",
+    "cn-native-select-icon",
+    "cn-native-select-wrapper"
+  ],
+  "navigation-menu": [
+    "cn-navigation-menu",
+    "cn-navigation-menu-content",
+    "cn-navigation-menu-indicator",
+    "cn-navigation-menu-indicator-arrow",
+    "cn-navigation-menu-item",
+    "cn-navigation-menu-link",
+    "cn-navigation-menu-list",
+    "cn-navigation-menu-popup",
+    "cn-navigation-menu-positioner",
+    "cn-navigation-menu-trigger",
+    "cn-navigation-menu-trigger-icon"
+  ],
+  "pagination": [
+    "cn-pagination",
+    "cn-pagination-content",
+    "cn-pagination-ellipsis",
+    "cn-pagination-link",
+    "cn-pagination-next",
+    "cn-pagination-next-text",
+    "cn-pagination-previous",
+    "cn-pagination-previous-text",
+    "cn-rtl-flip"
+  ],
+  "popover": [
+    "cn-popover-content",
+    "cn-popover-content-logical",
+    "cn-popover-description",
+    "cn-popover-header",
+    "cn-popover-title"
+  ],
+  "progress": [
+    "cn-progress-indicator",
+    "cn-progress-label",
+    "cn-progress-root",
+    "cn-progress-track",
+    "cn-progress-value"
+  ],
+  "questionnaire": [
+    "cn-font-heading",
+    "cn-questionnaire",
+    "cn-questionnaire-actions",
+    "cn-questionnaire-choice",
+    "cn-questionnaire-choice-content",
+    "cn-questionnaire-choice-description",
+    "cn-questionnaire-choice-indicator",
+    "cn-questionnaire-choice-indicator-check",
+    "cn-questionnaire-choice-indicator-dot",
+    "cn-questionnaire-choice-input",
+    "cn-questionnaire-choice-label",
+    "cn-questionnaire-choice-shortcut",
+    "cn-questionnaire-choices",
+    "cn-questionnaire-description",
+    "cn-questionnaire-error",
+    "cn-questionnaire-input",
+    "cn-questionnaire-input-wrapper",
+    "cn-questionnaire-item",
+    "cn-questionnaire-next",
+    "cn-questionnaire-previous",
+    "cn-questionnaire-progress",
+    "cn-questionnaire-shortcut",
+    "cn-questionnaire-skip",
+    "cn-questionnaire-submit",
+    "cn-questionnaire-title"
+  ],
+  "radio-group": [
+    "cn-radio-group",
+    "cn-radio-group-indicator",
+    "cn-radio-group-indicator-icon",
+    "cn-radio-group-item"
+  ],
+  "resizable": [
+    "cn-resizable-handle",
+    "cn-resizable-handle-icon",
+    "cn-resizable-panel-group"
+  ],
+  "scroll-area": [
+    "cn-scroll-area",
+    "cn-scroll-area-scrollbar",
+    "cn-scroll-area-thumb",
+    "cn-scroll-area-viewport"
+  ],
+  "select": [
+    "cn-menu-target",
+    "cn-menu-translucent",
+    "cn-select-content",
+    "cn-select-content-logical",
+    "cn-select-group",
+    "cn-select-item",
+    "cn-select-item-indicator",
+    "cn-select-item-indicator-icon",
+    "cn-select-item-text",
+    "cn-select-label",
+    "cn-select-scroll-down-button",
+    "cn-select-scroll-up-button",
+    "cn-select-separator",
+    "cn-select-trigger",
+    "cn-select-trigger-icon",
+    "cn-select-value"
+  ],
+  "separator": [],
+  "sheet": [
+    "cn-font-heading",
+    "cn-sheet-close",
+    "cn-sheet-content",
+    "cn-sheet-description",
+    "cn-sheet-footer",
+    "cn-sheet-header",
+    "cn-sheet-overlay",
+    "cn-sheet-title"
+  ],
+  "sidebar": [
+    "cn-rtl-flip",
+    "cn-sidebar-content",
+    "cn-sidebar-footer",
+    "cn-sidebar-gap",
+    "cn-sidebar-group",
+    "cn-sidebar-group-action",
+    "cn-sidebar-group-content",
+    "cn-sidebar-group-label",
+    "cn-sidebar-header",
+    "cn-sidebar-inner",
+    "cn-sidebar-input",
+    "cn-sidebar-inset",
+    "cn-sidebar-menu",
+    "cn-sidebar-menu-action",
+    "cn-sidebar-menu-badge",
+    "cn-sidebar-menu-button",
+    "cn-sidebar-menu-button-size-default",
+    "cn-sidebar-menu-button-size-lg",
+    "cn-sidebar-menu-button-size-sm",
+    "cn-sidebar-menu-button-variant-default",
+    "cn-sidebar-menu-button-variant-outline",
+    "cn-sidebar-menu-skeleton",
+    "cn-sidebar-menu-skeleton-icon",
+    "cn-sidebar-menu-skeleton-text",
+    "cn-sidebar-menu-sub",
+    "cn-sidebar-menu-sub-button",
+    "cn-sidebar-rail",
+    "cn-sidebar-separator",
+    "cn-sidebar-trigger"
+  ],
+  "skeleton": [
+    "cn-skeleton"
+  ],
+  "slider": [
+    "cn-slider",
+    "cn-slider-range",
+    "cn-slider-thumb",
+    "cn-slider-track"
+  ],
+  "sonner": [
+    "cn-toast"
+  ],
+  "spinner": [],
+  "switch": [
+    "cn-switch",
+    "cn-switch-thumb"
+  ],
+  "table": [
+    "cn-table",
+    "cn-table-body",
+    "cn-table-caption",
+    "cn-table-cell",
+    "cn-table-container",
+    "cn-table-footer",
+    "cn-table-head",
+    "cn-table-header",
+    "cn-table-row"
+  ],
+  "tabs": [
+    "cn-tabs",
+    "cn-tabs-content",
+    "cn-tabs-list",
+    "cn-tabs-list-variant-default",
+    "cn-tabs-list-variant-line",
+    "cn-tabs-trigger"
+  ],
+  "textarea": [
+    "cn-textarea"
+  ],
+  "toast": [
+    "cn-toast"
+  ],
+  "toggle-group": [
+    "cn-toggle-group",
+    "cn-toggle-group-item"
+  ],
+  "toggle": [
+    "cn-toggle",
+    "cn-toggle-size-default",
+    "cn-toggle-size-lg",
+    "cn-toggle-size-sm",
+    "cn-toggle-variant-default",
+    "cn-toggle-variant-outline"
+  ],
+  "tooltip": [
+    "cn-tooltip-arrow",
+    "cn-tooltip-arrow-logical",
+    "cn-tooltip-content",
+    "cn-tooltip-content-logical"
+  ],
+  "trace": [
+    "cn-trace",
+    "cn-trace-collapsible",
+    "cn-trace-collapsible-content",
+    "cn-trace-collapsible-content-inner",
+    "cn-trace-collapsible-trigger",
+    "cn-trace-description",
+    "cn-trace-icon",
+    "cn-trace-line",
+    "cn-trace-title"
+  ]
+}

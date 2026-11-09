@@ -284,7 +284,9 @@ function withBaseBorderColour(classes: readonly string[]): string[] {
  * translate is the engine's to resolve. A thumb clips its background to its padding box in the light scheme,
  * which a View has no counterpart of. A drawer's popup takes a stacked shadow while a second drawer is open
  * inside it, which the native drawer never opens. A combobox chip's remove button takes no pointer while it
- * is disabled, which a disabled pressable already takes none of.
+ * is disabled, which a disabled pressable already takes none of. A native select's field styles its
+ * placeholder and its selected text as a text input's and removes the browser's own look of a select; the
+ * native field is a pressable showing the chosen option's label, with none of those.
  */
 const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   [
@@ -303,6 +305,15 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
     new Set(['data-[swipe-direction=down]:data-nested-drawer-open:shadow-(--drawer-stacked-shadow)']),
   ],
   ['cn-combobox-chip-remove', new Set(['aria-disabled:pointer-events-none'])],
+  [
+    'cn-native-select',
+    new Set([
+      'appearance-none',
+      'placeholder:text-muted-foreground',
+      'selection:bg-primary',
+      'selection:text-primary-foreground',
+    ]),
+  ],
 ]);
 
 /**

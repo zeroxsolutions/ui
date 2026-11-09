@@ -242,12 +242,12 @@ function ComboboxContent({
         {/* The items draw with the combobox's own slots in place of a Command's. */}
         <CommandItemClassesContext.Provider
           value={{
-            // The check mark is drawn in the row rather than over upstream's pr-8, so that padding goes.
-            item: 'cn-combobox-item pr-2',
+            item: 'cn-combobox-item',
             highlighted: 'cn-combobox-item@highlighted',
             text: 'cn-combobox-item/text',
             highlightedText: 'cn-combobox-item/text@highlighted',
             icon: 'cn-combobox-item/icon',
+            indicator: 'cn-combobox-item-indicator',
           }}
         >
           {/* The content is drawn afresh at each open, so the chosen item is highlighted each time. */}
