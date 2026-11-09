@@ -1,0 +1,71 @@
+---
+title: Chat message
+description: One chat message row over Message, with a line beside its leading edge while its text is still streaming.
+---
+
+<NativePreview name="chat-message-demo" />
+
+## Installation
+
+<InstallCommand name="chat-message" />
+
+The CLI writes `components/data-display/chat-message.tsx`, installs
+[Direction](/native/components/nativewind/direction), [Message](/native/components/nativewind/message) and Utils.
+
+## Usage
+
+```tsx
+import { ChatMessage, ChatMessageAccent } from '@/components/data-display/chat-message';
+```
+
+Compose the row from [Message](/native/components/nativewind/message)'s parts, and add a `ChatMessageAccent`
+while the row streams:
+
+```tsx
+<ChatMessage streaming>
+  <ChatMessageAccent className="bg-chart-2" />
+  <MessageContent>
+    <MessageHeader>{agent.name}</MessageHeader>
+    <Bubble variant="ghost">
+      <BubbleContent>{text}</BubbleContent>
+    </Bubble>
+  </MessageContent>
+</ChatMessage>
+```
+
+Use it to mark a row as still streaming; a static row needs only Message.
+
+## Composition
+
+```text
+ChatMessage
+|-- ChatMessageAccent
+`-- MessageContent
+    |-- MessageHeader
+    `-- Bubble
+        `-- BubbleContent
+```
+
+## API reference
+
+### ChatMessage
+
+Takes every prop of [Message](/native/components/nativewind/message), plus:
+
+| Prop        | Type      | Default |
+| ----------- | --------- | ------- |
+| `streaming` | `boolean` | `false` |
+
+### ChatMessageAccent
+
+Takes every prop of React Native's `View`. The line 12px before the row's leading edge, drawn only while the row
+streams and hidden from a screen reader. It is painted in the primary colour, or in the colour a `className` or
+`style` gives it, such as the agent's. It sits outside the row, so the list around the row needs room there.
+
+## Differences from the web
+
+- The accent takes its colour from its own `className` or `style`; the web reads a `--chat-message-accent` CSS
+  variable set on the row, which neither engine passes from a parent's style to a child.
+- The accent is not rendered while the row is not streaming; the web keeps it in the page and hides it by a group
+  selector.
+- The web's `data-slot` and `data-streaming` attributes are not set; a View takes no data attributes.

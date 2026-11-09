@@ -1,0 +1,56 @@
+---
+title: Image preview
+description: A frame that shows an image contained within it, over a checkerboard so transparent pixels read clearly.
+---
+
+<NativePreview name="image-preview-demo" />
+
+## Installation
+
+<InstallCommand name="image-preview" />
+
+The CLI writes `components/data-display/image-preview.tsx`, installs [Icon](/native/components/nativewind/icon)
+and Utils, and adds `lucide-react-native` and `react-native-svg`.
+
+## Usage
+
+```tsx
+import { ImagePreview, ImagePreviewImage } from '@/components/data-display/image-preview';
+```
+
+```tsx
+<ImagePreview>
+  <ImagePreviewImage src={src} alt="Logo" />
+</ImagePreview>
+```
+
+It fills the space it is given, so size its wrapper rather than the frame itself. For a font file's specimen
+instead of an image, use [Font preview](/native/components/nativewind/font-preview).
+
+## Composition
+
+```text
+ImagePreview
+`-- ImagePreviewImage
+```
+
+## API reference
+
+### ImagePreview
+
+Takes every prop of React Native's `View`. A frame on the background colour with a checkerboard of the muted
+colour drawn under its children, hidden from a screen reader and from touches.
+
+### ImagePreviewImage
+
+Takes every prop of React Native's `Image`, `src` included. It fills the frame and draws the image centred and
+scaled down to fit, never up (`resizeMode="center"`, which a caller may override). It defaults `alt` to empty,
+which hides it from a screen reader as decorative; give it real text when the image conveys information, and it
+is announced as an image of that name.
+
+## Differences from the web
+
+- The checkerboard is an svg pattern laid under the image; React Native draws no CSS gradient, which the web's
+  `bg-checkerboard` is, so the item adds no utility to the app's CSS.
+- React Native's Image draws no svg file; preview one with `react-native-svg` instead.
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

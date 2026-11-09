@@ -1,0 +1,106 @@
+---
+title: AI provider card
+description: A small card for one AI provider in an overview grid, whose footer note carries a status dot and whose trigger selects it.
+---
+
+<NativePreview name="ai-provider-card-demo" />
+
+## Installation
+
+<InstallCommand name="ai-provider-card" />
+
+The CLI writes `components/data-display/ai-provider-card.tsx`, installs
+[Card](/native/components/nativewind/card), [Status indicator](/native/components/nativewind/status-indicator),
+[Text](/native/components/nativewind/text), Focus visible and Utils.
+
+## Usage
+
+```tsx
+import {
+  AiProviderCard,
+  AiProviderCardAction,
+  AiProviderCardDescription,
+  AiProviderCardLabel,
+  AiProviderCardTrigger,
+} from '@/components/data-display/ai-provider-card';
+```
+
+Compose a `CardHeader` holding `CardTitle` and an `AiProviderCardDescription`, a `CardFooter` holding the label and
+the action, and a trigger as the card's direct child:
+
+```tsx
+<AiProviderCard>
+  <CardHeader>
+    <CardTitle>OpenAI</CardTitle>
+    <AiProviderCardDescription>GPT reasoning and chat models for general-purpose assistance.</AiProviderCardDescription>
+  </CardHeader>
+  <CardFooter>
+    <AiProviderCardLabel tone="online">12 models</AiProviderCardLabel>
+    <AiProviderCardAction>
+      <Switch aria-label="Enable OpenAI" checked={enabled} onCheckedChange={setEnabled} />
+    </AiProviderCardAction>
+  </CardFooter>
+  <AiProviderCardTrigger aria-label="Select OpenAI" onPress={select} />
+</AiProviderCard>
+```
+
+Use it for a grid the person picks one provider from.
+
+## Composition
+
+```text
+AiProviderCard
+|-- CardHeader
+|   |-- CardTitle
+|   `-- AiProviderCardDescription
+|-- CardFooter
+|   |-- AiProviderCardLabel
+|   `-- AiProviderCardAction
+`-- AiProviderCardTrigger
+```
+
+## API reference
+
+### AiProviderCard
+
+Takes every prop of [Card](/native/components/nativewind/card), and defaults its `size` to `sm`. Given an
+`AiProviderCardTrigger` as a direct child, a press anywhere on the card runs the trigger's `onPress`, but on a
+control inside an `AiProviderCardAction`, which takes the press itself.
+
+### AiProviderCardDescription
+
+Takes every prop of `CardDescription`: the provider blurb, on at most two lines.
+
+### AiProviderCardLabel
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop   | Type                                        | Default |
+| ------ | ------------------------------------------- | ------- |
+| `tone` | `'online' \| 'offline' \| 'busy' \| 'idle'` | -       |
+
+The footer note, such as a model count or an attention message, in small muted text on one line. Given a `tone`,
+a [Status indicator](/native/components/nativewind/status-indicator) before it carries the status, so the note
+reads the same at any tone.
+
+### AiProviderCardAction
+
+Takes every prop of React Native's `View`: a control inside the card, such as a
+[Switch](/native/components/nativewind/switch), which takes a press itself, so pressing it does not select the card.
+
+### AiProviderCardTrigger
+
+Takes every prop of React Native's `Pressable`. The button that selects the card, announced as a button and
+covering the card under its content, so a screen reader and a keyboard reach the card as one button; give it an
+`aria-label` naming the provider. Pressing the card draws a hairline inside its edge, and keyboard focus a wider
+ring, both rounded as the card is.
+
+## Differences from the web
+
+- `onPress` stands in for the web's `onClick`, and pressing for hovering: the hairline the web draws while the card
+  is hovered shows while it is pressed.
+- The trigger lies under the card's content, and the card around it takes a press on the content; the web lays the
+  trigger over the content and lifts the action above it, which a view cannot, since it stacks above its siblings
+  only.
+- The trigger's inset rings are drawn as borders, which a view draws inside its box as the web's inset ring is.
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

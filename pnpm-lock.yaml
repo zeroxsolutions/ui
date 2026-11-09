@@ -1092,6 +1092,9 @@ importers:
       '@zeroxsolutions/shadcn-upstream':
         specifier: workspace:*
         version: link:../shadcn-upstream
+      '@zeroxsolutions/ui':
+        specifier: workspace:*
+        version: link:../ui
       babel-jest:
         specifier: 'catalog:'
         version: 30.3.0(@babel/core@7.29.7)
@@ -21277,7 +21280,9 @@ snapshots:
       metro-runtime: 0.87.1
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.89': {}
 

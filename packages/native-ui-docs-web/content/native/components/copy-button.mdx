@@ -1,0 +1,53 @@
+---
+title: Copy button
+description: An icon button that copies its value to the clipboard, showing a check until its timeout resets it.
+---
+
+<NativePreview name="copy-button-demo" />
+
+## Installation
+
+<InstallCommand name="copy-button" />
+
+The CLI writes `components/feedback/copy-button.tsx`, installs [Button](/native/components/nativewind/button),
+[Icon](/native/components/nativewind/icon) and [Text](/native/components/nativewind/text), and adds
+`expo-clipboard` and `lucide-react-native`.
+
+## Usage
+
+```tsx
+import { CopyButton } from '@/components/feedback/copy-button';
+```
+
+```tsx
+<CopyButton value={command} />
+```
+
+Use it beside a value the reader might want to copy, such as a command or a code snippet's whole block.
+
+## API reference
+
+### CopyButton
+
+Takes every prop of [Button](/native/components/nativewind/button) except `children`, plus:
+
+| Prop          | Type                      | Default    |
+| ------------- | ------------------------- | ---------- |
+| `value`       | `string`                  | required   |
+| `label`       | `string`                  | `'Copy'`   |
+| `copiedLabel` | `string`                  | `'Copied'` |
+| `timeout`     | `number`                  | `2000`     |
+| `onCopied`    | `(value: string) => void` | -          |
+
+It defaults `variant` to `ghost` and `size` to `icon-xs`. After a successful copy it shows a check and takes
+`copiedLabel` as its name for `timeout` ms, then resets. A screen reader hears `copiedLabel` once the copy has
+succeeded: iOS through an announcement, Android and the web through a polite live region. A caller's `onPress`
+runs before the copy, and calling `event.preventDefault()` in it skips the copy; a write the clipboard refuses
+leaves the button idle. Pass `label` and `copiedLabel` translated.
+
+## Differences from the web
+
+- `onPress` stands in for the web's `onClick`.
+- The icon is static and the check shows at once; the web's icon plays while the button is hovered or focused,
+  which a phone has not, and its check eases in.
+- The web's `data-slot` and `data-copied` attributes are not set; a View takes no data attributes.

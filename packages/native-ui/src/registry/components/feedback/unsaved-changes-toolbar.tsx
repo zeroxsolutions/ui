@@ -89,7 +89,7 @@ function UnsavedChangesToolbar({
           accessibilityLabel={!named && Platform.OS === 'ios' ? messageText : undefined}
           testID={testID}
           className={cn(
-            'bg-popover border-foreground/10 w-full max-w-lg flex-row items-center gap-3 rounded-2xl border py-2 pr-2 pl-4 shadow-lg',
+            'cn-unsaved-changes-toolbar bg-popover border-foreground/10 w-full max-w-lg flex-row items-center gap-3 border py-2 pr-2 pl-4 shadow-lg',
             state === 'attention' && 'border-destructive',
             className,
           )}

@@ -1,0 +1,45 @@
+---
+title: Floating toolbar
+description: A floating card-color toolbar shell, announced as a toolbar around the tools the caller composes.
+---
+
+<NativePreview name="floating-toolbar-demo" />
+
+## Installation
+
+<InstallCommand name="floating-toolbar" />
+
+The CLI writes `components/layout/floating-toolbar.tsx` and installs Utils.
+
+## Usage
+
+```tsx
+import { FloatingToolbar } from '@/components/layout/floating-toolbar';
+```
+
+```tsx
+<FloatingToolbar aria-label="Text formatting" className="absolute bottom-3 self-center z-20">
+  <Button variant="ghost" size="icon-sm" aria-label="Bold">
+    <Icon as={Bold} />
+  </Button>
+</FloatingToolbar>
+```
+
+Use it for the tool palette that floats over an editor canvas. Its placement is your `className`.
+
+## API reference
+
+### FloatingToolbar
+
+Takes every prop of React Native's `View`. A row of tools on the card colour, rounded, with a hairline border and
+the shadow of the style's menus, announced as a toolbar; give it an `aria-label`.
+
+## Differences from the web
+
+- The web blurs what lies under the bar with `backdrop-blur-sm`; neither engine blurs a view's backdrop, so the bar
+  is drawn on the card colour at 95% alone.
+- The web's ring, a box-shadow a device has no counterpart of, is drawn as a border as wide, in the style's ring
+  colour.
+- The web's `pointer-events-auto` is not set: on a device, a parent laid over a canvas lets presses through to its
+  children with `pointerEvents="box-none"` instead.
+- The web's `data-slot` attribute is not set; a View takes no data attributes.

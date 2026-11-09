@@ -1,8 +1,8 @@
 import { expect, test } from './test/fixtures';
 
 test('a page the native tree lacks answers 404 with its section index', async ({ page }) => {
-  // The web switch links here from the web's copy button, which has no native counterpart.
-  let response = await page.goto('/native/components/nativewind/copy-button');
+  // The web switch links to the same slug on native, which a web item not ported yet lacks.
+  let response = await page.goto('/native/components/nativewind/no-such-component');
 
   expect(response?.status()).toBe(404);
   await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();

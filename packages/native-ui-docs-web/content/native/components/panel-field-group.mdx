@@ -1,0 +1,52 @@
+---
+title: Panel field group
+description: The tight grid for paired and triplet inputs in a property panel, with any number of columns.
+---
+
+<NativePreview name="panel-field-group-demo" />
+
+## Installation
+
+<InstallCommand name="panel-field-group" />
+
+The CLI writes `components/layout/panel-field-group.tsx` and installs Utils.
+
+## Usage
+
+```tsx
+import { PanelFieldGroup } from '@/components/layout/panel-field-group';
+```
+
+```tsx
+<PanelFieldGroup cols={2}>
+  <Field>
+    <FieldLabel nativeID="x">X</FieldLabel>
+    <Input aria-label="X" aria-labelledby="x" defaultValue="0" />
+  </Field>
+  <Field>
+    <FieldLabel nativeID="y">Y</FieldLabel>
+    <Input aria-label="Y" aria-labelledby="y" defaultValue="0" />
+  </Field>
+</PanelFieldGroup>
+```
+
+Omit `cols` for one column. Use it for paired or tripled inputs (X + Y, W + H) in a property panel; for a single
+row that also needs a trailing action, wrap it in [Panel row](/native/components/nativewind/panel-row).
+
+## API reference
+
+### PanelFieldGroup
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop   | Type     | Default |
+| ------ | -------- | ------- |
+| `cols` | `number` | `1`     |
+
+It lays its children in rows of `cols`, each child in an equal share of its row, 8px apart, and the rows 4px apart.
+A short last row is filled with empty cells, so the columns line up. `className` styles the group.
+
+## Differences from the web
+
+- React Native has no grid, so a `grid-cols-*` class does not replace the columns; set `cols`.
+- The web writes `cols` to a `--cols` variable in `style`; here `style` goes to the group as given.

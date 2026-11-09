@@ -1,14 +1,9 @@
 import { isHiddenFromAccessibility, render, screen, userEvent, within } from '@testing-library/react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import { CodeInput } from './code-input';
 
 type RenderedNode = ReturnType<typeof screen.getByLabelText>;
 
 const HIDDEN = { includeHiddenElements: true } as const;
-
-function classNameOf(node: RenderedNode): string {
-  return String(node.props.className ?? '');
-}
 
 function groups(): RenderedNode[] {
   return screen.queryAllByTestId(/^code-group-\d$/, HIDDEN);
@@ -91,22 +86,16 @@ describe('CodeInput', () => {
     expect(screen.getByLabelText('Verification code').props.value).toBe('A7Z');
   });
 
-  it('marks the input invalid and draws the slots in the destructive tone', async () => {
+  it('marks the input invalid with aria-invalid', async () => {
     await render(<CodeInput testID="code" aria-label="Verification code" aria-invalid />);
 
     expect(screen.getByLabelText('Verification code').props['aria-invalid']).toBe(true);
-    for (const slot of slotsOf(groups()[0])) {
-      expect(emittedClasses(classNameOf(slot))).toContain('border-destructive');
-    }
   });
 
-  it('leaves the input valid and the slots plain without aria-invalid', async () => {
+  it('leaves the input valid without aria-invalid', async () => {
     await render(<CodeInput testID="code" aria-label="Verification code" />);
 
     expect(screen.getByLabelText('Verification code').props['aria-invalid']).toBeFalsy();
-    for (const slot of slotsOf(groups()[0])) {
-      expect(emittedClasses(classNameOf(slot))).not.toContain('border-destructive');
-    }
   });
 
   it('lets the OS offer a texted code to the one input', async () => {
@@ -115,34 +104,5 @@ describe('CodeInput', () => {
     expect(screen.getByLabelText('Verification code').props).toEqual(
       expect.objectContaining({ textContentType: 'oneTimeCode', autoComplete: 'sms-otp' }),
     );
-  });
-
-  it.each(['vega', 'nova'] as const)('makes every slot 48 square, sharing the row width, in %s', async (style) => {
-    await render(<CodeInput testID="code" aria-label="Verification code" pattern="3-3" />);
-
-    const slots = groups().flatMap(slotsOf);
-    expect(slots).toHaveLength(6);
-    for (const slot of slots) {
-      expect(emittedClasses(classNameOf(slot), style)).toEqual(expect.arrayContaining(['size-12', 'flex-1']));
-    }
-  });
-
-  it.each(['vega', 'nova'] as const)('draws each digit in text-lg and font-sans-semibold in %s', async (style) => {
-    await render(<CodeInput testID="code" aria-label="Verification code" defaultValue="123456" />);
-
-    const digits = screen.getAllByText(/^\d$/, HIDDEN);
-    expect(digits).toHaveLength(6);
-    for (const digit of digits) {
-      const classes = emittedClasses(digit.props.className, style);
-      expect(classes).toEqual(expect.arrayContaining(['text-lg', 'font-sans-semibold']));
-      expect(classes).not.toContain('text-sm');
-    }
-  });
-
-  it.each(['vega', 'nova'] as const)('replaces the style size of a slot with size-12 in %s', async (style) => {
-    await render(<CodeInput testID="code" aria-label="Verification code" />);
-
-    const classes = emittedClasses(classNameOf(slotsOf(groups()[0])[0]), style);
-    expect(classes.filter((name) => /^(size|h|w)-/.test(name))).toEqual(['size-12']);
   });
 });

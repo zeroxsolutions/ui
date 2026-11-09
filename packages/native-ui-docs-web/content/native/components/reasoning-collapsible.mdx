@@ -1,0 +1,88 @@
+---
+title: Reasoning collapsible
+description: A thinking disclosure that opens itself while a reasoning stream is live and closes shortly after the stream ends.
+---
+
+<NativePreview name="reasoning-collapsible-demo" />
+
+## Installation
+
+<InstallCommand name="reasoning-collapsible" />
+
+The CLI writes `components/layout/reasoning-collapsible.tsx` and `hooks/use-reasoning-collapsible.ts`, installs
+[Button](/native/components/nativewind/button), [Collapsible](/native/components/nativewind/collapsible),
+[Icon](/native/components/nativewind/icon), [Text](/native/components/nativewind/text), Motion, Text children and
+Utils, and adds `lucide-react-native` and `react-native-reanimated`.
+
+## Usage
+
+```tsx
+import {
+  ReasoningCollapsible,
+  ReasoningCollapsibleContent,
+  ReasoningCollapsibleTrigger,
+} from '@/components/layout/reasoning-collapsible';
+import { useReasoningCollapsible } from '@/hooks/use-reasoning-collapsible';
+```
+
+```tsx
+function ReasoningLabel() {
+  const { streaming, duration } = useReasoningCollapsible();
+  return streaming ? 'Thinking...' : `Thought for ${duration ?? 'a few'} seconds`;
+}
+
+<ReasoningCollapsible streaming={isLive}>
+  <ReasoningCollapsibleTrigger>
+    <ReasoningLabel />
+  </ReasoningCollapsibleTrigger>
+  <ReasoningCollapsibleContent>{text}</ReasoningCollapsibleContent>
+</ReasoningCollapsible>;
+```
+
+The label and the body are the consumer's; `useReasoningCollapsible` hands the label its timing. It opens while
+`streaming` is true (unless `defaultOpen` is `false`) and closes about a second after the stream ends, once only,
+so a reader who reopens old reasoning keeps it open. `useReasoningCollapsible()` returns
+`{ streaming, isOpen, duration }` from inside a `<ReasoningCollapsible>`; `duration` is the last stream's whole
+seconds, rounded up, undefined until one has ended, and it throws outside one.
+
+## Composition
+
+```text
+ReasoningCollapsible
+|-- ReasoningCollapsibleTrigger
+`-- ReasoningCollapsibleContent
+```
+
+## API reference
+
+### ReasoningCollapsible
+
+Takes every prop of [Collapsible](/native/components/nativewind/collapsible) except `open`, plus:
+
+| Prop          | Type      | Default              |
+| ------------- | --------- | -------------------- |
+| `streaming`   | `boolean` | `false`              |
+| `defaultOpen` | `boolean` | value of `streaming` |
+
+A thinking / reasoning disclosure. It opens while `streaming` is true (unless `defaultOpen` is `false`) and closes
+itself once about a second after the stream ends. Each press on its trigger is reported through `onOpenChange`.
+
+### ReasoningCollapsibleTrigger
+
+Takes every prop of [Button](/native/components/nativewind/button), drawn as a full-width small ghost Button
+announced as a button with its expanded state. Its `children` are the label, set in one line of Text, so a label
+component may return a string as above. The label fades to half opacity and back while the root is streaming,
+and stands still when the system asks for reduced motion. A brain icon leads it, and a chevron ends it, pointing
+up while the body is open.
+
+### ReasoningCollapsibleContent
+
+Takes every prop of [CollapsibleContent](/native/components/nativewind/collapsible). The reasoning body, in small
+muted text under the trigger; unmounted while closed. A string body is set in a Text.
+
+## Differences from the web
+
+- The brain and the chevron are static icons; the web's play while the row is hovered or focused, which a phone
+  has not, and its chevron turns over where this one points up.
+- The web's `data-slot` and `data-streaming` attributes are not set; a View takes no data attributes.
+- `onOpenChange` is called with the open state alone; base-ui's event details have no counterpart on a device.

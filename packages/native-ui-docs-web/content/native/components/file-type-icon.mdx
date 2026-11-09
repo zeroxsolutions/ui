@@ -1,0 +1,44 @@
+---
+title: File type icon
+description: A lucide icon chosen for a file's type from its extension, hidden from screen readers unless given an aria-label.
+---
+
+<NativePreview name="file-type-icon-demo" />
+
+## Installation
+
+<InstallCommand name="file-type-icon" />
+
+The CLI writes `components/data-display/file-type-icon.tsx` and `lib/file-type.ts`, installs
+[Icon](/native/components/nativewind/icon), and adds `lucide-react-native`.
+
+## Usage
+
+```tsx
+import { FileTypeIcon } from '@/components/data-display/file-type-icon';
+```
+
+```tsx
+<FileTypeIcon name="run.py" className="text-muted-foreground size-4" />
+```
+
+It is hidden from a screen reader, so pair it with the visible file name, or give it an `aria-label` where it
+stands alone, which makes it an image of that name.
+
+## API reference
+
+### FileTypeIcon
+
+Takes every prop of [Icon](/native/components/nativewind/icon) except `as`, plus:
+
+| Prop   | Type     | Default  |
+| ------ | -------- | -------- |
+| `name` | `string` | required |
+
+Draws the `lucide-react-native` icon `name` maps to by its extension, through Icon, so its classes size and
+colour it: code, data, image, font, audio, video, archive and text files each have their own, and any other
+extension a generic file. `lib/file-type.ts` exports the mapping as `fileTypeIcon(name)`.
+
+## Differences from the web
+
+- The web's `data-slot` attribute is not set; an svg on a device takes no data attributes.

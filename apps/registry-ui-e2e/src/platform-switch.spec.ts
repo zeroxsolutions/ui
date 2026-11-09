@@ -13,7 +13,6 @@ test('the switch points at the same place on native, which the native zone answe
     ['/', '/native'],
     ['/docs', '/native/docs'],
     ['/docs/components/base/tab-bar', '/native/components/nativewind/tab-bar'],
-    // The native tree has no copy button; the native zone's 404 lists its components.
     ['/docs/components/base/copy-button', '/native/components/nativewind/copy-button'],
     ['/blocks/base', '/native/blocks/nativewind'],
   ]) {

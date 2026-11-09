@@ -11,9 +11,11 @@ description: The React Native items, each published for NativeWind and Uniwind i
 | [Direction](/native/components/nativewind/direction)                             | The direction text reads in, for the parts inside it.                             |
 | [Button](/native/components/nativewind/button)                                   | A pressable control in the style's variants and sizes.                            |
 | [Button group](/native/components/nativewind/button-group)                       | Buttons joined into one control.                                                  |
+| [Copy button](/native/components/nativewind/copy-button)                         | An icon button that copies a value to the clipboard.                              |
 | [Toggle](/native/components/nativewind/toggle)                                   | A two-state button, announced as selected while pressed.                          |
 | [Toggle group](/native/components/nativewind/toggle-group)                       | Toggles of which one or several are pressed.                                      |
 | [Label](/native/components/nativewind/label)                                     | The text that names a field.                                                      |
+| [Icon label](/native/components/nativewind/icon-label)                           | An icon that stands in for a field's text label in a dense panel.                 |
 | [Field](/native/components/nativewind/field)                                     | The layout of a form: labels, controls, descriptions and errors.                  |
 | [Form](/native/components/nativewind/form)                                       | A form built from Field and a form library, such as react-hook-form.              |
 | [Questionnaire](/native/components/nativewind/questionnaire)                     | A form that asks one question at a time, with choices and a free-text answer.     |
@@ -36,8 +38,14 @@ description: The React Native items, each published for NativeWind and Uniwind i
 | [Avatar](/native/components/nativewind/avatar)                                   | A round picture with a fallback.                                                  |
 | [Badge](/native/components/nativewind/badge)                                     | A small pill for a status or a count.                                             |
 | [Card](/native/components/nativewind/card)                                       | A surface that groups related content.                                            |
+| [AI provider card](/native/components/nativewind/ai-provider-card)               | A small card for one AI provider that selects it.                                 |
+| [Model info card](/native/components/nativewind/model-info-card)                 | The detail panel for one model, over titled sections.                             |
 | [Empty](/native/components/nativewind/empty)                                     | A placeholder for a screen with nothing to show yet.                              |
 | [Item](/native/components/nativewind/item)                                       | A row of content with media, text and actions.                                    |
+| [Icon media](/native/components/nativewind/icon-media)                           | A small tinted square that holds one glyph.                                       |
+| [File type icon](/native/components/nativewind/file-type-icon)                   | The icon for a file's type, from its extension.                                   |
+| [Font preview](/native/components/nativewind/font-preview)                       | A font file drawn at several sizes, one row each.                                 |
+| [Image preview](/native/components/nativewind/image-preview)                     | An image contained in a frame, over a checkerboard.                               |
 | [Kbd](/native/components/nativewind/kbd)                                         | A keyboard key or shortcut.                                                       |
 | [Table](/native/components/nativewind/table)                                     | Rows of data with a header, a footer and a caption.                               |
 | [Chart](/native/components/nativewind/chart)                                     | Charts drawn from a config, with a tooltip and a legend.                          |
@@ -46,6 +54,8 @@ description: The React Native items, each published for NativeWind and Uniwind i
 | [Bubble](/native/components/nativewind/bubble)                                   | A message's framed surface, with reactions.                                       |
 | [Marker](/native/components/nativewind/marker)                                   | A status, a system note or a labelled line in a conversation.                     |
 | [Message](/native/components/nativewind/message)                                 | One message in a conversation, with an avatar, a header and a footer.             |
+| [Chat message](/native/components/nativewind/chat-message)                       | A message row with a line beside it while it streams.                             |
+| [Chat suggestion item](/native/components/nativewind/chat-suggestion-item)       | A starter prompt in an empty conversation.                                        |
 | [Message scroller](/native/components/nativewind/message-scroller)               | A conversation that scrolls, follows new replies and jumps to any message.        |
 | [Trace](/native/components/nativewind/trace)                                     | The steps an agent took, each of which can open to show its detail.               |
 | [Progress](/native/components/nativewind/progress)                               | A bar showing how far a task has got.                                             |
@@ -53,14 +63,25 @@ description: The React Native items, each published for NativeWind and Uniwind i
 | [Sonner](/native/components/nativewind/sonner)                                   | Short messages that come up over the screen and go after a few seconds.           |
 | [Toast](/native/components/nativewind/toast)                                     | Short messages raised through a toast manager, stacked over the screen.           |
 | [Unsaved changes toolbar](/native/components/nativewind/unsaved-changes-toolbar) | A floating bar with Reset and Save while a form has unsaved changes.              |
+| [Unsaved indicator](/native/components/nativewind/unsaved-indicator)             | The dot an editor shows on a tab with unsaved changes.                            |
+| [Status indicator](/native/components/nativewind/status-indicator)               | A dot coloured by a status: online, offline, busy or idle.                        |
+| [Permission card](/native/components/nativewind/permission-card)                 | An inline consent request that stays after it resolves.                           |
 | [Separator](/native/components/nativewind/separator)                             | A rule between groups of content.                                                 |
 | [Skeleton](/native/components/nativewind/skeleton)                               | A placeholder block for loading content.                                          |
 | [Aspect ratio](/native/components/nativewind/aspect-ratio)                       | A frame whose height follows its width.                                           |
 | [Scroll area](/native/components/nativewind/scroll-area)                         | A fixed-size box whose content scrolls.                                           |
 | [Carousel](/native/components/nativewind/carousel)                               | A row of slides scrolled by a swipe or its previous and next buttons.             |
 | [Resizable](/native/components/nativewind/resizable)                             | Panels side by side or stacked, with handles that drag the room between them.     |
+| [Center](/native/components/nativewind/center)                                   | A box that centres its children on both axes.                                     |
+| [Page container](/native/components/nativewind/page-container)                   | The centred, max-width content column of a wide surface.                          |
+| [Panel header](/native/components/nativewind/panel-header)                       | The top strip of a side panel: a title and its actions.                           |
+| [Panel row](/native/components/nativewind/panel-row)                             | A row of a property panel, its fields beside a trailing action.                   |
+| [Panel field group](/native/components/nativewind/panel-field-group)             | The tight grid for paired and triplet inputs in a property panel.                 |
+| [Floating toolbar](/native/components/nativewind/floating-toolbar)               | A floating bar around the tools of an editor canvas.                              |
 | [Accordion](/native/components/nativewind/accordion)                             | A stack of sections, each opened and closed by its trigger.                       |
 | [Collapsible](/native/components/nativewind/collapsible)                         | A region a trigger shows and hides.                                               |
+| [Collapsible card](/native/components/nativewind/collapsible-card)               | A card whose body its header hides and shows, open by default.                    |
+| [Reasoning collapsible](/native/components/nativewind/reasoning-collapsible)     | A thinking disclosure that opens while reasoning streams.                         |
 | [Alert dialog](/native/components/nativewind/alert-dialog)                       | A dialog that asks to confirm or acknowledge something before going on.           |
 | [Dialog](/native/components/nativewind/dialog)                                   | A window over the screen that the person deals with before going back to it.      |
 | [Sheet](/native/components/nativewind/sheet)                                     | A panel that slides over the screen from one of its edges.                        |
@@ -74,6 +95,7 @@ description: The React Native items, each published for NativeWind and Uniwind i
 | [Command](/native/components/nativewind/command)                                 | A menu of commands searched by typing.                                            |
 | [Tabs](/native/components/nativewind/tabs)                                       | Panels switched by a row of triggers.                                             |
 | [Tab bar](/native/components/nativewind/tab-bar)                                 | A bar of top-level destinations at one edge of the screen.                        |
+| [Editor tab](/native/components/nativewind/editor-tab)                           | One tab in an editor's tab strip, with its close button.                          |
 | [Navigation menu](/native/components/nativewind/navigation-menu)                 | Links to the app's sections, with triggers that open a panel of more links.       |
 | [Sidebar](/native/components/nativewind/sidebar)                                 | Side navigation: a sheet on a phone, a panel beside the screen from the md width. |
 | [Breadcrumb](/native/components/nativewind/breadcrumb)                           | The trail from the top of the app to the current screen.                          |

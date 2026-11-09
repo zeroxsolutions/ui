@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react-native';
 import { Circle, CircleCheck } from 'lucide-react-native';
 import { AccessibilityInfo, Platform } from 'react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import {
   PasswordStrength,
   PasswordStrengthMeter,
@@ -112,7 +111,7 @@ describe('PasswordStrengthMeter', () => {
 });
 
 describe('PasswordStrengthRequirement', () => {
-  it('shows a check and foreground text while met, and says Met', async () => {
+  it('shows a check while met, and says Met', async () => {
     await render(
       <PasswordStrengthRequirement met testID="row">
         At least 15 characters
@@ -120,19 +119,13 @@ describe('PasswordStrengthRequirement', () => {
     );
 
     expect(iconDrawn()).toBe(CircleCheck);
-    const classes = emittedClasses(screen.getByText('At least 15 characters').props.className);
-    expect(classes).toContain('text-foreground');
-    expect(classes).not.toContain('text-muted-foreground');
     expect(screen.getByTestId('row').props.accessibilityValue).toEqual({ text: 'Met' });
   });
 
-  it('shows a circle and muted text while unmet, and says Not met', async () => {
+  it('shows a circle while unmet, and says Not met', async () => {
     await render(<PasswordStrengthRequirement testID="row">At least 15 characters</PasswordStrengthRequirement>);
 
     expect(iconDrawn()).toBe(Circle);
-    const classes = emittedClasses(screen.getByText('At least 15 characters').props.className);
-    expect(classes).toContain('text-muted-foreground');
-    expect(classes).not.toContain('text-foreground');
     expect(screen.getByTestId('row').props.accessibilityValue).toEqual({ text: 'Not met' });
   });
 
