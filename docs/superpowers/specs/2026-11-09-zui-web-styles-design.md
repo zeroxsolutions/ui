@@ -59,13 +59,18 @@ imports the other. The pin does not move.
   draws every style. The installer's markers in those sources are resolved for the site the way the CLI
   resolves them for a consumer: `IconPlaceholder` draws the lucide icon, `cn-rtl-flip` and
   `cn-menu-target` resolve for `rtl: false` and `menuColor: default`. The three magicui files stay as they
-  are. The primitives are still not published; a consumer still gets them from `@shadcn/...`.
-- **Sheets.** The site loads upstream's and zui's sheets for all eight styles. The site's own chrome is
-  drawn in Nova; a preview stage is drawn in the picker's style, nested inside it, and the nearest style
-  wins (CSS `@scope` proximity, or an iframe per preview where that cannot be had in Tailwind's output).
-- **Source.** A preview's source panel, and every code excerpt of a zui item, show the code `add` writes
-  in the picker's style, read from that style's built output, never the token source.
-- Server-rendered pages draw the style named in the URL; a page with no `?style=` draws Nova, as today.
+  are. The primitives are still not published; a consumer still gets them from `@shadcn/...`. The
+  snapshot keeps upstream's base sources beside the sheets, so the check needs no network.
+- **Sheets.** The site loads upstream's and zui's sheets for all eight styles, inside
+  `@layer components`, so a utility passed in `className` still wins over a slot.
+- **The page takes the picker's style.** Base UI portals a popup to `body`, so a preview cannot hold a
+  style of its own: a vega preview's menu would open in Nova. The web pages carry `style-<style>` on
+  `<html>`, chrome included, set by an inline script before the first paint from `?style=` or the
+  reader's last choice, and changed by the picker. A page with neither draws Nova, as today. The native
+  zone's chrome stays Nova whatever the native picker says.
+- **Source.** A source panel of a zui item or the block shows the code `add` writes in the picker's
+  style, transformed with the same style map as the build, never the token source. An example writes
+  no token, so its source is the same in every style.
 
 ## What is checked
 
@@ -73,9 +78,9 @@ imports the other. The pin does not move.
 - Each of the other seven outputs differs from `base-nova` only in the classes of its tokens; a spec
   reads the 16 sheets and fails when a zui slot is missing from any of the eight zui sheets, when an item
   writes a token no sheet defines, or when a zui sheet defines a slot no item writes.
-- A spec fails when a site primitive differs from upstream's base source at the pin, beyond the three
-  resolved markers.
-- e2e on registry-ui: with `?style=vega` a preview's card has vega's spacing and the chrome keeps Nova's;
+- A spec fails when a site primitive differs from upstream's base source at the pin put through the
+  CLI's own install transforms (lucide icons, the default menu colour, no RTL).
+- e2e on registry-ui: with `?style=vega` a preview's card has vega's spacing, and so does a popup it opens;
   the source panel shows vega's classes; the served `/r/styles/base-lyra/collapsible-card.json` carries
   `rounded-none`, and no served file under any style holds a `cn-` token.
 - Screenshots of five items (collapsible-card, panel-header, permission-card, tag-input, data-table) in
