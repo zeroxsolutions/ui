@@ -93,7 +93,7 @@
     "react-test-renderer": "catalog:",
     "shadcn": "catalog:",
     "ts-jest": "^29.4.7",
-    "uniwind": "1.13.0"
+    "uniwind": "1.13.2"
   },
   "nx": {
     "tags": [
