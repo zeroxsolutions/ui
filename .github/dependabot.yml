@@ -56,7 +56,7 @@ updates:
           - patch
     ignore:
       # nx-managed:start
-      # Generated from the installed nx plugins' migrations.json by zeroxsolutions/github-actions
+      # Generated from the installed nx plugins' migrations.json by .github/actions/
       # nx-dependabot; these move through `nx migrate`. Edit outside the markers.
       - dependency-name: nx
       - dependency-name: '@nx/*'
