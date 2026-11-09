@@ -34,6 +34,12 @@ test("the native docs' sidebar lists their pages and the components under the de
     ['Panel header', '/panel-header'],
     ['Panel row', '/panel-row'],
     ['Panel field group', '/panel-field-group'],
+    ['Collapsible card', '/collapsible-card'],
+    ['Reasoning collapsible', '/reasoning-collapsible'],
+    ['Copy button', '/copy-button'],
+    ['File type icon', '/file-type-icon'],
+    ['Font preview', '/font-preview'],
+    ['Image preview', '/image-preview'],
   ]) {
     await expect(sidebar.getByRole('link', { name, exact: true })).toHaveAttribute(
       'href',

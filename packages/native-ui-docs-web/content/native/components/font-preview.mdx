@@ -1,0 +1,48 @@
+---
+title: Font preview
+description: A specimen of a font file at several sizes, one row per size, loaded under a family of its own.
+---
+
+<NativePreview name="font-preview-demo" />
+
+## Installation
+
+<InstallCommand name="font-preview" />
+
+The CLI writes `components/data-display/font-preview.tsx`, installs [Text](/native/components/nativewind/text) and
+Utils, and adds `expo-font`.
+
+## Usage
+
+```tsx
+import { FontPreview } from '@/components/data-display/font-preview';
+```
+
+```tsx
+<FontPreview src={fontUrl} />
+```
+
+The consumer places, pads and widths its wrapper; it renders one row per size, largest first, each specimen on one
+line that ends in an ellipsis at that width. Use it to compare a font file's weights before shipping it; for a
+previewed image rather than type, use [Image preview](/native/components/nativewind/image-preview).
+
+## API reference
+
+### FontPreview
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop       | Type        | Default                                         |
+| ---------- | ----------- | ----------------------------------------------- |
+| `src`      | `string`    | required                                        |
+| `sizes`    | `number[]`  | `[36, 24, 18, 14]`                              |
+| `children` | `ReactNode` | `'The quick brown fox jumps over the lazy dog'` |
+
+It loads `src` with expo-font under a family of its own, so several previews on one screen never collide. Until
+the file has loaded, and if it fails to, the specimens are drawn in the theme's font. iOS and Android load
+TrueType and OpenType files; a WOFF or WOFF2 file loads on the web only.
+
+## Differences from the web
+
+- `format` is not taken: expo-font reads a file's format itself, and a device loads no `@font-face`.
+- The web's `data-slot` attribute is not set; a View takes no data attributes.

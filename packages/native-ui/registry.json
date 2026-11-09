@@ -1490,6 +1490,119 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "collapsible-card",
+      "type": "registry:component",
+      "title": "Collapsible card",
+      "description": "A collapsible card with a header and body, open by default, on a card, muted or plain surface, whose trigger is announced as a button with its expanded state.",
+      "categories": ["layout"],
+      "dependencies": ["class-variance-authority", "lucide-react-native"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/collapsible",
+        "@zui/icon",
+        "@zui/text",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/layout/collapsible-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "reasoning-collapsible",
+      "type": "registry:component",
+      "title": "Reasoning collapsible",
+      "description": "A thinking disclosure that opens itself while a reasoning stream is live, pulses its label meanwhile unless the system asks for reduced motion, and closes shortly after the stream ends.",
+      "categories": ["layout"],
+      "dependencies": ["lucide-react-native", "react-native-reanimated"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/collapsible",
+        "@zui/icon",
+        "@zui/motion",
+        "@zui/text",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/layout/reasoning-collapsible.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/registry/hooks/use-reasoning-collapsible.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "copy-button",
+      "type": "registry:component",
+      "title": "Copy button",
+      "description": "An icon button that copies its value to the clipboard, showing a check and taking its copied name until its timeout resets it, and telling screen readers it copied.",
+      "categories": ["feedback"],
+      "dependencies": ["expo-clipboard", "lucide-react-native"],
+      "registryDependencies": ["@zui/button", "@zui/icon", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/components/feedback/copy-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "file-type-icon",
+      "type": "registry:component",
+      "title": "File type icon",
+      "description": "A lucide icon chosen for a file's type from its extension, hidden from screen readers unless given an aria-label.",
+      "categories": ["data-display"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/icon"],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/file-type-icon.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/registry/lib/file-type.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "font-preview",
+      "type": "registry:component",
+      "title": "Font preview",
+      "description": "A specimen of a font file at several sizes, one row per size, loaded through expo-font under a family scoped to the instance.",
+      "categories": ["data-display"],
+      "dependencies": ["expo-font"],
+      "registryDependencies": ["@zui/text", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/font-preview.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "image-preview",
+      "type": "registry:component",
+      "title": "Image preview",
+      "description": "A frame that shows an image contained within it, over a checkerboard so transparent pixels read clearly.",
+      "categories": ["data-display"],
+      "dependencies": ["lucide-react-native", "react-native-svg"],
+      "registryDependencies": ["@zui/icon", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/image-preview.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

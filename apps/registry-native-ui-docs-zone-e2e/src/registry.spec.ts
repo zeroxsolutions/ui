@@ -43,6 +43,12 @@ test('serves the react native items for each engine in each style', async ({ req
         'panel-header',
         'panel-row',
         'panel-field-group',
+        'collapsible-card',
+        'reasoning-collapsible',
+        'copy-button',
+        'file-type-icon',
+        'font-preview',
+        'image-preview',
       ]),
     );
 

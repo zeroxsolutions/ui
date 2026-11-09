@@ -1,0 +1,119 @@
+---
+title: Collapsible card
+description: A collapsible card with a header and body, open by default, on a card, muted or plain surface.
+---
+
+<NativePreview name="collapsible-card-demo" />
+
+## Installation
+
+<InstallCommand name="collapsible-card" />
+
+The CLI writes `components/layout/collapsible-card.tsx`, installs [Button](/native/components/nativewind/button),
+[Collapsible](/native/components/nativewind/collapsible), [Icon](/native/components/nativewind/icon),
+[Text](/native/components/nativewind/text), Text children and Utils, and adds `class-variance-authority` and
+`lucide-react-native`.
+
+## Usage
+
+```tsx
+import {
+  CollapsibleCard,
+  CollapsibleCardActions,
+  CollapsibleCardContent,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardTrigger,
+} from '@/components/layout/collapsible-card';
+```
+
+```tsx
+<CollapsibleCard>
+  <CollapsibleCardHeader>
+    <CollapsibleCardTitle>Layers</CollapsibleCardTitle>
+    <CollapsibleCardActions>
+      <CollapsibleCardTrigger />
+    </CollapsibleCardActions>
+  </CollapsibleCardHeader>
+  <CollapsibleCardContent className="p-3">Background, shadow, text</CollapsibleCardContent>
+</CollapsibleCard>
+```
+
+Use it for a card whose body the reader can hide, such as a code block's wrapper or a preview pane. A string
+title or body is set in a Text for you.
+
+## Composition
+
+```text
+CollapsibleCard
+|-- CollapsibleCardHeader
+|   |-- CollapsibleCardTitle
+|   `-- CollapsibleCardActions
+|       `-- CollapsibleCardTrigger
+`-- CollapsibleCardContent
+```
+
+## Variants
+
+```tsx
+<CollapsibleCard variant="muted">...</CollapsibleCard>
+```
+
+`default` draws the card surface, its hairline as a border; `muted` a borderless fill for a block nested in
+another card; `plain` no surface and a rule underneath, for a titled group of rows in a panel, with a narrower
+header; `flush` no surface at all, for a block filling a surface its container draws.
+
+## API reference
+
+### CollapsibleCard
+
+Takes every prop of [Collapsible](/native/components/nativewind/collapsible), plus:
+
+| Prop      | Type                                         | Default     |
+| --------- | -------------------------------------------- | ----------- |
+| `variant` | `'default' \| 'muted' \| 'plain' \| 'flush'` | `'default'` |
+
+`default` and `muted` rule the body off from the header, on the body, so the header keeps its height as the card
+opens and closes. It opens by default (`defaultOpen` defaults to `true`, rather than Collapsible's own `false`),
+and follows `open` when given it; each press is reported through `onOpenChange`.
+
+### CollapsibleCardHeader
+
+Takes every prop of React Native's `View`. The row above the body: a title, and the actions pushed to the far end
+when it holds a `CollapsibleCardActions`.
+
+### CollapsibleCardTitle
+
+Takes every prop of React Native's `View`. The header's muted title, as tall as the style's icon button, so the
+header is one height whether or not it holds actions. An [Icon](/native/components/nativewind/icon) in it with no
+size of its own is drawn at `size-4` as its leading icon.
+
+### CollapsibleCardActions
+
+Takes every prop of React Native's `View`. The header's trailing controls, such as a
+[Copy button](/native/components/nativewind/copy-button) and the `CollapsibleCardTrigger`.
+
+### CollapsibleCardTrigger
+
+Takes every prop of [Button](/native/components/nativewind/button), drawn as a ghost icon-sized Button, and is
+announced as a button with its expanded state. Its default content is a chevron, pointing up while the body is
+open. `children` replace the chevron, and text in them names the button; without text, as with the chevron or an
+icon alone, it is named "Toggle content" unless an `aria-label` is given.
+
+### CollapsibleCardContent
+
+Takes every prop of [CollapsibleContent](/native/components/nativewind/collapsible). The body that the trigger
+opens and closes; unmounted while closed unless `keepMounted`. It pads nothing: a text body takes `p-3`, the
+small card's spacing.
+
+### collapsibleCardVariants
+
+The `variant` variant: `default` (the default) adds the card surface, `muted` a borderless muted fill, `plain` a
+bottom border only, `flush` no surface classes at all.
+
+## Differences from the web
+
+- The chevron is a static icon that points down or up; the web's turns over and plays while the trigger is
+  hovered or focused, which a phone has not.
+- The web's `data-slot` and `data-variant` attributes are not set; a View takes no data attributes, so the
+  parts read the variant from the card instead.

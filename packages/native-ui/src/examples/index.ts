@@ -24,21 +24,26 @@ import { ChartDemo } from './chart-demo';
 import { CheckboxDemo } from './checkbox-demo';
 import { CodeBlockDemo } from './code-block-demo';
 import { CodeInputDemo } from './code-input-demo';
+import { CollapsibleCardDemo } from './collapsible-card-demo';
 import { CollapsibleDemo } from './collapsible-demo';
 import { ComboboxDemo } from './combobox-demo';
 import { CommandDemo } from './command-demo';
 import { ContextMenuDemo } from './context-menu-demo';
+import { CopyButtonDemo } from './copy-button-demo';
 import { DialogDemo } from './dialog-demo';
 import { DirectionDemo } from './direction-demo';
 import { DrawerDemo } from './drawer-demo';
 import { DropdownMenuDemo } from './dropdown-menu-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
+import { FileTypeIconDemo } from './file-type-icon-demo';
+import { FontPreviewDemo } from './font-preview-demo';
 import { FormDemo } from './form-demo';
 import { HoverCardDemo } from './hover-card-demo';
 import { IconDemo } from './icon-demo';
 import { IconLabelDemo } from './icon-label-demo';
 import { IconMediaDemo } from './icon-media-demo';
+import { ImagePreviewDemo } from './image-preview-demo';
 import { InputDemo } from './input-demo';
 import { InputGroupDemo } from './input-group-demo';
 import { InputOtpDemo } from './input-otp-demo';
@@ -62,6 +67,7 @@ import { PopoverDemo } from './popover-demo';
 import { ProgressDemo } from './progress-demo';
 import { QuestionnaireDemo } from './questionnaire-demo';
 import { RadioGroupDemo } from './radio-group-demo';
+import { ReasoningCollapsibleDemo } from './reasoning-collapsible-demo';
 import { ResizableDemo } from './resizable-demo';
 import { ScrollAreaDemo } from './scroll-area-demo';
 import { SelectDemo } from './select-demo';
@@ -109,21 +115,26 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'checkbox-demo': CheckboxDemo,
   'code-block-demo': CodeBlockDemo,
   'code-input-demo': CodeInputDemo,
+  'collapsible-card-demo': CollapsibleCardDemo,
   'collapsible-demo': CollapsibleDemo,
   'combobox-demo': ComboboxDemo,
   'command-demo': CommandDemo,
   'context-menu-demo': ContextMenuDemo,
+  'copy-button-demo': CopyButtonDemo,
   'dialog-demo': DialogDemo,
   'direction-demo': DirectionDemo,
   'drawer-demo': DrawerDemo,
   'dropdown-menu-demo': DropdownMenuDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
+  'file-type-icon-demo': FileTypeIconDemo,
+  'font-preview-demo': FontPreviewDemo,
   'form-demo': FormDemo,
   'hover-card-demo': HoverCardDemo,
   'icon-demo': IconDemo,
   'icon-label-demo': IconLabelDemo,
   'icon-media-demo': IconMediaDemo,
+  'image-preview-demo': ImagePreviewDemo,
   'input-demo': InputDemo,
   'input-group-demo': InputGroupDemo,
   'input-otp-demo': InputOtpDemo,
@@ -147,6 +158,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'progress-demo': ProgressDemo,
   'questionnaire-demo': QuestionnaireDemo,
   'radio-group-demo': RadioGroupDemo,
+  'reasoning-collapsible-demo': ReasoningCollapsibleDemo,
   'resizable-demo': ResizableDemo,
   'scroll-area-demo': ScrollAreaDemo,
   'select-demo': SelectDemo,
