@@ -160,6 +160,8 @@ function TagInputInput({
       value={draft}
       editable={disabled ? false : undefined}
       submitBehavior="submit"
+      // React Native for Web reads only blurOnSubmit, which submitBehavior overrides on iOS and Android.
+      blurOnSubmit={false}
       onChangeText={(text) => {
         onChangeText?.(text);
         const parts = text.split(',');

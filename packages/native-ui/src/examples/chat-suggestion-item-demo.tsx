@@ -6,9 +6,13 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { Icon } from '@/components/ui/icon';
 import { ItemContent, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item';
 
-/** An empty conversation with two starter prompts. */
+/**
+ * An empty conversation with two starter prompts. No document is open, so the summary starter keeps its prompt
+ * and says why instead.
+ */
 function ChatSuggestionItemDemo(): ReactNode {
   const [sent, setSent] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
 
   return (
     <Empty className="w-full">
@@ -17,11 +21,18 @@ function ChatSuggestionItemDemo(): ReactNode {
           <Icon as={Sparkles} />
         </EmptyMedia>
         <EmptyTitle>Start a conversation</EmptyTitle>
-        <EmptyDescription>{sent ? `Sent: "${sent}"` : 'Ask anything, or pick a starter'}</EmptyDescription>
+        <EmptyDescription>{sent ? `Sent: "${sent}"` : (hint ?? 'Ask anything, or pick a starter')}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <ItemGroup>
-          <ChatSuggestionItem prompt="Summarise this document" onSelectPrompt={setSent}>
+          <ChatSuggestionItem
+            prompt="Summarise this document"
+            onSelectPrompt={setSent}
+            onPress={(event) => {
+              event.preventDefault();
+              setHint('Open a document to summarise it');
+            }}
+          >
             <ItemMedia variant="icon">
               <Icon as={FileText} />
             </ItemMedia>

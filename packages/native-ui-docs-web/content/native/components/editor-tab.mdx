@@ -34,6 +34,9 @@ Compose the parts inside [Item](/native/components/nativewind/item)'s `ItemConte
 one tab in an editor's tab strip; give it `active` for the document on show and `dirty` while that document has
 unsaved changes.
 
+To make a tab pressable, give it `asChild` and a `Pressable` with `role="tab"` and `aria-selected`, as the demo
+does. A press on the close button does not reach that Pressable.
+
 ## Composition
 
 ```text
