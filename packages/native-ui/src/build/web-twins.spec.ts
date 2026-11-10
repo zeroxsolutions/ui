@@ -13,9 +13,6 @@ const NOT_PORTED: ReadonlyMap<string, string> = new Map([
 
 /** The web items a later wave of the port brings, which the list loses as each wave lands. */
 const PENDING: ReadonlySet<string> = new Set([
-  // wave 2
-  'language-combobox',
-  'frontmatter-form',
   // wave 3
   'tree-item',
   'file-tree',

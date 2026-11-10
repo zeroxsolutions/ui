@@ -61,6 +61,8 @@ test('serves the react native items for each engine in each style', async ({ req
         'command-menu',
         'number-field',
         'tag-input',
+        'language-combobox',
+        'frontmatter-form',
       ]),
     );
 

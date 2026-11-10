@@ -1,0 +1,140 @@
+---
+title: Language combobox
+description: A searchable language picker over Combobox that maps a BCP-47 code or code-language id to its option and reports the value picked.
+---
+
+<NativePreview name="language-combobox-demo" />
+
+## Installation
+
+<InstallCommand name="language-combobox" />
+
+The CLI writes `components/data-entry/language-combobox.tsx` and `hooks/use-language-options.ts`, and installs
+[Combobox](/native/components/nativewind/combobox) and the Language options lib, `lib/language-options.ts`, with the
+items they need.
+
+## Usage
+
+```tsx
+import { LanguageCombobox } from '@/components/data-entry/language-combobox';
+import {
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
+} from '@/components/ui/combobox';
+```
+
+```tsx
+<LanguageCombobox kind="code" value={value} onValueChange={setValue}>
+  <ComboboxTrigger size="sm" aria-label="Select language">
+    <ComboboxValue placeholder="Select" />
+  </ComboboxTrigger>
+  <ComboboxContent>
+    <ComboboxEmpty>No results.</ComboboxEmpty>
+    <ComboboxList>
+      {(option) => (
+        <ComboboxItem key={option.value} value={option.value}>
+          {option.label}
+        </ComboboxItem>
+      )}
+    </ComboboxList>
+  </ComboboxContent>
+</LanguageCombobox>
+```
+
+The root owns the option set and hands the Combobox each option's `value` and `label`; the caller composes every
+visible part inside it. Use `kind="locale"` for a UI language picker and `kind="code"` for a code block's language;
+pass `options` to replace either built-in set.
+
+## Icons
+
+The built-in options carry no icon. An `icon` on an option you pass is drawn by you, from your own `options`: before
+a Text label in a ComboboxItem, and in a function child of ComboboxValue, which is given the chosen value. The item
+is still found by its label as the reader types.
+
+```tsx
+const iconOf = (value?: string) => options.find((option) => option.value === value)?.icon;
+
+<LanguageCombobox kind="code" value={value} onValueChange={setValue} options={options}>
+  <ComboboxTrigger aria-label="Select language">
+    <ComboboxValue>
+      {([chosen]) => (
+        <>
+          {iconOf(chosen)}
+          <Text>{options.find((option) => option.value === chosen)?.label ?? 'Select'}</Text>
+        </>
+      )}
+    </ComboboxValue>
+  </ComboboxTrigger>
+  <ComboboxContent>
+    <ComboboxInput placeholder="Search language..." />
+    <ComboboxList>
+      {(option) => (
+        <ComboboxItem key={option.value} value={option.value}>
+          {iconOf(option.value)}
+          <Text>{option.label}</Text>
+        </ComboboxItem>
+      )}
+    </ComboboxList>
+  </ComboboxContent>
+</LanguageCombobox>;
+```
+
+Set the label in a Text when an icon sits beside it; only a label with nothing beside it may be a bare string.
+
+## Locale labels
+
+A built-in locale option is labelled with the language's own name, read from `Intl.DisplayNames`, or with its code
+where the runtime cannot name it. Hermes does not list `Intl.DisplayNames` among the Intl APIs it implements, so in
+a native app a locale is likely to show as its code. Pass `options` with labels of your own there:
+
+```tsx
+<LanguageCombobox
+  value={locale}
+  onValueChange={setLocale}
+  options={[
+    { value: 'en', label: 'English' },
+    { value: 'vi', label: 'Ti\u1ebfng Vi\u1ec7t' },
+  ]}
+>
+  {/* trigger and content as above */}
+</LanguageCombobox>
+```
+
+## API reference
+
+### LanguageCombobox
+
+Takes every prop of [Combobox](/native/components/nativewind/combobox) except `items`, `value`, `defaultValue`,
+`onValueChange` and `multiple`, plus:
+
+| Prop            | Type                      | Default    |
+| --------------- | ------------------------- | ---------- |
+| `kind`          | `'locale' \| 'code'`      | `'locale'` |
+| `options`       | `LanguageOption[]`        | -          |
+| `locales`       | `readonly string[]`       | -          |
+| `value`         | `string`                  | required   |
+| `onValueChange` | `(value: string) => void` | required   |
+
+`LanguageOption` is `{ value: string; label: string; icon?: ReactNode }`. `kind` selects the built-in option set,
+UI locale names or code-language ids, when `options` is omitted. A code alias such as `ts` shows as its language,
+which the list marks chosen. For `kind="locale"` without `options`, `locales` picks which BCP-47 codes to offer;
+omitted, only the current `value` is offered, so the picker still shows what is selected, and an empty `value` then
+offers nothing. A value no option carries is shown as itself.
+
+### useLanguageOptions
+
+`useLanguageOptions({ kind, options, locales, value }): LanguageOption[]` - the options a language picker offers,
+by the rules above. The array keeps its identity until an input changes.
+
+## Differences from the web
+
+- ComboboxList's function child is given each option's `value` and `label`, and ComboboxValue's the chosen value,
+  where the web's are given the whole option; draw an icon from your own `options` by value.
+- The built-in code options carry no icon, since the web's are DOM svg components.
+- A locale is likely to show as its code on Hermes; see Locale labels.
+- `itemToStringLabel` and `isItemEqualToValue` are not taken: the native Combobox holds a string value.
+- The web's `data-slot` attribute is not set; the Combobox draws no element of its own to carry it.

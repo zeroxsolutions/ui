@@ -1813,6 +1813,38 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "language-combobox",
+      "type": "registry:component",
+      "title": "Language combobox",
+      "description": "A searchable language picker over Combobox, for UI locales or the code languages the design system highlights, that shows a code alias such as ts as its language and reports the value picked.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/combobox", "@zui/language-options"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/language-combobox.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/registry/hooks/use-language-options.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "frontmatter-form",
+      "type": "registry:component",
+      "title": "Frontmatter form",
+      "description": "A frontmatter (YAML metadata) editor over Field: the caller composes one field per key, each control named by its label and bound to its value, and an invalid field's error shown and given to the control as its hint.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/field"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/frontmatter-form.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

@@ -46,6 +46,7 @@ import { FileTypeIconDemo } from './file-type-icon-demo';
 import { FloatingToolbarDemo } from './floating-toolbar-demo';
 import { FontPreviewDemo } from './font-preview-demo';
 import { FormDemo } from './form-demo';
+import { FrontmatterFormDemo } from './frontmatter-form-demo';
 import { HoverCardDemo } from './hover-card-demo';
 import { IconDemo } from './icon-demo';
 import { IconLabelDemo } from './icon-label-demo';
@@ -57,6 +58,7 @@ import { InputOtpDemo } from './input-otp-demo';
 import { ItemDemo } from './item-demo';
 import { KbdDemo } from './kbd-demo';
 import { LabelDemo } from './label-demo';
+import { LanguageComboboxDemo } from './language-combobox-demo';
 import { LanguageToggleGroupDemo } from './language-toggle-group-demo';
 import { MarkerDemo } from './marker-demo';
 import { MenubarDemo } from './menubar-demo';
@@ -149,6 +151,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'floating-toolbar-demo': FloatingToolbarDemo,
   'font-preview-demo': FontPreviewDemo,
   'form-demo': FormDemo,
+  'frontmatter-form-demo': FrontmatterFormDemo,
   'hover-card-demo': HoverCardDemo,
   'icon-demo': IconDemo,
   'icon-label-demo': IconLabelDemo,
@@ -160,6 +163,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'item-demo': ItemDemo,
   'kbd-demo': KbdDemo,
   'label-demo': LabelDemo,
+  'language-combobox-demo': LanguageComboboxDemo,
   'language-toggle-group-demo': LanguageToggleGroupDemo,
   'marker-demo': MarkerDemo,
   'menubar-demo': MenubarDemo,
