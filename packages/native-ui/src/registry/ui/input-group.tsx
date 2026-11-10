@@ -289,8 +289,13 @@ function InputGroupInput({
   ...props
 }: InputGroupInputProps): ReactNode {
   const { stacked, ...control } = useInputGroupControl({ ref, editable, 'aria-invalid': invalid, onFocus, onBlur });
+  // min-w-0, since the web's input keeps its own width as a floor and overflows a narrow group past its addons.
   return (
-    <Input className={cn('cn-input-group-input', stacked ? 'w-full' : 'flex-1', className)} {...control} {...props} />
+    <Input
+      className={cn('cn-input-group-input', stacked ? 'w-full' : 'min-w-0 flex-1', className)}
+      {...control}
+      {...props}
+    />
   );
 }
 
