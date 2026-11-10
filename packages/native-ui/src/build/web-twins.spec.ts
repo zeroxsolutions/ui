@@ -16,11 +16,8 @@ const PENDING: ReadonlySet<string> = new Set([
   // wave 2
   'number-field',
   'tag-input',
-  'language-toggle-group',
   'language-combobox',
   'frontmatter-form',
-  'emoji-appearance-toggle-group',
-  'command-menu',
   // wave 3
   'tree-item',
   'file-tree',

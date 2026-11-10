@@ -31,6 +31,7 @@ import { CollapsibleCardDemo } from './collapsible-card-demo';
 import { CollapsibleDemo } from './collapsible-demo';
 import { ComboboxDemo } from './combobox-demo';
 import { CommandDemo } from './command-demo';
+import { CommandMenuDemo } from './command-menu-demo';
 import { ContextMenuDemo } from './context-menu-demo';
 import { CopyButtonDemo } from './copy-button-demo';
 import { DialogDemo } from './dialog-demo';
@@ -38,6 +39,7 @@ import { DirectionDemo } from './direction-demo';
 import { DrawerDemo } from './drawer-demo';
 import { DropdownMenuDemo } from './dropdown-menu-demo';
 import { EditorTabDemo } from './editor-tab-demo';
+import { EmojiAppearanceToggleGroupDemo } from './emoji-appearance-toggle-group-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
 import { FileTypeIconDemo } from './file-type-icon-demo';
@@ -55,6 +57,7 @@ import { InputOtpDemo } from './input-otp-demo';
 import { ItemDemo } from './item-demo';
 import { KbdDemo } from './kbd-demo';
 import { LabelDemo } from './label-demo';
+import { LanguageToggleGroupDemo } from './language-toggle-group-demo';
 import { MarkerDemo } from './marker-demo';
 import { MenubarDemo } from './menubar-demo';
 import { MessageDemo } from './message-demo';
@@ -129,6 +132,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'collapsible-demo': CollapsibleDemo,
   'combobox-demo': ComboboxDemo,
   'command-demo': CommandDemo,
+  'command-menu-demo': CommandMenuDemo,
   'context-menu-demo': ContextMenuDemo,
   'copy-button-demo': CopyButtonDemo,
   'dialog-demo': DialogDemo,
@@ -136,6 +140,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'drawer-demo': DrawerDemo,
   'dropdown-menu-demo': DropdownMenuDemo,
   'editor-tab-demo': EditorTabDemo,
+  'emoji-appearance-toggle-group-demo': EmojiAppearanceToggleGroupDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
   'file-type-icon-demo': FileTypeIconDemo,
@@ -153,6 +158,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'item-demo': ItemDemo,
   'kbd-demo': KbdDemo,
   'label-demo': LabelDemo,
+  'language-toggle-group-demo': LanguageToggleGroupDemo,
   'marker-demo': MarkerDemo,
   'menubar-demo': MenubarDemo,
   'message-demo': MessageDemo,

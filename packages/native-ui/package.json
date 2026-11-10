@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "@zeroxsolutions/shadcn-upstream": "workspace:*",
+    "@zeroxsolutions/fluent-emoji": "workspace:*",
     "@zeroxsolutions/ui": "workspace:*",
     "@babel/runtime": "~7.27.6",
     "@expo-google-fonts/geist": "catalog:",

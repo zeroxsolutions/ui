@@ -1101,6 +1101,9 @@ importers:
       '@types/jest':
         specifier: 'catalog:'
         version: 30.0.0
+      '@zeroxsolutions/fluent-emoji':
+        specifier: workspace:*
+        version: link:../fluent-emoji
       '@zeroxsolutions/shadcn-upstream':
         specifier: workspace:*
         version: link:../shadcn-upstream

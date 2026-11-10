@@ -1,0 +1,56 @@
+---
+title: Language toggle group
+description: Every language shown inline as a single-choice toggle group, which never deselects so a language is always chosen.
+---
+
+<NativePreview name="language-toggle-group-demo" />
+
+## Installation
+
+<InstallCommand name="language-toggle-group" />
+
+The CLI writes `components/data-entry/language-toggle-group.tsx` and installs
+[Toggle group](/native/components/nativewind/toggle-group) with the items it needs.
+
+## Usage
+
+```tsx
+import { LanguageToggleGroup } from '@/components/data-entry/language-toggle-group';
+import { Text } from '@/components/ui/text';
+import { ToggleGroupItem } from '@/components/ui/toggle-group';
+```
+
+```tsx
+<LanguageToggleGroup value={language} onValueChange={setLanguage} aria-label="Language">
+  <ToggleGroupItem value="en">
+    <Text>English</Text>
+  </ToggleGroupItem>
+  <ToggleGroupItem value="es">
+    <Text>Spanish</Text>
+  </ToggleGroupItem>
+</LanguageToggleGroup>
+```
+
+Compose one `ToggleGroupItem` per option, as the group's direct children. Use it for a small, fixed set of two to
+four languages; for a longer or searchable list, use a [Combobox](/native/components/nativewind/combobox) instead.
+
+## API reference
+
+### LanguageToggleGroup
+
+Takes every prop of [ToggleGroup](/native/components/nativewind/toggle-group) except `type`, which it fixes to
+`single`, and `value` and `onValueChange`, which are redefined:
+
+| Prop            | Type                      | Default  |
+| --------------- | ------------------------- | -------- |
+| `value`         | `string`                  | required |
+| `onValueChange` | `(value: string) => void` | required |
+
+It is announced as a radio group, named by its `aria-label`, and each item as a radio, checked while its `value`
+equals the group's. Pressing the checked item reports nothing, so a language is always chosen. It defaults
+`variant` to `outline` and keeps the toggle group's default spacing.
+
+## Differences from the web
+
+- Its label goes in each item as a Text child, where the web's item takes the string itself.
+- The web's `data-slot` attribute is not set; a View takes no data attributes.
