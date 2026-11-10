@@ -1,0 +1,86 @@
+---
+title: Emoji appearance toggle group
+description: A single-choice row of swatches for choosing the Fluent emoji artwork style, each previewing the same sample emoji in its own style.
+---
+
+<NativePreview name="emoji-appearance-toggle-group-demo" />
+
+## Installation
+
+<InstallCommand name="emoji-appearance-toggle-group" />
+
+The CLI writes `components/data-entry/emoji-appearance-toggle-group.tsx`, installs
+[Toggle group](/native/components/nativewind/toggle-group), Utils and the Fluent emoji lib, which draws the
+artwork through `expo-image` from `https://fluent-emoji.zeroxsolutions.com`, and adds `expo-image`.
+
+## Usage
+
+```tsx
+import {
+  EmojiAppearanceToggleGroup,
+  EmojiAppearanceToggleGroupItem,
+} from '@/components/data-entry/emoji-appearance-toggle-group';
+import { Text } from '@/components/ui/text';
+import type { FluentEmojiStyle } from '@/lib/fluent-emoji';
+```
+
+```tsx
+<EmojiAppearanceToggleGroup value={style} onValueChange={setStyle}>
+  <EmojiAppearanceToggleGroupItem value="3d">
+    <Text>3D</Text>
+  </EmojiAppearanceToggleGroupItem>
+  <EmojiAppearanceToggleGroupItem value="flat">
+    <Text>Flat</Text>
+  </EmojiAppearanceToggleGroupItem>
+</EmojiAppearanceToggleGroup>
+```
+
+Compose one `EmojiAppearanceToggleGroupItem` per style the app offers, as the group's direct children; the preview
+emoji is the selector, so a style is always chosen. This is an app-level appearance control, not an emoji picker:
+the style is a preference the app persists and applies everywhere it draws a Fluent emoji, by passing it as
+`FluentEmoji`'s `variant`.
+
+## Composition
+
+```text
+EmojiAppearanceToggleGroup
+`-- EmojiAppearanceToggleGroupItem
+```
+
+## API reference
+
+### EmojiAppearanceToggleGroup
+
+Takes every prop of [ToggleGroup](/native/components/nativewind/toggle-group) except `type`, which it fixes to
+`single`, and `value` and `onValueChange`, which are redefined:
+
+| Prop            | Type                                | Default  |
+| --------------- | ----------------------------------- | -------- |
+| `value`         | `FluentEmojiStyle`                  | required |
+| `onValueChange` | `(style: FluentEmojiStyle) => void` | required |
+
+`FluentEmojiStyle` is `'3d' | 'flat' | 'modern' | 'mono' | 'anim'`. The group is announced as a radio group,
+named "Emoji style" unless given an `aria-label`, and pressing the checked swatch reports nothing. It defaults
+`variant` to `outline`, keeps the toggle group's default spacing, and wraps its swatches onto further rows when
+narrower than they are.
+
+### EmojiAppearanceToggleGroupItem
+
+Takes every prop of `ToggleGroupItem` except `value`, which is redefined:
+
+| Prop    | Type               | Default  |
+| ------- | ------------------ | -------- |
+| `value` | `FluentEmojiStyle` | required |
+
+One swatch, announced as a radio named by its label alone: the grinning face drawn 24px in `value`'s style,
+hidden from a screen reader, before the label, a Text child. The `anim` swatch plays its frames, and the black
+`mono` artwork is tinted the foreground colour. Where the artwork cannot be loaded, the swatch draws the emoji as
+text.
+
+## Differences from the web
+
+- The artwork comes from `https://fluent-emoji.zeroxsolutions.com` through `expo-image`, which draws svg and
+  animated webp on both platforms, where the web draws the files `@zeroxsolutions/fluent-emoji` serves.
+- `mono` takes the foreground colour, where the web inverts the black artwork in the dark theme.
+- Its label goes in each item as a Text child, where the web's item takes the string itself.
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

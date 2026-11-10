@@ -43,23 +43,14 @@ function EditorTabTitle({ className, ...props }: ComponentProps<typeof ItemTitle
  * The tab's trailing close control, a ghost extra-small icon Button named "Close" unless an `aria-label` is
  * given. Its X shows at all times, since a phone has no hover to reveal it; on a dirty tab that is not active,
  * the unsaved dot sits before it, where the web shows the dot in the X's place until the tab is hovered. A press
- * never reaches the tab, so closing a tab does not also activate it.
+ * goes to the innermost pressable alone, so closing a tab does not also activate it.
  */
-function EditorTabCloseButton({ onPress, ...props }: Omit<ComponentProps<typeof Button>, 'children'>): ReactNode {
+function EditorTabCloseButton(props: Omit<ComponentProps<typeof Button>, 'children'>): ReactNode {
   const { active, dirty } = useContext(EditorTabContext);
   return (
     <>
       {dirty && !active && <UnsavedIndicator />}
-      <Button
-        variant="ghost"
-        size="icon-xs"
-        aria-label="Close"
-        onPress={(event) => {
-          event.stopPropagation();
-          onPress?.(event);
-        }}
-        {...props}
-      >
+      <Button variant="ghost" size="icon-xs" aria-label="Close" {...props}>
         <Icon as={X} />
       </Button>
     </>

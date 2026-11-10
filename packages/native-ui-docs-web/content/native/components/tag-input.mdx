@@ -1,0 +1,108 @@
+---
+title: Tag input
+description: A tag editor with removable chips above a field that adds a new tag on the return key, a comma, or leaving the field.
+---
+
+<NativePreview name="tag-input-demo" />
+
+## Installation
+
+<InstallCommand name="tag-input" />
+
+The CLI writes `components/data-entry/tag-input.tsx`, installs [Badge](/native/components/nativewind/badge),
+[Button](/native/components/nativewind/button), [Icon](/native/components/nativewind/icon),
+[Input](/native/components/nativewind/input), [Text](/native/components/nativewind/text) and Utils, and adds
+`lucide-react-native`.
+
+## Usage
+
+```tsx
+import {
+  TagInput,
+  TagInputInput,
+  TagInputList,
+  TagInputTag,
+  TagInputTagRemove,
+} from '@/components/data-entry/tag-input';
+```
+
+```tsx
+<TagInput value={tags} onValueChange={setTags}>
+  <TagInputList>
+    {tags.map((tag) => (
+      <TagInputTag key={tag} value={tag}>
+        {tag}
+        <TagInputTagRemove aria-label={`Remove ${tag}`} />
+      </TagInputTag>
+    ))}
+  </TagInputList>
+  <TagInputInput aria-label="Add a tag" placeholder="Add a tag" />
+</TagInput>
+```
+
+The root owns the tag array and hands adding and removing to its parts; other props land on the root View. Use it
+for a free-form list of tags the reader types, such as keywords or labels.
+
+## Composition
+
+```text
+TagInput
+|-- TagInputList
+|   `-- TagInputTag
+|       `-- TagInputTagRemove
+`-- TagInputInput
+```
+
+## API reference
+
+### TagInput
+
+Takes every prop of a View, plus:
+
+| Prop            | Type                        | Default  |
+| --------------- | --------------------------- | -------- |
+| `value`         | `string[]`                  | required |
+| `onValueChange` | `(value: string[]) => void` | required |
+| `disabled`      | `boolean`                   | `false`  |
+
+A tag is trimmed, and an empty one or one the list holds already is never added.
+
+### TagInputList
+
+Takes every prop of a View. The row the tags wrap in; it draws nothing while it holds no tag.
+
+### TagInputTag
+
+Takes every prop of [Badge](/native/components/nativewind/badge), plus:
+
+| Prop    | Type     | Default  |
+| ------- | -------- | -------- |
+| `value` | `string` | required |
+
+One tag, a `secondary` badge unless given another `variant`: the label, then its `TagInputTagRemove`. A string
+child is drawn in a Text, so the label goes in as the tag itself.
+
+### TagInputTagRemove
+
+Takes every prop of [Button](/native/components/nativewind/button) except `children`. A ghost `icon-xs` button
+drawing a cross, announced as a button; name it with `aria-label`. Disabled with the root. An `onPress` runs first,
+and one that calls `preventDefault` keeps the tag. Throws outside a `TagInputTag`.
+
+### TagInputInput
+
+Takes every prop of [Input](/native/components/nativewind/input) except `value` and `defaultValue`, and keeps the
+draft itself; name it with `aria-label`. The return key adds the draft and keeps the field focused for the next
+tag. A comma adds the text before it, so a pasted `ui, docs, web` adds each tag. Leaving the field adds what is
+left. Backspace in an empty field removes the last tag. Disabled with the root. Your own `onChangeText`,
+`onSubmitEditing`, `onKeyPress` and `onBlur` run before the field's.
+
+## Differences from the web
+
+- Android's soft keyboards do not report Backspace in an empty field, so there a tag goes by its own remove button.
+- A comma is read from the text as it changes rather than as a key, since a touch keyboard does not report every
+  key.
+- `onPress`, `onChangeText`, `onSubmitEditing` and `onKeyPress` stand in for the web's `onClick`, `onChange` and
+  `onKeyDown`.
+- The cross is a static icon; the web's plays while the button is hovered or focused. The badge does not pad its
+  inline end for the button, since the web's padding reads a `data-icon` attribute.
+- The web's `data-slot` and `data-disabled` attributes are not set; a View takes no data attributes.

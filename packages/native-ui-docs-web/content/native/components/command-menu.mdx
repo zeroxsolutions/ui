@@ -1,0 +1,85 @@
+---
+title: Command menu
+description: "A command palette for jumping to a target: a CommandDialog holding a Command that reports the chosen item's value and closes."
+---
+
+<NativePreview name="command-menu-demo" />
+
+## Installation
+
+<InstallCommand name="command-menu" />
+
+The CLI writes `components/navigation/command-menu.tsx` and installs
+[Command](/native/components/nativewind/command) with the items it needs.
+
+## Usage
+
+```tsx
+import { CommandMenu, CommandMenuItem } from '@/components/navigation/command-menu';
+import { Button } from '@/components/ui/button';
+import { CommandEmpty, CommandInput, CommandList } from '@/components/ui/command';
+import { Text } from '@/components/ui/text';
+```
+
+```tsx
+<Button variant="outline" onPress={() => setOpen(true)}>
+  <Text>Open menu</Text>
+</Button>
+<CommandMenu open={open} onOpenChange={setOpen} onValueChange={setValue}>
+  <CommandInput placeholder="Jump to file..." />
+  <CommandList>
+    <CommandEmpty>No file found.</CommandEmpty>
+    <CommandMenuItem value="page.tsx">
+      <Text>page.tsx</Text>
+    </CommandMenuItem>
+  </CommandList>
+</CommandMenu>
+```
+
+Compose `CommandInput`, `CommandList`, `CommandEmpty` and the items as children, and open the menu from a control
+of your own, such as a button. The dialog draws in a portal, so the app needs a `PortalHost`, as for
+[Dialog](/native/components/nativewind/dialog).
+
+## Composition
+
+```text
+CommandMenu
+|-- CommandInput
+`-- CommandList
+    |-- CommandEmpty
+    `-- CommandMenuItem
+```
+
+## API reference
+
+### CommandMenu
+
+Takes every prop of [CommandDialog](/native/components/nativewind/command) except `onOpenChange`, which is
+redefined, plus:
+
+| Prop            | Type                      | Default |
+| --------------- | ------------------------- | ------- |
+| `onOpenChange`  | `(open: boolean) => void` | -       |
+| `onValueChange` | `(value: string) => void` | -       |
+
+It defaults CommandDialog's `title` to `'Command menu'` and `description` to `'Search for a target to jump to.'`,
+which a screen reader reads though they are not drawn. `onOpenChange` is called with `false` after an item is
+chosen.
+
+### CommandMenuItem
+
+Takes every prop of `CommandItem` except `value`, which is required here:
+
+| Prop    | Type     | Default  |
+| ------- | -------- | -------- |
+| `value` | `string` | required |
+
+Choosing it runs the item's own `onSelect` if given, then reports `value` through the menu's `onValueChange` and
+closes the dialog. The typed text is matched against `value`.
+
+## Differences from the web
+
+- The web's `useCommandShortcut` hook, which opens the menu on Cmd+K or Ctrl+K, is not ported, since a phone has
+  no such key; open the menu from a control.
+- Each item's label is a Text child, where the web's item takes the string itself.
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

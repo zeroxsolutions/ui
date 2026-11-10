@@ -31,6 +31,7 @@ import { CollapsibleCardDemo } from './collapsible-card-demo';
 import { CollapsibleDemo } from './collapsible-demo';
 import { ComboboxDemo } from './combobox-demo';
 import { CommandDemo } from './command-demo';
+import { CommandMenuDemo } from './command-menu-demo';
 import { ContextMenuDemo } from './context-menu-demo';
 import { CopyButtonDemo } from './copy-button-demo';
 import { DialogDemo } from './dialog-demo';
@@ -38,12 +39,14 @@ import { DirectionDemo } from './direction-demo';
 import { DrawerDemo } from './drawer-demo';
 import { DropdownMenuDemo } from './dropdown-menu-demo';
 import { EditorTabDemo } from './editor-tab-demo';
+import { EmojiAppearanceToggleGroupDemo } from './emoji-appearance-toggle-group-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
 import { FileTypeIconDemo } from './file-type-icon-demo';
 import { FloatingToolbarDemo } from './floating-toolbar-demo';
 import { FontPreviewDemo } from './font-preview-demo';
 import { FormDemo } from './form-demo';
+import { FrontmatterFormDemo } from './frontmatter-form-demo';
 import { HoverCardDemo } from './hover-card-demo';
 import { IconDemo } from './icon-demo';
 import { IconLabelDemo } from './icon-label-demo';
@@ -55,6 +58,8 @@ import { InputOtpDemo } from './input-otp-demo';
 import { ItemDemo } from './item-demo';
 import { KbdDemo } from './kbd-demo';
 import { LabelDemo } from './label-demo';
+import { LanguageComboboxDemo } from './language-combobox-demo';
+import { LanguageToggleGroupDemo } from './language-toggle-group-demo';
 import { MarkerDemo } from './marker-demo';
 import { MenubarDemo } from './menubar-demo';
 import { MessageDemo } from './message-demo';
@@ -62,6 +67,7 @@ import { MessageScrollerDemo } from './message-scroller-demo';
 import { ModelInfoCardDemo } from './model-info-card-demo';
 import { NativeSelectDemo } from './native-select-demo';
 import { NavigationMenuDemo } from './navigation-menu-demo';
+import { NumberFieldDemo } from './number-field-demo';
 import { PageContainerDemo } from './page-container-demo';
 import { PaginationDemo } from './pagination-demo';
 import { PanelFieldGroupDemo } from './panel-field-group-demo';
@@ -90,6 +96,7 @@ import { SwitchDemo } from './switch-demo';
 import { TabBarDemo } from './tab-bar-demo';
 import { TableDemo } from './table-demo';
 import { TabsDemo } from './tabs-demo';
+import { TagInputDemo } from './tag-input-demo';
 import { TextDemo } from './text-demo';
 import { ThemeDemo } from './theme-demo';
 import { ToastDemo } from './toast-demo';
@@ -129,6 +136,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'collapsible-demo': CollapsibleDemo,
   'combobox-demo': ComboboxDemo,
   'command-demo': CommandDemo,
+  'command-menu-demo': CommandMenuDemo,
   'context-menu-demo': ContextMenuDemo,
   'copy-button-demo': CopyButtonDemo,
   'dialog-demo': DialogDemo,
@@ -136,12 +144,14 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'drawer-demo': DrawerDemo,
   'dropdown-menu-demo': DropdownMenuDemo,
   'editor-tab-demo': EditorTabDemo,
+  'emoji-appearance-toggle-group-demo': EmojiAppearanceToggleGroupDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
   'file-type-icon-demo': FileTypeIconDemo,
   'floating-toolbar-demo': FloatingToolbarDemo,
   'font-preview-demo': FontPreviewDemo,
   'form-demo': FormDemo,
+  'frontmatter-form-demo': FrontmatterFormDemo,
   'hover-card-demo': HoverCardDemo,
   'icon-demo': IconDemo,
   'icon-label-demo': IconLabelDemo,
@@ -153,6 +163,8 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'item-demo': ItemDemo,
   'kbd-demo': KbdDemo,
   'label-demo': LabelDemo,
+  'language-combobox-demo': LanguageComboboxDemo,
+  'language-toggle-group-demo': LanguageToggleGroupDemo,
   'marker-demo': MarkerDemo,
   'menubar-demo': MenubarDemo,
   'message-demo': MessageDemo,
@@ -160,6 +172,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'model-info-card-demo': ModelInfoCardDemo,
   'native-select-demo': NativeSelectDemo,
   'navigation-menu-demo': NavigationMenuDemo,
+  'number-field-demo': NumberFieldDemo,
   'page-container-demo': PageContainerDemo,
   'pagination-demo': PaginationDemo,
   'panel-field-group-demo': PanelFieldGroupDemo,
@@ -188,6 +201,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'tab-bar-demo': TabBarDemo,
   'table-demo': TableDemo,
   'tabs-demo': TabsDemo,
+  'tag-input-demo': TagInputDemo,
   'text-demo': TextDemo,
   'theme-demo': ThemeDemo,
   'toast-demo': ToastDemo,

@@ -1,0 +1,130 @@
+---
+title: Frontmatter form
+description: A frontmatter (YAML metadata) editor over Field, whose fields bind each control to one key of the document and show the error the caller computes.
+---
+
+<NativePreview name="frontmatter-form-demo" />
+
+## Installation
+
+<InstallCommand name="frontmatter-form" />
+
+The CLI writes `components/data-entry/frontmatter-form.tsx` and installs [Field](/native/components/nativewind/field)
+with the items it needs.
+
+## Usage
+
+```tsx
+import {
+  FrontmatterForm,
+  FrontmatterFormField,
+  FrontmatterFormFieldControl,
+  FrontmatterFormFieldError,
+  FrontmatterFormFieldLabel,
+} from '@/components/data-entry/frontmatter-form';
+import { Input } from '@/components/ui/input';
+```
+
+```tsx
+<FrontmatterForm value={value} onValueChange={setValue}>
+  <FrontmatterFormField name="name">
+    <FrontmatterFormFieldLabel>Name</FrontmatterFormFieldLabel>
+    <FrontmatterFormFieldControl render={<Input aria-label="Name" placeholder="my-skill" />} />
+    <FrontmatterFormFieldError />
+  </FrontmatterFormField>
+</FrontmatterForm>
+```
+
+The caller composes one `FrontmatterFormField` per key and owns every label, hint (`FieldDescription`), control
+and validation rule; the component ships no rules of its own. Bind a non-text control, such as a Switch, through
+`useFrontmatterFormField` instead of `FrontmatterFormFieldControl`.
+
+## Composition
+
+```text
+FrontmatterForm
+`-- FrontmatterFormField
+    |-- FrontmatterFormFieldLabel
+    |-- FrontmatterFormFieldControl
+    `-- FrontmatterFormFieldError
+```
+
+## Invalid fields
+
+```tsx
+<FrontmatterForm value={value} onValueChange={setValue} errors={value.name ? {} : { name: 'A name is required.' }}>
+  <FrontmatterFormField name="name">
+    <FrontmatterFormFieldLabel>Name</FrontmatterFormFieldLabel>
+    <FrontmatterFormFieldControl render={<Input aria-label="Name" placeholder="my-skill" />} />
+    <FrontmatterFormFieldError />
+  </FrontmatterFormField>
+</FrontmatterForm>
+```
+
+A field whose key `errors` holds draws its label in the destructive colour, its control with the destructive
+border, and the message below it, which a screen reader announces as it appears. The control is given the message
+as its `accessibilityHint`, since React Native announces no `aria-invalid`.
+
+## API reference
+
+### useFrontmatterFormField
+
+`useFrontmatterFormField(): { name: string; value: unknown; setValue: (fieldValue: unknown) => void; error: string |
+undefined; labelId: string }` - reads the current field's binding. `labelId` is the label's `nativeID`, which a
+control names in `aria-labelledby`. Use it to bind a control `FrontmatterFormFieldControl` does not cover (a Switch,
+a tag input). Throws outside a `FrontmatterFormField`.
+
+### FrontmatterForm
+
+Takes every prop of [FieldGroup](/native/components/nativewind/field), plus:
+
+| Prop            | Type                                    | Default  |
+| --------------- | --------------------------------------- | -------- |
+| `value`         | `FrontmatterFormValue`                  | required |
+| `onValueChange` | `(value: FrontmatterFormValue) => void` | required |
+| `errors`        | `Record<string, string>`                | `{}`     |
+
+The root holds the document and its field setters; `FrontmatterFormValue` is an object of arbitrary keys, values
+usually strings. A change reports the whole document with that key set.
+
+### FrontmatterFormField
+
+Takes every prop of [Field](/native/components/nativewind/field), plus:
+
+| Prop   | Type     | Default  |
+| ------ | -------- | -------- |
+| `name` | `string` | required |
+
+One field, bound to `name`, `invalid` while the root's `errors` hold `name`.
+
+### FrontmatterFormFieldLabel
+
+Takes every prop of [FieldLabel](/native/components/nativewind/field) except `nativeID`, which it sets to the
+field's `labelId`.
+
+### FrontmatterFormFieldControl
+
+| Prop     | Type                                                    | Default  |
+| -------- | ------------------------------------------------------- | -------- |
+| `render` | `ReactElement<FrontmatterFormFieldControlElementProps>` | required |
+
+Clones `render`, the text control to bind, such as `<Input placeholder="my-skill" />` or `<Textarea />`, with the
+field's value as a string (a missing one as empty), `onChangeText`, `aria-invalid` and `aria-labelledby` naming the
+label, which replace its own. While the field is invalid the error replaces its `accessibilityHint`; while it is
+valid its own hint stays. Its own `onChangeText` still runs, before the field's.
+
+### FrontmatterFormFieldError
+
+Takes every prop of [FieldError](/native/components/nativewind/field). The current field's message from the root's
+`errors`; draws nothing while the field is valid.
+
+## Differences from the web
+
+- The label names its control through its `nativeID` and the control's `aria-labelledby`, which Android reads; iOS
+  reads only the control's own `aria-label`, so give the control one too, as the demo does. Pressing the label does
+  not focus the control.
+- The error reaches a screen reader as the control's `accessibilityHint`, in place of the web's `aria-describedby`.
+  The hook gives `labelId` in place of the web's `controlId` and `errorId`.
+- `onChangeText` stands in for the web's `onChange`.
+- The label's container-query classes are not set; a horizontal Field already lets its label grow.
+- The web's `data-slot` and `data-invalid` attributes are not set; a View takes no data attributes.

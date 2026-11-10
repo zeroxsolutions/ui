@@ -56,6 +56,13 @@ test('serves the react native items for each engine in each style', async ({ req
         'chat-suggestion-item',
         'floating-toolbar',
         'editor-tab',
+        'language-toggle-group',
+        'emoji-appearance-toggle-group',
+        'command-menu',
+        'number-field',
+        'tag-input',
+        'language-combobox',
+        'frontmatter-form',
       ]),
     );
 

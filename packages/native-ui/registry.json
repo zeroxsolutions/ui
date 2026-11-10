@@ -1704,6 +1704,147 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "expr-eval",
+      "type": "registry:lib",
+      "title": "Expression evaluator",
+      "description": "evaluateExpression, which works out simple arithmetic typed into a number field, such as 100 + 8 or (4 + 2) * 3, with + - * /, parentheses and decimals, and gives null for anything else.",
+      "files": [
+        {
+          "path": "src/registry/lib/expr-eval.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "language-options",
+      "type": "registry:lib",
+      "title": "Language options",
+      "description": "The code languages the design system highlights, with their labels and code-fence aliases, the locale options labelled with each language's own name where the runtime can name it, and findLanguageOption, which finds the option a value or its alias carries.",
+      "files": [
+        {
+          "path": "src/registry/lib/language-options.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "fluent-emoji",
+      "type": "registry:lib",
+      "title": "Fluent emoji",
+      "description": "fluentEmojiUrl, an emoji glyph's Fluent artwork URL on the house CDN in one of five styles, and FluentEmoji, which draws that artwork through expo-image, tints the black mono style the foreground colour, and draws the glyph as text where the artwork fails to load.",
+      "dependencies": ["expo-image"],
+      "registryDependencies": ["@zui/chart-theme", "@zui/text", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/lib/fluent-emoji.tsx",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "language-toggle-group",
+      "type": "registry:component",
+      "title": "Language toggle group",
+      "description": "Every language shown inline as a single-choice toggle group for a small fixed set, announced as a radio group, which never deselects so a language is always chosen.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/toggle-group"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/language-toggle-group.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "emoji-appearance-toggle-group",
+      "type": "registry:component",
+      "title": "Emoji appearance toggle group",
+      "description": "A single-choice row of swatches for choosing the Fluent emoji artwork style, each previewing the same sample emoji in its own style before its label, announced as a radio group named Emoji style.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/fluent-emoji", "@zui/toggle-group", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/emoji-appearance-toggle-group.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "command-menu",
+      "type": "registry:component",
+      "title": "Command menu",
+      "description": "A command palette for jumping to a target: a controlled CommandDialog holding a Command that reports the chosen item's value and closes when an item is chosen.",
+      "categories": ["navigation"],
+      "registryDependencies": ["@zui/command"],
+      "files": [
+        {
+          "path": "src/registry/components/navigation/command-menu.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "number-field",
+      "type": "registry:component",
+      "title": "Number field",
+      "description": "A compact numeric field for a property inspector over Input Group, which works out arithmetic such as 100 + 8, clamps to min and max and commits on the return key or on leaving the field; Escape drops the draft and the arrows step where the keyboard reports those keys.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/expr-eval", "@zui/input-group", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/number-field.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "tag-input",
+      "type": "registry:component",
+      "title": "Tag input",
+      "description": "A tag editor with removable chips above a field that adds a new tag on the return key, a comma or leaving the field, and never adds a duplicate.",
+      "categories": ["data-entry"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/badge", "@zui/button", "@zui/icon", "@zui/input", "@zui/text", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/tag-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "language-combobox",
+      "type": "registry:component",
+      "title": "Language combobox",
+      "description": "A searchable language picker over Combobox, for UI locales or the code languages the design system highlights, that shows a code alias such as ts as its language and reports the value picked.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/combobox", "@zui/language-options"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/language-combobox.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/registry/hooks/use-language-options.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "frontmatter-form",
+      "type": "registry:component",
+      "title": "Frontmatter form",
+      "description": "A frontmatter (YAML metadata) editor over Field: the caller composes one field per key, each control named by its label and bound to its value, and an invalid field's error shown and given to the control as its hint.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/field"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/frontmatter-form.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

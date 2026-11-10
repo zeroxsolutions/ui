@@ -43,7 +43,8 @@ all times, since a phone has no hover to reveal it.
 
 ## The Fluent emoji on native
 
-The native items draw each emoji with React Native's `Image` straight from the house CDN,
+The native items draw each emoji with `expo-image` straight from the house CDN (React Native's `Image` draws
+no svg, which three of the five styles are),
 `https://fluent-emoji.zeroxsolutions.com/<style>/<codepoint>.<ext>`, which serves every style's artwork,
 through a small `fluent-emoji` registry lib in the native registries that turns a glyph into that URL.
 They do not import `@zeroxsolutions/fluent-emoji`, whose URL module reads `import.meta.url`, which Metro
