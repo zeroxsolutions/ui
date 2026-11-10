@@ -59,6 +59,8 @@ test('serves the react native items for each engine in each style', async ({ req
         'language-toggle-group',
         'emoji-appearance-toggle-group',
         'command-menu',
+        'number-field',
+        'tag-input',
       ]),
     );
 

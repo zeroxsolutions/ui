@@ -1,0 +1,124 @@
+---
+title: Number field
+description: A compact numeric field for a property inspector that works out arithmetic, clamps to min and max, and commits on return or on leaving the field.
+---
+
+<NativePreview name="number-field-demo" />
+
+## Installation
+
+<InstallCommand name="number-field" />
+
+The CLI writes `components/data-entry/number-field.tsx`, installs
+[Input group](/native/components/nativewind/input-group) and Utils with the items they need, and writes the
+expression evaluator to `lib/expr-eval.ts`.
+
+## Usage
+
+```tsx
+import { NumberField, NumberFieldInput } from '@/components/data-entry/number-field';
+import { InputGroupAddon, InputGroupText } from '@/components/ui/input-group';
+```
+
+```tsx
+<NumberField value={width} onValueChange={setWidth} min={0} max={1000} step={1}>
+  <InputGroupAddon>
+    <InputGroupText>W</InputGroupText>
+  </InputGroupAddon>
+  <NumberFieldInput aria-label="Width" />
+  <InputGroupAddon align="inline-end">
+    <InputGroupText>px</InputGroupText>
+  </InputGroupAddon>
+</NumberField>
+```
+
+Compose a `NumberFieldInput` and any `InputGroupAddon` around it, such as a leading label or a trailing unit, as the
+group's direct children. Use it for a compact numeric field in a property inspector, such as a width or a corner
+radius; a reader who types `100 + 8` commits `108`.
+
+## Composition
+
+```text
+NumberField
+`-- NumberFieldInput
+```
+
+## Mixed values
+
+```tsx
+<NumberField value={widths[0]} onValueChange={(value) => setWidths(widths.map(() => value))} mixed={mixed}>
+  <NumberFieldInput aria-label="Width" placeholder="Mixed" />
+</NumberField>
+```
+
+Set `mixed` when the selection holds differing values: the field blanks to its `placeholder` until the reader types
+one, and your own `onValueChange` applies it to every selected target.
+
+## Steps on a touch keyboard
+
+The arrows step the value only where the keyboard reports them, a hardware keyboard or the web; a phone's keyboard
+has no arrow keys. Where a screen needs steps on a phone, compose buttons in an addon:
+
+```tsx
+import { Minus, Plus } from 'lucide-react-native';
+import { Icon } from '@/components/ui/icon';
+import { InputGroupAddon, InputGroupButton } from '@/components/ui/input-group';
+```
+
+```tsx
+<NumberField value={width} onValueChange={setWidth} min={0} max={1000}>
+  <NumberFieldInput aria-label="Width" />
+  <InputGroupAddon align="inline-end">
+    <InputGroupButton size="icon-xs" aria-label="Decrease width" onPress={() => setWidth(Math.max(0, width - 1))}>
+      <Icon as={Minus} />
+    </InputGroupButton>
+    <InputGroupButton size="icon-xs" aria-label="Increase width" onPress={() => setWidth(Math.min(1000, width + 1))}>
+      <Icon as={Plus} />
+    </InputGroupButton>
+  </InputGroupAddon>
+</NumberField>
+```
+
+## API reference
+
+### NumberField
+
+Takes every prop of [InputGroup](/native/components/nativewind/input-group) except `defaultValue`, plus:
+
+| Prop            | Type                              | Default  |
+| --------------- | --------------------------------- | -------- |
+| `value`         | `number`                          | required |
+| `onValueChange` | `(value: number) => void`         | required |
+| `disabled`      | `boolean`                         | -        |
+| `min`           | `number`                          | -        |
+| `max`           | `number`                          | -        |
+| `step`          | `number`                          | -        |
+| `parseRaw`      | `(raw: string) => number \| null` | -        |
+| `mixed`         | `boolean`                         | -        |
+| `displayText`   | `string`                          | -        |
+
+Parses the draft with `parseRaw`, or as arithmetic by default, clamps the result to `min` and `max`, and commits it
+on the return key or when the field is left; a draft that is not a number commits nothing. Escape drops the draft
+and commits nothing, and ArrowUp and ArrowDown move the value by `step`, clamped the same way, where the keyboard
+reports those keys. `displayText` shows a label, such as "Hug" or "Fill", in place of the number until the field
+is focused. `disabled` makes the input not editable, announced as disabled.
+
+### NumberFieldInput
+
+Takes every prop of [InputGroupInput](/native/components/nativewind/input-group) except `value`, `defaultValue`
+and `editable`, which the root sets. Name it with `aria-label`.
+
+Shows the field's value, or its draft while focused; its `placeholder` shows only while the field is `mixed`. It
+opens iOS's numbers-and-punctuation keyboard, since the decimal pad has no minus sign and no operators. Your own
+`onFocus`, `onChangeText`, `onBlur`, `onSubmitEditing` and `onKeyPress` run before the field's; an `onKeyPress`
+that calls `preventDefault` keeps Escape and the arrows from reaching it.
+
+## Differences from the web
+
+- On a phone, Escape and the arrows have no key to come from, so leaving the field always commits and `step` has no
+  trigger; compose step buttons as above where a screen needs them.
+- `onChangeText`, `onSubmitEditing` and `onKeyPress` stand in for the web's `onChange` and `onKeyDown`, and
+  `editable` for `disabled`; the web's `type` has no counterpart.
+- Native InputGroup draws its own focus ring, so the web's `cn-number-field` ring is not drawn.
+- The web's `data-slot`, `data-mixed`, `data-editing` and `data-disabled` attributes are not set; a View takes no
+  data attributes.

@@ -1784,6 +1784,35 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "number-field",
+      "type": "registry:component",
+      "title": "Number field",
+      "description": "A compact numeric field for a property inspector over Input Group, which works out arithmetic such as 100 + 8, clamps to min and max and commits on the return key or on leaving the field; Escape drops the draft and the arrows step where the keyboard reports those keys.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/expr-eval", "@zui/input-group", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/number-field.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "tag-input",
+      "type": "registry:component",
+      "title": "Tag input",
+      "description": "A tag editor with removable chips above a field that adds a new tag on the return key, a comma or leaving the field, and never adds a duplicate.",
+      "categories": ["data-entry"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/badge", "@zui/button", "@zui/icon", "@zui/input", "@zui/text", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/tag-input.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

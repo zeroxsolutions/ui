@@ -14,8 +14,6 @@ const NOT_PORTED: ReadonlyMap<string, string> = new Map([
 /** The web items a later wave of the port brings, which the list loses as each wave lands. */
 const PENDING: ReadonlySet<string> = new Set([
   // wave 2
-  'number-field',
-  'tag-input',
   'language-combobox',
   'frontmatter-form',
   // wave 3
@@ -39,6 +37,15 @@ const UNDRAWN_SLOTS: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map(
     new Map([
       [
         'cn-password-input',
+        "redraws InputGroup's focus ring for the web's own input slot; native InputGroup rings itself from its focused state",
+      ],
+    ]),
+  ],
+  [
+    'number-field',
+    new Map([
+      [
+        'cn-number-field',
         "redraws InputGroup's focus ring for the web's own input slot; native InputGroup rings itself from its focused state",
       ],
     ]),

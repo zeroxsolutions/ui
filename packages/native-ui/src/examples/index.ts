@@ -65,6 +65,7 @@ import { MessageScrollerDemo } from './message-scroller-demo';
 import { ModelInfoCardDemo } from './model-info-card-demo';
 import { NativeSelectDemo } from './native-select-demo';
 import { NavigationMenuDemo } from './navigation-menu-demo';
+import { NumberFieldDemo } from './number-field-demo';
 import { PageContainerDemo } from './page-container-demo';
 import { PaginationDemo } from './pagination-demo';
 import { PanelFieldGroupDemo } from './panel-field-group-demo';
@@ -93,6 +94,7 @@ import { SwitchDemo } from './switch-demo';
 import { TabBarDemo } from './tab-bar-demo';
 import { TableDemo } from './table-demo';
 import { TabsDemo } from './tabs-demo';
+import { TagInputDemo } from './tag-input-demo';
 import { TextDemo } from './text-demo';
 import { ThemeDemo } from './theme-demo';
 import { ToastDemo } from './toast-demo';
@@ -166,6 +168,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'model-info-card-demo': ModelInfoCardDemo,
   'native-select-demo': NativeSelectDemo,
   'navigation-menu-demo': NavigationMenuDemo,
+  'number-field-demo': NumberFieldDemo,
   'page-container-demo': PageContainerDemo,
   'pagination-demo': PaginationDemo,
   'panel-field-group-demo': PanelFieldGroupDemo,
@@ -194,6 +197,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'tab-bar-demo': TabBarDemo,
   'table-demo': TableDemo,
   'tabs-demo': TabsDemo,
+  'tag-input-demo': TagInputDemo,
   'text-demo': TextDemo,
   'theme-demo': ThemeDemo,
   'toast-demo': ToastDemo,

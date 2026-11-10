@@ -25,6 +25,8 @@
     "password-input",
     "password-strength",
     "code-input",
+    "number-field",
+    "tag-input",
     "textarea",
     "checkbox",
     "radio-group",
