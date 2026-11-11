@@ -1,3 +1,17 @@
+## 0.1.2 (2026-11-11)
+
+### 🚀 Features
+
+- **fluent-emoji:** export the catalog alone at /catalog ([4df6874d](https://github.com/zeroxsolutions/ui/commit/4df6874d))
+
+### 🩹 Fixes
+
+- **deps:** keep icons and fluent-emoji react peers as ranges ([e0f41e6b](https://github.com/zeroxsolutions/ui/commit/e0f41e6b))
+
+### ❤️ Thank You
+
+- Lương Văn Tú
+
 ## 0.1.1 (2026-10-08)
 
 ### 🚀 Features
