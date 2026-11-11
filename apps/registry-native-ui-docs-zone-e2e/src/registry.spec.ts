@@ -67,6 +67,7 @@ test('serves the react native items for each engine in each style', async ({ req
         'data-table-column-header',
         'model-list',
         'resize-handle',
+        'data-table',
       ]),
     );
 

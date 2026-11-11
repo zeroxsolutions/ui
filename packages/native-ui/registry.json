@@ -1931,6 +1931,30 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "data-table",
+      "type": "registry:component",
+      "title": "Data table",
+      "description": "The parts of a @tanstack/react-table view - toolbar, view, pagination and view options - reading one shared table instance from context.",
+      "categories": ["data-display"],
+      "dependencies": ["@tanstack/react-table", "lucide-react-native"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/dropdown-menu",
+        "@zui/empty",
+        "@zui/icon",
+        "@zui/table",
+        "@zui/text",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/data-table.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

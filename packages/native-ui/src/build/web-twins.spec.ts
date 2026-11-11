@@ -17,7 +17,6 @@ const PENDING: ReadonlySet<string> = new Set([
   'file-tree',
   'code-card',
   'markdown-view',
-  'data-table',
   // wave 4
   'emoji-picker',
   'avatar-picker',

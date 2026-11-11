@@ -73,7 +73,9 @@ resize-handle.
 - `@tanstack/react-table` is added to native-ui. It is headless and runs unchanged on React Native.
 - Native `Table` lays a row's cells out at equal widths in a horizontal scroller, with no `colSpan`. Three
   consequences:
-  - A column is as wide as the others unless the caller sets a width on its cells.
+  - Every column is as wide as the others. `DataTableView` draws the cells, and the web offers no width either,
+    leaving it to the browser's table layout; tanstack's `size` cannot stand in, since it defaults every
+    column to 150.
   - `DataTableEmpty` spans the body as one block, not as a cell.
   - Grouped headers that span columns are not supported. The docs page says so.
 - `DataTableViewOptions` uses the native DropdownMenu's checkbox items.
@@ -142,8 +144,7 @@ The Expo Go list for the pull request:
 - the drag with a finger;
 - the tree on VoiceOver and TalkBack;
 - renaming with an IME keyboard;
-- markdown on Hermes;
-- a wide data table scrolling sideways.
+- markdown on Hermes.
 
 ## Batches
 
