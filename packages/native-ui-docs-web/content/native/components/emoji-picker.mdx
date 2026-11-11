@@ -1,0 +1,130 @@
+---
+title: Emoji picker
+description: A searchable, categorized emoji list with an optional frequent row and a category nav, mounting only the rows near the screen.
+---
+
+<NativePreview name="emoji-picker-demo" />
+
+## Installation
+
+<InstallCommand name="emoji-picker" />
+
+The CLI writes `components/data-entry/emoji-picker.tsx`, installs [Button](/native/components/nativewind/button),
+[Icon](/native/components/nativewind/icon), [Input group](/native/components/nativewind/input-group),
+[Text](/native/components/nativewind/text), [Toggle group](/native/components/nativewind/toggle-group), Utils, the
+Fluent emoji lib and the emoji picker rows lib, and adds `@zeroxsolutions/fluent-emoji`, whose `catalog` entry holds
+the emoji, and `lucide-react-native`.
+
+## Usage
+
+```tsx
+import {
+  EmojiPicker,
+  EmojiPickerContent,
+  EmojiPickerEmpty,
+  EmojiPickerNav,
+  EmojiPickerSearch,
+} from '@/components/data-entry/emoji-picker';
+```
+
+```tsx
+<EmojiPicker onSelect={setEmoji}>
+  <EmojiPickerSearch />
+  <EmojiPickerContent>
+    <EmojiPickerEmpty>
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>No emoji found</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    </EmojiPickerEmpty>
+  </EmojiPickerContent>
+  <EmojiPickerNav aria-label="Categories" />
+</EmojiPicker>
+```
+
+The root owns the query, the active category and the rows, and draws nothing of its own. The list mounts only the
+rows near the screen, so opening the catalog of about 1900 emoji draws one screenful and fetches only the artwork
+in view. Use it to pick an emoji glyph; for the Fluent artwork style itself, use
+[Emoji appearance toggle group](/native/components/nativewind/emoji-appearance-toggle-group).
+
+## Composition
+
+```text
+EmojiPicker
+|-- EmojiPickerSearch
+|-- EmojiPickerContent
+|   `-- EmojiPickerEmpty
+`-- EmojiPickerNav
+```
+
+## API reference
+
+### EmojiPicker
+
+Holds the query, the active category and the rows, and draws nothing of its own:
+
+| Prop       | Type                                  | Default        |
+| ---------- | ------------------------------------- | -------------- |
+| `onSelect` | `(emoji: string) => void`             | required       |
+| `frequent` | `EmojiPickerFrequent`                 | -              |
+| `surface`  | `'background' \| 'card' \| 'popover'` | `'background'` |
+| `children` | `ReactNode`                           | required       |
+
+`frequent` is `{ name: string; emojis: string[] }`: the recently used row's heading and nav item name, and its
+glyphs, most recent first. The picker stores nothing; the caller keeps the list. An empty list keeps the nav item,
+disabled, and drops the section; an omitted `frequent` has neither.
+
+`surface` names what the picker sits on, the page, a [Card](/native/components/nativewind/card) or a
+[Popover](/native/components/nativewind/popover), and the headings are drawn in its colour so the rows scrolling under
+them stay hidden. It stands in for the web's `--emoji-picker-surface` variable;
+[Avatar picker](/native/components/nativewind/avatar-picker) sets it to `popover`.
+
+### EmojiPickerSearch
+
+Takes every prop of [Input group](/native/components/nativewind/input-group)'s `InputGroupInput` except `value`,
+`defaultValue`, `onChange` and `onChangeText`. The search field, bound to the picker's query, with a search icon
+before it; `placeholder` defaults to `"Search"` and `aria-label` to `"Search emoji"`, and `className` places the
+group. A query matches an emoji whose catalog search text holds it, trimmed and in any case, and the matches show
+in one list with no headings.
+
+### EmojiPickerContent
+
+Takes every prop of a View except `style`, plus:
+
+| Prop   | Type                   | Default |
+| ------ | ---------------------- | ------- |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'`  |
+
+The scrolling list, in a box of the `size` height placed by `className`: a FlatList of the emoji eight to a row,
+each a ghost icon button named by the emoji's name, under a heading per category that sticks to the top while its
+rows scroll under it. Only the rows near the screen mount. `children` follow the rows, which is where an
+`EmojiPickerEmpty` goes. A new search starts the list back at the top.
+
+### EmojiPickerEmpty
+
+Takes every prop of a View. The no-results state: draws its `children`, an [Empty](/native/components/nativewind/empty)
+the caller composes, only while a search matches nothing. Place it in `EmojiPickerContent`.
+
+### EmojiPickerNav
+
+Takes every prop of [Toggle group](/native/components/nativewind/toggle-group) except `type`, `value`,
+`onValueChange` and `children`. The category nav: a single-choice group joined across the picker's width, one icon
+item per category, announced as a radio named by the category. Choosing one scrolls the list to that category's
+heading; the active one stays chosen when pressed again. Give the group its own `aria-label`. Hidden while
+searching.
+
+### EmojiPickerGroupLabel
+
+Takes every prop of a View. A section heading in the muted colour on the colour of the picker's `surface`, which the
+list draws for each category; a string child is drawn in a Text.
+
+## Differences from the web
+
+- The list is a FlatList, whose own windowing and sticky headers replace the web's.
+- The headings take the colour `surface` names; the web's take the colour of the card or popover they sit in, or the
+  `--emoji-picker-surface` variable, neither of which a View can read.
+- The search and category icons are static; the web's play while hovered or focused. A cell has no tooltip.
+- `EmojiPickerNav` takes no `multiple`, since it is single-choice, and its items are radios, where the web's are
+  pressed buttons.
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

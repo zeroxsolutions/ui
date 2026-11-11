@@ -1733,8 +1733,8 @@
       "name": "fluent-emoji",
       "type": "registry:lib",
       "title": "Fluent emoji",
-      "description": "fluentEmojiUrl, an emoji glyph's Fluent artwork URL on the house CDN in one of five styles, and FluentEmoji, which draws that artwork through expo-image, tints the black mono style the foreground colour, and draws the glyph as text where the artwork fails to load.",
-      "dependencies": ["expo-image"],
+      "description": "fluentEmojiUrl, an emoji glyph's Fluent artwork URL on the house CDN in one of five styles, or none where the package's manifest lists no artwork for it, and FluentEmoji, which draws that artwork through expo-image, tints the black mono style the foreground colour, and draws the glyph as text where there is no artwork or it fails to load.",
+      "dependencies": ["@zeroxsolutions/fluent-emoji", "expo-image"],
       "registryDependencies": ["@zui/chart-theme", "@zui/text", "@zui/utils"],
       "files": [
         {
@@ -2039,6 +2039,84 @@
       "files": [
         {
           "path": "src/registry/components/data-display/file-tree.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "emoji-picker-rows",
+      "type": "registry:lib",
+      "title": "Emoji picker rows",
+      "description": "emojiPickerRows, which lays an emoji picker's sections out as list rows, a heading per section then its emoji eight to a row, or search results alone eight to a row with no heading, and says which rows are headings.",
+      "dependencies": ["@zeroxsolutions/fluent-emoji"],
+      "files": [
+        {
+          "path": "src/registry/lib/emoji-picker-rows.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "emoji-picker",
+      "type": "registry:component",
+      "title": "Emoji picker",
+      "description": "A searchable, categorized emoji list with an optional frequent row and a category nav, mounting only the rows near the screen under a heading per category that sticks to the top, so opening the catalog fetches only the artwork in view.",
+      "categories": ["data-entry"],
+      "dependencies": ["@zeroxsolutions/fluent-emoji", "lucide-react-native"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/emoji-picker-rows",
+        "@zui/fluent-emoji",
+        "@zui/icon",
+        "@zui/input-group",
+        "@zui/text",
+        "@zui/text-children",
+        "@zui/toggle-group",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/emoji-picker.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "avatar-picker-check-color",
+      "type": "registry:lib",
+      "title": "Avatar picker check color",
+      "description": "avatarPickerCheckColor, which picks white or near-black for the check on an avatar colour swatch, whichever contrasts more with a #rgb or #rrggbb colour by WCAG's relative luminance, and white for a colour it cannot read.",
+      "files": [
+        {
+          "path": "src/registry/lib/avatar-picker-check-color.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "avatar-picker",
+      "type": "registry:component",
+      "title": "Avatar picker",
+      "description": "A Popover-based avatar editor whose emoji, upload and colour panes edit one avatar value: an emoji from the emoji picker, a photo from the device's library handed to an optional upload, or a swatch or hex colour.",
+      "categories": ["data-entry"],
+      "dependencies": ["expo-image-picker", "lucide-react-native"],
+      "registryDependencies": [
+        "@zui/avatar",
+        "@zui/avatar-picker-check-color",
+        "@zui/button",
+        "@zui/emoji-picker",
+        "@zui/empty",
+        "@zui/field",
+        "@zui/icon",
+        "@zui/input",
+        "@zui/popover",
+        "@zui/tabs",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/avatar-picker.tsx",
           "type": "registry:component"
         }
       ]

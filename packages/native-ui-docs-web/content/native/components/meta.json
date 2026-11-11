@@ -33,6 +33,8 @@
     "radio-group",
     "language-toggle-group",
     "emoji-appearance-toggle-group",
+    "emoji-picker",
+    "avatar-picker",
     "select",
     "native-select",
     "combobox",

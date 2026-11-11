@@ -12,6 +12,7 @@ import { AlertDialogDemo } from './alert-dialog-demo';
 import { AspectRatioDemo } from './aspect-ratio-demo';
 import { AttachmentDemo } from './attachment-demo';
 import { AvatarDemo } from './avatar-demo';
+import { AvatarPickerDemo } from './avatar-picker-demo';
 import { BadgeDemo } from './badge-demo';
 import { BreadcrumbDemo } from './breadcrumb-demo';
 import { BubbleDemo } from './bubble-demo';
@@ -43,6 +44,7 @@ import { DrawerDemo } from './drawer-demo';
 import { DropdownMenuDemo } from './dropdown-menu-demo';
 import { EditorTabDemo } from './editor-tab-demo';
 import { EmojiAppearanceToggleGroupDemo } from './emoji-appearance-toggle-group-demo';
+import { EmojiPickerDemo } from './emoji-picker-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
 import { FileTreeDemo } from './file-tree-demo';
@@ -125,6 +127,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'aspect-ratio-demo': AspectRatioDemo,
   'attachment-demo': AttachmentDemo,
   'avatar-demo': AvatarDemo,
+  'avatar-picker-demo': AvatarPickerDemo,
   'badge-demo': BadgeDemo,
   'breadcrumb-demo': BreadcrumbDemo,
   'bubble-demo': BubbleDemo,
@@ -156,6 +159,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'dropdown-menu-demo': DropdownMenuDemo,
   'editor-tab-demo': EditorTabDemo,
   'emoji-appearance-toggle-group-demo': EmojiAppearanceToggleGroupDemo,
+  'emoji-picker-demo': EmojiPickerDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
   'file-tree-demo': FileTreeDemo,

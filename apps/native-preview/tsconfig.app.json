@@ -42,6 +42,9 @@
   "references": [
     {
       "path": "../../packages/native-ui/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/fluent-emoji/tsconfig.lib.json"
     }
   ]
 }

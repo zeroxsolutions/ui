@@ -263,3 +263,45 @@ test('a column menu item whose caller prevents the default keeps the column, and
   await expect(sizeHeader).toHaveCount(0);
   await expect(nameHeader).toBeVisible();
 });
+
+test('the emoji nav scrolls the list to a category, and a typed search narrows the list and hides the nav', async ({
+  page,
+}) => {
+  await page.goto(`${COMPONENTS}/emoji-picker`);
+  const demo = inside(page, 'Emoji picker demo');
+  const flags = demo.getByRole('radio', { name: 'Flags', exact: true });
+
+  // The list mounts only the rows near the screen, so the last category is not drawn until the nav reaches it.
+  await flags.click(DRAWN);
+  await expect(demo.getByText('Flags', { exact: true })).toBeInViewport();
+  await expect(demo.getByRole('button', { name: 'chequered flag', exact: true })).toBeInViewport();
+
+  await demo.getByRole('textbox', { name: 'Search emoji', exact: true }).fill('pizza');
+  await expect(flags).toHaveCount(0);
+  await demo.getByRole('button', { name: 'pizza', exact: true }).click();
+  await expect(demo.getByText('Picked: \u{1F355}', { exact: true })).toBeVisible();
+
+  await demo.getByRole('textbox', { name: 'Search emoji', exact: true }).fill('no such emoji');
+  await expect(demo.getByText('No emoji found', { exact: true })).toBeVisible();
+});
+
+test('an avatar takes an image picked from the file dialog, and a colour typed as hex', async ({ page }) => {
+  await page.goto(`${COMPONENTS}/avatar-picker`);
+  const demo = inside(page, 'Avatar picker demo');
+
+  await demo.getByRole('button', { name: 'Edit avatar', exact: true }).click(DRAWN);
+  await demo.getByRole('tab', { name: 'Upload', exact: true }).click();
+  const chooser = page.waitForEvent('filechooser');
+  await demo.getByRole('button', { name: 'Choose image', exact: true }).click();
+  // A 1x1 PNG.
+  const png = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+    'base64',
+  );
+  await (await chooser).setFiles({ name: 'avatar.png', mimeType: 'image/png', buffer: png });
+  await expect(demo.getByRole('button', { name: 'Replace image', exact: true })).toBeVisible();
+
+  await demo.getByRole('tab', { name: 'Color', exact: true }).click();
+  await demo.getByRole('textbox', { name: 'Custom', exact: true }).fill('#0EA5E9');
+  await expect(demo.getByRole('button', { name: '#0ea5e9', exact: true })).toHaveAttribute('aria-selected', 'true');
+});
