@@ -42,8 +42,9 @@ const ToggleGroupContext = createContext<{
   size: ToggleSize | undefined;
   spacing: ToggleGroupSpacing;
   orientation: 'horizontal' | 'vertical';
+  type: 'single' | 'multiple';
   value: string | string[] | undefined;
-}>({ variant: undefined, size: undefined, spacing: 2, orientation: 'horizontal', value: undefined });
+}>({ variant: undefined, size: undefined, spacing: 2, orientation: 'horizontal', type: 'single', value: undefined });
 
 /**
  * Whether an item is the group's first or last child, which a joined group rounds on the outside;
@@ -67,7 +68,7 @@ type ToggleGroupProps = ToggleGroupPrimitive.RootProps & {
 
 /**
  * A set of ToggleGroupItem children, announced as a radio group when `type` is `single` and as a
- * group when it is `multiple`. It is controlled: pressing an item calls `onValueChange` with the new
+ * group when it is `multiple`, a toolbar on the web. It is controlled: pressing an item calls `onValueChange` with the new
  * value, a string or undefined in single mode and an array in multiple mode, and the item shows as
  * pressed once `value` follows. `disabled` disables every item. The items are its direct children,
  * since a joined group finds its first and last item among them.
@@ -84,7 +85,7 @@ function ToggleGroup({
   const items = Children.toArray(children).filter(isValidElement);
 
   return (
-    <ToggleGroupContext.Provider value={{ variant, size, spacing, orientation, value: props.value }}>
+    <ToggleGroupContext.Provider value={{ variant, size, spacing, orientation, type: props.type, value: props.value }}>
       <ToggleGroupPrimitive.Root
         className={cn(toggleGroupVariants({ orientation, spacing, variant }), className)}
         orientation={orientation}
@@ -141,6 +142,10 @@ function ToggleGroupItem({ className, value, variant, size, ...props }: ToggleGr
             className,
           )}
           value={value}
+          // rn-primitives' web item says button whatever the group, over the radio Radix gives it, so a screen
+          // reader hears buttons in a radio group; this gives it the role the item has on a phone.
+          role={group.type === 'single' ? 'radio' : 'checkbox'}
+          aria-checked={pressed}
           {...props}
         />
       </IconClassContext.Provider>

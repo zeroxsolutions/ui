@@ -109,3 +109,18 @@ test('an emoji swatch whose artwork the CDN refuses draws the glyph as text', as
   await expect(group.getByText('3D', { exact: true })).toBeVisible(DRAWN);
   await expect(group.getByText(grinning, { exact: true })).toHaveCount(1);
 });
+
+test('a single-select toggle group reads as radios, the selected one checked', async ({ page }) => {
+  await page.goto(`${COMPONENTS}/toggle-group`);
+  const demo = inside(page, 'Toggle group demo');
+  const left = demo.getByRole('radio', { name: 'Left', exact: true });
+  const center = demo.getByRole('radio', { name: 'Center', exact: true });
+
+  await expect(left).toHaveAttribute('aria-checked', 'true', DRAWN);
+  await expect(center).toHaveAttribute('aria-checked', 'false');
+
+  await center.click();
+
+  await expect(center).toHaveAttribute('aria-checked', 'true');
+  await expect(left).toHaveAttribute('aria-checked', 'false');
+});
