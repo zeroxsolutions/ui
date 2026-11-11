@@ -62,6 +62,7 @@ test("the native docs' sidebar lists their pages and the components under the de
     ['Code card', '/code-card'],
     ['Markdown view', '/markdown-view'],
     ['File tree', '/file-tree'],
+    ['Emoji picker', '/emoji-picker'],
   ]) {
     await expect(sidebar.getByRole('link', { name, exact: true })).toHaveAttribute(
       'href',

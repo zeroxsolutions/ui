@@ -28,12 +28,23 @@ const GLYPHS = [
   String.fromCodePoint(0x1f1fb, 0x1f1f3),
 ];
 
+/** A family, drawn in 3d but in no flat style, and a face with no artwork in any style. */
+const GLYPHS_WITHOUT_ARTWORK = [String.fromCodePoint(0x1f46a), String.fromCodePoint(0x1fae9)];
+
 describe('fluentEmojiUrl', () => {
   it("builds the package's URL for each glyph in every style, given the same base", () => {
     const cases = GLYPHS.flatMap((glyph) => STYLES.map((style) => [glyph, style] as const));
     const built = cases.map(([glyph, style]) => fluentEmojiUrl(glyph, { style }));
     expect(built).toEqual(cases.map(([glyph, style]) => packageUrl(glyph, { style, base: FLUENT_EMOJI_BASE })));
     expect(built).not.toContain(undefined);
+  });
+
+  it('builds no URL where the package has no artwork, as the package does', () => {
+    const cases = GLYPHS_WITHOUT_ARTWORK.flatMap((glyph) => STYLES.map((style) => [glyph, style] as const));
+    const built = cases.map(([glyph, style]) => fluentEmojiUrl(glyph, { style }));
+    expect(built).toEqual(cases.map(([glyph, style]) => packageUrl(glyph, { style, base: FLUENT_EMOJI_BASE })));
+    expect(fluentEmojiUrl(String.fromCodePoint(0x1f46a), { style: 'flat' })).toBeUndefined();
+    expect(fluentEmojiUrl(String.fromCodePoint(0x1fae9))).toBeUndefined();
   });
 
   it('serves the CDN 3d artwork unless told otherwise', () => {
@@ -55,6 +66,15 @@ describe('FluentEmoji', () => {
 
     await screen.rerender(<FluentEmoji glyph={'\u{1F600}'} />);
     expect(screen.getByRole('img', { name: '\u{1F600}' })).toBeOnTheScreen();
+  });
+
+  it('draws a glyph with no artwork in its style as text, without waiting on a request', async () => {
+    const family = String.fromCodePoint(0x1f46a);
+    await render(<FluentEmoji glyph={family} name="family" variant="flat" />);
+    expect(screen.getByText(family, { includeHiddenElements: true })).toBeOnTheScreen();
+
+    await screen.rerender(<FluentEmoji glyph={family} name="family" variant="3d" />);
+    expect(screen.queryByText(family, { includeHiddenElements: true })).toBeNull();
   });
 
   it('is hidden from a screen reader when aria-hidden', async () => {

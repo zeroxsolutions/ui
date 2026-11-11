@@ -71,6 +71,7 @@ test('serves the react native items for each engine in each style', async ({ req
         'code-card',
         'markdown-view',
         'file-tree',
+        'emoji-picker',
       ]),
     );
 

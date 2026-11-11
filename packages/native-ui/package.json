@@ -49,6 +49,7 @@
     "@rn-primitives/toggle-group": "catalog:rn-primitives",
     "@rn-primitives/tooltip": "catalog:rn-primitives",
     "@tanstack/react-table": "catalog:",
+    "@zeroxsolutions/fluent-emoji": "workspace:*",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "d3-scale": "catalog:",
@@ -67,7 +68,6 @@
   },
   "devDependencies": {
     "@zeroxsolutions/shadcn-upstream": "workspace:*",
-    "@zeroxsolutions/fluent-emoji": "workspace:*",
     "@zeroxsolutions/ui": "workspace:*",
     "@babel/runtime": "~7.27.6",
     "@expo-google-fonts/geist": "catalog:",

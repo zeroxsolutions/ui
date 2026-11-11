@@ -43,6 +43,7 @@ import { DrawerDemo } from './drawer-demo';
 import { DropdownMenuDemo } from './dropdown-menu-demo';
 import { EditorTabDemo } from './editor-tab-demo';
 import { EmojiAppearanceToggleGroupDemo } from './emoji-appearance-toggle-group-demo';
+import { EmojiPickerDemo } from './emoji-picker-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
 import { FileTreeDemo } from './file-tree-demo';
@@ -156,6 +157,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'dropdown-menu-demo': DropdownMenuDemo,
   'editor-tab-demo': EditorTabDemo,
   'emoji-appearance-toggle-group-demo': EmojiAppearanceToggleGroupDemo,
+  'emoji-picker-demo': EmojiPickerDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
   'file-tree-demo': FileTreeDemo,

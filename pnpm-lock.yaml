@@ -485,6 +485,9 @@ importers:
       '@tanstack/react-table':
         specifier: 'catalog:'
         version: 8.21.3(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@zeroxsolutions/fluent-emoji':
+        specifier: workspace:*
+        version: link:../../packages/fluent-emoji
       '@zeroxsolutions/native-ui':
         specifier: workspace:*
         version: link:../../packages/native-ui
@@ -687,6 +690,9 @@ importers:
       '@tanstack/react-table':
         specifier: 'catalog:'
         version: 8.21.3(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@zeroxsolutions/fluent-emoji':
+        specifier: workspace:*
+        version: link:../../packages/fluent-emoji
       '@zeroxsolutions/native-ui':
         specifier: workspace:*
         version: link:../../packages/native-ui
@@ -1073,6 +1079,9 @@ importers:
       '@tanstack/react-table':
         specifier: 'catalog:'
         version: 8.21.3(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@zeroxsolutions/fluent-emoji':
+        specifier: workspace:*
+        version: link:../fluent-emoji
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1152,9 +1161,6 @@ importers:
       '@types/jest':
         specifier: 'catalog:'
         version: 30.0.0
-      '@zeroxsolutions/fluent-emoji':
-        specifier: workspace:*
-        version: link:../fluent-emoji
       '@zeroxsolutions/shadcn-upstream':
         specifier: workspace:*
         version: link:../shadcn-upstream

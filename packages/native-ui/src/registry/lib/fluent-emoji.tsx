@@ -1,3 +1,8 @@
+import {
+  emojiToUnicode,
+  FLUENT_EMOJI_MANIFEST_KEYS,
+  FLUENT_EMOJI_MANIFEST_MISSING,
+} from '@zeroxsolutions/fluent-emoji/catalog';
 import { Image } from 'expo-image';
 import { useEffect, useState, type ComponentProps, type ReactNode } from 'react';
 import { View } from 'react-native';
@@ -29,18 +34,29 @@ interface FluentEmojiUrlOptions {
   style?: FluentEmojiStyle;
 }
 
+const MANIFEST_KEYS = new Set(FLUENT_EMOJI_MANIFEST_KEYS);
+const missingByStyle = new Map<FluentEmojiStyle, Set<string>>();
+
+/** Whether the CDN serves `code`'s artwork in `style`, per the package's manifest of its own artwork. */
+function hasArtwork(code: string, style: FluentEmojiStyle) {
+  if (!MANIFEST_KEYS.has(code)) return false;
+  let missing = missingByStyle.get(style);
+  if (!missing) {
+    missing = new Set(FLUENT_EMOJI_MANIFEST_MISSING[style]);
+    missingByStyle.set(style, missing);
+  }
+  return !missing.has(code);
+}
+
 /**
  * The Fluent artwork URL of an emoji glyph, `<base>/<style>/<codepoint>.<ext>`, the codepoint being every code
  * point of the glyph as lowercase hex joined by `-`, variation selectors and joiners included. `undefined` for
- * an empty glyph. It does not know which glyphs have artwork, so a glyph with none gets a URL the CDN does not
- * serve, and {@link FluentEmoji} draws the glyph instead.
+ * an empty glyph and for a glyph with no artwork in that style, a custom `base` included, since the manifest
+ * lists the artwork the package ships and the CDN serves.
  */
 function fluentEmojiUrl(glyph: string, { base = FLUENT_EMOJI_BASE, style = '3d' }: FluentEmojiUrlOptions = {}) {
-  const code = [...glyph]
-    .map((char) => char.codePointAt(0)?.toString(16))
-    .filter(Boolean)
-    .join('-');
-  if (!code) return undefined;
+  const code = emojiToUnicode(glyph);
+  if (!code || !hasArtwork(code, style)) return undefined;
   return `${base.replace(/\/+$/, '')}/${style}/${code}.${STYLE_EXTENSION[style]}`;
 }
 
@@ -58,8 +74,8 @@ type FluentEmojiProps = Omit<ComponentProps<typeof View>, 'children'> & {
 /**
  * An emoji glyph in Microsoft's Fluent artwork, drawn by expo-image from the CDN in a 24px box unless
  * `className` sizes it, and announced as an image named `name`, or not at all when `aria-hidden`, as beside a
- * label that names it. Where the artwork fails to load, the glyph is drawn as text instead, so the box is never
- * blank. The black `mono` artwork is tinted the foreground colour.
+ * label that names it. A glyph with no artwork in its style is drawn as text without a request, and so is one
+ * whose artwork fails to load, so the box is never blank. The black `mono` artwork is tinted the foreground colour.
  */
 function FluentEmoji({ glyph, name, base, variant, className, ...props }: FluentEmojiProps): ReactNode {
   const { themeColor } = useChartTheme();
