@@ -14,6 +14,17 @@ import { FluentEmoji, EMOJI_CATEGORIES } from '@zeroxsolutions/fluent-emoji';
 <FluentEmoji glyph="🤯" name="exploding head" variant="flat" />;
 ```
 
+## The catalog alone
+
+`@zeroxsolutions/fluent-emoji/catalog` exports the catalog (`EMOJI_CATEGORIES`), the manifest of which glyphs
+have artwork in each style, and `emojiToUnicode`, and loads nothing else. A React Native app imports it there:
+the root also loads the URL builder, which reads the module's own URL as it loads, and React Native leaves that
+URL null.
+
+```ts
+import { EMOJI_CATEGORIES, FLUENT_EMOJI_MANIFEST_KEYS } from '@zeroxsolutions/fluent-emoji/catalog';
+```
+
 ## Styles
 
 Five styles are available, each in its own `assets/<style>/` subfolder. Pick one
