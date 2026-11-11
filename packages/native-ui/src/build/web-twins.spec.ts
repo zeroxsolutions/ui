@@ -12,10 +12,7 @@ const NOT_PORTED: ReadonlyMap<string, string> = new Map([
 ]);
 
 /** The web items a later wave of the port brings, which the list loses as each wave lands. */
-const PENDING: ReadonlySet<string> = new Set([
-  // wave 4
-  'avatar-picker',
-]);
+const PENDING: ReadonlySet<string> = new Set([]);
 
 /** Per ported item, the zui slots its web twin writes that a phone does not draw, each with its reason. */
 const UNDRAWN_SLOTS: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map([

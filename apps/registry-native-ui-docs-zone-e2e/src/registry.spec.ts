@@ -72,6 +72,7 @@ test('serves the react native items for each engine in each style', async ({ req
         'markdown-view',
         'file-tree',
         'emoji-picker',
+        'avatar-picker',
       ]),
     );
 

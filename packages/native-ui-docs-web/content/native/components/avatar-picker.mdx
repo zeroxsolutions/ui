@@ -1,0 +1,223 @@
+---
+title: Avatar picker
+description: A Popover-based avatar editor whose emoji, upload and colour panes edit one avatar value.
+---
+
+<NativePreview name="avatar-picker-demo" />
+
+## Installation
+
+<InstallCommand name="avatar-picker" />
+
+The CLI writes `components/data-entry/avatar-picker.tsx`, installs [Avatar](/native/components/nativewind/avatar),
+[Button](/native/components/nativewind/button), [Emoji picker](/native/components/nativewind/emoji-picker),
+[Empty](/native/components/nativewind/empty), [Field](/native/components/nativewind/field),
+[Icon](/native/components/nativewind/icon), [Input](/native/components/nativewind/input),
+[Popover](/native/components/nativewind/popover), [Tabs](/native/components/nativewind/tabs), Utils, the text children
+lib and the avatar picker check color lib, and adds `expo-image-picker` and `lucide-react-native`.
+
+`expo-image-picker` opens the photo library in Expo Go as it is. A development build applies its config plugin on
+prebuild without an entry in `app.json`, which gives iOS the default photo library prompt; add
+`["expo-image-picker", { "photosPermission": "..." }]` to `plugins` to word the prompt yourself.
+
+## Usage
+
+```tsx
+import {
+  AvatarPicker,
+  AvatarPickerColorContent,
+  AvatarPickerColorField,
+  AvatarPickerColorGroup,
+  AvatarPickerContent,
+  AvatarPickerEmojiContent,
+  AvatarPickerRemoveButton,
+  AvatarPickerTrigger,
+} from '@/components/data-entry/avatar-picker';
+```
+
+```tsx
+<AvatarPicker value={avatar} onValueChange={setAvatar}>
+  <AvatarPickerTrigger>
+    <Avatar alt="">...</Avatar>
+  </AvatarPickerTrigger>
+  <AvatarPickerContent>
+    <Tabs value={tab} onValueChange={setTab}>
+      <View className="flex-row items-center gap-1">
+        <TabsList variant="line">
+          <TabsTrigger value="emoji" aria-label="Emoji">
+            <Icon as={Smile} />
+          </TabsTrigger>
+          <TabsTrigger value="color" aria-label="Color">
+            <Icon as={Palette} />
+          </TabsTrigger>
+        </TabsList>
+        <AvatarPickerRemoveButton className="ml-auto" />
+      </View>
+      <AvatarPickerEmojiContent>
+        <EmojiPickerSearch />
+        <EmojiPickerContent>
+          <EmojiPickerEmpty>
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>No emoji found</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
+          </EmojiPickerEmpty>
+        </EmojiPickerContent>
+        <EmojiPickerNav aria-label="Emoji categories" />
+      </AvatarPickerEmojiContent>
+      <AvatarPickerColorContent>
+        <AvatarPickerColorGroup aria-label="Colors" />
+        <AvatarPickerColorField>Custom</AvatarPickerColorField>
+      </AvatarPickerColorContent>
+    </Tabs>
+  </AvatarPickerContent>
+</AvatarPicker>
+```
+
+The consumer composes the panes inside [Tabs](/native/components/nativewind/tabs), declaring a `TabsTrigger` per
+pane it includes (or none, for a single pane), and places `AvatarPickerRemoveButton` next to it. Use it to let
+someone set an emoji, a photo or a flat colour as one avatar value; compose only the panes the app offers.
+
+## Composition
+
+```text
+AvatarPicker
+|-- AvatarPickerTrigger
+`-- AvatarPickerContent
+    `-- Tabs
+        |-- AvatarPickerRemoveButton
+        |-- AvatarPickerEmojiContent
+        |   |-- EmojiPickerSearch
+        |   |-- EmojiPickerContent
+        |   |   `-- EmojiPickerEmpty
+        |   `-- EmojiPickerNav
+        |-- AvatarPickerUploadContent
+        |   |-- AvatarPickerUploadPreview
+        |   `-- AvatarPickerUploadTrigger
+        `-- AvatarPickerColorContent
+            |-- AvatarPickerColorGroup
+            `-- AvatarPickerColorField
+```
+
+## API reference
+
+### AvatarPicker
+
+Renders [Popover](/native/components/nativewind/popover) and takes every prop it takes, plus:
+
+| Prop            | Type                                 | Default  |
+| --------------- | ------------------------------------ | -------- |
+| `value`         | `AvatarPickerValue`                  | required |
+| `onValueChange` | `(value: AvatarPickerValue) => void` | required |
+
+`AvatarPickerValue` holds `emoji`, `imageUrl` and `color`, each a string or null. The root shares the value and its
+setters with every part. Picking an emoji clears the image, setting an image clears the emoji, a colour changes
+only the colour, and remove clears the emoji and the image and keeps the colour. A setter that runs after an upload
+resolves spreads the value as it is then, so a colour picked while the upload ran is kept.
+
+### AvatarPickerTrigger
+
+Renders Popover's `PopoverTrigger` around a ghost `icon-lg` [Button](/native/components/nativewind/button) holding
+the avatar the consumer composes as `children`, and takes every prop `PopoverTrigger` takes. Named "Edit avatar"
+unless an `aria-label` is given; `asChild` makes the consumer's own pressable child the trigger in place of the
+button.
+
+### AvatarPickerContent
+
+Renders Popover's `PopoverContent` and takes every prop it takes. The popover body the consumer fills with `Tabs`
+and the panes, 21rem wide. It defaults `align` to `start` and `side` to `bottom`, opening below the trigger's start
+edge.
+
+### AvatarPickerRemoveButton
+
+Renders [Button](/native/components/nativewind/button) and takes every prop it takes. The ghost `icon-sm` button
+that clears both emoji and image and keeps the colour, unless the consumer's own `onPress` calls `preventDefault`.
+Named "Remove avatar" unless an `aria-label` is given; `children` replace its trash icon.
+
+### AvatarPickerEmojiContent
+
+Renders Tabs' `TabsContent` and takes every prop it takes except `value`. Emoji pane (tab value `emoji`): wraps
+`children`, the picker's parts the consumer composes (`EmojiPickerSearch`, `EmojiPickerContent`, `EmojiPickerNav`),
+in an [Emoji picker](/native/components/nativewind/emoji-picker) whose pick sets the emoji and clears any image,
+stacked in a column `gap-2` apart. It sets the picker's `surface` to `popover`, so its headings are drawn in the
+popover's colour.
+
+### AvatarPickerUploadContent
+
+Renders Tabs' `TabsContent` and takes every prop it takes except `value`, plus:
+
+| Prop       | Type                                                                     | Default |
+| ---------- | ------------------------------------------------------------------------ | ------- |
+| `onUpload` | `(asset: ImagePickerAsset) => string \| null \| Promise<string \| null>` | -       |
+
+Upload pane (tab value `upload`): an [Empty](/native/components/nativewind/empty) frame the consumer fills with its
+copy (`EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`), an `AvatarPickerUploadPreview` and an
+`AvatarPickerUploadTrigger` inside `EmptyContent`. The trigger opens the device's photo library through
+`expo-image-picker`. The picked photo, an `ImagePickerAsset`, goes to `onUpload`, and the URL it resolves becomes
+`imageUrl`; when `onUpload` is omitted the asset's own `uri` becomes `imageUrl`. Closing the library without a pick
+changes nothing, and so do an `onUpload` that resolves `null`, throws or rejects; telling the user an upload failed
+is the caller's.
+
+While `onUpload` is pending the pane is announced busy and its trigger is disabled. Its children read that state
+through `useAvatarPickerUpload()`, which returns `{ uploading, choose }`, `choose` opening the library as the trigger
+does, and throws outside the pane.
+
+### AvatarPickerUploadPreview
+
+Renders [Avatar](/native/components/nativewind/avatar) and takes every prop it takes, `alt` made optional:
+
+| Prop  | Type     | Default |
+| ----- | -------- | ------- |
+| `alt` | `string` | `''`    |
+
+The avatar's current image, in an `AvatarImage`; it renders nothing while the avatar is not an image. It defaults
+`size` to `lg`. `alt` names the image, and an empty one marks it decorative. `children` follow the image, so an
+`AvatarFallback` placed there shows while it loads or when it fails.
+
+### AvatarPickerUploadTrigger
+
+Renders [Button](/native/components/nativewind/button) and takes every prop it takes. The outline `sm` button that
+opens the photo library, unless the consumer's own `onPress` calls `preventDefault`; disabled while an upload is
+pending. `children` are its label. Throws outside an `AvatarPickerUploadContent`.
+
+### AvatarPickerColorContent
+
+Renders Tabs' `TabsContent` and takes every prop it takes except `value`. Colour pane (tab value `color`): the
+consumer composes `AvatarPickerColorGroup` and `AvatarPickerColorField` in it, `gap-4` apart.
+
+### AvatarPickerColorGroup
+
+Takes every prop of a View, plus:
+
+| Prop     | Type                | Default                                                                                                                                |
+| -------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `colors` | `readonly string[]` | `['#6366f1', '#8b5cf6', '#a855f7', '#ec4899', '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#14b8a6', '#0ea5e9', '#3b82f6']` |
+
+A grid of colour swatches, six to a row, each a button named by its own colour and selected while it is the avatar's
+colour; the selected one carries a check in white or near-black, whichever contrasts more with the swatch. A press
+sets the avatar's colour. Announced as a group; name it with an `aria-label`.
+
+### AvatarPickerColorField
+
+Renders [Field](/native/components/nativewind/field) and takes every prop it takes, `orientation` defaulting to
+`horizontal`. `children` are its label, which names a text field showing the avatar's colour. The field sets the
+colour once it holds six hex digits, with or without a leading `#` and in either case, and always sets it as
+lowercase `#rrggbb`, the value the web's colour input gives; anything else typed waits there without changing the
+colour. A colour set elsewhere, such as by a swatch, replaces what is typed. It is empty while the avatar has no
+colour.
+
+## Differences from the web
+
+- The photo library, through `expo-image-picker`, replaces the web's hidden file input, and `onUpload` takes the
+  picked `ImagePickerAsset` where the web's takes a `File`, which React Native does not have. Without `onUpload`,
+  the asset's `uri` becomes the image where the web reads the file in as a data URL.
+- Dropping a file on the upload pane is dropped: a phone has nothing to drag a file from.
+- The upload pane's state reaches its children through `useAvatarPickerUpload()`, where the web's sets
+  `data-uploading`, `data-dragging` and `data-has-image` for `group-data-*` classes; a View takes no data
+  attributes. The image state is the value's own `imageUrl`.
+- `AvatarPickerColorField` is a text field for a hex value, since React Native has no colour input.
+- `AvatarPickerTrigger` takes `asChild` where the web's takes `render`, and the parts take `onPress` where the web's
+  take `onClick`.
+- The emoji pane sets the emoji picker's `surface` where the web's sets `--emoji-picker-surface`.
+- The web's `data-slot` attributes are not set.

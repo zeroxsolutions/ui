@@ -12,6 +12,7 @@ import { AlertDialogDemo } from './alert-dialog-demo';
 import { AspectRatioDemo } from './aspect-ratio-demo';
 import { AttachmentDemo } from './attachment-demo';
 import { AvatarDemo } from './avatar-demo';
+import { AvatarPickerDemo } from './avatar-picker-demo';
 import { BadgeDemo } from './badge-demo';
 import { BreadcrumbDemo } from './breadcrumb-demo';
 import { BubbleDemo } from './bubble-demo';
@@ -126,6 +127,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'aspect-ratio-demo': AspectRatioDemo,
   'attachment-demo': AttachmentDemo,
   'avatar-demo': AvatarDemo,
+  'avatar-picker-demo': AvatarPickerDemo,
   'badge-demo': BadgeDemo,
   'breadcrumb-demo': BreadcrumbDemo,
   'bubble-demo': BubbleDemo,

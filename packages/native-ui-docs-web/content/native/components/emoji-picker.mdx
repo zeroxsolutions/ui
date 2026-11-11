@@ -64,15 +64,21 @@ EmojiPicker
 
 Holds the query, the active category and the rows, and draws nothing of its own:
 
-| Prop       | Type                      | Default  |
-| ---------- | ------------------------- | -------- |
-| `onSelect` | `(emoji: string) => void` | required |
-| `frequent` | `EmojiPickerFrequent`     | -        |
-| `children` | `ReactNode`               | required |
+| Prop       | Type                                  | Default        |
+| ---------- | ------------------------------------- | -------------- |
+| `onSelect` | `(emoji: string) => void`             | required       |
+| `frequent` | `EmojiPickerFrequent`                 | -              |
+| `surface`  | `'background' \| 'card' \| 'popover'` | `'background'` |
+| `children` | `ReactNode`                           | required       |
 
 `frequent` is `{ name: string; emojis: string[] }`: the recently used row's heading and nav item name, and its
 glyphs, most recent first. The picker stores nothing; the caller keeps the list. An empty list keeps the nav item,
 disabled, and drops the section; an omitted `frequent` has neither.
+
+`surface` names what the picker sits on, the page, a [Card](/native/components/nativewind/card) or a
+[Popover](/native/components/nativewind/popover), and the headings are drawn in its colour so the rows scrolling under
+them stay hidden. It stands in for the web's `--emoji-picker-surface` variable;
+[Avatar picker](/native/components/nativewind/avatar-picker) sets it to `popover`.
 
 ### EmojiPickerSearch
 
@@ -110,14 +116,14 @@ searching.
 
 ### EmojiPickerGroupLabel
 
-Takes every prop of a View. A section heading in the muted colour on the background colour, which the list draws for
-each category; a string child is drawn in a Text.
+Takes every prop of a View. A section heading in the muted colour on the colour of the picker's `surface`, which the
+list draws for each category; a string child is drawn in a Text.
 
 ## Differences from the web
 
 - The list is a FlatList, whose own windowing and sticky headers replace the web's.
-- The headings sit on the background colour; the web's take the colour of the card or popover they sit in, or the
-  `--emoji-picker-surface` variable, which a View cannot read.
+- The headings take the colour `surface` names; the web's take the colour of the card or popover they sit in, or the
+  `--emoji-picker-surface` variable, neither of which a View can read.
 - The search and category icons are static; the web's play while hovered or focused. A cell has no tooltip.
 - `EmojiPickerNav` takes no `multiple`, since it is single-choice, and its items are radios, where the web's are
   pressed buttons.

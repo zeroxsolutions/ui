@@ -61,6 +61,11 @@ const HEADER_PX = 28;
 
 const HEIGHT_CLASSES = { sm: 'h-40', md: 'h-60', lg: 'h-80' } as const;
 
+const SURFACE_CLASSES = { background: 'bg-background', card: 'bg-card', popover: 'bg-popover' } as const;
+
+/** The colour of the surface the picker sits on, which its headings are drawn in. */
+type EmojiPickerSurface = keyof typeof SURFACE_CLASSES;
+
 interface EmojiPickerScroller {
   scrollToIndex: (index: number) => void;
 }
@@ -86,6 +91,7 @@ interface EmojiPickerContextValue {
   headerIndices: number[];
   /** Set by EmojiPickerContent while it is mounted, so the nav in a sibling subtree can scroll its list. */
   scrollerRef: RefObject<EmojiPickerScroller | null>;
+  surface: EmojiPickerSurface;
 }
 
 const EmojiPickerContext = createContext<EmojiPickerContextValue | null>(null);
@@ -104,6 +110,11 @@ interface EmojiPickerProps {
    * the picker stores nothing. Omitted, the picker has no frequent section and no nav item for one.
    */
   frequent?: EmojiPickerFrequent;
+  /**
+   * The surface the picker sits on, `background` (default), `card` or `popover`, whose colour the headings are
+   * drawn in so the rows scrolling under them stay hidden.
+   */
+  surface?: EmojiPickerSurface;
   /** The parts: `EmojiPickerSearch`, `EmojiPickerContent` (holding `EmojiPickerEmpty`) and `EmojiPickerNav`. */
   children: ReactNode;
 }
@@ -126,7 +137,7 @@ interface EmojiPickerProps {
  *     <EmojiPickerNav aria-label="Categories" />
  *   </EmojiPicker>
  */
-function EmojiPicker({ onSelect, frequent, children }: EmojiPickerProps): ReactNode {
+function EmojiPicker({ onSelect, frequent, surface = 'background', children }: EmojiPickerProps): ReactNode {
   const [query, setQuery] = useState('');
   const [active, setActive] = useState('smileys_people');
 
@@ -176,8 +187,9 @@ function EmojiPicker({ onSelect, frequent, children }: EmojiPickerProps): ReactN
       rows,
       headerIndices,
       scrollerRef,
+      surface,
     }),
-    [query, onSelect, results, navCategories, active, scrollToCategory, rows, headerIndices],
+    [query, onSelect, results, navCategories, active, scrollToCategory, rows, headerIndices, surface],
   );
 
   return <EmojiPickerContext.Provider value={context}>{children}</EmojiPickerContext.Provider>;
@@ -217,13 +229,15 @@ function EmojiPickerSearch({
 }
 
 /**
- * A section heading, the frequent row's name or a category's, drawn as the preset's group labels on the page
- * background so the rows scrolling under it stay hidden. A string child is set in a Text.
+ * A section heading, the frequent row's name or a category's, drawn as the preset's group labels in the colour of
+ * the picker's `surface` (the page background outside a picker) so the rows scrolling under it stay hidden. A
+ * string child is set in a Text.
  */
 function EmojiPickerGroupLabel({ className, children, ...props }: ComponentProps<typeof View>): ReactNode {
+  const surface = useContext(EmojiPickerContext)?.surface ?? 'background';
   return (
     <TextClassContext.Provider value="text-muted-foreground text-xs">
-      <View className={cn('justify-center bg-background px-2 py-1.5', className)} {...props}>
+      <View className={cn('justify-center px-2 py-1.5', SURFACE_CLASSES[surface], className)} {...props}>
         {asText(children)}
       </View>
     </TextClassContext.Provider>
@@ -358,4 +372,10 @@ function EmojiPickerCell({ emoji }: { emoji: EmojiDatum }): ReactNode {
 }
 
 export { EmojiPicker, EmojiPickerContent, EmojiPickerEmpty, EmojiPickerGroupLabel, EmojiPickerNav, EmojiPickerSearch };
-export type { EmojiPickerContentProps, EmojiPickerFrequent, EmojiPickerProps, EmojiPickerSearchProps };
+export type {
+  EmojiPickerContentProps,
+  EmojiPickerFrequent,
+  EmojiPickerProps,
+  EmojiPickerSearchProps,
+  EmojiPickerSurface,
+};

@@ -2080,6 +2080,46 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "avatar-picker-check-color",
+      "type": "registry:lib",
+      "title": "Avatar picker check color",
+      "description": "avatarPickerCheckColor, which picks white or near-black for the check on an avatar colour swatch, whichever contrasts more with a #rgb or #rrggbb colour by WCAG's relative luminance, and white for a colour it cannot read.",
+      "files": [
+        {
+          "path": "src/registry/lib/avatar-picker-check-color.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "avatar-picker",
+      "type": "registry:component",
+      "title": "Avatar picker",
+      "description": "A Popover-based avatar editor whose emoji, upload and colour panes edit one avatar value: an emoji from the emoji picker, a photo from the device's library handed to an optional upload, or a swatch or hex colour.",
+      "categories": ["data-entry"],
+      "dependencies": ["expo-image-picker", "lucide-react-native"],
+      "registryDependencies": [
+        "@zui/avatar",
+        "@zui/avatar-picker-check-color",
+        "@zui/button",
+        "@zui/emoji-picker",
+        "@zui/empty",
+        "@zui/field",
+        "@zui/icon",
+        "@zui/input",
+        "@zui/popover",
+        "@zui/tabs",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/avatar-picker.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }
