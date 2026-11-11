@@ -2027,6 +2027,21 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "file-tree",
+      "type": "registry:component",
+      "title": "File tree",
+      "description": "An accessible file tree that owns selection and folder expansion, controlled or uncontrolled: a press selects a row and toggles a folder, and the arrow, Home, End, Enter and Space keys move through it where the platform reports keys.",
+      "categories": ["data-display"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/focus-visible", "@zui/icon", "@zui/text", "@zui/text-children", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/file-tree.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

@@ -110,9 +110,9 @@ resize-handle.
 
 ## Dependencies
 
-- `@tanstack/react-table`, `unified` and `remark-gfm` are now declared by both `packages/ui` and native-ui, so
-  each moves to the default catalog and both take it from there.
-- `remark-parse` has one declarer and stays native-ui's own pin.
+- `@tanstack/react-table`, `unified`, `remark-gfm` and `remark-parse` move to the default catalog. Each is now
+  declared by more than one project: `packages/ui`, native-ui, or the two preview apps, which bundle every package
+  the demos import.
 - `@tanstack/react-table` declares `react-dom` as a peer, which an Expo app without web support lacks. The
   data-table docs page says the warning is harmless.
 

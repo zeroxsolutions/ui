@@ -45,6 +45,7 @@ import { EditorTabDemo } from './editor-tab-demo';
 import { EmojiAppearanceToggleGroupDemo } from './emoji-appearance-toggle-group-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
+import { FileTreeDemo } from './file-tree-demo';
 import { FileTypeIconDemo } from './file-type-icon-demo';
 import { FloatingToolbarDemo } from './floating-toolbar-demo';
 import { FontPreviewDemo } from './font-preview-demo';
@@ -157,6 +158,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'emoji-appearance-toggle-group-demo': EmojiAppearanceToggleGroupDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
+  'file-tree-demo': FileTreeDemo,
   'file-type-icon-demo': FileTypeIconDemo,
   'floating-toolbar-demo': FloatingToolbarDemo,
   'font-preview-demo': FontPreviewDemo,

@@ -13,8 +13,8 @@ resize-handle are in the 16 native registries, `PENDING` holding only wave 4's i
   docs page with `meta.json` and `index.mdx`, the native e2e's two lists, out of `PENDING`).
 - Specs: behaviour only, `userEvent`, red first; a copied lib compared with its web source. What jest cannot
   press or type is a case in `apps/registry-native-ui-docs-zone-e2e/src/native-component-demos.spec.ts`.
-- New packages: `@tanstack/react-table`, `unified`, `remark-gfm` to the default catalog (with `packages/ui`
-  taking them from it), `remark-parse` pinned by native-ui.
+- New packages: `@tanstack/react-table`, `unified`, `remark-gfm` and `remark-parse` to the default catalog,
+  taken by every project declaring them.
 
 ## Review focus
 
