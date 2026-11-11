@@ -20,11 +20,15 @@ async function pageIsAtItsEnd(page: Page): Promise<boolean> {
 /**
  * Scrolls toward the end a step at a time, the way a reader's scroll crosses every cell. Scrolled by
  * script, not by wheel: headless WebKit on a hosted Linux runner leaves the page where it is on a
- * wheel event.
+ * wheel event. Each step waits for a frame to be drawn: the cells watch the viewport once a frame, and
+ * several steps inside one frame move the page further than the viewport is tall, past cells no frame
+ * ever saw.
  */
 async function scrollToPageEndInSteps(page: Page): Promise<void> {
   for (let step = 0; step < 40 && !(await pageIsAtItsEnd(page)); step += 1) {
-    await page.evaluate('window.scrollBy(0, 400)');
+    await page.evaluate(
+      'new Promise((drawn) => { window.scrollBy(0, 400); requestAnimationFrame(() => requestAnimationFrame(drawn)); })',
+    );
   }
 }
 
@@ -165,23 +169,29 @@ test('the old docs column stays hidden from the end of its fade to the end of th
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/docs/components/base/collapsible-card');
   const tagInputLink = page.getByRole('navigation', { name: 'Docs' }).getByRole('link', { name: 'Tag Input' });
-  // Retried for the same reason as the sidebar step above: clicked before hydration, the link is a
-  // plain anchor and the page loads with no transition.
+  // The page starts transitions of its own while it loads and hydrates, so the route change's is the first
+  // one started after the click that fades the old column. Retried as a whole: clicked before hydration,
+  // the link is a plain anchor and the page loads with no transition, and a transition the page starts
+  // during the route change skips the route change's.
   await expect(async () => {
     await page.goto('/docs/components/base/collapsible-card');
+    const startedBefore = Number(await page.evaluate('window.__viewTransitionsReady.length'));
     await tagInputLink.click();
     await expect(page).toHaveURL(/\/docs\/components\/base\/tag-input$/, { timeout: 1_000 });
-    expect(await page.evaluate('window.__viewTransitionsReady.length')).toBe(1);
-  }).toPass();
 
-  // Ends the old column's fade while the route change as a whole is still running, and reads what
-  // that frame paints for the old column.
-  const opacityOnceFaded = await page.evaluate(`(async () => {
-    await window.__viewTransitionsReady[0];
-    const pseudo = '::view-transition-old(docs-content)';
-    const fade = document.getAnimations().find((animation) => animation.effect.pseudoElement === pseudo);
-    fade.finish();
-    return getComputedStyle(document.documentElement, pseudo).opacity;
-  })()`);
-  expect(opacityOnceFaded).toBe('0');
+    // Ends the old column's fade while the route change as a whole is still running, and reads what
+    // that frame paints for the old column.
+    const opacityOnceFaded = await page.evaluate(`(async () => {
+      const pseudo = '::view-transition-old(docs-content)';
+      for (const ready of window.__viewTransitionsReady.slice(${startedBefore})) {
+        if (!(await ready.then(() => true, () => false))) continue;
+        const fade = document.getAnimations().find((animation) => animation.effect.pseudoElement === pseudo);
+        if (!fade) continue;
+        fade.finish();
+        return getComputedStyle(document.documentElement, pseudo).opacity;
+      }
+      return 'no fade of the old column';
+    })()`);
+    expect(opacityOnceFaded).toBe('0');
+  }).toPass();
 });
