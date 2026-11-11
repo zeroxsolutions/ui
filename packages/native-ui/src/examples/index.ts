@@ -26,6 +26,7 @@ import { ChatMessageDemo } from './chat-message-demo';
 import { ChatSuggestionItemDemo } from './chat-suggestion-item-demo';
 import { CheckboxDemo } from './checkbox-demo';
 import { CodeBlockDemo } from './code-block-demo';
+import { CodeCardDemo } from './code-card-demo';
 import { CodeInputDemo } from './code-input-demo';
 import { CollapsibleCardDemo } from './collapsible-card-demo';
 import { CollapsibleDemo } from './collapsible-demo';
@@ -136,6 +137,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'chat-suggestion-item-demo': ChatSuggestionItemDemo,
   'checkbox-demo': CheckboxDemo,
   'code-block-demo': CodeBlockDemo,
+  'code-card-demo': CodeCardDemo,
   'code-input-demo': CodeInputDemo,
   'collapsible-card-demo': CollapsibleCardDemo,
   'collapsible-demo': CollapsibleDemo,

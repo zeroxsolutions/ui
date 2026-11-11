@@ -68,6 +68,7 @@ test('serves the react native items for each engine in each style', async ({ req
         'model-list',
         'resize-handle',
         'data-table',
+        'code-card',
       ]),
     );
 

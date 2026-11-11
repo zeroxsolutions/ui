@@ -1955,6 +1955,41 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "code-language",
+      "type": "registry:lib",
+      "title": "Code language",
+      "description": "isPlainLanguage, which says whether a code-fence language id is absent or names plain text, and languageLabel, the display name of a language id, case-insensitive, or the id itself when unlisted.",
+      "files": [
+        {
+          "path": "src/registry/lib/code-language.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "code-card",
+      "type": "registry:component",
+      "title": "Code card",
+      "description": "Read-only source over a collapsible card, highlighted by the registry's highlighter and plain until the grammar loads, with its language, line numbers and a copy action.",
+      "categories": ["data-display"],
+      "registryDependencies": [
+        "@zui/code-block",
+        "@zui/code-language",
+        "@zui/collapsible-card",
+        "@zui/copy-button",
+        "@zui/text",
+        "@zui/text-children",
+        "@zui/use-highlighted-code",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/code-card.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

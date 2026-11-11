@@ -1,0 +1,127 @@
+---
+title: Code card
+description: Read-only source over a collapsible card, highlighted by the registry's highlighter and plain until the grammar loads, with its language, line numbers and a copy action.
+---
+
+<NativePreview name="code-card-demo" />
+
+## Installation
+
+<InstallCommand name="code-card" />
+
+The CLI writes `components/data-display/code-card.tsx`, installs [Code Block](/native/components/nativewind/code-block)
+with its highlighter, [Collapsible card](/native/components/nativewind/collapsible-card),
+[Copy button](/native/components/nativewind/copy-button), [Text](/native/components/nativewind/text), Code
+language, Text children and Utils.
+
+## Usage
+
+```tsx
+import {
+  CodeCard,
+  CodeCardActions,
+  CodeCardCode,
+  CodeCardContent,
+  CodeCardCopy,
+  CodeCardLanguage,
+  CodeCardLineNumbers,
+} from '@/components/data-display/code-card';
+```
+
+The root holds the code; its parts show it. Compose a header from `CollapsibleCard` parts, then the body:
+
+```tsx
+<CodeCard code={source} language="ts">
+  <CollapsibleCardHeader>
+    <CollapsibleCardTitle>
+      <CodeCardLanguage />
+    </CollapsibleCardTitle>
+    <CollapsibleCardActions>
+      <CodeCardCopy />
+      <CollapsibleCardTrigger />
+    </CollapsibleCardActions>
+  </CollapsibleCardHeader>
+  <CodeCardContent>
+    <CodeCardLineNumbers />
+    <CodeCardCode />
+  </CodeCardContent>
+</CodeCard>
+```
+
+A block with no header floats its copy action over the code instead, inside `CodeCardActions` placed before
+`CodeCardContent`: `<CodeCardActions><CodeCardCopy variant="secondary" /></CodeCardActions>`.
+
+The code is highlighted by the same highlighter as [Code Block](/native/components/nativewind/code-block), in
+GitHub's light or dark colours for the scheme the app draws. It colours the languages that highlighter lists, by
+name or alias: bash, CSS, diff, HTML, JavaScript, JSON, JSX, Markdown, Python, SQL, TSX, TypeScript and YAML.
+Any other language shows as plain text, still labelled with its name.
+
+## Composition
+
+```text
+CodeCard
+|-- CodeCardActions
+|   `-- CodeCardCopy
+|-- CollapsibleCardHeader
+|   |-- CollapsibleCardTitle
+|   |   `-- CodeCardLanguage
+|   `-- CollapsibleCardActions
+|       |-- CodeCardCopy
+|       `-- CollapsibleCardTrigger
+`-- CodeCardContent
+    |-- CodeCardLineNumbers
+    `-- CodeCardCode
+```
+
+## API reference
+
+### CodeCard
+
+Renders [Collapsible card](/native/components/nativewind/collapsible-card) and takes every prop it takes, plus:
+
+| Prop       | Type                      | Default  |
+| ---------- | ------------------------- | -------- |
+| `code`     | `string`                  | required |
+| `language` | `string`                  | -        |
+| `lines`    | `HighlightLine[] \| null` | -        |
+
+It defaults `variant` to `muted`. `lines` is `code` already tokenized, one list of `{ content, style }` runs per
+line, each run drawn in its own `style`; given, the block highlights nothing itself, and `null` draws `code`
+plain.
+
+### CodeCardActions
+
+Takes every prop of a `View`. It floats over the code's top-right corner, for a block with no header.
+
+### CodeCardContent
+
+Renders `CollapsibleCardContent` and takes every prop it takes. It holds its children in a row inside a
+`CodeBlockContent`, which scrolls the code sideways when a line runs past the block.
+
+### CodeCardLineNumbers
+
+Takes every prop of a `Text`. It numbers every line of the block's code, hidden from assistive technology.
+
+### CodeCardCode
+
+Takes every prop of a `View` except `children`. It draws a `CodeBlockLine` per line of the block's code, plain
+until its highlighted lines arrive.
+
+### CodeCardLanguage
+
+Takes every prop of a `View`. It shows the block's language by its display name, "Plain text" when it has none;
+`children` replace the name.
+
+### CodeCardCopy
+
+Renders [Copy button](/native/components/nativewind/copy-button) and takes every prop it takes except `value`,
+which it supplies as the block's code. `label` defaults to `Copy code` and `size` to `icon`.
+
+## Differences from the web
+
+- `CodeCardActions` always shows; the web reveals it while the block is hovered or holds keyboard focus.
+- Only the 13 languages above are coloured, in GitHub's colours rather than the web's code theme, so the same
+  code is coloured differently on a phone and on the web.
+- `CodeCardLanguage` shows the name alone, without the web's language icon.
+- The code scrolls on the platform's own scroll indicators, not the web's styled rail.
+- The web's `data-slot` and `data-language` attributes are not set; a View takes no data attributes.
