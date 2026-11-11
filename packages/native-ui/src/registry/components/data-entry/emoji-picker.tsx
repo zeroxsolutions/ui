@@ -352,7 +352,8 @@ function EmojiPickerNav({
           value={category.id}
           disabled={category.disabled}
           aria-label={category.name}
-          className="flex-1"
+          // A toggle's minimum width and padding would push nine items past the picker; flex-1 shares it instead.
+          className="min-w-0 flex-1 px-0"
         >
           <Icon as={CATEGORY_ICONS[category.id] ?? Smile} />
         </ToggleGroupItem>
