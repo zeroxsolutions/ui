@@ -86,8 +86,10 @@ function TemplateContent<TProps extends object>({ template, context }: TemplateC
 function DataTableView({ children, className, ...props }: ComponentProps<typeof View>): ReactNode {
   const table = useDataTable();
   const rows = table.getRowModel().rows;
+  // border-border, since React Native draws a border black unless told, where the web's base layer colours every
+  // border.
   return (
-    <View className={cn('cn-data-table-container overflow-hidden border', className)} {...props}>
+    <View className={cn('cn-data-table-container border-border overflow-hidden border', className)} {...props}>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((group) => (
