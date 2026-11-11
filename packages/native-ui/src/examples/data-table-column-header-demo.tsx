@@ -1,5 +1,6 @@
 import { getCoreRowModel, getSortedRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import { View } from 'react-native';
 
 import {
   DataTableColumnHeader,
@@ -23,7 +24,10 @@ const COLUMNS: ColumnDef<FileRow>[] = [
   { accessorKey: 'size', header: 'Size' },
 ];
 
-/** A table's header row, its "Name" column opening a sort-and-hide menu from the column header. */
+/**
+ * A table's header row, each column opening a sort-and-hide menu from its header. Every file has a name, so the
+ * "Name" column's Hide keeps the column and says why instead.
+ */
 function DataTableColumnHeaderDemo(): ReactNode {
   const table = useReactTable({
     data: [],
@@ -31,31 +35,51 @@ function DataTableColumnHeaderDemo(): ReactNode {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
-  const column = table.getColumn('name');
+  const [hint, setHint] = useState<string | null>(null);
+  const name = table.getColumn('name');
+  const size = table.getColumn('size');
 
   return (
-    <Table className="w-full max-w-sm">
-      <TableHeader>
-        <TableRow>
-          <TableHead>
-            {column?.getIsVisible() && (
-              <DataTableColumnHeader column={column}>
-                <DataTableColumnHeaderTrigger>Name</DataTableColumnHeaderTrigger>
-                <DataTableColumnHeaderContent>
-                  <DataTableColumnHeaderSortAscending />
-                  <DataTableColumnHeaderSortDescending />
-                  <DropdownMenuSeparator />
-                  <DataTableColumnHeaderHide />
-                </DataTableColumnHeaderContent>
-              </DataTableColumnHeader>
-            )}
-          </TableHead>
-          <TableHead>
-            <Text>Size</Text>
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-    </Table>
+    <View className="w-full max-w-sm gap-2">
+      <Table className="w-full">
+        <TableHeader>
+          <TableRow>
+            <TableHead>
+              {name?.getIsVisible() && (
+                <DataTableColumnHeader column={name}>
+                  <DataTableColumnHeaderTrigger>Name</DataTableColumnHeaderTrigger>
+                  <DataTableColumnHeaderContent>
+                    <DataTableColumnHeaderSortAscending />
+                    <DataTableColumnHeaderSortDescending />
+                    <DropdownMenuSeparator />
+                    <DataTableColumnHeaderHide
+                      onPress={(event) => {
+                        event.preventDefault();
+                        setHint('Every file has a name, so this column stays');
+                      }}
+                    />
+                  </DataTableColumnHeaderContent>
+                </DataTableColumnHeader>
+              )}
+            </TableHead>
+            <TableHead>
+              {size?.getIsVisible() && (
+                <DataTableColumnHeader column={size}>
+                  <DataTableColumnHeaderTrigger>Size</DataTableColumnHeaderTrigger>
+                  <DataTableColumnHeaderContent>
+                    <DataTableColumnHeaderSortAscending />
+                    <DataTableColumnHeaderSortDescending />
+                    <DropdownMenuSeparator />
+                    <DataTableColumnHeaderHide />
+                  </DataTableColumnHeaderContent>
+                </DataTableColumnHeader>
+              )}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+      </Table>
+      {hint && <Text className="text-muted-foreground text-sm">{hint}</Text>}
+    </View>
   );
 }
 

@@ -1,3 +1,5 @@
+import { type Locator } from '@playwright/test';
+
 import { expect, test } from './test/fixtures';
 import { DRAWN, inside } from './test/native-preview';
 
@@ -123,4 +125,141 @@ test('a single-select toggle group reads as radios, the selected one checked', a
 
   await expect(center).toHaveAttribute('aria-checked', 'true');
   await expect(left).toHaveAttribute('aria-checked', 'false');
+});
+
+test('a file tree moves focus on the arrows, Home and End, opens and closes a folder on Right and Left, selects on Enter and Space, and keeps one row in the tab order', async ({
+  page,
+}) => {
+  await page.goto(`${COMPONENTS}/file-tree`);
+  const tree = inside(page, 'File tree demo').getByRole('tree', { name: 'Files', exact: true });
+  const row = (name: string): Locator => tree.getByRole('treeitem', { name, exact: true });
+  const src = row('src');
+  const indexTs = row('index.ts');
+  const readme = row('README.md');
+
+  await expect(indexTs).toHaveAttribute('aria-selected', 'true', DRAWN);
+  await tree.getByText('index.ts', { exact: true }).click();
+  await expect(indexTs).toBeFocused();
+
+  await page.keyboard.press('ArrowDown');
+  await expect(row('util.ts')).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await expect(readme).toBeFocused();
+  await page.keyboard.press('ArrowUp');
+  await expect(row('util.ts')).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(src).toBeFocused();
+  await page.keyboard.press('ArrowUp');
+  await expect(src).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(readme).toBeFocused();
+
+  await page.keyboard.press('Home');
+  await page.keyboard.press('ArrowRight');
+  await expect(indexTs).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(indexTs).toBeFocused();
+  await page.keyboard.press('ArrowLeft');
+  await expect(src).toBeFocused();
+  await page.keyboard.press('ArrowLeft');
+  await expect(src).toHaveAttribute('aria-expanded', 'false');
+  await expect(indexTs).toHaveCount(0);
+  await expect(src).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(src).toHaveAttribute('aria-expanded', 'true');
+  await expect(src).toBeFocused();
+
+  await page.keyboard.press('End');
+  await page.keyboard.press('Enter');
+  await expect(readme).toHaveAttribute('aria-selected', 'true');
+  await expect(indexTs).toHaveAttribute('aria-selected', 'false');
+  await page.keyboard.press('Home');
+  await page.keyboard.press('Space');
+  await expect(src).toHaveAttribute('aria-selected', 'true');
+  await expect(src).toHaveAttribute('aria-expanded', 'false');
+  await expect(readme).toHaveAttribute('aria-selected', 'false');
+
+  // Only the row last moved to is in the tab order, so Tab leaves the tree from its first row.
+  await page.keyboard.press('Tab');
+  await expect(readme).not.toBeFocused();
+  await expect(src).not.toBeFocused();
+});
+
+test('a tree row being renamed keeps its old name on Escape and takes the new one on return', async ({ page }) => {
+  await page.goto(`${COMPONENTS}/tree-item`);
+  const demo = inside(page, 'Tree item demo');
+  const field = demo.getByRole('textbox', { name: 'New name for README.md', exact: true });
+
+  await demo.getByRole('button', { name: 'Rename README.md', exact: true }).click(DRAWN);
+  await expect(field).toBeFocused();
+  await field.fill('NOTES.md');
+  await field.press('Escape');
+  await expect(field).toHaveCount(0);
+  await expect(demo.getByText('README.md', { exact: true })).toBeVisible();
+  await expect(demo.getByText('NOTES.md', { exact: true })).toHaveCount(0);
+
+  await demo.getByRole('button', { name: 'Rename README.md', exact: true }).click();
+  await field.fill('NOTES.md');
+  await field.press('Enter');
+  await expect(field).toHaveCount(0);
+  await expect(demo.getByText('NOTES.md', { exact: true })).toBeVisible();
+  await expect(demo.getByText('README.md', { exact: true })).toHaveCount(0);
+});
+
+test('a resize handle resizes on a drag past 4px and not under it, by its step on the arrows, and toggles on Enter and a double click', async ({
+  page,
+}) => {
+  await page.goto(`${COMPONENTS}/resize-handle`);
+  const demo = inside(page, 'Resize handle demo');
+  const handle = demo.getByRole('separator', { name: 'Resize panel', exact: true });
+
+  await expect(demo.getByText('Floating panel (160px)', { exact: true })).toBeVisible(DRAWN);
+  const box = await handle.boundingBox();
+  if (box === null) throw new Error('The resize handle is not drawn');
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  for (const step of [1, 2, 3]) await page.mouse.move(x + step, y);
+  await page.mouse.up();
+  // A drag reports nothing on the move that crosses 4px, so the width follows the 20px after it.
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 5, y);
+  await page.mouse.move(x + 25, y);
+  await page.mouse.up();
+  await expect(demo.getByText('Floating panel (180px)', { exact: true })).toBeVisible();
+
+  await handle.focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(demo.getByText('Floating panel (170px)', { exact: true })).toBeVisible();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await expect(demo.getByText('Floating panel (190px)', { exact: true })).toBeVisible();
+
+  await page.keyboard.press('Enter');
+  await expect(demo.getByText('Panel', { exact: true })).toBeVisible();
+  await handle.dblclick();
+  await expect(demo.getByText('Floating panel (190px)', { exact: true })).toBeVisible();
+});
+
+test('a column menu item whose caller prevents the default keeps the column, and another hides its column', async ({
+  page,
+}) => {
+  await page.goto(`${COMPONENTS}/data-table-column-header`);
+  const demo = inside(page, 'Data table column header demo');
+  const nameHeader = demo.getByRole('button', { name: 'Name', exact: true });
+  const sizeHeader = demo.getByRole('button', { name: 'Size', exact: true });
+
+  await nameHeader.click(DRAWN);
+  await demo.getByRole('menuitem', { name: 'Hide', exact: true }).click();
+  await expect(demo.getByText('Every file has a name, so this column stays', { exact: true })).toBeVisible();
+  await expect(nameHeader).toBeVisible();
+
+  await sizeHeader.click();
+  await demo.getByRole('menuitem', { name: 'Hide', exact: true }).click();
+  await expect(sizeHeader).toHaveCount(0);
+  await expect(nameHeader).toBeVisible();
 });
