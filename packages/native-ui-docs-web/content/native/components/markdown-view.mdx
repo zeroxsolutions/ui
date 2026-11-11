@@ -1,0 +1,68 @@
+---
+title: Markdown view
+description: A GitHub-Flavored Markdown string drawn in native parts styled to the design tokens, with tables as the registry's Table, task items as read-only checkboxes and fenced code as a Code card.
+---
+
+<NativePreview name="markdown-view-demo" />
+
+## Installation
+
+<InstallCommand name="markdown-view" />
+
+The CLI writes `components/data-display/markdown-view.tsx`, installs `unified`, `remark-parse`, `remark-gfm` and
+`expo-image`, and adds [Checkbox](/native/components/nativewind/checkbox),
+[Code card](/native/components/nativewind/code-card),
+[Collapsible card](/native/components/nativewind/collapsible-card),
+[Separator](/native/components/nativewind/separator), [Table](/native/components/nativewind/table),
+[Text](/native/components/nativewind/text), and the Code language, URL transform and Utils libs, with the URL
+transform lib in `lib/url-transform.ts`.
+
+## Usage
+
+```tsx
+import { MarkdownView } from '@/components/data-display/markdown-view';
+```
+
+```tsx
+<MarkdownView>{markdown}</MarkdownView>
+```
+
+It parses the string with `remark-parse` and `remark-gfm` and draws each node as a native part: headings,
+paragraphs, emphasis, strong and struck text, links, ordered and unordered lists with their task checkboxes,
+blockquotes, rules, images, tables, inline code and fenced code. Raw embedded HTML is never drawn, so untrusted
+markdown is safe. Use it for assistant replies and docs rendered from Markdown source; for literal source with no
+surrounding prose, compose [Code card](/native/components/nativewind/code-card) directly.
+
+A link opens through `Linking` when pressed, and only when its URL is relative or names `http`, `https`, `irc`,
+`ircs`, `mailto` or `xmpp`, the protocols react-markdown keeps on the web; a `javascript:`, `data:` or
+`vbscript:` link does nothing.
+
+## API reference
+
+### MarkdownView
+
+Renders a `View` and takes every prop a `View` takes except `children`, plus:
+
+| Prop       | Type     | Default  |
+| ---------- | -------- | -------- |
+| `children` | `string` | required |
+
+`children` is the Markdown source (GFM: tables, task lists, strikethrough, autolinks). Each heading is announced
+as a heading of its level. Fenced code becomes a `CodeCard`, headed with its language, a copy action and the
+collapse trigger when the fence names one, and with only a floating copy action when it is plain text; inline code
+stays a muted chip. A task item draws a read-only checkbox where the bullet would be, named by the item's own
+text, and a nested task list drops below that row. An image is as wide as the view, scaled to its own aspect once
+it loads and never past its own width, and announced by its alt text. A wide table or a long code line scrolls
+sideways inside its own block. It is memoized, so a streaming message's settled text does not re-parse on every
+chunk.
+
+## Differences from the web
+
+- React Native has no descendant selectors, so each part carries the classes the web gives its element from
+  the root.
+- List markers are drawn as text, a disc or the item's number, since React Native draws no list markers.
+- An image inside a link, a heading or a table cell shows its alt text, since a line of text cannot lay an image
+  out at its own size; an image in a paragraph is drawn as a block of its own.
+- A footnote's text is drawn where it is defined, after its label, not gathered at the end with back links.
+- The checkbox is named with `aria-label` rather than by `aria-labelledby` onto the item.
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

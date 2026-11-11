@@ -1,0 +1,133 @@
+---
+title: Data table
+description: The parts of a @tanstack/react-table view - toolbar, view, pagination and view options - reading one shared table instance from context.
+---
+
+<NativePreview name="data-table-demo" />
+
+## Installation
+
+<InstallCommand name="data-table" />
+
+The CLI writes `components/data-display/data-table.tsx`, installs [Button](/native/components/nativewind/button),
+[Dropdown menu](/native/components/nativewind/dropdown-menu), [Empty](/native/components/nativewind/empty),
+[Icon](/native/components/nativewind/icon), [Table](/native/components/nativewind/table),
+[Text](/native/components/nativewind/text), Text children and Utils, and adds `@tanstack/react-table` and
+`lucide-react-native`.
+
+`@tanstack/react-table` declares `react-dom` as a peer, which an Expo app without web support does not have. The
+package never imports it, so the install's warning about the missing peer is harmless.
+
+## Usage
+
+```tsx
+import {
+  DataTable,
+  DataTablePagination,
+  DataTablePaginationNext,
+  DataTablePaginationPrevious,
+  DataTableToolbar,
+  DataTableView,
+  DataTableViewOptions,
+} from '@/components/data-display/data-table';
+```
+
+You own `useReactTable` and the column definitions; these parts only render the table they are given:
+
+```tsx
+const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+
+<DataTable table={table}>
+  <DataTableToolbar>
+    <DataTableViewOptions />
+  </DataTableToolbar>
+  <DataTableView />
+  <DataTablePagination>
+    <DataTablePaginationPrevious aria-label="Previous page" />
+    <DataTablePaginationNext aria-label="Next page" />
+  </DataTablePagination>
+</DataTable>;
+```
+
+Give a column a sortable, hideable header with
+[Data table column header](/native/components/nativewind/data-table-column-header).
+
+The cells of a row share its width equally, as in [Table](/native/components/nativewind/table), so every column
+is as wide as the others.
+
+## Composition
+
+```text
+DataTable
+|-- DataTableToolbar
+|   `-- DataTableViewOptions
+|-- DataTableView
+|   `-- DataTableEmpty
+`-- DataTablePagination
+    |-- DataTablePaginationPrevious
+    `-- DataTablePaginationNext
+```
+
+## API reference
+
+### DataTable
+
+Takes every prop of a `View`, plus:
+
+| Prop    | Type                   | Default  |
+| ------- | ---------------------- | -------- |
+| `table` | `TanstackTable<TData>` | required |
+
+Holds the `@tanstack/react-table` instance, so every part reads it without prop-drilling, and stacks its parts
+with a gap.
+
+### DataTableToolbar
+
+Takes every prop of a `View`. A row for filters and actions above the table.
+
+### DataTableView
+
+Takes every prop of a `View`. Draws the table's header and current page of rows from the `DataTable`'s instance,
+in a bordered frame. Its `children` are drawn in the body
+only while there are no rows, such as a `DataTableEmpty`. Text a header or a cell returns is drawn in a `Text`.
+
+### DataTableEmpty
+
+Takes every prop of a `View`. What a `DataTableView` shows while there are no rows: one block across the body,
+its `children` centred in an [Empty](/native/components/nativewind/empty).
+
+### useDataTable
+
+`useDataTable<TData>(): TanstackTable<TData>` reads the `@tanstack/react-table` instance the surrounding
+`DataTable` holds; it throws outside one.
+
+### DataTablePagination
+
+Takes every prop of a `View`. A row aligned to the end for the pager; its `children` are a status line, such as
+"Page 1 of 3", and the step buttons, which read the table themselves.
+
+### DataTablePaginationPrevious, DataTablePaginationNext
+
+Each takes every prop of [Button](/native/components/nativewind/button) except `children`, plus:
+
+| Prop         | Type     | Default  |
+| ------------ | -------- | -------- |
+| `aria-label` | `string` | required |
+
+An outline icon button that steps the table back or on one page, disabled on the first or the last.
+
+### DataTableViewOptions
+
+Takes every prop of [Button](/native/components/nativewind/button). A menu with a checkbox for each column that
+has an accessor and can hide, named by the column's id, which shows and hides it. Its trigger is icon-only unless
+you pass `children`, and is named "Toggle columns" unless you give an `aria-label`. It draws nothing when no
+column can hide. The menu draws in the app's `PortalHost`, as
+[Dropdown menu](/native/components/nativewind/dropdown-menu) does.
+
+## Differences from the web
+
+- Every column is as wide as the others; the web sizes columns by their content.
+- Headers grouped across several columns are not supported, since a native row has no `colSpan`.
+- `DataTableEmpty` is a block across the body rather than a cell spanning every column, and takes a `View`'s props.
+- The step buttons' chevrons are static; the web's play while a button is hovered or focused.
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

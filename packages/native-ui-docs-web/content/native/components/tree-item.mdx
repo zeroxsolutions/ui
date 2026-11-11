@@ -1,0 +1,163 @@
+---
+title: Tree item
+description: One row of a hierarchy tree, drawn as the file tree's rows, with a depth indent, a disclosure trigger, a pressable label and an inline rename input.
+---
+
+<NativePreview name="tree-item-demo" />
+
+## Installation
+
+<InstallCommand name="tree-item" />
+
+The CLI writes `components/data-display/tree-item.tsx`, installs [Button](/native/components/nativewind/button),
+[Icon](/native/components/nativewind/icon), [Input](/native/components/nativewind/input),
+[Text](/native/components/nativewind/text), Text children and Utils, and adds `@rn-primitives/slot` and
+`lucide-react-native`.
+
+## Usage
+
+```tsx
+import {
+  TreeItem,
+  TreeItemIndent,
+  TreeItemLabel,
+  TreeItemRenameInput,
+  TreeItemTrigger,
+} from '@/components/data-display/tree-item';
+```
+
+```tsx
+<TreeItem expanded={open}>
+  <TreeItemIndent depth={0}>
+    <TreeItemTrigger aria-label="Toggle src" onPress={toggle} />
+  </TreeItemIndent>
+  <TreeItemLabel>src</TreeItemLabel>
+</TreeItem>
+<TreeItem leaf>
+  <TreeItemIndent depth={1} />
+  <TreeItemLabel>index.ts</TreeItemLabel>
+</TreeItem>
+```
+
+The consumer owns every visible icon and name, and supplies everything else: selection state, a
+`TreeItemRenameInput` while editing a name, and trailing controls after the name. File Tree draws a similar row and
+stays a separate family until a change shows the two should move together.
+
+To make the whole row select on a press, give it `asChild` and a `Pressable`; a press on the trigger or on a
+trailing button reaches that control alone, so it does not select the row:
+
+```tsx
+import { Pressable } from 'react-native';
+```
+
+```tsx
+<TreeItem expanded={open} asChild>
+  <Pressable aria-selected={selected} onPress={select}>
+    <TreeItemIndent depth={0}>
+      <TreeItemTrigger aria-label="Toggle src" onPress={toggle} />
+    </TreeItemIndent>
+    <TreeItemLabel>src</TreeItemLabel>
+  </Pressable>
+</TreeItem>
+```
+
+For a context menu, wrap the row in a [Context menu](/native/components/nativewind/context-menu)'s
+`ContextMenuTrigger`, which opens it on a long press.
+
+## Renaming
+
+```tsx
+<TreeItem editing leaf>
+  <TreeItemIndent depth={1} />
+  <TreeItemLabel>
+    <TreeItemRenameInput
+      aria-label="Name"
+      value={draft}
+      onChangeText={setDraft}
+      onCommit={() => rename(draft)}
+      onCancel={stopEditing}
+    />
+  </TreeItemLabel>
+</TreeItem>
+```
+
+## Composition
+
+```text
+TreeItem
+|-- TreeItemIndent
+|   `-- TreeItemTrigger
+`-- TreeItemLabel
+    `-- TreeItemRenameInput
+```
+
+## API reference
+
+### TreeItem
+
+Takes every prop of a `View`, plus:
+
+| Prop       | Type      | Default |
+| ---------- | --------- | ------- |
+| `expanded` | `boolean` | `false` |
+| `leaf`     | `boolean` | `false` |
+| `editing`  | `boolean` | `false` |
+| `asChild`  | `boolean` | `false` |
+
+The row draws as File Tree's rows do: the style's row height, rounded, on one line so a long name truncates; it
+grows to fit a rename input. `expanded` turns the trigger's chevron and announces it expanded, and `leaf` makes the
+indent hold the trigger's room. With `asChild` it renders its single child, such as a `Pressable`, with the row's
+classes merged onto it.
+
+### TreeItemIndent
+
+Takes every prop of a `View`, plus:
+
+| Prop    | Type     | Default  |
+| ------- | -------- | -------- |
+| `depth` | `number` | required |
+
+The row's leading column: an indent of 12px per level, then `children`, a folder row's `TreeItemTrigger`. A leaf
+row holds the trigger's own width instead, hidden from touch and from screen readers, so its name lines up with its
+folder siblings' names.
+
+### TreeItemTrigger
+
+Takes every prop of [Button](/native/components/nativewind/button) except `children`. The disclosure control of a
+folder row: a link icon button, with no fill while expanded, holding a chevron that turns down while the row is
+expanded, announced expanded or collapsed with the row. Give it an `aria-label` and an `onPress`. It throws outside a
+`TreeItem`.
+
+### TreeItemLabel
+
+Takes every prop of a `Pressable`. The row's name region: the consumer's icon and name as `children`, or a
+`TreeItemRenameInput` while renaming, and any badges after the name; a string child is drawn on one line. `onPress`
+receives the press event. It is one element to a screen reader only while it has `onPress` or `onLongPress`, so a
+rename input inside it stays reachable.
+
+### TreeItemRenameInput
+
+Takes every prop of [Input](/native/components/nativewind/input), plus:
+
+| Prop       | Type         | Default  |
+| ---------- | ------------ | -------- |
+| `onCommit` | `() => void` | required |
+| `onCancel` | `() => void` | required |
+
+The inline rename input, focused as it mounts. The return key commits by leaving the field, which calls
+`onCommit`, and leaving the field any other way commits too. Escape calls `onCancel` where the keyboard reports it;
+your own `onKeyPress` runs first, and one that calls `preventDefault` keeps Escape from it. The consumer owns the
+draft as `value` and `onChangeText`.
+
+## Differences from the web
+
+- `onPress` stands in for the web's `onClick`, and `onChangeText` for `onChange`. A press goes only to the innermost
+  pressable, so the trigger and the rename input need no `stopPropagation` to keep a press from the row.
+- On a phone, Escape has no key to come from, so leaving the field always commits; a screen offers its own cancel
+  control where it needs one.
+- The web's guard against keys typed during IME composition has no React Native counterpart and is dropped.
+- The row has no hover fill and no focus ring, which a phone has no hover or keyboard focus to show. The chevron is a
+  static icon; the web's plays on hover or focus.
+- `asChild` is this port's own: a View takes no press, so a selectable row renders a `Pressable` through it.
+- The web's `data-slot`, `data-expanded`, `data-leaf` and `data-editing` attributes are not set; a View takes no data
+  attributes.

@@ -12,12 +12,12 @@ module.exports = {
   moduleNameMapper: {
     '[.]svg$': '@nx/expo/plugins/jest/svg-mock',
     // Icon, Input, Textarea, Skeleton, the chart's theme and the colour scheme have one file per engine, and the registry ships one of them as icon.tsx, input.tsx, textarea.tsx, skeleton.tsx, lib/chart-theme.ts and lib/color-scheme.ts; the specs run NativeWind's.
-    // A composed component under components/<category>/ imports Icon and Input as ../../ui/icon and ../../ui/input, and a lib file the chart's
+    // A composed component under components/<category>/ imports Icon, Input and Skeleton as ../../ui/icon, ../../ui/input and ../../ui/skeleton, and a lib file the chart's
     // theme and the colour scheme as ./chart-theme and ./color-scheme.
     '^(?:[.]|[.][.]/[.][.]/ui)/icon$': '<rootDir>/src/registry/ui/icon.nativewind.tsx',
     '^(?:[.]|[.][.]/[.][.]/ui)/input$': '<rootDir>/src/registry/ui/input.nativewind.tsx',
     '^[.]/textarea$': '<rootDir>/src/registry/ui/textarea.nativewind.tsx',
-    '^[.]/skeleton$': '<rootDir>/src/registry/ui/skeleton.nativewind.tsx',
+    '^(?:[.]|[.][.]/[.][.]/ui)/skeleton$': '<rootDir>/src/registry/ui/skeleton.nativewind.tsx',
     '^(?:[.]|[.][.]/lib)/chart-theme$': '<rootDir>/src/registry/lib/chart-theme.nativewind.ts',
     '^(?:[.]|[.][.]/lib)/color-scheme$': '<rootDir>/src/registry/lib/color-scheme.nativewind.ts',
     // The demos import the items as an app does; build-registry writes NativeWind's Vega sources there.
@@ -26,12 +26,12 @@ module.exports = {
     // its engine's sources.
     '^@styles/([^/]+)/(.*)$': '<rootDir>/dist/src/nativewind-$1/$2',
   },
-  // jest-expo's preset list plus lucide-react-native, @rn-primitives, d3's modules, and shiki with the modules it
-  // imports. Under pnpm a package sits in a nested node_modules the preset leaves untransformed unless it names the
-  // package; lucide-react-native's react-native build, d3's modules and shiki's are ES modules, and
-  // @rn-primitives' dist holds raw JSX.
+  // jest-expo's preset list plus lucide-react-native, @rn-primitives, d3's modules, shiki, and unified's remark
+  // parser and react-markdown, each with the modules it imports. Under pnpm a package sits in a nested node_modules
+  // the preset leaves untransformed unless it names the package; lucide-react-native's react-native build, d3's
+  // modules, shiki's and the remark family's are ES modules, and @rn-primitives' dist holds raw JSX.
   transformIgnorePatterns: [
-    '/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|d3-[a-z-]+|internmap|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|lucide-react-native|@rn-primitives|shiki|@shikijs|oniguruma-[a-z-]+|regex(?:-[a-z]+)?|hast-util-[a-z-]+|mdast-util-[a-z-]+|micromark-util-[a-z-]+|unist-util-[a-z-]+|vfile(?:-message)?|@ungap|ccount|character-entities-[a-z0-9]+|(?:comma|space)-separated-tokens|stringify-entities|property-information|html-void-elements|devlop|dequal|trim-lines|zwitch))',
+    '/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|d3-[a-z-]+|internmap|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|lucide-react-native|@rn-primitives|shiki|@shikijs|oniguruma-[a-z-]+|regex(?:-[a-z]+)?|hast-util-[a-z-]+|mdast-util-[a-z-]+|micromark(?:-[a-z-]+)?|unist-util-[a-z-]+|vfile(?:-message)?|@ungap|ccount|character-entities(?:-[a-z0-9]+)?|(?:comma|space)-separated-tokens|stringify-entities|property-information|html-void-elements|devlop|dequal|trim-lines|zwitch|unified|remark-[a-z]+|react-markdown|bail|trough|is-plain-obj|is-(?:alphabetical|alphanumerical|decimal|hexadecimal)|character-reference-invalid|decode-named-character-reference|parse-entities|escape-string-regexp|longest-streak|markdown-table|estree-util-[a-z-]+|html-url-attributes))',
     '/node_modules/react-native-reanimated/plugin/',
     '/node_modules/@react-native/babel-preset/',
   ],

@@ -1,0 +1,121 @@
+---
+title: File tree
+description: An accessible file tree that owns selection and folder expansion, controlled or uncontrolled, and moves through its rows from the keyboard where the platform reports keys.
+---
+
+<NativePreview name="file-tree-demo" />
+
+## Installation
+
+<InstallCommand name="file-tree" />
+
+The CLI writes `components/data-display/file-tree.tsx`, installs [Icon](/native/components/nativewind/icon),
+[Text](/native/components/nativewind/text), Focus visible, Text children and Utils, and adds `lucide-react-native`.
+
+## Usage
+
+```tsx
+import { FileTree, FileTreeGroup, FileTreeItem, FileTreeLabel } from '@/components/data-display/file-tree';
+```
+
+The consumer composes `FileTreeItem`, `FileTreeLabel` and `FileTreeGroup` and owns every visible label and icon;
+the root ships no copy, so give it an `aria-label`:
+
+```tsx
+<FileTree aria-label="Files" defaultExpanded={['src']} defaultValue="src/index.ts">
+  <FileTreeItem value="src">
+    <FileTreeLabel>src</FileTreeLabel>
+    <FileTreeGroup>
+      <FileTreeItem value="src/index.ts">
+        <FileTreeLabel>index.ts</FileTreeLabel>
+      </FileTreeItem>
+    </FileTreeGroup>
+  </FileTreeItem>
+  <FileTreeItem value="README.md">
+    <FileTreeLabel>README.md</FileTreeLabel>
+  </FileTreeItem>
+</FileTree>
+```
+
+A press on a row selects it and opens or closes a folder. File Tree and [Tree item](/native/components/nativewind/tree-item)
+draw a similar row, and stay separate families until a change shows the two move together.
+
+## Keyboard
+
+Where the platform reports keys, on the web and from a hardware keyboard on Android, the tree follows the WAI-ARIA
+tree pattern. One row at a time is reached by Tab: the selected one while it shows, or the first.
+
+| Key           | Action                                                                   |
+| ------------- | ------------------------------------------------------------------------ |
+| Down / Up     | Focuses the next or the previous shown row.                              |
+| Home / End    | Focuses the first or the last shown row.                                 |
+| Right         | Opens a closed folder; on an open folder, focuses its first child.       |
+| Left          | Closes an open folder; on a file or a closed folder, focuses its parent. |
+| Enter / Space | Selects the focused row and opens or closes a folder.                    |
+
+## Composition
+
+```text
+FileTree
+|-- FileTreeItem
+|   |-- FileTreeLabel
+|   `-- FileTreeGroup
+|       `-- FileTreeItem
+|           `-- FileTreeLabel
+`-- FileTreeItem
+    `-- FileTreeLabel
+```
+
+## API reference
+
+### FileTree
+
+Takes every prop of a `View`, plus:
+
+| Prop               | Type                           | Default |
+| ------------------ | ------------------------------ | ------- |
+| `value`            | `string`                       | -       |
+| `defaultValue`     | `string`                       | -       |
+| `onValueChange`    | `(value: string) => void`      | -       |
+| `expanded`         | `string[]`                     | -       |
+| `defaultExpanded`  | `string[]`                     | `[]`    |
+| `onExpandedChange` | `(expanded: string[]) => void` | -       |
+
+The root owns selection and folder expansion, each following its prop when given it and holding its own state from
+the default otherwise; the change callbacks run in both cases. It has `role="tree"`. Your own `onKeyDown` runs
+first, and one that calls `preventDefault` keeps the key from the tree.
+
+### FileTreeItem
+
+Takes every prop of a `View`, plus:
+
+| Prop    | Type     | Default  |
+| ------- | -------- | -------- |
+| `value` | `string` | required |
+
+A node in a `FileTree`. It is a folder when a `FileTreeGroup` is one of its direct children, and a folder is
+announced expanded or collapsed; otherwise it is a file. On the web it is the tree item, with its level, its
+selected and expanded states, and its row as its name.
+
+### FileTreeLabel
+
+Takes every prop of a `Pressable`. The row of a `FileTreeItem`: a chevron on a folder, turned down while it is open,
+then your icon and file name as `children`, indented 12px per level; a string child is drawn on one line. A press
+selects the item and toggles a folder, after your own `onPress`. It is filled while selected and ringed while its
+item has keyboard focus. On a phone it is the tree item a screen reader reaches, announced selected, and a folder's
+row expanded or collapsed. It throws outside a `FileTreeItem`.
+
+### FileTreeGroup
+
+Takes every prop of a `View`. The nested children of a folder `FileTreeItem`, rendered only while the folder is open;
+the items inside it are one level deeper. It has `role="group"`. It throws outside a `FileTreeItem`.
+
+## Differences from the web
+
+- On a phone, the row is the tree item a screen reader reads, since a phone reads an element with children inside it
+  as one; the item itself is a plain `View` there. iOS has no tree roles, so a row announces its name and its
+  selected and expanded states only, and no level.
+- The keys work where the platform reports them: the web and a hardware keyboard on Android.
+- The chevron is a static icon; the web's plays while the row is hovered or focused, so the reduced-motion check
+  goes too. The row has no hover fill.
+- The web's `data-slot`, `data-value` and `data-selected` attributes are not set; a View takes no data attributes.

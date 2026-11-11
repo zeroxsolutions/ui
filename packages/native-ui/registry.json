@@ -1845,6 +1845,203 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "resize-drag",
+      "type": "registry:lib",
+      "title": "Resize drag",
+      "description": "shouldStartDrag, which says whether a press has moved far enough from where it went down to begin a resize, 4px either way by default, so a tap, a jitter or a double tap never resizes.",
+      "files": [
+        {
+          "path": "src/registry/lib/resize-drag.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "tree-item",
+      "type": "registry:component",
+      "title": "Tree item",
+      "description": "One row of a hierarchy tree, drawn as the file tree's rows, with a depth indent, a disclosure trigger announced expanded or collapsed, a pressable label and an inline rename input that commits on the return key or on leaving the field.",
+      "categories": ["data-display"],
+      "dependencies": ["@rn-primitives/slot", "lucide-react-native"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/icon",
+        "@zui/input",
+        "@zui/text",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/tree-item.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-header",
+      "type": "registry:component",
+      "title": "Data table column header",
+      "description": "A @tanstack/react-table column's sort-and-hide menu, taking the column directly rather than a shared table instance, its trigger showing the column's sort direction.",
+      "categories": ["data-display"],
+      "dependencies": ["@tanstack/react-table", "lucide-react-native"],
+      "registryDependencies": ["@zui/button", "@zui/dropdown-menu", "@zui/icon", "@zui/text-children", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/data-table-column-header.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "model-list",
+      "type": "registry:component",
+      "title": "Model list",
+      "description": "The frame for a model list section: a header with a title announced as a heading over a scrolling content area, a remove button for one model, and placeholder items while the list loads.",
+      "categories": ["layout"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/icon",
+        "@zui/item",
+        "@zui/scroll-area",
+        "@zui/skeleton",
+        "@zui/text",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/layout/model-list.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "resize-handle",
+      "type": "registry:component",
+      "title": "Resize handle",
+      "description": "A vertical resize grip for a panel outside any Resizable group, which reports its drag only once the finger has moved 4px, toggles on a double tap and is announced as adjustable.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/focus-visible", "@zui/resize-drag", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/resize-handle.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "data-table",
+      "type": "registry:component",
+      "title": "Data table",
+      "description": "The parts of a @tanstack/react-table view - toolbar, view, pagination and view options - reading one shared table instance from context.",
+      "categories": ["data-display"],
+      "dependencies": ["@tanstack/react-table", "lucide-react-native"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/dropdown-menu",
+        "@zui/empty",
+        "@zui/icon",
+        "@zui/table",
+        "@zui/text",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/data-table.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "code-language",
+      "type": "registry:lib",
+      "title": "Code language",
+      "description": "isPlainLanguage, which says whether a code-fence language id is absent or names plain text, and languageLabel, the display name of a language id, case-insensitive, or the id itself when unlisted.",
+      "files": [
+        {
+          "path": "src/registry/lib/code-language.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "code-card",
+      "type": "registry:component",
+      "title": "Code card",
+      "description": "Read-only source over a collapsible card, highlighted by the registry's highlighter and plain until the grammar loads, with its language, line numbers and a copy action.",
+      "categories": ["data-display"],
+      "registryDependencies": [
+        "@zui/code-block",
+        "@zui/code-language",
+        "@zui/collapsible-card",
+        "@zui/copy-button",
+        "@zui/text",
+        "@zui/text-children",
+        "@zui/use-highlighted-code",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/code-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "url-transform",
+      "type": "registry:lib",
+      "title": "URL transform",
+      "description": "defaultUrlTransform, which keeps a URL that is relative or names http, https, irc, ircs, mailto or xmpp and empties any other, as react-markdown's own filter does, so a javascript:, data: or vbscript: link never opens.",
+      "files": [
+        {
+          "path": "src/registry/lib/url-transform.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "markdown-view",
+      "type": "registry:component",
+      "title": "Markdown view",
+      "description": "A GitHub-Flavored Markdown string drawn in native parts styled to the design tokens, with tables as the registry's Table, task items as read-only checkboxes and fenced code as a Code card; raw HTML is dropped and a link opens only on a safe URL.",
+      "categories": ["data-display"],
+      "dependencies": ["expo-image", "remark-gfm", "remark-parse", "unified"],
+      "registryDependencies": [
+        "@zui/checkbox",
+        "@zui/code-card",
+        "@zui/code-language",
+        "@zui/collapsible-card",
+        "@zui/separator",
+        "@zui/table",
+        "@zui/text",
+        "@zui/url-transform",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/markdown-view.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "file-tree",
+      "type": "registry:component",
+      "title": "File tree",
+      "description": "An accessible file tree that owns selection and folder expansion, controlled or uncontrolled: a press selects a row and toggles a folder, and the arrow, Home, End, Enter and Space keys move through it where the platform reports keys.",
+      "categories": ["data-display"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": ["@zui/focus-visible", "@zui/icon", "@zui/text", "@zui/text-children", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/file-tree.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

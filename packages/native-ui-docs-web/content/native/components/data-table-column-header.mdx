@@ -1,0 +1,102 @@
+---
+title: Data table column header
+description: A @tanstack/react-table column's sort-and-hide menu, taking the column directly rather than a shared table instance.
+---
+
+<NativePreview name="data-table-column-header-demo" />
+
+## Installation
+
+<InstallCommand name="data-table-column-header" />
+
+The CLI writes `components/data-display/data-table-column-header.tsx`, installs
+[Button](/native/components/nativewind/button), [Dropdown menu](/native/components/nativewind/dropdown-menu),
+[Icon](/native/components/nativewind/icon), Text children and Utils, and adds `@tanstack/react-table` and
+`lucide-react-native`.
+
+## Usage
+
+```tsx
+import {
+  DataTableColumnHeader,
+  DataTableColumnHeaderContent,
+  DataTableColumnHeaderHide,
+  DataTableColumnHeaderSortAscending,
+  DataTableColumnHeaderSortDescending,
+  DataTableColumnHeaderTrigger,
+} from '@/components/data-display/data-table-column-header';
+import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+```
+
+```tsx
+const columns: ColumnDef<FileRow>[] = [
+  {
+    accessorKey: 'name',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column}>
+        <DataTableColumnHeaderTrigger>Name</DataTableColumnHeaderTrigger>
+        <DataTableColumnHeaderContent>
+          <DataTableColumnHeaderSortAscending />
+          <DataTableColumnHeaderSortDescending />
+          <DropdownMenuSeparator />
+          <DataTableColumnHeaderHide />
+        </DataTableColumnHeaderContent>
+      </DataTableColumnHeader>
+    ),
+  },
+];
+```
+
+Render it from a column's `header`. It takes the `column` directly, since column definitions live outside the
+render tree. A column that neither sorts nor hides takes its title as plain `children`, with no menu:
+
+```tsx
+<DataTableColumnHeader column={column}>Size</DataTableColumnHeader>
+```
+
+The menu draws in the app's `PortalHost`, as [Dropdown menu](/native/components/nativewind/dropdown-menu) does.
+
+## Composition
+
+```text
+DataTableColumnHeader
+|-- DataTableColumnHeaderTrigger
+`-- DataTableColumnHeaderContent
+    |-- DataTableColumnHeaderSortAscending
+    |-- DataTableColumnHeaderSortDescending
+    `-- DataTableColumnHeaderHide
+```
+
+## API reference
+
+### DataTableColumnHeader
+
+Takes every prop of a `View`, plus:
+
+| Prop     | Type                    | Default  |
+| -------- | ----------------------- | -------- |
+| `column` | `Column<TData, TValue>` | required |
+
+Holds the column menu's state, and hands `column` to its parts.
+
+### DataTableColumnHeaderTrigger
+
+Takes every prop of `DropdownMenuTrigger` except `asChild`. A ghost button named by its `children`, the column's
+title, followed by an icon for the column's sort direction: up while ascending, down while descending, both ways
+while unsorted. A press opens the menu.
+
+### DataTableColumnHeaderContent
+
+Takes every prop of `DropdownMenuContent`; `align` defaults to `start`. Its children are the actions.
+
+### DataTableColumnHeaderSortAscending, DataTableColumnHeaderSortDescending, DataTableColumnHeaderHide
+
+Each takes every prop of `DropdownMenuItem`. They sort the column ascending, sort it descending, and hide it, with
+the default copy "Asc", "Desc" and "Hide", which `children` replace. Your own `onPress` runs first, and one that calls
+`event.preventDefault()` skips the action. Each throws outside a `DataTableColumnHeader`.
+
+## Differences from the web
+
+- `onPress` stands in for the web's `onClick`.
+- The icons are static; the web's play while the trigger or an item is hovered or focused.
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

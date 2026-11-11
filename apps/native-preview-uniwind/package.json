@@ -30,6 +30,7 @@
     "@rn-primitives/toggle": "catalog:rn-primitives",
     "@rn-primitives/toggle-group": "catalog:rn-primitives",
     "@rn-primitives/tooltip": "catalog:rn-primitives",
+    "@tanstack/react-table": "catalog:",
     "@zeroxsolutions/native-ui": "workspace:*",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
@@ -53,9 +54,12 @@
     "react-native-svg": "catalog:expo",
     "react-native-web": "catalog:expo",
     "react-native-worklets": "catalog:expo",
+    "remark-gfm": "catalog:",
+    "remark-parse": "catalog:",
     "shiki": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
+    "unified": "catalog:",
     "uniwind": "1.13.0"
   },
   "devDependencies": {

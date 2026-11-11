@@ -54,6 +54,14 @@ test("the native docs' sidebar lists their pages and the components under the de
     ['Tag input', '/tag-input'],
     ['Language combobox', '/language-combobox'],
     ['Frontmatter form', '/frontmatter-form'],
+    ['Tree item', '/tree-item'],
+    ['Data table', '/data-table'],
+    ['Data table column header', '/data-table-column-header'],
+    ['Model list', '/model-list'],
+    ['Resize handle', '/resize-handle'],
+    ['Code card', '/code-card'],
+    ['Markdown view', '/markdown-view'],
+    ['File tree', '/file-tree'],
   ]) {
     await expect(sidebar.getByRole('link', { name, exact: true })).toHaveAttribute(
       'href',

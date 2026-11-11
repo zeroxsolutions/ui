@@ -26,6 +26,7 @@ import { ChatMessageDemo } from './chat-message-demo';
 import { ChatSuggestionItemDemo } from './chat-suggestion-item-demo';
 import { CheckboxDemo } from './checkbox-demo';
 import { CodeBlockDemo } from './code-block-demo';
+import { CodeCardDemo } from './code-card-demo';
 import { CodeInputDemo } from './code-input-demo';
 import { CollapsibleCardDemo } from './collapsible-card-demo';
 import { CollapsibleDemo } from './collapsible-demo';
@@ -34,6 +35,8 @@ import { CommandDemo } from './command-demo';
 import { CommandMenuDemo } from './command-menu-demo';
 import { ContextMenuDemo } from './context-menu-demo';
 import { CopyButtonDemo } from './copy-button-demo';
+import { DataTableColumnHeaderDemo } from './data-table-column-header-demo';
+import { DataTableDemo } from './data-table-demo';
 import { DialogDemo } from './dialog-demo';
 import { DirectionDemo } from './direction-demo';
 import { DrawerDemo } from './drawer-demo';
@@ -42,6 +45,7 @@ import { EditorTabDemo } from './editor-tab-demo';
 import { EmojiAppearanceToggleGroupDemo } from './emoji-appearance-toggle-group-demo';
 import { EmptyDemo } from './empty-demo';
 import { FieldDemo } from './field-demo';
+import { FileTreeDemo } from './file-tree-demo';
 import { FileTypeIconDemo } from './file-type-icon-demo';
 import { FloatingToolbarDemo } from './floating-toolbar-demo';
 import { FontPreviewDemo } from './font-preview-demo';
@@ -60,11 +64,13 @@ import { KbdDemo } from './kbd-demo';
 import { LabelDemo } from './label-demo';
 import { LanguageComboboxDemo } from './language-combobox-demo';
 import { LanguageToggleGroupDemo } from './language-toggle-group-demo';
+import { MarkdownViewDemo } from './markdown-view-demo';
 import { MarkerDemo } from './marker-demo';
 import { MenubarDemo } from './menubar-demo';
 import { MessageDemo } from './message-demo';
 import { MessageScrollerDemo } from './message-scroller-demo';
 import { ModelInfoCardDemo } from './model-info-card-demo';
+import { ModelListDemo } from './model-list-demo';
 import { NativeSelectDemo } from './native-select-demo';
 import { NavigationMenuDemo } from './navigation-menu-demo';
 import { NumberFieldDemo } from './number-field-demo';
@@ -82,6 +88,7 @@ import { QuestionnaireDemo } from './questionnaire-demo';
 import { RadioGroupDemo } from './radio-group-demo';
 import { ReasoningCollapsibleDemo } from './reasoning-collapsible-demo';
 import { ResizableDemo } from './resizable-demo';
+import { ResizeHandleDemo } from './resize-handle-demo';
 import { ScrollAreaDemo } from './scroll-area-demo';
 import { SelectDemo } from './select-demo';
 import { SeparatorDemo } from './separator-demo';
@@ -105,6 +112,7 @@ import { ToggleDemo } from './toggle-demo';
 import { ToggleGroupDemo } from './toggle-group-demo';
 import { TooltipDemo } from './tooltip-demo';
 import { TraceDemo } from './trace-demo';
+import { TreeItemDemo } from './tree-item-demo';
 import { UnsavedChangesToolbarDemo } from './unsaved-changes-toolbar-demo';
 import { UnsavedIndicatorDemo } from './unsaved-indicator-demo';
 
@@ -131,6 +139,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'chat-suggestion-item-demo': ChatSuggestionItemDemo,
   'checkbox-demo': CheckboxDemo,
   'code-block-demo': CodeBlockDemo,
+  'code-card-demo': CodeCardDemo,
   'code-input-demo': CodeInputDemo,
   'collapsible-card-demo': CollapsibleCardDemo,
   'collapsible-demo': CollapsibleDemo,
@@ -139,6 +148,8 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'command-menu-demo': CommandMenuDemo,
   'context-menu-demo': ContextMenuDemo,
   'copy-button-demo': CopyButtonDemo,
+  'data-table-column-header-demo': DataTableColumnHeaderDemo,
+  'data-table-demo': DataTableDemo,
   'dialog-demo': DialogDemo,
   'direction-demo': DirectionDemo,
   'drawer-demo': DrawerDemo,
@@ -147,6 +158,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'emoji-appearance-toggle-group-demo': EmojiAppearanceToggleGroupDemo,
   'empty-demo': EmptyDemo,
   'field-demo': FieldDemo,
+  'file-tree-demo': FileTreeDemo,
   'file-type-icon-demo': FileTypeIconDemo,
   'floating-toolbar-demo': FloatingToolbarDemo,
   'font-preview-demo': FontPreviewDemo,
@@ -165,11 +177,13 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'label-demo': LabelDemo,
   'language-combobox-demo': LanguageComboboxDemo,
   'language-toggle-group-demo': LanguageToggleGroupDemo,
+  'markdown-view-demo': MarkdownViewDemo,
   'marker-demo': MarkerDemo,
   'menubar-demo': MenubarDemo,
   'message-demo': MessageDemo,
   'message-scroller-demo': MessageScrollerDemo,
   'model-info-card-demo': ModelInfoCardDemo,
+  'model-list-demo': ModelListDemo,
   'native-select-demo': NativeSelectDemo,
   'navigation-menu-demo': NavigationMenuDemo,
   'number-field-demo': NumberFieldDemo,
@@ -187,6 +201,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'radio-group-demo': RadioGroupDemo,
   'reasoning-collapsible-demo': ReasoningCollapsibleDemo,
   'resizable-demo': ResizableDemo,
+  'resize-handle-demo': ResizeHandleDemo,
   'scroll-area-demo': ScrollAreaDemo,
   'select-demo': SelectDemo,
   'separator-demo': SeparatorDemo,
@@ -210,6 +225,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'toggle-group-demo': ToggleGroupDemo,
   'tooltip-demo': TooltipDemo,
   'trace-demo': TraceDemo,
+  'tree-item-demo': TreeItemDemo,
   'unsaved-changes-toolbar-demo': UnsavedChangesToolbarDemo,
   'unsaved-indicator-demo': UnsavedIndicatorDemo,
 };

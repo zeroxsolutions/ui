@@ -63,6 +63,14 @@ test('serves the react native items for each engine in each style', async ({ req
         'tag-input',
         'language-combobox',
         'frontmatter-form',
+        'tree-item',
+        'data-table-column-header',
+        'model-list',
+        'resize-handle',
+        'data-table',
+        'code-card',
+        'markdown-view',
+        'file-tree',
       ]),
     );
 
