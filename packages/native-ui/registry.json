@@ -1845,6 +1845,92 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "resize-drag",
+      "type": "registry:lib",
+      "title": "Resize drag",
+      "description": "shouldStartDrag, which says whether a press has moved far enough from where it went down to begin a resize, 4px either way by default, so a tap, a jitter or a double tap never resizes.",
+      "files": [
+        {
+          "path": "src/registry/lib/resize-drag.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "tree-item",
+      "type": "registry:component",
+      "title": "Tree item",
+      "description": "One row of a hierarchy tree, drawn as the file tree's rows, with a depth indent, a disclosure trigger announced expanded or collapsed, a pressable label and an inline rename input that commits on the return key or on leaving the field.",
+      "categories": ["data-display"],
+      "dependencies": ["@rn-primitives/slot", "lucide-react-native"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/icon",
+        "@zui/input",
+        "@zui/text",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/tree-item.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-header",
+      "type": "registry:component",
+      "title": "Data table column header",
+      "description": "A @tanstack/react-table column's sort-and-hide menu, taking the column directly rather than a shared table instance, its trigger showing the column's sort direction.",
+      "categories": ["data-display"],
+      "dependencies": ["@tanstack/react-table", "lucide-react-native"],
+      "registryDependencies": ["@zui/button", "@zui/dropdown-menu", "@zui/icon", "@zui/text-children", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/data-table-column-header.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "model-list",
+      "type": "registry:component",
+      "title": "Model list",
+      "description": "The frame for a model list section: a header with a title announced as a heading over a scrolling content area, a remove button for one model, and placeholder items while the list loads.",
+      "categories": ["layout"],
+      "dependencies": ["lucide-react-native"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/icon",
+        "@zui/item",
+        "@zui/scroll-area",
+        "@zui/skeleton",
+        "@zui/text",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/layout/model-list.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "resize-handle",
+      "type": "registry:component",
+      "title": "Resize handle",
+      "description": "A vertical resize grip for a panel outside any Resizable group, which reports its drag only once the finger has moved 4px, toggles on a double tap and is announced as adjustable.",
+      "categories": ["data-entry"],
+      "registryDependencies": ["@zui/focus-visible", "@zui/resize-drag", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/data-entry/resize-handle.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

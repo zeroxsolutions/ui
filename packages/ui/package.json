@@ -39,7 +39,7 @@
     "@shadcn/react": "^0.1.0",
     "@shikijs/langs": "catalog:",
     "@tailwindcss/typography": "^0.5.19",
-    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-table": "catalog:",
     "@tiptap/core": "^3.27.3",
     "@tiptap/extension-details": "^3.27.3",
     "@tiptap/extension-highlight": "^3.27.3",

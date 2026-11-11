@@ -48,6 +48,7 @@
     "@rn-primitives/toggle": "catalog:rn-primitives",
     "@rn-primitives/toggle-group": "catalog:rn-primitives",
     "@rn-primitives/tooltip": "catalog:rn-primitives",
+    "@tanstack/react-table": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "d3-scale": "catalog:",

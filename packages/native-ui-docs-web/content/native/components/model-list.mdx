@@ -1,0 +1,130 @@
+---
+title: Model list
+description: The frame for a model list section, a header over a scrolling content area, with a remove button and loading placeholders.
+---
+
+<NativePreview name="model-list-demo" />
+
+## Installation
+
+<InstallCommand name="model-list" />
+
+The CLI writes `components/layout/model-list.tsx`, installs [Button](/native/components/nativewind/button),
+[Icon](/native/components/nativewind/icon), [Item](/native/components/nativewind/item),
+[Scroll area](/native/components/nativewind/scroll-area), [Skeleton](/native/components/nativewind/skeleton),
+[Text](/native/components/nativewind/text) and Utils, and adds `lucide-react-native`.
+
+## Usage
+
+```tsx
+import {
+  ModelList,
+  ModelListAction,
+  ModelListContent,
+  ModelListHeader,
+  ModelListRemoveButton,
+  ModelListSkeleton,
+  ModelListTitle,
+} from '@/components/layout/model-list';
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '@/components/ui/item';
+```
+
+```tsx
+<ModelList>
+  <ModelListHeader>
+    <ModelListTitle>Model list</ModelListTitle>
+    <ModelListAction>{search}</ModelListAction>
+  </ModelListHeader>
+  <ModelListContent>
+    <ItemGroup>
+      <Item size="sm" className={unavailable ? 'opacity-50' : undefined}>
+        <ItemContent>
+          <ItemTitle>GPT-4o</ItemTitle>
+          <ItemDescription>gpt-4o</ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <ModelListRemoveButton aria-label="Remove GPT-4o" onPress={remove} />
+        </ItemActions>
+      </Item>
+    </ItemGroup>
+  </ModelListContent>
+</ModelList>
+```
+
+It owns no list state: it does not filter, group, sort or paginate. Place it in a parent of bounded height so the
+content scrolls. Show a `ModelListSkeleton` in the content while the list loads.
+
+Two things the web's frame does from its own classes, the caller writes on the element itself here:
+
+- an unavailable model's `Item` takes `opacity-50`, as above;
+- a `TabsList` in the header takes `basis-full`, so it has a line of its own:
+
+```tsx
+<ModelListHeader>
+  <ModelListTitle>Models</ModelListTitle>
+  <TabsList className="basis-full">{triggers}</TabsList>
+</ModelListHeader>
+```
+
+## Composition
+
+```text
+ModelList
+|-- ModelListHeader
+|   |-- ModelListTitle
+|   `-- ModelListAction
+`-- ModelListContent
+    `-- ItemGroup
+        `-- Item
+            `-- ItemActions
+                `-- ModelListRemoveButton
+```
+
+## API reference
+
+### ModelList
+
+Takes every prop of a `View`. A column filling its parent, which must have a bounded height for the content to
+scroll.
+
+### ModelListHeader
+
+Takes every prop of a `View`. A row of the title and trailing controls, wrapping onto a second line when they do not
+fit.
+
+### ModelListTitle
+
+Takes every prop of [Text](/native/components/nativewind/text). The section's heading, announced as a heading,
+growing to push the header's controls to its end.
+
+### ModelListAction
+
+Takes every prop of a `View`. Trailing header controls, such as a search field or a refresh button.
+
+### ModelListContent
+
+Takes every prop of [ScrollArea](/native/components/nativewind/scroll-area). The scrolling region filling the rest of
+the frame; its children stack with a gap.
+
+### ModelListRemoveButton
+
+Takes every prop of [Button](/native/components/nativewind/button). A ghost small icon button with a trash icon,
+named "Remove model" unless given its own `aria-label`; `children` replace the icon.
+
+### ModelListSkeleton
+
+Takes every prop of a `View`, plus:
+
+| Prop    | Type     | Default |
+| ------- | -------- | ------- |
+| `count` | `number` | `6`     |
+
+Placeholder items in the shape of a model item: a media placeholder, two text lines and a trailing control.
+
+## Differences from the web
+
+- The web dims an `Item` marked `data-unavailable` and stretches a `TabsList` across the header through selectors
+  that reach into its children, which React Native has no counterpart of; write `opacity-50` and `basis-full` on
+  those elements, as above.
+- `onPress` stands in for the web's `onClick`.
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

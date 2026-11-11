@@ -34,6 +34,7 @@ import { CommandDemo } from './command-demo';
 import { CommandMenuDemo } from './command-menu-demo';
 import { ContextMenuDemo } from './context-menu-demo';
 import { CopyButtonDemo } from './copy-button-demo';
+import { DataTableColumnHeaderDemo } from './data-table-column-header-demo';
 import { DialogDemo } from './dialog-demo';
 import { DirectionDemo } from './direction-demo';
 import { DrawerDemo } from './drawer-demo';
@@ -65,6 +66,7 @@ import { MenubarDemo } from './menubar-demo';
 import { MessageDemo } from './message-demo';
 import { MessageScrollerDemo } from './message-scroller-demo';
 import { ModelInfoCardDemo } from './model-info-card-demo';
+import { ModelListDemo } from './model-list-demo';
 import { NativeSelectDemo } from './native-select-demo';
 import { NavigationMenuDemo } from './navigation-menu-demo';
 import { NumberFieldDemo } from './number-field-demo';
@@ -82,6 +84,7 @@ import { QuestionnaireDemo } from './questionnaire-demo';
 import { RadioGroupDemo } from './radio-group-demo';
 import { ReasoningCollapsibleDemo } from './reasoning-collapsible-demo';
 import { ResizableDemo } from './resizable-demo';
+import { ResizeHandleDemo } from './resize-handle-demo';
 import { ScrollAreaDemo } from './scroll-area-demo';
 import { SelectDemo } from './select-demo';
 import { SeparatorDemo } from './separator-demo';
@@ -105,6 +108,7 @@ import { ToggleDemo } from './toggle-demo';
 import { ToggleGroupDemo } from './toggle-group-demo';
 import { TooltipDemo } from './tooltip-demo';
 import { TraceDemo } from './trace-demo';
+import { TreeItemDemo } from './tree-item-demo';
 import { UnsavedChangesToolbarDemo } from './unsaved-changes-toolbar-demo';
 import { UnsavedIndicatorDemo } from './unsaved-indicator-demo';
 
@@ -139,6 +143,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'command-menu-demo': CommandMenuDemo,
   'context-menu-demo': ContextMenuDemo,
   'copy-button-demo': CopyButtonDemo,
+  'data-table-column-header-demo': DataTableColumnHeaderDemo,
   'dialog-demo': DialogDemo,
   'direction-demo': DirectionDemo,
   'drawer-demo': DrawerDemo,
@@ -170,6 +175,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'message-demo': MessageDemo,
   'message-scroller-demo': MessageScrollerDemo,
   'model-info-card-demo': ModelInfoCardDemo,
+  'model-list-demo': ModelListDemo,
   'native-select-demo': NativeSelectDemo,
   'navigation-menu-demo': NavigationMenuDemo,
   'number-field-demo': NumberFieldDemo,
@@ -187,6 +193,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'radio-group-demo': RadioGroupDemo,
   'reasoning-collapsible-demo': ReasoningCollapsibleDemo,
   'resizable-demo': ResizableDemo,
+  'resize-handle-demo': ResizeHandleDemo,
   'scroll-area-demo': ScrollAreaDemo,
   'select-demo': SelectDemo,
   'separator-demo': SeparatorDemo,
@@ -210,6 +217,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'toggle-group-demo': ToggleGroupDemo,
   'tooltip-demo': TooltipDemo,
   'trace-demo': TraceDemo,
+  'tree-item-demo': TreeItemDemo,
   'unsaved-changes-toolbar-demo': UnsavedChangesToolbarDemo,
   'unsaved-indicator-demo': UnsavedIndicatorDemo,
 };

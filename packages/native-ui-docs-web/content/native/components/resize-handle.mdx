@@ -1,0 +1,71 @@
+---
+title: Resize handle
+description: A vertical resize grip for a panel outside any Resizable group, which reports its drag only once the finger has moved 4px.
+---
+
+<NativePreview name="resize-handle-demo" />
+
+## Installation
+
+<InstallCommand name="resize-handle" />
+
+The CLI writes `components/data-entry/resize-handle.tsx`, and installs the Focus visible, Resize drag and Utils libs,
+with the Resize drag lib in `lib/resize-drag.ts`.
+
+## Usage
+
+```tsx
+import { ResizeHandle } from '@/components/data-entry/resize-handle';
+```
+
+```tsx
+<View className="flex-row">
+  <View style={{ width: collapsed ? 48 : width }}>{panel}</View>
+  <ResizeHandle
+    aria-label="Resize panel"
+    value={width}
+    min={120}
+    max={320}
+    onDrag={(dx) => setWidth((current) => Math.min(320, Math.max(120, current + dx)))}
+    onToggle={() => setCollapsed((current) => !current)}
+  />
+</View>
+```
+
+Use it for a floating or overlaid panel whose width you own. Panes that share a row compose
+[Resizable](/native/components/nativewind/resizable) instead.
+
+A drag reports its width deltas through `onDrag` only once the finger has moved 4px, so a tap or a jitter never
+resizes, and a scrolling parent cannot take the touch while it lasts. A double tap calls `onToggle`, such as to
+collapse the panel. A screen reader announces it as adjustable, valued at `value`, and its swipe up or down resizes
+by `step`. On the web it is a focusable separator: the Left and Right arrows resize by `step` and Enter calls
+`onToggle`.
+
+## API reference
+
+### ResizeHandle
+
+Takes every prop of a `View`, plus:
+
+| Prop       | Type                   | Default  |
+| ---------- | ---------------------- | -------- |
+| `onDrag`   | `(dx: number) => void` | required |
+| `onToggle` | `() => void`           | required |
+| `value`    | `number`               | required |
+| `min`      | `number`               | -        |
+| `max`      | `number`               | -        |
+| `step`     | `number`               | `10`     |
+
+`onDrag` receives the width delta in px since the last move or adjustment; `dx` is not flipped when text reads right
+to left. `value`, `min` and `max` are announced as the handle's value and range. The handle takes a touch 20px wide,
+though it draws a 1px line. Your own `onKeyDown` runs first, and one that calls `preventDefault` skips the key's
+action.
+
+## Differences from the web
+
+- A double tap stands in for the web's double-click, and the responder system for its pointer capture.
+- The arrows and Enter work where the platform reports keys, the web and a hardware keyboard; on a phone a screen
+  reader's adjustments resize instead.
+- The web's own pointer and double-click handlers have no counterpart, so a caller cannot prevent the drag or the
+  toggle through them.
+- The web's `data-slot` attribute is not set; a View takes no data attributes.
