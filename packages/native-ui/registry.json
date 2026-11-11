@@ -1990,6 +1990,43 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "url-transform",
+      "type": "registry:lib",
+      "title": "URL transform",
+      "description": "defaultUrlTransform, which keeps a URL that is relative or names http, https, irc, ircs, mailto or xmpp and empties any other, as react-markdown's own filter does, so a javascript:, data: or vbscript: link never opens.",
+      "files": [
+        {
+          "path": "src/registry/lib/url-transform.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "markdown-view",
+      "type": "registry:component",
+      "title": "Markdown view",
+      "description": "A GitHub-Flavored Markdown string drawn in native parts styled to the design tokens, with tables as the registry's Table, task items as read-only checkboxes and fenced code as a Code card; raw HTML is dropped and a link opens only on a safe URL.",
+      "categories": ["data-display"],
+      "dependencies": ["expo-image", "remark-gfm", "remark-parse", "unified"],
+      "registryDependencies": [
+        "@zui/checkbox",
+        "@zui/code-card",
+        "@zui/code-language",
+        "@zui/collapsible-card",
+        "@zui/separator",
+        "@zui/table",
+        "@zui/text",
+        "@zui/url-transform",
+        "@zui/utils"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/data-display/markdown-view.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

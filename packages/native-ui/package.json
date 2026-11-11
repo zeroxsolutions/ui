@@ -59,8 +59,11 @@
     "lucide-react-native": "catalog:",
     "react-hook-form": "catalog:",
     "react-native-svg": "catalog:expo",
+    "remark-gfm": "catalog:",
+    "remark-parse": "catalog:",
     "shiki": "catalog:",
-    "tailwind-merge": "catalog:"
+    "tailwind-merge": "catalog:",
+    "unified": "catalog:"
   },
   "devDependencies": {
     "@zeroxsolutions/shadcn-upstream": "workspace:*",
@@ -89,6 +92,7 @@
     "jest-util": "~30.3.0",
     "nativewind": "4.2.7",
     "react": "catalog:",
+    "react-markdown": "catalog:",
     "react-native": "catalog:expo",
     "react-native-css-interop": "catalog:",
     "react-native-reanimated": "catalog:expo",

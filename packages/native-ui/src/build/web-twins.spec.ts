@@ -15,7 +15,6 @@ const NOT_PORTED: ReadonlyMap<string, string> = new Map([
 const PENDING: ReadonlySet<string> = new Set([
   // wave 3
   'file-tree',
-  'markdown-view',
   // wave 4
   'emoji-picker',
   'avatar-picker',

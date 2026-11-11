@@ -26,12 +26,12 @@ module.exports = {
     // its engine's sources.
     '^@styles/([^/]+)/(.*)$': '<rootDir>/dist/src/nativewind-$1/$2',
   },
-  // jest-expo's preset list plus lucide-react-native, @rn-primitives, d3's modules, and shiki with the modules it
-  // imports. Under pnpm a package sits in a nested node_modules the preset leaves untransformed unless it names the
-  // package; lucide-react-native's react-native build, d3's modules and shiki's are ES modules, and
-  // @rn-primitives' dist holds raw JSX.
+  // jest-expo's preset list plus lucide-react-native, @rn-primitives, d3's modules, shiki, and unified's remark
+  // parser and react-markdown, each with the modules it imports. Under pnpm a package sits in a nested node_modules
+  // the preset leaves untransformed unless it names the package; lucide-react-native's react-native build, d3's
+  // modules, shiki's and the remark family's are ES modules, and @rn-primitives' dist holds raw JSX.
   transformIgnorePatterns: [
-    '/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|d3-[a-z-]+|internmap|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|lucide-react-native|@rn-primitives|shiki|@shikijs|oniguruma-[a-z-]+|regex(?:-[a-z]+)?|hast-util-[a-z-]+|mdast-util-[a-z-]+|micromark-util-[a-z-]+|unist-util-[a-z-]+|vfile(?:-message)?|@ungap|ccount|character-entities-[a-z0-9]+|(?:comma|space)-separated-tokens|stringify-entities|property-information|html-void-elements|devlop|dequal|trim-lines|zwitch))',
+    '/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|d3-[a-z-]+|internmap|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|lucide-react-native|@rn-primitives|shiki|@shikijs|oniguruma-[a-z-]+|regex(?:-[a-z]+)?|hast-util-[a-z-]+|mdast-util-[a-z-]+|micromark(?:-[a-z-]+)?|unist-util-[a-z-]+|vfile(?:-message)?|@ungap|ccount|character-entities(?:-[a-z0-9]+)?|(?:comma|space)-separated-tokens|stringify-entities|property-information|html-void-elements|devlop|dequal|trim-lines|zwitch|unified|remark-[a-z]+|react-markdown|bail|trough|is-plain-obj|is-(?:alphabetical|alphanumerical|decimal|hexadecimal)|character-reference-invalid|decode-named-character-reference|parse-entities|escape-string-regexp|longest-streak|markdown-table|estree-util-[a-z-]+|html-url-attributes))',
     '/node_modules/react-native-reanimated/plugin/',
     '/node_modules/@react-native/babel-preset/',
   ],

@@ -60,6 +60,7 @@ test("the native docs' sidebar lists their pages and the components under the de
     ['Model list', '/model-list'],
     ['Resize handle', '/resize-handle'],
     ['Code card', '/code-card'],
+    ['Markdown view', '/markdown-view'],
   ]) {
     await expect(sidebar.getByRole('link', { name, exact: true })).toHaveAttribute(
       'href',

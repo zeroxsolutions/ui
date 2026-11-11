@@ -63,6 +63,7 @@ import { KbdDemo } from './kbd-demo';
 import { LabelDemo } from './label-demo';
 import { LanguageComboboxDemo } from './language-combobox-demo';
 import { LanguageToggleGroupDemo } from './language-toggle-group-demo';
+import { MarkdownViewDemo } from './markdown-view-demo';
 import { MarkerDemo } from './marker-demo';
 import { MenubarDemo } from './menubar-demo';
 import { MessageDemo } from './message-demo';
@@ -174,6 +175,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'label-demo': LabelDemo,
   'language-combobox-demo': LanguageComboboxDemo,
   'language-toggle-group-demo': LanguageToggleGroupDemo,
+  'markdown-view-demo': MarkdownViewDemo,
   'marker-demo': MarkerDemo,
   'menubar-demo': MenubarDemo,
   'message-demo': MessageDemo,
