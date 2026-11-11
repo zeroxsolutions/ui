@@ -136,7 +136,7 @@
     "version": {
       "fallbackCurrentVersionResolver": "disk",
       "conventionalCommits": true,
-      "preVersionCommand": "git clean -xdfq packages/*/dist && pnpm nx run-many -t build --skip-nx-cache",
+      "preVersionCommand": "git clean -xdfq packages/*/dist && pnpm nx run-many -t build --exclude=tag:build:remote --skip-nx-cache",
       "git": {
         "commit": true,
         "tag": true
