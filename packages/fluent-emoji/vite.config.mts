@@ -44,9 +44,10 @@ export default defineConfig(() => ({
       transformMixedEsModules: true,
     },
     lib: {
-      entry: 'src/index.ts',
+      // `catalog` is the data alone, for an app that cannot load the root (see src/catalog.ts).
+      entry: { index: 'src/index.ts', catalog: 'src/catalog.ts' },
       name: 'fluent-emoji',
-      fileName: 'index',
+      fileName: (_format: string, entryName: string) => `${entryName}.js`,
       formats: ['es' as const],
     },
     rolldownOptions: {
