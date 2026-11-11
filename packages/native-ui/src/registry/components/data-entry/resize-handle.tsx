@@ -160,7 +160,9 @@ function ResizeHandle({
         onBlur?.(event);
       }}
       className={cn(
-        'relative w-px shrink-0 items-center justify-center bg-border',
+        // Without select-none a drag selects text, and WebKit drags that selection on the next press, so the
+        // handle gets no more moves.
+        'relative w-px shrink-0 items-center justify-center bg-border select-none',
         focusVisible && 'ring-1 ring-ring',
         className,
       )}
