@@ -20,11 +20,7 @@
 version: 2
 updates:
   - package-ecosystem: github-actions
-    # The composite action under `.github/actions/` pins its own action refs, which the root
-    # directory alone does not reach.
-    directories:
-      - /
-      - /.github/actions/nx-setup
+    directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 3
@@ -34,6 +30,10 @@ updates:
       actions:
         patterns:
           - '*'
+    # The shared workflows and actions are called at the moving `v1` tag, which their own
+    # repository moves for every backward-compatible change; a bot pinning them would stop that.
+    ignore:
+      - dependency-name: zeroxsolutions/*
 
   - package-ecosystem: npm
     directory: /
@@ -133,6 +133,10 @@ updates:
       - dependency-name: vitest # nx: ^5.0.0
         update-types: [version-update:semver-major]
       # nx-managed:end
+      # The types follow the Node major `.tool-versions` runs; a later major describes APIs the
+      # runtime lacks. Moved by hand with the runtime.
+      - dependency-name: '@types/node'
+        versions: ['>=25']
 
   # No terraform ecosystem here, deliberately. A product root declares no
   # `required_providers` of its own - every constraint lives in a module - and the

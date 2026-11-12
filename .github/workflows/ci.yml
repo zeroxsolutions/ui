@@ -1,6 +1,6 @@
 # The pull-request gate. Five jobs:
 #
-#   gate  - the `nx-gate` workflow beside this one: the pre-push hook's targets plus
+#   gate  - the shared `nx-gate` workflow: the pre-push hook's targets plus
 #           `test`, over the projects the change reaches, on a clean checkout.
 #   build - `build` over the same projects, less those tagged `build:remote`, whose
 #           build runs on a vendor's servers with a login the gate does not hold.
@@ -12,6 +12,10 @@
 #
 # Nothing checks `iac/`: it is outside the nx graph, so no job reaches it,
 # and the pre-commit hook formats with oxfmt, which does not read `.tf`.
+#
+# Every job runs on a GitHub-hosted runner, never the organization's self-hosted ones: this
+# repository is public, so a pull request from a fork runs its own code on the runner, and a
+# self-hosted one keeps its disk and grants the runner user passwordless sudo.
 #
 # No project and no path is named, and the branch list carries both default-branch
 # spellings, so the file copies to another repository unchanged.
@@ -37,16 +41,18 @@ concurrency:
 
 jobs:
   gate:
-    uses: ./.github/workflows/nx-gate.yml
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
+      runs-on: ubuntu-latest
       targets: lint typecheck test
 
   # In a job of its own because `--exclude` covers every target of the run, and the tagged
   # projects' lint, typecheck and test still run in `gate`.
   build:
     needs: [gate]
-    uses: ./.github/workflows/nx-gate.yml
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
+      runs-on: ubuntu-latest
       targets: build
       exclude: tag:build:remote
 
@@ -58,16 +64,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/nx-setup
+      - uses: zeroxsolutions/github-actions/nx-setup@v1
       - run: pnpm nx format:check --all
 
   # Separate from `gate` so its cost is visible and its failure is legible on its
   # own. `affected` runs it only for changes that can reach it, from the base
   # `nx-gate` resolves out of the event payload.
   e2e:
-    uses: ./.github/workflows/nx-gate.yml
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
+      runs-on: ubuntu-latest
       targets: e2e
       # Each zone has its own e2e project, each in three browsers; a change reaching both ran
       # 14 minutes for the native zone alone and passed 30 (2026-11-03).
@@ -77,6 +83,5 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/nx-setup
+      - uses: zeroxsolutions/github-actions/nx-setup@v1
       - uses: zeroxsolutions/github-actions/nx-dependabot@v1
