@@ -18,6 +18,12 @@ describe('appPath', () => {
     );
   });
 
+  it('puts a block straight under components, where shadcn writes a registry:block file', () => {
+    expect(appPath({ path: 'registry/blocks/ai-provider-picker.tsx', type: 'registry:block' })).toBe(
+      'components/ai-provider-picker.tsx',
+    );
+  });
+
   it('puts a lib file under lib, where the lib alias points', () => {
     expect(appPath({ path: 'registry/lib/utils.ts', type: 'registry:lib' })).toBe('lib/utils.ts');
   });
@@ -32,7 +38,7 @@ describe('appPath', () => {
     expect(appPath({ path: 'registry/hooks/use-x.ts', type: 'registry:hook' })).toBe('hooks/use-x.ts');
   });
 
-  it('throws on a path outside ui, components, lib and hooks with no target', () => {
+  it('throws on a path outside ui, components, blocks, lib and hooks with no target', () => {
     expect(() => appPath({ path: 'registry/theme/x.ts', type: 'registry:file' })).toThrow(
       'No app path for registry/theme/x.ts',
     );

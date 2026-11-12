@@ -7,9 +7,7 @@ const PROJECT = join(__dirname, '../..');
 const WEB = dirname(require.resolve('@zeroxsolutions/ui/registry.json'));
 
 /** The web items with no native twin, each with what keeps it off a phone. */
-const NOT_PORTED: ReadonlyMap<string, string> = new Map([
-  ['ai-provider-picker', 'a block; the native registries publish no block and the native docs have no blocks page'],
-]);
+const NOT_PORTED: ReadonlyMap<string, string> = new Map([]);
 
 /** The web items a later wave of the port brings, which the list loses as each wave lands. */
 const PENDING: ReadonlySet<string> = new Set([]);

@@ -1,0 +1,98 @@
+---
+title: AI provider picker
+description: A responsive grid of AI provider cards, from the host's entries or a sample, that calls back with the provider key a card selects.
+---
+
+<NativePreview name="ai-provider-picker-demo" />
+
+## Installation
+
+<InstallCommand name="ai-provider-picker" />
+
+The CLI writes `components/ai-provider-picker.tsx`, installs
+[AI provider card](/native/components/nativewind/ai-provider-card), [Card](/native/components/nativewind/card), Utils
+and the brand mark lib, and adds `@zeroxsolutions/icons`, whose `brand-mark-url` and `ai-provider-mappings` entries
+name each provider's mark and where the CDN serves it, and `expo-image`, which draws it.
+
+## Usage
+
+```tsx
+import { AiProviderPicker } from '@/components/ai-provider-picker';
+```
+
+With no `entries`, the block shows its sample providers. Every card is a button that calls `onSelect` with its
+entry's `provider` key:
+
+```tsx
+<AiProviderPicker onSelect={(provider) => setProvider(provider)} />
+```
+
+The brand mark lib, `@/lib/brand-mark`, also draws a mark on its own: `BrandMark` by a brand's name and
+`AiProviderIcon` by a provider's key.
+
+```tsx
+<AiProviderIcon provider="openai" type="avatar" size={32} />
+```
+
+## API reference
+
+### AiProviderPicker
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop       | Type                               | Default                             |
+| ---------- | ---------------------------------- | ----------------------------------- |
+| `entries`  | `readonly AiProviderPickerEntry[]` | `AI_PROVIDER_PICKER_SAMPLE_ENTRIES` |
+| `onSelect` | `(provider: string) => void`       | -                                   |
+
+The cards sit in one column, two from the `sm` width and three from `lg`, each as tall as the tallest in its row.
+
+### AiProviderPickerEntry
+
+One card's data.
+
+| Field         | Type               | Holds                                                          |
+| ------------- | ------------------ | -------------------------------------------------------------- |
+| `provider`    | `string`           | the key `AiProviderIcon` resolves, such as `openai`            |
+| `name`        | `string`           | the card's title                                               |
+| `description` | `string`           | the text under the title, clamped to two lines                 |
+| `meta`        | `string`, optional | the muted footer note, such as `12 models`; omitted, no footer |
+
+### AI_PROVIDER_PICKER_SAMPLE_ENTRIES
+
+The sample entries the block shows with no `entries`: providers the `@zeroxsolutions/icons` brand set has a mark
+for, with names, blurbs and model counts only.
+
+### BrandMark
+
+| Prop      | Type                                         | Default    |
+| --------- | -------------------------------------------- | ---------- |
+| `name`    | `BrandMarkName`                              | -          |
+| `variant` | `'color' \| 'mono' \| 'avatar' \| 'combine'` | `'color'`  |
+| `size`    | `number`, the height in pixels               | `16`       |
+| `label`   | `string`                                     | -          |
+| `base`    | `string`                                     | the CDN    |
+| `shape`   | `'circle' \| 'square'`, for `avatar`         | `'circle'` |
+
+A variant the mark has no file for, or one whose file fails to load, falls to the next along `combine`/`avatar` to
+`color` to `mono`, and past `mono` to the name's first letter on a tinted circle. With a `label` the mark is an
+image named by it; without one a screen reader skips it.
+
+### AiProviderIcon
+
+Takes `provider`, the key, matched without regard to case, and `type`, `size` (default `24`), `shape` and `label`,
+which it hands to `BrandMark`. A key that resolves to no mark draws a sparkle.
+
+## Differences from the web
+
+- The web paints `mono` and `combine` in the text colour through a CSS mask, which React Native lacks; expo-image
+  tints them the foreground colour instead.
+- The web's ambient style provider and `setBrandMarkBase` are not ported: the block names its variant, and a mark
+  takes its own `base`.
+- `AiProviderIcon` takes no `extra` mappings, and neither part takes a `className` or a `style`.
+- `size` is a number of pixels; the web's also takes a CSS length, and `BrandMark`'s defaults to `1em`.
+- A key the CDN serves no mark for draws the letter, as on the web, without a request where the manifest lists no
+  file.
+- A row of views stands in for the web's grid, so a `className` adds to the row's classes rather than replacing
+  a column step.
+- The web's `data-slot` attributes are not set; a View takes no data attributes.

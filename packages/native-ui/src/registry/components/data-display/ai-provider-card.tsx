@@ -44,10 +44,13 @@ function AiProviderCard({ size = 'sm', className, children, ...props }: Componen
   // the card as the web's does. The trigger lies under the card's content instead, and this press area
   // around the card takes a press that lands on the content, which a control inside the content keeps for
   // itself. It is not an accessibility element, so the trigger and the controls stay ones of their own.
+  // It grows into a box taller than the card, such as a grid cell stretched to its row, so a card given
+  // `grow` can fill the cell.
   return (
     <AiProviderCardPressedContext.Provider value={pressed}>
       <Pressable
         accessible={false}
+        className="grow"
         disabled={trigger.props.disabled === true}
         onPress={trigger.props.onPress}
         onPressIn={() => setPressed(true)}

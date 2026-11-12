@@ -23,13 +23,11 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@zeroxsolutions/native-ui": "workspace:*",
     "@zeroxsolutions/routing": "catalog:",
     "@zeroxsolutions/ui": "workspace:*",
     "fumadocs-core": "catalog:",
     "qrcode.react": "^4.2.0"
-  },
-  "devDependencies": {
-    "@zeroxsolutions/native-ui": "workspace:*"
   },
   "peerDependencies": {
     "next-themes": "catalog:",

@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { NativeBlocksPage } from '@zeroxsolutions/native-ui-docs-web/pages/native-blocks-page';
-import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { NATIVE_ENGINES } from '@zeroxsolutions/ui/site/constants/native-engines';
 
-import { webBlocksRoute } from '@/routes/web-paths';
+import { nativeComponentsSources } from '@/lib/native-source';
 
 export const dynamic = 'force-static';
 
@@ -18,9 +18,18 @@ export function generateStaticParams(): { engine: string }[] {
 
 export const metadata: Metadata = {
   title: 'Native blocks',
-  description: 'The blocks the registry publishes for React Native: none yet.',
+  description: 'The blocks the registry publishes for React Native, each drawn live.',
 };
 
-export default function Page(): ReactNode {
-  return <NativeBlocksPage webBlocksHref={webBlocksRoute.build({ base: DEFAULT_COMPONENT_BASE })} />;
+interface NativeBlocksRouteProps {
+  params: Promise<{ engine: string }>;
+}
+
+export default async function Page({ params }: NativeBlocksRouteProps): Promise<ReactNode> {
+  const { engine: segment } = await params;
+  const engine = NATIVE_ENGINES.find((known) => known === segment);
+  if (!engine) notFound();
+  return (
+    <NativeBlocksPage engine={engine} componentPage={(name) => nativeComponentsSources[engine].getPage([name])?.url} />
+  );
 }

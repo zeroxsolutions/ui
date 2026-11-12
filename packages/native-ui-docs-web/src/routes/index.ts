@@ -26,7 +26,7 @@ export const nativeComponentRoute = createDynamicRoute<{ engine: NativeEngine; n
   ({ engine, name }) => `/native/components/${engine}/${name}`,
 );
 
-/** The native blocks on one engine; an empty state until the registry publishes a native block. */
+/** The native blocks on one engine, each drawn by the engine's preview app. */
 export const nativeBlocksRoute = createDynamicRoute<{ engine: NativeEngine }>(
   '/native/blocks/:engine',
   ({ engine }) => `/native/blocks/${engine}`,
