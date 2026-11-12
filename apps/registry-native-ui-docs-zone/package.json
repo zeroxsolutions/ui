@@ -88,7 +88,8 @@
       "wrangler:deploy": {
         "executor": "nx:run-commands",
         "dependsOn": [
-          "wrangler:build"
+          "wrangler:build",
+          "check-zone-routes"
         ],
         "options": {
           "cwd": "{projectRoot}"
@@ -97,6 +98,17 @@
           "production": {
             "command": "opennextjs-cloudflare deploy --env production"
           }
+        }
+      },
+      "check-zone-routes": {
+        "executor": "nx:run-commands",
+        "cache": true,
+        "inputs": [
+          "{workspaceRoot}/apps/*-zone/wrangler.jsonc",
+          "{workspaceRoot}/tools/check-zone-routes.sh"
+        ],
+        "options": {
+          "command": "tools/check-zone-routes.sh"
         }
       },
       "wrangler:typegen": {
