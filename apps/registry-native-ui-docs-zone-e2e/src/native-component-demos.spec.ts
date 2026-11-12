@@ -305,3 +305,15 @@ test('an avatar takes an image picked from the file dialog, and a colour typed a
   await demo.getByRole('textbox', { name: 'Custom', exact: true }).fill('#0EA5E9');
   await expect(demo.getByRole('button', { name: '#0ea5e9', exact: true })).toHaveAttribute('aria-selected', 'true');
 });
+
+test("the AI provider picker draws each provider's mark from the brand-mark CDN", async ({ page }) => {
+  await page.goto(`${COMPONENTS}/ai-provider-picker`);
+  const demo = inside(page, 'Ai provider picker demo');
+
+  await expect(demo.getByRole('button', { name: 'Select OpenAI', exact: true })).toBeVisible(DRAWN);
+  // The marks carry no name of their own beside the card's title, so the file each one loaded is what shows it.
+  const mark = demo.locator('img[src="https://icons.zeroxsolutions.com/brands/avatar/openai.svg"]');
+  await expect(mark).toBeVisible();
+  // A width of 0 is a file the browser has not drawn, or could not.
+  await expect(mark).not.toHaveJSProperty('naturalWidth', 0);
+});

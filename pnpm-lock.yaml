@@ -491,6 +491,9 @@ importers:
       '@zeroxsolutions/fluent-emoji':
         specifier: workspace:*
         version: link:../../packages/fluent-emoji
+      '@zeroxsolutions/icons':
+        specifier: workspace:*
+        version: link:../../packages/icons
       '@zeroxsolutions/native-ui':
         specifier: workspace:*
         version: link:../../packages/native-ui
@@ -699,6 +702,9 @@ importers:
       '@zeroxsolutions/fluent-emoji':
         specifier: workspace:*
         version: link:../../packages/fluent-emoji
+      '@zeroxsolutions/icons':
+        specifier: workspace:*
+        version: link:../../packages/icons
       '@zeroxsolutions/native-ui':
         specifier: workspace:*
         version: link:../../packages/native-ui
@@ -1091,6 +1097,9 @@ importers:
       '@zeroxsolutions/fluent-emoji':
         specifier: workspace:*
         version: link:../fluent-emoji
+      '@zeroxsolutions/icons':
+        specifier: workspace:*
+        version: link:../icons
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1248,6 +1257,9 @@ importers:
 
   packages/native-ui-docs-web:
     dependencies:
+      '@zeroxsolutions/native-ui':
+        specifier: workspace:*
+        version: link:../native-ui
       '@zeroxsolutions/routing':
         specifier: 'catalog:'
         version: 0.0.7
@@ -1266,10 +1278,6 @@ importers:
       react:
         specifier: 'catalog:'
         version: 19.3.1
-    devDependencies:
-      '@zeroxsolutions/native-ui':
-        specifier: workspace:*
-        version: link:../native-ui
 
   packages/shadcn-upstream: {}
 

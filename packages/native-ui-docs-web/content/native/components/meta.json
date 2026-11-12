@@ -122,6 +122,8 @@
     "navigation-menu",
     "sidebar",
     "breadcrumb",
-    "pagination"
+    "pagination",
+    "---Blocks---",
+    "ai-provider-picker"
   ]
 }

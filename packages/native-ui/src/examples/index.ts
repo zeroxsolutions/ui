@@ -7,6 +7,7 @@ import type { ComponentType } from 'react';
 
 import { AccordionDemo } from './accordion-demo';
 import { AiProviderCardDemo } from './ai-provider-card-demo';
+import { AiProviderPickerDemo } from './ai-provider-picker-demo';
 import { AlertDemo } from './alert-demo';
 import { AlertDialogDemo } from './alert-dialog-demo';
 import { AspectRatioDemo } from './aspect-ratio-demo';
@@ -122,6 +123,7 @@ import { UnsavedIndicatorDemo } from './unsaved-indicator-demo';
 const demos: Readonly<Record<string, ComponentType>> = {
   'accordion-demo': AccordionDemo,
   'ai-provider-card-demo': AiProviderCardDemo,
+  'ai-provider-picker-demo': AiProviderPickerDemo,
   'alert-demo': AlertDemo,
   'alert-dialog-demo': AlertDialogDemo,
   'aspect-ratio-demo': AspectRatioDemo,

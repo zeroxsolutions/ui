@@ -10,10 +10,14 @@ export interface RegistryFile {
   target?: string;
 }
 
-/** The folder under `@/` each folder of `src/registry` lands in, per the docs' `components.json`. */
+/**
+ * The folder under `@/` each folder of `src/registry` lands in, per the docs' `components.json`. shadcn writes a
+ * `registry:block` file into the components folder under the file's own name, so a block lands there too.
+ */
 const APP_FOLDERS: ReadonlyMap<string, string> = new Map([
   ['ui', 'components/ui'],
   ['components', 'components'],
+  ['blocks', 'components'],
   ['lib', 'lib'],
   ['hooks', 'hooks'],
 ]);
@@ -21,7 +25,7 @@ const APP_FOLDERS: ReadonlyMap<string, string> = new Map([
 /**
  * The path of `file` from an app's root, such as `components/ui/button.tsx` for
  * `registry/ui/button.tsx`. A `~/` target is taken as written.
- * @throws {Error} `No app path for <path>` for a file outside `ui`, `components`, `lib` and `hooks` with no
+ * @throws {Error} `No app path for <path>` for a file outside `ui`, `components`, `blocks`, `lib` and `hooks` with no
  * `~/` target
  */
 export function appPath(file: RegistryFile): string {

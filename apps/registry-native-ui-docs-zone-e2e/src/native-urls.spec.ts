@@ -37,11 +37,13 @@ test("the theme page under an engine shows only that engine's setup", async ({ p
   await expect(page.getByText('tailwind.config.js', { exact: false })).toHaveCount(0);
 });
 
-test('the native blocks page says there are none yet', async ({ page }) => {
-  await page.goto('/native/blocks/nativewind');
+test("the native blocks page links each block's page under its engine", async ({ page }) => {
+  await page.goto('/native/blocks/uniwind');
 
   await expect(page.getByRole('heading', { level: 1, name: 'Blocks' })).toBeVisible();
-  await expect(page.getByText('No native blocks yet')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 2 }).getByRole('link', { name: 'AI provider picker', exact: true }),
+  ).toHaveAttribute('href', '/native/components/uniwind/ai-provider-picker');
 });
 
 test('a component page under either engine names the NativeWind page canonical and shares one image', async ({

@@ -36,10 +36,13 @@
   "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
   "references": [
     {
-      "path": "../ui/tsconfig.lib.json"
+      "path": "../icons/tsconfig.lib.json"
     },
     {
       "path": "../fluent-emoji/tsconfig.lib.json"
+    },
+    {
+      "path": "../ui/tsconfig.lib.json"
     },
     {
       "path": "../shadcn-upstream/tsconfig.lib.json"

@@ -1744,6 +1744,20 @@
       ]
     },
     {
+      "name": "brand-mark",
+      "type": "registry:lib",
+      "title": "Brand mark",
+      "description": "BrandMark, a brand's mark from the @zeroxsolutions/icons CDN drawn through expo-image, falling along its variants to the name's first letter when a file is missing or fails to load and tinting the one-colour variants the foreground colour, and AiProviderIcon, the mark an AI provider's key resolves to, or a sparkle for a key that resolves to none.",
+      "dependencies": ["@zeroxsolutions/icons", "expo-image", "lucide-react-native"],
+      "registryDependencies": ["@zui/chart-theme", "@zui/text"],
+      "files": [
+        {
+          "path": "src/registry/lib/brand-mark.tsx",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "language-toggle-group",
       "type": "registry:component",
       "title": "Language toggle group",
@@ -2118,6 +2132,21 @@
         {
           "path": "src/registry/components/data-entry/avatar-picker.tsx",
           "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "ai-provider-picker",
+      "type": "registry:block",
+      "title": "AI provider picker",
+      "description": "A responsive grid of AI provider cards, from the host's entries or a sample, that calls back with the provider key a card selects.",
+      "categories": ["blocks"],
+      "dependencies": ["@zeroxsolutions/icons", "expo-image"],
+      "registryDependencies": ["@zui/ai-provider-card", "@zui/brand-mark", "@zui/card", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/blocks/ai-provider-picker.tsx",
+          "type": "registry:block"
         }
       ]
     }

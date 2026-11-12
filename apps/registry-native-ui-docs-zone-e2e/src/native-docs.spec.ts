@@ -64,6 +64,7 @@ test("the native docs' sidebar lists their pages and the components under the de
     ['File tree', '/file-tree'],
     ['Emoji picker', '/emoji-picker'],
     ['Avatar picker', '/avatar-picker'],
+    ['AI provider picker', '/ai-provider-picker'],
   ]) {
     await expect(sidebar.getByRole('link', { name, exact: true })).toHaveAttribute(
       'href',
