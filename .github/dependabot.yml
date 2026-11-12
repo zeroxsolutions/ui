@@ -110,7 +110,7 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: jsdom # nx: ^27.1.0
         update-types: [version-update:semver-major]
-      - dependency-name: next # nx: ~15.5.18
+      - dependency-name: next # nx: ~16.4.1
         update-types: [version-update:semver-major, version-update:semver-minor]
       - dependency-name: react # nx: ^19.0.0
         update-types: [version-update:semver-major]
