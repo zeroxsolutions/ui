@@ -183,5 +183,8 @@
         "linter": "oxlint"
       }
     }
+  },
+  "affected": {
+    "legacy": true
   }
 }
