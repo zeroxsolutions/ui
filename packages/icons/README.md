@@ -112,6 +112,22 @@ content-hashed. Artwork re-sourced under the same key therefore serves stale for
 header allows: upload it under a `v2/` prefix and move the default base to it. Old URLs keep
 working and nothing is purged.
 
+### Drawing the marks yourself
+
+`@zeroxsolutions/icons/brand-mark-url` exports the manifest and the URL builder alone, without the DOM
+components, for a renderer that draws the files itself: React Native has no `<img>` or CSS mask, and
+zui's native registries draw the marks with `expo-image`.
+
+```ts
+import { brandMarkChain, brandMarkUrlFor } from '@zeroxsolutions/icons/brand-mark-url';
+
+brandMarkChain('anthropic', 'avatar'); // ['avatar', 'mono']: the variants it has, in fallback order
+brandMarkUrlFor('anthropic', 'avatar'); // 'https://icons.zeroxsolutions.com/brands/avatar/anthropic.svg'
+```
+
+It also exports `BRAND_MARKS`, `brandMarkRatio` and `DEFAULT_BRAND_MARK_BASE`. A provider key resolves to a
+mark through `resolveAiProviderMark` in `@zeroxsolutions/icons/ai-provider-mappings`.
+
 ### Adding a brand
 
 Add its files under `assets/brands/<variant>/<name>.svg` (`color`, `mono`, `avatar`, `combine`;
