@@ -26,7 +26,7 @@ jobs:
   # Re-run the gate on the pushed commit. The pull-request gate ran on the merge
   # preview, which is not the commit that ships.
   gate:
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@791a357570313f887acd989d4da9eca4bed9d543
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
       runs-on: ubuntu-latest
       targets: lint typecheck test
@@ -35,7 +35,7 @@ jobs:
   # runs on a vendor's servers; their lint, typecheck and test ran in `gate`.
   build:
     needs: [gate]
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@791a357570313f887acd989d4da9eca4bed9d543
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
       runs-on: ubuntu-latest
       targets: build
@@ -49,7 +49,7 @@ jobs:
   # `wrangler:deploy` first refuses a path two zones both claim.
   deploy:
     needs: [gate, build]
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-deploy.yml@791a357570313f887acd989d4da9eca4bed9d543
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-deploy.yml@v1
     secrets: inherit
     with:
       runs-on: ubuntu-latest
@@ -104,7 +104,7 @@ jobs:
   # `deploy` ships every zone, so a skip never counts an update Expo later refused as published.
   eas-update:
     needs: [deploy]
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-deploy.yml@791a357570313f887acd989d4da9eca4bed9d543
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-deploy.yml@v1
     secrets: inherit
     with:
       runs-on: ubuntu-latest

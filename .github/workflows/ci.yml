@@ -41,7 +41,7 @@ concurrency:
 
 jobs:
   gate:
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@791a357570313f887acd989d4da9eca4bed9d543
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
       runs-on: ubuntu-latest
       targets: lint typecheck test
@@ -50,7 +50,7 @@ jobs:
   # projects' lint, typecheck and test still run in `gate`.
   build:
     needs: [gate]
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@791a357570313f887acd989d4da9eca4bed9d543
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
       runs-on: ubuntu-latest
       targets: build
@@ -71,7 +71,7 @@ jobs:
   # own. `affected` runs it only for changes that can reach it, from the base
   # `nx-gate` resolves out of the event payload.
   e2e:
-    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@791a357570313f887acd989d4da9eca4bed9d543
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@v1
     with:
       runs-on: ubuntu-latest
       targets: e2e
