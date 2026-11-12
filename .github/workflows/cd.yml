@@ -26,34 +26,35 @@ jobs:
   # Re-run the gate on the pushed commit. The pull-request gate ran on the merge
   # preview, which is not the commit that ships.
   gate:
-    uses: ./.github/workflows/nx-gate.yml
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@791a357570313f887acd989d4da9eca4bed9d543
     with:
+      runs-on: ubuntu-latest
       targets: lint typecheck test
 
   # `--exclude` covers every target of the run, so `build` runs alone, less the projects whose build
   # runs on a vendor's servers; their lint, typecheck and test ran in `gate`.
   build:
     needs: [gate]
-    uses: ./.github/workflows/nx-gate.yml
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-gate.yml@791a357570313f887acd989d4da9eca4bed9d543
     with:
+      runs-on: ubuntu-latest
       targets: build
       exclude: tag:build:remote
 
   # `secrets: inherit` is what lets the credentials through - a called workflow gets
   # an empty `secrets` context otherwise; the environment scopes which value wins.
+  #
+  # Every project defining the target deploys on every push, whatever the push changed: the
+  # deploys ship as one unit, so a partial one is repaired by re-running, and each zone's
+  # `wrangler:deploy` first refuses a path two zones both claim.
   deploy:
     needs: [gate, build]
-    uses: ./.github/workflows/nx-deploy.yml
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-deploy.yml@791a357570313f887acd989d4da9eca4bed9d543
     secrets: inherit
-    # nx-deploy reads the last successful cd run for its base, and a called workflow
-    # gets no permission its caller did not grant.
-    permissions:
-      contents: read
-      actions: read
     with:
+      runs-on: ubuntu-latest
       targets: wrangler:deploy
       environment: ${{ github.ref_name }}
-      mode: affected
 
   # Publish whatever the workspace declares an `rclone:sync` target for. Identifier-free like
   # the rest of this file: `run-many` matches no project in a repo that declares none and
@@ -74,9 +75,7 @@ jobs:
     environment:
       name: production
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: ./.github/actions/nx-setup
+      - uses: zeroxsolutions/github-actions/nx-setup@v1
 
       # `RCLONE_S3_*` is rclone's own naming - `--s3-<flag>` uppercased - so no step in this
       # pipeline renames a value on its way to the tool.
@@ -101,18 +100,13 @@ jobs:
   # is what the docs' "Open on your phone" QR opens in Expo Go. Each project declaring `eas:update` publishes to its own Expo project,
   # so EXPO_TOKEN has to be allowed to publish to every one of them. A job of its own after
   # the site deploy: what fails it is Expo's login or quota, so the deployed site stays as it is and
-  # re-running this job retries the updates alone. Affected like `deploy`, so a change that reaches
-  # no native preview publishes no update.
+  # re-running this job retries the updates alone. Every preview publishes on every deploy, as
+  # `deploy` ships every zone, so a skip never counts an update Expo later refused as published.
   eas-update:
     needs: [deploy]
-    uses: ./.github/workflows/nx-deploy.yml
+    uses: zeroxsolutions/github-actions/.github/workflows/nx-deploy.yml@791a357570313f887acd989d4da9eca4bed9d543
     secrets: inherit
-    # nx-deploy reads the last successful cd run for its base, and a called workflow
-    # gets no permission its caller did not grant.
-    permissions:
-      contents: read
-      actions: read
     with:
+      runs-on: ubuntu-latest
       targets: eas:update
       environment: ${{ github.ref_name }}
-      mode: affected
