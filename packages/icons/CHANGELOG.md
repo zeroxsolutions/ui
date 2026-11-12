@@ -1,3 +1,39 @@
+## 0.2.0 (2026-11-12)
+
+### 🚀 Features
+
+- **icons:** export the brand-mark manifest alone at /brand-mark-url ([6128dace](https://github.com/zeroxsolutions/ui/commit/6128dace))
+- **icons:** draw a brand mark by name with one BrandMark component ([7816088f](https://github.com/zeroxsolutions/ui/commit/7816088f))
+- **icons:** generate a brand manifest and resolve a mark to its url ([0b968419](https://github.com/zeroxsolutions/ui/commit/0b968419))
+- **icons:** render every brand mark to an svg file per variant ([7d71fd32](https://github.com/zeroxsolutions/ui/commit/7d71fd32))
+
+### 🩹 Fixes
+
+- **icons:** resolve the subpaths under the default condition too ([a17e4fc6](https://github.com/zeroxsolutions/ui/commit/a17e4fc6))
+- **icons,editor-core:** keep dist when building, for typecheck ([f2d8179c](https://github.com/zeroxsolutions/ui/commit/f2d8179c))
+- **deps:** keep icons and fluent-emoji react peers as ranges ([e0f41e6b](https://github.com/zeroxsolutions/ui/commit/e0f41e6b))
+- **icons:** fetch the mask probe in cors mode and keep server components working ([ec664a3f](https://github.com/zeroxsolutions/ui/commit/ec664a3f))
+- **icons:** restart a returning brand mark's fallback and pin the untested cases ([6f562f91](https://github.com/zeroxsolutions/ui/commit/6f562f91))
+
+### 💅 Refactors
+
+- ⚠️ **icons:** serve brand marks as files behind one BrandMark ([4b5bab53](https://github.com/zeroxsolutions/ui/commit/4b5bab53))
+- **icons:** draw AiProviderIcon through BrandMark ([06c237c6](https://github.com/zeroxsolutions/ui/commit/06c237c6))
+
+### ⚠️ Breaking Changes
+
+- **icons:** serve brand marks as files behind one BrandMark ([4b5bab53](https://github.com/zeroxsolutions/ui/commit/4b5bab53))
+  every @zeroxsolutions/icons/brands/<name> subpath and
+  its <Name>Mark component are removed; draw a brand with
+  <BrandMark name="<name>" /> from @zeroxsolutions/icons/brand-mark.
+  AiProviderMapping takes `mark: BrandMarkName` in place of `Icon`.
+  Refs: #24
+
+### ❤️ Thank You
+
+- Lương Văn Tú
+- luongvantuit
+
 ## 0.1.1 (2026-10-05)
 
 ### 🚀 Features
