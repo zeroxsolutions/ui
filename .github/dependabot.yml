@@ -137,6 +137,10 @@ updates:
       # runtime lacks. Moved by hand with the runtime.
       - dependency-name: '@types/node'
         versions: ['>=25']
+      # Playwright 1.65's Firefox fires cancel before change on an intercepted file chooser
+      # (microsoft/playwright#43994), which fails the avatar picker's upload case. Fixed in 1.66.
+      - dependency-name: '@playwright/test'
+        versions: ['1.65.x']
 
   # No terraform ecosystem here, deliberately. A product root declares no
   # `required_providers` of its own - every constraint lives in a module - and the
