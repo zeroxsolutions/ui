@@ -85,8 +85,9 @@ describe('ChatInput', () => {
     act(() => {
       editor.run('insertContent', { content: 'a portrait of ' });
     });
-    // The command is an inline node in the document, not surface state.
-    expect(control.querySelector('[data-slot="command"]')?.textContent).toBe('/image-gen');
+    // The command is an inline node in the document, not surface state. Tiptap mounts a React node
+    // view's portal a microtask after the transaction, so the pill is awaited.
+    await waitFor(() => expect(control.querySelector('[data-slot="command"]')?.textContent).toBe('/image-gen'));
 
     fireEvent.keyDown(control, { key: 'Enter' });
 

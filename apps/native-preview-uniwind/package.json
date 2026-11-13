@@ -63,7 +63,7 @@
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "unified": "catalog:",
-    "uniwind": "1.13.0"
+    "uniwind": "1.13.2"
   },
   "devDependencies": {
     "@testing-library/react-native": "catalog:",

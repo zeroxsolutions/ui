@@ -141,6 +141,8 @@ updates:
       # (microsoft/playwright#43994), which fails the avatar picker's upload case. Fixed in 1.66.
       - dependency-name: '@playwright/test'
         versions: ['1.65.x']
+      - dependency-name: playwright
+        versions: ['1.65.x']
 
   # No terraform ecosystem here, deliberately. A product root declares no
   # `required_providers` of its own - every constraint lives in a module - and the
