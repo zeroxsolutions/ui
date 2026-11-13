@@ -33,7 +33,7 @@ test('a copy button copies, and copies nothing while its caller prevents the def
   await page.goto(`${COMPONENTS}/copy-button`);
   const demo = inside(page, 'Copy button demo');
   const handedToClipboard = (): Promise<string[]> =>
-    demo.locator('body').evaluate<string[]>('window.handedToClipboard');
+    demo.locator('body').evaluate<string[], undefined>('window.handedToClipboard');
 
   await demo.getByRole('button', { name: 'Copy token', exact: true }).click(DRAWN);
   await expect(demo.getByText('Show the token to copy it', { exact: true })).toBeVisible();
