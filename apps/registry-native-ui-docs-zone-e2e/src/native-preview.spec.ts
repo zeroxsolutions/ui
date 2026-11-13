@@ -34,7 +34,7 @@ async function pickStyle(page: Page, style: string): Promise<void> {
 
 /** `color` as the browser in `frame` reports a computed colour, which differs by browser for a lab() colour. */
 async function asSerialised(frame: FrameLocator, color: string): Promise<string> {
-  return frame.locator('body').evaluate<string>(
+  return frame.locator('body').evaluate<string, undefined>(
     `(() => {
       const probe = document.createElement('div');
       probe.style.backgroundColor = ${JSON.stringify(color)};
@@ -82,7 +82,7 @@ test.describe('in a light colour scheme', () => {
           () =>
             inside(page, demo)
               .locator('body')
-              .evaluate<number | undefined>(
+              .evaluate<number | undefined, undefined>(
                 `(() => {
                   const scroller = [...document.querySelectorAll('#root *')].find((element) =>
                     ['auto', 'scroll'].includes(getComputedStyle(element).overflowY),
