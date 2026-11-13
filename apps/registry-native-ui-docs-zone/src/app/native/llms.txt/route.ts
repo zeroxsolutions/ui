@@ -8,10 +8,10 @@ function titled(index: string, title: string): string {
   return index.replace(/^# .*/, `# ${title}`);
 }
 
-export async function GET(): Promise<Response> {
-  const indexes = await Promise.all([
-    nativeDocsLlms.index().then((index) => titled(index, 'Native docs')),
-    nativeComponentsLlms.index().then((index) => titled(index, 'Native components')),
-  ]);
+export function GET(): Response {
+  const indexes = [
+    titled(nativeDocsLlms.index(), 'Native docs'),
+    titled(nativeComponentsLlms.index(), 'Native components'),
+  ];
   return new Response(indexes.join('\n\n'));
 }

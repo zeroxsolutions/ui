@@ -21,7 +21,7 @@ const TAILWIND_MERGE = {
 /** The engine version each install check app ran, and so the lowest the icon item may declare. */
 const INSTALL_CHECKED_ENGINE = {
   nativewind: 'nativewind@^4.2.7',
-  uniwind: 'uniwind@^1.13.0',
+  uniwind: 'uniwind@^1.13.2',
 } as const satisfies Record<Engine, string>;
 
 const slots = parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8'));

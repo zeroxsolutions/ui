@@ -49,3 +49,26 @@ if (typeof window !== 'undefined') {
       dispatchEvent: () => false,
     }) as MediaQueryList;
 }
+
+/**
+ * shiki's grammar engine inflates its inlined wasm through `Blob.prototype.stream`, which jsdom's Blob
+ * lacks, as it lacks `arrayBuffer`; without it every spec that renders highlighted code rejects in the
+ * background. The bytes are read with `FileReader`, which jsdom has.
+ */
+if (typeof Blob !== 'undefined' && typeof FileReader !== 'undefined') {
+  Blob.prototype.stream ??= function stream(this: Blob): ReadableStream<Uint8Array<ArrayBuffer>> {
+    return new ReadableStream({
+      start: (controller) =>
+        new Promise<void>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            controller.enqueue(new Uint8Array(reader.result as ArrayBuffer));
+            controller.close();
+            resolve();
+          };
+          reader.onerror = () => reject(reader.error);
+          reader.readAsArrayBuffer(this);
+        }),
+    });
+  };
+}
