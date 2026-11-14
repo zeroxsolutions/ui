@@ -62,10 +62,8 @@ updates:
       - dependency-name: '@nx/*'
       - dependency-name: '@babel/runtime' # nx: ~7.27.6
         update-types: [version-update:semver-major, version-update:semver-minor]
-      - dependency-name: '@expo/cli' # nx: ~56.1.14
-        update-types: [version-update:semver-major, version-update:semver-minor]
-      - dependency-name: '@expo/metro-runtime' # nx: ~56.0.14
-        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@expo/cli' # nx: ~56.1.14; declared past it
+      - dependency-name: '@expo/metro-runtime' # nx: ~56.0.14; declared past it
       - dependency-name: '@expo/vector-icons' # nx: ~15.1.0
         update-types: [version-update:semver-major, version-update:semver-minor]
       - dependency-name: '@swc-node/register' # nx: ^1.11.1
@@ -76,8 +74,7 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: '@swc/helpers' # nx: ^0.5.18
         update-types: [version-update:semver-major, version-update:semver-minor]
-      - dependency-name: '@testing-library/react-native' # nx: ~13.2.0
-        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@testing-library/react-native' # nx: ~13.2.0; declared past it
       - dependency-name: '@types/jest' # nx: ~30.0.0
         update-types: [version-update:semver-major, version-update:semver-minor]
       - dependency-name: '@types/react' # nx: ^19.0.0
@@ -92,20 +89,15 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: babel-jest # nx: ~30.3.0
         update-types: [version-update:semver-major, version-update:semver-minor]
-      - dependency-name: babel-preset-expo # nx: ~56.0.14
-        update-types: [version-update:semver-major, version-update:semver-minor]
-      - dependency-name: expo # nx: ~56.0.0
-        update-types: [version-update:semver-major, version-update:semver-minor]
-      - dependency-name: expo-splash-screen # nx: ~56.0.10
-        update-types: [version-update:semver-major, version-update:semver-minor]
-      - dependency-name: expo-status-bar # nx: ~56.0.4
-        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: babel-preset-expo # nx: ~56.0.14; declared past it
+      - dependency-name: expo # nx: ~56.0.0; declared past it
+      - dependency-name: expo-splash-screen # nx: ~56.0.10; declared past it
+      - dependency-name: expo-status-bar # nx: ~56.0.4; declared past it
       - dependency-name: jest # nx: ~30.3.0
         update-types: [version-update:semver-major, version-update:semver-minor]
       - dependency-name: jest-environment-jsdom # nx: ^30.0.0
         update-types: [version-update:semver-major]
-      - dependency-name: jest-expo # nx: ~56.0.4
-        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: jest-expo # nx: ~56.0.4; declared past it
       - dependency-name: jest-util # nx: ^30.0.0
         update-types: [version-update:semver-major]
       - dependency-name: jsdom # nx: ^27.1.0
@@ -116,10 +108,8 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: react-dom # nx: ^19.0.0
         update-types: [version-update:semver-major]
-      - dependency-name: react-native # nx: 0.85.3
-        update-types: [version-update:semver-major, version-update:semver-minor]
-      - dependency-name: react-native-svg # nx: 15.12.1
-        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: react-native # nx: 0.85.3; declared past it
+      - dependency-name: react-native-svg # nx: 15.12.1; declared past it
       - dependency-name: react-native-web # nx: ~0.21.0
         update-types: [version-update:semver-major, version-update:semver-minor]
       - dependency-name: ts-jest # nx: ^29.4.7
