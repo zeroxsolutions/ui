@@ -52,6 +52,8 @@ const SHIPPED = /^registry\/bases\/base-ui\/(lib|hooks|types)\//;
 const TOKEN_CLASS = /\b(?:bg|text|border|ring|fill|stroke)-(success|warning)(?![\w-])/g;
 const FAMILY = /^registry\/bases\/base-ui\/(?:components\/([^/]+)|(blocks))\/([^/]+)\.tsx$/;
 const PUBLISHED = ['registry:component', 'registry:block'];
+/** A document editor feature's own folder, which its item's first file sits in; the `features/index.ts` barrel is none. */
+const FEATURE = /^registry\/bases\/base-ui\/editor\/document\/features\/[^/]+\//;
 /** A file under icons/ is an animated icon this registry owns, published as the item of its file name. */
 const HOUSE_ICON = /^registry\/bases\/base-ui\/icons\/([^/]+)\.tsx$/;
 
@@ -119,7 +121,9 @@ function ownersOf(items: RegistryItem[]): Map<string, string> {
  * What the item has to declare for `shadcn add` to write files that compile: its own files (every one
  * outside lib/, hooks/ and types/), the lib/, hooks/ and types/ files they reach, the upstream item for a
  * vendored file, another item's `@zui/` name for a file that item ships, and the package for a bare import
- * or for a stylesheet its `css` imports, which the consumer's own stylesheet has to resolve.
+ * or for a stylesheet its `css` imports, which the consumer's own stylesheet has to resolve. A document editor
+ * feature also names `document-editor` even where no file imports it, since a feature plugs into that editor and
+ * does nothing without it.
  */
 function expectedDeclaration(item: RegistryItem, owners: ReadonlyMap<string, string>): Declaration {
   const roots = item.files.filter((file) => !SHIPPED.test(file.path));
@@ -150,6 +154,7 @@ function expectedDeclaration(item: RegistryItem, owners: ReadonlyMap<string, str
       }
     }
   }
+  if (FEATURE.test(item.files[0]?.path ?? '')) registryDependencies.add(`${ITEM_PREFIX}document-editor`);
   for (const key of Object.keys(item.css ?? {})) {
     const specifier = CSS_PACKAGE_IMPORT.exec(key)?.[1];
     if (specifier !== undefined) dependencies.add(packageOf(specifier));
@@ -689,6 +694,36 @@ describe('declarationProblems', () => {
   it('names the item that ships a component file by its @zui name', () => {
     const owners = new Map([[`${BASE}/components/data-display/ai-provider-card.tsx`, 'ai-provider-card']]);
     expect(declarationProblems(aiProviderPicker, owners)).toEqual([]);
+  });
+
+  it('requires a document editor feature to name document-editor, which none of its files imports', () => {
+    const mention = REGISTRY.items.find((item) => item.name === 'editor-mention');
+    if (mention === undefined) throw new Error('no editor-mention item');
+    const owners = ownersOf(REGISTRY.items);
+    const bare = {
+      ...mention,
+      registryDependencies: (mention.registryDependencies ?? []).filter(
+        (name) => name !== `${ITEM_PREFIX}document-editor`,
+      ),
+    };
+    expect(declarationProblems(bare, owners)).toEqual([
+      'editor-mention: registryDependencies lacks @zui/document-editor',
+    ]);
+    expect(declarationProblems({ ...bare, registryDependencies: [`${ITEM_PREFIX}document-editor`] }, owners)).toEqual(
+      [],
+    );
+  });
+
+  it('requires document-editor of no editor item outside a feature folder', () => {
+    const codeEditor = REGISTRY.items.find((item) => item.name === 'code-editor');
+    if (codeEditor === undefined) throw new Error('no code-editor item');
+    const item = {
+      ...codeEditor,
+      registryDependencies: [...(codeEditor.registryDependencies ?? []), `${ITEM_PREFIX}document-editor`],
+    };
+    expect(declarationProblems(item, ownersOf(REGISTRY.items))).toEqual([
+      'code-editor: registryDependencies declares @zui/document-editor, which its files do not import',
+    ]);
   });
 
   it('reports a component file the item imports that no item ships', () => {

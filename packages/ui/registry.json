@@ -2050,6 +2050,7 @@
         "@zui/code-card",
         "@zui/collapsible-card",
         "@zui/copy-button",
+        "@zui/document-editor",
         "@zui/editor-code-mirror",
         "@zui/language-combobox"
       ],
@@ -2114,7 +2115,7 @@
       "title": "Editor Embed",
       "description": "A block that shows an external page in a responsive frame, after a URL input while it is empty.",
       "categories": ["editor"],
-      "registryDependencies": ["@shadcn/input"],
+      "registryDependencies": ["@shadcn/input", "@zui/document-editor"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/embed/index.ts",
@@ -2150,7 +2151,13 @@
       "title": "Editor Image",
       "description": "A block image with alt text and an optional width, edited in a popover.",
       "categories": ["editor"],
-      "registryDependencies": ["@shadcn/button", "@shadcn/field", "@shadcn/input", "@shadcn/popover"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/field",
+        "@shadcn/input",
+        "@shadcn/popover",
+        "@zui/document-editor"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/image/index.ts",
@@ -2246,6 +2253,7 @@
         "@shadcn/utils",
         "@zui/collapsible-card",
         "@zui/copy-button",
+        "@zui/document-editor",
         "@zui/editor-code-mirror",
         "@zui/math-editor"
       ],
@@ -2287,7 +2295,7 @@
       "title": "Editor Mention",
       "description": "An inline pill that names a person, which the text treats as one unit.",
       "categories": ["editor"],
-      "registryDependencies": [],
+      "registryDependencies": ["@zui/document-editor"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/mention/index.ts",
@@ -2331,6 +2339,7 @@
         "@zui/code-card",
         "@zui/collapsible-card",
         "@zui/copy-button",
+        "@zui/document-editor",
         "@zui/editor-code-mirror",
         "@zui/mermaid-editor"
       ],
