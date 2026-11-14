@@ -1,0 +1,117 @@
+---
+title: Chat Input
+description: A one-line chat composer that turns @mentions and /commands into pills and hands the message to the host as a payload.
+---
+
+<ComponentPreview name="chat-input-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/chat-input
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @tiptap/extension-placeholder @tiptap/react @tiptap/starter-kit @zeroxsolutions/editor-core lucide-react zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add empty input-group item popover scroll-area utils @zui/document-editor @zui/editor-mention
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="chat-input" title="components/editor/composer/chat-input.tsx" />
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/chat-message-view.tsx"
+  title="components/editor/composer/chat-message-view.tsx"
+/>
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/composer-kit.ts"
+  title="components/editor/composer/composer-kit.ts"
+/>
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/composer-triggers.ts"
+  title="components/editor/composer/composer-triggers.ts"
+/>
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/triggers/inline-token.tsx"
+  title="components/editor/composer/triggers/inline-token.tsx"
+/>
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/triggers/trigger-layer.tsx"
+  title="components/editor/composer/triggers/trigger-layer.tsx"
+/>
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/triggers/trigger-menu.tsx"
+  title="components/editor/composer/triggers/trigger-menu.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
+
+import { ChatInput } from '@/components/editor/composer/chat-input';
+```
+
+```tsx
+function Composer({ send }: { send: (payload: ChatMessagePayload) => void }) {
+  return <ChatInput placeholder="Message the group..." onSubmit={send} />;
+}
+```
+
+Enter sends and clears the input, and Shift+Enter starts a new line. The payload carries the flattened `text`, the committed `tokens` grouped by kind, and the one-block `doc` that `ChatMessageView` draws, in `chat-message-view.tsx`.
+
+## API reference
+
+### ChatInput
+
+| Prop          | Type                                    | Default        |
+| ------------- | --------------------------------------- | -------------- |
+| `triggers`    | `ComposerTrigger[]`                     | `@` and `/`    |
+| `placeholder` | `string`                                | `'Message...'` |
+| `onSubmit`    | `(payload: ChatMessagePayload) => void` | -              |
+| `onReady`     | `(editor: IEditor) => void`             | -              |
+| `className`   | `string`                                | -              |
+
+Give `triggers` a stable array: the editor is built from it once, on mount.

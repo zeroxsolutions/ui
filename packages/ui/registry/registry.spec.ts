@@ -464,6 +464,14 @@ describe('registry.json', () => {
   it('publishes one demo per item and no other example', () => {
     expect(demoProblems(REGISTRY.items)).toEqual([]);
   });
+
+  it("ships neither KaTeX's stylesheet nor the typography plugin with chat-input or code-editor", () => {
+    const standalone = ['chat-input', 'code-editor'].map((name) => REGISTRY.items.find((item) => item.name === name));
+    expect(standalone.map((item) => item?.name)).toEqual(['chat-input', 'code-editor']);
+    expect(
+      standalone.flatMap((item) => Object.keys(item?.css ?? {}).filter((key) => /katex|typography/.test(key))),
+    ).toEqual([]);
+  });
 });
 
 const treeItem: RegistryItem = {

@@ -2491,6 +2491,321 @@
       ]
     },
     {
+      "name": "editor-features",
+      "type": "registry:component",
+      "title": "Editor Features",
+      "description": "Every document feature behind one import, from the standard kit to callout, toggle, link, image, table, code block, Mermaid, math, mention and embed.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@zui/document-editor",
+        "@zui/editor-callout",
+        "@zui/editor-code-block",
+        "@zui/editor-embed",
+        "@zui/editor-image",
+        "@zui/editor-link",
+        "@zui/editor-math",
+        "@zui/editor-mention",
+        "@zui/editor-mermaid",
+        "@zui/editor-table",
+        "@zui/editor-toggle"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/index.ts"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "name": "editor-features-demo",
+      "type": "registry:example",
+      "title": "Editor Features Demo",
+      "description": "A document built from features the barrel exports.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-features"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-features-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "math-editor",
+      "type": "registry:component",
+      "title": "Math Editor",
+      "description": "A standalone LaTeX editor with a source pane beside the live KaTeX formula, over a symbol palette.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/alert",
+        "@shadcn/button",
+        "@shadcn/command",
+        "@shadcn/dropdown-menu",
+        "@shadcn/empty",
+        "@shadcn/popover",
+        "@shadcn/resizable",
+        "@shadcn/tabs",
+        "@shadcn/use-mobile",
+        "@shadcn/utils",
+        "@zui/collapsible-card",
+        "@zui/editor-code-mirror",
+        "@zui/editor-theme"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/math/react/editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/math/react/editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/math/react/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/palette.tsx",
+          "type": "registry:component",
+          "target": "components/editor/math/react/palette.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/preview.tsx",
+          "type": "registry:component",
+          "target": "components/editor/math/react/preview.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/editor/math/react/toolbar.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/use-math-render.ts",
+          "type": "registry:component",
+          "target": "components/editor/math/react/use-math-render.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/viewer.tsx",
+          "type": "registry:component",
+          "target": "components/editor/math/react/viewer.tsx"
+        }
+      ],
+      "css": {
+        "@import 'katex/dist/katex.min.css'": {}
+      },
+      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react"]
+    },
+    {
+      "name": "math-editor-demo",
+      "type": "registry:example",
+      "title": "Math Editor Demo",
+      "description": "A LaTeX formula beside its source.",
+      "categories": ["examples"],
+      "dependencies": [],
+      "registryDependencies": ["@zui/math-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/math-editor-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "mermaid-editor",
+      "type": "registry:component",
+      "title": "Mermaid Editor",
+      "description": "A standalone Mermaid editor with a source pane beside the drawn diagram, with a template menu and export.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/alert",
+        "@shadcn/alert-dialog",
+        "@shadcn/button",
+        "@shadcn/combobox",
+        "@shadcn/dropdown-menu",
+        "@shadcn/empty",
+        "@shadcn/resizable",
+        "@shadcn/tabs",
+        "@shadcn/use-mobile",
+        "@shadcn/utils",
+        "@zui/code-card",
+        "@zui/collapsible-card",
+        "@zui/editor-code-mirror",
+        "@zui/editor-theme",
+        "@zui/floating-toolbar"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/mermaid/react/editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/mermaid/react/editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/mermaid/react/preview.tsx",
+          "type": "registry:component",
+          "target": "components/editor/mermaid/react/preview.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/mermaid/react/toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/editor/mermaid/react/toolbar.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/mermaid/react/use-mermaid-render.ts",
+          "type": "registry:component",
+          "target": "components/editor/mermaid/react/use-mermaid-render.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/mermaid/react/viewer.tsx",
+          "type": "registry:component",
+          "target": "components/editor/mermaid/react/viewer.tsx"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react"]
+    },
+    {
+      "name": "mermaid-editor-demo",
+      "type": "registry:example",
+      "title": "Mermaid Editor Demo",
+      "description": "A route drawn from Mermaid source.",
+      "categories": ["examples"],
+      "dependencies": [],
+      "registryDependencies": ["@zui/mermaid-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/mermaid-editor-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "code-editor",
+      "type": "registry:component",
+      "title": "Code Editor",
+      "description": "A multi-file code editor that keeps the open files and the active one in context, and routes each file to a code, Markdown, image or font view.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/empty",
+        "@shadcn/scroll-area",
+        "@shadcn/utils",
+        "@zui/editor-code-mirror",
+        "@zui/file-type-icon",
+        "@zui/font-preview",
+        "@zui/image-preview",
+        "@zui/markdown-view"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/code/code-editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/code/code-editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/code/file-content-router.tsx",
+          "type": "registry:component",
+          "target": "components/editor/code/file-content-router.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/code/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/code/index.ts"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "name": "code-editor-demo",
+      "type": "registry:example",
+      "title": "Code Editor Demo",
+      "description": "Two files beside a tree.",
+      "categories": ["examples"],
+      "dependencies": [],
+      "registryDependencies": ["@zui/code-editor", "@zui/file-tree"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/code-editor-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "chat-input",
+      "type": "registry:component",
+      "title": "Chat Input",
+      "description": "A one-line chat composer that turns @mentions and /commands into pills and hands the message to the host as a payload.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/empty",
+        "@shadcn/input-group",
+        "@shadcn/item",
+        "@shadcn/popover",
+        "@shadcn/scroll-area",
+        "@shadcn/utils",
+        "@zui/document-editor",
+        "@zui/editor-mention"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/composer/chat-input.tsx",
+          "type": "registry:component",
+          "target": "components/editor/composer/chat-input.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/chat-message-view.tsx",
+          "type": "registry:component",
+          "target": "components/editor/composer/chat-message-view.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/composer-kit.ts",
+          "type": "registry:component",
+          "target": "components/editor/composer/composer-kit.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/composer-triggers.ts",
+          "type": "registry:component",
+          "target": "components/editor/composer/composer-triggers.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/triggers/inline-token.tsx",
+          "type": "registry:component",
+          "target": "components/editor/composer/triggers/inline-token.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/triggers/trigger-layer.tsx",
+          "type": "registry:component",
+          "target": "components/editor/composer/triggers/trigger-layer.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/triggers/trigger-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/composer/triggers/trigger-menu.tsx"
+        }
+      ],
+      "dependencies": [
+        "@tiptap/extension-placeholder",
+        "@tiptap/react",
+        "@tiptap/starter-kit",
+        "@zeroxsolutions/editor-core",
+        "lucide-react",
+        "zod"
+      ]
+    },
+    {
+      "name": "chat-input-demo",
+      "type": "registry:example",
+      "title": "Chat Input Demo",
+      "description": "A composer that lists the messages it sent.",
+      "categories": ["examples"],
+      "dependencies": [],
+      "registryDependencies": ["@zui/chat-input"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/chat-input-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
       "name": "arrow-down-icon",
       "type": "registry:ui",
       "title": "Arrow Down Icon",

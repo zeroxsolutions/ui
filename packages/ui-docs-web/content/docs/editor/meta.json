@@ -4,6 +4,10 @@
     "index",
     "---Surfaces---",
     "document-editor",
+    "math-editor",
+    "mermaid-editor",
+    "code-editor",
+    "chat-input",
     "---Features---",
     "editor-callout",
     "editor-code-block",
@@ -15,6 +19,7 @@
     "editor-mermaid",
     "editor-table",
     "editor-toggle",
+    "editor-features",
     "---Libraries---",
     "editor-theme",
     "editor-code-mirror"

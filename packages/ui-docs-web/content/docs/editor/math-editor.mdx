@@ -1,0 +1,125 @@
+---
+title: Math Editor
+description: A standalone LaTeX editor with a source pane beside the live KaTeX formula, over a symbol palette.
+---
+
+<ComponentPreview name="math-editor-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/math-editor
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core lucide-react
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add alert button command dropdown-menu empty popover resizable tabs use-mobile utils @zui/collapsible-card @zui/editor-code-mirror @zui/editor-theme
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="math-editor" title="components/editor/math/react/editor.tsx" />
+
+<ComponentSource
+  name="math-editor"
+  file="registry/bases/base-ui/editor/math/react/index.ts"
+  title="components/editor/math/react/index.ts"
+/>
+
+<ComponentSource
+  name="math-editor"
+  file="registry/bases/base-ui/editor/math/react/palette.tsx"
+  title="components/editor/math/react/palette.tsx"
+/>
+
+<ComponentSource
+  name="math-editor"
+  file="registry/bases/base-ui/editor/math/react/preview.tsx"
+  title="components/editor/math/react/preview.tsx"
+/>
+
+<ComponentSource
+  name="math-editor"
+  file="registry/bases/base-ui/editor/math/react/toolbar.tsx"
+  title="components/editor/math/react/toolbar.tsx"
+/>
+
+<ComponentSource
+  name="math-editor"
+  file="registry/bases/base-ui/editor/math/react/use-math-render.ts"
+  title="components/editor/math/react/use-math-render.ts"
+/>
+
+<ComponentSource
+  name="math-editor"
+  file="registry/bases/base-ui/editor/math/react/viewer.tsx"
+  title="components/editor/math/react/viewer.tsx"
+/>
+
+<Step>Add its styles to your global CSS.</Step>
+
+```css
+@import 'katex/dist/katex.min.css';
+```
+
+The stylesheet comes from `katex`, which `@zeroxsolutions/editor-core` installs; add `katex` to your project if your bundler does not resolve it from there.
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { MathEditor } from '@/components/editor/math/react';
+```
+
+```tsx
+function Formula() {
+  return <MathEditor defaultValue="E = mc^2" onValueChange={save} />;
+}
+```
+
+It is controlled when given `value`, and starts from `defaultValue` otherwise. `FormulaViewer` draws a stored formula without the editing pane, and `MathPalette` is the symbol and template menu on its own.
+
+## API reference
+
+### MathEditor
+
+| Prop            | Type                          | Default  |
+| --------------- | ----------------------------- | -------- |
+| `value`         | `string`                      | -        |
+| `defaultValue`  | `string`                      | -        |
+| `onValueChange` | `(source: string) => void`    | -        |
+| `readOnly`      | `boolean`                     | `false`  |
+| `layout`        | `'auto' \| 'split' \| 'tabs'` | `'auto'` |
+| `toolbar`       | `boolean`                     | `true`   |
+| `className`     | `string`                      | -        |
+
+With `layout="auto"` the source and the formula sit side by side on a wide viewport and in tabs on a narrow one.
