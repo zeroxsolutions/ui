@@ -533,12 +533,37 @@ describe('registry.json', () => {
     expect(editorCssProblems(REGISTRY.items, sheet)).toEqual([]);
   });
 
-  it("ships neither KaTeX's stylesheet nor the typography plugin with chat-input or code-editor", () => {
-    const standalone = ['chat-input', 'code-editor'].map((name) => REGISTRY.items.find((item) => item.name === name));
-    expect(standalone.map((item) => item?.name)).toEqual(['chat-input', 'code-editor']);
-    expect(
-      standalone.flatMap((item) => Object.keys(item?.css ?? {}).filter((key) => /katex|typography/.test(key))),
-    ).toEqual([]);
+  it('reaches KaTeX through no registry dependency of chat-input or code-editor, and ships the typography plugin with neither', () => {
+    const byName = new Map(REGISTRY.items.map((item) => [item.name, item]));
+    const closureOf = (name: string): RegistryItem[] => {
+      const reached = new Map<string, RegistryItem>();
+      for (let pending = [name], next = pending.pop(); next !== undefined; next = pending.pop()) {
+        const item = byName.get(next);
+        if (item === undefined) throw new Error(`no item ${next}`);
+        if (reached.has(next)) continue;
+        reached.set(next, item);
+        pending.push(
+          ...(item.registryDependencies ?? [])
+            .filter((dependency) => dependency.startsWith(ITEM_PREFIX))
+            .map((dependency) => dependency.slice(ITEM_PREFIX.length)),
+        );
+      }
+      return [...reached.values()];
+    };
+    const katex = ['chat-input', 'code-editor'].flatMap((name) =>
+      closureOf(name)
+        .filter(
+          (item) =>
+            (item.dependencies ?? []).includes('katex') ||
+            Object.keys(item.css ?? {}).some((key) => /^@import\s+['"]katex/.test(key)),
+        )
+        .map((item) => `${name} reaches ${item.name}`),
+    );
+    expect(katex).toEqual([]);
+    const typography = ['chat-input', 'code-editor'].flatMap((name) =>
+      Object.keys(byName.get(name)?.css ?? {}).filter((key) => key.includes('typography')),
+    );
+    expect(typography).toEqual([]);
   });
 });
 

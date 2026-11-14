@@ -121,3 +121,6 @@ pick up component pages; lists that enumerate every item gain the new items.
 - `katex` and `mermaid` stay in the core's `dependencies` (owner, 2026-11-14). A project that installs only
   `chat-input` gets both in `node_modules` and bundles neither, since the math and mermaid features load lazily.
   The core is not changed or released for this spec.
+- `chat-input` reaches the `@tailwindcss/typography` plugin through its real dependency on `document-editor`, whose
+  files it imports (2026-11-14). KaTeX stays out of its whole dependency tree; the owner may later ask for the
+  shared document files to split into an item without css.
