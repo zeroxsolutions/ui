@@ -24,23 +24,29 @@ const searchClients = new Map<string, SearchClient>();
 /**
  * The search over the indexes `api` exports at build, which finds only the pages `platform` tagged. It
  * asks every index and lists their results in `api` order; a result whose URL an earlier index listed
- * is left out, so a page two indexes hold shows once.
+ * is left out, so a page two indexes hold shows once. An index that fails is skipped; the search fails
+ * only when every index does.
  */
 function searchClient(api: string | string[], platform: Platform): SearchClient {
   const froms = Array.isArray(api) ? api : [api];
+  // The order stays in the key: it decides which index's copy of a page two indexes hold is the one shown.
   const key = `${platform} ${froms.join(' ')}`;
   let client = searchClients.get(key);
   if (!client) {
     const clients = froms.map((from) => staticClient({ from, tag: platform }));
     client = {
       async search(query) {
-        const answers = await Promise.all(clients.map((each) => each.search(query)));
+        const answers = await Promise.allSettled(clients.map((each) => each.search(query)));
+        const failed = answers.find((answer) => answer.status === 'rejected');
+        if (failed && answers.every((answer) => answer.status === 'rejected')) throw failed.reason;
         const seen = new Set<string>();
-        return answers.flatMap((results) => {
-          const fresh = results.filter((result) => !seen.has(result.url));
-          for (const result of results) seen.add(result.url);
-          return fresh;
-        });
+        const merged: Awaited<ReturnType<SearchClient['search']>> = [];
+        for (const answer of answers) {
+          if (answer.status === 'rejected') continue;
+          merged.push(...answer.value.filter((result) => !seen.has(result.url)));
+          for (const result of answer.value) seen.add(result.url);
+        }
+        return merged;
       },
     };
     searchClients.set(key, client);
