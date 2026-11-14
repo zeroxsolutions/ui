@@ -67,8 +67,9 @@ function sourceOf(importer: string, specifier: string): string | undefined {
   else if (specifier.startsWith('.')) stem = join(dirname(importer), specifier);
   else if (specifier.startsWith('@/')) throw new Error(`${importer} imports ${specifier}, which is app code`);
   else return undefined;
+  const bare = stem.endsWith('.js') ? stem.slice(0, -'.js'.length) : stem;
   const found = ['.ts', '.tsx', '/index.ts', '/index.tsx']
-    .map((ext) => stem + ext)
+    .map((ext) => bare + ext)
     .find((p) => existsSync(join(APP, p)));
   if (found === undefined) throw new Error(`${importer} imports ${specifier}, which resolves to no file`);
   return found;
@@ -99,6 +100,7 @@ function ownersOf(items: RegistryItem[]): Map<string, string> {
           (file) =>
             file.path.startsWith(`${BASE}/components/`) ||
             file.path.startsWith(`${BASE}/blocks/`) ||
+            file.path.startsWith(`${BASE}/editor/`) ||
             HOUSE_ICON.test(file.path),
         )
         .map((file) => [file.path, item.name] as const),
@@ -201,11 +203,13 @@ function cssVarsProblems(item: RegistryItem): string[] {
     : [`${item.name}: cssVars should be ${JSON.stringify(expected)}`];
 }
 
-/** The declarations of the top-level `<rule> { ... }` block in the base stylesheet, or undefined when it declares none. */
+/** The declarations of the top-level `<rule> { ... }` block in the base stylesheet or else the editor's, or undefined when neither declares it. */
 function stylesheetRule(rule: string): Record<string, string> | undefined {
-  const css = readFileSync(join(APP, BASE, 'styles.css'), 'utf8');
   const escaped = rule.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const body = new RegExp(`^${escaped} \\{\\n([\\s\\S]*?)^\\}`, 'm').exec(css)?.[1];
+  const pattern = new RegExp(`^${escaped} \\{\\n([\\s\\S]*?)^\\}`, 'm');
+  const body = ['styles.css', 'editor/styles.css']
+    .map((sheet) => pattern.exec(readFileSync(join(APP, BASE, sheet), 'utf8'))?.[1])
+    .find((found) => found !== undefined);
   if (body === undefined) return undefined;
   return Object.fromEntries(
     [...body.matchAll(/^\s*([\w-]+):\s*([^;]+);/gm)].map(([, property, value]) => [property, value.trim()]),
@@ -264,6 +268,42 @@ function familyProblems(items: RegistryItem[], families: string[]): string[] {
     ];
   });
   return [...unowned, ...misnamed];
+}
+
+/** Every editor file: a non-spec `.ts` or `.tsx` under `editor/`. */
+function editorFiles(): string[] {
+  return readdirSync(join(APP, BASE, 'editor'), { recursive: true, encoding: 'utf8' })
+    .filter((path) => /\.tsx?$/.test(path) && !/\.spec\.tsx?$/.test(path))
+    .map((path) => `${BASE}/editor/${path}`)
+    .sort();
+}
+
+/**
+ * Each editor file ships in exactly one editor item, every editor item is in the editor category, and each
+ * of its files lands at `components/editor/` plus its path below `editor/`.
+ */
+function editorProblems(items: RegistryItem[], files: string[]): string[] {
+  const prefix = `${BASE}/editor/`;
+  const editorItems = items.filter((item) => item.files.some((file) => file.path.startsWith(prefix)));
+  const unowned = files.flatMap((path) => {
+    const owners = editorItems.filter((item) => item.files.some((file) => file.path === path));
+    if (owners.length === 1) return [];
+    return owners.length === 0
+      ? [`${path}: ships in no editor item`]
+      : [`${path}: ships in ${owners.map((item) => item.name).join(' and ')}`];
+  });
+  const misdeclared = editorItems.flatMap((item) => [
+    ...(isDeepStrictEqual(item.categories, ['editor']) ? [] : [`${item.name}: category should be editor`]),
+    ...item.files
+      .filter((file) => !SHIPPED.test(file.path))
+      .flatMap((file) => {
+        const expected = `components/editor/${file.path.slice(prefix.length)}`;
+        return file.path.startsWith(prefix) && file.target !== expected
+          ? [`${item.name}: ${file.path} should target ${expected}`]
+          : [];
+      }),
+  ]);
+  return [...unowned, ...misdeclared];
 }
 
 /**
@@ -382,6 +422,19 @@ const aiProviderPicker: RegistryItem = {
 const ICON_OWNERS = ownersOf(REGISTRY.items.filter((item) => HOUSE_ICON.test(item.files[0]?.path ?? '')));
 
 describe('declarationProblems', () => {
+  it('resolves a relative .js import to its .ts source', () => {
+    const item: RegistryItem = {
+      name: 'composer-triggers',
+      type: 'registry:component',
+      files: [{ path: `${BASE}/editor/composer/composer-triggers.ts`, type: 'registry:component' }],
+    };
+    const owners = new Map([
+      [`${BASE}/editor/document/features/mention/index.ts`, 'mention'],
+      [`${BASE}/editor/composer/triggers/inline-token.tsx`, 'inline-token'],
+    ]);
+    expect(declarationProblems(item, owners).filter((problem) => problem.includes('resolves to no file'))).toEqual([]);
+  });
+
   it('reports nothing for an item declaring exactly what its files import', () => {
     expect(declarationProblems(treeItem, ICON_OWNERS)).toEqual([]);
   });
@@ -650,5 +703,59 @@ describe('demoProblems', () => {
         type: 'registry:example',
       })}`,
     ]);
+  });
+});
+
+const EDITOR_FILE = `${BASE}/editor/x.tsx`;
+const editorItem = (name: string, overrides: Partial<RegistryItem> = {}): RegistryItem => ({
+  name,
+  type: 'registry:component',
+  categories: ['editor'],
+  files: [{ path: EDITOR_FILE, type: 'registry:component', target: 'components/editor/x.tsx' }],
+  ...overrides,
+});
+
+describe('editorFiles', () => {
+  it('lists the editor sources, sorted, with no spec or stylesheet', () => {
+    const files = editorFiles();
+    expect(files.length).toBeGreaterThan(0);
+    expect(files).toEqual([...files].sort());
+    expect(files.every((file) => file.startsWith(`${BASE}/editor/`) && /\.tsx?$/.test(file))).toBe(true);
+    expect(files.filter((file) => /\.spec\.tsx?$/.test(file))).toEqual([]);
+  });
+});
+
+describe('editorProblems', () => {
+  it('reports an editor file no item ships', () => {
+    expect(editorProblems([], [EDITOR_FILE])).toEqual([`${EDITOR_FILE}: ships in no editor item`]);
+  });
+
+  it('reports an editor file two items ship', () => {
+    expect(editorProblems([editorItem('a'), editorItem('b')], [EDITOR_FILE])).toEqual([
+      `${EDITOR_FILE}: ships in a and b`,
+    ]);
+  });
+
+  it('reports an editor item outside the editor category', () => {
+    expect(editorProblems([editorItem('a', { categories: ['data-entry'] })], [EDITOR_FILE])).toEqual([
+      'a: category should be editor',
+    ]);
+  });
+
+  it('reports a file whose target is not its path below editor/', () => {
+    const item = editorItem('a', {
+      files: [{ path: EDITOR_FILE, type: 'registry:component', target: 'components/x.tsx' }],
+    });
+    expect(editorProblems([item], [EDITOR_FILE])).toEqual([`a: ${EDITOR_FILE} should target components/editor/x.tsx`]);
+  });
+
+  it('reports nothing for one item per file with matching targets', () => {
+    const item = editorItem('a', {
+      files: [
+        { path: EDITOR_FILE, type: 'registry:component', target: 'components/editor/x.tsx' },
+        { path: `${BASE}/lib/ime.ts`, type: 'registry:lib' },
+      ],
+    });
+    expect(editorProblems([item], [EDITOR_FILE])).toEqual([]);
   });
 });
