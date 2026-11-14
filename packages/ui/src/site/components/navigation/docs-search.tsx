@@ -1,7 +1,7 @@
 'use client';
 
 import type { Root } from 'fumadocs-core/page-tree';
-import { useDocsSearch } from 'fumadocs-core/search/client';
+import { useDocsSearch, type SearchClient } from 'fumadocs-core/search/client';
 import { staticClient } from 'fumadocs-core/search/client/orama-static';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
@@ -17,18 +17,32 @@ import { SearchIcon, type SearchIconHandle } from '../../../../registry/bases/ba
 import type { Platform } from '../../types/platform';
 import type { SiteNavItem } from '../../types/site-nav-item';
 
-type SearchClient = ReturnType<typeof staticClient>;
-
-// One client per index and platform for the page's lifetime: a client fetches its index once, so a
+// One client per index list and platform for the page's lifetime: a client fetches its index once, so a
 // client built per render would fetch it again each time the header renders.
 const searchClients = new Map<string, SearchClient>();
 
-/** The search over the index `api` exports at build, which finds only the pages `platform` tagged. */
-function searchClient(api: string, platform: Platform): SearchClient {
-  const key = `${platform} ${api}`;
+/**
+ * The search over the indexes `api` exports at build, which finds only the pages `platform` tagged. It
+ * asks every index and lists their results in `api` order; a result whose URL an earlier index listed
+ * is left out, so a page two indexes hold shows once.
+ */
+function searchClient(api: string | string[], platform: Platform): SearchClient {
+  const froms = Array.isArray(api) ? api : [api];
+  const key = `${platform} ${froms.join(' ')}`;
   let client = searchClients.get(key);
   if (!client) {
-    client = staticClient({ from: api, tag: platform });
+    const clients = froms.map((from) => staticClient({ from, tag: platform }));
+    client = {
+      async search(query) {
+        const answers = await Promise.all(clients.map((each) => each.search(query)));
+        const seen = new Set<string>();
+        return answers.flatMap((results) => {
+          const fresh = results.filter((result) => !seen.has(result.url));
+          for (const result of results) seen.add(result.url);
+          return fresh;
+        });
+      },
+    };
     searchClients.set(key, client);
   }
   return client;
@@ -46,8 +60,8 @@ interface DocsSearchProps {
   navItems?: SiteNavItem[];
   /** The platform whose pages' text the index searches. */
   platform?: Platform;
-  /** Where the search index is served; the browser reads it once and searches it. */
-  api: string;
+  /** Where the search index is served; the browser reads it once and searches it. Several are searched as one, in this order. */
+  api: string | string[];
   /**
    * Where a found heading or text opens, given the URL the index lists it at; as listed when omitted. On
    * native, the index lists each component page under the default engine.

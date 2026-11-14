@@ -26,7 +26,7 @@ interface SiteHeaderNavProps {
    */
   trees: { web?: Root; native?: Record<NativeEngine, Root> };
   /** Where the search index is served, which `DocsSearch` reads. */
-  searchApi: string;
+  searchApi: string | string[];
 }
 
 /**

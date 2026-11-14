@@ -14,7 +14,7 @@ export default function EditorDocsLayout({ children }: { children: ReactNode }):
   return (
     <EditorNavProvider>
       <div data-slot="layout" className="group/layout bg-background relative z-10 flex min-h-svh flex-col">
-        <SiteHeader nav={{ trees: { web: tree }, searchApi: '/docs/editor/api/search' }} />
+        <SiteHeader nav={{ trees: { web: tree }, searchApi: ['/api/search', '/docs/editor/api/search'] }} />
         <main className="flex min-h-0 flex-1 flex-col">
           <DocsColumns sidebar={<DocsSidebar tree={tree} />}>{children}</DocsColumns>
         </main>

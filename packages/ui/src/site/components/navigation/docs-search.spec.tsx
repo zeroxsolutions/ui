@@ -51,7 +51,37 @@ const searchAPI = createSearchAPI('advanced', {
   ],
 });
 
-const server = setupServer(http.get('/api/search', () => searchAPI.staticGET()));
+/** The index the editor zone exports at `/docs/editor/api/search`; it also lists the status indicator page, as a page both zones could hold. */
+const editorSearchAPI = createSearchAPI('advanced', {
+  indexes: [
+    {
+      id: '/docs/editor/document-editor',
+      title: 'Document Editor',
+      url: '/docs/editor/document-editor',
+      tag: 'web',
+      structuredData: {
+        headings: [],
+        contents: [{ heading: undefined, content: 'The toolbar groups every formatting command.' }],
+      },
+    },
+    {
+      id: '/docs/components/status-indicator',
+      title: 'Status Indicator',
+      description: 'A dot and a label for a status.',
+      url: '/docs/components/status-indicator',
+      tag: 'web',
+      structuredData: {
+        headings: [],
+        contents: [{ heading: undefined, content: 'It sets `data-slot` on its root element.' }],
+      },
+    },
+  ],
+});
+
+const server = setupServer(
+  http.get('/api/search', () => searchAPI.staticGET()),
+  http.get('/docs/editor/api/search', () => editorSearchAPI.staticGET()),
+);
 
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 afterEach(() => {
@@ -169,6 +199,28 @@ describe('DocsSearch', () => {
     fireEvent.click(await screen.findByRole('option', { name: /label nativeID/ }, { timeout: 3_000 }));
 
     expect(push).toHaveBeenCalledWith(expect.stringMatching(/^\/native\/components\/uniwind\/label(#.*)?$/));
+  });
+
+  it('finds pages from every index', async () => {
+    render(<DocsSearch tree={tree} api={['/api/search', '/docs/editor/api/search']} />, { wrapper });
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'root element' } });
+    await screen.findByRole('option', { name: /on its root element/ }, { timeout: 3_000 });
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'toolbar formatting command' } });
+    fireEvent.click(await screen.findByRole('option', { name: /toolbar groups/ }, { timeout: 3_000 }));
+
+    expect(push).toHaveBeenCalledWith(expect.stringMatching(/^\/docs\/editor\/document-editor(#.*)?$/));
+  });
+
+  it('shows a page both indexes hold once', async () => {
+    render(<DocsSearch tree={tree} api={['/api/search', '/docs/editor/api/search']} />, { wrapper });
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'root element' } });
+
+    await screen.findByRole('option', { name: /on its root element/ }, { timeout: 3_000 });
+    expect(screen.getAllByRole('option', { name: /on its root element/ })).toHaveLength(1);
   });
 
   it('names the search button once, whichever of its labels and shortcut hint are drawn', () => {
