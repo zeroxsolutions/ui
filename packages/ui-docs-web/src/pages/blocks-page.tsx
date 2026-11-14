@@ -20,11 +20,13 @@ function BlocksPage({ writtenDocsPage }: BlocksPageProps): ReactNode {
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight">Blocks</h1>
         <p className="text-muted-foreground">
-          A block is a whole surface composed from this registry&apos;s components. Each is framed at the width of this
-          column, so its layout answers to the frame and not to the window.
+          A block is a page-level template, such as a dashboard or a sign-in page, composed from this registry&apos;s
+          components. Each is framed at the width of this column, so its layout answers to the frame and not to the
+          window.
         </p>
         <BaseSwitcher className="mt-4" />
       </header>
+      {publishedBlocks.length === 0 && <p>No blocks yet.</p>}
       {publishedBlocks.map((block) => {
         const url = writtenDocsPage(docsPageRoute.build({ slug: `blocks/${block.name}` }));
         return (

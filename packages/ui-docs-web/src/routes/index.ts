@@ -8,7 +8,7 @@ export const homeRoute = createStaticRoute('/', () => '/');
 /** The docs; the content loader serves every page beneath this path. */
 export const docsRoute = createStaticRoute('/docs', () => '/docs');
 
-/** One web docs page by its slug, its segments joined with `/` (`installation`, `blocks/ai-provider-picker`). */
+/** One web docs page by its slug, its segments joined with `/` (`installation`, `components/base/tag-input`). */
 export const docsPageRoute = createDynamicRoute<{ slug: string }>('/docs/*slug', ({ slug }) => `/docs/${slug}`);
 
 /** The docs' index of the components on one base, which the docs serve from `content/docs/components/<base>`. */

@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
-import { AI_PROVIDER_PICKER_SAMPLE_ENTRIES, AiProviderPicker } from '@/components/ai-provider-picker';
+import { AI_PROVIDER_PICKER_SAMPLE_ENTRIES, AiProviderPicker } from '@/components/data-entry/ai-provider-picker';
 
-/** The AiProviderPicker block over its sample providers. */
+/** The AiProviderPicker over its sample providers. */
 function AiProviderPickerDemo(): ReactNode {
   return (
     <View className="w-full">

@@ -9,7 +9,7 @@ description: A responsive grid of AI provider cards, from the host's entries or 
 
 <InstallCommand name="ai-provider-picker" />
 
-The CLI writes `components/ai-provider-picker.tsx`, installs
+The CLI writes `components/data-entry/ai-provider-picker.tsx`, installs
 [AI provider card](/native/components/nativewind/ai-provider-card), [Card](/native/components/nativewind/card), Utils
 and the brand mark lib, and adds `@zeroxsolutions/icons`, whose `brand-mark-url` and `ai-provider-mappings` entries
 name each provider's mark and where the CDN serves it, and `expo-image`, which draws it.
@@ -17,10 +17,10 @@ name each provider's mark and where the CDN serves it, and `expo-image`, which d
 ## Usage
 
 ```tsx
-import { AiProviderPicker } from '@/components/ai-provider-picker';
+import { AiProviderPicker } from '@/components/data-entry/ai-provider-picker';
 ```
 
-With no `entries`, the block shows its sample providers. Every card is a button that calls `onSelect` with its
+With no `entries`, the picker shows its sample providers. Every card is a button that calls `onSelect` with its
 entry's `provider` key:
 
 ```tsx
@@ -60,7 +60,7 @@ One card's data.
 
 ### AI_PROVIDER_PICKER_SAMPLE_ENTRIES
 
-The sample entries the block shows with no `entries`: providers the `@zeroxsolutions/icons` brand set has a mark
+The sample entries the picker shows with no `entries`: providers the `@zeroxsolutions/icons` brand set has a mark
 for, with names, blurbs and model counts only.
 
 ### BrandMark
@@ -87,7 +87,7 @@ which it hands to `BrandMark`. A key that resolves to no mark draws a sparkle.
 
 - The web paints `mono` and `combine` in the text colour through a CSS mask, which React Native lacks; expo-image
   tints them the foreground colour instead.
-- The web's ambient style provider and `setBrandMarkBase` are not ported: the block names its variant, and a mark
+- The web's ambient style provider and `setBrandMarkBase` are not ported: the picker names its variant, and a mark
   takes its own `base`.
 - `AiProviderIcon` takes no `extra` mappings, and neither part takes a `className` or a `style`.
 - `size` is a number of pixels; the web's also takes a CSS length, and `BrandMark`'s defaults to `1em`.
