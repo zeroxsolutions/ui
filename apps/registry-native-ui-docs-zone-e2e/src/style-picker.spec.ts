@@ -17,8 +17,13 @@ async function pickStyle(page: Page, style: string): Promise<void> {
   await page.getByRole('menuitem', { name: style }).click();
 }
 
+/** Reads the install command's URL; the tabs remount as the page hydrates, so the tab is clicked until it is selected. */
 async function installUrl(page: Page): Promise<string | null> {
-  await page.getByRole('tab', { name: 'URL' }).click();
+  const tab = page.getByRole('tab', { name: 'URL' });
+  await expect(async () => {
+    await tab.click({ timeout: 2_000 });
+    await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 1_000 });
+  }).toPass();
   return page.getByText(/add https:\/\/ui\.zeroxsolutions\.com\/r\/styles\//).textContent();
 }
 
