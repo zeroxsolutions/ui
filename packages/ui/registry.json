@@ -2134,7 +2134,7 @@
       "name": "editor-embed-demo",
       "type": "registry:example",
       "title": "Editor Embed Demo",
-      "description": "A document with a map embedded from a URL.",
+      "description": "A document with a page embedded from a URL.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/editor-core"],
       "registryDependencies": ["@zui/document-editor", "@zui/editor-embed"],

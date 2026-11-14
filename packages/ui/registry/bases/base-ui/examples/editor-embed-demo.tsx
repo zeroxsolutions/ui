@@ -20,6 +20,13 @@ function paragraph(text: string): NodeJSON {
   return { type: 'paragraph', content: [{ type: 'text', text }] };
 }
 
+/** The embedded page, written into its own URL so the demo loads nothing from another site. */
+const EMBEDDED_PAGE = `data:text/html;charset=utf-8,${encodeURIComponent(
+  '<!doctype html><meta name="color-scheme" content="light dark"><title>Hoi An old town</title>' +
+    '<body style="margin:0;display:grid;place-items:center;height:100vh;font-family:system-ui,sans-serif">' +
+    '<p>Hoi An old town</p></body>',
+)}`;
+
 const content: DocJSON = {
   type: 'doc',
   content: [
@@ -27,14 +34,14 @@ const content: DocJSON = {
     {
       type: 'embed',
       attrs: {
-        url: 'https://www.openstreetmap.org/export/embed.html?bbox=108.31,15.86,108.35,15.90',
+        url: EMBEDDED_PAGE,
         title: 'Hoi An old town',
       },
     },
   ],
 };
 
-/** A document with a map embedded from a URL. */
+/** A document with a page embedded from a URL. */
 function EditorEmbedDemo(): ReactNode {
   const [editor, setEditor] = useState<IEditor | null>(null);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
