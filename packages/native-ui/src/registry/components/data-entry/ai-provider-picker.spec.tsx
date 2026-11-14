@@ -4,12 +4,12 @@ import ts from 'typescript';
 import { AI_PROVIDER_PICKER_SAMPLE_ENTRIES, AiProviderPicker } from './ai-provider-picker';
 
 const WEB_SOURCE = readFileSync(
-  require.resolve('@zeroxsolutions/ui/registry/bases/base-ui/blocks/ai-provider-picker.tsx'),
+  require.resolve('@zeroxsolutions/ui/registry/bases/base-ui/components/data-entry/ai-provider-picker.tsx'),
   'utf8',
 );
 
 /**
- * The web block's own sample, cut from its source and run: the web file loads the DOM brand marks and the web's
+ * The web picker's own sample, cut from its source and run: the web file loads the DOM brand marks and the web's
  * own components, which do not load under React Native's Jest.
  */
 const webSample = ((): unknown => {
@@ -75,7 +75,7 @@ describe('AiProviderPicker', () => {
     }
   });
 
-  it("samples the web block's entries", () => {
+  it("samples the web picker's entries", () => {
     expect(AI_PROVIDER_PICKER_SAMPLE_ENTRIES).toEqual(webSample);
   });
 });

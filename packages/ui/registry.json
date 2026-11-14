@@ -878,16 +878,16 @@
     },
     {
       "name": "ai-provider-picker",
-      "type": "registry:block",
+      "type": "registry:component",
       "title": "AI Provider Picker",
       "description": "A responsive grid of AI provider cards, from the host's entries or a sample, that calls back with the provider key a card selects.",
-      "categories": ["blocks"],
+      "categories": ["data-entry"],
       "dependencies": ["@zeroxsolutions/icons"],
       "registryDependencies": ["@shadcn/card", "@shadcn/utils", "@zui/ai-provider-card"],
       "files": [
         {
-          "path": "registry/bases/base-ui/blocks/ai-provider-picker.tsx",
-          "type": "registry:block"
+          "path": "registry/bases/base-ui/components/data-entry/ai-provider-picker.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -2028,7 +2028,7 @@
       "name": "ai-provider-picker-demo",
       "type": "registry:example",
       "title": "AI Provider Picker Demo",
-      "description": "The AiProviderPicker block over its sample providers.",
+      "description": "The AiProviderPicker over its sample providers.",
       "categories": ["examples"],
       "registryDependencies": ["@zui/ai-provider-picker"],
       "files": [

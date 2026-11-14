@@ -1,0 +1,90 @@
+---
+title: AI Provider Picker
+description: A responsive grid of AI provider cards, from the host's entries or a sample, that calls back with the provider key a card selects.
+---
+
+<ComponentPreview name="ai-provider-picker-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/ai-provider-picker
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the icon package, which draws each provider's mark.</Step>
+
+```bash
+pnpm add @zeroxsolutions/icons
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add card utils @zui/ai-provider-card
+```
+
+<Step>Copy the component into `components/data-entry/ai-provider-picker.tsx`.</Step>
+
+<ComponentSource name="ai-provider-picker" title="components/data-entry/ai-provider-picker.tsx" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { AiProviderPicker } from '@/components/data-entry/ai-provider-picker';
+```
+
+With no `entries`, the picker shows its sample providers. Every card is a button that calls `onSelect` with its
+entry's `provider` key:
+
+```tsx
+<AiProviderPicker onSelect={(provider) => setProvider(provider)} />
+```
+
+## API reference
+
+### AI_PROVIDER_PICKER_SAMPLE_ENTRIES
+
+The sample entries the picker shows with no `entries`: providers the `@zeroxsolutions/icons` brand set has a mark
+for, with names, blurbs and model counts only.
+
+### AiProviderPicker
+
+Renders a `div` and takes every prop a `div` takes, plus:
+
+| Prop       | Type                               | Default                             |
+| ---------- | ---------------------------------- | ----------------------------------- |
+| `entries`  | `readonly AiProviderPickerEntry[]` | `AI_PROVIDER_PICKER_SAMPLE_ENTRIES` |
+| `onSelect` | `(provider: string) => void`       | -                                   |
+
+Its grid is one column, two from the `sm` breakpoint and three from `lg`;
+a `className` merges with those classes, so `lg:grid-cols-2` replaces only the three-column step.
+
+Each `AiProviderPickerEntry` is one card's data:
+
+- `provider`, a `string`: the key `AiProviderIcon` resolves, such as `openai`
+- `name`, a `string`: the card's title
+- `description`, a `string`: the text under the title, clamped to two lines
+- `meta`, an optional `string`: the muted footer note, such as `12 models`; omitted, the card has no footer

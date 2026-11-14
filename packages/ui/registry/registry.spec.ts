@@ -366,9 +366,10 @@ function editorCssProblems(items: RegistryItem[], sheet: string): string[] {
   });
 }
 
-/** Every family file: a component under a kind folder or a block, specs left out. */
+/** Every family file: a component under a kind folder or a block, specs left out. The blocks folder may not exist. */
 function familyFiles(): string[] {
   return ['components', 'blocks']
+    .filter((dir) => existsSync(join(APP, BASE, dir)))
     .flatMap((dir) =>
       readdirSync(join(APP, BASE, dir), { recursive: true, encoding: 'utf8' }).map((path) => `${BASE}/${dir}/${path}`),
     )
@@ -596,10 +597,10 @@ const emojiAppearanceToggleGroup: RegistryItem = {
 
 const aiProviderPicker: RegistryItem = {
   name: 'ai-provider-picker',
-  type: 'registry:block',
+  type: 'registry:component',
   dependencies: ['@zeroxsolutions/icons'],
   registryDependencies: ['@shadcn/card', '@shadcn/utils', `${ITEM_PREFIX}ai-provider-card`],
-  files: [{ path: `${BASE}/blocks/ai-provider-picker.tsx`, type: 'registry:block' }],
+  files: [{ path: `${BASE}/components/data-entry/ai-provider-picker.tsx`, type: 'registry:component' }],
 };
 
 /** The published icons, which the fixtures import and no fixture ships. */
@@ -724,7 +725,7 @@ describe('declarationProblems', () => {
 
   it('reports a component file the item imports that no item ships', () => {
     expect(declarationProblems(aiProviderPicker, ICON_OWNERS)).toEqual([
-      'ai-provider-picker: registry/bases/base-ui/blocks/ai-provider-picker.tsx imports @/registry/bases/base-ui/components/data-display/ai-provider-card, which no registry item ships',
+      'ai-provider-picker: registry/bases/base-ui/components/data-entry/ai-provider-picker.tsx imports @/registry/bases/base-ui/components/data-display/ai-provider-card, which no registry item ships',
     ]);
   });
 });
@@ -846,7 +847,12 @@ const FAMILIES = [`${BASE}/blocks/ai-provider-picker.tsx`, `${BASE}/components/d
 
 const familyItems: RegistryItem[] = [
   { ...treeItem, categories: ['data-display'] },
-  { ...aiProviderPicker, categories: ['blocks'] },
+  {
+    ...aiProviderPicker,
+    type: 'registry:block',
+    categories: ['blocks'],
+    files: [{ path: FAMILIES[0], type: 'registry:block' }],
+  },
 ];
 
 const treeItemDemo: RegistryItem = {
