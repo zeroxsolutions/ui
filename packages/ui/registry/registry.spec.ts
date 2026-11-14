@@ -69,16 +69,19 @@ function importsOf(path: string): string[] {
   ];
 }
 
-/** The app-relative file a specifier names, or undefined for a package. */
+/** The app-relative file a specifier names, or undefined for a package; a relative `.js` specifier is refused, since Turbopack resolves none. */
 function sourceOf(importer: string, specifier: string): string | undefined {
   let stem: string;
   if (specifier.startsWith('@/registry/')) stem = specifier.slice('@/'.length);
-  else if (specifier.startsWith('.')) stem = join(dirname(importer), specifier);
-  else if (specifier.startsWith('@/')) throw new Error(`${importer} imports ${specifier}, which is app code`);
+  else if (specifier.startsWith('.')) {
+    if (specifier.endsWith('.js')) {
+      throw new Error(`${importer} imports ${specifier}, which Turbopack cannot resolve; drop the .js`);
+    }
+    stem = join(dirname(importer), specifier);
+  } else if (specifier.startsWith('@/')) throw new Error(`${importer} imports ${specifier}, which is app code`);
   else return undefined;
-  const bare = stem.endsWith('.js') ? stem.slice(0, -'.js'.length) : stem;
   const found = ['.ts', '.tsx', '/index.ts', '/index.tsx']
-    .map((ext) => bare + ext)
+    .map((ext) => stem + ext)
     .find((p) => existsSync(join(APP, p)));
   if (found === undefined) throw new Error(`${importer} imports ${specifier}, which resolves to no file`);
   return found;
@@ -603,17 +606,10 @@ const aiProviderPicker: RegistryItem = {
 const ICON_OWNERS = ownersOf(REGISTRY.items.filter((item) => HOUSE_ICON.test(item.files[0]?.path ?? '')));
 
 describe('declarationProblems', () => {
-  it('resolves a relative .js import to its .ts source', () => {
-    const item: RegistryItem = {
-      name: 'composer-triggers',
-      type: 'registry:component',
-      files: [{ path: `${BASE}/editor/composer/composer-triggers.ts`, type: 'registry:component' }],
-    };
-    const owners = new Map([
-      [`${BASE}/editor/document/features/mention/index.ts`, 'mention'],
-      [`${BASE}/editor/composer/triggers/inline-token.tsx`, 'inline-token'],
-    ]);
-    expect(declarationProblems(item, owners).filter((problem) => problem.includes('resolves to no file'))).toEqual([]);
+  it('refuses a relative import ending .js, which Turbopack cannot resolve', () => {
+    expect(() => sourceOf(`${BASE}/editor/composer/chat-input.tsx`, './composer-kit.js')).toThrow(
+      `${BASE}/editor/composer/chat-input.tsx imports ./composer-kit.js, which Turbopack cannot resolve; drop the .js`,
+    );
   });
 
   it('reports nothing for an item declaring exactly what its files import', () => {
