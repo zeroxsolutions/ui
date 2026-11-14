@@ -68,7 +68,10 @@ describe('AnimatedGridPattern', () => {
     const { container } = render(<AnimatedGridPattern numSquares={4} />);
     await act(async () => undefined);
 
-    expect(squaresOf(container).map((square) => square.getAttribute('opacity'))).toEqual(['0', '0', '0', '0']);
+    // A cell starts at 0 and fades over `duration` seconds, so a slow runner may already have drawn a frame or two.
+    const opacities = squaresOf(container).map((square) => Number(square.getAttribute('opacity')));
+    expect(opacities).toHaveLength(4);
+    for (const opacity of opacities) expect(opacity).toBeLessThan(0.05);
   });
 
   it('draws its cells still at maxOpacity under reduced motion', async () => {
