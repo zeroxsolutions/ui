@@ -44,6 +44,9 @@
     },
     {
       "path": "./packages/shadcn-upstream"
+    },
+    {
+      "path": "./packages/editor-docs-web"
     }
   ],
   "compilerOptions": {

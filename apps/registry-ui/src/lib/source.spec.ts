@@ -11,6 +11,10 @@ const APP = resolve(import.meta.dirname, '../..');
 /** The web registry's package, whose `registry.json` paths are relative to it. */
 const UI = resolve(APP, '../../packages/ui');
 const CONTENT = resolve(APP, '../../packages/ui-docs-web/content/docs');
+/** The editor docs' folder, which `source.config.ts` loads beside `CONTENT`; its pages sit under `editor/`. */
+const EDITOR_CONTENT = resolve(APP, '../../packages/editor-docs-web/content/docs');
+/** Both content folders, which together are the site's docs. */
+const CONTENTS = [CONTENT, EDITOR_CONTENT];
 
 /** The content tree: every page's slug (`components/base/button`), and each folder's `meta.json` pages by folder (`''` is the root). */
 interface DocsTree {
@@ -24,13 +28,15 @@ const REST = /^(\.\.\.|z\.\.\.a)$/;
 /** A `pages` entry linking into the docs, `[Label](/docs/<slug>)`; the slug is captured. */
 const DOCS_LINK = /^\[[^\]]*\]\(\/docs\/?([^)#]*)\)$/;
 
-function readDocsTree(root: string): DocsTree {
-  const files = readdirSync(root, { recursive: true, encoding: 'utf8' });
-  const pages = files.filter((file) => file.endsWith('.mdx')).map((file) => file.slice(0, -'.mdx'.length));
+function readDocsTree(roots: string[]): DocsTree {
+  const files = roots.flatMap((root) =>
+    readdirSync(root, { recursive: true, encoding: 'utf8' }).map((file) => ({ root, file })),
+  );
+  const pages = files.filter(({ file }) => file.endsWith('.mdx')).map(({ file }) => file.slice(0, -'.mdx'.length));
   const metas = Object.fromEntries(
     files
-      .filter((file) => file === 'meta.json' || file.endsWith('/meta.json'))
-      .map((file) => [
+      .filter(({ file }) => file === 'meta.json' || file.endsWith('/meta.json'))
+      .map(({ root, file }) => [
         file.slice(0, -'meta.json'.length).replace(/\/$/, ''),
         (JSON.parse(readFileSync(join(root, file), 'utf8')) as { pages?: string[] }).pages ?? [],
       ]),
@@ -60,11 +66,13 @@ function unreachedPages({ pages, metas }: DocsTree): string[] {
 }
 
 /** Each page's MDX source, by slug. */
-function readPageSources(root: string): Record<string, string> {
+function readPageSources(roots: string[]): Record<string, string> {
   return Object.fromEntries(
-    readdirSync(root, { recursive: true, encoding: 'utf8' })
-      .filter((file) => file.endsWith('.mdx'))
-      .map((file) => [file.slice(0, -'.mdx'.length), readFileSync(join(root, file), 'utf8')]),
+    roots.flatMap((root) =>
+      readdirSync(root, { recursive: true, encoding: 'utf8' })
+        .filter((file) => file.endsWith('.mdx'))
+        .map((file) => [file.slice(0, -'.mdx'.length), readFileSync(join(root, file), 'utf8')]),
+    ),
   );
 }
 
@@ -578,7 +586,7 @@ function unusedExamples(sources: Record<string, string>, examples: string[]): st
 
 describe('content/docs', () => {
   it('reaches every page from a meta.json', () => {
-    expect(unreachedPages(readDocsTree(CONTENT))).toEqual([]);
+    expect(unreachedPages(readDocsTree(CONTENTS))).toEqual([]);
   });
 
   it('reports a page no meta.json lists or links', () => {
@@ -594,7 +602,7 @@ describe('content/docs', () => {
   });
 
   it('names only demos and items the examples index holds', () => {
-    expect(unresolvedNames(readPageSources(CONTENT), new Set(Object.keys(Index)))).toEqual([]);
+    expect(unresolvedNames(readPageSources(CONTENTS), new Set(Object.keys(Index)))).toEqual([]);
   });
 
   it('reports a name the examples index lacks', () => {
@@ -609,7 +617,7 @@ describe('content/docs', () => {
   });
 
   it("names every registry:example in some page's preview", () => {
-    expect(unusedExamples(readPageSources(CONTENT), readExampleNames())).toEqual([]);
+    expect(unusedExamples(readPageSources(CONTENTS), readExampleNames())).toEqual([]);
   });
 
   it('reports an example no page previews, naming it in a ComponentSource aside', () => {
@@ -626,7 +634,7 @@ describe('content/docs', () => {
   });
 
   it("opens every item page with the item's own demo", () => {
-    expect(misplacedFirstPreviews(readPageSources(CONTENT), readDemoedNames())).toEqual([]);
+    expect(misplacedFirstPreviews(readPageSources(CONTENTS), readDemoedNames())).toEqual([]);
   });
 
   it("reports an editor page whose first preview is not the item's demo", () => {
@@ -669,7 +677,7 @@ describe('content/docs', () => {
   });
 
   it("documents only registry items, and repeats an item's title and description", () => {
-    expect(unnamedPages(readPageSources(CONTENT), readItems())).toEqual([]);
+    expect(unnamedPages(readPageSources(CONTENTS), readItems())).toEqual([]);
   });
 
   it('reports a page for nothing published, and an item page that renames its item', () => {
@@ -739,7 +747,7 @@ describe('content/docs', () => {
   });
 
   it('documents only registry:component items under components/base/, its own index aside', () => {
-    expect(nonComponentPages(readPageSources(CONTENT), readComponentNames())).toEqual([]);
+    expect(nonComponentPages(readPageSources(CONTENTS), readComponentNames())).toEqual([]);
   });
 
   it('reports a components page for nothing registry.json publishes as a registry:component', () => {
@@ -774,7 +782,7 @@ describe('content/docs', () => {
         .filter(isFeature)
         .map((item) => item.name),
     );
-    expect(missingInstallCommands(readPageSources(CONTENT), readItems(), features)).toEqual([]);
+    expect(missingInstallCommands(readPageSources(CONTENTS), readItems(), features)).toEqual([]);
   });
 
   it('reports a page that installs its subject some other way, even where the right line sits in its Manual tab', () => {
@@ -820,7 +828,7 @@ describe('content/docs', () => {
   });
 
   it('gives every component a page', () => {
-    expect(pagelessComponents(readPageSources(CONTENT), readComponentItems())).toEqual([]);
+    expect(pagelessComponents(readPageSources(CONTENTS), readComponentItems())).toEqual([]);
   });
 
   it('reports a component with no page', () => {
@@ -945,7 +953,7 @@ describe('content/docs', () => {
   });
 
   it("installs every component's files and packages as its item lists them", () => {
-    expect(manualProblems(readPageSources(CONTENT), readComponentItems(true))).toEqual([]);
+    expect(manualProblems(readPageSources(CONTENTS), readComponentItems(true))).toEqual([]);
   });
 
   it('reports a missing file, a file titled with the wrong path, a file two blocks name, and the wrong packages', () => {
@@ -985,7 +993,9 @@ describe('content/docs', () => {
   });
 
   it('documents exactly the parts each component exports, with props each part declares', () => {
-    expect(apiProblems(readPageSources(CONTENT), readComponentItems(), familySource, PROPS_READ_ELSEWHERE)).toEqual([]);
+    expect(apiProblems(readPageSources(CONTENTS), readComponentItems(), familySource, PROPS_READ_ELSEWHERE)).toEqual(
+      [],
+    );
   });
 
   it('reports a missing part, and a prop the part does not declare', () => {
@@ -1062,7 +1072,7 @@ describe('content/docs', () => {
   });
 
   it('allows every PROPS_READ_ELSEWHERE entry, each a real part with a table listing every allowed prop', () => {
-    expect(readElsewhereProblems(readPageSources(CONTENT), readComponentItems(), PROPS_READ_ELSEWHERE)).toEqual([]);
+    expect(readElsewhereProblems(readPageSources(CONTENTS), readComponentItems(), PROPS_READ_ELSEWHERE)).toEqual([]);
   });
 
   it('reports an allowed prop its table drops, a part with no table, and an entry for no documented part', () => {

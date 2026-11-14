@@ -1,0 +1,22 @@
+{
+  "name": "@zeroxsolutions/editor-docs-web",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./routes": {
+      "types": "./src/routes/index.ts",
+      "default": "./src/routes/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@zeroxsolutions/routing": "catalog:"
+  },
+  "nx": {
+    "tags": [
+      "type:context-frontend",
+      "context:editor-docs"
+    ]
+  }
+}
