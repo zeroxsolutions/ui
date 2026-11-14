@@ -1,0 +1,58 @@
+---
+title: Meteors
+description: A decorative background of meteors falling across their parent, each a dot trailing a fading line, hidden from screen readers and drawn not at all when the system asks for reduced motion.
+---
+
+<NativePreview name="meteors-demo" />
+
+## Installation
+
+<InstallCommand name="meteors" />
+
+The CLI writes `components/general/meteors.tsx`, installs [Icon](/native/components/nativewind/icon), Motion and
+Utils, and adds `lucide-react-native`, `react-native-reanimated` and `react-native-svg`.
+
+## Usage
+
+```tsx
+import { Meteors } from '@/components/general/meteors';
+```
+
+The meteors fill their parent, so give it a size and `overflow-hidden`, and put the content after them, which
+draws over them:
+
+```tsx
+<View className="h-64 items-center justify-center overflow-hidden rounded-lg border border-border">
+  <Meteors />
+  <Text>Launch week</Text>
+</View>
+```
+
+They are decoration: hidden from a screen reader, and touches pass through them to what they cover.
+
+## API reference
+
+### Meteors
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop          | Type     | Default |
+| ------------- | -------- | ------- |
+| `number`      | `number` | `20`    |
+| `minDelay`    | `number` | `0.2`   |
+| `maxDelay`    | `number` | `1.2`   |
+| `minDuration` | `number` | `2`     |
+| `maxDuration` | `number` | `10`    |
+| `angle`       | `number` | `215`   |
+
+Each meteor starts at a random point along the top edge and first falls after a random wait between `minDelay`
+and `maxDelay` seconds, then falls again every `minDuration` to `maxDuration` seconds, a whole number picked once
+per meteor. `angle` is the path's rotation in degrees; at 215 a meteor falls to the right and down. When the
+system asks for reduced motion no meteor is drawn.
+
+## Differences from the web
+
+- The meteors draw in the muted foreground; a View hands no text colour to the parts inside it, so a `text-*`
+  class on Meteors does not recolour them as it does on the web.
+- The item adds no utility or keyframes to the app's CSS: Reanimated runs the fall.
+- The web's `data-slot` attribute is not set; a View takes no data attributes.

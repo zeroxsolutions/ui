@@ -29,6 +29,8 @@ test("the native docs' sidebar lists their pages and the components under the de
     ['Unsaved indicator', '/unsaved-indicator'],
     ['Icon media', '/icon-media'],
     ['Icon label', '/icon-label'],
+    ['Meteors', '/meteors'],
+    ['Animated grid pattern', '/animated-grid-pattern'],
     ['Center', '/center'],
     ['Page container', '/page-container'],
     ['Panel header', '/panel-header'],
