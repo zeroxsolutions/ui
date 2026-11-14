@@ -32,7 +32,8 @@ export function Viewer({ doc, features = [], theme, forcedMode, className }: Vie
   const registry = useMemo(() => createCodecRegistry(features), [features]);
   const tree = renderToReact(doc, registry);
   const inner = (
-    <div data-editor="document" className={cn('document-editor prose max-w-none', className)}>
+    // Sized by its container, as the editor is, so an unwrapped block scrolls rather than widening it.
+    <div data-editor="document" className={cn('document-editor prose max-w-none [contain:inline-size]', className)}>
       {tree}
     </div>
   );

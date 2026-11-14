@@ -191,7 +191,12 @@ export function Editor({ features, content, editable = true, className, onReady,
       <EditorContent
         editor={engine as never}
         data-editor="document"
-        className={cn('document-editor prose max-w-none text-base leading-relaxed focus:outline-none', className)}
+        // Its width comes from where it is placed, never from its content: a code line, a formula or a
+        // diagram that does not wrap would otherwise widen the whole document instead of scrolling in its block.
+        className={cn(
+          'document-editor prose max-w-none [contain:inline-size] text-base leading-relaxed focus:outline-none',
+          className,
+        )}
       />
       {gripHost && createPortal(<GripVertical size={16} aria-hidden />, gripHost)}
       {rootEl &&

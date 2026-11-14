@@ -195,9 +195,7 @@ export function CodeBlockNodeView({ attrs, updateAttrs, editable }: NodeViewProp
     <div
       data-code-block
       contentEditable={false}
-      // A code line does not wrap, so without the containment its width becomes the document's
-      // intrinsic width and a long line widens the whole editor instead of scrolling in its pane.
-      className="my-4 [contain:inline-size]"
+      className="my-4"
       onMouseDown={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
     >
