@@ -1,0 +1,101 @@
+---
+title: Editor Math
+description: Inline and block formulas written in LaTeX, drawn by KaTeX, with a symbol palette while editing.
+---
+
+<ComponentPreview name="editor-math-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-math
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core katex lucide-react zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button card input-group popover separator tabs utils @zui/collapsible-card @zui/copy-button @zui/editor-code-mirror @zui/math-editor
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-math" title="components/editor/document/features/math/index.ts" />
+
+<ComponentSource
+  name="editor-math"
+  file="registry/bases/base-ui/editor/document/features/math/math.tsx"
+  title="components/editor/document/features/math/math.tsx"
+/>
+
+<Step>Add its styles to your global CSS.</Step>
+
+```css
+@import 'katex/dist/katex.min.css';
+```
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+
+import { math } from '@/components/editor/document/features/math';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), math()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`math` adds `mathInline`, a formula inside a line of text, and `mathBlock`, a formula on its own line, both written in LaTeX in the `latex` attribute and drawn by KaTeX. Its slash items are "Inline math" and "Math block", and the commands `insertMathInline` and `insertMathBlock` take an optional `latex`.
+
+Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
+
+```tsx
+import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
+
+function insert(editor: IEditor) {
+  editor.run('insertMathBlock', { latex: 'x^2 + y^2 = r^2' });
+}
+```
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

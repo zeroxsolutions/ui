@@ -1,0 +1,125 @@
+---
+title: Editor Callout
+description: A highlighted block that sets a note apart in one of five variants: note, info, success, warning or danger.
+---
+
+<ComponentPreview name="editor-callout-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-callout
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core @zeroxsolutions/fluent-emoji lucide-react zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-callout" title="components/editor/document/features/callout/index.ts" />
+
+<ComponentSource
+  name="editor-callout"
+  file="registry/bases/base-ui/editor/document/features/callout/callout.tsx"
+  title="components/editor/document/features/callout/callout.tsx"
+/>
+
+<Step>Add its styles to your global CSS.</Step>
+
+```css
+.document-editor [data-slot='callout'] > img {
+  margin-bottom: 0;
+}
+@layer components {
+  .document-editor [data-slot='callout'] {
+    border-color: var(--border);
+    background: color-mix(in oklab, var(--muted-foreground) 6%, var(--background));
+  }
+  .document-editor [data-callout='info'] {
+    border-color: color-mix(in oklab, var(--info) 35%, var(--border));
+    background: color-mix(in oklab, var(--info) 8%, var(--background));
+  }
+  .document-editor [data-callout='success'] {
+    border-color: color-mix(in oklab, var(--success) 35%, var(--border));
+    background: color-mix(in oklab, var(--success) 8%, var(--background));
+  }
+  .document-editor [data-callout='warning'] {
+    border-color: color-mix(in oklab, var(--warning) 40%, var(--border));
+    background: color-mix(in oklab, var(--warning) 10%, var(--background));
+  }
+  .document-editor [data-callout='danger'] {
+    border-color: color-mix(in oklab, var(--destructive) 35%, var(--border));
+    background: color-mix(in oklab, var(--destructive) 8%, var(--background));
+  }
+}
+```
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+
+import { callout } from '@/components/editor/document/features/callout';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), callout()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`Callout` adds the `callout` block, a bordered box with an icon and room for further blocks, in the variants `note`, `info`, `success`, `warning` and `danger`. Its slash item is "Callout" and its command `insertCallout` takes an optional `variant`, `info` by default.
+
+Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
+
+```tsx
+import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
+
+function insert(editor: IEditor) {
+  editor.run('insertCallout', { variant: 'warning' });
+}
+```
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

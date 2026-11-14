@@ -1,0 +1,114 @@
+---
+title: Editor Image
+description: A block image with alt text and an optional width, edited in a popover.
+---
+
+<ComponentPreview name="editor-image-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-image
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core lucide-react zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button field input popover
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-image" title="components/editor/document/features/image/index.ts" />
+
+<ComponentSource
+  name="editor-image"
+  file="registry/bases/base-ui/editor/document/features/image/image.tsx"
+  title="components/editor/document/features/image/image.tsx"
+/>
+
+<Step>Add its styles to your global CSS.</Step>
+
+```css
+@layer components {
+  .document-editor img {
+    border-radius: 0.5rem;
+    max-width: 100%;
+    height: auto;
+  }
+  .document-editor img.ProseMirror-selectednode,
+  .document-editor [data-slot='image'].ProseMirror-selectednode,
+  .document-editor .ProseMirror-selectednode:is(img, video, iframe) {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 0.375rem;
+  }
+}
+```
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+
+import { image } from '@/components/editor/document/features/image';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), image()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`image` adds the `image` block, with the attributes `src`, `alt`, `title` and `width`. Selecting it opens an Edit popover for the alt text and the width. Its slash item is "Image" and its command `insertImage` takes a `src` and an optional `alt` and `title`.
+
+Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
+
+```tsx
+import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
+
+function insert(editor: IEditor) {
+  editor.run('insertImage', { src: '/lantern.jpg', alt: 'A red paper lantern' });
+}
+```
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

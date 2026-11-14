@@ -1,4 +1,22 @@
 {
   "title": "Editor",
-  "pages": ["index", "---Surfaces---", "document-editor", "---Libraries---", "editor-theme", "editor-code-mirror"]
+  "pages": [
+    "index",
+    "---Surfaces---",
+    "document-editor",
+    "---Features---",
+    "editor-callout",
+    "editor-code-block",
+    "editor-embed",
+    "editor-image",
+    "editor-link",
+    "editor-math",
+    "editor-mention",
+    "editor-mermaid",
+    "editor-table",
+    "editor-toggle",
+    "---Libraries---",
+    "editor-theme",
+    "editor-code-mirror"
+  ]
 }

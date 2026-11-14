@@ -1,0 +1,107 @@
+---
+title: Editor Mermaid
+description: A diagram block written in Mermaid, with a source pane while editing and the drawing when read.
+---
+
+<ComponentPreview name="editor-mermaid-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-mermaid
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core @zeroxsolutions/icons lucide-react zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add card separator tabs utils @zui/code-card @zui/collapsible-card @zui/copy-button @zui/editor-code-mirror @zui/mermaid-editor
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-mermaid" title="components/editor/document/features/mermaid/index.ts" />
+
+<ComponentSource
+  name="editor-mermaid"
+  file="registry/bases/base-ui/editor/document/features/mermaid/mermaid.tsx"
+  title="components/editor/document/features/mermaid/mermaid.tsx"
+/>
+
+<ComponentSource
+  name="editor-mermaid"
+  file="registry/bases/base-ui/lib/language-options.tsx"
+  title="lib/language-options.tsx"
+/>
+
+<ComponentSource
+  name="editor-mermaid"
+  file="registry/bases/base-ui/types/language-option.ts"
+  title="types/language-option.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+
+import { mermaid } from '@/components/editor/document/features/mermaid';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), mermaid()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`mermaid` adds the `mermaid` block, whose `source` attribute holds the diagram. While editing it shows a source pane beside a drawing, and when read only the drawing. Its slash item is "Mermaid" and its command `insertMermaid` takes an optional `source`.
+
+Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
+
+```tsx
+import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
+
+function insert(editor: IEditor) {
+  editor.run('insertMermaid', { source: 'flowchart LR\n  A --> B' });
+}
+```
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.
