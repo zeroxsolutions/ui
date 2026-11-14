@@ -5,11 +5,11 @@ import { CollapsibleCard } from '@/registry/bases/base-ui/components/layout/coll
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/registry/bases/base-ui/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { useIsMobile } from '@/registry/bases/base-ui/hooks/use-mobile';
-import { CodeMirrorPane } from '../../shared/code-mirror/index.js';
+import { CodeMirrorPane } from '../../shared/code-mirror/index';
 import type { MermaidEditorProps } from '@zeroxsolutions/editor-core/mermaid/core/types';
-import { DiagramCanvas } from './preview.js';
-import { MermaidToolbar } from './toolbar.js';
-import { useMermaidRender } from './use-mermaid-render.js';
+import { DiagramCanvas } from './preview';
+import { MermaidToolbar } from './toolbar';
+import { useMermaidRender } from './use-mermaid-render';
 
 /**
  * `<MermaidEditor>` — the standalone Mermaid authoring surface: a source pane

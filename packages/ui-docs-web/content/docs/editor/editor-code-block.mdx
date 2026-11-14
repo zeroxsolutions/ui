@@ -1,0 +1,128 @@
+---
+title: Editor Code Block
+description: A code block with a language picker, a CodeMirror pane while editing and a highlighted card when read.
+---
+
+<ComponentPreview name="editor-code-block-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-code-block
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core lucide-react zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button combobox dropdown-menu @zui/code-card @zui/collapsible-card @zui/copy-button @zui/editor-code-mirror @zui/language-combobox
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-code-block" title="components/editor/document/features/code-block/index.ts" />
+
+<ComponentSource
+  name="editor-code-block"
+  file="registry/bases/base-ui/editor/document/features/code-block/code-block.tsx"
+  title="components/editor/document/features/code-block/code-block.tsx"
+/>
+
+<ComponentSource
+  name="editor-code-block"
+  file="registry/bases/base-ui/editor/document/features/code-block/code-settings-menu.tsx"
+  title="components/editor/document/features/code-block/code-settings-menu.tsx"
+/>
+
+<ComponentSource
+  name="editor-code-block"
+  file="registry/bases/base-ui/types/language-option.ts"
+  title="lib/language-option.ts"
+/>
+
+<Step>Add its styles to your global CSS.</Step>
+
+```css
+.document-editor [data-slot='code-card'] pre {
+  margin: 0;
+  background: transparent;
+  border-radius: 0;
+  color: inherit;
+}
+.document-editor [data-slot='code-card'] code {
+  background: transparent;
+  color: inherit;
+  font-weight: inherit;
+  padding: 0;
+}
+.document-editor [data-slot='code-card'] code::before,
+.document-editor [data-slot='code-card'] code::after {
+  content: none;
+}
+```
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+
+import { codeBlock } from '@/components/editor/document/features/code-block';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), codeBlock()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`codeBlock` adds the `codeBlock` block, whose `language` and `code` attributes the editing pane and the highlighted card both read. Its slash item is "Code block" and its command `insertCodeBlock` takes an optional `language` and `code`.
+
+Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
+
+```tsx
+import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
+
+function insert(editor: IEditor) {
+  editor.run('insertCodeBlock', { language: 'typescript', code: 'const stops = 3;' });
+}
+```
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

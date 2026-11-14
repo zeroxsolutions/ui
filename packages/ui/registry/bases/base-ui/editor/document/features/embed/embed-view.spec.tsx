@@ -1,7 +1,7 @@
 import { render, fireEvent, cleanup } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
-import { EmbedView } from './embed.js';
+import { EmbedView } from './embed';
 
 afterEach(() => {
   cleanup();

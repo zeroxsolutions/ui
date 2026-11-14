@@ -4,7 +4,7 @@ import { Sigma } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { useMathRender, type MathRenderState } from './use-math-render.js';
+import { useMathRender, type MathRenderState } from './use-math-render';
 
 /**
  * `<FormulaRender>` - the rendered formula in a design-system container, plus its

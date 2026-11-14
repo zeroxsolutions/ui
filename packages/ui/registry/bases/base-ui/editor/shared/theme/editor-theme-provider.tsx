@@ -2,9 +2,9 @@
 
 import { useTheme } from 'next-themes';
 import { useMemo, type ReactNode } from 'react';
-import { defaultEditorTheme } from './default-theme.js';
-import { EditorThemeContext, type EditorThemeContextValue } from './editor-theme-context.js';
-import type { IEditorTheme, ThemeMode } from './types/editor-theme.js';
+import { defaultEditorTheme } from './default-theme';
+import { EditorThemeContext, type EditorThemeContextValue } from './editor-theme-context';
+import type { IEditorTheme, ThemeMode } from './types/editor-theme';
 
 export interface EditorThemeProviderProps {
   /** The theme to apply; defaults to the shipped default theme. */

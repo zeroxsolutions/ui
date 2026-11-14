@@ -1,0 +1,27 @@
+{
+  "title": "Editor",
+  "pages": [
+    "index",
+    "---Surfaces---",
+    "document-editor",
+    "math-editor",
+    "mermaid-editor",
+    "code-editor",
+    "chat-input",
+    "---Features---",
+    "editor-callout",
+    "editor-code-block",
+    "editor-embed",
+    "editor-image",
+    "editor-link",
+    "editor-math",
+    "editor-mention",
+    "editor-mermaid",
+    "editor-table",
+    "editor-toggle",
+    "editor-features",
+    "---Libraries---",
+    "editor-theme",
+    "editor-code-mirror"
+  ]
+}

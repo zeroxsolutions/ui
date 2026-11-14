@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { FileContentRouter, type FileContentRouterProps, type RoutedFile } from './file-content-router.js';
+import { FileContentRouter, type FileContentRouterProps, type RoutedFile } from './file-content-router';
 
 interface CodeEditorContextValue {
   files: RoutedFile[];

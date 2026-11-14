@@ -4,11 +4,13 @@ test('every component page renders its preview, fits a phone without a stage scr
   page,
   request,
 }) => {
-  // Each page is prerendered, but 42 of them across a cold worker outrun the default deadline.
-  test.setTimeout(180_000);
+  // Each page is prerendered, but 60 of them across a cold worker outrun the default deadline.
+  test.setTimeout(270_000);
   const response = await request.get('/r/styles/base-nova/registry.json');
   expect(response.status()).toBe(200);
-  const registry = (await response.json()) as { items: { name: string; type: string; title: string }[] };
+  const registry = (await response.json()) as {
+    items: { name: string; type: string; title: string; categories?: string[] }[];
+  };
   const components = registry.items.filter((item) => item.type === 'registry:component');
   expect(components.length).toBeGreaterThan(0);
 
@@ -19,8 +21,9 @@ test('every component page renders its preview, fits a phone without a stage scr
   });
   await page.setViewportSize({ width: 390, height: 844 });
 
-  for (const { name, title } of components) {
-    await page.goto(`/docs/components/base/${name}`);
+  for (const { name, title, categories } of components) {
+    // An editor item's page sits in the docs' editor section, not among the components.
+    await page.goto(categories?.[0] === 'editor' ? `/docs/editor/${name}` : `/docs/components/base/${name}`);
     await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
     await expect(page.locator('[data-slot=component-preview-stage]').first()).toBeVisible();
     // Measured once the page's own requests settle: a demo widened by an image or a font that arrives

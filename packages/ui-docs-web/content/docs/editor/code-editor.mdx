@@ -1,0 +1,88 @@
+---
+title: Code Editor
+description: A multi-file code editor that keeps the open files and the active one in context, and routes each file to a code, Markdown, image or font view.
+---
+
+<ComponentPreview name="code-editor-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/code-editor
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add empty scroll-area utils @zui/editor-code-mirror @zui/file-type-icon @zui/font-preview @zui/image-preview @zui/markdown-view
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="code-editor" title="components/editor/code/code-editor.tsx" />
+
+<ComponentSource
+  name="code-editor"
+  file="registry/bases/base-ui/editor/code/file-content-router.tsx"
+  title="components/editor/code/file-content-router.tsx"
+/>
+
+<ComponentSource
+  name="code-editor"
+  file="registry/bases/base-ui/editor/code/index.ts"
+  title="components/editor/code/index.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { CodeEditor, CodeEditorContent, type RoutedFile } from '@/components/editor/code';
+```
+
+```tsx
+function Project({ files }: { files: RoutedFile[] }) {
+  return (
+    <CodeEditor files={files} defaultValue="README.md" onFileTextChange={save}>
+      <CodeEditorContent>Pick a file.</CodeEditorContent>
+    </CodeEditor>
+  );
+}
+```
+
+`CodeEditor` holds the open files and the active path and draws nothing; lay out a tree, a menu and `CodeEditorContent` inside it, and read the selection with `useCodeEditor`. It keeps no text of its own, so the host stores each file and reacts to `onFileTextChange`. A file's `view` says how it is shown: `code`, `markdown`, `image`, `font` or `binary`, and `fileView` classifies a path by its extension.
+
+## API reference
+
+### CodeEditor
+
+| Prop               | Type                                   | Default |
+| ------------------ | -------------------------------------- | ------- |
+| `files`            | `RoutedFile[]`                         | -       |
+| `value`            | `string`                               | -       |
+| `defaultValue`     | `string`                               | -       |
+| `onValueChange`    | `(path: string) => void`               | -       |
+| `onFileTextChange` | `(path: string, text: string) => void` | -       |
+| `readOnly`         | `boolean`                              | `false` |

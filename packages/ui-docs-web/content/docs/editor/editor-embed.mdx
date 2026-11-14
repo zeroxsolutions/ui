@@ -1,0 +1,95 @@
+---
+title: Editor Embed
+description: A block that shows an external page in a responsive frame, after a URL input while it is empty.
+---
+
+<ComponentPreview name="editor-embed-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-embed
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core lucide-react zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add input
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-embed" title="components/editor/document/features/embed/index.ts" />
+
+<ComponentSource
+  name="editor-embed"
+  file="registry/bases/base-ui/editor/document/features/embed/embed.tsx"
+  title="components/editor/document/features/embed/embed.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+
+import { embed } from '@/components/editor/document/features/embed';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), embed()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`embed` adds the `embed` block, which draws its `url` in a responsive frame once one is set and asks for a URL while it is empty. Its slash item is "Embed" and its command `insertEmbed` takes a `url` and an optional `title`. The embedded page is not trusted: restrict which hosts a URL may name before you store it.
+
+Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
+
+```tsx
+import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
+
+function insert(editor: IEditor) {
+  editor.run('insertEmbed', { url: 'https://www.openstreetmap.org/export/embed.html', title: 'Map' });
+}
+```
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

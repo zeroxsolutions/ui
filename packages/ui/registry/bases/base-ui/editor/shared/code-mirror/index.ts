@@ -4,5 +4,5 @@
  * compose. Its Shiki foundation is the single highlighter in
  * `@/registry/bases/base-ui/lib/shiki` (design D2).
  */
-export { CodeMirrorPane } from './code-mirror-pane.js';
-export type { CodeMirrorPaneProps } from './code-mirror-pane.js';
+export { CodeMirrorPane } from './code-mirror-pane';
+export type { CodeMirrorPaneProps } from './code-mirror-pane';

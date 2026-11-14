@@ -7,7 +7,27 @@ const PROJECT = join(__dirname, '../..');
 const WEB = dirname(require.resolve('@zeroxsolutions/ui/registry.json'));
 
 /** The web items with no native twin, each with what keeps it off a phone. */
-const NOT_PORTED: ReadonlyMap<string, string> = new Map([]);
+/** The editor chrome renders through Tiptap into the DOM; a native editor is a design of its own. */
+const EDITOR = 'drawn by Tiptap, which renders only into the DOM';
+
+const NOT_PORTED: ReadonlyMap<string, string> = new Map([
+  ['document-editor', EDITOR],
+  ['editor-callout', EDITOR],
+  ['editor-code-block', EDITOR],
+  ['editor-embed', EDITOR],
+  ['editor-image', EDITOR],
+  ['editor-link', EDITOR],
+  ['editor-math', EDITOR],
+  ['editor-mention', EDITOR],
+  ['editor-mermaid', EDITOR],
+  ['editor-table', EDITOR],
+  ['editor-toggle', EDITOR],
+  ['editor-features', EDITOR],
+  ['math-editor', EDITOR],
+  ['mermaid-editor', EDITOR],
+  ['code-editor', EDITOR],
+  ['chat-input', EDITOR],
+]);
 
 /** The web items a later wave of the port brings, which the list loses as each wave lands. */
 const PENDING: ReadonlySet<string> = new Set([]);

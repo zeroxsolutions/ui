@@ -2,8 +2,8 @@ import { act, render, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DocJSON, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
-import { ChatInput } from './chat-input.js';
-import { ChatMessageView } from './chat-message-view.js';
+import { ChatInput } from './chat-input';
+import { ChatMessageView } from './chat-message-view';
 
 afterEach(cleanup);
 

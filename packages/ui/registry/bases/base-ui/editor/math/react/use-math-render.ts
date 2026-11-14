@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useEditorTheme } from '../../shared/theme/editor-theme-context.js';
+import { useEditorTheme } from '../../shared/theme/editor-theme-context';
 import { renderMath } from '@zeroxsolutions/editor-core/math/core/render';
 
 /**

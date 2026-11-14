@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { EditorView } from '@codemirror/view';
 
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
-import { CodeBlockNodeView, codeBlockCodec } from './code-block.js';
+import { CodeBlockNodeView, codeBlockCodec } from './code-block';
 
 // The read-only path's design-system CodeCard renders upstream ScrollArea,
 // which measures its viewport in a `queueMicrotask` its layout effect

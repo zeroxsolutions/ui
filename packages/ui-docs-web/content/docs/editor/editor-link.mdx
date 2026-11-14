@@ -1,0 +1,89 @@
+---
+title: Editor Link
+description: A link mark, set from the bubble menu with an address and removed again.
+---
+
+<ComponentPreview name="editor-link-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-link
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @tiptap/extension-link @zeroxsolutions/editor-core lucide-react zod
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-link" title="components/editor/document/features/link/index.ts" />
+
+<ComponentSource
+  name="editor-link"
+  file="registry/bases/base-ui/editor/document/features/link/link.tsx"
+  title="components/editor/document/features/link/link.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+
+import { link } from '@/components/editor/document/features/link';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), link()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`link` adds the `link` mark and the "Link" item of the bubble menu, which asks for an address. The commands are `setLink`, which takes an `href`, and `unsetLink`; both act on the selection.
+
+Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
+
+```tsx
+import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
+
+function insert(editor: IEditor) {
+  editor.run('setLink', { href: 'https://example.com' });
+}
+```
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

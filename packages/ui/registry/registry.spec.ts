@@ -11,10 +11,12 @@ interface RegistryFile {
   target?: string;
 }
 
-type CssVars = Record<'theme' | 'light' | 'dark', Record<string, string>>;
+/** A rule's declarations, or an at-rule's nested rules, as an item's `css` keys them. */
+interface CssBlock {
+  [key: string]: string | CssBlock;
+}
 
-/** A rule's body: its declarations, or the blocks nested in it, such as a keyframe's steps. */
-type CssBlock = Record<string, string> | Record<string, Record<string, string>>;
+type CssVars = Record<'theme' | 'light' | 'dark', Record<string, string>>;
 
 interface RegistryItem {
   name: string;
@@ -23,11 +25,8 @@ interface RegistryItem {
   dependencies?: string[];
   registryDependencies?: string[];
   cssVars?: CssVars;
-  /**
-   * CSS rules the item ships, keyed by at-rule (`@utility <name>`, `@keyframes <name>`), each a map of
-   * declarations, or of a keyframe's selector to its declarations.
-   */
-  css?: Record<string, CssBlock>;
+  /** CSS the item ships, keyed by selector or at-rule (`@utility <name>`), each a map of declarations or of nested rules. */
+  css?: CssBlock;
   files: RegistryFile[];
 }
 
@@ -47,10 +46,14 @@ const REGISTRY = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as
 const FROM_IMPORT = /^\s*(?:import|export)\s+(type\s+)?[^;'"]*?\bfrom\s*['"]([^'"]+)['"]/gm;
 const BARE_IMPORT = /^\s*import\s*['"]([^'"]+)['"]/gm;
 const DYNAMIC_IMPORT = /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g;
+/** A `css` key importing a package's stylesheet (`@import 'katex/dist/katex.min.css'`), its specifier captured; a path or a URL is no package. */
+const CSS_PACKAGE_IMPORT = /^@import\s+['"](?![./]|[a-z]+:)([^'"]+)['"]/;
 const SHIPPED = /^registry\/bases\/base-ui\/(lib|hooks|types)\//;
 const TOKEN_CLASS = /\b(?:bg|text|border|ring|fill|stroke)-(success|warning)(?![\w-])/g;
 const FAMILY = /^registry\/bases\/base-ui\/(?:components\/([^/]+)|(blocks))\/([^/]+)\.tsx$/;
 const PUBLISHED = ['registry:component', 'registry:block'];
+/** A document editor feature's own folder, which its item's first file sits in; the `features/index.ts` barrel is none. */
+const FEATURE = /^registry\/bases\/base-ui\/editor\/document\/features\/[^/]+\//;
 /** A file under icons/ is an animated icon this registry owns, published as the item of its file name. */
 const HOUSE_ICON = /^registry\/bases\/base-ui\/icons\/([^/]+)\.tsx$/;
 
@@ -66,12 +69,16 @@ function importsOf(path: string): string[] {
   ];
 }
 
-/** The app-relative file a specifier names, or undefined for a package. */
+/** The app-relative file a specifier names, or undefined for a package; a relative `.js` specifier is refused, since Turbopack resolves none. */
 function sourceOf(importer: string, specifier: string): string | undefined {
   let stem: string;
   if (specifier.startsWith('@/registry/')) stem = specifier.slice('@/'.length);
-  else if (specifier.startsWith('.')) stem = join(dirname(importer), specifier);
-  else if (specifier.startsWith('@/')) throw new Error(`${importer} imports ${specifier}, which is app code`);
+  else if (specifier.startsWith('.')) {
+    if (specifier.endsWith('.js')) {
+      throw new Error(`${importer} imports ${specifier}, which Turbopack cannot resolve; drop the .js`);
+    }
+    stem = join(dirname(importer), specifier);
+  } else if (specifier.startsWith('@/')) throw new Error(`${importer} imports ${specifier}, which is app code`);
   else return undefined;
   const found = ['.ts', '.tsx', '/index.ts', '/index.tsx']
     .map((ext) => stem + ext)
@@ -105,6 +112,7 @@ function ownersOf(items: RegistryItem[]): Map<string, string> {
           (file) =>
             file.path.startsWith(`${BASE}/components/`) ||
             file.path.startsWith(`${BASE}/blocks/`) ||
+            file.path.startsWith(`${BASE}/editor/`) ||
             HOUSE_ICON.test(file.path),
         )
         .map((file) => [file.path, item.name] as const),
@@ -115,7 +123,10 @@ function ownersOf(items: RegistryItem[]): Map<string, string> {
 /**
  * What the item has to declare for `shadcn add` to write files that compile: its own files (every one
  * outside lib/, hooks/ and types/), the lib/, hooks/ and types/ files they reach, the upstream item for a
- * vendored file, another item's `@zui/` name for a file that item ships, and the package for a bare import.
+ * vendored file, another item's `@zui/` name for a file that item ships, and the package for a bare import
+ * or for a stylesheet its `css` imports, which the consumer's own stylesheet has to resolve. A document editor
+ * feature also names `document-editor` even where no file imports it, since a feature plugs into that editor and
+ * does nothing without it.
  */
 function expectedDeclaration(item: RegistryItem, owners: ReadonlyMap<string, string>): Declaration {
   const roots = item.files.filter((file) => !SHIPPED.test(file.path));
@@ -145,6 +156,11 @@ function expectedDeclaration(item: RegistryItem, owners: ReadonlyMap<string, str
         if (owner !== item.name) registryDependencies.add(`${ITEM_PREFIX}${owner}`);
       }
     }
+  }
+  if (FEATURE.test(item.files[0]?.path ?? '')) registryDependencies.add(`${ITEM_PREFIX}document-editor`);
+  for (const key of Object.keys(item.css ?? {})) {
+    const specifier = CSS_PACKAGE_IMPORT.exec(key)?.[1];
+    if (specifier !== undefined) dependencies.add(packageOf(specifier));
   }
   const sorted = (values: Set<string>): string[] => [...values].sort();
   return {
@@ -207,36 +223,146 @@ function cssVarsProblems(item: RegistryItem): string[] {
     : [`${item.name}: cssVars should be ${JSON.stringify(expected)}`];
 }
 
-/** The declarations a block's body holds, one per `property: value;` line. */
-function declarationsOf(body: string): Record<string, string> {
-  return Object.fromEntries(
-    [...body.matchAll(/^\s*([\w-]+):\s*([^;]+);/gm)].map(([, property, value]) => [property, value.trim()]),
-  );
+/** A block of a stylesheet: its declarations, its statement at-rules, and the blocks nested in it, by prelude. */
+interface SheetBlock {
+  declarations: Record<string, string>;
+  statements: Set<string>;
+  blocks: Map<string, SheetBlock>;
 }
 
+/** A prelude on one line, so a selector list written across lines reads as an item's `css` key spells it. */
+function oneLine(prelude: string): string {
+  return prelude
+    .replace(/\s+/g, ' ')
+    .replace(/\s*,\s*/g, ', ')
+    .trim();
+}
+
+/** One statement of a block: an at-rule (`@plugin "..."`) joins its statements, any other is a declaration. */
+function addStatement(block: SheetBlock, text: string): void {
+  const statement = text.trim();
+  if (statement === '') return;
+  if (statement.startsWith('@')) {
+    block.statements.add(oneLine(statement));
+    return;
+  }
+  const colon = statement.indexOf(':');
+  block.declarations[statement.slice(0, colon).trim()] = statement
+    .slice(colon + 1)
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** A stylesheet's comments dropped and its rules read into nested blocks; a quoted string is read whole. */
+function parseSheet(css: string): SheetBlock {
+  const block = (): SheetBlock => ({ declarations: {}, statements: new Set(), blocks: new Map() });
+  const source = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const stack = [block()];
+  let text = '';
+  for (let i = 0; i < source.length; i++) {
+    const char = source[i];
+    const current = stack[stack.length - 1];
+    if (char === '"' || char === "'") {
+      const end = source.indexOf(char, i + 1);
+      text += source.slice(i, end + 1);
+      i = end;
+    } else if (char === '{') {
+      const prelude = oneLine(text);
+      const nested = current.blocks.get(prelude) ?? block();
+      current.blocks.set(prelude, nested);
+      stack.push(nested);
+      text = '';
+    } else if (char === ';' || char === '}') {
+      addStatement(current, text);
+      text = '';
+      if (char === '}') stack.pop();
+    } else {
+      text += char;
+    }
+  }
+  return stack[0];
+}
+
+/** The base stylesheet and the editor's, which the site renders with and an item's `css` is checked against. */
+const SHEETS = ['styles.css', 'editor/styles.css'].map((sheet) =>
+  parseSheet(readFileSync(join(APP, BASE, sheet), 'utf8')),
+);
+
 /**
- * The body of the top-level `<rule> { ... }` block in the base stylesheet, or undefined when it declares
- * none: its declarations, or, for a rule holding nested blocks such as `@keyframes`, each nested block's
- * selector to its declarations.
+ * Each entry of `shipped` against the blocks it nests in: a map of declarations is a rule with exactly the
+ * sheet's declarations, or with none a statement at-rule (`@plugin "..."`) the sheet holds; a map of maps is
+ * an at-rule (`@layer components`) whose rules are checked inside the sheet's block of that name.
  */
-function stylesheetRule(rule: string): CssBlock | undefined {
-  const css = readFileSync(join(APP, BASE, 'styles.css'), 'utf8');
-  const escaped = rule.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const body = new RegExp(`^${escaped} \\{\\n([\\s\\S]*?)^\\}`, 'm').exec(css)?.[1];
-  if (body === undefined) return undefined;
-  const nested = [...body.matchAll(/^\s*([^{}\n]+?)\s*\{\n([\s\S]*?)^\s*\}/gm)];
-  if (nested.length === 0) return declarationsOf(body);
-  return Object.fromEntries(nested.map(([, selector, block]) => [selector, declarationsOf(block)]));
+function cssBlockProblems(name: string, shipped: CssBlock, scopes: SheetBlock[], outer: string[]): string[] {
+  return Object.entries(shipped).flatMap(([rule, body]) => {
+    const label = ruleLabel(outer, rule);
+    if (typeof body === 'string') return [`${name}: css ${label} is a declaration outside a rule`];
+    const found = scopes.map((scope) => scope.blocks.get(rule)).find((block) => block !== undefined);
+    const nested = Object.values(body).some((value) => typeof value !== 'string');
+    if (nested) {
+      if (found === undefined) return [`${name}: css ships ${label}, which styles.css does not declare`];
+      return cssBlockProblems(name, body, [found], [...outer, rule]);
+    }
+    const expected = found?.declarations ?? (scopes.some((scope) => scope.statements.has(rule)) ? {} : undefined);
+    if (expected === undefined) return [`${name}: css ships ${label}, which styles.css does not declare`];
+    return isDeepStrictEqual(body, expected) ? [] : [`${name}: css ${label} should be ${JSON.stringify(expected)}`];
+  });
 }
 
 /** Each rule an item's `css` ships is the same rule, with the same declarations, as the stylesheet the site renders with. */
 function cssProblems(item: RegistryItem): string[] {
-  return Object.entries(item.css ?? {}).flatMap(([rule, declarations]) => {
-    const expected = stylesheetRule(rule);
-    if (expected === undefined) return [`${item.name}: css ships ${rule}, which styles.css does not declare`];
-    return isDeepStrictEqual(declarations, expected)
-      ? []
-      : [`${item.name}: css ${rule} should be ${JSON.stringify(expected)}`];
+  return cssBlockProblems(item.name, item.css ?? {}, SHEETS, []);
+}
+
+/** A rule as `cssProblems` labels it: the at-rules it nests in wrapped around it, `@layer components { .x }`. */
+function ruleLabel(outer: string[], rule: string): string {
+  return outer.reduceRight((inner, at) => `${at} { ${inner} }`, rule);
+}
+
+/** Each rule and statement at-rule of a parsed sheet, by label; a block holding blocks is an at-rule wrapping them. */
+function sheetRules(block: SheetBlock, outer: string[] = []): string[] {
+  return [
+    ...[...block.statements].map((statement) => ruleLabel(outer, statement)),
+    ...[...block.blocks].flatMap(([prelude, nested]) =>
+      nested.blocks.size > 0 ? sheetRules(nested, [...outer, prelude]) : [ruleLabel(outer, prelude)],
+    ),
+  ];
+}
+
+/** Each rule and statement at-rule an item's `css` ships, by label, read as `cssBlockProblems` reads it. */
+function shippedRules(css: CssBlock, outer: string[] = []): string[] {
+  return Object.entries(css).flatMap(([rule, body]) => {
+    if (typeof body === 'string') return [];
+    return Object.values(body).some((value) => typeof value !== 'string')
+      ? shippedRules(body, [...outer, rule])
+      : [ruleLabel(outer, rule)];
+  });
+}
+
+/**
+ * The editor sheet's rules that ship in some number of editor items other than one: the dark variant, which the
+ * base sheet already declares for every consumer, and the KaTeX import, which the spec gives to both items that
+ * typeset math.
+ */
+const SHARED_EDITOR_RULES: ReadonlyMap<string, readonly string[]> = new Map([
+  ['@custom-variant dark (&:is(.dark *))', []],
+  ["@import 'katex/dist/katex.min.css'", ['editor-math', 'math-editor']],
+]);
+
+/** Each rule of the editor sheet ships in the `css` of exactly one editor item, or of the items `SHARED_EDITOR_RULES` names. */
+function editorCssProblems(items: RegistryItem[], sheet: string): string[] {
+  const editorItems = items.filter((item) => item.files.some((file) => file.path.startsWith(`${BASE}/editor/`)));
+  return sheetRules(parseSheet(sheet)).flatMap((rule) => {
+    const owners = editorItems
+      .filter((item) => shippedRules(item.css ?? {}).includes(rule))
+      .map((item) => item.name)
+      .sort();
+    const shared = SHARED_EDITOR_RULES.get(rule);
+    if (shared !== undefined) {
+      return isDeepStrictEqual(owners, shared) ? [] : [`${rule}: should ship in ${JSON.stringify(shared)}`];
+    }
+    if (owners.length === 1) return [];
+    return owners.length === 0 ? [`${rule}: ships in no editor item`] : [`${rule}: ships in ${owners.join(' and ')}`];
   });
 }
 
@@ -252,10 +378,13 @@ function familyFiles(): string[] {
 
 /**
  * Each family file is the first file of exactly one component or block item, which takes its name and kind
- * folder, or else ships as a later file of exactly one such item, as a part only that item publishes.
+ * folder, or else ships as a later file of exactly one such item, as a part only that item publishes. An item
+ * of editor files answers to `editorProblems` instead.
  */
 function familyProblems(items: RegistryItem[], families: string[]): string[] {
-  const published = items.filter((item) => PUBLISHED.includes(item.type));
+  const published = items.filter(
+    (item) => PUBLISHED.includes(item.type) && !(item.files[0]?.path ?? '').startsWith(`${BASE}/editor/`),
+  );
   const unowned = families.flatMap((family) => {
     const owners = published.filter((item) => item.files[0]?.path === family).map((item) => item.name);
     if (owners.length === 0) {
@@ -281,6 +410,42 @@ function familyProblems(items: RegistryItem[], families: string[]): string[] {
     ];
   });
   return [...unowned, ...misnamed];
+}
+
+/** Every editor file: a non-spec `.ts` or `.tsx` under `editor/`. */
+function editorFiles(): string[] {
+  return readdirSync(join(APP, BASE, 'editor'), { recursive: true, encoding: 'utf8' })
+    .filter((path) => /\.tsx?$/.test(path) && !/\.spec\.tsx?$/.test(path))
+    .map((path) => `${BASE}/editor/${path}`)
+    .sort();
+}
+
+/**
+ * Each editor file ships in exactly one editor item, every editor item is in the editor category, and each
+ * of its files lands at `components/editor/` plus its path below `editor/`.
+ */
+function editorProblems(items: RegistryItem[], files: string[]): string[] {
+  const prefix = `${BASE}/editor/`;
+  const editorItems = items.filter((item) => item.files.some((file) => file.path.startsWith(prefix)));
+  const unowned = files.flatMap((path) => {
+    const owners = editorItems.filter((item) => item.files.some((file) => file.path === path));
+    if (owners.length === 1) return [];
+    return owners.length === 0
+      ? [`${path}: ships in no editor item`]
+      : [`${path}: ships in ${owners.map((item) => item.name).join(' and ')}`];
+  });
+  const misdeclared = editorItems.flatMap((item) => [
+    ...(isDeepStrictEqual(item.categories, ['editor']) ? [] : [`${item.name}: category should be editor`]),
+    ...item.files
+      .filter((file) => !SHIPPED.test(file.path))
+      .flatMap((file) => {
+        const expected = `components/editor/${file.path.slice(prefix.length)}`;
+        return file.path.startsWith(prefix) && file.target !== expected
+          ? [`${item.name}: ${file.path} should target ${expected}`]
+          : [];
+      }),
+  ]);
+  return [...unowned, ...misdeclared];
 }
 
 /**
@@ -366,6 +531,48 @@ describe('registry.json', () => {
   it('publishes one demo per item and no other example', () => {
     expect(demoProblems(REGISTRY.items)).toEqual([]);
   });
+
+  it('ships every editor file in exactly one editor item', () => {
+    expect(editorProblems(REGISTRY.items, editorFiles())).toEqual([]);
+  });
+
+  it('ships every rule of the editor sheet in the css of exactly one editor item', () => {
+    const sheet = readFileSync(join(APP, BASE, 'editor/styles.css'), 'utf8');
+    expect(editorCssProblems(REGISTRY.items, sheet)).toEqual([]);
+  });
+
+  it('reaches KaTeX through no registry dependency of chat-input or code-editor, and ships the typography plugin with neither', () => {
+    const byName = new Map(REGISTRY.items.map((item) => [item.name, item]));
+    const closureOf = (name: string): RegistryItem[] => {
+      const reached = new Map<string, RegistryItem>();
+      for (let pending = [name], next = pending.pop(); next !== undefined; next = pending.pop()) {
+        const item = byName.get(next);
+        if (item === undefined) throw new Error(`no item ${next}`);
+        if (reached.has(next)) continue;
+        reached.set(next, item);
+        pending.push(
+          ...(item.registryDependencies ?? [])
+            .filter((dependency) => dependency.startsWith(ITEM_PREFIX))
+            .map((dependency) => dependency.slice(ITEM_PREFIX.length)),
+        );
+      }
+      return [...reached.values()];
+    };
+    const katex = ['chat-input', 'code-editor'].flatMap((name) =>
+      closureOf(name)
+        .filter(
+          (item) =>
+            (item.dependencies ?? []).includes('katex') ||
+            Object.keys(item.css ?? {}).some((key) => /^@import\s+['"]katex/.test(key)),
+        )
+        .map((item) => `${name} reaches ${item.name}`),
+    );
+    expect(katex).toEqual([]);
+    const typography = ['chat-input', 'code-editor'].flatMap((name) =>
+      Object.keys(byName.get(name)?.css ?? {}).filter((key) => key.includes('typography')),
+    );
+    expect(typography).toEqual([]);
+  });
 });
 
 const treeItem: RegistryItem = {
@@ -399,6 +606,12 @@ const aiProviderPicker: RegistryItem = {
 const ICON_OWNERS = ownersOf(REGISTRY.items.filter((item) => HOUSE_ICON.test(item.files[0]?.path ?? '')));
 
 describe('declarationProblems', () => {
+  it('refuses a relative import ending .js, which Turbopack cannot resolve', () => {
+    expect(() => sourceOf(`${BASE}/editor/composer/chat-input.tsx`, './composer-kit.js')).toThrow(
+      `${BASE}/editor/composer/chat-input.tsx imports ./composer-kit.js, which Turbopack cannot resolve; drop the .js`,
+    );
+  });
+
   it('reports nothing for an item declaring exactly what its files import', () => {
     expect(declarationProblems(treeItem, ICON_OWNERS)).toEqual([]);
   });
@@ -446,6 +659,14 @@ describe('declarationProblems', () => {
     ]);
   });
 
+  it("reports a package the item's css imports but does not declare", () => {
+    const item = { ...emojiAppearanceToggleGroup, css: { "@import 'katex/dist/katex.min.css'": {} } };
+    expect(declarationProblems(item, ICON_OWNERS)).toEqual(['emoji-appearance-toggle-group: dependencies lacks katex']);
+    expect(
+      declarationProblems({ ...item, dependencies: ['@zeroxsolutions/fluent-emoji', 'katex'] }, ICON_OWNERS),
+    ).toEqual([]);
+  });
+
   it('reports a package no file of the item imports', () => {
     const item = { ...emojiAppearanceToggleGroup, dependencies: ['@zeroxsolutions/fluent-emoji', 'shiki'] };
     expect(declarationProblems(item, ICON_OWNERS)).toEqual([
@@ -469,6 +690,36 @@ describe('declarationProblems', () => {
   it('names the item that ships a component file by its @zui name', () => {
     const owners = new Map([[`${BASE}/components/data-display/ai-provider-card.tsx`, 'ai-provider-card']]);
     expect(declarationProblems(aiProviderPicker, owners)).toEqual([]);
+  });
+
+  it('requires a document editor feature to name document-editor, which none of its files imports', () => {
+    const mention = REGISTRY.items.find((item) => item.name === 'editor-mention');
+    if (mention === undefined) throw new Error('no editor-mention item');
+    const owners = ownersOf(REGISTRY.items);
+    const bare = {
+      ...mention,
+      registryDependencies: (mention.registryDependencies ?? []).filter(
+        (name) => name !== `${ITEM_PREFIX}document-editor`,
+      ),
+    };
+    expect(declarationProblems(bare, owners)).toEqual([
+      'editor-mention: registryDependencies lacks @zui/document-editor',
+    ]);
+    expect(declarationProblems({ ...bare, registryDependencies: [`${ITEM_PREFIX}document-editor`] }, owners)).toEqual(
+      [],
+    );
+  });
+
+  it('requires document-editor of no editor item outside a feature folder', () => {
+    const codeEditor = REGISTRY.items.find((item) => item.name === 'code-editor');
+    if (codeEditor === undefined) throw new Error('no code-editor item');
+    const item = {
+      ...codeEditor,
+      registryDependencies: [...(codeEditor.registryDependencies ?? []), `${ITEM_PREFIX}document-editor`],
+    };
+    expect(declarationProblems(item, ownersOf(REGISTRY.items))).toEqual([
+      'code-editor: registryDependencies declares @zui/document-editor, which its files do not import',
+    ]);
   });
 
   it('reports a component file the item imports that no item ships', () => {
@@ -538,6 +789,45 @@ describe('cssProblems', () => {
     ]);
   });
 
+  it('accepts a statement at-rule the editor sheet holds, shipped as an empty rule', () => {
+    expect(cssProblems({ ...treeItem, css: { '@plugin "@tailwindcss/typography"': {} } })).toEqual([]);
+  });
+
+  it('reports a statement at-rule no sheet holds', () => {
+    expect(cssProblems({ ...treeItem, css: { '@plugin "@tailwindcss/forms"': {} } })).toEqual([
+      'tree-item: css ships @plugin "@tailwindcss/forms", which styles.css does not declare',
+    ]);
+  });
+
+  it('reports a statement at-rule shipped with declarations', () => {
+    expect(cssProblems({ ...treeItem, css: { '@plugin "@tailwindcss/typography"': { a: 'b' } } })).toEqual([
+      'tree-item: css @plugin "@tailwindcss/typography" should be {}',
+    ]);
+  });
+
+  it('accepts a rule nested in a layer, shipped under that layer', () => {
+    const css = { '@layer components': { '.document-editor .ProseMirror': { outline: 'none' } } };
+    expect(cssProblems({ ...treeItem, css })).toEqual([]);
+  });
+
+  it('reports a nested rule whose declarations differ from the sheet', () => {
+    const css = { '@layer components': { '.document-editor .ProseMirror': { outline: 'auto' } } };
+    expect(cssProblems({ ...treeItem, css })).toEqual([
+      'tree-item: css @layer components { .document-editor .ProseMirror } should be {"outline":"none"}',
+    ]);
+  });
+
+  it('matches a selector list written across lines by its one-line form', () => {
+    const css = {
+      '.document-editor .ProseMirror > :first-child, .document-editor .ProseMirror > :last-child': {},
+      ".document-editor ul[data-type='taskList'] li p, .document-editor [data-slot='callout'] p, .document-editor [data-slot='toggle'] p":
+        { 'margin-top': '0', 'margin-bottom': '0' },
+    };
+    expect(cssProblems({ ...treeItem, css })).toEqual([
+      'tree-item: css ships .document-editor .ProseMirror > :first-child, .document-editor .ProseMirror > :last-child, which styles.css does not declare',
+    ]);
+  });
+
   it('compares a rule of nested blocks, such as keyframes, step by step', () => {
     const steps = {
       '0%': { transform: 'rotate(var(--angle)) translateX(0)', opacity: '1' },
@@ -547,7 +837,7 @@ describe('cssProblems', () => {
     expect(cssProblems({ ...treeItem, css: { '@keyframes meteor': steps } })).toEqual([]);
     const css = { '@keyframes meteor': { ...steps, '70%': { opacity: '0.5' } } };
     expect(cssProblems({ ...treeItem, css })).toEqual([
-      `tree-item: css @keyframes meteor should be ${JSON.stringify(steps)}`,
+      'tree-item: css @keyframes meteor { 70% } should be {"opacity":"1"}',
     ]);
   });
 });
@@ -625,6 +915,16 @@ describe('familyProblems', () => {
     ]);
   });
 
+  it('leaves an item of editor files to editorProblems', () => {
+    const editor = {
+      name: 'document-editor',
+      type: 'registry:component',
+      categories: ['editor'],
+      files: [{ path: `${BASE}/editor/x.tsx`, type: 'registry:component', target: 'components/editor/x.tsx' }],
+    };
+    expect(familyProblems([...familyItems, editor], FAMILIES)).toEqual([]);
+  });
+
   it('reports an item not categorised under its kind folder', () => {
     expect(familyProblems([{ ...familyItems[0], categories: ['data-entry'] }, familyItems[1]], FAMILIES)).toEqual([
       'tree-item: categories should be ["data-display"]',
@@ -679,6 +979,107 @@ describe('demoProblems', () => {
         path: `${BASE}/examples/tree-item-demo.tsx`,
         type: 'registry:example',
       })}`,
+    ]);
+  });
+});
+
+const EDITOR_FILE = `${BASE}/editor/x.tsx`;
+const editorItem = (name: string, overrides: Partial<RegistryItem> = {}): RegistryItem => ({
+  name,
+  type: 'registry:component',
+  categories: ['editor'],
+  files: [{ path: EDITOR_FILE, type: 'registry:component', target: 'components/editor/x.tsx' }],
+  ...overrides,
+});
+
+describe('editorFiles', () => {
+  it('lists the editor sources, sorted, with no spec or stylesheet', () => {
+    const files = editorFiles();
+    expect(files.length).toBeGreaterThan(0);
+    expect(files).toEqual([...files].sort());
+    expect(files.every((file) => file.startsWith(`${BASE}/editor/`) && /\.tsx?$/.test(file))).toBe(true);
+    expect(files.filter((file) => /\.spec\.tsx?$/.test(file))).toEqual([]);
+  });
+});
+
+describe('editorProblems', () => {
+  it('reports an editor file no item ships', () => {
+    expect(editorProblems([], [EDITOR_FILE])).toEqual([`${EDITOR_FILE}: ships in no editor item`]);
+  });
+
+  it('reports an editor file two items ship', () => {
+    expect(editorProblems([editorItem('a'), editorItem('b')], [EDITOR_FILE])).toEqual([
+      `${EDITOR_FILE}: ships in a and b`,
+    ]);
+  });
+
+  it('reports an editor item outside the editor category', () => {
+    expect(editorProblems([editorItem('a', { categories: ['data-entry'] })], [EDITOR_FILE])).toEqual([
+      'a: category should be editor',
+    ]);
+  });
+
+  it('reports a file whose target is not its path below editor/', () => {
+    const item = editorItem('a', {
+      files: [{ path: EDITOR_FILE, type: 'registry:component', target: 'components/x.tsx' }],
+    });
+    expect(editorProblems([item], [EDITOR_FILE])).toEqual([`a: ${EDITOR_FILE} should target components/editor/x.tsx`]);
+  });
+
+  it('reports nothing for one item per file with matching targets', () => {
+    const item = editorItem('a', {
+      files: [
+        { path: EDITOR_FILE, type: 'registry:component', target: 'components/editor/x.tsx' },
+        { path: `${BASE}/lib/ime.ts`, type: 'registry:lib' },
+      ],
+    });
+    expect(editorProblems([item], [EDITOR_FILE])).toEqual([]);
+  });
+});
+
+const EDITOR_SHEET = `@custom-variant dark (&:is(.dark *));
+.x { color: red; }
+@layer components {
+  .y { color: blue; }
+}`;
+
+describe('editorCssProblems', () => {
+  const shipping = (name: string, css: CssBlock): RegistryItem => editorItem(name, { css });
+
+  it('reports nothing when one editor item ships each rule and none ships the dark variant', () => {
+    const item = shipping('a', { '.x': { color: 'red' }, '@layer components': { '.y': { color: 'blue' } } });
+    expect(editorCssProblems([item], EDITOR_SHEET)).toEqual([]);
+  });
+
+  it('reports a rule no editor item ships, nested ones by their layer', () => {
+    expect(editorCssProblems([shipping('a', { '.x': { color: 'red' } })], EDITOR_SHEET)).toEqual([
+      '@layer components { .y }: ships in no editor item',
+    ]);
+  });
+
+  it('reports a rule two editor items ship', () => {
+    const rules = { '.x': { color: 'red' }, '@layer components': { '.y': { color: 'blue' } } };
+    expect(editorCssProblems([shipping('a', rules), shipping('b', { '.x': { color: 'red' } })], EDITOR_SHEET)).toEqual([
+      '.x: ships in a and b',
+    ]);
+  });
+
+  it('counts only items of editor files', () => {
+    const rules = { '.x': { color: 'red' }, '@layer components': { '.y': { color: 'blue' } } };
+    expect(editorCssProblems([{ ...treeItem, css: rules }], EDITOR_SHEET)).toEqual([
+      '.x: ships in no editor item',
+      '@layer components { .y }: ships in no editor item',
+    ]);
+  });
+
+  it('reports a shared rule shipped by other items than the ones named for it', () => {
+    const rules = {
+      '@custom-variant dark (&:is(.dark *))': {},
+      '.x': { color: 'red' },
+      '@layer components': { '.y': { color: 'blue' } },
+    };
+    expect(editorCssProblems([shipping('a', rules)], EDITOR_SHEET)).toEqual([
+      '@custom-variant dark (&:is(.dark *)): should ship in []',
     ]);
   });
 });

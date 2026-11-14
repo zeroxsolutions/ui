@@ -1,7 +1,7 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
-import { CodeMirrorPane } from './code-mirror-pane.js';
+import { CodeMirrorPane } from './code-mirror-pane';
 
 beforeAll(() => {
   // CodeMirror measures layout on mount; jsdom lacks these.

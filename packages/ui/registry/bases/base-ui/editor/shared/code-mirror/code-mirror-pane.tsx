@@ -14,17 +14,21 @@ import { bracketMatching, indentOnInput, indentUnit } from '@codemirror/language
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { editorTheme, shikiHighlighting, syntaxLanguage } from './code-syntax.js';
+import { editorTheme, shikiHighlighting, syntaxLanguage } from './code-syntax';
 
-const codeMirrorPaneVariants = cva('h-full overflow-hidden [&_.cm-editor]:h-full [&_.cm-scroller]:overflow-auto', {
-  variants: {
-    size: {
-      sm: 'text-xs [&_.cm-content]:py-2',
-      default: 'text-sm',
+// Contained inline, so a line that does not wrap scrolls in the pane instead of widening what holds it.
+const codeMirrorPaneVariants = cva(
+  'h-full overflow-hidden [contain:inline-size] [&_.cm-editor]:h-full [&_.cm-scroller]:overflow-auto',
+  {
+    variants: {
+      size: {
+        sm: 'text-xs [&_.cm-content]:py-2',
+        default: 'text-sm',
+      },
     },
+    defaultVariants: { size: 'default' },
   },
-  defaultVariants: { size: 'default' },
-});
+);
 
 export interface CodeMirrorPaneProps
   extends

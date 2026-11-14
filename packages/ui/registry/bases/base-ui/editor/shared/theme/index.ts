@@ -12,8 +12,8 @@ export type {
   MermaidTheme,
   ThemeMode,
   ThemeVariant,
-} from './types/editor-theme.js';
-export { defaultEditorTheme } from './default-theme.js';
-export { extendTheme } from './extend-theme.js';
-export { EditorThemeContext, useEditorTheme, type EditorThemeContextValue } from './editor-theme-context.js';
-export { EditorThemeProvider, type EditorThemeProviderProps } from './editor-theme-provider.js';
+} from './types/editor-theme';
+export { defaultEditorTheme } from './default-theme';
+export { extendTheme } from './extend-theme';
+export { EditorThemeContext, useEditorTheme, type EditorThemeContextValue } from './editor-theme-context';
+export { EditorThemeProvider, type EditorThemeProviderProps } from './editor-theme-provider';

@@ -1,0 +1,96 @@
+---
+title: Editor Theme
+description: The editor theme contract, its default built on the design tokens, and the provider that keeps it in step with light and dark mode.
+---
+
+`editor-theme` is a library the editor surfaces read their colours from; it draws nothing of its own, so it
+has no preview. [Document Editor](/docs/editor/document-editor) installs it.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/editor-theme
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add next-themes
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-theme" title="components/editor/shared/theme/index.ts" />
+
+<ComponentSource
+  name="editor-theme"
+  file="registry/bases/base-ui/editor/shared/theme/default-theme.ts"
+  title="components/editor/shared/theme/default-theme.ts"
+/>
+
+<ComponentSource
+  name="editor-theme"
+  file="registry/bases/base-ui/editor/shared/theme/editor-theme-context.ts"
+  title="components/editor/shared/theme/editor-theme-context.ts"
+/>
+
+<ComponentSource
+  name="editor-theme"
+  file="registry/bases/base-ui/editor/shared/theme/editor-theme-provider.tsx"
+  title="components/editor/shared/theme/editor-theme-provider.tsx"
+/>
+
+<ComponentSource
+  name="editor-theme"
+  file="registry/bases/base-ui/editor/shared/theme/extend-theme.ts"
+  title="components/editor/shared/theme/extend-theme.ts"
+/>
+
+<ComponentSource
+  name="editor-theme"
+  file="registry/bases/base-ui/editor/shared/theme/types/editor-theme.ts"
+  title="components/editor/shared/theme/types/editor-theme.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { EditorThemeProvider, defaultEditorTheme, extendTheme } from '@/components/editor/shared/theme';
+```
+
+```tsx
+const theme = extendTheme(defaultEditorTheme, { light: { code: { shiki: 'github-light' } } });
+
+<EditorThemeProvider theme={theme}>
+  <Viewer doc={content} />
+</EditorThemeProvider>;
+```
+
+`EditorThemeProvider` follows `next-themes`' resolved theme into light or dark mode, unless `forcedMode` fixes
+one. A theme holds a `light` and a `dark` variant, each naming the callout palettes, the code, diagram and
+formula themes. `extendTheme` returns a copy of a theme with the overrides merged in, and `useEditorTheme()`
+reads the theme, the mode and the variant a surface is drawn in; outside any provider it reads the default
+theme in light mode.

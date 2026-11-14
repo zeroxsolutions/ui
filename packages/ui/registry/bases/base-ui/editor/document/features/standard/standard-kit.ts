@@ -8,7 +8,7 @@ import { ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 import { defineFeature, type EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
-import { TaskItemView } from './task-item-view.js';
+import { TaskItemView } from './task-item-view';
 
 /** Options for the standard block set. */
 export interface StandardKitOptions {
@@ -21,8 +21,8 @@ export interface StandardKitOptions {
   /** Show the left-gutter block drag handle (default `true`). */
   dragHandle?: boolean;
 }
-import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs.js';
-import { standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui.js';
+import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs';
+import { standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui';
 
 /**
  * The standard block set (L1–L2): headings, bullet/ordered/task lists,

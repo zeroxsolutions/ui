@@ -9,7 +9,7 @@ import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { CaretRect, IEditor, SlashItem, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { filterSlashItems, groupByHeading } from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
-import { RectPopover } from './rect-popover.js';
+import { RectPopover } from './rect-popover';
 
 /**
  * The slash (`/`) insert menu — Notion-style **inline**: typing `/` leaves the

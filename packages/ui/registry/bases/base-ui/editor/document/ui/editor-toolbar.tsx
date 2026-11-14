@@ -6,7 +6,7 @@ import { Toggle } from '@/registry/bases/base-ui/ui/toggle';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { IEditor, ToolbarItem } from '@zeroxsolutions/editor-core/document/core/index';
-import { useEditorChanges } from './use-editor-changes.js';
+import { useEditorChanges } from './use-editor-changes';
 
 /**
  * The fixed/inline formatting toolbar (task 8.4), composed from the house

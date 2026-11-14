@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { ChatCommand } from '@zeroxsolutions/editor-core/composer/composer-types';
 import { commandTrigger, mentionTrigger } from './composer-triggers';
-import { ChatInput } from './chat-input.js';
+import { ChatInput } from './chat-input';
 
 afterEach(cleanup);
 

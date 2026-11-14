@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
-import { defaultEditorTheme } from './default-theme.js';
-import type { IEditorTheme, ThemeMode, ThemeVariant } from './types/editor-theme.js';
+import { defaultEditorTheme } from './default-theme';
+import type { IEditorTheme, ThemeMode, ThemeVariant } from './types/editor-theme';
 
 /** The active theme + resolved mode + the variant selected for that mode. */
 export interface EditorThemeContextValue {

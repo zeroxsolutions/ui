@@ -1,0 +1,32 @@
+---
+title: Editor
+description: Editing surfaces for documents, code, chat and formulas, composed over the headless editor core.
+---
+
+The editor comes in two halves. The core, `@zeroxsolutions/editor-core`, is an npm package: the document model, its
+JSON, the commands and the feature API, with no React and no styles. The chrome is the registry items on these
+pages: the React surfaces, their toolbars and menus, the document features and the styles, which install into your
+project like any other item, under `components/editor/`.
+
+## Install the core
+
+Every item that imports the core lists it as a dependency, so the CLI installs it with the first one. To install it
+on its own:
+
+```bash
+pnpm add @zeroxsolutions/editor-core
+```
+
+## Where to start
+
+| To edit        | Start from                                      |
+| -------------- | ----------------------------------------------- |
+| A document     | [Document Editor](/docs/editor/document-editor) |
+| A code file    | [Code Editor](/docs/editor/code-editor)         |
+| A chat message | [Chat Input](/docs/editor/chat-input)           |
+| A formula      | [Math Editor](/docs/editor/math-editor)         |
+| A diagram      | [Mermaid Editor](/docs/editor/mermaid-editor)   |
+
+The document editor ships the standard kit of headings, lists, tasks and marks. Every other kind of block, such as a
+table, a callout or a formula, is an item of its own that depends on it, so a project installs only the blocks it
+draws.

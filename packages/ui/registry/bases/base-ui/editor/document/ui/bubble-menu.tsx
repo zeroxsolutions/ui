@@ -6,8 +6,8 @@ import { Toggle } from '@/registry/bases/base-ui/ui/toggle';
 import { Popover } from '@/registry/bases/base-ui/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import type { BubbleItem, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import { selectionRect, selectionWithin, type Point } from './selection-rect.js';
-import { RectPopover } from './rect-popover.js';
+import { selectionRect, selectionWithin, type Point } from './selection-rect';
+import { RectPopover } from './rect-popover';
 
 /**
  * The selection bubble menu (task 8.2): a floating formatting bar that appears
