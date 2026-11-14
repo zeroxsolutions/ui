@@ -287,7 +287,7 @@ const SHEETS = ['styles.css', 'editor/styles.css'].map((sheet) =>
  */
 function cssBlockProblems(name: string, shipped: CssBlock, scopes: SheetBlock[], outer: string[]): string[] {
   return Object.entries(shipped).flatMap(([rule, body]) => {
-    const label = outer.reduceRight((inner, at) => `${at} { ${inner} }`, rule);
+    const label = ruleLabel(outer, rule);
     if (typeof body === 'string') return [`${name}: css ${label} is a declaration outside a rule`];
     const found = scopes.map((scope) => scope.blocks.get(rule)).find((block) => block !== undefined);
     const nested = Object.values(body).some((value) => typeof value !== 'string');
@@ -304,6 +304,58 @@ function cssBlockProblems(name: string, shipped: CssBlock, scopes: SheetBlock[],
 /** Each rule an item's `css` ships is the same rule, with the same declarations, as the stylesheet the site renders with. */
 function cssProblems(item: RegistryItem): string[] {
   return cssBlockProblems(item.name, item.css ?? {}, SHEETS, []);
+}
+
+/** A rule as `cssProblems` labels it: the at-rules it nests in wrapped around it, `@layer components { .x }`. */
+function ruleLabel(outer: string[], rule: string): string {
+  return outer.reduceRight((inner, at) => `${at} { ${inner} }`, rule);
+}
+
+/** Each rule and statement at-rule of a parsed sheet, by label; a block holding blocks is an at-rule wrapping them. */
+function sheetRules(block: SheetBlock, outer: string[] = []): string[] {
+  return [
+    ...[...block.statements].map((statement) => ruleLabel(outer, statement)),
+    ...[...block.blocks].flatMap(([prelude, nested]) =>
+      nested.blocks.size > 0 ? sheetRules(nested, [...outer, prelude]) : [ruleLabel(outer, prelude)],
+    ),
+  ];
+}
+
+/** Each rule and statement at-rule an item's `css` ships, by label, read as `cssBlockProblems` reads it. */
+function shippedRules(css: CssBlock, outer: string[] = []): string[] {
+  return Object.entries(css).flatMap(([rule, body]) => {
+    if (typeof body === 'string') return [];
+    return Object.values(body).some((value) => typeof value !== 'string')
+      ? shippedRules(body, [...outer, rule])
+      : [ruleLabel(outer, rule)];
+  });
+}
+
+/**
+ * The editor sheet's rules that ship in some number of editor items other than one: the dark variant, which the
+ * base sheet already declares for every consumer, and the KaTeX import, which the spec gives to both items that
+ * typeset math.
+ */
+const SHARED_EDITOR_RULES: ReadonlyMap<string, readonly string[]> = new Map([
+  ['@custom-variant dark (&:is(.dark *))', []],
+  ["@import 'katex/dist/katex.min.css'", ['editor-math', 'math-editor']],
+]);
+
+/** Each rule of the editor sheet ships in the `css` of exactly one editor item, or of the items `SHARED_EDITOR_RULES` names. */
+function editorCssProblems(items: RegistryItem[], sheet: string): string[] {
+  const editorItems = items.filter((item) => item.files.some((file) => file.path.startsWith(`${BASE}/editor/`)));
+  return sheetRules(parseSheet(sheet)).flatMap((rule) => {
+    const owners = editorItems
+      .filter((item) => shippedRules(item.css ?? {}).includes(rule))
+      .map((item) => item.name)
+      .sort();
+    const shared = SHARED_EDITOR_RULES.get(rule);
+    if (shared !== undefined) {
+      return isDeepStrictEqual(owners, shared) ? [] : [`${rule}: should ship in ${JSON.stringify(shared)}`];
+    }
+    if (owners.length === 1) return [];
+    return owners.length === 0 ? [`${rule}: ships in no editor item`] : [`${rule}: ships in ${owners.join(' and ')}`];
+  });
 }
 
 /** Every family file: a component under a kind folder or a block, specs left out. */
@@ -474,6 +526,11 @@ describe('registry.json', () => {
 
   it('ships every editor file in exactly one editor item', () => {
     expect(editorProblems(REGISTRY.items, editorFiles())).toEqual([]);
+  });
+
+  it('ships every rule of the editor sheet in the css of exactly one editor item', () => {
+    const sheet = readFileSync(join(APP, BASE, 'editor/styles.css'), 'utf8');
+    expect(editorCssProblems(REGISTRY.items, sheet)).toEqual([]);
   });
 
   it("ships neither KaTeX's stylesheet nor the typography plugin with chat-input or code-editor", () => {
@@ -908,5 +965,52 @@ describe('editorProblems', () => {
       ],
     });
     expect(editorProblems([item], [EDITOR_FILE])).toEqual([]);
+  });
+});
+
+const EDITOR_SHEET = `@custom-variant dark (&:is(.dark *));
+.x { color: red; }
+@layer components {
+  .y { color: blue; }
+}`;
+
+describe('editorCssProblems', () => {
+  const shipping = (name: string, css: CssBlock): RegistryItem => editorItem(name, { css });
+
+  it('reports nothing when one editor item ships each rule and none ships the dark variant', () => {
+    const item = shipping('a', { '.x': { color: 'red' }, '@layer components': { '.y': { color: 'blue' } } });
+    expect(editorCssProblems([item], EDITOR_SHEET)).toEqual([]);
+  });
+
+  it('reports a rule no editor item ships, nested ones by their layer', () => {
+    expect(editorCssProblems([shipping('a', { '.x': { color: 'red' } })], EDITOR_SHEET)).toEqual([
+      '@layer components { .y }: ships in no editor item',
+    ]);
+  });
+
+  it('reports a rule two editor items ship', () => {
+    const rules = { '.x': { color: 'red' }, '@layer components': { '.y': { color: 'blue' } } };
+    expect(editorCssProblems([shipping('a', rules), shipping('b', { '.x': { color: 'red' } })], EDITOR_SHEET)).toEqual([
+      '.x: ships in a and b',
+    ]);
+  });
+
+  it('counts only items of editor files', () => {
+    const rules = { '.x': { color: 'red' }, '@layer components': { '.y': { color: 'blue' } } };
+    expect(editorCssProblems([{ ...treeItem, css: rules }], EDITOR_SHEET)).toEqual([
+      '.x: ships in no editor item',
+      '@layer components { .y }: ships in no editor item',
+    ]);
+  });
+
+  it('reports a shared rule shipped by other items than the ones named for it', () => {
+    const rules = {
+      '@custom-variant dark (&:is(.dark *))': {},
+      '.x': { color: 'red' },
+      '@layer components': { '.y': { color: 'blue' } },
+    };
+    expect(editorCssProblems([shipping('a', rules)], EDITOR_SHEET)).toEqual([
+      '@custom-variant dark (&:is(.dark *)): should ship in []',
+    ]);
   });
 });
