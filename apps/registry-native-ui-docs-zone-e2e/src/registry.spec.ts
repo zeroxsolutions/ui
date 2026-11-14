@@ -38,6 +38,8 @@ test('serves the react native items for each engine in each style', async ({ req
         'unsaved-indicator',
         'icon-media',
         'icon-label',
+        'meteors',
+        'animated-grid-pattern',
         'center',
         'page-container',
         'panel-header',

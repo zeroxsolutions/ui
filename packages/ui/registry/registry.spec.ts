@@ -827,6 +827,19 @@ describe('cssProblems', () => {
       'tree-item: css ships .document-editor .ProseMirror > :first-child, .document-editor .ProseMirror > :last-child, which styles.css does not declare',
     ]);
   });
+
+  it('compares a rule of nested blocks, such as keyframes, step by step', () => {
+    const steps = {
+      '0%': { transform: 'rotate(var(--angle)) translateX(0)', opacity: '1' },
+      '70%': { opacity: '1' },
+      '100%': { transform: 'rotate(var(--angle)) translateX(-500px)', opacity: '0' },
+    };
+    expect(cssProblems({ ...treeItem, css: { '@keyframes meteor': steps } })).toEqual([]);
+    const css = { '@keyframes meteor': { ...steps, '70%': { opacity: '0.5' } } };
+    expect(cssProblems({ ...treeItem, css })).toEqual([
+      'tree-item: css @keyframes meteor { 70% } should be {"opacity":"1"}',
+    ]);
+  });
 });
 
 const FAMILIES = [`${BASE}/blocks/ai-provider-picker.tsx`, `${BASE}/components/data-display/tree-item.tsx`];

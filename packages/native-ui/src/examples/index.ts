@@ -10,6 +10,7 @@ import { AiProviderCardDemo } from './ai-provider-card-demo';
 import { AiProviderPickerDemo } from './ai-provider-picker-demo';
 import { AlertDemo } from './alert-demo';
 import { AlertDialogDemo } from './alert-dialog-demo';
+import { AnimatedGridPatternDemo } from './animated-grid-pattern-demo';
 import { AspectRatioDemo } from './aspect-ratio-demo';
 import { AttachmentDemo } from './attachment-demo';
 import { AvatarDemo } from './avatar-demo';
@@ -72,6 +73,7 @@ import { MarkerDemo } from './marker-demo';
 import { MenubarDemo } from './menubar-demo';
 import { MessageDemo } from './message-demo';
 import { MessageScrollerDemo } from './message-scroller-demo';
+import { MeteorsDemo } from './meteors-demo';
 import { ModelInfoCardDemo } from './model-info-card-demo';
 import { ModelListDemo } from './model-list-demo';
 import { NativeSelectDemo } from './native-select-demo';
@@ -126,6 +128,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'ai-provider-picker-demo': AiProviderPickerDemo,
   'alert-demo': AlertDemo,
   'alert-dialog-demo': AlertDialogDemo,
+  'animated-grid-pattern-demo': AnimatedGridPatternDemo,
   'aspect-ratio-demo': AspectRatioDemo,
   'attachment-demo': AttachmentDemo,
   'avatar-demo': AvatarDemo,
@@ -188,6 +191,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'menubar-demo': MenubarDemo,
   'message-demo': MessageDemo,
   'message-scroller-demo': MessageScrollerDemo,
+  'meteors-demo': MeteorsDemo,
   'model-info-card-demo': ModelInfoCardDemo,
   'model-list-demo': ModelListDemo,
   'native-select-demo': NativeSelectDemo,

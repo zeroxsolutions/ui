@@ -43,6 +43,7 @@ test('the picker writes no ?style= for the default, and a page with none shows t
   await expect(picker(page)).toContainText('Vega');
 
   await pickStyle(page, 'Nova');
+  await expect(page).toHaveURL(`${BUTTON}?style=nova`);
   await page.goto('/native/components/nativewind/card');
 
   await expect(picker(page)).toContainText('Nova');
