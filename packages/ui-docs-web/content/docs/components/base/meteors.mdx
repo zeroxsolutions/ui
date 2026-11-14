@@ -1,0 +1,107 @@
+---
+title: Meteors
+description: A decorative background of meteors falling across their container, each a dot trailing a fading line, drawn in the text colour and hidden under reduced motion.
+---
+
+<ComponentPreview name="meteors-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/meteors
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/general/meteors.tsx`.</Step>
+
+<ComponentSource name="meteors" title="components/general/meteors.tsx" />
+
+<Step>Add the fall to your global CSS.</Step>
+
+```css
+@utility animate-meteor {
+  animation: meteor 5s linear infinite;
+}
+
+@keyframes meteor {
+  0% {
+    transform: rotate(var(--angle)) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--angle)) translateX(-500px);
+    opacity: 0;
+  }
+}
+```
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Meteors } from '@/components/general/meteors';
+```
+
+The meteors fill their nearest positioned ancestor, so place them in a `relative` box that clips its overflow,
+and lift the content over them with `relative`:
+
+```tsx
+<div className="relative h-64 overflow-hidden rounded-lg border">
+  <Meteors />
+  <h2 className="relative">Launch week</h2>
+</div>
+```
+
+They are decoration: hidden from assistive technology and from the pointer, so nothing they cover stops
+taking clicks. A `text-*` class recolours them.
+
+## API reference
+
+### Meteors
+
+Renders a `div` and takes every prop a `div` takes, plus:
+
+| Prop          | Type     | Default |
+| ------------- | -------- | ------- |
+| `number`      | `number` | `20`    |
+| `minDelay`    | `number` | `0.2`   |
+| `maxDelay`    | `number` | `1.2`   |
+| `minDuration` | `number` | `2`     |
+| `maxDuration` | `number` | `10`    |
+| `angle`       | `number` | `215`   |
+
+Each meteor starts at a random point along the top edge and first falls after a random wait between `minDelay`
+and `maxDelay` seconds, then falls again every `minDuration` to `maxDuration` seconds, a whole number picked once
+per meteor. `angle` is the path's rotation in degrees, as CSS `rotate` measures it; at 215 a meteor falls to the
+right and down. The points are picked after the component mounts, so a server render draws no meteor. Under
+`prefers-reduced-motion` no meteor is drawn. It sets `data-slot="meteors"` and `aria-hidden`.

@@ -13,6 +13,9 @@ interface RegistryFile {
 
 type CssVars = Record<'theme' | 'light' | 'dark', Record<string, string>>;
 
+/** A rule's body: its declarations, or the blocks nested in it, such as a keyframe's steps. */
+type CssBlock = Record<string, string> | Record<string, Record<string, string>>;
+
 interface RegistryItem {
   name: string;
   type: string;
@@ -20,8 +23,11 @@ interface RegistryItem {
   dependencies?: string[];
   registryDependencies?: string[];
   cssVars?: CssVars;
-  /** CSS rules the item ships, keyed by at-rule (`@utility <name>`), each a map of declarations. */
-  css?: Record<string, Record<string, string>>;
+  /**
+   * CSS rules the item ships, keyed by at-rule (`@utility <name>`, `@keyframes <name>`), each a map of
+   * declarations, or of a keyframe's selector to its declarations.
+   */
+  css?: Record<string, CssBlock>;
   files: RegistryFile[];
 }
 
@@ -201,15 +207,26 @@ function cssVarsProblems(item: RegistryItem): string[] {
     : [`${item.name}: cssVars should be ${JSON.stringify(expected)}`];
 }
 
-/** The declarations of the top-level `<rule> { ... }` block in the base stylesheet, or undefined when it declares none. */
-function stylesheetRule(rule: string): Record<string, string> | undefined {
+/** The declarations a block's body holds, one per `property: value;` line. */
+function declarationsOf(body: string): Record<string, string> {
+  return Object.fromEntries(
+    [...body.matchAll(/^\s*([\w-]+):\s*([^;]+);/gm)].map(([, property, value]) => [property, value.trim()]),
+  );
+}
+
+/**
+ * The body of the top-level `<rule> { ... }` block in the base stylesheet, or undefined when it declares
+ * none: its declarations, or, for a rule holding nested blocks such as `@keyframes`, each nested block's
+ * selector to its declarations.
+ */
+function stylesheetRule(rule: string): CssBlock | undefined {
   const css = readFileSync(join(APP, BASE, 'styles.css'), 'utf8');
   const escaped = rule.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const body = new RegExp(`^${escaped} \\{\\n([\\s\\S]*?)^\\}`, 'm').exec(css)?.[1];
   if (body === undefined) return undefined;
-  return Object.fromEntries(
-    [...body.matchAll(/^\s*([\w-]+):\s*([^;]+);/gm)].map(([, property, value]) => [property, value.trim()]),
-  );
+  const nested = [...body.matchAll(/^\s*([^{}\n]+?)\s*\{\n([\s\S]*?)^\s*\}/gm)];
+  if (nested.length === 0) return declarationsOf(body);
+  return Object.fromEntries(nested.map(([, selector, block]) => [selector, declarationsOf(block)]));
 }
 
 /** Each rule an item's `css` ships is the same rule, with the same declarations, as the stylesheet the site renders with. */
@@ -518,6 +535,19 @@ describe('cssProblems', () => {
   it('reports a rule styles.css does not declare', () => {
     expect(cssProblems({ ...treeItem, css: { '@utility bg-missing': {} } })).toEqual([
       'tree-item: css ships @utility bg-missing, which styles.css does not declare',
+    ]);
+  });
+
+  it('compares a rule of nested blocks, such as keyframes, step by step', () => {
+    const steps = {
+      '0%': { transform: 'rotate(var(--angle)) translateX(0)', opacity: '1' },
+      '70%': { opacity: '1' },
+      '100%': { transform: 'rotate(var(--angle)) translateX(-500px)', opacity: '0' },
+    };
+    expect(cssProblems({ ...treeItem, css: { '@keyframes meteor': steps } })).toEqual([]);
+    const css = { '@keyframes meteor': { ...steps, '70%': { opacity: '0.5' } } };
+    expect(cssProblems({ ...treeItem, css })).toEqual([
+      `tree-item: css @keyframes meteor should be ${JSON.stringify(steps)}`,
     ]);
   });
 });

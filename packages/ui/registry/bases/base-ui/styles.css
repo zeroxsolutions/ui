@@ -52,20 +52,6 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  --animate-meteor: meteor 5s linear infinite;
-  @keyframes meteor {
-    0% {
-      transform: rotate(var(--angle)) translateX(0);
-      opacity: 1;
-    }
-    70% {
-      opacity: 1;
-    }
-    100% {
-      transform: rotate(var(--angle)) translateX(-500px);
-      opacity: 0;
-    }
-  }
 }
 
 :root {
@@ -212,4 +198,24 @@
 @utility bg-checkerboard {
   background-image: repeating-conic-gradient(var(--muted) 0 25%, var(--background) 0 50%);
   background-size: calc(var(--spacing) * 4) calc(var(--spacing) * 4);
+}
+
+/* Meteors' fall. The meteors item ships the same utility and keyframes in its registry `css`;
+   registry.spec.ts fails until they match. */
+@utility animate-meteor {
+  animation: meteor 5s linear infinite;
+}
+
+@keyframes meteor {
+  0% {
+    transform: rotate(var(--angle)) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--angle)) translateX(-500px);
+    opacity: 0;
+  }
 }

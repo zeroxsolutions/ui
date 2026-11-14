@@ -1420,6 +1420,36 @@
       ]
     },
     {
+      "name": "meteors",
+      "type": "registry:component",
+      "title": "Meteors",
+      "description": "A decorative background of meteors falling across their parent, each a dot trailing a fading line, hidden from screen readers and drawn not at all when the system asks for reduced motion.",
+      "categories": ["general"],
+      "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon", "@zui/motion", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/general/meteors.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "animated-grid-pattern",
+      "type": "registry:component",
+      "title": "Animated grid pattern",
+      "description": "A decorative grid of lines across its parent in which cells fade in and out at random, hidden from screen readers and drawn still when the system asks for reduced motion.",
+      "categories": ["general"],
+      "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-svg", "react-native-worklets"],
+      "registryDependencies": ["@zui/icon", "@zui/motion", "@zui/utils"],
+      "files": [
+        {
+          "path": "src/registry/components/general/animated-grid-pattern.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "center",
       "type": "registry:component",
       "title": "Center",

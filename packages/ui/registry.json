@@ -562,6 +562,57 @@
       ]
     },
     {
+      "name": "meteors",
+      "type": "registry:component",
+      "title": "Meteors",
+      "description": "A decorative background of meteors falling across their container, each a dot trailing a fading line, drawn in the text colour and hidden under reduced motion.",
+      "categories": ["general"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/general/meteors.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "css": {
+        "@utility animate-meteor": {
+          "animation": "meteor 5s linear infinite"
+        },
+        "@keyframes meteor": {
+          "0%": {
+            "transform": "rotate(var(--angle)) translateX(0)",
+            "opacity": "1"
+          },
+          "70%": {
+            "opacity": "1"
+          },
+          "100%": {
+            "transform": "rotate(var(--angle)) translateX(-500px)",
+            "opacity": "0"
+          }
+        }
+      }
+    },
+    {
+      "name": "animated-grid-pattern",
+      "type": "registry:component",
+      "title": "Animated Grid Pattern",
+      "description": "A decorative grid of lines across its container in which cells fade in and out at random, drawn in the text colour and still under reduced motion.",
+      "categories": ["general"],
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/components/general/animated-grid-pattern.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
       "name": "avatar-picker",
       "type": "registry:component",
       "title": "Avatar Picker",
@@ -1266,6 +1317,34 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/icon-media-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "meteors-demo",
+      "type": "registry:example",
+      "title": "Meteors Demo",
+      "description": "Meteors falling behind a heading in a bordered panel.",
+      "categories": ["examples"],
+      "registryDependencies": ["@zui/meteors"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/meteors-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "animated-grid-pattern-demo",
+      "type": "registry:example",
+      "title": "Animated Grid Pattern Demo",
+      "description": "A grid whose cells light and fade behind a heading, masked to fade toward the panel's edges.",
+      "categories": ["examples"],
+      "registryDependencies": ["@zui/animated-grid-pattern"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/animated-grid-pattern-demo.tsx",
           "type": "registry:example"
         }
       ]
