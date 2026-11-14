@@ -46,6 +46,8 @@ const REGISTRY = JSON.parse(readFileSync(join(APP, 'registry.json'), 'utf8')) as
 const FROM_IMPORT = /^\s*(?:import|export)\s+(type\s+)?[^;'"]*?\bfrom\s*['"]([^'"]+)['"]/gm;
 const BARE_IMPORT = /^\s*import\s*['"]([^'"]+)['"]/gm;
 const DYNAMIC_IMPORT = /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g;
+/** A `css` key importing a package's stylesheet (`@import 'katex/dist/katex.min.css'`), its specifier captured; a path or a URL is no package. */
+const CSS_PACKAGE_IMPORT = /^@import\s+['"](?![./]|[a-z]+:)([^'"]+)['"]/;
 const SHIPPED = /^registry\/bases\/base-ui\/(lib|hooks|types)\//;
 const TOKEN_CLASS = /\b(?:bg|text|border|ring|fill|stroke)-(success|warning)(?![\w-])/g;
 const FAMILY = /^registry\/bases\/base-ui\/(?:components\/([^/]+)|(blocks))\/([^/]+)\.tsx$/;
@@ -116,7 +118,8 @@ function ownersOf(items: RegistryItem[]): Map<string, string> {
 /**
  * What the item has to declare for `shadcn add` to write files that compile: its own files (every one
  * outside lib/, hooks/ and types/), the lib/, hooks/ and types/ files they reach, the upstream item for a
- * vendored file, another item's `@zui/` name for a file that item ships, and the package for a bare import.
+ * vendored file, another item's `@zui/` name for a file that item ships, and the package for a bare import
+ * or for a stylesheet its `css` imports, which the consumer's own stylesheet has to resolve.
  */
 function expectedDeclaration(item: RegistryItem, owners: ReadonlyMap<string, string>): Declaration {
   const roots = item.files.filter((file) => !SHIPPED.test(file.path));
@@ -146,6 +149,10 @@ function expectedDeclaration(item: RegistryItem, owners: ReadonlyMap<string, str
         if (owner !== item.name) registryDependencies.add(`${ITEM_PREFIX}${owner}`);
       }
     }
+  }
+  for (const key of Object.keys(item.css ?? {})) {
+    const specifier = CSS_PACKAGE_IMPORT.exec(key)?.[1];
+    if (specifier !== undefined) dependencies.add(packageOf(specifier));
   }
   const sorted = (values: Set<string>): string[] => [...values].sort();
   return {
@@ -563,6 +570,14 @@ describe('declarationProblems', () => {
     expect(declarationProblems(item, ICON_OWNERS)).toEqual([
       'emoji-appearance-toggle-group: dependencies lacks @zeroxsolutions/fluent-emoji',
     ]);
+  });
+
+  it("reports a package the item's css imports but does not declare", () => {
+    const item = { ...emojiAppearanceToggleGroup, css: { "@import 'katex/dist/katex.min.css'": {} } };
+    expect(declarationProblems(item, ICON_OWNERS)).toEqual(['emoji-appearance-toggle-group: dependencies lacks katex']);
+    expect(
+      declarationProblems({ ...item, dependencies: ['@zeroxsolutions/fluent-emoji', 'katex'] }, ICON_OWNERS),
+    ).toEqual([]);
   });
 
   it('reports a package no file of the item imports', () => {

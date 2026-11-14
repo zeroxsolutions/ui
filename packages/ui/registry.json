@@ -2594,7 +2594,7 @@
       "css": {
         "@import 'katex/dist/katex.min.css'": {}
       },
-      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react"]
+      "dependencies": ["@zeroxsolutions/editor-core", "katex", "lucide-react"]
     },
     {
       "name": "math-editor-demo",

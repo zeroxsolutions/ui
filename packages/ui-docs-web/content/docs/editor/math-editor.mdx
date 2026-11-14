@@ -29,7 +29,7 @@ pnpm dlx shadcn@latest add @zui/math-editor
 <Step>Install the packages it imports.</Step>
 
 ```bash
-pnpm add @zeroxsolutions/editor-core lucide-react
+pnpm add @zeroxsolutions/editor-core katex lucide-react
 ```
 
 <Step>Add the components it is built from.</Step>
@@ -83,8 +83,6 @@ pnpm dlx shadcn@latest add alert button command dropdown-menu empty popover resi
 ```css
 @import 'katex/dist/katex.min.css';
 ```
-
-The stylesheet comes from `katex`, which `@zeroxsolutions/editor-core` installs; add `katex` to your project if your bundler does not resolve it from there.
 
 <Step>Update the import paths to match your project.</Step>
 
