@@ -40,7 +40,7 @@
     "@vitest/coverage-v8": "~4.1.12",
     "@vitest/ui": "~4.1.12",
     "eas-cli": "25.3.0",
-    "eslint-plugin-playwright": "^1.6.2",
+    "eslint-plugin-playwright": "^2.12.2",
     "husky": "^9.1.7",
     "jiti": "2.7.0",
     "jsdom": "~22.1.0",
