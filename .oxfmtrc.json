@@ -32,6 +32,8 @@
     ".source",
     "packages/ui/registry/bases/base-ui/examples/__index__.tsx",
     "packages/ui/registry/bases/base-ui/examples/__components__.tsx",
+    "packages/ui/registry/bases/base-ui/examples/__editor-components__.tsx",
+    "packages/ui/registry/bases/base-ui/examples/__editor-components-client-only__.tsx",
     ".wrangler",
     "test-output",
     ".playwright-mcp",

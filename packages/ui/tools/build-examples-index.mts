@@ -2,14 +2,17 @@
  * Writes the docs' demo index from `examples/` and `registry.json`: every demo and every published
  * component and block, by name. `examples/__index__.tsx` maps a name to the files it ships, first the
  * one whose component it names (a demo is one file; an item lists its whole `files`), which
- * `ComponentSource` reads at build; `examples/__components__.tsx` maps it to a lazy import of the
- * component that first file exports, which `ComponentPreview` renders. They are two files because the
- * components use hooks and carry no client directive, so only a client module may import them,
- * while the paths are read on the server. An item in the `editor` category, and an item that names one
- * among its registry dependencies, loads through `next/dynamic` with `ssr: false` in place of `lazy`:
- * Next then leaves its import out of the server bundle, which would otherwise carry the editors'
- * Tiptap, CodeMirror, KaTeX and mermaid past the worker's size limit, and the page shows it once the
- * browser has loaded it.
+ * `ComponentSource` and `rehypeDocsCode` read at build, in every zone. The component maps are apart
+ * from it because the components use hooks and carry no client directive, so only a client module may
+ * import them, while the paths are read on the server. There are three maps, each a lazy import of the
+ * component the first file exports, so that an app bundles only the demos it renders:
+ * `__components__.tsx` holds every entry outside the editor set; `__editor-components__.tsx` holds the
+ * editor set, which the editor docs zone renders. The editor set is an item in the `editor` category
+ * and an item that names one among its registry dependencies. `__editor-components-client-only__.tsx`
+ * holds that set again through `next/dynamic` with `ssr: false` in place of `lazy`, for the app that
+ * still renders it beside the others: Next then leaves its import out of the server bundle, which
+ * would otherwise carry the editors' Tiptap, CodeMirror, KaTeX and mermaid past the worker's size
+ * limit, and the page shows it once the browser has loaded it.
  */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -40,7 +43,7 @@ const published = items
   .map((item) => ({ name: item.name, files: item.files.map((file) => file.path) }));
 
 const editors = new Set(items.filter((item) => item.categories?.includes('editor')).map((item) => item.name));
-const clientOnly = new Set(
+const editorSet = new Set(
   items
     .filter(
       (item) =>
@@ -68,27 +71,38 @@ ${entries.map(({ name, files }) => `  '${name}': { name: '${name}', files: ${JSO
 `,
 );
 
-writeFileSync(
-  join(APP, EXAMPLES, '__components__.tsx'),
-  `${HEADER}
-import dynamic from 'next/dynamic';
-import { lazy, type ComponentType } from 'react';
+const loader = ({ files: [file] }: { files: string[] }): string =>
+  `() => import('@/${file.replace(/\.tsx?$/, '')}').then(firstComponent)`;
+
+const inEditorSet = entries.filter(({ name }) => editorSet.has(name));
+const outsideEditorSet = entries.filter(({ name }) => !editorSet.has(name));
+
+function writeComponents(file: string, exportName: string, group: typeof entries, wrap: 'lazy' | 'dynamic'): void {
+  const lines = group.map((entry) =>
+    wrap === 'lazy'
+      ? `  '${entry.name}': lazy(${loader(entry)}),`
+      : `  '${entry.name}': dynamic(${loader(entry)}, { ssr: false }),`,
+  );
+  writeFileSync(
+    join(APP, EXAMPLES, file),
+    `${HEADER}
+${wrap === 'dynamic' ? "import dynamic from 'next/dynamic';\n" : ''}import { ${wrap === 'lazy' ? 'lazy, ' : ''}type ComponentType } from 'react';
 
 function firstComponent(module: Record<string, unknown>): { default: ComponentType } {
   return { default: Object.values(module).find((value) => typeof value === 'function') as ComponentType };
 }
 
-export const Components: Record<string, ComponentType> = {
-${entries
-  .map(({ name, files: [file] }) => {
-    const load = `() => import('@/${file.replace(/\.tsx?$/, '')}').then(firstComponent)`;
-    return clientOnly.has(name) ? `  '${name}': dynamic(${load}, { ssr: false }),` : `  '${name}': lazy(${load}),`;
-  })
-  .join('\n')}
+export const ${exportName}: Record<string, ComponentType> = {
+${lines.join('\n')}
 };
 `,
-);
+  );
+}
+
+writeComponents('__components__.tsx', 'Components', outsideEditorSet, 'lazy');
+writeComponents('__editor-components__.tsx', 'EditorComponents', inEditorSet, 'lazy');
+writeComponents('__editor-components-client-only__.tsx', 'EditorComponentsClientOnly', inEditorSet, 'dynamic');
 
 console.log(
-  `examples index: ${demos.length} demos, ${published.length} registry items, ${clientOnly.size} rendered in the browser only`,
+  `examples index: ${demos.length} demos, ${published.length} registry items, ${editorSet.size} in the editor set`,
 );

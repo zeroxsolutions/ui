@@ -2,11 +2,13 @@
   "$schema": "../../node_modules/oxlint/configuration_schema.json",
   "extends": ["../../.oxlintrc.jsonc"],
   "plugins": ["vitest"],
-  // The two examples indexes are written by tools/build-examples-index.mts. The root's list is
+  // The examples index and its component maps are written by tools/build-examples-index.mts. The root's list is
   // restated because `extends` does not carry it.
   "ignorePatterns": [
     "registry/bases/base-ui/examples/__index__.tsx",
     "registry/bases/base-ui/examples/__components__.tsx",
+    "registry/bases/base-ui/examples/__editor-components__.tsx",
+    "registry/bases/base-ui/examples/__editor-components-client-only__.tsx",
     "**/dist",
     "**/out-tsc",
     "**/vite.config.*.timestamp*",
