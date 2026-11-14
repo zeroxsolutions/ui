@@ -1,0 +1,101 @@
+---
+title: Animated Grid Pattern
+description: A decorative grid of lines across its container in which cells fade in and out at random, drawn in the text colour and still under reduced motion.
+---
+
+<ComponentPreview name="animated-grid-pattern-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/animated-grid-pattern
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it uses.</Step>
+
+```bash
+pnpm add motion
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the component into `components/general/animated-grid-pattern.tsx`.</Step>
+
+<ComponentSource name="animated-grid-pattern" title="components/general/animated-grid-pattern.tsx" />
+
+<Step>Copy the reduced-motion hook into `hooks/use-prefers-reduced-motion.ts`.</Step>
+
+<ComponentSource
+  name="animated-grid-pattern"
+  file="registry/bases/base-ui/hooks/use-prefers-reduced-motion.ts"
+  title="hooks/use-prefers-reduced-motion.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { AnimatedGridPattern } from '@/components/general/animated-grid-pattern';
+```
+
+The grid fills its nearest positioned ancestor, so place it in a `relative` box that clips its overflow, and lift
+the content over it with `relative`. A mask fades it toward the edges:
+
+```tsx
+<div className="relative h-64 overflow-hidden rounded-lg border">
+  <AnimatedGridPattern maxOpacity={0.3} className="mask-radial-from-40% mask-radial-to-80%" />
+  <h2 className="relative">Launch week</h2>
+</div>
+```
+
+It is decoration: hidden from assistive technology and from the pointer, so nothing it covers stops taking
+clicks. A `text-*` class recolours it; the lines draw at 30% of that colour.
+
+## API reference
+
+### AnimatedGridPattern
+
+Renders an `svg` and takes every prop an `svg` takes, plus:
+
+| Prop              | Type     | Default |
+| ----------------- | -------- | ------- |
+| `width`           | `number` | `40`    |
+| `height`          | `number` | `40`    |
+| `x`               | `number` | `-1`    |
+| `y`               | `number` | `-1`    |
+| `strokeDasharray` | `number` | `0`     |
+| `numSquares`      | `number` | `50`    |
+| `maxOpacity`      | `number` | `0.5`   |
+| `duration`        | `number` | `4`     |
+| `repeatDelay`     | `number` | `0.5`   |
+
+`width` and `height` size one cell in px, and `x` and `y` shift the grid. Once the grid has measured its box,
+`numSquares` cells fade in to `maxOpacity` over `duration` seconds, stay lit for `repeatDelay` seconds, fade out
+again, and move to another cell at random. Under `prefers-reduced-motion` the lit cells are drawn still at
+`maxOpacity` and never move. It sets `data-slot="animated-grid-pattern"` and `aria-hidden`.
