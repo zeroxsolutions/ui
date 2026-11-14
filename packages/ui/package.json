@@ -135,7 +135,9 @@
         "executor": "nx:run-commands",
         "outputs": [
           "{projectRoot}/registry/bases/base-ui/examples/__index__.tsx",
-          "{projectRoot}/registry/bases/base-ui/examples/__components__.tsx"
+          "{projectRoot}/registry/bases/base-ui/examples/__components__.tsx",
+          "{projectRoot}/registry/bases/base-ui/examples/__editor-components__.tsx",
+          "{projectRoot}/registry/bases/base-ui/examples/__editor-components-client-only__.tsx"
         ],
         "cache": true,
         "options": {

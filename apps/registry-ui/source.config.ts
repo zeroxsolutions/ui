@@ -11,6 +11,13 @@ export const docs = defineDocs({
   docs: { async: true, postprocess: { includeProcessedMarkdown: true } },
 });
 
+// The editor docs live in their own package, served from this app until their zone takes the paths; the
+// two collections are one source (`lib/source.ts`).
+export const editorDocs = defineDocs({
+  dir: '../../packages/editor-docs-web/content/docs',
+  docs: { async: true, postprocess: { includeProcessedMarkdown: true } },
+});
+
 export default defineConfig({
   mdxOptions: {
     // No fumadocs Shiki pass: `rehypeDocsCode` highlights with the registry's own highlighter and

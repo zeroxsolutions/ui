@@ -96,6 +96,8 @@ apps/registry-native-ui-docs-zone/public/native-preview-uniwind
 # The docs' demo index (emitted by @zeroxsolutions/ui:examples-index)
 packages/ui/registry/bases/base-ui/examples/__index__.tsx
 packages/ui/registry/bases/base-ui/examples/__components__.tsx
+packages/ui/registry/bases/base-ui/examples/__editor-components__.tsx
+packages/ui/registry/bases/base-ui/examples/__editor-components-client-only__.tsx
 
 # Playwright e2e artifacts (regenerated screenshots + reports)
 apps/registry-ui-e2e/screenshots

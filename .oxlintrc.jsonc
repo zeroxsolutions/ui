@@ -251,6 +251,10 @@
                 "onlyDependOnLibsWithTags": ["context:native-ui-docs", "type:ui"],
               },
               {
+                "sourceTag": "context:editor-docs",
+                "onlyDependOnLibsWithTags": ["context:editor-docs", "type:ui"],
+              },
+              {
                 "sourceTag": "*",
                 "onlyDependOnLibsWithTags": ["*"],
               },

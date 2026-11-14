@@ -11,6 +11,10 @@ vi.mock('../lib/shiki', async (importOriginal) => {
   return { ...actual, highlightToLines: vi.fn().mockResolvedValue(null) };
 });
 
+import { Components } from './__components__';
+import { EditorComponents } from './__editor-components__';
+import { EditorComponentsClientOnly } from './__editor-components-client-only__';
+import { Index } from './__index__';
 import { CommandMenuDemo } from './command-menu-demo';
 import { PermissionCardDemo } from './permission-card-demo';
 
@@ -37,7 +41,7 @@ type ExampleModule = Record<string, ComponentType>;
 
 // Next's global types declare `import.meta.glob` without Vite's module type parameter, and theirs is
 // the declaration that wins, so the module shape is asserted here instead.
-const MODULES = import.meta.glob(['./*.tsx', '!./*.spec.tsx', '!./__index__.tsx', '!./__components__.tsx'], {
+const MODULES = import.meta.glob(['./*.tsx', '!./*.spec.tsx', '!./__*.tsx'], {
   eager: true,
 }) as Record<string, ExampleModule>;
 
@@ -50,6 +54,18 @@ const EXAMPLES = Object.entries(MODULES).flatMap(([path, module]) =>
 );
 
 describe('examples', () => {
+  it('splits the demos between the maps', () => {
+    const plain = Object.keys(Components);
+    const editor = Object.keys(EditorComponents);
+
+    expect(plain.filter((name) => editor.includes(name))).toEqual([]);
+    expect([...plain, ...editor].sort()).toEqual(Object.keys(Index).sort());
+    expect(Object.keys(EditorComponentsClientOnly).sort()).toEqual([...editor].sort());
+    expect(editor).toContain('document-editor-demo');
+    expect(editor).toContain('chat-input-demo');
+    expect(editor).not.toContain('code-card-demo');
+  });
+
   it.each(EXAMPLES)('$file renders $exportName', async ({ Example }) => {
     const { container } = render(<Example />);
     // An upstream ScrollArea measures its viewport in a queueMicrotask outside
