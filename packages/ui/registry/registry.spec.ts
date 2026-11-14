@@ -11,6 +11,11 @@ interface RegistryFile {
   target?: string;
 }
 
+/** A rule's declarations, or an at-rule's nested rules, as an item's `css` keys them. */
+interface CssBlock {
+  [key: string]: string | CssBlock;
+}
+
 type CssVars = Record<'theme' | 'light' | 'dark', Record<string, string>>;
 
 interface RegistryItem {
@@ -20,8 +25,8 @@ interface RegistryItem {
   dependencies?: string[];
   registryDependencies?: string[];
   cssVars?: CssVars;
-  /** CSS rules the item ships, keyed by at-rule (`@utility <name>`), each a map of declarations. */
-  css?: Record<string, Record<string, string>>;
+  /** CSS the item ships, keyed by selector or at-rule (`@utility <name>`), each a map of declarations or of nested rules. */
+  css?: CssBlock;
   files: RegistryFile[];
 }
 
@@ -203,28 +208,95 @@ function cssVarsProblems(item: RegistryItem): string[] {
     : [`${item.name}: cssVars should be ${JSON.stringify(expected)}`];
 }
 
-/** The declarations of the top-level `<rule> { ... }` block in the base stylesheet or else the editor's, or undefined when neither declares it. */
-function stylesheetRule(rule: string): Record<string, string> | undefined {
-  const escaped = rule.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(`^${escaped} \\{\\n([\\s\\S]*?)^\\}`, 'm');
-  const body = ['styles.css', 'editor/styles.css']
-    .map((sheet) => pattern.exec(readFileSync(join(APP, BASE, sheet), 'utf8'))?.[1])
-    .find((found) => found !== undefined);
-  if (body === undefined) return undefined;
-  return Object.fromEntries(
-    [...body.matchAll(/^\s*([\w-]+):\s*([^;]+);/gm)].map(([, property, value]) => [property, value.trim()]),
-  );
+/** A block of a stylesheet: its declarations, its statement at-rules, and the blocks nested in it, by prelude. */
+interface SheetBlock {
+  declarations: Record<string, string>;
+  statements: Set<string>;
+  blocks: Map<string, SheetBlock>;
+}
+
+/** A prelude on one line, so a selector list written across lines reads as an item's `css` key spells it. */
+function oneLine(prelude: string): string {
+  return prelude
+    .replace(/\s+/g, ' ')
+    .replace(/\s*,\s*/g, ', ')
+    .trim();
+}
+
+/** One statement of a block: an at-rule (`@plugin "..."`) joins its statements, any other is a declaration. */
+function addStatement(block: SheetBlock, text: string): void {
+  const statement = text.trim();
+  if (statement === '') return;
+  if (statement.startsWith('@')) {
+    block.statements.add(oneLine(statement));
+    return;
+  }
+  const colon = statement.indexOf(':');
+  block.declarations[statement.slice(0, colon).trim()] = statement
+    .slice(colon + 1)
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** A stylesheet's comments dropped and its rules read into nested blocks; a quoted string is read whole. */
+function parseSheet(css: string): SheetBlock {
+  const block = (): SheetBlock => ({ declarations: {}, statements: new Set(), blocks: new Map() });
+  const source = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const stack = [block()];
+  let text = '';
+  for (let i = 0; i < source.length; i++) {
+    const char = source[i];
+    const current = stack[stack.length - 1];
+    if (char === '"' || char === "'") {
+      const end = source.indexOf(char, i + 1);
+      text += source.slice(i, end + 1);
+      i = end;
+    } else if (char === '{') {
+      const prelude = oneLine(text);
+      const nested = current.blocks.get(prelude) ?? block();
+      current.blocks.set(prelude, nested);
+      stack.push(nested);
+      text = '';
+    } else if (char === ';' || char === '}') {
+      addStatement(current, text);
+      text = '';
+      if (char === '}') stack.pop();
+    } else {
+      text += char;
+    }
+  }
+  return stack[0];
+}
+
+/** The base stylesheet and the editor's, which the site renders with and an item's `css` is checked against. */
+const SHEETS = ['styles.css', 'editor/styles.css'].map((sheet) =>
+  parseSheet(readFileSync(join(APP, BASE, sheet), 'utf8')),
+);
+
+/**
+ * Each entry of `shipped` against the blocks it nests in: a map of declarations is a rule with exactly the
+ * sheet's declarations, or with none a statement at-rule (`@plugin "..."`) the sheet holds; a map of maps is
+ * an at-rule (`@layer components`) whose rules are checked inside the sheet's block of that name.
+ */
+function cssBlockProblems(name: string, shipped: CssBlock, scopes: SheetBlock[], outer: string[]): string[] {
+  return Object.entries(shipped).flatMap(([rule, body]) => {
+    const label = outer.reduceRight((inner, at) => `${at} { ${inner} }`, rule);
+    if (typeof body === 'string') return [`${name}: css ${label} is a declaration outside a rule`];
+    const found = scopes.map((scope) => scope.blocks.get(rule)).find((block) => block !== undefined);
+    const nested = Object.values(body).some((value) => typeof value !== 'string');
+    if (nested) {
+      if (found === undefined) return [`${name}: css ships ${label}, which styles.css does not declare`];
+      return cssBlockProblems(name, body, [found], [...outer, rule]);
+    }
+    const expected = found?.declarations ?? (scopes.some((scope) => scope.statements.has(rule)) ? {} : undefined);
+    if (expected === undefined) return [`${name}: css ships ${label}, which styles.css does not declare`];
+    return isDeepStrictEqual(body, expected) ? [] : [`${name}: css ${label} should be ${JSON.stringify(expected)}`];
+  });
 }
 
 /** Each rule an item's `css` ships is the same rule, with the same declarations, as the stylesheet the site renders with. */
 function cssProblems(item: RegistryItem): string[] {
-  return Object.entries(item.css ?? {}).flatMap(([rule, declarations]) => {
-    const expected = stylesheetRule(rule);
-    if (expected === undefined) return [`${item.name}: css ships ${rule}, which styles.css does not declare`];
-    return isDeepStrictEqual(declarations, expected)
-      ? []
-      : [`${item.name}: css ${rule} should be ${JSON.stringify(expected)}`];
-  });
+  return cssBlockProblems(item.name, item.css ?? {}, SHEETS, []);
 }
 
 /** Every family file: a component under a kind folder or a block, specs left out. */
@@ -239,10 +311,13 @@ function familyFiles(): string[] {
 
 /**
  * Each family file is the first file of exactly one component or block item, which takes its name and kind
- * folder, or else ships as a later file of exactly one such item, as a part only that item publishes.
+ * folder, or else ships as a later file of exactly one such item, as a part only that item publishes. An item
+ * of editor files answers to `editorProblems` instead.
  */
 function familyProblems(items: RegistryItem[], families: string[]): string[] {
-  const published = items.filter((item) => PUBLISHED.includes(item.type));
+  const published = items.filter(
+    (item) => PUBLISHED.includes(item.type) && !(item.files[0]?.path ?? '').startsWith(`${BASE}/editor/`),
+  );
   const unowned = families.flatMap((family) => {
     const owners = published.filter((item) => item.files[0]?.path === family).map((item) => item.name);
     if (owners.length === 0) {
@@ -573,6 +648,45 @@ describe('cssProblems', () => {
       'tree-item: css ships @utility bg-missing, which styles.css does not declare',
     ]);
   });
+
+  it('accepts a statement at-rule the editor sheet holds, shipped as an empty rule', () => {
+    expect(cssProblems({ ...treeItem, css: { '@plugin "@tailwindcss/typography"': {} } })).toEqual([]);
+  });
+
+  it('reports a statement at-rule no sheet holds', () => {
+    expect(cssProblems({ ...treeItem, css: { '@plugin "@tailwindcss/forms"': {} } })).toEqual([
+      'tree-item: css ships @plugin "@tailwindcss/forms", which styles.css does not declare',
+    ]);
+  });
+
+  it('reports a statement at-rule shipped with declarations', () => {
+    expect(cssProblems({ ...treeItem, css: { '@plugin "@tailwindcss/typography"': { a: 'b' } } })).toEqual([
+      'tree-item: css @plugin "@tailwindcss/typography" should be {}',
+    ]);
+  });
+
+  it('accepts a rule nested in a layer, shipped under that layer', () => {
+    const css = { '@layer components': { '.document-editor .ProseMirror': { outline: 'none' } } };
+    expect(cssProblems({ ...treeItem, css })).toEqual([]);
+  });
+
+  it('reports a nested rule whose declarations differ from the sheet', () => {
+    const css = { '@layer components': { '.document-editor .ProseMirror': { outline: 'auto' } } };
+    expect(cssProblems({ ...treeItem, css })).toEqual([
+      'tree-item: css @layer components { .document-editor .ProseMirror } should be {"outline":"none"}',
+    ]);
+  });
+
+  it('matches a selector list written across lines by its one-line form', () => {
+    const css = {
+      '.document-editor .ProseMirror > :first-child, .document-editor .ProseMirror > :last-child': {},
+      ".document-editor ul[data-type='taskList'] li p, .document-editor [data-slot='callout'] p, .document-editor [data-slot='toggle'] p":
+        { 'margin-top': '0', 'margin-bottom': '0' },
+    };
+    expect(cssProblems({ ...treeItem, css })).toEqual([
+      'tree-item: css ships .document-editor .ProseMirror > :first-child, .document-editor .ProseMirror > :last-child, which styles.css does not declare',
+    ]);
+  });
 });
 
 const FAMILIES = [`${BASE}/blocks/ai-provider-picker.tsx`, `${BASE}/components/data-display/tree-item.tsx`];
@@ -646,6 +760,16 @@ describe('familyProblems', () => {
     expect(familyProblems([{ ...familyItems[0], name: 'tree-row' }, familyItems[1]], FAMILIES)).toEqual([
       'tree-row: name should be tree-item',
     ]);
+  });
+
+  it('leaves an item of editor files to editorProblems', () => {
+    const editor = {
+      name: 'document-editor',
+      type: 'registry:component',
+      categories: ['editor'],
+      files: [{ path: `${BASE}/editor/x.tsx`, type: 'registry:component', target: 'components/editor/x.tsx' }],
+    };
+    expect(familyProblems([...familyItems, editor], FAMILIES)).toEqual([]);
   });
 
   it('reports an item not categorised under its kind folder', () => {

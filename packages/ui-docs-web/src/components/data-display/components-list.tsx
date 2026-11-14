@@ -4,13 +4,20 @@ import { HostLink } from '@zeroxsolutions/ui/site/components/navigation/host-lin
 import { DEFAULT_COMPONENT_BASE } from '@zeroxsolutions/ui/site/constants/component-bases';
 import { cn } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/utils';
 
-import { publishedItems } from '../../lib/published-items';
+import { publishedItems, type PublishedItem } from '../../lib/published-items';
 import { componentRoute, docsPageRoute } from '../../routes';
 
 /** A category as a heading: `data-display` reads `Data display`. */
 function categoryLabel(category: string): string {
   const words = category.replaceAll('-', ' ');
   return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/** Where an item's page sits: a block's under `blocks/`, an editor item's under `editor/`, a component's under its base. */
+function itemPage(item: PublishedItem): string {
+  if (item.type === 'registry:block') return docsPageRoute.build({ slug: `blocks/${item.name}` });
+  if (item.category === 'editor') return docsPageRoute.build({ slug: `editor/${item.name}` });
+  return componentRoute.build({ base: DEFAULT_COMPONENT_BASE, name: item.name });
 }
 
 interface ComponentsListProps extends ComponentProps<'div'> {
@@ -30,10 +37,7 @@ function ComponentsList({ writtenDocsPage, className, ...props }: ComponentsList
           <h2 className="text-xl font-semibold tracking-tight">{categoryLabel(category)}</h2>
           <ul className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
             {items.map((item) => {
-              const url =
-                item.type === 'registry:block'
-                  ? writtenDocsPage(docsPageRoute.build({ slug: `blocks/${item.name}` }))
-                  : writtenDocsPage(componentRoute.build({ base: DEFAULT_COMPONENT_BASE, name: item.name }));
+              const url = writtenDocsPage(itemPage(item));
               return (
                 <li key={item.name} className="flex flex-col gap-1">
                   {url ? (

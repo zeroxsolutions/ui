@@ -182,6 +182,8 @@ interface RegistryFile {
 /** A `registry:component` item, with what its page installs and documents. */
 interface ComponentItem {
   name: string;
+  /** The item's category; an `editor` item's page sits under `editor/`. */
+  categories?: string[];
   files: RegistryFile[];
   dependencies: string[];
   registryDependencies: string[];
@@ -193,6 +195,7 @@ function readComponentItems(): ComponentItem[] {
     items: {
       name: string;
       type: string;
+      categories?: string[];
       files: RegistryFile[];
       dependencies?: string[];
       registryDependencies?: string[];
@@ -200,8 +203,9 @@ function readComponentItems(): ComponentItem[] {
   };
   return items
     .filter((item) => item.type === 'registry:component')
-    .map(({ name, files, dependencies, registryDependencies }) => ({
+    .map(({ name, categories, files, dependencies, registryDependencies }) => ({
       name,
+      categories,
       files,
       dependencies: dependencies ?? [],
       registryDependencies: registryDependencies ?? [],
@@ -222,9 +226,14 @@ function installTarget({ path, type }: RegistryFile): string {
   return path.slice(SOURCE_ROOT.length);
 }
 
+/** The page that documents a component: an editor item's under `editor/`, any other's under `components/base/`. */
+function componentPage({ name, categories }: ComponentItem): string {
+  return categories?.[0] === 'editor' ? `editor/${name}` : `components/base/${name}`;
+}
+
 /** Every component with no page. */
 function pagelessComponents(sources: Record<string, string>, components: ComponentItem[]): string[] {
-  return components.flatMap(({ name }) => (`components/base/${name}` in sources ? [] : [`${name}: has no page`]));
+  return components.flatMap((item) => (componentPage(item) in sources ? [] : [`${item.name}: has no page`]));
 }
 
 const COMPONENT_SOURCE = /<ComponentSource\b([^>]*?)\/>/g;
@@ -720,6 +729,17 @@ describe('content/docs', () => {
     const sources = { 'components/base/status-indicator': '' };
 
     expect(pagelessComponents(sources, components)).toEqual(['tag-input: has no page']);
+  });
+
+  it("finds an editor item's page under editor/, not under components/base/", () => {
+    const components = [
+      { name: 'document-editor', categories: ['editor'], files: [], dependencies: [], registryDependencies: [] },
+    ];
+
+    expect(pagelessComponents({ 'editor/document-editor': '' }, components)).toEqual([]);
+    expect(pagelessComponents({ 'components/base/document-editor': '' }, components)).toEqual([
+      'document-editor: has no page',
+    ]);
   });
 
   it('writes each file to the path the shadcn CLI installs it at', () => {

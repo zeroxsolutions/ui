@@ -61,7 +61,7 @@ export const Components: Record<string, LazyExoticComponent<ComponentType>> = {
 ${entries
   .map(
     ({ name, files: [file] }) =>
-      `  '${name}': lazy(() => import('@/${file.replace(/\.tsx$/, '')}').then(firstComponent)),`,
+      `  '${name}': lazy(() => import('@/${file.replace(/\.tsx?$/, '')}').then(firstComponent)),`,
   )
   .join('\n')}
 };

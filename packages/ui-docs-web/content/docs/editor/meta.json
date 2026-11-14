@@ -1,0 +1,4 @@
+{
+  "title": "Editor",
+  "pages": ["index", "---Surfaces---", "document-editor", "---Libraries---", "editor-theme", "editor-code-mirror"]
+}

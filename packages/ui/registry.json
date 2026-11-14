@@ -841,6 +841,373 @@
       ]
     },
     {
+      "name": "editor-theme",
+      "type": "registry:lib",
+      "title": "Editor Theme",
+      "description": "The editor theme contract, its default built on the design tokens, and the provider that keeps it in step with light and dark mode.",
+      "categories": ["editor"],
+      "dependencies": ["next-themes"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/index.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/default-theme.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/default-theme.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/editor-theme-context.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/editor-theme-context.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/editor-theme-provider.tsx",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/editor-theme-provider.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/extend-theme.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/extend-theme.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/types/editor-theme.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/types/editor-theme.ts"
+        }
+      ]
+    },
+    {
+      "name": "editor-code-mirror",
+      "type": "registry:lib",
+      "title": "Editor Code Mirror",
+      "description": "The CodeMirror pane the code and diagram editors type into, highlighted by Shiki in the editor theme.",
+      "categories": ["editor"],
+      "dependencies": [
+        "@codemirror/commands",
+        "@codemirror/language",
+        "@codemirror/state",
+        "@codemirror/view",
+        "@shikijs/langs",
+        "class-variance-authority",
+        "shiki"
+      ],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/shared/code-mirror/index.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/code-mirror/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/code-mirror/code-mirror-pane.tsx",
+          "type": "registry:lib",
+          "target": "components/editor/shared/code-mirror/code-mirror-pane.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/code-mirror/code-syntax.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/code-mirror/code-syntax.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/code-theme.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/mermaid-grammar.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/shiki.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "document-editor",
+      "type": "registry:component",
+      "title": "Document Editor",
+      "description": "A block document editor and its read-only viewers, with a toolbar, a bubble, a block menu and a slash menu, over the standard kit of headings, lists, tasks and marks.",
+      "categories": ["editor"],
+      "dependencies": [
+        "@base-ui/react",
+        "@tiptap/extension-highlight",
+        "@tiptap/extension-placeholder",
+        "@tiptap/extension-subscript",
+        "@tiptap/extension-superscript",
+        "@tiptap/extension-task-item",
+        "@tiptap/extension-task-list",
+        "@tiptap/react",
+        "@tiptap/starter-kit",
+        "@zeroxsolutions/editor-core",
+        "lucide-react",
+        "tiptap-extension-global-drag-handle"
+      ],
+      "devDependencies": ["@tailwindcss/typography"],
+      "registryDependencies": [
+        "@shadcn/checkbox",
+        "@shadcn/dropdown-menu",
+        "@shadcn/empty",
+        "@shadcn/item",
+        "@shadcn/popover",
+        "@shadcn/scroll-area",
+        "@shadcn/separator",
+        "@shadcn/toggle",
+        "@shadcn/tooltip",
+        "@shadcn/utils",
+        "@zui/editor-theme"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/react/editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/react/editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/standard/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/standard/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/standard/standard-codecs.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/standard/standard-codecs.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/standard/standard-kit.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/standard/standard-kit.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/standard/standard-ui.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/standard/standard-ui.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/standard/task-item-view.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/standard/task-item-view.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/node-view-adapter.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/node-view-adapter.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/react/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/react/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/react/viewer-live.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/react/viewer-live.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/react/viewer.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/react/viewer.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/serialize/render-to-react.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/serialize/render-to-react.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/block-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/block-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/bubble-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/bubble-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/editor-toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/editor-toolbar.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/rect-popover.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/rect-popover.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/selection-rect.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/selection-rect.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/slash-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/slash-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/use-editor-changes.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/use-editor-changes.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/react-types.ts",
+          "type": "registry:component",
+          "target": "components/editor/react-types.ts"
+        }
+      ],
+      "css": {
+        "@plugin \"@tailwindcss/typography\"": {},
+        ".document-editor": {
+          "--tw-prose-body": "var(--foreground)",
+          "--tw-prose-headings": "var(--foreground)",
+          "--tw-prose-lead": "var(--muted-foreground)",
+          "--tw-prose-links": "var(--primary)",
+          "--tw-prose-bold": "var(--foreground)",
+          "--tw-prose-counters": "var(--muted-foreground)",
+          "--tw-prose-bullets": "var(--muted-foreground)",
+          "--tw-prose-hr": "var(--border)",
+          "--tw-prose-quotes": "var(--foreground)",
+          "--tw-prose-quote-borders": "var(--border)",
+          "--tw-prose-captions": "var(--muted-foreground)",
+          "--tw-prose-code": "var(--foreground)",
+          "--tw-prose-pre-code": "var(--foreground)",
+          "--tw-prose-pre-bg": "var(--muted)",
+          "--tw-prose-th-borders": "var(--border)",
+          "--tw-prose-td-borders": "var(--border)",
+          "--tw-prose-invert-body": "var(--foreground)",
+          "--tw-prose-invert-headings": "var(--foreground)",
+          "--tw-prose-invert-links": "var(--primary)",
+          "--tw-prose-invert-bold": "var(--foreground)",
+          "--tw-prose-invert-bullets": "var(--muted-foreground)",
+          "--tw-prose-invert-hr": "var(--border)",
+          "--tw-prose-invert-quotes": "var(--foreground)",
+          "--tw-prose-invert-quote-borders": "var(--border)",
+          "--tw-prose-invert-code": "var(--foreground)",
+          "--tw-prose-invert-pre-bg": "var(--muted)",
+          "--tw-prose-invert-th-borders": "var(--border)",
+          "--tw-prose-invert-td-borders": "var(--border)"
+        },
+        ".document-editor ul[data-type='taskList'] li p, .document-editor [data-slot='callout'] p, .document-editor [data-slot='toggle'] p": {
+          "margin-top": "0",
+          "margin-bottom": "0"
+        },
+        ".document-editor .ProseMirror > :first-child": {
+          "margin-top": "0"
+        },
+        ".document-editor .ProseMirror > :last-child": {
+          "margin-bottom": "0"
+        },
+        "@layer components": {
+          ".document-editor .ProseMirror": {
+            "outline": "none"
+          },
+          ".document-editor .ProseMirror[contenteditable='true']": {
+            "padding-inline": "3rem"
+          },
+          ".document-editor .ProseMirror .is-empty::before, .document-editor .ProseMirror .is-editor-empty:first-child::before": {
+            "content": "attr(data-placeholder)",
+            "color": "var(--muted-foreground)",
+            "float": "left",
+            "height": "0",
+            "pointer-events": "none",
+            "opacity": "0.6"
+          },
+          ".document-editor ul[data-type='taskList']": {
+            "list-style": "none",
+            "padding-left": "0"
+          },
+          ".document-editor ul[data-type='taskList'] li": {
+            "display": "flex",
+            "align-items": "flex-start",
+            "gap": "0.5rem"
+          },
+          ".document-editor ul[data-type='taskList'] li > label": {
+            "display": "flex",
+            "align-items": "center",
+            "flex-shrink": "0",
+            "margin-top": "0.375rem",
+            "user-select": "none"
+          },
+          ".document-editor ul[data-type='taskList'] li > label input[type='checkbox']": {
+            "accent-color": "var(--primary)"
+          },
+          ".document-editor ul[data-type='taskList'] li > div": {
+            "flex": "1",
+            "min-width": "0"
+          },
+          ".document-editor ul[data-type='taskList'] li > div > p": {
+            "margin": "0"
+          },
+          ".document-editor .slash-active": {
+            "background": "color-mix(in oklab, var(--muted-foreground) 16%, transparent)",
+            "border-radius": "0.25rem",
+            "padding": "0.05rem 0.1rem",
+            "-webkit-box-decoration-break": "clone",
+            "box-decoration-break": "clone"
+          },
+          ".document-editor .slash-ghost": {
+            "color": "var(--muted-foreground)",
+            "opacity": "0.5",
+            "pointer-events": "none",
+            "user-select": "none",
+            "white-space": "pre"
+          },
+          ".document-editor mark": {
+            "background": "color-mix(in oklab, var(--primary) 22%, transparent)",
+            "color": "inherit",
+            "border-radius": "0.2rem",
+            "padding": "0 0.15rem"
+          },
+          ".document-editor :where(code):not(:where(pre code))": {
+            "overflow-wrap": "anywhere"
+          },
+          ".document-editor :where(pre)": {
+            "overflow-x": "auto"
+          },
+          ".document-editor.is-dragging .ProseMirror": {
+            "cursor": "grabbing"
+          },
+          ".document-editor.is-dragging .ProseMirror-selectednode": {
+            "filter": "grayscale(1)",
+            "opacity": "0.45"
+          },
+          ".drag-handle": {
+            "position": "fixed",
+            "width": "1.25rem",
+            "height": "1.5rem",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "border-radius": "0.375rem",
+            "background": "transparent",
+            "color": "var(--muted-foreground)",
+            "cursor": "grab",
+            "opacity": "0.55",
+            "transition": "opacity 0.15s ease, background 0.15s ease",
+            "z-index": "40"
+          },
+          ".drag-handle:hover": {
+            "background": "var(--accent)",
+            "opacity": "1"
+          },
+          ".drag-handle:active": {
+            "cursor": "grabbing"
+          },
+          ".drag-handle.hide": {
+            "opacity": "0",
+            "pointer-events": "none"
+          },
+          "@media (pointer: coarse)": {
+            ".drag-handle": {
+              "display": "none !important"
+            }
+          }
+        }
+      }
+    },
+    {
       "name": "ai-provider-card-demo",
       "type": "registry:example",
       "title": "AI Provider Card Demo",
@@ -1588,6 +1955,21 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/ai-provider-picker-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "document-editor-demo",
+      "type": "registry:example",
+      "title": "Document Editor Demo",
+      "description": "A short document with a heading, a paragraph, a list and a task list, under the toolbar.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/document-editor-demo.tsx",
           "type": "registry:example"
         }
       ]
