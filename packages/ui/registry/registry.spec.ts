@@ -472,6 +472,10 @@ describe('registry.json', () => {
     expect(demoProblems(REGISTRY.items)).toEqual([]);
   });
 
+  it('ships every editor file in exactly one editor item', () => {
+    expect(editorProblems(REGISTRY.items, editorFiles())).toEqual([]);
+  });
+
   it("ships neither KaTeX's stylesheet nor the typography plugin with chat-input or code-editor", () => {
     const standalone = ['chat-input', 'code-editor'].map((name) => REGISTRY.items.find((item) => item.name === name));
     expect(standalone.map((item) => item?.name)).toEqual(['chat-input', 'code-editor']);
