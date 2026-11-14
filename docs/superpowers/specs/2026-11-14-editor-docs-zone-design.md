@@ -22,7 +22,7 @@ owner asked for the split (2026-11-14). What it buys:
 1. Every editor URL answers what it answers today, on `ui.zeroxsolutions.com`, from the editor zone.
 2. `registry-ui`'s build imports nothing under `registry/bases/base-ui/editor/` and no editor demo.
 3. The editor demos render on the server in the editor zone (no `ssr: false`), as long as the zone's
-   worker stays under Workers Paid's 10 MB compressed limit (see Size).
+   worker passes `tools/check-worker-size.sh` (see Size).
 4. A change reaching only the editor chrome or its pages is not built by `registry-ui`'s targets, and
    the reverse.
 
@@ -96,9 +96,10 @@ in `packages/ui/src/site` and takes the index as it does today (its exact seam i
 
 ### Size
 
-The first task builds today's master and records the gzipped `handler.mjs` of `registry-ui`; the zone's
-task records the editor zone's with SSR on. Both must stay under 10 MB compressed, and `registry-ui`'s
-must fall.
+The first task builds today's master and records what `tools/check-worker-size.sh` prints for
+`registry-ui` (the upload total, which the script refuses above 58982 KiB, 90 per cent of Cloudflare's
+64 MiB uncompressed limit, and the handler's size); the zone's task records the editor zone's with SSR
+on. Both must pass the script, and `registry-ui`'s upload must fall.
 
 If the editor zone with every demo on the server goes past the limit, the item whose import tips it
 (mermaid is the likely one) keeps `ssr: false` in the editor zone's index alone, named in the generator
