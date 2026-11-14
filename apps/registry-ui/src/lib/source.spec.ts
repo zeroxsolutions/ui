@@ -94,6 +94,18 @@ function readComponentNames(): Set<string> {
   return new Set(items.filter((item) => item.type === 'registry:component').map((item) => item.name));
 }
 
+/** The component and block items registry.json publishes, each of which has a demo; a lib has none. */
+function readDemoedNames(): Set<string> {
+  const { items } = JSON.parse(readFileSync(join(UI, 'registry.json'), 'utf8')) as {
+    items: { name: string; type: string }[];
+  };
+  return new Set(
+    items
+      .filter((item) => item.type === 'registry:component' || item.type === 'registry:block')
+      .map((item) => item.name),
+  );
+}
+
 /** The names registry.json publishes as `registry:example`. */
 function readExampleNames(): string[] {
   const { items } = JSON.parse(readFileSync(join(UI, 'registry.json'), 'utf8')) as {
@@ -128,16 +140,19 @@ function readFrontmatter(source: string): Partial<ItemText> {
   return { title: field('title'), description: field('description') };
 }
 
-/** The pages under `components/base/` and `blocks/` that document one registry item each, which leaves out a folder's index. */
+/** A slug under `components/base/`, `blocks/` or `editor/`, the folders whose pages document one registry item each. */
+const ITEM_PAGE = /^(components\/base|blocks|editor)\/[^/]+$/;
+
+/** The pages under `components/base/`, `blocks/` and `editor/` that document one registry item each, which leaves out a folder's index. */
 function namedPages(sources: Record<string, string>): [slug: string, name: string, source: string][] {
   return Object.entries(sources)
-    .filter(([slug]) => /^(components\/base|blocks)\/[^/]+$/.test(slug) && !slug.endsWith('/index'))
+    .filter(([slug]) => ITEM_PAGE.test(slug) && !slug.endsWith('/index'))
     .map(([slug, source]) => [slug, slug.split('/').pop() ?? '', source]);
 }
 
 /**
- * Every page under `components/base/` or `blocks/` that names no registry item, and every item page
- * whose title or description is not the item's.
+ * Every page under `components/base/`, `blocks/` or `editor/` that names no registry item, and every item
+ * page whose title or description is not the item's.
  */
 function unnamedPages(sources: Record<string, string>, items: Map<string, ItemText>): string[] {
   return namedPages(sources).flatMap(([slug, name, source]) => {
@@ -151,8 +166,15 @@ function unnamedPages(sources: Record<string, string>, items: Map<string, ItemTe
   });
 }
 
-/** The command a page installs its subject with: an item by its `@zui/` name, a primitive by its name at shadcn. */
-function installCommand(name: string, items: Map<string, ItemText>): string {
+/** The item a document feature plugs into, which its page installs alongside it. */
+const FEATURE_HOST = '@zui/document-editor';
+
+/**
+ * The command a page installs its subject with: an item by its `@zui/` name, after Document Editor for a
+ * document feature, and a primitive by its name at shadcn.
+ */
+function installCommand(name: string, items: Map<string, ItemText>, features: ReadonlySet<string>): string {
+  if (features.has(name)) return `pnpm dlx shadcn@latest add ${FEATURE_HOST} @zui/${name}`;
   return items.has(name) ? `pnpm dlx shadcn@latest add @zui/${name}` : `pnpm dlx shadcn@latest add ${name}`;
 }
 
@@ -162,24 +184,30 @@ function cliBlock(source: string): string {
 }
 
 /** Every item or primitive page whose CLI tab has no line that is exactly its install command. */
-function missingInstallCommands(sources: Record<string, string>, items: Map<string, ItemText>): string[] {
+function missingInstallCommands(
+  sources: Record<string, string>,
+  items: Map<string, ItemText>,
+  features: ReadonlySet<string> = new Set(),
+): string[] {
   return namedPages(sources)
     .filter(
       ([, name, source]) =>
         !cliBlock(source)
           .split('\n')
-          .some((line) => line.trim() === installCommand(name, items)),
+          .some((line) => line.trim() === installCommand(name, items, features)),
     )
-    .map(([slug, name]) => `${slug}: has no \`${installCommand(name, items)}\``);
+    .map(([slug, name]) => `${slug}: has no \`${installCommand(name, items, features)}\``);
 }
 
 /** A file an item ships, as `registry.json` lists it. */
 interface RegistryFile {
   path: string;
   type: string;
+  /** Where the CLI writes the file, when the item names it. */
+  target?: string;
 }
 
-/** A `registry:component` item, with what its page installs and documents. */
+/** A `registry:component` or editor item, with what its page installs and documents. */
 interface ComponentItem {
   name: string;
   /** The item's category; an `editor` item's page sits under `editor/`. */
@@ -187,10 +215,12 @@ interface ComponentItem {
   files: RegistryFile[];
   dependencies: string[];
   registryDependencies: string[];
+  /** The CSS the item ships, keyed by selector or at-rule. */
+  css?: Record<string, unknown>;
 }
 
-/** The items registry.json publishes as `registry:component`. */
-function readComponentItems(): ComponentItem[] {
+/** The items registry.json publishes as `registry:component`, and with `all`, every editor item besides. */
+function readComponentItems(all = false): ComponentItem[] {
   const { items } = JSON.parse(readFileSync(join(UI, 'registry.json'), 'utf8')) as {
     items: {
       name: string;
@@ -199,27 +229,49 @@ function readComponentItems(): ComponentItem[] {
       files: RegistryFile[];
       dependencies?: string[];
       registryDependencies?: string[];
+      css?: Record<string, unknown>;
     }[];
   };
   return items
-    .filter((item) => item.type === 'registry:component')
-    .map(({ name, categories, files, dependencies, registryDependencies }) => ({
+    .filter((item) => item.type === 'registry:component' || (all && item.categories?.[0] === 'editor'))
+    .map(({ name, categories, files, dependencies, registryDependencies, css }) => ({
       name,
       categories,
       files,
       dependencies: dependencies ?? [],
       registryDependencies: registryDependencies ?? [],
+      css,
     }));
+}
+
+/** A document feature's first file, under `editor/document/features/<feature>/`; the barrel above them is no feature. */
+const FEATURE_FILE = /^registry\/bases\/base-ui\/editor\/document\/features\/[^/]+\//;
+
+function isFeature({ files }: ComponentItem): boolean {
+  return FEATURE_FILE.test(files[0]?.path ?? '');
+}
+
+/** A `css` key loading a Tailwind plugin, `@plugin "<package>"`; the package is captured. */
+const TAILWIND_PLUGIN = /^@plugin\s+["']([^"']+)["']$/;
+
+/** The Tailwind plugins an item's css loads, which a project installs as dev dependencies. */
+function pluginsOf({ css }: ComponentItem): string[] {
+  return Object.keys(css ?? {}).flatMap((key) => {
+    const plugin = TAILWIND_PLUGIN.exec(key)?.[1];
+    return plugin === undefined ? [] : [plugin];
+  });
 }
 
 /** The registry's source root, which the CLI drops from a component's path. */
 const SOURCE_ROOT = 'registry/bases/base-ui/';
 
 /**
- * Where the shadcn CLI writes a file. A lib or hook file goes into the app's `lib/` or `hooks/`
- * under its own name, and a component keeps its path from `components/` on.
+ * Where the shadcn CLI writes a file: its `target` when the item names one. Otherwise a lib or hook
+ * file goes into the app's `lib/` or `hooks/` under its own name, and a component keeps its path from
+ * `components/` on.
  */
-function installTarget({ path, type }: RegistryFile): string {
+function installTarget({ path, type, target }: RegistryFile): string {
+  if (target !== undefined) return target;
   const name = path.split('/').pop() ?? path;
   if (type === 'registry:lib') return `lib/${name}`;
   if (type === 'registry:hook') return `hooks/${name}`;
@@ -258,12 +310,15 @@ function registryDependencyNames(registryDependencies: string[]): string[] {
 /**
  * Every way a component page's Manual tab disagrees with its item: a file with no `ComponentSource`,
  * one titled with another path than the CLI writes it to, two `ComponentSource` blocks naming the same
- * file, `pnpm add` lines naming other packages than the item's `dependencies`, and a
- * `pnpm dlx shadcn@latest add` line naming other names than its `registryDependencies`, in another order.
+ * file, `pnpm add` lines naming other packages than the item's `dependencies` (and, as `pnpm add -D`, the
+ * Tailwind plugins its css loads), and a `pnpm dlx shadcn@latest add` line naming other names than its
+ * `registryDependencies`, in another order. A document feature adds Document Editor in a step of its own
+ * first, and leaves it out of the line after.
  */
 function manualProblems(sources: Record<string, string>, components: ComponentItem[]): string[] {
-  return components.flatMap(({ name, files, dependencies, registryDependencies }) => {
-    const slug = `components/base/${name}`;
+  return components.flatMap((item) => {
+    const { name, files, dependencies, registryDependencies } = item;
+    const slug = componentPage(item);
     const source = sources[slug];
     if (source === undefined) return [];
     const blocks = [...source.matchAll(COMPONENT_SOURCE)]
@@ -287,25 +342,34 @@ function manualProblems(sources: Record<string, string>, components: ComponentIt
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.startsWith('pnpm add '));
-    const expectedInstalls = dependencies.length > 0 ? [`pnpm add ${dependencies.join(' ')}`] : [];
+    const plugins = pluginsOf(item);
+    const expectedInstalls = [
+      ...(dependencies.length > 0 ? [`pnpm add ${dependencies.join(' ')}`] : []),
+      ...(plugins.length > 0 ? [`pnpm add -D ${plugins.join(' ')}`] : []),
+    ];
     const dependencyProblems =
       installs.join('\n') === expectedInstalls.join('\n')
         ? []
-        : [`${slug}: installs ${installs.join('; ') || 'no package'}, not ${expectedInstalls[0] ?? 'no package'}`];
+        : [
+            `${slug}: installs ${installs.join('; ') || 'no package'}, not ${expectedInstalls.join('; ') || 'no package'}`,
+          ];
     // Scoped to the Manual tab so this never reads the CLI tab's own `pnpm dlx shadcn@latest add
     // @zui/<name>` line, which installs the item itself, not its registryDependencies.
     const adds = manualBlock(source)
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.startsWith('pnpm dlx shadcn@latest add '));
-    const expectedAdds =
-      registryDependencies.length > 0
-        ? [`pnpm dlx shadcn@latest add ${registryDependencyNames(registryDependencies).join(' ')}`]
-        : [];
+    const parts = isFeature(item)
+      ? registryDependencies.filter((dependency) => dependency !== FEATURE_HOST)
+      : registryDependencies;
+    const expectedAdds = [
+      ...(isFeature(item) ? [`pnpm dlx shadcn@latest add ${FEATURE_HOST}`] : []),
+      ...(parts.length > 0 ? [`pnpm dlx shadcn@latest add ${registryDependencyNames(parts).join(' ')}`] : []),
+    ];
     const registryProblems =
       adds.join('\n') === expectedAdds.join('\n')
         ? []
-        : [`${slug}: adds ${adds.join('; ') || 'nothing'}, not ${expectedAdds[0] ?? 'nothing'}`];
+        : [`${slug}: adds ${adds.join('; ') || 'nothing'}, not ${expectedAdds.join('; ') || 'nothing'}`];
     return [...fileProblems, ...duplicateProblems, ...dependencyProblems, ...registryProblems];
   });
 }
@@ -489,10 +553,10 @@ function unresolvedNames(sources: Record<string, string>, index: Set<string>): s
   );
 }
 
-/** Every item page under `components/base/` or `blocks/` whose first `ComponentPreview` or `BlockPreview` is not `<name>-demo`. */
+/** Every item page under `components/base/`, `blocks/` or `editor/` whose first `ComponentPreview` or `BlockPreview` is not `<name>-demo`. */
 function misplacedFirstPreviews(sources: Record<string, string>, items: Set<string>): string[] {
   return Object.entries(sources)
-    .filter(([slug]) => /^(components\/base|blocks)\//.test(slug) && items.has(slug.split('/').pop() ?? ''))
+    .filter(([slug]) => ITEM_PAGE.test(slug) && items.has(slug.split('/').pop() ?? ''))
     .filter(([slug, source]) => {
       const first = [...source.matchAll(NAMED_SOURCE)].find(([, component]) => component !== 'ComponentSource');
       return first?.[2] !== `${slug.split('/').pop()}-demo`;
@@ -562,7 +626,13 @@ describe('content/docs', () => {
   });
 
   it("opens every item page with the item's own demo", () => {
-    expect(misplacedFirstPreviews(readPageSources(CONTENT), new Set(readItems().keys()))).toEqual([]);
+    expect(misplacedFirstPreviews(readPageSources(CONTENT), readDemoedNames())).toEqual([]);
+  });
+
+  it("reports an editor page whose first preview is not the item's demo", () => {
+    const sources = { 'editor/math-editor': '<ComponentPreview name="mermaid-editor-demo" />' };
+
+    expect(misplacedFirstPreviews(sources, new Set(['math-editor']))).toEqual(['editor/math-editor']);
   });
 
   it("reports an item page whose first preview is not the item's demo", () => {
@@ -586,6 +656,16 @@ describe('content/docs', () => {
     };
 
     expect(misplacedFirstPreviews(pages, new Set(['ai-provider-picker']))).toEqual([]);
+  });
+
+  it('reports an editor page that renames its item, and leaves the editor index out', () => {
+    const items = new Map([['math-editor', { title: 'Math Editor', description: 'A LaTeX editor.' }]]);
+    const sources = {
+      'editor/index': '---\ntitle: Editor\n---',
+      'editor/math-editor': '---\ntitle: Formula Editor\ndescription: A LaTeX editor.\n---',
+    };
+
+    expect(unnamedPages(sources, items)).toEqual(['editor/math-editor: title is not "Math Editor"']);
   });
 
   it("documents only registry items, and repeats an item's title and description", () => {
@@ -689,7 +769,12 @@ describe('content/docs', () => {
   });
 
   it('installs each item by its @zui name and each primitive by its name at shadcn', () => {
-    expect(missingInstallCommands(readPageSources(CONTENT), readItems())).toEqual([]);
+    const features = new Set(
+      readComponentItems(true)
+        .filter(isFeature)
+        .map((item) => item.name),
+    );
+    expect(missingInstallCommands(readPageSources(CONTENT), readItems(), features)).toEqual([]);
   });
 
   it('reports a page that installs its subject some other way, even where the right line sits in its Manual tab', () => {
@@ -714,6 +799,23 @@ describe('content/docs', () => {
     expect(missingInstallCommands(sources, items)).toEqual([
       'components/base/button: has no `pnpm dlx shadcn@latest add button`',
       'components/base/status-indicator: has no `pnpm dlx shadcn@latest add @zui/status-indicator`',
+    ]);
+  });
+
+  it('installs a document feature together with Document Editor, which it plugs into', () => {
+    const items = new Map([
+      ['editor-toggle', { title: 'Editor Toggle', description: 'A fold.' }],
+      ['editor-mention', { title: 'Editor Mention', description: 'A mention.' }],
+    ]);
+    const sources = {
+      'editor/editor-toggle':
+        '<TabsContent value="cli">\n```bash\npnpm dlx shadcn@latest add @zui/document-editor @zui/editor-toggle\n```\n</TabsContent>',
+      'editor/editor-mention':
+        '<TabsContent value="cli">\n```bash\npnpm dlx shadcn@latest add @zui/editor-mention\n```\n</TabsContent>',
+    };
+
+    expect(missingInstallCommands(sources, items, new Set(['editor-toggle', 'editor-mention']))).toEqual([
+      'editor/editor-mention: has no `pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-mention`',
     ]);
   });
 
@@ -757,8 +859,93 @@ describe('content/docs', () => {
     ).toBe('hooks/use-controllable-state.ts');
   });
 
+  it('writes a file with a target to that target, as the shadcn CLI does', () => {
+    expect(
+      installTarget({
+        path: 'registry/bases/base-ui/editor/shared/theme/index.ts',
+        type: 'registry:lib',
+        target: 'components/editor/shared/theme/index.ts',
+      }),
+    ).toBe('components/editor/shared/theme/index.ts');
+  });
+
+  it("checks an editor item's Manual tab on its page under editor/", () => {
+    const items = [
+      {
+        name: 'editor-theme',
+        categories: ['editor'],
+        files: [
+          {
+            path: 'registry/bases/base-ui/editor/shared/theme/index.ts',
+            type: 'registry:lib',
+            target: 'components/editor/shared/theme/index.ts',
+          },
+        ],
+        dependencies: ['next-themes'],
+        registryDependencies: [],
+      },
+    ];
+    const sources = {
+      'editor/editor-theme': '<ComponentSource name="editor-theme" title="lib/index.ts" />',
+    };
+
+    expect(manualProblems(sources, items)).toEqual([
+      'editor/editor-theme: titles registry/bases/base-ui/editor/shared/theme/index.ts "lib/index.ts", not "components/editor/shared/theme/index.ts"',
+      'editor/editor-theme: installs no package, not pnpm add next-themes',
+    ]);
+  });
+
+  it('adds Document Editor in its own step before the parts a document feature is built from', () => {
+    const toggle = {
+      name: 'editor-toggle',
+      categories: ['editor'],
+      files: [
+        {
+          path: 'registry/bases/base-ui/editor/document/features/toggle/index.ts',
+          type: 'registry:component',
+          target: 'components/editor/document/features/toggle/index.ts',
+        },
+      ],
+      dependencies: [],
+      registryDependencies: ['@shadcn/utils', '@zui/document-editor'],
+    };
+    const page = (adds: string[]): Record<string, string> => ({
+      'editor/editor-toggle': [
+        '<TabsContent value="manual">',
+        ...adds,
+        '<ComponentSource name="editor-toggle" title="components/editor/document/features/toggle/index.ts" />',
+        '</TabsContent>',
+      ].join('\n'),
+    });
+
+    expect(
+      manualProblems(page(['pnpm dlx shadcn@latest add @zui/document-editor', 'pnpm dlx shadcn@latest add utils']), [
+        toggle,
+      ]),
+    ).toEqual([]);
+    expect(manualProblems(page(['pnpm dlx shadcn@latest add utils @zui/document-editor']), [toggle])).toEqual([
+      'editor/editor-toggle: adds pnpm dlx shadcn@latest add utils @zui/document-editor, not pnpm dlx shadcn@latest add @zui/document-editor; pnpm dlx shadcn@latest add utils',
+    ]);
+  });
+
+  it("installs the Tailwind plugin an item's css loads as a dev dependency", () => {
+    const item = {
+      name: 'document-editor',
+      categories: ['editor'],
+      files: [],
+      dependencies: ['lucide-react'],
+      registryDependencies: [],
+      css: { '@plugin "@tailwindcss/typography"': {} },
+    };
+    const sources = { 'editor/document-editor': 'pnpm add lucide-react\n' };
+
+    expect(manualProblems(sources, [item])).toEqual([
+      'editor/document-editor: installs pnpm add lucide-react, not pnpm add lucide-react; pnpm add -D @tailwindcss/typography',
+    ]);
+  });
+
   it("installs every component's files and packages as its item lists them", () => {
-    expect(manualProblems(readPageSources(CONTENT), readComponentItems())).toEqual([]);
+    expect(manualProblems(readPageSources(CONTENT), readComponentItems(true))).toEqual([]);
   });
 
   it('reports a missing file, a file titled with the wrong path, a file two blocks name, and the wrong packages', () => {
