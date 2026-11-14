@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
 import { copyLatex, copyMathML } from '@zeroxsolutions/editor-core/math/core/export';
-import { MathPalette } from './palette.js';
+import { MathPalette } from './palette';
 
 export interface MathToolbarProps {
   /** The current LaTeX source, for export. */

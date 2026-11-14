@@ -38,8 +38,8 @@ import {
   type NodeCodec,
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
-import { CodeMirrorPane } from '../../../shared/code-mirror/index.js';
-import { CodeSettingsMenu, type CodeMirrorSettings } from './code-settings-menu.js';
+import { CodeMirrorPane } from '../../../shared/code-mirror/index';
+import { CodeSettingsMenu, type CodeMirrorSettings } from './code-settings-menu';
 
 /**
  * A fenced code block. A pure custom node (no engine extension — `standardKit`

@@ -12,7 +12,7 @@ import { COMPOSER_TOP_CONTENT, composerKit } from './composer-kit';
 import { defaultComposerTriggers, type ComposerTrigger } from './composer-triggers';
 import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
 import { docToPayload } from '@zeroxsolutions/editor-core/composer/message-payload';
-import { TriggerLayer } from './triggers/trigger-layer.js';
+import { TriggerLayer } from './triggers/trigger-layer';
 
 /**
  * The chat composer input - a contentEditable single line that highlights every

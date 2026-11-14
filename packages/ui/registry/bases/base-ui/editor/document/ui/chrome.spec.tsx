@@ -1,10 +1,10 @@
 import { act, render, fireEvent, cleanup } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { EditorSelection, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
-import { standardKit, callout } from '../features/index.js';
-import { BubbleMenu } from './bubble-menu.js';
-import { EditorToolbar } from './editor-toolbar.js';
-import { SlashMenu } from './slash-menu.js';
+import { standardKit, callout } from '../features/index';
+import { BubbleMenu } from './bubble-menu';
+import { EditorToolbar } from './editor-toolbar';
+import { SlashMenu } from './slash-menu';
 import {
   collectUiContributions,
   defaultBlockMenuItems,

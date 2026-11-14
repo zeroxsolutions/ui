@@ -5,14 +5,14 @@
  * heavy block (table, code-block, mermaid, math) is imported lazily and kept out
  * of the core bundle; this barrel is the eager convenience surface.
  */
-export { standardKit } from './standard/index.js';
-export { callout } from './callout/index.js';
-export { toggle } from './toggle/index.js';
-export { link } from './link/index.js';
-export { image } from './image/index.js';
-export { table } from './table/index.js';
-export { codeBlock } from './code-block/index.js';
-export { mermaid } from './mermaid/index.js';
-export { math } from './math/index.js';
-export { mention } from './mention/index.js';
-export { embed } from './embed/index.js';
+export { standardKit } from './standard/index';
+export { callout } from './callout/index';
+export { toggle } from './toggle/index';
+export { link } from './link/index';
+export { image } from './image/index';
+export { table } from './table/index';
+export { codeBlock } from './code-block/index';
+export { mermaid } from './mermaid/index';
+export { math } from './math/index';
+export { mention } from './mention/index';
+export { embed } from './embed/index';

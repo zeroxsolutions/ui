@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
-import { standardKit } from '../standard/index.js';
-import { image } from './image.js';
+import { standardKit } from '../standard/index';
+import { image } from './image';
 
 const editors: IEditor[] = [];
 function build(): IEditor {

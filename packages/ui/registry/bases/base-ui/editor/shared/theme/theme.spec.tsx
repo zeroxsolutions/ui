@@ -1,10 +1,10 @@
 import { renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
-import { defaultEditorTheme } from './default-theme.js';
-import { EditorThemeProvider } from './editor-theme-provider.js';
-import { useEditorTheme } from './editor-theme-context.js';
-import { extendTheme } from './extend-theme.js';
+import { defaultEditorTheme } from './default-theme';
+import { EditorThemeProvider } from './editor-theme-provider';
+import { useEditorTheme } from './editor-theme-context';
+import { extendTheme } from './extend-theme';
 
 describe('editor theming', () => {
   it('carries mode-specific sub-renderer themes from one contract', () => {

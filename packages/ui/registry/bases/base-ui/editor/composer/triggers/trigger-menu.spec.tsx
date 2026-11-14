@@ -1,7 +1,7 @@
 import { act, render, fireEvent, cleanup } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DocJSON, EditorSelection, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
-import { TriggerMenu } from './trigger-menu.js';
+import { TriggerMenu } from './trigger-menu';
 import { commandTrigger } from '../composer-triggers';
 import {
   invocationToken,

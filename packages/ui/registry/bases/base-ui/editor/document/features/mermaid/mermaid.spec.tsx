@@ -5,13 +5,13 @@ import { EditorView } from '@codemirror/view';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { DocJSON, IEditor, NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
 import { createCodecRegistry, importMarkdown, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
-import { standardKit } from '../standard/index.js';
-import { mermaid, MermaidView, mermaidCodec } from './mermaid.js';
+import { standardKit } from '../standard/index';
+import { mermaid, MermaidView, mermaidCodec } from './mermaid';
 
 // Keep the heavy Mermaid engine out of the node-view render: the render path is
 // debounced and its timer is cleared on unmount before it fires in a synchronous
 // test, but mocking the seam makes that guarantee explicit and deterministic.
-vi.mock('../../../mermaid/core/engine.js', () => ({
+vi.mock('../../../mermaid/core/engine', () => ({
   renderDiagram: vi.fn(async (_id: string, source: string) => ({
     ok: true,
     svg: `<svg data-source="${source}"></svg>`,

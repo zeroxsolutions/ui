@@ -1,6 +1,6 @@
 'use client';
 
-import { Editor, type EditorProps } from './editor.js';
+import { Editor, type EditorProps } from './editor';
 
 /**
  * The read-only **live** Viewer (see the `editor-viewer` spec). Unlike the

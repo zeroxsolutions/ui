@@ -1,8 +1,8 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { CodeEditor, CodeEditorContent, useCodeEditor } from './code-editor.js';
-import type { RoutedFile } from './file-content-router.js';
+import { CodeEditor, CodeEditorContent, useCodeEditor } from './code-editor';
+import type { RoutedFile } from './file-content-router';
 
 // CodeEditorContent's Markdown view renders upstream ScrollArea, which
 // measures its viewport in a `queueMicrotask` its layout effect schedules

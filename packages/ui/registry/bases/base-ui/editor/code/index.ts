@@ -4,8 +4,8 @@
  * selection; `FileContentRouter` picks the viewer for a `RoutedFile` (code →
  * `CodeMirrorPane`, else a generic registry preview).
  */
-export { CodeEditor, CodeEditorContent, useCodeEditor } from './code-editor.js';
-export type { CodeEditorContentProps, CodeEditorProps } from './code-editor.js';
+export { CodeEditor, CodeEditorContent, useCodeEditor } from './code-editor';
+export type { CodeEditorContentProps, CodeEditorProps } from './code-editor';
 
-export { FileContentRouter, fileView } from './file-content-router.js';
-export type { FileContentRouterProps, FileView, FileViewKind, RoutedFile } from './file-content-router.js';
+export { FileContentRouter, fileView } from './file-content-router';
+export type { FileContentRouterProps, FileView, FileViewKind, RoutedFile } from './file-content-router';

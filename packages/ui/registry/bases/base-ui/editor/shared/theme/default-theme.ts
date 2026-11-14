@@ -1,4 +1,4 @@
-import type { CalloutPalette, IEditorTheme } from './types/editor-theme.js';
+import type { CalloutPalette, IEditorTheme } from './types/editor-theme';
 
 /**
  * The shipped default theme (see the `editor-theming` spec). Built on

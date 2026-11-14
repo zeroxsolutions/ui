@@ -13,7 +13,7 @@ import { FloatingToolbar } from '@/registry/bases/base-ui/components/layout/floa
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { useMermaidRender, type MermaidRenderState } from './use-mermaid-render.js';
+import { useMermaidRender, type MermaidRenderState } from './use-mermaid-render';
 
 /**
  * `<DiagramCanvas>` — the diagram render inside a pan/zoom viewport. This

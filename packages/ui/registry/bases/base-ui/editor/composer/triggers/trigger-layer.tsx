@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import { TriggerMenu } from './trigger-menu.js';
+import { TriggerMenu } from './trigger-menu';
 import {
   validateTriggerRegistry,
   type TriggerToken,

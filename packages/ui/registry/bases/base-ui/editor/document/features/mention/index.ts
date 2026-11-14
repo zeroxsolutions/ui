@@ -1,1 +1,1 @@
-export { mention } from './mention.js';
+export { mention } from './mention';

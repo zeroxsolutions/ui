@@ -1,1 +1,1 @@
-export { callout } from './callout.js';
+export { callout } from './callout';

@@ -1,4 +1,4 @@
-import type { DeepPartial, IEditorTheme } from './types/editor-theme.js';
+import type { DeepPartial, IEditorTheme } from './types/editor-theme';
 
 /**
  * Extend a theme by overriding a subset of tokens (see the `editor-theming`

@@ -14,7 +14,7 @@ import { bracketMatching, indentOnInput, indentUnit } from '@codemirror/language
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { editorTheme, shikiHighlighting, syntaxLanguage } from './code-syntax.js';
+import { editorTheme, shikiHighlighting, syntaxLanguage } from './code-syntax';
 
 const codeMirrorPaneVariants = cva('h-full overflow-hidden [&_.cm-editor]:h-full [&_.cm-scroller]:overflow-auto', {
   variants: {
