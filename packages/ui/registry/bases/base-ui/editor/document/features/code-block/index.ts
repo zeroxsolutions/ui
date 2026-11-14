@@ -1,1 +1,1 @@
-export { codeBlock } from './code-block.js';
+export { codeBlock } from './code-block';

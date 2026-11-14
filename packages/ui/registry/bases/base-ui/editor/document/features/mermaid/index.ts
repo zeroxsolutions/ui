@@ -1,1 +1,1 @@
-export { mermaid } from './mermaid.js';
+export { mermaid } from './mermaid';

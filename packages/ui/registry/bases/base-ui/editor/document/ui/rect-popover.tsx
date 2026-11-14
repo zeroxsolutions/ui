@@ -2,7 +2,7 @@
 
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { rectAnchor, type RectLike } from './selection-rect.js';
+import { rectAnchor, type RectLike } from './selection-rect';
 
 /**
  * A popover popup anchored to a viewport rect (a caret or a selection) rather

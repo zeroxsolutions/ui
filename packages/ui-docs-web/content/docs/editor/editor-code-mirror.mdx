@@ -1,0 +1,90 @@
+---
+title: Editor Code Mirror
+description: The CodeMirror pane the code and diagram editors type into, highlighted by Shiki in the editor theme.
+---
+
+`editor-code-mirror` is a library the code and diagram editors type into; it has no preview of its own.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/editor-code-mirror
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @codemirror/commands @codemirror/language @codemirror/state @codemirror/view @shikijs/langs class-variance-authority shiki
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-code-mirror" title="components/editor/shared/code-mirror/index.ts" />
+
+<ComponentSource
+  name="editor-code-mirror"
+  file="registry/bases/base-ui/editor/shared/code-mirror/code-mirror-pane.tsx"
+  title="components/editor/shared/code-mirror/code-mirror-pane.tsx"
+/>
+
+<ComponentSource
+  name="editor-code-mirror"
+  file="registry/bases/base-ui/editor/shared/code-mirror/code-syntax.ts"
+  title="components/editor/shared/code-mirror/code-syntax.ts"
+/>
+
+<ComponentSource name="editor-code-mirror" file="registry/bases/base-ui/lib/code-theme.ts" title="lib/code-theme.ts" />
+
+<ComponentSource
+  name="editor-code-mirror"
+  file="registry/bases/base-ui/lib/mermaid-grammar.ts"
+  title="lib/mermaid-grammar.ts"
+/>
+
+<ComponentSource name="editor-code-mirror" file="registry/bases/base-ui/lib/shiki.ts" title="lib/shiki.ts" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { CodeMirrorPane } from '@/components/editor/shared/code-mirror';
+```
+
+```tsx
+<div className="h-64 rounded-lg border">
+  <CodeMirrorPane language="typescript" value={source} onValueChange={setSource} />
+</div>
+```
+
+The pane fills the height it is given, so size its wrapper. `value` with `onValueChange` holds the text, or
+`defaultValue` starts it; `language` takes a Shiki language id, and plain text without one. `readOnly`,
+`wrap`, `placeholder`, `tabSize`, `useTabs` and `showLineNumbers` change the live pane without remounting it,
+and `size` is `default` or `sm`.

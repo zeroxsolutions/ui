@@ -1,0 +1,64 @@
+---
+title: Editor Features
+description: Every document feature behind one import, from the standard kit to callout, toggle, link, image, table, code block, Mermaid, math, mention and embed.
+---
+
+<ComponentPreview name="editor-features-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/editor-features
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/editor-embed @zui/editor-image @zui/editor-link @zui/editor-math @zui/editor-mention @zui/editor-mermaid @zui/editor-table @zui/editor-toggle
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-features" title="components/editor/document/features/index.ts" />
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+
+import { callout, standardKit, toggle } from '@/components/editor/document/features';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), callout(), toggle()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+The barrel exports `standardKit`, `callout`, `toggle`, `link`, `image`, `table`, `codeBlock`, `mermaid`, `math`, `mention` and `embed`, each the one function its own page shows. Installing it installs every feature, with KaTeX and Mermaid behind two of them; to keep a project to the blocks it draws, install the feature items one by one and import each from its own folder.

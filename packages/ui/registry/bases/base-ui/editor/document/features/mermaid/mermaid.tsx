@@ -25,11 +25,11 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
-import { CodeMirrorPane } from '../../../shared/code-mirror/index.js';
+import { CodeMirrorPane } from '../../../shared/code-mirror/index';
 import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '@zeroxsolutions/editor-core/mermaid/core/detect';
 import { DEFAULT_DIAGRAM_SOURCE } from '@zeroxsolutions/editor-core/mermaid/core/templates';
-import { DiagramPreview } from '../../../mermaid/react/preview.js';
-import { DiagramViewer } from '../../../mermaid/react/viewer.js';
+import { DiagramPreview } from '../../../mermaid/react/preview';
+import { DiagramViewer } from '../../../mermaid/react/viewer';
 
 /**
  * The in-document Mermaid block. A custom **atom** node holding a text `source`;

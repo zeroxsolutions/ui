@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { MermaidToolbar } from './toolbar.js';
+import { MermaidToolbar } from './toolbar';
 
 // The switcher (Base UI Combobox) and the confirm dialog (Base UI AlertDialog)
 // reach for layout/animation/pointer APIs jsdom does not ship.

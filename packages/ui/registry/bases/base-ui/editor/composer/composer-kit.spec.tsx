@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { DocJSON, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
-import { mention } from '../document/features/mention/index.js';
-import { COMPOSER_TOP_CONTENT, composerKit } from './composer-kit.js';
+import { mention } from '../document/features/mention/index';
+import { COMPOSER_TOP_CONTENT, composerKit } from './composer-kit';
 
 const editors: IEditor[] = [];
 function build(): IEditor {

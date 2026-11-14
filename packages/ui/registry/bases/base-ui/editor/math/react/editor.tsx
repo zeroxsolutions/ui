@@ -5,10 +5,10 @@ import { CollapsibleCard } from '@/registry/bases/base-ui/components/layout/coll
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/registry/bases/base-ui/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { useIsMobile } from '@/registry/bases/base-ui/hooks/use-mobile';
-import { CodeMirrorPane } from '../../shared/code-mirror/index.js';
+import { CodeMirrorPane } from '../../shared/code-mirror/index';
 import type { MathEditorProps } from '@zeroxsolutions/editor-core/math/core/types';
-import { FormulaPreview } from './preview.js';
-import { MathToolbar } from './toolbar.js';
+import { FormulaPreview } from './preview';
+import { MathToolbar } from './toolbar';
 
 /**
  * `<MathEditor>` - the standalone KaTeX authoring surface: a LaTeX source pane

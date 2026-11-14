@@ -4,9 +4,9 @@ import { useMemo, type ReactNode } from 'react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/create-codec-registry';
 import { renderToReact } from '../serialize/render-to-react';
-import { defaultEditorTheme } from '../../shared/theme/default-theme.js';
-import { EditorThemeContext, type EditorThemeContextValue } from '../../shared/theme/editor-theme-context.js';
-import type { IEditorTheme, ThemeMode } from '../../shared/theme/types/editor-theme.js';
+import { defaultEditorTheme } from '../../shared/theme/default-theme';
+import { EditorThemeContext, type EditorThemeContextValue } from '../../shared/theme/editor-theme-context';
+import type { IEditorTheme, ThemeMode } from '../../shared/theme/types/editor-theme';
 import type { EditorFeature } from '@zeroxsolutions/editor-core/document/core/types/feature';
 import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
 
@@ -32,7 +32,8 @@ export function Viewer({ doc, features = [], theme, forcedMode, className }: Vie
   const registry = useMemo(() => createCodecRegistry(features), [features]);
   const tree = renderToReact(doc, registry);
   const inner = (
-    <div data-editor="document" className={cn('document-editor prose max-w-none', className)}>
+    // Sized by its container, as the editor is, so an unwrapped block scrolls rather than widening it.
+    <div data-editor="document" className={cn('document-editor prose max-w-none [contain:inline-size]', className)}>
       {tree}
     </div>
   );

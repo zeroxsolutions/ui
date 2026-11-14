@@ -4,9 +4,9 @@ import { z } from 'zod';
 import { describe, expect, it } from 'vitest';
 import { defineFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
-import { useEditorTheme } from '../../shared/theme/editor-theme-context.js';
-import { Viewer } from './viewer.js';
-import { ViewerLive } from './viewer-live.js';
+import { useEditorTheme } from '../../shared/theme/editor-theme-context';
+import { Viewer } from './viewer';
+import { ViewerLive } from './viewer-live';
 
 const badge = defineFeature({
   id: 'badge',

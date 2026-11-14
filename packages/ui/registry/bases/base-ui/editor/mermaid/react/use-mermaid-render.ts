@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { useEditorTheme } from '../../shared/theme/editor-theme-context.js';
+import { useEditorTheme } from '../../shared/theme/editor-theme-context';
 import { renderDiagram } from '@zeroxsolutions/editor-core/mermaid/core/engine';
 
 /** The lifecycle of a debounced render. */

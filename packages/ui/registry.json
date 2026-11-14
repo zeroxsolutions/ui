@@ -892,6 +892,373 @@
       ]
     },
     {
+      "name": "editor-theme",
+      "type": "registry:lib",
+      "title": "Editor Theme",
+      "description": "The editor theme contract, its default built on the design tokens, and the provider that keeps it in step with light and dark mode.",
+      "categories": ["editor"],
+      "dependencies": ["next-themes"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/index.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/default-theme.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/default-theme.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/editor-theme-context.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/editor-theme-context.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/editor-theme-provider.tsx",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/editor-theme-provider.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/extend-theme.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/extend-theme.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/theme/types/editor-theme.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/theme/types/editor-theme.ts"
+        }
+      ]
+    },
+    {
+      "name": "editor-code-mirror",
+      "type": "registry:lib",
+      "title": "Editor Code Mirror",
+      "description": "The CodeMirror pane the code and diagram editors type into, highlighted by Shiki in the editor theme.",
+      "categories": ["editor"],
+      "dependencies": [
+        "@codemirror/commands",
+        "@codemirror/language",
+        "@codemirror/state",
+        "@codemirror/view",
+        "@shikijs/langs",
+        "class-variance-authority",
+        "shiki"
+      ],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/shared/code-mirror/index.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/code-mirror/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/code-mirror/code-mirror-pane.tsx",
+          "type": "registry:lib",
+          "target": "components/editor/shared/code-mirror/code-mirror-pane.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/shared/code-mirror/code-syntax.ts",
+          "type": "registry:lib",
+          "target": "components/editor/shared/code-mirror/code-syntax.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/code-theme.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/mermaid-grammar.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/shiki.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "document-editor",
+      "type": "registry:component",
+      "title": "Document Editor",
+      "description": "A block document editor and its read-only viewers, with a toolbar, a bubble, a block menu and a slash menu, over the standard kit of headings, lists, tasks and marks.",
+      "categories": ["editor"],
+      "dependencies": [
+        "@base-ui/react",
+        "@tiptap/extension-highlight",
+        "@tiptap/extension-placeholder",
+        "@tiptap/extension-subscript",
+        "@tiptap/extension-superscript",
+        "@tiptap/extension-task-item",
+        "@tiptap/extension-task-list",
+        "@tiptap/react",
+        "@tiptap/starter-kit",
+        "@zeroxsolutions/editor-core",
+        "lucide-react",
+        "tiptap-extension-global-drag-handle"
+      ],
+      "devDependencies": ["@tailwindcss/typography"],
+      "registryDependencies": [
+        "@shadcn/checkbox",
+        "@shadcn/dropdown-menu",
+        "@shadcn/empty",
+        "@shadcn/item",
+        "@shadcn/popover",
+        "@shadcn/scroll-area",
+        "@shadcn/separator",
+        "@shadcn/toggle",
+        "@shadcn/tooltip",
+        "@shadcn/utils",
+        "@zui/editor-theme"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/react/editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/react/editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/standard/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/standard/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/standard/standard-codecs.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/standard/standard-codecs.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/standard/standard-kit.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/standard/standard-kit.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/standard/standard-ui.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/standard/standard-ui.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/standard/task-item-view.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/standard/task-item-view.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/node-view-adapter.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/node-view-adapter.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/react/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/react/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/react/viewer-live.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/react/viewer-live.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/react/viewer.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/react/viewer.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/serialize/render-to-react.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/serialize/render-to-react.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/block-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/block-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/bubble-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/bubble-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/editor-toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/editor-toolbar.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/rect-popover.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/rect-popover.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/selection-rect.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/selection-rect.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/slash-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/slash-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/use-editor-changes.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/use-editor-changes.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/react-types.ts",
+          "type": "registry:component",
+          "target": "components/editor/react-types.ts"
+        }
+      ],
+      "css": {
+        "@plugin \"@tailwindcss/typography\"": {},
+        ".document-editor": {
+          "--tw-prose-body": "var(--foreground)",
+          "--tw-prose-headings": "var(--foreground)",
+          "--tw-prose-lead": "var(--muted-foreground)",
+          "--tw-prose-links": "var(--primary)",
+          "--tw-prose-bold": "var(--foreground)",
+          "--tw-prose-counters": "var(--muted-foreground)",
+          "--tw-prose-bullets": "var(--muted-foreground)",
+          "--tw-prose-hr": "var(--border)",
+          "--tw-prose-quotes": "var(--foreground)",
+          "--tw-prose-quote-borders": "var(--border)",
+          "--tw-prose-captions": "var(--muted-foreground)",
+          "--tw-prose-code": "var(--foreground)",
+          "--tw-prose-pre-code": "var(--foreground)",
+          "--tw-prose-pre-bg": "var(--muted)",
+          "--tw-prose-th-borders": "var(--border)",
+          "--tw-prose-td-borders": "var(--border)",
+          "--tw-prose-invert-body": "var(--foreground)",
+          "--tw-prose-invert-headings": "var(--foreground)",
+          "--tw-prose-invert-links": "var(--primary)",
+          "--tw-prose-invert-bold": "var(--foreground)",
+          "--tw-prose-invert-bullets": "var(--muted-foreground)",
+          "--tw-prose-invert-hr": "var(--border)",
+          "--tw-prose-invert-quotes": "var(--foreground)",
+          "--tw-prose-invert-quote-borders": "var(--border)",
+          "--tw-prose-invert-code": "var(--foreground)",
+          "--tw-prose-invert-pre-bg": "var(--muted)",
+          "--tw-prose-invert-th-borders": "var(--border)",
+          "--tw-prose-invert-td-borders": "var(--border)"
+        },
+        ".document-editor ul[data-type='taskList'] li p, .document-editor [data-slot='callout'] p, .document-editor [data-slot='toggle'] p": {
+          "margin-top": "0",
+          "margin-bottom": "0"
+        },
+        ".document-editor .ProseMirror > :first-child": {
+          "margin-top": "0"
+        },
+        ".document-editor .ProseMirror > :last-child": {
+          "margin-bottom": "0"
+        },
+        "@layer components": {
+          ".document-editor .ProseMirror": {
+            "outline": "none"
+          },
+          ".document-editor .ProseMirror[contenteditable='true']": {
+            "padding-inline": "3rem"
+          },
+          ".document-editor .ProseMirror .is-empty::before, .document-editor .ProseMirror .is-editor-empty:first-child::before": {
+            "content": "attr(data-placeholder)",
+            "color": "var(--muted-foreground)",
+            "float": "left",
+            "height": "0",
+            "pointer-events": "none",
+            "opacity": "0.6"
+          },
+          ".document-editor ul[data-type='taskList']": {
+            "list-style": "none",
+            "padding-left": "0"
+          },
+          ".document-editor ul[data-type='taskList'] li": {
+            "display": "flex",
+            "align-items": "flex-start",
+            "gap": "0.5rem"
+          },
+          ".document-editor ul[data-type='taskList'] li > label": {
+            "display": "flex",
+            "align-items": "center",
+            "flex-shrink": "0",
+            "margin-top": "0.375rem",
+            "user-select": "none"
+          },
+          ".document-editor ul[data-type='taskList'] li > label input[type='checkbox']": {
+            "accent-color": "var(--primary)"
+          },
+          ".document-editor ul[data-type='taskList'] li > div": {
+            "flex": "1",
+            "min-width": "0"
+          },
+          ".document-editor ul[data-type='taskList'] li > div > p": {
+            "margin": "0"
+          },
+          ".document-editor .slash-active": {
+            "background": "color-mix(in oklab, var(--muted-foreground) 16%, transparent)",
+            "border-radius": "0.25rem",
+            "padding": "0.05rem 0.1rem",
+            "-webkit-box-decoration-break": "clone",
+            "box-decoration-break": "clone"
+          },
+          ".document-editor .slash-ghost": {
+            "color": "var(--muted-foreground)",
+            "opacity": "0.5",
+            "pointer-events": "none",
+            "user-select": "none",
+            "white-space": "pre"
+          },
+          ".document-editor mark": {
+            "background": "color-mix(in oklab, var(--primary) 22%, transparent)",
+            "color": "inherit",
+            "border-radius": "0.2rem",
+            "padding": "0 0.15rem"
+          },
+          ".document-editor :where(code):not(:where(pre code))": {
+            "overflow-wrap": "anywhere"
+          },
+          ".document-editor :where(pre)": {
+            "overflow-x": "auto"
+          },
+          ".document-editor.is-dragging .ProseMirror": {
+            "cursor": "grabbing"
+          },
+          ".document-editor.is-dragging .ProseMirror-selectednode": {
+            "filter": "grayscale(1)",
+            "opacity": "0.45"
+          },
+          ".drag-handle": {
+            "position": "fixed",
+            "width": "1.25rem",
+            "height": "1.5rem",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "border-radius": "0.375rem",
+            "background": "transparent",
+            "color": "var(--muted-foreground)",
+            "cursor": "grab",
+            "opacity": "0.55",
+            "transition": "opacity 0.15s ease, background 0.15s ease",
+            "z-index": "40"
+          },
+          ".drag-handle:hover": {
+            "background": "var(--accent)",
+            "opacity": "1"
+          },
+          ".drag-handle:active": {
+            "cursor": "grabbing"
+          },
+          ".drag-handle.hide": {
+            "opacity": "0",
+            "pointer-events": "none"
+          },
+          "@media (pointer: coarse)": {
+            ".drag-handle": {
+              "display": "none !important"
+            }
+          }
+        }
+      }
+    },
+    {
       "name": "ai-provider-card-demo",
       "type": "registry:example",
       "title": "AI Provider Card Demo",
@@ -940,7 +1307,7 @@
       "description": "A small, paginated file table with sortable columns and a view-options menu.",
       "categories": ["examples"],
       "dependencies": ["@tanstack/react-table"],
-      "registryDependencies": ["@shadcn/dropdown-menu", "@zui/data-table-column-header", "@zui/data-table"],
+      "registryDependencies": ["@shadcn/dropdown-menu", "@zui/data-table", "@zui/data-table-column-header"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/data-table-demo.tsx",
@@ -1667,6 +2034,909 @@
       "files": [
         {
           "path": "registry/bases/base-ui/examples/ai-provider-picker-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "document-editor-demo",
+      "type": "registry:example",
+      "title": "Document Editor Demo",
+      "description": "A short document with a heading, a paragraph, a list and a task list, under the toolbar.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/document-editor-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-callout",
+      "type": "registry:component",
+      "title": "Editor Callout",
+      "description": "A highlighted block that sets a note apart in one of five variants: note, info, success, warning or danger.",
+      "categories": ["editor"],
+      "registryDependencies": ["@zui/document-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/callout/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/callout/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/callout/callout.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/callout/callout.tsx"
+        }
+      ],
+      "css": {
+        ".document-editor [data-slot='callout'] > img": {
+          "margin-bottom": "0"
+        },
+        "@layer components": {
+          ".document-editor [data-slot='callout']": {
+            "border-color": "var(--border)",
+            "background": "color-mix(in oklab, var(--muted-foreground) 6%, var(--background))"
+          },
+          ".document-editor [data-callout='info']": {
+            "border-color": "color-mix(in oklab, var(--info) 35%, var(--border))",
+            "background": "color-mix(in oklab, var(--info) 8%, var(--background))"
+          },
+          ".document-editor [data-callout='success']": {
+            "border-color": "color-mix(in oklab, var(--success) 35%, var(--border))",
+            "background": "color-mix(in oklab, var(--success) 8%, var(--background))"
+          },
+          ".document-editor [data-callout='warning']": {
+            "border-color": "color-mix(in oklab, var(--warning) 40%, var(--border))",
+            "background": "color-mix(in oklab, var(--warning) 10%, var(--background))"
+          },
+          ".document-editor [data-callout='danger']": {
+            "border-color": "color-mix(in oklab, var(--destructive) 35%, var(--border))",
+            "background": "color-mix(in oklab, var(--destructive) 8%, var(--background))"
+          }
+        }
+      },
+      "dependencies": ["@zeroxsolutions/editor-core", "@zeroxsolutions/fluent-emoji", "lucide-react", "zod"]
+    },
+    {
+      "name": "editor-callout-demo",
+      "type": "registry:example",
+      "title": "Editor Callout Demo",
+      "description": "A document with a warning callout and a success callout.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-callout"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-callout-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-code-block",
+      "type": "registry:component",
+      "title": "Editor Code Block",
+      "description": "A code block with a language picker, a CodeMirror pane while editing and a highlighted card when read.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/combobox",
+        "@shadcn/dropdown-menu",
+        "@zui/code-card",
+        "@zui/collapsible-card",
+        "@zui/copy-button",
+        "@zui/document-editor",
+        "@zui/editor-code-mirror",
+        "@zui/language-combobox"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/code-block/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/code-block/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/code-block/code-block.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/code-block/code-block.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/code-block/code-settings-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/code-block/code-settings-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/types/language-option.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "css": {
+        ".document-editor [data-slot='code-card'] pre": {
+          "margin": "0",
+          "background": "transparent",
+          "border-radius": "0",
+          "color": "inherit"
+        },
+        ".document-editor [data-slot='code-card'] code": {
+          "background": "transparent",
+          "color": "inherit",
+          "font-weight": "inherit",
+          "padding": "0"
+        },
+        ".document-editor [data-slot='code-card'] code::before, .document-editor [data-slot='code-card'] code::after": {
+          "content": "none"
+        }
+      },
+      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react", "zod"]
+    },
+    {
+      "name": "editor-code-block-demo",
+      "type": "registry:example",
+      "title": "Editor Code Block Demo",
+      "description": "A document with a TypeScript code block.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-code-block"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-code-block-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-embed",
+      "type": "registry:component",
+      "title": "Editor Embed",
+      "description": "A block that shows an external page in a responsive frame, after a URL input while it is empty.",
+      "categories": ["editor"],
+      "registryDependencies": ["@shadcn/input", "@zui/document-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/embed/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/embed/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/embed/embed.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/embed/embed.tsx"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react", "zod"]
+    },
+    {
+      "name": "editor-embed-demo",
+      "type": "registry:example",
+      "title": "Editor Embed Demo",
+      "description": "A document with a page embedded from a URL.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-embed"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-embed-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-image",
+      "type": "registry:component",
+      "title": "Editor Image",
+      "description": "A block image with alt text and an optional width, edited in a popover.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/field",
+        "@shadcn/input",
+        "@shadcn/popover",
+        "@zui/document-editor"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/image/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/image/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/image/image.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/image/image.tsx"
+        }
+      ],
+      "css": {
+        "@layer components": {
+          ".document-editor img": {
+            "border-radius": "0.5rem",
+            "max-width": "100%",
+            "height": "auto"
+          },
+          ".document-editor img.ProseMirror-selectednode, .document-editor [data-slot='image'].ProseMirror-selectednode, .document-editor .ProseMirror-selectednode:is(img, video, iframe)": {
+            "outline": "2px solid var(--primary)",
+            "outline-offset": "2px",
+            "border-radius": "0.375rem"
+          }
+        }
+      },
+      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react", "zod"]
+    },
+    {
+      "name": "editor-image-demo",
+      "type": "registry:example",
+      "title": "Editor Image Demo",
+      "description": "A document with an image and its alt text.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-image"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-image-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-link",
+      "type": "registry:component",
+      "title": "Editor Link",
+      "description": "A link mark, set from the bubble menu with an address and removed again.",
+      "categories": ["editor"],
+      "registryDependencies": ["@zui/document-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/link/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/link/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/link/link.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/link/link.tsx"
+        }
+      ],
+      "dependencies": ["@tiptap/extension-link", "@zeroxsolutions/editor-core", "lucide-react", "zod"]
+    },
+    {
+      "name": "editor-link-demo",
+      "type": "registry:example",
+      "title": "Editor Link Demo",
+      "description": "A document with a link in a sentence.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-link"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-link-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-math",
+      "type": "registry:component",
+      "title": "Editor Math",
+      "description": "Inline and block formulas written in LaTeX, drawn by KaTeX, with a symbol palette while editing.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/card",
+        "@shadcn/input-group",
+        "@shadcn/popover",
+        "@shadcn/separator",
+        "@shadcn/tabs",
+        "@shadcn/utils",
+        "@zui/collapsible-card",
+        "@zui/copy-button",
+        "@zui/document-editor",
+        "@zui/editor-code-mirror",
+        "@zui/math-editor"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/math/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/math/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/math/math.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/math/math.tsx"
+        }
+      ],
+      "css": {
+        "@import 'katex/dist/katex.min.css'": {}
+      },
+      "dependencies": ["@zeroxsolutions/editor-core", "katex", "lucide-react", "zod"]
+    },
+    {
+      "name": "editor-math-demo",
+      "type": "registry:example",
+      "title": "Editor Math Demo",
+      "description": "A document with an inline formula and a block formula.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-math"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-math-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-mention",
+      "type": "registry:component",
+      "title": "Editor Mention",
+      "description": "An inline pill that names a person, which the text treats as one unit.",
+      "categories": ["editor"],
+      "registryDependencies": ["@zui/document-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/mention/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/mention/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/mention/mention.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/mention/mention.tsx"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core", "zod"]
+    },
+    {
+      "name": "editor-mention-demo",
+      "type": "registry:example",
+      "title": "Editor Mention Demo",
+      "description": "A document with two mentions in a sentence.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-mention"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-mention-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-mermaid",
+      "type": "registry:component",
+      "title": "Editor Mermaid",
+      "description": "A diagram block written in Mermaid, with a source pane while editing and the drawing when read.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/card",
+        "@shadcn/separator",
+        "@shadcn/tabs",
+        "@shadcn/utils",
+        "@zui/code-card",
+        "@zui/collapsible-card",
+        "@zui/copy-button",
+        "@zui/document-editor",
+        "@zui/editor-code-mirror",
+        "@zui/mermaid-editor"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/mermaid/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/mermaid/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/mermaid/mermaid.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/mermaid/mermaid.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/lib/language-options.tsx",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/bases/base-ui/types/language-option.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core", "@zeroxsolutions/icons", "lucide-react", "zod"]
+    },
+    {
+      "name": "editor-mermaid-demo",
+      "type": "registry:example",
+      "title": "Editor Mermaid Demo",
+      "description": "A document with a flowchart.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-mermaid"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-mermaid-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-table",
+      "type": "registry:component",
+      "title": "Editor Table",
+      "description": "A table with header cells, resizable columns and selectable cells.",
+      "categories": ["editor"],
+      "registryDependencies": ["@zui/document-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/table/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/table/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/table/table.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/table/table.tsx"
+        }
+      ],
+      "css": {
+        "@layer components": {
+          ".document-editor table": {
+            "border-collapse": "collapse",
+            "width": "100%",
+            "margin": "1rem 0",
+            "overflow": "hidden"
+          },
+          ".document-editor th, .document-editor td": {
+            "border": "1px solid var(--border)",
+            "padding": "0.375rem 0.75rem",
+            "vertical-align": "top",
+            "position": "relative"
+          },
+          ".document-editor th": {
+            "background": "var(--muted)",
+            "font-weight": "600",
+            "text-align": "left"
+          },
+          ".document-editor .column-resize-handle": {
+            "position": "absolute",
+            "right": "-2px",
+            "top": "0",
+            "bottom": "0",
+            "width": "4px",
+            "background": "var(--primary)",
+            "pointer-events": "none"
+          },
+          ".document-editor .tableWrapper": {
+            "overflow-x": "auto"
+          },
+          ".document-editor .selectedCell::after": {
+            "content": "''",
+            "position": "absolute",
+            "inset": "0",
+            "background": "color-mix(in oklab, var(--primary) 12%, transparent)",
+            "pointer-events": "none"
+          }
+        }
+      },
+      "dependencies": ["@tiptap/extension-table", "@zeroxsolutions/editor-core", "lucide-react"]
+    },
+    {
+      "name": "editor-table-demo",
+      "type": "registry:example",
+      "title": "Editor Table Demo",
+      "description": "A document with a three-column table.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-table"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-table-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-toggle",
+      "type": "registry:component",
+      "title": "Editor Toggle",
+      "description": "A block that folds the blocks inside it away behind a one-line summary.",
+      "categories": ["editor"],
+      "registryDependencies": ["@shadcn/utils", "@zui/document-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/toggle/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/toggle/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/toggle/toggle.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/features/toggle/toggle.tsx"
+        }
+      ],
+      "css": {
+        "@layer components": {
+          ".document-editor details[data-slot='toggle']:not([open]) > :not(summary)": {
+            "display": "none"
+          }
+        }
+      },
+      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react", "zod"]
+    },
+    {
+      "name": "editor-toggle-demo",
+      "type": "registry:example",
+      "title": "Editor Toggle Demo",
+      "description": "A document with an open toggle and a closed one.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-toggle"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-toggle-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "editor-features",
+      "type": "registry:component",
+      "title": "Editor Features",
+      "description": "Every document feature behind one import, from the standard kit to callout, toggle, link, image, table, code block, Mermaid, math, mention and embed.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@zui/document-editor",
+        "@zui/editor-callout",
+        "@zui/editor-code-block",
+        "@zui/editor-embed",
+        "@zui/editor-image",
+        "@zui/editor-link",
+        "@zui/editor-math",
+        "@zui/editor-mention",
+        "@zui/editor-mermaid",
+        "@zui/editor-table",
+        "@zui/editor-toggle"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/document/features/index.ts"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "name": "editor-features-demo",
+      "type": "registry:example",
+      "title": "Editor Features Demo",
+      "description": "A document built from features the barrel exports.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-features"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-features-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "math-editor",
+      "type": "registry:component",
+      "title": "Math Editor",
+      "description": "A standalone LaTeX editor with a source pane beside the live KaTeX formula, over a symbol palette.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/alert",
+        "@shadcn/button",
+        "@shadcn/command",
+        "@shadcn/dropdown-menu",
+        "@shadcn/empty",
+        "@shadcn/popover",
+        "@shadcn/resizable",
+        "@shadcn/tabs",
+        "@shadcn/use-mobile",
+        "@shadcn/utils",
+        "@zui/collapsible-card",
+        "@zui/editor-code-mirror",
+        "@zui/editor-theme"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/math/react/editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/math/react/editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/math/react/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/palette.tsx",
+          "type": "registry:component",
+          "target": "components/editor/math/react/palette.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/preview.tsx",
+          "type": "registry:component",
+          "target": "components/editor/math/react/preview.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/editor/math/react/toolbar.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/use-math-render.ts",
+          "type": "registry:component",
+          "target": "components/editor/math/react/use-math-render.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/math/react/viewer.tsx",
+          "type": "registry:component",
+          "target": "components/editor/math/react/viewer.tsx"
+        }
+      ],
+      "css": {
+        "@import 'katex/dist/katex.min.css'": {}
+      },
+      "dependencies": ["@zeroxsolutions/editor-core", "katex", "lucide-react"]
+    },
+    {
+      "name": "math-editor-demo",
+      "type": "registry:example",
+      "title": "Math Editor Demo",
+      "description": "A LaTeX formula beside its source.",
+      "categories": ["examples"],
+      "dependencies": [],
+      "registryDependencies": ["@zui/math-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/math-editor-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "mermaid-editor",
+      "type": "registry:component",
+      "title": "Mermaid Editor",
+      "description": "A standalone Mermaid editor with a source pane beside the drawn diagram, with a template menu and export.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/alert",
+        "@shadcn/alert-dialog",
+        "@shadcn/button",
+        "@shadcn/combobox",
+        "@shadcn/dropdown-menu",
+        "@shadcn/empty",
+        "@shadcn/resizable",
+        "@shadcn/tabs",
+        "@shadcn/use-mobile",
+        "@shadcn/utils",
+        "@zui/code-card",
+        "@zui/collapsible-card",
+        "@zui/editor-code-mirror",
+        "@zui/editor-theme",
+        "@zui/floating-toolbar"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/mermaid/react/editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/mermaid/react/editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/mermaid/react/preview.tsx",
+          "type": "registry:component",
+          "target": "components/editor/mermaid/react/preview.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/mermaid/react/toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/editor/mermaid/react/toolbar.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/mermaid/react/use-mermaid-render.ts",
+          "type": "registry:component",
+          "target": "components/editor/mermaid/react/use-mermaid-render.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/mermaid/react/viewer.tsx",
+          "type": "registry:component",
+          "target": "components/editor/mermaid/react/viewer.tsx"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react"]
+    },
+    {
+      "name": "mermaid-editor-demo",
+      "type": "registry:example",
+      "title": "Mermaid Editor Demo",
+      "description": "A route drawn from Mermaid source.",
+      "categories": ["examples"],
+      "dependencies": [],
+      "registryDependencies": ["@zui/mermaid-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/mermaid-editor-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "code-editor",
+      "type": "registry:component",
+      "title": "Code Editor",
+      "description": "A multi-file code editor that keeps the open files and the active one in context, and routes each file to a code, Markdown, image or font view.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/empty",
+        "@shadcn/scroll-area",
+        "@shadcn/utils",
+        "@zui/editor-code-mirror",
+        "@zui/file-type-icon",
+        "@zui/font-preview",
+        "@zui/image-preview",
+        "@zui/markdown-view"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/code/code-editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/code/code-editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/code/file-content-router.tsx",
+          "type": "registry:component",
+          "target": "components/editor/code/file-content-router.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/code/index.ts",
+          "type": "registry:component",
+          "target": "components/editor/code/index.ts"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "name": "code-editor-demo",
+      "type": "registry:example",
+      "title": "Code Editor Demo",
+      "description": "Two files beside a tree.",
+      "categories": ["examples"],
+      "dependencies": [],
+      "registryDependencies": ["@zui/code-editor", "@zui/file-tree"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/code-editor-demo.tsx",
+          "type": "registry:example"
+        }
+      ]
+    },
+    {
+      "name": "chat-input",
+      "type": "registry:component",
+      "title": "Chat Input",
+      "description": "A one-line chat composer that turns @mentions and /commands into pills and hands the message to the host as a payload.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/empty",
+        "@shadcn/input-group",
+        "@shadcn/item",
+        "@shadcn/popover",
+        "@shadcn/scroll-area",
+        "@shadcn/utils",
+        "@zui/document-editor",
+        "@zui/editor-mention"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/composer/chat-input.tsx",
+          "type": "registry:component",
+          "target": "components/editor/composer/chat-input.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/chat-message-view.tsx",
+          "type": "registry:component",
+          "target": "components/editor/composer/chat-message-view.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/composer-kit.ts",
+          "type": "registry:component",
+          "target": "components/editor/composer/composer-kit.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/composer-triggers.ts",
+          "type": "registry:component",
+          "target": "components/editor/composer/composer-triggers.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/triggers/inline-token.tsx",
+          "type": "registry:component",
+          "target": "components/editor/composer/triggers/inline-token.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/triggers/trigger-layer.tsx",
+          "type": "registry:component",
+          "target": "components/editor/composer/triggers/trigger-layer.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/composer/triggers/trigger-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/composer/triggers/trigger-menu.tsx"
+        }
+      ],
+      "dependencies": [
+        "@tiptap/extension-placeholder",
+        "@tiptap/react",
+        "@tiptap/starter-kit",
+        "@zeroxsolutions/editor-core",
+        "lucide-react",
+        "zod"
+      ],
+      "css": {
+        ".chat-composer :is([data-slot='mention'], [data-slot='channel'])": {
+          "background-color": "color-mix(in oklab, var(--composer-accent) 12%, transparent)",
+          "color": "var(--composer-accent)"
+        },
+        ".chat-composer [data-slot='command']": {
+          "background-color": "color-mix(in oklab, var(--composer-accent) 14%, transparent)",
+          "color": "var(--composer-accent)",
+          "box-shadow": "inset 0 0 0 1px color-mix(in oklab, var(--composer-accent) 30%, transparent)",
+          "margin-right": "0.125rem"
+        },
+        "@layer components": {
+          ".chat-composer .ProseMirror": {
+            "outline": "none",
+            "white-space": "pre-wrap",
+            "word-break": "break-word"
+          },
+          ".chat-composer .ProseMirror .is-empty::before, .chat-composer .ProseMirror .is-editor-empty:first-child::before": {
+            "content": "attr(data-placeholder)",
+            "color": "var(--muted-foreground)",
+            "float": "left",
+            "height": "0",
+            "pointer-events": "none",
+            "opacity": "0.6"
+          },
+          ".chat-composer": {
+            "--composer-accent": "oklch(0.55 0.18 265)"
+          },
+          ".dark .chat-composer": {
+            "--composer-accent": "oklch(0.7 0.15 265)"
+          },
+          ".chat-composer .slash-active": {
+            "background": "color-mix(in oklab, var(--composer-accent) 16%, transparent)",
+            "color": "var(--composer-accent)",
+            "border-radius": "0.25rem",
+            "padding": "0.05rem 0.1rem",
+            "-webkit-box-decoration-break": "clone",
+            "box-decoration-break": "clone"
+          },
+          ".chat-composer .slash-ghost": {
+            "color": "var(--muted-foreground)",
+            "opacity": "0.5",
+            "pointer-events": "none",
+            "user-select": "none",
+            "white-space": "pre"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat-input-demo",
+      "type": "registry:example",
+      "title": "Chat Input Demo",
+      "description": "A composer that lists the messages it sent.",
+      "categories": ["examples"],
+      "dependencies": [],
+      "registryDependencies": ["@zui/chat-input"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/chat-input-demo.tsx",
           "type": "registry:example"
         }
       ]

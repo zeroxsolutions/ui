@@ -27,10 +27,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
-import { CodeMirrorPane } from '../../../shared/code-mirror/index.js';
-import { FormulaPreview } from '../../../math/react/preview.js';
-import { FormulaViewer } from '../../../math/react/viewer.js';
-import { MathPalette } from '../../../math/react/palette.js';
+import { CodeMirrorPane } from '../../../shared/code-mirror/index';
+import { FormulaPreview } from '../../../math/react/preview';
+import { FormulaViewer } from '../../../math/react/viewer';
+import { MathPalette } from '../../../math/react/palette';
 
 /**
  * Inline + block **math**, rendered with **KaTeX**. The node contract is

@@ -1,7 +1,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { FileContentRouter, fileView } from './file-content-router.js';
+import { FileContentRouter, fileView } from './file-content-router';
 
 // The markdown view renders upstream ScrollArea, which measures its viewport
 // in a `queueMicrotask` its layout effect schedules on mount, outside of

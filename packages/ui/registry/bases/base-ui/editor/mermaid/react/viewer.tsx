@@ -14,7 +14,7 @@ import {
   CollapsibleCardTrigger,
 } from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { useMermaidRender } from './use-mermaid-render.js';
+import { useMermaidRender } from './use-mermaid-render';
 
 export interface DiagramViewerProps {
   /** The Mermaid source to render. */

@@ -1,0 +1,169 @@
+---
+title: Chat Input
+description: A one-line chat composer that turns @mentions and /commands into pills and hands the message to the host as a payload.
+---
+
+<ComponentPreview name="chat-input-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/chat-input
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @tiptap/extension-placeholder @tiptap/react @tiptap/starter-kit @zeroxsolutions/editor-core lucide-react zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add empty input-group item popover scroll-area utils @zui/document-editor @zui/editor-mention
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="chat-input" title="components/editor/composer/chat-input.tsx" />
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/chat-message-view.tsx"
+  title="components/editor/composer/chat-message-view.tsx"
+/>
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/composer-kit.ts"
+  title="components/editor/composer/composer-kit.ts"
+/>
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/composer-triggers.ts"
+  title="components/editor/composer/composer-triggers.ts"
+/>
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/triggers/inline-token.tsx"
+  title="components/editor/composer/triggers/inline-token.tsx"
+/>
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/triggers/trigger-layer.tsx"
+  title="components/editor/composer/triggers/trigger-layer.tsx"
+/>
+
+<ComponentSource
+  name="chat-input"
+  file="registry/bases/base-ui/editor/composer/triggers/trigger-menu.tsx"
+  title="components/editor/composer/triggers/trigger-menu.tsx"
+/>
+
+<Step>Add its styles to your global CSS.</Step>
+
+```css
+.chat-composer :is([data-slot='mention'], [data-slot='channel']) {
+  background-color: color-mix(in oklab, var(--composer-accent) 12%, transparent);
+  color: var(--composer-accent);
+}
+.chat-composer [data-slot='command'] {
+  background-color: color-mix(in oklab, var(--composer-accent) 14%, transparent);
+  color: var(--composer-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--composer-accent) 30%, transparent);
+  margin-right: 0.125rem;
+}
+@layer components {
+  .chat-composer .ProseMirror {
+    outline: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .chat-composer .ProseMirror .is-empty::before,
+  .chat-composer .ProseMirror .is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: var(--muted-foreground);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  .chat-composer {
+    --composer-accent: oklch(0.55 0.18 265);
+  }
+  .dark .chat-composer {
+    --composer-accent: oklch(0.7 0.15 265);
+  }
+  .chat-composer .slash-active {
+    background: color-mix(in oklab, var(--composer-accent) 16%, transparent);
+    color: var(--composer-accent);
+    border-radius: 0.25rem;
+    padding: 0.05rem 0.1rem;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .chat-composer .slash-ghost {
+    color: var(--muted-foreground);
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+  }
+}
+```
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
+
+import { ChatInput } from '@/components/editor/composer/chat-input';
+```
+
+```tsx
+function Composer({ send }: { send: (payload: ChatMessagePayload) => void }) {
+  return <ChatInput placeholder="Message the group..." onSubmit={send} />;
+}
+```
+
+Enter sends and clears the input, and Shift+Enter starts a new line. The payload carries the flattened `text`, the committed `tokens` grouped by kind, and the one-block `doc` that `ChatMessageView` draws, in `chat-message-view.tsx`.
+
+## API reference
+
+### ChatInput
+
+| Prop          | Type                                    | Default        |
+| ------------- | --------------------------------------- | -------------- |
+| `triggers`    | `ComposerTrigger[]`                     | `@` and `/`    |
+| `placeholder` | `string`                                | `'Message...'` |
+| `onSubmit`    | `(payload: ChatMessagePayload) => void` | -              |
+| `onReady`     | `(editor: IEditor) => void`             | -              |
+| `className`   | `string`                                | -              |
+
+Give `triggers` a stable array: the editor is built from it once, on mount.

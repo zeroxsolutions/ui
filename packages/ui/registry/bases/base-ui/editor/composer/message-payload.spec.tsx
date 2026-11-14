@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DocJSON, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { docToPayload } from '@zeroxsolutions/editor-core/composer/message-payload';
-import { channelTrigger, commandTrigger, mentionTrigger } from './composer-triggers.js';
+import { channelTrigger, commandTrigger, mentionTrigger } from './composer-triggers';
 
 // The registry the payload derives from - the shipped mention + command tokens.
 const tokens = [mentionTrigger().token, commandTrigger().token];

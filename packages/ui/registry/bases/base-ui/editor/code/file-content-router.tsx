@@ -7,7 +7,7 @@ import { ImagePreview, ImagePreviewImage } from '@/registry/bases/base-ui/compon
 import { MarkdownView } from '@/registry/bases/base-ui/components/data-display/markdown-view';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/registry/bases/base-ui/ui/empty';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
-import { CodeMirrorPane } from '../shared/code-mirror/index.js';
+import { CodeMirrorPane } from '../shared/code-mirror/index';
 
 /**
  * A file, already classified into how it should be shown. The discriminant

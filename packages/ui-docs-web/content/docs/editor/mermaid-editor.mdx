@@ -1,0 +1,105 @@
+---
+title: Mermaid Editor
+description: A standalone Mermaid editor with a source pane beside the drawn diagram, with a template menu and export.
+---
+
+<ComponentPreview name="mermaid-editor-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/mermaid-editor
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core lucide-react
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add alert alert-dialog button combobox dropdown-menu empty resizable tabs use-mobile utils @zui/code-card @zui/collapsible-card @zui/editor-code-mirror @zui/editor-theme @zui/floating-toolbar
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="mermaid-editor" title="components/editor/mermaid/react/editor.tsx" />
+
+<ComponentSource
+  name="mermaid-editor"
+  file="registry/bases/base-ui/editor/mermaid/react/preview.tsx"
+  title="components/editor/mermaid/react/preview.tsx"
+/>
+
+<ComponentSource
+  name="mermaid-editor"
+  file="registry/bases/base-ui/editor/mermaid/react/toolbar.tsx"
+  title="components/editor/mermaid/react/toolbar.tsx"
+/>
+
+<ComponentSource
+  name="mermaid-editor"
+  file="registry/bases/base-ui/editor/mermaid/react/use-mermaid-render.ts"
+  title="components/editor/mermaid/react/use-mermaid-render.ts"
+/>
+
+<ComponentSource
+  name="mermaid-editor"
+  file="registry/bases/base-ui/editor/mermaid/react/viewer.tsx"
+  title="components/editor/mermaid/react/viewer.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { MermaidEditor } from '@/components/editor/mermaid/react/editor';
+```
+
+```tsx
+function Diagram() {
+  return <MermaidEditor defaultValue={'flowchart LR\n  A --> B'} onValueChange={save} />;
+}
+```
+
+It is controlled when given `value`, and starts from `defaultValue` otherwise. `DiagramViewer`, in `viewer.tsx`, draws a stored diagram without the editing pane.
+
+## API reference
+
+### MermaidEditor
+
+| Prop            | Type                          | Default  |
+| --------------- | ----------------------------- | -------- |
+| `value`         | `string`                      | -        |
+| `defaultValue`  | `string`                      | -        |
+| `onValueChange` | `(source: string) => void`    | -        |
+| `readOnly`      | `boolean`                     | `false`  |
+| `layout`        | `'auto' \| 'split' \| 'tabs'` | `'auto'` |
+| `toolbar`       | `boolean`                     | `true`   |
+| `className`     | `string`                      | -        |
+
+With `layout="auto"` the source and the diagram sit side by side on a wide viewport and in tabs on a narrow one.

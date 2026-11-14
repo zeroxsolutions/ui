@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { DocJSON, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
-import { standardKit } from '../../document/features/standard/index.js';
-import { inlineToken } from './inline-token.js';
+import { standardKit } from '../../document/features/standard/index';
+import { inlineToken } from './inline-token';
 
 const editors: IEditor[] = [];
 function build(feature: ReturnType<typeof inlineToken>['feature']): IEditor {

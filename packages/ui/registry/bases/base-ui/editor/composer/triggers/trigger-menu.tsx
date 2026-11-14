@@ -8,7 +8,7 @@ import { Popover } from '@/registry/bases/base-ui/ui/popover';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { CaretRect, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
-import { RectPopover } from '../../document/ui/rect-popover.js';
+import { RectPopover } from '../../document/ui/rect-popover';
 import {
   defaultTriggerFilter,
   type TriggerOption,

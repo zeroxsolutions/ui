@@ -1,6 +1,6 @@
 import type { EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import { mention } from '../document/features/mention/index.js';
-import { inlineToken } from './triggers/inline-token.js';
+import { mention } from '../document/features/mention/index';
+import { inlineToken } from './triggers/inline-token';
 import {
   invocationToken,
   referenceToken,

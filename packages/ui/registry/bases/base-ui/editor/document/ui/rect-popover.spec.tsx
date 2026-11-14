@@ -1,7 +1,7 @@
 import { render, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Popover } from '@/registry/bases/base-ui/ui/popover';
-import { RectPopover } from './rect-popover.js';
+import { RectPopover } from './rect-popover';
 
 afterEach(() => {
   cleanup();
