@@ -1,0 +1,103 @@
+{
+  "name": "@zeroxsolutions/registry-editor-docs-zone",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@opennextjs/cloudflare": "catalog:",
+    "@shikijs/langs": "catalog:",
+    "@zeroxsolutions/editor-core": "workspace:*",
+    "@zeroxsolutions/editor-docs-web": "workspace:*",
+    "@zeroxsolutions/fluent-emoji": "workspace:*",
+    "@zeroxsolutions/routing": "catalog:",
+    "@zeroxsolutions/ui": "workspace:*",
+    "fumadocs-core": "catalog:",
+    "fumadocs-mdx": "catalog:",
+    "next": "catalog:",
+    "next-themes": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "shiki": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "wrangler": "catalog:"
+  },
+  "nx": {
+    "sourceRoot": "apps/registry-editor-docs-zone/src",
+    "tags": ["context:editor-docs"],
+    "targets": {
+      "dev": {
+        "dependsOn": ["^build", "@zeroxsolutions/ui:examples-index", "fumadocs-generate"]
+      },
+      "build": {
+        "dependsOn": ["^build", "^typecheck", "@zeroxsolutions/ui:examples-index", "fumadocs-generate"]
+      },
+      "wrangler:build": {
+        "executor": "nx:run-commands",
+        "dependsOn": ["^build", "^typecheck", "@zeroxsolutions/ui:examples-index", "fumadocs-generate"],
+        "inputs": [
+          "default",
+          "^default",
+          "{workspaceRoot}/tools/check-worker-size.sh",
+          {
+            "runtime": "pwd"
+          }
+        ],
+        "outputs": ["{projectRoot}/.open-next"],
+        "cache": true,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild && mkdir -p .open-next/assets/editor-static && mv .open-next/assets/_next .open-next/assets/editor-static/_next && test ! -e .open-next/assets/_next && ../../tools/check-worker-size.sh"
+        }
+      },
+      "wrangler:dev": {
+        "executor": "nx:run-commands",
+        "dependsOn": ["wrangler:build"],
+        "continuous": true,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "opennextjs-cloudflare preview --env development"
+        }
+      },
+      "wrangler:deploy": {
+        "executor": "nx:run-commands",
+        "dependsOn": ["wrangler:build", "check-zone-routes"],
+        "options": {
+          "cwd": "{projectRoot}"
+        },
+        "configurations": {
+          "production": {
+            "command": "opennextjs-cloudflare deploy --env production"
+          }
+        }
+      },
+      "check-zone-routes": {
+        "executor": "nx:run-commands",
+        "cache": true,
+        "inputs": ["{workspaceRoot}/apps/*-zone/wrangler.jsonc", "{workspaceRoot}/tools/check-zone-routes.sh"],
+        "options": {
+          "command": "tools/check-zone-routes.sh"
+        }
+      },
+      "wrangler:typegen": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+        }
+      },
+      "fumadocs-generate": {
+        "executor": "nx:run-commands",
+        "dependsOn": ["@zeroxsolutions/ui:examples-index"],
+        "outputs": ["{projectRoot}/.source"],
+        "cache": true,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "fumadocs-mdx"
+        }
+      }
+    }
+  }
+}

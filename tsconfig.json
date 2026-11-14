@@ -47,6 +47,9 @@
     },
     {
       "path": "./packages/editor-docs-web"
+    },
+    {
+      "path": "./apps/registry-editor-docs-zone"
     }
   ],
   "compilerOptions": {
