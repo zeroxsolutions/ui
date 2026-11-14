@@ -1,0 +1,65 @@
+---
+title: Animated grid pattern
+description: A decorative grid of lines across its parent in which cells fade in and out at random, hidden from screen readers and drawn still when the system asks for reduced motion.
+---
+
+<NativePreview name="animated-grid-pattern-demo" />
+
+## Installation
+
+<InstallCommand name="animated-grid-pattern" />
+
+The CLI writes `components/general/animated-grid-pattern.tsx`, installs [Icon](/native/components/nativewind/icon),
+Motion and Utils, and adds `lucide-react-native`, `react-native-reanimated`, `react-native-svg` and
+`react-native-worklets`.
+
+## Usage
+
+```tsx
+import { AnimatedGridPattern } from '@/components/general/animated-grid-pattern';
+```
+
+The grid fills its parent, so give it a size and `overflow-hidden`, and put the content after it, which draws over
+it:
+
+```tsx
+<View className="h-64 items-center justify-center overflow-hidden rounded-lg border border-border">
+  <AnimatedGridPattern maxOpacity={0.3} />
+  <Text>Launch week</Text>
+</View>
+```
+
+It is decoration: hidden from a screen reader, and touches pass through it to what it covers.
+
+## API reference
+
+### AnimatedGridPattern
+
+Takes every prop of React Native's `View`, plus:
+
+| Prop              | Type     | Default |
+| ----------------- | -------- | ------- |
+| `width`           | `number` | `40`    |
+| `height`          | `number` | `40`    |
+| `x`               | `number` | `-1`    |
+| `y`               | `number` | `-1`    |
+| `strokeDasharray` | `number` | `0`     |
+| `numSquares`      | `number` | `50`    |
+| `maxOpacity`      | `number` | `0.5`   |
+| `duration`        | `number` | `4`     |
+| `repeatDelay`     | `number` | `0.5`   |
+
+`width` and `height` size one cell in px, and `x` and `y` shift the grid. Once the grid has been laid out,
+`numSquares` cells fade in to `maxOpacity` over `duration` seconds, stay lit for `repeatDelay` seconds, fade out
+again, and move to another cell at random. The lines draw at 30% of the muted foreground. When the system asks for
+reduced motion the lit cells are drawn still at `maxOpacity` and never move.
+
+## Differences from the web
+
+- The grid draws in the muted foreground; a View hands no text colour to the parts inside it, so a `text-*` class
+  on AnimatedGridPattern does not recolour it as it does on the web.
+- The grid measures its box through `onLayout`, which it still calls with each layout, where the web watches its
+  svg with a `ResizeObserver`.
+- A web mask such as `mask-radial-from-40%` has no React Native counterpart, so the grid runs to its parent's
+  edges.
+- The web's `data-slot` attribute is not set; a View takes no data attributes.
