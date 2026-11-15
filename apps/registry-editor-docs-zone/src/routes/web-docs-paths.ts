@@ -7,6 +7,5 @@ export const webDocsSections: { title: string; url: string }[] = [
   { title: 'Introduction', url: '/docs' },
   { title: 'Installation', url: '/docs/installation' },
   { title: 'Components', url: '/docs/components' },
-  { title: 'Blocks', url: '/docs/blocks' },
   { title: 'Packages', url: '/docs/packages' },
 ];
