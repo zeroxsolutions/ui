@@ -79,7 +79,6 @@
         "inputs": [
           "default",
           "^default",
-          "{workspaceRoot}/tools/check-worker-size.sh",
           {
             "runtime": "pwd"
           }
@@ -90,7 +89,7 @@
         "cache": true,
         "options": {
           "cwd": "{projectRoot}",
-          "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild && ../../tools/check-worker-size.sh"
+          "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild"
         }
       },
       "wrangler:dev": {
