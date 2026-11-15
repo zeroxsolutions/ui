@@ -5,7 +5,6 @@ import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { COMPONENT_BASES } from '@zeroxsolutions/ui/site/constants/component-bases';
-import { EditorComponents } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__editor-components__';
 import { Index } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__index__';
 
 const APP = resolve(import.meta.dirname, '../..');
@@ -111,14 +110,21 @@ function readDemoedNames(): Set<string> {
   );
 }
 
-/** The names registry.json publishes as `registry:example`, outside the editor set, whose demos the editor zone's pages name. */
+/**
+ * The names registry.json publishes as `registry:example`, outside the editor set: the items in the `editor`
+ * category and those that name one among their registry dependencies, the set whose demos the editor zone's
+ * pages name.
+ */
 function readExampleNames(): string[] {
-  const { items } = JSON.parse(readFileSync(join(UI, 'registry.json'), 'utf8')) as {
-    items: { name: string; type: string }[];
+  const { name: registry, items } = JSON.parse(readFileSync(join(UI, 'registry.json'), 'utf8')) as {
+    name: string;
+    items: { name: string; type: string; categories?: string[]; registryDependencies?: string[] }[];
   };
-  return items
-    .filter((item) => item.type === 'registry:example' && !(item.name in EditorComponents))
-    .map((item) => item.name);
+  const editors = new Set(items.filter((item) => item.categories?.includes('editor')).map((item) => item.name));
+  const inEditorSet = (item: (typeof items)[number]): boolean =>
+    editors.has(item.name) ||
+    (item.registryDependencies ?? []).some((dependency) => editors.has(dependency.replace(`@${registry}/`, '')));
+  return items.filter((item) => item.type === 'registry:example' && !inEditorSet(item)).map((item) => item.name);
 }
 
 /** Every page directly under `components/base/`, its own index aside, that names nothing `registry.json` publishes as a `registry:component`. */
@@ -215,7 +221,7 @@ interface ComponentItem {
   css?: Record<string, unknown>;
 }
 
-/** The items registry.json publishes as `registry:component` outside the `editor` category, whose pages the editor zone owns. */
+/** The `registry:component` items outside the `editor` category; an editor item's page is the editor zone's. */
 function readComponentItems(): ComponentItem[] {
   const { items } = JSON.parse(readFileSync(join(UI, 'registry.json'), 'utf8')) as {
     items: {

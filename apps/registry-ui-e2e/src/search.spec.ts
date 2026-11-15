@@ -1,11 +1,9 @@
 import { expect, test } from './test/fixtures';
 
 // The editor zone answers `/docs/editor/api/search`, which the menu asks beside this app's own; no zone runs
-// under this project, so that request is answered with this app's index, which the menu reads the same way.
+// under this project, so that request is answered with an empty index.
 test.beforeEach(async ({ page }) => {
-  await page.route('**/docs/editor/api/search', async (route) => {
-    await route.fulfill({ response: await page.request.get('/api/search') });
-  });
+  await page.route('**/docs/editor/api/search', (route) => route.fulfill({ json: [] }));
 });
 
 test('the command menu finds a page and goes to it', async ({ page }) => {

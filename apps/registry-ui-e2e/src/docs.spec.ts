@@ -31,8 +31,6 @@ test("a docs page's code block is highlighted, its tokens in more than one colou
 });
 
 test('links into the editor zone with plain anchors', async ({ page }) => {
-  // Each editor link is a document load, and the components page lists every editor item.
-  test.setTimeout(270_000);
   await page.goto('/docs');
   const editorLinks = page
     .getByRole('navigation', { name: 'Docs' })
@@ -43,7 +41,31 @@ test('links into the editor zone with plain anchors', async ({ page }) => {
     await expect(link).not.toHaveAttribute('target', '_blank');
   }
 
-  for (const start of ['/docs', '/docs/components']) {
-    await expectDocumentLoadsAcrossZones(page, start, isRegistryUiPage);
-  }
+  await expectDocumentLoadsAcrossZones(page, '/docs', isRegistryUiPage);
+});
+
+test("the components page's editor links load the editor zone as documents", async ({ page }) => {
+  // Each editor link is a document load, and the page lists every editor item.
+  test.setTimeout(270_000);
+  await expectDocumentLoadsAcrossZones(page, '/docs/components', isRegistryUiPage);
+});
+
+test.describe('on a phone-width header', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("the menu's Editor section links into the editor zone with plain anchors", async ({ page }) => {
+    await page.goto('/docs');
+
+    // The menu opens only once the page has hydrated, so the trigger is clicked until it does.
+    await expect(async () => {
+      await page.getByRole('button', { name: 'Menu', exact: true }).filter({ visible: true }).click();
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1_000 });
+    }).toPass();
+    const editorLinks = page.getByRole('dialog').getByRole('link').and(page.locator('[href^="/docs/editor"]'));
+    await expect(editorLinks.first()).toBeVisible();
+    for (const link of await editorLinks.all()) {
+      await expect(link).not.toHaveAttribute('target', '_blank');
+      await expect(link).toHaveAttribute('href', /^\/docs\/editor(\/|$)/);
+    }
+  });
 });

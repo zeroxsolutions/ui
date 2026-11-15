@@ -2,8 +2,8 @@ import { createDynamicRoute, createStaticRoute } from '@zeroxsolutions/routing';
 
 /**
  * The editor paths this app links to, which the editor docs zone answers on the same host. This app may
- * not import `@zeroxsolutions/editor-docs-web`, so they are written again here, with the values of its
- * `routes`; a link built from them is a plain anchor, since this app has no page at any of them.
+ * not import the zone's packages, so they are written again here, with the values of the zone's
+ * routes; a link built from them is a plain anchor, since this app has no page at any of them.
  */
 
 /** The editor docs' introduction. */
