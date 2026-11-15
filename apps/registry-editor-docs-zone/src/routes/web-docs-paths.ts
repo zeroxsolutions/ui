@@ -6,6 +6,8 @@
 export const webDocsSections: { title: string; url: string }[] = [
   { title: 'Introduction', url: '/docs' },
   { title: 'Installation', url: '/docs/installation' },
-  { title: 'Components', url: '/docs/components' },
-  { title: 'Packages', url: '/docs/packages' },
+  // The final addresses: `/docs/components` redirects to its default base, and `/docs/packages` has no page of
+  // its own, so the section is listed by its one page.
+  { title: 'Components', url: '/docs/components/base' },
+  { title: 'Packages', url: '/docs/packages/icons' },
 ];

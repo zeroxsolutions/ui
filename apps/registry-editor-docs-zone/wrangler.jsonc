@@ -26,6 +26,7 @@
       // hostname, so a path listed here is never registry-ui's.
       "routes": [
         { "pattern": "ui.zeroxsolutions.com/docs/editor", "zone_name": "zeroxsolutions.com" },
+        { "pattern": "ui.zeroxsolutions.com/docs/editor.md", "zone_name": "zeroxsolutions.com" },
         { "pattern": "ui.zeroxsolutions.com/docs/editor/*", "zone_name": "zeroxsolutions.com" },
         { "pattern": "ui.zeroxsolutions.com/og/docs/editor/*", "zone_name": "zeroxsolutions.com" },
         { "pattern": "ui.zeroxsolutions.com/llms.mdx/docs/editor/*", "zone_name": "zeroxsolutions.com" },

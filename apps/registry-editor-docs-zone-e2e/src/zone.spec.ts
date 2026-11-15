@@ -51,6 +51,7 @@ test('links out of the zone with plain anchors', async ({ page }) => {
 
 test("answers the editor pages' markdown, image, sitemap and llms", async ({ request }) => {
   for (const [path, type] of [
+    ['/docs/editor.md', 'text/markdown'],
     ['/docs/editor/document-editor.md', 'text/markdown'],
     ['/og/docs/editor/document-editor/image.png', 'image/png'],
     ['/docs/editor/sitemap.xml', 'xml'],
@@ -69,5 +70,14 @@ test('the sitemap lists every editor page', async ({ request }) => {
 
   for (const path of ['/docs/editor', ...editorItems.map(({ name }) => `/docs/editor/${name}`)]) {
     expect(sitemap, path).toContain(`<loc>https://ui.zeroxsolutions.com${path}</loc>`);
+  }
+});
+
+test("the sidebar's web sections link their final addresses", async ({ page }) => {
+  await page.goto('/docs/editor');
+  const sidebar = page.getByRole('navigation', { name: 'Docs' });
+
+  for (const href of ['/docs', '/docs/installation', '/docs/components/base', '/docs/packages/icons']) {
+    await expect(sidebar.locator(`a[href="${href}"]`), href).toHaveCount(1);
   }
 });

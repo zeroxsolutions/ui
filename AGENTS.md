@@ -9,7 +9,7 @@ editor docs.
 
 - `apps/registry-ui` (+ `registry-ui-e2e`) - the web zone: the Next.js site on a Cloudflare worker that
   answers every path the other zones do not claim, the web items' JSON, `/docs` but for `/docs/editor`, and
-  the sitemap index and `llms.txt` that link the native zone's.
+  the sitemap index and `llms.txt` that link the native and editor zones' own.
 - `apps/registry-native-ui-docs-zone` (+ `registry-native-ui-docs-zone-e2e`) - the native zone: the
   Next.js site on its own worker that serves `/native`, `/native/*`, the native previews, and the
   `nativewind-*` and `uniwind-*` items' JSON, with its assets under `/native-static`.

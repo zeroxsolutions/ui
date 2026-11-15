@@ -52,19 +52,6 @@
           "shadcn-build",
           "fumadocs-generate",
           "@zeroxsolutions/ui:examples-index"
-        ],
-        "inputs": [
-          "default",
-          "^default",
-          {
-            "externalDependencies": [
-              "next"
-            ]
-          },
-          {
-            "dependentTasksOutputFiles": "**/*.d.ts",
-            "transitive": true
-          }
         ]
       },
       "wrangler:build": {
@@ -146,10 +133,6 @@
         "executor": "nx:run-commands",
         "dependsOn": [
           "@zeroxsolutions/ui:examples-index"
-        ],
-        "inputs": [
-          "default",
-          "^default"
         ],
         "outputs": [
           "{projectRoot}/.source"

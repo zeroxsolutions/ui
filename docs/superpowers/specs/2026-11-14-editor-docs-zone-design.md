@@ -23,8 +23,9 @@ owner asked for the split (2026-11-14). What it buys:
 2. `registry-ui`'s build imports nothing under `registry/bases/base-ui/editor/` and no editor demo.
 3. The editor demos render on the server in the editor zone (no `ssr: false`), as long as the zone's
    worker passes `tools/check-worker-size.sh` (see Size).
-4. A change reaching only the editor chrome or its pages is not built by `registry-ui`'s targets, and
-   the reverse.
+4. A change reaching only the editor pages (`packages/editor-docs-web` or the zone) is not built by
+   `registry-ui`'s targets, and the reverse. The editor chrome stays in `packages/ui` (see Non-goals), so
+   a change to it builds both zones.
 
 ## Non-goals
 
