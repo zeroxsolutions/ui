@@ -3,7 +3,7 @@ import { type Locator, type Page } from '@playwright/test';
 import { expect, test } from './test/fixtures';
 
 /** The docs page that runs longest, so its end is furthest below the rails' sticky start. */
-const LONGEST_PAGE = '/docs/blocks/ai-provider-picker';
+const LONGEST_PAGE = '/docs/components/base/avatar-picker';
 
 // The e2e tsconfig has no DOM lib, so page-side reads go in as expression strings.
 async function pageScrollY(page: Page): Promise<number> {
@@ -100,10 +100,10 @@ async function railOverflows(page: Page, railSelector: string, scrollerSelector:
  * wheel either stops at the rail or moves the page.
  */
 async function pageMovedWheelingPastRail(page: Page, rail: Locator): Promise<boolean> {
-  const before = await pageScrollY(page);
-
   const last = rail.getByRole('link').last();
+  // A hover scrolls its target into view, which on a component page's short viewport moves the page first.
   await rail.getByRole('link').first().hover();
+  const before = await pageScrollY(page);
   // The list clips its links, so the last one is in the viewport only once the list has scrolled to it.
   await expect(async () => {
     await page.mouse.wheel(0, 400);

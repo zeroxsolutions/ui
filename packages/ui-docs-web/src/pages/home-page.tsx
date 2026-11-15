@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 
-import { BlockFrame } from '@zeroxsolutions/ui/site/components/data-display/block-frame';
 import {
   ComponentPreview,
   ComponentPreviewCaption,
@@ -16,11 +15,14 @@ import { buttonVariants } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/but
 
 import registryData from '@zeroxsolutions/ui/registry.json';
 
-import { publishedBlocks, publishedItems } from '../lib/published-items';
-import { blocksRoute, componentRoute, componentsRoute, docsPageRoute, viewRoute } from '../routes';
+import { publishedItems } from '../lib/published-items';
+import { componentRoute, componentsRoute, docsPageRoute } from '../routes';
 
 /** The items the home page shows live, by registry name; each renders its `<name>-demo`. */
 const HOME_ITEMS = ['chat-message', 'code-card', 'file-tree', 'tag-input', 'password-input', 'status-indicator'];
+
+/** The item the home page shows live across its full width, under its own heading. */
+const HOME_FEATURED_ITEM = 'ai-provider-picker';
 
 /** The shadcn CLI command that installs one registry item through the app's `@zui` registry entry. */
 function homePageInstallCommand(name: string): string {
@@ -65,7 +67,7 @@ interface HomePageProps {
 }
 
 /**
- * The registry's home page: the hero, a few components live, a block in its frame, and how an item installs.
+ * The registry's home page: the hero, a few components live, one wide component live, and how an item installs.
  * Throws where a docs page it links to is not written, so the link fails the build.
  */
 function HomePage({ writtenDocsPage }: HomePageProps): ReactNode {
@@ -79,8 +81,8 @@ function HomePage({ writtenDocsPage }: HomePageProps): ReactNode {
     if (!item) throw new Error(`HomePage: "${name}" is not a published item`);
     return { ...item, url: writtenDocsPage(componentRoute.build({ base: DEFAULT_COMPONENT_BASE, name })) };
   });
-  const block = publishedBlocks.find((entry) => entry.name === 'ai-provider-picker');
-  if (!block) throw new Error('HomePage: "ai-provider-picker" is not a published block');
+  const featured = publishedItems.find((entry) => entry.name === HOME_FEATURED_ITEM);
+  if (!featured) throw new Error(`HomePage: "${HOME_FEATURED_ITEM}" is not a published item`);
 
   return (
     <div className="flex flex-col gap-24 pb-24">
@@ -138,20 +140,22 @@ function HomePage({ writtenDocsPage }: HomePageProps): ReactNode {
         </HomeGrid>
       </section>
 
-      <section aria-labelledby="home-blocks" className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6">
+      <section aria-labelledby="home-featured" className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6">
         <div className="flex items-baseline justify-between gap-4">
-          <h2 id="home-blocks" className="text-2xl font-semibold tracking-tight">
-            Blocks
+          <h2 id="home-featured" className="text-2xl font-semibold tracking-tight">
+            {featured.title}
           </h2>
           <HostLink
-            href={blocksRoute.build({ base: DEFAULT_COMPONENT_BASE })}
+            href={docsPageHref(componentRoute.build({ base: DEFAULT_COMPONENT_BASE, name: featured.name }))}
             className={buttonVariants({ variant: 'link' })}
           >
-            See the blocks
+            See the component
           </HostLink>
         </div>
         <ComponentPreview>
-          <BlockFrame src={viewRoute.build({ name: block.name })} title={block.title} />
+          <ComponentPreviewStage className="h-auto">
+            <RegistryExample name={`${featured.name}-demo`} />
+          </ComponentPreviewStage>
         </ComponentPreview>
       </section>
 

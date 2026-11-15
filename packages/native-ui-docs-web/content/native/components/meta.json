@@ -35,6 +35,7 @@
     "emoji-appearance-toggle-group",
     "emoji-picker",
     "avatar-picker",
+    "ai-provider-picker",
     "select",
     "native-select",
     "combobox",
@@ -124,8 +125,6 @@
     "navigation-menu",
     "sidebar",
     "breadcrumb",
-    "pagination",
-    "---Blocks---",
-    "ai-provider-picker"
+    "pagination"
   ]
 }

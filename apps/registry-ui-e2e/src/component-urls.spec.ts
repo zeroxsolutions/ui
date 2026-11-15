@@ -55,6 +55,7 @@ test('the components index, a component and the blocks render under the base, an
 
   await page.goto('/blocks/base');
   await expect(page.getByRole('heading', { level: 1, name: 'Blocks' })).toBeVisible();
+  await expect(page.getByText('No blocks yet.', { exact: true })).toBeVisible();
 });
 
 test('a base the registry does not publish answers 404', async ({ page }) => {

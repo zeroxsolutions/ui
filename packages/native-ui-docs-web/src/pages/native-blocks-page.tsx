@@ -25,11 +25,13 @@ function NativeBlocksPage({ engine, componentPage }: NativeBlocksPageProps): Rea
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight">Blocks</h1>
         <p className="text-muted-foreground">
-          A block is a whole surface composed from this registry&apos;s components. Each is drawn at the width of this
-          column, so its layout answers to the frame and not to the window.
+          A block is a page-level template, such as a dashboard or a sign-in page, composed from this registry&apos;s
+          components. Each is drawn at the width of this column, so its layout answers to the frame and not to the
+          window.
         </p>
         <EngineSwitcher className="mt-4" />
       </header>
+      {nativeBlocks.length === 0 && <p>No blocks yet.</p>}
       {nativeBlocks.map((block) => {
         const url = componentPage(block.name);
         return (

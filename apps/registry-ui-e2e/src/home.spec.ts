@@ -54,7 +54,13 @@ test('/ says what the registry is, shows its items live, fits a phone, and links
     )
     .toBe(INSTALL_COMMAND);
   for (const item of ITEMS) await expect(main.getByText(item, { exact: true })).toBeVisible();
-  await expect(main.getByTitle('AI Provider Picker')).toBeVisible();
+  // The featured component draws in place under its own heading, with a link to its page.
+  const featured = main.getByRole('region', { name: 'AI Provider Picker' });
+  await expect(featured.locator('[data-slot=component-preview-stage]')).toBeVisible();
+  await expect(featured.getByRole('link', { name: 'See the component' })).toHaveAttribute(
+    'href',
+    /\/docs\/components\/base\/ai-provider-picker$/,
+  );
 
   const browse = main.getByRole('link', { name: 'Browse components' });
   const getStarted = main.getByRole('link', { name: 'Get started' });

@@ -5,10 +5,10 @@ import {
   AiProviderCardDescription,
   AiProviderCardLabel,
   AiProviderCardTrigger,
-} from '../components/data-display/ai-provider-card';
-import { AiProviderIcon } from '../lib/brand-mark';
-import { cn } from '../lib/utils';
-import { CardFooter, CardHeader, CardTitle } from '../ui/card';
+} from '../data-display/ai-provider-card';
+import { AiProviderIcon } from '../../lib/brand-mark';
+import { cn } from '../../lib/utils';
+import { CardFooter, CardHeader, CardTitle } from '../../ui/card';
 
 /**
  * One card's data, the shape a host supplies or takes from

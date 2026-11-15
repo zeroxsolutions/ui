@@ -2167,16 +2167,16 @@
     },
     {
       "name": "ai-provider-picker",
-      "type": "registry:block",
+      "type": "registry:component",
       "title": "AI provider picker",
       "description": "A responsive grid of AI provider cards, from the host's entries or a sample, that calls back with the provider key a card selects.",
-      "categories": ["blocks"],
+      "categories": ["data-entry"],
       "dependencies": ["@zeroxsolutions/icons", "expo-image"],
       "registryDependencies": ["@zui/ai-provider-card", "@zui/brand-mark", "@zui/card", "@zui/utils"],
       "files": [
         {
-          "path": "src/registry/blocks/ai-provider-picker.tsx",
-          "type": "registry:block"
+          "path": "src/registry/components/data-entry/ai-provider-picker.tsx",
+          "type": "registry:component"
         }
       ]
     }
