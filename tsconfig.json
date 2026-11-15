@@ -50,6 +50,9 @@
     },
     {
       "path": "./apps/registry-editor-docs-zone"
+    },
+    {
+      "path": "./apps/registry-editor-docs-zone-e2e"
     }
   ],
   "compilerOptions": {
