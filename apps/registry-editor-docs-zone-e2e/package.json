@@ -1,0 +1,25 @@
+{
+  "name": "@zeroxsolutions/registry-editor-docs-zone-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "fumadocs-core": "catalog:",
+    "@zeroxsolutions/icons": "workspace:*"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "@zeroxsolutions/registry-editor-docs-zone"
+    ],
+    "targets": {
+      "e2e": {
+        "dependsOn": [
+          {
+            "projects": ["@zeroxsolutions/registry-editor-docs-zone"],
+            "target": "wrangler:build"
+          }
+        ],
+        "parallelism": false
+      }
+    }
+  }
+}

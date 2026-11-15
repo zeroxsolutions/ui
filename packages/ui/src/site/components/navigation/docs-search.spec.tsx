@@ -51,11 +51,52 @@ const searchAPI = createSearchAPI('advanced', {
   ],
 });
 
-const server = setupServer(http.get('/api/search', () => searchAPI.staticGET()));
+/** The index the editor zone exports at `/docs/editor/api/search`; it also lists the status indicator page, at the web index's url and id but with other text. */
+const editorSearchAPI = createSearchAPI('advanced', {
+  indexes: [
+    {
+      id: '/docs/editor/document-editor',
+      title: 'Document Editor',
+      url: '/docs/editor/document-editor',
+      tag: 'web',
+      structuredData: {
+        headings: [],
+        contents: [{ heading: undefined, content: 'The toolbar groups every formatting command.' }],
+      },
+    },
+    {
+      id: '/docs/components/status-indicator',
+      title: 'Status Indicator',
+      description: 'A dot and a label for a status.',
+      url: '/docs/components/status-indicator',
+      tag: 'web',
+      structuredData: {
+        headings: [],
+        contents: [{ heading: undefined, content: 'Its status dot carries the slot.' }],
+      },
+    },
+    {
+      id: '/docs/editor/status-bar',
+      title: 'Status Bar',
+      url: '/docs/editor/status-bar',
+      tag: 'web',
+      structuredData: {
+        headings: [],
+        contents: [{ heading: undefined, content: 'The status dot sits in the bar.' }],
+      },
+    },
+  ],
+});
+
+const server = setupServer(
+  http.get('/api/search', () => searchAPI.staticGET()),
+  http.get('/docs/editor/api/search', () => editorSearchAPI.staticGET()),
+);
 
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 afterEach(() => {
   cleanup();
+  server.resetHandlers();
   vi.unstubAllGlobals();
   push.mockClear();
 });
@@ -169,6 +210,40 @@ describe('DocsSearch', () => {
     fireEvent.click(await screen.findByRole('option', { name: /label nativeID/ }, { timeout: 3_000 }));
 
     expect(push).toHaveBeenCalledWith(expect.stringMatching(/^\/native\/components\/uniwind\/label(#.*)?$/));
+  });
+
+  it('finds pages from every index', async () => {
+    render(<DocsSearch tree={tree} api={['/api/search', '/docs/editor/api/search']} />, { wrapper });
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'root element' } });
+    await screen.findByRole('option', { name: /on its root element/ }, { timeout: 3_000 });
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'toolbar formatting command' } });
+    fireEvent.click(await screen.findByRole('option', { name: /toolbar groups/ }, { timeout: 3_000 }));
+
+    expect(push).toHaveBeenCalledWith(expect.stringMatching(/^\/docs\/editor\/document-editor(#.*)?$/));
+  });
+
+  it('shows a page both indexes hold once, from the first index', async () => {
+    render(<DocsSearch tree={tree} api={['/api/search', '/docs/editor/api/search']} />, { wrapper });
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'status dot' } });
+
+    // The status bar page answers in the same search as the second index's copy of the shared page.
+    await screen.findByRole('option', { name: /status dot sits/ }, { timeout: 3_000 });
+    expect(screen.queryByRole('option', { name: /dot carries the slot/ })).toBeNull();
+  });
+
+  it('keeps the pages of the indexes that answer when another fails', async () => {
+    // An index of its own: a client fetches each index once, so a url an earlier spec read is never fetched again.
+    server.use(http.get('/api/broken-search', () => new Response(null, { status: 500 })));
+    render(<DocsSearch tree={tree} api={['/api/search', '/api/broken-search']} />, { wrapper });
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'root element' } });
+
+    expect(await screen.findByRole('option', { name: /on its root element/ }, { timeout: 3_000 })).toBeTruthy();
   });
 
   it('names the search button once, whichever of its labels and shortcut hint are drawn', () => {

@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ui-sdk-registry-editor-docs-zone",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-20",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // next-themes inlines its theme script from the function's own source. With the bundler's name-keeping
+  // on, a page rendered in the worker carries a script calling `__name`, which the browser never
+  // defines, so it throws and the theme is set only after hydration.
+  "keep_names": false,
+  "observability": { "enabled": true },
+  // Both addresses `wrangler dev` binds, beside registry-ui's 8787 and 9229 and the native zone's 8788
+  // and 9230. Unset, the server port silently becomes the next free one.
+  "dev": { "port": 8789, "inspector_port": 9231 },
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "env": {
+    "development": {
+      "workers_dev": true,
+    },
+    "production": {
+      "workers_dev": false,
+      // Absent, a versioned preview still gets a *.workers.dev hostname from the account's own
+      // subdomain setting; the registry has one public host.
+      "preview_urls": false,
+      // The editor paths on registry-ui's host. A route takes precedence over a Custom Domain on the same
+      // hostname, so a path listed here is never registry-ui's.
+      "routes": [
+        { "pattern": "ui.zeroxsolutions.com/docs/editor", "zone_name": "zeroxsolutions.com" },
+        { "pattern": "ui.zeroxsolutions.com/docs/editor/*", "zone_name": "zeroxsolutions.com" },
+        { "pattern": "ui.zeroxsolutions.com/og/docs/editor/*", "zone_name": "zeroxsolutions.com" },
+        { "pattern": "ui.zeroxsolutions.com/llms.mdx/docs/editor/*", "zone_name": "zeroxsolutions.com" },
+        { "pattern": "ui.zeroxsolutions.com/editor-static/*", "zone_name": "zeroxsolutions.com" },
+      ],
+    },
+  },
+}
