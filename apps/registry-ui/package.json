@@ -64,8 +64,7 @@
           {
             "dependentTasksOutputFiles": "**/*.d.ts",
             "transitive": true
-          },
-          "{workspaceRoot}/packages/editor-docs-web/content/**/*"
+          }
         ]
       },
       "wrangler:build": {
@@ -81,7 +80,6 @@
           "default",
           "^default",
           "{workspaceRoot}/tools/check-worker-size.sh",
-          "{workspaceRoot}/packages/editor-docs-web/content/**/*",
           {
             "runtime": "pwd"
           }
@@ -152,8 +150,7 @@
         ],
         "inputs": [
           "default",
-          "^default",
-          "{workspaceRoot}/packages/editor-docs-web/content/**/*"
+          "^default"
         ],
         "outputs": [
           "{projectRoot}/.source"

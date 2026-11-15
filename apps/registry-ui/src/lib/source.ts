@@ -1,17 +1,21 @@
-import { docs, editorDocs } from 'collections/server';
-import { llms, loader, multiple } from 'fumadocs-core/source';
+import { docs } from 'collections/server';
+import { llms, loader } from 'fumadocs-core/source';
 
+import { inEditorZone } from '@/lib/editor-nav';
 import { pageMarkdown } from '@/lib/page-markdown';
 import { docsRoute, docsShareImageRoute } from '@zeroxsolutions/ui-docs-web/routes';
 
 export const source = loader({
   baseUrl: docsRoute.build(),
-  source: multiple({ docs: docs.toFumadocsSource(), editor: editorDocs.toFumadocsSource() }),
+  source: docs.toFumadocsSource(),
 });
 
-/** `href`, a URL a route built, where a docs page answers it; `undefined` where the content has no page there yet. */
+/**
+ * `href`, a URL a route built, where a docs page answers it; `undefined` where the content has no page
+ * there yet. Every href in the editor zone is written: the zone's pages are its own, and this app cannot read them.
+ */
 export function writtenDocsPage(href: string): string | undefined {
-  return source.getPageByHref(href) ? href : undefined;
+  return inEditorZone(href) || source.getPageByHref(href) ? href : undefined;
 }
 
 /**
