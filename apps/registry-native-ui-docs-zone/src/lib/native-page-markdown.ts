@@ -5,7 +5,7 @@ import { DEFAULT_NATIVE_ENGINE, NATIVE_ENGINE_LABELS } from '@zeroxsolutions/ui/
 import { PLATFORM_STYLES } from '@zeroxsolutions/ui/site/constants/platform-styles';
 import { nativeComponentsJson, nativeInstallCommands } from '@zeroxsolutions/native-ui-docs-web/lib/native-install';
 import type { nativeDocsSource } from '@/lib/native-source';
-import { pageMarkdownDocument } from '@/lib/page-markdown';
+import { pageMarkdownDocument } from '@zeroxsolutions/ui/site/lib/page-markdown';
 import { withNativeEngine } from '@zeroxsolutions/native-ui-docs-web/lib/native-location';
 import { registryHomepage } from '@/lib/registry';
 import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';

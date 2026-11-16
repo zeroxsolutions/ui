@@ -2,7 +2,7 @@
 
 import { Suspense, type ReactNode } from 'react';
 
-import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
+import { useCurrentStyle } from '../../hooks/use-current-style';
 
 /** A file as each web style other than the default writes it, with its lines highlighted, as JSON. */
 export type StyleSources = Record<string, { code: string; lines: string }>;

@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 
-import { SourceCodeCard } from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
-import type { HighlightLine } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/shiki';
+import { SourceCodeCard } from './source-code-card';
+import type { HighlightLine } from '../../../../registry/bases/base-ui/lib/shiki';
 
 import { StyledSource, type StyleSources } from './styled-source';
 

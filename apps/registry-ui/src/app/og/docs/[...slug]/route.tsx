@@ -1,6 +1,7 @@
+import { ImageResponse } from 'next/og';
 import { notFound } from 'next/navigation';
 
-import { shareImage } from '@/lib/share-image';
+import { shareImageElement, shareImageSize } from '@zeroxsolutions/ui/site/lib/share-image';
 import { docsPageImage, source } from '@/lib/source';
 import { docsShareImageRoute } from '@zeroxsolutions/ui-docs-web/routes';
 
@@ -21,5 +22,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   const page = source.getPage(slug.slice(0, -1));
   if (!page || docsPageImage(page).url !== docsShareImageRoute.build({ slug: slug.join('/') })) notFound();
 
-  return shareImage({ title: page.data.title, description: page.data.description });
+  return new ImageResponse(
+    shareImageElement({ title: page.data.title, description: page.data.description }),
+    shareImageSize,
+  );
 }

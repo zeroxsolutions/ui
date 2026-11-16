@@ -1,11 +1,8 @@
 import type { ReactNode } from 'react';
 
-import {
-  ComponentPreview,
-  ComponentPreviewStage,
-} from '@zeroxsolutions/ui/site/components/data-display/component-preview';
-import { RegistryExample } from '@zeroxsolutions/ui/site/components/data-display/registry-example';
-import { Index } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__index__';
+import { ComponentPreview, ComponentPreviewStage } from './component-preview';
+import { RegistryExample } from './registry-example';
+import { Index } from '../../../../registry/bases/base-ui/examples/__index__';
 
 import { ExampleSource } from './example-source';
 

@@ -18,8 +18,8 @@ import { writtenDocsPage } from '@/lib/source';
 
 import { BlockPreview } from '@zeroxsolutions/ui-docs-web/components/data-display/block-preview';
 import { ComponentsList } from '@zeroxsolutions/ui-docs-web/components/data-display/components-list';
-import { ComponentSource } from '@zeroxsolutions/ui-docs-web/components/data-display/component-source';
-import { ExamplePreview } from '@zeroxsolutions/ui-docs-web/components/data-display/example-preview';
+import { ComponentSource } from '@zeroxsolutions/ui/site/components/data-display/component-source';
+import { ExamplePreview } from '@zeroxsolutions/ui/site/components/data-display/example-preview';
 import { InitCommand } from '@zeroxsolutions/ui-docs-web/components/data-display/init-command';
 import { WebComponentsJson } from '@zeroxsolutions/ui-docs-web/components/data-display/web-components-json';
 

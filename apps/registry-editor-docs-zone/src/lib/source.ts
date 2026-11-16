@@ -5,7 +5,7 @@ import { llms, loader } from 'fumadocs-core/source';
 import { editorDocsShareImageRoute } from '@zeroxsolutions/editor-docs-web/routes';
 
 import { docsTree } from '@/lib/docs-tree';
-import { pageMarkdown } from '@/lib/page-markdown';
+import { pageMarkdown } from '@zeroxsolutions/ui/site/lib/page-markdown';
 import { webDocsRoute } from '@/routes/web-paths';
 import { webDocsSections } from '@/routes/web-docs-paths';
 

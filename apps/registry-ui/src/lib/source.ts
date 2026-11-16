@@ -2,7 +2,7 @@ import { docs } from 'collections/server';
 import { llms, loader } from 'fumadocs-core/source';
 
 import { inEditorZone } from '@/lib/editor-nav';
-import { pageMarkdown } from '@/lib/page-markdown';
+import { pageMarkdown } from '@zeroxsolutions/ui/site/lib/page-markdown';
 import { docsRoute, docsShareImageRoute } from '@zeroxsolutions/ui-docs-web/routes';
 
 export const source = loader({
