@@ -691,6 +691,531 @@
       ]
     },
     {
+      "name": "trash-2-icon",
+      "type": "registry:ui",
+      "title": "Trash 2 Icon",
+      "description": "An animated trash 2 icon, motion authored in the manner of lucide-animated, whose lid lifts and settles when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/trash-2-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/trash-2-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "circle-x-icon",
+      "type": "registry:ui",
+      "title": "Circle X Icon",
+      "description": "An animated circle x icon, motion authored in the manner of lucide-animated, whose cross shrinks and returns when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/circle-x-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/circle-x-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "plane-icon",
+      "type": "registry:ui",
+      "title": "Plane Icon",
+      "description": "An animated plane icon, motion authored in the manner of lucide-animated, whose body glides up and to the right and returns when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/plane-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/plane-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "dumbbell-icon",
+      "type": "registry:ui",
+      "title": "Dumbbell Icon",
+      "description": "An animated dumbbell icon, motion authored in the manner of lucide-animated, whose weights wobble to one side and the other when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/dumbbell-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/dumbbell-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lightbulb-icon",
+      "type": "registry:ui",
+      "title": "Lightbulb Icon",
+      "description": "An animated lightbulb icon, motion authored in the manner of lucide-animated, whose glass swells from its base and settles when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lightbulb-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lightbulb-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "hash-icon",
+      "type": "registry:ui",
+      "title": "Hash Icon",
+      "description": "An animated hash icon, motion authored in the manner of lucide-animated, whose two bars slide in opposite directions and return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/hash-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/hash-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "flag-icon",
+      "type": "registry:ui",
+      "title": "Flag Icon",
+      "description": "An animated flag icon, motion authored in the manner of lucide-animated, whose cloth sways about its pole and settles when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/flag-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/flag-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "chevron-up-icon",
+      "type": "registry:ui",
+      "title": "Chevron Up Icon",
+      "description": "An animated chevron up icon, adapted from lucide-animated, whose head lifts and settles when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/chevron-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/chevron-up-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "strikethrough-icon",
+      "type": "registry:ui",
+      "title": "Strikethrough Icon",
+      "description": "An animated strikethrough icon, motion authored in the manner of lucide-animated, whose halves part while the line is drawn in again when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/strikethrough-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/strikethrough-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "code-icon",
+      "type": "registry:ui",
+      "title": "Code Icon",
+      "description": "An animated code icon, motion authored in the manner of lucide-animated, whose two brackets move apart and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/code-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/code-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "highlighter-icon",
+      "type": "registry:ui",
+      "title": "Highlighter Icon",
+      "description": "An animated highlighter icon, motion authored in the manner of lucide-animated, whose pen tilts about its tip and returns when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/highlighter-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/highlighter-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "heading-1-icon",
+      "type": "registry:ui",
+      "title": "Heading 1 Icon",
+      "description": "An animated heading 1 icon, motion authored in the manner of lucide-animated, whose crossbar narrows and whose digit lifts, then both return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/heading-1-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/heading-1-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "heading-2-icon",
+      "type": "registry:ui",
+      "title": "Heading 2 Icon",
+      "description": "An animated heading 2 icon, motion authored in the manner of lucide-animated, whose stems lean apart and whose digit swells, then all return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/heading-2-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/heading-2-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "heading-3-icon",
+      "type": "registry:ui",
+      "title": "Heading 3 Icon",
+      "description": "An animated heading 3 icon, motion authored in the manner of lucide-animated, whose crossbar is drawn in again while the two curves of its digit part when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/heading-3-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/heading-3-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "list-icon",
+      "type": "registry:ui",
+      "title": "List Icon",
+      "description": "An animated list icon, motion authored in the manner of lucide-animated, whose bullets fade out and back and whose lines shorten, one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/list-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/list-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "list-ordered-icon",
+      "type": "registry:ui",
+      "title": "List Ordered Icon",
+      "description": "An animated list ordered icon, motion authored in the manner of lucide-animated, whose lines slide right and whose numbers lift, one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/list-ordered-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/list-ordered-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "list-todo-icon",
+      "type": "registry:ui",
+      "title": "List Todo Icon",
+      "description": "An animated list todo icon, motion authored in the manner of lucide-animated, whose lines slide right, whose box shrinks and whose tick is drawn in again when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/list-todo-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/list-todo-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "text-quote-icon",
+      "type": "registry:ui",
+      "title": "Text Quote Icon",
+      "description": "An animated text quote icon, motion authored in the manner of lucide-animated, whose lines slide and whose quote bar shortens, then all return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/text-quote-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/text-quote-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "minus-icon",
+      "type": "registry:ui",
+      "title": "Minus Icon",
+      "description": "An animated minus icon, motion authored in the manner of lucide-animated, whose bar shortens and returns when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/minus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/minus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "info-icon",
+      "type": "registry:ui",
+      "title": "Info Icon",
+      "description": "An animated info icon, motion authored in the manner of lucide-animated, whose ring swells, whose stem shortens and whose dot lifts, then all return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/info-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/info-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "image-icon",
+      "type": "registry:ui",
+      "title": "Image Icon",
+      "description": "An animated image icon, motion authored in the manner of lucide-animated, whose sun swells and whose hill is drawn in short and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/image-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/image-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "link-icon",
+      "type": "registry:ui",
+      "title": "Link Icon",
+      "description": "An animated link icon, adapted from lucide-animated, whose two halves shorten and tilt apart, then return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/link-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/link-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "table-icon",
+      "type": "registry:ui",
+      "title": "Table Icon",
+      "description": "An animated table icon, motion authored in the manner of lucide-animated, whose lines shorten, the rows one after the other, and return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/table-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/table-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "frame-icon",
+      "type": "registry:ui",
+      "title": "Frame Icon",
+      "description": "An animated frame icon, adapted from lucide-animated, whose four guides slide outward and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/frame-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/frame-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "sigma-icon",
+      "type": "registry:ui",
+      "title": "Sigma Icon",
+      "description": "An animated sigma icon, motion authored in the manner of lucide-animated, whose sum sign flattens and returns when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/sigma-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/sigma-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "radical-icon",
+      "type": "registry:ui",
+      "title": "Radical Icon",
+      "description": "An animated radical icon, motion authored in the manner of lucide-animated, drawn in again from its foot when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/radical-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/radical-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "omega-icon",
+      "type": "registry:ui",
+      "title": "Omega Icon",
+      "description": "An animated omega icon, motion authored in the manner of lucide-animated, whose sign lifts and widens, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/omega-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/omega-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "workflow-icon",
+      "type": "registry:ui",
+      "title": "Workflow Icon",
+      "description": "An animated workflow icon, adapted from lucide-animated, whose boxes and the link between them are drawn in again, one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/workflow-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/workflow-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "pencil-line-icon",
+      "type": "registry:ui",
+      "title": "Pencil Line Icon",
+      "description": "An animated pencil line icon, motion authored in the manner of lucide-animated, whose pencil slides right while the line shortens, then both return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/pencil-line-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/pencil-line-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "download-icon",
+      "type": "registry:ui",
+      "title": "Download Icon",
+      "description": "An animated download icon, adapted from lucide-animated, whose arrow dips toward the tray and returns when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/download-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/download-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "plus-icon",
+      "type": "registry:ui",
+      "title": "Plus Icon",
+      "description": "An animated plus icon, adapted from lucide-animated, which turns a quarter and returns when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/plus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/plus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "maximize-icon",
+      "type": "registry:ui",
+      "title": "Maximize Icon",
+      "description": "An animated maximize icon, adapted from lucide-animated, whose four corners move outward and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/maximize-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/maximize-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "rotate-ccw-icon",
+      "type": "registry:ui",
+      "title": "Rotate Ccw Icon",
+      "description": "An animated rotate ccw icon, adapted from lucide-animated, which turns back a little and returns when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/rotate-ccw-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/rotate-ccw-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "grip-vertical-icon",
+      "type": "registry:ui",
+      "title": "Grip Vertical Icon",
+      "description": "An animated grip vertical icon, adapted from lucide-animated, whose six dots dim and shrink, one after another, then return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/grip-vertical-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/grip-vertical-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "settings-2-icon",
+      "type": "registry:ui",
+      "title": "Settings 2 Icon",
+      "description": "An animated settings 2 icon, motion authored in the manner of lucide-animated, whose two knobs slide toward each other and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/settings-2-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/settings-2-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "button",
       "type": "registry:ui",
       "title": "Button",
