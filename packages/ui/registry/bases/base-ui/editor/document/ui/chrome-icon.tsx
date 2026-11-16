@@ -2,7 +2,6 @@
 
 import { isValidElement, useEffect, useRef, useState } from 'react';
 import type { ComponentType, FocusEvent, PointerEvent, ReactNode, Ref } from 'react';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /** What every animated icon exposes, so the chrome around it can play it. */
 export interface AnimatedIconHandle {
@@ -24,6 +23,13 @@ function isComponent(icon: unknown): icon is AnimatedIconComponent {
     (typeof icon === 'object' && icon !== null && !isValidElement(icon) && '$$typeof' in icon)
   );
 }
+
+/**
+ * The size a menu or toolbar icon had as an element with `size-4`. The wrapper span
+ * carries `size-4`, and the svg inside it is held to the same by `!`, because a
+ * control's own rule (a Toggle's `svg:not([class*='size-'])`) would otherwise size it.
+ */
+export const CHROME_ICON_CLASS = 'size-4 [&_svg]:size-4!';
 
 export interface ChromeIconProps {
   /** An animated icon component, or any node, which renders as given. */
@@ -51,7 +57,7 @@ export function ChromeIcon({ icon, className, active }: ChromeIconProps): ReactN
   if (icon == null || typeof icon === 'boolean') return null;
   if (isComponent(icon)) {
     const Icon = icon;
-    return <Icon ref={handle} aria-hidden className={cn(className)} />;
+    return <Icon ref={handle} aria-hidden className={className} />;
   }
   return icon as ReactNode;
 }

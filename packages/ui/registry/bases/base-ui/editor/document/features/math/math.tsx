@@ -168,7 +168,7 @@ function MathInlineForm({
  * The inline math node view. Read-only renders the real formula (no edit
  * affordance); editable is click-to-edit into a `Popover` anchored to the formula.
  */
-function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
+export function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
   const [editing, setEditing] = useState(false);
 
   if (!editable) {
@@ -216,7 +216,7 @@ function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeViewProp
  * The block math node view. Read-only is a design-system `Card` holding the real
  * formula; editable composes the shared `CollapsibleCard`/`Tabs` chrome.
  */
-function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
+export function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
   const insert = useChromeActive();
   if (!editable) {
     return (

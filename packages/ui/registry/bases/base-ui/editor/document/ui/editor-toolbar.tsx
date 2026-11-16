@@ -5,7 +5,7 @@ import { Toggle } from '@/registry/bases/base-ui/ui/toggle';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { IEditor, ToolbarItem } from '@zeroxsolutions/editor-core/document/core/index';
-import { ChromeControl } from './chrome-icon';
+import { CHROME_ICON_CLASS, ChromeControl } from './chrome-icon';
 import { useEditorChanges } from './use-editor-changes';
 
 /**
@@ -40,7 +40,7 @@ export function EditorToolbar({ editor, items, className }: EditorToolbarProps) 
               <ChromeControl
                 icon={item.icon}
                 fallback={item.title}
-                iconClassName="size-4"
+                iconClassName={CHROME_ICON_CLASS}
                 render={(control) => (
                   <Tooltip>
                     <TooltipTrigger

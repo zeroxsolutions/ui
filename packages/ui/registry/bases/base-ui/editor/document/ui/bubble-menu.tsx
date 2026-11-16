@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/regi
 import type { BubbleItem, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { selectionRect, selectionWithin, type Point } from './selection-rect';
 import { RectPopover } from './rect-popover';
-import { ChromeControl } from './chrome-icon';
+import { CHROME_ICON_CLASS, ChromeControl } from './chrome-icon';
 
 /**
  * The selection bubble menu (task 8.2): a floating formatting bar that appears
@@ -80,7 +80,7 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
                 key={item.id}
                 icon={item.icon}
                 fallback={item.title}
-                iconClassName="size-4"
+                iconClassName={CHROME_ICON_CLASS}
                 render={(control) => (
                   <Tooltip>
                     <TooltipTrigger

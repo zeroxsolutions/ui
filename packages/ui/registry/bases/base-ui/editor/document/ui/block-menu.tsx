@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
-import { ChromeControl } from './chrome-icon';
+import { CHROME_ICON_CLASS, ChromeControl } from './chrome-icon';
 import type { BlockMenuItem, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 
 /**
@@ -81,7 +81,7 @@ export function BlockMenu({ editor, items, container }: BlockMenuProps) {
                 <ChromeControl
                   icon={item.icon}
                   fallback={item.title}
-                  iconClassName="size-4"
+                  iconClassName={CHROME_ICON_CLASS}
                   render={(control) => (
                     <DropdownMenuItem
                       variant={item.id === 'delete' ? 'destructive' : 'default'}
