@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import type { RefObject } from 'react';
-import { Omega, Sigma } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Sigma } from 'lucide-react';
 import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
 import { CopyIcon } from '@/registry/bases/base-ui/icons/copy-icon';
 import { DownloadIcon } from '@/registry/bases/base-ui/icons/download-icon';
+import { OmegaIcon } from '@/registry/bases/base-ui/icons/omega-icon';
+import { usePlayWhile, useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import {
   CollapsibleCardActions,
@@ -21,34 +22,6 @@ import {
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
 import { copyLatex, copyMathML } from '@zeroxsolutions/editor-core/math/core/export';
 import { MathPalette } from './palette';
-
-/** The handle every animated icon exposes. */
-interface IconHandle {
-  startAnimation(): void;
-  stopAnimation(): void;
-}
-
-/** A control's ref to its icon, and the pointer and focus handlers that play it. */
-function useIconPlay() {
-  const ref = useRef<IconHandle>(null);
-  return {
-    ref,
-    handlers: {
-      onPointerEnter: () => ref.current?.startAnimation(),
-      onPointerLeave: () => ref.current?.stopAnimation(),
-      onFocus: () => ref.current?.startAnimation(),
-      onBlur: () => ref.current?.stopAnimation(),
-    },
-  };
-}
-
-/** The icon of an Export button: a download, then a check that plays once as the export finishes. */
-function ExportIcon({ done, iconRef }: { done: boolean; iconRef: RefObject<IconHandle | null> }) {
-  useEffect(() => {
-    if (done) iconRef.current?.startAnimation();
-  }, [done, iconRef]);
-  return done ? <CheckIcon ref={iconRef} aria-hidden /> : <DownloadIcon ref={iconRef} aria-hidden />;
-}
 
 export interface MathToolbarProps {
   /** The current LaTeX source, for export. */
@@ -68,10 +41,13 @@ export interface MathToolbarProps {
  * enclosing `CollapsibleCard` and its body.
  */
 export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
-  const exportPlay = useIconPlay();
-  const copyLatexPlay = useIconPlay();
-  const copyMathMLPlay = useIconPlay();
+  const insertPlay = useAnimatedIcon();
+  const exportPlay = useAnimatedIcon();
+  const copyLatexPlay = useAnimatedIcon();
+  const copyMathMLPlay = useAnimatedIcon();
   const [done, setDone] = useState(false);
+  // The check that replaces the download plays once as the export finishes.
+  usePlayWhile(exportPlay.ref, done);
   const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const runExport = (action: () => Promise<void>) => {
@@ -97,8 +73,8 @@ export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
         <MathPalette
           onInsert={onInsert}
           trigger={
-            <Button variant="ghost" size="sm">
-              <Omega />
+            <Button variant="ghost" size="sm" {...insertPlay.handlers}>
+              <OmegaIcon ref={insertPlay.ref} aria-hidden />
               Insert
             </Button>
           }
@@ -107,7 +83,11 @@ export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
           <DropdownMenuTrigger
             render={
               <Button variant="outline" size="sm" disabled={!source.trim()} {...exportPlay.handlers}>
-                <ExportIcon done={done} iconRef={exportPlay.ref} />
+                {done ? (
+                  <CheckIcon ref={exportPlay.ref} aria-hidden />
+                ) : (
+                  <DownloadIcon ref={exportPlay.ref} aria-hidden />
+                )}
                 Export
               </Button>
             }

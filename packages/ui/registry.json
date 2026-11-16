@@ -1126,6 +1126,10 @@
           "path": "registry/bases/base-ui/editor/react-types.ts",
           "type": "registry:component",
           "target": "components/editor/react-types.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-animated-icon.ts",
+          "type": "registry:hook"
         }
       ],
       "css": {
@@ -2676,7 +2680,8 @@
         "@zui/copy-icon",
         "@zui/download-icon",
         "@zui/editor-code-mirror",
-        "@zui/editor-theme"
+        "@zui/editor-theme",
+        "@zui/omega-icon"
       ],
       "files": [
         {
@@ -2713,6 +2718,10 @@
           "path": "registry/bases/base-ui/editor/math/react/viewer.tsx",
           "type": "registry:component",
           "target": "components/editor/math/react/viewer.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-animated-icon.ts",
+          "type": "registry:hook"
         }
       ],
       "css": {
@@ -2764,7 +2773,8 @@
         "@zui/maximize-icon",
         "@zui/minus-icon",
         "@zui/plus-icon",
-        "@zui/rotate-ccw-icon"
+        "@zui/rotate-ccw-icon",
+        "@zui/workflow-icon"
       ],
       "files": [
         {
@@ -2791,6 +2801,10 @@
           "path": "registry/bases/base-ui/editor/mermaid/react/viewer.tsx",
           "type": "registry:component",
           "target": "components/editor/mermaid/react/viewer.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-animated-icon.ts",
+          "type": "registry:hook"
         }
       ],
       "dependencies": ["@zeroxsolutions/editor-core", "lucide-react"]

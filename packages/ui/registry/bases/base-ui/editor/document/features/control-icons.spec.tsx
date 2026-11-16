@@ -33,6 +33,7 @@ const handles = vi.hoisted(() => {
     omega: make(),
     pencilLine: make(),
     settings2: make(),
+    workflow: make(),
     x: make(),
   };
 });
@@ -100,6 +101,10 @@ vi.mock('@/registry/bases/base-ui/icons/settings-2-icon', async (importOriginal)
   ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/settings-2-icon')>()),
   Settings2Icon: mockedIcon(handles.settings2),
 }));
+vi.mock('@/registry/bases/base-ui/icons/workflow-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/workflow-icon')>()),
+  WorkflowIcon: mockedIcon(handles.workflow),
+}));
 vi.mock('@/registry/bases/base-ui/icons/x-icon', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/x-icon')>()),
   XIcon: mockedIcon(handles.x),
@@ -125,6 +130,7 @@ beforeAll(() => {
 
 afterEach(() => {
   cleanup();
+  vi.unstubAllGlobals();
   for (const handle of Object.values(handles)) {
     handle.startAnimation.mockClear();
     handle.stopAnimation.mockClear();
@@ -224,18 +230,17 @@ describe('the chat input', () => {
   });
 });
 
-/** A menu item is highlighted by the pointer and by focus, which Base UI also moves on a pointer move, so it may start twice. */
+/**
+ * A menu item takes focus as the pointer enters it and gives it up as the pointer leaves, and the two
+ * are one state, so each pair starts once and stops once.
+ */
 function expectItemStartsAndStops(item: HTMLElement, handle: Handle): void {
   fireEvent.pointerEnter(item);
-  expect(handle.startAnimation).toHaveBeenCalled();
-  fireEvent.pointerLeave(item);
-  expect(handle.stopAnimation).toHaveBeenCalled();
-  handle.startAnimation.mockClear();
   fireEvent.focus(item);
-  expect(handle.startAnimation).toHaveBeenCalled();
-  handle.stopAnimation.mockClear();
+  expect(handle.startAnimation).toHaveBeenCalledTimes(1);
+  fireEvent.pointerLeave(item);
   fireEvent.blur(item);
-  expect(handle.stopAnimation).toHaveBeenCalled();
+  expect(handle.stopAnimation).toHaveBeenCalledTimes(1);
 }
 
 describe('the export controls of the math and mermaid toolbars', () => {
@@ -247,6 +252,16 @@ describe('the export controls of the math and mermaid toolbars', () => {
   it('starts the Export icon on pointer enter and on focus, and stops it on leave and blur', () => {
     render(<MathToolbar source="x" onInsert={() => {}} />);
     expectStartsAndStops(screen.getByRole('button', { name: /export/i }), handles.download);
+  });
+
+  it("starts the math toolbar's Insert icon on pointer enter and on focus, and stops it on leave and blur", () => {
+    render(<MathToolbar source="x" onInsert={() => {}} />);
+    expectStartsAndStops(screen.getByRole('button', { name: 'Insert' }), handles.omega);
+  });
+
+  it("starts the mermaid toolbar's Diagram type icon on pointer enter and on focus, and stops it on leave and blur", () => {
+    render(<MermaidToolbar source="graph TD" svg="" onPickTemplate={() => {}} />);
+    expectStartsAndStops(screen.getByRole('combobox', { name: 'Diagram type' }), handles.workflow);
   });
 
   it("starts the math menu item's Copy icon from the item", async () => {
@@ -264,7 +279,10 @@ describe('the export controls of the math and mermaid toolbars', () => {
   });
 
   it('plays the check once when the export finishes', async () => {
-    Object.assign(navigator, { clipboard: { writeText: vi.fn(async () => {}), write: vi.fn(async () => {}) } });
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      clipboard: { writeText: vi.fn(async () => {}), write: vi.fn(async () => {}) },
+    });
     render(<MathToolbar source="x" onInsert={() => {}} />);
     await openExport();
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Copy LaTeX' }));

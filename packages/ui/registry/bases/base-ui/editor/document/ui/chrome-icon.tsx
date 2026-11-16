@@ -1,13 +1,15 @@
 'use client';
 
-import { isValidElement, useEffect, useRef, useState } from 'react';
-import type { ComponentType, FocusEvent, PointerEvent, ReactNode, Ref } from 'react';
+import { isValidElement, useRef } from 'react';
+import type { ComponentType, ReactNode, Ref } from 'react';
+import {
+  useAnimatedActive,
+  usePlayWhile,
+  type AnimatedIconHandle,
+  type AnimatedIconHandlers,
+} from '@/registry/bases/base-ui/hooks/use-animated-icon';
 
-/** What every animated icon exposes, so the chrome around it can play it. */
-export interface AnimatedIconHandle {
-  startAnimation(): void;
-  stopAnimation(): void;
-}
+export type { AnimatedIconHandle };
 
 /** An animated icon component: a ref to its handle, and nothing else the chrome needs from it. */
 export type AnimatedIconComponent = ComponentType<{
@@ -46,13 +48,7 @@ export interface ChromeIconProps {
  */
 export function ChromeIcon({ icon, className, active }: ChromeIconProps): ReactNode {
   const handle = useRef<AnimatedIconHandle>(null);
-  const was = useRef(false);
-  useEffect(() => {
-    if (active === was.current) return;
-    was.current = active;
-    if (active) handle.current?.startAnimation();
-    else handle.current?.stopAnimation();
-  }, [active]);
+  usePlayWhile(handle, active);
 
   if (icon == null || typeof icon === 'boolean') return null;
   if (isComponent(icon)) {
@@ -62,27 +58,10 @@ export function ChromeIcon({ icon, className, active }: ChromeIconProps): ReactN
   return icon as ReactNode;
 }
 
-export interface ChromeActiveHandlers {
-  onPointerEnter: (event: PointerEvent<HTMLElement>) => void;
-  onPointerLeave: (event: PointerEvent<HTMLElement>) => void;
-  onFocus: (event: FocusEvent<HTMLElement>) => void;
-  onBlur: (event: FocusEvent<HTMLElement>) => void;
-}
+export type ChromeActiveHandlers = AnimatedIconHandlers;
 
 /** The pointer-over and focus of one control, as the `active` of the icon inside it. */
-export function useChromeActive(): { active: boolean; handlers: ChromeActiveHandlers } {
-  const [over, setOver] = useState(false);
-  const [focused, setFocused] = useState(false);
-  return {
-    active: over || focused,
-    handlers: {
-      onPointerEnter: () => setOver(true),
-      onPointerLeave: () => setOver(false),
-      onFocus: () => setFocused(true),
-      onBlur: () => setFocused(false),
-    },
-  };
-}
+export const useChromeActive = useAnimatedActive;
 
 export interface ChromeControlProps {
   icon: unknown;

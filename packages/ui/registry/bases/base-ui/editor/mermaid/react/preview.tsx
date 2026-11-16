@@ -10,6 +10,7 @@ import {
   type WheelEvent as ReactWheelEvent,
 } from 'react';
 import { Workflow } from 'lucide-react';
+import { useAnimatedIcon, type AnimatedIconHandle } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { MaximizeIcon } from '@/registry/bases/base-ui/icons/maximize-icon';
 import { MinusIcon } from '@/registry/bases/base-ui/icons/minus-icon';
 import { PlusIcon } from '@/registry/bases/base-ui/icons/plus-icon';
@@ -44,34 +45,19 @@ const IDENTITY: Transform = { x: 0, y: 0, k: 1 };
 const MIN_SCALE = 0.1;
 const MAX_SCALE = 8;
 
-/** The handle every animated icon exposes. */
-interface IconHandle {
-  startAnimation(): void;
-  stopAnimation(): void;
-}
-
 /** An icon button of the zoom toolbar; its icon plays while the pointer or the focus is on it. */
 function ZoomButton({
   icon: Icon,
   label,
   onClick,
 }: {
-  icon: ForwardRefExoticComponent<RefAttributes<IconHandle>>;
+  icon: ForwardRefExoticComponent<RefAttributes<AnimatedIconHandle>>;
   label: string;
   onClick: () => void;
 }) {
-  const ref = useRef<IconHandle>(null);
+  const { ref, handlers } = useAnimatedIcon();
   return (
-    <Button
-      variant="ghost"
-      size="icon-sm"
-      aria-label={label}
-      onClick={onClick}
-      onPointerEnter={() => ref.current?.startAnimation()}
-      onPointerLeave={() => ref.current?.stopAnimation()}
-      onFocus={() => ref.current?.startAnimation()}
-      onBlur={() => ref.current?.stopAnimation()}
-    >
+    <Button variant="ghost" size="icon-sm" aria-label={label} onClick={onClick} {...handlers}>
       <Icon ref={ref} aria-hidden />
     </Button>
   );

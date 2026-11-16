@@ -113,20 +113,16 @@ export function Editor({ features, content, editable = true, className, onReady,
   const [gripHost, setGripHost] = useState<HTMLElement | null>(null);
   const gripRef = useRef<GripVerticalIconHandle>(null);
   const plusRef = useRef<PlusIconHandle>(null);
-  // The handle is the extension's own node, so its pointer and focus reach the grip through listeners.
+  // The handle is the extension's own node and takes no focus, so only the pointer reaches the grip, through listeners.
   useEffect(() => {
     if (!handleEl) return;
     const start = () => gripRef.current?.startAnimation();
     const stop = () => gripRef.current?.stopAnimation();
     handleEl.addEventListener('pointerenter', start);
     handleEl.addEventListener('pointerleave', stop);
-    handleEl.addEventListener('focus', start);
-    handleEl.addEventListener('blur', stop);
     return () => {
       handleEl.removeEventListener('pointerenter', start);
       handleEl.removeEventListener('pointerleave', stop);
-      handleEl.removeEventListener('focus', start);
-      handleEl.removeEventListener('blur', stop);
     };
   }, [handleEl]);
   useEffect(() => {
@@ -174,6 +170,34 @@ export function Editor({ features, content, editable = true, className, onReady,
     return () => observer.disconnect();
   }, [handleEl]);
 
+  // The "+" is portaled into a wrapper we create, for the reason the grip's is: React removes it from
+  // our node, never from the editor root, whose children the editor's own teardown removes first.
+  const [plusHost, setPlusHost] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!rootEl) return;
+    const host = document.createElement('span');
+    host.style.display = 'contents';
+    rootEl.appendChild(host);
+    setPlusHost(host);
+    return () => {
+      setPlusHost(null);
+      host.remove();
+    };
+  }, [rootEl]);
+
+  // The extension hides its handle, and so the "+", whenever the pointer leaves the editor for anything
+  // that is not the handle itself, which includes the "+" a pointer is crossing to. Keep that mouseout
+  // from reaching the extension, in the capture phase, while it lands on the "+".
+  useEffect(() => {
+    if (!rootEl) return;
+    const keepHandle = (event: MouseEvent) => {
+      const to = event.relatedTarget;
+      if (to instanceof Element && to.closest('[data-editor-add]')) event.stopPropagation();
+    };
+    rootEl.addEventListener('mouseout', keepHandle, true);
+    return () => rootEl.removeEventListener('mouseout', keepHandle, true);
+  }, [rootEl]);
+
   // Grayout-while-dragging: the block drag handle is a *sibling* of the editor
   // DOM (the extension appends it next to `.ProseMirror`), so a handle-initiated
   // drag's native `dragstart` never bubbles through `.ProseMirror` and the
@@ -218,7 +242,7 @@ export function Editor({ features, content, editable = true, className, onReady,
         )}
       />
       {gripHost && createPortal(<GripVerticalIcon ref={gripRef} size={16} aria-hidden />, gripHost)}
-      {rootEl &&
+      {plusHost &&
         plus &&
         !plus.hidden &&
         createPortal(
@@ -250,7 +274,7 @@ export function Editor({ features, content, editable = true, className, onReady,
           >
             <PlusIcon ref={plusRef} size={16} aria-hidden />
           </button>,
-          rootEl,
+          plusHost,
         )}
     </>
   );

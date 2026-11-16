@@ -32,45 +32,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
-import { Workflow } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import type { RefObject } from 'react';
+import { useRef, useState } from 'react';
 import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
 import { CopyIcon } from '@/registry/bases/base-ui/icons/copy-icon';
 import { DownloadIcon } from '@/registry/bases/base-ui/icons/download-icon';
 import { ImageIcon } from '@/registry/bases/base-ui/icons/image-icon';
+import { WorkflowIcon } from '@/registry/bases/base-ui/icons/workflow-icon';
+import { usePlayWhile, useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '@zeroxsolutions/editor-core/mermaid/core/detect';
 import { copySvg, copyText, downloadPng, downloadSvg } from '@zeroxsolutions/editor-core/mermaid/core/export';
 import { DIAGRAM_TEMPLATES } from '@zeroxsolutions/editor-core/mermaid/core/templates';
 import type { DiagramTemplate } from '@zeroxsolutions/editor-core/mermaid/core/types';
-
-/** The handle every animated icon exposes. */
-interface IconHandle {
-  startAnimation(): void;
-  stopAnimation(): void;
-}
-
-/** A control's ref to its icon, and the pointer and focus handlers that play it. */
-function useIconPlay() {
-  const ref = useRef<IconHandle>(null);
-  return {
-    ref,
-    handlers: {
-      onPointerEnter: () => ref.current?.startAnimation(),
-      onPointerLeave: () => ref.current?.stopAnimation(),
-      onFocus: () => ref.current?.startAnimation(),
-      onBlur: () => ref.current?.stopAnimation(),
-    },
-  };
-}
-
-/** The icon of an Export button: a download, then a check that plays once as the export finishes. */
-function ExportIcon({ done, iconRef }: { done: boolean; iconRef: RefObject<IconHandle | null> }) {
-  useEffect(() => {
-    if (done) iconRef.current?.startAnimation();
-  }, [done, iconRef]);
-  return done ? <CheckIcon ref={iconRef} aria-hidden /> : <DownloadIcon ref={iconRef} aria-hidden />;
-}
 
 export interface MermaidToolbarProps {
   source: string;
@@ -105,13 +77,16 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
     source: '',
   };
   const hasContent = source.trim().length > 0;
-  const exportPlay = useIconPlay();
-  const copySourcePlay = useIconPlay();
-  const copySvgPlay = useIconPlay();
-  const downloadSvgPlay = useIconPlay();
-  const downloadPngPlay = useIconPlay();
+  const typePlay = useAnimatedIcon();
+  const exportPlay = useAnimatedIcon();
+  const copySourcePlay = useAnimatedIcon();
+  const copySvgPlay = useAnimatedIcon();
+  const downloadSvgPlay = useAnimatedIcon();
+  const downloadPngPlay = useAnimatedIcon();
   const [pending, setPending] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  // The check that replaces the download plays once as the export finishes.
+  usePlayWhile(exportPlay.ref, done);
   const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const pickTemplate = (templateSource: string) => {
@@ -144,8 +119,12 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
             itemToStringLabel={(template: DiagramTemplate) => template.label}
             isItemEqualToValue={(a: DiagramTemplate, b: DiagramTemplate) => a?.type === b?.type}
           >
-            <ComboboxTrigger render={<Button variant="ghost" size="sm" />} aria-label="Diagram type">
-              <Workflow />
+            <ComboboxTrigger
+              render={<Button variant="ghost" size="sm" />}
+              aria-label="Diagram type"
+              {...typePlay.handlers}
+            >
+              <WorkflowIcon ref={typePlay.ref} aria-hidden />
               <span>{current.label}</span>
             </ComboboxTrigger>
             <ComboboxContent className="min-w-56">
@@ -166,7 +145,11 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
             <DropdownMenuTrigger
               render={
                 <Button variant="outline" size="sm" disabled={!svg} {...exportPlay.handlers}>
-                  <ExportIcon done={done} iconRef={exportPlay.ref} />
+                  {done ? (
+                    <CheckIcon ref={exportPlay.ref} aria-hidden />
+                  ) : (
+                    <DownloadIcon ref={exportPlay.ref} aria-hidden />
+                  )}
                   Export
                 </Button>
               }
