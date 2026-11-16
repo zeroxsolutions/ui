@@ -39,6 +39,12 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
   const [active, setActive] = useState<TriggerQuery | null>(null);
   const [point, setPoint] = useState<CaretRect | null>(null);
   const [index, setIndex] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+  // The keys move the highlight without moving the list, so bring the highlighted
+  // option into view; `nearest` leaves the list still while it is already shown.
+  useEffect(() => {
+    listRef.current?.querySelector('[data-highlighted]')?.scrollIntoView({ block: 'nearest' });
+  }, [index]);
   // Position dismissed via Esc — suppresses reopening at the same `/` while the
   // text lingers, until the caret moves to a different trigger (or none).
   const dismissedFrom = useRef<number | null>(null);
@@ -180,8 +186,8 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
         data-slot="slash-menu"
         className="w-72 gap-0 p-0"
       >
-        <ScrollArea className="max-h-80">
-          <div className="p-1">
+        <ScrollArea className="flex max-h-80 flex-col *:data-[slot=scroll-area-viewport]:max-h-80">
+          <div ref={listRef} className="p-1">
             {ordered.length === 0 ? (
               <Empty className="min-h-0 gap-1 border-0 p-6">
                 <EmptyDescription>No matching blocks</EmptyDescription>

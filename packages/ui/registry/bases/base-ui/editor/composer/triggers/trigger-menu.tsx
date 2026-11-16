@@ -70,6 +70,12 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
   const [active, setActive] = useState<TriggerQuery | null>(null);
   const [point, setPoint] = useState<CaretRect | null>(null);
   const [index, setIndex] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+  // The keys move the highlight without moving the list, so bring the highlighted
+  // option into view; `nearest` leaves the list still while it is already shown.
+  useEffect(() => {
+    listRef.current?.querySelector('[data-highlighted]')?.scrollIntoView({ block: 'nearest' });
+  }, [index]);
   const [results, setResults] = useState<TriggerOption[]>([]);
   // Position dismissed via Esc - suppress reopening at the same char until the
   // caret moves to a different trigger (or none).
@@ -277,8 +283,8 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
         data-token-kind={token.kind}
         className="w-64 gap-0 p-0"
       >
-        <ScrollArea className="max-h-72">
-          <div className="p-1">
+        <ScrollArea className="flex max-h-72 flex-col *:data-[slot=scroll-area-viewport]:max-h-72">
+          <div ref={listRef} className="p-1">
             {ordered.length === 0 ? (
               <Empty className="min-h-0 gap-1 border-0 p-6">
                 <EmptyDescription>{token.emptyText ?? 'No matches'}</EmptyDescription>
