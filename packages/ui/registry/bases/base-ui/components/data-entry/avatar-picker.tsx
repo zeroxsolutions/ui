@@ -1,3 +1,6 @@
+'use client';
+
+import { mergeProps } from '@base-ui/react/merge-props';
 import * as React from 'react';
 
 import { Avatar, AvatarImage } from '@/registry/bases/base-ui/ui/avatar';
@@ -150,10 +153,6 @@ function AvatarPickerContent({
  */
 function AvatarPickerRemoveButton({
   onClick,
-  onPointerEnter,
-  onPointerLeave,
-  onFocus,
-  onBlur,
   children,
   'aria-label': ariaLabel = 'Remove avatar',
   ...props
@@ -171,23 +170,7 @@ function AvatarPickerRemoveButton({
         onClick?.(event);
         if (!event.defaultPrevented) remove();
       }}
-      onPointerEnter={(event) => {
-        onPointerEnter?.(event);
-        handlers.onPointerEnter(event);
-      }}
-      onPointerLeave={(event) => {
-        onPointerLeave?.(event);
-        handlers.onPointerLeave(event);
-      }}
-      onFocus={(event) => {
-        onFocus?.(event);
-        handlers.onFocus(event);
-      }}
-      onBlur={(event) => {
-        onBlur?.(event);
-        handlers.onBlur(event);
-      }}
-      {...props}
+      {...mergeProps<'button'>(handlers, props)}
     >
       {children ?? <Trash2Icon ref={ref} aria-hidden />}
     </Button>

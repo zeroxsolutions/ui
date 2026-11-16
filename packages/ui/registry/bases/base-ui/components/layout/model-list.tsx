@@ -1,5 +1,6 @@
 'use client';
 
+import { mergeProps } from '@base-ui/react/merge-props';
 import * as React from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
@@ -79,14 +80,7 @@ function ModelListContent({ className, children, ...props }: React.ComponentProp
 }
 
 /** The ghost remove button for one model item, labelled "Remove model" unless an `aria-label` is given; `children` replace its trash icon. */
-function ModelListRemoveButton({
-  onPointerEnter,
-  onPointerLeave,
-  onFocus,
-  onBlur,
-  children,
-  ...props
-}: React.ComponentProps<typeof Button>): React.ReactNode {
+function ModelListRemoveButton({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
   const { ref, handlers } = useAnimatedIcon();
   return (
     <Button
@@ -94,23 +88,7 @@ function ModelListRemoveButton({
       aria-label="Remove model"
       variant="ghost"
       size="icon-sm"
-      onPointerEnter={(event) => {
-        onPointerEnter?.(event);
-        handlers.onPointerEnter(event);
-      }}
-      onPointerLeave={(event) => {
-        onPointerLeave?.(event);
-        handlers.onPointerLeave(event);
-      }}
-      onFocus={(event) => {
-        onFocus?.(event);
-        handlers.onFocus(event);
-      }}
-      onBlur={(event) => {
-        onBlur?.(event);
-        handlers.onBlur(event);
-      }}
-      {...props}
+      {...mergeProps<'button'>(handlers, props)}
     >
       {children ?? <Trash2Icon ref={ref} aria-hidden />}
     </Button>

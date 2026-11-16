@@ -88,7 +88,7 @@
       "title": "Data Table",
       "description": "The composable parts of a @tanstack/react-table view - toolbar, view, pagination and view options - reading one shared table instance from context.",
       "categories": ["data-display"],
-      "dependencies": ["@tanstack/react-table"],
+      "dependencies": ["@base-ui/react", "@tanstack/react-table"],
       "registryDependencies": [
         "@shadcn/button",
         "@shadcn/dropdown-menu",
@@ -638,6 +638,7 @@
       "title": "Avatar Picker",
       "description": "A Popover-based avatar editor whose emoji, upload and color panes edit one avatar value.",
       "categories": ["data-entry"],
+      "dependencies": ["@base-ui/react"],
       "registryDependencies": [
         "@shadcn/avatar",
         "@shadcn/button",
@@ -752,6 +753,7 @@
       "title": "Model List",
       "description": "The frame for a model list section: a header over a scrolling content area that dims any item marked unavailable.",
       "categories": ["layout"],
+      "dependencies": ["@base-ui/react"],
       "registryDependencies": [
         "@shadcn/button",
         "@shadcn/item",

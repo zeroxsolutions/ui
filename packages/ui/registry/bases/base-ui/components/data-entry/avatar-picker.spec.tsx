@@ -64,9 +64,10 @@ describe('AvatarPickerColorGroup check', () => {
 
 describe('AvatarPickerRemoveButton icon', () => {
   it('plays the trash once while the pointer and the focus hold the button, and stops when both leave', () => {
+    const onPointerEnter = vi.fn();
     render(
       <AvatarPicker value={{}} onValueChange={() => {}}>
-        <AvatarPickerRemoveButton />
+        <AvatarPickerRemoveButton onPointerEnter={onPointerEnter} />
       </AvatarPicker>,
     );
     const button = screen.getByRole('button', { name: 'Remove avatar' });
@@ -74,6 +75,7 @@ describe('AvatarPickerRemoveButton icon', () => {
     fireEvent.pointerEnter(button);
     fireEvent.focus(button);
     expect(trashStart).toHaveBeenCalledTimes(1);
+    expect(onPointerEnter).toHaveBeenCalledTimes(1);
 
     fireEvent.pointerLeave(button);
     expect(trashStop).not.toHaveBeenCalled();

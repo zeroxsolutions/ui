@@ -32,7 +32,7 @@ export function useAnimatedActive(): { active: boolean; handlers: AnimatedIconHa
   };
 }
 
-/** Starts the icon when `active` turns true and stops it when it turns false; the first render does neither. */
+/** Starts the icon when `active` turns true and stops it when it turns false; a first render that is already active starts it, and one that is not does neither. */
 export function usePlayWhile(icon: RefObject<AnimatedIconHandle | null>, active: boolean): void {
   const was = useRef(false);
   useEffect(() => {

@@ -1,5 +1,6 @@
 'use client';
 
+import { mergeProps } from '@base-ui/react/merge-props';
 import * as React from 'react';
 import { type Table as TanstackTable, flexRender } from '@tanstack/react-table';
 
@@ -220,14 +221,7 @@ function DataTablePaginationNext(props: DataTablePaginationStepProps): React.Rea
  * `aria-label` is given. No "Toggle columns" heading: the checkbox list speaks
  * for itself, matching shadcn.
  */
-function DataTableViewOptions({
-  onPointerEnter,
-  onPointerLeave,
-  onFocus,
-  onBlur,
-  children,
-  ...props
-}: React.ComponentProps<typeof Button>): React.ReactNode {
+function DataTableViewOptions({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
   const table = useDataTable();
   const { ref, handlers } = useAnimatedIcon();
   const columns = table
@@ -245,23 +239,7 @@ function DataTableViewOptions({
             variant="outline"
             size="sm"
             aria-label="Toggle columns"
-            onPointerEnter={(event) => {
-              onPointerEnter?.(event);
-              handlers.onPointerEnter(event);
-            }}
-            onPointerLeave={(event) => {
-              onPointerLeave?.(event);
-              handlers.onPointerLeave(event);
-            }}
-            onFocus={(event) => {
-              onFocus?.(event);
-              handlers.onFocus(event);
-            }}
-            onBlur={(event) => {
-              onBlur?.(event);
-              handlers.onBlur(event);
-            }}
-            {...props}
+            {...mergeProps<'button'>(handlers, props)}
           />
         }
       >
