@@ -1,6 +1,6 @@
 import { act, screen } from '@testing-library/react-native';
-import { createElement, useImperativeHandle, type ComponentType, type ReactNode } from 'react';
-import type { AnimatedIconProps } from '../lib/icon-motion';
+import { createElement, useImperativeHandle, useRef, type ComponentType, type ReactNode } from 'react';
+import type { AnimatedIconProps, IconHandle } from '../lib/icon-motion';
 
 /** The handle a stand-in icon hands its ref: spies a spec reads to see a control start or stop the icon. */
 interface IconHandleSpy {
@@ -10,19 +10,36 @@ interface IconHandleSpy {
 
 type StandIn = ComponentType<AnimatedIconProps> & { handle: IconHandleSpy };
 
-/** `Glyph` drawn as it is, handing its ref one {@link IconHandleSpy} for as long as the spec runs. */
+/**
+ * `Glyph` drawn as it is, whose ref records each call on one {@link IconHandleSpy} for as long as the spec runs
+ * and passes it on to the real icon, so its motion still runs.
+ */
 function standIn(Glyph: ComponentType<AnimatedIconProps>): StandIn {
   const handle: IconHandleSpy = { startAnimation: jest.fn(), stopAnimation: jest.fn() };
   function Icon({ ref, ...props }: AnimatedIconProps): ReactNode {
-    useImperativeHandle(ref, () => handle, []);
-    return createElement(Glyph, props);
+    const real = useRef<IconHandle>(null);
+    useImperativeHandle(
+      ref,
+      () => ({
+        startAnimation() {
+          handle.startAnimation();
+          real.current?.startAnimation();
+        },
+        stopAnimation() {
+          handle.stopAnimation();
+          real.current?.stopAnimation();
+        },
+      }),
+      [],
+    );
+    return createElement(Glyph, { ...props, ref: real });
   }
   return Object.assign(Icon, { handle });
 }
 
 /**
  * The module a spec's `jest.mock` factory returns for an icon file of this folder, named as `copy-icon`: each icon
- * draws as the real one does, while its ref receives a spy {@link handleOf} reads back.
+ * draws and moves as the real one does, while its ref records each call on a spy {@link handleOf} reads back.
  *
  *   jest.mock('../../icons/copy-icon', () =>
  *     jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('copy-icon'),

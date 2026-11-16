@@ -145,8 +145,10 @@ describe('CopyButton', () => {
     expect(onFocus.mock.invocationCallOrder[0]).toBeLessThan(focusStart ?? 0);
   });
 
-  it('plays the check icon once when the copy succeeds', async () => {
+  it('plays the check icon once when the copy succeeds, and nothing on first draw', async () => {
     await render(<CopyButton value={COMMAND} />);
+    expect(checkIcon.startAnimation).not.toHaveBeenCalled();
+    expect(copyIcon.startAnimation).not.toHaveBeenCalled();
 
     await userEvent.setup().press(screen.getByRole('button', { name: 'Copy' }));
 
@@ -160,8 +162,12 @@ describe('CopyButton', () => {
     await render(<CopyButton value={COMMAND} timeout={100} />);
 
     await user.press(screen.getByRole('button', { name: 'Copy' }));
+    // The check's motion runs out and back for longer than the copied state lasts, so it unmounts mid-motion.
     await act(async () => {
       jest.advanceTimersByTime(100);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
     });
 
     expect(screen.getByRole('button', { name: 'Copy' })).toBeOnTheScreen();

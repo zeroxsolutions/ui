@@ -12,10 +12,6 @@ jest.mock('../../icons/eye-off-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('eye-off-icon'),
 );
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 // React Native's jest mock gives every TextInput one shared `focus` mock, so its calls carry over between tests.
 afterEach(() => {
   jest.clearAllMocks();

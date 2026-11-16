@@ -46,7 +46,7 @@
       "name": "icon-motion",
       "type": "registry:lib",
       "title": "Icon motion",
-      "description": "useIconMotion, the progress an animated icon draws its parts from, IconHandle, through which a control plays the icon's motion out and back, still when the system asks for reduced motion, and transformProps and dash, which turn the progress into a shape's transform and drawn stroke.",
+      "description": "useIconMotion, the progress an animated icon draws its parts from, IconHandle, through which a control plays the icon's motion out and back, still when the system asks for reduced motion, transformProps and dash, which turn the progress into a shape's transform and drawn stroke, iconTrigger, the press-in and focus handlers that start a control's icons, and usePlayOnReach, which plays a state icon once as its state is reached.",
       "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/motion"],
       "files": [
@@ -112,7 +112,7 @@
       "title": "Icon",
       "description": "A lucide icon sized and coloured by its classes, matching the label of the container around it.",
       "dependencies": ["lucide-react-native", "react-native-svg"],
-      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon-motion"],
+      "registryDependencies": ["@zui/utils", "@zui/text"],
       "files": [
         {
           "path": "src/registry/ui/icon.tsx",

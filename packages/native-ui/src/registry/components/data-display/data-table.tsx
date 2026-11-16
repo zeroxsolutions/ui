@@ -216,8 +216,8 @@ type DataTableViewOptionsProps = Omit<ComponentProps<typeof Button>, 'children'>
 /**
  * A menu that shows and hides the table's columns, a checkbox per column that has an accessor and can hide, named
  * by the column's id. Its trigger is an outline button with a settings icon, named "Toggle columns" unless an
- * `aria-label` is given; `children` add a visible label after the icon, which plays when the trigger is pressed in or
- * focused, after a caller's own `onPressIn` and `onFocus`. It draws nothing when no column can hide.
+ * `aria-label` is given; `children` add a visible label after the icon. The icon plays when the trigger is pressed
+ * in or focused, after a caller's own `onPressIn` and `onFocus`. It draws nothing when no column can hide.
  * @throws {Error} when rendered outside a DataTable
  */
 function DataTableViewOptions({ children, onPressIn, onFocus, ...props }: DataTableViewOptionsProps): ReactNode {

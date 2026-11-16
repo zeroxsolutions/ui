@@ -11,10 +11,6 @@ jest.mock('../../icons/chevron-right-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-right-icon'),
 );
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 // React Native's jest mock gives every TextInput one shared `blur` mock, so its calls carry over between tests.
 afterEach(() => {
   jest.clearAllMocks();

@@ -2,7 +2,6 @@ import type { LucideProps } from 'lucide-react-native';
 import { createContext, useContext, type ComponentType, type ReactNode, type Ref } from 'react';
 import type { TextStyle } from 'react-native';
 import { withUniwind } from 'uniwind';
-import type { AnimatedIconProps, IconHandle } from '../lib/icon-motion';
 import { cn } from '../lib/utils';
 import { TextClassContext } from './text';
 
@@ -13,11 +12,20 @@ import { TextClassContext } from './text';
  */
 const IconClassContext = createContext<string | undefined>(undefined);
 
+/**
+ * The handle an animated icon hands its ref, as icon-motion's `IconHandle` declares it. Spelled out here so
+ * Icon ships without icon-motion, which brings the animation runtime with it.
+ */
+interface IconMotionHandle {
+  startAnimation(): void;
+  stopAnimation(): void;
+}
+
 type IconProps = LucideProps & {
   /** The icon to draw: a lucide icon, such as `Check` from lucide-react-native, or an animated icon such as `CopyIcon`. */
-  as: ComponentType<AnimatedIconProps>;
+  as: ComponentType<LucideProps & { ref?: Ref<IconMotionHandle> }>;
   /** The handle of an animated `as`, which a control starts and stops it through; a lucide icon takes none. */
-  ref?: Ref<IconHandle>;
+  ref?: Ref<IconMotionHandle>;
 };
 
 // withUniwind hands the component its className as well as the props it mapped from it; the glyph
