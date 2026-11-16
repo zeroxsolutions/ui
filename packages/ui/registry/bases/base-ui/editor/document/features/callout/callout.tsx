@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { FluentEmoji } from '@zeroxsolutions/fluent-emoji';
-import { Info } from 'lucide-react';
+import { InfoIcon } from '@/registry/bases/base-ui/icons/info-icon';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeJSON, NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
@@ -153,7 +153,7 @@ export function callout(): EditorFeature {
     slash: [
       {
         id: 'callout',
-        icon: <Info className="size-4" />,
+        icon: InfoIcon,
         title: 'Callout',
         description: 'Highlighted note block',
         group: 'Blocks',

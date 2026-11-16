@@ -1,11 +1,11 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import { Toggle } from '@/registry/bases/base-ui/ui/toggle';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { IEditor, ToolbarItem } from '@zeroxsolutions/editor-core/document/core/index';
+import { ChromeControl } from './chrome-icon';
 import { useEditorChanges } from './use-editor-changes';
 
 /**
@@ -37,21 +37,27 @@ export function EditorToolbar({ editor, items, className }: EditorToolbarProps) 
           return (
             <span key={item.id} className="contents">
               {separator && <Separator orientation="vertical" className="mx-0.5 h-5" />}
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Toggle
-                      size="sm"
-                      pressed={active}
-                      aria-label={item.title}
-                      onPressedChange={() => editor.run(item.command, item.args)}
-                    >
-                      {(item.icon as ReactNode) ?? item.title}
-                    </Toggle>
-                  }
-                />
-                <TooltipContent>{item.title}</TooltipContent>
-              </Tooltip>
+              <ChromeControl
+                icon={item.icon}
+                fallback={item.title}
+                iconClassName="size-4"
+                render={(control) => (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Toggle
+                          size="sm"
+                          pressed={active}
+                          aria-label={item.title}
+                          onPressedChange={() => editor.run(item.command, item.args)}
+                          {...control}
+                        />
+                      }
+                    />
+                    <TooltipContent>{item.title}</TooltipContent>
+                  </Tooltip>
+                )}
+              />
             </span>
           );
         })}

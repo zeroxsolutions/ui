@@ -1,4 +1,4 @@
-import { ChevronRight } from 'lucide-react';
+import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/chevron-right-icon';
 import { z } from 'zod';
 import type { ReactNode } from 'react';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
@@ -112,7 +112,7 @@ export function toggle(): EditorFeature {
     slash: [
       {
         id: 'toggle',
-        icon: <ChevronRight className="size-4" />,
+        icon: ChevronRightIcon,
         title: 'Toggle',
         description: 'Collapsible section',
         group: 'Blocks',

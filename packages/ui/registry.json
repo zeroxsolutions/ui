@@ -1009,7 +1009,21 @@
         "@shadcn/toggle",
         "@shadcn/tooltip",
         "@shadcn/utils",
-        "@zui/editor-theme"
+        "@zui/bold-icon",
+        "@zui/code-icon",
+        "@zui/editor-theme",
+        "@zui/heading-1-icon",
+        "@zui/heading-2-icon",
+        "@zui/heading-3-icon",
+        "@zui/highlighter-icon",
+        "@zui/italic-icon",
+        "@zui/list-icon",
+        "@zui/list-ordered-icon",
+        "@zui/list-todo-icon",
+        "@zui/minus-icon",
+        "@zui/strikethrough-icon",
+        "@zui/text-quote-icon",
+        "@zui/underline-icon"
       ],
       "files": [
         {
@@ -1076,6 +1090,11 @@
           "path": "registry/bases/base-ui/editor/document/ui/bubble-menu.tsx",
           "type": "registry:component",
           "target": "components/editor/document/ui/bubble-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/chrome-icon.tsx",
+          "type": "registry:component",
+          "target": "components/editor/document/ui/chrome-icon.tsx"
         },
         {
           "path": "registry/bases/base-ui/editor/document/ui/editor-toolbar.tsx",
@@ -2059,7 +2078,7 @@
       "title": "Editor Callout",
       "description": "A highlighted block that sets a note apart in one of five variants: note, info, success, warning or danger.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/document-editor"],
+      "registryDependencies": ["@zui/document-editor", "@zui/info-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/callout/index.ts",
@@ -2127,11 +2146,13 @@
         "@shadcn/combobox",
         "@shadcn/dropdown-menu",
         "@zui/code-card",
+        "@zui/code-icon",
         "@zui/collapsible-card",
         "@zui/copy-button",
         "@zui/document-editor",
         "@zui/editor-code-mirror",
-        "@zui/language-combobox"
+        "@zui/language-combobox",
+        "@zui/settings-2-icon"
       ],
       "files": [
         {
@@ -2194,7 +2215,7 @@
       "title": "Editor Embed",
       "description": "A block that shows an external page in a responsive frame, after a URL input while it is empty.",
       "categories": ["editor"],
-      "registryDependencies": ["@shadcn/input", "@zui/document-editor"],
+      "registryDependencies": ["@shadcn/input", "@zui/document-editor", "@zui/frame-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/embed/index.ts",
@@ -2235,7 +2256,8 @@
         "@shadcn/field",
         "@shadcn/input",
         "@shadcn/popover",
-        "@zui/document-editor"
+        "@zui/document-editor",
+        "@zui/image-icon"
       ],
       "files": [
         {
@@ -2286,7 +2308,7 @@
       "title": "Editor Link",
       "description": "A link mark, set from the bubble menu with an address and removed again.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/document-editor"],
+      "registryDependencies": ["@zui/document-editor", "@zui/link-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/link/index.ts",
@@ -2330,11 +2352,18 @@
         "@shadcn/separator",
         "@shadcn/tabs",
         "@shadcn/utils",
+        "@zui/check-icon",
         "@zui/collapsible-card",
         "@zui/copy-button",
         "@zui/document-editor",
         "@zui/editor-code-mirror",
-        "@zui/math-editor"
+        "@zui/eye-icon",
+        "@zui/math-editor",
+        "@zui/omega-icon",
+        "@zui/pencil-line-icon",
+        "@zui/radical-icon",
+        "@zui/sigma-icon",
+        "@zui/x-icon"
       ],
       "files": [
         {
@@ -2420,7 +2449,10 @@
         "@zui/copy-button",
         "@zui/document-editor",
         "@zui/editor-code-mirror",
-        "@zui/mermaid-editor"
+        "@zui/eye-icon",
+        "@zui/mermaid-editor",
+        "@zui/pencil-line-icon",
+        "@zui/workflow-icon"
       ],
       "files": [
         {
@@ -2465,7 +2497,7 @@
       "title": "Editor Table",
       "description": "A table with header cells, resizable columns and selectable cells.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/document-editor"],
+      "registryDependencies": ["@zui/document-editor", "@zui/table-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/table/index.ts",
@@ -2541,7 +2573,7 @@
       "title": "Editor Toggle",
       "description": "A block that folds the blocks inside it away behind a one-line summary.",
       "categories": ["editor"],
-      "registryDependencies": ["@shadcn/utils", "@zui/document-editor"],
+      "registryDependencies": ["@shadcn/utils", "@zui/chevron-right-icon", "@zui/document-editor"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/toggle/index.ts",

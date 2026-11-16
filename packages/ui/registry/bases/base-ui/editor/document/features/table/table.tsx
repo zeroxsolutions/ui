@@ -1,5 +1,5 @@
 import { TableKit } from '@tiptap/extension-table';
-import { Table as TableIcon } from 'lucide-react';
+import { TableIcon } from '@/registry/bases/base-ui/icons/table-icon';
 import {
   defineFeature,
   type EditorFeature,
@@ -123,7 +123,7 @@ export function table(): EditorFeature {
     slash: [
       {
         id: 'table',
-        icon: <TableIcon className="size-4" />,
+        icon: TableIcon,
         title: 'Table',
         description: 'Insert a 2×2 table',
         group: 'Blocks',

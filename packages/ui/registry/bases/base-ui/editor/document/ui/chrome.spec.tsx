@@ -1,4 +1,6 @@
 import { act, render, fireEvent, cleanup } from '@testing-library/react';
+import * as React from 'react';
+import type { ComponentProps } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { EditorSelection, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { standardKit, callout } from '../features/index';
@@ -12,6 +14,32 @@ import {
   groupByHeading,
 } from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
 
+const handles = vi.hoisted(() => ({
+  bold: { startAnimation: vi.fn(), stopAnimation: vi.fn() },
+  heading1: { startAnimation: vi.fn(), stopAnimation: vi.fn() },
+  heading2: { startAnimation: vi.fn(), stopAnimation: vi.fn() },
+}));
+
+function mockedIcon(handle: { startAnimation: () => void; stopAnimation: () => void }) {
+  return React.forwardRef<unknown, ComponentProps<'span'>>((props, ref) => {
+    React.useImperativeHandle(ref, () => handle);
+    return <span aria-hidden={props['aria-hidden']} className={props.className} />;
+  });
+}
+
+vi.mock('@/registry/bases/base-ui/icons/bold-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/bold-icon')>()),
+  BoldIcon: mockedIcon(handles.bold),
+}));
+vi.mock('@/registry/bases/base-ui/icons/heading-1-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/heading-1-icon')>()),
+  Heading1Icon: mockedIcon(handles.heading1),
+}));
+vi.mock('@/registry/bases/base-ui/icons/heading-2-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/heading-2-icon')>()),
+  Heading2Icon: mockedIcon(handles.heading2),
+}));
+
 // SlashMenu's popover renders upstream ScrollArea, which measures its
 // viewport in a `queueMicrotask` its layout effect schedules on mount,
 // outside of `render`'s own act() batch — awaiting a no-op act() settles it
@@ -23,6 +51,10 @@ async function settle(): Promise<void> {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  for (const handle of Object.values(handles)) {
+    handle.startAnimation.mockClear();
+    handle.stopAnimation.mockClear();
+  }
 });
 
 function fakeEditor(
@@ -129,6 +161,32 @@ describe('EditorToolbar', () => {
     const { getByLabelText } = render(<EditorToolbar editor={fakeEditor()} items={items} />);
     expect(getByLabelText('Bold').getAttribute('aria-pressed')).toBe('true');
     expect(getByLabelText('Italic').getAttribute('aria-pressed')).toBe('false');
+  });
+});
+
+describe('EditorToolbar icons', () => {
+  const items = collectUiContributions([standardKit()]).toolbar;
+
+  it("starts a toolbar button's icon on pointer enter and on focus, and stops it on leave and blur", () => {
+    const { getByLabelText } = render(<EditorToolbar editor={fakeEditor()} items={items} />);
+    const bold = getByLabelText('Bold');
+    expect(handles.bold.startAnimation).not.toHaveBeenCalled();
+
+    fireEvent.pointerEnter(bold);
+    expect(handles.bold.startAnimation).toHaveBeenCalledTimes(1);
+    fireEvent.pointerLeave(bold);
+    expect(handles.bold.stopAnimation).toHaveBeenCalledTimes(1);
+
+    fireEvent.focus(bold);
+    expect(handles.bold.startAnimation).toHaveBeenCalledTimes(2);
+    fireEvent.blur(bold);
+    expect(handles.bold.stopAnimation).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders an element icon a feature passes, without a handle', () => {
+    const plain = [{ id: 'plain', title: 'Plain', icon: <svg data-testid="plain" />, command: 'noop' }];
+    const { getByTestId } = render(<EditorToolbar editor={fakeEditor()} items={plain} />);
+    expect(getByTestId('plain')).toBeDefined();
   });
 });
 
@@ -266,5 +324,25 @@ describe('SlashMenu', () => {
     fireEvent.click(getByText('Quote'));
     expect(run).toHaveBeenCalledWith('deleteRange', { from: 1, to: 6 });
     expect(run).toHaveBeenCalledWith('toggleBlockquote', undefined);
+  });
+});
+
+describe('SlashMenu icons', () => {
+  const items = collectUiContributions([standardKit()]).slash;
+
+  it("starts a slash row's icon when the arrow keys highlight it", async () => {
+    const editor = fakeEditor(
+      vi.fn(() => true),
+      { from: 1, to: 1, empty: true },
+      { query: 'head', from: 0, to: 5 },
+    );
+    render(<SlashMenu editor={editor} items={items} />);
+    await settle();
+    expect(handles.heading1.startAnimation).toHaveBeenCalledTimes(1);
+    expect(handles.heading2.startAnimation).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(document, { key: 'ArrowDown' });
+    expect(handles.heading2.startAnimation).toHaveBeenCalledTimes(1);
+    expect(handles.heading1.stopAnimation).toHaveBeenCalledTimes(1);
   });
 });

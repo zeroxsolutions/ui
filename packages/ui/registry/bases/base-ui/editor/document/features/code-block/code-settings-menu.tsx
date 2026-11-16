@@ -1,6 +1,7 @@
 'use client';
 
-import { Settings2 } from 'lucide-react';
+import { Settings2Icon } from '@/registry/bases/base-ui/icons/settings-2-icon';
+import { ChromeControl } from '../../ui/chrome-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import {
   DropdownMenu,
@@ -47,9 +48,15 @@ export interface CodeSettingsMenuProps {
 export function CodeSettingsMenu({ settings, onSettingsChange }: CodeSettingsMenuProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label="Code settings" />}>
-        <Settings2 />
-      </DropdownMenuTrigger>
+      <ChromeControl
+        icon={Settings2Icon}
+        render={(control) => (
+          <DropdownMenuTrigger
+            render={<Button variant="ghost" size="icon" aria-label="Code settings" />}
+            {...control}
+          />
+        )}
+      />
       <DropdownMenuContent align="end" className="min-w-48">
         <DropdownMenuRadioGroup
           value={String(settings.tabSize)}

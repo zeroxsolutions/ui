@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/registry/bases/base-ui/ui/item';
 import { Empty, EmptyDescription } from '@/registry/bases/base-ui/ui/empty';
 import { Popover } from '@/registry/bases/base-ui/ui/popover';
@@ -10,6 +9,7 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { CaretRect, IEditor, SlashItem, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { filterSlashItems, groupByHeading } from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
 import { RectPopover } from './rect-popover';
+import { ChromeIcon } from './chrome-icon';
 
 /**
  * The slash (`/`) insert menu — Notion-style **inline**: typing `/` leaves the
@@ -212,7 +212,7 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
                         className={cn('cursor-pointer', highlighted && 'bg-accent text-accent-foreground')}
                       >
                         <ItemMedia variant="icon" className="bg-secondary size-8 rounded-md border text-base">
-                          {item.icon as ReactNode}
+                          <ChromeIcon icon={item.icon} className="size-4" active={highlighted} />
                         </ItemMedia>
                         <ItemContent className="gap-0.5">
                           <ItemTitle>{item.title}</ItemTitle>
