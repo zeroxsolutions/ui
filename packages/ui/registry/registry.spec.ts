@@ -497,7 +497,7 @@ describe('registry.json', () => {
       .filter((file) => file.endsWith('.tsx') && !file.endsWith('.spec.tsx'))
       .map((file) => file.slice(0, -'.tsx'.length))
       .sort();
-    expect(icons).toHaveLength(46);
+    expect(icons).toHaveLength(73);
     const problems = icons.flatMap((name) => {
       const item = REGISTRY.items.find((candidate) => candidate.name === name);
       if (item === undefined) return [`${name}: no item`];
