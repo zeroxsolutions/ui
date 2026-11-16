@@ -80,7 +80,14 @@ function ModelListContent({ className, children, ...props }: React.ComponentProp
 }
 
 /** The ghost remove button for one model item, labelled "Remove model" unless an `aria-label` is given; `children` replace its trash icon. */
-function ModelListRemoveButton({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
+function ModelListRemoveButton({
+  onPointerEnter,
+  onPointerLeave,
+  onFocus,
+  onBlur,
+  children,
+  ...props
+}: React.ComponentProps<typeof Button>): React.ReactNode {
   const { ref, handlers } = useAnimatedIcon();
   return (
     <Button
@@ -88,7 +95,8 @@ function ModelListRemoveButton({ children, ...props }: React.ComponentProps<type
       aria-label="Remove model"
       variant="ghost"
       size="icon-sm"
-      {...mergeProps<'button'>(handlers, props)}
+      {...props}
+      {...mergeProps<'button'>(handlers, { onPointerEnter, onPointerLeave, onFocus, onBlur })}
     >
       {children ?? <Trash2Icon ref={ref} aria-hidden />}
     </Button>

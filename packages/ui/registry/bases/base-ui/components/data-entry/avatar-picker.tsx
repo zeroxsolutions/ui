@@ -153,6 +153,10 @@ function AvatarPickerContent({
  */
 function AvatarPickerRemoveButton({
   onClick,
+  onPointerEnter,
+  onPointerLeave,
+  onFocus,
+  onBlur,
   children,
   'aria-label': ariaLabel = 'Remove avatar',
   ...props
@@ -170,7 +174,8 @@ function AvatarPickerRemoveButton({
         onClick?.(event);
         if (!event.defaultPrevented) remove();
       }}
-      {...mergeProps<'button'>(handlers, props)}
+      {...props}
+      {...mergeProps<'button'>(handlers, { onPointerEnter, onPointerLeave, onFocus, onBlur })}
     >
       {children ?? <Trash2Icon ref={ref} aria-hidden />}
     </Button>

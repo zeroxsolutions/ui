@@ -2,6 +2,7 @@ import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { userEvent } from 'vitest/browser';
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
 import '../../../../../../test/nova-style.css';
 import { standardKit } from '../features/standard/index';
 import { Editor } from './editor';
@@ -27,7 +28,10 @@ vi.mock('@/registry/bases/base-ui/icons/plus-icon', async (importOriginal) => ({
   PlusIcon: mockedIcon(handles.plus),
 }));
 
-const content = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a block' }] }] };
+const content: DocJSON = {
+  type: 'doc',
+  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a block' }] }],
+};
 
 /** Mount the real editor and move the pointer over its block, which makes the extension show its handle. */
 async function mountWithHandle() {

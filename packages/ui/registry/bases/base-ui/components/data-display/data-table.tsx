@@ -221,7 +221,14 @@ function DataTablePaginationNext(props: DataTablePaginationStepProps): React.Rea
  * `aria-label` is given. No "Toggle columns" heading: the checkbox list speaks
  * for itself, matching shadcn.
  */
-function DataTableViewOptions({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
+function DataTableViewOptions({
+  onPointerEnter,
+  onPointerLeave,
+  onFocus,
+  onBlur,
+  children,
+  ...props
+}: React.ComponentProps<typeof Button>): React.ReactNode {
   const table = useDataTable();
   const { ref, handlers } = useAnimatedIcon();
   const columns = table
@@ -239,7 +246,8 @@ function DataTableViewOptions({ children, ...props }: React.ComponentProps<typeo
             variant="outline"
             size="sm"
             aria-label="Toggle columns"
-            {...mergeProps<'button'>(handlers, props)}
+            {...props}
+            {...mergeProps<'button'>(handlers, { onPointerEnter, onPointerLeave, onFocus, onBlur })}
           />
         }
       >
