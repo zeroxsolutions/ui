@@ -35,7 +35,7 @@ pnpm add @zeroxsolutions/editor-core katex lucide-react
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add alert button command dropdown-menu empty popover resizable tabs use-mobile utils @zui/collapsible-card @zui/editor-code-mirror @zui/editor-theme
+pnpm dlx shadcn@latest add alert button command dropdown-menu empty popover resizable tabs use-mobile utils @zui/check-icon @zui/collapsible-card @zui/copy-icon @zui/download-icon @zui/editor-code-mirror @zui/editor-theme @zui/omega-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -76,6 +76,12 @@ pnpm dlx shadcn@latest add alert button command dropdown-menu empty popover resi
   name="math-editor"
   file="registry/bases/base-ui/editor/math/react/viewer.tsx"
   title="components/editor/math/react/viewer.tsx"
+/>
+
+<ComponentSource
+  name="math-editor"
+  file="registry/bases/base-ui/hooks/use-animated-icon.ts"
+  title="hooks/use-animated-icon.ts"
 />
 
 <Step>Add its styles to your global CSS.</Step>
