@@ -1,9 +1,12 @@
+'use client';
+
 import * as React from 'react';
 import { type Table as TanstackTable, flexRender } from '@tanstack/react-table';
-import { Settings2 } from 'lucide-react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
+import { Settings2Icon } from '@/registry/bases/base-ui/icons/settings-2-icon';
+import { useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { ChevronLeftIcon } from '@/registry/bases/base-ui/icons/chevron-left-icon';
 import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/chevron-right-icon';
 import {
@@ -217,8 +220,16 @@ function DataTablePaginationNext(props: DataTablePaginationStepProps): React.Rea
  * `aria-label` is given. No "Toggle columns" heading: the checkbox list speaks
  * for itself, matching shadcn.
  */
-function DataTableViewOptions({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
+function DataTableViewOptions({
+  onPointerEnter,
+  onPointerLeave,
+  onFocus,
+  onBlur,
+  children,
+  ...props
+}: React.ComponentProps<typeof Button>): React.ReactNode {
   const table = useDataTable();
+  const { ref, handlers } = useAnimatedIcon();
   const columns = table
     .getAllColumns()
     .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide());
@@ -234,11 +245,27 @@ function DataTableViewOptions({ children, ...props }: React.ComponentProps<typeo
             variant="outline"
             size="sm"
             aria-label="Toggle columns"
+            onPointerEnter={(event) => {
+              onPointerEnter?.(event);
+              handlers.onPointerEnter(event);
+            }}
+            onPointerLeave={(event) => {
+              onPointerLeave?.(event);
+              handlers.onPointerLeave(event);
+            }}
+            onFocus={(event) => {
+              onFocus?.(event);
+              handlers.onFocus(event);
+            }}
+            onBlur={(event) => {
+              onBlur?.(event);
+              handlers.onBlur(event);
+            }}
             {...props}
           />
         }
       >
-        <Settings2 />
+        <Settings2Icon ref={ref} aria-hidden />
         {children}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -1,4 +1,21 @@
-import { ArrowUp, Bold, Check, ChevronRight, Download, Eye, Plus, Settings2 } from 'lucide-react';
+import {
+  ArrowUp,
+  Bold,
+  Check,
+  ChevronRight,
+  Circle,
+  CircleX,
+  Download,
+  Dumbbell,
+  Eye,
+  Flag,
+  Hash,
+  Lightbulb,
+  Plane,
+  Plus,
+  Settings2,
+  Trash2,
+} from 'lucide-react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
@@ -9,13 +26,23 @@ import { ArrowUpIcon } from '@/registry/bases/base-ui/icons/arrow-up-icon';
 import { BoldIcon } from '@/registry/bases/base-ui/icons/bold-icon';
 import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
 import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/chevron-right-icon';
+import { CircleIcon } from '@/registry/bases/base-ui/icons/circle-icon';
+import { CircleXIcon } from '@/registry/bases/base-ui/icons/circle-x-icon';
 import { DownloadIcon } from '@/registry/bases/base-ui/icons/download-icon';
+import { DumbbellIcon } from '@/registry/bases/base-ui/icons/dumbbell-icon';
 import { EyeIcon } from '@/registry/bases/base-ui/icons/eye-icon';
+import { FlagIcon } from '@/registry/bases/base-ui/icons/flag-icon';
+import { HashIcon } from '@/registry/bases/base-ui/icons/hash-icon';
+import { LightbulbIcon } from '@/registry/bases/base-ui/icons/lightbulb-icon';
+import { PlaneIcon } from '@/registry/bases/base-ui/icons/plane-icon';
 import { PlusIcon } from '@/registry/bases/base-ui/icons/plus-icon';
 import { Settings2Icon } from '@/registry/bases/base-ui/icons/settings-2-icon';
+import { Trash2Icon } from '@/registry/bases/base-ui/icons/trash-2-icon';
+import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { InputGroupButton } from '@/registry/bases/base-ui/ui/input-group';
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
 import { BlockMenu } from './block-menu';
 import { BubbleMenu } from './bubble-menu';
 import { CHROME_ICON_CLASS, ChromeIcon } from './chrome-icon';
@@ -209,6 +236,77 @@ describe('the size of an icon the chrome draws', () => {
         <span className="flex size-6 items-center justify-center">
           <PlusIcon size={16} aria-hidden />
         </span>,
+      ],
+    ];
+    for (const [was, now] of pairs) {
+      const a = await render(<Nova>{was}</Nova>);
+      const b = await render(<Nova>{now}</Nova>);
+      expect(svgWidths(b.container)).toEqual(svgWidths(a.container));
+    }
+  });
+
+  it('keeps the components remaining controls at the size their lucide element had', async () => {
+    const pairs: Array<[ReactNode, ReactNode]> = [
+      [
+        <Button variant="ghost" size="icon-sm">
+          <Trash2 />
+        </Button>,
+        <Button variant="ghost" size="icon-sm">
+          <Trash2Icon aria-hidden />
+        </Button>,
+      ],
+      [
+        <Button variant="outline" size="sm">
+          <Settings2 />
+        </Button>,
+        <Button variant="outline" size="sm">
+          <Settings2Icon aria-hidden />
+        </Button>,
+      ],
+      // The swatch is a bare element no primitive sizes.
+      [
+        <span className="flex size-8 items-center justify-center">
+          <Check aria-hidden className="size-4" />
+        </span>,
+        <span className="flex size-8 items-center justify-center">
+          <CheckIcon aria-hidden size={16} />
+        </span>,
+      ],
+      [
+        <Badge variant="outline">
+          <Circle data-icon="inline-start" aria-hidden />
+          word
+        </Badge>,
+        <Badge variant="outline">
+          <CircleIcon data-icon="inline-start" aria-hidden size={12} />
+          word
+        </Badge>,
+      ],
+      [
+        <Badge variant="outline">
+          <CircleX data-icon="inline-start" aria-hidden />
+          word
+        </Badge>,
+        <Badge variant="outline">
+          <CircleXIcon data-icon="inline-start" aria-hidden size={12} />
+          word
+        </Badge>,
+      ],
+      [
+        <ToggleGroup>
+          {[Plane, Dumbbell, Lightbulb, Hash, Flag].map((Icon, index) => (
+            <ToggleGroupItem key={index} value={String(index)} aria-label={String(index)}>
+              <Icon />
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>,
+        <ToggleGroup>
+          {[PlaneIcon, DumbbellIcon, LightbulbIcon, HashIcon, FlagIcon].map((Icon, index) => (
+            <ToggleGroupItem key={index} value={String(index)} aria-label={String(index)}>
+              <Icon />
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>,
       ],
     ];
     for (const [was, now] of pairs) {

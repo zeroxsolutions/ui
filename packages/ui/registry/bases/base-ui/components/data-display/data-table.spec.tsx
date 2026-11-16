@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   DataTable,
@@ -16,6 +16,7 @@ import {
   DataTablePaginationNext,
   DataTablePaginationPrevious,
   DataTableView,
+  DataTableViewOptions,
 } from './data-table';
 
 interface Row {
@@ -28,7 +29,23 @@ const COLUMNS: ColumnDef<Row>[] = [
   { accessorKey: 'size', header: 'Size' },
 ];
 
-afterEach(cleanup);
+const { gearStart, gearStop } = vi.hoisted(() => ({ gearStart: vi.fn(), gearStop: vi.fn() }));
+
+vi.mock('@/registry/bases/base-ui/icons/settings-2-icon', async () => {
+  const React = await import('react');
+  return {
+    Settings2Icon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation: gearStart, stopAnimation: gearStop }));
+      return <svg data-testid="settings-2-icon" aria-hidden={props['aria-hidden']} />;
+    }),
+  };
+});
+
+afterEach(() => {
+  cleanup();
+  gearStart.mockClear();
+  gearStop.mockClear();
+});
 
 function useRowsTable(rows: Row[]): TanstackTable<Row> {
   return useReactTable({
@@ -105,5 +122,33 @@ describe('DataTablePagination', () => {
       fireEvent.click(previous);
     });
     expect(screen.getByRole('cell', { name: 'a' })).toBeTruthy();
+  });
+});
+
+describe('DataTableViewOptions icon', () => {
+  function OptionsTable({ onPointerEnter }: { onPointerEnter?: () => void }): ReactNode {
+    const table = useRowsTable([]);
+    return (
+      <DataTable table={table}>
+        <DataTableViewOptions onPointerEnter={onPointerEnter} />
+      </DataTable>
+    );
+  }
+
+  it('plays the gear once while the pointer and the focus hold the trigger, and stops when both leave', () => {
+    const onPointerEnter = vi.fn();
+    render(<OptionsTable onPointerEnter={onPointerEnter} />);
+    const trigger = screen.getByRole('button', { name: 'Toggle columns' });
+
+    fireEvent.pointerEnter(trigger);
+    fireEvent.focus(trigger);
+    expect(gearStart).toHaveBeenCalledTimes(1);
+    expect(onPointerEnter).toHaveBeenCalledTimes(1);
+
+    fireEvent.pointerLeave(trigger);
+    expect(gearStop).not.toHaveBeenCalled();
+    fireEvent.blur(trigger);
+    expect(gearStop).toHaveBeenCalledTimes(1);
+    expect(gearStart).toHaveBeenCalledTimes(1);
   });
 });
