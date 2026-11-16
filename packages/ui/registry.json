@@ -3092,6 +3092,21 @@
       ]
     },
     {
+      "name": "chevron-up-icon",
+      "type": "registry:ui",
+      "title": "Chevron Up Icon",
+      "description": "An animated chevron up icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/chevron-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/chevron-up-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "chevrons-up-down-icon",
       "type": "registry:ui",
       "title": "Chevrons Up Down Icon",
@@ -3133,6 +3148,21 @@
           "path": "registry/bases/base-ui/icons/circle-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/circle-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "circle-x-icon",
+      "type": "registry:ui",
+      "title": "Circle X Icon",
+      "description": "An animated circle x icon, motion authored in the manner of lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/circle-x-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/circle-x-icon.tsx"
         }
       ]
     },
@@ -3197,6 +3227,21 @@
       ]
     },
     {
+      "name": "dumbbell-icon",
+      "type": "registry:ui",
+      "title": "Dumbbell Icon",
+      "description": "An animated dumbbell icon, motion authored in the manner of lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/dumbbell-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/dumbbell-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "eye-icon",
       "type": "registry:ui",
       "title": "Eye Icon",
@@ -3242,6 +3287,36 @@
       ]
     },
     {
+      "name": "flag-icon",
+      "type": "registry:ui",
+      "title": "Flag Icon",
+      "description": "An animated flag icon, motion authored in the manner of lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/flag-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/flag-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "hash-icon",
+      "type": "registry:ui",
+      "title": "Hash Icon",
+      "description": "An animated hash icon, motion authored in the manner of lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/hash-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/hash-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "italic-icon",
       "type": "registry:ui",
       "title": "Italic Icon",
@@ -3268,6 +3343,21 @@
           "path": "registry/bases/base-ui/icons/leaf-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/leaf-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lightbulb-icon",
+      "type": "registry:ui",
+      "title": "Lightbulb Icon",
+      "description": "An animated lightbulb icon, motion authored in the manner of lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lightbulb-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lightbulb-icon.tsx"
         }
       ]
     },
@@ -3362,6 +3452,21 @@
       ]
     },
     {
+      "name": "plane-icon",
+      "type": "registry:ui",
+      "title": "Plane Icon",
+      "description": "An animated plane icon, motion authored in the manner of lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/plane-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/plane-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "rotate-cw-icon",
       "type": "registry:ui",
       "title": "Rotate Cw Icon",
@@ -3448,6 +3553,21 @@
           "path": "registry/bases/base-ui/icons/sun-moon-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/sun-moon-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "trash-2-icon",
+      "type": "registry:ui",
+      "title": "Trash 2 Icon",
+      "description": "An animated trash 2 icon, motion authored in the manner of lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/trash-2-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/trash-2-icon.tsx"
         }
       ]
     },
