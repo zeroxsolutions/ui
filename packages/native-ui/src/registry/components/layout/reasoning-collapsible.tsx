@@ -5,7 +5,7 @@ import { ReasoningCollapsibleContext, useReasoningCollapsible } from '../../hook
 import { BrainIcon } from '../../icons/brain-icon';
 import { ChevronDownIcon } from '../../icons/chevron-down-icon';
 import { ChevronUpIcon } from '../../icons/chevron-up-icon';
-import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
+import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { usePulse } from '../../lib/motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
@@ -109,7 +109,7 @@ type ReasoningCollapsibleTriggerProps = Omit<CollapsibleTriggerProps, 'asChild' 
  * children are the label, set in one line of Text, so a label component may return a string. The label
  * pulses while the root is streaming, unless the system asks for reduced motion, and the chevron points up
  * while the body is open. The brain and the chevron play when the row is pressed in or focused, after a
- * caller's own `onPressIn` and `onFocus`.
+ * caller's own `onPressIn` and `onFocus`, and the other chevron plays once as the body opens or closes.
  * @throws {Error} when rendered outside a ReasoningCollapsible
  */
 function ReasoningCollapsibleTrigger({
@@ -122,7 +122,10 @@ function ReasoningCollapsibleTrigger({
   const { streaming, isOpen } = useReasoningCollapsible();
   const pulseStyle = usePulse(streaming);
   const brain = useRef<IconHandle>(null);
+  // The two chevrons are two components, so opening or closing mounts a new one at rest; it plays as it appears.
   const chevron = useRef<IconHandle>(null);
+  usePlayOnReach(chevron, isOpen);
+  usePlayOnReach(chevron, !isOpen);
   return (
     <CollapsibleTrigger asChild>
       <Button

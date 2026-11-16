@@ -12,7 +12,7 @@ import {
 import { View } from 'react-native';
 import { ChevronDownIcon } from '../../icons/chevron-down-icon';
 import { ChevronUpIcon } from '../../icons/chevron-up-icon';
-import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
+import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { asText, textOf } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
 import { Button } from '../../ui/button';
@@ -157,7 +157,7 @@ type CollapsibleCardTriggerProps = Omit<CollapsibleTriggerProps, 'asChild' | 'ch
  * no `children` it shows a chevron, pointing up while the body is open. `children` replace the chevron, and
  * text in them names the button; without text, such as the chevron or an icon alone, it is named "Toggle
  * content" unless an `aria-label` is given. The chevron plays when the button is pressed in or focused, after a
- * caller's own `onPressIn` and `onFocus`.
+ * caller's own `onPressIn` and `onFocus`, and the other chevron plays once as the body opens or closes.
  */
 function CollapsibleCardTrigger({
   className,
@@ -168,7 +168,10 @@ function CollapsibleCardTrigger({
 }: CollapsibleCardTriggerProps): ReactNode {
   const { open } = useContext(CollapsibleCardContext);
   const named = textOf(children).trim() !== '';
+  // The two chevrons are two components, so opening or closing mounts a new one at rest; it plays as it appears.
   const chevron = useRef<IconHandle>(null);
+  usePlayOnReach(chevron, open);
+  usePlayOnReach(chevron, !open);
   return (
     <CollapsibleTrigger asChild>
       <Button

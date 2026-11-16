@@ -210,11 +210,12 @@ describe('DataTableColumnHeader motion', () => {
     expect(handleOf(ChevronsUpDownIcon).stopAnimation).not.toHaveBeenCalled();
   });
 
+  // Asc and Desc count one start more: the sort they set swaps that icon into the trigger, where it plays once.
   it.each([
-    ['Asc', ArrowUpIcon],
-    ['Desc', ArrowDownIcon],
-    ['Hide', EyeOffIcon],
-  ])("starts the %s item's icon on focus and on press-in", async (item, icon) => {
+    ['Asc', ArrowUpIcon, 3],
+    ['Desc', ArrowDownIcon, 3],
+    ['Hide', EyeOffIcon, 2],
+  ] as const)("starts the %s item's icon on focus and on press-in", async (item, icon, starts) => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await render(<Header />);
     await user.press(screen.getByRole('button', { name: 'Name' }));
@@ -224,8 +225,23 @@ describe('DataTableColumnHeader motion', () => {
     await user.press(screen.getByRole('menuitem', { name: item }));
     await finishMotion();
 
-    expect(handleOf(icon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(icon).startAnimation).toHaveBeenCalledTimes(starts);
     expect(handleOf(icon).stopAnimation).not.toHaveBeenCalled();
+  });
+
+  it("plays the trigger's new sort icon once as a sort is chosen, and nothing on first draw", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<Header />);
+    expect(handleOf(ChevronsUpDownIcon).startAnimation).not.toHaveBeenCalled();
+    await user.press(screen.getByRole('button', { name: 'Name' }));
+    await finishMotion();
+
+    await user.press(screen.getByRole('menuitem', { name: 'Desc' }));
+    await finishMotion();
+
+    expect(screen.getByText('sorted: desc')).toBeOnTheScreen();
+    // One start from the item's press-in, one as the trigger shows the down arrow.
+    expect(handleOf(ArrowDownIcon).startAnimation).toHaveBeenCalledTimes(2);
   });
 
   it("runs a menu item's own press-in and focus handlers", async () => {

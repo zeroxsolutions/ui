@@ -119,9 +119,19 @@ describe('CollapsibleCardTrigger motion', () => {
 
     expect(onPressIn).toHaveBeenCalledTimes(1);
     expect(onFocus).toHaveBeenCalledTimes(1);
-    // The chevron points up when the press begins; the press closes the card, so focus finds it pointing down.
+    // The up chevron starts on press-in; closing swaps in the down chevron, which plays as it appears and on focus.
     expect(handleOf(ChevronUpIcon).startAnimation).toHaveBeenCalledTimes(1);
-    expect(handleOf(ChevronDownIcon).startAnimation).toHaveBeenCalledTimes(1);
+    expect(handleOf(ChevronDownIcon).startAnimation).toHaveBeenCalledTimes(2);
     expect(handleOf(ChevronUpIcon).stopAnimation).not.toHaveBeenCalled();
+  });
+
+  it('plays the newly shown chevron once after a press flips it, and nothing on first draw', async () => {
+    await render(<Example />);
+    expect(handleOf(ChevronUpIcon).startAnimation).not.toHaveBeenCalled();
+
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Toggle content' }));
+
+    expect(screen.getByRole('button', { name: 'Toggle content' })).toBeCollapsed();
+    expect(handleOf(ChevronDownIcon).startAnimation).toHaveBeenCalledTimes(1);
   });
 });

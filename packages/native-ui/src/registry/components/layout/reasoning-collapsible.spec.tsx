@@ -156,9 +156,21 @@ describe('ReasoningCollapsibleTrigger motion', () => {
     expect(onPressIn).toHaveBeenCalledTimes(1);
     expect(onFocus).toHaveBeenCalledTimes(1);
     expect(handleOf(BrainIcon).startAnimation).toHaveBeenCalledTimes(2);
-    // The chevron points down when the press begins; the press opens the reasoning, so focus finds it pointing up.
+    // The down chevron starts on press-in; opening swaps in the up chevron, which plays as it appears and on focus.
     expect(handleOf(ChevronDownIcon).startAnimation).toHaveBeenCalledTimes(1);
-    expect(handleOf(ChevronUpIcon).startAnimation).toHaveBeenCalledTimes(1);
+    expect(handleOf(ChevronUpIcon).startAnimation).toHaveBeenCalledTimes(2);
     expect(handleOf(BrainIcon).stopAnimation).not.toHaveBeenCalled();
+  });
+
+  it('plays the newly shown chevron once after a press flips it, and nothing on first draw', async () => {
+    await render(<Example />);
+    expect(handleOf(ChevronDownIcon).startAnimation).not.toHaveBeenCalled();
+
+    await userEvent
+      .setup({ advanceTimers: jest.advanceTimersByTime })
+      .press(screen.getByRole('button', { name: 'Thought for a few seconds' }));
+
+    expect(screen.getByRole('button', { name: 'Thought for a few seconds' })).toBeExpanded();
+    expect(handleOf(ChevronUpIcon).startAnimation).toHaveBeenCalledTimes(1);
   });
 });

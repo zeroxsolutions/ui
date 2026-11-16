@@ -130,9 +130,31 @@ describe('PasswordInputToggle motion', () => {
 
     expect(onPressIn).toHaveBeenCalledTimes(1);
     expect(onFocus).toHaveBeenCalledTimes(1);
-    // The eye is drawn when the press begins; the press shows the password, so focus finds the struck eye.
+    // The eye starts on press-in; the press swaps in the struck eye, which plays as it appears and again on focus.
     expect(handleOf(EyeIcon).startAnimation).toHaveBeenCalledTimes(1);
-    expect(handleOf(EyeOffIcon).startAnimation).toHaveBeenCalledTimes(1);
+    expect(handleOf(EyeOffIcon).startAnimation).toHaveBeenCalledTimes(2);
     expect(handleOf(EyeIcon).stopAnimation).not.toHaveBeenCalled();
+  });
+
+  it('plays the newly shown eye once after each press flips it, and nothing on first draw', async () => {
+    const user = userEvent.setup();
+    await render(
+      <PasswordInput>
+        <PasswordInputInput aria-label="Password" />
+        <InputGroupAddon align="inline-end">
+          <PasswordInputToggle />
+        </InputGroupAddon>
+      </PasswordInput>,
+    );
+    expect(handleOf(EyeIcon).startAnimation).not.toHaveBeenCalled();
+    expect(handleOf(EyeOffIcon).startAnimation).not.toHaveBeenCalled();
+
+    await user.press(screen.getByRole('button', { name: 'Show password' }));
+    expect(handleOf(EyeOffIcon).startAnimation).toHaveBeenCalledTimes(1);
+
+    await user.press(screen.getByRole('button', { name: 'Hide password' }));
+    // Once on the first press-in, once as the second press swaps the eye back in.
+    expect(handleOf(EyeIcon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(EyeOffIcon).startAnimation).toHaveBeenCalledTimes(2);
   });
 });

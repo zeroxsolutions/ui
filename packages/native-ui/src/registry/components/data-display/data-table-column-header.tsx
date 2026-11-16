@@ -13,7 +13,7 @@ import { ArrowDownIcon } from '../../icons/arrow-down-icon';
 import { ArrowUpIcon } from '../../icons/arrow-up-icon';
 import { ChevronsUpDownIcon } from '../../icons/chevrons-up-down-icon';
 import { EyeOffIcon } from '../../icons/eye-off-icon';
-import { iconTrigger, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
+import { iconTrigger, usePlayOnReach, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
 import { Button } from '../../ui/button';
@@ -80,7 +80,8 @@ type DataTableColumnHeaderTriggerProps = Omit<ComponentProps<typeof DropdownMenu
 /**
  * The ghost Button that opens the column menu, named by its `children`, the column's title, and followed by an
  * icon for the column's sort direction: up for ascending, down for descending, both ways while unsorted. The icon
- * plays when the trigger is pressed in or focused, after a caller's own `onPressIn` and `onFocus`.
+ * plays when the trigger is pressed in or focused, after a caller's own `onPressIn` and `onFocus`, and once as a
+ * new sort direction swaps it in.
  * @throws {Error} when rendered outside a DataTableColumnHeader
  */
 function DataTableColumnHeaderTrigger({
@@ -90,8 +91,12 @@ function DataTableColumnHeaderTrigger({
   ...props
 }: DataTableColumnHeaderTriggerProps): ReactNode {
   const { column } = useDataTableColumnHeader();
-  const icon = useRef<IconHandle>(null);
   const sorted = column.getIsSorted();
+  // Each direction is its own icon, so a sort chosen from the menu mounts a new one at rest; it plays as it appears.
+  const icon = useRef<IconHandle>(null);
+  usePlayOnReach(icon, sorted === 'asc');
+  usePlayOnReach(icon, sorted === 'desc');
+  usePlayOnReach(icon, sorted === false);
   const sortIcon = sorted === 'desc' ? ArrowDownIcon : sorted === 'asc' ? ArrowUpIcon : ChevronsUpDownIcon;
   return (
     <DropdownMenuTrigger asChild {...props}>
