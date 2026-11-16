@@ -2,9 +2,9 @@
 import type { Root } from 'fumadocs-core/page-tree';
 import { describe, expect, it } from 'vitest';
 
-import type { PublishedItem } from '@zeroxsolutions/ui-docs-web/lib/published-items';
+import { editorDocsSections } from '@zeroxsolutions/ui/site/constants/editor-docs-sections';
 
-import { inEditorZone, withEditorSection } from './editor-nav';
+import { inEditorZone, withEditorSection, type EditorNavItem } from './editor-nav';
 
 const tree: Root = {
   name: 'Docs',
@@ -19,36 +19,41 @@ const tree: Root = {
   ],
 };
 
-const item = (name: string, title: string, category: string): PublishedItem => ({
+const item = (name: string, title: string, category: string): EditorNavItem => ({
   name,
   title,
-  category,
-  type: 'registry:component',
-  description: '',
+  categories: [category],
 });
 
 describe('withEditorSection', () => {
+  const editorItems = editorDocsSections
+    .flatMap((section) => section.pages)
+    .map((name) => item(name, `Title of ${name}`, 'editor'));
+
   it('adds the editor section after Components, as external links', () => {
-    const result = withEditorSection(tree, [
-      item('button', 'Button', 'actions'),
-      item('math-editor', 'Math Editor', 'editor'),
-      item('document-editor', 'Document Editor', 'editor'),
-    ]);
+    const result = withEditorSection(tree, [item('button', 'Button', 'actions'), ...editorItems]);
 
     expect(result.children.map((node) => node.name)).toEqual(['Introduction', 'Components', 'Editor', 'Packages']);
-    expect(result.children[2]).toEqual({
-      type: 'folder',
-      name: 'Editor',
-      index: { type: 'page', name: 'Editor', url: '/docs/editor', external: true },
-      children: [
-        { type: 'page', name: 'Math Editor', url: '/docs/editor/math-editor', external: true },
-        { type: 'page', name: 'Document Editor', url: '/docs/editor/document-editor', external: true },
-      ],
+    const editor = result.children[2];
+    if (editor.type !== 'folder') throw new Error('the Editor section is not a folder');
+    expect(editor.children[0]).toEqual({ type: 'page', name: 'Editor', url: '/docs/editor', external: true });
+    expect(editor.children.filter((node) => node.type === 'separator').map((node) => node.name)).toEqual(
+      editorDocsSections.map((section) => section.title),
+    );
+    expect(editor.children).toContainEqual({
+      type: 'page',
+      name: 'Title of math-editor',
+      url: '/docs/editor/math-editor',
+      external: true,
     });
   });
 
+  it('titles the section only from editor items', () => {
+    expect(() => withEditorSection(tree, [item('math-editor', 'Math Editor', 'actions')])).toThrow('has no page');
+  });
+
   it('leaves the tree it was given as it was', () => {
-    withEditorSection(tree, []);
+    withEditorSection(tree, editorItems);
 
     expect(tree.children).toHaveLength(3);
   });

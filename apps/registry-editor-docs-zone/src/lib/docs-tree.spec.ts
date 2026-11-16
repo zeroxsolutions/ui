@@ -2,7 +2,9 @@
 import type { Root } from 'fumadocs-core/page-tree';
 import { describe, expect, it } from 'vitest';
 
-import { docsTree } from './docs-tree';
+import { editorDocsSections } from '@zeroxsolutions/ui/site/constants/editor-docs-sections';
+
+import { docsTree, editorSection } from './docs-tree';
 
 const EDITOR: Root = {
   name: 'Docs',
@@ -35,5 +37,33 @@ describe('docsTree', () => {
 
   it("keeps the editor folder's pages in their order", () => {
     expect(docsTree(EDITOR, WEB).children.slice(2)).toEqual(EDITOR.children);
+  });
+});
+
+describe('editorSection', () => {
+  const names = editorDocsSections.flatMap((section) => section.pages);
+  const loaded: Root = {
+    name: 'Docs',
+    children: [
+      {
+        type: 'folder',
+        name: 'editor',
+        index: { type: 'page', name: 'Editor', url: '/docs/editor' },
+        children: names
+          .toReversed()
+          .map((name) => ({ type: 'page' as const, name: `Title of ${name}`, url: `/docs/editor/${name}` })),
+      },
+    ],
+  };
+
+  it("lays the loader's pages out in the sidebar's sections, titled by their own files", () => {
+    const [folder] = editorSection(loaded).children;
+    if (folder.type !== 'folder') throw new Error('the Editor section is not a folder');
+
+    expect(folder.name).toBe('Editor');
+    expect(folder.children.filter((node) => node.type === 'page').map((node) => node.name)).toEqual([
+      'Editor',
+      ...names.map((name) => `Title of ${name}`),
+    ]);
   });
 });

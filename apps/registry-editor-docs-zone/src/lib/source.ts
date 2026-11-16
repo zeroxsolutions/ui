@@ -4,13 +4,20 @@ import { llms, loader } from 'fumadocs-core/source';
 
 import { editorDocsShareImageRoute } from '@zeroxsolutions/editor-docs-web/routes';
 
-import { docsTree } from '@/lib/docs-tree';
+import { docsTree, editorSection } from '@/lib/docs-tree';
 import { pageMarkdown } from '@zeroxsolutions/ui/site/lib/page-markdown';
 import { webDocsRoute } from '@/routes/web-paths';
 import { webDocsSections } from '@/routes/web-docs-paths';
 
-/** The editor docs pages, `content/docs/editor`, under `/docs/editor`: every page's first slug is `editor`. */
-export const source = loader({ baseUrl: webDocsRoute.build(), source: editorDocs.toFumadocsSource() });
+/**
+ * The editor docs pages, `content/docs/editor`, under `/docs/editor`: every page's first slug is `editor`.
+ * Its tree is laid out by `editorSection`, the order registry-ui's Editor section shares.
+ */
+export const source = loader({
+  baseUrl: webDocsRoute.build(),
+  source: editorDocs.toFumadocsSource(),
+  pageTree: { transformers: [{ root: editorSection }] },
+});
 
 /** The sidebar's tree: the web docs sections, then the editor pages. */
 export function sidebarTree(): Root {
