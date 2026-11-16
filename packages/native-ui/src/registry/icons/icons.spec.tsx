@@ -61,6 +61,12 @@ jest.mock('react-native-reanimated', () => {
 /** A time well inside every icon's motion, in ms, when its parts have left their resting place. */
 const MID_MOTION = 100;
 
+/** How long every icon's motion may run, out and back, in ms. */
+const MOTION_LIMIT = 600;
+
+/** How often the walker looks at a moving icon, in ms. */
+const SAMPLE = 25;
+
 /** `copy-icon` as its export is named, `CopyIcon`. */
 const exportName = (name: string): string =>
   name
@@ -95,16 +101,18 @@ async function renderIcon(Glyph: ComponentType<AnimatedIconProps>, handle: Ref<I
   await elapse(0);
 }
 
-/** The drawing as it stands now: the rendered tree, and the animated values its parts are drawn with. */
-const drawing = (): string =>
-  JSON.stringify({
-    tree: screen.toJSON(),
-    animated: mockDrawn.map((part) =>
+/** The animated values each animated part is drawn with now, one entry per part. */
+const parts = (): string[] =>
+  mockDrawn.map((part) =>
+    JSON.stringify(
       part.current.map((value) =>
         typeof value === 'object' && value !== null ? (mockUpdaters.get(value)?.current() ?? value) : value,
       ),
     ),
-  });
+  );
+
+/** The drawing as it stands now: the rendered tree, and the animated values its parts are drawn with. */
+const drawing = (): string => JSON.stringify({ tree: screen.toJSON(), animated: parts() });
 
 beforeEach(() => {
   jest.useFakeTimers();
@@ -130,7 +138,25 @@ describe('the animated icons', () => {
       expect(isHiddenFromAccessibility(screen.getByTestId('icon', HIDDEN))).toBe(true);
     });
 
-    it('moves its parts when started', async () => {
+    it('moves each of its animated parts when started', async () => {
+      reduceMotion(false);
+      const handle = createRef<IconHandle>();
+      await renderIcon(Glyph, handle);
+      const resting = parts();
+      const moved = new Set<number>();
+
+      await act(() => handle.current?.startAnimation());
+      for (let elapsed = 0; elapsed < MOTION_LIMIT; elapsed += SAMPLE) {
+        await elapse(SAMPLE);
+        parts().forEach((part, index) => {
+          if (part !== resting[index]) moved.add(index);
+        });
+      }
+      expect(resting.length).toBeGreaterThan(0);
+      expect(resting.map((_part, index) => index).filter((index) => !moved.has(index))).toEqual([]);
+    });
+
+    it(`is back at rest within ${MOTION_LIMIT} ms of being started`, async () => {
       reduceMotion(false);
       const handle = createRef<IconHandle>();
       await renderIcon(Glyph, handle);
@@ -139,6 +165,8 @@ describe('the animated icons', () => {
       await act(() => handle.current?.startAnimation());
       await elapse(MID_MOTION);
       expect(drawing()).not.toBe(resting);
+      await elapse(MOTION_LIMIT - MID_MOTION);
+      expect(drawing()).toBe(resting);
     });
 
     it('stays still when started under reduced motion', async () => {

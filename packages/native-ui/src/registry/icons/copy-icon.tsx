@@ -3,15 +3,13 @@
 import type { ReactNode } from 'react';
 import Animated, { useAnimatedProps } from 'react-native-reanimated';
 import Svg, { Path, Rect } from 'react-native-svg';
-import { useIconMotion, type AnimatedIconProps, type IconHandle, type IconTiming } from '../lib/icon-motion';
+import { useIconMotion, type AnimatedIconProps, type IconHandle } from '../lib/icon-motion';
 
 /** The handle a control starts and stops {@link CopyIcon} through. */
 type CopyIconHandle = IconHandle;
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
-
-const TIMING: IconTiming = { spring: { stiffness: 160, damping: 17, mass: 1 } };
 
 /** How far the two sheets move apart, in the 24-unit viewBox: the front one up and left, the back one down and right. */
 const SHIFT = 3;
@@ -29,7 +27,7 @@ function CopyIcon({
   nonScalingStroke: _nonScalingStroke,
   ...props
 }: AnimatedIconProps): ReactNode {
-  const progress = useIconMotion(ref, TIMING);
+  const progress = useIconMotion(ref);
   const front = useAnimatedProps(() => ({
     x: 8 - SHIFT * progress.value,
     y: 8 - SHIFT * progress.value,
@@ -49,9 +47,9 @@ function CopyIcon({
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
+      {...props}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      {...props}
     >
       <AnimatedRect width="14" height="14" x="8" y="8" rx="2" ry="2" animatedProps={front} />
       <AnimatedPath d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" animatedProps={back} />

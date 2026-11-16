@@ -38,7 +38,6 @@ import { CommandDemo } from './command-demo';
 import { CommandMenuDemo } from './command-menu-demo';
 import { ContextMenuDemo } from './context-menu-demo';
 import { CopyButtonDemo } from './copy-button-demo';
-import { CopyIconDemo } from './copy-icon-demo';
 import { DataTableColumnHeaderDemo } from './data-table-column-header-demo';
 import { DataTableDemo } from './data-table-demo';
 import { DialogDemo } from './dialog-demo';
@@ -157,7 +156,6 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'command-menu-demo': CommandMenuDemo,
   'context-menu-demo': ContextMenuDemo,
   'copy-button-demo': CopyButtonDemo,
-  'copy-icon-demo': CopyIconDemo,
   'data-table-column-header-demo': DataTableColumnHeaderDemo,
   'data-table-demo': DataTableDemo,
   'dialog-demo': DialogDemo,
