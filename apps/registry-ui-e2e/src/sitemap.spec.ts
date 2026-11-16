@@ -2,7 +2,7 @@ import { expect, test } from './test/fixtures';
 
 const HOST = 'https://ui.zeroxsolutions.com';
 
-test("/sitemap.xml is an index naming the web's sitemap and the native zone's", async ({ request }) => {
+test("/sitemap.xml is an index naming the web's sitemap and the native and editor zones'", async ({ request }) => {
   const response = await request.get('/sitemap.xml');
   expect(response.status()).toBe(200);
 
@@ -10,9 +10,10 @@ test("/sitemap.xml is an index naming the web's sitemap and the native zone's", 
   expect(index).toContain('<sitemapindex');
   expect(index).toContain(`<loc>${HOST}/docs-sitemap.xml</loc>`);
   expect(index).toContain(`<loc>${HOST}/native/sitemap.xml</loc>`);
+  expect(index).toContain(`<loc>${HOST}/docs/editor/sitemap.xml</loc>`);
 });
 
-test('/docs-sitemap.xml lists the web pages at the registry host, and no native one', async ({ request }) => {
+test('/docs-sitemap.xml lists the web pages at the registry host, and no native or editor one', async ({ request }) => {
   const response = await request.get('/docs-sitemap.xml');
   expect(response.status()).toBe(200);
 
@@ -21,4 +22,5 @@ test('/docs-sitemap.xml lists the web pages at the registry host, and no native 
   expect(sitemap).toContain(`<loc>${HOST}/docs/components/base/status-indicator</loc>`);
   expect(sitemap).toContain(`<loc>${HOST}/blocks/base</loc>`);
   expect(sitemap).not.toContain('/native');
+  expect(sitemap).not.toContain('/docs/editor');
 });

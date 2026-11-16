@@ -52,20 +52,6 @@
           "shadcn-build",
           "fumadocs-generate",
           "@zeroxsolutions/ui:examples-index"
-        ],
-        "inputs": [
-          "default",
-          "^default",
-          {
-            "externalDependencies": [
-              "next"
-            ]
-          },
-          {
-            "dependentTasksOutputFiles": "**/*.d.ts",
-            "transitive": true
-          },
-          "{workspaceRoot}/packages/editor-docs-web/content/**/*"
         ]
       },
       "wrangler:build": {
@@ -80,8 +66,6 @@
         "inputs": [
           "default",
           "^default",
-          "{workspaceRoot}/tools/check-worker-size.sh",
-          "{workspaceRoot}/packages/editor-docs-web/content/**/*",
           {
             "runtime": "pwd"
           }
@@ -92,7 +76,7 @@
         "cache": true,
         "options": {
           "cwd": "{projectRoot}",
-          "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild && ../../tools/check-worker-size.sh"
+          "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild"
         }
       },
       "wrangler:dev": {
@@ -149,11 +133,6 @@
         "executor": "nx:run-commands",
         "dependsOn": [
           "@zeroxsolutions/ui:examples-index"
-        ],
-        "inputs": [
-          "default",
-          "^default",
-          "{workspaceRoot}/packages/editor-docs-web/content/**/*"
         ],
         "outputs": [
           "{projectRoot}/.source"

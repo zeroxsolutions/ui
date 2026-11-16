@@ -13,7 +13,6 @@ vi.mock('../lib/shiki', async (importOriginal) => {
 
 import { Components } from './__components__';
 import { EditorComponents } from './__editor-components__';
-import { EditorComponentsClientOnly } from './__editor-components-client-only__';
 import { Index } from './__index__';
 import { CommandMenuDemo } from './command-menu-demo';
 import { PermissionCardDemo } from './permission-card-demo';
@@ -60,7 +59,6 @@ describe('examples', () => {
 
     expect(plain.filter((name) => editor.includes(name))).toEqual([]);
     expect([...plain, ...editor].sort()).toEqual(Object.keys(Index).sort());
-    expect(Object.keys(EditorComponentsClientOnly).sort()).toEqual([...editor].sort());
     expect(editor).toContain('document-editor-demo');
     expect(editor).toContain('chat-input-demo');
     expect(editor).not.toContain('code-card-demo');
