@@ -31,6 +31,8 @@ test("a docs page's code block is highlighted, its tokens in more than one colou
 });
 
 test('links into the editor zone with plain anchors', async ({ page }) => {
+  // Each editor link is a document load, and the sidebar lists the whole Editor section.
+  test.setTimeout(270_000);
   await page.goto('/docs');
   const editorLinks = page
     .getByRole('navigation', { name: 'Docs' })
