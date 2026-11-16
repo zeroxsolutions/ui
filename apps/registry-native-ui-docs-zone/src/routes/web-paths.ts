@@ -34,3 +34,6 @@ export const webBlocksRoute = createDynamicRoute<{ base: ComponentBase }>(
   '/blocks/:base',
   ({ base }) => `/blocks/${base}`,
 );
+
+/** The editor docs' introduction, which the editor zone answers on the same host rather than registry-ui. */
+export const webEditorDocsRoute = createStaticRoute('/docs/editor', () => '/docs/editor');

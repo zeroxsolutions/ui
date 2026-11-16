@@ -33,11 +33,12 @@ describe('zoneNavItems', () => {
     ]);
   });
 
-  it('points the web sections at the default base', () => {
+  it('points the web sections at the default base, then Editor', () => {
     expect(zoneNavItems('web', 'uniwind').map((item) => item.href)).toEqual([
       '/docs',
       '/docs/components/base',
       '/blocks/base',
+      '/docs/editor',
     ]);
   });
 });
