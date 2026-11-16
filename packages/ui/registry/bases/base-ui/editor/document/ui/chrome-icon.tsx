@@ -48,7 +48,7 @@ export interface ChromeIconProps {
  */
 export function ChromeIcon({ icon, className, active }: ChromeIconProps): ReactNode {
   const handle = useRef<AnimatedIconHandle>(null);
-  usePlayWhile(handle, active);
+  usePlayWhile(handle, active, { playOnFirstDraw: true });
 
   if (icon == null || typeof icon === 'boolean') return null;
   if (isComponent(icon)) {

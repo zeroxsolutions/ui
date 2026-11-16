@@ -35,10 +35,15 @@ export function useAnimatedActive(): { active: boolean; handlers: AnimatedIconHa
 /**
  * Starts the icon when `active` turns true after the first render and stops it when it turns false. A
  * first render is a state the reader did not cause, so one that is already active starts nothing, and
- * the icon waits for the flip.
+ * the icon waits for the flip. A control the reader has just acted on, such as a menu row highlighted
+ * as the menu opens, passes `playOnFirstDraw` so that an active first render starts it.
  */
-export function usePlayWhile(icon: RefObject<AnimatedIconHandle | null>, active: boolean): void {
-  const was = useRef(active);
+export function usePlayWhile(
+  icon: RefObject<AnimatedIconHandle | null>,
+  active: boolean,
+  { playOnFirstDraw = false }: { playOnFirstDraw?: boolean } = {},
+): void {
+  const was = useRef(playOnFirstDraw ? false : active);
   useEffect(() => {
     if (active === was.current) return;
     was.current = active;
