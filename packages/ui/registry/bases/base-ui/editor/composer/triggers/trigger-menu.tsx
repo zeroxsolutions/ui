@@ -72,10 +72,11 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
   const [index, setIndex] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
   // The keys move the highlight without moving the list, so bring the highlighted
-  // option into view; `nearest` leaves the list still while it is already shown.
+  // option into view, and so does a query that refilters the list; `nearest` leaves
+  // the list still while the option is already shown.
   useEffect(() => {
     listRef.current?.querySelector('[data-highlighted]')?.scrollIntoView({ block: 'nearest' });
-  }, [index]);
+  }, [index, active?.query]);
   const [results, setResults] = useState<TriggerOption[]>([]);
   // Position dismissed via Esc - suppress reopening at the same char until the
   // caret moves to a different trigger (or none).

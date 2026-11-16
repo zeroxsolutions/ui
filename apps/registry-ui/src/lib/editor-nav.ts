@@ -1,4 +1,4 @@
-import type { Root } from 'fumadocs-core/page-tree';
+import type { Item, Root } from 'fumadocs-core/page-tree';
 
 import { editorDocsFolder } from '@zeroxsolutions/ui/site/lib/editor-docs-folder';
 
@@ -26,11 +26,13 @@ export function withEditorSection(tree: Root, items: EditorNavItem[]): Root {
   const titles = new Map(
     items.filter((item) => item.categories?.includes('editor')).map((item) => [item.name, item.title]),
   );
+  const link = (name: string, url: string): Item => ({ type: 'page', name, url, external: true });
   const editor = editorDocsFolder({
-    indexUrl: editorDocsRoute.build(),
-    pageUrl: (name) => editorDocsPageRoute.build({ name }),
-    title: (name) => titles.get(name),
-    external: true,
+    index: link('Editor', editorDocsRoute.build()),
+    page: (name) => {
+      const title = titles.get(name);
+      return title === undefined ? undefined : link(title, editorDocsPageRoute.build({ name }));
+    },
   });
   const after = tree.children.findIndex((node) => node.type === 'folder' && node.name === 'Components');
   const at = after === -1 ? tree.children.length : after + 1;

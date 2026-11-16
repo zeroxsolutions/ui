@@ -42,28 +42,24 @@ describe('docsTree', () => {
 
 describe('editorSection', () => {
   const names = editorDocsSections.flatMap((section) => section.pages);
-  const loaded: Root = {
-    name: 'Docs',
-    children: [
-      {
-        type: 'folder',
-        name: 'editor',
-        index: { type: 'page', name: 'Editor', url: '/docs/editor' },
-        children: names
-          .toReversed()
-          .map((name) => ({ type: 'page' as const, name: `Title of ${name}`, url: `/docs/editor/${name}` })),
-      },
-    ],
-  };
+  const pages = names.toReversed().map((name) => ({
+    type: 'page' as const,
+    name: `Title of ${name}`,
+    url: `/docs/editor/${name}`,
+    description: `About ${name}`,
+  }));
+  const index = { type: 'page' as const, name: 'Editor', url: '/docs/editor', description: 'The editors' };
+  const loaded: Root = { name: 'Docs', children: [{ type: 'folder', name: 'editor', index, children: pages }] };
 
-  it("lays the loader's pages out in the sidebar's sections, titled by their own files", () => {
+  it("lays the loader's own page nodes out in the sidebar's sections", () => {
     const [folder] = editorSection(loaded).children;
     if (folder.type !== 'folder') throw new Error('the Editor section is not a folder');
+    const placed = folder.children.filter((node) => node.type === 'page');
 
     expect(folder.name).toBe('Editor');
-    expect(folder.children.filter((node) => node.type === 'page').map((node) => node.name)).toEqual([
-      'Editor',
-      ...names.map((name) => `Title of ${name}`),
-    ]);
+    expect(placed.map((node) => node.url)).toEqual(['/docs/editor', ...names.map((name) => `/docs/editor/${name}`)]);
+    // The same objects, so a description the llms index reads off each node is still there.
+    expect(placed[0]).toBe(index);
+    expect(placed.slice(1).every((node) => pages.includes(node as (typeof pages)[number]))).toBe(true);
   });
 });

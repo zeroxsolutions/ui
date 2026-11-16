@@ -12,7 +12,6 @@ import {
 
 import {
   webBlocksRoute,
-  webEditorDocsRoute,
   webComponentRoute,
   webComponentsRoute,
   webDocsPageRoute,
@@ -49,11 +48,7 @@ export function zoneHome(platform: Platform): string {
   return platform === 'native' ? nativeHomeRoute.build() : webHomeRoute.build();
 }
 
-/**
- * The header's Docs, Components and Blocks, each pointing into `platform`'s tree; on native, under
- * `engine`. The web header adds Editor last: its pages sit under Docs too, and the last item whose
- * pattern matches is the one marked.
- */
+/** The header's Docs, Components and Blocks, each pointing into `platform`'s tree; on native, under `engine`. */
 export function zoneNavItems(platform: Platform, engine: NativeEngine): SiteNavItem[] {
   if (platform === 'native') {
     return [
@@ -75,6 +70,5 @@ export function zoneNavItems(platform: Platform, engine: NativeEngine): SiteNavI
       pattern: `${webComponentsRoute.pathname}{/*rest}`,
     },
     { href: webBlocksRoute.build({ base }), label: 'Blocks', pattern: webBlocksRoute.pathname },
-    { href: webEditorDocsRoute.build(), label: 'Editor', pattern: `${webEditorDocsRoute.pathname}{/*rest}` },
   ];
 }

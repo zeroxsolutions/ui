@@ -5,18 +5,18 @@ import { editorDocsFolder } from '@zeroxsolutions/ui/site/lib/editor-docs-folder
 
 /**
  * `tree`, the loader's tree of the editor pages, as the one `Editor` folder `editorDocsSections` lays
- * out, each page under the title its own file gives it. The loader takes this as its tree, so the
- * sidebar, the pager and `llms.txt` all read the editor pages in that order.
+ * out. Each page is the loader's own node, moved rather than rebuilt, so its description still reaches
+ * `llms.txt`. The loader takes this as its tree, so the sidebar, the pager and `llms.txt` all read the
+ * editor pages in that order.
  */
 export function editorSection(tree: Root): Root {
-  const titles = new Map(flattenTree(tree.children).map((page) => [page.url, String(page.name)]));
-  const pageUrl = (name: string) => editorDocsPageRoute.build({ name });
+  const nodes = new Map(flattenTree(tree.children).map((node) => [node.url, node]));
+  const index = nodes.get(editorDocsRoute.build());
+  if (!index) throw new Error('The editor docs have no introduction');
 
   return {
     ...tree,
-    children: [
-      editorDocsFolder({ indexUrl: editorDocsRoute.build(), pageUrl, title: (name) => titles.get(pageUrl(name)) }),
-    ],
+    children: [editorDocsFolder({ index, page: (name) => nodes.get(editorDocsPageRoute.build({ name })) })],
   };
 }
 

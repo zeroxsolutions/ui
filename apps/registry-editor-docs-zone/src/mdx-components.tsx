@@ -16,7 +16,11 @@ import {
 
 import { ComponentSource } from '@zeroxsolutions/ui/site/components/data-display/component-source';
 import { ExamplePreview } from '@zeroxsolutions/ui/site/components/data-display/example-preview';
+import { exampleDemos } from '@zeroxsolutions/ui/site/lib/example-demos';
 import { editorExampleViewRoute } from '@zeroxsolutions/editor-docs-web/routes';
+
+/** The demos this app serves a page of their own for; a preview of anything else gets no full page button. */
+const demos = new Set(exampleDemos({ editor: true }));
 
 /**
  * Every element and component a page in `content/docs/editor` may use, passed to its compiled body: the
@@ -25,7 +29,10 @@ import { editorExampleViewRoute } from '@zeroxsolutions/editor-docs-web/routes';
 export const mdxComponents = {
   ...siteMdxComponents,
   ComponentPreview: (props: ComponentProps<typeof ExamplePreview>) => (
-    <ExamplePreview viewHref={editorExampleViewRoute.build({ name: props.name })} {...props} />
+    <ExamplePreview
+      viewHref={demos.has(props.name) ? editorExampleViewRoute.build({ name: props.name }) : undefined}
+      {...props}
+    />
   ),
   ComponentSource: ({ file, title, ...props }: ComponentProps<typeof ComponentSource>) => (
     <ComponentSource file={file} className="mt-6" {...props}>

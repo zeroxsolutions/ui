@@ -4,7 +4,7 @@ test("a preview's full page button opens its demo alone, with no site chrome", a
   test.setTimeout(90_000);
   await page.goto('/docs/editor/document-editor');
 
-  const open = page.getByRole('link', { name: 'Open in a new tab' }).first();
+  const open = page.getByRole('link', { name: 'Open document-editor-demo in a new tab' }).first();
   await expect(open).toHaveAttribute('href', '/docs/editor/view/document-editor-demo');
   await expect(open).toHaveAttribute('target', '_blank');
 

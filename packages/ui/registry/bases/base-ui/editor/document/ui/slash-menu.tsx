@@ -41,10 +41,11 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
   const [index, setIndex] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
   // The keys move the highlight without moving the list, so bring the highlighted
-  // option into view; `nearest` leaves the list still while it is already shown.
+  // option into view, and so does a query that refilters the list; `nearest` leaves
+  // the list still while the option is already shown.
   useEffect(() => {
     listRef.current?.querySelector('[data-highlighted]')?.scrollIntoView({ block: 'nearest' });
-  }, [index]);
+  }, [index, active?.query]);
   // Position dismissed via Esc — suppresses reopening at the same `/` while the
   // text lingers, until the caret moves to a different trigger (or none).
   const dismissedFrom = useRef<number | null>(null);

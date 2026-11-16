@@ -10,10 +10,10 @@ test('/view serves no page for an editor demo, which the editor zone serves', as
   expect((await request.get('/view/document-editor-demo')).status()).toBe(404);
 });
 
-test("a component preview's full page button opens its demo alone", async ({ page, context }) => {
+test("a component preview's full page button opens its demo alone", async ({ page, context, request }) => {
   await page.goto('/docs/components/base/ai-provider-picker');
 
-  const open = page.getByRole('link', { name: 'Open in a new tab' }).first();
+  const open = page.getByRole('link', { name: 'Open ai-provider-picker-demo in a new tab' }).first();
   await expect(open).toHaveAttribute('href', '/view/ai-provider-picker-demo');
   await expect(open).toHaveAttribute('target', '_blank');
 
@@ -21,7 +21,9 @@ test("a component preview's full page button opens its demo alone", async ({ pag
   await view.waitForLoadState();
   await expect(view).toHaveURL(/\/view\/ai-provider-picker-demo$/);
   await expect(view.getByRole('navigation', { name: 'Docs' })).toHaveCount(0);
-  await expect(view.locator('main')).not.toBeEmpty();
+  // The 404 page has no Docs navigation either, so the page's status and title are what tell them apart.
+  expect((await request.get('/view/ai-provider-picker-demo')).status()).toBe(200);
+  await expect(view).toHaveTitle(/^ai-provider-picker-demo/);
 });
 
 test('every published block fits a phone-wide frame and scrolls only inside its scroll area', async ({

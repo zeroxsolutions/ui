@@ -20,9 +20,13 @@ import { BlockPreview } from '@zeroxsolutions/ui-docs-web/components/data-displa
 import { ComponentsList } from '@zeroxsolutions/ui-docs-web/components/data-display/components-list';
 import { ComponentSource } from '@zeroxsolutions/ui/site/components/data-display/component-source';
 import { ExamplePreview } from '@zeroxsolutions/ui/site/components/data-display/example-preview';
+import { exampleDemos } from '@zeroxsolutions/ui/site/lib/example-demos';
 import { viewRoute } from '@zeroxsolutions/ui-docs-web/routes';
 import { InitCommand } from '@zeroxsolutions/ui-docs-web/components/data-display/init-command';
 import { WebComponentsJson } from '@zeroxsolutions/ui-docs-web/components/data-display/web-components-json';
+
+/** The demos this app serves a page of their own for; a preview of anything else gets no full page button. */
+const demos = new Set(exampleDemos({ editor: false }));
 
 /**
  * Every element and component a page in `content/docs` may use, passed to its compiled body: the site's
@@ -31,7 +35,7 @@ import { WebComponentsJson } from '@zeroxsolutions/ui-docs-web/components/data-d
 export const mdxComponents = {
   ...siteMdxComponents,
   ComponentPreview: (props: ComponentProps<typeof ExamplePreview>) => (
-    <ExamplePreview viewHref={viewRoute.build({ name: props.name })} {...props} />
+    <ExamplePreview viewHref={demos.has(props.name) ? viewRoute.build({ name: props.name }) : undefined} {...props} />
   ),
   BlockPreview,
   ComponentSource: ({ file, title, ...props }: ComponentProps<typeof ComponentSource>) => (

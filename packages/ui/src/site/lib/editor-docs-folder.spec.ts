@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import type { Item } from 'fumadocs-core/page-tree';
 import { describe, expect, it } from 'vitest';
 
 import { editorDocsSections } from '../constants/editor-docs-sections';
@@ -15,38 +16,34 @@ const items = (
   }
 ).items;
 
-const pageUrl = (name: string) => `/docs/editor/${name}`;
-const title = (name: string) => `Title of ${name}`;
+const node = (name: string): Item => ({ type: 'page', name: `Title of ${name}`, url: `/docs/editor/${name}` });
+const index: Item = { type: 'page', name: 'Editor', url: '/docs/editor' };
 
 describe('editorDocsFolder', () => {
   it('lists the introduction alone, then each section under its title', () => {
-    const groups = pageTreeGroups({
-      name: 'Docs',
-      children: [editorDocsFolder({ indexUrl: '/docs/editor', pageUrl, title })],
-    });
+    const groups = pageTreeGroups({ name: 'Docs', children: [editorDocsFolder({ index, page: node })] });
 
     expect(groups.map((group) => [group.name, group.pages.map((page) => page.url)])).toEqual([
       [undefined, ['/docs/editor']],
-      ...editorDocsSections.map(({ title: section, pages }) => [section, pages.map(pageUrl)]),
+      ...editorDocsSections.map(({ title, pages }) => [title, pages.map((name) => `/docs/editor/${name}`)]),
     ]);
-    expect(groups[1].pages[0].name).toBe('Title of document-editor');
   });
 
-  it('marks every page external when asked', () => {
-    const folder = editorDocsFolder({ indexUrl: '/docs/editor', pageUrl, title, external: true });
-    const pages = folder.children.filter((node) => node.type === 'page');
+  it('places the nodes it is handed as they are', () => {
+    const handed = new Map(
+      editorDocsSections
+        .flatMap((section) => section.pages)
+        .map((name) => [name, { ...node(name), description: name }]),
+    );
+    const folder = editorDocsFolder({ index, page: (name) => handed.get(name) });
 
-    expect(pages.length).toBeGreaterThan(1);
-    expect(pages.every((page) => page.external === true)).toBe(true);
+    expect(folder.children[0]).toBe(index);
+    expect(folder.children).toContain(handed.get('math-editor'));
   });
 
-  it('refuses a listed page it has no title for', () => {
+  it('refuses a listed page it has no node for', () => {
     expect(() =>
-      editorDocsFolder({
-        indexUrl: '/docs/editor',
-        pageUrl,
-        title: (name) => (name === 'math-editor' ? undefined : name),
-      }),
+      editorDocsFolder({ index, page: (name) => (name === 'math-editor' ? undefined : node(name)) }),
     ).toThrow('"math-editor"');
   });
 });

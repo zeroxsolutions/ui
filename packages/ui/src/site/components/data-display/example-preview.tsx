@@ -35,8 +35,12 @@ function ExamplePreview({ name, viewHref, ...source }: ExamplePreviewProps): Rea
             href={viewHref}
             target="_blank"
             rel="noreferrer"
-            aria-label="Open in a new tab"
-            className={cn(buttonVariants({ variant: 'ghost', size: 'icon-sm' }), 'absolute top-2 right-2')}
+            aria-label={`Open ${name} in a new tab`}
+            title="Open in a new tab"
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+              'bg-background/80 absolute top-2 right-2 backdrop-blur-sm',
+            )}
           >
             <Maximize2Icon />
           </a>
