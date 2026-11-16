@@ -43,6 +43,20 @@
       ]
     },
     {
+      "name": "icon-motion",
+      "type": "registry:lib",
+      "title": "Icon motion",
+      "description": "useIconMotion, the progress an animated icon draws its parts from, and IconHandle, through which a control plays the icon's motion out and back, still when the system asks for reduced motion.",
+      "dependencies": ["lucide-react-native", "react-native-reanimated"],
+      "registryDependencies": ["@zui/motion"],
+      "files": [
+        {
+          "path": "src/registry/lib/icon-motion.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "overlay",
       "type": "registry:lib",
       "title": "Overlay",
@@ -103,6 +117,21 @@
         {
           "path": "src/registry/ui/icon.tsx",
           "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "copy-icon",
+      "type": "registry:ui",
+      "title": "Copy Icon",
+      "description": "An animated copy icon, adapted from lucide-animated, whose sheets slide apart and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/copy-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/copy-icon.tsx"
         }
       ]
     },

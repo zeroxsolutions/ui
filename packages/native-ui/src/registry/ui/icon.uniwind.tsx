@@ -1,5 +1,5 @@
-import type { LucideIcon, LucideProps } from 'lucide-react-native';
-import { createContext, useContext, type ReactNode } from 'react';
+import type { LucideProps } from 'lucide-react-native';
+import { createContext, useContext, type ComponentType, type ReactNode } from 'react';
 import type { TextStyle } from 'react-native';
 import { withUniwind } from 'uniwind';
 import { cn } from '../lib/utils';
@@ -13,8 +13,8 @@ import { TextClassContext } from './text';
 const IconClassContext = createContext<string | undefined>(undefined);
 
 type IconProps = LucideProps & {
-  /** The lucide icon to draw, such as `Check` from lucide-react-native. */
-  as: LucideIcon;
+  /** The icon to draw: a lucide icon, such as `Check` from lucide-react-native, or an animated icon such as `CopyIcon`. */
+  as: ComponentType<LucideProps>;
 };
 
 // withUniwind hands the component its className as well as the props it mapped from it; the glyph

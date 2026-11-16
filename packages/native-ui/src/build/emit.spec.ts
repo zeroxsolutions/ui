@@ -203,6 +203,14 @@ describe('aliasImports', () => {
     );
   });
 
+  it("points an import of an animated icon at the consumer's components/general, where the icon lands", () => {
+    const source = "import { CopyIcon } from '../../icons/copy-icon';";
+
+    expect(aliasImports(source, 'components/feedback/copy-button.tsx')).toBe(
+      "import { CopyIcon } from '@/components/general/copy-icon';",
+    );
+  });
+
   it('leaves a package import alone', () => {
     const source = "import { Pressable } from 'react-native';";
 

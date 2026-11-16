@@ -58,9 +58,9 @@ function readRegistry(root: string): Registry {
   return JSON.parse(readFileSync(join(root, 'registry.json'), 'utf8')) as Registry;
 }
 
-const web = readRegistry(WEB).items.filter(
-  (item) => item.type === 'registry:component' || item.type === 'registry:block',
-);
+const webItems = readRegistry(WEB).items;
+const web = webItems.filter((item) => item.type === 'registry:component' || item.type === 'registry:block');
+const webIcons = webItems.filter((item) => item.type === 'registry:ui' && item.name.endsWith('-icon'));
 const native = new Map(readRegistry(PROJECT).items.map((item) => [item.name, item]));
 const zuiSlots = new Set(
   parseSlotMap(readFileSync(require.resolve('@zeroxsolutions/ui/registry/styles/style-nova.css'), 'utf8')).keys(),
@@ -82,6 +82,11 @@ describe("zui's own items on native", () => {
     expect(
       web.map((item) => item.name).filter((name) => !native.has(name) && !NOT_PORTED.has(name) && !PENDING.has(name)),
     ).toEqual([]);
+  });
+
+  it('has a native twin of every web animated icon', () => {
+    expect(webIcons.length).toBeGreaterThan(0);
+    expect(webIcons.map((item) => item.name).filter((name) => !native.has(name))).toEqual([]);
   });
 
   it('names no item as not ported or pending that is ported', () => {
