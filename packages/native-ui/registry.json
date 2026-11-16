@@ -47,7 +47,7 @@
       "type": "registry:lib",
       "title": "Icon motion",
       "description": "useIconMotion, the progress an animated icon draws its parts from, IconHandle, through which a control plays the icon's motion out and back, still when the system asks for reduced motion, and transformProps and dash, which turn the progress into a shape's transform and drawn stroke.",
-      "dependencies": ["lucide-react-native", "react-native-reanimated"],
+      "dependencies": ["lucide-react-native", "react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/motion"],
       "files": [
         {
