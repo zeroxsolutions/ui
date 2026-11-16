@@ -163,12 +163,10 @@ describe('PermissionCardStatus icon', () => {
     </PermissionCard>
   );
 
-  it('plays the icon of the status the card is in, once, as it appears', () => {
-    render(card('pending'));
+  it.each(['pending', 'approved', 'denied'] as const)('plays no icon when the card is first drawn %s', (status) => {
+    render(card(status));
 
-    expect(pendingStart).toHaveBeenCalledTimes(1);
-    expect(approvedStart).not.toHaveBeenCalled();
-    expect(deniedStart).not.toHaveBeenCalled();
+    for (const fn of all) expect(fn).not.toHaveBeenCalled();
   });
 
   it('plays the new status icon once when the status flips, and stops the one it leaves', () => {
@@ -176,7 +174,7 @@ describe('PermissionCardStatus icon', () => {
     rerender(card('approved'));
 
     expect(approvedStart).toHaveBeenCalledTimes(1);
-    expect(pendingStart).toHaveBeenCalledTimes(1);
+    expect(pendingStart).not.toHaveBeenCalled();
     expect(pendingStop).toHaveBeenCalledTimes(1);
 
     rerender(card('approved'));

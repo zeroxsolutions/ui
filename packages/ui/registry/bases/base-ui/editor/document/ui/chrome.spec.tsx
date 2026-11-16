@@ -341,7 +341,8 @@ describe('SlashMenu icons', () => {
     );
     render(<SlashMenu editor={editor} items={items} />);
     await settle();
-    expect(handles.heading1.startAnimation).toHaveBeenCalledTimes(1);
+    // The first row is highlighted as the menu is drawn, which the reader did not cause.
+    expect(handles.heading1.startAnimation).not.toHaveBeenCalled();
     expect(handles.heading2.startAnimation).not.toHaveBeenCalled();
 
     fireEvent.keyDown(document, { key: 'ArrowDown' });

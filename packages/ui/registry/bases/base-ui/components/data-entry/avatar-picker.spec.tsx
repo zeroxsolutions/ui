@@ -42,23 +42,26 @@ describe('AvatarPickerColorGroup check', () => {
     </AvatarPicker>
   );
 
-  it('draws the check on the pressed swatch only and plays it once as it appears', () => {
+  it('draws the check on the pressed swatch only and does not play it on first draw', () => {
     render(group('#6366f1'));
 
     expect(screen.getAllByTestId('check-icon')).toHaveLength(1);
     expect(screen.getByRole('button', { name: '#6366f1' }).querySelector('svg')).not.toBeNull();
-    expect(checkStart).toHaveBeenCalledTimes(1);
+    expect(checkStart).not.toHaveBeenCalled();
     expect(checkStop).not.toHaveBeenCalled();
   });
 
-  it('plays the check on the swatch that becomes pressed, not again on a rerender that keeps it', () => {
+  it('plays the check once on the swatch that becomes pressed, not again on a rerender that keeps it', () => {
     const { rerender } = render(group('#6366f1'));
     rerender(group('#6366f1'));
-    expect(checkStart).toHaveBeenCalledTimes(1);
+    expect(checkStart).not.toHaveBeenCalled();
 
     rerender(group('#ec4899'));
     expect(screen.getByRole('button', { name: '#ec4899' }).querySelector('svg')).not.toBeNull();
-    expect(checkStart).toHaveBeenCalledTimes(2);
+    expect(checkStart).toHaveBeenCalledTimes(1);
+
+    rerender(group('#ec4899'));
+    expect(checkStart).toHaveBeenCalledTimes(1);
   });
 });
 
