@@ -460,3 +460,29 @@ describe('DropdownMenu', () => {
     expect(screen.getByTestId('app-screen', { includeHiddenElements: false })).toBeOnTheScreen();
   });
 });
+
+describe('DropdownMenuTrigger handlers', () => {
+  it('forwards onPressIn, onFocus and onBlur', async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    const onBlur = jest.fn();
+    await render(
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button aria-label="Open" onPressIn={onPressIn} onFocus={onFocus} onBlur={onBlur} />
+        </DropdownMenuTrigger>
+      </DropdownMenu>,
+    );
+    const control = screen.getByRole('button', { name: 'Open' });
+
+    await userEvent.setup().press(control);
+    // The host element holds the handlers Pressable wired from what it was given; a bare fireEvent would find
+    // the ones on the component above it and pass whatever the port dropped.
+    await act(() => control.props.onFocus({ nativeEvent: {} }));
+    await act(() => control.props.onBlur({ nativeEvent: {} }));
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(onBlur).toHaveBeenCalledTimes(1);
+  });
+});

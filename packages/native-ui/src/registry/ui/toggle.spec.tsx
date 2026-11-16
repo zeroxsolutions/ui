@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { Bold } from 'lucide-react-native';
 import { useState } from 'react';
 import { registerCSS } from 'react-native-css-interop/test';
@@ -119,5 +119,34 @@ describe('Toggle', () => {
     expect(control.props.accessibilityState.disabled).toBe(true);
     expect(onPressedChange).not.toHaveBeenCalled();
     expect(emittedClasses(control.props.className)).toContain('disabled:opacity-50');
+  });
+});
+
+describe('Toggle handlers', () => {
+  it('forwards onPressIn, onFocus and onBlur', async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    const onBlur = jest.fn();
+    await render(
+      <Toggle
+        aria-label="Bold"
+        pressed={false}
+        onPressedChange={jest.fn()}
+        onPressIn={onPressIn}
+        onFocus={onFocus}
+        onBlur={onBlur}
+      />,
+    );
+    const control = screen.getByRole('button', { name: 'Bold' });
+
+    await userEvent.setup().press(control);
+    // The host element holds the handlers Pressable wired from what it was given; a bare fireEvent would find
+    // the ones on the component above it and pass whatever the port dropped.
+    await act(() => control.props.onFocus({ nativeEvent: {} }));
+    await act(() => control.props.onBlur({ nativeEvent: {} }));
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });

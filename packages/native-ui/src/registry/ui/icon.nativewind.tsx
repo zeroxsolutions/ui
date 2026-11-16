@@ -1,7 +1,8 @@
 import type { LucideProps } from 'lucide-react-native';
 import { cssInterop } from 'nativewind';
-import { createContext, useContext, type ComponentType, type ReactNode } from 'react';
+import { createContext, useContext, type ComponentType, type ReactNode, type Ref } from 'react';
 import type { TextStyle } from 'react-native';
+import type { AnimatedIconProps, IconHandle } from '../lib/icon-motion';
 import { cn } from '../lib/utils';
 import { TextClassContext } from './text';
 
@@ -14,7 +15,9 @@ const IconClassContext = createContext<string | undefined>(undefined);
 
 type IconProps = LucideProps & {
   /** The icon to draw: a lucide icon, such as `Check` from lucide-react-native, or an animated icon such as `CopyIcon`. */
-  as: ComponentType<LucideProps>;
+  as: ComponentType<AnimatedIconProps>;
+  /** The handle of an animated `as`, which a control starts and stops it through; a lucide icon takes none. */
+  ref?: Ref<IconHandle>;
 };
 
 function IconGlyph({ as: Glyph, ...props }: IconProps): ReactNode {

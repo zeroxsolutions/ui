@@ -1,9 +1,8 @@
 import { act, isHiddenFromAccessibility, render, screen } from '@testing-library/react-native';
 import { readdirSync } from 'node:fs';
-import { createRef, type ComponentType, type ReactNode, type Ref } from 'react';
+import { createRef, type ComponentType, type Ref } from 'react';
 import { AccessibilityInfo } from 'react-native';
 import type { AnimatedIconProps, IconHandle } from '../lib/icon-motion';
-import type { LucideProps } from 'lucide-react-native';
 import { Icon } from '../ui/icon';
 
 const HIDDEN = { includeHiddenElements: true } as const;
@@ -96,10 +95,7 @@ const elapse = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms));
 
 /** Draws `Glyph` through Icon, handing its handle to `handle`. */
 async function renderIcon(Glyph: ComponentType<AnimatedIconProps>, handle: Ref<IconHandle>): Promise<void> {
-  function Bound(props: LucideProps): ReactNode {
-    return <Glyph {...props} ref={handle} />;
-  }
-  await render(<Icon as={Bound} testID="icon" className="size-4" />);
+  await render(<Icon as={Glyph} ref={handle} testID="icon" className="size-4" />);
   await elapse(0);
 }
 

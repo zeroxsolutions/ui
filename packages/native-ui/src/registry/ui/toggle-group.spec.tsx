@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { useState, type ComponentProps } from 'react';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Text } from './text';
@@ -145,5 +145,29 @@ describe('ToggleGroup', () => {
 
     expect(screen.getByRole('radio', { name: 'Left' })).toBeDisabled();
     expect(screen.getByRole('radio', { name: 'Left' })).not.toBeChecked();
+  });
+});
+
+describe('ToggleGroupItem handlers', () => {
+  it('forwards onPressIn, onFocus and onBlur', async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    const onBlur = jest.fn();
+    await render(
+      <ToggleGroup type="single" value="" onValueChange={jest.fn()}>
+        <ToggleGroupItem value="left" aria-label="Left" onPressIn={onPressIn} onFocus={onFocus} onBlur={onBlur} />
+      </ToggleGroup>,
+    );
+    const control = screen.getByRole('radio', { name: 'Left' });
+
+    await userEvent.setup().press(control);
+    // The host element holds the handlers Pressable wired from what it was given; a bare fireEvent would find
+    // the ones on the component above it and pass whatever the port dropped.
+    await act(() => control.props.onFocus({ nativeEvent: {} }));
+    await act(() => control.props.onBlur({ nativeEvent: {} }));
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });
