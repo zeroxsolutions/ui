@@ -11,9 +11,10 @@ const HIDDEN = { includeHiddenElements: true } as const;
 /**
  * The animated props and styles each animated part of the icon under test is drawn with, read through their
  * updaters: Reanimated's Jest setup keeps animated values off the host elements Testing Library renders. Only
- * those handed to an animated component count, so a part computed and never drawn changes nothing.
+ * those handed to an animated component count, so a part computed and never drawn changes nothing. `props` holds
+ * the animated props alone, which reach the native view without passing through react-native-svg's components.
  */
-const mockDrawn: { current: unknown[] }[] = [];
+const mockDrawn: { current: unknown[]; props: unknown[] }[] = [];
 
 /** The updater behind each object `useAnimatedProps` or `useAnimatedStyle` returned, as of its last render. */
 const mockUpdaters = new WeakMap<object, { current: () => unknown }>();
@@ -39,12 +40,13 @@ jest.mock('react-native-reanimated', () => {
   const createAnimatedComponent = (component: never): unknown => {
     const Animated = actual.createAnimatedComponent(component) as unknown as ComponentType<DrawnProps>;
     return function Drawn(props: DrawnProps) {
-      const entry = useRef<{ current: unknown[] } | null>(null);
+      const entry = useRef<{ current: unknown[]; props: unknown[] } | null>(null);
       if (entry.current === null) {
-        entry.current = { current: [] };
+        entry.current = { current: [], props: [] };
         mockDrawn.push(entry.current);
       }
       entry.current.current = [props.animatedProps, props.style].flat(Infinity).filter((value) => value != null);
+      entry.current.props = [props.animatedProps].flat(Infinity).filter((value) => value != null);
       return createElement(Animated, props);
     };
   };
@@ -111,6 +113,36 @@ const parts = (): string[] =>
     ),
   );
 
+/**
+ * The transform props react-native-svg folds into `matrix` only when React renders a shape. An animated update
+ * skips that render, and the native view, which declares `matrix` alone, ignores them.
+ */
+const RENDER_ONLY_TRANSFORM = [
+  'translate',
+  'translateX',
+  'translateY',
+  'scale',
+  'scaleX',
+  'scaleY',
+  'rotation',
+  'origin',
+  'originX',
+  'originY',
+  'skew',
+  'skewX',
+  'skewY',
+  'transform',
+];
+
+/** The animated props each animated part is drawn with now, all parts together. */
+const animatedProps = (): Record<string, unknown>[] =>
+  mockDrawn.flatMap((part) =>
+    part.props.flatMap((value) => {
+      const props = typeof value === 'object' && value !== null ? (mockUpdaters.get(value)?.current() ?? value) : value;
+      return typeof props === 'object' && props !== null ? [props as Record<string, unknown>] : [];
+    }),
+  );
+
 /** The drawing as it stands now: the rendered tree, and the animated values its parts are drawn with. */
 const drawing = (): string => JSON.stringify({ tree: screen.toJSON(), animated: parts() });
 
@@ -154,6 +186,25 @@ describe('the animated icons', () => {
       }
       expect(resting.length).toBeGreaterThan(0);
       expect(resting.map((_part, index) => index).filter((index) => !moved.has(index))).toEqual([]);
+    });
+
+    it('moves its parts only through props the native view reads', async () => {
+      reduceMotion(false);
+      const handle = createRef<IconHandle>();
+      await renderIcon(Glyph, handle);
+
+      await act(() => handle.current?.startAnimation());
+      await elapse(MID_MOTION);
+      const names = animatedProps().flatMap((props) => Object.keys(props));
+      expect(names.filter((name) => RENDER_ONLY_TRANSFORM.includes(name))).toEqual([]);
+    });
+
+    it("rests untransformed, since react-native-svg drops a path's matrix from its first render", async () => {
+      reduceMotion(false);
+      await renderIcon(Glyph, createRef());
+
+      const matrices = animatedProps().flatMap((props) => ('matrix' in props ? [props.matrix] : []));
+      expect(matrices.filter((matrix) => JSON.stringify(matrix) !== '[1,0,0,1,0,0]')).toEqual([]);
     });
 
     it(`is back at rest within ${MOTION_LIMIT} ms of being started`, async () => {

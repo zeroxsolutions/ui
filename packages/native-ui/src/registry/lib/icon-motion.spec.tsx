@@ -1,7 +1,8 @@
-import { act, render } from '@testing-library/react-native';
+import { act, render, screen } from '@testing-library/react-native';
 import { createRef, type ReactNode, type Ref } from 'react';
 import { AccessibilityInfo } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
+import { Path, type TransformProps } from 'react-native-svg';
 import { dash, transformProps, useIconMotion, type IconHandle, type IconTiming } from './icon-motion';
 
 let progress: SharedValue<number> | undefined;
@@ -103,21 +104,31 @@ describe('useIconMotion', () => {
   });
 });
 
+/** The matrix react-native-svg hands its native path for a path drawn with `props`, its JS-only transform props. */
+async function svgMatrix(props: TransformProps): Promise<readonly number[] | undefined> {
+  await render(<Path d="M0 0h1" {...props} />);
+  const host = screen.toJSON();
+  if (host === null || Array.isArray(host) || host.type !== 'RNSVGPath') throw new Error('No native path drawn');
+  return (host.props as { matrix?: readonly number[] }).matrix;
+}
+
+/** Each number of `actual` against `expected`'s, to six places. */
+function expectMatrix(actual: readonly number[] | undefined, expected: readonly number[] | undefined): void {
+  expect(actual).toHaveLength(6);
+  expected?.forEach((value, index) => expect(actual?.[index]).toBeCloseTo(value, 6));
+}
+
 describe('transformProps', () => {
   it('leaves a shape where it is when nothing moves', () => {
-    expect(transformProps({})).toEqual({
-      translateX: 0,
-      translateY: 0,
-      scaleX: 1,
-      scaleY: 1,
-      rotation: 0,
-      originX: 12,
-      originY: 12,
-    });
+    expect(transformProps({})).toEqual({ matrix: [1, 0, 0, 1, 0, 0] });
   });
 
-  it('names its parts the way react-native-svg reads them, about the origin it is given', () => {
-    expect(transformProps({ x: 2, y: -3, scaleX: 2, scaleY: 0.5, rotate: 45, originX: 4, originY: 6 })).toEqual({
+  it('hands the native view a matrix, the one prop of a transform it reads', () => {
+    expect(Object.keys(transformProps({ x: 2, rotate: 30 }))).toEqual(['matrix']);
+  });
+
+  it('composes the matrix react-native-svg builds from the same move, scale and turn about the origin', async () => {
+    const expected = await svgMatrix({
       translateX: 2,
       translateY: -3,
       scaleX: 2,
@@ -126,12 +137,23 @@ describe('transformProps', () => {
       originX: 4,
       originY: 6,
     });
+
+    expectMatrix(
+      transformProps({ x: 2, y: -3, scaleX: 2, scaleY: 0.5, rotate: 45, originX: 4, originY: 6 }).matrix,
+      expected,
+    );
   });
 
-  it('keeps a scale above zero, which react-native-svg reads as none', () => {
-    const { scaleX, scaleY } = transformProps({ scaleX: 0, scaleY: 0 });
-    expect(scaleX).toBeGreaterThan(0);
-    expect(scaleY).toBeGreaterThan(0);
+  it('turns and scales about 12, 12 when no origin is given', async () => {
+    const expected = await svgMatrix({ scaleX: 1.5, scaleY: 1.5, rotation: -90, originX: 12, originY: 12 });
+
+    expectMatrix(transformProps({ scaleX: 1.5, scaleY: 1.5, rotate: -90 }).matrix, expected);
+  });
+
+  it('keeps a scale off zero, so the matrix can still be inverted, and keeps its sign', () => {
+    const [a, , , d] = transformProps({ scaleX: 0, scaleY: -0.0001 }).matrix;
+    expect(a).toBeGreaterThan(0);
+    expect(d).toBeLessThan(0);
   });
 });
 

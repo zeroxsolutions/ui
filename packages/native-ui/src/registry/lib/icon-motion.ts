@@ -15,6 +15,14 @@ import {
 } from 'react-native-reanimated';
 import { useReducedMotion } from './motion';
 
+declare module 'react-native-svg/lib/typescript/lib/extract/types' {
+  /** Read by every native shape and group, and missing from react-native-svg's own types. */
+  interface TransformProps {
+    /** SVG's `matrix(a b c d e f)`, which the native view draws with in place of the other transform props. */
+    matrix?: readonly number[];
+  }
+}
+
 /** What a control holds an animated icon by, to play its motion when the control is pressed or focused. */
 interface IconHandle {
   /** Plays the motion once, out and back; does nothing when the system asks for reduced motion. */
@@ -95,20 +103,20 @@ interface IconTransform {
   originY?: number;
 }
 
-/** The props of a shape or group react-native-svg builds its transform from. */
+/**
+ * The transform of a shape or group as react-native-svg's native views read it: SVG's `matrix(a b c d e f)`.
+ * An animated update reaches the native view without passing through react-native-svg's components, which
+ * fold `translateX`, `rotation`, `originX` and the rest into `matrix` only when React renders them, so those
+ * props would leave the shape where it is.
+ */
 interface IconTransformProps {
-  translateX: number;
-  translateY: number;
-  scaleX: number;
-  scaleY: number;
-  rotation: number;
-  originX: number;
-  originY: number;
+  matrix: [a: number, b: number, c: number, d: number, e: number, f: number];
 }
 
 /**
- * The transform props of a shape or group, which turn about the origin, scale about it, then move. A scale is
- * kept at least 0.001 in size, since react-native-svg reads 0 as no scale at all; its sign is kept, so a flip works.
+ * The transform of a shape or group, which turns about the origin, scales about it, then moves, as
+ * react-native-svg composes it from the same props. A scale is kept at least 0.001 in size, since a matrix that
+ * scales to 0 has no inverse to hit-test the shape with; its sign is kept, so a flip works.
  */
 function transformProps({
   x = 0,
@@ -120,15 +128,16 @@ function transformProps({
   originY = 12,
 }: IconTransform): IconTransformProps {
   'worklet';
-  return {
-    translateX: x,
-    translateY: y,
-    scaleX: Math.abs(scaleX) < 0.001 ? 0.001 : scaleX,
-    scaleY: Math.abs(scaleY) < 0.001 ? 0.001 : scaleY,
-    rotation: rotate,
-    originX,
-    originY,
-  };
+  const sx = Math.abs(scaleX) < 0.001 ? Math.sign(scaleX || 1) * 0.001 : scaleX;
+  const sy = Math.abs(scaleY) < 0.001 ? Math.sign(scaleY || 1) * 0.001 : scaleY;
+  const turn = (rotate * Math.PI) / 180;
+  const cos = Math.cos(turn);
+  const sin = Math.sin(turn);
+  const a = cos * sx;
+  const b = sin * sx;
+  const c = 0 - sin * sy;
+  const d = cos * sy;
+  return { matrix: [a, b, c, d, x + originX - (originX * a + originY * c), y + originY - (originX * b + originY * d)] };
 }
 
 /**
