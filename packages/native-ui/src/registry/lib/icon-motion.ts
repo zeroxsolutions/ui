@@ -1,9 +1,9 @@
 /**
- * What every animated icon shares: the handle a control starts and stops it through, its props, and the
- * progress its parts are drawn from.
+ * What every animated icon shares: the handle a control starts and stops it through, its props, the
+ * progress its parts are drawn from, and the hooks a control plays it from.
  */
 import type { LucideProps } from 'lucide-react-native';
-import { useImperativeHandle, type Ref } from 'react';
+import { useEffect, useImperativeHandle, useRef, type Ref, type RefObject } from 'react';
 import {
   cancelAnimation,
   Easing,
@@ -158,5 +158,62 @@ function dash(
   };
 }
 
-export { dash, transformProps, useIconMotion };
-export type { AnimatedIconProps, IconHandle, IconTiming, IconTransform, IconTransformProps };
+/** A control's own `onPressIn` and `onFocus`, as its caller handed them. */
+interface IconTriggerProps<PressIn, Focus> {
+  onPressIn?: ((event: PressIn) => void) | null;
+  onFocus?: ((event: Focus) => void) | null;
+}
+
+/** The `onPressIn` and `onFocus` a control spreads on itself to start its icons. */
+interface IconTriggerHandlers<PressIn, Focus> {
+  onPressIn: (event: PressIn) => void;
+  onFocus: (event: Focus) => void;
+}
+
+/**
+ * The `onPressIn` and `onFocus` of a control that draws animated icons: each runs the caller's own handler from
+ * `own`, then starts every icon in `icons` that is drawn. Nothing stops them on press-out or blur, since an icon
+ * plays out and back on its own and a quick tap would cut it short.
+ */
+function iconTrigger<PressIn, Focus>(
+  icons: readonly RefObject<IconHandle | null>[],
+  own: IconTriggerProps<PressIn, Focus>,
+): IconTriggerHandlers<PressIn, Focus> {
+  const start = (): void => {
+    for (const icon of icons) icon.current?.startAnimation();
+  };
+  return {
+    onPressIn: (event) => {
+      own.onPressIn?.(event);
+      start();
+    },
+    onFocus: (event) => {
+      own.onFocus?.(event);
+      start();
+    },
+  };
+}
+
+/**
+ * Plays `icon` once each time `reached` turns true, such as a check as a copy succeeds. A first render with
+ * `reached` already true plays nothing, so an icon drawn in the state it was already in stays still; an icon no
+ * longer drawn is skipped.
+ */
+function usePlayOnReach(icon: RefObject<IconHandle | null>, reached: boolean): void {
+  const was = useRef(reached);
+  useEffect(() => {
+    if (reached && !was.current) icon.current?.startAnimation();
+    was.current = reached;
+  }, [icon, reached]);
+}
+
+export { dash, iconTrigger, transformProps, useIconMotion, usePlayOnReach };
+export type {
+  AnimatedIconProps,
+  IconHandle,
+  IconTiming,
+  IconTransform,
+  IconTransformProps,
+  IconTriggerHandlers,
+  IconTriggerProps,
+};

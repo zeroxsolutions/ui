@@ -1,8 +1,11 @@
-import { Brain, ChevronDown, ChevronUp } from 'lucide-react-native';
 import { useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { ReasoningCollapsibleContext, useReasoningCollapsible } from '../../hooks/use-reasoning-collapsible';
+import { BrainIcon } from '../../icons/brain-icon';
+import { ChevronDownIcon } from '../../icons/chevron-down-icon';
+import { ChevronUpIcon } from '../../icons/chevron-up-icon';
+import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { usePulse } from '../../lib/motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
@@ -105,16 +108,31 @@ type ReasoningCollapsibleTriggerProps = Omit<CollapsibleTriggerProps, 'asChild' 
  * The toggle row, a full-width small ghost Button announced as a button with its expanded state; its
  * children are the label, set in one line of Text, so a label component may return a string. The label
  * pulses while the root is streaming, unless the system asks for reduced motion, and the chevron points up
- * while the body is open.
+ * while the body is open. The brain and the chevron play when the row is pressed in or focused, after a
+ * caller's own `onPressIn` and `onFocus`.
  * @throws {Error} when rendered outside a ReasoningCollapsible
  */
-function ReasoningCollapsibleTrigger({ className, children, ...props }: ReasoningCollapsibleTriggerProps): ReactNode {
+function ReasoningCollapsibleTrigger({
+  className,
+  children,
+  onPressIn,
+  onFocus,
+  ...props
+}: ReasoningCollapsibleTriggerProps): ReactNode {
   const { streaming, isOpen } = useReasoningCollapsible();
   const pulseStyle = usePulse(streaming);
+  const brain = useRef<IconHandle>(null);
+  const chevron = useRef<IconHandle>(null);
   return (
     <CollapsibleTrigger asChild>
-      <Button variant="ghost" size="sm" className={cn('w-full justify-start', className)} {...props}>
-        <Icon as={Brain} />
+      <Button
+        variant="ghost"
+        size="sm"
+        className={cn('w-full justify-start', className)}
+        {...iconTrigger([brain, chevron], { onPressIn, onFocus })}
+        {...props}
+      >
+        <Icon as={BrainIcon} ref={brain} />
         {/* The pulse runs on a layer around the label, as StatusIndicator's does, so the label stays a plain
             Text that both engines style; the layer grows in the row as the web's label does. */}
         <Animated.View style={[LABEL_LAYOUT, pulseStyle]}>
@@ -122,7 +140,7 @@ function ReasoningCollapsibleTrigger({ className, children, ...props }: Reasonin
             {children}
           </Text>
         </Animated.View>
-        <Icon as={isOpen ? ChevronUp : ChevronDown} />
+        <Icon as={isOpen ? ChevronUpIcon : ChevronDownIcon} ref={chevron} />
       </Button>
     </CollapsibleTrigger>
   );

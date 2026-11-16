@@ -1,7 +1,19 @@
 import type { Column } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff, type LucideIcon } from 'lucide-react-native';
-import { createContext, useContext, useMemo, type ComponentProps, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useRef,
+  type ComponentProps,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 import { View } from 'react-native';
+import { ArrowDownIcon } from '../../icons/arrow-down-icon';
+import { ArrowUpIcon } from '../../icons/arrow-up-icon';
+import { ChevronsUpDownIcon } from '../../icons/chevrons-up-down-icon';
+import { EyeOffIcon } from '../../icons/eye-off-icon';
+import { iconTrigger, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
 import { Button } from '../../ui/button';
@@ -67,19 +79,26 @@ type DataTableColumnHeaderTriggerProps = Omit<ComponentProps<typeof DropdownMenu
 
 /**
  * The ghost Button that opens the column menu, named by its `children`, the column's title, and followed by an
- * icon for the column's sort direction: up for ascending, down for descending, both ways while unsorted.
+ * icon for the column's sort direction: up for ascending, down for descending, both ways while unsorted. The icon
+ * plays when the trigger is pressed in or focused, after a caller's own `onPressIn` and `onFocus`.
  * @throws {Error} when rendered outside a DataTableColumnHeader
  */
-function DataTableColumnHeaderTrigger({ children, ...props }: DataTableColumnHeaderTriggerProps): ReactNode {
+function DataTableColumnHeaderTrigger({
+  children,
+  onPressIn,
+  onFocus,
+  ...props
+}: DataTableColumnHeaderTriggerProps): ReactNode {
   const { column } = useDataTableColumnHeader();
+  const icon = useRef<IconHandle>(null);
   const sorted = column.getIsSorted();
-  const sortIcon = sorted === 'desc' ? ArrowDown : sorted === 'asc' ? ArrowUp : ChevronsUpDown;
+  const sortIcon = sorted === 'desc' ? ArrowDownIcon : sorted === 'asc' ? ArrowUpIcon : ChevronsUpDownIcon;
   return (
     <DropdownMenuTrigger asChild {...props}>
       {/* The negative margin lines the button's label up with the column's cells. */}
-      <Button variant="ghost" className="-ml-2.5">
+      <Button variant="ghost" className="-ml-2.5" {...iconTrigger([icon], { onPressIn, onFocus })}>
         {asText(children)}
-        <Icon as={sortIcon} />
+        <Icon as={sortIcon} ref={icon} />
       </Button>
     </DropdownMenuTrigger>
   );
@@ -111,28 +130,35 @@ type DataTableColumnHeaderItemProps = Omit<ComponentProps<typeof DropdownMenuIte
 
 type DataTableColumnHeaderActionProps = DataTableColumnHeaderItemProps & {
   /** The leading icon. */
-  icon: LucideIcon;
+  icon: ComponentType<AnimatedIconProps>;
   /** What a press does to the column, unless the caller's `onPress` prevents it. */
   act: () => void;
 };
 
-/** A column menu item with a leading icon, which runs the caller's `onPress` before its own action. */
+/**
+ * A column menu item with a leading icon, which runs the caller's `onPress` before its own action. The icon plays
+ * when the item is pressed in or focused, after a caller's own `onPressIn` and `onFocus`.
+ */
 function DataTableColumnHeaderAction({
   icon,
   act,
   children,
   onPress,
+  onPressIn,
+  onFocus,
   ...props
 }: DataTableColumnHeaderActionProps): ReactNode {
+  const glyph = useRef<IconHandle>(null);
   return (
     <DropdownMenuItem
       onPress={(event) => {
         onPress?.(event);
         if (!event.isDefaultPrevented()) act();
       }}
+      {...iconTrigger([glyph], { onPressIn, onFocus })}
       {...props}
     >
-      <Icon as={icon} />
+      <Icon as={icon} ref={glyph} />
       {asText(children)}
     </DropdownMenuItem>
   );
@@ -146,7 +172,7 @@ function DataTableColumnHeaderAction({
 function DataTableColumnHeaderSortAscending({ children, ...props }: DataTableColumnHeaderItemProps): ReactNode {
   const { column } = useDataTableColumnHeader();
   return (
-    <DataTableColumnHeaderAction icon={ArrowUp} act={() => column.toggleSorting(false)} {...props}>
+    <DataTableColumnHeaderAction icon={ArrowUpIcon} act={() => column.toggleSorting(false)} {...props}>
       {children ?? 'Asc'}
     </DataTableColumnHeaderAction>
   );
@@ -160,7 +186,7 @@ function DataTableColumnHeaderSortAscending({ children, ...props }: DataTableCol
 function DataTableColumnHeaderSortDescending({ children, ...props }: DataTableColumnHeaderItemProps): ReactNode {
   const { column } = useDataTableColumnHeader();
   return (
-    <DataTableColumnHeaderAction icon={ArrowDown} act={() => column.toggleSorting(true)} {...props}>
+    <DataTableColumnHeaderAction icon={ArrowDownIcon} act={() => column.toggleSorting(true)} {...props}>
       {children ?? 'Desc'}
     </DataTableColumnHeaderAction>
   );
@@ -174,7 +200,7 @@ function DataTableColumnHeaderSortDescending({ children, ...props }: DataTableCo
 function DataTableColumnHeaderHide({ children, ...props }: DataTableColumnHeaderItemProps): ReactNode {
   const { column } = useDataTableColumnHeader();
   return (
-    <DataTableColumnHeaderAction icon={EyeOff} act={() => column.toggleVisibility(false)} {...props}>
+    <DataTableColumnHeaderAction icon={EyeOffIcon} act={() => column.toggleVisibility(false)} {...props}>
       {children ?? 'Hide'}
     </DataTableColumnHeaderAction>
   );

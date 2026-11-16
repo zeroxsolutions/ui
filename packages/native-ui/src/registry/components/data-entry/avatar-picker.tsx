@@ -1,5 +1,4 @@
 import { launchImageLibraryAsync, type ImagePickerAsset } from 'expo-image-picker';
-import { Check, Trash2 } from 'lucide-react-native';
 import {
   createContext,
   useContext,
@@ -12,6 +11,9 @@ import {
   type ReactNode,
 } from 'react';
 import { Pressable, View } from 'react-native';
+import { CheckIcon } from '../../icons/check-icon';
+import { Trash2Icon } from '../../icons/trash-2-icon';
+import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { avatarPickerCheckColor } from '../../lib/avatar-picker-check-color';
 import { textOf } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
@@ -174,15 +176,18 @@ function AvatarPickerContent({
 /**
  * The ghost button that clears both emoji and image and keeps the colour, unless the consumer's own `onPress`
  * calls `preventDefault`. Named "Remove avatar" unless an `aria-label` is given; `children` replace its trash
- * icon.
+ * icon, which plays when the button is pressed in or focused, after a caller's own `onPressIn` and `onFocus`.
  */
 function AvatarPickerRemoveButton({
   onPress,
+  onPressIn,
+  onFocus,
   children,
   'aria-label': ariaLabel = 'Remove avatar',
   ...props
 }: ComponentProps<typeof Button>): ReactNode {
   const { remove } = useAvatarPicker();
+  const icon = useRef<IconHandle>(null);
   return (
     <Button
       variant="ghost"
@@ -192,9 +197,10 @@ function AvatarPickerRemoveButton({
         onPress?.(event);
         if (!event.isDefaultPrevented()) remove();
       }}
+      {...iconTrigger([icon], { onPressIn, onFocus })}
       {...props}
     >
-      {children ?? <Icon as={Trash2} />}
+      {children ?? <Icon as={Trash2Icon} ref={icon} />}
     </Button>
   );
 }
@@ -396,18 +402,11 @@ function AvatarPickerColorGroup({
             return (
               <View key={column} className="flex-1">
                 {color !== undefined && (
-                  <Pressable
-                    role="button"
-                    aria-label={color}
-                    aria-selected={value.color === color}
+                  <AvatarPickerColorSwatch
+                    color={color}
+                    selected={value.color === color}
                     onPress={() => setColor(color)}
-                    style={{ backgroundColor: color }}
-                    className="size-8 items-center justify-center rounded-full"
-                  >
-                    {value.color === color && (
-                      <Icon as={Check} color={avatarPickerCheckColor(color)} className="size-4" />
-                    )}
-                  </Pressable>
+                  />
                 )}
               </View>
             );
@@ -415,6 +414,33 @@ function AvatarPickerColorGroup({
         </View>
       ))}
     </View>
+  );
+}
+
+interface AvatarPickerColorSwatchProps {
+  color: string;
+  selected: boolean;
+  onPress: () => void;
+}
+
+/**
+ * One swatch, a round button named by its `color`, carrying a check while `selected`. The check plays once as the
+ * swatch becomes selected, and not when it is drawn selected.
+ */
+function AvatarPickerColorSwatch({ color, selected, onPress }: AvatarPickerColorSwatchProps): ReactNode {
+  const check = useRef<IconHandle>(null);
+  usePlayOnReach(check, selected);
+  return (
+    <Pressable
+      role="button"
+      aria-label={color}
+      aria-selected={selected}
+      onPress={onPress}
+      style={{ backgroundColor: color }}
+      className="size-8 items-center justify-center rounded-full"
+    >
+      {selected && <Icon as={CheckIcon} ref={check} color={avatarPickerCheckColor(color)} className="size-4" />}
+    </Pressable>
   );
 }
 

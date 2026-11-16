@@ -1,5 +1,6 @@
-import { X } from 'lucide-react-native';
-import { createContext, useContext, type ComponentProps, type ReactNode } from 'react';
+import { createContext, useContext, useRef, type ComponentProps, type ReactNode } from 'react';
+import { XIcon } from '../../icons/x-icon';
+import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { cn } from '../../lib/utils';
 import { Button } from '../../ui/button';
 import { Icon } from '../../ui/icon';
@@ -43,15 +44,27 @@ function EditorTabTitle({ className, ...props }: ComponentProps<typeof ItemTitle
  * The tab's trailing close control, a ghost extra-small icon Button named "Close" unless an `aria-label` is
  * given. Its X shows at all times, since a phone has no hover to reveal it; on a dirty tab that is not active,
  * the unsaved dot sits before it, where the web shows the dot in the X's place until the tab is hovered. A press
- * goes to the innermost pressable alone, so closing a tab does not also activate it.
+ * goes to the innermost pressable alone, so closing a tab does not also activate it. The X plays when the button
+ * is pressed in or focused, after a caller's own `onPressIn` and `onFocus`.
  */
-function EditorTabCloseButton(props: Omit<ComponentProps<typeof Button>, 'children'>): ReactNode {
+function EditorTabCloseButton({
+  onPressIn,
+  onFocus,
+  ...props
+}: Omit<ComponentProps<typeof Button>, 'children'>): ReactNode {
   const { active, dirty } = useContext(EditorTabContext);
+  const icon = useRef<IconHandle>(null);
   return (
     <>
       {dirty && !active && <UnsavedIndicator />}
-      <Button variant="ghost" size="icon-xs" aria-label="Close" {...props}>
-        <Icon as={X} />
+      <Button
+        variant="ghost"
+        size="icon-xs"
+        aria-label="Close"
+        {...iconTrigger([icon], { onPressIn, onFocus })}
+        {...props}
+      >
+        <Icon as={XIcon} ref={icon} />
       </Button>
     </>
   );

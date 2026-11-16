@@ -112,7 +112,7 @@
       "title": "Icon",
       "description": "A lucide icon sized and coloured by its classes, matching the label of the container around it.",
       "dependencies": ["lucide-react-native", "react-native-svg"],
-      "registryDependencies": ["@zui/utils", "@zui/text"],
+      "registryDependencies": ["@zui/utils", "@zui/text", "@zui/icon-motion"],
       "files": [
         {
           "path": "src/registry/ui/icon.tsx",
@@ -2404,8 +2404,13 @@
       "title": "Password input",
       "description": "A password field over Input Group whose toggle, named Show password or Hide password, shows or hides the password.",
       "categories": ["data-entry"],
-      "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/icon", "@zui/input-group"],
+      "registryDependencies": [
+        "@zui/eye-icon",
+        "@zui/eye-off-icon",
+        "@zui/icon",
+        "@zui/icon-motion",
+        "@zui/input-group"
+      ],
       "files": [
         {
           "path": "src/registry/components/data-entry/password-input.tsx",
@@ -2419,8 +2424,16 @@
       "title": "Password strength",
       "description": "How strong a password is, as a three-step meter announced when it changes, and which of its requirements it meets, in a small card.",
       "categories": ["feedback"],
-      "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/card", "@zui/icon", "@zui/progress", "@zui/text", "@zui/utils"],
+      "registryDependencies": [
+        "@zui/card",
+        "@zui/circle-check-icon",
+        "@zui/circle-icon",
+        "@zui/icon",
+        "@zui/icon-motion",
+        "@zui/progress",
+        "@zui/text",
+        "@zui/utils"
+      ],
       "files": [
         {
           "path": "src/registry/components/feedback/password-strength.tsx",
@@ -2636,11 +2649,14 @@
       "title": "Collapsible card",
       "description": "A collapsible card with a header and body, open by default, on a card, muted or plain surface, whose trigger is announced as a button with its expanded state.",
       "categories": ["layout"],
-      "dependencies": ["class-variance-authority", "lucide-react-native"],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": [
         "@zui/button",
+        "@zui/chevron-down-icon",
+        "@zui/chevron-up-icon",
         "@zui/collapsible",
         "@zui/icon",
+        "@zui/icon-motion",
         "@zui/text",
         "@zui/text-children",
         "@zui/utils"
@@ -2658,11 +2674,15 @@
       "title": "Reasoning collapsible",
       "description": "A thinking disclosure that opens itself while a reasoning stream is live, pulses its label meanwhile unless the system asks for reduced motion, and closes shortly after the stream ends.",
       "categories": ["layout"],
-      "dependencies": ["lucide-react-native", "react-native-reanimated"],
+      "dependencies": ["react-native-reanimated"],
       "registryDependencies": [
+        "@zui/brain-icon",
         "@zui/button",
+        "@zui/chevron-down-icon",
+        "@zui/chevron-up-icon",
         "@zui/collapsible",
         "@zui/icon",
+        "@zui/icon-motion",
         "@zui/motion",
         "@zui/text",
         "@zui/text-children",
@@ -2685,8 +2705,15 @@
       "title": "Copy button",
       "description": "An icon button that copies its value to the clipboard, showing a check and taking its copied name until its timeout resets it, and telling screen readers it copied.",
       "categories": ["feedback"],
-      "dependencies": ["expo-clipboard", "lucide-react-native"],
-      "registryDependencies": ["@zui/button", "@zui/icon", "@zui/text"],
+      "dependencies": ["expo-clipboard"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/check-icon",
+        "@zui/copy-icon",
+        "@zui/icon",
+        "@zui/icon-motion",
+        "@zui/text"
+      ],
       "files": [
         {
           "path": "src/registry/components/feedback/copy-button.tsx",
@@ -2749,8 +2776,17 @@
       "title": "Permission card",
       "description": "An inline, non-modal AI-consent request that stays in scrollback after it resolves, showing its decision row while pending and its resolved row once the host settles its status.",
       "categories": ["feedback"],
-      "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/badge", "@zui/card", "@zui/icon", "@zui/text-children", "@zui/utils"],
+      "registryDependencies": [
+        "@zui/badge",
+        "@zui/card",
+        "@zui/circle-check-icon",
+        "@zui/circle-icon",
+        "@zui/circle-x-icon",
+        "@zui/icon",
+        "@zui/icon-motion",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
       "files": [
         {
           "path": "src/registry/components/feedback/permission-card.tsx",
@@ -2835,8 +2871,15 @@
       "title": "Editor tab",
       "description": "One tab in an editor's tab strip, muted until active, whose close button shows at all times, with the unsaved dot before it on a dirty tab that is not active.",
       "categories": ["navigation"],
-      "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/button", "@zui/icon", "@zui/item", "@zui/unsaved-indicator", "@zui/utils"],
+      "registryDependencies": [
+        "@zui/button",
+        "@zui/icon",
+        "@zui/icon-motion",
+        "@zui/item",
+        "@zui/unsaved-indicator",
+        "@zui/utils",
+        "@zui/x-icon"
+      ],
       "files": [
         {
           "path": "src/registry/components/navigation/editor-tab.tsx",
@@ -2958,8 +3001,16 @@
       "title": "Tag input",
       "description": "A tag editor with removable chips above a field that adds a new tag on the return key, a comma or leaving the field, and never adds a duplicate.",
       "categories": ["data-entry"],
-      "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/badge", "@zui/button", "@zui/icon", "@zui/input", "@zui/text", "@zui/utils"],
+      "registryDependencies": [
+        "@zui/badge",
+        "@zui/button",
+        "@zui/icon",
+        "@zui/icon-motion",
+        "@zui/input",
+        "@zui/text",
+        "@zui/utils",
+        "@zui/x-icon"
+      ],
       "files": [
         {
           "path": "src/registry/components/data-entry/tag-input.tsx",
@@ -3017,10 +3068,12 @@
       "title": "Tree item",
       "description": "One row of a hierarchy tree, drawn as the file tree's rows, with a depth indent, a disclosure trigger announced expanded or collapsed, a pressable label and an inline rename input that commits on the return key or on leaving the field.",
       "categories": ["data-display"],
-      "dependencies": ["@rn-primitives/slot", "lucide-react-native"],
+      "dependencies": ["@rn-primitives/slot"],
       "registryDependencies": [
         "@zui/button",
+        "@zui/chevron-right-icon",
         "@zui/icon",
+        "@zui/icon-motion",
         "@zui/input",
         "@zui/text",
         "@zui/text-children",
@@ -3039,8 +3092,19 @@
       "title": "Data table column header",
       "description": "A @tanstack/react-table column's sort-and-hide menu, taking the column directly rather than a shared table instance, its trigger showing the column's sort direction.",
       "categories": ["data-display"],
-      "dependencies": ["@tanstack/react-table", "lucide-react-native"],
-      "registryDependencies": ["@zui/button", "@zui/dropdown-menu", "@zui/icon", "@zui/text-children", "@zui/utils"],
+      "dependencies": ["@tanstack/react-table"],
+      "registryDependencies": [
+        "@zui/arrow-down-icon",
+        "@zui/arrow-up-icon",
+        "@zui/button",
+        "@zui/chevrons-up-down-icon",
+        "@zui/dropdown-menu",
+        "@zui/eye-off-icon",
+        "@zui/icon",
+        "@zui/icon-motion",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
       "files": [
         {
           "path": "src/registry/components/data-display/data-table-column-header.tsx",
@@ -3054,14 +3118,15 @@
       "title": "Model list",
       "description": "The frame for a model list section: a header with a title announced as a heading over a scrolling content area, a remove button for one model, and placeholder items while the list loads.",
       "categories": ["layout"],
-      "dependencies": ["lucide-react-native"],
       "registryDependencies": [
         "@zui/button",
         "@zui/icon",
+        "@zui/icon-motion",
         "@zui/item",
         "@zui/scroll-area",
         "@zui/skeleton",
         "@zui/text",
+        "@zui/trash-2-icon",
         "@zui/utils"
       ],
       "files": [
@@ -3091,12 +3156,16 @@
       "title": "Data table",
       "description": "The parts of a @tanstack/react-table view - toolbar, view, pagination and view options - reading one shared table instance from context.",
       "categories": ["data-display"],
-      "dependencies": ["@tanstack/react-table", "lucide-react-native"],
+      "dependencies": ["@tanstack/react-table"],
       "registryDependencies": [
         "@zui/button",
+        "@zui/chevron-left-icon",
+        "@zui/chevron-right-icon",
         "@zui/dropdown-menu",
         "@zui/empty",
         "@zui/icon",
+        "@zui/icon-motion",
+        "@zui/settings-2-icon",
         "@zui/table",
         "@zui/text",
         "@zui/text-children",
@@ -3187,8 +3256,15 @@
       "title": "File tree",
       "description": "An accessible file tree that owns selection and folder expansion, controlled or uncontrolled: a press selects a row and toggles a folder, and the arrow, Home, End, Enter and Space keys move through it where the platform reports keys.",
       "categories": ["data-display"],
-      "dependencies": ["lucide-react-native"],
-      "registryDependencies": ["@zui/focus-visible", "@zui/icon", "@zui/text", "@zui/text-children", "@zui/utils"],
+      "registryDependencies": [
+        "@zui/chevron-right-icon",
+        "@zui/focus-visible",
+        "@zui/icon",
+        "@zui/icon-motion",
+        "@zui/text",
+        "@zui/text-children",
+        "@zui/utils"
+      ],
       "files": [
         {
           "path": "src/registry/components/data-display/file-tree.tsx",
@@ -3218,10 +3294,20 @@
       "dependencies": ["@zeroxsolutions/fluent-emoji", "lucide-react-native"],
       "registryDependencies": [
         "@zui/button",
+        "@zui/clock-icon",
+        "@zui/coffee-icon",
+        "@zui/dumbbell-icon",
         "@zui/emoji-picker-rows",
+        "@zui/flag-icon",
         "@zui/fluent-emoji",
+        "@zui/hash-icon",
         "@zui/icon",
+        "@zui/icon-motion",
         "@zui/input-group",
+        "@zui/leaf-icon",
+        "@zui/lightbulb-icon",
+        "@zui/plane-icon",
+        "@zui/smile-icon",
         "@zui/text",
         "@zui/text-children",
         "@zui/toggle-group",
@@ -3252,19 +3338,22 @@
       "title": "Avatar picker",
       "description": "A Popover-based avatar editor whose emoji, upload and colour panes edit one avatar value: an emoji from the emoji picker, a photo from the device's library handed to an optional upload, or a swatch or hex colour.",
       "categories": ["data-entry"],
-      "dependencies": ["expo-image-picker", "lucide-react-native"],
+      "dependencies": ["expo-image-picker"],
       "registryDependencies": [
         "@zui/avatar",
         "@zui/avatar-picker-check-color",
         "@zui/button",
+        "@zui/check-icon",
         "@zui/emoji-picker",
         "@zui/empty",
         "@zui/field",
         "@zui/icon",
+        "@zui/icon-motion",
         "@zui/input",
         "@zui/popover",
         "@zui/tabs",
         "@zui/text-children",
+        "@zui/trash-2-icon",
         "@zui/utils"
       ],
       "files": [

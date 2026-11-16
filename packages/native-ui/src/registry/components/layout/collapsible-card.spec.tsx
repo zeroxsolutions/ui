@@ -8,6 +8,20 @@ import {
   CollapsibleCardTrigger,
   type CollapsibleCardProps,
 } from './collapsible-card';
+import { focus, handleOf } from '../../icons/animated-icon.testing';
+import { ChevronDownIcon } from '../../icons/chevron-down-icon';
+import { ChevronUpIcon } from '../../icons/chevron-up-icon';
+
+jest.mock('../../icons/chevron-down-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-down-icon'),
+);
+jest.mock('../../icons/chevron-up-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-up-icon'),
+);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 function Example(props: CollapsibleCardProps) {
   return (
@@ -83,5 +97,31 @@ describe('CollapsibleCard', () => {
     );
 
     expect(screen.getByRole('button', { name: 'Show layers' })).toBeOnTheScreen();
+  });
+});
+
+describe('CollapsibleCardTrigger motion', () => {
+  it('starts its chevron on press-in and on focus', async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    await render(
+      <CollapsibleCard>
+        <CollapsibleCardHeader>
+          <CollapsibleCardTrigger onPressIn={onPressIn} onFocus={onFocus} />
+        </CollapsibleCardHeader>
+        <CollapsibleCardContent>Background, shadow, text</CollapsibleCardContent>
+      </CollapsibleCard>,
+    );
+    const control = screen.getByRole('button', { name: 'Toggle content' });
+
+    await userEvent.setup().press(control);
+    await focus(control);
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    // The chevron points up when the press begins; the press closes the card, so focus finds it pointing down.
+    expect(handleOf(ChevronUpIcon).startAnimation).toHaveBeenCalledTimes(1);
+    expect(handleOf(ChevronDownIcon).startAnimation).toHaveBeenCalledTimes(1);
+    expect(handleOf(ChevronUpIcon).stopAnimation).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,16 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { Platform } from 'react-native';
 import { FileTree, FileTreeGroup, FileTreeItem, FileTreeLabel, type FileTreeProps } from './file-tree';
+import { focus, handleOf } from '../../icons/animated-icon.testing';
+import { ChevronRightIcon } from '../../icons/chevron-right-icon';
+
+jest.mock('../../icons/chevron-right-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-right-icon'),
+);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 /** The web demo's bundle: a folder over two files, then a file at the top level. */
 function Bundle(props: Omit<FileTreeProps, 'children'>) {
@@ -173,5 +183,43 @@ describe('FileTree', () => {
       await render(<Bundle defaultValue="src/util.ts" />);
       expect(focusable()).toEqual(['item-src']);
     });
+  });
+});
+
+describe('FileTreeLabel motion', () => {
+  it("starts a folder's chevron on press-in and on focus", async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    await render(
+      <FileTree aria-label="Files">
+        <FileTreeItem value="src">
+          <FileTreeLabel onPressIn={onPressIn} onFocus={onFocus}>
+            src
+          </FileTreeLabel>
+          <FileTreeGroup>
+            <FileTreeItem value="src/index.ts">
+              <FileTreeLabel>index.ts</FileTreeLabel>
+            </FileTreeItem>
+          </FileTreeGroup>
+        </FileTreeItem>
+      </FileTree>,
+    );
+    const row = screen.getByRole('treeitem', { name: 'src' });
+
+    await userEvent.setup().press(row);
+    await focus(screen.getByRole('treeitem', { name: 'src' }));
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(handleOf(ChevronRightIcon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(ChevronRightIcon).stopAnimation).not.toHaveBeenCalled();
+  });
+
+  it('starts nothing from a file, which draws no chevron', async () => {
+    await render(<Bundle />);
+
+    await userEvent.setup().press(screen.getByRole('treeitem', { name: 'README.md' }));
+
+    expect(handleOf(ChevronRightIcon).startAnimation).not.toHaveBeenCalled();
   });
 });

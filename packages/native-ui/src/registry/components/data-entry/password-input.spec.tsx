@@ -1,6 +1,20 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { InputGroupAddon } from '../../ui/input-group';
 import { PasswordInput, PasswordInputInput, PasswordInputToggle } from './password-input';
+import { focus, handleOf } from '../../icons/animated-icon.testing';
+import { EyeIcon } from '../../icons/eye-icon';
+import { EyeOffIcon } from '../../icons/eye-off-icon';
+
+jest.mock('../../icons/eye-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('eye-icon'),
+);
+jest.mock('../../icons/eye-off-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('eye-off-icon'),
+);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 // React Native's jest mock gives every TextInput one shared `focus` mock, so its calls carry over between tests.
 afterEach(() => {
@@ -99,5 +113,30 @@ describe('PasswordInput', () => {
     await expect(render(<PasswordInputInput aria-label="Password" />)).rejects.toThrow(
       'PasswordInput parts must be used within <PasswordInput>',
     );
+  });
+});
+
+describe('PasswordInputToggle motion', () => {
+  it('starts its icon on press-in and on focus', async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    await render(
+      <PasswordInput>
+        <PasswordInputInput aria-label="Password" />
+        <InputGroupAddon align="inline-end">
+          <PasswordInputToggle onPressIn={onPressIn} onFocus={onFocus} />
+        </InputGroupAddon>
+      </PasswordInput>,
+    );
+
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Show password' }));
+    await focus(screen.getByRole('button', { name: 'Hide password' }));
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    // The eye is drawn when the press begins; the press shows the password, so focus finds the struck eye.
+    expect(handleOf(EyeIcon).startAnimation).toHaveBeenCalledTimes(1);
+    expect(handleOf(EyeOffIcon).startAnimation).toHaveBeenCalledTimes(1);
+    expect(handleOf(EyeIcon).stopAnimation).not.toHaveBeenCalled();
   });
 });
