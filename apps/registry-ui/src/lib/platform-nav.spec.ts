@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 
+import { currentSiteNavItem } from '@zeroxsolutions/ui/site/lib/site-nav';
+
 import { nativeCounterpart, webNavItems } from './platform-nav';
 
 describe('nativeCounterpart', () => {
@@ -27,11 +29,21 @@ describe('nativeCounterpart', () => {
 });
 
 describe('webNavItems', () => {
-  it("points the header's Docs, Components and Blocks into the web tree", () => {
+  it("points the header's Docs, Components, Blocks and Editor into the web tree", () => {
     expect(webNavItems().map(({ label, href }) => [label, href])).toEqual([
       ['Docs', '/docs'],
       ['Components', '/docs/components/base'],
       ['Blocks', '/blocks/base'],
+      ['Editor', '/docs/editor'],
     ]);
+  });
+
+  it.each([
+    ['/docs/editor', 'Editor'],
+    ['/docs/editor/document-editor', 'Editor'],
+    ['/docs/installation', 'Docs'],
+    ['/docs/editor-foo', 'Docs'],
+  ])('marks the item for %s', (pathname, label) => {
+    expect(currentSiteNavItem(webNavItems(), pathname)?.label).toBe(label);
   });
 });

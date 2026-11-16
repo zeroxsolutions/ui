@@ -18,6 +18,7 @@ import {
   nativeDocsRoute,
   nativeHomeRoute,
 } from '@/routes/native-paths';
+import { editorDocsRoute } from '@/routes/editor-paths';
 
 /**
  * Where a pathname sits in the web tree. `slug` is a docs page's segments joined with `/`, `''` for the
@@ -76,12 +77,16 @@ export function nativeCounterpart(pathname: string, engine: NativeEngine): strin
   }
 }
 
-/** The header's Docs, Components and Blocks, each pointing into the web tree. */
+/**
+ * The header's Docs, Components, Blocks and Editor, each pointing into the web tree. Editor is listed
+ * last: its pages sit under Docs too, and the last item whose pattern matches is the one marked.
+ */
 export function webNavItems(): SiteNavItem[] {
   const base = DEFAULT_COMPONENT_BASE;
   return [
     { href: docsRoute.build(), label: 'Docs', pattern: `${docsRoute.pathname}{/*rest}` },
     { href: componentsRoute.build({ base }), label: 'Components', pattern: `${componentsRoute.pathname}{/*rest}` },
     { href: blocksRoute.build({ base }), label: 'Blocks', pattern: blocksRoute.pathname },
+    { href: editorDocsRoute.build(), label: 'Editor', pattern: `${editorDocsRoute.pathname}{/*rest}` },
   ];
 }

@@ -14,3 +14,9 @@ export const editorDocsShareImageRoute = createDynamicRoute<{ slug: string }>(
   '/og/docs/editor/*slug',
   ({ slug }) => `/og/docs/editor/${slug}`,
 );
+
+/** One editor demo alone, with no site chrome, which a preview's full page button opens. */
+export const editorExampleViewRoute = createDynamicRoute<{ name: string }>(
+  '/docs/editor/view/:name',
+  ({ name }) => `/docs/editor/view/${name}`,
+);

@@ -21,7 +21,10 @@ export function zoneHome(): string {
   return webHomeRoute.build();
 }
 
-/** The header's Docs, Components and Blocks, each pointing into the web tree; the editor pages sit under Docs. */
+/**
+ * The header's Docs, Components, Blocks and Editor. Editor is listed last: its pages sit under Docs too,
+ * and the last item whose pattern matches is the one marked.
+ */
 export function zoneNavItems(): SiteNavItem[] {
   const base = DEFAULT_COMPONENT_BASE;
   return [
@@ -32,5 +35,6 @@ export function zoneNavItems(): SiteNavItem[] {
       pattern: `${webComponentsRoute.pathname}{/*rest}`,
     },
     { href: webBlocksRoute.build({ base }), label: 'Blocks', pattern: webBlocksRoute.pathname },
+    { href: editorDocsRoute.build(), label: 'Editor', pattern: `${editorDocsRoute.pathname}{/*rest}` },
   ];
 }

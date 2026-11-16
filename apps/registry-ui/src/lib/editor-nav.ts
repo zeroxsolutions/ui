@@ -1,6 +1,6 @@
-import type { Item, Node, Root } from 'fumadocs-core/page-tree';
+import type { Item, Root } from 'fumadocs-core/page-tree';
 
-import type { PublishedItem } from '@zeroxsolutions/ui-docs-web/lib/published-items';
+import { editorDocsFolder } from '@zeroxsolutions/ui/site/lib/editor-docs-folder';
 
 import { editorDocsPageRoute, editorDocsRoute } from '@/routes/editor-paths';
 
@@ -10,24 +10,30 @@ export function inEditorZone(href: string): boolean {
   return path === editorDocsRoute.pathname || path.startsWith(`${editorDocsRoute.pathname}/`);
 }
 
-function editorPage(name: string, url: string): Item {
-  return { type: 'page', name, url, external: true };
+/** A `registry.json` item, as far as the Editor section reads it. */
+export interface EditorNavItem {
+  name: string;
+  title: string;
+  categories?: string[];
 }
 
 /**
- * `tree` with a folder `Editor` after its `Components` folder: its index is the editor docs'
- * introduction and its pages are the `editor` items, in `registry.json`'s order. Each is marked
- * `external`, since the editor zone serves them and a link to one loads the whole document.
+ * `tree` with the `Editor` folder after its `Components` folder, laid out as the editor zone lays out
+ * its own: the introduction, then each section's pages, titled from `items`, every `registry.json` item in the `editor` category, its libraries included. Each is marked `external`,
+ * since the editor zone serves them and a link to one loads the whole document.
  */
-export function withEditorSection(tree: Root, items: PublishedItem[]): Root {
-  const editor: Node = {
-    type: 'folder',
-    name: 'Editor',
-    index: editorPage('Editor', editorDocsRoute.build()),
-    children: items
-      .filter((item) => item.category === 'editor')
-      .map((item) => editorPage(item.title, editorDocsPageRoute.build({ name: item.name }))),
-  };
+export function withEditorSection(tree: Root, items: EditorNavItem[]): Root {
+  const titles = new Map(
+    items.filter((item) => item.categories?.includes('editor')).map((item) => [item.name, item.title]),
+  );
+  const link = (name: string, url: string): Item => ({ type: 'page', name, url, external: true });
+  const editor = editorDocsFolder({
+    index: link('Editor', editorDocsRoute.build()),
+    page: (name) => {
+      const title = titles.get(name);
+      return title === undefined ? undefined : link(title, editorDocsPageRoute.build({ name }));
+    },
+  });
   const after = tree.children.findIndex((node) => node.type === 'folder' && node.name === 'Components');
   const at = after === -1 ? tree.children.length : after + 1;
   return { ...tree, children: [...tree.children.slice(0, at), editor, ...tree.children.slice(at)] };
