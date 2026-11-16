@@ -32,12 +32,45 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
-import { Check, Copy, Download, Image as ImageIcon, Workflow } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Workflow } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import type { RefObject } from 'react';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
+import { CopyIcon } from '@/registry/bases/base-ui/icons/copy-icon';
+import { DownloadIcon } from '@/registry/bases/base-ui/icons/download-icon';
+import { ImageIcon } from '@/registry/bases/base-ui/icons/image-icon';
 import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '@zeroxsolutions/editor-core/mermaid/core/detect';
 import { copySvg, copyText, downloadPng, downloadSvg } from '@zeroxsolutions/editor-core/mermaid/core/export';
 import { DIAGRAM_TEMPLATES } from '@zeroxsolutions/editor-core/mermaid/core/templates';
 import type { DiagramTemplate } from '@zeroxsolutions/editor-core/mermaid/core/types';
+
+/** The handle every animated icon exposes. */
+interface IconHandle {
+  startAnimation(): void;
+  stopAnimation(): void;
+}
+
+/** A control's ref to its icon, and the pointer and focus handlers that play it. */
+function useIconPlay() {
+  const ref = useRef<IconHandle>(null);
+  return {
+    ref,
+    handlers: {
+      onPointerEnter: () => ref.current?.startAnimation(),
+      onPointerLeave: () => ref.current?.stopAnimation(),
+      onFocus: () => ref.current?.startAnimation(),
+      onBlur: () => ref.current?.stopAnimation(),
+    },
+  };
+}
+
+/** The icon of an Export button: a download, then a check that plays once as the export finishes. */
+function ExportIcon({ done, iconRef }: { done: boolean; iconRef: RefObject<IconHandle | null> }) {
+  useEffect(() => {
+    if (done) iconRef.current?.startAnimation();
+  }, [done, iconRef]);
+  return done ? <CheckIcon ref={iconRef} aria-hidden /> : <DownloadIcon ref={iconRef} aria-hidden />;
+}
 
 export interface MermaidToolbarProps {
   source: string;
@@ -72,6 +105,11 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
     source: '',
   };
   const hasContent = source.trim().length > 0;
+  const exportPlay = useIconPlay();
+  const copySourcePlay = useIconPlay();
+  const copySvgPlay = useIconPlay();
+  const downloadSvgPlay = useIconPlay();
+  const downloadPngPlay = useIconPlay();
   const [pending, setPending] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -127,31 +165,31 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <Button variant="outline" size="sm" disabled={!svg}>
-                  {done ? <Check /> : <Download />}
+                <Button variant="outline" size="sm" disabled={!svg} {...exportPlay.handlers}>
+                  <ExportIcon done={done} iconRef={exportPlay.ref} />
                   Export
                 </Button>
               }
             />
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => runExport(() => copyText(source))}>
-                  <Copy />
+                <DropdownMenuItem onClick={() => runExport(() => copyText(source))} {...copySourcePlay.handlers}>
+                  <CopyIcon ref={copySourcePlay.ref} aria-hidden />
                   Copy source
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => runExport(() => copySvg(svg))}>
-                  <Copy />
+                <DropdownMenuItem onClick={() => runExport(() => copySvg(svg))} {...copySvgPlay.handlers}>
+                  <CopyIcon ref={copySvgPlay.ref} aria-hidden />
                   Copy SVG
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => runExport(() => downloadSvg(svg))}>
-                  <Download />
+                <DropdownMenuItem onClick={() => runExport(() => downloadSvg(svg))} {...downloadSvgPlay.handlers}>
+                  <DownloadIcon ref={downloadSvgPlay.ref} aria-hidden />
                   Download SVG
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => runExport(() => downloadPng(svg))}>
-                  <ImageIcon />
+                <DropdownMenuItem onClick={() => runExport(() => downloadPng(svg))} {...downloadPngPlay.handlers}>
+                  <ImageIcon ref={downloadPngPlay.ref} aria-hidden />
                   Download PNG
                 </DropdownMenuItem>
               </DropdownMenuGroup>

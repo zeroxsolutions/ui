@@ -4,10 +4,16 @@ import {
   useCallback,
   useRef,
   useState,
+  type ForwardRefExoticComponent,
   type PointerEvent as ReactPointerEvent,
+  type RefAttributes,
   type WheelEvent as ReactWheelEvent,
 } from 'react';
-import { Maximize, Minus, Plus, RotateCcw, Workflow } from 'lucide-react';
+import { Workflow } from 'lucide-react';
+import { MaximizeIcon } from '@/registry/bases/base-ui/icons/maximize-icon';
+import { MinusIcon } from '@/registry/bases/base-ui/icons/minus-icon';
+import { PlusIcon } from '@/registry/bases/base-ui/icons/plus-icon';
+import { RotateCcwIcon } from '@/registry/bases/base-ui/icons/rotate-ccw-icon';
 import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
 import { FloatingToolbar } from '@/registry/bases/base-ui/components/layout/floating-toolbar';
 import { Button } from '@/registry/bases/base-ui/ui/button';
@@ -37,6 +43,39 @@ interface Transform {
 const IDENTITY: Transform = { x: 0, y: 0, k: 1 };
 const MIN_SCALE = 0.1;
 const MAX_SCALE = 8;
+
+/** The handle every animated icon exposes. */
+interface IconHandle {
+  startAnimation(): void;
+  stopAnimation(): void;
+}
+
+/** An icon button of the zoom toolbar; its icon plays while the pointer or the focus is on it. */
+function ZoomButton({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: ForwardRefExoticComponent<RefAttributes<IconHandle>>;
+  label: string;
+  onClick: () => void;
+}) {
+  const ref = useRef<IconHandle>(null);
+  return (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      aria-label={label}
+      onClick={onClick}
+      onPointerEnter={() => ref.current?.startAnimation()}
+      onPointerLeave={() => ref.current?.stopAnimation()}
+      onFocus={() => ref.current?.startAnimation()}
+      onBlur={() => ref.current?.stopAnimation()}
+    >
+      <Icon ref={ref} aria-hidden />
+    </Button>
+  );
+}
 
 const clamp = (value: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, value));
 
@@ -182,21 +221,13 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
 
       {status !== 'empty' && (
         <FloatingToolbar aria-label="Zoom controls" className="absolute right-2 bottom-2">
-          <Button variant="ghost" size="icon-sm" aria-label="Zoom out" onClick={() => zoomButton(1 / 1.2)}>
-            <Minus />
-          </Button>
+          <ZoomButton icon={MinusIcon} label="Zoom out" onClick={() => zoomButton(1 / 1.2)} />
           <span className="text-muted-foreground min-w-10 text-center text-xs tabular-nums">
             {Math.round(transform.k * 100)}%
           </span>
-          <Button variant="ghost" size="icon-sm" aria-label="Zoom in" onClick={() => zoomButton(1.2)}>
-            <Plus />
-          </Button>
-          <Button variant="ghost" size="icon-sm" aria-label="Fit to view" onClick={fit}>
-            <Maximize />
-          </Button>
-          <Button variant="ghost" size="icon-sm" aria-label="Reset view" onClick={reset}>
-            <RotateCcw />
-          </Button>
+          <ZoomButton icon={PlusIcon} label="Zoom in" onClick={() => zoomButton(1.2)} />
+          <ZoomButton icon={MaximizeIcon} label="Fit to view" onClick={fit} />
+          <ZoomButton icon={RotateCcwIcon} label="Reset view" onClick={reset} />
         </FloatingToolbar>
       )}
 

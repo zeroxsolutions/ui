@@ -1,20 +1,24 @@
-import { Bold, Check, Eye, Settings2 } from 'lucide-react';
+import { ArrowUp, Bold, Check, ChevronRight, Download, Eye, Plus, Settings2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import '../../../../../../test/nova-style.css';
+import { ArrowUpIcon } from '@/registry/bases/base-ui/icons/arrow-up-icon';
 import { BoldIcon } from '@/registry/bases/base-ui/icons/bold-icon';
 import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
+import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/chevron-right-icon';
+import { DownloadIcon } from '@/registry/bases/base-ui/icons/download-icon';
 import { EyeIcon } from '@/registry/bases/base-ui/icons/eye-icon';
+import { PlusIcon } from '@/registry/bases/base-ui/icons/plus-icon';
 import { Settings2Icon } from '@/registry/bases/base-ui/icons/settings-2-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { InputGroupButton } from '@/registry/bases/base-ui/ui/input-group';
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { BlockMenu } from './block-menu';
 import { BubbleMenu } from './bubble-menu';
-import { ChromeIcon } from './chrome-icon';
+import { CHROME_ICON_CLASS, ChromeIcon } from './chrome-icon';
 import { EditorToolbar } from './editor-toolbar';
 import { SlashMenu } from './slash-menu';
 
@@ -162,6 +166,49 @@ describe('the size of an icon the chrome draws', () => {
         <InputGroupButton size="icon-xs">
           <ChromeIcon icon={CheckIcon} active={false} />
         </InputGroupButton>,
+      ],
+      [
+        <Button variant="outline" size="sm">
+          <Download />
+          Export
+        </Button>,
+        <Button variant="outline" size="sm">
+          <DownloadIcon aria-hidden />
+          Export
+        </Button>,
+      ],
+      [
+        <Button variant="ghost" size="icon-sm">
+          <Plus />
+        </Button>,
+        <Button variant="ghost" size="icon-sm">
+          <PlusIcon aria-hidden />
+        </Button>,
+      ],
+      [
+        <InputGroupButton size="icon-sm">
+          <ArrowUp />
+        </InputGroupButton>,
+        <InputGroupButton size="icon-sm">
+          <ArrowUpIcon aria-hidden />
+        </InputGroupButton>,
+      ],
+      // The toggle marker and the block handle's plus are bare elements no primitive sizes.
+      [
+        <span className="flex size-6 items-center justify-center">
+          <ChevronRight className="size-4" />
+        </span>,
+        <span className="flex size-6 items-center justify-center">
+          <ChromeIcon icon={ChevronRightIcon} className={CHROME_ICON_CLASS} active={false} />
+        </span>,
+      ],
+      [
+        <span className="flex size-6 items-center justify-center">
+          <Plus size={16} />
+        </span>,
+        <span className="flex size-6 items-center justify-center">
+          <PlusIcon size={16} aria-hidden />
+        </span>,
       ],
     ];
     for (const [was, now] of pairs) {

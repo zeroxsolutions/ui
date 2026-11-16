@@ -3,6 +3,11 @@ import * as React from 'react';
 import type { ComponentProps } from 'react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
+import { ChatInput } from '../../composer/chat-input';
+import { MathToolbar } from '../../math/react/toolbar';
+import { DiagramCanvas } from '../../mermaid/react/preview';
+import { MermaidToolbar } from '../../mermaid/react/toolbar';
+import { ToggleView } from './toggle/toggle';
 import { CodeSettingsMenu } from './code-block/code-settings-menu';
 import { MathBlockView, MathInlineView } from './math/math';
 import { MermaidView } from './mermaid/mermaid';
@@ -14,7 +19,16 @@ vi.mock('../../mermaid/core/engine', () => ({
 const handles = vi.hoisted(() => {
   const make = () => ({ startAnimation: vi.fn(), stopAnimation: vi.fn() });
   return {
+    arrowUp: make(),
     check: make(),
+    chevronRight: make(),
+    copy: make(),
+    download: make(),
+    image: make(),
+    maximize: make(),
+    minus: make(),
+    plus: make(),
+    rotateCcw: make(),
     eye: make(),
     omega: make(),
     pencilLine: make(),
@@ -30,6 +44,42 @@ function mockedIcon(handle: { startAnimation: () => void; stopAnimation: () => v
   });
 }
 
+vi.mock('@/registry/bases/base-ui/icons/arrow-up-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/arrow-up-icon')>()),
+  ArrowUpIcon: mockedIcon(handles.arrowUp),
+}));
+vi.mock('@/registry/bases/base-ui/icons/chevron-right-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/chevron-right-icon')>()),
+  ChevronRightIcon: mockedIcon(handles.chevronRight),
+}));
+vi.mock('@/registry/bases/base-ui/icons/copy-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/copy-icon')>()),
+  CopyIcon: mockedIcon(handles.copy),
+}));
+vi.mock('@/registry/bases/base-ui/icons/download-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/download-icon')>()),
+  DownloadIcon: mockedIcon(handles.download),
+}));
+vi.mock('@/registry/bases/base-ui/icons/image-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/image-icon')>()),
+  ImageIcon: mockedIcon(handles.image),
+}));
+vi.mock('@/registry/bases/base-ui/icons/maximize-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/maximize-icon')>()),
+  MaximizeIcon: mockedIcon(handles.maximize),
+}));
+vi.mock('@/registry/bases/base-ui/icons/minus-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/minus-icon')>()),
+  MinusIcon: mockedIcon(handles.minus),
+}));
+vi.mock('@/registry/bases/base-ui/icons/plus-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/plus-icon')>()),
+  PlusIcon: mockedIcon(handles.plus),
+}));
+vi.mock('@/registry/bases/base-ui/icons/rotate-ccw-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/rotate-ccw-icon')>()),
+  RotateCcwIcon: mockedIcon(handles.rotateCcw),
+}));
 vi.mock('@/registry/bases/base-ui/icons/check-icon', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/check-icon')>()),
   CheckIcon: mockedIcon(handles.check),
@@ -146,5 +196,79 @@ describe('the code settings menu', () => {
     const settings = { tabSize: 2, useTabs: false, showLineNumbers: true, softWrap: false };
     render(<CodeSettingsMenu settings={settings} onSettingsChange={() => {}} />);
     expectStartsAndStops(screen.getByRole('button', { name: 'Code settings' }), handles.settings2);
+  });
+});
+
+describe('the toggle control', () => {
+  it('starts the chevron on pointer enter and on focus, and stops it on leave and blur', () => {
+    render(<ToggleView {...viewProps({ open: true })}>{null}</ToggleView>);
+    expectStartsAndStops(screen.getByRole('button', { name: 'Collapse' }), handles.chevronRight);
+  });
+});
+
+describe('the zoom buttons of a mermaid canvas', () => {
+  it("start each button's icon on pointer enter and on focus, and stop it on leave and blur", () => {
+    const state = { svg: '<svg></svg>', status: 'ready', error: null, line: null } as never;
+    render(<DiagramCanvas state={state} />);
+    expectStartsAndStops(screen.getByRole('button', { name: 'Zoom out' }), handles.minus);
+    expectStartsAndStops(screen.getByRole('button', { name: 'Zoom in' }), handles.plus);
+    expectStartsAndStops(screen.getByRole('button', { name: 'Fit to view' }), handles.maximize);
+    expectStartsAndStops(screen.getByRole('button', { name: 'Reset view' }), handles.rotateCcw);
+  });
+});
+
+describe('the chat input', () => {
+  it("starts the Send button's icon on pointer enter and on focus, and stops it on leave and blur", () => {
+    render(<ChatInput triggers={[]} onSubmit={() => {}} />);
+    expectStartsAndStops(screen.getByRole('button', { name: 'Send' }), handles.arrowUp);
+  });
+});
+
+/** A menu item is highlighted by the pointer and by focus, which Base UI also moves on a pointer move, so it may start twice. */
+function expectItemStartsAndStops(item: HTMLElement, handle: Handle): void {
+  fireEvent.pointerEnter(item);
+  expect(handle.startAnimation).toHaveBeenCalled();
+  fireEvent.pointerLeave(item);
+  expect(handle.stopAnimation).toHaveBeenCalled();
+  handle.startAnimation.mockClear();
+  fireEvent.focus(item);
+  expect(handle.startAnimation).toHaveBeenCalled();
+  handle.stopAnimation.mockClear();
+  fireEvent.blur(item);
+  expect(handle.stopAnimation).toHaveBeenCalled();
+}
+
+describe('the export controls of the math and mermaid toolbars', () => {
+  async function openExport(): Promise<void> {
+    fireEvent.click(screen.getByRole('button', { name: /export/i }));
+    await act(async () => {});
+  }
+
+  it('starts the Export icon on pointer enter and on focus, and stops it on leave and blur', () => {
+    render(<MathToolbar source="x" onInsert={() => {}} />);
+    expectStartsAndStops(screen.getByRole('button', { name: /export/i }), handles.download);
+  });
+
+  it("starts the math menu item's Copy icon from the item", async () => {
+    render(<MathToolbar source="x" onInsert={() => {}} />);
+    await openExport();
+    expectItemStartsAndStops(await screen.findByRole('menuitem', { name: 'Copy LaTeX' }), handles.copy);
+  });
+
+  it("starts the mermaid menu items' icons from the item", async () => {
+    render(<MermaidToolbar source="graph TD" svg="<svg></svg>" onPickTemplate={() => {}} />);
+    await openExport();
+    expectItemStartsAndStops(await screen.findByRole('menuitem', { name: 'Copy source' }), handles.copy);
+    expectItemStartsAndStops(await screen.findByRole('menuitem', { name: 'Download SVG' }), handles.download);
+    expectItemStartsAndStops(await screen.findByRole('menuitem', { name: 'Download PNG' }), handles.image);
+  });
+
+  it('plays the check once when the export finishes', async () => {
+    Object.assign(navigator, { clipboard: { writeText: vi.fn(async () => {}), write: vi.fn(async () => {}) } });
+    render(<MathToolbar source="x" onInsert={() => {}} />);
+    await openExport();
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Copy LaTeX' }));
+    await act(async () => {});
+    expect(handles.check.startAnimation).toHaveBeenCalledTimes(1);
   });
 });
