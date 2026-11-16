@@ -2,7 +2,7 @@ import { act, render } from '@testing-library/react-native';
 import { createRef, type ReactNode, type Ref } from 'react';
 import { AccessibilityInfo } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
-import { useIconMotion, type IconHandle, type IconTiming } from './icon-motion';
+import { dash, transformProps, useIconMotion, type IconHandle, type IconTiming } from './icon-motion';
 
 let progress: SharedValue<number> | undefined;
 
@@ -100,5 +100,51 @@ describe('useIconMotion', () => {
     expect(progressNow()).toBe(0);
     await elapse(400);
     expect(progressNow()).toBe(0);
+  });
+});
+
+describe('transformProps', () => {
+  it('leaves a shape where it is when nothing moves', () => {
+    expect(transformProps({})).toEqual({
+      translateX: 0,
+      translateY: 0,
+      scaleX: 1,
+      scaleY: 1,
+      rotation: 0,
+      originX: 12,
+      originY: 12,
+    });
+  });
+
+  it('names its parts the way react-native-svg reads them, about the origin it is given', () => {
+    expect(transformProps({ x: 2, y: -3, scaleX: 2, scaleY: 0.5, rotate: 45, originX: 4, originY: 6 })).toEqual({
+      translateX: 2,
+      translateY: -3,
+      scaleX: 2,
+      scaleY: 0.5,
+      rotation: 45,
+      originX: 4,
+      originY: 6,
+    });
+  });
+
+  it('keeps a scale above zero, which react-native-svg reads as none', () => {
+    const { scaleX, scaleY } = transformProps({ scaleX: 0, scaleY: 0 });
+    expect(scaleX).toBeGreaterThan(0);
+    expect(scaleY).toBeGreaterThan(0);
+  });
+});
+
+describe('dash', () => {
+  it('draws a path in full with a dash longer than it', () => {
+    expect(dash(10, 1)).toEqual({ strokeDasharray: [20, 20], strokeDashoffset: 0, opacity: 1 });
+  });
+
+  it('draws the part of a path from start for fraction of it', () => {
+    expect(dash(10, 0.5, 0.25)).toEqual({ strokeDasharray: [5, 20], strokeDashoffset: -2.5, opacity: 1 });
+  });
+
+  it('hides a path drawn not at all', () => {
+    expect(dash(10, 0).opacity).toBe(0);
   });
 });

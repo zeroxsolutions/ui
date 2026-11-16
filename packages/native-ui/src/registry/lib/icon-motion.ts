@@ -77,5 +77,77 @@ function useIconMotion(ref: Ref<IconHandle> | undefined, timing: IconTiming = DE
   return progress;
 }
 
-export { useIconMotion };
-export type { AnimatedIconProps, IconHandle, IconTiming };
+/** The parts of a transform an animated icon moves a shape by, in its 24-unit viewBox. */
+interface IconTransform {
+  /** How far to move right, `0` when left out. */
+  x?: number;
+  /** How far to move down, `0` when left out. */
+  y?: number;
+  /** The horizontal scale, `1` when left out. */
+  scaleX?: number;
+  /** The vertical scale, `1` when left out. */
+  scaleY?: number;
+  /** The clockwise turn in degrees, `0` when left out. */
+  rotate?: number;
+  /** The x the scale and the turn keep fixed, `12` when left out. */
+  originX?: number;
+  /** The y the scale and the turn keep fixed, `12` when left out. */
+  originY?: number;
+}
+
+/** The props of a shape or group react-native-svg builds its transform from. */
+interface IconTransformProps {
+  translateX: number;
+  translateY: number;
+  scaleX: number;
+  scaleY: number;
+  rotation: number;
+  originX: number;
+  originY: number;
+}
+
+/**
+ * The transform props of a shape or group, which turn about the origin, scale about it, then move. A scale is
+ * kept above zero, which react-native-svg reads as no scale at all.
+ */
+function transformProps({
+  x = 0,
+  y = 0,
+  scaleX = 1,
+  scaleY = 1,
+  rotate = 0,
+  originX = 12,
+  originY = 12,
+}: IconTransform): IconTransformProps {
+  'worklet';
+  return {
+    translateX: x,
+    translateY: y,
+    scaleX: Math.max(scaleX, 0.001),
+    scaleY: Math.max(scaleY, 0.001),
+    rotation: rotate,
+    originX,
+    originY,
+  };
+}
+
+/**
+ * The stroke props that draw `fraction` of a path `length` units long, beginning `start` of the way along it. A
+ * path drawn in full takes a dash longer than itself, so no cap sits where a closed path begins, and a path drawn
+ * not at all takes no opacity, since a round cap would still leave a dot.
+ */
+function dash(
+  length: number,
+  fraction: number,
+  start = 0,
+): { strokeDasharray: number[]; strokeDashoffset: number; opacity: number } {
+  'worklet';
+  return {
+    strokeDasharray: fraction >= 1 ? [2 * length, 2 * length] : [fraction * length, 2 * length],
+    strokeDashoffset: 0 - start * length,
+    opacity: fraction > 0 ? 1 : 0,
+  };
+}
+
+export { dash, transformProps, useIconMotion };
+export type { AnimatedIconProps, IconHandle, IconTiming, IconTransform, IconTransformProps };
