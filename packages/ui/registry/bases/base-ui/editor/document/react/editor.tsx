@@ -186,13 +186,15 @@ export function Editor({ features, content, editable = true, className, onReady,
   }, [rootEl]);
 
   // The extension hides its handle, and so the "+", whenever the pointer leaves the editor for anything
-  // that is not the handle itself, which includes the "+" a pointer is crossing to. Keep that mouseout
-  // from reaching the extension, in the capture phase, while it lands on the "+".
+  // that is not the handle node itself. That includes the "+" a pointer is crossing to and the grip we
+  // render inside the handle, so a pointer landing on the grip would hide the handle under it and show it
+  // again on the next move. Keep that mouseout from reaching the extension, in the capture phase, while
+  // it lands on either.
   useEffect(() => {
     if (!rootEl) return;
     const keepHandle = (event: MouseEvent) => {
       const to = event.relatedTarget;
-      if (to instanceof Element && to.closest('[data-editor-add]')) event.stopPropagation();
+      if (to instanceof Element && to.closest('[data-editor-add], .drag-handle')) event.stopPropagation();
     };
     rootEl.addEventListener('mouseout', keepHandle, true);
     return () => rootEl.removeEventListener('mouseout', keepHandle, true);

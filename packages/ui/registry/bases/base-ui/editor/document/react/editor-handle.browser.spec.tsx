@@ -4,6 +4,10 @@ import { render } from 'vitest-browser-react';
 import { userEvent } from 'vitest/browser';
 import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
 import '../../../../../../test/nova-style.css';
+// The editor's own sheet, which places the handle in the gutter and takes the pointer from it while it is
+// hidden. Without it the hidden handle sits in the flow under the block, and a pointer an earlier spec
+// file left resting there enters it before the spec hovers it.
+import '../../styles.css';
 import { standardKit } from '../features/standard/index';
 import { Editor } from './editor';
 
