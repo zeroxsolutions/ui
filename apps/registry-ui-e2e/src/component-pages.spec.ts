@@ -1,5 +1,12 @@
 import { expect, test } from './test/fixtures';
 
+/**
+ * What WebKit logs when leaving a page cancels a link's RSC prefetch it started (`Fetch API cannot load
+ * /?_rsc=... due to access control checks.`): the navigation the loop makes, not the page. A prefetch
+ * can start after the network has settled, as a link scrolls into view, so waiting does not rule it out.
+ */
+const ABORTED_PREFETCH = /\?_rsc=\S+ due to access control checks/;
+
 test('every component page renders its preview, fits a phone without a stage scrolling sideways, and throws nothing', async ({
   page,
   request,
@@ -20,7 +27,9 @@ test('every component page renders its preview, fits a phone without a stage scr
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(`${page.url()}: ${error.message}`));
   page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(`${page.url()}: ${message.text()}`);
+    if (message.type() === 'error' && !ABORTED_PREFETCH.test(message.text())) {
+      errors.push(`${page.url()}: ${message.text()}`);
+    }
   });
   await page.setViewportSize({ width: 390, height: 844 });
 
@@ -29,9 +38,7 @@ test('every component page renders its preview, fits a phone without a stage scr
     await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
     await expect(page.locator('[data-slot=component-preview-stage]').first()).toBeVisible();
     // Measured once the page's own requests settle: a demo widened by an image or a font that arrives
-    // late would otherwise pass on the first sample, taken before it lands. WebKit also reports a
-    // prefetch aborted by navigation as a page error, so this lets the page's own header-link
-    // prefetches settle before leaving it for the next one.
+    // late would otherwise pass on the first sample, taken before it lands.
     // eslint-disable-next-line playwright/no-networkidle
     await page.waitForLoadState('networkidle');
     await expect
