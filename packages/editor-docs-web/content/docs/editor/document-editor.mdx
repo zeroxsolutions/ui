@@ -29,7 +29,7 @@ pnpm dlx shadcn@latest add @zui/document-editor
 <Step>Install the packages it imports.</Step>
 
 ```bash
-pnpm add @base-ui/react @tiptap/extension-highlight @tiptap/extension-placeholder @tiptap/extension-subscript @tiptap/extension-superscript @tiptap/extension-task-item @tiptap/extension-task-list @tiptap/react @tiptap/starter-kit @zeroxsolutions/editor-core lucide-react tiptap-extension-global-drag-handle
+pnpm add @base-ui/react @tiptap/extension-highlight @tiptap/extension-placeholder @tiptap/extension-subscript @tiptap/extension-superscript @tiptap/extension-task-item @tiptap/extension-task-list @tiptap/react @tiptap/starter-kit @zeroxsolutions/editor-core tiptap-extension-global-drag-handle
 ```
 
 <Step>Install the Tailwind plugin its styles load.</Step>
@@ -41,7 +41,7 @@ pnpm add -D @tailwindcss/typography
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add checkbox dropdown-menu empty item popover scroll-area separator toggle tooltip utils @zui/editor-theme
+pnpm dlx shadcn@latest add checkbox dropdown-menu empty item popover scroll-area separator toggle tooltip utils @zui/bold-icon @zui/code-icon @zui/editor-theme @zui/grip-vertical-icon @zui/heading-1-icon @zui/heading-2-icon @zui/heading-3-icon @zui/highlighter-icon @zui/italic-icon @zui/list-icon @zui/list-ordered-icon @zui/list-todo-icon @zui/minus-icon @zui/plus-icon @zui/strikethrough-icon @zui/text-quote-icon @zui/underline-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -122,6 +122,12 @@ pnpm dlx shadcn@latest add checkbox dropdown-menu empty item popover scroll-area
 
 <ComponentSource
   name="document-editor"
+  file="registry/bases/base-ui/editor/document/ui/chrome-icon.tsx"
+  title="components/editor/document/ui/chrome-icon.tsx"
+/>
+
+<ComponentSource
+  name="document-editor"
   file="registry/bases/base-ui/editor/document/ui/editor-toolbar.tsx"
   title="components/editor/document/ui/editor-toolbar.tsx"
 />
@@ -154,6 +160,12 @@ pnpm dlx shadcn@latest add checkbox dropdown-menu empty item popover scroll-area
   name="document-editor"
   file="registry/bases/base-ui/editor/react-types.ts"
   title="components/editor/react-types.ts"
+/>
+
+<ComponentSource
+  name="document-editor"
+  file="registry/bases/base-ui/hooks/use-animated-icon.ts"
+  title="hooks/use-animated-icon.ts"
 />
 
 <Step>Add its styles to your global CSS.</Step>

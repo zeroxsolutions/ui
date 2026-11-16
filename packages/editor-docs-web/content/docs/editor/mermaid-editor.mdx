@@ -35,7 +35,7 @@ pnpm add @zeroxsolutions/editor-core lucide-react
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add alert alert-dialog button combobox dropdown-menu empty resizable tabs use-mobile utils @zui/code-card @zui/collapsible-card @zui/editor-code-mirror @zui/editor-theme @zui/floating-toolbar
+pnpm dlx shadcn@latest add alert alert-dialog button combobox dropdown-menu empty resizable tabs use-mobile utils @zui/check-icon @zui/code-card @zui/collapsible-card @zui/copy-icon @zui/download-icon @zui/editor-code-mirror @zui/editor-theme @zui/floating-toolbar @zui/image-icon @zui/maximize-icon @zui/minus-icon @zui/plus-icon @zui/rotate-ccw-icon @zui/workflow-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -64,6 +64,12 @@ pnpm dlx shadcn@latest add alert alert-dialog button combobox dropdown-menu empt
   name="mermaid-editor"
   file="registry/bases/base-ui/editor/mermaid/react/viewer.tsx"
   title="components/editor/mermaid/react/viewer.tsx"
+/>
+
+<ComponentSource
+  name="mermaid-editor"
+  file="registry/bases/base-ui/hooks/use-animated-icon.ts"
+  title="hooks/use-animated-icon.ts"
 />
 
 <Step>Update the import paths to match your project.</Step>
