@@ -1,8 +1,9 @@
+import { ImageResponse } from 'next/og';
 import { notFound } from 'next/navigation';
 
 import { editorDocsShareImageRoute } from '@zeroxsolutions/editor-docs-web/routes';
 
-import { shareImage } from '@/lib/share-image';
+import { shareImageElement, shareImageSize } from '@zeroxsolutions/ui/site/lib/share-image';
 import { docsPageImage, editorPage, source } from '@/lib/source';
 
 export const revalidate = false;
@@ -22,5 +23,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   const page = editorPage(slug.slice(0, -1));
   if (!page || docsPageImage(page).url !== editorDocsShareImageRoute.build({ slug: slug.join('/') })) notFound();
 
-  return shareImage({ title: page.data.title, description: page.data.description });
+  return new ImageResponse(
+    shareImageElement({ title: page.data.title, description: page.data.description }),
+    shareImageSize,
+  );
 }

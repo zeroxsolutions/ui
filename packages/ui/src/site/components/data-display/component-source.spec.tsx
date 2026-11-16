@@ -1,13 +1,9 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import {
-  SourceCodeCardCode,
-  SourceCodeCardContent,
-  SourceCodeCardCopy,
-} from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
+import { SourceCodeCardCode, SourceCodeCardContent, SourceCodeCardCopy } from './source-code-card';
 
-import { TestHost } from '@zeroxsolutions/ui/test/test-host';
+import { TestHost } from '../../../test/test-host';
 
 import { ComponentSource } from './component-source';
 

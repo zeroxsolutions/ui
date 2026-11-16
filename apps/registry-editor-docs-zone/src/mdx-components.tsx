@@ -14,8 +14,8 @@ import {
   SourceCodeCardTrigger,
 } from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
 
-import { ComponentSource } from '@/components/data-display/component-source';
-import { ExamplePreview } from '@/components/data-display/example-preview';
+import { ComponentSource } from '@zeroxsolutions/ui/site/components/data-display/component-source';
+import { ExamplePreview } from '@zeroxsolutions/ui/site/components/data-display/example-preview';
 
 /**
  * Every element and component a page in `content/docs/editor` may use, passed to its compiled body: the

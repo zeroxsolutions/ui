@@ -1,9 +1,6 @@
 import type { ReactNode } from 'react';
 
-import {
-  ComponentPreviewExcerpt,
-  ComponentPreviewSource,
-} from '@zeroxsolutions/ui/site/components/data-display/component-preview';
+import { ComponentPreviewExcerpt, ComponentPreviewSource } from './component-preview';
 import {
   SourceCodeCardActions,
   SourceCodeCardCode,
@@ -14,7 +11,7 @@ import {
   SourceCodeCardLineNumbers,
   SourceCodeCardTitle,
   SourceCodeCardTrigger,
-} from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
+} from './source-code-card';
 
 import { ComponentSource } from './component-source';
 

@@ -6,7 +6,7 @@ import { Index } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__inde
 
 import { publishedBlocks } from '../../lib/published-items';
 import { viewRoute } from '../../routes';
-import { ExampleSource } from './example-source';
+import { ExampleSource } from '@zeroxsolutions/ui/site/components/data-display/example-source';
 
 interface BlockPreviewProps {
   /** The demo whose source shows under the frame. */
