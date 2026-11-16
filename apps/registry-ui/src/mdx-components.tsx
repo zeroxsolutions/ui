@@ -20,6 +20,7 @@ import { BlockPreview } from '@zeroxsolutions/ui-docs-web/components/data-displa
 import { ComponentsList } from '@zeroxsolutions/ui-docs-web/components/data-display/components-list';
 import { ComponentSource } from '@zeroxsolutions/ui/site/components/data-display/component-source';
 import { ExamplePreview } from '@zeroxsolutions/ui/site/components/data-display/example-preview';
+import { viewRoute } from '@zeroxsolutions/ui-docs-web/routes';
 import { InitCommand } from '@zeroxsolutions/ui-docs-web/components/data-display/init-command';
 import { WebComponentsJson } from '@zeroxsolutions/ui-docs-web/components/data-display/web-components-json';
 
@@ -29,7 +30,9 @@ import { WebComponentsJson } from '@zeroxsolutions/ui-docs-web/components/data-d
  */
 export const mdxComponents = {
   ...siteMdxComponents,
-  ComponentPreview: ExamplePreview,
+  ComponentPreview: (props: ComponentProps<typeof ExamplePreview>) => (
+    <ExamplePreview viewHref={viewRoute.build({ name: props.name })} {...props} />
+  ),
   BlockPreview,
   ComponentSource: ({ file, title, ...props }: ComponentProps<typeof ComponentSource>) => (
     <ComponentSource file={file} className="mt-6" {...props}>

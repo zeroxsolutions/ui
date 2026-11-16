@@ -1,4 +1,8 @@
+import { Maximize2Icon } from 'lucide-react';
 import type { ReactNode } from 'react';
+
+import { buttonVariants } from '../../../../registry/bases/base-ui/ui/button';
+import { cn } from '../../../../registry/bases/base-ui/lib/utils';
 
 import { ComponentPreview, ComponentPreviewStage } from './component-preview';
 import { RegistryExample } from './registry-example';
@@ -13,16 +17,31 @@ interface ExamplePreviewProps {
   code?: string;
   language?: string;
   lines?: string;
+  /** The demo's page of its own, which a button on the stage opens in a new tab; none, no button. */
+  viewHref?: string;
 }
 
 /** A docs page's `<ComponentPreview name>`: the demo live above its source. Throws for a name the index lacks, so the page fails its build. */
-function ExamplePreview({ name, ...source }: ExamplePreviewProps): ReactNode {
+function ExamplePreview({ name, viewHref, ...source }: ExamplePreviewProps): ReactNode {
   if (!Index[name]) throw new Error(`ComponentPreview: "${name}" is not in the examples index`);
   return (
     <ComponentPreview className="mt-4 mb-12">
-      <ComponentPreviewStage>
-        <RegistryExample name={name} />
-      </ComponentPreviewStage>
+      <div className="relative">
+        <ComponentPreviewStage>
+          <RegistryExample name={name} />
+        </ComponentPreviewStage>
+        {viewHref ? (
+          <a
+            href={viewHref}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Open in a new tab"
+            className={cn(buttonVariants({ variant: 'ghost', size: 'icon-sm' }), 'absolute top-2 right-2')}
+          >
+            <Maximize2Icon />
+          </a>
+        ) : null}
+      </div>
       <ExampleSource name={name} {...source} />
     </ComponentPreview>
   );

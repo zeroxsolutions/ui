@@ -16,6 +16,7 @@ import {
 
 import { ComponentSource } from '@zeroxsolutions/ui/site/components/data-display/component-source';
 import { ExamplePreview } from '@zeroxsolutions/ui/site/components/data-display/example-preview';
+import { editorExampleViewRoute } from '@zeroxsolutions/editor-docs-web/routes';
 
 /**
  * Every element and component a page in `content/docs/editor` may use, passed to its compiled body: the
@@ -23,7 +24,9 @@ import { ExamplePreview } from '@zeroxsolutions/ui/site/components/data-display/
  */
 export const mdxComponents = {
   ...siteMdxComponents,
-  ComponentPreview: ExamplePreview,
+  ComponentPreview: (props: ComponentProps<typeof ExamplePreview>) => (
+    <ExamplePreview viewHref={editorExampleViewRoute.build({ name: props.name })} {...props} />
+  ),
   ComponentSource: ({ file, title, ...props }: ComponentProps<typeof ComponentSource>) => (
     <ComponentSource file={file} className="mt-6" {...props}>
       <SourceCodeCardHeader>

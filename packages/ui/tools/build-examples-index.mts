@@ -8,7 +8,8 @@
  * component the first file exports, so that an app bundles only the demos it renders:
  * `__components__.tsx` holds every entry outside the editor set; `__editor-components__.tsx` holds the
  * editor set, which the editor docs zone renders. The editor set is an item in the `editor` category
- * and an item that names one among its registry dependencies.
+ * and an item that names one among its registry dependencies; `Index` marks each entry's set too, so a
+ * server module can tell the two apart without importing either map.
  */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -59,10 +60,12 @@ writeFileSync(
 interface IndexEntry {
   name: string;
   files: string[];
+  /** In the editor set, which the editor docs zone renders rather than registry-ui. */
+  editor: boolean;
 }
 
 export const Index: Record<string, IndexEntry> = {
-${entries.map(({ name, files }) => `  '${name}': { name: '${name}', files: ${JSON.stringify(files)} },`).join('\n')}
+${entries.map(({ name, files }) => `  '${name}': { name: '${name}', files: ${JSON.stringify(files)}, editor: ${editorSet.has(name)} },`).join('\n')}
 };
 `,
 );
