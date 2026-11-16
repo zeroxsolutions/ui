@@ -27,8 +27,8 @@ function WrenchIcon({
   const wrench = useAnimatedProps(() => ({
     ...transformProps({
       rotate: interpolate(progress.value, [0, 0.42, 0.68, 0.88, 1], [0, 12, -14, 4, 0]),
-      originX: 20,
-      originY: 4,
+      originX: 21.6,
+      originY: 2.4,
     }),
   }));
 

@@ -31,9 +31,10 @@ function BrainIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  const width = Number.parseFloat(String(strokeWidth));
   const whole = useAnimatedProps(() => ({
     ...transformProps({ scaleX: 1 + 0.08 * progress.value, scaleY: 1 + 0.08 * progress.value }),
-    strokeWidth: Number(strokeWidth) * (1 + 0.125 * progress.value),
+    strokeWidth: width * (1 + 0.125 * progress.value),
   }));
   const stem = useAnimatedProps(() => dash(STEM, 1 - 0.6 * progress.value, 0.25 * progress.value));
   const side = useAnimatedProps(() => dash(SIDE, 1 - 0.5 * progress.value, 0.25 * progress.value));

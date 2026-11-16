@@ -41,7 +41,7 @@ function CheckIcon({
     const drawn = 1 - progress.value;
     const scale = 0.5 + 0.5 * drawn;
     return {
-      ...dash(TICK, drawn),
+      ...dash(TICK, drawn, 1 - drawn),
       opacity: interpolate(drawn, [0, 0.25], [0, 1], Extrapolation.CLAMP),
       ...transformProps({ scaleX: scale, scaleY: scale, originY: 11.5 }),
     };

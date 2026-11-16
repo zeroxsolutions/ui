@@ -108,7 +108,7 @@ interface IconTransformProps {
 
 /**
  * The transform props of a shape or group, which turn about the origin, scale about it, then move. A scale is
- * kept above zero, which react-native-svg reads as no scale at all.
+ * kept at least 0.001 in size, since react-native-svg reads 0 as no scale at all; its sign is kept, so a flip works.
  */
 function transformProps({
   x = 0,
@@ -123,8 +123,8 @@ function transformProps({
   return {
     translateX: x,
     translateY: y,
-    scaleX: Math.max(scaleX, 0.001),
-    scaleY: Math.max(scaleY, 0.001),
+    scaleX: Math.abs(scaleX) < 0.001 ? 0.001 : scaleX,
+    scaleY: Math.abs(scaleY) < 0.001 ? 0.001 : scaleY,
     rotation: rotate,
     originX,
     originY,

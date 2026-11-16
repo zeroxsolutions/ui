@@ -54,9 +54,10 @@ function PaletteIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref, TIMING);
-  const outline = useAnimatedProps(() =>
-    dash(OUTLINE, interpolate(1 - progress.value, [0, 0.5], [0, 1], Extrapolation.CLAMP)),
-  );
+  const outline = useAnimatedProps(() => {
+    const drawn = interpolate(1 - progress.value, [0, 0.5], [0, 1], Extrapolation.CLAMP);
+    return dash(OUTLINE, drawn, 1 - drawn);
+  });
   const first = useAnimatedProps(() => pop(progress.value, 0));
   const second = useAnimatedProps(() => pop(progress.value, 1));
   const third = useAnimatedProps(() => pop(progress.value, 2));

@@ -619,7 +619,7 @@
       "name": "sun-moon-icon",
       "type": "registry:ui",
       "title": "Sun Moon Icon",
-      "description": "An animated sun-moon icon, adapted from lucide-animated, whose moon rocks while the sun's rays fade, one after another, then return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "description": "An animated sun-moon icon, adapted from lucide-animated, whose moon rocks while three of the sun's rays fade, one after another, then return when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [

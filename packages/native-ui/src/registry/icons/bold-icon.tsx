@@ -24,7 +24,8 @@ function BoldIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  const letter = useAnimatedProps(() => ({ strokeWidth: Number(strokeWidth) * (1 + 0.75 * progress.value) }));
+  const width = Number.parseFloat(String(strokeWidth));
+  const letter = useAnimatedProps(() => ({ strokeWidth: width * (1 + 0.75 * progress.value) }));
 
   return (
     <Svg

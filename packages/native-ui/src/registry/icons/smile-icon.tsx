@@ -38,6 +38,7 @@ function SmileIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  const width = Number.parseFloat(String(strokeWidth));
   const face = useAnimatedProps(() => {
     const scale = interpolate(progress.value, [0, 0.3, 0.6, 1], [1, 1.15, 1.05, 1.1]);
     return {
@@ -46,7 +47,7 @@ function SmileIcon({
         scaleY: scale,
         rotate: interpolate(progress.value, [0, 1 / 3, 2 / 3, 1], [0, -3, 3, 0]),
       }),
-      strokeWidth: Number(strokeWidth) * (1 + 0.25 * progress.value),
+      strokeWidth: width * (1 + 0.25 * progress.value),
     };
   });
   const mouth = useAnimatedProps(() => ({

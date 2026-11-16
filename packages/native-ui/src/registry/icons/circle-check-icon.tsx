@@ -32,7 +32,7 @@ function CircleCheckIcon({
   const progress = useIconMotion(ref, TIMING);
   const tick = useAnimatedProps(() => {
     const drawn = 1 - progress.value;
-    return { ...dash(TICK, drawn), opacity: interpolate(drawn, [0, 0.25], [0, 1], Extrapolation.CLAMP) };
+    return { ...dash(TICK, drawn, 1 - drawn), opacity: interpolate(drawn, [0, 0.25], [0, 1], Extrapolation.CLAMP) };
   });
 
   return (

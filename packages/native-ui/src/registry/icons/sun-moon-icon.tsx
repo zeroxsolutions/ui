@@ -17,8 +17,8 @@ function fade(progress: number, delay: number): { opacity: number } {
 }
 
 /**
- * Lucide's sun-moon icon, whose moon rocks while the sun's rays fade, one after another, then return, when
- * started. Hidden from a screen reader: the control around it says what it does.
+ * Lucide's sun-moon icon, whose moon rocks while three of the sun's rays fade, one after another, then
+ * return, when started. Hidden from a screen reader: the control around it says what it does.
  */
 function SunMoonIcon({
   ref,
@@ -38,9 +38,8 @@ function SunMoonIcon({
     }),
   }));
   const first = useAnimatedProps(() => fade(progress.value, 0));
-  const second = useAnimatedProps(() => fade(progress.value, 0.1));
-  const third = useAnimatedProps(() => fade(progress.value, 0.2));
-  const fourth = useAnimatedProps(() => fade(progress.value, 0.3));
+  const second = useAnimatedProps(() => fade(progress.value, 0.15));
+  const third = useAnimatedProps(() => fade(progress.value, 0.3));
 
   return (
     <Svg
@@ -61,9 +60,9 @@ function SunMoonIcon({
         animatedProps={moon}
       />
       <AnimatedPath d="M12 2v2" animatedProps={first} />
-      <AnimatedPath d="M16 12a4 4 0 0 0-4-4" animatedProps={second} />
-      <AnimatedPath d="m19 5-1.256 1.256" animatedProps={third} />
-      <AnimatedPath d="M20 12h2" animatedProps={fourth} />
+      <Path d="M16 12a4 4 0 0 0-4-4" />
+      <AnimatedPath d="m19 5-1.256 1.256" animatedProps={second} />
+      <AnimatedPath d="M20 12h2" animatedProps={third} />
     </Svg>
   );
 }
