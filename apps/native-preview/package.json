@@ -104,6 +104,7 @@
       "eas:update": {
         "executor": "nx:run-commands",
         "dependsOn": [
+          "^build",
           "^build-registry"
         ],
         "options": {
