@@ -53,11 +53,11 @@ Seventeen positions already have a twin and only need the swap:
 
 Thirty-four icons have no twin and are authored, in the positions the inventory lists:
 
-| Group | Icons |
-|---|---|
+| Group                         | Icons                                                                                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Editor toolbar and slash menu | Strikethrough, Code, Highlighter, Heading1, Heading2, Heading3, List, ListOrdered, ListTodo, TextQuote, Minus, Info, Image, Link, Table, Frame, Sigma, Radical, Omega, Workflow |
-| Editor controls | PencilLine, Download, Plus, Maximize, RotateCcw, GripVertical, Settings2 |
-| Components | Trash2, CircleX, Plane, Dumbbell, Lightbulb, Hash, Flag |
+| Editor controls               | PencilLine, Download, Plus, Maximize, RotateCcw, GripVertical, Settings2                                                                                                        |
+| Components                    | Trash2, CircleX, Plane, Dumbbell, Lightbulb, Hash, Flag                                                                                                                         |
 
 ### Native: control positions in zui's own components
 
@@ -181,6 +181,7 @@ Three pull requests, each green on its own:
   - the drawing is hidden from accessibility.
 
   Each wired native control gets a case that press-in and focus start its icon.
+
 - **Parity:** `web-twins.spec.ts` fails for a web `*-icon` with no native twin.
 
 ## Left to the builder
