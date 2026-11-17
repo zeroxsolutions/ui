@@ -8,6 +8,7 @@ import {
   nativeComponentsRoute,
   nativeDocsRoute,
   nativeHomeRoute,
+  nativeIconsRoute,
 } from '@zeroxsolutions/native-ui-docs-web/routes';
 
 import {
@@ -17,11 +18,12 @@ import {
   webDocsPageRoute,
   webDocsRoute,
   webHomeRoute,
+  webIconsRoute,
 } from '@/routes/web-paths';
 
 /**
  * The web page at the same place as the native page at `pathname`: the home page, the docs page with the
- * same slug, the component with the same name, or the blocks page. This zone does not know which web
+ * same slug, the component with the same name, the blocks page or the icons page. This zone does not know which web
  * pages exist, so a native page the web lacks leads to a web 404 rather than to its section's index.
  */
 export function webCounterpart(pathname: string): string {
@@ -38,6 +40,8 @@ export function webCounterpart(pathname: string): string {
         : webComponentsRoute.build({ base });
     case 'blocks':
       return webBlocksRoute.build({ base });
+    case 'icons':
+      return webIconsRoute.build({ base });
     default:
       return webDocsRoute.build();
   }
@@ -48,7 +52,7 @@ export function zoneHome(platform: Platform): string {
   return platform === 'native' ? nativeHomeRoute.build() : webHomeRoute.build();
 }
 
-/** The header's Docs, Components and Blocks, each pointing into `platform`'s tree; on native, under `engine`. */
+/** The header's Docs, Components, Blocks and Icons, each pointing into `platform`'s tree; on native, under `engine`. */
 export function zoneNavItems(platform: Platform, engine: NativeEngine): SiteNavItem[] {
   if (platform === 'native') {
     return [
@@ -59,6 +63,7 @@ export function zoneNavItems(platform: Platform, engine: NativeEngine): SiteNavI
         pattern: `${nativeComponentsRoute.pathname}{/*rest}`,
       },
       { href: nativeBlocksRoute.build({ engine }), label: 'Blocks', pattern: nativeBlocksRoute.pathname },
+      { href: nativeIconsRoute.build({ engine }), label: 'Icons', pattern: nativeIconsRoute.pathname },
     ];
   }
   const base = DEFAULT_COMPONENT_BASE;
@@ -70,5 +75,6 @@ export function zoneNavItems(platform: Platform, engine: NativeEngine): SiteNavI
       pattern: `${webComponentsRoute.pathname}{/*rest}`,
     },
     { href: webBlocksRoute.build({ base }), label: 'Blocks', pattern: webBlocksRoute.pathname },
+    { href: webIconsRoute.build({ base }), label: 'Icons', pattern: webIconsRoute.pathname },
   ];
 }

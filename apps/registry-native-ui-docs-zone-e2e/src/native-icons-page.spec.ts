@@ -1,0 +1,38 @@
+import { expect, test } from './test/fixtures';
+import { waitForHydration } from './test/hydrated';
+import { DRAWN, inside } from './test/native-preview';
+
+test.slow(true, 'the frame may take all of DRAWN to draw, and then loads the icons as a chunk of their own');
+
+test("the header's Icons entry opens the native icons page, whose frame draws the icons", async ({ page }) => {
+  await page.goto('/native/docs');
+  await waitForHydration(page);
+
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Icons', exact: true }).click();
+
+  await expect(page).toHaveURL('/native/icons/nativewind');
+  await expect(page.getByRole('heading', { level: 1, name: 'Icons' })).toBeVisible();
+  const gallery = inside(page, 'Icon gallery demo');
+  await expect(gallery.getByRole('heading', { name: 'lucide' })).toBeVisible(DRAWN);
+  await expect(gallery.getByRole('button', { name: 'a-arrow-down', exact: true }).locator('svg')).toBeVisible(DRAWN);
+});
+
+test("the page's search narrows the frame's grid, and an icon tapped there shows its install line", async ({
+  page,
+}) => {
+  await page.goto('/native/icons/uniwind?q=arrow-up');
+  const gallery = inside(page, 'Icon gallery demo');
+  const tile = gallery.getByRole('button', { name: 'arrow-up', exact: true });
+
+  await expect(tile).toBeVisible(DRAWN);
+  await expect(gallery.getByRole('button', { name: 'arrow-down', exact: true })).toHaveCount(0);
+
+  await page.getByRole('searchbox', { name: 'Search icons' }).fill('copy');
+  await expect(gallery.getByRole('button', { name: 'copy', exact: true })).toBeVisible();
+  await expect(tile).toHaveCount(0);
+
+  await gallery.getByRole('button', { name: 'copy', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'copy' })).toContainText(
+    'pnpm dlx shadcn@latest add @zui/lucide-copy-icon',
+  );
+});

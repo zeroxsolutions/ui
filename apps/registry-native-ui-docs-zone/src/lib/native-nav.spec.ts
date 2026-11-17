@@ -11,6 +11,7 @@ describe('webCounterpart', () => {
     ['/native/components/uniwind', '/docs/components/base'],
     ['/native/components/nativewind/button', '/docs/components/base/button'],
     ['/native/blocks/uniwind', '/blocks/base'],
+    ['/native/icons/nativewind', '/icons/base'],
     ['/native/unknown', '/docs'],
   ])('moves %s to %s', (pathname, href) => {
     expect(webCounterpart(pathname)).toBe(href);
@@ -30,6 +31,7 @@ describe('zoneNavItems', () => {
       '/native/docs',
       '/native/components/uniwind',
       '/native/blocks/uniwind',
+      '/native/icons/uniwind',
     ]);
   });
 
@@ -38,6 +40,7 @@ describe('zoneNavItems', () => {
       '/docs',
       '/docs/components/base',
       '/blocks/base',
+      '/icons/base',
     ]);
   });
 });

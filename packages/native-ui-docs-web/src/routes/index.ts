@@ -32,6 +32,12 @@ export const nativeBlocksRoute = createDynamicRoute<{ engine: NativeEngine }>(
   ({ engine }) => `/native/blocks/${engine}`,
 );
 
+/** Every native animated icon, drawn by one engine's preview app. */
+export const nativeIconsRoute = createDynamicRoute<{ engine: NativeEngine }>(
+  '/native/icons/:engine',
+  ({ engine }) => `/native/icons/${engine}`,
+);
+
 /**
  * A native page's share image, which `/og/native/[...slug]` draws once at build. `slug` is `docs/<page>` or
  * `components/<name>`, with no engine: both engines' pages of one component share the image.

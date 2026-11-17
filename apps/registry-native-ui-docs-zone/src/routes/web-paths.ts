@@ -34,3 +34,9 @@ export const webBlocksRoute = createDynamicRoute<{ base: ComponentBase }>(
   '/blocks/:base',
   ({ base }) => `/blocks/${base}`,
 );
+
+/** Every web animated icon on one base. */
+export const webIconsRoute = createDynamicRoute<{ base: ComponentBase }>(
+  '/icons/:base',
+  ({ base }) => `/icons/${base}`,
+);

@@ -1,7 +1,17 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
+import {
+  Suspense,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type ReactNode,
+  type Ref,
+} from 'react';
 
 import { useCurrentStyle } from '@zeroxsolutions/ui/site/hooks/use-current-style';
 import { nativePreviewSrc, nativePreviewTitle, previewHeightOf, previewTheme } from '../../lib/native-preview';
@@ -20,7 +30,24 @@ const PREVIEW_ROOT_ID = 'root';
  */
 const DRAW_TIMEOUT_MS = 15_000;
 
-interface NativePreviewFrameProps {
+/** What a page holds a frame by, to post its demo a message. */
+interface NativePreviewFrameHandle {
+  /**
+   * Posts `message` to the demo, for the page's own origin only. A message posted before the frame is drawn, or
+   * while it loads another style or mode, is lost, so a demo that wants one asks for it once it listens.
+   */
+  post(message: unknown): void;
+}
+
+/** What a page that talks to its demo hands the frame. */
+interface NativePreviewFrameChannel {
+  /** Receives the handle the page posts to the demo through. */
+  ref?: Ref<NativePreviewFrameHandle>;
+  /** Called with each message the demo posts on the page's origin, other than its height. */
+  onMessage?: (data: unknown) => void;
+}
+
+interface NativePreviewFrameProps extends NativePreviewFrameChannel {
   /** The engine of the page, whose preview app draws the demo. */
   engine: NativeEngine;
   /** A demo's name in `@zeroxsolutions/native-ui/examples`, such as `button-demo`. */
@@ -30,14 +57,15 @@ interface NativePreviewFrameProps {
 /**
  * A native demo drawn by the page's engine's native preview, in a frame as tall as the demo, in the style the page
  * shows and the site's light or dark mode. A change of either loads the frame again. It shows a spinner
- * until the demo has drawn, and says so, with a link to the preview's own page, if it never does.
+ * until the demo has drawn, and says so, with a link to the preview's own page, if it never does. A page that
+ * talks to its demo posts through `ref` and hears it through `onMessage`.
  */
-function NativePreviewFrame({ engine, demo }: NativePreviewFrameProps): ReactNode {
+function NativePreviewFrame(props: NativePreviewFrameProps): ReactNode {
   return (
     // The style is read from the search params, and the mode once the page has hydrated; until both
     // are known the frame is left out, so it loads once, in the reader's style and mode.
     <Suspense fallback={<NativePreviewFrameLoading />}>
-      <NativePreviewFrameFromPage engine={engine} demo={demo} />
+      <NativePreviewFrameFromPage {...props} />
     </Suspense>
   );
 }
@@ -46,7 +74,7 @@ function subscribeToNothing(): () => void {
   return () => undefined;
 }
 
-function NativePreviewFrameFromPage({ engine, demo }: NativePreviewFrameProps): ReactNode {
+function NativePreviewFrameFromPage({ engine, demo, ref, onMessage }: NativePreviewFrameProps): ReactNode {
   const style = useCurrentStyle('native');
   const { resolvedTheme } = useTheme();
   const hydrated = useSyncExternalStore(
@@ -65,6 +93,8 @@ function NativePreviewFrameFromPage({ engine, demo }: NativePreviewFrameProps): 
         theme: previewTheme(resolvedTheme),
       })}
       title={nativePreviewTitle(demo)}
+      ref={ref}
+      onMessage={onMessage}
     />
   );
 }
@@ -72,7 +102,12 @@ function NativePreviewFrameFromPage({ engine, demo }: NativePreviewFrameProps): 
 /** Where the frame is with the page it was last pointed at. */
 type FrameStatus = 'loading' | 'drawn' | 'failed';
 
-function NativePreviewFrameDocument({ src, title }: { src: string; title: string }): ReactNode {
+interface NativePreviewFrameDocumentProps extends NativePreviewFrameChannel {
+  src: string;
+  title: string;
+}
+
+function NativePreviewFrameDocument({ src, title, ref, onMessage }: NativePreviewFrameDocumentProps): ReactNode {
   const frame = useRef<HTMLIFrameElement>(null);
   // Kept across a change of `src`, so a new style or mode reloads the frame without it jumping back to
   // the fallback height first.
@@ -83,17 +118,26 @@ function NativePreviewFrameDocument({ src, title }: { src: string; title: string
   }>();
   const status: FrameStatus = outcome?.src === src ? outcome.status : 'loading';
 
+  useImperativeHandle(
+    ref,
+    () => ({ post: (message) => frame.current?.contentWindow?.postMessage(message, window.location.origin) }),
+    [],
+  );
+
   useEffect(() => {
-    const onMessage = (event: MessageEvent): void => {
+    const receive = (event: MessageEvent): void => {
       if (event.source !== frame.current?.contentWindow || event.origin !== window.location.origin) return;
       const posted = previewHeightOf(event.data);
-      if (posted === undefined) return;
+      if (posted === undefined) {
+        onMessage?.(event.data);
+        return;
+      }
       setHeight(posted);
       setOutcome({ src, status: 'drawn' });
     };
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, [src]);
+    window.addEventListener('message', receive);
+    return () => window.removeEventListener('message', receive);
+  }, [src, onMessage]);
 
   useEffect(() => {
     if (status !== 'loading') return;
@@ -161,3 +205,4 @@ function NativePreviewFrameLoading(): ReactNode {
 }
 
 export { NativePreviewFrame };
+export type { NativePreviewFrameHandle };

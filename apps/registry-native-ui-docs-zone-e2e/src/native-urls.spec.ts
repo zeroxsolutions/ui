@@ -1,7 +1,12 @@
 import { expect, test } from './test/fixtures';
 
 test('an engine outside the set is a 404, not a page with broken snippets', async ({ request }) => {
-  for (const path of ['/native/components/foo/button', '/native/components/foo', '/native/blocks/foo']) {
+  for (const path of [
+    '/native/components/foo/button',
+    '/native/components/foo',
+    '/native/blocks/foo',
+    '/native/icons/foo',
+  ]) {
     expect((await request.get(path)).status(), path).toBe(404);
   }
 });

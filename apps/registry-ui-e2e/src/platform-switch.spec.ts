@@ -15,6 +15,7 @@ test('the switch points at the same place on native, which the native zone answe
     ['/docs/components/base/tab-bar', '/native/components/nativewind/tab-bar'],
     ['/docs/components/base/copy-button', '/native/components/nativewind/copy-button'],
     ['/blocks/base', '/native/blocks/nativewind'],
+    ['/icons/base', '/native/icons/nativewind'],
   ]) {
     await page.goto(path);
 

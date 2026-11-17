@@ -21,14 +21,17 @@ describe('native routes', () => {
     expect(nativeRoutes.nativeDocsPageRoute.matcher(built)).toMatchObject({ params: { slug: ['installation'] } });
   });
 
-  it('builds the native components index and the blocks page under an engine, and reads the engine back', () => {
+  it('builds the native components index, the blocks page and the icons page under an engine, and reads the engine back', () => {
     const components = nativeRoutes.nativeComponentsRoute.build({ engine: 'uniwind' });
     const blocks = nativeRoutes.nativeBlocksRoute.build({ engine: 'uniwind' });
+    const icons = nativeRoutes.nativeIconsRoute.build({ engine: 'uniwind' });
 
     expect(components).toBe('/native/components/uniwind');
     expect(blocks).toBe('/native/blocks/uniwind');
+    expect(icons).toBe('/native/icons/uniwind');
     expect(nativeRoutes.nativeComponentsRoute.matcher(components)).toMatchObject({ params: { engine: 'uniwind' } });
     expect(nativeRoutes.nativeBlocksRoute.matcher(blocks)).toMatchObject({ params: { engine: 'uniwind' } });
+    expect(nativeRoutes.nativeIconsRoute.matcher(icons)).toMatchObject({ params: { engine: 'uniwind' } });
   });
 
   it('builds a native component page under its engine, and reads the engine and the name back', () => {
