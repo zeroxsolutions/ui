@@ -8,9 +8,9 @@ const REGISTRY_PATH = join(__dirname, '../../registry.json');
 const registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8')) as Registry;
 /** Utils draws nothing, so it has no demo; the theme's demo draws its colours and fonts. */
 const DRAWN_TYPES = new Set(['registry:theme', 'registry:ui', 'registry:component', 'registry:block']);
-/** An animated icon has no demo of its own, as on the web; the controls that play it show it. */
+/** An animated icon, a file under registry/icons/, has no demo of its own, as on the web; the controls that play it show it. */
 const isAnimatedIcon = (item: Registry['items'][number]): boolean =>
-  item.type === 'registry:ui' && item.name.endsWith('-icon');
+  item.type === 'registry:ui' && (item.files?.[0]?.path.startsWith('src/registry/icons/') ?? false);
 const drawnItems = registry.items
   .filter((item) => DRAWN_TYPES.has(item.type) && !isAnimatedIcon(item))
   .map((item) => item.name);

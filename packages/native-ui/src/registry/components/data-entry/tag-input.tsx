@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { View } from 'react-native';
-import { XIcon } from '../../icons/x-icon';
+import { XIcon } from '../../icons/lucide/x-icon';
 import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { cn } from '../../lib/utils';
 import { Badge } from '../../ui/badge';

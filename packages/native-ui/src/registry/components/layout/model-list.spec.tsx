@@ -11,10 +11,10 @@ import {
   ModelListTitle,
 } from './model-list';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { Trash2Icon } from '../../icons/trash-2-icon';
+import { TrashIcon } from '../../icons/lucide/trash-icon';
 
-jest.mock('../../icons/trash-2-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('trash-2-icon'),
+jest.mock('../../icons/lucide/trash-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('trash-icon'),
 );
 
 beforeEach(() => {
@@ -102,7 +102,7 @@ describe('ModelListRemoveButton motion', () => {
 
     expect(onPressIn).toHaveBeenCalledTimes(1);
     expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(handleOf(Trash2Icon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(Trash2Icon).stopAnimation).not.toHaveBeenCalled();
+    expect(handleOf(TrashIcon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(TrashIcon).stopAnimation).not.toHaveBeenCalled();
   });
 });

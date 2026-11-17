@@ -1,6 +1,6 @@
 import { useRef, type ComponentProps, type ReactNode } from 'react';
 import { View } from 'react-native';
-import { Trash2Icon } from '../../icons/trash-2-icon';
+import { TrashIcon } from '../../icons/lucide/trash-icon';
 import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { cn } from '../../lib/utils';
 import { Button } from '../../ui/button';
@@ -79,7 +79,7 @@ function ModelListRemoveButton({ children, onPressIn, onFocus, ...props }: Compo
       {...iconTrigger([icon], { onPressIn, onFocus })}
       {...props}
     >
-      {children ?? <Icon as={Trash2Icon} ref={icon} />}
+      {children ?? <Icon as={TrashIcon} ref={icon} />}
     </Button>
   );
 }

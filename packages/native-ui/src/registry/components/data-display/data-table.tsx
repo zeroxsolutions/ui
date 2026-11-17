@@ -9,9 +9,9 @@ import {
   type ReactNode,
 } from 'react';
 import { View } from 'react-native';
-import { ChevronLeftIcon } from '../../icons/chevron-left-icon';
-import { ChevronRightIcon } from '../../icons/chevron-right-icon';
-import { Settings2Icon } from '../../icons/settings-2-icon';
+import { ChevronLeftIcon } from '../../icons/lucide/chevron-left-icon';
+import { ChevronRightIcon } from '../../icons/lucide/chevron-right-icon';
+import { Settings2Icon } from '../../icons/lucide/settings-2-icon';
 import { iconTrigger, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';

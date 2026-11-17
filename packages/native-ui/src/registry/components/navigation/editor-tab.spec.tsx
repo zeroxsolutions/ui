@@ -2,9 +2,9 @@ import { render, screen, userEvent } from '@testing-library/react-native';
 import { ItemActions, ItemContent } from '../../ui/item';
 import { EditorTab, EditorTabCloseButton, EditorTabTitle, type EditorTabProps } from './editor-tab';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { XIcon } from '../../icons/x-icon';
+import { XIcon } from '../../icons/lucide/x-icon';
 
-jest.mock('../../icons/x-icon', () =>
+jest.mock('../../icons/lucide/x-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('x-icon'),
 );
 

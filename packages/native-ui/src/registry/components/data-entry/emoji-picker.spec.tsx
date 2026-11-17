@@ -11,41 +11,41 @@ import {
   type EmojiPickerProps,
 } from './emoji-picker';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { ClockIcon } from '../../icons/clock-icon';
-import { SmileIcon } from '../../icons/smile-icon';
-import { LeafIcon } from '../../icons/leaf-icon';
-import { CoffeeIcon } from '../../icons/coffee-icon';
-import { PlaneIcon } from '../../icons/plane-icon';
-import { DumbbellIcon } from '../../icons/dumbbell-icon';
-import { LightbulbIcon } from '../../icons/lightbulb-icon';
-import { HashIcon } from '../../icons/hash-icon';
-import { FlagIcon } from '../../icons/flag-icon';
+import { ClockIcon } from '../../icons/lucide/clock-icon';
+import { FaceSlightlySmilingIcon } from '../../icons/lucide/face-slightly-smiling-icon';
+import { LeafIcon } from '../../icons/lucide/leaf-icon';
+import { CoffeeIcon } from '../../icons/lucide/coffee-icon';
+import { PlaneIcon } from '../../icons/lucide/plane-icon';
+import { DumbbellIcon } from '../../icons/lucide/dumbbell-icon';
+import { LightbulbIcon } from '../../icons/lucide/lightbulb-icon';
+import { HashIcon } from '../../icons/lucide/hash-icon';
+import { FlagIcon } from '../../icons/lucide/flag-icon';
 
-jest.mock('../../icons/clock-icon', () =>
+jest.mock('../../icons/lucide/clock-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('clock-icon'),
 );
-jest.mock('../../icons/smile-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('smile-icon'),
+jest.mock('../../icons/lucide/face-slightly-smiling-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('face-slightly-smiling-icon'),
 );
-jest.mock('../../icons/leaf-icon', () =>
+jest.mock('../../icons/lucide/leaf-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('leaf-icon'),
 );
-jest.mock('../../icons/coffee-icon', () =>
+jest.mock('../../icons/lucide/coffee-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('coffee-icon'),
 );
-jest.mock('../../icons/plane-icon', () =>
+jest.mock('../../icons/lucide/plane-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('plane-icon'),
 );
-jest.mock('../../icons/dumbbell-icon', () =>
+jest.mock('../../icons/lucide/dumbbell-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('dumbbell-icon'),
 );
-jest.mock('../../icons/lightbulb-icon', () =>
+jest.mock('../../icons/lucide/lightbulb-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('lightbulb-icon'),
 );
-jest.mock('../../icons/hash-icon', () =>
+jest.mock('../../icons/lucide/hash-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('hash-icon'),
 );
-jest.mock('../../icons/flag-icon', () =>
+jest.mock('../../icons/lucide/flag-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('flag-icon'),
 );
 
@@ -164,7 +164,7 @@ describe('EmojiPicker', () => {
 describe('EmojiPickerNav motion', () => {
   it.each([
     ['Recent', ClockIcon],
-    ['Smileys & people', SmileIcon],
+    ['Smileys & people', FaceSlightlySmilingIcon],
     ['Animals & nature', LeafIcon],
     ['Food & drink', CoffeeIcon],
     ['Travel & places', PlaneIcon],
@@ -183,7 +183,7 @@ describe('EmojiPickerNav motion', () => {
     expect(handleOf(icon).stopAnimation).not.toHaveBeenCalled();
     for (const other of [
       ClockIcon,
-      SmileIcon,
+      FaceSlightlySmilingIcon,
       LeafIcon,
       CoffeeIcon,
       PlaneIcon,

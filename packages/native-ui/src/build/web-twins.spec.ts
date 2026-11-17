@@ -60,8 +60,18 @@ function readRegistry(root: string): Registry {
 
 const webItems = readRegistry(WEB).items;
 const web = webItems.filter((item) => item.type === 'registry:component' || item.type === 'registry:block');
-const webIcons = webItems.filter((item) => item.type === 'registry:ui' && item.name.endsWith('-icon'));
-const native = new Map(readRegistry(PROJECT).items.map((item) => [item.name, item]));
+const nativeItems = readRegistry(PROJECT).items;
+const native = new Map(nativeItems.map((item) => [item.name, item]));
+
+/** The `<set>/<file>` an animated icon's first file sits at under `icons/`, which both halves name it by. */
+const ICON_FILE = /(?:^|\/)icons\/([a-z0-9-]+\/[a-z0-9-]+)\.tsx$/;
+const iconsOf = (items: Registry['items']): string[] =>
+  items.flatMap((item) => {
+    const match = item.type === 'registry:ui' ? ICON_FILE.exec(item.files?.[0]?.path ?? '') : null;
+    return match ? [match[1]] : [];
+  });
+const webIcons = iconsOf(webItems);
+const nativeIcons = new Set(iconsOf(nativeItems));
 const zuiSlots = new Set(
   parseSlotMap(readFileSync(require.resolve('@zeroxsolutions/ui/registry/styles/style-nova.css'), 'utf8')).keys(),
 );
@@ -84,9 +94,20 @@ describe("zui's own items on native", () => {
     ).toEqual([]);
   });
 
-  it('has a native twin of every web animated icon', () => {
+  it('has a native twin of every web animated icon, at the same <set>/<file> under icons/', () => {
     expect(webIcons.length).toBeGreaterThan(0);
-    expect(webIcons.map((item) => item.name).filter((name) => !native.has(name))).toEqual([]);
+    expect(webIcons.filter((icon) => !nativeIcons.has(icon))).toEqual([]);
+  });
+
+  it('has copy-button name the lucide copy and check icons by their items and import them from the lucide set', () => {
+    const item = native.get('copy-button');
+    if (item === undefined) throw new Error('no copy-button item');
+    expect(item.registryDependencies).toEqual(
+      expect.arrayContaining(['@zui/lucide-copy-icon', '@zui/lucide-check-icon']),
+    );
+    const source = readFileSync(join(PROJECT, item.files?.[0]?.path ?? ''), 'utf8');
+    expect(source).toContain('../../icons/lucide/copy-icon');
+    expect(source).toContain('../../icons/lucide/check-icon');
   });
 
   it('names no item as not ported or pending that is ported', () => {

@@ -1,7 +1,7 @@
 import { Slot } from '@rn-primitives/slot';
 import { createContext, useContext, useMemo, useRef, type ComponentProps, type ReactNode } from 'react';
 import { Pressable, View, type TextInputInstance } from 'react-native';
-import { ChevronRightIcon } from '../../icons/chevron-right-icon';
+import { ChevronRightIcon } from '../../icons/lucide/chevron-right-icon';
 import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';

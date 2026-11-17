@@ -3,18 +3,18 @@ import * as Clipboard from 'expo-clipboard';
 import { Copy } from 'lucide-react-native';
 import { AccessibilityInfo, Platform } from 'react-native';
 import { registerCSS } from 'react-native-css-interop/test';
-import { CheckIcon } from '../../icons/check-icon';
+import { CheckIcon } from '../../icons/lucide/check-icon';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { CopyIcon } from '../../icons/copy-icon';
+import { CopyIcon } from '../../icons/lucide/copy-icon';
 import { Button } from '../../ui/button';
 import { Icon } from '../../ui/icon';
 import { CopyButton } from './copy-button';
 
 jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn() }));
-jest.mock('../../icons/copy-icon', () =>
+jest.mock('../../icons/lucide/copy-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('copy-icon'),
 );
-jest.mock('../../icons/check-icon', () =>
+jest.mock('../../icons/lucide/check-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('check-icon'),
 );
 

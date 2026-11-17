@@ -14,15 +14,15 @@ import {
   type RefObject,
 } from 'react';
 import { FlatList, View } from 'react-native';
-import { ClockIcon } from '../../icons/clock-icon';
-import { CoffeeIcon } from '../../icons/coffee-icon';
-import { DumbbellIcon } from '../../icons/dumbbell-icon';
-import { FlagIcon } from '../../icons/flag-icon';
-import { HashIcon } from '../../icons/hash-icon';
-import { LeafIcon } from '../../icons/leaf-icon';
-import { LightbulbIcon } from '../../icons/lightbulb-icon';
-import { PlaneIcon } from '../../icons/plane-icon';
-import { SmileIcon } from '../../icons/smile-icon';
+import { ClockIcon } from '../../icons/lucide/clock-icon';
+import { CoffeeIcon } from '../../icons/lucide/coffee-icon';
+import { DumbbellIcon } from '../../icons/lucide/dumbbell-icon';
+import { FlagIcon } from '../../icons/lucide/flag-icon';
+import { HashIcon } from '../../icons/lucide/hash-icon';
+import { LeafIcon } from '../../icons/lucide/leaf-icon';
+import { LightbulbIcon } from '../../icons/lucide/lightbulb-icon';
+import { PlaneIcon } from '../../icons/lucide/plane-icon';
+import { FaceSlightlySmilingIcon } from '../../icons/lucide/face-slightly-smiling-icon';
 import {
   EMOJI_PICKER_COLUMNS,
   emojiPickerRows,
@@ -42,7 +42,7 @@ import { ToggleGroup, ToggleGroupItem } from '../../ui/toggle-group';
 /** The nav's glyph per category. */
 const CATEGORY_ICONS: Record<string, ComponentType<AnimatedIconProps>> = {
   frequent: ClockIcon,
-  smileys_people: SmileIcon,
+  smileys_people: FaceSlightlySmilingIcon,
   animals_nature: LeafIcon,
   food_drink: CoffeeIcon,
   travel_places: PlaneIcon,
@@ -365,7 +365,7 @@ function EmojiPickerNavItem({ id, name, disabled }: { id: string; name: string; 
       className="min-w-0 flex-1 px-0"
       {...iconTrigger([icon], {})}
     >
-      <Icon as={CATEGORY_ICONS[id] ?? SmileIcon} ref={icon} />
+      <Icon as={CATEGORY_ICONS[id] ?? FaceSlightlySmilingIcon} ref={icon} />
     </ToggleGroupItem>
   );
 }

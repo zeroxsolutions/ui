@@ -1,8 +1,8 @@
 import * as Clipboard from 'expo-clipboard';
 import { useCallback, useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, View } from 'react-native';
-import { CheckIcon } from '../../icons/check-icon';
-import { CopyIcon } from '../../icons/copy-icon';
+import { CheckIcon } from '../../icons/lucide/check-icon';
+import { CopyIcon } from '../../icons/lucide/copy-icon';
 import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { Button } from '../../ui/button';
 import { Icon } from '../../ui/icon';

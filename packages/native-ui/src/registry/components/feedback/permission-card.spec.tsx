@@ -1,8 +1,8 @@
 import { isHiddenFromAccessibility, render, screen, userEvent } from '@testing-library/react-native';
 import { handleOf } from '../../icons/animated-icon.testing';
-import { CircleCheckIcon } from '../../icons/circle-check-icon';
-import { CircleIcon } from '../../icons/circle-icon';
-import { CircleXIcon } from '../../icons/circle-x-icon';
+import { CircleCheckIcon } from '../../icons/lucide/circle-check-icon';
+import { CircleIcon } from '../../icons/lucide/circle-icon';
+import { CircleXIcon } from '../../icons/lucide/circle-x-icon';
 import { Button } from '../../ui/button';
 import { CardDescription, CardHeader } from '../../ui/card';
 import { Text } from '../../ui/text';
@@ -25,13 +25,13 @@ jest.mock('../../ui/icon', () => {
       createElement('View', { testID: 'status-icon', icon: as }, createElement(as, { ref })),
   };
 });
-jest.mock('../../icons/circle-icon', () =>
+jest.mock('../../icons/lucide/circle-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('circle-icon'),
 );
-jest.mock('../../icons/circle-check-icon', () =>
+jest.mock('../../icons/lucide/circle-check-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('circle-check-icon'),
 );
-jest.mock('../../icons/circle-x-icon', () =>
+jest.mock('../../icons/lucide/circle-x-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('circle-x-icon'),
 );
 

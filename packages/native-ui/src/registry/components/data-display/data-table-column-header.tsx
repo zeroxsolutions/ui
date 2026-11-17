@@ -9,10 +9,10 @@ import {
   type ReactNode,
 } from 'react';
 import { View } from 'react-native';
-import { ArrowDownIcon } from '../../icons/arrow-down-icon';
-import { ArrowUpIcon } from '../../icons/arrow-up-icon';
-import { ChevronsUpDownIcon } from '../../icons/chevrons-up-down-icon';
-import { EyeOffIcon } from '../../icons/eye-off-icon';
+import { ArrowDownIcon } from '../../icons/lucide/arrow-down-icon';
+import { ArrowUpIcon } from '../../icons/lucide/arrow-up-icon';
+import { ChevronsUpDownIcon } from '../../icons/lucide/chevrons-up-down-icon';
+import { EyeOffIcon } from '../../icons/lucide/eye-off-icon';
 import { iconTrigger, usePlayOnReach, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';

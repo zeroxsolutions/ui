@@ -28,17 +28,17 @@ import {
   useDataTable,
 } from './data-table';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { ChevronLeftIcon } from '../../icons/chevron-left-icon';
-import { ChevronRightIcon } from '../../icons/chevron-right-icon';
-import { Settings2Icon } from '../../icons/settings-2-icon';
+import { ChevronLeftIcon } from '../../icons/lucide/chevron-left-icon';
+import { ChevronRightIcon } from '../../icons/lucide/chevron-right-icon';
+import { Settings2Icon } from '../../icons/lucide/settings-2-icon';
 
-jest.mock('../../icons/chevron-left-icon', () =>
+jest.mock('../../icons/lucide/chevron-left-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-left-icon'),
 );
-jest.mock('../../icons/chevron-right-icon', () =>
+jest.mock('../../icons/lucide/chevron-right-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-right-icon'),
 );
-jest.mock('../../icons/settings-2-icon', () =>
+jest.mock('../../icons/lucide/settings-2-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('settings-2-icon'),
 );
 

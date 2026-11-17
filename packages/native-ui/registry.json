@@ -121,7 +121,7 @@
       ]
     },
     {
-      "name": "copy-icon",
+      "name": "lucide-copy-icon",
       "type": "registry:ui",
       "title": "Copy Icon",
       "description": "An animated copy icon, adapted from lucide-animated, whose sheets slide apart and back when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -129,14 +129,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/copy-icon.tsx",
+          "path": "src/registry/icons/lucide/copy-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/copy-icon.tsx"
+          "target": "components/general/lucide/copy-icon.tsx"
         }
       ]
     },
     {
-      "name": "arrow-down-icon",
+      "name": "lucide-arrow-down-icon",
       "type": "registry:ui",
       "title": "Arrow Down Icon",
       "description": "An animated arrow-down icon, adapted from lucide-animated, whose head dips and whose stem shortens and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -144,14 +144,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/arrow-down-icon.tsx",
+          "path": "src/registry/icons/lucide/arrow-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/arrow-down-icon.tsx"
+          "target": "components/general/lucide/arrow-down-icon.tsx"
         }
       ]
     },
     {
-      "name": "arrow-left-icon",
+      "name": "lucide-arrow-left-icon",
       "type": "registry:ui",
       "title": "Arrow Left Icon",
       "description": "An animated arrow-left icon, adapted from lucide-animated, whose head slides right and whose stem shortens and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -159,14 +159,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/arrow-left-icon.tsx",
+          "path": "src/registry/icons/lucide/arrow-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/arrow-left-icon.tsx"
+          "target": "components/general/lucide/arrow-left-icon.tsx"
         }
       ]
     },
     {
-      "name": "arrow-right-icon",
+      "name": "lucide-arrow-right-icon",
       "type": "registry:ui",
       "title": "Arrow Right Icon",
       "description": "An animated arrow-right icon, adapted from lucide-animated, whose head slides left and whose stem shortens and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -174,14 +174,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/arrow-right-icon.tsx",
+          "path": "src/registry/icons/lucide/arrow-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/arrow-right-icon.tsx"
+          "target": "components/general/lucide/arrow-right-icon.tsx"
         }
       ]
     },
     {
-      "name": "arrow-up-icon",
+      "name": "lucide-arrow-up-icon",
       "type": "registry:ui",
       "title": "Arrow Up Icon",
       "description": "An animated arrow-up icon, adapted from lucide-animated, whose head rises and whose stem shortens and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -189,29 +189,29 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/arrow-up-icon.tsx",
+          "path": "src/registry/icons/lucide/arrow-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/arrow-up-icon.tsx"
+          "target": "components/general/lucide/arrow-up-icon.tsx"
         }
       ]
     },
     {
-      "name": "bold-icon",
+      "name": "lucide-letter-b-icon",
       "type": "registry:ui",
-      "title": "Bold Icon",
-      "description": "An animated bold icon, adapted from lucide-animated, whose stroke thickens and thins back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "title": "Letter B Icon",
+      "description": "An animated letter b icon, adapted from lucide-animated, whose stroke thickens and thins back when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/bold-icon.tsx",
+          "path": "src/registry/icons/lucide/letter-b-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/bold-icon.tsx"
+          "target": "components/general/lucide/letter-b-icon.tsx"
         }
       ]
     },
     {
-      "name": "brain-icon",
+      "name": "lucide-brain-icon",
       "type": "registry:ui",
       "title": "Brain Icon",
       "description": "An animated brain icon, adapted from lucide-animated, whose strokes pull in toward their ends while the whole brain swells and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -219,14 +219,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/brain-icon.tsx",
+          "path": "src/registry/icons/lucide/brain-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/brain-icon.tsx"
+          "target": "components/general/lucide/brain-icon.tsx"
         }
       ]
     },
     {
-      "name": "check-icon",
+      "name": "lucide-check-icon",
       "type": "registry:ui",
       "title": "Check Icon",
       "description": "An animated check icon, adapted from lucide-animated, drawn in again from nothing, growing from half size when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -234,14 +234,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/check-icon.tsx",
+          "path": "src/registry/icons/lucide/check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/check-icon.tsx"
+          "target": "components/general/lucide/check-icon.tsx"
         }
       ]
     },
     {
-      "name": "chevron-down-icon",
+      "name": "lucide-chevron-down-icon",
       "type": "registry:ui",
       "title": "Chevron Down Icon",
       "description": "An animated chevron-down icon, adapted from lucide-animated, whose chevron dips and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -249,14 +249,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/chevron-down-icon.tsx",
+          "path": "src/registry/icons/lucide/chevron-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/chevron-down-icon.tsx"
+          "target": "components/general/lucide/chevron-down-icon.tsx"
         }
       ]
     },
     {
-      "name": "chevron-left-icon",
+      "name": "lucide-chevron-left-icon",
       "type": "registry:ui",
       "title": "Chevron Left Icon",
       "description": "An animated chevron-left icon, adapted from lucide-animated, whose chevron slides left and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -264,14 +264,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/chevron-left-icon.tsx",
+          "path": "src/registry/icons/lucide/chevron-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/chevron-left-icon.tsx"
+          "target": "components/general/lucide/chevron-left-icon.tsx"
         }
       ]
     },
     {
-      "name": "chevron-right-icon",
+      "name": "lucide-chevron-right-icon",
       "type": "registry:ui",
       "title": "Chevron Right Icon",
       "description": "An animated chevron-right icon, adapted from lucide-animated, whose chevron slides right and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -279,14 +279,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/chevron-right-icon.tsx",
+          "path": "src/registry/icons/lucide/chevron-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/chevron-right-icon.tsx"
+          "target": "components/general/lucide/chevron-right-icon.tsx"
         }
       ]
     },
     {
-      "name": "chevrons-up-down-icon",
+      "name": "lucide-chevrons-up-down-icon",
       "type": "registry:ui",
       "title": "Chevrons Up Down Icon",
       "description": "An animated chevrons-up-down icon, adapted from lucide-animated, whose chevrons part and return, when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -294,14 +294,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/chevrons-up-down-icon.tsx",
+          "path": "src/registry/icons/lucide/chevrons-up-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/chevrons-up-down-icon.tsx"
+          "target": "components/general/lucide/chevrons-up-down-icon.tsx"
         }
       ]
     },
     {
-      "name": "circle-icon",
+      "name": "lucide-circle-icon",
       "type": "registry:ui",
       "title": "Circle Icon",
       "description": "An animated circle icon, adapted from lucide-animated, drawn in again from nothing when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -309,14 +309,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/circle-icon.tsx",
+          "path": "src/registry/icons/lucide/circle-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/circle-icon.tsx"
+          "target": "components/general/lucide/circle-icon.tsx"
         }
       ]
     },
     {
-      "name": "circle-check-icon",
+      "name": "lucide-circle-check-icon",
       "type": "registry:ui",
       "title": "Circle Check Icon",
       "description": "An animated circle-check icon, adapted from lucide-animated, whose tick is drawn in again from nothing when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -324,14 +324,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/circle-check-icon.tsx",
+          "path": "src/registry/icons/lucide/circle-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/circle-check-icon.tsx"
+          "target": "components/general/lucide/circle-check-icon.tsx"
         }
       ]
     },
     {
-      "name": "clock-icon",
+      "name": "lucide-clock-icon",
       "type": "registry:ui",
       "title": "Clock Icon",
       "description": "An animated clock icon, adapted from lucide-animated, whose hands turn and return, when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -339,14 +339,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/clock-icon.tsx",
+          "path": "src/registry/icons/lucide/clock-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/clock-icon.tsx"
+          "target": "components/general/lucide/clock-icon.tsx"
         }
       ]
     },
     {
-      "name": "coffee-icon",
+      "name": "lucide-coffee-icon",
       "type": "registry:ui",
       "title": "Coffee Icon",
       "description": "An animated coffee icon, adapted from lucide-animated, whose three wisps of steam rise and fade, one after another, then return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -354,14 +354,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/coffee-icon.tsx",
+          "path": "src/registry/icons/lucide/coffee-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/coffee-icon.tsx"
+          "target": "components/general/lucide/coffee-icon.tsx"
         }
       ]
     },
     {
-      "name": "corner-down-left-icon",
+      "name": "lucide-corner-down-left-icon",
       "type": "registry:ui",
       "title": "Corner Down Left Icon",
       "description": "An animated corner-down-left icon, adapted from lucide-animated, which stretches sideways and shifts left, then returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -369,14 +369,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/corner-down-left-icon.tsx",
+          "path": "src/registry/icons/lucide/corner-down-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/corner-down-left-icon.tsx"
+          "target": "components/general/lucide/corner-down-left-icon.tsx"
         }
       ]
     },
     {
-      "name": "eye-icon",
+      "name": "lucide-eye-icon",
       "type": "registry:ui",
       "title": "Eye Icon",
       "description": "An animated eye icon, adapted from lucide-animated, which half closes and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -384,14 +384,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/eye-icon.tsx",
+          "path": "src/registry/icons/lucide/eye-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/eye-icon.tsx"
+          "target": "components/general/lucide/eye-icon.tsx"
         }
       ]
     },
     {
-      "name": "eye-off-icon",
+      "name": "lucide-eye-off-icon",
       "type": "registry:ui",
       "title": "Eye Off Icon",
       "description": "An animated eye-off icon, adapted from lucide-animated, whose slash is drawn in again from nothing when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -399,14 +399,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/eye-off-icon.tsx",
+          "path": "src/registry/icons/lucide/eye-off-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/eye-off-icon.tsx"
+          "target": "components/general/lucide/eye-off-icon.tsx"
         }
       ]
     },
     {
-      "name": "file-text-icon",
+      "name": "lucide-file-text-icon",
       "type": "registry:ui",
       "title": "File Text Icon",
       "description": "An animated file-text icon, adapted from lucide-animated, which swells a little while its three lines pull in and return one after another when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -414,14 +414,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/file-text-icon.tsx",
+          "path": "src/registry/icons/lucide/file-text-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/file-text-icon.tsx"
+          "target": "components/general/lucide/file-text-icon.tsx"
         }
       ]
     },
     {
-      "name": "italic-icon",
+      "name": "lucide-italic-icon",
       "type": "registry:ui",
       "title": "Italic Icon",
       "description": "An animated italic icon, adapted from lucide-animated, whose three strokes are drawn in again, the slant last when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -429,14 +429,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/italic-icon.tsx",
+          "path": "src/registry/icons/lucide/italic-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/italic-icon.tsx"
+          "target": "components/general/lucide/italic-icon.tsx"
         }
       ]
     },
     {
-      "name": "leaf-icon",
+      "name": "lucide-leaf-icon",
       "type": "registry:ui",
       "title": "Leaf Icon",
       "description": "An animated leaf icon, adapted from lucide-animated, which sways and tilts in the wind, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -444,14 +444,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/leaf-icon.tsx",
+          "path": "src/registry/icons/lucide/leaf-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/leaf-icon.tsx"
+          "target": "components/general/lucide/leaf-icon.tsx"
         }
       ]
     },
     {
-      "name": "loader-circle-icon",
+      "name": "lucide-loader-circle-icon",
       "type": "registry:ui",
       "title": "Loader Circle Icon",
       "description": "An animated loader-circle icon, adapted from lucide-animated, whose arc turns once round and back when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -459,14 +459,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/loader-circle-icon.tsx",
+          "path": "src/registry/icons/lucide/loader-circle-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/loader-circle-icon.tsx"
+          "target": "components/general/lucide/loader-circle-icon.tsx"
         }
       ]
     },
     {
-      "name": "lock-icon",
+      "name": "lucide-lock-icon",
       "type": "registry:ui",
       "title": "Lock Icon",
       "description": "An animated lock icon, adapted from lucide-animated, which rattles while its shackle pulls shorter and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -474,14 +474,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/lock-icon.tsx",
+          "path": "src/registry/icons/lucide/lock-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lock-icon.tsx"
+          "target": "components/general/lucide/lock-icon.tsx"
         }
       ]
     },
     {
-      "name": "menu-icon",
+      "name": "lucide-menu-icon",
       "type": "registry:ui",
       "title": "Menu Icon",
       "description": "An animated menu icon, adapted from lucide-animated, whose outer bars cross into an X while the middle one fades, and return, when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -489,14 +489,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/menu-icon.tsx",
+          "path": "src/registry/icons/lucide/menu-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/menu-icon.tsx"
+          "target": "components/general/lucide/menu-icon.tsx"
         }
       ]
     },
     {
-      "name": "message-square-icon",
+      "name": "lucide-message-square-icon",
       "type": "registry:ui",
       "title": "Message Square Icon",
       "description": "An animated message-square icon, adapted from lucide-animated, which swells and wobbles from side to side, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -504,14 +504,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/message-square-icon.tsx",
+          "path": "src/registry/icons/lucide/message-square-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/message-square-icon.tsx"
+          "target": "components/general/lucide/message-square-icon.tsx"
         }
       ]
     },
     {
-      "name": "palette-icon",
+      "name": "lucide-palette-icon",
       "type": "registry:ui",
       "title": "Palette Icon",
       "description": "An animated palette icon, adapted from lucide-animated, whose outline is drawn in again and whose four dots pop in one after another when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -519,14 +519,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/palette-icon.tsx",
+          "path": "src/registry/icons/lucide/palette-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/palette-icon.tsx"
+          "target": "components/general/lucide/palette-icon.tsx"
         }
       ]
     },
     {
-      "name": "panel-left-close-icon",
+      "name": "lucide-panel-left-close-icon",
       "type": "registry:ui",
       "title": "Panel Left Close Icon",
       "description": "An animated panel-left-close icon, adapted from lucide-animated, whose chevron nudges left and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -534,14 +534,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/panel-left-close-icon.tsx",
+          "path": "src/registry/icons/lucide/panel-left-close-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/panel-left-close-icon.tsx"
+          "target": "components/general/lucide/panel-left-close-icon.tsx"
         }
       ]
     },
     {
-      "name": "rotate-cw-icon",
+      "name": "lucide-rotate-cw-icon",
       "type": "registry:ui",
       "title": "Rotate Cw Icon",
       "description": "An animated rotate-cw icon, adapted from lucide-animated, which turns part of the way round and back when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -549,14 +549,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/rotate-cw-icon.tsx",
+          "path": "src/registry/icons/lucide/rotate-cw-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/rotate-cw-icon.tsx"
+          "target": "components/general/lucide/rotate-cw-icon.tsx"
         }
       ]
     },
     {
-      "name": "search-icon",
+      "name": "lucide-search-icon",
       "type": "registry:ui",
       "title": "Search Icon",
       "description": "An animated search icon, adapted from lucide-animated, which lifts and dips as if looking about, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -564,14 +564,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/search-icon.tsx",
+          "path": "src/registry/icons/lucide/search-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/search-icon.tsx"
+          "target": "components/general/lucide/search-icon.tsx"
         }
       ]
     },
     {
-      "name": "sliders-horizontal-icon",
+      "name": "lucide-sliders-horizontal-icon",
       "type": "registry:ui",
       "title": "Sliders Horizontal Icon",
       "description": "An animated sliders-horizontal icon, adapted from lucide-animated, whose three knobs slide, each to its own side, and return, when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -579,29 +579,29 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/sliders-horizontal-icon.tsx",
+          "path": "src/registry/icons/lucide/sliders-horizontal-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/sliders-horizontal-icon.tsx"
+          "target": "components/general/lucide/sliders-horizontal-icon.tsx"
         }
       ]
     },
     {
-      "name": "smile-icon",
+      "name": "lucide-face-slightly-smiling-icon",
       "type": "registry:ui",
-      "title": "Smile Icon",
-      "description": "An animated smile icon, adapted from lucide-animated, which bounces and tilts while its smile widens and its eyes pop, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
+      "title": "Face Slightly Smiling Icon",
+      "description": "An animated face slightly smiling icon, adapted from lucide-animated, which bounces and tilts while its smile widens and its eyes pop, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/smile-icon.tsx",
+          "path": "src/registry/icons/lucide/face-slightly-smiling-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/smile-icon.tsx"
+          "target": "components/general/lucide/face-slightly-smiling-icon.tsx"
         }
       ]
     },
     {
-      "name": "sparkles-icon",
+      "name": "lucide-sparkles-icon",
       "type": "registry:ui",
       "title": "Sparkles Icon",
       "description": "An animated sparkles icon, adapted from lucide-animated, whose big star lifts and fills in while the small ones blink, then returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -609,14 +609,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/sparkles-icon.tsx",
+          "path": "src/registry/icons/lucide/sparkles-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/sparkles-icon.tsx"
+          "target": "components/general/lucide/sparkles-icon.tsx"
         }
       ]
     },
     {
-      "name": "sun-moon-icon",
+      "name": "lucide-sun-moon-icon",
       "type": "registry:ui",
       "title": "Sun Moon Icon",
       "description": "An animated sun-moon icon, adapted from lucide-animated, whose moon rocks while three of the sun's rays fade, one after another, then return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -624,14 +624,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/sun-moon-icon.tsx",
+          "path": "src/registry/icons/lucide/sun-moon-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/sun-moon-icon.tsx"
+          "target": "components/general/lucide/sun-moon-icon.tsx"
         }
       ]
     },
     {
-      "name": "underline-icon",
+      "name": "lucide-underline-icon",
       "type": "registry:ui",
       "title": "Underline Icon",
       "description": "An animated underline icon, adapted from lucide-animated, whose letter and line are drawn in again, the line last when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -639,14 +639,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/underline-icon.tsx",
+          "path": "src/registry/icons/lucide/underline-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/underline-icon.tsx"
+          "target": "components/general/lucide/underline-icon.tsx"
         }
       ]
     },
     {
-      "name": "upload-icon",
+      "name": "lucide-upload-icon",
       "type": "registry:ui",
       "title": "Upload Icon",
       "description": "An animated upload icon, adapted from lucide-animated, whose arrow lifts and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -654,14 +654,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/upload-icon.tsx",
+          "path": "src/registry/icons/lucide/upload-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/upload-icon.tsx"
+          "target": "components/general/lucide/upload-icon.tsx"
         }
       ]
     },
     {
-      "name": "wrench-icon",
+      "name": "lucide-wrench-icon",
       "type": "registry:ui",
       "title": "Wrench Icon",
       "description": "An animated wrench icon, adapted from lucide-animated, which twists to one side and the other about its handle, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -669,14 +669,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/wrench-icon.tsx",
+          "path": "src/registry/icons/lucide/wrench-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/wrench-icon.tsx"
+          "target": "components/general/lucide/wrench-icon.tsx"
         }
       ]
     },
     {
-      "name": "x-icon",
+      "name": "lucide-x-icon",
       "type": "registry:ui",
       "title": "X Icon",
       "description": "An animated x icon, adapted from lucide-animated, whose two strokes are drawn in again, the second last, when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -684,29 +684,29 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/x-icon.tsx",
+          "path": "src/registry/icons/lucide/x-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/x-icon.tsx"
+          "target": "components/general/lucide/x-icon.tsx"
         }
       ]
     },
     {
-      "name": "trash-2-icon",
+      "name": "lucide-trash-icon",
       "type": "registry:ui",
-      "title": "Trash 2 Icon",
-      "description": "An animated trash 2 icon, motion authored in the manner of lucide-animated, whose lid lifts and settles when a control starts it, hidden from screen readers and still under reduced motion.",
+      "title": "Trash Icon",
+      "description": "An animated trash icon, motion authored in the manner of lucide-animated, whose lid lifts and settles when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/trash-2-icon.tsx",
+          "path": "src/registry/icons/lucide/trash-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/trash-2-icon.tsx"
+          "target": "components/general/lucide/trash-icon.tsx"
         }
       ]
     },
     {
-      "name": "circle-x-icon",
+      "name": "lucide-circle-x-icon",
       "type": "registry:ui",
       "title": "Circle X Icon",
       "description": "An animated circle x icon, motion authored in the manner of lucide-animated, whose cross shrinks and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -714,14 +714,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/circle-x-icon.tsx",
+          "path": "src/registry/icons/lucide/circle-x-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/circle-x-icon.tsx"
+          "target": "components/general/lucide/circle-x-icon.tsx"
         }
       ]
     },
     {
-      "name": "plane-icon",
+      "name": "lucide-plane-icon",
       "type": "registry:ui",
       "title": "Plane Icon",
       "description": "An animated plane icon, motion authored in the manner of lucide-animated, whose body glides up and to the right and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -729,14 +729,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/plane-icon.tsx",
+          "path": "src/registry/icons/lucide/plane-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/plane-icon.tsx"
+          "target": "components/general/lucide/plane-icon.tsx"
         }
       ]
     },
     {
-      "name": "dumbbell-icon",
+      "name": "lucide-dumbbell-icon",
       "type": "registry:ui",
       "title": "Dumbbell Icon",
       "description": "An animated dumbbell icon, motion authored in the manner of lucide-animated, whose weights wobble to one side and the other when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -744,14 +744,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/dumbbell-icon.tsx",
+          "path": "src/registry/icons/lucide/dumbbell-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/dumbbell-icon.tsx"
+          "target": "components/general/lucide/dumbbell-icon.tsx"
         }
       ]
     },
     {
-      "name": "lightbulb-icon",
+      "name": "lucide-lightbulb-icon",
       "type": "registry:ui",
       "title": "Lightbulb Icon",
       "description": "An animated lightbulb icon, motion authored in the manner of lucide-animated, whose glass swells from its base and settles when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -759,14 +759,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/lightbulb-icon.tsx",
+          "path": "src/registry/icons/lucide/lightbulb-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lightbulb-icon.tsx"
+          "target": "components/general/lucide/lightbulb-icon.tsx"
         }
       ]
     },
     {
-      "name": "hash-icon",
+      "name": "lucide-hash-icon",
       "type": "registry:ui",
       "title": "Hash Icon",
       "description": "An animated hash icon, motion authored in the manner of lucide-animated, whose two bars slide in opposite directions and return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -774,14 +774,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/hash-icon.tsx",
+          "path": "src/registry/icons/lucide/hash-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/hash-icon.tsx"
+          "target": "components/general/lucide/hash-icon.tsx"
         }
       ]
     },
     {
-      "name": "flag-icon",
+      "name": "lucide-flag-icon",
       "type": "registry:ui",
       "title": "Flag Icon",
       "description": "An animated flag icon, motion authored in the manner of lucide-animated, whose cloth sways about its pole and settles when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -789,14 +789,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/flag-icon.tsx",
+          "path": "src/registry/icons/lucide/flag-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/flag-icon.tsx"
+          "target": "components/general/lucide/flag-icon.tsx"
         }
       ]
     },
     {
-      "name": "chevron-up-icon",
+      "name": "lucide-chevron-up-icon",
       "type": "registry:ui",
       "title": "Chevron Up Icon",
       "description": "An animated chevron up icon, adapted from lucide-animated, whose head lifts and settles when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -804,14 +804,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/chevron-up-icon.tsx",
+          "path": "src/registry/icons/lucide/chevron-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/chevron-up-icon.tsx"
+          "target": "components/general/lucide/chevron-up-icon.tsx"
         }
       ]
     },
     {
-      "name": "strikethrough-icon",
+      "name": "lucide-strikethrough-icon",
       "type": "registry:ui",
       "title": "Strikethrough Icon",
       "description": "An animated strikethrough icon, motion authored in the manner of lucide-animated, whose halves part while the line is drawn in again when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -819,14 +819,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/strikethrough-icon.tsx",
+          "path": "src/registry/icons/lucide/strikethrough-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/strikethrough-icon.tsx"
+          "target": "components/general/lucide/strikethrough-icon.tsx"
         }
       ]
     },
     {
-      "name": "code-icon",
+      "name": "lucide-code-icon",
       "type": "registry:ui",
       "title": "Code Icon",
       "description": "An animated code icon, motion authored in the manner of lucide-animated, whose two brackets move apart and back when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -834,14 +834,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/code-icon.tsx",
+          "path": "src/registry/icons/lucide/code-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/code-icon.tsx"
+          "target": "components/general/lucide/code-icon.tsx"
         }
       ]
     },
     {
-      "name": "highlighter-icon",
+      "name": "lucide-highlighter-icon",
       "type": "registry:ui",
       "title": "Highlighter Icon",
       "description": "An animated highlighter icon, motion authored in the manner of lucide-animated, whose pen tilts about its tip and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -849,14 +849,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/highlighter-icon.tsx",
+          "path": "src/registry/icons/lucide/highlighter-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/highlighter-icon.tsx"
+          "target": "components/general/lucide/highlighter-icon.tsx"
         }
       ]
     },
     {
-      "name": "heading-1-icon",
+      "name": "lucide-heading-1-icon",
       "type": "registry:ui",
       "title": "Heading 1 Icon",
       "description": "An animated heading 1 icon, motion authored in the manner of lucide-animated, whose crossbar narrows and whose digit lifts, then both return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -864,14 +864,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/heading-1-icon.tsx",
+          "path": "src/registry/icons/lucide/heading-1-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/heading-1-icon.tsx"
+          "target": "components/general/lucide/heading-1-icon.tsx"
         }
       ]
     },
     {
-      "name": "heading-2-icon",
+      "name": "lucide-heading-2-icon",
       "type": "registry:ui",
       "title": "Heading 2 Icon",
       "description": "An animated heading 2 icon, motion authored in the manner of lucide-animated, whose stems lean apart and whose digit swells, then all return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -879,14 +879,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/heading-2-icon.tsx",
+          "path": "src/registry/icons/lucide/heading-2-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/heading-2-icon.tsx"
+          "target": "components/general/lucide/heading-2-icon.tsx"
         }
       ]
     },
     {
-      "name": "heading-3-icon",
+      "name": "lucide-heading-3-icon",
       "type": "registry:ui",
       "title": "Heading 3 Icon",
       "description": "An animated heading 3 icon, motion authored in the manner of lucide-animated, whose crossbar is drawn in again while the two curves of its digit part when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -894,14 +894,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/heading-3-icon.tsx",
+          "path": "src/registry/icons/lucide/heading-3-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/heading-3-icon.tsx"
+          "target": "components/general/lucide/heading-3-icon.tsx"
         }
       ]
     },
     {
-      "name": "list-icon",
+      "name": "lucide-list-icon",
       "type": "registry:ui",
       "title": "List Icon",
       "description": "An animated list icon, motion authored in the manner of lucide-animated, whose bullets fade out and back and whose lines shorten, one after another when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -909,14 +909,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/list-icon.tsx",
+          "path": "src/registry/icons/lucide/list-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/list-icon.tsx"
+          "target": "components/general/lucide/list-icon.tsx"
         }
       ]
     },
     {
-      "name": "list-ordered-icon",
+      "name": "lucide-list-ordered-icon",
       "type": "registry:ui",
       "title": "List Ordered Icon",
       "description": "An animated list ordered icon, motion authored in the manner of lucide-animated, whose lines slide right and whose numbers lift, one after another when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -924,14 +924,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/list-ordered-icon.tsx",
+          "path": "src/registry/icons/lucide/list-ordered-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/list-ordered-icon.tsx"
+          "target": "components/general/lucide/list-ordered-icon.tsx"
         }
       ]
     },
     {
-      "name": "list-todo-icon",
+      "name": "lucide-list-todo-icon",
       "type": "registry:ui",
       "title": "List Todo Icon",
       "description": "An animated list todo icon, motion authored in the manner of lucide-animated, whose lines slide right, whose box shrinks and whose tick is drawn in again when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -939,14 +939,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/list-todo-icon.tsx",
+          "path": "src/registry/icons/lucide/list-todo-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/list-todo-icon.tsx"
+          "target": "components/general/lucide/list-todo-icon.tsx"
         }
       ]
     },
     {
-      "name": "text-quote-icon",
+      "name": "lucide-text-quote-icon",
       "type": "registry:ui",
       "title": "Text Quote Icon",
       "description": "An animated text quote icon, motion authored in the manner of lucide-animated, whose lines slide and whose quote bar shortens, then all return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -954,14 +954,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/text-quote-icon.tsx",
+          "path": "src/registry/icons/lucide/text-quote-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/text-quote-icon.tsx"
+          "target": "components/general/lucide/text-quote-icon.tsx"
         }
       ]
     },
     {
-      "name": "minus-icon",
+      "name": "lucide-minus-icon",
       "type": "registry:ui",
       "title": "Minus Icon",
       "description": "An animated minus icon, motion authored in the manner of lucide-animated, whose bar shortens and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -969,14 +969,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/minus-icon.tsx",
+          "path": "src/registry/icons/lucide/minus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/minus-icon.tsx"
+          "target": "components/general/lucide/minus-icon.tsx"
         }
       ]
     },
     {
-      "name": "info-icon",
+      "name": "lucide-info-icon",
       "type": "registry:ui",
       "title": "Info Icon",
       "description": "An animated info icon, motion authored in the manner of lucide-animated, whose ring swells, whose stem shortens and whose dot lifts, then all return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -984,14 +984,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/info-icon.tsx",
+          "path": "src/registry/icons/lucide/info-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/info-icon.tsx"
+          "target": "components/general/lucide/info-icon.tsx"
         }
       ]
     },
     {
-      "name": "image-icon",
+      "name": "lucide-image-icon",
       "type": "registry:ui",
       "title": "Image Icon",
       "description": "An animated image icon, motion authored in the manner of lucide-animated, whose sun swells and whose hill is drawn in short and back when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -999,14 +999,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/image-icon.tsx",
+          "path": "src/registry/icons/lucide/image-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/image-icon.tsx"
+          "target": "components/general/lucide/image-icon.tsx"
         }
       ]
     },
     {
-      "name": "link-icon",
+      "name": "lucide-link-icon",
       "type": "registry:ui",
       "title": "Link Icon",
       "description": "An animated link icon, adapted from lucide-animated, whose two halves shorten and tilt apart, then return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1014,14 +1014,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/link-icon.tsx",
+          "path": "src/registry/icons/lucide/link-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/link-icon.tsx"
+          "target": "components/general/lucide/link-icon.tsx"
         }
       ]
     },
     {
-      "name": "table-icon",
+      "name": "lucide-table-icon",
       "type": "registry:ui",
       "title": "Table Icon",
       "description": "An animated table icon, motion authored in the manner of lucide-animated, whose lines shorten, the rows one after the other, and return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1029,14 +1029,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/table-icon.tsx",
+          "path": "src/registry/icons/lucide/table-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/table-icon.tsx"
+          "target": "components/general/lucide/table-icon.tsx"
         }
       ]
     },
     {
-      "name": "frame-icon",
+      "name": "lucide-frame-icon",
       "type": "registry:ui",
       "title": "Frame Icon",
       "description": "An animated frame icon, adapted from lucide-animated, whose four guides slide outward and back when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1044,14 +1044,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/frame-icon.tsx",
+          "path": "src/registry/icons/lucide/frame-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/frame-icon.tsx"
+          "target": "components/general/lucide/frame-icon.tsx"
         }
       ]
     },
     {
-      "name": "sigma-icon",
+      "name": "lucide-sigma-icon",
       "type": "registry:ui",
       "title": "Sigma Icon",
       "description": "An animated sigma icon, motion authored in the manner of lucide-animated, whose sum sign flattens and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1059,14 +1059,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/sigma-icon.tsx",
+          "path": "src/registry/icons/lucide/sigma-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/sigma-icon.tsx"
+          "target": "components/general/lucide/sigma-icon.tsx"
         }
       ]
     },
     {
-      "name": "radical-icon",
+      "name": "lucide-radical-icon",
       "type": "registry:ui",
       "title": "Radical Icon",
       "description": "An animated radical icon, motion authored in the manner of lucide-animated, drawn in again from its foot when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1074,14 +1074,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/radical-icon.tsx",
+          "path": "src/registry/icons/lucide/radical-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/radical-icon.tsx"
+          "target": "components/general/lucide/radical-icon.tsx"
         }
       ]
     },
     {
-      "name": "omega-icon",
+      "name": "lucide-omega-icon",
       "type": "registry:ui",
       "title": "Omega Icon",
       "description": "An animated omega icon, motion authored in the manner of lucide-animated, whose sign lifts and widens, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1089,14 +1089,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/omega-icon.tsx",
+          "path": "src/registry/icons/lucide/omega-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/omega-icon.tsx"
+          "target": "components/general/lucide/omega-icon.tsx"
         }
       ]
     },
     {
-      "name": "workflow-icon",
+      "name": "lucide-workflow-icon",
       "type": "registry:ui",
       "title": "Workflow Icon",
       "description": "An animated workflow icon, adapted from lucide-animated, whose boxes and the link between them are drawn in again, one after another when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1104,14 +1104,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/workflow-icon.tsx",
+          "path": "src/registry/icons/lucide/workflow-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/workflow-icon.tsx"
+          "target": "components/general/lucide/workflow-icon.tsx"
         }
       ]
     },
     {
-      "name": "pencil-line-icon",
+      "name": "lucide-pencil-line-icon",
       "type": "registry:ui",
       "title": "Pencil Line Icon",
       "description": "An animated pencil line icon, motion authored in the manner of lucide-animated, whose pencil slides right while the line shortens, then both return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1119,14 +1119,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/pencil-line-icon.tsx",
+          "path": "src/registry/icons/lucide/pencil-line-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/pencil-line-icon.tsx"
+          "target": "components/general/lucide/pencil-line-icon.tsx"
         }
       ]
     },
     {
-      "name": "download-icon",
+      "name": "lucide-download-icon",
       "type": "registry:ui",
       "title": "Download Icon",
       "description": "An animated download icon, adapted from lucide-animated, whose arrow dips toward the tray and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1134,14 +1134,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/download-icon.tsx",
+          "path": "src/registry/icons/lucide/download-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/download-icon.tsx"
+          "target": "components/general/lucide/download-icon.tsx"
         }
       ]
     },
     {
-      "name": "plus-icon",
+      "name": "lucide-plus-icon",
       "type": "registry:ui",
       "title": "Plus Icon",
       "description": "An animated plus icon, adapted from lucide-animated, which turns a quarter and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1149,14 +1149,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/plus-icon.tsx",
+          "path": "src/registry/icons/lucide/plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/plus-icon.tsx"
+          "target": "components/general/lucide/plus-icon.tsx"
         }
       ]
     },
     {
-      "name": "maximize-icon",
+      "name": "lucide-maximize-icon",
       "type": "registry:ui",
       "title": "Maximize Icon",
       "description": "An animated maximize icon, adapted from lucide-animated, whose four corners move outward and back when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1164,14 +1164,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/maximize-icon.tsx",
+          "path": "src/registry/icons/lucide/maximize-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/maximize-icon.tsx"
+          "target": "components/general/lucide/maximize-icon.tsx"
         }
       ]
     },
     {
-      "name": "rotate-ccw-icon",
+      "name": "lucide-rotate-ccw-icon",
       "type": "registry:ui",
       "title": "Rotate Ccw Icon",
       "description": "An animated rotate ccw icon, adapted from lucide-animated, which turns back a little and returns when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1179,14 +1179,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/rotate-ccw-icon.tsx",
+          "path": "src/registry/icons/lucide/rotate-ccw-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/rotate-ccw-icon.tsx"
+          "target": "components/general/lucide/rotate-ccw-icon.tsx"
         }
       ]
     },
     {
-      "name": "grip-vertical-icon",
+      "name": "lucide-grip-vertical-icon",
       "type": "registry:ui",
       "title": "Grip Vertical Icon",
       "description": "An animated grip vertical icon, adapted from lucide-animated, whose six dots dim and shrink, one after another, then return when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1194,14 +1194,14 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/grip-vertical-icon.tsx",
+          "path": "src/registry/icons/lucide/grip-vertical-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/grip-vertical-icon.tsx"
+          "target": "components/general/lucide/grip-vertical-icon.tsx"
         }
       ]
     },
     {
-      "name": "settings-2-icon",
+      "name": "lucide-settings-2-icon",
       "type": "registry:ui",
       "title": "Settings 2 Icon",
       "description": "An animated settings 2 icon, motion authored in the manner of lucide-animated, whose two knobs slide toward each other and back when a control starts it, hidden from screen readers and still under reduced motion.",
@@ -1209,9 +1209,9 @@
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
         {
-          "path": "src/registry/icons/settings-2-icon.tsx",
+          "path": "src/registry/icons/lucide/settings-2-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/settings-2-icon.tsx"
+          "target": "components/general/lucide/settings-2-icon.tsx"
         }
       ]
     },
@@ -2225,7 +2225,12 @@
       "type": "registry:hook",
       "title": "Use mobile",
       "description": "useIsMobile, whether the window is narrower than the md width, as a phone's is, following the window as it resizes.",
-      "files": [{ "path": "src/registry/hooks/use-mobile.ts", "type": "registry:hook" }]
+      "files": [
+        {
+          "path": "src/registry/hooks/use-mobile.ts",
+          "type": "registry:hook"
+        }
+      ]
     },
     {
       "name": "code-block",
@@ -2362,7 +2367,12 @@
       "description": "A conversation's scrolling transcript that opens at its end or its last turn, brings each new turn near the top, follows a streamed reply while the reader is at the end, keeps its place as history loads above, and has a button and hooks to jump to either end or to any message.",
       "dependencies": ["lucide-react-native", "react-native-reanimated"],
       "registryDependencies": ["@zui/utils", "@zui/text-children", "@zui/button", "@zui/icon", "@zui/motion"],
-      "files": [{ "path": "src/registry/ui/message-scroller.tsx", "type": "registry:ui" }]
+      "files": [
+        {
+          "path": "src/registry/ui/message-scroller.tsx",
+          "type": "registry:ui"
+        }
+      ]
     },
     {
       "name": "questionnaire",
@@ -2379,7 +2389,12 @@
         "@zui/input",
         "@zui/focus-visible"
       ],
-      "files": [{ "path": "src/registry/ui/questionnaire.tsx", "type": "registry:ui" }]
+      "files": [
+        {
+          "path": "src/registry/ui/questionnaire.tsx",
+          "type": "registry:ui"
+        }
+      ]
     },
     {
       "name": "trace",
@@ -2396,7 +2411,12 @@
         "@zui/motion",
         "@zui/focus-visible"
       ],
-      "files": [{ "path": "src/registry/ui/trace.tsx", "type": "registry:ui" }]
+      "files": [
+        {
+          "path": "src/registry/ui/trace.tsx",
+          "type": "registry:ui"
+        }
+      ]
     },
     {
       "name": "password-input",
@@ -2405,11 +2425,11 @@
       "description": "A password field over Input Group whose toggle, named Show password or Hide password, shows or hides the password.",
       "categories": ["data-entry"],
       "registryDependencies": [
-        "@zui/eye-icon",
-        "@zui/eye-off-icon",
         "@zui/icon",
         "@zui/icon-motion",
-        "@zui/input-group"
+        "@zui/input-group",
+        "@zui/lucide-eye-icon",
+        "@zui/lucide-eye-off-icon"
       ],
       "files": [
         {
@@ -2426,10 +2446,10 @@
       "categories": ["feedback"],
       "registryDependencies": [
         "@zui/card",
-        "@zui/circle-check-icon",
-        "@zui/circle-icon",
         "@zui/icon",
         "@zui/icon-motion",
+        "@zui/lucide-circle-check-icon",
+        "@zui/lucide-circle-icon",
         "@zui/progress",
         "@zui/text",
         "@zui/utils"
@@ -2652,11 +2672,11 @@
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
         "@zui/button",
-        "@zui/chevron-down-icon",
-        "@zui/chevron-up-icon",
         "@zui/collapsible",
         "@zui/icon",
         "@zui/icon-motion",
+        "@zui/lucide-chevron-down-icon",
+        "@zui/lucide-chevron-up-icon",
         "@zui/text",
         "@zui/text-children",
         "@zui/utils"
@@ -2676,13 +2696,13 @@
       "categories": ["layout"],
       "dependencies": ["react-native-reanimated"],
       "registryDependencies": [
-        "@zui/brain-icon",
         "@zui/button",
-        "@zui/chevron-down-icon",
-        "@zui/chevron-up-icon",
         "@zui/collapsible",
         "@zui/icon",
         "@zui/icon-motion",
+        "@zui/lucide-brain-icon",
+        "@zui/lucide-chevron-down-icon",
+        "@zui/lucide-chevron-up-icon",
         "@zui/motion",
         "@zui/text",
         "@zui/text-children",
@@ -2708,10 +2728,10 @@
       "dependencies": ["expo-clipboard"],
       "registryDependencies": [
         "@zui/button",
-        "@zui/check-icon",
-        "@zui/copy-icon",
         "@zui/icon",
         "@zui/icon-motion",
+        "@zui/lucide-check-icon",
+        "@zui/lucide-copy-icon",
         "@zui/text"
       ],
       "files": [
@@ -2779,11 +2799,11 @@
       "registryDependencies": [
         "@zui/badge",
         "@zui/card",
-        "@zui/circle-check-icon",
-        "@zui/circle-icon",
-        "@zui/circle-x-icon",
         "@zui/icon",
         "@zui/icon-motion",
+        "@zui/lucide-circle-check-icon",
+        "@zui/lucide-circle-icon",
+        "@zui/lucide-circle-x-icon",
         "@zui/text-children",
         "@zui/utils"
       ],
@@ -2876,9 +2896,9 @@
         "@zui/icon",
         "@zui/icon-motion",
         "@zui/item",
+        "@zui/lucide-x-icon",
         "@zui/unsaved-indicator",
-        "@zui/utils",
-        "@zui/x-icon"
+        "@zui/utils"
       ],
       "files": [
         {
@@ -3007,9 +3027,9 @@
         "@zui/icon",
         "@zui/icon-motion",
         "@zui/input",
+        "@zui/lucide-x-icon",
         "@zui/text",
-        "@zui/utils",
-        "@zui/x-icon"
+        "@zui/utils"
       ],
       "files": [
         {
@@ -3071,10 +3091,10 @@
       "dependencies": ["@rn-primitives/slot"],
       "registryDependencies": [
         "@zui/button",
-        "@zui/chevron-right-icon",
         "@zui/icon",
         "@zui/icon-motion",
         "@zui/input",
+        "@zui/lucide-chevron-right-icon",
         "@zui/text",
         "@zui/text-children",
         "@zui/utils"
@@ -3094,14 +3114,14 @@
       "categories": ["data-display"],
       "dependencies": ["@tanstack/react-table"],
       "registryDependencies": [
-        "@zui/arrow-down-icon",
-        "@zui/arrow-up-icon",
         "@zui/button",
-        "@zui/chevrons-up-down-icon",
         "@zui/dropdown-menu",
-        "@zui/eye-off-icon",
         "@zui/icon",
         "@zui/icon-motion",
+        "@zui/lucide-arrow-down-icon",
+        "@zui/lucide-arrow-up-icon",
+        "@zui/lucide-chevrons-up-down-icon",
+        "@zui/lucide-eye-off-icon",
         "@zui/text-children",
         "@zui/utils"
       ],
@@ -3123,10 +3143,10 @@
         "@zui/icon",
         "@zui/icon-motion",
         "@zui/item",
+        "@zui/lucide-trash-icon",
         "@zui/scroll-area",
         "@zui/skeleton",
         "@zui/text",
-        "@zui/trash-2-icon",
         "@zui/utils"
       ],
       "files": [
@@ -3159,13 +3179,13 @@
       "dependencies": ["@tanstack/react-table"],
       "registryDependencies": [
         "@zui/button",
-        "@zui/chevron-left-icon",
-        "@zui/chevron-right-icon",
         "@zui/dropdown-menu",
         "@zui/empty",
         "@zui/icon",
         "@zui/icon-motion",
-        "@zui/settings-2-icon",
+        "@zui/lucide-chevron-left-icon",
+        "@zui/lucide-chevron-right-icon",
+        "@zui/lucide-settings-2-icon",
         "@zui/table",
         "@zui/text",
         "@zui/text-children",
@@ -3257,10 +3277,10 @@
       "description": "An accessible file tree that owns selection and folder expansion, controlled or uncontrolled: a press selects a row and toggles a folder, and the arrow, Home, End, Enter and Space keys move through it where the platform reports keys.",
       "categories": ["data-display"],
       "registryDependencies": [
-        "@zui/chevron-right-icon",
         "@zui/focus-visible",
         "@zui/icon",
         "@zui/icon-motion",
+        "@zui/lucide-chevron-right-icon",
         "@zui/text",
         "@zui/text-children",
         "@zui/utils"
@@ -3294,20 +3314,20 @@
       "dependencies": ["@zeroxsolutions/fluent-emoji", "lucide-react-native"],
       "registryDependencies": [
         "@zui/button",
-        "@zui/clock-icon",
-        "@zui/coffee-icon",
-        "@zui/dumbbell-icon",
         "@zui/emoji-picker-rows",
-        "@zui/flag-icon",
         "@zui/fluent-emoji",
-        "@zui/hash-icon",
         "@zui/icon",
         "@zui/icon-motion",
         "@zui/input-group",
-        "@zui/leaf-icon",
-        "@zui/lightbulb-icon",
-        "@zui/plane-icon",
-        "@zui/smile-icon",
+        "@zui/lucide-clock-icon",
+        "@zui/lucide-coffee-icon",
+        "@zui/lucide-dumbbell-icon",
+        "@zui/lucide-face-slightly-smiling-icon",
+        "@zui/lucide-flag-icon",
+        "@zui/lucide-hash-icon",
+        "@zui/lucide-leaf-icon",
+        "@zui/lucide-lightbulb-icon",
+        "@zui/lucide-plane-icon",
         "@zui/text",
         "@zui/text-children",
         "@zui/toggle-group",
@@ -3343,17 +3363,17 @@
         "@zui/avatar",
         "@zui/avatar-picker-check-color",
         "@zui/button",
-        "@zui/check-icon",
         "@zui/emoji-picker",
         "@zui/empty",
         "@zui/field",
         "@zui/icon",
         "@zui/icon-motion",
         "@zui/input",
+        "@zui/lucide-check-icon",
+        "@zui/lucide-trash-icon",
         "@zui/popover",
         "@zui/tabs",
         "@zui/text-children",
-        "@zui/trash-2-icon",
         "@zui/utils"
       ],
       "files": [

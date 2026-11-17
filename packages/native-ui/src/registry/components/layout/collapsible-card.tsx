@@ -10,8 +10,8 @@ import {
   type ReactNode,
 } from 'react';
 import { View } from 'react-native';
-import { ChevronDownIcon } from '../../icons/chevron-down-icon';
-import { ChevronUpIcon } from '../../icons/chevron-up-icon';
+import { ChevronDownIcon } from '../../icons/lucide/chevron-down-icon';
+import { ChevronUpIcon } from '../../icons/lucide/chevron-up-icon';
 import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { asText, textOf } from '../../lib/text-children';
 import { cn } from '../../lib/utils';

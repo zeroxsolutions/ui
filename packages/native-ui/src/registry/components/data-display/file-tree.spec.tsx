@@ -2,9 +2,9 @@ import { render, screen, userEvent } from '@testing-library/react-native';
 import { Platform } from 'react-native';
 import { FileTree, FileTreeGroup, FileTreeItem, FileTreeLabel, type FileTreeProps } from './file-tree';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { ChevronRightIcon } from '../../icons/chevron-right-icon';
+import { ChevronRightIcon } from '../../icons/lucide/chevron-right-icon';
 
-jest.mock('../../icons/chevron-right-icon', () =>
+jest.mock('../../icons/lucide/chevron-right-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-right-icon'),
 );
 

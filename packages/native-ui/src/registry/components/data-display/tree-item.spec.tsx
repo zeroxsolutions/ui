@@ -5,9 +5,9 @@ import { Button } from '../../ui/button';
 import { Text } from '../../ui/text';
 import { TreeItem, TreeItemIndent, TreeItemLabel, TreeItemRenameInput, TreeItemTrigger } from './tree-item';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { ChevronRightIcon } from '../../icons/chevron-right-icon';
+import { ChevronRightIcon } from '../../icons/lucide/chevron-right-icon';
 
-jest.mock('../../icons/chevron-right-icon', () =>
+jest.mock('../../icons/lucide/chevron-right-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-right-icon'),
 );
 

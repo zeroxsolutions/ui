@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useRef, useState, type ComponentProps, type ReactNode } from 'react';
-import { EyeIcon } from '../../icons/eye-icon';
-import { EyeOffIcon } from '../../icons/eye-off-icon';
+import { EyeIcon } from '../../icons/lucide/eye-icon';
+import { EyeOffIcon } from '../../icons/lucide/eye-off-icon';
 import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { Icon } from '../../ui/icon';
 import {

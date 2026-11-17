@@ -2,13 +2,13 @@ import { render, screen, userEvent } from '@testing-library/react-native';
 import { InputGroupAddon } from '../../ui/input-group';
 import { PasswordInput, PasswordInputInput, PasswordInputToggle } from './password-input';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { EyeIcon } from '../../icons/eye-icon';
-import { EyeOffIcon } from '../../icons/eye-off-icon';
+import { EyeIcon } from '../../icons/lucide/eye-icon';
+import { EyeOffIcon } from '../../icons/lucide/eye-off-icon';
 
-jest.mock('../../icons/eye-icon', () =>
+jest.mock('../../icons/lucide/eye-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('eye-icon'),
 );
-jest.mock('../../icons/eye-off-icon', () =>
+jest.mock('../../icons/lucide/eye-off-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('eye-off-icon'),
 );
 

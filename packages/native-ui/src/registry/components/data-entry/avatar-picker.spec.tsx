@@ -23,14 +23,14 @@ import {
 } from './avatar-picker';
 import { EmojiPickerContent, EmojiPickerSearch } from './emoji-picker';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { CheckIcon } from '../../icons/check-icon';
-import { Trash2Icon } from '../../icons/trash-2-icon';
+import { CheckIcon } from '../../icons/lucide/check-icon';
+import { TrashIcon } from '../../icons/lucide/trash-icon';
 
-jest.mock('../../icons/check-icon', () =>
+jest.mock('../../icons/lucide/check-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('check-icon'),
 );
-jest.mock('../../icons/trash-2-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('trash-2-icon'),
+jest.mock('../../icons/lucide/trash-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('trash-icon'),
 );
 
 beforeEach(() => {
@@ -364,8 +364,8 @@ describe('AvatarPicker motion', () => {
 
     expect(onPressIn).toHaveBeenCalledTimes(1);
     expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(handleOf(Trash2Icon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(Trash2Icon).stopAnimation).not.toHaveBeenCalled();
+    expect(handleOf(TrashIcon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(TrashIcon).stopAnimation).not.toHaveBeenCalled();
   });
 
   it('plays the selected check once when a swatch is picked, and not for the swatch selected from the start', async () => {

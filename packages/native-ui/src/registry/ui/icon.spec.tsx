@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react-native';
 import { Check } from 'lucide-react-native';
 import { createRef } from 'react';
 import type { IconHandle } from '../lib/icon-motion';
-import { CopyIcon } from '../icons/copy-icon';
+import { CopyIcon } from '../icons/lucide/copy-icon';
 import { registerCSS } from 'react-native-css-interop/test';
 import { Icon, IconClassContext } from './icon';
 
