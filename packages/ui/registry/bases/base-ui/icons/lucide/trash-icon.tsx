@@ -1,33 +1,29 @@
 'use client';
 
-// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+// Motion authored for this registry in the manner of lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
 
-import type { Variants } from 'motion/react';
+import type { Transition } from 'motion/react';
 import { motion, useAnimation, useReducedMotion } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-export interface BoldIconHandle {
+export interface TrashIconHandle {
   startAnimation: () => void;
   stopAnimation: () => void;
 }
 
-interface BoldIconProps extends HTMLAttributes<HTMLSpanElement> {
+interface TrashIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
-const PATH_VARIANTS: Variants = {
-  normal: {
-    strokeWidth: 2,
-  },
-  animate: {
-    strokeWidth: 3.5,
-  },
+const DEFAULT_TRANSITION: Transition = {
+  times: [0, 0.4, 1],
+  duration: 0.5,
 };
 
-const BoldIcon = forwardRef<BoldIconHandle, BoldIconProps>(
+const TrashIcon = forwardRef<TrashIconHandle, TrashIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
     const isMotionReduced = useReducedMotion();
@@ -65,9 +61,10 @@ const BoldIcon = forwardRef<BoldIconHandle, BoldIconProps>(
       },
       [controls, onMouseLeave],
     );
+
     return (
       <span
-        data-slot="bold-icon"
+        data-slot="trash-icon"
         className={cn('inline-flex', className)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -84,18 +81,26 @@ const BoldIcon = forwardRef<BoldIconHandle, BoldIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.path
+          <motion.g
             animate={controls}
-            d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"
-            transition={{ duration: 0.6 }}
-            variants={PATH_VARIANTS}
-          />
+            transition={DEFAULT_TRANSITION}
+            variants={{
+              normal: { y: 0 },
+              animate: { y: [0, -2, 0] },
+            }}
+          >
+            <path d="M3 6h18" />
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </motion.g>
+          <path d="M10 11v6" />
+          <path d="M14 11v6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
         </svg>
       </span>
     );
   },
 );
 
-BoldIcon.displayName = 'BoldIcon';
+TrashIcon.displayName = 'TrashIcon';
 
-export { BoldIcon };
+export { TrashIcon };

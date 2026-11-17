@@ -11,8 +11,8 @@ import { Input } from '@/registry/bases/base-ui/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
 import { TabsContent } from '@/registry/bases/base-ui/ui/tabs';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
-import { Trash2Icon } from '@/registry/bases/base-ui/icons/trash-2-icon';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/lucide/check-icon';
+import { TrashIcon } from '@/registry/bases/base-ui/icons/lucide/trash-icon';
 import { useAnimatedIcon, type AnimatedIconHandle } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { EmojiPicker } from '@/registry/bases/base-ui/components/data-entry/emoji-picker';
 
@@ -173,7 +173,7 @@ function AvatarPickerRemoveButton({
       {...props}
       {...mergeProps<'button'>(handlers, { onPointerEnter, onPointerLeave, onFocus, onBlur })}
     >
-      {children ?? <Trash2Icon ref={ref} aria-hidden />}
+      {children ?? <TrashIcon ref={ref} aria-hidden />}
     </Button>
   );
 }

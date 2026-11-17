@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EditorContent } from '@tiptap/react';
-import { ArrowUpIcon } from '@/registry/bases/base-ui/icons/arrow-up-icon';
+import { ArrowUpIcon } from '@/registry/bases/base-ui/icons/lucide/arrow-up-icon';
 import { InputGroup, InputGroupAddon, InputGroupButton } from '@/registry/bases/base-ui/ui/input-group';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/index';

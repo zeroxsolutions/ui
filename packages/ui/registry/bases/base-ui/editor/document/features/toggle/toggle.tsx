@@ -1,4 +1,4 @@
-import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/chevron-right-icon';
+import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/lucide/chevron-right-icon';
 import { z } from 'zod';
 import type { ReactNode } from 'react';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';

@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from 'react';
-import { ImageIcon } from '@/registry/bases/base-ui/icons/image-icon';
+import { ImageIcon } from '@/registry/bases/base-ui/icons/lucide/image-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Field, FieldLabel } from '@/registry/bases/base-ui/ui/field';
 import { Input } from '@/registry/bases/base-ui/ui/input';

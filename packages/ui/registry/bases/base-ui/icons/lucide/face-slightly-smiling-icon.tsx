@@ -9,16 +9,16 @@ import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-export interface SmileIconHandle {
+export interface FaceSlightlySmilingIconHandle {
   startAnimation: () => void;
   stopAnimation: () => void;
 }
 
-interface SmileIconProps extends HTMLAttributes<HTMLSpanElement> {
+interface FaceSlightlySmilingIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
-const SmileIcon = forwardRef<SmileIconHandle, SmileIconProps>(
+const FaceSlightlySmilingIcon = forwardRef<FaceSlightlySmilingIconHandle, FaceSlightlySmilingIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
     const isMotionReduced = useReducedMotion();
@@ -113,7 +113,7 @@ const SmileIcon = forwardRef<SmileIconHandle, SmileIconProps>(
 
     return (
       <span
-        data-slot="smile-icon"
+        data-slot="face-slightly-smiling-icon"
         className={cn('inline-flex', className)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -143,6 +143,6 @@ const SmileIcon = forwardRef<SmileIconHandle, SmileIconProps>(
   },
 );
 
-SmileIcon.displayName = 'SmileIcon';
+FaceSlightlySmilingIcon.displayName = 'FaceSlightlySmilingIcon';
 
-export { SmileIcon };
+export { FaceSlightlySmilingIcon };

@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings2Icon } from '@/registry/bases/base-ui/icons/settings-2-icon';
+import { Settings2Icon } from '@/registry/bases/base-ui/icons/lucide/settings-2-icon';
 import { ChromeControl } from '../../ui/chrome-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import {

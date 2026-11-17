@@ -12,9 +12,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/registry/bases/base-ui/ui/empty';
-import { FileTextIcon, type FileTextIconHandle } from '@/registry/bases/base-ui/icons/file-text-icon';
+import { FileTextIcon, type FileTextIconHandle } from '@/registry/bases/base-ui/icons/lucide/file-text-icon';
 import { ItemContent, ItemGroup, ItemMedia, ItemTitle } from '@/registry/bases/base-ui/ui/item';
-import { SparklesIcon } from '@/registry/bases/base-ui/icons/sparkles-icon';
+import { SparklesIcon } from '@/registry/bases/base-ui/icons/lucide/sparkles-icon';
 
 /** An empty conversation with two starter prompts; the first one's icon plays on the item's hover or focus. */
 function ChatSuggestionItemDemo(): ReactNode {

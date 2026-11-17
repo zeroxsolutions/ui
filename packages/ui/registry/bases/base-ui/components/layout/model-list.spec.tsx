@@ -14,12 +14,12 @@ import {
 
 const { trashStart, trashStop } = vi.hoisted(() => ({ trashStart: vi.fn(), trashStop: vi.fn() }));
 
-vi.mock('@/registry/bases/base-ui/icons/trash-2-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/trash-icon', async () => {
   const React = await import('react');
   return {
-    Trash2Icon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
+    TrashIcon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
       React.useImperativeHandle(ref, () => ({ startAnimation: trashStart, stopAnimation: trashStop }));
-      return <svg data-testid="trash-2-icon" aria-hidden={props['aria-hidden']} />;
+      return <svg data-testid="trash-icon" aria-hidden={props['aria-hidden']} />;
     }),
   };
 });
@@ -129,7 +129,7 @@ describe('ModelListRemoveButton icon', () => {
   it('hides the icon from assistive tech', () => {
     render(<ModelListRemoveButton />);
 
-    expect(screen.getByTestId('trash-2-icon').getAttribute('aria-hidden')).toBe('true');
+    expect(screen.getByTestId('trash-icon').getAttribute('aria-hidden')).toBe('true');
   });
 
   it('starts nothing when children replace the icon', () => {

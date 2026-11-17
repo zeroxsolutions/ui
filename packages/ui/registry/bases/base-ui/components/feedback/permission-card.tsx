@@ -6,9 +6,9 @@ import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Card, CardAction, CardFooter, CardTitle } from '@/registry/bases/base-ui/ui/card';
-import { CircleCheckIcon } from '@/registry/bases/base-ui/icons/circle-check-icon';
-import { CircleIcon } from '@/registry/bases/base-ui/icons/circle-icon';
-import { CircleXIcon } from '@/registry/bases/base-ui/icons/circle-x-icon';
+import { CircleCheckIcon } from '@/registry/bases/base-ui/icons/lucide/circle-check-icon';
+import { CircleIcon } from '@/registry/bases/base-ui/icons/lucide/circle-icon';
+import { CircleXIcon } from '@/registry/bases/base-ui/icons/lucide/circle-x-icon';
 import { usePlayWhile, type AnimatedIconHandle } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 
 /** The lifecycle of a consent request; the host sets it, and nothing inside the card changes it. */

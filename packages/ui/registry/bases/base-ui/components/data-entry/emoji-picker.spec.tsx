@@ -14,7 +14,7 @@ import {
 
 const { categoryStart, categoryStop } = vi.hoisted(() => ({ categoryStart: vi.fn(), categoryStop: vi.fn() }));
 
-vi.mock('@/registry/bases/base-ui/icons/plane-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/plane-icon', async () => {
   const React = await import('react');
   return {
     PlaneIcon: React.forwardRef<unknown, object>((_props, ref) => {
@@ -24,7 +24,7 @@ vi.mock('@/registry/bases/base-ui/icons/plane-icon', async () => {
   };
 });
 
-vi.mock('@/registry/bases/base-ui/icons/dumbbell-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/dumbbell-icon', async () => {
   const React = await import('react');
   return {
     DumbbellIcon: React.forwardRef<unknown, object>((_props, ref) => {
@@ -34,7 +34,7 @@ vi.mock('@/registry/bases/base-ui/icons/dumbbell-icon', async () => {
   };
 });
 
-vi.mock('@/registry/bases/base-ui/icons/lightbulb-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/lightbulb-icon', async () => {
   const React = await import('react');
   return {
     LightbulbIcon: React.forwardRef<unknown, object>((_props, ref) => {
@@ -44,7 +44,7 @@ vi.mock('@/registry/bases/base-ui/icons/lightbulb-icon', async () => {
   };
 });
 
-vi.mock('@/registry/bases/base-ui/icons/hash-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/hash-icon', async () => {
   const React = await import('react');
   return {
     HashIcon: React.forwardRef<unknown, object>((_props, ref) => {
@@ -54,7 +54,7 @@ vi.mock('@/registry/bases/base-ui/icons/hash-icon', async () => {
   };
 });
 
-vi.mock('@/registry/bases/base-ui/icons/flag-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/flag-icon', async () => {
   const React = await import('react');
   return {
     FlagIcon: React.forwardRef<unknown, object>((_props, ref) => {

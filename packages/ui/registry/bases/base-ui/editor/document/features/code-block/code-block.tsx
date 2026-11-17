@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { CodeIcon } from '@/registry/bases/base-ui/icons/code-icon';
+import { CodeIcon } from '@/registry/bases/base-ui/icons/lucide/code-icon';
 import {
   CodeCard,
   CodeCardActions,

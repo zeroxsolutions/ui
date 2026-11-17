@@ -3,14 +3,14 @@
 import { useRef, type ReactNode } from 'react';
 
 import { FloatingToolbar } from '@/registry/bases/base-ui/components/layout/floating-toolbar';
-import { BoldIcon, type BoldIconHandle } from '@/registry/bases/base-ui/icons/bold-icon';
+import { LetterBIcon, type LetterBIconHandle } from '@/registry/bases/base-ui/icons/lucide/letter-b-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ItalicIcon, type ItalicIconHandle } from '@/registry/bases/base-ui/icons/italic-icon';
-import { UnderlineIcon, type UnderlineIconHandle } from '@/registry/bases/base-ui/icons/underline-icon';
+import { ItalicIcon, type ItalicIconHandle } from '@/registry/bases/base-ui/icons/lucide/italic-icon';
+import { UnderlineIcon, type UnderlineIconHandle } from '@/registry/bases/base-ui/icons/lucide/underline-icon';
 
 /** A row of formatting buttons in the toolbar's own shell, each icon playing while its button is hovered or focused. */
 function FloatingToolbarDemo(): ReactNode {
-  const boldRef = useRef<BoldIconHandle>(null);
+  const boldRef = useRef<LetterBIconHandle>(null);
   const italicRef = useRef<ItalicIconHandle>(null);
   const underlineRef = useRef<UnderlineIconHandle>(null);
 
@@ -25,7 +25,7 @@ function FloatingToolbarDemo(): ReactNode {
         onFocus={() => boldRef.current?.startAnimation()}
         onBlur={() => boldRef.current?.stopAnimation()}
       >
-        <BoldIcon ref={boldRef} aria-hidden />
+        <LetterBIcon ref={boldRef} aria-hidden />
       </Button>
       <Button
         variant="ghost"

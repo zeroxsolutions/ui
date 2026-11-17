@@ -11,10 +11,10 @@ import {
 } from 'react';
 import { Workflow } from 'lucide-react';
 import { useAnimatedIcon, type AnimatedIconHandle } from '@/registry/bases/base-ui/hooks/use-animated-icon';
-import { MaximizeIcon } from '@/registry/bases/base-ui/icons/maximize-icon';
-import { MinusIcon } from '@/registry/bases/base-ui/icons/minus-icon';
-import { PlusIcon } from '@/registry/bases/base-ui/icons/plus-icon';
-import { RotateCcwIcon } from '@/registry/bases/base-ui/icons/rotate-ccw-icon';
+import { MaximizeIcon } from '@/registry/bases/base-ui/icons/lucide/maximize-icon';
+import { MinusIcon } from '@/registry/bases/base-ui/icons/lucide/minus-icon';
+import { PlusIcon } from '@/registry/bases/base-ui/icons/lucide/plus-icon';
+import { RotateCcwIcon } from '@/registry/bases/base-ui/icons/lucide/rotate-ccw-icon';
 import { Alert, AlertDescription, AlertTitle } from '@/registry/bases/base-ui/ui/alert';
 import { FloatingToolbar } from '@/registry/bases/base-ui/components/layout/floating-toolbar';
 import { Button } from '@/registry/bases/base-ui/ui/button';

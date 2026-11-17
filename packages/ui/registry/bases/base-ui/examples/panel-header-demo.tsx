@@ -12,7 +12,7 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 import {
   PanelLeftCloseIcon,
   type PanelLeftCloseIconHandle,
-} from '@/registry/bases/base-ui/icons/panel-left-close-icon';
+} from '@/registry/bases/base-ui/icons/lucide/panel-left-close-icon';
 
 /** A single-row panel header: a title beside a trailing collapse action. */
 function PanelHeaderDemo(): ReactNode {

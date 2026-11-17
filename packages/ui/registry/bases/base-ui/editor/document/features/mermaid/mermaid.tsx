@@ -1,8 +1,8 @@
 'use client';
 
-import { EyeIcon } from '@/registry/bases/base-ui/icons/eye-icon';
-import { PencilLineIcon } from '@/registry/bases/base-ui/icons/pencil-line-icon';
-import { WorkflowIcon } from '@/registry/bases/base-ui/icons/workflow-icon';
+import { EyeIcon } from '@/registry/bases/base-ui/icons/lucide/eye-icon';
+import { PencilLineIcon } from '@/registry/bases/base-ui/icons/lucide/pencil-line-icon';
+import { WorkflowIcon } from '@/registry/bases/base-ui/icons/lucide/workflow-icon';
 import { ChromeControl } from '../../ui/chrome-icon';
 import {
   CodeCard,

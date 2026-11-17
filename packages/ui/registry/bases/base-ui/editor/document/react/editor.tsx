@@ -3,8 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { EditorContent } from '@tiptap/react';
-import { GripVerticalIcon, type GripVerticalIconHandle } from '@/registry/bases/base-ui/icons/grip-vertical-icon';
-import { PlusIcon, type PlusIconHandle } from '@/registry/bases/base-ui/icons/plus-icon';
+import {
+  GripVerticalIcon,
+  type GripVerticalIconHandle,
+} from '@/registry/bases/base-ui/icons/lucide/grip-vertical-icon';
+import { PlusIcon, type PlusIconHandle } from '@/registry/bases/base-ui/icons/lucide/plus-icon';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/create-document-editor';
 import type { Delta } from '@zeroxsolutions/editor-core/document/core/types/delta';

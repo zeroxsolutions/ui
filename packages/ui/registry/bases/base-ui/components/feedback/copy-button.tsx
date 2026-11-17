@@ -3,8 +3,8 @@
 import * as React from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
-import { CopyIcon, type CopyIconHandle } from '@/registry/bases/base-ui/icons/copy-icon';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/lucide/check-icon';
+import { CopyIcon, type CopyIconHandle } from '@/registry/bases/base-ui/icons/lucide/copy-icon';
 
 const COPY_RESET_MS = 2000;
 

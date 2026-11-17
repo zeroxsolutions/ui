@@ -1,17 +1,17 @@
-import { BoldIcon } from '@/registry/bases/base-ui/icons/bold-icon';
-import { CodeIcon } from '@/registry/bases/base-ui/icons/code-icon';
-import { Heading1Icon } from '@/registry/bases/base-ui/icons/heading-1-icon';
-import { Heading2Icon } from '@/registry/bases/base-ui/icons/heading-2-icon';
-import { Heading3Icon } from '@/registry/bases/base-ui/icons/heading-3-icon';
-import { HighlighterIcon } from '@/registry/bases/base-ui/icons/highlighter-icon';
-import { ItalicIcon } from '@/registry/bases/base-ui/icons/italic-icon';
-import { ListIcon } from '@/registry/bases/base-ui/icons/list-icon';
-import { ListOrderedIcon } from '@/registry/bases/base-ui/icons/list-ordered-icon';
-import { ListTodoIcon } from '@/registry/bases/base-ui/icons/list-todo-icon';
-import { MinusIcon } from '@/registry/bases/base-ui/icons/minus-icon';
-import { StrikethroughIcon } from '@/registry/bases/base-ui/icons/strikethrough-icon';
-import { TextQuoteIcon } from '@/registry/bases/base-ui/icons/text-quote-icon';
-import { UnderlineIcon } from '@/registry/bases/base-ui/icons/underline-icon';
+import { LetterBIcon } from '@/registry/bases/base-ui/icons/lucide/letter-b-icon';
+import { CodeIcon } from '@/registry/bases/base-ui/icons/lucide/code-icon';
+import { Heading1Icon } from '@/registry/bases/base-ui/icons/lucide/heading-1-icon';
+import { Heading2Icon } from '@/registry/bases/base-ui/icons/lucide/heading-2-icon';
+import { Heading3Icon } from '@/registry/bases/base-ui/icons/lucide/heading-3-icon';
+import { HighlighterIcon } from '@/registry/bases/base-ui/icons/lucide/highlighter-icon';
+import { ItalicIcon } from '@/registry/bases/base-ui/icons/lucide/italic-icon';
+import { ListIcon } from '@/registry/bases/base-ui/icons/lucide/list-icon';
+import { ListOrderedIcon } from '@/registry/bases/base-ui/icons/lucide/list-ordered-icon';
+import { ListTodoIcon } from '@/registry/bases/base-ui/icons/lucide/list-todo-icon';
+import { MinusIcon } from '@/registry/bases/base-ui/icons/lucide/minus-icon';
+import { StrikethroughIcon } from '@/registry/bases/base-ui/icons/lucide/strikethrough-icon';
+import { TextQuoteIcon } from '@/registry/bases/base-ui/icons/lucide/text-quote-icon';
+import { UnderlineIcon } from '@/registry/bases/base-ui/icons/lucide/underline-icon';
 import type { BubbleItem, SlashItem, ToolbarItem } from '@zeroxsolutions/editor-core/document/core/index';
 
 /** Slash-menu insert items for the standard blocks. */
@@ -90,7 +90,7 @@ export const standardToolbarItems: ToolbarItem[] = [
   {
     id: 'bold',
     title: 'Bold',
-    icon: BoldIcon,
+    icon: LetterBIcon,
     command: 'toggleMark',
     args: { name: 'bold' },
     activeWhen: 'bold',

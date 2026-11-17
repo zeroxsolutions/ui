@@ -1,29 +1,33 @@
 'use client';
 
-// Motion authored for this registry in the manner of lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
 
-import type { Transition } from 'motion/react';
+import type { Variants } from 'motion/react';
 import { motion, useAnimation, useReducedMotion } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-export interface Trash2IconHandle {
+export interface LetterBIconHandle {
   startAnimation: () => void;
   stopAnimation: () => void;
 }
 
-interface Trash2IconProps extends HTMLAttributes<HTMLSpanElement> {
+interface LetterBIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
-const DEFAULT_TRANSITION: Transition = {
-  times: [0, 0.4, 1],
-  duration: 0.5,
+const PATH_VARIANTS: Variants = {
+  normal: {
+    strokeWidth: 2,
+  },
+  animate: {
+    strokeWidth: 3.5,
+  },
 };
 
-const Trash2Icon = forwardRef<Trash2IconHandle, Trash2IconProps>(
+const LetterBIcon = forwardRef<LetterBIconHandle, LetterBIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
     const isMotionReduced = useReducedMotion();
@@ -61,10 +65,9 @@ const Trash2Icon = forwardRef<Trash2IconHandle, Trash2IconProps>(
       },
       [controls, onMouseLeave],
     );
-
     return (
       <span
-        data-slot="trash-2-icon"
+        data-slot="letter-b-icon"
         className={cn('inline-flex', className)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -81,26 +84,18 @@ const Trash2Icon = forwardRef<Trash2IconHandle, Trash2IconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.g
+          <motion.path
             animate={controls}
-            transition={DEFAULT_TRANSITION}
-            variants={{
-              normal: { y: 0 },
-              animate: { y: [0, -2, 0] },
-            }}
-          >
-            <path d="M3 6h18" />
-            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-          </motion.g>
-          <path d="M10 11v6" />
-          <path d="M14 11v6" />
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+            d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"
+            transition={{ duration: 0.6 }}
+            variants={PATH_VARIANTS}
+          />
         </svg>
       </span>
     );
   },
 );
 
-Trash2Icon.displayName = 'Trash2Icon';
+LetterBIcon.displayName = 'LetterBIcon';
 
-export { Trash2Icon };
+export { LetterBIcon };

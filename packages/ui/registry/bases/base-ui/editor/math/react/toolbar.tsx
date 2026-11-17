@@ -2,10 +2,10 @@
 
 import { useRef, useState } from 'react';
 import { Sigma } from 'lucide-react';
-import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
-import { CopyIcon } from '@/registry/bases/base-ui/icons/copy-icon';
-import { DownloadIcon } from '@/registry/bases/base-ui/icons/download-icon';
-import { OmegaIcon } from '@/registry/bases/base-ui/icons/omega-icon';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/lucide/check-icon';
+import { CopyIcon } from '@/registry/bases/base-ui/icons/lucide/copy-icon';
+import { DownloadIcon } from '@/registry/bases/base-ui/icons/lucide/download-icon';
+import { OmegaIcon } from '@/registry/bases/base-ui/icons/lucide/omega-icon';
 import { usePlayWhile, useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import {

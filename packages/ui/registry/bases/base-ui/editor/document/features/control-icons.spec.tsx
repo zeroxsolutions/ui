@@ -45,68 +45,68 @@ function mockedIcon(handle: { startAnimation: () => void; stopAnimation: () => v
   });
 }
 
-vi.mock('@/registry/bases/base-ui/icons/arrow-up-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/arrow-up-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/arrow-up-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/arrow-up-icon')>()),
   ArrowUpIcon: mockedIcon(handles.arrowUp),
 }));
-vi.mock('@/registry/bases/base-ui/icons/chevron-right-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/chevron-right-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/chevron-right-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/chevron-right-icon')>()),
   ChevronRightIcon: mockedIcon(handles.chevronRight),
 }));
-vi.mock('@/registry/bases/base-ui/icons/copy-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/copy-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/copy-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/copy-icon')>()),
   CopyIcon: mockedIcon(handles.copy),
 }));
-vi.mock('@/registry/bases/base-ui/icons/download-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/download-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/download-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/download-icon')>()),
   DownloadIcon: mockedIcon(handles.download),
 }));
-vi.mock('@/registry/bases/base-ui/icons/image-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/image-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/image-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/image-icon')>()),
   ImageIcon: mockedIcon(handles.image),
 }));
-vi.mock('@/registry/bases/base-ui/icons/maximize-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/maximize-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/maximize-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/maximize-icon')>()),
   MaximizeIcon: mockedIcon(handles.maximize),
 }));
-vi.mock('@/registry/bases/base-ui/icons/minus-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/minus-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/minus-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/minus-icon')>()),
   MinusIcon: mockedIcon(handles.minus),
 }));
-vi.mock('@/registry/bases/base-ui/icons/plus-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/plus-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/plus-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/plus-icon')>()),
   PlusIcon: mockedIcon(handles.plus),
 }));
-vi.mock('@/registry/bases/base-ui/icons/rotate-ccw-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/rotate-ccw-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/rotate-ccw-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/rotate-ccw-icon')>()),
   RotateCcwIcon: mockedIcon(handles.rotateCcw),
 }));
-vi.mock('@/registry/bases/base-ui/icons/check-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/check-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/check-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/check-icon')>()),
   CheckIcon: mockedIcon(handles.check),
 }));
-vi.mock('@/registry/bases/base-ui/icons/eye-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/eye-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/eye-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/eye-icon')>()),
   EyeIcon: mockedIcon(handles.eye),
 }));
-vi.mock('@/registry/bases/base-ui/icons/omega-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/omega-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/omega-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/omega-icon')>()),
   OmegaIcon: mockedIcon(handles.omega),
 }));
-vi.mock('@/registry/bases/base-ui/icons/pencil-line-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/pencil-line-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/pencil-line-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/pencil-line-icon')>()),
   PencilLineIcon: mockedIcon(handles.pencilLine),
 }));
-vi.mock('@/registry/bases/base-ui/icons/settings-2-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/settings-2-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/settings-2-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/settings-2-icon')>()),
   Settings2Icon: mockedIcon(handles.settings2),
 }));
-vi.mock('@/registry/bases/base-ui/icons/workflow-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/workflow-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/workflow-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/workflow-icon')>()),
   WorkflowIcon: mockedIcon(handles.workflow),
 }));
-vi.mock('@/registry/bases/base-ui/icons/x-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/x-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/x-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/x-icon')>()),
   XIcon: mockedIcon(handles.x),
 }));
 

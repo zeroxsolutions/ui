@@ -1,4 +1,4 @@
-import { FrameIcon } from '@/registry/bases/base-ui/icons/frame-icon';
+import { FrameIcon } from '@/registry/bases/base-ui/icons/lucide/frame-icon';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';

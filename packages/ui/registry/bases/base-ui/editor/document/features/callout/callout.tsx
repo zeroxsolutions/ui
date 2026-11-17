@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { FluentEmoji } from '@zeroxsolutions/fluent-emoji';
-import { InfoIcon } from '@/registry/bases/base-ui/icons/info-icon';
+import { InfoIcon } from '@/registry/bases/base-ui/icons/lucide/info-icon';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeJSON, NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';

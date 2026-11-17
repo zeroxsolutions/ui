@@ -33,11 +33,11 @@ import {
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
 import { useRef, useState } from 'react';
-import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
-import { CopyIcon } from '@/registry/bases/base-ui/icons/copy-icon';
-import { DownloadIcon } from '@/registry/bases/base-ui/icons/download-icon';
-import { ImageIcon } from '@/registry/bases/base-ui/icons/image-icon';
-import { WorkflowIcon } from '@/registry/bases/base-ui/icons/workflow-icon';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/lucide/check-icon';
+import { CopyIcon } from '@/registry/bases/base-ui/icons/lucide/copy-icon';
+import { DownloadIcon } from '@/registry/bases/base-ui/icons/lucide/download-icon';
+import { ImageIcon } from '@/registry/bases/base-ui/icons/lucide/image-icon';
+import { WorkflowIcon } from '@/registry/bases/base-ui/icons/lucide/workflow-icon';
 import { usePlayWhile, useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '@zeroxsolutions/editor-core/mermaid/core/detect';
 import { copySvg, copyText, downloadPng, downloadSvg } from '@zeroxsolutions/editor-core/mermaid/core/export';
