@@ -16,11 +16,14 @@ type CoffeeIconHandle = IconHandle;
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-/** A wisp of steam `delay` of the way in, rising 3 units while it fades. */
+/**
+ * A wisp of steam `delay` of the way in, rising 0.9 while it fades: less than the web twin's 3, which takes it
+ * past the canvas, which react-native-svg clips.
+ */
 function wisp(progress: number, delay: number): { opacity: number } & IconTransformProps {
   'worklet';
   const rise = interpolate(progress, [delay, 1], [0, 1], Extrapolation.CLAMP);
-  return { ...transformProps({ y: -3 * rise }), opacity: 1 - rise };
+  return { ...transformProps({ y: -0.9 * rise }), opacity: 1 - rise };
 }
 
 /**

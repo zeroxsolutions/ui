@@ -24,9 +24,10 @@ function PlaneIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // 1.8 up and across, less than the web twin's 2, which takes the nose past the canvas, which react-native-svg clips.
   const body = useAnimatedProps(() => {
     const p = progress.value;
-    return { ...transformProps({ x: 2 * p, y: -2 * p }) };
+    return { ...transformProps({ x: 1.8 * p, y: -1.8 * p }) };
   });
 
   return (

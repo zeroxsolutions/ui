@@ -39,8 +39,10 @@ function FaceSlightlySmilingIcon({
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
   const width = Number.parseFloat(String(strokeWidth));
+  // A swell of 1.08, 1.03 and 1.06, less than the web twin's 1.15, 1.05 and 1.1, which take the face past the canvas,
+  // which react-native-svg clips.
   const face = useAnimatedProps(() => {
-    const scale = interpolate(progress.value, [0, 0.3, 0.6, 1], [1, 1.15, 1.05, 1.1]);
+    const scale = interpolate(progress.value, [0, 0.3, 0.6, 1], [1, 1.08, 1.03, 1.06]);
     return {
       ...transformProps({
         scaleX: scale,

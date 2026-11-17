@@ -29,9 +29,10 @@ function PencilLineIcon({
     const p = progress.value;
     return { ...transformProps({ scaleX: 1 - 0.4 * p, originX: 21, originY: 21 }) };
   });
+  // A slide of 1, less than the web twin's 3, which takes the tip past the canvas, which react-native-svg clips.
   const pencil = useAnimatedProps(() => {
     const p = progress.value;
-    return { ...transformProps({ x: 3 * p }) };
+    return { ...transformProps({ x: 1 * p }) };
   });
 
   return (
