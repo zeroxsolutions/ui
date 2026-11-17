@@ -6,7 +6,7 @@ import { staticClient } from 'fumadocs-core/search/client/orama-static';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { useHost } from '../../../host/host-provider';
-import { useIconAnimation } from '../../hooks/use-icon-animation';
+import { useAnimatedIcon } from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
 import { pageTreeGroups } from '../../lib/page-tree';
 import { CommandMenu, CommandMenuItem } from '../../../../registry/bases/base-ui/components/navigation/command-menu';
 import { useCommandShortcut } from '../../../../registry/bases/base-ui/hooks/use-command-shortcut';
@@ -88,7 +88,7 @@ function DocsSearch({ tree, navItems = [], platform = 'web', api, resultHref }: 
   // never compares a platform-specific hint against the one it prerendered. macOS draws its Command key
   // as the place-of-interest sign, which the source spells as an escape to stay plain ASCII.
   const [modifierKey, setModifierKey] = useState('Ctrl');
-  const searchIcon = useIconAnimation<SearchIconHandle>();
+  const searchIcon = useAnimatedIcon();
   const { search, setSearch, query } = useDocsSearch({ client: searchClient(api, platform) });
   const groups = useMemo(() => pageTreeGroups(tree), [tree]);
 

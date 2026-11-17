@@ -86,4 +86,42 @@ describe('the docs chrome icons', () => {
     expect(sizeOf(ours as Element)).toEqual(sizeOf(reference));
     expect(sizeOf(reference).width).toBe(16);
   });
+
+  // The browser project runs as a reader who asked for reduced motion.
+  it("leaves the style in use's check as drawn under reduced motion", async () => {
+    await render(
+      <Stage>
+        <StylePicker platform="web" />
+      </Stage>,
+    );
+    await userEvent.click(page.getByRole('button', { name: /^Style/ }));
+    const item = page.getByRole('menuitem', { name: 'Nova' });
+    await expect.element(item).toBeVisible();
+    const drawing = (): string => item.element().querySelector('svg')?.outerHTML ?? '';
+    const before = drawing();
+
+    await userEvent.hover(item);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    expect(before).not.toBe('');
+    expect(drawing()).toBe(before);
+  }, 20_000);
+
+  // The picker starts a row's check on the row's focus, so the arrow keys play it by moving the focus onto it.
+  it('moves the focus, which plays the check, onto the style in use as the arrow keys reach it', async () => {
+    await render(
+      <Stage>
+        <StylePicker platform="web" />
+      </Stage>,
+    );
+    await userEvent.click(page.getByRole('button', { name: /^Style/ }));
+    const inUse = page.getByRole('menuitem', { name: 'Nova' });
+    await expect.element(inUse).toBeVisible();
+
+    for (let press = 0; press < 8 && document.activeElement !== inUse.element(); press += 1) {
+      await userEvent.keyboard('{ArrowDown}');
+    }
+
+    await expect.element(inUse).toHaveFocus();
+  });
 });

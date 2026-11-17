@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 
 import { useHost } from '../../../host/host-provider';
-import { useIconAnimation } from '../../hooks/use-icon-animation';
+import { useAnimatedIcon } from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
 
 import {
   ArrowLeftIcon,
@@ -25,7 +25,7 @@ interface DocsNeighbourLinkProps {
 /** The page header's icon link to the previous or the next page; its arrow plays on hover or focus. */
 function DocsNeighbourLink({ direction, href }: DocsNeighbourLinkProps): ReactNode {
   const { Link } = useHost();
-  const arrow = useIconAnimation<ArrowLeftIconHandle | ArrowRightIconHandle>();
+  const arrow = useAnimatedIcon();
 
   return (
     <Link

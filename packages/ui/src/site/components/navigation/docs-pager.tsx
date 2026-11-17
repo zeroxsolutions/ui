@@ -4,7 +4,7 @@ import type { Root } from 'fumadocs-core/page-tree';
 import type { ComponentProps, ReactNode } from 'react';
 
 import { useHost } from '../../../host/host-provider';
-import { useIconAnimation } from '../../hooks/use-icon-animation';
+import { useAnimatedIcon } from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
 
 import { pageNeighbours } from '../../lib/page-tree';
 import { cn } from '../../../../registry/bases/base-ui/lib/utils';
@@ -33,8 +33,8 @@ interface DocsPagerProps extends ComponentProps<'nav'> {
 function DocsPager({ tree, url, className, ...props }: DocsPagerProps): ReactNode {
   const { Link } = useHost();
   const { previous, next } = pageNeighbours(tree, url);
-  const previousIcon = useIconAnimation<ArrowLeftIconHandle>();
-  const nextIcon = useIconAnimation<ArrowRightIconHandle>();
+  const previousIcon = useAnimatedIcon();
+  const nextIcon = useAnimatedIcon();
   if (!previous && !next) return null;
 
   return (

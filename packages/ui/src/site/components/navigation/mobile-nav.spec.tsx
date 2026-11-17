@@ -75,14 +75,18 @@ describe('MobileNav', () => {
     expect(within(sheet).getByRole('button', { name: /^Style\s*Nova/ })).toBeTruthy();
   });
 
-  it('plays its icon while the button is hovered, and stops it when the pointer leaves', () => {
+  it('plays its icon while the pointer or the focus is on the button, and stops it as either leaves', () => {
     renderNav();
     const trigger = screen.getByRole('button', { name: 'Menu' });
 
-    fireEvent.mouseEnter(trigger);
+    fireEvent.pointerEnter(trigger);
     expect(startAnimation).toHaveBeenCalledTimes(1);
-
-    fireEvent.mouseLeave(trigger);
+    fireEvent.pointerLeave(trigger);
     expect(stopAnimation).toHaveBeenCalledTimes(1);
+
+    fireEvent.focus(trigger);
+    expect(startAnimation).toHaveBeenCalledTimes(2);
+    fireEvent.blur(trigger);
+    expect(stopAnimation).toHaveBeenCalledTimes(2);
   });
 });

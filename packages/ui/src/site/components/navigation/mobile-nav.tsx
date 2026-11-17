@@ -5,7 +5,7 @@ import { useState, type MouseEvent, type ReactNode } from 'react';
 
 import { useHost } from '../../../host/host-provider';
 import { DocsSidebar } from './docs-sidebar';
-import { useIconAnimation } from '../../hooks/use-icon-animation';
+import { useAnimatedIcon } from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
 import { currentSiteNavItem } from '../../lib/site-nav';
 import { Button } from '../../../../registry/bases/base-ui/ui/button';
 import { MenuIcon, type MenuIconHandle } from '../../../../registry/bases/base-ui/icons/lucide/menu-icon';
@@ -48,7 +48,7 @@ function MobileNav({ tree, items, platform }: MobileNavProps): ReactNode {
   const pathname = usePathname();
   const current = currentSiteNavItem(items, pathname);
   const [open, setOpen] = useState(false);
-  const menuIcon = useIconAnimation<MenuIconHandle>();
+  const menuIcon = useAnimatedIcon();
 
   const closeOnLink = (event: MouseEvent<HTMLElement>): void => {
     if (event.target instanceof Element && event.target.closest('a')) setOpen(false);

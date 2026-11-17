@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { forwardRef, useImperativeHandle, type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -118,16 +118,24 @@ describe('StylePicker', () => {
     expect(chevron.stopAnimation).toHaveBeenCalledTimes(2);
   });
 
-  it('plays the check once when a style becomes the one in use, and not when the menu draws it', async () => {
+  it('plays the check of the style in use as the menu opens on it, and as the highlight comes back to it', async () => {
     url.search = '?style=nova';
-    const { rerender } = render(<StylePicker platform="native" />, { wrapper });
+    render(<StylePicker platform="native" />, { wrapper });
     openPicker();
-    await screen.findByRole('menuitem', { name: 'Vega' });
-    expect(check.startAnimation).not.toHaveBeenCalled();
+    const nova = await screen.findByRole('menuitem', { name: 'Nova' });
+    const vega = screen.getByRole('menuitem', { name: 'Vega' });
 
-    url.search = '';
-    rerender(<StylePicker platform="native" />);
+    fireEvent.focus(nova);
+    expect(check.startAnimation).toHaveBeenCalledTimes(1);
+    fireEvent.blur(nova);
+    expect(check.stopAnimation).toHaveBeenCalledTimes(1);
 
-    await waitFor(() => expect(check.startAnimation).toHaveBeenCalledTimes(1));
+    fireEvent.pointerEnter(vega);
+    expect(check.startAnimation).toHaveBeenCalledTimes(1);
+
+    fireEvent.pointerEnter(nova);
+    expect(check.startAnimation).toHaveBeenCalledTimes(2);
+    fireEvent.pointerLeave(nova);
+    expect(check.stopAnimation).toHaveBeenCalledTimes(2);
   });
 });

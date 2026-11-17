@@ -3,7 +3,7 @@
 import { useInView } from 'motion/react';
 import { Suspense, useRef, type ComponentType, type ReactNode, type Ref } from 'react';
 
-import { type AnimatedIconHandle, useIconAnimation } from '../../hooks/use-icon-animation';
+import { type AnimatedIconHandle, useAnimatedIcon } from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
 import { filterIconSets, type IconSet } from '../../lib/icon-sets';
 import { useRegistryExample } from './registry-example';
 
@@ -37,7 +37,7 @@ interface IconGridTileProps {
 function IconGridTile({ name, glyph, picked, onPick }: IconGridTileProps) {
   // The provider's map types every entry as a component taking no props; an icon item takes its handle's ref.
   const Icon = useRegistryExample(name) as AnimatedIcon | undefined;
-  const { ref, handlers } = useIconAnimation<AnimatedIconHandle>();
+  const { ref, handlers } = useAnimatedIcon();
   const tile = useRef<HTMLButtonElement>(null);
   const near = useInView(tile, { once: true, margin: '200px 0px' });
   const placeholder = <span className="size-6" />;
