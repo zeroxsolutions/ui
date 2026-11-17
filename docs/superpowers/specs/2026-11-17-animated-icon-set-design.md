@@ -28,6 +28,9 @@ the docs header where a reader sees every icon move and takes the one they need.
   goes in a control, and zui's items already hold one wherever they draw an icon in a control. The new
   icons are for consumers.
 - A docs page per icon.
+- A second icon set (Tabler and the like). zui may offer others later. Lucide stays the set whose items
+  carry no prefix (`copy-icon`), because it is the set zui's items draw; a later set's items carry the
+  set's name (`tabler-copy-icon`), so no rename of this set's items is owed. My call.
 
 ## The inventory (lucide-animated `0f9920917a5d45d1d263299d56f9015c69c21b70`, 2026-11-15)
 
@@ -36,8 +39,9 @@ lucide-animated publishes 469 icons there. 46 are already zui icons, so 423 are 
 are not taken as they stand:
 
 - **Brand marks, dropped.** chrome, discord, dribbble, facebook, figma, github, gitlab, instagram,
-  linkedin, twitch, twitter, youtube. Lucide 1.x ships no brand marks, so these have no glyph in the
-  catalog's Lucide, and a mark's owner, not Lucide's licence, decides how it may be drawn. My call.
+  linkedin, twitch, twitter, youtube. zui ships none of them today. Lucide 1.x ships no brand marks, so
+  these have no glyph in the catalog's Lucide. A brand set, if zui offers one, is a set of its own,
+  like the other icon sets zui may offer later.
 - **Names Lucide 1.72.0 does not have, renamed.** airplane, align-horizontal, align-vertical,
   attach-file, cart, clap, connect, cursor-click, downvote, fingerprint, flask, key-circle, login,
   logout, upvote. Each takes the name of the Lucide 1.72.0 glyph it draws (login draws `log-in`, cart
