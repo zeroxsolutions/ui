@@ -31,8 +31,8 @@ const ICONS: IconGalleryGridIcon[] = lucideIconModules
   })
   .sort((a, b) => a.glyph.localeCompare(b.glyph));
 
-/** A tile's width, `w-24`, in the pixels the grid's columns are counted in. */
-const TILE_WIDTH = 96;
+/** A tile's width and height, `w-24 h-24`, in the pixels the grid's columns and rows are counted in. */
+const TILE_SIZE = 96;
 
 /** `glyph`'s export name, as the icon's file declares it: `arrow-up` gives `ArrowUpIcon`. */
 function iconExportName(glyph: string): string {
@@ -71,7 +71,7 @@ function IconGalleryGridTile({ icon, picked, onPick }: IconGalleryGridTileProps)
       onBlur={focus.onBlur}
       onPress={() => onPick(icon.name)}
       className={cn(
-        'w-24 items-center gap-2 rounded-md px-1 py-3',
+        'h-24 w-24 items-center gap-2 rounded-md px-1 py-3',
         picked && 'bg-muted',
         focus.focusVisible && 'ring-ring ring-2',
       )}
@@ -100,7 +100,7 @@ interface IconGalleryGridProps {
  */
 function IconGalleryGrid({ query, picked, onPick }: IconGalleryGridProps): ReactNode {
   const [width, setWidth] = useState(0);
-  const columns = Math.max(1, Math.floor(width / TILE_WIDTH));
+  const columns = Math.max(1, Math.floor(width / TILE_SIZE));
   const shown = ICONS.filter(({ glyph }) => glyph.includes(query));
 
   return (
@@ -122,6 +122,10 @@ function IconGalleryGrid({ query, picked, onPick }: IconGalleryGridProps): React
             initialNumToRender={columns * 4}
             maxToRenderPerBatch={columns * 2}
             windowSize={3}
+            // Every row is one tile tall, so the list knows its whole height before it draws a row. Without it the
+            // list grows only as rows are measured, and a browser that sends no scroll event once the list is at the
+            // end of what it has drawn leaves it there.
+            getItemLayout={(_rows, row) => ({ length: TILE_SIZE, offset: TILE_SIZE * row, index: row })}
           />
         )}
       </View>

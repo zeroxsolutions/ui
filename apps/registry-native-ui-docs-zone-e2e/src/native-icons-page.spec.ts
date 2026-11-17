@@ -46,9 +46,15 @@ test('the frame keeps a fixed height, and the grid scrolls inside it to the icon
   await expect(first).toBeVisible(DRAWN);
   await expect.poll(async () => (await frame(page, 'Icon gallery demo').boundingBox())?.height).toBe(560);
 
+  const zap = gallery.getByRole('button', { name: 'zap', exact: true });
   await first.hover();
+  // Read against the frame's box, which runs below a desktop viewport.
   await expect(async () => {
-    await page.mouse.wheel(0, 4000);
-    await expect(gallery.getByRole('button', { name: 'zap', exact: true })).toBeInViewport({ timeout: 500 });
+    await page.mouse.wheel(0, 600);
+    await expect(zap).toBeAttached({ timeout: 500 });
+    const [outer, inner] = await Promise.all([frame(page, 'Icon gallery demo').boundingBox(), zap.boundingBox()]);
+    expect(
+      outer !== null && inner !== null && inner.y >= outer.y && inner.y + inner.height <= outer.y + outer.height,
+    ).toBe(true);
   }).toPass({ timeout: 30_000 });
 });
