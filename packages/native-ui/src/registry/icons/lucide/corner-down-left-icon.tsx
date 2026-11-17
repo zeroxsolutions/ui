@@ -33,10 +33,10 @@ function CornerDownLeftIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref, TIMING);
-  // A shift of 1.7, less than the web twin's 2, which with the stretch takes the tip past the canvas, which react-
-  // native-svg clips.
+  // A shift of 1.6, less than the web twin's 2: with the stretch, any more takes the tip's round end past the
+  // canvas's left edge, which react-native-svg clips.
   const whole = useAnimatedProps(() => ({
-    ...transformProps({ scaleX: 1 + 0.15 * progress.value, x: -1.7 * progress.value }),
+    ...transformProps({ scaleX: 1 + 0.15 * progress.value, x: -1.6 * progress.value }),
   }));
 
   return (
