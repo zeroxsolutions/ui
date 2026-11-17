@@ -34,24 +34,21 @@ const ICONS: IconGalleryGridIcon[] = lucideIconModules
 /** A tile's width, `w-24`, in the pixels the grid's columns are counted in. */
 const TILE_WIDTH = 96;
 
-/**
- * The component an icon's module exports, asked for as its tile first draws, so a module is evaluated only for an
- * icon the grid shows.
- */
-function iconComponentOf(module: string): ComponentType<AnimatedIconProps> | undefined {
-  const exports = lucideIconModules(module) as Record<string, unknown>;
-  return Object.values(exports).find((value) => typeof value === 'function') as
-    | ComponentType<AnimatedIconProps>
-    | undefined;
+/** `glyph`'s export name, as the icon's file declares it: `arrow-up` gives `ArrowUpIcon`. */
+function iconExportName(glyph: string): string {
+  return `${glyph
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('')}Icon`;
 }
 
 /**
- * The icons whose glyph holds `query`, read as a glyph name: lower case, its words joined by `-`, as the docs
- * page's own count reads it, so the grid and the count agree.
+ * The component the module of `icon` exports, asked for as its tile first draws, so a module is evaluated only for
+ * an icon the grid shows.
  */
-function iconGalleryGridMatches(query: string): IconGalleryGridIcon[] {
-  const wanted = query.trim().toLowerCase().split(/\s+/).join('-');
-  return ICONS.filter(({ glyph }) => glyph.includes(wanted));
+function iconComponentOf(icon: IconGalleryGridIcon): ComponentType<AnimatedIconProps> | undefined {
+  const exports = lucideIconModules(icon.module) as Record<string, ComponentType<AnimatedIconProps> | undefined>;
+  return exports[iconExportName(icon.glyph)];
 }
 
 interface IconGalleryGridTileProps {
@@ -64,7 +61,7 @@ interface IconGalleryGridTileProps {
 function IconGalleryGridTile({ icon, picked, onPick }: IconGalleryGridTileProps): ReactNode {
   const handle = useRef<IconHandle>(null);
   const focus = useFocusVisible();
-  const Glyph = iconComponentOf(icon.module);
+  const Glyph = iconComponentOf(icon);
   return (
     <Pressable
       role="button"
@@ -88,7 +85,7 @@ function IconGalleryGridTile({ icon, picked, onPick }: IconGalleryGridTileProps)
 }
 
 interface IconGalleryGridProps {
-  /** What the reader typed in the docs page's search box. */
+  /** What the reader typed in the docs page's search box, already read as a glyph name (`arrow-up`). */
   query: string;
   /** The item name of the icon last tapped, whose tile is marked; `undefined` before a tap. */
   picked: string | undefined;
@@ -97,13 +94,13 @@ interface IconGalleryGridProps {
 }
 
 /**
- * The lucide set's icons whose name holds `query`, under the set's name, in a list of its own height that scrolls.
+ * The lucide set's icons whose glyph holds `query`, under the set's name, in a list of its own height that scrolls.
  * The list draws only the rows near what it shows, so an icon, with its motion, is mounted as it is scrolled to.
  */
 function IconGalleryGrid({ query, picked, onPick }: IconGalleryGridProps): ReactNode {
   const [width, setWidth] = useState(0);
   const columns = Math.max(1, Math.floor(width / TILE_WIDTH));
-  const shown = iconGalleryGridMatches(query);
+  const shown = ICONS.filter(({ glyph }) => glyph.includes(query));
 
   return (
     <View className="gap-3">
@@ -112,7 +109,7 @@ function IconGalleryGrid({ query, picked, onPick }: IconGalleryGridProps): React
       </Text>
       <View className="h-96" onLayout={(event) => setWidth(event.nativeEvent.layout.width)}>
         {shown.length === 0 ? (
-          <Text className="text-muted-foreground">No icon has a name holding &quot;{query.trim()}&quot;.</Text>
+          <Text className="text-muted-foreground">No icon has a name holding &quot;{query}&quot;.</Text>
         ) : (
           <FlatList
             // A list cannot change its column count in place, so a new count draws a new list.

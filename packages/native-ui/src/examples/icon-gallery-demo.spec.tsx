@@ -47,7 +47,8 @@ const framed = {
 };
 /** The global the demo reads as its window, which React Native's own is. */
 const window = globalThis as unknown as Record<string, unknown>;
-const unframed = Object.fromEntries(Object.keys(framed).map((key) => [key, window[key]]));
+/** The keys of {@link framed} the window held before the spec framed it, with what each held. */
+const unframed = Object.fromEntries(Object.keys(framed).flatMap((key) => (key in window ? [[key, window[key]]] : [])));
 
 /** Posts `data` to the demo from `source` on `origin`, as the page framing it does. */
 const receive = (data: unknown, { origin = ORIGIN, source = page as unknown } = {}) =>
@@ -72,7 +73,10 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  Object.assign(window, unframed);
+  for (const key of Object.keys(framed)) {
+    if (key in unframed) window[key] = unframed[key];
+    else delete window[key];
+  }
   jest.useRealTimers();
   jest.restoreAllMocks();
 });
@@ -88,7 +92,7 @@ describe('IconGalleryDemo', () => {
     await render(<IconGalleryDemo />);
     expect(await tile('copy')).toBeOnTheScreen();
 
-    await receive({ type: 'zui:icon-gallery:query', query: 'Arrow' });
+    await receive({ type: 'zui:icon-gallery:query', query: 'arrow' });
 
     expect(screen.getByRole('button', { name: 'arrow-up' })).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: 'arrow-down' })).toBeOnTheScreen();
@@ -111,6 +115,16 @@ describe('IconGalleryDemo', () => {
     );
     expect(screen.getByRole('button', { name: 'arrow-up' })).toBeSelected();
     expect(screen.getByRole('button', { name: 'copy' })).not.toBeSelected();
+  });
+
+  it('marks the tile of the icon the page says was picked, as after the frame loads again', async () => {
+    await render(<IconGalleryDemo />);
+    await tile('copy');
+
+    await receive({ type: 'zui:icon-gallery:query', query: '', picked: 'lucide-copy-icon' });
+
+    expect(screen.getByRole('button', { name: 'copy' })).toBeSelected();
+    expect(screen.getByRole('button', { name: 'arrow-up' })).not.toBeSelected();
   });
 
   it('starts the icon of a tile on press-in and on focus, and lets press-out leave it playing', async () => {

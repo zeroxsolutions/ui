@@ -98,12 +98,20 @@ describe('NativeIconGallery', () => {
     expect(posted).not.toHaveBeenCalled();
   });
 
-  it('shows the install line of the icon tapped in the frame', () => {
+  it('shows the install line and the native usage of the icon tapped in the frame, and hands the frame the pick', () => {
     renderGallery();
+    const posted = postedToFrame();
+    postFromFrame({ type: ICON_GALLERY_READY_MESSAGE });
 
     postFromFrame({ type: ICON_GALLERY_PICK_MESSAGE, name: 'lucide-arrow-up-icon' });
 
-    expect(screen.getByRole('heading', { name: 'arrow-up' })).toBeTruthy();
-    expect(screen.getByText('pnpm dlx shadcn@latest add @zui/lucide-arrow-up-icon')).toBeTruthy();
+    const panel = screen.getByRole('region', { name: 'arrow-up' });
+    expect(panel.textContent).toContain('pnpm dlx shadcn@latest add @zui/lucide-arrow-up-icon');
+    expect(panel.textContent).toContain('<Icon as={ArrowUpIcon} ref={icon} />');
+    expect(panel.textContent).not.toContain('pointed at');
+    expect(posted).toHaveBeenLastCalledWith(
+      { type: ICON_GALLERY_QUERY_MESSAGE, query: '', picked: 'lucide-arrow-up-icon' },
+      window.location.origin,
+    );
   });
 });

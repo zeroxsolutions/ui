@@ -30,7 +30,9 @@ function IconGalleryDemo(): ReactNode {
     if (!frame) return;
     const onMessage = (event: IconGalleryMessageEvent): void => {
       const posted = iconGalleryQueryOf(frame, event);
-      if (posted !== undefined) setQuery(posted);
+      if (posted === undefined) return;
+      setQuery(posted.query);
+      if (posted.picked !== undefined) setPicked(posted.picked);
     };
     frame.addEventListener('message', onMessage);
     postIconGalleryReady(frame);

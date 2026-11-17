@@ -1,5 +1,4 @@
-import registry from '@zeroxsolutions/native-ui/registry.json';
-import { iconSets, type IconSet } from '@zeroxsolutions/ui/site/lib/icon-sets';
+import { glyphQuery, iconExportName } from '@zeroxsolutions/ui/site/lib/icon-sets';
 
 /**
  * The `type` of each message the native Icons page and the gallery demo in its frame pass each other. The demo's
@@ -13,12 +12,42 @@ export const ICON_GALLERY_PICK_MESSAGE = 'zui:icon-gallery:pick';
 /** The name of the demo that draws the native icons, in `@zeroxsolutions/native-ui/examples`. */
 export const ICON_GALLERY_DEMO = 'icon-gallery-demo';
 
-/** Every animated icon the native registry publishes, by set, read from `registry.json` at build. */
-export const nativeIconSets: IconSet[] = iconSets(registry.items);
+/** The message that hands the gallery demo the search and the icon picked on the page. */
+export interface IconGalleryQueryMessage {
+  type: typeof ICON_GALLERY_QUERY_MESSAGE;
+  /** What the reader typed, read as a glyph name, so the demo keeps the icons whose glyph holds it. */
+  query: string;
+  /** The item name of the icon picked, whose tile the demo marks; absent before a pick. */
+  picked?: string;
+}
 
-/** The message that hands the gallery demo what the reader typed in the page's search box. */
-export function iconGalleryQueryMessage(query: string): { type: typeof ICON_GALLERY_QUERY_MESSAGE; query: string } {
-  return { type: ICON_GALLERY_QUERY_MESSAGE, query };
+/**
+ * The message that hands the gallery demo what the reader typed in the page's search box, read as the page's own
+ * count reads it, and the icon picked, so a frame loaded again in another style or mode marks the same tile.
+ */
+export function iconGalleryQueryMessage(query: string, picked?: string): IconGalleryQueryMessage {
+  return { type: ICON_GALLERY_QUERY_MESSAGE, query: glyphQuery(query), ...(picked === undefined ? {} : { picked }) };
+}
+
+/** How a React Native app imports the icon `glyph` of `set`, draws it through Icon, and plays it from a control. */
+export function nativeIconUsage(set: string, glyph: string): string {
+  const name = iconExportName(glyph);
+  return [
+    "import { useRef } from 'react';",
+    "import { Pressable } from 'react-native';",
+    '',
+    `import { ${name}, type ${name}Handle } from '@/components/general/${set}/${glyph}-icon';`,
+    "import { Icon } from '@/components/ui/icon';",
+    "import { iconTrigger } from '@/lib/icon-motion';",
+    '',
+    `const icon = useRef<${name}Handle>(null);`,
+    '',
+    '// iconTrigger plays the icon once, out and back, as the control is pressed in or',
+    '// focused; nothing stops it on press-out.',
+    '<Pressable {...iconTrigger([icon], {})} onPress={onPress}>',
+    `  <Icon as={${name}} ref={icon} />`,
+    '</Pressable>',
+  ].join('\n');
 }
 
 /** What the gallery demo told the page: that it listens for the search, or the item name of the icon tapped. */

@@ -23,8 +23,9 @@ import {
 
 /**
  * The web page at the same place as the native page at `pathname`: the home page, the docs page with the
- * same slug, the component with the same name, the blocks page or the icons page. This zone does not know which web
- * pages exist, so a native page the web lacks leads to a web 404 rather than to its section's index.
+ * same slug, the component with the same name, the blocks page or the icons page. This zone does not know
+ * which web pages exist, so a native page the web lacks leads to a web 404 rather than to its section's
+ * index.
  */
 export function webCounterpart(pathname: string): string {
   const location = nativeLocation(pathname);

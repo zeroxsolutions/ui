@@ -10,7 +10,7 @@ import {
   ICON_GALLERY_READY_MESSAGE,
   iconGalleryMessageOf,
   iconGalleryQueryMessage,
-  nativeIconSets,
+  nativeIconUsage,
 } from './native-icon-gallery';
 
 /** The demo's side of the messages, in the native preview's icon gallery demo. */
@@ -25,8 +25,23 @@ describe('the icon gallery messages', () => {
     expect(channel).toContain(`const ICON_GALLERY_PICK_MESSAGE = '${ICON_GALLERY_PICK_MESSAGE}';`);
   });
 
-  it('sends the search as a query message', () => {
-    expect(iconGalleryQueryMessage('arrow up')).toEqual({ type: ICON_GALLERY_QUERY_MESSAGE, query: 'arrow up' });
+  it('sends the search read as a glyph name, as the page counts it, so the demo only checks that a glyph holds it', () => {
+    for (const [typed, query] of [
+      ['Arrow Up', 'arrow-up'],
+      ['  copy ', 'copy'],
+      ['ARROW-up', 'arrow-up'],
+      ['', ''],
+    ]) {
+      expect(iconGalleryQueryMessage(typed)).toEqual({ type: ICON_GALLERY_QUERY_MESSAGE, query });
+    }
+  });
+
+  it('sends the icon picked on the page with the search', () => {
+    expect(iconGalleryQueryMessage('copy', 'lucide-copy-icon')).toEqual({
+      type: ICON_GALLERY_QUERY_MESSAGE,
+      query: 'copy',
+      picked: 'lucide-copy-icon',
+    });
   });
 
   it('reads a ready and a pick message, and nothing else', () => {
@@ -41,16 +56,16 @@ describe('the icon gallery messages', () => {
   });
 });
 
-describe('nativeIconSets', () => {
-  it("holds every icon of the native registry's lucide folder, under its item name", () => {
-    const registry = JSON.parse(
-      readFileSync(join(import.meta.dirname, '../../../native-ui/registry.json'), 'utf8'),
-    ) as { items: { name: string; files?: { path: string }[] }[] };
-    const lucide = registry.items.filter((item) =>
-      item.files?.some((file) => file.path.startsWith('src/registry/icons/lucide/')),
-    );
+describe('nativeIconUsage', () => {
+  it('imports the icon from where the CLI writes it, draws it through Icon and plays it from iconTrigger', () => {
+    const usage = nativeIconUsage('lucide', 'arrow-up');
 
-    expect(nativeIconSets.map(({ set }) => set)).toEqual(['lucide']);
-    expect(nativeIconSets[0]?.icons.map(({ name }) => name).sort()).toEqual(lucide.map(({ name }) => name).sort());
+    expect(usage).toContain(
+      "import { ArrowUpIcon, type ArrowUpIconHandle } from '@/components/general/lucide/arrow-up-icon';",
+    );
+    expect(usage).toContain("import { iconTrigger } from '@/lib/icon-motion';");
+    expect(usage).toContain('<Pressable {...iconTrigger([icon], {})} onPress={onPress}>');
+    expect(usage).toContain('<Icon as={ArrowUpIcon} ref={icon} />');
+    expect(usage).not.toContain('stopAnimation');
   });
 });

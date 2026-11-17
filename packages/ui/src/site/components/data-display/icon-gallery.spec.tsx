@@ -42,10 +42,16 @@ function renderGallery({
   search = '',
   sets = SETS,
   onPick,
-}: { search?: string; sets?: IconSet[]; onPick?: () => void } = {}) {
+  usage,
+}: {
+  search?: string;
+  sets?: IconSet[];
+  onPick?: () => void;
+  usage?: (set: string, glyph: string) => string;
+} = {}) {
   render(
     <TestHost pathname="/icons/base" search={search}>
-      <IconGallery sets={sets} renderGrid={renderGrid} onPick={onPick} />
+      <IconGallery sets={sets} renderGrid={renderGrid} onPick={onPick} usage={usage} />
     </TestHost>,
   );
 }
@@ -120,5 +126,13 @@ describe('IconGallery', () => {
     expect(panel.textContent).toContain(
       "import { ArrowUpIcon, type ArrowUpIconHandle } from '@/components/general/lucide/arrow-up-icon';",
     );
+  });
+
+  it('shows the usage snippet the page hands it for the picked icon', () => {
+    renderGallery({ usage: (set, glyph) => `usage of ${set}/${glyph}` });
+
+    fireEvent.click(screen.getByRole('button', { name: 'arrow-up' }));
+
+    expect(screen.getByRole('region', { name: 'arrow-up' }).textContent).toContain('usage of lucide/arrow-up');
   });
 });

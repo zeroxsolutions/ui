@@ -5,7 +5,7 @@ import { type FormEvent, type ReactNode, useDeferredValue, useEffect, useId, use
 import { useHost } from '../../../host/host-provider';
 import { useHydrated } from '../../hooks/use-hydrated';
 import { iconSearch, type IconSearch } from '../../lib/icon-search';
-import { filterIconSets, type IconSet } from '../../lib/icon-sets';
+import { filterIconSets, iconExportName, type IconSet } from '../../lib/icon-sets';
 import { installLine } from '../../lib/install-line';
 import { Input } from '../../../../registry/bases/base-ui/ui/input';
 import {
@@ -34,22 +34,19 @@ interface IconGalleryProps {
   renderGrid: (props: IconGalleryGridProps) => ReactNode;
   /** Called with the item name of each icon the reader picks. */
   onPick?: (name: string) => void;
+  /**
+   * The usage snippet of the icon `glyph` of `set`; the web's, a control playing it from pointer and focus,
+   * when left out.
+   */
+  usage?: (set: string, glyph: string) => string;
 }
 
 /** How long typing pauses before the URL takes what the box holds. */
 const PAUSE_MS = 300;
 
-/** `glyph`'s export name, as the icon's file declares it: `arrow-up` gives `ArrowUpIcon`. */
-function iconGalleryExportName(glyph: string): string {
-  return `${glyph
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('')}Icon`;
-}
-
-/** How an app imports and holds the icon `glyph` of `set`, at the path the CLI writes it to on either platform. */
+/** How a web app imports and holds the icon `glyph` of `set`, at the path the CLI writes it to. */
 function iconGalleryUsage(set: string, glyph: string): string {
-  const name = iconGalleryExportName(glyph);
+  const name = iconExportName(glyph);
   return [
     "import { useRef } from 'react';",
     `import { ${name}, type ${name}Handle } from '@/components/general/${set}/${glyph}-icon';`,
@@ -83,7 +80,8 @@ function IconGalleryCode({ code, language, copyLabel }: { code: string; language
 
 interface IconGalleryInstallProps {
   name: string;
-  set: string;
+  /** The usage snippet the panel shows. */
+  usage: string;
   glyph: string;
   /** Takes focus and comes into view each time `name` changes after the first draw. */
   pickCount: number;
@@ -94,7 +92,7 @@ interface IconGalleryInstallProps {
  * that name and brings the panel into view, so a keyboard, a screen reader and a phone all land on what
  * the pick showed, which follows the whole grid.
  */
-function IconGalleryInstall({ name, set, glyph, pickCount }: IconGalleryInstallProps) {
+function IconGalleryInstall({ name, usage, glyph, pickCount }: IconGalleryInstallProps) {
   const headingId = useId();
   const panel = useRef<HTMLElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -116,7 +114,7 @@ function IconGalleryInstall({ name, set, glyph, pickCount }: IconGalleryInstallP
       </div>
       <div className="flex flex-col gap-2">
         <h3 className="text-sm font-medium">Usage</h3>
-        <IconGalleryCode code={iconGalleryUsage(set, glyph)} language="tsx" copyLabel="Copy the usage" />
+        <IconGalleryCode code={usage} language="tsx" copyLabel="Copy the usage" />
       </div>
     </section>
   );
@@ -141,7 +139,14 @@ interface IconGalleryViewProps extends IconGalleryProps {
   state: ReturnType<IconSearch['read']>['state'];
 }
 
-function IconGalleryView({ sets, renderGrid, onPick, search, state }: IconGalleryViewProps): ReactNode {
+function IconGalleryView({
+  sets,
+  renderGrid,
+  onPick,
+  usage = iconGalleryUsage,
+  search,
+  state,
+}: IconGalleryViewProps): ReactNode {
   const searchId = useId();
   const box = useRef<HTMLInputElement>(null);
   // The `q` the box last showed or the URL last took from it, so the URL writes the box only when it moved.
@@ -230,7 +235,7 @@ function IconGalleryView({ sets, renderGrid, onPick, search, state }: IconGaller
           {pickedIcon ? (
             <IconGalleryInstall
               name={pickedIcon.name}
-              set={pickedIcon.set}
+              usage={usage(pickedIcon.set, pickedIcon.glyph)}
               glyph={pickedIcon.glyph}
               pickCount={pickCount}
             />

@@ -32,9 +32,20 @@ export function iconSets(items: readonly IconRegistryItem[]): IconSet[] {
   }));
 }
 
-/** `query` as a glyph name: lower case, its words joined by `-`, so `Arrow Up` reads as `arrow-up`. */
-function glyphQuery(query: string): string {
+/**
+ * `query` as a glyph name: lower case, its words joined by `-`, so `Arrow Up` reads as `arrow-up`. An icon
+ * matches when its glyph holds this, which is all a grid that is handed it has to check.
+ */
+export function glyphQuery(query: string): string {
   return query.trim().toLowerCase().split(/\s+/).join('-');
+}
+
+/** `glyph`'s export name, as the icon's file declares it on either platform: `arrow-up` gives `ArrowUpIcon`. */
+export function iconExportName(glyph: string): string {
+  return `${glyph
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('')}Icon`;
 }
 
 /** The icons of `sets` whose glyph holds `query`, read as a glyph name; a set left with none is dropped. */

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 
-import { filterIconSets, iconSets } from './icon-sets';
+import { filterIconSets, glyphQuery, iconExportName, iconSets } from './icon-sets';
 
 const item = (name: string, path: string) => ({ name, files: [{ path }] });
 
@@ -53,5 +53,23 @@ describe('filterIconSets', () => {
 
   it('keeps every set whole for an empty query', () => {
     expect(filterIconSets(sets, '  ')).toEqual(sets);
+  });
+});
+
+describe('glyphQuery', () => {
+  it.each([
+    ['Arrow Up', 'arrow-up'],
+    ['  copy ', 'copy'],
+    ['ARROW-up', 'arrow-up'],
+    ['', ''],
+  ])('reads %j as %j', (query, glyph) => {
+    expect(glyphQuery(query)).toBe(glyph);
+  });
+});
+
+describe('iconExportName', () => {
+  it("names a glyph's export as its file declares it", () => {
+    expect(iconExportName('arrow-up')).toBe('ArrowUpIcon');
+    expect(iconExportName('copy')).toBe('CopyIcon');
   });
 });

@@ -6,7 +6,11 @@
  * style's sources and imports nothing outside them.
  */
 
-/** Page to demo: `{ type, query }`, what the reader typed in the page's search box. */
+/**
+ * Page to demo: `{ type, query, picked? }`. `query` is what the reader typed in the page's search box, already read
+ * as a glyph name (`Arrow Up` as `arrow-up`), so the demo keeps the icons whose glyph holds it. `picked` is the item
+ * name of the icon picked on the page, absent before a pick.
+ */
 const ICON_GALLERY_QUERY_MESSAGE = 'zui:icon-gallery:query';
 
 /** Demo to page: `{ type }`, posted once the demo listens, so the page sends the search it already holds. */
@@ -40,7 +44,10 @@ function iconGalleryFrame(): IconGalleryWindow | undefined {
   return self as IconGalleryWindow;
 }
 
-/** Tells the page framing `self` that the demo listens for its search. Only a page on the demo's own origin receives it. */
+/**
+ * Tells the page framing `self` that the demo listens for its search. Only a page on the demo's own origin
+ * receives it.
+ */
 function postIconGalleryReady(self: IconGalleryWindow): void {
   self.parent.postMessage({ type: ICON_GALLERY_READY_MESSAGE }, self.location.origin);
 }
@@ -50,16 +57,23 @@ function postIconGalleryPick(self: IconGalleryWindow, name: string): void {
   self.parent.postMessage({ type: ICON_GALLERY_PICK_MESSAGE, name }, self.location.origin);
 }
 
+/** What a query message carries: the search, as a glyph name, and the icon picked on the page, if any. */
+interface IconGalleryQuery {
+  query: string;
+  picked?: string;
+}
+
 /**
- * The search a query message carries.
+ * The search and the pick a query message carries.
  * @returns `undefined` for any other message, and for one that came from a window other than the page framing
  * `self` or from another origin
  */
-function iconGalleryQueryOf(self: IconGalleryWindow, event: IconGalleryMessageEvent): string | undefined {
+function iconGalleryQueryOf(self: IconGalleryWindow, event: IconGalleryMessageEvent): IconGalleryQuery | undefined {
   if (event.source !== self.parent || event.origin !== self.location.origin) return undefined;
   if (typeof event.data !== 'object' || event.data === null) return undefined;
-  const { type, query } = event.data as { type?: unknown; query?: unknown };
-  return type === ICON_GALLERY_QUERY_MESSAGE && typeof query === 'string' ? query : undefined;
+  const { type, query, picked } = event.data as { type?: unknown; query?: unknown; picked?: unknown };
+  if (type !== ICON_GALLERY_QUERY_MESSAGE || typeof query !== 'string') return undefined;
+  return typeof picked === 'string' ? { query, picked } : { query };
 }
 
 export {
@@ -71,4 +85,4 @@ export {
   postIconGalleryPick,
   postIconGalleryReady,
 };
-export type { IconGalleryMessageEvent, IconGalleryWindow };
+export type { IconGalleryMessageEvent, IconGalleryQuery, IconGalleryWindow };

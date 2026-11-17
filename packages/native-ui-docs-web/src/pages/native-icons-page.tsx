@@ -4,14 +4,17 @@ import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 
 import { NativeIconGallery } from '../components/data-display/native-icon-gallery';
 import { EngineSwitcher } from '../components/navigation/engine-switcher';
-import { nativeIconSets } from '../lib/native-icon-gallery';
+import { nativeIconSets } from '../lib/native-icon-sets';
 
 interface NativeIconsPageProps {
   /** The engine the page is read under, whose preview app draws the icons. */
   engine: NativeEngine;
 }
 
-/** Every animated icon the native registry publishes, drawn by one engine's preview app, each played as it is pressed. */
+/**
+ * Every animated icon the native registry publishes, drawn by one engine's preview app, each played as it is
+ * pressed.
+ */
 function NativeIconsPage({ engine }: NativeIconsPageProps): ReactNode {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-10">
