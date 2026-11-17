@@ -1,10 +1,27 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import type { ReactNode } from 'react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { forwardRef, useImperativeHandle, type ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TestHost } from '../../../test/test-host';
 
 import { StylePicker } from './style-picker';
+
+const chevron = vi.hoisted(() => ({ startAnimation: vi.fn(), stopAnimation: vi.fn() }));
+const check = vi.hoisted(() => ({ startAnimation: vi.fn(), stopAnimation: vi.fn() }));
+
+// The icons' handles are the seam: the picker drives them, and the motion behind them is the icons' own.
+vi.mock('../../../../registry/bases/base-ui/icons/lucide/chevron-down-icon', () => ({
+  ChevronDownIcon: forwardRef(function ChevronDownIcon(_props, ref) {
+    useImperativeHandle(ref, () => chevron);
+    return null;
+  }),
+}));
+vi.mock('../../../../registry/bases/base-ui/icons/lucide/check-icon', () => ({
+  CheckIcon: forwardRef(function CheckIcon(_props, ref) {
+    useImperativeHandle(ref, () => check);
+    return null;
+  }),
+}));
 
 const BUTTON = '/native/components/nativewind/button';
 
@@ -20,6 +37,7 @@ function wrapper({ children }: { children: ReactNode }): ReactNode {
 
 afterEach(() => {
   cleanup();
+  vi.clearAllMocks();
   localStorage.clear();
 });
 
@@ -83,5 +101,33 @@ describe('StylePicker', () => {
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Nova' }));
 
     expect(screen.getByRole('button', { name: /^Style/ }).textContent).toContain('Nova');
+  });
+
+  it("plays the trigger's icon while the pointer or the focus is on it, and stops it as either leaves", () => {
+    render(<StylePicker platform="native" />, { wrapper });
+    const trigger = screen.getByRole('button', { name: /^Style/ });
+
+    fireEvent.pointerEnter(trigger);
+    expect(chevron.startAnimation).toHaveBeenCalledTimes(1);
+    fireEvent.pointerLeave(trigger);
+    expect(chevron.stopAnimation).toHaveBeenCalledTimes(1);
+
+    fireEvent.focus(trigger);
+    expect(chevron.startAnimation).toHaveBeenCalledTimes(2);
+    fireEvent.blur(trigger);
+    expect(chevron.stopAnimation).toHaveBeenCalledTimes(2);
+  });
+
+  it('plays the check once when a style becomes the one in use, and not when the menu draws it', async () => {
+    url.search = '?style=nova';
+    const { rerender } = render(<StylePicker platform="native" />, { wrapper });
+    openPicker();
+    await screen.findByRole('menuitem', { name: 'Vega' });
+    expect(check.startAnimation).not.toHaveBeenCalled();
+
+    url.search = '';
+    rerender(<StylePicker platform="native" />);
+
+    await waitFor(() => expect(check.startAnimation).toHaveBeenCalledTimes(1));
   });
 });

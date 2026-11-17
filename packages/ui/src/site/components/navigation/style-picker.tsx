@@ -1,8 +1,7 @@
 'use client';
 
 import { Menu as MenuPrimitive } from '@base-ui/react/menu';
-import { CheckIcon, ChevronDownIcon } from 'lucide-react';
-import { Suspense, type ReactNode } from 'react';
+import { Suspense, useRef, type ReactNode } from 'react';
 
 import { useHost } from '../../../host/host-provider';
 import { DEFAULT_PLATFORM_STYLE, PLATFORM_STYLE_LABELS, PLATFORM_STYLES } from '../../constants/platform-styles';
@@ -10,6 +9,14 @@ import { useCurrentStyle } from '../../hooks/use-current-style';
 import { useHydrated } from '../../hooks/use-hydrated';
 import { rememberStyle } from '../../hooks/use-remembered-choice';
 import { styleHref } from '../../lib/style-choice';
+import {
+  type AnimatedIconHandle,
+  useAnimatedIcon,
+  usePlayWhile,
+} from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
+import { CheckIcon } from '../../../../registry/bases/base-ui/icons/lucide/check-icon';
+import { ChevronDownIcon } from '../../../../registry/bases/base-ui/icons/lucide/chevron-down-icon';
+import { cn } from '../../../../registry/bases/base-ui/lib/utils';
 import { Button } from '../../../../registry/bases/base-ui/ui/button';
 import {
   DropdownMenu,
@@ -55,12 +62,13 @@ function StylePickerMenu({ platform, style, search }: StylePickerMenuProps): Rea
   const { Link, usePathname } = useHost();
   const pathname = usePathname();
   const styles: readonly PlatformStyle[] = PLATFORM_STYLES[platform];
+  const chevron = useAnimatedIcon();
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger data-slot="style-picker" render={<Button variant="ghost" size="sm" />}>
+      <DropdownMenuTrigger data-slot="style-picker" render={<Button variant="ghost" size="sm" {...chevron.handlers} />}>
         <span className="text-muted-foreground">Style</span> {PLATFORM_STYLE_LABELS[style]}
-        <ChevronDownIcon />
+        <ChevronDownIcon ref={chevron.ref} aria-hidden />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuGroup>
@@ -79,13 +87,24 @@ function StylePickerMenu({ platform, style, search }: StylePickerMenuProps): Rea
               className="focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center justify-between gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none"
             >
               {PLATFORM_STYLE_LABELS[option]}
-              {option === style ? <CheckIcon className="size-4" /> : null}
+              <SelectedCheck selected={option === style} />
             </MenuPrimitive.LinkItem>
           ))}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+/**
+ * The mark on the menu row of the style in use. It stays drawn, hidden, on the rows that are not, so a
+ * row that becomes the one in use plays it once, where a row drawn already selected, as the menu
+ * opens, does not.
+ */
+function SelectedCheck({ selected }: { selected: boolean }): ReactNode {
+  const icon = useRef<AnimatedIconHandle>(null);
+  usePlayWhile(icon, selected);
+  return <CheckIcon ref={icon} aria-hidden className={cn('size-4 [&_svg]:size-4!', !selected && 'invisible')} />;
 }
 
 export { StylePicker };
