@@ -43,6 +43,13 @@ describe('web routes', () => {
     expect(webRoutes.blocksRoute.matcher(built)).toMatchObject({ params: { base: 'base' } });
   });
 
+  it('builds the icons page under a base, and reads the base back', () => {
+    const built = webRoutes.iconsRoute.build({ base: 'base' });
+
+    expect(built).toBe('/icons/base');
+    expect(webRoutes.iconsRoute.matcher(built)).toMatchObject({ params: { base: 'base' } });
+  });
+
   it('builds a web docs page from its slug, and reads the segments back', () => {
     const built = webRoutes.docsPageRoute.build({ slug: 'blocks/ai-provider-picker' });
 

@@ -13,6 +13,7 @@ describe('nativeCounterpart', () => {
     ['/docs/components/base', '/native/components/uniwind'],
     ['/docs/components/base/tab-bar', '/native/components/uniwind/tab-bar'],
     ['/blocks/base', '/native/blocks/uniwind'],
+    ['/icons/base', '/native/icons/uniwind'],
     ['/view/ai-provider-picker', '/native/docs'],
   ])('moves %s to %s', (pathname, href) => {
     expect(nativeCounterpart(pathname, 'uniwind')).toBe(href);
@@ -29,11 +30,12 @@ describe('nativeCounterpart', () => {
 });
 
 describe('webNavItems', () => {
-  it("points the header's Docs, Components, Blocks and Editor into the web tree", () => {
+  it("points the header's Docs, Components, Blocks, Icons and Editor into the web tree", () => {
     expect(webNavItems().map(({ label, href }) => [label, href])).toEqual([
       ['Docs', '/docs'],
       ['Components', '/docs/components/base'],
       ['Blocks', '/blocks/base'],
+      ['Icons', '/icons/base'],
       ['Editor', '/docs/editor'],
     ]);
   });
@@ -43,6 +45,7 @@ describe('webNavItems', () => {
     ['/docs/editor/document-editor', 'Editor'],
     ['/docs/installation', 'Docs'],
     ['/docs/editor-foo', 'Docs'],
+    ['/icons/base', 'Icons'],
   ])('marks the item for %s', (pathname, label) => {
     expect(currentSiteNavItem(webNavItems(), pathname)?.label).toBe(label);
   });

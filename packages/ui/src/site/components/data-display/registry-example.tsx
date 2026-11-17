@@ -18,16 +18,21 @@ function RegistryExamplesProvider({
   return <RegistryExamplesContext value={components}>{children}</RegistryExamplesContext>;
 }
 
+/** The component the provider holds under `name`, a demo or a registry item; `undefined` where it holds none. */
+function useRegistryExample(name: string): ComponentType | undefined {
+  return useContext(RegistryExamplesContext)[name];
+}
+
 /**
  * Renders the demo the provider holds under `name`. The demos and the components they compose use
  * hooks and carry no client directive, since the registry ships without one, so their lazy imports
  * sit on the client side of the boundary, in the map the provider was given.
  */
 function RegistryExample({ name }: { name: string }): ReactNode {
-  const Demo = useContext(RegistryExamplesContext)[name];
+  const Demo = useRegistryExample(name);
   if (!Demo) throw new Error(`No example named "${name}"`);
 
   return <Demo />;
 }
 
-export { RegistryExample, RegistryExamplesProvider };
+export { RegistryExample, RegistryExamplesProvider, useRegistryExample };

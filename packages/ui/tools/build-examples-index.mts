@@ -83,8 +83,14 @@ function writeComponents(file: string, exportName: string, group: typeof entries
     `${HEADER}
 import { lazy, type ComponentType } from 'react';
 
+// An animated icon's module exports no function, only the object \`forwardRef\` returns, so that object
+// is taken where the module exports no function.
 function firstComponent(module: Record<string, unknown>): { default: ComponentType } {
-  return { default: Object.values(module).find((value) => typeof value === 'function') as ComponentType };
+  const exports = Object.values(module);
+  const component =
+    exports.find((value) => typeof value === 'function') ??
+    exports.find((value) => typeof value === 'object' && value !== null && '$$typeof' in value);
+  return { default: component as ComponentType };
 }
 
 export const ${exportName}: Record<string, ComponentType> = {

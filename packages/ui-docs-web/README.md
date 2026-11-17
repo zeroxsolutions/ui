@@ -1,6 +1,6 @@
 # @zeroxsolutions/ui-docs-web
 
-The web platform's docs: `content/docs`, the pages of `/`, `/docs`, `/blocks` and `/view` with their
+The web platform's docs: `content/docs`, the pages of `/`, `/docs`, `/blocks`, `/icons` and `/view` with their
 components, and the route units of those paths. `@zeroxsolutions/registry-ui` compiles the content and
 renders each page from its route file.
 

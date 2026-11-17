@@ -38,6 +38,12 @@ export const nativeBlocksRoute = createDynamicRoute<{ engine: NativeEngine }>(
   ({ engine }) => `/native/blocks/${engine}`,
 );
 
+/** The native icons on one engine. */
+export const nativeIconsRoute = createDynamicRoute<{ engine: NativeEngine }>(
+  '/native/icons/:engine',
+  ({ engine }) => `/native/icons/${engine}`,
+);
+
 /** The native zone's sitemap, which this app's sitemap index names. */
 export const nativeSitemapRoute = createStaticRoute('/native/sitemap.xml', () => '/native/sitemap.xml');
 

@@ -6,6 +6,7 @@ import {
   docsPageRoute,
   docsRoute,
   homeRoute,
+  iconsRoute,
 } from '@zeroxsolutions/ui-docs-web/routes';
 import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 import type { SiteNavItem } from '@zeroxsolutions/ui/site/types/site-nav-item';
@@ -17,20 +18,22 @@ import {
   nativeDocsPageRoute,
   nativeDocsRoute,
   nativeHomeRoute,
+  nativeIconsRoute,
 } from '@/routes/native-paths';
 import { editorDocsRoute } from '@/routes/editor-paths';
 
 /**
  * Where a pathname sits in the web tree. `slug` is a docs page's segments joined with `/`, `''` for the
- * introduction. `other` is every page outside home, the docs, components and blocks, such as a block's
- * own view.
+ * introduction. `other` is every page outside home, the docs, components, blocks and icons, such as a
+ * block's own view.
  */
 type WebLocation =
   | { section: 'home' }
   | { section: 'other' }
   | { section: 'docs'; slug: string }
   | { section: 'components'; base: string; name?: string }
-  | { section: 'blocks'; base: string };
+  | { section: 'blocks'; base: string }
+  | { section: 'icons'; base: string };
 
 // A wildcard's matcher hands back its segments as an array, though the route's params type it as the joined string.
 function slugOf(slug: string | string[]): string {
@@ -46,6 +49,8 @@ function webLocation(pathname: string): WebLocation {
   if (components) return { section: 'components', base: components.params.base };
   const blocks = blocksRoute.matcher(pathname);
   if (blocks) return { section: 'blocks', base: blocks.params.base };
+  const icons = iconsRoute.matcher(pathname);
+  if (icons) return { section: 'icons', base: icons.params.base };
   if (docsRoute.matcher(pathname)) return { section: 'docs', slug: '' };
   const docsPage = docsPageRoute.matcher(pathname);
   if (docsPage) return { section: 'docs', slug: slugOf(docsPage.params.slug) };
@@ -55,7 +60,7 @@ function webLocation(pathname: string): WebLocation {
 
 /**
  * The native page at the same place as the web page at `pathname`, under `engine`: the home page, the
- * docs page with the same slug, the component with the same name, or the blocks page. This app does not
+ * docs page with the same slug, the component with the same name, the blocks page or the icons page. This app does not
  * know which native pages exist, so a web page the native tree lacks leads to the native zone's 404,
  * which lists that section's pages.
  */
@@ -72,13 +77,15 @@ export function nativeCounterpart(pathname: string, engine: NativeEngine): strin
         : nativeComponentsRoute.build({ engine });
     case 'blocks':
       return nativeBlocksRoute.build({ engine });
+    case 'icons':
+      return nativeIconsRoute.build({ engine });
     case 'other':
       return nativeDocsRoute.build();
   }
 }
 
 /**
- * The header's Docs, Components, Blocks and Editor, each pointing into the web tree. Editor is listed
+ * The header's Docs, Components, Blocks, Icons and Editor, each pointing into the web tree. Editor is listed
  * last: its pages sit under Docs too, and the last item whose pattern matches is the one marked.
  */
 export function webNavItems(): SiteNavItem[] {
@@ -87,6 +94,7 @@ export function webNavItems(): SiteNavItem[] {
     { href: docsRoute.build(), label: 'Docs', pattern: `${docsRoute.pathname}{/*rest}` },
     { href: componentsRoute.build({ base }), label: 'Components', pattern: `${componentsRoute.pathname}{/*rest}` },
     { href: blocksRoute.build({ base }), label: 'Blocks', pattern: blocksRoute.pathname },
+    { href: iconsRoute.build({ base }), label: 'Icons', pattern: iconsRoute.pathname },
     { href: editorDocsRoute.build(), label: 'Editor', pattern: `${editorDocsRoute.pathname}{/*rest}` },
   ];
 }
