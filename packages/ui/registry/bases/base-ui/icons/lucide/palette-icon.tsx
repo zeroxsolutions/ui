@@ -141,7 +141,7 @@ const PaletteIcon = forwardRef<PaletteIconHandle, PaletteIconProps>(
         >
           <motion.path
             animate={controls}
-            d="M12 2a1 1 0 0 0 0 20l.25 0a1.75 1.75 0 0 0 1.4-2.8l-.3-.4a1.75 1.75 0 0 1 1.4-2.8h2.25a5 5 0 0 0 5-5 10 9 0 0 0-10-9z"
+            d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"
             initial="normal"
             strokeDasharray={DASH_LENGTH}
             variants={OUTLINE_VARIANTS}

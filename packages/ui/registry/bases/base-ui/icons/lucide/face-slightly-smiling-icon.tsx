@@ -71,14 +71,14 @@ const FaceSlightlySmilingIcon = forwardRef<FaceSlightlySmilingIconHandle, FaceSl
 
     const mouthVariants: Variants = {
       normal: {
-        d: 'M8 14s1.5 2 4 2 4-2 4-2',
+        d: 'M16.472 15a6 6 0 0 1-8.943 0',
         pathLength: 1,
         pathOffset: 0,
         strokeWidth: 2,
         transition: { duration: 0.3, ease: 'easeOut' },
       },
       animate: {
-        d: 'M7 13.5s2.5 3.5 5 3.5 5-3.5 5-3.5',
+        d: 'M17.5 14.5a6 6 0 0 1-11 0',
         pathLength: [0.3, 1, 1],
         pathOffset: [0, 0, 0],
         strokeWidth: 2.5,
@@ -134,9 +134,9 @@ const FaceSlightlySmilingIcon = forwardRef<FaceSlightlySmilingIconHandle, FaceSl
           xmlns="http://www.w3.org/2000/svg"
         >
           <circle cx="12" cy="12" r="10" />
-          <motion.path animate={controls} d="M8 14s1.5 2 4 2 4-2 4-2" initial="normal" variants={mouthVariants} />
-          <motion.line animate={controls} initial="normal" variants={eyeVariants} x1="9" x2="9.01" y1="9" y2="9" />
-          <motion.line animate={controls} initial="normal" variants={eyeVariants} x1="15" x2="15.01" y1="9" y2="9" />
+          <motion.path animate={controls} d="M16.472 15a6 6 0 01-8.943 0" initial="normal" variants={mouthVariants} />
+          <motion.path animate={controls} d="M9 10V9" initial="normal" variants={eyeVariants} />
+          <motion.path animate={controls} d="M15 10V9" initial="normal" variants={eyeVariants} />
         </motion.svg>
       </span>
     );

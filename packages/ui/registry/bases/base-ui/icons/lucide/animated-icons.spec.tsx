@@ -100,18 +100,21 @@ const DRAWN_OTHERWISE = new Set<string>([
   // Split into pieces that move apart, whose union is the glyph element.
   'accessibility',
   'arrow-down-left',
+  'brain',
+  'clock',
   'folder-clock',
   'link-2',
   'rotate-ccw-clock',
   'ticket',
   // The glyph element's geometry drawn the other way, so a pathLength draw runs as the motion was made.
   'chart-line',
+  'check',
   'check-check',
+  'circle-check',
+  'corner-down-left',
   'dollar-sign',
   'euro',
   'file-chart-line',
-  'check',
-  'corner-down-left',
   'georgian-lari',
   'message-circle-check',
   'party-popper',
@@ -120,21 +123,7 @@ const DRAWN_OTHERWISE = new Set<string>([
   // A d that Motion morphs, written with its arc flags apart: Motion reads Lucide's packed `016` as one number.
   'face-grinning',
   'face-slightly-frowning',
-  // Icons from before the set was ported that still draw a part as a line or an older Lucide path.
-  'brain',
-  'circle-check',
-  'clock',
   'face-slightly-smiling',
-  'file-text',
-  'leaf',
-  'menu',
-  'message-square',
-  'palette',
-  'search',
-  'sliders-horizontal',
-  'sparkles',
-  'sun-moon',
-  'upload',
 ]);
 
 function inButton(node: ReactNode) {

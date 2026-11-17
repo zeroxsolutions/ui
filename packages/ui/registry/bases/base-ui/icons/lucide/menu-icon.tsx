@@ -26,7 +26,7 @@ const LINE_VARIANTS: Variants = {
   },
   animate: (custom: number) => ({
     rotate: custom === 1 ? 45 : custom === 3 ? -45 : 0,
-    y: custom === 1 ? 6 : custom === 3 ? -6 : 0,
+    y: custom === 1 ? 7 : custom === 3 ? -7 : 0,
     opacity: custom === 2 ? 0 : 1,
     transition: {
       type: 'spring',
@@ -93,36 +93,9 @@ const MenuIcon = forwardRef<MenuIconHandle, MenuIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.line
-            animate={controls}
-            custom={1}
-            initial="normal"
-            variants={LINE_VARIANTS}
-            x1="4"
-            x2="20"
-            y1="6"
-            y2="6"
-          />
-          <motion.line
-            animate={controls}
-            custom={2}
-            initial="normal"
-            variants={LINE_VARIANTS}
-            x1="4"
-            x2="20"
-            y1="12"
-            y2="12"
-          />
-          <motion.line
-            animate={controls}
-            custom={3}
-            initial="normal"
-            variants={LINE_VARIANTS}
-            x1="4"
-            x2="20"
-            y1="18"
-            y2="18"
-          />
+          <motion.path animate={controls} custom={1} d="M4 5h16" initial="normal" variants={LINE_VARIANTS} />
+          <motion.path animate={controls} custom={2} d="M4 12h16" initial="normal" variants={LINE_VARIANTS} />
+          <motion.path animate={controls} custom={3} d="M4 19h16" initial="normal" variants={LINE_VARIANTS} />
         </svg>
       </span>
     );
