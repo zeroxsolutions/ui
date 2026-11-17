@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import Animated, { Easing, Extrapolation, interpolate, useAnimatedProps } from 'react-native-reanimated';
-import Svg, { G, Path, Text } from 'react-native-svg';
+import Svg, { G, Path } from 'react-native-svg';
 import {
   transformProps,
   useIconMotion,
@@ -25,9 +25,11 @@ const FADE = 0.6;
 const ASK = 0.4;
 
 /**
- * The theme's bold Geist face, which the question mark is set in: a device picks a custom font's weight by its family.
+ * The size of the question mark, drawn with Lucide's circle-question-mark strokes, and how far it is moved up from
+ * their middle (12, 12): at 0.6 it stands 6 units tall over (12, 8), clear of the arc.
  */
-const BOLD = 'Geist_700Bold';
+const MARK_SIZE = 0.6;
+const MARK_RISE = -4;
 
 /**
  * Lucide's wifi-low icon, whose signal fades out as a question mark pops up above it, and back when started. The
@@ -50,7 +52,8 @@ function WifiLowIcon({
     const shown = interpolate(progress.value, [ASK, 1], [0, 1], Extrapolation.CLAMP);
     // Untransformed while hidden, since react-native-svg drops a shape's matrix from its first render.
     if (shown === 0) return { opacity: 0, ...transformProps({}) };
-    return { opacity: shown, ...transformProps({ scaleX: shown, scaleY: shown, originX: 12, originY: 8 }) };
+    const scale = MARK_SIZE * shown;
+    return { opacity: shown, ...transformProps({ y: MARK_RISE, scaleX: scale, scaleY: scale }) };
   });
 
   return (
@@ -70,18 +73,8 @@ function WifiLowIcon({
       <Path d="M12 20h.01" />
       <AnimatedPath d="M8.5 16.429a5 5 0 0 1 7 0" animatedProps={arc} />
       <AnimatedG opacity={0} animatedProps={question}>
-        <Text
-          x="12"
-          y="8"
-          fill={color}
-          stroke="none"
-          fontSize="8"
-          fontFamily={BOLD}
-          textAnchor="middle"
-          alignmentBaseline="central"
-        >
-          ?
-        </Text>
+        <Path d="M9 9.5a3 2.5 0 016 0c0 2-2 2-3 3.5" />
+        <Path d="M12 17h.01" />
       </AnimatedG>
     </Svg>
   );

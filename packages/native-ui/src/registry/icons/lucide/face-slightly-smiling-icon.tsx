@@ -1,9 +1,10 @@
 // Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
 
 import type { ReactNode } from 'react';
-import Animated, { interpolate, useAnimatedProps } from 'react-native-reanimated';
+import Animated, { Extrapolation, interpolate, useAnimatedProps } from 'react-native-reanimated';
 import Svg, { Circle, G, Path } from 'react-native-svg';
 import {
+  dash,
   transformProps,
   useIconMotion,
   type AnimatedIconProps,
@@ -25,8 +26,9 @@ function eye(progress: number, cx: number): IconTransformProps {
 }
 
 /**
- * Lucide's face slightly smiling icon, which bounces and tilts while its smile widens and its eyes pop, then settles, when
- * started. Hidden from a screen reader: the control around it says what it does.
+ * Lucide's face slightly smiling icon, which bounces and tilts while its smile is drawn again as it widens to the web
+ * twin's `M17.5 14.5a6 6 0 0 1-11 0` and its eyes pop, then settles, when started. Hidden from a screen reader: the
+ * control around it says what it does.
  */
 function FaceSlightlySmilingIcon({
   ref,
@@ -52,13 +54,14 @@ function FaceSlightlySmilingIcon({
       strokeWidth: width * (1 + 0.25 * progress.value),
     };
   });
-  const mouth = useAnimatedProps(() => ({
-    ...transformProps({
-      scaleX: 1 + 0.25 * progress.value,
-      scaleY: 1 + 0.5 * progress.value,
-      originY: 15,
-    }),
-  }));
+  const mouth = useAnimatedProps(() => {
+    const widen = interpolate(progress.value, [0.125, 0.625], [0, 1], Extrapolation.CLAMP);
+    const chord = 8.943 + 2.057 * widen;
+    return {
+      d: `M${16.472 + 1.028 * widen} ${15 - 0.5 * widen}a6 6 0 0 1-${chord} 0`,
+      ...dash(12 * Math.asin(chord / 12), interpolate(progress.value, [0, 0.125, 0.4375], [1, 0.3, 1])),
+    };
+  });
   const leftEye = useAnimatedProps(() => eye(progress.value, 9));
   const rightEye = useAnimatedProps(() => eye(progress.value, 15));
 

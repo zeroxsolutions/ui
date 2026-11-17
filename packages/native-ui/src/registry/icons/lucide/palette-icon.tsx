@@ -30,10 +30,14 @@ const DOTS = [
   { cx: 17.5, cy: 10.5 },
 ];
 
-/** The dot at `index` growing from nothing once the outline is under way, each a tenth of the draw after the last. */
+/**
+ * The dot at `index` growing from nothing once the outline is under way, each a tenth of the draw after the last, and
+ * overshooting to 1.25 before it settles, as the web twin's spring does.
+ */
 function pop(progress: number, index: number): IconTransformProps {
   'worklet';
-  const scale = interpolate(1 - progress, [0.4 + 0.1 * index, 0.7 + 0.1 * index], [0, 1], Extrapolation.CLAMP);
+  const start = 0.4 + 0.1 * index;
+  const scale = interpolate(1 - progress, [start, start + 0.2, start + 0.3], [0, 1.25, 1], Extrapolation.CLAMP);
   return transformProps({ scaleX: scale, scaleY: scale, originX: DOTS[index].cx, originY: DOTS[index].cy });
 }
 
@@ -56,7 +60,7 @@ function PaletteIcon({
   const progress = useIconMotion(ref, TIMING);
   const outline = useAnimatedProps(() => {
     const drawn = interpolate(1 - progress.value, [0, 0.5], [0, 1], Extrapolation.CLAMP);
-    return dash(OUTLINE, drawn, 1 - drawn);
+    return dash(OUTLINE, drawn);
   });
   const first = useAnimatedProps(() => pop(progress.value, 0));
   const second = useAnimatedProps(() => pop(progress.value, 1));

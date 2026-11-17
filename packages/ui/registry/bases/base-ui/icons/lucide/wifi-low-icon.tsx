@@ -133,16 +133,10 @@ const WifiLowIcon = forwardRef<WifiLowIconHandle, WifiLowIconProps>(
               }}
             />
           ))}
-          <motion.text
+          <motion.g
             animate={questionControls}
-            dominantBaseline="central"
-            fill="currentColor"
-            fontSize="8"
-            fontWeight="bold"
             initial={{ opacity: 0, scale: 0 }}
-            stroke="none"
             style={{ transformBox: 'view-box', originX: '12px', originY: '8px' }}
-            textAnchor="middle"
             variants={{
               hide: {
                 opacity: 0,
@@ -160,11 +154,12 @@ const WifiLowIcon = forwardRef<WifiLowIconHandle, WifiLowIconProps>(
                 },
               },
             }}
-            x="12"
-            y="8"
           >
-            ?
-          </motion.text>
+            <g transform="translate(4.8 0.8) scale(0.6)">
+              <path d="M9 9.5a3 2.5 0 016 0c0 2-2 2-3 3.5" />
+              <path d="M12 17h.01" />
+            </g>
+          </motion.g>
         </svg>
       </span>
     );
