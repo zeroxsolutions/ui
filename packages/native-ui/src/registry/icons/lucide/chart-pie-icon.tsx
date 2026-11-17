@@ -24,7 +24,8 @@ function ChartPieIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  const slice = useAnimatedProps(() => transformProps({ x: 1.1 * progress.value, y: -1.1 * progress.value }));
+  // Less than the web twin's 1.1, which takes the slice past the canvas, which react-native-svg clips.
+  const slice = useAnimatedProps(() => transformProps({ x: progress.value, y: -progress.value }));
 
   return (
     <Svg

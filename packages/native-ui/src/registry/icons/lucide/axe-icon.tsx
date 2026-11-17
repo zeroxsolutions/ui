@@ -11,6 +11,13 @@ type AxeIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
+ * How far the axe lifts back and swings, in degrees about its bottom-left corner: far less than the web twin's 20
+ * and 25, which would swing its head past the canvas, which react-native-svg clips.
+ */
+const LIFT = -4;
+const STRIKE = 4;
+
+/**
  * Lucide's axe icon, which swings back, then forward past rest, and back, about its lower-left corner, when started.
  * Hidden from a screen reader: the control around it says what it does.
  */
@@ -25,7 +32,7 @@ function AxeIcon({
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
   const axe = useAnimatedProps(() =>
-    transformProps({ rotate: interpolate(progress.value, [0, 0.75, 1], [0, -20, 25]), originX: 0, originY: 24 }),
+    transformProps({ rotate: interpolate(progress.value, [0, 0.75, 1], [0, LIFT, STRIKE]), originX: 0, originY: 24 }),
   );
 
   return (

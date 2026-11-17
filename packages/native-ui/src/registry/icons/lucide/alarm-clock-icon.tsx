@@ -39,7 +39,9 @@ function AlarmClockIcon({
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
   const clock = useAnimatedProps(() => shake(progress.value, 1.5, 1));
-  const bells = useAnimatedProps(() => shake(progress.value, 2.5, 2));
+  // Less than the web twin's lift of 2.5 and sway of 2, which take the bells past the canvas, which react-native-svg
+  // clips.
+  const bells = useAnimatedProps(() => shake(progress.value, 2, 1));
 
   return (
     <Svg

@@ -28,8 +28,9 @@ function CookingPotIcon({
     const scale = 1 + 0.08 * progress.value;
     return transformProps({ scaleX: scale, scaleY: scale, originY: 16 });
   });
+  // 10 degrees, less than the web twin's 14, which takes the handle past the canvas, which react-native-svg clips.
   const lid = useAnimatedProps(() =>
-    transformProps({ rotate: interpolate(progress.value, [0, 0.5, 1], [0, -14, 14]), originX: 18, originY: 6 }),
+    transformProps({ rotate: interpolate(progress.value, [0, 0.5, 1], [0, -10, 10]), originX: 18, originY: 6 }),
   );
 
   return (

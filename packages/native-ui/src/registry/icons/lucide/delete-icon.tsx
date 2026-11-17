@@ -11,8 +11,11 @@ type DeleteIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-/** How far the key slides left, in the 24-unit viewBox. */
-const SLIDE = -1.5;
+/**
+ * How far the key slides left, in the 24-unit viewBox: less than the web twin's 1.5, which takes its tip past the
+ * canvas, which react-native-svg clips.
+ */
+const SLIDE = -1;
 
 /**
  * Lucide's delete icon, which slides left as a backspace does while its cross turns a quarter turn, and back when

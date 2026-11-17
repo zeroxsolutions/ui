@@ -18,17 +18,20 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedG = Animated.createAnimatedComponent(G);
 const AnimatedLine = Animated.createAnimatedComponent(Line);
 
-/** Each speed line: where it is drawn, and the middle it stretches about. */
+/**
+ * Each speed line: where it is drawn, from the canvas's left edge. The web twin starts them past that edge and slides
+ * them 16 further left, past the canvas, which react-native-svg clips.
+ */
 const LINES = [
-  { x1: 0, x2: 5, y: 8 },
-  { x1: -1, x2: 6, y: 11 },
-  { x1: 0, x2: 4, y: 14 },
+  { x1: 1, x2: 5, y: 8 },
+  { x1: 1, x2: 6, y: 11 },
+  { x1: 1, x2: 4, y: 14 },
 ];
 
 /**
- * The speed line at `index` streaking out behind the ambulance, each a tenth of the motion after the last: it
- * fades in, stretches and slides left, then fades out. Hidden at rest, and untransformed there, since
- * react-native-svg drops a shape's matrix from its first render.
+ * The speed line at `index` flicking out behind the ambulance, each a tenth of the motion after the last: it fades in,
+ * stretches out from the canvas's left edge and shrinks back, then fades out. Hidden at rest, and untransformed there,
+ * since react-native-svg drops a shape's matrix from its first render.
  */
 function streak(progress: number, index: number): IconTransformProps & { opacity: number } {
   'worklet';
@@ -38,16 +41,15 @@ function streak(progress: number, index: number): IconTransformProps & { opacity
   return {
     opacity: interpolate(run, [0, 0.2, 0.6, 1], [0, 0.7, 0.5, 0]),
     ...transformProps({
-      x: interpolate(run, [0, 0.2, 0.6, 1], [0, -4, -10, -16]),
       scaleX: interpolate(run, [0, 0.2, 0.6, 1], [0.2, 1, 0.8, 0.3]),
-      originX: (line.x1 + line.x2) / 2,
+      originX: line.x1,
       originY: line.y,
     }),
   };
 }
 
 /**
- * Lucide's ambulance icon, which bounces while its wheels turn, its cross dims and speed lines streak out behind it,
+ * Lucide's ambulance icon, which bounces while its wheels turn, its cross dims and speed lines flick out behind it,
  * when started. The speed lines are hidden at rest. Hidden from a screen reader: the control around it says what it
  * does.
  */
@@ -83,9 +85,9 @@ function AmbulanceIcon({
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      <AnimatedLine x1="0" x2="5" y1="8" y2="8" opacity={0} animatedProps={first} />
-      <AnimatedLine x1="-1" x2="6" y1="11" y2="11" opacity={0} animatedProps={second} />
-      <AnimatedLine x1="0" x2="4" y1="14" y2="14" opacity={0} animatedProps={third} />
+      <AnimatedLine x1="1" x2="5" y1="8" y2="8" opacity={0} animatedProps={first} />
+      <AnimatedLine x1="1" x2="6" y1="11" y2="11" opacity={0} animatedProps={second} />
+      <AnimatedLine x1="1" x2="4" y1="14" y2="14" opacity={0} animatedProps={third} />
       <AnimatedG animatedProps={body}>
         <Path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
         <Path d="M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.684-.948l-1.923-.641a1 1 0 0 1-.578-.502l-1.539-3.076A1 1 0 0 0 16.382 8H14" />

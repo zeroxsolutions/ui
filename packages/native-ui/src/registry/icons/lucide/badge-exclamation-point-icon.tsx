@@ -24,8 +24,9 @@ function BadgeExclamationPointIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // A swell of 0.09, less than the web twin's 0.1, which takes the badge past the canvas, which react-native-svg clips.
   const badge = useAnimatedProps(() => {
-    const scale = 1 + 0.1 * progress.value;
+    const scale = 1 + 0.09 * progress.value;
     return transformProps({
       scaleX: scale,
       scaleY: scale,

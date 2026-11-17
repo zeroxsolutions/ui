@@ -19,10 +19,10 @@ interface FolderHeartIconProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const HEART_VARIANTS: Variants = {
-  normal: { scale: 1, opacity: 0.9 },
+  normal: { scale: 1, opacity: 1 },
   animate: {
     scale: [1, 1.12, 1.04, 1.12, 1],
-    opacity: [0.9, 1, 0.85, 1, 0.9],
+    opacity: [1, 1, 0.85, 1, 1],
     transition: {
       duration: 0.8,
       ease: 'easeInOut',

@@ -1,7 +1,7 @@
 // Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
 
 import type { ReactNode } from 'react';
-import Animated, { useAnimatedProps } from 'react-native-reanimated';
+import Animated, { interpolate, useAnimatedProps } from 'react-native-reanimated';
 import Svg, { G, Path } from 'react-native-svg';
 import { transformProps, useIconMotion, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
 
@@ -9,6 +9,12 @@ import { transformProps, useIconMotion, type AnimatedIconProps, type IconHandle 
 type FolderSyncIconHandle = IconHandle;
 
 const AnimatedG = Animated.createAnimatedComponent(G);
+
+/**
+ * How much the arrows shrink through the turn, as a fraction of their size: the web twin keeps them whole, and turned
+ * whole they would sweep past the canvas, which react-native-svg clips.
+ */
+const SHRINK = 0.25;
 
 /**
  * Lucide's folder-sync icon, whose arrows turn a full turn backwards about their middle and unwind when started. Hidden
@@ -24,7 +30,10 @@ function FolderSyncIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  const arrows = useAnimatedProps(() => transformProps({ rotate: -360 * progress.value, originX: 17, originY: 16 }));
+  const arrows = useAnimatedProps(() => {
+    const scale = 1 - SHRINK * interpolate(progress.value, [0, 0.1, 0.9, 1], [0, 1, 1, 0]);
+    return transformProps({ rotate: -360 * progress.value, originX: 17, originY: 16, scaleX: scale, scaleY: scale });
+  });
 
   return (
     <Svg

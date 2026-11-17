@@ -24,12 +24,14 @@ function BicepsFlexedIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // 5 degrees and a swell of 0.04, less than the web twin's 15 and 0.3, which take the arm past the canvas, which
+  // react-native-svg clips.
   const arm = useAnimatedProps(() => {
-    const scale = 1 + 0.3 * progress.value;
-    return transformProps({ rotate: 15 * progress.value, scaleX: scale, scaleY: scale });
+    const scale = 1 + 0.04 * progress.value;
+    return transformProps({ rotate: 5 * progress.value, scaleX: scale, scaleY: scale });
   });
-  const muscle = useAnimatedProps(() => transformProps({ rotate: 15 * progress.value, originX: 11.21, originY: 14.5 }));
-  const crease = useAnimatedProps(() => transformProps({ rotate: 15 * progress.value, originX: 8.98, originY: 10.91 }));
+  const muscle = useAnimatedProps(() => transformProps({ rotate: 5 * progress.value, originX: 11.21, originY: 14.5 }));
+  const crease = useAnimatedProps(() => transformProps({ rotate: 5 * progress.value, originX: 8.98, originY: 10.91 }));
 
   return (
     <Svg

@@ -24,7 +24,8 @@ function FolderOutputIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  const arrow = useAnimatedProps(() => transformProps({ x: -2 * progress.value }));
+  // Less than the web twin's 2, which takes the tip past the canvas, which react-native-svg clips.
+  const arrow = useAnimatedProps(() => transformProps({ x: -1 * progress.value }));
 
   return (
     <Svg

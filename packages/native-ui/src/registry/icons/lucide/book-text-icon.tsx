@@ -24,12 +24,13 @@ function BookTextIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // 4.5 degrees, less than the web twin's 8, which takes a corner past the canvas, which react-native-svg clips.
   const book = useAnimatedProps(() => {
     const scale = 1 + 0.04 * progress.value;
     return transformProps({
       scaleX: scale,
       scaleY: scale,
-      rotate: interpolate(progress.value, [0, 0.4, 1], [0, -8, 8]),
+      rotate: interpolate(progress.value, [0, 0.4, 1], [0, -4.5, 4.5]),
     });
   });
 

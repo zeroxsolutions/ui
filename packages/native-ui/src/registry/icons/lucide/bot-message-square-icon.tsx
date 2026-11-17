@@ -40,10 +40,11 @@ function BotMessageSquareIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // A bob of 0.4, less than the web twin's 1.5, which takes the antenna past the canvas, which react-native-svg clips.
   const bot = useAnimatedProps(() => {
     const scale = 1 + 0.03 * progress.value;
     return transformProps({
-      y: interpolate(progress.value, [0, 0.5, 1], [0, 1, -1]),
+      y: interpolate(progress.value, [0, 0.5, 1], [0, 0.4, -0.4]),
       scaleX: scale,
       scaleY: scale,
       rotate: interpolate(progress.value, [0, 0.5, 1], [0, -3, 3]),

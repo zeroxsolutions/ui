@@ -24,10 +24,12 @@ function ChessKnightIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // A hop of 0.6 and a tip of 6 degrees, less than the web twin's 12 and 42, which take the ears past the canvas, which
+  // react-native-svg clips.
   const knight = useAnimatedProps(() =>
     transformProps({
-      y: -1.5 * Math.sin(Math.PI * progress.value),
-      rotate: 15 * progress.value,
+      y: -0.6 * Math.sin(Math.PI * progress.value),
+      rotate: 6 * progress.value,
       originY: 22,
     }),
   );

@@ -156,7 +156,9 @@ describe('animated icons', () => {
    * Every icon is drawn and started at once, then read every 40 ms for 1.5 s: an element that moves
    * only after a delay, as file-text's last line does at 0.7 s, is still caught, where one read at a
    * fixed time would miss it. An element counts as moved when any attribute, style included, differs
-   * from what it read at rest.
+   * from what it read at rest. At rest, read after the icons are stopped, each element of the icon's
+   * Lucide 1.72.0 glyph must be drawn whole by some element of the icon; an element that matches none,
+   * such as a decoration hidden at rest or a part drawn as a reversed path, is not checked.
    */
   describe('the walk', () => {
     const SAMPLE_MS = 40;
@@ -165,9 +167,11 @@ describe('animated icons', () => {
     // Every icon is drawn and read on each sample, so the walk's time grows with the set and its limit grows with it.
     const WALK_TIMEOUT_MS = 10_000 + cases.length * 500;
     const unmoved = new Map<string, string[]>();
+    const unwhole = new Map<string, string[]>();
     let stillIcons: string[] = [];
 
     beforeAll(async () => {
+      const glyphs = await Promise.all(cases.map(({ name }) => lucideNode(name.slice(0, -'-icon'.length))));
       motionState.real = true;
       motionState.reduced = false;
       const handles = cases.map(() => createRef<Handle>());
@@ -184,6 +188,19 @@ describe('animated icons', () => {
       // a start; read before it, a start that only writes rest values would count as a move.
       for (const handle of handles) handle.current?.stopAnimation();
       await wait(REST_MS);
+      cases.forEach(({ name }, index) => {
+        const svg = container.querySelector(`[data-icon="${name}"] svg`)!;
+        const drawn = [...svg.querySelectorAll('*')];
+        unwhole.set(
+          name,
+          glyphs[index]
+            .filter(([tag, attributes]) => drawn.some((element) => draws(element, tag, attributes)))
+            .filter(
+              ([tag, attributes]) => !drawn.some((element) => draws(element, tag, attributes) && isWhole(element, svg)),
+            )
+            .map(([tag, attributes]) => `${tag} ${JSON.stringify(attributes)}`),
+        );
+      });
       const walked = cases.map(({ name }) => {
         const elements = [...container.querySelectorAll(`[data-icon="${name}"] [data-walk]`)];
         return { name, elements, rest: elements.map(attributesOf), moved: elements.map(() => false) };
@@ -215,11 +232,47 @@ describe('animated icons', () => {
     it.each(cases)('$name moves every animated element', ({ name }) => {
       expect(unmoved.get(name)).toEqual([]);
     });
+
+    it.each(cases)('$name draws its whole Lucide glyph at rest', ({ name }) => {
+      expect(unwhole.get(name)).toEqual([]);
+    });
   });
 });
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** One element of a Lucide glyph: its tag and the attributes that place it. */
+type GlyphElement = [tag: string, attributes: Record<string, string>];
+
+/** The elements of the Lucide 1.72.0 glyph named `glyph`, as lucide-react draws them. */
+async function lucideNode(glyph: string): Promise<GlyphElement[]> {
+  const icon = (await import(`lucide-react/icons/${glyph}`)) as { __iconData: { node: GlyphElement[] } };
+  return icon.__iconData.node.map(([tag, { key: _key, ...attributes }]) => [tag, attributes]);
+}
+
+/** Whether `element` is the glyph element `tag` placed by `attributes`. */
+function draws(element: Element, tag: string, attributes: Record<string, string>): boolean {
+  return (
+    element.tagName.toLowerCase() === tag &&
+    Object.entries(attributes).every(([attribute, value]) => element.getAttribute(attribute) === value)
+  );
+}
+
+/**
+ * Whether `element` is drawn whole inside `svg`: at full opacity, its own and every group's around it, and with
+ * all of its length drawn. Motion writes a pathLength as `stroke-dasharray` over a `pathLength` of 1, its first
+ * value the share drawn, and a pathOffset as `stroke-dashoffset`.
+ */
+function isWhole(element: Element, svg: Element): boolean {
+  for (let node: Element | null = element; node !== null && node !== svg.parentElement; node = node.parentElement) {
+    const opacity = (node as SVGElement).style?.opacity || node.getAttribute('opacity');
+    if (opacity !== null && opacity !== '' && Number(opacity) < 1) return false;
+  }
+  const drawn = element.getAttribute('stroke-dasharray');
+  const offset = element.getAttribute('stroke-dashoffset');
+  return (drawn === null || Number.parseFloat(drawn) >= 1) && (offset === null || Number.parseFloat(offset) === 0);
 }
 
 /** An element's attributes, style included, as one comparable string. */

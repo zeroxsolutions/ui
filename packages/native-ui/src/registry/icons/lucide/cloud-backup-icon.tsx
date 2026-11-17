@@ -1,7 +1,7 @@
 // Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
 
 import type { ReactNode } from 'react';
-import Animated, { useAnimatedProps } from 'react-native-reanimated';
+import Animated, { interpolate, useAnimatedProps } from 'react-native-reanimated';
 import Svg, { G, Path } from 'react-native-svg';
 import { transformProps, useIconMotion, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
 
@@ -9,6 +9,12 @@ import { transformProps, useIconMotion, type AnimatedIconProps, type IconHandle 
 type CloudBackupIconHandle = IconHandle;
 
 const AnimatedG = Animated.createAnimatedComponent(G);
+
+/**
+ * How much the arrow shrinks through the turn, as a fraction of its size: the web twin keeps it whole, and turned
+ * whole it would sweep past the canvas, which react-native-svg clips.
+ */
+const SHRINK = 0.1;
 
 /**
  * Lucide's cloud-backup icon, whose arrow turns a full turn backwards about its middle and unwinds when started. Hidden
@@ -24,7 +30,10 @@ function CloudBackupIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  const arrow = useAnimatedProps(() => transformProps({ rotate: -360 * progress.value, originY: 16 }));
+  const arrow = useAnimatedProps(() => {
+    const scale = 1 - SHRINK * interpolate(progress.value, [0, 0.1, 0.9, 1], [0, 1, 1, 0]);
+    return transformProps({ rotate: -360 * progress.value, originY: 16, scaleX: scale, scaleY: scale });
+  });
 
   return (
     <Svg

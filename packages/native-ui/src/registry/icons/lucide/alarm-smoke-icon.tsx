@@ -16,8 +16,11 @@ type AlarmSmokeIconHandle = IconHandle;
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 
-/** How far below its place the smoke rises from, in the 24-unit viewBox. */
-const RISE = 6;
+/**
+ * How far the smoke sinks as it fades, in the 24-unit viewBox: less than the web twin's 6, which takes it past the
+ * canvas, which react-native-svg clips.
+ */
+const RISE = 2;
 
 /** The way out is quick, so the way back is what brings the smoke up. */
 const TIMING: IconTiming = { outEasing: Easing.out(Easing.exp) };

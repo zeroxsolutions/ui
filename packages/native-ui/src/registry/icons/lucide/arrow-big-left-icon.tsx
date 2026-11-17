@@ -33,7 +33,8 @@ function ArrowBigLeftIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref, TIMING);
-  const arrow = useAnimatedProps(() => transformProps({ x: -3 * progress.value }));
+  // Less than the web twin's 3, which takes the tip past the canvas, which react-native-svg clips.
+  const arrow = useAnimatedProps(() => transformProps({ x: -2.5 * progress.value }));
 
   return (
     <Svg

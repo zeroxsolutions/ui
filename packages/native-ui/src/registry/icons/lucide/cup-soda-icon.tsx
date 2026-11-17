@@ -51,9 +51,11 @@ function CupSodaIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // A lift of 0.6, less than the web twin's 0.85, which takes the straw's top past the canvas, which react-native-svg
+  // clips.
   const straw = useAnimatedProps(() =>
     transformProps({
-      y: interpolate(progress.value, [0, 0.5, 1], [0, -0.85, 0.15]),
+      y: interpolate(progress.value, [0, 0.5, 1], [0, -0.6, 0.15]),
       scaleY: interpolate(progress.value, [0, 0.5, 1], [1, 1.06, 0.99]),
       originX: 13.5,
       originY: 8,

@@ -28,10 +28,11 @@ function BookmarkMinusIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // A stretch of 1.2, less than the web twin's 1.3, which takes the top past the canvas, which react-native-svg clips.
   const ribbon = useAnimatedProps(() =>
     transformProps({
       scaleX: interpolate(progress.value, [0, 0.5, 1], [1, 0.9, 1.1]),
-      scaleY: interpolate(progress.value, [0, 0.5, 1], [1, 1.3, 0.9]),
+      scaleY: interpolate(progress.value, [0, 0.5, 1], [1, 1.2, 0.9]),
     }),
   );
   const minus = useAnimatedProps(() => dash(MINUS, interpolate(progress.value, [0.5, 1], [1, 0], Extrapolation.CLAMP)));

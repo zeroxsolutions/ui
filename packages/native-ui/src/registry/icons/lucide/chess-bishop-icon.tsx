@@ -24,9 +24,11 @@ function ChessBishopIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // A rise of 0.8 and a tip of 8 degrees, less than the web twin's 6 and 16, which take the top past the canvas, which
+  // react-native-svg clips.
   const bishop = useAnimatedProps(() => ({
     opacity: interpolate(progress.value, [0.3, 0.8], [1, 0], Extrapolation.CLAMP),
-    ...transformProps({ x: -3 * progress.value, y: -3 * progress.value, rotate: -16 * progress.value }),
+    ...transformProps({ x: -2 * progress.value, y: -0.8 * progress.value, rotate: -8 * progress.value }),
   }));
 
   return (

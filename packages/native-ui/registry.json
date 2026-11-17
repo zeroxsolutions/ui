@@ -1264,7 +1264,7 @@
       "name": "lucide-car-icon",
       "type": "registry:ui",
       "title": "Car Icon",
-      "description": "An animated car icon, adapted from lucide-animated, which bounces twice while its wheels squash and speed lines streak out behind it, when a control starts it, hidden from screen readers and still under reduced motion.",
+      "description": "An animated car icon, adapted from lucide-animated, which bounces twice while its wheels squash and speed lines flick out behind it, when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [

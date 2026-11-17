@@ -19,9 +19,9 @@ interface FolderRootIconProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const ROOT_VARIANTS: Variants = {
-  normal: { opacity: 0.6 },
+  normal: { opacity: 1 },
   animate: {
-    opacity: [0.6, 1, 0.3, 0.6],
+    opacity: [1, 0.3, 1],
     transition: {
       duration: 0.8,
       ease: 'easeInOut',

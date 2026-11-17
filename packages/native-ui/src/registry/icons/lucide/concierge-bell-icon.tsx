@@ -10,8 +10,11 @@ type ConciergeBellIconHandle = IconHandle;
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 
-/** How far the sound waves spread at most: less than the web twin's 1.3, which would take the left one past the canvas. */
-const SPREAD = 1.1;
+/**
+ * How far the sound waves spread at most: less than the web twin's 1.3, which takes the left one past the canvas, which
+ * react-native-svg clips.
+ */
+const SPREAD = 1.08;
 
 /**
  * Lucide's concierge-bell icon, whose button is pressed, so the bell rocks and its sound waves spread out and fade when

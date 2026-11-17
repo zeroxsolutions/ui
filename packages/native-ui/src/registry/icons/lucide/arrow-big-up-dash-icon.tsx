@@ -34,7 +34,8 @@ function ArrowBigUpDashIcon({
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref, TIMING);
   const stroke = useAnimatedProps(() => transformProps({ y: -1 * progress.value }));
-  const arrow = useAnimatedProps(() => transformProps({ y: -3 * progress.value }));
+  // Less than the web twin's 3, which takes the tip past the canvas, which react-native-svg clips.
+  const arrow = useAnimatedProps(() => transformProps({ y: -2.4 * progress.value }));
 
   return (
     <Svg

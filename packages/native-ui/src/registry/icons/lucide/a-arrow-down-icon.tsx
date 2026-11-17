@@ -18,8 +18,11 @@ type AArrowDownIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-/** How far above its place the arrow comes in from, in the 24-unit viewBox. */
-const SHIFT = -10;
+/**
+ * How far above its place the arrow comes in from, in the 24-unit viewBox: less than the web twin's 10, which starts it
+ * past the canvas, which react-native-svg clips.
+ */
+const SHIFT = -5;
 
 /** A stroke of the letter `drawn` of the way back in, scaled about its own middle at (6.5, `originY`). */
 function letterIn(drawn: number, originY: number): IconTransformProps & { opacity: number } {

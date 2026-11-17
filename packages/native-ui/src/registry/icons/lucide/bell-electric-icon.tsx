@@ -56,9 +56,11 @@ function BellElectricIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  const bell = useAnimatedProps(() => rattle(progress.value, 12, 1.5, 1, 12, 12));
+  // Less than the web twin's 12 degrees and 1.5 and 1 across, which with the clapper's 1.6 and 1.2 take the bell past
+  // the canvas, which react-native-svg clips.
+  const bell = useAnimatedProps(() => rattle(progress.value, 8, 0.5, 0.5, 12, 12));
   const arc = useAnimatedProps(() => rattle(progress.value, 6, 0.8, 0.5, 19.4, 6.5));
-  const clapper = useAnimatedProps(() => rattle(progress.value, 10, 1.6, 1.2, 9, 9, 0.08, 0.05));
+  const clapper = useAnimatedProps(() => rattle(progress.value, 10, 0.6, 0.6, 9, 9, 0.08, 0.05));
 
   return (
     <Svg
