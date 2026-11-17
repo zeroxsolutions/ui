@@ -63,16 +63,22 @@ const ArrowDownLeftIcon = forwardRef<ArrowDownLeftIconHandle, ArrowDownLeftIconP
 
     const handleMouseEnter = useCallback(
       (e: React.MouseEvent<HTMLSpanElement>) => {
-        if (!isControlledRef.current && !isMotionReduced) controls.start('animate');
-        onMouseEnter?.(e);
+        if (isControlledRef.current) {
+          onMouseEnter?.(e);
+        } else if (!isMotionReduced) {
+          controls.start('animate');
+        }
       },
       [controls, isMotionReduced, onMouseEnter],
     );
 
     const handleMouseLeave = useCallback(
       (e: React.MouseEvent<HTMLSpanElement>) => {
-        if (!isControlledRef.current) controls.start('normal');
-        onMouseLeave?.(e);
+        if (isControlledRef.current) {
+          onMouseLeave?.(e);
+        } else {
+          controls.start('normal');
+        }
       },
       [controls, onMouseLeave],
     );

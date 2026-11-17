@@ -79,16 +79,22 @@ const GripHorizontalIcon = forwardRef<GripHorizontalIconHandle, GripHorizontalIc
 
     const handleMouseEnter = useCallback(
       (e: React.MouseEvent<HTMLSpanElement>) => {
-        if (!isControlledRef.current) startAnimation();
-        onMouseEnter?.(e);
+        if (isControlledRef.current) {
+          onMouseEnter?.(e);
+        } else {
+          startAnimation();
+        }
       },
       [startAnimation, onMouseEnter],
     );
 
     const handleMouseLeave = useCallback(
       (e: React.MouseEvent<HTMLSpanElement>) => {
-        if (!isControlledRef.current) stopAnimation();
-        onMouseLeave?.(e);
+        if (isControlledRef.current) {
+          onMouseLeave?.(e);
+        } else {
+          stopAnimation();
+        }
       },
       [stopAnimation, onMouseLeave],
     );

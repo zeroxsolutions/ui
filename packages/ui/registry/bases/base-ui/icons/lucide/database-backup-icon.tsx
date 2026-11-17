@@ -81,7 +81,7 @@ const DatabaseBackupIcon = forwardRef<DatabaseBackupIconHandle, DatabaseBackupIc
 
           <motion.g
             animate={controls}
-            style={{ transformOrigin: '17.5px 17px' }}
+            style={{ transformBox: 'view-box', originX: '17.5px', originY: '17px' }}
             transition={{ duration: 0.6, ease: 'easeInOut' }}
             variants={{
               normal: { rotate: 0 },

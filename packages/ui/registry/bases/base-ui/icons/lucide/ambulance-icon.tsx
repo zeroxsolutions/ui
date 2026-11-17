@@ -172,7 +172,7 @@ const AmbulanceIcon = forwardRef<AmbulanceIconHandle, AmbulanceIconProps>(
               cy="18"
               initial="normal"
               r="2"
-              style={{ transformOrigin: '7px 18px' }}
+              style={{ transformBox: 'view-box', originX: '7px', originY: '18px' }}
               variants={WHEEL_VARIANTS}
             />
           </motion.g>
@@ -184,7 +184,7 @@ const AmbulanceIcon = forwardRef<AmbulanceIconHandle, AmbulanceIconProps>(
               cy="18"
               initial="normal"
               r="2"
-              style={{ transformOrigin: '17px 18px' }}
+              style={{ transformBox: 'view-box', originX: '17px', originY: '18px' }}
               variants={WHEEL_VARIANTS}
             />
           </motion.g>

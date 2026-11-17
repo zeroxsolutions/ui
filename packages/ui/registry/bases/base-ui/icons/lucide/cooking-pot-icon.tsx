@@ -100,13 +100,18 @@ const CookingPotIcon = forwardRef<CookingPotIconHandle, CookingPotIconProps>(
           <motion.g
             animate={controls}
             initial="normal"
-            style={{ transformOrigin: '12px 16px' }}
+            style={{ transformBox: 'view-box', originX: '12px', originY: '16px' }}
             variants={POT_VARIANTS}
           >
             <path d="M2 12h20" />
             <path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8" />
           </motion.g>
-          <motion.g animate={controls} initial="normal" style={{ transformOrigin: '18px 6px' }} variants={LID_VARIANTS}>
+          <motion.g
+            animate={controls}
+            initial="normal"
+            style={{ transformBox: 'view-box', originX: '18px', originY: '6px' }}
+            variants={LID_VARIANTS}
+          >
             <path d="m4 8 16-4" />
             <path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8" />
           </motion.g>

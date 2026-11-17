@@ -99,7 +99,7 @@ const ChessBishopIcon = forwardRef<ChessBishopIconHandle, ChessBishopIconProps>(
           <motion.g
             animate={controls}
             initial="normal"
-            style={{ transformBox: 'view-box', transformOrigin: '12px 12px' }}
+            style={{ transformBox: 'view-box', originX: '12px', originY: '12px' }}
             variants={BISHOP_VARIANTS}
           >
             <path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z" />

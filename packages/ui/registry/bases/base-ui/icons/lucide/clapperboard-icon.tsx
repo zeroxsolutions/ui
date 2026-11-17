@@ -21,8 +21,6 @@ interface ClapperboardIconProps extends HTMLAttributes<HTMLSpanElement> {
 const VARIANTS: Variants = {
   normal: {
     rotate: 0,
-    originX: '4px',
-    originY: '20px',
   },
   animate: {
     rotate: [-10, -10, 0],
@@ -37,8 +35,6 @@ const VARIANTS: Variants = {
 const CLAP_VARIANTS: Variants = {
   normal: {
     rotate: 0,
-    originX: '3px',
-    originY: '11px',
   },
   animate: {
     rotate: [0, -10, 16, 0],
@@ -108,8 +104,16 @@ const ClapperboardIcon = forwardRef<ClapperboardIconHandle, ClapperboardIconProp
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.g animate={controls} variants={VARIANTS}>
-            <motion.g animate={controls} variants={CLAP_VARIANTS}>
+          <motion.g
+            animate={controls}
+            style={{ transformBox: 'view-box', originX: '4px', originY: '20px' }}
+            variants={VARIANTS}
+          >
+            <motion.g
+              animate={controls}
+              style={{ transformBox: 'view-box', originX: '3px', originY: '11px' }}
+              variants={CLAP_VARIANTS}
+            >
               <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z" />
               <path d="m6.18 5.276 3.1 3.899" />
               <path d="m12.296 3.464 3.02 3.956" />

@@ -127,7 +127,7 @@ const ChessPawnIcon = forwardRef<ChessPawnIconHandle, ChessPawnIconProps>(
           <motion.g
             animate={bodyControls}
             initial="normal"
-            style={{ transformBox: 'view-box', transformOrigin: '12px 21px' }}
+            style={{ transformBox: 'view-box', originX: '12px', originY: '21px' }}
             variants={BODY_VARIANTS}
           >
             <path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z" />

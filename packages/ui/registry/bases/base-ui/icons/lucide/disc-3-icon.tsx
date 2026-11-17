@@ -79,7 +79,7 @@ const Disc3Icon = forwardRef<Disc3IconHandle, Disc3IconProps>(
 
           <motion.g
             animate={controls}
-            style={{ transformOrigin: '12px 12px' }}
+            style={{ transformBox: 'view-box', originX: '12px', originY: '12px' }}
             transition={{ duration: 0.4, ease: 'easeInOut' }}
             variants={{
               normal: { rotate: 0 },

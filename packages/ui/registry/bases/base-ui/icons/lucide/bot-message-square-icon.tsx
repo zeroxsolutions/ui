@@ -35,16 +35,22 @@ const BotMessageSquareIcon = forwardRef<BotMessageSquareIconHandle, BotMessageSq
 
     const handleMouseEnter = useCallback(
       (e: React.MouseEvent<HTMLSpanElement>) => {
-        if (isControlledRef.current) onMouseEnter?.(e);
-        else if (!isMotionReduced) controls.start('animate');
+        if (isControlledRef.current) {
+          onMouseEnter?.(e);
+        } else if (!isMotionReduced) {
+          controls.start('animate');
+        }
       },
       [controls, isMotionReduced, onMouseEnter],
     );
 
     const handleMouseLeave = useCallback(
       (e: React.MouseEvent<HTMLSpanElement>) => {
-        if (isControlledRef.current) onMouseLeave?.(e);
-        else controls.start('normal');
+        if (isControlledRef.current) {
+          onMouseLeave?.(e);
+        } else {
+          controls.start('normal');
+        }
       },
       [controls, onMouseLeave],
     );

@@ -3,8 +3,8 @@
 // Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
 
 import { motion, useAnimation, useReducedMotion, type Variants } from 'motion/react';
-import type { HTMLAttributes, MouseEvent } from 'react';
-import { forwardRef, useCallback, useImperativeHandle } from 'react';
+import type { HTMLAttributes } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
@@ -42,39 +42,39 @@ const ChessKnightIcon = forwardRef<ChessKnightIconHandle, ChessKnightIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
     const isMotionReduced = useReducedMotion();
-    const isControlled = !!ref;
+    const isControlledRef = useRef(false);
 
-    useImperativeHandle(
-      ref,
-      () => ({
+    useImperativeHandle(ref, () => {
+      isControlledRef.current = true;
+
+      return {
         startAnimation: () => {
           if (!isMotionReduced) controls.start('animate');
         },
         stopAnimation: () => controls.start('normal'),
-      }),
-      [controls],
-    );
+      };
+    });
 
     const handleMouseEnter = useCallback(
-      (e: MouseEvent<HTMLSpanElement>) => {
-        if (isControlled) {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
+        if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else if (!isMotionReduced) {
           controls.start('animate');
         }
       },
-      [controls, isControlled, isMotionReduced, onMouseEnter],
+      [controls, isMotionReduced, onMouseEnter],
     );
 
     const handleMouseLeave = useCallback(
-      (e: MouseEvent<HTMLSpanElement>) => {
-        if (isControlled) {
+      (e: React.MouseEvent<HTMLSpanElement>) => {
+        if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
           controls.start('normal');
         }
       },
-      [controls, isControlled, onMouseLeave],
+      [controls, onMouseLeave],
     );
 
     return (
@@ -100,7 +100,7 @@ const ChessKnightIcon = forwardRef<ChessKnightIconHandle, ChessKnightIconProps>(
           <motion.g
             animate={controls}
             initial="normal"
-            style={{ transformBox: 'view-box', transformOrigin: '12px 22px' }}
+            style={{ transformBox: 'view-box', originX: '12px', originY: '22px' }}
             variants={KNIGHT_VARIANTS}
           >
             <path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z" />

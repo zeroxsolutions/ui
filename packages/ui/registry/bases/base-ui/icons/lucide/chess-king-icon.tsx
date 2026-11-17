@@ -100,7 +100,7 @@ const ChessKingIcon = forwardRef<ChessKingIconHandle, ChessKingIconProps>(
           <motion.g
             animate={controls}
             initial="normal"
-            style={{ transformBox: 'view-box', transformOrigin: '12px 22px' }}
+            style={{ transformBox: 'view-box', originX: '12px', originY: '22px' }}
             variants={KING_VARIANTS}
           >
             <path d="M4 20a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" />

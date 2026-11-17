@@ -97,7 +97,7 @@ const LoaderCircleIcon = forwardRef<LoaderCircleIconHandle, LoaderCircleIconProp
           <motion.path
             animate={controls}
             d="M21 12a9 9 0 1 1-6.219-8.56"
-            style={{ transformOrigin: '12px 12px' }}
+            style={{ transformBox: 'view-box', originX: '12px', originY: '12px' }}
             transition={DEFAULT_TRANSITION}
             variants={G_VARIANTS}
           />

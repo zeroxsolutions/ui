@@ -92,7 +92,7 @@ const FolderKeyIcon = forwardRef<FolderKeyIconHandle, FolderKeyIconProps>(
           <motion.g
             animate={controls}
             initial="normal"
-            style={{ transformOrigin: '19px 18px' }}
+            style={{ transformBox: 'view-box', originX: '19px', originY: '18px' }}
             variants={KEY_VARIANTS}
           >
             <path d="M19 12v6" />

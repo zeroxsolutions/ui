@@ -92,7 +92,7 @@ const FolderLockIcon = forwardRef<FolderLockIconHandle, FolderLockIconProps>(
           <motion.g
             animate={controls}
             initial="normal"
-            style={{ transformOrigin: '18px 19px' }}
+            style={{ transformBox: 'view-box', originX: '18px', originY: '19px' }}
             variants={LOCK_VARIANTS}
           >
             <rect height="5" rx="1" width="8" x="14" y="17" />

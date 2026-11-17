@@ -155,7 +155,7 @@ const CarIcon = forwardRef<CarIconHandle, CarIconProps>(
           <motion.g
             animate={controls}
             initial="normal"
-            style={{ transformOrigin: '7px 19px' }}
+            style={{ transformBox: 'view-box', originX: '7px', originY: '17px' }}
             variants={WHEEL_VARIANTS}
           >
             <circle cx="7" cy="17" r="2" />
@@ -166,7 +166,7 @@ const CarIcon = forwardRef<CarIconHandle, CarIconProps>(
           <motion.g
             animate={controls}
             initial="normal"
-            style={{ transformOrigin: '17px 19px' }}
+            style={{ transformBox: 'view-box', originX: '17px', originY: '17px' }}
             variants={WHEEL_VARIANTS}
           >
             <circle cx="17" cy="17" r="2" />

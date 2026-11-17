@@ -134,7 +134,7 @@ const ConciergeBellIcon = forwardRef<ConciergeBellIconHandle, ConciergeBellIconP
           <motion.g
             animate={controls}
             initial="normal"
-            style={{ originX: '14px', originY: '18px' }}
+            style={{ transformBox: 'view-box', originX: '14px', originY: '18px' }}
             variants={SOUND_WAVES_VARIANTS}
           >
             <path d="M2 13a7 7 0 0 1 1-3.5" opacity="0.7" strokeWidth="1.5" />
