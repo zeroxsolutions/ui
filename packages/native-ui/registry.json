@@ -2776,6 +2776,51 @@
       ]
     },
     {
+      "name": "lucide-file-cog-icon",
+      "type": "registry:ui",
+      "title": "File Cog Icon",
+      "description": "An animated file cog icon, adapted from lucide-animated, whose cog turns half a turn about its middle and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/file-cog-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/file-cog-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-file-pen-line-icon",
+      "type": "registry:ui",
+      "title": "File Pen Line Icon",
+      "description": "An animated file pen line icon, adapted from lucide-animated, whose pen wobbles while the line it writes grows longer, and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/file-pen-line-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/file-pen-line-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-file-stack-icon",
+      "type": "registry:ui",
+      "title": "File Stack Icon",
+      "description": "An animated file stack icon, adapted from lucide-animated, whose back and front pages slide in toward the middle one and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/file-stack-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/file-stack-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-file-text-icon",
       "type": "registry:ui",
       "title": "File Text Icon",
@@ -2787,6 +2832,36 @@
           "path": "src/registry/icons/lucide/file-text-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/file-text-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-fingerprint-pattern-icon",
+      "type": "registry:ui",
+      "title": "Fingerprint Pattern Icon",
+      "description": "An animated fingerprint pattern icon, adapted from lucide-animated, whose ridges are traced in again over their faint outlines when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/fingerprint-pattern-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/fingerprint-pattern-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-fish-symbol-icon",
+      "type": "registry:ui",
+      "title": "Fish Symbol Icon",
+      "description": "An animated fish symbol icon, adapted from lucide-animated, which is drawn in again from nothing when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/fish-symbol-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/fish-symbol-icon.tsx"
         }
       ]
     },
@@ -2806,6 +2881,381 @@
       ]
     },
     {
+      "name": "lucide-flame-icon",
+      "type": "registry:ui",
+      "title": "Flame Icon",
+      "description": "An animated flame icon, adapted from lucide-animated, which is drawn in again from nothing when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/flame-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/flame-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-archive-icon",
+      "type": "registry:ui",
+      "title": "Folder Archive Icon",
+      "description": "An animated folder archive icon, adapted from lucide-animated, whose zip fades out and in again when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-archive-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-archive-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-check-icon",
+      "type": "registry:ui",
+      "title": "Folder Check Icon",
+      "description": "An animated folder check icon, adapted from lucide-animated, whose tick is drawn in again from nothing when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-check-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-check-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-clock-icon",
+      "type": "registry:ui",
+      "title": "Folder Clock Icon",
+      "description": "An animated folder clock icon, adapted from lucide-animated, whose hour hand turns a full turn and minute hand an eighth of one about their shared end, and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-clock-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-clock-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-code-icon",
+      "type": "registry:ui",
+      "title": "Folder Code Icon",
+      "description": "An animated folder code icon, adapted from lucide-animated, whose brackets lean apart and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-code-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-code-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-cog-icon",
+      "type": "registry:ui",
+      "title": "Folder Cog Icon",
+      "description": "An animated folder cog icon, adapted from lucide-animated, whose cog turns half a turn about its middle and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-cog-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-cog-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-dot-icon",
+      "type": "registry:ui",
+      "title": "Folder Dot Icon",
+      "description": "An animated folder dot icon, adapted from lucide-animated, whose dot fades out and in again when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-dot-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-dot-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-down-icon",
+      "type": "registry:ui",
+      "title": "Folder Down Icon",
+      "description": "An animated folder down icon, adapted from lucide-animated, whose arrow drops and comes back up when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-down-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-git-2-icon",
+      "type": "registry:ui",
+      "title": "Folder Git 2 Icon",
+      "description": "An animated folder git 2 icon, adapted from lucide-animated, whose commit, branch and second commit are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-git-2-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-git-2-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-git-icon",
+      "type": "registry:ui",
+      "title": "Folder Git Icon",
+      "description": "An animated folder git icon, adapted from lucide-animated, whose commit is drawn in again from left to right when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-git-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-git-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-heart-icon",
+      "type": "registry:ui",
+      "title": "Folder Heart Icon",
+      "description": "An animated folder heart icon, adapted from lucide-animated, whose heart beats twice about its middle when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-heart-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-heart-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-input-icon",
+      "type": "registry:ui",
+      "title": "Folder Input Icon",
+      "description": "An animated folder input icon, adapted from lucide-animated, whose arrow pushes in and comes back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-input-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-input-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-kanban-icon",
+      "type": "registry:ui",
+      "title": "Folder Kanban Icon",
+      "description": "An animated folder kanban icon, adapted from lucide-animated, whose columns dim one after another and brighten again when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-kanban-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-kanban-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-key-icon",
+      "type": "registry:ui",
+      "title": "Folder Key Icon",
+      "description": "An animated folder key icon, adapted from lucide-animated, whose key turns in its lock and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-key-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-key-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-lock-icon",
+      "type": "registry:ui",
+      "title": "Folder Lock Icon",
+      "description": "An animated folder lock icon, adapted from lucide-animated, whose lock lifts and rocks, and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-lock-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-lock-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-minus-icon",
+      "type": "registry:ui",
+      "title": "Folder Minus Icon",
+      "description": "An animated folder minus icon, adapted from lucide-animated, whose minus is drawn in again from nothing when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-minus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-minus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-open-icon",
+      "type": "registry:ui",
+      "title": "Folder Open Icon",
+      "description": "An animated folder open icon, adapted from lucide-animated, which rocks about its middle and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-open-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-open-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-output-icon",
+      "type": "registry:ui",
+      "title": "Folder Output Icon",
+      "description": "An animated folder output icon, adapted from lucide-animated, whose arrow pushes out and comes back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-output-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-output-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-plus-icon",
+      "type": "registry:ui",
+      "title": "Folder Plus Icon",
+      "description": "An animated folder plus icon, adapted from lucide-animated, whose plus is drawn in again from nothing, its bar before its stem when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-plus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-plus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-root-icon",
+      "type": "registry:ui",
+      "title": "Folder Root Icon",
+      "description": "An animated folder root icon, adapted from lucide-animated, whose root dims and brightens again when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-root-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-root-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-sync-icon",
+      "type": "registry:ui",
+      "title": "Folder Sync Icon",
+      "description": "An animated folder sync icon, adapted from lucide-animated, whose arrows turn a full turn backwards about their middle and unwind when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-sync-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-sync-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-tree-icon",
+      "type": "registry:ui",
+      "title": "Folder Tree Icon",
+      "description": "An animated folder tree icon, adapted from lucide-animated, whose folders and the branches to them are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-tree-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-tree-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-up-icon",
+      "type": "registry:ui",
+      "title": "Folder Up Icon",
+      "description": "An animated folder up icon, adapted from lucide-animated, whose arrow rises and comes back down when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-up-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-x-icon",
+      "type": "registry:ui",
+      "title": "Folder X Icon",
+      "description": "An animated folder x icon, adapted from lucide-animated, whose cross is drawn in again, one stroke after the other when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folder-x-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-x-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folders-icon",
+      "type": "registry:ui",
+      "title": "Folders Icon",
+      "description": "An animated folders icon, adapted from lucide-animated, whose back folder slides forward while the front one shrinks away behind it, and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/folders-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folders-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-frame-icon",
       "type": "registry:ui",
       "title": "Frame Icon",
@@ -2817,6 +3267,306 @@
           "path": "src/registry/icons/lucide/frame-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/frame-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-gallery-horizontal-end-icon",
+      "type": "registry:ui",
+      "title": "Gallery Horizontal End Icon",
+      "description": "An animated gallery horizontal end icon, adapted from lucide-animated, whose cards behind the front one slide in from behind it, the nearer first when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/gallery-horizontal-end-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/gallery-horizontal-end-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-gallery-thumbnails-icon",
+      "type": "registry:ui",
+      "title": "Gallery Thumbnails Icon",
+      "description": "An animated gallery thumbnails icon, adapted from lucide-animated, whose thumbnails fade in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/gallery-thumbnails-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/gallery-thumbnails-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-gallery-vertical-end-icon",
+      "type": "registry:ui",
+      "title": "Gallery Vertical End Icon",
+      "description": "An animated gallery vertical end icon, adapted from lucide-animated, whose cards behind the front one slide in from behind it, the nearer first when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/gallery-vertical-end-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/gallery-vertical-end-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-gauge-icon",
+      "type": "registry:ui",
+      "title": "Gauge Icon",
+      "description": "An animated gauge icon, adapted from lucide-animated, whose needle swings across the dial and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/gauge-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/gauge-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-gavel-icon",
+      "type": "registry:ui",
+      "title": "Gavel Icon",
+      "description": "An animated gavel icon, adapted from lucide-animated, which lifts back and strikes, and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/gavel-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/gavel-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-georgian-lari-icon",
+      "type": "registry:ui",
+      "title": "Georgian Lari Icon",
+      "description": "An animated georgian lari icon, adapted from lucide-animated, whose curve and base are drawn in again, then its two stems when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/georgian-lari-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/georgian-lari-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-branch-icon",
+      "type": "registry:ui",
+      "title": "Git Branch Icon",
+      "description": "An animated git branch icon, adapted from lucide-animated, whose commits and the branch between them are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-branch-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-branch-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-commit-horizontal-icon",
+      "type": "registry:ui",
+      "title": "Git Commit Horizontal Icon",
+      "description": "An animated git commit horizontal icon, adapted from lucide-animated, whose commit and the lines either side of it are drawn in again from left to right when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-commit-horizontal-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-commit-horizontal-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-commit-vertical-icon",
+      "type": "registry:ui",
+      "title": "Git Commit Vertical Icon",
+      "description": "An animated git commit vertical icon, adapted from lucide-animated, whose commit and the lines either side of it are drawn in again from top to bottom when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-commit-vertical-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-commit-vertical-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-compare-arrows-icon",
+      "type": "registry:ui",
+      "title": "Git Compare Arrows Icon",
+      "description": "An animated git compare arrows icon, adapted from lucide-animated, whose commits and the arrows between them are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-compare-arrows-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-compare-arrows-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-compare-icon",
+      "type": "registry:ui",
+      "title": "Git Compare Icon",
+      "description": "An animated git compare icon, adapted from lucide-animated, whose commits and the lines between them are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-compare-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-compare-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-fork-icon",
+      "type": "registry:ui",
+      "title": "Git Fork Icon",
+      "description": "An animated git fork icon, adapted from lucide-animated, whose commits and the fork between them are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-fork-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-fork-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-graph-icon",
+      "type": "registry:ui",
+      "title": "Git Graph Icon",
+      "description": "An animated git graph icon, adapted from lucide-animated, whose commits and the lines between them are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-graph-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-graph-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-merge-icon",
+      "type": "registry:ui",
+      "title": "Git Merge Icon",
+      "description": "An animated git merge icon, adapted from lucide-animated, whose commits and the merge between them are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-merge-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-merge-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-pull-request-closed-icon",
+      "type": "registry:ui",
+      "title": "Git Pull Request Closed Icon",
+      "description": "An animated git pull request closed icon, adapted from lucide-animated, whose commits, the lines from them and the cross are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-pull-request-closed-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-pull-request-closed-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-pull-request-create-icon",
+      "type": "registry:ui",
+      "title": "Git Pull Request Create Icon",
+      "description": "An animated git pull request create icon, adapted from lucide-animated, whose commit, the lines and the plus are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-pull-request-create-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-pull-request-create-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-pull-request-icon",
+      "type": "registry:ui",
+      "title": "Git Pull Request Icon",
+      "description": "An animated git pull request icon, adapted from lucide-animated, whose commits and the lines from them are drawn in again one after another when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/git-pull-request-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-pull-request-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-graduation-cap-icon",
+      "type": "registry:ui",
+      "title": "Graduation Cap Icon",
+      "description": "An animated graduation cap icon, adapted from lucide-animated, which lifts and tilts while its tassel swings, and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/graduation-cap-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/graduation-cap-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-grip-horizontal-icon",
+      "type": "registry:ui",
+      "title": "Grip Horizontal Icon",
+      "description": "An animated grip horizontal icon, adapted from lucide-animated, whose dots shrink and dim one after another, row by row, and come back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/grip-horizontal-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/grip-horizontal-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-grip-icon",
+      "type": "registry:ui",
+      "title": "Grip Icon",
+      "description": "An animated grip icon, adapted from lucide-animated, whose dots dim one after another and brighten again when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/grip-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/grip-icon.tsx"
         }
       ]
     },
