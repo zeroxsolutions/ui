@@ -162,6 +162,8 @@ describe('animated icons', () => {
     const SAMPLE_MS = 40;
     const WINDOW_MS = 1500;
     const REST_MS = 600;
+    // Every icon is drawn and read on each sample, so the walk's time grows with the set and its limit grows with it.
+    const WALK_TIMEOUT_MS = 10_000 + cases.length * 500;
     const unmoved = new Map<string, string[]>();
     let stillIcons: string[] = [];
 
@@ -204,7 +206,7 @@ describe('animated icons', () => {
       stillIcons = walked.filter((icon) => icon.elements.length === 0).map((icon) => icon.name);
       cleanup();
       motionState.real = false;
-    }, 30_000);
+    }, WALK_TIMEOUT_MS);
 
     it('finds an animated element in every icon', () => {
       expect(stillIcons).toEqual([]);
