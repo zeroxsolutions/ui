@@ -60,14 +60,15 @@ afterEach(() => {
 });
 
 describe('IconGrid', () => {
-  it('heads each set with its name and shows the icons whose name holds the query, the picked one pressed', async () => {
+  it('heads each set with its name and shows the icons whose name holds the query, the picked one current', async () => {
     await renderGrid({ query: 'Arrow Up', picked: 'lucide-arrow-up-icon' });
 
     await expect.element(page.getByRole('heading', { name: 'lucide' })).toBeVisible();
     await expect
       .element(page.getByRole('button', { name: 'arrow-up', exact: true }))
-      .toHaveAttribute('aria-pressed', 'true');
-    await expect.element(page.getByRole('button', { name: 'arrow-up-right' })).toHaveAttribute('aria-pressed', 'false');
+      .toHaveAttribute('aria-current', 'true');
+    await expect.element(page.getByRole('button', { name: 'arrow-up-right' })).not.toHaveAttribute('aria-current');
+    await expect.element(page.getByRole('button', { name: 'arrow-up-right' })).not.toHaveAttribute('aria-pressed');
     await expect.element(page.getByRole('button', { name: 'arrow-down' })).not.toBeInTheDocument();
   });
 

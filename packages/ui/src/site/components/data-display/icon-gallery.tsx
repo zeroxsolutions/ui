@@ -22,7 +22,7 @@ import {
 interface IconGalleryGridProps {
   /** What the reader typed in the search box. */
   query: string;
-  /** The item name of the icon the reader picked, which its tile marks as pressed; `undefined` before a pick. */
+  /** The item name of the icon the reader picked, which its tile marks as current; `undefined` before a pick. */
   picked?: string;
   /** Picks the icon with this item name, which the install panel then shows. */
   onPick: (name: string) => void;

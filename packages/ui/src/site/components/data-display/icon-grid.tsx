@@ -14,7 +14,7 @@ interface IconGridProps {
   sets: IconSet[];
   /** What the reader typed; the grid shows the icons whose glyph holds it. */
   query: string;
-  /** The item name of the icon the reader picked, whose tile is marked pressed. */
+  /** The item name of the icon the reader picked, whose tile is marked current. */
   picked?: string;
   /** Called with the item name of the icon the reader picks. */
   onPick: (name: string) => void;
@@ -47,8 +47,8 @@ function IconGridTile({ name, glyph, picked, onPick }: IconGridTileProps) {
       ref={tile}
       type="button"
       data-slot="icon-grid-tile"
-      aria-pressed={picked}
-      className="hover:bg-muted aria-pressed:bg-muted aria-pressed:border-foreground focus-visible:ring-ring/50 flex w-full flex-col items-center gap-2 rounded-lg border px-2 py-4 outline-none focus-visible:ring-3"
+      aria-current={picked ? 'true' : undefined}
+      className="hover:bg-muted aria-[current=true]:bg-muted aria-[current=true]:border-foreground focus-visible:ring-ring/50 flex w-full flex-col items-center gap-2 rounded-lg border px-2 py-4 outline-none focus-visible:ring-3"
       onClick={() => onPick(name)}
       {...handlers}
     >
