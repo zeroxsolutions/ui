@@ -33,9 +33,9 @@ function typing(progress: number, index: number): { opacity: number } {
 }
 
 /**
- * Lucide's bot-message-square icon, which bobs and rocks while its bubble swells twice, its eyes blink one after the
- * other and typing dots pulse under them, when started. The typing dots are hidden at rest. Hidden from a screen
- * reader: the control around it says what it does.
+ * Lucide's bot-message-square icon, which bobs and rocks, shrinking a little, while its bubble swells twice, its eyes
+ * blink one after the other and typing dots pulse under them, when started. The typing dots are hidden at rest. Hidden
+ * from a screen reader: the control around it says what it does.
  */
 function BotMessageSquareIcon({
   ref,

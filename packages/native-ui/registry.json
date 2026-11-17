@@ -1024,7 +1024,7 @@
       "name": "lucide-book-text-icon",
       "type": "registry:ui",
       "title": "Book Text Icon",
-      "description": "An animated book text icon, adapted from lucide-animated, which swells slightly and rocks to one side and the other about its middle, then settles, when a control starts it, hidden from screen readers and still under reduced motion.",
+      "description": "An animated book text icon, adapted from lucide-animated, which shrinks slightly and rocks to one side and the other about its middle, then settles, when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
@@ -1129,7 +1129,7 @@
       "name": "lucide-bot-message-square-icon",
       "type": "registry:ui",
       "title": "Bot Message Square Icon",
-      "description": "An animated bot message square icon, adapted from lucide-animated, which bobs and rocks while its bubble swells twice, its eyes blink one after the other and typing dots pulse under them, when a control starts it, hidden from screen readers and still under reduced motion.",
+      "description": "An animated bot message square icon, adapted from lucide-animated, which bobs and rocks, shrinking a little, while its bubble swells twice, its eyes blink one after the other and typing dots pulse under them, when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
@@ -3619,7 +3619,7 @@
       "name": "lucide-hand-fist-icon",
       "type": "registry:ui",
       "title": "Hand Fist Icon",
-      "description": "An animated hand fist icon, adapted from lucide-animated, which punches up, growing, and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "description": "An animated hand fist icon, adapted from lucide-animated, which punches up, shrinking a little towards its wrist, and back when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
@@ -4759,7 +4759,7 @@
       "name": "lucide-message-square-icon",
       "type": "registry:ui",
       "title": "Message Square Icon",
-      "description": "An animated message-square icon, adapted from lucide-animated, which swells and wobbles from side to side, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
+      "description": "An animated message-square icon, adapted from lucide-animated, which shrinks a little and wobbles from side to side, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
@@ -5689,7 +5689,7 @@
       "name": "lucide-rotate-ccw-icon",
       "type": "registry:ui",
       "title": "Rotate Ccw Icon",
-      "description": "An animated rotate ccw icon, adapted from lucide-animated, which turns back a little and returns when a control starts it, hidden from screen readers and still under reduced motion.",
+      "description": "An animated rotate ccw icon, adapted from lucide-animated, which turns back part of the way round, shrinking a little, and returns when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
@@ -5704,7 +5704,7 @@
       "name": "lucide-rotate-cw-icon",
       "type": "registry:ui",
       "title": "Rotate Cw Icon",
-      "description": "An animated rotate-cw icon, adapted from lucide-animated, which turns part of the way round and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "description": "An animated rotate-cw icon, adapted from lucide-animated, which turns part of the way round, shrinking a little, and back when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
@@ -6394,7 +6394,7 @@
       "name": "lucide-sun-moon-icon",
       "type": "registry:ui",
       "title": "Sun Moon Icon",
-      "description": "An animated sun-moon icon, adapted from lucide-animated, whose moon rocks while three of the sun's rays fade, one after another, then return when a control starts it, hidden from screen readers and still under reduced motion.",
+      "description": "An animated sun-moon icon, adapted from lucide-animated, whose moon and the sun's arc rock together while three of the sun's rays fade in again, one after another, when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [
@@ -7249,7 +7249,7 @@
       "name": "lucide-wrench-icon",
       "type": "registry:ui",
       "title": "Wrench Icon",
-      "description": "An animated wrench icon, adapted from lucide-animated, which twists to one side and the other about its handle, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
+      "description": "An animated wrench icon, adapted from lucide-animated, which twists to one side and the other about its head, shrinking a little, then settles when a control starts it, hidden from screen readers and still under reduced motion.",
       "dependencies": ["react-native-reanimated", "react-native-svg"],
       "registryDependencies": ["@zui/icon-motion"],
       "files": [

@@ -19,8 +19,8 @@ const RISE = -1.5;
 const SIZE = 0.95;
 
 /**
- * Lucide's hand-fist icon, which punches up, growing, and back when started. Hidden from a screen reader: the control
- * around it says what it does.
+ * Lucide's hand-fist icon, which punches up, shrinking a little towards its wrist, and back when started. Hidden from
+ * a screen reader: the control around it says what it does.
  */
 function HandFistIcon({
   ref,

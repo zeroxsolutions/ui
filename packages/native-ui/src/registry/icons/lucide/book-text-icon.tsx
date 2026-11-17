@@ -20,7 +20,7 @@ const ROCK = [0, -8, 8];
 const SIZE = 0.94;
 
 /**
- * Lucide's book-text icon, which swells slightly and rocks to one side and the other about its middle, then settles,
+ * Lucide's book-text icon, which shrinks slightly and rocks to one side and the other about its middle, then settles,
  * when started. Hidden from a screen reader: the control around it says what it does.
  */
 function BookTextIcon({

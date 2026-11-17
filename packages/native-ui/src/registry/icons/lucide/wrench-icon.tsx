@@ -18,7 +18,7 @@ const TWIST = [0, 12, -14, 4, 0];
 const SIZE = [1, 0.8, 0.8, 1];
 
 /**
- * Lucide's wrench icon, which twists to one side and the other about its handle, then settles, when
+ * Lucide's wrench icon, which twists to one side and the other about its head, shrinking a little, then settles, when
  * started. Hidden from a screen reader: the control around it says what it does.
  */
 function WrenchIcon({

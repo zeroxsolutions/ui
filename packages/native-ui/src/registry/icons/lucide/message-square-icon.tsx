@@ -20,7 +20,7 @@ const ROCK = [0, -7, 7, 0];
 const SIZE = 0.97;
 
 /**
- * Lucide's message-square icon, which swells and wobbles from side to side, then settles, when started.
+ * Lucide's message-square icon, which shrinks a little and wobbles from side to side, then settles, when started.
  * Hidden from a screen reader: the control around it says what it does.
  */
 function MessageSquareIcon({

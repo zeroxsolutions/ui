@@ -11,10 +11,12 @@ type HandIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * The wave, in degrees about the wrist at each half of the way out: about half the web twin's -15 and 10, which
- * would swing the fingers past the canvas, which react-native-svg clips.
+ * The wave, in degrees about the wrist at each half of the way out, the web twin's, and the hand's size as it waves: at
+ * full size the wave would swing the fingers past the canvas, which react-native-svg clips, so the hand shrinks towards
+ * the wrist as it waves, as hand-metal does.
  */
-const WAVE = [0, -8, 4];
+const WAVE = [0, -15, 10];
+const SIZE = [1, 0.88, 0.88];
 
 /**
  * Lucide's hand icon, which waves from its wrist and back when started. Hidden from a screen reader: the control around
@@ -33,6 +35,8 @@ function HandIcon({
   const whole = useAnimatedProps(() =>
     transformProps({
       rotate: interpolate(progress.value, [0, 0.5, 1], WAVE),
+      scaleX: interpolate(progress.value, [0, 0.5, 1], SIZE),
+      scaleY: interpolate(progress.value, [0, 0.5, 1], SIZE),
       originX: 12,
       originY: 21.6,
     }),

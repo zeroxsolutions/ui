@@ -12,6 +12,12 @@ const AnimatedG = Animated.createAnimatedComponent(G);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 /**
+ * How much the brain swells: the web twin's 1.08 would take its lower right lobe past the canvas, which
+ * react-native-svg clips.
+ */
+const SWELL = 0.07;
+
+/**
  * The lengths of the strokes that pull in, in the 24-unit viewBox. Lucide's top arc is drawn as two halves, each from
  * the middle, as the web twin draws it, so each pulls in on its own.
  */
@@ -36,7 +42,7 @@ function BrainIcon({
   const progress = useIconMotion(ref);
   const width = Number.parseFloat(String(strokeWidth));
   const whole = useAnimatedProps(() => ({
-    ...transformProps({ scaleX: 1 + 0.08 * progress.value, scaleY: 1 + 0.08 * progress.value }),
+    ...transformProps({ scaleX: 1 + SWELL * progress.value, scaleY: 1 + SWELL * progress.value }),
     strokeWidth: width * (1 + 0.125 * progress.value),
   }));
   const stem = useAnimatedProps(() => dash(STEM, 1 - 0.6 * progress.value, 0.25 * progress.value));

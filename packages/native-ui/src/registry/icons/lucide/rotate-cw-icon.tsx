@@ -19,8 +19,8 @@ const TURN = 50;
 const SIZE = 0.86;
 
 /**
- * Lucide's rotate-cw icon, which turns part of the way round and back when started. Hidden from a screen
- * reader: the control around it says what it does.
+ * Lucide's rotate-cw icon, which turns part of the way round, shrinking a little, and back when started. Hidden from a
+ * screen reader: the control around it says what it does.
  */
 function RotateCwIcon({
   ref,

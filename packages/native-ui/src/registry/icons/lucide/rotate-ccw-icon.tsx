@@ -19,8 +19,8 @@ const TURN = -50;
 const SIZE = 0.86;
 
 /**
- * Lucide's rotate ccw icon, which turns back a little and returns, when started. Hidden from a screen reader:
- * the control around it says what it does.
+ * Lucide's rotate ccw icon, which turns back part of the way round, shrinking a little, and returns, when started.
+ * Hidden from a screen reader: the control around it says what it does.
  */
 function RotateCcwIcon({
   ref,
