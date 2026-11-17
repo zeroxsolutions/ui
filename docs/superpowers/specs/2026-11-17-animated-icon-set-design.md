@@ -12,8 +12,10 @@ the docs header where a reader sees every icon move and takes the one they need.
 
 1. zui publishes an animated icon for every icon lucide-animated publishes, outside the exceptions
    below, on web and on native, under the same name on both.
-2. Every zui icon is named after the Lucide 1.72.0 glyph it draws, so a consumer swaps `as={Copy}`
-   for `as={CopyIcon}` without looking up a second name.
+2. Every icon belongs to a named set, and no set is the default. Lucide is the first set: each icon's
+   registry item is `lucide-<glyph>-icon`, where `<glyph>` is the Lucide 1.72.0 name of the glyph it
+   draws, and its export keeps Lucide's own name with `Icon` (`CopyIcon`), so a consumer swaps
+   `as={Copy}` for `as={CopyIcon}` without looking up a second name.
 3. The docs header has an Icons entry, on the web zone, the editor zone and the native zone. Its page
    shows every icon of the platform being read, moving when the reader points at, focuses or taps it,
    finds one by name, and gives the line that installs it.
@@ -28,9 +30,7 @@ the docs header where a reader sees every icon move and takes the one they need.
   goes in a control, and zui's items already hold one wherever they draw an icon in a control. The new
   icons are for consumers.
 - A docs page per icon.
-- A second icon set (Tabler and the like). zui may offer others later. Lucide stays the set whose items
-  carry no prefix (`copy-icon`), because it is the set zui's items draw; a later set's items carry the
-  set's name (`tabler-copy-icon`), so no rename of this set's items is owed. My call.
+- A second icon set (Tabler and the like). zui may offer others later, each laid out as Lucide is below.
 
 ## The inventory (lucide-animated `0f9920917a5d45d1d263299d56f9015c69c21b70`, 2026-11-15)
 
@@ -53,6 +53,24 @@ The new set is then about 410 icons. The plan states the exact count.
 
 ## Shape
 
+### The set's name
+
+A shadcn registry's item names are one flat list, and the CLI finds an item by that name alone, so two
+sets drawing `copy` need two names. The owner ruled (2026-11-17) that every set carries its name, Lucide
+included, so zui favours none:
+
+|        | Item (the CLI's id)     | Source in the repo                                              | Installed at                              |
+| ------ | ----------------------- | --------------------------------------------------------------- | ----------------------------------------- |
+| web    | `@zui/lucide-copy-icon` | `packages/ui/registry/bases/base-ui/icons/lucide/copy-icon.tsx` | `components/general/lucide/copy-icon.tsx` |
+| native | `@zui/lucide-copy-icon` | `packages/native-ui/src/registry/icons/lucide/copy-icon.tsx`    | `components/general/lucide/copy-icon.tsx` |
+
+The 73 icons zui ships today move to this layout before any icon is added, with every zui item that
+imports one, its registry dependencies, the docs pages' install lines and the parity check. 38 of them
+are published on master under the old names (`@zui/copy-icon`). Those names stop resolving: an app
+that vendored one keeps its copy, and adding it again takes the new name. There is no alias item under
+the old name, since an alias is the unprefixed default this ruling removes. The pull request says so
+for consumers. My call.
+
 ### The icons
 
 Each new icon is made as the earlier spec makes one, unchanged:
@@ -69,7 +87,7 @@ moves the 1.72.0 part the same way.
 
 The checks that hold the 73 hold the new icons, with no per-icon test:
 
-- The web icon spec walks every `*-icon.tsx`.
+- The web icon spec walks every icon under `icons/<set>/`.
 - The native walker (`icons.spec.tsx`) checks every native icon: it starts, every part moves, it rests
   within 600 ms, it stays still under reduced motion, it is hidden from accessibility.
 - The parity check (`web-twins.spec.ts`) fails for a web icon with no native twin.
@@ -88,8 +106,10 @@ entry is a plain link to the web page, as its Components and Blocks entries are.
 - shows every icon of its platform, each under its name, and plays an icon when the reader points at
   it, focuses it or, on native, taps it;
 - has a search box that narrows the icons by name as the reader types;
-- gives, for the icon the reader picks, the install line (`pnpm dlx shadcn@latest add @zui/<name>-icon`)
-  with a copy button, and a short usage snippet.
+- gives, for the icon the reader picks, the install line
+  (`pnpm dlx shadcn@latest add @zui/lucide-<glyph>-icon`) with a copy button, and a short usage snippet.
+
+The page groups icons by set, with one set today; the set's name heads its grid.
 
 The native icons are drawn by the preview app in a frame, as every native preview is, so the native
 page's grid is a demo of the preview app. The search box and the install line stay on the page, shared
@@ -106,8 +126,8 @@ Icons page lands on the other platform's Icons page.
 
 ### The docs chrome
 
-The preview's "Open in a new tab" button draws `maximize-2-icon`, and the style picker draws
-`chevron-down-icon` and `check-icon`, each started by its control as the earlier spec starts any icon.
+The preview's "Open in a new tab" button draws `lucide-maximize-2-icon`, and the style picker draws
+`lucide-chevron-down-icon` and `lucide-check-icon`, each started by its control as the earlier spec starts any icon.
 The earlier spec left this chrome out; the owner asked for it on 2026-11-17.
 
 ## Order
@@ -115,14 +135,17 @@ The earlier spec left this chrome out; the owner asked for it on 2026-11-17.
 The pull requests stack on #129. Each is green on its own, and each icon pull request carries both
 platforms' copies of its icons so the parity check holds at every step:
 
-1. **Icons A-L** and **Icons M-Z**: the new icons, web and native, in two pull requests by name. 400
+1. **The rename**: the 73 icons move to the `lucide` set, on both platforms, with every importer.
+2. **Icons A-L** and **Icons M-Z**: the new icons, web and native, in two pull requests by name. 400
    icons on two platforms do not review as one diff.
-2. **The Icons page and the chrome**: the two pages, the header entry on the three zones, the
+3. **The Icons page and the chrome**: the two pages, the header entry on the three zones, the
    platform switch, and the chrome swap.
 
 ## Testing
 
-- The icons: the three walking checks above, unchanged.
+- The icons: the three walking checks above, reading the set folders.
+- The rename: the registry spec fails for an icon item outside `icons/<set>/` or whose name does not
+  start with its set's name.
 - The page, web: a component spec that searching narrows the grid, that pointer enter and focus on a
   tile start its icon, and that the install line copies. One end-to-end case per zone that the header's
   Icons entry opens the page.
