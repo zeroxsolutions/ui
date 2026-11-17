@@ -103,7 +103,7 @@ const ReceiptRussianRubleIcon = forwardRef<ReceiptRussianRubleIconHandle, Receip
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -122,7 +122,7 @@ const ReceiptRussianRubleIcon = forwardRef<ReceiptRussianRubleIconHandle, Receip
             variants={RUSSIAN_RUBLE_MAIN_VARIANTS}
           />
           <motion.path animate={controls} d="M8 15h5" initial="normal" variants={RUSSIAN_RUBLE_SECONDARY_VARIANTS} />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

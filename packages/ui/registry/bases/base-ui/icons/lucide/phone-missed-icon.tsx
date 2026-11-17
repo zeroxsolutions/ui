@@ -92,7 +92,7 @@ const PhoneMissedIcon = forwardRef<PhoneMissedIconHandle, PhoneMissedIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -114,7 +114,7 @@ const PhoneMissedIcon = forwardRef<PhoneMissedIconHandle, PhoneMissedIconProps>(
             initial="initial"
             variants={PHONE_MISSED_VARIANTS}
           />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

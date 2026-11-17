@@ -18,11 +18,6 @@ interface SquareArrowDownIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
-const SQUARE_VARIANTS: Variants = {
-  normal: { transition: { duration: 0.4 } },
-  animate: { transition: { duration: 0.6, ease: 'easeInOut' } },
-};
-
 const PATH_VARIANTS: Variants = {
   normal: { d: 'm8 12 4 4 4-4', translateY: 0, opacity: 1 },
   animate: {
@@ -98,16 +93,7 @@ const SquareArrowDownIcon = forwardRef<SquareArrowDownIconHandle, SquareArrowDow
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.rect
-            animate={controls}
-            height="18"
-            initial="normal"
-            rx="2"
-            variants={SQUARE_VARIANTS}
-            width="18"
-            x="3"
-            y="3"
-          />
+          <rect height="18" rx="2" width="18" x="3" y="3" />
           <motion.path animate={controls} d="m8 12 4 4 4-4" initial="normal" variants={PATH_VARIANTS} />
           <motion.path animate={controls} d="M12 8v8" initial="normal" variants={SECOND_PATH_VARIANTS} />
         </svg>

@@ -103,7 +103,7 @@ const ReceiptJapaneseYenIcon = forwardRef<ReceiptJapaneseYenIconHandle, ReceiptJ
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -119,7 +119,7 @@ const ReceiptJapaneseYenIcon = forwardRef<ReceiptJapaneseYenIconHandle, ReceiptJ
           <motion.path animate={controls} d="M9 11h6" initial="normal" variants={JAPANESE_YEN_SECONDARY_VARIANTS} />
           <motion.path animate={controls} d="M9 15h6" initial="normal" variants={JAPANESE_YEN_SECONDARY_VARIANTS} />
           <motion.path animate={controls} d="m9 7 3 3v7" initial="normal" variants={JAPANESE_YEN_MAIN_VARIANTS} />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

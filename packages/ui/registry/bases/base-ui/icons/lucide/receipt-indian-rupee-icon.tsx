@@ -103,7 +103,7 @@ const ReceiptIndianRupeeIcon = forwardRef<ReceiptIndianRupeeIconHandle, ReceiptI
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -123,7 +123,7 @@ const ReceiptIndianRupeeIcon = forwardRef<ReceiptIndianRupeeIconHandle, ReceiptI
             initial="normal"
             variants={INDIAN_RUPEE_MAIN_VARIANTS}
           />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

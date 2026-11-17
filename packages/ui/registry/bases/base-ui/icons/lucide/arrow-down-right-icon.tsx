@@ -102,7 +102,7 @@ const ArrowDownRightIcon = forwardRef<ArrowDownRightIconHandle, ArrowDownRightIc
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.path animate={controls} d="M7 7 L17 17" variants={SHAFT_VARIANTS} />
+          <motion.path animate={controls} d="m7 7 10 10" variants={SHAFT_VARIANTS} />
           <motion.path animate={controls} d="M17 7v10H7" variants={HEAD_VARIANTS} />
           <motion.path animate={controls} d="M17 17 L10 17" variants={HEAD_VARIANTS} />
         </svg>

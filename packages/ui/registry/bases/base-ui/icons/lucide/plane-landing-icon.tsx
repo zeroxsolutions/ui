@@ -85,7 +85,7 @@ const PlaneLandingIcon = forwardRef<PlaneLandingIconHandle, PlaneLandingIconProp
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           className="overflow-visible"
           fill="none"
           height={size}
@@ -105,7 +105,7 @@ const PlaneLandingIcon = forwardRef<PlaneLandingIconHandle, PlaneLandingIconProp
             style={{ originX: 0.5, originY: 0.5 }}
             variants={PLANE_LANDING_VARIANTS}
           />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

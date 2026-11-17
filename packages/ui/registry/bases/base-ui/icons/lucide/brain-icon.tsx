@@ -152,7 +152,7 @@ const BrainIcon = forwardRef<BrainIconHandle, BrainIconProps>(
           <motion.path animate={controls} d="M12 18V5" variants={BRAIN_STEM_VARIANTS} />
           <motion.path
             animate={controls}
-            d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"
+            d="M15 13a4.17 4.17 0 01-3-4 4.17 4.17 0 01-3 4"
             variants={BRAIN_SIDE_VARIANTS}
           />
 

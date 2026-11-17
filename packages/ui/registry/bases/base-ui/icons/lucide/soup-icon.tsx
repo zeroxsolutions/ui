@@ -80,7 +80,7 @@ const SoupIcon = forwardRef<SoupIconHandle, SoupIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -116,7 +116,7 @@ const SoupIcon = forwardRef<SoupIconHandle, SoupIconProps>(
             initial="normal"
             variants={SOUP_PATH_VARIANTS}
           />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

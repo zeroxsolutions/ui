@@ -54,9 +54,7 @@ const SprayCanIcon = forwardRef<SprayCanIconHandle, SprayCanIconProps>(
     const startAnimation = useCallback(() => {
       if (isAnimatingRef.current) return;
       isAnimatingRef.current = true;
-      controls.start('animate').catch(() => {
-        // ignore when interrupted by a new animation
-      });
+      controls.start('animate');
     }, [controls]);
 
     const stopAnimation = useCallback(async () => {

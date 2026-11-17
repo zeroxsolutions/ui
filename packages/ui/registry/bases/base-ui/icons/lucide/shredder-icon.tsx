@@ -94,7 +94,7 @@ const ShredderIcon = forwardRef<ShredderIconHandle, ShredderIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -115,7 +115,7 @@ const ShredderIcon = forwardRef<ShredderIconHandle, ShredderIconProps>(
           <motion.path animate={controls} custom={0.6} d="M18 20v-3" initial="normal" variants={SHRED_PATH_VARIANTS} />
           <path d="M2 13h20" />
           <motion.path animate={controls} d="M6 20v-3" initial="normal" variants={SHRED_PATH_VARIANTS} />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

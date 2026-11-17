@@ -133,7 +133,7 @@ const FaceSlightlySmilingIcon = forwardRef<FaceSlightlySmilingIconHandle, FaceSl
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="10" />
           <motion.path animate={controls} d="M8 14s1.5 2 4 2 4-2 4-2" initial="normal" variants={mouthVariants} />
           <motion.line animate={controls} initial="normal" variants={eyeVariants} x1="9" x2="9.01" y1="9" y2="9" />
           <motion.line animate={controls} initial="normal" variants={eyeVariants} x1="15" x2="15.01" y1="9" y2="9" />

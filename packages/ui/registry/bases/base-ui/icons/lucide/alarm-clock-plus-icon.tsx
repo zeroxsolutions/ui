@@ -123,7 +123,7 @@ const AlarmClockPlusIcon = forwardRef<AlarmClockPlusIconHandle, AlarmClockPlusIc
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -142,7 +142,7 @@ const AlarmClockPlusIcon = forwardRef<AlarmClockPlusIconHandle, AlarmClockPlusIc
           <motion.path animate={controls} d="M17.64 18.67 20 21" initial="normal" variants={PATH_VARIANTS} />
           <motion.path animate={controls} d="M9 13h6" initial="normal" variants={PATH_VARIANTS} />
           <motion.path animate={controls} d="M12 10v6" initial="normal" variants={PATH_VARIANTS} />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

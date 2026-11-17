@@ -73,7 +73,7 @@ const WifiSyncIcon = forwardRef<WifiSyncIconHandle, WifiSyncIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -93,7 +93,7 @@ const WifiSyncIcon = forwardRef<WifiSyncIconHandle, WifiSyncIconProps>(
             <path d="M17.965 18.105h4L20.43 19.71a5 5 0 0 1-8-1.5" />
             <path d="M21.965 22.105v-4" />
           </motion.g>
-        </motion.svg>
+        </svg>
       </span>
     );
   },

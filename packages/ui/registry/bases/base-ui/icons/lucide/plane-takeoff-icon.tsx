@@ -84,7 +84,7 @@ const PlaneTakeoffIcon = forwardRef<PlaneTakeoffIconHandle, PlaneTakeoffIconProp
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -104,7 +104,7 @@ const PlaneTakeoffIcon = forwardRef<PlaneTakeoffIconHandle, PlaneTakeoffIconProp
             style={{ originX: 0.5, originY: 0.5 }}
             variants={PLANE_VARIANTS}
           />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

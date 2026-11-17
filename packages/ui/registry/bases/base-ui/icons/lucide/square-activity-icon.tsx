@@ -40,20 +40,6 @@ const PATH_VARIANTS: Variants = {
   },
 };
 
-const SQUARE_VARIANTS: Variants = {
-  normal: {
-    transition: {
-      duration: 0.4,
-    },
-  },
-  animate: {
-    transition: {
-      duration: 0.6,
-      ease: 'easeInOut',
-    },
-  },
-};
-
 const SquareActivityIcon = forwardRef<SquareActivityIconHandle, SquareActivityIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
@@ -112,16 +98,7 @@ const SquareActivityIcon = forwardRef<SquareActivityIconHandle, SquareActivityIc
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.rect
-            animate={controls}
-            height="18"
-            initial="normal"
-            rx="2"
-            variants={SQUARE_VARIANTS}
-            width="18"
-            x="3"
-            y="3"
-          />
+          <rect height="18" rx="2" width="18" x="3" y="3" />
           <motion.path animate={controls} d="M17 12h-2l-2 5-2-10-2 5H7" initial="normal" variants={PATH_VARIANTS} />
         </svg>
       </span>

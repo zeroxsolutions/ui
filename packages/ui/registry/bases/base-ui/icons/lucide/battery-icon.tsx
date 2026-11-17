@@ -75,7 +75,7 @@ const BatteryIcon = forwardRef<BatteryIconHandle, BatteryIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           <rect height="12" rx="2" width="16" x="2" y="6" />
-          <path d="M22 14v-4" />
+          <path d="M 22 14 L 22 10" />
 
           <motion.rect
             animate={controls}

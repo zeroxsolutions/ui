@@ -90,7 +90,7 @@ const ReceiptTextIcon = forwardRef<ReceiptTextIconHandle, ReceiptTextIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -107,7 +107,7 @@ const ReceiptTextIcon = forwardRef<ReceiptTextIconHandle, ReceiptTextIconProps>(
             <motion.path d="M8 12H16" variants={LINE_VARIANTS} />
             <motion.path d="M8 16H13" variants={LINE_VARIANTS} />
           </motion.g>
-        </motion.svg>
+        </svg>
       </span>
     );
   },

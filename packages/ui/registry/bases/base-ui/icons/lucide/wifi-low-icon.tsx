@@ -17,7 +17,7 @@ interface WifiLowIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
-const WIFI_LEVELS = [{ d: 'M8.5 16.429a5 5 0 0 1 7 0', initialOpacity: 1, delay: 0.1 }];
+const WIFI_LEVELS = [{ d: 'M8.5 16.429a5 5 0 0 1 7 0', delay: 0.1 }];
 
 const WifiLowIcon = forwardRef<WifiLowIconHandle, WifiLowIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
@@ -115,7 +115,6 @@ const WifiLowIcon = forwardRef<WifiLowIconHandle, WifiLowIconProps>(
             <motion.path
               animate={controls}
               d={level.d}
-              initial={{ opacity: level.initialOpacity }}
               key={level.d}
               variants={{
                 fadeOut: {

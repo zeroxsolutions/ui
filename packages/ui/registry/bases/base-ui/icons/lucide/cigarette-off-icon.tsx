@@ -88,7 +88,7 @@ const CigaretteOffIcon = forwardRef<CigaretteOffIconHandle, CigaretteOffIconProp
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -103,10 +103,10 @@ const CigaretteOffIcon = forwardRef<CigaretteOffIconHandle, CigaretteOffIconProp
           <path d="M12 12H3a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h13" />
           <motion.path animate={controls} d="M18 8c0-2.5-2-2.5-2-5" initial="normal" variants={CIGARETTE_VARIANTS} />
           <motion.path animate={controls} d="m2 2 20 20" initial="normal" variants={PATH_VARIANTS} />
-          <motion.path d="M21 12a1 1 0 0 1 1 1v2a1 1 0 0 1-.5.866" />
+          <path d="M21 12a1 1 0 0 1 1 1v2a1 1 0 0 1-.5.866" />
           <motion.path animate={controls} d="M22 8c0-2.5-2-2.5-2-5" initial="normal" variants={CIGARETTE_VARIANTS} />
           <path d="M7 12v4" />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

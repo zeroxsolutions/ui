@@ -104,8 +104,8 @@ const PhoneIncomingIcon = forwardRef<PhoneIncomingIconHandle, PhoneIncomingIconP
           xmlns="http://www.w3.org/2000/svg"
         >
           <motion.g animate={controls} initial={{ y: 0, opacity: 1 }} variants={ARROW_VARIANTS}>
-            <motion.path d="M16 2v6h6" />
-            <motion.path d="m22 2-6 6" />
+            <path d="M16 2v6h6" />
+            <path d="m22 2-6 6" />
           </motion.g>
           <motion.path
             animate={controls}

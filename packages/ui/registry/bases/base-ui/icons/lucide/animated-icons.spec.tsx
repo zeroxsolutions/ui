@@ -92,6 +92,51 @@ const cases = Object.entries(ICONS).map(([path, module]) => {
   return { name, Icon: exported[1] };
 });
 
+/**
+ * The icons that draw an element of their Lucide 1.72.0 glyph in a form the walk cannot match by its attributes,
+ * so it does not fail them for that element. Every other icon must draw each glyph element as Lucide spells it.
+ */
+const DRAWN_OTHERWISE = new Set<string>([
+  // Split into pieces that move apart, whose union is the glyph element.
+  'accessibility',
+  'arrow-down-left',
+  'folder-clock',
+  'link-2',
+  'rotate-ccw-clock',
+  'ticket',
+  // The glyph element's geometry drawn the other way, so a pathLength draw runs as the motion was made.
+  'chart-line',
+  'check-check',
+  'dollar-sign',
+  'euro',
+  'file-chart-line',
+  'check',
+  'corner-down-left',
+  'georgian-lari',
+  'message-circle-check',
+  'party-popper',
+  'receipt-text',
+  'trending-up-down',
+  // A d that Motion morphs, written with its arc flags apart: Motion reads Lucide's packed `016` as one number.
+  'face-grinning',
+  'face-slightly-frowning',
+  // Icons from before the set was ported that still draw a part as a line or an older Lucide path.
+  'brain',
+  'circle-check',
+  'clock',
+  'face-slightly-smiling',
+  'file-text',
+  'leaf',
+  'menu',
+  'message-square',
+  'palette',
+  'search',
+  'sliders-horizontal',
+  'sparkles',
+  'sun-moon',
+  'upload',
+]);
+
 function inButton(node: ReactNode) {
   return render(<button type="button">{node}</button>);
 }
@@ -157,8 +202,9 @@ describe('animated icons', () => {
    * only after a delay, as file-text's last line does at 0.7 s, is still caught, where one read at a
    * fixed time would miss it. An element counts as moved when any attribute, style included, differs
    * from what it read at rest. At rest, read after the icons are stopped, each element of the icon's
-   * Lucide 1.72.0 glyph must be drawn whole by some element of the icon; an element that matches none,
-   * such as a decoration hidden at rest or a part drawn as a reversed path, is not checked.
+   * Lucide 1.72.0 glyph must be drawn whole by some element of the icon: at full opacity, fully drawn, and
+   * neither moved, turned nor scaled, itself or through a group around it. A glyph element no element draws
+   * fails the icon unless the icon is in DRAWN_OTHERWISE. A decoration outside the glyph is not checked.
    */
   describe('the walk', () => {
     const SAMPLE_MS = 40;
@@ -191,14 +237,21 @@ describe('animated icons', () => {
       cases.forEach(({ name }, index) => {
         const svg = container.querySelector(`[data-icon="${name}"] svg`)!;
         const drawn = [...svg.querySelectorAll('*')];
+        const glyphName = name.slice(0, -'-icon'.length);
         unwhole.set(
           name,
           glyphs[index]
-            .filter(([tag, attributes]) => drawn.some((element) => draws(element, tag, attributes)))
+            .filter(
+              ([tag, attributes]) =>
+                drawn.some((element) => draws(element, tag, attributes)) || !DRAWN_OTHERWISE.has(glyphName),
+            )
             .filter(
               ([tag, attributes]) => !drawn.some((element) => draws(element, tag, attributes) && isWhole(element, svg)),
             )
-            .map(([tag, attributes]) => `${tag} ${JSON.stringify(attributes)}`),
+            .map(
+              ([tag, attributes]) =>
+                `${drawn.some((element) => draws(element, tag, attributes)) ? 'not whole at rest' : 'not drawn'}: ${tag} ${JSON.stringify(attributes)}`,
+            ),
         );
       });
       const walked = cases.map(({ name }) => {
@@ -269,10 +322,25 @@ function isWhole(element: Element, svg: Element): boolean {
   for (let node: Element | null = element; node !== null && node !== svg.parentElement; node = node.parentElement) {
     const opacity = (node as SVGElement).style?.opacity || node.getAttribute('opacity');
     if (opacity !== null && opacity !== '' && Number(opacity) < 1) return false;
+    if (!isIdentity((node as SVGElement).style?.transform) || !isIdentity(node.getAttribute('transform'))) return false;
   }
   const drawn = element.getAttribute('stroke-dasharray');
   const offset = element.getAttribute('stroke-dashoffset');
   return (drawn === null || Number.parseFloat(drawn) >= 1) && (offset === null || Number.parseFloat(offset) === 0);
+}
+
+/** Whether a CSS or SVG transform leaves the element where it is: no translation or turn, and a scale of 1. */
+function isIdentity(transform: string | null | undefined): boolean {
+  if (transform === null || transform === undefined || transform === '' || transform === 'none') return true;
+  return [...transform.matchAll(/(\w+)\(([^)]*)\)/g)].every(([, kind, values]) => {
+    const numbers = values
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .map((value) => Number.parseFloat(value));
+    if (kind.startsWith('scale')) return numbers.every((value) => value === 1);
+    if (kind === 'matrix') return numbers.join(' ') === '1 0 0 1 0 0';
+    return numbers.every((value) => value === 0);
+  });
 }
 
 /** An element's attributes, style included, as one comparable string. */

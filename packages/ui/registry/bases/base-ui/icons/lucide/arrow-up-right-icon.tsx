@@ -96,7 +96,7 @@ const ArrowUpRightIcon = forwardRef<ArrowUpRightIconHandle, ArrowUpRightIconProp
         >
           <motion.g animate={controls} variants={ARROW_VARIANTS}>
             <path d="M7 7h10v10" />
-            <path d="M7 17L17 7" />
+            <path d="M7 17 17 7" />
           </motion.g>
         </svg>
       </span>

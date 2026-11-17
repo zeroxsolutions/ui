@@ -59,20 +59,14 @@ const ProjectorIcon = forwardRef<ProjectorIconHandle, ProjectorIconProps>(
     const isControlledRef = useRef(false);
 
     const startAll = useCallback(async () => {
-      bodyControls.start('animate').catch(() => {
-        // ignore when interrupted by a new animation
-      });
+      bodyControls.start('animate');
       await pathControls.start('hidden');
       await pathControls.start('animate');
     }, [bodyControls, pathControls]);
 
     const stopAll = useCallback(() => {
-      bodyControls.start('normal').catch(() => {
-        // ignore when interrupted
-      });
-      pathControls.start('visible').catch(() => {
-        // ignore when interrupted
-      });
+      bodyControls.start('normal');
+      pathControls.start('visible');
     }, [bodyControls, pathControls]);
 
     useImperativeHandle(ref, () => {
@@ -81,9 +75,7 @@ const ProjectorIcon = forwardRef<ProjectorIconHandle, ProjectorIconProps>(
       return {
         startAnimation: () => {
           if (isMotionReduced) return;
-          startAll().catch(() => {
-            // ignore when interrupted
-          });
+          startAll();
         },
         stopAnimation: () => stopAll(),
       };

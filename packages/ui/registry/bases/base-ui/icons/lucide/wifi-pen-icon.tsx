@@ -81,7 +81,7 @@ const WifiPenIcon = forwardRef<WifiPenIconHandle, WifiPenIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -101,7 +101,7 @@ const WifiPenIcon = forwardRef<WifiPenIconHandle, WifiPenIconProps>(
           />
           <path d="M5 12.859a10 10 0 0 1 10.5-2.222" />
           <path d="M8.5 16.429a5 5 0 0 1 3-1.406" />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

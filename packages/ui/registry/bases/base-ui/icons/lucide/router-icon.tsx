@@ -93,7 +93,7 @@ const RouterIcon = forwardRef<RouterIconHandle, RouterIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -122,7 +122,7 @@ const RouterIcon = forwardRef<RouterIconHandle, RouterIconProps>(
             initial={{ opacity: 1 }}
             variants={PATH_VARIANTS}
           />
-        </motion.svg>
+        </svg>
       </span>
     );
   },
