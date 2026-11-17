@@ -25,14 +25,14 @@ describe('the icon gallery messages', () => {
     expect(channel).toContain(`const ICON_GALLERY_PICK_MESSAGE = '${ICON_GALLERY_PICK_MESSAGE}';`);
   });
 
-  it('sends the search read as a glyph name, as the page counts it, so the demo only checks that a glyph holds it', () => {
-    for (const [typed, query] of [
-      ['Arrow Up', 'arrow-up'],
-      ['  copy ', 'copy'],
-      ['ARROW-up', 'arrow-up'],
-      ['', ''],
+  it('sends the search read as a glyph name, as the page counts it, and as the reader typed it, trimmed', () => {
+    for (const [text, query, typed] of [
+      ['Arrow Up', 'arrow-up', 'Arrow Up'],
+      ['  copy ', 'copy', 'copy'],
+      ['ARROW-up', 'arrow-up', 'ARROW-up'],
+      ['', '', ''],
     ]) {
-      expect(iconGalleryQueryMessage(typed)).toEqual({ type: ICON_GALLERY_QUERY_MESSAGE, query });
+      expect(iconGalleryQueryMessage(text)).toEqual({ type: ICON_GALLERY_QUERY_MESSAGE, query, typed });
     }
   });
 
@@ -40,6 +40,7 @@ describe('the icon gallery messages', () => {
     expect(iconGalleryQueryMessage('copy', 'lucide-copy-icon')).toEqual({
       type: ICON_GALLERY_QUERY_MESSAGE,
       query: 'copy',
+      typed: 'copy',
       picked: 'lucide-copy-icon',
     });
   });

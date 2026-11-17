@@ -87,6 +87,8 @@ function IconGalleryGridTile({ icon, picked, onPick }: IconGalleryGridTileProps)
 interface IconGalleryGridProps {
   /** What the reader typed in the docs page's search box, already read as a glyph name (`arrow-up`). */
   query: string;
+  /** The same search as the reader typed it (`Arrow Up`), which the list names when no glyph holds `query`. */
+  typed: string;
   /** The item name of the icon last tapped, whose tile is marked; `undefined` before a tap. */
   picked: string | undefined;
   /** Called with the item name of the icon tapped. */
@@ -98,7 +100,7 @@ interface IconGalleryGridProps {
  * given and scrolls itself.
  * The list draws only the rows near what it shows, so an icon, with its motion, is mounted as it is scrolled to.
  */
-function IconGalleryGrid({ query, picked, onPick }: IconGalleryGridProps): ReactNode {
+function IconGalleryGrid({ query, typed, picked, onPick }: IconGalleryGridProps): ReactNode {
   const [width, setWidth] = useState(0);
   const columns = Math.max(1, Math.floor(width / TILE_SIZE));
   const shown = ICONS.filter(({ glyph }) => glyph.includes(query));
@@ -110,7 +112,7 @@ function IconGalleryGrid({ query, picked, onPick }: IconGalleryGridProps): React
       </Text>
       <View className="flex-1" onLayout={(event) => setWidth(event.nativeEvent.layout.width)}>
         {shown.length === 0 ? (
-          <Text className="text-muted-foreground">No icon has a name holding &quot;{query}&quot;.</Text>
+          <Text className="text-muted-foreground">No icon has a name holding &quot;{typed}&quot;.</Text>
         ) : (
           <FlatList
             // A list cannot change its column count in place, so a new count draws a new list.

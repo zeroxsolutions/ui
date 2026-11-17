@@ -13,7 +13,7 @@ import { useCommandShortcut } from '../../../../registry/bases/base-ui/hooks/use
 import { Button } from '../../../../registry/bases/base-ui/ui/button';
 import { CommandEmpty, CommandGroup, CommandInput, CommandList } from '../../../../registry/bases/base-ui/ui/command';
 import { Kbd, KbdGroup } from '../../../../registry/bases/base-ui/ui/kbd';
-import { SearchIcon, type SearchIconHandle } from '../../../../registry/bases/base-ui/icons/lucide/search-icon';
+import { SearchIcon } from '../../../../registry/bases/base-ui/icons/lucide/search-icon';
 import type { Platform } from '../../types/platform';
 import type { SiteNavItem } from '../../types/site-nav-item';
 

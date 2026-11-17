@@ -58,3 +58,13 @@ test('the frame keeps a fixed height, and the grid scrolls inside it to the icon
     ).toBe(true);
   }).toPass({ timeout: 30_000 });
 });
+
+test("the page's empty status and the frame's both print what the reader typed", async ({ page }) => {
+  await page.goto('/native/icons/nativewind?q=Arrow+Sideways');
+  const gallery = inside(page, 'Icon gallery demo');
+  const empty = 'No icon has a name holding "Arrow Sideways".';
+
+  // The frame's spinner is a status too, until the preview has drawn.
+  await expect(page.getByRole('status').filter({ hasText: empty })).toBeVisible();
+  await expect(gallery.getByText(empty)).toBeVisible(DRAWN);
+});

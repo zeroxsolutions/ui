@@ -92,14 +92,17 @@ describe('IconGalleryDemo', () => {
     await render(<IconGalleryDemo />);
     expect(await tile('copy')).toBeOnTheScreen();
 
-    await receive({ type: 'zui:icon-gallery:query', query: 'arrow' });
+    await receive({ type: 'zui:icon-gallery:query', query: 'arrow', typed: 'arrow' });
 
     expect(screen.getByRole('button', { name: 'arrow-up' })).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: 'arrow-down' })).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'copy' })).toBeNull();
 
-    await receive({ type: 'zui:icon-gallery:query', query: 'copy' }, { origin: 'https://elsewhere.example' });
-    await receive({ type: 'zui:icon-gallery:query', query: 'copy' }, { source: {} });
+    await receive(
+      { type: 'zui:icon-gallery:query', query: 'copy', typed: 'copy' },
+      { origin: 'https://elsewhere.example' },
+    );
+    await receive({ type: 'zui:icon-gallery:query', query: 'copy', typed: 'copy' }, { source: {} });
 
     expect(screen.queryByRole('button', { name: 'copy' })).toBeNull();
   });
@@ -121,10 +124,19 @@ describe('IconGalleryDemo', () => {
     await render(<IconGalleryDemo />);
     await tile('copy');
 
-    await receive({ type: 'zui:icon-gallery:query', query: '', picked: 'lucide-copy-icon' });
+    await receive({ type: 'zui:icon-gallery:query', query: '', typed: '', picked: 'lucide-copy-icon' });
 
     expect(screen.getByRole('button', { name: 'copy' })).toBeSelected();
     expect(screen.getByRole('button', { name: 'arrow-up' })).not.toBeSelected();
+  });
+
+  it("prints the reader's own text, not the glyph name it narrows by, when no icon's name holds it", async () => {
+    await render(<IconGalleryDemo />);
+    await tile('copy');
+
+    await receive({ type: 'zui:icon-gallery:query', query: 'arrow-sideways', typed: 'Arrow Sideways' });
+
+    expect(await screen.findByText('No icon has a name holding "Arrow Sideways".')).toBeVisible();
   });
 
   it('starts the icon of a tile on press-in and on focus, and lets press-out leave it playing', async () => {

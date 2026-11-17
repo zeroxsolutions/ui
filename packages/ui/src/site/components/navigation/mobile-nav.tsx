@@ -8,7 +8,7 @@ import { DocsSidebar } from './docs-sidebar';
 import { useAnimatedIcon } from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
 import { currentSiteNavItem } from '../../lib/site-nav';
 import { Button } from '../../../../registry/bases/base-ui/ui/button';
-import { MenuIcon, type MenuIconHandle } from '../../../../registry/bases/base-ui/icons/lucide/menu-icon';
+import { MenuIcon } from '../../../../registry/bases/base-ui/icons/lucide/menu-icon';
 import {
   Sheet,
   SheetContent,

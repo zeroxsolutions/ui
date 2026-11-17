@@ -24,3 +24,11 @@ test('/native/sitemap.xml lists the later native components at their NativeWind 
     expect(sitemap, name).toContain(`<loc>${HOST}/native/components/nativewind/${name}</loc>`);
   }
 });
+
+test('/native/sitemap.xml lists the icons page of each engine', async ({ request }) => {
+  const sitemap = await (await request.get('/native/sitemap.xml')).text();
+
+  for (const engine of ['nativewind', 'uniwind']) {
+    expect(sitemap, engine).toContain(`<loc>${HOST}/native/icons/${engine}</loc>`);
+  }
+});

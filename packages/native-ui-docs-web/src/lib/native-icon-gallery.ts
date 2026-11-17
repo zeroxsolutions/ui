@@ -17,16 +17,24 @@ export interface IconGalleryQueryMessage {
   type: typeof ICON_GALLERY_QUERY_MESSAGE;
   /** What the reader typed, read as a glyph name, so the demo keeps the icons whose glyph holds it. */
   query: string;
+  /** What the reader typed, trimmed, which the demo prints when no glyph holds `query`. */
+  typed: string;
   /** The item name of the icon picked, whose tile the demo marks; absent before a pick. */
   picked?: string;
 }
 
 /**
  * The message that hands the gallery demo what the reader typed in the page's search box, read as the page's own
- * count reads it, and the icon picked, so a frame loaded again in another style or mode marks the same tile.
+ * count reads it and as the page's own status prints it, and the icon picked, so a frame loaded again in another
+ * style or mode marks the same tile.
  */
 export function iconGalleryQueryMessage(query: string, picked?: string): IconGalleryQueryMessage {
-  return { type: ICON_GALLERY_QUERY_MESSAGE, query: glyphQuery(query), ...(picked === undefined ? {} : { picked }) };
+  return {
+    type: ICON_GALLERY_QUERY_MESSAGE,
+    query: glyphQuery(query),
+    typed: query.trim(),
+    ...(picked === undefined ? {} : { picked }),
+  };
 }
 
 /** How a React Native app imports the icon `glyph` of `set`, draws it through Icon, and plays it from a control. */

@@ -23,6 +23,7 @@ const IconGalleryGrid = lazy(() =>
  */
 function IconGalleryDemo(): ReactNode {
   const [query, setQuery] = useState('');
+  const [typed, setTyped] = useState('');
   const [picked, setPicked] = useState<string>();
   const [frame] = useState(iconGalleryFrame);
 
@@ -32,6 +33,7 @@ function IconGalleryDemo(): ReactNode {
       const posted = iconGalleryQueryOf(frame, event);
       if (posted === undefined) return;
       setQuery(posted.query);
+      setTyped(posted.typed);
       if (posted.picked !== undefined) setPicked(posted.picked);
     };
     frame.addEventListener('message', onMessage);
@@ -46,7 +48,7 @@ function IconGalleryDemo(): ReactNode {
 
   return (
     <Suspense fallback={<Text className="text-muted-foreground">Loading the icons</Text>}>
-      <IconGalleryGrid query={query} picked={picked} onPick={pick} />
+      <IconGalleryGrid query={query} typed={typed} picked={picked} onPick={pick} />
     </Suspense>
   );
 }

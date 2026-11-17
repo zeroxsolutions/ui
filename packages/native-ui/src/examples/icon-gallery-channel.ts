@@ -7,8 +7,9 @@
  */
 
 /**
- * Page to demo: `{ type, query, picked? }`. `query` is what the reader typed in the page's search box, already read
- * as a glyph name (`Arrow Up` as `arrow-up`), so the demo keeps the icons whose glyph holds it. `picked` is the item
+ * Page to demo: `{ type, query, typed, picked? }`. `query` is what the reader typed in the page's search box, already
+ * read as a glyph name (`Arrow Up` as `arrow-up`), so the demo keeps the icons whose glyph holds it. `typed` is the
+ * same text as the reader typed it, trimmed, which the demo prints when no glyph holds `query`. `picked` is the item
  * name of the icon picked on the page, absent before a pick.
  */
 const ICON_GALLERY_QUERY_MESSAGE = 'zui:icon-gallery:query';
@@ -57,9 +58,13 @@ function postIconGalleryPick(self: IconGalleryWindow, name: string): void {
   self.parent.postMessage({ type: ICON_GALLERY_PICK_MESSAGE, name }, self.location.origin);
 }
 
-/** What a query message carries: the search, as a glyph name, and the icon picked on the page, if any. */
+/**
+ * What a query message carries: the search, as a glyph name and as the reader typed it, and the icon picked on the
+ * page, if any.
+ */
 interface IconGalleryQuery {
   query: string;
+  typed: string;
   picked?: string;
 }
 
@@ -71,9 +76,14 @@ interface IconGalleryQuery {
 function iconGalleryQueryOf(self: IconGalleryWindow, event: IconGalleryMessageEvent): IconGalleryQuery | undefined {
   if (event.source !== self.parent || event.origin !== self.location.origin) return undefined;
   if (typeof event.data !== 'object' || event.data === null) return undefined;
-  const { type, query, picked } = event.data as { type?: unknown; query?: unknown; picked?: unknown };
-  if (type !== ICON_GALLERY_QUERY_MESSAGE || typeof query !== 'string') return undefined;
-  return typeof picked === 'string' ? { query, picked } : { query };
+  const { type, query, typed, picked } = event.data as {
+    type?: unknown;
+    query?: unknown;
+    typed?: unknown;
+    picked?: unknown;
+  };
+  if (type !== ICON_GALLERY_QUERY_MESSAGE || typeof query !== 'string' || typeof typed !== 'string') return undefined;
+  return typeof picked === 'string' ? { query, typed, picked } : { query, typed };
 }
 
 export {

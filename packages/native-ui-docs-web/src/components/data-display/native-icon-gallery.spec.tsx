@@ -74,7 +74,7 @@ describe('NativeIconGallery', () => {
     postFromFrame({ type: ICON_GALLERY_READY_MESSAGE });
 
     expect(posted).toHaveBeenLastCalledWith(
-      { type: ICON_GALLERY_QUERY_MESSAGE, query: 'arrow' },
+      { type: ICON_GALLERY_QUERY_MESSAGE, query: 'arrow', typed: 'arrow' },
       window.location.origin,
     );
 
@@ -82,7 +82,7 @@ describe('NativeIconGallery', () => {
 
     await waitFor(() =>
       expect(posted).toHaveBeenLastCalledWith(
-        { type: ICON_GALLERY_QUERY_MESSAGE, query: 'copy' },
+        { type: ICON_GALLERY_QUERY_MESSAGE, query: 'copy', typed: 'copy' },
         window.location.origin,
       ),
     );
@@ -110,7 +110,7 @@ describe('NativeIconGallery', () => {
     expect(panel.textContent).toContain('<Icon as={ArrowUpIcon} ref={icon} />');
     expect(panel.textContent).not.toContain('pointed at');
     expect(posted).toHaveBeenLastCalledWith(
-      { type: ICON_GALLERY_QUERY_MESSAGE, query: '', picked: 'lucide-arrow-up-icon' },
+      { type: ICON_GALLERY_QUERY_MESSAGE, query: '', typed: '', picked: 'lucide-arrow-up-icon' },
       window.location.origin,
     );
   });
