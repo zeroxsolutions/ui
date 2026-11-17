@@ -1,6 +1,6 @@
 import { expect, test } from './test/fixtures';
 import { waitForHydration } from './test/hydrated';
-import { DRAWN, inside } from './test/native-preview';
+import { DRAWN, frame, inside } from './test/native-preview';
 
 test.slow(true, 'the frame may take all of DRAWN to draw, and then loads the icons as a chunk of their own');
 
@@ -35,4 +35,20 @@ test("the page's search narrows the frame's grid, and an icon tapped there shows
   await expect(page.getByRole('region', { name: 'copy' })).toContainText(
     'pnpm dlx shadcn@latest add @zui/lucide-copy-icon',
   );
+});
+
+test('the frame keeps a fixed height, and the grid scrolls inside it to the icons at the end of the set', async ({
+  page,
+}) => {
+  await page.goto('/native/icons/nativewind');
+  const gallery = inside(page, 'Icon gallery demo');
+  const first = gallery.getByRole('button', { name: 'a-arrow-down', exact: true });
+  await expect(first).toBeVisible(DRAWN);
+  await expect.poll(async () => (await frame(page, 'Icon gallery demo').boundingBox())?.height).toBe(560);
+
+  await first.hover();
+  await expect(async () => {
+    await page.mouse.wheel(0, 4000);
+    await expect(gallery.getByRole('button', { name: 'zap', exact: true })).toBeInViewport({ timeout: 500 });
+  }).toPass({ timeout: 30_000 });
 });

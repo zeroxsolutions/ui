@@ -94,7 +94,8 @@ interface IconGalleryGridProps {
 }
 
 /**
- * The lucide set's icons whose glyph holds `query`, under the set's name, in a list of its own height that scrolls.
+ * The lucide set's icons whose glyph holds `query`, under the set's name, in a list that fills the height it is
+ * given and scrolls itself.
  * The list draws only the rows near what it shows, so an icon, with its motion, is mounted as it is scrolled to.
  */
 function IconGalleryGrid({ query, picked, onPick }: IconGalleryGridProps): ReactNode {
@@ -103,11 +104,11 @@ function IconGalleryGrid({ query, picked, onPick }: IconGalleryGridProps): React
   const shown = ICONS.filter(({ glyph }) => glyph.includes(query));
 
   return (
-    <View className="gap-3">
+    <View className="flex-1 gap-3">
       <Text role="heading" className="font-sans-semibold">
         {SET}
       </Text>
-      <View className="h-96" onLayout={(event) => setWidth(event.nativeEvent.layout.width)}>
+      <View className="flex-1" onLayout={(event) => setWidth(event.nativeEvent.layout.width)}>
         {shown.length === 0 ? (
           <Text className="text-muted-foreground">No icon has a name holding &quot;{query}&quot;.</Text>
         ) : (

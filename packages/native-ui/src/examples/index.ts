@@ -243,4 +243,11 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'unsaved-indicator-demo': UnsavedIndicatorDemo,
 };
 
-export { demos };
+/**
+ * The demos that scroll themselves, such as the icon gallery's windowed list, which the preview draws in the
+ * whole screen rather than in its own scroll view: a list that windows its rows cannot sit inside another
+ * scroller of the same direction.
+ */
+const selfScrollingDemos: ReadonlySet<string> = new Set(['icon-gallery-demo']);
+
+export { demos, selfScrollingDemos };
