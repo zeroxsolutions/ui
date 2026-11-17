@@ -11,7 +11,7 @@ function WebIconGallery({ sets }: { sets: IconSet[] }): ReactNode {
   return (
     <IconGallery
       sets={sets}
-      renderGrid={({ query, onPick }) => <IconGrid sets={sets} query={query} onPick={onPick} />}
+      renderGrid={({ query, picked, onPick }) => <IconGrid sets={sets} query={query} picked={picked} onPick={onPick} />}
     />
   );
 }

@@ -14,6 +14,8 @@ interface IconGridProps {
   sets: IconSet[];
   /** What the reader typed; the grid shows the icons whose glyph holds it. */
   query: string;
+  /** The item name of the icon the reader picked, whose tile is marked pressed. */
+  picked?: string;
   /** Called with the item name of the icon the reader picks. */
   onPick: (name: string) => void;
 }
@@ -25,7 +27,14 @@ interface IconGridProps {
  * drawing every icon at once fetches every chunk and mounts every icon's motion before the reader has
  * scrolled, while the reader sees a screenful of them.
  */
-function IconGridTile({ name, glyph, onPick }: { name: string; glyph: string; onPick: (name: string) => void }) {
+interface IconGridTileProps {
+  name: string;
+  glyph: string;
+  picked: boolean;
+  onPick: (name: string) => void;
+}
+
+function IconGridTile({ name, glyph, picked, onPick }: IconGridTileProps) {
   // The provider's map types every entry as a component taking no props; an icon item takes its handle's ref.
   const Icon = useRegistryExample(name) as AnimatedIcon | undefined;
   const { ref, handlers } = useIconAnimation<AnimatedIconHandle>();
@@ -38,7 +47,8 @@ function IconGridTile({ name, glyph, onPick }: { name: string; glyph: string; on
       ref={tile}
       type="button"
       data-slot="icon-grid-tile"
-      className="hover:bg-muted focus-visible:ring-ring/50 flex w-full flex-col items-center gap-2 rounded-lg border px-2 py-4 outline-none focus-visible:ring-3"
+      aria-pressed={picked}
+      className="hover:bg-muted aria-pressed:bg-muted aria-pressed:border-foreground focus-visible:ring-ring/50 flex w-full flex-col items-center gap-2 rounded-lg border px-2 py-4 outline-none focus-visible:ring-3"
       onClick={() => onPick(name)}
       {...handlers}
     >
@@ -55,16 +65,16 @@ function IconGridTile({ name, glyph, onPick }: { name: string; glyph: string; on
 }
 
 /** The web icons of `sets` whose glyph holds `query`, a grid of tiles per set under the set's name. */
-function IconGrid({ sets, query, onPick }: IconGridProps): ReactNode {
+function IconGrid({ sets, query, picked, onPick }: IconGridProps): ReactNode {
   return (
     <div data-slot="icon-grid" className="flex flex-col gap-8">
       {filterIconSets(sets, query).map(({ set, icons }) => (
-        <section key={set} className="flex flex-col gap-3">
+        <section key={set} aria-label={set} className="flex flex-col gap-3">
           <h2 className="font-mono text-sm font-medium">{set}</h2>
           <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
             {icons.map(({ name, glyph }) => (
               <li key={name}>
-                <IconGridTile name={name} glyph={glyph} onPick={onPick} />
+                <IconGridTile name={name} glyph={glyph} picked={name === picked} onPick={onPick} />
               </li>
             ))}
           </ul>

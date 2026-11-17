@@ -14,6 +14,7 @@ test("the header's Icons entry opens the icons page, whose picked icon shows its
   await expect(page.getByRole('heading', { level: 1, name: 'Icons' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'lucide' })).toBeVisible();
   await page.getByRole('searchbox', { name: 'Search icons' }).fill('Arrow Up');
+  await expect(page).toHaveURL('/icons/base?q=Arrow+Up');
   const tile = page.getByRole('button', { name: 'arrow-up', exact: true });
   // The icon is its own chunk, loaded once its tile draws.
   await expect(tile.locator('svg')).toBeVisible();
@@ -22,4 +23,14 @@ test("the header's Icons entry opens the icons page, whose picked icon shows its
   await expect(page.getByRole('region', { name: 'arrow-up' })).toContainText(
     'pnpm dlx shadcn@latest add @zui/lucide-arrow-up-icon',
   );
+});
+
+test('/icons/base?q=arrow opens on the icons whose name holds arrow', async ({ page }) => {
+  await page.goto('/icons/base?q=arrow');
+
+  await expect(page.getByRole('searchbox', { name: 'Search icons' })).toHaveValue('arrow');
+  const tiles = page.getByRole('region', { name: 'lucide' }).getByRole('button');
+  await expect(page.getByRole('button', { name: 'zap', exact: true })).toHaveCount(0);
+  await expect(tiles.first()).toBeVisible();
+  for (const name of await tiles.allInnerTexts()) expect(name).toContain('arrow');
 });

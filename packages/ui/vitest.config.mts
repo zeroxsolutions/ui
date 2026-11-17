@@ -38,7 +38,7 @@ export default defineConfig({
         test: {
           name: '@zeroxsolutions/ui:browser',
           setupFiles: ['test/browser-setup.ts'],
-          include: ['registry/**/*.browser.spec.tsx'],
+          include: ['registry/**/*.browser.spec.tsx', 'src/**/*.browser.spec.tsx'],
           browser: {
             enabled: true,
             headless: true,

@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
-import { COMPONENT_BASES } from '@zeroxsolutions/ui/site/constants/component-bases';
+import { publishedIconBases } from '@zeroxsolutions/ui-docs-web/lib/published-items';
 import { IconsPage } from '@zeroxsolutions/ui-docs-web/pages/icons-page';
 
 export const dynamic = 'force-static';
 
-// A base outside the set answers 404 rather than rendering the icons under a base nobody publishes.
+// A base with no icons answers 404 rather than rendering icons drawn on another base.
 export const dynamicParams = false;
 
 export function generateStaticParams(): { base: string }[] {
-  return COMPONENT_BASES.map((base) => ({ base }));
+  return publishedIconBases.map((base) => ({ base }));
 }
 
 export const metadata: Metadata = {
