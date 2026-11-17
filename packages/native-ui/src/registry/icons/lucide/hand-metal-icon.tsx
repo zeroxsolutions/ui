@@ -11,10 +11,12 @@ type HandMetalIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * The rock, in degrees about the wrist at each half of the way out: about a quarter of the web twin's 15, which
- * would swing the fingers past the canvas, which react-native-svg clips.
+ * The rock, in degrees about the wrist at each half of the way out, and the hand's size as it rocks: the web twin's 15
+ * would swing the fingers past the canvas, which react-native-svg clips, so it rocks less and shrinks towards the
+ * wrist as it rocks.
  */
-const ROCK = [0, -3.5, 3.5];
+const ROCK = [0, -10, 10];
+const SIZE = [1, 0.88, 0.88];
 
 /**
  * Lucide's hand-metal icon, which rocks from its wrist and back when started. Hidden from a screen reader: the control
@@ -33,6 +35,8 @@ function HandMetalIcon({
   const whole = useAnimatedProps(() =>
     transformProps({
       rotate: interpolate(progress.value, [0, 0.5, 1], ROCK),
+      scaleX: interpolate(progress.value, [0, 0.5, 1], SIZE),
+      scaleY: interpolate(progress.value, [0, 0.5, 1], SIZE),
       originX: 12,
       originY: 21.6,
     }),

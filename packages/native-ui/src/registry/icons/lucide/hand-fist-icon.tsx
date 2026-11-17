@@ -11,11 +11,12 @@ type HandFistIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * How far the fist rises, in the 24-unit viewBox, and how much it grows: the web twin's 4 and 1.1 would take its
- * knuckles past the top of the canvas, which react-native-svg clips.
+ * How far the fist rises, in the 24-unit viewBox, and its size as it rises, about its wrist: the web twin's 4,
+ * growing to 1.1, would take its knuckles past the top of the canvas, which react-native-svg clips, so it rises less
+ * and shrinks a little instead.
  */
-const RISE = -0.6;
-const GROW = 0.03;
+const RISE = -1.5;
+const SIZE = 0.95;
 
 /**
  * Lucide's hand-fist icon, which punches up, growing, and back when started. Hidden from a screen reader: the control
@@ -34,8 +35,9 @@ function HandFistIcon({
   const whole = useAnimatedProps(() =>
     transformProps({
       y: RISE * progress.value,
-      scaleX: 1 + GROW * progress.value,
-      scaleY: 1 + GROW * progress.value,
+      scaleX: 1 - (1 - SIZE) * progress.value,
+      scaleY: 1 - (1 - SIZE) * progress.value,
+      originY: 22,
     }),
   );
 

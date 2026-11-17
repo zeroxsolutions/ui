@@ -11,11 +11,12 @@ type KeySquareIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * The twist in degrees at each half of the way out, and how much the key grows at the first: less than the web
- * twin's 15 and 1.05, which would swing the key's foot past the canvas, which react-native-svg clips.
+ * The twist in degrees at each half of the way out, the web twin's, and the key's size as it twists: growing to 1.05
+ * as the web twin does would swing the key's foot past the canvas, which react-native-svg clips, so it shrinks a
+ * little instead.
  */
-const TWIST = [0, 4, -4];
-const GROW = 1.02;
+const TWIST = [0, 15, -15];
+const SIZE = [1, 0.9, 0.9];
 
 /**
  * Lucide's key-square icon, which twists one way, then the other, and back when started. Hidden from a screen reader:
@@ -34,8 +35,8 @@ function KeySquareIcon({
   const whole = useAnimatedProps(() =>
     transformProps({
       rotate: interpolate(progress.value, [0, 0.5, 1], TWIST),
-      scaleX: interpolate(progress.value, [0, 0.5, 1], [1, GROW, 1]),
-      scaleY: interpolate(progress.value, [0, 0.5, 1], [1, GROW, 1]),
+      scaleX: interpolate(progress.value, [0, 0.5, 1], SIZE),
+      scaleY: interpolate(progress.value, [0, 0.5, 1], SIZE),
     }),
   );
 

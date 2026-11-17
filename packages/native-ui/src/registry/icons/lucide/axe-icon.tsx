@@ -11,11 +11,12 @@ type AxeIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * How far the axe lifts back and swings, in degrees about its bottom-left corner: far less than the web twin's 20
- * and 25, which would swing its head past the canvas, which react-native-svg clips.
+ * How far the axe lifts back and strikes, in degrees about its bottom-left corner, and its size as it does: the web
+ * twin's 20 and 25 would swing its head past the canvas, which react-native-svg clips, so it swings less and shrinks
+ * towards the corner as it swings, as the pickaxe does.
  */
-const LIFT = -4;
-const STRIKE = 4;
+const SWING = [0, -10, 10];
+const SIZE = [1, 0.85, 0.85];
 
 /**
  * Lucide's axe icon, which swings back, then forward past rest, and back, about its lower-left corner, when started.
@@ -32,7 +33,13 @@ function AxeIcon({
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
   const axe = useAnimatedProps(() =>
-    transformProps({ rotate: interpolate(progress.value, [0, 0.75, 1], [0, LIFT, STRIKE]), originX: 0, originY: 24 }),
+    transformProps({
+      rotate: interpolate(progress.value, [0, 0.75, 1], SWING),
+      scaleX: interpolate(progress.value, [0, 0.75, 1], SIZE),
+      scaleY: interpolate(progress.value, [0, 0.75, 1], SIZE),
+      originX: 0,
+      originY: 24,
+    }),
   );
 
   return (

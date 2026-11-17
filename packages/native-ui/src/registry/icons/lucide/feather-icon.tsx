@@ -12,11 +12,13 @@ const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
  * The feather's turn, lift and sideways drift at the start, middle and end of the way out, in degrees and 24-unit
- * viewBox units. Each is about half the web twin's or less, which would take the feather past the canvas.
+ * viewBox units, and its size as it drifts. The turn is the web twin's; its 4 up and 2 across would take the feather
+ * past the canvas, which react-native-svg clips, so it drifts less and shrinks as it sways.
  */
-const TURN = [0, -4, 2];
-const LIFT = [0, -0.5, -0.25];
-const DRIFT = [0, 0.5, -0.5];
+const TURN = [0, -8, 4];
+const LIFT = [0, -1, -0.5];
+const DRIFT = [0, 1, -1];
+const SIZE = [1, 0.82, 0.82];
 
 /**
  * Lucide's feather icon, which drifts up a little and sways from side to side, and back when started. Hidden from a
@@ -37,6 +39,8 @@ function FeatherIcon({
       rotate: interpolate(progress.value, [0, 0.5, 1], TURN),
       x: interpolate(progress.value, [0, 0.5, 1], DRIFT),
       y: interpolate(progress.value, [0, 0.5, 1], LIFT),
+      scaleX: interpolate(progress.value, [0, 0.5, 1], SIZE),
+      scaleY: interpolate(progress.value, [0, 0.5, 1], SIZE),
     }),
   );
 

@@ -11,10 +11,12 @@ type KeyIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * The turn, in degrees about the bow, past its stop and back to it: an eighth of the web twin's 33 and 25, which
- * would swing the shaft past the left of the canvas, which react-native-svg clips.
+ * The turn, in degrees about the bow, past its stop and back to it, and the key's size as it turns: the web twin's 33
+ * and 25 would swing the shaft past the left of the canvas, which react-native-svg clips, so it turns less and
+ * shrinks towards the bow as it turns.
  */
-const TURN = [0, 4, 3];
+const TURN = [0, 15, 12];
+const SIZE = [1, 0.85, 0.85];
 
 /**
  * Lucide's key icon, which turns in its lock, and back when started. Hidden from a screen reader: the control around it
@@ -33,6 +35,8 @@ function KeyIcon({
   const whole = useAnimatedProps(() =>
     transformProps({
       rotate: interpolate(progress.value, [0, 0.75, 1], TURN),
+      scaleX: interpolate(progress.value, [0, 0.75, 1], SIZE),
+      scaleY: interpolate(progress.value, [0, 0.75, 1], SIZE),
       originX: 16.8,
       originY: 7.2,
     }),

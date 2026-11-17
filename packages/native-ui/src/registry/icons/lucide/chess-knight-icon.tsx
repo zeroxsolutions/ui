@@ -1,7 +1,7 @@
 // Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
 
 import type { ReactNode } from 'react';
-import Animated, { useAnimatedProps } from 'react-native-reanimated';
+import Animated, { interpolate, useAnimatedProps } from 'react-native-reanimated';
 import Svg, { G, Path } from 'react-native-svg';
 import { transformProps, useIconMotion, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
 
@@ -9,6 +9,15 @@ import { transformProps, useIconMotion, type AnimatedIconProps, type IconHandle 
 type ChessKnightIconHandle = IconHandle;
 
 const AnimatedG = Animated.createAnimatedComponent(G);
+
+/**
+ * How high the knight hops and how far it rears back, in 24-unit viewBox units and degrees about the middle of its
+ * base, and its size as it does: the web twin's 12 and 42 would take the ears past the canvas, which react-native-svg
+ * clips, so it hops and rears less and shrinks towards its base.
+ */
+const HOP = -1;
+const TIP = 15;
+const SIZE = 0.85;
 
 /**
  * Lucide's chess-knight icon, which hops, rearing back on its base, and lands again when started. Hidden from a screen
@@ -24,15 +33,16 @@ function ChessKnightIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  // A hop of 0.6 and a tip of 6 degrees, less than the web twin's 12 and 42, which take the ears past the canvas, which
-  // react-native-svg clips.
-  const knight = useAnimatedProps(() =>
-    transformProps({
-      y: -0.6 * Math.sin(Math.PI * progress.value),
-      rotate: 6 * progress.value,
+  const knight = useAnimatedProps(() => {
+    const size = interpolate(progress.value, [0, 0.5, 1], [1, SIZE, SIZE]);
+    return transformProps({
+      y: HOP * progress.value,
+      rotate: TIP * progress.value,
+      scaleX: size,
+      scaleY: size,
       originY: 22,
-    }),
-  );
+    });
+  });
 
   return (
     <Svg

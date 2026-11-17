@@ -27,7 +27,7 @@ const TRAIL =
  * place: the web twin's 3 and its 0.1 s delay of 0.55. At half the trail's size, less than half of 3 keeps it inside
  * the canvas.
  */
-const SLIDE = 1.25;
+const SLIDE = 1.1;
 const DELAY = 0.2;
 
 /**

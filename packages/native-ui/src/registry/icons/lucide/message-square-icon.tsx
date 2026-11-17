@@ -10,6 +10,15 @@ type MessageSquareIconHandle = IconHandle;
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 
+/** The wobble, in degrees about the middle, at each third of the way out: the web twin's. */
+const ROCK = [0, -7, 7, 0];
+
+/**
+ * The bubble's size as it wobbles: the web twin grows it to 1.05, which would push a corner past the canvas, which
+ * react-native-svg clips, so it shrinks a little as it wobbles, as message-circle does.
+ */
+const SIZE = 0.97;
+
 /**
  * Lucide's message-square icon, which swells and wobbles from side to side, then settles, when started.
  * Hidden from a screen reader: the control around it says what it does.
@@ -24,14 +33,14 @@ function MessageSquareIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  // 4 degrees, less than the web twin's 7, which takes a corner past the canvas, which react-native-svg clips.
-  const whole = useAnimatedProps(() => ({
-    ...transformProps({
-      rotate: interpolate(progress.value, [0, 1 / 3, 2 / 3, 1], [0, -4, 4, 0]),
-      scaleX: 1 + 0.05 * progress.value,
-      scaleY: 1 + 0.05 * progress.value,
-    }),
-  }));
+  const whole = useAnimatedProps(() => {
+    const size = interpolate(progress.value, [0, 1 / 3, 1], [1, SIZE, SIZE]);
+    return transformProps({
+      rotate: interpolate(progress.value, [0, 1 / 3, 2 / 3, 1], ROCK),
+      scaleX: size,
+      scaleY: size,
+    });
+  });
 
   return (
     <Svg

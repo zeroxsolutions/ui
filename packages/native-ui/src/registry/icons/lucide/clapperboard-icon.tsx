@@ -11,11 +11,13 @@ type ClapperboardIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * How far the board tips back and the clapper opens, in degrees: much less than the web twin's 10 each, which would
- * lift the clapper's far end past the top of the canvas, since it rests a unit from it.
+ * How far the board tips back and the clapper opens, in degrees, the web twin's 10 each, and the board's size as it
+ * tips: at full size they would lift the clapper's far end past the top of the canvas, which react-native-svg clips,
+ * since it rests a unit from it, so the board shrinks towards its foot as it tips.
  */
-const TIP = -3;
-const OPEN = -2;
+const TIP = -10;
+const OPEN = -10;
+const SIZE = 0.8;
 
 /** How far past shut the clapper snaps, in degrees. */
 const SNAP = 16;
@@ -34,7 +36,10 @@ function ClapperboardIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  const board = useAnimatedProps(() => transformProps({ rotate: TIP * progress.value, originX: 4, originY: 20 }));
+  const board = useAnimatedProps(() => {
+    const size = interpolate(progress.value, [0, 0.5, 1], [1, SIZE, SIZE]);
+    return transformProps({ rotate: TIP * progress.value, scaleX: size, scaleY: size, originX: 4, originY: 20 });
+  });
   const clapper = useAnimatedProps(() =>
     transformProps({ rotate: interpolate(progress.value, [0, 0.5, 1], [0, OPEN, SNAP]), originX: 3, originY: 11 }),
   );

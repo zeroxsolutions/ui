@@ -10,6 +10,15 @@ type BookTextIconHandle = IconHandle;
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 
+/** The rock, in degrees about the middle, at the start, two fifths of the way out and its end: the web twin's 8. */
+const ROCK = [0, -8, 8];
+
+/**
+ * The book's size as it rocks: the web twin swells it to 1.04, which would take a corner past the canvas, which
+ * react-native-svg clips, so it shrinks a little as it rocks.
+ */
+const SIZE = 0.94;
+
 /**
  * Lucide's book-text icon, which swells slightly and rocks to one side and the other about its middle, then settles,
  * when started. Hidden from a screen reader: the control around it says what it does.
@@ -24,13 +33,12 @@ function BookTextIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  // 4.5 degrees, less than the web twin's 8, which takes a corner past the canvas, which react-native-svg clips.
   const book = useAnimatedProps(() => {
-    const scale = 1 + 0.04 * progress.value;
+    const size = interpolate(progress.value, [0, 0.4, 1], [1, SIZE, SIZE]);
     return transformProps({
-      scaleX: scale,
-      scaleY: scale,
-      rotate: interpolate(progress.value, [0, 0.4, 1], [0, -4.5, 4.5]),
+      scaleX: size,
+      scaleY: size,
+      rotate: interpolate(progress.value, [0, 0.4, 1], ROCK),
     });
   });
 

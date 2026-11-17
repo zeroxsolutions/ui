@@ -11,11 +11,12 @@ type HammerIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * How far the hammer lifts back and strikes, in degrees about its bottom-left corner: far less than the web twin's 20
- * and 25, which would swing its head past the canvas, which react-native-svg clips.
+ * How far the hammer lifts back and strikes, in degrees about its bottom-left corner, and its size as it does: the web
+ * twin's 20 and 25 would swing its head past the canvas, which react-native-svg clips, so it swings less and shrinks
+ * towards the corner as it swings, as the pickaxe does.
  */
-const LIFT = -4;
-const STRIKE = 4;
+const SWING = [0, -10, 10];
+const SIZE = [1, 0.85, 0.85];
 
 /**
  * Lucide's hammer icon, which lifts back and strikes, and back when started. Hidden from a screen reader: the control
@@ -33,7 +34,9 @@ function HammerIcon({
   const progress = useIconMotion(ref);
   const whole = useAnimatedProps(() =>
     transformProps({
-      rotate: interpolate(progress.value, [0, 0.75, 1], [0, LIFT, STRIKE]),
+      rotate: interpolate(progress.value, [0, 0.75, 1], SWING),
+      scaleX: interpolate(progress.value, [0, 0.75, 1], SIZE),
+      scaleY: interpolate(progress.value, [0, 0.75, 1], SIZE),
       originX: 0,
       originY: 24,
     }),

@@ -11,10 +11,10 @@ type HatGlassesIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * The hat's tip in degrees, and its lift in the 24-unit viewBox, at each half of the way out: less than the web
- * twin's -4 and -3, which would lift its crown past the top of the canvas, which react-native-svg clips.
+ * The hat's tip in degrees, the web twin's, and its lift in the 24-unit viewBox, at each half of the way out: less
+ * than the web twin's -3, which would lift its crown past the top of the canvas, which react-native-svg clips.
  */
-const TIP = [0, -3, 1.5];
+const TIP = [0, -4, 2];
 const HAT_LIFT = [0, -1.2, 0.5];
 
 /**

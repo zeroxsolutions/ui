@@ -12,10 +12,10 @@ const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
  * The hop in the 24-unit viewBox, and the rock in degrees, at each half of the way out: a third of the web twin's
- * 3-unit hop and less than its 3-degree rock, which would take the bow past the top of the canvas, which react-native-svg clips.
+ * 3-unit hop, which would take the bow past the top of the canvas, which react-native-svg clips, and its 3-degree rock.
  */
 const HOP = [0, -1, 0];
-const ROCK = [0, 2, -2];
+const ROCK = [0, 3, -3];
 
 /**
  * Lucide's key-round icon, which hops and rocks, and back when started. Hidden from a screen reader: the control around

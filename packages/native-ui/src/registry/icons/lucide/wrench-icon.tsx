@@ -11,6 +11,13 @@ type WrenchIconHandle = IconHandle;
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 /**
+ * The twist, in degrees about the head, at each step, and the wrench's size as it twists: the web twin's 12, -14 and
+ * 4 would swing the handle past the canvas, which react-native-svg clips, so it shrinks towards the head as it twists.
+ */
+const TWIST = [0, 12, -14, 4, 0];
+const SIZE = [1, 0.8, 0.8, 1];
+
+/**
  * Lucide's wrench icon, which twists to one side and the other about its handle, then settles, when
  * started. Hidden from a screen reader: the control around it says what it does.
  */
@@ -24,15 +31,16 @@ function WrenchIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  // About a quarter of the web twin's swing (12 and -14 degrees), which takes the handle past the canvas, which react-
-  // native-svg clips.
-  const wrench = useAnimatedProps(() => ({
-    ...transformProps({
-      rotate: interpolate(progress.value, [0, 0.42, 0.68, 0.88, 1], [0, 3, -3, 1, 0]),
+  const wrench = useAnimatedProps(() => {
+    const size = interpolate(progress.value, [0, 0.42, 0.88, 1], SIZE);
+    return transformProps({
+      rotate: interpolate(progress.value, [0, 0.42, 0.68, 0.88, 1], TWIST),
+      scaleX: size,
+      scaleY: size,
       originX: 21.6,
       originY: 2.4,
-    }),
-  }));
+    });
+  });
 
   return (
     <Svg

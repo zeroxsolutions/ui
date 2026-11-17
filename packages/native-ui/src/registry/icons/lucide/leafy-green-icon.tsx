@@ -13,6 +13,18 @@ const AnimatedG = Animated.createAnimatedComponent(G);
 /** Where in the way out each step of the sway falls. */
 const SWAY = [0, 0.25, 0.5, 0.75, 1];
 
+/** The turn at each step of the sway, in degrees about the middle: the web twin's. */
+const TURN = [0, -8, 4, -3, 0];
+
+/**
+ * The lift and the drift at each step of the sway, in 24-unit viewBox units, and the plant's size as it sways: the web
+ * twin's 4 up and 2 across would take the leaves past the canvas, which react-native-svg clips, so it moves less and
+ * shrinks as it sways.
+ */
+const LIFT = [0, -1, -0.5, -0.25, 0];
+const DRIFT = [0, 1, -1, 0.5, 0];
+const SIZE = 0.82;
+
 /**
  * Lucide's leafy-green icon, which sways and tilts in the wind, then settles when started. Hidden from a screen reader:
  * the control around it says what it does.
@@ -27,15 +39,16 @@ function LeafyGreenIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  // About a quarter of the web twin's sway (8 degrees, 4 up, 2 across), which takes the leaves past the canvas, which
-  // react-native-svg clips.
-  const whole = useAnimatedProps(() =>
-    transformProps({
-      rotate: interpolate(progress.value, SWAY, [0, -2, 1, -0.75, 0]),
-      y: interpolate(progress.value, SWAY, [0, -0.5, -0.25, -0.1, 0]),
-      x: interpolate(progress.value, SWAY, [0, 0.5, -0.5, 0.25, 0]),
-    }),
-  );
+  const whole = useAnimatedProps(() => {
+    const size = interpolate(progress.value, [0, 0.25, 0.75, 1], [1, SIZE, SIZE, 1]);
+    return transformProps({
+      rotate: interpolate(progress.value, SWAY, TURN),
+      y: interpolate(progress.value, SWAY, LIFT),
+      x: interpolate(progress.value, SWAY, DRIFT),
+      scaleX: size,
+      scaleY: size,
+    });
+  });
 
   return (
     <Svg

@@ -13,6 +13,13 @@ const AnimatedG = Animated.createAnimatedComponent(G);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 /**
+ * The bob down, then up, in 24-unit viewBox units, and the bot's size as it bobs: the web twin's 1.5, growing to 1.03,
+ * would take the antenna past the canvas, which react-native-svg clips, so it bobs less and shrinks a little instead.
+ */
+const BOB = [0, 1, -1];
+const SIZE = 0.94;
+
+/**
  * The opacity of the typing dot `index` from the left at `progress`, each pulsing a little after the last. Hidden
  * at rest.
  */
@@ -40,13 +47,12 @@ function BotMessageSquareIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  // A bob of 0.4, less than the web twin's 1.5, which takes the antenna past the canvas, which react-native-svg clips.
   const bot = useAnimatedProps(() => {
-    const scale = 1 + 0.03 * progress.value;
+    const size = interpolate(progress.value, [0, 0.5, 1], [1, SIZE, SIZE]);
     return transformProps({
-      y: interpolate(progress.value, [0, 0.5, 1], [0, 0.4, -0.4]),
-      scaleX: scale,
-      scaleY: scale,
+      y: interpolate(progress.value, [0, 0.5, 1], BOB),
+      scaleX: size,
+      scaleY: size,
       rotate: interpolate(progress.value, [0, 0.5, 1], [0, -3, 3]),
     });
   });
