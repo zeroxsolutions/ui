@@ -14,8 +14,8 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
-    "@tiptap/core": "^3.33.1",
-    "@tiptap/pm": "^3.33.1",
+    "@tiptap/core": "^3.34.0",
+    "@tiptap/pm": "^3.34.0",
     "katex": "^0.19.1",
     "mermaid": "^11.16.0",
     "remark": "^15.0.1",
