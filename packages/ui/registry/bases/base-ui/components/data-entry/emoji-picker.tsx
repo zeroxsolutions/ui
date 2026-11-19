@@ -4,25 +4,25 @@ import { EMOJI_CATEGORIES, FluentEmoji, type EmojiDatum } from '@zeroxsolutions/
 import * as React from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ClockIcon, type ClockIconHandle } from '@/registry/bases/base-ui/icons/clock-icon';
-import { CoffeeIcon } from '@/registry/bases/base-ui/icons/coffee-icon';
-import { DumbbellIcon } from '@/registry/bases/base-ui/icons/dumbbell-icon';
-import { FlagIcon } from '@/registry/bases/base-ui/icons/flag-icon';
-import { HashIcon } from '@/registry/bases/base-ui/icons/hash-icon';
+import { ClockIcon, type ClockIconHandle } from '@/registry/bases/base-ui/icons/lucide/clock-icon';
+import { CoffeeIcon } from '@/registry/bases/base-ui/icons/lucide/coffee-icon';
+import { DumbbellIcon } from '@/registry/bases/base-ui/icons/lucide/dumbbell-icon';
+import { FlagIcon } from '@/registry/bases/base-ui/icons/lucide/flag-icon';
+import { HashIcon } from '@/registry/bases/base-ui/icons/lucide/hash-icon';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
-import { LeafIcon } from '@/registry/bases/base-ui/icons/leaf-icon';
-import { LightbulbIcon } from '@/registry/bases/base-ui/icons/lightbulb-icon';
-import { PlaneIcon } from '@/registry/bases/base-ui/icons/plane-icon';
+import { LeafIcon } from '@/registry/bases/base-ui/icons/lucide/leaf-icon';
+import { LightbulbIcon } from '@/registry/bases/base-ui/icons/lucide/lightbulb-icon';
+import { PlaneIcon } from '@/registry/bases/base-ui/icons/lucide/plane-icon';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
-import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/icons/search-icon';
-import { SmileIcon } from '@/registry/bases/base-ui/icons/smile-icon';
+import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/icons/lucide/search-icon';
+import { FaceSlightlySmilingIcon } from '@/registry/bases/base-ui/icons/lucide/face-slightly-smiling-icon';
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /** The nav's animated glyph per category. Every animated icon shares `ClockIcon`'s props and ref handle. */
 const CATEGORY_ICONS: Record<string, typeof ClockIcon> = {
   frequent: ClockIcon,
-  smileys_people: SmileIcon,
+  smileys_people: FaceSlightlySmilingIcon,
   animals_nature: LeafIcon,
   food_drink: CoffeeIcon,
   travel_places: PlaneIcon,

@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react-native';
 import { AccessibilityInfo, Platform } from 'react-native';
 import { handleOf } from '../../icons/animated-icon.testing';
-import { CircleCheckIcon } from '../../icons/circle-check-icon';
-import { CircleIcon } from '../../icons/circle-icon';
+import { CircleCheckIcon } from '../../icons/lucide/circle-check-icon';
+import { CircleIcon } from '../../icons/lucide/circle-icon';
 import {
   PasswordStrength,
   PasswordStrengthMeter,
@@ -21,10 +21,10 @@ jest.mock('../../ui/icon', () => {
       createElement('View', { testID: 'requirement-icon', icon: as }, createElement(as, { ref })),
   };
 });
-jest.mock('../../icons/circle-icon', () =>
+jest.mock('../../icons/lucide/circle-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('circle-icon'),
 );
-jest.mock('../../icons/circle-check-icon', () =>
+jest.mock('../../icons/lucide/circle-check-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('circle-check-icon'),
 );
 

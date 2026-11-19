@@ -4,8 +4,8 @@ import type { ComponentProps } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { EditorSelection, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { standardKit, callout } from '../features/index';
-import { Heading1Icon } from '@/registry/bases/base-ui/icons/heading-1-icon';
-import { Heading2Icon } from '@/registry/bases/base-ui/icons/heading-2-icon';
+import { Heading1Icon } from '@/registry/bases/base-ui/icons/lucide/heading-1-icon';
+import { Heading2Icon } from '@/registry/bases/base-ui/icons/lucide/heading-2-icon';
 import { BlockMenu } from './block-menu';
 import { BubbleMenu } from './bubble-menu';
 import { EditorToolbar } from './editor-toolbar';
@@ -30,16 +30,16 @@ function mockedIcon(handle: { startAnimation: () => void; stopAnimation: () => v
   });
 }
 
-vi.mock('@/registry/bases/base-ui/icons/bold-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/bold-icon')>()),
-  BoldIcon: mockedIcon(handles.bold),
+vi.mock('@/registry/bases/base-ui/icons/lucide/letter-b-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/letter-b-icon')>()),
+  LetterBIcon: mockedIcon(handles.bold),
 }));
-vi.mock('@/registry/bases/base-ui/icons/heading-1-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/heading-1-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/heading-1-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/heading-1-icon')>()),
   Heading1Icon: mockedIcon(handles.heading1),
 }));
-vi.mock('@/registry/bases/base-ui/icons/heading-2-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/heading-2-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/heading-2-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/heading-2-icon')>()),
   Heading2Icon: mockedIcon(handles.heading2),
 }));
 

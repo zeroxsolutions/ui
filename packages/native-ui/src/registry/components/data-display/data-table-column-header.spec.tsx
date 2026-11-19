@@ -14,21 +14,21 @@ import {
   DataTableColumnHeaderTrigger,
 } from './data-table-column-header';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { ChevronsUpDownIcon } from '../../icons/chevrons-up-down-icon';
-import { ArrowUpIcon } from '../../icons/arrow-up-icon';
-import { ArrowDownIcon } from '../../icons/arrow-down-icon';
-import { EyeOffIcon } from '../../icons/eye-off-icon';
+import { ChevronsUpDownIcon } from '../../icons/lucide/chevrons-up-down-icon';
+import { ArrowUpIcon } from '../../icons/lucide/arrow-up-icon';
+import { ArrowDownIcon } from '../../icons/lucide/arrow-down-icon';
+import { EyeOffIcon } from '../../icons/lucide/eye-off-icon';
 
-jest.mock('../../icons/chevrons-up-down-icon', () =>
+jest.mock('../../icons/lucide/chevrons-up-down-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevrons-up-down-icon'),
 );
-jest.mock('../../icons/arrow-up-icon', () =>
+jest.mock('../../icons/lucide/arrow-up-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('arrow-up-icon'),
 );
-jest.mock('../../icons/arrow-down-icon', () =>
+jest.mock('../../icons/lucide/arrow-down-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('arrow-down-icon'),
 );
-jest.mock('../../icons/eye-off-icon', () =>
+jest.mock('../../icons/lucide/eye-off-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('eye-off-icon'),
 );
 

@@ -12,7 +12,7 @@ module.exports = {
   moduleNameMapper: {
     '[.]svg$': '@nx/expo/plugins/jest/svg-mock',
     // Icon, Input, Textarea, Skeleton, the chart's theme and the colour scheme have one file per engine, and the registry ships one of them as icon.tsx, input.tsx, textarea.tsx, skeleton.tsx, lib/chart-theme.ts and lib/color-scheme.ts; the specs run NativeWind's.
-    // A composed component under components/<category>/ imports Icon, Input and Skeleton as ../../ui/icon, ../../ui/input and ../../ui/skeleton, a spec under icons/ Icon as ../ui/icon, and a lib file the chart's
+    // A composed component under components/<category>/ imports Icon, Input and Skeleton as ../../ui/icon, ../../ui/input and ../../ui/skeleton, a spec under icons/lucide/ Icon as ../../ui/icon, and a lib file the chart's
     // theme and the colour scheme as ./chart-theme and ./color-scheme.
     '^(?:[.]|[.][.](?:/[.][.])?/ui)/icon$': '<rootDir>/src/registry/ui/icon.nativewind.tsx',
     '^(?:[.]|[.][.]/[.][.]/ui)/input$': '<rootDir>/src/registry/ui/input.nativewind.tsx',

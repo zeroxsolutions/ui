@@ -31,7 +31,7 @@ const COLUMNS: ColumnDef<Row>[] = [
 
 const { gearStart, gearStop } = vi.hoisted(() => ({ gearStart: vi.fn(), gearStop: vi.fn() }));
 
-vi.mock('@/registry/bases/base-ui/icons/settings-2-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/settings-2-icon', async () => {
   const React = await import('react');
   return {
     Settings2Icon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {

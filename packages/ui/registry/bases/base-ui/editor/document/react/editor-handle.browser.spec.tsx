@@ -23,12 +23,12 @@ function mockedIcon(handle: { startAnimation: () => void; stopAnimation: () => v
   });
 }
 
-vi.mock('@/registry/bases/base-ui/icons/grip-vertical-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/grip-vertical-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/grip-vertical-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/grip-vertical-icon')>()),
   GripVerticalIcon: mockedIcon(handles.grip),
 }));
-vi.mock('@/registry/bases/base-ui/icons/plus-icon', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/plus-icon')>()),
+vi.mock('@/registry/bases/base-ui/icons/lucide/plus-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/plus-icon')>()),
   PlusIcon: mockedIcon(handles.plus),
 }));
 

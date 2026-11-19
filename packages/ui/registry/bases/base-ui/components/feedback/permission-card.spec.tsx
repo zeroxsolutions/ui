@@ -30,7 +30,7 @@ beforeAll(() => {
 
 const { pendingStart, pendingStop } = vi.hoisted(() => ({ pendingStart: vi.fn(), pendingStop: vi.fn() }));
 
-vi.mock('@/registry/bases/base-ui/icons/circle-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/circle-icon', async () => {
   const React = await import('react');
   return {
     CircleIcon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
@@ -42,7 +42,7 @@ vi.mock('@/registry/bases/base-ui/icons/circle-icon', async () => {
 
 const { deniedStart, deniedStop } = vi.hoisted(() => ({ deniedStart: vi.fn(), deniedStop: vi.fn() }));
 
-vi.mock('@/registry/bases/base-ui/icons/circle-x-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/circle-x-icon', async () => {
   const React = await import('react');
   return {
     CircleXIcon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
@@ -54,7 +54,7 @@ vi.mock('@/registry/bases/base-ui/icons/circle-x-icon', async () => {
 
 const { approvedStart, approvedStop } = vi.hoisted(() => ({ approvedStart: vi.fn(), approvedStop: vi.fn() }));
 
-vi.mock('@/registry/bases/base-ui/icons/circle-check-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/circle-check-icon', async () => {
   const React = await import('react');
   return {
     CircleCheckIcon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {

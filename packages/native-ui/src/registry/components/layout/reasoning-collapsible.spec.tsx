@@ -9,17 +9,17 @@ import {
   type ReasoningCollapsibleProps,
 } from './reasoning-collapsible';
 import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { BrainIcon } from '../../icons/brain-icon';
-import { ChevronDownIcon } from '../../icons/chevron-down-icon';
-import { ChevronUpIcon } from '../../icons/chevron-up-icon';
+import { BrainIcon } from '../../icons/lucide/brain-icon';
+import { ChevronDownIcon } from '../../icons/lucide/chevron-down-icon';
+import { ChevronUpIcon } from '../../icons/lucide/chevron-up-icon';
 
-jest.mock('../../icons/brain-icon', () =>
+jest.mock('../../icons/lucide/brain-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('brain-icon'),
 );
-jest.mock('../../icons/chevron-down-icon', () =>
+jest.mock('../../icons/lucide/chevron-down-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-down-icon'),
 );
-jest.mock('../../icons/chevron-up-icon', () =>
+jest.mock('../../icons/lucide/chevron-up-icon', () =>
   jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-up-icon'),
 );
 

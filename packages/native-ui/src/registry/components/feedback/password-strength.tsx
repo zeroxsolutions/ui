@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, View } from 'react-native';
-import { CircleCheckIcon } from '../../icons/circle-check-icon';
-import { CircleIcon } from '../../icons/circle-icon';
+import { CircleCheckIcon } from '../../icons/lucide/circle-check-icon';
+import { CircleIcon } from '../../icons/lucide/circle-icon';
 import { usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { Card, CardContent } from '../../ui/card';
 import { Icon } from '../../ui/icon';

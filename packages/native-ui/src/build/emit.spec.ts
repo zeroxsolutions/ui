@@ -204,10 +204,10 @@ describe('aliasImports', () => {
   });
 
   it("points an import of an animated icon at the consumer's components/general, where the icon lands", () => {
-    const source = "import { CopyIcon } from '../../icons/copy-icon';";
+    const source = "import { CopyIcon } from '../../icons/lucide/copy-icon';";
 
     expect(aliasImports(source, 'components/feedback/copy-button.tsx')).toBe(
-      "import { CopyIcon } from '@/components/general/copy-icon';",
+      "import { CopyIcon } from '@/components/general/lucide/copy-icon';",
     );
   });
 
@@ -244,7 +244,15 @@ const PLATFORM_PACKAGES: ReadonlySet<string> = new Set(['react', 'react-native']
 const BARE_WEIGHT = /\bfont-(?:normal|medium|semibold|bold)\b|fontWeight/;
 const IMPORT_SPECIFIER = /from '([^']+)'/g;
 // An item under components/ui, or a composed one under components/<category>, such as a status indicator.
-const ALIASED_ITEM = /^@\/(?:components\/[\w-]+|lib|hooks)\/(.+)$/;
+const ALIASED_ITEM = /^@\/(?:components\/(?!general\/)[\w-]+|lib|hooks)\/(.+)$/;
+// An animated icon under components/general/<set>, published as the item `<set>-<file>`.
+const ALIASED_ICON = /^@\/components\/general\/([\w-]+)\/([\w-]+)$/;
+
+/** The item a `@/` import of a registry file names, or `undefined` for an import of anything else. */
+function itemOf(specifier: string): string | undefined {
+  const icon = ALIASED_ICON.exec(specifier);
+  return icon ? `${icon[1]}-${icon[2]}` : ALIASED_ITEM.exec(specifier)?.[1];
+}
 
 function packageName(specifier: string): string {
   const segments = specifier.split('/');
@@ -336,13 +344,13 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
       );
       for (const file of built.files) {
         for (const [, specifier] of file.content.matchAll(IMPORT_SPECIFIER)) {
-          const aliased = ALIASED_ITEM.exec(specifier);
+          const item = itemOf(specifier);
           if (ownFiles.has(specifier)) {
             continue;
-          } else if (aliased) {
-            expect({ file: file.path, needs: `@zui/${aliased[1]}` }).toEqual({
+          } else if (item !== undefined) {
+            expect({ file: file.path, needs: `@zui/${item}` }).toEqual({
               file: file.path,
-              needs: built.registryDependencies?.find((dependency) => dependency === `@zui/${aliased[1]}`),
+              needs: built.registryDependencies?.find((dependency) => dependency === `@zui/${item}`),
             });
           } else if (!PLATFORM_PACKAGES.has(specifier)) {
             expect(packages).toContain(packageName(specifier));

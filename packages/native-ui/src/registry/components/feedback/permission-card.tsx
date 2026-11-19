@@ -8,9 +8,9 @@ import {
   type ReactNode,
 } from 'react';
 import { View } from 'react-native';
-import { CircleCheckIcon } from '../../icons/circle-check-icon';
-import { CircleIcon } from '../../icons/circle-icon';
-import { CircleXIcon } from '../../icons/circle-x-icon';
+import { CircleCheckIcon } from '../../icons/lucide/circle-check-icon';
+import { CircleIcon } from '../../icons/lucide/circle-icon';
+import { CircleXIcon } from '../../icons/lucide/circle-x-icon';
 import { usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';

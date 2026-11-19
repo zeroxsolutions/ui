@@ -38,15 +38,15 @@ function standIn(Glyph: ComponentType<AnimatedIconProps>): StandIn {
 }
 
 /**
- * The module a spec's `jest.mock` factory returns for an icon file of this folder, named as `copy-icon`: each icon
+ * The module a spec's `jest.mock` factory returns for an icon file of the lucide folder, named as `copy-icon`: each icon
  * draws and moves as the real one does, while its ref records each call on a spy {@link handleOf} reads back.
  *
- *   jest.mock('../../icons/copy-icon', () =>
+ *   jest.mock('../../icons/lucide/copy-icon', () =>
  *     jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('copy-icon'),
  *   );
  */
 function animatedIconModule(file: string): Record<string, StandIn> {
-  const actual = jest.requireActual<Record<string, ComponentType<AnimatedIconProps>>>(`./${file}`);
+  const actual = jest.requireActual<Record<string, ComponentType<AnimatedIconProps>>>(`./lucide/${file}`);
   return Object.fromEntries(Object.entries(actual).map(([name, Glyph]) => [name, standIn(Glyph)]));
 }
 

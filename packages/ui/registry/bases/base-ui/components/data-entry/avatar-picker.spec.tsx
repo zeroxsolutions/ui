@@ -10,7 +10,7 @@ const { checkStart, checkStop, trashStart, trashStop } = vi.hoisted(() => ({
   trashStop: vi.fn(),
 }));
 
-vi.mock('@/registry/bases/base-ui/icons/check-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/check-icon', async () => {
   const React = await import('react');
   return {
     CheckIcon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
@@ -20,12 +20,12 @@ vi.mock('@/registry/bases/base-ui/icons/check-icon', async () => {
   };
 });
 
-vi.mock('@/registry/bases/base-ui/icons/trash-2-icon', async () => {
+vi.mock('@/registry/bases/base-ui/icons/lucide/trash-icon', async () => {
   const React = await import('react');
   return {
-    Trash2Icon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
+    TrashIcon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
       React.useImperativeHandle(ref, () => ({ startAnimation: trashStart, stopAnimation: trashStop }));
-      return <svg data-testid="trash-2-icon" aria-hidden={props['aria-hidden']} />;
+      return <svg data-testid="trash-icon" aria-hidden={props['aria-hidden']} />;
     }),
   };
 });

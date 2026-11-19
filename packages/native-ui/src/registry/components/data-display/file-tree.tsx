@@ -17,7 +17,7 @@ import {
   type RefObject,
 } from 'react';
 import { Platform, Pressable, View, type GestureResponderEvent, type KeyDownEvent } from 'react-native';
-import { ChevronRightIcon } from '../../icons/chevron-right-icon';
+import { ChevronRightIcon } from '../../icons/lucide/chevron-right-icon';
 import { useFocusVisible } from '../../lib/focus-visible';
 import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';

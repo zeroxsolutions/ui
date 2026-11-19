@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Sigma } from 'lucide-react';
-import { SigmaIcon } from '@/registry/bases/base-ui/icons/sigma-icon';
-import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
-import { EyeIcon } from '@/registry/bases/base-ui/icons/eye-icon';
-import { OmegaIcon } from '@/registry/bases/base-ui/icons/omega-icon';
-import { PencilLineIcon } from '@/registry/bases/base-ui/icons/pencil-line-icon';
-import { RadicalIcon } from '@/registry/bases/base-ui/icons/radical-icon';
-import { XIcon } from '@/registry/bases/base-ui/icons/x-icon';
+import { SigmaIcon } from '@/registry/bases/base-ui/icons/lucide/sigma-icon';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/lucide/check-icon';
+import { EyeIcon } from '@/registry/bases/base-ui/icons/lucide/eye-icon';
+import { OmegaIcon } from '@/registry/bases/base-ui/icons/lucide/omega-icon';
+import { PencilLineIcon } from '@/registry/bases/base-ui/icons/lucide/pencil-line-icon';
+import { RadicalIcon } from '@/registry/bases/base-ui/icons/lucide/radical-icon';
+import { XIcon } from '@/registry/bases/base-ui/icons/lucide/x-icon';
 import { ChromeControl, ChromeIcon, useChromeActive } from '../../ui/chrome-icon';
 import katex from 'katex';
 import { z } from 'zod';

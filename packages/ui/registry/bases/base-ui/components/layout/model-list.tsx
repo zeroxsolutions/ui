@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { Trash2Icon } from '@/registry/bases/base-ui/icons/trash-2-icon';
+import { TrashIcon } from '@/registry/bases/base-ui/icons/lucide/trash-icon';
 import { useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { Item, ItemActions, ItemContent, ItemMedia } from '@/registry/bases/base-ui/ui/item';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
@@ -98,7 +98,7 @@ function ModelListRemoveButton({
       {...props}
       {...mergeProps<'button'>(handlers, { onPointerEnter, onPointerLeave, onFocus, onBlur })}
     >
-      {children ?? <Trash2Icon ref={ref} aria-hidden />}
+      {children ?? <TrashIcon ref={ref} aria-hidden />}
     </Button>
   );
 }

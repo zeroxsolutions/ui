@@ -1,5 +1,5 @@
 import { TableKit } from '@tiptap/extension-table';
-import { TableIcon } from '@/registry/bases/base-ui/icons/table-icon';
+import { TableIcon } from '@/registry/bases/base-ui/icons/lucide/table-icon';
 import {
   defineFeature,
   type EditorFeature,

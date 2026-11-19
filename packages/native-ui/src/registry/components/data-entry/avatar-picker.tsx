@@ -11,8 +11,8 @@ import {
   type ReactNode,
 } from 'react';
 import { Pressable, View } from 'react-native';
-import { CheckIcon } from '../../icons/check-icon';
-import { Trash2Icon } from '../../icons/trash-2-icon';
+import { CheckIcon } from '../../icons/lucide/check-icon';
+import { TrashIcon } from '../../icons/lucide/trash-icon';
 import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { avatarPickerCheckColor } from '../../lib/avatar-picker-check-color';
 import { textOf } from '../../lib/text-children';
@@ -200,7 +200,7 @@ function AvatarPickerRemoveButton({
       {...iconTrigger([icon], { onPressIn, onFocus })}
       {...props}
     >
-      {children ?? <Icon as={Trash2Icon} ref={icon} />}
+      {children ?? <Icon as={TrashIcon} ref={icon} />}
     </Button>
   );
 }

@@ -814,7 +814,7 @@ describe('content/docs', () => {
           { path: 'registry/bases/base-ui/types/status-tone.ts', type: 'registry:lib' },
         ],
         dependencies: ['lucide-react'],
-        registryDependencies: ['@shadcn/utils', '@zui/circle-icon'],
+        registryDependencies: ['@shadcn/utils', '@zui/lucide-circle-icon'],
       },
     ];
     const sources = {
@@ -837,7 +837,7 @@ describe('content/docs', () => {
       'components/base/status-indicator: has no ComponentSource for registry/bases/base-ui/types/status-tone.ts',
       'components/base/status-indicator: has 2 ComponentSource blocks for registry/bases/base-ui/components/feedback/status-indicator.tsx',
       'components/base/status-indicator: installs pnpm add react, not pnpm add lucide-react',
-      'components/base/status-indicator: adds pnpm dlx shadcn@latest add utils, not pnpm dlx shadcn@latest add utils @zui/circle-icon',
+      'components/base/status-indicator: adds pnpm dlx shadcn@latest add utils, not pnpm dlx shadcn@latest add utils @zui/lucide-circle-icon',
     ]);
   });
 

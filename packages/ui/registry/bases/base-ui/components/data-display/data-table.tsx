@@ -6,10 +6,10 @@ import { type Table as TanstackTable, flexRender } from '@tanstack/react-table';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { Settings2Icon } from '@/registry/bases/base-ui/icons/settings-2-icon';
+import { Settings2Icon } from '@/registry/bases/base-ui/icons/lucide/settings-2-icon';
 import { useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
-import { ChevronLeftIcon } from '@/registry/bases/base-ui/icons/chevron-left-icon';
-import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/chevron-right-icon';
+import { ChevronLeftIcon } from '@/registry/bases/base-ui/icons/lucide/chevron-left-icon';
+import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/lucide/chevron-right-icon';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,

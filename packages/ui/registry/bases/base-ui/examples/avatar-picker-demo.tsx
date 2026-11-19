@@ -33,16 +33,19 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/registry/bases/base-ui/ui/empty';
-import { PaletteIcon, type PaletteIconHandle } from '@/registry/bases/base-ui/icons/palette-icon';
-import { SmileIcon, type SmileIconHandle } from '@/registry/bases/base-ui/icons/smile-icon';
+import { PaletteIcon, type PaletteIconHandle } from '@/registry/bases/base-ui/icons/lucide/palette-icon';
+import {
+  FaceSlightlySmilingIcon,
+  type FaceSlightlySmilingIconHandle,
+} from '@/registry/bases/base-ui/icons/lucide/face-slightly-smiling-icon';
 import { Spinner } from '@/registry/bases/base-ui/ui/spinner';
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
-import { UploadIcon, type UploadIconHandle } from '@/registry/bases/base-ui/icons/upload-icon';
+import { UploadIcon, type UploadIconHandle } from '@/registry/bases/base-ui/icons/lucide/upload-icon';
 
 /** An avatar, tinted by the picked colour, that opens an emoji, upload and colour editor. */
 function AvatarPickerDemo(): ReactNode {
   const [avatar, setAvatar] = useState<AvatarPickerValue>({ color: '#6366f1' });
-  const smileRef = useRef<SmileIconHandle>(null);
+  const smileRef = useRef<FaceSlightlySmilingIconHandle>(null);
   const uploadTabRef = useRef<UploadIconHandle>(null);
   const uploadRef = useRef<UploadIconHandle>(null);
   const paletteRef = useRef<PaletteIconHandle>(null);
@@ -74,7 +77,7 @@ function AvatarPickerDemo(): ReactNode {
                 onFocus={() => smileRef.current?.startAnimation()}
                 onBlur={() => smileRef.current?.stopAnimation()}
               >
-                <SmileIcon ref={smileRef} aria-hidden />
+                <FaceSlightlySmilingIcon ref={smileRef} aria-hidden />
               </TabsTrigger>
               <TabsTrigger
                 value="upload"

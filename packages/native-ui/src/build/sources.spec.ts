@@ -25,8 +25,8 @@ describe('appPath', () => {
   });
 
   it('puts an animated icon under components/general, where a composed control imports it from', () => {
-    expect(appPath({ path: 'registry/icons/copy-icon.tsx', type: 'registry:ui' })).toBe(
-      'components/general/copy-icon.tsx',
+    expect(appPath({ path: 'registry/icons/lucide/copy-icon.tsx', type: 'registry:ui' })).toBe(
+      'components/general/lucide/copy-icon.tsx',
     );
   });
 

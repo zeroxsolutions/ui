@@ -1,5 +1,5 @@
 import { Link } from '@tiptap/extension-link';
-import { LinkIcon } from '@/registry/bases/base-ui/icons/link-icon';
+import { LinkIcon } from '@/registry/bases/base-ui/icons/lucide/link-icon';
 import { z } from 'zod';
 import {
   defineFeature,

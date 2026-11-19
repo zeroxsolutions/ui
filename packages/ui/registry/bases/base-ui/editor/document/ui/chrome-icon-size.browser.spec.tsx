@@ -22,22 +22,22 @@ import { render } from 'vitest-browser-react';
 import { userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import '../../../../../../test/nova-style.css';
-import { ArrowUpIcon } from '@/registry/bases/base-ui/icons/arrow-up-icon';
-import { BoldIcon } from '@/registry/bases/base-ui/icons/bold-icon';
-import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
-import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/chevron-right-icon';
-import { CircleIcon } from '@/registry/bases/base-ui/icons/circle-icon';
-import { CircleXIcon } from '@/registry/bases/base-ui/icons/circle-x-icon';
-import { DownloadIcon } from '@/registry/bases/base-ui/icons/download-icon';
-import { DumbbellIcon } from '@/registry/bases/base-ui/icons/dumbbell-icon';
-import { EyeIcon } from '@/registry/bases/base-ui/icons/eye-icon';
-import { FlagIcon } from '@/registry/bases/base-ui/icons/flag-icon';
-import { HashIcon } from '@/registry/bases/base-ui/icons/hash-icon';
-import { LightbulbIcon } from '@/registry/bases/base-ui/icons/lightbulb-icon';
-import { PlaneIcon } from '@/registry/bases/base-ui/icons/plane-icon';
-import { PlusIcon } from '@/registry/bases/base-ui/icons/plus-icon';
-import { Settings2Icon } from '@/registry/bases/base-ui/icons/settings-2-icon';
-import { Trash2Icon } from '@/registry/bases/base-ui/icons/trash-2-icon';
+import { ArrowUpIcon } from '@/registry/bases/base-ui/icons/lucide/arrow-up-icon';
+import { LetterBIcon } from '@/registry/bases/base-ui/icons/lucide/letter-b-icon';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/lucide/check-icon';
+import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/lucide/chevron-right-icon';
+import { CircleIcon } from '@/registry/bases/base-ui/icons/lucide/circle-icon';
+import { CircleXIcon } from '@/registry/bases/base-ui/icons/lucide/circle-x-icon';
+import { DownloadIcon } from '@/registry/bases/base-ui/icons/lucide/download-icon';
+import { DumbbellIcon } from '@/registry/bases/base-ui/icons/lucide/dumbbell-icon';
+import { EyeIcon } from '@/registry/bases/base-ui/icons/lucide/eye-icon';
+import { FlagIcon } from '@/registry/bases/base-ui/icons/lucide/flag-icon';
+import { HashIcon } from '@/registry/bases/base-ui/icons/lucide/hash-icon';
+import { LightbulbIcon } from '@/registry/bases/base-ui/icons/lucide/lightbulb-icon';
+import { PlaneIcon } from '@/registry/bases/base-ui/icons/lucide/plane-icon';
+import { PlusIcon } from '@/registry/bases/base-ui/icons/lucide/plus-icon';
+import { Settings2Icon } from '@/registry/bases/base-ui/icons/lucide/settings-2-icon';
+import { TrashIcon } from '@/registry/bases/base-ui/icons/lucide/trash-icon';
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { InputGroupButton } from '@/registry/bases/base-ui/ui/input-group';
@@ -77,7 +77,7 @@ const editor = {
 /** Two items in one menu: what master drew (the lucide element carrying `size-4`), and the animated icon now. */
 const items = [
   { id: 'was', title: 'Was', icon: <Bold className="size-4" />, command: 'x' },
-  { id: 'now', title: 'Now', icon: BoldIcon, command: 'x' },
+  { id: 'now', title: 'Now', icon: LetterBIcon, command: 'x' },
 ];
 
 /** The two icons of a menu draw at the same size, and at 16px. */
@@ -252,7 +252,7 @@ describe('the size of an icon the chrome draws', () => {
           <Trash2 />
         </Button>,
         <Button variant="ghost" size="icon-sm">
-          <Trash2Icon aria-hidden />
+          <TrashIcon aria-hidden />
         </Button>,
       ],
       [

@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 
-import { CircleCheckIcon, type CircleCheckIconHandle } from '@/registry/bases/base-ui/icons/circle-check-icon';
-import { CircleIcon, type CircleIconHandle } from '@/registry/bases/base-ui/icons/circle-icon';
+import { CircleCheckIcon, type CircleCheckIconHandle } from '@/registry/bases/base-ui/icons/lucide/circle-check-icon';
+import { CircleIcon, type CircleIconHandle } from '@/registry/bases/base-ui/icons/lucide/circle-icon';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Card } from '@/registry/bases/base-ui/ui/card';
 import { Progress, ProgressLabel, ProgressValue } from '@/registry/bases/base-ui/ui/progress';
