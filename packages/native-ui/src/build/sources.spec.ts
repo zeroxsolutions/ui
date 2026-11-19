@@ -24,6 +24,12 @@ describe('appPath', () => {
     );
   });
 
+  it('puts an animated icon under components/general, where a composed control imports it from', () => {
+    expect(appPath({ path: 'registry/icons/copy-icon.tsx', type: 'registry:ui' })).toBe(
+      'components/general/copy-icon.tsx',
+    );
+  });
+
   it('puts a lib file under lib, where the lib alias points', () => {
     expect(appPath({ path: 'registry/lib/utils.ts', type: 'registry:lib' })).toBe('lib/utils.ts');
   });

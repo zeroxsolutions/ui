@@ -18,6 +18,7 @@ const APP_FOLDERS: ReadonlyMap<string, string> = new Map([
   ['ui', 'components/ui'],
   ['components', 'components'],
   ['blocks', 'components'],
+  ['icons', 'components/general'],
   ['lib', 'lib'],
   ['hooks', 'hooks'],
 ]);
@@ -25,7 +26,7 @@ const APP_FOLDERS: ReadonlyMap<string, string> = new Map([
 /**
  * The path of `file` from an app's root, such as `components/ui/button.tsx` for
  * `registry/ui/button.tsx`. A `~/` target is taken as written.
- * @throws {Error} `No app path for <path>` for a file outside `ui`, `components`, `blocks`, `lib` and `hooks` with no
+ * @throws {Error} `No app path for <path>` for a file outside `ui`, `components`, `blocks`, `icons`, `lib` and `hooks` with no
  * `~/` target
  */
 export function appPath(file: RegistryFile): string {
