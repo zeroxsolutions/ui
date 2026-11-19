@@ -24,7 +24,7 @@ const escapeHtml = (value: string): string =>
 
 /**
  * The inline pill — a `Badge` tinted with the design-system `primary` token that
- * reads as one unit. Shared by the editable node view and the static `toReact`
+ * reads as one unit, at the size of the line it sits in rather than a label's. Shared by the editable node view and the static `toReact`
  * codec so both surfaces render identically.
  */
 function MentionPill({ id, label, contentEditable }: { id: string; label: string; contentEditable?: boolean }) {
@@ -33,7 +33,7 @@ function MentionPill({ id, label, contentEditable }: { id: string; label: string
       data-slot="mention"
       data-mention-id={id}
       contentEditable={contentEditable}
-      className="bg-primary/10 text-primary"
+      className="bg-primary/10 text-primary h-auto text-[length:inherit]"
     >
       @{label || id}
     </Badge>
