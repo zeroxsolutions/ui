@@ -4,6 +4,7 @@ import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-react';
 
 import { ArrowUpIcon } from '../../../../registry/bases/base-ui/icons/lucide/arrow-up-icon';
+import { drawingsOver } from '../../../test/drawings-over';
 import type { IconSet } from '../../lib/icon-sets';
 import { RegistryExamplesProvider } from './registry-example';
 
@@ -131,8 +132,8 @@ describe('IconGrid', () => {
     const before = drawing();
 
     await userEvent.hover(tile);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const drawings = await drawingsOver(drawing, 500);
 
-    expect(drawing()).toBe(before);
+    expect(drawings).toEqual(new Set([before]));
   }, 20_000);
 });

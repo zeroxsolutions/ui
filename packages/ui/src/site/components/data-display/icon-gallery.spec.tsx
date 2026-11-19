@@ -93,6 +93,27 @@ describe('IconGallery', () => {
     expect(window.history.length).toBe(entries + 1);
   });
 
+  it("keeps the reader's text when the host reads back an older search the box wrote, and follows one it did not", async () => {
+    const page = (search: string) => (
+      <TestHost pathname="/icons/base" search={search}>
+        <IconGallery sets={SETS} renderGrid={renderGrid} />
+      </TestHost>
+    );
+    const { rerender } = render(page(''));
+    fireEvent.change(box(), { target: { value: 'up' } });
+    await waitFor(() => expect(here()).toBe('/icons/base?q=up'));
+    fireEvent.change(box(), { target: { value: 'down' } });
+    await waitFor(() => expect(here()).toBe('/icons/base?q=down'));
+
+    rerender(page('q=up'));
+    expect(box().value).toBe('down');
+    rerender(page('q=down'));
+    expect(box().value).toBe('down');
+
+    rerender(page('q=arrow'));
+    expect(box().value).toBe('arrow');
+  });
+
   it('says so when no icon has a name holding the query', () => {
     renderGallery();
 

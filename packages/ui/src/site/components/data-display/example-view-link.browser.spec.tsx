@@ -10,6 +10,7 @@ import { render } from 'vitest-browser-react';
 
 import '../../../../test/nova-style.css';
 import { Button } from '../../../../registry/bases/base-ui/ui/button';
+import { drawingsOver } from '../../../test/drawings-over';
 import { TestHost } from '../../../test/test-host';
 import { StylePicker } from '../navigation/style-picker';
 
@@ -101,10 +102,10 @@ describe('the docs chrome icons', () => {
     const before = drawing();
 
     await userEvent.hover(item);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const drawings = await drawingsOver(drawing, 500);
 
     expect(before).not.toBe('');
-    expect(drawing()).toBe(before);
+    expect(drawings).toEqual(new Set([before]));
   }, 20_000);
 
   // The picker starts a row's check on the row's focus, so the arrow keys play it by moving the focus onto it.

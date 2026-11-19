@@ -4,13 +4,14 @@
  * one whose component it names (a demo is one file; an item lists its whole `files`), which
  * `ComponentSource` and `rehypeDocsCode` read at build, in every zone. The component maps are apart
  * from it because the components use hooks and carry no client directive, so only a client module may
- * import them, while the paths are read on the server. There are two maps, each a lazy import of the
+ * import them, while the paths are read on the server. There are three maps, each a lazy import of the
  * component the first file exports, so that an app bundles only the demos it renders:
  * `__components__.tsx` holds every entry outside the editor set and the icons; `__editor-components__.tsx`
- * holds the editor set, which the editor docs zone renders; `__icon-components__.tsx` holds the animated
- * icons, which only the Icons page renders, so that no other page carries an entry per icon. The editor set is an item in the `editor` category
- * and an item that names one among its registry dependencies; `Index` marks each entry's set too, so a
- * server module can tell the two apart without importing either map.
+ * holds the editor set, which the editor docs zone renders; `__icon-components__.tsx` holds the
+ * animated icons, which only the Icons page renders, so that no other page carries an entry per icon.
+ * The editor set is an item in the `editor` category and an item that names one among its registry
+ * dependencies; `Index` marks each entry's editor flag too, so a server module can tell the editor set
+ * apart without importing any map.
  */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';

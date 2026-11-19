@@ -18,8 +18,11 @@ interface ConstructionIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
-// The barrier's stripes slide one period to the right on a loop; the stripe that slides in from the
-// left stays hidden at rest, so the still icon is Lucide's.
+// The barrier's stripes slide one period to the right on a loop. Each is drawn across the whole barrier
+// and clipped to its outline, whose rounded corners cut the end stripes where Lucide ends them, so a
+// stripe that has slid one period lies exactly where its neighbour started and the loop has no seam.
+// The two stripes outside Lucide's three, which show only part-way in, stay hidden at rest, so the
+// still icon is Lucide's.
 const STRIPES_VARIANTS: Variants = {
   normal: { x: 0 },
   animate: {
@@ -33,7 +36,7 @@ const STRIPES_VARIANTS: Variants = {
   },
 };
 
-const ENTERING_STRIPE_VARIANTS: Variants = {
+const OUTER_STRIPE_VARIANTS: Variants = {
   normal: { opacity: 0 },
   animate: { opacity: 1, transition: { duration: 0 } },
 };
@@ -98,7 +101,7 @@ const ConstructionIcon = forwardRef<ConstructionIconHandle, ConstructionIconProp
         >
           <defs>
             <clipPath id={clipId}>
-              <rect height="10" width="22" x="1" y="5" />
+              <rect height="8" rx="1" width="20" x="2" y="6" />
             </clipPath>
           </defs>
           <rect height="8" rx="1" width="20" x="2" y="6" />
@@ -108,10 +111,12 @@ const ConstructionIcon = forwardRef<ConstructionIconHandle, ConstructionIconProp
           <path d="M7 3v3" />
           <g clipPath={`url(#${clipId})`}>
             <motion.g animate={controls} initial="normal" variants={STRIPES_VARIANTS}>
-              <motion.path d="M4 14-3.7 6.3" variants={ENTERING_STRIPE_VARIANTS} />
-              <path d="M10 14 2.3 6.3" />
-              <path d="m14 6 7.7 7.7" />
+              <motion.path d="m-10 6 8 8" variants={OUTER_STRIPE_VARIANTS} />
+              <motion.path d="m-4 6 8 8" variants={OUTER_STRIPE_VARIANTS} />
+              <path d="m2 6 8 8" />
               <path d="m8 6 8 8" />
+              <path d="m14 6 8 8" />
+              <motion.path d="m20 6 8 8" variants={OUTER_STRIPE_VARIANTS} />
             </motion.g>
           </g>
         </svg>
