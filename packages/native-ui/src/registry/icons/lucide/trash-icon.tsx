@@ -24,9 +24,10 @@ function TrashIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // A lift of 1, less than the web twin's 2, which takes the handle past the canvas, which react-native-svg clips.
   const lid = useAnimatedProps(() => {
     const p = progress.value;
-    return { ...transformProps({ y: -2 * p }) };
+    return { ...transformProps({ y: -1 * p }) };
   });
 
   return (

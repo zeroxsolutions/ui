@@ -3047,6 +3047,396 @@
       ]
     },
     {
+      "name": "lucide-a-arrow-down-icon",
+      "type": "registry:ui",
+      "title": "A Arrow Down Icon",
+      "description": "An animated a-arrow-down icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/a-arrow-down-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/a-arrow-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-a-arrow-up-icon",
+      "type": "registry:ui",
+      "title": "A Arrow Up Icon",
+      "description": "An animated a-arrow-up icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/a-arrow-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/a-arrow-up-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-accessibility-icon",
+      "type": "registry:ui",
+      "title": "Accessibility Icon",
+      "description": "An animated accessibility icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/accessibility-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/accessibility-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-activity-icon",
+      "type": "registry:ui",
+      "title": "Activity Icon",
+      "description": "An animated activity icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/activity-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/activity-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-air-vent-icon",
+      "type": "registry:ui",
+      "title": "Air Vent Icon",
+      "description": "An animated air-vent icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/air-vent-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/air-vent-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-airplay-icon",
+      "type": "registry:ui",
+      "title": "Airplay Icon",
+      "description": "An animated airplay icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/airplay-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/airplay-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-alarm-clock-check-icon",
+      "type": "registry:ui",
+      "title": "Alarm Clock Check Icon",
+      "description": "An animated alarm-clock-check icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/alarm-clock-check-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/alarm-clock-check-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-alarm-clock-icon",
+      "type": "registry:ui",
+      "title": "Alarm Clock Icon",
+      "description": "An animated alarm-clock icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/alarm-clock-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/alarm-clock-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-alarm-clock-minus-icon",
+      "type": "registry:ui",
+      "title": "Alarm Clock Minus Icon",
+      "description": "An animated alarm-clock-minus icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/alarm-clock-minus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/alarm-clock-minus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-alarm-clock-plus-icon",
+      "type": "registry:ui",
+      "title": "Alarm Clock Plus Icon",
+      "description": "An animated alarm-clock-plus icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/alarm-clock-plus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/alarm-clock-plus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-alarm-smoke-icon",
+      "type": "registry:ui",
+      "title": "Alarm Smoke Icon",
+      "description": "An animated alarm-smoke icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/alarm-smoke-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/alarm-smoke-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-align-horizontal-space-around-icon",
+      "type": "registry:ui",
+      "title": "Align Horizontal Space Around Icon",
+      "description": "An animated align-horizontal-space-around icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/align-horizontal-space-around-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/align-horizontal-space-around-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-align-vertical-space-around-icon",
+      "type": "registry:ui",
+      "title": "Align Vertical Space Around Icon",
+      "description": "An animated align-vertical-space-around icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/align-vertical-space-around-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/align-vertical-space-around-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-ambulance-icon",
+      "type": "registry:ui",
+      "title": "Ambulance Icon",
+      "description": "An animated ambulance icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/ambulance-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/ambulance-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-archive-icon",
+      "type": "registry:ui",
+      "title": "Archive Icon",
+      "description": "An animated archive icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/archive-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/archive-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-big-down-dash-icon",
+      "type": "registry:ui",
+      "title": "Arrow Big Down Dash Icon",
+      "description": "An animated arrow-big-down-dash icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-big-down-dash-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-big-down-dash-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-big-down-icon",
+      "type": "registry:ui",
+      "title": "Arrow Big Down Icon",
+      "description": "An animated arrow-big-down icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-big-down-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-big-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-big-left-dash-icon",
+      "type": "registry:ui",
+      "title": "Arrow Big Left Dash Icon",
+      "description": "An animated arrow-big-left-dash icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-big-left-dash-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-big-left-dash-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-big-left-icon",
+      "type": "registry:ui",
+      "title": "Arrow Big Left Icon",
+      "description": "An animated arrow-big-left icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-big-left-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-big-left-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-big-right-dash-icon",
+      "type": "registry:ui",
+      "title": "Arrow Big Right Dash Icon",
+      "description": "An animated arrow-big-right-dash icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-big-right-dash-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-big-right-dash-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-big-right-icon",
+      "type": "registry:ui",
+      "title": "Arrow Big Right Icon",
+      "description": "An animated arrow-big-right icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-big-right-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-big-right-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-big-up-dash-icon",
+      "type": "registry:ui",
+      "title": "Arrow Big Up Dash Icon",
+      "description": "An animated arrow-big-up-dash icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-big-up-dash-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-big-up-dash-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-big-up-icon",
+      "type": "registry:ui",
+      "title": "Arrow Big Up Icon",
+      "description": "An animated arrow-big-up icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-big-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-big-up-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-down-0-1-icon",
+      "type": "registry:ui",
+      "title": "Arrow Down 0 1 Icon",
+      "description": "An animated arrow-down-0-1 icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-down-0-1-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-down-0-1-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-down-1-0-icon",
+      "type": "registry:ui",
+      "title": "Arrow Down 1 0 Icon",
+      "description": "An animated arrow-down-1-0 icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-down-1-0-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-down-1-0-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-down-a-z-icon",
+      "type": "registry:ui",
+      "title": "Arrow Down A Z Icon",
+      "description": "An animated arrow-down-a-z icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-down-a-z-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-down-a-z-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-arrow-down-icon",
       "type": "registry:ui",
       "title": "Arrow Down Icon",
@@ -3058,6 +3448,51 @@
           "path": "registry/bases/base-ui/icons/lucide/arrow-down-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/arrow-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-down-left-icon",
+      "type": "registry:ui",
+      "title": "Arrow Down Left Icon",
+      "description": "An animated arrow-down-left icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-down-left-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-down-left-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-down-right-icon",
+      "type": "registry:ui",
+      "title": "Arrow Down Right Icon",
+      "description": "An animated arrow-down-right icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-down-right-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-down-right-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-down-z-a-icon",
+      "type": "registry:ui",
+      "title": "Arrow Down Z A Icon",
+      "description": "An animated arrow-down-z-a icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-down-z-a-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-down-z-a-icon.tsx"
         }
       ]
     },
@@ -3107,17 +3542,557 @@
       ]
     },
     {
-      "name": "lucide-letter-b-icon",
+      "name": "lucide-arrow-up-left-icon",
       "type": "registry:ui",
-      "title": "Letter B Icon",
-      "description": "An animated letter-b icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "title": "Arrow Up Left Icon",
+      "description": "An animated arrow-up-left icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
       "dependencies": ["motion"],
       "registryDependencies": ["@shadcn/utils"],
       "files": [
         {
-          "path": "registry/bases/base-ui/icons/lucide/letter-b-icon.tsx",
+          "path": "registry/bases/base-ui/icons/lucide/arrow-up-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/letter-b-icon.tsx"
+          "target": "components/general/lucide/arrow-up-left-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-arrow-up-right-icon",
+      "type": "registry:ui",
+      "title": "Arrow Up Right Icon",
+      "description": "An animated arrow-up-right icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/arrow-up-right-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/arrow-up-right-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-at-sign-icon",
+      "type": "registry:ui",
+      "title": "At Sign Icon",
+      "description": "An animated at-sign icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/at-sign-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/at-sign-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-atom-icon",
+      "type": "registry:ui",
+      "title": "Atom Icon",
+      "description": "An animated atom icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/atom-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/atom-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-audio-lines-icon",
+      "type": "registry:ui",
+      "title": "Audio Lines Icon",
+      "description": "An animated audio-lines icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/audio-lines-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/audio-lines-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-axe-icon",
+      "type": "registry:ui",
+      "title": "Axe Icon",
+      "description": "An animated axe icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/axe-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/axe-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-badge-exclamation-point-icon",
+      "type": "registry:ui",
+      "title": "Badge Exclamation Point Icon",
+      "description": "An animated badge-exclamation-point icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/badge-exclamation-point-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/badge-exclamation-point-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-badge-percent-icon",
+      "type": "registry:ui",
+      "title": "Badge Percent Icon",
+      "description": "An animated badge-percent icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/badge-percent-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/badge-percent-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-ban-icon",
+      "type": "registry:ui",
+      "title": "Ban Icon",
+      "description": "An animated ban icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/ban-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/ban-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-banana-icon",
+      "type": "registry:ui",
+      "title": "Banana Icon",
+      "description": "An animated banana icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/banana-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/banana-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-battery-charging-icon",
+      "type": "registry:ui",
+      "title": "Battery Charging Icon",
+      "description": "An animated battery-charging icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/battery-charging-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/battery-charging-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-battery-exclamation-point-icon",
+      "type": "registry:ui",
+      "title": "Battery Exclamation Point Icon",
+      "description": "An animated battery-exclamation-point icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/battery-exclamation-point-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/battery-exclamation-point-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-battery-full-icon",
+      "type": "registry:ui",
+      "title": "Battery Full Icon",
+      "description": "An animated battery-full icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/battery-full-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/battery-full-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-battery-icon",
+      "type": "registry:ui",
+      "title": "Battery Icon",
+      "description": "An animated battery icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/battery-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/battery-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-battery-low-icon",
+      "type": "registry:ui",
+      "title": "Battery Low Icon",
+      "description": "An animated battery-low icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/battery-low-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/battery-low-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-battery-medium-icon",
+      "type": "registry:ui",
+      "title": "Battery Medium Icon",
+      "description": "An animated battery-medium icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/battery-medium-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/battery-medium-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-battery-plus-icon",
+      "type": "registry:ui",
+      "title": "Battery Plus Icon",
+      "description": "An animated battery-plus icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/battery-plus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/battery-plus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bell-electric-icon",
+      "type": "registry:ui",
+      "title": "Bell Electric Icon",
+      "description": "An animated bell-electric icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bell-electric-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bell-electric-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bell-icon",
+      "type": "registry:ui",
+      "title": "Bell Icon",
+      "description": "An animated bell icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bell-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bell-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-biceps-flexed-icon",
+      "type": "registry:ui",
+      "title": "Biceps Flexed Icon",
+      "description": "An animated biceps-flexed icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/biceps-flexed-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/biceps-flexed-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-binary-icon",
+      "type": "registry:ui",
+      "title": "Binary Icon",
+      "description": "An animated binary icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/binary-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/binary-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-blocks-icon",
+      "type": "registry:ui",
+      "title": "Blocks Icon",
+      "description": "An animated blocks icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/blocks-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/blocks-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bluetooth-connected-icon",
+      "type": "registry:ui",
+      "title": "Bluetooth Connected Icon",
+      "description": "An animated bluetooth-connected icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bluetooth-connected-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bluetooth-connected-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bluetooth-icon",
+      "type": "registry:ui",
+      "title": "Bluetooth Icon",
+      "description": "An animated bluetooth icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bluetooth-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bluetooth-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bluetooth-off-icon",
+      "type": "registry:ui",
+      "title": "Bluetooth Off Icon",
+      "description": "An animated bluetooth-off icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bluetooth-off-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bluetooth-off-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bluetooth-searching-icon",
+      "type": "registry:ui",
+      "title": "Bluetooth Searching Icon",
+      "description": "An animated bluetooth-searching icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bluetooth-searching-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bluetooth-searching-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bone-icon",
+      "type": "registry:ui",
+      "title": "Bone Icon",
+      "description": "An animated bone icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bone-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bone-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-book-text-icon",
+      "type": "registry:ui",
+      "title": "Book Text Icon",
+      "description": "An animated book-text icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/book-text-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/book-text-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bookmark-check-icon",
+      "type": "registry:ui",
+      "title": "Bookmark Check Icon",
+      "description": "An animated bookmark-check icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bookmark-check-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bookmark-check-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bookmark-icon",
+      "type": "registry:ui",
+      "title": "Bookmark Icon",
+      "description": "An animated bookmark icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bookmark-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bookmark-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bookmark-minus-icon",
+      "type": "registry:ui",
+      "title": "Bookmark Minus Icon",
+      "description": "An animated bookmark-minus icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bookmark-minus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bookmark-minus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bookmark-plus-icon",
+      "type": "registry:ui",
+      "title": "Bookmark Plus Icon",
+      "description": "An animated bookmark-plus icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bookmark-plus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bookmark-plus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bookmark-x-icon",
+      "type": "registry:ui",
+      "title": "Bookmark X Icon",
+      "description": "An animated bookmark-x icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bookmark-x-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bookmark-x-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bot-icon",
+      "type": "registry:ui",
+      "title": "Bot Icon",
+      "description": "An animated bot icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bot-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bot-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-bot-message-square-icon",
+      "type": "registry:ui",
+      "title": "Bot Message Square Icon",
+      "description": "An animated bot-message-square icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/bot-message-square-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/bot-message-square-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-box-icon",
+      "type": "registry:ui",
+      "title": "Box Icon",
+      "description": "An animated box icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/box-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/box-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-boxes-icon",
+      "type": "registry:ui",
+      "title": "Boxes Icon",
+      "description": "An animated boxes icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/boxes-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/boxes-icon.tsx"
         }
       ]
     },
@@ -3137,6 +4112,291 @@
       ]
     },
     {
+      "name": "lucide-briefcase-business-icon",
+      "type": "registry:ui",
+      "title": "Briefcase Business Icon",
+      "description": "An animated briefcase-business icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/briefcase-business-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/briefcase-business-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-calendar-check-2-icon",
+      "type": "registry:ui",
+      "title": "Calendar Check 2 Icon",
+      "description": "An animated calendar-check-2 icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/calendar-check-2-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/calendar-check-2-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-calendar-check-icon",
+      "type": "registry:ui",
+      "title": "Calendar Check Icon",
+      "description": "An animated calendar-check icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/calendar-check-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/calendar-check-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-calendar-cog-icon",
+      "type": "registry:ui",
+      "title": "Calendar Cog Icon",
+      "description": "An animated calendar-cog icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/calendar-cog-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/calendar-cog-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-calendar-days-icon",
+      "type": "registry:ui",
+      "title": "Calendar Days Icon",
+      "description": "An animated calendar-days icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/calendar-days-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/calendar-days-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-car-icon",
+      "type": "registry:ui",
+      "title": "Car Icon",
+      "description": "An animated car icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/car-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/car-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cast-icon",
+      "type": "registry:ui",
+      "title": "Cast Icon",
+      "description": "An animated cast icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cast-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cast-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cctv-icon",
+      "type": "registry:ui",
+      "title": "Cctv Icon",
+      "description": "An animated cctv icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cctv-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cctv-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chart-bar-decreasing-icon",
+      "type": "registry:ui",
+      "title": "Chart Bar Decreasing Icon",
+      "description": "An animated chart-bar-decreasing icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chart-bar-decreasing-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chart-bar-decreasing-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chart-bar-increasing-icon",
+      "type": "registry:ui",
+      "title": "Chart Bar Increasing Icon",
+      "description": "An animated chart-bar-increasing icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chart-bar-increasing-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chart-bar-increasing-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chart-column-decreasing-icon",
+      "type": "registry:ui",
+      "title": "Chart Column Decreasing Icon",
+      "description": "An animated chart-column-decreasing icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chart-column-decreasing-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chart-column-decreasing-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chart-column-increasing-icon",
+      "type": "registry:ui",
+      "title": "Chart Column Increasing Icon",
+      "description": "An animated chart-column-increasing icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chart-column-increasing-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chart-column-increasing-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chart-line-icon",
+      "type": "registry:ui",
+      "title": "Chart Line Icon",
+      "description": "An animated chart-line icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chart-line-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chart-line-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chart-no-axes-column-decreasing-icon",
+      "type": "registry:ui",
+      "title": "Chart No Axes Column Decreasing Icon",
+      "description": "An animated chart-no-axes-column-decreasing icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chart-no-axes-column-decreasing-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chart-no-axes-column-decreasing-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chart-no-axes-column-increasing-icon",
+      "type": "registry:ui",
+      "title": "Chart No Axes Column Increasing Icon",
+      "description": "An animated chart-no-axes-column-increasing icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chart-no-axes-column-increasing-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chart-no-axes-column-increasing-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chart-pie-icon",
+      "type": "registry:ui",
+      "title": "Chart Pie Icon",
+      "description": "An animated chart-pie icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chart-pie-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chart-pie-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chart-scatter-icon",
+      "type": "registry:ui",
+      "title": "Chart Scatter Icon",
+      "description": "An animated chart-scatter icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chart-scatter-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chart-scatter-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chart-spline-icon",
+      "type": "registry:ui",
+      "title": "Chart Spline Icon",
+      "description": "An animated chart-spline icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chart-spline-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chart-spline-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-check-check-icon",
+      "type": "registry:ui",
+      "title": "Check Check Icon",
+      "description": "An animated check-check icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/check-check-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/check-check-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-check-icon",
       "type": "registry:ui",
       "title": "Check Icon",
@@ -3152,6 +4412,66 @@
       ]
     },
     {
+      "name": "lucide-chess-bishop-icon",
+      "type": "registry:ui",
+      "title": "Chess Bishop Icon",
+      "description": "An animated chess-bishop icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chess-bishop-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chess-bishop-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chess-king-icon",
+      "type": "registry:ui",
+      "title": "Chess King Icon",
+      "description": "An animated chess-king icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chess-king-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chess-king-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chess-knight-icon",
+      "type": "registry:ui",
+      "title": "Chess Knight Icon",
+      "description": "An animated chess-knight icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chess-knight-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chess-knight-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chess-pawn-icon",
+      "type": "registry:ui",
+      "title": "Chess Pawn Icon",
+      "description": "An animated chess-pawn icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chess-pawn-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chess-pawn-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-chevron-down-icon",
       "type": "registry:ui",
       "title": "Chevron Down Icon",
@@ -3163,6 +4483,21 @@
           "path": "registry/bases/base-ui/icons/lucide/chevron-down-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/chevron-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chevron-first-icon",
+      "type": "registry:ui",
+      "title": "Chevron First Icon",
+      "description": "An animated chevron-first icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chevron-first-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chevron-first-icon.tsx"
         }
       ]
     },
@@ -3212,6 +4547,51 @@
       ]
     },
     {
+      "name": "lucide-chevrons-down-up-icon",
+      "type": "registry:ui",
+      "title": "Chevrons Down Up Icon",
+      "description": "An animated chevrons-down-up icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chevrons-down-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chevrons-down-up-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chevrons-left-right-icon",
+      "type": "registry:ui",
+      "title": "Chevrons Left Right Icon",
+      "description": "An animated chevrons-left-right icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chevrons-left-right-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chevrons-left-right-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-chevrons-right-left-icon",
+      "type": "registry:ui",
+      "title": "Chevrons Right Left Icon",
+      "description": "An animated chevrons-right-left icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/chevrons-right-left-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/chevrons-right-left-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-chevrons-up-down-icon",
       "type": "registry:ui",
       "title": "Chevrons Up Down Icon",
@@ -3223,6 +4603,36 @@
           "path": "registry/bases/base-ui/icons/lucide/chevrons-up-down-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/chevrons-up-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cigarette-icon",
+      "type": "registry:ui",
+      "title": "Cigarette Icon",
+      "description": "An animated cigarette icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cigarette-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cigarette-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cigarette-off-icon",
+      "type": "registry:ui",
+      "title": "Cigarette Off Icon",
+      "description": "An animated cigarette-off icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cigarette-off-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cigarette-off-icon.tsx"
         }
       ]
     },
@@ -3242,6 +4652,111 @@
       ]
     },
     {
+      "name": "lucide-circle-chevron-down-icon",
+      "type": "registry:ui",
+      "title": "Circle Chevron Down Icon",
+      "description": "An animated circle-chevron-down icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/circle-chevron-down-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/circle-chevron-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-circle-chevron-left-icon",
+      "type": "registry:ui",
+      "title": "Circle Chevron Left Icon",
+      "description": "An animated circle-chevron-left icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/circle-chevron-left-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/circle-chevron-left-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-circle-chevron-right-icon",
+      "type": "registry:ui",
+      "title": "Circle Chevron Right Icon",
+      "description": "An animated circle-chevron-right icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/circle-chevron-right-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/circle-chevron-right-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-circle-chevron-up-icon",
+      "type": "registry:ui",
+      "title": "Circle Chevron Up Icon",
+      "description": "An animated circle-chevron-up icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/circle-chevron-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/circle-chevron-up-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-circle-dashed-icon",
+      "type": "registry:ui",
+      "title": "Circle Dashed Icon",
+      "description": "An animated circle-dashed icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/circle-dashed-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/circle-dashed-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-circle-dollar-sign-icon",
+      "type": "registry:ui",
+      "title": "Circle Dollar Sign Icon",
+      "description": "An animated circle-dollar-sign icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/circle-dollar-sign-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/circle-dollar-sign-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-circle-gauge-icon",
+      "type": "registry:ui",
+      "title": "Circle Gauge Icon",
+      "description": "An animated circle-gauge icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/circle-gauge-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/circle-gauge-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-circle-icon",
       "type": "registry:ui",
       "title": "Circle Icon",
@@ -3253,6 +4768,21 @@
           "path": "registry/bases/base-ui/icons/lucide/circle-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/circle-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-circle-question-mark-icon",
+      "type": "registry:ui",
+      "title": "Circle Question Mark Icon",
+      "description": "An animated circle-question-mark icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/circle-question-mark-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/circle-question-mark-icon.tsx"
         }
       ]
     },
@@ -3272,6 +4802,36 @@
       ]
     },
     {
+      "name": "lucide-clapperboard-icon",
+      "type": "registry:ui",
+      "title": "Clapperboard Icon",
+      "description": "An animated clapperboard icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/clapperboard-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/clapperboard-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-clipboard-check-icon",
+      "type": "registry:ui",
+      "title": "Clipboard Check Icon",
+      "description": "An animated clipboard-check icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/clipboard-check-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/clipboard-check-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-clock-icon",
       "type": "registry:ui",
       "title": "Clock Icon",
@@ -3283,6 +4843,156 @@
           "path": "registry/bases/base-ui/icons/lucide/clock-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/clock-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cloud-backup-icon",
+      "type": "registry:ui",
+      "title": "Cloud Backup Icon",
+      "description": "An animated cloud-backup icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cloud-backup-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cloud-backup-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cloud-cog-icon",
+      "type": "registry:ui",
+      "title": "Cloud Cog Icon",
+      "description": "An animated cloud-cog icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cloud-cog-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cloud-cog-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cloud-download-icon",
+      "type": "registry:ui",
+      "title": "Cloud Download Icon",
+      "description": "An animated cloud-download icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cloud-download-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cloud-download-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cloud-lightning-icon",
+      "type": "registry:ui",
+      "title": "Cloud Lightning Icon",
+      "description": "An animated cloud-lightning icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cloud-lightning-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cloud-lightning-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cloud-rain-icon",
+      "type": "registry:ui",
+      "title": "Cloud Rain Icon",
+      "description": "An animated cloud-rain icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cloud-rain-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cloud-rain-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cloud-rain-wind-icon",
+      "type": "registry:ui",
+      "title": "Cloud Rain Wind Icon",
+      "description": "An animated cloud-rain-wind icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cloud-rain-wind-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cloud-rain-wind-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cloud-snow-icon",
+      "type": "registry:ui",
+      "title": "Cloud Snow Icon",
+      "description": "An animated cloud-snow icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cloud-snow-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cloud-snow-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cloud-sun-icon",
+      "type": "registry:ui",
+      "title": "Cloud Sun Icon",
+      "description": "An animated cloud-sun icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cloud-sun-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cloud-sun-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cloud-sync-icon",
+      "type": "registry:ui",
+      "title": "Cloud Sync Icon",
+      "description": "An animated cloud-sync icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cloud-sync-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cloud-sync-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cloud-upload-icon",
+      "type": "registry:ui",
+      "title": "Cloud Upload Icon",
+      "description": "An animated cloud-upload icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cloud-upload-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cloud-upload-icon.tsx"
         }
       ]
     },
@@ -3317,6 +5027,96 @@
       ]
     },
     {
+      "name": "lucide-cog-icon",
+      "type": "registry:ui",
+      "title": "Cog Icon",
+      "description": "An animated cog icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cog-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cog-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-compass-icon",
+      "type": "registry:ui",
+      "title": "Compass Icon",
+      "description": "An animated compass icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/compass-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/compass-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-concierge-bell-icon",
+      "type": "registry:ui",
+      "title": "Concierge Bell Icon",
+      "description": "An animated concierge-bell icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/concierge-bell-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/concierge-bell-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-construction-icon",
+      "type": "registry:ui",
+      "title": "Construction Icon",
+      "description": "An animated construction icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/construction-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/construction-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-contrast-icon",
+      "type": "registry:ui",
+      "title": "Contrast Icon",
+      "description": "An animated contrast icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/contrast-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/contrast-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cooking-pot-icon",
+      "type": "registry:ui",
+      "title": "Cooking Pot Icon",
+      "description": "An animated cooking-pot icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cooking-pot-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cooking-pot-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-copy-icon",
       "type": "registry:ui",
       "title": "Copy Icon",
@@ -3347,6 +5147,216 @@
       ]
     },
     {
+      "name": "lucide-corner-down-right-icon",
+      "type": "registry:ui",
+      "title": "Corner Down Right Icon",
+      "description": "An animated corner-down-right icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/corner-down-right-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/corner-down-right-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-corner-left-down-icon",
+      "type": "registry:ui",
+      "title": "Corner Left Down Icon",
+      "description": "An animated corner-left-down icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/corner-left-down-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/corner-left-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-corner-left-up-icon",
+      "type": "registry:ui",
+      "title": "Corner Left Up Icon",
+      "description": "An animated corner-left-up icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/corner-left-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/corner-left-up-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-corner-right-down-icon",
+      "type": "registry:ui",
+      "title": "Corner Right Down Icon",
+      "description": "An animated corner-right-down icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/corner-right-down-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/corner-right-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-corner-right-up-icon",
+      "type": "registry:ui",
+      "title": "Corner Right Up Icon",
+      "description": "An animated corner-right-up icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/corner-right-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/corner-right-up-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-corner-up-left-icon",
+      "type": "registry:ui",
+      "title": "Corner Up Left Icon",
+      "description": "An animated corner-up-left icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/corner-up-left-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/corner-up-left-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-corner-up-right-icon",
+      "type": "registry:ui",
+      "title": "Corner Up Right Icon",
+      "description": "An animated corner-up-right icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/corner-up-right-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/corner-up-right-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cpu-icon",
+      "type": "registry:ui",
+      "title": "Cpu Icon",
+      "description": "An animated cpu icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cpu-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cpu-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-credit-card-icon",
+      "type": "registry:ui",
+      "title": "Credit Card Icon",
+      "description": "An animated credit-card icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/credit-card-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/credit-card-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-cup-soda-icon",
+      "type": "registry:ui",
+      "title": "Cup Soda Icon",
+      "description": "An animated cup-soda icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/cup-soda-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/cup-soda-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-database-backup-icon",
+      "type": "registry:ui",
+      "title": "Database Backup Icon",
+      "description": "An animated database-backup icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/database-backup-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/database-backup-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-delete-icon",
+      "type": "registry:ui",
+      "title": "Delete Icon",
+      "description": "An animated delete icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/delete-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/delete-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-disc-3-icon",
+      "type": "registry:ui",
+      "title": "Disc 3 Icon",
+      "description": "An animated disc-3 icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/disc-3-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/disc-3-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-dollar-sign-icon",
+      "type": "registry:ui",
+      "title": "Dollar Sign Icon",
+      "description": "An animated dollar-sign icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/dollar-sign-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/dollar-sign-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-download-icon",
       "type": "registry:ui",
       "title": "Download Icon",
@@ -3362,6 +5372,36 @@
       ]
     },
     {
+      "name": "lucide-droplet-icon",
+      "type": "registry:ui",
+      "title": "Droplet Icon",
+      "description": "An animated droplet icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/droplet-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/droplet-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-drum-icon",
+      "type": "registry:ui",
+      "title": "Drum Icon",
+      "description": "An animated drum icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/drum-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/drum-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-dumbbell-icon",
       "type": "registry:ui",
       "title": "Dumbbell Icon",
@@ -3373,6 +5413,81 @@
           "path": "registry/bases/base-ui/icons/lucide/dumbbell-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/dumbbell-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-earth-icon",
+      "type": "registry:ui",
+      "title": "Earth Icon",
+      "description": "An animated earth icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/earth-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/earth-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-euro-icon",
+      "type": "registry:ui",
+      "title": "Euro Icon",
+      "description": "An animated euro icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/euro-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/euro-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-ev-charger-icon",
+      "type": "registry:ui",
+      "title": "Ev Charger Icon",
+      "description": "An animated ev-charger icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/ev-charger-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/ev-charger-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-expand-icon",
+      "type": "registry:ui",
+      "title": "Expand Icon",
+      "description": "An animated expand icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/expand-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/expand-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-external-link-icon",
+      "type": "registry:ui",
+      "title": "External Link Icon",
+      "description": "An animated external-link icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/external-link-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/external-link-icon.tsx"
         }
       ]
     },
@@ -3407,6 +5522,231 @@
       ]
     },
     {
+      "name": "lucide-face-angry-icon",
+      "type": "registry:ui",
+      "title": "Face Angry Icon",
+      "description": "An animated face-angry icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/face-angry-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/face-angry-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-face-expressionless-icon",
+      "type": "registry:ui",
+      "title": "Face Expressionless Icon",
+      "description": "An animated face-expressionless icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/face-expressionless-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/face-expressionless-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-face-grinning-icon",
+      "type": "registry:ui",
+      "title": "Face Grinning Icon",
+      "description": "An animated face-grinning icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/face-grinning-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/face-grinning-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-face-neutral-icon",
+      "type": "registry:ui",
+      "title": "Face Neutral Icon",
+      "description": "An animated face-neutral icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/face-neutral-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/face-neutral-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-face-slightly-frowning-icon",
+      "type": "registry:ui",
+      "title": "Face Slightly Frowning Icon",
+      "description": "An animated face-slightly-frowning icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/face-slightly-frowning-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/face-slightly-frowning-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-face-slightly-smiling-icon",
+      "type": "registry:ui",
+      "title": "Face Slightly Smiling Icon",
+      "description": "An animated face-slightly-smiling icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/face-slightly-smiling-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/face-slightly-smiling-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-face-slightly-smiling-plus-icon",
+      "type": "registry:ui",
+      "title": "Face Slightly Smiling Plus Icon",
+      "description": "An animated face-slightly-smiling-plus icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/face-slightly-smiling-plus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/face-slightly-smiling-plus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-fan-icon",
+      "type": "registry:ui",
+      "title": "Fan Icon",
+      "description": "An animated fan icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/fan-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/fan-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-feather-icon",
+      "type": "registry:ui",
+      "title": "Feather Icon",
+      "description": "An animated feather icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/feather-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/feather-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-file-chart-line-icon",
+      "type": "registry:ui",
+      "title": "File Chart Line Icon",
+      "description": "An animated file-chart-line icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/file-chart-line-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/file-chart-line-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-file-check-corner-icon",
+      "type": "registry:ui",
+      "title": "File Check Corner Icon",
+      "description": "An animated file-check-corner icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/file-check-corner-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/file-check-corner-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-file-check-icon",
+      "type": "registry:ui",
+      "title": "File Check Icon",
+      "description": "An animated file-check icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/file-check-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/file-check-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-file-cog-icon",
+      "type": "registry:ui",
+      "title": "File Cog Icon",
+      "description": "An animated file-cog icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/file-cog-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/file-cog-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-file-pen-line-icon",
+      "type": "registry:ui",
+      "title": "File Pen Line Icon",
+      "description": "An animated file-pen-line icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/file-pen-line-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/file-pen-line-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-file-stack-icon",
+      "type": "registry:ui",
+      "title": "File Stack Icon",
+      "description": "An animated file-stack icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/file-stack-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/file-stack-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-file-text-icon",
       "type": "registry:ui",
       "title": "File Text Icon",
@@ -3418,6 +5758,36 @@
           "path": "registry/bases/base-ui/icons/lucide/file-text-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/file-text-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-fingerprint-pattern-icon",
+      "type": "registry:ui",
+      "title": "Fingerprint Pattern Icon",
+      "description": "An animated fingerprint-pattern icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/fingerprint-pattern-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/fingerprint-pattern-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-fish-symbol-icon",
+      "type": "registry:ui",
+      "title": "Fish Symbol Icon",
+      "description": "An animated fish-symbol icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/fish-symbol-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/fish-symbol-icon.tsx"
         }
       ]
     },
@@ -3437,6 +5807,381 @@
       ]
     },
     {
+      "name": "lucide-flame-icon",
+      "type": "registry:ui",
+      "title": "Flame Icon",
+      "description": "An animated flame icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/flame-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/flame-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-archive-icon",
+      "type": "registry:ui",
+      "title": "Folder Archive Icon",
+      "description": "An animated folder-archive icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-archive-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-archive-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-check-icon",
+      "type": "registry:ui",
+      "title": "Folder Check Icon",
+      "description": "An animated folder-check icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-check-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-check-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-clock-icon",
+      "type": "registry:ui",
+      "title": "Folder Clock Icon",
+      "description": "An animated folder-clock icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-clock-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-clock-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-code-icon",
+      "type": "registry:ui",
+      "title": "Folder Code Icon",
+      "description": "An animated folder-code icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-code-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-code-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-cog-icon",
+      "type": "registry:ui",
+      "title": "Folder Cog Icon",
+      "description": "An animated folder-cog icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-cog-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-cog-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-dot-icon",
+      "type": "registry:ui",
+      "title": "Folder Dot Icon",
+      "description": "An animated folder-dot icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-dot-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-dot-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-down-icon",
+      "type": "registry:ui",
+      "title": "Folder Down Icon",
+      "description": "An animated folder-down icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-down-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-down-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-git-2-icon",
+      "type": "registry:ui",
+      "title": "Folder Git 2 Icon",
+      "description": "An animated folder-git-2 icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-git-2-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-git-2-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-git-icon",
+      "type": "registry:ui",
+      "title": "Folder Git Icon",
+      "description": "An animated folder-git icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-git-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-git-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-heart-icon",
+      "type": "registry:ui",
+      "title": "Folder Heart Icon",
+      "description": "An animated folder-heart icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-heart-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-heart-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-input-icon",
+      "type": "registry:ui",
+      "title": "Folder Input Icon",
+      "description": "An animated folder-input icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-input-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-input-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-kanban-icon",
+      "type": "registry:ui",
+      "title": "Folder Kanban Icon",
+      "description": "An animated folder-kanban icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-kanban-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-kanban-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-key-icon",
+      "type": "registry:ui",
+      "title": "Folder Key Icon",
+      "description": "An animated folder-key icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-key-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-key-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-lock-icon",
+      "type": "registry:ui",
+      "title": "Folder Lock Icon",
+      "description": "An animated folder-lock icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-lock-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-lock-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-minus-icon",
+      "type": "registry:ui",
+      "title": "Folder Minus Icon",
+      "description": "An animated folder-minus icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-minus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-minus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-open-icon",
+      "type": "registry:ui",
+      "title": "Folder Open Icon",
+      "description": "An animated folder-open icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-open-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-open-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-output-icon",
+      "type": "registry:ui",
+      "title": "Folder Output Icon",
+      "description": "An animated folder-output icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-output-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-output-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-plus-icon",
+      "type": "registry:ui",
+      "title": "Folder Plus Icon",
+      "description": "An animated folder-plus icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-plus-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-plus-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-root-icon",
+      "type": "registry:ui",
+      "title": "Folder Root Icon",
+      "description": "An animated folder-root icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-root-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-root-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-sync-icon",
+      "type": "registry:ui",
+      "title": "Folder Sync Icon",
+      "description": "An animated folder-sync icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-sync-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-sync-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-tree-icon",
+      "type": "registry:ui",
+      "title": "Folder Tree Icon",
+      "description": "An animated folder-tree icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-tree-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-tree-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-up-icon",
+      "type": "registry:ui",
+      "title": "Folder Up Icon",
+      "description": "An animated folder-up icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-up-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-up-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folder-x-icon",
+      "type": "registry:ui",
+      "title": "Folder X Icon",
+      "description": "An animated folder-x icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folder-x-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folder-x-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-folders-icon",
+      "type": "registry:ui",
+      "title": "Folders Icon",
+      "description": "An animated folders icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/folders-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/folders-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-frame-icon",
       "type": "registry:ui",
       "title": "Frame Icon",
@@ -3448,6 +6193,306 @@
           "path": "registry/bases/base-ui/icons/lucide/frame-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/frame-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-gallery-horizontal-end-icon",
+      "type": "registry:ui",
+      "title": "Gallery Horizontal End Icon",
+      "description": "An animated gallery-horizontal-end icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/gallery-horizontal-end-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/gallery-horizontal-end-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-gallery-thumbnails-icon",
+      "type": "registry:ui",
+      "title": "Gallery Thumbnails Icon",
+      "description": "An animated gallery-thumbnails icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/gallery-thumbnails-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/gallery-thumbnails-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-gallery-vertical-end-icon",
+      "type": "registry:ui",
+      "title": "Gallery Vertical End Icon",
+      "description": "An animated gallery-vertical-end icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/gallery-vertical-end-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/gallery-vertical-end-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-gauge-icon",
+      "type": "registry:ui",
+      "title": "Gauge Icon",
+      "description": "An animated gauge icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/gauge-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/gauge-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-gavel-icon",
+      "type": "registry:ui",
+      "title": "Gavel Icon",
+      "description": "An animated gavel icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/gavel-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/gavel-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-georgian-lari-icon",
+      "type": "registry:ui",
+      "title": "Georgian Lari Icon",
+      "description": "An animated georgian-lari icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/georgian-lari-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/georgian-lari-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-branch-icon",
+      "type": "registry:ui",
+      "title": "Git Branch Icon",
+      "description": "An animated git-branch icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-branch-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-branch-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-commit-horizontal-icon",
+      "type": "registry:ui",
+      "title": "Git Commit Horizontal Icon",
+      "description": "An animated git-commit-horizontal icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-commit-horizontal-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-commit-horizontal-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-commit-vertical-icon",
+      "type": "registry:ui",
+      "title": "Git Commit Vertical Icon",
+      "description": "An animated git-commit-vertical icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-commit-vertical-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-commit-vertical-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-compare-arrows-icon",
+      "type": "registry:ui",
+      "title": "Git Compare Arrows Icon",
+      "description": "An animated git-compare-arrows icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-compare-arrows-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-compare-arrows-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-compare-icon",
+      "type": "registry:ui",
+      "title": "Git Compare Icon",
+      "description": "An animated git-compare icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-compare-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-compare-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-fork-icon",
+      "type": "registry:ui",
+      "title": "Git Fork Icon",
+      "description": "An animated git-fork icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-fork-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-fork-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-graph-icon",
+      "type": "registry:ui",
+      "title": "Git Graph Icon",
+      "description": "An animated git-graph icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-graph-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-graph-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-merge-icon",
+      "type": "registry:ui",
+      "title": "Git Merge Icon",
+      "description": "An animated git-merge icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-merge-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-merge-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-pull-request-closed-icon",
+      "type": "registry:ui",
+      "title": "Git Pull Request Closed Icon",
+      "description": "An animated git-pull-request-closed icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-pull-request-closed-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-pull-request-closed-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-pull-request-create-icon",
+      "type": "registry:ui",
+      "title": "Git Pull Request Create Icon",
+      "description": "An animated git-pull-request-create icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-pull-request-create-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-pull-request-create-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-git-pull-request-icon",
+      "type": "registry:ui",
+      "title": "Git Pull Request Icon",
+      "description": "An animated git-pull-request icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/git-pull-request-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/git-pull-request-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-graduation-cap-icon",
+      "type": "registry:ui",
+      "title": "Graduation Cap Icon",
+      "description": "An animated graduation-cap icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/graduation-cap-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/graduation-cap-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-grip-horizontal-icon",
+      "type": "registry:ui",
+      "title": "Grip Horizontal Icon",
+      "description": "An animated grip-horizontal icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/grip-horizontal-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/grip-horizontal-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-grip-icon",
+      "type": "registry:ui",
+      "title": "Grip Icon",
+      "description": "An animated grip icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/grip-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/grip-icon.tsx"
         }
       ]
     },
@@ -3598,6 +6643,21 @@
           "path": "registry/bases/base-ui/icons/lucide/leaf-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/leaf-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-letter-b-icon",
+      "type": "registry:ui",
+      "title": "Letter B Icon",
+      "description": "An animated letter-b icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/letter-b-icon.tsx",
+          "type": "registry:ui",
+          "target": "components/general/lucide/letter-b-icon.tsx"
         }
       ]
     },
@@ -3958,21 +7018,6 @@
           "path": "registry/bases/base-ui/icons/lucide/sliders-horizontal-icon.tsx",
           "type": "registry:ui",
           "target": "components/general/lucide/sliders-horizontal-icon.tsx"
-        }
-      ]
-    },
-    {
-      "name": "lucide-face-slightly-smiling-icon",
-      "type": "registry:ui",
-      "title": "Face Slightly Smiling Icon",
-      "description": "An animated face-slightly-smiling icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
-      "dependencies": ["motion"],
-      "registryDependencies": ["@shadcn/utils"],
-      "files": [
-        {
-          "path": "registry/bases/base-ui/icons/lucide/face-slightly-smiling-icon.tsx",
-          "type": "registry:ui",
-          "target": "components/general/lucide/face-slightly-smiling-icon.tsx"
         }
       ]
     },

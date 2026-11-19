@@ -24,9 +24,11 @@ function LightbulbIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // A swell of 1.06, less than the web twin's 1.12, which takes the top of the glass past the canvas, which react-
+  // native-svg clips.
   const glass = useAnimatedProps(() => {
     const p = progress.value;
-    return { ...transformProps({ scaleX: 1 + 0.12 * p, scaleY: 1 + 0.12 * p, originY: 14 }) };
+    return { ...transformProps({ scaleX: 1 + 0.06 * p, scaleY: 1 + 0.06 * p, originY: 14 }) };
   });
 
   return (

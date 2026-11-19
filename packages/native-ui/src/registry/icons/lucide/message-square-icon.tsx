@@ -24,9 +24,10 @@ function MessageSquareIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // 4 degrees, less than the web twin's 7, which takes a corner past the canvas, which react-native-svg clips.
   const whole = useAnimatedProps(() => ({
     ...transformProps({
-      rotate: interpolate(progress.value, [0, 1 / 3, 2 / 3, 1], [0, -7, 7, 0]),
+      rotate: interpolate(progress.value, [0, 1 / 3, 2 / 3, 1], [0, -4, 4, 0]),
       scaleX: 1 + 0.05 * progress.value,
       scaleY: 1 + 0.05 * progress.value,
     }),

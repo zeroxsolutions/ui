@@ -24,9 +24,10 @@ function RotateCcwIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // 12 degrees, less than the web twin's 50, which takes the arrowhead past the canvas, which react-native-svg clips.
   const whole = useAnimatedProps(() => {
     const p = progress.value;
-    return { ...transformProps({ rotate: -50 * p, originY: 12.007 }) };
+    return { ...transformProps({ rotate: -12 * p, originY: 12.007 }) };
   });
 
   return (

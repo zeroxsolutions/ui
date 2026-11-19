@@ -27,10 +27,12 @@ function SearchIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // A look of 1 up and 1 left, less than the web twin's 4 and 3, which take the lens past the canvas, which react-
+  // native-svg clips.
   const whole = useAnimatedProps(() => ({
     ...transformProps({
-      x: interpolate(progress.value, LOOK, [0, 0, -3, 0]),
-      y: interpolate(progress.value, LOOK, [0, -4, 0, 0]),
+      x: interpolate(progress.value, LOOK, [0, 0, -1, 0]),
+      y: interpolate(progress.value, LOOK, [0, -1, 0, 0]),
     }),
   }));
 

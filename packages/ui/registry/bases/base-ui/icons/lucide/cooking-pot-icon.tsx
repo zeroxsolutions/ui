@@ -1,0 +1,126 @@
+'use client';
+
+// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+
+import type { Variants } from 'motion/react';
+import { motion, useAnimation, useReducedMotion } from 'motion/react';
+import type { HTMLAttributes } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
+
+import { cn } from '@/registry/bases/base-ui/lib/utils';
+
+export interface CookingPotIconHandle {
+  startAnimation: () => void;
+  stopAnimation: () => void;
+}
+
+interface CookingPotIconProps extends HTMLAttributes<HTMLSpanElement> {
+  size?: number;
+}
+
+const LID_VARIANTS: Variants = {
+  normal: { rotate: 0 },
+  animate: {
+    rotate: [0, -14, 14, -10, 10, -6, 6, 0],
+    transition: {
+      duration: 0.9,
+      ease: 'easeInOut',
+    },
+  },
+};
+
+const POT_VARIANTS: Variants = {
+  normal: { scale: 1 },
+  animate: {
+    scale: [1, 1.08, 1],
+    transition: {
+      duration: 0.95,
+      ease: 'easeInOut',
+    },
+  },
+};
+
+const CookingPotIcon = forwardRef<CookingPotIconHandle, CookingPotIconProps>(
+  ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
+    const controls = useAnimation();
+    const isMotionReduced = useReducedMotion();
+    const isControlledRef = useRef(false);
+
+    useImperativeHandle(ref, () => {
+      isControlledRef.current = true;
+      return {
+        startAnimation: () => {
+          if (!isMotionReduced) controls.start('animate');
+        },
+        stopAnimation: () => controls.start('normal'),
+      };
+    });
+
+    const handleMouseEnter = useCallback(
+      (e: React.MouseEvent<HTMLSpanElement>) => {
+        if (isControlledRef.current) {
+          onMouseEnter?.(e);
+        } else if (!isMotionReduced) {
+          controls.start('animate');
+        }
+      },
+      [controls, isMotionReduced, onMouseEnter],
+    );
+
+    const handleMouseLeave = useCallback(
+      (e: React.MouseEvent<HTMLSpanElement>) => {
+        if (isControlledRef.current) {
+          onMouseLeave?.(e);
+        } else {
+          controls.start('normal');
+        }
+      },
+      [controls, onMouseLeave],
+    );
+
+    return (
+      <span
+        data-slot="cooking-pot-icon"
+        className={cn('inline-flex', className)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        {...props}
+      >
+        <svg
+          fill="none"
+          height={size}
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width={size}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <motion.g
+            animate={controls}
+            initial="normal"
+            style={{ transformBox: 'view-box', originX: '12px', originY: '16px' }}
+            variants={POT_VARIANTS}
+          >
+            <path d="M2 12h20" />
+            <path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8" />
+          </motion.g>
+          <motion.g
+            animate={controls}
+            initial="normal"
+            style={{ transformBox: 'view-box', originX: '18px', originY: '6px' }}
+            variants={LID_VARIANTS}
+          >
+            <path d="m4 8 16-4" />
+            <path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8" />
+          </motion.g>
+        </svg>
+      </span>
+    );
+  },
+);
+
+CookingPotIcon.displayName = 'CookingPotIcon';
+
+export { CookingPotIcon };

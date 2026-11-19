@@ -24,13 +24,15 @@ function CodeIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // Each bracket moves 1, less than the web twin's 2.5, which takes the closing one past the canvas, which react-
+  // native-svg clips.
   const close = useAnimatedProps(() => {
     const p = progress.value;
-    return { ...transformProps({ x: 2.5 * p }) };
+    return { ...transformProps({ x: 1 * p }) };
   });
   const open = useAnimatedProps(() => {
     const p = progress.value;
-    return { ...transformProps({ x: -2.5 * p }) };
+    return { ...transformProps({ x: -1 * p }) };
   });
 
   return (

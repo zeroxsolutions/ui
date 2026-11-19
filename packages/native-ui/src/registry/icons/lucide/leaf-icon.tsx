@@ -27,11 +27,13 @@ function LeafIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // About a quarter of the web twin's sway (8 degrees, 4 up, 2 across), which takes the tip past the canvas, which
+  // react-native-svg clips.
   const whole = useAnimatedProps(() => ({
     ...transformProps({
-      rotate: interpolate(progress.value, SWAY, [0, -8, 4, -3, 0]),
-      y: interpolate(progress.value, SWAY, [0, -4, -2, -1, 0]),
-      x: interpolate(progress.value, SWAY, [0, 2, -2, 1, 0]),
+      rotate: interpolate(progress.value, SWAY, [0, -2, 1, -0.75, 0]),
+      y: interpolate(progress.value, SWAY, [0, -0.5, -0.25, -0.1, 0]),
+      x: interpolate(progress.value, SWAY, [0, 0.5, -0.5, 0.25, 0]),
     }),
   }));
 

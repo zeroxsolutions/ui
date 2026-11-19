@@ -24,17 +24,19 @@ function ListOrderedIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // Each line slides 2, less than the web twin's 2.5, which takes its end past the canvas, which react-native-svg
+  // clips.
   const firstLine = useAnimatedProps(() => {
     const p = progress.value;
-    return { ...transformProps({ x: 2.5 * p }) };
+    return { ...transformProps({ x: 2 * p }) };
   });
   const secondLine = useAnimatedProps(() => {
     const p = Math.max(0, (progress.value - 0.08) / 0.92);
-    return { ...transformProps({ x: 2.5 * p }) };
+    return { ...transformProps({ x: 2 * p }) };
   });
   const thirdLine = useAnimatedProps(() => {
     const p = Math.max(0, (progress.value - 0.16) / 0.84);
-    return { ...transformProps({ x: 2.5 * p }) };
+    return { ...transformProps({ x: 2 * p }) };
   });
   const firstNumber = useAnimatedProps(() => {
     const p = progress.value;

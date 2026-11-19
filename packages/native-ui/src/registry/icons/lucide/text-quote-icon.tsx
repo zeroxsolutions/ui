@@ -28,13 +28,15 @@ function TextQuoteIcon({
     const p = progress.value;
     return { ...transformProps({ scaleX: 1 - 0.3 * p, originX: 3, originY: 5 }) };
   });
+  // Each line slides 2, less than the web twin's 2.5, which takes its end past the canvas, which react-native-svg
+  // clips.
   const second = useAnimatedProps(() => {
     const p = Math.max(0, (progress.value - 0.08) / 0.92);
-    return { ...transformProps({ x: 2.5 * p }) };
+    return { ...transformProps({ x: 2 * p }) };
   });
   const third = useAnimatedProps(() => {
     const p = Math.max(0, (progress.value - 0.16) / 0.84);
-    return { ...transformProps({ x: 2.5 * p }) };
+    return { ...transformProps({ x: 2 * p }) };
   });
   const bar = useAnimatedProps(() => {
     const p = progress.value;

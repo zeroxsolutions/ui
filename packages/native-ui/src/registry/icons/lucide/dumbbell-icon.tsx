@@ -24,9 +24,10 @@ function DumbbellIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // 9.5 degrees, less than the web twin's 12, which takes a weight's end past the canvas, which react-native-svg clips.
   const weights = useAnimatedProps(() => {
     const p = progress.value;
-    return { ...transformProps({ rotate: -12 * Math.sin(2 * Math.PI * p) }) };
+    return { ...transformProps({ rotate: -9.5 * Math.sin(2 * Math.PI * p) }) };
   });
 
   return (

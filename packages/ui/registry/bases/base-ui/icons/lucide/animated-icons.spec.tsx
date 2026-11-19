@@ -1,15 +1,20 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { createElement, createRef, forwardRef, type ComponentType, type ReactNode, type Ref } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 /**
  * Motion's hooks are replaced by recording stand-ins: jsdom runs no animation frame, so a case asserts
  * which controls an icon started, not a value it never animates. `motion.<tag>` renders the bare tag
- * with Motion's own props removed.
+ * with Motion's own props removed. The walk sets `real`, and then Motion runs as shipped, its elements
+ * marked `data-walk` where they carry variants that set a value or an `animate` target, so the walk can
+ * find what an icon moves. An element handed only the controls, or variants holding nothing but a
+ * transition, is a group passing its variant on to its children; it moves nothing of its own and goes
+ * unmarked.
  */
-const motionState = vi.hoisted(() => ({ reduced: false, starts: [] as unknown[][] }));
+const motionState = vi.hoisted(() => ({ reduced: false, real: false, starts: [] as unknown[][] }));
 
-vi.mock('motion/react', () => {
+vi.mock('motion/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('motion/react')>();
   const MOTION_PROPS = new Set([
     'animate',
     'initial',
@@ -20,27 +25,51 @@ vi.mock('motion/react', () => {
     'whileHover',
     'whileTap',
   ]);
+  // One component per tag, so a render does not remount what an earlier render drew.
+  const standIns = new Map<string, ComponentType>();
+  const standIn = (tag: string) =>
+    forwardRef<Element, Record<string, unknown>>(function MotionStandIn(props, ref) {
+      if (motionState.real) {
+        const walked = setsValues(props.variants) || isTarget(props.animate);
+        const Real = (actual.motion as unknown as Record<string, ComponentType<Record<string, unknown>>>)[tag];
+        return createElement(Real, { ...props, ...(walked ? { 'data-walk': '' } : {}), ref });
+      }
+      const rest = Object.fromEntries(Object.entries(props).filter(([key]) => !MOTION_PROPS.has(key)));
+      return createElement(tag, { ...rest, ref });
+    }) as unknown as ComponentType;
+  const setsValues = (variants: unknown) =>
+    typeof variants === 'object' &&
+    variants !== null &&
+    Object.values(variants).some(
+      (variant) =>
+        typeof variant === 'function' ||
+        Object.keys(variant as object).some((key) => key !== 'transition' && key !== 'transitionEnd'),
+    );
+  const isTarget = (animate: unknown) => typeof animate === 'object' && animate !== null && !('start' in animate);
   const motion = new Proxy(
     {},
     {
-      get: (_, tag: string) =>
-        forwardRef<Element, Record<string, unknown>>(function MotionStandIn(props, ref) {
-          const rest = Object.fromEntries(Object.entries(props).filter(([key]) => !MOTION_PROPS.has(key)));
-          return createElement(tag, { ...rest, ref });
-        }),
+      get: (_, tag: string) => {
+        if (!standIns.has(tag)) standIns.set(tag, standIn(tag));
+        return standIns.get(tag);
+      },
     },
   );
   return {
+    ...actual,
     motion,
-    useAnimation: () => ({
-      start: (...args: unknown[]) => {
-        motionState.starts.push(args);
-        return Promise.resolve();
-      },
-      stop: () => undefined,
-      set: () => undefined,
-      mount: () => () => undefined,
-    }),
+    useAnimation: () =>
+      motionState.real
+        ? actual.useAnimation()
+        : {
+            start: (...args: unknown[]) => {
+              motionState.starts.push(args);
+              return Promise.resolve();
+            },
+            stop: () => undefined,
+            set: () => undefined,
+            mount: () => () => undefined,
+          },
     useReducedMotion: () => motionState.reduced,
   };
 });
@@ -122,4 +151,131 @@ describe('animated icons', () => {
       expect(playStarts()).toEqual([]);
     });
   });
+
+  /**
+   * Every icon is drawn and started at once, then read every 40 ms for 1.5 s: an element that moves
+   * only after a delay, as file-text's last line does at 0.7 s, is still caught, where one read at a
+   * fixed time would miss it. An element counts as moved when any attribute, style included, differs
+   * from what it read at rest. At rest, read after the icons are stopped, each element of the icon's
+   * Lucide 1.72.0 glyph must be drawn whole by some element of the icon; an element that matches none,
+   * such as a decoration hidden at rest or a part drawn as a reversed path, is not checked.
+   */
+  describe('the walk', () => {
+    const SAMPLE_MS = 40;
+    const WINDOW_MS = 1500;
+    const REST_MS = 600;
+    // Every icon is drawn and read on each sample, so the walk's time grows with the set and its limit grows with it.
+    const WALK_TIMEOUT_MS = 10_000 + cases.length * 500;
+    const unmoved = new Map<string, string[]>();
+    const unwhole = new Map<string, string[]>();
+    let stillIcons: string[] = [];
+
+    beforeAll(async () => {
+      const glyphs = await Promise.all(cases.map(({ name }) => lucideNode(name.slice(0, -'-icon'.length))));
+      motionState.real = true;
+      motionState.reduced = false;
+      const handles = cases.map(() => createRef<Handle>());
+      const { container } = render(
+        <>
+          {cases.map(({ name, Icon }, index) => (
+            <button key={name} type="button" data-icon={name}>
+              <Icon ref={handles[index]} />
+            </button>
+          ))}
+        </>,
+      );
+      // Rest is read after the icons are stopped, so Motion has written each rest value it would write on
+      // a start; read before it, a start that only writes rest values would count as a move.
+      for (const handle of handles) handle.current?.stopAnimation();
+      await wait(REST_MS);
+      cases.forEach(({ name }, index) => {
+        const svg = container.querySelector(`[data-icon="${name}"] svg`)!;
+        const drawn = [...svg.querySelectorAll('*')];
+        unwhole.set(
+          name,
+          glyphs[index]
+            .filter(([tag, attributes]) => drawn.some((element) => draws(element, tag, attributes)))
+            .filter(
+              ([tag, attributes]) => !drawn.some((element) => draws(element, tag, attributes) && isWhole(element, svg)),
+            )
+            .map(([tag, attributes]) => `${tag} ${JSON.stringify(attributes)}`),
+        );
+      });
+      const walked = cases.map(({ name }) => {
+        const elements = [...container.querySelectorAll(`[data-icon="${name}"] [data-walk]`)];
+        return { name, elements, rest: elements.map(attributesOf), moved: elements.map(() => false) };
+      });
+      for (const handle of handles) handle.current?.startAnimation();
+      for (let elapsed = 0; elapsed < WINDOW_MS; elapsed += SAMPLE_MS) {
+        await wait(SAMPLE_MS);
+        for (const icon of walked) {
+          icon.elements.forEach((element, index) => {
+            if (attributesOf(element) !== icon.rest[index]) icon.moved[index] = true;
+          });
+        }
+      }
+      for (const icon of walked) {
+        unmoved.set(
+          icon.name,
+          icon.elements.filter((_, index) => !icon.moved[index]).map((element) => element.outerHTML),
+        );
+      }
+      stillIcons = walked.filter((icon) => icon.elements.length === 0).map((icon) => icon.name);
+      cleanup();
+      motionState.real = false;
+    }, WALK_TIMEOUT_MS);
+
+    it('finds an animated element in every icon', () => {
+      expect(stillIcons).toEqual([]);
+    });
+
+    it.each(cases)('$name moves every animated element', ({ name }) => {
+      expect(unmoved.get(name)).toEqual([]);
+    });
+
+    it.each(cases)('$name draws its whole Lucide glyph at rest', ({ name }) => {
+      expect(unwhole.get(name)).toEqual([]);
+    });
+  });
 });
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** One element of a Lucide glyph: its tag and the attributes that place it. */
+type GlyphElement = [tag: string, attributes: Record<string, string>];
+
+/** The elements of the Lucide 1.72.0 glyph named `glyph`, as lucide-react draws them. */
+async function lucideNode(glyph: string): Promise<GlyphElement[]> {
+  const icon = (await import(`lucide-react/icons/${glyph}`)) as { __iconData: { node: GlyphElement[] } };
+  return icon.__iconData.node.map(([tag, { key: _key, ...attributes }]) => [tag, attributes]);
+}
+
+/** Whether `element` is the glyph element `tag` placed by `attributes`. */
+function draws(element: Element, tag: string, attributes: Record<string, string>): boolean {
+  return (
+    element.tagName.toLowerCase() === tag &&
+    Object.entries(attributes).every(([attribute, value]) => element.getAttribute(attribute) === value)
+  );
+}
+
+/**
+ * Whether `element` is drawn whole inside `svg`: at full opacity, its own and every group's around it, and with
+ * all of its length drawn. Motion writes a pathLength as `stroke-dasharray` over a `pathLength` of 1, its first
+ * value the share drawn, and a pathOffset as `stroke-dashoffset`.
+ */
+function isWhole(element: Element, svg: Element): boolean {
+  for (let node: Element | null = element; node !== null && node !== svg.parentElement; node = node.parentElement) {
+    const opacity = (node as SVGElement).style?.opacity || node.getAttribute('opacity');
+    if (opacity !== null && opacity !== '' && Number(opacity) < 1) return false;
+  }
+  const drawn = element.getAttribute('stroke-dasharray');
+  const offset = element.getAttribute('stroke-dashoffset');
+  return (drawn === null || Number.parseFloat(drawn) >= 1) && (offset === null || Number.parseFloat(offset) === 0);
+}
+
+/** An element's attributes, style included, as one comparable string. */
+function attributesOf(element: Element): string {
+  return [...element.attributes].map((attribute) => `${attribute.name}=${attribute.value}`).join(' ');
+}

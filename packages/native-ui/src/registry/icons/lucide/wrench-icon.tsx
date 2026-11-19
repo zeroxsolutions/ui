@@ -24,9 +24,11 @@ function WrenchIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
+  // About a quarter of the web twin's swing (12 and -14 degrees), which takes the handle past the canvas, which react-
+  // native-svg clips.
   const wrench = useAnimatedProps(() => ({
     ...transformProps({
-      rotate: interpolate(progress.value, [0, 0.42, 0.68, 0.88, 1], [0, 12, -14, 4, 0]),
+      rotate: interpolate(progress.value, [0, 0.42, 0.68, 0.88, 1], [0, 3, -3, 1, 0]),
       originX: 21.6,
       originY: 2.4,
     }),
