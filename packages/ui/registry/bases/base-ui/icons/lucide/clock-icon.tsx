@@ -45,12 +45,12 @@ const MINUTE_HAND_VARIANTS: Variants = {
   normal: {
     rotate: 0,
     originX: '0%',
-    originY: '100%',
+    originY: '0%',
   },
   animate: {
     rotate: 45,
     originX: '0%',
-    originY: '100%',
+    originY: '0%',
   },
 };
 
@@ -113,25 +113,19 @@ const ClockIcon = forwardRef<ClockIconHandle, ClockIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           <circle cx="12" cy="12" r="10" />
-          <motion.line
+          <motion.path
             animate={controls}
+            d="M12 6v6"
             initial="normal"
             transition={HAND_TRANSITION}
             variants={HAND_VARIANTS}
-            x1="12"
-            x2="12"
-            y1="12"
-            y2="6"
           />
-          <motion.line
+          <motion.path
             animate={controls}
+            d="m12 12 4 2"
             initial="normal"
             transition={MINUTE_HAND_TRANSITION}
             variants={MINUTE_HAND_VARIANTS}
-            x1="12"
-            x2="16"
-            y1="12"
-            y2="12"
           />
         </svg>
       </span>

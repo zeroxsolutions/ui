@@ -77,7 +77,7 @@ const FolderOpenIcon = forwardRef<FolderOpenIconHandle, FolderOpenIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -95,7 +95,7 @@ const FolderOpenIcon = forwardRef<FolderOpenIconHandle, FolderOpenIconProps>(
             style={{ transformBox: 'view-box', originX: '12px', originY: '12px' }}
             variants={VARIANTS}
           />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 import { IconLabel } from '@/registry/bases/base-ui/components/general/icon-label';
 import { Input } from '@/registry/bases/base-ui/ui/input';
-import { RotateCWIcon } from '@/registry/bases/base-ui/icons/lucide/rotate-cw-icon';
+import { RotateCwIcon } from '@/registry/bases/base-ui/icons/lucide/rotate-cw-icon';
 import { SearchIcon } from '@/registry/bases/base-ui/icons/lucide/search-icon';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 
@@ -22,7 +22,7 @@ function IconLabelDemo(): ReactNode {
         <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger render={<IconLabel htmlFor="icon-label-demo-rotation" />}>
-              <RotateCWIcon aria-hidden />
+              <RotateCwIcon aria-hidden />
               <span className="sr-only">Rotation</span>
             </TooltipTrigger>
             <TooltipContent>Rotation</TooltipContent>

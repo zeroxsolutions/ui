@@ -87,7 +87,7 @@ const BatteryFullIcon = forwardRef<BatteryFullIconHandle, BatteryFullIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -103,7 +103,7 @@ const BatteryFullIcon = forwardRef<BatteryFullIconHandle, BatteryFullIconProps>(
           <motion.path animate={controls} custom={0} initial="initial" variants={LINE_VARIANTS} d="M6 10v4" />
           <motion.path animate={controls} custom={1} initial="initial" variants={LINE_VARIANTS} d="M10 10v4" />
           <motion.path animate={controls} custom={2} initial="initial" variants={LINE_VARIANTS} d="M14 10v4" />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

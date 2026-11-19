@@ -96,7 +96,7 @@ const CircleCheckIcon = forwardRef<CircleCheckIconHandle, CircleCheckIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           <circle cx="12" cy="12" r="10" />
-          <motion.path animate={controls} d="m9 12 2 2 4-4" initial="normal" variants={PATH_VARIANTS} />
+          <motion.path animate={controls} d="M8 12l2.5 2.5L16 9" initial="normal" variants={PATH_VARIANTS} />
         </svg>
       </span>
     );

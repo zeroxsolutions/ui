@@ -25,11 +25,11 @@ function SlidersHorizontalIcon({
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
   const topLeft = useAnimatedProps(() => ({ d: `M${10 - 5 * progress.value} 5H3` }));
-  const topRight = useAnimatedProps(() => ({ d: `M21 5H${14 - 5 * progress.value}` }));
+  const topRight = useAnimatedProps(() => ({ d: `M21 5H${14 - 4 * progress.value}` }));
   const topKnob = useAnimatedProps(() => ({ d: `M${14 - 5 * progress.value} 3v4` }));
   const middleLeft = useAnimatedProps(() => ({ d: `M${8 + 5 * progress.value} 12H3` }));
   const middleRight = useAnimatedProps(() => ({ d: `M21 12H${12 + 6 * progress.value}` }));
-  const middleKnob = useAnimatedProps(() => ({ d: `M${8 + 5 * progress.value} 10v4` }));
+  const middleKnob = useAnimatedProps(() => ({ d: `M${8 + 6 * progress.value} 10v4` }));
   const bottomLeft = useAnimatedProps(() => ({ d: `M${12 - 8 * progress.value} 19H3` }));
   const bottomRight = useAnimatedProps(() => ({ d: `M21 19H${16 - 8 * progress.value}` }));
   const bottomKnob = useAnimatedProps(() => ({ d: `M${16 - 8 * progress.value} 17v4` }));

@@ -8,16 +8,16 @@ import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-export interface RotateCWIconHandle {
+export interface RotateCwIconHandle {
   startAnimation: () => void;
   stopAnimation: () => void;
 }
 
-interface RotateCWIconProps extends HTMLAttributes<HTMLSpanElement> {
+interface RotateCwIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
 }
 
-const RotateCWIcon = forwardRef<RotateCWIconHandle, RotateCWIconProps>(
+const RotateCwIcon = forwardRef<RotateCwIconHandle, RotateCwIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
     const isMotionReduced = useReducedMotion();
@@ -82,6 +82,6 @@ const RotateCWIcon = forwardRef<RotateCWIconHandle, RotateCWIconProps>(
   },
 );
 
-RotateCWIcon.displayName = 'RotateCWIcon';
+RotateCwIcon.displayName = 'RotateCwIcon';
 
-export { RotateCWIcon };
+export { RotateCwIcon };

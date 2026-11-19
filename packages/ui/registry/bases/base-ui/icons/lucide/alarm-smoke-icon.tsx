@@ -92,7 +92,7 @@ const AlarmSmokeIcon = forwardRef<AlarmSmokeIconHandle, AlarmSmokeIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -117,8 +117,8 @@ const AlarmSmokeIcon = forwardRef<AlarmSmokeIconHandle, AlarmSmokeIconProps>(
             variants={SMOKE_VARIANTS}
           />
           <motion.g animate={controls} initial={{ scale: 1, opacity: 1 }} variants={ALARM_VARIANTS}>
-            <motion.path d="m19 8-.8 3a1.25 1.25 0 0 1-1.2 1H7a1.25 1.25 0 0 1-1.2-1L5 8" />
-            <motion.path d="M21 3a1 1 0 0 1 1 1v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a1 1 0 0 1 1-1z" />
+            <path d="m19 8-.8 3a1.25 1.25 0 0 1-1.2 1H7a1.25 1.25 0 0 1-1.2-1L5 8" />
+            <path d="M21 3a1 1 0 0 1 1 1v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a1 1 0 0 1 1-1z" />
           </motion.g>
           <motion.path
             animate={controls}
@@ -126,7 +126,7 @@ const AlarmSmokeIcon = forwardRef<AlarmSmokeIconHandle, AlarmSmokeIconProps>(
             initial={{ y: 0, opacity: 1 }}
             variants={SMOKE_VARIANTS}
           />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

@@ -93,7 +93,7 @@ const BicepsFlexedIcon = forwardRef<BicepsFlexedIconHandle, BicepsFlexedIconProp
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -123,7 +123,7 @@ const BicepsFlexedIcon = forwardRef<BicepsFlexedIconHandle, BicepsFlexedIconProp
             initial="normal"
             variants={BICEPS_FLEXED_SVG_VARIANTS}
           />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

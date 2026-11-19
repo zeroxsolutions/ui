@@ -106,18 +106,10 @@ const SunMoonIcon = forwardRef<SunMoonIconHandle, SunMoonIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           <motion.g animate={sunControls} initial="normal" variants={SUN_VARIANTS}>
-            <path d="M12 8a2.83 2.83 0 0 0 4 4 4 4 0 1 1-4-4" />
+            <path d="M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715" />
+            <path d="M16 12a4 4 0 0 0-4-4" />
           </motion.g>
-          {[
-            'M12 2v2',
-            'M12 20v2',
-            'm4.9 4.9 1.4 1.4',
-            'm17.7 17.7 1.4 1.4',
-            'M2 12h2',
-            'M20 12h2',
-            'm6.3 17.7-1.4 1.4',
-            'm19.1 4.9-1.4 1.4',
-          ].map((d, index) => (
+          {['M12 2v2', 'm19 5-1.256 1.256', 'M20 12h2'].map((d, index) => (
             <motion.path
               animate={moonControls}
               custom={index + 1}

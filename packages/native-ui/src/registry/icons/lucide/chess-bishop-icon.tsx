@@ -11,6 +11,15 @@ type ChessBishopIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
+ * How far the bishop slides up and left, in 24-unit viewBox units, and tips, in degrees about the middle, and its size
+ * as it does: the web twin's 6 would take the top past the canvas, which react-native-svg clips, so it slides less and
+ * shrinks as it slides; it tips the web twin's 16.
+ */
+const SLIDE = -3;
+const TIP = -16;
+const SIZE = 0.82;
+
+/**
  * Lucide's chess-bishop icon, which slides up and left, tilting, and fades away, then comes back, when started. Hidden
  * from a screen reader: the control around it says what it does.
  */
@@ -24,12 +33,19 @@ function ChessBishopIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  // A rise of 0.8 and a tip of 8 degrees, less than the web twin's 6 and 16, which take the top past the canvas, which
-  // react-native-svg clips.
-  const bishop = useAnimatedProps(() => ({
-    opacity: interpolate(progress.value, [0.3, 0.8], [1, 0], Extrapolation.CLAMP),
-    ...transformProps({ x: -2 * progress.value, y: -0.8 * progress.value, rotate: -8 * progress.value }),
-  }));
+  const bishop = useAnimatedProps(() => {
+    const size = interpolate(progress.value, [0, 0.5, 1], [1, SIZE, SIZE]);
+    return {
+      opacity: interpolate(progress.value, [0.3, 0.8], [1, 0], Extrapolation.CLAMP),
+      ...transformProps({
+        x: SLIDE * progress.value,
+        y: SLIDE * progress.value,
+        rotate: TIP * progress.value,
+        scaleX: size,
+        scaleY: size,
+      }),
+    };
+  });
 
   return (
     <Svg

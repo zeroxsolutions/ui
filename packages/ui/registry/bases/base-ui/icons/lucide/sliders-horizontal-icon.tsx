@@ -83,163 +83,59 @@ const SlidersHorizontalIcon = forwardRef<SlidersHorizontalIconHandle, SlidersHor
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.line
+          <motion.path
             animate={controls}
-            initial={false}
+            d="M21 5h-7"
             transition={DEFAULT_TRANSITION}
-            variants={{
-              normal: {
-                x2: 14,
-              },
-              animate: {
-                x2: 10,
-              },
-            }}
-            x1="21"
-            x2="14"
-            y1="4"
-            y2="4"
+            variants={{ normal: { d: 'M21 5h-7' }, animate: { d: 'M21 5h-11' } }}
           />
-          <motion.line
+          <motion.path
             animate={controls}
+            d="M10 5H3"
             transition={DEFAULT_TRANSITION}
-            variants={{
-              normal: {
-                x1: 10,
-              },
-              animate: {
-                x1: 5,
-              },
-            }}
-            x1="10"
-            x2="3"
-            y1="4"
-            y2="4"
+            variants={{ normal: { d: 'M10 5H3' }, animate: { d: 'M5 5H3' } }}
           />
-
-          <motion.line
+          <motion.path
             animate={controls}
+            d="M21 12h-9"
             transition={DEFAULT_TRANSITION}
-            variants={{
-              normal: {
-                x2: 12,
-              },
-              animate: {
-                x2: 18,
-              },
-            }}
-            x1="21"
-            x2="12"
-            y1="12"
-            y2="12"
+            variants={{ normal: { d: 'M21 12h-9' }, animate: { d: 'M21 12h-3' } }}
           />
-
-          <motion.line
+          <motion.path
             animate={controls}
+            d="M8 12H3"
             transition={DEFAULT_TRANSITION}
-            variants={{
-              normal: {
-                x1: 8,
-              },
-              animate: {
-                x1: 13,
-              },
-            }}
-            x1="8"
-            x2="3"
-            y1="12"
-            y2="12"
+            variants={{ normal: { d: 'M8 12H3' }, animate: { d: 'M13 12H3' } }}
           />
-
-          <motion.line
+          <motion.path
             animate={controls}
+            d="M12 19H3"
             transition={DEFAULT_TRANSITION}
-            variants={{
-              normal: {
-                x2: 12,
-              },
-              animate: {
-                x2: 4,
-              },
-            }}
-            x1="3"
-            x2="12"
-            y1="20"
-            y2="20"
+            variants={{ normal: { d: 'M12 19H3' }, animate: { d: 'M4 19H3' } }}
           />
-
-          <motion.line
+          <motion.path
             animate={controls}
+            d="M21 19h-5"
             transition={DEFAULT_TRANSITION}
-            variants={{
-              normal: {
-                x1: 16,
-              },
-              animate: {
-                x1: 8,
-              },
-            }}
-            x1="16"
-            x2="21"
-            y1="20"
-            y2="20"
+            variants={{ normal: { d: 'M21 19h-5' }, animate: { d: 'M21 19h-13' } }}
           />
-
-          <motion.line
+          <motion.path
             animate={controls}
+            d="M14 3v4"
             transition={DEFAULT_TRANSITION}
-            variants={{
-              normal: {
-                x1: 14,
-                x2: 14,
-              },
-              animate: {
-                x1: 9,
-                x2: 9,
-              },
-            }}
-            x1="14"
-            x2="14"
-            y1="2"
-            y2="6"
+            variants={{ normal: { d: 'M14 3v4' }, animate: { d: 'M9 3v4' } }}
           />
-
-          <motion.line
+          <motion.path
             animate={controls}
+            d="M8 10v4"
             transition={DEFAULT_TRANSITION}
-            variants={{
-              normal: {
-                x1: 8,
-                x2: 8,
-              },
-              animate: {
-                x1: 14,
-                x2: 14,
-              },
-            }}
-            x1="8"
-            x2="8"
-            y1="10"
-            y2="14"
+            variants={{ normal: { d: 'M8 10v4' }, animate: { d: 'M14 10v4' } }}
           />
-
-          <motion.line
+          <motion.path
             animate={controls}
+            d="M16 17v4"
             transition={DEFAULT_TRANSITION}
-            variants={{
-              normal: {
-                x1: 16,
-                x2: 16,
-              },
-              animate: {
-                x1: 8,
-                x2: 8,
-              },
-            }}
-            x1="16"
-            x2="16"
-            y1="18"
-            y2="22"
+            variants={{ normal: { d: 'M16 17v4' }, animate: { d: 'M8 17v4' } }}
           />
         </svg>
       </span>

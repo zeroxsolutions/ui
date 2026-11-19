@@ -85,9 +85,7 @@ const AlarmClockCheckIcon = forwardRef<AlarmClockCheckIconHandle, AlarmClockChec
 
     const resetToNormal = useCallback(() => {
       controls.stop();
-      controls.start('normal').catch(() => {
-        // ignore when interrupted by a new animation
-      });
+      controls.start('normal');
     }, [controls]);
 
     useImperativeHandle(ref, () => {
@@ -130,7 +128,7 @@ const AlarmClockCheckIcon = forwardRef<AlarmClockCheckIconHandle, AlarmClockChec
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -148,7 +146,7 @@ const AlarmClockCheckIcon = forwardRef<AlarmClockCheckIconHandle, AlarmClockChec
           <motion.path animate={controls} d="M6.38 18.7 4 21" initial="normal" variants={PATH_VARIANTS} />
           <motion.path animate={controls} d="M17.64 18.67 20 21" initial="normal" variants={PATH_VARIANTS} />
           <motion.path animate={controls} d="m9 13 2 2 4-4" initial="normal" variants={PATH_VARIANTS} />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

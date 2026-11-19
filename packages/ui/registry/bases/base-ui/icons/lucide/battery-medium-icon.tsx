@@ -87,7 +87,7 @@ const BatteryMediumIcon = forwardRef<BatteryMediumIconHandle, BatteryMediumIconP
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
+        <svg
           fill="none"
           height={size}
           stroke="currentColor"
@@ -102,7 +102,7 @@ const BatteryMediumIcon = forwardRef<BatteryMediumIconHandle, BatteryMediumIconP
           <path d="M22 14v-4" />
           <motion.path animate={controls} custom={0} initial="initial" variants={LINE_VARIANTS} d="M6 14v-4" />
           <motion.path animate={controls} custom={1} initial="initial" variants={LINE_VARIANTS} d="M10 14v-4" />
-        </motion.svg>
+        </svg>
       </span>
     );
   },

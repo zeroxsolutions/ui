@@ -1,7 +1,7 @@
 // Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
 
 import type { ReactNode } from 'react';
-import Animated, { useAnimatedProps } from 'react-native-reanimated';
+import Animated, { interpolate, useAnimatedProps } from 'react-native-reanimated';
 import Svg, { G, Path } from 'react-native-svg';
 import { transformProps, useIconMotion, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
 
@@ -11,8 +11,16 @@ type RotateCwIconHandle = IconHandle;
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * Lucide's rotate-cw icon, which turns part of the way round and back when started. Hidden from a screen
- * reader: the control around it says what it does.
+ * How far the arrow turns, in degrees about the middle, and how small it gets as it does: the web twin's 50,
+ * which would sweep the arrowhead past the canvas, which react-native-svg clips, so it shrinks a little as it turns,
+ * as refresh-cw's arrows do.
+ */
+const TURN = 50;
+const SIZE = 0.86;
+
+/**
+ * Lucide's rotate-cw icon, which turns part of the way round, shrinking a little, and back when started. Hidden from a
+ * screen reader: the control around it says what it does.
  */
 function RotateCwIcon({
   ref,
@@ -24,8 +32,10 @@ function RotateCwIcon({
   ...props
 }: AnimatedIconProps): ReactNode {
   const progress = useIconMotion(ref);
-  // 12 degrees, less than the web twin's 50, which takes the arrowhead past the canvas, which react-native-svg clips.
-  const whole = useAnimatedProps(() => transformProps({ rotate: 12 * progress.value }));
+  const whole = useAnimatedProps(() => {
+    const size = interpolate(progress.value, [0, 0.5, 1], [1, SIZE, SIZE]);
+    return transformProps({ rotate: TURN * progress.value, scaleX: size, scaleY: size });
+  });
 
   return (
     <Svg
