@@ -76,7 +76,7 @@
     "react-day-picker": "^10.0.2",
     "react-hook-form": "catalog:",
     "react-markdown": "catalog:",
-    "react-resizable-panels": "^4.21.0",
+    "react-resizable-panels": "^4.24.0",
     "recharts": "3.10.1",
     "remark": "^15.0.1",
     "remark-gfm": "catalog:",
