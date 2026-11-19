@@ -67,3 +67,15 @@ export function rectAnchor(rect: RectLike | null) {
     }),
   };
 }
+
+/**
+ * The anchor of a menu opened at a trigger, re-read on every scroll: its
+ * vertical edges follow the caret, its horizontal edges stay where the menu
+ * opened. The highlight painted around the trigger once the menu is open pads
+ * the text, so a caret read after it sits a few pixels right of the first read,
+ * and the menu would jump sideways on the first scroll.
+ */
+export function pinHorizontal(next: RectLike | null, opened: RectLike | null): RectLike | null {
+  if (!next || !opened) return next;
+  return { top: next.top, bottom: next.bottom, left: opened.left, right: opened.right };
+}

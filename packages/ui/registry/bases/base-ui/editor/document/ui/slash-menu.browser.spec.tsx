@@ -5,8 +5,13 @@ import type { IEditor, SlashItem } from '@zeroxsolutions/editor-core/document/co
 
 import { SlashMenu } from './slash-menu';
 
-/** An editor with the caret after a bare `/`, so the menu opens on every item. */
-function slashEditor(): IEditor {
+/**
+ * An editor with the caret after a bare `/`, so the menu opens on every item. `caretRect` answers each read
+ * in turn and then keeps its last answer.
+ */
+function slashEditor(...carets: { top: number; bottom: number; left: number; right: number }[]): IEditor {
+  const reads = carets.length > 0 ? carets : [{ top: 10, bottom: 30, left: 20, right: 80 }];
+  let read = 0;
   return {
     status: 'ready',
     run: vi.fn(() => true),
@@ -14,7 +19,7 @@ function slashEditor(): IEditor {
     isFocused: () => true,
     onChange: () => () => {},
     onSelectionUpdate: () => () => {},
-    caretRect: () => ({ top: 10, bottom: 30, left: 20, right: 80 }),
+    caretRect: () => reads[Math.min(read++, reads.length - 1)],
     triggerQuery: () => ({ from: 1, to: 2, query: '' }),
     setSlashDecoration: () => {},
     focus: () => {},
@@ -105,5 +110,28 @@ describe('SlashMenu with more items than it holds', () => {
     await userEvent.hover(third);
 
     await vi.waitFor(() => expect(popup.querySelector('[data-highlighted]')!.textContent).toContain('Item 2'));
+  });
+
+  it('keeps its left edge when its list scrolls after the trigger highlight moved the caret', async () => {
+    // The first read comes before the highlight around the `/` is painted; every later read after it.
+    const editor = slashEditor(
+      { top: 10, bottom: 30, left: 20, right: 80 },
+      { top: 10, bottom: 30, left: 24, right: 84 },
+    );
+    render(<SlashMenu editor={editor} items={items} />);
+    const popup = await vi.waitFor(() => {
+      const found = document.querySelector('[data-slot=slash-menu]');
+      if (!found) throw new Error('the menu is not open');
+      return found;
+    });
+    const viewport = popup.querySelector('[data-slot=scroll-area-viewport]')!;
+    await vi.waitFor(() => expect(popup.getBoundingClientRect().left).toBeGreaterThan(0));
+    const opened = popup.getBoundingClientRect().left;
+
+    await userEvent.keyboard('{ArrowUp}');
+    await vi.waitFor(() => expect(viewport.scrollTop).toBeGreaterThan(0));
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    expect(popup.getBoundingClientRect().left).toBe(opened);
   });
 });

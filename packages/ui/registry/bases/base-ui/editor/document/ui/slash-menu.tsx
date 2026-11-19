@@ -9,6 +9,7 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { CaretRect, IEditor, SlashItem, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { filterSlashItems, groupByHeading } from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
 import { RectPopover } from './rect-popover';
+import { pinHorizontal } from './selection-rect';
 import { CHROME_ICON_CLASS, ChromeIcon } from './chrome-icon';
 
 /**
@@ -49,6 +50,8 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
   // Position dismissed via Esc — suppresses reopening at the same `/` while the
   // text lingers, until the caret moves to a different trigger (or none).
   const dismissedFrom = useRef<number | null>(null);
+  // The trigger the menu's anchor was first read at, so a re-read keeps its left edge.
+  const openedFrom = useRef<number | null>(null);
 
   const filtered = useMemo(() => filterSlashItems(items, active?.query ?? ''), [items, active?.query]);
   const groups = useMemo(() => groupByHeading(filtered), [filtered]);
@@ -70,12 +73,14 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
   useEffect(() => {
     const sync = () => {
       if (!editor.isEditable() || !editor.isFocused()) {
+        openedFrom.current = null;
         setActive(null);
         return;
       }
       const query = editor.triggerQuery('/');
       if (!query) {
         dismissedFrom.current = null;
+        openedFrom.current = null;
         setActive(null);
         return;
       }
@@ -84,7 +89,11 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
         return;
       }
       setActive(query);
-      setPoint(editor.caretRect());
+      const caret = editor.caretRect();
+      // Read before the update: React may run the updater after the ref below has moved on.
+      const sameTrigger = openedFrom.current === query.from;
+      setPoint((opened) => (sameTrigger ? pinHorizontal(caret, opened) : caret));
+      openedFrom.current = query.from;
     };
     sync();
     // Engine-synced selection/focus events (not raw DOM `selectionchange`) so
