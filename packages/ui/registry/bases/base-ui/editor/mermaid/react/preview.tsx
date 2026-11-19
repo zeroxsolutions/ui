@@ -172,7 +172,7 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
   return (
     <div
       data-slot="diagram-canvas"
-      className={cn('bg-card relative flex h-full min-h-48 flex-col overflow-hidden rounded-md border', className)}
+      className={cn('cn-editor-diagram bg-card relative flex h-full min-h-48 flex-col overflow-hidden', className)}
     >
       <div
         ref={viewportRef}

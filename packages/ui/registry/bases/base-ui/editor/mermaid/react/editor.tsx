@@ -56,7 +56,7 @@ export function MermaidEditor({
       className="h-full"
     />
   );
-  const canvas = <DiagramCanvas state={state} className="h-full rounded-none border-0" />;
+  const canvas = <DiagramCanvas state={state} className="h-full rounded-none shadow-none ring-0" />;
 
   return (
     <CollapsibleCard variant="muted" data-slot="mermaid-editor" className={className}>

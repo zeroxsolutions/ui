@@ -62,7 +62,7 @@ function ImageFigure({
           src={src}
           alt={alt}
           title={title}
-          className="h-auto max-w-full rounded-lg border"
+          className="cn-editor-block h-auto max-w-full border"
           style={{ width: width ? `${width}px` : undefined }}
         />
       ) : (

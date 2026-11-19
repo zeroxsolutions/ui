@@ -313,10 +313,13 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
                     // Keep the editor focused so the range survives the click.
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => select(option)}
-                    className={cn('cursor-pointer', highlighted && 'bg-accent text-accent-foreground')}
+                    className="cn-editor-menu-item data-highlighted:bg-accent data-highlighted:text-accent-foreground cursor-pointer"
                   >
                     {(option.icon as ReactNode) && (
-                      <ItemMedia variant="icon" className={token.menuMediaClassName ?? 'text-muted-foreground'}>
+                      <ItemMedia
+                        variant="icon"
+                        className={cn('cn-editor-menu-media', token.menuMediaClassName ?? 'text-muted-foreground')}
+                      >
                         {option.icon as ReactNode}
                       </ItemMedia>
                     )}

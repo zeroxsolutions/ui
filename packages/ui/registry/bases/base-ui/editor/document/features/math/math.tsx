@@ -69,7 +69,7 @@ const mathAttrs = z.object({
 type MathAttrs = z.infer<typeof mathAttrs>;
 
 /** Wrapper classes shared by the `toReact` codecs so the static export matches the view. */
-const MATH_BLOCK_WRAPPER = 'my-4 overflow-x-auto rounded-md bg-muted/40 p-3 text-center';
+const MATH_BLOCK_WRAPPER = 'my-4 overflow-x-auto bg-muted/40 p-3 text-center';
 const MATH_INLINE_WRAPPER = 'inline-block align-middle';
 
 /**
@@ -187,7 +187,7 @@ export function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeV
         data-math="inline"
         contentEditable={false}
         className={cn(
-          'hover:bg-muted inline-block cursor-pointer rounded-sm align-middle',
+          'cn-editor-inline hover:bg-muted inline-block cursor-pointer align-middle',
           selected && 'ring-ring ring-2',
         )}
         onMouseDown={(event) => event.stopPropagation()}
@@ -366,7 +366,7 @@ const mathBlockCodec: NodeCodec<MathAttrs> = {
     return (
       <div
         data-math-block
-        className={MATH_BLOCK_WRAPPER}
+        className={cn('cn-editor-block', MATH_BLOCK_WRAPPER)}
         dangerouslySetInnerHTML={{
           __html: katex.renderToString(latex, {
             throwOnError: false,

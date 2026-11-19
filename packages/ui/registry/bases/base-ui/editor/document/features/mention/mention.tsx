@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
 
@@ -22,20 +23,20 @@ const escapeHtml = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /**
- * The inline pill — a rounded chip on the design-system `primary` token that
+ * The inline pill — a `Badge` tinted with the design-system `primary` token that
  * reads as one unit. Shared by the editable node view and the static `toReact`
  * codec so both surfaces render identically.
  */
 function MentionPill({ id, label, contentEditable }: { id: string; label: string; contentEditable?: boolean }) {
   return (
-    <span
+    <Badge
       data-slot="mention"
       data-mention-id={id}
       contentEditable={contentEditable}
-      className="bg-primary/10 text-primary inline-flex items-center rounded-md px-1.5 py-0.5 text-sm font-medium"
+      className="bg-primary/10 text-primary"
     >
       @{label || id}
-    </span>
+    </Badge>
   );
 }
 

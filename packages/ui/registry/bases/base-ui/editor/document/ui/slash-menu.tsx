@@ -5,7 +5,6 @@ import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/regi
 import { Empty, EmptyDescription } from '@/registry/bases/base-ui/ui/empty';
 import { Popover } from '@/registry/bases/base-ui/ui/popover';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { CaretRect, IEditor, SlashItem, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { filterSlashItems, groupByHeading } from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
 import { RectPopover } from './rect-popover';
@@ -220,9 +219,9 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
                         // Keep the editor focused so the selection/range survives the click.
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => select(item)}
-                        className={cn('cursor-pointer', highlighted && 'bg-accent text-accent-foreground')}
+                        className="cn-editor-menu-item data-highlighted:bg-accent data-highlighted:text-accent-foreground cursor-pointer"
                       >
-                        <ItemMedia variant="icon" className="bg-secondary size-8 rounded-md border text-base">
+                        <ItemMedia variant="icon" className="cn-editor-menu-media bg-secondary size-8 border text-base">
                           <ChromeIcon icon={item.icon} className={CHROME_ICON_CLASS} active={highlighted} />
                         </ItemMedia>
                         <ItemContent className="gap-0.5">

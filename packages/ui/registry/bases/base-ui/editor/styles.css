@@ -243,10 +243,10 @@
    * (a ProseMirror decoration with class `slash-active`, painted via the façade's
    * `setTriggerHighlight` while the menu is open, cleared when it closes) so the
    * active trigger reads as a pending command, matching Notion. `box-decoration-
-   * break: clone` keeps the pill intact if the `/query` wraps a line. */
+   * break: clone` keeps the pill intact if the `/query` wraps a line. Its radius
+   * is the style's, from the `cn-editor-content` slot on the editor's root. */
   .document-editor .slash-active {
     background: color-mix(in oklab, var(--muted-foreground) 16%, transparent);
-    border-radius: 0.25rem;
     padding: 0.05rem 0.1rem;
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
@@ -264,11 +264,10 @@
     white-space: pre;
   }
 
-  /* Highlight mark. */
+  /* Highlight mark; its radius is the style's, from the root's `cn-editor-content` slot. */
   .document-editor mark {
     background: color-mix(in oklab, var(--primary) 22%, transparent);
     color: inherit;
-    border-radius: 0.2rem;
     padding: 0 0.15rem;
   }
 
@@ -280,9 +279,9 @@
     overflow-x: auto;
   }
 
-  /* Images: rounded, responsive, with a ring when selected as a node. */
+  /* Images: responsive, with a ring when selected as a node. The image block
+   * rounds its own `<img>` with the style's radius. */
   .document-editor img {
-    border-radius: 0.5rem;
     max-width: 100%;
     height: auto;
   }
@@ -290,13 +289,13 @@
    * Notion-style: NO fill on a text block. The browser's own translucent drag
    * ghost, which follows the pointer, is the only cue a drag needs; a static
    * tint on the source block is just noise. Only atomic media keeps a light ring
-   * so a selected image's bounds stay visible. */
+   * so a selected image's bounds stay visible; the outline follows the
+   * element's own radius. */
   .document-editor img.ProseMirror-selectednode,
   .document-editor [data-slot='image'].ProseMirror-selectednode,
   .document-editor .ProseMirror-selectednode:is(img, video, iframe) {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
-    border-radius: 0.375rem;
   }
 
   /* Drag in flight — GRAY OUT the source block, don't fill. The editor root
@@ -354,7 +353,8 @@
    * `.hide` class as the pointer moves over blocks — so visibility is driven by
    * `.hide`, NOT a `:hover`/opacity scheme (which would fight the extension and
    * leave the grip invisible and ungrabbable). Position is set inline by the
-   * extension (viewport coords → `position: fixed`). */
+   * extension (viewport coords → `position: fixed`). Its radius and hover fill
+   * are a ghost button's, on the span `<Editor/>` renders the grip into. */
   .drag-handle {
     position: fixed;
     width: 1.25rem;
@@ -362,20 +362,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0.375rem;
     background: transparent;
     /* The house `GripVertical` icon (rendered into this div by `<Editor/>`)
      * inherits this as its `currentColor` stroke. */
     color: var(--muted-foreground);
     cursor: grab;
     opacity: 0.55;
-    transition:
-      opacity 0.15s ease,
-      background 0.15s ease;
+    transition: opacity 0.15s ease;
     z-index: 40;
   }
   .drag-handle:hover {
-    background: var(--accent);
     opacity: 1;
   }
   .drag-handle:active {
@@ -426,11 +422,11 @@
 
   /* The inline `@query` / `/query` the open menu is filtering on — a coloured
    * highlight on the composer accent (NOT a flat gray), so the pending
-   * mention/command reads as active and matches the resolved pill. */
+   * mention/command reads as active and matches the resolved pill. Its radius is
+   * the style's, from the root's `cn-editor-content` slot. */
   .chat-composer .slash-active {
     background: color-mix(in oklab, var(--composer-accent) 16%, transparent);
     color: var(--composer-accent);
-    border-radius: 0.25rem;
     padding: 0.05rem 0.1rem;
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;

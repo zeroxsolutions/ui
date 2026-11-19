@@ -1045,6 +1045,7 @@
       ],
       "devDependencies": ["@tailwindcss/typography"],
       "registryDependencies": [
+        "@shadcn/button",
         "@shadcn/checkbox",
         "@shadcn/dropdown-menu",
         "@shadcn/empty",
@@ -1264,7 +1265,6 @@
           },
           ".document-editor .slash-active": {
             "background": "color-mix(in oklab, var(--muted-foreground) 16%, transparent)",
-            "border-radius": "0.25rem",
             "padding": "0.05rem 0.1rem",
             "-webkit-box-decoration-break": "clone",
             "box-decoration-break": "clone"
@@ -1279,7 +1279,6 @@
           ".document-editor mark": {
             "background": "color-mix(in oklab, var(--primary) 22%, transparent)",
             "color": "inherit",
-            "border-radius": "0.2rem",
             "padding": "0 0.15rem"
           },
           ".document-editor :where(code):not(:where(pre code))": {
@@ -1302,16 +1301,14 @@
             "display": "flex",
             "align-items": "center",
             "justify-content": "center",
-            "border-radius": "0.375rem",
             "background": "transparent",
             "color": "var(--muted-foreground)",
             "cursor": "grab",
             "opacity": "0.55",
-            "transition": "opacity 0.15s ease, background 0.15s ease",
+            "transition": "opacity 0.15s ease",
             "z-index": "40"
           },
           ".drag-handle:hover": {
-            "background": "var(--accent)",
             "opacity": "1"
           },
           ".drag-handle:active": {
@@ -2326,14 +2323,12 @@
       "css": {
         "@layer components": {
           ".document-editor img": {
-            "border-radius": "0.5rem",
             "max-width": "100%",
             "height": "auto"
           },
           ".document-editor img.ProseMirror-selectednode, .document-editor [data-slot='image'].ProseMirror-selectednode, .document-editor .ProseMirror-selectednode:is(img, video, iframe)": {
             "outline": "2px solid var(--primary)",
-            "outline-offset": "2px",
-            "border-radius": "0.375rem"
+            "outline-offset": "2px"
           }
         }
       },
@@ -2455,7 +2450,7 @@
       "title": "Editor Mention",
       "description": "An inline pill that names a person, which the text treats as one unit.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/document-editor"],
+      "registryDependencies": ["@shadcn/badge", "@zui/document-editor"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/mention/index.ts",
@@ -2928,6 +2923,7 @@
       "description": "A one-line chat composer that turns @mentions and /commands into pills and hands the message to the host as a payload.",
       "categories": ["editor"],
       "registryDependencies": [
+        "@shadcn/badge",
         "@shadcn/empty",
         "@shadcn/input-group",
         "@shadcn/item",
@@ -3016,7 +3012,6 @@
           ".chat-composer .slash-active": {
             "background": "color-mix(in oklab, var(--composer-accent) 16%, transparent)",
             "color": "var(--composer-accent)",
-            "border-radius": "0.25rem",
             "padding": "0.05rem 0.1rem",
             "-webkit-box-decoration-break": "clone",
             "box-decoration-break": "clone"

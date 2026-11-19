@@ -28,7 +28,7 @@ export function EditorToolbar({ editor, items, className }: EditorToolbarProps) 
     <div
       role="toolbar"
       data-slot="editor-toolbar"
-      className={cn('flex flex-wrap items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-md', className)}
+      className={cn('cn-editor-toolbar flex flex-wrap items-center gap-0.5 bg-popover', className)}
     >
       <TooltipProvider>
         {items.map((item, index) => {

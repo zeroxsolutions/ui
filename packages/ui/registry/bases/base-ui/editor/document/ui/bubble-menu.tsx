@@ -70,7 +70,7 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
         initialFocus={false}
         role="toolbar"
         data-slot="bubble-menu"
-        className="flex-row items-center gap-0.5 rounded-lg p-1"
+        className="cn-editor-toolbar flex-row items-center gap-0.5"
       >
         <TooltipProvider>
           {items.map((item) => {
