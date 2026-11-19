@@ -81,3 +81,11 @@ test("the sidebar's web sections link their final addresses", async ({ page }) =
     await expect(sidebar.locator(`a[href="${href}"]`), href).toHaveCount(1);
   }
 });
+
+test("the header's Icons entry links the web icons page, after Blocks", async ({ page }) => {
+  await page.goto('/docs/editor');
+  const header = page.getByRole('navigation', { name: 'Main' });
+
+  await expect(header.getByRole('link', { name: 'Icons', exact: true })).toHaveAttribute('href', '/icons/base');
+  await expect(header.getByRole('link')).toHaveText(['Docs', 'Components', 'Blocks', 'Icons', 'Editor']);
+});

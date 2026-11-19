@@ -1,14 +1,11 @@
-import { Maximize2Icon } from 'lucide-react';
 import type { ReactNode } from 'react';
-
-import { buttonVariants } from '../../../../registry/bases/base-ui/ui/button';
-import { cn } from '../../../../registry/bases/base-ui/lib/utils';
 
 import { ComponentPreview, ComponentPreviewStage } from './component-preview';
 import { RegistryExample } from './registry-example';
 import { Index } from '../../../../registry/bases/base-ui/examples/__index__';
 
 import { ExampleSource } from './example-source';
+import { ExampleViewLink } from './example-view-link';
 
 interface ExamplePreviewProps {
   /** A demo name in the examples index. */
@@ -30,21 +27,7 @@ function ExamplePreview({ name, viewHref, ...source }: ExamplePreviewProps): Rea
         <ComponentPreviewStage>
           <RegistryExample name={name} />
         </ComponentPreviewStage>
-        {viewHref ? (
-          <a
-            href={viewHref}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={`Open ${name} in a new tab`}
-            title="Open in a new tab"
-            className={cn(
-              buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-              'bg-background/80 absolute top-2 right-2 backdrop-blur-sm',
-            )}
-          >
-            <Maximize2Icon />
-          </a>
-        ) : null}
+        {viewHref ? <ExampleViewLink name={name} href={viewHref} /> : null}
       </div>
       <ExampleSource name={name} {...source} />
     </ComponentPreview>

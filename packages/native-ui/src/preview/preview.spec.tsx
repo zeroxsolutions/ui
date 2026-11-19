@@ -14,6 +14,14 @@ jest.mock('react-native-safe-area-context', () => require('react-native-safe-are
 
 const UPDATE = 'exp://u.expo.dev/0f6c4b9e-2d1a-4c3b-9e8f-7a6b5c4d3e2f';
 
+/** Whether `element` is drawn inside a scroll view, the host element React Native's ScrollView renders. */
+function insideScrollView(element: ReturnType<typeof screen.getByText>): boolean {
+  for (let parent = element.parent; parent; parent = parent.parent) {
+    if (parent.type === 'RCTScrollView') return true;
+  }
+  return false;
+}
+
 describe('Preview', () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -92,5 +100,24 @@ describe('Preview', () => {
     });
     // The manager outlives the render, so the toast is let leave it before the next case.
     await waitFor(() => expect(screen.queryByText('Event created')).toBeNull());
+  });
+
+  it('draws a demo inside its scroll view', async () => {
+    jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(`${UPDATE}/--/badge-demo`);
+
+    await render(<Preview bundledStyle={undefined} applyColorScheme={() => undefined} />);
+
+    expect(insideScrollView(await screen.findByText('Overdue'))).toBe(true);
+  });
+
+  it('draws the icon gallery, whose list scrolls itself, outside any scroll view', async () => {
+    jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(`${UPDATE}/--/icon-gallery-demo`);
+    jest.spyOn(findDemoModule, 'findDemo').mockReturnValue(function IconGalleryStandIn() {
+      return <Text>Gallery</Text>;
+    });
+
+    await render(<Preview bundledStyle={undefined} applyColorScheme={() => undefined} />);
+
+    expect(insideScrollView(await screen.findByText('Gallery'))).toBe(false);
   });
 });

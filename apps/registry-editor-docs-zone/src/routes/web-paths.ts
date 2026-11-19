@@ -20,6 +20,12 @@ export const webComponentsRoute = createDynamicRoute<{ base: ComponentBase }>(
   ({ base }) => `/docs/components/${base}`,
 );
 
+/** Every web icon on one base. */
+export const webIconsRoute = createDynamicRoute<{ base: ComponentBase }>(
+  '/icons/:base',
+  ({ base }) => `/icons/${base}`,
+);
+
 /** Every web block on one base. */
 export const webBlocksRoute = createDynamicRoute<{ base: ComponentBase }>(
   '/blocks/:base',

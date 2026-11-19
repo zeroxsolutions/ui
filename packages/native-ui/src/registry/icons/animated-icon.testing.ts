@@ -1,4 +1,6 @@
 import { act, screen } from '@testing-library/react-native';
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { createElement, useImperativeHandle, useRef, type ComponentType, type ReactNode } from 'react';
 import type { AnimatedIconProps, IconHandle } from '../lib/icon-motion';
 
@@ -68,5 +70,23 @@ async function focus(control: ReturnType<typeof screen.getByRole>): Promise<void
   await act(() => control.props.onFocus({ nativeEvent: {} }));
 }
 
-export { animatedIconModule, focus, handleOf };
+/**
+ * The module a spec's `jest.mock` factory returns for the examples' `lucide-icon-modules`, whose Metro
+ * `require.context` Jest cannot run: the same keys (`./copy-icon.tsx`) over this package's lucide folder, each
+ * module required as it is asked for.
+ *
+ *   jest.mock('./lucide-icon-modules', () =>
+ *     jest.requireActual('../registry/icons/animated-icon.testing').lucideIconModulesModule(),
+ *   );
+ */
+function lucideIconModulesModule(): { lucideIconModules: ((key: string) => unknown) & { keys(): string[] } } {
+  const keys = readdirSync(join(__dirname, 'lucide'))
+    .filter((file) => file.endsWith('-icon.tsx'))
+    .map((file) => `./${file}`);
+  const lucideIconModules = (key: string): unknown =>
+    jest.requireActual(`./lucide/${key.slice(2).replace(/\.tsx$/, '')}`);
+  return { lucideIconModules: Object.assign(lucideIconModules, { keys: () => keys }) };
+}
+
+export { animatedIconModule, focus, handleOf, lucideIconModulesModule };
 export type { IconHandleSpy };

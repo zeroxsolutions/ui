@@ -7,7 +7,7 @@ import { demos as miraDemos } from '@styles/mira/examples';
 import { demos as novaDemos } from '@styles/nova/examples';
 import { demos as rheaDemos } from '@styles/rhea/examples';
 import { demos as seraDemos } from '@styles/sera/examples';
-import { demos as vegaDemos } from '@styles/vega/examples';
+import { demos as vegaDemos, selfScrollingDemos } from '@styles/vega/examples';
 
 import type { PreviewStyle } from './preview-url';
 
@@ -36,4 +36,9 @@ function findDemo(style: PreviewStyle, name: string): ComponentType | undefined 
 /** The names of the demos every style draws, in the order the list shows them. */
 const DEMO_NAMES: readonly string[] = Object.keys(vegaDemos);
 
-export { DEMO_NAMES, findDemo };
+/** Whether the demo named `name` scrolls itself, so the preview draws it in the whole screen and not in a scroll view. */
+function scrollsItself(name: string): boolean {
+  return selfScrollingDemos.has(name);
+}
+
+export { DEMO_NAMES, findDemo, scrollsItself };

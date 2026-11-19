@@ -1,8 +1,7 @@
 'use client';
 
 import { Menu as MenuPrimitive } from '@base-ui/react/menu';
-import { CheckIcon, ChevronDownIcon } from 'lucide-react';
-import { Suspense, type ReactNode } from 'react';
+import { Suspense, useRef, type ReactNode } from 'react';
 
 import { useHost } from '../../../host/host-provider';
 import { DEFAULT_PLATFORM_STYLE, PLATFORM_STYLE_LABELS, PLATFORM_STYLES } from '../../constants/platform-styles';
@@ -10,6 +9,14 @@ import { useCurrentStyle } from '../../hooks/use-current-style';
 import { useHydrated } from '../../hooks/use-hydrated';
 import { rememberStyle } from '../../hooks/use-remembered-choice';
 import { styleHref } from '../../lib/style-choice';
+import {
+  type AnimatedIconHandle,
+  useAnimatedActive,
+  useAnimatedIcon,
+  usePlayWhile,
+} from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
+import { CheckIcon } from '../../../../registry/bases/base-ui/icons/lucide/check-icon';
+import { ChevronDownIcon } from '../../../../registry/bases/base-ui/icons/lucide/chevron-down-icon';
 import { Button } from '../../../../registry/bases/base-ui/ui/button';
 import {
   DropdownMenu,
@@ -52,39 +59,65 @@ interface StylePickerMenuProps extends StylePickerProps {
 }
 
 function StylePickerMenu({ platform, style, search }: StylePickerMenuProps): ReactNode {
-  const { Link, usePathname } = useHost();
+  const { usePathname } = useHost();
   const pathname = usePathname();
   const styles: readonly PlatformStyle[] = PLATFORM_STYLES[platform];
+  const chevron = useAnimatedIcon();
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger data-slot="style-picker" render={<Button variant="ghost" size="sm" />}>
+      <DropdownMenuTrigger data-slot="style-picker" render={<Button variant="ghost" size="sm" {...chevron.handlers} />}>
         <span className="text-muted-foreground">Style</span> {PLATFORM_STYLE_LABELS[style]}
-        <ChevronDownIcon />
+        <ChevronDownIcon ref={chevron.ref} aria-hidden />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Style</DropdownMenuLabel>
           {styles.map((option) => (
-            <MenuPrimitive.LinkItem
+            <StyleRow
               key={option}
-              closeOnClick
-              render={
-                <Link
-                  href={styleHref(pathname, search, platform, option)}
-                  aria-current={option === style ? 'page' : undefined}
-                  onClick={() => rememberStyle(platform, option)}
-                />
-              }
-              className="focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center justify-between gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none"
-            >
-              {PLATFORM_STYLE_LABELS[option]}
-              {option === style ? <CheckIcon className="size-4" /> : null}
-            </MenuPrimitive.LinkItem>
+              label={PLATFORM_STYLE_LABELS[option]}
+              href={styleHref(pathname, search, platform, option)}
+              selected={option === style}
+              onChoose={() => rememberStyle(platform, option)}
+            />
           ))}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+interface StyleRowProps {
+  label: string;
+  href: string;
+  /** Whether it is the style in use, which marks the row with a check. */
+  selected: boolean;
+  onChoose: () => void;
+}
+
+/**
+ * One style's row in the menu. The check on the style in use is the row's icon: it plays while the row holds
+ * the pointer or the focus, which the menu moves with its highlight, and it plays for the row highlighted as
+ * the menu opens, where the reader has just acted.
+ */
+function StyleRow({ label, href, selected, onChoose }: StyleRowProps): ReactNode {
+  const { Link } = useHost();
+  const icon = useRef<AnimatedIconHandle>(null);
+  const { active, handlers } = useAnimatedActive();
+  usePlayWhile(icon, active, { playOnFirstDraw: true });
+
+  return (
+    <MenuPrimitive.LinkItem
+      closeOnClick
+      render={<Link href={href} aria-current={selected ? 'page' : undefined} onClick={onChoose} />}
+      className="focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center justify-between gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none"
+      {...handlers}
+    >
+      {label}
+      {/* The wrapper span holds the size, and `!` holds the svg to it against the item's own svg rule. */}
+      {selected ? <CheckIcon ref={icon} aria-hidden className="size-4 [&_svg]:size-4!" /> : null}
+    </MenuPrimitive.LinkItem>
   );
 }
 

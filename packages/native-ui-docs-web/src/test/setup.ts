@@ -3,8 +3,13 @@ import { vi } from 'vitest';
 /**
  * The browser APIs jsdom lacks that the components under test call as they mount, added only where
  * jsdom has none, so a spec that stubs one itself still wins. next-themes reads `matchMedia`, here
- * matching nothing, which is a desktop in its light scheme.
+ * matching nothing, which is a desktop in its light scheme; the icon gallery's install panel brings
+ * itself into view with `scrollIntoView` on a pick.
  */
+if (typeof Element !== 'undefined') {
+  Element.prototype.scrollIntoView ??= () => undefined;
+}
+
 if (typeof window !== 'undefined') {
   window.matchMedia ??= (media: string) =>
     ({

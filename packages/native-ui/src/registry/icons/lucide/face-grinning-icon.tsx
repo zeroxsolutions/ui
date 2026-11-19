@@ -44,7 +44,9 @@ function FaceGrinningIcon({
   const progress = useIconMotion(ref);
   const width = Number.parseFloat(String(strokeWidth));
   const face = useAnimatedProps(() => {
-    const scale = interpolate(progress.value, [0, 1 / 3, 2 / 3, 1], [1, 1.07, 1, 1.05]);
+    // A swell of 1.06 at most: with the line drawn bolder, the web twin's 1.15 and even 1.07 take the circle's
+    // outer edge past the canvas, which react-native-svg clips.
+    const scale = interpolate(progress.value, [0, 1 / 3, 2 / 3, 1], [1, 1.06, 1, 1.05]);
     return {
       ...transformProps({
         scaleX: scale,

@@ -29,6 +29,9 @@ export const blocksRoute = createDynamicRoute<{ base: ComponentBase }>(
   ({ base }) => `/blocks/${base}`,
 );
 
+/** Every animated icon the registry publishes on one base, with its install line. */
+export const iconsRoute = createDynamicRoute<{ base: ComponentBase }>('/icons/:base', ({ base }) => `/icons/${base}`);
+
 /** One block alone on a page, which the docs and the blocks page frame. */
 export const viewRoute = createDynamicRoute<{ name: string }>('/view/:name', ({ name }) => `/view/${name}`);
 

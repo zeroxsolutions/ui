@@ -28,6 +28,13 @@ function postHeightToHost(self: FramedWindow, height: number): void {
  */
 const OVERLAY_FRAME_HEIGHT = 560;
 
+/**
+ * The height, in CSS pixels, of a frame whose demo scrolls itself, such as the icon gallery. Such a demo fills
+ * whatever height it is given, so it has no height of its own to post; this one shows a few rows of a list and
+ * leaves room for the page around the frame on a phone.
+ */
+const SELF_SCROLLING_FRAME_HEIGHT = 560;
+
 /** The height a frame takes for a demo `contentHeight` tall, in CSS pixels, with or without an open overlay. */
 function frameHeightOf(contentHeight: number, overlayOpen: boolean): number {
   return overlayOpen ? Math.max(contentHeight, OVERLAY_FRAME_HEIGHT) : contentHeight;
@@ -62,5 +69,12 @@ function showsOverlay(document: OverlayDocument): boolean {
   );
 }
 
-export { HEIGHT_MESSAGE, OVERLAY_FRAME_HEIGHT, frameHeightOf, postHeightToHost, showsOverlay };
+export {
+  HEIGHT_MESSAGE,
+  OVERLAY_FRAME_HEIGHT,
+  SELF_SCROLLING_FRAME_HEIGHT,
+  frameHeightOf,
+  postHeightToHost,
+  showsOverlay,
+};
 export type { FramedWindow, OverlayDocument };

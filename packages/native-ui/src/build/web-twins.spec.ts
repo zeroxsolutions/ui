@@ -99,6 +99,22 @@ describe("zui's own items on native", () => {
     expect(webIcons.filter((icon) => !nativeIcons.has(icon))).toEqual([]);
   });
 
+  it('names each ui item shipping a file under icons/ <set>-<file> after the icons/<set>/<file>.tsx it is', () => {
+    const problems = nativeItems
+      .filter((item) => item.type === 'registry:ui')
+      .flatMap((item) =>
+        (item.files ?? [])
+          .filter((file) => file.path.startsWith('src/registry/icons/'))
+          .flatMap((file) => {
+            const match = /^src\/registry\/icons\/([a-z0-9-]+)\/([a-z0-9-]+)\.tsx$/.exec(file.path);
+            if (match === null) return [`${item.name}: ${file.path} is not icons/<set>/<file>.tsx`];
+            const [, set, name] = match;
+            return item.name === `${set}-${name}` ? [] : [`${item.name}: should be ${set}-${name}`];
+          }),
+      );
+    expect(problems).toEqual([]);
+  });
+
   it('has copy-button name the lucide copy and check icons by their items and import them from the lucide set', () => {
     const item = native.get('copy-button');
     if (item === undefined) throw new Error('no copy-button item');

@@ -11,6 +11,7 @@ test("the switch points at the same page on the web, which the web's zone answer
     ['/native', '/'],
     ['/native/docs', '/docs'],
     ['/native/components/nativewind/tab-bar', '/docs/components/base/tab-bar'],
+    ['/native/icons/uniwind', '/icons/base'],
   ]) {
     await page.goto(path);
 
@@ -29,6 +30,7 @@ test("the header's sections point into the native tree, and the engine tabs unde
   const main = page.getByRole('navigation', { name: 'Main' });
   await expect(main.getByRole('link', { name: 'Docs' })).toHaveAttribute('href', '/native/docs');
   await expect(main.getByRole('link', { name: 'Blocks' })).toHaveAttribute('href', '/native/blocks/nativewind');
+  await expect(main.getByRole('link', { name: 'Icons' })).toHaveAttribute('href', '/native/icons/nativewind');
 
   await page
     .getByRole('main')

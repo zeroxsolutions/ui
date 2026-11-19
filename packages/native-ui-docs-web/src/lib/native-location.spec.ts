@@ -20,6 +20,7 @@ describe('nativeLocation', () => {
       { platform: 'native', section: 'components', engine: 'nativewind', name: 'button' },
     ],
     ['/native/blocks/uniwind', { platform: 'native', section: 'blocks', engine: 'uniwind' }],
+    ['/native/icons/nativewind', { platform: 'native', section: 'icons', engine: 'nativewind' }],
   ])('reads %s', (pathname, location) => {
     expect(nativeLocation(pathname)).toEqual(location);
   });
@@ -31,6 +32,7 @@ describe('nativeLocation', () => {
       name: 'button',
     });
     expect(nativeLocation('/native/blocks/foo')).toEqual({ platform: 'native', section: 'blocks' });
+    expect(nativeLocation('/native/icons/foo')).toEqual({ platform: 'native', section: 'icons' });
   });
 
   it('reads nothing from a path outside the native tree', () => {
@@ -39,12 +41,13 @@ describe('nativeLocation', () => {
 });
 
 describe('withLocationEngine', () => {
-  it('moves a component page, the components index and the blocks page to the other engine', () => {
+  it('moves a component page, the components index, the blocks page and the icons page to the other engine', () => {
     expect(withLocationEngine(located('/native/components/nativewind/button'), 'uniwind')).toBe(
       '/native/components/uniwind/button',
     );
     expect(withLocationEngine(located('/native/components/nativewind'), 'uniwind')).toBe('/native/components/uniwind');
     expect(withLocationEngine(located('/native/blocks/uniwind'), 'nativewind')).toBe('/native/blocks/nativewind');
+    expect(withLocationEngine(located('/native/icons/uniwind'), 'nativewind')).toBe('/native/icons/nativewind');
   });
 
   it('has nothing to move on a page whose path holds no engine', () => {

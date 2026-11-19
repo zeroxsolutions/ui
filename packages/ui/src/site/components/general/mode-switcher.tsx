@@ -3,15 +3,15 @@
 import { useTheme } from 'next-themes';
 import { useCallback, type ReactNode } from 'react';
 
-import { useIconAnimation } from '../../hooks/use-icon-animation';
+import { useAnimatedIcon } from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
 
 import { Button } from '../../../../registry/bases/base-ui/ui/button';
-import { SunMoonIcon, type SunMoonIconHandle } from '../../../../registry/bases/base-ui/icons/lucide/sun-moon-icon';
+import { SunMoonIcon } from '../../../../registry/bases/base-ui/icons/lucide/sun-moon-icon';
 
 /** A button that switches the site between its light and dark theme; its icon plays on the button's hover or focus. */
 function ModeSwitcher(): ReactNode {
   const { setTheme, resolvedTheme } = useTheme();
-  const icon = useIconAnimation<SunMoonIconHandle>();
+  const icon = useAnimatedIcon();
 
   const toggleTheme = useCallback(() => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');

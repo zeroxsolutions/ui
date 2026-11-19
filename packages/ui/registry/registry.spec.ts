@@ -521,6 +521,30 @@ describe('registry.json', () => {
     expect(problems).toEqual([]);
   });
 
+  it('keeps no icon directly in icons/, outside a set', () => {
+    const loose = readdirSync(join(APP, BASE, 'icons'), { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith('.tsx') && !entry.name.endsWith('.spec.tsx'))
+      .map((entry) => entry.name);
+    expect(loose).toEqual([]);
+  });
+
+  it('names each ui item shipping a file under icons/ <set>-<file> after the icons/<set>/<file>.tsx it is', () => {
+    const icon = new RegExp(`^${BASE}/icons/([a-z0-9-]+)/([a-z0-9-]+)\\.tsx$`);
+    const problems = REGISTRY.items
+      .filter((item) => item.type === 'registry:ui')
+      .flatMap((item) =>
+        item.files
+          .filter((file) => file.path.startsWith(`${BASE}/icons/`))
+          .flatMap((file) => {
+            const match = icon.exec(file.path);
+            if (match === null) return [`${item.name}: ${file.path} is not icons/<set>/<file>.tsx`];
+            const [, set, name] = match;
+            return item.name === `${set}-${name}` ? [] : [`${item.name}: should be ${set}-${name}`];
+          }),
+      );
+    expect(problems).toEqual([]);
+  });
+
   it('has copy-button name the lucide copy icon by its item and import it from the lucide set', () => {
     const item = REGISTRY.items.find((candidate) => candidate.name === 'copy-button');
     if (item === undefined) throw new Error('no copy-button item');

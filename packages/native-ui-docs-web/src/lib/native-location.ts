@@ -8,6 +8,7 @@ import {
   nativeDocsPageRoute,
   nativeDocsRoute,
   nativeHomeRoute,
+  nativeIconsRoute,
 } from '../routes';
 
 /**
@@ -19,7 +20,8 @@ export type NativeLocation =
   | { platform: 'native'; section: 'home' }
   | { platform: 'native'; section: 'docs'; slug: string }
   | { platform: 'native'; section: 'components'; engine?: NativeEngine; name?: string }
-  | { platform: 'native'; section: 'blocks'; engine?: NativeEngine };
+  | { platform: 'native'; section: 'blocks'; engine?: NativeEngine }
+  | { platform: 'native'; section: 'icons'; engine?: NativeEngine };
 
 function knownEngine(segment: string): NativeEngine | undefined {
   return NATIVE_ENGINES.find((engine) => engine === segment);
@@ -53,6 +55,11 @@ export function nativeLocation(pathname: string): NativeLocation | undefined {
     const engine = knownEngine(blocks.params.engine);
     return engine ? { platform: 'native', section: 'blocks', engine } : { platform: 'native', section: 'blocks' };
   }
+  const icons = nativeIconsRoute.matcher(pathname);
+  if (icons) {
+    const engine = knownEngine(icons.params.engine);
+    return engine ? { platform: 'native', section: 'icons', engine } : { platform: 'native', section: 'icons' };
+  }
   if (nativeDocsRoute.matcher(pathname)) return { platform: 'native', section: 'docs', slug: '' };
   const docsPage = nativeDocsPageRoute.matcher(pathname);
   if (docsPage) return { platform: 'native', section: 'docs', slug: slugOf(docsPage.params.slug) };
@@ -63,6 +70,7 @@ export function nativeLocation(pathname: string): NativeLocation | undefined {
 export function withLocationEngine(location: NativeLocation, engine: NativeEngine): string | undefined {
   if (!('engine' in location) || !location.engine) return undefined;
   if (location.section === 'blocks') return nativeBlocksRoute.build({ engine });
+  if (location.section === 'icons') return nativeIconsRoute.build({ engine });
   return location.name
     ? nativeComponentRoute.build({ engine, name: location.name })
     : nativeComponentsRoute.build({ engine });
