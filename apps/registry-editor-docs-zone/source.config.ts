@@ -6,7 +6,7 @@ import { rehypeDocsCode } from '@zeroxsolutions/ui/site/lib/rehype-docs-code';
 // frontmatter alone (the sitemap, the share images, `llms.txt`) does not bundle every page.
 export const editorDocs = defineDocs({
   dir: '../../packages/editor-docs-web/content/docs',
-  docs: { async: true, postprocess: { includeProcessedMarkdown: true } },
+  docs: { async: true, postprocess: { includeProcessedMarkdown: { output: 'string' } } },
 });
 
 export default defineConfig({

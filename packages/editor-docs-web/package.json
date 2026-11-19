@@ -11,7 +11,8 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@zeroxsolutions/routing": "catalog:"
+    "@zeroxsolutions/routing": "catalog:",
+    "fumadocs-core": "catalog:"
   },
   "nx": {
     "tags": [

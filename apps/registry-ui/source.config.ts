@@ -8,7 +8,7 @@ import { rehypeDocsCode } from '@zeroxsolutions/ui/site/lib/rehype-docs-code';
 // Cloudflare's size limit.
 export const docs = defineDocs({
   dir: '../../packages/ui-docs-web/content/docs',
-  docs: { async: true, postprocess: { includeProcessedMarkdown: true } },
+  docs: { async: true, postprocess: { includeProcessedMarkdown: { output: 'string' } } },
 });
 
 export default defineConfig({
