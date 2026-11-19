@@ -29,18 +29,26 @@ pnpm dlx shadcn@latest add @zui/model-list
 <Step>Install the packages it uses.</Step>
 
 ```bash
-pnpm add lucide-react
+pnpm add @base-ui/react
 ```
 
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add button item scroll-area skeleton utils
+pnpm dlx shadcn@latest add button item scroll-area skeleton utils @zui/lucide-trash-icon
 ```
 
 <Step>Copy the component into `components/layout/model-list.tsx`.</Step>
 
 <ComponentSource name="model-list" title="components/layout/model-list.tsx" />
+
+<Step>Copy the hook that starts its icons into `hooks/use-animated-icon.ts`.</Step>
+
+<ComponentSource
+  name="model-list"
+  file="registry/bases/base-ui/hooks/use-animated-icon.ts"
+  title="hooks/use-animated-icon.ts"
+/>
 
 <Step>Update the import paths to match your project.</Step>
 

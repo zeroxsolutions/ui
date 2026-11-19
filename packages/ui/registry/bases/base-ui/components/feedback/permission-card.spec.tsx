@@ -1,5 +1,5 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
   PermissionCard,
@@ -28,7 +28,48 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver;
 });
 
-afterEach(cleanup);
+const { pendingStart, pendingStop } = vi.hoisted(() => ({ pendingStart: vi.fn(), pendingStop: vi.fn() }));
+
+vi.mock('@/registry/bases/base-ui/icons/lucide/circle-icon', async () => {
+  const React = await import('react');
+  return {
+    CircleIcon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation: pendingStart, stopAnimation: pendingStop }));
+      return <svg data-testid="circle-icon" aria-hidden={props['aria-hidden']} />;
+    }),
+  };
+});
+
+const { deniedStart, deniedStop } = vi.hoisted(() => ({ deniedStart: vi.fn(), deniedStop: vi.fn() }));
+
+vi.mock('@/registry/bases/base-ui/icons/lucide/circle-x-icon', async () => {
+  const React = await import('react');
+  return {
+    CircleXIcon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation: deniedStart, stopAnimation: deniedStop }));
+      return <svg data-testid="circle-x-icon" aria-hidden={props['aria-hidden']} />;
+    }),
+  };
+});
+
+const { approvedStart, approvedStop } = vi.hoisted(() => ({ approvedStart: vi.fn(), approvedStop: vi.fn() }));
+
+vi.mock('@/registry/bases/base-ui/icons/lucide/circle-check-icon', async () => {
+  const React = await import('react');
+  return {
+    CircleCheckIcon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation: approvedStart, stopAnimation: approvedStop }));
+      return <svg data-testid="circle-check-icon" aria-hidden={props['aria-hidden']} />;
+    }),
+  };
+});
+
+const all = [pendingStart, pendingStop, deniedStart, deniedStop, approvedStart, approvedStop];
+
+afterEach(() => {
+  cleanup();
+  for (const fn of all) fn.mockClear();
+});
 
 describe('PermissionCard', () => {
   it('reflects status on the root for selector-driven coordination', () => {
@@ -112,5 +153,35 @@ describe('PermissionCard', () => {
       </PermissionCard>,
     );
     screen.getByText(/Allowed once/);
+  });
+});
+
+describe('PermissionCardStatus icon', () => {
+  const card = (status: 'pending' | 'approved' | 'denied') => (
+    <PermissionCard status={status}>
+      <PermissionCardStatus>word</PermissionCardStatus>
+    </PermissionCard>
+  );
+
+  it.each(['pending', 'approved', 'denied'] as const)('plays no icon when the card is first drawn %s', (status) => {
+    render(card(status));
+
+    for (const fn of all) expect(fn).not.toHaveBeenCalled();
+  });
+
+  it('plays the new status icon once when the status flips, and stops the one it leaves', () => {
+    const { rerender } = render(card('pending'));
+    rerender(card('approved'));
+
+    expect(approvedStart).toHaveBeenCalledTimes(1);
+    expect(pendingStart).not.toHaveBeenCalled();
+    expect(pendingStop).toHaveBeenCalledTimes(1);
+
+    rerender(card('approved'));
+    expect(approvedStart).toHaveBeenCalledTimes(1);
+
+    rerender(card('denied'));
+    expect(deniedStart).toHaveBeenCalledTimes(1);
+    expect(approvedStop).toHaveBeenCalledTimes(1);
   });
 });

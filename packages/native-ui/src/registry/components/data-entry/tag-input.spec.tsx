@@ -1,6 +1,16 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { useState } from 'react';
 import { TagInput, TagInputInput, TagInputList, TagInputTag, TagInputTagRemove, type TagInputProps } from './tag-input';
+import { focus, handleOf } from '../../icons/animated-icon.testing';
+import { XIcon } from '../../icons/lucide/x-icon';
+
+jest.mock('../../icons/lucide/x-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('x-icon'),
+);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 /** The editor as its demo composes it, holding its tags so each change shows. */
 function Tags({ value: initial, onValueChange, ...props }: TagInputProps) {
@@ -189,5 +199,31 @@ describe('TagInput', () => {
         </TagInput>,
       ),
     ).rejects.toThrow('TagInputTagRemove must be used within <TagInputTag>');
+  });
+});
+
+describe('TagInputTagRemove motion', () => {
+  it('starts its icon on press-in and on focus', async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    await render(
+      <TagInput value={['design']} onValueChange={jest.fn()}>
+        <TagInputList>
+          <TagInputTag value="design">
+            design
+            <TagInputTagRemove aria-label="Remove design" onPressIn={onPressIn} onFocus={onFocus} />
+          </TagInputTag>
+        </TagInputList>
+      </TagInput>,
+    );
+    const control = screen.getByRole('button', { name: 'Remove design' });
+
+    await userEvent.setup().press(control);
+    await focus(control);
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(handleOf(XIcon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(XIcon).stopAnimation).not.toHaveBeenCalled();
   });
 });

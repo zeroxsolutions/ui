@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
 import { Toggle } from '@/registry/bases/base-ui/ui/toggle';
 import { Popover } from '@/registry/bases/base-ui/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import type { BubbleItem, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { selectionRect, selectionWithin, type Point } from './selection-rect';
 import { RectPopover } from './rect-popover';
+import { CHROME_ICON_CLASS, ChromeControl } from './chrome-icon';
 
 /**
  * The selection bubble menu (task 8.2): a floating formatting bar that appears
@@ -76,23 +76,30 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
           {items.map((item) => {
             const active = item.activeWhen ? editor.isActive(item.activeWhen) : false;
             return (
-              <Tooltip key={item.id}>
-                <TooltipTrigger
-                  render={
-                    <Toggle
-                      size="sm"
-                      pressed={active}
-                      aria-label={item.title}
-                      // Keep focus (and the selection) on mousedown so the command applies.
-                      onMouseDown={(event) => event.preventDefault()}
-                      onPressedChange={() => editor.run(item.command, item.args)}
-                    >
-                      {(item.icon as ReactNode) ?? item.title}
-                    </Toggle>
-                  }
-                />
-                <TooltipContent>{item.title}</TooltipContent>
-              </Tooltip>
+              <ChromeControl
+                key={item.id}
+                icon={item.icon}
+                fallback={item.title}
+                iconClassName={CHROME_ICON_CLASS}
+                render={(control) => (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Toggle
+                          size="sm"
+                          pressed={active}
+                          aria-label={item.title}
+                          // Keep focus (and the selection) on mousedown so the command applies.
+                          onMouseDown={(event) => event.preventDefault()}
+                          onPressedChange={() => editor.run(item.command, item.args)}
+                          {...control}
+                        />
+                      }
+                    />
+                    <TooltipContent>{item.title}</TooltipContent>
+                  </Tooltip>
+                )}
+              />
             );
           })}
         </TooltipProvider>

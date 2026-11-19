@@ -67,4 +67,43 @@ describe('SlashMenu with more items than it holds', () => {
       expect(box(highlighted).top).toBeGreaterThanOrEqual(box(viewport).top - 1);
     });
   });
+
+  it('keeps the option the keys move to under a cursor that has not moved', async () => {
+    // A cursor left where the popup opens, as an earlier spec or the reader's hand leaves it.
+    const rest = document.createElement('div');
+    rest.style.cssText = 'position:fixed;left:20px;top:200px;width:288px;height:40px;';
+    document.body.append(rest);
+    await userEvent.hover(rest);
+    rest.remove();
+    render(<SlashMenu editor={slashEditor()} items={items} />);
+    const popup = await vi.waitFor(() => {
+      const found = document.querySelector('[data-slot=slash-menu]');
+      if (!found) throw new Error('the menu is not open');
+      return found;
+    });
+    const viewport = popup.querySelector('[data-slot=scroll-area-viewport]')!;
+
+    await userEvent.keyboard('{ArrowUp}');
+    // The list scrolls under the cursor, and the browser answers on a later frame.
+    await vi.waitFor(() => expect(viewport.scrollTop).toBeGreaterThan(0));
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    expect(popup.querySelector('[data-highlighted]')!.textContent).toContain('Item 15');
+  });
+
+  it('highlights the option the pointer moves onto', async () => {
+    render(<SlashMenu editor={slashEditor()} items={items} />);
+    const popup = await vi.waitFor(() => {
+      const found = document.querySelector('[data-slot=slash-menu]');
+      if (!found) throw new Error('the menu is not open');
+      return found;
+    });
+    const third = Array.from(popup.querySelectorAll('[data-slot=item-title]')).find(
+      (title) => title.textContent === 'Item 2',
+    )!;
+
+    await userEvent.hover(third);
+
+    await vi.waitFor(() => expect(popup.querySelector('[data-highlighted]')!.textContent).toContain('Item 2'));
+  });
 });

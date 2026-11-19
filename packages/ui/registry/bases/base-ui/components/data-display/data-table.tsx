@@ -1,11 +1,15 @@
+'use client';
+
+import { mergeProps } from '@base-ui/react/merge-props';
 import * as React from 'react';
 import { type Table as TanstackTable, flexRender } from '@tanstack/react-table';
-import { Settings2 } from 'lucide-react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ChevronLeftIcon } from '@/registry/bases/base-ui/icons/chevron-left-icon';
-import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/chevron-right-icon';
+import { Settings2Icon } from '@/registry/bases/base-ui/icons/lucide/settings-2-icon';
+import { useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
+import { ChevronLeftIcon } from '@/registry/bases/base-ui/icons/lucide/chevron-left-icon';
+import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/lucide/chevron-right-icon';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -217,8 +221,16 @@ function DataTablePaginationNext(props: DataTablePaginationStepProps): React.Rea
  * `aria-label` is given. No "Toggle columns" heading: the checkbox list speaks
  * for itself, matching shadcn.
  */
-function DataTableViewOptions({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
+function DataTableViewOptions({
+  onPointerEnter,
+  onPointerLeave,
+  onFocus,
+  onBlur,
+  children,
+  ...props
+}: React.ComponentProps<typeof Button>): React.ReactNode {
   const table = useDataTable();
+  const { ref, handlers } = useAnimatedIcon();
   const columns = table
     .getAllColumns()
     .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide());
@@ -235,10 +247,11 @@ function DataTableViewOptions({ children, ...props }: React.ComponentProps<typeo
             size="sm"
             aria-label="Toggle columns"
             {...props}
+            {...mergeProps<'button'>(handlers, { onPointerEnter, onPointerLeave, onFocus, onBlur })}
           />
         }
       >
-        <Settings2 />
+        <Settings2Icon ref={ref} aria-hidden />
         {children}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

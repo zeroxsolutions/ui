@@ -1,6 +1,16 @@
-import { X } from 'lucide-react-native';
-import { Children, createContext, useContext, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
+import {
+  Children,
+  createContext,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import { View } from 'react-native';
+import { XIcon } from '../../icons/lucide/x-icon';
+import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { cn } from '../../lib/utils';
 import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
@@ -111,11 +121,18 @@ function TagInputTag({ value, children, ...props }: TagInputTagProps): ReactNode
 /**
  * The tag's remove button, a ghost `icon-xs` Button drawing a cross, announced as a button. The caller names it
  * with `aria-label`. Disabled with the root. An `onPress` runs first, and one that calls `preventDefault` keeps the tag.
+ * The cross plays when the button is pressed in or focused, after a caller's own `onPressIn` and `onFocus`.
  * @throws {Error} when rendered outside a TagInputTag
  */
-function TagInputTagRemove({ onPress, ...props }: Omit<ComponentProps<typeof Button>, 'children'>): ReactNode {
+function TagInputTagRemove({
+  onPress,
+  onPressIn,
+  onFocus,
+  ...props
+}: Omit<ComponentProps<typeof Button>, 'children'>): ReactNode {
   const { disabled, remove } = useTagInput();
   const tag = useContext(TagInputTagContext);
+  const icon = useRef<IconHandle>(null);
   if (tag === null) throw new Error('TagInputTagRemove must be used within <TagInputTag>');
   return (
     <Button
@@ -126,9 +143,10 @@ function TagInputTagRemove({ onPress, ...props }: Omit<ComponentProps<typeof But
         onPress?.(event);
         if (!event.isDefaultPrevented()) remove(tag);
       }}
+      {...iconTrigger([icon], { onPressIn, onFocus })}
       {...props}
     >
-      <Icon as={X} />
+      <Icon as={XIcon} ref={icon} />
     </Button>
   );
 }

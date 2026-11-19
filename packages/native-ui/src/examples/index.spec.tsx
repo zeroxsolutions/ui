@@ -4,16 +4,29 @@ import { join } from 'node:path';
 import type { Registry } from 'shadcn/schema';
 import { demos } from './index';
 
+jest.mock('./lucide-icon-modules', () =>
+  jest
+    .requireActual<typeof import('../registry/icons/animated-icon.testing')>('../registry/icons/animated-icon.testing')
+    .lucideIconModulesModule(),
+);
+
 const REGISTRY_PATH = join(__dirname, '../../registry.json');
 const registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8')) as Registry;
 /** Utils draws nothing, so it has no demo; the theme's demo draws its colours and fonts. */
 const DRAWN_TYPES = new Set(['registry:theme', 'registry:ui', 'registry:component', 'registry:block']);
-const drawnItems = registry.items.filter((item) => DRAWN_TYPES.has(item.type)).map((item) => item.name);
+/** An animated icon, a file under registry/icons/, has no demo of its own, as on the web; the controls that play it show it. */
+const isAnimatedIcon = (item: Registry['items'][number]): boolean =>
+  item.type === 'registry:ui' && (item.files?.[0]?.path.startsWith('src/registry/icons/') ?? false);
+/** The demos that draw no one item: the icon gallery draws every animated icon for the docs' Icons page. */
+const GALLERY_DEMOS = ['icon-gallery-demo'];
+const drawnItems = registry.items
+  .filter((item) => DRAWN_TYPES.has(item.type) && !isAnimatedIcon(item))
+  .map((item) => item.name);
 
 describe('demos', () => {
-  it('has a <name>-demo for the theme and every ui, component and block item of the registry, and nothing else', () => {
+  it('has a <name>-demo for the theme and every ui, component and block item of the registry, the galleries, and nothing else', () => {
     expect(drawnItems.length).toBeGreaterThan(0);
-    expect(Object.keys(demos).sort()).toEqual(drawnItems.map((name) => `${name}-demo`).sort());
+    expect(Object.keys(demos).sort()).toEqual([...drawnItems.map((name) => `${name}-demo`), ...GALLERY_DEMOS].sort());
   });
 
   it.each(drawnItems)('keeps the %s demo in its own <name>-demo.tsx', (name) => {

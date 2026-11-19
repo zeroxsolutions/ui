@@ -1,4 +1,3 @@
-import { ChevronRight } from 'lucide-react-native';
 import {
   Children,
   createContext,
@@ -18,7 +17,9 @@ import {
   type RefObject,
 } from 'react';
 import { Platform, Pressable, View, type GestureResponderEvent, type KeyDownEvent } from 'react-native';
+import { ChevronRightIcon } from '../../icons/lucide/chevron-right-icon';
 import { useFocusVisible } from '../../lib/focus-visible';
+import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
 import { Icon } from '../../ui/icon';
@@ -408,7 +409,8 @@ type FileTreeLabelProps = Omit<ComponentProps<typeof Pressable>, 'children'> & {
  * icon and file name as `children`, indented by depth; a string child is drawn on one line. A press selects the
  * item and toggles a folder, after a caller's `onPress`. It is filled while selected and ringed while its item
  * holds focus from the keyboard. On a device it is the tree item a screen reader reaches, announced selected, and
- * a folder's expanded or collapsed.
+ * a folder's expanded or collapsed. A folder's chevron plays when the row is pressed in or focused, after a caller's
+ * own `onPressIn` and `onFocus`.
  * @throws {Error} when rendered outside a FileTreeItem
  */
 function FileTreeLabel({
@@ -416,6 +418,7 @@ function FileTreeLabel({
   children,
   style,
   onPress,
+  onPressIn,
   onFocus,
   onBlur,
   ref,
@@ -425,6 +428,8 @@ function FileTreeLabel({
   const item = useFileTreeItem();
   const web = Platform.OS === 'web';
   const indent = (item.level - 1) * 12 + 6;
+  const chevron = useRef<IconHandle>(null);
+  const trigger = iconTrigger([chevron], { onPressIn, onFocus });
 
   const deviceTreeItem = web
     ? // A click on the row would otherwise focus it rather than its item, as a browser focuses the item it is in.
@@ -468,8 +473,9 @@ function FileTreeLabel({
           tree.select(item.value);
           if (item.folder) tree.toggleExpanded(item.value);
         }}
+        onPressIn={trigger.onPressIn}
         onFocus={(event) => {
-          onFocus?.(event);
+          trigger.onFocus(event);
           if (web) item.target.current?.focus();
           else item.onTargetFocus(event);
         }}
@@ -482,7 +488,7 @@ function FileTreeLabel({
         {item.folder ? (
           // Not every engine turns an svg by its className, so the chevron turns in a View around it.
           <View aria-hidden className={cn('shrink-0', item.expanded && 'rotate-90')}>
-            <Icon as={ChevronRight} size={16} className="text-primary" />
+            <Icon as={ChevronRightIcon} ref={chevron} size={16} className="text-primary" />
           </View>
         ) : (
           <View aria-hidden className="w-4 shrink-0" />

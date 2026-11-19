@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react-native';
-import { Circle, CircleCheck } from 'lucide-react-native';
 import { AccessibilityInfo, Platform } from 'react-native';
+import { handleOf } from '../../icons/animated-icon.testing';
+import { CircleCheckIcon } from '../../icons/lucide/circle-check-icon';
+import { CircleIcon } from '../../icons/lucide/circle-icon';
 import {
   PasswordStrength,
   PasswordStrengthMeter,
@@ -9,13 +11,28 @@ import {
   type PasswordStrengthValue,
 } from './password-strength';
 
-// Stands in for Icon so a spec reads which icon component the row passes, not the path it draws.
+// Stands in for Icon so a spec reads which icon component the row passes, not the path it draws; the icon still
+// takes its ref, so the row can play it.
 jest.mock('../../ui/icon', () => {
   const { createElement } = jest.requireActual<typeof import('react')>('react');
   return {
     ...jest.requireActual('../../ui/icon'),
-    Icon: ({ as }: { as: unknown }) => createElement('View', { testID: 'requirement-icon', icon: as }),
+    Icon: ({ as, ref }: import('../../ui/icon').IconProps) =>
+      createElement('View', { testID: 'requirement-icon', icon: as }, createElement(as, { ref })),
   };
+});
+jest.mock('../../icons/lucide/circle-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('circle-icon'),
+);
+jest.mock('../../icons/lucide/circle-check-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('circle-check-icon'),
+);
+
+const circleIcon = handleOf(CircleIcon);
+const circleCheckIcon = handleOf(CircleCheckIcon);
+
+beforeEach(() => {
+  jest.clearAllMocks();
 });
 
 function Example({ strength }: { strength: PasswordStrengthValue }) {
@@ -111,6 +128,25 @@ describe('PasswordStrengthMeter', () => {
 });
 
 describe('PasswordStrengthRequirement', () => {
+  it('plays the met icon once when the requirement is met', async () => {
+    await render(<PasswordStrengthRequirement>At least 15 characters</PasswordStrengthRequirement>);
+
+    await screen.rerender(<PasswordStrengthRequirement met>At least 15 characters</PasswordStrengthRequirement>);
+    await screen.rerender(<PasswordStrengthRequirement met>At least 15 characters</PasswordStrengthRequirement>);
+
+    expect(circleCheckIcon.startAnimation).toHaveBeenCalledTimes(1);
+    expect(circleIcon.startAnimation).not.toHaveBeenCalled();
+  });
+
+  it('plays nothing when it is drawn already met, or when it stops being met', async () => {
+    await render(<PasswordStrengthRequirement met>At least 15 characters</PasswordStrengthRequirement>);
+
+    await screen.rerender(<PasswordStrengthRequirement>At least 15 characters</PasswordStrengthRequirement>);
+
+    expect(circleCheckIcon.startAnimation).not.toHaveBeenCalled();
+    expect(circleIcon.startAnimation).not.toHaveBeenCalled();
+  });
+
   it('shows a check while met, and says Met', async () => {
     await render(
       <PasswordStrengthRequirement met testID="row">
@@ -118,14 +154,14 @@ describe('PasswordStrengthRequirement', () => {
       </PasswordStrengthRequirement>,
     );
 
-    expect(iconDrawn()).toBe(CircleCheck);
+    expect(iconDrawn()).toBe(CircleCheckIcon);
     expect(screen.getByTestId('row').props.accessibilityValue).toEqual({ text: 'Met' });
   });
 
   it('shows a circle while unmet, and says Not met', async () => {
     await render(<PasswordStrengthRequirement testID="row">At least 15 characters</PasswordStrengthRequirement>);
 
-    expect(iconDrawn()).toBe(Circle);
+    expect(iconDrawn()).toBe(CircleIcon);
     expect(screen.getByTestId('row').props.accessibilityValue).toEqual({ text: 'Not met' });
   });
 

@@ -27,8 +27,8 @@ import { Toaster as SeraBaseToaster, useToastManager as useSeraToastManager } fr
 import { Toaster as VegaBaseToaster, useToastManager as useVegaToastManager } from '@styles/vega/components/ui/toast';
 
 import { DemoBoundary } from './demo-boundary';
-import { DEMO_NAMES, findDemo } from './find-demo';
-import { frameHeightOf, postHeightToHost, showsOverlay } from './frame-height';
+import { DEMO_NAMES, findDemo, scrollsItself } from './find-demo';
+import { SELF_SCROLLING_FRAME_HEIGHT, frameHeightOf, postHeightToHost, showsOverlay } from './frame-height';
 import {
   demoNameFromDeepLink,
   demoNameFromSearch,
@@ -213,15 +213,45 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
     if (ready) void SplashScreen.hideAsync();
   }, [ready]);
 
+  // A demo that scrolls itself fills the screen instead of a scroll view, so it has no content height to report.
+  const selfScrolling = ready && name !== undefined && scrollsItself(name);
+  const drawnHeight = selfScrolling ? SELF_SCROLLING_FRAME_HEIGHT : contentHeight;
   useEffect(() => {
-    if (Platform.OS === 'web' && contentHeight !== undefined) {
-      postHeightToHost(window, frameHeightOf(contentHeight, overlayShown || toastShown));
+    if (Platform.OS === 'web' && drawnHeight !== undefined) {
+      postHeightToHost(window, frameHeightOf(drawnHeight, overlayShown || toastShown));
     }
-  }, [contentHeight, overlayShown, toastShown]);
+  }, [drawnHeight, overlayShown, toastShown]);
 
   const modalShown = useModalOverlayShown();
   if (!ready) return null;
   const Demo = name === undefined ? undefined : findDemo(style, name);
+
+  const drawn = (
+    // An open modal overlay hides the demo from screen readers on a device; the web's primitives hide
+    // the page themselves, and focus returns into it while the overlay goes out.
+    <View
+      aria-hidden={Platform.OS !== 'web' && modalShown}
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+      className={selfScrolling ? 'flex-1' : undefined}
+    >
+      {Demo !== undefined && name !== undefined ? (
+        <DemoBoundary key={name} name={name}>
+          <Demo />
+        </DemoBoundary>
+      ) : (
+        <DemoList missing={name} onOpen={open} />
+      )}
+    </View>
+  );
+
+  if (selfScrolling) {
+    return (
+      <View className="bg-background flex-1 p-6">
+        {drawn}
+        <StatusBar style="auto" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -229,20 +259,7 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
       contentContainerClassName="p-6"
       onContentSizeChange={(_width, height) => setContentHeight(height)}
     >
-      {/* An open modal overlay hides the demo from screen readers on a device; the web's primitives hide
-          the page themselves, and focus returns into it while the overlay goes out. */}
-      <View
-        aria-hidden={Platform.OS !== 'web' && modalShown}
-        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
-      >
-        {Demo !== undefined && name !== undefined ? (
-          <DemoBoundary key={name} name={name}>
-            <Demo />
-          </DemoBoundary>
-        ) : (
-          <DemoList missing={name} onOpen={open} />
-        )}
-      </View>
+      {drawn}
       <StatusBar style="auto" />
     </ScrollView>
   );
@@ -254,7 +271,9 @@ function PreviewScreen({ bundledStyle, applyColorScheme }: PreviewProps): ReactN
  * `exp://u.expo.dev/<project>/--/button-demo` in Expo Go, in the colour scheme `?theme=light|dark` asks
  * for on web, or the system's without one; a name no demo has says so above the list of demos, and no
  * name lists them. In a frame, it posts the drawn content's height to the page framing it each time
- * that height changes, and a taller one while the demo shows an overlay. The splash screen stays up until the fonts and, on native, the link are read.
+ * that height changes, and a taller one while the demo shows an overlay. A demo that scrolls itself fills
+ * the screen in place of the scroll view the others are drawn in, and its frame takes a fixed height. The
+ * splash screen stays up until the fonts and, on native, the link are read.
  *
  * A preview app renders it as its root, after importing its engine's stylesheet; `@/` in this module and
  * the demos' `@/` resolve to that app's emitted sources. It holds the app's `PortalHost` and both Toasters, so

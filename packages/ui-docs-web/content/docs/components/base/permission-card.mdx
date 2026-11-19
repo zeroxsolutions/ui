@@ -26,21 +26,23 @@ pnpm dlx shadcn@latest add @zui/permission-card
 
 <Steps>
 
-<Step>Install the packages it uses.</Step>
-
-```bash
-pnpm add lucide-react
-```
-
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add badge card utils @zui/circle-check-icon
+pnpm dlx shadcn@latest add badge card utils @zui/lucide-circle-check-icon @zui/lucide-circle-icon @zui/lucide-circle-x-icon
 ```
 
 <Step>Copy the component into `components/feedback/permission-card.tsx`.</Step>
 
 <ComponentSource name="permission-card" title="components/feedback/permission-card.tsx" />
+
+<Step>Copy the hook that starts its icons into `hooks/use-animated-icon.ts`.</Step>
+
+<ComponentSource
+  name="permission-card"
+  file="registry/bases/base-ui/hooks/use-animated-icon.ts"
+  title="hooks/use-animated-icon.ts"
+/>
 
 <Step>Update the import paths to match your project.</Step>
 

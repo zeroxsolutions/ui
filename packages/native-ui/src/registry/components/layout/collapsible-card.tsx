@@ -1,15 +1,18 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import {
   Children,
   createContext,
   isValidElement,
   useContext,
+  useRef,
   useState,
   type ComponentProps,
   type ReactNode,
 } from 'react';
 import { View } from 'react-native';
+import { ChevronDownIcon } from '../../icons/lucide/chevron-down-icon';
+import { ChevronUpIcon } from '../../icons/lucide/chevron-up-icon';
+import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { asText, textOf } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
 import { Button } from '../../ui/button';
@@ -153,11 +156,22 @@ type CollapsibleCardTriggerProps = Omit<CollapsibleTriggerProps, 'asChild' | 'ch
  * The ghost icon Button that opens and closes the body, announced as a button with its expanded state. With
  * no `children` it shows a chevron, pointing up while the body is open. `children` replace the chevron, and
  * text in them names the button; without text, such as the chevron or an icon alone, it is named "Toggle
- * content" unless an `aria-label` is given.
+ * content" unless an `aria-label` is given. The chevron plays when the button is pressed in or focused, after a
+ * caller's own `onPressIn` and `onFocus`, and the other chevron plays once as the body opens or closes.
  */
-function CollapsibleCardTrigger({ className, children, ...props }: CollapsibleCardTriggerProps): ReactNode {
+function CollapsibleCardTrigger({
+  className,
+  children,
+  onPressIn,
+  onFocus,
+  ...props
+}: CollapsibleCardTriggerProps): ReactNode {
   const { open } = useContext(CollapsibleCardContext);
   const named = textOf(children).trim() !== '';
+  // The two chevrons are two components, so opening or closing mounts a new one at rest; it plays as it appears.
+  const chevron = useRef<IconHandle>(null);
+  usePlayOnReach(chevron, open);
+  usePlayOnReach(chevron, !open);
   return (
     <CollapsibleTrigger asChild>
       <Button
@@ -165,9 +179,10 @@ function CollapsibleCardTrigger({ className, children, ...props }: CollapsibleCa
         size="icon"
         aria-label={named ? undefined : 'Toggle content'}
         className={className}
+        {...iconTrigger([chevron], { onPressIn, onFocus })}
         {...props}
       >
-        {asText(children) ?? <Icon as={open ? ChevronUp : ChevronDown} />}
+        {asText(children) ?? <Icon as={open ? ChevronUpIcon : ChevronDownIcon} ref={chevron} />}
       </Button>
     </CollapsibleTrigger>
   );

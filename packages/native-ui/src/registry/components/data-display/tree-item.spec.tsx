@@ -4,6 +4,12 @@ import { Pressable } from 'react-native';
 import { Button } from '../../ui/button';
 import { Text } from '../../ui/text';
 import { TreeItem, TreeItemIndent, TreeItemLabel, TreeItemRenameInput, TreeItemTrigger } from './tree-item';
+import { focus, handleOf } from '../../icons/animated-icon.testing';
+import { ChevronRightIcon } from '../../icons/lucide/chevron-right-icon';
+
+jest.mock('../../icons/lucide/chevron-right-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-right-icon'),
+);
 
 // React Native's jest mock gives every TextInput one shared `blur` mock, so its calls carry over between tests.
 afterEach(() => {
@@ -146,5 +152,29 @@ describe('TreeItemRenameInput', () => {
     await user.type(screen.getByLabelText('Name'), 'x', { skipBlur: true });
 
     expect(onCommit).not.toHaveBeenCalled();
+  });
+});
+
+describe('TreeItemTrigger motion', () => {
+  it('starts its chevron on press-in and on focus', async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    await render(
+      <TreeItem>
+        <TreeItemIndent depth={0}>
+          <TreeItemTrigger aria-label="Toggle src" onPressIn={onPressIn} onFocus={onFocus} />
+        </TreeItemIndent>
+        <TreeItemLabel>src</TreeItemLabel>
+      </TreeItem>,
+    );
+    const control = screen.getByRole('button', { name: 'Toggle src' });
+
+    await userEvent.setup().press(control);
+    await focus(control);
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(handleOf(ChevronRightIcon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(ChevronRightIcon).stopAnimation).not.toHaveBeenCalled();
   });
 });

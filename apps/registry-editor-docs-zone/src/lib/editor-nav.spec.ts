@@ -27,6 +27,7 @@ describe('zoneNavItems', () => {
       '/docs',
       '/docs/components/base',
       '/blocks/base',
+      '/icons/base',
       '/docs/editor',
     ]);
   });

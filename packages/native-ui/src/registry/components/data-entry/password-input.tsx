@@ -1,5 +1,7 @@
-import { Eye, EyeOff } from 'lucide-react-native';
-import { createContext, useContext, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useRef, useState, type ComponentProps, type ReactNode } from 'react';
+import { EyeIcon } from '../../icons/lucide/eye-icon';
+import { EyeOffIcon } from '../../icons/lucide/eye-off-icon';
+import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { Icon } from '../../ui/icon';
 import {
   InputGroup,
@@ -66,16 +68,25 @@ type PasswordInputToggleProps = Omit<InputGroupButtonProps, 'children' | 'size'>
 /**
  * The show/hide toggle, a ghost `icon-xs` InputGroupButton announced as a button, drawing an eye while
  * the password is hidden and a struck eye while it shows. Its name follows the state, `showLabel`
- * then `hideLabel`, which an app passes translated. Pressing it does not move focus.
+ * then `hideLabel`, which an app passes translated. Pressing it does not move focus. The eye plays when the
+ * toggle is pressed in or focused, after a caller's own `onPressIn` and `onFocus`, and the other eye plays once
+ * as a press swaps it in.
  * @throws {Error} when rendered outside a PasswordInput
  */
 function PasswordInputToggle({
   showLabel = 'Show password',
   hideLabel = 'Hide password',
   onPress,
+  onPressIn,
+  onFocus,
   ...props
 }: PasswordInputToggleProps): ReactNode {
   const { visible, toggle } = usePasswordInput();
+  // Eye and struck eye are two components, so a press that flips them mounts a new icon at rest; it plays as it
+  // appears.
+  const icon = useRef<IconHandle>(null);
+  usePlayOnReach(icon, visible);
+  usePlayOnReach(icon, !visible);
   return (
     <InputGroupButton
       size="icon-xs"
@@ -86,9 +97,10 @@ function PasswordInputToggle({
         onPress?.(event);
         toggle();
       }}
+      {...iconTrigger([icon], { onPressIn, onFocus })}
       {...props}
     >
-      <Icon as={visible ? EyeOff : Eye} />
+      <Icon as={visible ? EyeOffIcon : EyeIcon} ref={icon} />
     </InputGroupButton>
   );
 }

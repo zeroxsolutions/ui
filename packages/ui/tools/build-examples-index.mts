@@ -6,8 +6,9 @@
  * from it because the components use hooks and carry no client directive, so only a client module may
  * import them, while the paths are read on the server. There are two maps, each a lazy import of the
  * component the first file exports, so that an app bundles only the demos it renders:
- * `__components__.tsx` holds every entry outside the editor set; `__editor-components__.tsx` holds the
- * editor set, which the editor docs zone renders. The editor set is an item in the `editor` category
+ * `__components__.tsx` holds every entry outside the editor set and the icons; `__editor-components__.tsx`
+ * holds the editor set, which the editor docs zone renders; `__icon-components__.tsx` holds the animated
+ * icons, which only the Icons page renders, so that no other page carries an entry per icon. The editor set is an item in the `editor` category
  * and an item that names one among its registry dependencies; `Index` marks each entry's set too, so a
  * server module can tell the two apart without importing either map.
  */
@@ -16,6 +17,7 @@ import { join, resolve } from 'node:path';
 
 const APP = resolve(import.meta.dirname, '..');
 const EXAMPLES = 'registry/bases/base-ui/examples';
+const ICONS = 'registry/bases/base-ui/icons';
 const HEADER = '// Written by tools/build-examples-index.mts from examples/ and registry.json.';
 
 interface RegistryItem {
@@ -73,8 +75,10 @@ ${entries.map(({ name, files }) => `  '${name}': { name: '${name}', files: ${JSO
 const loader = ({ files: [file] }: { files: string[] }): string =>
   `() => import('@/${file.replace(/\.tsx?$/, '')}').then(firstComponent)`;
 
+const isIcon = ({ files: [file] }: { files: string[] }): boolean => file.startsWith(`${ICONS}/`);
 const inEditorSet = entries.filter(({ name }) => editorSet.has(name));
-const outsideEditorSet = entries.filter(({ name }) => !editorSet.has(name));
+const icons = entries.filter((entry) => !editorSet.has(entry.name) && isIcon(entry));
+const outsideEditorSet = entries.filter((entry) => !editorSet.has(entry.name) && !isIcon(entry));
 
 function writeComponents(file: string, exportName: string, group: typeof entries): void {
   const lines = group.map((entry) => `  '${entry.name}': lazy(${loader(entry)}),`);
@@ -83,8 +87,14 @@ function writeComponents(file: string, exportName: string, group: typeof entries
     `${HEADER}
 import { lazy, type ComponentType } from 'react';
 
+// An animated icon's module exports no function, only the object \`forwardRef\` returns, so that object
+// is taken where the module exports no function.
 function firstComponent(module: Record<string, unknown>): { default: ComponentType } {
-  return { default: Object.values(module).find((value) => typeof value === 'function') as ComponentType };
+  const exports = Object.values(module);
+  const component =
+    exports.find((value) => typeof value === 'function') ??
+    exports.find((value) => typeof value === 'object' && value !== null && '$$typeof' in value);
+  return { default: component as ComponentType };
 }
 
 export const ${exportName}: Record<string, ComponentType> = {
@@ -96,7 +106,8 @@ ${lines.join('\n')}
 
 writeComponents('__components__.tsx', 'Components', outsideEditorSet);
 writeComponents('__editor-components__.tsx', 'EditorComponents', inEditorSet);
+writeComponents('__icon-components__.tsx', 'IconComponents', icons);
 
 console.log(
-  `examples index: ${demos.length} demos, ${published.length} registry items, ${editorSet.size} in the editor set`,
+  `examples index: ${demos.length} demos, ${published.length} registry items, ${editorSet.size} in the editor set, ${icons.length} icons`,
 );

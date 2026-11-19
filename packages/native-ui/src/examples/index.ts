@@ -1,7 +1,8 @@
 /**
- * One demo per drawn registry item, written as an app writes it, importing the items through `@/`.
- * build-registry copies them into each style's emitted sources, and the native preview draws each one
- * at `/native-preview/index.html?style=<style>&demo=<key>`.
+ * One demo per drawn registry item, written as an app writes it, importing the items through `@/`, and the
+ * icon gallery, which draws every animated icon for the docs' Icons page. build-registry copies them into
+ * each style's emitted sources, and the native preview draws each one at
+ * `/native-preview/index.html?style=<style>&demo=<key>`.
  */
 import type { ComponentType } from 'react';
 
@@ -57,6 +58,7 @@ import { FormDemo } from './form-demo';
 import { FrontmatterFormDemo } from './frontmatter-form-demo';
 import { HoverCardDemo } from './hover-card-demo';
 import { IconDemo } from './icon-demo';
+import { IconGalleryDemo } from './icon-gallery-demo';
 import { IconLabelDemo } from './icon-label-demo';
 import { IconMediaDemo } from './icon-media-demo';
 import { ImagePreviewDemo } from './image-preview-demo';
@@ -175,6 +177,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'frontmatter-form-demo': FrontmatterFormDemo,
   'hover-card-demo': HoverCardDemo,
   'icon-demo': IconDemo,
+  'icon-gallery-demo': IconGalleryDemo,
   'icon-label-demo': IconLabelDemo,
   'icon-media-demo': IconMediaDemo,
   'image-preview-demo': ImagePreviewDemo,
@@ -240,4 +243,11 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'unsaved-indicator-demo': UnsavedIndicatorDemo,
 };
 
-export { demos };
+/**
+ * The demos that scroll themselves, such as the icon gallery's windowed list, which the preview draws in the
+ * whole screen rather than in its own scroll view: a list that windows its rows cannot sit inside another
+ * scroller of the same direction.
+ */
+const selfScrollingDemos: ReadonlySet<string> = new Set(['icon-gallery-demo']);
+
+export { demos, selfScrollingDemos };

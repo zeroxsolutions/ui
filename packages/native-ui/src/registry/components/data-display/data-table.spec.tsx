@@ -27,6 +27,24 @@ import {
   DataTableViewOptions,
   useDataTable,
 } from './data-table';
+import { focus, handleOf } from '../../icons/animated-icon.testing';
+import { ChevronLeftIcon } from '../../icons/lucide/chevron-left-icon';
+import { ChevronRightIcon } from '../../icons/lucide/chevron-right-icon';
+import { Settings2Icon } from '../../icons/lucide/settings-2-icon';
+
+jest.mock('../../icons/lucide/chevron-left-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-left-icon'),
+);
+jest.mock('../../icons/lucide/chevron-right-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-right-icon'),
+);
+jest.mock('../../icons/lucide/settings-2-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('settings-2-icon'),
+);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 // Jest runs no Reanimated frame into the props a query reads, so the opacity a menu fades in from hides it
 // from them.
@@ -221,5 +239,88 @@ describe('DataTable', () => {
     }
 
     await expect(render(<Outside />)).rejects.toThrow('DataTable parts must be used within <DataTable>');
+  });
+});
+
+/** The file table a page at a time, holding only the `children` a case draws in it. */
+function Bare({ children }: { children: ReactNode }): ReactNode {
+  const table = useReactTable({
+    data: FILES,
+    columns: COLUMNS,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 1 } },
+  });
+  return (
+    <>
+      <DataTable table={table}>{children}</DataTable>
+      <PortalHost />
+    </>
+  );
+}
+
+describe('DataTable motion', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    // A menu opens where its trigger is laid out, which Jest lays nothing out to report.
+    jest
+      .spyOn(View.prototype as unknown as { measure: (callback: (...args: number[]) => void) => void }, 'measure')
+      .mockImplementation((callback) => callback(0, 0, 100, 40, 50, 200));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it("starts each pager step's chevron on press-in and on focus", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<Files pageSize={1} />);
+
+    await user.press(screen.getByRole('button', { name: 'Next page' }));
+    await focus(screen.getByRole('button', { name: 'Next page' }));
+    await user.press(screen.getByRole('button', { name: 'Previous page' }));
+    await focus(screen.getByRole('button', { name: 'Previous page' }));
+
+    expect(handleOf(ChevronRightIcon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(ChevronLeftIcon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(ChevronRightIcon).stopAnimation).not.toHaveBeenCalled();
+  });
+
+  it("runs a pager step's own press-in and focus handlers", async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    await render(
+      <Bare>
+        <DataTablePaginationNext aria-label="Next page" onPressIn={onPressIn} onFocus={onFocus} />
+      </Bare>,
+    );
+    const control = screen.getByRole('button', { name: 'Next page' });
+
+    await userEvent.setup({ advanceTimers: jest.advanceTimersByTime }).press(control);
+    await focus(control);
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+  });
+
+  it("starts the view options' settings icon on press-in and on focus", async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    await render(
+      <Bare>
+        <DataTableViewOptions onPressIn={onPressIn} onFocus={onFocus} />
+      </Bare>,
+    );
+    const control = screen.getByRole('button', { name: 'Toggle columns' });
+
+    await userEvent.setup({ advanceTimers: jest.advanceTimersByTime }).press(control);
+    await act(() => jest.advanceTimersByTimeAsync(300));
+    await focus(control);
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(handleOf(Settings2Icon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(Settings2Icon).stopAnimation).not.toHaveBeenCalled();
   });
 });

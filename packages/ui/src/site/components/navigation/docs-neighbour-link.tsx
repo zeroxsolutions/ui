@@ -3,10 +3,10 @@
 import type { ReactNode } from 'react';
 
 import { useHost } from '../../../host/host-provider';
-import { useIconAnimation } from '../../hooks/use-icon-animation';
+import { useAnimatedIcon } from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
 
-import { ArrowLeftIcon, type ArrowLeftIconHandle } from '../../../../registry/bases/base-ui/icons/arrow-left-icon';
-import { ArrowRightIcon, type ArrowRightIconHandle } from '../../../../registry/bases/base-ui/icons/arrow-right-icon';
+import { ArrowLeftIcon } from '../../../../registry/bases/base-ui/icons/lucide/arrow-left-icon';
+import { ArrowRightIcon } from '../../../../registry/bases/base-ui/icons/lucide/arrow-right-icon';
 import { buttonVariants } from '../../../../registry/bases/base-ui/ui/button';
 
 interface DocsNeighbourLinkProps {
@@ -19,7 +19,7 @@ interface DocsNeighbourLinkProps {
 /** The page header's icon link to the previous or the next page; its arrow plays on hover or focus. */
 function DocsNeighbourLink({ direction, href }: DocsNeighbourLinkProps): ReactNode {
   const { Link } = useHost();
-  const arrow = useIconAnimation<ArrowLeftIconHandle | ArrowRightIconHandle>();
+  const arrow = useAnimatedIcon();
 
   return (
     <Link

@@ -1,6 +1,7 @@
-import { Trash2 } from 'lucide-react-native';
-import type { ComponentProps, ReactNode } from 'react';
+import { useRef, type ComponentProps, type ReactNode } from 'react';
 import { View } from 'react-native';
+import { TrashIcon } from '../../icons/lucide/trash-icon';
+import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { cn } from '../../lib/utils';
 import { Button } from '../../ui/button';
 import { Icon } from '../../ui/icon';
@@ -65,12 +66,20 @@ function ModelListContent({ className, children, ...props }: ComponentProps<type
 
 /**
  * The ghost remove button for one model item, named "Remove model" unless an `aria-label` is given; `children`
- * replace its trash icon.
+ * replace its trash icon, which plays when the button is pressed in or focused, after a caller's own `onPressIn`
+ * and `onFocus`.
  */
-function ModelListRemoveButton({ children, ...props }: ComponentProps<typeof Button>): ReactNode {
+function ModelListRemoveButton({ children, onPressIn, onFocus, ...props }: ComponentProps<typeof Button>): ReactNode {
+  const icon = useRef<IconHandle>(null);
   return (
-    <Button aria-label="Remove model" variant="ghost" size="icon-sm" {...props}>
-      {children ?? <Icon as={Trash2} />}
+    <Button
+      aria-label="Remove model"
+      variant="ghost"
+      size="icon-sm"
+      {...iconTrigger([icon], { onPressIn, onFocus })}
+      {...props}
+    >
+      {children ?? <Icon as={TrashIcon} ref={icon} />}
     </Button>
   );
 }

@@ -1,34 +1,35 @@
 'use client';
 
 import { EMOJI_CATEGORIES, FluentEmoji, type EmojiDatum } from '@zeroxsolutions/fluent-emoji';
-import { Dumbbell, Flag, Hash, Lightbulb, Plane, type LucideIcon } from 'lucide-react';
 import * as React from 'react';
 
 import { Button } from '@/registry/bases/base-ui/ui/button';
-import { ClockIcon, type ClockIconHandle } from '@/registry/bases/base-ui/icons/clock-icon';
-import { CoffeeIcon } from '@/registry/bases/base-ui/icons/coffee-icon';
+import { ClockIcon, type ClockIconHandle } from '@/registry/bases/base-ui/icons/lucide/clock-icon';
+import { CoffeeIcon } from '@/registry/bases/base-ui/icons/lucide/coffee-icon';
+import { DumbbellIcon } from '@/registry/bases/base-ui/icons/lucide/dumbbell-icon';
+import { FlagIcon } from '@/registry/bases/base-ui/icons/lucide/flag-icon';
+import { HashIcon } from '@/registry/bases/base-ui/icons/lucide/hash-icon';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/registry/bases/base-ui/ui/input-group';
-import { LeafIcon } from '@/registry/bases/base-ui/icons/leaf-icon';
+import { LeafIcon } from '@/registry/bases/base-ui/icons/lucide/leaf-icon';
+import { LightbulbIcon } from '@/registry/bases/base-ui/icons/lucide/lightbulb-icon';
+import { PlaneIcon } from '@/registry/bases/base-ui/icons/lucide/plane-icon';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
-import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/icons/search-icon';
-import { SmileIcon } from '@/registry/bases/base-ui/icons/smile-icon';
+import { SearchIcon, type SearchIconHandle } from '@/registry/bases/base-ui/icons/lucide/search-icon';
+import { FaceSlightlySmilingIcon } from '@/registry/bases/base-ui/icons/lucide/face-slightly-smiling-icon';
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
-/**
- * The nav's glyph per category: animated where the registry's animated icons draw it, a still lucide glyph where they do not.
- * Every animated icon shares `ClockIcon`'s props and ref handle.
- */
-const CATEGORY_ICONS: Record<string, { animated: typeof ClockIcon } | { still: LucideIcon }> = {
-  frequent: { animated: ClockIcon },
-  smileys_people: { animated: SmileIcon },
-  animals_nature: { animated: LeafIcon },
-  food_drink: { animated: CoffeeIcon },
-  travel_places: { still: Plane },
-  activities: { still: Dumbbell },
-  objects: { still: Lightbulb },
-  symbols: { still: Hash },
-  flags: { still: Flag },
+/** The nav's animated glyph per category. Every animated icon shares `ClockIcon`'s props and ref handle. */
+const CATEGORY_ICONS: Record<string, typeof ClockIcon> = {
+  frequent: ClockIcon,
+  smileys_people: FaceSlightlySmilingIcon,
+  animals_nature: LeafIcon,
+  food_drink: CoffeeIcon,
+  travel_places: PlaneIcon,
+  activities: DumbbellIcon,
+  objects: LightbulbIcon,
+  symbols: HashIcon,
+  flags: FlagIcon,
 };
 
 /** Cells per grid row. */
@@ -529,7 +530,7 @@ function EmojiPickerNav({
   );
 }
 
-/** One category item, its glyph from `CATEGORY_ICONS`; an animated glyph plays on the item's hover or focus. */
+/** One category item, its animated glyph from `CATEGORY_ICONS`, played on the item's hover or focus. */
 function EmojiPickerNavItem({
   value,
   className,
@@ -540,7 +541,7 @@ function EmojiPickerNavItem({
   ...props
 }: React.ComponentProps<typeof ToggleGroupItem> & { value: string }): React.ReactNode {
   const iconRef = React.useRef<ClockIconHandle>(null);
-  const icon = CATEGORY_ICONS[value] ?? CATEGORY_ICONS.smileys_people;
+  const Icon = CATEGORY_ICONS[value] ?? CATEGORY_ICONS.smileys_people;
   return (
     <ToggleGroupItem
       data-slot="emoji-picker-nav-item"
@@ -564,7 +565,7 @@ function EmojiPickerNavItem({
       }}
       {...props}
     >
-      {'animated' in icon ? <icon.animated ref={iconRef} /> : <icon.still />}
+      <Icon ref={iconRef} />
     </ToggleGroupItem>
   );
 }

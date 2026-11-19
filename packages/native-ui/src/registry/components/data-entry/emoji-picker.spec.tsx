@@ -10,6 +10,48 @@ import {
   EmojiPickerSearch,
   type EmojiPickerProps,
 } from './emoji-picker';
+import { focus, handleOf } from '../../icons/animated-icon.testing';
+import { ClockIcon } from '../../icons/lucide/clock-icon';
+import { FaceSlightlySmilingIcon } from '../../icons/lucide/face-slightly-smiling-icon';
+import { LeafIcon } from '../../icons/lucide/leaf-icon';
+import { CoffeeIcon } from '../../icons/lucide/coffee-icon';
+import { PlaneIcon } from '../../icons/lucide/plane-icon';
+import { DumbbellIcon } from '../../icons/lucide/dumbbell-icon';
+import { LightbulbIcon } from '../../icons/lucide/lightbulb-icon';
+import { HashIcon } from '../../icons/lucide/hash-icon';
+import { FlagIcon } from '../../icons/lucide/flag-icon';
+
+jest.mock('../../icons/lucide/clock-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('clock-icon'),
+);
+jest.mock('../../icons/lucide/face-slightly-smiling-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('face-slightly-smiling-icon'),
+);
+jest.mock('../../icons/lucide/leaf-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('leaf-icon'),
+);
+jest.mock('../../icons/lucide/coffee-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('coffee-icon'),
+);
+jest.mock('../../icons/lucide/plane-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('plane-icon'),
+);
+jest.mock('../../icons/lucide/dumbbell-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('dumbbell-icon'),
+);
+jest.mock('../../icons/lucide/lightbulb-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('lightbulb-icon'),
+);
+jest.mock('../../icons/lucide/hash-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('hash-icon'),
+);
+jest.mock('../../icons/lucide/flag-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('flag-icon'),
+);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 /** The picker as its demo composes it: search, the list with an empty state, and the category nav. */
 function Picker(props: Omit<EmojiPickerProps, 'children'>) {
@@ -116,5 +158,41 @@ describe('EmojiPicker', () => {
 
     expect(screen.getByText('No emoji found')).toBeOnTheScreen();
     expect(screen.queryAllByRole('button')).toEqual([]);
+  });
+});
+
+describe('EmojiPickerNav motion', () => {
+  it.each([
+    ['Recent', ClockIcon],
+    ['Smileys & people', FaceSlightlySmilingIcon],
+    ['Animals & nature', LeafIcon],
+    ['Food & drink', CoffeeIcon],
+    ['Travel & places', PlaneIcon],
+    ['Activities', DumbbellIcon],
+    ['Objects', LightbulbIcon],
+    ['Symbols', HashIcon],
+    ['Flags', FlagIcon],
+  ])('starts the icon of %s on press-in and on focus', async (name, icon) => {
+    await render(<Picker onSelect={jest.fn()} frequent={{ name: 'Recent', emojis: ['\u{1F355}'] }} />);
+    const control = screen.getByRole('radio', { name });
+
+    await userEvent.setup().press(control);
+    await focus(control);
+
+    expect(handleOf(icon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(icon).stopAnimation).not.toHaveBeenCalled();
+    for (const other of [
+      ClockIcon,
+      FaceSlightlySmilingIcon,
+      LeafIcon,
+      CoffeeIcon,
+      PlaneIcon,
+      DumbbellIcon,
+      LightbulbIcon,
+      HashIcon,
+      FlagIcon,
+    ]) {
+      if (other !== icon) expect(handleOf(other).startAnimation).not.toHaveBeenCalled();
+    }
   });
 });

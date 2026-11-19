@@ -1,10 +1,11 @@
-import { ChevronRight } from 'lucide-react';
+import { ChevronRightIcon } from '@/registry/bases/base-ui/icons/lucide/chevron-right-icon';
 import { z } from 'zod';
 import type { ReactNode } from 'react';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeJSON, NodeViewProps, SerializeContext } from '@zeroxsolutions/editor-core/document/core/index';
 import type { ReactNodeCodec } from '../../../react-types';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { CHROME_ICON_CLASS, ChromeIcon, useChromeActive } from '../../ui/chrome-icon';
 
 /**
  * A toggle block — a collapsible/details section (like Notion's toggle or the
@@ -21,7 +22,8 @@ const toggleAttrs = z.object({
 });
 type ToggleAttrs = z.infer<typeof toggleAttrs>;
 
-function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<ToggleAttrs>) {
+export function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<ToggleAttrs>) {
+  const marker = useChromeActive();
   return (
     // Notion layout: the ▸ marker sits in the left gutter, inline with the first
     // body line — a flex row (`items-start`) puts the fixed-width chevron beside
@@ -33,12 +35,15 @@ function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<ToggleAttrs>
         aria-label={attrs.open ? 'Collapse' : 'Expand'}
         aria-expanded={attrs.open}
         contentEditable={false}
+        {...marker.handlers}
         onClick={() => updateAttrs({ open: !attrs.open })}
         className="text-muted-foreground hover:bg-accent mt-0.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md select-none"
       >
-        <span aria-hidden className={cn('inline-block leading-none transition-transform', attrs.open && 'rotate-90')}>
-          ▸
-        </span>
+        <ChromeIcon
+          icon={ChevronRightIcon}
+          active={marker.active}
+          className={cn(CHROME_ICON_CLASS, 'transition-transform', attrs.open && 'rotate-90')}
+        />
       </span>
       <div className={cn('min-w-0 flex-1', attrs.open ? 'block' : 'hidden')}>{children as ReactNode}</div>
     </div>
@@ -112,7 +117,7 @@ export function toggle(): EditorFeature {
     slash: [
       {
         id: 'toggle',
-        icon: <ChevronRight className="size-4" />,
+        icon: ChevronRightIcon,
         title: 'Toggle',
         description: 'Collapsible section',
         group: 'Blocks',

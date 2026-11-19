@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 
 import { IconMedia } from '@/registry/bases/base-ui/components/general/icon-media';
-import { EyeIcon } from '@/registry/bases/base-ui/icons/eye-icon';
-import { MessageSquareIcon } from '@/registry/bases/base-ui/icons/message-square-icon';
+import { EyeIcon } from '@/registry/bases/base-ui/icons/lucide/eye-icon';
+import { MessageSquareIcon } from '@/registry/bases/base-ui/icons/lucide/message-square-icon';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
-import { WrenchIcon } from '@/registry/bases/base-ui/icons/wrench-icon';
+import { WrenchIcon } from '@/registry/bases/base-ui/icons/lucide/wrench-icon';
 
 /** A chat-ability glyph named by its own caption, beside two named only through a composed tooltip. */
 function IconMediaDemo(): ReactNode {

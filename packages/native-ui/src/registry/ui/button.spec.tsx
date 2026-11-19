@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { Check } from 'lucide-react-native';
 import { readFileSync } from 'node:fs';
 import { registerCSS } from 'react-native-css-interop/test';
@@ -114,5 +114,25 @@ describe('Button', () => {
       const { width, height } = screen.getByRole('img', { name: 'Saved' }).props;
       expect({ width, height }).toEqual({ width: 20, height: 20 });
     });
+  });
+});
+
+describe('Button handlers', () => {
+  it('forwards onPressIn, onFocus and onBlur', async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    const onBlur = jest.fn();
+    await render(<Button aria-label="Copy" onPressIn={onPressIn} onFocus={onFocus} onBlur={onBlur} />);
+    const control = screen.getByRole('button', { name: 'Copy' });
+
+    await userEvent.setup().press(control);
+    // The host element holds the handlers Pressable wired from what it was given; a bare fireEvent would find
+    // the ones on the component above it and pass whatever the port dropped.
+    await act(() => control.props.onFocus({ nativeEvent: {} }));
+    await act(() => control.props.onBlur({ nativeEvent: {} }));
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });

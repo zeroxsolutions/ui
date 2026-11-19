@@ -1,5 +1,8 @@
 import { render, screen } from '@testing-library/react-native';
 import { Check } from 'lucide-react-native';
+import { createRef } from 'react';
+import type { IconHandle } from '../lib/icon-motion';
+import { CopyIcon } from '../icons/lucide/copy-icon';
 import { registerCSS } from 'react-native-css-interop/test';
 import { Icon, IconClassContext } from './icon';
 
@@ -8,6 +11,14 @@ describe('Icon', () => {
     registerCSS(
       '.text-red-500 { color: #ef4444; } .size-4 { width: 16px; height: 16px; } .size-5 { width: 20px; height: 20px; }',
     );
+  });
+
+  it('hands its ref to the glyph it draws', async () => {
+    const ref = createRef<IconHandle>();
+    await render(<Icon as={CopyIcon} ref={ref} className="size-4" />);
+
+    expect(ref.current?.startAnimation).toEqual(expect.any(Function));
+    expect(ref.current?.stopAnimation).toEqual(expect.any(Function));
   });
 
   it('renders the lucide icon it is given', async () => {

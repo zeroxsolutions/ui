@@ -24,6 +24,7 @@ const RELATIVE_IMPORT = /(from\s+)(['"])(\.{1,2}\/[^'"]+)\2/g;
 const FOLDER_ALIASES: ReadonlyMap<string, string> = new Map([
   ['ui', '@/components/ui'],
   ['components', '@/components'],
+  ['icons', '@/components/general'],
   ['lib', '@/lib'],
   ['hooks', '@/hooks'],
 ]);
@@ -166,8 +167,8 @@ export function emitSource(
  * Rewrites the relative imports of a registry source to the aliases shadcn maps onto the
  * consumer's `components.json`, such as `../lib/utils` to `@/lib/utils`.
  * @param file - the source's path under `src/registry`, such as `ui/button.tsx`
- * @throws {Error} `No alias for <specifier> in <file>` for an import outside `ui`, `components`, `lib` and
- * `hooks`
+ * @throws {Error} `No alias for <specifier> in <file>` for an import outside `ui`, `components`, `icons`,
+ * `lib` and `hooks`
  */
 export function aliasImports(source: string, file: string): string {
   return source.replace(RELATIVE_IMPORT, (_import, from: string, quote: string, specifier: string) => {

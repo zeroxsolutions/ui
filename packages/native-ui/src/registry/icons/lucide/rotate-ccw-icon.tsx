@@ -1,0 +1,63 @@
+// Adapted from lucide-animated (https://github.com/pqoqubbw/icons), MIT License, Copyright (c) 2024-2026 pqoqubbw.
+
+import type { ReactNode } from 'react';
+import Animated, { interpolate, useAnimatedProps } from 'react-native-reanimated';
+import Svg, { G, Path } from 'react-native-svg';
+import { transformProps, useIconMotion, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
+
+/** The handle a control starts and stops {@link RotateCcwIcon} through. */
+type RotateCcwIconHandle = IconHandle;
+
+const AnimatedG = Animated.createAnimatedComponent(G);
+
+/**
+ * How far the arrow turns, in degrees about the middle, and how small it gets as it does: the web twin's -50,
+ * which would sweep the arrowhead past the canvas, which react-native-svg clips, so it shrinks a little as it turns,
+ * as refresh-cw's arrows do.
+ */
+const TURN = -50;
+const SIZE = 0.86;
+
+/**
+ * Lucide's rotate ccw icon, which turns back part of the way round, shrinking a little, and returns, when started.
+ * Hidden from a screen reader: the control around it says what it does.
+ */
+function RotateCcwIcon({
+  ref,
+  color = 'currentColor',
+  size = 24,
+  strokeWidth = 2,
+  absoluteStrokeWidth: _absoluteStrokeWidth,
+  nonScalingStroke: _nonScalingStroke,
+  ...props
+}: AnimatedIconProps): ReactNode {
+  const progress = useIconMotion(ref);
+  const whole = useAnimatedProps(() => {
+    const size = interpolate(progress.value, [0, 0.5, 1], [1, SIZE, SIZE]);
+    return transformProps({ rotate: TURN * progress.value, scaleX: size, scaleY: size });
+  });
+
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
+      <AnimatedG animatedProps={whole}>
+        <Path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <Path d="M3 3v5h5" />
+      </AnimatedG>
+    </Svg>
+  );
+}
+
+export { RotateCcwIcon };
+export type { RotateCcwIconHandle };

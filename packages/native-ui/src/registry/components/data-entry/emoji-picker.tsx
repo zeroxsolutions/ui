@@ -1,17 +1,5 @@
 import { EMOJI_CATEGORIES, type EmojiDatum } from '@zeroxsolutions/fluent-emoji/catalog';
-import {
-  Clock,
-  Coffee,
-  Dumbbell,
-  Flag,
-  Hash,
-  Leaf,
-  Lightbulb,
-  Plane,
-  Search,
-  Smile,
-  type LucideIcon,
-} from 'lucide-react-native';
+import { Search } from 'lucide-react-native';
 import {
   createContext,
   useCallback,
@@ -21,10 +9,20 @@ import {
   useRef,
   useState,
   type ComponentProps,
+  type ComponentType,
   type ReactNode,
   type RefObject,
 } from 'react';
 import { FlatList, View } from 'react-native';
+import { ClockIcon } from '../../icons/lucide/clock-icon';
+import { CoffeeIcon } from '../../icons/lucide/coffee-icon';
+import { DumbbellIcon } from '../../icons/lucide/dumbbell-icon';
+import { FlagIcon } from '../../icons/lucide/flag-icon';
+import { HashIcon } from '../../icons/lucide/hash-icon';
+import { LeafIcon } from '../../icons/lucide/leaf-icon';
+import { LightbulbIcon } from '../../icons/lucide/lightbulb-icon';
+import { PlaneIcon } from '../../icons/lucide/plane-icon';
+import { FaceSlightlySmilingIcon } from '../../icons/lucide/face-slightly-smiling-icon';
 import {
   EMOJI_PICKER_COLUMNS,
   emojiPickerRows,
@@ -32,6 +30,7 @@ import {
   type EmojiPickerSection,
 } from '../../lib/emoji-picker-rows';
 import { FluentEmoji } from '../../lib/fluent-emoji';
+import { iconTrigger, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
 import { Button } from '../../ui/button';
@@ -41,16 +40,16 @@ import { TextClassContext } from '../../ui/text';
 import { ToggleGroup, ToggleGroupItem } from '../../ui/toggle-group';
 
 /** The nav's glyph per category. */
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  frequent: Clock,
-  smileys_people: Smile,
-  animals_nature: Leaf,
-  food_drink: Coffee,
-  travel_places: Plane,
-  activities: Dumbbell,
-  objects: Lightbulb,
-  symbols: Hash,
-  flags: Flag,
+const CATEGORY_ICONS: Record<string, ComponentType<AnimatedIconProps>> = {
+  frequent: ClockIcon,
+  smileys_people: FaceSlightlySmilingIcon,
+  animals_nature: LeafIcon,
+  food_drink: CoffeeIcon,
+  travel_places: PlaneIcon,
+  activities: DumbbellIcon,
+  objects: LightbulbIcon,
+  symbols: HashIcon,
+  flags: FlagIcon,
 };
 
 // The list hands these heights to FlatList's getItemLayout, which is how the nav scrolls to a header that has
@@ -327,7 +326,8 @@ function EmojiPickerEmpty(props: ComponentProps<typeof View>): ReactNode {
 /**
  * The category nav, a single-choice ToggleGroup joined across the picker's width: one icon item per category,
  * named by the category, which scrolls the list to that category's heading. The active category stays chosen
- * when pressed again. Give the group its own `aria-label`. Hidden while searching.
+ * when pressed again. An item's icon plays when the item is pressed in or focused. Give the group its own
+ * `aria-label`. Hidden while searching.
  */
 function EmojiPickerNav({
   className,
@@ -347,18 +347,26 @@ function EmojiPickerNav({
       {...props}
     >
       {navCategories.map((category) => (
-        <ToggleGroupItem
-          key={category.id}
-          value={category.id}
-          disabled={category.disabled}
-          aria-label={category.name}
-          // A toggle's minimum width and padding would push nine items past the picker; flex-1 shares it instead.
-          className="min-w-0 flex-1 px-0"
-        >
-          <Icon as={CATEGORY_ICONS[category.id] ?? Smile} />
-        </ToggleGroupItem>
+        <EmojiPickerNavItem key={category.id} {...category} />
       ))}
     </ToggleGroup>
+  );
+}
+
+/** One category of the nav, drawing the category's icon, which it plays when pressed in or focused. */
+function EmojiPickerNavItem({ id, name, disabled }: { id: string; name: string; disabled: boolean }): ReactNode {
+  const icon = useRef<IconHandle>(null);
+  return (
+    <ToggleGroupItem
+      value={id}
+      disabled={disabled}
+      aria-label={name}
+      // A toggle's minimum width and padding would push nine items past the picker; flex-1 shares it instead.
+      className="min-w-0 flex-1 px-0"
+      {...iconTrigger([icon], {})}
+    >
+      <Icon as={CATEGORY_ICONS[id] ?? FaceSlightlySmilingIcon} ref={icon} />
+    </ToggleGroupItem>
   );
 }
 

@@ -22,6 +22,20 @@ import {
   type AvatarPickerValue,
 } from './avatar-picker';
 import { EmojiPickerContent, EmojiPickerSearch } from './emoji-picker';
+import { focus, handleOf } from '../../icons/animated-icon.testing';
+import { CheckIcon } from '../../icons/lucide/check-icon';
+import { TrashIcon } from '../../icons/lucide/trash-icon';
+
+jest.mock('../../icons/lucide/check-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('check-icon'),
+);
+jest.mock('../../icons/lucide/trash-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('trash-icon'),
+);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 // The photo library is a native module Jest has no device for; the spec answers what the system picker would.
 jest.mock('expo-image-picker', () => ({ launchImageLibraryAsync: jest.fn() }));
@@ -331,5 +345,36 @@ describe('AvatarPicker', () => {
     expect(onUpload).not.toHaveBeenCalled();
     expect(onValueChange).not.toHaveBeenCalled();
     expect(chooseImage()).toBeEnabled();
+  });
+});
+
+describe('AvatarPicker motion', () => {
+  it("starts the remove button's icon on press-in and on focus", async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    await render(
+      <AvatarPicker value={{ emoji: '\u{1F600}' }} onValueChange={jest.fn()}>
+        <AvatarPickerRemoveButton onPressIn={onPressIn} onFocus={onFocus} />
+      </AvatarPicker>,
+    );
+    const control = screen.getByRole('button', { name: 'Remove avatar' });
+
+    await userEvent.setup().press(control);
+    await focus(control);
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(handleOf(TrashIcon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(TrashIcon).stopAnimation).not.toHaveBeenCalled();
+  });
+
+  it('plays the selected check once when a swatch is picked, and not for the swatch selected from the start', async () => {
+    await render(<Editor initial={{ color: '#6366f1' }} tab="color" />);
+    expect(handleOf(CheckIcon).startAnimation).not.toHaveBeenCalled();
+
+    await userEvent.setup().press(screen.getByRole('button', { name: '#ec4899' }));
+
+    expect(screen.getByRole('button', { name: '#ec4899' })).toBeSelected();
+    expect(handleOf(CheckIcon).startAnimation).toHaveBeenCalledTimes(1);
   });
 });

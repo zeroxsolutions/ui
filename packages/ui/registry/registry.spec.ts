@@ -54,8 +54,8 @@ const FAMILY = /^registry\/bases\/base-ui\/(?:components\/([^/]+)|(blocks))\/([^
 const PUBLISHED = ['registry:component', 'registry:block'];
 /** A document editor feature's own folder, which its item's first file sits in; the `features/index.ts` barrel is none. */
 const FEATURE = /^registry\/bases\/base-ui\/editor\/document\/features\/[^/]+\//;
-/** A file under icons/ is an animated icon this registry owns, published as the item of its file name. */
-const HOUSE_ICON = /^registry\/bases\/base-ui\/icons\/([^/]+)\.tsx$/;
+/** A file under icons/<set>/ is an animated icon this registry owns, published as the item `<set>-<file name>`. */
+const HOUSE_ICON = /^registry\/bases\/base-ui\/icons\/([a-z0-9-]+)\/([^/]+)\.tsx$/;
 
 /** The specifiers a source file imports; a type-only import of a package is left out, since nothing installs for it. */
 function importsOf(path: string): string[] {
@@ -492,17 +492,26 @@ describe('registry.json', () => {
     expect(named.map((item) => item.name)).toEqual([]);
   });
 
-  it('publishes each icon under icons/ as the item of its name, landing in the consumer components/general/', () => {
-    const icons = readdirSync(join(APP, BASE, 'icons'))
-      .filter((file) => file.endsWith('.tsx') && !file.endsWith('.spec.tsx'))
-      .map((file) => file.slice(0, -'.tsx'.length))
-      .sort();
-    expect(icons).toHaveLength(38);
-    const problems = icons.flatMap((name) => {
+  it('publishes each icon under icons/<set>/ as the item <set>-<file>, landing in the consumer components/general/<set>/', () => {
+    const iconsDir = join(APP, BASE, 'icons');
+    const icons = readdirSync(iconsDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .flatMap((set) =>
+        readdirSync(join(iconsDir, set.name))
+          .filter((file) => file.endsWith('.tsx') && !file.endsWith('.spec.tsx'))
+          .map((file) => ({ set: set.name, file: file.slice(0, -'.tsx'.length) })),
+      );
+    expect(icons.length).toBeGreaterThan(0);
+    const problems = icons.flatMap(({ set, file }) => {
+      const name = `${set}-${file}`;
       const item = REGISTRY.items.find((candidate) => candidate.name === name);
       if (item === undefined) return [`${name}: no item`];
       const expected = [
-        { path: `${BASE}/icons/${name}.tsx`, type: 'registry:ui', target: `components/general/${name}.tsx` },
+        {
+          path: `${BASE}/icons/${set}/${file}.tsx`,
+          type: 'registry:ui',
+          target: `components/general/${set}/${file}.tsx`,
+        },
       ];
       return [
         ...(item.type === 'registry:ui' ? [] : [`${name}: type ${item.type}`]),
@@ -510,6 +519,38 @@ describe('registry.json', () => {
       ];
     });
     expect(problems).toEqual([]);
+  });
+
+  it('keeps no icon directly in icons/, outside a set', () => {
+    const loose = readdirSync(join(APP, BASE, 'icons'), { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith('.tsx') && !entry.name.endsWith('.spec.tsx'))
+      .map((entry) => entry.name);
+    expect(loose).toEqual([]);
+  });
+
+  it('names each ui item shipping a file under icons/ <set>-<file> after the icons/<set>/<file>.tsx it is', () => {
+    const icon = new RegExp(`^${BASE}/icons/([a-z0-9-]+)/([a-z0-9-]+)\\.tsx$`);
+    const problems = REGISTRY.items
+      .filter((item) => item.type === 'registry:ui')
+      .flatMap((item) =>
+        item.files
+          .filter((file) => file.path.startsWith(`${BASE}/icons/`))
+          .flatMap((file) => {
+            const match = icon.exec(file.path);
+            if (match === null) return [`${item.name}: ${file.path} is not icons/<set>/<file>.tsx`];
+            const [, set, name] = match;
+            return item.name === `${set}-${name}` ? [] : [`${item.name}: should be ${set}-${name}`];
+          }),
+      );
+    expect(problems).toEqual([]);
+  });
+
+  it('has copy-button name the lucide copy icon by its item and import it from the lucide set', () => {
+    const item = REGISTRY.items.find((candidate) => candidate.name === 'copy-button');
+    if (item === undefined) throw new Error('no copy-button item');
+    expect(item.registryDependencies).toContain(`${ITEM_PREFIX}lucide-copy-icon`);
+    const source = readFileSync(join(APP, item.files[0].path), 'utf8');
+    expect(source).toContain('@/registry/bases/base-ui/icons/lucide/copy-icon');
   });
 
   it('declares exactly the files, upstream items and packages each item imports', () => {
@@ -579,7 +620,7 @@ describe('registry.json', () => {
 const treeItem: RegistryItem = {
   name: 'tree-item',
   type: 'registry:component',
-  registryDependencies: ['@shadcn/button', '@shadcn/input', '@shadcn/utils', `${ITEM_PREFIX}chevron-right-icon`],
+  registryDependencies: ['@shadcn/button', '@shadcn/input', '@shadcn/utils', `${ITEM_PREFIX}lucide-chevron-right-icon`],
   files: [
     { path: `${BASE}/components/data-display/tree-item.tsx`, type: 'registry:component' },
     { path: `${BASE}/hooks/use-prefers-reduced-motion.ts`, type: 'registry:hook' },
@@ -642,7 +683,7 @@ describe('declarationProblems', () => {
   it('names an animated icon by its house item name', () => {
     const item = { ...treeItem, registryDependencies: treeItem.registryDependencies?.slice(0, -1) };
     expect(declarationProblems(item, ICON_OWNERS)).toEqual([
-      'tree-item: registryDependencies lacks @zui/chevron-right-icon',
+      'tree-item: registryDependencies lacks @zui/lucide-chevron-right-icon',
     ]);
   });
 
@@ -679,11 +720,11 @@ describe('declarationProblems', () => {
     const copyButton: RegistryItem = {
       name: 'copy-button',
       type: 'registry:component',
-      registryDependencies: ['@shadcn/button', '@shadcn/check', `${ITEM_PREFIX}copy-icon`],
+      registryDependencies: ['@shadcn/button', '@shadcn/check', `${ITEM_PREFIX}lucide-copy-icon`],
       files: [{ path: `${BASE}/components/feedback/copy-button.tsx`, type: 'registry:component' }],
     };
     expect(declarationProblems(copyButton, ICON_OWNERS)).toEqual([
-      `copy-button: registryDependencies lacks ${ITEM_PREFIX}check-icon`,
+      `copy-button: registryDependencies lacks ${ITEM_PREFIX}lucide-check-icon`,
       'copy-button: registryDependencies declares @shadcn/check, which its files do not import',
     ]);
   });

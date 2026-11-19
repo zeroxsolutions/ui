@@ -1,4 +1,4 @@
-import { Frame } from 'lucide-react';
+import { FrameIcon } from '@/registry/bases/base-ui/icons/lucide/frame-icon';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
@@ -137,7 +137,7 @@ export function embed(): EditorFeature {
     slash: [
       {
         id: 'embed',
-        icon: <Frame className="size-4" />,
+        icon: FrameIcon,
         title: 'Embed',
         description: 'Embed a URL',
         group: 'Blocks',

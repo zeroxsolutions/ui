@@ -1,8 +1,12 @@
+'use client';
+
+import { mergeProps } from '@base-ui/react/merge-props';
 import * as React from 'react';
-import { Trash2 } from 'lucide-react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
+import { TrashIcon } from '@/registry/bases/base-ui/icons/lucide/trash-icon';
+import { useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { Item, ItemActions, ItemContent, ItemMedia } from '@/registry/bases/base-ui/ui/item';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import { Skeleton } from '@/registry/bases/base-ui/ui/skeleton';
@@ -76,10 +80,25 @@ function ModelListContent({ className, children, ...props }: React.ComponentProp
 }
 
 /** The ghost remove button for one model item, labelled "Remove model" unless an `aria-label` is given; `children` replace its trash icon. */
-function ModelListRemoveButton({ children, ...props }: React.ComponentProps<typeof Button>): React.ReactNode {
+function ModelListRemoveButton({
+  onPointerEnter,
+  onPointerLeave,
+  onFocus,
+  onBlur,
+  children,
+  ...props
+}: React.ComponentProps<typeof Button>): React.ReactNode {
+  const { ref, handlers } = useAnimatedIcon();
   return (
-    <Button data-slot="model-list-remove-button" aria-label="Remove model" variant="ghost" size="icon-sm" {...props}>
-      {children ?? <Trash2 />}
+    <Button
+      data-slot="model-list-remove-button"
+      aria-label="Remove model"
+      variant="ghost"
+      size="icon-sm"
+      {...props}
+      {...mergeProps<'button'>(handlers, { onPointerEnter, onPointerLeave, onFocus, onBlur })}
+    >
+      {children ?? <TrashIcon ref={ref} aria-hidden />}
     </Button>
   );
 }

@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { EditorContent } from '@tiptap/react';
-import { GripVertical, Plus } from 'lucide-react';
+import {
+  GripVerticalIcon,
+  type GripVerticalIconHandle,
+} from '@/registry/bases/base-ui/icons/lucide/grip-vertical-icon';
+import { PlusIcon, type PlusIconHandle } from '@/registry/bases/base-ui/icons/lucide/plus-icon';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/create-document-editor';
 import type { Delta } from '@zeroxsolutions/editor-core/document/core/types/delta';
@@ -110,6 +114,20 @@ export function Editor({ features, content, editable = true, className, onReady,
   // the race is gone. `display: contents` keeps the span out of the handle's
   // layout, so the grip sits exactly where it did before.
   const [gripHost, setGripHost] = useState<HTMLElement | null>(null);
+  const gripRef = useRef<GripVerticalIconHandle>(null);
+  const plusRef = useRef<PlusIconHandle>(null);
+  // The handle is the extension's own node and takes no focus, so only the pointer reaches the grip, through listeners.
+  useEffect(() => {
+    if (!handleEl) return;
+    const start = () => gripRef.current?.startAnimation();
+    const stop = () => gripRef.current?.stopAnimation();
+    handleEl.addEventListener('pointerenter', start);
+    handleEl.addEventListener('pointerleave', stop);
+    return () => {
+      handleEl.removeEventListener('pointerenter', start);
+      handleEl.removeEventListener('pointerleave', stop);
+    };
+  }, [handleEl]);
   useEffect(() => {
     if (!handleEl) {
       setGripHost(null);
@@ -155,6 +173,36 @@ export function Editor({ features, content, editable = true, className, onReady,
     return () => observer.disconnect();
   }, [handleEl]);
 
+  // The "+" is portaled into a wrapper we create, for the reason the grip's is: React removes it from
+  // our node, never from the editor root, whose children the editor's own teardown removes first.
+  const [plusHost, setPlusHost] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!rootEl) return;
+    const host = document.createElement('span');
+    host.style.display = 'contents';
+    rootEl.appendChild(host);
+    setPlusHost(host);
+    return () => {
+      setPlusHost(null);
+      host.remove();
+    };
+  }, [rootEl]);
+
+  // The extension hides its handle, and so the "+", whenever the pointer leaves the editor for anything
+  // that is not the handle node itself. That includes the "+" a pointer is crossing to and the grip we
+  // render inside the handle, so a pointer landing on the grip would hide the handle under it and show it
+  // again on the next move. Keep that mouseout from reaching the extension, in the capture phase, while
+  // it lands on either.
+  useEffect(() => {
+    if (!rootEl) return;
+    const keepHandle = (event: MouseEvent) => {
+      const to = event.relatedTarget;
+      if (to instanceof Element && to.closest('[data-editor-add], .drag-handle')) event.stopPropagation();
+    };
+    rootEl.addEventListener('mouseout', keepHandle, true);
+    return () => rootEl.removeEventListener('mouseout', keepHandle, true);
+  }, [rootEl]);
+
   // Grayout-while-dragging: the block drag handle is a *sibling* of the editor
   // DOM (the extension appends it next to `.ProseMirror`), so a handle-initiated
   // drag's native `dragstart` never bubbles through `.ProseMirror` and the
@@ -198,8 +246,8 @@ export function Editor({ features, content, editable = true, className, onReady,
           className,
         )}
       />
-      {gripHost && createPortal(<GripVertical size={16} aria-hidden />, gripHost)}
-      {rootEl &&
+      {gripHost && createPortal(<GripVerticalIcon ref={gripRef} size={16} aria-hidden />, gripHost)}
+      {plusHost &&
         plus &&
         !plus.hidden &&
         createPortal(
@@ -208,6 +256,10 @@ export function Editor({ features, content, editable = true, className, onReady,
             aria-label="Insert block below"
             draggable={false}
             data-editor-add
+            onPointerEnter={() => plusRef.current?.startAnimation()}
+            onPointerLeave={() => plusRef.current?.stopAnimation()}
+            onFocus={() => plusRef.current?.startAnimation()}
+            onBlur={() => plusRef.current?.stopAnimation()}
             // Keep the editor focused (so `insertBlockAt` has a live selection to
             // work from) and don't let the press bubble into a handle drag.
             onMouseDown={(event) => {
@@ -225,9 +277,9 @@ export function Editor({ features, content, editable = true, className, onReady,
             className="text-muted-foreground hover:bg-accent fixed z-40 flex size-6 items-center justify-center rounded-md opacity-55 transition hover:opacity-100"
             style={{ top: plus.top, left: plus.left - 22 }}
           >
-            <Plus size={16} aria-hidden />
+            <PlusIcon ref={plusRef} size={16} aria-hidden />
           </button>,
-          rootEl,
+          plusHost,
         )}
     </>
   );

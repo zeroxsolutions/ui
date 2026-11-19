@@ -1,6 +1,17 @@
-import { Circle, CircleCheck, CircleX } from 'lucide-react-native';
-import { Children, createContext, isValidElement, useContext, type ComponentProps, type ReactNode } from 'react';
+import {
+  Children,
+  createContext,
+  isValidElement,
+  useContext,
+  useRef,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import { View } from 'react-native';
+import { CircleCheckIcon } from '../../icons/lucide/circle-check-icon';
+import { CircleIcon } from '../../icons/lucide/circle-icon';
+import { CircleXIcon } from '../../icons/lucide/circle-x-icon';
+import { usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
 import { Badge } from '../../ui/badge';
@@ -15,9 +26,9 @@ const PermissionCardContext = createContext<PermissionCardStatusValue>('pending'
 
 /** The icon the status badge draws for each status. */
 const STATUS_ICONS = {
-  pending: Circle,
-  approved: CircleCheck,
-  denied: CircleX,
+  pending: CircleIcon,
+  approved: CircleCheckIcon,
+  denied: CircleXIcon,
 } as const satisfies Readonly<Record<PermissionCardStatusValue, unknown>>;
 
 type PermissionCardProps = ComponentProps<typeof Card> & {
@@ -70,7 +81,8 @@ function PermissionCardTitle({ className, ...props }: ComponentProps<typeof Card
 /**
  * A Badge, `outline` unless the caller passes another `variant` (`destructive` for a denied request): its
  * children are the status word, set in a Text when a string, and its icon follows the card's status and is
- * hidden from a screen reader, which reads the word.
+ * hidden from a screen reader, which reads the word. The icon plays once as the card turns to its status, and not
+ * when the card is first drawn.
  */
 function PermissionCardStatus({
   variant = 'outline',
@@ -79,10 +91,15 @@ function PermissionCardStatus({
   ...props
 }: ComponentProps<typeof Badge>): ReactNode {
   const status = useContext(PermissionCardContext);
+  // One icon is drawn at a time, so the ref holds whichever the status shows.
+  const icon = useRef<IconHandle>(null);
+  usePlayOnReach(icon, status === 'pending');
+  usePlayOnReach(icon, status === 'approved');
+  usePlayOnReach(icon, status === 'denied');
   return (
     <Badge variant={variant} className={className} {...props}>
       <View aria-hidden>
-        <Icon as={STATUS_ICONS[status]} />
+        <Icon as={STATUS_ICONS[status]} ref={icon} />
       </View>
       {asText(children)}
     </Badge>

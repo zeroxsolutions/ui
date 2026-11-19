@@ -1,19 +1,17 @@
-import {
-  Bold,
-  Code,
-  Heading1,
-  Heading2,
-  Heading3,
-  Highlighter,
-  Italic,
-  List,
-  ListOrdered,
-  ListTodo,
-  Minus,
-  Strikethrough,
-  TextQuote,
-  Underline,
-} from 'lucide-react';
+import { LetterBIcon } from '@/registry/bases/base-ui/icons/lucide/letter-b-icon';
+import { CodeIcon } from '@/registry/bases/base-ui/icons/lucide/code-icon';
+import { Heading1Icon } from '@/registry/bases/base-ui/icons/lucide/heading-1-icon';
+import { Heading2Icon } from '@/registry/bases/base-ui/icons/lucide/heading-2-icon';
+import { Heading3Icon } from '@/registry/bases/base-ui/icons/lucide/heading-3-icon';
+import { HighlighterIcon } from '@/registry/bases/base-ui/icons/lucide/highlighter-icon';
+import { ItalicIcon } from '@/registry/bases/base-ui/icons/lucide/italic-icon';
+import { ListIcon } from '@/registry/bases/base-ui/icons/lucide/list-icon';
+import { ListOrderedIcon } from '@/registry/bases/base-ui/icons/lucide/list-ordered-icon';
+import { ListTodoIcon } from '@/registry/bases/base-ui/icons/lucide/list-todo-icon';
+import { MinusIcon } from '@/registry/bases/base-ui/icons/lucide/minus-icon';
+import { StrikethroughIcon } from '@/registry/bases/base-ui/icons/lucide/strikethrough-icon';
+import { TextQuoteIcon } from '@/registry/bases/base-ui/icons/lucide/text-quote-icon';
+import { UnderlineIcon } from '@/registry/bases/base-ui/icons/lucide/underline-icon';
 import type { BubbleItem, SlashItem, ToolbarItem } from '@zeroxsolutions/editor-core/document/core/index';
 
 /** Slash-menu insert items for the standard blocks. */
@@ -22,7 +20,7 @@ export const standardSlashItems: SlashItem[] = [
     id: 'h1',
     title: 'Heading 1',
     group: 'Basic',
-    icon: <Heading1 className="size-4" />,
+    icon: Heading1Icon,
     keywords: ['h1', 'title'],
     command: 'toggleHeading',
     args: { level: 1 },
@@ -31,7 +29,7 @@ export const standardSlashItems: SlashItem[] = [
     id: 'h2',
     title: 'Heading 2',
     group: 'Basic',
-    icon: <Heading2 className="size-4" />,
+    icon: Heading2Icon,
     keywords: ['h2', 'subtitle'],
     command: 'toggleHeading',
     args: { level: 2 },
@@ -40,7 +38,7 @@ export const standardSlashItems: SlashItem[] = [
     id: 'h3',
     title: 'Heading 3',
     group: 'Basic',
-    icon: <Heading3 className="size-4" />,
+    icon: Heading3Icon,
     keywords: ['h3'],
     command: 'toggleHeading',
     args: { level: 3 },
@@ -49,7 +47,7 @@ export const standardSlashItems: SlashItem[] = [
     id: 'bulletList',
     title: 'Bullet list',
     group: 'Basic',
-    icon: <List className="size-4" />,
+    icon: ListIcon,
     keywords: ['ul', 'unordered', 'list'],
     command: 'toggleBulletList',
   },
@@ -57,7 +55,7 @@ export const standardSlashItems: SlashItem[] = [
     id: 'orderedList',
     title: 'Numbered list',
     group: 'Basic',
-    icon: <ListOrdered className="size-4" />,
+    icon: ListOrderedIcon,
     keywords: ['ol', 'ordered', 'number'],
     command: 'toggleOrderedList',
   },
@@ -65,7 +63,7 @@ export const standardSlashItems: SlashItem[] = [
     id: 'taskList',
     title: 'To-do list',
     group: 'Basic',
-    icon: <ListTodo className="size-4" />,
+    icon: ListTodoIcon,
     keywords: ['task', 'todo', 'checkbox'],
     command: 'toggleTaskList',
   },
@@ -73,7 +71,7 @@ export const standardSlashItems: SlashItem[] = [
     id: 'blockquote',
     title: 'Quote',
     group: 'Basic',
-    icon: <TextQuote className="size-4" />,
+    icon: TextQuoteIcon,
     keywords: ['quote', 'blockquote'],
     command: 'toggleBlockquote',
   },
@@ -81,7 +79,7 @@ export const standardSlashItems: SlashItem[] = [
     id: 'divider',
     title: 'Divider',
     group: 'Basic',
-    icon: <Minus className="size-4" />,
+    icon: MinusIcon,
     keywords: ['hr', 'rule', 'divider', 'separator'],
     command: 'setHorizontalRule',
   },
@@ -92,7 +90,7 @@ export const standardToolbarItems: ToolbarItem[] = [
   {
     id: 'bold',
     title: 'Bold',
-    icon: <Bold className="size-4" />,
+    icon: LetterBIcon,
     command: 'toggleMark',
     args: { name: 'bold' },
     activeWhen: 'bold',
@@ -100,7 +98,7 @@ export const standardToolbarItems: ToolbarItem[] = [
   {
     id: 'italic',
     title: 'Italic',
-    icon: <Italic className="size-4" />,
+    icon: ItalicIcon,
     command: 'toggleMark',
     args: { name: 'italic' },
     activeWhen: 'italic',
@@ -108,7 +106,7 @@ export const standardToolbarItems: ToolbarItem[] = [
   {
     id: 'underline',
     title: 'Underline',
-    icon: <Underline className="size-4" />,
+    icon: UnderlineIcon,
     command: 'toggleMark',
     args: { name: 'underline' },
     activeWhen: 'underline',
@@ -116,7 +114,7 @@ export const standardToolbarItems: ToolbarItem[] = [
   {
     id: 'strike',
     title: 'Strikethrough',
-    icon: <Strikethrough className="size-4" />,
+    icon: StrikethroughIcon,
     command: 'toggleMark',
     args: { name: 'strike' },
     activeWhen: 'strike',
@@ -124,7 +122,7 @@ export const standardToolbarItems: ToolbarItem[] = [
   {
     id: 'code',
     title: 'Inline code',
-    icon: <Code className="size-4" />,
+    icon: CodeIcon,
     command: 'toggleMark',
     args: { name: 'code' },
     activeWhen: 'code',
@@ -132,7 +130,7 @@ export const standardToolbarItems: ToolbarItem[] = [
   {
     id: 'highlight',
     title: 'Highlight',
-    icon: <Highlighter className="size-4" />,
+    icon: HighlighterIcon,
     command: 'toggleMark',
     args: { name: 'highlight' },
     activeWhen: 'highlight',

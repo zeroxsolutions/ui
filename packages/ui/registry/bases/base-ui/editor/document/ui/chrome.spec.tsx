@@ -1,7 +1,12 @@
 import { act, render, fireEvent, cleanup } from '@testing-library/react';
+import * as React from 'react';
+import type { ComponentProps } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { EditorSelection, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { standardKit, callout } from '../features/index';
+import { Heading1Icon } from '@/registry/bases/base-ui/icons/lucide/heading-1-icon';
+import { Heading2Icon } from '@/registry/bases/base-ui/icons/lucide/heading-2-icon';
+import { BlockMenu } from './block-menu';
 import { BubbleMenu } from './bubble-menu';
 import { EditorToolbar } from './editor-toolbar';
 import { SlashMenu } from './slash-menu';
@@ -11,6 +16,32 @@ import {
   filterSlashItems,
   groupByHeading,
 } from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
+
+const handles = vi.hoisted(() => ({
+  bold: { startAnimation: vi.fn(), stopAnimation: vi.fn() },
+  heading1: { startAnimation: vi.fn(), stopAnimation: vi.fn() },
+  heading2: { startAnimation: vi.fn(), stopAnimation: vi.fn() },
+}));
+
+function mockedIcon(handle: { startAnimation: () => void; stopAnimation: () => void }) {
+  return React.forwardRef<unknown, ComponentProps<'span'>>((props, ref) => {
+    React.useImperativeHandle(ref, () => handle);
+    return <span aria-hidden={props['aria-hidden']} className={props.className} />;
+  });
+}
+
+vi.mock('@/registry/bases/base-ui/icons/lucide/letter-b-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/letter-b-icon')>()),
+  LetterBIcon: mockedIcon(handles.bold),
+}));
+vi.mock('@/registry/bases/base-ui/icons/lucide/heading-1-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/heading-1-icon')>()),
+  Heading1Icon: mockedIcon(handles.heading1),
+}));
+vi.mock('@/registry/bases/base-ui/icons/lucide/heading-2-icon', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/registry/bases/base-ui/icons/lucide/heading-2-icon')>()),
+  Heading2Icon: mockedIcon(handles.heading2),
+}));
 
 // SlashMenu's popover renders upstream ScrollArea, which measures its
 // viewport in a `queueMicrotask` its layout effect schedules on mount,
@@ -23,6 +54,10 @@ async function settle(): Promise<void> {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  for (const handle of Object.values(handles)) {
+    handle.startAnimation.mockClear();
+    handle.stopAnimation.mockClear();
+  }
 });
 
 function fakeEditor(
@@ -129,6 +164,32 @@ describe('EditorToolbar', () => {
     const { getByLabelText } = render(<EditorToolbar editor={fakeEditor()} items={items} />);
     expect(getByLabelText('Bold').getAttribute('aria-pressed')).toBe('true');
     expect(getByLabelText('Italic').getAttribute('aria-pressed')).toBe('false');
+  });
+});
+
+describe('EditorToolbar icons', () => {
+  const items = collectUiContributions([standardKit()]).toolbar;
+
+  it("starts a toolbar button's icon on pointer enter and on focus, and stops it on leave and blur", () => {
+    const { getByLabelText } = render(<EditorToolbar editor={fakeEditor()} items={items} />);
+    const bold = getByLabelText('Bold');
+    expect(handles.bold.startAnimation).not.toHaveBeenCalled();
+
+    fireEvent.pointerEnter(bold);
+    expect(handles.bold.startAnimation).toHaveBeenCalledTimes(1);
+    fireEvent.pointerLeave(bold);
+    expect(handles.bold.stopAnimation).toHaveBeenCalledTimes(1);
+
+    fireEvent.focus(bold);
+    expect(handles.bold.startAnimation).toHaveBeenCalledTimes(2);
+    fireEvent.blur(bold);
+    expect(handles.bold.stopAnimation).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders an element icon a feature passes, without a handle', () => {
+    const plain = [{ id: 'plain', title: 'Plain', icon: <svg data-testid="plain" />, command: 'noop' }];
+    const { getByTestId } = render(<EditorToolbar editor={fakeEditor()} items={plain} />);
+    expect(getByTestId('plain')).toBeDefined();
   });
 });
 
@@ -266,5 +327,54 @@ describe('SlashMenu', () => {
     fireEvent.click(getByText('Quote'));
     expect(run).toHaveBeenCalledWith('deleteRange', { from: 1, to: 6 });
     expect(run).toHaveBeenCalledWith('toggleBlockquote', undefined);
+  });
+});
+
+describe('SlashMenu icons', () => {
+  const items = collectUiContributions([standardKit()]).slash;
+
+  it("starts a slash row's icon when the arrow keys highlight it", async () => {
+    const editor = fakeEditor(
+      vi.fn(() => true),
+      { from: 1, to: 1, empty: true },
+      { query: 'head', from: 0, to: 5 },
+    );
+    render(<SlashMenu editor={editor} items={items} />);
+    await settle();
+    expect(handles.heading1.startAnimation).toHaveBeenCalledTimes(1);
+    expect(handles.heading2.startAnimation).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(document, { key: 'ArrowDown' });
+    expect(handles.heading2.startAnimation).toHaveBeenCalledTimes(1);
+    expect(handles.heading1.stopAnimation).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('BlockMenu icons', () => {
+  it("starts a row's icon when the arrow keys highlight it, because Base UI moves focus to the highlighted row", async () => {
+    const container = document.createElement('div');
+    container.innerHTML = '<div class="ProseMirror"><p>text</p></div>';
+    document.body.append(container);
+    const items = [
+      { id: 'one', title: 'One', icon: Heading1Icon, command: 'x' },
+      { id: 'two', title: 'Two', icon: Heading2Icon, command: 'x' },
+    ];
+    const { getByLabelText } = render(<BlockMenu editor={fakeEditor()} items={items} container={container} />);
+    fireEvent.mouseMove(container);
+    await settle();
+    fireEvent.click(getByLabelText('Block actions'));
+    await settle();
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-item"]'));
+    expect(rows).toHaveLength(2);
+
+    await act(async () => rows[0].focus());
+    expect(handles.heading1.startAnimation).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(rows[0], { key: 'ArrowDown' });
+    await settle();
+    // The highlight is the focus: the second row holds it, its icon started, the first one stopped.
+    expect(document.activeElement).toBe(rows[1]);
+    expect(rows[1].hasAttribute('data-highlighted')).toBe(true);
+    expect(handles.heading2.startAnimation).toHaveBeenCalledTimes(1);
+    expect(handles.heading1.stopAnimation).toHaveBeenCalledTimes(1);
   });
 });

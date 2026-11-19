@@ -1,4 +1,6 @@
-import { Check, Trash2 } from 'lucide-react';
+'use client';
+
+import { mergeProps } from '@base-ui/react/merge-props';
 import * as React from 'react';
 
 import { Avatar, AvatarImage } from '@/registry/bases/base-ui/ui/avatar';
@@ -9,6 +11,9 @@ import { Input } from '@/registry/bases/base-ui/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
 import { TabsContent } from '@/registry/bases/base-ui/ui/tabs';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/lucide/check-icon';
+import { TrashIcon } from '@/registry/bases/base-ui/icons/lucide/trash-icon';
+import { useAnimatedIcon, type AnimatedIconHandle } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { EmojiPicker } from '@/registry/bases/base-ui/components/data-entry/emoji-picker';
 
 interface AvatarPickerValue {
@@ -144,11 +149,16 @@ function AvatarPickerContent({
  */
 function AvatarPickerRemoveButton({
   onClick,
+  onPointerEnter,
+  onPointerLeave,
+  onFocus,
+  onBlur,
   children,
   'aria-label': ariaLabel = 'Remove avatar',
   ...props
 }: React.ComponentProps<typeof Button>): React.ReactNode {
   const { remove } = useAvatarPicker();
+  const { ref, handlers } = useAnimatedIcon();
   return (
     <Button
       data-slot="avatar-picker-remove-button"
@@ -161,8 +171,9 @@ function AvatarPickerRemoveButton({
         if (!event.defaultPrevented) remove();
       }}
       {...props}
+      {...mergeProps<'button'>(handlers, { onPointerEnter, onPointerLeave, onFocus, onBlur })}
     >
-      {children ?? <Trash2 />}
+      {children ?? <TrashIcon ref={ref} aria-hidden />}
     </Button>
   );
 }
@@ -421,6 +432,20 @@ function avatarPickerCheckColor(swatch: string): string {
   return 1.05 / (luminance + 0.05) >= (luminance + 0.05) / 0.053 ? '#ffffff' : '#0a0a0a';
 }
 
+/**
+ * The check on a pressed swatch, drawn in as the reader presses it, and not drawn in when the group is
+ * first drawn with the swatch already pressed. It sits in the swatch's own box, so it is sized here at
+ * the 16px the swatch gave its lucide check.
+ */
+function AvatarPickerSwatchCheck({ animate }: { animate: boolean }): React.ReactNode {
+  const ref = React.useRef<AnimatedIconHandle>(null);
+  const [playOnMount] = React.useState(animate);
+  React.useEffect(() => {
+    if (playOnMount) ref.current?.startAnimation();
+  }, [playOnMount]);
+  return <CheckIcon ref={ref} aria-hidden size={16} />;
+}
+
 /** A grid of colour swatches; a click sets the avatar's colour. Name the group with an `aria-label`. */
 function AvatarPickerColorGroup({
   className,
@@ -441,6 +466,9 @@ function AvatarPickerColorGroup({
   ...props
 }: AvatarPickerColorGroupProps): React.ReactNode {
   const { value, setColor } = useAvatarPicker();
+  // A check that mounts with the group was pressed before the reader came; one that mounts later was pressed by them.
+  const [drawn, setDrawn] = React.useState(false);
+  React.useEffect(() => setDrawn(true), []);
   return (
     <div
       data-slot="avatar-picker-color-group"
@@ -458,7 +486,7 @@ function AvatarPickerColorGroup({
           style={{ backgroundColor: c, color: avatarPickerCheckColor(c) }}
           className="focus-visible:ring-ring/50 flex size-8 items-center justify-center rounded-full outline-none focus-visible:ring-3"
         >
-          {value.color === c && <Check aria-hidden className="size-4" />}
+          {value.color === c && <AvatarPickerSwatchCheck animate={drawn} />}
         </button>
       ))}
     </div>

@@ -3,7 +3,7 @@ import type { SiteNavItem } from '@zeroxsolutions/ui/site/types/site-nav-item';
 import { editorDocsRoute } from '@zeroxsolutions/editor-docs-web/routes';
 
 import { nativeDocsRoute } from '@/routes/native-paths';
-import { webBlocksRoute, webComponentsRoute, webDocsRoute, webHomeRoute } from '@/routes/web-paths';
+import { webBlocksRoute, webComponentsRoute, webDocsRoute, webHomeRoute, webIconsRoute } from '@/routes/web-paths';
 
 /** Whether `href` is a page of this zone: `/docs/editor` or a path under it, or a link within the page. */
 export function inZone(href: string): boolean {
@@ -22,7 +22,7 @@ export function zoneHome(): string {
 }
 
 /**
- * The header's Docs, Components, Blocks and Editor. Editor is listed last: its pages sit under Docs too,
+ * The header's Docs, Components, Blocks, Icons and Editor. Editor is listed last: its pages sit under Docs too,
  * and the last item whose pattern matches is the one marked.
  */
 export function zoneNavItems(): SiteNavItem[] {
@@ -35,6 +35,7 @@ export function zoneNavItems(): SiteNavItem[] {
       pattern: `${webComponentsRoute.pathname}{/*rest}`,
     },
     { href: webBlocksRoute.build({ base }), label: 'Blocks', pattern: webBlocksRoute.pathname },
+    { href: webIconsRoute.build({ base }), label: 'Icons', pattern: webIconsRoute.pathname },
     { href: editorDocsRoute.build(), label: 'Editor', pattern: `${editorDocsRoute.pathname}{/*rest}` },
   ];
 }

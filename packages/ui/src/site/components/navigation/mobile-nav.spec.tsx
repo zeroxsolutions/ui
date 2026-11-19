@@ -12,7 +12,7 @@ const { startAnimation, stopAnimation } = vi.hoisted(() => ({ startAnimation: vi
 const url = { pathname: '/docs' };
 
 // The icon's handle is the seam: the button drives it, and the motion behind it is the icon's own.
-vi.mock('../../../../registry/bases/base-ui/icons/menu-icon', () => ({
+vi.mock('../../../../registry/bases/base-ui/icons/lucide/menu-icon', () => ({
   MenuIcon: forwardRef(function MenuIcon(_props, ref) {
     useImperativeHandle(ref, () => ({ startAnimation, stopAnimation }));
     return null;
@@ -75,14 +75,18 @@ describe('MobileNav', () => {
     expect(within(sheet).getByRole('button', { name: /^Style\s*Nova/ })).toBeTruthy();
   });
 
-  it('plays its icon while the button is hovered, and stops it when the pointer leaves', () => {
+  it('plays its icon while the pointer or the focus is on the button, and stops it as either leaves', () => {
     renderNav();
     const trigger = screen.getByRole('button', { name: 'Menu' });
 
-    fireEvent.mouseEnter(trigger);
+    fireEvent.pointerEnter(trigger);
     expect(startAnimation).toHaveBeenCalledTimes(1);
-
-    fireEvent.mouseLeave(trigger);
+    fireEvent.pointerLeave(trigger);
     expect(stopAnimation).toHaveBeenCalledTimes(1);
+
+    fireEvent.focus(trigger);
+    expect(startAnimation).toHaveBeenCalledTimes(2);
+    fireEvent.blur(trigger);
+    expect(stopAnimation).toHaveBeenCalledTimes(2);
   });
 });
