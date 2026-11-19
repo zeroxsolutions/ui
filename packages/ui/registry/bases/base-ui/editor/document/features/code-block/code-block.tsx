@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Code } from 'lucide-react';
+import { CodeIcon } from '@/registry/bases/base-ui/icons/code-icon';
 import {
   CodeCard,
   CodeCardActions,
@@ -289,7 +289,7 @@ export function codeBlock(): EditorFeature {
     slash: [
       {
         id: 'codeBlock',
-        icon: <Code className="size-4" />,
+        icon: CodeIcon,
         title: 'Code block',
         description: 'Syntax-highlighted code',
         group: 'Blocks',

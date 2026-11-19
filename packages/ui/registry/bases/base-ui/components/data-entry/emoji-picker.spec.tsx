@@ -12,6 +12,58 @@ import {
   type EmojiPickerProps,
 } from './emoji-picker';
 
+const { categoryStart, categoryStop } = vi.hoisted(() => ({ categoryStart: vi.fn(), categoryStop: vi.fn() }));
+
+vi.mock('@/registry/bases/base-ui/icons/plane-icon', async () => {
+  const React = await import('react');
+  return {
+    PlaneIcon: React.forwardRef<unknown, object>((_props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation: categoryStart, stopAnimation: categoryStop }));
+      return <svg data-testid="plane-icon" />;
+    }),
+  };
+});
+
+vi.mock('@/registry/bases/base-ui/icons/dumbbell-icon', async () => {
+  const React = await import('react');
+  return {
+    DumbbellIcon: React.forwardRef<unknown, object>((_props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation: categoryStart, stopAnimation: categoryStop }));
+      return <svg data-testid="dumbbell-icon" />;
+    }),
+  };
+});
+
+vi.mock('@/registry/bases/base-ui/icons/lightbulb-icon', async () => {
+  const React = await import('react');
+  return {
+    LightbulbIcon: React.forwardRef<unknown, object>((_props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation: categoryStart, stopAnimation: categoryStop }));
+      return <svg data-testid="lightbulb-icon" />;
+    }),
+  };
+});
+
+vi.mock('@/registry/bases/base-ui/icons/hash-icon', async () => {
+  const React = await import('react');
+  return {
+    HashIcon: React.forwardRef<unknown, object>((_props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation: categoryStart, stopAnimation: categoryStop }));
+      return <svg data-testid="hash-icon" />;
+    }),
+  };
+});
+
+vi.mock('@/registry/bases/base-ui/icons/flag-icon', async () => {
+  const React = await import('react');
+  return {
+    FlagIcon: React.forwardRef<unknown, object>((_props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation: categoryStart, stopAnimation: categoryStop }));
+      return <svg data-testid="flag-icon" />;
+    }),
+  };
+});
+
 /** The picker as its demo composes it: search, the grid with an empty state, and the category nav. */
 function Picker(props: Omit<EmojiPickerProps, 'children'>) {
   return (
@@ -57,6 +109,8 @@ beforeAll(() => {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  categoryStart.mockClear();
+  categoryStop.mockClear();
 });
 
 describe('EmojiPicker', () => {
@@ -179,5 +233,30 @@ describe('EmojiPicker', () => {
     // The next one a cell row further: the size-8 button (32px) plus the half-step gap.
     const secondCells = document.querySelector<HTMLElement>('[data-index="2"]');
     expect(secondCells?.style.transform).toBe('translateY(62px)');
+  });
+});
+
+describe('EmojiPickerNav category icons', () => {
+  it.each([
+    ['Travel & places', 'plane-icon'],
+    ['Activities', 'dumbbell-icon'],
+    ['Objects', 'lightbulb-icon'],
+    ['Symbols', 'hash-icon'],
+    ['Flags', 'flag-icon'],
+  ])('draws %s with its animated icon and plays it on hover and focus', async (name, testId) => {
+    render(<Picker onSelect={vi.fn()} />);
+    await settle();
+    const item = screen.getByRole('button', { name });
+    expect(item.querySelector(`[data-testid="${testId}"]`)).not.toBeNull();
+
+    fireEvent.mouseEnter(item);
+    expect(categoryStart).toHaveBeenCalledTimes(1);
+    fireEvent.mouseLeave(item);
+    expect(categoryStop).toHaveBeenCalledTimes(1);
+
+    fireEvent.focus(item);
+    expect(categoryStart).toHaveBeenCalledTimes(2);
+    fireEvent.blur(item);
+    expect(categoryStop).toHaveBeenCalledTimes(2);
   });
 });

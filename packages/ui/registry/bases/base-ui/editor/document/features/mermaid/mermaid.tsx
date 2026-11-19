@@ -1,6 +1,9 @@
 'use client';
 
-import { Eye, PencilLine, Workflow } from 'lucide-react';
+import { EyeIcon } from '@/registry/bases/base-ui/icons/eye-icon';
+import { PencilLineIcon } from '@/registry/bases/base-ui/icons/pencil-line-icon';
+import { WorkflowIcon } from '@/registry/bases/base-ui/icons/workflow-icon';
+import { ChromeControl } from '../../ui/chrome-icon';
 import {
   CodeCard,
   CodeCardCode,
@@ -105,12 +108,14 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
           </CollapsibleCardTitle>
           <CollapsibleCardActions>
             <TabsList>
-              <TabsTrigger value="view" aria-label="View">
-                <Eye />
-              </TabsTrigger>
-              <TabsTrigger value="edit" aria-label="Edit">
-                <PencilLine />
-              </TabsTrigger>
+              <ChromeControl
+                icon={EyeIcon}
+                render={(control) => <TabsTrigger value="view" aria-label="View" {...control} />}
+              />
+              <ChromeControl
+                icon={PencilLineIcon}
+                render={(control) => <TabsTrigger value="edit" aria-label="Edit" {...control} />}
+              />
             </TabsList>
             <CopyButton value={attrs.source} label="Copy source" size="icon" />
             <CollapsibleCardTrigger />
@@ -207,7 +212,7 @@ export function mermaid(): EditorFeature {
     slash: [
       {
         id: 'mermaid',
-        icon: <Workflow className="size-4" />,
+        icon: WorkflowIcon,
         title: 'Mermaid',
         description: 'Diagram from text',
         group: 'Blocks',

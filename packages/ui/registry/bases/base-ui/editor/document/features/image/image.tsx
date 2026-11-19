@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from 'react';
-import { Image as ImageIcon } from 'lucide-react';
+import { ImageIcon } from '@/registry/bases/base-ui/icons/image-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Field, FieldLabel } from '@/registry/bases/base-ui/ui/field';
 import { Input } from '@/registry/bases/base-ui/ui/input';
@@ -209,7 +209,7 @@ export function image(): EditorFeature {
     slash: [
       {
         id: 'image',
-        icon: <ImageIcon className="size-4" />,
+        icon: ImageIcon,
         title: 'Image',
         description: 'Embed an image by URL',
         group: 'Blocks',

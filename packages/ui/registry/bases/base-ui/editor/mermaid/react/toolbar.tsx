@@ -32,8 +32,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
-import { Check, Copy, Download, Image as ImageIcon, Workflow } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
+import { CopyIcon } from '@/registry/bases/base-ui/icons/copy-icon';
+import { DownloadIcon } from '@/registry/bases/base-ui/icons/download-icon';
+import { ImageIcon } from '@/registry/bases/base-ui/icons/image-icon';
+import { WorkflowIcon } from '@/registry/bases/base-ui/icons/workflow-icon';
+import { usePlayWhile, useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '@zeroxsolutions/editor-core/mermaid/core/detect';
 import { copySvg, copyText, downloadPng, downloadSvg } from '@zeroxsolutions/editor-core/mermaid/core/export';
 import { DIAGRAM_TEMPLATES } from '@zeroxsolutions/editor-core/mermaid/core/templates';
@@ -72,8 +77,16 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
     source: '',
   };
   const hasContent = source.trim().length > 0;
+  const typePlay = useAnimatedIcon();
+  const exportPlay = useAnimatedIcon();
+  const copySourcePlay = useAnimatedIcon();
+  const copySvgPlay = useAnimatedIcon();
+  const downloadSvgPlay = useAnimatedIcon();
+  const downloadPngPlay = useAnimatedIcon();
   const [pending, setPending] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  // The check that replaces the download plays once as the export finishes.
+  usePlayWhile(exportPlay.ref, done);
   const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const pickTemplate = (templateSource: string) => {
@@ -106,8 +119,12 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
             itemToStringLabel={(template: DiagramTemplate) => template.label}
             isItemEqualToValue={(a: DiagramTemplate, b: DiagramTemplate) => a?.type === b?.type}
           >
-            <ComboboxTrigger render={<Button variant="ghost" size="sm" />} aria-label="Diagram type">
-              <Workflow />
+            <ComboboxTrigger
+              render={<Button variant="ghost" size="sm" />}
+              aria-label="Diagram type"
+              {...typePlay.handlers}
+            >
+              <WorkflowIcon ref={typePlay.ref} aria-hidden />
               <span>{current.label}</span>
             </ComboboxTrigger>
             <ComboboxContent className="min-w-56">
@@ -127,31 +144,35 @@ export function MermaidToolbar({ source, svg, onPickTemplate, className }: Merma
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <Button variant="outline" size="sm" disabled={!svg}>
-                  {done ? <Check /> : <Download />}
+                <Button variant="outline" size="sm" disabled={!svg} {...exportPlay.handlers}>
+                  {done ? (
+                    <CheckIcon ref={exportPlay.ref} aria-hidden />
+                  ) : (
+                    <DownloadIcon ref={exportPlay.ref} aria-hidden />
+                  )}
                   Export
                 </Button>
               }
             />
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => runExport(() => copyText(source))}>
-                  <Copy />
+                <DropdownMenuItem onClick={() => runExport(() => copyText(source))} {...copySourcePlay.handlers}>
+                  <CopyIcon ref={copySourcePlay.ref} aria-hidden />
                   Copy source
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => runExport(() => copySvg(svg))}>
-                  <Copy />
+                <DropdownMenuItem onClick={() => runExport(() => copySvg(svg))} {...copySvgPlay.handlers}>
+                  <CopyIcon ref={copySvgPlay.ref} aria-hidden />
                   Copy SVG
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => runExport(() => downloadSvg(svg))}>
-                  <Download />
+                <DropdownMenuItem onClick={() => runExport(() => downloadSvg(svg))} {...downloadSvgPlay.handlers}>
+                  <DownloadIcon ref={downloadSvgPlay.ref} aria-hidden />
                   Download SVG
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => runExport(() => downloadPng(svg))}>
-                  <ImageIcon />
+                <DropdownMenuItem onClick={() => runExport(() => downloadPng(svg))} {...downloadPngPlay.handlers}>
+                  <ImageIcon ref={downloadPngPlay.ref} aria-hidden />
                   Download PNG
                 </DropdownMenuItem>
               </DropdownMenuGroup>

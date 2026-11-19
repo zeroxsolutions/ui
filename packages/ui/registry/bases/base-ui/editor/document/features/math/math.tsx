@@ -1,7 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { Check, Eye, Omega, PencilLine, Radical, Sigma, X } from 'lucide-react';
+import { Sigma } from 'lucide-react';
+import { SigmaIcon } from '@/registry/bases/base-ui/icons/sigma-icon';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
+import { EyeIcon } from '@/registry/bases/base-ui/icons/eye-icon';
+import { OmegaIcon } from '@/registry/bases/base-ui/icons/omega-icon';
+import { PencilLineIcon } from '@/registry/bases/base-ui/icons/pencil-line-icon';
+import { RadicalIcon } from '@/registry/bases/base-ui/icons/radical-icon';
+import { XIcon } from '@/registry/bases/base-ui/icons/x-icon';
+import { ChromeControl, ChromeIcon, useChromeActive } from '../../ui/chrome-icon';
 import katex from 'katex';
 import { z } from 'zod';
 import { Button } from '@/registry/bases/base-ui/ui/button';
@@ -82,6 +90,7 @@ function MathInlineForm({
   const [draft, setDraft] = useState(initialLatex);
   const inputRef = useRef<HTMLInputElement>(null);
   const pendingCaret = useRef<number | null>(null);
+  const omega = useChromeActive();
 
   // Sync the caret to the DOM input after a palette insert (an imperative
   // external-system sync - the one legitimate use of an effect here).
@@ -131,17 +140,23 @@ function MathInlineForm({
             onInsert={insert}
             nativeButton={false}
             trigger={
-              <InputGroupButton size="icon-xs" aria-label="Insert symbol">
-                <Omega />
+              <InputGroupButton size="icon-xs" aria-label="Insert symbol" {...omega.handlers}>
+                <ChromeIcon icon={OmegaIcon} active={omega.active} />
               </InputGroupButton>
             }
           />
-          <InputGroupButton size="icon-xs" aria-label="Apply" onClick={() => onCommit(draft)}>
-            <Check />
-          </InputGroupButton>
-          <InputGroupButton size="icon-xs" aria-label="Cancel" onClick={onCancel}>
-            <X />
-          </InputGroupButton>
+          <ChromeControl
+            icon={CheckIcon}
+            render={(control) => (
+              <InputGroupButton size="icon-xs" aria-label="Apply" onClick={() => onCommit(draft)} {...control} />
+            )}
+          />
+          <ChromeControl
+            icon={XIcon}
+            render={(control) => (
+              <InputGroupButton size="icon-xs" aria-label="Cancel" onClick={onCancel} {...control} />
+            )}
+          />
         </InputGroupAddon>
       </InputGroup>
       <FormulaPreview source={draft} displayMode={false} compact />
@@ -153,7 +168,7 @@ function MathInlineForm({
  * The inline math node view. Read-only renders the real formula (no edit
  * affordance); editable is click-to-edit into a `Popover` anchored to the formula.
  */
-function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
+export function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
   const [editing, setEditing] = useState(false);
 
   if (!editable) {
@@ -201,7 +216,8 @@ function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeViewProp
  * The block math node view. Read-only is a design-system `Card` holding the real
  * formula; editable composes the shared `CollapsibleCard`/`Tabs` chrome.
  */
-function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
+export function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps<MathAttrs>) {
+  const insert = useChromeActive();
   if (!editable) {
     return (
       <Card size="sm" className="my-4" data-math="block" contentEditable={false}>
@@ -233,12 +249,14 @@ function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps
           </CollapsibleCardTitle>
           <CollapsibleCardActions>
             <TabsList>
-              <TabsTrigger value="view" aria-label="View">
-                <Eye />
-              </TabsTrigger>
-              <TabsTrigger value="edit" aria-label="Edit">
-                <PencilLine />
-              </TabsTrigger>
+              <ChromeControl
+                icon={EyeIcon}
+                render={(control) => <TabsTrigger value="view" aria-label="View" {...control} />}
+              />
+              <ChromeControl
+                icon={PencilLineIcon}
+                render={(control) => <TabsTrigger value="edit" aria-label="Edit" {...control} />}
+              />
             </TabsList>
             <CopyButton value={attrs.latex} label="Copy source" size="icon" />
             <CollapsibleCardTrigger />
@@ -256,8 +274,8 @@ function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeViewProps
               <MathPalette
                 onInsert={(snippet) => updateAttrs({ latex: attrs.latex + snippet })}
                 trigger={
-                  <Button variant="ghost" size="sm">
-                    <Omega />
+                  <Button variant="ghost" size="sm" {...insert.handlers}>
+                    <ChromeIcon icon={OmegaIcon} active={insert.active} />
                     Insert
                   </Button>
                 }
@@ -412,7 +430,7 @@ export function math(): EditorFeature {
     slash: [
       {
         id: 'math-block',
-        icon: <Sigma className="size-4" />,
+        icon: SigmaIcon,
         title: 'Math block',
         description: 'Display equation (KaTeX)',
         group: 'Blocks',
@@ -421,7 +439,7 @@ export function math(): EditorFeature {
       },
       {
         id: 'math-inline',
-        icon: <Radical className="size-4" />,
+        icon: RadicalIcon,
         title: 'Inline math',
         description: 'Inline formula (KaTeX)',
         group: 'Inline',

@@ -298,7 +298,9 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
                     key={option.id}
                     size="sm"
                     data-highlighted={highlighted || undefined}
-                    onMouseEnter={() => setIndex(position)}
+                    // The browser fires mouseenter on a cursor that stays still while the list opens or
+                    // scrolls under it, which would take the highlight from the keys; only a move does.
+                    onMouseMove={() => setIndex(position)}
                     // Keep the editor focused so the range survives the click.
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => select(option)}

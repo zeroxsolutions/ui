@@ -1,7 +1,12 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Check, Copy, Download, Omega, Sigma } from 'lucide-react';
+import { Sigma } from 'lucide-react';
+import { CheckIcon } from '@/registry/bases/base-ui/icons/check-icon';
+import { CopyIcon } from '@/registry/bases/base-ui/icons/copy-icon';
+import { DownloadIcon } from '@/registry/bases/base-ui/icons/download-icon';
+import { OmegaIcon } from '@/registry/bases/base-ui/icons/omega-icon';
+import { usePlayWhile, useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import {
   CollapsibleCardActions,
@@ -36,7 +41,13 @@ export interface MathToolbarProps {
  * enclosing `CollapsibleCard` and its body.
  */
 export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
+  const insertPlay = useAnimatedIcon();
+  const exportPlay = useAnimatedIcon();
+  const copyLatexPlay = useAnimatedIcon();
+  const copyMathMLPlay = useAnimatedIcon();
   const [done, setDone] = useState(false);
+  // The check that replaces the download plays once as the export finishes.
+  usePlayWhile(exportPlay.ref, done);
   const doneTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const runExport = (action: () => Promise<void>) => {
@@ -62,8 +73,8 @@ export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
         <MathPalette
           onInsert={onInsert}
           trigger={
-            <Button variant="ghost" size="sm">
-              <Omega />
+            <Button variant="ghost" size="sm" {...insertPlay.handlers}>
+              <OmegaIcon ref={insertPlay.ref} aria-hidden />
               Insert
             </Button>
           }
@@ -71,20 +82,24 @@ export function MathToolbar({ source, onInsert, className }: MathToolbarProps) {
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <Button variant="outline" size="sm" disabled={!source.trim()}>
-                {done ? <Check /> : <Download />}
+              <Button variant="outline" size="sm" disabled={!source.trim()} {...exportPlay.handlers}>
+                {done ? (
+                  <CheckIcon ref={exportPlay.ref} aria-hidden />
+                ) : (
+                  <DownloadIcon ref={exportPlay.ref} aria-hidden />
+                )}
                 Export
               </Button>
             }
           />
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => runExport(() => copyLatex(source))}>
-                <Copy />
+              <DropdownMenuItem onClick={() => runExport(() => copyLatex(source))} {...copyLatexPlay.handlers}>
+                <CopyIcon ref={copyLatexPlay.ref} aria-hidden />
                 Copy LaTeX
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => runExport(() => copyMathML(source))}>
-                <Copy />
+              <DropdownMenuItem onClick={() => runExport(() => copyMathML(source))} {...copyMathMLPlay.handlers}>
+                <CopyIcon ref={copyMathMLPlay.ref} aria-hidden />
                 Copy MathML
               </DropdownMenuItem>
             </DropdownMenuGroup>

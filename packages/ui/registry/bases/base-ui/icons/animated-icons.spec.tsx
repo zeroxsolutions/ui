@@ -80,8 +80,8 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('animated icons', () => {
-  it('covers all 38 icons', () => {
-    expect(cases).toHaveLength(38);
+  it('covers all 73 icons', () => {
+    expect(cases).toHaveLength(73);
   });
 
   describe.each(cases)('$name', ({ name, Icon }) => {

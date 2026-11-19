@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EditorContent } from '@tiptap/react';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUpIcon } from '@/registry/bases/base-ui/icons/arrow-up-icon';
 import { InputGroup, InputGroupAddon, InputGroupButton } from '@/registry/bases/base-ui/ui/input-group';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { createNodeViewRenderer } from '../document/node-view-adapter';
+import { ChromeControl } from '../document/ui/chrome-icon';
 import { COMPOSER_TOP_CONTENT, composerKit } from './composer-kit';
 import { defaultComposerTriggers, type ComposerTrigger } from './composer-triggers';
 import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
@@ -129,9 +130,12 @@ export function ChatInput({ triggers, placeholder = 'Message...', onSubmit, onRe
           <EditorContent editor={engine as never} />
         </div>
         <InputGroupAddon align="inline-end" className="py-0 pr-0">
-          <InputGroupButton size="icon-sm" aria-label="Send" onClick={submit} className="ml-auto">
-            <ArrowUp />
-          </InputGroupButton>
+          <ChromeControl
+            icon={ArrowUpIcon}
+            render={(control) => (
+              <InputGroupButton size="icon-sm" aria-label="Send" onClick={submit} className="ml-auto" {...control} />
+            )}
+          />
         </InputGroupAddon>
       </InputGroup>
       {editor && <TriggerLayer editor={editor} triggers={tokens} />}

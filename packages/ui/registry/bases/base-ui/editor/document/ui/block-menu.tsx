@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
+import { CHROME_ICON_CLASS, ChromeControl } from './chrome-icon';
 import type { BlockMenuItem, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 
 /**
@@ -78,12 +78,18 @@ export function BlockMenu({ editor, items, container }: BlockMenuProps) {
             {items.map((item) => (
               <span key={item.id} className="contents">
                 {item.separatorBefore && <DropdownMenuSeparator />}
-                <DropdownMenuItem
-                  variant={item.id === 'delete' ? 'destructive' : 'default'}
-                  onClick={() => editor.run(item.command, item.args)}
-                >
-                  {(item.icon as ReactNode) ?? item.title}
-                </DropdownMenuItem>
+                <ChromeControl
+                  icon={item.icon}
+                  fallback={item.title}
+                  iconClassName={CHROME_ICON_CLASS}
+                  render={(control) => (
+                    <DropdownMenuItem
+                      variant={item.id === 'delete' ? 'destructive' : 'default'}
+                      onClick={() => editor.run(item.command, item.args)}
+                      {...control}
+                    />
+                  )}
+                />
               </span>
             ))}
           </DropdownMenuContent>

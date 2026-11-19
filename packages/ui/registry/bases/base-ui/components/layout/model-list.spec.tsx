@@ -12,7 +12,23 @@ import {
   ModelListTitle,
 } from './model-list';
 
-afterEach(cleanup);
+const { trashStart, trashStop } = vi.hoisted(() => ({ trashStart: vi.fn(), trashStop: vi.fn() }));
+
+vi.mock('@/registry/bases/base-ui/icons/trash-2-icon', async () => {
+  const React = await import('react');
+  return {
+    Trash2Icon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
+      React.useImperativeHandle(ref, () => ({ startAnimation: trashStart, stopAnimation: trashStop }));
+      return <svg data-testid="trash-2-icon" aria-hidden={props['aria-hidden']} />;
+    }),
+  };
+});
+
+afterEach(() => {
+  cleanup();
+  trashStart.mockClear();
+  trashStop.mockClear();
+});
 
 describe('ModelList', () => {
   it('renders the title, controls, tabs, and content', () => {
@@ -89,5 +105,37 @@ describe('ModelListSkeleton', () => {
     const { container } = render(<ModelListSkeleton count={3} />);
 
     expect(container.firstElementChild?.children).toHaveLength(3);
+  });
+});
+
+describe('ModelListRemoveButton icon', () => {
+  it('plays the trash once while the pointer and the focus hold the button, and stops when both leave', () => {
+    const onPointerEnter = vi.fn();
+    render(<ModelListRemoveButton onPointerEnter={onPointerEnter} />);
+    const button = screen.getByRole('button', { name: 'Remove model' });
+
+    fireEvent.pointerEnter(button);
+    fireEvent.focus(button);
+    expect(trashStart).toHaveBeenCalledTimes(1);
+    expect(onPointerEnter).toHaveBeenCalledTimes(1);
+
+    fireEvent.pointerLeave(button);
+    expect(trashStop).not.toHaveBeenCalled();
+    fireEvent.blur(button);
+    expect(trashStop).toHaveBeenCalledTimes(1);
+    expect(trashStart).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the icon from assistive tech', () => {
+    render(<ModelListRemoveButton />);
+
+    expect(screen.getByTestId('trash-2-icon').getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('starts nothing when children replace the icon', () => {
+    render(<ModelListRemoveButton>clear</ModelListRemoveButton>);
+
+    fireEvent.pointerEnter(screen.getByRole('button', { name: 'Remove model' }));
+    expect(trashStart).not.toHaveBeenCalled();
   });
 });

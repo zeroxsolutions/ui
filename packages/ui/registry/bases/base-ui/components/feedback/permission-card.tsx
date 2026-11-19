@@ -1,13 +1,21 @@
-import { Circle, CircleX } from 'lucide-react';
+'use client';
+
+import { createContext, useContext, useRef } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { Card, CardAction, CardFooter, CardTitle } from '@/registry/bases/base-ui/ui/card';
 import { CircleCheckIcon } from '@/registry/bases/base-ui/icons/circle-check-icon';
+import { CircleIcon } from '@/registry/bases/base-ui/icons/circle-icon';
+import { CircleXIcon } from '@/registry/bases/base-ui/icons/circle-x-icon';
+import { usePlayWhile, type AnimatedIconHandle } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 
 /** The lifecycle of a consent request; the host sets it, and nothing inside the card changes it. */
 type PermissionCardStatusValue = 'pending' | 'approved' | 'denied';
+
+/** The status the surrounding card is in, which `PermissionCardStatus` reads to play the icon it shows. */
+const PermissionCardStatusContext = createContext<PermissionCardStatusValue | null>(null);
 
 interface PermissionCardProps extends ComponentProps<typeof Card> {
   status: PermissionCardStatusValue;
@@ -44,18 +52,20 @@ interface PermissionCardProps extends ComponentProps<typeof Card> {
  */
 function PermissionCard({ status, size = 'sm', className, ...props }: PermissionCardProps): ReactNode {
   return (
-    <Card
-      data-slot="permission-card"
-      data-status={status}
-      size={size}
-      className={cn(
-        'group/permission-card',
-        'has-data-[slot=permission-card-actions]:pb-0 has-data-[slot=permission-card-resolved]:pb-0',
-        'data-[size=sm]:has-data-[slot=permission-card-actions]:pb-0 data-[size=sm]:has-data-[slot=permission-card-resolved]:pb-0',
-        className,
-      )}
-      {...props}
-    />
+    <PermissionCardStatusContext.Provider value={status}>
+      <Card
+        data-slot="permission-card"
+        data-status={status}
+        size={size}
+        className={cn(
+          'group/permission-card',
+          'has-data-[slot=permission-card-actions]:pb-0 has-data-[slot=permission-card-resolved]:pb-0',
+          'data-[size=sm]:has-data-[slot=permission-card-actions]:pb-0 data-[size=sm]:has-data-[slot=permission-card-resolved]:pb-0',
+          className,
+        )}
+        {...props}
+      />
+    </PermissionCardStatusContext.Provider>
   );
 }
 
@@ -70,25 +80,38 @@ function PermissionCardTitle({ className, ...props }: ComponentProps<typeof Card
  * status word, and its icon follows the root's `data-status`.
  */
 function PermissionCardStatus({ children, ...props }: ComponentProps<typeof Badge>): ReactNode {
+  const status = useContext(PermissionCardStatusContext);
+  const pending = useRef<AnimatedIconHandle>(null);
+  const approved = useRef<AnimatedIconHandle>(null);
+  const denied = useRef<AnimatedIconHandle>(null);
+  // Each icon plays once as its status begins; the card draws all three and shows one.
+  usePlayWhile(pending, status === 'pending');
+  usePlayWhile(approved, status === 'approved');
+  usePlayWhile(denied, status === 'denied');
   return (
     <CardAction>
       <Badge data-slot="permission-card-status" variant="outline" {...props}>
-        <Circle
-          data-icon="inline-start"
-          aria-hidden
-          className="hidden group-data-[status=pending]/permission-card:block"
-        />
-        {/* Badge sizes only its direct svg children; an animated icon's svg sits inside the icon's own div, so `size` gives it the Badge's icon size. */}
-        <CircleCheckIcon
+        {/* Badge sizes only its direct svg children; an animated icon's svg sits inside the icon's own span, so `size` gives it the Badge's icon size. */}
+        <CircleIcon
+          ref={pending}
           data-icon="inline-start"
           aria-hidden
           size={12}
-          className="hidden group-data-[status=approved]/permission-card:block"
+          className="hidden group-data-[status=pending]/permission-card:inline-flex"
         />
-        <CircleX
+        <CircleCheckIcon
+          ref={approved}
           data-icon="inline-start"
           aria-hidden
-          className="hidden group-data-[status=denied]/permission-card:block"
+          size={12}
+          className="hidden group-data-[status=approved]/permission-card:inline-flex"
+        />
+        <CircleXIcon
+          ref={denied}
+          data-icon="inline-start"
+          aria-hidden
+          size={12}
+          className="hidden group-data-[status=denied]/permission-card:inline-flex"
         />
         {children}
       </Badge>
