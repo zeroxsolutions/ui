@@ -1,6 +1,8 @@
-import { Circle, CircleCheck } from 'lucide-react-native';
 import { createContext, useContext, useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, View } from 'react-native';
+import { CircleCheckIcon } from '../../icons/circle-check-icon';
+import { CircleIcon } from '../../icons/circle-icon';
+import { usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { Card, CardContent } from '../../ui/card';
 import { Icon } from '../../ui/icon';
 import { Progress } from '../../ui/progress';
@@ -104,9 +106,10 @@ type PasswordStrengthRequirementProps = ComponentProps<typeof View> & {
 };
 
 /**
- * One requirement: a check and foreground text while met, a circle and muted text while not. It is
- * one element for a screen reader, whose value text is `metLabel` or `unmetLabel`, so the state is
- * heard after the requirement.
+ * One requirement: a check and foreground text while met, a circle and muted text while not. The check
+ * plays once as the requirement becomes met, and not when the row is first drawn met. It is one element
+ * for a screen reader, whose value text is `metLabel` or `unmetLabel`, so the state is heard after the
+ * requirement.
  */
 function PasswordStrengthRequirement({
   met = false,
@@ -116,6 +119,8 @@ function PasswordStrengthRequirement({
   children,
   ...props
 }: PasswordStrengthRequirementProps): ReactNode {
+  const icon = useRef<IconHandle>(null);
+  usePlayOnReach(icon, met);
   return (
     <View
       accessible
@@ -123,7 +128,7 @@ function PasswordStrengthRequirement({
       className={cn('flex-row items-center gap-2', className)}
       {...props}
     >
-      <Icon as={met ? CircleCheck : Circle} className="text-foreground size-4 shrink-0" />
+      <Icon as={met ? CircleCheckIcon : CircleIcon} ref={icon} className="text-foreground size-4 shrink-0" />
       <Text className={cn('min-w-0 flex-1 text-sm', met ? 'text-foreground' : 'text-muted-foreground')}>
         {children}
       </Text>

@@ -10,6 +10,16 @@ import {
   ModelListSkeleton,
   ModelListTitle,
 } from './model-list';
+import { focus, handleOf } from '../../icons/animated-icon.testing';
+import { Trash2Icon } from '../../icons/trash-2-icon';
+
+jest.mock('../../icons/trash-2-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('trash-2-icon'),
+);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('ModelList', () => {
   it('announces its title as a heading, over the controls and the models it holds', async () => {
@@ -77,5 +87,22 @@ describe('ModelListSkeleton', () => {
     await render(<ModelListSkeleton testID="loading" count={2} />);
 
     expect(screen.getByTestId('loading').children).toHaveLength(2);
+  });
+});
+
+describe('ModelListRemoveButton motion', () => {
+  it('starts its icon on press-in and on focus', async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    await render(<ModelListRemoveButton onPressIn={onPressIn} onFocus={onFocus} />);
+    const control = screen.getByRole('button', { name: 'Remove model' });
+
+    await userEvent.setup().press(control);
+    await focus(control);
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(handleOf(Trash2Icon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(Trash2Icon).stopAnimation).not.toHaveBeenCalled();
   });
 });

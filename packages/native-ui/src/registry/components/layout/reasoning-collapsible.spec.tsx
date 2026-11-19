@@ -8,6 +8,24 @@ import {
   ReasoningCollapsibleTrigger,
   type ReasoningCollapsibleProps,
 } from './reasoning-collapsible';
+import { focus, handleOf } from '../../icons/animated-icon.testing';
+import { BrainIcon } from '../../icons/brain-icon';
+import { ChevronDownIcon } from '../../icons/chevron-down-icon';
+import { ChevronUpIcon } from '../../icons/chevron-up-icon';
+
+jest.mock('../../icons/brain-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('brain-icon'),
+);
+jest.mock('../../icons/chevron-down-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-down-icon'),
+);
+jest.mock('../../icons/chevron-up-icon', () =>
+  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-up-icon'),
+);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 /** Words the label from the live state, returning a string as the web's does. */
 function ReasoningLabel(): ReactNode {
@@ -115,5 +133,44 @@ describe('ReasoningCollapsible', () => {
     );
 
     expect(screen.getByText('Reading the retry policy.')).toBeVisible();
+  });
+});
+
+describe('ReasoningCollapsibleTrigger motion', () => {
+  it('starts its brain and its chevron on press-in and on focus', async () => {
+    const onPressIn = jest.fn();
+    const onFocus = jest.fn();
+    await render(
+      <ReasoningCollapsible>
+        <ReasoningCollapsibleTrigger onPressIn={onPressIn} onFocus={onFocus}>
+          Thought
+        </ReasoningCollapsibleTrigger>
+        <ReasoningCollapsibleContent>Checking the logs.</ReasoningCollapsibleContent>
+      </ReasoningCollapsible>,
+    );
+    const control = screen.getByRole('button', { name: 'Thought' });
+
+    await userEvent.setup({ advanceTimers: jest.advanceTimersByTime }).press(control);
+    await focus(control);
+
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(handleOf(BrainIcon).startAnimation).toHaveBeenCalledTimes(2);
+    // The down chevron starts on press-in; opening swaps in the up chevron, which plays as it appears and on focus.
+    expect(handleOf(ChevronDownIcon).startAnimation).toHaveBeenCalledTimes(1);
+    expect(handleOf(ChevronUpIcon).startAnimation).toHaveBeenCalledTimes(2);
+    expect(handleOf(BrainIcon).stopAnimation).not.toHaveBeenCalled();
+  });
+
+  it('plays the newly shown chevron once after a press flips it, and nothing on first draw', async () => {
+    await render(<Example />);
+    expect(handleOf(ChevronDownIcon).startAnimation).not.toHaveBeenCalled();
+
+    await userEvent
+      .setup({ advanceTimers: jest.advanceTimersByTime })
+      .press(screen.getByRole('button', { name: 'Thought for a few seconds' }));
+
+    expect(screen.getByRole('button', { name: 'Thought for a few seconds' })).toBeExpanded();
+    expect(handleOf(ChevronUpIcon).startAnimation).toHaveBeenCalledTimes(1);
   });
 });

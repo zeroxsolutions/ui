@@ -1,5 +1,8 @@
 import { render, screen } from '@testing-library/react-native';
 import { Check } from 'lucide-react-native';
+import { createRef } from 'react';
+import type { IconHandle } from '../lib/icon-motion';
+import { CopyIcon } from '../icons/copy-icon';
 import type { ComponentType } from 'react';
 import { Icon } from './icon.uniwind';
 
@@ -53,6 +56,14 @@ jest.mock('uniwind', () => {
 });
 
 describe('Icon on Uniwind', () => {
+  it('hands its ref to the glyph it draws', async () => {
+    const ref = createRef<IconHandle>();
+    await render(<Icon as={CopyIcon} ref={ref} className="size-4" />);
+
+    expect(ref.current?.startAnimation).toEqual(expect.any(Function));
+    expect(ref.current?.stopAnimation).toEqual(expect.any(Function));
+  });
+
   it('does not pass the className it mapped on to the svg', async () => {
     await render(<Icon as={Check} className="size-4 text-red-500" accessible role="img" aria-label="Saved" />);
 

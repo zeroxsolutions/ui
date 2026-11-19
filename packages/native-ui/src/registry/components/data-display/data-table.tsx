@@ -1,7 +1,18 @@
 import { flexRender, type ColumnDefTemplate, type Table as TanstackTable } from '@tanstack/react-table';
-import { ChevronLeft, ChevronRight, Settings2, type LucideIcon } from 'lucide-react-native';
-import { createContext, useContext, useMemo, type ComponentProps, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useRef,
+  type ComponentProps,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 import { View } from 'react-native';
+import { ChevronLeftIcon } from '../../icons/chevron-left-icon';
+import { ChevronRightIcon } from '../../icons/chevron-right-icon';
+import { Settings2Icon } from '../../icons/settings-2-icon';
+import { iconTrigger, type AnimatedIconProps, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
 import { Button } from '../../ui/button';
@@ -147,11 +158,20 @@ type DataTablePaginationStepProps = Omit<ComponentProps<typeof Button>, 'childre
   'aria-label': string;
 };
 
-/** An outline icon button that steps the pager, drawing `icon`. */
-function DataTablePaginationStep({ icon, ...props }: DataTablePaginationStepProps & { icon: LucideIcon }): ReactNode {
+/**
+ * An outline icon button that steps the pager, drawing `icon`, which plays when the button is pressed in or
+ * focused, after a caller's own `onPressIn` and `onFocus`.
+ */
+function DataTablePaginationStep({
+  icon,
+  onPressIn,
+  onFocus,
+  ...props
+}: DataTablePaginationStepProps & { icon: ComponentType<AnimatedIconProps> }): ReactNode {
+  const glyph = useRef<IconHandle>(null);
   return (
-    <Button variant="outline" size="icon-sm" {...props}>
-      <Icon as={icon} />
+    <Button variant="outline" size="icon-sm" {...iconTrigger([glyph], { onPressIn, onFocus })} {...props}>
+      <Icon as={icon} ref={glyph} />
     </Button>
   );
 }
@@ -164,7 +184,7 @@ function DataTablePaginationPrevious(props: DataTablePaginationStepProps): React
   const table = useDataTable();
   return (
     <DataTablePaginationStep
-      icon={ChevronLeft}
+      icon={ChevronLeftIcon}
       onPress={() => table.previousPage()}
       disabled={!table.getCanPreviousPage()}
       {...props}
@@ -180,7 +200,7 @@ function DataTablePaginationNext(props: DataTablePaginationStepProps): ReactNode
   const table = useDataTable();
   return (
     <DataTablePaginationStep
-      icon={ChevronRight}
+      icon={ChevronRightIcon}
       onPress={() => table.nextPage()}
       disabled={!table.getCanNextPage()}
       {...props}
@@ -196,11 +216,13 @@ type DataTableViewOptionsProps = Omit<ComponentProps<typeof Button>, 'children'>
 /**
  * A menu that shows and hides the table's columns, a checkbox per column that has an accessor and can hide, named
  * by the column's id. Its trigger is an outline button with a settings icon, named "Toggle columns" unless an
- * `aria-label` is given; `children` add a visible label after the icon. It draws nothing when no column can hide.
+ * `aria-label` is given; `children` add a visible label after the icon. The icon plays when the trigger is pressed
+ * in or focused, after a caller's own `onPressIn` and `onFocus`. It draws nothing when no column can hide.
  * @throws {Error} when rendered outside a DataTable
  */
-function DataTableViewOptions({ children, ...props }: DataTableViewOptionsProps): ReactNode {
+function DataTableViewOptions({ children, onPressIn, onFocus, ...props }: DataTableViewOptionsProps): ReactNode {
   const table = useDataTable();
+  const icon = useRef<IconHandle>(null);
   const columns = table
     .getAllColumns()
     .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide());
@@ -210,8 +232,14 @@ function DataTableViewOptions({ children, ...props }: DataTableViewOptionsProps)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" aria-label="Toggle columns" {...props}>
-          <Icon as={Settings2} />
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label="Toggle columns"
+          {...iconTrigger([icon], { onPressIn, onFocus })}
+          {...props}
+        >
+          <Icon as={Settings2Icon} ref={icon} />
           {asText(children)}
         </Button>
       </DropdownMenuTrigger>

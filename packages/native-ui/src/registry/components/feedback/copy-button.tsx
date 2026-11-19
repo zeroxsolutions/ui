@@ -1,7 +1,9 @@
 import * as Clipboard from 'expo-clipboard';
-import { Check, Copy } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, View } from 'react-native';
+import { CheckIcon } from '../../icons/check-icon';
+import { CopyIcon } from '../../icons/copy-icon';
+import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { Button } from '../../ui/button';
 import { Icon } from '../../ui/icon';
 import { Text } from '../../ui/text';
@@ -26,7 +28,8 @@ interface CopyButtonProps extends Omit<ComponentProps<typeof Button>, 'children'
  * accessible name for `timeout` ms, then resets; a screen reader hears `copiedLabel` once the copy has
  * succeeded. A caller `onPress` runs first, and calling `event.preventDefault()` in it skips the copy.
  * Defaults to a `ghost` `icon-xs` Button, and every Button prop passes through. A write the clipboard
- * refuses leaves the button idle.
+ * refuses leaves the button idle. Its copy icon plays when the button is pressed in or focused, after a
+ * caller's own `onPressIn` and `onFocus`, and its check plays once as a copy succeeds.
  */
 function CopyButton({
   value,
@@ -35,12 +38,17 @@ function CopyButton({
   timeout = COPY_RESET_MS,
   onCopied,
   onPress,
+  onPressIn,
+  onFocus,
   variant = 'ghost',
   size = 'icon-xs',
   ...props
 }: CopyButtonProps): ReactNode {
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // The copy and the check icons expose the same handle; whichever is showing holds the ref.
+  const icon = useRef<IconHandle>(null);
+  usePlayOnReach(icon, copied);
 
   useEffect(() => (): void => clearTimeout(timer.current), []);
 
@@ -69,9 +77,10 @@ function CopyButton({
           onPress?.(event);
           if (!event.isDefaultPrevented()) copy();
         }}
+        {...iconTrigger([icon], { onPressIn, onFocus })}
         {...props}
       >
-        <Icon as={copied ? Check : Copy} />
+        <Icon as={copied ? CheckIcon : CopyIcon} ref={icon} />
       </Button>
       <View aria-live="polite" pointerEvents="none" className="absolute h-px w-px overflow-hidden opacity-0">
         <Text>{copied ? copiedLabel : ''}</Text>

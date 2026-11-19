@@ -17,8 +17,9 @@ const UPPER = 30.78;
 const LOWER = 30.78;
 
 /**
- * Lucide's link icon, whose two halves shorten and tilt apart, then return, when started. Hidden from a
- * screen reader: the control around it says what it does.
+ * Lucide's link icon, whose two halves each draw a little shorter at both ends and tilt a few degrees
+ * anticlockwise, the same way, then return, when started. Hidden from a screen reader: the control around it
+ * says what it does.
  */
 function LinkIcon({
   ref,

@@ -20,8 +20,8 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 const TIMING: IconTiming = { duration: 200 };
 
 /**
- * Lucide's arrow-up icon, whose head rises and whose stem shortens and returns when started. Hidden from a
- * screen reader: the control around it says what it does.
+ * Lucide's arrow-up icon, whose head dips and whose stem shortens from the top, then both return, when started.
+ * Hidden from a screen reader: the control around it says what it does.
  */
 function ArrowUpIcon({
   ref,

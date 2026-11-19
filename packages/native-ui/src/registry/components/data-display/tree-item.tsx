@@ -1,7 +1,8 @@
 import { Slot } from '@rn-primitives/slot';
-import { ChevronRight } from 'lucide-react-native';
 import { createContext, useContext, useMemo, useRef, type ComponentProps, type ReactNode } from 'react';
 import { Pressable, View, type TextInputInstance } from 'react-native';
+import { ChevronRightIcon } from '../../icons/chevron-right-icon';
+import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
 import { Button } from '../../ui/button';
@@ -104,11 +105,18 @@ function TreeItemIndent({ depth, className, style, children, ...props }: TreeIte
  * The disclosure control of a folder row: a link `icon-xs` Button, which has no expanded fill, holding a chevron
  * that turns down while the row is `expanded`, announced expanded or collapsed with it. Give it an `aria-label`
  * and an `onPress`; a press on it reaches it alone, so it never selects the row. It goes in the row's
- * `TreeItemIndent`, and a leaf row leaves it out.
+ * `TreeItemIndent`, and a leaf row leaves it out. The chevron plays when the button is pressed in or focused, after
+ * a caller's own `onPressIn` and `onFocus`.
  * @throws {Error} when rendered outside a TreeItem
  */
-function TreeItemTrigger({ accessibilityState, ...props }: Omit<ComponentProps<typeof Button>, 'children'>): ReactNode {
+function TreeItemTrigger({
+  accessibilityState,
+  onPressIn,
+  onFocus,
+  ...props
+}: Omit<ComponentProps<typeof Button>, 'children'>): ReactNode {
   const context = useContext(TreeItemContext);
+  const chevron = useRef<IconHandle>(null);
   if (!context) throw new Error('TreeItemTrigger must be used within <TreeItem>');
   const { expanded } = context;
   return (
@@ -117,11 +125,12 @@ function TreeItemTrigger({ accessibilityState, ...props }: Omit<ComponentProps<t
       size="icon-xs"
       aria-expanded={expanded}
       accessibilityState={{ ...accessibilityState, expanded }}
+      {...iconTrigger([chevron], { onPressIn, onFocus })}
       {...props}
     >
       {/* Not every engine turns an svg by its className, so the chevron turns in a View around it. */}
       <View className={cn(expanded && 'rotate-90')}>
-        <Icon as={ChevronRight} />
+        <Icon as={ChevronRightIcon} ref={chevron} />
       </View>
     </Button>
   );
