@@ -124,6 +124,8 @@ const DRAWN_OTHERWISE = new Set<string>([
   'face-grinning',
   'face-slightly-frowning',
   'face-slightly-smiling',
+  // Drawn longer and clipped to the glyph's own outline, so a looping slide meets itself without a seam.
+  'construction',
 ]);
 
 function inButton(node: ReactNode) {

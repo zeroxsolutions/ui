@@ -151,6 +151,10 @@ function IconGalleryView({
   const box = useRef<HTMLInputElement>(null);
   // The `q` the box last showed or the URL last took from it, so the URL writes the box only when it moved.
   const shown = useRef(state.q);
+  // The `q`s this view wrote to the URL that the host has not read back yet, oldest first. A host that
+  // reads the URL a beat late hands back an older one of them while the reader types on, and that is the
+  // view's own write arriving, not a navigation the box should follow.
+  const written = useRef<string[]>([]);
   const [term, setTerm] = useState(state.q);
   const shownTerm = useDeferredValue(term);
   const [picked, setPicked] = useState<string>();
@@ -163,6 +167,11 @@ function IconGalleryView({
 
   // Back, a link or the reader's own submit moved the URL's `q`: the box and the grid follow it.
   useEffect(() => {
+    const echo = written.current.indexOf(state.q);
+    if (echo !== -1) {
+      written.current = written.current.slice(echo + 1);
+      return;
+    }
     if (shown.current === state.q) return;
     shown.current = state.q;
     if (box.current !== null) box.current.value = state.q;
@@ -178,6 +187,7 @@ function IconGalleryView({
     if (q === shown.current) return;
     const timer = setTimeout(() => {
       shown.current = q;
+      written.current.push(q);
       window.history.replaceState(null, '', href);
     }, PAUSE_MS);
     return () => clearTimeout(timer);
@@ -188,6 +198,7 @@ function IconGalleryView({
     const href = search.fromForm(new FormData(event.currentTarget));
     const q = search.read(iconGalleryQueryOf(href)).state.q;
     shown.current = q;
+    written.current.push(q);
     setTerm(q);
     window.history.pushState(null, '', href);
   };
