@@ -58,8 +58,10 @@ export function MathPalette({ onInsert, trigger, nativeButton = true, className 
                     <span aria-hidden className="w-5 text-center text-base">
                       {symbol.preview}
                     </span>
-                    <span>{symbol.label}</span>
-                    <CommandShortcut>{symbol.latex}</CommandShortcut>
+                    <span className="shrink-0">{symbol.label}</span>
+                    <CommandShortcut title={symbol.latex} className="min-w-0 truncate">
+                      {symbol.latex}
+                    </CommandShortcut>
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -71,8 +73,12 @@ export function MathPalette({ onInsert, trigger, nativeButton = true, className 
                   value={`${template.label} ${template.latex}`}
                   onSelect={() => onInsert(template.latex, template.caretOffset)}
                 >
-                  <span>{template.label}</span>
-                  <CommandShortcut>{template.latex}</CommandShortcut>
+                  {/* A long source (a matrix, a cases block) is cut to one line beside its name rather than
+                      wrapping under it, which read as a second entry; its title keeps it whole. */}
+                  <span className="shrink-0">{template.label}</span>
+                  <CommandShortcut title={template.latex} className="min-w-0 truncate">
+                    {template.latex}
+                  </CommandShortcut>
                 </CommandItem>
               ))}
             </CommandGroup>
