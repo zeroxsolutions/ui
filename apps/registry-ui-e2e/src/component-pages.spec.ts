@@ -4,6 +4,7 @@ import { expect, test } from './test/fixtures';
  * What WebKit logs when leaving a page cancels a link's RSC prefetch it started (`Fetch API cannot load
  * /?_rsc=... due to access control checks.`): the navigation the loop makes, not the page. A prefetch
  * can start after the network has settled, as a link scrolls into view, so waiting does not rule it out.
+ * It reaches the page as a console error or, when the router's fetch rejects unhandled, as a page error.
  */
 const ABORTED_PREFETCH = /\?_rsc=\S+ due to access control checks/;
 
@@ -25,7 +26,9 @@ test('every component page renders its preview, fits a phone without a stage scr
   expect(components.length).toBeGreaterThan(0);
 
   const errors: string[] = [];
-  page.on('pageerror', (error) => errors.push(`${page.url()}: ${error.message}`));
+  page.on('pageerror', (error) => {
+    if (!ABORTED_PREFETCH.test(error.message)) errors.push(`${page.url()}: ${error.message}`);
+  });
   page.on('console', (message) => {
     if (message.type() === 'error' && !ABORTED_PREFETCH.test(message.text())) {
       errors.push(`${page.url()}: ${message.text()}`);
