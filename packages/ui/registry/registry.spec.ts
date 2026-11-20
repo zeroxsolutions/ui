@@ -747,9 +747,12 @@ describe('declarationProblems', () => {
     expect(declarationProblems(bare, owners)).toEqual([
       'editor-mention: registryDependencies lacks @zui/document-editor',
     ]);
-    expect(declarationProblems({ ...bare, registryDependencies: [`${ITEM_PREFIX}document-editor`] }, owners)).toEqual(
-      [],
-    );
+    expect(
+      declarationProblems(
+        { ...bare, registryDependencies: [...bare.registryDependencies, `${ITEM_PREFIX}document-editor`] },
+        owners,
+      ),
+    ).toEqual([]);
   });
 
   it('requires document-editor of no editor item outside a feature folder', () => {

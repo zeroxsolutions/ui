@@ -91,4 +91,40 @@
   .cn-panel-header-row {
     @apply h-9;
   }
+
+  /* MARK: Editor */
+  /* cn-kbd's radius, on the trigger highlight and the highlight mark the engine paints */
+  .cn-editor-content {
+    @apply [&_.slash-active]:rounded-lg [&_mark]:rounded-lg;
+  }
+
+  /* cn-kbd's radius, an inline formula */
+  .cn-editor-inline {
+    @apply rounded-lg;
+  }
+
+  /* cn-alert's radius, an image, an embed or a formula block */
+  .cn-editor-block {
+    @apply rounded-2xl;
+  }
+
+  /* cn-card's ring, radius and shadow, a diagram */
+  .cn-editor-diagram {
+    @apply ring-foreground/5 dark:ring-foreground/10 rounded-[min(var(--radius-4xl),24px)] shadow-sm ring-1;
+  }
+
+  /* cn-dropdown-menu-content's ring, radius, padding and shadow */
+  .cn-editor-toolbar {
+    @apply ring-foreground/5 dark:ring-foreground/10 rounded-2xl p-1 shadow-lg ring-1;
+  }
+
+  /* cn-combobox-item's radius, a row of a menu filtered by what is typed */
+  .cn-editor-menu-item {
+    @apply rounded-xl;
+  }
+
+  /* cn-item-media-variant-image's radius, the tile a menu row's icon sits on */
+  .cn-editor-menu-media {
+    @apply rounded-xl;
+  }
 }

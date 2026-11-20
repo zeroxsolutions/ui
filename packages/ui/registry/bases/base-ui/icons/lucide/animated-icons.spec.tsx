@@ -211,6 +211,21 @@ describe('animated icons', () => {
       const glyphs = await Promise.all(cases.map(({ name }) => lucideNode(name.slice(0, -'-icon'.length))));
       motionState.real = true;
       motionState.reduced = false;
+      // Motion's frames run on a fake clock the walk advances, so every frame of every animation is drawn in
+      // order however loaded the machine is; on a real clock a starved runner's first frame came after a short
+      // animation had ended, and the icon read as never moved.
+      vi.useFakeTimers({
+        toFake: [
+          'setTimeout',
+          'clearTimeout',
+          'setInterval',
+          'clearInterval',
+          'requestAnimationFrame',
+          'cancelAnimationFrame',
+          'performance',
+          'Date',
+        ],
+      });
       const handles = cases.map(() => createRef<Handle>());
       const { container } = render(
         <>
@@ -266,6 +281,7 @@ describe('animated icons', () => {
       }
       stillIcons = walked.filter((icon) => icon.elements.length === 0).map((icon) => icon.name);
       cleanup();
+      vi.useRealTimers();
       motionState.real = false;
     }, WALK_TIMEOUT_MS);
 
@@ -283,8 +299,9 @@ describe('animated icons', () => {
   });
 });
 
-function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+/** Moves the walk's fake clock on, running every timer and frame due on the way. */
+async function wait(ms: number): Promise<void> {
+  await vi.advanceTimersByTimeAsync(ms);
 }
 
 /** One element of a Lucide glyph: its tag and the attributes that place it. */

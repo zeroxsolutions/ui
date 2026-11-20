@@ -46,14 +46,21 @@ const ALERT_TO_VARIANT: Record<string, Variant> = {
 
 /**
  * Presentational shell shared by the editable node view and the static
- * `toReact` codec, so both surfaces render identically. Layout is Tailwind
- * utilities; the per-variant colors live in `styles.css` keyed on
+ * `toReact` codec, so both surfaces render identically. Its surface is the
+ * `Alert`'s slots, without the component, whose `role="alert"` would announce
+ * every callout of a document as it renders; its body keeps the document's text
+ * size rather than the alert's, and its colors are the callout's own, never the
+ * alert variant's, whose utilities would outrank them. They live in `styles.css` keyed on
  * `[data-callout]` (design-system `--info` / `--success` / … tokens that flip
  * with `.dark`), so a callout is themed even in the engine-free Viewer.
  */
 function CalloutShell({ variant, children }: { variant: Variant; children: ReactNode }) {
   return (
-    <div data-slot="callout" data-callout={variant} className="my-4 flex items-start gap-3 rounded-lg border p-4">
+    <div
+      data-slot="callout"
+      data-callout={variant}
+      className="cn-alert my-4 flex items-start gap-3 text-[length:inherit]"
+    >
       <FluentEmoji
         glyph={ICON[variant]}
         name={variant}

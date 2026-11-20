@@ -125,7 +125,7 @@ export function ChatInput({ triggers, placeholder = 'Message...', onSubmit, onRe
         <div
           ref={wrapperRef}
           data-slot="input-group-control"
-          className="chat-composer [&_.ProseMirror]:text-foreground min-w-0 flex-1 [&_.ProseMirror]:min-h-6 [&_.ProseMirror]:py-1 [&_.ProseMirror]:text-sm"
+          className="cn-editor-content chat-composer [&_.ProseMirror]:text-foreground min-w-0 flex-1 [&_.ProseMirror]:min-h-6 [&_.ProseMirror]:py-1 [&_.ProseMirror]:text-sm"
         >
           <EditorContent editor={engine as never} />
         </div>

@@ -1,2 +1,5 @@
+/* Nova's slots, upstream's and zui's, layered as the site layers them, so a utility an item is handed in
+ * `className` wins over its slot, as it does once the build replaces the slot. */
 @import '../registry/bases/base-ui/styles.css' reference;
-@import '@zeroxsolutions/shadcn-upstream/snapshot/style-nova.css';
+@import '@zeroxsolutions/shadcn-upstream/snapshot/style-nova.css' layer(components);
+@import '../registry/styles/style-nova.css' layer(components);

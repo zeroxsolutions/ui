@@ -9,6 +9,7 @@ import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { CaretRect, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { RectPopover } from '../../document/ui/rect-popover';
+import { pinHorizontal } from '../../document/ui/selection-rect';
 import {
   defaultTriggerFilter,
   type TriggerOption,
@@ -81,6 +82,8 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
   // Position dismissed via Esc - suppress reopening at the same char until the
   // caret moves to a different trigger (or none).
   const dismissedFrom = useRef<number | null>(null);
+  // The trigger the menu's anchor was first read at, so a re-read keeps its left edge.
+  const openedFrom = useRef<number | null>(null);
 
   const ordered = useMemo(
     () => (token.filter ?? defaultTriggerFilter)(results, active?.query ?? ''),
@@ -101,6 +104,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
   useEffect(() => {
     const sync = () => {
       if (!editor.isEditable() || !editor.isFocused()) {
+        openedFrom.current = null;
         setActive(null);
         return;
       }
@@ -108,6 +112,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
       const gated = token.gate === 'line-start' && !charAtInputStart(editor, token.char);
       if (!query || gated) {
         dismissedFrom.current = null;
+        openedFrom.current = null;
         setActive(null);
         return;
       }
@@ -116,7 +121,11 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
         return;
       }
       setActive(query);
-      setPoint(editor.caretRect());
+      const caret = editor.caretRect();
+      // Read before the update: React may run the updater after the ref below has moved on.
+      const sameTrigger = openedFrom.current === query.from;
+      setPoint((opened) => (sameTrigger ? pinHorizontal(caret, opened) : caret));
+      openedFrom.current = query.from;
     };
     sync();
     const offSelection = editor.onSelectionUpdate(sync);
@@ -304,10 +313,13 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
                     // Keep the editor focused so the range survives the click.
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => select(option)}
-                    className={cn('cursor-pointer', highlighted && 'bg-accent text-accent-foreground')}
+                    className="cn-editor-menu-item data-highlighted:bg-accent data-highlighted:text-accent-foreground cursor-pointer"
                   >
                     {(option.icon as ReactNode) && (
-                      <ItemMedia variant="icon" className={token.menuMediaClassName ?? 'text-muted-foreground'}>
+                      <ItemMedia
+                        variant="icon"
+                        className={cn('cn-editor-menu-media', token.menuMediaClassName ?? 'text-muted-foreground')}
+                      >
                         {option.icon as ReactNode}
                       </ItemMedia>
                     )}

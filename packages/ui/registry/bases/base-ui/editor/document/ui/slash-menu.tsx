@@ -5,10 +5,10 @@ import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/regi
 import { Empty, EmptyDescription } from '@/registry/bases/base-ui/ui/empty';
 import { Popover } from '@/registry/bases/base-ui/ui/popover';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { CaretRect, IEditor, SlashItem, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { filterSlashItems, groupByHeading } from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
 import { RectPopover } from './rect-popover';
+import { pinHorizontal } from './selection-rect';
 import { CHROME_ICON_CLASS, ChromeIcon } from './chrome-icon';
 
 /**
@@ -49,6 +49,8 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
   // Position dismissed via Esc — suppresses reopening at the same `/` while the
   // text lingers, until the caret moves to a different trigger (or none).
   const dismissedFrom = useRef<number | null>(null);
+  // The trigger the menu's anchor was first read at, so a re-read keeps its left edge.
+  const openedFrom = useRef<number | null>(null);
 
   const filtered = useMemo(() => filterSlashItems(items, active?.query ?? ''), [items, active?.query]);
   const groups = useMemo(() => groupByHeading(filtered), [filtered]);
@@ -70,12 +72,14 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
   useEffect(() => {
     const sync = () => {
       if (!editor.isEditable() || !editor.isFocused()) {
+        openedFrom.current = null;
         setActive(null);
         return;
       }
       const query = editor.triggerQuery('/');
       if (!query) {
         dismissedFrom.current = null;
+        openedFrom.current = null;
         setActive(null);
         return;
       }
@@ -84,7 +88,11 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
         return;
       }
       setActive(query);
-      setPoint(editor.caretRect());
+      const caret = editor.caretRect();
+      // Read before the update: React may run the updater after the ref below has moved on.
+      const sameTrigger = openedFrom.current === query.from;
+      setPoint((opened) => (sameTrigger ? pinHorizontal(caret, opened) : caret));
+      openedFrom.current = query.from;
     };
     sync();
     // Engine-synced selection/focus events (not raw DOM `selectionchange`) so
@@ -211,9 +219,9 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
                         // Keep the editor focused so the selection/range survives the click.
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => select(item)}
-                        className={cn('cursor-pointer', highlighted && 'bg-accent text-accent-foreground')}
+                        className="cn-editor-menu-item data-highlighted:bg-accent data-highlighted:text-accent-foreground cursor-pointer"
                       >
-                        <ItemMedia variant="icon" className="bg-secondary size-8 rounded-md border text-base">
+                        <ItemMedia variant="icon" className="cn-editor-menu-media bg-secondary size-8 border text-base">
                           <ChromeIcon icon={item.icon} className={CHROME_ICON_CLASS} active={highlighted} />
                         </ItemMedia>
                         <ItemContent className="gap-0.5">

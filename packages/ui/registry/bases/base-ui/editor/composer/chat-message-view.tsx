@@ -33,7 +33,7 @@ export function ChatMessageView({ message, triggers, className }: ChatMessageVie
   return (
     <div
       className={cn(
-        'chat-composer inline-flex flex-wrap items-baseline gap-1.5 text-sm text-foreground [&_p]:m-0 [&_p]:inline',
+        'cn-editor-content chat-composer inline-flex flex-wrap items-baseline gap-1.5 text-sm text-foreground [&_p]:m-0 [&_p]:inline',
         className,
       )}
     >

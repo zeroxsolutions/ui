@@ -8,6 +8,7 @@ import {
   type GripVerticalIconHandle,
 } from '@/registry/bases/base-ui/icons/lucide/grip-vertical-icon';
 import { PlusIcon, type PlusIconHandle } from '@/registry/bases/base-ui/icons/lucide/plus-icon';
+import { Button } from '@/registry/bases/base-ui/ui/button';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/create-document-editor';
 import type { Delta } from '@zeroxsolutions/editor-core/document/core/types/delta';
@@ -242,17 +243,25 @@ export function Editor({ features, content, editable = true, className, onReady,
         // Its width comes from where it is placed, never from its content: a code line, a formula or a
         // diagram that does not wrap would otherwise widen the whole document instead of scrolling in its block.
         className={cn(
-          'document-editor prose max-w-none [contain:inline-size] text-base leading-relaxed focus:outline-none',
+          'cn-editor-content document-editor prose max-w-none [contain:inline-size] text-base leading-relaxed focus:outline-none',
           className,
         )}
       />
-      {gripHost && createPortal(<GripVerticalIcon ref={gripRef} size={16} aria-hidden />, gripHost)}
+      {gripHost &&
+        createPortal(
+          <span className="cn-button cn-button-variant-ghost cn-button-size-icon-sm flex size-full items-center justify-center">
+            <GripVerticalIcon ref={gripRef} size={16} aria-hidden />
+          </span>,
+          gripHost,
+        )}
       {plusHost &&
         plus &&
         !plus.hidden &&
         createPortal(
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             aria-label="Insert block below"
             draggable={false}
             data-editor-add
@@ -274,11 +283,12 @@ export function Editor({ features, content, editable = true, className, onReady,
                 });
               }
             }}
-            className="text-muted-foreground hover:bg-accent fixed z-40 flex size-6 items-center justify-center rounded-md opacity-55 transition hover:opacity-100"
+            // The gutter beside the grip is laid out for this size, whatever size the style draws.
+            className="text-muted-foreground fixed z-40 size-6 opacity-55 hover:opacity-100"
             style={{ top: plus.top, left: plus.left - 22 }}
           >
             <PlusIcon ref={plusRef} size={16} aria-hidden />
-          </button>,
+          </Button>,
           plusHost,
         )}
     </>

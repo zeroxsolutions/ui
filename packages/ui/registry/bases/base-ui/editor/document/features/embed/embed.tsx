@@ -33,7 +33,7 @@ const escapeHtml = (value: string): string =>
  */
 function EmbedFrame({ url, title }: { url: string; title: string }) {
   return (
-    <div data-slot="embed" data-embed contentEditable={false} className="my-4 overflow-hidden rounded-lg border">
+    <div data-slot="embed" data-embed contentEditable={false} className="cn-editor-block my-4 overflow-hidden border">
       <iframe src={url} title={title} loading="lazy" className="aspect-video h-full w-full border-0" />
     </div>
   );

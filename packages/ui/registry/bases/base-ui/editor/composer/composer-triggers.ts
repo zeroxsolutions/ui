@@ -76,7 +76,7 @@ export function mentionTrigger(source: MentionSource = {}): ComposerTrigger<'men
       id: String(attrs.id ?? ''),
       label: String(attrs.label ?? ''),
     }),
-    menuMediaClassName: 'size-8 rounded-md border bg-secondary text-base',
+    menuMediaClassName: 'size-8 border bg-secondary text-base',
     emptyText: 'No people found',
   });
   return { token, feature: mention() };

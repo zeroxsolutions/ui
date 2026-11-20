@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Badge } from '@/registry/bases/base-ui/ui/badge';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import {
   defineFeature,
@@ -77,18 +78,15 @@ export function inlineToken(spec: InlineTokenSpec): InlineToken {
 
   function TokenPill({ attrs, contentEditable }: { attrs: InlineTokenAttrs; contentEditable?: boolean }) {
     return (
-      <span
+      <Badge
         data-slot={kind}
         data-token-kind={kind}
         data-token-id={attrs.id}
         contentEditable={contentEditable}
-        className={cn(
-          'inline-flex items-center rounded-md bg-primary/10 px-1.5 py-0.5 text-sm font-medium text-primary',
-          spec.accentClass,
-        )}
+        className={cn('bg-primary/10 text-primary h-auto text-[length:inherit]', spec.accentClass)}
       >
         {tokenText(spec, attrs)}
-      </span>
+      </Badge>
     );
   }
 

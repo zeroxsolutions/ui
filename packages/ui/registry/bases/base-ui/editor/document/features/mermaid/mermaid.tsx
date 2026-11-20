@@ -124,7 +124,7 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
         <CollapsibleCardContent keepMounted>
           <Separator />
           <TabsContent value="view">
-            <DiagramPreview source={attrs.source} className="rounded-none border-0" />
+            <DiagramPreview source={attrs.source} className="rounded-none shadow-none ring-0" />
           </TabsContent>
           <TabsContent value="edit">
             <CodeMirrorPane

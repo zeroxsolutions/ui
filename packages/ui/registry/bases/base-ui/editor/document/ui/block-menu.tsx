@@ -8,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
+import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import { CHROME_ICON_CLASS, ChromeControl } from './chrome-icon';
 import type { BlockMenuItem, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
@@ -61,13 +62,15 @@ export function BlockMenu({ editor, items, container }: BlockMenuProps) {
               render={
                 <TooltipTrigger
                   render={
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon-sm"
                       aria-label="Block actions"
-                      className="text-muted-foreground hover:bg-accent flex h-6 w-5 cursor-grab items-center justify-center rounded opacity-60 transition hover:opacity-100"
+                      className="text-muted-foreground h-6 w-5 cursor-grab opacity-60 hover:opacity-100"
                     >
                       ⋮⋮
-                    </button>
+                    </Button>
                   }
                 />
               }

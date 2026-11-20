@@ -37,7 +37,7 @@ export function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<Toggl
         contentEditable={false}
         {...marker.handlers}
         onClick={() => updateAttrs({ open: !attrs.open })}
-        className="text-muted-foreground hover:bg-accent mt-0.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md select-none"
+        className="cn-button cn-button-variant-ghost cn-button-size-icon-sm text-muted-foreground mt-0.5 flex size-6 shrink-0 cursor-pointer items-center justify-center select-none"
       >
         <ChromeIcon
           icon={ChevronRightIcon}
@@ -67,7 +67,7 @@ const toggleCodec: ReactNodeCodec<ToggleAttrs> = {
     // line. The browser still hides the non-summary flex item when closed, so the
     // native open/close keeps working with zero JS.
     <details data-slot="toggle" className="group my-2 flex items-start gap-1" open={node.attrs?.open ?? true}>
-      <summary className="text-muted-foreground hover:bg-accent mt-0.5 flex size-6 shrink-0 cursor-pointer list-none items-center justify-center rounded-md select-none [&::-webkit-details-marker]:hidden">
+      <summary className="cn-button cn-button-variant-ghost cn-button-size-icon-sm text-muted-foreground mt-0.5 flex size-6 shrink-0 cursor-pointer list-none items-center justify-center select-none [&::-webkit-details-marker]:hidden">
         <span aria-hidden className="inline-block leading-none transition-transform group-open:rotate-90">
           ▸
         </span>
