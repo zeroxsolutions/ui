@@ -79,17 +79,20 @@ describe('IconGrid', () => {
     await expect.element(page.getByTestId('lucide-arrow-up-icon')).toBeInTheDocument();
     const handle = handles.get('lucide-arrow-up-icon');
 
+    // The tile plays its icon from an effect after the state the event set, so each count is waited for.
+    const calls = (fn: (() => void) | undefined) => () =>
+      (fn as ReturnType<typeof vi.fn> | undefined)?.mock.calls.length;
     await userEvent.hover(tile);
-    expect(handle?.startAnimation).toHaveBeenCalledTimes(1);
+    await expect.poll(calls(handle?.startAnimation)).toBe(1);
     await userEvent.unhover(tile);
-    expect(handle?.stopAnimation).toHaveBeenCalledTimes(1);
+    await expect.poll(calls(handle?.stopAnimation)).toBe(1);
 
     await userEvent.tab();
     await expect.element(tile).toHaveFocus();
-    expect(handle?.startAnimation).toHaveBeenCalledTimes(2);
+    await expect.poll(calls(handle?.startAnimation)).toBe(2);
     await userEvent.tab();
-    expect(handle?.stopAnimation).toHaveBeenCalledTimes(2);
-    expect(handles.get('lucide-arrow-up-right-icon')?.startAnimation).toHaveBeenCalledTimes(1);
+    await expect.poll(calls(handle?.stopAnimation)).toBe(2);
+    await expect.poll(calls(handles.get('lucide-arrow-up-right-icon')?.startAnimation)).toBe(1);
   });
 
   it('hands the picked tile its item name', async () => {
