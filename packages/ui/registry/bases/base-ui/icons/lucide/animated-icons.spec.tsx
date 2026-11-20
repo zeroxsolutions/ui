@@ -249,6 +249,17 @@ describe('animated icons', () => {
         const elements = [...container.querySelectorAll(`[data-icon="${name}"] [data-walk]`)];
         return { name, elements, rest: elements.map(attributesOf), moved: elements.map(() => false) };
       });
+      // Every write is seen as it lands: a sample taken on a timer misses a short move on a loaded runner,
+      // where two reads can be further apart than the move lasts.
+      const observer = new MutationObserver((records) => {
+        for (const { target } of records) {
+          for (const icon of walked) {
+            const index = icon.elements.indexOf(target as Element);
+            if (index >= 0 && attributesOf(icon.elements[index]) !== icon.rest[index]) icon.moved[index] = true;
+          }
+        }
+      });
+      for (const icon of walked) for (const element of icon.elements) observer.observe(element, { attributes: true });
       for (const handle of handles) handle.current?.startAnimation();
       for (let elapsed = 0; elapsed < WINDOW_MS; elapsed += SAMPLE_MS) {
         await wait(SAMPLE_MS);
@@ -258,6 +269,7 @@ describe('animated icons', () => {
           });
         }
       }
+      observer.disconnect();
       for (const icon of walked) {
         unmoved.set(
           icon.name,
