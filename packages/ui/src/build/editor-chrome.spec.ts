@@ -60,6 +60,7 @@ const PIECES: Record<string, string[]> = {
   'composer/triggers/trigger-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media'],
   'document/features/mention/mention.tsx': ['<Badge'],
   'composer/triggers/inline-token.tsx': ['<Badge'],
+  'profiles/variables/variable.tsx': ['<Badge'],
   'document/features/callout/callout.tsx': ['cn-alert'],
   'document/features/toggle/toggle.tsx': ['cn-button cn-button-variant-ghost cn-button-size-icon-sm'],
   'document/react/editor.tsx': [
