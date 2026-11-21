@@ -4,7 +4,7 @@ import type { Editor } from '../../document/advanced.js';
 import { createDocumentEditor } from '../../document/core/create-document-editor.js';
 import type { EditorFeature, IEditor, NodeJSON } from '../../document/core/types/index.js';
 import { blockIdentity, type BlockIdentityOptions } from './block-identity.js';
-import { emailNodeSpecs } from './email-nodes.js';
+import { emailNodeSpecs } from '../core/email-nodes.js';
 
 const email: EditorFeature = { id: 'email', nodes: emailNodeSpecs.nodes, marks: emailNodeSpecs.marks };
 const undoable: EditorFeature = { id: 'history', advanced: { prosePlugins: [history()] } };

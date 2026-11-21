@@ -18,10 +18,9 @@ import {
   type NodeJSON,
   type SlashItem,
 } from '@zeroxsolutions/editor-core/document/core/index';
+import { blockIdentity, type BlockIdentityOptions } from '@zeroxsolutions/editor-core/profiles/editor/index';
 import {
-  blockIdentity,
   EMAIL_KINDS,
-  type BlockIdentityOptions,
   type EditorProfile,
   type EmailBlockKind,
   type VariableDeclaration,

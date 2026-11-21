@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { CONTENT_LOAD_META, Extension, Plugin, PluginKey, facadeFor } from '../../document/advanced.js';
 import type { Editor, EngineHandle } from '../../document/advanced.js';
 import type { EditorFeature, IEditor, NodeJSON } from '../../document/core/types/index.js';
-import { EMAIL_BLOCK_NODES } from './email-nodes.js';
+import { EMAIL_BLOCK_NODES } from '../core/email-nodes.js';
 
 type EngineState = Editor['state'];
 type EngineNode = EngineState['doc'];
