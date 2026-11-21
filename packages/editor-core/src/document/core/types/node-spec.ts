@@ -50,6 +50,8 @@ export interface NodeSpec<A = Record<string, unknown>> {
    *  the wrapper tag the schema serializes to and parses from. Richer HTML
    *  handling belongs in the node's codec (see `NodeCodec`). */
   htmlTag?: string;
+  /** The plain text a leaf node reads as when it is copied as text or read with `getText`. */
+  text?(attrs: A): string;
 }
 
 /**

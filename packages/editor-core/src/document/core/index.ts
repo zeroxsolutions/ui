@@ -48,6 +48,7 @@ export type {
   SlashItem,
   Snapshot,
   ToolbarItem,
+  TriggerBoundary,
   TriggerQuery,
 } from './types/index.js';
 

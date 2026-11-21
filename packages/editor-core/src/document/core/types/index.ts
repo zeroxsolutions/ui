@@ -13,7 +13,15 @@ export type {
   DocumentChangeHandlers,
   IDocumentBackend,
 } from './document-backend.js';
-export type { CaretRect, EditorSelection, EditorStatus, FocusPosition, IEditor, TriggerQuery } from './editor.js';
+export type {
+  CaretRect,
+  EditorSelection,
+  EditorStatus,
+  FocusPosition,
+  IEditor,
+  TriggerBoundary,
+  TriggerQuery,
+} from './editor.js';
 export type { CommandDescriptor, CommandMap } from './command.js';
 export type { NodeViewProps } from './node-view.js';
 export type { ContentExpression, InputRuleSpec, MarkSpec, NodeSpec, NodeViewRenderer } from './node-spec.js';

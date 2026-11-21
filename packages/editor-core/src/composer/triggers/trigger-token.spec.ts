@@ -32,6 +32,7 @@ describe('archetype presets', () => {
     expect(token).toMatchObject({
       archetype: 'reference',
       gate: 'anywhere',
+      boundary: 'whitespace',
       multiplicity: 'many',
       commitOnSpace: false,
       backspaceRestore: false,
@@ -44,6 +45,7 @@ describe('archetype presets', () => {
     expect(token).toMatchObject({
       archetype: 'invocation',
       gate: 'line-start',
+      boundary: 'whitespace',
       multiplicity: 'one-leading',
       commitOnSpace: true,
       backspaceRestore: true,
@@ -66,6 +68,13 @@ describe('archetype presets', () => {
     // untouched invocation defaults remain
     expect(token.gate).toBe('line-start');
     expect(token.commitOnSpace).toBe(true);
+  });
+});
+
+describe('the boundary before the char', () => {
+  it('opens after anything when a token asks for it', () => {
+    const token = referenceToken('variable', '{{', config({ boundary: 'any' }));
+    expect(token.boundary).toBe('any');
   });
 });
 

@@ -47,6 +47,7 @@ function compileNode(spec: NodeSpec, renderer?: NodeViewRenderer): Node {
     draggable: spec.draggable,
     defining: spec.defining,
     addAttributes: () => deriveAttributes(spec.attrs),
+    renderText: spec.text ? ({ node }) => spec.text?.(node.attrs) ?? '' : undefined,
     parseHTML: () => [{ tag: spec.htmlTag ?? `[data-type="${spec.name}"]` }],
     renderHTML: ({ HTMLAttributes }) => {
       const attrs = mergeAttributes({ 'data-type': spec.name }, HTMLAttributes);

@@ -1,4 +1,4 @@
-import type { IEditor } from '../../document/core/index.js';
+import type { IEditor, TriggerBoundary } from '../../document/core/index.js';
 
 /**
  * A trigger token is the composer's unit of extensibility: registering one
@@ -64,6 +64,8 @@ export interface TriggerToken<Kind extends string = string, Ref = unknown> {
   char: string;
   archetype: TriggerArchetype;
   gate: TriggerGate;
+  /** What may stand right before the char: whitespace or the block's start (`@`, `/`), or anything (`{{`). */
+  boundary: TriggerBoundary;
   multiplicity: TriggerMultiplicity;
   /** Commit when the typed query exactly equals an option's slug/label + space. */
   commitOnSpace: boolean;
@@ -98,6 +100,7 @@ export interface TriggerTokenConfig<Kind extends string, Ref> extends Partial<
   Pick<
     TriggerToken<Kind, Ref>,
     | 'gate'
+    | 'boundary'
     | 'multiplicity'
     | 'commitOnSpace'
     | 'backspaceRestore'
@@ -139,10 +142,11 @@ export class DuplicateTriggerError extends Error {
 
 const ARCHETYPE_DEFAULTS: Record<
   TriggerArchetype,
-  Pick<TriggerToken, 'gate' | 'multiplicity' | 'commitOnSpace' | 'backspaceRestore' | 'queryField'>
+  Pick<TriggerToken, 'gate' | 'boundary' | 'multiplicity' | 'commitOnSpace' | 'backspaceRestore' | 'queryField'>
 > = {
   reference: {
     gate: 'anywhere',
+    boundary: 'whitespace',
     multiplicity: 'many',
     commitOnSpace: false,
     backspaceRestore: false,
@@ -150,6 +154,7 @@ const ARCHETYPE_DEFAULTS: Record<
   },
   invocation: {
     gate: 'line-start',
+    boundary: 'whitespace',
     multiplicity: 'one-leading',
     commitOnSpace: true,
     backspaceRestore: true,
@@ -157,6 +162,7 @@ const ARCHETYPE_DEFAULTS: Record<
   },
   insertion: {
     gate: 'anywhere',
+    boundary: 'whitespace',
     multiplicity: 'many',
     commitOnSpace: false,
     backspaceRestore: false,
@@ -197,6 +203,7 @@ function resolveToken<Kind extends string, Ref>(
     char,
     archetype,
     gate: config.gate ?? defaults.gate,
+    boundary: config.boundary ?? defaults.boundary,
     multiplicity: config.multiplicity ?? defaults.multiplicity,
     commitOnSpace: config.commitOnSpace ?? defaults.commitOnSpace,
     backspaceRestore: config.backspaceRestore ?? defaults.backspaceRestore,

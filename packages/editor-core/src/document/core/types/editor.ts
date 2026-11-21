@@ -45,6 +45,9 @@ export interface CaretRect {
  *  through the caret — so the chrome can delete `char…query` when an item is
  *  chosen, keeping the Notion-style inline flow where the `/` stays visible in
  *  the text while the menu filters. */
+/** What may stand right before a trigger char: whitespace or the block's start, or anything at all. */
+export type TriggerBoundary = 'whitespace' | 'any';
+
 export interface TriggerQuery {
   /** The run of non-space characters typed after the trigger char. */
   query: string;
@@ -85,10 +88,11 @@ export interface IEditor {
   caretRect(): CaretRect | null;
   /** For an inline trigger menu (slash `/`, mention `@`): when the collapsed
    *  caret sits in a textblock right after `char` followed by a run of non-space
-   *  query chars — and `char` began the block or followed whitespace — returns
-   *  that query and the `char…caret` document range. Null otherwise. Drives the
-   *  Notion-style inline slash menu (the `/` stays typed in the document). */
-  triggerQuery(char: string): TriggerQuery | null;
+   *  query chars - and `char` began the block or followed whitespace, or followed
+   *  anything under `boundary: 'any'` - returns that query and the `char...caret`
+   *  document range. Null otherwise. Drives the Notion-style inline slash menu
+   *  (the `/` stays typed in the document). */
+  triggerQuery(char: string, options?: { boundary?: TriggerBoundary }): TriggerQuery | null;
   /** Paint (or clear) the slash menu's inline decoration — all engine-side, so
    *  it mutates no document content. `from…to` gets the gray `/query` highlight;
    *  `ghost` (when set) renders faint inline text right after the caret — the
