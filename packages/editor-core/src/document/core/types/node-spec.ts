@@ -27,10 +27,13 @@ export type ContentExpression =
 export interface NodeSpec<A = Record<string, unknown>> {
   /** Unique node type name (matches the JSON `type`). */
   name: string;
-  /** Whether the node sits in the block or inline flow. */
-  group: 'block' | 'inline';
+  /** Whether the node sits in the block or inline flow. Omit it for a node that sits only where a parent's
+   *  content expression names it, such as a list's item, so no other block can hold it. */
+  group?: 'block' | 'inline';
   /** What the node may contain; omit for an atom/leaf. */
   content?: ContentExpression;
+  /** The marks its content may carry, by name, space-separated; `''` for none. Omit for every mark. */
+  marks?: string;
   /** A leaf node with no editable content (image, mention, …). */
   atom?: boolean;
   /** Whether the node can be dragged by the block handle. */

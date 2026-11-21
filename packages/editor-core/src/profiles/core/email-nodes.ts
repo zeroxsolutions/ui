@@ -36,7 +36,8 @@ function block(name: string, spec: Partial<NodeSpec>, shape: z.ZodRawShape): Nod
  * The email profile's nodes and marks. The paragraph is the core's own, carrying `align`, `spaceAfter`,
  * `tone` and `source` as global attributes, so it is not listed here. No node declares `id` or `key`:
  * `blockIdentity` owns them, on the paragraph and on every type in `EMAIL_BLOCK_NODES`, so it can keep
- * them out of HTML, which a node's own attributes cannot.
+ * them out of HTML, which a node's own attributes cannot. A list item and a lane are in no group, so only a list
+ * or a columns block holds one; code and html carry no mark, since the export stores them as plain text.
  */
 export const emailNodeSpecs: { nodes: NodeSpec[]; marks: MarkSpec[] } = {
   nodes: [
@@ -51,14 +52,14 @@ export const emailNodeSpecs: { nodes: NodeSpec[]; marks: MarkSpec[] } = {
         width: z.enum(['inline', 'full']).optional(),
       },
     ),
-    block('emailCode', { content: 'text*' }, { align, spaceAfter }),
+    block('emailCode', { content: 'text*', marks: '' }, { align, spaceAfter }),
     block('emailList', { content: 'emailListItem+' }, { align, spaceAfter }),
-    { name: 'emailListItem', group: 'block', content: 'inline*', defining: true, attrs: z.object({ source }) },
+    { name: 'emailListItem', content: 'inline*', defining: true, attrs: z.object({ source }) },
     block('emailCallout', { content: 'inline*' }, { align, spaceAfter, source }),
     block('emailDivider', { atom: true }, { spaceAfter }),
-    block('emailColumns', { content: 'emailLane+' }, { ratio: z.array(z.number()).optional() }),
-    { name: 'emailLane', group: 'block', content: 'block*', defining: true },
-    block('emailHtml', { content: 'text*' }, { spaceAfter }),
+    block('emailColumns', { content: 'emailLane+' }, { ratio: z.array(z.number()).optional(), spaceAfter }),
+    { name: 'emailLane', content: 'block*', defining: true },
+    block('emailHtml', { content: 'text*', marks: '' }, { spaceAfter }),
     block('emailUnknown', { atom: true }, { block: z.unknown().optional() }),
     { name: 'variable', group: 'inline', atom: true, attrs: z.object({ name: z.string() }) },
   ],

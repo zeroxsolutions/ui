@@ -41,6 +41,7 @@ function compileNode(spec: NodeSpec, renderer?: NodeViewRenderer): Node {
     name: spec.name,
     group: spec.group,
     content: spec.content,
+    marks: spec.marks,
     inline: spec.group === 'inline',
     atom: spec.atom,
     selectable: spec.selectable,
