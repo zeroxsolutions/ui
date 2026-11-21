@@ -1,0 +1,308 @@
+---
+title: Email Editor
+description: A block editor for an email's body, with {{name}} variables, whose blocks and links stay inside what the email renderer prints, and a live preview.
+---
+
+<ComponentPreview name="email-editor-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/email-editor
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @tiptap/extensions @zeroxsolutions/editor-core lucide-react zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button combobox badge dropdown-menu separator tooltip utils @zui/chat-input @zui/document-editor @zui/lucide-code-icon @zui/lucide-info-icon @zui/lucide-italic-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-letter-b-icon @zui/lucide-list-icon @zui/lucide-minus-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-text-align-start-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="email-editor" title="components/editor/profiles/email/block-attributes-menu.tsx" />
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/email-editor.tsx"
+  title="components/editor/profiles/email/email-editor.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/email-kit.ts"
+  title="components/editor/profiles/email/email-kit.ts"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/kit-context.ts"
+  title="components/editor/profiles/email/kit-context.ts"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/marks.ts"
+  title="components/editor/profiles/email/marks.ts"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/nodes/block-style.ts"
+  title="components/editor/profiles/email/nodes/block-style.ts"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/nodes/button.tsx"
+  title="components/editor/profiles/email/nodes/button.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/nodes/callout.tsx"
+  title="components/editor/profiles/email/nodes/callout.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/nodes/code.tsx"
+  title="components/editor/profiles/email/nodes/code.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/nodes/columns.tsx"
+  title="components/editor/profiles/email/nodes/columns.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/nodes/divider.tsx"
+  title="components/editor/profiles/email/nodes/divider.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/nodes/html.tsx"
+  title="components/editor/profiles/email/nodes/html.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/nodes/list.tsx"
+  title="components/editor/profiles/email/nodes/list.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/nodes/unknown.tsx"
+  title="components/editor/profiles/email/nodes/unknown.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/problem-decorations.ts"
+  title="components/editor/profiles/email/problem-decorations.ts"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/url-variable-picker.tsx"
+  title="components/editor/profiles/email/url-variable-picker.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/problem-marker.tsx"
+  title="components/editor/profiles/problem-marker.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/problem-messages.ts"
+  title="components/editor/profiles/problem-messages.ts"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/problem-navigation.ts"
+  title="components/editor/profiles/problem-navigation.ts"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/variables/variable-menu.tsx"
+  title="components/editor/profiles/variables/variable-menu.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/variables/variable.tsx"
+  title="components/editor/profiles/variables/variable.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { emailProfile, type EditorEmailBlock } from '@zeroxsolutions/editor-core/profiles/index';
+import { createEmailRenderer } from '@zeroxsolutions/editor-core/template/email/index';
+
+import { EmailEditor } from '@/components/editor/profiles/email/email-editor';
+```
+
+```tsx
+const profile = emailProfile({
+  variables: [
+    { name: 'first_name', type: 'string', label: 'First name', sampleValue: 'Lan' },
+    {
+      name: 'trip_url',
+      type: 'url',
+      label: 'Trip link',
+      sampleValue: 'https://trip-vietnam.com/trips/hoi-an',
+      required: true,
+    },
+  ],
+});
+// `theme` is the renderer's EmailTheme and `layoutProps` the logo and footer its layout takes; the demo defines both.
+const renderer = createEmailRenderer({ theme });
+
+function Template({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blocks: EditorEmailBlock[]) => void }) {
+  return (
+    <EmailEditor
+      profile={profile}
+      value={blocks}
+      onChange={save}
+      renderer={renderer}
+      previewInput={{ subject: 'Your trip starts soon', preheader: null, locale: 'en', layoutProps }}
+    />
+  );
+}
+```
+
+The editor states an email as the blocks the renderer takes: `paragraph`, `button`, `code`, `list`, `callout`, `divider`, `columns` and `html`. It never fills a variable with a real value, and it never refuses an edit because of a problem: it marks the problem and reports it.
+
+## API reference
+
+### EmailEditor
+
+| Prop                   | Type                                             | Default  |
+| ---------------------- | ------------------------------------------------ | -------- |
+| `profile`              | `EditorProfile`                                  | -        |
+| `value`                | `EditorEmailBlock[]`                             | -        |
+| `renderer`             | `EmailPreviewRenderer`                           | -        |
+| `previewInput`         | `EmailPreviewInput`                              | -        |
+| `features`             | `EditorFeature[]`                                | -        |
+| `required`             | `readonly string[]`                              | -        |
+| `structure`            | `'free' \| 'locked'`                             | `'free'` |
+| `className`            | `string`                                         | -        |
+| `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        |
+| `onBlur`               | `() => void`                                     | -        |
+| `onValidate`           | `(problems: ProfileProblem[]) => void`           | -        |
+| `renderBlockAdornment` | `(id: string \| null, key: string) => ReactNode` | -        |
+| `onReady`              | `(editor: IEditor) => void`                      | -        |
+
+`renderer` and `previewInput` come together: the preview is drawn only with a renderer, and a renderer needs the subject, locale and layout it renders in. `previewInput` is a render's input without `blocks`, `variables` and `variableTypes`, which the editor fills from the document and the declarations' `sampleValue`.
+
+`required` lists the ids of the blocks the author may not remove. `structure="locked"` lets the author edit text and variables only: nothing is inserted, removed or restyled. `renderBlockAdornment` draws what the host wants beside a block, such as a translation's standing; `id` is null for a block not saved yet, so `key` identifies it. `features` adds the host's own blocks, each with an email codec, and is read once: a change needs a remount.
+
+`emailProfile` takes `allow` (the block kinds the author may use, all eight by default), `variables`, `extraKinds` (the kinds of the host's own `features`) and `bounds`, a partial of the limits below:
+
+| Bound       | Default | Limits                                          |
+| ----------- | ------- | ----------------------------------------------- |
+| `text`      | 5000    | characters of a paragraph, callout or list item |
+| `label`     | 200     | characters of a button's label                  |
+| `href`      | 2000    | characters of a button's link                   |
+| `listItems` | 20      | items of a list                                 |
+| `blocks`    | 50      | blocks in all; a lane's blocks count            |
+| `lanes`     | 4       | lanes of a columns block                        |
+| `variables` | 20      | declared variables                              |
+
+The defaults of `text`, `label`, `href`, `listItems` and `lanes` are what the renderer accepts, so a bound can go lower, never higher: a higher one throws `editor.profile.bound_above_renderer`. Columns hold one level only.
+
+## Variables
+
+Declare each variable once, in the profile, with a `name` of word characters, a `type` of `string`, `duration`, `url` or `email`, and optionally a `label`, a `sampleValue` and `required`. A token is written `{{name}}`.
+
+Typing `{{` at any position opens the variable menu, and the toolbar's variable button opens it too; picking one inserts a pill. A button's link takes one `url` variable, and a text link points to one `url` variable too. A `required` variable that no block prints is a problem.
+
+When the declarations change, hand the editor a new profile: it reads the new declarations and redraws its pills and problems itself. If a host edits the declarations in place instead, call `refreshVariables(editor)` with the editor `onReady` gave it, so every pill reads its label and its problem again:
+
+```tsx
+import { refreshVariables } from '@/components/editor/profiles/variables/variable';
+
+refreshVariables(editor);
+```
+
+## Validation
+
+`onValidate` receives the problems on mount and whenever the list changes. Each marks its block in the editor, and the server reads the same list with `validate(blocks, profile)` from `@zeroxsolutions/editor-core/profiles/index`, so build the same profile on both sides.
+
+| Kind                            | Message                                  |
+| ------------------------------- | ---------------------------------------- |
+| `variable-undeclared`           | This variable is not declared            |
+| `href-not-url-variable`         | The link must be one link variable       |
+| `link-not-url-variable`         | A link can only point to a link variable |
+| `required-variable-not-printed` | A required variable is not used          |
+| `markup-malformed`              | The formatting is not closed             |
+| `block-not-allowed`             | This block is not allowed here           |
+| `unknown-block-type`            | This block is of an unknown type         |
+| `block-nested-too-deep`         | Columns cannot hold columns              |
+| `lanes-mismatch`                | The columns do not match their widths    |
+| `text-empty`                    | This block is empty                      |
+| `text-too-long`                 | This text is too long                    |
+| `list-too-long`                 | This list has too many items             |
+| `too-many-blocks`               | The email has too many blocks            |
+
+A message about a variable names it, as in `This variable is not declared: {{trip_name}}`. The wording lives in `problem-messages.ts`, so a host can replace it.
+
+F8 moves the caret to the next problem and Shift+F8 to the previous one; Escape on a problem's marker goes back to its block.
+
+## Markup
+
+A paragraph, a callout and a list item carry text in a small markup, which the editor shows as formatting:
+
+| Write                  | Reads as                            |
+| ---------------------- | ----------------------------------- |
+| `**bold**`             | bold                                |
+| `_italic_`             | italic                              |
+| `[label]({{name}})`    | a link to the `url` variable `name` |
+| `\*`, `\_`, `\[`, `\\` | the character itself, not markup    |
+
+A backslash escapes the next character. A `**`, `_` or `[` left open is a `markup-malformed` problem.
+
+## Hosting the value
+
+`value` is the document the editor shows. Hand back what `onChange` gave you; do not rebuild it or refetch it into `value` while the author is editing. After a save, run `assignBlockIds` on the blocks the server answered with, so a block the editor added keeps its identity. Pass a different `value` only to load another document, such as another locale; a value that differs from the editor's replaces it and drops the edits made since. Remounting the editor with a `key` loads one as well.
+
+## Travel
+
+Travel keeps one template per message and locale, whose body is these blocks. Its profile declares the variables the message may print, such as `first_name` and `trip_url`, and marks `trip_url` required for a message whose only job is to open the trip. The renderer that prints the preview is the one the sending service renders with, so the preview is the email a traveller receives.

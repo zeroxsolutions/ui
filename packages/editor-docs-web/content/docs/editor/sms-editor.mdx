@@ -1,0 +1,136 @@
+---
+title: SMS Editor
+description: A plain-text editor for one SMS body with {{name}} variables and a meter of the segments it will cost.
+---
+
+<ComponentPreview name="sms-editor-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/sms-editor
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @tiptap/extensions @zeroxsolutions/editor-core
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add tooltip utils @zui/chat-input @zui/document-editor @zui/email-editor
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="sms-editor" title="components/editor/profiles/sms/sms-editor.tsx" />
+
+<ComponentSource
+  name="sms-editor"
+  file="registry/bases/base-ui/editor/profiles/sms/sms-kit.ts"
+  title="components/editor/profiles/sms/sms-kit.ts"
+/>
+
+<ComponentSource
+  name="sms-editor"
+  file="registry/bases/base-ui/editor/profiles/sms/sms-meter.tsx"
+  title="components/editor/profiles/sms/sms-meter.tsx"
+/>
+
+<ComponentSource
+  name="sms-editor"
+  file="registry/bases/base-ui/editor/profiles/sms/sms-problems.ts"
+  title="components/editor/profiles/sms/sms-problems.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+Installing it also installs the email editor's files, since the variable pills and the problem markers are shared between the two.
+
+## Usage
+
+```tsx
+import { smsProfile } from '@zeroxsolutions/editor-core/profiles/index';
+
+import { SmsEditor } from '@/components/editor/profiles/sms/sms-editor';
+```
+
+```tsx
+const profile = smsProfile({ variables: [{ name: 'code', type: 'string', label: 'Code', sampleValue: '482913' }] });
+
+function OtpMessage({ body, save }: { body: string; save: (body: string) => void }) {
+  return <SmsEditor profile={profile} value={body} onChange={save} />;
+}
+```
+
+The body is plain text with no block and no mark; the only structure in it is a `{{name}}` variable. The meter under it counts the units the body uses of a segment in its encoding (GSM-7 or UCS-2), reading each variable as its literal `{{name}}` text, and turns to the `sms-segment-exceeded` problem when the body needs more segments than `maxSegments` allows (one by default).
+
+## API reference
+
+### SmsEditor
+
+| Prop         | Type                                   | Default |
+| ------------ | -------------------------------------- | ------- |
+| `profile`    | `EditorProfile`                        | -       |
+| `value`      | `string`                               | -       |
+| `className`  | `string`                               | -       |
+| `onChange`   | `(body: string) => void`               | -       |
+| `onBlur`     | `() => void`                           | -       |
+| `onValidate` | `(problems: ProfileProblem[]) => void` | -       |
+| `onReady`    | `(editor: IEditor) => void`            | -       |
+
+`smsProfile` takes `variables` and `maxSegments`.
+
+## Variables
+
+Declare each variable once, in the profile, with a `name` of word characters, a `type` of `string`, `duration`, `url` or `email`, and optionally a `label`, a `sampleValue` and `required`. Typing `{{` at any position opens the variable menu and picking one inserts a pill; a pill that is not declared is marked. A `required` variable that the body does not print is a problem.
+
+When the declarations change, hand the editor a new profile and it redraws its pills itself. A host that edits the declarations in place calls `refreshVariables(editor)`, from `@/components/editor/profiles/variables/variable`, so every pill reads its label again.
+
+## Validation
+
+`onValidate` receives the problems on mount and whenever the list changes, and the server reads the same list with `validate` from `@zeroxsolutions/editor-core/profiles/index`.
+
+| Kind                            | Message                            |
+| ------------------------------- | ---------------------------------- |
+| `variable-undeclared`           | This variable is not declared      |
+| `required-variable-not-printed` | A required variable is not used    |
+| `sms-segment-exceeded`          | The message is longer than allowed |
+| `sms-placeholder-malformed`     | A variable is not closed           |
+
+A message about a variable names it. F8 moves the caret to the next problem and Shift+F8 to the previous one; Escape on a problem's marker goes back to its text.
+
+## Markup
+
+The body has no formatting, so `**`, `_` and `[label](...)` are the characters they are. The one markup is `{{name}}`. Pasting several lines keeps each as a line.
+
+## Hosting the value
+
+`value` is the body the editor shows. Hand back what `onChange` gave you; pass a different `value` only to open another body, since one that differs from the editor's replaces it and drops the edits made since.
+
+## Travel
+
+Travel sends the sign-in code and the departure reminder by SMS from a body written here, one per locale. The OTP body declares `code` and stays within one segment, because a second segment is a second message billed to the traveller's carrier.

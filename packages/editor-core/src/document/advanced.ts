@@ -12,9 +12,15 @@
  *
  * Subpath: `@zeroxsolutions/editor-core/document/advanced`.
  */
-export { Extension, Mark, Node, mergeAttributes } from '@tiptap/core';
+export { Extension, InputRule, Mark, Node, mergeAttributes } from '@tiptap/core';
 export type { Editor, Extensions } from '@tiptap/core';
-export { Plugin, PluginKey } from '@tiptap/pm/state';
+export { Plugin, PluginKey, Selection } from '@tiptap/pm/state';
+export { Decoration, DecorationSet } from '@tiptap/pm/view';
+export type { EditorView } from '@tiptap/pm/view';
+export { Fragment, Slice } from '@tiptap/pm/model';
+export { isHistoryTransaction } from '@tiptap/pm/history';
+export type { Node as ProseMirrorNode, NodeType } from '@tiptap/pm/model';
 export type { AdvancedContribution } from './core/types/feature.js';
+export { CONTENT_LOAD_META } from './core/engine/content-load.js';
 export { facadeFor } from './core/engine/facade-registry.js';
 export type { EngineHandle } from './core/engine/engine-handle.js';

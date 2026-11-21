@@ -74,6 +74,9 @@ describe('IconGrid', () => {
   });
 
   it("starts a tile's icon as the pointer enters it and as it takes focus, and stops it as either leaves", async () => {
+    // The pointer rests where an earlier spec left it. A tile mounting under it takes the pointer's enter before
+    // its icon is drawn, so the icon would never see the hover below as a change.
+    await userEvent.unhover(document.body);
     await renderGrid({ query: 'arrow-up' });
     const tile = page.getByRole('button', { name: 'arrow-up', exact: true });
     await expect.element(page.getByTestId('lucide-arrow-up-icon')).toBeInTheDocument();

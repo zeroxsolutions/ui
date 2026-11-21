@@ -1,5 +1,6 @@
 import type { Editor } from '@tiptap/core';
 import { z } from 'zod';
+import { CONTENT_LOAD_META } from '../engine/content-load.js';
 import type { EngineHandle } from '../engine/engine-handle.js';
 import type { ResolvedCommand } from './command-registry.js';
 
@@ -15,6 +16,21 @@ import type { ResolvedCommand } from './command-registry.js';
 const attrs = z.record(z.string(), z.unknown()).optional();
 const named = z.object({ name: z.string().min(1), attrs });
 const content = z.union([z.string(), z.record(z.string(), z.unknown()), z.array(z.record(z.string(), z.unknown()))]);
+
+/** Replace the document as a host load (the facade's `setContent`): marked so guards let it through,
+ *  and kept out of undo so an undo right after a load cannot bring the previous document back. The
+ *  `setContent` command stays unmarked: a feature running it acts for the author. */
+export function loadContent(handle: EngineHandle, content: unknown): boolean {
+  const editor = handle as unknown as Editor;
+  return editor
+    .chain()
+    .command(({ tr }) => {
+      tr.setMeta(CONTENT_LOAD_META, true).setMeta('addToHistory', false);
+      return true;
+    })
+    .setContent(content as Parameters<Editor['commands']['setContent']>[0])
+    .run();
+}
 
 export function makeBuiltInCommands(handle: EngineHandle): Record<string, ResolvedCommand> {
   const editor = handle as unknown as Editor;

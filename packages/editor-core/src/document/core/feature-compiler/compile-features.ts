@@ -41,12 +41,14 @@ function compileNode(spec: NodeSpec, renderer?: NodeViewRenderer): Node {
     name: spec.name,
     group: spec.group,
     content: spec.content,
+    marks: spec.marks,
     inline: spec.group === 'inline',
     atom: spec.atom,
     selectable: spec.selectable,
     draggable: spec.draggable,
     defining: spec.defining,
     addAttributes: () => deriveAttributes(spec.attrs),
+    renderText: spec.text ? ({ node }) => spec.text?.(node.attrs) ?? '' : undefined,
     parseHTML: () => [{ tag: spec.htmlTag ?? `[data-type="${spec.name}"]` }],
     renderHTML: ({ HTMLAttributes }) => {
       const attrs = mergeAttributes({ 'data-type': spec.name }, HTMLAttributes);

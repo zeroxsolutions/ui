@@ -2,7 +2,7 @@ import { Editor, type Content, type Extensions } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { createPmStepsBackend } from './backend/pm-steps-backend.js';
-import { makeBuiltInCommands } from './command/built-in-commands.js';
+import { loadContent, makeBuiltInCommands } from './command/built-in-commands.js';
 import { CommandRegistry } from './command/command-registry.js';
 import { compileFeatures } from './feature-compiler/compile-features.js';
 import { registerFacade, unregisterFacade } from './engine/facade-registry.js';
@@ -10,7 +10,7 @@ import type { EngineHandle } from './engine/engine-handle.js';
 import { resolveFeatures } from './registry/feature-registry.js';
 import type { Delta, Snapshot } from './types/delta.js';
 import type { DocumentBackendFactory, IDocumentBackend } from './types/document-backend.js';
-import type { EditorSelection, IEditor, TriggerQuery } from './types/editor.js';
+import type { EditorSelection, IEditor, TriggerBoundary, TriggerQuery } from './types/editor.js';
 import type { EditorFeature } from './types/feature.js';
 import type { DocJSON } from './types/json.js';
 import type { NodeViewRenderer } from './types/node-spec.js';
@@ -168,7 +168,7 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
   // begins the block or follows whitespace, capturing the non-space run after
   // it as the query. Returns the `char…caret` doc range so the chrome can delete
   // the typed `/query` when an item is chosen — the Notion inline flow.
-  const triggerQuery = (char: string): TriggerQuery | null => {
+  const triggerQuery = (char: string, options: { boundary?: TriggerBoundary } = {}): TriggerQuery | null => {
     const { selection } = engine.state;
     if (!selection.empty) return null;
     const $from = selection.$from;
@@ -179,7 +179,11 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
     // a text index lines up with a document offset within the block.
     const textBefore = $from.parent.textBetween(0, caret - parentStart, '\n', '￼');
     const escaped = char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const match = new RegExp(`(?:^|\\s)${escaped}(\\S*)$`).exec(textBefore);
+    // With no boundary to anchor it, the query stops at the char's last occurrence, so `{{a}}{{b` queries `b`.
+    const match =
+      options.boundary === 'any'
+        ? new RegExp(`${escaped}((?:(?!${escaped})\\S)*)$`).exec(textBefore)
+        : new RegExp(`(?:^|\\s)${escaped}(\\S*)$`).exec(textBefore);
     if (!match) return null;
     const query = match[1];
     return {
@@ -196,7 +200,7 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
     getJSON: () => engine.getJSON() as DocJSON,
     getText: () => engine.getText(),
     setContent: (doc) => {
-      engine.commands.setContent(doc as unknown as Content);
+      loadContent(handle, doc);
     },
     isEmpty: () => engine.isEmpty,
     can: (command, args) => registry.can(command, args),

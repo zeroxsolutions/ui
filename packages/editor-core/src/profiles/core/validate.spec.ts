@@ -1,0 +1,218 @@
+import { describe, expect, it } from 'vitest';
+import { emailProfile, MAIL_LAYOUT_KINDS, smsProfile } from './profile.js';
+import type { EditorEmailBlock, VariableDeclaration } from './types.js';
+import { validate } from './validate.js';
+
+const VARIABLES: VariableDeclaration[] = [
+  { name: 'name', type: 'string' },
+  { name: 'link', type: 'url' },
+];
+
+function block(type: string, content: Record<string, unknown>, extra: Partial<EditorEmailBlock> = {}) {
+  return { id: null, key: 'k1', type, attributes: {}, content, ...extra } satisfies EditorEmailBlock;
+}
+
+const paragraph = (text: string) => block('paragraph', { text });
+const profile = emailProfile({ variables: VARIABLES });
+
+describe('validate an email', () => {
+  it('flags a token naming no declaration', () => {
+    expect(validate([paragraph('Hi {{x}}')], profile)).toEqual([
+      { kind: 'variable-undeclared', block: 'k1', field: 'text', name: 'x' },
+    ]);
+  });
+
+  it('names a block by its id when it has one', () => {
+    expect(validate([{ ...paragraph('{{x}}'), id: 'b1' }], profile)).toEqual([
+      { kind: 'variable-undeclared', block: 'b1', field: 'text', name: 'x' },
+    ]);
+  });
+
+  it('flags a button href that is not one url variable', () => {
+    const href = (value: string) => block('button', { label: 'Go', href: value });
+    const problem = { kind: 'href-not-url-variable', block: 'k1', field: 'href' };
+    expect(validate([href('{{name}}')], profile)).toEqual([problem]);
+    expect(validate([href('https://x')], profile)).toEqual([problem]);
+    expect(validate([href('{{link}}')], profile)).toEqual([]);
+  });
+
+  it('flags an href that is more than one token, beside an undeclared name', () => {
+    expect(validate([block('button', { label: 'Go', href: 'https://x/{{x}}' })], profile)).toEqual([
+      { kind: 'variable-undeclared', block: 'k1', field: 'href', name: 'x' },
+      { kind: 'href-not-url-variable', block: 'k1', field: 'href' },
+    ]);
+  });
+
+  it('flags a list with no items', () => {
+    expect(validate([block('list', { items: [] })], profile)).toEqual([
+      { kind: 'text-empty', block: 'k1', field: 'items' },
+    ]);
+  });
+
+  it('flags a link variable once per field', () => {
+    expect(validate([paragraph('[a]({{name}}) [b]({{name}})')], profile)).toHaveLength(1);
+  });
+
+  it('flags a link whose target is a declared variable that is not a url', () => {
+    expect(validate([paragraph('[a]({{name}})')], profile)).toEqual([
+      { kind: 'link-not-url-variable', block: 'k1', field: 'text', name: 'name' },
+    ]);
+  });
+
+  it('reads a link target that is not one token as malformed', () => {
+    expect(validate([paragraph('[a](https://x)')], profile)).toEqual([
+      { kind: 'markup-malformed', block: 'k1', field: 'text', offset: 3 },
+    ]);
+  });
+
+  it('flags a required variable no block prints', () => {
+    const required = emailProfile({ variables: [{ name: 'name', type: 'string', required: true }] });
+    expect(validate([paragraph('Hi')], required)).toEqual([
+      { kind: 'required-variable-not-printed', block: null, name: 'name' },
+    ]);
+    expect(validate([paragraph('Hi {{name}}')], required)).toEqual([]);
+  });
+
+  it('counts a variable in a link target, in a lane and in a list item as printed', () => {
+    const required = emailProfile({
+      variables: [
+        { name: 'link', type: 'url', required: true },
+        { name: 'name', type: 'string', required: true },
+      ],
+    });
+    const columns = block(
+      'columns',
+      {},
+      {
+        attributes: { ratio: [1, 1] },
+        lanes: [[block('list', { items: ['[a]({{link}})'] })], [paragraph('{{name}}')]],
+      },
+    );
+    expect(validate([columns], required)).toEqual([]);
+  });
+
+  it('flags unclosed markup with its offset', () => {
+    expect(validate([paragraph('**a')], profile)).toEqual([
+      { kind: 'markup-malformed', block: 'k1', field: 'text', offset: 0 },
+    ]);
+  });
+
+  it('flags a block the profile does not allow', () => {
+    const layout = emailProfile({ allow: MAIL_LAYOUT_KINDS });
+    expect(validate([block('button', { label: 'Go', href: '{{link}}' })], layout)).toEqual([
+      { kind: 'block-not-allowed', block: 'k1' },
+    ]);
+  });
+
+  it('flags a block of a type no profile knows', () => {
+    expect(validate([block('video', {})], profile)).toEqual([{ kind: 'unknown-block-type', block: 'k1' }]);
+  });
+
+  it('flags columns inside a lane', () => {
+    const inner = block('columns', {}, { attributes: { ratio: [1, 1] }, lanes: [[], []] });
+    const outer = block('columns', {}, { attributes: { ratio: [1, 1] }, lanes: [[inner], []] });
+    expect(validate([outer], profile)).toEqual([{ kind: 'block-nested-too-deep', block: 'k1' }]);
+  });
+
+  it('flags a ratio that does not match the lanes', () => {
+    const columns = block('columns', {}, { attributes: { ratio: [1, 1, 1] }, lanes: [[], []] });
+    expect(validate([columns], profile)).toEqual([{ kind: 'lanes-mismatch', block: 'k1', field: 'ratio' }]);
+  });
+
+  it('flags empty text and an empty list item', () => {
+    expect(validate([paragraph('')], profile)).toEqual([{ kind: 'text-empty', block: 'k1', field: 'text' }]);
+    expect(validate([block('list', { items: ['a', ''] })], profile)).toEqual([
+      { kind: 'text-empty', block: 'k1', field: 'items', item: 1 },
+    ]);
+  });
+
+  it('flags text over the bound, markers counted', () => {
+    expect(validate([paragraph('a'.repeat(5001))], profile)).toEqual([
+      { kind: 'text-too-long', block: 'k1', field: 'text' },
+    ]);
+    expect(validate([paragraph(`**${'a'.repeat(4998)}**`)], profile)).toEqual([
+      { kind: 'text-too-long', block: 'k1', field: 'text' },
+    ]);
+  });
+
+  it('flags a list over its item bound', () => {
+    const items = Array.from({ length: 21 }, () => 'a');
+    expect(validate([block('list', { items })], profile)).toEqual([
+      { kind: 'list-too-long', block: 'k1', field: 'items' },
+    ]);
+  });
+
+  it('flags more blocks than the bound, lane children counted', () => {
+    const many = Array.from({ length: 51 }, () => paragraph('a'));
+    expect(validate(many, profile)).toEqual([{ kind: 'too-many-blocks', block: null }]);
+    const lane = Array.from({ length: 49 }, () => paragraph('a'));
+    const columns = block('columns', {}, { attributes: { ratio: [1, 1] }, lanes: [lane, [paragraph('a')]] });
+    expect(validate([columns], profile)).toEqual([{ kind: 'too-many-blocks', block: null }]);
+  });
+
+  it('returns nothing for a valid email', () => {
+    const lanes = [[paragraph('Left {{name}}')], [block('divider', {})]];
+    const document = [
+      paragraph('Hi **{{name}}**, [open]({{link}}) _now_'),
+      block('button', { label: 'Go {{name}}', href: '{{link}}' }),
+      block('code', { code: 'a = 1' }),
+      block('list', { items: ['one', '**two**'] }),
+      block('callout', { text: 'Careful' }),
+      block('divider', {}),
+      block('columns', {}, { attributes: { ratio: [1, 2] }, lanes }),
+      block('html', { html: '<b>x</b>' }),
+    ];
+    expect(validate(document, profile)).toEqual([]);
+  });
+});
+
+describe('validate an SMS body', () => {
+  const sms = smsProfile({ variables: [{ name: 'name', type: 'string', required: true }] });
+  const kinds = (body: string, p = sms) => validate(body, p).map((problem) => problem.kind);
+
+  it('accepts a body that fits', () => {
+    expect(validate('Hi {{name}}', sms)).toEqual([]);
+  });
+
+  it('flags 161 ASCII characters', () => {
+    expect(kinds(`{{name}}${'a'.repeat(153)}`)).toContain('sms-segment-exceeded');
+  });
+
+  it('flags 71 characters once one leaves GSM-7', () => {
+    expect(kinds(`{{name}}${'a'.repeat(63)}\u1EA1`)).toContain('sms-segment-exceeded');
+  });
+
+  it('counts each extension character as two units', () => {
+    expect(kinds(`{{name}}${'{'.repeat(81)}`)).toContain('sms-segment-exceeded');
+    expect(kinds(`{{name}}${'{'.repeat(74)}`)).not.toContain('sms-segment-exceeded');
+    for (const c of '^{}\\[]~|') expect(kinds(`${'a'.repeat(79)}${c}{{name}}`)).not.toContain('sms-segment-exceeded');
+    for (const c of '^{}\\[]~|') expect(kinds(`${'a'.repeat(159)}${c}`)).toContain('sms-segment-exceeded');
+  });
+
+  it('allows more segments when the profile does', () => {
+    const long = smsProfile({ maxSegments: 2, variables: sms.variables });
+    expect(kinds(`{{name}}${'a'.repeat(200)}`, long)).toEqual([]);
+    expect(kinds(`{{name}}${'a'.repeat(400)}`, long)).toContain('sms-segment-exceeded');
+  });
+
+  it('flags a stray brace with its offset', () => {
+    expect(validate('Hi {{name}', sms)).toContainEqual({ kind: 'sms-placeholder-malformed', block: null, offset: 3 });
+    expect(validate('Hi {{name}} }}', sms)).toContainEqual({
+      kind: 'sms-placeholder-malformed',
+      block: null,
+      offset: 12,
+    });
+    expect(validate('Hi }}{{name}}', sms)).toContainEqual({
+      kind: 'sms-placeholder-malformed',
+      block: null,
+      offset: 3,
+    });
+  });
+
+  it('flags an undeclared token and a required one not printed', () => {
+    expect(validate('Hi {{x}}', sms)).toEqual([
+      { kind: 'variable-undeclared', block: null, name: 'x' },
+      { kind: 'required-variable-not-printed', block: null, name: 'name' },
+    ]);
+  });
+});

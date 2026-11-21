@@ -108,7 +108,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
         setActive(null);
         return;
       }
-      const query = editor.triggerQuery(token.char);
+      const query = editor.triggerQuery(token.char, { boundary: token.boundary });
       const gated = token.gate === 'line-start' && !charAtInputStart(editor, token.char);
       if (!query || gated) {
         dismissedFrom.current = null;
@@ -192,7 +192,7 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
     (option: TriggerOption) => {
       // Re-read the range at select time so a query typed after the last render
       // is still fully removed before the token is committed.
-      const match = editor.triggerQuery(token.char);
+      const match = editor.triggerQuery(token.char, { boundary: token.boundary });
       if (match) editor.run('deleteRange', { from: match.from, to: match.to });
       token.insert(editor, option);
       editor.focus();
