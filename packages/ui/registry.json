@@ -3042,6 +3042,239 @@
       ]
     },
     {
+      "name": "email-editor",
+      "type": "registry:component",
+      "title": "Email Editor",
+      "description": "A block editor for an email's body, with {{name}} variables, whose blocks and links stay inside what the email renderer prints, and a live preview.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/combobox",
+        "@shadcn/badge",
+        "@shadcn/dropdown-menu",
+        "@shadcn/separator",
+        "@shadcn/tooltip",
+        "@shadcn/utils",
+        "@zui/chat-input",
+        "@zui/document-editor",
+        "@zui/lucide-code-icon",
+        "@zui/lucide-info-icon",
+        "@zui/lucide-italic-icon",
+        "@zui/lucide-layout-grid-icon",
+        "@zui/lucide-layout-panel-top-icon",
+        "@zui/lucide-letter-b-icon",
+        "@zui/lucide-list-icon",
+        "@zui/lucide-minus-icon",
+        "@zui/lucide-mouse-pointer-click-icon",
+        "@zui/lucide-text-align-start-icon"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/block-attributes-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/block-attributes-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/email-editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-kit.ts",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/email-kit.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/kit-context.ts",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/kit-context.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/marks.ts",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/marks.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/nodes/block-style.ts",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/nodes/block-style.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/nodes/button.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/nodes/button.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/nodes/callout.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/nodes/callout.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/nodes/code.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/nodes/code.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/nodes/columns.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/nodes/columns.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/nodes/divider.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/nodes/divider.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/nodes/html.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/nodes/html.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/nodes/list.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/nodes/list.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/nodes/unknown.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/nodes/unknown.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/problem-decorations.ts",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/problem-decorations.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/url-variable-picker.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/email/url-variable-picker.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/problem-marker.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/problem-marker.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/problem-messages.ts",
+          "type": "registry:component",
+          "target": "components/editor/profiles/problem-messages.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/problem-navigation.ts",
+          "type": "registry:component",
+          "target": "components/editor/profiles/problem-navigation.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/variables/variable-menu.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/variables/variable-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/variables/variable.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/variables/variable.tsx"
+        }
+      ],
+      "dependencies": ["@tiptap/extensions", "@tiptap/pm", "@zeroxsolutions/editor-core", "lucide-react", "zod"],
+      "css": {
+        ".document-editor p[data-align='left']": {
+          "text-align": "left"
+        },
+        ".document-editor p[data-align='center']": {
+          "text-align": "center"
+        },
+        ".document-editor p[data-align='right']": {
+          "text-align": "right"
+        },
+        ".document-editor p[data-tone='muted']": {
+          "color": "var(--muted-foreground)"
+        },
+        ".document-editor p[data-space-after='small']": {
+          "margin-bottom": "0.5rem"
+        },
+        ".document-editor p[data-space-after='medium']": {
+          "margin-bottom": "1rem"
+        },
+        ".document-editor p[data-space-after='large']": {
+          "margin-bottom": "2rem"
+        },
+        ".document-editor [data-slot='email-columns'] > [data-node-view-content] > [data-node-view-content-react]": {
+          "display": "grid",
+          "grid-auto-flow": "column",
+          "grid-auto-columns": "minmax(0, 1fr)",
+          "grid-template-columns": "var(--email-columns, none)",
+          "gap": "0.75rem"
+        }
+      }
+    },
+    {
+      "name": "sms-editor",
+      "type": "registry:component",
+      "title": "SMS Editor",
+      "description": "A plain-text editor for one SMS body with {{name}} variables and a meter of the segments it will cost.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/tooltip",
+        "@shadcn/utils",
+        "@zui/chat-input",
+        "@zui/document-editor",
+        "@zui/email-editor"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/profiles/sms/sms-editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/sms/sms-editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/sms/sms-kit.ts",
+          "type": "registry:component",
+          "target": "components/editor/profiles/sms/sms-kit.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/sms/sms-meter.tsx",
+          "type": "registry:component",
+          "target": "components/editor/profiles/sms/sms-meter.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/sms/sms-problems.ts",
+          "type": "registry:component",
+          "target": "components/editor/profiles/sms/sms-problems.ts"
+        }
+      ],
+      "dependencies": ["@tiptap/extensions", "@tiptap/pm", "@zeroxsolutions/editor-core"]
+    },
+    {
+      "name": "email-editor-demo",
+      "type": "registry:example",
+      "title": "Email Editor Demo",
+      "description": "A trip reminder email: a greeting, a button to the trip link, a callout and two columns, with the rendered email beside it.",
+      "categories": ["examples"],
+      "registryDependencies": ["@zui/email-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/email-editor-demo.tsx",
+          "type": "registry:example"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core"]
+    },
+    {
+      "name": "sms-editor-demo",
+      "type": "registry:example",
+      "title": "SMS Editor Demo",
+      "description": "A one-segment sign-in code message.",
+      "categories": ["examples"],
+      "registryDependencies": ["@zui/sms-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/sms-editor-demo.tsx",
+          "type": "registry:example"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core"]
+    },
+    {
       "name": "lucide-a-arrow-down-icon",
       "type": "registry:ui",
       "title": "A Arrow Down Icon",

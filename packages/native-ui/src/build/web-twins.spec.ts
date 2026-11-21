@@ -27,6 +27,8 @@ const NOT_PORTED: ReadonlyMap<string, string> = new Map([
   ['mermaid-editor', EDITOR],
   ['code-editor', EDITOR],
   ['chat-input', EDITOR],
+  ['email-editor', EDITOR],
+  ['sms-editor', EDITOR],
 ]);
 
 /** The web items a later wave of the port brings, which the list loses as each wave lands. */

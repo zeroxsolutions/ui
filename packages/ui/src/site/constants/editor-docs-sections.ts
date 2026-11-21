@@ -6,7 +6,15 @@
 export const editorDocsSections: readonly { title: string; pages: readonly string[] }[] = [
   {
     title: 'Surfaces',
-    pages: ['document-editor', 'math-editor', 'mermaid-editor', 'code-editor', 'chat-input'],
+    pages: [
+      'document-editor',
+      'math-editor',
+      'mermaid-editor',
+      'code-editor',
+      'chat-input',
+      'email-editor',
+      'sms-editor',
+    ],
   },
   {
     title: 'Features',
