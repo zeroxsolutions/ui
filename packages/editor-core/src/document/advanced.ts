@@ -14,7 +14,9 @@
  */
 export { Extension, InputRule, Mark, Node, mergeAttributes } from '@tiptap/core';
 export type { Editor, Extensions } from '@tiptap/core';
-export { Plugin, PluginKey } from '@tiptap/pm/state';
+export { Plugin, PluginKey, Selection } from '@tiptap/pm/state';
+export { Decoration, DecorationSet } from '@tiptap/pm/view';
+export type { EditorView } from '@tiptap/pm/view';
 export { Fragment, Slice } from '@tiptap/pm/model';
 export { isHistoryTransaction } from '@tiptap/pm/history';
 export type { Node as ProseMirrorNode, NodeType } from '@tiptap/pm/model';
