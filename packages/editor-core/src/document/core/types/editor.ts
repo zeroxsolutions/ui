@@ -40,14 +40,14 @@ export interface CaretRect {
   right: number;
 }
 
+/** What may stand right before a trigger char: whitespace or the block's start, or anything at all. */
+export type TriggerBoundary = 'whitespace' | 'any';
+
 /** An inline trigger match (`/` slash command, `@` mention, …): the query typed
  *  after the trigger char, plus the document range spanning the trigger char
  *  through the caret — so the chrome can delete `char…query` when an item is
  *  chosen, keeping the Notion-style inline flow where the `/` stays visible in
  *  the text while the menu filters. */
-/** What may stand right before a trigger char: whitespace or the block's start, or anything at all. */
-export type TriggerBoundary = 'whitespace' | 'any';
-
 export interface TriggerQuery {
   /** The run of non-space characters typed after the trigger char. */
   query: string;
