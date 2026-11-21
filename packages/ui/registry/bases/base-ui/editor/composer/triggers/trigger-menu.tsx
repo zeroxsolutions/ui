@@ -14,7 +14,7 @@ import {
   defaultTriggerFilter,
   type TriggerOption,
   type TriggerToken,
-} from '@zeroxsolutions/editor-core/composer/triggers/trigger-token';
+} from '@zeroxsolutions/editor-core/composer/index';
 
 /**
  * The one generic suggestion menu, driven by a `TriggerToken` descriptor - the

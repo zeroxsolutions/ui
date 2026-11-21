@@ -6,7 +6,7 @@ import { Empty, EmptyDescription } from '@/registry/bases/base-ui/ui/empty';
 import { Popover } from '@/registry/bases/base-ui/ui/popover';
 import { ScrollArea } from '@/registry/bases/base-ui/ui/scroll-area';
 import type { CaretRect, IEditor, SlashItem, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
-import { filterSlashItems, groupByHeading } from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
+import { filterSlashItems, groupByHeading } from '@zeroxsolutions/editor-core/document/ui/index';
 import { RectPopover } from './rect-popover';
 import { pinHorizontal } from './selection-rect';
 import { CHROME_ICON_CLASS, ChromeIcon } from './chrome-icon';

@@ -77,7 +77,7 @@ pnpm dlx shadcn@latest add card separator tabs utils @zui/code-card @zui/collaps
 ## Usage
 
 ```tsx
-import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 
 import { mermaid } from '@/components/editor/document/features/mermaid';
 import { standardKit } from '@/components/editor/document/features/standard';
@@ -97,8 +97,6 @@ function NotesEditor({ content }: { content: DocJSON }) {
 Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
 
 ```tsx
-import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
-
 function insert(editor: IEditor) {
   editor.run('insertMermaid', { source: 'flowchart LR\n  A --> B' });
 }

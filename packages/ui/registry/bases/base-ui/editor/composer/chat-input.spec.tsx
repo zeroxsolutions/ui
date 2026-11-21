@@ -1,7 +1,7 @@
 import { act, render, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import type { ChatCommand } from '@zeroxsolutions/editor-core/composer/composer-types';
+import type { ChatCommand } from '@zeroxsolutions/editor-core/composer/index';
 import { commandTrigger, mentionTrigger } from './composer-triggers';
 import { ChatInput } from './chat-input';
 

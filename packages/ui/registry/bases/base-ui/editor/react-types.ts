@@ -3,8 +3,9 @@ import type {
   MarkCodec as CoreMarkCodec,
   NodeCodec as CoreNodeCodec,
   SerializeContext as CoreSerializeContext,
-} from '@zeroxsolutions/editor-core/document/core/types/codec';
-import type { MarkJSON, NodeJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+  MarkJSON,
+  NodeJSON,
+} from '@zeroxsolutions/editor-core/document/core/index';
 
 /**
  * React-typed aliases for the serialization slots `editor-core` declares opaque.

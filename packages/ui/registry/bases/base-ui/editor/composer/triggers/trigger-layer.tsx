@@ -3,10 +3,7 @@
 import { useMemo } from 'react';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { TriggerMenu } from './trigger-menu';
-import {
-  validateTriggerRegistry,
-  type TriggerToken,
-} from '@zeroxsolutions/editor-core/composer/triggers/trigger-token';
+import { validateTriggerRegistry, type TriggerToken } from '@zeroxsolutions/editor-core/composer/index';
 
 /**
  * Mounts one `TriggerMenu` per registered pill-bearing token and validates the

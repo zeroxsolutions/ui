@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode } from 'react';
-import type { CodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/codec-registry';
-import type { NodeJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+import type { CodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/index';
+import type { NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import type { ReactSerializeContext } from '../../react-types';
 
 /**

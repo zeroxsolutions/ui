@@ -2,7 +2,7 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { renderToReact } from '../document/serialize/render-to-react';
 import { defaultComposerTriggers, type ComposerTrigger } from './composer-triggers';
-import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
+import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/index';
 
 /**
  * The read-only render of a submitted message - the matching half of `ChatInput`.

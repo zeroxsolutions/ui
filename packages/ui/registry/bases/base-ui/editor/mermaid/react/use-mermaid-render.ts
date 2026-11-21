@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { useEditorTheme } from '../../shared/theme/editor-theme-context';
-import { renderDiagram } from '@zeroxsolutions/editor-core/mermaid/core/engine';
+import { renderDiagram } from '@zeroxsolutions/editor-core/mermaid/core/index';
 
 /** The lifecycle of a debounced render. */
 export type MermaidRenderStatus = 'idle' | 'rendering' | 'ok' | 'error' | 'empty';

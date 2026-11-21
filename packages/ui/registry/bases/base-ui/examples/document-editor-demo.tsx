@@ -2,9 +2,8 @@
 
 import { useState, type ReactNode } from 'react';
 
-import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
-import type { DocJSON, NodeJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
-import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
+import type { IEditor, DocJSON, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
+import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 
 import { standardKit } from '@/registry/bases/base-ui/editor/document/features/standard';
 import { Editor } from '@/registry/bases/base-ui/editor/document/react';

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
-import { MATH_TEMPLATES } from '@zeroxsolutions/editor-core/math/core/templates';
+import { MATH_TEMPLATES } from '@zeroxsolutions/editor-core/math/core/index';
 import '../../../../../../test/nova-style.css';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { MathPalette } from './palette';

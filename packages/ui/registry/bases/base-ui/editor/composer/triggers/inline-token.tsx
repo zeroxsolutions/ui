@@ -8,7 +8,7 @@ import {
   type NodeCodec,
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
-import type { TriggerOption } from '@zeroxsolutions/editor-core/composer/triggers/trigger-token';
+import type { TriggerOption } from '@zeroxsolutions/editor-core/composer/index';
 
 /**
  * The one factory that generates an inline pill token - the `NodeSpec` + the

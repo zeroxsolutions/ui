@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import { referenceToken, type TriggerOption } from '@zeroxsolutions/editor-core/composer/triggers/trigger-token';
+import { referenceToken, type TriggerOption } from '@zeroxsolutions/editor-core/composer/index';
 
 import { TriggerMenu } from './trigger-menu';
 

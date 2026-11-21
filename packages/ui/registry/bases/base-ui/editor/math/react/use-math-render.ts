@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useEditorTheme } from '../../shared/theme/editor-theme-context';
-import { renderMath } from '@zeroxsolutions/editor-core/math/core/render';
+import { renderMath } from '@zeroxsolutions/editor-core/math/core/index';
 
 /**
  * The lifecycle of a render. KaTeX is synchronous, so there is no `idle` /
