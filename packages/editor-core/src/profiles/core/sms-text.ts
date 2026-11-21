@@ -16,17 +16,23 @@ export function toSmsText(doc: DocJSON): string {
   return (doc.content ?? []).map(inlineText).join('\n');
 }
 
+/** The inline nodes `text` reads as: its text, each `{{name}}` a `variable` node. */
+export function splitVariables(text: string): NodeJSON[] {
+  const inline: NodeJSON[] = [];
+  let last = 0;
+  for (const match of text.matchAll(VARIABLE_TOKEN)) {
+    if (match.index > last) inline.push({ type: 'text', text: text.slice(last, match.index) });
+    inline.push({ type: 'variable', attrs: { name: match[1] } });
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) inline.push({ type: 'text', text: text.slice(last) });
+  return inline;
+}
+
 /** The document `body` reads as: one paragraph per line, each `{{name}}` a `variable` node. */
 export function fromSmsText(body: string): DocJSON {
   const content = body.split('\n').map((line): NodeJSON => {
-    const inline: NodeJSON[] = [];
-    let last = 0;
-    for (const match of line.matchAll(VARIABLE_TOKEN)) {
-      if (match.index > last) inline.push({ type: 'text', text: line.slice(last, match.index) });
-      inline.push({ type: 'variable', attrs: { name: match[1] } });
-      last = match.index + match[0].length;
-    }
-    if (last < line.length) inline.push({ type: 'text', text: line.slice(last) });
+    const inline = splitVariables(line);
     return inline.length === 0 ? { type: 'paragraph' } : { type: 'paragraph', content: inline };
   });
   return { type: 'doc', content };

@@ -1,6 +1,9 @@
 export {
   EMAIL_KINDS,
+  emailNodeSpecs,
   emailProfile,
+  fromEmailBlocks,
+  toEmailBlocks,
   MAIL_LAYOUT_KINDS,
   smsProfile,
   fromSmsText,

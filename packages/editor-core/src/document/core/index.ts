@@ -17,6 +17,7 @@ export type {
   ContentExpression,
   Delta,
   DeserializeContext,
+  EmailBlockJSON,
   DocJSON,
   DocumentBackendFactory,
   DocumentBackendInit,

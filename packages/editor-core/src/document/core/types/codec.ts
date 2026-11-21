@@ -54,6 +54,16 @@ export interface MarkDelimiters {
   close: string;
 }
 
+/** The wire shape of one email block, as a node codec reads and writes it. `lanes` is set on columns only. */
+export interface EmailBlockJSON {
+  id: string | null;
+  key: string;
+  type: string;
+  attributes: Record<string, unknown>;
+  content: Record<string, unknown>;
+  lanes?: EmailBlockJSON[][];
+}
+
 export interface NodeCodec<A = Record<string, unknown>> {
   /** The node type this codec serializes/parses. */
   node: string;
@@ -65,6 +75,10 @@ export interface NodeCodec<A = Record<string, unknown>> {
   toReact?(node: NodeJSON<A>, ctx: SerializeContext): unknown;
   fromMarkdown?(token: MarkdownToken, ctx: DeserializeContext): NodeJSON<A> | null;
   fromHTML?(element: HTMLElement, ctx: DeserializeContext): NodeJSON<A> | null;
+  /** The email block this node exports as; a block node without it cannot join the email profile. */
+  toEmailBlock?(node: NodeJSON<A>): EmailBlockJSON;
+  /** The node an email block of this feature's type imports as, or null when the block is not this feature's. */
+  fromEmailBlock?(block: EmailBlockJSON): NodeJSON<A> | null;
   /** Per-format override of the registry's default missing-codec fallback. */
   fallback?: Partial<Record<Format, FallbackStrategy>>;
 }

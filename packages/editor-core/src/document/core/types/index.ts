@@ -19,6 +19,7 @@ export type { NodeViewProps } from './node-view.js';
 export type { ContentExpression, InputRuleSpec, MarkSpec, NodeSpec, NodeViewRenderer } from './node-spec.js';
 export type {
   DeserializeContext,
+  EmailBlockJSON,
   FallbackStrategy,
   Format,
   MarkCodec,
