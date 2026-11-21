@@ -2,12 +2,10 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { CircleAlertIcon } from 'lucide-react';
 import { Selection } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
-import { Button } from '@/registry/bases/base-ui/ui/button';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
+import { TooltipProvider } from '@/registry/bases/base-ui/ui/tooltip';
 import { Extension, Plugin, PluginKey, type ProseMirrorNode } from '@zeroxsolutions/editor-core/document/advanced';
 import type { EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
@@ -30,6 +28,8 @@ import { Editor } from '../../document/react/editor';
 import { BubbleMenu } from '../../document/ui/bubble-menu';
 import { EditorToolbar } from '../../document/ui/editor-toolbar';
 import { SlashMenu } from '../../document/ui/slash-menu';
+import { ProblemMarker } from '../problem-marker';
+import { caretNode, nextMarker, useFocusLeave } from '../problem-navigation';
 import { refreshVariables, variableFeature } from '../variables/variable';
 import { VariableMenu } from '../variables/variable-menu';
 import { BlockAttributesMenu } from './block-attributes-menu';
@@ -157,34 +157,6 @@ function renderProblemMessage(problem: RenderProblem): string {
   return `${problem.kind}${problem.name === undefined ? '' : ` {{${problem.name}}}`}${where}`;
 }
 
-function ProblemMarker({ mark }: { mark: ProblemMark }) {
-  return (
-    <>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              data-slot="email-problem-marker"
-              aria-label="Problem"
-              aria-describedby={mark.id}
-              className="text-destructive"
-            >
-              <CircleAlertIcon aria-hidden />
-            </Button>
-          }
-        />
-        <TooltipContent side="top">{mark.messages.join('. ')}</TooltipContent>
-      </Tooltip>
-      <span id={mark.id} className="sr-only">
-        {mark.messages.join('. ')}
-      </span>
-    </>
-  );
-}
-
 /**
  * The email profile's editor: the document editor with `emailKit`'s blocks, marks and variables, the block menu,
  * each problem marked where it is, the host's adornment beside each block, and the renderer's preview.
@@ -310,8 +282,7 @@ export function EmailEditor({
   );
   useEffect(
     () => () => {
-      for (const pending of [timer, previewTimer, blurTimer])
-        if (pending.current !== null) clearTimeout(pending.current);
+      for (const pending of [timer, previewTimer]) if (pending.current !== null) clearTimeout(pending.current);
     },
     [],
   );
@@ -377,20 +348,7 @@ export function EmailEditor({
     schedule(editor);
   }, [editor, profile, renderer, previewInput, schedule]);
 
-  // Focus is inside while it is in the editor or in a popup it opened, which React bubbles through its portal: a
-  // blur waits a tick for focus to come back before it tells the host.
-  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const focusIn = () => {
-    if (blurTimer.current !== null) clearTimeout(blurTimer.current);
-    blurTimer.current = null;
-  };
-  const focusOut = () => {
-    focusIn();
-    blurTimer.current = setTimeout(() => {
-      blurTimer.current = null;
-      live.current.onBlur?.();
-    }, 0);
-  };
+  const focus = useFocusLeave(() => live.current.onBlur?.());
 
   // F8 and Shift+F8 reach the next and the previous problem, as in VS Code; Escape on one goes back to its block.
   const keyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -407,11 +365,7 @@ export function EmailEditor({
     if (markers.length === 0) return;
     event.preventDefault();
     const from = marker ?? caretNode() ?? target;
-    const after = (element: Element) =>
-      element !== from && (from.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
-    const next = event.shiftKey
-      ? (markers.filter((element) => element !== from && !after(element)).pop() ?? markers[markers.length - 1])
-      : (markers.find(after) ?? markers[0]);
+    const next = nextMarker(markers, from, event.shiftKey);
     next.focus();
   };
 
@@ -425,8 +379,7 @@ export function EmailEditor({
         ref={setRoot}
         data-slot="email-editor"
         className="relative flex flex-col gap-2"
-        onFocus={focusIn}
-        onBlur={focusOut}
+        {...focus}
         onKeyDownCapture={keyDown}
       >
         {editor && (
@@ -453,7 +406,7 @@ export function EmailEditor({
             return createPortal(
               <>
                 {marksOf(row).map((mark) => (
-                  <ProblemMarker key={mark.id} mark={mark} />
+                  <ProblemMarker key={mark.id} id={mark.id} messages={mark.messages} slot="email-problem-marker" />
                 ))}
                 {renderBlockAdornment && (
                   <span data-slot="email-block-adornment" className="contents">
@@ -494,11 +447,6 @@ export function EmailEditor({
       )}
     </div>
   );
-}
-
-/** The DOM node the caret sits in, to find the problem after it. */
-function caretNode(): Node | null {
-  return document.getSelection()?.focusNode ?? null;
 }
 
 /** Puts the caret at the start of the block keyed `key`, or picks the block when it holds no text. */

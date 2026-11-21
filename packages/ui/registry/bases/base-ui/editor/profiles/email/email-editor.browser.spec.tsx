@@ -26,7 +26,7 @@ import {
   type EmailPreviewProps,
   type EmailPreviewRenderer,
 } from './email-editor';
-import { problemMessage } from './problem-decorations';
+import { problemMessage } from '../problem-messages';
 
 const declared: VariableDeclaration[] = [
   { name: 'name', type: 'string', label: 'Name', sampleValue: 'Lan' },

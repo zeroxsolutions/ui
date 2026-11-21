@@ -69,7 +69,9 @@ const PIECES: Record<string, string[]> = {
   'profiles/email/nodes/divider.tsx': ['<Separator'],
   'profiles/email/url-variable-picker.tsx': ['<Button'],
   'profiles/email/block-attributes-menu.tsx': ['<Button', '<Tooltip'],
-  'profiles/email/email-editor.tsx': ['<Button', '<Tooltip', 'cn-editor-block'],
+  'profiles/problem-marker.tsx': ['<Button', '<Tooltip'],
+  'profiles/email/email-editor.tsx': ['<Tooltip', 'cn-editor-block'],
+  'profiles/sms/sms-editor.tsx': ['<Tooltip'],
   'document/features/callout/callout.tsx': ['cn-alert'],
   'document/features/toggle/toggle.tsx': ['cn-button cn-button-variant-ghost cn-button-size-icon-sm'],
   'document/react/editor.tsx': [
