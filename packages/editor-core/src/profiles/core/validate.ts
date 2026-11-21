@@ -1,5 +1,6 @@
 import { parseInlineMarkup, variableTokens } from '../../template/index.js';
 import { EMAIL_KINDS } from './profile.js';
+import { measureSmsBody, strayBraceOffset } from './sms-text.js';
 import type { EditorEmailBlock, EditorProfile, ProfileProblem } from './types.js';
 
 const RATIO_WEIGHT_MAX = 12;
@@ -48,6 +49,10 @@ function checkField(walk: Walk, block: string, { field, item, value, max, marked
     }
   }
 
+  checkTokens(walk, where, value);
+}
+
+function checkTokens(walk: Walk, where: Pick<ProfileProblem, 'block' | 'field' | 'item'>, value: string): void {
   for (const name of new Set(variableTokens(value))) {
     walk.printed.add(name);
     if (declaredType(walk, name) === undefined) walk.problems.push({ kind: 'variable-undeclared', ...where, name });
@@ -139,10 +144,27 @@ function walkBlocks(walk: Walk, blocks: readonly EditorEmailBlock[], depth: numb
   for (const block of blocks) checkBlock(walk, block, depth);
 }
 
+function checkSms(walk: Walk, body: string): void {
+  const offset = strayBraceOffset(body);
+  if (offset !== -1) walk.problems.push({ kind: 'sms-placeholder-malformed', block: null, offset });
+  const { segments, units, limit } = measureSmsBody(body);
+  const maxSegments = walk.profile.maxSegments ?? 1;
+  if (units > limit && segments > maxSegments) walk.problems.push({ kind: 'sms-segment-exceeded', block: null });
+  checkTokens(walk, { block: null }, body);
+  for (const { name, required } of walk.profile.variables) {
+    if (required && !walk.printed.has(name)) {
+      walk.problems.push({ kind: 'required-variable-not-printed', block: null, name });
+    }
+  }
+}
+
 /** The problems `value` has against `profile`, in document order, then field order. The editor never refuses an edit for one. */
 export function validate(value: readonly EditorEmailBlock[] | string, profile: EditorProfile): ProfileProblem[] {
-  if (typeof value === 'string') return [];
   const walk: Walk = { profile, problems: [], printed: new Set(), count: 0 };
+  if (typeof value === 'string') {
+    checkSms(walk, value);
+    return walk.problems;
+  }
   walkBlocks(walk, value, 0);
   if (walk.count > profile.bounds.blocks) walk.problems.push({ kind: 'too-many-blocks', block: null });
   for (const { name, required } of profile.variables) {

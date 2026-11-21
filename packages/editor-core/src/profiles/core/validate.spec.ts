@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emailProfile, MAIL_LAYOUT_KINDS } from './profile.js';
+import { emailProfile, MAIL_LAYOUT_KINDS, smsProfile } from './profile.js';
 import type { EditorEmailBlock, VariableDeclaration } from './types.js';
 import { validate } from './validate.js';
 
@@ -150,10 +150,6 @@ describe('validate an email', () => {
     expect(validate([columns], profile)).toEqual([{ kind: 'too-many-blocks', block: null }]);
   });
 
-  it('hands a string to the SMS half, which returns nothing yet', () => {
-    expect(validate('Hi', profile)).toEqual([]);
-  });
-
   it('returns nothing for a valid email', () => {
     const lanes = [[paragraph('Left {{name}}')], [block('divider', {})]];
     const document = [
@@ -167,5 +163,56 @@ describe('validate an email', () => {
       block('html', { html: '<b>x</b>' }),
     ];
     expect(validate(document, profile)).toEqual([]);
+  });
+});
+
+describe('validate an SMS body', () => {
+  const sms = smsProfile({ variables: [{ name: 'name', type: 'string', required: true }] });
+  const kinds = (body: string, p = sms) => validate(body, p).map((problem) => problem.kind);
+
+  it('accepts a body that fits', () => {
+    expect(validate('Hi {{name}}', sms)).toEqual([]);
+  });
+
+  it('flags 161 ASCII characters', () => {
+    expect(kinds(`{{name}}${'a'.repeat(153)}`)).toContain('sms-segment-exceeded');
+  });
+
+  it('flags 71 characters once one leaves GSM-7', () => {
+    expect(kinds(`{{name}}${'a'.repeat(63)}\u1EA1`)).toContain('sms-segment-exceeded');
+  });
+
+  it('counts each extension character as two units', () => {
+    expect(kinds(`{{name}}${'{'.repeat(81)}`)).toContain('sms-segment-exceeded');
+    expect(kinds(`{{name}}${'{'.repeat(74)}`)).not.toContain('sms-segment-exceeded');
+    for (const c of '^{}\\[]~|') expect(kinds(`${'a'.repeat(79)}${c}{{name}}`)).not.toContain('sms-segment-exceeded');
+    for (const c of '^{}\\[]~|') expect(kinds(`${'a'.repeat(159)}${c}`)).toContain('sms-segment-exceeded');
+  });
+
+  it('allows more segments when the profile does', () => {
+    const long = smsProfile({ maxSegments: 2, variables: sms.variables });
+    expect(kinds(`{{name}}${'a'.repeat(200)}`, long)).toEqual([]);
+    expect(kinds(`{{name}}${'a'.repeat(400)}`, long)).toContain('sms-segment-exceeded');
+  });
+
+  it('flags a stray brace with its offset', () => {
+    expect(validate('Hi {{name}', sms)).toContainEqual({ kind: 'sms-placeholder-malformed', block: null, offset: 3 });
+    expect(validate('Hi {{name}} }}', sms)).toContainEqual({
+      kind: 'sms-placeholder-malformed',
+      block: null,
+      offset: 12,
+    });
+    expect(validate('Hi }}{{name}}', sms)).toContainEqual({
+      kind: 'sms-placeholder-malformed',
+      block: null,
+      offset: 3,
+    });
+  });
+
+  it('flags an undeclared token and a required one not printed', () => {
+    expect(validate('Hi {{x}}', sms)).toEqual([
+      { kind: 'variable-undeclared', block: null, name: 'x' },
+      { kind: 'required-variable-not-printed', block: null, name: 'name' },
+    ]);
   });
 });
