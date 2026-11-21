@@ -2,11 +2,17 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { Selection } from '@tiptap/pm/state';
-import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { TooltipProvider } from '@/registry/bases/base-ui/ui/tooltip';
-import { Extension, Plugin, PluginKey, type ProseMirrorNode } from '@zeroxsolutions/editor-core/document/advanced';
+import {
+  Decoration,
+  DecorationSet,
+  Extension,
+  Plugin,
+  PluginKey,
+  Selection,
+  type ProseMirrorNode,
+} from '@zeroxsolutions/editor-core/document/advanced';
 import type { EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import {
@@ -21,13 +27,13 @@ import {
   sameBlockContent,
   type RenderedEmail,
   type RenderEmailInput,
-  type RenderProblem,
 } from '@zeroxsolutions/editor-core/template/email/index';
 import { TriggerLayer } from '../../composer/triggers/trigger-layer';
 import { Editor } from '../../document/react/editor';
 import { BubbleMenu } from '../../document/ui/bubble-menu';
 import { EditorToolbar } from '../../document/ui/editor-toolbar';
 import { SlashMenu } from '../../document/ui/slash-menu';
+import { renderProblemMessage } from '../problem-messages';
 import { ProblemMarker } from '../problem-marker';
 import { caretNode, nextMarker, useFocusLeave } from '../problem-navigation';
 import { refreshVariables, variableFeature } from '../variables/variable';
@@ -151,10 +157,21 @@ function overlayFeature(read: () => Overlay): EditorFeature {
   };
 }
 
-/** The message a render problem shows under the preview. */
-function renderProblemMessage(problem: RenderProblem): string {
-  const where = problem.blockId === null ? '' : ` in block ${problem.blockId}`;
-  return `${problem.kind}${problem.name === undefined ? '' : ` {{${problem.name}}}`}${where}`;
+/**
+ * The value with the keys of saved blocks left out: a saved block is known by its id, and a refetched copy may
+ * carry no keys or other ones. A block not saved yet keeps its key, the only identity it has.
+ */
+function withoutSavedKeys(blocks: readonly EditorEmailBlock[]): unknown[] {
+  return blocks.map(({ key, lanes, ...block }) => ({
+    ...block,
+    ...(block.id === null ? { key } : {}),
+    ...(lanes ? { lanes: lanes.map(withoutSavedKeys) } : {}),
+  }));
+}
+
+/** Whether two values hold the same content, saved blocks compared by id alone. */
+function sameValue(left: readonly EditorEmailBlock[], right: readonly EditorEmailBlock[]): boolean {
+  return sameBlockContent(withoutSavedKeys(left), withoutSavedKeys(right));
 }
 
 /**
@@ -210,6 +227,8 @@ export function EmailEditor({
     const features = [...kit, overlayFeature(() => overlay.current)];
     return { codecs, variables, features, ui: collectUiContributions(features) };
   });
+  // The editor reads its content once, on mount; a later value loads through setContent below.
+  const [initialContent] = useState(() => fromEmailBlocks(value, setup.codecs));
 
   const [editor, setEditor] = useState<IEditor | null>(null);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
@@ -257,8 +276,13 @@ export function EmailEditor({
         current.variables.flatMap(({ name, sampleValue }) => (sampleValue === undefined ? [] : [[name, sampleValue]])),
       );
       const variableTypes = Object.fromEntries(current.variables.map(({ name, type }) => [name, type]));
-      const rendered = render.render({ ...input, blocks: withIds(exportBlocks(from)), variables, variableTypes });
-      setPreview({ html: rendered.html, problems: rendered.problems.map(renderProblemMessage) });
+      const blocks = exportBlocks(from);
+      const rendered = render.render({ ...input, blocks: withIds(blocks), variables, variableTypes });
+      const places = new Map(rowsOf(blocks).map((row, index) => [row.id ?? row.key, index + 1]));
+      const problems = rendered.problems.map((problem) =>
+        renderProblemMessage(problem, problem.blockId === null ? undefined : places.get(problem.blockId)),
+      );
+      setPreview({ html: rendered.html, problems });
     },
     [exportBlocks],
   );
@@ -315,8 +339,8 @@ export function EmailEditor({
   // A value from outside loads; the one the editor reported, handed back, does not.
   useEffect(() => {
     if (!editor) return;
-    if (sameBlockContent(value, loaded.current)) return;
-    if (reported.current !== null && sameBlockContent(value, reported.current)) return;
+    if (sameValue(value, loaded.current)) return;
+    if (reported.current !== null && sameValue(value, reported.current)) return;
     loaded.current = value;
     loading.current = true;
     try {
@@ -391,7 +415,7 @@ export function EmailEditor({
         )}
         <Editor
           features={setup.features}
-          content={fromEmailBlocks(value, setup.codecs)}
+          content={initialContent}
           onReady={(ready) => {
             setEditor(ready);
             onReady?.(ready);
@@ -422,8 +446,8 @@ export function EmailEditor({
       </div>
       {unplaced.length > 0 && (
         <ul data-slot="email-problems" className="text-destructive flex flex-col gap-1 text-sm">
-          {unplaced.map((message) => (
-            <li key={message}>{message}</li>
+          {unplaced.map((message, index) => (
+            <li key={`${index}:${message}`}>{message}</li>
           ))}
         </ul>
       )}
@@ -438,8 +462,9 @@ export function EmailEditor({
           />
           {preview.problems.length > 0 && (
             <ul data-slot="email-preview-problems" className="text-destructive flex flex-col gap-1 text-sm">
-              {preview.problems.map((message) => (
-                <li key={message}>{message}</li>
+              {preview.problems.map((message, index) => (
+                // The renderer reports a variable once per use, so two lines can read the same.
+                <li key={`${index}:${message}`}>{message}</li>
               ))}
             </ul>
           )}

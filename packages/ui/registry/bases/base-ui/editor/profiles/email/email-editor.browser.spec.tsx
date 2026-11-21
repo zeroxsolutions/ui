@@ -26,7 +26,7 @@ import {
   type EmailPreviewProps,
   type EmailPreviewRenderer,
 } from './email-editor';
-import { problemMessage } from '../problem-messages';
+import { problemMessage, RENDER_PROBLEM_MESSAGES } from '../problem-messages';
 
 const declared: VariableDeclaration[] = [
   { name: 'name', type: 'string', label: 'Name', sampleValue: 'Lan' },
@@ -207,6 +207,21 @@ describe('EmailEditor', () => {
     await vi.waitFor(() => expect(probe.editor.getText()).toBe('Heabllo'));
   });
 
+  it('does not reload a refetched copy of the same content whose saved blocks carry no keys', async () => {
+    const probe = await mount([paragraph('Hello', 'p1')]);
+    await caretAfter('Hello');
+    await userEvent.keyboard('{Home}{ArrowRight}{ArrowRight}a');
+    const reported = await vi.waitFor(() => {
+      const blocks = last(probe.reported);
+      expect(blocks?.[0].content).toEqual({ text: 'Heallo' });
+      return blocks as EditorEmailBlock[];
+    });
+
+    probe.load(reported.map(({ key: _key, ...block }) => block as EditorEmailBlock));
+    await userEvent.keyboard('b');
+    await vi.waitFor(() => expect(probe.editor.getText()).toBe('Heabllo'));
+  });
+
   it('tells the host when the focus leaves it, and not while it is in a popup the editor opened', async () => {
     const probe = await mount([paragraph('Hello')]);
     await caretAfter('Hello');
@@ -376,7 +391,32 @@ describe('EmailEditor', () => {
     const expected = renderer.render({ ...previewInput, ...sampled, blocks: withIds(blocks) });
     expect(frame.srcdoc).toBe(expected.html);
     expect(expected.problems.length).toBeGreaterThan(0);
-    expect(find('[data-slot=email-preview-problems]').textContent).toContain('nobody');
+    // In words, at the place of its block in the document: the columns, Left, then Right.
+    expect(find('[data-slot=email-preview-problems]').textContent).toContain(
+      `${RENDER_PROBLEM_MESSAGES['variable-missing']}: {{nobody}} (block 3)`,
+    );
+    expect(find('[data-slot=email-preview-problems]').textContent).not.toContain('variable-missing');
+  });
+
+  it('lists two render problems that read the same as two lines', async () => {
+    const renderer = createEmailRenderer({ theme });
+    const footer = ['f1', 'f2'].map((id) => ({
+      id,
+      type: 'paragraph',
+      attributes: {},
+      content: { text: '{{unsub}}' },
+    }));
+    const input = { ...previewInput, regions: { footer: { blocks: footer, variables: {}, variableTypes: {} } } };
+    const errors = vi.spyOn(console, 'error');
+    await mount([paragraph('Hello', 'p1')], { preview: { renderer, input } });
+
+    const line = `${RENDER_PROBLEM_MESSAGES['variable-missing']}: {{unsub}} (in the footer)`;
+    await vi.waitFor(() => {
+      const lines = [...find('[data-slot=email-preview-problems]').querySelectorAll('li')].map((li) => li.textContent);
+      expect(lines).toEqual([line, line]);
+    });
+    expect(errors.mock.calls.flat().join(' ')).not.toContain('same key');
+    errors.mockRestore();
   });
 
   it('validates a bounded number of times under a host that re-renders on each report', async () => {

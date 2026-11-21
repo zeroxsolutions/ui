@@ -1,4 +1,5 @@
 import type { ProblemKind, ProfileProblem } from '@zeroxsolutions/editor-core/profiles/index';
+import type { RenderProblem, RenderProblemKind } from '@zeroxsolutions/editor-core/template/email/index';
 
 /** What each problem says to the author, in one place so a host can later replace the wording. */
 export const PROBLEM_MESSAGES: Readonly<Record<ProblemKind, string>> = {
@@ -23,4 +24,36 @@ export const PROBLEM_MESSAGES: Readonly<Record<ProblemKind, string>> = {
 export function problemMessage(problem: ProfileProblem): string {
   const message = PROBLEM_MESSAGES[problem.kind];
   return problem.name === undefined ? message : `${message}: {{${problem.name}}}`;
+}
+
+/** What each problem the renderer met while drawing the preview says to the author. */
+export const RENDER_PROBLEM_MESSAGES: Readonly<Record<RenderProblemKind, string>> = {
+  'variable-missing': 'This variable has no sample value to preview',
+  'href-not-url-variable': 'The link must be one link variable',
+  'href-scheme-refused': 'The link is not a web or mail address',
+  'unknown-block-type': 'This block is of an unknown type',
+  'block-nested-too-deep': 'Columns cannot hold columns',
+};
+
+/**
+ * The message a render problem reads as, naming its variable or block type and where it is: a region of the
+ * layout, the subject or preheader, or `block`, the place in the document of the block it names.
+ */
+export function renderProblemMessage(problem: RenderProblem, block?: number): string {
+  const message = RENDER_PROBLEM_MESSAGES[problem.kind];
+  const named =
+    problem.name === undefined
+      ? ''
+      : problem.kind === 'unknown-block-type'
+        ? `: ${problem.name}`
+        : `: {{${problem.name}}}`;
+  const where =
+    problem.region !== undefined
+      ? ` (in the ${problem.region})`
+      : problem.blockId === null
+        ? ' (in the subject or preheader)'
+        : block !== undefined
+          ? ` (block ${block})`
+          : '';
+  return `${message}${named}${where}`;
 }
