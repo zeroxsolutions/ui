@@ -1030,6 +1030,9 @@ importers:
       '@tiptap/pm':
         specifier: ^3.34.0
         version: 3.34.0
+      get-east-asian-width:
+        specifier: 1.6.0
+        version: 1.6.0
       katex:
         specifier: ^0.19.1
         version: 0.19.1
