@@ -1,4 +1,6 @@
 export {
+  blockIdentity,
+  type BlockIdentityOptions,
   EMAIL_KINDS,
   emailNodeSpecs,
   emailProfile,
