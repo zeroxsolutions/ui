@@ -206,6 +206,18 @@ describe('blockIdentity', () => {
     expect(keysAreUnique(editor)).toBe(true);
   });
 
+  it('gives an inserted keyed block a null id when another block holds its id', () => {
+    const { editor, engine } = mount([paragraph('one', { id: 'a', key: 'ka' })]);
+
+    engine.commands.setTextSelection(engine.state.doc.content.size);
+    editor.run('insertContent', { content: paragraph('c', { id: 'a', key: 'kz' }) });
+    editor.run('insertContent', { content: paragraph('d', { id: 'n', key: 'ka' }) });
+
+    expect(blocks(editor).map((block) => block.id)).toEqual(['a', null, null]);
+    expect(blocks(editor)[0].key).toBe('ka');
+    expect(keysAreUnique(editor)).toBe(true);
+  });
+
   it('assignBlockIds sets ids without moving the selection or adding an undo step', () => {
     const { editor, engine } = mount([paragraph('one', { key: 'ka' }), paragraph('two', { key: 'kb' })], {}, [
       undoable,
@@ -396,6 +408,15 @@ describe('blockIdentity', () => {
         ['paragraph', null],
       ]);
       expect(keysAreUnique(editor)).toBe(true);
+    });
+
+    it('leaves an author setContent command guarded', () => {
+      const { editor } = mount([paragraph('one', { id: 'a', key: 'ka' })], { structure: () => 'locked' });
+      const before = editor.getJSON();
+
+      editor.run('setContent', { content: loaded });
+
+      expect(editor.getJSON()).toEqual(before);
     });
 
     it('is not undone by an undo right after it', () => {

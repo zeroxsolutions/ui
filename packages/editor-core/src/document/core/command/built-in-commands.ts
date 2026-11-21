@@ -17,8 +17,9 @@ const attrs = z.record(z.string(), z.unknown()).optional();
 const named = z.object({ name: z.string().min(1), attrs });
 const content = z.union([z.string(), z.record(z.string(), z.unknown()), z.array(z.record(z.string(), z.unknown()))]);
 
-/** Replace the document as a host load: marked so guards let it through, and kept out of undo so an
- *  undo right after a load cannot bring the previous document back. */
+/** Replace the document as a host load (the facade's `setContent`): marked so guards let it through,
+ *  and kept out of undo so an undo right after a load cannot bring the previous document back. The
+ *  `setContent` command stays unmarked: a feature running it acts for the author. */
 export function loadContent(handle: EngineHandle, content: unknown): boolean {
   const editor = handle as unknown as Editor;
   return editor
@@ -57,7 +58,7 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
     },
     setContent: {
       args: z.object({ content }),
-      run: ({ content: c }) => loadContent(handle, c),
+      run: ({ content: c }) => editor.commands.setContent(c),
     },
     toggleMark: {
       args: named,

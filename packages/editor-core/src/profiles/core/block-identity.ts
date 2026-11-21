@@ -216,11 +216,13 @@ export function blockIdentity(options: BlockIdentityOptions = {}): EditorFeature
         return firstHolder.get(key) === block && !(pasted && !oldKeys.has(key));
       };
 
-      const keyless: Block[] = [];
+      // Blocks new to the document, keyed or not, are settled after the ones it already had, so a
+      // newcomer keeps its id only when no block holds it and no paste brought it.
+      const newcomers: Block[] = [];
       for (const block of blocks) {
         const key = keyOf(block.node);
-        if (key === undefined) {
-          keyless.push(block);
+        if (key === undefined || (keptKey(block, key) && !oldKeys.has(key))) {
+          newcomers.push(block);
         } else if (keptKey(block, key)) {
           const id = idOf(block.node);
           if (id !== undefined) heldIds.add(id);
@@ -228,12 +230,11 @@ export function blockIdentity(options: BlockIdentityOptions = {}): EditorFeature
           set(block, freshKey(taken), null);
         }
       }
-      for (const block of keyless) {
-        // A keyless block keeps its id only when it is the id's one holder and no paste brought it.
+      for (const block of newcomers) {
         const id = idOf(block.node);
         const keep = id !== undefined && !pasted && !heldIds.has(id);
         if (keep) heldIds.add(id);
-        set(block, freshKey(taken), keep ? id : null);
+        set(block, keyOf(block.node) ?? freshKey(taken), keep ? id : null);
       }
       if (!tr.docChanged) return null;
       return tr.setMeta(identityKey, true);
