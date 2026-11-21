@@ -1,4 +1,4 @@
-import type { Format } from '../../document/core/types/codec.js';
+import type { EmailBlockJSON, Format } from '../../document/core/types/codec.js';
 import type { VariableType } from '../../template/index.js';
 
 export type EmailBlockKind = 'paragraph' | 'button' | 'code' | 'list' | 'callout' | 'divider' | 'columns' | 'html';
@@ -29,14 +29,7 @@ export interface VariableDeclaration {
 }
 
 /** The wire shape of one email block. `lanes` is set on columns only. */
-export interface EditorEmailBlock {
-  id: string | null;
-  key: string;
-  type: string;
-  attributes: Record<string, unknown>;
-  content: Record<string, unknown>;
-  lanes?: EditorEmailBlock[][];
-}
+export type EditorEmailBlock = EmailBlockJSON;
 
 /** `block` is the block's id, or its key when the id is null. */
 export interface ProfileProblem {

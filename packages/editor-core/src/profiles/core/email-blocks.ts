@@ -77,6 +77,21 @@ function inlineOf(source: string): NodeJSON[] {
   );
 }
 
+function printed(nodes: readonly NodeJSON[]): string {
+  return printInlineMarkup(runsOf(nodes));
+}
+
+/**
+ * The markup of `nodes`: `source` as stored when the nodes still read as it did on import, else the
+ * canonical print. Printing is canonical, so a stored text that spells the same runs another way would
+ * otherwise change, and a translation of it would go stale, with no edit.
+ */
+function markupOf(nodes: readonly NodeJSON[], source: unknown): string {
+  const current = printed(nodes);
+  return typeof source === 'string' && printed(inlineOf(source)) === current ? source : current;
+}
+
+// House attribute schemas are optional, never nullable: a null here is an engine's blank, not a stored value.
 function present(attrs: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(attrs).filter(([, value]) => value !== undefined && value !== null));
 }
@@ -85,6 +100,7 @@ function attributesOf(node: NodeJSON): Record<string, unknown> {
   const { id, key, ...rest } = node.attrs ?? {};
   void id;
   void key;
+  delete rest.source;
   for (const name of CONTENT_ATTRIBUTES[node.type] ?? []) delete rest[name];
   return present(rest);
 }
@@ -100,7 +116,7 @@ function nodeOf(
   rest: Partial<NodeJSON> = {},
   own: Record<string, unknown> = {},
 ): NodeJSON {
-  return { type, attrs: { id: block.id, key: block.key, ...own, ...block.attributes }, ...rest };
+  return { type, attrs: { ...block.attributes, id: block.id, key: block.key, ...own }, ...rest };
 }
 
 function plainContent(text: string): NodeJSON[] | undefined {
@@ -121,16 +137,21 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailB
         ...base,
         type: 'paragraph',
         attributes,
-        content: { text: printInlineMarkup(runsOf(node.content ?? [])) },
+        content: { text: markupOf(node.content ?? [], node.attrs?.source) },
       };
     case 'emailCallout':
-      return { ...base, type: 'callout', attributes, content: { text: printInlineMarkup(runsOf(node.content ?? [])) } };
+      return {
+        ...base,
+        type: 'callout',
+        attributes,
+        content: { text: markupOf(node.content ?? [], node.attrs?.source) },
+      };
     case 'emailList':
       return {
         ...base,
         type: 'list',
         attributes,
-        content: { items: (node.content ?? []).map((item) => printInlineMarkup(runsOf(item.content ?? []))) },
+        content: { items: (node.content ?? []).map((item) => markupOf(item.content ?? [], item.attrs?.source)) },
       };
     case 'emailButton': {
       const { label, href } = node.attrs ?? {};
@@ -151,7 +172,11 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailB
         lanes: (node.content ?? []).map((lane) => (lane.content ?? []).map((child) => exportBlock(child, codecs))),
       };
     case 'emailUnknown':
-      return node.attrs?.block as EditorEmailBlock;
+      return {
+        ...(node.attrs?.block as EditorEmailBlock),
+        ...(node.attrs && 'id' in node.attrs ? { id: base.id } : {}),
+        ...(node.attrs && 'key' in node.attrs ? { key: base.key } : {}),
+      };
     default:
       if (custom?.toEmailBlock) return custom.toEmailBlock(node);
       return { ...base, type: node.type, attributes, content: {} };
@@ -162,12 +187,16 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
   const text = str(block.content.text);
   switch (block.type) {
     case 'paragraph':
-      return nodeOf(block, 'paragraph', withContent(inlineOf(text)));
+      return nodeOf(block, 'paragraph', withContent(inlineOf(text)), { source: text });
     case 'callout':
-      return nodeOf(block, 'emailCallout', withContent(inlineOf(text)));
+      return nodeOf(block, 'emailCallout', withContent(inlineOf(text)), { source: text });
     case 'list': {
       const items = Array.isArray(block.content.items) ? block.content.items : [];
-      const content = items.map((item): NodeJSON => ({ type: 'emailListItem', ...withContent(inlineOf(str(item))) }));
+      const content = items.map((item): NodeJSON => ({
+        type: 'emailListItem',
+        attrs: { source: str(item) },
+        ...withContent(inlineOf(str(item))),
+      }));
       return nodeOf(block, 'emailList', { content });
     }
     case 'button':

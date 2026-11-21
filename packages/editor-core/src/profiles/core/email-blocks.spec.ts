@@ -26,13 +26,24 @@ describe('email blocks', () => {
 
   it('round-trips every kind, lanes and ids included, and makes no default explicit', () => {
     const blocks: EditorEmailBlock[] = [
-      block({ id: 'a', key: 'a', type: 'paragraph', attributes: { tone: 'muted' }, content: { text: 'Hi {{name}}' } }),
-      block({ id: 'b', type: 'callout', content: { text: '**Note**' } }),
+      block({
+        id: 'a',
+        key: 'a',
+        type: 'paragraph',
+        attributes: { tone: 'muted', align: 'center', spaceAfter: 'large' },
+        content: { text: 'Hi {{name}}' },
+      }),
+      block({
+        id: 'b',
+        type: 'callout',
+        attributes: { align: 'right', spaceAfter: 'small' },
+        content: { text: '**Note**' },
+      }),
       block({ type: 'list', content: { items: ['one', '_two_ {{x}}'] } }),
       block({ type: 'button', attributes: { width: 'full' }, content: { label: 'Go', href: '{{u}}' } }),
       block({ type: 'code', content: { code: '{{code}}' } }),
       block({ type: 'html', content: { html: '<p>{{a}}</p>' } }),
-      block({ type: 'divider' }),
+      block({ type: 'divider', attributes: { spaceAfter: 'small' } }),
       block({
         id: 'c',
         type: 'columns',
@@ -41,6 +52,26 @@ describe('email blocks', () => {
       }),
     ];
     expect(toEmailBlocks(fromEmailBlocks(blocks))).toEqual(blocks);
+  });
+
+  it.each(['C:\\path', 'a]b', '_**a**_', '[**a**]({{u}})', '[a]({{u}})[b]({{u}})', '**open'])(
+    'exports the stored text %s unchanged when nothing was edited',
+    (text) => {
+      const blocks = [
+        block({ type: 'paragraph', content: { text } }),
+        block({ type: 'callout', content: { text } }),
+        block({ type: 'list', content: { items: [text, text] } }),
+      ];
+      expect(toEmailBlocks(fromEmailBlocks(blocks))).toEqual(blocks);
+    },
+  );
+
+  it('reprints a field that was edited', () => {
+    const doc = fromEmailBlocks([block({ type: 'paragraph', content: { text: '_**a**_' } })]);
+    const node = doc.content![0];
+    node.content = [...node.content!, { type: 'text', text: '*' }];
+    expect(toEmailBlocks(doc)[0].content).toEqual({ text: '**_a_**\\*' });
+    expect(toEmailBlocks(doc)[0].attributes).toEqual({});
   });
 
   it('writes marks as markup', () => {
@@ -108,5 +139,24 @@ describe('email blocks', () => {
     expect(doc.content?.[0].type).toBe('emailUnknown');
     expect(doc.content?.[0].attrs?.block).toEqual(blocks[0]);
     expect(toEmailBlocks(doc)).toEqual(blocks);
+  });
+
+  it('exports an unknown block under its node identity', () => {
+    const doc = fromEmailBlocks([block({ id: 'x', key: 'x', type: 'quote', content: { text: 'hi' } })]);
+    doc.content![0].attrs = { ...doc.content![0].attrs, id: 'copy', key: 'x-2' };
+    expect(toEmailBlocks(doc)[0]).toMatchObject({ id: 'copy', key: 'x-2', type: 'quote', content: { text: 'hi' } });
+  });
+
+  it('keeps a stored attribute from overwriting identity or content', () => {
+    const doc = fromEmailBlocks([
+      block({
+        id: 'a',
+        key: 'k',
+        type: 'button',
+        attributes: { id: 'z', label: 'z' },
+        content: { label: 'Go', href: 'h' },
+      }),
+    ]);
+    expect(doc.content![0].attrs).toMatchObject({ id: 'a', key: 'k', label: 'Go', href: 'h' });
   });
 });
