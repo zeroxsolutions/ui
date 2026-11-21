@@ -44,14 +44,14 @@ fills them with real values; it shows sample values in a preview only.
 - Locales, translation states, drafts, versions, publishing, previews over HTTP, test sends, permissions:
   they stay in travel. The editor holds one locale's content at a time.
 - Filling variables with real values, escaping values, formatting dates or money: the server's, through
-  `@zeroxsolutions/template`.
+  the house template code (`@zeroxsolutions/editor-core/template/*`, below).
 - A block library wider than Notion's (project 2) and drag-in block presets (project 3).
 - The native editor (project 4).
 
 ## Anti-goals
 
-- A second email renderer. The house renderer (`createEmailRenderer` in `@zeroxsolutions/template/email`)
-  is the only one; a preview that renders differently from a send is the failure this avoids.
+- A second email renderer. The house renderer (`createEmailRenderer` in
+  `@zeroxsolutions/editor-core/template/email/index`) is the only one; a preview that renders differently from a send is the failure this avoids.
 - A profile that lets the author build what its export cannot carry. A block or a mark the email
   renderer cannot draw is not offered in the email profile at all, rather than refused at export.
 - Validation that exists only in the browser: the rules run as pure functions the server can import.
@@ -69,7 +69,7 @@ fills them with real values; it shows sample values in a preview only.
   registry's `composer/triggers/inline-token.tsx` and `trigger-menu.tsx`) already insert an inline atom
   token from a menu opened by a typed character. Variables build on it.
 
-### In travel and the house template package (`@zeroxsolutions/template` 0.2.0, on npm, peer `zod ^4.3.6`)
+### In travel and the house template package (`@zeroxsolutions/template` 0.2.0, on npm, peer `zod ^4.3.6`; it moves into `editor-core`, below)
 
 The house package owns the email block shapes, the renderer, the variable token and the SMS measure:
 
@@ -193,7 +193,7 @@ problem blocks a save; the editor never refuses an edit because of one.
   `**bold**`, `_italic_`, `[label]({{name}})`, with `\` escaping a literal `*`, `_`, `[`, `]` or `\`.
   A string keeps travel's columns, its 5000-character bound and its translation by field; a structured
   run array would change every wire shape and split a sentence into pieces a translation cannot move.
-- `@zeroxsolutions/template` owns the grammar: a parser and a printer for it in `.`, and the email
+- The house template code owns the grammar: a parser and a printer for it in `template/index`, and the email
   renderer drawing it as `<strong>`, `<em>` and `<a href>` (the href passing the same scheme check as a
   button's), with the text alternative dropping the markers and printing a link as `label (url)`. Text
   that held a literal `**` before now renders bold, so the release is breaking; its number is read off
@@ -244,21 +244,72 @@ problem blocks a save; the editor never refuses an edit because of one.
 live meter under the body: units used of the segment limit and the encoding (GSM-7 or UCS-2), from the
 house `measureSms`, with tokens counted as their literal text as travel's write check counts them.
 
+### The template code moves into editor-core (decided by the owner 2026-11-21)
+
+`@zeroxsolutions/template` was published from the zeroxsolutions repo. Its inline markup landed there
+(zeroxsolutions#103, merged at `5bb8d693`, never published). It moves into this repo's
+`@zeroxsolutions/editor-core` as the folder `src/template/`, because the editor and the renderer share
+the block kinds, the bounds and the markup grammar and change together: one repo puts both sides of a
+change in one pull request, and the editor reads the renderer from the workspace instead of waiting on
+a publish.
+
+- **One package, a subpath per entry.** `editor-core`'s entry map is the dist-mirrored wildcard
+  (`"./*"`), so the folder's barrels are its entries. Travel's workers load the template alone, so the
+  split is earned by load, not by a second package. The old entries map as:
+
+  | `@zeroxsolutions/template` | `@zeroxsolutions/editor-core`  |
+  | -------------------------- | ------------------------------ |
+  | `.`                        | `template/index`               |
+  | `./email`                  | `template/email/index`         |
+  | `./email/testing`          | `template/email/testing/index` |
+  | `./sms`                    | `template/sms/index`           |
+
+  The names each entry lists do not change.
+
+- **The fence.** `src/template/` imports nothing else of `editor-core` and no package but `zod` and
+  `get-east-asian-width`, so a worker importing it never loads the editor's engine, katex or mermaid. A
+  spec in that folder fails any other import; the rest of `editor-core` may import the template.
+- **The code moves without its history.** It is copied at `5bb8d693` in one commit naming the source;
+  its history stays readable in zeroxsolutions. (Call made by the writer: imported history would put
+  every past `feat(template)` commit into `editor-core`'s changelog range.)
+- **zeroxsolutions removes `packages/template`** once the copy is merged here. Version 0.2.0 stays on
+  npm, so travel keeps working until its switch; the npm package is deprecated, pointing at
+  `editor-core`, after travel switched (the owner's go).
+- **No separate release.** The template ships in the `editor-core` release that carries the profiles;
+  its number is read off that release's dry run.
+
+### editor-core's entries
+
+The same change tidies the entries the template joins, by the house rule for a wildcard map ("no root
+barrel and never `export *`", every entry a folder's `index`):
+
+- The five barrels that hold only `export {}` are deleted: `src/index.ts`, `src/document/index.ts`,
+  `src/math/index.ts`, `src/mermaid/index.ts`, `src/migrate/index.ts`. Nothing imports them.
+- `document/core/index.ts` lists the type names of `./types/index.js` instead of `export *`.
+- Consumers import an area's `index`, never a file inside it: `document/core/index`,
+  `document/serialize/index`, `document/migrate/index`, `document/ui/index`, `math/core/index`,
+  `mermaid/core/index`, a new `composer/index`, and `template/*/index`. The engine handles the
+  registry's node-view adapter reads (`facadeFor`, `EngineHandle`) join the unstable
+  `document/advanced` escape, which is the one entry that is a file. Every old path still resolves,
+  so no consumer breaks. A spec fails any other import of an `editor-core` path.
+- The wildcard map itself stays: changing it would change the file every existing import resolves.
+
 ### Where each part lives
 
-| Part                                                                                                                                                                     | Package                                                                      |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| The inline markup grammar (parse, print, `sameInlineMarkup`) and its rendering to HTML and text                                                                          | `@zeroxsolutions/template` (npm), a release before the editor's              |
-| `EditorProfile`, `emailProfile`, `smsProfile`, the engine-free email nodes, the `variable` node, `validate`, the `email-blocks` and `sms-text` codecs                    | `@zeroxsolutions/editor-core` (npm), depending on `@zeroxsolutions/template` |
-| Button and columns node views, the variable chip and menu, the problem decorations, the SMS meter, an `EmailEditor` and an `SmsEditor` composed from the document editor | registry items under `editor/` in `packages/ui`                              |
-| Docs pages for both editors, with a live email preview                                                                                                                   | `packages/editor-docs-web`                                                   |
+| Part                                                                                                                                                                     | Package                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| The template code: variables, the email renderer, the SMS measure, the inline markup grammar and its rendering to HTML and text                                          | `@zeroxsolutions/editor-core`, `src/template/`, behind the fence          |
+| `EditorProfile`, `emailProfile`, `smsProfile`, the engine-free email nodes, the `variable` node, `validate`, the `email-blocks` and `sms-text` codecs                    | `@zeroxsolutions/editor-core`, `src/profiles/`, importing `src/template/` |
+| Button and columns node views, the variable chip and menu, the problem decorations, the SMS meter, an `EmailEditor` and an `SmsEditor` composed from the document editor | registry items under `editor/` in `packages/ui`                           |
+| Docs pages for both editors, with a live email preview                                                                                                                   | `packages/editor-docs-web`                                                |
 
 ### Travel's switch (a follow-up PR in the travel repo, part of this project's acceptance)
 
 Travel replaces `block-editor.tsx`, `block-list.tsx`, `block-item.tsx`, `block-content-form.tsx` and the
 SMS textarea with the registry's `EmailEditor` and `SmsEditor`, mapping its stored blocks in and out with
-`email-blocks` and its refusal codes onto the editor's problem kinds. It takes the new
-`@zeroxsolutions/template`, refuses malformed markup on write and keeps markup in translation drafts.
+`email-blocks` and its refusal codes onto the editor's problem kinds. It moves every import of
+`@zeroxsolutions/template` to the matching `@zeroxsolutions/editor-core/template/*/index` entry and drops
+the old dependency, refuses malformed markup on write and keeps markup in translation drafts.
 Its API, tables and translation states do not change.
 
 ## Left to the builder

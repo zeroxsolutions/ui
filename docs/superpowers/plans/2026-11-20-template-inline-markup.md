@@ -1,5 +1,7 @@
 # Inline markup in @zeroxsolutions/template Implementation Plan
 
+> **Executed:** zeroxsolutions#103, merged at `5bb8d693`, never published. The code then moved into ui's editor-core (`2026-11-21-template-into-editor-core.md`).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Teach the house email renderer bold, italic and variable links inside paragraph, callout and list text, through one inline markup grammar the package owns.

@@ -4,19 +4,19 @@
 
 **Goal:** Ship the email and SMS profiles of the design system's editor, with typed variables, validation on the wire shape, inline marks, and the `EmailEditor` and `SmsEditor` registry items that let travel delete its block editor.
 
-**Architecture:** Everything that renders nothing lives in `@zeroxsolutions/editor-core` under a new `src/profiles/` folder: the wire types, the profiles, `validate`, the email node specs, the `email-blocks` and `sms-text` codecs, and the block-identity engine plugin. The registry adds the React parts under `packages/ui/registry/bases/base-ui/editor/profiles/`: node views, the variable chip and its `{{` menu, the problem decorations, the SMS meter, and the two editor surfaces. Inline markup comes from `@zeroxsolutions/template`, never re-implemented.
+**Architecture:** Everything that renders nothing lives in `@zeroxsolutions/editor-core` under a new `src/profiles/` folder: the wire types, the profiles, `validate`, the email node specs, the `email-blocks` and `sms-text` codecs, and the block-identity engine plugin. The registry adds the React parts under `packages/ui/registry/bases/base-ui/editor/profiles/`: node views, the variable chip and its `{{` menu, the problem decorations, the SMS meter, and the two editor surfaces. Inline markup, the bounds, the renderer and the SMS measure come from editor-core's own `src/template/`, imported relatively, never re-implemented.
 
 **Tech Stack:** TypeScript, Tiptap 3 through editor-core, React 19, zod 4, vitest (jsdom and the `@zeroxsolutions/ui:browser` project), shadcn registry, Fumadocs.
 
-**Spec:** `docs/superpowers/specs/2026-11-20-editor-profiles-design.md`. Prerequisite: `docs/superpowers/plans/2026-11-20-template-inline-markup.md` merged and the new `@zeroxsolutions/template` published (the owner's go).
+**Spec:** `docs/superpowers/specs/2026-11-20-editor-profiles-design.md`. Prerequisite: `docs/superpowers/plans/2026-11-21-template-into-editor-core.md` merged in ui (no publish needed).
 
 ## Global Constraints
 
 - Worktree `.claude/worktrees/editor-profiles` off `origin/master`, branch `feat/editor-profiles`; `pnpm install` before the first commit. Never touch the main checkout.
-- `@zeroxsolutions/editor-core` adds `@zeroxsolutions/template` (the version Plan A published) to `dependencies`; zod stays its own dependency.
+- `src/profiles/` imports the template relatively from `src/template/` (e.g. `../../template/email/index.js`); never the reverse, which the fence spec in `src/template/` fails. No new dependency. Consumers import editor-core only through an area's `index` (the entries specs fail anything else), so `profiles/` gets `profiles/index.ts` and `profiles/core/index.ts` as its entries.
 - Variable types are the house `VARIABLE_TYPES` (`string`, `duration`, `url`, `email`); a token is `{{name}}`, `name` `\w+`.
 - Email kinds: `paragraph`, `button`, `code`, `list`, `callout`, `divider`, `columns`, `html`. Mail-layout regions allow `paragraph`, `list`, `callout`, `divider`, `columns`.
-- Bounds: text, label, href and list bounds from `@zeroxsolutions/template/email` (`BLOCK_TEXT_MAX_LENGTH` 5000, `BUTTON_LABEL_MAX_LENGTH` 200, `BUTTON_HREF_MAX_LENGTH` 2000, `LIST_MAX_ITEMS` 20); profile options with travel's defaults for the rest: `maxBlocks` 50 (lane children counted), `maxLanes` 4, `maxVariables` 20; one level of nesting.
+- Bounds: text, label, href and list bounds from `src/template/email/index.ts` (`BLOCK_TEXT_MAX_LENGTH` 5000, `BUTTON_LABEL_MAX_LENGTH` 200, `BUTTON_HREF_MAX_LENGTH` 2000, `LIST_MAX_ITEMS` 20); profile options with travel's defaults for the rest: `maxBlocks` 50 (lane children counted), `maxLanes` 4, `maxVariables` 20; one level of nesting.
 - `align`: `left | center | right`; `spaceAfter`: `small | medium | large` (default `medium`); `tone`: `default | muted`; `width`: `inline | full`; `ratio`: 2..4 integers 1..12, one per lane.
 - Marks in the email profile: bold, italic, link to one declared `url` variable; on paragraph, callout and list items only. SMS: no block but its body, no mark.
 - Problem kinds, exactly: `variable-undeclared`, `href-not-url-variable`, `link-not-url-variable`, `required-variable-not-printed`, `markup-malformed`, `block-not-allowed`, `unknown-block-type`, `block-nested-too-deep`, `lanes-mismatch`, `text-empty`, `text-too-long`, `list-too-long`, `too-many-blocks`, `sms-segment-exceeded`, `sms-placeholder-malformed`.
@@ -50,7 +50,6 @@
 
 - Create: `packages/editor-core/src/profiles/core/types.ts`, `profiles/core/profile.ts`, `profiles/core/index.ts`, `profiles/index.ts`
 - Test: `packages/editor-core/src/profiles/core/profile.spec.ts`
-- Modify: `packages/editor-core/package.json` (dependency)
 
 **Interfaces:**
 
@@ -84,7 +83,7 @@
 
 **Interfaces:**
 
-- Consumes: Task 1 types; `parseInlineMarkup`, `variableTokens` from `@zeroxsolutions/template`.
+- Consumes: Task 1 types; `parseInlineMarkup`, `variableTokens` from `src/template/index.ts`.
 - Produces: `validate(value: readonly EditorEmailBlock[] | string, profile: EditorProfile): ProfileProblem[]` (a string goes to the SMS half, Task 3; until then it returns `[]`).
 
 - [ ] **Step 1: Write the failing tests**, one per kind, each with the smallest input and the exact problem: `variable-undeclared` (`{ kind, block: 'k1', field: 'text', name: 'x' }`); `href-not-url-variable` (button href `{{name}}` where `name` is `string`, and href `https://x`); `link-not-url-variable` (paragraph `[a]({{name}})`); `required-variable-not-printed` (`block: null, name`); `markup-malformed` (`'**a'`, with `offset: 0`); `block-not-allowed` (a `button` under `MAIL_LAYOUT_KINDS`); `unknown-block-type`; `block-nested-too-deep` (columns in a lane); `lanes-mismatch` (`ratio` of 3 with 2 lanes); `text-empty` (paragraph `''`, list item `''` with `item`); `text-too-long` (5001 chars, markers counted); `list-too-long` (21 items); `too-many-blocks` (51 counting lane children, `block: null`); plus `returns nothing for a valid email` over a document holding every kind.
@@ -224,7 +223,7 @@
 - Create: `packages/ui/registry/bases/base-ui/examples/email-editor-demo.tsx`, `sms-editor-demo.tsx`, `packages/editor-docs-web/content/docs/editor/email-editor.mdx`, `sms-editor.mdx`
 - Modify: the e2e page lists that name every editor page (grep `chat-input` under `apps/*-e2e`)
 
-- [ ] **Step 1:** Add both items: files under `profiles/` (and `profiles/core` is not shipped: it is editor-core), `registryDependencies` from what the files import, `dependencies` `@zeroxsolutions/editor-core` and `@zeroxsolutions/template`. Run `CI=true pnpm nx run @zeroxsolutions/ui:test -- --run registry/registry.spec.ts`; PASS (every editor file in exactly one item).
+- [ ] **Step 1:** Add both items: files under `profiles/` (and `profiles/core` is not shipped: it is editor-core), `registryDependencies` from what the files import, `dependencies` `@zeroxsolutions/editor-core` only (the demo imports `createEmailRenderer` from `@zeroxsolutions/editor-core/template/email/index`). Run `CI=true pnpm nx run @zeroxsolutions/ui:test -- --run registry/registry.spec.ts`; PASS (every editor file in exactly one item).
 - [ ] **Step 2:** Demos: the email demo uses a travel-shaped template (greeting paragraph, a button to `{{trip_url}}`, a callout, a two-lane columns) with a `createEmailRenderer()` preview; the SMS demo a one-segment OTP body.
 - [ ] **Step 3:** Docs pages shaped as `chat-input.mdx`: install, usage, props tables, the variables and validation sections, the markup grammar, the travel mapping note. Add both to "Surfaces".
 - [ ] **Step 4: Run** `CI=true pnpm nx run-many -t lint typecheck test -p @zeroxsolutions/ui @zeroxsolutions/editor-core @zeroxsolutions/editor-docs-web` and `CI=true pnpm nx run @zeroxsolutions/ui:build-registry`; PASS. Then `pnpm nx affected -t lint typecheck`.
@@ -232,4 +231,4 @@
 
 ---
 
-Plan C (travel's switch) is written after this plan and Plan A are released, against travel's `origin/master` at that time.
+Plan C (travel's switch, including its imports moving from `@zeroxsolutions/template` to `@zeroxsolutions/editor-core/template/*/index`) is written after this plan's editor-core release, against travel's `origin/master` at that time.
