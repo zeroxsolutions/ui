@@ -1,4 +1,5 @@
 export {
+  EMAIL_KINDS,
   emailProfile,
   MAIL_LAYOUT_KINDS,
   smsProfile,

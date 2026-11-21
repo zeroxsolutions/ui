@@ -36,6 +36,23 @@ describe('validate an email', () => {
     expect(validate([href('{{link}}')], profile)).toEqual([]);
   });
 
+  it('flags an href that is more than one token, beside an undeclared name', () => {
+    expect(validate([block('button', { label: 'Go', href: 'https://x/{{x}}' })], profile)).toEqual([
+      { kind: 'variable-undeclared', block: 'k1', field: 'href', name: 'x' },
+      { kind: 'href-not-url-variable', block: 'k1', field: 'href' },
+    ]);
+  });
+
+  it('flags a list with no items', () => {
+    expect(validate([block('list', { items: [] })], profile)).toEqual([
+      { kind: 'text-empty', block: 'k1', field: 'items' },
+    ]);
+  });
+
+  it('flags a link variable once per field', () => {
+    expect(validate([paragraph('[a]({{name}}) [b]({{name}})')], profile)).toHaveLength(1);
+  });
+
   it('flags a link whose target is a declared variable that is not a url', () => {
     expect(validate([paragraph('[a]({{name}})')], profile)).toEqual([
       { kind: 'link-not-url-variable', block: 'k1', field: 'text', name: 'name' },

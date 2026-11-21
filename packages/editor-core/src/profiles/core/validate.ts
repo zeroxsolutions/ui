@@ -1,7 +1,7 @@
 import { parseInlineMarkup, variableTokens } from '../../template/index.js';
+import { EMAIL_KINDS } from './profile.js';
 import type { EditorEmailBlock, EditorProfile, ProfileProblem } from './types.js';
 
-const KNOWN_KINDS = ['paragraph', 'button', 'code', 'list', 'callout', 'divider', 'columns', 'html'];
 const RATIO_WEIGHT_MAX = 12;
 
 interface Walk {
@@ -37,9 +37,11 @@ function checkField(walk: Walk, block: string, { field, item, value, max, marked
     const parsed = parseInlineMarkup(value);
     if (!parsed.ok) walk.problems.push({ kind: 'markup-malformed', ...where, offset: parsed.offset });
     else {
+      const linked = new Set<string>();
       for (const run of parsed.runs) {
         const type = run.kind === 'link' ? declaredType(walk, run.variable) : undefined;
-        if (run.kind === 'link' && type !== undefined && type !== 'url') {
+        if (run.kind === 'link' && type !== undefined && type !== 'url' && !linked.has(run.variable)) {
+          linked.add(run.variable);
           walk.problems.push({ kind: 'link-not-url-variable', ...where, name: run.variable });
         }
       }
@@ -53,15 +55,13 @@ function checkField(walk: Walk, block: string, { field, item, value, max, marked
 }
 
 function checkHref(walk: Walk, block: string, value: string): void {
-  const { bounds } = walk.profile;
-  const before = walk.problems.length;
-  checkField(walk, block, { field: 'href', value, max: bounds.href, marked: false });
-  if (value === '' || walk.problems.length > before) return;
+  checkField(walk, block, { field: 'href', value, max: walk.profile.bounds.href, marked: false });
+  if (value === '') return;
   const names = variableTokens(value);
   const exact = names.length === 1 && value === `{{${names[0]}}}`;
-  if (!exact || declaredType(walk, names[0]) !== 'url') {
-    walk.problems.push({ kind: 'href-not-url-variable', block, field: 'href' });
-  }
+  const type = exact ? declaredType(walk, names[0]) : undefined;
+  if (exact && type === undefined) return;
+  if (type !== 'url') walk.problems.push({ kind: 'href-not-url-variable', block, field: 'href' });
 }
 
 function checkColumns(walk: Walk, block: EditorEmailBlock, id: string): void {
@@ -86,7 +86,7 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
     walk.problems.push({ kind: 'block-nested-too-deep', block: id });
     return;
   }
-  if (!KNOWN_KINDS.includes(block.type) && !kinds.includes(block.type)) {
+  if (!(EMAIL_KINDS as readonly string[]).includes(block.type) && !kinds.includes(block.type)) {
     walk.problems.push({ kind: 'unknown-block-type', block: id });
     return;
   }
@@ -103,6 +103,7 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
       break;
     case 'list': {
       const items = Array.isArray(content.items) ? content.items : [];
+      if (items.length === 0) walk.problems.push({ kind: 'text-empty', block: id, field: 'items' });
       if (items.length > bounds.listItems) walk.problems.push({ kind: 'list-too-long', block: id, field: 'items' });
       items.forEach((value, item) =>
         checkField(walk, id, { field: 'items', item, value: text(value), max: bounds.text, marked: true }),

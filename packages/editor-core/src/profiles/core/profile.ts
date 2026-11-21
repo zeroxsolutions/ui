@@ -7,7 +7,7 @@ import {
 } from '../../template/email/index.js';
 import type { EditorProfile, EmailBlockKind, EmailBounds, VariableDeclaration } from './types.js';
 
-const EMAIL_KINDS: readonly EmailBlockKind[] = [
+export const EMAIL_KINDS: readonly EmailBlockKind[] = [
   'paragraph',
   'button',
   'code',
