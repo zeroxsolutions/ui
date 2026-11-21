@@ -192,6 +192,7 @@ const profile = emailProfile({
     },
   ],
 });
+// `theme` is the renderer's EmailTheme and `layoutProps` the logo and footer its layout takes; the demo defines both.
 const renderer = createEmailRenderer({ theme });
 
 function Template({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blocks: EditorEmailBlock[]) => void }) {
@@ -233,7 +234,19 @@ The editor states an email as the blocks the renderer takes: `paragraph`, `butto
 
 `required` lists the ids of the blocks the author may not remove. `structure="locked"` lets the author edit text and variables only: nothing is inserted, removed or restyled. `renderBlockAdornment` draws what the host wants beside a block, such as a translation's standing; `id` is null for a block not saved yet, so `key` identifies it. `features` adds the host's own blocks, each with an email codec, and is read once: a change needs a remount.
 
-The profile's options bound the document: `maxBlocks` 50 (a lane's blocks count), `maxLanes` 4, `maxVariables` 20, and the text, label, link and list limits of the renderer. Columns hold one level only.
+`emailProfile` takes `allow` (the block kinds the author may use, all eight by default), `variables`, `extraKinds` (the kinds of the host's own `features`) and `bounds`, a partial of the limits below:
+
+| Bound       | Default | Limits                                          |
+| ----------- | ------- | ----------------------------------------------- |
+| `text`      | 5000    | characters of a paragraph, callout or list item |
+| `label`     | 200     | characters of a button's label                  |
+| `href`      | 2000    | characters of a button's link                   |
+| `listItems` | 20      | items of a list                                 |
+| `blocks`    | 50      | blocks in all; a lane's blocks count            |
+| `lanes`     | 4       | lanes of a columns block                        |
+| `variables` | 20      | declared variables                              |
+
+Columns hold one level only.
 
 ## Variables
 
