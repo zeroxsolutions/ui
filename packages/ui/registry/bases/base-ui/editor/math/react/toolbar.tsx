@@ -20,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
-import { copyLatex, copyMathML } from '@zeroxsolutions/editor-core/math/core/export';
+import { copyLatex, copyMathML } from '@zeroxsolutions/editor-core/math/core/index';
 import { MathPalette } from './palette';
 
 export interface MathToolbarProps {

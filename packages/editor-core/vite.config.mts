@@ -24,7 +24,7 @@ const entries = Object.fromEntries(
   glob
     .sync('src/**/*.{ts,tsx}', {
       cwd: import.meta.dirname,
-      ignore: ['src/index.ts', 'src/**/*.{test,spec}.{ts,tsx}', 'src/**/*.stories.{ts,tsx}', 'src/**/*.d.ts'],
+      ignore: ['src/**/*.{test,spec}.{ts,tsx}', 'src/**/*.stories.{ts,tsx}', 'src/**/*.d.ts', 'src/**/*.fixture.ts'],
     })
     .map((file) => [file.replace(/^src\//, '').replace(/\.(ts|tsx)$/, ''), resolve(import.meta.dirname, file)]),
 );

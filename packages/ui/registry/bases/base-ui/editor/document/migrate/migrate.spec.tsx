@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { EditorError } from '@zeroxsolutions/editor-core/document/core/index';
 import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../features/standard/index';
-import { createMigrator, summarizeImport } from '@zeroxsolutions/editor-core/document/migrate/migrator';
+import { createMigrator, summarizeImport } from '@zeroxsolutions/editor-core/document/migrate/index';
 
 const registry = createCodecRegistry([standardKit()]);
 

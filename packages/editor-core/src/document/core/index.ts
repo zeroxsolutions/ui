@@ -6,7 +6,49 @@
  * an engine-free public signature (verified by the `assert-engine-free-dts`
  * build guard).
  */
-export * from './types/index.js';
+export type {
+  AdvancedContribution,
+  BackendTransaction,
+  BlockMenuItem,
+  BubbleItem,
+  CaretRect,
+  CommandDescriptor,
+  CommandMap,
+  ContentExpression,
+  Delta,
+  DeserializeContext,
+  DocJSON,
+  DocumentBackendFactory,
+  DocumentBackendInit,
+  DocumentChangeHandlers,
+  DroppedNode,
+  EditorFeature,
+  EditorSelection,
+  EditorStatus,
+  FallbackStrategy,
+  FocusPosition,
+  Format,
+  IDocumentBackend,
+  IEditor,
+  ImportResult,
+  ImportWarning,
+  InputRuleSpec,
+  MarkCodec,
+  MarkDelimiters,
+  MarkJSON,
+  MarkSpec,
+  MarkdownToken,
+  NodeCodec,
+  NodeJSON,
+  NodeSpec,
+  NodeViewProps,
+  NodeViewRenderer,
+  SerializeContext,
+  SlashItem,
+  Snapshot,
+  ToolbarItem,
+  TriggerQuery,
+} from './types/index.js';
 
 export { createEditor } from './builder/create-editor.js';
 export type { EditorBuilder, EditorMountOptions } from './builder/create-editor.js';

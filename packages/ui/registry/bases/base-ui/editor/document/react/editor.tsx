@@ -10,11 +10,8 @@ import {
 import { PlusIcon, type PlusIconHandle } from '@/registry/bases/base-ui/icons/lucide/plus-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/create-document-editor';
-import type { Delta } from '@zeroxsolutions/editor-core/document/core/types/delta';
-import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
-import type { EditorFeature } from '@zeroxsolutions/editor-core/document/core/types/feature';
-import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import type { Delta, IEditor, EditorFeature, DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { createNodeViewRenderer } from '../node-view-adapter';
 
 /**

@@ -34,7 +34,7 @@ typing - is supplied by the ui registry (`@/registry/bases/base-ui/editor/...`).
 ## Quick start - the imperative builder
 
 ```ts
-import { createEditor } from '@zeroxsolutions/editor-core/document/core';
+import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
 
 const editor = createEditor()
   .use(myFeature())
@@ -68,7 +68,7 @@ A feature is the single declarative unit: one block/mark bundled with its
 behavior, serialization, node view, and UI - **engine-free**.
 
 ```tsx
-import { defineFeature } from '@zeroxsolutions/editor-core/document/core';
+import { defineFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import { z } from 'zod';
 
 export const badge = () =>
@@ -116,8 +116,8 @@ shipped from the ui registry alongside the React surfaces, not from this package
 ## Serialization & Migrate
 
 ```ts
-import { createCodecRegistry, serialize, importMarkdown } from '@zeroxsolutions/editor-core/document/serialize';
-import { createMigrator, summarizeImport } from '@zeroxsolutions/editor-core/document/migrate';
+import { createCodecRegistry, serialize, importMarkdown } from '@zeroxsolutions/editor-core/document/serialize/index';
+import { createMigrator, summarizeImport } from '@zeroxsolutions/editor-core/document/migrate/index';
 
 const registry = createCodecRegistry([myFeature()]);
 serialize(doc, 'markdown', registry); // 'html' | 'react' | custom formats
@@ -138,7 +138,7 @@ The slash / toolbar / bubble / block menu **items** a feature declares are
 aggregated engine-free; the menu **components** themselves are chrome.
 
 ```ts
-import { collectUiContributions, defaultBlockMenuItems } from '@zeroxsolutions/editor-core/document/ui';
+import { collectUiContributions, defaultBlockMenuItems } from '@zeroxsolutions/editor-core/document/ui/index';
 
 const ui = collectUiContributions(features);
 // ui.toolbar, ui.slash, ui.bubble, ui.blockMenu - the chrome renders these
@@ -157,17 +157,21 @@ public `.d.ts` outside this subpath.
 ## Public surface
 
 Per-file subpath exports (`./*` -> `./dist/*`), so each module is imported (and
-tree-shaken / lazy-loaded) on its own. **Import each module at its full subpath**;
-a directory barrel is `<subpath>/index`, a standalone module is its file path.
+tree-shaken / lazy-loaded) on its own. **Import each area through its barrel, `<area>/index`**;
+`document/advanced` is the one entry that is a file.
 
-- `document/core` - the engine-free contract: `createEditor` (builder),
+- `document/core/index` - the engine-free contract: `createEditor` (builder),
   `createDocumentEditor`, `defineFeature`, the `IEditor` façade, types, errors.
-- `document/serialize`, `document/migrate` - codecs + import/Migrate.
-- `document/ui` - `collectUiContributions` / `defaultBlockMenuItems` (the headless
+- `document/serialize/index`, `document/migrate/index` - codecs + import/Migrate.
+- `document/ui/index` - `collectUiContributions` / `defaultBlockMenuItems` (the headless
   aggregation; the menu _components_ are chrome).
 - `document/advanced` - the unstable engine escape.
-- `math/core/...`, `mermaid/core/...` - the KaTeX / Mermaid engines.
-- `composer/...` - the headless composer types + trigger tokens.
+- `math/core/index`, `mermaid/core/index` - the KaTeX / Mermaid engines.
+- `composer/index` - the headless composer types and trigger tokens.
+- `template/index` - the message-template core; see "Message templates" below.
+- `template/email/index` - the email templates; see "Message templates" below.
+- `template/email/testing/index` - the email templates' test helpers; see "Message templates" below.
+- `template/sms/index` - the SMS templates; see "Message templates" below.
 
 Released with Nx Release + SemVer from conventional commits.
 
@@ -175,3 +179,29 @@ Released with Nx Release + SemVer from conventional commits.
 
 `nx test @zeroxsolutions/editor-core` (Vitest). `nx build @zeroxsolutions/editor-core`
 runs the engine-hiding build guard.
+
+## Message templates - `template/`
+
+Message templates: the `{{name}}` grammar every channel shares, the SMS render and what it costs, and an
+email renderer a product themes, overrides per block and layout, and extends with block types. Where a
+template lives (storage, keys, locales, versions, delivery) stays in the product, which hands this code a
+body and a send's values and gets back what to send.
+
+- `template/index` - variables and inline markup: `interpolate`, `escapeHtml`, `redactVariables`,
+  `variableTokens`, `sameVariableTokens`, `VARIABLE_TOKEN`, `VARIABLE_TYPES`, `displayWidth`, and
+  `parseInlineMarkup`, `printInlineMarkup`, `plainInlineText`, `sameInlineMarkup`.
+- `template/email/index` - the email renderer: `createEmailRenderer`, `defineBlock`, `defaultBlocks`,
+  `defaultLayout`, `assertEmailTheme`, `sameBlockContent`, the `REGIONS`, the block limits and the errors
+  `EmailThemeInvalid` and `BlockTypeCollision`.
+- `template/email/testing/index` - `checkEmailRenderer`, the conformance check a product runs on its own
+  renderer.
+- `template/sms/index` - `renderSms`, `measureSms`, `fitsOneSmsSegment` and `SMS_SEGMENT_UNITS`.
+
+```ts
+import { interpolate } from '@zeroxsolutions/editor-core/template/index';
+import { createEmailRenderer } from '@zeroxsolutions/editor-core/template/email/index';
+import { renderSms } from '@zeroxsolutions/editor-core/template/sms/index';
+```
+
+The folder imports nothing outside itself, `zod` and `get-east-asian-width`. The code came from
+zeroxsolutions `packages/template` at commit `5bb8d693`.

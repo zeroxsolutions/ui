@@ -9,7 +9,7 @@
       // knip maps each `exports` entry back to `src`, and a `./*` export maps to every file there,
       // specs included, so a spec counts as production code and its `vitest` import as unlisted. A
       // spec is in no build's entries, so nothing it imports ships.
-      "ignore": ["src/**/*.{spec,test}.{ts,tsx}"],
+      "ignore": ["src/**/*.{spec,test}.{ts,tsx}", "src/**/*.fixture.ts"],
       // The emitted declarations import `react`'s types, so a package declares `@types/react` as an
       // optional peer: a consumer compiling against them already has it, and one that does not
       // compile TypeScript never needs it. `--strict` counts only required peers as declared.

@@ -6,7 +6,7 @@ import {
   referenceToken,
   type TriggerOption,
   type TriggerToken,
-} from '@zeroxsolutions/editor-core/composer/triggers/trigger-token';
+} from '@zeroxsolutions/editor-core/composer/index';
 import type {
   ChatChannel,
   ChatChannelRef,
@@ -14,7 +14,7 @@ import type {
   ChatCommandRef,
   ChatMention,
   ChatPerson,
-} from '@zeroxsolutions/editor-core/composer/composer-types';
+} from '@zeroxsolutions/editor-core/composer/index';
 
 /**
  * The composer's shipped triggers, each bundling the interaction descriptor

@@ -11,8 +11,8 @@ import { createNodeViewRenderer } from '../document/node-view-adapter';
 import { ChromeControl } from '../document/ui/chrome-icon';
 import { COMPOSER_TOP_CONTENT, composerKit } from './composer-kit';
 import { defaultComposerTriggers, type ComposerTrigger } from './composer-triggers';
-import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
-import { docToPayload } from '@zeroxsolutions/editor-core/composer/message-payload';
+import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/index';
+import { docToPayload } from '@zeroxsolutions/editor-core/composer/index';
 import { TriggerLayer } from './triggers/trigger-layer';
 
 /**

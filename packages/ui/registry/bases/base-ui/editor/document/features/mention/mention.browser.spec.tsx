@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-react';
-import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
 import { Editor } from '../../react/editor';

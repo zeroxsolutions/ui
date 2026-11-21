@@ -39,10 +39,16 @@ import { DownloadIcon } from '@/registry/bases/base-ui/icons/lucide/download-ico
 import { ImageIcon } from '@/registry/bases/base-ui/icons/lucide/image-icon';
 import { WorkflowIcon } from '@/registry/bases/base-ui/icons/lucide/workflow-icon';
 import { usePlayWhile, useAnimatedIcon } from '@/registry/bases/base-ui/hooks/use-animated-icon';
-import { detectDiagramType, DIAGRAM_TYPE_LABEL } from '@zeroxsolutions/editor-core/mermaid/core/detect';
-import { copySvg, copyText, downloadPng, downloadSvg } from '@zeroxsolutions/editor-core/mermaid/core/export';
-import { DIAGRAM_TEMPLATES } from '@zeroxsolutions/editor-core/mermaid/core/templates';
-import type { DiagramTemplate } from '@zeroxsolutions/editor-core/mermaid/core/types';
+import {
+  detectDiagramType,
+  DIAGRAM_TYPE_LABEL,
+  copySvg,
+  copyText,
+  downloadPng,
+  downloadSvg,
+  DIAGRAM_TEMPLATES,
+} from '@zeroxsolutions/editor-core/mermaid/core/index';
+import type { DiagramTemplate } from '@zeroxsolutions/editor-core/mermaid/core/index';
 
 export interface MermaidToolbarProps {
   source: string;

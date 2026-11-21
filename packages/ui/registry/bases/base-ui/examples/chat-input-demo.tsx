@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 
-import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/composer-types';
+import type { ChatMessagePayload } from '@zeroxsolutions/editor-core/composer/index';
 
 import { ChatInput } from '@/registry/bases/base-ui/editor/composer/chat-input';
 

@@ -12,8 +12,7 @@ import {
 } from '@/registry/bases/base-ui/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { SYMBOL_GROUPS } from '@zeroxsolutions/editor-core/math/core/symbols';
-import { MATH_TEMPLATES } from '@zeroxsolutions/editor-core/math/core/templates';
+import { SYMBOL_GROUPS, MATH_TEMPLATES } from '@zeroxsolutions/editor-core/math/core/index';
 
 /**
  * `<MathPalette>` - the symbol/template inserter. It composes the shipped

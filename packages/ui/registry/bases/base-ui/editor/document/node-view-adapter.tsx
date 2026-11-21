@@ -5,10 +5,9 @@ import {
   type NodeViewProps as EngineNodeViewProps,
 } from '@tiptap/react';
 import type { ReactNode } from 'react';
-import { facadeFor } from '@zeroxsolutions/editor-core/document/core/engine/facade-registry';
-import type { EngineHandle } from '@zeroxsolutions/editor-core/document/core/engine/engine-handle';
-import type { NodeSpec, NodeViewRenderer } from '@zeroxsolutions/editor-core/document/core/types/node-spec';
-import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/types/node-view';
+import { facadeFor } from '@zeroxsolutions/editor-core/document/advanced';
+import type { EngineHandle } from '@zeroxsolutions/editor-core/document/advanced';
+import type { NodeSpec, NodeViewRenderer, NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
 
 /**
  * Wrap a feature's engine-free `render(props)` into an engine node-view

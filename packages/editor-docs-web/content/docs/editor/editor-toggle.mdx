@@ -75,7 +75,7 @@ pnpm dlx shadcn@latest add utils @zui/lucide-chevron-right-icon
 ## Usage
 
 ```tsx
-import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 
 import { toggle } from '@/components/editor/document/features/toggle';
 import { standardKit } from '@/components/editor/document/features/standard';
@@ -95,8 +95,6 @@ function NotesEditor({ content }: { content: DocJSON }) {
 Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
 
 ```tsx
-import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
-
 function insert(editor: IEditor) {
   editor.run('insertToggle');
 }

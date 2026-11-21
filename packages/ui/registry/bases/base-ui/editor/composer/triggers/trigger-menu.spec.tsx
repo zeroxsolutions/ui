@@ -3,11 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DocJSON, EditorSelection, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { TriggerMenu } from './trigger-menu';
 import { commandTrigger } from '../composer-triggers';
-import {
-  invocationToken,
-  referenceToken,
-  type TriggerOption,
-} from '@zeroxsolutions/editor-core/composer/triggers/trigger-token';
+import { invocationToken, referenceToken, type TriggerOption } from '@zeroxsolutions/editor-core/composer/index';
 
 // TriggerMenu's popover renders upstream ScrollArea, which measures its
 // viewport in a `queueMicrotask` its layout effect schedules on mount,

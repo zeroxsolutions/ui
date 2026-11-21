@@ -95,7 +95,7 @@ pnpm dlx shadcn@latest add @zui/lucide-info-icon
 ## Usage
 
 ```tsx
-import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 
 import { callout } from '@/components/editor/document/features/callout';
 import { standardKit } from '@/components/editor/document/features/standard';
@@ -115,8 +115,6 @@ function NotesEditor({ content }: { content: DocJSON }) {
 Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
 
 ```tsx
-import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
-
 function insert(editor: IEditor) {
   editor.run('insertCallout', { variant: 'warning' });
 }

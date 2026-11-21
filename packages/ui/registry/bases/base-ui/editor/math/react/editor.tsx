@@ -6,7 +6,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/registry
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { useIsMobile } from '@/registry/bases/base-ui/hooks/use-mobile';
 import { CodeMirrorPane } from '../../shared/code-mirror/index';
-import type { MathEditorProps } from '@zeroxsolutions/editor-core/math/core/types';
+import type { MathEditorProps } from '@zeroxsolutions/editor-core/math/core/index';
 import { FormulaPreview } from './preview';
 import { MathToolbar } from './toolbar';
 

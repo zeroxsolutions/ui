@@ -15,7 +15,7 @@ import {
   defaultBlockMenuItems,
   filterSlashItems,
   groupByHeading,
-} from '@zeroxsolutions/editor-core/document/ui/collect-ui-contributions';
+} from '@zeroxsolutions/editor-core/document/ui/index';
 
 const handles = vi.hoisted(() => ({
   bold: { startAnimation: vi.fn(), stopAnimation: vi.fn() },

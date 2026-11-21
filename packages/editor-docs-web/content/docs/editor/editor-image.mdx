@@ -82,7 +82,7 @@ pnpm dlx shadcn@latest add button field input popover @zui/lucide-image-icon
 ## Usage
 
 ```tsx
-import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 
 import { image } from '@/components/editor/document/features/image';
 import { standardKit } from '@/components/editor/document/features/standard';
@@ -102,8 +102,6 @@ function NotesEditor({ content }: { content: DocJSON }) {
 Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
 
 ```tsx
-import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
-
 function insert(editor: IEditor) {
   editor.run('insertImage', { src: '/lantern.jpg', alt: 'A red paper lantern' });
 }

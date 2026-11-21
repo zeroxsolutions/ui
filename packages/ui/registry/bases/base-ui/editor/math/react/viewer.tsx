@@ -1,7 +1,7 @@
 'use client';
 
 import { useEditorTheme } from '../../shared/theme/editor-theme-context';
-import { renderMathHtml } from '@zeroxsolutions/editor-core/math/core/render';
+import { renderMathHtml } from '@zeroxsolutions/editor-core/math/core/index';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 /**

@@ -1,0 +1,227 @@
+// @vitest-environment node
+import { describe, expect, it } from 'vitest';
+import { variableTokens } from '../variables/variable-tokens.js';
+import {
+  type InlineRun,
+  parseInlineMarkup,
+  plainInlineText,
+  printInlineMarkup,
+  sameInlineMarkup,
+} from './inline-markup.js';
+import { markupSamples } from './inline-markup.fixture.js';
+
+const plain = (text: string): InlineRun => ({ kind: 'text', text, bold: false, italic: false });
+
+function runsOf(source: string): readonly InlineRun[] {
+  const parsed = parseInlineMarkup(source);
+  if (!parsed.ok) throw new Error(`refused ${source}: ${parsed.problem}`);
+  return parsed.runs;
+}
+
+describe('parseInlineMarkup', () => {
+  it('parses plain text as one run', () => {
+    expect(runsOf('Hi {{name}},')).toEqual([plain('Hi {{name}},')]);
+  });
+
+  it('parses bold, italic and both', () => {
+    expect(runsOf('a **b** _c_ **_d_**')).toEqual([
+      plain('a '),
+      { kind: 'text', text: 'b', bold: true, italic: false },
+      plain(' '),
+      { kind: 'text', text: 'c', bold: false, italic: true },
+      plain(' '),
+      { kind: 'text', text: 'd', bold: true, italic: true },
+    ]);
+  });
+
+  it('parses a link with a marked label', () => {
+    expect(runsOf('[Open **now**]({{trip_url}})')).toEqual([
+      {
+        kind: 'link',
+        variable: 'trip_url',
+        label: [plain('Open '), { kind: 'text', text: 'now', bold: true, italic: false }],
+      },
+    ]);
+  });
+
+  it('parses a variable token with an underscore as text', () => {
+    expect(runsOf('{{first_name}}')).toEqual([plain('{{first_name}}')]);
+  });
+
+  it('resolves escapes', () => {
+    expect(runsOf('\\*\\*x\\_ \\[y\\] \\\\')).toEqual([plain('**x_ [y] \\')]);
+    expect(runsOf('\\n')).toEqual([plain('\\n')]);
+  });
+
+  it('keeps a backslash that ends the text as text', () => {
+    expect(runsOf('a\\')).toEqual([plain('a\\')]);
+  });
+
+  it('keeps a lone star as text', () => {
+    expect(runsOf('5 * 3')).toEqual([plain('5 * 3')]);
+  });
+
+  it.each([
+    ['**a', 'marker-unclosed', 0],
+    ['_a', 'marker-unclosed', 0],
+    ['{{a****b}}', 'marker-inside-token', 0],
+    ['{{a\\_b}}', 'marker-inside-token', 0],
+    ['{{a\\_****b}}', 'marker-inside-token', 0],
+    ['**{{a**__**b}}**', 'marker-inside-token', 2],
+    ['{****{a}}', 'marker-inside-token', 0],
+    ['{{a}****}', 'marker-inside-token', 0],
+    ['{__{a}}', 'marker-inside-token', 0],
+    ['{{a}__}', 'marker-inside-token', 0],
+    ['[{****{a}}]({{u}})', 'marker-inside-token', 1],
+    ['**{{a****}}**', 'marker-inside-token', 2],
+    ['**[{**{a}**}]({{u}})**', 'marker-inside-token', 3],
+    ['_[{_{a}_}]({{u}})_', 'marker-inside-token', 2],
+    ['**[{{**a**}}]({{u}})**', 'marker-inside-token', 3],
+    ['**_[**{{a**}}]({{u}})_**', 'marker-inside-token', 6],
+    ['_{{a**_**b}} _{{c**_**d}}', 'marker-ambiguous', 0],
+    ['{{**_**a}}_ {{**_**b}}_', 'marker-ambiguous', 2],
+    ['_{{a**_**b}}', 'marker-ambiguous', 0],
+    ['{{a**_**b}}', 'marker-unclosed', 5],
+    ['{{**_**a}}', 'marker-unclosed', 4],
+    ['[a', 'link-unclosed', 0],
+    ['[a](https://x)', 'link-target-not-one-token', 3],
+    ['[a]({{u}} {{v}})', 'link-target-not-one-token', 3],
+    ['[]({{u}})', 'link-label-empty', 0],
+    ['[[a]({{u}})]({{v}})', 'link-nested', 1],
+  ])('refuses %j as %s at %i', (source, problem, offset) => {
+    expect(parseInlineMarkup(source)).toEqual({ ok: false, problem, offset });
+  });
+});
+
+describe('printInlineMarkup', () => {
+  it.each([
+    'Hi {{name}},',
+    'a **b** _c_ **_d_**',
+    '[Open **now**]({{trip_url}})',
+    '{{first_name}}',
+    '\\*\\*x\\_ \\[y\\] \\\\',
+    '\\n',
+    '5 * 3',
+    '**[a **b**]({{u}})**',
+    '_[a _b_]({{u}})_',
+  ])('prints what it parsed from %j', (source) => {
+    expect(runsOf(printInlineMarkup(runsOf(source)))).toEqual(runsOf(source));
+  });
+
+  it("merges the marks folded into a label with the label's own", () => {
+    expect(runsOf('**[a **b**]({{u}})**')).toEqual([
+      { kind: 'link', variable: 'u', label: [{ kind: 'text', text: 'a b', bold: true, italic: false }] },
+    ]);
+  });
+
+  it.each([
+    'a **b** _c_',
+    '[Open **now**]({{trip_url}})',
+    '**{{name}}**',
+    '_{{first_name}}_',
+    '[{{name}}]({{u}})',
+    'Hi **there** _friend_',
+    '**a [b]({{u}})**',
+    '**[a]({{u}})**',
+    '**Book _now_ today**',
+    '**a _b_**',
+    '_a **b**_',
+    'x **bold _both_ end** y',
+  ])('prints the canonical %j as it came', (source) => {
+    expect(printInlineMarkup(runsOf(source))).toBe(source);
+  });
+
+  it('joins a mark closed and reopened with nothing between into one span', () => {
+    expect(runsOf('**a****b**')).toEqual([{ kind: 'text', text: 'ab', bold: true, italic: false }]);
+    expect(printInlineMarkup(runsOf('**a****b**'))).toBe('**ab**');
+  });
+
+  it('prints every accepted generated source back to the same runs and the same tokens', () => {
+    let accepted = 0;
+    const mismatches: unknown[] = [];
+    for (const source of markupSamples(20000)) {
+      const parsed = parseInlineMarkup(source);
+      if (!parsed.ok) continue;
+      accepted += 1;
+      const printed = printInlineMarkup(parsed.runs);
+      const reparsed = parseInlineMarkup(printed);
+      const sameRuns = reparsed.ok && JSON.stringify(reparsed.runs) === JSON.stringify(parsed.runs);
+      const sameTokens = variableTokens(printed).sort().join() === variableTokens(source).sort().join();
+      if (!sameRuns || !sameTokens) mismatches.push({ source, printed, reparsed });
+    }
+    expect(mismatches.slice(0, 5)).toEqual([]);
+    expect(accepted).toBeGreaterThan(2000);
+  });
+
+  it('escapes markers in text when printing', () => {
+    expect(printInlineMarkup([plain('a*b_[c]\\')])).toBe('a\\*b\\_\\[c\\]\\\\');
+  });
+
+  it.each(['{{a*b}}', '{{x]}}', '**{{a*b}}**', '{{a\\\\b}}'])('prints %j back to a source that parses', (source) => {
+    const parsed = parseInlineMarkup(source);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parseInlineMarkup(printInlineMarkup(parsed.runs))).toEqual(parsed);
+  });
+
+  it('prints every accepted tricky input to a source that spells the same tokens', () => {
+    const sources = [
+      '{{a}}',
+      '{{a_b}} and {{a}}',
+      '**{{a}}** _{{b}}_',
+      '{{a*b}}',
+      '{{x]}}',
+      '{ {a}}',
+      '{**{**a}}',
+      '**a** **b**',
+      '_a_ _b_',
+      '**a**_b_**c**',
+      '[{{a}}]({{u}})',
+      '\\{{a}}',
+      '{{a\\}}',
+    ];
+    const checked: unknown[] = [];
+    const expected: unknown[] = [];
+    for (const source of sources) {
+      const parsed = parseInlineMarkup(source);
+      if (!parsed.ok) continue;
+      const printed = printInlineMarkup(parsed.runs);
+      checked.push([source, parseInlineMarkup(printed).ok, variableTokens(printed).sort()]);
+      expected.push([source, true, variableTokens(source).sort()]);
+    }
+    expect(checked).toEqual(expected);
+  });
+});
+
+describe('plainInlineText', () => {
+  it('drops markers, resolves escapes and reads a link as its label', () => {
+    expect(plainInlineText('**Hi** [there]({{u}}) \\_')).toBe('Hi there _');
+  });
+});
+
+describe('sameInlineMarkup', () => {
+  it('holds for the same spans and links in another order', () => {
+    expect(sameInlineMarkup('**a** [b]({{u}})', '[x]({{u}}) **y**')).toBe(true);
+  });
+
+  it.each([
+    ['a dropped bold span', '**a** b', 'a b'],
+    ['another link variable', '[a]({{u}})', '[a]({{v}})'],
+    ['an added italic span', 'a b', 'a _b_'],
+    ['a malformed translation', '**a**', '**a'],
+  ])('refuses %s', (_case, source, translation) => {
+    expect(sameInlineMarkup(source, translation)).toBe(false);
+  });
+
+  it('counts a span that wraps another span or a link once', () => {
+    expect(sameInlineMarkup('**Book _now_ today**', '**_Ngay_ dat hom nay**')).toBe(true);
+    expect(sameInlineMarkup('**see [a]({{u}}) now**', '**[a]({{u}}) now**')).toBe(true);
+  });
+
+  it('compares a list item by item, in order, with as many items', () => {
+    expect(sameInlineMarkup(['**a**', 'c'], ['**b**', 'd'])).toBe(true);
+    expect(sameInlineMarkup(['**a**', 'c'], ['d', '**b**'])).toBe(false);
+    expect(sameInlineMarkup(['**a**'], ['**a**', 'b'])).toBe(false);
+    expect(sameInlineMarkup(['**a**'], ['b'])).toBe(false);
+  });
+});

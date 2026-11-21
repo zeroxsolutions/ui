@@ -13,7 +13,7 @@ import type { ReactNodeCodec } from '../../../react-types';
  * from Tiptap's MIT `TableKit` (used **internally** — the feature exposes only an
  * engine-free `EditorFeature`). This file adds the GFM-table Markdown codec, the
  * HTML/React codecs, and the insert command + slash item. Import this feature
- * lazily (`await import('@zeroxsolutions/editor-core/document/features/table/index.js')`)
+ * lazily (`await import('@/registry/bases/base-ui/editor/document/features/table/index')`)
  * to keep it out of the core bundle.
  *
  * The node codecs author against the chrome `ReactNodeCodec` (so `toReact` can

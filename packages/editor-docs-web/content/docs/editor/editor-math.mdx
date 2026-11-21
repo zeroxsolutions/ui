@@ -71,7 +71,7 @@ pnpm dlx shadcn@latest add button card input-group popover separator tabs utils 
 ## Usage
 
 ```tsx
-import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/types/json';
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 
 import { math } from '@/components/editor/document/features/math';
 import { standardKit } from '@/components/editor/document/features/standard';
@@ -91,8 +91,6 @@ function NotesEditor({ content }: { content: DocJSON }) {
 Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
 
 ```tsx
-import type { IEditor } from '@zeroxsolutions/editor-core/document/core/types/editor';
-
 function insert(editor: IEditor) {
   editor.run('insertMathBlock', { latex: 'x^2 + y^2 = r^2' });
 }
