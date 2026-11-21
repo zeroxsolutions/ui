@@ -223,8 +223,7 @@ export function SmsEditor({ profile, value, className, onChange, onBlur, onValid
     const target = event.target as Element;
     const marker = target.closest<HTMLElement>('[data-slot=sms-problem-marker]');
     if (event.key === 'Escape' && marker) {
-      const index = [...root.querySelectorAll('[data-slot=sms-problem-marker]')].indexOf(marker);
-      const mark = marks[index];
+      const mark = marks.find((candidate) => candidate.id === marker.dataset.markId);
       if (mark && setup.overlay.returnTo(mark)) event.preventDefault();
       return;
     }

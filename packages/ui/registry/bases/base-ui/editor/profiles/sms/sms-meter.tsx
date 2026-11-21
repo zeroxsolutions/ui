@@ -11,7 +11,8 @@ const ENCODING_LABELS = { gsm7: 'GSM-7', ucs2: 'UCS-2' } as const;
  */
 export function SmsMeter({ body, profile, className }: { body: string; profile: EditorProfile; className?: string }) {
   const { units, limit, encoding, segments } = measureSmsBody(body);
-  const exceeded = units > limit && segments > (profile.maxSegments ?? 1);
+  const cap = profile.maxSegments ?? 1;
+  const exceeded = units > limit && segments > cap;
   return (
     <p
       data-slot="sms-meter"
@@ -19,7 +20,7 @@ export function SmsMeter({ body, profile, className }: { body: string; profile: 
       aria-live="polite"
       className={cn('text-muted-foreground text-sm tabular-nums', exceeded && 'text-destructive', className)}
     >
-      <span data-slot="sms-meter-count">{`${units} / ${limit} ${ENCODING_LABELS[encoding]}`}</span>
+      <span data-slot="sms-meter-count">{`${units} / ${limit} ${ENCODING_LABELS[encoding]}${cap > 1 ? ` - ${segments} of ${cap} segments` : ''}`}</span>
       {exceeded && (
         <span data-slot="sms-meter-message"> {problemMessage({ kind: 'sms-segment-exceeded', block: null })}</span>
       )}

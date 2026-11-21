@@ -32,9 +32,9 @@ interface Probe {
 }
 
 /** A host that stores what the editor reports and hands it back as the value. */
-function Host({ initial, probe }: { initial: string; probe: Probe }) {
+function Host({ initial, probe, first = profile }: { initial: string; probe: Probe; first?: EditorProfile }) {
   const [value, setValue] = useState(initial);
-  const [current, setProfile] = useState(profile);
+  const [current, setProfile] = useState(first);
   probe.load = setValue;
   probe.declare = setProfile;
   return (
@@ -55,7 +55,7 @@ function Host({ initial, probe }: { initial: string; probe: Probe }) {
   );
 }
 
-async function mount(initial: string): Promise<Probe & { editor: IEditor }> {
+async function mount(initial: string, first?: EditorProfile): Promise<Probe & { editor: IEditor }> {
   const probe: Probe = {
     editor: null,
     reported: [],
@@ -64,7 +64,7 @@ async function mount(initial: string): Promise<Probe & { editor: IEditor }> {
     load: () => {},
     declare: () => {},
   };
-  await render(<Host initial={initial} probe={probe} />);
+  await render(<Host initial={initial} probe={probe} first={first} />);
   await vi.waitFor(() => {
     if (!probe.editor) throw new Error('the editor is not ready');
   });
@@ -123,7 +123,11 @@ describe('SmsEditor', () => {
     await userEvent.keyboard(
       '{Shift>}{Home}{/Shift}{Control>}b{/Control}{Control>}i{/Control}{Meta>}b{/Meta}{Meta>}i{/Meta}',
     );
-    expect(document.querySelector('[contenteditable=true] strong, [contenteditable=true] em')).toBeNull();
+    expect(
+      document.querySelector(
+        '[contenteditable=true] strong, [contenteditable=true] em, [contenteditable=true] b, [contenteditable=true] i',
+      ),
+    ).toBeNull();
     expect(JSON.stringify(probe.editor.getJSON())).not.toContain('"marks"');
   });
 
@@ -229,5 +233,37 @@ describe('SmsEditor', () => {
     probe.declare(smsProfile({ variables: [{ ...declared[0], label: 'First name' }, declared[1]] }));
     await new Promise((resolve) => setTimeout(resolve, 400));
     expect(probe.validated).toHaveLength(count);
+  });
+
+  it('marks an emoji whole when it is the character that overflows', async () => {
+    const probe = await mount(`${'x'.repeat(69)}\u{1F600}`);
+    // 69 + 2 = 71 units: UCS-2, past one segment of 70.
+    const decorated = await vi.waitFor(() => find('[contenteditable=true] [data-problem]'), { timeout: 1000 });
+    expect(decorated.textContent).toBe('\u{1F600}');
+    expect(probe.editor.getText()).toContain('\u{1F600}');
+  });
+
+  it('keeps blank lines in pasted text, and turns its tokens into chips', async () => {
+    const probe = await mount('');
+    await userEvent.click(await vi.waitFor(() => find('[contenteditable=true] p')));
+    const data = new DataTransfer();
+    data.setData('text/plain', 'a\n\nb {{a}}');
+    find('[contenteditable=true]').dispatchEvent(
+      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
+    );
+    await vi.waitFor(() => expect(last(probe.reported)).toBe('a\n\nb {{a}}'));
+    await vi.waitFor(() => expect(find('[contenteditable=true] [data-slot=variable]')).toBeTruthy());
+  });
+
+  it('shows the segments against the cap when the profile allows several', async () => {
+    await mount('x'.repeat(200), smsProfile({ variables: declared, maxSegments: 2 }));
+    await vi.waitFor(() => expect(meter()).toBe('200 / 160 GSM-7 - 2 of 2 segments'));
+    expect(find('[data-slot=sms-meter]').getAttribute('data-problem')).toBeNull();
+  });
+
+  it('marks the meter exceeded past the segment cap', async () => {
+    await mount('x'.repeat(307), smsProfile({ variables: declared, maxSegments: 2 }));
+    await vi.waitFor(() => expect(meter()).toBe('307 / 160 GSM-7 - 3 of 2 segments'));
+    expect(find('[data-slot=sms-meter]').getAttribute('data-problem')).toBe('sms-segment-exceeded');
   });
 });

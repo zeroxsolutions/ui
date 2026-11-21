@@ -18,6 +18,7 @@ export function ProblemMarker({ id, messages, slot }: { id: string; messages: re
               variant="ghost"
               size="icon-xs"
               data-slot={slot}
+              data-mark-id={id}
               aria-label="Problem"
               aria-describedby={id}
               className="text-destructive"

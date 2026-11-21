@@ -54,7 +54,10 @@ export function smsMarks(
     let place: Pick<SmsMark, 'range' | 'name'>;
     if (problem.kind === 'sms-segment-exceeded') {
       // The characters that took the body past the limit.
-      const from = overflowOffset(body, profile.maxSegments ?? 1);
+      let from = overflowOffset(body, profile.maxSegments ?? 1);
+      // An emoji is two code units; the mark takes it whole.
+      const unit = body.charCodeAt(from);
+      if (from > 0 && unit >= 0xdc00 && unit <= 0xdfff) from -= 1;
       where = `tail ${from}`;
       place = { range: { from, to: body.length } };
     } else if (problem.offset !== undefined) {
