@@ -4,6 +4,7 @@ import {
   BUTTON_HREF_MAX_LENGTH,
   BUTTON_LABEL_MAX_LENGTH,
   LIST_MAX_ITEMS,
+  MAX_LANES,
 } from '../../template/email/index.js';
 import type { EditorProfile, EmailBlockKind, EmailBounds, VariableDeclaration } from './types.js';
 
@@ -27,9 +28,34 @@ const DEFAULT_BOUNDS: EmailBounds = {
   href: BUTTON_HREF_MAX_LENGTH,
   listItems: LIST_MAX_ITEMS,
   blocks: 50,
-  lanes: 4,
+  lanes: MAX_LANES,
   variables: 20,
 };
+
+/** The bounds the renderer itself enforces on write: a profile may tighten them, never loosen them. */
+const RENDERER_BOUNDS = {
+  text: BLOCK_TEXT_MAX_LENGTH,
+  label: BUTTON_LABEL_MAX_LENGTH,
+  href: BUTTON_HREF_MAX_LENGTH,
+  listItems: LIST_MAX_ITEMS,
+  lanes: MAX_LANES,
+} as const satisfies Partial<EmailBounds>;
+
+function boundsOf(overrides: Partial<EmailBounds> = {}): EmailBounds {
+  // An entry given as undefined would otherwise replace the default and switch its check off.
+  const given = Object.fromEntries(Object.entries(overrides).filter(([, value]) => value !== undefined));
+  const bounds: EmailBounds = { ...DEFAULT_BOUNDS, ...given };
+  for (const [name, limit] of Object.entries(RENDERER_BOUNDS)) {
+    const value = bounds[name as keyof typeof RENDERER_BOUNDS];
+    if (value > limit) {
+      throw new EditorError(
+        'editor.profile.bound_above_renderer',
+        `Bound "${name}" is ${value}, above the renderer's ${limit}.`,
+      );
+    }
+  }
+  return bounds;
+}
 
 const VARIABLE_NAME = /^\w{1,64}$/;
 
@@ -69,7 +95,7 @@ export function emailProfile(
       throw new EditorError('editor.profile.unknown_kind', `"${kind}" is not an email block kind.`);
     }
   }
-  const bounds = { ...DEFAULT_BOUNDS, ...options.bounds };
+  const bounds = boundsOf(options.bounds);
   const variables = options.variables ?? [];
   assertVariables(variables, bounds.variables);
   return {

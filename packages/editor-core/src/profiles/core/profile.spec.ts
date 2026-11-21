@@ -39,6 +39,21 @@ describe('emailProfile', () => {
     expect(profile.bounds.blocks).toBe(10);
   });
 
+  it('refuses a bound above what the renderer accepts', () => {
+    for (const bounds of [{ text: 5001 }, { label: 201 }, { href: 2001 }, { listItems: 21 }, { lanes: 5 }]) {
+      expect(() => emailProfile({ bounds })).toThrow(
+        expect.objectContaining({ code: 'editor.profile.bound_above_renderer' }),
+      );
+    }
+    expect(emailProfile({ bounds: { text: 5000, lanes: 4, listItems: 20 } }).bounds.lanes).toBe(4);
+    expect(emailProfile({ bounds: { text: 100, lanes: 2 } }).bounds).toMatchObject({ text: 100, lanes: 2 });
+  });
+
+  it('keeps the default for a bound given as undefined', () => {
+    const profile = emailProfile({ bounds: { text: undefined, lanes: undefined, blocks: 10 } });
+    expect(profile.bounds).toMatchObject({ text: 5000, lanes: 4, blocks: 10 });
+  });
+
   it('refuses a duplicate variable name', () => {
     const v = { name: 'a', type: 'string' as const };
     expect(() => emailProfile({ variables: [v, v] })).toThrow(/twice/);

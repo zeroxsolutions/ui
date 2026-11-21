@@ -246,7 +246,7 @@ The editor states an email as the blocks the renderer takes: `paragraph`, `butto
 | `lanes`     | 4       | lanes of a columns block                        |
 | `variables` | 20      | declared variables                              |
 
-Columns hold one level only.
+The defaults of `text`, `label`, `href`, `listItems` and `lanes` are what the renderer accepts, so a bound can go lower, never higher: a higher one throws `editor.profile.bound_above_renderer`. Columns hold one level only.
 
 ## Variables
 

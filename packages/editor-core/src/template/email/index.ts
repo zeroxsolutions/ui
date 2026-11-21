@@ -17,6 +17,7 @@ export {
   BUTTON_LABEL_MAX_LENGTH,
   LIST_MAX_ITEMS,
 } from './blocks/shared.js';
+export { MAX_LANES } from './blocks/columns.js';
 export { defaultBlocks, type DefaultBlocks, type DefaultBlockType } from './blocks/index.js';
 export { defaultLayout, type DefaultLayoutProps, type EmailLayout, type LayoutInput } from './layout.js';
 export { REGIONS, type Region, type RegionInput } from './region.js';
