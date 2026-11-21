@@ -235,6 +235,20 @@ describe('blockIdentity', () => {
     expect(blocks(editor).map((block) => block.id)).toEqual(['1', '2']);
   });
 
+  it('keys a block type it is given and lets the host assign its id', () => {
+    const note: EditorFeature = { id: 'note', nodes: [{ name: 'note', group: 'block', content: 'inline*' }] };
+    const { editor } = mount(
+      [paragraph('one'), { type: 'note', content: [{ type: 'text', text: 'two' }] }],
+      { types: ['note'] },
+      [note],
+    );
+
+    expect(keysAreUnique(editor)).toBe(true);
+    const key = blocks(editor)[1].key as string;
+    expect(editor.run('assignBlockIds', { ids: { [key]: 'n1' } })).toBe(true);
+    expect(blocks(editor)[1]).toEqual({ type: 'note', id: 'n1', key });
+  });
+
   it('assignBlockIds refuses an id another block holds', () => {
     const { editor } = mount([paragraph('one', { id: 'a', key: 'ka' }), paragraph('two', { key: 'kb' })]);
     const before = editor.getJSON();

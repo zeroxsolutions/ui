@@ -15,6 +15,8 @@ export interface BlockIdentityOptions {
   required?: () => readonly string[];
   /** `locked` lets the author edit text, variables and marks only. */
   structure?: () => 'free' | 'locked';
+  /** Block node types besides the paragraph and the email blocks that carry an id and a key, such as a custom feature's. */
+  types?: readonly string[];
 }
 
 interface Block {
@@ -252,7 +254,7 @@ export function blockIdentity(options: BlockIdentityOptions = {}): EditorFeature
     },
     addGlobalAttributes: () => [
       {
-        types: ['paragraph', ...EMAIL_BLOCK_NODES],
+        types: ['paragraph', ...EMAIL_BLOCK_NODES, ...(options.types ?? [])],
         attributes: { id: identityAttribute, key: identityAttribute },
       },
     ],
