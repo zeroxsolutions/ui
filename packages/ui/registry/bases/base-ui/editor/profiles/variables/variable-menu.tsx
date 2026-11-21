@@ -12,7 +12,7 @@ import {
 } from '@/registry/bases/base-ui/ui/combobox';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
-import { insertVariable, variableIcon, variableLabel } from './variable';
+import { insertVariable, matchesVariable, variableIcon, variableLabel } from './variable';
 
 export interface VariableMenuProps {
   editor: IEditor;
@@ -33,6 +33,8 @@ export function VariableMenu({ editor, declarations, className }: VariableMenuPr
         editor.focus();
       }}
       itemToStringLabel={variableLabel}
+      // The same match as the `{{` menu: a label or a name.
+      filter={(declaration: VariableDeclaration, query: string) => matchesVariable(declaration, query)}
     >
       <ComboboxTrigger data-slot="variable-menu" render={<Button variant="ghost" size="sm" className={className} />}>
         Variable
