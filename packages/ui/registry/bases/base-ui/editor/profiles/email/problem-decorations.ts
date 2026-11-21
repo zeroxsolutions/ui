@@ -1,5 +1,4 @@
-import { Decoration } from '@tiptap/pm/view';
-import type { ProseMirrorNode } from '@zeroxsolutions/editor-core/document/advanced';
+import { Decoration, type ProseMirrorNode } from '@zeroxsolutions/editor-core/document/advanced';
 import type { ProblemKind, ProfileProblem } from '@zeroxsolutions/editor-core/profiles/index';
 import { problemMessage } from '../problem-messages';
 import { carriesKey } from './kit-context';

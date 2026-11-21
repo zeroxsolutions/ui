@@ -1,11 +1,17 @@
 'use client';
 
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
-import { Selection } from '@tiptap/pm/state';
-import { DecorationSet, type EditorView } from '@tiptap/pm/view';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { TooltipProvider } from '@/registry/bases/base-ui/ui/tooltip';
-import { Extension, Plugin, PluginKey, type ProseMirrorNode } from '@zeroxsolutions/editor-core/document/advanced';
+import {
+  DecorationSet,
+  Extension,
+  Plugin,
+  PluginKey,
+  Selection,
+  type EditorView,
+  type ProseMirrorNode,
+} from '@zeroxsolutions/editor-core/document/advanced';
 import type { EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import {
   fromSmsText,

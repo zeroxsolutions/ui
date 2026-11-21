@@ -3175,7 +3175,7 @@
           "target": "components/editor/profiles/variables/variable.tsx"
         }
       ],
-      "dependencies": ["@tiptap/extensions", "@tiptap/pm", "@zeroxsolutions/editor-core", "lucide-react", "zod"],
+      "dependencies": ["@tiptap/extensions", "@zeroxsolutions/editor-core", "lucide-react", "zod"],
       "css": {
         ".document-editor p[data-align='left']": {
           "text-align": "left"
@@ -3242,7 +3242,7 @@
           "target": "components/editor/profiles/sms/sms-problems.ts"
         }
       ],
-      "dependencies": ["@tiptap/extensions", "@tiptap/pm", "@zeroxsolutions/editor-core"]
+      "dependencies": ["@tiptap/extensions", "@zeroxsolutions/editor-core"]
     },
     {
       "name": "email-editor-demo",
