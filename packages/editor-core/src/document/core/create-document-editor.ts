@@ -2,7 +2,7 @@ import { Editor, type Content, type Extensions } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { createPmStepsBackend } from './backend/pm-steps-backend.js';
-import { makeBuiltInCommands } from './command/built-in-commands.js';
+import { loadContent, makeBuiltInCommands } from './command/built-in-commands.js';
 import { CommandRegistry } from './command/command-registry.js';
 import { compileFeatures } from './feature-compiler/compile-features.js';
 import { registerFacade, unregisterFacade } from './engine/facade-registry.js';
@@ -196,7 +196,7 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
     getJSON: () => engine.getJSON() as DocJSON,
     getText: () => engine.getText(),
     setContent: (doc) => {
-      engine.commands.setContent(doc as unknown as Content);
+      loadContent(handle, doc);
     },
     isEmpty: () => engine.isEmpty,
     can: (command, args) => registry.can(command, args),

@@ -1,11 +1,21 @@
 import { z } from 'zod';
 import type { MarkSpec, NodeSpec } from '../../document/core/types/index.js';
 
+/** The email node types that are blocks: each carries `id` and `key` under `blockIdentity`. */
+export const EMAIL_BLOCK_NODES = [
+  'emailButton',
+  'emailCode',
+  'emailList',
+  'emailCallout',
+  'emailDivider',
+  'emailColumns',
+  'emailHtml',
+  'emailUnknown',
+] as const;
+
 const ALIGNS = ['left', 'center', 'right'] as const;
 const SPACES = ['small', 'medium', 'large'] as const;
 
-/** Every attribute is optional with no default, so an attribute a block never carried stays off it. */
-const identity = { id: z.string().nullable().optional(), key: z.string().optional() };
 /** The text as stored, kept so an unedited field exports as it was read. */
 const source = z.string().optional();
 const align = z.enum(ALIGNS).optional();
@@ -17,14 +27,16 @@ function block(name: string, spec: Partial<NodeSpec>, shape: z.ZodRawShape): Nod
     group: 'block',
     draggable: true,
     selectable: true,
-    attrs: z.object({ ...identity, ...shape }),
+    attrs: z.object(shape),
     ...spec,
   };
 }
 
 /**
- * The email profile's nodes and marks. The paragraph is the core's own, carrying `id`, `key`, `align`,
- * `spaceAfter`, `tone` and `source` as global attributes, so it is not listed here.
+ * The email profile's nodes and marks. The paragraph is the core's own, carrying `align`, `spaceAfter`,
+ * `tone` and `source` as global attributes, so it is not listed here. No node declares `id` or `key`:
+ * `blockIdentity` owns them, on the paragraph and on every type in `EMAIL_BLOCK_NODES`, so it can keep
+ * them out of HTML, which a node's own attributes cannot.
  */
 export const emailNodeSpecs: { nodes: NodeSpec[]; marks: MarkSpec[] } = {
   nodes: [

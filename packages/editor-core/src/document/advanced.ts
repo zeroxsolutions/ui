@@ -16,5 +16,6 @@ export { Extension, Mark, Node, mergeAttributes } from '@tiptap/core';
 export type { Editor, Extensions } from '@tiptap/core';
 export { Plugin, PluginKey } from '@tiptap/pm/state';
 export type { AdvancedContribution } from './core/types/feature.js';
+export { CONTENT_LOAD_META } from './core/engine/content-load.js';
 export { facadeFor } from './core/engine/facade-registry.js';
 export type { EngineHandle } from './core/engine/engine-handle.js';

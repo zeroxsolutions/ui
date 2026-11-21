@@ -7,8 +7,9 @@ import { blockIdentity, type BlockIdentityOptions } from './block-identity.js';
 import { emailNodeSpecs } from './email-nodes.js';
 
 const email: EditorFeature = { id: 'email', nodes: emailNodeSpecs.nodes, marks: emailNodeSpecs.marks };
+const undoable: EditorFeature = { id: 'history', advanced: { prosePlugins: [history()] } };
 
-type Attrs = { id?: string | null; key?: string | null };
+type Attrs = Record<string, unknown> & { id?: string | null; key?: string | null };
 
 function paragraph(text: string, attrs: Attrs = {}): NodeJSON {
   return { type: 'paragraph', attrs, content: text ? [{ type: 'text', text }] : [] };
@@ -16,6 +17,10 @@ function paragraph(text: string, attrs: Attrs = {}): NodeJSON {
 
 function callout(text: string, attrs: Attrs = {}): NodeJSON {
   return { type: 'emailCallout', attrs, content: [{ type: 'text', text }] };
+}
+
+function button(attrs: Attrs): NodeJSON {
+  return { type: 'emailButton', attrs };
 }
 
 const mounted: IEditor[] = [];
@@ -57,7 +62,25 @@ function press(engine: Editor, key: string): void {
   engine.view.someProp('handleKeyDown', (handle) => handle(engine.view, event));
 }
 
+/** Copies the document's first `count` top-level blocks as the clipboard would carry them. */
+function copyBlocks(engine: Editor, count = 1): string {
+  let size = 0;
+  for (let index = 0; index < count; index += 1) size += engine.state.doc.child(index).nodeSize;
+  return engine.view.serializeForClipboard(engine.state.doc.slice(0, size)).dom.innerHTML;
+}
+
+function paste(engine: Editor, html: string): void {
+  engine.view.pasteHTML(html, new Event('paste') as ClipboardEvent);
+}
+
 describe('blockIdentity', () => {
+  it('keys every block the document opens with, keeping its ids', () => {
+    const { editor } = mount([paragraph('one', { id: 'a' }), callout('note', { id: 'b' }), paragraph('two')]);
+
+    expect(blocks(editor).map((block) => block.id)).toEqual(['a', 'b', null]);
+    expect(keysAreUnique(editor)).toBe(true);
+  });
+
   it('gives every new block a key and a null id', () => {
     const { editor, engine } = mount([
       paragraph('one', { id: 'a', key: 'ka' }),
@@ -66,7 +89,6 @@ describe('blockIdentity', () => {
 
     engine.commands.setTextSelection(4);
     engine.commands.splitBlock();
-    // Enter inside a callout splits it into two callouts carrying the same attributes.
     engine.commands.setTextSelection(10);
     engine.commands.splitBlock();
     editor.run('insertContent', { content: { type: 'paragraph', content: [{ type: 'text', text: 'new' }] } });
@@ -82,17 +104,39 @@ describe('blockIdentity', () => {
     expect(keysAreUnique(editor)).toBe(true);
   });
 
-  it('gives a block the document opened without a key one on the first edit, keeping its id', () => {
-    const { editor, engine } = mount([paragraph('one', { id: 'a' }), paragraph('two')]);
+  it('keeps the id on the half that keeps the text when Enter splits a block', () => {
+    const atStart = mount([callout('note', { id: 'b', key: 'kb' })]);
+    atStart.engine.commands.setTextSelection(1);
+    press(atStart.engine, 'Enter');
+    const [empty, kept] = blocks(atStart.editor);
+    expect(atStart.engine.state.doc.child(0).textContent).toBe('');
+    expect(empty.id).toBeNull();
+    expect(empty.key).not.toBe('kb');
+    expect(kept).toEqual({ type: 'emailCallout', id: 'b', key: 'kb' });
 
-    engine.commands.setTextSelection(2);
-    editor.run('insertContent', { content: 'x' });
+    const plain = mount([paragraph('one', { id: 'a', key: 'ka' })]);
+    plain.engine.commands.setTextSelection(1);
+    press(plain.engine, 'Enter');
+    expect(blocks(plain.editor)[0].id).toBeNull();
+    expect(blocks(plain.editor)[1]).toEqual({ type: 'paragraph', id: 'a', key: 'ka' });
+    expect(keysAreUnique(plain.editor)).toBe(true);
 
-    expect(blocks(editor).map((block) => block.id)).toEqual(['a', null]);
-    expect(keysAreUnique(editor)).toBe(true);
+    const command = mount([callout('note', { id: 'b', key: 'kb' })]);
+    command.engine.commands.setTextSelection(1);
+    command.engine.commands.splitBlock();
+    expect(blocks(command.editor)[0].id).toBeNull();
+    expect(blocks(command.editor)[1]).toEqual({ type: 'emailCallout', id: 'b', key: 'kb' });
+
+    const inside = mount([callout('note', { id: 'b', key: 'kb' })]);
+    inside.engine.commands.setTextSelection(3);
+    press(inside.engine, 'Enter');
+    const [first, second] = blocks(inside.editor);
+    expect(first).toEqual({ type: 'emailCallout', id: 'b', key: 'kb' });
+    expect(second.id).toBeNull();
+    expect(keysAreUnique(inside.editor)).toBe(true);
   });
 
-  it('keeps id and key across a text edit and a move', () => {
+  it('keeps id and key across a text edit, a move and a retype', () => {
     const { editor, engine } = mount([
       paragraph('one', { id: 'a', key: 'ka' }),
       paragraph('two', { id: 'b', key: 'kb' }),
@@ -103,28 +147,37 @@ describe('blockIdentity', () => {
     const second = engine.state.doc.child(1);
     const from = engine.state.doc.child(0).nodeSize;
     engine.view.dispatch(engine.state.tr.delete(from, from + second.nodeSize).insert(0, second));
+    engine.commands.setTextSelection(2);
+    expect(editor.run('setNode', { name: 'emailCallout' })).toBe(true);
 
     expect(blocks(editor)).toEqual([
-      { type: 'paragraph', id: 'b', key: 'kb' },
+      { type: 'emailCallout', id: 'b', key: 'kb' },
       { type: 'paragraph', id: 'a', key: 'ka' },
     ]);
     expect(editor.getText()).toContain('oxne');
   });
 
-  it('gives a pasted copy of a block a null id and a new key', () => {
-    const { editor, engine } = mount([callout('note', { id: 'b', key: 'kb' }), paragraph('')]);
-    const { dom } = engine.view.serializeForClipboard(engine.state.doc.slice(0, engine.state.doc.child(0).nodeSize));
-    const copied = dom.innerHTML;
-    expect(copied).toContain('kb');
+  it('keeps id and key off the clipboard', () => {
+    const { engine } = mount([callout('note', { id: 'b', key: 'kb' }), paragraph('one', { id: 'a', key: 'ka' })]);
+
+    const copied = copyBlocks(engine, 2);
+    expect(copied).not.toMatch(/\b(id|key)=/);
+    expect(engine.getHTML()).not.toMatch(/\b(id|key)=/);
+  });
+
+  it('gives a pasted copy of a block a null id and a new key, in a document opened with ids and no keys', () => {
+    const { editor, engine } = mount([callout('note', { id: 'b' }), paragraph('')]);
+    const original = blocks(editor)[0];
 
     engine.commands.setTextSelection(engine.state.doc.content.size - 1);
-    engine.view.pasteHTML(copied, new Event('paste') as ClipboardEvent);
+    paste(engine, copyBlocks(engine));
 
     const callouts = blocks(editor).filter((block) => block.type === 'emailCallout');
     expect(callouts).toHaveLength(2);
-    expect(callouts[0]).toEqual({ type: 'emailCallout', id: 'b', key: 'kb' });
+    expect(callouts[0]).toEqual(original);
+    expect(callouts[0].id).toBe('b');
     expect(callouts[1].id).toBeNull();
-    expect(callouts[1].key).not.toBe('kb');
+    expect(callouts[1].key).not.toBe(original.key);
     expect(keysAreUnique(editor)).toBe(true);
   });
 
@@ -138,10 +191,24 @@ describe('blockIdentity', () => {
     expect(keysAreUnique(editor)).toBe(true);
   });
 
+  it('gives an inserted block a null id when another block holds its id', () => {
+    const { editor, engine } = mount([paragraph('one', { id: 'a', key: 'ka' })]);
+
+    engine.commands.setTextSelection(engine.state.doc.content.size);
+    editor.run('insertContent', {
+      content: { type: 'paragraph', attrs: { id: 'a' }, content: [{ type: 'text', text: 'c' }] },
+    });
+    editor.run('insertContent', {
+      content: { type: 'paragraph', attrs: { id: 'n' }, content: [{ type: 'text', text: 'd' }] },
+    });
+
+    expect(blocks(editor).map((block) => block.id)).toEqual(['a', null, 'n']);
+    expect(keysAreUnique(editor)).toBe(true);
+  });
+
   it('assignBlockIds sets ids without moving the selection or adding an undo step', () => {
-    const history_: EditorFeature = { id: 'history', advanced: { prosePlugins: [history()] } };
     const { editor, engine } = mount([paragraph('one', { key: 'ka' }), paragraph('two', { key: 'kb' })], {}, [
-      history_,
+      undoable,
     ]);
     engine.commands.setTextSelection(7);
     editor.run('insertContent', { content: 'x' });
@@ -154,6 +221,15 @@ describe('blockIdentity', () => {
     undo(engine.state, engine.view.dispatch);
     expect(editor.getText()).not.toContain('x');
     expect(blocks(editor).map((block) => block.id)).toEqual(['1', '2']);
+  });
+
+  it('assignBlockIds refuses an id another block holds', () => {
+    const { editor } = mount([paragraph('one', { id: 'a', key: 'ka' }), paragraph('two', { key: 'kb' })]);
+    const before = editor.getJSON();
+
+    expect(editor.run('assignBlockIds', { ids: { kb: 'a' } })).toBe(false);
+    expect(editor.run('assignBlockIds', { ids: { ka: 'z', kb: 'z' } })).toBe(false);
+    expect(editor.getJSON()).toEqual(before);
   });
 
   it('refuses deleting a required block', () => {
@@ -179,70 +255,159 @@ describe('blockIdentity', () => {
     expect(blocks(editor)).toEqual([{ type: 'paragraph', id: 'a', key: 'ka' }]);
   });
 
-  it('refuses insert, delete, move, retype, attribute change and split in locked structure', () => {
-    const { editor, engine } = mount(
-      [
-        paragraph('one', { id: 'a', key: 'ka' }),
-        callout('note', { id: 'b', key: 'kb' }),
-        paragraph('two', { id: 'c', key: 'kc' }),
+  it('refuses deleting a columns block holding a required block', () => {
+    const columns: NodeJSON = {
+      type: 'emailColumns',
+      attrs: { id: 'c', key: 'kc', ratio: [1, 1] },
+      content: [
+        { type: 'emailLane', content: [paragraph('left', { id: 'l', key: 'kl' })] },
+        { type: 'emailLane', content: [paragraph('right', { id: 'r', key: 'kr' })] },
       ],
-      { structure: () => 'locked' },
-    );
+    };
+    const { editor, engine } = mount([columns, paragraph('after', { id: 'p', key: 'kp' })], { required: () => ['l'] });
 
-    engine.commands.setTextSelection(2);
-    expect(editor.run('insertContent', { content: 'x' })).toBe(true);
-    expect(editor.run('insertContent', { content: { type: 'variable', attrs: { name: 'first' } } })).toBe(true);
-    engine.commands.setTextSelection({ from: 1, to: 3 });
-    expect(editor.run('toggleMark', { name: 'bold' })).toBe(true);
-    expect(editor.getText()).toContain('ox');
-    const edited = editor.getJSON();
-    expect(JSON.stringify(edited)).toContain('"variable"');
-    expect(JSON.stringify(edited)).toContain('"bold"');
+    engine.commands.setNodeSelection(0);
+    expect(editor.can('deleteBlock')).toBe(false);
+    expect(editor.run('deleteBlock')).toBe(false);
+    // The caret in the right lane's paragraph: that block alone may go.
+    engine.commands.setTextSelection(engine.state.doc.child(0).nodeSize - 4);
+    expect(editor.can('deleteBlock')).toBe(true);
+  });
 
-    const refused: Array<[string, () => void]> = [
-      ['insert', () => editor.run('insertContent', { content: { type: 'emailDivider' } })],
-      ['delete', () => editor.run('deleteBlock')],
-      ['delete range', () => engine.view.dispatch(engine.state.tr.delete(0, engine.state.doc.child(0).nodeSize))],
+  it('refuses a paste over a required block that would drop its id', () => {
+    const elsewhere = mount([paragraph('other')]);
+    const copied = copyBlocks(elsewhere.engine);
+    const content = [paragraph('one', { id: 'a', key: 'ka' }), paragraph('two', { id: 'b', key: 'kb' })];
+
+    const unguarded = mount(content, { structure: () => 'locked' });
+    unguarded.engine.commands.setNodeSelection(0);
+    paste(unguarded.engine, copied);
+    expect(unguarded.editor.getText()).toContain('other');
+
+    const { editor, engine } = mount(content, { structure: () => 'locked', required: () => ['a'] });
+    const before = editor.getJSON();
+    engine.commands.setNodeSelection(0);
+    paste(engine, copied);
+    expect(editor.getJSON()).toEqual(before);
+  });
+
+  describe('locked structure', () => {
+    const content = [
+      paragraph('one', { id: 'a', key: 'ka' }),
+      callout('note', { id: 'b', key: 'kb' }),
+      paragraph('two', { id: 'c', key: 'kc' }),
+    ];
+    const calloutCaret = (engine: Editor) => engine.state.doc.child(0).nodeSize + 2;
+    const attempts: Array<[string, (editor: IEditor, engine: Editor) => void]> = [
+      ['insert', (editor) => editor.run('insertContent', { content: { type: 'emailDivider' } })],
+      ['delete', (editor) => editor.run('deleteBlock')],
+      [
+        'delete a whole block',
+        (editor, engine) => {
+          engine.commands.setNodeSelection(0);
+          editor.run('deleteSelection');
+        },
+      ],
       [
         'move',
-        () => {
+        (_, engine) => {
           const last = engine.state.doc.child(2);
           const from = engine.state.doc.content.size - last.nodeSize;
           engine.view.dispatch(engine.state.tr.delete(from, engine.state.doc.content.size).insert(0, last));
         },
       ],
-      ['retype', () => editor.run('setNode', { name: 'emailCallout' })],
+      ['retype', (editor) => editor.run('setNode', { name: 'emailCallout' })],
       [
         'attribute change',
-        () => {
-          engine.commands.setTextSelection(engine.state.doc.child(0).nodeSize + 2);
+        (editor, engine) => {
+          engine.commands.setTextSelection(calloutCaret(engine));
           editor.run('updateAttributes', { name: 'emailCallout', attrs: { align: 'center' } });
         },
       ],
-      ['split', () => engine.commands.splitBlock()],
-      ['enter', () => press(engine, 'Enter')],
+      ['split', (_, engine) => engine.commands.splitBlock()],
+      ['enter', (_, engine) => press(engine, 'Enter')],
+      [
+        'join',
+        (_, engine) => {
+          engine.commands.setTextSelection(engine.state.doc.content.size - 4);
+          press(engine, 'Backspace');
+        },
+      ],
     ];
-    for (const [name, attempt] of refused) {
+
+    it.each(attempts)('refuses %s, which a free structure allows', (_, attempt) => {
+      const free = mount(content);
+      free.engine.commands.setTextSelection(3);
+      const freeBefore = free.editor.getJSON();
+      attempt(free.editor, free.engine);
+      expect(free.editor.getJSON()).not.toEqual(freeBefore);
+
+      const { editor, engine } = mount(content, { structure: () => 'locked' });
       engine.commands.setTextSelection(3);
-      attempt();
-      expect(editor.getJSON(), name).toEqual(edited);
-    }
-    expect(editor.can('deleteBlock')).toBe(false);
-    expect(editor.run('assignBlockIds', { ids: { kc: 'z' } })).toBe(true);
-    expect(blocks(editor)[2].id).toBe('z');
+      const before = editor.getJSON();
+      attempt(editor, engine);
+      expect(editor.getJSON()).toEqual(before);
+    });
+
+    it('lets text, variables, marks and host ids through', () => {
+      const { editor, engine } = mount(content, { structure: () => 'locked' });
+
+      engine.commands.setTextSelection(2);
+      expect(editor.run('insertContent', { content: 'x' })).toBe(true);
+      expect(editor.run('insertContent', { content: { type: 'variable', attrs: { name: 'first' } } })).toBe(true);
+      engine.commands.setTextSelection({ from: 1, to: 3 });
+      expect(editor.run('toggleMark', { name: 'bold' })).toBe(true);
+      expect(editor.can('deleteBlock')).toBe(false);
+      expect(editor.run('assignBlockIds', { ids: { kc: 'z' } })).toBe(true);
+
+      const json = JSON.stringify(editor.getJSON());
+      expect(editor.getText()).toContain('ox');
+      expect(json).toContain('"variable"');
+      expect(json).toContain('"bold"');
+      expect(blocks(editor)[2].id).toBe('z');
+    });
+
+    it("lets a button's label change and refuses its href", () => {
+      const { editor, engine } = mount([button({ id: 'a', key: 'ka', label: 'Go', href: '{{u}}' })], {
+        structure: () => 'locked',
+      });
+
+      engine.commands.setNodeSelection(0);
+      expect(editor.run('updateAttributes', { name: 'emailButton', attrs: { label: 'Di' } })).toBe(true);
+      expect(editor.getJSON().content?.[0].attrs).toMatchObject({ label: 'Di', href: '{{u}}' });
+      editor.run('updateAttributes', { name: 'emailButton', attrs: { href: '{{v}}' } });
+      expect(editor.getJSON().content?.[0].attrs).toMatchObject({ label: 'Di', href: '{{u}}' });
+    });
   });
 
-  it('refuses a join in locked structure', () => {
-    const content = [paragraph('one', { id: 'a', key: 'ka' }), paragraph('two', { id: 'b', key: 'kb' })];
-    const free = mount(content);
-    free.engine.commands.setTextSelection(6);
-    press(free.engine, 'Backspace');
-    expect(blocks(free.editor)).toHaveLength(1);
+  describe('a host content load', () => {
+    const loaded = { type: 'doc' as const, content: [callout('loaded', { id: 'x' }), paragraph('more')] };
 
-    const { editor, engine } = mount(content, { structure: () => 'locked' });
-    const before = editor.getJSON();
-    engine.commands.setTextSelection(6);
-    press(engine, 'Backspace');
-    expect(editor.getJSON()).toEqual(before);
+    it('passes locked structure and a required id, and keys the loaded blocks', () => {
+      const { editor } = mount([paragraph('one', { id: 'a', key: 'ka' })], {
+        structure: () => 'locked',
+        required: () => ['a'],
+      });
+
+      editor.setContent(loaded);
+
+      expect(blocks(editor).map((block) => [block.type, block.id])).toEqual([
+        ['emailCallout', 'x'],
+        ['paragraph', null],
+      ]);
+      expect(keysAreUnique(editor)).toBe(true);
+    });
+
+    it('is not undone by an undo right after it', () => {
+      const { editor, engine } = mount([paragraph('one', { id: 'a', key: 'ka' })], {}, [undoable]);
+      engine.commands.setTextSelection(2);
+      editor.run('insertContent', { content: 'x' });
+
+      editor.setContent(loaded);
+      undo(engine.state, engine.view.dispatch);
+
+      expect(editor.getText()).toContain('loaded');
+      expect(editor.getText()).not.toContain('oxne');
+    });
   });
 });
