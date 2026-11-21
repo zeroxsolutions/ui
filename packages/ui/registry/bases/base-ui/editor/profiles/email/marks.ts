@@ -1,3 +1,5 @@
+import { createElement } from 'react';
+import { UnlinkIcon } from 'lucide-react';
 import { z } from 'zod';
 import { ItalicIcon } from '@/registry/bases/base-ui/icons/lucide/italic-icon';
 import { LetterBIcon } from '@/registry/bases/base-ui/icons/lucide/letter-b-icon';
@@ -14,6 +16,14 @@ const MARK_CLASSES: Record<string, string> = { emailLink: 'text-primary underlin
 const markItems: ToolbarItem[] = [
   { id: 'email-bold', title: 'Bold', icon: LetterBIcon, command: 'toggleBold', activeWhen: 'bold' },
   { id: 'email-italic', title: 'Italic', icon: ItalicIcon, command: 'toggleItalic', activeWhen: 'italic' },
+  {
+    id: 'email-unlink',
+    title: 'Remove link',
+    icon: createElement(UnlinkIcon, { 'aria-hidden': true }),
+    // The email kit's command: a caret inside a link removes the whole link.
+    command: 'unsetEmailLink',
+    activeWhen: 'emailLink',
+  },
 ];
 
 /**
@@ -40,7 +50,6 @@ export function emailMarks(): EditorFeature {
         run: (editor, { variable }: { variable: string }) =>
           editor.run('setMark', { name: 'emailLink', attrs: { variable } }),
       },
-      unsetEmailLink: { run: (editor) => editor.run('unsetMark', { name: 'emailLink' }) },
     },
     shortcuts: { 'Mod-b': 'toggleBold', 'Mod-i': 'toggleItalic' },
     toolbar: markItems,

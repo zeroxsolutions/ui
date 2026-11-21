@@ -2,6 +2,7 @@ import { MousePointerClickIcon } from '@/registry/bases/base-ui/icons/lucide/mou
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { NodeSpec, NodeViewProps, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
+import { selectBlockOf } from '../kit-context';
 import { UrlVariablePicker, type DeclarationSource } from '../url-variable-picker';
 import { blockClasses, emailSpec, justifyClass, type EmailBlockStyle } from './block-style';
 
@@ -29,7 +30,7 @@ export const emailButtonSlashItem: SlashItem = {
  * from the `url` variables only.
  */
 export function emailButtonNode(declarations: DeclarationSource): NodeSpec {
-  function EmailButtonView({ attrs, updateAttrs, editable }: NodeViewProps<EmailButtonAttrs>) {
+  function EmailButtonView({ attrs, updateAttrs, editable, editor }: NodeViewProps<EmailButtonAttrs>) {
     const variable = HREF_TOKEN.exec(attrs.href ?? '')?.[1] ?? attrs.href ?? null;
     const full = attrs.width === 'full';
     return (
@@ -37,6 +38,8 @@ export function emailButtonNode(declarations: DeclarationSource): NodeSpec {
         data-slot="email-button"
         data-width={attrs.width ?? 'inline'}
         contentEditable={false}
+        // Its fields take the focus without moving the selection; the block menu acts on the selected block.
+        onFocus={(event) => selectBlockOf(editor, event.currentTarget)}
         className={cn('flex flex-col gap-2', blockClasses(attrs))}
       >
         <div className={cn('flex', justifyClass(attrs.align))}>

@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { EMAIL_BLOCK_ATTRIBUTES, emailBlockAt, type EmailBlockState } from './email-kit';
 
@@ -98,71 +99,80 @@ export function BlockAttributesMenu({ editor }: BlockAttributesMenuProps) {
 
   return (
     <div data-slot="email-block-menu" className="fixed z-40" style={{ top: rect.top, left: rect.left - 28 }}>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Block actions"
-              className="text-muted-foreground size-6 opacity-60 hover:opacity-100"
+      <TooltipProvider>
+        <DropdownMenu>
+          <Tooltip>
+            <DropdownMenuTrigger
+              render={
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Block actions"
+                      className="text-muted-foreground size-6 opacity-60 hover:opacity-100"
+                    >
+                      <EllipsisVerticalIcon aria-hidden />
+                    </Button>
+                  }
+                />
+              }
+            />
+            <TooltipContent side="left">Block actions</TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent align="start" side="left" className="w-56">
+            {attributes.map(([name, values]) => (
+              <DropdownMenuGroup key={name}>
+                <DropdownMenuLabel>{ATTRIBUTE_TITLES[name] ?? name}</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={(block.attrs[name] as string | null) ?? DEFAULTS[name]}
+                  onValueChange={(value: string) => run('setBlockAttributes', { attrs: { [name]: value } })}
+                >
+                  {values.map((value) => (
+                    <DropdownMenuRadioItem key={value} value={value} disabled={block.locked} closeOnClick>
+                      {VALUE_TITLES[value] ?? value}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuGroup>
+            ))}
+            {block.columns && (
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Columns</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={block.columns.ratio.join(':')}
+                  onValueChange={(value: string) => run('setColumnsRatio', { ratio: value.split(':').map(Number) })}
+                >
+                  {ratioChoices(block.columns.ratio, block.maxLanes).map((ratio) => (
+                    <DropdownMenuRadioItem
+                      key={ratio.join(':')}
+                      value={ratio.join(':')}
+                      disabled={block.locked}
+                      closeOnClick
+                    >
+                      {ratio.join(' : ')}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuGroup>
+            )}
+            {(attributes.length > 0 || block.columns) && <DropdownMenuSeparator />}
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={reason !== null}
+              onClick={() => run('deleteBlock')}
+              className="items-start"
             >
-              <EllipsisVerticalIcon aria-hidden />
-            </Button>
-          }
-        />
-        <DropdownMenuContent align="start" side="left" className="w-56">
-          {attributes.map(([name, values]) => (
-            <DropdownMenuGroup key={name}>
-              <DropdownMenuLabel>{ATTRIBUTE_TITLES[name] ?? name}</DropdownMenuLabel>
-              <DropdownMenuRadioGroup
-                value={(block.attrs[name] as string | null) ?? DEFAULTS[name]}
-                onValueChange={(value: string) => run('setBlockAttributes', { attrs: { [name]: value } })}
-              >
-                {values.map((value) => (
-                  <DropdownMenuRadioItem key={value} value={value} disabled={block.locked} closeOnClick>
-                    {VALUE_TITLES[value] ?? value}
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuGroup>
-          ))}
-          {block.columns && (
-            <DropdownMenuGroup>
-              <DropdownMenuLabel>Columns</DropdownMenuLabel>
-              <DropdownMenuRadioGroup
-                value={block.columns.ratio.join(':')}
-                onValueChange={(value: string) => run('setColumnsRatio', { ratio: value.split(':').map(Number) })}
-              >
-                {ratioChoices(block.columns.ratio, block.maxLanes).map((ratio) => (
-                  <DropdownMenuRadioItem
-                    key={ratio.join(':')}
-                    value={ratio.join(':')}
-                    disabled={block.locked}
-                    closeOnClick
-                  >
-                    {ratio.join(' : ')}
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuGroup>
-          )}
-          {(attributes.length > 0 || block.columns) && <DropdownMenuSeparator />}
-          <DropdownMenuItem
-            variant="destructive"
-            disabled={reason !== null}
-            onClick={() => run('deleteBlock')}
-            className="items-start"
-          >
-            <Trash2Icon aria-hidden className="mt-0.5" />
-            <span className="flex flex-col gap-0.5">
-              <span>Delete</span>
-              {reason && <span className="text-muted-foreground text-xs">{reason}</span>}
-            </span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+              <Trash2Icon aria-hidden className="mt-0.5" />
+              <span className="flex flex-col gap-0.5">
+                <span>Delete</span>
+                {reason && <span className="text-muted-foreground text-xs">{reason}</span>}
+              </span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TooltipProvider>
     </div>
   );
 }

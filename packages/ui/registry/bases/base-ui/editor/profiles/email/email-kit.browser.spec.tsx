@@ -41,18 +41,49 @@ function block(overrides: Partial<EditorEmailBlock> & Pick<EditorEmailBlock, 'ty
 const paragraph = (text: string, id: string | null = null) =>
   block({ id, key: id ?? '', type: 'paragraph', content: { text } });
 
+const textOf = (node: NodeJSON) => (node.content ?? []).map((child) => child.text ?? '').join('');
+
+/** A custom block with an email codec, as a host's own feature adds one. */
+const note: EditorFeature = {
+  id: 'note',
+  nodes: [{ name: 'note', group: 'block', content: 'inline*' }],
+  codecs: [
+    {
+      node: 'note',
+      toEmailBlock: (node) => ({
+        id: typeof node.attrs?.id === 'string' ? node.attrs.id : null,
+        key: String(node.attrs?.key ?? ''),
+        type: 'note',
+        attributes: {},
+        content: { text: textOf(node) },
+      }),
+      fromEmailBlock: (stored) =>
+        stored.type === 'note'
+          ? {
+              type: 'note',
+              attrs: { id: stored.id, key: stored.key },
+              content: [{ type: 'text', text: String(stored.content.text) }],
+            }
+          : null,
+    },
+  ],
+};
+const codecs = note.codecs ?? [];
+
 function EmailHarness({
   profile,
   blocks,
+  extra,
   options,
   onReady,
 }: {
   profile: EditorProfile;
   blocks: EditorEmailBlock[];
+  extra: EditorFeature[];
   options?: EmailKitOptions;
   onReady(editor: IEditor): void;
 }) {
-  const [features] = useState(() => emailKit(profile, [], options));
+  const [features] = useState(() => emailKit(profile, extra, options));
   const [ui] = useState(() => collectUiContributions(features));
   const [editor, setEditor] = useState<IEditor | null>(null);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
@@ -60,7 +91,7 @@ function EmailHarness({
     <div ref={setRoot} className="style-nova p-12">
       <Editor
         features={features}
-        content={fromEmailBlocks(blocks)}
+        content={fromEmailBlocks(blocks, codecs)}
         onReady={(ready) => {
           setEditor(ready);
           onReady(ready);
@@ -78,17 +109,35 @@ function EmailHarness({
 
 async function mount(
   blocks: EditorEmailBlock[],
-  { profile = fullProfile, options }: { profile?: EditorProfile; options?: EmailKitOptions } = {},
+  {
+    profile = fullProfile,
+    options,
+    extra = [],
+  }: { profile?: EditorProfile; options?: EmailKitOptions; extra?: EditorFeature[] } = {},
 ): Promise<IEditor> {
   let ready: IEditor | null = null;
-  await render(<EmailHarness profile={profile} blocks={blocks} options={options} onReady={(e) => (ready = e)} />);
+  await render(
+    <EmailHarness profile={profile} blocks={blocks} extra={extra} options={options} onReady={(e) => (ready = e)} />,
+  );
   return vi.waitFor(() => {
     if (!ready) throw new Error('the editor is not ready');
     return ready;
   });
 }
 
-const exported = (editor: IEditor) => toEmailBlocks(editor.getJSON());
+const exported = (editor: IEditor) => toEmailBlocks(editor.getJSON(), codecs);
+
+/** Pastes `html` at the caret, as the clipboard of another editor carries it. */
+function pasteHtml(html: string): void {
+  const data = new DataTransfer();
+  data.setData('text/html', html);
+  (document.activeElement ?? find('[contenteditable=true]')).dispatchEvent(
+    new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
+  );
+}
+
+const buttonHtml = '<div data-type="emailButton" label="Go" href="{{resetUrl}}"></div>';
+const typesOf = (editor: IEditor) => (editor.getJSON().content ?? []).map((node) => node.type);
 
 function find(selector: string, text?: string): HTMLElement {
   const found = [...document.querySelectorAll<HTMLElement>(selector)].find(
@@ -98,9 +147,9 @@ function find(selector: string, text?: string): HTMLElement {
   return found;
 }
 
-/** Puts the caret at the end of the text `text` the editor shows. */
+/** Puts the caret at the end of the paragraph holding `text`. */
 async function caretAfter(text: string): Promise<void> {
-  const element = await vi.waitFor(() => find('[contenteditable=true] p, [contenteditable=true] [data-slot]', text));
+  const element = await vi.waitFor(() => find('[contenteditable=true] p', text));
   await userEvent.click(element);
   await userEvent.keyboard('{End}');
 }
@@ -153,7 +202,8 @@ describe('the email kit', () => {
   it("chooses a button's link from the url variables only", async () => {
     const editor = await mount([block({ type: 'button', content: { label: 'Reset', href: '{{resetUrl}}' } })]);
     const picker = await vi.waitFor(() => find('[data-slot=email-button] [data-slot=url-variable-picker]'));
-    expect(picker.textContent).toContain('Reset link');
+    // Its name is its text, so it names both what it chooses and what it holds.
+    expect([picker.getAttribute('aria-label'), picker.textContent]).toEqual([null, 'Button link: Reset link']);
 
     const options = await pickOption(picker);
     expect(options.map((option) => option.textContent)).toEqual(['Reset link', 'Help page']);
@@ -167,12 +217,36 @@ describe('the email kit', () => {
     await caretAfter('Open the page');
     await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
 
-    const picker = find('[data-slot=url-variable-picker][aria-label=Link]');
+    const picker = find('[data-slot=url-variable-picker][data-label=Link]');
     const options = await pickOption(picker);
     expect(options.map((option) => option.textContent)).toEqual(['Reset link', 'Help page']);
     await userEvent.click(options[0]);
 
     await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Open the [page]({{resetUrl}})' }));
+  });
+
+  it('shows the link the caret is in, and removes it whole', async () => {
+    const editor = await mount([paragraph('Open the [page]({{resetUrl}})')]);
+    await caretAfter('Open the page');
+    await userEvent.keyboard('{ArrowLeft}{ArrowLeft}');
+
+    await vi.waitFor(() =>
+      expect(find('[data-slot=url-variable-picker][data-label=Link]').textContent).toBe('Link: Reset link'),
+    );
+    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label="Remove link"]'));
+
+    await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Open the page' }));
+    expect(find('[data-slot=url-variable-picker][data-label=Link]').textContent).toBe('Link');
+  });
+
+  it('toggles italic from the bubble menu', async () => {
+    const editor = await mount([paragraph('Hello world')]);
+    await caretAfter('Hello world');
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
+
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label=Italic]')));
+
+    await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Hello _world_' }));
   });
 
   it('toggles bold from the bubble menu and Mod-B, and italic from Mod-I', async () => {
@@ -191,11 +265,10 @@ describe('the email kit', () => {
     await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Hello _world_' }));
   });
 
-  it('keeps marks off a code block, an html block and a button label', async () => {
+  it('keeps marks off a code block and an html block', async () => {
     const blocks = [
       block({ id: 'c', key: 'c', type: 'code', content: { code: 'abc' } }),
       block({ id: 'h', key: 'h', type: 'html', content: { html: '<b>x</b>' } }),
-      block({ id: 'b', key: 'b', type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } }),
     ];
     const editor = await mount(blocks);
 
@@ -205,8 +278,6 @@ describe('the email kit', () => {
       expect(editor.can('toggleBold')).toBe(false);
       await userEvent.keyboard('{ControlOrMeta>}b{/ControlOrMeta}{ControlOrMeta>}i{/ControlOrMeta}');
     }
-    await userEvent.click(find('[aria-label="Button label"]'));
-    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}{ControlOrMeta>}b{/ControlOrMeta}');
 
     expect(exported(editor)).toEqual(blocks);
     expect(JSON.stringify(editor.getJSON())).not.toContain('"marks"');
@@ -238,6 +309,44 @@ describe('the email kit', () => {
     await chooseInBlockMenu('Full width');
 
     await vi.waitFor(() => expect(exported(editor)[1].attributes).toEqual({ width: 'full' }));
+  });
+
+  it('acts on a button whose label field holds the focus', async () => {
+    const editor = await mount([
+      paragraph('Before'),
+      block({ type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } }),
+    ]);
+    await caretAfter('Before');
+    await userEvent.click(find('[aria-label="Button label"]'));
+
+    await chooseInBlockMenu('Full width');
+
+    await vi.waitFor(() => expect(exported(editor)[1].attributes).toEqual({ width: 'full' }));
+    expect(exported(editor)[0].attributes).toEqual({});
+  });
+
+  it('moves the blocks of a removed lane into the last lane kept', async () => {
+    const editor = await mount([
+      block({
+        id: 'cols',
+        key: 'cols',
+        type: 'columns',
+        attributes: { ratio: [1, 1, 1] },
+        lanes: [[paragraph('left', 'l')], [paragraph('middle', 'm')], [paragraph('right', 'r')]],
+      }),
+    ]);
+    await caretAfter('left');
+
+    await chooseInBlockMenu('1 : 1');
+
+    await vi.waitFor(() => expect(exported(editor)[0].lanes).toHaveLength(2));
+    expect(exported(editor)[0].lanes?.map((lane) => lane.map(({ id, content }) => [id, content]))).toEqual([
+      [['l', { text: 'left' }]],
+      [
+        ['m', { text: 'middle' }],
+        ['r', { text: 'right' }],
+      ],
+    ]);
   });
 
   it("adds and removes a lane by the columns' ratio, keeping each block's id", async () => {
@@ -332,6 +441,70 @@ describe('the email kit', () => {
     expect(find('[role=menuitemradio]', 'Center').hasAttribute('data-disabled')).toBe(true);
   });
 
+  it('adds no block of a kind the profile leaves out, while a full profile takes it', async () => {
+    const layout = await mount([paragraph('Header')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
+    await caretAfter('Header');
+    pasteHtml(buttonHtml);
+    expect(typesOf(layout)).not.toContain('emailButton');
+
+    const full = await mount([paragraph('Body')]);
+    await caretAfter('Body');
+    pasteHtml(buttonHtml);
+    await vi.waitFor(() => expect(typesOf(full)).toContain('emailButton'));
+  });
+
+  it('opens a stored mail layout holding a button in a lane', async () => {
+    const stored = [
+      block({
+        id: 'cols',
+        key: 'cols',
+        type: 'columns',
+        lanes: [
+          [block({ id: 'b', key: 'b', type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } })],
+          [paragraph('right', 'r')],
+        ],
+      }),
+    ];
+    const editor = await mount(stored, { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
+
+    expect(exported(editor)).toEqual(stored);
+  });
+
+  it("keys a custom block, takes the host's id for it, and lets a lane hold it", async () => {
+    const editor = await mount(
+      [
+        block({ type: 'columns', lanes: [[paragraph('left')], [paragraph('right')]] }),
+        block({ type: 'note', content: { text: 'Hi' } }),
+      ],
+      { extra: [note] },
+    );
+
+    const added = exported(editor)[1];
+    expect(added.key).not.toBe('');
+    expect(editor.run('assignBlockIds', { ids: { [added.key]: 'n1' } })).toBe(true);
+    expect(exported(editor)[1]).toMatchObject({ id: 'n1', key: added.key, type: 'note' });
+
+    await caretAfter('left');
+    editor.run('insertContent', { content: { type: 'note', content: [{ type: 'text', text: 'In a lane' }] } });
+    await vi.waitFor(() =>
+      expect(exported(editor)[0].lanes?.[0].map(({ type, content }) => [type, content])).toContainEqual([
+        'note',
+        { text: 'In a lane' },
+      ]),
+    );
+  });
+
+  it('refuses a custom feature with an inline node or a mark', () => {
+    const chip: EditorFeature = { id: 'chip', nodes: [{ name: 'chip', group: 'inline', atom: true }] };
+    const shout: EditorFeature = { id: 'shout', marks: [{ name: 'shout', htmlTag: 'mark' }] };
+    expect(() => emailKit(fullProfile, [chip])).toThrow(
+      expect.objectContaining({ code: 'editor.profile.no_email_codec', message: expect.stringContaining('"chip"') }),
+    );
+    expect(() => emailKit(fullProfile, [shout])).toThrow(
+      expect.objectContaining({ code: 'editor.profile.no_email_codec', message: expect.stringContaining('"shout"') }),
+    );
+  });
+
   it('refuses a custom feature whose block has no email codec, naming it', () => {
     const quote: EditorFeature = {
       id: 'quote',
@@ -342,17 +515,6 @@ describe('the email kit', () => {
     );
     expect(() => emailKit(fullProfile, [standardKit()])).toThrow(/"standard"/);
 
-    const note: EditorFeature = {
-      id: 'note',
-      nodes: [{ name: 'note', group: 'block', content: 'inline*' }],
-      codecs: [
-        {
-          node: 'note',
-          toEmailBlock: () => block({ type: 'note' }),
-          fromEmailBlock: (stored) => (stored.type === 'note' ? { type: 'note' } : null),
-        },
-      ],
-    };
     expect(() => emailKit(fullProfile, [note])).not.toThrow();
   });
 });

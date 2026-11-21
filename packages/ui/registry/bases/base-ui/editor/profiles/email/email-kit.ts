@@ -2,10 +2,11 @@ import { Dropcursor, Gapcursor, Placeholder, UndoRedo } from '@tiptap/extensions
 import { z } from 'zod';
 import { TextAlignStartIcon } from '@/registry/bases/base-ui/icons/lucide/text-align-start-icon';
 import {
+  CONTENT_LOAD_META,
   Extension,
-  facadeFor,
+  Plugin,
+  PluginKey,
   type Editor,
-  type EngineHandle,
   type ProseMirrorNode,
 } from '@zeroxsolutions/editor-core/document/advanced';
 import {
@@ -25,6 +26,17 @@ import {
   type VariableDeclaration,
 } from '@zeroxsolutions/editor-core/profiles/index';
 import { variableFeature, type VariableFeature } from '../variables/variable';
+import {
+  blockAt,
+  columnsAt,
+  contexts,
+  contextOf,
+  emailLinkAt,
+  laneAt,
+  type EngineState,
+  type Found,
+  type KitContext,
+} from './kit-context';
 import { emailMarks } from './marks';
 import { emailButtonNode, emailButtonSlashItem } from './nodes/button';
 import { emailCalloutNode, emailCalloutSlashItem } from './nodes/callout';
@@ -34,8 +46,6 @@ import { emailDividerNode, emailDividerSlashItem } from './nodes/divider';
 import { emailHtmlNode, emailHtmlSlashItem } from './nodes/html';
 import { emailListNodes, emailListSlashItem } from './nodes/list';
 import { emailUnknownNode } from './nodes/unknown';
-
-type EngineState = Editor['state'];
 
 /** The node each email kind is. */
 export const EMAIL_KIND_NODES: Readonly<Record<EmailBlockKind, string>> = {
@@ -107,49 +117,6 @@ export interface EmailKitOptions extends BlockIdentityOptions {
   /** The hint an empty line shows. */
   placeholder?: string;
 }
-
-/** What the kit's commands and the block menu read off one editor built from it. */
-interface KitContext {
-  locked(): boolean;
-  required(): readonly string[];
-  maxLanes: number;
-}
-
-// The kit's commands receive the facade; this is how they reach the engine and the options behind it.
-const contexts = new Map<Editor, KitContext>();
-
-function contextOf(editor: IEditor): { engine: Editor; context: KitContext } | undefined {
-  for (const [engine, context] of contexts) {
-    if (facadeFor(engine as unknown as EngineHandle) === editor) return { engine, context };
-  }
-  return undefined;
-}
-
-interface Found {
-  node: ProseMirrorNode;
-  pos: number;
-}
-
-function carriesKey(node: ProseMirrorNode): boolean {
-  const attrs = node.type.spec.attrs;
-  return attrs !== undefined && 'key' in attrs;
-}
-
-/** The innermost node around the selection that `matches`, or the node a node selection picked. */
-function nodeAt(state: EngineState, matches: (node: ProseMirrorNode) => boolean): Found | undefined {
-  const picked = (state.selection as { node?: ProseMirrorNode }).node;
-  if (picked && matches(picked)) return { node: picked, pos: state.selection.from };
-  const { $from } = state.selection;
-  for (let depth = $from.depth; depth > 0; depth -= 1) {
-    const node = $from.node(depth);
-    if (matches(node)) return { node, pos: $from.before(depth) };
-  }
-  return undefined;
-}
-
-const blockAt = (state: EngineState) => nodeAt(state, carriesKey);
-const columnsAt = (state: EngineState) => nodeAt(state, (node) => node.type.name === 'emailColumns');
-const laneAt = (state: EngineState) => nodeAt(state, (node) => node.type.name === 'emailLane');
 
 function holdsRequired(node: ProseMirrorNode, required: readonly string[]): boolean {
   if (required.length === 0) return false;
@@ -227,8 +194,50 @@ const dataAttribute = (attribute: string, name: string) => ({
   renderHTML: (attrs: Record<string, unknown>) => (attrs[attribute] ? { [`data-${name}`]: attrs[attribute] } : {}),
 });
 
-/** The engine half: the paragraph's email attributes, the list's way out, and the context the commands read. */
-function emailEngine(context: KitContext): Extension {
+// Undo puts back what the author removed, a stored block of a left-out kind included.
+const HISTORY_META = 'history$';
+
+/** How many nodes of each block type outside `admitted` a document holds. */
+function outsiders(doc: ProseMirrorNode, admitted: ReadonlySet<string>): Map<string, number> {
+  const counts = new Map<string, number>();
+  doc.descendants((node) => {
+    const name = node.type.name;
+    const block = (node.type.spec.group ?? '').split(' ').includes('block');
+    if (block && !admitted.has(name)) counts.set(name, (counts.get(name) ?? 0) + 1);
+    return true;
+  });
+  return counts;
+}
+
+/**
+ * Refuses a change that adds a block of a type outside `admitted`, such as a pasted or dropped button in a mail
+ * layout. A stored one stays, moves and goes, showing its problem; a host's load and an undo pass.
+ */
+function admittedBlocks(admitted: ReadonlySet<string>): Plugin {
+  const counted = new WeakMap<ProseMirrorNode, Map<string, number>>();
+  const countsOf = (doc: ProseMirrorNode) => {
+    let counts = counted.get(doc);
+    if (!counts) counted.set(doc, (counts = outsiders(doc, admitted)));
+    return counts;
+  };
+  return new Plugin({
+    key: new PluginKey('emailAdmittedBlocks'),
+    filterTransaction(tr, state: EngineState) {
+      if (!tr.docChanged || tr.getMeta(CONTENT_LOAD_META) || tr.getMeta(HISTORY_META)) return true;
+      const before = countsOf(state.doc);
+      for (const [name, count] of countsOf(tr.doc)) {
+        if (count > (before.get(name) ?? 0)) return false;
+      }
+      return true;
+    },
+  });
+}
+
+/**
+ * The engine half: the paragraph's email attributes, the list's way out, the blocks an author may add, and the
+ * context the commands read.
+ */
+function emailEngine(context: KitContext, admitted: ReadonlySet<string>): Extension {
   return Extension.create({
     name: 'emailKit',
     onBeforeCreate() {
@@ -252,15 +261,23 @@ function emailEngine(context: KitContext): Extension {
     addKeyboardShortcuts() {
       return { Enter: () => leaveList(this.editor) };
     },
+    addProseMirrorPlugins: () => [admittedBlocks(admitted)],
   });
 }
 
 /**
- * Refuses a feature whose node or mark the email export cannot carry: every node it declares or encodes needs
- * a codec with `toEmailBlock` and `fromEmailBlock`, and a mark has no place in the stored text.
+ * Refuses a feature whose node or mark the email export cannot carry: every block it declares or encodes needs
+ * a codec with `toEmailBlock` and `fromEmailBlock`, and an inline node or a mark has no place in the stored text.
  */
 function assertEmailCodecs(extra: readonly EditorFeature[]): void {
   for (const feature of extra) {
+    const inline = (feature.nodes ?? []).find((node) => node.group === 'inline');
+    if (inline) {
+      throw new EditorError(
+        'editor.profile.no_email_codec',
+        `Feature "${feature.id}" holds the inline node "${inline.name}", which an email's text cannot store.`,
+      );
+    }
     const codecs = new Map((feature.codecs ?? []).map((codec) => [codec.node, codec]));
     const parts = new Set((feature.nodes ?? []).filter((node) => node.group === undefined).map((node) => node.name));
     const names = [...(feature.nodes ?? []).map((node) => node.name), ...codecs.keys()].filter(
@@ -288,8 +305,9 @@ function assertEmailCodecs(extra: readonly EditorFeature[]): void {
 /**
  * The email profile's features: block identity, variables, the three marks and the blocks `profile` allows,
  * with the slash items, toolbar and bubble that offer only those. Every email node is in the schema, so a
- * stored block of a kind the profile leaves out still opens and shows its problem; none is offered. `extra`
- * joins when each of its block nodes has an email codec.
+ * stored block of a kind the profile leaves out still opens and shows its problem; none is offered, and a
+ * change that adds one is refused. `extra` joins when each of its block nodes has an email codec, and its blocks
+ * carry an id and a key.
  */
 export function emailKit(
   profile: EditorProfile,
@@ -310,11 +328,13 @@ export function emailKit(
   const extraBlocks = extra.flatMap((feature) =>
     (feature.nodes ?? []).filter((node) => node.group === 'block').map((node) => node.name),
   );
+  // Every kind but columns, whatever the profile allows, so a stored lane opens; adding is narrowed below.
   const laneContent = `(${[
-    ...kinds.filter((kind) => kind !== 'columns').map((kind) => EMAIL_KIND_NODES[kind]),
+    ...EMAIL_KINDS.filter((kind) => kind !== 'columns').map((kind) => EMAIL_KIND_NODES[kind]),
     'emailUnknown',
     ...extraBlocks,
   ].join(' | ')})*`;
+  const admitted = new Set([...kinds.map((kind) => EMAIL_KIND_NODES[kind]), 'emailUnknown', ...extraBlocks]);
 
   const insertable = (editor: IEditor, kind: EmailBlockKind): boolean => {
     const found = contextOf(editor);
@@ -362,6 +382,14 @@ export function emailKit(
           return !!block && !locked() && validAttributes(block.node.type.name, attrs);
         },
       },
+      // Here rather than with the marks: a caret inside a link removes the whole link, which needs the engine.
+      unsetEmailLink: {
+        run: (editor) => {
+          const found = contextOf(editor);
+          return !!found && found.engine.chain().focus().extendMarkRange('emailLink').unsetMark('emailLink').run();
+        },
+        can: (editor) => emailLinkAt(editor) !== null,
+      },
       setColumnsRatio: {
         args: z.object({ ratio: z.array(z.number().int().min(1).max(12)).min(2) }),
         run: (editor, { ratio }: { ratio: number[] }) => {
@@ -379,7 +407,7 @@ export function emailKit(
     slash: kinds.map((kind) => SLASH_ITEMS[kind]),
     advanced: {
       engineExtensions: [
-        emailEngine(context),
+        emailEngine(context, admitted),
         UndoRedo,
         Dropcursor,
         Gapcursor,
@@ -389,7 +417,7 @@ export function emailKit(
   });
 
   return [
-    blockIdentity({ required: options.required, structure: options.structure }),
+    blockIdentity({ required: options.required, structure: options.structure, types: extraBlocks }),
     variables.feature,
     emailMarks(),
     blocks,

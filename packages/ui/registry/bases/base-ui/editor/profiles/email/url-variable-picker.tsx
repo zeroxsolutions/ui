@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LinkIcon } from 'lucide-react';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import {
@@ -15,6 +15,7 @@ import {
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { matchesVariable, variableIcon, variableLabel } from '../variables/variable';
+import { emailLinkAt } from './kit-context';
 
 /** The declarations, or a getter a picker reads each time it opens, since a host may change them while it is shown. */
 export type DeclarationSource = readonly VariableDeclaration[] | (() => readonly VariableDeclaration[]);
@@ -29,7 +30,7 @@ export interface UrlVariablePickerProps {
   /** The name of the variable chosen now, if any. */
   value: string | null;
   onValueChange(name: string): void;
-  /** What the picker chooses, read by assistive technology. */
+  /** What the picker chooses; assistive technology reads it before the chosen variable. */
   label: string;
   disabled?: boolean;
   className?: string;
@@ -65,10 +66,11 @@ export function UrlVariablePicker({
     >
       <ComboboxTrigger
         data-slot="url-variable-picker"
-        aria-label={label}
+        data-label={label}
         render={<Button variant="outline" size="sm" className={className} />}
       >
         <LinkIcon aria-hidden />
+        {(chosen || value) && <span className="sr-only">{label}: </span>}
         {chosen ? variableLabel(chosen) : (value ?? label)}
       </ComboboxTrigger>
       <ComboboxContent className="w-64">
@@ -93,13 +95,23 @@ export interface LinkVariablePickerProps {
   className?: string;
 }
 
-/** The toolbar's link control: links the selected text to the chosen `url` variable. */
+/** The toolbar's link control: shows the link on the selection and links the selected text to the chosen `url` variable. */
 export function LinkVariablePicker({ editor, declarations, className }: LinkVariablePickerProps) {
+  const [linked, setLinked] = useState(() => emailLinkAt(editor));
+  useEffect(() => {
+    const update = () => setLinked(emailLinkAt(editor));
+    update();
+    const offSelection = editor.onSelectionUpdate(update);
+    const offChange = editor.onChange(update);
+    return () => {
+      offSelection();
+      offChange();
+    };
+  }, [editor]);
   return (
     <UrlVariablePicker
       declarations={declarations}
-      // A picker, not a field: each pick links the selection anew.
-      value={null}
+      value={linked}
       label="Link"
       className={className}
       onValueChange={(variable) => {
