@@ -141,7 +141,9 @@ describe('SmsEditor', () => {
   it('loads a value the host changes, and does not reload the one it reported', async () => {
     const probe = await mount('Hello');
     await caretAtEnd(probe);
-    await userEvent.keyboard('{Home}{ArrowRight}{ArrowRight}abc');
+    // ProseMirror takes a caret at the start of the document within 200ms of a focus event for the browser's own
+    // reset and puts its last selection back, so a slow runner's Home could land the text at the end.
+    await userEvent.keyboard('{End}{ArrowLeft}{ArrowLeft}{ArrowLeft}abc');
     await vi.waitFor(() => expect(probe.editor.getText()).toBe('Heabcllo'));
 
     probe.load('Xin chao');

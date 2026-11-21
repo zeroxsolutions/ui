@@ -183,7 +183,9 @@ describe('EmailEditor', () => {
   it('loads a value the host changes, and does not reload the one it reported', async () => {
     const probe = await mount([paragraph('Hello', 'p1')]);
     await caretAfter('Hello');
-    await userEvent.keyboard('{Home}{ArrowRight}{ArrowRight}abc');
+    // ProseMirror takes a caret at the start of the document within 200ms of a focus event for the browser's own
+    // reset and puts its last selection back, so a slow runner's Home could land the text at the end.
+    await userEvent.keyboard('{End}{ArrowLeft}{ArrowLeft}{ArrowLeft}abc');
     // Each reported value came back as the value; a reload would have moved the caret out of the word.
     await vi.waitFor(() => expect(probe.editor.getText()).toBe('Heabcllo'));
 
@@ -194,7 +196,7 @@ describe('EmailEditor', () => {
   it('does not reload a value of the same content with its keys in another order', async () => {
     const probe = await mount([paragraph('Hello', 'p1')]);
     await caretAfter('Hello');
-    await userEvent.keyboard('{Home}{ArrowRight}{ArrowRight}a');
+    await userEvent.keyboard('{End}{ArrowLeft}{ArrowLeft}{ArrowLeft}a');
     const reported = await vi.waitFor(() => {
       const blocks = last(probe.reported);
       expect(blocks?.[0].content).toEqual({ text: 'Heallo' });
@@ -210,7 +212,7 @@ describe('EmailEditor', () => {
   it('does not reload a refetched copy of the same content whose saved blocks carry no keys', async () => {
     const probe = await mount([paragraph('Hello', 'p1')]);
     await caretAfter('Hello');
-    await userEvent.keyboard('{Home}{ArrowRight}{ArrowRight}a');
+    await userEvent.keyboard('{End}{ArrowLeft}{ArrowLeft}{ArrowLeft}a');
     const reported = await vi.waitFor(() => {
       const blocks = last(probe.reported);
       expect(blocks?.[0].content).toEqual({ text: 'Heallo' });
@@ -454,7 +456,7 @@ describe('EmailEditor', () => {
     });
 
     await caretAfter('Hello');
-    await userEvent.keyboard('{Home}{ArrowRight}{ArrowRight}');
+    await userEvent.keyboard('{End}{ArrowLeft}{ArrowLeft}{ArrowLeft}');
 
     expect(probe.editor.run('assignBlockIds', { ids: { [added.key]: 'p2' } })).toBe(true);
     await vi.waitFor(() => expect(last(probe.reported)?.map(({ id }) => id)).toEqual(['p1', 'p2']));
