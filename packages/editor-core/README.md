@@ -157,8 +157,8 @@ public `.d.ts` outside this subpath.
 ## Public surface
 
 Per-file subpath exports (`./*` -> `./dist/*`), so each module is imported (and
-tree-shaken / lazy-loaded) on its own. **Import each module at its full subpath**;
-a directory barrel is `<subpath>/index`, a standalone module is its file path.
+tree-shaken / lazy-loaded) on its own. **Import each area through its barrel, `<area>/index`**;
+`document/advanced` is the one entry that is a file.
 
 - `document/core/index` - the engine-free contract: `createEditor` (builder),
   `createDocumentEditor`, `defineFeature`, the `IEditor` façade, types, errors.
@@ -166,9 +166,8 @@ a directory barrel is `<subpath>/index`, a standalone module is its file path.
 - `document/ui/index` - `collectUiContributions` / `defaultBlockMenuItems` (the headless
   aggregation; the menu _components_ are chrome).
 - `document/advanced` - the unstable engine escape.
-- `math/core/...`, `mermaid/core/...` - the KaTeX / Mermaid engines.
-- `composer/...` - the headless composer types + trigger tokens.
-- `composer/index` - the composer's barrel.
+- `math/core/index`, `mermaid/core/index` - the KaTeX / Mermaid engines.
+- `composer/index` - the headless composer types and trigger tokens.
 - `template/index` - the message-template core; see "Message templates" below.
 - `template/email/index` - the email templates; see "Message templates" below.
 - `template/email/testing/index` - the email templates' test helpers; see "Message templates" below.
