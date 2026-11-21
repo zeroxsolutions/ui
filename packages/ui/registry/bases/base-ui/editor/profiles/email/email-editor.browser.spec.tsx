@@ -5,16 +5,27 @@ import { userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import {
   emailProfile,
+  toEmailBlocks,
   validate,
   type EditorEmailBlock,
   type EditorProfile,
   type ProfileProblem,
   type VariableDeclaration,
 } from '@zeroxsolutions/editor-core/profiles/index';
-import { createEmailRenderer, type EmailTheme } from '@zeroxsolutions/editor-core/template/email/index';
+import {
+  createEmailRenderer,
+  type EmailTheme,
+  type RenderEmailInput,
+} from '@zeroxsolutions/editor-core/template/email/index';
 import '../../../../../../test/nova-style.css';
 import '../../styles.css';
-import { EmailEditor, type EmailEditorProps } from './email-editor';
+import {
+  EmailEditor,
+  type EmailEditorProps,
+  type EmailPreviewInput,
+  type EmailPreviewProps,
+  type EmailPreviewRenderer,
+} from './email-editor';
 import { problemMessage } from './problem-decorations';
 
 const declared: VariableDeclaration[] = [
@@ -43,6 +54,22 @@ const layoutProps = {
   footer: ['Example Company Limited.'],
 };
 
+const previewInput = { subject: 'Hello', preheader: null, locale: 'vi', layoutProps } satisfies EmailPreviewInput;
+
+const sampled = {
+  variables: { name: 'Lan', resetUrl: 'https://example.test/reset' },
+  variableTypes: { name: 'string', resetUrl: 'url' },
+} as const;
+
+/** The blocks a render takes, a key standing in for each missing id. */
+function withIds(blocks: readonly EditorEmailBlock[]): RenderEmailInput<unknown>['blocks'] {
+  return blocks.map(({ lanes, ...block }) => ({
+    ...block,
+    id: block.id ?? block.key,
+    ...(lanes ? { lanes: lanes.map(withIds) } : {}),
+  }));
+}
+
 const paragraph = (text: string, id: string | null = null): EditorEmailBlock => ({
   id,
   key: id ?? '',
@@ -64,23 +91,30 @@ interface Probe {
   declare(profile: EditorProfile): void;
 }
 
-type HarnessProps = Omit<EmailEditorProps, 'value' | 'onChange' | 'onValidate' | 'onBlur' | 'onReady'> & {
+interface HarnessProps {
+  profile: EditorProfile;
+  required?: readonly string[];
+  structure?: 'free' | 'locked';
+  preview?: { renderer: EmailPreviewRenderer; input: EmailPreviewInput };
+  renderBlockAdornment?: EmailEditorProps['renderBlockAdornment'];
   initial: EditorEmailBlock[];
   probe: Probe;
-};
+}
 
 /** A host that stores what the editor reports and hands it back as the value, as travel's rows do. */
-function Host({ initial, probe, renderBlockAdornment, profile: first, ...props }: HarnessProps) {
+function Host({ initial, probe, renderBlockAdornment, profile: first, preview, ...props }: HarnessProps) {
   const [value, setValue] = useState(initial);
   const [current, setProfile] = useState(first);
   probe.declare = setProfile;
   const [adornment, setAdornment] = useState(() => renderBlockAdornment);
   probe.load = setValue;
   probe.adorn = (next) => setAdornment(() => next);
+  const previewProps: EmailPreviewProps = preview ? { renderer: preview.renderer, previewInput: preview.input } : {};
   return (
     <div className="style-nova p-12">
       <EmailEditor
         {...props}
+        {...previewProps}
         profile={current}
         value={value}
         renderBlockAdornment={adornment}
@@ -133,6 +167,8 @@ async function caretAfter(text: string): Promise<void> {
 
 const last = <T,>(list: T[]): T | undefined => list[list.length - 1];
 
+const exportedOf = (editor: IEditor) => toEmailBlocks(editor.getJSON());
+
 describe('EmailEditor', () => {
   it('loads its value and reports each edit as blocks', async () => {
     const probe = await mount([paragraph('Hello', 'p1')]);
@@ -155,13 +191,39 @@ describe('EmailEditor', () => {
     await vi.waitFor(() => expect(probe.editor.getText()).toBe('Xin chao'));
   });
 
-  it('tells the host when the focus leaves it', async () => {
+  it('does not reload a value of the same content with its keys in another order', async () => {
+    const probe = await mount([paragraph('Hello', 'p1')]);
+    await caretAfter('Hello');
+    await userEvent.keyboard('{Home}{ArrowRight}{ArrowRight}a');
+    const reported = await vi.waitFor(() => {
+      const blocks = last(probe.reported);
+      expect(blocks?.[0].content).toEqual({ text: 'Heallo' });
+      return blocks as EditorEmailBlock[];
+    });
+
+    const reversed = <T extends object>(object: T): T => Object.fromEntries(Object.entries(object).reverse()) as T;
+    probe.load(reported.map((block) => reversed({ ...block, content: reversed(block.content) })));
+    await userEvent.keyboard('b');
+    await vi.waitFor(() => expect(probe.editor.getText()).toBe('Heabllo'));
+  });
+
+  it('tells the host when the focus leaves it, and not while it is in a popup the editor opened', async () => {
     const probe = await mount([paragraph('Hello')]);
     await caretAfter('Hello');
+    await userEvent.click(find('[data-slot=variable-menu]'));
+    const option = await vi.waitFor(() => find('[data-slot=combobox-item]', 'Reset link'));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(probe.blurs).toBe(0);
+
+    await userEvent.click(option);
+    await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'Hello{{resetUrl}}' }));
+    await new Promise((resolve) => setTimeout(resolve, 50));
     expect(probe.blurs).toBe(0);
     await userEvent.click(find('button', 'Elsewhere'));
 
     await vi.waitFor(() => expect(probe.blurs).toBe(1));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(probe.blurs).toBe(1);
   });
 
   it('marks a problem in place within a second, with its message on hover and on focus', async () => {
@@ -182,6 +244,31 @@ describe('EmailEditor', () => {
     marker.focus();
     await vi.waitFor(() => expect(find('[data-slot=tooltip-content]').textContent).toBe(message));
     expect(last(probe.validated)).toEqual(validate(last(probe.reported) ?? [], profile));
+  });
+
+  it('reaches each problem from the text with F8 and Shift+F8, and goes back to its block with Escape', async () => {
+    const probe = await mount([paragraph('One', 'p1'), paragraph('', 'p2'), paragraph('Three {{nobody}}', 'p3')]);
+    const markers = await vi.waitFor(() => {
+      const found = [...document.querySelectorAll<HTMLElement>('[data-slot=email-problem-marker]')];
+      expect(found).toHaveLength(2);
+      return found;
+    });
+    await caretAfter('One');
+
+    await userEvent.keyboard('{F8}');
+    expect(document.activeElement).toBe(markers[0]);
+    const empty = problemMessage({ kind: 'text-empty', block: 'p2' });
+    await vi.waitFor(() => expect(find('[data-slot=tooltip-content]').textContent).toBe(empty));
+    await userEvent.keyboard('{F8}');
+    expect(document.activeElement).toBe(markers[1]);
+    await userEvent.keyboard('{Shift>}{F8}{/Shift}');
+    expect(document.activeElement).toBe(markers[0]);
+
+    await userEvent.keyboard('{Escape}');
+    await vi.waitFor(() => expect(document.activeElement?.getAttribute('contenteditable')).toBe('true'));
+    await userEvent.keyboard('Two');
+    await vi.waitFor(() => expect(last(probe.reported)?.[1].content).toEqual({ text: 'Two' }));
+    expect(probe.blurs).toBe(0);
   });
 
   it('marks the token a problem names, and validates once on mount', async () => {
@@ -252,7 +339,7 @@ describe('EmailEditor', () => {
 
   it("previews the renderer's HTML for the blocks, keys standing in for ids, with the sample values", async () => {
     const renderer = createEmailRenderer({ theme });
-    const probe = await mount([paragraph('Hi {{name}}', 'p1')], { renderer, previewInput: { layoutProps } });
+    const probe = await mount([paragraph('Hi {{name}}', 'p1')], { preview: { renderer, input: previewInput } });
     await caretAfter('Hi');
     await userEvent.keyboard('{Enter}More');
 
@@ -261,21 +348,59 @@ describe('EmailEditor', () => {
       expect(found.srcdoc).toContain('More');
       return found;
     });
-    const blocks = (last(probe.reported) ?? []).map(({ lanes: _lanes, ...block }) => ({
-      ...block,
-      id: block.id ?? block.key,
-    }));
-    const expected = renderer.render({
-      blocks,
-      subject: '',
-      preheader: null,
-      locale: 'en',
-      variables: { name: 'Lan', resetUrl: 'https://example.test/reset' },
-      variableTypes: { name: 'string', resetUrl: 'url' },
-      layoutProps,
-    });
+    const expected = renderer.render({ ...previewInput, ...sampled, blocks: withIds(last(probe.reported) ?? []) });
     expect(frame.srcdoc).toBe(expected.html);
     expect(frame.getAttribute('sandbox')).toBe('');
+  });
+
+  it('previews a columns block, keys standing in for the ids of its lanes, and lists the render problems', async () => {
+    const renderer = createEmailRenderer({ theme });
+    const lanes = [[paragraph('Left')], [paragraph('Right {{nobody}}')]];
+    const columns: EditorEmailBlock = {
+      id: 'c1',
+      key: 'c1',
+      type: 'columns',
+      attributes: { ratio: [1, 1] },
+      content: {},
+      lanes,
+    };
+    const probe = await mount([columns], { preview: { renderer, input: previewInput } });
+
+    const frame = await vi.waitFor(() => find('iframe[data-slot=email-preview]') as HTMLIFrameElement);
+    const blocks = exportedOf(probe.editor);
+    const laneIds = (blocks[0].lanes ?? []).flat().map(({ id, key }) => [id, key !== '']);
+    expect(laneIds).toEqual([
+      [null, true],
+      [null, true],
+    ]);
+    const expected = renderer.render({ ...previewInput, ...sampled, blocks: withIds(blocks) });
+    expect(frame.srcdoc).toBe(expected.html);
+    expect(expected.problems.length).toBeGreaterThan(0);
+    expect(find('[data-slot=email-preview-problems]').textContent).toContain('nobody');
+  });
+
+  it('validates a bounded number of times under a host that re-renders on each report', async () => {
+    let calls = 0;
+    const renderer = createEmailRenderer({ theme });
+    function Restless() {
+      const [, setProblems] = useState<ProfileProblem[]>([]);
+      return (
+        <EmailEditor
+          profile={emailProfile({ variables: declared })}
+          value={[paragraph('', 'p1')]}
+          renderer={renderer}
+          previewInput={{ subject: 'Hello', preheader: null, locale: 'vi', layoutProps }}
+          onValidate={(problems) => {
+            calls += 1;
+            setProblems(problems);
+          }}
+        />
+      );
+    }
+    await render(<Restless />);
+    await vi.waitFor(() => expect(calls).toBe(1));
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    expect(calls).toBe(1);
   });
 
   it('keeps the caret when the host assigns ids after a save', async () => {
@@ -288,10 +413,13 @@ describe('EmailEditor', () => {
       return block as EditorEmailBlock;
     });
 
+    await caretAfter('Hello');
+    await userEvent.keyboard('{Home}{ArrowRight}{ArrowRight}');
+
     expect(probe.editor.run('assignBlockIds', { ids: { [added.key]: 'p2' } })).toBe(true);
     await vi.waitFor(() => expect(last(probe.reported)?.map(({ id }) => id)).toEqual(['p1', 'p2']));
     await userEvent.keyboard('!');
 
-    await vi.waitFor(() => expect(last(probe.reported)?.[1].content).toEqual({ text: 'More!' }));
+    await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'He!llo' }));
   });
 });
