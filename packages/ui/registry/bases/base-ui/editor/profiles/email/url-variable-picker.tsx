@@ -53,7 +53,9 @@ export function UrlVariablePicker({
   return (
     <Combobox
       items={items}
-      value={chosen}
+      // The trigger shows `value`; the list keeps none, so picking the variable already chosen fires again, as a
+      // link widened over more text needs.
+      value={null}
       disabled={disabled}
       onOpenChange={(open) => {
         if (open) setItems(urlDeclarations(declarations));

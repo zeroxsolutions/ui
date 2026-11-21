@@ -4,6 +4,7 @@ import { TextAlignStartIcon } from '@/registry/bases/base-ui/icons/lucide/text-a
 import {
   CONTENT_LOAD_META,
   Extension,
+  isHistoryTransaction,
   Plugin,
   PluginKey,
   type Editor,
@@ -194,15 +195,17 @@ const dataAttribute = (attribute: string, name: string) => ({
   renderHTML: (attrs: Record<string, unknown>) => (attrs[attribute] ? { [`data-${name}`]: attrs[attribute] } : {}),
 });
 
-// Undo puts back what the author removed, a stored block of a left-out kind included.
-const HISTORY_META = 'history$';
+/** Whether a node spec's group, a space-separated list, names `group`. */
+function inGroup(spec: { group?: string }, group: string): boolean {
+  return (spec.group ?? '').split(' ').includes(group);
+}
 
 /** How many nodes of each block type outside `admitted` a document holds. */
 function outsiders(doc: ProseMirrorNode, admitted: ReadonlySet<string>): Map<string, number> {
   const counts = new Map<string, number>();
   doc.descendants((node) => {
     const name = node.type.name;
-    const block = (node.type.spec.group ?? '').split(' ').includes('block');
+    const block = inGroup(node.type.spec, 'block');
     if (block && !admitted.has(name)) counts.set(name, (counts.get(name) ?? 0) + 1);
     return true;
   });
@@ -223,7 +226,8 @@ function admittedBlocks(admitted: ReadonlySet<string>): Plugin {
   return new Plugin({
     key: new PluginKey('emailAdmittedBlocks'),
     filterTransaction(tr, state: EngineState) {
-      if (!tr.docChanged || tr.getMeta(CONTENT_LOAD_META) || tr.getMeta(HISTORY_META)) return true;
+      // Undo and redo put back what the author removed, a stored block of a left-out kind included.
+      if (!tr.docChanged || tr.getMeta(CONTENT_LOAD_META) || isHistoryTransaction(tr)) return true;
       const before = countsOf(state.doc);
       for (const [name, count] of countsOf(tr.doc)) {
         if (count > (before.get(name) ?? 0)) return false;
@@ -271,7 +275,7 @@ function emailEngine(context: KitContext, admitted: ReadonlySet<string>): Extens
  */
 function assertEmailCodecs(extra: readonly EditorFeature[]): void {
   for (const feature of extra) {
-    const inline = (feature.nodes ?? []).find((node) => node.group === 'inline');
+    const inline = (feature.nodes ?? []).find((node) => inGroup(node, 'inline'));
     if (inline) {
       throw new EditorError(
         'editor.profile.no_email_codec',
@@ -279,7 +283,11 @@ function assertEmailCodecs(extra: readonly EditorFeature[]): void {
       );
     }
     const codecs = new Map((feature.codecs ?? []).map((codec) => [codec.node, codec]));
-    const parts = new Set((feature.nodes ?? []).filter((node) => node.group === undefined).map((node) => node.name));
+    const parts = new Set(
+      (feature.nodes ?? [])
+        .filter((node) => !inGroup(node, 'block') && !inGroup(node, 'inline'))
+        .map((node) => node.name),
+    );
     const names = [...(feature.nodes ?? []).map((node) => node.name), ...codecs.keys()].filter(
       (name) => !parts.has(name),
     );
@@ -326,7 +334,7 @@ export function emailKit(
   const context: KitContext = { locked, required, maxLanes: profile.bounds.lanes };
 
   const extraBlocks = extra.flatMap((feature) =>
-    (feature.nodes ?? []).filter((node) => node.group === 'block').map((node) => node.name),
+    (feature.nodes ?? []).filter((node) => inGroup(node, 'block')).map((node) => node.name),
   );
   // Every kind but columns, whatever the profile allows, so a stored lane opens; adding is narrowed below.
   const laneContent = `(${[

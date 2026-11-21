@@ -239,6 +239,19 @@ describe('the email kit', () => {
     expect(find('[data-slot=url-variable-picker][data-label=Link]').textContent).toBe('Link');
   });
 
+  it('links a wider selection to the variable the picker already shows', async () => {
+    const editor = await mount([paragraph('Open the [page]({{resetUrl}})')]);
+    await caretAfter('Open the page');
+    await userEvent.keyboard('{Shift>}' + '{ArrowLeft}'.repeat(8) + '{/Shift}');
+
+    const picker = find('[data-slot=url-variable-picker][data-label=Link]');
+    await vi.waitFor(() => expect(picker.textContent).toBe('Link: Reset link'));
+    const options = await pickOption(picker);
+    await userEvent.click(options.find((option) => option.textContent === 'Reset link')!);
+
+    await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Open [the page]({{resetUrl}})' }));
+  });
+
   it('toggles italic from the bubble menu', async () => {
     const editor = await mount([paragraph('Hello world')]);
     await caretAfter('Hello world');
@@ -453,6 +466,20 @@ describe('the email kit', () => {
     await vi.waitFor(() => expect(typesOf(full)).toContain('emailButton'));
   });
 
+  it('brings back a stored block of a left-out kind on undo', async () => {
+    const stored = [paragraph('Header', 'p'), block({ id: 'b', key: 'b', type: 'button', content: { label: 'Go' } })];
+    const editor = await mount(stored, { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
+    await caretAfter('Header');
+    await userEvent.keyboard('{ArrowDown}');
+    await openBlockMenu();
+    await userEvent.click(find('[role=menuitem]', 'Delete'));
+    await vi.waitFor(() => expect(typesOf(editor)).toEqual(['paragraph']));
+
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+
+    await vi.waitFor(() => expect(exported(editor)).toEqual(stored));
+  });
+
   it('opens a stored mail layout holding a button in a lane', async () => {
     const stored = [
       block({
@@ -492,6 +519,30 @@ describe('the email kit', () => {
         { text: 'In a lane' },
       ]),
     );
+  });
+
+  it('reads a node in several groups by each of them', async () => {
+    const aside: EditorFeature = {
+      id: 'aside',
+      nodes: [{ name: 'aside', group: 'block aside' as 'block', content: 'inline*' }],
+      codecs: [
+        {
+          node: 'aside',
+          toEmailBlock: (node) => block({ key: String(node.attrs?.key ?? ''), type: 'aside' }),
+          fromEmailBlock: () => null,
+        },
+      ],
+    };
+    const tag: EditorFeature = { id: 'tag', nodes: [{ name: 'tag', group: 'inline tag' as 'inline', atom: true }] };
+    expect(() => emailKit(fullProfile, [tag])).toThrow(/"tag"/);
+
+    const editor = await mount([paragraph('Body')], { extra: [aside] });
+    await caretAfter('Body');
+    editor.run('insertContent', { content: { type: 'aside', content: [{ type: 'text', text: 'Aside' }] } });
+
+    await vi.waitFor(() => expect(typesOf(editor)).toContain('aside'));
+    const added = editor.getJSON().content?.find((node) => node.type === 'aside');
+    expect(added?.attrs?.key).toEqual(expect.any(String));
   });
 
   it('refuses a custom feature with an inline node or a mark', () => {
