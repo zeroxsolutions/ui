@@ -39,12 +39,20 @@ const theme: EmailTheme = {
   font: { family: 'Inter', fallback: 'Arial, Helvetica, sans-serif' },
 };
 
+// Inline, so the preview, a sandboxed frame with no origin, requests nothing; a sent mail takes the hosted PNG
+// that DefaultLayoutProps asks for, since mail clients render no SVG.
+const logo =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="48"><rect width="240" height="48" rx="8" fill="#007A55"/><text x="120" y="31" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#ECFDF5" text-anchor="middle">Trip Vietnam</text></svg>',
+  );
+
 const previewInput: EmailPreviewInput = {
   subject: 'Your trip to {{destination}} starts soon',
   preheader: null,
   locale: 'en',
   layoutProps: {
-    logo: { url: 'https://trip-vietnam.com/logo@2x.png', alt: 'Trip Vietnam', width: 120 },
+    logo: { url: logo, alt: 'Trip Vietnam', width: 120 },
     footer: ['Trip Vietnam'],
   },
 };
