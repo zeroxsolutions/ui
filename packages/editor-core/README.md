@@ -168,6 +168,11 @@ a directory barrel is `<subpath>/index`, a standalone module is its file path.
 - `document/advanced` - the unstable engine escape.
 - `math/core/...`, `mermaid/core/...` - the KaTeX / Mermaid engines.
 - `composer/...` - the headless composer types + trigger tokens.
+- `composer/index` - the composer's barrel.
+- `template/index` - the message-template core; see "Message templates" below.
+- `template/email/index` - the email templates; see "Message templates" below.
+- `template/email/testing/index` - the email templates' test helpers; see "Message templates" below.
+- `template/sms/index` - the SMS templates; see "Message templates" below.
 
 Released with Nx Release + SemVer from conventional commits.
 

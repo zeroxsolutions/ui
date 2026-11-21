@@ -29,8 +29,8 @@ function shippedFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) return shippedFiles(path);
-    const shipped =
-      entry.name.endsWith('.ts') && !entry.name.endsWith('.spec.ts') && !entry.name.endsWith('.fixture.ts');
+    const isCode = ['.ts', '.tsx', '.mts', '.cts', '.js', '.mjs'].some((extension) => entry.name.endsWith(extension));
+    const shipped = isCode && !/\.(spec|fixture)\./.test(entry.name);
     return shipped ? [path] : [];
   });
 }
