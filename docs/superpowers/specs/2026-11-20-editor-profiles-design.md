@@ -290,8 +290,9 @@ barrel and never `export *`", every entry a folder's `index`):
   `document/serialize/index`, `document/migrate/index`, `document/ui/index`, `math/core/index`,
   `mermaid/core/index`, a new `composer/index`, and `template/*/index`. The engine handles the
   registry's node-view adapter reads (`facadeFor`, `EngineHandle`) join the unstable
-  `document/advanced` escape, which is the one entry that is a file. Every old path still resolves,
-  so no consumer breaks. A spec fails any other import of an `editor-core` path.
+  `document/advanced` escape, which is the one entry that is a file. Every old path still resolves
+  except the five empty barrels (`src/index`, `document/index`, `math/index`, `mermaid/index`,
+  `migrate/index`), published in 0.1.0; they exported no name, so no consumer loses one. A spec fails any other import of an `editor-core` path.
 - The wildcard map itself stays: changing it would change the file every existing import resolves.
 
 ### Where each part lives
