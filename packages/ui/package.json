@@ -77,7 +77,7 @@
     "react-hook-form": "catalog:",
     "react-markdown": "catalog:",
     "react-resizable-panels": "^4.24.0",
-    "recharts": "3.10.1",
+    "recharts": "3.11.0",
     "remark": "^15.0.1",
     "remark-gfm": "catalog:",
     "rough-notation": "^0.5.1",
