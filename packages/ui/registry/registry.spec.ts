@@ -421,10 +421,7 @@ function editorFiles(): string[] {
     .sort();
 }
 
-/**
- * Each editor file ships in exactly one editor item, every editor item is in the editor category, and each
- * of its files lands at `components/editor/` plus its path below `editor/`.
- */
+/** Each editor file ships in exactly one editor item, and every editor item is in the editor category. */
 function editorProblems(items: RegistryItem[], files: string[]): string[] {
   const prefix = `${BASE}/editor/`;
   const editorItems = items.filter((item) => item.files.some((file) => file.path.startsWith(prefix)));
@@ -435,18 +432,46 @@ function editorProblems(items: RegistryItem[], files: string[]): string[] {
       ? [`${path}: ships in no editor item`]
       : [`${path}: ships in ${owners.map((item) => item.name).join(' and ')}`];
   });
-  const misdeclared = editorItems.flatMap((item) => [
-    ...(isDeepStrictEqual(item.categories, ['editor']) ? [] : [`${item.name}: category should be editor`]),
-    ...item.files
-      .filter((file) => !SHIPPED.test(file.path))
-      .flatMap((file) => {
-        const expected = `components/editor/${file.path.slice(prefix.length)}`;
-        return file.path.startsWith(prefix) && file.target !== expected
-          ? [`${item.name}: ${file.path} should target ${expected}`]
-          : [];
-      }),
-  ]);
+  const misdeclared = editorItems.flatMap((item) =>
+    isDeepStrictEqual(item.categories, ['editor']) ? [] : [`${item.name}: category should be editor`],
+  );
   return [...unowned, ...misdeclared];
+}
+
+/**
+ * Where a published file lands, as a target the shadcn CLI resolves through the consumer's `components.json`
+ * aliases: a component, editor file, icon or demo under `@components/`, a hook under `@hooks/`, a lib or type
+ * file under `@lib/`. A plain target is read from the project root, so it lands in `components/` whatever the
+ * consumer's `components` alias names; a component with none keeps only what follows a folder named like that
+ * alias's last segment, so `@/shared/widgets` drops its kind folder. Nothing of ours targets `@ui/`, which holds
+ * shadcn's own primitives.
+ * @returns the target, or undefined for a file under a folder no rule places yet
+ */
+function aliasTarget(path: string): string | undefined {
+  if (!path.startsWith(`${BASE}/`)) return undefined;
+  const [folder, ...below] = path.slice(`${BASE}/`.length).split('/');
+  const name = below.join('/');
+  if (name === '') return undefined;
+  if (folder === 'components') return `@components/${name}`;
+  if (folder === 'editor') return `@components/editor/${name}`;
+  if (folder === 'icons') return `@components/general/${name}`;
+  if (folder === 'examples' && below.length === 1) return `@components/${name}`;
+  if (folder === 'hooks' && below.length === 1) return `@hooks/${name}`;
+  if ((folder === 'lib' || folder === 'types') && below.length === 1) return `@lib/${name}`;
+  return undefined;
+}
+
+/** Each published file whose target is not the one {@link aliasTarget} gives its path. */
+function targetProblems(items: RegistryItem[]): string[] {
+  return items.flatMap((item) =>
+    item.files.flatMap((file) => {
+      const expected = aliasTarget(file.path);
+      if (expected === undefined) return [`${item.name}: ${file.path} is in no folder with an alias target`];
+      return file.target === expected
+        ? []
+        : [`${item.name}: ${file.path} should target ${expected}, not ${file.target}`];
+    }),
+  );
 }
 
 /**
@@ -475,7 +500,8 @@ function demoProblems(items: RegistryItem[]): string[] {
       .map((example) => `${example.name}: is the demo of no item`),
     ...examples.flatMap((example) => {
       const expected = { path: `${BASE}/examples/${example.name}.tsx`, type: 'registry:example' };
-      return isDeepStrictEqual(example.files[0], expected)
+      const first = example.files[0];
+      return isDeepStrictEqual({ path: first?.path, type: first?.type }, expected)
         ? []
         : [`${example.name}: files[0] should be ${JSON.stringify(expected)}`];
     }),
@@ -492,7 +518,7 @@ describe('registry.json', () => {
     expect(named.map((item) => item.name)).toEqual([]);
   });
 
-  it('publishes each icon under icons/<set>/ as the item <set>-<file>, landing in the consumer components/general/<set>/', () => {
+  it("publishes each icon under icons/<set>/ as the item <set>-<file>, landing in general/<set>/ of the consumer's components alias", () => {
     const iconsDir = join(APP, BASE, 'icons');
     const icons = readdirSync(iconsDir, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
@@ -510,7 +536,7 @@ describe('registry.json', () => {
         {
           path: `${BASE}/icons/${set}/${file}.tsx`,
           type: 'registry:ui',
-          target: `components/general/${set}/${file}.tsx`,
+          target: `@components/general/${set}/${file}.tsx`,
         },
       ];
       return [
@@ -572,6 +598,10 @@ describe('registry.json', () => {
 
   it('publishes one demo per item and no other example', () => {
     expect(demoProblems(REGISTRY.items)).toEqual([]);
+  });
+
+  it("lands every file through the consumer's aliases, in its own folder", () => {
+    expect(targetProblems(REGISTRY.items)).toEqual([]);
   });
 
   it('ships every editor file in exactly one editor item', () => {
@@ -970,7 +1000,7 @@ describe('familyProblems', () => {
       name: 'document-editor',
       type: 'registry:component',
       categories: ['editor'],
-      files: [{ path: `${BASE}/editor/x.tsx`, type: 'registry:component', target: 'components/editor/x.tsx' }],
+      files: [{ path: `${BASE}/editor/x.tsx`, type: 'registry:component', target: '@components/editor/x.tsx' }],
     };
     expect(familyProblems([...familyItems, editor], FAMILIES)).toEqual([]);
   });
@@ -1033,12 +1063,63 @@ describe('demoProblems', () => {
   });
 });
 
+describe('targetProblems', () => {
+  const item = (files: RegistryFile[]): RegistryItem => ({ name: 'a', type: 'registry:component', files });
+
+  it('reports nothing for files targeted through the alias of their folder', () => {
+    const files = [
+      {
+        path: `${BASE}/components/data-entry/x.tsx`,
+        type: 'registry:component',
+        target: '@components/data-entry/x.tsx',
+      },
+      { path: `${BASE}/editor/document/x.ts`, type: 'registry:lib', target: '@components/editor/document/x.ts' },
+      { path: `${BASE}/icons/lucide/x-icon.tsx`, type: 'registry:ui', target: '@components/general/lucide/x-icon.tsx' },
+      { path: `${BASE}/examples/x-demo.tsx`, type: 'registry:example', target: '@components/x-demo.tsx' },
+      { path: `${BASE}/hooks/use-x.ts`, type: 'registry:hook', target: '@hooks/use-x.ts' },
+      { path: `${BASE}/lib/x.ts`, type: 'registry:lib', target: '@lib/x.ts' },
+      { path: `${BASE}/types/x.ts`, type: 'registry:lib', target: '@lib/x.ts' },
+    ];
+    expect(targetProblems([item(files)])).toEqual([]);
+  });
+
+  it('reports a plain target, which the CLI reads from the project root', () => {
+    const file = { path: `${BASE}/editor/x.tsx`, type: 'registry:component', target: 'components/editor/x.tsx' };
+    expect(targetProblems([item([file])])).toEqual([
+      `a: ${file.path} should target @components/editor/x.tsx, not components/editor/x.tsx`,
+    ]);
+  });
+
+  it('reports a component with no target, which loses its kind folder under a renamed components alias', () => {
+    const file = { path: `${BASE}/components/data-entry/x.tsx`, type: 'registry:component' };
+    expect(targetProblems([item([file])])).toEqual([
+      `a: ${file.path} should target @components/data-entry/x.tsx, not undefined`,
+    ]);
+  });
+
+  it('reports a target under the ui alias or the project root', () => {
+    const files = [
+      { path: `${BASE}/icons/lucide/x-icon.tsx`, type: 'registry:ui', target: '@ui/general/lucide/x-icon.tsx' },
+      { path: `${BASE}/lib/x.ts`, type: 'registry:lib', target: '~/lib/x.ts' },
+    ];
+    expect(targetProblems([item(files)])).toEqual([
+      `a: ${files[0].path} should target @components/general/lucide/x-icon.tsx, not @ui/general/lucide/x-icon.tsx`,
+      `a: ${files[1].path} should target @lib/x.ts, not ~/lib/x.ts`,
+    ]);
+  });
+
+  it('reports a file under a folder no rule places', () => {
+    const file = { path: `${BASE}/ui/button.tsx`, type: 'registry:ui', target: '@ui/button.tsx' };
+    expect(targetProblems([item([file])])).toEqual([`a: ${file.path} is in no folder with an alias target`]);
+  });
+});
+
 const EDITOR_FILE = `${BASE}/editor/x.tsx`;
 const editorItem = (name: string, overrides: Partial<RegistryItem> = {}): RegistryItem => ({
   name,
   type: 'registry:component',
   categories: ['editor'],
-  files: [{ path: EDITOR_FILE, type: 'registry:component', target: 'components/editor/x.tsx' }],
+  files: [{ path: EDITOR_FILE, type: 'registry:component', target: '@components/editor/x.tsx' }],
   ...overrides,
 });
 
@@ -1069,17 +1150,10 @@ describe('editorProblems', () => {
     ]);
   });
 
-  it('reports a file whose target is not its path below editor/', () => {
-    const item = editorItem('a', {
-      files: [{ path: EDITOR_FILE, type: 'registry:component', target: 'components/x.tsx' }],
-    });
-    expect(editorProblems([item], [EDITOR_FILE])).toEqual([`a: ${EDITOR_FILE} should target components/editor/x.tsx`]);
-  });
-
-  it('reports nothing for one item per file with matching targets', () => {
+  it('reports nothing for one item per file', () => {
     const item = editorItem('a', {
       files: [
-        { path: EDITOR_FILE, type: 'registry:component', target: 'components/editor/x.tsx' },
+        { path: EDITOR_FILE, type: 'registry:component', target: '@components/editor/x.tsx' },
         { path: `${BASE}/lib/ime.ts`, type: 'registry:lib' },
       ],
     });

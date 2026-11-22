@@ -163,6 +163,10 @@ pnpm dlx shadcn@latest add @zui/button
 The CLI writes the item's files under the aliases in `components.json`, here `components/ui/button.tsx`, and
 installs the items it uses, Text, Icon and Utils.
 
+Each item places its files through the `@ui/`, `@components/`, `@lib/` and `@hooks/` target placeholders, which
+the CLI reads from version 4.7.0. An older CLI writes them into folders named `@ui` and `@components` at the
+project root, so install with 4.7.0 or later; `shadcn@latest` is.
+
 ## Load the fonts
 
 Text draws Geist, which loads at runtime. Install the splash screen, which stays up until the fonts load:

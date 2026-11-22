@@ -260,13 +260,27 @@ function pluginsOf({ css }: ComponentItem): string[] {
 /** The registry's source root, which the CLI drops from a component's path. */
 const SOURCE_ROOT = 'registry/bases/base-ui/';
 
+/** The folder each target placeholder resolves to under the aliases `shadcn init` writes. */
+const DEFAULT_ALIAS_FOLDERS: Readonly<Record<string, string>> = {
+  '@components/': 'components/',
+  '@ui/': 'components/ui/',
+  '@lib/': 'lib/',
+  '@hooks/': 'hooks/',
+};
+
 /**
- * Where the shadcn CLI writes a file: its `target` when the item names one. Otherwise a lib or hook
- * file goes into the app's `lib/` or `hooks/` under its own name, and a component keeps its path from
+ * Where the shadcn CLI writes a file under the aliases `shadcn init` writes: its `target`, with a placeholder
+ * such as `@components/` read as its default folder, when the item names one. Otherwise a lib or hook file
+ * goes into the app's `lib/` or `hooks/` under its own name, and a component keeps its path from
  * `components/` on.
  */
 function installTarget({ path, type, target }: RegistryFile): string {
-  if (target !== undefined) return target;
+  if (target !== undefined) {
+    const placeholder = Object.keys(DEFAULT_ALIAS_FOLDERS).find((prefix) => target.startsWith(prefix));
+    return placeholder === undefined
+      ? target
+      : `${DEFAULT_ALIAS_FOLDERS[placeholder]}${target.slice(placeholder.length)}`;
+  }
   const name = path.split('/').pop() ?? path;
   if (type === 'registry:lib') return `lib/${name}`;
   if (type === 'registry:hook') return `hooks/${name}`;

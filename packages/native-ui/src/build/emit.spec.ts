@@ -237,7 +237,33 @@ interface BuiltItem {
   dependencies?: string[];
   devDependencies?: string[];
   registryDependencies?: string[];
-  files: { path: string; content: string }[];
+  files: { path: string; type: string; target?: string; content: string }[];
+}
+
+/** The alias placeholder each folder of `registry/` installs under; an icon set lands in `general/` of components. */
+const ALIAS_TARGETS: ReadonlyMap<string, string> = new Map([
+  ['ui', '@ui'],
+  ['components', '@components'],
+  ['icons', '@components/general'],
+  ['lib', '@lib'],
+  ['hooks', '@hooks'],
+]);
+
+/**
+ * Where a built file lands, as a target the shadcn CLI resolves through the consumer's `components.json`
+ * aliases: its path below `registry/<folder>/` under that folder's placeholder. A plain target is read from
+ * the project root, whatever the consumer's aliases name, and a file with none keeps only what follows a folder
+ * named like the alias's last segment, so a renamed components alias drops a component's kind folder. A
+ * `registry:file` is a root file beside `global.css`, written as a `~/` target.
+ * @returns the target, or undefined for a file under a folder no placeholder covers
+ */
+function aliasTarget({ path, type }: { path: string; type: string }): string | undefined {
+  const [root, folder = '', ...below] = path.split('/');
+  if (type === 'registry:file') return `~/${below.join('/')}`;
+  const placeholder = ALIAS_TARGETS.get(folder);
+  return root === 'registry' && placeholder !== undefined && below.length > 0
+    ? `${placeholder}/${below.join('/')}`
+    : undefined;
 }
 
 const PLATFORM_PACKAGES: ReadonlySet<string> = new Set(['react', 'react-native']);
@@ -316,6 +342,19 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
       });
       expect(json).not.toMatch(OTHER_ENGINE_PACKAGE[engine]);
     }
+  });
+
+  it("lands every file through the consumer's aliases, in its own folder", () => {
+    const problems = items.flatMap((built) =>
+      built.files.flatMap((file) => {
+        const expected = aliasTarget(file);
+        return file.target !== undefined && file.target === expected
+          ? []
+          : [`${built.name}: ${file.path} targets ${file.target}, not ${expected}`];
+      }),
+    );
+
+    expect(problems).toEqual([]);
   });
 
   it('resolves every @zui dependency to an item of the same registry', () => {
@@ -438,11 +477,10 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
     expect(item('button')?.registryDependencies).toBeDefined();
   });
 
-  it('ships fonts.ts as a lib file with no target, so it lands in the lib alias like utils', () => {
+  it('ships fonts.ts as a lib file in the lib alias, like utils', () => {
     const fonts = item('theme')?.files.find((file) => file.path.endsWith('/fonts.ts'));
 
-    expect(fonts).toMatchObject({ type: 'registry:lib' });
-    expect(fonts).not.toHaveProperty('target');
+    expect(fonts).toMatchObject({ type: 'registry:lib', target: '@lib/fonts.ts' });
   });
 
   it('ships fonts.ts in the theme with the packages it imports', () => {
@@ -453,7 +491,7 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
     expect(theme?.dependencies).toEqual(expect.arrayContaining(['expo-font', '@expo-google-fonts/geist']));
   });
 
-  it('ships password-input as a data-entry registry:component under components/, which the CLI keeps below the components alias', () => {
+  it('ships password-input as a data-entry registry:component under data-entry/ of the components alias', () => {
     const passwordInput = item('password-input');
 
     expect(passwordInput).toMatchObject({ type: 'registry:component', categories: ['data-entry'] });
@@ -463,7 +501,7 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
         type: 'registry:component',
       }),
     ]);
-    expect(passwordInput?.files[0]).not.toHaveProperty('target');
+    expect(passwordInput?.files[0]).toHaveProperty('target', '@components/data-entry/password-input.tsx');
     expect(passwordInput?.files[0].content).toContain("from '@/components/ui/input-group'");
   });
 
@@ -477,7 +515,7 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
         type: 'registry:component',
       }),
     ]);
-    expect(passwordStrength?.files[0]).not.toHaveProperty('target');
+    expect(passwordStrength?.files[0]).toHaveProperty('target', '@components/feedback/password-strength.tsx');
     expect(passwordStrength?.files[0].content).toContain("from '@/components/ui/progress'");
   });
 
@@ -505,7 +543,7 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
         type: 'registry:component',
       }),
     ]);
-    expect(toolbar?.files[0]).not.toHaveProperty('target');
+    expect(toolbar?.files[0]).toHaveProperty('target', '@components/feedback/unsaved-changes-toolbar.tsx');
     expect(toolbar?.files[0].content).toContain("from '@/components/ui/spinner'");
   });
 
@@ -516,7 +554,7 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
     expect(tabBar?.files).toEqual([
       expect.objectContaining({ path: 'registry/components/navigation/tab-bar.tsx', type: 'registry:component' }),
     ]);
-    expect(tabBar?.files[0]).not.toHaveProperty('target');
+    expect(tabBar?.files[0]).toHaveProperty('target', '@components/navigation/tab-bar.tsx');
     expect(tabBar?.files[0].content).toContain("from '@/components/ui/badge'");
   });
 

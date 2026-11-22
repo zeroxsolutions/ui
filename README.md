@@ -54,7 +54,8 @@ pnpm dlx shadcn@latest add @zui/status-indicator
 ```
 
 The CLI writes the item's files under your `components.json` aliases, and pulls in every shadcn
-primitive and registry item it composes. The full index is
+primitive and registry item it composes. The items name those folders through target placeholders such as
+`@components/`, which shadcn reads from 4.7.0; an older CLI writes a folder named `@components` instead. The full index is
 [`/r/styles/base-nova/registry.json`](https://ui.zeroxsolutions.com/r/styles/base-nova/registry.json); each item's page in the docs
 shows its preview, its source and its API.
 
