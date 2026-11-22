@@ -49,8 +49,8 @@ async function initialDemoName(getInitialUrl: () => Promise<string | null | unde
 }
 
 /**
- * The style `value` names, such as the page's `?style=` or the `EXPO_PUBLIC_STYLE` a native update was
- * bundled with.
+ * The style `value` names, such as the page's `?style=` or the style a native update was published
+ * in.
  * @returns one of {@link PREVIEW_STYLES}, or `undefined` for none or any other value
  */
 function styleOf(value: string | null | undefined): PreviewStyle | undefined {

@@ -2,20 +2,17 @@ import { join } from 'node:path';
 import { previewScreenSources, previewSources, previewStyle, sharedThemeFile } from './preview-style';
 
 describe('previewStyle', () => {
-  it.each(['vega', 'luma', 'lyra', 'maia', 'mira', 'nova', 'rhea', 'sera'])(
-    'takes %s from EXPO_PUBLIC_STYLE',
-    (style) => {
-      expect(previewStyle(style)).toBe(style);
-    },
-  );
+  it.each(['vega', 'luma', 'lyra', 'maia', 'mira', 'nova', 'rhea', 'sera'])('takes %s from PREVIEW_STYLE', (style) => {
+    expect(previewStyle(style)).toBe(style);
+  });
 
-  it('draws vega, the native default, with no EXPO_PUBLIC_STYLE', () => {
+  it('draws vega, the native default, with no PREVIEW_STYLE', () => {
     expect(previewStyle(undefined)).toBe('vega');
   });
 
   it('throws on a style the native registries are not built in', () => {
     expect(() => previewStyle('base-nova')).toThrow(
-      'EXPO_PUBLIC_STYLE is base-nova; the native preview draws vega, luma, lyra, maia, mira, nova, rhea, sera',
+      'PREVIEW_STYLE is base-nova; the native preview draws vega, luma, lyra, maia, mira, nova, rhea, sera',
     );
   });
 });
