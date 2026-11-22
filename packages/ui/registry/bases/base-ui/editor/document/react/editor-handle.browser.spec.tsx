@@ -79,4 +79,29 @@ describe('the block handle of the document editor', () => {
     await userEvent.hover(block);
     expect(handles.plus.stopAnimation).toHaveBeenCalledTimes(1);
   });
+
+  it('keeps the handle and the plus shown while the pointer crosses onto them, with their cursors', async () => {
+    const { handle } = await mountWithHandle();
+    const plus = () => document.querySelector<HTMLElement>('[data-editor-add]');
+    // The element under the pointer at a control's centre, which is the icon inside it, not the control.
+    const cursorAt = (control: HTMLElement) => {
+      const rect = control.getBoundingClientRect();
+      const under = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return under ? getComputedStyle(under).cursor : null;
+    };
+
+    await userEvent.hover(handle);
+    expect(handle.classList.contains('hide')).toBe(false);
+    expect(plus()).not.toBeNull();
+    expect(cursorAt(handle)).toBe('grab');
+
+    await userEvent.hover(plus()!);
+    expect(handle.classList.contains('hide')).toBe(false);
+    expect(plus()).not.toBeNull();
+    expect(cursorAt(plus()!)).toBe('pointer');
+
+    await userEvent.hover(handle);
+    expect(handle.classList.contains('hide')).toBe(false);
+    expect(plus()).not.toBeNull();
+  });
 });
