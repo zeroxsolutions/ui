@@ -60,11 +60,11 @@ shows its preview, its source and its API.
 
 ## Packages
 
-| Package                                                 | What it is                                                                                    |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| [`@zeroxsolutions/icons`](packages/icons)               | Inline-SVG React icons: brand marks and file-type icons, one import path per icon             |
-| [`@zeroxsolutions/fluent-emoji`](packages/fluent-emoji) | Microsoft Fluent Emoji as a React component, with the Unicode catalog and self-hosted artwork |
-| [`@zeroxsolutions/editor-core`](packages/editor-core)   | A headless, block-based rich-text editing engine with no React dependency                     |
+| Package                                                 | What it is                                                                                                                             |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@zeroxsolutions/icons`](packages/icons)               | Inline-SVG React icons: brand marks and file-type icons, one import path per icon                                                      |
+| [`@zeroxsolutions/fluent-emoji`](packages/fluent-emoji) | Microsoft Fluent Emoji as a React component, with the Unicode catalog and self-hosted artwork                                          |
+| [`@zeroxsolutions/editor-core`](packages/editor-core)   | A headless, block-based rich-text editing engine with no React dependency, its message templates and its email and SMS editor profiles |
 
 ```bash
 pnpm add @zeroxsolutions/icons
