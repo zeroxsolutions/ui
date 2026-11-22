@@ -2,14 +2,15 @@ import { MinusIcon } from '@/registry/bases/base-ui/icons/lucide/minus-icon';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { NodeSpec, NodeViewProps, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
+import { DEFAULT_PROFILE_MESSAGES } from '../../messages';
 import { blockClasses, emailSpec, type EmailBlockStyle } from './block-style';
 
 export const emailDividerSlashItem: SlashItem = {
   id: 'email-divider',
-  title: 'Divider',
-  description: 'A rule between two parts',
+  title: DEFAULT_PROFILE_MESSAGES.blocks.divider.title,
+  description: DEFAULT_PROFILE_MESSAGES.blocks.divider.description,
   icon: MinusIcon,
-  group: 'Email',
+  group: DEFAULT_PROFILE_MESSAGES.blockGroup,
   keywords: ['divider', 'rule', 'separator', 'hr'],
   command: 'insertEmailBlock',
   args: { kind: 'divider' },

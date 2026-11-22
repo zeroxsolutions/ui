@@ -2,14 +2,15 @@ import type { ReactNode } from 'react';
 import { CodeIcon } from '@/registry/bases/base-ui/icons/lucide/code-icon';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { NodeSpec, NodeViewProps, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
+import { DEFAULT_PROFILE_MESSAGES } from '../../messages';
 import { blockClasses, emailSpec, type EmailBlockStyle } from './block-style';
 
 export const emailCodeSlashItem: SlashItem = {
   id: 'email-code',
-  title: 'Code',
-  description: 'Text set in a fixed-width font',
+  title: DEFAULT_PROFILE_MESSAGES.blocks.code.title,
+  description: DEFAULT_PROFILE_MESSAGES.blocks.code.description,
   icon: CodeIcon,
-  group: 'Email',
+  group: DEFAULT_PROFILE_MESSAGES.blockGroup,
   keywords: ['code', 'monospace', 'otp'],
   command: 'insertEmailBlock',
   args: { kind: 'code' },

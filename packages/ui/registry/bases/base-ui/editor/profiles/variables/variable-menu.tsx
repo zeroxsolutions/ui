@@ -12,16 +12,24 @@ import {
 } from '@/registry/bases/base-ui/ui/combobox';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
+import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { insertVariable, matchesVariable, variableIcon, variableLabel } from './variable';
 
 export interface VariableMenuProps {
   editor: IEditor;
   declarations: readonly VariableDeclaration[];
+  /** Its words; the English when absent. */
+  messages?: ProfileEditorMessages;
   className?: string;
 }
 
 /** The toolbar's "Variable" picker: a filterable list of the declarations, each inserted at the caret. */
-export function VariableMenu({ editor, declarations, className }: VariableMenuProps) {
+export function VariableMenu({
+  editor,
+  declarations,
+  messages = DEFAULT_PROFILE_MESSAGES,
+  className,
+}: VariableMenuProps) {
   return (
     <Combobox
       items={declarations as VariableDeclaration[]}
@@ -37,11 +45,11 @@ export function VariableMenu({ editor, declarations, className }: VariableMenuPr
       filter={(declaration: VariableDeclaration, query: string) => matchesVariable(declaration, query)}
     >
       <ComboboxTrigger data-slot="variable-menu" render={<Button variant="ghost" size="sm" className={className} />}>
-        Variable
+        {messages.variable}
       </ComboboxTrigger>
       <ComboboxContent className="w-64">
-        <ComboboxInput showTrigger={false} placeholder="Find a variable" aria-label="Find a variable" />
-        <ComboboxEmpty>No variables found</ComboboxEmpty>
+        <ComboboxInput showTrigger={false} placeholder={messages.findVariable} aria-label={messages.findVariable} />
+        <ComboboxEmpty>{messages.noVariables}</ComboboxEmpty>
         <ComboboxList>
           {(declaration: VariableDeclaration) => (
             <ComboboxItem key={declaration.name} value={declaration}>

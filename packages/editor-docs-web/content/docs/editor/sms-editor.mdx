@@ -82,7 +82,7 @@ import { SmsEditor } from '@/components/editor/profiles/sms/sms-editor';
 const profile = smsProfile({ variables: [{ name: 'code', type: 'string', label: 'Code', sampleValue: '482913' }] });
 
 function OtpMessage({ body, save }: { body: string; save: (body: string) => void }) {
-  return <SmsEditor profile={profile} value={body} onChange={save} />;
+  return <SmsEditor label="Message" profile={profile} value={body} onChange={save} />;
 }
 ```
 
@@ -96,11 +96,28 @@ The body is plain text with no block and no mark; the only structure in it is a 
 | ------------ | -------------------------------------- | ------- |
 | `profile`    | `EditorProfile`                        | -       |
 | `value`      | `string`                               | -       |
+| `label`      | `string`                               | -       |
+| `messages`   | `Partial<ProfileEditorMessages>`       | -       |
+| `readOnly`   | `boolean`                              | `false` |
 | `className`  | `string`                               | -       |
 | `onChange`   | `(body: string) => void`               | -       |
 | `onBlur`     | `() => void`                           | -       |
 | `onValidate` | `(problems: ProfileProblem[]) => void` | -       |
 | `onReady`    | `(editor: IEditor) => void`            | -       |
+
+`label` is the editable surface's accessible name. `readOnly` shows the body, its problems and its cost with nothing that changes it: typing is refused and the variable menu is not drawn.
+
+`messages` words every string the editor draws, as the [email editor](/docs/editor/email-editor) does; a key it leaves out stays English. Build it once per locale, outside the render or in a memo, since a new object rebuilds the menus' words. The meter reads `smsMeter`, which takes the units, the limit, the encoding (`gsm7` or `ucs2`), the segments and the profile's `maxSegments`:
+
+```tsx
+const vi: Partial<ProfileEditorMessages> = {
+  smsMeter: ({ units, limit, segments, maxSegments }) =>
+    maxSegments > 1 ? `${units}/${limit} ky tu - ${segments}/${maxSegments} tin` : `${units}/${limit} ky tu`,
+  noVariables: 'Khong co bien nao',
+};
+
+<SmsEditor label="Tin nhan" messages={vi} profile={profile} value={body} onChange={save} />;
+```
 
 `smsProfile` takes `variables` and `maxSegments`.
 

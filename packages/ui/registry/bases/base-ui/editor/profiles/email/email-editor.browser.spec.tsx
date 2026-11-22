@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { userEvent } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import {
   emailProfile,
@@ -26,7 +26,7 @@ import {
   type EmailPreviewProps,
   type EmailPreviewRenderer,
 } from './email-editor';
-import { problemMessage, RENDER_PROBLEM_MESSAGES } from '../problem-messages';
+import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 
 const declared: VariableDeclaration[] = [
   { name: 'name', type: 'string', label: 'Name', sampleValue: 'Lan' },
@@ -89,10 +89,14 @@ interface Probe {
   adorn(adornment: (id: string | null, key: string) => ReactNode): void;
   /** Hands the editor another profile, as a host whose declarations changed does. */
   declare(profile: EditorProfile): void;
+  /** Turns read-only on or off, as a host opening a draft does. */
+  lock(readOnly: boolean): void;
 }
 
 interface HarnessProps {
   profile: EditorProfile;
+  messages?: Partial<ProfileEditorMessages>;
+  readOnly?: boolean;
   required?: readonly string[];
   structure?: 'free' | 'locked';
   preview?: { renderer: EmailPreviewRenderer; input: EmailPreviewInput };
@@ -102,10 +106,20 @@ interface HarnessProps {
 }
 
 /** A host that stores what the editor reports and hands it back as the value, as travel's rows do. */
-function Host({ initial, probe, renderBlockAdornment, profile: first, preview, ...props }: HarnessProps) {
+function Host({
+  initial,
+  probe,
+  renderBlockAdornment,
+  profile: first,
+  preview,
+  readOnly: locked,
+  ...props
+}: HarnessProps) {
   const [value, setValue] = useState(initial);
   const [current, setProfile] = useState(first);
   probe.declare = setProfile;
+  const [readOnly, setReadOnly] = useState(locked);
+  probe.lock = setReadOnly;
   const [adornment, setAdornment] = useState(() => renderBlockAdornment);
   probe.load = setValue;
   probe.adorn = (next) => setAdornment(() => next);
@@ -115,6 +129,8 @@ function Host({ initial, probe, renderBlockAdornment, profile: first, preview, .
       <EmailEditor
         {...props}
         {...previewProps}
+        label="Body"
+        readOnly={readOnly}
         profile={current}
         value={value}
         renderBlockAdornment={adornment}
@@ -143,6 +159,7 @@ async function mount(
     load: () => {},
     adorn: () => {},
     declare: () => {},
+    lock: () => {},
   };
   await render(<Host profile={profile} {...props} initial={initial} probe={probe} />);
   await vi.waitFor(() => {
@@ -248,7 +265,7 @@ describe('EmailEditor', () => {
     await caretAfter('Hello');
     await userEvent.keyboard('{Shift>}{Home}{/Shift}{Backspace}');
 
-    const message = problemMessage({ kind: 'text-empty', block: 'p1', field: 'text' });
+    const message = DEFAULT_PROFILE_MESSAGES.problem({ kind: 'text-empty', block: 'p1', field: 'text' });
     const marker = await vi.waitFor(() => find('[data-slot=email-problem-marker]'), { timeout: 1000 });
     const decorated = find('[contenteditable=true] [data-problem]');
     expect(document.getElementById(decorated.getAttribute('aria-describedby') ?? '')?.textContent).toBe(message);
@@ -274,7 +291,7 @@ describe('EmailEditor', () => {
 
     await userEvent.keyboard('{F8}');
     expect(document.activeElement).toBe(markers[0]);
-    const empty = problemMessage({ kind: 'text-empty', block: 'p2' });
+    const empty = DEFAULT_PROFILE_MESSAGES.problem({ kind: 'text-empty', block: 'p2' });
     await vi.waitFor(() => expect(find('[data-slot=tooltip-content]').textContent).toBe(empty));
     await userEvent.keyboard('{F8}');
     expect(document.activeElement).toBe(markers[1]);
@@ -395,7 +412,7 @@ describe('EmailEditor', () => {
     expect(expected.problems.length).toBeGreaterThan(0);
     // In words, at the place of its block in the document: the columns, Left, then Right.
     expect(find('[data-slot=email-preview-problems]').textContent).toContain(
-      `${RENDER_PROBLEM_MESSAGES['variable-missing']}: {{nobody}} (block 3)`,
+      DEFAULT_PROFILE_MESSAGES.renderProblem({ kind: 'variable-missing', name: 'nobody', blockId: 'x' }, 3),
     );
     expect(find('[data-slot=email-preview-problems]').textContent).not.toContain('variable-missing');
   });
@@ -412,7 +429,12 @@ describe('EmailEditor', () => {
     const errors = vi.spyOn(console, 'error');
     await mount([paragraph('Hello', 'p1')], { preview: { renderer, input } });
 
-    const line = `${RENDER_PROBLEM_MESSAGES['variable-missing']}: {{unsub}} (in the footer)`;
+    const line = DEFAULT_PROFILE_MESSAGES.renderProblem({
+      kind: 'variable-missing',
+      name: 'unsub',
+      blockId: 'f1',
+      region: 'footer',
+    });
     await vi.waitFor(() => {
       const lines = [...find('[data-slot=email-preview-problems]').querySelectorAll('li')].map((li) => li.textContent);
       expect(lines).toEqual([line, line]);
@@ -428,6 +450,7 @@ describe('EmailEditor', () => {
       const [, setProblems] = useState<ProfileProblem[]>([]);
       return (
         <EmailEditor
+          label="Body"
           profile={emailProfile({ variables: declared })}
           value={[paragraph('', 'p1')]}
           renderer={renderer}
@@ -463,5 +486,72 @@ describe('EmailEditor', () => {
     await userEvent.keyboard('!');
 
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'He!llo' }));
+  });
+
+  it("draws a problem in the host's words", async () => {
+    await mount([paragraph('', 'p1')], { messages: { problem: () => 'Khoi trong' } });
+
+    const marker = await vi.waitFor(() => find('[data-slot=email-problem-marker]'));
+    expect(document.getElementById(marker.getAttribute('aria-describedby') ?? '')?.textContent).toBe('Khoi trong');
+  });
+
+  it("names the toolbar's controls and the slash menu's blocks in the host's words", async () => {
+    await mount([paragraph('Hello', 'p1')], {
+      messages: {
+        bold: 'In dam',
+        blocks: { ...DEFAULT_PROFILE_MESSAGES.blocks, divider: { title: 'Duong ke', description: 'Mot duong ke' } },
+      },
+    });
+    await expect.element(page.getByRole('button', { name: 'In dam' })).toBeInTheDocument();
+    await caretAfter('Hello');
+    await userEvent.keyboard('{Enter}/');
+
+    await vi.waitFor(() => expect(find('[data-slot=slash-menu]').textContent).toContain('Duong ke'));
+  });
+
+  it('is named by its label', async () => {
+    await mount([paragraph('Hello', 'p1')]);
+
+    await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeInTheDocument();
+  });
+
+  it("unlocks and locks a button's label and link as read-only turns off and on", async () => {
+    const button: EditorEmailBlock = {
+      id: 'b1',
+      key: 'b1',
+      type: 'button',
+      attributes: {},
+      content: { label: 'Reset', href: '{{resetUrl}}' },
+    };
+    const probe = await mount([button], { readOnly: true });
+    const field = page.getByRole('textbox', { name: 'Button label' });
+    const picker = () => find('[data-slot=url-variable-picker][data-label="Button link"]');
+    await expect.element(field).toHaveAttribute('readonly');
+    await vi.waitFor(() => expect(picker()).toBeDisabled());
+
+    probe.lock(false);
+    await expect.element(field).not.toHaveAttribute('readonly');
+    await vi.waitFor(() => expect(picker()).toBeEnabled());
+    await userEvent.type(field, ' now');
+    await vi.waitFor(() =>
+      expect(last(probe.reported)?.[0].content).toEqual({ label: 'Reset now', href: '{{resetUrl}}' }),
+    );
+
+    probe.lock(true);
+    await expect.element(field).toHaveAttribute('readonly');
+    await vi.waitFor(() => expect(picker()).toBeDisabled());
+  });
+
+  it('refuses typing and opens no block menu when read-only', async () => {
+    const probe = await mount([paragraph('Hello', 'p1')], { readOnly: true });
+    await userEvent.type(page.getByRole('textbox', { name: 'Body' }), ' there');
+    await userEvent.keyboard('/');
+
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(probe.reported).toEqual([]);
+    expect(probe.editor.getText()).toBe('Hello');
+    expect(document.querySelector('[data-slot=email-block-menu]')).toBeNull();
+    expect(document.querySelector('[data-slot=slash-menu]')).toBeNull();
+    expect(document.querySelector('[data-slot=editor-toolbar]')).toBeNull();
   });
 });

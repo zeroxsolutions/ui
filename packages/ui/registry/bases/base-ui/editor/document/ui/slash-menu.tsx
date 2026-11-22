@@ -33,9 +33,16 @@ export interface SlashMenuProps {
   /** The inline ghost shown right after `/` on an empty query (Notion's
    *  `/<placeholder>`). Defaults to `Type to search`. */
   placeholder?: string;
+  /** What the menu says when no item matches the query. Defaults to `No matching blocks`. */
+  emptyText?: string;
 }
 
-export function SlashMenu({ editor, items, placeholder = 'Type to search' }: SlashMenuProps) {
+export function SlashMenu({
+  editor,
+  items,
+  placeholder = 'Type to search',
+  emptyText = 'No matching blocks',
+}: SlashMenuProps) {
   const [active, setActive] = useState<TriggerQuery | null>(null);
   const [point, setPoint] = useState<CaretRect | null>(null);
   const [index, setIndex] = useState(0);
@@ -199,7 +206,7 @@ export function SlashMenu({ editor, items, placeholder = 'Type to search' }: Sla
           <div ref={listRef} className="p-1">
             {ordered.length === 0 ? (
               <Empty className="min-h-0 gap-1 border-0 p-6">
-                <EmptyDescription>No matching blocks</EmptyDescription>
+                <EmptyDescription>{emptyText}</EmptyDescription>
               </Empty>
             ) : (
               groups.map(([heading, groupItems]) => (

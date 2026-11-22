@@ -4,9 +4,19 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/bases/base-u
 
 /**
  * The button that shows a problem's messages on hover and on focus, and describes the marked text by the same
- * messages. `slot` is the profile's own `data-slot`, which its F8 handler looks for.
+ * messages. `slot` is the profile's own `data-slot`, which its F8 handler looks for; `label` is the button's name.
  */
-export function ProblemMarker({ id, messages, slot }: { id: string; messages: readonly string[]; slot: string }) {
+export function ProblemMarker({
+  id,
+  messages,
+  slot,
+  label,
+}: {
+  id: string;
+  messages: readonly string[];
+  slot: string;
+  label: string;
+}) {
   const text = messages.join('. ');
   return (
     <>
@@ -19,7 +29,7 @@ export function ProblemMarker({ id, messages, slot }: { id: string; messages: re
               size="icon-xs"
               data-slot={slot}
               data-mark-id={id}
-              aria-label="Problem"
+              aria-label={label}
               aria-describedby={id}
               className="text-destructive"
             >

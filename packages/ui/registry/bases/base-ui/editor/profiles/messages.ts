@@ -1,0 +1,193 @@
+import type { EmailBlockKind, ProblemKind, ProfileProblem } from '@zeroxsolutions/editor-core/profiles/index';
+import type { RenderProblem, RenderProblemKind } from '@zeroxsolutions/editor-core/template/email/index';
+
+/** The attributes the email block menu sets. */
+export type EmailBlockAttribute = 'align' | 'spaceAfter' | 'tone' | 'width';
+
+/** The values those attributes take. */
+export type EmailBlockAttributeValue =
+  | 'left'
+  | 'center'
+  | 'right'
+  | 'small'
+  | 'medium'
+  | 'large'
+  | 'default'
+  | 'muted'
+  | 'inline'
+  | 'full';
+
+/** What the SMS meter reads: the units used of a segment's limit, and the segments against the profile's cap. */
+export interface SmsMeterReading {
+  units: number;
+  limit: number;
+  encoding: 'gsm7' | 'ucs2';
+  segments: number;
+  /** The most segments the profile allows; the default wording names the segments only when it is above one. */
+  maxSegments: number;
+}
+
+/**
+ * Every string the email and SMS editors draw. A host passes some of them as `messages`, in its own catalogue's
+ * words, and the rest stay `DEFAULT_PROFILE_MESSAGES`'s English.
+ */
+export interface ProfileEditorMessages {
+  /** What a problem says to the author, naming the variable it is about. */
+  problem(problem: ProfileProblem): string;
+  /** What a problem the renderer met says, and where it is; `block` is the place in the document of its block. */
+  renderProblem(problem: RenderProblem, block?: number): string;
+  /** The SMS meter's count. */
+  smsMeter(reading: SmsMeterReading): string;
+  /** The name of the button that shows a problem's messages. */
+  problemMarker: string;
+  /** The title of the email preview's frame. */
+  emailPreview: string;
+  /** The hint an empty email line shows. */
+  emptyLine: string;
+  /** The hint after a typed `/` before anything follows it. */
+  slashSearch: string;
+  /** What the slash menu says when nothing matches. */
+  slashEmpty: string;
+  /** The slash menu's heading over the email blocks. */
+  blockGroup: string;
+  /** Each email block's name and line in the slash menu. */
+  blocks: Readonly<Record<EmailBlockKind, { title: string; description: string }>>;
+  bold: string;
+  italic: string;
+  removeLink: string;
+  /** The toolbar's link picker. */
+  link: string;
+  findLink: string;
+  noLinkVariables: string;
+  /** The toolbar's variable picker. */
+  variable: string;
+  findVariable: string;
+  /** What a variable picker, or the `{{` menu, says when no declaration matches. */
+  noVariables: string;
+  blockActions: string;
+  attributes: Readonly<Record<EmailBlockAttribute, string>>;
+  attributeValues: Readonly<Record<EmailBlockAttributeValue, string>>;
+  /** The block menu's heading over the lane shares. */
+  columns: string;
+  delete: string;
+  /** Why Delete is disabled in locked structure. */
+  deleteLocked: string;
+  /** Why Delete is disabled on a block the host requires. */
+  deleteRequired: string;
+  buttonLabel: string;
+  buttonLink: string;
+  /** The heading over an HTML block's source. */
+  htmlBlock: string;
+  /** What a stored block of a type no feature reads shows in its place. */
+  unknownBlock(type: string): string;
+}
+
+const PROBLEMS: Readonly<Record<ProblemKind, string>> = {
+  'variable-undeclared': 'This variable is not declared',
+  'href-not-url-variable': 'The link must be one link variable',
+  'link-not-url-variable': 'A link can only point to a link variable',
+  'required-variable-not-printed': 'A required variable is not used',
+  'markup-malformed': 'The formatting is not closed',
+  'block-not-allowed': 'This block is not allowed here',
+  'unknown-block-type': 'This block is of an unknown type',
+  'block-nested-too-deep': 'Columns cannot hold columns',
+  'lanes-mismatch': 'The columns do not match their widths',
+  'text-empty': 'This block is empty',
+  'text-too-long': 'This text is too long',
+  'list-too-long': 'This list has too many items',
+  'too-many-blocks': 'The email has too many blocks',
+  'sms-segment-exceeded': 'The message is longer than allowed',
+  'sms-placeholder-malformed': 'A variable is not closed',
+};
+
+const RENDER_PROBLEMS: Readonly<Record<RenderProblemKind, string>> = {
+  'variable-missing': 'This variable has no sample value to preview',
+  'href-not-url-variable': 'The link must be one link variable',
+  'href-scheme-refused': 'The link is not a web or mail address',
+  'unknown-block-type': 'This block is of an unknown type',
+  'block-nested-too-deep': 'Columns cannot hold columns',
+};
+
+const ENCODINGS = { gsm7: 'GSM-7', ucs2: 'UCS-2' } as const;
+
+/** The editors' English, which a host's `messages` are merged over. */
+export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
+  problem(problem) {
+    const message = PROBLEMS[problem.kind];
+    return problem.name === undefined ? message : `${message}: {{${problem.name}}}`;
+  },
+  renderProblem(problem, block) {
+    const message = RENDER_PROBLEMS[problem.kind];
+    const named =
+      problem.name === undefined
+        ? ''
+        : problem.kind === 'unknown-block-type'
+          ? `: ${problem.name}`
+          : `: {{${problem.name}}}`;
+    const where =
+      problem.region !== undefined
+        ? ` (in the ${problem.region})`
+        : problem.blockId === null
+          ? ' (in the subject or preheader)'
+          : block !== undefined
+            ? ` (block ${block})`
+            : '';
+    return `${message}${named}${where}`;
+  },
+  smsMeter({ units, limit, encoding, segments, maxSegments }) {
+    const count = `${units} / ${limit} ${ENCODINGS[encoding]}`;
+    return maxSegments > 1 ? `${count} - ${segments} of ${maxSegments} segments` : count;
+  },
+  problemMarker: 'Problem',
+  emailPreview: 'Email preview',
+  emptyLine: "Type '/' for blocks",
+  slashSearch: 'Type to search',
+  slashEmpty: 'No matching blocks',
+  blockGroup: 'Email',
+  blocks: {
+    paragraph: { title: 'Text', description: 'A paragraph of text' },
+    button: { title: 'Button', description: 'A button that opens a link variable' },
+    code: { title: 'Code', description: 'Text set in a fixed-width font' },
+    list: { title: 'List', description: 'A bulleted list of short lines' },
+    callout: { title: 'Callout', description: 'Text set apart in a panel' },
+    divider: { title: 'Divider', description: 'A rule between two parts' },
+    columns: { title: 'Columns', description: 'Two to four lanes side by side' },
+    html: { title: 'HTML', description: 'Markup the email prints as written' },
+  },
+  bold: 'Bold',
+  italic: 'Italic',
+  removeLink: 'Remove link',
+  link: 'Link',
+  findLink: 'Find a link',
+  noLinkVariables: 'No link variables',
+  variable: 'Variable',
+  findVariable: 'Find a variable',
+  noVariables: 'No variables found',
+  blockActions: 'Block actions',
+  attributes: { align: 'Align', spaceAfter: 'Space after', tone: 'Tone', width: 'Width' },
+  attributeValues: {
+    left: 'Left',
+    center: 'Center',
+    right: 'Right',
+    small: 'Small',
+    medium: 'Medium',
+    large: 'Large',
+    default: 'Default',
+    muted: 'Muted',
+    inline: 'Fit the label',
+    full: 'Full width',
+  },
+  columns: 'Columns',
+  delete: 'Delete',
+  deleteLocked: 'The structure is locked: only text and variables change',
+  deleteRequired: 'This block is required',
+  buttonLabel: 'Button label',
+  buttonLink: 'Button link',
+  htmlBlock: 'HTML',
+  unknownBlock: (type) => `A ${type} block this editor cannot show`,
+};
+
+/** `messages` over the English, so a host passing some of them keeps the rest. */
+export function profileMessages(messages?: Partial<ProfileEditorMessages>): ProfileEditorMessages {
+  return messages ? { ...DEFAULT_PROFILE_MESSAGES, ...messages } : DEFAULT_PROFILE_MESSAGES;
+}

@@ -16,27 +16,9 @@ import {
 } from '@/registry/bases/base-ui/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import type { EmailBlockAttribute, EmailBlockAttributeValue, ProfileEditorMessages } from '../messages';
 import { EMAIL_BLOCK_ATTRIBUTES, emailBlockAt, type EmailBlockState } from './email-kit';
-
-const ATTRIBUTE_TITLES: Record<string, string> = {
-  align: 'Align',
-  spaceAfter: 'Space after',
-  tone: 'Tone',
-  width: 'Width',
-};
-
-const VALUE_TITLES: Record<string, string> = {
-  left: 'Left',
-  center: 'Center',
-  right: 'Right',
-  small: 'Small',
-  medium: 'Medium',
-  large: 'Large',
-  default: 'Default',
-  muted: 'Muted',
-  inline: 'Fit the label',
-  full: 'Full width',
-};
+import { messagesOf } from './kit-context';
 
 /** What an attribute reads as while the block does not set it: the house renderer's own default. */
 const DEFAULTS: Record<string, string> = {
@@ -58,9 +40,9 @@ function ratioChoices(current: readonly number[], maxLanes: number): number[][] 
   return choices.some((choice) => choice.join(':') === key) ? choices : [...choices, [...current]];
 }
 
-function deleteReason(block: EmailBlockState): string | null {
-  if (block.locked) return 'The structure is locked: only text and variables change';
-  if (block.required) return 'This block is required';
+function deleteReason(block: EmailBlockState, messages: ProfileEditorMessages): string | null {
+  if (block.locked) return messages.deleteLocked;
+  if (block.required) return messages.deleteRequired;
   return null;
 }
 
@@ -91,7 +73,8 @@ export function BlockAttributesMenu({ editor }: BlockAttributesMenuProps) {
   if (!block || !rect) return null;
 
   const attributes = Object.entries(EMAIL_BLOCK_ATTRIBUTES[block.type] ?? {});
-  const reason = deleteReason(block);
+  const messages = messagesOf(editor);
+  const reason = deleteReason(block, messages);
   const run = (command: string, args?: unknown) => {
     editor.run(command, args);
     editor.focus();
@@ -110,7 +93,7 @@ export function BlockAttributesMenu({ editor }: BlockAttributesMenuProps) {
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      aria-label="Block actions"
+                      aria-label={messages.blockActions}
                       className="text-muted-foreground size-6 opacity-60 hover:opacity-100"
                     >
                       <EllipsisVerticalIcon aria-hidden />
@@ -119,19 +102,19 @@ export function BlockAttributesMenu({ editor }: BlockAttributesMenuProps) {
                 />
               }
             />
-            <TooltipContent side="left">Block actions</TooltipContent>
+            <TooltipContent side="left">{messages.blockActions}</TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="start" side="left" className="w-56">
             {attributes.map(([name, values]) => (
               <DropdownMenuGroup key={name}>
-                <DropdownMenuLabel>{ATTRIBUTE_TITLES[name] ?? name}</DropdownMenuLabel>
+                <DropdownMenuLabel>{messages.attributes[name as EmailBlockAttribute] ?? name}</DropdownMenuLabel>
                 <DropdownMenuRadioGroup
                   value={(block.attrs[name] as string | null) ?? DEFAULTS[name]}
                   onValueChange={(value: string) => run('setBlockAttributes', { attrs: { [name]: value } })}
                 >
                   {values.map((value) => (
                     <DropdownMenuRadioItem key={value} value={value} disabled={block.locked} closeOnClick>
-                      {VALUE_TITLES[value] ?? value}
+                      {messages.attributeValues[value as EmailBlockAttributeValue] ?? value}
                     </DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
@@ -139,7 +122,7 @@ export function BlockAttributesMenu({ editor }: BlockAttributesMenuProps) {
             ))}
             {block.columns && (
               <DropdownMenuGroup>
-                <DropdownMenuLabel>Columns</DropdownMenuLabel>
+                <DropdownMenuLabel>{messages.columns}</DropdownMenuLabel>
                 <DropdownMenuRadioGroup
                   value={block.columns.ratio.join(':')}
                   onValueChange={(value: string) => run('setColumnsRatio', { ratio: value.split(':').map(Number) })}
@@ -166,7 +149,7 @@ export function BlockAttributesMenu({ editor }: BlockAttributesMenuProps) {
             >
               <Trash2Icon aria-hidden className="mt-0.5" />
               <span className="flex flex-col gap-0.5">
-                <span>Delete</span>
+                <span>{messages.delete}</span>
                 {reason && <span className="text-muted-foreground text-xs">{reason}</span>}
               </span>
             </DropdownMenuItem>

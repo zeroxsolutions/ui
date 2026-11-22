@@ -5,6 +5,7 @@ import {
   type ProseMirrorNode,
 } from '@zeroxsolutions/editor-core/document/advanced';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 
 export type EngineState = Editor['state'];
 
@@ -13,6 +14,8 @@ export interface KitContext {
   locked(): boolean;
   required(): readonly string[];
   maxLanes: number;
+  /** The words the kit's views and block menu draw, read each time one renders. */
+  messages(): ProfileEditorMessages;
 }
 
 // The kit's commands and views receive the facade; this is how they reach the engine and the options behind it.
@@ -23,6 +26,11 @@ export function contextOf(editor: IEditor): { engine: Editor; context: KitContex
     if (facadeFor(engine as unknown as EngineHandle) === editor) return { engine, context };
   }
   return undefined;
+}
+
+/** The words `editor`'s kit draws: its host's, or the English when it was not built from `emailKit`. */
+export function messagesOf(editor: IEditor): ProfileEditorMessages {
+  return contextOf(editor)?.context.messages() ?? DEFAULT_PROFILE_MESSAGES;
 }
 
 export interface Found {

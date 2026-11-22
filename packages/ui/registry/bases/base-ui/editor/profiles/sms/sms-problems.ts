@@ -5,7 +5,6 @@ import {
   type ProblemKind,
   type ProfileProblem,
 } from '@zeroxsolutions/editor-core/profiles/index';
-import { problemMessage } from '../problem-messages';
 
 /** The problems marked on one place of the body: a range of it, or the chips of one variable. */
 export interface SmsMark {
@@ -38,13 +37,15 @@ function overflowOffset(body: string, maxSegments: number): number {
 
 /**
  * The marks `problems` make on `body`, and the messages of the problems no place holds, such as a required
- * variable the body never prints. `idBase` keeps the element ids of two editors apart.
+ * variable the body never prints, each in the words `problemMessage` gives it. `idBase` keeps the element ids of
+ * two editors apart.
  */
 export function smsMarks(
   problems: readonly ProfileProblem[],
   body: string,
   profile: EditorProfile,
   idBase: string,
+  problemMessage: (problem: ProfileProblem) => string,
 ): { marks: SmsMark[]; unplaced: string[] } {
   const marks = new Map<string, SmsMark>();
   const unplaced: string[] = [];

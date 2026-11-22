@@ -3155,9 +3155,9 @@
           "target": "components/editor/profiles/problem-marker.tsx"
         },
         {
-          "path": "registry/bases/base-ui/editor/profiles/problem-messages.ts",
+          "path": "registry/bases/base-ui/editor/profiles/messages.ts",
           "type": "registry:component",
-          "target": "components/editor/profiles/problem-messages.ts"
+          "target": "components/editor/profiles/messages.ts"
         },
         {
           "path": "registry/bases/base-ui/editor/profiles/problem-navigation.ts",

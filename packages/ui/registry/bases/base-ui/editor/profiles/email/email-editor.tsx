@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { TooltipProvider } from '@/registry/bases/base-ui/ui/tooltip';
@@ -33,13 +33,13 @@ import { Editor } from '../../document/react/editor';
 import { BubbleMenu } from '../../document/ui/bubble-menu';
 import { EditorToolbar } from '../../document/ui/editor-toolbar';
 import { SlashMenu } from '../../document/ui/slash-menu';
-import { renderProblemMessage } from '../problem-messages';
+import { profileMessages, type ProfileEditorMessages } from '../messages';
 import { ProblemMarker } from '../problem-marker';
 import { caretNode, nextMarker, useFocusLeave } from '../problem-navigation';
 import { refreshVariables, variableFeature } from '../variables/variable';
 import { VariableMenu } from '../variables/variable-menu';
 import { BlockAttributesMenu } from './block-attributes-menu';
-import { emailKit } from './email-kit';
+import { emailKit, wordEmailItems } from './email-kit';
 import { carriesKey, contextOf } from './kit-context';
 import { LinkVariablePicker } from './url-variable-picker';
 import { problemDecorations, problemMarks, type ProblemMark } from './problem-decorations';
@@ -71,6 +71,16 @@ export type EmailEditorProps = EmailEditorBaseProps & EmailPreviewProps;
 interface EmailEditorBaseProps {
   profile: EditorProfile;
   value: EditorEmailBlock[];
+  /** The editable surface's accessible name. */
+  label: string;
+  /**
+   * The host's words for any string the editor draws; the rest stay English. Build it once per locale: a new
+   * object rebuilds the toolbar's and menus' items. A problem keeps the words it was marked with until the
+   * problems are read again, after the next edit.
+   */
+  messages?: Partial<ProfileEditorMessages>;
+  /** Shows the document and its problems with no way to change it: no typing, toolbar or block menu. */
+  readOnly?: boolean;
   /** Features of the host's own blocks, each with an email codec. Read once: a change needs a remount. */
   features?: EditorFeature[];
   /** The ids of the blocks the author may not remove. */
@@ -113,19 +123,22 @@ function withIds(blocks: readonly EditorEmailBlock[]): RenderEmailInput<unknown>
 interface Overlay {
   marks: readonly ProblemMark[];
   host(key: string): HTMLElement;
+  label: string;
 }
 
 const overlayKey = new PluginKey('emailEditorOverlay');
 
 /**
- * The problem decorations, and the row before each block where its markers and the host's adornment are drawn.
- * `read` is a getter so a new set of problems needs no new plugin; a transaction with this plugin's meta redraws.
+ * The problem decorations, the row before each block where its markers and the host's adornment are drawn, and
+ * the surface's accessible name. `read` is a getter so a new set of problems needs no new plugin; a transaction
+ * with this plugin's meta redraws.
  */
 function overlayFeature(read: () => Overlay): EditorFeature {
   let drawn: { doc: ProseMirrorNode; overlay: Overlay; set: DecorationSet } | null = null;
   const plugin = new Plugin({
     key: overlayKey,
     props: {
+      attributes: () => ({ 'aria-label': read().label }),
       decorations(state) {
         const overlay = read();
         if (drawn?.doc === state.doc && drawn.overlay === overlay) return drawn.set;
@@ -183,6 +196,9 @@ function sameValue(left: readonly EditorEmailBlock[], right: readonly EditorEmai
 export function EmailEditor({
   profile,
   value,
+  label,
+  messages,
+  readOnly = false,
   features: extra,
   required = [],
   structure = 'free',
@@ -196,8 +212,9 @@ export function EmailEditor({
   onReady,
 }: EmailEditorProps) {
   const idBase = useId();
-  const live = useRef({ profile, required, structure, renderer, previewInput, onChange, onValidate, onBlur });
-  live.current = { profile, required, structure, renderer, previewInput, onChange, onValidate, onBlur };
+  const text = useMemo(() => profileMessages(messages), [messages]);
+  const live = useRef({ profile, required, structure, renderer, previewInput, text, onChange, onValidate, onBlur });
+  live.current = { profile, required, structure, renderer, previewInput, text, onChange, onValidate, onBlur };
 
   const hosts = useRef(new Map<string, HTMLElement>());
   const host = useCallback((key: string) => {
@@ -212,7 +229,7 @@ export function EmailEditor({
     }
     return element;
   }, []);
-  const overlay = useRef<Overlay>({ marks: [], host });
+  const overlay = useRef<Overlay>({ marks: [], host, label });
 
   const [setup] = useState(() => {
     const codecs = (extra ?? []).flatMap((feature) => feature.codecs ?? []);
@@ -223,6 +240,7 @@ export function EmailEditor({
       variables,
       required: () => live.current.required,
       structure: () => live.current.structure,
+      messages: () => live.current.text,
     });
     const features = [...kit, overlayFeature(() => overlay.current)];
     return { codecs, variables, features, ui: collectUiContributions(features) };
@@ -253,15 +271,15 @@ export function EmailEditor({
       const problems = validate(exportBlocks(from), live.current.profile);
       if (validated.current !== null && sameBlockContent(validated.current, problems)) return;
       validated.current = problems;
-      const placed = problemMarks(problems, idBase);
-      overlay.current = { marks: placed.marks, host };
+      const placed = problemMarks(problems, idBase, live.current.text.problem);
+      overlay.current = { ...overlay.current, marks: placed.marks };
       setMarks(placed.marks);
       setUnplaced(placed.unplaced);
       const engine = contextOf(from)?.engine;
       engine?.view.dispatch(engine.state.tr.setMeta(overlayKey, true));
       live.current.onValidate?.(problems);
     },
-    [exportBlocks, host, idBase],
+    [exportBlocks, idBase],
   );
 
   const draw = useCallback(
@@ -280,7 +298,7 @@ export function EmailEditor({
       const rendered = render.render({ ...input, blocks: withIds(blocks), variables, variableTypes });
       const places = new Map(rowsOf(blocks).map((row, index) => [row.id ?? row.key, index + 1]));
       const problems = rendered.problems.map((problem) =>
-        renderProblemMessage(problem, problem.blockId === null ? undefined : places.get(problem.blockId)),
+        live.current.text.renderProblem(problem, problem.blockId === null ? undefined : places.get(problem.blockId)),
       );
       setPreview({ html: rendered.html, problems });
     },
@@ -372,6 +390,27 @@ export function EmailEditor({
     schedule(editor);
   }, [editor, profile, renderer, previewInput, schedule]);
 
+  // The engine reads the name off the overlay when it draws, which a new label alone does not cause.
+  useEffect(() => {
+    if (overlay.current.label === label) return;
+    overlay.current = { ...overlay.current, label };
+    const engine = editor && contextOf(editor)?.engine;
+    engine?.view.dispatch(engine.state.tr.setMeta(overlayKey, true));
+  }, [editor, label]);
+
+  const variables = useMemo(
+    () => ({ ...setup.variables.token, emptyText: text.noVariables }),
+    [setup, text.noVariables],
+  );
+  const items = useMemo(
+    () => ({
+      toolbar: wordEmailItems(setup.ui.toolbar, text),
+      slash: wordEmailItems(setup.ui.slash, text),
+      bubble: wordEmailItems(setup.ui.bubble, text),
+    }),
+    [setup, text],
+  );
+
   const focus = useFocusLeave(() => live.current.onBlur?.());
 
   // F8 and Shift+F8 reach the next and the previous problem, as in VS Code; Escape on one goes back to its block.
@@ -394,6 +433,7 @@ export function EmailEditor({
   };
 
   const locked = structure === 'locked';
+  const menus = editor !== null && !readOnly;
   const variablesOf = useCallback(() => live.current.profile.variables, []);
   const marksOf = (row: Row) => marks.filter((mark) => mark.block === (row.id ?? row.key));
 
@@ -406,31 +446,40 @@ export function EmailEditor({
         {...focus}
         onKeyDownCapture={keyDown}
       >
-        {editor && (
+        {menus && (
           <div className="flex flex-wrap items-center gap-1">
-            <EditorToolbar editor={editor} items={setup.ui.toolbar} />
-            <LinkVariablePicker editor={editor} declarations={variablesOf} />
-            <VariableMenu editor={editor} declarations={profile.variables} />
+            <EditorToolbar editor={editor} items={items.toolbar} />
+            <LinkVariablePicker editor={editor} declarations={variablesOf} messages={text} />
+            <VariableMenu editor={editor} declarations={profile.variables} messages={text} />
           </div>
         )}
         <Editor
           features={setup.features}
           content={initialContent}
+          editable={!readOnly}
           onReady={(ready) => {
             setEditor(ready);
             onReady?.(ready);
           }}
         />
-        {editor && <TriggerLayer editor={editor} triggers={[setup.variables.token]} />}
-        {editor && !locked && <SlashMenu editor={editor} items={setup.ui.slash} />}
-        {editor && <BubbleMenu editor={editor} items={setup.ui.bubble} container={root} />}
-        {editor && !locked && <BlockAttributesMenu key={required.join('\u0000')} editor={editor} />}
+        {menus && <TriggerLayer editor={editor} triggers={[variables]} />}
+        {menus && !locked && (
+          <SlashMenu editor={editor} items={items.slash} placeholder={text.slashSearch} emptyText={text.slashEmpty} />
+        )}
+        {menus && <BubbleMenu editor={editor} items={items.bubble} container={root} />}
+        {menus && !locked && <BlockAttributesMenu key={required.join('\u0000')} editor={editor} />}
         <TooltipProvider>
           {rows.map((row) => {
             return createPortal(
               <>
                 {marksOf(row).map((mark) => (
-                  <ProblemMarker key={mark.id} id={mark.id} messages={mark.messages} slot="email-problem-marker" />
+                  <ProblemMarker
+                    key={mark.id}
+                    id={mark.id}
+                    messages={mark.messages}
+                    slot="email-problem-marker"
+                    label={text.problemMarker}
+                  />
                 ))}
                 {renderBlockAdornment && (
                   <span data-slot="email-block-adornment" className="contents">
@@ -455,7 +504,7 @@ export function EmailEditor({
         <>
           <iframe
             data-slot="email-preview"
-            title="Email preview"
+            title={text.emailPreview}
             sandbox=""
             srcDoc={preview.html}
             className="cn-editor-block h-[480px] w-full border"
