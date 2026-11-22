@@ -1,7 +1,7 @@
 /**
  * The styles the preview draws, and the emitted sources of each, which Metro, Tailwind and the Expo
  * config read. One bundle holds every style: the web export takes the style from the page's address,
- * and a native update from `EXPO_PUBLIC_STYLE`, which Expo writes into the bundle.
+ * and a native update from `PREVIEW_STYLE`, which the app config writes into the update's manifest.
  */
 const { readFileSync } = require('node:fs');
 const { dirname, join } = require('node:path');
@@ -13,14 +13,14 @@ const PREVIEW_STYLES = ['vega', 'luma', 'lyra', 'maia', 'mira', 'nova', 'rhea', 
 const DEFAULT_STYLE = 'vega';
 
 /**
- * @param {string | undefined} value - `process.env.EXPO_PUBLIC_STYLE`; `vega` when unset
+ * @param {string | undefined} value - `process.env.PREVIEW_STYLE`; `vega` when unset
  * @returns {string} one of {@link PREVIEW_STYLES}
- * @throws {Error} `EXPO_PUBLIC_STYLE is <value>; the native preview draws vega, luma, ...` for any other value
+ * @throws {Error} `PREVIEW_STYLE is <value>; the native preview draws vega, luma, ...` for any other value
  */
 function previewStyle(value) {
   const style = value ?? DEFAULT_STYLE;
   if (!PREVIEW_STYLES.includes(style)) {
-    throw new Error(`EXPO_PUBLIC_STYLE is ${style}; the native preview draws ${PREVIEW_STYLES.join(', ')}`);
+    throw new Error(`PREVIEW_STYLE is ${style}; the native preview draws ${PREVIEW_STYLES.join(', ')}`);
   }
   return style;
 }

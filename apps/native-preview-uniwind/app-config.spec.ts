@@ -15,3 +15,24 @@ describe('the app config', () => {
     },
   );
 });
+
+describe('the style an update names', () => {
+  const previous = process.env.PREVIEW_STYLE;
+
+  afterEach(() => {
+    if (previous === undefined) delete process.env.PREVIEW_STYLE;
+    else process.env.PREVIEW_STYLE = previous;
+  });
+
+  it('is PREVIEW_STYLE, in the manifest every update of the one export carries', () => {
+    process.env.PREVIEW_STYLE = 'lyra';
+
+    expect(getConfig(__dirname).exp.extra?.previewStyle).toBe('lyra');
+  });
+
+  it('throws at publish time on a style the native registries are not built in', () => {
+    process.env.PREVIEW_STYLE = 'base-nova';
+
+    expect(() => getConfig(__dirname)).toThrow('PREVIEW_STYLE is base-nova');
+  });
+});

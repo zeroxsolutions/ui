@@ -1,6 +1,7 @@
 import '../../global.css';
 
 import { Preview, type ColorScheme } from '@zeroxsolutions/native-ui/preview';
+import Constants from 'expo-constants';
 import type { ReactNode } from 'react';
 import { Uniwind } from 'uniwind';
 
@@ -11,7 +12,7 @@ function applyColorScheme(scheme: ColorScheme): void {
 
 /** The preview, drawn with Uniwind. */
 function App(): ReactNode {
-  return <Preview bundledStyle={process.env.EXPO_PUBLIC_STYLE} applyColorScheme={applyColorScheme} />;
+  return <Preview bundledStyle={Constants.expoConfig?.extra?.previewStyle} applyColorScheme={applyColorScheme} />;
 }
 
 export { App };

@@ -47,6 +47,7 @@ catalogs:
   expo:
     "expo": "58.0.16"
     "expo-clipboard": "58.0.4"
+    "expo-constants": "~58.0.12"
     "react-native": "0.88.0"
     "@expo/metro-runtime": "58.0.14"
     "expo-font": "58.0.12"

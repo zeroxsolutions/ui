@@ -1,6 +1,7 @@
 import '@/global.css';
 
 import { Preview, type ColorScheme } from '@zeroxsolutions/native-ui/preview';
+import Constants from 'expo-constants';
 import { colorScheme } from 'nativewind';
 import type { ReactNode } from 'react';
 
@@ -14,7 +15,7 @@ function applyColorScheme(scheme: ColorScheme): void {
 
 /** The preview, drawn with NativeWind. */
 function App(): ReactNode {
-  return <Preview bundledStyle={process.env.EXPO_PUBLIC_STYLE} applyColorScheme={applyColorScheme} />;
+  return <Preview bundledStyle={Constants.expoConfig?.extra?.previewStyle} applyColorScheme={applyColorScheme} />;
 }
 
 export { App };

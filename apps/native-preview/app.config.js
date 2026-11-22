@@ -1,11 +1,13 @@
 const { previewStyle } = require('./preview-style');
 
-// A native update is bundled in the one style the app reads from EXPO_PUBLIC_STYLE, so a value no
-// style has fails the export here rather than in Expo Go.
-previewStyle(process.env.EXPO_PUBLIC_STYLE);
-
-/** Serves the web export under the site's `/native-preview/`, where its assets load from. */
+/**
+ * Serves the web export under the site's `/native-preview/`, where its assets load from, and names the style a
+ * native update draws: eas-cli writes this config into each update's manifest when it publishes, so one
+ * export serves every style's update, each published with its own PREVIEW_STYLE. A value no style has
+ * fails the publish here rather than in Expo Go.
+ */
 module.exports = ({ config }) => ({
   ...config,
   experiments: { ...config.experiments, baseUrl: '/native-preview' },
+  extra: { ...config.extra, previewStyle: previewStyle(process.env.PREVIEW_STYLE) },
 });

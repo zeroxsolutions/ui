@@ -172,9 +172,9 @@ function useOverlayShown(): boolean {
 
 interface PreviewProps {
   /**
-   * `process.env.EXPO_PUBLIC_STYLE`, the style a native update was bundled in, which Expo writes only
-   * into the app's own code. On native the preview draws it, `vega` when it is unset; on web it draws
-   * the page's `?style=`, `vega` without one.
+   * The style a native update was published in, which the app reads from the update's manifest. On
+   * native the preview draws it, `vega` when it is unset; on web it draws the page's `?style=`, `vega`
+   * without one.
    */
   bundledStyle: string | undefined;
   /**

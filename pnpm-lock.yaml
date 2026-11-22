@@ -133,6 +133,9 @@ catalogs:
     expo-clipboard:
       specifier: 58.0.4
       version: 58.0.4
+    expo-constants:
+      specifier: ~58.0.12
+      version: 58.0.15
     expo-font:
       specifier: 58.0.12
       version: 58.0.12
@@ -521,6 +524,9 @@ importers:
       expo-clipboard:
         specifier: catalog:expo
         version: 58.0.4(expo@58.0.16)(react-native@0.88.0(@babel/core@7.29.7)(@react-native/metro-config@0.88.0(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)
+      expo-constants:
+        specifier: catalog:expo
+        version: 58.0.15(expo@58.0.16)(react-native@0.88.0(@babel/core@7.29.7)(@react-native/metro-config@0.88.0(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.1))(typescript@6.0.3)
       expo-font:
         specifier: catalog:expo
         version: 58.0.12(expo@58.0.16)(react-native@0.88.0(@babel/core@7.29.7)(@react-native/metro-config@0.88.0(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)
@@ -732,6 +738,9 @@ importers:
       expo-clipboard:
         specifier: catalog:expo
         version: 58.0.4(expo@58.0.16)(react-native@0.88.0(@babel/core@7.29.7)(@react-native/metro-config@0.88.0(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)
+      expo-constants:
+        specifier: catalog:expo
+        version: 58.0.15(expo@58.0.16)(react-native@0.88.0(@babel/core@7.29.7)(@react-native/metro-config@0.88.0(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.1))(typescript@6.0.3)
       expo-font:
         specifier: catalog:expo
         version: 58.0.12(expo@58.0.16)(react-native@0.88.0(@babel/core@7.29.7)(@react-native/metro-config@0.88.0(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)
@@ -8714,7 +8723,7 @@ packages:
 
   bunyan@1.8.15:
     resolution: {integrity: sha512-0tECWShh6wUysgucJcBAoYegf3JJoZWibxdqhTm7OHPeT42qdjkZ29QCMcKwbgU1kiH+auSIasNRXMLWXafXig==}
-    engines: {'0': node >=0.10.0}
+    engines: {node: '>=0.10.0'}
     hasBin: true
 
   byte-counter@0.1.0:
