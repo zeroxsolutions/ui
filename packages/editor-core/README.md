@@ -21,9 +21,8 @@ passes its own renderer (or omits it and gets no React node views).
 
 ## Install
 
-```jsonc
-// package.json
-"dependencies": { "@zeroxsolutions/editor-core": "workspace:*" }
+```bash
+pnpm add @zeroxsolutions/editor-core
 ```
 
 No `react` peer - the core is **framework-free** (zero `react` runtime, types, and
@@ -172,6 +171,10 @@ tree-shaken / lazy-loaded) on its own. **Import each area through its barrel, `<
 - `template/email/index` - the email templates; see "Message templates" below.
 - `template/email/testing/index` - the email templates' test helpers; see "Message templates" below.
 - `template/sms/index` - the SMS templates; see "Message templates" below.
+- `profiles/index` - the email and SMS editor profiles, their validation and their codecs, with no
+  engine; see "Editor profiles" below.
+- `profiles/editor/index` - `blockIdentity`, the editor feature that keeps a host's block ids; see
+  "Editor profiles" below.
 
 Released with Nx Release + SemVer from conventional commits.
 
@@ -205,3 +208,48 @@ import { renderSms } from '@zeroxsolutions/editor-core/template/sms/index';
 
 The folder imports nothing outside itself, `zod` and `get-east-asian-width`. The code came from
 zeroxsolutions `packages/template` at commit `5bb8d693`.
+
+## Editor profiles - `profiles/`
+
+A profile says what one kind of message may hold: the block kinds an author may add, the variables the
+product declares, and the bounds the email renderer enforces. The email and SMS editors in the ui
+registry (`@zui/email-editor`, `@zui/sms-editor`) edit against one, and a server checks a stored body
+against the same profile before it sends.
+
+- `profiles/index` loads no editing engine, so a server or a worker imports it alone:
+  - `emailProfile({ allow?, variables?, bounds?, extraKinds? })` and `smsProfile({ variables?, maxSegments? })`
+    build a profile. A bound may be tightened, never set above the renderer's own limit, and a
+    variable name is 1 to 64 word characters, declared once; both throw an `EditorError` otherwise.
+  - `validate(value, profile)` lists the problems of email blocks or an SMS body, in document order.
+    Each `ProfileProblem` names its `kind` (`variable-undeclared`, `block-not-allowed`, `text-too-long`,
+    `sms-segment-exceeded` and the rest of `ProblemKind`) and the block's id, or its key when the id is
+    null. The editor never refuses an edit for a problem; it shows it.
+  - `toEmailBlocks(doc)` and `fromEmailBlocks(blocks)` convert between the editor's document and the
+    email renderer's blocks. A block nobody edited exports its stored text verbatim.
+  - `toSmsText(doc)`, `fromSmsText(body)` and `measureSmsBody(body)` (units, limit, encoding, segments)
+    do the same for an SMS body.
+  - `EMAIL_KINDS`, `MAIL_LAYOUT_KINDS` (what a header or footer region may hold) and `emailNodeSpecs`.
+- `profiles/editor/index` exports `blockIdentity({ required?, structure?, types? })`, a feature for
+  `createEditor().use(...)`. It gives every top-level and lane block a `key` unique in the document and
+  keeps the host's `id` on it across edits and moves. A pasted, duplicated or split-off block gets
+  `id: null`, and ids never ride the clipboard. `required` blocks cannot be removed, and
+  `structure: 'locked'` allows text, variable and mark edits only; a content load through the facade's
+  `setContent` passes both. It adds the commands `assignBlockIds({ ids })` (key to id, run after the
+  host saves) and `deleteBlock`.
+
+```ts
+import { emailProfile, toEmailBlocks, validate } from '@zeroxsolutions/editor-core/profiles/index';
+
+const profile = emailProfile({
+  allow: ['paragraph', 'button', 'list', 'divider'],
+  variables: [{ name: 'firstName', type: 'string', required: true }],
+  bounds: { blocks: 20 },
+});
+
+const problems = validate(toEmailBlocks(editor.getJSON()), profile);
+if (problems.length > 0) refuse(problems);
+```
+
+The editors themselves, their menus, the variable chips and the preview are registry items; their
+pages are [Email editor](https://ui.zeroxsolutions.com/docs/editor/email-editor) and
+[SMS editor](https://ui.zeroxsolutions.com/docs/editor/sms-editor).
