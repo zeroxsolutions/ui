@@ -47,8 +47,9 @@ function IconGridTile({ name, glyph, picked, onPick }: IconGridTileProps) {
       ref={tile}
       type="button"
       data-slot="icon-grid-tile"
+      title={glyph}
       aria-current={picked ? 'true' : undefined}
-      className="hover:bg-muted aria-[current=true]:bg-muted aria-[current=true]:border-foreground focus-visible:ring-ring/50 flex w-full flex-col items-center gap-2 rounded-lg border px-2 py-4 outline-none focus-visible:ring-3"
+      className="hover:bg-muted aria-[current=true]:bg-muted aria-[current=true]:border-foreground focus-visible:ring-ring/50 flex h-full w-full flex-col items-center gap-2 rounded-lg border px-2 py-4 outline-none focus-visible:ring-3"
       onClick={() => onPick(name)}
       {...handlers}
     >
@@ -59,7 +60,7 @@ function IconGridTile({ name, glyph, picked, onPick }: IconGridTileProps) {
       ) : (
         placeholder
       )}
-      <span className="text-muted-foreground w-full font-mono text-xs break-all">{glyph}</span>
+      <span className="text-muted-foreground line-clamp-2 h-8 w-full font-mono text-xs wrap-break-word">{glyph}</span>
     </button>
   );
 }
@@ -71,9 +72,9 @@ function IconGrid({ sets, query, picked, onPick }: IconGridProps): ReactNode {
       {filterIconSets(sets, query).map(({ set, icons }) => (
         <section key={set} aria-label={set} className="flex flex-col gap-3">
           <h2 className="font-mono text-sm font-medium">{set}</h2>
-          <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+          <ul className="grid auto-rows-fr grid-cols-2 gap-2 sm:grid-cols-4">
             {icons.map(({ name, glyph }) => (
-              <li key={name}>
+              <li key={name} className="flex">
                 <IconGridTile name={name} glyph={glyph} picked={name === picked} onPick={onPick} />
               </li>
             ))}
