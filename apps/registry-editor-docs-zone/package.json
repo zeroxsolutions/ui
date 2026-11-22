@@ -29,14 +29,26 @@
     "tags": ["context:editor-docs"],
     "targets": {
       "dev": {
-        "dependsOn": ["^build", "@zeroxsolutions/ui:examples-index", "fumadocs-generate"]
+        "dependsOn": ["^build", "@zeroxsolutions/ui:build-registry", "@zeroxsolutions/ui:examples-index", "fumadocs-generate"]
       },
       "build": {
-        "dependsOn": ["^build", "^typecheck", "@zeroxsolutions/ui:examples-index", "fumadocs-generate"]
+        "dependsOn": [
+          "^build",
+          "^typecheck",
+          "@zeroxsolutions/ui:build-registry",
+          "@zeroxsolutions/ui:examples-index",
+          "fumadocs-generate"
+        ]
       },
       "wrangler:build": {
         "executor": "nx:run-commands",
-        "dependsOn": ["^build", "^typecheck", "@zeroxsolutions/ui:examples-index", "fumadocs-generate"],
+        "dependsOn": [
+          "^build",
+          "^typecheck",
+          "@zeroxsolutions/ui:build-registry",
+          "@zeroxsolutions/ui:examples-index",
+          "fumadocs-generate"
+        ],
         "inputs": [
           "default",
           "^default",

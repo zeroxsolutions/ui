@@ -1,6 +1,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { packHighlightLines } from '../../lib/packed-lines';
 import { mdxComponents } from './mdx-components';
 
 const { pre: Pre } = mdxComponents;
@@ -37,9 +38,10 @@ describe('mdxComponents.pre', () => {
   });
 
   it('paints the fence with the lines tokenized as the page compiled, under a copy button', async () => {
-    const lines = JSON.stringify([
-      [{ content: 'const', style: { color: 'var(--code-keyword)' } }, { content: ' a = 1' }],
-    ]);
+    const lines = packHighlightLines(
+      [[{ content: 'const', style: { color: 'var(--code-keyword)' } }, { content: ' a = 1' }]],
+      'const a = 1',
+    );
     const container = await renderFence('const a = 1', { language: 'ts', lines });
 
     expect(container.querySelector('code span')?.textContent).toBe('const');

@@ -9,6 +9,7 @@ import { parseCodeBlockAttributes } from 'fumadocs-core/mdx-plugins/codeblock-ut
 import { DEFAULT_PLATFORM_STYLE, PLATFORM_STYLES } from '../constants/platform-styles';
 import { Index } from '../../../registry/bases/base-ui/examples/__index__';
 import { highlightToLines } from '../../../registry/bases/base-ui/lib/shiki';
+import { packHighlightLines } from './packed-lines';
 
 interface HastAttribute {
   type: string;
@@ -47,6 +48,11 @@ const NATIVE_EXAMPLES_DIR = '../../packages/native-ui/src/examples';
 
 /** A native demo's name, such as `button-demo`; anything else, a path included, names no demo. */
 const NATIVE_DEMO_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*-demo$/;
+
+/** `code` highlighted as `language`, packed by `packHighlightLines`. */
+async function highlighted(code: string, language: string): Promise<string> {
+  return packHighlightLines(await highlightToLines(code, language), code);
+}
 
 function textOf(node: HastNode): string {
   return node.type === 'text' ? (node.value ?? '') : (node.children ?? []).map(textOf).join('');
@@ -97,7 +103,7 @@ async function highlightFence(pre: HastNode): Promise<void> {
   const language = (Array.isArray(className) ? className : [className])
     .map((name) => /^language-(\S+)$/.exec(String(name))?.[1])
     .find(Boolean);
-  if (language) properties.lines = JSON.stringify(await highlightToLines(textOf(code).replace(/\n$/, ''), language));
+  if (language) properties.lines = await highlighted(textOf(code).replace(/\n$/, ''), language);
   pre.properties = properties;
 }
 
@@ -138,7 +144,7 @@ async function highlightSource(element: HastNode): Promise<void> {
     const others: Record<string, { code: string; lines: string }> = {};
     for (const [style, source] of Object.entries(sources)) {
       if (style === DEFAULT_PLATFORM_STYLE.web || source === code) continue;
-      others[style] = { code: source, lines: JSON.stringify(await highlightToLines(source, language)) };
+      others[style] = { code: source, lines: await highlighted(source, language) };
     }
     styled.push({ type: 'mdxJsxAttribute', name: 'styleSources', value: JSON.stringify(others) });
   }
@@ -147,15 +153,16 @@ async function highlightSource(element: HastNode): Promise<void> {
     ...styled,
     { type: 'mdxJsxAttribute', name: 'code', value: code },
     { type: 'mdxJsxAttribute', name: 'language', value: language },
-    { type: 'mdxJsxAttribute', name: 'lines', value: JSON.stringify(await highlightToLines(code, language)) },
+    { type: 'mdxJsxAttribute', name: 'lines', value: await highlighted(code, language) },
   ].filter((attribute, index, all) => all.findIndex((other) => other.name === attribute.name) === index);
 }
 
 /**
  * Highlights a docs page's code as the page compiles, with the registry's own highlighter, so nothing
  * the server runs to render a page imports Shiki. A fence's `pre` gets its `title` from the fence's
- * meta and its tokenized `lines` as JSON. A `ComponentPreview`, `BlockPreview`, `ComponentSource` or
- * native page's `NativePreview` gets the source of the file it shows as `code`, its `language`, and its `lines` as JSON;
+ * meta and its tokenized `lines`, packed by `packHighlightLines`. A `ComponentPreview`, `BlockPreview`,
+ * `ComponentSource` or native page's `NativePreview` gets the source of the file it shows as `code`, its
+ * `language`, and its `lines`, packed the same;
  * a `ComponentSource` of a file that writes slots gets the default style's code, and every other style's
  * that differs as `styleSources`. It runs after fumadocs has kept
  * the page's Markdown, so none of this reaches the page's `.md`. A demo's source is read once, as its

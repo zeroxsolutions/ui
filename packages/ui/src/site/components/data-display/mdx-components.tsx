@@ -1,7 +1,7 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
 import { DocsCodeCard } from './docs-code-card';
-import type { HighlightLine } from '../../../../registry/bases/base-ui/lib/shiki';
+import { unpackHighlightLines } from '../../lib/packed-lines';
 import { cn } from '../../../../registry/bases/base-ui/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '../../../../registry/bases/base-ui/ui/alert';
 import { ScrollArea, ScrollBar } from '../../../../registry/bases/base-ui/ui/scroll-area';
@@ -82,13 +82,14 @@ export const mdxComponents = {
   pre: ({ children, title, lines }: ComponentProps<'pre'> & { lines?: string }) => {
     const code = isValidElement<{ className?: string; children?: ReactNode }>(children) ? children.props : {};
     const language = /language-(\S+)/.exec(code.className ?? '')?.[1];
+    const text = nodeText(code.children).replace(/\n$/, '');
 
     return (
       <DocsCodeCard
-        code={nodeText(code.children).replace(/\n$/, '')}
+        code={text}
         language={language}
         title={title}
-        lines={lines ? (JSON.parse(lines) as HighlightLine[] | null) : null}
+        lines={unpackHighlightLines(lines, text)}
         className="mt-6"
       />
     );

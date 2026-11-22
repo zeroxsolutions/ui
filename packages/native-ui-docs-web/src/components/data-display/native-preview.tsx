@@ -14,7 +14,7 @@ import {
   SourceCodeCardTitle,
 } from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
 import { EXPO_PROJECT_IDS } from '../../constants/native-preview-device';
-import type { HighlightLine } from '@zeroxsolutions/ui/registry/bases/base-ui/lib/shiki';
+import { unpackHighlightLines } from '@zeroxsolutions/ui/site/lib/packed-lines';
 import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/tabs';
 
@@ -25,7 +25,10 @@ interface NativePreviewProps {
   engine: NativeEngine;
   /** A demo's name in `@zeroxsolutions/native-ui/examples`, such as `button-demo`. */
   name: string;
-  /** The demo's source, its language and its lines as JSON, which `rehypeDocsCode` sets as the page compiles. */
+  /**
+   * The demo's source, its language and its lines, packed by `packHighlightLines`, which `rehypeDocsCode`
+   * sets as the page compiles.
+   */
   code?: string;
   language?: string;
   lines?: string;
@@ -56,11 +59,7 @@ function NativePreview({ engine, name, code, language, lines }: NativePreviewPro
         </ComponentPreview>
       </TabsContent>
       <TabsContent value="code" className="mt-4">
-        <SourceCodeCard
-          code={code}
-          language={language}
-          lines={lines ? (JSON.parse(lines) as HighlightLine[] | null) : null}
-        >
+        <SourceCodeCard code={code} language={language} lines={unpackHighlightLines(lines, code)}>
           <SourceCodeCardHeader>
             <SourceCodeCardTitle>
               <SourceCodeCardLanguage>{language}</SourceCodeCardLanguage>
