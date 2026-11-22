@@ -1,6 +1,5 @@
 import { Decoration, type ProseMirrorNode } from '@zeroxsolutions/editor-core/document/advanced';
 import type { ProblemKind, ProfileProblem } from '@zeroxsolutions/editor-core/profiles/index';
-import { problemMessage } from '../problem-messages';
 import { carriesKey } from './kit-context';
 
 /** The problems marked on one place: a block, or a variable token or link inside it. */
@@ -17,11 +16,13 @@ export interface ProblemMark {
 
 /**
  * The marks `problems` make, one per block and named variable, and the messages of the problems no block holds,
- * such as too many blocks. `idBase` keeps the element ids of two editors apart.
+ * such as too many blocks, each in the words `problemMessage` gives it. `idBase` keeps the element ids of two
+ * editors apart.
  */
 export function problemMarks(
   problems: readonly ProfileProblem[],
   idBase: string,
+  problemMessage: (problem: ProfileProblem) => string,
 ): { marks: ProblemMark[]; unplaced: string[] } {
   const marks = new Map<string, ProblemMark>();
   const unplaced: string[] = [];

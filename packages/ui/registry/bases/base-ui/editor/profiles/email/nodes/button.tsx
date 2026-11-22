@@ -2,8 +2,9 @@ import { MousePointerClickIcon } from '@/registry/bases/base-ui/icons/lucide/mou
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { NodeSpec, NodeViewProps, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
-import { selectBlockOf } from '../kit-context';
+import { messagesOf, selectBlockOf } from '../kit-context';
 import { UrlVariablePicker, type DeclarationSource } from '../url-variable-picker';
+import { DEFAULT_PROFILE_MESSAGES } from '../../messages';
 import { blockClasses, emailSpec, justifyClass, type EmailBlockStyle } from './block-style';
 
 interface EmailButtonAttrs extends EmailBlockStyle {
@@ -16,10 +17,10 @@ const HREF_TOKEN = /^\{\{(\w+)\}\}$/;
 
 export const emailButtonSlashItem: SlashItem = {
   id: 'email-button',
-  title: 'Button',
-  description: 'A button that opens a link variable',
+  title: DEFAULT_PROFILE_MESSAGES.blocks.button.title,
+  description: DEFAULT_PROFILE_MESSAGES.blocks.button.description,
   icon: MousePointerClickIcon,
-  group: 'Email',
+  group: DEFAULT_PROFILE_MESSAGES.blockGroup,
   keywords: ['button', 'cta', 'link'],
   command: 'insertEmailBlock',
   args: { kind: 'button' },
@@ -33,6 +34,7 @@ export function emailButtonNode(declarations: DeclarationSource): NodeSpec {
   function EmailButtonView({ attrs, updateAttrs, editable, editor }: NodeViewProps<EmailButtonAttrs>) {
     const variable = HREF_TOKEN.exec(attrs.href ?? '')?.[1] ?? attrs.href ?? null;
     const full = attrs.width === 'full';
+    const messages = messagesOf(editor);
     return (
       <div
         data-slot="email-button"
@@ -45,8 +47,8 @@ export function emailButtonNode(declarations: DeclarationSource): NodeSpec {
         <div className={cn('flex', justifyClass(attrs.align))}>
           <span className={cn(buttonVariants({ variant: 'default' }), full && 'w-full')}>
             <input
-              aria-label="Button label"
-              placeholder="Button label"
+              aria-label={messages.buttonLabel}
+              placeholder={messages.buttonLabel}
               value={attrs.label ?? ''}
               readOnly={!editable}
               onChange={(event) => updateAttrs({ label: event.target.value })}
@@ -58,7 +60,8 @@ export function emailButtonNode(declarations: DeclarationSource): NodeSpec {
           <UrlVariablePicker
             declarations={declarations}
             value={variable}
-            label="Button link"
+            label={messages.buttonLink}
+            messages={messages}
             disabled={!editable}
             onValueChange={(name) => updateAttrs({ href: `{{${name}}}` })}
           />

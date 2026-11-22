@@ -13,7 +13,7 @@ function SmsEditorDemo(): ReactNode {
   const [body, setBody] = useState('Trip Vietnam: your code is {{code}}. It expires in 10 minutes.');
   return (
     <div className="w-full max-w-md">
-      <SmsEditor profile={profile} value={body} onChange={setBody} />
+      <SmsEditor label="Message" profile={profile} value={body} onChange={setBody} />
     </div>
   );
 }

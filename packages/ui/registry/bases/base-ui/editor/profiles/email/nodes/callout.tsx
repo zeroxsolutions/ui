@@ -2,14 +2,15 @@ import type { ReactNode } from 'react';
 import { InfoIcon } from '@/registry/bases/base-ui/icons/lucide/info-icon';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { NodeSpec, NodeViewProps, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
+import { DEFAULT_PROFILE_MESSAGES } from '../../messages';
 import { blockClasses, emailSpec, type EmailBlockStyle } from './block-style';
 
 export const emailCalloutSlashItem: SlashItem = {
   id: 'email-callout',
-  title: 'Callout',
-  description: 'Text set apart in a panel',
+  title: DEFAULT_PROFILE_MESSAGES.blocks.callout.title,
+  description: DEFAULT_PROFILE_MESSAGES.blocks.callout.description,
   icon: InfoIcon,
-  group: 'Email',
+  group: DEFAULT_PROFILE_MESSAGES.blockGroup,
   keywords: ['callout', 'note', 'notice'],
   command: 'insertEmailBlock',
   args: { kind: 'callout' },

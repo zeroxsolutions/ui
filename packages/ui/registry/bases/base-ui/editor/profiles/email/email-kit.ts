@@ -17,6 +17,7 @@ import {
   type IEditor,
   type NodeJSON,
   type SlashItem,
+  type ToolbarItem,
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockIdentity, type BlockIdentityOptions } from '@zeroxsolutions/editor-core/profiles/editor/index';
 import {
@@ -25,6 +26,7 @@ import {
   type EmailBlockKind,
   type VariableDeclaration,
 } from '@zeroxsolutions/editor-core/profiles/index';
+import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { variableFeature, type VariableFeature } from '../variables/variable';
 import {
   blockAt,
@@ -76,10 +78,10 @@ export const EMAIL_BLOCK_ATTRIBUTES: Readonly<Record<string, Readonly<Record<str
 
 const paragraphSlashItem: SlashItem = {
   id: 'email-paragraph',
-  title: 'Text',
-  description: 'A paragraph of text',
+  title: DEFAULT_PROFILE_MESSAGES.blocks.paragraph.title,
+  description: DEFAULT_PROFILE_MESSAGES.blocks.paragraph.description,
   icon: TextAlignStartIcon,
-  group: 'Email',
+  group: DEFAULT_PROFILE_MESSAGES.blockGroup,
   keywords: ['text', 'paragraph'],
   command: 'insertEmailBlock',
   args: { kind: 'paragraph' },
@@ -95,6 +97,28 @@ const SLASH_ITEMS: Readonly<Record<EmailBlockKind, SlashItem>> = {
   columns: emailColumnsSlashItem,
   html: emailHtmlSlashItem,
 };
+
+const SLASH_KINDS = new Map(Object.entries(SLASH_ITEMS).map(([kind, item]) => [item.id, kind as EmailBlockKind]));
+
+const MARK_WORDS: Readonly<Record<string, 'bold' | 'italic' | 'removeLink'>> = {
+  'email-bold': 'bold',
+  'email-italic': 'italic',
+  'email-unlink': 'removeLink',
+};
+
+/** The kit's slash, toolbar and bubble items in `messages`' words; an item of a host's own feature keeps its own. */
+export function wordEmailItems<T extends SlashItem | ToolbarItem>(
+  items: readonly T[],
+  messages: ProfileEditorMessages,
+): T[] {
+  return items.map((item) => {
+    const mark = MARK_WORDS[item.id];
+    if (mark) return { ...item, title: messages[mark] };
+    const kind = SLASH_KINDS.get(item.id);
+    if (!kind) return item;
+    return { ...item, ...messages.blocks[kind], group: messages.blockGroup };
+  });
+}
 
 const lane = (): NodeJSON => ({ type: 'emailLane', content: [{ type: 'paragraph' }] });
 
@@ -114,8 +138,10 @@ export interface EmailKitOptions extends BlockIdentityOptions {
   declarations?: () => readonly VariableDeclaration[];
   /** The variable feature the host also hands its trigger layer; one is built on `declarations` when absent. */
   variables?: VariableFeature;
-  /** The hint an empty line shows. */
+  /** The hint an empty line shows; `messages`' `emptyLine` when absent. */
   placeholder?: string;
+  /** The words the kit draws, read each time they are drawn; the English when absent. */
+  messages?: () => ProfileEditorMessages;
 }
 
 function holdsRequired(node: ProseMirrorNode, required: readonly string[]): boolean {
@@ -330,7 +356,8 @@ export function emailKit(
   const variables = options.variables ?? variableFeature(declarations);
   const required = () => options.required?.() ?? [];
   const locked = () => options.structure?.() === 'locked';
-  const context: KitContext = { locked, required, maxLanes: profile.bounds.lanes };
+  const messages = options.messages ?? (() => DEFAULT_PROFILE_MESSAGES);
+  const context: KitContext = { locked, required, maxLanes: profile.bounds.lanes, messages };
 
   const extraBlocks = extra.flatMap((feature) =>
     (feature.nodes ?? []).filter((node) => inGroup(node, 'block')).map((node) => node.name),
@@ -418,7 +445,10 @@ export function emailKit(
         UndoRedo,
         Dropcursor,
         Gapcursor,
-        Placeholder.configure({ includeChildren: true, placeholder: options.placeholder ?? "Type '/' for blocks" }),
+        Placeholder.configure({
+          includeChildren: true,
+          placeholder: () => options.placeholder ?? messages().emptyLine,
+        }),
       ],
     },
   });

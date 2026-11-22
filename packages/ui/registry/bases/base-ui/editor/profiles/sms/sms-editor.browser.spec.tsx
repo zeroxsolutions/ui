@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { userEvent } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import {
   smsProfile,
@@ -12,7 +12,7 @@ import {
 } from '@zeroxsolutions/editor-core/profiles/index';
 import '../../../../../../test/nova-style.css';
 import '../../styles.css';
-import { problemMessage } from '../problem-messages';
+import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { SmsEditor } from './sms-editor';
 
 const declared: VariableDeclaration[] = [
@@ -32,7 +32,15 @@ interface Probe {
 }
 
 /** A host that stores what the editor reports and hands it back as the value. */
-function Host({ initial, probe, first = profile }: { initial: string; probe: Probe; first?: EditorProfile }) {
+interface HostProps {
+  initial: string;
+  probe: Probe;
+  first?: EditorProfile;
+  messages?: Partial<ProfileEditorMessages>;
+  readOnly?: boolean;
+}
+
+function Host({ initial, probe, first = profile, ...props }: HostProps) {
   const [value, setValue] = useState(initial);
   const [current, setProfile] = useState(first);
   probe.load = setValue;
@@ -40,6 +48,8 @@ function Host({ initial, probe, first = profile }: { initial: string; probe: Pro
   return (
     <div className="style-nova p-12">
       <SmsEditor
+        {...props}
+        label="Message"
         profile={current}
         value={value}
         onChange={(body) => {
@@ -55,7 +65,11 @@ function Host({ initial, probe, first = profile }: { initial: string; probe: Pro
   );
 }
 
-async function mount(initial: string, first?: EditorProfile): Promise<Probe & { editor: IEditor }> {
+async function mount(
+  initial: string,
+  first?: EditorProfile,
+  props: Pick<HostProps, 'messages' | 'readOnly'> = {},
+): Promise<Probe & { editor: IEditor }> {
   const probe: Probe = {
     editor: null,
     reported: [],
@@ -64,7 +78,7 @@ async function mount(initial: string, first?: EditorProfile): Promise<Probe & { 
     load: () => {},
     declare: () => {},
   };
-  await render(<Host initial={initial} probe={probe} first={first} />);
+  await render(<Host {...props} initial={initial} probe={probe} first={first} />);
   await vi.waitFor(() => {
     if (!probe.editor) throw new Error('the editor is not ready');
   });
@@ -108,7 +122,7 @@ describe('SmsEditor', () => {
     await caretAtEnd(probe);
     await userEvent.keyboard('yz');
 
-    const message = problemMessage({ kind: 'sms-segment-exceeded', block: null });
+    const message = DEFAULT_PROFILE_MESSAGES.problem({ kind: 'sms-segment-exceeded', block: null });
     await vi.waitFor(() => expect(find('[data-slot=sms-meter]').textContent).toContain(message));
     expect(find('[data-slot=sms-meter]').getAttribute('data-problem')).toBe('sms-segment-exceeded');
     const decorated = await vi.waitFor(() => find('[contenteditable=true] [data-problem]'), { timeout: 1000 });
@@ -178,7 +192,7 @@ describe('SmsEditor', () => {
     expect(probe.validated[0]).toEqual(validate('Hi {{a}}', profile));
     await vi.waitFor(() =>
       expect(find('[data-slot=sms-problems]').textContent).toBe(
-        problemMessage({ kind: 'required-variable-not-printed', block: null, name: 'code' }),
+        DEFAULT_PROFILE_MESSAGES.problem({ kind: 'required-variable-not-printed', block: null, name: 'code' }),
       ),
     );
   });
@@ -196,7 +210,7 @@ describe('SmsEditor', () => {
     expect(kinds).toEqual(['sms-placeholder-malformed', 'variable-undeclared']);
     expect(marked[0].textContent).toBe('{{');
     expect(document.getElementById(marked[0].getAttribute('aria-describedby') ?? '')?.textContent).toBe(
-      problemMessage({ kind: 'sms-placeholder-malformed', block: null, offset: 0 }),
+      DEFAULT_PROFILE_MESSAGES.problem({ kind: 'sms-placeholder-malformed', block: null, offset: 0 }),
     );
   });
 
@@ -267,5 +281,20 @@ describe('SmsEditor', () => {
     await mount('x'.repeat(307), smsProfile({ variables: declared, maxSegments: 2 }));
     await vi.waitFor(() => expect(meter()).toBe('307 / 160 GSM-7 - 3 of 2 segments'));
     expect(find('[data-slot=sms-meter]').getAttribute('data-problem')).toBe('sms-segment-exceeded');
+  });
+  it("reads the meter in the host's words", async () => {
+    await mount('', undefined, { messages: { smsMeter: ({ units, limit }) => units + '/' + limit } });
+
+    await vi.waitFor(() => expect(meter()).toBe('0/160'));
+  });
+
+  it('is named by its label, and refuses typing when read-only', async () => {
+    const probe = await mount('Hello', undefined, { readOnly: true });
+    await userEvent.type(page.getByRole('textbox', { name: 'Message' }), ' there');
+
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(probe.reported).toEqual([]);
+    expect(probe.editor.getText()).toBe('Hello');
+    expect(document.querySelector('[data-slot=variable-menu]')).toBeNull();
   });
 });

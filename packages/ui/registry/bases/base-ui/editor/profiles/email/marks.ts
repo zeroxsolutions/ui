@@ -10,15 +10,28 @@ import {
   type ToolbarItem,
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { emailNodeSpecs } from '@zeroxsolutions/editor-core/profiles/index';
+import { DEFAULT_PROFILE_MESSAGES } from '../messages';
 
 const MARK_CLASSES: Record<string, string> = { emailLink: 'text-primary underline underline-offset-2' };
 
 const markItems: ToolbarItem[] = [
-  { id: 'email-bold', title: 'Bold', icon: LetterBIcon, command: 'toggleBold', activeWhen: 'bold' },
-  { id: 'email-italic', title: 'Italic', icon: ItalicIcon, command: 'toggleItalic', activeWhen: 'italic' },
+  {
+    id: 'email-bold',
+    title: DEFAULT_PROFILE_MESSAGES.bold,
+    icon: LetterBIcon,
+    command: 'toggleBold',
+    activeWhen: 'bold',
+  },
+  {
+    id: 'email-italic',
+    title: DEFAULT_PROFILE_MESSAGES.italic,
+    icon: ItalicIcon,
+    command: 'toggleItalic',
+    activeWhen: 'italic',
+  },
   {
     id: 'email-unlink',
-    title: 'Remove link',
+    title: DEFAULT_PROFILE_MESSAGES.removeLink,
     icon: createElement(UnlinkIcon, { 'aria-hidden': true }),
     // The email kit's command: a caret inside a link removes the whole link.
     command: 'unsetEmailLink',

@@ -15,6 +15,7 @@ import {
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { matchesVariable, variableIcon, variableLabel } from '../variables/variable';
+import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { emailLinkAt } from './kit-context';
 
 /** The declarations, or a getter a picker reads each time it opens, since a host may change them while it is shown. */
@@ -33,6 +34,8 @@ export interface UrlVariablePickerProps {
   /** What the picker chooses; assistive technology reads it before the chosen variable. */
   label: string;
   disabled?: boolean;
+  /** The words of its search field and its empty list; the English when absent. */
+  messages?: ProfileEditorMessages;
   className?: string;
 }
 
@@ -46,6 +49,7 @@ export function UrlVariablePicker({
   onValueChange,
   label,
   disabled,
+  messages = DEFAULT_PROFILE_MESSAGES,
   className,
 }: UrlVariablePickerProps) {
   const [items, setItems] = useState(() => urlDeclarations(declarations));
@@ -76,8 +80,8 @@ export function UrlVariablePicker({
         {chosen ? variableLabel(chosen) : (value ?? label)}
       </ComboboxTrigger>
       <ComboboxContent className="w-64">
-        <ComboboxInput showTrigger={false} placeholder="Find a link" aria-label="Find a link" />
-        <ComboboxEmpty>No link variables</ComboboxEmpty>
+        <ComboboxInput showTrigger={false} placeholder={messages.findLink} aria-label={messages.findLink} />
+        <ComboboxEmpty>{messages.noLinkVariables}</ComboboxEmpty>
         <ComboboxList>
           {(declaration: VariableDeclaration) => (
             <ComboboxItem key={declaration.name} value={declaration}>
@@ -94,11 +98,18 @@ export function UrlVariablePicker({
 export interface LinkVariablePickerProps {
   editor: IEditor;
   declarations: DeclarationSource;
+  /** Its words; the English when absent. */
+  messages?: ProfileEditorMessages;
   className?: string;
 }
 
 /** The toolbar's link control: shows the link on the selection and links the selected text to the chosen `url` variable. */
-export function LinkVariablePicker({ editor, declarations, className }: LinkVariablePickerProps) {
+export function LinkVariablePicker({
+  editor,
+  declarations,
+  messages = DEFAULT_PROFILE_MESSAGES,
+  className,
+}: LinkVariablePickerProps) {
   const [linked, setLinked] = useState(() => emailLinkAt(editor));
   useEffect(() => {
     const update = () => setLinked(emailLinkAt(editor));
@@ -114,7 +125,8 @@ export function LinkVariablePicker({ editor, declarations, className }: LinkVari
     <UrlVariablePicker
       declarations={declarations}
       value={linked}
-      label="Link"
+      label={messages.link}
+      messages={messages}
       className={className}
       onValueChange={(variable) => {
         editor.run('setEmailLink', { variable });

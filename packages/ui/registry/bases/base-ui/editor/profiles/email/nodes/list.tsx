@@ -2,14 +2,15 @@ import type { ReactNode } from 'react';
 import { ListIcon } from '@/registry/bases/base-ui/icons/lucide/list-icon';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { NodeSpec, NodeViewProps, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
+import { DEFAULT_PROFILE_MESSAGES } from '../../messages';
 import { blockClasses, emailSpec, type EmailBlockStyle } from './block-style';
 
 export const emailListSlashItem: SlashItem = {
   id: 'email-list',
-  title: 'List',
-  description: 'A bulleted list of short lines',
+  title: DEFAULT_PROFILE_MESSAGES.blocks.list.title,
+  description: DEFAULT_PROFILE_MESSAGES.blocks.list.description,
   icon: ListIcon,
-  group: 'Email',
+  group: DEFAULT_PROFILE_MESSAGES.blockGroup,
   keywords: ['list', 'bullet', 'ul'],
   command: 'insertEmailBlock',
   args: { kind: 'list' },

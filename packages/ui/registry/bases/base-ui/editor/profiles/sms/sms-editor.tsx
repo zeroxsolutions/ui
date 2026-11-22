@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { TooltipProvider } from '@/registry/bases/base-ui/ui/tooltip';
 import {
@@ -23,6 +23,7 @@ import {
 import { sameBlockContent } from '@zeroxsolutions/editor-core/template/email/index';
 import { TriggerLayer } from '../../composer/triggers/trigger-layer';
 import { Editor } from '../../document/react/editor';
+import { profileMessages, type ProfileEditorMessages } from '../messages';
 import { ProblemMarker } from '../problem-marker';
 import { caretNode, nextMarker, useFocusLeave } from '../problem-navigation';
 import { refreshVariables, variableFeature } from '../variables/variable';
@@ -41,6 +42,15 @@ export interface SmsEditorProps {
    * open another body; one that differs from the editor's replaces it, dropping the edits made since.
    */
   value: string;
+  /** The editable surface's accessible name. */
+  label: string;
+  /**
+   * The host's words for any string the editor draws; the rest stay English. A problem keeps the words it was
+   * marked with until the problems are read again, after the next edit.
+   */
+  messages?: Partial<ProfileEditorMessages>;
+  /** Shows the body, its problems and its cost with no way to change it: no typing and no variable menu. */
+  readOnly?: boolean;
   className?: string;
   onChange?(body: string): void;
   /** The focus left the editor and the popups it opened; when to save is the host's. */
@@ -53,10 +63,11 @@ export interface SmsEditorProps {
 const overlayKey = new PluginKey('smsEditorOverlay');
 
 /**
- * The problem decorations. `read` is a getter so a new set of marks needs no new plugin; a transaction with this
- * plugin's meta redraws. `view` is the engine's, which the editor reaches the caret through.
+ * The problem decorations and the surface's accessible name. `read` and `label` are getters so a new set of marks
+ * or a new name needs no new plugin; a transaction with this plugin's meta redraws. `view` is the engine's, which
+ * the editor reaches the caret through.
  */
-function overlayFeature(read: () => readonly SmsMark[]) {
+function overlayFeature(read: () => readonly SmsMark[], label: () => string) {
   let view: EditorView | null = null;
   let drawn: { doc: ProseMirrorNode; marks: readonly SmsMark[]; set: DecorationSet } | null = null;
   const plugin = new Plugin({
@@ -70,6 +81,7 @@ function overlayFeature(read: () => readonly SmsMark[]) {
       };
     },
     props: {
+      attributes: () => ({ 'aria-label': label() }),
       decorations(state) {
         const marks = read();
         if (drawn?.doc === state.doc && drawn.marks === marks) return drawn.set;
@@ -107,16 +119,31 @@ function overlayFeature(read: () => readonly SmsMark[]) {
  * the text, and the segment meter. `value` loads whenever it differs from what the editor last reported, so a
  * host hands back what `onChange` gave it without moving the caret.
  */
-export function SmsEditor({ profile, value, className, onChange, onBlur, onValidate, onReady }: SmsEditorProps) {
+export function SmsEditor({
+  profile,
+  value,
+  label,
+  messages,
+  readOnly = false,
+  className,
+  onChange,
+  onBlur,
+  onValidate,
+  onReady,
+}: SmsEditorProps) {
   const idBase = useId();
-  const live = useRef({ profile, onChange, onValidate, onBlur });
-  live.current = { profile, onChange, onValidate, onBlur };
+  const text = useMemo(() => profileMessages(messages), [messages]);
+  const live = useRef({ profile, label, text, onChange, onValidate, onBlur });
+  live.current = { profile, label, text, onChange, onValidate, onBlur };
 
   const marksRef = useRef<readonly SmsMark[]>([]);
   const unplacedRef = useRef<readonly string[]>([]);
   const [setup] = useState(() => {
     const variables = variableFeature(() => live.current.profile.variables);
-    const overlay = overlayFeature(() => marksRef.current);
+    const overlay = overlayFeature(
+      () => marksRef.current,
+      () => live.current.label,
+    );
     return { variables, overlay, features: [...smsKit(profile, { variables }), overlay.feature] };
   });
 
@@ -139,7 +166,7 @@ export function SmsEditor({ profile, value, className, onChange, onBlur, onValid
       const text = toSmsText(from.getJSON());
       const problems = validate(text, live.current.profile);
       // The marks follow the body too, as a tail does when the problem stays the same.
-      const placed = smsMarks(problems, text, live.current.profile, idBase);
+      const placed = smsMarks(problems, text, live.current.profile, idBase, live.current.text.problem);
       if (
         !sameBlockContent(marksRef.current, placed.marks) ||
         !sameBlockContent(unplacedRef.current, placed.unplaced)
@@ -221,6 +248,19 @@ export function SmsEditor({ profile, value, className, onChange, onBlur, onValid
     schedule(editor);
   }, [editor, profile, schedule]);
 
+  // The engine reads the name when it draws, which a new label alone does not cause.
+  const named = useRef(label);
+  useEffect(() => {
+    if (named.current === label) return;
+    named.current = label;
+    setup.overlay.redraw();
+  }, [label, setup]);
+
+  const variables = useMemo(
+    () => ({ ...setup.variables.token, emptyText: text.noVariables }),
+    [setup, text.noVariables],
+  );
+
   const focus = useFocusLeave(() => live.current.onBlur?.());
 
   // F8 and Shift+F8 reach the next and the previous problem, as in VS Code; Escape on one goes back to its text.
@@ -251,31 +291,38 @@ export function SmsEditor({ profile, value, className, onChange, onBlur, onValid
         {...focus}
         onKeyDownCapture={keyDown}
       >
-        {editor && (
+        {editor && !readOnly && (
           <div className="flex flex-wrap items-center gap-1">
-            <VariableMenu editor={editor} declarations={variablesOf} />
+            <VariableMenu editor={editor} declarations={variablesOf} messages={text} />
           </div>
         )}
         <Editor
           features={setup.features}
           content={fromSmsText(value)}
+          editable={!readOnly}
           onReady={(ready) => {
             setEditor(ready);
             onReady?.(ready);
           }}
         />
-        {editor && <TriggerLayer editor={editor} triggers={[setup.variables.token]} />}
+        {editor && !readOnly && <TriggerLayer editor={editor} triggers={[variables]} />}
         <TooltipProvider>
           {marks.length > 0 && (
             <div data-slot="sms-problem-markers" className="flex flex-wrap items-center gap-1">
               {marks.map((mark) => (
-                <ProblemMarker key={mark.id} id={mark.id} messages={mark.messages} slot="sms-problem-marker" />
+                <ProblemMarker
+                  key={mark.id}
+                  id={mark.id}
+                  messages={mark.messages}
+                  slot="sms-problem-marker"
+                  label={text.problemMarker}
+                />
               ))}
             </div>
           )}
         </TooltipProvider>
       </div>
-      <SmsMeter body={body} profile={profile} />
+      <SmsMeter body={body} profile={profile} messages={text} />
       {unplaced.length > 0 && (
         <ul data-slot="sms-problems" className="text-destructive flex flex-col gap-1 text-sm">
           {unplaced.map((message) => (

@@ -101,6 +101,7 @@ function EmailEditorDemo(): ReactNode {
   return (
     <div className="w-full max-w-3xl">
       <EmailEditor
+        label="Email body"
         profile={profile}
         value={blocks}
         onChange={setBlocks}

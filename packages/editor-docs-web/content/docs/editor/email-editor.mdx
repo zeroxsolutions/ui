@@ -140,8 +140,8 @@ pnpm dlx shadcn@latest add button combobox badge dropdown-menu separator tooltip
 
 <ComponentSource
   name="email-editor"
-  file="registry/bases/base-ui/editor/profiles/problem-messages.ts"
-  title="components/editor/profiles/problem-messages.ts"
+  file="registry/bases/base-ui/editor/profiles/messages.ts"
+  title="components/editor/profiles/messages.ts"
 />
 
 <ComponentSource
@@ -198,6 +198,7 @@ const renderer = createEmailRenderer({ theme });
 function Template({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blocks: EditorEmailBlock[]) => void }) {
   return (
     <EmailEditor
+      label="Email body"
       profile={profile}
       value={blocks}
       onChange={save}
@@ -218,6 +219,9 @@ The editor states an email as the blocks the renderer takes: `paragraph`, `butto
 | ---------------------- | ------------------------------------------------ | -------- |
 | `profile`              | `EditorProfile`                                  | -        |
 | `value`                | `EditorEmailBlock[]`                             | -        |
+| `label`                | `string`                                         | -        |
+| `messages`             | `Partial<ProfileEditorMessages>`                 | -        |
+| `readOnly`             | `boolean`                                        | `false`  |
 | `renderer`             | `EmailPreviewRenderer`                           | -        |
 | `previewInput`         | `EmailPreviewInput`                              | -        |
 | `features`             | `EditorFeature[]`                                | -        |
@@ -231,6 +235,25 @@ The editor states an email as the blocks the renderer takes: `paragraph`, `butto
 | `onReady`              | `(editor: IEditor) => void`                      | -        |
 
 `renderer` and `previewInput` come together: the preview is drawn only with a renderer, and a renderer needs the subject, locale and layout it renders in. `previewInput` is a render's input without `blocks`, `variables` and `variableTypes`, which the editor fills from the document and the declarations' `sampleValue`.
+
+`label` is the editable surface's accessible name. `readOnly` shows the document and its problems with nothing that changes it: typing is refused and the toolbar, the slash menu and the block menu are not drawn.
+
+`messages` words every string the editor draws, in the host's language; a key it leaves out stays English. `ProfileEditorMessages` and its English, `DEFAULT_PROFILE_MESSAGES`, come from `messages.ts`. A message that takes a value is a function, such as `problem(problem)`, which names the variable a problem is about. A problem keeps the words it was marked with until the editor reads the problems again, after the next edit.
+
+```tsx
+import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '@/components/editor/profiles/messages';
+
+const vi: Partial<ProfileEditorMessages> = {
+  problem: (problem) =>
+    problem.kind === 'text-empty' ? 'Khoi nay dang trong' : DEFAULT_PROFILE_MESSAGES.problem(problem),
+  emptyLine: "Go '/' de chen khoi",
+  bold: 'In dam',
+  italic: 'In nghieng',
+  blockActions: 'Thao tac khoi',
+};
+
+<EmailEditor label="Noi dung email" messages={vi} profile={profile} value={blocks} onChange={save} />;
+```
 
 `required` lists the ids of the blocks the author may not remove. `structure="locked"` lets the author edit text and variables only: nothing is inserted, removed or restyled. `renderBlockAdornment` draws what the host wants beside a block, such as a translation's standing; `id` is null for a block not saved yet, so `key` identifies it. `features` adds the host's own blocks, each with an email codec, and is read once: a change needs a remount.
 
@@ -282,7 +305,7 @@ refreshVariables(editor);
 | `list-too-long`                 | This list has too many items             |
 | `too-many-blocks`               | The email has too many blocks            |
 
-A message about a variable names it, as in `This variable is not declared: {{trip_name}}`. The wording lives in `problem-messages.ts`, so a host can replace it.
+A message about a variable names it, as in `This variable is not declared: {{trip_name}}`. A host words them through `messages.problem`.
 
 F8 moves the caret to the next problem and Shift+F8 to the previous one; Escape on a problem's marker goes back to its block.
 

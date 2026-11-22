@@ -24,6 +24,7 @@ import {
 import { referenceToken, type TriggerOption, type TriggerToken } from '@zeroxsolutions/editor-core/composer/index';
 import { emailNodeSpecs, type VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { escapeHtml, VARIABLE_TOKEN, type VariableType } from '@zeroxsolutions/editor-core/template/index';
+import { DEFAULT_PROFILE_MESSAGES } from '../messages';
 
 type VariableAttrs = { name: string };
 
@@ -304,7 +305,7 @@ export function variableFeature(getDeclarations: () => readonly VariableDeclarat
       insertVariable(editor, chosen.id);
     },
     readRef: (attrs) => ({ name: String(attrs.name ?? '') }),
-    emptyText: 'No variables found',
+    emptyText: DEFAULT_PROFILE_MESSAGES.noVariables,
   });
 
   return { feature, token };

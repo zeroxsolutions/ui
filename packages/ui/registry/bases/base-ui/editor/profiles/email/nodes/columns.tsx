@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { LayoutGridIcon } from '@/registry/bases/base-ui/icons/lucide/layout-grid-icon';
 import type { NodeSpec, NodeViewProps, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
+import { DEFAULT_PROFILE_MESSAGES } from '../../messages';
 import { blockClasses, emailSpec, type EmailBlockStyle } from './block-style';
 
 interface EmailColumnsAttrs extends EmailBlockStyle {
@@ -9,10 +10,10 @@ interface EmailColumnsAttrs extends EmailBlockStyle {
 
 export const emailColumnsSlashItem: SlashItem = {
   id: 'email-columns',
-  title: 'Columns',
-  description: 'Two to four lanes side by side',
+  title: DEFAULT_PROFILE_MESSAGES.blocks.columns.title,
+  description: DEFAULT_PROFILE_MESSAGES.blocks.columns.description,
   icon: LayoutGridIcon,
-  group: 'Email',
+  group: DEFAULT_PROFILE_MESSAGES.blockGroup,
   keywords: ['columns', 'lanes', 'side by side'],
   command: 'insertEmailBlock',
   args: { kind: 'columns' },
