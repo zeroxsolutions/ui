@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 
+import { unpackHighlightLines } from './packed-lines';
 import { rehypeDocsCode } from './rehype-docs-code';
 
 interface Node {
@@ -55,7 +56,7 @@ describe('rehypeDocsCode', () => {
     await run(pre);
 
     expect(pre.properties?.title).toBe('a.ts');
-    const [line] = JSON.parse(String(pre.properties?.lines)) as { content: string; style?: object }[][];
+    const [line] = unpackHighlightLines(String(pre.properties?.lines), 'const a = 1') ?? [];
     expect(line.map((token) => token.content).join('')).toBe('const a = 1');
     expect(line.some((token) => token.style)).toBe(true);
   });
@@ -67,9 +68,12 @@ describe('rehypeDocsCode', () => {
 
     expect(attribute(source, 'code')).toContain('function StatusIndicator');
     expect(attribute(source, 'language')).toBe('tsx');
-    expect(JSON.parse(String(attribute(source, 'lines')))).toHaveLength(
-      String(attribute(source, 'code')).split('\n').length,
-    );
+    const code = String(attribute(source, 'code'));
+    expect(
+      unpackHighlightLines(String(attribute(source, 'lines')), code)?.map((line) =>
+        line.map((token) => token.content).join(''),
+      ),
+    ).toEqual(code.split('\n'));
   });
 
   it("gives a NativePreview its demo's source from native-ui's examples, its language and its lines", async () => {
@@ -79,9 +83,12 @@ describe('rehypeDocsCode', () => {
 
     expect(attribute(preview, 'code')).toContain('function ButtonDemo');
     expect(attribute(preview, 'language')).toBe('tsx');
-    expect(JSON.parse(String(attribute(preview, 'lines')))).toHaveLength(
-      String(attribute(preview, 'code')).split('\n').length,
-    );
+    const code = String(attribute(preview, 'code'));
+    expect(
+      unpackHighlightLines(String(attribute(preview, 'lines')), code)?.map((line) =>
+        line.map((token) => token.content).join(''),
+      ),
+    ).toEqual(code.split('\n'));
   });
 
   it('fails the page on a NativePreview naming no native demo, a path outside the examples included', async () => {

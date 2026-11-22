@@ -25,7 +25,10 @@ const EXCERPT_LINES = 3;
 interface ExampleSourceProps {
   /** A demo name in the examples index. */
   name: string;
-  /** The demo's source, its language and its lines as JSON, which `rehypeDocsCode` sets as the page compiles. */
+  /**
+   * The demo's source, its language and its lines, packed by `packHighlightLines`, which `rehypeDocsCode`
+   * sets as the page compiles.
+   */
   code?: string;
   language?: string;
   lines?: string;
