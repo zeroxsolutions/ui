@@ -33,7 +33,12 @@ pnpm dlx shadcn@latest add @zui/status-indicator
 
 The CLI writes the item's files under the aliases in `components.json` and rewrites its imports to match. With
 the aliases `init` writes, Status Indicator lands in `components/feedback/status-indicator.tsx`, its tone type in
-`lib/status-tone.ts`, and the component imports them as `@/lib/utils` and `@/lib/status-tone`.
+`lib/status-tone.ts`, and the component imports them as `@/lib/utils` and `@/lib/status-tone`. With `components`
+set to `@/shared/widgets`, it lands in `shared/widgets/feedback/status-indicator.tsx`.
+
+Each item places its files through the `@components/`, `@lib/` and `@hooks/` target placeholders, which the CLI
+reads from version 4.7.0. An older CLI writes them into a folder named `@components` at the project root, so
+install with 4.7.0 or later; `shadcn@latest` is.
 
 ## Items that use other items
 

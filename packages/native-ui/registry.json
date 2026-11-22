@@ -12,7 +12,8 @@
       "files": [
         {
           "path": "src/registry/lib/fonts.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/fonts.ts"
         }
       ]
     },
@@ -25,7 +26,8 @@
       "files": [
         {
           "path": "src/registry/lib/utils.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/utils.ts"
         }
       ]
     },
@@ -38,7 +40,8 @@
       "files": [
         {
           "path": "src/registry/lib/motion.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/motion.ts"
         }
       ]
     },
@@ -52,7 +55,8 @@
       "files": [
         {
           "path": "src/registry/lib/icon-motion.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/icon-motion.ts"
         }
       ]
     },
@@ -64,7 +68,8 @@
       "files": [
         {
           "path": "src/registry/lib/overlay.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/overlay.ts"
         }
       ]
     },
@@ -76,7 +81,8 @@
       "files": [
         {
           "path": "src/registry/lib/menu.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/menu.ts"
         }
       ]
     },
@@ -88,7 +94,8 @@
       "files": [
         {
           "path": "src/registry/lib/command-score.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/command-score.ts"
         }
       ]
     },
@@ -102,7 +109,8 @@
       "files": [
         {
           "path": "src/registry/ui/text.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/text.tsx"
         }
       ]
     },
@@ -116,7 +124,8 @@
       "files": [
         {
           "path": "src/registry/ui/icon.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/icon.tsx"
         }
       ]
     },
@@ -131,7 +140,7 @@
         {
           "path": "src/registry/icons/lucide/a-arrow-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/a-arrow-down-icon.tsx"
+          "target": "@components/general/lucide/a-arrow-down-icon.tsx"
         }
       ]
     },
@@ -146,7 +155,7 @@
         {
           "path": "src/registry/icons/lucide/a-arrow-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/a-arrow-up-icon.tsx"
+          "target": "@components/general/lucide/a-arrow-up-icon.tsx"
         }
       ]
     },
@@ -161,7 +170,7 @@
         {
           "path": "src/registry/icons/lucide/accessibility-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/accessibility-icon.tsx"
+          "target": "@components/general/lucide/accessibility-icon.tsx"
         }
       ]
     },
@@ -176,7 +185,7 @@
         {
           "path": "src/registry/icons/lucide/activity-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/activity-icon.tsx"
+          "target": "@components/general/lucide/activity-icon.tsx"
         }
       ]
     },
@@ -191,7 +200,7 @@
         {
           "path": "src/registry/icons/lucide/air-vent-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/air-vent-icon.tsx"
+          "target": "@components/general/lucide/air-vent-icon.tsx"
         }
       ]
     },
@@ -206,7 +215,7 @@
         {
           "path": "src/registry/icons/lucide/airplay-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/airplay-icon.tsx"
+          "target": "@components/general/lucide/airplay-icon.tsx"
         }
       ]
     },
@@ -221,7 +230,7 @@
         {
           "path": "src/registry/icons/lucide/alarm-clock-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/alarm-clock-check-icon.tsx"
+          "target": "@components/general/lucide/alarm-clock-check-icon.tsx"
         }
       ]
     },
@@ -236,7 +245,7 @@
         {
           "path": "src/registry/icons/lucide/alarm-clock-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/alarm-clock-icon.tsx"
+          "target": "@components/general/lucide/alarm-clock-icon.tsx"
         }
       ]
     },
@@ -251,7 +260,7 @@
         {
           "path": "src/registry/icons/lucide/alarm-clock-minus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/alarm-clock-minus-icon.tsx"
+          "target": "@components/general/lucide/alarm-clock-minus-icon.tsx"
         }
       ]
     },
@@ -266,7 +275,7 @@
         {
           "path": "src/registry/icons/lucide/alarm-clock-plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/alarm-clock-plus-icon.tsx"
+          "target": "@components/general/lucide/alarm-clock-plus-icon.tsx"
         }
       ]
     },
@@ -281,7 +290,7 @@
         {
           "path": "src/registry/icons/lucide/alarm-smoke-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/alarm-smoke-icon.tsx"
+          "target": "@components/general/lucide/alarm-smoke-icon.tsx"
         }
       ]
     },
@@ -296,7 +305,7 @@
         {
           "path": "src/registry/icons/lucide/align-horizontal-space-around-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/align-horizontal-space-around-icon.tsx"
+          "target": "@components/general/lucide/align-horizontal-space-around-icon.tsx"
         }
       ]
     },
@@ -311,7 +320,7 @@
         {
           "path": "src/registry/icons/lucide/align-vertical-space-around-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/align-vertical-space-around-icon.tsx"
+          "target": "@components/general/lucide/align-vertical-space-around-icon.tsx"
         }
       ]
     },
@@ -326,7 +335,7 @@
         {
           "path": "src/registry/icons/lucide/ambulance-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/ambulance-icon.tsx"
+          "target": "@components/general/lucide/ambulance-icon.tsx"
         }
       ]
     },
@@ -341,7 +350,7 @@
         {
           "path": "src/registry/icons/lucide/archive-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/archive-icon.tsx"
+          "target": "@components/general/lucide/archive-icon.tsx"
         }
       ]
     },
@@ -356,7 +365,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-big-down-dash-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-big-down-dash-icon.tsx"
+          "target": "@components/general/lucide/arrow-big-down-dash-icon.tsx"
         }
       ]
     },
@@ -371,7 +380,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-big-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-big-down-icon.tsx"
+          "target": "@components/general/lucide/arrow-big-down-icon.tsx"
         }
       ]
     },
@@ -386,7 +395,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-big-left-dash-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-big-left-dash-icon.tsx"
+          "target": "@components/general/lucide/arrow-big-left-dash-icon.tsx"
         }
       ]
     },
@@ -401,7 +410,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-big-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-big-left-icon.tsx"
+          "target": "@components/general/lucide/arrow-big-left-icon.tsx"
         }
       ]
     },
@@ -416,7 +425,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-big-right-dash-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-big-right-dash-icon.tsx"
+          "target": "@components/general/lucide/arrow-big-right-dash-icon.tsx"
         }
       ]
     },
@@ -431,7 +440,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-big-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-big-right-icon.tsx"
+          "target": "@components/general/lucide/arrow-big-right-icon.tsx"
         }
       ]
     },
@@ -446,7 +455,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-big-up-dash-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-big-up-dash-icon.tsx"
+          "target": "@components/general/lucide/arrow-big-up-dash-icon.tsx"
         }
       ]
     },
@@ -461,7 +470,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-big-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-big-up-icon.tsx"
+          "target": "@components/general/lucide/arrow-big-up-icon.tsx"
         }
       ]
     },
@@ -476,7 +485,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-down-0-1-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-down-0-1-icon.tsx"
+          "target": "@components/general/lucide/arrow-down-0-1-icon.tsx"
         }
       ]
     },
@@ -491,7 +500,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-down-1-0-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-down-1-0-icon.tsx"
+          "target": "@components/general/lucide/arrow-down-1-0-icon.tsx"
         }
       ]
     },
@@ -506,7 +515,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-down-a-z-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-down-a-z-icon.tsx"
+          "target": "@components/general/lucide/arrow-down-a-z-icon.tsx"
         }
       ]
     },
@@ -521,7 +530,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-down-icon.tsx"
+          "target": "@components/general/lucide/arrow-down-icon.tsx"
         }
       ]
     },
@@ -536,7 +545,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-down-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-down-left-icon.tsx"
+          "target": "@components/general/lucide/arrow-down-left-icon.tsx"
         }
       ]
     },
@@ -551,7 +560,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-down-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-down-right-icon.tsx"
+          "target": "@components/general/lucide/arrow-down-right-icon.tsx"
         }
       ]
     },
@@ -566,7 +575,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-down-z-a-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-down-z-a-icon.tsx"
+          "target": "@components/general/lucide/arrow-down-z-a-icon.tsx"
         }
       ]
     },
@@ -581,7 +590,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-left-icon.tsx"
+          "target": "@components/general/lucide/arrow-left-icon.tsx"
         }
       ]
     },
@@ -596,7 +605,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-right-icon.tsx"
+          "target": "@components/general/lucide/arrow-right-icon.tsx"
         }
       ]
     },
@@ -611,7 +620,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-up-icon.tsx"
+          "target": "@components/general/lucide/arrow-up-icon.tsx"
         }
       ]
     },
@@ -626,7 +635,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-up-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-up-left-icon.tsx"
+          "target": "@components/general/lucide/arrow-up-left-icon.tsx"
         }
       ]
     },
@@ -641,7 +650,7 @@
         {
           "path": "src/registry/icons/lucide/arrow-up-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/arrow-up-right-icon.tsx"
+          "target": "@components/general/lucide/arrow-up-right-icon.tsx"
         }
       ]
     },
@@ -656,7 +665,7 @@
         {
           "path": "src/registry/icons/lucide/at-sign-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/at-sign-icon.tsx"
+          "target": "@components/general/lucide/at-sign-icon.tsx"
         }
       ]
     },
@@ -671,7 +680,7 @@
         {
           "path": "src/registry/icons/lucide/atom-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/atom-icon.tsx"
+          "target": "@components/general/lucide/atom-icon.tsx"
         }
       ]
     },
@@ -686,7 +695,7 @@
         {
           "path": "src/registry/icons/lucide/audio-lines-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/audio-lines-icon.tsx"
+          "target": "@components/general/lucide/audio-lines-icon.tsx"
         }
       ]
     },
@@ -701,7 +710,7 @@
         {
           "path": "src/registry/icons/lucide/axe-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/axe-icon.tsx"
+          "target": "@components/general/lucide/axe-icon.tsx"
         }
       ]
     },
@@ -716,7 +725,7 @@
         {
           "path": "src/registry/icons/lucide/badge-exclamation-point-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/badge-exclamation-point-icon.tsx"
+          "target": "@components/general/lucide/badge-exclamation-point-icon.tsx"
         }
       ]
     },
@@ -731,7 +740,7 @@
         {
           "path": "src/registry/icons/lucide/badge-percent-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/badge-percent-icon.tsx"
+          "target": "@components/general/lucide/badge-percent-icon.tsx"
         }
       ]
     },
@@ -746,7 +755,7 @@
         {
           "path": "src/registry/icons/lucide/ban-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/ban-icon.tsx"
+          "target": "@components/general/lucide/ban-icon.tsx"
         }
       ]
     },
@@ -761,7 +770,7 @@
         {
           "path": "src/registry/icons/lucide/banana-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/banana-icon.tsx"
+          "target": "@components/general/lucide/banana-icon.tsx"
         }
       ]
     },
@@ -776,7 +785,7 @@
         {
           "path": "src/registry/icons/lucide/battery-charging-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/battery-charging-icon.tsx"
+          "target": "@components/general/lucide/battery-charging-icon.tsx"
         }
       ]
     },
@@ -791,7 +800,7 @@
         {
           "path": "src/registry/icons/lucide/battery-exclamation-point-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/battery-exclamation-point-icon.tsx"
+          "target": "@components/general/lucide/battery-exclamation-point-icon.tsx"
         }
       ]
     },
@@ -806,7 +815,7 @@
         {
           "path": "src/registry/icons/lucide/battery-full-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/battery-full-icon.tsx"
+          "target": "@components/general/lucide/battery-full-icon.tsx"
         }
       ]
     },
@@ -821,7 +830,7 @@
         {
           "path": "src/registry/icons/lucide/battery-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/battery-icon.tsx"
+          "target": "@components/general/lucide/battery-icon.tsx"
         }
       ]
     },
@@ -836,7 +845,7 @@
         {
           "path": "src/registry/icons/lucide/battery-low-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/battery-low-icon.tsx"
+          "target": "@components/general/lucide/battery-low-icon.tsx"
         }
       ]
     },
@@ -851,7 +860,7 @@
         {
           "path": "src/registry/icons/lucide/battery-medium-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/battery-medium-icon.tsx"
+          "target": "@components/general/lucide/battery-medium-icon.tsx"
         }
       ]
     },
@@ -866,7 +875,7 @@
         {
           "path": "src/registry/icons/lucide/battery-plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/battery-plus-icon.tsx"
+          "target": "@components/general/lucide/battery-plus-icon.tsx"
         }
       ]
     },
@@ -881,7 +890,7 @@
         {
           "path": "src/registry/icons/lucide/bell-electric-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bell-electric-icon.tsx"
+          "target": "@components/general/lucide/bell-electric-icon.tsx"
         }
       ]
     },
@@ -896,7 +905,7 @@
         {
           "path": "src/registry/icons/lucide/bell-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bell-icon.tsx"
+          "target": "@components/general/lucide/bell-icon.tsx"
         }
       ]
     },
@@ -911,7 +920,7 @@
         {
           "path": "src/registry/icons/lucide/biceps-flexed-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/biceps-flexed-icon.tsx"
+          "target": "@components/general/lucide/biceps-flexed-icon.tsx"
         }
       ]
     },
@@ -926,7 +935,7 @@
         {
           "path": "src/registry/icons/lucide/binary-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/binary-icon.tsx"
+          "target": "@components/general/lucide/binary-icon.tsx"
         }
       ]
     },
@@ -941,7 +950,7 @@
         {
           "path": "src/registry/icons/lucide/blocks-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/blocks-icon.tsx"
+          "target": "@components/general/lucide/blocks-icon.tsx"
         }
       ]
     },
@@ -956,7 +965,7 @@
         {
           "path": "src/registry/icons/lucide/bluetooth-connected-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bluetooth-connected-icon.tsx"
+          "target": "@components/general/lucide/bluetooth-connected-icon.tsx"
         }
       ]
     },
@@ -971,7 +980,7 @@
         {
           "path": "src/registry/icons/lucide/bluetooth-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bluetooth-icon.tsx"
+          "target": "@components/general/lucide/bluetooth-icon.tsx"
         }
       ]
     },
@@ -986,7 +995,7 @@
         {
           "path": "src/registry/icons/lucide/bluetooth-off-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bluetooth-off-icon.tsx"
+          "target": "@components/general/lucide/bluetooth-off-icon.tsx"
         }
       ]
     },
@@ -1001,7 +1010,7 @@
         {
           "path": "src/registry/icons/lucide/bluetooth-searching-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bluetooth-searching-icon.tsx"
+          "target": "@components/general/lucide/bluetooth-searching-icon.tsx"
         }
       ]
     },
@@ -1016,7 +1025,7 @@
         {
           "path": "src/registry/icons/lucide/bone-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bone-icon.tsx"
+          "target": "@components/general/lucide/bone-icon.tsx"
         }
       ]
     },
@@ -1031,7 +1040,7 @@
         {
           "path": "src/registry/icons/lucide/book-text-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/book-text-icon.tsx"
+          "target": "@components/general/lucide/book-text-icon.tsx"
         }
       ]
     },
@@ -1046,7 +1055,7 @@
         {
           "path": "src/registry/icons/lucide/bookmark-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bookmark-check-icon.tsx"
+          "target": "@components/general/lucide/bookmark-check-icon.tsx"
         }
       ]
     },
@@ -1061,7 +1070,7 @@
         {
           "path": "src/registry/icons/lucide/bookmark-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bookmark-icon.tsx"
+          "target": "@components/general/lucide/bookmark-icon.tsx"
         }
       ]
     },
@@ -1076,7 +1085,7 @@
         {
           "path": "src/registry/icons/lucide/bookmark-minus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bookmark-minus-icon.tsx"
+          "target": "@components/general/lucide/bookmark-minus-icon.tsx"
         }
       ]
     },
@@ -1091,7 +1100,7 @@
         {
           "path": "src/registry/icons/lucide/bookmark-plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bookmark-plus-icon.tsx"
+          "target": "@components/general/lucide/bookmark-plus-icon.tsx"
         }
       ]
     },
@@ -1106,7 +1115,7 @@
         {
           "path": "src/registry/icons/lucide/bookmark-x-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bookmark-x-icon.tsx"
+          "target": "@components/general/lucide/bookmark-x-icon.tsx"
         }
       ]
     },
@@ -1121,7 +1130,7 @@
         {
           "path": "src/registry/icons/lucide/bot-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bot-icon.tsx"
+          "target": "@components/general/lucide/bot-icon.tsx"
         }
       ]
     },
@@ -1136,7 +1145,7 @@
         {
           "path": "src/registry/icons/lucide/bot-message-square-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/bot-message-square-icon.tsx"
+          "target": "@components/general/lucide/bot-message-square-icon.tsx"
         }
       ]
     },
@@ -1151,7 +1160,7 @@
         {
           "path": "src/registry/icons/lucide/box-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/box-icon.tsx"
+          "target": "@components/general/lucide/box-icon.tsx"
         }
       ]
     },
@@ -1166,7 +1175,7 @@
         {
           "path": "src/registry/icons/lucide/boxes-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/boxes-icon.tsx"
+          "target": "@components/general/lucide/boxes-icon.tsx"
         }
       ]
     },
@@ -1181,7 +1190,7 @@
         {
           "path": "src/registry/icons/lucide/brain-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/brain-icon.tsx"
+          "target": "@components/general/lucide/brain-icon.tsx"
         }
       ]
     },
@@ -1196,7 +1205,7 @@
         {
           "path": "src/registry/icons/lucide/briefcase-business-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/briefcase-business-icon.tsx"
+          "target": "@components/general/lucide/briefcase-business-icon.tsx"
         }
       ]
     },
@@ -1211,7 +1220,7 @@
         {
           "path": "src/registry/icons/lucide/calendar-check-2-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/calendar-check-2-icon.tsx"
+          "target": "@components/general/lucide/calendar-check-2-icon.tsx"
         }
       ]
     },
@@ -1226,7 +1235,7 @@
         {
           "path": "src/registry/icons/lucide/calendar-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/calendar-check-icon.tsx"
+          "target": "@components/general/lucide/calendar-check-icon.tsx"
         }
       ]
     },
@@ -1241,7 +1250,7 @@
         {
           "path": "src/registry/icons/lucide/calendar-cog-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/calendar-cog-icon.tsx"
+          "target": "@components/general/lucide/calendar-cog-icon.tsx"
         }
       ]
     },
@@ -1256,7 +1265,7 @@
         {
           "path": "src/registry/icons/lucide/calendar-days-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/calendar-days-icon.tsx"
+          "target": "@components/general/lucide/calendar-days-icon.tsx"
         }
       ]
     },
@@ -1271,7 +1280,7 @@
         {
           "path": "src/registry/icons/lucide/car-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/car-icon.tsx"
+          "target": "@components/general/lucide/car-icon.tsx"
         }
       ]
     },
@@ -1286,7 +1295,7 @@
         {
           "path": "src/registry/icons/lucide/cast-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cast-icon.tsx"
+          "target": "@components/general/lucide/cast-icon.tsx"
         }
       ]
     },
@@ -1301,7 +1310,7 @@
         {
           "path": "src/registry/icons/lucide/cctv-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cctv-icon.tsx"
+          "target": "@components/general/lucide/cctv-icon.tsx"
         }
       ]
     },
@@ -1316,7 +1325,7 @@
         {
           "path": "src/registry/icons/lucide/chart-bar-decreasing-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chart-bar-decreasing-icon.tsx"
+          "target": "@components/general/lucide/chart-bar-decreasing-icon.tsx"
         }
       ]
     },
@@ -1331,7 +1340,7 @@
         {
           "path": "src/registry/icons/lucide/chart-bar-increasing-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chart-bar-increasing-icon.tsx"
+          "target": "@components/general/lucide/chart-bar-increasing-icon.tsx"
         }
       ]
     },
@@ -1346,7 +1355,7 @@
         {
           "path": "src/registry/icons/lucide/chart-column-decreasing-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chart-column-decreasing-icon.tsx"
+          "target": "@components/general/lucide/chart-column-decreasing-icon.tsx"
         }
       ]
     },
@@ -1361,7 +1370,7 @@
         {
           "path": "src/registry/icons/lucide/chart-column-increasing-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chart-column-increasing-icon.tsx"
+          "target": "@components/general/lucide/chart-column-increasing-icon.tsx"
         }
       ]
     },
@@ -1376,7 +1385,7 @@
         {
           "path": "src/registry/icons/lucide/chart-line-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chart-line-icon.tsx"
+          "target": "@components/general/lucide/chart-line-icon.tsx"
         }
       ]
     },
@@ -1391,7 +1400,7 @@
         {
           "path": "src/registry/icons/lucide/chart-no-axes-column-decreasing-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chart-no-axes-column-decreasing-icon.tsx"
+          "target": "@components/general/lucide/chart-no-axes-column-decreasing-icon.tsx"
         }
       ]
     },
@@ -1406,7 +1415,7 @@
         {
           "path": "src/registry/icons/lucide/chart-no-axes-column-increasing-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chart-no-axes-column-increasing-icon.tsx"
+          "target": "@components/general/lucide/chart-no-axes-column-increasing-icon.tsx"
         }
       ]
     },
@@ -1421,7 +1430,7 @@
         {
           "path": "src/registry/icons/lucide/chart-pie-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chart-pie-icon.tsx"
+          "target": "@components/general/lucide/chart-pie-icon.tsx"
         }
       ]
     },
@@ -1436,7 +1445,7 @@
         {
           "path": "src/registry/icons/lucide/chart-scatter-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chart-scatter-icon.tsx"
+          "target": "@components/general/lucide/chart-scatter-icon.tsx"
         }
       ]
     },
@@ -1451,7 +1460,7 @@
         {
           "path": "src/registry/icons/lucide/chart-spline-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chart-spline-icon.tsx"
+          "target": "@components/general/lucide/chart-spline-icon.tsx"
         }
       ]
     },
@@ -1466,7 +1475,7 @@
         {
           "path": "src/registry/icons/lucide/check-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/check-check-icon.tsx"
+          "target": "@components/general/lucide/check-check-icon.tsx"
         }
       ]
     },
@@ -1481,7 +1490,7 @@
         {
           "path": "src/registry/icons/lucide/check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/check-icon.tsx"
+          "target": "@components/general/lucide/check-icon.tsx"
         }
       ]
     },
@@ -1496,7 +1505,7 @@
         {
           "path": "src/registry/icons/lucide/chess-bishop-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chess-bishop-icon.tsx"
+          "target": "@components/general/lucide/chess-bishop-icon.tsx"
         }
       ]
     },
@@ -1511,7 +1520,7 @@
         {
           "path": "src/registry/icons/lucide/chess-king-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chess-king-icon.tsx"
+          "target": "@components/general/lucide/chess-king-icon.tsx"
         }
       ]
     },
@@ -1526,7 +1535,7 @@
         {
           "path": "src/registry/icons/lucide/chess-knight-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chess-knight-icon.tsx"
+          "target": "@components/general/lucide/chess-knight-icon.tsx"
         }
       ]
     },
@@ -1541,7 +1550,7 @@
         {
           "path": "src/registry/icons/lucide/chess-pawn-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chess-pawn-icon.tsx"
+          "target": "@components/general/lucide/chess-pawn-icon.tsx"
         }
       ]
     },
@@ -1556,7 +1565,7 @@
         {
           "path": "src/registry/icons/lucide/chevron-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chevron-down-icon.tsx"
+          "target": "@components/general/lucide/chevron-down-icon.tsx"
         }
       ]
     },
@@ -1571,7 +1580,7 @@
         {
           "path": "src/registry/icons/lucide/chevron-first-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chevron-first-icon.tsx"
+          "target": "@components/general/lucide/chevron-first-icon.tsx"
         }
       ]
     },
@@ -1586,7 +1595,7 @@
         {
           "path": "src/registry/icons/lucide/chevron-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chevron-left-icon.tsx"
+          "target": "@components/general/lucide/chevron-left-icon.tsx"
         }
       ]
     },
@@ -1601,7 +1610,7 @@
         {
           "path": "src/registry/icons/lucide/chevron-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chevron-right-icon.tsx"
+          "target": "@components/general/lucide/chevron-right-icon.tsx"
         }
       ]
     },
@@ -1616,7 +1625,7 @@
         {
           "path": "src/registry/icons/lucide/chevron-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chevron-up-icon.tsx"
+          "target": "@components/general/lucide/chevron-up-icon.tsx"
         }
       ]
     },
@@ -1631,7 +1640,7 @@
         {
           "path": "src/registry/icons/lucide/chevrons-down-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chevrons-down-up-icon.tsx"
+          "target": "@components/general/lucide/chevrons-down-up-icon.tsx"
         }
       ]
     },
@@ -1646,7 +1655,7 @@
         {
           "path": "src/registry/icons/lucide/chevrons-left-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chevrons-left-right-icon.tsx"
+          "target": "@components/general/lucide/chevrons-left-right-icon.tsx"
         }
       ]
     },
@@ -1661,7 +1670,7 @@
         {
           "path": "src/registry/icons/lucide/chevrons-right-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chevrons-right-left-icon.tsx"
+          "target": "@components/general/lucide/chevrons-right-left-icon.tsx"
         }
       ]
     },
@@ -1676,7 +1685,7 @@
         {
           "path": "src/registry/icons/lucide/chevrons-up-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/chevrons-up-down-icon.tsx"
+          "target": "@components/general/lucide/chevrons-up-down-icon.tsx"
         }
       ]
     },
@@ -1691,7 +1700,7 @@
         {
           "path": "src/registry/icons/lucide/cigarette-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cigarette-icon.tsx"
+          "target": "@components/general/lucide/cigarette-icon.tsx"
         }
       ]
     },
@@ -1706,7 +1715,7 @@
         {
           "path": "src/registry/icons/lucide/cigarette-off-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cigarette-off-icon.tsx"
+          "target": "@components/general/lucide/cigarette-off-icon.tsx"
         }
       ]
     },
@@ -1721,7 +1730,7 @@
         {
           "path": "src/registry/icons/lucide/circle-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-check-icon.tsx"
+          "target": "@components/general/lucide/circle-check-icon.tsx"
         }
       ]
     },
@@ -1736,7 +1745,7 @@
         {
           "path": "src/registry/icons/lucide/circle-chevron-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-chevron-down-icon.tsx"
+          "target": "@components/general/lucide/circle-chevron-down-icon.tsx"
         }
       ]
     },
@@ -1751,7 +1760,7 @@
         {
           "path": "src/registry/icons/lucide/circle-chevron-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-chevron-left-icon.tsx"
+          "target": "@components/general/lucide/circle-chevron-left-icon.tsx"
         }
       ]
     },
@@ -1766,7 +1775,7 @@
         {
           "path": "src/registry/icons/lucide/circle-chevron-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-chevron-right-icon.tsx"
+          "target": "@components/general/lucide/circle-chevron-right-icon.tsx"
         }
       ]
     },
@@ -1781,7 +1790,7 @@
         {
           "path": "src/registry/icons/lucide/circle-chevron-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-chevron-up-icon.tsx"
+          "target": "@components/general/lucide/circle-chevron-up-icon.tsx"
         }
       ]
     },
@@ -1796,7 +1805,7 @@
         {
           "path": "src/registry/icons/lucide/circle-dashed-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-dashed-icon.tsx"
+          "target": "@components/general/lucide/circle-dashed-icon.tsx"
         }
       ]
     },
@@ -1811,7 +1820,7 @@
         {
           "path": "src/registry/icons/lucide/circle-dollar-sign-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-dollar-sign-icon.tsx"
+          "target": "@components/general/lucide/circle-dollar-sign-icon.tsx"
         }
       ]
     },
@@ -1826,7 +1835,7 @@
         {
           "path": "src/registry/icons/lucide/circle-gauge-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-gauge-icon.tsx"
+          "target": "@components/general/lucide/circle-gauge-icon.tsx"
         }
       ]
     },
@@ -1841,7 +1850,7 @@
         {
           "path": "src/registry/icons/lucide/circle-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-icon.tsx"
+          "target": "@components/general/lucide/circle-icon.tsx"
         }
       ]
     },
@@ -1856,7 +1865,7 @@
         {
           "path": "src/registry/icons/lucide/circle-question-mark-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-question-mark-icon.tsx"
+          "target": "@components/general/lucide/circle-question-mark-icon.tsx"
         }
       ]
     },
@@ -1871,7 +1880,7 @@
         {
           "path": "src/registry/icons/lucide/circle-x-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/circle-x-icon.tsx"
+          "target": "@components/general/lucide/circle-x-icon.tsx"
         }
       ]
     },
@@ -1886,7 +1895,7 @@
         {
           "path": "src/registry/icons/lucide/clapperboard-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/clapperboard-icon.tsx"
+          "target": "@components/general/lucide/clapperboard-icon.tsx"
         }
       ]
     },
@@ -1901,7 +1910,7 @@
         {
           "path": "src/registry/icons/lucide/clipboard-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/clipboard-check-icon.tsx"
+          "target": "@components/general/lucide/clipboard-check-icon.tsx"
         }
       ]
     },
@@ -1916,7 +1925,7 @@
         {
           "path": "src/registry/icons/lucide/clock-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/clock-icon.tsx"
+          "target": "@components/general/lucide/clock-icon.tsx"
         }
       ]
     },
@@ -1931,7 +1940,7 @@
         {
           "path": "src/registry/icons/lucide/cloud-backup-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cloud-backup-icon.tsx"
+          "target": "@components/general/lucide/cloud-backup-icon.tsx"
         }
       ]
     },
@@ -1946,7 +1955,7 @@
         {
           "path": "src/registry/icons/lucide/cloud-cog-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cloud-cog-icon.tsx"
+          "target": "@components/general/lucide/cloud-cog-icon.tsx"
         }
       ]
     },
@@ -1961,7 +1970,7 @@
         {
           "path": "src/registry/icons/lucide/cloud-download-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cloud-download-icon.tsx"
+          "target": "@components/general/lucide/cloud-download-icon.tsx"
         }
       ]
     },
@@ -1976,7 +1985,7 @@
         {
           "path": "src/registry/icons/lucide/cloud-lightning-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cloud-lightning-icon.tsx"
+          "target": "@components/general/lucide/cloud-lightning-icon.tsx"
         }
       ]
     },
@@ -1991,7 +2000,7 @@
         {
           "path": "src/registry/icons/lucide/cloud-rain-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cloud-rain-icon.tsx"
+          "target": "@components/general/lucide/cloud-rain-icon.tsx"
         }
       ]
     },
@@ -2006,7 +2015,7 @@
         {
           "path": "src/registry/icons/lucide/cloud-rain-wind-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cloud-rain-wind-icon.tsx"
+          "target": "@components/general/lucide/cloud-rain-wind-icon.tsx"
         }
       ]
     },
@@ -2021,7 +2030,7 @@
         {
           "path": "src/registry/icons/lucide/cloud-snow-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cloud-snow-icon.tsx"
+          "target": "@components/general/lucide/cloud-snow-icon.tsx"
         }
       ]
     },
@@ -2036,7 +2045,7 @@
         {
           "path": "src/registry/icons/lucide/cloud-sun-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cloud-sun-icon.tsx"
+          "target": "@components/general/lucide/cloud-sun-icon.tsx"
         }
       ]
     },
@@ -2051,7 +2060,7 @@
         {
           "path": "src/registry/icons/lucide/cloud-sync-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cloud-sync-icon.tsx"
+          "target": "@components/general/lucide/cloud-sync-icon.tsx"
         }
       ]
     },
@@ -2066,7 +2075,7 @@
         {
           "path": "src/registry/icons/lucide/cloud-upload-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cloud-upload-icon.tsx"
+          "target": "@components/general/lucide/cloud-upload-icon.tsx"
         }
       ]
     },
@@ -2081,7 +2090,7 @@
         {
           "path": "src/registry/icons/lucide/code-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/code-icon.tsx"
+          "target": "@components/general/lucide/code-icon.tsx"
         }
       ]
     },
@@ -2096,7 +2105,7 @@
         {
           "path": "src/registry/icons/lucide/coffee-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/coffee-icon.tsx"
+          "target": "@components/general/lucide/coffee-icon.tsx"
         }
       ]
     },
@@ -2111,7 +2120,7 @@
         {
           "path": "src/registry/icons/lucide/cog-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cog-icon.tsx"
+          "target": "@components/general/lucide/cog-icon.tsx"
         }
       ]
     },
@@ -2126,7 +2135,7 @@
         {
           "path": "src/registry/icons/lucide/compass-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/compass-icon.tsx"
+          "target": "@components/general/lucide/compass-icon.tsx"
         }
       ]
     },
@@ -2141,7 +2150,7 @@
         {
           "path": "src/registry/icons/lucide/concierge-bell-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/concierge-bell-icon.tsx"
+          "target": "@components/general/lucide/concierge-bell-icon.tsx"
         }
       ]
     },
@@ -2156,7 +2165,7 @@
         {
           "path": "src/registry/icons/lucide/construction-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/construction-icon.tsx"
+          "target": "@components/general/lucide/construction-icon.tsx"
         }
       ]
     },
@@ -2171,7 +2180,7 @@
         {
           "path": "src/registry/icons/lucide/contrast-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/contrast-icon.tsx"
+          "target": "@components/general/lucide/contrast-icon.tsx"
         }
       ]
     },
@@ -2186,7 +2195,7 @@
         {
           "path": "src/registry/icons/lucide/cooking-pot-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cooking-pot-icon.tsx"
+          "target": "@components/general/lucide/cooking-pot-icon.tsx"
         }
       ]
     },
@@ -2201,7 +2210,7 @@
         {
           "path": "src/registry/icons/lucide/copy-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/copy-icon.tsx"
+          "target": "@components/general/lucide/copy-icon.tsx"
         }
       ]
     },
@@ -2216,7 +2225,7 @@
         {
           "path": "src/registry/icons/lucide/corner-down-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/corner-down-left-icon.tsx"
+          "target": "@components/general/lucide/corner-down-left-icon.tsx"
         }
       ]
     },
@@ -2231,7 +2240,7 @@
         {
           "path": "src/registry/icons/lucide/corner-down-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/corner-down-right-icon.tsx"
+          "target": "@components/general/lucide/corner-down-right-icon.tsx"
         }
       ]
     },
@@ -2246,7 +2255,7 @@
         {
           "path": "src/registry/icons/lucide/corner-left-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/corner-left-down-icon.tsx"
+          "target": "@components/general/lucide/corner-left-down-icon.tsx"
         }
       ]
     },
@@ -2261,7 +2270,7 @@
         {
           "path": "src/registry/icons/lucide/corner-left-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/corner-left-up-icon.tsx"
+          "target": "@components/general/lucide/corner-left-up-icon.tsx"
         }
       ]
     },
@@ -2276,7 +2285,7 @@
         {
           "path": "src/registry/icons/lucide/corner-right-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/corner-right-down-icon.tsx"
+          "target": "@components/general/lucide/corner-right-down-icon.tsx"
         }
       ]
     },
@@ -2291,7 +2300,7 @@
         {
           "path": "src/registry/icons/lucide/corner-right-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/corner-right-up-icon.tsx"
+          "target": "@components/general/lucide/corner-right-up-icon.tsx"
         }
       ]
     },
@@ -2306,7 +2315,7 @@
         {
           "path": "src/registry/icons/lucide/corner-up-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/corner-up-left-icon.tsx"
+          "target": "@components/general/lucide/corner-up-left-icon.tsx"
         }
       ]
     },
@@ -2321,7 +2330,7 @@
         {
           "path": "src/registry/icons/lucide/corner-up-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/corner-up-right-icon.tsx"
+          "target": "@components/general/lucide/corner-up-right-icon.tsx"
         }
       ]
     },
@@ -2336,7 +2345,7 @@
         {
           "path": "src/registry/icons/lucide/cpu-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cpu-icon.tsx"
+          "target": "@components/general/lucide/cpu-icon.tsx"
         }
       ]
     },
@@ -2351,7 +2360,7 @@
         {
           "path": "src/registry/icons/lucide/credit-card-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/credit-card-icon.tsx"
+          "target": "@components/general/lucide/credit-card-icon.tsx"
         }
       ]
     },
@@ -2366,7 +2375,7 @@
         {
           "path": "src/registry/icons/lucide/cup-soda-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/cup-soda-icon.tsx"
+          "target": "@components/general/lucide/cup-soda-icon.tsx"
         }
       ]
     },
@@ -2381,7 +2390,7 @@
         {
           "path": "src/registry/icons/lucide/database-backup-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/database-backup-icon.tsx"
+          "target": "@components/general/lucide/database-backup-icon.tsx"
         }
       ]
     },
@@ -2396,7 +2405,7 @@
         {
           "path": "src/registry/icons/lucide/delete-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/delete-icon.tsx"
+          "target": "@components/general/lucide/delete-icon.tsx"
         }
       ]
     },
@@ -2411,7 +2420,7 @@
         {
           "path": "src/registry/icons/lucide/disc-3-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/disc-3-icon.tsx"
+          "target": "@components/general/lucide/disc-3-icon.tsx"
         }
       ]
     },
@@ -2426,7 +2435,7 @@
         {
           "path": "src/registry/icons/lucide/dollar-sign-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/dollar-sign-icon.tsx"
+          "target": "@components/general/lucide/dollar-sign-icon.tsx"
         }
       ]
     },
@@ -2441,7 +2450,7 @@
         {
           "path": "src/registry/icons/lucide/download-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/download-icon.tsx"
+          "target": "@components/general/lucide/download-icon.tsx"
         }
       ]
     },
@@ -2456,7 +2465,7 @@
         {
           "path": "src/registry/icons/lucide/droplet-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/droplet-icon.tsx"
+          "target": "@components/general/lucide/droplet-icon.tsx"
         }
       ]
     },
@@ -2471,7 +2480,7 @@
         {
           "path": "src/registry/icons/lucide/drum-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/drum-icon.tsx"
+          "target": "@components/general/lucide/drum-icon.tsx"
         }
       ]
     },
@@ -2486,7 +2495,7 @@
         {
           "path": "src/registry/icons/lucide/dumbbell-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/dumbbell-icon.tsx"
+          "target": "@components/general/lucide/dumbbell-icon.tsx"
         }
       ]
     },
@@ -2501,7 +2510,7 @@
         {
           "path": "src/registry/icons/lucide/earth-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/earth-icon.tsx"
+          "target": "@components/general/lucide/earth-icon.tsx"
         }
       ]
     },
@@ -2516,7 +2525,7 @@
         {
           "path": "src/registry/icons/lucide/euro-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/euro-icon.tsx"
+          "target": "@components/general/lucide/euro-icon.tsx"
         }
       ]
     },
@@ -2531,7 +2540,7 @@
         {
           "path": "src/registry/icons/lucide/ev-charger-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/ev-charger-icon.tsx"
+          "target": "@components/general/lucide/ev-charger-icon.tsx"
         }
       ]
     },
@@ -2546,7 +2555,7 @@
         {
           "path": "src/registry/icons/lucide/expand-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/expand-icon.tsx"
+          "target": "@components/general/lucide/expand-icon.tsx"
         }
       ]
     },
@@ -2561,7 +2570,7 @@
         {
           "path": "src/registry/icons/lucide/external-link-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/external-link-icon.tsx"
+          "target": "@components/general/lucide/external-link-icon.tsx"
         }
       ]
     },
@@ -2576,7 +2585,7 @@
         {
           "path": "src/registry/icons/lucide/eye-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/eye-icon.tsx"
+          "target": "@components/general/lucide/eye-icon.tsx"
         }
       ]
     },
@@ -2591,7 +2600,7 @@
         {
           "path": "src/registry/icons/lucide/eye-off-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/eye-off-icon.tsx"
+          "target": "@components/general/lucide/eye-off-icon.tsx"
         }
       ]
     },
@@ -2606,7 +2615,7 @@
         {
           "path": "src/registry/icons/lucide/face-angry-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/face-angry-icon.tsx"
+          "target": "@components/general/lucide/face-angry-icon.tsx"
         }
       ]
     },
@@ -2621,7 +2630,7 @@
         {
           "path": "src/registry/icons/lucide/face-expressionless-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/face-expressionless-icon.tsx"
+          "target": "@components/general/lucide/face-expressionless-icon.tsx"
         }
       ]
     },
@@ -2636,7 +2645,7 @@
         {
           "path": "src/registry/icons/lucide/face-grinning-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/face-grinning-icon.tsx"
+          "target": "@components/general/lucide/face-grinning-icon.tsx"
         }
       ]
     },
@@ -2651,7 +2660,7 @@
         {
           "path": "src/registry/icons/lucide/face-neutral-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/face-neutral-icon.tsx"
+          "target": "@components/general/lucide/face-neutral-icon.tsx"
         }
       ]
     },
@@ -2666,7 +2675,7 @@
         {
           "path": "src/registry/icons/lucide/face-slightly-frowning-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/face-slightly-frowning-icon.tsx"
+          "target": "@components/general/lucide/face-slightly-frowning-icon.tsx"
         }
       ]
     },
@@ -2681,7 +2690,7 @@
         {
           "path": "src/registry/icons/lucide/face-slightly-smiling-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/face-slightly-smiling-icon.tsx"
+          "target": "@components/general/lucide/face-slightly-smiling-icon.tsx"
         }
       ]
     },
@@ -2696,7 +2705,7 @@
         {
           "path": "src/registry/icons/lucide/face-slightly-smiling-plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/face-slightly-smiling-plus-icon.tsx"
+          "target": "@components/general/lucide/face-slightly-smiling-plus-icon.tsx"
         }
       ]
     },
@@ -2711,7 +2720,7 @@
         {
           "path": "src/registry/icons/lucide/fan-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/fan-icon.tsx"
+          "target": "@components/general/lucide/fan-icon.tsx"
         }
       ]
     },
@@ -2726,7 +2735,7 @@
         {
           "path": "src/registry/icons/lucide/feather-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/feather-icon.tsx"
+          "target": "@components/general/lucide/feather-icon.tsx"
         }
       ]
     },
@@ -2741,7 +2750,7 @@
         {
           "path": "src/registry/icons/lucide/file-chart-line-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/file-chart-line-icon.tsx"
+          "target": "@components/general/lucide/file-chart-line-icon.tsx"
         }
       ]
     },
@@ -2756,7 +2765,7 @@
         {
           "path": "src/registry/icons/lucide/file-check-corner-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/file-check-corner-icon.tsx"
+          "target": "@components/general/lucide/file-check-corner-icon.tsx"
         }
       ]
     },
@@ -2771,7 +2780,7 @@
         {
           "path": "src/registry/icons/lucide/file-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/file-check-icon.tsx"
+          "target": "@components/general/lucide/file-check-icon.tsx"
         }
       ]
     },
@@ -2786,7 +2795,7 @@
         {
           "path": "src/registry/icons/lucide/file-cog-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/file-cog-icon.tsx"
+          "target": "@components/general/lucide/file-cog-icon.tsx"
         }
       ]
     },
@@ -2801,7 +2810,7 @@
         {
           "path": "src/registry/icons/lucide/file-pen-line-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/file-pen-line-icon.tsx"
+          "target": "@components/general/lucide/file-pen-line-icon.tsx"
         }
       ]
     },
@@ -2816,7 +2825,7 @@
         {
           "path": "src/registry/icons/lucide/file-stack-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/file-stack-icon.tsx"
+          "target": "@components/general/lucide/file-stack-icon.tsx"
         }
       ]
     },
@@ -2831,7 +2840,7 @@
         {
           "path": "src/registry/icons/lucide/file-text-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/file-text-icon.tsx"
+          "target": "@components/general/lucide/file-text-icon.tsx"
         }
       ]
     },
@@ -2846,7 +2855,7 @@
         {
           "path": "src/registry/icons/lucide/fingerprint-pattern-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/fingerprint-pattern-icon.tsx"
+          "target": "@components/general/lucide/fingerprint-pattern-icon.tsx"
         }
       ]
     },
@@ -2861,7 +2870,7 @@
         {
           "path": "src/registry/icons/lucide/fish-symbol-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/fish-symbol-icon.tsx"
+          "target": "@components/general/lucide/fish-symbol-icon.tsx"
         }
       ]
     },
@@ -2876,7 +2885,7 @@
         {
           "path": "src/registry/icons/lucide/flag-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/flag-icon.tsx"
+          "target": "@components/general/lucide/flag-icon.tsx"
         }
       ]
     },
@@ -2891,7 +2900,7 @@
         {
           "path": "src/registry/icons/lucide/flame-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/flame-icon.tsx"
+          "target": "@components/general/lucide/flame-icon.tsx"
         }
       ]
     },
@@ -2906,7 +2915,7 @@
         {
           "path": "src/registry/icons/lucide/folder-archive-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-archive-icon.tsx"
+          "target": "@components/general/lucide/folder-archive-icon.tsx"
         }
       ]
     },
@@ -2921,7 +2930,7 @@
         {
           "path": "src/registry/icons/lucide/folder-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-check-icon.tsx"
+          "target": "@components/general/lucide/folder-check-icon.tsx"
         }
       ]
     },
@@ -2936,7 +2945,7 @@
         {
           "path": "src/registry/icons/lucide/folder-clock-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-clock-icon.tsx"
+          "target": "@components/general/lucide/folder-clock-icon.tsx"
         }
       ]
     },
@@ -2951,7 +2960,7 @@
         {
           "path": "src/registry/icons/lucide/folder-code-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-code-icon.tsx"
+          "target": "@components/general/lucide/folder-code-icon.tsx"
         }
       ]
     },
@@ -2966,7 +2975,7 @@
         {
           "path": "src/registry/icons/lucide/folder-cog-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-cog-icon.tsx"
+          "target": "@components/general/lucide/folder-cog-icon.tsx"
         }
       ]
     },
@@ -2981,7 +2990,7 @@
         {
           "path": "src/registry/icons/lucide/folder-dot-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-dot-icon.tsx"
+          "target": "@components/general/lucide/folder-dot-icon.tsx"
         }
       ]
     },
@@ -2996,7 +3005,7 @@
         {
           "path": "src/registry/icons/lucide/folder-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-down-icon.tsx"
+          "target": "@components/general/lucide/folder-down-icon.tsx"
         }
       ]
     },
@@ -3011,7 +3020,7 @@
         {
           "path": "src/registry/icons/lucide/folder-git-2-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-git-2-icon.tsx"
+          "target": "@components/general/lucide/folder-git-2-icon.tsx"
         }
       ]
     },
@@ -3026,7 +3035,7 @@
         {
           "path": "src/registry/icons/lucide/folder-git-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-git-icon.tsx"
+          "target": "@components/general/lucide/folder-git-icon.tsx"
         }
       ]
     },
@@ -3041,7 +3050,7 @@
         {
           "path": "src/registry/icons/lucide/folder-heart-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-heart-icon.tsx"
+          "target": "@components/general/lucide/folder-heart-icon.tsx"
         }
       ]
     },
@@ -3056,7 +3065,7 @@
         {
           "path": "src/registry/icons/lucide/folder-input-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-input-icon.tsx"
+          "target": "@components/general/lucide/folder-input-icon.tsx"
         }
       ]
     },
@@ -3071,7 +3080,7 @@
         {
           "path": "src/registry/icons/lucide/folder-kanban-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-kanban-icon.tsx"
+          "target": "@components/general/lucide/folder-kanban-icon.tsx"
         }
       ]
     },
@@ -3086,7 +3095,7 @@
         {
           "path": "src/registry/icons/lucide/folder-key-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-key-icon.tsx"
+          "target": "@components/general/lucide/folder-key-icon.tsx"
         }
       ]
     },
@@ -3101,7 +3110,7 @@
         {
           "path": "src/registry/icons/lucide/folder-lock-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-lock-icon.tsx"
+          "target": "@components/general/lucide/folder-lock-icon.tsx"
         }
       ]
     },
@@ -3116,7 +3125,7 @@
         {
           "path": "src/registry/icons/lucide/folder-minus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-minus-icon.tsx"
+          "target": "@components/general/lucide/folder-minus-icon.tsx"
         }
       ]
     },
@@ -3131,7 +3140,7 @@
         {
           "path": "src/registry/icons/lucide/folder-open-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-open-icon.tsx"
+          "target": "@components/general/lucide/folder-open-icon.tsx"
         }
       ]
     },
@@ -3146,7 +3155,7 @@
         {
           "path": "src/registry/icons/lucide/folder-output-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-output-icon.tsx"
+          "target": "@components/general/lucide/folder-output-icon.tsx"
         }
       ]
     },
@@ -3161,7 +3170,7 @@
         {
           "path": "src/registry/icons/lucide/folder-plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-plus-icon.tsx"
+          "target": "@components/general/lucide/folder-plus-icon.tsx"
         }
       ]
     },
@@ -3176,7 +3185,7 @@
         {
           "path": "src/registry/icons/lucide/folder-root-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-root-icon.tsx"
+          "target": "@components/general/lucide/folder-root-icon.tsx"
         }
       ]
     },
@@ -3191,7 +3200,7 @@
         {
           "path": "src/registry/icons/lucide/folder-sync-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-sync-icon.tsx"
+          "target": "@components/general/lucide/folder-sync-icon.tsx"
         }
       ]
     },
@@ -3206,7 +3215,7 @@
         {
           "path": "src/registry/icons/lucide/folder-tree-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-tree-icon.tsx"
+          "target": "@components/general/lucide/folder-tree-icon.tsx"
         }
       ]
     },
@@ -3221,7 +3230,7 @@
         {
           "path": "src/registry/icons/lucide/folder-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-up-icon.tsx"
+          "target": "@components/general/lucide/folder-up-icon.tsx"
         }
       ]
     },
@@ -3236,7 +3245,7 @@
         {
           "path": "src/registry/icons/lucide/folder-x-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folder-x-icon.tsx"
+          "target": "@components/general/lucide/folder-x-icon.tsx"
         }
       ]
     },
@@ -3251,7 +3260,7 @@
         {
           "path": "src/registry/icons/lucide/folders-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/folders-icon.tsx"
+          "target": "@components/general/lucide/folders-icon.tsx"
         }
       ]
     },
@@ -3266,7 +3275,7 @@
         {
           "path": "src/registry/icons/lucide/frame-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/frame-icon.tsx"
+          "target": "@components/general/lucide/frame-icon.tsx"
         }
       ]
     },
@@ -3281,7 +3290,7 @@
         {
           "path": "src/registry/icons/lucide/gallery-horizontal-end-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/gallery-horizontal-end-icon.tsx"
+          "target": "@components/general/lucide/gallery-horizontal-end-icon.tsx"
         }
       ]
     },
@@ -3296,7 +3305,7 @@
         {
           "path": "src/registry/icons/lucide/gallery-thumbnails-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/gallery-thumbnails-icon.tsx"
+          "target": "@components/general/lucide/gallery-thumbnails-icon.tsx"
         }
       ]
     },
@@ -3311,7 +3320,7 @@
         {
           "path": "src/registry/icons/lucide/gallery-vertical-end-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/gallery-vertical-end-icon.tsx"
+          "target": "@components/general/lucide/gallery-vertical-end-icon.tsx"
         }
       ]
     },
@@ -3326,7 +3335,7 @@
         {
           "path": "src/registry/icons/lucide/gauge-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/gauge-icon.tsx"
+          "target": "@components/general/lucide/gauge-icon.tsx"
         }
       ]
     },
@@ -3341,7 +3350,7 @@
         {
           "path": "src/registry/icons/lucide/gavel-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/gavel-icon.tsx"
+          "target": "@components/general/lucide/gavel-icon.tsx"
         }
       ]
     },
@@ -3356,7 +3365,7 @@
         {
           "path": "src/registry/icons/lucide/georgian-lari-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/georgian-lari-icon.tsx"
+          "target": "@components/general/lucide/georgian-lari-icon.tsx"
         }
       ]
     },
@@ -3371,7 +3380,7 @@
         {
           "path": "src/registry/icons/lucide/git-branch-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-branch-icon.tsx"
+          "target": "@components/general/lucide/git-branch-icon.tsx"
         }
       ]
     },
@@ -3386,7 +3395,7 @@
         {
           "path": "src/registry/icons/lucide/git-commit-horizontal-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-commit-horizontal-icon.tsx"
+          "target": "@components/general/lucide/git-commit-horizontal-icon.tsx"
         }
       ]
     },
@@ -3401,7 +3410,7 @@
         {
           "path": "src/registry/icons/lucide/git-commit-vertical-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-commit-vertical-icon.tsx"
+          "target": "@components/general/lucide/git-commit-vertical-icon.tsx"
         }
       ]
     },
@@ -3416,7 +3425,7 @@
         {
           "path": "src/registry/icons/lucide/git-compare-arrows-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-compare-arrows-icon.tsx"
+          "target": "@components/general/lucide/git-compare-arrows-icon.tsx"
         }
       ]
     },
@@ -3431,7 +3440,7 @@
         {
           "path": "src/registry/icons/lucide/git-compare-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-compare-icon.tsx"
+          "target": "@components/general/lucide/git-compare-icon.tsx"
         }
       ]
     },
@@ -3446,7 +3455,7 @@
         {
           "path": "src/registry/icons/lucide/git-fork-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-fork-icon.tsx"
+          "target": "@components/general/lucide/git-fork-icon.tsx"
         }
       ]
     },
@@ -3461,7 +3470,7 @@
         {
           "path": "src/registry/icons/lucide/git-graph-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-graph-icon.tsx"
+          "target": "@components/general/lucide/git-graph-icon.tsx"
         }
       ]
     },
@@ -3476,7 +3485,7 @@
         {
           "path": "src/registry/icons/lucide/git-merge-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-merge-icon.tsx"
+          "target": "@components/general/lucide/git-merge-icon.tsx"
         }
       ]
     },
@@ -3491,7 +3500,7 @@
         {
           "path": "src/registry/icons/lucide/git-pull-request-closed-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-pull-request-closed-icon.tsx"
+          "target": "@components/general/lucide/git-pull-request-closed-icon.tsx"
         }
       ]
     },
@@ -3506,7 +3515,7 @@
         {
           "path": "src/registry/icons/lucide/git-pull-request-create-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-pull-request-create-icon.tsx"
+          "target": "@components/general/lucide/git-pull-request-create-icon.tsx"
         }
       ]
     },
@@ -3521,7 +3530,7 @@
         {
           "path": "src/registry/icons/lucide/git-pull-request-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/git-pull-request-icon.tsx"
+          "target": "@components/general/lucide/git-pull-request-icon.tsx"
         }
       ]
     },
@@ -3536,7 +3545,7 @@
         {
           "path": "src/registry/icons/lucide/graduation-cap-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/graduation-cap-icon.tsx"
+          "target": "@components/general/lucide/graduation-cap-icon.tsx"
         }
       ]
     },
@@ -3551,7 +3560,7 @@
         {
           "path": "src/registry/icons/lucide/grip-horizontal-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/grip-horizontal-icon.tsx"
+          "target": "@components/general/lucide/grip-horizontal-icon.tsx"
         }
       ]
     },
@@ -3566,7 +3575,7 @@
         {
           "path": "src/registry/icons/lucide/grip-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/grip-icon.tsx"
+          "target": "@components/general/lucide/grip-icon.tsx"
         }
       ]
     },
@@ -3581,7 +3590,7 @@
         {
           "path": "src/registry/icons/lucide/grip-vertical-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/grip-vertical-icon.tsx"
+          "target": "@components/general/lucide/grip-vertical-icon.tsx"
         }
       ]
     },
@@ -3596,7 +3605,7 @@
         {
           "path": "src/registry/icons/lucide/hammer-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hammer-icon.tsx"
+          "target": "@components/general/lucide/hammer-icon.tsx"
         }
       ]
     },
@@ -3611,7 +3620,7 @@
         {
           "path": "src/registry/icons/lucide/hand-coins-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hand-coins-icon.tsx"
+          "target": "@components/general/lucide/hand-coins-icon.tsx"
         }
       ]
     },
@@ -3626,7 +3635,7 @@
         {
           "path": "src/registry/icons/lucide/hand-fist-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hand-fist-icon.tsx"
+          "target": "@components/general/lucide/hand-fist-icon.tsx"
         }
       ]
     },
@@ -3641,7 +3650,7 @@
         {
           "path": "src/registry/icons/lucide/hand-grab-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hand-grab-icon.tsx"
+          "target": "@components/general/lucide/hand-grab-icon.tsx"
         }
       ]
     },
@@ -3656,7 +3665,7 @@
         {
           "path": "src/registry/icons/lucide/hand-heart-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hand-heart-icon.tsx"
+          "target": "@components/general/lucide/hand-heart-icon.tsx"
         }
       ]
     },
@@ -3671,7 +3680,7 @@
         {
           "path": "src/registry/icons/lucide/hand-helping-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hand-helping-icon.tsx"
+          "target": "@components/general/lucide/hand-helping-icon.tsx"
         }
       ]
     },
@@ -3686,7 +3695,7 @@
         {
           "path": "src/registry/icons/lucide/hand-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hand-icon.tsx"
+          "target": "@components/general/lucide/hand-icon.tsx"
         }
       ]
     },
@@ -3701,7 +3710,7 @@
         {
           "path": "src/registry/icons/lucide/hand-metal-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hand-metal-icon.tsx"
+          "target": "@components/general/lucide/hand-metal-icon.tsx"
         }
       ]
     },
@@ -3716,7 +3725,7 @@
         {
           "path": "src/registry/icons/lucide/hard-drive-download-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hard-drive-download-icon.tsx"
+          "target": "@components/general/lucide/hard-drive-download-icon.tsx"
         }
       ]
     },
@@ -3731,7 +3740,7 @@
         {
           "path": "src/registry/icons/lucide/hard-drive-upload-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hard-drive-upload-icon.tsx"
+          "target": "@components/general/lucide/hard-drive-upload-icon.tsx"
         }
       ]
     },
@@ -3746,7 +3755,7 @@
         {
           "path": "src/registry/icons/lucide/hash-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hash-icon.tsx"
+          "target": "@components/general/lucide/hash-icon.tsx"
         }
       ]
     },
@@ -3761,7 +3770,7 @@
         {
           "path": "src/registry/icons/lucide/hat-glasses-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hat-glasses-icon.tsx"
+          "target": "@components/general/lucide/hat-glasses-icon.tsx"
         }
       ]
     },
@@ -3776,7 +3785,7 @@
         {
           "path": "src/registry/icons/lucide/heading-1-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/heading-1-icon.tsx"
+          "target": "@components/general/lucide/heading-1-icon.tsx"
         }
       ]
     },
@@ -3791,7 +3800,7 @@
         {
           "path": "src/registry/icons/lucide/heading-2-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/heading-2-icon.tsx"
+          "target": "@components/general/lucide/heading-2-icon.tsx"
         }
       ]
     },
@@ -3806,7 +3815,7 @@
         {
           "path": "src/registry/icons/lucide/heading-3-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/heading-3-icon.tsx"
+          "target": "@components/general/lucide/heading-3-icon.tsx"
         }
       ]
     },
@@ -3821,7 +3830,7 @@
         {
           "path": "src/registry/icons/lucide/heart-handshake-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/heart-handshake-icon.tsx"
+          "target": "@components/general/lucide/heart-handshake-icon.tsx"
         }
       ]
     },
@@ -3836,7 +3845,7 @@
         {
           "path": "src/registry/icons/lucide/heart-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/heart-icon.tsx"
+          "target": "@components/general/lucide/heart-icon.tsx"
         }
       ]
     },
@@ -3851,7 +3860,7 @@
         {
           "path": "src/registry/icons/lucide/heart-pulse-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/heart-pulse-icon.tsx"
+          "target": "@components/general/lucide/heart-pulse-icon.tsx"
         }
       ]
     },
@@ -3866,7 +3875,7 @@
         {
           "path": "src/registry/icons/lucide/highlighter-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/highlighter-icon.tsx"
+          "target": "@components/general/lucide/highlighter-icon.tsx"
         }
       ]
     },
@@ -3881,7 +3890,7 @@
         {
           "path": "src/registry/icons/lucide/hourglass-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/hourglass-icon.tsx"
+          "target": "@components/general/lucide/hourglass-icon.tsx"
         }
       ]
     },
@@ -3896,7 +3905,7 @@
         {
           "path": "src/registry/icons/lucide/house-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/house-icon.tsx"
+          "target": "@components/general/lucide/house-icon.tsx"
         }
       ]
     },
@@ -3911,7 +3920,7 @@
         {
           "path": "src/registry/icons/lucide/id-card-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/id-card-icon.tsx"
+          "target": "@components/general/lucide/id-card-icon.tsx"
         }
       ]
     },
@@ -3926,7 +3935,7 @@
         {
           "path": "src/registry/icons/lucide/image-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/image-icon.tsx"
+          "target": "@components/general/lucide/image-icon.tsx"
         }
       ]
     },
@@ -3941,7 +3950,7 @@
         {
           "path": "src/registry/icons/lucide/indian-rupee-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/indian-rupee-icon.tsx"
+          "target": "@components/general/lucide/indian-rupee-icon.tsx"
         }
       ]
     },
@@ -3956,7 +3965,7 @@
         {
           "path": "src/registry/icons/lucide/info-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/info-icon.tsx"
+          "target": "@components/general/lucide/info-icon.tsx"
         }
       ]
     },
@@ -3971,7 +3980,7 @@
         {
           "path": "src/registry/icons/lucide/italic-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/italic-icon.tsx"
+          "target": "@components/general/lucide/italic-icon.tsx"
         }
       ]
     },
@@ -3986,7 +3995,7 @@
         {
           "path": "src/registry/icons/lucide/japanese-yen-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/japanese-yen-icon.tsx"
+          "target": "@components/general/lucide/japanese-yen-icon.tsx"
         }
       ]
     },
@@ -4001,7 +4010,7 @@
         {
           "path": "src/registry/icons/lucide/key-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/key-icon.tsx"
+          "target": "@components/general/lucide/key-icon.tsx"
         }
       ]
     },
@@ -4016,7 +4025,7 @@
         {
           "path": "src/registry/icons/lucide/key-round-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/key-round-icon.tsx"
+          "target": "@components/general/lucide/key-round-icon.tsx"
         }
       ]
     },
@@ -4031,7 +4040,7 @@
         {
           "path": "src/registry/icons/lucide/key-square-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/key-square-icon.tsx"
+          "target": "@components/general/lucide/key-square-icon.tsx"
         }
       ]
     },
@@ -4046,7 +4055,7 @@
         {
           "path": "src/registry/icons/lucide/keyboard-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/keyboard-icon.tsx"
+          "target": "@components/general/lucide/keyboard-icon.tsx"
         }
       ]
     },
@@ -4061,7 +4070,7 @@
         {
           "path": "src/registry/icons/lucide/languages-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/languages-icon.tsx"
+          "target": "@components/general/lucide/languages-icon.tsx"
         }
       ]
     },
@@ -4076,7 +4085,7 @@
         {
           "path": "src/registry/icons/lucide/laptop-minimal-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/laptop-minimal-check-icon.tsx"
+          "target": "@components/general/lucide/laptop-minimal-check-icon.tsx"
         }
       ]
     },
@@ -4091,7 +4100,7 @@
         {
           "path": "src/registry/icons/lucide/layers-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/layers-icon.tsx"
+          "target": "@components/general/lucide/layers-icon.tsx"
         }
       ]
     },
@@ -4106,7 +4115,7 @@
         {
           "path": "src/registry/icons/lucide/layout-grid-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/layout-grid-icon.tsx"
+          "target": "@components/general/lucide/layout-grid-icon.tsx"
         }
       ]
     },
@@ -4121,7 +4130,7 @@
         {
           "path": "src/registry/icons/lucide/layout-panel-top-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/layout-panel-top-icon.tsx"
+          "target": "@components/general/lucide/layout-panel-top-icon.tsx"
         }
       ]
     },
@@ -4136,7 +4145,7 @@
         {
           "path": "src/registry/icons/lucide/leaf-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/leaf-icon.tsx"
+          "target": "@components/general/lucide/leaf-icon.tsx"
         }
       ]
     },
@@ -4151,7 +4160,7 @@
         {
           "path": "src/registry/icons/lucide/leafy-green-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/leafy-green-icon.tsx"
+          "target": "@components/general/lucide/leafy-green-icon.tsx"
         }
       ]
     },
@@ -4166,7 +4175,7 @@
         {
           "path": "src/registry/icons/lucide/letter-b-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/letter-b-icon.tsx"
+          "target": "@components/general/lucide/letter-b-icon.tsx"
         }
       ]
     },
@@ -4181,7 +4190,7 @@
         {
           "path": "src/registry/icons/lucide/lightbulb-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/lightbulb-icon.tsx"
+          "target": "@components/general/lucide/lightbulb-icon.tsx"
         }
       ]
     },
@@ -4196,7 +4205,7 @@
         {
           "path": "src/registry/icons/lucide/link-2-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/link-2-icon.tsx"
+          "target": "@components/general/lucide/link-2-icon.tsx"
         }
       ]
     },
@@ -4211,7 +4220,7 @@
         {
           "path": "src/registry/icons/lucide/link-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/link-icon.tsx"
+          "target": "@components/general/lucide/link-icon.tsx"
         }
       ]
     },
@@ -4226,7 +4235,7 @@
         {
           "path": "src/registry/icons/lucide/list-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/list-icon.tsx"
+          "target": "@components/general/lucide/list-icon.tsx"
         }
       ]
     },
@@ -4241,7 +4250,7 @@
         {
           "path": "src/registry/icons/lucide/list-ordered-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/list-ordered-icon.tsx"
+          "target": "@components/general/lucide/list-ordered-icon.tsx"
         }
       ]
     },
@@ -4256,7 +4265,7 @@
         {
           "path": "src/registry/icons/lucide/list-todo-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/list-todo-icon.tsx"
+          "target": "@components/general/lucide/list-todo-icon.tsx"
         }
       ]
     },
@@ -4271,7 +4280,7 @@
         {
           "path": "src/registry/icons/lucide/loader-circle-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/loader-circle-icon.tsx"
+          "target": "@components/general/lucide/loader-circle-icon.tsx"
         }
       ]
     },
@@ -4286,7 +4295,7 @@
         {
           "path": "src/registry/icons/lucide/loader-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/loader-icon.tsx"
+          "target": "@components/general/lucide/loader-icon.tsx"
         }
       ]
     },
@@ -4301,7 +4310,7 @@
         {
           "path": "src/registry/icons/lucide/loader-pinwheel-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/loader-pinwheel-icon.tsx"
+          "target": "@components/general/lucide/loader-pinwheel-icon.tsx"
         }
       ]
     },
@@ -4316,7 +4325,7 @@
         {
           "path": "src/registry/icons/lucide/locate-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/locate-icon.tsx"
+          "target": "@components/general/lucide/locate-icon.tsx"
         }
       ]
     },
@@ -4331,7 +4340,7 @@
         {
           "path": "src/registry/icons/lucide/lock-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/lock-icon.tsx"
+          "target": "@components/general/lucide/lock-icon.tsx"
         }
       ]
     },
@@ -4346,7 +4355,7 @@
         {
           "path": "src/registry/icons/lucide/lock-keyhole-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/lock-keyhole-icon.tsx"
+          "target": "@components/general/lucide/lock-keyhole-icon.tsx"
         }
       ]
     },
@@ -4361,7 +4370,7 @@
         {
           "path": "src/registry/icons/lucide/lock-keyhole-open-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/lock-keyhole-open-icon.tsx"
+          "target": "@components/general/lucide/lock-keyhole-open-icon.tsx"
         }
       ]
     },
@@ -4376,7 +4385,7 @@
         {
           "path": "src/registry/icons/lucide/lock-open-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/lock-open-icon.tsx"
+          "target": "@components/general/lucide/lock-open-icon.tsx"
         }
       ]
     },
@@ -4391,7 +4400,7 @@
         {
           "path": "src/registry/icons/lucide/log-in-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/log-in-icon.tsx"
+          "target": "@components/general/lucide/log-in-icon.tsx"
         }
       ]
     },
@@ -4406,7 +4415,7 @@
         {
           "path": "src/registry/icons/lucide/log-out-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/log-out-icon.tsx"
+          "target": "@components/general/lucide/log-out-icon.tsx"
         }
       ]
     },
@@ -4421,7 +4430,7 @@
         {
           "path": "src/registry/icons/lucide/mail-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/mail-check-icon.tsx"
+          "target": "@components/general/lucide/mail-check-icon.tsx"
         }
       ]
     },
@@ -4436,7 +4445,7 @@
         {
           "path": "src/registry/icons/lucide/mailbox-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/mailbox-icon.tsx"
+          "target": "@components/general/lucide/mailbox-icon.tsx"
         }
       ]
     },
@@ -4451,7 +4460,7 @@
         {
           "path": "src/registry/icons/lucide/map-pin-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/map-pin-check-icon.tsx"
+          "target": "@components/general/lucide/map-pin-check-icon.tsx"
         }
       ]
     },
@@ -4466,7 +4475,7 @@
         {
           "path": "src/registry/icons/lucide/map-pin-check-inside-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/map-pin-check-inside-icon.tsx"
+          "target": "@components/general/lucide/map-pin-check-inside-icon.tsx"
         }
       ]
     },
@@ -4481,7 +4490,7 @@
         {
           "path": "src/registry/icons/lucide/map-pin-house-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/map-pin-house-icon.tsx"
+          "target": "@components/general/lucide/map-pin-house-icon.tsx"
         }
       ]
     },
@@ -4496,7 +4505,7 @@
         {
           "path": "src/registry/icons/lucide/map-pin-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/map-pin-icon.tsx"
+          "target": "@components/general/lucide/map-pin-icon.tsx"
         }
       ]
     },
@@ -4511,7 +4520,7 @@
         {
           "path": "src/registry/icons/lucide/map-pin-minus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/map-pin-minus-icon.tsx"
+          "target": "@components/general/lucide/map-pin-minus-icon.tsx"
         }
       ]
     },
@@ -4526,7 +4535,7 @@
         {
           "path": "src/registry/icons/lucide/map-pin-minus-inside-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/map-pin-minus-inside-icon.tsx"
+          "target": "@components/general/lucide/map-pin-minus-inside-icon.tsx"
         }
       ]
     },
@@ -4541,7 +4550,7 @@
         {
           "path": "src/registry/icons/lucide/map-pin-off-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/map-pin-off-icon.tsx"
+          "target": "@components/general/lucide/map-pin-off-icon.tsx"
         }
       ]
     },
@@ -4556,7 +4565,7 @@
         {
           "path": "src/registry/icons/lucide/map-pin-plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/map-pin-plus-icon.tsx"
+          "target": "@components/general/lucide/map-pin-plus-icon.tsx"
         }
       ]
     },
@@ -4571,7 +4580,7 @@
         {
           "path": "src/registry/icons/lucide/map-pin-plus-inside-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/map-pin-plus-inside-icon.tsx"
+          "target": "@components/general/lucide/map-pin-plus-inside-icon.tsx"
         }
       ]
     },
@@ -4586,7 +4595,7 @@
         {
           "path": "src/registry/icons/lucide/map-pin-x-inside-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/map-pin-x-inside-icon.tsx"
+          "target": "@components/general/lucide/map-pin-x-inside-icon.tsx"
         }
       ]
     },
@@ -4601,7 +4610,7 @@
         {
           "path": "src/registry/icons/lucide/maximize-2-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/maximize-2-icon.tsx"
+          "target": "@components/general/lucide/maximize-2-icon.tsx"
         }
       ]
     },
@@ -4616,7 +4625,7 @@
         {
           "path": "src/registry/icons/lucide/maximize-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/maximize-icon.tsx"
+          "target": "@components/general/lucide/maximize-icon.tsx"
         }
       ]
     },
@@ -4631,7 +4640,7 @@
         {
           "path": "src/registry/icons/lucide/menu-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/menu-icon.tsx"
+          "target": "@components/general/lucide/menu-icon.tsx"
         }
       ]
     },
@@ -4646,7 +4655,7 @@
         {
           "path": "src/registry/icons/lucide/message-circle-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-circle-check-icon.tsx"
+          "target": "@components/general/lucide/message-circle-check-icon.tsx"
         }
       ]
     },
@@ -4661,7 +4670,7 @@
         {
           "path": "src/registry/icons/lucide/message-circle-dashed-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-circle-dashed-icon.tsx"
+          "target": "@components/general/lucide/message-circle-dashed-icon.tsx"
         }
       ]
     },
@@ -4676,7 +4685,7 @@
         {
           "path": "src/registry/icons/lucide/message-circle-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-circle-icon.tsx"
+          "target": "@components/general/lucide/message-circle-icon.tsx"
         }
       ]
     },
@@ -4691,7 +4700,7 @@
         {
           "path": "src/registry/icons/lucide/message-circle-more-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-circle-more-icon.tsx"
+          "target": "@components/general/lucide/message-circle-more-icon.tsx"
         }
       ]
     },
@@ -4706,7 +4715,7 @@
         {
           "path": "src/registry/icons/lucide/message-circle-plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-circle-plus-icon.tsx"
+          "target": "@components/general/lucide/message-circle-plus-icon.tsx"
         }
       ]
     },
@@ -4721,7 +4730,7 @@
         {
           "path": "src/registry/icons/lucide/message-circle-x-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-circle-x-icon.tsx"
+          "target": "@components/general/lucide/message-circle-x-icon.tsx"
         }
       ]
     },
@@ -4736,7 +4745,7 @@
         {
           "path": "src/registry/icons/lucide/message-square-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-square-check-icon.tsx"
+          "target": "@components/general/lucide/message-square-check-icon.tsx"
         }
       ]
     },
@@ -4751,7 +4760,7 @@
         {
           "path": "src/registry/icons/lucide/message-square-dashed-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-square-dashed-icon.tsx"
+          "target": "@components/general/lucide/message-square-dashed-icon.tsx"
         }
       ]
     },
@@ -4766,7 +4775,7 @@
         {
           "path": "src/registry/icons/lucide/message-square-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-square-icon.tsx"
+          "target": "@components/general/lucide/message-square-icon.tsx"
         }
       ]
     },
@@ -4781,7 +4790,7 @@
         {
           "path": "src/registry/icons/lucide/message-square-more-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-square-more-icon.tsx"
+          "target": "@components/general/lucide/message-square-more-icon.tsx"
         }
       ]
     },
@@ -4796,7 +4805,7 @@
         {
           "path": "src/registry/icons/lucide/message-square-plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-square-plus-icon.tsx"
+          "target": "@components/general/lucide/message-square-plus-icon.tsx"
         }
       ]
     },
@@ -4811,7 +4820,7 @@
         {
           "path": "src/registry/icons/lucide/message-square-x-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/message-square-x-icon.tsx"
+          "target": "@components/general/lucide/message-square-x-icon.tsx"
         }
       ]
     },
@@ -4826,7 +4835,7 @@
         {
           "path": "src/registry/icons/lucide/mic-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/mic-icon.tsx"
+          "target": "@components/general/lucide/mic-icon.tsx"
         }
       ]
     },
@@ -4841,7 +4850,7 @@
         {
           "path": "src/registry/icons/lucide/mic-off-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/mic-off-icon.tsx"
+          "target": "@components/general/lucide/mic-off-icon.tsx"
         }
       ]
     },
@@ -4856,7 +4865,7 @@
         {
           "path": "src/registry/icons/lucide/minimize-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/minimize-icon.tsx"
+          "target": "@components/general/lucide/minimize-icon.tsx"
         }
       ]
     },
@@ -4871,7 +4880,7 @@
         {
           "path": "src/registry/icons/lucide/minus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/minus-icon.tsx"
+          "target": "@components/general/lucide/minus-icon.tsx"
         }
       ]
     },
@@ -4886,7 +4895,7 @@
         {
           "path": "src/registry/icons/lucide/monitor-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/monitor-check-icon.tsx"
+          "target": "@components/general/lucide/monitor-check-icon.tsx"
         }
       ]
     },
@@ -4901,7 +4910,7 @@
         {
           "path": "src/registry/icons/lucide/monitor-cog-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/monitor-cog-icon.tsx"
+          "target": "@components/general/lucide/monitor-cog-icon.tsx"
         }
       ]
     },
@@ -4916,7 +4925,7 @@
         {
           "path": "src/registry/icons/lucide/moon-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/moon-icon.tsx"
+          "target": "@components/general/lucide/moon-icon.tsx"
         }
       ]
     },
@@ -4931,7 +4940,7 @@
         {
           "path": "src/registry/icons/lucide/mouse-pointer-click-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/mouse-pointer-click-icon.tsx"
+          "target": "@components/general/lucide/mouse-pointer-click-icon.tsx"
         }
       ]
     },
@@ -4946,7 +4955,7 @@
         {
           "path": "src/registry/icons/lucide/nfc-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/nfc-icon.tsx"
+          "target": "@components/general/lucide/nfc-icon.tsx"
         }
       ]
     },
@@ -4961,7 +4970,7 @@
         {
           "path": "src/registry/icons/lucide/omega-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/omega-icon.tsx"
+          "target": "@components/general/lucide/omega-icon.tsx"
         }
       ]
     },
@@ -4976,7 +4985,7 @@
         {
           "path": "src/registry/icons/lucide/palette-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/palette-icon.tsx"
+          "target": "@components/general/lucide/palette-icon.tsx"
         }
       ]
     },
@@ -4991,7 +5000,7 @@
         {
           "path": "src/registry/icons/lucide/panel-left-close-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/panel-left-close-icon.tsx"
+          "target": "@components/general/lucide/panel-left-close-icon.tsx"
         }
       ]
     },
@@ -5006,7 +5015,7 @@
         {
           "path": "src/registry/icons/lucide/panel-left-open-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/panel-left-open-icon.tsx"
+          "target": "@components/general/lucide/panel-left-open-icon.tsx"
         }
       ]
     },
@@ -5021,7 +5030,7 @@
         {
           "path": "src/registry/icons/lucide/panel-right-open-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/panel-right-open-icon.tsx"
+          "target": "@components/general/lucide/panel-right-open-icon.tsx"
         }
       ]
     },
@@ -5036,7 +5045,7 @@
         {
           "path": "src/registry/icons/lucide/party-popper-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/party-popper-icon.tsx"
+          "target": "@components/general/lucide/party-popper-icon.tsx"
         }
       ]
     },
@@ -5051,7 +5060,7 @@
         {
           "path": "src/registry/icons/lucide/pause-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/pause-icon.tsx"
+          "target": "@components/general/lucide/pause-icon.tsx"
         }
       ]
     },
@@ -5066,7 +5075,7 @@
         {
           "path": "src/registry/icons/lucide/pen-tool-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/pen-tool-icon.tsx"
+          "target": "@components/general/lucide/pen-tool-icon.tsx"
         }
       ]
     },
@@ -5081,7 +5090,7 @@
         {
           "path": "src/registry/icons/lucide/pencil-line-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/pencil-line-icon.tsx"
+          "target": "@components/general/lucide/pencil-line-icon.tsx"
         }
       ]
     },
@@ -5096,7 +5105,7 @@
         {
           "path": "src/registry/icons/lucide/philippine-peso-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/philippine-peso-icon.tsx"
+          "target": "@components/general/lucide/philippine-peso-icon.tsx"
         }
       ]
     },
@@ -5111,7 +5120,7 @@
         {
           "path": "src/registry/icons/lucide/phone-call-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/phone-call-icon.tsx"
+          "target": "@components/general/lucide/phone-call-icon.tsx"
         }
       ]
     },
@@ -5126,7 +5135,7 @@
         {
           "path": "src/registry/icons/lucide/phone-forwarded-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/phone-forwarded-icon.tsx"
+          "target": "@components/general/lucide/phone-forwarded-icon.tsx"
         }
       ]
     },
@@ -5141,7 +5150,7 @@
         {
           "path": "src/registry/icons/lucide/phone-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/phone-icon.tsx"
+          "target": "@components/general/lucide/phone-icon.tsx"
         }
       ]
     },
@@ -5156,7 +5165,7 @@
         {
           "path": "src/registry/icons/lucide/phone-incoming-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/phone-incoming-icon.tsx"
+          "target": "@components/general/lucide/phone-incoming-icon.tsx"
         }
       ]
     },
@@ -5171,7 +5180,7 @@
         {
           "path": "src/registry/icons/lucide/phone-missed-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/phone-missed-icon.tsx"
+          "target": "@components/general/lucide/phone-missed-icon.tsx"
         }
       ]
     },
@@ -5186,7 +5195,7 @@
         {
           "path": "src/registry/icons/lucide/phone-off-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/phone-off-icon.tsx"
+          "target": "@components/general/lucide/phone-off-icon.tsx"
         }
       ]
     },
@@ -5201,7 +5210,7 @@
         {
           "path": "src/registry/icons/lucide/pickaxe-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/pickaxe-icon.tsx"
+          "target": "@components/general/lucide/pickaxe-icon.tsx"
         }
       ]
     },
@@ -5216,7 +5225,7 @@
         {
           "path": "src/registry/icons/lucide/plane-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/plane-icon.tsx"
+          "target": "@components/general/lucide/plane-icon.tsx"
         }
       ]
     },
@@ -5231,7 +5240,7 @@
         {
           "path": "src/registry/icons/lucide/plane-landing-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/plane-landing-icon.tsx"
+          "target": "@components/general/lucide/plane-landing-icon.tsx"
         }
       ]
     },
@@ -5246,7 +5255,7 @@
         {
           "path": "src/registry/icons/lucide/plane-takeoff-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/plane-takeoff-icon.tsx"
+          "target": "@components/general/lucide/plane-takeoff-icon.tsx"
         }
       ]
     },
@@ -5261,7 +5270,7 @@
         {
           "path": "src/registry/icons/lucide/play-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/play-icon.tsx"
+          "target": "@components/general/lucide/play-icon.tsx"
         }
       ]
     },
@@ -5276,7 +5285,7 @@
         {
           "path": "src/registry/icons/lucide/plug-zap-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/plug-zap-icon.tsx"
+          "target": "@components/general/lucide/plug-zap-icon.tsx"
         }
       ]
     },
@@ -5291,7 +5300,7 @@
         {
           "path": "src/registry/icons/lucide/plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/plus-icon.tsx"
+          "target": "@components/general/lucide/plus-icon.tsx"
         }
       ]
     },
@@ -5306,7 +5315,7 @@
         {
           "path": "src/registry/icons/lucide/pound-sterling-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/pound-sterling-icon.tsx"
+          "target": "@components/general/lucide/pound-sterling-icon.tsx"
         }
       ]
     },
@@ -5321,7 +5330,7 @@
         {
           "path": "src/registry/icons/lucide/projector-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/projector-icon.tsx"
+          "target": "@components/general/lucide/projector-icon.tsx"
         }
       ]
     },
@@ -5336,7 +5345,7 @@
         {
           "path": "src/registry/icons/lucide/rabbit-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/rabbit-icon.tsx"
+          "target": "@components/general/lucide/rabbit-icon.tsx"
         }
       ]
     },
@@ -5351,7 +5360,7 @@
         {
           "path": "src/registry/icons/lucide/radical-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/radical-icon.tsx"
+          "target": "@components/general/lucide/radical-icon.tsx"
         }
       ]
     },
@@ -5366,7 +5375,7 @@
         {
           "path": "src/registry/icons/lucide/radio-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/radio-icon.tsx"
+          "target": "@components/general/lucide/radio-icon.tsx"
         }
       ]
     },
@@ -5381,7 +5390,7 @@
         {
           "path": "src/registry/icons/lucide/radio-tower-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/radio-tower-icon.tsx"
+          "target": "@components/general/lucide/radio-tower-icon.tsx"
         }
       ]
     },
@@ -5396,7 +5405,7 @@
         {
           "path": "src/registry/icons/lucide/receipt-cent-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/receipt-cent-icon.tsx"
+          "target": "@components/general/lucide/receipt-cent-icon.tsx"
         }
       ]
     },
@@ -5411,7 +5420,7 @@
         {
           "path": "src/registry/icons/lucide/receipt-euro-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/receipt-euro-icon.tsx"
+          "target": "@components/general/lucide/receipt-euro-icon.tsx"
         }
       ]
     },
@@ -5426,7 +5435,7 @@
         {
           "path": "src/registry/icons/lucide/receipt-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/receipt-icon.tsx"
+          "target": "@components/general/lucide/receipt-icon.tsx"
         }
       ]
     },
@@ -5441,7 +5450,7 @@
         {
           "path": "src/registry/icons/lucide/receipt-indian-rupee-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/receipt-indian-rupee-icon.tsx"
+          "target": "@components/general/lucide/receipt-indian-rupee-icon.tsx"
         }
       ]
     },
@@ -5456,7 +5465,7 @@
         {
           "path": "src/registry/icons/lucide/receipt-japanese-yen-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/receipt-japanese-yen-icon.tsx"
+          "target": "@components/general/lucide/receipt-japanese-yen-icon.tsx"
         }
       ]
     },
@@ -5471,7 +5480,7 @@
         {
           "path": "src/registry/icons/lucide/receipt-pound-sterling-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/receipt-pound-sterling-icon.tsx"
+          "target": "@components/general/lucide/receipt-pound-sterling-icon.tsx"
         }
       ]
     },
@@ -5486,7 +5495,7 @@
         {
           "path": "src/registry/icons/lucide/receipt-russian-ruble-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/receipt-russian-ruble-icon.tsx"
+          "target": "@components/general/lucide/receipt-russian-ruble-icon.tsx"
         }
       ]
     },
@@ -5501,7 +5510,7 @@
         {
           "path": "src/registry/icons/lucide/receipt-swiss-franc-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/receipt-swiss-franc-icon.tsx"
+          "target": "@components/general/lucide/receipt-swiss-franc-icon.tsx"
         }
       ]
     },
@@ -5516,7 +5525,7 @@
         {
           "path": "src/registry/icons/lucide/receipt-text-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/receipt-text-icon.tsx"
+          "target": "@components/general/lucide/receipt-text-icon.tsx"
         }
       ]
     },
@@ -5531,7 +5540,7 @@
         {
           "path": "src/registry/icons/lucide/receipt-turkish-lira-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/receipt-turkish-lira-icon.tsx"
+          "target": "@components/general/lucide/receipt-turkish-lira-icon.tsx"
         }
       ]
     },
@@ -5546,7 +5555,7 @@
         {
           "path": "src/registry/icons/lucide/redo-dot-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/redo-dot-icon.tsx"
+          "target": "@components/general/lucide/redo-dot-icon.tsx"
         }
       ]
     },
@@ -5561,7 +5570,7 @@
         {
           "path": "src/registry/icons/lucide/redo-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/redo-icon.tsx"
+          "target": "@components/general/lucide/redo-icon.tsx"
         }
       ]
     },
@@ -5576,7 +5585,7 @@
         {
           "path": "src/registry/icons/lucide/refresh-ccw-dot-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/refresh-ccw-dot-icon.tsx"
+          "target": "@components/general/lucide/refresh-ccw-dot-icon.tsx"
         }
       ]
     },
@@ -5591,7 +5600,7 @@
         {
           "path": "src/registry/icons/lucide/refresh-ccw-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/refresh-ccw-icon.tsx"
+          "target": "@components/general/lucide/refresh-ccw-icon.tsx"
         }
       ]
     },
@@ -5606,7 +5615,7 @@
         {
           "path": "src/registry/icons/lucide/refresh-cw-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/refresh-cw-icon.tsx"
+          "target": "@components/general/lucide/refresh-cw-icon.tsx"
         }
       ]
     },
@@ -5621,7 +5630,7 @@
         {
           "path": "src/registry/icons/lucide/refresh-cw-off-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/refresh-cw-off-icon.tsx"
+          "target": "@components/general/lucide/refresh-cw-off-icon.tsx"
         }
       ]
     },
@@ -5636,7 +5645,7 @@
         {
           "path": "src/registry/icons/lucide/rocket-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/rocket-icon.tsx"
+          "target": "@components/general/lucide/rocket-icon.tsx"
         }
       ]
     },
@@ -5651,7 +5660,7 @@
         {
           "path": "src/registry/icons/lucide/rocking-chair-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/rocking-chair-icon.tsx"
+          "target": "@components/general/lucide/rocking-chair-icon.tsx"
         }
       ]
     },
@@ -5666,7 +5675,7 @@
         {
           "path": "src/registry/icons/lucide/roller-coaster-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/roller-coaster-icon.tsx"
+          "target": "@components/general/lucide/roller-coaster-icon.tsx"
         }
       ]
     },
@@ -5681,7 +5690,7 @@
         {
           "path": "src/registry/icons/lucide/rotate-ccw-clock-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/rotate-ccw-clock-icon.tsx"
+          "target": "@components/general/lucide/rotate-ccw-clock-icon.tsx"
         }
       ]
     },
@@ -5696,7 +5705,7 @@
         {
           "path": "src/registry/icons/lucide/rotate-ccw-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/rotate-ccw-icon.tsx"
+          "target": "@components/general/lucide/rotate-ccw-icon.tsx"
         }
       ]
     },
@@ -5711,7 +5720,7 @@
         {
           "path": "src/registry/icons/lucide/rotate-cw-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/rotate-cw-icon.tsx"
+          "target": "@components/general/lucide/rotate-cw-icon.tsx"
         }
       ]
     },
@@ -5726,7 +5735,7 @@
         {
           "path": "src/registry/icons/lucide/route-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/route-icon.tsx"
+          "target": "@components/general/lucide/route-icon.tsx"
         }
       ]
     },
@@ -5741,7 +5750,7 @@
         {
           "path": "src/registry/icons/lucide/router-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/router-icon.tsx"
+          "target": "@components/general/lucide/router-icon.tsx"
         }
       ]
     },
@@ -5756,7 +5765,7 @@
         {
           "path": "src/registry/icons/lucide/russian-ruble-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/russian-ruble-icon.tsx"
+          "target": "@components/general/lucide/russian-ruble-icon.tsx"
         }
       ]
     },
@@ -5771,7 +5780,7 @@
         {
           "path": "src/registry/icons/lucide/satellite-dish-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/satellite-dish-icon.tsx"
+          "target": "@components/general/lucide/satellite-dish-icon.tsx"
         }
       ]
     },
@@ -5786,7 +5795,7 @@
         {
           "path": "src/registry/icons/lucide/saudi-riyal-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/saudi-riyal-icon.tsx"
+          "target": "@components/general/lucide/saudi-riyal-icon.tsx"
         }
       ]
     },
@@ -5801,7 +5810,7 @@
         {
           "path": "src/registry/icons/lucide/scan-face-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/scan-face-icon.tsx"
+          "target": "@components/general/lucide/scan-face-icon.tsx"
         }
       ]
     },
@@ -5816,7 +5825,7 @@
         {
           "path": "src/registry/icons/lucide/scan-text-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/scan-text-icon.tsx"
+          "target": "@components/general/lucide/scan-text-icon.tsx"
         }
       ]
     },
@@ -5831,7 +5840,7 @@
         {
           "path": "src/registry/icons/lucide/search-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/search-icon.tsx"
+          "target": "@components/general/lucide/search-icon.tsx"
         }
       ]
     },
@@ -5846,7 +5855,7 @@
         {
           "path": "src/registry/icons/lucide/send-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/send-icon.tsx"
+          "target": "@components/general/lucide/send-icon.tsx"
         }
       ]
     },
@@ -5861,7 +5870,7 @@
         {
           "path": "src/registry/icons/lucide/server-cog-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/server-cog-icon.tsx"
+          "target": "@components/general/lucide/server-cog-icon.tsx"
         }
       ]
     },
@@ -5876,7 +5885,7 @@
         {
           "path": "src/registry/icons/lucide/server-crash-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/server-crash-icon.tsx"
+          "target": "@components/general/lucide/server-crash-icon.tsx"
         }
       ]
     },
@@ -5891,7 +5900,7 @@
         {
           "path": "src/registry/icons/lucide/server-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/server-icon.tsx"
+          "target": "@components/general/lucide/server-icon.tsx"
         }
       ]
     },
@@ -5906,7 +5915,7 @@
         {
           "path": "src/registry/icons/lucide/settings-2-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/settings-2-icon.tsx"
+          "target": "@components/general/lucide/settings-2-icon.tsx"
         }
       ]
     },
@@ -5921,7 +5930,7 @@
         {
           "path": "src/registry/icons/lucide/settings-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/settings-icon.tsx"
+          "target": "@components/general/lucide/settings-icon.tsx"
         }
       ]
     },
@@ -5936,7 +5945,7 @@
         {
           "path": "src/registry/icons/lucide/shield-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/shield-check-icon.tsx"
+          "target": "@components/general/lucide/shield-check-icon.tsx"
         }
       ]
     },
@@ -5951,7 +5960,7 @@
         {
           "path": "src/registry/icons/lucide/ship-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/ship-icon.tsx"
+          "target": "@components/general/lucide/ship-icon.tsx"
         }
       ]
     },
@@ -5966,7 +5975,7 @@
         {
           "path": "src/registry/icons/lucide/ship-wheel-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/ship-wheel-icon.tsx"
+          "target": "@components/general/lucide/ship-wheel-icon.tsx"
         }
       ]
     },
@@ -5981,7 +5990,7 @@
         {
           "path": "src/registry/icons/lucide/shower-head-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/shower-head-icon.tsx"
+          "target": "@components/general/lucide/shower-head-icon.tsx"
         }
       ]
     },
@@ -5996,7 +6005,7 @@
         {
           "path": "src/registry/icons/lucide/shredder-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/shredder-icon.tsx"
+          "target": "@components/general/lucide/shredder-icon.tsx"
         }
       ]
     },
@@ -6011,7 +6020,7 @@
         {
           "path": "src/registry/icons/lucide/shrink-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/shrink-icon.tsx"
+          "target": "@components/general/lucide/shrink-icon.tsx"
         }
       ]
     },
@@ -6026,7 +6035,7 @@
         {
           "path": "src/registry/icons/lucide/sigma-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/sigma-icon.tsx"
+          "target": "@components/general/lucide/sigma-icon.tsx"
         }
       ]
     },
@@ -6041,7 +6050,7 @@
         {
           "path": "src/registry/icons/lucide/sliders-horizontal-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/sliders-horizontal-icon.tsx"
+          "target": "@components/general/lucide/sliders-horizontal-icon.tsx"
         }
       ]
     },
@@ -6056,7 +6065,7 @@
         {
           "path": "src/registry/icons/lucide/smartphone-charging-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/smartphone-charging-icon.tsx"
+          "target": "@components/general/lucide/smartphone-charging-icon.tsx"
         }
       ]
     },
@@ -6071,7 +6080,7 @@
         {
           "path": "src/registry/icons/lucide/smartphone-nfc-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/smartphone-nfc-icon.tsx"
+          "target": "@components/general/lucide/smartphone-nfc-icon.tsx"
         }
       ]
     },
@@ -6086,7 +6095,7 @@
         {
           "path": "src/registry/icons/lucide/snowflake-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/snowflake-icon.tsx"
+          "target": "@components/general/lucide/snowflake-icon.tsx"
         }
       ]
     },
@@ -6101,7 +6110,7 @@
         {
           "path": "src/registry/icons/lucide/soup-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/soup-icon.tsx"
+          "target": "@components/general/lucide/soup-icon.tsx"
         }
       ]
     },
@@ -6116,7 +6125,7 @@
         {
           "path": "src/registry/icons/lucide/sparkles-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/sparkles-icon.tsx"
+          "target": "@components/general/lucide/sparkles-icon.tsx"
         }
       ]
     },
@@ -6131,7 +6140,7 @@
         {
           "path": "src/registry/icons/lucide/spray-can-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/spray-can-icon.tsx"
+          "target": "@components/general/lucide/spray-can-icon.tsx"
         }
       ]
     },
@@ -6146,7 +6155,7 @@
         {
           "path": "src/registry/icons/lucide/square-activity-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-activity-icon.tsx"
+          "target": "@components/general/lucide/square-activity-icon.tsx"
         }
       ]
     },
@@ -6161,7 +6170,7 @@
         {
           "path": "src/registry/icons/lucide/square-arrow-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-arrow-down-icon.tsx"
+          "target": "@components/general/lucide/square-arrow-down-icon.tsx"
         }
       ]
     },
@@ -6176,7 +6185,7 @@
         {
           "path": "src/registry/icons/lucide/square-arrow-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-arrow-left-icon.tsx"
+          "target": "@components/general/lucide/square-arrow-left-icon.tsx"
         }
       ]
     },
@@ -6191,7 +6200,7 @@
         {
           "path": "src/registry/icons/lucide/square-arrow-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-arrow-right-icon.tsx"
+          "target": "@components/general/lucide/square-arrow-right-icon.tsx"
         }
       ]
     },
@@ -6206,7 +6215,7 @@
         {
           "path": "src/registry/icons/lucide/square-arrow-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-arrow-up-icon.tsx"
+          "target": "@components/general/lucide/square-arrow-up-icon.tsx"
         }
       ]
     },
@@ -6221,7 +6230,7 @@
         {
           "path": "src/registry/icons/lucide/square-chevron-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-chevron-down-icon.tsx"
+          "target": "@components/general/lucide/square-chevron-down-icon.tsx"
         }
       ]
     },
@@ -6236,7 +6245,7 @@
         {
           "path": "src/registry/icons/lucide/square-chevron-left-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-chevron-left-icon.tsx"
+          "target": "@components/general/lucide/square-chevron-left-icon.tsx"
         }
       ]
     },
@@ -6251,7 +6260,7 @@
         {
           "path": "src/registry/icons/lucide/square-chevron-right-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-chevron-right-icon.tsx"
+          "target": "@components/general/lucide/square-chevron-right-icon.tsx"
         }
       ]
     },
@@ -6266,7 +6275,7 @@
         {
           "path": "src/registry/icons/lucide/square-chevron-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-chevron-up-icon.tsx"
+          "target": "@components/general/lucide/square-chevron-up-icon.tsx"
         }
       ]
     },
@@ -6281,7 +6290,7 @@
         {
           "path": "src/registry/icons/lucide/square-pen-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-pen-icon.tsx"
+          "target": "@components/general/lucide/square-pen-icon.tsx"
         }
       ]
     },
@@ -6296,7 +6305,7 @@
         {
           "path": "src/registry/icons/lucide/square-stack-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/square-stack-icon.tsx"
+          "target": "@components/general/lucide/square-stack-icon.tsx"
         }
       ]
     },
@@ -6311,7 +6320,7 @@
         {
           "path": "src/registry/icons/lucide/stamp-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/stamp-icon.tsx"
+          "target": "@components/general/lucide/stamp-icon.tsx"
         }
       ]
     },
@@ -6326,7 +6335,7 @@
         {
           "path": "src/registry/icons/lucide/stethoscope-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/stethoscope-icon.tsx"
+          "target": "@components/general/lucide/stethoscope-icon.tsx"
         }
       ]
     },
@@ -6341,7 +6350,7 @@
         {
           "path": "src/registry/icons/lucide/strikethrough-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/strikethrough-icon.tsx"
+          "target": "@components/general/lucide/strikethrough-icon.tsx"
         }
       ]
     },
@@ -6356,7 +6365,7 @@
         {
           "path": "src/registry/icons/lucide/sun-dim-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/sun-dim-icon.tsx"
+          "target": "@components/general/lucide/sun-dim-icon.tsx"
         }
       ]
     },
@@ -6371,7 +6380,7 @@
         {
           "path": "src/registry/icons/lucide/sun-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/sun-icon.tsx"
+          "target": "@components/general/lucide/sun-icon.tsx"
         }
       ]
     },
@@ -6386,7 +6395,7 @@
         {
           "path": "src/registry/icons/lucide/sun-medium-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/sun-medium-icon.tsx"
+          "target": "@components/general/lucide/sun-medium-icon.tsx"
         }
       ]
     },
@@ -6401,7 +6410,7 @@
         {
           "path": "src/registry/icons/lucide/sun-moon-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/sun-moon-icon.tsx"
+          "target": "@components/general/lucide/sun-moon-icon.tsx"
         }
       ]
     },
@@ -6416,7 +6425,7 @@
         {
           "path": "src/registry/icons/lucide/sunset-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/sunset-icon.tsx"
+          "target": "@components/general/lucide/sunset-icon.tsx"
         }
       ]
     },
@@ -6431,7 +6440,7 @@
         {
           "path": "src/registry/icons/lucide/swiss-franc-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/swiss-franc-icon.tsx"
+          "target": "@components/general/lucide/swiss-franc-icon.tsx"
         }
       ]
     },
@@ -6446,7 +6455,7 @@
         {
           "path": "src/registry/icons/lucide/switch-camera-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/switch-camera-icon.tsx"
+          "target": "@components/general/lucide/switch-camera-icon.tsx"
         }
       ]
     },
@@ -6461,7 +6470,7 @@
         {
           "path": "src/registry/icons/lucide/syringe-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/syringe-icon.tsx"
+          "target": "@components/general/lucide/syringe-icon.tsx"
         }
       ]
     },
@@ -6476,7 +6485,7 @@
         {
           "path": "src/registry/icons/lucide/table-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/table-icon.tsx"
+          "target": "@components/general/lucide/table-icon.tsx"
         }
       ]
     },
@@ -6491,7 +6500,7 @@
         {
           "path": "src/registry/icons/lucide/telescope-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/telescope-icon.tsx"
+          "target": "@components/general/lucide/telescope-icon.tsx"
         }
       ]
     },
@@ -6506,7 +6515,7 @@
         {
           "path": "src/registry/icons/lucide/terminal-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/terminal-icon.tsx"
+          "target": "@components/general/lucide/terminal-icon.tsx"
         }
       ]
     },
@@ -6521,7 +6530,7 @@
         {
           "path": "src/registry/icons/lucide/text-align-center-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/text-align-center-icon.tsx"
+          "target": "@components/general/lucide/text-align-center-icon.tsx"
         }
       ]
     },
@@ -6536,7 +6545,7 @@
         {
           "path": "src/registry/icons/lucide/text-align-end-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/text-align-end-icon.tsx"
+          "target": "@components/general/lucide/text-align-end-icon.tsx"
         }
       ]
     },
@@ -6551,7 +6560,7 @@
         {
           "path": "src/registry/icons/lucide/text-align-start-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/text-align-start-icon.tsx"
+          "target": "@components/general/lucide/text-align-start-icon.tsx"
         }
       ]
     },
@@ -6566,7 +6575,7 @@
         {
           "path": "src/registry/icons/lucide/text-quote-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/text-quote-icon.tsx"
+          "target": "@components/general/lucide/text-quote-icon.tsx"
         }
       ]
     },
@@ -6581,7 +6590,7 @@
         {
           "path": "src/registry/icons/lucide/thermometer-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/thermometer-icon.tsx"
+          "target": "@components/general/lucide/thermometer-icon.tsx"
         }
       ]
     },
@@ -6596,7 +6605,7 @@
         {
           "path": "src/registry/icons/lucide/thumbs-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/thumbs-down-icon.tsx"
+          "target": "@components/general/lucide/thumbs-down-icon.tsx"
         }
       ]
     },
@@ -6611,7 +6620,7 @@
         {
           "path": "src/registry/icons/lucide/thumbs-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/thumbs-up-icon.tsx"
+          "target": "@components/general/lucide/thumbs-up-icon.tsx"
         }
       ]
     },
@@ -6626,7 +6635,7 @@
         {
           "path": "src/registry/icons/lucide/ticket-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/ticket-icon.tsx"
+          "target": "@components/general/lucide/ticket-icon.tsx"
         }
       ]
     },
@@ -6641,7 +6650,7 @@
         {
           "path": "src/registry/icons/lucide/timer-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/timer-icon.tsx"
+          "target": "@components/general/lucide/timer-icon.tsx"
         }
       ]
     },
@@ -6656,7 +6665,7 @@
         {
           "path": "src/registry/icons/lucide/tornado-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/tornado-icon.tsx"
+          "target": "@components/general/lucide/tornado-icon.tsx"
         }
       ]
     },
@@ -6671,7 +6680,7 @@
         {
           "path": "src/registry/icons/lucide/train-track-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/train-track-icon.tsx"
+          "target": "@components/general/lucide/train-track-icon.tsx"
         }
       ]
     },
@@ -6686,7 +6695,7 @@
         {
           "path": "src/registry/icons/lucide/trash-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/trash-icon.tsx"
+          "target": "@components/general/lucide/trash-icon.tsx"
         }
       ]
     },
@@ -6701,7 +6710,7 @@
         {
           "path": "src/registry/icons/lucide/tree-deciduous-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/tree-deciduous-icon.tsx"
+          "target": "@components/general/lucide/tree-deciduous-icon.tsx"
         }
       ]
     },
@@ -6716,7 +6725,7 @@
         {
           "path": "src/registry/icons/lucide/tree-pine-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/tree-pine-icon.tsx"
+          "target": "@components/general/lucide/tree-pine-icon.tsx"
         }
       ]
     },
@@ -6731,7 +6740,7 @@
         {
           "path": "src/registry/icons/lucide/trending-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/trending-down-icon.tsx"
+          "target": "@components/general/lucide/trending-down-icon.tsx"
         }
       ]
     },
@@ -6746,7 +6755,7 @@
         {
           "path": "src/registry/icons/lucide/trending-up-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/trending-up-down-icon.tsx"
+          "target": "@components/general/lucide/trending-up-down-icon.tsx"
         }
       ]
     },
@@ -6761,7 +6770,7 @@
         {
           "path": "src/registry/icons/lucide/trending-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/trending-up-icon.tsx"
+          "target": "@components/general/lucide/trending-up-icon.tsx"
         }
       ]
     },
@@ -6776,7 +6785,7 @@
         {
           "path": "src/registry/icons/lucide/truck-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/truck-icon.tsx"
+          "target": "@components/general/lucide/truck-icon.tsx"
         }
       ]
     },
@@ -6791,7 +6800,7 @@
         {
           "path": "src/registry/icons/lucide/turkish-lira-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/turkish-lira-icon.tsx"
+          "target": "@components/general/lucide/turkish-lira-icon.tsx"
         }
       ]
     },
@@ -6806,7 +6815,7 @@
         {
           "path": "src/registry/icons/lucide/underline-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/underline-icon.tsx"
+          "target": "@components/general/lucide/underline-icon.tsx"
         }
       ]
     },
@@ -6821,7 +6830,7 @@
         {
           "path": "src/registry/icons/lucide/undo-dot-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/undo-dot-icon.tsx"
+          "target": "@components/general/lucide/undo-dot-icon.tsx"
         }
       ]
     },
@@ -6836,7 +6845,7 @@
         {
           "path": "src/registry/icons/lucide/undo-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/undo-icon.tsx"
+          "target": "@components/general/lucide/undo-icon.tsx"
         }
       ]
     },
@@ -6851,7 +6860,7 @@
         {
           "path": "src/registry/icons/lucide/upload-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/upload-icon.tsx"
+          "target": "@components/general/lucide/upload-icon.tsx"
         }
       ]
     },
@@ -6866,7 +6875,7 @@
         {
           "path": "src/registry/icons/lucide/user-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/user-check-icon.tsx"
+          "target": "@components/general/lucide/user-check-icon.tsx"
         }
       ]
     },
@@ -6881,7 +6890,7 @@
         {
           "path": "src/registry/icons/lucide/user-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/user-icon.tsx"
+          "target": "@components/general/lucide/user-icon.tsx"
         }
       ]
     },
@@ -6896,7 +6905,7 @@
         {
           "path": "src/registry/icons/lucide/user-plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/user-plus-icon.tsx"
+          "target": "@components/general/lucide/user-plus-icon.tsx"
         }
       ]
     },
@@ -6911,7 +6920,7 @@
         {
           "path": "src/registry/icons/lucide/user-round-check-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/user-round-check-icon.tsx"
+          "target": "@components/general/lucide/user-round-check-icon.tsx"
         }
       ]
     },
@@ -6926,7 +6935,7 @@
         {
           "path": "src/registry/icons/lucide/user-round-cog-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/user-round-cog-icon.tsx"
+          "target": "@components/general/lucide/user-round-cog-icon.tsx"
         }
       ]
     },
@@ -6941,7 +6950,7 @@
         {
           "path": "src/registry/icons/lucide/user-round-plus-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/user-round-plus-icon.tsx"
+          "target": "@components/general/lucide/user-round-plus-icon.tsx"
         }
       ]
     },
@@ -6956,7 +6965,7 @@
         {
           "path": "src/registry/icons/lucide/users-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/users-icon.tsx"
+          "target": "@components/general/lucide/users-icon.tsx"
         }
       ]
     },
@@ -6971,7 +6980,7 @@
         {
           "path": "src/registry/icons/lucide/users-round-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/users-round-icon.tsx"
+          "target": "@components/general/lucide/users-round-icon.tsx"
         }
       ]
     },
@@ -6986,7 +6995,7 @@
         {
           "path": "src/registry/icons/lucide/vibrate-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/vibrate-icon.tsx"
+          "target": "@components/general/lucide/vibrate-icon.tsx"
         }
       ]
     },
@@ -7001,7 +7010,7 @@
         {
           "path": "src/registry/icons/lucide/volume-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/volume-icon.tsx"
+          "target": "@components/general/lucide/volume-icon.tsx"
         }
       ]
     },
@@ -7016,7 +7025,7 @@
         {
           "path": "src/registry/icons/lucide/wallet-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/wallet-icon.tsx"
+          "target": "@components/general/lucide/wallet-icon.tsx"
         }
       ]
     },
@@ -7031,7 +7040,7 @@
         {
           "path": "src/registry/icons/lucide/washing-machine-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/washing-machine-icon.tsx"
+          "target": "@components/general/lucide/washing-machine-icon.tsx"
         }
       ]
     },
@@ -7046,7 +7055,7 @@
         {
           "path": "src/registry/icons/lucide/waves-arrow-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/waves-arrow-down-icon.tsx"
+          "target": "@components/general/lucide/waves-arrow-down-icon.tsx"
         }
       ]
     },
@@ -7061,7 +7070,7 @@
         {
           "path": "src/registry/icons/lucide/waves-arrow-up-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/waves-arrow-up-icon.tsx"
+          "target": "@components/general/lucide/waves-arrow-up-icon.tsx"
         }
       ]
     },
@@ -7076,7 +7085,7 @@
         {
           "path": "src/registry/icons/lucide/waves-horizontal-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/waves-horizontal-icon.tsx"
+          "target": "@components/general/lucide/waves-horizontal-icon.tsx"
         }
       ]
     },
@@ -7091,7 +7100,7 @@
         {
           "path": "src/registry/icons/lucide/waves-ladder-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/waves-ladder-icon.tsx"
+          "target": "@components/general/lucide/waves-ladder-icon.tsx"
         }
       ]
     },
@@ -7106,7 +7115,7 @@
         {
           "path": "src/registry/icons/lucide/waypoints-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/waypoints-icon.tsx"
+          "target": "@components/general/lucide/waypoints-icon.tsx"
         }
       ]
     },
@@ -7121,7 +7130,7 @@
         {
           "path": "src/registry/icons/lucide/webhook-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/webhook-icon.tsx"
+          "target": "@components/general/lucide/webhook-icon.tsx"
         }
       ]
     },
@@ -7136,7 +7145,7 @@
         {
           "path": "src/registry/icons/lucide/wifi-cog-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/wifi-cog-icon.tsx"
+          "target": "@components/general/lucide/wifi-cog-icon.tsx"
         }
       ]
     },
@@ -7151,7 +7160,7 @@
         {
           "path": "src/registry/icons/lucide/wifi-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/wifi-icon.tsx"
+          "target": "@components/general/lucide/wifi-icon.tsx"
         }
       ]
     },
@@ -7166,7 +7175,7 @@
         {
           "path": "src/registry/icons/lucide/wifi-low-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/wifi-low-icon.tsx"
+          "target": "@components/general/lucide/wifi-low-icon.tsx"
         }
       ]
     },
@@ -7181,7 +7190,7 @@
         {
           "path": "src/registry/icons/lucide/wifi-pen-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/wifi-pen-icon.tsx"
+          "target": "@components/general/lucide/wifi-pen-icon.tsx"
         }
       ]
     },
@@ -7196,7 +7205,7 @@
         {
           "path": "src/registry/icons/lucide/wifi-sync-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/wifi-sync-icon.tsx"
+          "target": "@components/general/lucide/wifi-sync-icon.tsx"
         }
       ]
     },
@@ -7211,7 +7220,7 @@
         {
           "path": "src/registry/icons/lucide/wind-arrow-down-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/wind-arrow-down-icon.tsx"
+          "target": "@components/general/lucide/wind-arrow-down-icon.tsx"
         }
       ]
     },
@@ -7226,7 +7235,7 @@
         {
           "path": "src/registry/icons/lucide/wind-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/wind-icon.tsx"
+          "target": "@components/general/lucide/wind-icon.tsx"
         }
       ]
     },
@@ -7241,7 +7250,7 @@
         {
           "path": "src/registry/icons/lucide/workflow-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/workflow-icon.tsx"
+          "target": "@components/general/lucide/workflow-icon.tsx"
         }
       ]
     },
@@ -7256,7 +7265,7 @@
         {
           "path": "src/registry/icons/lucide/wrench-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/wrench-icon.tsx"
+          "target": "@components/general/lucide/wrench-icon.tsx"
         }
       ]
     },
@@ -7271,7 +7280,7 @@
         {
           "path": "src/registry/icons/lucide/x-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/x-icon.tsx"
+          "target": "@components/general/lucide/x-icon.tsx"
         }
       ]
     },
@@ -7286,7 +7295,7 @@
         {
           "path": "src/registry/icons/lucide/zap-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/zap-icon.tsx"
+          "target": "@components/general/lucide/zap-icon.tsx"
         }
       ]
     },
@@ -7301,7 +7310,7 @@
         {
           "path": "src/registry/icons/lucide/zap-off-icon.tsx",
           "type": "registry:ui",
-          "target": "components/general/lucide/zap-off-icon.tsx"
+          "target": "@components/general/lucide/zap-off-icon.tsx"
         }
       ]
     },
@@ -7315,7 +7324,8 @@
       "files": [
         {
           "path": "src/registry/ui/button.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/button.tsx"
         }
       ]
     },
@@ -7329,7 +7339,8 @@
       "files": [
         {
           "path": "src/registry/ui/separator.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/separator.tsx"
         }
       ]
     },
@@ -7342,7 +7353,8 @@
       "files": [
         {
           "path": "src/registry/ui/skeleton.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/skeleton.tsx"
         }
       ]
     },
@@ -7356,7 +7368,8 @@
       "files": [
         {
           "path": "src/registry/ui/label.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/label.tsx"
         }
       ]
     },
@@ -7370,7 +7383,8 @@
       "files": [
         {
           "path": "src/registry/ui/badge.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/badge.tsx"
         }
       ]
     },
@@ -7383,7 +7397,8 @@
       "files": [
         {
           "path": "src/registry/ui/card.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/card.tsx"
         }
       ]
     },
@@ -7397,7 +7412,8 @@
       "files": [
         {
           "path": "src/registry/ui/avatar.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/avatar.tsx"
         }
       ]
     },
@@ -7411,7 +7427,8 @@
       "files": [
         {
           "path": "src/registry/ui/progress.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/progress.tsx"
         }
       ]
     },
@@ -7424,7 +7441,8 @@
       "files": [
         {
           "path": "src/registry/ui/slider.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/slider.tsx"
         }
       ]
     },
@@ -7438,7 +7456,8 @@
       "files": [
         {
           "path": "src/registry/ui/calendar.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/calendar.tsx"
         }
       ]
     },
@@ -7452,7 +7471,8 @@
       "files": [
         {
           "path": "src/registry/ui/carousel.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/carousel.tsx"
         }
       ]
     },
@@ -7466,7 +7486,8 @@
       "files": [
         {
           "path": "src/registry/ui/resizable.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/resizable.tsx"
         }
       ]
     },
@@ -7492,7 +7513,8 @@
       "files": [
         {
           "path": "src/registry/ui/sonner.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/sonner.tsx"
         }
       ]
     },
@@ -7505,7 +7527,8 @@
       "files": [
         {
           "path": "src/registry/ui/input.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/input.tsx"
         }
       ]
     },
@@ -7518,7 +7541,8 @@
       "files": [
         {
           "path": "src/registry/ui/textarea.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/textarea.tsx"
         }
       ]
     },
@@ -7532,7 +7556,8 @@
       "files": [
         {
           "path": "src/registry/ui/switch.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/switch.tsx"
         }
       ]
     },
@@ -7546,7 +7571,8 @@
       "files": [
         {
           "path": "src/registry/ui/checkbox.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/checkbox.tsx"
         }
       ]
     },
@@ -7560,7 +7586,8 @@
       "files": [
         {
           "path": "src/registry/ui/radio-group.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/radio-group.tsx"
         }
       ]
     },
@@ -7574,7 +7601,8 @@
       "files": [
         {
           "path": "src/registry/ui/toggle.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/toggle.tsx"
         }
       ]
     },
@@ -7588,7 +7616,8 @@
       "files": [
         {
           "path": "src/registry/ui/toggle-group.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/toggle-group.tsx"
         }
       ]
     },
@@ -7602,7 +7631,8 @@
       "files": [
         {
           "path": "src/registry/ui/tabs.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/tabs.tsx"
         }
       ]
     },
@@ -7616,7 +7646,8 @@
       "files": [
         {
           "path": "src/registry/ui/spinner.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/spinner.tsx"
         }
       ]
     },
@@ -7630,7 +7661,8 @@
       "files": [
         {
           "path": "src/registry/ui/input-group.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/input-group.tsx"
         }
       ]
     },
@@ -7644,7 +7676,8 @@
       "files": [
         {
           "path": "src/registry/ui/input-otp.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/input-otp.tsx"
         }
       ]
     },
@@ -7657,7 +7690,8 @@
       "files": [
         {
           "path": "src/registry/ui/kbd.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/kbd.tsx"
         }
       ]
     },
@@ -7671,7 +7705,8 @@
       "files": [
         {
           "path": "src/registry/ui/alert.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/alert.tsx"
         }
       ]
     },
@@ -7685,7 +7720,8 @@
       "files": [
         {
           "path": "src/registry/ui/empty.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/empty.tsx"
         }
       ]
     },
@@ -7699,7 +7735,8 @@
       "files": [
         {
           "path": "src/registry/ui/aspect-ratio.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/aspect-ratio.tsx"
         }
       ]
     },
@@ -7713,7 +7750,8 @@
       "files": [
         {
           "path": "src/registry/ui/breadcrumb.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/breadcrumb.tsx"
         }
       ]
     },
@@ -7727,7 +7765,8 @@
       "files": [
         {
           "path": "src/registry/ui/button-group.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/button-group.tsx"
         }
       ]
     },
@@ -7741,7 +7780,8 @@
       "files": [
         {
           "path": "src/registry/ui/pagination.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/pagination.tsx"
         }
       ]
     },
@@ -7755,7 +7795,8 @@
       "files": [
         {
           "path": "src/registry/ui/item.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/item.tsx"
         }
       ]
     },
@@ -7768,7 +7809,8 @@
       "files": [
         {
           "path": "src/registry/ui/scroll-area.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/scroll-area.tsx"
         }
       ]
     },
@@ -7782,7 +7824,8 @@
       "files": [
         {
           "path": "src/registry/ui/table.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/table.tsx"
         }
       ]
     },
@@ -7796,7 +7839,8 @@
       "files": [
         {
           "path": "src/registry/ui/field.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/field.tsx"
         }
       ]
     },
@@ -7810,7 +7854,8 @@
       "files": [
         {
           "path": "src/registry/ui/collapsible.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/collapsible.tsx"
         }
       ]
     },
@@ -7829,7 +7874,8 @@
       "files": [
         {
           "path": "src/registry/ui/accordion.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/accordion.tsx"
         }
       ]
     },
@@ -7843,7 +7889,8 @@
       "files": [
         {
           "path": "src/registry/ui/alert-dialog.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/alert-dialog.tsx"
         }
       ]
     },
@@ -7862,7 +7909,8 @@
       "files": [
         {
           "path": "src/registry/ui/dialog.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/dialog.tsx"
         }
       ]
     },
@@ -7889,7 +7937,8 @@
       "files": [
         {
           "path": "src/registry/ui/sheet.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/sheet.tsx"
         }
       ]
     },
@@ -7903,7 +7952,8 @@
       "files": [
         {
           "path": "src/registry/ui/drawer.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/drawer.tsx"
         }
       ]
     },
@@ -7917,7 +7967,8 @@
       "files": [
         {
           "path": "src/registry/ui/popover.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/popover.tsx"
         }
       ]
     },
@@ -7947,7 +7998,8 @@
       "files": [
         {
           "path": "src/registry/ui/navigation-menu.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/navigation-menu.tsx"
         }
       ]
     },
@@ -7981,7 +8033,8 @@
       "files": [
         {
           "path": "src/registry/ui/sidebar.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/sidebar.tsx"
         }
       ]
     },
@@ -8000,7 +8053,8 @@
       "files": [
         {
           "path": "src/registry/ui/tooltip.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/tooltip.tsx"
         }
       ]
     },
@@ -8014,7 +8068,8 @@
       "files": [
         {
           "path": "src/registry/ui/hover-card.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/hover-card.tsx"
         }
       ]
     },
@@ -8041,7 +8096,8 @@
       "files": [
         {
           "path": "src/registry/ui/dropdown-menu.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/dropdown-menu.tsx"
         }
       ]
     },
@@ -8068,7 +8124,8 @@
       "files": [
         {
           "path": "src/registry/ui/context-menu.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/context-menu.tsx"
         }
       ]
     },
@@ -8095,7 +8152,8 @@
       "files": [
         {
           "path": "src/registry/ui/menubar.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/menubar.tsx"
         }
       ]
     },
@@ -8122,7 +8180,8 @@
       "files": [
         {
           "path": "src/registry/ui/select.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/select.tsx"
         }
       ]
     },
@@ -8144,7 +8203,8 @@
       "files": [
         {
           "path": "src/registry/ui/command.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/command.tsx"
         }
       ]
     },
@@ -8166,7 +8226,8 @@
       "files": [
         {
           "path": "src/registry/ui/combobox.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/combobox.tsx"
         }
       ]
     },
@@ -8178,7 +8239,8 @@
       "files": [
         {
           "path": "src/registry/ui/direction.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/direction.tsx"
         }
       ]
     },
@@ -8191,7 +8253,8 @@
       "files": [
         {
           "path": "src/registry/ui/native-select.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/native-select.tsx"
         }
       ]
     },
@@ -8226,7 +8289,8 @@
       "files": [
         {
           "path": "src/registry/ui/toast.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/toast.tsx"
         }
       ]
     },
@@ -8241,7 +8305,8 @@
       "files": [
         {
           "path": "src/registry/lib/charts.tsx",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/charts.tsx"
         }
       ]
     },
@@ -8253,7 +8318,8 @@
       "files": [
         {
           "path": "src/registry/lib/color-scheme.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/color-scheme.ts"
         }
       ]
     },
@@ -8266,7 +8332,8 @@
       "files": [
         {
           "path": "src/registry/lib/chart-theme.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/chart-theme.ts"
         }
       ]
     },
@@ -8288,7 +8355,8 @@
       "files": [
         {
           "path": "src/registry/ui/chart.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/chart.tsx"
         }
       ]
     },
@@ -8302,11 +8370,13 @@
       "files": [
         {
           "path": "src/registry/hooks/use-highlighted-code.ts",
-          "type": "registry:hook"
+          "type": "registry:hook",
+          "target": "@hooks/use-highlighted-code.ts"
         },
         {
           "path": "src/registry/lib/highlighter.tsx",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/highlighter.tsx"
         }
       ]
     },
@@ -8318,7 +8388,8 @@
       "files": [
         {
           "path": "src/registry/hooks/use-mobile.ts",
-          "type": "registry:hook"
+          "type": "registry:hook",
+          "target": "@hooks/use-mobile.ts"
         }
       ]
     },
@@ -8339,7 +8410,8 @@
       "files": [
         {
           "path": "src/registry/ui/code-block.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/code-block.tsx"
         }
       ]
     },
@@ -8362,7 +8434,8 @@
       "files": [
         {
           "path": "src/registry/ui/attachment.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/attachment.tsx"
         }
       ]
     },
@@ -8376,7 +8449,8 @@
       "files": [
         {
           "path": "src/registry/ui/marker.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/marker.tsx"
         }
       ]
     },
@@ -8389,7 +8463,8 @@
       "files": [
         {
           "path": "src/registry/ui/message.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/message.tsx"
         }
       ]
     },
@@ -8401,7 +8476,8 @@
       "files": [
         {
           "path": "src/registry/lib/focus-visible.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/focus-visible.ts"
         }
       ]
     },
@@ -8414,7 +8490,8 @@
       "files": [
         {
           "path": "src/registry/lib/text-children.tsx",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/text-children.tsx"
         }
       ]
     },
@@ -8426,7 +8503,8 @@
       "files": [
         {
           "path": "src/registry/lib/message-context.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/message-context.ts"
         }
       ]
     },
@@ -8446,7 +8524,8 @@
       "files": [
         {
           "path": "src/registry/ui/bubble.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/bubble.tsx"
         }
       ]
     },
@@ -8460,7 +8539,8 @@
       "files": [
         {
           "path": "src/registry/ui/message-scroller.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/message-scroller.tsx"
         }
       ]
     },
@@ -8482,7 +8562,8 @@
       "files": [
         {
           "path": "src/registry/ui/questionnaire.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/questionnaire.tsx"
         }
       ]
     },
@@ -8504,7 +8585,8 @@
       "files": [
         {
           "path": "src/registry/ui/trace.tsx",
-          "type": "registry:ui"
+          "type": "registry:ui",
+          "target": "@ui/trace.tsx"
         }
       ]
     },
@@ -8524,7 +8606,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/password-input.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/password-input.tsx"
         }
       ]
     },
@@ -8547,7 +8630,8 @@
       "files": [
         {
           "path": "src/registry/components/feedback/password-strength.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/feedback/password-strength.tsx"
         }
       ]
     },
@@ -8561,7 +8645,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/code-input.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/code-input.tsx"
         }
       ]
     },
@@ -8575,7 +8660,8 @@
       "files": [
         {
           "path": "src/registry/components/feedback/unsaved-changes-toolbar.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/feedback/unsaved-changes-toolbar.tsx"
         }
       ]
     },
@@ -8589,7 +8675,8 @@
       "files": [
         {
           "path": "src/registry/components/navigation/tab-bar.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/navigation/tab-bar.tsx"
         }
       ]
     },
@@ -8604,7 +8691,8 @@
       "files": [
         {
           "path": "src/registry/components/feedback/status-indicator.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/feedback/status-indicator.tsx"
         }
       ]
     },
@@ -8618,7 +8706,8 @@
       "files": [
         {
           "path": "src/registry/components/feedback/unsaved-indicator.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/feedback/unsaved-indicator.tsx"
         }
       ]
     },
@@ -8632,7 +8721,8 @@
       "files": [
         {
           "path": "src/registry/components/general/icon-media.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/general/icon-media.tsx"
         }
       ]
     },
@@ -8647,7 +8737,8 @@
       "files": [
         {
           "path": "src/registry/components/general/icon-label.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/general/icon-label.tsx"
         }
       ]
     },
@@ -8662,7 +8753,8 @@
       "files": [
         {
           "path": "src/registry/components/general/meteors.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/general/meteors.tsx"
         }
       ]
     },
@@ -8677,7 +8769,8 @@
       "files": [
         {
           "path": "src/registry/components/general/animated-grid-pattern.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/general/animated-grid-pattern.tsx"
         }
       ]
     },
@@ -8692,7 +8785,8 @@
       "files": [
         {
           "path": "src/registry/components/layout/center.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/layout/center.tsx"
         }
       ]
     },
@@ -8707,7 +8801,8 @@
       "files": [
         {
           "path": "src/registry/components/layout/page-container.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/layout/page-container.tsx"
         }
       ]
     },
@@ -8721,7 +8816,8 @@
       "files": [
         {
           "path": "src/registry/components/layout/panel-header.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/layout/panel-header.tsx"
         }
       ]
     },
@@ -8735,7 +8831,8 @@
       "files": [
         {
           "path": "src/registry/components/layout/panel-row.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/layout/panel-row.tsx"
         }
       ]
     },
@@ -8749,7 +8846,8 @@
       "files": [
         {
           "path": "src/registry/components/layout/panel-field-group.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/layout/panel-field-group.tsx"
         }
       ]
     },
@@ -8774,7 +8872,8 @@
       "files": [
         {
           "path": "src/registry/components/layout/collapsible-card.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/layout/collapsible-card.tsx"
         }
       ]
     },
@@ -8801,11 +8900,13 @@
       "files": [
         {
           "path": "src/registry/components/layout/reasoning-collapsible.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/layout/reasoning-collapsible.tsx"
         },
         {
           "path": "src/registry/hooks/use-reasoning-collapsible.ts",
-          "type": "registry:hook"
+          "type": "registry:hook",
+          "target": "@hooks/use-reasoning-collapsible.ts"
         }
       ]
     },
@@ -8827,7 +8928,8 @@
       "files": [
         {
           "path": "src/registry/components/feedback/copy-button.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/feedback/copy-button.tsx"
         }
       ]
     },
@@ -8842,11 +8944,13 @@
       "files": [
         {
           "path": "src/registry/components/data-display/file-type-icon.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/file-type-icon.tsx"
         },
         {
           "path": "src/registry/lib/file-type.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/file-type.ts"
         }
       ]
     },
@@ -8861,7 +8965,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/font-preview.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/font-preview.tsx"
         }
       ]
     },
@@ -8876,7 +8981,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/image-preview.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/image-preview.tsx"
         }
       ]
     },
@@ -8900,7 +9006,8 @@
       "files": [
         {
           "path": "src/registry/components/feedback/permission-card.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/feedback/permission-card.tsx"
         }
       ]
     },
@@ -8914,7 +9021,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/ai-provider-card.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/ai-provider-card.tsx"
         }
       ]
     },
@@ -8929,7 +9037,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/model-info-card.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/model-info-card.tsx"
         }
       ]
     },
@@ -8943,7 +9052,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/chat-message.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/chat-message.tsx"
         }
       ]
     },
@@ -8957,7 +9067,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/chat-suggestion-item.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/chat-suggestion-item.tsx"
         }
       ]
     },
@@ -8971,7 +9082,8 @@
       "files": [
         {
           "path": "src/registry/components/layout/floating-toolbar.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/layout/floating-toolbar.tsx"
         }
       ]
     },
@@ -8993,7 +9105,8 @@
       "files": [
         {
           "path": "src/registry/components/navigation/editor-tab.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/navigation/editor-tab.tsx"
         }
       ]
     },
@@ -9005,7 +9118,8 @@
       "files": [
         {
           "path": "src/registry/lib/expr-eval.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/expr-eval.ts"
         }
       ]
     },
@@ -9017,7 +9131,8 @@
       "files": [
         {
           "path": "src/registry/lib/language-options.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/language-options.ts"
         }
       ]
     },
@@ -9031,7 +9146,8 @@
       "files": [
         {
           "path": "src/registry/lib/fluent-emoji.tsx",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/fluent-emoji.tsx"
         }
       ]
     },
@@ -9045,7 +9161,8 @@
       "files": [
         {
           "path": "src/registry/lib/brand-mark.tsx",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/brand-mark.tsx"
         }
       ]
     },
@@ -9059,7 +9176,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/language-toggle-group.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/language-toggle-group.tsx"
         }
       ]
     },
@@ -9073,7 +9191,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/emoji-appearance-toggle-group.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/emoji-appearance-toggle-group.tsx"
         }
       ]
     },
@@ -9087,7 +9206,8 @@
       "files": [
         {
           "path": "src/registry/components/navigation/command-menu.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/navigation/command-menu.tsx"
         }
       ]
     },
@@ -9101,7 +9221,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/number-field.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/number-field.tsx"
         }
       ]
     },
@@ -9124,7 +9245,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/tag-input.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/tag-input.tsx"
         }
       ]
     },
@@ -9138,11 +9260,13 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/language-combobox.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/language-combobox.tsx"
         },
         {
           "path": "src/registry/hooks/use-language-options.ts",
-          "type": "registry:hook"
+          "type": "registry:hook",
+          "target": "@hooks/use-language-options.ts"
         }
       ]
     },
@@ -9156,7 +9280,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/frontmatter-form.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/frontmatter-form.tsx"
         }
       ]
     },
@@ -9168,7 +9293,8 @@
       "files": [
         {
           "path": "src/registry/lib/resize-drag.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/resize-drag.ts"
         }
       ]
     },
@@ -9192,7 +9318,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/tree-item.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/tree-item.tsx"
         }
       ]
     },
@@ -9218,7 +9345,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/data-table-column-header.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/data-table-column-header.tsx"
         }
       ]
     },
@@ -9242,7 +9370,8 @@
       "files": [
         {
           "path": "src/registry/components/layout/model-list.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/layout/model-list.tsx"
         }
       ]
     },
@@ -9256,7 +9385,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/resize-handle.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/resize-handle.tsx"
         }
       ]
     },
@@ -9284,7 +9414,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/data-table.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/data-table.tsx"
         }
       ]
     },
@@ -9296,7 +9427,8 @@
       "files": [
         {
           "path": "src/registry/lib/code-language.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/code-language.ts"
         }
       ]
     },
@@ -9319,7 +9451,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/code-card.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/code-card.tsx"
         }
       ]
     },
@@ -9331,7 +9464,8 @@
       "files": [
         {
           "path": "src/registry/lib/url-transform.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/url-transform.ts"
         }
       ]
     },
@@ -9356,7 +9490,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/markdown-view.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/markdown-view.tsx"
         }
       ]
     },
@@ -9378,7 +9513,8 @@
       "files": [
         {
           "path": "src/registry/components/data-display/file-tree.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-display/file-tree.tsx"
         }
       ]
     },
@@ -9391,7 +9527,8 @@
       "files": [
         {
           "path": "src/registry/lib/emoji-picker-rows.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/emoji-picker-rows.ts"
         }
       ]
     },
@@ -9426,7 +9563,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/emoji-picker.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/emoji-picker.tsx"
         }
       ]
     },
@@ -9438,7 +9576,8 @@
       "files": [
         {
           "path": "src/registry/lib/avatar-picker-check-color.ts",
-          "type": "registry:lib"
+          "type": "registry:lib",
+          "target": "@lib/avatar-picker-check-color.ts"
         }
       ]
     },
@@ -9469,7 +9608,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/avatar-picker.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/avatar-picker.tsx"
         }
       ]
     },
@@ -9484,7 +9624,8 @@
       "files": [
         {
           "path": "src/registry/components/data-entry/ai-provider-picker.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "@components/data-entry/ai-provider-picker.tsx"
         }
       ]
     }
