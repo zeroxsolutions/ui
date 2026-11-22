@@ -4,7 +4,7 @@ import {
   ReactNodeViewRenderer,
   type NodeViewProps as EngineNodeViewProps,
 } from '@tiptap/react';
-import type { ReactNode } from 'react';
+import { useCallback, useSyncExternalStore, type ReactNode } from 'react';
 import { facadeFor } from '@zeroxsolutions/editor-core/document/advanced';
 import type { EngineHandle } from '@zeroxsolutions/editor-core/document/advanced';
 import type { NodeSpec, NodeViewRenderer, NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
@@ -18,12 +18,28 @@ import type { NodeSpec, NodeViewRenderer, NodeViewProps } from '@zeroxsolutions/
  */
 export function buildNodeViewComponent(spec: NodeSpec): unknown {
   function EditorNodeView(engineProps: EngineNodeViewProps): ReactNode {
-    const facade = facadeFor(engineProps.editor as unknown as EngineHandle);
+    const engine = engineProps.editor;
+    const facade = facadeFor(engine as unknown as EngineHandle);
+    // The engine draws a node view again only when its node changes; `setEditable` emits `update` instead.
+    const subscribe = useCallback(
+      (listener: () => void) => {
+        engine.on('update', listener);
+        return () => {
+          engine.off('update', listener);
+        };
+      },
+      [engine],
+    );
+    const editable = useSyncExternalStore(
+      subscribe,
+      () => engine.isEditable,
+      () => engine.isEditable,
+    );
     const props: NodeViewProps = {
       attrs: engineProps.node.attrs as Record<string, unknown>,
       updateAttrs: (patch) => engineProps.updateAttributes(patch),
       selected: engineProps.selected ?? false,
-      editable: engineProps.editor.isEditable,
+      editable,
       editor: facade as NodeViewProps['editor'],
       deleteNode: () => engineProps.deleteNode(),
       children: spec.content ? <NodeViewContent /> : undefined,

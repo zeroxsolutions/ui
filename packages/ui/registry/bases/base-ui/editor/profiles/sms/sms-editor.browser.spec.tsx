@@ -282,6 +282,7 @@ describe('SmsEditor', () => {
     await vi.waitFor(() => expect(meter()).toBe('307 / 160 GSM-7 - 3 of 2 segments'));
     expect(find('[data-slot=sms-meter]').getAttribute('data-problem')).toBe('sms-segment-exceeded');
   });
+
   it("reads the meter in the host's words", async () => {
     await mount('', undefined, { messages: { smsMeter: ({ units, limit }) => units + '/' + limit } });
 

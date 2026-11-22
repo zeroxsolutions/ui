@@ -107,20 +107,16 @@ The body is plain text with no block and no mark; the only structure in it is a 
 
 `label` is the editable surface's accessible name. `readOnly` shows the body, its problems and its cost with nothing that changes it: typing is refused and the variable menu is not drawn.
 
-`messages` words every string the editor draws, as the [email editor](/docs/editor/email-editor) does; a key it leaves out stays English. The meter reads `smsMeter`, which takes the units, the limit, the encoding (`gsm7` or `ucs2`), the segments and the profile's `maxSegments`:
+`messages` words every string the editor draws, as the [email editor](/docs/editor/email-editor) does; a key it leaves out stays English. Build it once per locale, outside the render or in a memo, since a new object rebuilds the menus' words. The meter reads `smsMeter`, which takes the units, the limit, the encoding (`gsm7` or `ucs2`), the segments and the profile's `maxSegments`:
 
 ```tsx
-<SmsEditor
-  label="Tin nhan"
-  messages={{
-    smsMeter: ({ units, limit, segments, maxSegments }) =>
-      maxSegments > 1 ? `${units}/${limit} ky tu - ${segments}/${maxSegments} tin` : `${units}/${limit} ky tu`,
-    noVariables: 'Khong co bien nao',
-  }}
-  profile={profile}
-  value={body}
-  onChange={save}
-/>
+const vi: Partial<ProfileEditorMessages> = {
+  smsMeter: ({ units, limit, segments, maxSegments }) =>
+    maxSegments > 1 ? `${units}/${limit} ky tu - ${segments}/${maxSegments} tin` : `${units}/${limit} ky tu`,
+  noVariables: 'Khong co bien nao',
+};
+
+<SmsEditor label="Tin nhan" messages={vi} profile={profile} value={body} onChange={save} />;
 ```
 
 `smsProfile` takes `variables` and `maxSegments`.

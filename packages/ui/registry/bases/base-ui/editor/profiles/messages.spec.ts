@@ -16,7 +16,7 @@ function sources(directory: string): string[] {
 
 // A tag's text up to the next tag. An arrow's `=>` and a statement's punctuation would read code as text.
 const JSX_TEXT = /(?<!=)>\s*[A-Za-z][^<{}();=]*<\/?[A-Za-z]/;
-const NAMED_ATTRIBUTE = /(aria-label|title|placeholder)="[^"]*[A-Za-z]/;
+const NAMED_ATTRIBUTE = /(aria-label|title|placeholder|label)="[^"]*[A-Za-z]/;
 
 describe('the profiles', () => {
   it('draw no word of their own but through the messages', () => {

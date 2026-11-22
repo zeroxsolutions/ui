@@ -89,6 +89,8 @@ interface Probe {
   adorn(adornment: (id: string | null, key: string) => ReactNode): void;
   /** Hands the editor another profile, as a host whose declarations changed does. */
   declare(profile: EditorProfile): void;
+  /** Turns read-only on or off, as a host opening a draft does. */
+  lock(readOnly: boolean): void;
 }
 
 interface HarnessProps {
@@ -104,10 +106,20 @@ interface HarnessProps {
 }
 
 /** A host that stores what the editor reports and hands it back as the value, as travel's rows do. */
-function Host({ initial, probe, renderBlockAdornment, profile: first, preview, ...props }: HarnessProps) {
+function Host({
+  initial,
+  probe,
+  renderBlockAdornment,
+  profile: first,
+  preview,
+  readOnly: locked,
+  ...props
+}: HarnessProps) {
   const [value, setValue] = useState(initial);
   const [current, setProfile] = useState(first);
   probe.declare = setProfile;
+  const [readOnly, setReadOnly] = useState(locked);
+  probe.lock = setReadOnly;
   const [adornment, setAdornment] = useState(() => renderBlockAdornment);
   probe.load = setValue;
   probe.adorn = (next) => setAdornment(() => next);
@@ -118,6 +130,7 @@ function Host({ initial, probe, renderBlockAdornment, profile: first, preview, .
         {...props}
         {...previewProps}
         label="Body"
+        readOnly={readOnly}
         profile={current}
         value={value}
         renderBlockAdornment={adornment}
@@ -146,6 +159,7 @@ async function mount(
     load: () => {},
     adorn: () => {},
     declare: () => {},
+    lock: () => {},
   };
   await render(<Host profile={profile} {...props} initial={initial} probe={probe} />);
   await vi.waitFor(() => {
@@ -473,6 +487,7 @@ describe('EmailEditor', () => {
 
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'He!llo' }));
   });
+
   it("draws a problem in the host's words", async () => {
     await mount([paragraph('', 'p1')], { messages: { problem: () => 'Khoi trong' } });
 
@@ -498,6 +513,33 @@ describe('EmailEditor', () => {
     await mount([paragraph('Hello', 'p1')]);
 
     await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeInTheDocument();
+  });
+
+  it("unlocks and locks a button's label and link as read-only turns off and on", async () => {
+    const button: EditorEmailBlock = {
+      id: 'b1',
+      key: 'b1',
+      type: 'button',
+      attributes: {},
+      content: { label: 'Reset', href: '{{resetUrl}}' },
+    };
+    const probe = await mount([button], { readOnly: true });
+    const field = page.getByRole('textbox', { name: 'Button label' });
+    const picker = () => find('[data-slot=url-variable-picker][data-label="Button link"]');
+    await expect.element(field).toHaveAttribute('readonly');
+    await vi.waitFor(() => expect(picker()).toBeDisabled());
+
+    probe.lock(false);
+    await expect.element(field).not.toHaveAttribute('readonly');
+    await vi.waitFor(() => expect(picker()).toBeEnabled());
+    await userEvent.type(field, ' now');
+    await vi.waitFor(() =>
+      expect(last(probe.reported)?.[0].content).toEqual({ label: 'Reset now', href: '{{resetUrl}}' }),
+    );
+
+    probe.lock(true);
+    await expect.element(field).toHaveAttribute('readonly');
+    await vi.waitFor(() => expect(picker()).toBeDisabled());
   });
 
   it('refuses typing and opens no block menu when read-only', async () => {

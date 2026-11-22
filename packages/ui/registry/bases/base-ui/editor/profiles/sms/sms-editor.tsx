@@ -45,8 +45,9 @@ export interface SmsEditorProps {
   /** The editable surface's accessible name. */
   label: string;
   /**
-   * The host's words for any string the editor draws; the rest stay English. A problem keeps the words it was
-   * marked with until the problems are read again, after the next edit.
+   * The host's words for any string the editor draws; the rest stay English. Build it once per locale: a new
+   * object rebuilds the variable menus' words. A problem keeps the words it was marked with until the
+   * problems are read again, after the next edit.
    */
   messages?: Partial<ProfileEditorMessages>;
   /** Shows the body, its problems and its cost with no way to change it: no typing and no variable menu. */

@@ -238,7 +238,7 @@ The editor states an email as the blocks the renderer takes: `paragraph`, `butto
 
 `label` is the editable surface's accessible name. `readOnly` shows the document and its problems with nothing that changes it: typing is refused and the toolbar, the slash menu and the block menu are not drawn.
 
-`messages` words every string the editor draws, in the host's language; a key it leaves out stays English. `ProfileEditorMessages` and its English, `DEFAULT_PROFILE_MESSAGES`, come from `messages.ts`. A message that takes a value is a function, such as `problem(problem)`, which names the variable a problem is about. A problem keeps the words it was marked with until the editor reads the problems again, after the next edit.
+`messages` words every string the editor draws, in the host's language; a key it leaves out stays English. `ProfileEditorMessages` and its English, `DEFAULT_PROFILE_MESSAGES`, come from `messages.ts`. A message that takes a value is a function, such as `problem(problem)`, which names the variable a problem is about. Build `messages` once per locale, outside the render or in a memo: a new object rebuilds the toolbar's and the menus' items. A problem keeps the words it was marked with until the editor reads the problems again, after the next edit.
 
 ```tsx
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '@/components/editor/profiles/messages';

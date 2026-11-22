@@ -74,8 +74,9 @@ interface EmailEditorBaseProps {
   /** The editable surface's accessible name. */
   label: string;
   /**
-   * The host's words for any string the editor draws; the rest stay English. A problem keeps the words it was
-   * marked with until the problems are read again, after the next edit.
+   * The host's words for any string the editor draws; the rest stay English. Build it once per locale: a new
+   * object rebuilds the toolbar's and menus' items. A problem keeps the words it was marked with until the
+   * problems are read again, after the next edit.
    */
   messages?: Partial<ProfileEditorMessages>;
   /** Shows the document and its problems with no way to change it: no typing, toolbar or block menu. */
@@ -278,7 +279,7 @@ export function EmailEditor({
       engine?.view.dispatch(engine.state.tr.setMeta(overlayKey, true));
       live.current.onValidate?.(problems);
     },
-    [exportBlocks, host, idBase],
+    [exportBlocks, idBase],
   );
 
   const draw = useCallback(
