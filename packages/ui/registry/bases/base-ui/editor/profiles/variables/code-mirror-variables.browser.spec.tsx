@@ -41,6 +41,8 @@ function Pane({
         return () => listeners.delete(listener);
       },
       icon: (declaration) => <svg data-icon={declaration.type} />,
+      // Keys reach the list as soon as it shows, so a spec waits on the option, not on the library's delay.
+      interactionDelay: 0,
     });
   });
   return (
@@ -78,16 +80,6 @@ function content(): HTMLElement {
 const tokens = () => [...content().querySelectorAll<HTMLElement>('[data-variable]')];
 const optionLabels = () => [...document.querySelectorAll('[role=option]')].map((option) => option.textContent);
 
-/**
- * `@codemirror/autocomplete` hands no key to a list in its first moments open (its `interactionDelay`, 75 ms by
- * default), and nothing on the page shows when that ends; a key pressed sooner moves the caret and closes the
- * list, as it would under an author who had not seen it yet.
- */
-async function waitOutTheOpeningDelay(): Promise<void> {
-  const shown = performance.now();
-  await vi.waitFor(() => expect(performance.now() - shown).toBeGreaterThan(150));
-}
-
 async function typeAtEnd(text: string): Promise<void> {
   await userEvent.click(content());
   await userEvent.keyboard('{ControlOrMeta>}{End}{/ControlOrMeta}');
@@ -113,7 +105,6 @@ describe('variables in a code pane', () => {
     const probe = await mount('Hi ');
     await typeAtEnd('{{{{');
     await expect.element(page.getByRole('option', { name: 'Name' })).toBeVisible();
-    await waitOutTheOpeningDelay();
     await userEvent.keyboard('{ArrowDown}');
     await vi.waitFor(() =>
       expect(document.querySelector('[role=option][aria-selected=true]')?.textContent).toBe('Reset link'),
