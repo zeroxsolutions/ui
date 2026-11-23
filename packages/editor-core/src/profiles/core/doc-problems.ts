@@ -23,14 +23,8 @@ function problemsIn(blocks: readonly NodeJSON[], problems: ProfileProblem[]): vo
     }
     if (isCarried(node)) continue;
     const { id, key } = node.attrs ?? {};
-    const blockId = typeof id === 'string' ? id : null;
-    const blockKey = typeof key === 'string' ? key : '';
-    problems.push({
-      kind: 'block-not-carried',
-      block: blockId ?? blockKey,
-      blockId,
-      blockKey,
-    });
+    const block = typeof id === 'string' ? id : typeof key === 'string' ? key : null;
+    problems.push({ kind: 'block-not-carried', block });
   }
 }
 

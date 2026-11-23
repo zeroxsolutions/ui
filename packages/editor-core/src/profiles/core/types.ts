@@ -32,15 +32,10 @@ export interface VariableDeclaration {
 /** The wire shape of one email block. `lanes` is set on columns only. */
 export type EditorEmailBlock = EmailBlockJSON;
 
-/**
- * `block` is the block's id, or its key when the id is null. `blockId` and `blockKey` are set on a
- * `block-not-carried` problem, which is read off the document and so names the block by both.
- */
+/** `block` is the block's id, or its key when the id is null. */
 export interface ProfileProblem {
   kind: ProblemKind;
   block: string | null;
-  blockId?: string | null;
-  blockKey?: string;
   field?: string;
   item?: number;
   offset?: number;

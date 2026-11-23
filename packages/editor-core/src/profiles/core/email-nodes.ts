@@ -51,7 +51,7 @@ function block(name: string, spec: Partial<NodeSpec>, shape: z.ZodRawShape): Nod
 }
 
 /**
- * The email profile's nodes and marks. The paragraph is the core's own, carrying `align`, `spaceAfter`,
+ * The email profile's nodes and its link mark; bold and italic are the document's own marks. The paragraph is the core's own, carrying `align`, `spaceAfter`,
  * `tone` and `source` as global attributes, so it is not listed here; lists, callouts, code and rules
  * are the document's own nodes, which the codec reads by type name. No node declares `id` or `key`:
  * `blockIdentity` owns them, on the paragraph and on every type in `EMAIL_BLOCK_NODES`, so it can keep
@@ -77,9 +77,5 @@ export const emailNodeSpecs: { nodes: NodeSpec[]; marks: MarkSpec[] } = {
     block('emailUnknown', { atom: true }, { block: z.unknown().optional() }),
     { name: 'variable', group: 'inline', atom: true, attrs: z.object({ name: z.string() }) },
   ],
-  marks: [
-    { name: 'bold', htmlTag: 'strong' },
-    { name: 'italic', htmlTag: 'em' },
-    { name: 'emailLink', htmlTag: 'a', inclusive: false, attrs: z.object({ variable: z.string() }) },
-  ],
+  marks: [{ name: 'emailLink', htmlTag: 'a', inclusive: false, attrs: z.object({ variable: z.string() }) }],
 };

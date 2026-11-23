@@ -54,16 +54,12 @@ describe('docProblems', () => {
       },
     ],
   ])('flags %s as not carried', (_, node) => {
-    expect(docProblems(docOf(keyed(node)))).toEqual([
-      { kind: 'block-not-carried', block: 'k1', blockId: null, blockKey: 'k1' },
-    ]);
+    expect(docProblems(docOf(keyed(node)))).toEqual([{ kind: 'block-not-carried', block: 'k1' }]);
   });
 
-  it('names the block by its id and keeps the key beside it', () => {
+  it('names the block by its id when it has one', () => {
     const quote = keyed({ type: 'blockquote', content: [para('a')] }, 'b1');
-    expect(docProblems(docOf(quote))).toEqual([
-      { kind: 'block-not-carried', block: 'b1', blockId: 'b1', blockKey: 'k1' },
-    ]);
+    expect(docProblems(docOf(quote))).toEqual([{ kind: 'block-not-carried', block: 'b1' }]);
   });
 
   it('flags a block inside a lane', () => {

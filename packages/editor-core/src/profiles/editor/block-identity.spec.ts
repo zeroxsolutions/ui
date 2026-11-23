@@ -23,7 +23,7 @@ const documentNodes: NodeSpec[] = [
 const email: EditorFeature = {
   id: 'email',
   nodes: [...documentNodes, ...emailNodeSpecs.nodes],
-  marks: emailNodeSpecs.marks,
+  marks: [{ name: 'bold', htmlTag: 'strong' }, ...emailNodeSpecs.marks],
 };
 const undoable: EditorFeature = { id: 'history', advanced: { prosePlugins: [history()] } };
 
