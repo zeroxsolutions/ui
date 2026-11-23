@@ -25,13 +25,13 @@
       // The native paths on registry-ui's host. A route takes precedence over a Custom Domain on the same
       // hostname, so a path listed here is never registry-ui's.
       "routes": [
-        { "pattern": "ui.zeroxsolutions.com/native", "zone_name": "zeroxsolutions.com" },
-        { "pattern": "ui.zeroxsolutions.com/native/*", "zone_name": "zeroxsolutions.com" },
-        { "pattern": "ui.zeroxsolutions.com/native-preview/*", "zone_name": "zeroxsolutions.com" },
-        { "pattern": "ui.zeroxsolutions.com/native-preview-uniwind/*", "zone_name": "zeroxsolutions.com" },
+        // A route matches the query string too, and only a trailing wildcard takes one. An exact `/native`
+        // misses the router's `/native?_rsc=` prefetch, which registry-ui answers with its 404. The wildcard
+        // also claims `/native-preview*` and `/native-static*`, so registry-ui serves no path that starts
+        // with `/native`, which tools/check-zone-routes.sh checks.
+        { "pattern": "ui.zeroxsolutions.com/native*", "zone_name": "zeroxsolutions.com" },
         { "pattern": "ui.zeroxsolutions.com/og/native/*", "zone_name": "zeroxsolutions.com" },
         { "pattern": "ui.zeroxsolutions.com/llms.mdx/native/*", "zone_name": "zeroxsolutions.com" },
-        { "pattern": "ui.zeroxsolutions.com/native-static/*", "zone_name": "zeroxsolutions.com" },
         { "pattern": "ui.zeroxsolutions.com/r/styles/nativewind-*", "zone_name": "zeroxsolutions.com" },
         { "pattern": "ui.zeroxsolutions.com/r/styles/uniwind-*", "zone_name": "zeroxsolutions.com" },
       ],

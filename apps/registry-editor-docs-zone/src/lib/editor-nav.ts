@@ -5,7 +5,11 @@ import { editorDocsRoute } from '@zeroxsolutions/editor-docs-web/routes';
 import { nativeDocsRoute } from '@/routes/native-paths';
 import { webBlocksRoute, webComponentsRoute, webDocsRoute, webHomeRoute, webIconsRoute } from '@/routes/web-paths';
 
-/** Whether `href` is a page of this zone: `/docs/editor` or a path under it, or a link within the page. */
+/**
+ * Whether `href` is a page of this zone: `/docs/editor` or a path under it, or a link within the page. The
+ * zone's route also claims `/docs/editor<suffix>`, but neither app has a page there, so a link to one draws
+ * a 404 whichever app answers it.
+ */
 export function inZone(href: string): boolean {
   const path = href.split(/[?#]/, 1)[0];
   return path === '' || path === editorDocsRoute.pathname || path.startsWith(`${editorDocsRoute.pathname}/`);

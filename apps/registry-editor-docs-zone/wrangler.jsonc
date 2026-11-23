@@ -25,10 +25,10 @@
       // The editor paths on registry-ui's host. A route takes precedence over a Custom Domain on the same
       // hostname, so a path listed here is never registry-ui's.
       "routes": [
-        // A route matches the query string too, and only a trailing wildcard takes one: an exact
+        // A route matches the query string too, and only a trailing wildcard takes one. An exact
         // `/docs/editor` misses the router's `/docs/editor?_rsc=` prefetch, which registry-ui answers with
         // its 404. The wildcard also claims `/docs/editor.md` and any `/docs/editor<suffix>`, so registry-ui
-        // serves no path that starts with `/docs/editor`.
+        // serves no path that starts with `/docs/editor`, which tools/check-zone-routes.sh checks.
         { "pattern": "ui.zeroxsolutions.com/docs/editor*", "zone_name": "zeroxsolutions.com" },
         { "pattern": "ui.zeroxsolutions.com/og/docs/editor/*", "zone_name": "zeroxsolutions.com" },
         { "pattern": "ui.zeroxsolutions.com/llms.mdx/docs/editor/*", "zone_name": "zeroxsolutions.com" },

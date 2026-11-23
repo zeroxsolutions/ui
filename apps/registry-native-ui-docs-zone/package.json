@@ -104,7 +104,9 @@
         "cache": true,
         "inputs": [
           "{workspaceRoot}/apps/*-zone/wrangler.jsonc",
-          "{workspaceRoot}/tools/check-zone-routes.sh"
+          "{workspaceRoot}/tools/check-zone-routes.sh",
+          "{workspaceRoot}/apps/registry-ui/src/app/**/*",
+          "{workspaceRoot}/packages/ui-docs-web/content/docs/**/*"
         ],
         "options": {
           "command": "tools/check-zone-routes.sh"
