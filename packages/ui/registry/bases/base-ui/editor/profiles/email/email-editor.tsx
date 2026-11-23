@@ -57,6 +57,7 @@ import { emailKit, emailUi, type EmailUi } from './email-kit';
 import { UNLINK_ITEM_ID } from './marks';
 import { carriesKey, contextOf } from './kit-context';
 import { EmailLinkPopover } from './email-link-popover';
+import { EmailPreview } from './email-preview';
 import { problemDecorations, problemMarks, type ProblemMark } from './problem-decorations';
 
 /** How long after an edit the problems are read again, at most, and how long after the last edit the preview is. */
@@ -94,6 +95,8 @@ interface EmailEditorBaseProps {
    * problems are read again, after the next edit.
    */
   messages?: Partial<ProfileEditorMessages>;
+  /** The sender's name the preview's inbox line shows above the subject. */
+  sender?: string;
   /** Shows the document and its problems with no way to change it: no typing, toolbar or block menu. */
   readOnly?: boolean;
   /** Features of the host's own blocks, each with an email codec. Read once: a change needs a remount. */
@@ -256,7 +259,7 @@ function EmailEditorBubbleMenu({ editor, items, container }: EmailEditorBubbleMe
 /**
  * The email profile's editor: the document editor with `emailKit`'s blocks, marks and variables, the block menu,
  * each problem marked where it is, the host's adornment beside each block, and, with a renderer, the rendered
- * email under a Preview tab. The frame is the Document Editor's: the toolbar above the document, the Edit and
+ * email under a Preview tab, at a desktop or a phone's width and in a light or a dark scheme. The frame is the Document Editor's: the toolbar above the document, the Edit and
  * Preview tabs at the end of the toolbar's row, as a Mermaid block's switch sits, and the problems no block holds
  * under the document.
  * `value` loads whenever it differs from what the editor last reported, so a host hands back what `onChange`
@@ -273,6 +276,7 @@ export function EmailEditor({
   structure = 'free',
   renderer,
   previewInput,
+  sender,
   className,
   onChange,
   onBlur,
@@ -336,7 +340,12 @@ export function EmailEditor({
   const [rows, setRows] = useState<Row[]>([]);
   const [marks, setMarks] = useState<ProblemMark[]>([]);
   const [unplaced, setUnplaced] = useState<string[]>([]);
-  const [preview, setPreview] = useState<{ html: string; problems: string[] } | null>(null);
+  const [preview, setPreview] = useState<{
+    html: string;
+    subject: string;
+    preheader: string;
+    problems: string[];
+  } | null>(null);
 
   // What the editor last reported, and the value it last loaded: a value with the same content as either is no news.
   const reported = useRef<EditorEmailBlock[] | null>(null);
@@ -384,7 +393,7 @@ export function EmailEditor({
       const problems = rendered.problems.map((problem) =>
         live.current.text.renderProblem(problem, problem.blockId === null ? undefined : places.get(problem.blockId)),
       );
-      setPreview({ html: rendered.html, problems });
+      setPreview({ html: rendered.html, subject: rendered.subject, preheader: rendered.preheader, problems });
     },
     [exportBlocks],
   );
@@ -566,17 +575,15 @@ export function EmailEditor({
             {pane}
           </TabsContent>
           <TabsContent value="preview" keepMounted>
-            <div data-slot="email-preview-page" className="cn-editor-page h-128 overflow-hidden">
-              {preview && (
-                <iframe
-                  data-slot="email-preview"
-                  title={text.emailPreview}
-                  sandbox=""
-                  srcDoc={preview.html}
-                  className="size-full"
-                />
-              )}
-            </div>
+            {preview && (
+              <EmailPreview
+                html={preview.html}
+                subject={preview.subject}
+                preheader={preview.preheader}
+                sender={sender}
+                messages={text}
+              />
+            )}
           </TabsContent>
         </Tabs>
       ) : (

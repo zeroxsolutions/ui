@@ -35,7 +35,7 @@ pnpm add @codemirror/autocomplete @codemirror/state @codemirror/view @tiptap/rea
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add badge button combobox field popover tabs tooltip utils @zui/chat-input @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-braces-icon @zui/lucide-eye-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-text-align-start-icon
+pnpm dlx shadcn@latest add badge button combobox field popover separator tabs toggle-group tooltip utils @zui/chat-input @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-braces-icon @zui/lucide-eye-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-moon-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-sun-icon @zui/lucide-text-align-start-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -44,6 +44,12 @@ pnpm dlx shadcn@latest add badge button combobox field popover tabs tooltip util
   name="email-editor"
   file="registry/bases/base-ui/editor/profiles/email/email-editor.tsx"
   title="components/editor/profiles/email/email-editor.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/email-preview.tsx"
+  title="components/editor/profiles/email/email-preview.tsx"
 />
 
 <ComponentSource
@@ -189,6 +195,7 @@ function WelcomeEmail({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blo
       onChange={save}
       renderer={renderer}
       previewInput={{ subject: 'Welcome', preheader: null, locale: 'en', layoutProps }}
+      sender="Example"
     />
   );
 }
@@ -201,8 +208,53 @@ menu holds Turn into, Duplicate and Delete, and the block's Align, Space after, 
 The editor is drawn as the Document Editor is, with its toolbar above the blocks and nothing around them.
 With a `renderer`, an Edit and a Preview tab sit at the end of the toolbar's row, as a Mermaid block's switch
 does. The Preview tab shows the rendered email with each variable's `sampleValue`, and the toolbar is disabled
-while it is open. `theme` is the renderer's `EmailTheme` and `layoutProps` its logo and footer, and the demo's
-source defines both.
+while it is open. `layoutProps` is the default layout's logo and footer, and the demo's source defines it.
+
+Above the email, the preview shows the `sender`, the subject and the preheader as an inbox lists them. Its bar
+switches between Desktop, a 640px frame, and Mobile, a 375px frame where the email's narrow-screen rules
+apply, and between Light and Dark. Dark sets the frame's color scheme, so the email's
+`prefers-color-scheme: dark` rules apply. The scheme opens on the page's own.
+
+## Theme
+
+`createEmailRenderer` takes the `EmailTheme` every default block and the default layout paint with. Mail
+clients read no CSS variable and no `oklch()`, so each color is a six- or eight-digit hex.
+
+```tsx
+import { createEmailRenderer, type EmailTheme } from '@zeroxsolutions/editor-core/template/email/index';
+
+const theme: EmailTheme = {
+  colors: {
+    background: '#FFFFFF',
+    foreground: '#09090B',
+    primary: '#007A55',
+    primaryForeground: '#ECFDF5',
+    muted: '#F4F4F5',
+    mutedForeground: '#63636D',
+    border: '#E4E4E7',
+  },
+  dark: {
+    background: '#18181B',
+    foreground: '#FAFAFA',
+    primary: '#00BC7D',
+    primaryForeground: '#022C22',
+    muted: '#27272A',
+    mutedForeground: '#9F9FA9',
+    border: '#3F3F46',
+  },
+  radius: 10,
+  font: { family: 'Inter', fallback: 'Arial, Helvetica, sans-serif' },
+};
+
+const renderer = createEmailRenderer({ theme });
+```
+
+`dark` is optional and takes the same keys as `colors`. With it, the email declares a light and a dark color
+scheme, and a client in dark mode that reads `prefers-color-scheme`, such as Apple Mail, paints it with `dark`.
+Gmail reads no such rule and shows the light palette. Without `dark`, the email declares no dark scheme and
+stays light. `radius` is in px. `createEmailRenderer` throws `EmailThemeInvalid`, naming the value's path,
+for a color that is not hex or a font list that holds anything but names, spaces, commas, hyphens and single
+quotes.
 
 Hand the blocks `onChange` gives you back as `value`, and the editor does not reload them. After a save,
 call `editor.run('assignBlockIds', { ids })` on the editor `onReady` gave you, with a map of block key to
@@ -219,6 +271,7 @@ saved id. The blocks it reports from then on carry those ids.
 | `label`                | `string`                                         | -        | The accessible name of the editable area.                                           |
 | `renderer`             | `EmailPreviewRenderer`                           | -        | A `createEmailRenderer` instance. Without one, the editor draws no preview.         |
 | `previewInput`         | `EmailPreviewInput`                              | -        | The subject, preheader, locale and layout props the preview renders with.           |
+| `sender`               | `string`                                         | -        | The sender's name the preview shows above the subject.                              |
 | `messages`             | `Partial<ProfileEditorMessages>`                 | -        | Your words for the strings the editor draws. A key left out stays English.          |
 | `readOnly`             | `boolean`                                        | `false`  | Shows the blocks and their problems with no toolbar or menus.                       |
 | `required`             | `readonly string[]`                              | -        | The ids of the blocks the author may not delete.                                    |

@@ -750,6 +750,56 @@ describe('EmailEditor frame', () => {
     for (const control of controls) await expect.element(control).toBeEnabled();
   });
 
+  const frame = () => find('iframe[data-slot=email-preview]') as HTMLIFrameElement;
+
+  it('draws the email at a desktop width, and at a phone width under the narrow-screen breakpoint', async () => {
+    await page.viewport(1280, 800);
+    await mount([paragraph('Hello', 'p1')], withPreview());
+    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+    const devices = page.getByRole('group', { name: 'Device' });
+    await expect.element(devices.getByRole('button', { name: 'Desktop' })).toHaveAttribute('aria-pressed', 'true');
+    // The email's narrow-screen rules apply at 600px and under, and the frame is sized, not scaled.
+    expect(frame().getBoundingClientRect().width).toBeGreaterThan(600);
+
+    await userEvent.click(devices.getByRole('button', { name: 'Mobile' }));
+    await expect.element(devices.getByRole('button', { name: 'Mobile' })).toHaveAttribute('aria-pressed', 'true');
+    await vi.waitFor(() => expect(frame().getBoundingClientRect().width).toBeLessThanOrEqual(375));
+  });
+
+  it("answers the email's dark rules on Dark, and its light ones on Light", async () => {
+    const dark = { ...theme.colors, background: '#18181B' };
+    await mount([paragraph('Hello', 'p1')], {
+      preview: { renderer: createEmailRenderer({ theme: { ...theme, dark } }), input: previewInput },
+    });
+    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+    const schemes = page.getByRole('group', { name: 'Color scheme' });
+    await expect.element(schemes.getByRole('button', { name: 'Light' })).toHaveAttribute('aria-pressed', 'true');
+    await vi.waitFor(() => expect(frame().srcdoc).toContain('@media not all{.zx-bg{background:#18181B'));
+
+    await userEvent.click(schemes.getByRole('button', { name: 'Dark' }));
+    await vi.waitFor(() => expect(frame().srcdoc).toContain('@media all{.zx-bg{background:#18181B'));
+    expect(frame().style.colorScheme).toBe('dark');
+  });
+
+  it('shows the sender, the subject and the preheader above the email', async () => {
+    render(
+      <EmailEditor
+        label="Body"
+        profile={profile}
+        value={[paragraph('Hello', 'p1')]}
+        renderer={createEmailRenderer({ theme })}
+        previewInput={{ ...previewInput, subject: 'Hi {{name}}', preheader: 'Your week' }}
+        sender="Example"
+      />,
+    );
+    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+
+    const inbox = page.elementLocator(await vi.waitFor(() => find('[data-slot=email-preview-inbox]')));
+    await expect.element(inbox.getByText('Example')).toBeVisible();
+    await expect.element(inbox.getByText('Hi Lan')).toBeVisible();
+    await expect.element(inbox.getByText('Your week')).toBeVisible();
+  });
+
   it('offers the tabs when read-only, with no toolbar', async () => {
     await mount([paragraph('Hello', 'p1')], { ...withPreview(), readOnly: true });
 

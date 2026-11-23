@@ -36,6 +36,15 @@ const theme: EmailTheme = {
     mutedForeground: '#63636D',
     border: '#E4E4E7',
   },
+  dark: {
+    background: '#18181B',
+    foreground: '#FAFAFA',
+    primary: '#00BC7D',
+    primaryForeground: '#022C22',
+    muted: '#27272A',
+    mutedForeground: '#9F9FA9',
+    border: '#3F3F46',
+  },
   radius: 10,
   font: { family: 'Inter', fallback: 'Arial, Helvetica, sans-serif' },
 };
@@ -50,7 +59,7 @@ const logo =
 
 const previewInput: EmailPreviewInput = {
   subject: 'Your {{plan}} plan is ready',
-  preheader: null,
+  preheader: 'Open your account and invite your team.',
   locale: 'en',
   layoutProps: {
     logo: { url: logo, alt: 'ZUI', width: 120 },
@@ -107,6 +116,7 @@ function EmailEditorDemo(): ReactNode {
       onChange={setBlocks}
       renderer={renderer}
       previewInput={previewInput}
+      sender="ZUI"
       className="max-w-2xl"
     />
   );
