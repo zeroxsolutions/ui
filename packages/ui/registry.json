@@ -3208,7 +3208,7 @@
       "name": "email-editor",
       "type": "registry:component",
       "title": "Email Editor",
-      "description": "A block editor for an email body, with {{name}} variables, a block menu for each block's layout, and a preview of the rendered email.",
+      "description": "A block editor for an email body, with {{name}} variables, a block menu per block, and a preview of the rendered email.",
       "categories": ["editor"],
       "registryDependencies": [
         "@shadcn/badge",
@@ -3392,7 +3392,7 @@
       "name": "email-editor-demo",
       "type": "registry:example",
       "title": "Email Editor Demo",
-      "description": "A welcome email: a button and a text link to url variables, a callout and two columns, beside its preview.",
+      "description": "A welcome email with a button and a text link to url variables, a callout and two columns, beside its preview.",
       "categories": ["examples"],
       "registryDependencies": ["@zui/email-editor"],
       "files": [

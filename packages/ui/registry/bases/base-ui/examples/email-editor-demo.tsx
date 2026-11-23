@@ -95,7 +95,7 @@ const initial: EditorEmailBlock[] = [
   },
 ];
 
-/** A welcome email: a button and a text link to url variables, a callout and two columns, beside its preview. */
+/** A welcome email with a button and a text link to url variables, a callout and two columns, beside its preview. */
 function EmailEditorDemo(): ReactNode {
   const [blocks, setBlocks] = useState(initial);
   const renderer = useMemo(() => createEmailRenderer({ theme }), []);

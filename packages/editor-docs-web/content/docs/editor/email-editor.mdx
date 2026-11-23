@@ -1,6 +1,6 @@
 ---
 title: Email Editor
-description: A block editor for an email body, with {{name}} variables, a block menu for each block's layout, and a preview of the rendered email.
+description: A block editor for an email body, with {{name}} variables, a block menu per block, and a preview of the rendered email.
 ---
 
 <ComponentPreview name="email-editor-demo" />
@@ -182,39 +182,40 @@ function WelcomeEmail({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blo
 }
 ```
 
-The editor is the Document Editor with the email's blocks: paragraph, bulleted list, callout, code block,
-divider, button, columns and HTML. Click a block's grip, or press Mod-/, to open its block menu: Turn into,
-Duplicate, Delete, and the block's Align, Space after, Tone, Width, Lanes or Link. With a `renderer`, the
-preview shows the rendered email with each variable's `sampleValue`. `theme` is the renderer's `EmailTheme`
-and `layoutProps` its logo and footer; the demo's source defines both.
+The editor offers the Document Editor's paragraph, bulleted list, callout, code block and divider, and the
+email's button, columns and HTML blocks. Click a block's grip, or press Mod-/, to open its block menu. The
+menu holds Turn into, Duplicate and Delete, and the block's Align, Space after, Tone, Width, Lanes or Link.
 
-Pass back the blocks `onChange` gave you. After a save, give the new blocks their ids with
-`editor.run('assignBlockIds', { ids })`, a map of block key to id. The blocks it reports then carry those
-ids, and the saved value handed back does not reload the document.
+With a `renderer`, the preview shows the rendered email with each variable's `sampleValue`. `theme` is the
+renderer's `EmailTheme` and `layoutProps` its logo and footer, and the demo's source defines both.
+
+Hand the blocks `onChange` gives you back as `value`, and the editor does not reload them. After a save,
+call `editor.run('assignBlockIds', { ids })` on the editor `onReady` gave you, with a map of block key to
+saved id. The blocks it reports from then on carry those ids.
 
 ## API reference
 
 ### EmailEditor
 
-| Prop                   | Type                                             | Default  | Description                                                                       |
-| ---------------------- | ------------------------------------------------ | -------- | --------------------------------------------------------------------------------- |
-| `profile`              | `EditorProfile`                                  | -        | The blocks and variables the author may use, from `emailProfile`.                 |
-| `value`                | `EditorEmailBlock[]`                             | -        | The blocks shown. A value with other content than the last change replaces them.  |
-| `label`                | `string`                                         | -        | The accessible name of the editable area.                                         |
-| `renderer`             | `EmailPreviewRenderer`                           | -        | A `createEmailRenderer` instance. Without one, no preview is drawn.               |
-| `previewInput`         | `EmailPreviewInput`                              | -        | The subject, preheader, locale and layout props the preview renders with.         |
-| `layout`               | `'auto' \| 'split' \| 'tabs'`                    | `'auto'` | `split` sets the preview beside the editor, `tabs` behind a tab, `auto` by width. |
-| `messages`             | `Partial<ProfileEditorMessages>`                 | -        | Your words for the strings the editor draws. A key left out stays English.        |
-| `readOnly`             | `boolean`                                        | `false`  | Shows the blocks and their problems with no toolbar or menus.                     |
-| `required`             | `readonly string[]`                              | -        | The ids of the blocks the author may not delete.                                  |
-| `structure`            | `'free' \| 'locked'`                             | `'free'` | `locked` allows text and variable edits only.                                     |
-| `features`             | `EditorFeature[]`                                | -        | Your own blocks, each with an email codec. Read once, on mount.                   |
-| `className`            | `string`                                         | -        | Classes for the frame.                                                            |
-| `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        | Called with the blocks after each edit.                                           |
-| `onBlur`               | `() => void`                                     | -        | Called when the focus leaves the editor and the menus it opened.                  |
-| `onValidate`           | `(problems: ProfileProblem[]) => void`           | -        | Called with the problems on mount and when they change.                           |
-| `renderBlockAdornment` | `(id: string \| null, key: string) => ReactNode` | -        | Draws your content beside each block. `id` is null until the block is saved.      |
-| `onReady`              | `(editor: IEditor) => void`                      | -        | Called once with the editor.                                                      |
+| Prop                   | Type                                             | Default  | Description                                                                                                                                      |
+| ---------------------- | ------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `profile`              | `EditorProfile`                                  | -        | The blocks and variables the author may use, from `emailProfile`.                                                                                |
+| `value`                | `EditorEmailBlock[]`                             | -        | The blocks shown. A value that differs from the last `onChange` loads in its place.                                                              |
+| `label`                | `string`                                         | -        | The accessible name of the editable area.                                                                                                        |
+| `renderer`             | `EmailPreviewRenderer`                           | -        | A `createEmailRenderer` instance. Without one, the editor draws no preview.                                                                      |
+| `previewInput`         | `EmailPreviewInput`                              | -        | The subject, preheader, locale and layout props the preview renders with.                                                                        |
+| `layout`               | `'auto' \| 'split' \| 'tabs'`                    | `'auto'` | `split` draws the preview beside the editor, `tabs` under a Preview tab, and `auto` splits at a viewport 768px wide or more and uses tabs below. |
+| `messages`             | `Partial<ProfileEditorMessages>`                 | -        | Your words for the strings the editor draws. A key left out stays English.                                                                       |
+| `readOnly`             | `boolean`                                        | `false`  | Shows the blocks and their problems with no toolbar or menus.                                                                                    |
+| `required`             | `readonly string[]`                              | -        | The ids of the blocks the author may not delete.                                                                                                 |
+| `structure`            | `'free' \| 'locked'`                             | `'free'` | `locked` allows edits to text, marks (bold, italic, link) and variables only.                                                                    |
+| `features`             | `EditorFeature[]`                                | -        | Your own blocks, each with an email codec. Read once, on mount.                                                                                  |
+| `className`            | `string`                                         | -        | Classes for the frame.                                                                                                                           |
+| `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        | Called with the blocks after each edit.                                                                                                          |
+| `onBlur`               | `() => void`                                     | -        | Called when the focus leaves the editor and the menus it opened.                                                                                 |
+| `onValidate`           | `(problems: ProfileProblem[]) => void`           | -        | Called with the problems on mount and when they change.                                                                                          |
+| `renderBlockAdornment` | `(id: string \| null, key: string) => ReactNode` | -        | Draws your content beside each block. `id` is null until the block is saved.                                                                     |
+| `onReady`              | `(editor: IEditor) => void`                      | -        | Called once with the editor.                                                                                                                     |
 
 Build `messages` once per locale; a new object rebuilds the toolbar and the menus. Its English defaults are
 `DEFAULT_PROFILE_MESSAGES` in `messages.ts`.
@@ -228,8 +229,9 @@ Build `messages` once per locale; a new object rebuilds the toolbar and the menu
 | `bounds`     | `Partial<EmailBounds>`  | the table below |
 | `extraKinds` | `string[]`              | `[]`            |
 
-`extraKinds` names the kinds of your own `features`. A bound may be lowered, never raised: a value above the
-renderer's limit throws `editor.profile.bound_above_renderer`.
+`extraKinds` names the kinds of your own `features`. The renderer caps `text`, `label`, `href`, `listItems`
+and `lanes` at their defaults, and a higher value throws `editor.profile.bound_above_renderer`. `blocks` and
+`variables` may be raised.
 
 | Bound       | Default | Limits                                          |
 | ----------- | ------- | ----------------------------------------------- |
@@ -253,9 +255,14 @@ To change the variables, pass a new profile. If you change the declarations in p
 
 ## Validation
 
-Each problem is marked on its block, with its message on hover and focus. F8 and Shift+F8 move to the next
-and previous problem, and Escape on a marker returns to its block. On the server, `validate(blocks, profile)`
-from `@zeroxsolutions/editor-core/profiles/index` returns the same list for the same profile.
+Each problem is marked on its block, with its message on hover and focus. A problem with no block, such as
+`required-variable-not-printed` or `too-many-blocks`, and each problem the preview's render reports are listed
+in the editor's footer. F8 and Shift+F8 move to the next and previous problem, and Escape on a marker returns
+to its block.
+
+On the server, `validate(blocks, profile)` from `@zeroxsolutions/editor-core/profiles/index` returns the same
+list for the same profile, except `block-not-carried`. Only the editor reports that one, since it reads the
+document before the export.
 
 | Kind                            | Message                                     |
 | ------------------------------- | ------------------------------------------- |
@@ -274,8 +281,7 @@ from `@zeroxsolutions/editor-core/profiles/index` returns the same list for the 
 | `too-many-blocks`               | The email has too many blocks               |
 | `block-not-carried`             | The email keeps only the text of this block |
 
-`block-not-carried` marks a block the email cannot hold, such as a pasted heading or numbered list. The
-email keeps its text.
+`block-not-carried` marks a block the email cannot hold, such as a pasted heading or numbered list.
 
 ## Markup
 

@@ -95,18 +95,18 @@ segments, the meter and the text past the limit are marked.
 
 ### SmsEditor
 
-| Prop         | Type                                   | Default | Description                                                      |
-| ------------ | -------------------------------------- | ------- | ---------------------------------------------------------------- |
-| `profile`    | `EditorProfile`                        | -       | The variables and the segment limit, from `smsProfile`.          |
-| `value`      | `string`                               | -       | The body shown. A value other than the last change replaces it.  |
-| `label`      | `string`                               | -       | The accessible name of the editable area.                        |
-| `messages`   | `Partial<ProfileEditorMessages>`       | -       | Your words for the strings it draws, `smsMeter` among them.      |
-| `readOnly`   | `boolean`                              | `false` | Shows the body, its problems and its cost with no variable menu. |
-| `className`  | `string`                               | -       | Classes for the frame.                                           |
-| `onChange`   | `(body: string) => void`               | -       | Called with the body after each edit.                            |
-| `onBlur`     | `() => void`                           | -       | Called when the focus leaves the editor and the menus it opened. |
-| `onValidate` | `(problems: ProfileProblem[]) => void` | -       | Called with the problems on mount and when they change.          |
-| `onReady`    | `(editor: IEditor) => void`            | -       | Called once with the editor.                                     |
+| Prop         | Type                                   | Default | Description                                                                       |
+| ------------ | -------------------------------------- | ------- | --------------------------------------------------------------------------------- |
+| `profile`    | `EditorProfile`                        | -       | The variables and the segment limit, from `smsProfile`.                           |
+| `value`      | `string`                               | -       | The body shown. A value that differs from the last `onChange` loads in its place. |
+| `label`      | `string`                               | -       | The accessible name of the editable area.                                         |
+| `messages`   | `Partial<ProfileEditorMessages>`       | -       | Your words for the strings it draws, `smsMeter` among them.                       |
+| `readOnly`   | `boolean`                              | `false` | Shows the body, its problems and its cost with no variable menu.                  |
+| `className`  | `string`                               | -       | Classes for the frame.                                                            |
+| `onChange`   | `(body: string) => void`               | -       | Called with the body after each edit.                                             |
+| `onBlur`     | `() => void`                           | -       | Called when the focus leaves the editor and the menus it opened.                  |
+| `onValidate` | `(problems: ProfileProblem[]) => void` | -       | Called with the problems on mount and when they change.                           |
+| `onReady`    | `(editor: IEditor) => void`            | -       | Called once with the editor.                                                      |
 
 `smsMeter` takes `units`, `limit`, `encoding` (`gsm7` or `ucs2`), `segments` and `maxSegments`, and returns
 the meter's text.
@@ -137,5 +137,5 @@ server, `validate(body, profile)` from `@zeroxsolutions/editor-core/profiles/ind
 
 ## Markup
 
-There is none: `**`, `_` and `[label](...)` stay the characters they are. Enter and a pasted line break make
-a new line.
+The body has no formatting. `**`, `_` and `[label](...)` stay as typed. Enter and a pasted line break make a
+new line.
