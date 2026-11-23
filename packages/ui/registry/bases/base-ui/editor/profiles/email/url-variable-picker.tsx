@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LinkIcon } from 'lucide-react';
-import { Button } from '@/registry/bases/base-ui/ui/button';
+import { LinkIcon } from '@/registry/bases/base-ui/icons/lucide/link-icon';
 import {
   Combobox,
   ComboboxContent,
@@ -10,11 +9,11 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-  ComboboxTrigger,
 } from '@/registry/bases/base-ui/ui/combobox';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { matchesVariable, variableIcon, variableLabel } from '../variables/variable';
+import { VariableMenuTrigger } from '../variables/variable-menu';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { emailLinkAt } from './kit-context';
 
@@ -41,7 +40,8 @@ export interface UrlVariablePickerProps {
 
 /**
  * The one picker for an email link target: the declared `url` variables only, because the house renderer
- * accepts an href or a link that is exactly one `url` token. A button's href and a text link both use it.
+ * accepts an href or a link that is exactly one `url` token. Its trigger is a toolbar icon named by `label`,
+ * and by the chosen variable after it when there is one.
  */
 export function UrlVariablePicker({
   declarations,
@@ -70,15 +70,13 @@ export function UrlVariablePicker({
       itemToStringLabel={variableLabel}
       filter={(declaration: VariableDeclaration, query: string) => matchesVariable(declaration, query)}
     >
-      <ComboboxTrigger
+      <VariableMenuTrigger
         data-slot="url-variable-picker"
         data-label={label}
-        render={<Button variant="outline" size="sm" className={className} />}
-      >
-        <LinkIcon aria-hidden />
-        {(chosen || value) && <span className="sr-only">{label}: </span>}
-        {chosen ? variableLabel(chosen) : (value ?? label)}
-      </ComboboxTrigger>
+        icon={LinkIcon}
+        label={chosen || value ? `${label}: ${chosen ? variableLabel(chosen) : value}` : label}
+        className={className}
+      />
       <ComboboxContent className="w-64">
         <ComboboxInput showTrigger={false} placeholder={messages.findLink} aria-label={messages.findLink} />
         <ComboboxEmpty>{messages.noLinkVariables}</ComboboxEmpty>

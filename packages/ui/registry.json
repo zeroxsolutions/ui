@@ -3206,17 +3206,24 @@
       "description": "A block editor for an email's body, with {{name}} variables, whose blocks and links stay inside what the email renderer prints, and a live preview.",
       "categories": ["editor"],
       "registryDependencies": [
+        "@shadcn/badge",
         "@shadcn/button",
         "@shadcn/combobox",
-        "@shadcn/badge",
+        "@shadcn/resizable",
+        "@shadcn/tabs",
+        "@shadcn/toggle",
         "@shadcn/tooltip",
+        "@shadcn/use-mobile",
         "@shadcn/utils",
         "@zui/chat-input",
+        "@zui/collapsible-card",
         "@zui/document-editor",
         "@zui/editor-callout",
         "@zui/editor-code-block",
+        "@zui/lucide-dollar-sign-icon",
         "@zui/lucide-layout-grid-icon",
         "@zui/lucide-layout-panel-top-icon",
+        "@zui/lucide-link-icon",
         "@zui/lucide-mouse-pointer-click-icon",
         "@zui/lucide-text-align-start-icon"
       ],
@@ -3307,7 +3314,7 @@
           "target": "@components/editor/profiles/variables/variable.tsx"
         }
       ],
-      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react", "zod"],
+      "dependencies": ["@base-ui/react", "@zeroxsolutions/editor-core", "lucide-react", "zod"],
       "css": {
         ".document-editor .ProseMirror [data-align='left'], .document-editor .ProseMirror [data-align='left'] p": {
           "text-align": "left"

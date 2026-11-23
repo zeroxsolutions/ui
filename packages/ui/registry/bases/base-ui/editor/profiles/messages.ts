@@ -42,6 +42,10 @@ export interface ProfileEditorMessages {
   problemMarker: string;
   /** The title of the email preview's frame. */
   emailPreview: string;
+  /** The tab that shows the email editor where the editor and the preview take turns. */
+  editTab: string;
+  /** The tab that shows the email preview there. */
+  previewTab: string;
   /** The hint an empty email line shows. */
   emptyLine: string;
   /** The hint after a typed `/` before anything follows it. */
@@ -81,7 +85,6 @@ export interface ProfileEditorMessages {
   /** Why Duplicate is disabled on a block of a kind the profile does not let the author add. */
   kindNotAllowed: string;
   buttonLabel: string;
-  buttonLink: string;
   /** The heading over an HTML block's source. */
   htmlBlock: string;
   /** What a stored block of a type no feature reads shows in its place. */
@@ -147,6 +150,8 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   },
   problemMarker: 'Problem',
   emailPreview: 'Email preview',
+  editTab: 'Edit',
+  previewTab: 'Preview',
   emptyLine: "Type '/' for blocks",
   slashSearch: 'Type to search',
   slashEmpty: 'No matching blocks',
@@ -192,7 +197,6 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   deleteRequired: 'This block is required',
   kindNotAllowed: 'This kind of block is not allowed here',
   buttonLabel: 'Button label',
-  buttonLink: 'Button link',
   htmlBlock: 'HTML',
   unknownBlock: (type) => `A ${type} block this editor cannot show`,
 };

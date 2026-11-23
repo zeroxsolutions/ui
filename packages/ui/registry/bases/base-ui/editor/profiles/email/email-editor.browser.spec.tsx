@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
@@ -99,6 +99,7 @@ interface HarnessProps {
   readOnly?: boolean;
   required?: readonly string[];
   structure?: 'free' | 'locked';
+  layout?: EmailEditorProps['layout'];
   preview?: { renderer: EmailPreviewRenderer; input: EmailPreviewInput };
   renderBlockAdornment?: EmailEditorProps['renderBlockAdornment'];
   initial: EditorEmailBlock[];
@@ -206,7 +207,7 @@ describe('EmailEditor', () => {
   it('loads its value and reports each edit as blocks', async () => {
     const probe = await mount([paragraph('Hello', 'p1')]);
     await caretAfter('Hello');
-    await userEvent.keyboard(' there');
+    await userEvent.keyboard(' there{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}');
 
     await vi.waitFor(() =>
       expect(last(probe.reported)?.map(({ id, content }) => [id, content])).toEqual([['p1', { text: 'Hello there' }]]),
@@ -605,5 +606,95 @@ describe('EmailEditor', () => {
     expect(document.querySelector('[role=menu]')).toBeNull();
     expect(document.querySelector('[data-slot=slash-menu]')).toBeNull();
     expect(document.querySelector('[data-slot=editor-toolbar]')).toBeNull();
+  });
+});
+
+describe('EmailEditor frame', () => {
+  // The browser's own viewport, which a spec here changes and the next spec must not inherit.
+  const initial = { width: window.innerWidth, height: window.innerHeight };
+  afterEach(async () => {
+    await page.viewport(initial.width, initial.height);
+  });
+
+  const withPreview = () => ({ preview: { renderer: createEmailRenderer({ theme }), input: previewInput } });
+
+  it('draws the editor beside the preview at a wide viewport', async () => {
+    await page.viewport(1280, 800);
+    await mount([paragraph('Hello', 'p1')], withPreview());
+
+    await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeVisible();
+    await expect.element(page.getByTitle('Email preview')).toBeVisible();
+    expect(document.querySelector('[role=tablist]')).toBeNull();
+  });
+
+  it('tabs between the editor and the preview at a narrow viewport', async () => {
+    await page.viewport(375, 800);
+    await mount([paragraph('Hello', 'p1')], withPreview());
+
+    await expect.element(page.getByRole('tab', { name: 'Edit' })).toBeVisible();
+    await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeVisible();
+    await expect.element(page.getByTitle('Email preview')).not.toBeVisible();
+
+    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+    await expect.element(page.getByTitle('Email preview')).toBeVisible();
+    await expect.element(page.elementLocator(find('[contenteditable=true]'))).not.toBeVisible();
+  });
+
+  it('keeps the typed text and the caret as the viewport crosses the breakpoint and back', async () => {
+    await page.viewport(1280, 800);
+    const probe = await mount([paragraph('Hello', 'p1')], withPreview());
+    const surface = find('[contenteditable=true]');
+    await caretAfter('Hello');
+    await userEvent.keyboard(' there{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}');
+
+    await page.viewport(375, 800);
+    await expect.element(page.getByRole('tab', { name: 'Edit' })).toBeVisible();
+    await page.viewport(1280, 800);
+    await vi.waitFor(() => expect(document.querySelector('[role=tablist]')).toBeNull());
+
+    expect(find('[contenteditable=true]')).toBe(surface);
+    probe.editor.focus();
+    await vi.waitFor(() => expect(document.activeElement).toBe(surface));
+    await userEvent.keyboard('!');
+    await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'Hello! there' }));
+  });
+
+  it('follows a forced layout at any viewport', async () => {
+    await page.viewport(1280, 800);
+    await mount([paragraph('Hello', 'p1')], { ...withPreview(), layout: 'tabs' });
+
+    await expect.element(page.getByRole('tab', { name: 'Preview' })).toBeVisible();
+  });
+
+  it('draws the editor alone without a renderer, at any viewport', async () => {
+    await page.viewport(375, 800);
+    await mount([paragraph('Hello', 'p1')]);
+
+    await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeVisible();
+    expect(document.querySelector('[role=tablist]')).toBeNull();
+    expect(document.querySelector('iframe')).toBeNull();
+  });
+
+  it("draws the link picker and the variable menu as the toolbar's controls", async () => {
+    await mount([paragraph('Hello', 'p1')]);
+
+    const toolbar = page.getByRole('toolbar');
+    await expect.element(toolbar.getByRole('combobox', { name: 'Link', exact: true })).toBeVisible();
+    await expect.element(toolbar.getByRole('combobox', { name: 'Variable', exact: true })).toBeVisible();
+  });
+
+  it("names the link picker's button with the variable the selection links to", async () => {
+    const linked: EditorEmailBlock = {
+      id: 'p1',
+      key: 'p1',
+      type: 'paragraph',
+      attributes: {},
+      content: { text: '[Reset]({{resetUrl}})' },
+    };
+    await mount([linked]);
+    await caretAfter('Reset');
+    await userEvent.keyboard('{ArrowLeft}');
+
+    await expect.element(page.getByRole('toolbar').getByRole('combobox', { name: 'Link: Reset link' })).toBeVisible();
   });
 });

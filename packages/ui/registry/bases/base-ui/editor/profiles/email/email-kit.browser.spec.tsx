@@ -279,12 +279,14 @@ describe('the email kit', () => {
     await userEvent.keyboard('{ArrowLeft}{ArrowLeft}');
 
     await vi.waitFor(() =>
-      expect(find('[data-slot=url-variable-picker][data-label=Link]').textContent).toBe('Link: Reset link'),
+      expect(find('[data-slot=url-variable-picker][data-label=Link]').getAttribute('aria-label')).toBe(
+        'Link: Reset link',
+      ),
     );
     await userEvent.click(find('[data-slot=editor-toolbar] [aria-label="Remove link"]'));
 
     await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Open the page' }));
-    expect(find('[data-slot=url-variable-picker][data-label=Link]').textContent).toBe('Link');
+    expect(find('[data-slot=url-variable-picker][data-label=Link]').getAttribute('aria-label')).toBe('Link');
   });
 
   it('links a wider selection to the variable the picker already shows', async () => {
@@ -293,7 +295,7 @@ describe('the email kit', () => {
     await userEvent.keyboard('{Shift>}' + '{ArrowLeft}'.repeat(8) + '{/Shift}');
 
     const picker = find('[data-slot=url-variable-picker][data-label=Link]');
-    await vi.waitFor(() => expect(picker.textContent).toBe('Link: Reset link'));
+    await vi.waitFor(() => expect(picker.getAttribute('aria-label')).toBe('Link: Reset link'));
     const options = await pickOption(picker);
     await userEvent.click(options.find((option) => option.textContent === 'Reset link')!);
 

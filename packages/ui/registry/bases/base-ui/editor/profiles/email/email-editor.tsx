@@ -1,8 +1,22 @@
 'use client';
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import { createPortal } from 'react-dom';
+import { CollapsibleCard, CollapsibleCardHeader } from '@/registry/bases/base-ui/components/layout/collapsible-card';
+import { useIsMobile } from '@/registry/bases/base-ui/hooks/use-mobile';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/registry/bases/base-ui/ui/resizable';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { TooltipProvider } from '@/registry/bases/base-ui/ui/tooltip';
 import {
   Decoration,
@@ -87,6 +101,12 @@ interface EmailEditorBaseProps {
   required?: readonly string[];
   /** `locked` lets the author edit text and variables only; nothing is inserted, removed or restyled. */
   structure?: 'free' | 'locked';
+  /**
+   * Where the preview sits beside the editor when there is a renderer: `split` side by side in resizable panels,
+   * `tabs` in turn under an Edit and a Preview tab, `auto` split on a wide viewport and tabs on a narrow one.
+   * The editor keeps its document, selection and history as the layout changes.
+   */
+  layout?: 'auto' | 'split' | 'tabs';
   className?: string;
   onChange?(blocks: EditorEmailBlock[]): void;
   /** The focus left the editor and the popups it opened; when to save is the host's. */
@@ -187,9 +207,29 @@ function sameValue(left: readonly EditorEmailBlock[], right: readonly EditorEmai
   return sameBlockContent(withoutSavedKeys(left), withoutSavedKeys(right));
 }
 
+interface EmailEditorPaneProps {
+  /** The element the editor renders into, once for the editor's life. */
+  surface: HTMLElement | null;
+}
+
+/**
+ * Where the layout places the editor. The pane mounted last takes `surface`, so a change of layout moves the
+ * editor's DOM into the new pane: rendered inside each pane, the editor would mount again and lose its document,
+ * selection and history.
+ */
+function EmailEditorPane({ surface }: EmailEditorPaneProps) {
+  const pane = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (surface) pane.current?.append(surface);
+  }, [surface]);
+  return <div ref={pane} data-slot="email-editor-pane" className="h-full overflow-y-auto py-2" />;
+}
+
 /**
  * The email profile's editor: the document editor with `emailKit`'s blocks, marks and variables, the block menu,
- * each problem marked where it is, the host's adornment beside each block, and the renderer's preview.
+ * each problem marked where it is, the host's adornment beside each block, and the renderer's preview beside the
+ * editor or under a tab of its own, as `layout` says. The frame is the Mermaid editor's: a muted `CollapsibleCard`,
+ * the toolbar in its header and the problems no block holds in its footer.
  * `value` loads whenever it differs from what the editor last reported, so a host hands back what `onChange`
  * gave it without moving the caret.
  */
@@ -202,6 +242,7 @@ export function EmailEditor({
   features: extra,
   required = [],
   structure = 'free',
+  layout = 'auto',
   renderer,
   previewInput,
   className,
@@ -247,6 +288,16 @@ export function EmailEditor({
   });
   // The editor reads its content once, on mount; a later value loads through setContent below.
   const [initialContent] = useState(() => fromEmailBlocks(value, setup.codecs));
+
+  // Made after hydration, as the server draws no editor.
+  const [surface, setSurface] = useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const element = document.createElement('div');
+    element.dataset.slot = 'email-editor-surface';
+    setSurface(element);
+  }, []);
+  const isMobile = useIsMobile();
+  const tabbed = layout === 'tabs' || (layout === 'auto' && isMobile);
 
   const [editor, setEditor] = useState<IEditor | null>(null);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
@@ -431,89 +482,137 @@ export function EmailEditor({
   const variablesOf = useCallback(() => live.current.profile.variables, []);
   const marksOf = (row: Row) => marks.filter((mark) => mark.block === (row.id ?? row.key));
 
+  const pane = <EmailEditorPane surface={surface} />;
+  const frame = preview && (
+    <iframe
+      data-slot="email-preview"
+      title={text.emailPreview}
+      sandbox=""
+      srcDoc={preview.html}
+      className="size-full"
+    />
+  );
+  const previewProblems = (renderer && preview?.problems) || [];
+
   return (
-    <div className={cn('flex flex-col gap-3', className)}>
-      <div
-        ref={setRoot}
-        data-slot="email-editor"
-        className="relative flex flex-col gap-2"
-        {...focus}
-        onKeyDownCapture={keyDown}
-      >
-        {menus && (
-          <div className="flex flex-wrap items-center gap-1">
-            <EditorToolbar editor={editor} items={items.toolbar} />
-            <LinkVariablePicker editor={editor} declarations={variablesOf} messages={text} />
-            <VariableMenu editor={editor} declarations={profile.variables} messages={text} />
-          </div>
-        )}
-        <Editor
-          features={setup.features}
-          content={initialContent}
-          editable={!readOnly}
-          blockMenuLabel={text.blockActions}
-          onReady={(ready) => {
-            setEditor(ready);
-            onReady?.(ready);
-          }}
-        />
-        {menus && <TriggerLayer editor={editor} triggers={[variables]} />}
-        {menus && !locked && (
-          <SlashMenu editor={editor} items={items.slash} placeholder={text.slashSearch} emptyText={text.slashEmpty} />
-        )}
-        {menus && <BubbleMenu editor={editor} items={items.bubble} container={root} />}
-        <TooltipProvider>
-          {rows.map((row) => {
-            return createPortal(
+    <CollapsibleCard
+      ref={setRoot}
+      variant="muted"
+      data-slot="email-editor"
+      className={cn('relative', className)}
+      {...focus}
+      onKeyDownCapture={keyDown}
+    >
+      {menus && (
+        <CollapsibleCardHeader>
+          <EditorToolbar
+            editor={editor}
+            items={items.toolbar}
+            className="min-w-0"
+            end={
               <>
-                {marksOf(row).map((mark) => (
-                  <ProblemMarker
-                    key={mark.id}
-                    id={mark.id}
-                    messages={mark.messages}
-                    slot="email-problem-marker"
-                    label={text.problemMarker}
-                  />
-                ))}
-                {renderBlockAdornment && (
-                  <span data-slot="email-block-adornment" className="contents">
-                    {renderBlockAdornment(row.id, row.key)}
-                  </span>
-                )}
-              </>,
-              host(row.key),
-              row.key,
-            );
-          })}
-        </TooltipProvider>
-      </div>
-      {unplaced.length > 0 && (
-        <ul data-slot="email-problems" className="text-destructive flex flex-col gap-1 text-sm">
-          {unplaced.map((message, index) => (
-            <li key={`${index}:${message}`}>{message}</li>
-          ))}
-        </ul>
-      )}
-      {renderer && preview && (
-        <>
-          <iframe
-            data-slot="email-preview"
-            title={text.emailPreview}
-            sandbox=""
-            srcDoc={preview.html}
-            className="cn-editor-block h-[480px] w-full border"
+                <LinkVariablePicker editor={editor} declarations={variablesOf} messages={text} />
+                <VariableMenu editor={editor} declarations={profile.variables} messages={text} />
+              </>
+            }
           />
-          {preview.problems.length > 0 && (
-            <ul data-slot="email-preview-problems" className="text-destructive flex flex-col gap-1 text-sm">
-              {preview.problems.map((message, index) => (
+        </CollapsibleCardHeader>
+      )}
+      <div
+        data-slot="email-editor-body"
+        className={cn('flex min-h-0 flex-col', renderer && 'h-112', menus && 'border-t')}
+      >
+        {!renderer ? (
+          pane
+        ) : tabbed ? (
+          <Tabs defaultValue="edit" className="min-h-0 flex-1">
+            <TabsList className="mx-2 mt-2">
+              <TabsTrigger value="edit">{text.editTab}</TabsTrigger>
+              <TabsTrigger value="preview">{text.previewTab}</TabsTrigger>
+            </TabsList>
+            {/* Kept mounted, so the editor stays in the document behind the preview and the preview behind it. */}
+            <TabsContent value="edit" keepMounted className="min-h-0">
+              {pane}
+            </TabsContent>
+            <TabsContent value="preview" keepMounted className="min-h-0">
+              {frame}
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1">
+            <ResizablePanel defaultSize="55%" minSize="20%">
+              {pane}
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize="45%" minSize="20%">
+              {frame}
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
+      </div>
+      {surface &&
+        createPortal(
+          <Editor
+            features={setup.features}
+            content={initialContent}
+            editable={!readOnly}
+            blockMenuLabel={text.blockActions}
+            onReady={(ready) => {
+              setEditor(ready);
+              onReady?.(ready);
+            }}
+          />,
+          surface,
+        )}
+      {menus && <TriggerLayer editor={editor} triggers={[variables]} />}
+      {menus && !locked && (
+        <SlashMenu editor={editor} items={items.slash} placeholder={text.slashSearch} emptyText={text.slashEmpty} />
+      )}
+      {menus && <BubbleMenu editor={editor} items={items.bubble} container={root} />}
+      <TooltipProvider>
+        {rows.map((row) =>
+          createPortal(
+            <>
+              {marksOf(row).map((mark) => (
+                <ProblemMarker
+                  key={mark.id}
+                  id={mark.id}
+                  messages={mark.messages}
+                  slot="email-problem-marker"
+                  label={text.problemMarker}
+                />
+              ))}
+              {renderBlockAdornment && (
+                <span data-slot="email-block-adornment" className="contents">
+                  {renderBlockAdornment(row.id, row.key)}
+                </span>
+              )}
+            </>,
+            host(row.key),
+            row.key,
+          ),
+        )}
+      </TooltipProvider>
+      {(unplaced.length > 0 || previewProblems.length > 0) && (
+        <div data-slot="email-editor-footer" className="flex flex-col gap-1 border-t px-3 py-2 text-sm">
+          {unplaced.length > 0 && (
+            <ul data-slot="email-problems" className="text-destructive flex flex-col gap-1">
+              {unplaced.map((message, index) => (
+                <li key={`${index}:${message}`}>{message}</li>
+              ))}
+            </ul>
+          )}
+          {previewProblems.length > 0 && (
+            <ul data-slot="email-preview-problems" className="text-destructive flex flex-col gap-1">
+              {previewProblems.map((message, index) => (
                 // The renderer reports a variable once per use, so two lines can read the same.
                 <li key={`${index}:${message}`}>{message}</li>
               ))}
             </ul>
           )}
-        </>
+        </div>
       )}
-    </div>
+    </CollapsibleCard>
   );
 }
 

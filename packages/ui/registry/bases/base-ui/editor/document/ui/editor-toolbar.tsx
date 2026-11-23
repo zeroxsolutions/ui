@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import { Toggle } from '@/registry/bases/base-ui/ui/toggle';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
@@ -18,10 +19,15 @@ import { useEditorChanges } from './use-editor-changes';
 export interface EditorToolbarProps {
   editor: IEditor;
   items: ToolbarItem[];
+  /**
+   * Controls a host draws after the items, past a separator, such as a picker that opens a list. Each is drawn in
+   * the items' style, `toggleVariants({ size: 'sm' })` with its icon and a `Tooltip`, inside this provider.
+   */
+  end?: ReactNode;
   className?: string;
 }
 
-export function EditorToolbar({ editor, items, className }: EditorToolbarProps) {
+export function EditorToolbar({ editor, items, end, className }: EditorToolbarProps) {
   // Subscribe so pressed states track the selection.
   useEditorChanges(editor);
   return (
@@ -61,6 +67,8 @@ export function EditorToolbar({ editor, items, className }: EditorToolbarProps) 
             </span>
           );
         })}
+        {end && items.length > 0 && <Separator orientation="vertical" className="mx-0.5 h-5" />}
+        {end}
       </TooltipProvider>
     </div>
   );
