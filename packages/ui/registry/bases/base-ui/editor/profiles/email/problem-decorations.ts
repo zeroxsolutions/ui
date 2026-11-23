@@ -56,7 +56,7 @@ const MARKED = 'bg-destructive/10 underline decoration-destructive decoration-wa
 /**
  * The decorations `marks` put on `doc`: each on the variable token or the linked text it names in its block, or
  * on the block itself. Each marked element is described by its messages, so a screen reader in the text reads
- * them; the marker beside the block shows them on hover and on focus.
+ * them; the marker in the block's row shows them on hover and on focus.
  */
 export function problemDecorations(doc: ProseMirrorNode, marks: readonly ProblemMark[]): Decoration[] {
   if (marks.length === 0) return [];
@@ -71,7 +71,9 @@ export function problemDecorations(doc: ProseMirrorNode, marks: readonly Problem
       const inside = mark.name === undefined ? [] : tokensOf(node, pos, mark.name);
       if (inside.length === 0) decorations.push(Decoration.node(pos, pos + node.nodeSize, attrs));
       for (const { from, to, atom } of inside) {
-        decorations.push(atom ? Decoration.node(from, to, attrs) : Decoration.inline(from, to, attrs));
+        // A chip marks its own undeclared name, in the destructive token; an underline would run under it.
+        const { class: _marked, ...chip } = attrs;
+        decorations.push(atom ? Decoration.node(from, to, chip) : Decoration.inline(from, to, attrs));
       }
     }
     // A lane's blocks are marked on their own.

@@ -16,6 +16,7 @@ import {
 import type { EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import {
+  docProblems,
   fromEmailBlocks,
   toEmailBlocks,
   validate,
@@ -38,8 +39,7 @@ import { ProblemMarker } from '../problem-marker';
 import { caretNode, nextMarker, useFocusLeave } from '../problem-navigation';
 import { refreshVariables, variableFeature } from '../variables/variable';
 import { VariableMenu } from '../variables/variable-menu';
-import { BlockAttributesMenu } from './block-attributes-menu';
-import { emailKit, wordEmailItems } from './email-kit';
+import { emailKit, emailUi } from './email-kit';
 import { carriesKey, contextOf } from './kit-context';
 import { LinkVariablePicker } from './url-variable-picker';
 import { problemDecorations, problemMarks, type ProblemMark } from './problem-decorations';
@@ -243,7 +243,7 @@ export function EmailEditor({
       messages: () => live.current.text,
     });
     const features = [...kit, overlayFeature(() => overlay.current)];
-    return { codecs, variables, features, ui: collectUiContributions(features) };
+    return { codecs, variables, features, profile, ui: collectUiContributions(features) };
   });
   // The editor reads its content once, on mount; a later value loads through setContent below.
   const [initialContent] = useState(() => fromEmailBlocks(value, setup.codecs));
@@ -268,7 +268,8 @@ export function EmailEditor({
   const check = useCallback(
     (from: IEditor) => {
       if (from.status === 'destroyed') return;
-      const problems = validate(exportBlocks(from), live.current.profile);
+      // What the export cannot carry is named on the document's own nodes, before they fold into email blocks.
+      const problems = [...validate(exportBlocks(from), live.current.profile), ...docProblems(from.getJSON())];
       if (validated.current !== null && sameBlockContent(validated.current, problems)) return;
       validated.current = problems;
       const placed = problemMarks(problems, idBase, live.current.text.problem);
@@ -402,14 +403,7 @@ export function EmailEditor({
     () => ({ ...setup.variables.token, emptyText: text.noVariables }),
     [setup, text.noVariables],
   );
-  const items = useMemo(
-    () => ({
-      toolbar: wordEmailItems(setup.ui.toolbar, text),
-      slash: wordEmailItems(setup.ui.slash, text),
-      bubble: wordEmailItems(setup.ui.bubble, text),
-    }),
-    [setup, text],
-  );
+  const items = useMemo(() => emailUi(setup.ui, setup.profile, text), [setup, text]);
 
   const focus = useFocusLeave(() => live.current.onBlur?.());
 
@@ -467,7 +461,6 @@ export function EmailEditor({
           <SlashMenu editor={editor} items={items.slash} placeholder={text.slashSearch} emptyText={text.slashEmpty} />
         )}
         {menus && <BubbleMenu editor={editor} items={items.bubble} container={root} />}
-        {menus && !locked && <BlockAttributesMenu key={required.join('\u0000')} editor={editor} />}
         <TooltipProvider>
           {rows.map((row) => {
             return createPortal(

@@ -184,6 +184,22 @@ async function caretAfter(text: string): Promise<void> {
 
 const last = <T,>(list: T[]): T | undefined => list[list.length - 1];
 
+/** Shows the grip of the paragraph holding `text`, as a pointer over it does. */
+async function gripOf(text: string): Promise<HTMLElement> {
+  await userEvent.hover(await vi.waitFor(() => find('[contenteditable=true] p', text)));
+  return vi.waitFor(() => {
+    const grip = find('.drag-handle');
+    if (grip.classList.contains('hide')) throw new Error('the grip is hidden');
+    return grip;
+  });
+}
+
+/** Opens the block menu from the grip of the paragraph holding `text`. */
+async function openBlockMenu(text: string): Promise<void> {
+  await userEvent.click(await gripOf(text));
+  await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
+}
+
 const exportedOf = (editor: IEditor) => toEmailBlocks(editor.getJSON());
 
 describe('EmailEditor', () => {
@@ -353,12 +369,12 @@ describe('EmailEditor', () => {
 
   it("disables a required block's Delete with its reason", async () => {
     await mount([paragraph('Keep me', 'kept')], { required: ['kept'] });
-    await caretAfter('Keep me');
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=email-block-menu] [aria-label="Block actions"]')));
+    await openBlockMenu('Keep me');
 
-    const refused = await vi.waitFor(() => find('[role=menuitem]', 'Delete'));
-    expect(refused.hasAttribute('data-disabled')).toBe(true);
-    expect(refused.textContent).toContain('This block is required');
+    const refused = page.getByRole('menuitem', { name: 'Delete' });
+    await expect.element(refused).toBeDisabled();
+    await userEvent.hover(refused, { force: true });
+    await expect.element(page.getByText('This block is required')).toBeVisible();
   });
 
   it('offers no insert and no remove in locked structure', async () => {
@@ -368,7 +384,26 @@ describe('EmailEditor', () => {
 
     await vi.waitFor(() => expect(find('[contenteditable=true] p').textContent).toBe('Hi /'));
     expect(document.querySelector('[data-slot=slash-menu]')).toBeNull();
-    expect(document.querySelector('[data-slot=email-block-menu]')).toBeNull();
+    await openBlockMenu('Hi /');
+    await expect.element(page.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
+  });
+
+  it('marks a pasted heading, whose structure the email cannot carry, with one problem', async () => {
+    const probe = await mount([paragraph('Body', 'p1')]);
+    await caretAfter('Body');
+    const data = new DataTransfer();
+    // Between two paragraphs, so the heading is pasted whole rather than joined to the line it lands in.
+    data.setData('text/html', '<p>Before</p><h1>Hi</h1><p>After</p>');
+    document.activeElement?.dispatchEvent(
+      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
+    );
+
+    await vi.waitFor(() => expect(last(probe.validated)?.map(({ kind }) => kind)).toEqual(['block-not-carried']));
+    await vi.waitFor(() => expect(document.querySelectorAll('[data-slot=email-problem-marker]')).toHaveLength(1));
+    expect(exportedOf(probe.editor).map(({ type, content }) => [type, content])).toContainEqual([
+      'paragraph',
+      { text: 'Hi' },
+    ]);
   });
 
   it("previews the renderer's HTML for the blocks, keys standing in for ids, with the sample values", async () => {
@@ -550,7 +585,9 @@ describe('EmailEditor', () => {
     await new Promise((resolve) => setTimeout(resolve, 400));
     expect(probe.reported).toEqual([]);
     expect(probe.editor.getText()).toBe('Hello');
-    expect(document.querySelector('[data-slot=email-block-menu]')).toBeNull();
+    await userEvent.hover(find('[data-editor=document] p', 'Hello'));
+    expect(document.querySelector('.drag-handle:not(.hide)')).toBeNull();
+    expect(document.querySelector('[role=menu]')).toBeNull();
     expect(document.querySelector('[data-slot=slash-menu]')).toBeNull();
     expect(document.querySelector('[data-slot=editor-toolbar]')).toBeNull();
   });

@@ -145,6 +145,32 @@ describe('SmsEditor', () => {
     expect(JSON.stringify(probe.editor.getJSON())).not.toContain('"marks"');
   });
 
+  it('draws no grip, no insert button and no slash menu', async () => {
+    const probe = await mount('Hello');
+    await userEvent.hover(await vi.waitFor(() => find('[contenteditable=true] p')));
+    await caretAtEnd(probe);
+    await userEvent.keyboard(' /');
+
+    await vi.waitFor(() => expect(last(probe.reported)).toBe('Hello /'));
+    expect(document.querySelector('.drag-handle')).toBeNull();
+    expect(document.querySelector('[data-editor-add]')).toBeNull();
+    expect(document.querySelector('[data-slot=slash-menu]')).toBeNull();
+  });
+
+  it('keeps a typed heading or list shortcut, and a pasted heading, as text', async () => {
+    const probe = await mount('');
+    await caretAtEnd(probe);
+    await userEvent.keyboard('# Title{Enter}- item');
+    const data = new DataTransfer();
+    data.setData('text/html', '<h1>Hi</h1>');
+    find('[contenteditable=true]').dispatchEvent(
+      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
+    );
+
+    await vi.waitFor(() => expect(last(probe.reported)).toBe('# Title\n- itemHi'));
+    expect((probe.editor.getJSON().content ?? []).map((block) => block.type)).toEqual(['paragraph', 'paragraph']);
+  });
+
   it('makes a line break on Enter, reported as a new line', async () => {
     const probe = await mount('Hello');
     await caretAtEnd(probe);
@@ -156,7 +182,9 @@ describe('SmsEditor', () => {
     const probe = await mount('Hello');
     await caretAtEnd(probe);
     // ProseMirror takes a caret at the start of the document within 200ms of a focus event for the browser's own
-    // reset and puts its last selection back, so a slow runner's Home could land the text at the end.
+    // reset and puts its last selection back, so a slow runner's Home could land the text at the end, and an
+    // arrow pressed inside that window can be undone; the keys wait it out.
+    await new Promise((resolve) => setTimeout(resolve, 250));
     await userEvent.keyboard('{End}{ArrowLeft}{ArrowLeft}{ArrowLeft}abc');
     await vi.waitFor(() => expect(probe.editor.getText()).toBe('Heabcllo'));
 

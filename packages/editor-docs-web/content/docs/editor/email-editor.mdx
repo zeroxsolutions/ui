@@ -29,18 +29,16 @@ pnpm dlx shadcn@latest add @zui/email-editor
 <Step>Install the packages it imports.</Step>
 
 ```bash
-pnpm add @tiptap/extensions @zeroxsolutions/editor-core lucide-react zod
+pnpm add @zeroxsolutions/editor-core lucide-react zod
 ```
 
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add button combobox badge dropdown-menu separator tooltip utils @zui/chat-input @zui/document-editor @zui/lucide-code-icon @zui/lucide-info-icon @zui/lucide-italic-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-letter-b-icon @zui/lucide-list-icon @zui/lucide-minus-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-text-align-start-icon
+pnpm dlx shadcn@latest add button combobox badge tooltip utils @zui/chat-input @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-text-align-start-icon
 ```
 
 <Step>Copy the files into your project.</Step>
-
-<ComponentSource name="email-editor" title="components/editor/profiles/email/block-attributes-menu.tsx" />
 
 <ComponentSource
   name="email-editor"
@@ -80,38 +78,14 @@ pnpm dlx shadcn@latest add button combobox badge dropdown-menu separator tooltip
 
 <ComponentSource
   name="email-editor"
-  file="registry/bases/base-ui/editor/profiles/email/nodes/callout.tsx"
-  title="components/editor/profiles/email/nodes/callout.tsx"
-/>
-
-<ComponentSource
-  name="email-editor"
-  file="registry/bases/base-ui/editor/profiles/email/nodes/code.tsx"
-  title="components/editor/profiles/email/nodes/code.tsx"
-/>
-
-<ComponentSource
-  name="email-editor"
   file="registry/bases/base-ui/editor/profiles/email/nodes/columns.tsx"
   title="components/editor/profiles/email/nodes/columns.tsx"
 />
 
 <ComponentSource
   name="email-editor"
-  file="registry/bases/base-ui/editor/profiles/email/nodes/divider.tsx"
-  title="components/editor/profiles/email/nodes/divider.tsx"
-/>
-
-<ComponentSource
-  name="email-editor"
   file="registry/bases/base-ui/editor/profiles/email/nodes/html.tsx"
   title="components/editor/profiles/email/nodes/html.tsx"
-/>
-
-<ComponentSource
-  name="email-editor"
-  file="registry/bases/base-ui/editor/profiles/email/nodes/list.tsx"
-  title="components/editor/profiles/email/nodes/list.tsx"
 />
 
 <ComponentSource

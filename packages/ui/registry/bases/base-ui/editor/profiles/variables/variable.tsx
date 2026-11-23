@@ -234,7 +234,7 @@ export function variableFeature(getDeclarations: () => readonly VariableDeclarat
         data-problem={declaration ? undefined : 'variable-undeclared'}
         aria-invalid={declaration ? undefined : true}
         contentEditable={contentEditable}
-        className="bg-primary/10 text-primary data-problem:bg-destructive/10 data-problem:text-destructive h-auto text-[length:inherit]"
+        className="bg-primary/10 text-primary data-problem:border-destructive data-problem:text-destructive h-auto text-[length:inherit] data-problem:bg-transparent"
       >
         {declaration && variableIcon(declaration.type)}
         {declaration ? variableLabel(declaration) : name}

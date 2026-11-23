@@ -65,14 +65,18 @@ export interface ProfileEditorMessages {
   /** What a variable picker, or the `{{` menu, says when no declaration matches. */
   noVariables: string;
   blockActions: string;
+  /** The block menu's submenu of the kinds a block can become. */
+  turnInto: string;
+  /** The block menu's submenu heading of each attribute. */
   attributes: Readonly<Record<EmailBlockAttribute, string>>;
   attributeValues: Readonly<Record<EmailBlockAttributeValue, string>>;
-  /** The block menu's heading over the lane shares. */
+  /** The block menu's submenu of the lane shares. */
   columns: string;
+  duplicate: string;
   delete: string;
-  /** Why Delete is disabled in locked structure. */
+  /** Why a block menu item is disabled in locked structure. */
   deleteLocked: string;
-  /** Why Delete is disabled on a block the host requires. */
+  /** Why a block menu item is disabled on a block the host requires. */
   deleteRequired: string;
   buttonLabel: string;
   buttonLink: string;
@@ -96,6 +100,7 @@ const PROBLEMS: Readonly<Record<ProblemKind, string>> = {
   'text-too-long': 'This text is too long',
   'list-too-long': 'This list has too many items',
   'too-many-blocks': 'The email has too many blocks',
+  'block-not-carried': 'The email keeps only the text of this block',
   'sms-segment-exceeded': 'The message is longer than allowed',
   'sms-placeholder-malformed': 'A variable is not closed',
 };
@@ -148,7 +153,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
     paragraph: { title: 'Text', description: 'A paragraph of text' },
     button: { title: 'Button', description: 'A button that opens a link variable' },
     code: { title: 'Code', description: 'Text set in a fixed-width font' },
-    list: { title: 'List', description: 'A bulleted list of short lines' },
+    list: { title: 'Bulleted list', description: 'A bulleted list of short lines' },
     callout: { title: 'Callout', description: 'Text set apart in a panel' },
     divider: { title: 'Divider', description: 'A rule between two parts' },
     columns: { title: 'Columns', description: 'Two to four lanes side by side' },
@@ -164,6 +169,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   findVariable: 'Find a variable',
   noVariables: 'No variables found',
   blockActions: 'Block actions',
+  turnInto: 'Turn into',
   attributes: { align: 'Align', spaceAfter: 'Space after', tone: 'Tone', width: 'Width' },
   attributeValues: {
     left: 'Left',
@@ -177,7 +183,8 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
     inline: 'Fit the label',
     full: 'Full width',
   },
-  columns: 'Columns',
+  columns: 'Lanes',
+  duplicate: 'Duplicate',
   delete: 'Delete',
   deleteLocked: 'The structure is locked: only text and variables change',
   deleteRequired: 'This block is required',

@@ -20,6 +20,11 @@ export interface StandardKitOptions {
   placeholder?: string;
   /** Show the left-gutter block drag handle (default `true`). */
   dragHandle?: boolean;
+  /**
+   * Keep an empty paragraph below a last block that is not one (default `true`). A profile whose export
+   * stores every block turns it off, since the kept line would export as an empty block.
+   */
+  trailingNode?: boolean;
 }
 import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs';
 import { standardBlockMenuItems, standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui';
@@ -37,7 +42,7 @@ import { standardBlockMenuItems, standardBubbleItems, standardSlashItems, standa
  * link features own those).
  */
 export function standardKit(options: StandardKitOptions = {}): EditorFeature {
-  const { placeholder = "Type '/' for commands…", dragHandle = true } = options;
+  const { placeholder = "Type '/' for commands…", dragHandle = true, trailingNode = true } = options;
   return defineFeature({
     id: 'standard',
     codecs: standardNodeCodecs,
@@ -54,6 +59,7 @@ export function standardKit(options: StandardKitOptions = {}): EditorFeature {
           text: false,
           codeBlock: false,
           link: false,
+          ...(trailingNode ? {} : { trailingNode: false as const }),
         }),
         Highlight.configure({ multicolor: true }),
         Subscript,

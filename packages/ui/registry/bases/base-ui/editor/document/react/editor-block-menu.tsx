@@ -82,9 +82,11 @@ function EditorBlockMenuGroup({
  * dropdown, run through the façade. The menu hangs off an invisible trigger at `anchor`, because the grip
  * is the drag extension's own node and cannot be a React trigger.
  */
-export function EditorBlockMenu({ editor, items, open, onOpenChange, anchor }: EditorBlockMenuProps) {
+export function EditorBlockMenu({ editor, items: offered, open, onOpenChange, anchor }: EditorBlockMenuProps) {
   const run = (item: BlockMenuItem) => editor.run(item.command, item.args);
   const seen = new Set<string>();
+  // Read while the menu renders, which is after the grip selected its block.
+  const items = offered.filter((item) => item.visible?.(editor) ?? true);
 
   return (
     <TooltipProvider>

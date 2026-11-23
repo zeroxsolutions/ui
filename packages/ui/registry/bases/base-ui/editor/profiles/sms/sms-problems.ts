@@ -104,7 +104,9 @@ export function smsDecorations(doc: ProseMirrorNode, marks: readonly SmsMark[]):
         if (node.type.name === 'variable') {
           const named = mark.name === node.attrs.name;
           const reached = mark.range && mark.range.from < cursor + length && mark.range.to > cursor;
-          if (named || reached) decorations.push(Decoration.node(from, from + node.nodeSize, attrs));
+          // A chip marks its own undeclared name; one a range reaches is marked like the text beside it.
+          const { class: _marked, ...chip } = attrs;
+          if (named || reached) decorations.push(Decoration.node(from, from + node.nodeSize, reached ? attrs : chip));
         } else if (node.isText && mark.range) {
           const start = Math.max(mark.range.from, cursor);
           const end = Math.min(mark.range.to, cursor + length);

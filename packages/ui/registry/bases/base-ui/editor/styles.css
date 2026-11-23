@@ -133,27 +133,27 @@
   content: none;
 }
 
-/* The email profile's paragraph attributes ride as data attributes, since the paragraph is the editor's own
- * node and has no view to draw them. UNLAYERED to beat the typography plugin's own `p` margin and color. */
-.document-editor p[data-align='left'] {
+/* The email profile's attributes ride as data attributes on the document's own nodes (a paragraph, a list, a
+ * rule), which have no view to draw them. Unlayered to beat the typography plugin's own margin and color. */
+.document-editor [data-align='left'] {
   text-align: left;
 }
-.document-editor p[data-align='center'] {
+.document-editor [data-align='center'] {
   text-align: center;
 }
-.document-editor p[data-align='right'] {
+.document-editor [data-align='right'] {
   text-align: right;
 }
-.document-editor p[data-tone='muted'] {
+.document-editor [data-tone='muted'] {
   color: var(--muted-foreground);
 }
-.document-editor p[data-space-after='small'] {
+.document-editor [data-space-after='small'] {
   margin-bottom: 0.5rem;
 }
-.document-editor p[data-space-after='medium'] {
+.document-editor [data-space-after='medium'] {
   margin-bottom: 1rem;
 }
-.document-editor p[data-space-after='large'] {
+.document-editor [data-space-after='large'] {
   margin-bottom: 2rem;
 }
 

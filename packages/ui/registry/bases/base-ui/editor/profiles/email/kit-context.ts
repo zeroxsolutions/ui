@@ -9,7 +9,7 @@ import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../message
 
 export type EngineState = Editor['state'];
 
-/** What the kit's commands, views and block menu read off one editor built from it. */
+/** What the kit's commands, views and block menu items read off one editor built from it. */
 export interface KitContext {
   locked(): boolean;
   required(): readonly string[];
@@ -58,25 +58,6 @@ function nodeAt(state: EngineState, matches: (node: ProseMirrorNode) => boolean)
 export const blockAt = (state: EngineState) => nodeAt(state, carriesKey);
 export const columnsAt = (state: EngineState) => nodeAt(state, (node) => node.type.name === 'emailColumns');
 export const laneAt = (state: EngineState) => nodeAt(state, (node) => node.type.name === 'emailLane');
-
-/**
- * Selects the block whose view holds `element`. A field inside a block's view takes the focus without moving
- * the editor's selection, so the block menu would otherwise act on whatever block the caret last sat in. The
- * editor does not own the focus then, so the selection changes without taking the focus from the field.
- */
-export function selectBlockOf(editor: IEditor, element: Element): boolean {
-  const engine = contextOf(editor)?.engine;
-  if (!engine) return false;
-  let found: number | undefined;
-  engine.state.doc.descendants((node, pos) => {
-    if (carriesKey(node) && engine.view.nodeDOM(pos)?.contains(element)) found = pos;
-    return true;
-  });
-  if (found === undefined) return false;
-  const picked = (engine.state.selection as { node?: ProseMirrorNode }).node;
-  if (picked && engine.state.selection.from === found) return true;
-  return engine.chain().setNodeSelection(found).run();
-}
 
 /** The url variable the selection is linked to, or null when it holds no link. */
 export function emailLinkAt(editor: IEditor): string | null {

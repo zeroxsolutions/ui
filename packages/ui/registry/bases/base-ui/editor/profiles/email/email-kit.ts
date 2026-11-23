@@ -1,4 +1,3 @@
-import { Dropcursor, Gapcursor, Placeholder, UndoRedo } from '@tiptap/extensions';
 import { z } from 'zod';
 import { TextAlignStartIcon } from '@/registry/bases/base-ui/icons/lucide/text-align-start-icon';
 import {
@@ -13,6 +12,7 @@ import {
 import {
   defineFeature,
   EditorError,
+  type BlockMenuItem,
   type EditorFeature,
   type IEditor,
   type NodeJSON,
@@ -21,12 +21,26 @@ import {
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockIdentity, type BlockIdentityOptions } from '@zeroxsolutions/editor-core/profiles/editor/index';
 import {
+  EMAIL_GLOBAL_ATTRIBUTES,
   EMAIL_KINDS,
   type EditorProfile,
   type EmailBlockKind,
   type VariableDeclaration,
 } from '@zeroxsolutions/editor-core/profiles/index';
-import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
+import { callout } from '../../document/features/callout/index';
+import { codeBlock } from '../../document/features/code-block/index';
+import {
+  standardBlockMenuItems,
+  standardKit,
+  standardSlashItems,
+  standardToolbarItems,
+} from '../../document/features/standard/index';
+import {
+  DEFAULT_PROFILE_MESSAGES,
+  type EmailBlockAttribute,
+  type EmailBlockAttributeValue,
+  type ProfileEditorMessages,
+} from '../messages';
 import { variableFeature, type VariableFeature } from '../variables/variable';
 import {
   blockAt,
@@ -41,40 +55,106 @@ import {
 } from './kit-context';
 import { emailMarks } from './marks';
 import { emailButtonNode, emailButtonSlashItem } from './nodes/button';
-import { emailCalloutNode, emailCalloutSlashItem } from './nodes/callout';
-import { emailCodeNode, emailCodeSlashItem } from './nodes/code';
 import { emailColumnsNodes, emailColumnsSlashItem } from './nodes/columns';
-import { emailDividerNode, emailDividerSlashItem } from './nodes/divider';
 import { emailHtmlNode, emailHtmlSlashItem } from './nodes/html';
-import { emailListNodes, emailListSlashItem } from './nodes/list';
 import { emailUnknownNode } from './nodes/unknown';
 
-/** The node each email kind is. */
+/** The node each email kind is: the document's own block, or the email profile's where the document has none. */
 export const EMAIL_KIND_NODES: Readonly<Record<EmailBlockKind, string>> = {
   paragraph: 'paragraph',
   button: 'emailButton',
-  code: 'emailCode',
-  list: 'emailList',
-  callout: 'emailCallout',
-  divider: 'emailDivider',
+  code: 'codeBlock',
+  list: 'bulletList',
+  callout: 'callout',
+  divider: 'horizontalRule',
   columns: 'emailColumns',
   html: 'emailHtml',
+};
+
+/**
+ * The document blocks the export folds into a paragraph or a list, by the kind each folds into. One arrives
+ * only by a paste or a drop, keeps its text, and is a `block-not-carried` problem; nothing offers one.
+ */
+const FOLDED_BLOCKS: Readonly<Record<string, EmailBlockKind>> = {
+  heading: 'paragraph',
+  blockquote: 'paragraph',
+  orderedList: 'list',
+  taskList: 'list',
 };
 
 const ALIGNS = ['left', 'center', 'right'] as const;
 const SPACES = ['small', 'medium', 'large'] as const;
 
-/** The attributes the block menu sets on each block node, and the values each takes. */
-export const EMAIL_BLOCK_ATTRIBUTES: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
-  paragraph: { align: ALIGNS, spaceAfter: SPACES, tone: ['default', 'muted'] },
-  emailButton: { align: ALIGNS, spaceAfter: SPACES, width: ['inline', 'full'] },
-  emailCode: { align: ALIGNS, spaceAfter: SPACES },
-  emailList: { align: ALIGNS, spaceAfter: SPACES },
-  emailCallout: { align: ALIGNS, spaceAfter: SPACES },
-  emailDivider: { spaceAfter: SPACES },
-  emailHtml: { spaceAfter: SPACES },
-  emailColumns: { spaceAfter: SPACES },
+/** The values each attribute the block menu sets takes. */
+const ATTRIBUTE_VALUES: Readonly<Record<EmailBlockAttribute, readonly EmailBlockAttributeValue[]>> = {
+  align: ALIGNS,
+  spaceAfter: SPACES,
+  tone: ['default', 'muted'],
+  width: ['inline', 'full'],
 };
+
+/** The attributes the block menu sets on each block node. */
+const BLOCK_ATTRIBUTES: Readonly<Record<string, readonly EmailBlockAttribute[]>> = {
+  paragraph: ['align', 'spaceAfter', 'tone'],
+  emailButton: ['align', 'spaceAfter', 'width'],
+  codeBlock: ['align', 'spaceAfter'],
+  bulletList: ['align', 'spaceAfter'],
+  callout: ['align', 'spaceAfter'],
+  horizontalRule: ['spaceAfter'],
+  emailHtml: ['spaceAfter'],
+  emailColumns: ['spaceAfter'],
+};
+
+/** What an attribute reads as while the block does not set it: the house renderer's own default. */
+const ATTRIBUTE_DEFAULTS: Readonly<Record<EmailBlockAttribute, EmailBlockAttributeValue>> = {
+  align: 'left',
+  spaceAfter: 'medium',
+  tone: 'default',
+  width: 'inline',
+};
+
+/**
+ * The blocks Turn into rewrites without losing what they hold, since their content is text. `turnBlockInto`
+ * keeps only a block's lines, so a button, code, html, a divider or columns would lose what they are.
+ */
+const TURNABLE_BLOCKS = new Set(['paragraph', 'bulletList', 'callout', ...Object.keys(FOLDED_BLOCKS)]);
+
+/** The order the slash menu lists the kinds in. */
+const SLASH_ORDER: readonly EmailBlockKind[] = [
+  'paragraph',
+  'list',
+  'callout',
+  'code',
+  'divider',
+  'button',
+  'columns',
+  'html',
+];
+
+/** The slash item that inserts each kind: the document's own where the kind is a document block. */
+const KIND_SLASH_ITEMS: Readonly<Record<EmailBlockKind, string>> = {
+  paragraph: 'email-paragraph',
+  list: 'bulletList',
+  callout: 'callout',
+  code: 'codeBlock',
+  divider: 'divider',
+  button: 'email-button',
+  columns: 'email-columns',
+  html: 'email-html',
+};
+
+/** The toolbar and bubble items of the marks an email stores, by the words each is drawn in. */
+const MARK_ITEMS: Readonly<Record<string, 'bold' | 'italic' | 'removeLink'>> = {
+  bold: 'bold',
+  italic: 'italic',
+  'email-unlink': 'removeLink',
+};
+
+/** The document's own items; the ones above aside, each offers what an email cannot store. */
+const DOCUMENT_ITEMS = new Set([...standardSlashItems, ...standardToolbarItems].map((item) => item.id));
+
+/** The marks the email's inline markup stores. */
+const EMAIL_MARKS = new Set(['bold', 'italic', 'emailLink']);
 
 const paragraphSlashItem: SlashItem = {
   id: 'email-paragraph',
@@ -87,37 +167,45 @@ const paragraphSlashItem: SlashItem = {
   args: { kind: 'paragraph' },
 };
 
-const SLASH_ITEMS: Readonly<Record<EmailBlockKind, SlashItem>> = {
+/** The email profile's own slash items; the document's features offer the rest. */
+const OWN_SLASH_ITEMS: Partial<Record<EmailBlockKind, SlashItem>> = {
   paragraph: paragraphSlashItem,
   button: emailButtonSlashItem,
-  code: emailCodeSlashItem,
-  list: emailListSlashItem,
-  callout: emailCalloutSlashItem,
-  divider: emailDividerSlashItem,
   columns: emailColumnsSlashItem,
   html: emailHtmlSlashItem,
 };
 
-const SLASH_KINDS = new Map(Object.entries(SLASH_ITEMS).map(([kind, item]) => [item.id, kind as EmailBlockKind]));
+/** The items the chrome draws: the slash menu's, the toolbar's and the bubble's. */
+export interface EmailUi {
+  slash: SlashItem[];
+  toolbar: ToolbarItem[];
+  bubble: ToolbarItem[];
+}
 
-const MARK_WORDS: Readonly<Record<string, 'bold' | 'italic' | 'removeLink'>> = {
-  'email-bold': 'bold',
-  'email-italic': 'italic',
-  'email-unlink': 'removeLink',
-};
-
-/** The kit's slash, toolbar and bubble items in `messages`' words; an item of a host's own feature keeps its own. */
-export function wordEmailItems<T extends SlashItem | ToolbarItem>(
-  items: readonly T[],
-  messages: ProfileEditorMessages,
-): T[] {
-  return items.map((item) => {
-    const mark = MARK_WORDS[item.id];
-    if (mark) return { ...item, title: messages[mark] };
-    const kind = SLASH_KINDS.get(item.id);
-    if (!kind) return item;
-    return { ...item, ...messages.blocks[kind], group: messages.blockGroup };
-  });
+/**
+ * The kit's slash, toolbar and bubble items narrowed to what `profile` holds, in `messages`' words: the
+ * kinds it allows, in the slash menu's order, and the bold, italic and link marks. A document item for what an
+ * email cannot store is left out; an item of a host's own feature keeps its place and its words.
+ */
+export function emailUi(
+  contributions: EmailUi,
+  profile: EditorProfile,
+  messages: ProfileEditorMessages = DEFAULT_PROFILE_MESSAGES,
+): EmailUi {
+  const kindItems = new Set(Object.values(KIND_SLASH_ITEMS));
+  const offered = SLASH_ORDER.filter((kind) => profile.kinds.includes(kind)).flatMap((kind) =>
+    contributions.slash
+      .filter((item) => item.id === KIND_SLASH_ITEMS[kind])
+      .map((item) => ({ ...item, ...messages.blocks[kind], group: messages.blockGroup })),
+  );
+  const hosted = contributions.slash.filter((item) => !kindItems.has(item.id) && !DOCUMENT_ITEMS.has(item.id));
+  const marks = (items: readonly ToolbarItem[]) =>
+    items.flatMap((item) => {
+      const words = MARK_ITEMS[item.id];
+      if (words) return [{ ...item, title: messages[words] }];
+      return DOCUMENT_ITEMS.has(item.id) ? [] : [item];
+    });
+  return { slash: [...offered, ...hosted], toolbar: marks(contributions.toolbar), bubble: marks(contributions.bubble) };
 }
 
 const lane = (): NodeJSON => ({ type: 'emailLane', content: [{ type: 'paragraph' }] });
@@ -125,10 +213,10 @@ const lane = (): NodeJSON => ({ type: 'emailLane', content: [{ type: 'paragraph'
 /** What each kind inserts, empty, so the author fills it in place. */
 const NEW_BLOCKS: Readonly<Record<Exclude<EmailBlockKind, 'paragraph'>, () => NodeJSON>> = {
   button: () => ({ type: 'emailButton' }),
-  code: () => ({ type: 'emailCode' }),
-  list: () => ({ type: 'emailList', content: [{ type: 'emailListItem' }] }),
-  callout: () => ({ type: 'emailCallout' }),
-  divider: () => ({ type: 'emailDivider' }),
+  code: () => ({ type: 'codeBlock', attrs: { language: 'text', code: '' } }),
+  list: () => ({ type: 'bulletList', content: [{ type: 'listItem', content: [{ type: 'paragraph' }] }] }),
+  callout: () => ({ type: 'callout', attrs: { variant: 'info' }, content: [{ type: 'paragraph' }] }),
+  divider: () => ({ type: 'horizontalRule' }),
   columns: () => ({ type: 'emailColumns', attrs: { ratio: [1, 1] }, content: [lane(), lane()] }),
   html: () => ({ type: 'emailHtml' }),
 };
@@ -140,7 +228,10 @@ export interface EmailKitOptions extends BlockIdentityOptions {
   variables?: VariableFeature;
   /** The hint an empty line shows; `messages`' `emptyLine` when absent. */
   placeholder?: string;
-  /** The words the kit draws, read each time they are drawn; the English when absent. */
+  /**
+   * The words the kit draws. The block menu's titles and the hint are read once, when the kit is built; the
+   * reasons an item is disabled are read each time the menu opens. The English when absent.
+   */
   messages?: () => ProfileEditorMessages;
 }
 
@@ -152,15 +243,6 @@ function holdsRequired(node: ProseMirrorNode, required: readonly string[]): bool
     return !found;
   });
   return found;
-}
-
-function validAttributes(type: string, attrs: Record<string, string>): boolean {
-  const allowed = EMAIL_BLOCK_ATTRIBUTES[type];
-  return (
-    allowed !== undefined &&
-    Object.entries(attrs).length > 0 &&
-    Object.entries(attrs).every(([name, value]) => allowed[name]?.includes(value) === true)
-  );
 }
 
 /**
@@ -197,29 +279,6 @@ function setRatio(engine: Editor, { node, pos }: Found, ratio: number[]): boolea
   return engine.state.doc !== before;
 }
 
-/** Enter on the empty last item of a list leaves the list for a new line below it, as a document list does. */
-function leaveList(engine: Editor): boolean {
-  const { selection } = engine.state;
-  const { $from } = selection;
-  if (!selection.empty || $from.parent.type.name !== 'emailListItem' || $from.parent.content.size > 0) return false;
-  const list = $from.node(-1);
-  if (list.childCount < 2 || $from.index(-1) !== list.childCount - 1) return false;
-  const item = $from.before();
-  const after = $from.before(-1) + list.nodeSize - $from.parent.nodeSize;
-  return engine
-    .chain()
-    .deleteRange({ from: item, to: item + $from.parent.nodeSize })
-    .insertContentAt(after, { type: 'paragraph' })
-    .setTextSelection(after + 1)
-    .run();
-}
-
-const dataAttribute = (attribute: string, name: string) => ({
-  default: null,
-  parseHTML: (element: HTMLElement) => element.getAttribute(`data-${name}`),
-  renderHTML: (attrs: Record<string, unknown>) => (attrs[attribute] ? { [`data-${name}`]: attrs[attribute] } : {}),
-});
-
 /** Whether a node spec's group, a space-separated list, names `group`. */
 function inGroup(spec: { group?: string }, group: string): boolean {
   return (spec.group ?? '').split(' ').includes(group);
@@ -235,63 +294,6 @@ function outsiders(doc: ProseMirrorNode, admitted: ReadonlySet<string>): Map<str
     return true;
   });
   return counts;
-}
-
-/**
- * Refuses a change that adds a block of a type outside `admitted`, such as a pasted or dropped button in a mail
- * layout. A stored one stays, moves and goes, showing its problem; a host's load and an undo pass.
- */
-function admittedBlocks(admitted: ReadonlySet<string>): Plugin {
-  const counted = new WeakMap<ProseMirrorNode, Map<string, number>>();
-  const countsOf = (doc: ProseMirrorNode) => {
-    let counts = counted.get(doc);
-    if (!counts) counted.set(doc, (counts = outsiders(doc, admitted)));
-    return counts;
-  };
-  return new Plugin({
-    key: new PluginKey('emailAdmittedBlocks'),
-    filterTransaction(tr, state: EngineState) {
-      // Undo and redo put back what the author removed, a stored block of a left-out kind included.
-      if (!tr.docChanged || tr.getMeta(CONTENT_LOAD_META) || isHistoryTransaction(tr)) return true;
-      const before = countsOf(state.doc);
-      for (const [name, count] of countsOf(tr.doc)) {
-        if (count > (before.get(name) ?? 0)) return false;
-      }
-      return true;
-    },
-  });
-}
-
-/**
- * The engine half: the paragraph's email attributes, the list's way out, the blocks an author may add, and the
- * context the commands read.
- */
-function emailEngine(context: KitContext, admitted: ReadonlySet<string>): Extension {
-  return Extension.create({
-    name: 'emailKit',
-    onBeforeCreate() {
-      contexts.set(this.editor, context);
-    },
-    onDestroy() {
-      contexts.delete(this.editor);
-    },
-    addGlobalAttributes: () => [
-      {
-        types: ['paragraph'],
-        attributes: {
-          align: dataAttribute('align', 'align'),
-          spaceAfter: dataAttribute('spaceAfter', 'space-after'),
-          tone: dataAttribute('tone', 'tone'),
-          // The stored text an import keeps beside the nodes; a copy must not carry it to another block.
-          source: { default: null, rendered: false, keepOnSplit: false, parseHTML: () => null },
-        },
-      },
-    ],
-    addKeyboardShortcuts() {
-      return { Enter: () => leaveList(this.editor) };
-    },
-    addProseMirrorPlugins: () => [admittedBlocks(admitted)],
-  });
 }
 
 /**
@@ -335,12 +337,134 @@ function assertEmailCodecs(extra: readonly EditorFeature[]): void {
   }
 }
 
+/** Whether the block's own id is one the host requires. */
+function isRequired(node: ProseMirrorNode, required: readonly string[]): boolean {
+  return typeof node.attrs.id === 'string' && required.includes(node.attrs.id);
+}
+
+function validAttributes(type: string, attrs: Record<string, string>): boolean {
+  const allowed = BLOCK_ATTRIBUTES[type];
+  return (
+    allowed !== undefined &&
+    Object.entries(attrs).length > 0 &&
+    Object.entries(attrs).every(
+      ([name, value]) =>
+        allowed.includes(name as EmailBlockAttribute) &&
+        ATTRIBUTE_VALUES[name as EmailBlockAttribute].includes(value as EmailBlockAttributeValue),
+    )
+  );
+}
+
+const DATA_NAMES: Readonly<Record<string, string>> = { align: 'align', spaceAfter: 'space-after', tone: 'tone' };
+
+const dataAttribute = (attribute: string) => ({
+  default: null,
+  parseHTML: (element: HTMLElement) => element.getAttribute(`data-${DATA_NAMES[attribute]}`),
+  renderHTML: (attrs: Record<string, unknown>) =>
+    attrs[attribute] ? { [`data-${DATA_NAMES[attribute]}`]: attrs[attribute] } : {},
+});
+
+// The stored text an import keeps beside the nodes; a copy must not carry it to another block.
+const sourceAttribute = { default: null, rendered: false, keepOnSplit: false, parseHTML: () => null };
+
+/** The attributes each document node carries for the email, as global attributes on the document's own nodes. */
+function emailGlobalAttributes() {
+  return Object.entries(EMAIL_GLOBAL_ATTRIBUTES).map(([type, names]) => ({
+    types: [type],
+    attributes: Object.fromEntries(
+      names.map((name) => [name, name === 'source' ? sourceAttribute : dataAttribute(name)]),
+    ),
+  }));
+}
+
 /**
- * The email profile's features: block identity, variables, the three marks and the blocks `profile` allows,
- * with the slash items, toolbar and bubble that offer only those. Every email node is in the schema, so a
- * stored block of a kind the profile leaves out still opens and shows its problem; none is offered, and a
- * change that adds one is refused. `extra` joins when each of its block nodes has an email codec, and its blocks
- * carry an id and a key.
+ * Refuses a change that adds a block of a type outside `admitted`, such as a pasted or dropped button in a mail
+ * layout; a paste or a drop may also bring one of `carried`, which the export folds and marks. A stored block
+ * stays, moves and goes, showing its problem; a host's load and an undo pass.
+ */
+function admittedBlocks(admitted: ReadonlySet<string>, carried: ReadonlySet<string>): Plugin {
+  const pastable = new Set([...admitted, ...carried]);
+  const counted = new WeakMap<ProseMirrorNode, Map<string, number>>();
+  const countsOf = (doc: ProseMirrorNode) => {
+    let counts = counted.get(doc);
+    if (!counts) counted.set(doc, (counts = outsiders(doc, admitted)));
+    return counts;
+  };
+  return new Plugin({
+    key: new PluginKey('emailAdmittedBlocks'),
+    filterTransaction(tr, state: EngineState) {
+      // Undo and redo put back what the author removed, a stored block of a left-out kind included.
+      if (!tr.docChanged || tr.getMeta(CONTENT_LOAD_META) || isHistoryTransaction(tr)) return true;
+      const pasted = tr.getMeta('uiEvent') === 'paste' || tr.getMeta('uiEvent') === 'drop';
+      const before = countsOf(state.doc);
+      for (const [name, count] of countsOf(tr.doc)) {
+        if (count > (before.get(name) ?? 0) && !(pasted && pastable.has(name))) return false;
+      }
+      return true;
+    },
+  });
+}
+
+/**
+ * Takes off every mark outside `allowed` as soon as a change puts one on, so a shortcut or a paste of a mark the
+ * stored text cannot hold leaves the text plain. A host's load passes.
+ */
+export function heldMarks(allowed: ReadonlySet<string>): Plugin {
+  return new Plugin({
+    key: new PluginKey('heldMarks'),
+    appendTransaction(transactions, _before, state) {
+      if (transactions.some((tr) => tr.getMeta(CONTENT_LOAD_META))) return null;
+      if (!transactions.some((tr) => tr.docChanged || tr.storedMarksSet)) return null;
+      const tr = state.tr;
+      const stray = new Set<ProseMirrorNode['marks'][number]['type']>();
+      state.doc.descendants((node) => {
+        for (const mark of node.marks) if (!allowed.has(mark.type.name)) stray.add(mark.type);
+        return true;
+      });
+      for (const type of stray) tr.removeMark(0, state.doc.content.size, type);
+      const stored = state.storedMarks;
+      if (stored?.some((mark) => !allowed.has(mark.type.name))) {
+        tr.setStoredMarks(stored.filter((mark) => allowed.has(mark.type.name)));
+      }
+      return tr.docChanged || tr.storedMarksSet ? tr : null;
+    },
+  });
+}
+
+/**
+ * The engine half: the email attributes on the document's nodes, the blocks and marks an author may add, the
+ * input rules of only what the email stores, and the context the commands read.
+ */
+function emailEngine(
+  context: KitContext,
+  admitted: ReadonlySet<string>,
+  carried: ReadonlySet<string>,
+  inputRules: readonly string[],
+): Extension {
+  return Extension.create({
+    name: 'emailKit',
+    onBeforeCreate() {
+      contexts.set(this.editor, context);
+      // The document's rules would turn `# ` into a heading and `1. ` into a numbered list, which the email
+      // folds; the engine reads the option when it builds its plugins, after this.
+      this.editor.options.enableInputRules = [...inputRules];
+    },
+    onDestroy() {
+      contexts.delete(this.editor);
+    },
+    addGlobalAttributes: () => emailGlobalAttributes(),
+    addProseMirrorPlugins: () => [admittedBlocks(admitted, carried), heldMarks(EMAIL_MARKS)],
+  });
+}
+
+/**
+ * The email profile's features: the Document Editor's own blocks, frame and block menu (`standardKit`, the
+ * callout and the code block), and what the document has no block for (the button, the columns and their lanes,
+ * the html block, the variable chip and the link to a url variable), with the email attributes on the
+ * document's nodes and a block menu item for each. Every email node is in the schema, so a stored block of a
+ * kind the profile leaves out still opens and shows its problem; none is offered, and a change that adds one is
+ * refused. `extra` joins when each of its block nodes has an email codec, and its blocks carry an id and a key.
+ * Narrow the chrome's items with `emailUi`.
  */
 export function emailKit(
   profile: EditorProfile,
@@ -365,29 +489,52 @@ export function emailKit(
   // Every kind but columns, whatever the profile allows, so a stored lane opens; adding is narrowed below.
   const laneContent = `(${[
     ...EMAIL_KINDS.filter((kind) => kind !== 'columns').map((kind) => EMAIL_KIND_NODES[kind]),
+    ...Object.keys(FOLDED_BLOCKS),
     'emailUnknown',
     ...extraBlocks,
   ].join(' | ')})*`;
-  const admitted = new Set([...kinds.map((kind) => EMAIL_KIND_NODES[kind]), 'emailUnknown', ...extraBlocks]);
+  // A list item's and a callout's lines are paragraphs, whatever the profile allows at the top.
+  const admitted = new Set([
+    'paragraph',
+    ...kinds.map((kind) => EMAIL_KIND_NODES[kind]),
+    'emailUnknown',
+    ...extraBlocks,
+  ]);
+  const carried = new Set(
+    Object.entries(FOLDED_BLOCKS)
+      .filter(([, kind]) => admitted.has(EMAIL_KIND_NODES[kind]))
+      .map(([name]) => name),
+  );
+  const inputRules = [
+    'zeroxEditorBehavior',
+    'variableEngine',
+    'bold',
+    'italic',
+    ...(kinds.includes('list') ? ['bulletList'] : []),
+    ...(kinds.includes('divider') ? ['horizontalRule'] : []),
+  ];
 
   const insertable = (editor: IEditor, kind: EmailBlockKind): boolean => {
     const found = contextOf(editor);
     if (!found || locked() || !kinds.includes(kind)) return false;
     return kind !== 'columns' || laneAt(found.engine.state) === undefined;
   };
+  const attributable = (editor: IEditor, attrs: Record<string, string>) => {
+    const found = contextOf(editor);
+    const block = found && blockAt(found.engine.state);
+    if (!found || !block || locked() || isRequired(block.node, required())) return undefined;
+    return validAttributes(block.node.type.name, attrs) ? { engine: found.engine, block } : undefined;
+  };
+  const columnsOf = (editor: IEditor, ratio: number[]) => {
+    const found = contextOf(editor);
+    const columns = found && columnsAt(found.engine.state);
+    if (!found || !columns || locked() || isRequired(columns.node, required())) return undefined;
+    return ratio.length <= profile.bounds.lanes ? { engine: found.engine, columns } : undefined;
+  };
 
   const blocks = defineFeature({
     id: 'emailBlocks',
-    nodes: [
-      emailButtonNode(declarations),
-      emailCodeNode(),
-      ...emailListNodes(),
-      emailCalloutNode(),
-      emailDividerNode(),
-      ...emailColumnsNodes(laneContent),
-      emailHtmlNode(),
-      emailUnknownNode(),
-    ],
+    nodes: [emailButtonNode(declarations), ...emailColumnsNodes(laneContent), emailHtmlNode(), emailUnknownNode()],
     commands: {
       insertEmailBlock: {
         args: z.object({ kind: z.enum(EMAIL_KINDS as [EmailBlockKind, ...EmailBlockKind[]]) }),
@@ -401,20 +548,16 @@ export function emailKit(
       setBlockAttributes: {
         args: z.object({ attrs: z.record(z.string(), z.string()) }),
         run: (editor, { attrs }: { attrs: Record<string, string> }) => {
-          const found = contextOf(editor);
-          const block = found && blockAt(found.engine.state);
-          if (!found || !block || locked() || !validAttributes(block.node.type.name, attrs)) return false;
-          const tr = found.engine.state.tr;
+          const target = attributable(editor, attrs);
+          if (!target) return false;
+          const { engine, block } = target;
+          const tr = engine.state.tr;
           for (const [name, value] of Object.entries(attrs)) tr.setNodeAttribute(block.pos, name, value);
-          const before = found.engine.state.doc;
-          found.engine.view.dispatch(tr);
-          return found.engine.state.doc !== before;
+          const before = engine.state.doc;
+          engine.view.dispatch(tr);
+          return engine.state.doc !== before;
         },
-        can: (editor, { attrs }: { attrs: Record<string, string> }) => {
-          const found = contextOf(editor);
-          const block = found && blockAt(found.engine.state);
-          return !!block && !locked() && validAttributes(block.node.type.name, attrs);
-        },
+        can: (editor, { attrs }: { attrs: Record<string, string> }) => attributable(editor, attrs) !== undefined,
       },
       // Here rather than with the marks: a caret inside a link removes the whole link, which needs the engine.
       unsetEmailLink: {
@@ -427,76 +570,145 @@ export function emailKit(
       setColumnsRatio: {
         args: z.object({ ratio: z.array(z.number().int().min(1).max(12)).min(2) }),
         run: (editor, { ratio }: { ratio: number[] }) => {
-          const found = contextOf(editor);
-          const columns = found && columnsAt(found.engine.state);
-          if (!found || !columns || locked() || ratio.length > profile.bounds.lanes) return false;
-          return setRatio(found.engine, columns, ratio);
+          const target = columnsOf(editor, ratio);
+          return !!target && setRatio(target.engine, target.columns, ratio);
         },
-        can: (editor, { ratio }: { ratio: number[] }) => {
-          const found = contextOf(editor);
-          return !!found && !!columnsAt(found.engine.state) && !locked() && ratio.length <= profile.bounds.lanes;
-        },
+        can: (editor, { ratio }: { ratio: number[] }) => columnsOf(editor, ratio) !== undefined,
       },
     },
-    slash: kinds.map((kind) => SLASH_ITEMS[kind]),
-    advanced: {
-      engineExtensions: [
-        emailEngine(context, admitted),
-        UndoRedo,
-        Dropcursor,
-        Gapcursor,
-        Placeholder.configure({
-          includeChildren: true,
-          placeholder: () => options.placeholder ?? messages().emptyLine,
-        }),
-      ],
-    },
+    slash: kinds.flatMap((kind) => OWN_SLASH_ITEMS[kind] ?? []),
+    advanced: { engineExtensions: [emailEngine(context, admitted, carried, inputRules)] },
   });
 
+  // The document's own block menu, Turn into narrowed to the email's kinds, joins the email's below.
+  const standard: EditorFeature = {
+    ...standardKit({ placeholder: options.placeholder ?? messages().emptyLine, trailingNode: false }),
+    blockMenu: [],
+  };
+
   return [
+    standard,
+    callout({ variants: ['info'] }),
+    codeBlock({ languagePicker: false }),
     blockIdentity({ required: options.required, structure: options.structure, types: extraBlocks }),
     variables.feature,
     emailMarks(),
     blocks,
+    defineFeature({ id: 'emailBlockMenu', blockMenu: emailBlockMenuItems(kinds, profile.bounds.lanes, messages()) }),
     ...extra,
   ];
 }
 
-/** The block the selection is in, as the block menu reads it. */
-export interface EmailBlockState {
-  /** The block's node type. */
-  type: string;
-  attrs: Readonly<Record<string, unknown>>;
-  /** The block's element, to place chrome beside it. */
-  element: HTMLElement | null;
-  /** The columns block the selection is in, or is: its ratio, one share per lane. */
-  columns: { ratio: readonly number[] } | null;
-  /** The most lanes a columns block may have. */
-  maxLanes: number;
-  /** Whether the structure is locked, so no attribute changes and no block goes. */
-  locked: boolean;
-  /** Whether the block, or a block inside it, is one the host requires. */
-  required: boolean;
+/** The lane shares offered for each lane count up to `maxLanes`. */
+function ratioChoices(maxLanes: number): number[][] {
+  const choices: number[][] = [];
+  for (let lanes = 2; lanes <= maxLanes; lanes += 1) {
+    choices.push(Array.from({ length: lanes }, () => 1));
+    if (lanes === 2) choices.push([2, 1], [1, 2]);
+    if (lanes === 3) choices.push([1, 2, 1]);
+  }
+  return choices;
 }
 
-/** The block the selection is in, or null when the editor was not built from `emailKit` or holds no selection in a block. */
-export function emailBlockAt(editor: IEditor): EmailBlockState | null {
+/** The block the grip picked, or the one the caret is in, with what its editor's kit reads. */
+function menuBlock(editor: IEditor): { block: Found; context: KitContext; state: EngineState } | null {
   const found = contextOf(editor);
-  if (!found) return null;
-  const { engine, context } = found;
-  const block = blockAt(engine.state);
+  const block = found && blockAt(found.engine.state);
+  return found && block ? { block, context: found.context, state: found.engine.state } : null;
+}
+
+/** Why a change to `block` is refused: locked structure, or a required block; `whole` counts the blocks inside it. */
+function refusal(context: KitContext, block: Found | undefined, whole: boolean): string | null {
+  const words = context.messages();
+  if (context.locked()) return words.deleteLocked;
   if (!block) return null;
-  const columns = columnsAt(engine.state);
-  const ratio = columns?.node.attrs.ratio as number[] | null | undefined;
-  return {
-    type: block.node.type.name,
-    attrs: block.node.attrs,
-    element: (engine.view.nodeDOM(block.pos) as HTMLElement | null) ?? null,
-    columns: columns
-      ? { ratio: ratio && ratio.length > 0 ? ratio : Array.from({ length: columns.node.childCount }, () => 1) }
-      : null,
-    maxLanes: context.maxLanes,
-    locked: context.locked(),
-    required: holdsRequired(block.node, context.required()),
+  const required = context.required();
+  return (whole ? holdsRequired(block.node, required) : isRequired(block.node, required)) ? words.deleteRequired : null;
+}
+
+const typeOf = (editor: IEditor) => menuBlock(editor)?.block.node.type.name;
+
+/**
+ * The email's block menu: Turn into its text kinds, a submenu per attribute the picked block takes, the lanes of
+ * the columns it is or sits in, and the document's Duplicate and Delete. Each is disabled, with its reason, in
+ * locked structure and on a block the host requires. The titles are `words`'.
+ */
+function emailBlockMenuItems(
+  kinds: readonly EmailBlockKind[],
+  maxLanes: number,
+  words: ProfileEditorMessages,
+): BlockMenuItem[] {
+  const own = (editor: IEditor) => {
+    const at = menuBlock(editor);
+    return at ? refusal(at.context, at.block, false) : null;
   };
+  const whole = (editor: IEditor) => {
+    const at = menuBlock(editor);
+    return at ? refusal(at.context, at.block, true) : null;
+  };
+
+  const turnInto = (['paragraph', 'list'] as const)
+    .filter((kind) => kinds.includes(kind))
+    .map((kind): BlockMenuItem => ({
+      id: `email-turn-into-${kind}`,
+      title: words.blocks[kind].title,
+      group: words.turnInto,
+      command: 'turnBlockInto',
+      args: { name: EMAIL_KIND_NODES[kind] },
+      visible: (editor) => TURNABLE_BLOCKS.has(typeOf(editor) ?? ''),
+      active: (editor) => typeOf(editor) === EMAIL_KIND_NODES[kind],
+      disabledReason: whole,
+    }));
+
+  const attributes = (Object.keys(ATTRIBUTE_VALUES) as EmailBlockAttribute[]).flatMap((attribute) =>
+    ATTRIBUTE_VALUES[attribute].map((value): BlockMenuItem => ({
+      id: `email-${attribute}-${value}`,
+      title: words.attributeValues[value],
+      group: words.attributes[attribute],
+      command: 'setBlockAttributes',
+      args: { attrs: { [attribute]: value } },
+      visible: (editor) => BLOCK_ATTRIBUTES[typeOf(editor) ?? '']?.includes(attribute) === true,
+      active: (editor) => {
+        const set = menuBlock(editor)?.block.node.attrs[attribute] as string | null | undefined;
+        return (set ?? ATTRIBUTE_DEFAULTS[attribute]) === value;
+      },
+      disabledReason: own,
+    })),
+  );
+
+  const columnsOf = (editor: IEditor) => {
+    const found = contextOf(editor);
+    const columns = found && columnsAt(found.engine.state);
+    return found && columns ? { context: found.context, columns } : null;
+  };
+  const lanes = ratioChoices(maxLanes).map((ratio): BlockMenuItem => ({
+    id: `email-lanes-${ratio.join('-')}`,
+    title: ratio.join(' : '),
+    group: words.columns,
+    command: 'setColumnsRatio',
+    args: { ratio },
+    visible: (editor) => columnsOf(editor) !== null,
+    active: (editor) => {
+      const columns = columnsOf(editor)?.columns.node;
+      if (!columns) return false;
+      const set = columns.attrs.ratio as number[] | null | undefined;
+      const current = set && set.length > 0 ? set : Array.from({ length: columns.childCount }, () => 1);
+      return current.join(':') === ratio.join(':');
+    },
+    disabledReason: (editor) => {
+      const at = columnsOf(editor);
+      return at ? refusal(at.context, at.columns, false) : null;
+    },
+  }));
+
+  const documentItem = (id: string, title: string): BlockMenuItem[] =>
+    standardBlockMenuItems.filter((item) => item.id === id).map((item) => ({ ...item, title, disabledReason: whole }));
+
+  return [
+    ...turnInto,
+    ...attributes,
+    ...lanes,
+    ...documentItem('duplicate', words.duplicate),
+    ...documentItem('delete', words.delete),
+  ];
 }

@@ -3209,29 +3209,18 @@
         "@shadcn/button",
         "@shadcn/combobox",
         "@shadcn/badge",
-        "@shadcn/dropdown-menu",
-        "@shadcn/separator",
         "@shadcn/tooltip",
         "@shadcn/utils",
         "@zui/chat-input",
         "@zui/document-editor",
-        "@zui/lucide-code-icon",
-        "@zui/lucide-info-icon",
-        "@zui/lucide-italic-icon",
+        "@zui/editor-callout",
+        "@zui/editor-code-block",
         "@zui/lucide-layout-grid-icon",
         "@zui/lucide-layout-panel-top-icon",
-        "@zui/lucide-letter-b-icon",
-        "@zui/lucide-list-icon",
-        "@zui/lucide-minus-icon",
         "@zui/lucide-mouse-pointer-click-icon",
         "@zui/lucide-text-align-start-icon"
       ],
       "files": [
-        {
-          "path": "registry/bases/base-ui/editor/profiles/email/block-attributes-menu.tsx",
-          "type": "registry:component",
-          "target": "@components/editor/profiles/email/block-attributes-menu.tsx"
-        },
         {
           "path": "registry/bases/base-ui/editor/profiles/email/email-editor.tsx",
           "type": "registry:component",
@@ -3263,34 +3252,14 @@
           "target": "@components/editor/profiles/email/nodes/button.tsx"
         },
         {
-          "path": "registry/bases/base-ui/editor/profiles/email/nodes/callout.tsx",
-          "type": "registry:component",
-          "target": "@components/editor/profiles/email/nodes/callout.tsx"
-        },
-        {
-          "path": "registry/bases/base-ui/editor/profiles/email/nodes/code.tsx",
-          "type": "registry:component",
-          "target": "@components/editor/profiles/email/nodes/code.tsx"
-        },
-        {
           "path": "registry/bases/base-ui/editor/profiles/email/nodes/columns.tsx",
           "type": "registry:component",
           "target": "@components/editor/profiles/email/nodes/columns.tsx"
         },
         {
-          "path": "registry/bases/base-ui/editor/profiles/email/nodes/divider.tsx",
-          "type": "registry:component",
-          "target": "@components/editor/profiles/email/nodes/divider.tsx"
-        },
-        {
           "path": "registry/bases/base-ui/editor/profiles/email/nodes/html.tsx",
           "type": "registry:component",
           "target": "@components/editor/profiles/email/nodes/html.tsx"
-        },
-        {
-          "path": "registry/bases/base-ui/editor/profiles/email/nodes/list.tsx",
-          "type": "registry:component",
-          "target": "@components/editor/profiles/email/nodes/list.tsx"
         },
         {
           "path": "registry/bases/base-ui/editor/profiles/email/nodes/unknown.tsx",
@@ -3333,27 +3302,27 @@
           "target": "@components/editor/profiles/variables/variable.tsx"
         }
       ],
-      "dependencies": ["@tiptap/extensions", "@zeroxsolutions/editor-core", "lucide-react", "zod"],
+      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react", "zod"],
       "css": {
-        ".document-editor p[data-align='left']": {
+        ".document-editor [data-align='left']": {
           "text-align": "left"
         },
-        ".document-editor p[data-align='center']": {
+        ".document-editor [data-align='center']": {
           "text-align": "center"
         },
-        ".document-editor p[data-align='right']": {
+        ".document-editor [data-align='right']": {
           "text-align": "right"
         },
-        ".document-editor p[data-tone='muted']": {
+        ".document-editor [data-tone='muted']": {
           "color": "var(--muted-foreground)"
         },
-        ".document-editor p[data-space-after='small']": {
+        ".document-editor [data-space-after='small']": {
           "margin-bottom": "0.5rem"
         },
-        ".document-editor p[data-space-after='medium']": {
+        ".document-editor [data-space-after='medium']": {
           "margin-bottom": "1rem"
         },
-        ".document-editor p[data-space-after='large']": {
+        ".document-editor [data-space-after='large']": {
           "margin-bottom": "2rem"
         },
         ".document-editor [data-slot='email-columns'] > [data-node-view-content] > [data-node-view-content-react]": {
@@ -3400,7 +3369,7 @@
           "target": "@components/editor/profiles/sms/sms-problems.ts"
         }
       ],
-      "dependencies": ["@tiptap/extensions", "@zeroxsolutions/editor-core"]
+      "dependencies": ["@zeroxsolutions/editor-core"]
     },
     {
       "name": "email-editor-demo",

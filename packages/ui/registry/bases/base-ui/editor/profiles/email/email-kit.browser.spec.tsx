@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { userEvent } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { EditorFeature, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import {
@@ -20,8 +20,7 @@ import { Editor } from '../../document/react/editor';
 import { BubbleMenu } from '../../document/ui/bubble-menu';
 import { EditorToolbar } from '../../document/ui/editor-toolbar';
 import { SlashMenu } from '../../document/ui/slash-menu';
-import { BlockAttributesMenu } from './block-attributes-menu';
-import { emailKit, type EmailKitOptions } from './email-kit';
+import { emailKit, emailUi, type EmailKitOptions } from './email-kit';
 import { LinkVariablePicker } from './url-variable-picker';
 
 const declared: VariableDeclaration[] = [
@@ -84,7 +83,7 @@ function EmailHarness({
   onReady(editor: IEditor): void;
 }) {
   const [features] = useState(() => emailKit(profile, extra, options));
-  const [ui] = useState(() => collectUiContributions(features));
+  const [ui] = useState(() => emailUi(collectUiContributions(features), profile));
   const [editor, setEditor] = useState<IEditor | null>(null);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
   return (
@@ -102,7 +101,6 @@ function EmailHarness({
       {editor && <LinkVariablePicker editor={editor} declarations={declared} />}
       {editor && <SlashMenu editor={editor} items={ui.slash} />}
       {editor && <BubbleMenu editor={editor} items={ui.bubble} container={root} />}
-      {editor && <BlockAttributesMenu editor={editor} />}
     </div>
   );
 }
@@ -154,21 +152,27 @@ async function caretAfter(text: string): Promise<void> {
   await userEvent.keyboard('{End}');
 }
 
-/** Opens the block menu once the last one has closed, and returns it. */
-async function openBlockMenu(): Promise<HTMLElement> {
+/** Shows the grip of the block `selector` names, holding `text`, as a pointer over the block does. */
+async function gripOf(selector: string, text?: string): Promise<HTMLElement> {
   await vi.waitFor(() => expect(document.querySelector('[role=menu]')).toBeNull());
-  const trigger = await vi.waitFor(() => find('[data-slot=email-block-menu] [aria-label="Block actions"]'));
-  await userEvent.click(trigger);
-  return vi.waitFor(() => find('[role=menu]'));
+  await userEvent.hover(await vi.waitFor(() => find(selector, text)));
+  return vi.waitFor(() => {
+    const grip = find('.drag-handle');
+    if (grip.classList.contains('hide')) throw new Error('the grip is hidden');
+    return grip;
+  });
 }
 
-async function chooseInBlockMenu(title: string): Promise<void> {
-  const menu = await openBlockMenu();
-  const item = [...menu.querySelectorAll<HTMLElement>('[role=menuitemradio]')].find(
-    (candidate) => candidate.textContent === title,
-  );
-  if (!item) throw new Error(`the block menu offers no "${title}"`);
-  await userEvent.click(item);
+/** Opens the block menu from the grip of the paragraph holding `text`, or of the block `selector` names. */
+async function openBlockMenu(text: string, selector = '[contenteditable=true] p'): Promise<void> {
+  await userEvent.click(await gripOf(selector, text));
+  await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
+}
+
+async function chooseInBlockMenu(text: string, group: string, title: string, selector?: string): Promise<void> {
+  await openBlockMenu(text, selector);
+  await userEvent.click(page.getByRole('menuitem', { name: group }));
+  await userEvent.click(page.getByRole('menuitemradio', { name: title, exact: true }));
 }
 
 async function pickOption(trigger: HTMLElement): Promise<HTMLElement[]> {
@@ -183,20 +187,42 @@ async function pickOption(trigger: HTMLElement): Promise<HTMLElement[]> {
 const marksOf = (editor: IEditor): NodeJSON['marks'][] =>
   (editor.getJSON().content ?? []).flatMap((node) => (node.content ?? []).map((child) => child.marks));
 
+/** The titles the slash menu lists once `/` is typed in an empty document. */
+async function slashTitles(): Promise<(string | null)[]> {
+  await userEvent.click(find('[contenteditable=true]'));
+  await userEvent.keyboard('/');
+  const menu = await vi.waitFor(() => find('[data-slot=slash-menu]'));
+  return [...menu.querySelectorAll('[data-slot=item-title]')].map((title) => title.textContent);
+}
+
 describe('the email kit', () => {
+  it("offers in the slash menu the email's kinds, the document's blocks among them", async () => {
+    await mount([paragraph('')]);
+
+    expect(await slashTitles()).toEqual([
+      'Text',
+      'Bulleted list',
+      'Callout',
+      'Code',
+      'Divider',
+      'Button',
+      'Columns',
+      'HTML',
+    ]);
+  });
+
   it('offers in the slash menu only the kinds a mail-layout region holds', async () => {
     await mount([paragraph('')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
-    await userEvent.click(find('[contenteditable=true]'));
-    await userEvent.keyboard('/');
 
-    const menu = await vi.waitFor(() => find('[data-slot=slash-menu]'));
-    expect([...menu.querySelectorAll('[data-slot=item-title]')].map((title) => title.textContent)).toEqual([
-      'Text',
-      'List',
-      'Callout',
-      'Divider',
-      'Columns',
-    ]);
+    expect(await slashTitles()).toEqual(['Text', 'Bulleted list', 'Callout', 'Divider', 'Columns']);
+  });
+
+  it("draws the document editor's grip and its insert button beside a block", async () => {
+    await mount([paragraph('Hello')]);
+
+    await gripOf('[contenteditable=true] p', 'Hello');
+
+    expect(document.querySelector('[data-editor-add]')).not.toBeNull();
   });
 
   it("chooses a button's link from the url variables only", async () => {
@@ -285,24 +311,43 @@ describe('the email kit', () => {
     ];
     const editor = await mount(blocks);
 
-    for (const slot of ['email-code', 'email-html']) {
-      await userEvent.click(await vi.waitFor(() => find(`[data-slot=${slot}]`)));
-      await userEvent.keyboard('{End}{Shift>}{Home}{/Shift}');
-      expect(editor.can('toggleBold')).toBe(false);
-      await userEvent.keyboard('{ControlOrMeta>}b{/ControlOrMeta}{ControlOrMeta>}i{/ControlOrMeta}');
-    }
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=email-html]')));
+    await userEvent.keyboard('{End}{Shift>}{Home}{/Shift}');
+    expect(editor.can('toggleBold')).toBe(false);
+    await userEvent.keyboard('{ControlOrMeta>}b{/ControlOrMeta}{ControlOrMeta>}i{/ControlOrMeta}');
 
     expect(exported(editor)).toEqual(blocks);
     expect(JSON.stringify(editor.getJSON())).not.toContain('"marks"');
   });
 
+  it('turns no typed shortcut into a heading and keeps no underline', async () => {
+    const editor = await mount([paragraph('Hello')]);
+    await caretAfter('Hello');
+    await userEvent.keyboard('{Enter}# Title');
+    await userEvent.keyboard('{Shift>}{Home}{/Shift}{ControlOrMeta>}u{/ControlOrMeta}');
+
+    await vi.waitFor(() =>
+      expect(exported(editor)[1]).toMatchObject({ type: 'paragraph', content: { text: '# Title' } }),
+    );
+    expect(typesOf(editor)).toEqual(['paragraph', 'paragraph']);
+    expect(JSON.stringify(editor.getJSON())).not.toContain('"marks"');
+  });
+
+  it('keeps a pasted heading as a heading, which exports as its text', async () => {
+    const editor = await mount([paragraph('Body')]);
+    await caretAfter('Body');
+    // Between two paragraphs, so the heading is pasted whole rather than joined to the line it lands in.
+    pasteHtml('<p>Before</p><h1>Hi</h1><p>After</p>');
+
+    await vi.waitFor(() => expect(typesOf(editor)).toContain('heading'));
+    expect(exported(editor).map(({ type, content }) => [type, content])).toContainEqual(['paragraph', { text: 'Hi' }]);
+  });
   it('sets align, space after and tone on a paragraph from the block menu', async () => {
     const editor = await mount([paragraph('Hi there', 'p')]);
-    await caretAfter('Hi there');
 
-    await chooseInBlockMenu('Center');
-    await chooseInBlockMenu('Large');
-    await chooseInBlockMenu('Muted');
+    await chooseInBlockMenu('Hi there', 'Align', 'Center');
+    await chooseInBlockMenu('Hi there', 'Space after', 'Large');
+    await chooseInBlockMenu('Hi there', 'Tone', 'Muted');
 
     await vi.waitFor(() =>
       expect(exported(editor)[0].attributes).toEqual({ align: 'center', spaceAfter: 'large', tone: 'muted' }),
@@ -311,33 +356,28 @@ describe('the email kit', () => {
     expect(getComputedStyle(shown).textAlign).toBe('center');
   });
 
-  it("sets a button's width from the block menu", async () => {
-    const editor = await mount([
-      paragraph('Before'),
-      block({ type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } }),
-    ]);
-    await caretAfter('Before');
-    await userEvent.keyboard('{ArrowDown}');
+  it("offers Align's three choices with the block's own checked", async () => {
+    await mount([paragraph('Hi there', 'p')]);
+    await openBlockMenu('Hi there');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Align' }));
 
-    await chooseInBlockMenu('Full width');
-
-    await vi.waitFor(() => expect(exported(editor)[1].attributes).toEqual({ width: 'full' }));
+    const choices = page.getByRole('menuitemradio');
+    await expect.element(choices.nth(0)).toBeVisible();
+    expect(choices.elements().map((choice) => choice.textContent)).toEqual(['Left', 'Center', 'Right']);
+    await expect.element(page.getByRole('menuitemradio', { name: 'Left' })).toBeChecked();
   });
-
-  it('acts on a button whose label field holds the focus', async () => {
+  it('sets the width of the button whose grip opened the menu, not of the block the caret is in', async () => {
     const editor = await mount([
       paragraph('Before'),
       block({ type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } }),
     ]);
     await caretAfter('Before');
-    await userEvent.click(find('[aria-label="Button label"]'));
 
-    await chooseInBlockMenu('Full width');
+    await chooseInBlockMenu('', 'Width', 'Full width', '[data-slot=email-button]');
 
     await vi.waitFor(() => expect(exported(editor)[1].attributes).toEqual({ width: 'full' }));
     expect(exported(editor)[0].attributes).toEqual({});
   });
-
   it('moves the blocks of a removed lane into the last lane kept', async () => {
     const editor = await mount([
       block({
@@ -348,9 +388,7 @@ describe('the email kit', () => {
         lanes: [[paragraph('left', 'l')], [paragraph('middle', 'm')], [paragraph('right', 'r')]],
       }),
     ]);
-    await caretAfter('left');
-
-    await chooseInBlockMenu('1 : 1');
+    await chooseInBlockMenu('left', 'Lanes', '1 : 1');
 
     await vi.waitFor(() => expect(exported(editor)[0].lanes).toHaveLength(2));
     expect(exported(editor)[0].lanes?.map((lane) => lane.map(({ id, content }) => [id, content]))).toEqual([
@@ -372,13 +410,11 @@ describe('the email kit', () => {
         lanes: [[paragraph('left', 'l')], [paragraph('right', 'r')]],
       }),
     ]);
-    await caretAfter('left');
-
-    await chooseInBlockMenu('1 : 1 : 1');
+    await chooseInBlockMenu('left', 'Lanes', '1 : 1 : 1');
     await vi.waitFor(() => expect(exported(editor)[0].lanes).toHaveLength(3));
     expect(exported(editor)[0].attributes).toEqual({ ratio: [1, 1, 1], spaceAfter: 'large' });
 
-    await chooseInBlockMenu('2 : 1');
+    await chooseInBlockMenu('left', 'Lanes', '2 : 1');
     await vi.waitFor(() => expect(exported(editor)[0].lanes).toHaveLength(2));
     const [columns] = exported(editor);
     expect(columns.attributes).toEqual({ ratio: [2, 1], spaceAfter: 'large' });
@@ -405,16 +441,19 @@ describe('the email kit', () => {
     }
   });
 
-  it('keeps a list item out of the top level', async () => {
-    const editor = await mount([paragraph('Lines')]);
-    await caretAfter('Lines');
+  it("turns a text block into the email's text kinds only, and offers no Turn into on a button", async () => {
+    await mount([paragraph('Lines'), block({ type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } })]);
+    await openBlockMenu('Lines');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
 
-    editor.run('insertContent', { content: { type: 'emailListItem', content: [{ type: 'text', text: 'one' }] } });
+    const choices = page.getByRole('menuitemradio');
+    await expect.element(choices.nth(0)).toBeVisible();
+    expect(choices.elements().map((choice) => choice.textContent)).toEqual(['Text', 'Bulleted list']);
+    await userEvent.keyboard('{Escape}{Escape}');
 
-    const types = editor.getJSON().content?.map((node) => node.type);
-    expect(types).not.toContain('emailListItem');
+    await openBlockMenu('', '[data-slot=email-button]');
+    expect(page.getByRole('menuitem', { name: 'Turn into' }).elements()).toEqual([]);
   });
-
   it('keys every block it holds, so an added block exports with a key', async () => {
     const editor = await mount([paragraph('Hi')]);
     await caretAfter('Hi');
@@ -429,31 +468,45 @@ describe('the email kit', () => {
     const editor = await mount([paragraph('Keep me', 'kept'), paragraph('Drop me', 'dropped')], {
       options: { required: () => ['kept'] },
     });
-    await caretAfter('Keep me');
-    await openBlockMenu();
-    const refused = find('[role=menuitem]', 'Delete');
-    expect(refused.hasAttribute('data-disabled')).toBe(true);
-    expect(refused.textContent).toContain('This block is required');
+    await openBlockMenu('Keep me');
+    const refused = page.getByRole('menuitem', { name: 'Delete' });
+    await expect.element(refused).toBeDisabled();
+    await userEvent.hover(refused, { force: true });
+    await expect.element(page.getByText('This block is required')).toBeVisible();
     await userEvent.keyboard('{Escape}');
 
-    await caretAfter('Drop me');
-    await openBlockMenu();
-    await userEvent.click(find('[role=menuitem]', 'Delete'));
+    await openBlockMenu('Drop me');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
 
     await vi.waitFor(() => expect(exported(editor).map(({ id }) => id)).toEqual(['kept']));
   });
-
   it('changes no attribute and deletes no block in locked structure', async () => {
+    const locked = 'The structure is locked: only text and variables change';
     await mount([paragraph('Hi', 'p')], { options: { structure: () => 'locked' } });
-    await caretAfter('Hi');
-    await openBlockMenu();
+    await openBlockMenu('Hi');
 
-    const refused = find('[role=menuitem]', 'Delete');
-    expect(refused.hasAttribute('data-disabled')).toBe(true);
-    expect(refused.textContent).toContain('locked');
-    expect(find('[role=menuitemradio]', 'Center').hasAttribute('data-disabled')).toBe(true);
+    await expect.element(page.getByRole('menuitem', { name: 'Duplicate' })).toBeDisabled();
+    const refused = page.getByRole('menuitem', { name: 'Delete' });
+    await expect.element(refused).toBeDisabled();
+    await userEvent.hover(refused, { force: true });
+    await expect.element(page.getByText(locked)).toBeVisible();
+
+    await userEvent.click(page.getByRole('menuitem', { name: 'Align' }));
+    for (const choice of ['Left', 'Center', 'Right']) {
+      await expect.element(page.getByRole('menuitemradio', { name: choice })).toBeDisabled();
+    }
   });
 
+  it("disables a required block's attribute items with its reason", async () => {
+    await mount([paragraph('Keep me', 'kept')], { options: { required: () => ['kept'] } });
+    await openBlockMenu('Keep me');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Space after' }));
+
+    const large = page.getByRole('menuitemradio', { name: 'Large' });
+    await expect.element(large).toBeDisabled();
+    await userEvent.hover(large, { force: true });
+    await expect.element(page.getByText('This block is required')).toBeVisible();
+  });
   it('adds no block of a kind the profile leaves out, while a full profile takes it', async () => {
     const layout = await mount([paragraph('Header')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
     await caretAfter('Header');
@@ -470,11 +523,11 @@ describe('the email kit', () => {
     const stored = [paragraph('Header', 'p'), block({ id: 'b', key: 'b', type: 'button', content: { label: 'Go' } })];
     const editor = await mount(stored, { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
     await caretAfter('Header');
-    await userEvent.keyboard('{ArrowDown}');
-    await openBlockMenu();
-    await userEvent.click(find('[role=menuitem]', 'Delete'));
+    await openBlockMenu('', '[data-slot=email-button]');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
     await vi.waitFor(() => expect(typesOf(editor)).toEqual(['paragraph']));
 
+    await caretAfter('Header');
     await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
 
     await vi.waitFor(() => expect(exported(editor)).toEqual(stored));

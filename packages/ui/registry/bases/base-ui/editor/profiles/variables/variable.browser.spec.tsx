@@ -19,10 +19,10 @@ const declared: VariableDeclaration[] = [
   { name: 'supportEmail', type: 'email', label: 'Support email' },
 ];
 
-// A text-only block, as the email profile's code is.
-const emailCode: EditorFeature = {
-  id: 'email-code',
-  nodes: emailNodeSpecs.nodes.filter((node) => node.name === 'emailCode'),
+// A text-only block, as the email profile's html is.
+const emailHtml: EditorFeature = {
+  id: 'email-html',
+  nodes: emailNodeSpecs.nodes.filter((node) => node.name === 'emailHtml'),
 };
 
 function VariableEditor({
@@ -40,7 +40,7 @@ function VariableEditor({
     <div className="style-nova">
       {editor && <VariableMenu editor={editor} declarations={declarations} />}
       <Editor
-        features={[standardKit(), emailCode, variables.feature]}
+        features={[standardKit(), emailHtml, variables.feature]}
         content={content}
         onReady={(ready) => {
           setEditor(ready);
@@ -180,18 +180,18 @@ describe('a variable', () => {
   it('keeps a pasted {{name}} as text in a block that holds text only', async () => {
     const editor = await mount({
       type: 'doc',
-      content: [{ type: 'emailCode', content: [text('ab')] }],
+      content: [{ type: 'emailHtml', content: [text('ab')] }],
     });
     await copyText('{{code}}');
 
-    await userEvent.click(document.querySelector('[data-type=emailCode]')!);
+    await userEvent.click(document.querySelector('[data-type=emailHtml]')!);
     await userEvent.keyboard('{End}{ArrowLeft}');
     await userEvent.paste();
 
     // The empty paragraph after it is the trailing line the standard kit keeps below a last block.
     await vi.waitFor(() =>
       expect(editor.getJSON().content).toEqual([
-        expect.objectContaining({ type: 'emailCode', content: [text('a{{code}}b')] }),
+        expect.objectContaining({ type: 'emailHtml', content: [text('a{{code}}b')] }),
         { type: 'paragraph' },
       ]),
     );
