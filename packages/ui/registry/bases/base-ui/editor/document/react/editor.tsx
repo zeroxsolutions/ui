@@ -19,7 +19,7 @@ import { EditorBlockMenu } from './editor-block-menu';
 /**
  * The editable `<Editor/>` surface. It mounts the engine-backed editor into a
  * DOM element on mount and tears it down on unmount, exposing only the `IEditor`
- * façade to callers (`onReady`) — no engine type crosses the props boundary. The
+ * facade to callers (`onReady`) - no engine type crosses the props boundary. The
  * engine lives in this component's module graph (as expected for the editable
  * surface); the static `<Viewer/>` deliberately does not import it.
  */
@@ -28,7 +28,7 @@ export interface EditorProps {
   content?: DocJSON;
   editable?: boolean;
   className?: string;
-  /** Called once with the façade when the editor is ready. */
+  /** Called once with the facade when the editor is ready. */
   onReady?(editor: IEditor): void;
   /** Called with each step-sized delta as the document changes. */
   onChange?(delta: Delta): void;
@@ -38,6 +38,10 @@ export interface EditorProps {
 
 /** A press on the grip that moves less than this is a click that opens the block menu; more is a drag. */
 const GRIP_CLICK_SLOP_PX = 4;
+
+/** How far right of the pointer the drag handle looks for the node it drags: its own 50px plus the standard
+ *  kit's 24px handle width. The menu looks at the same point, so it acts on the node a drag would move. */
+const GRIP_REACH_PX = 74;
 
 export function Editor({
   features,
@@ -157,7 +161,7 @@ export function Editor({
       const editor = editorRef.current;
       if (moved >= GRIP_CLICK_SLOP_PX || !editor?.isEditable()) return;
       const rect = handleEl.getBoundingClientRect();
-      if (!editor.run('selectBlockAt', { y: rect.top + rect.height / 2 })) return;
+      if (!editor.run('selectBlockAt', { y: event.clientY, x: event.clientX + GRIP_REACH_PX })) return;
       setMenu({ top: rect.top, left: rect.left, width: rect.width, height: rect.height });
     };
     handleEl.addEventListener('pointerdown', onPress);
@@ -174,12 +178,21 @@ export function Editor({
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey) || event.key !== '/') return;
       const editor = editorRef.current;
-      const caret = editor?.caretRect();
-      if (!editor || !caret || !editor.isEditable()) return;
+      const view = (engine as { view?: { dom: Element; nodeDOM(pos: number): Node | null } } | null)?.view;
+      const target = event.target instanceof Element ? event.target : null;
+      // A code view keeps its own keys (Mod-/ comments a line in a code block). A field inside a block's view
+      // takes the focus without moving the editor's selection, so the menu opens only once its view has
+      // selected its own block; otherwise it would open on whatever block the caret last sat in.
+      if (event.defaultPrevented || !editor || !view || !target || target.closest('.cm-editor')) return;
+      if (target !== view.dom) {
+        const selection = editor.getSelection();
+        if (!selection.isNode || !view.nodeDOM(selection.from)?.contains(target)) return;
+      }
+      const caret = editor.caretRect();
+      if (!caret || !editor.isEditable()) return;
       event.preventDefault();
       if (!editor.run('selectBlockAt', { y: (caret.top + caret.bottom) / 2 })) return;
-      const view = (engine as { view?: { nodeDOM(pos: number): Node | null } } | null)?.view;
-      const block = view?.nodeDOM(editor.getSelection().from);
+      const block = view.nodeDOM(editor.getSelection().from);
       if (!(block instanceof HTMLElement)) return;
       const rect = block.getBoundingClientRect();
       setMenu({ top: rect.top, left: rect.left, width: 24, height: Math.min(rect.height, 24) });

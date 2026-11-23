@@ -152,6 +152,8 @@ const turnInto = (id: string, title: string, node: string, attrs?: Record<string
   group: 'Turn into',
   command: 'turnBlockInto',
   args: { name: node, attrs },
+  // Offered only on a block of text, which is the only kind `turnBlockInto` rewrites without loss.
+  visible: (editor) => editor.can('turnBlockInto', { name: node, attrs }),
   active: (editor) => editor.isActive(node, attrs),
 });
 

@@ -9,6 +9,7 @@ import '../../../../../../test/nova-style.css';
 // file left resting there enters it before the spec hovers it.
 import '../../styles.css';
 import { defineFeature } from '@zeroxsolutions/editor-core/document/core/index';
+import { codeBlock } from '../features/code-block/index';
 import { standardKit } from '../features/standard/index';
 import { Editor } from './editor';
 
@@ -149,6 +150,33 @@ async function turnInto(handle: HTMLElement, choice: string) {
 
 const types = (editor: IEditor) => (editor.getJSON().content ?? []).map((block) => block.type);
 
+const bullets = (...texts: string[]) => ({
+  type: 'bulletList',
+  content: texts.map((text) => ({ type: 'listItem', content: [line(text)] })),
+});
+
+/** The text of each item of the top-level list at `index`. */
+const itemsOf = (editor: IEditor, index: number) =>
+  (editor.getJSON().content?.[index]?.content ?? []).map((item) => item.content?.[0]?.content?.[0]?.text);
+
+/** Points at the list item holding `text`, so the handle sits beside that item rather than its list. */
+async function gripBesideItem(text: string): Promise<HTMLElement> {
+  const item = Array.from(document.querySelectorAll<HTMLElement>('.ProseMirror li')).find(
+    (candidate) => candidate.textContent === text,
+  );
+  if (!item) throw new Error(`no item holds ${text}`);
+  await userEvent.hover(item);
+  return vi.waitFor(() => {
+    const handle = document.querySelector<HTMLElement>('.drag-handle');
+    const top = handle?.getBoundingClientRect().top ?? -1;
+    const rect = item.getBoundingClientRect();
+    if (!handle || handle.classList.contains('hide') || top < rect.top - 12 || top > rect.bottom) {
+      throw new Error('the handle is not beside the item');
+    }
+    return handle;
+  });
+}
+
 describe('the block menu the grip opens', () => {
   it('opens a Block actions menu with Duplicate and Delete on a click of the grip', async () => {
     const { handle } = await mountBlocks(['first', 'second'], 1);
@@ -226,6 +254,63 @@ describe('the block menu the grip opens', () => {
     await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
     await vi.waitFor(() => expect(document.querySelectorAll('.ProseMirror > *')).toHaveLength(1));
     expect(document.querySelector('.ProseMirror')?.textContent).toBe('first');
+  });
+
+  it('deletes only the list item whose grip opened the menu', async () => {
+    const doc: DocJSON = { type: 'doc', content: [bullets('one', 'two', 'three'), line('after')] };
+    const { editor } = await mountDocument(doc, 1);
+    await userEvent.click(await gripBesideItem('three'));
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
+    await vi.waitFor(() => expect(itemsOf(editor(), 0)).toEqual(['one', 'two']));
+    expect(types(editor())).toEqual(['bulletList', 'paragraph']);
+  });
+
+  it('turns only the list item whose grip opened the menu into text, out of its list', async () => {
+    const doc: DocJSON = { type: 'doc', content: [bullets('one', 'two', 'three'), line('after')] };
+    const { editor } = await mountDocument(doc, 1);
+    await turnInto(await gripBesideItem('two'), 'Text');
+    await vi.waitFor(() => expect(types(editor())).toEqual(['bulletList', 'paragraph', 'bulletList', 'paragraph']));
+    expect(editor().getJSON().content?.[1]).toMatchObject({ content: [{ text: 'two' }] });
+  });
+
+  it('drags the list item whose grip opens the menu, not its whole list', async () => {
+    const doc: DocJSON = { type: 'doc', content: [bullets('one', 'two', 'three'), line('after')] };
+    const { blocks, editor } = await mountDocument(doc, 1);
+    await userEvent.dragAndDrop(await gripBesideItem('three'), blocks[1], { steps: 10 });
+    await vi.waitFor(() => expect(itemsOf(editor(), 0)).toEqual(['one', 'two']));
+    expect(editor().getText()).toContain('three');
+  });
+
+  it('offers no Turn into on a code block, whose code it would flatten', async () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [line('before'), { type: 'codeBlock', attrs: { language: 'text', code: 'let a = 1;' } }],
+    };
+    const { handle, editor } = await mountDocument(doc, 1, [codeBlock()]);
+    await userEvent.click(handle);
+    const menu = page.getByRole('menu', { name: 'Block actions' });
+    await expect.element(menu.getByRole('menuitem', { name: 'Delete' })).toBeVisible();
+    expect(editor().getSelection()).toMatchObject({ isNode: true, from: 8 });
+    expect(menu.getByRole('menuitem', { name: 'Turn into' }).elements()).toHaveLength(0);
+  });
+
+  it('opens no block menu on Mod-/ inside a code block, whose own keys take it', async () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [line('before'), { type: 'codeBlock', attrs: { language: 'javascript', code: 'let a = 1;' } }],
+    };
+    await mountDocument(doc, 0, [codeBlock()]);
+    const code = await vi.waitFor(() => {
+      const found = document.querySelector<HTMLElement>('.cm-content');
+      if (!found) throw new Error('the code view is not mounted');
+      return found;
+    });
+    await userEvent.click(code);
+    await userEvent.keyboard('{Control>}/{/Control}');
+    // A key typed after it lands in the code, so the shortcut has been handled by the time it shows.
+    await userEvent.keyboard('x');
+    await vi.waitFor(() => expect(code.textContent).toContain('x'));
+    expect(page.getByRole('menu').elements()).toHaveLength(0);
   });
 
   it('moves the block and opens no menu when the grip is pressed and dragged past the next block', async () => {
