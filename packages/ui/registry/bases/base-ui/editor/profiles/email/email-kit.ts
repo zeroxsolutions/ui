@@ -54,7 +54,7 @@ import {
   type Found,
   type KitContext,
 } from './kit-context';
-import { emailMarks } from './marks';
+import { emailMarks, UNLINK_ITEM_ID } from './marks';
 import { emailButtonNode, emailButtonSlashItem } from './nodes/button';
 import { emailColumnsNodes, emailColumnsSlashItem } from './nodes/columns';
 import { emailHtmlNode, emailHtmlSlashItem } from './nodes/html';
@@ -148,7 +148,7 @@ const KIND_SLASH_ITEMS: Readonly<Record<EmailBlockKind, string>> = {
 const MARK_ITEMS: Readonly<Record<string, 'bold' | 'italic' | 'removeLink'>> = {
   bold: 'bold',
   italic: 'italic',
-  'email-unlink': 'removeLink',
+  [UNLINK_ITEM_ID]: 'removeLink',
 };
 
 /** The document's own items; the ones above aside, each offers what an email cannot store. */

@@ -12,8 +12,12 @@ import { DEFAULT_PROFILE_MESSAGES } from '../messages';
 
 const LINK_CLASS = 'text-primary underline underline-offset-2';
 
+/** The id of the bubble's item that removes the link the selection is in. */
+export const UNLINK_ITEM_ID = 'email-unlink';
+
+// Bubble only, as the document's own link is: the toolbar row ends with the link picker.
 const unlinkItem: ToolbarItem = {
-  id: 'email-unlink',
+  id: UNLINK_ITEM_ID,
   title: DEFAULT_PROFILE_MESSAGES.removeLink,
   icon: createElement(UnlinkIcon, { 'aria-hidden': true }),
   // The email kit's command: a caret inside a link removes the whole link.
@@ -46,7 +50,6 @@ export function emailMarks(): EditorFeature {
           editor.run('setMark', { name: 'emailLink', attrs: { variable } }),
       },
     },
-    toolbar: [unlinkItem],
     bubble: [unlinkItem],
   });
 }

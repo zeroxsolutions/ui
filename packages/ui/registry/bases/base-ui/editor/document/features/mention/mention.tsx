@@ -33,7 +33,7 @@ function MentionPill({ id, label, contentEditable }: { id: string; label: string
       data-slot="mention"
       data-mention-id={id}
       contentEditable={contentEditable}
-      className="bg-primary/10 text-primary h-auto text-[length:inherit]"
+      className="bg-primary/10 text-primary h-auto py-0 text-[length:inherit]"
     >
       @{label || id}
     </Badge>

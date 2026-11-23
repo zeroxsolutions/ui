@@ -1376,6 +1376,10 @@
           ".document-editor :where(pre)": {
             "overflow-x": "auto"
           },
+          ".document-editor .ProseMirror-selectednode:not(span, img, video, iframe, [data-slot='image'], :has([data-slot='image']))": {
+            "background-color": "color-mix(in oklab, var(--primary) 6%, transparent)",
+            "outline": "1px solid color-mix(in oklab, var(--ring) 60%, transparent)"
+          },
           ".document-editor.is-dragging .ProseMirror": {
             "cursor": "grabbing"
           },
@@ -3347,6 +3351,12 @@
           "grid-auto-columns": "minmax(0, 1fr)",
           "grid-template-columns": "var(--email-columns, none)",
           "gap": "0.75rem"
+        },
+        ".document-editor .ProseMirror > [data-slot='email-block-row']:first-child + *, .document-editor [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :first-child, .document-editor [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > [data-slot='email-block-row']:first-child + *": {
+          "margin-top": "0"
+        },
+        ".document-editor :where( [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :last-child, [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
+          "margin-bottom": "0"
         }
       }
     },

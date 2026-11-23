@@ -305,7 +305,8 @@ export function SmsEditor({
       <div data-slot="sms-editor-body" className={cn('flex flex-col', editor && !readOnly && 'border-t')}>
         <Editor
           // No grip, so no gutter, editable or not: the text starts where the toolbar's and the footer's padding do.
-          className="[&_.ProseMirror]:px-3 [&_.ProseMirror[contenteditable=true]]:px-3"
+          // The vertical padding is the email editor's pane's; an empty message still offers three lines to click.
+          className="[&_.ProseMirror]:px-3 [&_.ProseMirror]:py-2 [&_.ProseMirror[contenteditable=true]]:min-h-24 [&_.ProseMirror[contenteditable=true]]:px-3"
           features={setup.features}
           content={fromSmsText(value)}
           editable={!readOnly}

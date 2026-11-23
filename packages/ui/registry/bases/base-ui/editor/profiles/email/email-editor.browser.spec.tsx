@@ -368,6 +368,14 @@ describe('EmailEditor', () => {
     await vi.waitFor(() => expect(find('[data-slot=email-block-adornment]').textContent).toBe('stale p1'));
   });
 
+  it('marks the block the grip selected while its menu is open', async () => {
+    await mount([paragraph('First', 'p1'), paragraph('Second', 'p2')]);
+    await openBlockMenu('Second');
+
+    expect(find('[contenteditable=true] p', 'Second').classList).toContain('ProseMirror-selectednode');
+    expect(find('[contenteditable=true] p', 'First').classList).not.toContain('ProseMirror-selectednode');
+  });
+
   it("disables a required block's Delete with its reason", async () => {
     await mount([paragraph('Keep me', 'kept')], { required: ['kept'] });
     await openBlockMenu('Keep me');
@@ -707,6 +715,35 @@ describe('EmailEditor frame', () => {
     const toolbar = page.getByRole('toolbar');
     await expect.element(toolbar.getByRole('combobox', { name: 'Link', exact: true })).toBeVisible();
     await expect.element(toolbar.getByRole('combobox', { name: 'Variable', exact: true })).toBeVisible();
+  });
+
+  it('reads bold, italic, then the link picker and the variable menu, with no remove-link control', async () => {
+    await mount([paragraph('Hello', 'p1')]);
+
+    const toolbar = await vi.waitFor(() => find('[role=toolbar]'));
+    const names = [...toolbar.querySelectorAll('button, [role=combobox]')].map((control) =>
+      control.getAttribute('aria-label'),
+    );
+    expect(names).toEqual(['Bold', 'Italic', 'Link', 'Variable']);
+  });
+
+  it('offers to remove a link in the bubble only while the selection is in one', async () => {
+    const linked: EditorEmailBlock = {
+      id: 'p1',
+      key: 'p1',
+      type: 'paragraph',
+      attributes: {},
+      content: { text: 'Open the [page]({{resetUrl}})' },
+    };
+    const probe = await mount([linked]);
+    await caretAfter('Open the page');
+    await userEvent.keyboard('{ArrowLeft}{ArrowLeft}{Shift>}{ArrowLeft}{/Shift}');
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label="Remove link"]')));
+    await vi.waitFor(() => expect(exportedOf(probe.editor)[0].content).toEqual({ text: 'Open the page' }));
+
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}');
+    await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label=Italic]'));
+    expect(document.querySelector('[data-slot=bubble-menu] [aria-label="Remove link"]')).toBeNull();
   });
 
   it("names the link picker's button with the variable the selection links to", async () => {

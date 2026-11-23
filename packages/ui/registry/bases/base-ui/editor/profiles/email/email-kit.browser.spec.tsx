@@ -283,7 +283,8 @@ describe('the email kit', () => {
         'Link: Reset link',
       ),
     );
-    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label="Remove link"]'));
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}');
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label="Remove link"]')));
 
     await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Open the page' }));
     expect(find('[data-slot=url-variable-picker][data-label=Link]').getAttribute('aria-label')).toBe('Link');

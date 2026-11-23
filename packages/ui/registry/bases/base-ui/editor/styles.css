@@ -170,6 +170,32 @@
   gap: 0.75rem;
 }
 
+/* An email block's marker row, empty and hidden while its block has no problem, sits before the block, so the
+ * first block is not the `:first-child` the reset above reaches. A lane's first and last block sit flush with
+ * its padding, as the document's do with the editor's edge. `:where` keeps a block's own `spaceAfter` above. */
+.document-editor .ProseMirror > [data-slot='email-block-row']:first-child + *,
+.document-editor [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :first-child,
+.document-editor
+  [data-slot='email-lane']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > [data-slot='email-block-row']:first-child
+  + * {
+  margin-top: 0;
+}
+.document-editor
+  :where(
+    [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :last-child,
+    [data-slot='email-lane']
+      > [data-node-view-content]
+      > [data-node-view-content-react]
+      > :last-child
+      > [data-node-view-wrapper]
+      > *
+  ) {
+  margin-bottom: 0;
+}
+
 @layer components {
   /* 2. Engine internals the `prose` plugin doesn't cover. */
 
@@ -333,6 +359,13 @@
   .document-editor .ProseMirror-selectednode:is(img, video, iframe) {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
+  }
+  /* A block the grip selected for its menu. An inline atom (a chip) is a span and keeps its own look; an image
+   * keeps the ring above. No radius: the block's own corners are the style's, and the root slot rounds none. */
+  .document-editor
+    .ProseMirror-selectednode:not(span, img, video, iframe, [data-slot='image'], :has([data-slot='image'])) {
+    background-color: color-mix(in oklab, var(--primary) 6%, transparent);
+    outline: 1px solid color-mix(in oklab, var(--ring) 60%, transparent);
   }
 
   /* Drag in flight — GRAY OUT the source block, don't fill. The editor root

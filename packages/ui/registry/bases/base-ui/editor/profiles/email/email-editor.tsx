@@ -53,7 +53,8 @@ import { ProblemMarker } from '../problem-marker';
 import { caretNode, nextMarker, useFocusLeave } from '../problem-navigation';
 import { refreshVariables, variableFeature } from '../variables/variable';
 import { VariableMenu } from '../variables/variable-menu';
-import { emailKit, emailUi } from './email-kit';
+import { emailKit, emailUi, type EmailUi } from './email-kit';
+import { UNLINK_ITEM_ID } from './marks';
 import { carriesKey, contextOf } from './kit-context';
 import { LinkVariablePicker } from './url-variable-picker';
 import { problemDecorations, problemMarks, type ProblemMark } from './problem-decorations';
@@ -233,6 +234,29 @@ function EmailEditorPane({ surface, onRelease, onAdopt }: EmailEditorPaneProps) 
     return () => handlers.current.onRelease();
   }, [surface]);
   return <div ref={pane} data-slot="email-editor-pane" className="h-full overflow-y-auto py-2" />;
+}
+
+interface EmailEditorBubbleMenuProps {
+  editor: IEditor;
+  items: EmailUi['bubble'];
+  container: HTMLElement | null;
+}
+
+/** The selection bubble, offering to remove a link only while the selection is in one. */
+function EmailEditorBubbleMenu({ editor, items, container }: EmailEditorBubbleMenuProps) {
+  const [inLink, setInLink] = useState(() => editor.isActive('emailLink'));
+  // The engine's own events, not the DOM's `selectionchange`, which fires before the engine reads the selection.
+  useEffect(() => {
+    const update = () => setInLink(editor.isActive('emailLink'));
+    const offSelection = editor.onSelectionUpdate(update);
+    const offChange = editor.onChange(update);
+    return () => {
+      offSelection();
+      offChange();
+    };
+  }, [editor]);
+  const offered = items.filter((item) => inLink || item.id !== UNLINK_ITEM_ID);
+  return <BubbleMenu editor={editor} items={offered} container={container} />;
 }
 
 /**
@@ -604,7 +628,7 @@ export function EmailEditor({
       {menus && !locked && (
         <SlashMenu editor={editor} items={items.slash} placeholder={text.slashSearch} emptyText={text.slashEmpty} />
       )}
-      {menus && <BubbleMenu editor={editor} items={items.bubble} container={root} />}
+      {menus && <EmailEditorBubbleMenu editor={editor} items={items.bubble} container={root} />}
       <TooltipProvider>
         {rows.map((row) =>
           createPortal(
