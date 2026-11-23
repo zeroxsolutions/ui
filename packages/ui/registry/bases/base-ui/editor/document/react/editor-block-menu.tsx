@@ -83,7 +83,7 @@ function EditorBlockMenuGroup({
 
 /**
  * The block actions menu the document editor's grip opens: a feature's `blockMenu` items in the house
- * dropdown, run through the façade. The menu hangs off an invisible trigger at `anchor`, because the grip
+ * dropdown, run through the facade. The menu hangs off an invisible trigger at `anchor`, because the grip
  * is the drag extension's own node and cannot be a React trigger.
  */
 export function EditorBlockMenu({

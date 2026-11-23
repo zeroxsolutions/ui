@@ -338,7 +338,7 @@ describe('the email kit', () => {
 
     await userEvent.click(await vi.waitFor(() => find('[data-slot=email-html]')));
     await userEvent.keyboard('{End}{Shift>}{Home}{/Shift}');
-    expect(editor.can('toggleBold')).toBe(false);
+    expect(editor.can('toggleMark', { name: 'bold' })).toBe(false);
     await userEvent.keyboard('{ControlOrMeta>}b{/ControlOrMeta}{ControlOrMeta>}i{/ControlOrMeta}');
 
     expect(exported(editor)).toEqual(blocks);

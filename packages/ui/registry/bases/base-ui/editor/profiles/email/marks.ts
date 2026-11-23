@@ -32,18 +32,8 @@ const unlinkItem: ToolbarItem = {
 export function emailMarks(): EditorFeature {
   return defineFeature({
     id: 'emailMarks',
-    marks: emailNodeSpecs.marks
-      .filter((mark) => mark.name === 'emailLink')
-      .map((mark): MarkSpec => ({ ...mark, className: LINK_CLASS })),
+    marks: emailNodeSpecs.marks.map((mark): MarkSpec => ({ ...mark, className: LINK_CLASS })),
     commands: {
-      toggleBold: {
-        run: (editor) => editor.run('toggleMark', { name: 'bold' }),
-        can: (editor) => editor.can('toggleMark', { name: 'bold' }),
-      },
-      toggleItalic: {
-        run: (editor) => editor.run('toggleMark', { name: 'italic' }),
-        can: (editor) => editor.can('toggleMark', { name: 'italic' }),
-      },
       setEmailLink: {
         args: z.object({ variable: z.string().regex(/^\w+$/) }),
         run: (editor, { variable }: { variable: string }) =>
