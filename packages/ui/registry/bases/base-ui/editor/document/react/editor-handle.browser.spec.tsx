@@ -498,6 +498,23 @@ describe('the block a grip addresses inside another block', () => {
     expect(editor().getJSON().content?.[1]).toEqual(loaded);
   });
 
+  it('deletes only the quote inside a quote whose grip opened the menu', async () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [
+        { type: 'blockquote', content: [line('outer'), { type: 'blockquote', content: [line('inner')] }] },
+        line('after'),
+      ],
+    };
+    const { editor } = await mountDocument(doc, 1);
+    await userEvent.click(await gripBeside(holding('.ProseMirror blockquote blockquote', 'inner')));
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
+    await vi.waitFor(() =>
+      expect(editor().getJSON().content?.[0]).toEqual({ type: 'blockquote', content: [line('outer')] }),
+    );
+    expect(types(editor())).toEqual(['blockquote', 'paragraph']);
+  });
+
   const quoteInItem: DocJSON = {
     type: 'doc',
     content: [

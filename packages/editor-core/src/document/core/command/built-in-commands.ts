@@ -254,8 +254,11 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
     const { view } = editor;
     view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, pos)));
     const { selection, doc } = view.state;
-    picked = selection instanceof NodeSelection ? null : { pos, node: doc.nodeAt(pos)!, selection };
+    const node = doc.nodeAt(pos);
+    const inside = node && !selection.empty && selection.from > pos && selection.to < pos + node.nodeSize;
+    picked = selection instanceof NodeSelection || !node || !inside ? null : { pos, node, selection };
   };
+  // A cell selection of every cell of a table counts as that table; an edit inside it from elsewhere voids the pick.
   /** The whole block the grip's menu acts on: the selected node, or the block the grip picked whose selection
    *  a plugin widened, while neither the selection nor that block has changed since. */
   const pickedBlock = (): NodeSelection | null => {
