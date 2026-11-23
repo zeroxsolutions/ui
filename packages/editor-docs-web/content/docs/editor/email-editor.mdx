@@ -35,7 +35,7 @@ pnpm add @codemirror/autocomplete @codemirror/state @codemirror/view @tiptap/rea
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add badge button combobox field popover resizable tabs tooltip use-mobile utils @zui/chat-input @zui/collapsible-card @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-braces-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-text-align-start-icon
+pnpm dlx shadcn@latest add badge button combobox field popover tabs tooltip utils @zui/chat-input @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-braces-icon @zui/lucide-eye-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-text-align-start-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -198,8 +198,11 @@ The editor offers the Document Editor's paragraph, bulleted list, callout, code 
 email's button, columns and HTML blocks. Click a block's grip, or press Mod-/, to open its block menu. The
 menu holds Turn into, Duplicate and Delete, and the block's Align, Space after, Tone, Width, Lanes or Link.
 
-With a `renderer`, the preview shows the rendered email with each variable's `sampleValue`. `theme` is the
-renderer's `EmailTheme` and `layoutProps` its logo and footer, and the demo's source defines both.
+The editor is drawn as the Document Editor is, with its toolbar above the blocks and nothing around them.
+With a `renderer`, an Edit and a Preview tab sit at the end of the toolbar's row, as a Mermaid block's switch
+does. The Preview tab shows the rendered email with each variable's `sampleValue`, and the toolbar is disabled
+while it is open. `theme` is the renderer's `EmailTheme` and `layoutProps` its logo and footer, and the demo's
+source defines both.
 
 Hand the blocks `onChange` gives you back as `value`, and the editor does not reload them. After a save,
 call `editor.run('assignBlockIds', { ids })` on the editor `onReady` gave you, with a map of block key to
@@ -209,25 +212,24 @@ saved id. The blocks it reports from then on carry those ids.
 
 ### EmailEditor
 
-| Prop                   | Type                                             | Default  | Description                                                                                                                                      |
-| ---------------------- | ------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `profile`              | `EditorProfile`                                  | -        | The blocks and variables the author may use, from `emailProfile`.                                                                                |
-| `value`                | `EditorEmailBlock[]`                             | -        | The blocks shown. A value that differs from the last `onChange` loads in its place.                                                              |
-| `label`                | `string`                                         | -        | The accessible name of the editable area.                                                                                                        |
-| `renderer`             | `EmailPreviewRenderer`                           | -        | A `createEmailRenderer` instance. Without one, the editor draws no preview.                                                                      |
-| `previewInput`         | `EmailPreviewInput`                              | -        | The subject, preheader, locale and layout props the preview renders with.                                                                        |
-| `layout`               | `'auto' \| 'split' \| 'tabs'`                    | `'auto'` | `split` draws the preview beside the editor, `tabs` under a Preview tab, and `auto` splits at a viewport 768px wide or more and uses tabs below. |
-| `messages`             | `Partial<ProfileEditorMessages>`                 | -        | Your words for the strings the editor draws. A key left out stays English.                                                                       |
-| `readOnly`             | `boolean`                                        | `false`  | Shows the blocks and their problems with no toolbar or menus.                                                                                    |
-| `required`             | `readonly string[]`                              | -        | The ids of the blocks the author may not delete.                                                                                                 |
-| `structure`            | `'free' \| 'locked'`                             | `'free'` | `locked` allows edits to text, marks (bold, italic, link) and variables only.                                                                    |
-| `features`             | `EditorFeature[]`                                | -        | Your own blocks, each with an email codec. Read once, on mount.                                                                                  |
-| `className`            | `string`                                         | -        | Classes for the frame.                                                                                                                           |
-| `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        | Called with the blocks after each edit.                                                                                                          |
-| `onBlur`               | `() => void`                                     | -        | Called when the focus leaves the editor and the menus it opened.                                                                                 |
-| `onValidate`           | `(problems: ProfileProblem[]) => void`           | -        | Called with the problems on mount and when they change.                                                                                          |
-| `renderBlockAdornment` | `(id: string \| null, key: string) => ReactNode` | -        | Draws your content beside each block. `id` is null until the block is saved.                                                                     |
-| `onReady`              | `(editor: IEditor) => void`                      | -        | Called once with the editor.                                                                                                                     |
+| Prop                   | Type                                             | Default  | Description                                                                         |
+| ---------------------- | ------------------------------------------------ | -------- | ----------------------------------------------------------------------------------- |
+| `profile`              | `EditorProfile`                                  | -        | The blocks and variables the author may use, from `emailProfile`.                   |
+| `value`                | `EditorEmailBlock[]`                             | -        | The blocks shown. A value that differs from the last `onChange` loads in its place. |
+| `label`                | `string`                                         | -        | The accessible name of the editable area.                                           |
+| `renderer`             | `EmailPreviewRenderer`                           | -        | A `createEmailRenderer` instance. Without one, the editor draws no preview.         |
+| `previewInput`         | `EmailPreviewInput`                              | -        | The subject, preheader, locale and layout props the preview renders with.           |
+| `messages`             | `Partial<ProfileEditorMessages>`                 | -        | Your words for the strings the editor draws. A key left out stays English.          |
+| `readOnly`             | `boolean`                                        | `false`  | Shows the blocks and their problems with no toolbar or menus.                       |
+| `required`             | `readonly string[]`                              | -        | The ids of the blocks the author may not delete.                                    |
+| `structure`            | `'free' \| 'locked'`                             | `'free'` | `locked` allows edits to text, marks (bold, italic, link) and variables only.       |
+| `features`             | `EditorFeature[]`                                | -        | Your own blocks, each with an email codec. Read once, on mount.                     |
+| `className`            | `string`                                         | -        | Classes for the frame.                                                              |
+| `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        | Called with the blocks after each edit.                                             |
+| `onBlur`               | `() => void`                                     | -        | Called when the focus leaves the editor and the menus it opened.                    |
+| `onValidate`           | `(problems: ProfileProblem[]) => void`           | -        | Called with the problems on mount and when they change.                             |
+| `renderBlockAdornment` | `(id: string \| null, key: string) => ReactNode` | -        | Draws your content beside each block. `id` is null until the block is saved.        |
+| `onReady`              | `(editor: IEditor) => void`                      | -        | Called once with the editor.                                                        |
 
 Build `messages` once per locale; a new object rebuilds the toolbar and the menus. Its English defaults are
 `DEFAULT_PROFILE_MESSAGES` in `messages.ts`.
@@ -283,7 +285,7 @@ To change the variables, pass a new profile. If you change the declarations in p
 
 Each problem is marked on its block, with its message on hover and focus. A problem with no block, such as
 `required-variable-not-printed` or `too-many-blocks`, and each problem the preview's render reports are listed
-in the editor's footer. F8 and Shift+F8 move to the next and previous problem, and Escape on a marker returns
+under the blocks. F8 and Shift+F8 move to the next and previous problem, and Escape on a marker returns
 to its block.
 
 On the server, `validate(blocks, profile)` from `@zeroxsolutions/editor-core/profiles/index` returns the same

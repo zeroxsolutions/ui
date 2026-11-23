@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { CollapsibleCard, CollapsibleCardHeader } from '@/registry/bases/base-ui/components/layout/collapsible-card';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { TooltipProvider } from '@/registry/bases/base-ui/ui/tooltip';
 import {
@@ -119,7 +118,8 @@ function overlayFeature(read: () => readonly SmsMark[], label: () => string) {
 
 /**
  * The SMS profile's editor: the document editor with `smsKit`'s paragraphs and variables, each problem marked in
- * the text, and the segment meter. `value` loads whenever it differs from what the editor last reported, so a
+ * the text, and the segment meter under it. The frame is the Document Editor's: the toolbar above the text and
+ * nothing around it. `value` loads whenever it differs from what the editor last reported, so a
  * host hands back what `onChange` gave it without moving the caret.
  */
 export function SmsEditor({
@@ -283,56 +283,50 @@ export function SmsEditor({
     nextMarker(markers, marker ?? caretNode() ?? target, event.shiftKey).focus();
   };
 
+  const menus = editor !== null && !readOnly;
   return (
-    <CollapsibleCard
+    <div
       ref={setRoot}
-      variant="muted"
       data-slot="sms-editor"
-      className={cn('relative', className)}
+      className={cn('relative flex w-full flex-col gap-3', className)}
       {...focus}
       onKeyDownCapture={keyDown}
     >
-      {editor && !readOnly && (
-        <CollapsibleCardHeader>
-          <EditorToolbar
-            editor={editor}
-            items={[]}
-            className="min-w-0"
-            end={<VariableMenu editor={editor} declarations={profile.variables} messages={text} />}
-          />
-        </CollapsibleCardHeader>
-      )}
-      <div data-slot="sms-editor-body" className={cn('flex flex-col', editor && !readOnly && 'border-t')}>
-        <Editor
-          // No grip, so no gutter, editable or not: the text starts where the toolbar's and the footer's padding do.
-          // The vertical padding is the email editor's pane's; an empty message still offers three lines to click.
-          className="[&_.ProseMirror]:px-3 [&_.ProseMirror]:py-2 [&_.ProseMirror[contenteditable=true]]:min-h-24 [&_.ProseMirror[contenteditable=true]]:px-3"
-          features={setup.features}
-          content={fromSmsText(value)}
-          editable={!readOnly}
-          onReady={(ready) => {
-            setEditor(ready);
-            onReady?.(ready);
-          }}
+      {menus && (
+        <EditorToolbar
+          editor={editor}
+          items={[]}
+          className="min-w-0 self-start"
+          end={<VariableMenu editor={editor} declarations={profile.variables} messages={text} />}
         />
-      </div>
-      {editor && !readOnly && <TriggerLayer editor={editor} triggers={[variables]} />}
-      <TooltipProvider>
-        {marks.length > 0 && (
-          <div data-slot="sms-problem-markers" className="flex flex-wrap items-center gap-1 px-3 pb-2">
-            {marks.map((mark) => (
-              <ProblemMarker
-                key={mark.id}
-                id={mark.id}
-                messages={mark.messages}
-                slot="sms-problem-marker"
-                label={text.problemMarker}
-              />
-            ))}
-          </div>
-        )}
-      </TooltipProvider>
-      <div data-slot="sms-editor-footer" className="flex flex-col gap-1 border-t px-3 py-2 text-sm">
+      )}
+      <Editor
+        features={setup.features}
+        content={fromSmsText(value)}
+        editable={!readOnly}
+        onReady={(ready) => {
+          setEditor(ready);
+          onReady?.(ready);
+        }}
+      />
+      {menus && <TriggerLayer editor={editor} triggers={[variables]} />}
+      {/* From the text's left edge: the editable text sits past the grip's gutter, the read-only text flush. */}
+      <div data-slot="sms-editor-footer" className={cn('flex flex-col gap-1 text-sm', !readOnly && 'px-12')}>
+        <TooltipProvider>
+          {marks.length > 0 && (
+            <div data-slot="sms-problem-markers" className="flex flex-wrap items-center gap-1">
+              {marks.map((mark) => (
+                <ProblemMarker
+                  key={mark.id}
+                  id={mark.id}
+                  messages={mark.messages}
+                  slot="sms-problem-marker"
+                  label={text.problemMarker}
+                />
+              ))}
+            </div>
+          )}
+        </TooltipProvider>
         <SmsMeter body={body} profile={profile} messages={text} />
         {unplaced.length > 0 && (
           <ul data-slot="sms-problems" className="text-destructive flex flex-col gap-1">
@@ -342,6 +336,6 @@ export function SmsEditor({
           </ul>
         )}
       </div>
-    </CollapsibleCard>
+    </div>
   );
 }

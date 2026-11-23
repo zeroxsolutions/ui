@@ -95,21 +95,20 @@ const initial: EditorEmailBlock[] = [
   },
 ];
 
-/** A welcome email with a button and a text link to url variables, a callout and two columns, beside its preview. */
+/** A welcome email with a button and a text link to url variables, a callout and two columns, and its preview. */
 function EmailEditorDemo(): ReactNode {
   const [blocks, setBlocks] = useState(initial);
   const renderer = useMemo(() => createEmailRenderer({ theme }), []);
   return (
-    <div className="w-full max-w-3xl">
-      <EmailEditor
-        label="Email body"
-        profile={profile}
-        value={blocks}
-        onChange={setBlocks}
-        renderer={renderer}
-        previewInput={previewInput}
-      />
-    </div>
+    <EmailEditor
+      label="Email body"
+      profile={profile}
+      value={blocks}
+      onChange={setBlocks}
+      renderer={renderer}
+      previewInput={previewInput}
+      className="max-w-2xl"
+    />
   );
 }
 

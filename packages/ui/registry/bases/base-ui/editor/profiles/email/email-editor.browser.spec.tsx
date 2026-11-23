@@ -99,7 +99,6 @@ interface HarnessProps {
   readOnly?: boolean;
   required?: readonly string[];
   structure?: 'free' | 'locked';
-  layout?: EmailEditorProps['layout'];
   preview?: { renderer: EmailPreviewRenderer; input: EmailPreviewInput };
   renderBlockAdornment?: EmailEditorProps['renderBlockAdornment'];
   initial: EditorEmailBlock[];
@@ -703,20 +702,14 @@ describe('EmailEditor frame', () => {
 
   const withPreview = () => ({ preview: { renderer: createEmailRenderer({ theme }), input: previewInput } });
 
-  it('draws the editor beside the preview at a wide viewport', async () => {
-    await page.viewport(1280, 800);
+  it.each([
+    [1280, 800],
+    [375, 800],
+  ])('tabs between the editor and the preview at %ipx', async (width, height) => {
+    await page.viewport(width, height);
     await mount([paragraph('Hello', 'p1')], withPreview());
 
-    await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeVisible();
-    await expect.element(page.getByTitle('Email preview')).toBeVisible();
-    expect(document.querySelector('[role=tablist]')).toBeNull();
-  });
-
-  it('tabs between the editor and the preview at a narrow viewport', async () => {
-    await page.viewport(375, 800);
-    await mount([paragraph('Hello', 'p1')], withPreview());
-
-    await expect.element(page.getByRole('tab', { name: 'Edit' })).toBeVisible();
+    await expect.element(page.getByRole('tab', { name: 'Edit' })).toHaveAttribute('aria-selected', 'true');
     await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeVisible();
     await expect.element(page.getByTitle('Email preview')).not.toBeVisible();
 
@@ -725,36 +718,23 @@ describe('EmailEditor frame', () => {
     await expect.element(page.elementLocator(find('[contenteditable=true]'))).not.toBeVisible();
   });
 
-  it('keeps the typed text, the caret and the focus as the viewport crosses the breakpoint and back', async () => {
-    await page.viewport(1280, 800);
+  it('keeps the editor, its text and its caret across the tabs', async () => {
     const probe = await mount([paragraph('Hello', 'p1')], withPreview());
     const surface = find('[contenteditable=true]');
     await caretAfter('Hello');
     await userEvent.keyboard(' there{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}');
 
-    await page.viewport(375, 800);
-    await expect.element(page.getByRole('tab', { name: 'Edit' })).toBeVisible();
-    await page.viewport(1280, 800);
-    await vi.waitFor(() => expect(document.querySelector('[role=tablist]')).toBeNull());
+    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+    await userEvent.click(page.getByRole('tab', { name: 'Edit' }));
 
     expect(find('[contenteditable=true]')).toBe(surface);
+    probe.editor.focus();
     await vi.waitFor(() => expect(document.activeElement).toBe(surface));
     await userEvent.keyboard('!');
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'Hello! there' }));
-    expect(probe.blurs).toBe(0);
-  });
-
-  it('splits at a narrow viewport when the layout is split', async () => {
-    await page.viewport(375, 800);
-    await mount([paragraph('Hello', 'p1')], { ...withPreview(), layout: 'split' });
-
-    await expect.element(page.getByTitle('Email preview')).toBeVisible();
-    await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeVisible();
-    expect(document.querySelector('[role=tablist]')).toBeNull();
   });
 
   it('disables the toolbar while the preview tab hides the editor', async () => {
-    await page.viewport(375, 800);
     await mount([paragraph('Hello', 'p1')], withPreview());
     const toolbar = page.getByRole('toolbar');
     const controls = [
@@ -770,11 +750,12 @@ describe('EmailEditor frame', () => {
     for (const control of controls) await expect.element(control).toBeEnabled();
   });
 
-  it('follows a forced layout at any viewport', async () => {
-    await page.viewport(1280, 800);
-    await mount([paragraph('Hello', 'p1')], { ...withPreview(), layout: 'tabs' });
+  it('offers the tabs when read-only, with no toolbar', async () => {
+    await mount([paragraph('Hello', 'p1')], { ...withPreview(), readOnly: true });
 
-    await expect.element(page.getByRole('tab', { name: 'Preview' })).toBeVisible();
+    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+    await expect.element(page.getByTitle('Email preview')).toBeVisible();
+    expect(document.querySelector('[role=toolbar]')).toBeNull();
   });
 
   it('draws the editor alone without a renderer, at any viewport', async () => {

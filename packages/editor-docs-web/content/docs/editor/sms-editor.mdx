@@ -35,7 +35,7 @@ pnpm add @zeroxsolutions/editor-core@^0.2.0
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add tooltip utils @zui/chat-input @zui/collapsible-card @zui/document-editor @zui/email-editor
+pnpm dlx shadcn@latest add tooltip utils @zui/chat-input @zui/document-editor @zui/email-editor
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -86,8 +86,8 @@ function SignInMessage({ body, save }: { body: string; save: (body: string) => v
 }
 ```
 
-The body is plain text and `{{name}}` variables, drawn in the Email Editor's frame with the variable menu in
-its toolbar. The meter in the footer shows the body's length against one segment's limit in its encoding, GSM-7
+The body is plain text and `{{name}}` variables, drawn as the Document Editor is, under a toolbar holding the
+variable menu. The meter under the text shows the body's length against one segment's limit in its encoding, GSM-7
 or UCS-2, counting each variable as its `{{name}}` text. When the body needs more than `maxSegments`
 segments, the meter and the text past the limit are marked.
 

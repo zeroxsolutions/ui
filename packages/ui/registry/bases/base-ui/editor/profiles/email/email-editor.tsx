@@ -12,10 +12,9 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { CollapsibleCard, CollapsibleCardHeader } from '@/registry/bases/base-ui/components/layout/collapsible-card';
-import { useIsMobile } from '@/registry/bases/base-ui/hooks/use-mobile';
+import { EyeIcon } from '@/registry/bases/base-ui/icons/lucide/eye-icon';
+import { PencilLineIcon } from '@/registry/bases/base-ui/icons/lucide/pencil-line-icon';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/registry/bases/base-ui/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { TooltipProvider } from '@/registry/bases/base-ui/ui/tooltip';
 import {
@@ -46,6 +45,7 @@ import {
 import { TriggerLayer } from '../../composer/triggers/trigger-layer';
 import { Editor } from '../../document/react/editor';
 import { BubbleMenu } from '../../document/ui/bubble-menu';
+import { ChromeControl } from '../../document/ui/chrome-icon';
 import { EditorToolbar } from '../../document/ui/editor-toolbar';
 import { SlashMenu } from '../../document/ui/slash-menu';
 import { profileMessages, type ProfileEditorMessages } from '../messages';
@@ -102,12 +102,6 @@ interface EmailEditorBaseProps {
   required?: readonly string[];
   /** `locked` lets the author edit text and variables only; nothing is inserted, removed or restyled. */
   structure?: 'free' | 'locked';
-  /**
-   * Where the preview sits beside the editor when there is a renderer: `split` side by side in resizable panels,
-   * `tabs` in turn under an Edit and a Preview tab, `auto` split on a wide viewport and tabs on a narrow one.
-   * The editor keeps its document, selection and history as the layout changes.
-   */
-  layout?: 'auto' | 'split' | 'tabs';
   className?: string;
   onChange?(blocks: EditorEmailBlock[]): void;
   /** The focus left the editor and the popups it opened; when to save is the host's. */
@@ -218,9 +212,9 @@ interface EmailEditorPaneProps {
 }
 
 /**
- * Where the layout places the editor. The pane mounted last takes `surface`, so a change of layout moves the
- * editor's DOM into the new pane: rendered inside each pane, the editor would mount again and lose its document,
- * selection and history.
+ * Where the editor is drawn, alone or under the Edit tab. The pane mounted last takes `surface`, so a renderer
+ * given or taken away moves the editor's DOM into the new pane: rendered inside each pane, the editor would mount
+ * again and lose its document, selection and history.
  */
 function EmailEditorPane({ surface, onRelease, onAdopt }: EmailEditorPaneProps) {
   const pane = useRef<HTMLDivElement>(null);
@@ -233,14 +227,7 @@ function EmailEditorPane({ surface, onRelease, onAdopt }: EmailEditorPaneProps) 
     handlers.current.onAdopt();
     return () => handlers.current.onRelease();
   }, [surface]);
-  // The thin rail in the border token, as the code pane draws it, rather than the browser's light default in dark mode.
-  return (
-    <div
-      ref={pane}
-      data-slot="email-editor-pane"
-      className="h-full [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto py-2"
-    />
-  );
+  return <div ref={pane} data-slot="email-editor-pane" />;
 }
 
 interface EmailEditorBubbleMenuProps {
@@ -268,9 +255,10 @@ function EmailEditorBubbleMenu({ editor, items, container }: EmailEditorBubbleMe
 
 /**
  * The email profile's editor: the document editor with `emailKit`'s blocks, marks and variables, the block menu,
- * each problem marked where it is, the host's adornment beside each block, and the renderer's preview beside the
- * editor or under a tab of its own, as `layout` says. The frame is the Mermaid editor's: a muted `CollapsibleCard`,
- * the toolbar in its header and the problems no block holds in its footer.
+ * each problem marked where it is, the host's adornment beside each block, and, with a renderer, the rendered
+ * email under a Preview tab. The frame is the Document Editor's: the toolbar above the document, the Edit and
+ * Preview tabs at the end of the toolbar's row, as a Mermaid block's switch sits, and the problems no block holds
+ * under the document.
  * `value` loads whenever it differs from what the editor last reported, so a host hands back what `onChange`
  * gave it without moving the caret.
  */
@@ -283,7 +271,6 @@ export function EmailEditor({
   features: extra,
   required = [],
   structure = 'free',
-  layout = 'auto',
   renderer,
   previewInput,
   className,
@@ -337,19 +324,11 @@ export function EmailEditor({
     element.dataset.slot = 'email-editor-surface';
     setSurface(element);
   }, []);
-  const isMobile = useIsMobile();
-  const tabbed = layout === 'tabs' || (layout === 'auto' && isMobile);
-  // Each switch into tabs opens on the editor, which a moved focus returns to.
   const [tab, setTab] = useState<'edit' | 'preview'>('edit');
-  const [wasTabbed, setWasTabbed] = useState(tabbed);
-  if (wasTabbed !== tabbed) {
-    setWasTabbed(tabbed);
-    setTab('edit');
-  }
-  const hidden = Boolean(renderer) && tabbed && tab === 'preview';
+  const hidden = Boolean(renderer) && tab === 'preview';
 
   // What held the focus in the editor as its pane gave it up: moving the surface drops the focus, and the
-  // author typing as the viewport crosses the breakpoint keeps typing.
+  // author typing as the host passes a renderer keeps typing.
   const held = useRef<HTMLElement | null>(null);
 
   const [editor, setEditor] = useState<IEditor | null>(null);
@@ -548,69 +527,64 @@ export function EmailEditor({
     else element.focus({ preventScroll: true });
   };
   const pane = <EmailEditorPane surface={surface} onRelease={release} onAdopt={adopt} />;
-  const frame = preview && (
-    <iframe
-      data-slot="email-preview"
-      title={text.emailPreview}
-      sandbox=""
-      srcDoc={preview.html}
-      className="size-full"
+  const toolbar = menus && (
+    <EditorToolbar
+      editor={editor}
+      items={items.toolbar}
+      className="min-w-0 self-start"
+      disabled={hidden}
+      end={<VariableMenu editor={editor} declarations={profile.variables} messages={text} disabled={hidden} />}
     />
   );
   const previewProblems = (renderer && preview?.problems) || [];
 
   return (
-    <CollapsibleCard
+    <div
       ref={setRoot}
-      variant="muted"
       data-slot="email-editor"
-      className={cn('relative', className)}
+      className={cn('relative flex w-full flex-col gap-3', className)}
       {...focus}
       onKeyDownCapture={keyDown}
     >
-      {menus && (
-        <CollapsibleCardHeader>
-          <EditorToolbar
-            editor={editor}
-            items={items.toolbar}
-            className="min-w-0"
-            disabled={hidden}
-            end={<VariableMenu editor={editor} declarations={profile.variables} messages={text} disabled={hidden} />}
-          />
-        </CollapsibleCardHeader>
-      )}
-      <div
-        data-slot="email-editor-body"
-        className={cn('flex min-h-0 flex-col overflow-hidden', renderer && 'h-112', menus && 'border-t')}
-      >
-        {!renderer ? (
-          pane
-        ) : tabbed ? (
-          <Tabs value={tab} onValueChange={(value: 'edit' | 'preview') => setTab(value)} className="min-h-0 flex-1">
-            <TabsList className="mx-2 mt-2">
-              <TabsTrigger value="edit">{text.editTab}</TabsTrigger>
-              <TabsTrigger value="preview">{text.previewTab}</TabsTrigger>
+      {renderer ? (
+        <Tabs value={tab} onValueChange={(value: 'edit' | 'preview') => setTab(value)} className="gap-3">
+          <div data-slot="email-editor-bar" className="flex items-center gap-3">
+            {toolbar}
+            <TabsList className="ms-auto shrink-0">
+              <ChromeControl
+                icon={PencilLineIcon}
+                render={(control) => <TabsTrigger value="edit" aria-label={text.editTab} {...control} />}
+              />
+              <ChromeControl
+                icon={EyeIcon}
+                render={(control) => <TabsTrigger value="preview" aria-label={text.previewTab} {...control} />}
+              />
             </TabsList>
-            {/* Kept mounted, so the editor stays in the document behind the preview and the preview behind it. */}
-            <TabsContent value="edit" keepMounted className="min-h-0">
-              {pane}
-            </TabsContent>
-            <TabsContent value="preview" keepMounted className="min-h-0">
-              {frame}
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1">
-            <ResizablePanel defaultSize="55%" minSize="20%">
-              {pane}
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize="45%" minSize="20%">
-              {frame}
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        )}
-      </div>
+          </div>
+          {/* Kept mounted, so the editor stays in the document behind the preview and the preview behind it. */}
+          <TabsContent value="edit" keepMounted>
+            {pane}
+          </TabsContent>
+          <TabsContent value="preview" keepMounted>
+            <div data-slot="email-preview-page" className="cn-editor-page h-128 overflow-hidden">
+              {preview && (
+                <iframe
+                  data-slot="email-preview"
+                  title={text.emailPreview}
+                  sandbox=""
+                  srcDoc={preview.html}
+                  className="size-full"
+                />
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <>
+          {toolbar}
+          {pane}
+        </>
+      )}
       {surface &&
         createPortal(
           <Editor
@@ -656,7 +630,8 @@ export function EmailEditor({
         )}
       </TooltipProvider>
       {(unplaced.length > 0 || previewProblems.length > 0) && (
-        <div data-slot="email-editor-footer" className="flex flex-col gap-1 border-t px-3 py-2 text-sm">
+        // Under the document, from its text's left edge: the editable text sits past the grip's gutter.
+        <div data-slot="email-editor-footer" className={cn('flex flex-col gap-1 text-sm', !readOnly && 'px-12')}>
           {unplaced.length > 0 && (
             <ul data-slot="email-problems" className="text-destructive flex flex-col gap-1">
               {unplaced.map((message, index) => (
@@ -674,7 +649,7 @@ export function EmailEditor({
           )}
         </div>
       )}
-    </CollapsibleCard>
+    </div>
   );
 }
 

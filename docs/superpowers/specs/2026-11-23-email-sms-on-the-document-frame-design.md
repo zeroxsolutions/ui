@@ -32,13 +32,16 @@ side with the Document Editor it reads as a different product.
    with its own handle is used nowhere; it is folded into the grip. The email profile's attributes
    (`align`, `spaceAfter`, `tone`, `width`, `ratio`, a button's link) are items of that menu. Nothing the
    author does not type sits inside the document flow.
-5. The preview is part of the editor, as the Mermaid editor's is: the frame is a `CollapsibleCard` in its
-   `muted` variant with the toolbar in its header, and a `layout` prop: `'auto'` (default) splits the
-   editor and the preview side by side in a `ResizablePanelGroup` on wide viewports and switches to
-   `Tabs` ("Edit" / "Preview", host-worded) on narrow ones; `'split'` and `'tabs'` force one. The preview
-   is drawn only with a renderer, as now; without one the frame shows the editor alone.
+5. The preview is part of the editor, as the Mermaid editor's is. The frame is the Document Editor's: the
+   `EditorToolbar` above the document and nothing around it, no card, header or divider. With a renderer,
+   `Tabs` ("Edit" / "Preview", host-worded) switch between the editor and the rendered email at every
+   width, drawn as a Mermaid block's View/Edit switch is and placed at the end of the toolbar's row. The
+   preview is drawn only with a renderer; without one the frame shows the editor alone.
+   Revised 2026-11-23 after the owner's review: the frame is the Document Editor's, not a card.
+   Revised 2026-11-23 after the owner's review: always tabs, like the code blocks. The `layout` prop and
+   the resizable split are gone.
 6. The SMS editor is the same frame with the SMS profile: paragraph text and variables, no block menu
-   items beyond the variable, and the segment meter in the frame's footer, aligned with the text.
+   items beyond the variable, and the segment meter under the text, aligned with the text.
 7. The docs pages follow the Document Editor page's outline (demo, Installation, Usage, API reference)
    and say what the component does; travel's own wiring leaves the design system's docs.
 
@@ -59,18 +62,18 @@ side with the Document Editor it reads as a different product.
 
 ### Blocks
 
-| Email kind  | Node                                      | Owner                     |
-| ----------- | ----------------------------------------- | ------------------------- |
-| `paragraph` | the document paragraph                    | `standardKit`             |
-| `list`      | bullet and ordered list                   | `standardKit`             |
-| `divider`   | horizontal rule                           | `standardKit`             |
-| `callout`   | the callout                               | `editor-callout`          |
-| `code`      | the code block                            | `editor-code-block`       |
-| `button`    | `emailButton`                             | email profile             |
-| `columns`   | `emailColumns` with lanes                 | email profile             |
-| `html`      | `emailHtml`                               | email profile             |
-| link mark   | the link                                  | `editor-link`             |
-| variable    | `variable` chip                           | profiles (shared with SMS)|
+| Email kind  | Node                      | Owner                      |
+| ----------- | ------------------------- | -------------------------- |
+| `paragraph` | the document paragraph    | `standardKit`              |
+| `list`      | bullet and ordered list   | `standardKit`              |
+| `divider`   | horizontal rule           | `standardKit`              |
+| `callout`   | the callout               | `editor-callout`           |
+| `code`      | the code block            | `editor-code-block`        |
+| `button`    | `emailButton`             | email profile              |
+| `columns`   | `emailColumns` with lanes | email profile              |
+| `html`      | `emailHtml`               | email profile              |
+| link mark   | the link                  | `editor-link`              |
+| variable    | `variable` chip           | profiles (shared with SMS) |
 
 - The email attributes are global attributes the email profile adds to the reused nodes, so the document
   profile's own schema does not change.
@@ -95,8 +98,8 @@ side with the Document Editor it reads as a different product.
 
 ### Preview
 
-- `EmailEditor` draws the renderer's HTML in a sandboxed iframe filling its panel or tab, sized by the
-  frame, not a fixed 480px slab.
+- `EmailEditor` draws the renderer's HTML in a sandboxed iframe on a page under the Preview tab, a panel
+  with the design system's card radius and ring.
 - The iframe's background follows the renderer's theme; the frame around it follows Editor Theme.
 
 ## Testing
@@ -108,6 +111,6 @@ side with the Document Editor it reads as a different product.
 - A browser spec per profile editor that the grip, the "+" and the block menu are the Document Editor's
   (same slots and labels) and that each attribute item sets its attribute.
 - A browser spec that a pasted heading, task list and two-paragraph list item are marked as problems.
-- A spec that `layout="auto"` splits at a wide viewport and shows tabs at a narrow one.
+- A spec that the Edit and Preview tabs switch at a wide and a narrow viewport, keeping the one editor.
 - Before and after screenshots of both docs demos in light and dark, beside the Document Editor demo,
   attached to the pull request.

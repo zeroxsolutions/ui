@@ -327,7 +327,7 @@ describe('SmsEditor', () => {
     expect(document.querySelector('[data-slot=variable-menu]')).toBeNull();
   });
 
-  it("draws the variable menu in the header toolbar, and the meter from the text's left edge", async () => {
+  it("draws the variable menu in the toolbar, and the meter from the text's left edge", async () => {
     await mount('Hello');
 
     const toolbar = await vi.waitFor(() => find('[role=toolbar]'));
