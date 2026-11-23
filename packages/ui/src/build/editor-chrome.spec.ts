@@ -64,7 +64,7 @@ const PIECES: Record<string, string[]> = {
   'profiles/email/nodes/button.tsx': ['buttonVariants'],
   'profiles/email/nodes/html.tsx': ['cn-editor-block'],
   'profiles/email/nodes/unknown.tsx': ['cn-editor-block'],
-  'profiles/email/url-variable-picker.tsx': ['<EditorToolbarComboboxTrigger'],
+  'profiles/email/email-link-popover.tsx': ['<RectPopover', '<Button'],
   'profiles/variables/variable-menu.tsx': ['<EditorToolbarComboboxTrigger'],
   'document/ui/editor-toolbar-combobox-trigger.tsx': ['toggleVariants', '<Tooltip'],
   'profiles/problem-marker.tsx': ['<Button', '<Tooltip'],

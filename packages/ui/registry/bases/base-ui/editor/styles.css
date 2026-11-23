@@ -196,6 +196,33 @@
   margin-bottom: 0;
 }
 
+/* The variable text field: one line of text and variable chips, which a block of a document may hold, so it
+ * drops the document's gutter, its outline and its paragraph margin. Unlayered, as the gutter is in
+ * `@layer components` and the typography plugin's margin in a later layer. */
+.variable-text-field .ProseMirror,
+.variable-text-field .ProseMirror[contenteditable='true'] {
+  outline: none;
+  padding-inline: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.variable-text-field .ProseMirror p {
+  margin: 0;
+}
+.variable-text-field .ProseMirror .is-empty::before,
+.variable-text-field .ProseMirror .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+/* The `{{query}}` the variable menu filters on, in the field's own colour, which on a button is not the page's. */
+.variable-text-field .slash-active {
+  background: color-mix(in oklab, currentColor 16%, transparent);
+  padding: 0.05rem 0.1rem;
+}
+
 @layer components {
   /* 2. Engine internals the `prose` plugin doesn't cover. */
 

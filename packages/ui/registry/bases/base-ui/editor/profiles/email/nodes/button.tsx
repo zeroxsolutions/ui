@@ -2,8 +2,9 @@ import { MousePointerClickIcon } from '@/registry/bases/base-ui/icons/lucide/mou
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { NodeSpec, NodeViewProps, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
-import { messagesOf, selectBlockOf } from '../kit-context';
+import { contextOf, messagesOf, selectBlockOf } from '../kit-context';
 import { DEFAULT_PROFILE_MESSAGES } from '../../messages';
+import { VariableTextField } from '../../variables/variable-text-field';
 import { blockClasses, emailSpec, justifyClass, type EmailBlockStyle } from './block-style';
 
 interface EmailButtonAttrs extends EmailBlockStyle {
@@ -24,13 +25,14 @@ export const emailButtonSlashItem: SlashItem = {
 };
 
 /**
- * The button block. Its label is an attribute, edited in a field, so it carries no mark; its href, one of the
- * `url` variables, is chosen in the block menu's Link.
+ * The button block. Its label is an attribute, edited in a variable text field, so it carries no mark but may
+ * hold variables; its href is set in the link popover the block menu's Link opens.
  */
 export function emailButtonNode(): NodeSpec {
   function EmailButtonView({ attrs, updateAttrs, editable, editor }: NodeViewProps<EmailButtonAttrs>) {
     const full = attrs.width === 'full';
     const messages = messagesOf(editor);
+    const context = contextOf(editor)?.context;
     return (
       <div
         data-slot="email-button"
@@ -40,16 +42,19 @@ export function emailButtonNode(): NodeSpec {
         onFocus={(event) => selectBlockOf(editor, event.currentTarget)}
         className={cn('flex', justifyClass(attrs.align), blockClasses(attrs))}
       >
-        <span className={cn(buttonVariants({ variant: 'default' }), full && 'w-full')}>
-          <input
-            aria-label={messages.buttonLabel}
-            placeholder={messages.buttonLabel}
+        <div className={cn(buttonVariants({ variant: 'default' }), full && 'w-full')}>
+          <VariableTextField
             value={attrs.label ?? ''}
-            readOnly={!editable}
-            onChange={(event) => updateAttrs({ label: event.target.value })}
-            className="field-sizing-content min-w-16 bg-transparent text-center outline-none placeholder:text-current/60"
+            onValueChange={(label) => updateAttrs({ label })}
+            declarations={() => context?.declarations() ?? []}
+            variables={context?.variables}
+            label={messages.buttonLabel}
+            placeholder={messages.buttonLabel}
+            disabled={!editable}
+            messages={messages}
+            className="min-w-16 text-center"
           />
-        </span>
+        </div>
       </div>
     );
   }

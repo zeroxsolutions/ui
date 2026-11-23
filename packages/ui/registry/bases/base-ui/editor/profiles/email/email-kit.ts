@@ -42,19 +42,21 @@ import {
   type ProfileEditorMessages,
 } from '../messages';
 import { heldMarks } from '../held-marks';
-import { variableFeature, variableLabel, type VariableFeature } from '../variables/variable';
+import { variableFeature, type VariableFeature } from '../variables/variable';
 import {
   blockAt,
   columnsAt,
   contexts,
   contextOf,
   emailLinkAt,
+  emailLinkTarget,
   laneAt,
+  requestEmailLink,
   type EngineState,
   type Found,
   type KitContext,
 } from './kit-context';
-import { emailMarks, UNLINK_ITEM_ID } from './marks';
+import { emailMarks, LINK_ITEM_ID, UNLINK_ITEM_ID } from './marks';
 import { emailButtonNode, emailButtonSlashItem } from './nodes/button';
 import { emailColumnsNodes, emailColumnsSlashItem } from './nodes/columns';
 import { emailHtmlNode, emailHtmlSlashItem } from './nodes/html';
@@ -145,9 +147,10 @@ const KIND_SLASH_ITEMS: Readonly<Record<EmailBlockKind, string>> = {
 };
 
 /** The toolbar and bubble items of the marks an email stores, by the words each is drawn in. */
-const MARK_ITEMS: Readonly<Record<string, 'bold' | 'italic' | 'removeLink'>> = {
+const MARK_ITEMS: Readonly<Record<string, 'bold' | 'italic' | 'link' | 'removeLink'>> = {
   bold: 'bold',
   italic: 'italic',
+  [LINK_ITEM_ID]: 'link',
   [UNLINK_ITEM_ID]: 'removeLink',
 };
 
@@ -223,7 +226,7 @@ const NEW_BLOCKS: Readonly<Record<Exclude<EmailBlockKind, 'paragraph'>, () => No
 };
 
 export interface EmailKitOptions extends BlockIdentityOptions {
-  /** The declarations a link picker lists; the profile's own when absent. A getter, so a host changes them live. */
+  /** The declarations the chips and the link popover read; the profile's own when absent. A getter, so a host changes them live. */
   declarations?: () => readonly VariableDeclaration[];
   /** The variable feature the host also hands its trigger layer; one is built on `declarations` when absent. */
   variables?: VariableFeature;
@@ -482,7 +485,9 @@ export function emailKit(
     maxLanes: profile.bounds.lanes,
     admitted,
     declarations,
+    variables,
     messages,
+    linkListeners: new Set(),
   };
   const rules = [
     'zeroxEditorBehavior',
@@ -504,13 +509,15 @@ export function emailKit(
     if (!found || !block || locked() || isRequired(block.node, required())) return undefined;
     return validAttributes(block.node.type.name, attrs) ? { engine: found.engine, block } : undefined;
   };
-  const linkable = (editor: IEditor, name: string) => {
+  const linkable = (editor: IEditor) => {
     const found = contextOf(editor);
     const block = found && blockAt(found.engine.state);
     if (!found || !block || block.node.type.name !== 'emailButton' || locked()) return undefined;
-    if (isRequired(block.node, required())) return undefined;
-    const url = declarations().some((declaration) => declaration.name === name && declaration.type === 'url');
-    return url ? { engine: found.engine, block } : undefined;
+    return isRequired(block.node, required()) ? undefined : { engine: found.engine, block };
+  };
+  const linkTarget = (editor: IEditor) => {
+    const found = contextOf(editor);
+    return found && emailLinkTarget(found.engine, (button) => refusal(context, button, false));
   };
   const columnsOf = (editor: IEditor, ratio: number[]) => {
     const found = contextOf(editor);
@@ -555,16 +562,24 @@ export function emailKit(
         can: (editor) => emailLinkAt(editor) !== null,
       },
       setButtonLink: {
-        args: z.object({ name: z.string().regex(/^\w+$/) }),
-        run: (editor, { name }: { name: string }) => {
-          const target = linkable(editor, name);
+        args: z.object({ href: z.string().trim().min(1) }),
+        run: (editor, { href }: { href: string }) => {
+          const target = linkable(editor);
           if (!target) return false;
           const { engine, block } = target;
           const before = engine.state.doc;
-          engine.view.dispatch(engine.state.tr.setNodeAttribute(block.pos, 'href', `{{${name}}}`));
+          engine.view.dispatch(engine.state.tr.setNodeAttribute(block.pos, 'href', href));
           return engine.state.doc !== before;
         },
-        can: (editor, { name }: { name: string }) => linkable(editor, name) !== undefined,
+        can: (editor) => linkable(editor) !== undefined,
+      },
+      // The popover is the host's: the toolbar, the bubble and a button's block menu all open it through here.
+      editEmailLink: {
+        run: (editor) => {
+          const target = linkTarget(editor);
+          return !!target && requestEmailLink(editor, target);
+        },
+        can: (editor) => linkTarget(editor) !== undefined,
       },
       setColumnsRatio: {
         args: z.object({ ratio: z.array(z.number().int().min(1).max(12)).min(2) }),
@@ -624,12 +639,10 @@ function refusal(context: KitContext, block: Found, whole: boolean): string | nu
   return (whole ? holdsRequired(block.node, required) : isRequired(block.node, required)) ? words.deleteRequired : null;
 }
 
-const HREF_TOKEN = /^\{\{(\w+)\}\}$/;
-
 /**
  * The email's block menu for the block the grip picked, or the one the caret is in, read as the menu opens:
- * Turn into its text kinds, a submenu per attribute the block takes, a button's Link among the declared `url`
- * variables, the lanes of the columns it is or sits in, and the document's Duplicate and Delete. Each is
+ * Turn into its text kinds, a submenu per attribute the block takes, a button's Link, which opens the link
+ * popover on it, the lanes of the columns it is or sits in, and the document's Duplicate and Delete. Each is
  * disabled, with its reason, in locked structure and on a block the host requires; Duplicate also on a block of
  * a kind the profile does not let the author add.
  */
@@ -670,30 +683,9 @@ function emailBlockMenuItems(editor: IEditor, kinds: readonly EmailBlockKind[]):
     })),
   );
 
-  const href = HREF_TOKEN.exec(String(block.node.attrs.href ?? ''))?.[1];
-  const urls = context.declarations().filter((declaration) => declaration.type === 'url');
+  // Always offered, so a locked button's link can be read; the popover disables its field with the reason.
   const link: BlockMenuItem[] =
-    type !== 'emailButton'
-      ? []
-      : urls.length === 0
-        ? [
-            {
-              id: 'email-link-none',
-              title: words.noLinkVariables,
-              group: words.link,
-              command: 'setButtonLink',
-              disabledReason: () => words.noLinkVariables,
-            },
-          ]
-        : urls.map((declaration) => ({
-            id: `email-link-${declaration.name}`,
-            title: variableLabel(declaration),
-            group: words.link,
-            command: 'setButtonLink',
-            args: { name: declaration.name },
-            active: () => href === declaration.name,
-            disabledReason: own,
-          }));
+    type === 'emailButton' ? [{ id: LINK_ITEM_ID, title: words.link, command: 'editEmailLink' }] : [];
 
   const columns = columnsAt(found.engine.state);
   const stored = columns?.node.attrs.ratio as number[] | null | undefined;

@@ -1,5 +1,6 @@
 import { Decoration, type ProseMirrorNode } from '@zeroxsolutions/editor-core/document/advanced';
 import type { ProblemKind, ProfileProblem } from '@zeroxsolutions/editor-core/profiles/index';
+import { variableTokens } from '@zeroxsolutions/editor-core/template/index';
 import { carriesKey } from './kit-context';
 
 /** The problems marked on one place: a block, or a variable token or link inside it. */
@@ -82,7 +83,7 @@ export function problemDecorations(doc: ProseMirrorNode, marks: readonly Problem
   return decorations;
 }
 
-/** The variable chips named `name` in `block`, and the text it links to `name`. */
+/** The variable chips named `name` in `block`, and the text it links to an href that spells `name`. */
 function tokensOf(block: ProseMirrorNode, pos: number, name: string): { from: number; to: number; atom: boolean }[] {
   const found: { from: number; to: number; atom: boolean }[] = [];
   block.descendants((node, offset) => {
@@ -92,7 +93,9 @@ function tokensOf(block: ProseMirrorNode, pos: number, name: string): { from: nu
       found.push({ from, to: from + node.nodeSize, atom: true });
     } else if (
       node.isText &&
-      node.marks.some((mark) => mark.type.name === 'emailLink' && mark.attrs.variable === name)
+      node.marks.some(
+        (mark) => mark.type.name === 'emailLink' && variableTokens(String(mark.attrs.href ?? '')).includes(name),
+      )
     ) {
       found.push({ from, to: from + node.nodeSize, atom: false });
     }

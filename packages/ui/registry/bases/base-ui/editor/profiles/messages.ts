@@ -59,10 +59,14 @@ export interface ProfileEditorMessages {
   bold: string;
   italic: string;
   removeLink: string;
-  /** The toolbar's link picker. */
+  /** The link control in the toolbar, the bubble and a button's block menu, and the heading of its popover. */
   link: string;
-  findLink: string;
-  noLinkVariables: string;
+  /** The hint the link popover's address field shows while it is empty. */
+  linkPlaceholder: string;
+  /** The heading over the declared link variables the popover offers. */
+  linkVariables: string;
+  /** The popover's button that sets the link. */
+  applyLink: string;
   /** The toolbar's variable picker. */
   variable: string;
   findVariable: string;
@@ -93,8 +97,8 @@ export interface ProfileEditorMessages {
 
 const PROBLEMS: Readonly<Record<ProblemKind, string>> = {
   'variable-undeclared': 'This variable is not declared',
-  'href-not-url-variable': 'The link must be one link variable',
-  'link-not-url-variable': 'A link can only point to a link variable',
+  'href-invalid': 'The link must start with https://, http://, mailto: or a link variable',
+  'link-invalid': 'This link must start with https://, http://, mailto: or a link variable',
   'required-variable-not-printed': 'A required variable is not used',
   'markup-malformed': 'The formatting is not closed',
   'block-not-allowed': 'This block is not allowed here',
@@ -112,7 +116,7 @@ const PROBLEMS: Readonly<Record<ProblemKind, string>> = {
 
 const RENDER_PROBLEMS: Readonly<Record<RenderProblemKind, string>> = {
   'variable-missing': 'This variable has no sample value to preview',
-  'href-not-url-variable': 'The link must be one link variable',
+  'href-invalid': 'The link must start with https://, http://, mailto: or a link variable',
   'href-scheme-refused': 'The link is not a web or mail address',
   'unknown-block-type': 'This block is of an unknown type',
   'block-nested-too-deep': 'Columns cannot hold columns',
@@ -158,7 +162,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   blockGroup: 'Email',
   blocks: {
     paragraph: { title: 'Text', description: 'A paragraph of text' },
-    button: { title: 'Button', description: 'A button that opens a link variable' },
+    button: { title: 'Button', description: 'A button that opens a link' },
     code: { title: 'Code', description: 'Text set in a fixed-width font' },
     list: { title: 'Bulleted list', description: 'A bulleted list of short lines' },
     callout: { title: 'Callout', description: 'Text set apart in a panel' },
@@ -170,8 +174,9 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   italic: 'Italic',
   removeLink: 'Remove link',
   link: 'Link',
-  findLink: 'Find a link',
-  noLinkVariables: 'No link variables',
+  linkPlaceholder: 'URL or {{variable}}',
+  linkVariables: 'Variables',
+  applyLink: 'Apply',
   variable: 'Variable',
   findVariable: 'Find a variable',
   noVariables: 'No variables found',

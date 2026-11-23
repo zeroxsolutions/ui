@@ -3218,6 +3218,8 @@
         "@shadcn/badge",
         "@shadcn/button",
         "@shadcn/combobox",
+        "@shadcn/field",
+        "@shadcn/popover",
         "@shadcn/resizable",
         "@shadcn/tabs",
         "@shadcn/tooltip",
@@ -3287,9 +3289,9 @@
           "target": "@components/editor/profiles/email/problem-decorations.ts"
         },
         {
-          "path": "registry/bases/base-ui/editor/profiles/email/url-variable-picker.tsx",
+          "path": "registry/bases/base-ui/editor/profiles/email/email-link-popover.tsx",
           "type": "registry:component",
-          "target": "@components/editor/profiles/email/url-variable-picker.tsx"
+          "target": "@components/editor/profiles/email/email-link-popover.tsx"
         },
         {
           "path": "registry/bases/base-ui/editor/profiles/problem-marker.tsx",
@@ -3320,9 +3322,14 @@
           "path": "registry/bases/base-ui/editor/profiles/variables/variable.tsx",
           "type": "registry:component",
           "target": "@components/editor/profiles/variables/variable.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/variables/variable-text-field.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/variables/variable-text-field.tsx"
         }
       ],
-      "dependencies": ["@zeroxsolutions/editor-core@^0.2.0", "lucide-react", "zod"],
+      "dependencies": ["@tiptap/react", "@zeroxsolutions/editor-core@^0.2.0", "lucide-react", "zod"],
       "css": {
         ".document-editor .ProseMirror [data-align='left'], .document-editor .ProseMirror [data-align='left'] p": {
           "text-align": "left"
@@ -3357,6 +3364,26 @@
         },
         ".document-editor :where( [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :last-child, [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
           "margin-bottom": "0"
+        },
+        ".variable-text-field .ProseMirror, .variable-text-field .ProseMirror[contenteditable='true']": {
+          "outline": "none",
+          "padding-inline": "0",
+          "white-space": "pre-wrap",
+          "overflow-wrap": "anywhere"
+        },
+        ".variable-text-field .ProseMirror p": {
+          "margin": "0"
+        },
+        ".variable-text-field .ProseMirror .is-empty::before, .variable-text-field .ProseMirror .is-editor-empty:first-child::before": {
+          "content": "attr(data-placeholder)",
+          "float": "left",
+          "height": "0",
+          "pointer-events": "none",
+          "opacity": "0.6"
+        },
+        ".variable-text-field .slash-active": {
+          "background": "color-mix(in oklab, currentColor 16%, transparent)",
+          "padding": "0.05rem 0.1rem"
         }
       }
     },

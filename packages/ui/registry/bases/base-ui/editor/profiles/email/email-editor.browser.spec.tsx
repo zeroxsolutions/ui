@@ -584,21 +584,24 @@ describe('EmailEditor', () => {
     };
     const probe = await mount([button], { readOnly: true });
     const field = page.getByRole('textbox', { name: 'Button label' });
-    await expect.element(field).toHaveAttribute('readonly');
+    await expect.element(field).toHaveAttribute('aria-readonly', 'true');
 
     probe.lock(false);
-    await expect.element(field).not.toHaveAttribute('readonly');
-    await userEvent.type(field, ' now');
+    await expect.element(field).not.toHaveAttribute('aria-readonly');
+    await userEvent.click(field);
+    await userEvent.keyboard('{End} now');
     await vi.waitFor(() =>
       expect(last(probe.reported)?.[0].content).toEqual({ label: 'Reset now', href: '{{resetUrl}}' }),
     );
     await openBlockMenu('', '[data-slot=email-button]');
     await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
-    await expect.element(page.getByRole('menuitemradio', { name: 'Reset link' })).toBeChecked();
-    await userEvent.keyboard('{Escape}{Escape}');
+    const popover = page.getByRole('dialog', { name: 'Link' });
+    await expect.element(popover.getByRole('textbox', { name: 'Link' }).getByText('Reset link')).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await expect.element(popover).not.toBeInTheDocument();
 
     probe.lock(true);
-    await expect.element(field).toHaveAttribute('readonly');
+    await expect.element(field).toHaveAttribute('aria-readonly', 'true');
   });
 
   it('refuses typing and opens no block menu when read-only', async () => {
@@ -682,7 +685,7 @@ describe('EmailEditor frame', () => {
     const toolbar = page.getByRole('toolbar');
     const controls = [
       toolbar.getByRole('button', { name: 'Bold' }),
-      toolbar.getByRole('combobox', { name: 'Link', exact: true }),
+      toolbar.getByRole('button', { name: 'Link', exact: true }),
       toolbar.getByRole('combobox', { name: 'Variable', exact: true }),
     ];
 
@@ -709,15 +712,15 @@ describe('EmailEditor frame', () => {
     expect(document.querySelector('iframe')).toBeNull();
   });
 
-  it("draws the link picker and the variable menu as the toolbar's controls", async () => {
+  it("draws the link control and the variable menu as the toolbar's controls", async () => {
     await mount([paragraph('Hello', 'p1')]);
 
     const toolbar = page.getByRole('toolbar');
-    await expect.element(toolbar.getByRole('combobox', { name: 'Link', exact: true })).toBeVisible();
+    await expect.element(toolbar.getByRole('button', { name: 'Link', exact: true })).toBeVisible();
     await expect.element(toolbar.getByRole('combobox', { name: 'Variable', exact: true })).toBeVisible();
   });
 
-  it('reads bold, italic, then the link picker and the variable menu, with no remove-link control', async () => {
+  it('reads bold, italic, then the link control and the variable menu, with no remove-link control', async () => {
     await mount([paragraph('Hello', 'p1')]);
 
     const toolbar = await vi.waitFor(() => find('[role=toolbar]'));
@@ -746,7 +749,7 @@ describe('EmailEditor frame', () => {
     expect(document.querySelector('[data-slot=bubble-menu] [aria-label="Remove link"]')).toBeNull();
   });
 
-  it("names the link picker's button with the variable the selection links to", async () => {
+  it('presses the link control while the caret is in a link', async () => {
     const linked: EditorEmailBlock = {
       id: 'p1',
       key: 'p1',
@@ -758,6 +761,8 @@ describe('EmailEditor frame', () => {
     await caretAfter('Reset');
     await userEvent.keyboard('{ArrowLeft}');
 
-    await expect.element(page.getByRole('toolbar').getByRole('combobox', { name: 'Link: Reset link' })).toBeVisible();
+    await expect
+      .element(page.getByRole('toolbar').getByRole('button', { name: 'Link', exact: true }))
+      .toHaveAttribute('aria-pressed', 'true');
   });
 });

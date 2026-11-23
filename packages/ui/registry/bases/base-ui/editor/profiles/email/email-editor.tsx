@@ -56,7 +56,7 @@ import { VariableMenu } from '../variables/variable-menu';
 import { emailKit, emailUi, type EmailUi } from './email-kit';
 import { UNLINK_ITEM_ID } from './marks';
 import { carriesKey, contextOf } from './kit-context';
-import { LinkVariablePicker } from './url-variable-picker';
+import { EmailLinkPopover } from './email-link-popover';
 import { problemDecorations, problemMarks, type ProblemMark } from './problem-decorations';
 
 /** How long after an edit the problems are read again, at most, and how long after the last edit the preview is. */
@@ -525,7 +525,6 @@ export function EmailEditor({
 
   const locked = structure === 'locked';
   const menus = editor !== null && !readOnly;
-  const variablesOf = useCallback(() => live.current.profile.variables, []);
   const marksOf = (row: Row) => marks.filter((mark) => mark.block === (row.id ?? row.key));
 
   const release = () => {
@@ -569,12 +568,7 @@ export function EmailEditor({
             items={items.toolbar}
             className="min-w-0"
             disabled={hidden}
-            end={
-              <>
-                <LinkVariablePicker editor={editor} declarations={variablesOf} messages={text} disabled={hidden} />
-                <VariableMenu editor={editor} declarations={profile.variables} messages={text} disabled={hidden} />
-              </>
-            }
+            end={<VariableMenu editor={editor} declarations={profile.variables} messages={text} disabled={hidden} />}
           />
         </CollapsibleCardHeader>
       )}
@@ -629,6 +623,7 @@ export function EmailEditor({
         <SlashMenu editor={editor} items={items.slash} placeholder={text.slashSearch} emptyText={text.slashEmpty} />
       )}
       {menus && <EmailEditorBubbleMenu editor={editor} items={items.bubble} container={root} />}
+      {menus && <EmailLinkPopover editor={editor} messages={text} />}
       <TooltipProvider>
         {rows.map((row) =>
           createPortal(

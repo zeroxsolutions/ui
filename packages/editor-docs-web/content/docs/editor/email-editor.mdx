@@ -35,7 +35,7 @@ pnpm add @zeroxsolutions/editor-core@^0.2.0 lucide-react zod
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add badge button combobox resizable tabs tooltip use-mobile utils @zui/chat-input @zui/collapsible-card @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-braces-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-text-align-start-icon
+pnpm dlx shadcn@latest add badge button combobox field popover resizable tabs tooltip use-mobile utils @zui/chat-input @zui/collapsible-card @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-braces-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-text-align-start-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -102,8 +102,8 @@ pnpm dlx shadcn@latest add badge button combobox resizable tabs tooltip use-mobi
 
 <ComponentSource
   name="email-editor"
-  file="registry/bases/base-ui/editor/profiles/email/url-variable-picker.tsx"
-  title="components/editor/profiles/email/url-variable-picker.tsx"
+  file="registry/bases/base-ui/editor/profiles/email/email-link-popover.tsx"
+  title="components/editor/profiles/email/email-link-popover.tsx"
 />
 
 <ComponentSource
@@ -140,6 +140,12 @@ pnpm dlx shadcn@latest add badge button combobox resizable tabs tooltip use-mobi
   name="email-editor"
   file="registry/bases/base-ui/editor/profiles/variables/variable.tsx"
   title="components/editor/profiles/variables/variable.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/variables/variable-text-field.tsx"
+  title="components/editor/profiles/variables/variable-text-field.tsx"
 />
 
 <Step>Update the import paths to match your project.</Step>
@@ -246,9 +252,17 @@ and `lanes` at their defaults, and a higher value throws `editor.profile.bound_a
 ## Variables
 
 A variable has a `name` of word characters, a `type` of `string`, `duration`, `url` or `email`, and an
-optional `label`, `sampleValue` and `required`. Type `{{` or use the toolbar's variable menu to insert one.
-The toolbar's link picker links the selected text to a `url` variable, and a button's link is set from its
-block menu. A `required` variable that no block uses is a problem.
+optional `label`, `sampleValue` and `required`. Type `{{` or use the toolbar's variable menu to insert one
+into text, and type `{{` in a button's label to insert one there. A token naming no declaration is drawn in
+red. A `required` variable that no block uses is a problem.
+
+The Link button in the toolbar or the selection bubble opens the link popover on the selected text, or on the
+link the caret is in. A button's Link, in its block menu, opens the same popover on the button's link. Type
+the link in its field, or click one of the `url` variables listed under it. A link is valid when it starts
+with `https://`, `http://` or `mailto:`, or with a `url` variable. Any variable may follow, as in
+`https://example.com/trip?token={{token}}`, and the renderer URL-encodes its value. A link that starts with a
+`url` variable gets that value as it is, so the value supplies the scheme. In locked structure, a button's
+link field is read-only.
 
 To change the variables, pass a new profile. If you change the declarations in place instead, call
 `refreshVariables(editor)` from `variables/variable.tsx`.
@@ -264,22 +278,22 @@ On the server, `validate(blocks, profile)` from `@zeroxsolutions/editor-core/pro
 list for the same profile, except `block-not-carried`. Only the editor reports that one, since it reads the
 document before the export.
 
-| Kind                            | Message                                     |
-| ------------------------------- | ------------------------------------------- |
-| `variable-undeclared`           | This variable is not declared               |
-| `href-not-url-variable`         | The link must be one link variable          |
-| `link-not-url-variable`         | A link can only point to a link variable    |
-| `required-variable-not-printed` | A required variable is not used             |
-| `markup-malformed`              | The formatting is not closed                |
-| `block-not-allowed`             | This block is not allowed here              |
-| `unknown-block-type`            | This block is of an unknown type            |
-| `block-nested-too-deep`         | Columns cannot hold columns                 |
-| `lanes-mismatch`                | The columns do not match their widths       |
-| `text-empty`                    | This block is empty                         |
-| `text-too-long`                 | This text is too long                       |
-| `list-too-long`                 | This list has too many items                |
-| `too-many-blocks`               | The email has too many blocks               |
-| `block-not-carried`             | The email keeps only the text of this block |
+| Kind                            | Message                                                                 |
+| ------------------------------- | ----------------------------------------------------------------------- |
+| `variable-undeclared`           | This variable is not declared                                           |
+| `href-invalid`                  | The link must start with https://, http://, mailto: or a link variable  |
+| `link-invalid`                  | This link must start with https://, http://, mailto: or a link variable |
+| `required-variable-not-printed` | A required variable is not used                                         |
+| `markup-malformed`              | The formatting is not closed                                            |
+| `block-not-allowed`             | This block is not allowed here                                          |
+| `unknown-block-type`            | This block is of an unknown type                                        |
+| `block-nested-too-deep`         | Columns cannot hold columns                                             |
+| `lanes-mismatch`                | The columns do not match their widths                                   |
+| `text-empty`                    | This block is empty                                                     |
+| `text-too-long`                 | This text is too long                                                   |
+| `list-too-long`                 | This list has too many items                                            |
+| `too-many-blocks`               | The email has too many blocks                                           |
+| `block-not-carried`             | The email keeps only the text of this block                             |
 
 `block-not-carried` marks a block the email cannot hold, such as a pasted heading or numbered list.
 
@@ -287,9 +301,9 @@ document before the export.
 
 A paragraph, a callout and a list item store their text in this markup:
 
-| Write                  | Reads as                            |
-| ---------------------- | ----------------------------------- |
-| `**bold**`             | bold                                |
-| `_italic_`             | italic                              |
-| `[label]({{name}})`    | a link to the `url` variable `name` |
-| `\*`, `\_`, `\[`, `\\` | the character itself                |
+| Write                  | Reads as                                           |
+| ---------------------- | -------------------------------------------------- |
+| `**bold**`             | bold                                               |
+| `_italic_`             | italic                                             |
+| `[label](href)`        | a link to `href`, which may hold `{{name}}` tokens |
+| `\*`, `\_`, `\[`, `\\` | the character itself                               |

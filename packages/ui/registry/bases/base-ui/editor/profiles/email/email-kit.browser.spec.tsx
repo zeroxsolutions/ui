@@ -21,7 +21,7 @@ import { BubbleMenu } from '../../document/ui/bubble-menu';
 import { EditorToolbar } from '../../document/ui/editor-toolbar';
 import { SlashMenu } from '../../document/ui/slash-menu';
 import { emailKit, emailUi, type EmailKitOptions } from './email-kit';
-import { LinkVariablePicker } from './url-variable-picker';
+import { EmailLinkPopover } from './email-link-popover';
 
 const declared: VariableDeclaration[] = [
   { name: 'name', type: 'string', label: 'Name' },
@@ -98,7 +98,7 @@ function EmailHarness({
       />
       {/* Below the text, so the bubble over a selection never covers them. */}
       {editor && <EditorToolbar editor={editor} items={ui.toolbar} />}
-      {editor && <LinkVariablePicker editor={editor} declarations={declared} />}
+      {editor && <EmailLinkPopover editor={editor} />}
       {editor && <SlashMenu editor={editor} items={ui.slash} />}
       {editor && <BubbleMenu editor={editor} items={ui.bubble} container={root} />}
     </div>
@@ -175,13 +175,13 @@ async function chooseInBlockMenu(text: string, group: string, title: string, sel
   await userEvent.click(page.getByRole('menuitemradio', { name: title, exact: true }));
 }
 
-async function pickOption(trigger: HTMLElement): Promise<HTMLElement[]> {
-  await userEvent.click(trigger);
-  return vi.waitFor(() => {
-    const options = [...document.querySelectorAll<HTMLElement>('[data-slot=combobox-item]')];
-    if (options.length === 0) throw new Error('the picker is not open');
-    return options;
-  });
+/** Opens the link popover of the only button from its block menu. */
+async function openButtonLink() {
+  await openBlockMenu('', '[data-slot=email-button]');
+  await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
+  const popover = page.getByRole('dialog', { name: 'Link' });
+  await expect.element(popover).toBeVisible();
+  return popover;
 }
 
 const marksOf = (editor: IEditor): NodeJSON['marks'][] =>
@@ -225,23 +225,69 @@ describe('the email kit', () => {
     expect(document.querySelector('[data-editor-add]')).not.toBeNull();
   });
 
-  it("chooses a button's link in the block menu from the url variables only, read as it opens", async () => {
+  it("offers a button's link the url variables only, read as the popover opens, and sets one in one click", async () => {
     const declarations = [...declared];
     const editor = await mount([block({ type: 'button', content: { label: 'Reset', href: '{{resetUrl}}' } })], {
       options: { declarations: () => declarations },
     });
-    expect(document.querySelector('[data-slot=email-button] [data-slot=url-variable-picker]')).toBeNull();
     declarations.push({ name: 'laterUrl', type: 'url', label: 'Later link' });
 
-    await openBlockMenu('', '[data-slot=email-button]');
-    await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
-    const choices = page.getByRole('menuitemradio');
+    const popover = await openButtonLink();
+    const choices = popover.getByRole('group', { name: 'Variables' }).getByRole('button');
     await expect.element(choices.nth(0)).toBeVisible();
     expect(choices.elements().map((choice) => choice.textContent)).toEqual(['Reset link', 'Help page', 'Later link']);
-    await expect.element(page.getByRole('menuitemradio', { name: 'Reset link' })).toBeChecked();
-    await userEvent.click(page.getByRole('menuitemradio', { name: 'Help page' }));
+    await userEvent.click(popover.getByRole('button', { name: 'Help page' }));
 
     await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ label: 'Reset', href: '{{helpUrl}}' }));
+    await expect.element(popover).not.toBeInTheDocument();
+  });
+
+  it("types a button's href with a variable inside it, and marks one that is not declared", async () => {
+    const editor = await mount([block({ type: 'button', content: { label: 'Reset', href: '{{resetUrl}}' } })]);
+
+    const popover = await openButtonLink();
+    const field = popover.getByRole('textbox', { name: 'Link' });
+    await expect.element(field.getByText('Reset link')).toBeVisible();
+    await userEvent.click(field);
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}{Backspace}https://x.test/a?t={{{{nope}}');
+    await expect.element(field.getByText('nope')).toHaveAttribute('data-problem', 'variable-undeclared');
+    await expect.element(popover.getByText('This variable is not declared: {{nope}}')).toBeVisible();
+    await expect.element(field).toHaveAttribute('aria-invalid', 'true');
+
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}{Backspace}https://x.test/a?t={{{{name}}{Enter}');
+    await vi.waitFor(() =>
+      expect(exported(editor)[0].content).toEqual({ label: 'Reset', href: 'https://x.test/a?t={{name}}' }),
+    );
+  });
+
+  it("disables a locked button's href field and its choices, with the reason", async () => {
+    const editor = await mount([block({ type: 'button', content: { label: 'Reset', href: '{{resetUrl}}' } })], {
+      options: { structure: () => 'locked' },
+    });
+
+    const popover = await openButtonLink();
+    await expect.element(popover.getByRole('textbox', { name: 'Link' })).toHaveAttribute('aria-readonly', 'true');
+    await expect.element(popover.getByRole('button', { name: 'Help page' })).toBeDisabled();
+    await expect.element(popover.getByRole('button', { name: 'Apply' })).toBeDisabled();
+    await expect.element(popover.getByText('The structure is locked: only text and variables change')).toBeVisible();
+    expect(exported(editor)[0].content).toEqual({ label: 'Reset', href: '{{resetUrl}}' });
+  });
+
+  it("inserts a variable chip in a button's label from the {{ menu, exported as its token", async () => {
+    const editor = await mount([block({ type: 'button', content: { label: 'Continue', href: '{{resetUrl}}' } })]);
+
+    await userEvent.click(page.getByRole('textbox', { name: 'Button label' }));
+    await userEvent.keyboard('{End} {{{{');
+    const menu = await vi.waitFor(() => find('[data-slot=trigger-menu]'));
+    expect(menu.textContent).toContain('Name');
+    await userEvent.keyboard('nam{Enter}');
+
+    await vi.waitFor(() =>
+      expect(exported(editor)[0].content).toEqual({ label: 'Continue {{name}}', href: '{{resetUrl}}' }),
+    );
+    await expect
+      .element(page.getByRole('textbox', { name: 'Button label' }).getByText('Name'))
+      .toHaveAttribute('data-slot', 'variable');
   });
 
   it('opens the block menu of a button whose label field holds the focus with Mod-/', async () => {
@@ -250,7 +296,7 @@ describe('the email kit', () => {
       block({ type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } }),
     ]);
     await caretAfter('Before');
-    await userEvent.click(find('[aria-label="Button label"]'));
+    await userEvent.click(page.getByRole('textbox', { name: 'Button label' }));
     await userEvent.keyboard('{ControlOrMeta>}/{/ControlOrMeta}');
     await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
 
@@ -260,47 +306,55 @@ describe('the email kit', () => {
     await vi.waitFor(() => expect(exported(editor)[1].attributes).toEqual({ width: 'full' }));
     expect(exported(editor)[0].attributes).toEqual({});
   });
-  it('links text to a url variable through the same picker', async () => {
+  it('links the selected text to an href typed with a variable inside it', async () => {
     const editor = await mount([paragraph('Open the page')]);
     await caretAfter('Open the page');
     await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
 
-    const picker = find('[data-slot=url-variable-picker][data-label=Link]');
-    const options = await pickOption(picker);
-    expect(options.map((option) => option.textContent)).toEqual(['Reset link', 'Help page']);
-    await userEvent.click(options[0]);
-
-    await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Open the [page]({{resetUrl}})' }));
-  });
-
-  it('shows the link the caret is in, and removes it whole', async () => {
-    const editor = await mount([paragraph('Open the [page]({{resetUrl}})')]);
-    await caretAfter('Open the page');
-    await userEvent.keyboard('{ArrowLeft}{ArrowLeft}');
+    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    const popover = page.getByRole('dialog', { name: 'Link' });
+    await expect.element(popover.getByRole('textbox', { name: 'Link' })).toHaveFocus();
+    await userEvent.keyboard('https://x.test/a?t={{{{name}}');
+    await userEvent.click(popover.getByRole('button', { name: 'Apply' }));
 
     await vi.waitFor(() =>
-      expect(find('[data-slot=url-variable-picker][data-label=Link]').getAttribute('aria-label')).toBe(
-        'Link: Reset link',
-      ),
+      expect(exported(editor)[0].content).toEqual({ text: 'Open the [page](https://x.test/a?t={{name}})' }),
     );
-    await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}');
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label="Remove link"]')));
-
-    await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Open the page' }));
-    expect(find('[data-slot=url-variable-picker][data-label=Link]').getAttribute('aria-label')).toBe('Link');
   });
 
-  it('links a wider selection to the variable the picker already shows', async () => {
+  it('opens the link the caret is in from the bubble, and removes it whole', async () => {
+    const editor = await mount([paragraph('Open the [page]({{resetUrl}})')]);
+    await caretAfter('Open the page');
+    await userEvent.keyboard('{ArrowLeft}{Shift>}{ArrowLeft}{/Shift}');
+
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label=Link]')));
+    const popover = page.getByRole('dialog', { name: 'Link' });
+    await expect.element(popover.getByRole('textbox', { name: 'Link' }).getByText('Reset link')).toBeVisible();
+    await userEvent.click(popover.getByRole('button', { name: 'Remove link' }));
+
+    await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Open the page' }));
+  });
+
+  it('links a wider selection to the href of the link inside it', async () => {
     const editor = await mount([paragraph('Open the [page]({{resetUrl}})')]);
     await caretAfter('Open the page');
     await userEvent.keyboard('{Shift>}' + '{ArrowLeft}'.repeat(8) + '{/Shift}');
 
-    const picker = find('[data-slot=url-variable-picker][data-label=Link]');
-    await vi.waitFor(() => expect(picker.getAttribute('aria-label')).toBe('Link: Reset link'));
-    const options = await pickOption(picker);
-    await userEvent.click(options.find((option) => option.textContent === 'Reset link')!);
+    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    const popover = page.getByRole('dialog', { name: 'Link' });
+    await expect.element(popover.getByRole('textbox', { name: 'Link' }).getByText('Reset link')).toBeVisible();
+    expect(popover.getByRole('button', { name: 'Remove link' }).query()).not.toBeNull();
+    await userEvent.click(popover.getByRole('button', { name: 'Apply' }));
 
     await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Open [the page]({{resetUrl}})' }));
+  });
+
+  it('opens no link popover on a caret outside a link', async () => {
+    const editor = await mount([paragraph('Open the page')]);
+    await caretAfter('Open the page');
+
+    expect(editor.can('editEmailLink')).toBe(false);
+    expect(editor.run('editEmailLink')).toBe(false);
   });
 
   it('toggles italic from the bubble menu', async () => {
@@ -593,7 +647,7 @@ describe('the email kit', () => {
     };
 
     for (const group of ['Turn into', 'Align', 'Space after', 'Tone']) await refusedIn(group, 'Hi');
-    for (const group of ['Width', 'Link']) await refusedIn(group, '', '[data-slot=email-button]');
+    await refusedIn('Width', '', '[data-slot=email-button]');
     await refusedIn('Lanes', 'left');
 
     await openBlockMenu('Hi');
