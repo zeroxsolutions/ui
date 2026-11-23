@@ -35,7 +35,7 @@ pnpm add @zeroxsolutions/editor-core
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add tooltip utils @zui/chat-input @zui/document-editor @zui/email-editor
+pnpm dlx shadcn@latest add tooltip utils @zui/chat-input @zui/collapsible-card @zui/document-editor @zui/email-editor
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -79,57 +79,54 @@ import { SmsEditor } from '@/components/editor/profiles/sms/sms-editor';
 ```
 
 ```tsx
-const profile = smsProfile({ variables: [{ name: 'code', type: 'string', label: 'Code', sampleValue: '482913' }] });
+const profile = smsProfile({ variables: [{ name: 'code', type: 'string', label: 'code', sampleValue: '482913' }] });
 
-function OtpMessage({ body, save }: { body: string; save: (body: string) => void }) {
+function SignInMessage({ body, save }: { body: string; save: (body: string) => void }) {
   return <SmsEditor label="Message" profile={profile} value={body} onChange={save} />;
 }
 ```
 
-The body is plain text with no block and no mark; the only structure in it is a `{{name}}` variable. The meter under it counts the units the body uses of a segment in its encoding (GSM-7 or UCS-2), reading each variable as its literal `{{name}}` text, and turns to the `sms-segment-exceeded` problem when the body needs more segments than `maxSegments` allows (one by default).
+The body is plain text and `{{name}}` variables, drawn in the Email Editor's frame with the variable menu in
+its toolbar. The meter in the footer shows the body's length against one segment's limit in its encoding, GSM-7
+or UCS-2, counting each variable as its `{{name}}` text. When the body needs more than `maxSegments`
+segments, the meter and the text past the limit are marked.
 
 ## API reference
 
 ### SmsEditor
 
-| Prop         | Type                                   | Default |
-| ------------ | -------------------------------------- | ------- |
-| `profile`    | `EditorProfile`                        | -       |
-| `value`      | `string`                               | -       |
-| `label`      | `string`                               | -       |
-| `messages`   | `Partial<ProfileEditorMessages>`       | -       |
-| `readOnly`   | `boolean`                              | `false` |
-| `className`  | `string`                               | -       |
-| `onChange`   | `(body: string) => void`               | -       |
-| `onBlur`     | `() => void`                           | -       |
-| `onValidate` | `(problems: ProfileProblem[]) => void` | -       |
-| `onReady`    | `(editor: IEditor) => void`            | -       |
+| Prop         | Type                                   | Default | Description                                                      |
+| ------------ | -------------------------------------- | ------- | ---------------------------------------------------------------- |
+| `profile`    | `EditorProfile`                        | -       | The variables and the segment limit, from `smsProfile`.          |
+| `value`      | `string`                               | -       | The body shown. A value other than the last change replaces it.  |
+| `label`      | `string`                               | -       | The accessible name of the editable area.                        |
+| `messages`   | `Partial<ProfileEditorMessages>`       | -       | Your words for the strings it draws, `smsMeter` among them.      |
+| `readOnly`   | `boolean`                              | `false` | Shows the body, its problems and its cost with no variable menu. |
+| `className`  | `string`                               | -       | Classes for the frame.                                           |
+| `onChange`   | `(body: string) => void`               | -       | Called with the body after each edit.                            |
+| `onBlur`     | `() => void`                           | -       | Called when the focus leaves the editor and the menus it opened. |
+| `onValidate` | `(problems: ProfileProblem[]) => void` | -       | Called with the problems on mount and when they change.          |
+| `onReady`    | `(editor: IEditor) => void`            | -       | Called once with the editor.                                     |
 
-`label` is the editable surface's accessible name. `readOnly` shows the body, its problems and its cost with nothing that changes it: typing is refused and the variable menu is not drawn.
+`smsMeter` takes `units`, `limit`, `encoding` (`gsm7` or `ucs2`), `segments` and `maxSegments`, and returns
+the meter's text.
 
-`messages` words every string the editor draws, as the [email editor](/docs/editor/email-editor) does; a key it leaves out stays English. Build it once per locale, outside the render or in a memo, since a new object rebuilds the menus' words. The meter reads `smsMeter`, which takes the units, the limit, the encoding (`gsm7` or `ucs2`), the segments and the profile's `maxSegments`:
+### smsProfile
 
-```tsx
-const vi: Partial<ProfileEditorMessages> = {
-  smsMeter: ({ units, limit, segments, maxSegments }) =>
-    maxSegments > 1 ? `${units}/${limit} ky tu - ${segments}/${maxSegments} tin` : `${units}/${limit} ky tu`,
-  noVariables: 'Khong co bien nao',
-};
-
-<SmsEditor label="Tin nhan" messages={vi} profile={profile} value={body} onChange={save} />;
-```
-
-`smsProfile` takes `variables` and `maxSegments`.
+| Option        | Type                    | Default |
+| ------------- | ----------------------- | ------- |
+| `variables`   | `VariableDeclaration[]` | `[]`    |
+| `maxSegments` | `number`                | `1`     |
 
 ## Variables
 
-Declare each variable once, in the profile, with a `name` of word characters, a `type` of `string`, `duration`, `url` or `email`, and optionally a `label`, a `sampleValue` and `required`. Typing `{{` at any position opens the variable menu and picking one inserts a pill; a pill that is not declared is marked. A `required` variable that the body does not print is a problem.
-
-When the declarations change, hand the editor a new profile and it redraws its pills itself. A host that edits the declarations in place calls `refreshVariables(editor)`, from `@/components/editor/profiles/variables/variable`, so every pill reads its label again.
+Variables are declared as in the [Email Editor](/docs/editor/email-editor#variables). Type `{{` or use the
+toolbar's variable menu to insert one.
 
 ## Validation
 
-`onValidate` receives the problems on mount and whenever the list changes, and the server reads the same list with `validate` from `@zeroxsolutions/editor-core/profiles/index`.
+F8 and Shift+F8 move to the next and previous problem, and Escape on a marker returns to the text. On the
+server, `validate(body, profile)` from `@zeroxsolutions/editor-core/profiles/index` returns the same list.
 
 | Kind                            | Message                            |
 | ------------------------------- | ---------------------------------- |
@@ -138,16 +135,7 @@ When the declarations change, hand the editor a new profile and it redraws its p
 | `sms-segment-exceeded`          | The message is longer than allowed |
 | `sms-placeholder-malformed`     | A variable is not closed           |
 
-A message about a variable names it. F8 moves the caret to the next problem and Shift+F8 to the previous one; Escape on a problem's marker goes back to its text.
-
 ## Markup
 
-The body has no formatting, so `**`, `_` and `[label](...)` are the characters they are. The one markup is `{{name}}`. Pasting several lines keeps each as a line.
-
-## Hosting the value
-
-`value` is the body the editor shows. Hand back what `onChange` gave you; pass a different `value` only to open another body, since one that differs from the editor's replaces it and drops the edits made since.
-
-## Travel
-
-Travel sends the sign-in code and the departure reminder by SMS from a body written here, one per locale. The OTP body declares `code` and stays within one segment, because a second segment is a second message billed to the traveller's carrier.
+There is none: `**`, `_` and `[label](...)` stay the characters they are. Enter and a pasted line break make
+a new line.

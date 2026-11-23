@@ -134,6 +134,12 @@ pnpm dlx shadcn@latest add button checkbox dropdown-menu empty item popover scro
 
 <ComponentSource
   name="document-editor"
+  file="registry/bases/base-ui/editor/document/ui/editor-toolbar-combobox-trigger.tsx"
+  title="components/editor/document/ui/editor-toolbar-combobox-trigger.tsx"
+/>
+
+<ComponentSource
+  name="document-editor"
   file="registry/bases/base-ui/editor/document/ui/rect-popover.tsx"
   title="components/editor/document/ui/rect-popover.tsx"
 />
@@ -375,19 +381,20 @@ interactions a static render cannot give.
 
 ### Editor
 
-| Prop        | Type                        | Default |
-| ----------- | --------------------------- | ------- |
-| `features`  | `EditorFeature[]`           | -       |
-| `content`   | `DocJSON`                   | -       |
-| `editable`  | `boolean`                   | `true`  |
-| `className` | `string`                    | -       |
-| `onReady`   | `(editor: IEditor) => void` | -       |
-| `onChange`  | `(delta: Delta) => void`    | -       |
+| Prop             | Type                        | Default           |
+| ---------------- | --------------------------- | ----------------- |
+| `features`       | `EditorFeature[]`           | -                 |
+| `content`        | `DocJSON`                   | -                 |
+| `editable`       | `boolean`                   | `true`            |
+| `className`      | `string`                    | -                 |
+| `onReady`        | `(editor: IEditor) => void` | -                 |
+| `onChange`       | `(delta: Delta) => void`    | -                 |
+| `blockMenuLabel` | `string`                    | `'Block actions'` |
 
 It renders the document with `data-editor="document"` and the `document-editor prose` classes its styles
-key on. Beside the standard kit's block drag handle it draws an "Insert block below" button, which opens the
-slash menu on a new line. A click on the block handle opens the block menu (Turn into, Duplicate, Delete);
-pressing it and dragging still moves the block.
+key on. Beside each block it draws a grip and an "Insert block below" button, which opens the slash menu on
+a new line. A click on the grip, or Mod-/ in the block, opens the block menu: Turn into, Duplicate and
+Delete. Dragging the grip moves the block.
 
 ### Viewer
 

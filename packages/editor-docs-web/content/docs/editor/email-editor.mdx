@@ -1,6 +1,6 @@
 ---
 title: Email Editor
-description: A block editor for an email's body, with {{name}} variables, whose blocks and links stay inside what the email renderer prints, and a live preview.
+description: A block editor for an email body, with {{name}} variables, a block menu for each block's layout, and a preview of the rendered email.
 ---
 
 <ComponentPreview name="email-editor-demo" />
@@ -35,7 +35,7 @@ pnpm add @zeroxsolutions/editor-core lucide-react zod
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add button combobox badge tooltip utils @zui/chat-input @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-text-align-start-icon
+pnpm dlx shadcn@latest add badge button combobox resizable tabs tooltip use-mobile utils @zui/chat-input @zui/collapsible-card @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-braces-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-text-align-start-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -162,20 +162,13 @@ import { EmailEditor } from '@/components/editor/profiles/email/email-editor';
 ```tsx
 const profile = emailProfile({
   variables: [
-    { name: 'first_name', type: 'string', label: 'First name', sampleValue: 'Lan' },
-    {
-      name: 'trip_url',
-      type: 'url',
-      label: 'Trip link',
-      sampleValue: 'https://trip-vietnam.com/trips/hoi-an',
-      required: true,
-    },
+    { name: 'first_name', type: 'string', label: 'first name', sampleValue: 'Lan' },
+    { name: 'account_url', type: 'url', label: 'account link', sampleValue: 'https://example.com/account' },
   ],
 });
-// `theme` is the renderer's EmailTheme and `layoutProps` the logo and footer its layout takes; the demo defines both.
 const renderer = createEmailRenderer({ theme });
 
-function Template({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blocks: EditorEmailBlock[]) => void }) {
+function WelcomeEmail({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blocks: EditorEmailBlock[]) => void }) {
   return (
     <EmailEditor
       label="Email body"
@@ -183,61 +176,60 @@ function Template({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blocks:
       value={blocks}
       onChange={save}
       renderer={renderer}
-      previewInput={{ subject: 'Your trip starts soon', preheader: null, locale: 'en', layoutProps }}
+      previewInput={{ subject: 'Welcome', preheader: null, locale: 'en', layoutProps }}
     />
   );
 }
 ```
 
-The editor states an email as the blocks the renderer takes: `paragraph`, `button`, `code`, `list`, `callout`, `divider`, `columns` and `html`. It never fills a variable with a real value, and it never refuses an edit because of a problem: it marks the problem and reports it.
+The editor is the Document Editor with the email's blocks: paragraph, bulleted list, callout, code block,
+divider, button, columns and HTML. Click a block's grip, or press Mod-/, to open its block menu: Turn into,
+Duplicate, Delete, and the block's Align, Space after, Tone, Width, Lanes or Link. With a `renderer`, the
+preview shows the rendered email with each variable's `sampleValue`. `theme` is the renderer's `EmailTheme`
+and `layoutProps` its logo and footer; the demo's source defines both.
+
+Pass back the blocks `onChange` gave you. After a save, give the new blocks their ids with
+`editor.run('assignBlockIds', { ids })`, a map of block key to id. The blocks it reports then carry those
+ids, and the saved value handed back does not reload the document.
 
 ## API reference
 
 ### EmailEditor
 
-| Prop                   | Type                                             | Default  |
-| ---------------------- | ------------------------------------------------ | -------- |
-| `profile`              | `EditorProfile`                                  | -        |
-| `value`                | `EditorEmailBlock[]`                             | -        |
-| `label`                | `string`                                         | -        |
-| `messages`             | `Partial<ProfileEditorMessages>`                 | -        |
-| `readOnly`             | `boolean`                                        | `false`  |
-| `renderer`             | `EmailPreviewRenderer`                           | -        |
-| `previewInput`         | `EmailPreviewInput`                              | -        |
-| `features`             | `EditorFeature[]`                                | -        |
-| `required`             | `readonly string[]`                              | -        |
-| `structure`            | `'free' \| 'locked'`                             | `'free'` |
-| `className`            | `string`                                         | -        |
-| `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        |
-| `onBlur`               | `() => void`                                     | -        |
-| `onValidate`           | `(problems: ProfileProblem[]) => void`           | -        |
-| `renderBlockAdornment` | `(id: string \| null, key: string) => ReactNode` | -        |
-| `onReady`              | `(editor: IEditor) => void`                      | -        |
+| Prop                   | Type                                             | Default  | Description                                                                       |
+| ---------------------- | ------------------------------------------------ | -------- | --------------------------------------------------------------------------------- |
+| `profile`              | `EditorProfile`                                  | -        | The blocks and variables the author may use, from `emailProfile`.                 |
+| `value`                | `EditorEmailBlock[]`                             | -        | The blocks shown. A value with other content than the last change replaces them.  |
+| `label`                | `string`                                         | -        | The accessible name of the editable area.                                         |
+| `renderer`             | `EmailPreviewRenderer`                           | -        | A `createEmailRenderer` instance. Without one, no preview is drawn.               |
+| `previewInput`         | `EmailPreviewInput`                              | -        | The subject, preheader, locale and layout props the preview renders with.         |
+| `layout`               | `'auto' \| 'split' \| 'tabs'`                    | `'auto'` | `split` sets the preview beside the editor, `tabs` behind a tab, `auto` by width. |
+| `messages`             | `Partial<ProfileEditorMessages>`                 | -        | Your words for the strings the editor draws. A key left out stays English.        |
+| `readOnly`             | `boolean`                                        | `false`  | Shows the blocks and their problems with no toolbar or menus.                     |
+| `required`             | `readonly string[]`                              | -        | The ids of the blocks the author may not delete.                                  |
+| `structure`            | `'free' \| 'locked'`                             | `'free'` | `locked` allows text and variable edits only.                                     |
+| `features`             | `EditorFeature[]`                                | -        | Your own blocks, each with an email codec. Read once, on mount.                   |
+| `className`            | `string`                                         | -        | Classes for the frame.                                                            |
+| `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        | Called with the blocks after each edit.                                           |
+| `onBlur`               | `() => void`                                     | -        | Called when the focus leaves the editor and the menus it opened.                  |
+| `onValidate`           | `(problems: ProfileProblem[]) => void`           | -        | Called with the problems on mount and when they change.                           |
+| `renderBlockAdornment` | `(id: string \| null, key: string) => ReactNode` | -        | Draws your content beside each block. `id` is null until the block is saved.      |
+| `onReady`              | `(editor: IEditor) => void`                      | -        | Called once with the editor.                                                      |
 
-`renderer` and `previewInput` come together: the preview is drawn only with a renderer, and a renderer needs the subject, locale and layout it renders in. `previewInput` is a render's input without `blocks`, `variables` and `variableTypes`, which the editor fills from the document and the declarations' `sampleValue`.
+Build `messages` once per locale; a new object rebuilds the toolbar and the menus. Its English defaults are
+`DEFAULT_PROFILE_MESSAGES` in `messages.ts`.
 
-`label` is the editable surface's accessible name. `readOnly` shows the document and its problems with nothing that changes it: typing is refused and the toolbar, the slash menu and the block menu are not drawn.
+### emailProfile
 
-`messages` words every string the editor draws, in the host's language; a key it leaves out stays English. `ProfileEditorMessages` and its English, `DEFAULT_PROFILE_MESSAGES`, come from `messages.ts`. A message that takes a value is a function, such as `problem(problem)`, which names the variable a problem is about. Build `messages` once per locale, outside the render or in a memo: a new object rebuilds the toolbar's and the menus' items. A problem keeps the words it was marked with until the editor reads the problems again, after the next edit.
+| Option       | Type                    | Default         |
+| ------------ | ----------------------- | --------------- |
+| `allow`      | `EmailBlockKind[]`      | all eight       |
+| `variables`  | `VariableDeclaration[]` | `[]`            |
+| `bounds`     | `Partial<EmailBounds>`  | the table below |
+| `extraKinds` | `string[]`              | `[]`            |
 
-```tsx
-import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '@/components/editor/profiles/messages';
-
-const vi: Partial<ProfileEditorMessages> = {
-  problem: (problem) =>
-    problem.kind === 'text-empty' ? 'Khoi nay dang trong' : DEFAULT_PROFILE_MESSAGES.problem(problem),
-  emptyLine: "Go '/' de chen khoi",
-  bold: 'In dam',
-  italic: 'In nghieng',
-  blockActions: 'Thao tac khoi',
-};
-
-<EmailEditor label="Noi dung email" messages={vi} profile={profile} value={blocks} onChange={save} />;
-```
-
-`required` lists the ids of the blocks the author may not remove. `structure="locked"` lets the author edit text and variables only: nothing is inserted, removed or restyled. `renderBlockAdornment` draws what the host wants beside a block, such as a translation's standing; `id` is null for a block not saved yet, so `key` identifies it. `features` adds the host's own blocks, each with an email codec, and is read once: a change needs a remount.
-
-`emailProfile` takes `allow` (the block kinds the author may use, all eight by default), `variables`, `extraKinds` (the kinds of the host's own `features`) and `bounds`, a partial of the limits below:
+`extraKinds` names the kinds of your own `features`. A bound may be lowered, never raised: a value above the
+renderer's limit throws `editor.profile.bound_above_renderer`.
 
 | Bound       | Default | Limits                                          |
 | ----------- | ------- | ----------------------------------------------- |
@@ -245,67 +237,53 @@ const vi: Partial<ProfileEditorMessages> = {
 | `label`     | 200     | characters of a button's label                  |
 | `href`      | 2000    | characters of a button's link                   |
 | `listItems` | 20      | items of a list                                 |
-| `blocks`    | 50      | blocks in all; a lane's blocks count            |
+| `blocks`    | 50      | blocks in all, a lane's blocks included         |
 | `lanes`     | 4       | lanes of a columns block                        |
 | `variables` | 20      | declared variables                              |
 
-The defaults of `text`, `label`, `href`, `listItems` and `lanes` are what the renderer accepts, so a bound can go lower, never higher: a higher one throws `editor.profile.bound_above_renderer`. Columns hold one level only.
-
 ## Variables
 
-Declare each variable once, in the profile, with a `name` of word characters, a `type` of `string`, `duration`, `url` or `email`, and optionally a `label`, a `sampleValue` and `required`. A token is written `{{name}}`.
+A variable has a `name` of word characters, a `type` of `string`, `duration`, `url` or `email`, and an
+optional `label`, `sampleValue` and `required`. Type `{{` or use the toolbar's variable menu to insert one.
+The toolbar's link picker links the selected text to a `url` variable, and a button's link is set from its
+block menu. A `required` variable that no block uses is a problem.
 
-Typing `{{` at any position opens the variable menu, and the toolbar's variable button opens it too; picking one inserts a pill. A button's link takes one `url` variable, and a text link points to one `url` variable too. A `required` variable that no block prints is a problem.
-
-When the declarations change, hand the editor a new profile: it reads the new declarations and redraws its pills and problems itself. If a host edits the declarations in place instead, call `refreshVariables(editor)` with the editor `onReady` gave it, so every pill reads its label and its problem again:
-
-```tsx
-import { refreshVariables } from '@/components/editor/profiles/variables/variable';
-
-refreshVariables(editor);
-```
+To change the variables, pass a new profile. If you change the declarations in place instead, call
+`refreshVariables(editor)` from `variables/variable.tsx`.
 
 ## Validation
 
-`onValidate` receives the problems on mount and whenever the list changes. Each marks its block in the editor, and the server reads the same list with `validate(blocks, profile)` from `@zeroxsolutions/editor-core/profiles/index`, so build the same profile on both sides.
+Each problem is marked on its block, with its message on hover and focus. F8 and Shift+F8 move to the next
+and previous problem, and Escape on a marker returns to its block. On the server, `validate(blocks, profile)`
+from `@zeroxsolutions/editor-core/profiles/index` returns the same list for the same profile.
 
-| Kind                            | Message                                  |
-| ------------------------------- | ---------------------------------------- |
-| `variable-undeclared`           | This variable is not declared            |
-| `href-not-url-variable`         | The link must be one link variable       |
-| `link-not-url-variable`         | A link can only point to a link variable |
-| `required-variable-not-printed` | A required variable is not used          |
-| `markup-malformed`              | The formatting is not closed             |
-| `block-not-allowed`             | This block is not allowed here           |
-| `unknown-block-type`            | This block is of an unknown type         |
-| `block-nested-too-deep`         | Columns cannot hold columns              |
-| `lanes-mismatch`                | The columns do not match their widths    |
-| `text-empty`                    | This block is empty                      |
-| `text-too-long`                 | This text is too long                    |
-| `list-too-long`                 | This list has too many items             |
-| `too-many-blocks`               | The email has too many blocks            |
+| Kind                            | Message                                     |
+| ------------------------------- | ------------------------------------------- |
+| `variable-undeclared`           | This variable is not declared               |
+| `href-not-url-variable`         | The link must be one link variable          |
+| `link-not-url-variable`         | A link can only point to a link variable    |
+| `required-variable-not-printed` | A required variable is not used             |
+| `markup-malformed`              | The formatting is not closed                |
+| `block-not-allowed`             | This block is not allowed here              |
+| `unknown-block-type`            | This block is of an unknown type            |
+| `block-nested-too-deep`         | Columns cannot hold columns                 |
+| `lanes-mismatch`                | The columns do not match their widths       |
+| `text-empty`                    | This block is empty                         |
+| `text-too-long`                 | This text is too long                       |
+| `list-too-long`                 | This list has too many items                |
+| `too-many-blocks`               | The email has too many blocks               |
+| `block-not-carried`             | The email keeps only the text of this block |
 
-A message about a variable names it, as in `This variable is not declared: {{trip_name}}`. A host words them through `messages.problem`.
-
-F8 moves the caret to the next problem and Shift+F8 to the previous one; Escape on a problem's marker goes back to its block.
+`block-not-carried` marks a block the email cannot hold, such as a pasted heading or numbered list. The
+email keeps its text.
 
 ## Markup
 
-A paragraph, a callout and a list item carry text in a small markup, which the editor shows as formatting:
+A paragraph, a callout and a list item store their text in this markup:
 
 | Write                  | Reads as                            |
 | ---------------------- | ----------------------------------- |
 | `**bold**`             | bold                                |
 | `_italic_`             | italic                              |
 | `[label]({{name}})`    | a link to the `url` variable `name` |
-| `\*`, `\_`, `\[`, `\\` | the character itself, not markup    |
-
-A backslash escapes the next character. A `**`, `_` or `[` left open is a `markup-malformed` problem.
-
-## Hosting the value
-
-`value` is the document the editor shows. Hand back what `onChange` gave you; do not rebuild it or refetch it into `value` while the author is editing. After a save, run `assignBlockIds` on the blocks the server answered with, so a block the editor added keeps its identity. Pass a different `value` only to load another document, such as another locale; a value that differs from the editor's replaces it and drops the edits made since. Remounting the editor with a `key` loads one as well.
-
-## Travel
-
-Travel keeps one template per message and locale, whose body is these blocks. Its profile declares the variables the message may print, such as `first_name` and `trip_url`, and marks `trip_url` required for a message whose only job is to open the trip. The renderer that prints the preview is the one the sending service renders with, so the preview is the email a traveller receives.
+| `\*`, `\_`, `\[`, `\\` | the character itself                |

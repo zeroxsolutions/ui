@@ -12,15 +12,16 @@ import { createEmailRenderer, type EmailTheme } from '@zeroxsolutions/editor-cor
 import { EmailEditor, type EmailPreviewInput } from '@/registry/bases/base-ui/editor/profiles/email/email-editor';
 
 const variables: VariableDeclaration[] = [
-  { name: 'first_name', type: 'string', label: 'First name', sampleValue: 'Lan' },
-  { name: 'destination', type: 'string', label: 'Destination', sampleValue: 'Hoi An' },
+  { name: 'first_name', type: 'string', label: 'first name', sampleValue: 'Lan' },
+  { name: 'plan', type: 'string', label: 'plan', sampleValue: 'Team' },
   {
-    name: 'trip_url',
+    name: 'account_url',
     type: 'url',
-    label: 'Trip link',
-    sampleValue: 'https://trip-vietnam.com/trips/hoi-an',
+    label: 'account link',
+    sampleValue: 'https://example.com/account',
     required: true,
   },
+  { name: 'guide_url', type: 'url', label: 'guide link', sampleValue: 'https://example.com/guide' },
 ];
 
 const profile = emailProfile({ variables });
@@ -44,16 +45,16 @@ const theme: EmailTheme = {
 const logo =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="48"><rect width="240" height="48" rx="8" fill="#007A55"/><text x="120" y="31" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#ECFDF5" text-anchor="middle">Trip Vietnam</text></svg>',
+    '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="48"><rect width="240" height="48" rx="8" fill="#007A55"/><text x="120" y="31" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#ECFDF5" text-anchor="middle">ZUI</text></svg>',
   );
 
 const previewInput: EmailPreviewInput = {
-  subject: 'Your trip to {{destination}} starts soon',
+  subject: 'Your {{plan}} plan is ready',
   preheader: null,
   locale: 'en',
   layoutProps: {
-    logo: { url: logo, alt: 'Trip Vietnam', width: 120 },
-    footer: ['Trip Vietnam'],
+    logo: { url: logo, alt: 'ZUI', width: 120 },
+    footer: ['ZUI'],
   },
 };
 
@@ -66,20 +67,20 @@ const text = (id: string, content: string): EditorEmailBlock => ({
 });
 
 const initial: EditorEmailBlock[] = [
-  text('greeting', 'Hi {{first_name}}, **{{destination}}** is only a few days away.'),
+  text('greeting', 'Hi {{first_name}}, your **{{plan}}** plan is ready.'),
   {
     id: 'open',
     key: 'open',
     type: 'button',
     attributes: { align: 'center' },
-    content: { label: 'Open your trip', href: '{{trip_url}}' },
+    content: { label: 'Open your account', href: '{{account_url}}' },
   },
   {
-    id: 'tip',
-    key: 'tip',
+    id: 'note',
+    key: 'note',
     type: 'callout',
     attributes: {},
-    content: { text: 'Carry a copy of your passport and your hotel address.' },
+    content: { text: 'Your first invoice is sent on the first day of next month.' },
   },
   {
     id: 'lanes',
@@ -88,13 +89,13 @@ const initial: EditorEmailBlock[] = [
     attributes: { ratio: [1, 1] },
     content: {},
     lanes: [
-      [text('before', '**Before you go**: check the weather and the exchange rate.')],
-      [text('after', '**Once there**: save the places you like for the next trip.')],
+      [text('invite', '**Invite your team**: add people from the members page.')],
+      [text('help', '**Need help?** Read the [getting started guide]({{guide_url}}).')],
     ],
   },
 ];
 
-/** The email as the editor states it, and the email a renderer prints from it, drawn as the reader will see it. */
+/** A welcome email: a button and a text link to url variables, a callout and two columns, beside its preview. */
 function EmailEditorDemo(): ReactNode {
   const [blocks, setBlocks] = useState(initial);
   const renderer = useMemo(() => createEmailRenderer({ theme }), []);

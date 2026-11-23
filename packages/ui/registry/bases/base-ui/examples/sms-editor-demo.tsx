@@ -10,7 +10,7 @@ const profile = smsProfile({ variables: [{ name: 'code', type: 'string', label: 
 
 /** A one-segment sign-in code message; the meter counts what the code will cost once it is filled in. */
 function SmsEditorDemo(): ReactNode {
-  const [body, setBody] = useState('Trip Vietnam: your code is {{code}}. It expires in 10 minutes.');
+  const [body, setBody] = useState('Your sign-in code is {{code}}. It expires in 10 minutes.');
   return (
     <div className="w-full max-w-md">
       <SmsEditor label="Message" profile={profile} value={body} onChange={setBody} />
