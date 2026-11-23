@@ -3,6 +3,7 @@ import { defineBlock } from '../block.js';
 import { NARROW } from '../narrow-screen.js';
 import { fontStack } from '../theme.js';
 import { align, BUTTON_HREF_MAX_LENGTH, BUTTON_LABEL_MAX_LENGTH, readOr, row, spaceAfter } from './shared.js';
+import { classAttribute, paintClasses } from '../color-scheme.js';
 
 const attributes = z.object({ align, spaceAfter, width: z.enum(['inline', 'full']).optional() }).strict();
 const content = z
@@ -34,7 +35,10 @@ export const button = defineBlock({
       `background:${colors.primary};color:${colors.primaryForeground};font-family:${fontStack(ctx.theme)};` +
       `font-size:14px;font-weight:500;line-height:18px;padding:7px 10px;border-radius:${radius}px;text-decoration:none;`;
     return {
-      html: row(a, `<a href="${href.html}" class="${NARROW.button}" style="${style}">${ctx.html(c.label)}</a>`),
+      html: row(
+        a,
+        `<a href="${href.html}"${classAttribute(NARROW.button, ...paintClasses(ctx.theme, 'primary', 'primaryForeground'))} style="${style}">${ctx.html(c.label)}</a>`,
+      ),
       text: `${ctx.text(c.label)}: ${href.text}\n\n`,
     };
   },

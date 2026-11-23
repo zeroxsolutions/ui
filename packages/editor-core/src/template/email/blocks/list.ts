@@ -29,7 +29,7 @@ export const list = defineBlock({
     return {
       html: row(
         a,
-        `<ul${textClassAttribute(ctx.region)} style="margin:0;padding-left:20px;${textStyle(ctx.theme, ctx.region)}">${html}</ul>`,
+        `<ul${textClassAttribute(ctx.theme, ctx.region)} style="margin:0;padding-left:20px;${textStyle(ctx.theme, ctx.region)}">${html}</ul>`,
       ),
       text: `${text}\n\n`,
     };

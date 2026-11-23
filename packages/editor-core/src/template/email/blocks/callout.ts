@@ -22,7 +22,7 @@ export const callout = defineBlock({
     const { colors, radius } = ctx.theme;
     const style = `background:${colors.muted};border-left:4px solid ${colors.primary};border-radius:${radius}px;padding:12px 16px;${textStyle(ctx.theme, ctx.region)}`;
     const drawn = ctx.inline(c.text);
-    const box = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td${textClassAttribute(ctx.region)} style="${style}">${drawn.html}</td></tr></table>`;
+    const box = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td${textClassAttribute(ctx.theme, ctx.region, undefined, 'muted', 'accent')} style="${style}">${drawn.html}</td></tr></table>`;
     return { html: row(a, box), text: `${drawn.text}\n\n` };
   },
   sample: { attributes: {}, content: { text: '{{place}} is closed today.' }, variableTypes: { place: 'string' } },

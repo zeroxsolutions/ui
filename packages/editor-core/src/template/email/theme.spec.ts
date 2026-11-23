@@ -18,6 +18,15 @@ describe('assertEmailTheme', () => {
     },
   );
 
+  it('refuses a dark colour a mail client cannot read, named by its path', () => {
+    const theme = { ...FIXTURE_THEME, dark: { ...FIXTURE_THEME.colors, muted: 'oklch(0.3 0 0)' } };
+    expect(() => assertEmailTheme(theme)).toThrow(new EmailThemeInvalid('dark.muted'));
+  });
+
+  it('accepts a dark palette of hex colours', () => {
+    expect(() => assertEmailTheme({ ...FIXTURE_THEME, dark: FIXTURE_THEME.colors })).not.toThrow();
+  });
+
   it('refuses a negative or non-finite radius', () => {
     expect(() => assertEmailTheme({ ...FIXTURE_THEME, radius: -1 })).toThrow(EmailThemeInvalid);
     expect(() => assertEmailTheme({ ...FIXTURE_THEME, radius: Number.NaN })).toThrow(EmailThemeInvalid);

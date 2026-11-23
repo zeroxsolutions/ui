@@ -31,4 +31,4 @@ export {
   type RenderedEmail,
   type RenderEmailInput,
 } from './renderer.js';
-export { assertEmailTheme, EmailThemeInvalid, type EmailTheme } from './theme.js';
+export { assertEmailTheme, EmailThemeInvalid, type EmailColors, type EmailTheme } from './theme.js';

@@ -26,7 +26,7 @@ export const paragraph = defineBlock({
     return {
       html: row(
         a,
-        `<div${textClassAttribute(ctx.region)} style="${textStyle(ctx.theme, ctx.region, color)}">${drawn.html}</div>`,
+        `<div${textClassAttribute(ctx.theme, ctx.region, a.tone === 'muted' ? 'mutedForeground' : undefined)} style="${textStyle(ctx.theme, ctx.region, color)}">${drawn.html}</div>`,
       ),
       text: `${drawn.text}\n\n`,
     };

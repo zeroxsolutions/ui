@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { parseInlineMarkup } from '../../markup/inline-markup.js';
+import { classAttribute, paintClasses } from '../color-scheme.js';
 import { NARROW } from '../narrow-screen.js';
 import type { Region } from '../region.js';
 import { fontStack, type EmailTheme } from '../theme.js';
@@ -47,11 +48,21 @@ export function textStyle(theme: EmailTheme, region: Region | 'body', color?: st
 }
 
 /**
- * The class attribute, with its leading space, that a phone grows text by; empty in the footer, whose text
- * stays small on a phone as the footer lines do.
+ * The class attribute, with its leading space, of text in `region`: the class a phone grows text by, which
+ * the footer leaves out as its text stays small, then the classes the dark palette repaints it by, its text
+ * muted in the footer or for a muted `tone`, and `extra`.
  */
-export function textClassAttribute(region: Region | 'body'): string {
-  return region === 'footer' ? '' : ` class="${NARROW.text}"`;
+export function textClassAttribute(
+  theme: EmailTheme,
+  region: Region | 'body',
+  tone?: 'foreground' | 'mutedForeground',
+  ...extra: readonly ('muted' | 'accent')[]
+): string {
+  const footer = region === 'footer';
+  return classAttribute(
+    !footer && NARROW.text,
+    ...paintClasses(theme, tone ?? (footer ? 'mutedForeground' : 'foreground'), ...extra),
+  );
 }
 
 export function monospaceStyle(): string {

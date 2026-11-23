@@ -7,6 +7,7 @@ import type { Variables } from '../variables/variables.js';
 import type { RenderContext, RenderedBlock, RenderProblem } from './block.js';
 import type { Region } from './region.js';
 import type { EmailTheme } from './theme.js';
+import { classAttribute, paintClasses } from './color-scheme.js';
 
 /** What one render shares across its blocks; `problems` collects as the blocks render. */
 export interface RenderState {
@@ -125,7 +126,7 @@ export function createRenderContext(
         const href = context.href(run.href);
         if (href.html === '') return { html: labelHtml, text: labelText };
         return {
-          html: `<a href="${href.html}" style="color:${state.theme.colors.primary};">${labelHtml}</a>`,
+          html: `<a href="${href.html}"${classAttribute(...paintClasses(state.theme, 'link'))} style="color:${state.theme.colors.primary};">${labelHtml}</a>`,
           text: `${labelText} (${href.text})`,
         };
       });
