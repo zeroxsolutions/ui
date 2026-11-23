@@ -41,6 +41,29 @@ describe('callout', () => {
     expect(node?.attrs?.variant).toBe('danger');
   });
 
+  it('inserts the one variant a narrowed callout allows, with no variant given', () => {
+    const element = document.createElement('div');
+    document.body.append(element);
+    const editor = createEditor()
+      .use(standardKit())
+      .use(callout({ variants: ['warning'] }))
+      .build({ element });
+    editors.push(editor);
+    expect(editor.run('insertCallout')).not.toBe(false);
+    expect(editor.getJSON().content?.find((n) => n.type === 'callout')?.attrs?.variant).toBe('warning');
+  });
+
+  it('refuses a variant a narrowed callout does not allow', () => {
+    const element = document.createElement('div');
+    document.body.append(element);
+    const editor = createEditor()
+      .use(standardKit())
+      .use(callout({ variants: ['warning'] }))
+      .build({ element });
+    editors.push(editor);
+    expect(() => editor.run('insertCallout', { variant: 'danger' })).toThrow();
+  });
+
   it('round-trips through HTML unambiguously', () => {
     const doc = calloutDoc('success');
     const html = serialize(doc, 'html', registry);

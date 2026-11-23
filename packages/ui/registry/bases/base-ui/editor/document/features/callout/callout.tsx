@@ -130,7 +130,15 @@ function stripAlertMarker(content: NodeJSON[]): NodeJSON[] {
   return first.content && first.content.length === 0 ? content.slice(1) : content;
 }
 
-export function callout(): EditorFeature {
+/** What a profile may narrow: the variants an inserted callout can take. */
+export interface CalloutOptions {
+  /** The variants the callout offers; the first is the one inserted when none is named. Default: all. */
+  variants?: readonly Variant[];
+}
+
+export function callout(options: CalloutOptions = {}): EditorFeature {
+  const variants = options.variants?.length ? options.variants : VARIANTS;
+  const fallback: Variant = variants.includes('info') ? 'info' : variants[0];
   return defineFeature({
     id: 'callout',
     nodes: [
@@ -146,12 +154,12 @@ export function callout(): EditorFeature {
     codecs: [calloutCodec as NodeCodec],
     commands: {
       insertCallout: {
-        args: z.object({ variant: z.enum(VARIANTS).default('info') }).optional(),
+        args: z.object({ variant: z.enum(variants as [Variant, ...Variant[]]).default(fallback) }).optional(),
         run: (editor, args) =>
           editor.run('insertContent', {
             content: {
               type: 'callout',
-              attrs: { variant: args?.variant ?? 'info' },
+              attrs: { variant: args?.variant ?? fallback },
               content: [{ type: 'paragraph' }],
             },
           }),

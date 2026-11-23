@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { EditorView } from '@codemirror/view';
 
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
-import { CodeBlockNodeView, codeBlockCodec } from './code-block';
+import { CodeBlockNodeView, codeBlock, codeBlockCodec } from './code-block';
 
 // The read-only path's design-system CodeCard renders upstream ScrollArea,
 // which measures its viewport in a `queueMicrotask` its layout effect
@@ -86,6 +86,13 @@ describe('code-block node view (editable)', () => {
     expect(item).not.toBeNull();
     fireEvent.click(item!);
     expect(updateAttrs).toHaveBeenCalledWith(expect.objectContaining({ language: expect.any(String) }));
+  });
+
+  it('draws no language control when the profile turns the picker off', () => {
+    const NarrowView = codeBlock({ languagePicker: false }).nodes![0].render as typeof CodeBlockNodeView;
+    render(<NarrowView {...nodeViewProps({ language: 'text', code: 'x' }, true)} />);
+    expect(screen.queryByRole('combobox', { name: /language/i })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Code settings' })).toBeTruthy();
   });
 
   it('opens the settings menu without crashing', () => {

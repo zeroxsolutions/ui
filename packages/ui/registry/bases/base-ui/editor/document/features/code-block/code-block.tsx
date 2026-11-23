@@ -78,9 +78,11 @@ const PLAIN_LANGUAGES = new Set(['', 'text', 'plaintext', 'plain', 'txt']);
 function EditableCodeBlock({
   attrs,
   updateAttrs,
+  languagePicker,
 }: {
   attrs: CodeBlockAttrs;
   updateAttrs: (patch: Partial<CodeBlockAttrs>) => void;
+  languagePicker: boolean;
 }) {
   const [settings, setSettings] = React.useState<CodeMirrorSettings>(DEFAULT_CODE_SETTINGS);
   const patchSettings = React.useCallback(
@@ -95,34 +97,36 @@ function EditableCodeBlock({
     <CollapsibleCard variant="muted" data-language={language} className="group/code">
       <CollapsibleCardHeader>
         <CollapsibleCardTitle>
-          <LanguageCombobox
-            kind="code"
-            value={language || 'text'}
-            onValueChange={(next) => updateAttrs({ language: next })}
-          >
-            <ComboboxTrigger render={<Button variant="outline" size="sm" />} aria-label="Language">
-              <ComboboxValue>
-                {(option: LanguageOption | null) => (
-                  <>
-                    {option?.icon}
-                    <span>{option?.label ?? 'Language...'}</span>
-                  </>
-                )}
-              </ComboboxValue>
-            </ComboboxTrigger>
-            <ComboboxContent className="min-w-56">
-              <ComboboxInput showTrigger={false} placeholder="Language..." />
-              <ComboboxEmpty>No results.</ComboboxEmpty>
-              <ComboboxList>
-                {(option: LanguageOption) => (
-                  <ComboboxItem key={option.value} value={option}>
-                    {option.icon}
-                    <span>{option.label}</span>
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </LanguageCombobox>
+          {languagePicker ? (
+            <LanguageCombobox
+              kind="code"
+              value={language || 'text'}
+              onValueChange={(next) => updateAttrs({ language: next })}
+            >
+              <ComboboxTrigger render={<Button variant="outline" size="sm" />} aria-label="Language">
+                <ComboboxValue>
+                  {(option: LanguageOption | null) => (
+                    <>
+                      {option?.icon}
+                      <span>{option?.label ?? 'Language...'}</span>
+                    </>
+                  )}
+                </ComboboxValue>
+              </ComboboxTrigger>
+              <ComboboxContent className="min-w-56">
+                <ComboboxInput showTrigger={false} placeholder="Language..." />
+                <ComboboxEmpty>No results.</ComboboxEmpty>
+                <ComboboxList>
+                  {(option: LanguageOption) => (
+                    <ComboboxItem key={option.value} value={option}>
+                      {option.icon}
+                      <span>{option.label}</span>
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </LanguageCombobox>
+          ) : null}
         </CollapsibleCardTitle>
         <CollapsibleCardActions>
           <CodeSettingsMenu settings={settings} onSettingsChange={patchSettings} />
@@ -190,7 +194,16 @@ function ReadOnlyCodeBlock({
  * language never moves the editor selection. `editable` flips between the live
  * `CodeMirrorPane` surface and the read-only `the ui registry` `CodeCard`.
  */
-export function CodeBlockNodeView({ attrs, updateAttrs, editable }: NodeViewProps<CodeBlockAttrs>) {
+export function CodeBlockNodeView(props: NodeViewProps<CodeBlockAttrs>) {
+  return <CodeBlockView {...props} languagePicker />;
+}
+
+function CodeBlockView({
+  attrs,
+  updateAttrs,
+  editable,
+  languagePicker,
+}: NodeViewProps<CodeBlockAttrs> & { languagePicker: boolean }) {
   return (
     <div
       data-code-block
@@ -200,7 +213,7 @@ export function CodeBlockNodeView({ attrs, updateAttrs, editable }: NodeViewProp
       onPointerDown={(event) => event.stopPropagation()}
     >
       {editable ? (
-        <EditableCodeBlock attrs={attrs} updateAttrs={updateAttrs} />
+        <EditableCodeBlock attrs={attrs} updateAttrs={updateAttrs} languagePicker={languagePicker} />
       ) : (
         <ReadOnlyCodeBlock code={attrs.code} language={attrs.language} />
       )}
@@ -251,7 +264,17 @@ export const codeBlockCodec: NodeCodec<CodeBlockAttrs> = {
   },
 };
 
-export function codeBlock(): EditorFeature {
+/** What a profile may narrow: whether the editable block offers a language control. */
+export interface CodeBlockOptions {
+  /** Show the language control. When false, a block is plain `text`. Default: true. */
+  languagePicker?: boolean;
+}
+
+export function codeBlock(options: CodeBlockOptions = {}): EditorFeature {
+  const languagePicker = options.languagePicker ?? true;
+  const view = languagePicker
+    ? CodeBlockNodeView
+    : (props: NodeViewProps<CodeBlockAttrs>) => <CodeBlockView {...props} languagePicker={false} />;
   return defineFeature({
     id: 'code-block',
     nodes: [
@@ -262,7 +285,7 @@ export function codeBlock(): EditorFeature {
         selectable: true,
         draggable: true,
         attrs: codeBlockAttrs,
-        render: CodeBlockNodeView,
+        render: view,
       },
     ],
     codecs: [codeBlockCodec as NodeCodec],
@@ -279,7 +302,7 @@ export function codeBlock(): EditorFeature {
             content: {
               type: 'codeBlock',
               attrs: {
-                language: args?.language ?? 'text',
+                language: languagePicker ? (args?.language ?? 'text') : 'text',
                 code: args?.code ?? '',
               },
             },
