@@ -210,6 +210,10 @@ function sameValue(left: readonly EditorEmailBlock[], right: readonly EditorEmai
 interface EmailEditorPaneProps {
   /** The element the editor renders into, once for the editor's life. */
   surface: HTMLElement | null;
+  /** Called as the pane gives the surface up, before it leaves the document. */
+  onRelease(): void;
+  /** Called once the pane holds the surface. */
+  onAdopt(): void;
 }
 
 /**
@@ -217,10 +221,16 @@ interface EmailEditorPaneProps {
  * editor's DOM into the new pane: rendered inside each pane, the editor would mount again and lose its document,
  * selection and history.
  */
-function EmailEditorPane({ surface }: EmailEditorPaneProps) {
+function EmailEditorPane({ surface, onRelease, onAdopt }: EmailEditorPaneProps) {
   const pane = useRef<HTMLDivElement>(null);
+  const handlers = useRef({ onRelease, onAdopt });
+  handlers.current = { onRelease, onAdopt };
+  // React runs a removed pane's cleanup while its DOM is still in the document, and the new pane's effect after.
   useLayoutEffect(() => {
-    if (surface) pane.current?.append(surface);
+    if (!surface) return;
+    pane.current?.append(surface);
+    handlers.current.onAdopt();
+    return () => handlers.current.onRelease();
   }, [surface]);
   return <div ref={pane} data-slot="email-editor-pane" className="h-full overflow-y-auto py-2" />;
 }
@@ -298,6 +308,18 @@ export function EmailEditor({
   }, []);
   const isMobile = useIsMobile();
   const tabbed = layout === 'tabs' || (layout === 'auto' && isMobile);
+  // Each switch into tabs opens on the editor, which a moved focus returns to.
+  const [tab, setTab] = useState<'edit' | 'preview'>('edit');
+  const [wasTabbed, setWasTabbed] = useState(tabbed);
+  if (wasTabbed !== tabbed) {
+    setWasTabbed(tabbed);
+    setTab('edit');
+  }
+  const hidden = Boolean(renderer) && tabbed && tab === 'preview';
+
+  // What held the focus in the editor as its pane gave it up: moving the surface drops the focus, and the
+  // author typing as the viewport crosses the breakpoint keeps typing.
+  const held = useRef<HTMLElement | null>(null);
 
   const [editor, setEditor] = useState<IEditor | null>(null);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
@@ -482,7 +504,20 @@ export function EmailEditor({
   const variablesOf = useCallback(() => live.current.profile.variables, []);
   const marksOf = (row: Row) => marks.filter((mark) => mark.block === (row.id ?? row.key));
 
-  const pane = <EmailEditorPane surface={surface} />;
+  const release = () => {
+    const active = document.activeElement;
+    held.current = surface && active instanceof HTMLElement && surface.contains(active) ? active : null;
+  };
+  const adopt = () => {
+    const element = held.current;
+    held.current = null;
+    if (!element?.isConnected) return;
+    const view = editor && contextOf(editor)?.engine.view;
+    // The view puts its own selection back as it takes the focus; a bare focus() would let the browser place it.
+    if (view?.dom === element) view.focus();
+    else element.focus({ preventScroll: true });
+  };
+  const pane = <EmailEditorPane surface={surface} onRelease={release} onAdopt={adopt} />;
   const frame = preview && (
     <iframe
       data-slot="email-preview"
@@ -509,10 +544,11 @@ export function EmailEditor({
             editor={editor}
             items={items.toolbar}
             className="min-w-0"
+            disabled={hidden}
             end={
               <>
-                <LinkVariablePicker editor={editor} declarations={variablesOf} messages={text} />
-                <VariableMenu editor={editor} declarations={profile.variables} messages={text} />
+                <LinkVariablePicker editor={editor} declarations={variablesOf} messages={text} disabled={hidden} />
+                <VariableMenu editor={editor} declarations={profile.variables} messages={text} disabled={hidden} />
               </>
             }
           />
@@ -520,12 +556,12 @@ export function EmailEditor({
       )}
       <div
         data-slot="email-editor-body"
-        className={cn('flex min-h-0 flex-col', renderer && 'h-112', menus && 'border-t')}
+        className={cn('flex min-h-0 flex-col overflow-hidden', renderer && 'h-112', menus && 'border-t')}
       >
         {!renderer ? (
           pane
         ) : tabbed ? (
-          <Tabs defaultValue="edit" className="min-h-0 flex-1">
+          <Tabs value={tab} onValueChange={(value: 'edit' | 'preview') => setTab(value)} className="min-h-0 flex-1">
             <TabsList className="mx-2 mt-2">
               <TabsTrigger value="edit">{text.editTab}</TabsTrigger>
               <TabsTrigger value="preview">{text.previewTab}</TabsTrigger>

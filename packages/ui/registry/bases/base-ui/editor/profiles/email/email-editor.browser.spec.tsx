@@ -207,7 +207,7 @@ describe('EmailEditor', () => {
   it('loads its value and reports each edit as blocks', async () => {
     const probe = await mount([paragraph('Hello', 'p1')]);
     await caretAfter('Hello');
-    await userEvent.keyboard(' there{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}');
+    await userEvent.keyboard(' there');
 
     await vi.waitFor(() =>
       expect(last(probe.reported)?.map(({ id, content }) => [id, content])).toEqual([['p1', { text: 'Hello there' }]]),
@@ -640,7 +640,7 @@ describe('EmailEditor frame', () => {
     await expect.element(page.elementLocator(find('[contenteditable=true]'))).not.toBeVisible();
   });
 
-  it('keeps the typed text and the caret as the viewport crosses the breakpoint and back', async () => {
+  it('keeps the typed text, the caret and the focus as the viewport crosses the breakpoint and back', async () => {
     await page.viewport(1280, 800);
     const probe = await mount([paragraph('Hello', 'p1')], withPreview());
     const surface = find('[contenteditable=true]');
@@ -653,10 +653,36 @@ describe('EmailEditor frame', () => {
     await vi.waitFor(() => expect(document.querySelector('[role=tablist]')).toBeNull());
 
     expect(find('[contenteditable=true]')).toBe(surface);
-    probe.editor.focus();
     await vi.waitFor(() => expect(document.activeElement).toBe(surface));
     await userEvent.keyboard('!');
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'Hello! there' }));
+    expect(probe.blurs).toBe(0);
+  });
+
+  it('splits at a narrow viewport when the layout is split', async () => {
+    await page.viewport(375, 800);
+    await mount([paragraph('Hello', 'p1')], { ...withPreview(), layout: 'split' });
+
+    await expect.element(page.getByTitle('Email preview')).toBeVisible();
+    await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeVisible();
+    expect(document.querySelector('[role=tablist]')).toBeNull();
+  });
+
+  it('disables the toolbar while the preview tab hides the editor', async () => {
+    await page.viewport(375, 800);
+    await mount([paragraph('Hello', 'p1')], withPreview());
+    const toolbar = page.getByRole('toolbar');
+    const controls = [
+      toolbar.getByRole('button', { name: 'Bold' }),
+      toolbar.getByRole('combobox', { name: 'Link', exact: true }),
+      toolbar.getByRole('combobox', { name: 'Variable', exact: true }),
+    ];
+
+    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+    for (const control of controls) await expect.element(control).toBeDisabled();
+
+    await userEvent.click(page.getByRole('tab', { name: 'Edit' }));
+    for (const control of controls) await expect.element(control).toBeEnabled();
   });
 
   it('follows a forced layout at any viewport', async () => {

@@ -13,8 +13,8 @@ import {
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { matchesVariable, variableIcon, variableLabel } from '../variables/variable';
-import { VariableMenuTrigger } from '../variables/variable-menu';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
+import { EditorToolbarComboboxTrigger } from '../../document/ui/editor-toolbar-combobox-trigger';
 import { emailLinkAt } from './kit-context';
 
 /** The declarations, or a getter a picker reads each time it opens, since a host may change them while it is shown. */
@@ -70,7 +70,7 @@ export function UrlVariablePicker({
       itemToStringLabel={variableLabel}
       filter={(declaration: VariableDeclaration, query: string) => matchesVariable(declaration, query)}
     >
-      <VariableMenuTrigger
+      <EditorToolbarComboboxTrigger
         data-slot="url-variable-picker"
         data-label={label}
         icon={LinkIcon}
@@ -98,6 +98,8 @@ export interface LinkVariablePickerProps {
   declarations: DeclarationSource;
   /** Its words; the English when absent. */
   messages?: ProfileEditorMessages;
+  /** Refuses to open, as while the editor is out of sight. */
+  disabled?: boolean;
   className?: string;
 }
 
@@ -106,6 +108,7 @@ export function LinkVariablePicker({
   editor,
   declarations,
   messages = DEFAULT_PROFILE_MESSAGES,
+  disabled,
   className,
 }: LinkVariablePickerProps) {
   const [linked, setLinked] = useState(() => emailLinkAt(editor));
@@ -125,6 +128,7 @@ export function LinkVariablePicker({
       value={linked}
       label={messages.link}
       messages={messages}
+      disabled={disabled}
       className={className}
       onValueChange={(variable) => {
         editor.run('setEmailLink', { variable });

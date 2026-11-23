@@ -1180,6 +1180,21 @@
       ]
     },
     {
+      "name": "lucide-braces-icon",
+      "type": "registry:ui",
+      "title": "Braces Icon",
+      "description": "An animated braces icon, motion authored in the manner of lucide-animated, whose two braces move apart and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/braces-icon.tsx",
+          "type": "registry:ui",
+          "target": "@components/general/lucide/braces-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-brain-icon",
       "type": "registry:ui",
       "title": "Brain Icon",

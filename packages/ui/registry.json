@@ -1234,6 +1234,11 @@
           "target": "@components/editor/document/ui/editor-toolbar.tsx"
         },
         {
+          "path": "registry/bases/base-ui/editor/document/ui/editor-toolbar-combobox-trigger.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/ui/editor-toolbar-combobox-trigger.tsx"
+        },
+        {
           "path": "registry/bases/base-ui/editor/document/ui/rect-popover.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/ui/rect-popover.tsx"
@@ -3211,7 +3216,6 @@
         "@shadcn/combobox",
         "@shadcn/resizable",
         "@shadcn/tabs",
-        "@shadcn/toggle",
         "@shadcn/tooltip",
         "@shadcn/use-mobile",
         "@shadcn/utils",
@@ -3220,7 +3224,7 @@
         "@zui/document-editor",
         "@zui/editor-callout",
         "@zui/editor-code-block",
-        "@zui/lucide-dollar-sign-icon",
+        "@zui/lucide-braces-icon",
         "@zui/lucide-layout-grid-icon",
         "@zui/lucide-layout-panel-top-icon",
         "@zui/lucide-link-icon",
@@ -3314,7 +3318,7 @@
           "target": "@components/editor/profiles/variables/variable.tsx"
         }
       ],
-      "dependencies": ["@base-ui/react", "@zeroxsolutions/editor-core", "lucide-react", "zod"],
+      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react", "zod"],
       "css": {
         ".document-editor .ProseMirror [data-align='left'], .document-editor .ProseMirror [data-align='left'] p": {
           "text-align": "left"
@@ -4462,6 +4466,21 @@
           "path": "registry/bases/base-ui/icons/lucide/boxes-icon.tsx",
           "type": "registry:ui",
           "target": "@components/general/lucide/boxes-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-braces-icon",
+      "type": "registry:ui",
+      "title": "Braces Icon",
+      "description": "An animated braces icon, motion authored in the manner of lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/braces-icon.tsx",
+          "type": "registry:ui",
+          "target": "@components/general/lucide/braces-icon.tsx"
         }
       ]
     },
