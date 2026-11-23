@@ -1,6 +1,6 @@
 import type { Editor } from '@tiptap/core';
 import { Fragment } from '@tiptap/pm/model';
-import { NodeSelection, TextSelection, type Transaction } from '@tiptap/pm/state';
+import { NodeSelection, type Selection, TextSelection, type Transaction } from '@tiptap/pm/state';
 import { z } from 'zod';
 import { CONTENT_LOAD_META } from '../engine/content-load.js';
 import type { EngineHandle } from '../engine/engine-handle.js';
@@ -78,15 +78,20 @@ function fitsAt(doc: PmNode, pos: number, nodes: PmNode[]): boolean {
 }
 
 /**
- * The transaction that turns the selected block into `name`, or `null` when the selection is not a whole block
+ * The transaction that turns the block `selection` picked into `name`, or `null` when it picked no whole block
  * of text, the schema has no such type, its parent may not hold what it would become, or the block is a list
  * item and `name` is its own list's type, which would change nothing. A list item leaves its list: the list
  * splits around it, and the item becomes the target. The only item of a list turns the whole list, which keeps
  * the list's attributes, such as its id, on what replaces it.
  */
-function turnInto(state: Editor['state'], name: string, a: Record<string, unknown>): Transaction | null {
-  const { selection, schema } = state;
-  if (!(selection instanceof NodeSelection)) return null;
+function turnInto(
+  state: Editor['state'],
+  selection: NodeSelection | null,
+  name: string,
+  a: Record<string, unknown>,
+): Transaction | null {
+  const { schema } = state;
+  if (!selection) return null;
   const $picked = state.doc.resolve(selection.from);
   const alone = LIST_ITEMS.has(selection.node.type.name) && $picked.parent.childCount === 1;
   const source = alone ? $picked.parent : selection.node;
@@ -242,6 +247,24 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
   const editor = handle as unknown as Editor;
   const attrsOf = (a?: Record<string, unknown>) => (a ?? {}) as Record<string, unknown>;
 
+  // A table's own plugin turns a node selection of the table into a selection of its cells, so the block the
+  // grip picked is kept here while the state still holds what that selection became.
+  let picked: { pos: number; node: PmNode; selection: Selection } | null = null;
+  const pick = (pos: number) => {
+    const { view } = editor;
+    view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, pos)));
+    const { selection, doc } = view.state;
+    picked = selection instanceof NodeSelection ? null : { pos, node: doc.nodeAt(pos)!, selection };
+  };
+  /** The whole block the grip's menu acts on: the selected node, or the block the grip picked whose selection
+   *  a plugin widened, while neither the selection nor that block has changed since. */
+  const pickedBlock = (): NodeSelection | null => {
+    const { selection, doc } = editor.state;
+    if (selection instanceof NodeSelection) return selection;
+    if (!picked || !selection.eq(picked.selection) || doc.nodeAt(picked.pos) !== picked.node) return null;
+    return NodeSelection.create(doc, picked.pos);
+  };
+
   // Run/probe an engine chain command by name, guarded so it no-ops when the
   // extension that provides it (heading/list/blockquote/hr — contributed by a
   // feature) is not registered. Lets a feature's toolbar/slash command compose
@@ -363,7 +386,7 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
           const point = x !== undefined && grip === true ? x + gripReach(editor) : x;
           const pos = blockAt(view, y, point, caret === true);
           if (pos === null) return false;
-          view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, pos)));
+          pick(pos);
           return true;
         } catch {
           return false;
@@ -385,7 +408,7 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
           if (pos === null) return false;
           // Built apart from the state's selection, which a table's own plugin turns into a cell selection.
           const selection = NodeSelection.create(view.state.doc, pos);
-          view.dispatch(view.state.tr.setSelection(selection));
+          pick(pos);
           const slice = selection.content();
           const { dom, text } = view.serializeForClipboard(slice);
           data.clearData();
@@ -408,8 +431,8 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
     },
     duplicateBlock: {
       run: () => {
-        const { selection } = editor.state;
-        if (!(selection instanceof NodeSelection)) return false;
+        const selection = pickedBlock();
+        if (!selection) return false;
         const copy = withoutIds(selection.node.toJSON() as Record<string, unknown>, editor.schema);
         return editor.chain().insertContentAt(selection.to, copy).run();
       },
@@ -420,17 +443,24 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
     turnBlockInto: {
       args: z.object({ name: z.string().min(1), attrs }),
       run: ({ name, attrs: a }) => {
-        const tr = turnInto(editor.state, name, attrsOf(a));
+        const tr = turnInto(editor.state, pickedBlock(), name, attrsOf(a));
         if (!tr) return false;
         editor.view.dispatch(tr.scrollIntoView());
         return true;
       },
-      can: ({ name, attrs: a }) => turnInto(editor.state, name, attrsOf(a)) !== null,
+      can: ({ name, attrs: a }) => turnInto(editor.state, pickedBlock(), name, attrsOf(a)) !== null,
     },
     deleteBlock: {
       run: () => {
-        if (!(editor.state.selection instanceof NodeSelection)) return false;
-        return editor.chain().deleteSelection().run();
+        const selection = pickedBlock();
+        if (!selection) return false;
+        return editor
+          .chain()
+          .command(({ tr }) => {
+            tr.setSelection(selection).deleteSelection();
+            return true;
+          })
+          .run();
       },
     },
     deleteNode: {

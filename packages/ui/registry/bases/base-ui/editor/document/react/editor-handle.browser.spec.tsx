@@ -472,6 +472,32 @@ describe('the block a grip addresses inside another block', () => {
     });
   });
 
+  /** Opens the block menu from the grip beside the first line of the table, which the handle stands beside. */
+  async function tableMenu(blocks: HTMLElement[]) {
+    await userEvent.click(await gripBeside(holding('.ProseMirror td p', 'c1'), blocks[0]));
+    await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
+  }
+
+  it('deletes the whole table from its grip menu, and Mod-Z brings it back', async () => {
+    const { blocks, editor } = await mountDocument(tableDoc, 1, [table()]);
+    const loaded = editor().getJSON();
+    await tableMenu(blocks);
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
+    await vi.waitFor(() => expect(types(editor())).toEqual(['paragraph']));
+    await vi.waitFor(() => expect(document.activeElement?.classList.contains('ProseMirror')).toBe(true));
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+    await vi.waitFor(() => expect(editor().getJSON()).toEqual(loaded));
+  });
+
+  it('duplicates the whole table from its grip menu into two equal tables', async () => {
+    const { blocks, editor } = await mountDocument(tableDoc, 1, [table()]);
+    const loaded = editor().getJSON().content?.[0];
+    await tableMenu(blocks);
+    await userEvent.click(page.getByRole('menuitem', { name: 'Duplicate' }));
+    await vi.waitFor(() => expect(types(editor())).toEqual(['table', 'table', 'paragraph']));
+    expect(editor().getJSON().content?.[1]).toEqual(loaded);
+  });
+
   const quoteInItem: DocJSON = {
     type: 'doc',
     content: [
