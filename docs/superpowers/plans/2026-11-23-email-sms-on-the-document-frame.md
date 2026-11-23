@@ -45,12 +45,14 @@
 ### Task 1: The email codec on the document's nodes
 
 **Files:**
+
 - Modify: `packages/editor-core/src/profiles/core/email-nodes.ts`, `email-blocks.ts`, `types.ts`, `validate.ts`, `index.ts`
 - Modify: `packages/editor-core/src/profiles/editor/block-identity.ts`
 - Create: `packages/editor-core/src/profiles/core/doc-problems.ts`
 - Test: `email-blocks.spec.ts`, `doc-problems.spec.ts` (new), `block-identity.spec.ts`
 
 **Interfaces:**
+
 - Produces: `EMAIL_BLOCK_NODES` = `['bulletList', 'callout', 'codeBlock', 'horizontalRule', 'emailButton', 'emailColumns', 'emailHtml', 'emailUnknown', 'heading', 'orderedList', 'taskList', 'blockquote']` (the nodes `blockIdentity` keys, besides `paragraph`); `emailNodeSpecs.nodes` keeps only `emailButton`, `emailColumns`, `emailLane`, `emailHtml`, `emailUnknown`, `variable`; `EMAIL_GLOBAL_ATTRIBUTES: Record<string, string[]>` (node name to the email attributes it carries: paragraph `align spaceAfter tone source`, bulletList `align spaceAfter`, callout `align spaceAfter source`, codeBlock `align spaceAfter`, horizontalRule `spaceAfter`); `docProblems(doc: DocJSON): ProfileProblem[]`; problem kind `block-not-carried` with `blockId: string | null` and `blockKey: string`.
 - Mapping: `list` <-> `bulletList` > `listItem` > `paragraph` (one per item, `source` on the paragraph); `callout` <-> `callout{variant:'info'}` > one `paragraph`; `code` <-> `codeBlock{language:'text', code}`; `divider` <-> `horizontalRule`.
 
@@ -63,12 +65,14 @@
 ### Task 2: A grip-opened block menu in the Document Editor
 
 **Files:**
+
 - Modify: `packages/editor-core/src/document/core/types/ui-contribution.ts`, `packages/editor-core/src/document/core/command/built-in-commands.ts`
 - Modify: `packages/ui/registry/bases/base-ui/editor/document/react/editor.tsx`, `document/features/standard/standard-ui.ts`
 - Delete: `packages/ui/registry/bases/base-ui/editor/document/ui/block-menu.tsx` (folded into the grip) and its uses in `chrome.spec.tsx` and `chrome-icon-size.browser.spec.tsx`
 - Test: `document/react/editor-handle.browser.spec.tsx`, `built-in-commands` spec beside the file
 
 **Interfaces:**
+
 - Produces: `BlockMenuItem` gains `group?: string` (items sharing a group render as one labelled radio submenu), `active?(editor: IEditor): boolean`, `disabledReason?(editor: IEditor): string | null`. Built-in commands `selectBlockAt({ y: number })` (NodeSelection of the top-level or lane block under `y`), `duplicateBlock()` (copies the selected block below it, `id` attributes set to `null`, new `key`s left to `blockIdentity`), `deleteBlock()`. `standardKit` contributes block menu items `turn-into-*` (Text, Heading 1-3, Bulleted list, Numbered list, To-do list, Quote; group `Turn into`), `duplicate`, `delete` (separatorBefore).
 - `Editor` computes `collectUiContributions(features).blockMenu` and renders it in the house `DropdownMenu` anchored to the grip; it is not a prop.
 
@@ -81,10 +85,12 @@
 ### Task 3: Callout and code block options for a narrower profile
 
 **Files:**
+
 - Modify: `packages/ui/registry/bases/base-ui/editor/document/features/callout/callout.tsx`, `code-block/code-block.tsx`, `code-block/code-settings-menu.tsx`
 - Test: `callout.spec.tsx`, `code-block.spec.tsx`
 
 **Interfaces:**
+
 - Produces: `callout(options?: { variants?: readonly CalloutVariant[] })` (default all; with one variant the view draws no variant picker and inserts that variant); `codeBlock(options?: { languagePicker?: boolean })` (default `true`; `false` hides the language control and inserts `language: 'text'`).
 
 - [ ] **Step 1: Failing specs:** `callout({ variants: ['info'] })` view renders no variant picker; `codeBlock({ languagePicker: false })` view renders no language control; defaults unchanged (existing specs pass).
@@ -96,12 +102,14 @@
 ### Task 4: emailKit composed from the document's features
 
 **Files:**
+
 - Modify: `packages/ui/registry/bases/base-ui/editor/profiles/email/email-kit.ts`, `kit-context.ts`, `nodes/block-style.ts`, `nodes/button.tsx`, `nodes/columns.tsx`, `problem-decorations.ts`, `../variables/variable.tsx` (chip state)
 - Delete: `profiles/email/nodes/code.tsx`, `list.tsx`, `callout.tsx`, `divider.tsx`, `profiles/email/block-attributes-menu.tsx`
 - Modify: `profiles/sms/sms-kit.ts`
 - Test: `email-kit.browser.spec.tsx`, `sms-editor.browser.spec.tsx`
 
 **Interfaces:**
+
 - Consumes: Task 1's specs and `EMAIL_GLOBAL_ATTRIBUTES`, Task 2's `BlockMenuItem` fields and commands, Task 3's options.
 - Produces: `emailKit(profile, extra?, context)` returns `[standardKit({ placeholder }), callout({ variants: ['info'] }), codeBlock({ languagePicker: false }), ...emailFeatures]`, where the email features add the email-only nodes, the global attributes, `emailLink`, and block menu items per attribute (`group` `Align`, `Space after`, `Tone`, `Width`, `Lanes`; `disabledReason` from locked structure and required blocks; Delete's reason likewise). The kit's slash, toolbar and bubble items are filtered to the profile's kinds and marks (`emailUi(contributions, profile)`); `MAIL_LAYOUT_KINDS` narrows them the same way. `smsKit(profile)` returns `[standardKit({ placeholder, dragHandle: false }), variable feature]` with every slash, toolbar, bubble and block menu item filtered out but the variable's.
 - The variable chip of an undeclared name uses the `destructive` token on its own border and text; the underline decoration is removed. Problem markers stay in the block's gutter row, right-aligned, never positioned over content.
@@ -115,10 +123,12 @@
 ### Task 5: The EmailEditor frame and its preview
 
 **Files:**
+
 - Modify: `packages/ui/registry/bases/base-ui/editor/profiles/email/email-editor.tsx`, `url-variable-picker.tsx`, `../variables/variable-menu.tsx`, `document/ui/editor-toolbar.tsx`, `profiles/messages.ts`
 - Test: `email-editor.browser.spec.tsx`
 
 **Interfaces:**
+
 - Produces: `EmailEditorProps` gains `layout?: 'auto' | 'split' | 'tabs'` (default `'auto'`); messages gain `editTab` (`'Edit'`) and `previewTab` (`'Preview'`). `EditorToolbar` gains `end?: ReactNode`, drawn in its row after a separator; the link picker and the variable menu render there as icon buttons with tooltips, in the toolbar's own control style.
 - Frame: `CollapsibleCard variant="muted"` with `data-slot="email-editor"`; header = `EditorToolbar`; body = the editor, and with a renderer the preview: `ResizablePanelGroup` (55/45) when split, `Tabs` with `editTab`/`previewTab` when tabbed; `'auto'` is split unless `useIsMobile()`. The editor instance is mounted once and moved between layouts without remount (render both layouts' slots around one `Editor` element via a stable container). The preview iframe fills its panel (`h-full`), no fixed height; the unplaced and preview problem lists sit in the frame's footer.
 
@@ -131,11 +141,13 @@
 ### Task 6: The SmsEditor frame
 
 **Files:**
+
 - Modify: `packages/ui/registry/bases/base-ui/editor/profiles/sms/sms-editor.tsx`, `sms-meter.tsx`
 - Modify: `packages/ui/registry/bases/base-ui/examples/sms-editor-demo.tsx` (variable labels lower case, e.g. `code`)
 - Test: `sms-editor.browser.spec.tsx`
 
 **Interfaces:**
+
 - Produces: the same `CollapsibleCard` frame as Task 5, header `EditorToolbar` with the variable menu in `end`, the meter in the frame's footer starting at the text's left edge.
 
 - [ ] **Step 1: Failing browser spec:** the variable menu is inside `role="toolbar"`; the meter's left edge equals the editor content's left edge (within 1px); existing SMS specs pass.
@@ -147,11 +159,13 @@
 ### Task 7: Registry items, demos and docs pages
 
 **Files:**
+
 - Modify: `packages/ui/registry.json` (email-editor and sms-editor files and `registryDependencies`: add `editor-callout`, `editor-code-block`, `collapsible-card`, `resizable`, `tabs`; drop deleted files), `packages/ui/registry/bases/base-ui/examples/email-editor-demo.tsx`
 - Modify: `packages/editor-docs-web/content/docs/editor/email-editor.mdx`, `sms-editor.mdx`, `document-editor.mdx` (the grip's block menu)
 - Modify: the site link that prefetches `/docs/editor` (it answers 404; point it at the editor docs' first page or add the index page the sidebar's "Editor" entry names)
 
 **Interfaces:**
+
 - Docs outline, as `document-editor.mdx`: demo, Installation, Usage (one short example), API reference (props table, one line per prop), then at most these sections: Variables, Validation (problem table), Markup. No "Travel" or "Hosting the value" section, no paragraph over four sentences; wording passes the `cutting-ai-tells` and `writing-prose` skills.
 
 - [ ] **Step 1: Run** `CI=true pnpm nx run @zeroxsolutions/ui:test -- --run registry/registry.spec.ts src/build`; note failures from Tasks 4-6's file moves.
@@ -162,6 +176,7 @@
 ### Task 8: Side-by-side review and the spec amendment
 
 **Files:**
+
 - Modify: `docs/superpowers/specs/2026-11-23-email-sms-on-the-document-frame-design.md` (the link row: `emailLink`, email profile, per this plan's ruling)
 - Create: `.superpowers/sdd/<plan workspace>/screens/` (not committed)
 
@@ -169,3 +184,50 @@
 - [ ] **Step 2:** Compare each against the Document Editor: grip, "+", toolbar row, block menu, fonts, spacing. List every difference; fix each in the owning task's files and re-shoot.
 - [ ] **Step 3:** Amend the spec's link row; commit `docs(spec): keep the email link a variable mark`.
 - [ ] **Step 4:** Stop the dev server by its PID.
+
+---
+
+## Addendum (2026-11-23): variables in every text field
+
+**Spec:** `docs/superpowers/specs/2026-11-23-variables-in-every-text-field-design.md`. Same Global Constraints.
+
+### Task 9: Hrefs and labels as token strings in editor-core
+
+**Files:** `packages/editor-core/src/template/markup/inline-markup.ts`, `template/email/context.ts`, `template/email/blocks/button.ts`, `profiles/core/validate.ts`, `profiles/core/types.ts`, `profiles/core/email-blocks.ts`, `profiles/core/email-nodes.ts`, their specs.
+
+**Interfaces:**
+
+- Produces: `InlineLink { kind: 'link'; href: string; label: InlineText[] }`; `hrefProblem(href: string, typeOf: (name: string) => VariableType | undefined): 'href-invalid' | null` (one function used by validate for buttons and links, exported from `template/index`); problem kinds `href-invalid`, `link-invalid` replace `href-not-url-variable`, `link-not-url-variable` (profiles and renderer); `emailLink` mark attrs `{ href: string }`; codec reads a legacy `emailLink{variable}` as `href: '{{variable}}'`.
+- Renderer `ctx.href(template)`: leading `url` token filled raw (escaped, scheme-checked, `href-scheme-refused` as today); every other token `encodeURIComponent`-ed; fixed scheme literal required otherwise (`href-invalid`).
+
+- [ ] Step 1: failing specs per the spec's Testing section (markup, validate, renderer, codec legacy mark).
+- [ ] Step 2: run `CI=true pnpm nx run @zeroxsolutions/editor-core:test -- --run src/template src/profiles`; FAIL.
+- [ ] Step 3: implement.
+- [ ] Step 4: same run + lint/typecheck; PASS.
+- [ ] Step 5: commit `feat(editor-core)!: let a link hold any text with variables` with a `BREAKING CHANGE:` paragraph naming the replaced problem kinds and `InlineLink.href`.
+
+### Task 10: One variable text field for labels and hrefs
+
+**Files:** create `packages/ui/registry/bases/base-ui/editor/profiles/variables/variable-text-field.tsx`; modify `profiles/email/nodes/button.tsx`, `profiles/email/email-kit.ts` (button Link item), `profiles/email/url-variable-picker.tsx` (becomes the link editor), `profiles/email/marks.ts`, `profiles/messages.ts`, registry.json; specs.
+
+**Interfaces:**
+
+- Produces: `VariableTextField({ value: string; onValueChange(value: string): void; declarations: () => VariableDeclaration[]; label: string; placeholder?: string; disabled?: boolean; invalid?: boolean })`: a single-line field built on the editor core with the variable feature (no blocks, no marks, no line breaks; Enter commits), tokens as chips, `{{` opens the variable menu, undeclared tokens marked.
+- The button label edits inline through `VariableTextField`. The button's block menu "Link" item opens a popover holding a `VariableTextField` for the href plus the declared `url` variables as one-click choices. The toolbar's and bubble's link control opens the same popover for the selection's link (set, change, remove).
+- Messages for `href-invalid` and `link-invalid` replace the removed kinds' messages.
+
+- [ ] Step 1: failing browser specs: `{{` in the button label inserts a chip and exports `{{name}}`; typing `https://x.test/a?t={{token}}` as a link href exports that href; an undeclared token in an href is marked; a url-variable choice sets `{{trip_url}}`; locked structure disables the href field.
+- [ ] Step 2-4: run the editor browser suite, `registry src/build`, lint/typecheck; FAIL then PASS.
+- [ ] Step 5: commit `feat(ui): edit labels and links as text with variables`.
+
+### Task 11: Variables in code and HTML blocks
+
+**Files:** create `packages/ui/registry/bases/base-ui/editor/shared/code-mirror/variable-tokens.ts` (CodeMirror extension); modify `document/features/code-block/code-block.tsx` (an option `variables?: () => VariableDeclaration[]`), `profiles/email/nodes/html.tsx`, `profiles/email/email-kit.ts`, the email docs page's Variables section; specs.
+
+**Interfaces:**
+
+- Produces: `variableTokens(declarations: () => VariableDeclaration[]): Extension` for CodeMirror: highlights `{{name}}`, marks undeclared names, and completes on `{{` from the declarations. The HTML block's text gets the same highlight and `{{` menu through a ProseMirror decoration plus the variable trigger inserting literal `{{name}}` text (its content stays plain text, so the export is unchanged).
+
+- [ ] Step 1: failing browser specs: `{{` in a code block offers the declarations and inserts `{{name}}`; an undeclared token in code and in HTML is marked; exports unchanged.
+- [ ] Step 2-4: run, FAIL then PASS, plus lint/typecheck and the docs zone build.
+- [ ] Step 5: commit `feat(ui): detect variables in code and html blocks`.
