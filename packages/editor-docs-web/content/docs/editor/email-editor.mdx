@@ -207,13 +207,17 @@ menu holds Turn into, Duplicate and Delete, and the block's Align, Space after, 
 
 The editor is drawn as the Document Editor is, with its toolbar above the blocks and nothing around them.
 With a `renderer`, an Edit and a Preview tab sit at the end of the toolbar's row, as a Mermaid block's switch
-does. The Preview tab shows the rendered email with each variable's `sampleValue`, and the toolbar is disabled
-while it is open. `layoutProps` is the default layout's logo and footer, and the demo's source defines it.
+does. The Preview tab shows the rendered email with each variable's `sampleValue`. `layoutProps` is the
+default layout's logo and footer, and the demo's source defines it.
 
-Above the email, the preview shows the `sender`, the subject and the preheader as an inbox lists them. Its bar
-switches between Desktop, a 640px frame, and Mobile, a 375px frame where the email's narrow-screen rules
-apply, and between Light and Dark. Dark sets the frame's color scheme, so the email's
-`prefers-color-scheme: dark` rules apply. The scheme opens on the page's own.
+On the Preview tab, the preview's controls take the toolbar's place. Desktop draws the email 640px wide,
+scaled down to fit a narrower page, and Mobile draws it in a column at most 375px wide, where the email's
+narrow-screen rules apply. Light and Dark answer the email's `prefers-color-scheme` rules, and the scheme
+opens on the page's own. Above the email sit the `sender`, the subject and the preheader as an inbox lists
+them, and the frame is as tall as the email.
+
+The frame runs scripts at an opaque origin, under a policy that admits only the script that reports its
+height, so a script or a handler in an HTML block does not run.
 
 ## Theme
 

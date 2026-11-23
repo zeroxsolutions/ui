@@ -98,14 +98,15 @@ side with the Document Editor it reads as a different product.
 
 ### Preview
 
-- `EmailEditor` draws the renderer's HTML in a sandboxed iframe on a page under the Preview tab, a panel
-  with the design system's card radius and ring.
-- The iframe's background follows the renderer's theme; the frame around it follows Editor Theme.
-- A bar over the page switches between a desktop width and a phone's, the frame sized so the email's
-  narrow-screen rules apply, and between a light and a dark scheme, which answers the email's
-  `prefers-color-scheme` rules. The sender, subject and preheader sit above the page as an inbox lists them.
-  `EmailTheme` takes an optional `dark` palette that the renderer emits as those rules. Added 2026-11-23
-  after the owner's review of the bare page.
+- `EmailEditor` draws the renderer's HTML in a sandboxed iframe under the Preview tab, on a muted canvas,
+  as tall as the email. On desktop the email's own background is the page, 640px wide and scaled down to
+  fit; on mobile it sits in a rounded column at most 375px wide, where its narrow-screen rules apply.
+- The iframe's background follows the renderer's theme; the canvas around it follows Editor Theme.
+- On the Preview tab the toolbar's place holds the device and the color-scheme controls. The scheme
+  answers the email's `prefers-color-scheme` rules. The sender, subject and preheader sit above the email
+  as an inbox lists them. `EmailTheme` takes an optional `dark` palette that the renderer emits as those
+  rules. Added 2026-11-23 after the owner's review of the bare page.
+- The frame runs scripts at an opaque origin under a nonce policy that admits only its height report.
 
 ## Testing
 

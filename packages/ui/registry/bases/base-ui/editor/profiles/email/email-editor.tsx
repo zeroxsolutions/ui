@@ -57,7 +57,7 @@ import { emailKit, emailUi, type EmailUi } from './email-kit';
 import { UNLINK_ITEM_ID } from './marks';
 import { carriesKey, contextOf } from './kit-context';
 import { EmailLinkPopover } from './email-link-popover';
-import { EmailPreview } from './email-preview';
+import { EmailPreview, EmailPreviewBar, type EmailPreviewDevice, type EmailPreviewScheme } from './email-preview';
 import { problemDecorations, problemMarks, type ProblemMark } from './problem-decorations';
 
 /** How long after an edit the problems are read again, at most, and how long after the last edit the preview is. */
@@ -329,7 +329,9 @@ export function EmailEditor({
     setSurface(element);
   }, []);
   const [tab, setTab] = useState<'edit' | 'preview'>('edit');
-  const hidden = Boolean(renderer) && tab === 'preview';
+  const previewing = Boolean(renderer) && tab === 'preview';
+  const [device, setDevice] = useState<EmailPreviewDevice>('desktop');
+  const [scheme, setScheme] = useState<EmailPreviewScheme>('light');
 
   // What held the focus in the editor as its pane gave it up: moving the surface drops the focus, and the
   // author typing as the host passes a renderer keeps typing.
@@ -337,6 +339,10 @@ export function EmailEditor({
 
   const [editor, setEditor] = useState<IEditor | null>(null);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
+  // The preview opens on the page's scheme, a class on an ancestor that only the browser reads.
+  useEffect(() => {
+    if (root?.closest('.dark')) setScheme('dark');
+  }, [root]);
   const [rows, setRows] = useState<Row[]>([]);
   const [marks, setMarks] = useState<ProblemMark[]>([]);
   const [unplaced, setUnplaced] = useState<string[]>([]);
@@ -541,8 +547,7 @@ export function EmailEditor({
       editor={editor}
       items={items.toolbar}
       className="min-w-0 self-start"
-      disabled={hidden}
-      end={<VariableMenu editor={editor} declarations={profile.variables} messages={text} disabled={hidden} />}
+      end={<VariableMenu editor={editor} declarations={profile.variables} messages={text} />}
     />
   );
   const previewProblems = (renderer && preview?.problems) || [];
@@ -557,8 +562,20 @@ export function EmailEditor({
     >
       {renderer ? (
         <Tabs value={tab} onValueChange={(value: 'edit' | 'preview') => setTab(value)} className="gap-3">
+          {/* The Preview tab's controls take the toolbar's place, as the editor is out of sight. */}
           <div data-slot="email-editor-bar" className="flex items-center gap-3">
-            {toolbar}
+            {previewing ? (
+              <EmailPreviewBar
+                device={device}
+                scheme={scheme}
+                onDeviceChange={setDevice}
+                onSchemeChange={setScheme}
+                messages={text}
+                className="min-w-0 self-start"
+              />
+            ) : (
+              toolbar
+            )}
             <TabsList className="ms-auto shrink-0">
               <ChromeControl
                 icon={PencilLineIcon}
@@ -581,6 +598,8 @@ export function EmailEditor({
                 subject={preview.subject}
                 preheader={preview.preheader}
                 sender={sender}
+                device={device}
+                scheme={scheme}
                 messages={text}
               />
             )}

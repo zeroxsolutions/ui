@@ -184,6 +184,13 @@ async function caretAfter(text: string): Promise<void> {
 
 const last = <T,>(list: T[]): T | undefined => list[list.length - 1];
 
+/** The renderer's HTML in a preview frame, without the policy and the measuring script the preview adds. */
+function rendered(frame: HTMLIFrameElement): string {
+  return frame.srcdoc
+    .replace(/<meta http-equiv="Content-Security-Policy" content="[^"]*">/, '')
+    .replace(/<script nonce="[0-9a-f]+">[\s\S]*?<\/script>/, '');
+}
+
 /** Shows the grip of the paragraph holding `text`, or of the block `selector` names, as a pointer over it does. */
 async function gripOf(text: string, selector = '[contenteditable=true] p'): Promise<HTMLElement> {
   await userEvent.hover(await vi.waitFor(() => find(selector, text)));
@@ -456,8 +463,9 @@ describe('EmailEditor', () => {
       return found;
     });
     const expected = renderer.render({ ...previewInput, ...sampled, blocks: withIds(last(probe.reported) ?? []) });
-    expect(frame.srcdoc).toBe(expected.html);
-    expect(frame.getAttribute('sandbox')).toBe('');
+    expect(rendered(frame)).toBe(expected.html);
+    // Scripts run under a policy that admits the measuring script alone, at an opaque origin.
+    expect(frame.getAttribute('sandbox')).toBe('allow-scripts');
   });
 
   it('previews a columns block, keys standing in for the ids of its lanes, and lists the render problems', async () => {
@@ -481,7 +489,7 @@ describe('EmailEditor', () => {
       [null, true],
     ]);
     const expected = renderer.render({ ...previewInput, ...sampled, blocks: withIds(blocks) });
-    expect(frame.srcdoc).toBe(expected.html);
+    expect(rendered(frame)).toBe(expected.html);
     expect(expected.problems.length).toBeGreaterThan(0);
     // In words, at the place of its block in the document: the columns, Left, then Right.
     expect(find('[data-slot=email-preview-problems]').textContent).toContain(
@@ -734,20 +742,19 @@ describe('EmailEditor frame', () => {
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'Hello! there' }));
   });
 
-  it('disables the toolbar while the preview tab hides the editor', async () => {
+  it("puts the preview's controls in the toolbar's place on the Preview tab, and the toolbar back on Edit", async () => {
     await mount([paragraph('Hello', 'p1')], withPreview());
-    const toolbar = page.getByRole('toolbar');
-    const controls = [
-      toolbar.getByRole('button', { name: 'Bold' }),
-      toolbar.getByRole('button', { name: 'Link', exact: true }),
-      toolbar.getByRole('combobox', { name: 'Variable', exact: true }),
-    ];
 
     await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
-    for (const control of controls) await expect.element(control).toBeDisabled();
+    await expect.element(page.getByRole('group', { name: 'Device' })).toBeVisible();
+    await expect.element(page.getByRole('group', { name: 'Color scheme' })).toBeVisible();
+    expect(document.querySelector('[role=toolbar]')).toBeNull();
 
     await userEvent.click(page.getByRole('tab', { name: 'Edit' }));
-    for (const control of controls) await expect.element(control).toBeEnabled();
+    const toolbar = page.getByRole('toolbar');
+    await expect.element(toolbar.getByRole('button', { name: 'Bold' })).toBeEnabled();
+    await expect.element(toolbar.getByRole('combobox', { name: 'Variable', exact: true })).toBeEnabled();
+    expect(document.querySelector('[data-slot=email-preview-bar]')).toBeNull();
   });
 
   const frame = () => find('iframe[data-slot=email-preview]') as HTMLIFrameElement;
@@ -758,12 +765,39 @@ describe('EmailEditor frame', () => {
     await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
     const devices = page.getByRole('group', { name: 'Device' });
     await expect.element(devices.getByRole('button', { name: 'Desktop' })).toHaveAttribute('aria-pressed', 'true');
-    // The email's narrow-screen rules apply at 600px and under, and the frame is sized, not scaled.
-    expect(frame().getBoundingClientRect().width).toBeGreaterThan(600);
+    // The email's narrow-screen rules apply at 600px and under.
+    expect(frame().offsetWidth).toBeGreaterThan(600);
 
     await userEvent.click(devices.getByRole('button', { name: 'Mobile' }));
     await expect.element(devices.getByRole('button', { name: 'Mobile' })).toHaveAttribute('aria-pressed', 'true');
-    await vi.waitFor(() => expect(frame().getBoundingClientRect().width).toBeLessThanOrEqual(375));
+    await vi.waitFor(() => expect(frame().offsetWidth).toBeLessThanOrEqual(375));
+  });
+
+  it('scales the desktop email down to fit a narrow viewport, past the narrow-screen breakpoint', async () => {
+    await page.viewport(375, 800);
+    await mount([paragraph('Hello', 'p1')], withPreview());
+    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+
+    await vi.waitFor(() => expect(frame().getBoundingClientRect().width).toBeLessThan(375));
+    expect(frame().offsetWidth).toBeGreaterThan(600);
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(375);
+  });
+
+  it('grows the frame with the email, running only its own measuring script', async () => {
+    const probe = await mount([paragraph('Hello', 'p1')], withPreview());
+    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+    expect(frame().getAttribute('sandbox')).toBe('allow-scripts');
+    expect(frame().srcdoc).toMatch(
+      /<meta http-equiv="Content-Security-Policy" content="script-src 'nonce-[0-9a-f]+'">/,
+    );
+    const first = await vi.waitFor(() => {
+      const height = parseFloat(frame().style.height);
+      expect(height).toBeGreaterThan(0);
+      return height;
+    });
+
+    probe.load(['One', 'Two', 'Three', 'Four', 'Five'].map((text, index) => paragraph(text, `p${index}`)));
+    await vi.waitFor(() => expect(parseFloat(frame().style.height)).toBeGreaterThan(first));
   });
 
   it("answers the email's dark rules on Dark, and its light ones on Light", async () => {
