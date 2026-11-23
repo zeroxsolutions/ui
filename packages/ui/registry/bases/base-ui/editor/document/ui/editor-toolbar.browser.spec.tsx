@@ -68,6 +68,15 @@ describe('EditorToolbar', () => {
     expect(focused()).toBe(items[0].title);
   });
 
+  it('leaves a modified arrow, Home or End to the page', async () => {
+    await mount();
+    await userEvent.click(page.getByRole('button', { name: 'Before' }));
+    await userEvent.tab();
+
+    await userEvent.keyboard('{Shift>}{ArrowRight}{/Shift}{Control>}{End}{/Control}{Alt>}{ArrowRight}{/Alt}');
+    expect(focused()).toBe(items[0].title);
+  });
+
   it('comes back by Tab to the control focused last', async () => {
     await mount();
     await userEvent.click(page.getByRole('button', { name: 'Before' }));

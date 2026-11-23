@@ -3360,6 +3360,7 @@
         "@shadcn/tooltip",
         "@shadcn/utils",
         "@zui/chat-input",
+        "@zui/collapsible-card",
         "@zui/document-editor",
         "@zui/email-editor"
       ],

@@ -326,4 +326,14 @@ describe('SmsEditor', () => {
     expect(probe.editor.getText()).toBe('Hello');
     expect(document.querySelector('[data-slot=variable-menu]')).toBeNull();
   });
+
+  it("draws the variable menu in the header toolbar, and the meter from the text's left edge", async () => {
+    await mount('Hello');
+
+    const toolbar = await vi.waitFor(() => find('[role=toolbar]'));
+    expect(toolbar.contains(find('[data-slot=variable-menu]'))).toBe(true);
+    expect(toolbar.querySelector('[role=separator]')).toBeNull();
+    const text = find('[contenteditable=true] p').getBoundingClientRect().left;
+    expect(Math.abs(find('[data-slot=sms-meter-count]').getBoundingClientRect().left - text)).toBeLessThanOrEqual(1);
+  });
 });

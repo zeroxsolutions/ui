@@ -68,6 +68,8 @@ export function EditorToolbar({ editor, items, end, disabled = false, className 
     if (index >= 0) rove(index);
   };
   const keyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    // Shift, Ctrl, Alt and Meta with these keys are the platform's or the page's, not the toolbar's.
+    if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return;
     const step = EDITOR_TOOLBAR_STEPS[event.key];
     const controls = editorToolbarControls(toolbar.current);
     // A popup an `end` control opened is a React child, so its keys arrive here too; they are its own.

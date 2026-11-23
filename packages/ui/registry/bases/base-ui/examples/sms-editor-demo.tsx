@@ -6,7 +6,7 @@ import { smsProfile } from '@zeroxsolutions/editor-core/profiles/index';
 
 import { SmsEditor } from '@/registry/bases/base-ui/editor/profiles/sms/sms-editor';
 
-const profile = smsProfile({ variables: [{ name: 'code', type: 'string', label: 'Code', sampleValue: '482913' }] });
+const profile = smsProfile({ variables: [{ name: 'code', type: 'string', label: 'code', sampleValue: '482913' }] });
 
 /** A one-segment sign-in code message; the meter counts what the code will cost once it is filled in. */
 function SmsEditorDemo(): ReactNode {
