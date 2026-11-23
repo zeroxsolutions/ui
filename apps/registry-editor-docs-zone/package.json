@@ -29,7 +29,12 @@
     "tags": ["context:editor-docs"],
     "targets": {
       "dev": {
-        "dependsOn": ["^build", "@zeroxsolutions/ui:build-registry", "@zeroxsolutions/ui:examples-index", "fumadocs-generate"]
+        "dependsOn": [
+          "^build",
+          "@zeroxsolutions/ui:build-registry",
+          "@zeroxsolutions/ui:examples-index",
+          "fumadocs-generate"
+        ]
       },
       "build": {
         "dependsOn": [
@@ -87,9 +92,12 @@
       "check-zone-routes": {
         "executor": "nx:run-commands",
         "cache": true,
-        "inputs": ["{workspaceRoot}/apps/*-zone/wrangler.jsonc", "{workspaceRoot}/tools/check-zone-routes.sh",
+        "inputs": [
+          "{workspaceRoot}/apps/*-zone/wrangler.jsonc",
+          "{workspaceRoot}/tools/check-zone-routes.sh",
           "{workspaceRoot}/apps/registry-ui/src/app/**/*",
-          "{workspaceRoot}/packages/ui-docs-web/content/docs/**/*"],
+          "{workspaceRoot}/packages/ui-docs-web/content/docs/**/*"
+        ],
         "options": {
           "command": "tools/check-zone-routes.sh"
         }
