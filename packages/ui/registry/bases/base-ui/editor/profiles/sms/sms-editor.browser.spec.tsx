@@ -336,4 +336,11 @@ describe('SmsEditor', () => {
     const text = find('[contenteditable=true] p').getBoundingClientRect().left;
     expect(Math.abs(find('[data-slot=sms-meter-count]').getBoundingClientRect().left - text)).toBeLessThanOrEqual(1);
   });
+
+  it("keeps the meter on the text's left edge when read-only", async () => {
+    await mount('Hello', undefined, { readOnly: true });
+
+    const text = (await vi.waitFor(() => find('.ProseMirror p'))).getBoundingClientRect().left;
+    expect(Math.abs(find('[data-slot=sms-meter-count]').getBoundingClientRect().left - text)).toBeLessThanOrEqual(1);
+  });
 });

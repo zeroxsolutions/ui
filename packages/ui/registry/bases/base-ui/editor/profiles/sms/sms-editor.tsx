@@ -304,8 +304,8 @@ export function SmsEditor({
       )}
       <div data-slot="sms-editor-body" className={cn('flex flex-col', editor && !readOnly && 'border-t')}>
         <Editor
-          // No grip, so no gutter: the text starts where the toolbar's and the footer's padding do.
-          className="[&_.ProseMirror[contenteditable=true]]:px-3"
+          // No grip, so no gutter, editable or not: the text starts where the toolbar's and the footer's padding do.
+          className="[&_.ProseMirror]:px-3 [&_.ProseMirror[contenteditable=true]]:px-3"
           features={setup.features}
           content={fromSmsText(value)}
           editable={!readOnly}
