@@ -607,7 +607,7 @@ export function emailKit(
   return [
     standard,
     callout({ variants: ['info'] }),
-    codeBlock({ languagePicker: false }),
+    codeBlock({ languagePicker: false, variables: declarations }),
     blockIdentity({ required: options.required, structure: options.structure, types: extraBlocks }),
     variables.feature,
     emailMarks(),

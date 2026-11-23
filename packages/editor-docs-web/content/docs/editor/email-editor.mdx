@@ -257,6 +257,10 @@ in text, in a button's label or in a link. The menu inserts into the label or th
 the focus before the menu. A token naming no declaration is drawn in red. A `required` variable that no block
 uses is a problem.
 
+A code block and an HTML block keep each token as its `{{name}}` text, so the export holds the text as typed.
+The token is highlighted in place and drawn in red when nothing declares it, and typing `{{` there lists the
+declarations to insert from.
+
 The Link button in the toolbar or the selection bubble opens the link popover on the selected text, or on the
 link the caret is in. A button's Link, in its block menu, opens the same popover on the button's link. Type
 the link in its field, or click one of the `url` variables listed under it. A link is valid when it starts

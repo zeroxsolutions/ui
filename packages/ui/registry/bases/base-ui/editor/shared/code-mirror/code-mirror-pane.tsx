@@ -54,6 +54,8 @@ export interface CodeMirrorPaneProps
   useTabs?: boolean;
   /** Show the line-number gutter. Defaults to true. */
   showLineNumbers?: boolean;
+  /** More CodeMirror behaviour, such as `variableTokens`. Read once, when the pane mounts. */
+  extensions?: Extension;
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -81,6 +83,7 @@ export function CodeMirrorPane({
   tabSize = 2,
   useTabs = false,
   showLineNumbers = true,
+  extensions = [],
   size,
   className,
   ref,
@@ -144,6 +147,7 @@ export function CodeMirrorPane({
         editableCompartment.current.of([EditorView.editable.of(!readOnly), EditorState.readOnly.of(readOnly)]),
         wrapCompartment.current.of(wrap ? EditorView.lineWrapping : []),
         placeholderCompartment.current.of(placeholder ? placeholderExtension(placeholder) : []),
+        extensions,
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onValueChangeRef.current?.(update.state.doc.toString());

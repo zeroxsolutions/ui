@@ -2,13 +2,19 @@ import { useSyncExternalStore, type ReactNode } from 'react';
 import { z } from 'zod';
 import { LinkIcon, MailIcon, TimerIcon, TypeIcon } from 'lucide-react';
 import { Badge } from '@/registry/bases/base-ui/ui/badge';
+import { cva } from 'class-variance-authority';
 import {
+  Decoration,
+  DecorationSet,
   Extension,
+  facadeFor,
   Fragment,
   InputRule,
   Plugin,
   PluginKey,
   Slice,
+  type Editor,
+  type EngineHandle,
   type NodeType,
   type ProseMirrorNode,
 } from '@zeroxsolutions/editor-core/document/advanced';
@@ -167,10 +173,82 @@ function declarationsVersion() {
   };
 }
 
-/** The engine half of the feature: the paste import and the typed-token rule. */
-function variableEngine(): Extension {
+type DeclarationsVersion = ReturnType<typeof declarationsVersion>;
+
+const TOKEN_TEXT_KEY = new PluginKey<DecorationSet>('variableTokenText');
+// cva rather than plain strings, so `shadcn add` writes the slot as the installing project's style draws it.
+const tokenTextVariants = cva('cn-editor-inline', {
+  variants: {
+    declared: { true: 'bg-primary/10 text-primary', false: 'bg-destructive/10 text-destructive' },
+  },
+});
+
+/** The `{{name}}` tokens written as text in the blocks that hold text only, each drawn as a token in place. */
+function tokenTextDecorations(doc: ProseMirrorNode, declared: ReadonlySet<string>): DecorationSet {
+  const variable = doc.type.schema.nodes.variable;
+  const decorations: Decoration[] = [];
+  doc.descendants((node, pos) => {
+    if (!node.isTextblock) return true;
+    if (variable && takesVariable(node.type, variable)) return false;
+    node.forEach((child, offset) => {
+      for (const match of (child.text ?? '').matchAll(VARIABLE_TOKEN)) {
+        const from = pos + 1 + offset + match.index;
+        const name = match[1];
+        decorations.push(
+          Decoration.inline(
+            from,
+            from + match[0].length,
+            declared.has(name)
+              ? { class: tokenTextVariants({ declared: true }), 'data-variable': name }
+              : {
+                  class: tokenTextVariants({ declared: false }),
+                  'data-variable': name,
+                  'data-problem': 'variable-undeclared',
+                  'aria-invalid': 'true',
+                },
+          ),
+        );
+      }
+    });
+    return false;
+  });
+  return DecorationSet.create(doc, decorations);
+}
+
+/** Draws {@link tokenTextDecorations} again on each edit and each time the host says the declarations changed. */
+function tokenText(getDeclarations: () => readonly VariableDeclaration[], version: DeclarationsVersion): Plugin {
+  const build = (doc: ProseMirrorNode) =>
+    tokenTextDecorations(doc, new Set(getDeclarations().map((declaration) => declaration.name)));
+  return new Plugin<DecorationSet>({
+    key: TOKEN_TEXT_KEY,
+    state: {
+      init: (_config, state) => build(state.doc),
+      apply: (tr, drawn) => (tr.docChanged || tr.getMeta(TOKEN_TEXT_KEY) ? build(tr.doc) : drawn),
+    },
+    props: { decorations: (state) => TOKEN_TEXT_KEY.getState(state) },
+    view: (view) => ({
+      destroy: version.subscribe(() => view.dispatch(view.state.tr.setMeta(TOKEN_TEXT_KEY, true))),
+    }),
+  });
+}
+
+/**
+ * The engine half of the feature: the paste import, the typed-token rule and the tokens drawn in a text-only
+ * block. Each live engine is in `engines`, so a command reaches the block its caret is in.
+ */
+function variableEngine(
+  getDeclarations: () => readonly VariableDeclaration[],
+  version: DeclarationsVersion,
+  engines: Set<Editor>,
+): Extension {
   return Extension.create({
     name: 'variableEngine',
+    onCreate() {
+      engines.add(this.editor);
+    },
+    onDestroy() {
+      engines.delete(this.editor);
+    },
     addInputRules() {
       return [
         new InputRule({
@@ -210,6 +288,7 @@ function variableEngine(): Extension {
             },
           },
         }),
+        tokenText(getDeclarations, version),
       ];
     },
   });
@@ -222,6 +301,15 @@ function variableEngine(): Extension {
  */
 export function variableFeature(getDeclarations: () => readonly VariableDeclaration[]): VariableFeature {
   const version = declarationsVersion();
+  const engines = new Set<Editor>();
+  // A text-only block, such as html, is stored as its text, so a variable goes in as its `{{name}}` token.
+  const holdsTextOnly = (editor: IEditor): boolean => {
+    const engine = [...engines].find((candidate) => facadeFor(candidate as unknown as EngineHandle) === editor);
+    const variable = engine?.state.schema.nodes.variable;
+    if (!engine || !variable) return false;
+    const { $from } = engine.state.selection;
+    return $from.parent.isTextblock && !takesVariable($from.parent.type, variable);
+  };
 
   function VariableChip({ name, contentEditable }: { name: string; contentEditable?: boolean }) {
     useSyncExternalStore(version.subscribe, version.read, version.read);
@@ -277,7 +365,11 @@ export function variableFeature(getDeclarations: () => readonly VariableDeclarat
       insertVariable: {
         args: z.object({ name: z.string().regex(/^\w+$/) }),
         run: (editor, args) =>
-          editor.run('insertContent', { content: { type: 'variable', attrs: { name: args.name } } }),
+          editor.run('insertContent', {
+            content: holdsTextOnly(editor)
+              ? { type: 'text', text: `{{${args.name}}}` }
+              : { type: 'variable', attrs: { name: args.name } },
+          }),
       },
       refreshVariables: {
         run: () => {
@@ -286,7 +378,7 @@ export function variableFeature(getDeclarations: () => readonly VariableDeclarat
         },
       },
     },
-    advanced: { engineExtensions: [variableEngine()] },
+    advanced: { engineExtensions: [variableEngine(getDeclarations, version, engines)] },
   });
 
   const option = (declaration: VariableDeclaration): TriggerOption => ({

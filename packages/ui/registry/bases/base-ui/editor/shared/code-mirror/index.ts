@@ -6,3 +6,4 @@
  */
 export { CodeMirrorPane } from './code-mirror-pane';
 export type { CodeMirrorPaneProps } from './code-mirror-pane';
+export { variableTokens } from './variable-tokens';

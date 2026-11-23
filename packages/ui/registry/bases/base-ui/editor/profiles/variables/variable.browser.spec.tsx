@@ -241,3 +241,73 @@ describe('a variable', () => {
     expect(getComputedStyle(chip).fontSize).toBe(getComputedStyle(chip.closest('p')!).fontSize);
   });
 });
+
+describe('a variable in a block that holds text only', () => {
+  const html = (value: string): DocJSON => ({
+    type: 'doc',
+    content: [{ type: 'emailHtml', content: value ? [text(value)] : [] }],
+  });
+  const htmlBlock = () => document.querySelector<HTMLElement>('[data-type=emailHtml]')!;
+  const htmlText = (editor: IEditor) => editor.getJSON().content?.[0];
+  const drawnTokens = () =>
+    [...htmlBlock().querySelectorAll<HTMLElement>('[data-variable]')].map((token) => [
+      token.textContent,
+      token.dataset.problem,
+    ]);
+
+  it('opens the menu on {{ and inserts the chosen one as its {{name}} text', async () => {
+    const editor = await mount(html('<p>'));
+    await userEvent.click(htmlBlock());
+    await userEvent.keyboard('{End}{{{{na');
+
+    expect(titles(await openMenu())).toEqual(['Name']);
+    await userEvent.keyboard('{Enter}');
+
+    await vi.waitFor(() =>
+      expect(htmlText(editor)).toEqual(expect.objectContaining({ content: [text('<p>{{name}}')] })),
+    );
+    expect(chips()).toEqual([]);
+  });
+
+  it("inserts the toolbar's variable as its {{name}} text", async () => {
+    const editor = await mount(html('<p>'));
+    await userEvent.click(htmlBlock());
+    await userEvent.keyboard('{End}');
+    await userEvent.click(document.querySelector<HTMLElement>('[data-slot=variable-menu]')!);
+    await userEvent.click(
+      await vi.waitFor(() => {
+        const item = [...document.querySelectorAll<HTMLElement>('[data-slot=combobox-item]')].find(
+          (candidate) => candidate.textContent === 'Reset link',
+        );
+        if (!item) throw new Error('the picker is not open');
+        return item;
+      }),
+    );
+
+    await vi.waitFor(() =>
+      expect(htmlText(editor)).toEqual(expect.objectContaining({ content: [text('<p>{{resetUrl}}')] })),
+    );
+  });
+
+  it('draws each token in place, the one no declaration names marked as undeclared', async () => {
+    await mount(html('<a href="{{resetUrl}}">{{ghost}}</a>'));
+
+    await vi.waitFor(() =>
+      expect(drawnTokens()).toEqual([
+        ['{{resetUrl}}', undefined],
+        ['{{ghost}}', 'variable-undeclared'],
+      ]),
+    );
+  });
+
+  it('marks a token again once the host says the declarations changed', async () => {
+    const declarations = [...declared];
+    const editor = await mount(html('{{later}}'), declarations);
+    await vi.waitFor(() => expect(drawnTokens()).toEqual([['{{later}}', 'variable-undeclared']]));
+
+    declarations.push({ name: 'later', type: 'url', label: 'Later link' });
+    refreshVariables(editor);
+
+    await vi.waitFor(() => expect(drawnTokens()).toEqual([['{{later}}', undefined]]));
+  });
+});

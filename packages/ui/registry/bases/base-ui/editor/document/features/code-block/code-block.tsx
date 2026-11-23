@@ -32,13 +32,14 @@ import {
 } from '@/registry/bases/base-ui/ui/combobox';
 import type { LanguageOption } from '@/registry/bases/base-ui/types/language-option';
 import { z } from 'zod';
+import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import {
   defineFeature,
   type EditorFeature,
   type NodeCodec,
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
-import { CodeMirrorPane } from '../../../shared/code-mirror/index';
+import { CodeMirrorPane, variableTokens } from '../../../shared/code-mirror/index';
 import { CodeSettingsMenu, type CodeMirrorSettings } from './code-settings-menu';
 
 /**
@@ -79,11 +80,15 @@ function EditableCodeBlock({
   attrs,
   updateAttrs,
   languagePicker,
+  variables,
 }: {
   attrs: CodeBlockAttrs;
   updateAttrs: (patch: Partial<CodeBlockAttrs>) => void;
   languagePicker: boolean;
+  variables?: () => readonly VariableDeclaration[];
 }) {
+  // One per pane, so each pane's `{{` list has an id of its own.
+  const [extensions] = React.useState(() => (variables ? variableTokens(variables) : undefined));
   const [settings, setSettings] = React.useState<CodeMirrorSettings>(DEFAULT_CODE_SETTINGS);
   const patchSettings = React.useCallback(
     (patch: Partial<CodeMirrorSettings>) => setSettings((prev) => ({ ...prev, ...patch })),
@@ -144,6 +149,7 @@ function EditableCodeBlock({
           showLineNumbers={settings.showLineNumbers}
           wrap={settings.softWrap}
           placeholder="Write code…"
+          extensions={extensions}
           className="h-64"
         />
       </CollapsibleCardContent>
@@ -203,7 +209,8 @@ function CodeBlockView({
   updateAttrs,
   editable,
   languagePicker,
-}: NodeViewProps<CodeBlockAttrs> & { languagePicker: boolean }) {
+  variables,
+}: NodeViewProps<CodeBlockAttrs> & { languagePicker: boolean; variables?: () => readonly VariableDeclaration[] }) {
   return (
     <div
       data-code-block
@@ -213,7 +220,12 @@ function CodeBlockView({
       onPointerDown={(event) => event.stopPropagation()}
     >
       {editable ? (
-        <EditableCodeBlock attrs={attrs} updateAttrs={updateAttrs} languagePicker={languagePicker} />
+        <EditableCodeBlock
+          attrs={attrs}
+          updateAttrs={updateAttrs}
+          languagePicker={languagePicker}
+          variables={variables}
+        />
       ) : (
         <ReadOnlyCodeBlock code={attrs.code} language={attrs.language} />
       )}
@@ -264,20 +276,24 @@ export const codeBlockCodec: NodeCodec<CodeBlockAttrs> = {
   },
 };
 
-/** The node view of a block whose profile turned the language control off. */
-function PlainCodeBlockView(props: NodeViewProps<CodeBlockAttrs>) {
-  return <CodeBlockView {...props} languagePicker={false} />;
-}
-
-/** What a profile may narrow: whether the editable block offers a language control. */
+/** What a profile may narrow: whether the editable block offers a language control, and its variables. */
 export interface CodeBlockOptions {
   /** Show the language control. When false, a block is plain `text`. Default: true. */
   languagePicker?: boolean;
+  /**
+   * The variables the code may hold: each `{{name}}` is drawn as a token, an undeclared one marked, and `{{`
+   * offers these. Read as the author types. Absent: the code is plain text.
+   */
+  variables?: () => readonly VariableDeclaration[];
 }
 
 export function codeBlock(options: CodeBlockOptions = {}): EditorFeature {
   const languagePicker = options.languagePicker ?? true;
-  const view = languagePicker ? CodeBlockNodeView : PlainCodeBlockView;
+  const { variables } = options;
+  function NarrowedCodeBlockView(props: NodeViewProps<CodeBlockAttrs>) {
+    return <CodeBlockView {...props} languagePicker={languagePicker} variables={variables} />;
+  }
+  const view = languagePicker && !variables ? CodeBlockNodeView : NarrowedCodeBlockView;
   return defineFeature({
     id: 'code-block',
     nodes: [
