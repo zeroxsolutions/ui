@@ -47,6 +47,8 @@ function compileNode(spec: NodeSpec, renderer?: NodeViewRenderer): Node {
     selectable: spec.selectable,
     draggable: spec.draggable,
     defining: spec.defining,
+    // Carried onto the schema's own spec, so `node.type.spec.container` reads it without a name list.
+    extendNodeSchema: (extension) => (extension.name === spec.name && spec.container ? { container: true } : {}),
     addAttributes: () => deriveAttributes(spec.attrs),
     renderText: spec.text ? ({ node }) => spec.text?.(node.attrs) ?? '' : undefined,
     parseHTML: () => [{ tag: spec.htmlTag ?? `[data-type="${spec.name}"]` }],

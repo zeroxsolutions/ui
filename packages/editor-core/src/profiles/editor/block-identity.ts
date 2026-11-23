@@ -24,7 +24,6 @@ interface Block {
   pos: number;
 }
 
-const LANE = 'emailLane';
 /**
  * Attributes the skeleton ignores: identity's own, the stored text an import keeps beside it, and a
  * button's label, which is text a translated locale changes; its `href` names a variable and stays.
@@ -56,7 +55,7 @@ function blocksOf(doc: EngineNode): Block[] {
       const pos = contentStart + offset;
       if (carriesKey(child)) blocks.push({ node: child, pos });
       child.forEach((lane, laneOffset) => {
-        if (lane.type.name === LANE) visit(lane, pos + 1 + laneOffset + 1);
+        if (lane.type.spec.container) visit(lane, pos + 1 + laneOffset + 1);
       });
     });
   };
@@ -137,7 +136,7 @@ function keyOpeningContent(content: unknown, schema: EngineSchema): unknown {
   const keyed = (node: NodeJSON): NodeJSON => {
     const spec = schema.nodes[node.type]?.spec.attrs;
     const lanes = node.content?.map((child) =>
-      child.type === LANE ? { ...child, content: child.content?.map(keyed) } : child,
+      schema.nodes[child.type]?.spec.container ? { ...child, content: child.content?.map(keyed) } : child,
     );
     const next = lanes ? { ...node, content: lanes } : { ...node };
     if (!spec || !('key' in spec)) return next;

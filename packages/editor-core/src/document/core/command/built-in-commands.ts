@@ -35,9 +35,6 @@ export function loadContent(handle: EngineHandle, content: unknown): boolean {
 
 type PmNode = Editor['state']['doc'];
 
-/** A lane is a column's container: its blocks are the ones the grip reaches inside a columns block. */
-const LANE = 'emailLane';
-
 /** Clears every `id` in a copied block, so the copy is a new block the host has not named. */
 function withoutIds(json: Record<string, unknown>): Record<string, unknown> {
   const attrs = json.attrs as Record<string, unknown> | undefined;
@@ -176,7 +173,7 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
               if (y < rect.top || y > rect.bottom) return;
               found = pos;
               child.forEach((lane, laneOffset) => {
-                if (lane.type.name !== LANE) return;
+                if (!lane.type.spec.container) return;
                 const inside = under(lane, pos + 1 + laneOffset + 1);
                 if (inside !== null) found = inside;
               });
@@ -198,6 +195,48 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
         if (!(selection instanceof NodeSelection)) return false;
         const copy = withoutIds(selection.node.toJSON() as Record<string, unknown>);
         return editor.chain().insertContentAt(selection.to, copy).run();
+      },
+    },
+    // Replace the selected block with another type, keeping its text: a list or a quote becomes the
+    // target with its items' text, where a toggle command would nest the target inside it.
+    turnBlockInto: {
+      args: z.object({ name: z.string().min(1), attrs }),
+      run: ({ name, attrs: a }) => {
+        const { state } = editor;
+        const { selection, schema } = state;
+        if (!(selection instanceof NodeSelection)) return false;
+        const target = schema.nodes[name];
+        if (!target) return false;
+        const lines: PmNode[] = [];
+        if (selection.node.isTextblock) lines.push(selection.node);
+        else selection.node.descendants((node) => (node.isTextblock ? (lines.push(node), false) : true));
+        if (lines.length === 0) return false;
+        const paragraph = schema.nodes.paragraph;
+        const item = schema.nodes[name === 'taskList' ? 'taskItem' : 'listItem'];
+        let built: PmNode[];
+        if (name === 'paragraph' || name === 'heading') {
+          built = lines.map((line) => target.create(attrsOf(a), line.content));
+        } else if (name === 'blockquote') {
+          built = [
+            target.create(
+              null,
+              lines.map((line) => paragraph.create(null, line.content)),
+            ),
+          ];
+        } else if (item && target.contentMatch.matchType(item)) {
+          built = [
+            target.create(
+              null,
+              lines.map((line) => item.create(null, paragraph.create(null, line.content))),
+            ),
+          ];
+        } else {
+          return false;
+        }
+        const tr = state.tr.replaceWith(selection.from, selection.to, built);
+        tr.setSelection(NodeSelection.create(tr.doc, selection.from));
+        editor.view.dispatch(tr.scrollIntoView());
+        return true;
       },
     },
     deleteBlock: {

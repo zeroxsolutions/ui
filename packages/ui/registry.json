@@ -1159,14 +1159,14 @@
       ],
       "files": [
         {
-          "path": "registry/bases/base-ui/editor/document/react/editor-block-menu.tsx",
-          "type": "registry:component",
-          "target": "@components/editor/document/react/editor-block-menu.tsx"
-        },
-        {
           "path": "registry/bases/base-ui/editor/document/react/editor.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/react/editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/react/editor-block-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/react/editor-block-menu.tsx"
         },
         {
           "path": "registry/bases/base-ui/editor/document/features/standard/index.ts",

@@ -42,6 +42,8 @@ export interface NodeSpec<A = Record<string, unknown>> {
   selectable?: boolean;
   /** Whether the node defines a boundary that isolates its content. */
   defining?: boolean;
+  /** The node holds blocks the block menu addresses on their own, such as a column of a columns block. */
+  container?: boolean;
   /** Zod schema for the node's attributes — the single source of the attribute
    *  type, its defaults, and boundary validation. */
   attrs?: ZodType<A>;

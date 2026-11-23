@@ -112,21 +112,17 @@ const paragraphs = (...texts: string[]): DocJSON => ({
   content: texts.map((text) => ({ type: 'paragraph', content: [{ type: 'text', text }] })),
 });
 
-/** Mounts the editor on `texts` and points at the block at `index`, so the handle sits beside it. */
-async function mountBlocks(texts: string[], index: number, extra: EditorFeature[] = []) {
+/** Mounts the editor on `content` and points at its top-level block at `index`, so the handle sits beside it. */
+async function mountDocument(content: DocJSON, index: number, extra: EditorFeature[] = []) {
   let editor: IEditor | undefined;
   await render(
     <div className="style-nova" style={{ padding: '0 80px' }}>
-      <Editor
-        features={[standardKit(), ...extra]}
-        content={paragraphs(...texts)}
-        onReady={(ready: IEditor) => (editor = ready)}
-      />
+      <Editor features={[standardKit(), ...extra]} content={content} onReady={(ready: IEditor) => (editor = ready)} />
     </div>,
   );
   const blocks = await vi.waitFor(() => {
-    const found = Array.from(document.querySelectorAll<HTMLElement>('.ProseMirror p'));
-    if (found.length !== texts.length) throw new Error('the editor is not mounted');
+    const found = Array.from(document.querySelectorAll<HTMLElement>('.ProseMirror > *'));
+    if (found.length !== content.content?.length) throw new Error('the editor is not mounted');
     return found;
   });
   await userEvent.hover(blocks[index]);
@@ -137,6 +133,18 @@ async function mountBlocks(texts: string[], index: number, extra: EditorFeature[
   });
   const textsNow = () => (editor!.getJSON().content ?? []).map((block) => block.content?.[0]?.text);
   return { blocks, handle, texts: textsNow, editor: () => editor! };
+}
+
+function mountBlocks(texts: string[], index: number, extra: EditorFeature[] = []) {
+  return mountDocument(paragraphs(...texts), index, extra);
+}
+
+const line = (text: string) => ({ type: 'paragraph', content: [{ type: 'text', text }] });
+
+async function turnInto(handle: HTMLElement, choice: string) {
+  await userEvent.click(handle);
+  await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
+  await userEvent.click(page.getByRole('menuitemradio', { name: choice }));
 }
 
 const types = (editor: IEditor) => (editor.getJSON().content ?? []).map((block) => block.type);
@@ -171,6 +179,41 @@ describe('the block menu the grip opens', () => {
     await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
     await userEvent.click(page.getByRole('menuitemradio', { name: 'Heading 1' }));
     await vi.waitFor(() => expect(types(editor()).slice(0, 2)).toEqual(['paragraph', 'heading']));
+  });
+
+  it('turns a bulleted list into a top-level heading with no list left', async () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [{ type: 'bulletList', content: [{ type: 'listItem', content: [line('item')] }] }, line('after')],
+    };
+    const { handle, editor } = await mountDocument(doc, 0);
+    await turnInto(handle, 'Heading 1');
+    await vi.waitFor(() => expect(JSON.stringify(editor().getJSON())).not.toContain('bulletList'));
+    expect(editor().getJSON().content?.[0]).toMatchObject({ type: 'heading', content: [{ text: 'item' }] });
+  });
+
+  it('turns a paragraph into a bulleted list', async () => {
+    const { handle, editor } = await mountBlocks(['first', 'second'], 0);
+    await turnInto(handle, 'Bulleted list');
+    await vi.waitFor(() => expect(types(editor())).toEqual(['bulletList', 'paragraph']));
+  });
+
+  it('turns a quote into text', async () => {
+    const doc: DocJSON = { type: 'doc', content: [{ type: 'blockquote', content: [line('said')] }, line('after')] };
+    const { handle, editor } = await mountDocument(doc, 0);
+    await turnInto(handle, 'Text');
+    await vi.waitFor(() => expect(types(editor())).toEqual(['paragraph', 'paragraph']));
+    expect(editor().getJSON().content?.[0]).toMatchObject({ content: [{ text: 'said' }] });
+  });
+
+  it('opens the same menu on the block holding the caret with Mod-/', async () => {
+    const { blocks } = await mountBlocks(['first', 'second'], 0);
+    await userEvent.click(blocks[1]);
+    await userEvent.keyboard('{Control>}/{/Control}');
+    await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
+    await vi.waitFor(() => expect(document.querySelectorAll('.ProseMirror > *')).toHaveLength(1));
+    expect(document.querySelector('.ProseMirror')?.textContent).toBe('first');
   });
 
   it('moves the block and opens no menu when the grip is pressed and dragged past the next block', async () => {

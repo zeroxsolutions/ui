@@ -72,7 +72,7 @@ export const emailNodeSpecs: { nodes: NodeSpec[]; marks: MarkSpec[] } = {
       },
     ),
     block('emailColumns', { content: 'emailLane+' }, { ratio: z.array(z.number()).optional(), spaceAfter }),
-    { name: 'emailLane', content: 'block*', defining: true },
+    { name: 'emailLane', content: 'block*', defining: true, container: true },
     block('emailHtml', { content: 'text*', marks: '' }, { spaceAfter }),
     block('emailUnknown', { atom: true }, { block: z.unknown().optional() }),
     { name: 'variable', group: 'inline', atom: true, attrs: z.object({ name: z.string() }) },

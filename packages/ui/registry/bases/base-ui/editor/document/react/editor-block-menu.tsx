@@ -122,7 +122,7 @@ export function EditorBlockMenu({ editor, items, open, onOpenChange, anchor }: E
                     iconClassName={CHROME_ICON_CLASS}
                     render={(control) => (
                       <DropdownMenuItem
-                        variant={item.id === 'delete' ? 'destructive' : 'default'}
+                        variant={item.destructive ? 'destructive' : 'default'}
                         disabled={reason !== null}
                         onClick={() => run(item)}
                         {...control}

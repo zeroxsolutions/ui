@@ -146,31 +146,25 @@ export const standardToolbarItems: ToolbarItem[] = [
 
 export const standardBubbleItems: BubbleItem[] = standardToolbarItems;
 
-const turnInto = (
-  id: string,
-  title: string,
-  command: string,
-  node: string,
-  args?: Record<string, unknown>,
-): BlockMenuItem => ({
+const turnInto = (id: string, title: string, node: string, attrs?: Record<string, unknown>): BlockMenuItem => ({
   id: `turn-into-${id}`,
   title,
   group: 'Turn into',
-  command,
-  args,
-  active: (editor) => editor.isActive(node, args),
+  command: 'turnBlockInto',
+  args: { name: node, attrs },
+  active: (editor) => editor.isActive(node, attrs),
 });
 
 /** The grip menu of the standard blocks: turn the block into another, copy it, remove it. */
 export const standardBlockMenuItems: BlockMenuItem[] = [
-  turnInto('text', 'Text', 'setParagraph', 'paragraph'),
-  turnInto('heading-1', 'Heading 1', 'toggleHeading', 'heading', { level: 1 }),
-  turnInto('heading-2', 'Heading 2', 'toggleHeading', 'heading', { level: 2 }),
-  turnInto('heading-3', 'Heading 3', 'toggleHeading', 'heading', { level: 3 }),
-  turnInto('bulleted-list', 'Bulleted list', 'toggleBulletList', 'bulletList'),
-  turnInto('numbered-list', 'Numbered list', 'toggleOrderedList', 'orderedList'),
-  turnInto('to-do-list', 'To-do list', 'toggleTaskList', 'taskList'),
-  turnInto('quote', 'Quote', 'toggleBlockquote', 'blockquote'),
+  turnInto('text', 'Text', 'paragraph'),
+  turnInto('heading-1', 'Heading 1', 'heading', { level: 1 }),
+  turnInto('heading-2', 'Heading 2', 'heading', { level: 2 }),
+  turnInto('heading-3', 'Heading 3', 'heading', { level: 3 }),
+  turnInto('bulleted-list', 'Bulleted list', 'bulletList'),
+  turnInto('numbered-list', 'Numbered list', 'orderedList'),
+  turnInto('to-do-list', 'To-do list', 'taskList'),
+  turnInto('quote', 'Quote', 'blockquote'),
   { id: 'duplicate', title: 'Duplicate', icon: CopyIcon, command: 'duplicateBlock' },
-  { id: 'delete', title: 'Delete', icon: TrashIcon, command: 'deleteBlock', separatorBefore: true },
+  { id: 'delete', title: 'Delete', icon: TrashIcon, command: 'deleteBlock', destructive: true, separatorBefore: true },
 ];

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { EditorContent } from '@tiptap/react';
 import {
@@ -33,6 +33,9 @@ export interface EditorProps {
   /** Called with each step-sized delta as the document changes. */
   onChange?(delta: Delta): void;
 }
+
+/** A press on the grip that moves less than this is a click that opens the block menu; more is a drag. */
+const GRIP_CLICK_SLOP_PX = 4;
 
 export function Editor({ features, content, editable = true, className, onReady, onChange }: EditorProps) {
   // The raw engine instance — needed only to hand to `@tiptap/react`'s
@@ -128,31 +131,52 @@ export function Editor({ features, content, editable = true, className, onReady,
       handleEl.removeEventListener('pointerleave', stop);
     };
   }, [handleEl]);
-  // A press that moves under this many pixels is a click on the grip; more is the start of a drag.
   const [menu, setMenu] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
-  const blockMenuItems = useMemo(() => collectUiContributions(features ?? []).blockMenu, [features]);
+  // The features are read once on mount (see the note on the build effect), so the items are too.
+  const [blockMenuItems] = useState(() => collectUiContributions(features ?? []).blockMenu);
+  const press = useRef<{ x: number; y: number } | null>(null);
   useEffect(() => {
     if (!handleEl || blockMenuItems.length === 0) return;
-    let down: { x: number; y: number } | null = null;
-    const press = (event: PointerEvent) => {
-      down = { x: event.clientX, y: event.clientY };
+    const onPress = (event: PointerEvent) => {
+      press.current = { x: event.clientX, y: event.clientY };
     };
-    const click = (event: MouseEvent) => {
+    const onClick = (event: MouseEvent) => {
+      const down = press.current;
+      press.current = null;
       const moved = down ? Math.hypot(event.clientX - down.x, event.clientY - down.y) : 0;
-      down = null;
       const editor = editorRef.current;
-      if (moved >= 4 || !editor?.isEditable()) return;
+      if (moved >= GRIP_CLICK_SLOP_PX || !editor?.isEditable()) return;
       const rect = handleEl.getBoundingClientRect();
       if (!editor.run('selectBlockAt', { y: rect.top + rect.height / 2 })) return;
       setMenu({ top: rect.top, left: rect.left, width: rect.width, height: rect.height });
     };
-    handleEl.addEventListener('pointerdown', press);
-    handleEl.addEventListener('click', click);
+    handleEl.addEventListener('pointerdown', onPress);
+    handleEl.addEventListener('click', onClick);
     return () => {
-      handleEl.removeEventListener('pointerdown', press);
-      handleEl.removeEventListener('click', click);
+      handleEl.removeEventListener('pointerdown', onPress);
+      handleEl.removeEventListener('click', onClick);
     };
   }, [handleEl, blockMenuItems]);
+
+  // The keyboard way to the same menu: Mod-/ picks the block holding the caret and opens it at that block.
+  useEffect(() => {
+    if (!rootEl || blockMenuItems.length === 0) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key !== '/') return;
+      const editor = editorRef.current;
+      const caret = editor?.caretRect();
+      if (!editor || !caret || !editor.isEditable()) return;
+      event.preventDefault();
+      if (!editor.run('selectBlockAt', { y: (caret.top + caret.bottom) / 2 })) return;
+      const view = (engine as { view?: { nodeDOM(pos: number): Node | null } } | null)?.view;
+      const block = view?.nodeDOM(editor.getSelection().from);
+      if (!(block instanceof HTMLElement)) return;
+      const rect = block.getBoundingClientRect();
+      setMenu({ top: rect.top, left: rect.left, width: 24, height: Math.min(rect.height, 24) });
+    };
+    rootEl.addEventListener('keydown', onKeyDown);
+    return () => rootEl.removeEventListener('keydown', onKeyDown);
+  }, [rootEl, engine, blockMenuItems]);
 
   useEffect(() => {
     if (!handleEl) {

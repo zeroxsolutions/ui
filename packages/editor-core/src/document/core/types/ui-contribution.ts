@@ -45,6 +45,8 @@ export interface BlockMenuItem {
   icon?: unknown;
   command: string;
   args?: unknown;
+  /** Draws the item as a destructive action. */
+  destructive?: boolean;
   /** Renders a divider before this item. */
   separatorBefore?: boolean;
   /** Items sharing a group render as one labelled submenu of radio items. */

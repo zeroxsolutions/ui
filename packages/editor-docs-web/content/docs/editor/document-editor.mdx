@@ -41,7 +41,7 @@ pnpm add -D @tailwindcss/typography
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add button checkbox dropdown-menu empty item popover scroll-area separator toggle tooltip utils @zui/lucide-letter-b-icon @zui/lucide-code-icon @zui/editor-theme @zui/lucide-grip-vertical-icon @zui/lucide-heading-1-icon @zui/lucide-heading-2-icon @zui/lucide-heading-3-icon @zui/lucide-highlighter-icon @zui/lucide-italic-icon @zui/lucide-list-icon @zui/lucide-list-ordered-icon @zui/lucide-list-todo-icon @zui/lucide-minus-icon @zui/lucide-plus-icon @zui/lucide-strikethrough-icon @zui/lucide-text-quote-icon @zui/lucide-underline-icon
+pnpm dlx shadcn@latest add button checkbox dropdown-menu empty item popover scroll-area separator toggle tooltip utils @zui/lucide-letter-b-icon @zui/lucide-code-icon @zui/lucide-copy-icon @zui/editor-theme @zui/lucide-grip-vertical-icon @zui/lucide-heading-1-icon @zui/lucide-heading-2-icon @zui/lucide-heading-3-icon @zui/lucide-highlighter-icon @zui/lucide-italic-icon @zui/lucide-list-icon @zui/lucide-list-ordered-icon @zui/lucide-list-todo-icon @zui/lucide-minus-icon @zui/lucide-plus-icon @zui/lucide-strikethrough-icon @zui/lucide-text-quote-icon @zui/lucide-trash-icon @zui/lucide-underline-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -110,8 +110,8 @@ pnpm dlx shadcn@latest add button checkbox dropdown-menu empty item popover scro
 
 <ComponentSource
   name="document-editor"
-  file="registry/bases/base-ui/editor/document/ui/block-menu.tsx"
-  title="components/editor/document/ui/block-menu.tsx"
+  file="registry/bases/base-ui/editor/document/react/editor-block-menu.tsx"
+  title="components/editor/document/react/editor-block-menu.tsx"
 />
 
 <ComponentSource
@@ -386,7 +386,8 @@ interactions a static render cannot give.
 
 It renders the document with `data-editor="document"` and the `document-editor prose` classes its styles
 key on. Beside the standard kit's block drag handle it draws an "Insert block below" button, which opens the
-slash menu on a new line.
+slash menu on a new line. A click on the block handle opens the block menu (Turn into, Duplicate, Delete);
+pressing it and dragging still moves the block.
 
 ### Viewer
 
