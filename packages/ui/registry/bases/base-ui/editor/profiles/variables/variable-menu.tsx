@@ -39,11 +39,11 @@ export function VariableMenu({
   disabled,
   className,
 }: VariableMenuProps) {
-  // Read as the picker takes the focus: the press reads the element it is taking the focus from, the keyboard
-  // the element it came from. A move between the toolbar's own controls keeps the field read before.
+  // The field the focus came straight from as the picker took it: a press reads the element it takes the focus
+  // from, the keyboard the element it came from. Forgotten after a pick and once the list has closed, so a later
+  // pick never lands in a field the author has since left.
   const field = useRef<IEditor | null>(null);
-  const reach = (from: Element | null, trigger: HTMLElement) => {
-    if (from && trigger.closest('[role=toolbar]')?.contains(from)) return;
+  const reach = (from: Element | null) => {
     field.current = variableTextFieldOf(from);
   };
   return (
@@ -55,8 +55,12 @@ export function VariableMenu({
       onValueChange={(declaration: VariableDeclaration | null) => {
         if (!declaration) return;
         const target = field.current?.status === 'destroyed' ? editor : (field.current ?? editor);
+        field.current = null;
         insertVariable(target, declaration.name);
         target.focus();
+      }}
+      onOpenChangeComplete={(open) => {
+        if (!open) field.current = null;
       }}
       itemToStringLabel={variableLabel}
       // The same match as the `{{` menu: a label or a name.
@@ -67,8 +71,8 @@ export function VariableMenu({
         icon={BracesIcon}
         label={messages.variable}
         className={className}
-        onPointerDownCapture={(event) => reach(document.activeElement, event.currentTarget)}
-        onFocusCapture={(event) => reach(event.relatedTarget as Element | null, event.currentTarget)}
+        onPointerDownCapture={() => reach(document.activeElement)}
+        onFocusCapture={(event) => reach(event.relatedTarget as Element | null)}
       />
       <ComboboxContent className="w-64">
         <ComboboxInput showTrigger={false} placeholder={messages.findVariable} aria-label={messages.findVariable} />

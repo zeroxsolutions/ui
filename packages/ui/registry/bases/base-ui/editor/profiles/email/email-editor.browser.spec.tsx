@@ -196,6 +196,21 @@ async function gripOf(text: string, selector = '[contenteditable=true] p'): Prom
 }
 
 /** Opens the block menu from the grip of the paragraph holding `text`, or of the block `selector` names. */
+/** A button keyed b1 labelled Reset, linked to the reset url. */
+const button = (): EditorEmailBlock => ({
+  id: 'b1',
+  key: 'b1',
+  type: 'button',
+  attributes: {},
+  content: { label: 'Reset', href: '{{resetUrl}}' },
+});
+
+/** Picks `label` from the toolbar's variable menu. */
+async function pickVariable(label: string): Promise<void> {
+  await userEvent.click(find('[data-slot=variable-menu]'));
+  await userEvent.click(await vi.waitFor(() => find('[data-slot=combobox-item]', label)));
+}
+
 async function openBlockMenu(text: string, selector?: string): Promise<void> {
   await userEvent.click(await gripOf(text, selector));
   await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
@@ -625,6 +640,42 @@ describe('EmailEditor', () => {
     );
     expect(last(probe.reported)?.[0].content).toEqual({ text: 'Hello' });
     await expect.element(field.getByText('Reset link')).toHaveAttribute('data-slot', 'variable');
+  });
+
+  it('forgets the label once the author leaves it, so a later pick lands in the document', async () => {
+    const probe = await mount([paragraph('Hello', 'p1'), button()]);
+    const field = page.getByRole('textbox', { name: 'Button label' });
+    await userEvent.click(field);
+    await userEvent.keyboard('{End}');
+    await pickVariable('Name');
+    await vi.waitFor(() =>
+      expect(last(probe.reported)?.[1].content).toEqual({ label: 'Reset{{name}}', href: '{{resetUrl}}' }),
+    );
+
+    await caretAfter('Hello');
+    await userEvent.click(page.getByRole('toolbar').getByRole('button', { name: 'Bold', exact: true }));
+    await pickVariable('Reset link');
+
+    await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'Hello{{resetUrl}}' }));
+    expect(last(probe.reported)?.[1].content).toEqual({ label: 'Reset{{name}}', href: '{{resetUrl}}' });
+  });
+
+  it("inserts the toolbar's variable into the link popover's href field, which stays open", async () => {
+    const probe = await mount([button()]);
+    await openBlockMenu('', '[data-slot=email-button]');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
+    const popover = page.getByRole('dialog', { name: 'Link' });
+    const href = popover.getByRole('textbox', { name: 'Link' });
+    await expect.element(href).toHaveFocus();
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}{Backspace}https://x.test/?n=');
+
+    await pickVariable('Name');
+    await expect.element(href.getByText('Name')).toHaveAttribute('data-slot', 'variable');
+    await userEvent.click(popover.getByRole('button', { name: 'Apply' }));
+
+    await vi.waitFor(() =>
+      expect(last(probe.reported)?.[0].content).toEqual({ label: 'Reset', href: 'https://x.test/?n={{name}}' }),
+    );
   });
 
   it('refuses typing and opens no block menu when read-only', async () => {

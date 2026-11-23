@@ -38,8 +38,10 @@ export interface VariableTextFieldProps {
   label: string;
   /** The hint the field shows while it is empty; none when absent. */
   placeholder?: string;
-  /** Shows the text with no way to change it and no `{{` menu. */
+  /** Shows the text dimmed, with no way to change it and no `{{` menu, as a field that does not apply now. */
   disabled?: boolean;
+  /** Shows the text with no way to change it and no `{{` menu, drawn as it is, as a read-only document shows it. */
+  readOnly?: boolean;
   /** Marks the field as holding a value that cannot be used. */
   invalid?: boolean;
   /** The id of the element that says why it is invalid. */
@@ -96,6 +98,7 @@ function oneLine(slice: Slice, view: EditorView): Slice {
 interface FieldState {
   labelId: string;
   disabled: boolean;
+  readOnly: boolean;
   invalid: boolean;
   describedBy?: string;
 }
@@ -113,12 +116,13 @@ function fieldLine(read: () => FieldState): Extension {
         key: fieldKey,
         props: {
           attributes: () => {
-            const { labelId, disabled, invalid, describedBy } = read();
+            const { labelId, disabled, readOnly, invalid, describedBy } = read();
             return {
               role: 'textbox',
               'aria-multiline': 'false',
               'aria-labelledby': labelId,
-              ...(disabled ? { 'aria-readonly': 'true' } : {}),
+              ...(disabled ? { 'aria-disabled': 'true' } : {}),
+              ...(readOnly ? { 'aria-readonly': 'true' } : {}),
               ...(invalid ? { 'aria-invalid': 'true' } : {}),
               ...(describedBy ? { 'aria-describedby': describedBy } : {}),
             };
@@ -147,6 +151,7 @@ export function VariableTextField({
   label,
   placeholder,
   disabled = false,
+  readOnly = false,
   invalid = false,
   describedBy,
   autoFocus = false,
@@ -154,10 +159,11 @@ export function VariableTextField({
   className,
 }: VariableTextFieldProps) {
   const labelId = useId();
-  const live = useRef({ onValueChange, onCommit, declarations, labelId, disabled, invalid, describedBy });
-  live.current = { onValueChange, onCommit, declarations, labelId, disabled, invalid, describedBy };
+  const live = useRef({ onValueChange, onCommit, declarations, labelId, disabled, readOnly, invalid, describedBy });
+  live.current = { onValueChange, onCommit, declarations, labelId, disabled, readOnly, invalid, describedBy };
+  const editable = !disabled && !readOnly;
   // Read once, when the field is built.
-  const build = useRef({ value, shared, placeholder, disabled, autoFocus });
+  const build = useRef({ value, shared, placeholder, editable, autoFocus });
 
   const [engine, setEngine] = useState<{ view?: EditorView } | null>(null);
   const [field, setField] = useState<{ editor: IEditor; variables: VariableFeature } | null>(null);
@@ -166,7 +172,7 @@ export function VariableTextField({
   const loading = useRef(false);
 
   useEffect(() => {
-    const { shared, placeholder, disabled, autoFocus } = build.current;
+    const { shared, placeholder, editable, autoFocus } = build.current;
     const variables = shared ?? variableFeature(() => live.current.declarations());
     const editor = createDocumentEditor({
       features: [
@@ -176,7 +182,7 @@ export function VariableTextField({
       ],
       topContent: COMPOSER_TOP_CONTENT,
       content: fieldContent(build.current.value),
-      editable: !disabled,
+      editable,
       nodeViewRenderer: createNodeViewRenderer(),
       element: document.createElement('div'),
       onEngine: (raw) => setEngine(raw as { view?: EditorView }),
@@ -211,8 +217,8 @@ export function VariableTextField({
   }, [field, value]);
 
   useEffect(() => {
-    field?.editor.setEditable(!disabled);
-  }, [field, disabled]);
+    field?.editor.setEditable(editable);
+  }, [field, editable]);
 
   useEffect(() => {
     const element = root.current;
@@ -227,7 +233,7 @@ export function VariableTextField({
   useEffect(() => {
     const view = engine?.view;
     view?.dispatch(view.state.tr.setMeta(fieldKey, true));
-  }, [engine, disabled, invalid, describedBy]);
+  }, [engine, disabled, readOnly, invalid, describedBy]);
 
   // Enter is the field's in the capture phase, before the engine's own keys; an open `{{` menu stops it first.
   const keyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -247,11 +253,12 @@ export function VariableTextField({
       ref={root}
       data-slot="variable-text-field"
       data-disabled={disabled || undefined}
+      data-readonly={readOnly || undefined}
       data-invalid={invalid || undefined}
       // The ring an input draws on its own focus and invalid state, drawn here because the focus and
       // `aria-invalid` sit on the text inside.
       className={cn(
-        'variable-text-field cn-editor-content min-w-0 transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 data-invalid:border-destructive data-invalid:ring-3 data-invalid:ring-destructive/20 dark:data-invalid:ring-destructive/40',
+        'variable-text-field cn-editor-content min-w-0 transition-[color,box-shadow] data-disabled:cursor-not-allowed data-disabled:opacity-50 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 data-invalid:border-destructive data-invalid:ring-3 data-invalid:ring-destructive/20 dark:data-invalid:ring-destructive/40',
         className,
       )}
       onKeyDownCapture={keyDown}
@@ -260,7 +267,7 @@ export function VariableTextField({
         {label}
       </span>
       <EditorContent editor={engine as never} />
-      {field && trigger && !disabled && <TriggerLayer editor={field.editor} triggers={[trigger]} />}
+      {field && trigger && editable && <TriggerLayer editor={field.editor} triggers={[trigger]} />}
     </div>
   );
 }

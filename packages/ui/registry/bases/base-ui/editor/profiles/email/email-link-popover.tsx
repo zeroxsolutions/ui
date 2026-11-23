@@ -83,7 +83,11 @@ export function EmailLinkPopover({ editor, messages = DEFAULT_PROFILE_MESSAGES }
   const shown = open !== null;
   useEffect(() => {
     if (!shown) return;
-    return editor.onChange(() => setOpen(null));
+    return editor.onChange(() => {
+      // The author's focus is wherever the change left it, not owed back to the text.
+      refocus.current = false;
+      setOpen(null);
+    });
   }, [editor, shown]);
 
   const context = contextOf(editor)?.context;
@@ -127,8 +131,12 @@ export function EmailLinkPopover({ editor, messages = DEFAULT_PROFILE_MESSAGES }
   return (
     <Popover
       open={open !== null}
-      onOpenChange={(next) => {
+      onOpenChange={(next, details) => {
         if (next) return;
+        // The toolbar's variable menu inserts into the href field, so reaching it keeps the popover open.
+        const { event } = details;
+        const to = (event instanceof FocusEvent && event.relatedTarget) || event?.target;
+        if (to instanceof Element && to.closest('[data-slot=variable-menu], [data-slot=combobox-content]')) return;
         refocus.current = popup.current?.contains(document.activeElement) ?? false;
         setOpen(null);
       }}
@@ -164,7 +172,7 @@ export function EmailLinkPopover({ editor, messages = DEFAULT_PROFILE_MESSAGES }
                 describedBy={problems.length > 0 ? problemId : undefined}
                 autoFocus={reason === null}
                 messages={messages}
-                className="cn-input data-disabled:bg-input/50 h-auto min-h-8 data-disabled:cursor-not-allowed data-disabled:opacity-50"
+                className="cn-input data-disabled:bg-input/50 h-auto min-h-8"
               />
               {reason !== null && <FieldDescription>{reason}</FieldDescription>}
               {problems.length > 0 && <FieldError id={problemId} errors={problems.map((message) => ({ message }))} />}

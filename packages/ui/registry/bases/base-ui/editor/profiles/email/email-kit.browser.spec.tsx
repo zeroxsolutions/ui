@@ -276,7 +276,7 @@ describe('the email kit', () => {
     });
 
     const popover = await openButtonLink();
-    await expect.element(popover.getByRole('textbox', { name: 'Link' })).toHaveAttribute('aria-readonly', 'true');
+    await expect.element(popover.getByRole('textbox', { name: 'Link' })).toHaveAttribute('aria-disabled', 'true');
     await expect.element(popover.getByRole('button', { name: 'Help page' })).toBeDisabled();
     await expect.element(popover.getByRole('button', { name: 'Apply' })).toBeDisabled();
     await expect.element(popover.getByText('The structure is locked: only text and variables change')).toBeVisible();
@@ -417,6 +417,24 @@ describe('the email kit', () => {
 
     await expect.element(popover).not.toBeInTheDocument();
     await vi.waitFor(() => expect(document.activeElement).toBe(find('[contenteditable=true]')));
+  });
+
+  it('widens a selection ending inside a link in a later block to the whole of that link', async () => {
+    const editor = await mount([paragraph('First line', 'p1'), paragraph('[Open](https://x.test/o) it', 'p2')]);
+    await caretAfter('Open it');
+    await userEvent.keyboard('{Home}{ArrowRight}{ArrowRight}{Shift>}{ArrowUp}{Home}{/Shift}');
+
+    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    const popover = page.getByRole('dialog', { name: 'Link' });
+    await expect.element(popover.getByRole('textbox', { name: 'Link' })).toHaveFocus();
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}{Backspace}https://x.test/n{Enter}');
+
+    await vi.waitFor(() =>
+      expect(exported(editor).map((stored) => stored.content)).toEqual([
+        { text: '[First line](https://x.test/n)' },
+        { text: '[Open](https://x.test/n) it' },
+      ]),
+    );
   });
 
   it('closes the popover when the document changes from outside', async () => {

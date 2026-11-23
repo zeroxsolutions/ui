@@ -50,7 +50,7 @@ export function emailButtonNode(): NodeSpec {
             variables={context?.variables}
             label={messages.buttonLabel}
             placeholder={messages.buttonLabel}
-            disabled={!editable}
+            readOnly={!editable}
             messages={messages}
             className="min-w-16 text-center"
           />

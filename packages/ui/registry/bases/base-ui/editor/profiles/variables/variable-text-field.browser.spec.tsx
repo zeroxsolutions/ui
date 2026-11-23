@@ -117,8 +117,9 @@ describe('VariableTextField', () => {
 
   it('takes no typing and opens no menu while disabled', async () => {
     const probe = await mount('Go', true);
-    await expect.element(field()).toHaveAttribute('aria-readonly', 'true');
-    await userEvent.click(field());
+    await expect.element(field()).toHaveAttribute('aria-disabled', 'true');
+    expect(box().opacity).toBe('0.5');
+    await userEvent.click(field(), { force: true });
     await userEvent.keyboard('x{{{{');
 
     expect(document.querySelector('[data-slot=trigger-menu]')).toBeNull();

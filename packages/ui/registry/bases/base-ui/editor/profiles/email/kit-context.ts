@@ -157,11 +157,15 @@ export function emailLinkTarget(engine: Editor, reason: (button: Found) => strin
   if (!link || !$from.parent.type.allowsMarkType(link)) return undefined;
   const hrefs = linksIn(state);
   if (empty && hrefs.length === 0) return undefined;
-  const runs = linkRuns(state, from);
+  // Each end in its own block: a selection may end in a later block than it starts in.
+  const startRuns = linkRuns(state, from);
+  const endRuns = linkRuns(state, to);
   const start =
-    runs.find((run) => run.from <= from && from < run.to) ?? (empty ? runs.find((run) => run.to === from) : undefined);
+    startRuns.find((run) => run.from <= from && from < run.to) ??
+    (empty ? startRuns.find((run) => run.to === from) : undefined);
   const end =
-    runs.find((run) => run.from < to && to <= run.to) ?? (empty ? runs.find((run) => run.from === to) : undefined);
+    endRuns.find((run) => run.from < to && to <= run.to) ??
+    (empty ? endRuns.find((run) => run.from === to) : undefined);
   return {
     kind: 'text',
     from: Math.min(from, start?.from ?? from),
