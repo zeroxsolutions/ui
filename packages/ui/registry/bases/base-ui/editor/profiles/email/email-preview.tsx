@@ -20,6 +20,8 @@ export type EmailPreviewScheme = 'light' | 'dark';
  */
 const DESKTOP_WIDTH = 640;
 const CARD_WIDTH = 600;
+/** The phone column's width at most. */
+const PHONE_WIDTH = 375;
 
 interface EmailPreviewBarProps {
   device: EmailPreviewDevice;
@@ -197,6 +199,8 @@ function EmailPreview({
   // A hidden tab measures no width, and its frame keeps the last scale until it shows.
   const scale = desktop && width > 0 ? Math.min(1, width / DESKTOP_WIDTH) : 1;
   const tall = height === null ? undefined : height * scale;
+  // Centred by a whole-pixel inset: an odd width centred by auto margins sits on a half pixel, which draws a seam.
+  const phone = { maxWidth: PHONE_WIDTH, marginLeft: Math.floor(Math.max(0, width - PHONE_WIDTH) / 2) };
 
   // A new frame per scheme: Chromium kept the first document when `srcdoc` changed before it loaded.
   const email = (
@@ -223,8 +227,8 @@ function EmailPreview({
       <div ref={room} data-slot="email-preview-device" data-device={device} className="flex flex-col gap-3">
         <div
           data-slot="email-preview-inbox"
-          className={cn('mx-auto flex w-full min-w-0 flex-col gap-0.5', !desktop && 'max-w-93.75')}
-          style={desktop ? { maxWidth: CARD_WIDTH * scale } : undefined}
+          className={cn('flex w-full min-w-0 flex-col gap-0.5', desktop && 'mx-auto')}
+          style={desktop ? { maxWidth: CARD_WIDTH * scale } : phone}
         >
           {sender && <p className="text-muted-foreground truncate text-xs">{sender}</p>}
           <p className="truncate text-sm font-medium">{subject}</p>
@@ -240,7 +244,7 @@ function EmailPreview({
             {email}
           </div>
         ) : (
-          <div data-slot="email-preview-page" className="cn-editor-page mx-auto w-full max-w-93.75 overflow-hidden">
+          <div data-slot="email-preview-page" className="cn-editor-page w-full overflow-hidden" style={phone}>
             {email}
           </div>
         )}
